@@ -1,0 +1,1101 @@
+/* ==========================================================================
+   Navigation Sidebar & Auto-NtM Module Styling
+   High-efficiency Maritime Cockpit / Workstation Layout
+   ========================================================================== */
+
+/* ── App Shell Layout ── */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Left Navigation Sidebar (Thin 58px) ── */
+.nav-sidebar {
+  width: 58px;
+  flex: 0 0 58px;
+  background: rgba(8, 14, 32, 0.95);
+  border-right: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.85rem 0;
+  gap: 0.85rem;
+  z-index: 1000;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.nav-sidebar .nav-logo {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(126, 182, 255, 0.12);
+  border: 1px solid rgba(140, 170, 255, 0.25);
+  margin-bottom: 0.4rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.nav-sidebar .nav-logo:hover {
+  transform: scale(1.06);
+}
+
+.nav-sidebar .nav-logo img {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-item {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-item:hover {
+  background: rgba(126, 182, 255, 0.14);
+  color: var(--text);
+  border-color: rgba(140, 170, 255, 0.3);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(60, 110, 220, 0.45), rgba(40, 70, 160, 0.55));
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 0 14px rgba(126, 182, 255, 0.35);
+}
+
+.nav-item .badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ff5252;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 8px;
+  border: 1px solid #fff;
+  min-width: 14px;
+  text-align: center;
+  display: none;
+}
+
+.nav-item .tooltip {
+  position: absolute;
+  left: 64px;
+  background: rgba(10, 18, 40, 0.96);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  z-index: 2000;
+}
+
+.nav-item:hover .tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Content Viewport ── */
+.app-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+/* Tab 2 (Auto-NtM) Full-Height Cockpit Layout */
+#tab-ntm.active {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 40px);
+  padding: 0.65rem 0.85rem;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Auto-NtM Cockpit: Unified Top Command Strip
+   ========================================================================== */
+.ntm-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.42rem 0.75rem;
+  background: rgba(10, 18, 40, 0.78);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  margin-bottom: 0.6rem;
+  flex-shrink: 0;
+}
+
+.ntm-toolbar-left,
+.ntm-toolbar-center,
+.ntm-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Title Badge */
+.ntm-title-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.6rem;
+  background: rgba(126, 182, 255, 0.1);
+  border: 1px solid rgba(140, 170, 255, 0.2);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.ntm-status-pill {
+  background: rgba(125, 255, 166, 0.18);
+  color: #7dffa6;
+  border: 1px solid rgba(125, 255, 166, 0.35);
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+
+/* Primary Ingestion Buttons */
+.ntm-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(180deg, #3a7bd0, #2251aa);
+  color: #fff;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(160, 190, 255, 0.35);
+  transition: all 0.16s ease;
+  margin: 0;
+}
+
+.ntm-btn-primary:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 10px rgba(58, 123, 208, 0.4);
+}
+
+.ntm-btn-glass {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(22, 34, 72, 0.65);
+  color: var(--text);
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  transition: all 0.16s ease;
+  margin: 0;
+}
+
+.ntm-btn-glass:hover {
+  background: rgba(126, 182, 255, 0.16);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Segmented Filter Pills Control */
+.ntm-segmented-filters {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(6, 11, 26, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.ntm-filter-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 0.32rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+}
+
+.ntm-filter-btn:hover {
+  color: #fff;
+  background: rgba(126, 182, 255, 0.12);
+}
+
+.ntm-filter-btn.active {
+  background: linear-gradient(180deg, #3a7bd0, #2251aa);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(34, 81, 170, 0.45);
+}
+
+.filter-cnt {
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+/* Export CTA Button */
+.ntm-btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(180deg, #248248, #165830);
+  color: #fff;
+  padding: 0.4rem 0.95rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid #48bb78;
+  box-shadow: 0 2px 10px rgba(36, 130, 72, 0.35);
+  transition: all 0.16s ease;
+  margin: 0;
+}
+
+.ntm-btn-export:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 14px rgba(72, 187, 120, 0.5);
+}
+
+/* Danger / Clear All Button */
+.ntm-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(180deg, #a33020, #7a1e12);
+  color: #fff;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(220, 80, 60, 0.6);
+  box-shadow: 0 2px 8px rgba(163, 48, 32, 0.3);
+  transition: all 0.16s ease;
+  margin: 0;
+}
+
+.ntm-btn-danger:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 12px rgba(220, 80, 60, 0.4);
+}
+
+.exp-badge {
+  background: #fff;
+  color: #165830;
+  font-size: 0.68rem;
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.ntm-status-msg {
+  font-size: 0.75rem;
+  color: var(--ok);
+  font-weight: 600;
+  margin-left: 0.3rem;
+}
+
+/* ==========================================================================
+   Workspace Layout (Sidebar + Map)
+   ========================================================================== */
+.ntm-workspace {
+  display: grid;
+  grid-template-columns: 370px 1fr;
+  gap: 0.75rem;
+  flex: 1 1 auto;
+  min-height: 0; /* allows child scroll */
+  position: relative;
+  transition: grid-template-columns 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ntm-workspace.sidebar-collapsed {
+  grid-template-columns: 0px 1fr;
+}
+
+/* ── Notices Sidebar ── */
+.ntm-sidebar-list {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  transition: opacity 0.2s ease;
+}
+
+.ntm-workspace.sidebar-collapsed .ntm-sidebar-list {
+  opacity: 0;
+  pointer-events: none;
+  border: none;
+}
+
+.ntm-list-header {
+  padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(14, 24, 54, 0.7);
+}
+
+.ntm-list-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ntm-list-header h3 {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ntm-list-count {
+  font-size: 0.72rem;
+  color: var(--ok);
+  font-weight: 700;
+  background: rgba(125, 255, 166, 0.12);
+  padding: 1px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(125, 255, 166, 0.25);
+}
+
+.ntm-sidebar-collapse-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  transition: all 0.15s;
+  margin: 0;
+}
+
+.ntm-sidebar-collapse-btn:hover {
+  background: rgba(126, 182, 255, 0.15);
+  color: #fff;
+  border-color: var(--line);
+}
+
+/* Integrated Search Bar inside Sidebar */
+.ntm-search-wrap {
+  padding: 0.45rem 0.65rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(6, 12, 28, 0.55);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.ntm-search-icon {
+  position: absolute;
+  left: 1.1rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.ntm-search-input {
+  width: 100%;
+  background: rgba(5, 10, 28, 0.8);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.35rem 1.6rem 0.35rem 1.8rem;
+  font-size: 0.78rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.ntm-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(126, 182, 255, 0.25);
+}
+
+.ntm-search-clear {
+  position: absolute;
+  right: 1.1rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+.ntm-search-clear:hover {
+  color: #fff;
+}
+
+/* Selection control bar */
+.ntm-select-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.75rem;
+  background: rgba(8, 14, 32, 0.5);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.ntm-select-all-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.7rem;
+}
+
+.ntm-select-all-label input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+  accent-color: #3a7bd0;
+  margin: 0;
+}
+
+.ntm-items-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+/* Single Notice Card Item */
+.ntm-card-item {
+  background: rgba(12, 22, 50, 0.55);
+  border: 1px solid rgba(140, 170, 255, 0.14);
+  border-left: 3px solid #6ed0ff;
+  border-radius: 6px;
+  padding: 0.55rem 0.65rem;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  position: relative;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.ntm-card-item.type-T {
+  border-left-color: #ffc850;
+}
+
+.ntm-card-item.type-P {
+  border-left-color: #bb86fc;
+}
+
+.ntm-card-item.type-PERM {
+  border-left-color: #4fc3f7;
+}
+
+.ntm-card-item:hover {
+  background: rgba(126, 182, 255, 0.12);
+  border-color: rgba(126, 182, 255, 0.4);
+  transform: translateX(2px);
+}
+
+.ntm-card-item.selected {
+  background: rgba(126, 182, 255, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(126, 182, 255, 0.2);
+}
+
+.ntm-card-chk {
+  margin-top: 3px;
+  cursor: pointer;
+  accent-color: #3a7bd0;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.ntm-card-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ntm-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.ntm-card-id {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.ntm-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.ntm-tag.temp {
+  background: rgba(255, 201, 120, 0.2);
+  color: #ffc978;
+  border: 1px solid rgba(255, 201, 120, 0.4);
+}
+
+.ntm-tag.prelim {
+  background: rgba(201, 164, 255, 0.2);
+  color: #c9a4ff;
+  border: 1px solid rgba(201, 164, 255, 0.4);
+}
+
+.ntm-tag.perm {
+  background: rgba(110, 208, 255, 0.2);
+  color: #6ed0ff;
+  border: 1px solid rgba(110, 208, 255, 0.4);
+}
+
+.ntm-card-region {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #cad8f4;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ntm-card-subject {
+  font-size: 0.72rem;
+  color: #9eb2d6;
+  line-height: 1.35;
+  margin-bottom: 0.35rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ntm-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ntm-card-coords {
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: #8cb4ff;
+  background: rgba(126, 182, 255, 0.08);
+  padding: 2px 5px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ntm-card-coords:hover {
+  background: rgba(126, 182, 255, 0.2);
+  color: #fff;
+}
+
+.ntm-card-charts {
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+/* Sidebar Footer */
+.ntm-sidebar-footer {
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid var(--line);
+  background: rgba(10, 18, 40, 0.6);
+}
+
+.ntm-sidebar-export-btn {
+  width: 100%;
+  background: linear-gradient(180deg, #248248, #165830);
+  color: #fff;
+  border: 1px solid #48bb78;
+  border-radius: 6px;
+  padding: 0.42rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  margin: 0;
+}
+
+.ntm-sidebar-export-btn:hover {
+  filter: brightness(1.15);
+}
+
+/* ==========================================================================
+   Map Container & Cockpit HUD Elements
+   ========================================================================== */
+.ntm-map-container {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #080f24;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+#ntmMap {
+  width: 100%;
+  height: 100%;
+  background: #060b1c;
+}
+
+#ntmCanvasMap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+
+/* Floating Expand Button (shown when sidebar is collapsed) */
+.ntm-map-expand-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 500;
+  background: rgba(10, 18, 42, 0.9);
+  color: #fff;
+  border: 1px solid var(--accent);
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+  margin: 0;
+}
+
+.ntm-map-expand-btn:hover {
+  background: var(--accent);
+  color: #000;
+}
+
+/* Floating Cursor Coordinates HUD */
+.ntm-coords-hud {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 500;
+  background: rgba(6, 12, 28, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.25rem 0.65rem;
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: #a4c4ff;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ntm-coords-hud .hud-label {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* Dark Nautical Leaflet Controls Overrides */
+.leaflet-bar a {
+  background: rgba(10, 18, 42, 0.88) !important;
+  color: #e8eefc !important;
+  border-color: var(--line) !important;
+  backdrop-filter: blur(8px);
+}
+
+.leaflet-bar a:hover {
+  background: rgba(126, 182, 255, 0.25) !important;
+  color: #fff !important;
+}
+
+.leaflet-control-layers {
+  background: rgba(10, 18, 42, 0.92) !important;
+  color: #e8eefc !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.5) !important;
+  font-family: "Segoe UI", sans-serif !important;
+  font-size: 0.75rem !important;
+}
+
+.leaflet-control-layers-toggle {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Drag & Drop Overlay Zone */
+.ntm-dropzone {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 14, 38, 0.88);
+  backdrop-filter: blur(8px);
+  border: 2px dashed var(--accent);
+  border-radius: 10px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  z-index: 1000;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.ntm-dropzone.active {
+  display: flex;
+}
+
+.ntm-dropzone-icon {
+  font-size: 3rem;
+  animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-8px); }
+}
+
+/* ==========================================================================
+   Modals Styling
+   ========================================================================== */
+.ntm-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 3000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.ntm-modal.open {
+  display: flex;
+}
+
+.ntm-modal-box {
+  background: #0c142c;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 620px;
+  padding: 1.25rem 1.4rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65);
+  box-sizing: border-box;
+}
+
+.ntm-modal-box h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.ntm-modal-textarea {
+  width: 100%;
+  height: 220px;
+  background: rgba(5, 10, 24, 0.8);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.6rem;
+  font-family: monospace;
+  font-size: 0.8rem;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.ntm-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+/* Clean & Simple Export Modal Styles */
+.ntm-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.ntm-modal-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.ntm-modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0 4px;
+  margin: 0;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.ntm-modal-close:hover {
+  color: #fff;
+}
+
+.ntm-export-box {
+  max-width: 460px !important;
+  padding: 1.15rem 1.3rem !important;
+}
+
+.ntm-export-section {
+  margin-bottom: 0.75rem;
+}
+
+.ntm-export-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.45rem;
+}
+
+.ntm-export-types-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.ntm-type-toggle-pill {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  background: rgba(14, 24, 52, 0.75);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.45rem 0.35rem !important;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+.ntm-type-toggle-pill:hover {
+  background: rgba(126, 182, 255, 0.14);
+  border-color: rgba(126, 182, 255, 0.35);
+}
+
+.ntm-type-toggle-pill input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  margin: 0 !important;
+  accent-color: #3a7bd0;
+}
+
+.ntm-type-toggle-pill .pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ntm-type-toggle-pill.type-t .pill-dot { background: #ffc850; box-shadow: 0 0 6px #ffc850; }
+.ntm-type-toggle-pill.type-p .pill-dot { background: #bb86fc; box-shadow: 0 0 6px #bb86fc; }
+.ntm-type-toggle-pill.type-perm .pill-dot { background: #4fc3f7; box-shadow: 0 0 6px #4fc3f7; }
+
+.ntm-type-toggle-pill .pill-text {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #e8eefc;
+  white-space: nowrap;
+}
+
+.ntm-type-toggle-pill .ntm-export-count-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--ok);
+  background: rgba(125, 255, 166, 0.15);
+  padding: 1px 5px;
+  border-radius: 8px;
+  margin-left: 2px;
+}
+
+.ntm-export-filter-option {
+  margin-bottom: 0.85rem;
+  padding: 0.2rem 0;
+}
+
+.ntm-checkbox-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  color: #cad8f4 !important;
+  cursor: pointer;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+.ntm-checkbox-row input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: #3a7bd0;
+  margin: 0 !important;
+}
+
+.ntm-export-summary-banner {
+  background: rgba(126, 182, 255, 0.08);
+  border: 1px solid rgba(140, 170, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #a4c4ff;
+  margin-bottom: 0.85rem;
+}
+
+.ntm-btn-export-main {
+  width: 100%;
+  background: linear-gradient(180deg, #289e57, #176536);
+  color: #fff;
+  border: 1px solid #48bb78;
+  border-radius: 8px;
+  padding: 0.65rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  box-shadow: 0 4px 14px rgba(36, 130, 72, 0.35);
+  margin-bottom: 0.75rem;
+}
+
+.ntm-btn-export-main:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 6px 18px rgba(72, 187, 120, 0.5);
+  transform: translateY(-1px);
+}
+
+.ntm-export-secondary-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.ntm-export-secondary-row .secondary-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.ntm-btn-format {
+  background: rgba(18, 28, 58, 0.6);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 0.28rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin: 0;
+}
+
+.ntm-btn-format:hover {
+  background: rgba(126, 182, 255, 0.16);
+  border-color: var(--accent);
+  color: #fff;
+}
