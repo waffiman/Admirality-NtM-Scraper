@@ -1,0 +1,39 @@
+name: Admiralty NtM Weekly Auto-Scraper
+
+on:
+  # UKHO publishes weekly notices every Thursday by ~09:00 UTC
+  schedule:
+    - cron: '0 10 * * 4'
+  # Allow manual trigger anytime from GitHub Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scraper/requirements.txt
+
+      - name: Run Admiralty NtM Scraper
+        run: |
+          python scraper/scrape.py
+
+      - name: Commit and push if notices changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automated NtM update from UKHO Admiralty [skip ci]"
+          file_pattern: "public/notices.json"
