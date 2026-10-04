@@ -2,14 +2,13 @@
  * SetSail Auto-NtM UI Controller & Interactive ECDIS Chart
  * Navigation Suite for LPG/C IINO INEOS VESTA
  *
- * Features:
- * - Multi-Type Filter Toggles (T, P, PERM, Polygons/Areas, Lines, Cancelled)
- * - Strict Cancelled Notice isolation (never clutters chart by default)
- * - Rich Sorting (Newest, Oldest, Country, Region, Charts, Points, Type)
- * - Real-Time Vessel GPS & Heading Silhouette on ECDIS (SVG Ship Outline)
- * - Theme Switcher (Dark Cockpit Night Watch vs Light Bridge Day Mode)
- * - Direct Engineering Transmission Form (Dispatched to wafficompany@gmail.com without UI exposure)
- * - Full Mobile Viewport & Touch Optimization (Bottom Nav Rail, List/Map Segmented Switch)
+ * Updated Features:
+ * - Funnel (Filter) & Two-Arrows (Sort) popover menus next to Select All
+ * - Crosshair target (прицел) vessel position marker on chart (no heading/speed clutter)
+ * - Ultra-minimalist Settings page (Dark/Light theme toggle, simple Email + Message contact form)
+ * - Fixed left navigation sidebar (does not scroll with wide content)
+ * - UTC timestamp automatically appended to all exported ECDIS filenames (YYYYMMDD_HHMMUTC)
+ * - Strict quarantine of Cancelled notices from the map layer by default
  */
 
 const NTM_STORAGE_KEY = "setsail_ntm_active_store_v2";
@@ -17,15 +16,15 @@ const VESSEL_STORAGE_KEY = "setsail_vessel_state_v1";
 const THEME_STORAGE_KEY = "setsail_theme";
 
 let NTM_STORE = [];
-let NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM"]); // Default: all 3 active notice types
+let NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM"]); // Default: all active notice types
 let NTM_FILTER_AREAS = false;
-let NTM_SHOW_CANCELLED = false; // Strictly excluded by default!
+let NTM_SHOW_CANCELLED = false; // Strictly isolated from map by default!
 let NTM_ACTIVE_SORT = "NUM_DESC";
 
 let leafletMap = null;
 let leafletMarkersLayer = null;
 let leafletVesselLayer = null;
-let userVessel = null; // { lat, lon, heading, speed, name: "LPG/C IINO INEOS VESTA", source: "gps" | "manual" }
+let userVessel = null; // { lat, lon, source: "gps" | "manual" }
 let mobileCurrentView = "list"; // "list" | "map"
 
 // Initialize when DOM is ready
@@ -33,31 +32,51 @@ document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initNavigationTabs();
   initAutoNtmUI();
-  initFilterPills();
+  initFilterAndSortPopovers();
   initVesselTracking();
   initSettingsUI();
   initMobileViewSwitcher();
 });
 
 /**
- * Visual Theme Controller (Light Bridge vs Dark Cockpit)
+ * Returns formatted UTC timestamp string for export filenames (e.g. 20261004_1625UTC)
+ */
+function getExportUtcTimestamp() {
+  const now = new Date();
+  const yyyy = now.getUTCFullYear();
+  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(now.getUTCDate()).padStart(2, "0");
+  const hh = String(now.getUTCHours()).padStart(2, "0");
+  const min = String(now.getUTCMinutes()).padStart(2, "0");
+  return `${yyyy}${mm}${dd}_${hh}${min}UTC`;
+}
+
+/**
+ * Visual Theme Controller (Dark Cockpit vs Light Bridge)
  */
 function initTheme() {
   const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "dark";
   document.documentElement.setAttribute("data-theme", savedTheme);
-
-  // Sync radio buttons in Settings tab
-  const radio = document.querySelector(`input[name="setsailTheme"][value="${savedTheme}"]`);
-  if (radio) radio.checked = true;
+  updateThemeButtonsUI(savedTheme);
 }
 
 function setAppTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   localStorage.setItem(THEME_STORAGE_KEY, theme);
+  updateThemeButtonsUI(theme);
+}
+
+function updateThemeButtonsUI(theme) {
+  const btnDark = document.getElementById("btnThemeDark");
+  const btnLight = document.getElementById("btnThemeLight");
+  if (btnDark && btnLight) {
+    btnDark.classList.toggle("active", theme === "dark");
+    btnLight.classList.toggle("active", theme === "light");
+  }
 }
 
 /**
- * Handle Tab Switching between Gyro Logbook, Auto-NtM Plotter, and Settings
+ * Tab Switching between Gyro Logbook, Auto-NtM, and Settings
  */
 function initNavigationTabs() {
   const navItems = document.querySelectorAll(".nav-sidebar .nav-item");
@@ -93,17 +112,170 @@ function initNavigationTabs() {
 }
 
 /**
- * Setup Auto-NtM UI buttons, drag & drop, search, and export modal
+ * Setup Filter (Funnel) and Sort (Two-Arrows) Popovers
+ */
+function initFilterAndSortPopovers() {
+  const filterBtn = document.getElementById("ntmFilterMenuBtn");
+  const sortBtn = document.getElementById("ntmSortMenuBtn");
+  const filterPop = document.getElementById("ntmFilterPopover");
+  const sortPop = document.getElementById("ntmSortPopover");
+  const filterClose = document.getElementById("ntmFilterCloseBtn");
+  const sortClose = document.getElementById("ntmSortCloseBtn");
+
+  // Toggle filter popover
+  if (filterBtn && filterPop) {
+    filterBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = filterPop.classList.contains("open");
+      if (sortPop) sortPop.classList.remove("open");
+      filterPop.classList.toggle("open", !isOpen);
+      filterBtn.classList.toggle("active", !isOpen);
+    });
+  }
+
+  // Toggle sort popover
+  if (sortBtn && sortPop) {
+    sortBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = sortPop.classList.contains("open");
+      if (filterPop) filterPop.classList.remove("open");
+      sortPop.classList.toggle("open", !isOpen);
+      sortBtn.classList.toggle("active", !isOpen);
+    });
+  }
+
+  if (filterClose && filterPop) {
+    filterClose.addEventListener("click", (e) => {
+      e.stopPropagation();
+      filterPop.classList.remove("open");
+      if (filterBtn) filterBtn.classList.remove("active");
+    });
+  }
+
+  if (sortClose && sortPop) {
+    sortClose.addEventListener("click", (e) => {
+      e.stopPropagation();
+      sortPop.classList.remove("open");
+      if (sortBtn) sortBtn.classList.remove("active");
+    });
+  }
+
+  // Close popovers on outside click
+  document.addEventListener("click", (e) => {
+    if (filterPop && !filterPop.contains(e.target) && e.target !== filterBtn && !filterBtn?.contains(e.target)) {
+      filterPop.classList.remove("open");
+      if (filterBtn) filterBtn.classList.remove("active");
+    }
+    if (sortPop && !sortPop.contains(e.target) && e.target !== sortBtn && !sortBtn?.contains(e.target)) {
+      sortPop.classList.remove("open");
+      if (sortBtn) sortBtn.classList.remove("active");
+    }
+  });
+
+  // Filter Checkbox Listeners
+  const chkAll = document.getElementById("popChkAll");
+  const chkT = document.getElementById("popChkT");
+  const chkP = document.getElementById("popChkP");
+  const chkPerm = document.getElementById("popChkPerm");
+  const chkPoly = document.getElementById("popChkPoly");
+  const chkCan = document.getElementById("popChkCancelled");
+
+  if (chkAll) {
+    chkAll.addEventListener("change", () => {
+      if (chkAll.checked) {
+        NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM"]);
+        NTM_FILTER_AREAS = false;
+        NTM_SHOW_CANCELLED = false;
+        if (chkT) chkT.checked = true;
+        if (chkP) chkP.checked = true;
+        if (chkPerm) chkPerm.checked = true;
+        if (chkPoly) chkPoly.checked = false;
+        if (chkCan) chkCan.checked = false;
+      }
+      syncFilterIndicators();
+      renderNtMListAndMap();
+    });
+  }
+
+  const handleTypeChange = () => {
+    NTM_ACTIVE_TYPES.clear();
+    if (chkT && chkT.checked) NTM_ACTIVE_TYPES.add("T");
+    if (chkP && chkP.checked) NTM_ACTIVE_TYPES.add("P");
+    if (chkPerm && chkPerm.checked) NTM_ACTIVE_TYPES.add("PERM");
+
+    const allTypesChecked = NTM_ACTIVE_TYPES.size === 3 && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED;
+    if (chkAll) chkAll.checked = allTypesChecked;
+
+    syncFilterIndicators();
+    renderNtMListAndMap();
+  };
+
+  if (chkT) chkT.addEventListener("change", handleTypeChange);
+  if (chkP) chkP.addEventListener("change", handleTypeChange);
+  if (chkPerm) chkPerm.addEventListener("change", handleTypeChange);
+
+  if (chkPoly) {
+    chkPoly.addEventListener("change", () => {
+      NTM_FILTER_AREAS = chkPoly.checked;
+      if (chkAll) chkAll.checked = false;
+      syncFilterIndicators();
+      renderNtMListAndMap();
+    });
+  }
+
+  if (chkCan) {
+    chkCan.addEventListener("change", () => {
+      NTM_SHOW_CANCELLED = chkCan.checked;
+      if (chkAll) chkAll.checked = false;
+      syncFilterIndicators();
+      renderNtMListAndMap();
+    });
+  }
+
+  // Sort Radio Listeners
+  const sortRadios = document.querySelectorAll('input[name="popSort"]');
+  sortRadios.forEach(radio => {
+    radio.addEventListener("change", (e) => {
+      NTM_ACTIVE_SORT = e.target.value;
+      if (sortPop) sortPop.classList.remove("open");
+      if (sortBtn) sortBtn.classList.remove("active");
+      renderNtMListAndMap();
+    });
+  });
+}
+
+/**
+ * Updates filter dot indicator on funnel icon and summary label
+ */
+function syncFilterIndicators() {
+  const dot = document.getElementById("filterActiveDot");
+  const label = document.getElementById("ntmActiveFiltersLabel");
+  const isDefault = NTM_ACTIVE_TYPES.has("T") && NTM_ACTIVE_TYPES.has("P") && NTM_ACTIVE_TYPES.has("PERM") && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED;
+
+  if (dot) dot.style.display = isDefault ? "none" : "block";
+
+  if (label) {
+    if (NTM_SHOW_CANCELLED) {
+      label.textContent = "🚫 Cancelled";
+    } else if (isDefault) {
+      label.textContent = "All Active";
+    } else {
+      const parts = [];
+      if (NTM_ACTIVE_TYPES.has("T")) parts.push("T");
+      if (NTM_ACTIVE_TYPES.has("P")) parts.push("P");
+      if (NTM_ACTIVE_TYPES.has("PERM")) parts.push("Perm");
+      if (NTM_FILTER_AREAS) parts.push("Areas");
+      label.textContent = parts.length > 0 ? parts.join(", ") : "None";
+    }
+  }
+}
+
+/**
+ * Setup Auto-NtM UI buttons, search, and export modal
  */
 function initAutoNtmUI() {
   const fileInput = document.getElementById("ntmPdfInput");
   const uploadBtn = document.getElementById("ntmUploadBtn");
-  const pasteBtn = document.getElementById("ntmPasteBtn");
-  const pasteModal = document.getElementById("ntmPasteModal");
-  const pasteCancel = document.getElementById("ntmPasteCancel");
-  const pasteApply = document.getElementById("ntmPasteApply");
-  const pasteText = document.getElementById("ntmPasteText");
-  const dropzone = document.getElementById("ntmDropzone");
   const searchInput = document.getElementById("ntmSearchInput");
 
   // Export Modal Elements
@@ -125,58 +297,6 @@ function initAutoNtmUI() {
     uploadBtn.addEventListener("click", () => fileInput.click());
     fileInput.addEventListener("change", (e) => {
       handlePdfFiles(e.target.files);
-    });
-  }
-
-  // Raw Text Paste Modal
-  if (pasteBtn && pasteModal) {
-    pasteBtn.addEventListener("click", () => {
-      pasteModal.classList.add("open");
-      if (pasteText) pasteText.focus();
-    });
-    if (pasteCancel) {
-      pasteCancel.addEventListener("click", () => {
-        pasteModal.classList.remove("open");
-      });
-    }
-    if (pasteApply) {
-      pasteApply.addEventListener("click", () => {
-        const text = pasteText.value;
-        if (text.trim() && typeof window.parseAdmiraltyNtMText === "function") {
-          const parsed = window.parseAdmiraltyNtMText(text);
-          addNoticesToStore(parsed.notices, parsed.cancelledIds);
-        }
-        pasteModal.classList.remove("open");
-        pasteText.value = "";
-      });
-    }
-  }
-
-  // Drag and drop onto map workspace
-  const workspace = document.querySelector(".ntm-workspace");
-  if (workspace && dropzone) {
-    workspace.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropzone.classList.add("active");
-    });
-    workspace.addEventListener("dragleave", (e) => {
-      if (e.target === dropzone) dropzone.classList.remove("active");
-    });
-    workspace.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropzone.classList.remove("active");
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        handlePdfFiles(e.dataTransfer.files);
-      }
-    });
-  }
-
-  // Sort Dropdown
-  const sortSelect = document.getElementById("ntmSortSelect");
-  if (sortSelect) {
-    sortSelect.addEventListener("change", (e) => {
-      NTM_ACTIVE_SORT = e.target.value || "NUM_DESC";
-      renderNtMListAndMap();
     });
   }
 
@@ -220,7 +340,7 @@ function initAutoNtmUI() {
     }
   });
 
-  // Export Actions
+  // Export Actions with UTC timestamp in filenames!
   if (expBtnJrc) {
     expBtnJrc.addEventListener("click", () => {
       const selected = getExportSelectedNotices();
@@ -228,8 +348,9 @@ function initAutoNtmUI() {
         alert("No notices match the selected export criteria.");
         return;
       }
+      const fname = `Admiralty_NtM_Overlay_${getExportUtcTimestamp()}.uchm`;
       if (typeof window.downloadJrcUchmFile === "function") {
-        window.downloadJrcUchmFile(selected, "Admiralty_NtM_Overlay.uchm");
+        window.downloadJrcUchmFile(selected, fname);
       }
       if (exportModal) exportModal.classList.remove("open");
     });
@@ -242,9 +363,10 @@ function initAutoNtmUI() {
         alert("No notices available for export.");
         return;
       }
+      const fname = `Admiralty_NtM_Overlay_${getExportUtcTimestamp()}.geojson`;
       if (typeof window.exportToGeoJson === "function") {
         const jsonStr = window.exportToGeoJson(selected);
-        downloadTextFile(jsonStr, "Admiralty_NtM_Overlay.geojson", "application/geo+json");
+        downloadTextFile(jsonStr, fname, "application/geo+json");
       }
       if (exportModal) exportModal.classList.remove("open");
     });
@@ -257,9 +379,10 @@ function initAutoNtmUI() {
         alert("No notices available for export.");
         return;
       }
+      const fname = `Admiralty_NtM_Coordinates_${getExportUtcTimestamp()}.csv`;
       if (typeof window.exportToCsv === "function") {
         const csvStr = window.exportToCsv(selected);
-        downloadTextFile(csvStr, "Admiralty_NtM_Coordinates.csv", "text/csv");
+        downloadTextFile(csvStr, fname, "text/csv");
       }
       if (exportModal) exportModal.classList.remove("open");
     });
@@ -317,101 +440,6 @@ function initAutoNtmUI() {
 }
 
 /**
- * Setup Multi-Type Filter Pills (T, P, PERM, Polygons, Lines, Cancelled)
- * Users can toggle multiple pills simultaneously!
- */
-function initFilterPills() {
-  const pillAll = document.getElementById("ntmPillAll");
-  const pillT = document.getElementById("ntmPillT");
-  const pillP = document.getElementById("ntmPillP");
-  const pillPerm = document.getElementById("ntmPillPerm");
-  const pillPoly = document.getElementById("ntmPillPoly");
-  const pillCancelled = document.getElementById("ntmPillCancelled");
-
-  if (pillAll) {
-    pillAll.addEventListener("click", () => {
-      // Reset to all active types, clear polygons and cancelled
-      NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM"]);
-      NTM_FILTER_AREAS = false;
-      NTM_SHOW_CANCELLED = false;
-      syncPillClasses();
-      renderNtMListAndMap();
-    });
-  }
-
-  if (pillT) {
-    pillT.addEventListener("click", () => {
-      if (NTM_ACTIVE_TYPES.has("T")) {
-        NTM_ACTIVE_TYPES.delete("T");
-      } else {
-        NTM_ACTIVE_TYPES.add("T");
-      }
-      syncPillClasses();
-      renderNtMListAndMap();
-    });
-  }
-
-  if (pillP) {
-    pillP.addEventListener("click", () => {
-      if (NTM_ACTIVE_TYPES.has("P")) {
-        NTM_ACTIVE_TYPES.delete("P");
-      } else {
-        NTM_ACTIVE_TYPES.add("P");
-      }
-      syncPillClasses();
-      renderNtMListAndMap();
-    });
-  }
-
-  if (pillPerm) {
-    pillPerm.addEventListener("click", () => {
-      if (NTM_ACTIVE_TYPES.has("PERM")) {
-        NTM_ACTIVE_TYPES.delete("PERM");
-      } else {
-        NTM_ACTIVE_TYPES.add("PERM");
-      }
-      syncPillClasses();
-      renderNtMListAndMap();
-    });
-  }
-
-  if (pillPoly) {
-    pillPoly.addEventListener("click", () => {
-      NTM_FILTER_AREAS = !NTM_FILTER_AREAS;
-      syncPillClasses();
-      renderNtMListAndMap();
-    });
-  }
-
-  if (pillCancelled) {
-    pillCancelled.addEventListener("click", () => {
-      // Explicit toggle to view cancelled notices (strictly excluded by default!)
-      NTM_SHOW_CANCELLED = !NTM_SHOW_CANCELLED;
-      syncPillClasses();
-      renderNtMListAndMap();
-    });
-  }
-}
-
-function syncPillClasses() {
-  const pillAll = document.getElementById("ntmPillAll");
-  const pillT = document.getElementById("ntmPillT");
-  const pillP = document.getElementById("ntmPillP");
-  const pillPerm = document.getElementById("ntmPillPerm");
-  const pillPoly = document.getElementById("ntmPillPoly");
-  const pillCancelled = document.getElementById("ntmPillCancelled");
-
-  const isAllActive = NTM_ACTIVE_TYPES.has("T") && NTM_ACTIVE_TYPES.has("P") && NTM_ACTIVE_TYPES.has("PERM") && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED;
-
-  if (pillAll) pillAll.classList.toggle("active", isAllActive);
-  if (pillT) pillT.classList.toggle("active", NTM_ACTIVE_TYPES.has("T"));
-  if (pillP) pillP.classList.toggle("active", NTM_ACTIVE_TYPES.has("P"));
-  if (pillPerm) pillPerm.classList.toggle("active", NTM_ACTIVE_TYPES.has("PERM"));
-  if (pillPoly) pillPoly.classList.toggle("active", NTM_FILTER_AREAS);
-  if (pillCancelled) pillCancelled.classList.toggle("active", NTM_SHOW_CANCELLED);
-}
-
-/**
  * Mobile List vs Map Switcher
  */
 function initMobileViewSwitcher() {
@@ -421,7 +449,6 @@ function initMobileViewSwitcher() {
 
   if (!listBtn || !mapBtn || !workspace) return;
 
-  // Default to list view on mobile
   workspace.classList.add("mobile-view-list");
 
   listBtn.addEventListener("click", () => {
@@ -446,7 +473,7 @@ function initMobileViewSwitcher() {
 }
 
 /**
- * Vessel GPS Position & ECDIS Silhouette Layer
+ * Crosshair Target Vessel Tracking (No heading/speed clutter)
  */
 function initVesselTracking() {
   const myVesselBtn = document.getElementById("ntmMyVesselBtn");
@@ -456,7 +483,6 @@ function initVesselTracking() {
   const fetchGpsBtn = document.getElementById("vesselFetchGpsBtn");
   const applyBtn = document.getElementById("vesselApplyBtn");
   const clearBtn = document.getElementById("vesselClearBtn");
-  const settingsOpenBtn = document.getElementById("settingsOpenVesselModalBtn");
 
   // Load persisted vessel state
   try {
@@ -471,12 +497,11 @@ function initVesselTracking() {
     if (userVessel) {
       const latEl = document.getElementById("vesselLat");
       const lonEl = document.getElementById("vesselLon");
-      const hdgEl = document.getElementById("vesselHdg");
-      const spdEl = document.getElementById("vesselSpd");
       if (latEl) latEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
       if (lonEl) lonEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
-      if (hdgEl) hdgEl.value = userVessel.heading || 0;
-      if (spdEl) spdEl.value = userVessel.speed || 0;
+      if (clearBtn) clearBtn.style.display = "inline-block";
+    } else {
+      if (clearBtn) clearBtn.style.display = "none";
     }
     modal.classList.add("open");
   };
@@ -485,80 +510,61 @@ function initVesselTracking() {
     if (modal) modal.classList.remove("open");
   };
 
-  if (myVesselBtn) {
-    myVesselBtn.addEventListener("click", () => {
-      if (userVessel && leafletMap) {
-        leafletMap.flyTo([userVessel.lat, userVessel.lon], Math.max(leafletMap.getZoom(), 9));
-      } else {
-        openModal();
-      }
-    });
-  }
-
-  if (settingsOpenBtn) settingsOpenBtn.addEventListener("click", openModal);
+  if (myVesselBtn) myVesselBtn.addEventListener("click", openModal);
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
 
-  // Fetch live GPS position from browser navigator.geolocation
+  // Auto GPS
   if (fetchGpsBtn) {
     fetchGpsBtn.addEventListener("click", () => {
       if (!navigator.geolocation) {
-        alert("Geolocation API is not supported by your browser.");
+        alert("Геолокация не поддерживается вашим браузером. Введите координаты вручную.");
         return;
       }
-      fetchGpsBtn.textContent = "Acquiring GPS Fix... 📡";
+      fetchGpsBtn.textContent = "Определение координат... 📡";
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          fetchGpsBtn.textContent = "📍 Get Live Browser GPS Position";
+          fetchGpsBtn.textContent = "📍 Определить позицию автоматически (GPS)";
           const lat = pos.coords.latitude;
           const lon = pos.coords.longitude;
-          const heading = (pos.coords.heading !== null && !isNaN(pos.coords.heading)) ? pos.coords.heading : (userVessel ? userVessel.heading : 0);
-          const speed = (pos.coords.speed !== null && !isNaN(pos.coords.speed)) ? (pos.coords.speed * 1.94384) : (userVessel ? userVessel.speed : 0);
 
           const latEl = document.getElementById("vesselLat");
           const lonEl = document.getElementById("vesselLon");
-          const hdgEl = document.getElementById("vesselHdg");
-          const spdEl = document.getElementById("vesselSpd");
-
           if (latEl) latEl.value = lat.toFixed(5);
           if (lonEl) lonEl.value = lon.toFixed(5);
-          if (hdgEl) hdgEl.value = Math.round(heading);
-          if (spdEl) spdEl.value = speed.toFixed(1);
 
-          plotUserVessel(lat, lon, heading, speed, "gps");
+          plotUserVessel(lat, lon, "gps");
           closeModal();
         },
         (err) => {
-          fetchGpsBtn.textContent = "📍 Get Live Browser GPS Position";
-          alert(`Could not acquire GPS: ${err.message}. You can enter coordinates manually below.`);
+          fetchGpsBtn.textContent = "📍 Определить позицию автоматически (GPS)";
+          alert(`Ошибка GPS: ${err.message}. Пожалуйста, введите координаты вручную ниже.`);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     });
   }
 
-  // Apply manual coordinates
+  // Manual Coordinates
   if (applyBtn) {
     applyBtn.addEventListener("click", () => {
       const latVal = document.getElementById("vesselLat")?.value.trim() || "";
       const lonVal = document.getElementById("vesselLon")?.value.trim() || "";
-      const hdgVal = parseFloat(document.getElementById("vesselHdg")?.value) || 0;
-      const spdVal = parseFloat(document.getElementById("vesselSpd")?.value) || 0;
 
       const parsedLat = parseCoordinateString(latVal);
       const parsedLon = parseCoordinateString(lonVal);
 
       if (parsedLat === null || parsedLon === null) {
-        alert("Please enter valid Latitude and Longitude values (e.g. 58° 37.70' N or 58.6283).");
+        alert("Пожалуйста, введите корректные координаты (например, 58° 37.70' N или 58.6283).");
         return;
       }
 
-      plotUserVessel(parsedLat, parsedLon, hdgVal, spdVal, "manual");
+      plotUserVessel(parsedLat, parsedLon, "manual");
       closeModal();
     });
   }
 
-  // Clear vessel position
+  // Clear Vessel Target
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
       userVessel = null;
@@ -566,25 +572,20 @@ function initVesselTracking() {
       if (leafletVesselLayer) leafletVesselLayer.clearLayers();
       const hud = document.getElementById("ntmVesselHud");
       if (hud) hud.style.display = "none";
-      const statusEl = document.getElementById("settingsVesselStatus");
-      if (statusEl) statusEl.textContent = "Not Plotted";
       closeModal();
     });
   }
 }
 
 /**
- * Coordinate parser supporting decimal and nautical DMS degrees & minutes
+ * Coordinate string parser
  */
 function parseCoordinateString(str) {
   if (!str) return null;
-  // Decimal check
   const num = parseFloat(str);
   if (!isNaN(num) && /^-?\d+(\.\d+)?$/.test(str.trim())) {
     return num;
   }
-
-  // DMS format e.g. 58° 37.70' N or 017° 46.30' E
   const match = str.match(/([0-9]+)[\s°]+([0-9.]+)?[\s'′]*([NSEWnsew])?/i);
   if (match) {
     const deg = parseFloat(match[1]);
@@ -598,47 +599,36 @@ function parseCoordinateString(str) {
 }
 
 /**
- * Generates an SVG ECDIS vessel silhouette icon oriented to course over ground
+ * Generates Crosshair Target Marker (Прицел)
  */
-function getEcdisVesselIcon(heading = 0) {
-  const normHeading = Math.round(((heading % 360) + 360) % 360);
+function getEcdisCrosshairIcon() {
   const svgHtml = `
-    <div class="vessel-ecdis-wrapper" style="transform: rotate(${normHeading}deg);">
-      <div class="vessel-radar-ring"></div>
-      <svg width="44" height="44" viewBox="-22 -22 44 44" class="vessel-ecdis-svg">
-        <!-- 6-Minute Course Vector Line ahead -->
-        <line x1="0" y1="-8" x2="0" y2="-28" stroke="#ffeb3b" stroke-width="2.5" stroke-dasharray="3,2" />
-        <polygon points="0,-30 -3.5,-23 3.5,-23" fill="#ffeb3b" />
-        <!-- Ship Hull Silhouette (Standard ECDIS Symbol) -->
-        <path d="M 0 -14 L 7 -5 L 7 11 L 4 15 L -4 15 L -7 11 L -7 -5 Z" fill="#00e5ff" stroke="#ffffff" stroke-width="1.8" />
-        <!-- Bridge Wing Marks -->
-        <line x1="-7" y1="2" x2="7" y2="2" stroke="#ffffff" stroke-width="1" />
-        <!-- Center GPS Antenna Pivot -->
-        <circle cx="0" cy="0" r="2.8" fill="#ff1744" stroke="#ffffff" stroke-width="1" />
+    <div class="crosshair-wrapper">
+      <div class="crosshair-pulse-ring"></div>
+      <svg width="34" height="34" viewBox="-17 -17 34 34" class="crosshair-svg">
+        <circle cx="0" cy="0" r="13" fill="none" stroke="#00e5ff" stroke-width="1.2" opacity="0.5" />
+        <circle cx="0" cy="0" r="8" fill="none" stroke="#ffffff" stroke-width="1.8" />
+        <line x1="0" y1="-15" x2="0" y2="-9" stroke="#ffffff" stroke-width="2" />
+        <line x1="0" y1="9" x2="0" y2="15" stroke="#ffffff" stroke-width="2" />
+        <line x1="-15" y1="0" x2="-9" y2="0" stroke="#ffffff" stroke-width="2" />
+        <line x1="9" y1="0" x2="15" y2="0" stroke="#ffffff" stroke-width="2" />
+        <circle cx="0" cy="0" r="3" fill="#00e5ff" stroke="#ffffff" stroke-width="1" />
       </svg>
     </div>
   `;
   return L.divIcon({
     html: svgHtml,
-    className: "ecdis-vessel-marker",
-    iconSize: [44, 44],
-    iconAnchor: [22, 22]
+    className: "ecdis-crosshair-marker",
+    iconSize: [34, 34],
+    iconAnchor: [17, 17]
   });
 }
 
 /**
- * Plot user vessel on Leaflet map
+ * Plot user vessel crosshair on map
  */
-function plotUserVessel(lat, lon, heading = 0, speed = 0, source = "manual") {
-  userVessel = {
-    lat,
-    lon,
-    heading,
-    speed,
-    name: "LPG/C IINO INEOS VESTA",
-    source,
-    updatedAt: new Date().toISOString()
-  };
+function plotUserVessel(lat, lon, source = "manual") {
+  userVessel = { lat, lon, source, updatedAt: new Date().toISOString() };
 
   try {
     localStorage.setItem(VESSEL_STORAGE_KEY, JSON.stringify(userVessel));
@@ -648,19 +638,17 @@ function plotUserVessel(lat, lon, heading = 0, speed = 0, source = "manual") {
     leafletVesselLayer.clearLayers();
 
     const marker = L.marker([lat, lon], {
-      icon: getEcdisVesselIcon(heading),
-      zIndexOffset: 1000
+      icon: getEcdisCrosshairIcon(),
+      zIndexOffset: 1200
     });
 
     marker.bindPopup(`
-      <div style="font-family:'Segoe UI',sans-serif;color:#111;min-width:210px;">
-        <div style="font-weight:700;color:#0a3888;font-size:1.05rem;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:6px;">
-          ⚓ LPG/C IINO INEOS VESTA
+      <div style="font-family:'Segoe UI',sans-serif;color:#111;min-width:180px;">
+        <div style="font-weight:700;color:#0a3888;font-size:1rem;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:5px;">
+          🎯 Позиция судна (Vessel)
         </div>
-        <div style="font-size:0.8rem;color:#444;margin-bottom:3px;"><b>Position:</b> ${formatLatLonDMS(lat, lon)}</div>
-        <div style="font-size:0.8rem;color:#444;margin-bottom:3px;"><b>COG / Heading:</b> ${Math.round(heading)}°</div>
-        <div style="font-size:0.8rem;color:#444;margin-bottom:3px;"><b>SOG:</b> ${speed.toFixed(1)} kts</div>
-        <div style="font-size:0.75rem;color:#666;margin-top:6px;"><b>Fix Source:</b> ${source === "gps" ? "Live GPS Sensor" : "Manual Bridge Entry"}</div>
+        <div style="font-size:0.8rem;color:#333;margin-bottom:3px;"><b>Координаты:</b> ${formatLatLonDMS(lat, lon)}</div>
+        <div style="font-size:0.75rem;color:#666;"><b>Источник:</b> ${source === "gps" ? "GPS браузера" : "Ввод штурмана"}</div>
       </div>
     `);
 
@@ -672,114 +660,93 @@ function plotUserVessel(lat, lon, heading = 0, speed = 0, source = "manual") {
   const hud = document.getElementById("ntmVesselHud");
   if (hud) {
     hud.style.display = "flex";
-    hud.innerHTML = `🚢 <strong>IINO INEOS VESTA</strong> | ${formatLatLonDMS(lat, lon)} | COG ${Math.round(heading)}° | SOG ${speed.toFixed(1)} kts`;
-  }
-
-  // Update Settings Tab telemetry status
-  const statusEl = document.getElementById("settingsVesselStatus");
-  if (statusEl) {
-    statusEl.textContent = `Plotted at ${formatLatLonDMS(lat, lon)} (COG ${Math.round(heading)}°)`;
+    hud.innerHTML = `🎯 <strong>Vessel:</strong> ${formatLatLonDMS(lat, lon)}`;
   }
 }
 
 /**
- * Settings UI & Direct Line to Developer Engineering
+ * Minimalist Settings UI
  */
 function initSettingsUI() {
-  // Theme Radio Switcher
-  const radios = document.querySelectorAll('input[name="setsailTheme"]');
-  radios.forEach(r => {
-    r.addEventListener("change", (e) => {
-      setAppTheme(e.target.value);
-    });
-  });
+  // Theme Toggle Buttons
+  const btnDark = document.getElementById("btnThemeDark");
+  const btnLight = document.getElementById("btnThemeLight");
 
-  // Developer Feedback Form
-  // NOTE: Email wafficompany@gmail.com is strictly kept inside this JS dispatch endpoint
-  // and is NEVER displayed to the user in plaintext in the HTML or UI.
+  if (btnDark) {
+    btnDark.addEventListener("click", () => setAppTheme("dark"));
+  }
+  if (btnLight) {
+    btnLight.addEventListener("click", () => setAppTheme("light"));
+  }
+
+  // Minimal Contact Form: Reply Email + Message
   const submitBtn = document.getElementById("contactSubmitBtn");
   const statusEl = document.getElementById("contactStatusMsg");
 
   if (submitBtn) {
     submitBtn.addEventListener("click", async () => {
-      const officer = document.getElementById("contactOfficer")?.value.trim() || "";
-      const vessel = document.getElementById("contactVessel")?.value.trim() || "LPG/C IINO INEOS VESTA";
-      const category = document.getElementById("contactCategory")?.value || "General Feedback";
-      const subject = document.getElementById("contactSubject")?.value.trim() || "";
+      const email = document.getElementById("contactEmail")?.value.trim() || "";
       const message = document.getElementById("contactMessage")?.value.trim() || "";
 
-      if (!message || !subject) {
-        alert("Please complete the Subject and Message fields before transmitting.");
+      if (!message || !email) {
+        alert("Пожалуйста, заполните ваш Email для ответа и текст сообщения.");
         return;
       }
 
       submitBtn.disabled = true;
-      submitBtn.textContent = "Transmitting to Engineering... 📡";
+      submitBtn.textContent = "Отправка... ⏳";
       if (statusEl) statusEl.textContent = "";
 
       const payload = {
-        officer,
-        vessel,
-        category,
-        subject,
+        replyTo: email,
         message,
+        vessel: "LPG/C IINO INEOS VESTA",
         clientTime: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        screenWidth: window.innerWidth,
-        screenHeight: window.innerHeight,
-        version: "SetSail v2.4 (October 2026)",
-        activeNoticesCount: NTM_STORE.length
+        version: "SetSail v2.4 (Minimalist Edition)"
       };
 
       try {
-        const targetEndpoint = ["https://formsubmit.co/ajax/", "wafficompany", "@", "gmail.com"].join("");
-        const res = await fetch(targetEndpoint, {
+        const endpoint = ["https://formsubmit.co/ajax/", "wafficompany", "@", "gmail.com"].join("");
+        const res = await fetch(endpoint, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
           body: JSON.stringify(payload)
         });
 
         if (res.ok) {
           if (statusEl) {
-            statusEl.textContent = "✅ Message successfully transmitted to SetSail Bridge Engineering!";
+            statusEl.textContent = "✅ Сообщение отправлено разработчикам!";
             statusEl.style.color = "var(--ok)";
           }
-          alert("Transmission successful!\n\nYour feedback has been logged directly with SetSail Maritime Engineering.");
-          const subjInput = document.getElementById("contactSubject");
+          alert("Спасибо! Ваше сообщение отправлено разработчикам. Ответ придет на " + email);
           const msgInput = document.getElementById("contactMessage");
-          if (subjInput) subjInput.value = "";
           if (msgInput) msgInput.value = "";
         } else {
-          throw new Error(`Server returned HTTP ${res.status}`);
+          throw new Error("HTTP " + res.status);
         }
       } catch (err) {
         if (statusEl) {
-          statusEl.textContent = "Transmission completed (Offline queued).";
+          statusEl.textContent = "Зафиксировано в судовом журнале.";
           statusEl.style.color = "var(--warn)";
         }
-        alert("Message recorded in bridge log. SetSail engineering will review upon next sync.");
+        alert("Сообщение зафиксировано. Разработчики получат его при следующей синхронизации.");
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = "🚀 Transmit Message to Engineering";
+        submitBtn.textContent = "✉️ Отправить разработчикам";
       }
     });
   }
 
-  // Cache Reset Button
+  // Cache Reset
   const clearCacheBtn = document.getElementById("settingsClearCacheBtn");
   if (clearCacheBtn) {
     clearCacheBtn.addEventListener("click", () => {
-      if (!confirm("Clear local notice storage and re-fetch latest Admiralty NtM bulletins?")) return;
-      try {
-        localStorage.removeItem(NTM_STORAGE_KEY);
-      } catch (e) {}
+      if (!confirm("Сбросить кэш поправок и повторно загрузить свежие данные?")) return;
+      try { localStorage.removeItem(NTM_STORAGE_KEY); } catch (e) {}
       NTM_STORE = [];
       if (leafletMarkersLayer) leafletMarkersLayer.clearLayers();
       loadRemoteNoticesJson().then(() => {
-        alert("Local storage refreshed successfully from live Admiralty scraper.");
+        alert("Кэш успешно очищен, поправки перезагружены.");
       });
     });
   }
@@ -838,7 +805,7 @@ function updateExportModalCounts() {
   selected.forEach(s => totalPts += (s.coords ? s.coords.length : 0));
 
   if (elSummary) {
-    elSummary.textContent = `Will export: ${selected.length} notices (${totalPts} points/vertices)`;
+    elSummary.textContent = `Will export: ${selected.length} notices (${totalPts} points) | UTC: ${getExportUtcTimestamp()}`;
   }
 }
 
@@ -867,7 +834,7 @@ async function handlePdfFiles(fileList) {
 
   for (let i = 0; i < fileList.length; i++) {
     const file = fileList[i];
-    if (statusEl) statusEl.textContent = `Reading ${file.name} (${i + 1}/${fileList.length})...`;
+    if (statusEl) statusEl.textContent = `Reading ${file.name}...`;
 
     try {
       const text = await extractTextFromPdf(file);
@@ -913,7 +880,6 @@ async function extractTextFromPdf(file) {
  * Add / update notices in store and process cancellations
  */
 function addNoticesToStore(newNotices, cancelledIds = []) {
-  // 1. Process cancellations: mark as CANCELLED so they can be filtered out by default
   if (cancelledIds && cancelledIds.length > 0) {
     NTM_STORE.forEach(item => {
       if (cancelledIds.includes(item.id)) {
@@ -923,7 +889,6 @@ function addNoticesToStore(newNotices, cancelledIds = []) {
     });
   }
 
-  // 2. Add / Update new notices
   newNotices.forEach(item => {
     const existingIdx = NTM_STORE.findIndex(n => n.id === item.id);
     if (existingIdx >= 0) {
@@ -935,7 +900,6 @@ function addNoticesToStore(newNotices, cancelledIds = []) {
 
   saveStoreToStorage();
 
-  // Update badge on sidebar
   const badge = document.getElementById("ntmBadge");
   const activeCount = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
   if (badge) {
@@ -985,7 +949,7 @@ function loadStoreFromStorage() {
 }
 
 /**
- * Attempt to load auto-synced notices.json generated by Admiralty Scraper
+ * Attempt to load auto-synced notices.json
  */
 async function loadRemoteNoticesJson() {
   try {
@@ -1005,14 +969,12 @@ async function loadRemoteNoticesJson() {
       }
       return true;
     }
-  } catch (err) {
-    // Expected on local file:/// origin without a local web server
-  }
+  } catch (err) {}
   return false;
 }
 
 /**
- * Initialize Leaflet Map (with Ocean, OSM, Satellite layers & OpenSeaMap overlay)
+ * Initialize Leaflet Map
  */
 function initNtMMap() {
   const mapDiv = document.getElementById("ntmMap");
@@ -1027,29 +989,26 @@ function initNtMMap() {
       attributionControl: false
     });
 
-    // Base Layers (100% Free, No API key required)
     const oceanLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 13,
-      attribution: "Tiles &copy; Esri &mdash; GEBCO, NOAA, CHS, National Geographic"
+      attribution: "Tiles &copy; Esri"
     });
 
     const osmLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors"
+      attribution: "&copy; OpenStreetMap"
     });
 
     const satLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 18,
-      attribution: "Tiles &copy; Esri World Imagery"
+      attribution: "Tiles &copy; Esri"
     });
 
-    // Default to Ocean Navigation Chart
     oceanLayer.addTo(leafletMap);
 
-    // Marine Marks & Buoys Overlay
     const seamarkLayer = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", {
       maxZoom: 18,
-      attribution: "Map data: &copy; OpenSeaMap contributors"
+      attribution: "OpenSeaMap"
     });
 
     const baseMaps = {
@@ -1059,7 +1018,7 @@ function initNtMMap() {
     };
 
     const overlayMaps = {
-      "⚓ OpenSeaMap Buoys & Marks": seamarkLayer
+      "⚓ OpenSeaMap Buoys": seamarkLayer
     };
 
     L.control.layers(baseMaps, overlayMaps, { position: "topright" }).addTo(leafletMap);
@@ -1075,9 +1034,9 @@ function initNtMMap() {
       }
     });
 
-    // Plot vessel if already stored
+    // Plot crosshair target if user position stored
     if (userVessel) {
-      plotUserVessel(userVessel.lat, userVessel.lon, userVessel.heading, userVessel.speed, userVessel.source);
+      plotUserVessel(userVessel.lat, userVessel.lon, userVessel.source);
     }
 
     renderNtMListAndMap();
@@ -1155,7 +1114,7 @@ function drawOfflineCanvasMap() {
 }
 
 /**
- * Filter helper honoring Multi-Type pills, Cancelled isolation, and Search
+ * Filter helper honoring popovers and search
  */
 function getFilteredNotices() {
   const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
@@ -1163,26 +1122,21 @@ function getFilteredNotices() {
   let list = NTM_STORE.filter(item => {
     const isCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
 
-    // 1. Strict Cancelled Isolation:
-    // Cancelled notices are NEVER included unless user explicitly checked NTM_SHOW_CANCELLED!
+    // Strict Cancelled Isolation:
     if (isCancelled) {
       if (!NTM_SHOW_CANCELLED) return false;
     } else {
       if (NTM_SHOW_CANCELLED) {
-        // When user is viewing the Cancelled tab/filter specifically, only show cancelled
         return false;
       }
-      // 2. Multi-type filter
       if (NTM_ACTIVE_TYPES.size > 0 && !NTM_ACTIVE_TYPES.has(item.type)) {
         return false;
       }
-      // 3. Shape filter (areas)
       if (NTM_FILTER_AREAS && !item.isPolygon && !(item.coords && item.coords.length >= 3)) {
         return false;
       }
     }
 
-    // 4. Search Filter
     if (searchVal) {
       const searchStr = `${item.id} ${item.country || ""} ${item.region || ""} ${item.subject || ""} ${(item.charts || []).join(" ")} ${item.cancels ? item.cancels.join(" ") : ""}`.toLowerCase();
       if (!searchStr.includes(searchVal)) return false;
@@ -1191,7 +1145,7 @@ function getFilteredNotices() {
     return true;
   });
 
-  // 5. Rich Sorting
+  // Sorting
   list.sort((a, b) => {
     const numA = parseInt(a.num, 10) || parseInt(a.id, 10) || 0;
     const numB = parseInt(b.num, 10) || parseInt(b.id, 10) || 0;
@@ -1224,7 +1178,6 @@ function getFilteredNotices() {
       if (oA !== oB) return oA - oB;
       return numB - numA;
     }
-    // Default: NUM_DESC (Newest notice number first)
     return numB - numA;
   });
 
@@ -1232,7 +1185,7 @@ function getFilteredNotices() {
 }
 
 /**
- * Format coordinates to clean nautical DMS (e.g. 58° 37.70' N, 017° 46.30' E)
+ * Format coordinates to nautical DMS
  */
 function formatLatLonDMS(lat, lon) {
   const latDeg = Math.floor(Math.abs(lat));
@@ -1263,18 +1216,16 @@ function fitAllNoticesOnMap() {
 }
 
 /**
- * Render notices in the list sidebar and on the interactive Leaflet map
+ * Render notices in the list sidebar and on Leaflet map
  */
 function renderNtMListAndMap() {
   const listContainer = document.getElementById("ntmItemsScroll");
   const countEl = document.getElementById("ntmListCount");
   const filtered = getFilteredNotices();
 
-  // Active vs Cancelled counts
   const activeNotices = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED");
   const cancelledNotices = NTM_STORE.filter(n => n.isCancelled || n.status === "CANCELLED");
 
-  const countAll = activeNotices.length;
   const countT = activeNotices.filter(n => n.type === "T").length;
   const countP = activeNotices.filter(n => n.type === "P").length;
   const countPerm = activeNotices.filter(n => n.type === "PERM").length;
@@ -1285,19 +1236,19 @@ function renderNtMListAndMap() {
     countEl.textContent = `${filtered.length} of ${NTM_STORE.length}`;
   }
 
-  // Update Pill Counts
-  const elCntT = document.getElementById("cntT");
+  // Update Popover Counts
+  const elCntT = document.getElementById("popCntT");
   if (elCntT) elCntT.textContent = countT;
-  const elCntP = document.getElementById("cntP");
+  const elCntP = document.getElementById("popCntP");
   if (elCntP) elCntP.textContent = countP;
-  const elCntPerm = document.getElementById("cntPerm");
+  const elCntPerm = document.getElementById("popCntPerm");
   if (elCntPerm) elCntPerm.textContent = countPerm;
-  const elCntPoly = document.getElementById("cntPoly");
+  const elCntPoly = document.getElementById("popCntPoly");
   if (elCntPoly) elCntPoly.textContent = countPoly;
-  const elCntCan = document.getElementById("cntCancelled");
+  const elCntCan = document.getElementById("popCntCancelled");
   if (elCntCan) elCntCan.textContent = countCancelled;
 
-  syncPillClasses();
+  syncFilterIndicators();
 
   const expBadge = document.getElementById("ntmExportBadge");
   if (expBadge) {
@@ -1310,7 +1261,7 @@ function renderNtMListAndMap() {
   // Render Notice Cards into Sidebar
   if (listContainer) {
     if (filtered.length === 0) {
-      listContainer.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.8rem;">No notices match the active filters.<br/>Toggle filter pills or adjust your search query.</div>';
+      listContainer.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.8rem;">Нет поправок, соответствующих выбранному фильтру.<br/>Используйте иконку фильтра над списком для настройки.</div>';
     } else {
       let html = "";
       filtered.forEach(item => {
@@ -1318,7 +1269,6 @@ function renderNtMListAndMap() {
         const tagClass = item.type === "T" ? "temp" : (item.type === "P" ? "prelim" : "perm");
         const typeLabel = item.type === "T" ? "TEMP (T)" : (item.type === "P" ? "PRELIM (P)" : "PERM");
 
-        // Safe type badge calculation
         const typeBadge = isItemCancelled
           ? `<span class="ntm-tag cancelled">CANCELLED</span>`
           : `<span class="ntm-tag ${tagClass}">${typeLabel}</span>`;
@@ -1364,7 +1314,6 @@ function renderNtMListAndMap() {
         ? "#ef4444"
         : (item.type === "T" ? "#ffc850" : (item.type === "P" ? "#bb86fc" : "#4fc3f7"));
 
-      // Polygons
       if (item.isPolygon && item.coords.length >= 3) {
         const polyPoints = item.coords.map(c => [c.lat, c.lon]);
         const polygon = L.polygon(polyPoints, {
@@ -1385,7 +1334,6 @@ function renderNtMListAndMap() {
         `);
         leafletMarkersLayer.addLayer(polygon);
       } else if (item.isLine && item.coords.length >= 2) {
-        // Polyline
         const linePoints = item.coords.map(c => [c.lat, c.lon]);
         const polyline = L.polyline(linePoints, {
           color: color,
@@ -1401,7 +1349,6 @@ function renderNtMListAndMap() {
         `);
         leafletMarkersLayer.addLayer(polyline);
       } else {
-        // Points
         item.coords.forEach(coord => {
           const circle = L.circleMarker([coord.lat, coord.lon], {
             radius: 6,
@@ -1465,7 +1412,6 @@ function selectNtMNotice(noticeId) {
     });
   }
 
-  // On mobile, automatically switch to map view upon clicking a card
   if (window.innerWidth <= 768 && mobileCurrentView === "list") {
     const mapBtn = document.getElementById("ntmViewMapBtn");
     if (mapBtn) mapBtn.click();
@@ -1473,7 +1419,7 @@ function selectNtMNotice(noticeId) {
 }
 
 /**
- * Initial sample notices including Permanent (PERM), Temporary (T), and Preliminary (P)
+ * Initial sample notices
  */
 function loadSampleNtMData() {
   const sampleNotices = [
