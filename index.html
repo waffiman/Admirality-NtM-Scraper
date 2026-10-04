@@ -631,9 +631,45 @@
           </div>
 
           <div class="ntm-toolbar-right">
-            <button type="button" class="ntm-btn-glass" id="ntmMyVesselBtn" title="Locate &amp; Plot Vessel Position on ECDIS">
-              📡 My Vessel
-            </button>
+            <!-- My Vessel Popover Anchor -->
+            <div class="ntm-popover-anchor">
+              <button type="button" class="ntm-btn-glass" id="ntmMyVesselBtn" title="Locate &amp; Plot Vessel Position on ECDIS">
+                📡 My Vessel
+              </button>
+
+              <div class="ntm-popover ntm-vessel-popover" id="ntmVesselPopover">
+                <div class="ntm-popover-header">
+                  <span>🎯 Vessel Target</span>
+                  <button type="button" class="ntm-popover-close" id="vesselPopClose">×</button>
+                </div>
+                <div class="ntm-popover-body">
+                  <p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.5rem;">
+                    Plot ECDIS crosshair target at vessel location:
+                  </p>
+                  <button type="button" class="ntm-btn-glass" id="vesselFetchGpsBtn" style="width:100%;padding:0.45rem;font-weight:600;font-size:0.78rem;justify-content:center;margin-bottom:0.4rem;">
+                    📍 Auto GPS Position
+                  </button>
+
+                  <div class="ntm-popover-divider"></div>
+                  <div class="ntm-popover-subtitle">Manual Coordinates:</div>
+
+                  <div class="form-group" style="margin-bottom:0.35rem;">
+                    <label for="vesselLat" style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:2px;">Latitude:</label>
+                    <input type="text" id="vesselLat" class="min-input" placeholder="e.g., 58° 37.70' N or 58.628" style="font-size:0.76rem;padding:0.35rem 0.5rem;" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:0.5rem;">
+                    <label for="vesselLon" style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:2px;">Longitude:</label>
+                    <input type="text" id="vesselLon" class="min-input" placeholder="e.g., 017° 46.30' E or 17.771" style="font-size:0.76rem;padding:0.35rem 0.5rem;" />
+                  </div>
+
+                  <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
+                    <button type="button" class="ntm-btn-glass" id="vesselClearBtn" style="color:var(--warn);margin-right:auto;display:none;font-size:0.72rem;padding:0.3rem 0.55rem;">Clear</button>
+                    <button type="button" class="ntm-btn-primary" id="vesselApplyBtn" style="font-size:0.75rem;padding:0.35rem 0.7rem;">Plot Target 🎯</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <button type="button" class="ntm-btn-glass" id="ntmFitAllBtn" title="Fit all plotted notices into view">
               🎯 Fit View
             </button>
@@ -824,42 +860,42 @@
       <div id="tab-settings" class="tab-pane">
         <div class="settings-wrap minimal-settings">
           <div class="settings-header">
-            <h2>⚙️ Настройки</h2>
-            <p class="settings-subtitle">SetSail Navigation Suite &bull; LPG/C IINO INEOS VESTA</p>
+            <h2>⚙️ Settings</h2>
+            <p class="settings-subtitle">SetSail Marine Navigation Suite &bull; LPG/C IINO INEOS VESTA</p>
           </div>
 
           <div class="settings-grid-minimal">
             <!-- Card 1: Theme Switcher -->
             <div class="settings-card-min">
-              <div class="min-card-title">Тема оформления</div>
-              <p class="min-card-desc">Выберите тему оформления мостика (ночная темная или дневная светлая).</p>
+              <div class="min-card-title">Bridge Display Theme</div>
+              <p class="min-card-desc">Choose bridge color profile: Dark Cockpit (night watchkeeping) or Light Mode (bright daylight).</p>
               <div class="min-theme-toggle">
                 <button type="button" class="theme-toggle-btn active" data-theme-val="dark" id="btnThemeDark">
-                  🌙 Dark (Ночь)
+                  🌙 Dark (Night)
                 </button>
                 <button type="button" class="theme-toggle-btn" data-theme-val="light" id="btnThemeLight">
-                  ☀️ Light (День)
+                  ☀️ Light (Day)
                 </button>
               </div>
             </div>
 
             <!-- Card 2: Contact Developers Form (Minimalist: Email + Message) -->
             <div class="settings-card-min">
-              <div class="min-card-title">Связь с разработчиками</div>
-              <p class="min-card-desc">Отправьте сообщение, найденную ошибку или пожелание. Ответ разработчики отправят на указанную вами почту.</p>
+              <div class="min-card-title">Developer Support &amp; Feedback</div>
+              <p class="min-card-desc">Transmit bug reports, missing notice inquiries, or suggestions directly to SetSail engineering. Replies are sent to your provided email.</p>
               
               <form id="setsailContactForm" class="min-contact-form" onsubmit="return false;">
                 <div class="form-group">
-                  <label for="contactEmail">Email для ответа:</label>
-                  <input type="email" id="contactEmail" class="min-input" placeholder="ваш_email@example.com" required />
+                  <label for="contactEmail">Reply Email Address:</label>
+                  <input type="email" id="contactEmail" class="min-input" placeholder="officer@example.com" required />
                 </div>
                 <div class="form-group">
-                  <label for="contactMessage">Сообщение:</label>
-                  <textarea id="contactMessage" class="min-textarea" rows="4" placeholder="Введите текст сообщения..." required></textarea>
+                  <label for="contactMessage">Message / Report:</label>
+                  <textarea id="contactMessage" class="min-textarea" rows="4" placeholder="Describe the issue or suggestion..." required></textarea>
                 </div>
                 <div class="form-actions" style="display:flex;align-items:center;gap:0.8rem;margin-top:0.4rem;">
                   <button type="button" class="min-btn-submit" id="contactSubmitBtn">
-                    ✉️ Отправить разработчикам
+                    ✉️ Transmit to Engineering
                   </button>
                   <span class="contact-status-msg" id="contactStatusMsg"></span>
                 </div>
@@ -868,53 +904,17 @@
 
             <!-- Card 3: Storage & Cache Reset -->
             <div class="settings-card-min">
-              <div class="min-card-title">Кэш и данные</div>
-              <p class="min-card-desc">Принудительное обновление и повторная загрузка поправок с сервера.</p>
+              <div class="min-card-title">Cache &amp; Stored Telemetry</div>
+              <p class="min-card-desc">Force cache purge and re-synchronize latest Notices to Mariners from server.</p>
               <button type="button" class="min-btn-outline" id="settingsClearCacheBtn">
-                🔄 Сбросить кэш поправок и синхронизировать
+                🔄 Reset NtM Cache &amp; Re-sync
               </button>
             </div>
           </div>
         </div>
       </div><!-- end #tab-settings -->
 
-      <!-- Modal for Vessel GPS / Heading Entry -->
-      <div class="ntm-modal" id="ntmVesselModal">
-        <div class="ntm-modal-box" style="max-width:380px;">
-          <div class="ntm-modal-header">
-            <h3>🎯 Позиция судна (My Vessel)</h3>
-            <button type="button" class="ntm-modal-close" id="vesselModalClose" title="Закрыть">×</button>
-          </div>
-          <p style="font-size:0.78rem;color:var(--muted);margin:0 0 1rem;">
-            Нанесите точку (прицел) вашего судна на карту.
-          </p>
 
-          <!-- Option 1: Auto GPS -->
-          <button type="button" class="ntm-btn-glass" id="vesselFetchGpsBtn" style="width:100%;padding:0.75rem;font-weight:600;font-size:0.85rem;justify-content:center;">
-            📍 Определить позицию автоматически (GPS)
-          </button>
-
-          <div class="modal-or-divider">
-            <span>или введите вручную</span>
-          </div>
-
-          <!-- Option 2: Manual Coordinates -->
-          <div class="form-group" style="margin-bottom:0.6rem;">
-            <label for="vesselLat" style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:3px;">Широта (Latitude):</label>
-            <input type="text" id="vesselLat" class="min-input" placeholder="например, 58° 37.70' N или 58.628" />
-          </div>
-          <div class="form-group" style="margin-bottom:1rem;">
-            <label for="vesselLon" style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:3px;">Долгота (Longitude):</label>
-            <input type="text" id="vesselLon" class="min-input" placeholder="например, 017° 46.30' E или 17.771" />
-          </div>
-
-          <div class="ntm-modal-actions" style="display:flex;gap:0.5rem;justify-content:flex-end;">
-            <button type="button" class="ntm-btn-glass" id="vesselClearBtn" style="color:var(--warn);margin-right:auto;display:none;">Очистить</button>
-            <button type="button" class="secondary" id="vesselModalCancel">Отмена</button>
-            <button type="button" class="ntm-btn-primary" id="vesselApplyBtn">Нанести на карту 🎯</button>
-          </div>
-        </div>
-      </div>
 
       <!-- Modal for Raw Text Paste -->
       <div class="ntm-modal" id="ntmPasteModal">
@@ -1740,11 +1740,11 @@
     function autoEphemeris(body, jd) {
       if (!body || !Number.isFinite(jd)) return null;
       const bKey = body.trim().toLowerCase();
-      if (bKey === "sun" || bKey === "солнце") {
+      if (bKey === "sun" ) {
         const s = sunGhaDec(jd);
         return { gha: s.gha, dec: s.dec, source: "Sun" };
       }
-      if (bKey === "moon" || bKey === "луна") {
+      if (bKey === "moon" ) {
         const m = moonGhaDec(jd);
         return { gha: m.gha, dec: m.dec, source: "Moon" };
       }
@@ -1979,11 +1979,11 @@
 
       // ── Sun ──
       const sunAltAz  = Number.isFinite(jd) ? (() => { const s = sunGhaDec(jd);  return computeAltAz(s.gha, s.dec);  })() : { alt: NaN, az: NaN };
-      rows += buildRow("☀ Sun",  sunAltAz,  "alm-sun",  selectedBody === "sun"  || selectedBody === "солнце");
+      rows += buildRow("☀ Sun",  sunAltAz,  "alm-sun",  selectedBody === "sun"  );
 
       // ── Moon ──
       const moonAltAz = Number.isFinite(jd) ? (() => { const m = moonGhaDec(jd); return computeAltAz(m.gha, m.dec); })() : { alt: NaN, az: NaN };
-      rows += buildRow("☽ Moon", moonAltAz, "alm-moon", selectedBody === "moon" || selectedBody === "луна");
+      rows += buildRow("☽ Moon", moonAltAz, "alm-moon", selectedBody === "moon" );
 
       // ── Divider ──
       rows += '<tr class="alm-divider"><td colspan="3"></td></tr>';
