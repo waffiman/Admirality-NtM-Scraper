@@ -1,6 +1,7 @@
-# ⚓ Admiralty Notices to Mariners (NtM) Auto-Scraper & Live ECDIS Plotter
+# ⛵ SetSail — Marine Navigation Suite & Auto-NtM ECDIS Plotter
 
-Automated weekly scraper for UKHO (United Kingdom Hydrographic Office) Admiralty Notices to Mariners. Every Thursday, it fetches the official weekly bulletin from `msi.admiralty.co.uk`, parses all notices (Permanent, Temporary, Preliminary, Areas & Lines), resolves cancellations, and publishes an interactive navigation chart and JRC ECDIS overlay.
+**SetSail** is a high-precision maritime navigation suite featuring a Gyro & Magnetic Compass Logbook, celestial Star Almanac for 59 bodies, and an automated UKHO Admiralty Notices to Mariners (Auto-NtM) interactive ECDIS overlay.
+
 
 ---
 
