@@ -578,7 +578,8 @@ async function loadRemoteNoticesJson() {
       if (statusEl) {
         const meta = data.metadata || {};
         const wk = meta.weekNumber ? `Wk ${meta.weekNumber}/${meta.year}` : (meta.weeklyBulletin || "Live");
-        statusEl.innerHTML = `<span style="color:#4ade80;font-weight:600;">🟢 Live NtM ${wk}: ${NTM_STORE.length} active</span>`;
+        const activeCnt = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
+        statusEl.innerHTML = `<span class="ntm-live-status"><span class="ntm-live-dot" title="Live UKHO telemetry online"></span>Live NtM ${wk}: ${activeCnt} active</span>`;
       }
       return true;
     }
@@ -732,14 +733,21 @@ function getFilteredNotices() {
   const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
 
   let list = NTM_STORE.filter(item => {
-    if (NTM_ACTIVE_FILTER === "T" && item.type !== "T") return false;
-    if (NTM_ACTIVE_FILTER === "P" && item.type !== "P") return false;
-    if (NTM_ACTIVE_FILTER === "PERM" && item.type !== "PERM") return false;
-    if (NTM_ACTIVE_FILTER === "POLY" && !item.isPolygon && !(item.coords && item.coords.length >= 3)) return false;
-    if (NTM_ACTIVE_FILTER === "LINE" && !item.isLine) return false;
+    const isCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
+
+    if (NTM_ACTIVE_FILTER === "CANCELLED") {
+      if (!isCancelled) return false;
+    } else {
+      if (isCancelled) return false;
+      if (NTM_ACTIVE_FILTER === "T" && item.type !== "T") return false;
+      if (NTM_ACTIVE_FILTER === "P" && item.type !== "P") return false;
+      if (NTM_ACTIVE_FILTER === "PERM" && item.type !== "PERM") return false;
+      if (NTM_ACTIVE_FILTER === "POLY" && !item.isPolygon && !(item.coords && item.coords.length >= 3)) return false;
+      if (NTM_ACTIVE_FILTER === "LINE" && !item.isLine) return false;
+    }
 
     if (searchVal) {
-      const searchStr = `${item.id} ${item.country} ${item.region} ${item.subject} ${(item.charts||[]).join(' ')}`.toLowerCase();
+      const searchStr = `${item.id} ${item.country} ${item.region} ${item.subject} ${(item.charts||[]).join(' ')} ${item.cancels ? item.cancels.join(' ') : ''}`.toLowerCase();
       if (!searchStr.includes(searchVal)) return false;
     }
     return true;
@@ -819,12 +827,15 @@ function renderNtMListAndMap() {
     countEl.textContent = `${filtered.length} of ${NTM_STORE.length}`;
   }
 
-  // Update Top Bar Segmented Counters
-  const countAll = NTM_STORE.length;
-  const countT = NTM_STORE.filter(n => n.type === "T").length;
-  const countP = NTM_STORE.filter(n => n.type === "P").length;
-  const countPerm = NTM_STORE.filter(n => n.type === "PERM").length;
-  const countPoly = NTM_STORE.filter(n => n.isPolygon || (n.coords && n.coords.length >= 3)).length;
+  // Update Live Notice Counters (Active vs Cancelled)
+  const activeNotices = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED");
+  const cancelledNotices = NTM_STORE.filter(n => n.isCancelled || n.status === "CANCELLED");
+  const countAll = activeNotices.length;
+  const countT = activeNotices.filter(n => n.type === "T").length;
+  const countP = activeNotices.filter(n => n.type === "P").length;
+  const countPerm = activeNotices.filter(n => n.type === "PERM").length;
+  const countPoly = activeNotices.filter(n => n.isPolygon || (n.coords && n.coords.length >= 3)).length;
+  const countCancelled = cancelledNotices.length;
 
   const elCntAll = document.getElementById("cntAll");
   if (elCntAll) elCntAll.textContent = countAll;
@@ -853,6 +864,15 @@ function renderNtMListAndMap() {
     if (optPoly) optPoly.textContent = `Areas (${countPoly})`;
     const optLine = filterSelectEl.querySelector('option[value="LINE"]');
     if (optLine) optLine.textContent = `Lines (${countLine})`;
+    let optCan = filterSelectEl.querySelector('option[value="CANCELLED"]');
+    if (!optCan && countCancelled > 0) {
+      optCan = document.createElement("option");
+      optCan.value = "CANCELLED";
+      filterSelectEl.appendChild(optCan);
+    }
+    if (optCan) {
+      optCan.textContent = `Cancelled (${countCancelled})`;
+    }
   }
 
   const statusPill = document.getElementById("ntmStatusPill");
@@ -879,13 +899,17 @@ function renderNtMListAndMap() {
         const isChecked = item.checkedForExport !== false;
 
         const chartsStr = (item.charts && item.charts.length > 0) ? `Charts: ${item.charts.join(', ')}` : '';
+        const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
+        const cancelsBanner = (item.cancels && item.cancels.length > 0) ? `<div class="ntm-cancels-banner">⛔ Cancels: ${item.cancels.join(', ')}</div>` : "";
+        const cancelledNoticeClass = isItemCancelled ? "cancelled" : "";
+        const typeBadge = isItemCancelled ? `<span class="ntm-tag cancelled">CANCELLED</span>` : `${typeBadge}`;
         html += `
-          <div class="ntm-card-item type-${item.type}" data-id="${item.id}" onclick="selectNtMNotice('${item.id}')">
+          <div class="ntm-card-item type-${item.type} ${cancelledNoticeClass}" data-id="${item.id}" onclick="selectNtMNotice('${item.id}')">
             <input type="checkbox" class="ntm-card-chk" ${isChecked ? 'checked' : ''} onclick="event.stopPropagation(); toggleNoticeCheck('${item.id}', this.checked)" title="Include in export" />
             <div class="ntm-card-content">
               <div class="ntm-card-top">
                 <span class="ntm-card-id">${item.id}</span>
-                <span class="ntm-tag ${tagClass}">${typeLabel}</span>
+                ${typeBadge}
               </div>
               <div class="ntm-card-region">${item.country || 'Region'} — ${item.region || ''}</div>
               <div class="ntm-card-subject">${item.subject || ''}</div>
