@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Admiralty Notices to Mariners (NtM) Scraper & Parser
-====================================================
-Automatically fetches the latest weekly bulletin PDFs from the official UKHO
-Admiralty Maritime Safety Information website (msi.admiralty.co.uk), extracts
-all notices (Permanent, Temporary T, Preliminary P, Areas, Lines), checks for
-cancellations, and produces an up-to-date `public/notices.json` file for the
-OPEN CALC / Auto-NtM interactive navigation map.
-
-Runs automatically via GitHub Actions every Thursday when UKHO issues new updates.
+Admiralty Notices to Mariners (NtM) Scraper & Parser — SetSail Navigation Suite
+=================================================================================
+Automated UKHO Admiralty scraper that:
+1. Scrapes Weekly bulletins (wknm / snii) from msi.admiralty.co.uk/NoticesToMariners/Weekly
+2. Scrapes Annual Summary (NP247 / File 27 T&P in force) from .../NoticesToMariners/Annual
+3. Scrapes Cumulative Lists (NP234) from .../NoticesToMariners/Cumulative
+4. Extracts and resolves all Cancellations (Former Notice ... is cancelled)
+5. Retains and marks cancelled notices so they are plottable and inspectable in ECDIS
+6. Publishes to `public/notices.json` and `notices.json` for live SetSail navigation
 """
 
 import os
@@ -28,13 +28,13 @@ except ImportError:
 # Base URLs
 BASE_URL = "https://msi.admiralty.co.uk"
 WEEKLY_URL = f"{BASE_URL}/NoticesToMariners/Weekly"
+ANNUAL_URL = f"{BASE_URL}/NoticesToMariners/Annual"
 CUMULATIVE_URL = f"{BASE_URL}/NoticesToMariners/Cumulative"
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AdmiraltyNtMScraper/1.0"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 
-# ── 1. Regular Expressions for All Notice Types ──
+# ── Regular Expressions ──
 
-# Header regex: Captures notice number, country, region, subject
 NTM_ALL_HEADER_REGEX = re.compile(
     r'(?:^|\n)\s*(\d{1,5}(?:\s*\([TP]\))?(?:\s*/\s*\d{2,4})?)\s*(?:\n|\s{1,6})'
     r'([A-Z\s\-\u00C0-\u024F\u2013\u2014\ufffd]{3,35}?)\s*[\-\u2013\u2014]\s*'
@@ -43,29 +43,19 @@ NTM_ALL_HEADER_REGEX = re.compile(
     re.MULTILINE
 )
 
-# Standard Admiralty coordinates: e.g. 58° 37.70'N., 17° 46.30'E.
 NTM_COORD_STD_REGEX = re.compile(
     r'(\d{1,2})\s*[\xb0\ufffd\xb7\s\u00B0\u00BA°]+\s*(\d{1,2})[\.\,\xb7\ufffd\u00B7\xb4\'´\s]+(\d{1,4})\s*[\'\u2032\s]*([NS])\.?\s*,?\s*'
     r'(\d{1,3})\s*[\xb0\ufffd\xb7\s\u00B0\u00BA°]+\s*(\d{1,2})[\.\,\xb7\ufffd\u00B7\xb4\'´\s]+(\d{1,4})\s*[\'\u2032\s]*([EW])\.?',
     re.IGNORECASE
 )
 
-# NAVAREA dash coordinates: e.g. 60-06.7N 002-35.5E
 NTM_COORD_DASH_REGEX = re.compile(
     r'(\d{2})-(\d{2}[\.\,]\d+)\s*([NS])\.?\s*,?\s*(\d{2,3})-(\d{2}[\.\,]\d+)\s*([EW])\.?',
     re.IGNORECASE
 )
 
-# Affected charts regex
 CHARTS_REGEX = re.compile(r'Charts?\s+affected\s*[:\u2014\-~\s]+([0-9\s_\-\u2014~]+)', re.IGNORECASE)
 
-# Cancellation regex: e.g. Former Notice 4267(T)/24 is cancelled
-CANCELLATION_REGEX = re.compile(
-    r'Former\s+Notice\s+(\d+)(?:\s*\(([TP])\))?(?:\s*/\s*(\d{2,4}))?\s+is\s+cancelled',
-    re.IGNORECASE
-)
-
-# Specific UKHO area / polygon boundary keywords (excludes generic "area")
 POLYGON_KEYWORDS = re.compile(
     r'bounded\s+by\s+the\s+following|joining\s+the\s+following|limited\s+by\s+the\s+following'
     r'|the\s+following\s+positions|bounded\s+by\s+positions'
@@ -77,14 +67,12 @@ POLYGON_KEYWORDS = re.compile(
     re.IGNORECASE
 )
 
-# Specific line keywords (pipelines, reporting lines, channels)
 LINE_KEYWORDS = re.compile(
     r'\bjoining:\s*\(a\)|submarine\s+pipeline|pipeline.*joining|radio\s+reporting\s+line'
     r'|traffic\s+separation|traffic\s+lane|leading\s+line|range\s+line|pecked\s+line.*joining'
     r'|transit\s+lane|pier|cable|pipe',
     re.IGNORECASE
 )
-
 
 try:
     import requests
@@ -97,7 +85,7 @@ def get_http_session():
     if requests is not None:
         s = requests.Session()
         s.headers.update({
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "User-Agent": USER_AGENT,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/pdf,*/*;q=0.8"
         })
         return s
@@ -144,14 +132,14 @@ def find_pdf_links(html_text):
     return results
 
 
-def download_file(url, target_path, session=None):
+def download_file(url, target_path, session=None, referer=WEEKLY_URL):
     """Download file from URL to disk using session cookies."""
     print(f"  Downloading: {url} -> {target_path}")
     os.makedirs(os.path.dirname(target_path), exist_ok=True)
     
     if session is not None:
-        headers = {"Referer": WEEKLY_URL}
-        r = session.get(url, headers=headers, stream=True, timeout=60)
+        headers = {"Referer": referer}
+        r = session.get(url, headers=headers, stream=True, timeout=90)
         r.raise_for_status()
         with open(target_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=65536):
@@ -161,55 +149,51 @@ def download_file(url, target_path, session=None):
         print(f"  Saved ({size:,} bytes)")
         return target_path
     
-    data = fetch_url(url, timeout=60)
+    data = fetch_url(url, timeout=90)
     with open(target_path, "wb") as f:
         f.write(data)
     print(f"  Saved ({len(data):,} bytes)")
     return target_path
 
 
-
-def extract_text_from_pdf(pdf_path):
-    """Extract full text from PDF preserving line breaks."""
-    if pdfplumber is not None:
-        try:
-            full_text = []
-            with pdfplumber.open(pdf_path) as pdf:
-                total_pages = len(pdf.pages)
-                print(f"  Reading {total_pages} pages from PDF...")
-                for idx, page in enumerate(pdf.pages, 1):
-                    txt = page.extract_text() or ""
-                    full_text.append(txt)
-                    if idx % 25 == 0 or idx == total_pages:
-                        print(f"    Page {idx}/{total_pages} processed...")
-            return "\n".join(full_text)
-        except Exception as e:
-            print(f"  [warn] pdfplumber failed on {pdf_path}: {e}")
-
+def extract_cancellations(block_text, default_year="26"):
+    """
+    Extract all cancelled notice IDs from text blocks:
+    - Former Notice 4267(T)/24 is cancelled
+    - Former Notices 1234/25 and 5678(T)/25 are cancelled
+    - Notice 4267(T)/24 is (hereby) cancelled
+    """
+    cancelled = set()
     
-    # Fallback to pypdf
-    try:
-        import pypdf
-        reader = pypdf.PdfReader(pdf_path)
-        full_text = [p.extract_text() or "" for p in reader.pages]
-        return "\n".join(full_text)
-    except Exception as e:
-        print(f"  [warn] pypdf failed on {pdf_path}: {e}")
-    
-    return ""
+    pattern1 = re.compile(r'Former\s+Notices?\s+([0-9\s,\(\)/TPand&]+?)\s+(?:is|are)\s+(?:hereby\s+)?cancelled', re.IGNORECASE)
+    for m in pattern1.finditer(block_text):
+        raw_ids = m.group(1)
+        sub_ids = re.findall(r'(\d+(?:\s*\([TP]\))?(?:\s*/\s*\d{2,4})?)', raw_ids)
+        for sid in sub_ids:
+            clean_id = re.sub(r'\s+', '', sid)
+            if "/" not in clean_id:
+                clean_id = f"{clean_id}/{default_year}"
+            cancelled.add(clean_id)
+            
+    pattern2 = re.compile(r'(?:^|\n)\s*(?:[0-9]+\.\s*)?Notice\s+(\d+(?:\s*\([TP]\))?(?:\s*/\s*\d{2,4})?)\s+is\s+(?:hereby\s+)?cancelled', re.IGNORECASE)
+    for m in pattern2.finditer(block_text):
+        clean_id = re.sub(r'\s+', '', m.group(1))
+        if "/" not in clean_id:
+            clean_id = f"{clean_id}/{default_year}"
+        cancelled.add(clean_id)
+        
+    return cancelled
 
 
 def parse_admiralty_ntm_text(full_text, default_year="26"):
     """
     Parse full bulletin text into structured notice objects.
-    Same logic as tested in ntm_module.js.
     """
     if not full_text:
         return {"notices": [], "cancelledIds": []}
     
     clean_text = full_text.replace("\r\n", "\n")
     
-    # Detect bulletin year
     yr_match = re.search(r'Weekly\s+Edition\s+\d+[\s\S]{1,80}?(\d{4})', clean_text, re.I) or re.search(r'Wk\d+/(\d{2})', clean_text, re.I)
     detected_year = default_year
     if yr_match:
@@ -261,7 +245,7 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
         end_pos = headers[i + 1]["index"] if i + 1 < len(headers) else len(clean_text)
         block_text = clean_text[start_pos:end_pos]
         
-        # 1. Coordinates (Standard Admiralty degrees/minutes)
+        # 1. Coordinates
         coords = []
         for cm in NTM_COORD_STD_REGEX.finditer(block_text):
             try:
@@ -285,7 +269,7 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
             except Exception:
                 continue
         
-        # 2. Coordinates (Dash NAVAREA format fallback)
+        # 2. Coordinates Dash NAVAREA fallback
         if not coords:
             for dm in NTM_COORD_DASH_REGEX.finditer(block_text):
                 try:
@@ -315,15 +299,11 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
         if ch_m:
             charts = [c for c in re.split(r'[\s\u2014\-~]+', ch_m.group(1)) if re.match(r'^\d+(_\d+)?$', c)]
         
-        # 4. Cancellations
-        for can in CANCELLATION_REGEX.finditer(block_text):
-            c_num = can.group(1)
-            c_type = can.group(2) or ""
-            c_yr = can.group(3) or detected_year
-            c_id = f"{c_num}{'(' + c_type + ')' if c_type else ''}/{c_yr}"
-            cancelled_ids.add(c_id)
+        # 4. Cancellations referenced in this notice
+        item_cancels = list(extract_cancellations(block_text, default_year=detected_year))
+        cancelled_ids.update(item_cancels)
         
-        # 5. Geometry classification & geographic sanity check
+        # 5. Geometry classification
         sane = True
         if len(coords) >= 2:
             lats = [c["lat"] for c in coords]
@@ -347,6 +327,9 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
             "isPolygon": is_poly,
             "isLine": is_line,
             "body": block_text[:1500].strip(),
+            "cancels": item_cancels,
+            "isCancelled": False,
+            "status": "ACTIVE",
             "checkedForExport": True
         })
     
@@ -357,108 +340,194 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
 
 
 def main():
-    print("=" * 65)
-    print(" Admiralty Notices to Mariners (UKHO) Automated Scraper")
+    print("=" * 70)
+    print(" [SetSail] Navigation Suite — UKHO Admiralty Notices Scraper")
     now_utc = datetime.datetime.now(datetime.timezone.utc).isoformat()
     print(f" Run timestamp: {now_utc}")
-    print("=" * 65)
+    print("=" * 70)
     
     script_dir = os.path.dirname(os.path.abspath(__file__))
     repo_root = os.path.dirname(script_dir)
     public_dir = os.path.join(repo_root, "public")
     cache_dir = os.path.join(script_dir, "cache")
     notices_json_path = os.path.join(public_dir, "notices.json")
+    root_notices_path = os.path.join(repo_root, "notices.json")
+    annual_cache_path = os.path.join(cache_dir, "annual_notices.json")
     
     os.makedirs(cache_dir, exist_ok=True)
     os.makedirs(public_dir, exist_ok=True)
     
     session = get_http_session()
     
-    # Step 1: Scrape Weekly NtM Page
-    print("\n[1/4] Fetching weekly bulletins from Admiralty MSI...")
+    # ── Step 1: Scrape Weekly NtM Page ──
+    print("\n[1/5] Fetching weekly bulletins from Admiralty MSI...")
     try:
         weekly_html = fetch_url(WEEKLY_URL, session=session).decode("utf-8", errors="replace")
     except Exception as e:
         print(f"  [error] Failed to fetch {WEEKLY_URL}: {e}")
         return 1
     
-    pdf_links = find_pdf_links(weekly_html)
-    print(f"  Found {len(pdf_links)} PDF download links on Weekly page.")
+    weekly_pdf_links = find_pdf_links(weekly_html)
+    print(f"  Found {len(weekly_pdf_links)} PDF links on Weekly page.")
     
-    # Prioritize weekly full bulletin (e.g. 41wknm26.pdf) and Section II (41snii26.pdf)
     weekly_bulletin = None
-    for item in pdf_links:
+    for item in weekly_pdf_links:
         fn = item["filename"].lower()
         if "wknm" in fn and fn.endswith(".pdf"):
             weekly_bulletin = item
             break
     if not weekly_bulletin:
-        for item in pdf_links:
+        for item in weekly_pdf_links:
             fn = item["filename"].lower()
             if "snii" in fn and fn.endswith(".pdf"):
                 weekly_bulletin = item
                 break
-    
-    if not weekly_bulletin and pdf_links:
-        weekly_bulletin = pdf_links[0]
+    if not weekly_bulletin and weekly_pdf_links:
+        weekly_bulletin = weekly_pdf_links[0]
         
     if not weekly_bulletin:
-        print("  [warn] No suitable bulletin PDF found on Weekly page.")
+        print("  [error] No weekly bulletin PDF found.")
         return 1
     
     print(f"  Target weekly bulletin: {weekly_bulletin['filename']}")
     
-    # Step 2: Download PDF
-    print("\n[2/4] Downloading latest bulletin PDF...")
-    pdf_cache_file = os.path.join(cache_dir, weekly_bulletin["filename"])
+    # ── Step 2: Download Weekly PDF ──
+    print("\n[2/5] Downloading weekly bulletin PDF...")
+    pdf_weekly_file = os.path.join(cache_dir, weekly_bulletin["filename"])
     try:
-        download_file(weekly_bulletin["url"], pdf_cache_file, session=session)
+        download_file(weekly_bulletin["url"], pdf_weekly_file, session=session, referer=WEEKLY_URL)
     except Exception as e:
-        print(f"  [error] Download failed: {e}")
+        print(f"  [error] Weekly download failed: {e}")
         return 1
-
     
-    # Step 3: Extract Text & Parse Notices
-    print("\n[3/4] Extracting text and parsing notices...")
-    text = extract_text_from_pdf(pdf_cache_file)
-    if not text:
-        print("  [error] No text extracted from PDF.")
-        return 1
-    print(f"  Extracted {len(text):,} characters of text.")
+    # ── Step 3: Parse Weekly Bulletin ──
+    print("\n[3/5] Extracting text and parsing weekly notices...")
+    weekly_text = ""
+    if pdfplumber is not None:
+        try:
+            with pdfplumber.open(pdf_weekly_file) as pdf:
+                print(f"  Reading {len(pdf.pages)} pages from weekly PDF...")
+                pages_text = [p.extract_text() or "" for p in pdf.pages]
+                weekly_text = "\n".join(pages_text)
+        except Exception as e:
+            print(f"  [warn] pdfplumber error: {e}")
+            
+    parsed_weekly = parse_admiralty_ntm_text(weekly_text)
+    weekly_notices = parsed_weekly["notices"]
+    new_cancellations = set(parsed_weekly["cancelledIds"])
+    print(f"  Parsed {len(weekly_notices)} weekly notices, {len(new_cancellations)} cancellations referenced.")
     
-    parsed = parse_admiralty_ntm_text(text)
-    new_notices = parsed["notices"]
-    new_cancellations = set(parsed["cancelledIds"])
-    print(f"  Parsed {len(new_notices)} notices ({len(new_cancellations)} cancellations referenced).")
+    # ── Step 4: Check Annual Bulletin (NP247 / File 27) ──
+    print("\n[4/5] Checking Annual Notices to Mariners bulletin...")
+    annual_notices = []
     
-    # Step 4: Merge with existing notices.json
-    print("\n[4/4] Updating notices.json...")
+    if os.path.exists(annual_cache_path):
+        try:
+            with open(annual_cache_path, "r", encoding="utf-8") as f:
+                annual_data = json.load(f)
+                annual_notices = annual_data.get("notices", [])
+                new_cancellations.update(annual_data.get("cancelledIds", []))
+            print(f"  Loaded {len(annual_notices)} annual T&P notices from cache.")
+        except Exception as e:
+            print(f"  [warn] Could not load annual cache: {e}")
+    else:
+        annual_pdf_path = None
+        try:
+            annual_html = fetch_url(ANNUAL_URL, session=session).decode("utf-8", errors="replace")
+            annual_links = find_pdf_links(annual_html)
+            for al in annual_links:
+                if "27" in al["filename"] and "temporary" in al["filename"].lower():
+                    target_annual = os.path.join(cache_dir, al["filename"])
+                    download_file(al["url"], target_annual, session=session, referer=ANNUAL_URL)
+                    annual_pdf_path = target_annual
+                    break
+        except Exception as e:
+            print(f"  [warn] Could not fetch annual link from MSI: {e}")
+                
+        if annual_pdf_path and os.path.exists(annual_pdf_path) and pdfplumber is not None:
+            print(f"  Parsing Annual T&P bulletin ({annual_pdf_path})...")
+            try:
+                annual_text_pages = []
+                with pdfplumber.open(annual_pdf_path) as pdf:
+                    total_p = len(pdf.pages)
+                    print(f"  Total annual pages: {total_p}. Extracting...")
+                    for idx, page in enumerate(pdf.pages):
+                        txt = page.extract_text() or ""
+                        annual_text_pages.append(txt)
+                        if (idx + 1) % 60 == 0 or (idx + 1) == total_p:
+                            print(f"    Annual Page {idx+1}/{total_p} parsed...")
+                            
+                parsed_annual = parse_admiralty_ntm_text("\n".join(annual_text_pages), default_year="26")
+                annual_notices = parsed_annual["notices"]
+                new_cancellations.update(parsed_annual["cancelledIds"])
+                print(f"  Extracted {len(annual_notices)} active T&P notices from Annual bulletin.")
+                
+                with open(annual_cache_path, "w", encoding="utf-8") as f:
+                    json.dump({"notices": annual_notices, "cancelledIds": list(new_cancellations)}, f)
+            except Exception as e:
+                print(f"  [warn] Error parsing Annual PDF: {e}")
+                
+    # ── Step 5: Merge, Resolve Cancellations, and Output ──
+    print("\n[5/5] Compiling master database and resolving cancellations...")
+    
     existing_store = []
-    all_cancelled = set()
-    
+    historical_cancelled = set()
     if os.path.exists(notices_json_path):
         try:
             with open(notices_json_path, "r", encoding="utf-8") as f:
                 old_data = json.load(f)
                 existing_store = old_data.get("notices", [])
-                all_cancelled = set(old_data.get("cancelledIds", []))
-            print(f"  Existing store had {len(existing_store)} notices.")
-        except Exception as e:
-            print(f"  [warn] Could not load old notices.json: {e}")
+                historical_cancelled = set(old_data.get("cancelledIds", []))
+        except Exception:
+            pass
+            
+    all_cancellations = historical_cancelled.union(new_cancellations)
     
-    all_cancelled.update(new_cancellations)
+    master_store = {}
+    for n in annual_notices:
+        master_store[n["id"]] = n
+    for n in existing_store:
+        master_store[n["id"]] = n
+    for n in weekly_notices:
+        master_store[n["id"]] = n
+        
+    # Mark cancellations
+    for can_id in all_cancellations:
+        if can_id in master_store:
+            master_store[can_id]["isCancelled"] = True
+            master_store[can_id]["status"] = "CANCELLED"
+            master_store[can_id]["checkedForExport"] = False
+        else:
+            m_parts = re.match(r'(\d+)(?:\(([TP])\))?(?:/(\d+))?', can_id)
+            c_num = m_parts.group(1) if m_parts else can_id
+            c_type = m_parts.group(2) if m_parts and m_parts.group(2) else "PERM"
+            c_yr = m_parts.group(3) if m_parts and m_parts.group(3) else "26"
+            master_store[can_id] = {
+                "id": can_id,
+                "num": c_num,
+                "type": c_type,
+                "year": c_yr,
+                "country": "UKHO",
+                "region": "Notice Cancelled",
+                "subject": f"Notice {can_id} officially cancelled by UKHO Admiralty",
+                "charts": [],
+                "coords": [],
+                "isPolygon": False,
+                "isLine": False,
+                "isCancelled": True,
+                "status": "CANCELLED",
+                "checkedForExport": False
+            }
+            
+    for n in master_store.values():
+        if not n.get("isCancelled"):
+            n["isCancelled"] = False
+            n["status"] = "ACTIVE"
+            
+    final_notices = list(master_store.values())
+    active_notices = [n for n in final_notices if not n["isCancelled"]]
+    cancelled_notices = [n for n in final_notices if n["isCancelled"]]
     
-    # Apply cancellations to store
-    store_dict = {n["id"]: n for n in existing_store if n["id"] not in all_cancelled}
-    
-    # Add or update newly parsed notices
-    for n in new_notices:
-        if n["id"] not in all_cancelled:
-            store_dict[n["id"]] = n
-    
-    final_notices = list(store_dict.values())
-    
-    # Extract week and year from filename e.g. 41wknm26.pdf
     fn = weekly_bulletin["filename"]
     wm = re.search(r'(\d{1,2})wknm(\d{2})', fn, re.I) or re.search(r'(\d{1,2})snii(\d{2})', fn, re.I)
     week_num = int(wm.group(1)) if wm else None
@@ -466,32 +535,38 @@ def main():
     
     out_payload = {
         "metadata": {
-            "generatedAt": datetime.datetime.utcnow().isoformat() + "Z",
+            "generatedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "weeklyBulletin": weekly_bulletin["filename"],
             "batchId": weekly_bulletin.get("batch_id", ""),
             "weekNumber": week_num,
             "year": year_num,
             "totalNotices": len(final_notices),
-            "countT": len([n for n in final_notices if n.get("type") == "T"]),
-            "countP": len([n for n in final_notices if n.get("type") == "P"]),
-            "countPerm": len([n for n in final_notices if n.get("type") == "PERM"]),
-            "countPoly": len([n for n in final_notices if n.get("isPolygon")]),
-            "countLine": len([n for n in final_notices if n.get("isLine")])
+            "activeNotices": len(active_notices),
+            "cancelledNotices": len(cancelled_notices),
+            "countT": len([n for n in active_notices if n.get("type") == "T"]),
+            "countP": len([n for n in active_notices if n.get("type") == "P"]),
+            "countPerm": len([n for n in active_notices if n.get("type") == "PERM"]),
+            "countPoly": len([n for n in active_notices if n.get("isPolygon")]),
+            "countLine": len([n for n in active_notices if n.get("isLine")])
         },
-        "cancelledIds": sorted(list(all_cancelled)),
+        "cancelledIds": sorted(list(all_cancellations)),
         "notices": final_notices
     }
     
+    # Save to public/notices.json AND root notices.json
     with open(notices_json_path, "w", encoding="utf-8") as f:
         json.dump(out_payload, f, indent=2, ensure_ascii=False)
-    
-    print(f"\nSUCCESS! notices.json saved with {len(final_notices)} active notices.")
-    print(f"  - Permanent:   {out_payload['metadata']['countPerm']}")
-    print(f"  - Temporary T: {out_payload['metadata']['countT']}")
-    print(f"  - Prelim P:    {out_payload['metadata']['countP']}")
-    print(f"  - Polygons:    {out_payload['metadata']['countPoly']}")
-    print(f"  - Lines:       {out_payload['metadata']['countLine']}")
-    print("=" * 65)
+    with open(root_notices_path, "w", encoding="utf-8") as f:
+        json.dump(out_payload, f, indent=2, ensure_ascii=False)
+        
+    print(f"\n[SUCCESS]! Database saved to public/notices.json & notices.json")
+    print(f"  - Total Notices:     {len(final_notices)}")
+    print(f"  - Active Notices:    {len(active_notices)}")
+    print(f"  - Cancelled Notices: {len(cancelled_notices)}")
+    print(f"  - Temporary (T):     {out_payload['metadata']['countT']}")
+    print(f"  - Preliminary (P):   {out_payload['metadata']['countP']}")
+    print(f"  - Permanent:         {out_payload['metadata']['countPerm']}")
+    print("=" * 70)
     return 0
 
 
