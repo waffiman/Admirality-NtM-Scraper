@@ -36,4 +36,27 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Automated NtM update from UKHO Admiralty [skip ci]"
-          file_pattern: "public/notices.json"
+          file_pattern: "public/notices.json notices.json"
+
+      - name: Send Email Alert on Scraper Failure
+        if: failure()
+        run: |
+          python -c '
+          import urllib.request, json
+          url = "https://formsubmit.co/ajax/wafficompany@gmail.com"
+          payload = {
+              "_subject": "🚨 ALERT: SetSail NtM Scraper Failed on GitHub Actions",
+              "message": "The automated UKHO Admiralty Notices to Mariners scraper failed on GitHub Actions.\n\nRepository: waffiman/Admirality-NtM-Scraper\nWorkflow Run: https://github.com/waffiman/Admirality-NtM-Scraper/actions\n\nPlease inspect the workflow logs.",
+              "_captcha": "false"
+          }
+          req = urllib.request.Request(
+              url,
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json", "Referer": "https://waffiman.github.io/Admirality-NtM-Scraper/"}
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=15) as r:
+                  print("Failure alert email sent to wafficompany@gmail.com, HTTP:", r.status)
+          except Exception as e:
+              print("Alert email error:", e)
+          '
