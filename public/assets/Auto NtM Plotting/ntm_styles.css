@@ -1939,15 +1939,76 @@
 
 
 /* ==========================================================================
-   MOBILE RESPONSIVE ADAPTATIONS
+   MOBILE & DESKTOP RESPONSIVE ADAPTATIONS
    ========================================================================== */
-.ntm-mobile-view-switcher {
-  display: none;
+
+/* ── DESKTOP DISPLAY (Screens >= 769px) ── */
+@media (min-width: 769px) {
+  html, body {
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important; /* Prevents global page scroll on desktop */
+  }
+
+  .app-container {
+    display: flex !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  .nav-sidebar {
+    width: 58px !important;
+    flex: 0 0 58px !important;
+    height: 100vh !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    z-index: 1000 !important;
+    overflow: hidden !important; /* Sidebar never scrolls */
+  }
+
+  .app-content {
+    margin-left: 58px !important;
+    flex: 1 1 auto !important;
+    height: 100vh !important;
+    width: calc(100vw - 58px) !important;
+    overflow-y: auto !important; /* Wide right portion scrolls independently */
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  #tab-ntm.active {
+    height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .ntm-mobile-view-switcher {
+    display: none !important;
+  }
 }
 
+/* ── MOBILE & TABLET DISPLAY (Screens <= 768px) ── */
 @media (max-width: 768px) {
+  html, body {
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+  }
+
   .app-container {
+    display: flex !important;
     flex-direction: column !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    position: relative !important;
   }
 
   .nav-sidebar {
@@ -1957,75 +2018,100 @@
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
-    height: 58px !important;
+    height: 56px !important;
+    flex: 0 0 56px !important;
     flex-direction: row !important;
     justify-content: space-around !important;
     align-items: center !important;
-    padding: 0 0.8rem !important;
+    padding: 0 0.5rem !important;
     gap: 0 !important;
     border-top: 1px solid var(--line) !important;
     border-right: none !important;
-    z-index: 9999 !important;
+    z-index: 10000 !important;
     background: rgba(8, 14, 32, 0.98) !important;
-    box-shadow: 0 -4px 16px rgba(0,0,0,0.4);
+    backdrop-filter: blur(12px) !important;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5) !important;
   }
 
   [data-theme="light"] .nav-sidebar {
     background: rgba(255, 255, 255, 0.98) !important;
     border-top: 1px solid #cbd5e1 !important;
-    box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08) !important;
   }
 
   .nav-sidebar .nav-logo {
     display: none !important;
   }
 
-  .nav-item {
+  .nav-item,
+  .nav-settings-item {
     width: 44px !important;
     height: 44px !important;
     margin: 0 !important;
+    margin-top: 0 !important;
+    flex: 0 0 44px !important;
   }
 
   .app-content {
-    padding-bottom: 65px !important;
-    min-height: calc(100vh - 65px) !important;
+    margin-left: 0 !important;
+    width: 100vw !important;
+    height: calc(100vh - 56px) !important;
+    padding-bottom: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Tab 1: Gyro Logbook Mobile */
+  #tab-gyro {
+    padding: 0.5rem 0.5rem 60px 0.5rem !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100% !important;
+  }
+
+  /* Tab 2: Auto-NtM Mobile */
+  #tab-ntm.active {
+    height: calc(100vh - 56px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
   .ntm-toolbar {
     flex-wrap: wrap !important;
-    padding: 0.5rem 0.75rem !important;
-    gap: 0.5rem !important;
+    padding: 0.35rem 0.5rem !important;
+    gap: 0.35rem !important;
   }
 
   .ntm-toolbar-left {
-    flex: 1 1 auto;
-  }
-
-  .ntm-toolbar-right {
-    flex: 1 1 auto;
-    justify-content: flex-end;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
   }
 
   .ntm-mobile-view-switcher {
     display: flex !important;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.25);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 2px;
+    align-items: center !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 8px !important;
+    padding: 2px !important;
+    margin-right: auto !important;
   }
 
   .ntm-mview-btn {
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    font-size: 0.74rem;
-    font-weight: 600;
-    padding: 0.35rem 0.65rem;
-    border-radius: 6px;
-    cursor: pointer;
-    min-height: 34px;
-    transition: all 0.15s;
+    border: none !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+    font-size: 0.74rem !important;
+    font-weight: 600 !important;
+    padding: 0.35rem 0.65rem !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    min-height: 32px !important;
+    transition: all 0.15s !important;
   }
 
   .ntm-mview-btn.active {
@@ -2033,26 +2119,48 @@
     color: #ffffff !important;
   }
 
+  .ntm-toolbar-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  .ntm-toolbar-right .ntm-btn-glass,
+  .ntm-toolbar-right .ntm-btn-export {
+    font-size: 0.74rem !important;
+    padding: 0.35rem 0.55rem !important;
+    min-height: 32px !important;
+  }
+
   .ntm-workspace {
     display: flex !important;
     flex-direction: column !important;
-    height: calc(100vh - 128px) !important;
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
     position: relative !important;
+    overflow: hidden !important;
   }
 
-  /* In mobile view, toggle sidebar or map based on active view mode */
+  /* Default or mobile-view-list: show list, hide map */
+  .ntm-workspace .ntm-sidebar-list,
   .ntm-workspace.mobile-view-list .ntm-sidebar-list {
     display: flex !important;
     width: 100% !important;
     height: 100% !important;
+    flex: 1 1 auto !important;
     opacity: 1 !important;
     pointer-events: auto !important;
+    overflow: hidden !important;
   }
 
+  .ntm-workspace .ntm-map-container,
   .ntm-workspace.mobile-view-list .ntm-map-container {
     display: none !important;
   }
 
+  /* In mobile-view-map: hide list, show map */
   .ntm-workspace.mobile-view-map .ntm-sidebar-list {
     display: none !important;
   }
@@ -2061,72 +2169,43 @@
     display: flex !important;
     width: 100% !important;
     height: 100% !important;
+    flex: 1 1 auto !important;
+    position: relative !important;
   }
 
-  .settings-grid {
+  #ntmMap {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Tab 3: Settings Mobile */
+  #tab-settings {
+    padding: 0.5rem 0.5rem 60px 0.5rem !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100% !important;
+  }
+
+  .settings-grid-minimal {
     grid-template-columns: 1fr !important;
   }
 
-  .settings-card-wide {
-    grid-column: span 1 !important;
+  .settings-card-min {
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  .contact-dev-form .form-row {
-    grid-template-columns: 1fr !important;
+  /* Popover responsive fit on mobile */
+  .ntm-popover {
+    max-width: calc(100vw - 20px) !important;
   }
 
-  .theme-switch-options {
-    grid-template-columns: 1fr !important;
+  .ntm-vessel-popover {
+    right: 0 !important;
+    left: auto !important;
+    width: 290px !important;
+    max-width: calc(100vw - 20px) !important;
   }
-}
-
-
-/* ==========================================================================
-   FIXED NAVIGATION RAIL & SCROLL ISOLATION
-   Ensures left narrow panel never scrolls, wide content scrolls independently
-   ========================================================================== */
-html, body {
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important; /* Prevents global page scroll on desktop */
-}
-
-.app-container {
-  display: flex !important;
-  height: 100vh !important;
-  width: 100vw !important;
-  overflow: hidden !important;
-  position: relative !important;
-}
-
-.nav-sidebar {
-  width: 58px !important;
-  flex: 0 0 58px !important;
-  height: 100vh !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  bottom: 0 !important;
-  z-index: 1000 !important;
-  overflow: hidden !important; /* Sidebar never scrolls */
-}
-
-.app-content {
-  margin-left: 58px !important;
-  flex: 1 1 auto !important;
-  height: 100vh !important;
-  width: calc(100vw - 58px) !important;
-  overflow-y: auto !important; /* Wide right portion scrolls independently */
-  overflow-x: hidden !important;
-  box-sizing: border-box !important;
-}
-
-#tab-ntm.active {
-  height: 100vh !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
 }
 
 /* ==========================================================================
