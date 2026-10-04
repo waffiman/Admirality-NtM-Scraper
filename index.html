@@ -426,6 +426,11 @@
         <span class="badge" id="ntmBadge">0</span>
         <span class="tooltip">SetSail Auto-NtM (Live ECDIS)</span>
       </button>
+
+      <button type="button" class="nav-item nav-settings-item" data-tab="tab-settings" aria-label="Settings &amp; Support" style="margin-top:auto;" title="Settings &amp; Support">
+        ⚙️
+        <span class="tooltip">Settings &amp; Support</span>
+      </button>
     </nav>
 
     <!-- ── Main Viewport Content ── -->
@@ -606,87 +611,321 @@
 
       <!-- ── Tab 2: Auto-NtM Plotter (Admiralty Notices & ECDIS Overlay) ── -->
       <div id="tab-ntm" class="tab-pane">
-      <!-- ── Top Command Bar (Fixed Single Row) ── -->
-      <div class="ntm-toolbar no-print">
-        <div class="ntm-toolbar-left">
-          <input type="file" id="ntmPdfInput" accept=".pdf" multiple style="display:none;" />
-          <div class="setsail-brand-badge" title="SetSail Auto-NtM Live Navigation Chart">
-            <span class="setsail-brand-logo">⛵</span>
-            <span class="setsail-brand-title">SetSail <strong>NtM</strong></span>
-          </div>
-          <span id="ntmStatusMsg" class="ntm-status-msg"></span>
-        </div>
-
-
-                <div class="ntm-toolbar-right">
-          <button type="button" class="ntm-btn-glass" id="ntmFitAllBtn" title="Fit all plotted notices into view">
-            🎯 Fit View
-          </button>
-          <button type="button" class="ntm-btn-export" id="ntmOpenExportBtn" title="Export notices to ECDIS / GeoJSON / CSV">
-            💾 Export to ECDIS <span class="exp-badge" id="ntmExportBadge">0</span>
-          </button>
-        </div>
-      </div>
-
-
-      <!-- ── Split Workspace: Left Sidebar + Right Map ── -->
-      <div class="ntm-workspace" id="ntmWorkspace">
-        <!-- Sidebar: Active Notices & Integrated Search -->
-        <aside class="ntm-sidebar-list" id="ntmSidebar">
-          <div class="ntm-list-header">
-            <div class="ntm-list-header-title">
-              <h3>Active Notices</h3>
-              <span class="ntm-list-count" id="ntmListCount">0 of 0</span>
+        <!-- ── Top Command Bar (Fixed Single Row) ── -->
+        <div class="ntm-toolbar no-print">
+          <div class="ntm-toolbar-left">
+            <input type="file" id="ntmPdfInput" accept=".pdf" multiple style="display:none;" />
+            <div class="setsail-brand-badge" title="SetSail Auto-NtM Live Navigation Chart">
+              <span class="setsail-brand-logo">⛵</span>
+              <span class="setsail-brand-title">SetSail <strong>NtM</strong></span>
             </div>
-            <button type="button" class="ntm-sidebar-collapse-btn" id="ntmCollapseSidebarBtn" title="Collapse sidebar to maximize chart view">
-              ◀
+            <span id="ntmStatusMsg" class="ntm-status-msg"></span>
+          </div>
+
+          <!-- Mobile View Switcher (List vs Map) -->
+          <div class="ntm-mobile-view-switcher" id="ntmMobileViewSwitcher">
+            <button type="button" class="ntm-mview-btn active" id="ntmViewListBtn" title="Switch to List View">📋 List</button>
+            <button type="button" class="ntm-mview-btn" id="ntmViewMapBtn" title="Switch to Chart View">🗺️ Chart</button>
+          </div>
+
+          <div class="ntm-toolbar-right">
+            <button type="button" class="ntm-btn-glass" id="ntmMyVesselBtn" title="Locate &amp; Plot Vessel Position on ECDIS">
+              📡 My Vessel
+            </button>
+            <button type="button" class="ntm-btn-glass" id="ntmFitAllBtn" title="Fit all plotted notices into view">
+              🎯 Fit View
+            </button>
+            <button type="button" class="ntm-btn-export" id="ntmOpenExportBtn" title="Export notices to ECDIS / GeoJSON / CSV">
+              💾 Export to ECDIS <span class="exp-badge" id="ntmExportBadge">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Split Workspace: Left Sidebar + Right Map ── -->
+        <div class="ntm-workspace" id="ntmWorkspace">
+          <!-- Sidebar: Active Notices & Integrated Search -->
+          <aside class="ntm-sidebar-list" id="ntmSidebar">
+            <div class="ntm-list-header">
+              <div class="ntm-list-header-title">
+                <h3>Active Notices</h3>
+                <span class="ntm-list-count" id="ntmListCount">0 of 0</span>
+              </div>
+              <button type="button" class="ntm-sidebar-collapse-btn" id="ntmCollapseSidebarBtn" title="Collapse sidebar to maximize chart view">
+                ◀
+              </button>
+            </div>
+
+            <!-- Integrated Search Box -->
+            <div class="ntm-search-wrap">
+              <span class="ntm-search-icon">🔍</span>
+              <input type="text" id="ntmSearchInput" class="ntm-search-input" placeholder="Search notice, region, chart..." />
+              <button type="button" id="ntmClearSearchBtn" class="ntm-search-clear" style="display:none;" title="Clear search">×</button>
+            </div>
+
+            <!-- Multi-Type Filter Pills Bar -->
+            <div class="ntm-filter-pills-bar" id="ntmFilterPillsBar">
+              <button type="button" class="ntm-filter-pill pill-all active" id="ntmPillAll" title="Toggle all active notice types">All</button>
+              <button type="button" class="ntm-filter-pill pill-t active" id="ntmPillT" title="Toggle Temporary (T) Notices">
+                <span class="pill-dot t-dot"></span>(T) <span class="pill-count" id="cntT">0</span>
+              </button>
+              <button type="button" class="ntm-filter-pill pill-p active" id="ntmPillP" title="Toggle Preliminary (P) Notices">
+                <span class="pill-dot p-dot"></span>(P) <span class="pill-count" id="cntP">0</span>
+              </button>
+              <button type="button" class="ntm-filter-pill pill-perm active" id="ntmPillPerm" title="Toggle Permanent Notices">
+                <span class="pill-dot perm-dot"></span>Perm <span class="pill-count" id="cntPerm">0</span>
+              </button>
+              <button type="button" class="ntm-filter-pill pill-poly" id="ntmPillPoly" title="Filter Polygon Areas">
+                <span class="pill-dot poly-dot"></span>Areas <span class="pill-count" id="cntPoly">0</span>
+              </button>
+              <button type="button" class="ntm-filter-pill pill-cancelled" id="ntmPillCancelled" title="Show Cancelled Notices (strictly hidden by default)">
+                <span class="pill-dot can-dot"></span>🚫 Cancelled <span class="pill-count" id="cntCancelled">0</span>
+              </button>
+            </div>
+
+            <!-- Selection Controls & Rich Sorting Bar -->
+            <div class="ntm-select-bar">
+              <div class="ntm-select-bar-left">
+                <label class="ntm-select-all-label" title="Toggle selection of visible notices for ECDIS export">
+                  <input type="checkbox" id="ntmSelectAllChk" checked />
+                  <span id="ntmSelectAllText">All</span>
+                </label>
+                <span class="ntm-select-badge" id="ntmSelectedCount" title="Selected for ECDIS export">0</span>
+              </div>
+
+              <div class="ntm-select-bar-right">
+                <!-- Rich Sort Dropdown -->
+                <div class="ntm-control-group" title="Sort notices list">
+                  <select id="ntmSortSelect" class="ntm-compact-select">
+                    <option value="NUM_DESC">⚡ Newest #</option>
+                    <option value="NUM_ASC">🔢 Oldest #</option>
+                    <option value="COUNTRY">🌍 Country A-Z</option>
+                    <option value="REGION">🗺️ Region A-Z</option>
+                    <option value="CHARTS">📑 Most Charts</option>
+                    <option value="POINTS">📍 Most Points</option>
+                    <option value="TYPE">🏷️ Type (T→P→Perm)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scrollable Cards List Container -->
+            <div class="ntm-items-scroll" id="ntmItemsScroll"></div>
+          </aside>
+
+          <!-- Interactive Map Container -->
+          <div class="ntm-map-container" id="ntmMapContainer">
+            <button type="button" class="ntm-map-expand-btn" id="ntmExpandSidebarBtn" style="display:none;" title="Expand list sidebar">
+              ▶
+            </button>
+            <div id="ntmMap" class="ntm-leaflet-map" style="width:100%; height:100%;"></div>
+            <canvas id="ntmCanvasMap" class="ntm-canvas-map" style="display:none;"></canvas>
+            <div class="ntm-coords-hud" id="ntmHudCoords">00° 00.00' N, 000° 00.00' E</div>
+            <div class="ntm-vessel-hud" id="ntmVesselHud" style="display:none;"></div>
+            <div class="ntm-dropzone" id="ntmDropzone">
+              <div class="ntm-dropzone-icon">📥</div>
+              <p>Drop UKHO NtM PDF bulletins here</p>
+            </div>
+          </div>
+        </div>
+      </div><!-- end #tab-ntm -->
+
+      <!-- ── Tab 3: System Settings & Engineering Support ── -->
+      <div id="tab-settings" class="tab-pane">
+        <div class="settings-wrap">
+          <div class="settings-header">
+            <h2>⚙️ SetSail Settings &amp; Engineering Support</h2>
+            <p class="settings-subtitle">Bridge Display Profiles, Themes &amp; Direct Maritime Support Line</p>
+          </div>
+
+          <div class="settings-grid">
+            <!-- Card 1: Display & Visual Theme -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <h3>🎨 Bridge Display &amp; Visual Theme</h3>
+                <span class="settings-card-badge">Instant Switch</span>
+              </div>
+              <p class="settings-desc">Select visual profile suited for bridge lighting conditions.</p>
+              
+              <div class="theme-switch-options">
+                <label class="theme-option-card" id="optThemeDark">
+                  <input type="radio" name="setsailTheme" value="dark" checked />
+                  <div class="theme-preview theme-dark-preview">
+                    <div class="preview-bar"></div>
+                    <div class="preview-body"></div>
+                  </div>
+                  <div class="theme-info">
+                    <strong>🌙 Dark Cockpit (Night Watch)</strong>
+                    <span>Deep navy blue bridge layout, preserves night vision (Default).</span>
+                  </div>
+                </label>
+
+                <label class="theme-option-card" id="optThemeLight">
+                  <input type="radio" name="setsailTheme" value="light" />
+                  <div class="theme-preview theme-light-preview">
+                    <div class="preview-bar"></div>
+                    <div class="preview-body"></div>
+                  </div>
+                  <div class="theme-info">
+                    <strong>☀️ Light Bridge (Day Mode)</strong>
+                    <span>High-contrast crisp nautical slate layout, optimal in daylight.</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Card 2: Vessel & Telemetry Profile -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <h3>🚢 Vessel &amp; Navigation Telemetry</h3>
+                <span class="settings-card-badge">ECDIS Target</span>
+              </div>
+              <p class="settings-desc">Configure vessel identification and live GPS silhouette plotting.</p>
+              
+              <div class="vessel-telemetry-box">
+                <div class="telemetry-row">
+                  <span class="t-label">Vessel Name:</span>
+                  <span class="t-val">LPG/C IINO INEOS VESTA</span>
+                </div>
+                <div class="telemetry-row">
+                  <span class="t-label">Call Sign / IMO:</span>
+                  <span class="t-val">9V2743 / IMO 9681326</span>
+                </div>
+                <div class="telemetry-row">
+                  <span class="t-label">MMSI / Type:</span>
+                  <span class="t-val">563004000 / LPG Carrier</span>
+                </div>
+                <div class="telemetry-row">
+                  <span class="t-label">ECDIS Status:</span>
+                  <span class="t-val" id="settingsVesselStatus">Not Plotted</span>
+                </div>
+              </div>
+
+              <div class="settings-actions">
+                <button type="button" class="settings-btn" id="settingsOpenVesselModalBtn">
+                  📡 Set Vessel GPS / Heading Coordinates
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 3: Contact Developers & Support Form -->
+            <div class="settings-card settings-card-wide">
+              <div class="settings-card-header">
+                <h3>📬 Direct Line to SetSail Maritime Engineering</h3>
+                <span class="settings-card-badge">Direct Dispatch</span>
+              </div>
+              <p class="settings-desc">
+                Encountered a bug, noticed a missing notice in the UKHO scraper, or have an operational feature suggestion?
+                Transmit your message directly to our engineering team. All submissions are automatically encrypted and logged.
+              </p>
+
+              <form id="setsailContactForm" class="contact-dev-form" onsubmit="return false;">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="contactOfficer">Officer Rank &amp; Name</label>
+                    <input type="text" id="contactOfficer" class="settings-input" placeholder="e.g. Chief Officer / 2nd Officer" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="contactVessel">Vessel</label>
+                    <input type="text" id="contactVessel" class="settings-input" value="LPG/C IINO INEOS VESTA" required />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="contactCategory">Category</label>
+                    <select id="contactCategory" class="settings-input">
+                      <option value="Bug Report">🐛 Bug Report / Display Glitch</option>
+                      <option value="Scraper / NtM Issue">📡 UKHO Admiralty Scraper / Notice Issue</option>
+                      <option value="Feature Request">💡 Feature Request / Improvement Idea</option>
+                      <option value="ECDIS Export">💾 ECDIS Overlay / Export Feedback</option>
+                      <option value="General Support">⚓ General Navigation Support</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="contactSubject">Subject</label>
+                    <input type="text" id="contactSubject" class="settings-input" placeholder="Brief summary of inquiry or issue" required />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="contactMessage">Message / Operational Details</label>
+                  <textarea id="contactMessage" class="settings-textarea" rows="4" placeholder="Describe the behavior, chart number, or suggestion in detail..." required></textarea>
+                </div>
+
+                <div class="form-footer">
+                  <button type="button" class="settings-submit-btn" id="contactSubmitBtn">
+                    🚀 Transmit Message to Engineering
+                  </button>
+                  <span class="contact-status-msg" id="contactStatusMsg"></span>
+                </div>
+              </form>
+            </div>
+
+            <!-- Card 4: System Cache & Telemetry -->
+            <div class="settings-card">
+              <div class="settings-card-header">
+                <h3>🗄️ Storage Cache &amp; Reset</h3>
+                <span class="settings-card-badge">Maintenance</span>
+              </div>
+              <p class="settings-desc">Force clear cached local notice data and re-download fresh data from server.</p>
+              <div class="settings-actions">
+                <button type="button" class="settings-btn-danger" id="settingsClearCacheBtn">
+                  🔄 Reset NtM Storage Cache &amp; Resync
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- end #tab-settings -->
+
+      <!-- Modal for Vessel GPS / Heading Entry -->
+      <div class="ntm-modal" id="ntmVesselModal">
+        <div class="ntm-modal-box">
+          <div class="ntm-modal-header">
+            <h3>📡 Vessel GPS Position &amp; Heading</h3>
+            <button type="button" class="ntm-modal-close" id="vesselModalClose" title="Close">×</button>
+          </div>
+          <p style="font-size:0.8rem;color:var(--muted);margin:0 0 1rem;">
+            Plot your vessel silhouette directly on the ECDIS chart with live heading orientation.
+          </p>
+
+          <div style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <button type="button" class="ntm-btn-glass" id="vesselFetchGpsBtn" style="flex:1;">
+              📍 Get Live Browser GPS Position
+            </button>
+            <button type="button" class="ntm-btn-glass" id="vesselClearBtn" style="color:var(--warn);">
+              Clear Vessel
             </button>
           </div>
 
-          <!-- Integrated Search Box directly above the notices list -->
-          <div class="ntm-search-wrap">
-            <span class="ntm-search-icon">🔍</span>
-            <input type="text" id="ntmSearchInput" class="ntm-search-input" placeholder="Search notice, region, chart..." />
-            <button type="button" id="ntmClearSearchBtn" class="ntm-search-clear" style="display:none;" title="Clear search">×</button>
-          </div>
-
-          <!-- Selection Controls Bar -->
-          <div class="ntm-select-bar">
-            <div class="ntm-select-bar-left">
-              <label class="ntm-select-all-label" title="Toggle selection of visible notices for ECDIS export">
-                <input type="checkbox" id="ntmSelectAllChk" checked />
-                <span id="ntmSelectAllText">All</span>
-              </label>
-              <span class="ntm-select-badge" id="ntmSelectedCount" title="Selected for ECDIS export">0</span>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="vesselLat">Latitude (e.g. 58° 37.70' N or 58.6283)</label>
+              <input type="text" id="vesselLat" class="settings-input" placeholder="e.g. 58° 37.70' N" />
             </div>
-
-            <div class="ntm-select-bar-right">
-              <!-- Filter Dropdown -->
-              <div class="ntm-control-group" title="Filter notices by type">
-                <select id="ntmFilterSelect" class="ntm-compact-select">
-                  <option value="ALL">All Types</option>
-                  <option value="T">Temp (T)</option>
-                  <option value="P">Prelim (P)</option>
-                  <option value="PERM">Permanent</option>
-                  <option value="POLY">Areas</option>
-                  <option value="LINE">Lines</option>
-                </select>
-              </div>
-
-              <!-- Sort Dropdown -->
-              <div class="ntm-control-group" title="Sort notices list">
-                <select id="ntmSortSelect" class="ntm-compact-select">
-                  <option value="NUM_DESC"># Newest</option>
-                  <option value="NUM_ASC"># Oldest</option>
-                  <option value="COUNTRY">Country A-Z</option>
-                  <option value="TYPE">Type</option>
-                </select>
-              </div>
+            <div class="form-group">
+              <label for="vesselLon">Longitude (e.g. 017° 46.30' E or 17.7717)</label>
+              <input type="text" id="vesselLon" class="settings-input" placeholder="e.g. 017° 46.30' E" />
             </div>
           </div>
-        </main>
+
+          <div class="form-row" style="margin-top:0.6rem;">
+            <div class="form-group">
+              <label for="vesselHdg">Heading / Course Over Ground (°)</label>
+              <input type="number" id="vesselHdg" class="settings-input" min="0" max="359" placeholder="000 - 359" />
+            </div>
+            <div class="form-group">
+              <label for="vesselSpd">Speed Over Ground (knots)</label>
+              <input type="number" id="vesselSpd" class="settings-input" min="0" step="0.1" placeholder="e.g. 14.5" />
+            </div>
+          </div>
+
+          <div class="ntm-modal-actions" style="margin-top:1.2rem;">
+            <button type="button" class="secondary" id="vesselModalCancel">Cancel</button>
+            <button type="button" class="ntm-btn-primary" id="vesselApplyBtn">Plot Vessel on Chart ⚓</button>
+          </div>
+        </div>
       </div>
-    </div><!-- end #tab-ntm -->
 
       <!-- Modal for Raw Text Paste -->
       <div class="ntm-modal" id="ntmPasteModal">
