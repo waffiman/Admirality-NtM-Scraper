@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gyro Compass Logbook — IINO INEOS VESTA</title>
+  <title>SetSail — Marine Navigation Suite | IINO INEOS VESTA</title>
   <link rel="icon" href="assets/gyro_compass_logbook.ico" type="image/x-icon" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css" />
@@ -412,19 +412,19 @@
   <div class="app-container">
     <!-- ── Left Navigation Sidebar ── -->
     <nav class="nav-sidebar no-print" aria-label="Main Navigation">
-      <div class="nav-logo" title="IINO INEOS VESTA Navigation Assistant">
-        <img src="assets/gyro_compass_logbook.ico" alt="Logo" />
+      <div class="nav-logo" title="SetSail Navigation Suite — IINO INEOS VESTA">
+        <img src="assets/gyro_compass_logbook.ico" alt="SetSail Logo" />
       </div>
 
-      <button type="button" class="nav-item active" data-tab="tab-gyro" aria-label="Gyro Compass Logbook">
+      <button type="button" class="nav-item active" data-tab="tab-gyro" aria-label="SetSail Gyro &amp; Compass Logbook">
         🧭
         <span class="tooltip">Gyro &amp; Compass Logbook</span>
       </button>
 
-      <button type="button" class="nav-item" data-tab="tab-ntm" aria-label="Auto-NtM Plotter">
+      <button type="button" class="nav-item" data-tab="tab-ntm" aria-label="SetSail Auto-NtM Plotter">
         🗺️
         <span class="badge" id="ntmBadge">0</span>
-        <span class="tooltip">Auto-NtM Plotter (ECDIS Overlay)</span>
+        <span class="tooltip">SetSail Auto-NtM (Live ECDIS)</span>
       </button>
     </nav>
 
@@ -433,7 +433,8 @@
       <!-- ── Tab 1: Gyro / Magnetic Compass Logbook ── -->
       <div id="tab-gyro" class="tab-pane active">
         <div class="wrap">
-    <h1 class="no-print">Gyro / Magnetic Compass</h1>
+    <h1 class="no-print">SetSail · Gyro &amp; Magnetic Compass</h1>
+
 
     <div class="inputs-row">
 
@@ -609,14 +610,13 @@
       <div class="ntm-toolbar no-print">
         <div class="ntm-toolbar-left">
           <input type="file" id="ntmPdfInput" accept=".pdf" multiple style="display:none;" />
-          <button type="button" class="ntm-btn-primary" id="ntmUploadBtn" title="Upload weekly (wknm) or cumulative T&P PDF bulletin">
-            📁 Upload PDF
-          </button>
-          <button type="button" class="ntm-btn-glass" id="ntmPasteBtn" title="Paste notice text copied from Navtor or PDF">
-            📋 Paste Text
-          </button>
+          <div class="setsail-brand-badge" title="SetSail Auto-NtM Live Navigation Chart">
+            <span class="setsail-brand-logo">⛵</span>
+            <span class="setsail-brand-title">SetSail <strong>NtM</strong></span>
+          </div>
           <span id="ntmStatusMsg" class="ntm-status-msg"></span>
         </div>
+
 
         <div class="ntm-toolbar-center">
           <!-- Segmented Filter Control with Live Counters -->
