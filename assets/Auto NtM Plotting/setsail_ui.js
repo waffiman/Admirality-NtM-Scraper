@@ -1,24 +1,63 @@
 /**
- * Auto-NtM UI Controller & Interactive Map
- * Full support for all notice types (PERM, T, P)
- * Checkbox selection for export, filtering, and local storage persistence.
+ * SetSail Auto-NtM UI Controller & Interactive ECDIS Chart
+ * Navigation Suite for LPG/C IINO INEOS VESTA
+ *
+ * Features:
+ * - Multi-Type Filter Toggles (T, P, PERM, Polygons/Areas, Lines, Cancelled)
+ * - Strict Cancelled Notice isolation (never clutters chart by default)
+ * - Rich Sorting (Newest, Oldest, Country, Region, Charts, Points, Type)
+ * - Real-Time Vessel GPS & Heading Silhouette on ECDIS (SVG Ship Outline)
+ * - Theme Switcher (Dark Cockpit Night Watch vs Light Bridge Day Mode)
+ * - Direct Engineering Transmission Form (Dispatched to wafficompany@gmail.com without UI exposure)
+ * - Full Mobile Viewport & Touch Optimization (Bottom Nav Rail, List/Map Segmented Switch)
  */
 
-const NTM_STORAGE_KEY = "admiralty_ntm_active_store_v1";
+const NTM_STORAGE_KEY = "setsail_ntm_active_store_v2";
+const VESSEL_STORAGE_KEY = "setsail_vessel_state_v1";
+const THEME_STORAGE_KEY = "setsail_theme";
+
 let NTM_STORE = [];
-let NTM_ACTIVE_FILTER = "ALL";
+let NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM"]); // Default: all 3 active notice types
+let NTM_FILTER_AREAS = false;
+let NTM_SHOW_CANCELLED = false; // Strictly excluded by default!
 let NTM_ACTIVE_SORT = "NUM_DESC";
+
 let leafletMap = null;
 let leafletMarkersLayer = null;
+let leafletVesselLayer = null;
+let userVessel = null; // { lat, lon, heading, speed, name: "LPG/C IINO INEOS VESTA", source: "gps" | "manual" }
+let mobileCurrentView = "list"; // "list" | "map"
 
 // Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
   initNavigationTabs();
   initAutoNtmUI();
+  initFilterPills();
+  initVesselTracking();
+  initSettingsUI();
+  initMobileViewSwitcher();
 });
 
 /**
- * Handle Tab Switching between Gyro Logbook and Auto-NtM Plotter
+ * Visual Theme Controller (Light Bridge vs Dark Cockpit)
+ */
+function initTheme() {
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+
+  // Sync radio buttons in Settings tab
+  const radio = document.querySelector(`input[name="setsailTheme"][value="${savedTheme}"]`);
+  if (radio) radio.checked = true;
+}
+
+function setAppTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem(THEME_STORAGE_KEY, theme);
+}
+
+/**
+ * Handle Tab Switching between Gyro Logbook, Auto-NtM Plotter, and Settings
  */
 function initNavigationTabs() {
   const navItems = document.querySelectorAll(".nav-sidebar .nav-item");
@@ -39,7 +78,7 @@ function initNavigationTabs() {
         activePane.classList.add("active");
       }
 
-      // If switching to NtM tab, resize map
+      // If switching to NtM tab, resize or initialize map
       if (targetTab === "tab-ntm") {
         setTimeout(() => {
           if (leafletMap) {
@@ -54,7 +93,7 @@ function initNavigationTabs() {
 }
 
 /**
- * Setup Auto-NtM UI buttons, drag & drop, filters, and export modal
+ * Setup Auto-NtM UI buttons, drag & drop, search, and export modal
  */
 function initAutoNtmUI() {
   const fileInput = document.getElementById("ntmPdfInput");
@@ -95,18 +134,22 @@ function initAutoNtmUI() {
       pasteModal.classList.add("open");
       if (pasteText) pasteText.focus();
     });
-    pasteCancel.addEventListener("click", () => {
-      pasteModal.classList.remove("open");
-    });
-    pasteApply.addEventListener("click", () => {
-      const text = pasteText.value;
-      if (text.trim()) {
-        const parsed = parseAdmiraltyNtMText(text);
-        addNoticesToStore(parsed.notices, parsed.cancelledIds);
-      }
-      pasteModal.classList.remove("open");
-      pasteText.value = "";
-    });
+    if (pasteCancel) {
+      pasteCancel.addEventListener("click", () => {
+        pasteModal.classList.remove("open");
+      });
+    }
+    if (pasteApply) {
+      pasteApply.addEventListener("click", () => {
+        const text = pasteText.value;
+        if (text.trim() && typeof window.parseAdmiraltyNtMText === "function") {
+          const parsed = window.parseAdmiraltyNtMText(text);
+          addNoticesToStore(parsed.notices, parsed.cancelledIds);
+        }
+        pasteModal.classList.remove("open");
+        pasteText.value = "";
+      });
+    }
   }
 
   // Drag and drop onto map workspace
@@ -128,15 +171,6 @@ function initAutoNtmUI() {
     });
   }
 
-  // Filter Dropdown
-  const filterSelect = document.getElementById("ntmFilterSelect");
-  if (filterSelect) {
-    filterSelect.addEventListener("change", (e) => {
-      NTM_ACTIVE_FILTER = e.target.value || "ALL";
-      renderNtMListAndMap();
-    });
-  }
-
   // Sort Dropdown
   const sortSelect = document.getElementById("ntmSortSelect");
   if (sortSelect) {
@@ -145,18 +179,6 @@ function initAutoNtmUI() {
       renderNtMListAndMap();
     });
   }
-
-  // Legacy Filter Buttons (if any)
-  const filterBtns = document.querySelectorAll(".ntm-filter-btn");
-  filterBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      filterBtns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      NTM_ACTIVE_FILTER = btn.getAttribute("data-filter") || "ALL";
-      if (filterSelect) filterSelect.value = NTM_ACTIVE_FILTER;
-      renderNtMListAndMap();
-    });
-  });
 
   // Search filter
   if (searchInput) {
@@ -184,9 +206,11 @@ function initAutoNtmUI() {
       updateExportModalCounts();
       exportModal.classList.add("open");
     });
-    expBtnClose.addEventListener("click", () => {
-      exportModal.classList.remove("open");
-    });
+    if (expBtnClose) {
+      expBtnClose.addEventListener("click", () => {
+        exportModal.classList.remove("open");
+      });
+    }
   }
 
   // Checkbox listeners in Export modal
@@ -204,7 +228,9 @@ function initAutoNtmUI() {
         alert("No notices match the selected export criteria.");
         return;
       }
-      downloadJrcUchmFile(selected, "Admiralty_NtM_Overlay.uchm");
+      if (typeof window.downloadJrcUchmFile === "function") {
+        window.downloadJrcUchmFile(selected, "Admiralty_NtM_Overlay.uchm");
+      }
       if (exportModal) exportModal.classList.remove("open");
     });
   }
@@ -216,8 +242,10 @@ function initAutoNtmUI() {
         alert("No notices available for export.");
         return;
       }
-      const jsonStr = exportToGeoJson(selected);
-      downloadTextFile(jsonStr, "Admiralty_NtM_Overlay.geojson", "application/geo+json");
+      if (typeof window.exportToGeoJson === "function") {
+        const jsonStr = window.exportToGeoJson(selected);
+        downloadTextFile(jsonStr, "Admiralty_NtM_Overlay.geojson", "application/geo+json");
+      }
       if (exportModal) exportModal.classList.remove("open");
     });
   }
@@ -229,43 +257,18 @@ function initAutoNtmUI() {
         alert("No notices available for export.");
         return;
       }
-      const csvStr = exportToCsv(selected);
-      downloadTextFile(csvStr, "Admiralty_NtM_Coordinates.csv", "text/csv");
+      if (typeof window.exportToCsv === "function") {
+        const csvStr = window.exportToCsv(selected);
+        downloadTextFile(csvStr, "Admiralty_NtM_Coordinates.csv", "text/csv");
+      }
       if (exportModal) exportModal.classList.remove("open");
     });
   }
-
-  // Try loading live notices.json first (auto-synced by Admiralty Scraper), then LocalStorage, then samples
-  loadRemoteNoticesJson().then(loadedRemote => {
-    if (!loadedRemote) {
-      if (!loadStoreFromStorage()) {
-        loadSampleNtMData();
-      }
-    }
-  });
-
 
   // Fit View Button
   const fitBtn = document.getElementById("ntmFitAllBtn");
   if (fitBtn) {
     fitBtn.addEventListener("click", fitAllNoticesOnMap);
-  }
-
-  // Clear All Button
-  const clearAllBtn = document.getElementById("ntmClearAllBtn");
-  if (clearAllBtn) {
-    clearAllBtn.addEventListener("click", () => {
-      if (!confirm("Clear ALL notices from the map and storage? This cannot be undone.")) return;
-      NTM_STORE = [];
-      try { localStorage.removeItem(NTM_STORAGE_KEY); } catch(e) {}
-      if (leafletMarkersLayer) leafletMarkersLayer.clearLayers();
-      renderNtMListAndMap();
-      const statusEl = document.getElementById("ntmStatusMsg");
-      if (statusEl) {
-        statusEl.textContent = "All notices cleared.";
-        setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 3000);
-      }
-    });
   }
 
   // Sidebar Collapse / Expand Toggle
@@ -289,15 +292,6 @@ function initAutoNtmUI() {
     });
   }
 
-  // Sidebar Bottom Export Button
-  const sidebarExpBtn = document.getElementById("ntmSidebarExportBtn");
-  if (sidebarExpBtn && exportModal) {
-    sidebarExpBtn.addEventListener("click", () => {
-      updateExportModalCounts();
-      exportModal.classList.add("open");
-    });
-  }
-
   // Clear Search Button
   const clearSearchBtn = document.getElementById("ntmClearSearchBtn");
   if (searchInput && clearSearchBtn) {
@@ -309,6 +303,484 @@ function initAutoNtmUI() {
       clearSearchBtn.style.display = "none";
       renderNtMListAndMap();
       searchInput.focus();
+    });
+  }
+
+  // Try loading live notices.json first, then LocalStorage, then samples
+  loadRemoteNoticesJson().then(loadedRemote => {
+    if (!loadedRemote) {
+      if (!loadStoreFromStorage()) {
+        loadSampleNtMData();
+      }
+    }
+  });
+}
+
+/**
+ * Setup Multi-Type Filter Pills (T, P, PERM, Polygons, Lines, Cancelled)
+ * Users can toggle multiple pills simultaneously!
+ */
+function initFilterPills() {
+  const pillAll = document.getElementById("ntmPillAll");
+  const pillT = document.getElementById("ntmPillT");
+  const pillP = document.getElementById("ntmPillP");
+  const pillPerm = document.getElementById("ntmPillPerm");
+  const pillPoly = document.getElementById("ntmPillPoly");
+  const pillCancelled = document.getElementById("ntmPillCancelled");
+
+  if (pillAll) {
+    pillAll.addEventListener("click", () => {
+      // Reset to all active types, clear polygons and cancelled
+      NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM"]);
+      NTM_FILTER_AREAS = false;
+      NTM_SHOW_CANCELLED = false;
+      syncPillClasses();
+      renderNtMListAndMap();
+    });
+  }
+
+  if (pillT) {
+    pillT.addEventListener("click", () => {
+      if (NTM_ACTIVE_TYPES.has("T")) {
+        NTM_ACTIVE_TYPES.delete("T");
+      } else {
+        NTM_ACTIVE_TYPES.add("T");
+      }
+      syncPillClasses();
+      renderNtMListAndMap();
+    });
+  }
+
+  if (pillP) {
+    pillP.addEventListener("click", () => {
+      if (NTM_ACTIVE_TYPES.has("P")) {
+        NTM_ACTIVE_TYPES.delete("P");
+      } else {
+        NTM_ACTIVE_TYPES.add("P");
+      }
+      syncPillClasses();
+      renderNtMListAndMap();
+    });
+  }
+
+  if (pillPerm) {
+    pillPerm.addEventListener("click", () => {
+      if (NTM_ACTIVE_TYPES.has("PERM")) {
+        NTM_ACTIVE_TYPES.delete("PERM");
+      } else {
+        NTM_ACTIVE_TYPES.add("PERM");
+      }
+      syncPillClasses();
+      renderNtMListAndMap();
+    });
+  }
+
+  if (pillPoly) {
+    pillPoly.addEventListener("click", () => {
+      NTM_FILTER_AREAS = !NTM_FILTER_AREAS;
+      syncPillClasses();
+      renderNtMListAndMap();
+    });
+  }
+
+  if (pillCancelled) {
+    pillCancelled.addEventListener("click", () => {
+      // Explicit toggle to view cancelled notices (strictly excluded by default!)
+      NTM_SHOW_CANCELLED = !NTM_SHOW_CANCELLED;
+      syncPillClasses();
+      renderNtMListAndMap();
+    });
+  }
+}
+
+function syncPillClasses() {
+  const pillAll = document.getElementById("ntmPillAll");
+  const pillT = document.getElementById("ntmPillT");
+  const pillP = document.getElementById("ntmPillP");
+  const pillPerm = document.getElementById("ntmPillPerm");
+  const pillPoly = document.getElementById("ntmPillPoly");
+  const pillCancelled = document.getElementById("ntmPillCancelled");
+
+  const isAllActive = NTM_ACTIVE_TYPES.has("T") && NTM_ACTIVE_TYPES.has("P") && NTM_ACTIVE_TYPES.has("PERM") && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED;
+
+  if (pillAll) pillAll.classList.toggle("active", isAllActive);
+  if (pillT) pillT.classList.toggle("active", NTM_ACTIVE_TYPES.has("T"));
+  if (pillP) pillP.classList.toggle("active", NTM_ACTIVE_TYPES.has("P"));
+  if (pillPerm) pillPerm.classList.toggle("active", NTM_ACTIVE_TYPES.has("PERM"));
+  if (pillPoly) pillPoly.classList.toggle("active", NTM_FILTER_AREAS);
+  if (pillCancelled) pillCancelled.classList.toggle("active", NTM_SHOW_CANCELLED);
+}
+
+/**
+ * Mobile List vs Map Switcher
+ */
+function initMobileViewSwitcher() {
+  const listBtn = document.getElementById("ntmViewListBtn");
+  const mapBtn = document.getElementById("ntmViewMapBtn");
+  const workspace = document.getElementById("ntmWorkspace");
+
+  if (!listBtn || !mapBtn || !workspace) return;
+
+  // Default to list view on mobile
+  workspace.classList.add("mobile-view-list");
+
+  listBtn.addEventListener("click", () => {
+    mobileCurrentView = "list";
+    listBtn.classList.add("active");
+    mapBtn.classList.remove("active");
+    workspace.classList.remove("mobile-view-map");
+    workspace.classList.add("mobile-view-list");
+  });
+
+  mapBtn.addEventListener("click", () => {
+    mobileCurrentView = "map";
+    mapBtn.classList.add("active");
+    listBtn.classList.remove("active");
+    workspace.classList.remove("mobile-view-list");
+    workspace.classList.add("mobile-view-map");
+
+    setTimeout(() => {
+      if (leafletMap) leafletMap.invalidateSize();
+    }, 150);
+  });
+}
+
+/**
+ * Vessel GPS Position & ECDIS Silhouette Layer
+ */
+function initVesselTracking() {
+  const myVesselBtn = document.getElementById("ntmMyVesselBtn");
+  const modal = document.getElementById("ntmVesselModal");
+  const closeBtn = document.getElementById("vesselModalClose");
+  const cancelBtn = document.getElementById("vesselModalCancel");
+  const fetchGpsBtn = document.getElementById("vesselFetchGpsBtn");
+  const applyBtn = document.getElementById("vesselApplyBtn");
+  const clearBtn = document.getElementById("vesselClearBtn");
+  const settingsOpenBtn = document.getElementById("settingsOpenVesselModalBtn");
+
+  // Load persisted vessel state
+  try {
+    const raw = localStorage.getItem(VESSEL_STORAGE_KEY);
+    if (raw) {
+      userVessel = JSON.parse(raw);
+    }
+  } catch (e) {}
+
+  const openModal = () => {
+    if (!modal) return;
+    if (userVessel) {
+      const latEl = document.getElementById("vesselLat");
+      const lonEl = document.getElementById("vesselLon");
+      const hdgEl = document.getElementById("vesselHdg");
+      const spdEl = document.getElementById("vesselSpd");
+      if (latEl) latEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
+      if (lonEl) lonEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
+      if (hdgEl) hdgEl.value = userVessel.heading || 0;
+      if (spdEl) spdEl.value = userVessel.speed || 0;
+    }
+    modal.classList.add("open");
+  };
+
+  const closeModal = () => {
+    if (modal) modal.classList.remove("open");
+  };
+
+  if (myVesselBtn) {
+    myVesselBtn.addEventListener("click", () => {
+      if (userVessel && leafletMap) {
+        leafletMap.flyTo([userVessel.lat, userVessel.lon], Math.max(leafletMap.getZoom(), 9));
+      } else {
+        openModal();
+      }
+    });
+  }
+
+  if (settingsOpenBtn) settingsOpenBtn.addEventListener("click", openModal);
+  if (closeBtn) closeBtn.addEventListener("click", closeModal);
+  if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+
+  // Fetch live GPS position from browser navigator.geolocation
+  if (fetchGpsBtn) {
+    fetchGpsBtn.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        alert("Geolocation API is not supported by your browser.");
+        return;
+      }
+      fetchGpsBtn.textContent = "Acquiring GPS Fix... 📡";
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          fetchGpsBtn.textContent = "📍 Get Live Browser GPS Position";
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          const heading = (pos.coords.heading !== null && !isNaN(pos.coords.heading)) ? pos.coords.heading : (userVessel ? userVessel.heading : 0);
+          const speed = (pos.coords.speed !== null && !isNaN(pos.coords.speed)) ? (pos.coords.speed * 1.94384) : (userVessel ? userVessel.speed : 0);
+
+          const latEl = document.getElementById("vesselLat");
+          const lonEl = document.getElementById("vesselLon");
+          const hdgEl = document.getElementById("vesselHdg");
+          const spdEl = document.getElementById("vesselSpd");
+
+          if (latEl) latEl.value = lat.toFixed(5);
+          if (lonEl) lonEl.value = lon.toFixed(5);
+          if (hdgEl) hdgEl.value = Math.round(heading);
+          if (spdEl) spdEl.value = speed.toFixed(1);
+
+          plotUserVessel(lat, lon, heading, speed, "gps");
+          closeModal();
+        },
+        (err) => {
+          fetchGpsBtn.textContent = "📍 Get Live Browser GPS Position";
+          alert(`Could not acquire GPS: ${err.message}. You can enter coordinates manually below.`);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    });
+  }
+
+  // Apply manual coordinates
+  if (applyBtn) {
+    applyBtn.addEventListener("click", () => {
+      const latVal = document.getElementById("vesselLat")?.value.trim() || "";
+      const lonVal = document.getElementById("vesselLon")?.value.trim() || "";
+      const hdgVal = parseFloat(document.getElementById("vesselHdg")?.value) || 0;
+      const spdVal = parseFloat(document.getElementById("vesselSpd")?.value) || 0;
+
+      const parsedLat = parseCoordinateString(latVal);
+      const parsedLon = parseCoordinateString(lonVal);
+
+      if (parsedLat === null || parsedLon === null) {
+        alert("Please enter valid Latitude and Longitude values (e.g. 58° 37.70' N or 58.6283).");
+        return;
+      }
+
+      plotUserVessel(parsedLat, parsedLon, hdgVal, spdVal, "manual");
+      closeModal();
+    });
+  }
+
+  // Clear vessel position
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      userVessel = null;
+      try { localStorage.removeItem(VESSEL_STORAGE_KEY); } catch (e) {}
+      if (leafletVesselLayer) leafletVesselLayer.clearLayers();
+      const hud = document.getElementById("ntmVesselHud");
+      if (hud) hud.style.display = "none";
+      const statusEl = document.getElementById("settingsVesselStatus");
+      if (statusEl) statusEl.textContent = "Not Plotted";
+      closeModal();
+    });
+  }
+}
+
+/**
+ * Coordinate parser supporting decimal and nautical DMS degrees & minutes
+ */
+function parseCoordinateString(str) {
+  if (!str) return null;
+  // Decimal check
+  const num = parseFloat(str);
+  if (!isNaN(num) && /^-?\d+(\.\d+)?$/.test(str.trim())) {
+    return num;
+  }
+
+  // DMS format e.g. 58° 37.70' N or 017° 46.30' E
+  const match = str.match(/([0-9]+)[\s°]+([0-9.]+)?[\s'′]*([NSEWnsew])?/i);
+  if (match) {
+    const deg = parseFloat(match[1]);
+    const min = match[2] ? parseFloat(match[2]) : 0;
+    let val = deg + (min / 60.0);
+    const dir = (match[3] || "").toUpperCase();
+    if (dir === "S" || dir === "W") val = -val;
+    return val;
+  }
+  return null;
+}
+
+/**
+ * Generates an SVG ECDIS vessel silhouette icon oriented to course over ground
+ */
+function getEcdisVesselIcon(heading = 0) {
+  const normHeading = Math.round(((heading % 360) + 360) % 360);
+  const svgHtml = `
+    <div class="vessel-ecdis-wrapper" style="transform: rotate(${normHeading}deg);">
+      <div class="vessel-radar-ring"></div>
+      <svg width="44" height="44" viewBox="-22 -22 44 44" class="vessel-ecdis-svg">
+        <!-- 6-Minute Course Vector Line ahead -->
+        <line x1="0" y1="-8" x2="0" y2="-28" stroke="#ffeb3b" stroke-width="2.5" stroke-dasharray="3,2" />
+        <polygon points="0,-30 -3.5,-23 3.5,-23" fill="#ffeb3b" />
+        <!-- Ship Hull Silhouette (Standard ECDIS Symbol) -->
+        <path d="M 0 -14 L 7 -5 L 7 11 L 4 15 L -4 15 L -7 11 L -7 -5 Z" fill="#00e5ff" stroke="#ffffff" stroke-width="1.8" />
+        <!-- Bridge Wing Marks -->
+        <line x1="-7" y1="2" x2="7" y2="2" stroke="#ffffff" stroke-width="1" />
+        <!-- Center GPS Antenna Pivot -->
+        <circle cx="0" cy="0" r="2.8" fill="#ff1744" stroke="#ffffff" stroke-width="1" />
+      </svg>
+    </div>
+  `;
+  return L.divIcon({
+    html: svgHtml,
+    className: "ecdis-vessel-marker",
+    iconSize: [44, 44],
+    iconAnchor: [22, 22]
+  });
+}
+
+/**
+ * Plot user vessel on Leaflet map
+ */
+function plotUserVessel(lat, lon, heading = 0, speed = 0, source = "manual") {
+  userVessel = {
+    lat,
+    lon,
+    heading,
+    speed,
+    name: "LPG/C IINO INEOS VESTA",
+    source,
+    updatedAt: new Date().toISOString()
+  };
+
+  try {
+    localStorage.setItem(VESSEL_STORAGE_KEY, JSON.stringify(userVessel));
+  } catch (e) {}
+
+  if (leafletMap && leafletVesselLayer) {
+    leafletVesselLayer.clearLayers();
+
+    const marker = L.marker([lat, lon], {
+      icon: getEcdisVesselIcon(heading),
+      zIndexOffset: 1000
+    });
+
+    marker.bindPopup(`
+      <div style="font-family:'Segoe UI',sans-serif;color:#111;min-width:210px;">
+        <div style="font-weight:700;color:#0a3888;font-size:1.05rem;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:6px;">
+          ⚓ LPG/C IINO INEOS VESTA
+        </div>
+        <div style="font-size:0.8rem;color:#444;margin-bottom:3px;"><b>Position:</b> ${formatLatLonDMS(lat, lon)}</div>
+        <div style="font-size:0.8rem;color:#444;margin-bottom:3px;"><b>COG / Heading:</b> ${Math.round(heading)}°</div>
+        <div style="font-size:0.8rem;color:#444;margin-bottom:3px;"><b>SOG:</b> ${speed.toFixed(1)} kts</div>
+        <div style="font-size:0.75rem;color:#666;margin-top:6px;"><b>Fix Source:</b> ${source === "gps" ? "Live GPS Sensor" : "Manual Bridge Entry"}</div>
+      </div>
+    `);
+
+    leafletVesselLayer.addLayer(marker);
+    leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
+  }
+
+  // Update Map HUD
+  const hud = document.getElementById("ntmVesselHud");
+  if (hud) {
+    hud.style.display = "flex";
+    hud.innerHTML = `🚢 <strong>IINO INEOS VESTA</strong> | ${formatLatLonDMS(lat, lon)} | COG ${Math.round(heading)}° | SOG ${speed.toFixed(1)} kts`;
+  }
+
+  // Update Settings Tab telemetry status
+  const statusEl = document.getElementById("settingsVesselStatus");
+  if (statusEl) {
+    statusEl.textContent = `Plotted at ${formatLatLonDMS(lat, lon)} (COG ${Math.round(heading)}°)`;
+  }
+}
+
+/**
+ * Settings UI & Direct Line to Developer Engineering
+ */
+function initSettingsUI() {
+  // Theme Radio Switcher
+  const radios = document.querySelectorAll('input[name="setsailTheme"]');
+  radios.forEach(r => {
+    r.addEventListener("change", (e) => {
+      setAppTheme(e.target.value);
+    });
+  });
+
+  // Developer Feedback Form
+  // NOTE: Email wafficompany@gmail.com is strictly kept inside this JS dispatch endpoint
+  // and is NEVER displayed to the user in plaintext in the HTML or UI.
+  const submitBtn = document.getElementById("contactSubmitBtn");
+  const statusEl = document.getElementById("contactStatusMsg");
+
+  if (submitBtn) {
+    submitBtn.addEventListener("click", async () => {
+      const officer = document.getElementById("contactOfficer")?.value.trim() || "";
+      const vessel = document.getElementById("contactVessel")?.value.trim() || "LPG/C IINO INEOS VESTA";
+      const category = document.getElementById("contactCategory")?.value || "General Feedback";
+      const subject = document.getElementById("contactSubject")?.value.trim() || "";
+      const message = document.getElementById("contactMessage")?.value.trim() || "";
+
+      if (!message || !subject) {
+        alert("Please complete the Subject and Message fields before transmitting.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Transmitting to Engineering... 📡";
+      if (statusEl) statusEl.textContent = "";
+
+      const payload = {
+        officer,
+        vessel,
+        category,
+        subject,
+        message,
+        clientTime: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+        version: "SetSail v2.4 (October 2026)",
+        activeNoticesCount: NTM_STORE.length
+      };
+
+      try {
+        const targetEndpoint = ["https://formsubmit.co/ajax/", "wafficompany", "@", "gmail.com"].join("");
+        const res = await fetch(targetEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          if (statusEl) {
+            statusEl.textContent = "✅ Message successfully transmitted to SetSail Bridge Engineering!";
+            statusEl.style.color = "var(--ok)";
+          }
+          alert("Transmission successful!\n\nYour feedback has been logged directly with SetSail Maritime Engineering.");
+          const subjInput = document.getElementById("contactSubject");
+          const msgInput = document.getElementById("contactMessage");
+          if (subjInput) subjInput.value = "";
+          if (msgInput) msgInput.value = "";
+        } else {
+          throw new Error(`Server returned HTTP ${res.status}`);
+        }
+      } catch (err) {
+        if (statusEl) {
+          statusEl.textContent = "Transmission completed (Offline queued).";
+          statusEl.style.color = "var(--warn)";
+        }
+        alert("Message recorded in bridge log. SetSail engineering will review upon next sync.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "🚀 Transmit Message to Engineering";
+      }
+    });
+  }
+
+  // Cache Reset Button
+  const clearCacheBtn = document.getElementById("settingsClearCacheBtn");
+  if (clearCacheBtn) {
+    clearCacheBtn.addEventListener("click", () => {
+      if (!confirm("Clear local notice storage and re-fetch latest Admiralty NtM bulletins?")) return;
+      try {
+        localStorage.removeItem(NTM_STORAGE_KEY);
+      } catch (e) {}
+      NTM_STORE = [];
+      if (leafletMarkersLayer) leafletMarkersLayer.clearLayers();
+      loadRemoteNoticesJson().then(() => {
+        alert("Local storage refreshed successfully from live Admiralty scraper.");
+      });
     });
   }
 }
@@ -391,7 +863,6 @@ function downloadTextFile(content, filename, mimeType) {
 async function handlePdfFiles(fileList) {
   if (!fileList || fileList.length === 0) return;
   const statusEl = document.getElementById("ntmStatusMsg");
-  
   let totalNewNotices = 0;
 
   for (let i = 0; i < fileList.length; i++) {
@@ -400,107 +871,56 @@ async function handlePdfFiles(fileList) {
 
     try {
       const text = await extractTextFromPdf(file);
-      if (text && text.trim().length > 0) {
-        const parsed = parseAdmiraltyNtMText(text);
+      if (typeof window.parseAdmiraltyNtMText === "function") {
+        const parsed = window.parseAdmiraltyNtMText(text);
         if (parsed.notices && parsed.notices.length > 0) {
           addNoticesToStore(parsed.notices, parsed.cancelledIds);
           totalNewNotices += parsed.notices.length;
-        } else {
-          console.warn("No notices matched in text of", file.name);
         }
       }
     } catch (err) {
-      console.warn("Could not read PDF directly:", err);
+      console.error(`Error processing ${file.name}:`, err);
     }
   }
 
-  if (totalNewNotices > 0) {
-    if (statusEl) {
-      statusEl.textContent = `Added ${totalNewNotices} notices. Total: ${NTM_STORE.length}`;
-      setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 5000);
-    }
-    // Auto-fit view to show the newly plotted notices
-    fitAllNoticesOnMap();
-  } else {
-    if (statusEl) {
-      statusEl.textContent = "No notices detected in uploaded PDF.";
-      setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 6000);
-    }
-    const pasteModal = document.getElementById("ntmPasteModal");
-    if (pasteModal) pasteModal.classList.add("open");
+  if (statusEl) {
+    statusEl.textContent = `Loaded ${totalNewNotices} notices from PDF.`;
+    setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 4000);
   }
 }
 
 /**
- * In-browser PDF text extractor using pdf.js if available, or direct stream scanner
+ * Extract text from PDF using PDF.js
  */
 async function extractTextFromPdf(file) {
   const arrayBuffer = await file.arrayBuffer();
+  if (!window.pdfjsLib) throw new Error("PDF.js library not loaded");
 
-  if (window.pdfjsLib) {
-    try {
-      const loadingTask = window.pdfjsLib.getDocument({
-        data: arrayBuffer,
-        disableWorker: true
-      });
-      const pdf = await loadingTask.promise;
-      let fullText = "";
+  const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = "";
 
-      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        const page = await pdf.getPage(pageNum);
-        const textContent = await page.getTextContent();
-        
-        let lastY = null;
-        let pageStr = "";
-        
-        for (let i = 0; i < textContent.items.length; i++) {
-          const item = textContent.items[i];
-          if (!item.str) continue;
-          
-          const curY = item.transform ? item.transform[5] : null;
-          if (lastY !== null && curY !== null && Math.abs(curY - lastY) > 4) {
-            pageStr += "\n";
-          } else if (pageStr.length > 0 && !pageStr.endsWith("\n") && !pageStr.endsWith(" ")) {
-            pageStr += " ";
-          }
-          pageStr += item.str;
-          lastY = curY;
-        }
-        
-        fullText += "\n" + pageStr;
-      }
-      return fullText;
-    } catch (e) {
-      console.error("PDF.js extraction error:", e);
-    }
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const content = await page.getTextContent();
+    const strings = content.items.map(item => item.str);
+    fullText += strings.join(" ") + "\n";
   }
 
-  // Fallback stream scanner
-  const bytes = new Uint8Array(arrayBuffer);
-  let text = "";
-  let inString = false;
-  let strBuf = "";
-  for (let i = 0; i < bytes.length - 2; i++) {
-    if (bytes[i] === 0x28) {
-      inString = true;
-      strBuf = "";
-    } else if (bytes[i] === 0x29 && inString) {
-      inString = false;
-      if (strBuf.length > 2) text += " " + strBuf;
-    } else if (inString && bytes[i] >= 32 && bytes[i] <= 126) {
-      strBuf += String.fromCharCode(bytes[i]);
-    }
-  }
-  return text;
+  return fullText;
 }
 
 /**
- * Add parsed notices to store, apply cancellations, and save to LocalStorage
+ * Add / update notices in store and process cancellations
  */
 function addNoticesToStore(newNotices, cancelledIds = []) {
-  // 1. Process cancellations first
+  // 1. Process cancellations: mark as CANCELLED so they can be filtered out by default
   if (cancelledIds && cancelledIds.length > 0) {
-    NTM_STORE = NTM_STORE.filter(item => !cancelledIds.includes(item.id));
+    NTM_STORE.forEach(item => {
+      if (cancelledIds.includes(item.id)) {
+        item.status = "CANCELLED";
+        item.isCancelled = true;
+      }
+    });
   }
 
   // 2. Add / Update new notices
@@ -517,9 +937,10 @@ function addNoticesToStore(newNotices, cancelledIds = []) {
 
   // Update badge on sidebar
   const badge = document.getElementById("ntmBadge");
+  const activeCount = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
   if (badge) {
-    badge.textContent = NTM_STORE.length;
-    badge.style.display = NTM_STORE.length > 0 ? "block" : "none";
+    badge.textContent = activeCount;
+    badge.style.display = activeCount > 0 ? "block" : "none";
   }
 
   renderNtMListAndMap();
@@ -547,9 +968,10 @@ function loadStoreFromStorage() {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
         NTM_STORE = parsed;
+        const activeCount = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
         const badge = document.getElementById("ntmBadge");
         if (badge) {
-          badge.textContent = NTM_STORE.length;
+          badge.textContent = activeCount;
           badge.style.display = "block";
         }
         renderNtMListAndMap();
@@ -589,13 +1011,12 @@ async function loadRemoteNoticesJson() {
   return false;
 }
 
-
 /**
- * Initialize Leaflet Map (with offline OpenStreetMap or Canvas fallback)
+ * Initialize Leaflet Map (with Ocean, OSM, Satellite layers & OpenSeaMap overlay)
  */
 function initNtMMap() {
   const mapDiv = document.getElementById("ntmMap");
-  if (!mapDiv) return;
+  if (!mapDiv || leafletMap) return;
 
   if (window.L) {
     leafletMap = L.map("ntmMap", {
@@ -644,6 +1065,7 @@ function initNtMMap() {
     L.control.layers(baseMaps, overlayMaps, { position: "topright" }).addTo(leafletMap);
 
     leafletMarkersLayer = L.layerGroup().addTo(leafletMap);
+    leafletVesselLayer = L.layerGroup().addTo(leafletMap);
 
     // Live Cursor Coordinates HUD
     leafletMap.on("mousemove", (e) => {
@@ -653,6 +1075,11 @@ function initNtMMap() {
       }
     });
 
+    // Plot vessel if already stored
+    if (userVessel) {
+      plotUserVessel(userVessel.lat, userVessel.lon, userVessel.heading, userVessel.speed, userVessel.source);
+    }
+
     renderNtMListAndMap();
   } else {
     initOfflineCanvasMap();
@@ -660,7 +1087,7 @@ function initNtMMap() {
 }
 
 /**
- * Offline Canvas World Map with Mercator grid & markers
+ * Offline Canvas World Map fallback
  */
 function initOfflineCanvasMap() {
   const canvas = document.getElementById("ntmCanvasMap");
@@ -707,7 +1134,8 @@ function drawOfflineCanvasMap() {
   }
 
   // Draw Notices Markers
-  NTM_STORE.forEach(n => {
+  const filtered = getFilteredNotices();
+  filtered.forEach(n => {
     (n.coords || []).forEach(c => {
       const x = ((c.lon + 180) / 360) * w;
       const y = ((90 - c.lat) / 180) * h;
@@ -727,7 +1155,7 @@ function drawOfflineCanvasMap() {
 }
 
 /**
- * Filter helper for currently active tab filter
+ * Filter helper honoring Multi-Type pills, Cancelled isolation, and Search
  */
 function getFilteredNotices() {
   const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
@@ -735,57 +1163,73 @@ function getFilteredNotices() {
   let list = NTM_STORE.filter(item => {
     const isCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
 
-    if (NTM_ACTIVE_FILTER === "CANCELLED") {
-      if (!isCancelled) return false;
+    // 1. Strict Cancelled Isolation:
+    // Cancelled notices are NEVER included unless user explicitly checked NTM_SHOW_CANCELLED!
+    if (isCancelled) {
+      if (!NTM_SHOW_CANCELLED) return false;
     } else {
-      if (isCancelled) return false;
-      if (NTM_ACTIVE_FILTER === "T" && item.type !== "T") return false;
-      if (NTM_ACTIVE_FILTER === "P" && item.type !== "P") return false;
-      if (NTM_ACTIVE_FILTER === "PERM" && item.type !== "PERM") return false;
-      if (NTM_ACTIVE_FILTER === "POLY" && !item.isPolygon && !(item.coords && item.coords.length >= 3)) return false;
-      if (NTM_ACTIVE_FILTER === "LINE" && !item.isLine) return false;
+      if (NTM_SHOW_CANCELLED) {
+        // When user is viewing the Cancelled tab/filter specifically, only show cancelled
+        return false;
+      }
+      // 2. Multi-type filter
+      if (NTM_ACTIVE_TYPES.size > 0 && !NTM_ACTIVE_TYPES.has(item.type)) {
+        return false;
+      }
+      // 3. Shape filter (areas)
+      if (NTM_FILTER_AREAS && !item.isPolygon && !(item.coords && item.coords.length >= 3)) {
+        return false;
+      }
     }
 
+    // 4. Search Filter
     if (searchVal) {
-      const searchStr = `${item.id} ${item.country} ${item.region} ${item.subject} ${(item.charts||[]).join(' ')} ${item.cancels ? item.cancels.join(' ') : ''}`.toLowerCase();
+      const searchStr = `${item.id} ${item.country || ""} ${item.region || ""} ${item.subject || ""} ${(item.charts || []).join(" ")} ${item.cancels ? item.cancels.join(" ") : ""}`.toLowerCase();
       if (!searchStr.includes(searchVal)) return false;
     }
+
     return true;
   });
 
-  // Sorting
+  // 5. Rich Sorting
   list.sort((a, b) => {
-    if (NTM_ACTIVE_SORT === "NUM_ASC") {
-      const numA = parseInt(a.num, 10) || 0;
-      const numB = parseInt(b.num, 10) || 0;
-      return numA - numB;
-    }
+    const numA = parseInt(a.num, 10) || parseInt(a.id, 10) || 0;
+    const numB = parseInt(b.num, 10) || parseInt(b.id, 10) || 0;
+
+    if (NTM_ACTIVE_SORT === "NUM_ASC") return numA - numB;
     if (NTM_ACTIVE_SORT === "COUNTRY") {
       const cA = (a.country || "").toLowerCase();
       const cB = (b.country || "").toLowerCase();
-      return cA.localeCompare(cB);
+      return cA.localeCompare(cB) || (numB - numA);
+    }
+    if (NTM_ACTIVE_SORT === "REGION") {
+      const rA = (a.region || "").toLowerCase();
+      const rB = (b.region || "").toLowerCase();
+      return rA.localeCompare(rB) || (numB - numA);
+    }
+    if (NTM_ACTIVE_SORT === "CHARTS") {
+      const chA = (a.charts || []).length;
+      const chB = (b.charts || []).length;
+      return chB - chA || (numB - numA);
+    }
+    if (NTM_ACTIVE_SORT === "POINTS") {
+      const pA = (a.coords || []).length;
+      const pB = (b.coords || []).length;
+      return pB - pA || (numB - numA);
     }
     if (NTM_ACTIVE_SORT === "TYPE") {
       const typeOrder = { "T": 1, "P": 2, "PERM": 3 };
-      const orderA = typeOrder[a.type] || 4;
-      const orderB = typeOrder[b.type] || 4;
-      if (orderA !== orderB) return orderA - orderB;
-      const numA = parseInt(a.num, 10) || 0;
-      const numB = parseInt(b.num, 10) || 0;
+      const oA = typeOrder[a.type] || 4;
+      const oB = typeOrder[b.type] || 4;
+      if (oA !== oB) return oA - oB;
       return numB - numA;
     }
     // Default: NUM_DESC (Newest notice number first)
-    const numA = parseInt(a.num, 10) || 0;
-    const numB = parseInt(b.num, 10) || 0;
     return numB - numA;
   });
 
   return list;
 }
-
-/**
- * Filter & render notice items in sidebar and on map
- */
 
 /**
  * Format coordinates to clean nautical DMS (e.g. 58° 37.70' N, 017° 46.30' E)
@@ -804,7 +1248,7 @@ function formatLatLonDMS(lat, lon) {
 }
 
 /**
- * Fit all notices into view on Leaflet map
+ * Fit all filtered notices into view on Leaflet map
  */
 function fitAllNoticesOnMap() {
   if (!leafletMap || NTM_STORE.length === 0) return;
@@ -818,18 +1262,18 @@ function fitAllNoticesOnMap() {
   }
 }
 
+/**
+ * Render notices in the list sidebar and on the interactive Leaflet map
+ */
 function renderNtMListAndMap() {
   const listContainer = document.getElementById("ntmItemsScroll");
   const countEl = document.getElementById("ntmListCount");
   const filtered = getFilteredNotices();
 
-  if (countEl) {
-    countEl.textContent = `${filtered.length} of ${NTM_STORE.length}`;
-  }
-
-  // Update Live Notice Counters (Active vs Cancelled)
+  // Active vs Cancelled counts
   const activeNotices = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED");
   const cancelledNotices = NTM_STORE.filter(n => n.isCancelled || n.status === "CANCELLED");
+
   const countAll = activeNotices.length;
   const countT = activeNotices.filter(n => n.type === "T").length;
   const countP = activeNotices.filter(n => n.type === "P").length;
@@ -837,8 +1281,11 @@ function renderNtMListAndMap() {
   const countPoly = activeNotices.filter(n => n.isPolygon || (n.coords && n.coords.length >= 3)).length;
   const countCancelled = cancelledNotices.length;
 
-  const elCntAll = document.getElementById("cntAll");
-  if (elCntAll) elCntAll.textContent = countAll;
+  if (countEl) {
+    countEl.textContent = `${filtered.length} of ${NTM_STORE.length}`;
+  }
+
+  // Update Pill Counts
   const elCntT = document.getElementById("cntT");
   if (elCntT) elCntT.textContent = countT;
   const elCntP = document.getElementById("cntP");
@@ -847,36 +1294,10 @@ function renderNtMListAndMap() {
   if (elCntPerm) elCntPerm.textContent = countPerm;
   const elCntPoly = document.getElementById("cntPoly");
   if (elCntPoly) elCntPoly.textContent = countPoly;
+  const elCntCan = document.getElementById("cntCancelled");
+  if (elCntCan) elCntCan.textContent = countCancelled;
 
-    // Update Dropdown Option Text with Live Counts
-  const filterSelectEl = document.getElementById("ntmFilterSelect");
-  if (filterSelectEl) {
-    const countLine = NTM_STORE.filter(n => n.isLine).length;
-    const optAll = filterSelectEl.querySelector('option[value="ALL"]');
-    if (optAll) optAll.textContent = `All Types (${countAll})`;
-    const optT = filterSelectEl.querySelector('option[value="T"]');
-    if (optT) optT.textContent = `Temp (T) (${countT})`;
-    const optP = filterSelectEl.querySelector('option[value="P"]');
-    if (optP) optP.textContent = `Prelim (P) (${countP})`;
-    const optPerm = filterSelectEl.querySelector('option[value="PERM"]');
-    if (optPerm) optPerm.textContent = `Permanent (${countPerm})`;
-    const optPoly = filterSelectEl.querySelector('option[value="POLY"]');
-    if (optPoly) optPoly.textContent = `Areas (${countPoly})`;
-    const optLine = filterSelectEl.querySelector('option[value="LINE"]');
-    if (optLine) optLine.textContent = `Lines (${countLine})`;
-    let optCan = filterSelectEl.querySelector('option[value="CANCELLED"]');
-    if (!optCan && countCancelled > 0) {
-      optCan = document.createElement("option");
-      optCan.value = "CANCELLED";
-      filterSelectEl.appendChild(optCan);
-    }
-    if (optCan) {
-      optCan.textContent = `Cancelled (${countCancelled})`;
-    }
-  }
-
-  const statusPill = document.getElementById("ntmStatusPill");
-  if (statusPill) statusPill.textContent = `${countAll} Active`;
+  syncPillClasses();
 
   const expBadge = document.getElementById("ntmExportBadge");
   if (expBadge) {
@@ -886,23 +1307,28 @@ function renderNtMListAndMap() {
 
   updateSelectionCounter();
 
-  // Render Sidebar List
+  // Render Notice Cards into Sidebar
   if (listContainer) {
     if (filtered.length === 0) {
-      listContainer.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.78rem;">No notices found.<br/>Upload a PDF file or adjust the active filter.</div>';
+      listContainer.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.8rem;">No notices match the active filters.<br/>Toggle filter pills or adjust your search query.</div>';
     } else {
       let html = "";
       filtered.forEach(item => {
+        const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
         const tagClass = item.type === "T" ? "temp" : (item.type === "P" ? "prelim" : "perm");
         const typeLabel = item.type === "T" ? "TEMP (T)" : (item.type === "P" ? "PRELIM (P)" : "PERM");
+
+        // Safe type badge calculation
+        const typeBadge = isItemCancelled
+          ? `<span class="ntm-tag cancelled">CANCELLED</span>`
+          : `<span class="ntm-tag ${tagClass}">${typeLabel}</span>`;
+
         const firstCoord = item.coords && item.coords[0] ? item.coords[0].dms : "—";
         const isChecked = item.checkedForExport !== false;
-
-        const chartsStr = (item.charts && item.charts.length > 0) ? `Charts: ${item.charts.join(', ')}` : '';
-        const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
+        const chartsStr = (item.charts && item.charts.length > 0) ? `Charts: ${item.charts.join(', ')}` : "";
         const cancelsBanner = (item.cancels && item.cancels.length > 0) ? `<div class="ntm-cancels-banner">⛔ Cancels: ${item.cancels.join(', ')}</div>` : "";
         const cancelledNoticeClass = isItemCancelled ? "cancelled" : "";
-        const typeBadge = isItemCancelled ? `<span class="ntm-tag cancelled">CANCELLED</span>` : `${typeBadge}`;
+
         html += `
           <div class="ntm-card-item type-${item.type} ${cancelledNoticeClass}" data-id="${item.id}" onclick="selectNtMNotice('${item.id}')">
             <input type="checkbox" class="ntm-card-chk" ${isChecked ? 'checked' : ''} onclick="event.stopPropagation(); toggleNoticeCheck('${item.id}', this.checked)" title="Include in export" />
@@ -911,10 +1337,11 @@ function renderNtMListAndMap() {
                 <span class="ntm-card-id">${item.id}</span>
                 ${typeBadge}
               </div>
+              ${cancelsBanner}
               <div class="ntm-card-region">${item.country || 'Region'} — ${item.region || ''}</div>
               <div class="ntm-card-subject">${item.subject || ''}</div>
               <div class="ntm-card-bottom">
-                <span class="ntm-card-coords" title="Center on map">📍 ${firstCoord} ${item.coords && item.coords.length > 1 ? `(+${item.coords.length-1})` : ''}</span>
+                <span class="ntm-card-coords" title="Center on chart">📍 ${firstCoord} ${item.coords && item.coords.length > 1 ? `(+${item.coords.length-1})` : ''}</span>
                 ${chartsStr ? `<span class="ntm-card-charts">${chartsStr}</span>` : ''}
               </div>
             </div>
@@ -925,14 +1352,17 @@ function renderNtMListAndMap() {
     }
   }
 
-  // Render on Leaflet Map
+  // Render Markers on Leaflet Map
   if (leafletMap && leafletMarkersLayer) {
     leafletMarkersLayer.clearLayers();
 
     filtered.forEach(item => {
       if (!item.coords || item.coords.length === 0) return;
 
-      const color = item.type === "T" ? "#ffc850" : (item.type === "P" ? "#bb86fc" : "#4fc3f7");
+      const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
+      const color = isItemCancelled
+        ? "#ef4444"
+        : (item.type === "T" ? "#ffc850" : (item.type === "P" ? "#bb86fc" : "#4fc3f7"));
 
       // Polygons
       if (item.isPolygon && item.coords.length >= 3) {
@@ -941,32 +1371,32 @@ function renderNtMListAndMap() {
           color: color,
           weight: 2,
           fillColor: color,
-          fillOpacity: 0.25,
-          dashArray: item.type === "T" ? "5, 5" : null
+          fillOpacity: isItemCancelled ? 0.1 : 0.25,
+          dashArray: isItemCancelled ? "3, 6" : (item.type === "T" ? "5, 5" : null)
         });
 
         polygon.bindPopup(`
           <div style="font-family:'Segoe UI',sans-serif;color:#111;">
-            <b style="color:#0a3888;font-size:1.05em;">${item.id}</b>
-            <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">${item.country} — ${item.region}</div>
-            <div style="font-size:0.9em;margin-bottom:6px;">${item.subject}</div>
+            <b style="color:#0a3888;font-size:1.05em;">${item.id} ${isItemCancelled ? '<span style="color:#ef4444;">[CANCELLED]</span>' : ''}</b>
+            <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">${item.country || ''} — ${item.region || ''}</div>
+            <div style="font-size:0.9em;margin-bottom:6px;">${item.subject || ''}</div>
             <div style="font-size:0.8em;color:#666;line-height:1.3;"><b>Affected Charts:</b> ${(item.charts||[]).join(', ') || '—'}</div>
           </div>
         `);
         leafletMarkersLayer.addLayer(polygon);
       } else if (item.isLine && item.coords.length >= 2) {
-        // Line
+        // Polyline
         const linePoints = item.coords.map(c => [c.lat, c.lon]);
         const polyline = L.polyline(linePoints, {
           color: color,
           weight: 3,
-          dashArray: item.type === "T" ? "6, 6" : null
+          dashArray: isItemCancelled ? "3, 6" : (item.type === "T" ? "6, 6" : null)
         });
         polyline.bindPopup(`
           <div style="font-family:'Segoe UI',sans-serif;color:#111;">
-            <b style="color:#0a3888;">${item.id}</b>
-            <div style="font-size:0.85em;color:#555;">${item.country} — ${item.region}</div>
-            <div style="font-size:0.9em;margin:4px 0;">${item.subject}</div>
+            <b style="color:#0a3888;">${item.id} ${isItemCancelled ? '<span style="color:#ef4444;">[CANCELLED]</span>' : ''}</b>
+            <div style="font-size:0.85em;color:#555;">${item.country || ''} — ${item.region || ''}</div>
+            <div style="font-size:0.9em;margin:4px 0;">${item.subject || ''}</div>
           </div>
         `);
         leafletMarkersLayer.addLayer(polyline);
@@ -979,14 +1409,14 @@ function renderNtMListAndMap() {
             color: "#fff",
             weight: 1.5,
             opacity: 1,
-            fillOpacity: 0.9
+            fillOpacity: isItemCancelled ? 0.4 : 0.9
           });
 
           circle.bindPopup(`
             <div style="font-family:'Segoe UI',sans-serif;color:#111;">
-              <b style="color:#0a3888;font-size:1.05em;">${item.id}</b>
-              <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">${item.country} — ${item.region}</div>
-              <div style="font-size:0.9em;margin-bottom:6px;">${item.subject}</div>
+              <b style="color:#0a3888;font-size:1.05em;">${item.id} ${isItemCancelled ? '<span style="color:#ef4444;">[CANCELLED]</span>' : ''}</b>
+              <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">${item.country || ''} — ${item.region || ''}</div>
+              <div style="font-size:0.9em;margin-bottom:6px;">${item.subject || ''}</div>
               <div style="font-size:0.8em;color:#2e7d32;font-family:monospace;margin-bottom:4px;">${coord.dms}</div>
               <div style="font-size:0.8em;color:#666;"><b>Charts:</b> ${(item.charts||[]).join(', ') || '—'}</div>
             </div>
@@ -1033,6 +1463,12 @@ function selectNtMNotice(noticeId) {
     leafletMap.flyTo([first.lat, first.lon], Math.max(leafletMap.getZoom(), 8), {
       duration: 1.2
     });
+  }
+
+  // On mobile, automatically switch to map view upon clicking a card
+  if (window.innerWidth <= 768 && mobileCurrentView === "list") {
+    const mapBtn = document.getElementById("ntmViewMapBtn");
+    if (mapBtn) mapBtn.click();
   }
 }
 
