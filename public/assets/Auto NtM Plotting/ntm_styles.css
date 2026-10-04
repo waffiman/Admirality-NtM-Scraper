@@ -2572,3 +2572,125 @@ html, body {
 .modal-or-divider span {
   padding: 0 0.5rem !important;
 }
+
+
+/* ==========================================================================
+   NAVIGATION SIDEBAR BUTTON BORDERS (UNIFORM STYLING)
+   Ensures Settings button has the exact same border as the buttons above
+   ========================================================================== */
+.nav-item,
+.nav-settings-item {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(14, 24, 52, 0.6) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--muted) !important;
+  font-size: 1.25rem !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+.nav-item:hover,
+.nav-settings-item:hover {
+  background: rgba(126, 182, 255, 0.18) !important;
+  border-color: var(--accent) !important;
+  color: #ffffff !important;
+  transform: scale(1.05);
+}
+
+.nav-item.active,
+.nav-settings-item.active {
+  background: linear-gradient(135deg, rgba(60, 110, 220, 0.5), rgba(40, 70, 160, 0.65)) !important;
+  border-color: var(--accent) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(126, 182, 255, 0.4) !important;
+}
+
+[data-theme="light"] .nav-item,
+[data-theme="light"] .nav-settings-item {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+[data-theme="light"] .nav-item:hover,
+[data-theme="light"] .nav-settings-item:hover {
+  background: #f1f5f9 !important;
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+}
+
+[data-theme="light"] .nav-item.active,
+[data-theme="light"] .nav-settings-item.active {
+  background: rgba(2, 132, 199, 0.15) !important;
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+  box-shadow: 0 0 10px rgba(2, 132, 199, 0.25) !important;
+}
+
+/* ==========================================================================
+   OFFLINE & SCRAPER ERROR TELEMETRY DOT (STATIC SOLID RED)
+   ========================================================================== */
+.ntm-offline-dot {
+  width: 8px !important;
+  height: 8px !important;
+  background-color: #ff4757 !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+  box-shadow: 0 0 6px rgba(255, 71, 87, 0.8) !important;
+  animation: none !important; /* STRICTLY STATIC */
+}
+
+/* ==========================================================================
+   NAVAREA FILTER & CARD BADGES
+   ========================================================================== */
+.ntm-popover-subtitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0.4rem 0 0.25rem 0.2rem;
+}
+
+.ntm-navarea-select {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background: rgba(6, 12, 28, 0.8) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  color: var(--text) !important;
+  font-size: 0.75rem !important;
+  padding: 0.3rem 0.45rem !important;
+  font-family: inherit !important;
+}
+
+[data-theme="light"] .ntm-navarea-select {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.ntm-card-navarea {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #70a1ff;
+  background: rgba(112, 161, 255, 0.15);
+  border: 1px solid rgba(112, 161, 255, 0.35);
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-right: 4px;
+}
+
+[data-theme="light"] .ntm-card-navarea {
+  color: #1e40af;
+  background: #dbeafe;
+  border-color: #bfdbfe;
+}
