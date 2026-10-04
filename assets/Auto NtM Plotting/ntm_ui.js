@@ -2,23 +2,26 @@
  * SetSail Auto-NtM UI Controller & Interactive ECDIS Chart
  * Navigation Suite for LPG/C IINO INEOS VESTA
  *
- * Updated Features:
- * - Funnel (Filter) & Two-Arrows (Sort) popover menus next to Select All
- * - Crosshair target (прицел) vessel position marker on chart (no heading/speed clutter)
- * - Ultra-minimalist Settings page (Dark/Light theme toggle, simple Email + Message contact form)
- * - Fixed left navigation sidebar (does not scroll with wide content)
- * - UTC timestamp automatically appended to all exported ECDIS filenames (YYYYMMDD_HHMMUTC)
- * - Strict quarantine of Cancelled notices from the map layer by default
+ * Capabilities:
+ * - 100% PWA Offline Mode: Loads instantly even with NO internet (No Google Dinosaur)
+ * - Static Red Telemetry Dot when offline or on scraping error; pulsating Green dot when online
+ * - Full NAVAREA filtering (NAVAREA I through XXI) & card badges
+ * - Popover Filter (Funnel) & Sort (Two Arrows) next to Select All
+ * - Crosshair target (прицел) vessel position marker
+ * - Minimalist Settings page with Dark/Light theme & Email+Message support form
+ * - UTC timestamp appended to exported ECDIS filenames (YYYYMMDD_HHMMUTC)
  */
 
 const NTM_STORAGE_KEY = "setsail_ntm_active_store_v2";
 const VESSEL_STORAGE_KEY = "setsail_vessel_state_v1";
 const THEME_STORAGE_KEY = "setsail_theme";
+const META_STORAGE_KEY = "setsail_meta_v1";
 
 let NTM_STORE = [];
 let NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM"]); // Default: all active notice types
 let NTM_FILTER_AREAS = false;
 let NTM_SHOW_CANCELLED = false; // Strictly isolated from map by default!
+let NTM_ACTIVE_NAVAREA = "ALL";
 let NTM_ACTIVE_SORT = "NUM_DESC";
 
 let leafletMap = null;
@@ -36,10 +39,11 @@ document.addEventListener("DOMContentLoaded", () => {
   initVesselTracking();
   initSettingsUI();
   initMobileViewSwitcher();
+  initNetworkStatusWatchdog();
 });
 
 /**
- * Returns formatted UTC timestamp string for export filenames (e.g. 20261004_1625UTC)
+ * Returns formatted UTC timestamp string for export filenames (e.g. 20261004_1645UTC)
  */
 function getExportUtcTimestamp() {
   const now = new Date();
@@ -97,7 +101,6 @@ function initNavigationTabs() {
         activePane.classList.add("active");
       }
 
-      // If switching to NtM tab, resize or initialize map
       if (targetTab === "tab-ntm") {
         setTimeout(() => {
           if (leafletMap) {
@@ -109,6 +112,141 @@ function initNavigationTabs() {
       }
     });
   });
+}
+
+/**
+ * Network Status Watchdog: Green pulsing dot for online, static Red dot for offline/error
+ */
+function initNetworkStatusWatchdog() {
+  window.addEventListener("online", () => {
+    console.log("[SetSail] Online connection restored.");
+    loadRemoteNoticesJson();
+  });
+
+  window.addEventListener("offline", () => {
+    console.log("[SetSail] Operating in offline mode.");
+    updateNetworkStatusHUD(false);
+  });
+}
+
+function updateNetworkStatusHUD(isOnline, customWk = null) {
+  const statusEl = document.getElementById("ntmStatusMsg");
+  if (!statusEl) return;
+
+  let wkStr = customWk;
+  if (!wkStr) {
+    try {
+      const savedMeta = JSON.parse(localStorage.getItem(META_STORAGE_KEY) || "{}");
+      wkStr = savedMeta.weekNumber ? `Wk ${savedMeta.weekNumber}/${savedMeta.year || ''}` : (savedMeta.weeklyBulletin || "Local");
+    } catch (e) {
+      wkStr = "Local";
+    }
+  }
+
+  const activeCnt = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
+
+  if (isOnline) {
+    statusEl.innerHTML = `<span class="ntm-live-status"><span class="ntm-live-dot" title="Live UKHO telemetry online"></span>Live NtM ${wkStr}: ${activeCnt} active</span>`;
+  } else {
+    statusEl.innerHTML = `<span class="ntm-live-status" style="color:#ff6b81;"><span class="ntm-offline-dot" title="Offline mode — using cached NtM database"></span>Offline (Cached NtM ${wkStr}): ${activeCnt} active</span>`;
+  }
+}
+
+/**
+ * IMO / IHO NAVAREA Resolver:
+ * Maps notice to its corresponding NAVAREA (I through XXI) based on country, region and coordinates
+ */
+function getNoticeNavarea(notice) {
+  const country = (notice.country || "").toUpperCase();
+  const region = (notice.region || "").toUpperCase();
+
+  // NAVAREA I: UK, Ireland, North Sea, Baltic, Norway south of 71N
+  if (country.includes("ENGLAND") || country.includes("SCOTLAND") || country.includes("IRELAND") || 
+      country.includes("SWEDEN") || country.includes("FINLAND") || country.includes("NORWAY") || 
+      country.includes("NORTH SEA") || country.includes("DENMARK") || country.includes("BALTIC")) {
+    return "NAVAREA I";
+  }
+
+  // NAVAREA II: East Atlantic & West Africa
+  if (country.includes("FRANCE") || country.includes("SPAIN") || country.includes("PORTUGAL") || 
+      country.includes("MOROCCO") || country.includes("SENEGAL") || country.includes("NIGERIA") ||
+      country.includes("GHANA") || country.includes("WEST AFRICA")) {
+    if (region.includes("MEDITERRANEAN") || region.includes("SOUTH COAST") || (region.includes("EAST COAST") && country.includes("SPAIN"))) {
+      return "NAVAREA III";
+    }
+    return "NAVAREA II";
+  }
+
+  // NAVAREA III: Mediterranean & Black Sea
+  if (country.includes("TÜRKIYE") || country.includes("TURKEY") || country.includes("ISRAEL") || 
+      country.includes("GREECE") || country.includes("ITALY") || country.includes("BLACK SEA") || 
+      country.includes("MEDITERRANEAN") || country.includes("CYPRUS") || country.includes("EGYPT")) {
+    return "NAVAREA III";
+  }
+
+  // NAVAREA IV: North-West Atlantic & Gulf of Mexico
+  if (country.includes("UNITED STATES") || country.includes("USA") || country.includes("CANADA") || 
+      country.includes("MEXICO") || country.includes("COLOMBIA") || country.includes("BAHAMAS") || 
+      country.includes("BERMUDA") || country.includes("CARIBBEAN") || country.includes("NORTH ATLANTIC")) {
+    if (region.includes("WEST COAST") || region.includes("PACIFIC")) {
+      return "NAVAREA XII";
+    }
+    return "NAVAREA IV";
+  }
+
+  // NAVAREA V: South Atlantic (Brazil)
+  if (country.includes("BRAZIL") || country.includes("URUGUAY")) {
+    return "NAVAREA V";
+  }
+
+  // NAVAREA VIII: North Indian Ocean
+  if (country.includes("INDIA") || country.includes("SRI LANKA") || country.includes("PAKISTAN") || 
+      country.includes("BANGLADESH") || country.includes("INDIAN OCEAN") || country.includes("BAY OF BENGAL") ||
+      country.includes("ARABIAN SEA")) {
+    return "NAVAREA VIII";
+  }
+
+  // NAVAREA IX: Red Sea & Persian Gulf
+  if (country.includes("PERSIAN GULF") || country.includes("ARABIAN GULF") || country.includes("RED SEA") || 
+      country.includes("OMAN") || country.includes("UNITED ARAB EMIRATES") || country.includes("UAE") || 
+      country.includes("SAUDI ARABIA") || country.includes("BAHRAIN") || country.includes("QATAR") || 
+      country.includes("KUWAIT") || country.includes("IRAQ") || country.includes("IRAN") || country.includes("DJIBOUTI")) {
+    return "NAVAREA IX";
+  }
+
+  // NAVAREA XI: East Asia & Western Pacific
+  if (country.includes("CHINA") || country.includes("KOREA") || country.includes("JAPAN") || 
+      country.includes("PHILIPPINES") || country.includes("PHILIPPINE ISLANDS") || country.includes("MALAYSIA") || 
+      country.includes("INDONESIA") || country.includes("SINGAPORE") || country.includes("VIETNAM") || 
+      country.includes("TAIWAN") || country.includes("MALACCA") || country.includes("SOUTH CHINA SEA")) {
+    return "NAVAREA XI";
+  }
+
+  // NAVAREA XII: US / Canada West Coast
+  if (country.includes("ALASKA") || country.includes("HAWAII")) {
+    return "NAVAREA XII";
+  }
+
+  // NAVAREA XIV: South Pacific
+  if (country.includes("NEW ZEALAND") || country.includes("FIJI") || country.includes("SOUTH PACIFIC")) {
+    return "NAVAREA XIV";
+  }
+
+  // NAVAREA XX: Russian Arctic (Barents, White Sea)
+  if (country.includes("RUSSIA")) {
+    if (region.includes("BARENTS") || region.includes("WHITE SEA") || region.includes("KARA")) {
+      return "NAVAREA XX";
+    }
+    if (region.includes("PACIFIC") || region.includes("KAMCHATKA") || region.includes("SAKHALIN") || region.includes("OKHOTSK")) {
+      return "NAVAREA XIII";
+    }
+    if (region.includes("BALTIC")) {
+      return "NAVAREA I";
+    }
+    return "NAVAREA XX";
+  }
+
+  return "NAVAREA I";
 }
 
 /**
@@ -179,6 +317,7 @@ function initFilterAndSortPopovers() {
   const chkPerm = document.getElementById("popChkPerm");
   const chkPoly = document.getElementById("popChkPoly");
   const chkCan = document.getElementById("popChkCancelled");
+  const selectNavarea = document.getElementById("popSelectNavarea");
 
   if (chkAll) {
     chkAll.addEventListener("change", () => {
@@ -186,11 +325,13 @@ function initFilterAndSortPopovers() {
         NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM"]);
         NTM_FILTER_AREAS = false;
         NTM_SHOW_CANCELLED = false;
+        NTM_ACTIVE_NAVAREA = "ALL";
         if (chkT) chkT.checked = true;
         if (chkP) chkP.checked = true;
         if (chkPerm) chkPerm.checked = true;
         if (chkPoly) chkPoly.checked = false;
         if (chkCan) chkCan.checked = false;
+        if (selectNavarea) selectNavarea.value = "ALL";
       }
       syncFilterIndicators();
       renderNtMListAndMap();
@@ -203,7 +344,7 @@ function initFilterAndSortPopovers() {
     if (chkP && chkP.checked) NTM_ACTIVE_TYPES.add("P");
     if (chkPerm && chkPerm.checked) NTM_ACTIVE_TYPES.add("PERM");
 
-    const allTypesChecked = NTM_ACTIVE_TYPES.size === 3 && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED;
+    const allTypesChecked = NTM_ACTIVE_TYPES.size === 3 && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED && NTM_ACTIVE_NAVAREA === "ALL";
     if (chkAll) chkAll.checked = allTypesChecked;
 
     syncFilterIndicators();
@@ -232,6 +373,15 @@ function initFilterAndSortPopovers() {
     });
   }
 
+  if (selectNavarea) {
+    selectNavarea.addEventListener("change", (e) => {
+      NTM_ACTIVE_NAVAREA = e.target.value || "ALL";
+      if (chkAll && NTM_ACTIVE_NAVAREA !== "ALL") chkAll.checked = false;
+      syncFilterIndicators();
+      renderNtMListAndMap();
+    });
+  }
+
   // Sort Radio Listeners
   const sortRadios = document.querySelectorAll('input[name="popSort"]');
   sortRadios.forEach(radio => {
@@ -250,20 +400,22 @@ function initFilterAndSortPopovers() {
 function syncFilterIndicators() {
   const dot = document.getElementById("filterActiveDot");
   const label = document.getElementById("ntmActiveFiltersLabel");
-  const isDefault = NTM_ACTIVE_TYPES.has("T") && NTM_ACTIVE_TYPES.has("P") && NTM_ACTIVE_TYPES.has("PERM") && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED;
+  const isDefault = NTM_ACTIVE_TYPES.has("T") && NTM_ACTIVE_TYPES.has("P") && NTM_ACTIVE_TYPES.has("PERM") && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED && NTM_ACTIVE_NAVAREA === "ALL";
 
   if (dot) dot.style.display = isDefault ? "none" : "block";
 
   if (label) {
     if (NTM_SHOW_CANCELLED) {
       label.textContent = "🚫 Cancelled";
+    } else if (NTM_ACTIVE_NAVAREA !== "ALL") {
+      label.textContent = NTM_ACTIVE_NAVAREA;
     } else if (isDefault) {
       label.textContent = "All Active";
     } else {
       const parts = [];
       if (NTM_ACTIVE_TYPES.has("T")) parts.push("T");
       if (NTM_ACTIVE_TYPES.has("P")) parts.push("P");
-      if (NTM_ACTIVE_TYPES.has("PERM")) parts.push("Perm");
+      if (NTM_ACTIVE_TYPES.has("Perm") || NTM_ACTIVE_TYPES.has("PERM")) parts.push("Perm");
       if (NTM_FILTER_AREAS) parts.push("Areas");
       label.textContent = parts.length > 0 ? parts.join(", ") : "None";
     }
@@ -429,12 +581,13 @@ function initAutoNtmUI() {
     });
   }
 
-  // Try loading live notices.json first, then LocalStorage, then samples
+  // Load Remote / Storage / Sample notices
   loadRemoteNoticesJson().then(loadedRemote => {
     if (!loadedRemote) {
       if (!loadStoreFromStorage()) {
         loadSampleNtMData();
       }
+      updateNetworkStatusHUD(false);
     }
   });
 }
@@ -656,7 +809,6 @@ function plotUserVessel(lat, lon, source = "manual") {
     leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
   }
 
-  // Update Map HUD
   const hud = document.getElementById("ntmVesselHud");
   if (hud) {
     hud.style.display = "flex";
@@ -668,7 +820,6 @@ function plotUserVessel(lat, lon, source = "manual") {
  * Minimalist Settings UI
  */
 function initSettingsUI() {
-  // Theme Toggle Buttons
   const btnDark = document.getElementById("btnThemeDark");
   const btnLight = document.getElementById("btnThemeLight");
 
@@ -702,7 +853,7 @@ function initSettingsUI() {
         message,
         vessel: "LPG/C IINO INEOS VESTA",
         clientTime: new Date().toISOString(),
-        version: "SetSail v2.4 (Minimalist Edition)"
+        version: "SetSail v2.4 (PWA Edition)"
       };
 
       try {
@@ -954,22 +1105,26 @@ function loadStoreFromStorage() {
 async function loadRemoteNoticesJson() {
   try {
     const res = await fetch("notices.json?t=" + Date.now(), { cache: "no-store" });
-    if (!res.ok) return false;
+    if (!res.ok) {
+      updateNetworkStatusHUD(false);
+      return false;
+    }
     const data = await res.json();
     if (data && Array.isArray(data.notices) && data.notices.length > 0) {
       NTM_STORE = data.notices;
       saveStoreToStorage();
-      renderNtMListAndMap();
-      const statusEl = document.getElementById("ntmStatusMsg");
-      if (statusEl) {
-        const meta = data.metadata || {};
-        const wk = meta.weekNumber ? `Wk ${meta.weekNumber}/${meta.year}` : (meta.weeklyBulletin || "Live");
-        const activeCnt = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
-        statusEl.innerHTML = `<span class="ntm-live-status"><span class="ntm-live-dot" title="Live UKHO telemetry online"></span>Live NtM ${wk}: ${activeCnt} active</span>`;
+      if (data.metadata) {
+        try { localStorage.setItem(META_STORAGE_KEY, JSON.stringify(data.metadata)); } catch(e){}
       }
+      renderNtMListAndMap();
+      const meta = data.metadata || {};
+      const wk = meta.weekNumber ? `Wk ${meta.weekNumber}/${meta.year}` : (meta.weeklyBulletin || "Live");
+      updateNetworkStatusHUD(true, wk);
       return true;
     }
-  } catch (err) {}
+  } catch (err) {
+    updateNetworkStatusHUD(false);
+  }
   return false;
 }
 
@@ -1026,7 +1181,6 @@ function initNtMMap() {
     leafletMarkersLayer = L.layerGroup().addTo(leafletMap);
     leafletVesselLayer = L.layerGroup().addTo(leafletMap);
 
-    // Live Cursor Coordinates HUD
     leafletMap.on("mousemove", (e) => {
       const hud = document.getElementById("ntmHudCoords");
       if (hud) {
@@ -1034,7 +1188,6 @@ function initNtMMap() {
       }
     });
 
-    // Plot crosshair target if user position stored
     if (userVessel) {
       plotUserVessel(userVessel.lat, userVessel.lon, userVessel.source);
     }
@@ -1068,7 +1221,6 @@ function drawOfflineCanvasMap() {
   ctx.fillStyle = "#070d22";
   ctx.fillRect(0, 0, w, h);
 
-  // Lat / Lon Grid
   ctx.strokeStyle = "rgba(140, 170, 255, 0.15)";
   ctx.lineWidth = 1;
   ctx.font = "10px Segoe UI, sans-serif";
@@ -1092,7 +1244,6 @@ function drawOfflineCanvasMap() {
     ctx.fillText(`${Math.abs(lon)}°${lon >= 0 ? "E" : "W"}`, x + 4, h - 8);
   }
 
-  // Draw Notices Markers
   const filtered = getFilteredNotices();
   filtered.forEach(n => {
     (n.coords || []).forEach(c => {
@@ -1114,7 +1265,7 @@ function drawOfflineCanvasMap() {
 }
 
 /**
- * Filter helper honoring popovers and search
+ * Filter helper honoring popovers, NAVAREA, and search
  */
 function getFilteredNotices() {
   const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
@@ -1135,6 +1286,12 @@ function getFilteredNotices() {
       if (NTM_FILTER_AREAS && !item.isPolygon && !(item.coords && item.coords.length >= 3)) {
         return false;
       }
+    }
+
+    // NAVAREA filter
+    if (NTM_ACTIVE_NAVAREA !== "ALL") {
+      const itemNavarea = getNoticeNavarea(item);
+      if (itemNavarea !== NTM_ACTIVE_NAVAREA) return false;
     }
 
     if (searchVal) {
@@ -1261,13 +1418,14 @@ function renderNtMListAndMap() {
   // Render Notice Cards into Sidebar
   if (listContainer) {
     if (filtered.length === 0) {
-      listContainer.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.8rem;">Нет поправок, соответствующих выбранному фильтру.<br/>Используйте иконку фильтра над списком для настройки.</div>';
+      listContainer.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.8rem;">Нет поправок, соответствующих выбранному фильтру.<br/>Используйте иконку воронки (фильтр) над списком для настройки.</div>';
     } else {
       let html = "";
       filtered.forEach(item => {
         const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
         const tagClass = item.type === "T" ? "temp" : (item.type === "P" ? "prelim" : "perm");
         const typeLabel = item.type === "T" ? "TEMP (T)" : (item.type === "P" ? "PRELIM (P)" : "PERM");
+        const navarea = getNoticeNavarea(item);
 
         const typeBadge = isItemCancelled
           ? `<span class="ntm-tag cancelled">CANCELLED</span>`
@@ -1288,7 +1446,7 @@ function renderNtMListAndMap() {
                 ${typeBadge}
               </div>
               ${cancelsBanner}
-              <div class="ntm-card-region">${item.country || 'Region'} — ${item.region || ''}</div>
+              <div class="ntm-card-region"><span class="ntm-card-navarea">${navarea}</span> ${item.country || 'Region'} — ${item.region || ''}</div>
               <div class="ntm-card-subject">${item.subject || ''}</div>
               <div class="ntm-card-bottom">
                 <span class="ntm-card-coords" title="Center on chart">📍 ${firstCoord} ${item.coords && item.coords.length > 1 ? `(+${item.coords.length-1})` : ''}</span>
@@ -1327,7 +1485,7 @@ function renderNtMListAndMap() {
         polygon.bindPopup(`
           <div style="font-family:'Segoe UI',sans-serif;color:#111;">
             <b style="color:#0a3888;font-size:1.05em;">${item.id} ${isItemCancelled ? '<span style="color:#ef4444;">[CANCELLED]</span>' : ''}</b>
-            <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">${item.country || ''} — ${item.region || ''}</div>
+            <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">[${getNoticeNavarea(item)}] ${item.country || ''} — ${item.region || ''}</div>
             <div style="font-size:0.9em;margin-bottom:6px;">${item.subject || ''}</div>
             <div style="font-size:0.8em;color:#666;line-height:1.3;"><b>Affected Charts:</b> ${(item.charts||[]).join(', ') || '—'}</div>
           </div>
@@ -1343,7 +1501,7 @@ function renderNtMListAndMap() {
         polyline.bindPopup(`
           <div style="font-family:'Segoe UI',sans-serif;color:#111;">
             <b style="color:#0a3888;">${item.id} ${isItemCancelled ? '<span style="color:#ef4444;">[CANCELLED]</span>' : ''}</b>
-            <div style="font-size:0.85em;color:#555;">${item.country || ''} — ${item.region || ''}</div>
+            <div style="font-size:0.85em;color:#555;">[${getNoticeNavarea(item)}] ${item.country || ''} — ${item.region || ''}</div>
             <div style="font-size:0.9em;margin:4px 0;">${item.subject || ''}</div>
           </div>
         `);
@@ -1362,7 +1520,7 @@ function renderNtMListAndMap() {
           circle.bindPopup(`
             <div style="font-family:'Segoe UI',sans-serif;color:#111;">
               <b style="color:#0a3888;font-size:1.05em;">${item.id} ${isItemCancelled ? '<span style="color:#ef4444;">[CANCELLED]</span>' : ''}</b>
-              <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">${item.country || ''} — ${item.region || ''}</div>
+              <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">[${getNoticeNavarea(item)}] ${item.country || ''} — ${item.region || ''}</div>
               <div style="font-size:0.9em;margin-bottom:6px;">${item.subject || ''}</div>
               <div style="font-size:0.8em;color:#2e7d32;font-family:monospace;margin-bottom:4px;">${coord.dms}</div>
               <div style="font-size:0.8em;color:#666;"><b>Charts:</b> ${(item.charts||[]).join(', ') || '—'}</div>
