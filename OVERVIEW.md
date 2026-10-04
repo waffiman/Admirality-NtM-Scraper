@@ -161,24 +161,27 @@ Located in the upper-left status header, the telemetry indicator informs the bri
   * Eliminates unnecessary heading/speed clutter, focusing purely on exact coordinates on the chart.
   * Interactive popup and live overlay HUD displaying coordinates in standard nautical DMS format (`58° 37.70' N, 017° 46.30' E`).
 
-### 6.2 Dual Position Acquisition Options
-When clicking **My Vessel**, a clean dialog offers two choices:
-1. **Auto GPS:** Acquires coordinates automatically via browser Geolocation (`enableHighAccuracy: true`).
-2. **Manual Input:** Allows entering bridge GPS coordinates in DMS or decimal degrees with a single click.
+### 6.2 Compact Popover Positioning (Non-Invasive Target Entry)
+Clicking **📡 My Vessel** triggers a compact anchored popover directly beneath the toolbar button (matching the Filter and Sort popovers):
+1. **Auto GPS Position:** Acquires coordinates automatically via browser Geolocation (`enableHighAccuracy: true`).
+2. **Manual Coordinates:** Bridge navigators can enter latitude and longitude in degrees-minutes-seconds (`58° 37.70' N`) or decimal format (`58.628`).
+3. **Target Plotting:** Pins the interactive ECDIS crosshair reticle on the chart and updates the persistent bridge HUD telemetry.
+4. **Clean Dismissal:** Automatically closes on outside click or when switching popovers.
 
 ---
 
 ## 7. Module 4: Minimalist System Settings & Engineering Support
 
-### 7.1 Minimalist Design & Fixed Left Navigation Rail
-* **Fixed Navigation Rail:** The left 58px sidebar is permanently fixed in place and never scrolls. Only the wide content area on the right scrolls independently.
-* **Minimalist Block Layout:**
-  * **Theme Switcher:** Instant toggle between `🌙 Dark (Ночь)` and `☀️ Light (День)` modes.
-  * **Direct Developer Support Form:** Streamlined to two essential fields:
-    * **Email for reply (Email для ответа)**: Where the engineering team will send their response.
-    * **Message (Сообщение)**: Problem description or feature suggestion.
-    * Developer email is kept secure in backend dispatch and strictly hidden from UI.
-  * **Data Cache Reset:** One-click button to clear local storage and re-fetch live Admiralty bulletins.
+### 7.1 Pure English Cockpit & Minimalist Settings
+* **Universal Maritime English:** All headings, controls, alerts, and tooltips are strictly in English.
+* **Fixed Navigation Rail (Desktop):** The left 58px sidebar is permanently fixed in place and never scrolls. Only the wide content area on the right scrolls independently.
+* **Streamlined Settings Grid:**
+  * **Bridge Display Theme:** Instant toggle between `🌙 Dark (Night Cockpit)` and `☀️ Light (Bridge Day)` modes.
+  * **Direct Developer Support Form:** Clean contact module with two essential fields:
+    * **Reply Email Address:** Navigator's email for replies from engineering.
+    * **Message / Report:** Description of missing notices, suggestions, or bridge observations.
+    * Developer email (`wafficompany@gmail.com`) is handled securely in backend dispatch and never exposed in the client UI.
+  * **Cache & Stored Telemetry Reset:** One-click button to purge local storage and re-fetch live Admiralty bulletins.
 
 ### 7.2 Unified Menu Button Border & Dimensions
 All navigation icons in the left rail—including the bottom **⚙️ Settings** button (`.nav-settings-item`)—share identical visual specifications:
@@ -207,7 +210,32 @@ All navigation icons in the left rail—including the bottom **⚙️ Settings**
 
 ---
 
-## 10. Navigator FAQ & Troubleshooting
+
+---
+
+## 10. Custom Domain & Deployment Options
+
+SetSail can be hosted on a dedicated custom domain using two 100% free production options:
+
+### Option A: Free Developer Domain (`setsail.is-a.dev`)
+* **Registrar:** `is-a.dev` (Official open-source developer domain registry).
+* **Cost:** 100% Free forever.
+* **Setup:**
+  1. A CNAME record pointing to `waffiman.github.io` is registered in `is-a-dev/register`.
+  2. In the GitHub repository Settings > Pages > Custom Domain, enter `setsail.is-a.dev`.
+  3. GitHub Pages automatically issues a free Let's Encrypt SSL/TLS certificate.
+  4. The site is then accessible at `https://setsail.is-a.dev/`.
+
+### Option B: Cloudflare Pages (`setsail.pages.dev`)
+* **Platform:** Cloudflare Pages (Direct Git integration).
+* **Cost:** 100% Free forever, unlimited bandwidth, global edge caching.
+* **Setup:**
+  1. In Cloudflare Dashboard, navigate to **Workers & Pages** > **Create application** > **Pages**.
+  2. Connect the GitHub repository `waffiman/Admirality-NtM-Scraper`.
+  3. Set project name to `setsail` (or `setsail-nav`).
+  4. Instant live portal at `https://setsail.pages.dev/` with automatic SSL and DDoS protection.
+
+## 11. Navigator FAQ & Troubleshooting
 
 **Q: Can I use SetSail when the ship has no internet connection?**  
 **A:** Yes! SetSail is fully offline-capable in two ways:
@@ -230,4 +258,4 @@ All navigation icons in the left rail—including the bottom **⚙️ Settings**
 **A:** Navigate to the **⚙️ Settings** tab at the bottom of the left navigation rail, enter your reply email and message, and click *Transmit Message*.
 
 ---
-*Maintained by SetSail Bridge Engineering &bull; LPG/C IINO INEOS VESTA &bull; Production Release v2.5*
+*Maintained by SetSail Bridge Engineering &bull; LPG/C IINO INEOS VESTA &bull; Production Release v2.6*
