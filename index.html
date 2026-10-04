@@ -618,23 +618,9 @@
         </div>
 
 
-        <div class="ntm-toolbar-center">
-          <!-- Segmented Filter Control with Live Counters -->
-          <div class="ntm-segmented-filters">
-            <button type="button" class="ntm-filter-btn active" data-filter="ALL">All <span class="filter-cnt" id="cntAll">0</span></button>
-            <button type="button" class="ntm-filter-btn" data-filter="T">Temp (T) <span class="filter-cnt" id="cntT">0</span></button>
-            <button type="button" class="ntm-filter-btn" data-filter="P">Prelim (P) <span class="filter-cnt" id="cntP">0</span></button>
-            <button type="button" class="ntm-filter-btn" data-filter="PERM">Perm <span class="filter-cnt" id="cntPerm">0</span></button>
-            <button type="button" class="ntm-filter-btn" data-filter="POLY">Areas <span class="filter-cnt" id="cntPoly">0</span></button>
-          </div>
-        </div>
-
-        <div class="ntm-toolbar-right">
+                <div class="ntm-toolbar-right">
           <button type="button" class="ntm-btn-glass" id="ntmFitAllBtn" title="Fit all plotted notices into view">
             🎯 Fit View
-          </button>
-          <button type="button" class="ntm-btn-danger" id="ntmClearAllBtn" title="Clear all notices and reset the map">
-            🗑️ Clear All
           </button>
           <button type="button" class="ntm-btn-export" id="ntmOpenExportBtn" title="Export notices to ECDIS / GeoJSON / CSV">
             💾 Export to ECDIS <span class="exp-badge" id="ntmExportBadge">0</span>
@@ -666,40 +652,37 @@
 
           <!-- Selection Controls Bar -->
           <div class="ntm-select-bar">
-            <label class="ntm-select-all-label">
-              <input type="checkbox" id="ntmSelectAllChk" checked />
-              <span>Select All</span>
-            </label>
-            <span id="ntmSelectedCount">0 selected</span>
-          </div>
+            <div class="ntm-select-bar-left">
+              <label class="ntm-select-all-label" title="Toggle selection of visible notices for ECDIS export">
+                <input type="checkbox" id="ntmSelectAllChk" checked />
+                <span id="ntmSelectAllText">All</span>
+              </label>
+              <span class="ntm-select-badge" id="ntmSelectedCount" title="Selected for ECDIS export">0</span>
+            </div>
 
-          <!-- Scrollable Cards List -->
-          <div class="ntm-items-scroll" id="ntmItemsScroll">
-            <!-- Cards rendered dynamically -->
-          </div>
-        </aside>
+            <div class="ntm-select-bar-right">
+              <!-- Filter Dropdown -->
+              <div class="ntm-control-group" title="Filter notices by type">
+                <select id="ntmFilterSelect" class="ntm-compact-select">
+                  <option value="ALL">All Types</option>
+                  <option value="T">Temp (T)</option>
+                  <option value="P">Prelim (P)</option>
+                  <option value="PERM">Permanent</option>
+                  <option value="POLY">Areas</option>
+                  <option value="LINE">Lines</option>
+                </select>
+              </div>
 
-        <!-- Main Chart Container -->
-        <main class="ntm-map-container" id="ntmMapContainer">
-          <div id="ntmMap"></div>
-          <canvas id="ntmCanvasMap"></canvas>
-
-          <!-- Floating Sidebar Toggle on Map when collapsed -->
-          <button type="button" class="ntm-map-expand-btn" id="ntmExpandSidebarBtn" title="Show notices list" style="display:none;">
-            ▶ Show Notices
-          </button>
-
-          <!-- Floating Cursor Coordinates HUD (Bottom-Left) -->
-          <div class="ntm-coords-hud" id="ntmCoordsHud">
-            <span class="hud-label">CURSOR:</span>
-            <span class="hud-val" id="ntmHudCoords">—</span>
-          </div>
-
-          <!-- Drag & Drop Overlay Zone -->
-          <div class="ntm-dropzone" id="ntmDropzone">
-            <div class="ntm-dropzone-icon">📥</div>
-            <div style="font-size:1.15rem;font-weight:700;color:#fff;">Drag &amp; drop NtM PDF bulletins here</div>
-            <div style="font-size:0.82rem;color:var(--muted);margin-top:4px;">Supports weekly (e.g. 01wknm26.pdf) and cumulative T&amp;P bulletins</div>
+              <!-- Sort Dropdown -->
+              <div class="ntm-control-group" title="Sort notices list">
+                <select id="ntmSortSelect" class="ntm-compact-select">
+                  <option value="NUM_DESC"># Newest</option>
+                  <option value="NUM_ASC"># Oldest</option>
+                  <option value="COUNTRY">Country A-Z</option>
+                  <option value="TYPE">Type</option>
+                </select>
+              </div>
+            </div>
           </div>
         </main>
       </div>
