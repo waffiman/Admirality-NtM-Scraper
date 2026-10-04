@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#080e20" />
   <title>SetSail — Marine Navigation Suite | IINO INEOS VESTA</title>
   <link rel="icon" href="assets/gyro_compass_logbook.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="assets/leaflet/leaflet.css" />
   <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css" />
   <style>
     :root {
@@ -717,6 +719,23 @@
                         <span class="chk-label">🚫 Cancelled</span>
                         <span class="chk-count" id="popCntCancelled">0</span>
                       </label>
+
+                      <div class="ntm-popover-divider"></div>
+                      <div class="ntm-popover-subtitle">NAVAREA:</div>
+                      <select id="popSelectNavarea" class="ntm-navarea-select" title="Filter by IMO/IHO NAVAREA">
+                        <option value="ALL">All NAVAREAs (Global)</option>
+                        <option value="NAVAREA I">NAVAREA I (UK / North Sea / Baltic)</option>
+                        <option value="NAVAREA II">NAVAREA II (East Atlantic / W Africa)</option>
+                        <option value="NAVAREA III">NAVAREA III (Med / Black Sea)</option>
+                        <option value="NAVAREA IV">NAVAREA IV (US / Canada East / Gulf)</option>
+                        <option value="NAVAREA V">NAVAREA V (Brazil / S. Atlantic)</option>
+                        <option value="NAVAREA VIII">NAVAREA VIII (India / Indian Ocean)</option>
+                        <option value="NAVAREA IX">NAVAREA IX (Persian Gulf / Red Sea)</option>
+                        <option value="NAVAREA XI">NAVAREA XI (East Asia / China / Malacca)</option>
+                        <option value="NAVAREA XII">NAVAREA XII (US / Canada West)</option>
+                        <option value="NAVAREA XIV">NAVAREA XIV (New Zealand / Pacific)</option>
+                        <option value="NAVAREA XX">NAVAREA XX (Barents / White Sea)</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -1529,6 +1548,7 @@
       </div>
     </div>
   </div>
+
 </body>
 </html>`;
     }
@@ -2051,7 +2071,7 @@
   </div><!-- end .app-container -->
 
   <!-- Leaflet & Auto-NtM Module Scripts -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="assets/leaflet/leaflet.js"></script>
   <script src="assets/Auto NtM Plotting/pdf.min.js"></script>
   <script>
     if (window.pdfjsLib) {
@@ -2059,7 +2079,21 @@
     }
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js"></script>
-  <script src="assets/Auto NtM Plotting/ntm_ui.js"></script>
+  <script src="assets/Auto NtM Plotting/setsail_ui.js"></script>
 
+  <!-- SetSail PWA Offline Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js', { scope: './' })
+          .then((reg) => {
+            console.log('[SetSail PWA] Service Worker registered successfully, scope:', reg.scope);
+          })
+          .catch((err) => {
+            console.warn('[SetSail PWA] Service Worker registration failed:', err);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
