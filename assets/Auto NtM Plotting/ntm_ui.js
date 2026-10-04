@@ -7,6 +7,7 @@
 const NTM_STORAGE_KEY = "admiralty_ntm_active_store_v1";
 let NTM_STORE = [];
 let NTM_ACTIVE_FILTER = "ALL";
+let NTM_ACTIVE_SORT = "NUM_DESC";
 let leafletMap = null;
 let leafletMarkersLayer = null;
 
@@ -127,13 +128,32 @@ function initAutoNtmUI() {
     });
   }
 
-  // Filter Buttons
+  // Filter Dropdown
+  const filterSelect = document.getElementById("ntmFilterSelect");
+  if (filterSelect) {
+    filterSelect.addEventListener("change", (e) => {
+      NTM_ACTIVE_FILTER = e.target.value || "ALL";
+      renderNtMListAndMap();
+    });
+  }
+
+  // Sort Dropdown
+  const sortSelect = document.getElementById("ntmSortSelect");
+  if (sortSelect) {
+    sortSelect.addEventListener("change", (e) => {
+      NTM_ACTIVE_SORT = e.target.value || "NUM_DESC";
+      renderNtMListAndMap();
+    });
+  }
+
+  // Legacy Filter Buttons (if any)
   const filterBtns = document.querySelectorAll(".ntm-filter-btn");
   filterBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       filterBtns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       NTM_ACTIVE_FILTER = btn.getAttribute("data-filter") || "ALL";
+      if (filterSelect) filterSelect.value = NTM_ACTIVE_FILTER;
       renderNtMListAndMap();
     });
   });
@@ -711,11 +731,12 @@ function drawOfflineCanvasMap() {
 function getFilteredNotices() {
   const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
 
-  return NTM_STORE.filter(item => {
+  let list = NTM_STORE.filter(item => {
     if (NTM_ACTIVE_FILTER === "T" && item.type !== "T") return false;
     if (NTM_ACTIVE_FILTER === "P" && item.type !== "P") return false;
     if (NTM_ACTIVE_FILTER === "PERM" && item.type !== "PERM") return false;
-    if (NTM_ACTIVE_FILTER === "POLY" && !item.isPolygon) return false;
+    if (NTM_ACTIVE_FILTER === "POLY" && !item.isPolygon && !(item.coords && item.coords.length >= 3)) return false;
+    if (NTM_ACTIVE_FILTER === "LINE" && !item.isLine) return false;
 
     if (searchVal) {
       const searchStr = `${item.id} ${item.country} ${item.region} ${item.subject} ${(item.charts||[]).join(' ')}`.toLowerCase();
@@ -723,6 +744,35 @@ function getFilteredNotices() {
     }
     return true;
   });
+
+  // Sorting
+  list.sort((a, b) => {
+    if (NTM_ACTIVE_SORT === "NUM_ASC") {
+      const numA = parseInt(a.num, 10) || 0;
+      const numB = parseInt(b.num, 10) || 0;
+      return numA - numB;
+    }
+    if (NTM_ACTIVE_SORT === "COUNTRY") {
+      const cA = (a.country || "").toLowerCase();
+      const cB = (b.country || "").toLowerCase();
+      return cA.localeCompare(cB);
+    }
+    if (NTM_ACTIVE_SORT === "TYPE") {
+      const typeOrder = { "T": 1, "P": 2, "PERM": 3 };
+      const orderA = typeOrder[a.type] || 4;
+      const orderB = typeOrder[b.type] || 4;
+      if (orderA !== orderB) return orderA - orderB;
+      const numA = parseInt(a.num, 10) || 0;
+      const numB = parseInt(b.num, 10) || 0;
+      return numB - numA;
+    }
+    // Default: NUM_DESC (Newest notice number first)
+    const numA = parseInt(a.num, 10) || 0;
+    const numB = parseInt(b.num, 10) || 0;
+    return numB - numA;
+  });
+
+  return list;
 }
 
 /**
@@ -786,6 +836,24 @@ function renderNtMListAndMap() {
   if (elCntPerm) elCntPerm.textContent = countPerm;
   const elCntPoly = document.getElementById("cntPoly");
   if (elCntPoly) elCntPoly.textContent = countPoly;
+
+    // Update Dropdown Option Text with Live Counts
+  const filterSelectEl = document.getElementById("ntmFilterSelect");
+  if (filterSelectEl) {
+    const countLine = NTM_STORE.filter(n => n.isLine).length;
+    const optAll = filterSelectEl.querySelector('option[value="ALL"]');
+    if (optAll) optAll.textContent = `All Types (${countAll})`;
+    const optT = filterSelectEl.querySelector('option[value="T"]');
+    if (optT) optT.textContent = `Temp (T) (${countT})`;
+    const optP = filterSelectEl.querySelector('option[value="P"]');
+    if (optP) optP.textContent = `Prelim (P) (${countP})`;
+    const optPerm = filterSelectEl.querySelector('option[value="PERM"]');
+    if (optPerm) optPerm.textContent = `Permanent (${countPerm})`;
+    const optPoly = filterSelectEl.querySelector('option[value="POLY"]');
+    if (optPoly) optPoly.textContent = `Areas (${countPoly})`;
+    const optLine = filterSelectEl.querySelector('option[value="LINE"]');
+    if (optLine) optLine.textContent = `Lines (${countLine})`;
+  }
 
   const statusPill = document.getElementById("ntmStatusPill");
   if (statusPill) statusPill.textContent = `${countAll} Active`;
@@ -916,7 +984,8 @@ function updateSelectionCounter() {
   if (!selEl) return;
   const filtered = getFilteredNotices();
   const checkedCount = filtered.filter(n => n.checkedForExport !== false).length;
-  selEl.textContent = `${checkedCount} of ${filtered.length} selected`;
+  selEl.textContent = `${checkedCount} / ${filtered.length}`;
+  selEl.title = `${checkedCount} of ${filtered.length} notices selected for export`;
 
   const selectAllChk = document.getElementById("ntmSelectAllChk");
   if (selectAllChk) {
