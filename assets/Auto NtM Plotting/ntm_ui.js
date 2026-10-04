@@ -7,7 +7,7 @@
  * - Static Red Telemetry Dot when offline or on scraping error; pulsating Green dot when online
  * - Full NAVAREA filtering (NAVAREA I through XXI) & card badges
  * - Popover Filter (Funnel) & Sort (Two Arrows) next to Select All
- * - Crosshair target (прицел) vessel position marker
+ * - Crosshair target vessel position marker
  * - Minimalist Settings page with Dark/Light theme & Email+Message support form
  * - UTC timestamp appended to exported ECDIS filenames (YYYYMMDD_HHMMUTC)
  */
@@ -300,6 +300,9 @@ function initFilterAndSortPopovers() {
 
   // Close popovers on outside click
   document.addEventListener("click", (e) => {
+    const vesselPop = document.getElementById("ntmVesselPopover");
+    const myVesselBtn = document.getElementById("ntmMyVesselBtn");
+
     if (filterPop && !filterPop.contains(e.target) && e.target !== filterBtn && !filterBtn?.contains(e.target)) {
       filterPop.classList.remove("open");
       if (filterBtn) filterBtn.classList.remove("active");
@@ -307,6 +310,10 @@ function initFilterAndSortPopovers() {
     if (sortPop && !sortPop.contains(e.target) && e.target !== sortBtn && !sortBtn?.contains(e.target)) {
       sortPop.classList.remove("open");
       if (sortBtn) sortBtn.classList.remove("active");
+    }
+    if (vesselPop && !vesselPop.contains(e.target) && e.target !== myVesselBtn && !myVesselBtn?.contains(e.target)) {
+      vesselPop.classList.remove("open");
+      if (myVesselBtn) myVesselBtn.classList.remove("active");
     }
   });
 
@@ -630,9 +637,8 @@ function initMobileViewSwitcher() {
  */
 function initVesselTracking() {
   const myVesselBtn = document.getElementById("ntmMyVesselBtn");
-  const modal = document.getElementById("ntmVesselModal");
-  const closeBtn = document.getElementById("vesselModalClose");
-  const cancelBtn = document.getElementById("vesselModalCancel");
+  const vesselPop = document.getElementById("ntmVesselPopover");
+  const closeBtn = document.getElementById("vesselPopClose");
   const fetchGpsBtn = document.getElementById("vesselFetchGpsBtn");
   const applyBtn = document.getElementById("vesselApplyBtn");
   const clearBtn = document.getElementById("vesselClearBtn");
@@ -645,39 +651,58 @@ function initVesselTracking() {
     }
   } catch (e) {}
 
-  const openModal = () => {
-    if (!modal) return;
-    if (userVessel) {
-      const latEl = document.getElementById("vesselLat");
-      const lonEl = document.getElementById("vesselLon");
-      if (latEl) latEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
-      if (lonEl) lonEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
-      if (clearBtn) clearBtn.style.display = "inline-block";
+  const togglePopover = () => {
+    if (!vesselPop) return;
+    const isOpen = vesselPop.classList.contains("open");
+
+    // Close filter and sort popovers
+    const filterPop = document.getElementById("ntmFilterPopover");
+    const sortPop = document.getElementById("ntmSortPopover");
+    if (filterPop) filterPop.classList.remove("open");
+    if (sortPop) sortPop.classList.remove("open");
+
+    if (isOpen) {
+      vesselPop.classList.remove("open");
+      if (myVesselBtn) myVesselBtn.classList.remove("active");
     } else {
-      if (clearBtn) clearBtn.style.display = "none";
+      vesselPop.classList.add("open");
+      if (myVesselBtn) myVesselBtn.classList.add("active");
+      if (userVessel) {
+        const latEl = document.getElementById("vesselLat");
+        const lonEl = document.getElementById("vesselLon");
+        if (latEl) latEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
+        if (lonEl) lonEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
+        if (clearBtn) clearBtn.style.display = "inline-block";
+      } else {
+        if (clearBtn) clearBtn.style.display = "none";
+      }
     }
-    modal.classList.add("open");
   };
 
-  const closeModal = () => {
-    if (modal) modal.classList.remove("open");
+  const closePopover = () => {
+    if (vesselPop) vesselPop.classList.remove("open");
+    if (myVesselBtn) myVesselBtn.classList.remove("active");
   };
 
-  if (myVesselBtn) myVesselBtn.addEventListener("click", openModal);
-  if (closeBtn) closeBtn.addEventListener("click", closeModal);
-  if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+  if (myVesselBtn) {
+    myVesselBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      togglePopover();
+    });
+  }
+  if (closeBtn) closeBtn.addEventListener("click", closePopover);
 
   // Auto GPS
   if (fetchGpsBtn) {
     fetchGpsBtn.addEventListener("click", () => {
       if (!navigator.geolocation) {
-        alert("Геолокация не поддерживается вашим браузером. Введите координаты вручную.");
+        alert("Geolocation is not supported by your browser. Please enter coordinates manually.");
         return;
       }
-      fetchGpsBtn.textContent = "Определение координат... 📡";
+      fetchGpsBtn.textContent = "Acquiring GPS... 📡";
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          fetchGpsBtn.textContent = "📍 Определить позицию автоматически (GPS)";
+          fetchGpsBtn.textContent = "📍 Auto GPS Position";
           const lat = pos.coords.latitude;
           const lon = pos.coords.longitude;
 
@@ -687,11 +712,11 @@ function initVesselTracking() {
           if (lonEl) lonEl.value = lon.toFixed(5);
 
           plotUserVessel(lat, lon, "gps");
-          closeModal();
+          closePopover();
         },
         (err) => {
-          fetchGpsBtn.textContent = "📍 Определить позицию автоматически (GPS)";
-          alert(`Ошибка GPS: ${err.message}. Пожалуйста, введите координаты вручную ниже.`);
+          fetchGpsBtn.textContent = "📍 Auto GPS Position";
+          alert(`GPS Error: ${err.message}. Please enter coordinates manually below.`);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
@@ -708,12 +733,12 @@ function initVesselTracking() {
       const parsedLon = parseCoordinateString(lonVal);
 
       if (parsedLat === null || parsedLon === null) {
-        alert("Пожалуйста, введите корректные координаты (например, 58° 37.70' N или 58.6283).");
+        alert("Please enter valid coordinates (e.g., 58° 37.70' N or 58.6283).");
         return;
       }
 
       plotUserVessel(parsedLat, parsedLon, "manual");
-      closeModal();
+      closePopover();
     });
   }
 
@@ -725,7 +750,7 @@ function initVesselTracking() {
       if (leafletVesselLayer) leafletVesselLayer.clearLayers();
       const hud = document.getElementById("ntmVesselHud");
       if (hud) hud.style.display = "none";
-      closeModal();
+      closePopover();
     });
   }
 }
@@ -752,7 +777,7 @@ function parseCoordinateString(str) {
 }
 
 /**
- * Generates Crosshair Target Marker (Прицел)
+ * Generates Crosshair Target Marker
  */
 function getEcdisCrosshairIcon() {
   const svgHtml = `
@@ -798,10 +823,10 @@ function plotUserVessel(lat, lon, source = "manual") {
     marker.bindPopup(`
       <div style="font-family:'Segoe UI',sans-serif;color:#111;min-width:180px;">
         <div style="font-weight:700;color:#0a3888;font-size:1rem;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:5px;">
-          🎯 Позиция судна (Vessel)
+          🎯 Vessel Position
         </div>
-        <div style="font-size:0.8rem;color:#333;margin-bottom:3px;"><b>Координаты:</b> ${formatLatLonDMS(lat, lon)}</div>
-        <div style="font-size:0.75rem;color:#666;"><b>Источник:</b> ${source === "gps" ? "GPS браузера" : "Ввод штурмана"}</div>
+        <div style="font-size:0.8rem;color:#333;margin-bottom:3px;"><b>Coordinates:</b> ${formatLatLonDMS(lat, lon)}</div>
+        <div style="font-size:0.75rem;color:#666;"><b>Source:</b> ${source === "gps" ? "Browser GPS" : "Manual Navigation Entry"}</div>
       </div>
     `);
 
@@ -840,12 +865,12 @@ function initSettingsUI() {
       const message = document.getElementById("contactMessage")?.value.trim() || "";
 
       if (!message || !email) {
-        alert("Пожалуйста, заполните ваш Email для ответа и текст сообщения.");
+        alert("Please provide your reply email address and message.");
         return;
       }
 
       submitBtn.disabled = true;
-      submitBtn.textContent = "Отправка... ⏳";
+      submitBtn.textContent = "Transmitting... ⏳";
       if (statusEl) statusEl.textContent = "";
 
       const payload = {
@@ -853,7 +878,7 @@ function initSettingsUI() {
         message,
         vessel: "LPG/C IINO INEOS VESTA",
         clientTime: new Date().toISOString(),
-        version: "SetSail v2.4 (PWA Edition)"
+        version: "SetSail v2.5 (Production PWA)"
       };
 
       try {
@@ -866,10 +891,10 @@ function initSettingsUI() {
 
         if (res.ok) {
           if (statusEl) {
-            statusEl.textContent = "✅ Сообщение отправлено разработчикам!";
+            statusEl.textContent = "✅ Transmitted to engineering team!";
             statusEl.style.color = "var(--ok)";
           }
-          alert("Спасибо! Ваше сообщение отправлено разработчикам. Ответ придет на " + email);
+          alert("Thank you! Your message has been transmitted to SetSail engineering. Replies will be sent to " + email);
           const msgInput = document.getElementById("contactMessage");
           if (msgInput) msgInput.value = "";
         } else {
@@ -877,13 +902,13 @@ function initSettingsUI() {
         }
       } catch (err) {
         if (statusEl) {
-          statusEl.textContent = "Зафиксировано в судовом журнале.";
+          statusEl.textContent = "Logged locally in bridge telemetry buffer.";
           statusEl.style.color = "var(--warn)";
         }
-        alert("Сообщение зафиксировано. Разработчики получат его при следующей синхронизации.");
+        alert("Message logged locally. It will be transmitted to engineering upon next connection sync.");
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = "✉️ Отправить разработчикам";
+        submitBtn.textContent = "✉️ Transmit to Engineering";
       }
     });
   }
@@ -892,12 +917,12 @@ function initSettingsUI() {
   const clearCacheBtn = document.getElementById("settingsClearCacheBtn");
   if (clearCacheBtn) {
     clearCacheBtn.addEventListener("click", () => {
-      if (!confirm("Сбросить кэш поправок и повторно загрузить свежие данные?")) return;
+      if (!confirm("Reset NtM cache and re-download fresh bulletin from server?")) return;
       try { localStorage.removeItem(NTM_STORAGE_KEY); } catch (e) {}
       NTM_STORE = [];
       if (leafletMarkersLayer) leafletMarkersLayer.clearLayers();
       loadRemoteNoticesJson().then(() => {
-        alert("Кэш успешно очищен, поправки перезагружены.");
+        alert("NtM cache cleared successfully. Fresh bulletin loaded.");
       });
     });
   }
@@ -1418,7 +1443,7 @@ function renderNtMListAndMap() {
   // Render Notice Cards into Sidebar
   if (listContainer) {
     if (filtered.length === 0) {
-      listContainer.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.8rem;">Нет поправок, соответствующих выбранному фильтру.<br/>Используйте иконку воронки (фильтр) над списком для настройки.</div>';
+      listContainer.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.8rem;">No notices match the selected filter criteria.<br/>Use the filter funnel icon above to adjust settings.</div>';
     } else {
       let html = "";
       filtered.forEach(item => {
