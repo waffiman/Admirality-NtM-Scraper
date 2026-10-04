@@ -116,69 +116,60 @@ $$	ext{Zn} = egin{cases} Z & 	ext{if } 	ext{LHA} > 180^\circ 	ext{ and } Z \ge 
 * **Strict Map Hygiene:** Cancelled notices are **quarantined from the active chart layer by default**.
 * To view revoked notices (e.g. for chart audit purposes), the navigator can click the `[🚫 Cancelled]` pill. When activated, cancelled notices render in red with strikethrough badges.
 
-### 4.4 Multi-Type Filter Toggles & Rich Sorting
-* **Multi-Select Filter Pills:**
-  * `[All]` — Quick reset to all active notice types.
-  * `[🟡 (T)]` — Temporary notices with live counter.
-  * `[🟣 (P)]` — Preliminary notices with live counter.
-  * `[🔵 Perm]` — Permanent notices with live counter.
-  * `[📐 Areas]` — Polygon restricted zones and areas.
-  * `[🚫 Cancelled]` — Isolated revoked notice archive.
-  * Multiple pills can be toggled simultaneously (e.g. `(T)` + `(P)` simultaneously).
-* **Rich Sorting Options:**
-  * `⚡ Newest #` — Descending bulletin notice numbers.
-  * `🔢 Oldest #` — Ascending bulletin notice numbers.
-  * `🌍 Country A-Z` — Alphabetical country ordering.
-  * `🗺️ Region A-Z` — Alphabetical regional grouping.
-  * `📑 Most Charts` — Prioritizes notices affecting multiple navigational charts.
-  * `📍 Most Points` — Complex multi-coordinate notices first.
-  * `🏷️ Type` — Grouped by Temporary $	o$ Preliminary $	o$ Permanent.
+### 4.4 Filter (Funnel) & Sort (Arrows) Popover Controls
+* **Icon-Based Compact Control Row:** Placed directly adjacent (to the left) of the **Select All** checkbox above the notices list:
+  * 🌪️ **Funnel Icon (Filter):** Opens a sleek popover window with checkboxes for:
+    * `[✓] All Active Types`
+    * `[✓] Temp (T)` (with dynamic count)
+    * `[✓] Prelim (P)` (with dynamic count)
+    * `[✓] Permanent` (with dynamic count)
+    * `[ ] Areas / Polygons`
+    * `[ ] 🚫 Cancelled` (strictly unchecked and isolated by default)
+    * Live indicator dot appears on the funnel icon whenever non-default filters are active.
+  * ⇅ **Two Arrows Icon (Sort):** Opens a popover menu allowing instant sorting by:
+    * `⚡ Notice # (Newest)` (Default)
+    * `🔢 Notice # (Oldest)`
+    * `🌍 Country (A-Z)`
+    * `🗺️ Region (A-Z)`
+    * `📑 Most Charts Affected`
+    * `📍 Most Points Plotted`
+    * `🏷️ Type (T → P → Perm)`
 
 ### 4.5 ECDIS Export Engines
+* **Automatic UTC Timestamp in Filenames:** Every exported file is automatically stamped with the current UTC date and time (format: `YYYYMMDD_HHMMUTC`, e.g. `Admiralty_NtM_Overlay_20261004_1625UTC.uchm`), allowing navigators to easily identify and archive successive chart correction revisions locally.
+
 1. **JRC ECDIS User Chart Map (`.uchm`):** Binary structure readable by JRC JAN-9201 / JAN-7201 ECDIS consoles via USB drive.
 2. **GeoJSON (`.geojson`):** Standard RFC 7946 geographic features importable into NavStation, Transas, Sperry Marine, and OpenCPN.
 3. **Voyage Planning CSV (`.csv`):** Tabular DMS coordinates formatted for official passage plans.
 
 ---
 
-## 5. Module 3: Real-Time Vessel GPS & ECDIS Silhouette
+## 5. Module 3: Real-Time Vessel Position & Crosshair Target Marker
 
-### 5.1 ECDIS Silhouette Marker & Heading Vectors
-* SetSail plots the vessel's live position using an official **ECDIS ship silhouette**:
-  * Sharp bow, bridge wings, and transom stern.
-  * Rotates dynamically to match the vessel's true heading ($	ext{000}^\circ - 	ext{359}^\circ$).
-  * Yellow dashed 6-minute course vector projecting ahead from the bow.
-  * Radar pulsating ring centered on the GPS antenna pivot point.
-  * Interactive popup and live overlay HUD displaying vessel name (*LPG/C IINO INEOS VESTA*), position in DMS, COG, and SOG.
+### 5.1 Nautical Crosshair Target (Прицел)
+* Replaces bulky silhouettes with a precise **ECDIS Crosshair Target (прицел)**:
+  * Central high-contrast cyan radar dot.
+  * Precision reticle ring with 4 cardinal crosshair ticks.
+  * Pulsating radar ring indicator.
+  * Eliminates unnecessary heading/speed clutter, focusing purely on exact coordinates on the chart.
+  * Interactive popup and live overlay HUD displaying coordinates in standard nautical DMS format (`58° 37.70' N, 017° 46.30' E`).
 
-### 5.2 Live Sensor Geolocation & Manual Bridge Fallback
-* **Browser Geolocation:** One-click GPS fix acquisition via `navigator.geolocation` (`enableHighAccuracy: true`).
-* **Manual Bridge Input:** On computers lacking direct browser GPS connectivity, navigators can enter coordinates in either DMS (`58° 37.70' N, 017° 46.30' E`) or decimal degrees, along with heading and speed.
-* Vessel position is persisted locally in `localStorage` across restarts.
+### 5.2 Dual Position Acquisition Options
+When clicking **My Vessel**, a clean dialog offers two choices:
+1. **Auto GPS:** Acquires coordinates automatically via browser Geolocation (`enableHighAccuracy: true`).
+2. **Manual Input:** Allows entering bridge GPS coordinates in DMS or decimal degrees with a single click.
 
----
+## 6. Module 4: Minimalist System Settings & Engineering Support
 
-## 6. Module 4: System Settings & Visual Profiles
-
-### 6.1 Dark Cockpit vs Light Bridge Day Profiles
-* **🌙 Dark Cockpit (Night Watch):** Deep navy blue bridge layout (`#050814`) with amber and soft cyan accents, preserving the watchkeeper's night vision during dark hours.
-* **☀️ Light Bridge (Day Mode):** High-contrast crisp nautical slate layout (`#f1f5f9` / `#ffffff`) with navy text and ocean blue highlights, designed for bright daylight operations.
-* Selection is instantly applied across all modules and persisted in `localStorage`.
-
-### 6.2 Direct Transmission to Engineering Team
-* Located in the **Settings** tab (gear icon at the bottom of the left nav rail).
-* Provides a secure direct communication line to the SetSail software development and engineering team.
-* Fields: Officer Rank/Name, Vessel Name (*LPG/C IINO INEOS VESTA*), Category (Bug, Scraper Discrepancy, Feature Request), Subject, and Message.
-* Submits securely without exposing developer email in plaintext.
-* Includes automated client diagnostics (browser version, screen resolution, active notices count).
-
-### 6.3 Vessel Profile & Local Storage Telemetry
-* Pre-configured vessel parameters:
-  * **Vessel Name:** LPG/C *IINO INEOS VESTA*
-  * **IMO:** 9681326 &bull; **MMSI:** 563004000 &bull; **Call Sign:** 9V2743
-* **Cache Management:** One-click cache reset button to clear local storage and re-synchronize fresh notice bulletins.
-
----
+### 6.1 Minimalist Design & Fixed Left Navigation Rail
+* **Fixed Navigation Rail:** The left 58px sidebar is permanently fixed in place and never scrolls. Only the wide content area on the right scrolls independently.
+* **Minimalist Block Layout:**
+  * **Theme Switcher:** Instant toggle between `🌙 Dark (Ночь)` and `☀️ Light (День)` modes.
+  * **Direct Developer Support Form:** Streamlined to two essential fields:
+    * **Email for reply (Email для ответа)**: Where the engineering team will send their response.
+    * **Message (Сообщение)**: Problem description or feature suggestion.
+    * Developer email (`wafficompany@gmail.com`) is kept secure in backend dispatch and not exposed in UI.
+  * **Data Cache Reset:** One-click button to clear local storage and re-fetch live Admiralty bulletins.
 
 ## 7. Mobile Optimization & Tablet Workflows
 
