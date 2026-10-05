@@ -118,6 +118,13 @@ function initNavigationTabs() {
  * Network Status Watchdog: Green pulsing dot for online, static Red dot for offline/error
  */
 function initNetworkStatusWatchdog() {
+  // Check immediately on startup
+  if (typeof navigator !== "undefined" && typeof navigator.onLine === "boolean") {
+    if (!navigator.onLine) {
+      updateNetworkStatusHUD(false);
+    }
+  }
+
   window.addEventListener("online", () => {
     console.log("[SetSail] Online connection restored.");
     loadRemoteNoticesJson();
@@ -127,11 +134,25 @@ function initNetworkStatusWatchdog() {
     console.log("[SetSail] Operating in offline mode.");
     updateNetworkStatusHUD(false);
   });
+
+  // Active interval check every 3 seconds
+  setInterval(() => {
+    if (typeof navigator !== "undefined" && typeof navigator.onLine === "boolean") {
+      if (!navigator.onLine) {
+        updateNetworkStatusHUD(false);
+      }
+    }
+  }, 3000);
 }
 
 function updateNetworkStatusHUD(isOnline, customWk = null) {
   const statusEl = document.getElementById("ntmStatusMsg");
   if (!statusEl) return;
+
+  // Strict check: if browser is offline, force isOnline to false
+  if (typeof navigator !== "undefined" && typeof navigator.onLine === "boolean" && !navigator.onLine) {
+    isOnline = false;
+  }
 
   let wkStr = customWk;
   if (!wkStr) {
@@ -1144,7 +1165,8 @@ async function loadRemoteNoticesJson() {
       renderNtMListAndMap();
       const meta = data.metadata || {};
       const wk = meta.weekNumber ? `Wk ${meta.weekNumber}/${meta.year}` : (meta.weeklyBulletin || "Live");
-      updateNetworkStatusHUD(true, wk);
+      const isOfflineResp = res.headers.get("X-SetSail-Offline") === "true" || !navigator.onLine;
+      updateNetworkStatusHUD(!isOfflineResp, wk);
       return true;
     }
   } catch (err) {
