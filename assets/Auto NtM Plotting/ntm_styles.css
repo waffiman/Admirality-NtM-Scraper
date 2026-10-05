@@ -2777,24 +2777,35 @@
   border-color: #bfdbfe;
 }
 
-
 /* ==========================================================================
    CINEMATIC HOME PAGE — LIVING VIDEO BACKGROUND & MARITIME HUD
    ========================================================================== */
 #tab-home.active {
   display: flex !important;
   flex-direction: column !important;
-  min-height: 100vh !important;
-  margin: -1.25rem !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
   position: relative !important;
-  overflow-x: hidden !important;
+  overflow: hidden !important;
   background: #030712 !important;
+  box-sizing: border-box !important;
+}
+
+/* Suppress app-content scrollbar and hide external footer when Home is active */
+.app-content:has(#tab-home.active) {
+  overflow-y: hidden !important;
+}
+#tab-home.active ~ .waffi-credit-footer {
+  display: none !important;
 }
 
 .home-hero-viewport {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -2853,19 +2864,22 @@
   background-size: 100% 100%, 60px 60px, 60px 60px;
 }
 
-/* Foreground Container */
+/* Foreground Container: 100% Viewport Locked, Zero Scroll */
 .home-hero-content {
   position: relative;
   z-index: 2;
   width: 100%;
-  max-width: 1320px;
+  max-width: 1200px;
+  height: 100%;
+  max-height: 100vh;
   margin: 0 auto;
-  padding: 2.2rem 2.5rem;
+  padding: 1.5rem 1.8rem 1.25rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 100vh;
+  align-items: center;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* Top Bridge HUD Bar */
@@ -2874,13 +2888,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  flex-wrap: wrap;
-  padding: 0.65rem 1.1rem;
+  width: 100%;
+  padding: 0.6rem 1.1rem;
   background: rgba(8, 16, 38, 0.65);
   border: 1px solid rgba(140, 170, 255, 0.22);
   border-radius: 30px;
   backdrop-filter: blur(14px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
 }
 
 .home-hud-pill {
@@ -2908,14 +2923,14 @@
 }
 
 .home-hud-badge {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 12px;
-  background: rgba(126, 182, 255, 0.15);
-  color: #7eb6ff;
-  border: 1px solid rgba(126, 182, 255, 0.3);
   letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(30, 41, 59, 0.7);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .home-hud-badge.ok {
@@ -2924,257 +2939,211 @@
   border-color: rgba(16, 185, 129, 0.35);
 }
 
-/* Central Cinematic Banner */
-.home-hero-banner {
-  text-align: center;
-  max-width: 880px;
-  margin: 3.2rem auto 2.2rem;
-  padding: 0 1rem;
-}
-
-.home-hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.8rem;
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  color: #7eb6ff;
-  text-transform: uppercase;
-  margin-bottom: 0.8rem;
-}
-
-.eyebrow-accent {
-  display: inline-block;
-  width: 30px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #7eb6ff);
-}
-.eyebrow-accent:last-child {
-  background: linear-gradient(90deg, #7eb6ff, transparent);
-}
-
-.home-hero-title {
-  font-size: 4.4rem;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  margin: 0 0 0.8rem;
-  background: linear-gradient(135deg, #ffffff 0%, #e0edff 45%, #7eb6ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 35px rgba(126, 182, 255, 0.35);
-  line-height: 1.05;
-}
-
-.home-hero-tagline {
-  font-size: 1.05rem;
-  line-height: 1.65;
-  color: #c5d4eb;
-  margin: 0 auto 2.2rem;
-  max-width: 720px;
-  font-weight: 400;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-}
-
-.home-hero-actions {
+.home-hud-right {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 1.1rem;
-  flex-wrap: wrap;
-}
-
-.home-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7rem;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  color: #ffffff;
-  padding: 0.85rem 1.8rem;
-  border-radius: 10px;
-  border: 1px solid rgba(147, 197, 253, 0.45);
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4), inset 0 1px 0 rgba(255,255,255,0.25);
-  margin: 0;
-}
-
-.home-btn-primary:hover {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6);
-}
-
-.home-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: rgba(15, 23, 42, 0.65);
-  color: #e2e8f0;
-  padding: 0.85rem 1.6rem;
-  border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  transition: all 0.25s ease;
-  margin: 0;
-}
-
-.home-btn-secondary:hover {
-  background: rgba(30, 41, 59, 0.8);
-  border-color: #7eb6ff;
-  color: #ffffff;
-  transform: translateY(-2px);
-}
-
-/* Cinematic Feature HUD Cards */
-.home-features-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.4rem;
-  margin-top: 1rem;
-}
-
-.home-card {
-  background: rgba(10, 18, 42, 0.65);
-  border: 1px solid rgba(140, 170, 255, 0.22);
-  border-radius: 14px;
-  padding: 1.4rem 1.5rem;
-  backdrop-filter: blur(16px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-  position: relative;
-  overflow: hidden;
-}
-
-.home-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(126, 182, 255, 0.6), transparent);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.home-card:hover {
-  background: rgba(15, 27, 62, 0.82);
-  border-color: rgba(126, 182, 255, 0.55);
-  transform: translateY(-4px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(126, 182, 255, 0.2);
-}
-
-.home-card:hover::before {
-  opacity: 1;
-}
-
-.home-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.85rem;
-}
-
-.home-card-tag {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 3px 8px;
-  border-radius: 6px;
-  text-transform: uppercase;
-}
-
-.home-card-tag.tag-cyan {
-  background: rgba(2, 132, 199, 0.2);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.35);
-}
-.home-card-tag.tag-purple {
-  background: rgba(168, 85, 247, 0.2);
-  color: #c084fc;
-  border: 1px solid rgba(192, 132, 252, 0.35);
-}
-.home-card-tag.tag-amber {
-  background: rgba(245, 158, 11, 0.2);
-  color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.35);
-}
-
-.home-card-icon {
-  font-size: 1.4rem;
-}
-
-.home-card-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 0.5rem;
-  letter-spacing: 0.02em;
-}
-
-.home-card-desc {
-  font-size: 0.82rem;
-  line-height: 1.5;
-  color: #94a3b8;
-  margin: 0 0 1.2rem;
-  flex-grow: 1;
-}
-
-.home-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid rgba(140, 170, 255, 0.12);
-  padding-top: 0.8rem;
-  margin-top: auto;
-}
-
-.home-card-link {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #7eb6ff;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  transition: gap 0.2s;
-}
-
-.home-card:hover .home-card-link {
-  color: #ffffff;
   gap: 0.5rem;
 }
 
-.home-card-stat {
-  font-size: 0.72rem;
-  color: #64748b;
-  font-family: monospace;
-}
-
-/* Bottom Telemetry Footer */
-.home-hero-footer {
+/* Central Stage: Minimalist Title & Tool Dock */
+.home-center-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  font-size: 0.72rem;
-  color: #64748b;
-  letter-spacing: 0.08em;
-  margin-top: 2rem;
-  padding-top: 1rem;
+  margin: auto 0;
+  width: 100%;
+  max-width: 900px;
+  gap: 2.2rem;
+  box-sizing: border-box;
 }
 
-.footer-dot {
-  margin: 0 0.6rem;
+.home-brand-block {
+  text-align: center;
+}
+
+.home-brand-title {
+  font-size: 3.8rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  margin: 0 0 0.4rem;
+  background: linear-gradient(135deg, #ffffff 0%, #e2eeff 45%, #7eb6ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 35px rgba(126, 182, 255, 0.35);
+  line-height: 1;
+}
+
+.home-brand-sub {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  color: #7eb6ff;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+/* Extensible Tool Launcher Grid */
+.home-tool-grid {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.home-tool-tile {
+  background: rgba(10, 22, 50, 0.6);
+  border: 1px solid rgba(135, 175, 255, 0.22);
+  border-radius: 18px;
+  padding: 1.25rem 1rem 1rem;
+  width: 190px;
+  max-width: 210px;
+  min-width: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  backdrop-filter: blur(16px);
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+  font-family: inherit;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.home-tool-tile:hover {
+  background: rgba(16, 36, 80, 0.82);
+  border-color: rgba(126, 182, 255, 0.65);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(126, 182, 255, 0.3);
+}
+
+.home-tool-tile:active {
+  transform: translateY(-2px) scale(0.99);
+}
+
+.home-tool-icon-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(126, 182, 255, 0.12);
+  border: 1px solid rgba(140, 180, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin-bottom: 0.75rem;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.home-tool-tile:hover .home-tool-icon-box {
+  transform: scale(1.1);
+  background: rgba(126, 182, 255, 0.22);
+  border-color: rgba(126, 182, 255, 0.6);
+}
+
+.home-tool-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.home-tool-desc {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 400;
+  line-height: 1.35;
+  margin-bottom: 0.6rem;
+}
+
+.home-tool-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #7eb6ff;
+  background: rgba(126, 182, 255, 0.12);
+  border: 1px solid rgba(126, 182, 255, 0.3);
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: auto;
+}
+
+/* Floating Overlay Footer (Inside Video Viewport, Overlaid On Video) */
+.home-hud-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  letter-spacing: 0.06em;
+  width: 100%;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+}
+
+.home-waffi-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(8, 16, 38, 0.6);
+  border: 1px solid rgba(140, 170, 255, 0.22);
+  border-radius: 20px;
+  padding: 3px 10px;
+  color: #cbd5e1;
+  text-decoration: none;
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.home-waffi-pill:hover {
+  background: rgba(16, 32, 70, 0.85);
+  border-color: rgba(126, 182, 255, 0.5);
+  color: #ffffff;
+}
+
+.home-waffi-label {
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.home-waffi-logo {
+  width: 44px;
+  height: auto;
+  display: block;
+  vertical-align: middle;
+}
+
+.home-waffi-domain {
+  font-size: 0.7rem;
+  color: #7eb6ff;
+  font-weight: 600;
+}
+
+.home-waffi-arrow {
+  font-size: 0.7rem;
+  color: #7eb6ff;
+}
+
+.home-hud-bottom-divider {
   color: #475569;
+}
+
+.home-hud-status {
+  color: #64748b;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
 }
 
 /* Nav Logo Button in sidebar */
@@ -3194,48 +3163,62 @@
 }
 
 /* Mobile Responsiveness */
-@media (max-width: 1024px) {
-  .home-features-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  .home-hero-title {
-    font-size: 3.2rem;
-  }
-}
-
 @media (max-width: 768px) {
   #tab-home.active {
     margin: 0 !important;
-    min-height: calc(100vh - 58px) !important;
-    padding-bottom: 75px !important;
+    height: calc(100vh - 56px) !important;
+    max-height: calc(100vh - 56px) !important;
+    overflow: hidden !important;
+  }
+  .home-hero-viewport {
+    height: calc(100vh - 56px) !important;
+    max-height: calc(100vh - 56px) !important;
   }
   .home-hero-content {
-    padding: 1.2rem 1rem;
-    min-height: auto;
+    padding: 0.9rem 0.85rem 0.65rem;
+    height: 100%;
+    max-height: calc(100vh - 56px);
   }
-  .home-hero-title {
+  .home-brand-title {
     font-size: 2.5rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
   }
-  .home-hero-banner {
-    margin: 1.5rem auto 1.5rem;
+  .home-center-stage {
+    gap: 1.25rem;
   }
-  .home-hero-tagline {
-    font-size: 0.9rem;
+  .home-tool-grid {
+    gap: 0.65rem;
+  }
+  .home-tool-tile {
+    width: calc(50% - 0.35rem);
+    min-width: 130px;
+    padding: 0.85rem 0.55rem;
+    border-radius: 14px;
+  }
+  .home-tool-icon-box {
+    width: 44px;
+    height: 44px;
+    font-size: 1.4rem;
+    margin-bottom: 0.45rem;
+  }
+  .home-tool-title {
+    font-size: 0.82rem;
+  }
+  .home-tool-desc {
+    display: none;
   }
   .home-hud-top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.4rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 0.4rem 0.7rem;
     border-radius: 16px;
-    padding: 0.6rem 0.8rem;
+    gap: 0.35rem;
   }
-  .home-hud-right {
-    width: 100%;
-    justify-content: space-between;
+  .home-hud-bottom {
+    font-size: 0.65rem;
+    gap: 0.4rem;
   }
-  .home-features-grid {
-    grid-template-columns: 1fr;
+  .home-hud-status {
+    display: none;
   }
 }
