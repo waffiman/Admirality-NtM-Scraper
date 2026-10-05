@@ -34,6 +34,7 @@ let mobileCurrentView = "list"; // "list" | "map"
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initNavigationTabs();
+  switchToTab("tab-home");
   initHomeChronometer();
   initHomeVideo();
   initAutoNtmUI();
@@ -120,6 +121,18 @@ function switchToTab(targetTab) {
     activePane.classList.add("active");
   }
 
+  const appContent = document.querySelector(".app-content");
+  const waffiFooter = document.querySelector(".waffi-credit-footer");
+
+  if (targetTab === "tab-home") {
+    if (appContent) appContent.style.overflowY = "hidden";
+    if (waffiFooter) waffiFooter.style.display = "none";
+    initHomeVideo();
+  } else {
+    if (appContent) appContent.style.overflowY = "";
+    if (waffiFooter) waffiFooter.style.display = "";
+  }
+
   if (targetTab === "tab-ntm") {
     setTimeout(() => {
       if (leafletMap) {
@@ -128,8 +141,6 @@ function switchToTab(targetTab) {
         initNtMMap();
       }
     }, 150);
-  } else if (targetTab === "tab-home") {
-    initHomeVideo();
   }
 }
 
