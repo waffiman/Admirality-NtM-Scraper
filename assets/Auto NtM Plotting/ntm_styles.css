@@ -2717,13 +2717,16 @@
    OFFLINE & SCRAPER ERROR TELEMETRY DOT (STATIC SOLID RED)
    ========================================================================== */
 .ntm-offline-dot {
-  width: 8px !important;
-  height: 8px !important;
-  background-color: #ff4757 !important;
-  border-radius: 50% !important;
   display: inline-block !important;
-  box-shadow: 0 0 6px rgba(255, 71, 87, 0.8) !important;
-  animation: none !important; /* STRICTLY STATIC */
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 50% !important;
+  background-color: #ff4757 !important;
+  box-shadow: 0 0 6px rgba(255, 71, 87, 0.9) !important;
+  animation: none !important; /* STRICTLY STATIC - NO ANIMATION */
+  margin-right: 6px !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
 }
 
 /* ==========================================================================
