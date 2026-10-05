@@ -131,8 +131,18 @@ self.addEventListener('fetch', (event) => {
           }
           return netRes;
         })
-        .catch(() => {
-          return caches.match(event.request).then((cached) => cached || caches.match('notices.json'));
+        .catch(async () => {
+          const cached = (await caches.match(event.request)) || (await caches.match('notices.json'));
+          if (cached) {
+            const blob = await cached.blob();
+            const headers = new Headers(cached.headers);
+            headers.set('X-SetSail-Offline', 'true');
+            return new Response(blob, {
+              status: 200,
+              statusText: 'OK (Offline Cache)',
+              headers: headers
+            });
+          }
         })
     );
     return;
