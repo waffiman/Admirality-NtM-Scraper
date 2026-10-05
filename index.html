@@ -444,7 +444,13 @@
         <div class="home-hero-viewport">
           <!-- Background Video (Pure Design Element, No Player Controls, Full Coverage) -->
           <video class="home-hero-video" id="homeHeroVideo" autoplay muted loop playsinline preload="auto">
+            <!-- Mobile Vertical Video Source (Auto-loads when user adds vertical video file) -->
+            <source media="(max-width: 768px) and (orientation: portrait)" src="assets/home_bg_mobile.mp4" type="video/mp4" />
+            <source media="(max-width: 768px) and (orientation: portrait)" src="assets/Video vertical for Home page background.mp4" type="video/mp4" />
+            <!-- Primary Local Offline Source -->
             <source src="assets/home_bg.mp4" type="video/mp4" />
+            <!-- High-Speed Global CDN Release Mirror -->
+            <source src="https://github.com/waffiman/Admirality-NtM-Scraper/releases/download/v2.7-assets/home_bg.mp4" type="video/mp4" />
             <source src="assets/Video horizontal for Home page background.mp4" type="video/mp4" />
           </video>
           
