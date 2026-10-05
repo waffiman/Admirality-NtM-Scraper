@@ -34,6 +34,8 @@ let mobileCurrentView = "list"; // "list" | "map"
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initNavigationTabs();
+  initHomeChronometer();
+  initHomeVideo();
   initAutoNtmUI();
   initFilterAndSortPopovers();
   initVesselTracking();
@@ -80,38 +82,97 @@ function updateThemeButtonsUI(theme) {
 }
 
 /**
- * Tab Switching between Gyro Logbook, Auto-NtM, and Settings
+ * Tab Switching between Home, Gyro Logbook, Auto-NtM, and Settings
  */
 function initNavigationTabs() {
   const navItems = document.querySelectorAll(".nav-sidebar .nav-item");
   navItems.forEach(item => {
     item.addEventListener("click", () => {
       const targetTab = item.getAttribute("data-tab");
-      if (!targetTab) return;
-
-      navItems.forEach(n => n.classList.remove("active"));
-      item.classList.add("active");
-
-      document.querySelectorAll(".tab-pane").forEach(pane => {
-        pane.classList.remove("active");
-      });
-
-      const activePane = document.getElementById(targetTab);
-      if (activePane) {
-        activePane.classList.add("active");
-      }
-
-      if (targetTab === "tab-ntm") {
-        setTimeout(() => {
-          if (leafletMap) {
-            leafletMap.invalidateSize();
-          } else {
-            initNtMMap();
-          }
-        }, 150);
-      }
+      if (targetTab) switchToTab(targetTab);
     });
   });
+
+  // Support CTA buttons across the interface
+  document.querySelectorAll("[data-switch-tab]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetTab = btn.getAttribute("data-switch-tab");
+      if (targetTab) switchToTab(targetTab);
+    });
+  });
+}
+
+/**
+ * Programmatic Tab Switcher
+ */
+function switchToTab(targetTab) {
+  const navItems = document.querySelectorAll(".nav-sidebar .nav-item");
+  navItems.forEach(n => {
+    n.classList.toggle("active", n.getAttribute("data-tab") === targetTab);
+  });
+
+  document.querySelectorAll(".tab-pane").forEach(pane => {
+    pane.classList.remove("active");
+  });
+
+  const activePane = document.getElementById(targetTab);
+  if (activePane) {
+    activePane.classList.add("active");
+  }
+
+  if (targetTab === "tab-ntm") {
+    setTimeout(() => {
+      if (leafletMap) {
+        leafletMap.invalidateSize();
+      } else {
+        initNtMMap();
+      }
+    }, 150);
+  } else if (targetTab === "tab-home") {
+    initHomeVideo();
+  }
+}
+
+/**
+ * Real-Time UTC Digital Chronometer for Bridge Home Page
+ */
+function initHomeChronometer() {
+  const clockEl = document.getElementById("homeUtcClock");
+  if (!clockEl) return;
+
+  function update() {
+    const now = new Date();
+    const hh = String(now.getUTCHours()).padStart(2, "0");
+    const mm = String(now.getUTCMinutes()).padStart(2, "0");
+    const ss = String(now.getUTCSeconds()).padStart(2, "0");
+    clockEl.textContent = `${hh}:${mm}:${ss} UTC`;
+  }
+  update();
+  setInterval(update, 1000);
+}
+
+/**
+ * Autoplay Assurance for Cinematic Background Video
+ */
+function initHomeVideo() {
+  const vid = document.getElementById("homeHeroVideo");
+  if (!vid) return;
+
+  vid.muted = true;
+  const playPromise = vid.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(() => {
+      // Browser autoplay restriction: retry on first user interaction
+      vid.muted = true;
+      const startOnTouch = () => {
+        vid.play().catch(() => {});
+        document.removeEventListener("click", startOnTouch);
+        document.removeEventListener("touchstart", startOnTouch);
+      };
+      document.addEventListener("click", startOnTouch, { once: true });
+      document.addEventListener("touchstart", startOnTouch, { once: true });
+    });
+  }
 }
 
 /**
@@ -1451,6 +1512,11 @@ function renderNtMListAndMap() {
   if (elCntPoly) elCntPoly.textContent = countPoly;
   const elCntCan = document.getElementById("popCntCancelled");
   if (elCntCan) elCntCan.textContent = countCancelled;
+
+  const homeNoticeCountEl = document.getElementById("homeNoticeCount");
+  if (homeNoticeCountEl) {
+    homeNoticeCountEl.textContent = `${activeNotices.length} Notices Active`;
+  }
 
   syncFilterIndicators();
 
