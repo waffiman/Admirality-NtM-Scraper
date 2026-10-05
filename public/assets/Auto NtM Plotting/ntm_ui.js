@@ -1519,7 +1519,107 @@ function renderNtMListAndMap() {
         ? "#ef4444"
         : (item.type === "T" ? "#ffc850" : (item.type === "P" ? "#bb86fc" : "#4fc3f7"));
 
-      if (item.isPolygon && item.coords.length >= 3) {
+      if (item.subPolygons && item.subPolygons.length > 0) {
+        item.subPolygons.forEach(sub => {
+          const pts = sub.points || (sub.coords || []).map(c => [c.lat, c.lon]);
+          if (!pts || pts.length === 0) return;
+
+          if (pts.length >= 3) {
+            let subColor = color;
+            let subFill = color;
+            let subFillOpacity = isItemCancelled ? 0.12 : 0.25;
+            let subWeight = 2;
+            let subDash = isItemCancelled ? "4, 6" : null;
+
+            if (!isItemCancelled) {
+              if (sub.category === "separation_zone") {
+                subColor = "#9333ea";
+                subFill = "#a855f7";
+                subFillOpacity = 0.38;
+                subWeight = 2.5;
+              } else if (sub.category === "traffic_lane") {
+                subColor = "#0284c7";
+                subFill = "#38bdf8";
+                subFillOpacity = 0.18;
+                subWeight = 2;
+                subDash = "6, 4";
+              } else if (sub.category === "precautionary_area") {
+                subColor = "#eab308";
+                subFill = "#facc15";
+                subFillOpacity = 0.22;
+                subDash = "5, 5";
+              } else if (sub.category === "restricted_area") {
+                subColor = "#e11d48";
+                subFill = "#fb7185";
+                subFillOpacity = 0.26;
+                subDash = "4, 4";
+              } else if (sub.category === "anchorage_area") {
+                subColor = "#059669";
+                subFill = "#34d399";
+                subFillOpacity = 0.22;
+                subDash = "5, 5";
+              } else if (sub.category === "spoil_ground") {
+                subColor = "#ea580c";
+                subFill = "#fb923c";
+                subFillOpacity = 0.22;
+                subDash = "4, 4";
+              } else if (sub.category === "works_area") {
+                subColor = "#f59e0b";
+                subFill = "#fbbf24";
+                subFillOpacity = 0.22;
+                subDash = "5, 5";
+              }
+            }
+
+            const polygon = L.polygon(pts, {
+              color: subColor,
+              weight: subWeight,
+              fillColor: subFill,
+              fillOpacity: subFillOpacity,
+              dashArray: subDash
+            });
+
+            polygon.bindPopup(`
+              <div style="font-family:'Segoe UI',sans-serif;color:#111;min-width:230px;">
+                <div style="font-size:0.75em;text-transform:uppercase;color:#6b7280;letter-spacing:0.5px;font-weight:600;margin-bottom:2px;">
+                  ${(sub.category || 'MARITIME AREA').replace('_', ' ').toUpperCase()}
+                </div>
+                <b style="color:#0a3888;font-size:1.05em;">${item.id} — ${sub.name}</b>
+                ${isItemCancelled ? '<span style="color:#ef4444;font-weight:bold;"> [CANCELLED]</span>' : ''}
+                <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">[${getNoticeNavarea(item)}] ${item.country || ''} — ${item.region || ''}</div>
+                <div style="font-size:0.88em;margin-bottom:6px;line-height:1.35;">${item.subject || ''}</div>
+                <div style="font-size:0.8em;color:#475569;margin-bottom:4px;"><b>Area:</b> ${sub.name} (${pts.length} coordinates)</div>
+                <div style="font-size:0.8em;color:#666;"><b>Affected Charts:</b> ${(item.charts||[]).join(', ') || '—'}</div>
+              </div>
+            `);
+            leafletMarkersLayer.addLayer(polygon);
+          } else if (pts.length === 2) {
+            const polyline = L.polyline(pts, {
+              color: color,
+              weight: 3,
+              dashArray: isItemCancelled ? "3, 6" : "6, 6"
+            });
+            leafletMarkersLayer.addLayer(polyline);
+          } else if (pts.length === 1) {
+            const circle = L.circleMarker(pts[0], {
+              radius: 7,
+              fillColor: isItemCancelled ? "#ef4444" : "#e11d48",
+              color: "#fff",
+              weight: 2,
+              fillOpacity: 0.9
+            });
+            circle.bindPopup(`
+              <div style="font-family:'Segoe UI',sans-serif;color:#111;">
+                <b style="color:#0a3888;">${item.id} — ${sub.name}</b>
+                ${isItemCancelled ? '<span style="color:#ef4444;font-weight:bold;"> [CANCELLED]</span>' : ''}
+                <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">[${getNoticeNavarea(item)}] ${item.country || ''}</div>
+                <div style="font-size:0.85em;">${item.subject || ''}</div>
+              </div>
+            `);
+            leafletMarkersLayer.addLayer(circle);
+          }
+        });
+      } else if (item.isPolygon && item.coords.length >= 3) {
         const polyPoints = item.coords.map(c => [c.lat, c.lon]);
         const polygon = L.polygon(polyPoints, {
           color: color,
@@ -1611,10 +1711,15 @@ function selectNtMNotice(noticeId) {
   if (!item || !item.coords || item.coords.length === 0) return;
 
   if (leafletMap) {
-    const first = item.coords[0];
-    leafletMap.flyTo([first.lat, first.lon], Math.max(leafletMap.getZoom(), 8), {
-      duration: 1.2
-    });
+    if (item.coords.length > 1) {
+      const bounds = L.latLngBounds(item.coords.map(c => [c.lat, c.lon]));
+      leafletMap.fitBounds(bounds.pad(0.18), { maxZoom: 12, duration: 1.2 });
+    } else {
+      const first = item.coords[0];
+      leafletMap.flyTo([first.lat, first.lon], Math.max(leafletMap.getZoom(), 9), {
+        duration: 1.2
+      });
+    }
   }
 
   if (window.innerWidth <= 768 && mobileCurrentView === "list") {
