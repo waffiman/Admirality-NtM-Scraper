@@ -258,4 +258,39 @@ SetSail can be hosted on a dedicated custom domain using two 100% free productio
 **A:** Navigate to the **⚙️ Settings** tab at the bottom of the left navigation rail, enter your reply email and message, and click *Transmit Message*.
 
 ---
-*Maintained by SetSail Bridge Engineering &bull; LPG/C IINO INEOS VESTA &bull; Production Release v2.6*
+
+## 12. High-Precision Geometry Engine & TSS Multi-Polygon Architecture
+
+### 12.1 Problem: Multi-Area & TSS Polygon Tangling
+In standard maritime publications, complex Traffic Separation Schemes (TSS) and multi-zone notices often list dozens or hundreds of coordinates across multiple schemes, traffic corridors, separation zones, precautionary areas, and anchoring prohibitions. 
+When plotted as an unsegmented flat array (`L.polygon([pt1, pt2, ..., ptN])`), Leaflet sequentially connects the terminal coordinate of one zone across miles of open water to the initial coordinate of an adjacent or distant zone. This produced chaotic intersecting lines ("spiderweb" artifacts) that completely distorted the nautical geometry.
+
+### 12.2 Solution: Automatic Sub-Polygon Segmentation Engine
+SetSail implements a dual-layer hydrographic segmentation engine in both the scraper pipeline (`scraper/scrape.py`) and client chart renderer (`setsail_ui.js`):
+1. **Hierarchical Subsection Parsing:** Automatically partitions notices by scheme headers (`3. Traffic scheme A...`, `4. Traffic scheme B...`), operational classifications (`a. Separation zones...`, `b. Westbound traffic lanes...`), and coordinate boundary conjunctions (`and`).
+2. **Category-Specific Maritime Color Coding:**
+   * **TSS Separation Zones:** Admiralty Magenta/Purple (`#9333ea`, fill `#a855f7`, opacity `0.38`, weight `2.5px`).
+   * **Traffic Lanes (Inbound/Outbound/N-S):** Marine Cyan Flow Corridors (`#0284c7`, fill `#38bdf8`, opacity `0.18`, dash `6, 4`).
+   * **Precautionary Areas:** Cautionary Amber (`#eab308`, fill `#facc15`, opacity `0.22`, dash `5, 5`).
+   * **Restricted / Anchoring Prohibited Areas:** Regulatory Rose-Red (`#e11d48`, fill `#fb7185`, opacity `0.26`, dash `4, 4`).
+   * **Anchorage Berths & Waiting Areas:** Emerald Green (`#059669`, fill `#34d399`, opacity `0.22`, dash `5, 5`).
+   * **Spoil Grounds & Foul Areas:** Navigation Orange (`#ea580c`, fill `#fb923c`, opacity `0.22`, dash `4, 4`).
+   * **Prohibited Navigation Focal Points:** Reticle circle marker with alert popup.
+3. **Smooth Fit-Bounds Centering:** When a navigator selects a multi-area notice in the sidebar, `leafletMap.fitBounds` dynamically calculates the bounding envelope of the entire scheme and frames all lanes and zones simultaneously with high-resolution clarity.
+4. **ECDIS GeoJSON MultiPolygon Compatibility:** Exports each sub-polygon as an independent feature with standard metadata (`subName`, `category`, `charts`), allowing seamless import into bridge ECDIS systems (Transas / Wartsila Navi-Sailor, JRC, Furuno).
+
+### 12.3 Case Study: Notice 3935(P)/22 (Changjiang Kou TSS, Shanghai)
+Notice **3935(P)/22** covers the extensive restructuring of the Changjiang Kou (Yangtze River Estuary) approaches, consisting of **119 discrete coordinates**. Rather than a single disordered polygon, SetSail renders all **29 distinct hydrographic features**:
+* Scheme A: 2 Separation Zones, 2 Westbound Lanes, 2 Eastbound Lanes (6 polygons)
+* Scheme B: 2 Separation Zones, 2 Westbound Lanes, 2 Eastbound Lanes (6 polygons)
+* Scheme C1: Separation Zone, Southbound Lane, Northbound Lane (3 polygons)
+* Scheme C3: Separation Zone, Southbound Lane, Northbound Lane (3 polygons)
+* New North-South Scheme: 2 Separation Zones, 2 Southbound Lanes, 2 Northbound Lanes (6 polygons)
+* Precautionary Areas: North & South Precautionary Areas (2 polygons)
+* Scheme C2 Prohibited Navigation Point: Focused circular reticle marker (1 position)
+* Anchoring Prohibited Areas: North & South Prohibited Quadrilaterals (2 polygons)
+
+Every boundary forms a strictly closed, non-intersecting polygon faithful to UKHO Chart 1199, 1306, and 1602 specifications.
+
+---
+*Maintained by SetSail Bridge Engineering &bull; LPG/C IINO INEOS VESTA &bull; Production Release v2.7*
