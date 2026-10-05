@@ -413,20 +413,22 @@
 <body>
   <div class="app-container">
     <!-- ── Left Navigation Sidebar ── -->
+    <!-- ── Left Navigation Sidebar ── -->
     <nav class="nav-sidebar no-print" aria-label="Main Navigation">
-      <div class="nav-logo" title="SetSail Navigation Suite — IINO INEOS VESTA">
-        <img src="assets/gyro_compass_logbook.ico" alt="SetSail Logo" />
-      </div>
-
-      <button type="button" class="nav-item active" data-tab="tab-gyro" aria-label="SetSail Gyro &amp; Compass Logbook">
-        🧭
-        <span class="tooltip">Gyro &amp; Compass Logbook</span>
+      <button type="button" class="nav-item nav-logo-btn active" data-tab="tab-home" aria-label="SetSail Home &bull; Overview" title="SetSail Home &bull; Overview">
+        <img src="assets/gyro_compass_logbook.ico" alt="SetSail Logo" class="nav-logo-img" />
+        <span class="tooltip">Home · Overview</span>
       </button>
 
       <button type="button" class="nav-item" data-tab="tab-ntm" aria-label="SetSail Auto-NtM Plotter">
         🗺️
         <span class="badge" id="ntmBadge">0</span>
         <span class="tooltip">SetSail Auto-NtM (Live ECDIS)</span>
+      </button>
+
+      <button type="button" class="nav-item" data-tab="tab-gyro" aria-label="SetSail Gyro &amp; Compass Logbook">
+        🧭
+        <span class="tooltip">Gyro &amp; Compass Logbook</span>
       </button>
 
       <button type="button" class="nav-item nav-settings-item" data-tab="tab-settings" aria-label="Settings &amp; Support" style="margin-top:auto;" title="Settings &amp; Support">
@@ -437,8 +439,128 @@
 
     <!-- ── Main Viewport Content ── -->
     <main class="app-content">
+      <!-- ── Tab 0: Cinematic Home / Overview ── -->
+      <div id="tab-home" class="tab-pane active">
+        <div class="home-hero-viewport">
+          <!-- Background Video (Pure Design Element, No Player Controls, Full Coverage) -->
+          <video class="home-hero-video" id="homeHeroVideo" autoplay muted loop playsinline preload="auto">
+            <source src="assets/home_bg.mp4" type="video/mp4" />
+            <source src="assets/Video horizontal for Home page background.mp4" type="video/mp4" />
+          </video>
+          
+          <!-- Cinematic Atmosphere Overlays -->
+          <div class="home-vignette-overlay"></div>
+          <div class="home-gradient-overlay"></div>
+          <div class="home-radar-grid"></div>
+
+          <!-- Content Foreground -->
+          <div class="home-hero-content">
+            <!-- Top Bridge HUD Bar -->
+            <div class="home-hud-top">
+              <div class="home-hud-pill">
+                <span class="home-hud-dot live-pulse"></span>
+                <span class="home-hud-text">VESSEL: <strong>LPG/C IINO INEOS VESTA</strong></span>
+              </div>
+              <div class="home-hud-pill">
+                <span class="home-hud-icon">⏱️</span>
+                <span class="home-hud-text" id="homeUtcClock">00:00:00 UTC</span>
+              </div>
+              <div class="home-hud-pill home-hud-right">
+                <span class="home-hud-badge">UKHO WK 41/26</span>
+                <span class="home-hud-badge ok">OFFLINE READY</span>
+              </div>
+            </div>
+
+            <!-- Central Cinematic Hero Banner -->
+            <div class="home-hero-banner">
+              <div class="home-hero-eyebrow">
+                <span class="eyebrow-accent"></span>
+                <span>INTEGRATED BRIDGE NAVIGATION SUITE</span>
+                <span class="eyebrow-accent"></span>
+              </div>
+
+              <h1 class="home-hero-title">SETSAIL</h1>
+              <p class="home-hero-tagline">
+                Next-generation hydrographic intelligence, real-time Admiralty Notices to Mariners, 
+                high-precision TSS routing, and astronomical sight reduction for watchkeeping officers.
+              </p>
+
+              <div class="home-hero-actions">
+                <button type="button" class="home-btn-primary" data-switch-tab="tab-ntm">
+                  <span class="btn-icon">🗺️</span>
+                  <span>Enter ECDIS Plotter</span>
+                  <span class="btn-arrow">→</span>
+                </button>
+                <button type="button" class="home-btn-secondary" data-switch-tab="tab-gyro">
+                  <span class="btn-icon">🧭</span>
+                  <span>Compass Logbook</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Cinematic Feature HUD Grid -->
+            <div class="home-features-grid">
+              <!-- Feature 1: Live ECDIS NtM -->
+              <div class="home-card" data-switch-tab="tab-ntm">
+                <div class="home-card-header">
+                  <span class="home-card-tag tag-cyan">HYDROGRAPHIC RADAR</span>
+                  <span class="home-card-icon">🗺️</span>
+                </div>
+                <h3 class="home-card-title">Auto-NtM &amp; TSS Corridors</h3>
+                <p class="home-card-desc">
+                  Automated scraping of weekly UKHO bulletins. Complete sub-polygon segmentation for complex Traffic Separation Schemes (Changjiang Kou 3935(P)/22), active/cancelled filtering, and instant ECDIS GeoJSON export.
+                </p>
+                <div class="home-card-footer">
+                  <span class="home-card-link">Launch Plotter <span>→</span></span>
+                  <span class="home-card-stat" id="homeNoticeCount">86 Notices Active</span>
+                </div>
+              </div>
+
+              <!-- Feature 2: Celestial & Gyro -->
+              <div class="home-card" data-switch-tab="tab-gyro">
+                <div class="home-card-header">
+                  <span class="home-card-tag tag-purple">ALMANAC ENGINE</span>
+                  <span class="home-card-icon">🧭</span>
+                </div>
+                <h3 class="home-card-title">Celestial &amp; Gyro Error</h3>
+                <p class="home-card-desc">
+                  Solar and stellar sight reduction, magnetic deviation curve modeling, true azimuth verification, and official bridge watchkeeping logbook generation.
+                </p>
+                <div class="home-card-footer">
+                  <span class="home-card-link">Open Logbook <span>→</span></span>
+                  <span class="home-card-stat">Astronomical V2.7</span>
+                </div>
+              </div>
+
+              <!-- Feature 3: Bridge Diagnostics & Offline PWA -->
+              <div class="home-card" data-switch-tab="tab-settings">
+                <div class="home-card-header">
+                  <span class="home-card-tag tag-amber">SYSTEM DIAGNOSTICS</span>
+                  <span class="home-card-icon">⚙️</span>
+                </div>
+                <h3 class="home-card-title">Bridge Deck &amp; Settings</h3>
+                <p class="home-card-desc">
+                  Seamless Dark/Light cockpit color schemes for night watchkeeping, GPS vessel reticle plotting, autonomous offline caching, and direct satellite engineering dispatch.
+                </p>
+                <div class="home-card-footer">
+                  <span class="home-card-link">System Settings <span>→</span></span>
+                  <span class="home-card-stat">Zero Dinosaur</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Vessel Telemetry Footer -->
+            <div class="home-hero-footer">
+              <span>LPG/C IINO INEOS VESTA &bull; BRIDGE COCKPIT &bull; IMO 9813589</span>
+              <span class="footer-dot">&bull;</span>
+              <span>STANDALONE PWA &bull; PRODUCTION V2.7</span>
+            </div>
+          </div>
+        </div>
+      </div><!-- end #tab-home -->
+
       <!-- ── Tab 1: Gyro / Magnetic Compass Logbook ── -->
-      <div id="tab-gyro" class="tab-pane active">
+      <div id="tab-gyro" class="tab-pane">
         <div class="wrap">
     <h1 class="no-print">SetSail · Gyro &amp; Magnetic Compass</h1>
 
@@ -861,41 +983,35 @@
         <div class="settings-wrap minimal-settings">
           <div class="settings-header">
             <h2>⚙️ Settings</h2>
-            <p class="settings-subtitle">SetSail Marine Navigation Suite &bull; LPG/C IINO INEOS VESTA</p>
           </div>
 
           <div class="settings-grid-minimal">
             <!-- Card 1: Theme Switcher -->
             <div class="settings-card-min">
-              <div class="min-card-title">Bridge Display Theme</div>
-              <p class="min-card-desc">Choose bridge color profile: Dark Cockpit (night watchkeeping) or Light Mode (bright daylight).</p>
+              <div class="min-card-title">Theme</div>
               <div class="min-theme-toggle">
                 <button type="button" class="theme-toggle-btn active" data-theme-val="dark" id="btnThemeDark">
-                  🌙 Dark (Night)
+                  🌙 Dark
                 </button>
                 <button type="button" class="theme-toggle-btn" data-theme-val="light" id="btnThemeLight">
-                  ☀️ Light (Day)
+                  ☀️ Light
                 </button>
               </div>
             </div>
 
-            <!-- Card 2: Contact Developers Form (Minimalist: Email + Message) -->
+            <!-- Card 2: Contact Developers Form -->
             <div class="settings-card-min">
-              <div class="min-card-title">Developer Support &amp; Feedback</div>
-              <p class="min-card-desc">Transmit bug reports, missing notice inquiries, or suggestions directly to SetSail engineering. Replies are sent to your provided email.</p>
-              
+              <div class="min-card-title">Developer Feedback</div>
               <form id="setsailContactForm" class="min-contact-form" onsubmit="return false;">
                 <div class="form-group">
-                  <label for="contactEmail">Reply Email Address:</label>
-                  <input type="email" id="contactEmail" class="min-input" placeholder="officer@example.com" required />
+                  <input type="email" id="contactEmail" class="min-input" placeholder="Your reply email..." required />
                 </div>
                 <div class="form-group">
-                  <label for="contactMessage">Message / Report:</label>
-                  <textarea id="contactMessage" class="min-textarea" rows="4" placeholder="Describe the issue or suggestion..." required></textarea>
+                  <textarea id="contactMessage" class="min-textarea" rows="3" placeholder="Message or report..." required></textarea>
                 </div>
-                <div class="form-actions" style="display:flex;align-items:center;gap:0.8rem;margin-top:0.4rem;">
+                <div class="form-actions" style="display:flex;align-items:center;gap:0.8rem;margin-top:0.3rem;">
                   <button type="button" class="min-btn-submit" id="contactSubmitBtn">
-                    ✉️ Transmit to Engineering
+                    ✉️ Send
                   </button>
                   <span class="contact-status-msg" id="contactStatusMsg"></span>
                 </div>
@@ -904,10 +1020,9 @@
 
             <!-- Card 3: Storage & Cache Reset -->
             <div class="settings-card-min">
-              <div class="min-card-title">Cache &amp; Stored Telemetry</div>
-              <p class="min-card-desc">Force cache purge and re-synchronize latest Notices to Mariners from server.</p>
+              <div class="min-card-title">Cache</div>
               <button type="button" class="min-btn-outline" id="settingsClearCacheBtn">
-                🔄 Reset NtM Cache &amp; Re-sync
+                🔄 Reset Cache
               </button>
             </div>
           </div>
