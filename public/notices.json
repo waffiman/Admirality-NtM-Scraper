@@ -1,18 +1,17 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-04T07:22:42.431782+00:00",
+    "generatedAt": "2026-10-03T17:12:57.191453Z",
     "weeklyBulletin": "41wknm26.pdf",
     "batchId": "64fd805d-9ae0-4303-a77b-1e8e7bf08be7",
     "weekNumber": 41,
     "year": 26,
-    "totalNotices": 98,
-    "activeNotices": 85,
-    "cancelledNotices": 13,
+    "totalNotices": 86,
     "countT": 14,
-    "countP": 10,
+    "countP": 11,
     "countPerm": 61,
-    "countPoly": 12,
-    "countLine": 2
+    "countPoly": 13,
+    "countLine": 2,
+    "activeNotices": 86
   },
   "cancelledIds": [
     "1246(T)/22",
@@ -30,6 +29,626 @@
     "4314(T)/25"
   ],
   "notices": [
+    {
+      "id": "3935(P)/22",
+      "num": "3935",
+      "type": "P",
+      "year": "22",
+      "country": "CHINA",
+      "region": "East Coast",
+      "subject": "Traffic separation scheme. Separation zones. Precautionary areas. Restricted areas. Changjiang Kou.",
+      "charts": [
+        "1199",
+        "1306",
+        "1602",
+        "2412",
+        "3480"
+      ],
+      "coords": [
+        {
+          "lat": 31.107,
+          "lon": 122.55233,
+          "dms": "31° 06.42' N, 122° 33.14' E"
+        },
+        {
+          "lat": 31.107,
+          "lon": 122.7555,
+          "dms": "31° 06.42' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.09867,
+          "lon": 122.7555,
+          "dms": "31° 05.92' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.09867,
+          "lon": 122.55233,
+          "dms": "31° 05.92' N, 122° 33.14' E"
+        },
+        {
+          "lat": 31.107,
+          "lon": 122.83883,
+          "dms": "31° 06.42' N, 122° 50.33' E"
+        },
+        {
+          "lat": 31.107,
+          "lon": 123.0,
+          "dms": "31° 06.42' N, 123° 00.00' E"
+        },
+        {
+          "lat": 31.09867,
+          "lon": 123.0,
+          "dms": "31° 05.92' N, 123° 00.00' E"
+        },
+        {
+          "lat": 31.09867,
+          "lon": 122.83883,
+          "dms": "31° 05.92' N, 122° 50.33' E"
+        },
+        {
+          "lat": 31.107,
+          "lon": 122.55233,
+          "dms": "31° 06.42' N, 122° 33.14' E"
+        },
+        {
+          "lat": 31.107,
+          "lon": 122.7555,
+          "dms": "31° 06.42' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.7555,
+          "dms": "31° 07.17' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.55233,
+          "dms": "31° 07.17' N, 122° 33.14' E"
+        },
+        {
+          "lat": 31.107,
+          "lon": 122.83883,
+          "dms": "31° 06.42' N, 122° 50.33' E"
+        },
+        {
+          "lat": 31.107,
+          "lon": 123.0,
+          "dms": "31° 06.42' N, 123° 00.00' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 123.0,
+          "dms": "31° 07.17' N, 123° 00.00' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.83883,
+          "dms": "31° 07.17' N, 122° 50.33' E"
+        },
+        {
+          "lat": 31.09867,
+          "lon": 122.7555,
+          "dms": "31° 05.92' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.09867,
+          "lon": 122.55233,
+          "dms": "31° 05.92' N, 122° 33.14' E"
+        },
+        {
+          "lat": 31.086,
+          "lon": 122.55233,
+          "dms": "31° 05.16' N, 122° 33.14' E"
+        },
+        {
+          "lat": 31.08617,
+          "lon": 122.7555,
+          "dms": "31° 05.17' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.09867,
+          "lon": 123.0,
+          "dms": "31° 05.92' N, 123° 00.00' E"
+        },
+        {
+          "lat": 31.09867,
+          "lon": 122.83883,
+          "dms": "31° 05.92' N, 122° 50.33' E"
+        },
+        {
+          "lat": 31.08617,
+          "lon": 122.83883,
+          "dms": "31° 05.17' N, 122° 50.33' E"
+        },
+        {
+          "lat": 31.08617,
+          "lon": 123.0,
+          "dms": "31° 05.17' N, 123° 00.00' E"
+        },
+        {
+          "lat": 30.992,
+          "lon": 122.55233,
+          "dms": "30° 59.52' N, 122° 33.14' E"
+        },
+        {
+          "lat": 30.98433,
+          "lon": 122.59033,
+          "dms": "30° 59.06' N, 122° 35.42' E"
+        },
+        {
+          "lat": 30.98433,
+          "lon": 122.7555,
+          "dms": "30° 59.06' N, 122° 45.33' E"
+        },
+        {
+          "lat": 30.97567,
+          "lon": 122.7555,
+          "dms": "30° 58.54' N, 122° 45.33' E"
+        },
+        {
+          "lat": 30.97567,
+          "lon": 122.59033,
+          "dms": "30° 58.54' N, 122° 35.42' E"
+        },
+        {
+          "lat": 30.9835,
+          "lon": 122.55233,
+          "dms": "30° 59.01' N, 122° 33.14' E"
+        },
+        {
+          "lat": 30.9845,
+          "lon": 122.83883,
+          "dms": "30° 59.07' N, 122° 50.33' E"
+        },
+        {
+          "lat": 30.9845,
+          "lon": 123.0,
+          "dms": "30° 59.07' N, 123° 00.00' E"
+        },
+        {
+          "lat": 30.97567,
+          "lon": 123.0,
+          "dms": "30° 58.54' N, 123° 00.00' E"
+        },
+        {
+          "lat": 30.97567,
+          "lon": 122.83883,
+          "dms": "30° 58.54' N, 122° 50.33' E"
+        },
+        {
+          "lat": 30.992,
+          "lon": 122.55233,
+          "dms": "30° 59.52' N, 122° 33.14' E"
+        },
+        {
+          "lat": 30.98433,
+          "lon": 122.59033,
+          "dms": "30° 59.06' N, 122° 35.42' E"
+        },
+        {
+          "lat": 30.98433,
+          "lon": 122.7555,
+          "dms": "30° 59.06' N, 122° 45.33' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 122.7555,
+          "dms": "30° 59.83' N, 122° 45.33' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 122.59033,
+          "dms": "30° 59.83' N, 122° 35.42' E"
+        },
+        {
+          "lat": 31.005,
+          "lon": 122.55233,
+          "dms": "31° 00.30' N, 122° 33.14' E"
+        },
+        {
+          "lat": 30.9845,
+          "lon": 122.83883,
+          "dms": "30° 59.07' N, 122° 50.33' E"
+        },
+        {
+          "lat": 30.9845,
+          "lon": 123.0,
+          "dms": "30° 59.07' N, 123° 00.00' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 123.0,
+          "dms": "30° 59.83' N, 123° 00.00' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 122.83883,
+          "dms": "30° 59.83' N, 122° 50.33' E"
+        },
+        {
+          "lat": 30.97567,
+          "lon": 122.7555,
+          "dms": "30° 58.54' N, 122° 45.33' E"
+        },
+        {
+          "lat": 30.97567,
+          "lon": 122.59033,
+          "dms": "30° 58.54' N, 122° 35.42' E"
+        },
+        {
+          "lat": 30.9835,
+          "lon": 122.55233,
+          "dms": "30° 59.01' N, 122° 33.14' E"
+        },
+        {
+          "lat": 30.9705,
+          "lon": 122.55233,
+          "dms": "30° 58.23' N, 122° 33.14' E"
+        },
+        {
+          "lat": 30.96267,
+          "lon": 122.59033,
+          "dms": "30° 57.76' N, 122° 35.42' E"
+        },
+        {
+          "lat": 30.96283,
+          "lon": 122.7555,
+          "dms": "30° 57.77' N, 122° 45.33' E"
+        },
+        {
+          "lat": 30.97567,
+          "lon": 123.0,
+          "dms": "30° 58.54' N, 123° 00.00' E"
+        },
+        {
+          "lat": 30.97567,
+          "lon": 122.83883,
+          "dms": "30° 58.54' N, 122° 50.33' E"
+        },
+        {
+          "lat": 30.96283,
+          "lon": 122.83883,
+          "dms": "30° 57.77' N, 122° 50.33' E"
+        },
+        {
+          "lat": 30.96283,
+          "lon": 123.0,
+          "dms": "30° 57.77' N, 123° 00.00' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.53817,
+          "dms": "31° 20.00' N, 122° 32.29' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.538,
+          "dms": "31° 07.17' N, 122° 32.28' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.52817,
+          "dms": "31° 07.17' N, 122° 31.69' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.52817,
+          "dms": "31° 20.00' N, 122° 31.69' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.52817,
+          "dms": "31° 20.00' N, 122° 31.69' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.52817,
+          "dms": "31° 07.17' N, 122° 31.69' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.51333,
+          "dms": "31° 07.17' N, 122° 30.80' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.51333,
+          "dms": "31° 20.00' N, 122° 30.80' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.55233,
+          "dms": "31° 07.17' N, 122° 33.14' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.538,
+          "dms": "31° 07.17' N, 122° 32.28' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.53817,
+          "dms": "31° 20.00' N, 122° 32.29' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.5525,
+          "dms": "31° 20.00' N, 122° 33.15' E"
+        },
+        {
+          "lat": 30.818,
+          "lon": 122.52783,
+          "dms": "30° 49.08' N, 122° 31.67' E"
+        },
+        {
+          "lat": 30.97567,
+          "lon": 122.528,
+          "dms": "30° 58.54' N, 122° 31.68' E"
+        },
+        {
+          "lat": 30.9735,
+          "lon": 122.53783,
+          "dms": "30° 58.41' N, 122° 32.27' E"
+        },
+        {
+          "lat": 30.82117,
+          "lon": 122.53783,
+          "dms": "30° 49.27' N, 122° 32.27' E"
+        },
+        {
+          "lat": 30.818,
+          "lon": 122.52783,
+          "dms": "30° 49.08' N, 122° 31.67' E"
+        },
+        {
+          "lat": 30.97567,
+          "lon": 122.528,
+          "dms": "30° 58.54' N, 122° 31.68' E"
+        },
+        {
+          "lat": 30.97867,
+          "lon": 122.5135,
+          "dms": "30° 58.72' N, 122° 30.81' E"
+        },
+        {
+          "lat": 30.81367,
+          "lon": 122.51367,
+          "dms": "30° 48.82' N, 122° 30.82' E"
+        },
+        {
+          "lat": 30.82117,
+          "lon": 122.53783,
+          "dms": "30° 49.27' N, 122° 32.27' E"
+        },
+        {
+          "lat": 30.9735,
+          "lon": 122.53783,
+          "dms": "30° 58.41' N, 122° 32.27' E"
+        },
+        {
+          "lat": 30.9705,
+          "lon": 122.55233,
+          "dms": "30° 58.23' N, 122° 33.14' E"
+        },
+        {
+          "lat": 30.82567,
+          "lon": 122.55233,
+          "dms": "30° 49.54' N, 122° 33.14' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.78883,
+          "dms": "31° 20.00' N, 122° 47.33' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.8055,
+          "dms": "31° 20.00' N, 122° 48.33' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.8055,
+          "dms": "31° 07.17' N, 122° 48.33' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.78883,
+          "dms": "31° 07.17' N, 122° 47.33' E"
+        },
+        {
+          "lat": 31.08617,
+          "lon": 122.78883,
+          "dms": "31° 05.17' N, 122° 47.33' E"
+        },
+        {
+          "lat": 31.08617,
+          "lon": 122.8055,
+          "dms": "31° 05.17' N, 122° 48.33' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 122.8055,
+          "dms": "30° 59.83' N, 122° 48.33' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 122.78883,
+          "dms": "30° 59.83' N, 122° 47.33' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.78883,
+          "dms": "31° 20.00' N, 122° 47.33' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.78883,
+          "dms": "31° 07.17' N, 122° 47.33' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.7555,
+          "dms": "31° 07.17' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.7555,
+          "dms": "31° 20.00' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.08617,
+          "lon": 122.7555,
+          "dms": "31° 05.17' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.08617,
+          "lon": 122.78883,
+          "dms": "31° 05.17' N, 122° 47.33' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 122.78883,
+          "dms": "30° 59.83' N, 122° 47.33' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 122.7555,
+          "dms": "30° 59.83' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.8055,
+          "dms": "31° 20.00' N, 122° 48.33' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.8055,
+          "dms": "31° 07.17' N, 122° 48.33' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.83883,
+          "dms": "31° 07.17' N, 122° 50.33' E"
+        },
+        {
+          "lat": 31.33333,
+          "lon": 122.83883,
+          "dms": "31° 20.00' N, 122° 50.33' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 122.8055,
+          "dms": "30° 59.83' N, 122° 48.33' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 122.83883,
+          "dms": "30° 59.83' N, 122° 50.33' E"
+        },
+        {
+          "lat": 31.08617,
+          "lon": 122.83883,
+          "dms": "31° 05.17' N, 122° 50.33' E"
+        },
+        {
+          "lat": 31.08617,
+          "lon": 122.8055,
+          "dms": "31° 05.17' N, 122° 48.33' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.7555,
+          "dms": "31° 07.17' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.1195,
+          "lon": 122.83883,
+          "dms": "31° 07.17' N, 122° 50.33' E"
+        },
+        {
+          "lat": 31.08617,
+          "lon": 122.83883,
+          "dms": "31° 05.17' N, 122° 50.33' E"
+        },
+        {
+          "lat": 31.08617,
+          "lon": 122.7555,
+          "dms": "31° 05.17' N, 122° 45.33' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 122.7555,
+          "dms": "30° 59.83' N, 122° 45.33' E"
+        },
+        {
+          "lat": 30.99717,
+          "lon": 122.83883,
+          "dms": "30° 59.83' N, 122° 50.33' E"
+        },
+        {
+          "lat": 30.96283,
+          "lon": 122.83883,
+          "dms": "30° 57.77' N, 122° 50.33' E"
+        },
+        {
+          "lat": 30.96283,
+          "lon": 122.7555,
+          "dms": "30° 57.77' N, 122° 45.33' E"
+        },
+        {
+          "lat": 31.04617,
+          "lon": 122.53317,
+          "dms": "31° 02.77' N, 122° 31.99' E"
+        },
+        {
+          "lat": 31.2195,
+          "lon": 122.848,
+          "dms": "31° 13.17' N, 122° 50.88' E"
+        },
+        {
+          "lat": 31.125,
+          "lon": 122.848,
+          "dms": "31° 07.50' N, 122° 50.88' E"
+        },
+        {
+          "lat": 31.125,
+          "lon": 122.89117,
+          "dms": "31° 07.50' N, 122° 53.47' E"
+        },
+        {
+          "lat": 31.2195,
+          "lon": 122.89117,
+          "dms": "31° 13.17' N, 122° 53.47' E"
+        },
+        {
+          "lat": 31.08417,
+          "lon": 122.83733,
+          "dms": "31° 05.05' N, 122° 50.24' E"
+        },
+        {
+          "lat": 31.03317,
+          "lon": 122.83733,
+          "dms": "31° 01.99' N, 122° 50.24' E"
+        },
+        {
+          "lat": 31.03317,
+          "lon": 122.90217,
+          "dms": "31° 01.99' N, 122° 54.13' E"
+        },
+        {
+          "lat": 31.08417,
+          "lon": 122.90217,
+          "dms": "31° 05.05' N, 122° 54.13' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "3935(P)/22 CHINA - East Coast - Traffic separation scheme. Separation zones. Precautionary areas. Restricted\nareas.\nSource: UKHO\n1. The Changjiang Kou traffic separation scheme is reported to have been significantly amended.\n2. The details of the reported new scheme are shown in the accompanying diagram. The numbered positions in the diagram\nrelate to the positions listed below.\n3. Traffic scheme A is reported to have been extended eastwards.\na. Separation zones are reported to have been established bound by the following positions:\n(1) 31° 06´·42N., 122° 33´·14E.\n(2) 31° 06´·42N., 122° 45´·33E.\n(3) 31° 05´·92N., 122° 45´·33E.\n(4) 31° 05´·92N., 122° 33´·14E.\nand\n(5) 31° 06´·42N., 122° 50´·33E.\n(6) 31° 06´·42N., 123° 00´·00E.\n(7) 31° 05´·92N., 123° 00´·00E.\n(8) 31° 05´·92N., 122° 50´·33E.\nb. Westbound traffic lanes are reported to have been established bound by the following positions:\n(1) 31° 06´·42N., 122° 33´·14E.\n(2) 31° 06´·42N., 122° 45´·33E.\n(9) 31° 07´·17N., 122° 45´·33E.\n(10) 31° 07´·17N., 122° 33´·14E.\nand\n(5) 31° 06´·42N., 122° 50´·33E.\n(6) 31° 06´·42N., 123° 00´·00E.\n(11) 31° 07´·17N., 123° 00´·00E.\n(12) 31° 07´·17N., 122° 50´·33E.\nc.Eastbound traffic lanes are reported to have been established bound by the following positions:\n(3) 31° 05´·92N., 122° 45´·33E.\n(4) 31° 05´·92N., 122° 33´·14E.\n(13) 31° 05´·16N., 122° 33´·14E.\n(14) 31° 05´·17N., 122° 45´·33E.\nand\n(7) 31° 05´·92N., 123° 00´·00E.\n(8) 31° 05´·92N., 122° 50´·33E.\n2.331\n3935(P)/22 CHINA - East Coast - Traffic separation scheme. Separation zones. Precautionary areas. Restricted\nareas. (continued)\n(15) 31° 05´·17N., 122° 50´·33E.\n(16) 31° 05´·17N., 123° 00´·00E.\n4. Traffic scheme B is reported to have been extended eastwards.\na.Separation zones are reported to have been established bound by the following positions:\n(17) 30° 59´·52N., 122° 33´·14E.\n(18) 30° 59´·06N., 122° 35´·42E.\n(19) 30° 59´·06N., 122° 45´·33E.\n(20) 30° 58´·54N., 122° 45´·33E.\n(21) 30° 58´·54N., 122° 35´·42E.\n(22) 30° 59´·01N., 122° 33´·14E.\nand\n(23) 30° 59´·07N., 122° 50´·33E.\n(24) 30° 59´·07N., 123° 00´·00E.\n(25) 30° 58´·54N., 123° 00´·00E.\n(26) 30° 58´·54N., 122° 50´·33E.\nb.Westbound traffic lanes are reported to have been established bound by the following positions:\n(17) 30° 59´·52N., 122° 33´·14E.\n(18) 30° 59´·06N., 122° 35´·42E.\n(19) 30° 59´·06N., 122° 45´·33E.\n(27) 30° 59´·83N., 122° 45´·33E.\n(28) 30° 59´·83N., 122° 35´·42E.\n(29) 31° 00´·30N., 122° 33´·14E.\nand\n(23) 30° 59´·07N., 122° 50´·33E.\n(24) 30° 59´·07N., 123° 00´·00E.\n(30) 30° 59´·83N., 123° 00´·00E.\n(31) 30° 59´·83N., 122° 50´·33E.\nc.Eastbound traffic lanes are reported to have been established bound by the following positions:\n(20) 30° 58´·54N., 122° 45´·33E.\n(21) 30° 58´·54N., 122° 35´·42E.\n(22) 30° 59´·01N., 122° 33´·14E.\n(32) 30° 58´·23N., 122° 33´·14E.\n(33) 30° 57´·76N., 122° 35´·42E.\n(34) 30° 57´·77N., 122° 45´·33E.\nand\n(25) 30° 58´·54N., 123° 00´·00E.\n(26) 30° 58´·54N., 122° 50´·33E.\n(35) 30° 57´·77N., 122° 50´·33E.\n(36) 30° 57´·77N., 123° 00´·00E.\n5. Traffic scheme C1 is reported to have been extended northwards.\na.A separation zone is reported to have been established bound by the following positions:\n(37) 31° 20´·00N., 122° 32´·29E.\n(38) 31° 07´·17N., 122° 32´·28E.\n(39) 31° 07´·17N., 122° 31´·69E.\n(40) 31° 20´·00N., 122° 31´·69E.\nb.A southbound traffic lane is reported to have been established bound by the following positions:\n(40) 31° 20´·00N., 122° 31´·69E.\n(39) 31° 07´·17N., 122° 31´·69E.\n(42) 31° 07´·17N., 122° 30´·80E.\n(",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
     {
       "id": "4687/26",
       "num": "4687",
@@ -53,10 +672,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4687 RUSSIA - Barents Sea Coast - Obstruction.\nSource: Russian Notice 32/2997/26\nChart 2966 (Panel, Murmansk) [ previous update 4376/26 ] WGS84 DATUM\nInsert + Obstn\n69° 03´·13N., 33° 02´·83E.\nChart 2966 [ previous update 4376/26 ] WGS84 DATUM\nInsert + Obstn\n69° 03´·13N., 33° 02´·83E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4687 RUSSIA - Barents Sea Coast - Obstruction.                          \n          Source: Russian Notice 32/2997/26                                       \n          Chart 2966 (Panel, Murmansk) [ previous update 4376/26 ] WGS84 DATUM    \n                                                                                  \n          Insert    + Obstn                                                       \n                                                      69° 03´·13N., 33° 02´·83E.  \n          Chart 2966 [ previous update 4376/26 ] WGS84 DATUM                      \n          Insert    + Obstn                                                       \n                                                      69° 03´·13N., 33° 02´·83E.",
       "checkedForExport": true
     },
     {
@@ -82,10 +698,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4700 NORWAY - West Coast - Light.\nSource: Norwegian Notice 15/82203/26\nChart 1428 (INT 1402) [ previous update 3989/26 ] WGS84 DATUM\nInsert ¶{\n63° 13´·6N., 7° 52´·2E.\nChart 1429 (INT 1403) [ previous update New Edition 17/09/2026 ] WGS84 DATUM\nInsert ¶{\n63° 13´·6N., 7° 52´·2E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4700 NORWAY - West Coast - Light.                                       \n          Source: Norwegian Notice 15/82203/26                                    \n          Chart 1428 (INT 1402) [ previous update 3989/26 ] WGS84 DATUM           \n                                                                                  \n          Insert    ¶{                                                            \n                                                      63° 13´·6N., 7° 52´·2E.     \n          Chart 1429 (INT 1403) [ previous update New Edition 17/09/2026 ] WGS84 DATUM\n          Insert    ¶{                                                            \n                                                      63° 13´·6N., 7° 52´·2E.",
       "checkedForExport": true
     },
     {
@@ -116,10 +729,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4705 RUSSIA - Barents Sea Coast - Buoyage.\nSource: Russian Notice 36/3372/26\nChart 2966 (Panel, Murmansk) [ previous update 4687/26 ] WGS84 DATUM\nInsert G;f Fl.Y.5s No 1\n69° 02´·51N., 33° 03´·81E.\nG;f\nFl.Y.5s No 2\n69° 03´·08N., 33° 04´·07E.\nG;f\nFl.Y.5s No 3\n69° 03´·24N., 33° 05´·21E.\n2.13\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4705 RUSSIA - Barents Sea Coast - Buoyage.                              \n          Source: Russian Notice 36/3372/26                                       \n                                                                                  \n          Chart 2966 (Panel, Murmansk) [ previous update 4687/26 ] WGS84 DATUM    \n          Insert    G;f Fl.Y.5s No 1                                              \n                                                      69° 02´·51N., 33° 03´·81E.  \n                    G;f                                                           \n                      Fl.Y.5s No 2                                                \n                                                      69° 03´·08N., 33° 04´·07E.  \n                    G;f                                                           \n                      Fl.Y.5s No 3                                                \n                                                      69° 03´·24N., 33° 05´·21E.",
       "checkedForExport": true
     },
     {
@@ -270,10 +880,7 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4745 RUSSIA - White Sea Coast - Spoil grounds. Legends.\nSource: Russian Notice 32/2998/26\nChart 2273 [ previous update 1447/26 ] PULKOVO 1942 DATUM\nInsert limit of spoil ground, pecked line, joining: (a) 64° 57´·05N., 39° 58´·20E.\n(b) 64° 57´·78N., 39° 58´·20E.\n(c) 64° 57´·78N., 39° 59´·85E.\n(d) 64° 57´·05N., 39° 59´·85E.\n(e) 64° 57´·05N., 39° 58´·85E.\nand\n(f) 64° 58´·55N., 40° 06´·12E.\n(g) 64° 59´·47N., 40° 06´·15E.\n(h) 64° 59´·45N., 40° 08´·50E.\n(i) 64° 58´·54N., 40° 08´·47E.\nlegend, Spoil Ground, close W of: (a)-(e) above\nlegend, Spoil Ground, within: (f)-(i) above\nChart 2294 (Panel A, Ostrov Mud'yugskiy to Ostrov Linskiy Priluk) [ previous update 2831/26 ] WGS84 DATUM\nInsert limit of spoil ground, pecked line, joining: (a) 64° 46´·58N., 40° 26´·11E.\n(b) 64° 46´·67N., 40° 26´·21E.\n(c) 64° 46´·53N., 40° 26´·85E.\n(d) 64° 46´·47N., 40° 27´·17E.\n(e) 64° 46´·42N., 40° 27´·35E.\n(f) 64° 46´·39N., 40° 27´·44E.\n(g) 64° 46´·32N., 40° 27´·37E.\n(h) 64° 46´·32N., 40° 27´·35E.\n(i) 64° 46´·43N., 40° 26´·85E.\nlegend, Spoil Ground, within: (a)-(i) above\nlegend, R.R.A No 150-A (see Note), within: (a)-(i) above\nChart 2294 [ previous update 2831/26 ] WGS84 DATUM\nInsert limit of spoil ground, pecked line, joining: (a) 64° 57´·07N., 39° 58´·05E.\n(b) 64° 57´·80N., 39° 58´·05E.\n(c) 64° 57´·80N., 39° 59´·70E.\n(d) 64° 57´·07N., 39° 59´·70E.\n(e) 64° 57´·07N., 39° 58´·70E.\nand\n(f) 64° 58´·57N., 40° 05´·96E.\n(g) 64° 59´·48N., 40° 06´·00E.\n(h) 64° 59´·47N., 40° 08´·35E.\n(i) 64° 58´·55N., 40° 08´·31E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4745 RUSSIA - White Sea Coast - Spoil grounds. Legends.                 \n          Source: Russian Notice 32/2998/26                                       \n          Chart 2273 [ previous update 1447/26 ] PULKOVO 1942 DATUM               \n          Insert   limit of spoil ground, pecked line, joining: (a) 64° 57´·05N., 39° 58´·20E.\n                                                   (b) 64° 57´·78N., 39° 58´·20E. \n                                                   (c) 64° 57´·78N., 39° 59´·85E. \n                                                   (d) 64° 57´·05N., 39° 59´·85E. \n                                                   (e) 64° 57´·05N., 39° 58´·85E. \n                                                      and                         \n                                                   (f) 64° 58´·55N., 40° 06´·12E. \n                                                   (g) 64° 59´·47N., 40° 06´·15E. \n                                                   (h) 64° 59´·45N., 40° 08´·50E. \n                                                   (i) 64° 58´·54N., 40° 08´·47E. \n                   legend, Spoil Ground, close W of:  (a)-(e) above               \n                   legend, Spoil Ground, within:      (f)-(i) above",
       "checkedForExport": true
     },
     {
@@ -299,10 +906,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4646 FINLAND - West Coast - Buoy.\nSource: Finnish Notice 21/205/26\nChart 3803 (INT 1131) (Panel, Uusikaupunki (Nyståd)) [ previous update 1390/26 ] WGS84 DATUM\nReplace I{\\ with J\\\n60° 47´·62N., 21° 23´·58E.\nChart 3803 (INT 1131) [ previous update 1390/26 ] WGS84 DATUM\nReplace I{\\ with J\\\n60° 47´·62N., 21° 23´·58E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4646 FINLAND - West Coast - Buoy.                                       \n          Source: Finnish Notice 21/205/26                                        \n          Chart 3803 (INT 1131) (Panel, Uusikaupunki (Nyståd)) [ previous update 1390/26 ] WGS84 DATUM\n          Replace   I{\\ with J\\                                                   \n                                                      60° 47´·62N., 21° 23´·58E.  \n                                                                                  \n          Chart 3803 (INT 1131) [ previous update 1390/26 ] WGS84 DATUM           \n          Replace   I{\\ with J\\                                                   \n                                                      60° 47´·62N., 21° 23´·58E.",
       "checkedForExport": true
     },
     {
@@ -328,10 +932,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4651 SWEDEN - West Coast - Rocks.\nSource: Swedish Notice 1135/20292/26\nChart 858 (INT 1316) [ previous update 3635/26 ] WGS84 DATUM\nInsert ¯ , and extend 3m contour SW to enclose\n57° 36´·96N., 11° 54´·50E.\n57° 36´·95N., 11° 54´·48E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4651 SWEDEN - West Coast - Rocks.                                       \n          Source: Swedish Notice 1135/20292/26                                    \n          Chart 858 (INT 1316) [ previous update 3635/26 ] WGS84 DATUM            \n                                                                                  \n          Insert    ¯ , and extend 3m contour SW to enclose                       \n                                                      57° 36´·96N., 11° 54´·50E.  \n                                                      57° 36´·95N., 11° 54´·48E.",
       "checkedForExport": true
     },
     {
@@ -352,10 +953,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4652 SWEDEN - East Coast - Rock.\nSource: Swedish Notice 1135/20297/26\nChart 810 (INT 1771) [ previous update 4147/26 ] WGS84 DATUM\nInsert ¯ , and extend 3m contour SE to enclose\n59° 32´·06N., 17° 05´·70E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4652 SWEDEN - East Coast - Rock.                                        \n          Source: Swedish Notice 1135/20297/26                                    \n                                                                                  \n          Chart 810 (INT 1771) [ previous update 4147/26 ] WGS84 DATUM            \n          Insert    ¯ , and extend 3m contour SE to enclose                       \n                                                      59° 32´·06N., 17° 05´·70E.",
       "checkedForExport": true
     },
     {
@@ -386,10 +984,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4653 FINLAND - West Coast - NM Blocks. Light.\nSource: Finnish Notice 21/206/26\nChart 2085 [ previous update 4831/25 ] WGS84 DATUM\nInsert the accompanying block, centred on: 64° 00´·8N., 22° 50´·8E.\nChart 2252 [ previous update 479/25 ] WGS84 DATUM\nAmend light to, Fl(2)12M 63° 59´·6N., 22° 52´·3E.\nChart 3862 (INT 1143) [ previous update 3165/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 63° 59´·9N., 22° 52´·3E.\n2.15\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4653 FINLAND - West Coast - NM Blocks. Light.                           \n          Source: Finnish Notice 21/206/26                                        \n          Chart 2085 [ previous update 4831/25 ] WGS84 DATUM                      \n                                                                                  \n          Insert   the accompanying block, centred on: 64° 00´·8N., 22° 50´·8E.   \n          Chart 2252 [ previous update 479/25 ] WGS84 DATUM                       \n                                                                                  \n          Amend    light to, Fl(2)12M                 63° 59´·6N., 22° 52´·3E.    \n          Chart 3862 (INT 1143) [ previous update 3165/26 ] WGS84 DATUM           \n                                                                                  \n          Insert   the accompanying block, centred on: 63° 59´·9N., 22° 52´·3E.",
       "checkedForExport": true
     },
     {
@@ -420,10 +1015,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4654 SWEDEN - East Coast - Rocks.\nSource: Swedish Notice 1135/20278/26\nChart 837 (INT 1232) [ previous update 907/26 ] WGS84 DATUM\nInsert ¯ , and extend 3m contour NE to enclose\n58° 52´·64N., 17° 58´·01E.\n58° 52´·62N., 17° 58´·01E.\n58° 52´·60N., 17° 58´·02E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4654 SWEDEN - East Coast - Rocks.                                       \n          Source: Swedish Notice 1135/20278/26                                    \n          Chart 837 (INT 1232) [ previous update 907/26 ] WGS84 DATUM             \n          Insert    ¯ , and extend 3m contour NE to enclose                       \n                                                      58° 52´·64N., 17° 58´·01E.  \n                                                      58° 52´·62N., 17° 58´·01E.  \n                                                      58° 52´·60N., 17° 58´·02E.",
       "checkedForExport": true
     },
     {
@@ -464,10 +1056,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4664 SWEDEN - West Coast - Lights.\nSource: Swedish Notice 1135/20320/26\nChart 857 (INT 1317) (Panel A, Hake Fjord to Älvsborgsfjorden) [ previous update 5362/25 ] WGS84 DATUM\nInsert · VQ Y (occas)\n57° 38´·918N., 11° 43´·637E.\nChart 858 (INT 1316) [ previous update 4651/26 ] WGS84 DATUM\nInsert · VQ Y (occas)\n57° 38´·92N., 11° 43´·64E.\n57° 37´·68N., 11° 44´·84E.\n57° 36´·35N., 11° 45´·49E.\n57° 35´·06N., 11° 45´·17E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4664 SWEDEN - West Coast - Lights.                                      \n          Source: Swedish Notice 1135/20320/26                                    \n                                                                                  \n          Chart 857 (INT 1317) (Panel A, Hake Fjord to Älvsborgsfjorden) [ previous update 5362/25 ] WGS84 DATUM\n          Insert    ·  VQ Y (occas)                                               \n                                                      57° 38´·918N., 11° 43´·637E.\n          Chart 858 (INT 1316) [ previous update 4651/26 ] WGS84 DATUM            \n                                                                                  \n          Insert    ·  VQ Y (occas)                                               \n                                                      57° 38´·92N., 11° 43´·64E.  \n                                                      57° 37´·68N., 11° 44´·84E.  \n                                                      57° 36´·35N., 11° 45´·49E.  \n                                                      57° 35´·06N., 11° 45´·17E.",
       "checkedForExport": true
     },
     {
@@ -578,10 +1167,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4692 FINLAND - West Coast - Buoyage.\nSource: Finnish Notice 21/208/26\nChart 2620 (INT 11461) (Panel A, Raahe) [ previous update 5069/25 ] WGS84 DATUM\nReplace IV{ with JV\n64° 39´·80N., 24° 23´·03E.\n64° 39´·83N., 24° 23´·47E.\n64° 39´·73N., 24° 23´·95E.\nIU{ JU\nwith\n64° 39´·75N., 24° 23´·41E.\n64° 39´·74N., 24° 23´·19E.\n64° 39´·71N., 24° 22´·97E.\nChart 3873 (INT 1146) [ previous update 5069/25 ] WGS84 DATUM\nReplace IV{ with JV\n64° 39´·80N., 24° 23´·03E.\n64° 39´·83N., 24° 23´·47E.\n64° 39´·73N., 24° 23´·95E.\nIU{ JU\nwith\n64° 39´·75N., 24° 23´·41E.\n64° 39´·74N., 24° 23´·19E.\n64° 39´·71N., 24° 22´·97E.\n2.16\nWk41/26\nII\n4694* GERMANY - Baltic Coast - Maritime limit. Legend.\nSource: WSA Ostsee 275/26\nChart DE 1672 (INT 1355) [ previous update 3238/26 ] WGS84 DATUM\nInsert maritime limit, pecked line, joining: (a) 54° 05´·806N., 12° 07´·873E.\n(b) 54° 05´·766N., 12° 07´·908E.\n(c) 54° 05´·827N., 12° 09´·039E.\n(d) 54° 05´·748N., 12° 09´·047E.\n(e) 54° 05´·684N., 12° 07´·791E.\n(f) 54° 05´·756N., 12° 07´·721E.\nlegend, Works in progress, within: (a)-(f) above\n4733 ESTONIA - Radar beacon.\nSource: Estonian Notice 8/145/26\nChart 2264 [ previous update New Edition 10/09/2026 ] WGS84 DATUM\nInsert radar beacon, Racon(B), at light 59° 25´·56N., 27° 44´·37E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4692 FINLAND - West Coast - Buoyage.                                    \n          Source: Finnish Notice 21/208/26                                        \n                                                                                  \n          Chart 2620 (INT 11461) (Panel A, Raahe) [ previous update 5069/25 ] WGS84 DATUM\n          Replace   IV{ with JV                                                   \n                                                      64° 39´·80N., 24° 23´·03E.  \n                                                      64° 39´·83N., 24° 23´·47E.  \n                                                      64° 39´·73N., 24° 23´·95E.  \n                    IU{  JU                                                       \n                       with                                                       \n                                                      64° 39´·75N., 24° 23´·41E.  \n                                                      64° 39´·74N., 24° 23´·19E.  \n                                                      64° 39´·71N., 24° 22´·97E.  \n          Chart 3873 (INT 1146) [ previous update 5069/25 ] WGS84 DATUM           \n          Replace   IV{ with JV                                                   \n                                                      64° 39´·80N., 24° 23´·03E.",
       "checkedForExport": true
     },
     {
@@ -662,10 +1248,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4761 RUSSIA - Baltic Sea Coast - NM Blocks.\nSource: Russian Notices 34/3207-3214/26\nChart 2698 [ previous update 4458/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 59° 44´·4N., 28° 25´·8E.\nChart 2713 [ previous update 4458/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 59° 44´·4N., 28° 25´·6E.\n4695* GERMANY - North Sea Coast - Restricted area.\nSource: WSA Weser-Jade-Nordsee 11/09/26\nChart DE 7 (INT 1460) (Panel, Wilhelmshaven) [ previous update 2913/26 ] WGS84 DATUM\nDelete limit of restricted area, entry prohibited, pecked line, joining: 53° 30´·781N., 8° 08´·756E.\n53° 30´·777N., 8° 08´·874E.\nChart DE 7 (INT 1460) [ previous update 2913/26 ] WGS84 DATUM\nDelete limit of restricted area, entry prohibited, pecked line, joining: 53° 30´·78N., 8° 08´·75E.\n53° 30´·77N., 8° 08´·88E.\n2.17\nWk41/26\nII\n4701* GERMANY - North Sea Coast - Depths. Drying height.\nSource: WSA Weser-Jade-Nordsee, Survey LP31572, LP31573/26\nChart DE 2 (INT 1456) [ previous update 4487/26 ] WGS84 DATUM\nInsert depth, 174 (a) 53° 45´·80N., 7° 59´·64E.\nDelete depth, 184, close SE of: (a) above\nReplace depth, 38, with drying height,14, and extend 0m low water\nline E to enclose 53° 46´·50N., 7° 49´·48E.\nChart DE 20 (INT 1424) [ previous update 4483/26 ] WGS84 DATUM\nInsert drying height,14, enclosed by 0m low water line (a) 53° 45´·47N., 8° 00´·15E.\nDelete depth, 43, close S of: (a) above\n4714 BELGIUM - NM Blocks. Radio reporting point. Legend.\nSource: Belgian Notices 19/140-141/26\nChart BE",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4761 RUSSIA - Baltic Sea Coast - NM Blocks.                             \n          Source: Russian Notices 34/3207-3214/26                                 \n                                                                                  \n          Chart 2698 [ previous update 4458/26 ] WGS84 DATUM                      \n          Insert   the accompanying block, centred on: 59° 44´·4N., 28° 25´·8E.   \n                                                                                  \n          Chart 2713 [ previous update 4458/26 ] WGS84 DATUM                      \n          Insert   the accompanying block, centred on: 59° 44´·4N., 28° 25´·6E.   \n                                                                                  \n                                                                                  \n                                                                                  \n          4695* GERMANY - North Sea Coast - Restricted area.                      \n          Source: WSA Weser-Jade-Nordsee 11/09/26                                 \n                                                                                  \n          Chart DE 7 (INT 1460) (Panel, Wilhelmshaven) [ previous update 2913/26 ] WGS84",
       "checkedForExport": true
     },
     {
@@ -711,10 +1294,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4729 NORTH SEA - Netherlands Sector - Buoyage.\nSource: Netherlands Notice 38/227/26\nChart 110 (INT 1473) [ previous update 4164/26 ] WGS84 DATUM\nDelete Gf; Fl(5)Y.20s MT 1\n51° 49´·99N., 3° 03´·46E.\nGf;\nFl(5)Y.20s MT 2\n51° 51´·18N., 3° 09´·45E.\nGf;\nFl(5)Y.20s MT 3\n51° 46´·26N., 3° 09´·65E.\nGf;\nFl(5)Y.20s MT 4\n51° 42´·38N., 3° 16´·81E.\nGf;\nFl(5)Y.20s MT 5\n51° 39´·06N., 3° 12´·73E.\nChart 1630 (INT 1416) [ previous update 4506/26 ] WGS84 DATUM\nDelete Gf; Fl(5)Y.20s MT 14\n51° 45´·97N., 2° 50´·83E.\n2.18\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4729 NORTH SEA - Netherlands Sector - Buoyage.                          \n          Source: Netherlands Notice 38/227/26                                    \n                                                                                  \n          Chart 110 (INT 1473) [ previous update 4164/26 ] WGS84 DATUM            \n          Delete    Gf; Fl(5)Y.20s MT 1                                           \n                                                      51° 49´·99N., 3° 03´·46E.   \n                    Gf;                                                           \n                      Fl(5)Y.20s MT 2                                             \n                                                      51° 51´·18N., 3° 09´·45E.   \n                    Gf;                                                           \n                      Fl(5)Y.20s MT 3                                             \n                                                      51° 46´·26N., 3° 09´·65E.   \n                    Gf;                                                           \n                      Fl(5)Y.20s MT 4                                             \n                                                      51° 42´·38N., 3° 16´·81E.",
       "checkedForExport": true
     },
     {
@@ -770,10 +1350,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4756 NORTH SEA - Netherlands Sector - Platform. Restricted area. Legend.\nSource: Netherlands Notice 38/232/26\nChart 266 [ previous update 4383/26 ] WGS84 DATUM\nDelete ¼{ D18a-A and associated circular limit of restricted area,\nÇ\n, centred on:\n54° 08´·93N., 2° 49´·33E.\nlegend, GAS FIELD DECOMMISSIONING (see Note),\ncentred on: 54° 08´·17N., 2° 50´·95E.\nChart 1187 [ previous update 3944/26 ] ETRS89 DATUM\nDelete ¼ D18a-A and associated circular limit of restricted area,\nÇ\n, centred on:\n54° 08´·93N., 2° 49´·33E.\nlegend, GAS FIELD DECOMMISSIONING (see Note),\ncentred on: 54° 08´·57N., 2° 50´·69E.\nChart 2182A (INT 1043) [ previous update 4668/26 ] WGS84 DATUM\nDelete ¼{\n54° 08´·9N., 2° 49´·3E.\nChart 2182B (INT 1042) [ previous update 4383/26 ] WGS84 DATUM\nDelete ¼{\n54° 08´·9N., 2° 49´·3E.\nChart 5614_25 [ previous update 3485/26 ] WGS84 DATUM\nDelete ¼{\n54° 08´·9N., 2° 49´·3E.\nChart 5615_23 [ previous update 4383/26 ] WGS84 DATUM\nDelete ¼{\n54° 08´·9N., 2° 49´·3E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4756 NORTH SEA - Netherlands Sector - Platform. Restricted area. Legend.\n          Source: Netherlands Notice 38/232/26                                    \n          Chart 266 [ previous update 4383/26 ] WGS84 DATUM                       \n          Delete    ¼{ D18a-A and associated circular limit of restricted area,   \n                                                                                  \n                    Ç                                                             \n                      , centred on:                                               \n                                                      54° 08´·93N., 2° 49´·33E.   \n                   legend, GAS FIELD DECOMMISSIONING (see Note),                  \n                   centred on:                        54° 08´·17N., 2° 50´·95E.   \n          Chart 1187 [ previous update 3944/26 ] ETRS89 DATUM                     \n          Delete    ¼ D18a-A and associated circular limit of restricted area,    \n                    Ç                                                             \n                      , centred on:                                               \n                                                      54° 08´·93N., 2° 49´·33E.   \n                   legend, GAS FIELD DECOMMISSIONING (see Note),",
       "checkedForExport": true
     },
     {
@@ -854,10 +1431,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4706 FRANCE - West Coast - Superbuoys.\nSource: French Notice 35/43/26\nNote:This update is included in New Edition 20, published late 2026\nChart 1104 [ previous update 3425/26 ] WGS84 DATUM\nInsert Pf; Fl(5)Y.20s No 1 ODAS\n47° 40´·9N., 4° 30´·7W.\nPf;\nFl(5)Y.20s No 2 ODAS\n47° 35´·6N., 4° 15´·2W.\nPf;\nFl(5)Y.20s No 3 ODAS\n47° 29´·1N., 4° 27´·2W.\nPf;\nFl(5)Y.20s No 4 ODAS\n47° 32´·5N., 4° 38´·2W.\n2.19\nWk41/26\nII\n4706 FRANCE - West Coast - Superbuoys. (continued)\nChart 2521 (INT 1801) [ previous update New Edition 12/02/2026 ] WGS84 DATUM\nInsert Pf; Fl(5)Y.20s No 1 ODAS\n47° 40´·86N., 4° 30´·71W.\nPf;\nFl(5)Y.20s No 2 ODAS\n47° 35´·60N., 4° 15´·23W.\nPf;\nFl(5)Y.20s No 3 ODAS\n47° 29´·10N., 4° 27´·22W.\nPf;\nFl(5)Y.20s No 4 ODAS\n47° 32´·54N., 4° 38´·18W.\nChart 2643 (INT 1800) [ previous update 4071/26 ] WGS84 DATUM\nInsert Pf; Fl(5)Y.20s No 1 ODAS\n47° 40´·86N., 4° 30´·71W.\nChart 2655 [ previous update 4071/26 ] ETRS89 DATUM\nInsert Pf; Fl(5)Y.20s No 1 ODAS\n47° 40´·9N., 4° 30´·7W.\nPf;\nFl(5)Y.20s No 2 ODAS\n47° 35´·6N., 4° 15´·2W.\nChart 2820 [ previous update 730/25 ] WGS84 DATUM\nInsert Pf; Fl(5)Y.20s No 1 ODAS\n47° 40´·86N., 4° 30´·71W.\nPf;\nFl(5)Y.20s No 2 ODAS\n47° 35´·60N., 4° 15´·23W.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4706 FRANCE - West Coast - Superbuoys.                                  \n          Source: French Notice 35/43/26                                          \n          Note:This update is included in New Edition 20, published late 2026     \n          Chart 1104 [ previous update 3425/26 ] WGS84 DATUM                      \n                                                                                  \n          Insert    Pf; Fl(5)Y.20s No 1 ODAS                                      \n                                                      47° 40´·9N., 4° 30´·7W.     \n                    Pf;                                                           \n                       Fl(5)Y.20s No 2 ODAS                                       \n                                                      47° 35´·6N., 4° 15´·2W.     \n                    Pf;                                                           \n                       Fl(5)Y.20s No 3 ODAS                                       \n                                                      47° 29´·1N., 4° 27´·2W.     \n                    Pf;                                                           \n                       Fl(5)Y.20s No 4 ODAS",
       "checkedForExport": true
     },
     {
@@ -883,10 +1457,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4741 FRANCE - North Coast - Buoyage.\nSource: French Notice 36/45/26\nChart 2029 [ previous update 3701/26 ] WGS84 DATUM\nInsert GrW Q(3)10s\n48° 35´·61N., 2° 45´·34W.\nAmend light-buoy to, Q Perle de Binic Nord 48° 36´·32N., 2° 46´·16W.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4741 FRANCE - North Coast - Buoyage.                                    \n          Source: French Notice 36/45/26                                          \n          Chart 2029 [ previous update 3701/26 ] WGS84 DATUM                      \n          Insert    GrW Q(3)10s                                                   \n                                                      48° 35´·61N., 2° 45´·34W.   \n          Amend    light-buoy to, Q Perle de Binic Nord 48° 36´·32N., 2° 46´·16W.",
       "checkedForExport": true
     },
     {
@@ -912,10 +1483,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4734 NORTH ATLANTIC OCEAN - Islas Canarias - Buoyage. Superbuoy.\nSource: Spanish Notice 36/216/26\nChart 1847 (INT 1929) [ previous update 2854/25 ] WGS84 DATUM\nInsert Bf; Fl(4)Y.10s3M\n28° 29´·33N., 16° 11´·27W.\nReplace Pf Fl(5)Y.20s3M ODAS with Ef Fl(5)Y.20s3M ODAS\n28° 27´·89N., 16° 14´·34W.\n2.20\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4734 NORTH ATLANTIC OCEAN - Islas Canarias - Buoyage. Superbuoy.        \n          Source: Spanish Notice 36/216/26                                        \n                                                                                  \n          Chart 1847 (INT 1929) [ previous update 2854/25 ] WGS84 DATUM           \n          Insert    Bf; Fl(4)Y.10s3M                                              \n                                                      28° 29´·33N., 16° 11´·27W.  \n          Replace   Pf Fl(5)Y.20s3M ODAS with Ef Fl(5)Y.20s3M ODAS                \n                                                      28° 27´·89N., 16° 14´·34W.",
       "checkedForExport": true
     },
     {
@@ -936,10 +1504,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4759 NORTH ATLANTIC OCEAN - Islas Canarias - Buoy.\nSource: Spanish Notice 36/215/26\nChart 1863 (Panel B, Puerto del Rosario) [ previous update 3387/26 ] WGS84 DATUM\nInsert GWr VQ(3)10s\n28° 29´·57N., 13° 51´·13W.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4759 NORTH ATLANTIC OCEAN - Islas Canarias - Buoy.                      \n          Source: Spanish Notice 36/215/26                                        \n          Chart 1863 (Panel B, Puerto del Rosario) [ previous update 3387/26 ] WGS84 DATUM\n          Insert    GWr VQ(3)10s                                                  \n                                                      28° 29´·57N., 13° 51´·13W.",
       "checkedForExport": true
     },
     {
@@ -990,10 +1555,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4661 TÜRKIYE - South Coast - Outfall.\nSource: Turkish Notice 30/166/26\nChart 237 [ previous update 3925/26 ] WGS84 DATUM\nInsert outfall, È , joining:\n36° 51´·4N., 31° 00´·7E.\n36° 50´·7N., 31° 00´·2E.\n4671 CEUTA - Anchorage area. Legend.\nSource: Spanish Notices 35/211-212/26\nChart 2742 (INT 3252) [ previous update 4553/26 ] WGS84 DATUM\nInsert limit of anchorage area, pecked line, joining: (a) 35° 52´·933N., 5° 19´·269W.\n(b) 35° 53´·074N., 5° 19´·115W.\n(c) 35° 52´·983N., 5° 18´·564W.\n(d) 35° 52´·613N., 5° 18´·776W.\n(e) 35° 52´·740N., 5° 18´·909W.\n½\nlegend, Recreational Craft, within:\n(a)-(e) above",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4661 TÜRKIYE - South Coast - Outfall.                                   \n          Source: Turkish Notice 30/166/26                                        \n                                                                                  \n          Chart 237 [ previous update 3925/26 ] WGS84 DATUM                       \n          Insert   outfall, È , joining:                                          \n                                                      36° 51´·4N., 31° 00´·7E.    \n                                                      36° 50´·7N., 31° 00´·2E.    \n                                                                                  \n                                                                                  \n                                                                                  \n          4671 CEUTA - Anchorage area. Legend.                                    \n          Source: Spanish Notices 35/211-212/26                                   \n          Chart 2742 (INT 3252) [ previous update 4553/26 ] WGS84 DATUM           \n                                                                                  \n          Insert   limit of anchorage area, pecked line, joining: (a) 35° 52´·933N., 5°",
       "checkedForExport": true
     },
     {
@@ -1039,10 +1601,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4711 RUSSIA - Black Sea Coast - Buoyage. Fishing stakes.\nSource: Russian Notices 33/3123-3124/26, 33/3127/26 and 33/3129/26\nChart 2216 [ previous update 4530/26 ] WGS84 DATUM\nInsert G Q\n45° 08´·39N., 36° 32´·81E.\nG;f\nFl.Y.5s\n44° 56´·99N., 36° 41´·41E.\nsymbol, fishing stakes, length 1260m, oriented 081°/261°,\ncentred on: 44° 48´·08N., 36° 59´·61E.\nsymbol, fishing stakes, length 940m, oriented 098°/278°,\ncentred on: 44° 48´·66N., 37° 01´·24E.\nChart 2242 [ previous update 139/26 ] WGS84 DATUM\nInsert G Q\n45° 08´·39N., 36° 32´·81E.\nG;f\nFl.Y.5s\n45° 06´·90N., 36° 39´·82E.\n2.21\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4711 RUSSIA - Black Sea Coast - Buoyage. Fishing stakes.                \n          Source: Russian Notices 33/3123-3124/26, 33/3127/26 and 33/3129/26      \n                                                                                  \n          Chart 2216 [ previous update 4530/26 ] WGS84 DATUM                      \n          Insert    G Q                                                           \n                                                      45° 08´·39N., 36° 32´·81E.  \n                    G;f                                                           \n                      Fl.Y.5s                                                     \n                                                      44° 56´·99N., 36° 41´·41E.  \n                   symbol, fishing stakes, length 1260m, oriented 081°/261°,      \n                   centred on:                        44° 48´·08N., 36° 59´·61E.  \n                   symbol, fishing stakes, length 940m, oriented 098°/278°,       \n                   centred on:                        44° 48´·66N., 37° 01´·24E.  \n          Chart 2242 [ previous update 139/26 ] WGS84 DATUM                       \n          Insert    G Q                                                           \n                                                      45° 08´·39N., 36° 32´·81E.  \n                    G;f",
       "checkedForExport": true
     },
     {
@@ -1238,10 +1797,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4727 ISRAEL - Mediterranean Sea Coast - Obstruction. Buoy. Automatic Identification System.\nSource: ENC I1200011\nChart 1585 (INT 3680) [ previous update 2090/26 ] WGS84 DATUM\nReplace Ef Fl.Y.4s with Bf Q.Y\n(a) 33° 02´·39N., 34° 56´·83E.\nInsert Automatic Identification System, AIS, at light-buoy (a) above\nChart 1591 (INT 3681) (Panel D, Ashqelon) [ previous update New Edition 08/05/2025 ] WGS84 DATUM\nInsert 17, Obstn\n31° 40´·89N., 34° 32´·41E.\nChart 2634 [ previous update 3672/26 ] WGS84 DATUM\nReplace Ef Fl.Y.4s with Bf Q.Y\n(a) 33° 02´·4N., 34° 56´·8E.\nInsert Automatic Identification System, AIS, at light-buoy (a) above\n4744 ROMANIA - Notes. Submarine pipelines. Legends.\nSource: Romanian Notices 5/38/26 and 6/43/26\nChart 2214 [ previous update New Edition 05/02/2026 ] WGS84 DATUM\nInsert submarine pipeline, È , joining:\n43° 58´·3N., 28° 39´·7E.\n(a) 43° 57´·7N., 28° 42´·5E.\n(b) 44° 01´·8N., 29° 38´·6E.\n44° 02´·4N., 29° 58´·6E.\nlegend, Gas, along: (a)-(b) above\nChart 2230 [ previous update 4412/26 ] WGS84 DATUM\nInsert the accompanying note, GAS PIPELINES, centred on: 43° 44´·0N., 27° 47´·0E.\nÈ\nsubmarine pipeline, , joining:\n43° 58´·4N., 28° 39´·4E.\n(a) 43° 57´·7N., 28° 42´·5E.\n(b) 44° 00´·9N., 29° 29´·6E.\n(c) 44° 01´·8N., 29° 38´·6E.\n(d) 44° 02´·0N., 29° 47´·8E.\n44° 02´·6N., 29° 51´·4E.\n44° 02´·2N., 29° 54´·3E.\n44° 02´·4N., 29° 58´·6E.\nlegend, Gas (see Note) , along: (a)-(b) above\n(c)-(d) above\n2.22\nWk41/26\nII\n4744 ROMANIA - Notes. Submarine pipelines. Legends. (continued)\nChart",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4727 ISRAEL - Mediterranean Sea Coast - Obstruction. Buoy. Automatic Identification System.\n          Source: ENC I1200011                                                    \n          Chart 1585 (INT 3680) [ previous update 2090/26 ] WGS84 DATUM           \n          Replace   Ef Fl.Y.4s with Bf Q.Y                                        \n                                                   (a) 33° 02´·39N., 34° 56´·83E. \n          Insert   Automatic Identification System, AIS, at light-buoy (a) above  \n                                                                                  \n          Chart 1591 (INT 3681) (Panel D, Ashqelon) [ previous update New Edition 08/05/2025 ] WGS84 DATUM\n          Insert    17, Obstn                                                     \n                                                      31° 40´·89N., 34° 32´·41E.  \n          Chart 2634 [ previous update 3672/26 ] WGS84 DATUM                      \n                                                                                  \n          Replace   Ef Fl.Y.4s with Bf Q.Y                                        \n                                                   (a) 33° 02´·4N., 34° 56´·8E.   \n          Insert   Automatic Identification System, AIS, at light-buoy (a) above",
       "checkedForExport": true
     },
     {
@@ -1262,10 +1818,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4748 SPAIN - Mediterranean Sea Coast - Buoy.\nSource: Spanish Notice 36/218/26\nChart 774 [ previous update 3174/26 ] WGS84 DATUM\nInsert Gf; Fl(5)Y.20s ODAS\n37° 15´·3N., 1° 43´·4W.\n2.23\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4748 SPAIN - Mediterranean Sea Coast - Buoy.                            \n          Source: Spanish Notice 36/218/26                                        \n          Chart 774 [ previous update 3174/26 ] WGS84 DATUM                       \n          Insert    Gf; Fl(5)Y.20s ODAS                                           \n                                                      37° 15´·3N., 1° 43´·4W.     \n                                                                                  \n                                                                                  \n                                                                                  \n                                                                                  \n                                                                                  \n                                                                                  \n                                                                                  \n                                        2.23                                      \n          Wk41/26",
       "checkedForExport": true
     },
     {
@@ -1471,12 +2024,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4758 SPAIN - Mediterranean Sea Coast - Buoy.\nSource: Spanish Notice 36/217/26\nChart 1448 [ previous update 4471/26 ] WGS84 DATUM\nInsert Gf; Fl(5)Y.20s1M ODAS\n36° 09´·25N., 5° 25´·83W.\nChart 1455 [ previous update 2854/26 ] WGS84 DATUM\nInsert Gf; Fl(5)Y.20s1M ODAS\n36° 09´·25N., 5° 25´·83W.\n4686* QATAR - Buoy.\nSource: MENAS\nNote:Former Notice 2822(T)/17 is cancelled.\nChart 2523 (INT 7250) [ previous update 4117/26 ] WGS84 DATUM\nInsert GYo Fl(2)\n26° 14´·26N., 51° 08´·21E.\nChart 3790 (INT 7252) [ previous update 2932/26 ] WGS84 DATUM\nInsert GYo Fl(2)\n26° 14´·26N., 51° 08´·21E.\n4709* UNITED ARAB EMIRATES - Restricted areas.\nSource: Dubai Petroleum\nChart 2442 [ previous update 4133/26 ] WGS84 DATUM\nInsert circular limit of restricted area, radius 500m (0·27M), Ç ,\ncentred on: 25° 34´·74N., 54° 28´·32E.\n25° 33´·21N., 54° 26´·00E.\nChart 3413 (INT 7227) (Panel B, Fateh) [ previous update 4133/26 ] WGS84 DATUM\nInsert circular limit of restricted area, radius 500m, Ç , centred\non: 25° 34´·74N., 54° 28´·33E.\n4713* UNITED ARAB EMIRATES - Buoyage. Depths.\nSource: Port of Fujairah Notice 376/26 and UKHO\nChart 3708 [ previous update 2995/25 ] WGS84 DATUM\nInsert Ib Fl.G.4s G1\n25° 10´·254N., 56° 22´·289E.\nIb\nFl.G.4s G2\n(a) 25° 10´·081N., 56° 22´·376E.\nDelete depth, 163, close SW of: (a) above\nInsert depth, 164 25° 10´·037N., 56° 22´·388E.\n2.24\nWk41/26\nII\n4713* UNITED ARAB EMIRATES - Buoyage. Depths. (continued)\nChart 3709 [ previous update 1138/26 ] WGS84 DATUM\nInsert Ib Fl.G.4s G2\n25° 10´·08",
-      "cancels": [
-        "2822(T)/17"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4758 SPAIN - Mediterranean Sea Coast - Buoy.                            \n          Source: Spanish Notice 36/217/26                                        \n          Chart 1448 [ previous update 4471/26 ] WGS84 DATUM                      \n          Insert    Gf; Fl(5)Y.20s1M ODAS                                         \n                                                      36° 09´·25N., 5° 25´·83W.   \n                                                                                  \n          Chart 1455 [ previous update 2854/26 ] WGS84 DATUM                      \n          Insert    Gf; Fl(5)Y.20s1M ODAS                                         \n                                                      36° 09´·25N., 5° 25´·83W.   \n                                                                                  \n                                                                                  \n                                                                                  \n          4686* QATAR - Buoy.                                                     \n          Source: MENAS                                                           \n          Note:Former Notice 2822(T)/17 is cancelled.                             \n          Chart 2523 (INT 7250) [ previous update 4117/26 ] WGS84 DATUM",
       "checkedForExport": true
     },
     {
@@ -1527,10 +2075,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4658 CHINA - East Coast - Buoyage.\nSource: Chinese Notice 29/844/26\nChart 1126 [ previous update 4534/26 ] CGCS 2000 DATUM\nInsert GrW Q(3)10s\n30° 01´·82N., 122° 19´·94E.\nChart 1304 [ previous update 4534/26 ] CGCS 2000 DATUM\nInsert GrW Q(3)10s\n30° 03´·08N., 122° 18´·33E.\n30° 02´·34N., 122° 19´·38E.\n30° 01´·82N., 122° 19´·94E.\nChart 1305 [ previous update 3851/26 ] CGCS 2000 DATUM\nInsert GrW Q(3)10s\n30° 03´·08N., 122° 18´·33E.\n30° 02´·34N., 122° 19´·38E.\n30° 01´·82N., 122° 19´·94E.\n2.26\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4658 CHINA - East Coast - Buoyage.                                      \n          Source: Chinese Notice 29/844/26                                        \n                                                                                  \n          Chart 1126 [ previous update 4534/26 ] CGCS 2000 DATUM                  \n          Insert    GrW Q(3)10s                                                   \n                                                      30° 01´·82N., 122° 19´·94E. \n          Chart 1304 [ previous update 4534/26 ] CGCS 2000 DATUM                  \n                                                                                  \n          Insert    GrW Q(3)10s                                                   \n                                                      30° 03´·08N., 122° 18´·33E. \n                                                      30° 02´·34N., 122° 19´·38E. \n                                                      30° 01´·82N., 122° 19´·94E. \n          Chart 1305 [ previous update 3851/26 ] CGCS 2000 DATUM                  \n          Insert    GrW Q(3)10s                                                   \n                                                      30° 03´·08N., 122° 18´·33E.",
       "checkedForExport": true
     },
     {
@@ -1551,10 +2096,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4662 CHINA - Yellow Sea Coast - Virtual aid to navigation.\nSource: Chinese Notice 30/879/26\nChart 1201 [ previous update 4510/26 ] CGCS 2000 DATUM\nDelete symbol, Virtual aid to navigation, starboard lateral topmark, V-\nAIS, out of position 34° 38´·88N., 119° 37´·01E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4662 CHINA - Yellow Sea Coast - Virtual aid to navigation.              \n          Source: Chinese Notice 30/879/26                                        \n          Chart 1201 [ previous update 4510/26 ] CGCS 2000 DATUM                  \n          Delete   symbol, Virtual aid to navigation, starboard lateral topmark, V-\n                   AIS, out of position               34° 38´·88N., 119° 37´·01E.",
       "checkedForExport": true
     },
     {
@@ -1580,10 +2122,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4663 CHINA - Bo Hai - Light.\nSource: Chinese Notice 29/841/26\nChart 1206 [ previous update 4444/26 ] CGCS 2000 DATUM\nDelete ¶ Fl.R.6s8M\n37° 49´·37N., 120° 50´·17E.\nChart 1255 [ previous update 4444/26 ] CGCS 2000 DATUM\nDelete ¶ Fl.R.6s12m8M\n37° 49´·4N., 120° 50´·2E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4663 CHINA - Bo Hai - Light.                                            \n          Source: Chinese Notice 29/841/26                                        \n                                                                                  \n          Chart 1206 [ previous update 4444/26 ] CGCS 2000 DATUM                  \n          Delete    ¶ Fl.R.6s8M                                                   \n                                                      37° 49´·37N., 120° 50´·17E. \n          Chart 1255 [ previous update 4444/26 ] CGCS 2000 DATUM                  \n                                                                                  \n          Delete    ¶ Fl.R.6s12m8M                                                \n                                                      37° 49´·4N., 120° 50´·2E.",
       "checkedForExport": true
     },
     {
@@ -1649,10 +2188,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4685 CHINA - East Coast - Virtual aids to navigation.\nSource: Chinese Notice 30/881/26\nChart 1199 [ previous update 3851/26 ] CGCS 2000 DATUM\nInsert symbol, Virtual aid to navigation, special topmark, V-AIS 30° 55´·7N., 122° 07´·9E.\n30° 53´·1N., 122° 06´·7E.\nChart 1303 [ previous update 3712/26 ] CGCS 2000 DATUM\nInsert symbol, Virtual aid to navigation, special topmark, V-AIS 30° 55´·77N., 122° 06´·99E.\n30° 55´·73N., 122° 07´·91E.\n30° 53´·11N., 122° 06´·69E.\nChart 1602 [ previous update New Edition 06/08/2026 ] CGCS 2000 DATUM\nInsert symbol, Virtual aid to navigation, special topmark, V-AIS 30° 55´·77N., 122° 06´·99E.\n30° 55´·73N., 122° 07´·91E.\n30° 53´·11N., 122° 06´·69E.\n4718 TAIWAN - Wreck.\nSource: UKHO\nChart 2412 [ previous update New Edition 30/07/2026 ] WGS84 DATUM\nInsert ^ PA\n26° 10´·0N., 122° 46´·0E.\nChart 3236 [ previous update New Edition 30/07/2026 ] WGS84 DATUM\nInsert ^ PA\n26° 10´·0N., 122° 46´·0E.\n2.27\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4685 CHINA - East Coast - Virtual aids to navigation.                   \n          Source: Chinese Notice 30/881/26                                        \n          Chart 1199 [ previous update 3851/26 ] CGCS 2000 DATUM                  \n          Insert   symbol, Virtual aid to navigation, special topmark, V-AIS 30° 55´·7N., 122° 07´·9E.\n                                                      30° 53´·1N., 122° 06´·7E.   \n                                                                                  \n          Chart 1303 [ previous update 3712/26 ] CGCS 2000 DATUM                  \n          Insert   symbol, Virtual aid to navigation, special topmark, V-AIS 30° 55´·77N., 122° 06´·99E.\n                                                      30° 55´·73N., 122° 07´·91E. \n                                                      30° 53´·11N., 122° 06´·69E. \n                                                                                  \n          Chart 1602 [ previous update New Edition 06/08/2026 ] CGCS 2000 DATUM   \n          Insert   symbol, Virtual aid to navigation, special topmark, V-AIS 30° 55´·77N., 122° 06´·99E.\n                                                      30° 55´·73N., 122° 07´·91E.",
       "checkedForExport": true
     },
     {
@@ -1673,10 +2209,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4737 CHINA - South Coast - Virtual aid to navigation.\nSource: Chinese Notice 26/727/26\nChart 1555 [ previous update 4593/26 ] CGCS 2000 DATUM\nDelete symbol, Virtual aid to navigation, isolated danger topmark, V-\nAIS, out of position 22° 02´·7N., 113° 53´·9E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4737 CHINA - South Coast - Virtual aid to navigation.                   \n          Source: Chinese Notice 26/727/26                                        \n          Chart 1555 [ previous update 4593/26 ] CGCS 2000 DATUM                  \n          Delete   symbol, Virtual aid to navigation, isolated danger topmark, V- \n                   AIS, out of position               22° 02´·7N., 113° 53´·9E.",
       "checkedForExport": true
     },
     {
@@ -1697,10 +2230,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4740 CHINA - South Coast - Depth.\nSource: Chinese Notice 31/943/26\nChart 343 [ previous update 4452/26 ] CGCS 2000 DATUM\nInsert depth, 2, enclosed by 2m contour 22° 29´·52N., 113° 43´·84E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4740 CHINA - South Coast - Depth.                                       \n          Source: Chinese Notice 31/943/26                                        \n                                                                                  \n          Chart 343 [ previous update 4452/26 ] CGCS 2000 DATUM                   \n          Insert   depth, 2, enclosed by 2m contour   22° 29´·52N., 113° 43´·84E.",
       "checkedForExport": true
     },
     {
@@ -1736,10 +2266,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4742 CHINA - East Coast - Lights.\nSource: Chinese Notice 30/883/26\nChart 1665 [ previous update 3688/26 ] CGCS 2000 DATUM\nInsert · Fl.G\n30° 34´·06N., 121° 02´·74E.\n·\nFl.R\n30° 34´·01N., 121° 02´·77E.\n·\nMo(A)6s\n30° 33´·73N., 121° 02´·91E.\nAmend light to, Mo(A)6s 30° 34´·03N., 121° 02´·76E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4742 CHINA - East Coast - Lights.                                       \n          Source: Chinese Notice 30/883/26                                        \n                                                                                  \n          Chart 1665 [ previous update 3688/26 ] CGCS 2000 DATUM                  \n          Insert    ·  Fl.G                                                       \n                                                      30° 34´·06N., 121° 02´·74E. \n                    ·                                                             \n                       Fl.R                                                       \n                                                      30° 34´·01N., 121° 02´·77E. \n                    ·                                                             \n                       Mo(A)6s                                                    \n                                                      30° 33´·73N., 121° 02´·91E. \n          Amend    light to, Mo(A)6s                  30° 34´·03N., 121° 02´·76E.",
       "checkedForExport": true
     },
     {
@@ -1800,10 +2327,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4750 CHINA - Yellow Sea Coast - Buoyage. Virtual aids to navigation.\nSource: Chinese Notices 30/877-878/26\nChart 738 [ previous update 313/26 ] CGCS 2000 DATUM\nInsert symbol, Virtual aid to navigation, port lateral topmark, V-AIS,\nout of position (a) 34° 44´·012N., 119° 29´·537E.\nDelete symbol, Virtual aid to navigation, port lateral topmark, V-AIS\nclose NW of: (a) above\nMove symbol, Virtual aid to navigation, starboard lateral topmark, V-\nAIS from: 34° 44´·625N., 119° 28´·715E.\nto: 34° 44´·652N., 119° 28´·728E.\nG\\d\nFl.R.4s No 44 , from:\n34° 44´·548N., 119° 28´·368E.\nto: 34° 44´·520N., 119° 28´·327E.\nI]b\nQ.G No 41, from:\n34° 44´·387N., 119° 29´·820E.\nto: 34° 44´·407N., 119° 29´·772E.\nChart 739 [ previous update New Edition 15/09/2022 ] CGCS 2000 DATUM\nInsert Ib] Fl(2)G.6s No 49\n34° 45´·277N., 119° 25´·283E.\nDelete Ib] Fl(2)G.6s No 49\n34° 45´·278N., 119° 25´·600E.\n2.28\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4750 CHINA - Yellow Sea Coast - Buoyage. Virtual aids to navigation.    \n          Source: Chinese Notices 30/877-878/26                                   \n                                                                                  \n          Chart 738 [ previous update 313/26 ] CGCS 2000 DATUM                    \n          Insert   symbol, Virtual aid to navigation, port lateral topmark, V-AIS,\n                   out of position                 (a) 34° 44´·012N., 119° 29´·537E.\n          Delete   symbol, Virtual aid to navigation, port lateral topmark, V-AIS \n                   close NW of:                       (a) above                   \n          Move     symbol, Virtual aid to navigation, starboard lateral topmark, V-\n                   AIS from:                          34° 44´·625N., 119° 28´·715E.\n                   to:                                34° 44´·652N., 119° 28´·728E.\n                    G\\d                                                           \n                      Fl.R.4s No 44 , from:                                       \n                                                      34° 44´·548N., 119° 28´·368E.\n                   to:                                34° 44´·520N., 119° 28´·327E.\n                    I]b                                                           \n                      Q.G No 41, from:                                            \n                                                      34° 44´·387N., 119° 29´·820",
       "checkedForExport": true
     },
     {
@@ -1834,10 +2358,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4751 CHINA - Yellow Sea Coast - Buoyage. Light.\nSource: Chinese Notice 31/927/26\nChart 3696 [ previous update 2813/23 ] CGCS 2000 DATUM\nInsert ¶ Iso.6s11m7M\n38° 58´·212N., 121° 49´·163E.\nGqV\nVQ(6)+LFl.10s DY2\n38° 58´·093N., 121° 49´·347E.\nDelete Gd\\ Fl.R.4s DY2\n38° 58´·044N., 121° 49´·205E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4751 CHINA - Yellow Sea Coast - Buoyage. Light.                         \n          Source: Chinese Notice 31/927/26                                        \n          Chart 3696 [ previous update 2813/23 ] CGCS 2000 DATUM                  \n          Insert    ¶ Iso.6s11m7M                                                 \n                                                      38° 58´·212N., 121° 49´·163E.\n                    GqV                                                           \n                      VQ(6)+LFl.10s DY2                                           \n                                                      38° 58´·093N., 121° 49´·347E.\n          Delete    Gd\\ Fl.R.4s DY2                                               \n                                                      38° 58´·044N., 121° 49´·205E.",
       "checkedForExport": true
     },
     {
@@ -1953,10 +2474,7 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4752 CHINA - East Coast - Anchorage areas. Legends.\nSource: Chinese Notice 30/884/26\nChart 1304 [ previous update 4658/26 ] CGCS 2000 DATUM\nInsert limit of anchorage area, pecked line, joining: (a) 30° 12´·04N., 122° 18´·64E.\n(b) 30° 12´·05N., 122° 20´·21E.\n(c) 30° 11´·29N., 122° 20´·22E.\n(d) 30° 11´·28N., 122° 18´·15E.\n(e) 30° 11´·79N., 122° 18´·14E.\nand\n(f) 30° 10´·01N., 122° 19´·22E.\n(g) 30° 10´·01N., 122° 20´·00E.\n(h) 30° 09´·14N., 122° 20´·01E.\n(i) 30° 09´·14N., 122° 19´·74E.\n(j) 30° 09´·81N., 122° 19´·22E.\n½\nlegend, Waiting Area , within:\n(a)-(e) above\n(f)-(j) above\nChart 1305 [ previous update 4658/26 ] CGCS 2000 DATUM\nInsert limit of anchorage area, pecked line, joining: (a) 30° 12´·04N., 122° 18´·64E.\n(b) 30° 12´·05N., 122° 20´·21E.\n(c) 30° 11´·29N., 122° 20´·22E.\n(d) 30° 11´·28N., 122° 18´·15E.\n(e) 30° 11´·79N., 122° 18´·14E.\nand\n(f) 30° 10´·01N., 122° 19´·22E.\n(g) 30° 10´·01N., 122° 20´·00E.\n(h) 30° 09´·14N., 122° 20´·01E.\n(i) 30° 09´·14N., 122° 19´·74E.\n(j) 30° 09´·81N., 122° 19´·22E.\n½\nlegend, Waiting Area , within:\n(a)-(e) above\n½\nlegend, Waiting Area , close E of:\n(f)-(j) above\n2.29\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4752 CHINA - East Coast - Anchorage areas. Legends.                     \n          Source: Chinese Notice 30/884/26                                        \n          Chart 1304 [ previous update 4658/26 ] CGCS 2000 DATUM                  \n          Insert   limit of anchorage area, pecked line, joining: (a) 30° 12´·04N., 122° 18´·64E.\n                                                   (b) 30° 12´·05N., 122° 20´·21E.\n                                                   (c) 30° 11´·29N., 122° 20´·22E.\n                                                   (d) 30° 11´·28N., 122° 18´·15E.\n                                                   (e) 30° 11´·79N., 122° 18´·14E.\n                                                      and                         \n                                                   (f) 30° 10´·01N., 122° 19´·22E.\n                                                   (g) 30° 10´·01N., 122° 20´·00E.\n                                                   (h) 30° 09´·14N., 122° 20´·01E.\n                                                   (i) 30° 09´·14N., 122° 19´·74E.\n                                                   (j) 30° 09´·81N., 122° 19´·22E.\n                        ½                                                         \n                   legend, Waiting Area , within:",
       "checkedForExport": true
     },
     {
@@ -1977,10 +2495,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4753 CHINA - South Coast - Wreck.\nSource: Chinese Notice 31/944/26\nChart 3892 [ previous update New Edition 17/09/2026 ] CGCS 2000 DATUM\nInsert ´ Rep(2025) PA\n21° 27´·4N., 108° 52´·6E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4753 CHINA - South Coast - Wreck.                                       \n          Source: Chinese Notice 31/944/26                                        \n          Chart 3892 [ previous update New Edition 17/09/2026 ] CGCS 2000 DATUM   \n          Insert    ´ Rep(2025) PA                                                \n                                                      21° 27´·4N., 108° 52´·6E.",
       "checkedForExport": true
     },
     {
@@ -2006,10 +2521,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4754 CHINA - South Coast - Wreck.\nSource: Chinese Notice 31/944/26\nChart 1728 [ previous update 4516/26 ] CGCS 2000 DATUM\nInsert ´ PA Rep(2025)\n21° 27´·38N., 108° 52´·62E.\nChart 3992 [ previous update 4516/26 ] CGCS 2000 DATUM\nInsert wreck out of position, ´ PA Rep(2025)\n21° 27´·38N., 108° 52´·62E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4754 CHINA - South Coast - Wreck.                                       \n          Source: Chinese Notice 31/944/26                                        \n                                                                                  \n          Chart 1728 [ previous update 4516/26 ] CGCS 2000 DATUM                  \n          Insert    ´ PA Rep(2025)                                                \n                                                      21° 27´·38N., 108° 52´·62E. \n          Chart 3992 [ previous update 4516/26 ] CGCS 2000 DATUM                  \n                                                                                  \n          Insert   wreck out of position, ´ PA Rep(2025)                          \n                                                      21° 27´·38N., 108° 52´·62E.",
       "checkedForExport": true
     },
     {
@@ -2085,10 +2597,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4763 CHINA - East Coast - Buoyage. Virtual aids to navigation.\nSource: Chinese Notice 32/995/26\nChart 1719 [ previous update 3798/26 ] CGCS 2000 DATUM\nInsert symbol, Virtual aid to navigation, starboard lateral topmark, V-\nAIS 24° 31´·23N., 118° 13´·18E.\nI]b\nQ.G JT 19\n24° 31´·25N., 118° 14´·06E.\nG\\d\nQ.R JT 20\n24° 31´·08N., 118° 13´·91E.\nI]b\nFl(3)G.10s JT 15\n24° 30´·67N., 118° 14´·44E.\nG\\d\nFl(2)R.6s JT 14\n24° 30´·35N., 118° 14´·46E.\nDelete G÷\\ Fl(2+1)R.6s JTL 18\n24° 31´·05N., 118° 13´·39E.\nIb]\nQ.G JTL 17\n24° 31´·15N., 118° 13´·89E.\nGd\\\nFl(3)R.10s JTL 14\n24° 30´·39N., 118° 14´·22E.\nsymbol, Virtual aid to navigation, special topmark, V-AIS 24° 30´·93N., 118° 13´·59E.\n24° 30´·59N., 118° 13´·75E.\n24° 30´·59N., 118° 14´·05E.\n2.30\nWk41/26\nII\n4769 TAIWAN - Buoyage.\nSource: Taiwanese Notice 140/26 and UKHO\nChart 2618 (Panel A, Taichung) [ previous update 3279/26 ] WGS84 DATUM\nInsert Jb Fl(5)G.7s No 3\n(a) 24° 15´·24N., 120° 30´·34E.\nDelete Jb Fl(2)G.4s No 3, close NE of:\n(a) above",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4763 CHINA - East Coast - Buoyage. Virtual aids to navigation.          \n          Source: Chinese Notice 32/995/26                                        \n                                                                                  \n          Chart 1719 [ previous update 3798/26 ] CGCS 2000 DATUM                  \n          Insert   symbol, Virtual aid to navigation, starboard lateral topmark, V-\n                   AIS                                24° 31´·23N., 118° 13´·18E. \n                    I]b                                                           \n                      Q.G JT 19                                                   \n                                                      24° 31´·25N., 118° 14´·06E. \n                    G\\d                                                           \n                      Q.R JT 20                                                   \n                                                      24° 31´·08N., 118° 13´·91E. \n                    I]b                                                           \n                      Fl(3)G.10s JT 15                                            \n                                                      24° 30´·67N., 118° 14´·44E. \n                    G\\d",
       "checkedForExport": true
     },
     {
@@ -2109,10 +2618,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4681 KOREA - South Coast - Light.\nSource: Korean Notice 31/442/26\nChart 1163 [ previous update New Edition 27/08/2026 ] WGS84 DATUM\nAmend range of light to, 39M 35° 04´·657N., 128° 46´·079E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4681 KOREA - South Coast - Light.                                       \n          Source: Korean Notice 31/442/26                                         \n          Chart 1163 [ previous update New Edition 27/08/2026 ] WGS84 DATUM       \n                                                                                  \n          Amend    range of light to, 39M             35° 04´·657N., 128° 46´·079E.",
       "checkedForExport": true
     },
     {
@@ -2158,10 +2664,7 @@
       ],
       "isPolygon": false,
       "isLine": true,
-      "body": "4712 RUSSIA - Pacific Ocean Coast - Harbour limit. Legend.\nSource: Russian Notice 37/3617/26\nChart 1230 (Panel A, Zaliv Terpeniya) [ previous update 1082/26 ] UNDETERMINED DATUM\nInsert harbour limit, pecked line, joining: 48° 52´·0N., 142° 57´·1E.\n48° 51´·6N., 142° 58´·0E.\n48° 51´·6N., 143° 03´·0E.\n(a) 48° 50´·0N., 143° 03´·0E.\n(b) 48° 50´·0N., 142° 58´·0E.\n(c) 48° 49´·9N., 142° 55´·3E.\nlegend, Port Limit, along S side of: (a)-(c) above",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4712 RUSSIA - Pacific Ocean Coast - Harbour limit. Legend.              \n          Source: Russian Notice 37/3617/26                                       \n          Chart 1230 (Panel A, Zaliv Terpeniya) [ previous update 1082/26 ] UNDETERMINED DATUM\n                                                                                  \n          Insert   harbour limit, pecked line, joining: 48° 52´·0N., 142° 57´·1E. \n                                                      48° 51´·6N., 142° 58´·0E.   \n                                                      48° 51´·6N., 143° 03´·0E.   \n                                                   (a) 48° 50´·0N., 143° 03´·0E.  \n                                                   (b) 48° 50´·0N., 142° 58´·0E.  \n                                                   (c) 48° 49´·9N., 142° 55´·3E.  \n                   legend, Port Limit, along S side of: (a)-(c) above",
       "checkedForExport": true
     },
     {
@@ -2182,10 +2685,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4736 KOREA - West Coast - Light.\nSource: Korean Notice 32/458/26\nChart 913 (INT 5254) [ previous update 4307/26 ] WGS84 DATUM\nAmend light to, Fl(4)Y.8s13m7M 35° 46´·91N., 126° 26´·04E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4736 KOREA - West Coast - Light.                                        \n          Source: Korean Notice 32/458/26                                         \n          Chart 913 (INT 5254) [ previous update 4307/26 ] WGS84 DATUM            \n          Amend    light to, Fl(4)Y.8s13m7M           35° 46´·91N., 126° 26´·04E.",
       "checkedForExport": true
     },
     {
@@ -2206,10 +2706,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4749 KOREA - South Coast - Wreck.\nSource: Korean Notice 33/472/26\nChart 3390 (INT 5362) [ previous update 4556/26 ] WGS84 DATUM\nInsert 7#+ Wk\n34° 51´·96N., 127° 41´·18E.\n2.31\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4749 KOREA - South Coast - Wreck.                                       \n          Source: Korean Notice 33/472/26                                         \n                                                                                  \n          Chart 3390 (INT 5362) [ previous update 4556/26 ] WGS84 DATUM           \n          Insert    7#+ Wk                                                        \n                                                      34° 51´·96N., 127° 41´·18E.",
       "checkedForExport": true
     },
     {
@@ -2240,10 +2737,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4690 MALAYSIA - Sarawak - Fish haven.\nSource: Marine Department, Sarawak Notice 116/26\nChart 1336 [ previous update 4261/26 ] WGS84 DATUM\nInsert Á\n3° 01´·2N., 112° 05´·3E.\nChart 3836 [ previous update 1887/26 ] WGS84 DATUM\nInsert Á\n3° 01´·22N., 112° 05´·31E.\nChart 3837 (INT 5709) [ previous update 4301/26 ] WGS84 DATUM\nInsert Á\n3° 01´·22N., 112° 05´·31E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4690 MALAYSIA - Sarawak - Fish haven.                                   \n          Source: Marine Department, Sarawak Notice 116/26                        \n          Chart 1336 [ previous update 4261/26 ] WGS84 DATUM                      \n          Insert    Á                                                             \n                                                      3° 01´·2N., 112° 05´·3E.    \n                                                                                  \n          Chart 3836 [ previous update 1887/26 ] WGS84 DATUM                      \n          Insert    Á                                                             \n                                                      3° 01´·22N., 112° 05´·31E.  \n          Chart 3837 (INT 5709) [ previous update 4301/26 ] WGS84 DATUM           \n                                                                                  \n          Insert    Á                                                             \n                                                      3° 01´·22N., 112° 05´·31E.",
       "checkedForExport": true
     },
     {
@@ -2274,10 +2768,7 @@
       ],
       "isPolygon": false,
       "isLine": true,
-      "body": "4696 INDONESIA - Jawa - Recommended tracks. Legends.\nSource: Indonesian Notice 33/234/26\nChart 933 [ previous update 4155/26 ] WGS84 DATUM\nInsert two-way recommended track, pecked line, joining: (a) 5° 56´·94S., 106° 47´·15E.\n(b) 5° 57´·82S., 106° 47´·15E.\nand\n(b) above\n(c) 5° 58´·20S., 106° 47´·37E.\nlegend, 180°-360°, along: (a)-(b) above\nlegend, 149°-329°, along: (b)-(c) above",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4696 INDONESIA - Jawa - Recommended tracks. Legends.                    \n          Source: Indonesian Notice 33/234/26                                     \n                                                                                  \n          Chart 933 [ previous update 4155/26 ] WGS84 DATUM                       \n          Insert   two-way recommended track, pecked line, joining: (a) 5° 56´·94S., 106° 47´·15E.\n                                                   (b) 5° 57´·82S., 106° 47´·15E. \n                                                      and                         \n                                                      (b) above                   \n                                                   (c) 5° 58´·20S., 106° 47´·37E. \n                   legend, 180°-360°, along:          (a)-(b) above               \n                   legend, 149°-329°, along:          (b)-(c) above",
       "checkedForExport": true
     },
     {
@@ -2303,10 +2794,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4702 MALAYSIA - Sarawak - Fish haven. Depth.\nSource: Marine Department, Sarawak Notice 117/26\nChart 1336 [ previous update 4690/26 ] WGS84 DATUM\nInsert Á\n(a) 1° 50´·3N., 110° 09´·5E.\nDelete depth, 122, close NW of: (a) above\nChart 3834 [ previous update 4261/26 ] WGS84 DATUM\nInsert Á\n1° 50´·31N., 110° 09´·47E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4702 MALAYSIA - Sarawak - Fish haven. Depth.                            \n          Source: Marine Department, Sarawak Notice 117/26                        \n                                                                                  \n          Chart 1336 [ previous update 4690/26 ] WGS84 DATUM                      \n          Insert    Á                                                             \n                                                   (a) 1° 50´·3N., 110° 09´·5E.   \n          Delete   depth, 122, close NW of:           (a) above                   \n                                                                                  \n          Chart 3834 [ previous update 4261/26 ] WGS84 DATUM                      \n          Insert    Á                                                             \n                                                      1° 50´·31N., 110° 09´·47E.",
       "checkedForExport": true
     },
     {
@@ -2392,10 +2880,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4703 INDONESIA - Java Sea - Wrecks.\nSource: Indonesian Notice 33/233/26\nChart 945 [ previous update 4815/25 ] WGS84 DATUM\nDelete ´ Wk\n6° 37´·37S., 113° 16´·66E.\n6° 40´·41S., 113° 27´·78E.\n6° 40´·47S., 113° 42´·57E.\n2.32\nWk41/26\nII\n4703 INDONESIA - Java Sea - Wrecks. (continued)\nChart 1066 [ previous update 3978/26 ] WGS84 DATUM\nDelete ´ Wk\n6° 37´·5S., 113° 17´·0E.\n6° 40´·4S., 113° 27´·7E.\n6° 40´·5S., 113° 42´·6E.\nChart 2471 [ previous update 3290/26 ] WGS84 DATUM\nDelete ´ Wk\n6° 40´·4S., 113° 27´·7E.\n6° 40´·5S., 113° 42´·6E.\nChart 2796 [ previous update 3978/26 ] WGS84 DATUM\nDelete ´ Wk\n6° 37´·5S., 113° 17´·0E.\n6° 40´·4S., 113° 27´·7E.\n6° 40´·5S., 113° 42´·6E.\nChart 2876 [ previous update 3136/26 ] WGS84 DATUM\nDelete ´ Wk\n6° 37´·5S., 113° 17´·0E.\n6° 40´·4S., 113° 27´·7E.\n6° 40´·5S., 113° 42´·6E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4703 INDONESIA - Java Sea - Wrecks.                                     \n          Source: Indonesian Notice 33/233/26                                     \n          Chart 945 [ previous update 4815/25 ] WGS84 DATUM                       \n          Delete    ´ Wk                                                          \n                                                      6° 37´·37S., 113° 16´·66E.  \n                                                      6° 40´·41S., 113° 27´·78E.  \n                                                      6° 40´·47S., 113° 42´·57E.  \n                                                                                  \n                                                                                  \n                                                                                  \n                                                                                  \n                                        2.32                                      \n                                                                   Wk41/26",
       "checkedForExport": true
     },
     {
@@ -2456,10 +2941,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4719 PHILIPPINE ISLANDS - Luzon - Depths.\nSource: ENC PH4MCT40\nChart 3931 [ previous update New Edition 04/12/2025 ] WGS84 DATUM\nInsert depth, 77 14° 33´·40N., 120° 57´·80E.\ndepth, 34 14° 33´·87N., 120° 58´·48E.\ndepth, 74 14° 33´·96N., 120° 57´·90E.\ndepth, 32 (a) 14° 33´·93N., 120° 57´·50E.\nDelete depth, 39, close SE of: (a) above\nChart 3932 [ previous update New Edition 04/12/2025 ] WGS84 DATUM\nInsert depth, 89 14° 34´·551N., 120° 58´·113E.\ndepth, 32 (a) 14° 33´·930N., 120° 57´·497E.\nDelete depth, 39, close SE of: (a) above\nInsert depth, 74 14° 33´·965N., 120° 57´·896E.\ndepth, 34 14° 33´·874N., 120° 58´·477E.\ndepth, 77 (b) 14° 33´·399N., 120° 57´·797E.\nDelete depth, 85, close S of: (b) above\n2.33\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4719 PHILIPPINE ISLANDS - Luzon - Depths.                               \n          Source: ENC PH4MCT40                                                    \n                                                                                  \n          Chart 3931 [ previous update New Edition 04/12/2025 ] WGS84 DATUM       \n          Insert   depth, 77                          14° 33´·40N., 120° 57´·80E. \n                   depth, 34                          14° 33´·87N., 120° 58´·48E. \n                   depth, 74                          14° 33´·96N., 120° 57´·90E. \n                   depth, 32                       (a) 14° 33´·93N., 120° 57´·50E.\n                                                                                  \n          Delete   depth, 39, close SE of:            (a) above                   \n          Chart 3932 [ previous update New Edition 04/12/2025 ] WGS84 DATUM       \n                                                                                  \n          Insert   depth, 89                          14° 34´·551N., 120° 58´·113E.\n                   depth, 32                       (a) 14° 33´·930N., 120° 57´·497E.\n          Delete   depth, 39, close SE of:            (a) above",
       "checkedForExport": true
     },
     {
@@ -2490,10 +2972,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4726 INDONESIA - Java Sea - Buoy.\nSource: Indonesian Notice 33/231/26\nChart 945 [ previous update 4703/26 ] WGS84 DATUM\nDelete Ef; Fl(2)Y.8s\n6° 45´·82S., 113° 42´·20E.\nChart 2796 [ previous update 4703/26 ] WGS84 DATUM\nDelete Ef; Fl(2)Y.8s\n6° 45´·8S., 113° 42´·2E.\nChart 2876 [ previous update 4703/26 ] WGS84 DATUM\nDelete Ef; Fl(2)Y.8s\n6° 45´·8S., 113° 42´·2E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4726 INDONESIA - Java Sea - Buoy.                                       \n          Source: Indonesian Notice 33/231/26                                     \n          Chart 945 [ previous update 4703/26 ] WGS84 DATUM                       \n          Delete    Ef; Fl(2)Y.8s                                                 \n                                                      6° 45´·82S., 113° 42´·20E.  \n                                                                                  \n          Chart 2796 [ previous update 4703/26 ] WGS84 DATUM                      \n          Delete    Ef; Fl(2)Y.8s                                                 \n                                                      6° 45´·8S., 113° 42´·2E.    \n          Chart 2876 [ previous update 4703/26 ] WGS84 DATUM                      \n                                                                                  \n          Delete    Ef; Fl(2)Y.8s                                                 \n                                                      6° 45´·8S., 113° 42´·2E.",
       "checkedForExport": true
     },
     {
@@ -2519,10 +2998,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4731 MALAYSIA - Sarawak - Fish haven.\nSource: Marine Department, Sarawak Notice 118/26\nChart 1336 [ previous update 4702/26 ] WGS84 DATUM\nInsert Á\n2° 00´·0N., 109° 48´·7E.\nChart 3834 [ previous update 4702/26 ] WGS84 DATUM\nInsert Á\n2° 00´·05N., 109° 48´·66E.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4731 MALAYSIA - Sarawak - Fish haven.                                   \n          Source: Marine Department, Sarawak Notice 118/26                        \n                                                                                  \n          Chart 1336 [ previous update 4702/26 ] WGS84 DATUM                      \n          Insert    Á                                                             \n                                                      2° 00´·0N., 109° 48´·7E.    \n                                                                                  \n          Chart 3834 [ previous update 4702/26 ] WGS84 DATUM                      \n          Insert    Á                                                             \n                                                      2° 00´·05N., 109° 48´·66E.",
       "checkedForExport": true
     },
     {
@@ -2643,12 +3119,7 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4673 NEW ZEALAND - South Island - NM Blocks. Notes. Marine Reserves. Legends.\nSource: Australian Notice 18/58/26\nNote:Former Notice 3514(P)/26 is cancelled.\nChart NZ 64 [ previous update 3674/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 45° 51´·5S., 170° 47´·9E.\nthe accompanying note, MARINE RESERVE, centred on: 43° 49´·4S., 171° 02´·3E.\nÇ Ç\nlimit of marine reserve, MR , joining:\n(a) 44° 57´·6S., 171° 08´·0E.\n(b) 44° 57´·7S., 171° 14´·4E.\n(c) 45° 04´·0S., 171° 08´·8E.\n(d) 45° 03´·9S., 171° 01´·2E.\nÆ\nlegend, Marine Reserve (see Note) , within:\n(a)-(d) above\n2.34\nWk41/26\nII\n4673 NEW ZEALAND - South Island - NM Blocks. Notes. Marine Reserves. Legends. (continued)\nChart NZ 66 [ previous update 3674/26 ] WGS84 DATUM\nInsert the accompanying block A, centred on: 45° 56´·1S., 170° 31´·7E.\nthe accompanying block B, centred on: 45° 50´·2S., 170° 56´·1E.\nthe accompanying note, MARINE RESERVE, centred on: 45° 46´·04S., 169° 54´·58E.\nÇ Ç\nlimit of marine reserve, MR , joining:\n46° 06´·37S., 170° 11´·72E.\n(a) 46° 06´·40S., 170° 12´·62E.\n(b) 46° 09´·54S., 170° 10´·72E.\n46° 09´·51S., 170° 09´·34E.\nlegend, Marine Reserve (see Note), close E of: (a)-(b) above\nÆ\n, centred on:\n46° 07´·11S., 170° 11´·79E.\nChart NZ 661 [ previous update New Edition 01/02/2026 ] WGS84 DATUM\nInsert the accompanying note, MARINE RESERVE outside N border, E of WGS 84\nlegend\nthe accompanying block, centred on: 45° 50´·4S., 170° 56´·1E.\nÇ Ç\nlimit of marine reserve, MR , joining:\n45° 54´·21S., 170° 39´·76E",
-      "cancels": [
-        "3514(P)/26"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4673 NEW ZEALAND - South Island - NM Blocks. Notes. Marine Reserves. Legends.\n          Source: Australian Notice 18/58/26                                      \n          Note:Former Notice 3514(P)/26 is cancelled.                             \n          Chart NZ 64 [ previous update 3674/26 ] WGS84 DATUM                     \n          Insert   the accompanying block, centred on: 45° 51´·5S., 170° 47´·9E.  \n                   the accompanying note, MARINE RESERVE, centred on: 43° 49´·4S., 171° 02´·3E.\n                                Ç   Ç                                             \n                   limit of marine reserve, MR , joining:                         \n                                                   (a) 44° 57´·6S., 171° 08´·0E.  \n                                                   (b) 44° 57´·7S., 171° 14´·4E.  \n                                                   (c) 45° 04´·0S., 171° 08´·8E.  \n                                                   (d) 45° 03´·9S., 171° 01´·2E.  \n                                     Æ                                            \n                   legend, Marine Reserve (see Note) , within:                    \n                                                      (a)-(d) above",
       "checkedForExport": true
     },
     {
@@ -2679,10 +3150,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4655 NORTH PACIFIC OCEAN - Mariana Islands - Depths.\nSource: ENC US2PACPE\nChart 764 [ previous update New Edition 10/04/2025 ] WGS84 DATUM\nInsert depth, 307 (a) 14° 07´·1N., 142° 47´·8E.\nDelete depth, 358, close E of: (a) above\nChart 4507 (INT 507) [ previous update 2403/26 ] WGS84 DATUM\nInsert depth, 307 (a) 14° 07´·1N., 142° 47´·8E.\nDelete depth, 358, close S of: (a) above\nChart 4510 (INT 510) [ previous update New Edition 17/04/2025 ] WGS84 DATUM\nInsert depth, 307 (a) 14° 07´·1N., 142° 47´·8E.\nDelete depth, 358, close S of: (a) above",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4655 NORTH PACIFIC OCEAN - Mariana Islands - Depths.                    \n          Source: ENC US2PACPE                                                    \n          Chart 764 [ previous update New Edition 10/04/2025 ] WGS84 DATUM        \n          Insert   depth, 307                      (a) 14° 07´·1N., 142° 47´·8E.  \n          Delete   depth, 358, close E of:            (a) above                   \n          Chart 4507 (INT 507) [ previous update 2403/26 ] WGS84 DATUM            \n          Insert   depth, 307                      (a) 14° 07´·1N., 142° 47´·8E.  \n          Delete   depth, 358, close S of:            (a) above                   \n                                                                                  \n          Chart 4510 (INT 510) [ previous update New Edition 17/04/2025 ] WGS84 DATUM\n          Insert   depth, 307                      (a) 14° 07´·1N., 142° 47´·8E.  \n          Delete   depth, 358, close S of:            (a) above",
       "checkedForExport": true
     },
     {
@@ -2703,10 +3171,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4666 UNITED STATES OF AMERICA - West Coast - Wreck.\nSource: ENC US5LGBCD\nChart 1081 [ previous update 2775/26 ] NAD83 DATUM\nInsert ´\n33° 42´·950N., 118° 15´·141W.\n2.35\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4666 UNITED STATES OF AMERICA - West Coast - Wreck.                     \n          Source: ENC US5LGBCD                                                    \n          Chart 1081 [ previous update 2775/26 ] NAD83 DATUM                      \n                                                                                  \n          Insert    ´                                                             \n                                                      33° 42´·950N., 118° 15´·141W.\n                                                                                  \n                                                                                  \n                                                                                  \n                                        2.35                                      \n          Wk41/26",
       "checkedForExport": true
     },
     {
@@ -2721,10 +3186,7 @@
       "coords": [],
       "isPolygon": false,
       "isLine": false,
-      "body": "4728 CANADA - British Columbia - Wrecks.\nSource: Canadian Notices 7/3493/26 and 7/3496/26\nChart 4963 [ previous update 4246/26 ] NAD83 DATUM\nInsert 7!+ Wk\n49° 16´ 57·8\"N., 123° 09´ 37·9\"W.\n3&+\nWk\n49° 16´ 50·4\"N., 123° 09´ 01·9\"W.\n4!+\nWk\n49° 16´ 54·0\"N., 123° 08´ 58·7\"W.\nReplace 4+ Wk with 4%+ Wk\n49° 16´ 55·5\"N., 123° 09´ 16·9\"W.\n2)+ 3#+\nWk with Wk\n49° 16´ 37·7\"N., 123° 09´ 36·4\"W.\nChart 4966 [ previous update 4246/26 ] NAD83 DATUM\nInsert 3$+ Wk\n49° 16´ 30·1\"N., 123° 11´ 21·5\"W.\n13,\nWk\n49° 17´ 10·7\"N., 123° 10´ 41·8\"W.\n7!+\nWk\n49° 16´ 57·8\"N., 123° 09´ 37·9\"W.\n3&+\nWk\n49° 16´ 50·4\"N., 123° 09´ 01·9\"W.\n4!+\nWk\n49° 16´ 54·0\"N., 123° 08´ 58·7\"W.\nReplace 4+ Wk with 4%+ Wk\n49° 16´ 55·5\"N., 123° 09´ 16·9\"W.\n2)+ 3#+\nWk with Wk\n49° 16´ 37·7\"N., 123° 09´ 36·4\"W.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4728 CANADA - British Columbia - Wrecks.                                \n          Source: Canadian Notices 7/3493/26 and 7/3496/26                        \n          Chart 4963 [ previous update 4246/26 ] NAD83 DATUM                      \n          Insert    7!+ Wk                                                        \n                                                      49° 16´ 57·8\"N., 123° 09´ 37·9\"W.\n                    3&+                                                           \n                      Wk                                                          \n                                                      49° 16´ 50·4\"N., 123° 09´ 01·9\"W.\n                    4!+                                                           \n                      Wk                                                          \n                                                      49° 16´ 54·0\"N., 123° 08´ 58·7\"W.\n          Replace   4+ Wk with 4%+ Wk                                             \n                                                      49° 16´ 55·5\"N., 123° 09´ 16·9\"W.\n                    2)+   3#+                                                     \n                      Wk with Wk                                                  \n                                                      49° 16´ 37·7\"N",
       "checkedForExport": true
     },
     {
@@ -2739,10 +3201,7 @@
       "coords": [],
       "isPolygon": false,
       "isLine": false,
-      "body": "4743 CANADA - British Columbia - Buoyage. Legend.\nSource: Canadian Notice 7/3908/26\nChart 4931 (Panel, Kitimat) [ previous update 1368/26 ] NAD83 DATUM\nInsert Gl Fl.Y (priv)\n53° 59´ 46·1\"N., 128° 40´ 56·6\"W.\n53° 59´ 41·6\"N., 128° 40´ 56·0\"W.\n53° 59´ 35·8\"N., 128° 40´ 54·9\"W.\nlegend, Constr (2026), centred on: 53° 59´ 42·2\"N., 128° 40´ 49·7\"W.\nChart 4931 [ previous update 1368/26 ] NAD83 DATUM\nInsert legend, Constr (2026), centred on: 53° 59´ 42·7\"N., 128° 40´ 48·2\"W.\n2.36\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4743 CANADA - British Columbia - Buoyage. Legend.                       \n          Source: Canadian Notice 7/3908/26                                       \n          Chart 4931 (Panel, Kitimat) [ previous update 1368/26 ] NAD83 DATUM     \n          Insert    Gl Fl.Y (priv)                                                \n                                                      53° 59´ 46·1\"N., 128° 40´ 56·6\"W.\n                                                      53° 59´ 41·6\"N., 128° 40´ 56·0\"W.\n                                                      53° 59´ 35·8\"N., 128° 40´ 54·9\"W.\n                   legend, Constr (2026), centred on: 53° 59´ 42·2\"N., 128° 40´ 49·7\"W.\n          Chart 4931 [ previous update 1368/26 ] NAD83 DATUM                      \n          Insert   legend, Constr (2026), centred on: 53° 59´ 42·7\"N., 128° 40´ 48·2\"W.",
       "checkedForExport": true
     },
     {
@@ -2993,12 +3452,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4660 COLOMBIA - Pacific Ocean Coast - Depths. Buoy.\nSource: ENC CO400153\nChart 2319 [ previous update New Edition 17/09/2026 ] WGS84 DATUM\nInsert depth, 136 (a) 3° 47´·63N., 77° 17´·78W.\nDelete depth, 141, close SW of: (a) above\nInsert depth, 132 (b) 3° 47´·64N., 77° 17´·33W.\nDelete depth, 139, close SE of: (b) above\nInsert depth, 134 (c) 3° 47´·63N., 77° 16´·93W.\nDelete depth, 139, close N of: (c) above\nInsert depth, 13 (d) 3° 47´·65N., 77° 16´·26W.\nDelete depth, 141, close SE of: (d) above\nInsert depth, 128 (e) 3° 47´·66N., 77° 15´·78W.\nDelete depth, 14, close SE of: (e) above\nInsert depth, 126 (f) 3° 47´·64N., 77° 15´·03W.\nDelete depth, 139, close NE of: (f) above\ndepth, 139, close W of: (f) above\nInsert depth, 122 (g) 3° 47´·66N., 77° 14´·39W.\nDelete depth, 139, close SE of: (g) above\nReplace depth, 139, with depth, 134 3° 47´·64N., 77° 16´·58W.\nMove I[b Q.G '13', from:\n3° 47´·73N., 77° 14´·27W.\nto: 3° 47´·83N., 77° 14´·14W.\n4698 PERU - Marine farms.\nSource: Peruvian Notice 7/86/26\nChart 3084 (Panel A, Bahía Pisco) [ previous update 4269/25 ] WGS84 DATUM\nInsert limit of marine farm, pecked line, joining: (a) 13° 43´·36S., 76° 18´·96W.\n(b) 13° 43´·41S., 76° 18´·06W.\n(c) 13° 44´·13S., 76° 18´·06W.\n(d) 13° 44´·41S., 76° 18´·41W.\n(e) 13° 44´·41S., 76° 18´·63W.\n(f) 13° 44´·06S., 76° 18´·54W.\n(g) 13° 44´·06S., 76° 18´·36W.\n(h) 13° 43´·61S., 76° 18´·35W.\n(i) 13° 43´·61S., 76° 19´·01W.\nË\n, within:\n(a)-(i) above\nË\n13° 44´·32S., 76° 19´·09W.\n2.37\nWk41/26\nII\n4656 ARGENTINA - Buoyag",
-      "cancels": [
-        "1246(T)/22"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4660 COLOMBIA - Pacific Ocean Coast - Depths. Buoy.                     \n          Source: ENC CO400153                                                    \n          Chart 2319 [ previous update New Edition 17/09/2026 ] WGS84 DATUM       \n          Insert   depth, 136                      (a) 3° 47´·63N., 77° 17´·78W.  \n                                                                                  \n          Delete   depth, 141, close SW of:           (a) above                   \n          Insert   depth, 132                      (b) 3° 47´·64N., 77° 17´·33W.  \n          Delete   depth, 139, close SE of:           (b) above                   \n          Insert   depth, 134                      (c) 3° 47´·63N., 77° 16´·93W.  \n          Delete   depth, 139, close N of:            (c) above                   \n          Insert   depth, 13                       (d) 3° 47´·65N., 77° 16´·26W.  \n          Delete   depth, 141, close SE of:           (d) above                   \n                                                                                  \n          Insert   depth, 128                      (e) 3° 47´·66N., 77° 15´·78W.  \n          Delete   depth, 14, close SE of:            (e) above                   \n          Insert   depth, 126                      (f) 3° 47´·64N., 77° 15´·03W.",
       "checkedForExport": true
     },
     {
@@ -3019,10 +3473,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4697 UNITED STATES OF AMERICA - Gulf of Mexico - Wreck.\nSource: ENC US3LA1CB\nChart 3850 [ previous update 4081/26 ] NAD83 DATUM\nInsert 12$, Wk\n29° 04´·6N., 92° 00´·4W.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4697 UNITED STATES OF AMERICA - Gulf of Mexico - Wreck.                 \n          Source: ENC US3LA1CB                                                    \n          Chart 3850 [ previous update 4081/26 ] NAD83 DATUM                      \n          Insert    12$, Wk                                                       \n                                                      29° 04´·6N., 92° 00´·4W.",
       "checkedForExport": true
     },
     {
@@ -3058,10 +3509,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4710 MEXICO - Gulf of Mexico - Buoyage.\nSource: Mexican Notice 14/90/26 and 14/92/26\nChart 375 (Panel B) [ previous update 720/26 ] WGS84 DATUM\nMove I[b Fl.G.3s No 15, from:\n19° 13´·434N., 96° 09´·985W.\nto: 19° 13´·330N., 96° 09´·936W.\nI[b\nFl.G.3s No 13, from:\n19° 13´·206N., 96° 09´·830W.\nto: 19° 13´·251N., 96° 09´·837W.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4710 MEXICO - Gulf of Mexico - Buoyage.                                 \n          Source: Mexican Notice 14/90/26 and 14/92/26                            \n                                                                                  \n          Chart 375 (Panel B) [ previous update 720/26 ] WGS84 DATUM              \n          Move      I[b Fl.G.3s No 15, from:                                      \n                                                      19° 13´·434N., 96° 09´·985W.\n                   to:                                19° 13´·330N., 96° 09´·936W.\n                    I[b                                                           \n                      Fl.G.3s No 13, from:                                        \n                                                      19° 13´·206N., 96° 09´·830W.\n                   to:                                19° 13´·251N., 96° 09´·837W.",
       "checkedForExport": true
     },
     {
@@ -3102,10 +3550,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4723 UNITED STATES OF AMERICA - Gulf of Mexico - Obstruction. Radar beacon.\nSource: ENC's US5LCHEB and US5LCHFA\nChart 3190 (Panel A) [ previous update 4167/26 ] NAD83 DATUM\nDelete + Obstn PA\n29° 37´·15N., 93° 15´·95W.\nsymbol, radar beacon, Racon(C) 29° 37´·63N., 93° 18´·20W.\nChart 3854 [ previous update 4104/26 ] NAD83 DATUM\nDelete + Obstn PA\n29° 37´·15N., 93° 15´·95W.\nsymbol, radar beacon, Racon(C) 29° 37´·64N., 93° 18´·21W.\nChart 5520 [ previous update 4081/26 ] WGS84 DATUM\nDelete symbol, radar beacon, Racon(C) 29° 37´·6N., 93° 18´·2W.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4723 UNITED STATES OF AMERICA - Gulf of Mexico - Obstruction. Radar beacon.\n          Source: ENC's US5LCHEB and US5LCHFA                                     \n                                                                                  \n          Chart 3190 (Panel A) [ previous update 4167/26 ] NAD83 DATUM            \n          Delete    + Obstn PA                                                    \n                                                      29° 37´·15N., 93° 15´·95W.  \n                   symbol, radar beacon, Racon(C)     29° 37´·63N., 93° 18´·20W.  \n                                                                                  \n          Chart 3854 [ previous update 4104/26 ] NAD83 DATUM                      \n          Delete    + Obstn PA                                                    \n                                                      29° 37´·15N., 93° 15´·95W.  \n                   symbol, radar beacon, Racon(C)     29° 37´·64N., 93° 18´·21W.  \n          Chart 5520 [ previous update 4081/26 ] WGS84 DATUM                      \n          Delete   symbol, radar beacon, Racon(C)     29° 37´·6N., 93° 18´·2W.",
       "checkedForExport": true
     },
     {
@@ -3126,10 +3571,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4647 CANADA - Gulf of Saint Lawrence - Depths.\nSource: Canadian Notice 7/4024/26\nChart 4766 [ previous update 1963/26 ] NAD83 DATUM\nInsert depth, 138, and extend 20m contour SE to enclose (a) 48° 21´·9N., 64° 31´·9W.\nDelete depth, 238, close SE of: (a) above\n2.40\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4647 CANADA - Gulf of Saint Lawrence - Depths.                          \n          Source: Canadian Notice 7/4024/26                                       \n          Chart 4766 [ previous update 1963/26 ] NAD83 DATUM                      \n          Insert   depth, 138, and extend 20m contour SE to enclose (a) 48° 21´·9N., 64° 31´·9W.\n          Delete   depth, 238, close SE of:           (a) above",
       "checkedForExport": true
     },
     {
@@ -3150,10 +3592,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4657 CANADA - Nova Scotia - Buoy.\nSource: Canadian Notices 7/4203/26 and 7/4237/26\nChart 4752 (INT 4631) [ previous update 2201/26 ] NAD83 DATUM\nAmend light-buoy to, Fl(5)Y 20s 44° 31´·88N., 63° 29´·72W.\nChart 4753 (INT 4632) [ previous update 3338/26 ] NAD83 DATUM\nAmend light-buoy to, Fl(5)Y 20s 44° 31´ 53·0\"N., 63° 29´ 43·1\"W.",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4657 CANADA - Nova Scotia - Buoy.                                       \n          Source: Canadian Notices 7/4203/26 and 7/4237/26                        \n          Chart 4752 (INT 4631) [ previous update 2201/26 ] NAD83 DATUM           \n          Amend    light-buoy to, Fl(5)Y 20s          44° 31´·88N., 63° 29´·72W.  \n                                                                                  \n          Chart 4753 (INT 4632) [ previous update 3338/26 ] NAD83 DATUM           \n          Amend    light-buoy to, Fl(5)Y 20s          44° 31´ 53·0\"N., 63° 29´ 43·1\"W.",
       "checkedForExport": true
     },
     {
@@ -3189,10 +3628,7 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4670 UNITED STATES OF AMERICA - East Coast - Maritime limit. Legend.\nSource: ENC US4MD1BD\nChart 2921 (Panel 1) [ previous update 4558/26 ] NAD83 DATUM\nInsert maritime limit, pecked line, joining: (a) 38° 20´·78N., 76° 17´·92W.\n(b) 38° 21´·48N., 76° 15´·38W.\n(c) 38° 18´·63N., 76° 14´·11W.\n(d) 38° 17´·91N., 76° 16´·66W.\nlegend, Works in progress (2026), within: (a)-(d) above\nDelete hydrography within: (a)-(d) above\n2.41\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4670 UNITED STATES OF AMERICA - East Coast - Maritime limit. Legend.    \n          Source: ENC US4MD1BD                                                    \n                                                                                  \n          Chart 2921 (Panel 1) [ previous update 4558/26 ] NAD83 DATUM            \n          Insert   maritime limit, pecked line, joining: (a) 38° 20´·78N., 76° 17´·92W.\n                                                   (b) 38° 21´·48N., 76° 15´·38W. \n                                                   (c) 38° 18´·63N., 76° 14´·11W. \n                                                   (d) 38° 17´·91N., 76° 16´·66W. \n                   legend, Works in progress (2026), within: (a)-(d) above        \n          Delete   hydrography within:                (a)-(d) above",
       "checkedForExport": true
     },
     {
@@ -3213,10 +3649,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4717 CANADA - Gulf of Saint Lawrence - Depths.\nSource: Canadian Notice 7/4426/26\nChart 4769 (Panel, Dalhousie Harbour) [ previous update 1679/25 ] NAD83 DATUM\nInsert depth, 17, and extend 18ft contour NE to enclose 48° 04´ 15·3\"N., 66° 21´ 31·1\"W.\ndepth, 5, and extend 6ft contour N to enclose (a) 48° 04´ 20·2\"N., 66° 21´ 42·6\"W.\nDelete depth, 15, close NE of: (a) above\nInsert depth, 17, and extend 18ft contour NE to enclose (b) 48° 04´ 14·9\"N., 66° 21´ 54·5\"W.\nDelete depth, 18, close SW of: (b) above\nInsert depth, 14 48° 04´ 20·8\"N., 66° 21´ 58·0\"W.\ndepth, 16, and extend 18ft contour N to enclose (c) 48° 04´ 22·3\"N., 66° 22´ 16·7\"W.\nDelete depth, 19, close NW of: (c) above\nInsert depth, 27 (d) 48° 04´ 24·1\"N., 66° 22´ 26·4\"W.\nDelete depth, 30, close NW of: (d) above\nInsert depth, 4, and extend 6ft contour N to enclose (e) 48° 04´ 19·6\"N., 66° 22´ 34·0\"W.\nDelete depth, 6, and associated 6ft contour, close NE of: (e) above\nInsert depth, 8 (f) 48° 04´ 20·8\"N., 66° 22´ 34·2\"W.\nDelete depth, 10, close NE of: (f) above\nInsert depth, 29, and extend 30ft contour N to enclose (g) 48° 04´ 26·1\"N., 66° 22´ 33·8\"W.\nDelete depth, 31, close N of: (g) above\nInsert depth, 17, enclosed by 18ft contour (h) 48° 04´ 21·1\"N., 66° 22´ 42·2\"W.\nDelete depth, 19, close W of: (h) above\nInsert depth, 8 (i) 48° 04´ 20·8\"N., 66° 22´ 51·9\"W.\nDelete depth, 9, close W of: (i) above\nReplace depth, 16, with depth, 14 48° 04´ 20·7\"N., 66° 22´ 40·1\"W.\ndepth, 6, with depth, 5 48° 04´ 20·1\"N., 66° 22´ 30·0\"W.\nde",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4717 CANADA - Gulf of Saint Lawrence - Depths.                          \n          Source: Canadian Notice 7/4426/26                                       \n          Chart 4769 (Panel, Dalhousie Harbour) [ previous update 1679/25 ] NAD83 DATUM\n          Insert   depth, 17, and extend 18ft contour NE to enclose 48° 04´ 15·3\"N., 66° 21´ 31·1\"W.\n                   depth, 5, and extend 6ft contour N to enclose (a) 48° 04´ 20·2\"N., 66° 21´ 42·6\"W.\n          Delete   depth, 15, close NE of:            (a) above                   \n          Insert   depth, 17, and extend 18ft contour NE to enclose (b) 48° 04´ 14·9\"N., 66° 21´ 54·5\"W.\n          Delete   depth, 18, close SW of:            (b) above                   \n          Insert   depth, 14                          48° 04´ 20·8\"N., 66° 21´ 58·0\"W.\n                   depth, 16, and extend 18ft contour N to enclose (c) 48° 04´ 22·3\"N., 66° 22´ 16·7\"W.\n          Delete   depth, 19, close NW of:            (c) above                   \n          Insert   depth, 27                       (d) 48° 04´ 24·1\"N., 66° 22´ 26·4\"W.\n          Delete   depth, 30, close NW of:            (d) above                   \n          Insert   depth, 4, and extend 6ft contour N to enclose (e) 48° 04´ 19·6\"N., 66° 22´ 34·0\"W.\n          Delete   depth, 6, and associated 6ft contour, c",
       "checkedForExport": true
     },
     {
@@ -3242,10 +3675,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4739 CANADA - Newfoundland and Labrador - Fog signal. Light.\nSource: Canadian Notices 7/4016-4017/26\nChart 4733 [ previous update 217/26 ] NAD83 DATUM\nInsert fog signal, Horn(1)60s, at light 46° 41´·4N., 53° 24´·2W.\nChart 4734 [ previous update 5809/25 ] NAD83 DATUM\nInsert fog signal, Horn(1)60s, at light (a) 46° 41´·5N., 53° 24´·1W.\nAmend light to, Fl.10s102ft22M (a) above\n2.42\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4739 CANADA - Newfoundland and Labrador - Fog signal. Light.            \n          Source: Canadian Notices 7/4016-4017/26                                 \n          Chart 4733 [ previous update 217/26 ] NAD83 DATUM                       \n          Insert   fog signal, Horn(1)60s, at light   46° 41´·4N., 53° 24´·2W.    \n                                                                                  \n          Chart 4734 [ previous update 5809/25 ] NAD83 DATUM                      \n          Insert   fog signal, Horn(1)60s, at light (a) 46° 41´·5N., 53° 24´·1W.  \n          Amend    light to, Fl.10s102ft22M           (a) above",
       "checkedForExport": true
     },
     {
@@ -3268,10 +3698,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4650(P)/26 ENGLAND - West Coast - Wreck.\nSource: SAR SITREPS\n1. A non-dangerous wreck exists in position 49° 59´·00N., 4° 27´·00W.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n3. Charts will be updated when full details are available.\n(ETRS89 DATUM)\nCharts affected - 442 (INT 1701) - 2655 - 2656 - 2675 (INT 1070) - 5602_1",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4650(P)/26 ENGLAND - West Coast - Wreck.                                \n          Source: SAR SITREPS                                                     \n          1. A non-dangerous wreck exists in position 49° 59´·00N., 4° 27´·00W.   \n          2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n          3. Charts will be updated when full details are available.              \n            (ETRS89 DATUM)                                                        \n          Charts affected - 442 (INT 1701) - 2655 - 2656 - 2675 (INT 1070) - 5602_1",
       "checkedForExport": true
     },
     {
@@ -3309,10 +3736,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4665(P)/26 ENGLAND - South Coast - Depths. Drying height.\nSource: mv Northern Wind\n1. Recent survey information has shown that numerous depths less than charted exist in the area outside Dungeness. The\nmost significant are as follows:\nDepth Position\n4·4m 50° 54´·59N., 0° 58´·49E.\n9·4m 50° 55´·09N., 0° 59´·36E.\n18·9m 50° 55´·15N., 0° 59´·55E.\nDrying Height Position\n0·6m 50° 54´·88N., 0° 58´·99E.\n2. Mariners are advised to navigate with caution in the area.\n3. Charts will be updated when full details are available.\n(ETRS89 DATUM)\nCharts affected - 536 (INT 1740) - 1610 (INT 1511) - 1892 (INT 1741) - 2449 - 2451 (INT 1704) - 5605_2 - 5605_6 -\n5605_7",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4665(P)/26 ENGLAND - South Coast - Depths. Drying height.               \n          Source: mv Northern Wind                                                \n          1. Recent survey information has shown that numerous depths less than charted exist in the area outside Dungeness. The\n            most significant are as follows:                                      \n                                                                                  \n            Depth                       Position                                  \n            4·4m                        50° 54´·59N., 0° 58´·49E.                 \n            9·4m                        50° 55´·09N., 0° 59´·36E.                 \n            18·9m                       50° 55´·15N., 0° 59´·55E.                 \n            Drying Height               Position                                  \n            0·6m                        50° 54´·88N., 0° 58´·99E.                 \n          2. Mariners are advised to navigate with caution in the area.           \n          3. Charts will be updated when full details are available.              \n            (ETRS89 DATUM)                                                        \n          Charts affected - 536 (INT 1740)",
       "checkedForExport": true
     },
     {
@@ -3341,10 +3765,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4699(T)/26 WALES - South Coast - Scientific instruments. Buoyage.\nSource: Milford Haven Port Authority Notice 108/26\n1. Scientific instruments, marked by yellow special buoys, Fl(5)Y 20s, have been established on the seabed in the following\npositions:\n51° 42´·024N., 5° 08´·002W.\n51° 41´·843N., 5° 00´·528W.\n2. Mariners are advised to navigate with caution in the area and keep clear of deployed equipment.\n(ETRS89 DATUM)\nCharts affected - 2878 - 3273 (INT 1649) - 3274 (INT 1650) - 3275 (INT 1651) - 5620_11 - 5620_13",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4699(T)/26 WALES - South Coast - Scientific instruments. Buoyage.       \n          Source: Milford Haven Port Authority Notice 108/26                      \n          1. Scientific instruments, marked by yellow special buoys, Fl(5)Y 20s, have been established on the seabed in the following\n            positions:                                                            \n            51° 42´·024N., 5° 08´·002W.                                           \n            51° 41´·843N., 5° 00´·528W.                                           \n          2. Mariners are advised to navigate with caution in the area and keep clear of deployed equipment.\n            (ETRS89 DATUM)                                                        \n                                                                                  \n          Charts affected - 2878 - 3273 (INT 1649) - 3274 (INT 1650) - 3275 (INT 1651) - 5620_11 - 5620_13",
       "checkedForExport": true
     },
     {
@@ -3587,12 +4008,7 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4707(P)/26 SCOTLAND - South West Coast - Depths. Wreck. Obstructions. Drying height.\nSource: mv Northern Breeze and mv Northern Gale\n1. Recent survey information has shown that numerous depths less than charted exist within Luce Bay and Beaufort's Dyke,\nand between Cairns Money Head and The Mull of Galloway. The most significant are as follows:\nDepth Position\nDrying 0·5m 54° 48´·12N., 5° 02´·68W.\n4·2m 54° 48´·03N., 5° 02´·64W.\n11·3m 54° 47´·90N., 5° 03´·18W.\n8·7m 54° 46´·80N., 5° 01´·06W.\n2.43\nWk41/26\nII\n4707(P)/26 SCOTLAND - South West Coast - Depths. Wreck. Obstructions. Drying height. (continued)\n13·5m 54° 46´·43N., 5° 01´·21W.\n25·9m 54° 46´·34N., 5° 04´·81W.\n12·8m 54° 45´·94N., 5° 00´·85W.\n17·8m 54° 45´·03N., 5° 00´·92W.\n26·1m 54° 44´·72N., 5° 01´·79W.\n21·3m 54° 44´·17N., 5° 01´·10W.\n26·3m 54° 42´·97N., 5° 00´·22W.\n13·9m 54° 41´·91N., 4° 57´·76W.\n26·6m 54° 38´·42N., 4° 57´·35W.\n24·9m 54° 37´·65N., 4° 55´·30W.\n26·4m 54° 37´·16N., 4° 52´·23W.\n27·5m 54° 37´·06N., 4° 54´·12W.\n14·2m 54° 38´·23N., 4° 53´·65W.\n17·1m 54° 37´·89N., 4° 53´·68W.\n26·7m 54° 37´·99N., 4° 50´·22W.\n18·4m 54° 38´·73N., 4° 51´·27W.\n13·6m 54° 40´·36N., 4° 50´·69W.\nand\nDepth Position\n5·4m 54° 40´·58N., 4° 51´·39W.\n17·4m 54° 41´·08N., 4° 46´·33W.\n18·4m 54° 40´·44N., 4° 46´·28W.\n30·3m 54° 35´·54N., 4° 43´·77W.\n7·2m 54° 40´·56N., 4° 57´·98W.\n9·3m 54° 45´·08N., 4° 59´·97W.\n9·4m 54° 44´·62N., 4° 59´·74W.\n8·3m 54° 43´·84N., 4° 58´·79W.\n8·8m 54° 43´·34N., 4° 57´·99W.\n10·2m 54° 42´·24N., 4° 57´·52W.\n2·0m 54° 40´·35",
-      "cancels": [
-        "3026(P)/26"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4707(P)/26 SCOTLAND - South West Coast - Depths. Wreck. Obstructions. Drying height.\n          Source: mv Northern Breeze and mv Northern Gale                         \n          1. Recent survey information has shown that numerous depths less than charted exist within Luce Bay and Beaufort's Dyke,\n            and between Cairns Money Head and The Mull of Galloway. The most significant are as follows:\n            Depth        Position                                                 \n            Drying 0·5m  54° 48´·12N., 5° 02´·68W.                                \n            4·2m         54° 48´·03N., 5° 02´·64W.                                \n            11·3m        54° 47´·90N., 5° 03´·18W.                                \n            8·7m         54° 46´·80N., 5° 01´·06W.                                \n                                                                                  \n                                                                                  \n                                                                                  \n                                        2.43                                      \n          Wk41/26",
       "checkedForExport": true
     },
     {
@@ -3615,10 +4031,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4765(T)/26 ENGLAND - East Coast - Wreck.\nSource: HM Coastguard\n1. A dangerous wreck has been reported in approximate position 51° 47´·74N., 1° 36´·83E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(ETRS89 DATUM)\nCharts affected - 1183 (INT 1561) - 1610 (INT 1511) - 1975 - 2692 - 5607_2",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4765(T)/26 ENGLAND - East Coast - Wreck.                                \n          Source: HM Coastguard                                                   \n          1. A dangerous wreck has been reported in approximate position 51° 47´·74N., 1° 36´·83E.\n          2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n            (ETRS89 DATUM)                                                        \n          Charts affected - 1183 (INT 1561) - 1610 (INT 1511) - 1975 - 2692 - 5607_2",
       "checkedForExport": true
     },
     {
@@ -3672,12 +4085,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4766(P)/26 IRELAND - West Coast - Depths. Drying height.\nSource: Geological Survey Ireland\n1. Depths less than charted exist within McSwyne's Bay. The most significant are as follows:\nDepth Position\n2·8m 54° 36´·940N., 8° 25´·318W.\n4·7m 54° 37´·32N., 8° 24´·67W.\n2·5m 54° 37´·19N., 8° 24´·44W.\n0·6m 54° 37´·30N., 8° 24´·28W.\n8·4m 54° 37´·34N., 8° 23´·34W.\n3·7m 54° 36´·78N., 8° 23´·02W.\n*Drying 0·3m 54° 37´·59N., 8° 23´·87W.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n3. Charts will be updated when full details are available.\n4. *Former Notice 4080(P)/26 is cancelled.\n*Indicates new or revised entry.\n(ETRS89 DATUM)\nCharts affected - 2702 - 2792",
-      "cancels": [
-        "4080(P)/26"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4766(P)/26 IRELAND - West Coast - Depths. Drying height.                \n          Source: Geological Survey Ireland                                       \n          1. Depths less than charted exist within McSwyne's Bay. The most significant are as follows:\n                                                                                  \n            Depth                       Position                                  \n            2·8m                        54° 36´·940N., 8° 25´·318W.               \n            4·7m                        54° 37´·32N., 8° 24´·67W.                 \n            2·5m                        54° 37´·19N., 8° 24´·44W.                 \n            0·6m                        54° 37´·30N., 8° 24´·28W.                 \n            8·4m                        54° 37´·34N., 8° 23´·34W.                 \n            3·7m                        54° 36´·78N., 8° 23´·02W.                 \n            *Drying 0·3m                54° 37´·59N., 8° 23´·87W.                 \n          2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n          3. Charts will be updated when full details are available.              \n          4.",
       "checkedForExport": true
     },
     {
@@ -3885,13 +4293,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4649(T)/26 SWEDEN - East Coast - Works. Dredging area.\nSource: Swedish Notice 1135/20310(T)/26\n1. Dredging works are taking place within the northern quay in Umeå hamn, in the vicinity of position:\n63° 42´·00N., 20° 20´·70E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(WGS84 DATUM)\nChart affected - 934 (INT 1174)\n2.45\nWk41/26\nII\n4708(P)/26 POLAND - Wind farm. Works. Buoyage. Piles. Restricted areas.\nSource: Polish Notices 52/631(T)/24, 1/2(T)/25, 1/12(T)/25, 40/442/25 and 46/558(T)/25\n1. Wind farm construction works are taking place within an area, marked by cardinal light-buoys, bounded by the following\npositions:\n55° 02´·09N., 17° 33´·10E.\n55° 06´·65N., 17° 37´·30E.\n55° 06´·65N., 17° 46´·27E.\n55° 04´·94N., 17° 46´·66E.\n55° 05´·11N., 17° 43´·09E.\n55° 00´·30N., 17° 43´·09E.\n54° 59´·62N., 17° 38´·65E.\n54° 59´·66N., 17° 38´·89E.\n54° 58´·66N., 17° 33´·85E.\n2. Numerous piles have been established within the area.\n3. There is an entry prohibited area, radius 500 metres, around each pile.\n4. Mariners are advised to navigate with caution in the area.\n5. Charts will be updated when works are complete.\n6. *Former Notice 1927(P)/26 is cancelled.\n*Indicates new or revised entry.\n(WGS84 DATUM)\nCharts affected - 2014 (INT 1219) - 2018 (INT 1202) - 2040 (INT 1218)\n4746(T)/26 POLAND - Measuring instruments.\nSource: Polish Notices 29/363(T) and 29/365(T)/26\n1. Measuring instruments have been established on t",
-      "cancels": [
-        "1927(P)/26",
-        "4199(T)/26"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4649(T)/26 SWEDEN - East Coast - Works. Dredging area.                  \n          Source: Swedish Notice 1135/20310(T)/26                                 \n          1. Dredging works are taking place within the northern quay in Umeå hamn, in the vicinity of position:\n            63° 42´·00N., 20° 20´·70E.                                            \n          2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n            (WGS84 DATUM)                                                         \n          Chart affected - 934 (INT 1174)",
       "checkedForExport": true
     },
     {
@@ -4076,12 +4478,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4757(T)/26 NORTH SEA - Norwegian Sector - Buoy.\nSource: Norwegian Notice 7/81252(T)/26\n1. A yellow spherical ODAS buoy, Fl(5)Y.20s, has been deployed in position 59° 46´·51N., 2° 31´·80E.\n2. Mariners are advised to navigate with caution in the area.\n3. Former Notice 2329(T)/26 is cancelled.\n(WGS84 DATUM)\nCharts affected - 292 - 294 - 1427 (INT 1401) - 2182C (INT 1041)\n2.47\nWk41/26\nII\n4667(P)/26 BANGLADESH - Depths. Overhead cable. Vertical clearance. Buoyage.\nSource: ENCs BD507427 and BNHOC 25/26\n1. Depths less than charted exist within Chattogram Harbour. The most significant are as follows:\nDepth Position\n7·1m 22° 05´·12N., 91° 40´·10E.\n6·1m 22° 08´·23N., 91° 40´·08E.\n6·1m 22° 09´·55N., 91° 40´·10E.\n7·3m 22° 20´·20N., 91° 40´·74E.\n10·9m 22° 20´·09N., 91° 43´·32E.\n7·7m 22° 06´·26N., 91° 43´·91E.\n8·6m 22° 06´·77N., 91° 48´·65E.\n8·6m 22° 07´·41N., 91° 47´·64E.\n7·4m 22° 10´·05N., 91° 42´·90E.\n6·5m 22° 16´·72N., 91° 45´·05E.\n11·3m 22° 16´·07N., 91° 44´·24E.\n11·2m 22° 16´·07N., 91° 44´·75E.\n5·8m 22° 13´·61N., 91° 46´·99E.\n3·1m 22° 12´·61N., 91° 47´·77E.\n2. The overhead power cable joining the following positions now has a safe vertical clearance of 39m:\n22° 18´·02N., 91° 48´·16E.\n22° 18´·19N., 91° 47´·79E.\n3. The following light-buoys have been established:\nCharacteristic Designation Buoy Type Position\nLFl.G.6s No-1 Starboard Lateral 22° 12´·64N., 91° 47´·61E.\nLFl.R.6s No-2 Port Lateral 22° 13´·07N., 91° 47´·61E.\nLFl.G.6s No-3 Starboard Lateral 22° 13´·06N., 91° 47´·99E.\nLFl.G.6",
-      "cancels": [
-        "2329(T)/26"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4757(T)/26 NORTH SEA - Norwegian Sector - Buoy.                         \n          Source: Norwegian Notice 7/81252(T)/26                                  \n          1. A yellow spherical ODAS buoy, Fl(5)Y.20s, has been deployed in position 59° 46´·51N., 2° 31´·80E.\n          2. Mariners are advised to navigate with caution in the area.           \n          3. Former Notice 2329(T)/26 is cancelled.                               \n            (WGS84 DATUM)                                                         \n          Charts affected - 292 - 294 - 1427 (INT 1401) - 2182C (INT 1041)",
       "checkedForExport": true
     },
     {
@@ -4314,12 +4711,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4669(P)/26 INDIAN OCEAN - La Réunion - Area to be avoided. Restricted area.\nSource: French Notice 34/4(P)/26\n1. An area to be avoided, recommended only for cargo vessels of 300 gross tonnage or more in transit, without scheduled\nlayover or authorized activity, is established in the French waters off the island of La Réunion, bounded by the following\npositions:\n20° 40´·23S., 55° 27´·53E.\n20° 40´·23S., 56° 30´·02E.\n21° 12´·55S., 56° 47´·08E.\n21° 43´·28S., 55° 36´·32E.\n21° 31´·30S., 55° 05´·32E.\n21° 08´·10S., 55° 00´·76E.\n21° 05´·10S., 55° 00´·23E.\n21° 04´·17S., 55° 00´·26E.\n21° 02´·89S., 55° 00´·05E.\n20° 59´·53S., 55° 00´·44E.\n20° 56´·57S., 55° 01´·62E.\n20° 54´·18S., 55° 03´·40E.\n20° 50´·11S., 55° 05´·58E.\n20° 46´·26S., 55° 08´·86E.\n20° 45´·01S., 55° 10´·76E.\n20° 43´·44S., 55° 15´·79E.\n20° 41´·87S., 55° 18´·61E.\n20° 40´·73S., 55° 22´·36E.\n20° 40´·44S., 55° 24´·64E.\n2. The area comes into force from 1st December 2026.\n3. Charts will be updated when full details are available.\n(WGS84 DATUM)\nCharts affected - 712 (INT 7730) - 1495 (INT 7736) - 1497 (INT 7735) - 3905 (INT 7062) - 3906 (INT 7064) - 4700\n(INT 700) - 4702 (INT 702) - 4713\n2.49\nWk41/26\nII\n4679(T)/26 BANGLADESH - Buoyage.\nSource: BNHOC Notices 06(T)/25, 09(T)/25, 19(T)25, 24(T)/25, 06(T)/26, 21(T)/26 and 22(T)/26\n1. Changes to buoyage have taken place within Pussur River including the following:\nCharacteristic DesignatiBuoy Type Status Position\non\n*Fl(2)G.10s B-3 Starboard lateral Missing 21° 30´·38N., 89° 29´·98E.\nFl(",
-      "cancels": [
-        "3317(T)/26"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4669(P)/26 INDIAN OCEAN - La Réunion - Area to be avoided. Restricted area.\n          Source: French Notice 34/4(P)/26                                        \n          1. An area to be avoided, recommended only for cargo vessels of 300 gross tonnage or more in transit, without scheduled\n            layover or authorized activity, is established in the French waters off the island of La Réunion, bounded by the following\n            positions:                                                            \n            20° 40´·23S., 55° 27´·53E.                                            \n            20° 40´·23S., 56° 30´·02E.                                            \n            21° 12´·55S., 56° 47´·08E.                                            \n            21° 43´·28S., 55° 36´·32E.                                            \n            21° 31´·30S., 55° 05´·32E.                                            \n            21° 08´·10S., 55° 00´·76E.                                            \n            21° 05´·10S., 55° 00´·23E.                                            \n            21° 04´·17S., 55° 00´·26E.                                            \n            21° 02´·89S., 55° 00´·05E.                                            \n            20° 59´·53S., 55° 00´·44E.",
       "checkedForExport": true
     },
     {
@@ -4369,10 +4761,7 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4674(P)/26 CHINA - East Coast - Submarine pipelines. Works.\nSource: Chinese Notice 29/869(T)/26\n1. Pipeline laying operations are taking place, joining the following positions:\n29° 42´·34N., 122° 04´·32E.\n29° 42´·07N., 122° 04´·62E.\n29° 41´·38N., 122° 02´·88E.\n29° 41´·43N., 122° 01´·36E.\n29° 42´·34N., 122° 00´·55E.\n29° 42´·01N., 122° 02´·57E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n3. Charts will be updated when works are complete.\n(WGS84 DATUM)\nCharts affected - 1126 - 1759\n2.50\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4674(P)/26 CHINA - East Coast - Submarine pipelines. Works.             \n          Source: Chinese Notice 29/869(T)/26                                     \n          1. Pipeline laying operations are taking place, joining the following positions:\n            29° 42´·34N., 122° 04´·32E.                                           \n            29° 42´·07N., 122° 04´·62E.                                           \n            29° 41´·38N., 122° 02´·88E.                                           \n            29° 41´·43N., 122° 01´·36E.                                           \n            29° 42´·34N., 122° 00´·55E.                                           \n            29° 42´·01N., 122° 02´·57E.                                           \n          2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n          3. Charts will be updated when works are complete.                      \n            (WGS84 DATUM)                                                         \n          Charts affected - 1126 - 1759",
       "checkedForExport": true
     },
     {
@@ -4505,10 +4894,7 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4675(T)/26 CHINA - Bo Hai - Works.\nSource: Chinese Notice 29/864(T)/26\n1. Offshore works are taking place, in areas bounded by the following positions:\n38° 04´·1N., 119° 27´·9E.\n38° 02´·0N., 119° 27´·5E.\n38° 01´·7N., 119° 29´·6E.\n38° 03´·8N., 119° 29´·9E.\nand\n38° 13´·8N., 119° 27´·2E.\n38° 12´·7N., 119° 27´·1E.\n38° 12´·2N., 119° 27´·4E.\n38° 11´·4N., 119° 30´·1E.\n38° 12´·9N., 119° 29´·2E.\n38° 13´·2N., 119° 29´·2E.\nand\n38° 16´·4N., 119° 24´·0E.\n38° 15´·5N., 119° 22´·1E.\n38° 15´·2N., 119° 23´·2E.\n38° 16´·1N., 119° 25´·2E.\nand\n38° 17´·3N., 119° 25´·9E.\n38° 16´·4N., 119° 23´·9E.\n38° 16´·0N., 119° 25´·0E.\n38° 16´·8N., 119° 26´·7E.\n38° 16´·8N., 119° 26´·8E.\nand\n38° 16´·1N., 119° 28´·5E.\n38° 15´·4N., 119° 26´·6E.\n38° 14´·3N., 119° 27´·4E.\n38° 14´·9N., 119° 29´·3E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(CGCS 2000 DATUM)\nChart affected - 1250",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4675(T)/26 CHINA - Bo Hai - Works.                                      \n          Source: Chinese Notice 29/864(T)/26                                     \n          1. Offshore works are taking place, in areas bounded by the following positions:\n            38° 04´·1N., 119° 27´·9E.                                             \n            38° 02´·0N., 119° 27´·5E.                                             \n            38° 01´·7N., 119° 29´·6E.                                             \n            38° 03´·8N., 119° 29´·9E.                                             \n            and                                                                   \n            38° 13´·8N., 119° 27´·2E.                                             \n            38° 12´·7N., 119° 27´·1E.                                             \n            38° 12´·2N., 119° 27´·4E.                                             \n            38° 11´·4N., 119° 30´·1E.                                             \n            38° 12´·9N., 119° 29´·2E.                                             \n            38° 13´·2N., 119° 29´·2E.                                             \n            and                                                                   \n            38° 16´·4N., 119° 24´·0E.",
       "checkedForExport": true
     },
     {
@@ -4552,12 +4938,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4676(T)/26 CHINA - Bo Hai - Works.\nSource: Chinese Notice 29/863(T)/26\n1. Offshore works are taking place, in an area bounded by the following positions:\n38° 15´·9N., 118° 46´·0E.\n38° 15´·4N., 118° 46´·3E.\n38° 14´·3N., 118° 42´·1E.\n38° 14´·8N., 118° 41´·8E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(CGCS 2000 DATUM)\nChart affected - 1250\n2.51\nWk41/26\nII\n4677(T)/26 TAIWAN - Platform.\nSource: Taiwanese Notice 130(T)/26\n1. *A lit wave generator platform, Fl.R.3s, has been deployed in position 25° 09´·347N., 121° 46´·807E.\n2. Mariners are advised to navigate with caution in the area.\n3. *Former Notice 4314(T)/25 is cancelled.\n*Indicates new or revised entry\n(WGS84 DATUM)\nChart affected - 2619",
-      "cancels": [
-        "4314(T)/25"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4676(T)/26 CHINA - Bo Hai - Works.                                      \n          Source: Chinese Notice 29/863(T)/26                                     \n          1. Offshore works are taking place, in an area bounded by the following positions:\n            38° 15´·9N., 118° 46´·0E.                                             \n            38° 15´·4N., 118° 46´·3E.                                             \n            38° 14´·3N., 118° 42´·1E.                                             \n            38° 14´·8N., 118° 41´·8E.                                             \n          2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n            (CGCS 2000 DATUM)                                                     \n          Chart affected - 1250",
       "checkedForExport": true
     },
     {
@@ -4595,10 +4976,7 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4678(T)/26 CHINA - Bo Hai - Works.\nSource: Chinese Notice 30/919(T)/26\n1. Offshore works are taking place, within an area bounded by the following positions:\n39° 19´·1N., 121° 23´·5E.\n39° 18´·4N., 121° 23´·5E.\n39° 18´·4N., 121° 23´·9E.\n39° 19´·1N., 121° 23´·9E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(CGCS 2000 DATUM)\nChart affected - 1249",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4678(T)/26 CHINA - Bo Hai - Works.                                      \n          Source: Chinese Notice 30/919(T)/26                                     \n          1. Offshore works are taking place, within an area bounded by the following positions:\n                                                                                  \n            39° 19´·1N., 121° 23´·5E.                                             \n            39° 18´·4N., 121° 23´·5E.                                             \n            39° 18´·4N., 121° 23´·9E.                                             \n            39° 19´·1N., 121° 23´·9E.                                             \n          2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n            (CGCS 2000 DATUM)                                                     \n          Chart affected - 1249",
       "checkedForExport": true
     },
     {
@@ -4637,10 +5015,7 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4680(T)/26 CHINA - East Coast - Works.\nSource: Chinese Notice 30/921(T)/26\n1. Offshore works are taking place, in an area bounded by the following positions:\n31° 01´·50N., 121° 58´·20E.\n31° 02´·20N., 121° 59´·40E.\n31° 01´·57N., 122° 00´·22E.\n31° 01´·03N., 121° 58´·50E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(CGCS 2000 DATUM)\nChart affected - 1602\n2.52\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4680(T)/26 CHINA - East Coast - Works.                                  \n          Source: Chinese Notice 30/921(T)/26                                     \n          1. Offshore works are taking place, in an area bounded by the following positions:\n            31° 01´·50N., 121° 58´·20E.                                           \n            31° 02´·20N., 121° 59´·40E.                                           \n            31° 01´·57N., 122° 00´·22E.                                           \n            31° 01´·03N., 121° 58´·50E.                                           \n          2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n            (CGCS 2000 DATUM)                                                     \n          Chart affected - 1602",
       "checkedForExport": true
     },
     {
@@ -4709,10 +5084,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4682(T)/26 CHINA - Yellow Sea Coast - Dredged area. Works.\nSource: Chinese Notice 30/920(T)/26\n1. Dredging works are taking place in the area bounded by the following positions:\n35° 37´·228N., 119° 47´·918E.\n35° 37´·283N., 119° 48´·032E.\n35° 37´·285N., 119° 48´·528E.\n35° 36´·488N., 119° 48´·500E.\n35° 36´·085N., 119° 48´·277E.\n35° 36´·612N., 119° 48´·365E.\n35° 36´·767N., 119° 48´·243E.\n35° 36´·767N., 119° 47´·953E.\n35° 37´·220N., 119° 47´·918E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(CGCS 2000 DATUM)\nChart affected - 809\n4691(T)/26 MALAYSIA - Peninsular Malaysia, East Coast - Works.\nSource: Marine Department, Malaysia Notice 155(T)/26\n1. Construction works are taking place in the vicinity of position 1° 27´·50N., 104° 27´·02E.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nCharts affected - 1312 - 2403 - 2422 - 2869 - 3831",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4682(T)/26 CHINA - Yellow Sea Coast - Dredged area. Works.              \n          Source: Chinese Notice 30/920(T)/26                                     \n          1. Dredging works are taking place in the area bounded by the following positions:\n            35° 37´·228N., 119° 47´·918E.                                         \n            35° 37´·283N., 119° 48´·032E.                                         \n            35° 37´·285N., 119° 48´·528E.                                         \n            35° 36´·488N., 119° 48´·500E.                                         \n            35° 36´·085N., 119° 48´·277E.                                         \n            35° 36´·612N., 119° 48´·365E.                                         \n            35° 36´·767N., 119° 48´·243E.                                         \n            35° 36´·767N., 119° 47´·953E.                                         \n            35° 37´·220N., 119° 47´·918E.                                         \n          2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n            (CGCS 2000 DATUM)                                                     \n          Chart affected - 809",
       "checkedForExport": true
     },
     {
@@ -4931,12 +5303,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4721(P)/26 CHINA - East Coast - Platforms. Submarine power cables. Wind farm.\nSource: Chinese Notices 27/747-748/26 and 33/1031/26\n1. Wind farms have been established in areas bounded by the following positions:\n33° 25´·59N., 121° 34´·80E.\n33° 21´·87N., 121° 37´·89E.\n33° 21´·88N., 121° 32´·64E.\n2. and\n33° 16´·91N., 121° 29´·71E.\n33° 16´·81N., 121° 38´·64E.\n33° 12´·86N., 121° 35´·19E.\n33° 13´·05N., 121° 27´·46E.\n3. and\n33° 15´·05N., 121° 20´·28E.\n33° 10´·82N., 121° 16´·91E.\n33° 10´·83N., 121° 13´·55E.\n33° 12´·85N., 121° 13´·43E.\n4. and\n*32° 38´·08N., 121° 43´·72E.\n*32° 37´·71N., 121° 53´·73E.\n*32° 40´·71N., 121° 51´·85E.\n*32° 40´·79N., 121° 49´·73E.\n*32° 38´·73N., 121° 43´·37E.\n2.53\nWk41/26\nII\n4721(P)/26 CHINA - East Coast - Platforms. Submarine power cables. Wind farm. (continued)\n5. and\n*32° 37´·92N., 121° 56´·82E.\n*32° 37´·89N., 122° 00´·86E.\n*32° 38´·90N., 122° 00´·96E.\n*32° 39´·91N., 122° 00´·53E.\n*32° 39´·36N., 121° 55´·98E.\n6. Submarine power cables have been laid joining the following positions:\n33° 13´·00N., 120° 58´·68E.\n33° 14´·47N., 121° 17´·22E.\n33° 15´·98N., 121° 21´·81E.\n7. and\n33° 14´·19N., 121° 14´·19E.\n33° 12´·62N., 121° 16´·41E.\n8. and\n33° 22´·44N., 121° 34´·30E.\n33° 21´·97N., 121° 32´·61E.\n33° 18´·34N., 121° 30´·68E.\n33° 16´·26N., 121° 30´·58E.\n33° 15´·85N., 121° 30´·23E.\n33° 15´·87N., 121° 29´·35E.\n33° 15´·96N., 121° 29´·05E.\n9. Unlit platforms have been established in the following positions:\n33° 22´·44N., 121° 34´·30E.\n33° 16´·26N., 121° 30´·58E.\n33° 12",
-      "cancels": [
-        "4052(P)/26"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4721(P)/26 CHINA - East Coast - Platforms. Submarine power cables. Wind farm.\n          Source: Chinese Notices 27/747-748/26 and 33/1031/26                    \n          1. Wind farms have been established in areas bounded by the following positions:\n                                                                                  \n            33° 25´·59N., 121° 34´·80E.                                           \n            33° 21´·87N., 121° 37´·89E.                                           \n            33° 21´·88N., 121° 32´·64E.                                           \n          2. and                                                                  \n            33° 16´·91N., 121° 29´·71E.                                           \n            33° 16´·81N., 121° 38´·64E.                                           \n            33° 12´·86N., 121° 35´·19E.                                           \n            33° 13´·05N., 121° 27´·46E.                                           \n          3. and                                                                  \n            33° 15´·05N., 121° 20´·28E.                                           \n            33° 10´·82N., 121° 16´·91E.",
       "checkedForExport": true
     },
     {
@@ -5015,12 +5382,7 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4760(P)/26 CHINA - East Coast - Submarine power cable. Wind farm.\nSource: Chinese Notices 33/1041-1043/26\n1. A wind farm has been established, within an area bounded by the following positions:\n25° 05´·04N., 119° 18´·05E.\n25° 05´·15N., 119° 18´·40E.\n25° 02´·27N., 119° 21´·60E.\n25° 00´·64N., 119° 18´·65E.\n25° 01´·13N., 119° 17´·03E.\n2. A submarine power cable has been laid, joining the following positions:\n25° 11´·09N., 119° 15´·61E.\n25° 10´·12N., 119° 15´·46E.\n25° 04´·88N., 119° 18´·00E.\n3. Mariners are advised to navigate with caution in the area.\n4. These changes will be included in a New Edition of Chart 1716 to be published late 2026.\n5. Charts 1761 and 2401 will be updated by Notice to Mariners.\n(CGCS 2000 DATUM)\nChart affected - 1716\n4770(T)/26 TAIWAN - Works.\nSource: UKHO and Taiwanese Notice 13/25\n1. Wharf construction works are taking place in the vicinity of the following positions:\n24° 15´·61N., 120° 30´·50E.\n24° 15´·24N., 120° 30´·31E.\n24° 15´·20N., 120° 30´·40E.\n24° 15´·59N., 120° 30´·57E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n3. *Former Notice 2409(T)/25 is cancelled.\n*Indicates new or revised entry.\n(WGS84 DATUM)\nChart affected - 2618",
-      "cancels": [
-        "2409(T)/25"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4760(P)/26 CHINA - East Coast - Submarine power cable. Wind farm.       \n          Source: Chinese Notices 33/1041-1043/26                                 \n          1. A wind farm has been established, within an area bounded by the following positions:\n            25° 05´·04N., 119° 18´·05E.                                           \n            25° 05´·15N., 119° 18´·40E.                                           \n            25° 02´·27N., 119° 21´·60E.                                           \n            25° 00´·64N., 119° 18´·65E.                                           \n            25° 01´·13N., 119° 17´·03E.                                           \n          2. A submarine power cable has been laid, joining the following positions:\n            25° 11´·09N., 119° 15´·61E.                                           \n            25° 10´·12N., 119° 15´·46E.                                           \n            25° 04´·88N., 119° 18´·00E.                                           \n          3. Mariners are advised to navigate with caution in the area.           \n          4. These changes will be included in a New Edition of Chart 1716 to be published late 2026.\n          5. Charts 1761 and 2401 will be updated by Notice to Mariners.          \n            (CGCS 2000 DATUM)",
       "checkedForExport": true
     },
     {
@@ -5044,10 +5406,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4683(T)/26 KOREA - South Coast - Buoy.\nSource: Korean Notice 31/448(T)/26\n1. An unlit yellow spherical ODAS buoy has been deployed, until further notice, in position 34° 47´·51N., 128° 09´·02E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(WGS84 DATUM)\nCharts affected - 127 - 3391 (INT 5360)\n2.55\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4683(T)/26 KOREA - South Coast - Buoy.                                  \n          Source: Korean Notice 31/448(T)/26                                      \n          1. An unlit yellow spherical ODAS buoy has been deployed, until further notice, in position 34° 47´·51N., 128° 09´·02E.\n          2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n            (WGS84 DATUM)                                                         \n          Charts affected - 127 - 3391 (INT 5360)",
       "checkedForExport": true
     },
     {
@@ -5071,10 +5430,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4684(T)/26 KOREA - South Coast - Buoy.\nSource: Korean Notice 31/449(T)/26\n1. An unlit yellow spherical ODAS buoy has been deployed, until further notice, in position 34° 40´·45N., 127° 59´·44E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(WGS84 DATUM)\nCharts affected - 127 - 3391 (INT 5360)",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4684(T)/26 KOREA - South Coast - Buoy.                                  \n          Source: Korean Notice 31/449(T)/26                                      \n          1. An unlit yellow spherical ODAS buoy has been deployed, until further notice, in position 34° 40´·45N., 127° 59´·44E.\n          2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n            (WGS84 DATUM)                                                         \n          Charts affected - 127 - 3391 (INT 5360)",
       "checkedForExport": true
     },
     {
@@ -5097,10 +5453,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4768(T)/26 KOREA - South Coast - Buoy.\nSource: Korean Notice 31/447(T)/26\n1. An unlit yellow ODAS buoy has been deployed, until further notice, in position 34° 46´·0N., 128° 19´·1E.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nChart affected - 127",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4768(T)/26 KOREA - South Coast - Buoy.                                  \n          Source: Korean Notice 31/447(T)/26                                      \n          1. An unlit yellow ODAS buoy has been deployed, until further notice, in position 34° 46´·0N., 128° 19´·1E.\n          2. Mariners are advised to navigate with caution in the area.           \n            (WGS84 DATUM)                                                         \n                                                                                  \n          Chart affected - 127",
       "checkedForExport": true
     },
     {
@@ -5173,12 +5526,7 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4672(P)/26 BRAZIL - East Coast - Depths. Drying height.\nSource: Brazilian Notice 12/E 57(P)/26\n1. Depths less than charted exist within Ilhéus. The most significant are as follows:\nDepth Position\n7·7m 14° 45´·82S., 39° 01´·52W.\n6·7m 14° 45´·89S., 39° 01´·51W.\n7·6m 14° 45´·95S., 39° 02´·00W.\n0·3m 14° 46´·14S., 39° 01´·59W.\n0·9m 14° 46´·21S., 39° 01´·58W.\n6·2m 14° 46´·26S., 39° 01´·99W.\n0·3m 14° 46´·39S., 39° 01´·58W.\n2. Shoaling, with minimum depth 8m, has been reported in the vicinity of a line joining the following positions:\n14° 45´·81S., 39° 01´·52W.\n14° 45´·59S., 39° 01´·55W.\n3. Shoaling, with minimum drying height 0·4m, has been reported in the vicinity of a line joining the following positions:\n14° 46´·55S., 39° 01´·57W.\n14° 46´·41S., 39° 01´·60W.\n4. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n5. *Former Notice 4249(P)/26 is cancelled.\n*Indicates new or revised entry\n(WGS84 DATUM)\nChart affected - 551",
-      "cancels": [
-        "4249(P)/26"
-      ],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4672(P)/26 BRAZIL - East Coast - Depths. Drying height.                 \n          Source: Brazilian Notice 12/E 57(P)/26                                  \n          1. Depths less than charted exist within Ilhéus. The most significant are as follows:\n            Depth             Position                                            \n            7·7m              14° 45´·82S., 39° 01´·52W.                          \n            6·7m              14° 45´·89S., 39° 01´·51W.                          \n            7·6m              14° 45´·95S., 39° 02´·00W.                          \n            0·3m              14° 46´·14S., 39° 01´·59W.                          \n            0·9m              14° 46´·21S., 39° 01´·58W.                          \n            6·2m              14° 46´·26S., 39° 01´·99W.                          \n            0·3m              14° 46´·39S., 39° 01´·58W.                          \n          2. Shoaling, with minimum depth 8m, has been reported in the vicinity of a line joining the following positions:\n            14° 45´·81S., 39° 01´·52W.                                            \n            14° 45´·59S., 39° 01´·55W.                                            \n          3. Shoaling, with minimum",
       "checkedForExport": true
     },
     {
@@ -5202,10 +5550,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4725(T)/26 WEST INDIES - Windward Islands - Wreck.\nSource: French Notice 36/5(T)/26\n1. A dangerous wreck has been reported in position 14° 32´·82N., 61° 01´·71W.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nChart affected - 368\n2.56\nWk41/26\nII",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4725(T)/26 WEST INDIES - Windward Islands - Wreck.                      \n                                                                                  \n          Source: French Notice 36/5(T)/26                                        \n          1. A dangerous wreck has been reported in position 14° 32´·82N., 61° 01´·71W.\n          2. Mariners are advised to navigate with caution in the area.           \n            (WGS84 DATUM)                                                         \n          Chart affected - 368                                                    \n                                                                                  \n                                                                                  \n                                                                                  \n                                        2.56                                      \n                                                                   Wk41/26",
       "checkedForExport": true
     },
     {
@@ -5229,10 +5574,7 @@
       ],
       "isPolygon": false,
       "isLine": false,
-      "body": "4735(T)/26 WEST INDIES - Trinidad and Tobago - Buoy.\nSource: Trinidad and Tobago Coastal Warning 120/26\n1. The Têteron Rock light-buoy, Fl.G.5s, in position 10° 40´·80N., 61° 40´·10W.is reported missing.\n(WGS84 DATUM)\nCharts affected - 474 - 483",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4735(T)/26 WEST INDIES - Trinidad and Tobago - Buoy.                    \n          Source: Trinidad and Tobago Coastal Warning 120/26                      \n          1. The Têteron Rock light-buoy, Fl.G.5s, in position 10° 40´·80N., 61° 40´·10W.is reported missing.\n            (WGS84 DATUM)                                                         \n          Charts affected - 474 - 483",
       "checkedForExport": true
     },
     {
@@ -5308,219 +5650,8 @@
       ],
       "isPolygon": true,
       "isLine": false,
-      "body": "4762(P)/26 UNITED STATES OF AMERICA - East Coast - Works. Restricted areas. Obstructions.\nSource: United States ENC US5BALBB Edition 15\n1. Construction works are taking place at the Francis Scott Key Bridge until 2028, in an area bounded by the following\npositions:\n39° 13´·47N., 76° 31´·27W.\n39° 13´·35N., 76° 31´·12W.\n39° 12´·68N., 76° 31´·98W.\n39° 12´·79N., 76° 32´·14W.\n2. Fixed and Floating obstructions, some submerged, may exist within this area.\n3. Entry prohibited areas have been established in areas bounded by the following positions:\n39° 13´·15N., 76° 31´·68W.\n39° 13´·46N., 76° 31´·27W.\n39° 13´·31N., 76° 31´·09W.\n39° 12´·99N., 76° 31´·51W.\n4. and\n39° 12´·80N., 76° 32´·14W.\n39° 13´·02N., 76° 31´·85W.\n39° 12´·86N., 76° 31´·68W.\n39° 12´·65N., 76° 31´·95W.\n5. Mariners are advised to consult the NOAA electronic charts for full details.\n6. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n7. Chart 2850 will be updated when full details are available.\n(NAD83 DATUM)\nC hart affected - 2850\n2.57\nWk41/26\nTo accompany Notice to Mariners 4673/26\nOn Chart NZ 64\nMARINE RESERVE\nTe Au Roa o Te Rakihouia Marine Protected\nAreas. All marine life and habitats are\ntotally protected. No fishing, netting, taking\nor killing of marine life. See Department of\nConservation website for full restrictions.\nTo accompany Notice to Mariners 4673/26\nOn Chart NZ 66\nMARINE RESERVE\nTe Au Roa o Te Rakihouia Marine Protected\nAreas. A",
-      "cancels": [],
-      "isCancelled": false,
-      "status": "ACTIVE",
+      "body": "4762(P)/26 UNITED STATES OF AMERICA - East Coast - Works. Restricted areas. Obstructions.\n          Source: United States ENC US5BALBB Edition 15                           \n          1. Construction works are taking place at the Francis Scott Key Bridge until 2028, in an area bounded by the following\n            positions:                                                            \n                                                                                  \n            39° 13´·47N., 76° 31´·27W.                                            \n            39° 13´·35N., 76° 31´·12W.                                            \n            39° 12´·68N., 76° 31´·98W.                                            \n            39° 12´·79N., 76° 32´·14W.                                            \n          2. Fixed and Floating obstructions, some submerged, may exist within this area.\n          3. Entry prohibited areas have been established in areas bounded by the following positions:\n            39° 13´·15N., 76° 31´·68W.                                            \n            39° 13´·46N., 76° 31´·27W.                                            \n            39° 13´·31N., 76° 31´·09W.",
       "checkedForExport": true
-    },
-    {
-      "id": "2822(T)/17",
-      "num": "2822",
-      "type": "T",
-      "year": "17",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 2822(T)/17 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "3514(P)/26",
-      "num": "3514",
-      "type": "P",
-      "year": "26",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 3514(P)/26 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "2329(T)/26",
-      "num": "2329",
-      "type": "T",
-      "year": "26",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 2329(T)/26 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "2409(T)/25",
-      "num": "2409",
-      "type": "T",
-      "year": "25",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 2409(T)/25 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "4314(T)/25",
-      "num": "4314",
-      "type": "T",
-      "year": "25",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 4314(T)/25 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "4052(P)/26",
-      "num": "4052",
-      "type": "P",
-      "year": "26",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 4052(P)/26 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "3026(P)/26",
-      "num": "3026",
-      "type": "P",
-      "year": "26",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 3026(P)/26 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "4080(P)/26",
-      "num": "4080",
-      "type": "P",
-      "year": "26",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 4080(P)/26 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "3317(T)/26",
-      "num": "3317",
-      "type": "T",
-      "year": "26",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 3317(T)/26 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "1927(P)/26",
-      "num": "1927",
-      "type": "P",
-      "year": "26",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 1927(P)/26 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "4249(P)/26",
-      "num": "4249",
-      "type": "P",
-      "year": "26",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 4249(P)/26 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "4199(T)/26",
-      "num": "4199",
-      "type": "T",
-      "year": "26",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 4199(T)/26 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
-    },
-    {
-      "id": "1246(T)/22",
-      "num": "1246",
-      "type": "T",
-      "year": "22",
-      "country": "UKHO",
-      "region": "Notice Cancelled",
-      "subject": "Notice 1246(T)/22 officially cancelled by UKHO Admiralty",
-      "charts": [],
-      "coords": [],
-      "isPolygon": false,
-      "isLine": false,
-      "isCancelled": true,
-      "status": "CANCELLED",
-      "checkedForExport": false
     }
   ]
 }
