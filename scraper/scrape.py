@@ -185,6 +185,143 @@ def extract_cancellations(block_text, default_year="26"):
     return cancelled
 
 
+
+def extract_subpolygons_from_text(notice_id, notice_subject, full_text):
+    """
+    Extract structured sub-polygons/areas from notice text.
+    Handles:
+    - Multi-scheme TSS (e.g. 3935(P)/22)
+    - Multiple areas separated by 'and' (e.g. 4675(T)/26, 4745/26, 4752/26)
+    - Distinct numbered / lettered sub-sections
+    """
+    lines = full_text.splitlines()
+    sub_polygons = []
+    
+    current_scheme = ""
+    current_sub = ""
+    current_pts = []
+    area_counter = 1
+    
+    def flush():
+        nonlocal current_pts, area_counter
+        if not current_pts:
+            return
+        
+        name_parts = []
+        if current_scheme:
+            name_parts.append(current_scheme)
+        if current_sub:
+            name_parts.append(current_sub)
+        if not name_parts:
+            short_subj = notice_subject.split(".")[0].strip() or "Area"
+            name_parts.append(f"{short_subj} (Zone {area_counter})")
+        elif len(current_pts) >= 3 and not any(k in " ".join(name_parts).lower() for k in ["zone", "area", "lane"]):
+            name_parts.append(f"Area {area_counter}")
+            
+        full_name = " — ".join(name_parts)
+        low = full_name.lower()
+        
+        cat = "general"
+        if "separation zone" in low:
+            cat = "separation_zone"
+        elif "precautionary" in low:
+            cat = "precautionary_area"
+        elif "restricted" in low or "prohibited" in low or "anchoring prohibited" in low:
+            cat = "restricted_area"
+        elif "traffic lane" in low:
+            cat = "traffic_lane"
+        elif "spoil ground" in low:
+            cat = "spoil_ground"
+        elif "anchorage" in low or "waiting area" in low:
+            cat = "anchorage_area"
+        elif "works" in low:
+            cat = "works_area"
+            
+        sub_polygons.append({
+            "name": full_name,
+            "category": cat,
+            "coords": current_pts,
+            "points": [[p["lat"], p["lon"]] for p in current_pts]
+        })
+        area_counter += 1
+        current_pts = []
+
+    for line in lines:
+        l_str = line.strip()
+        if not l_str:
+            continue
+            
+        if re.match(r'^\d+\.\d+$', l_str) or "(continued)" in l_str.lower() or "source: " in l_str.lower():
+            continue
+            
+        # 1. Scheme / Section header
+        m_main = re.match(r'^(\d+)\.\s*(.*)', l_str)
+        if m_main:
+            hdr = m_main.group(2).strip()
+            cm_inline = NTM_COORD_STD_REGEX.search(hdr)
+            if cm_inline and "centred on" in hdr.lower():
+                flush()
+                current_scheme = hdr.split("centred on")[0].strip()
+                current_sub = "Navigation Prohibited"
+                lat_d = int(cm_inline.group(1))
+                lat_m = float(f"{cm_inline.group(2)}.{cm_inline.group(3)}")
+                lat = round(lat_d + lat_m / 60.0, 5)
+                if cm_inline.group(4).upper() == "S": lat = -lat
+                lon_d = int(cm_inline.group(5))
+                lon_m = float(f"{cm_inline.group(6)}.{cm_inline.group(7)}")
+                lon = round(lon_d + lon_m / 60.0, 5)
+                if cm_inline.group(8).upper() == "W": lon = -lon
+                dms = f"{cm_inline.group(1)}° {cm_inline.group(2)}.{cm_inline.group(3)}' {cm_inline.group(4).upper()}, {cm_inline.group(5)}° {cm_inline.group(6)}.{cm_inline.group(7)}' {cm_inline.group(8).upper()}"
+                current_pts.append({"lat": lat, "lon": lon, "dms": dms})
+                flush()
+                continue
+                
+            flush()
+            if "Traffic scheme" in hdr:
+                m_s = re.search(r'Traffic scheme\s+([A-Z0-9]+)', hdr, re.I)
+                current_scheme = f"Scheme {m_s.group(1)}" if m_s else hdr
+            elif "traffic separation scheme" in hdr.lower():
+                current_scheme = "TSS Scheme"
+            elif "precautionary area" in hdr.lower():
+                current_scheme = "Precautionary Area"
+            elif "anchoring prohibited" in hdr.lower():
+                current_scheme = "Anchoring Prohibited Area"
+            elif "offshore works" in hdr.lower() or "works" in hdr.lower():
+                current_scheme = "Works Area"
+            else:
+                current_scheme = hdr
+            current_sub = ""
+            continue
+            
+        # 2. Sub-section header
+        m_sub = re.match(r'^([a-z])\.\s*([A-Za-z\s\-]+?)(?:\s+are reported|\s+is reported|\s+bound by|:|$)', l_str, re.I)
+        if m_sub:
+            flush()
+            current_sub = m_sub.group(2).strip()
+            continue
+            
+        # 3. 'and' separator
+        if l_str.lower() == "and":
+            flush()
+            continue
+            
+        # 4. Check coordinate
+        cm = NTM_COORD_STD_REGEX.search(l_str)
+        if cm:
+            lat_d = int(cm.group(1))
+            lat_m = float(f"{cm.group(2)}.{cm.group(3)}")
+            lat = round(lat_d + lat_m / 60.0, 5)
+            if cm.group(4).upper() == "S": lat = -lat
+            lon_d = int(cm.group(5))
+            lon_m = float(f"{cm.group(6)}.{cm.group(7)}")
+            lon = round(lon_d + lon_m / 60.0, 5)
+            if cm.group(8).upper() == "W": lon = -lon
+            dms = f"{cm.group(1)}° {cm.group(2)}.{cm.group(3)}' {cm.group(4).upper()}, {cm.group(5)}° {cm.group(6)}.{cm.group(7)}' {cm.group(8).upper()}"
+            current_pts.append({"lat": lat, "lon": lon, "dms": dms})
+
+    flush()
+    return sub_polygons
+
 def parse_admiralty_ntm_text(full_text, default_year="26"):
     """
     Parse full bulletin text into structured notice objects.
@@ -311,10 +448,20 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
             if (max(lats) - min(lats)) > 8 or (max(lons) - min(lons)) > 12:
                 sane = False
         
-        is_poly = len(coords) >= 3 and bool(POLYGON_KEYWORDS.search(block_text)) and sane
-        is_line = len(coords) >= 2 and not is_poly and sane and bool(LINE_KEYWORDS.search(block_text))
+        # Check if sounding / depth / light table (discrete points, not a polygon)
+        is_sounding_table = bool(re.search(r'\b(?:Depth|Depths|Drying\s+height|Obstructions?|Wrecks?|Sounding)\s+Position\b', block_text, re.I))
         
-        results.append({
+        is_poly = len(coords) >= 3 and bool(POLYGON_KEYWORDS.search(block_text)) and sane and not is_sounding_table
+        is_line = len(coords) >= 2 and not is_poly and sane and bool(LINE_KEYWORDS.search(block_text)) and not is_sounding_table
+        
+        # Extract subPolygons if TSS or multi-area notice
+        sub_polys = []
+        if is_poly or "traffic separation" in block_text.lower() or "separation zone" in block_text.lower():
+            sub_polys = extract_subpolygons_from_text(cur["fullId"], cur["subject"], block_text)
+            if len(sub_polys) > 1:
+                is_poly = True
+        
+        notice_obj = {
             "id": cur["fullId"],
             "num": cur["num"],
             "type": cur["type"],
@@ -331,7 +478,11 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
             "isCancelled": False,
             "status": "ACTIVE",
             "checkedForExport": True
-        })
+        }
+        if sub_polys and len(sub_polys) > 1:
+            notice_obj["subPolygons"] = sub_polys
+            
+        results.append(notice_obj)
     
     return {
         "notices": results,
