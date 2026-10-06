@@ -1,0 +1,7 @@
+# Ignore python scraper from Vercel deployment so Vercel treats this as pure static PWA
+scraper/
+.github/
+*.py
+*.pyc
+__pycache__/
+requirements.txt
