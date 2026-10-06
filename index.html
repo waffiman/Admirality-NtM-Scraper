@@ -12,6 +12,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
   <link rel="stylesheet" href="assets/leaflet/leaflet.css" />
   <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css" />
+  <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
+  <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_horizontal.png" />
   <style>
     :root {
       --bg0: #060d1a;
@@ -964,6 +966,58 @@
             <div class="ntm-dropzone" id="ntmDropzone">
               <div class="ntm-dropzone-icon">📥</div>
               <p>Drop UKHO NtM PDF bulletins here</p>
+            </div>
+
+            <!-- Excel-Style Bottom Overlays Dock Bar -->
+            <div class="excel-overlay-dock" id="excelOverlayDock" role="toolbar" aria-label="ECDIS Chart Overlays">
+              <div class="excel-tabs-scroll">
+                <!-- Tab 1: Port Depths & Approaches -->
+                <button type="button" class="excel-tab active" data-overlay="depths" id="tabOverlayDepths" title="Toggle Port Depths, Fairways &amp; Declared Soundings">
+                  <span class="excel-tab-check">✓</span>
+                  <span class="excel-tab-icon">⚓</span>
+                  <span class="excel-tab-name">Port Depths &amp; Approaches</span>
+                  <span class="excel-tab-badge depths-badge" id="depthsAuditBadge">42 PORTS • AUDITED</span>
+                </button>
+
+                <!-- Tab 2: Depth Contours (Isobaths) -->
+                <button type="button" class="excel-tab active" data-overlay="isobaths" id="tabOverlayIsobaths" title="Toggle EMODnet &amp; NOAA Depth Contours (5m/10m/15m/20m)">
+                  <span class="excel-tab-check">✓</span>
+                  <span class="excel-tab-icon">🌊</span>
+                  <span class="excel-tab-name">Depth Contours (Isobaths)</span>
+                  <span class="excel-tab-badge">EMODNET • NOAA</span>
+                </button>
+
+                <!-- Tab 3: UKHO Notices & TSS -->
+                <button type="button" class="excel-tab active" data-overlay="notices" id="tabOverlayNotices" title="Toggle UKHO Notices to Mariners &amp; Changjiang TSS corridors">
+                  <span class="excel-tab-check">✓</span>
+                  <span class="excel-tab-icon">⚠️</span>
+                  <span class="excel-tab-name">UKHO Notices &amp; TSS</span>
+                  <span class="excel-tab-badge" id="ntmCountBadge">LIVE</span>
+                </button>
+
+                <!-- Tab 4: OpenSeaMap Buoys -->
+                <button type="button" class="excel-tab" data-overlay="buoys" id="tabOverlayBuoys" title="Toggle OpenSeaMap Buoys, Beacons &amp; Lights">
+                  <span class="excel-tab-check"></span>
+                  <span class="excel-tab-icon">💡</span>
+                  <span class="excel-tab-name">OpenSeaMap Buoys</span>
+                </button>
+
+                <!-- Tab 5: Passage Plan Route -->
+                <button type="button" class="excel-tab active" data-overlay="route" id="tabOverlayRoute" title="Toggle Passage Plan Waypoints &amp; Track">
+                  <span class="excel-tab-check">✓</span>
+                  <span class="excel-tab-icon">🚢</span>
+                  <span class="excel-tab-name">Passage Plan Route</span>
+                  <span class="excel-tab-badge" id="routeLegsBadge">ACTIVE</span>
+                </button>
+              </div>
+
+              <div class="excel-dock-actions">
+                <button type="button" class="excel-audit-btn" id="btnWeeklyDepthAudit" title="Run Weekly Depth Verification &amp; Change Detection Analysis across all ports">
+                  <span class="audit-icon">🔄</span>
+                  <span class="audit-text">Audit Depths</span>
+                  <span class="audit-status" id="auditLastStatus">WK 41/26 OK</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2183,6 +2237,7 @@
     }
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js"></script>
   <script src="assets/Auto NtM Plotting/setsail_ui.js"></script>
 
   <!-- SetSail PWA Offline Service Worker Registration -->
