@@ -1784,6 +1784,13 @@ function initNtMMap() {
       plotUserVessel(userVessel.lat, userVessel.lon, userVessel.source);
     }
 
+    if (typeof initPortDepthsLayers === "function") {
+      initPortDepthsLayers(leafletMap);
+    }
+    if (typeof initExcelOverlayDock === "function") {
+      initExcelOverlayDock(leafletMap);
+    }
+
     renderNtMListAndMap();
   } else {
     initOfflineCanvasMap();
@@ -2012,12 +2019,66 @@ function renderNtMListAndMap() {
 
   updateSelectionCounter();
 
-  // Render Notice Cards into Sidebar
+  // Multi-Target Search: Check matching ports from PORT_DEPTHS_DB
+  const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
+  let matchedPorts = [];
+  if (searchVal && typeof PORT_DEPTHS_DB !== "undefined") {
+    matchedPorts = PORT_DEPTHS_DB.filter(p => {
+      return p.name.toLowerCase().includes(searchVal) ||
+             (p.nameCn && p.nameCn.toLowerCase().includes(searchVal)) ||
+             p.country.toLowerCase().includes(searchVal) ||
+             p.unlocode.toLowerCase().includes(searchVal) ||
+             p.authority.toLowerCase().includes(searchVal) ||
+             (p.fairways && p.fairways.some(f => f.name.toLowerCase().includes(searchVal)));
+    });
+  }
+
+  if (countEl) {
+    if (matchedPorts.length > 0) {
+      countEl.textContent = `${matchedPorts.length} Ports, ${filtered.length} Notices`;
+    } else {
+      countEl.textContent = `${filtered.length} of ${NTM_STORE.length}`;
+    }
+  }
+
+  // Render Notice & Port Cards into Sidebar
   if (listContainer) {
-    if (filtered.length === 0) {
-      listContainer.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.8rem;">No notices match the selected filter criteria.<br/>Use the filter funnel icon above to adjust settings.</div>';
+    if (filtered.length === 0 && matchedPorts.length === 0) {
+      listContainer.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.8rem;">No notices or ports match the selected filter criteria.<br/>Try searching for a port name (e.g., Shanghai, Rotterdam, Houston, Ningbo).</div>';
     } else {
       let html = "";
+
+      // 1. Port Search Results (Top Section)
+      if (matchedPorts.length > 0) {
+        html += `<div class="ntm-search-section-header"><span>⚓ WORLD PORTS & APPROACHES (${matchedPorts.length})</span></div>`;
+        matchedPorts.forEach(port => {
+          const mainDepth = (port.fairways && port.fairways[0]) ? `${port.fairways[0].depth}m` : "12.5m";
+          const firstCoord = formatLatLonDMS(port.approachCoords[0], port.approachCoords[1]);
+          html += `
+            <div class="ntm-card-item ntm-port-search-card" data-port-id="${port.id}" onclick="jumpToPort('${port.id}')" title="Click to inspect ${port.name} fairway depths">
+              <div class="ntm-card-content">
+                <div class="ntm-card-top">
+                  <span class="ntm-card-id" style="color:#38bdf8;">${port.flag} ${port.name}</span>
+                  <span class="ntm-tag perm">${port.unlocode}</span>
+                </div>
+                <div class="ntm-card-subject">
+                  Fairway Depth: <strong style="color:#34d399;">${mainDepth} LAT</strong> • Max Draft: <strong>${port.maxDraftFloodTide || '15.0m'}</strong>
+                  <div style="font-size:0.68rem;color:var(--muted);margin-top:2px;">${port.authority}</div>
+                </div>
+                <div class="ntm-card-bottom">
+                  <span class="ntm-card-coords">📍 ${firstCoord}</span>
+                  <span class="ntm-tag" style="background:rgba(52,211,153,0.18);color:#34d399;border:1px solid rgba(52,211,153,0.3);">${port.auditStatus}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        if (filtered.length > 0) {
+          html += `<div class="ntm-search-section-header" style="margin-top:0.6rem;"><span>⚠️ UKHO NOTICES TO MARINERS (${filtered.length})</span></div>`;
+        }
+      }
+
+      // 2. Notices Cards
       filtered.forEach(item => {
         const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
         const tagClass = item.type === "T" ? "temp" : (item.type === "P" ? "prelim" : "perm");
