@@ -4,7 +4,8 @@
  * Fully offline-capable bridge cockpit — Zero Google Dinosaur!
  */
 
-const CACHE_NAME = 'setsail-cache-v2.7';
+const CACHE_NAME = 'setsail-cache-v2.8';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v1';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -57,7 +58,7 @@ self.addEventListener('activate', (event) => {
       self.clients.claim(),
       caches.keys().then((keys) => {
         return Promise.all(
-          keys.filter((key) => key !== CACHE_NAME).map((key) => {
+          keys.filter((key) => key !== CACHE_NAME && key !== TILE_CACHE_NAME).map((key) => {
             console.log('[SetSail SW] Removing deprecated cache:', key);
             return caches.delete(key);
           })
@@ -149,7 +150,46 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Static assets: Cache-First with Stale-While-Revalidate
+  // 3. Map Tiles: Persistent Tile Cache with 0ms local response
+  const isMapTile = (
+    url.hostname.includes('tile.openstreetmap.org') ||
+    url.hostname.includes('arcgisonline.com') ||
+    url.hostname.includes('openseamap.org') ||
+    url.hostname.includes('cartocdn.com')
+  );
+
+  if (isMapTile) {
+    event.respondWith(
+      caches.open(TILE_CACHE_NAME).then(async (tileCache) => {
+        const cachedTile = await tileCache.match(event.request);
+        if (cachedTile) {
+          return cachedTile;
+        }
+
+        try {
+          const networkTile = await fetch(event.request);
+          if (networkTile && (networkTile.ok || networkTile.type === 'opaque')) {
+            tileCache.put(event.request, networkTile.clone());
+          }
+          return networkTile;
+        } catch (fetchErr) {
+          // Transparent 1x1 fallback tile when offline and uncached
+          return new Response(
+            new Uint8Array([
+              137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82,
+              0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0,
+              0, 0, 10, 73, 68, 65, 84, 120, 156, 99, 0, 1, 0, 0, 5, 0, 1,
+              13, 10, 45, 180, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130
+            ]),
+            { headers: { 'Content-Type': 'image/png' } }
+          );
+        }
+      })
+    );
+    return;
+  }
+
+  // 4. Static assets: Cache-First with Stale-While-Revalidate
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
