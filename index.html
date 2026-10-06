@@ -14,18 +14,20 @@
   <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css" />
   <style>
     :root {
-      --bg0: #050814;
-      --bg1: #0a1024;
-      --card: rgba(14, 22, 48, 0.72);
-      --line: rgba(140, 170, 255, 0.18);
-      --text: #e8eefc;
-      --muted: #8b9bb8;
-      --accent: #7eb6ff;
-      --star: #c9d7ff;
-      --manual: rgba(255, 214, 120, 0.12);
-      --calc: rgba(110, 200, 255, 0.12);
-      --ok: #7dffa6;
-      --warn: #ffc978;
+      --bg0: #060d1a;
+      --bg1: #0d172e;
+      --card: rgba(16, 29, 56, 0.76);
+      --line: rgba(72, 112, 178, 0.22);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --brand-navy: #152f54;
+      --brand-coral: #ea4c25;
+      --star: #cbd5e1;
+      --manual: rgba(234, 76, 37, 0.12);
+      --calc: rgba(56, 189, 248, 0.12);
+      --ok: #34d399;
+      --warn: #fbbf24;
     }
     * { box-sizing: border-box; }
     body {
@@ -474,6 +476,10 @@
                 <span class="home-hud-icon">⏱️</span>
                 <span class="home-hud-text" id="homeUtcClock">00:00:00 UTC</span>
               </div>
+              <div class="home-hud-pill home-hud-vessel" id="homeVesselHudPill" title="Live Vessel Navigation Position (Click to inspect on ECDIS)">
+                <span class="home-hud-icon">📍</span>
+                <span class="home-hud-text" id="homeVesselHudCoords">VESSEL: WAITING GPS...</span>
+              </div>
               <div class="home-hud-pill home-hud-right">
                 <span class="home-hud-badge">UKHO WK 41/26</span>
                 <span class="home-hud-badge ok">OFFLINE READY</span>
@@ -765,6 +771,21 @@
                     <button type="button" class="ntm-btn-glass" id="vesselClearBtn" style="color:var(--warn);margin-right:auto;display:none;font-size:0.72rem;padding:0.3rem 0.55rem;">Clear</button>
                     <button type="button" class="ntm-btn-primary" id="vesselApplyBtn" style="font-size:0.75rem;padding:0.35rem 0.7rem;">Plot Target 🎯</button>
                   </div>
+
+                  <div class="ntm-popover-divider"></div>
+                  <div class="ntm-popover-subtitle">Passage Plan Route:</div>
+                  <input type="file" id="vesselRouteFile" accept=".rtz,.csv,.rtm" style="display:none;" />
+                  <button type="button" class="ntm-btn-glass" id="vesselUploadRouteBtn" style="width:100%;padding:0.45rem;font-weight:600;font-size:0.78rem;justify-content:center;margin-bottom:0.35rem;">
+                    🗺️ Upload Route (.rtz, .csv, .rtm)
+                  </button>
+                  <div id="vesselRouteInfoBox" style="font-size:0.72rem;color:var(--muted);display:none;margin-bottom:0.4rem;padding:0.35rem 0.5rem;background:rgba(255,255,255,0.04);border-radius:6px;border:1px solid var(--line);">
+                    <div id="vesselRouteName" style="color:var(--accent);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+                    <div id="vesselRouteMeta" style="color:var(--muted);font-size:0.7rem;margin-top:2px;"></div>
+                  </div>
+                  <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
+                    <button type="button" class="ntm-btn-glass" id="vesselClearRouteBtn" style="color:var(--warn);display:none;font-size:0.72rem;padding:0.3rem 0.55rem;margin-right:auto;">Clear Route</button>
+                    <button type="button" class="ntm-btn-glass" id="vesselFitRouteBtn" style="display:none;font-size:0.72rem;padding:0.3rem 0.55rem;">Fit Route 🔍</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -921,13 +942,6 @@
                     </div>
                   </div>
                 </div>
-
-                <!-- Select All Checkbox -->
-                <label class="ntm-select-all-label" title="Toggle selection of visible notices for ECDIS export">
-                  <input type="checkbox" id="ntmSelectAllChk" checked />
-                  <span id="ntmSelectAllText">All</span>
-                </label>
-                <span class="ntm-select-badge" id="ntmSelectedCount" title="Selected for ECDIS export">0</span>
               </div>
 
               <div class="ntm-select-bar-right">
@@ -1057,11 +1071,9 @@
             </div>
           </div>
 
-          <div class="ntm-export-filter-option">
-            <label class="ntm-checkbox-row">
-              <input type="checkbox" id="expChkOnlyChecked" />
-              <span>Only export notices checked in list</span>
-            </label>
+          <div class="ntm-export-filter-option" style="padding:6px 0;font-size:0.75rem;color:var(--muted);display:flex;align-items:center;gap:6px;">
+            <span>ℹ️</span>
+            <span>All notices currently active on the chart are included automatically.</span>
           </div>
 
           <!-- Live Summary Banner -->
