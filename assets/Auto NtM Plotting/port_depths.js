@@ -697,18 +697,24 @@ function initExcelOverlayDock(map) {
   const dock = document.getElementById("excelOverlayDock");
   if (!dock) return;
 
-  const tabs = dock.querySelectorAll(".excel-tab");
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      const overlayKey = tab.getAttribute("data-overlay");
-      const isActive = !tab.classList.contains("active");
-      setOverlayActive(overlayKey, isActive, map);
+  const depthTab = document.getElementById("tabOverlayDepths");
+  if (depthTab) {
+    depthTab.addEventListener("click", (e) => {
+      // If user clicked the inline audit button, trigger audit modal and do not toggle tab
+      if (e.target && e.target.closest("#btnWeeklyDepthAudit")) {
+        e.stopPropagation();
+        runWeeklyDepthAudit(true);
+        return;
+      }
+      const isActive = !depthTab.classList.contains("active");
+      setOverlayActive("depths", isActive, map);
     });
-  });
+  }
 
   const auditBtn = document.getElementById("btnWeeklyDepthAudit");
   if (auditBtn) {
-    auditBtn.addEventListener("click", () => {
+    auditBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
       runWeeklyDepthAudit(true);
     });
   }
@@ -736,11 +742,16 @@ function setOverlayActive(overlayKey, isActive, map = null) {
 
   if (!currentMap) return;
 
-  // Toggle map layers
+  // Toggle map layers: depths and isobaths toggle together
   if (overlayKey === "depths") {
+    OVERLAY_STATES.isobaths = isActive;
     if (leafletPortDepthsLayer) {
       if (isActive) currentMap.addLayer(leafletPortDepthsLayer);
       else currentMap.removeLayer(leafletPortDepthsLayer);
+    }
+    if (leafletIsobathsLayer) {
+      if (isActive) currentMap.addLayer(leafletIsobathsLayer);
+      else currentMap.removeLayer(leafletIsobathsLayer);
     }
   } else if (overlayKey === "isobaths") {
     if (leafletIsobathsLayer) {
