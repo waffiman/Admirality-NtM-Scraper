@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   switchToTab("tab-home");
   initHomeChronometer();
   initHomeVideo();
+  initHomeHudVessel();
   initAutoNtmUI();
   initFilterAndSortPopovers();
   initVesselTracking();
@@ -559,18 +560,7 @@ function initAutoNtmUI() {
     });
   }
 
-  // Select All Checkbox
-  if (selectAllChk) {
-    selectAllChk.addEventListener("change", (e) => {
-      const isChecked = e.target.checked;
-      const filtered = getFilteredNotices();
-      filtered.forEach(item => {
-        item.checkedForExport = isChecked;
-      });
-      saveStoreToStorage();
-      renderNtMListAndMap();
-    });
-  }
+// Select All removed per user request (all visible chart notices auto-exported)
 
   // Export Modal Open / Close
   if (openExportBtn && exportModal) {
@@ -728,7 +718,417 @@ function initMobileViewSwitcher() {
 /**
  * Crosshair Target Vessel Tracking (No heading/speed clutter)
  */
+
+/**
+ * Hero / Home Page Vessel Coordinates HUD & First-Visit Geolocation Prompt
+ */
+
+// ==========================================================================
+// PASSAGE PLAN / ROUTE PARSERS & ECDIS TRACK PLOTTER (.rtz, .csv, .rtm)
+// ==========================================================================
+let leafletRouteLayer = null;
+let activeRouteData = null;
+const ROUTE_STORAGE_KEY = "setsail_active_route";
+
+/**
+ * Parse CIRM / IEC 61174 XML Route Plan (.rtz)
+ */
+function parseRtzRoute(xmlStr, fallbackName) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xmlStr, "text/xml");
+  const routeInfo = doc.querySelector("routeInfo");
+  let routeName = routeInfo?.getAttribute("routeName") || fallbackName.replace(/\.rtz$/i, "");
+  
+  const waypoints = [];
+  const wpNodes = doc.querySelectorAll("waypoint");
+  wpNodes.forEach((wp, idx) => {
+    const pos = wp.querySelector("position");
+    if (!pos) return;
+    const lat = parseFloat(pos.getAttribute("lat"));
+    const lon = parseFloat(pos.getAttribute("lon"));
+    if (isNaN(lat) || isNaN(lon)) return;
+    const wpName = wp.getAttribute("name") || wp.querySelector("defaultWaypoint")?.getAttribute("name") || `WPT ${idx + 1}`;
+    waypoints.push({
+      id: idx + 1,
+      lat,
+      lon,
+      name: wpName.trim()
+    });
+  });
+  return { name: routeName, waypoints, format: "RTZ" };
+}
+
+/**
+ * Parse JRC ECDIS Route Sheet (.csv)
+ */
+function parseCsvRoute(csvStr, fallbackName) {
+  const lines = csvStr.split(/\r?\n/);
+  let routeName = fallbackName.replace(/\.csv$/i, "");
+  const waypoints = [];
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (trimmed.startsWith("//")) {
+      const comment = trimmed.substring(2).trim();
+      if (!comment.startsWith("ROUTE SHEET") && !comment.startsWith("<<") && !comment.startsWith("WPT No.")) {
+        const parts = comment.split(",");
+        if (parts[0] && parts[0].trim()) {
+          routeName = parts[0].trim();
+        }
+      }
+      continue;
+    }
+    const cols = trimmed.split(",").map(c => c.trim());
+    if (cols.length >= 7 && /^\d+$/.test(cols[0])) {
+      const wpIdx = parseInt(cols[0], 10);
+      const latDeg = parseFloat(cols[1]);
+      const latMin = parseFloat(cols[2]);
+      const latHem = cols[3].toUpperCase();
+      const lonDeg = parseFloat(cols[4]);
+      const lonMin = parseFloat(cols[5]);
+      const lonHem = cols[6].toUpperCase();
+      
+      if (!isNaN(latDeg) && !isNaN(lonDeg)) {
+        let lat = latDeg + (isNaN(latMin) ? 0 : latMin) / 60.0;
+        if (latHem === "S") lat = -lat;
+        let lon = lonDeg + (isNaN(lonMin) ? 0 : lonMin) / 60.0;
+        if (lonHem === "W") lon = -lon;
+        const wpName = (cols.length > 16 && cols[16]) ? cols[16] : `WPT ${cols[0]}`;
+        waypoints.push({
+          id: wpIdx + 1,
+          lat,
+          lon,
+          name: wpName
+        });
+      }
+    }
+  }
+  return { name: routeName, waypoints, format: "CSV" };
+}
+
+/**
+ * Parse Transas / Wärtsilä Navi-Sailor binary route (.rtm)
+ */
+function parseRtmRoute(arrayBuffer, fallbackName) {
+  const view = new DataView(arrayBuffer);
+  let routeName = fallbackName.replace(/\.rtm$/i, "");
+  const waypoints = [];
+  let offset = 380;
+  const stride = 304;
+  
+  while (offset + 16 <= arrayBuffer.byteLength) {
+    const lat = view.getFloat64(offset, true);
+    const lon = view.getFloat64(offset + 8, true);
+    
+    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180 && !(lat === 0 && lon === 0)) {
+      let wpName = `WPT ${waypoints.length + 1}`;
+      try {
+        const bytes = new Uint8Array(arrayBuffer, offset - 130, 130);
+        let s = "";
+        for (let i = 0; i < bytes.length; i++) {
+          if (bytes[i] >= 32 && bytes[i] <= 126) s += String.fromCharCode(bytes[i]);
+          else if (bytes[i] === 0) s += "\x00";
+        }
+        const parts = s.split("\x00").map(p => p.trim()).filter(Boolean);
+        if (parts.length > 0) wpName = parts[parts.length - 1];
+      } catch (e) {}
+      
+      waypoints.push({
+        id: waypoints.length + 1,
+        lat,
+        lon,
+        name: wpName
+      });
+      offset += stride;
+    } else {
+      break;
+    }
+  }
+  return { name: routeName, waypoints, format: "RTM" };
+}
+
+/**
+ * Render Route Polyline and Waypoint Markers on Leaflet Chart
+ */
+function renderRouteOnMap(route, shouldFly = true) {
+  if (!leafletMap) return;
+  if (!leafletRouteLayer) {
+    leafletRouteLayer = L.layerGroup().addTo(leafletMap);
+  }
+  leafletRouteLayer.clearLayers();
+  
+  if (!route || !route.waypoints || route.waypoints.length === 0) {
+    return;
+  }
+  
+  activeRouteData = route;
+  try {
+    localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(route));
+  } catch (e) {}
+
+  // Continuous longitude unwrapping for Pacific / antimeridian crossing
+  const unrolledCoords = [];
+  let prevLon = null;
+  let lonOffset = 0;
+
+  for (let i = 0; i < route.waypoints.length; i++) {
+    const wp = route.waypoints[i];
+    let curLon = wp.lon;
+    if (prevLon !== null) {
+      let diff = curLon - (prevLon - lonOffset);
+      if (diff > 180) {
+        lonOffset -= 360;
+      } else if (diff < -180) {
+        lonOffset += 360;
+      }
+    }
+    const adjustedLon = curLon + lonOffset;
+    unrolledCoords.push([wp.lat, adjustedLon]);
+    prevLon = adjustedLon;
+  }
+
+  // Draw Route Track Polyline
+  const trackGlow = L.polyline(unrolledCoords, {
+    color: "#0284c7",
+    weight: 7,
+    opacity: 0.35,
+    interactive: false
+  });
+  const trackLine = L.polyline(unrolledCoords, {
+    color: "#38bdf8",
+    weight: 3.5,
+    dashArray: "8, 6",
+    opacity: 0.95
+  });
+  
+  leafletRouteLayer.addLayer(trackGlow);
+  leafletRouteLayer.addLayer(trackLine);
+
+  // Add Waypoints
+  route.waypoints.forEach((wp, idx) => {
+    const isStart = idx === 0;
+    const isEnd = idx === route.waypoints.length - 1;
+    const wptCoords = unrolledCoords[idx];
+    
+    const color = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#38bdf8");
+    const fillColor = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#ffffff");
+    const radius = isStart || isEnd ? 6 : 4;
+    
+    const marker = L.circleMarker(wptCoords, {
+      radius,
+      color,
+      weight: 2,
+      fillColor,
+      fillOpacity: 0.95,
+      zIndexOffset: 1000
+    });
+    
+    marker.bindPopup(`
+      <div style="font-family:'Segoe UI',sans-serif;min-width:180px;color:#1e293b;">
+        <div style="font-weight:700;font-size:0.92rem;color:${color};border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:5px;">
+          ${isStart ? "🏁 Departure: " : (isEnd ? "🏁 Destination: " : "📍 Waypoint: ")}${wp.name || wp.id}
+        </div>
+        <div style="font-size:0.78rem;color:#475569;margin-bottom:2px;"><b>Coordinates:</b> ${formatLatLonDMS(wp.lat, wp.lon)}</div>
+        <div style="font-size:0.72rem;color:#64748b;"><b>Route:</b> ${route.name} (WPT ${idx + 1} of ${route.waypoints.length})</div>
+      </div>
+    `);
+    
+    leafletRouteLayer.addLayer(marker);
+  });
+
+  // Update UI in My Vessel Popover
+  const infoBox = document.getElementById("vesselRouteInfoBox");
+  const nameEl = document.getElementById("vesselRouteName");
+  const metaEl = document.getElementById("vesselRouteMeta");
+  const clearBtn = document.getElementById("vesselClearRouteBtn");
+  const fitBtn = document.getElementById("vesselFitRouteBtn");
+
+  if (infoBox) infoBox.style.display = "block";
+  if (nameEl) nameEl.textContent = `🗺️ ${route.name}`;
+  if (metaEl) metaEl.textContent = `${route.waypoints.length} WPTs • Format: ${route.format}`;
+  if (clearBtn) clearBtn.style.display = "inline-block";
+  if (fitBtn) fitBtn.style.display = "inline-block";
+
+  if (shouldFly && trackLine.getBounds().isValid()) {
+    leafletMap.fitBounds(trackLine.getBounds().pad(0.08));
+  }
+}
+
+function clearActiveRoute() {
+  activeRouteData = null;
+  try {
+    localStorage.removeItem(ROUTE_STORAGE_KEY);
+  } catch (e) {}
+  if (leafletRouteLayer) {
+    leafletRouteLayer.clearLayers();
+  }
+  const infoBox = document.getElementById("vesselRouteInfoBox");
+  const clearBtn = document.getElementById("vesselClearRouteBtn");
+  const fitBtn = document.getElementById("vesselFitRouteBtn");
+  if (infoBox) infoBox.style.display = "none";
+  if (clearBtn) clearBtn.style.display = "none";
+  if (fitBtn) fitBtn.style.display = "none";
+}
+
+function fitRouteBounds() {
+  if (!leafletMap || !activeRouteData || !activeRouteData.waypoints || activeRouteData.waypoints.length === 0) return;
+  const latLngs = activeRouteData.waypoints.map(w => [w.lat, w.lon]);
+  const b = L.latLngBounds(latLngs);
+  if (b.isValid()) {
+    leafletMap.fitBounds(b.pad(0.08));
+  }
+}
+
+function initHomeHudVessel() {
+  const homeHudCoords = document.getElementById("homeVesselHudCoords");
+  const homeHudPill = document.getElementById("homeVesselHudPill");
+
+  if (homeHudPill) {
+    homeHudPill.addEventListener("click", () => {
+      switchToTab("tab-ntm");
+      if (userVessel && leafletMap) {
+        leafletMap.flyTo([userVessel.lat, userVessel.lon], Math.max(leafletMap.getZoom(), 9));
+      } else {
+        const myVesselBtn = document.getElementById("ntmMyVesselBtn");
+        if (myVesselBtn) myVesselBtn.click();
+      }
+    });
+  }
+
+  if (userVessel) {
+    if (homeHudCoords) {
+      homeHudCoords.innerHTML = `VESSEL: <strong>${formatLatLonDMS(userVessel.lat, userVessel.lon)}</strong>`;
+    }
+    return;
+  }
+
+  // First-visit automatic geolocation prompt
+  const geoPrompted = localStorage.getItem("setsail_geo_prompted");
+  if (!geoPrompted) {
+    localStorage.setItem("setsail_geo_prompted", "1");
+    if (navigator.geolocation) {
+      if (homeHudCoords) homeHudCoords.textContent = "ACQUIRING GPS...";
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          plotUserVessel(lat, lon, "gps");
+          if (homeHudCoords) {
+            homeHudCoords.innerHTML = `VESSEL: <strong>${formatLatLonDMS(lat, lon)}</strong>`;
+          }
+        },
+        (err) => {
+          console.log("[SetSail Geo] First-visit GPS acquisition declined:", err.message);
+          if (homeHudCoords) {
+            homeHudCoords.innerHTML = "VESSEL: <em>NOT SET</em>";
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    } else {
+      if (homeHudCoords) homeHudCoords.innerHTML = "VESSEL: <em>NOT SET</em>";
+    }
+  } else {
+    if (homeHudCoords) homeHudCoords.innerHTML = "VESSEL: <em>NOT SET</em>";
+  }
+}
+
 function initVesselTracking() {
+  // Passage Plan Route Upload Listener
+  const routeFileInput = document.getElementById("vesselRouteFile");
+  const uploadRouteBtn = document.getElementById("vesselUploadRouteBtn");
+  const clearRouteBtn = document.getElementById("vesselClearRouteBtn");
+  const fitRouteBtn = document.getElementById("vesselFitRouteBtn");
+
+  if (uploadRouteBtn && routeFileInput) {
+    uploadRouteBtn.addEventListener("click", () => {
+      routeFileInput.click();
+    });
+
+    routeFileInput.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const ext = file.name.split(".").pop().toLowerCase();
+
+      if (ext === "rtm") {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const parsed = parseRtmRoute(evt.target.result, file.name);
+            if (!parsed.waypoints || parsed.waypoints.length === 0) {
+              alert("No valid waypoints found in .rtm route file.");
+              return;
+            }
+            renderRouteOnMap(parsed, true);
+          } catch (err) {
+            console.error("RTM error:", err);
+            alert("Error parsing .rtm file: " + err.message);
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } else if (ext === "rtz") {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const parsed = parseRtzRoute(evt.target.result, file.name);
+            if (!parsed.waypoints || parsed.waypoints.length === 0) {
+              alert("No valid waypoints found in .rtz route file.");
+              return;
+            }
+            renderRouteOnMap(parsed, true);
+          } catch (err) {
+            console.error("RTZ error:", err);
+            alert("Error parsing .rtz file: " + err.message);
+          }
+        };
+        reader.readAsText(file);
+      } else if (ext === "csv") {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const parsed = parseCsvRoute(evt.target.result, file.name);
+            if (!parsed.waypoints || parsed.waypoints.length === 0) {
+              alert("No valid waypoints found in .csv route file.");
+              return;
+            }
+            renderRouteOnMap(parsed, true);
+          } catch (err) {
+            console.error("CSV error:", err);
+            alert("Error parsing .csv file: " + err.message);
+          }
+        };
+        reader.readAsText(file);
+      } else {
+        alert("Unsupported format. Please select .rtz, .csv, or .rtm file.");
+      }
+      routeFileInput.value = "";
+    });
+  }
+
+  if (clearRouteBtn) {
+    clearRouteBtn.addEventListener("click", clearActiveRoute);
+  }
+  if (fitRouteBtn) {
+    fitRouteBtn.addEventListener("click", fitRouteBounds);
+  }
+
+  // Restore saved route info inside popover if present
+  try {
+    const savedRouteStr = localStorage.getItem(ROUTE_STORAGE_KEY);
+    if (savedRouteStr) {
+      const savedRoute = JSON.parse(savedRouteStr);
+      const infoBox = document.getElementById("vesselRouteInfoBox");
+      const nameEl = document.getElementById("vesselRouteName");
+      const metaEl = document.getElementById("vesselRouteMeta");
+      if (infoBox) infoBox.style.display = "block";
+      if (nameEl) nameEl.textContent = `🗺️ ${savedRoute.name}`;
+      if (metaEl) metaEl.textContent = `${savedRoute.waypoints.length} WPTs • Format: ${savedRoute.format}`;
+      if (clearRouteBtn) clearRouteBtn.style.display = "inline-block";
+      if (fitRouteBtn) fitRouteBtn.style.display = "inline-block";
+    }
+  } catch (e) {}
+
   const myVesselBtn = document.getElementById("ntmMyVesselBtn");
   const vesselPop = document.getElementById("ntmVesselPopover");
   const closeBtn = document.getElementById("vesselPopClose");
@@ -843,6 +1243,10 @@ function initVesselTracking() {
       if (leafletVesselLayer) leafletVesselLayer.clearLayers();
       const hud = document.getElementById("ntmVesselHud");
       if (hud) hud.style.display = "none";
+      const homeHudCoords = document.getElementById("homeVesselHudCoords");
+      if (homeHudCoords) {
+        homeHudCoords.innerHTML = "VESSEL: <em>NOT SET</em>";
+      }
       closePopover();
     });
   }
@@ -931,6 +1335,11 @@ function plotUserVessel(lat, lon, source = "manual") {
   if (hud) {
     hud.style.display = "flex";
     hud.innerHTML = `🎯 <strong>Vessel:</strong> ${formatLatLonDMS(lat, lon)}`;
+  }
+
+  const homeHudCoords = document.getElementById("homeVesselHudCoords");
+  if (homeHudCoords) {
+    homeHudCoords.innerHTML = `VESSEL: <strong>${formatLatLonDMS(lat, lon)}</strong>`;
   }
 }
 
@@ -1041,10 +1450,9 @@ function getExportSelectedNotices() {
   const chkT = document.getElementById("expChkT")?.checked ?? true;
   const chkP = document.getElementById("expChkP")?.checked ?? true;
   const chkPerm = document.getElementById("expChkPerm")?.checked ?? true;
-  const onlyChecked = document.getElementById("expChkOnlyChecked")?.checked ?? false;
 
-  return NTM_STORE.filter(item => {
-    if (onlyChecked && !item.checkedForExport) return false;
+  // Automatically export all notices currently active on the chart (filtered by search and active filters)
+  return getFilteredNotices().filter(item => {
     if (item.type === "T" && !chkT) return false;
     if (item.type === "P" && !chkP) return false;
     if (item.type === "PERM" && !chkPerm) return false;
@@ -1056,9 +1464,10 @@ function getExportSelectedNotices() {
  * Update counters inside the Export Configuration Modal
  */
 function updateExportModalCounts() {
-  const countT = NTM_STORE.filter(n => n.type === "T").length;
-  const countP = NTM_STORE.filter(n => n.type === "P").length;
-  const countPerm = NTM_STORE.filter(n => n.type === "PERM").length;
+  const filtered = getFilteredNotices();
+  const countT = filtered.filter(n => n.type === "T").length;
+  const countP = filtered.filter(n => n.type === "P").length;
+  const countPerm = filtered.filter(n => n.type === "PERM").length;
 
   const elT = document.getElementById("expCountT");
   const elP = document.getElementById("expCountP");
@@ -1291,14 +1700,29 @@ function initNtMMap() {
       "🛰️ Satellite": satLayer
     };
 
+    if (!leafletRouteLayer) {
+      leafletRouteLayer = L.layerGroup();
+    }
+
     const overlayMaps = {
-      "⚓ OpenSeaMap Buoys": seamarkLayer
+      "⚓ OpenSeaMap Buoys": seamarkLayer,
+      "🗺️ Passage Plan Route": leafletRouteLayer
     };
 
     L.control.layers(baseMaps, overlayMaps, { position: "topright" }).addTo(leafletMap);
 
     leafletMarkersLayer = L.layerGroup().addTo(leafletMap);
     leafletVesselLayer = L.layerGroup().addTo(leafletMap);
+    leafletRouteLayer.addTo(leafletMap);
+
+    // Restore saved route onto map
+    try {
+      const savedRouteStr = localStorage.getItem(ROUTE_STORAGE_KEY);
+      if (savedRouteStr) {
+        const savedRoute = JSON.parse(savedRouteStr);
+        renderRouteOnMap(savedRoute, false);
+      }
+    } catch (e) {}
 
     leafletMap.on("mousemove", (e) => {
       const hud = document.getElementById("ntmHudCoords");
@@ -1563,7 +1987,6 @@ function renderNtMListAndMap() {
 
         html += `
           <div class="ntm-card-item type-${item.type} ${cancelledNoticeClass}" data-id="${item.id}" onclick="selectNtMNotice('${item.id}')">
-            <input type="checkbox" class="ntm-card-chk" ${isChecked ? 'checked' : ''} onclick="event.stopPropagation(); toggleNoticeCheck('${item.id}', this.checked)" title="Include in export" />
             <div class="ntm-card-content">
               <div class="ntm-card-top">
                 <span class="ntm-card-id">${item.id}</span>
@@ -1763,16 +2186,14 @@ function renderNtMListAndMap() {
  * Update selection counter text
  */
 function updateSelectionCounter() {
-  const selEl = document.getElementById("ntmSelectedCount");
-  if (!selEl) return;
   const filtered = getFilteredNotices();
-  const checkedCount = filtered.filter(n => n.checkedForExport !== false).length;
-  selEl.textContent = `${checkedCount} / ${filtered.length}`;
-  selEl.title = `${checkedCount} of ${filtered.length} notices selected for export`;
-
-  const selectAllChk = document.getElementById("ntmSelectAllChk");
-  if (selectAllChk) {
-    selectAllChk.checked = filtered.length > 0 && checkedCount === filtered.length;
+  const expBadge = document.getElementById("ntmExportBadge");
+  if (expBadge) {
+    expBadge.textContent = `${filtered.length}`;
+  }
+  const selEl = document.getElementById("ntmSelectedCount");
+  if (selEl) {
+    selEl.textContent = `${filtered.length}`;
   }
 }
 
