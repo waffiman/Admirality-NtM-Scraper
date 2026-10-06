@@ -478,13 +478,9 @@
                 <span class="home-hud-icon">⏱️</span>
                 <span class="home-hud-text" id="homeUtcClock">00:00:00 UTC</span>
               </div>
-              <div class="home-hud-pill home-hud-vessel" id="homeVesselHudPill" title="Live Vessel Navigation Position (Click to inspect on ECDIS)">
+              <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" title="Live Vessel Navigation Position (Click to inspect on ECDIS)">
                 <span class="home-hud-icon">📍</span>
                 <span class="home-hud-text" id="homeVesselHudCoords">VESSEL: WAITING GPS...</span>
-              </div>
-              <div class="home-hud-pill home-hud-right">
-                <span class="home-hud-badge">UKHO WK 41/26</span>
-                <span class="home-hud-badge ok">OFFLINE READY</span>
               </div>
             </div>
 
@@ -969,53 +965,19 @@
             </div>
 
             <!-- Excel-Style Bottom Overlays Dock Bar -->
+            <!-- Excel-Style Bottom Overlays Dock Bar: Single Port Depths & Isobaths Tile -->
             <div class="excel-overlay-dock" id="excelOverlayDock" role="toolbar" aria-label="ECDIS Chart Overlays">
               <div class="excel-tabs-scroll">
-                <!-- Tab 1: Port Depths & Approaches -->
-                <button type="button" class="excel-tab active" data-overlay="depths" id="tabOverlayDepths" title="Toggle Port Depths, Fairways &amp; Declared Soundings">
+                <!-- Single Tile: Port Depths & Isobaths -->
+                <button type="button" class="excel-tab active" data-overlay="depths" id="tabOverlayDepths" title="Toggle Port Depths, Fairways &amp; Isobaths Contours">
                   <span class="excel-tab-check">✓</span>
                   <span class="excel-tab-icon">⚓</span>
-                  <span class="excel-tab-name">Port Depths &amp; Approaches</span>
-                  <span class="excel-tab-badge depths-badge" id="depthsAuditBadge">42 PORTS • AUDITED</span>
-                </button>
-
-                <!-- Tab 2: Depth Contours (Isobaths) -->
-                <button type="button" class="excel-tab active" data-overlay="isobaths" id="tabOverlayIsobaths" title="Toggle EMODnet &amp; NOAA Depth Contours (5m/10m/15m/20m)">
-                  <span class="excel-tab-check">✓</span>
-                  <span class="excel-tab-icon">🌊</span>
-                  <span class="excel-tab-name">Depth Contours (Isobaths)</span>
-                  <span class="excel-tab-badge">EMODNET • NOAA</span>
-                </button>
-
-                <!-- Tab 3: UKHO Notices & TSS -->
-                <button type="button" class="excel-tab active" data-overlay="notices" id="tabOverlayNotices" title="Toggle UKHO Notices to Mariners &amp; Changjiang TSS corridors">
-                  <span class="excel-tab-check">✓</span>
-                  <span class="excel-tab-icon">⚠️</span>
-                  <span class="excel-tab-name">UKHO Notices &amp; TSS</span>
-                  <span class="excel-tab-badge" id="ntmCountBadge">LIVE</span>
-                </button>
-
-                <!-- Tab 4: OpenSeaMap Buoys -->
-                <button type="button" class="excel-tab" data-overlay="buoys" id="tabOverlayBuoys" title="Toggle OpenSeaMap Buoys, Beacons &amp; Lights">
-                  <span class="excel-tab-check"></span>
-                  <span class="excel-tab-icon">💡</span>
-                  <span class="excel-tab-name">OpenSeaMap Buoys</span>
-                </button>
-
-                <!-- Tab 5: Passage Plan Route -->
-                <button type="button" class="excel-tab active" data-overlay="route" id="tabOverlayRoute" title="Toggle Passage Plan Waypoints &amp; Track">
-                  <span class="excel-tab-check">✓</span>
-                  <span class="excel-tab-icon">🚢</span>
-                  <span class="excel-tab-name">Passage Plan Route</span>
-                  <span class="excel-tab-badge" id="routeLegsBadge">ACTIVE</span>
-                </button>
-              </div>
-
-              <div class="excel-dock-actions">
-                <button type="button" class="excel-audit-btn" id="btnWeeklyDepthAudit" title="Run Weekly Depth Verification &amp; Change Detection Analysis across all ports">
-                  <span class="audit-icon">🔄</span>
-                  <span class="audit-text">Audit Depths</span>
-                  <span class="audit-status" id="auditLastStatus">WK 41/26 OK</span>
+                  <span class="excel-tab-name">Port Depths &amp; Isobaths</span>
+                  <span class="excel-tab-badge depths-badge" id="depthsAuditBadge">42 PORTS</span>
+                  <!-- Inline Audit depths pop-up trigger -->
+                  <span class="excel-tab-audit-inline" id="btnWeeklyDepthAudit" title="Click to view Weekly Port Bathymetry Audit Report">
+                    🔄 Audit depths
+                  </span>
                 </button>
               </div>
             </div>
