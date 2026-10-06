@@ -1669,33 +1669,82 @@ function initNtMMap() {
       zoom: 3,
       minZoom: 2,
       maxZoom: 18,
-      attributionControl: false
+      attributionControl: false,
+      preferCanvas: true,
+      zoomAnimation: true,
+      fadeAnimation: true,
+      markerZoomAnimation: true
+    });
+
+    // High-performance CDN Tile Providers (Fastly & Esri CDN with tile buffering)
+    const cartoDarkLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      subdomains: "abcd",
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap &copy; CARTO",
+      keepBuffer: 8,
+      updateWhenIdle: false,
+      updateWhenZooming: false,
+      crossOrigin: true
     });
 
     const oceanLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 13,
-      attribution: "Tiles &copy; Esri"
+      attribution: "Tiles &copy; Esri",
+      keepBuffer: 8,
+      updateWhenIdle: false,
+      updateWhenZooming: false,
+      crossOrigin: true
+    });
+
+    const cartoVoyagerLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+      subdomains: "abcd",
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap &copy; CARTO",
+      keepBuffer: 8,
+      updateWhenIdle: false,
+      updateWhenZooming: false,
+      crossOrigin: true
     });
 
     const osmLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
-      attribution: "&copy; OpenStreetMap"
+      attribution: "&copy; OpenStreetMap",
+      keepBuffer: 8,
+      updateWhenIdle: false,
+      updateWhenZooming: false,
+      crossOrigin: true
     });
 
     const satLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 18,
-      attribution: "Tiles &copy; Esri"
+      attribution: "Tiles &copy; Esri",
+      keepBuffer: 8,
+      updateWhenIdle: false,
+      updateWhenZooming: false,
+      crossOrigin: true
     });
 
-    oceanLayer.addTo(leafletMap);
+    // Pick active base layer according to theme
+    const activeTheme = document.documentElement.getAttribute("data-theme") || "dark";
+    if (activeTheme === "light") {
+      oceanLayer.addTo(leafletMap);
+    } else {
+      cartoDarkLayer.addTo(leafletMap);
+    }
 
     const seamarkLayer = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", {
       maxZoom: 18,
-      attribution: "OpenSeaMap"
+      attribution: "OpenSeaMap",
+      keepBuffer: 8,
+      updateWhenIdle: false,
+      updateWhenZooming: false,
+      crossOrigin: true
     });
 
     const baseMaps = {
-      "🌊 Ocean Chart": oceanLayer,
+      "🌙 Dark ECDIS (Ultra-Fast)": cartoDarkLayer,
+      "🌊 Ocean Chart (Esri)": oceanLayer,
+      "🧭 Light Nav (Carto)": cartoVoyagerLayer,
       "🗺️ OpenStreetMap": osmLayer,
       "🛰️ Satellite": satLayer
     };
