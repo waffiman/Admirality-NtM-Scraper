@@ -1676,30 +1676,10 @@ function initNtMMap() {
       markerZoomAnimation: true
     });
 
-    // High-performance CDN Tile Providers (Fastly & Esri CDN with tile buffering)
-    const cartoDarkLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      subdomains: "abcd",
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap &copy; CARTO",
-      keepBuffer: 8,
-      updateWhenIdle: false,
-      updateWhenZooming: false,
-      crossOrigin: true
-    });
-
+    // Primary Reliable Free Tile Providers (Zero API Key, High Availability)
     const oceanLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 13,
       attribution: "Tiles &copy; Esri",
-      keepBuffer: 8,
-      updateWhenIdle: false,
-      updateWhenZooming: false,
-      crossOrigin: true
-    });
-
-    const cartoVoyagerLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      subdomains: "abcd",
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap &copy; CARTO",
       keepBuffer: 8,
       updateWhenIdle: false,
       updateWhenZooming: false,
@@ -1724,13 +1704,8 @@ function initNtMMap() {
       crossOrigin: true
     });
 
-    // Pick active base layer according to theme
-    const activeTheme = document.documentElement.getAttribute("data-theme") || "dark";
-    if (activeTheme === "light") {
-      oceanLayer.addTo(leafletMap);
-    } else {
-      cartoDarkLayer.addTo(leafletMap);
-    }
+    // Primary Default Nautical Chart
+    oceanLayer.addTo(leafletMap);
 
     const seamarkLayer = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", {
       maxZoom: 18,
@@ -1742,9 +1717,7 @@ function initNtMMap() {
     });
 
     const baseMaps = {
-      "🌙 Dark ECDIS (Ultra-Fast)": cartoDarkLayer,
       "🌊 Ocean Chart (Esri)": oceanLayer,
-      "🧭 Light Nav (Carto)": cartoVoyagerLayer,
       "🗺️ OpenStreetMap": osmLayer,
       "🛰️ Satellite": satLayer
     };
