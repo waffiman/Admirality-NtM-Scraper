@@ -24,6 +24,7 @@ const OFFLINE_CORE_ASSETS = [
   'assets/Auto NtM Plotting/ntm_styles.css',
   'assets/Auto NtM Plotting/ntm_ui.js',
   'assets/Auto NtM Plotting/setsail_ui.js',
+  'assets/Auto NtM Plotting/port_depths.js',
   'assets/Auto NtM Plotting/ntm_module.js',
   'assets/Auto NtM Plotting/pdf.min.js',
   'assets/Auto NtM Plotting/pdf.worker.min.js'
