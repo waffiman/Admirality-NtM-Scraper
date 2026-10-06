@@ -4,8 +4,8 @@
  * Fully offline-capable bridge cockpit — Zero Google Dinosaur!
  */
 
-const CACHE_NAME = 'setsail-cache-v2.8';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v1';
+const CACHE_NAME = 'setsail-cache-v2.9';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v2';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -155,8 +155,7 @@ self.addEventListener('fetch', (event) => {
   const isMapTile = (
     url.hostname.includes('tile.openstreetmap.org') ||
     url.hostname.includes('arcgisonline.com') ||
-    url.hostname.includes('openseamap.org') ||
-    url.hostname.includes('cartocdn.com')
+    url.hostname.includes('openseamap.org')
   );
 
   if (isMapTile) {
