@@ -3222,3 +3222,56 @@
     display: none;
   }
 }
+
+
+
+/* SetSail Hero Horizontal Logo in Center Stage */
+.home-hero-logo {
+  max-width: 380px;
+  width: 85%;
+  height: auto;
+  display: block;
+  margin: 0 auto 0.65rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 25px rgba(126, 182, 255, 0.45));
+  transition: transform 0.3s ease;
+}
+
+.home-hero-logo:hover {
+  transform: scale(1.02);
+}
+
+/* Nav Logo Button (Square Logo) */
+.nav-item.nav-logo-btn {
+  background: rgba(14, 24, 52, 0.6) !important;
+  border: 1px solid var(--line) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.nav-item.nav-logo-btn .nav-logo-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+/* Home WAFFI Footer Logo - Unclipped full aspect ratio */
+.home-waffi-logo {
+  height: 20px;
+  width: auto;
+  max-width: 60px;
+  display: inline-block;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+/* Explicitly disable radar grid */
+.home-radar-grid {
+  display: none !important;
+}
