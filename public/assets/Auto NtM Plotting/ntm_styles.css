@@ -3902,3 +3902,92 @@
   line-height: 1.2;
   margin-right: 6px;
 }
+
+
+/* ?? SetSail Brand Minimalist Vector Icon System ?? */
+.setsail-icon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.15em;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+  transition: transform 0.18s ease, stroke 0.18s ease, filter 0.18s ease;
+}
+
+.setsail-icon-sm { width: 14px; height: 14px; }
+.setsail-icon-md { width: 18px; height: 18px; }
+.setsail-icon-lg { width: 22px; height: 22px; }
+.setsail-icon-xl { width: 32px; height: 32px; }
+
+.nav-item .setsail-icon {
+  width: 22px;
+  height: 22px;
+  stroke: #94a3b8;
+}
+
+.nav-item:hover .setsail-icon {
+  stroke: #e2e8f0;
+  transform: scale(1.08);
+}
+
+.nav-item.active .setsail-icon {
+  stroke: #38bdf8;
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
+}
+
+.home-tool-icon-box .setsail-icon {
+  width: 30px;
+  height: 30px;
+  stroke: #38bdf8;
+}
+
+.home-tool-tile:hover .home-tool-icon-box .setsail-icon {
+  stroke: #7dd3fc;
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+}
+
+.home-hud-icon .setsail-icon {
+  width: 15px;
+  height: 15px;
+  stroke: #38bdf8;
+  vertical-align: -0.18em;
+}
+
+.ntm-search-icon .setsail-icon {
+  width: 16px;
+  height: 16px;
+  stroke: #64748b;
+}
+
+.excel-tab-info-btn .setsail-icon {
+  width: 14px;
+  height: 14px;
+  stroke: #38bdf8;
+}
+
+.ntm-btn-glass .setsail-icon,
+.ntm-btn-export .setsail-icon,
+.ntm-mview-btn .setsail-icon {
+  margin-right: 5px;
+  vertical-align: -0.16em;
+}
+
+.home-hero-logo-wrap {
+  display: block;
+  width: min(440px, 86vw);
+  height: auto;
+  margin: 0 auto;
+}
+
+.home-hero-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: auto;
+}
