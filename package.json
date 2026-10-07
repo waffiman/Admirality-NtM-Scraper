@@ -1,0 +1,9 @@
+{
+  "name": "setsail",
+  "version": "2.7.0",
+  "description": "SetSail Marine Navigation Suite",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Static PWA Build Complete'"
+  }
+}
