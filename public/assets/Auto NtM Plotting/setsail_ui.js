@@ -129,9 +129,24 @@ function switchToTab(targetTab) {
     if (appContent) appContent.style.overflowY = "hidden";
     if (waffiFooter) waffiFooter.style.display = "none";
     initHomeVideo();
+  } else if (targetTab === "tab-ntm") {
+    if (appContent) {
+      appContent.style.overflowY = "hidden";
+      appContent.style.maxHeight = "100vh";
+    }
+    if (waffiFooter) waffiFooter.style.display = "none";
   } else {
-    if (appContent) appContent.style.overflowY = "";
+    if (appContent) {
+      appContent.style.overflowY = "";
+      appContent.style.maxHeight = "";
+    }
     if (waffiFooter) waffiFooter.style.display = "";
+  }
+
+  if (targetTab === "tab-gyro") {
+    setTimeout(() => {
+      if (typeof drawDevChart === "function") drawDevChart();
+    }, 50);
   }
 
   if (targetTab === "tab-ntm") {
@@ -998,7 +1013,7 @@ function initHomeHudVessel() {
 
   if (userVessel) {
     if (homeHudCoords) {
-      homeHudCoords.innerHTML = `VESSEL: <strong>${formatLatLonDMS(userVessel.lat, userVessel.lon)}</strong>`;
+      homeHudCoords.innerHTML = `POS: <strong>${formatLatLonDMS(userVessel.lat, userVessel.lon)}</strong>`;
     }
     return;
   }
@@ -1015,22 +1030,22 @@ function initHomeHudVessel() {
           const lon = pos.coords.longitude;
           plotUserVessel(lat, lon, "gps");
           if (homeHudCoords) {
-            homeHudCoords.innerHTML = `VESSEL: <strong>${formatLatLonDMS(lat, lon)}</strong>`;
+            homeHudCoords.innerHTML = `POS: <strong>${formatLatLonDMS(lat, lon)}</strong>`;
           }
         },
         (err) => {
           console.log("[SetSail Geo] First-visit GPS acquisition declined:", err.message);
           if (homeHudCoords) {
-            homeHudCoords.innerHTML = "VESSEL: <em>NOT SET</em>";
+            homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
           }
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
       );
     } else {
-      if (homeHudCoords) homeHudCoords.innerHTML = "VESSEL: <em>NOT SET</em>";
+      if (homeHudCoords) homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
     }
   } else {
-    if (homeHudCoords) homeHudCoords.innerHTML = "VESSEL: <em>NOT SET</em>";
+    if (homeHudCoords) homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
   }
 }
 
@@ -1245,7 +1260,7 @@ function initVesselTracking() {
       if (hud) hud.style.display = "none";
       const homeHudCoords = document.getElementById("homeVesselHudCoords");
       if (homeHudCoords) {
-        homeHudCoords.innerHTML = "VESSEL: <em>NOT SET</em>";
+        homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
       }
       closePopover();
     });
@@ -1339,7 +1354,7 @@ function plotUserVessel(lat, lon, source = "manual") {
 
   const homeHudCoords = document.getElementById("homeVesselHudCoords");
   if (homeHudCoords) {
-    homeHudCoords.innerHTML = `VESSEL: <strong>${formatLatLonDMS(lat, lon)}</strong>`;
+    homeHudCoords.innerHTML = `POS: <strong>${formatLatLonDMS(lat, lon)}</strong>`;
   }
 }
 
@@ -2008,39 +2023,38 @@ function renderNtMListAndMap() {
 
   if (countEl) {
     if (matchedPorts.length > 0) {
-      countEl.textContent = `${matchedPorts.length} Ports, ${filtered.length} Notices`;
+      countEl.textContent = `${matchedPorts.length} Ports, ${filtered.length} NtMs`;
     } else {
       countEl.textContent = `${filtered.length} of ${NTM_STORE.length}`;
     }
   }
 
-  // Render Notice & Port Cards into Sidebar
   if (listContainer) {
-    if (filtered.length === 0 && matchedPorts.length === 0) {
-      listContainer.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.8rem;">No notices or ports match the selected filter criteria.<br/>Try searching for a port name (e.g., Shanghai, Rotterdam, Houston, Ningbo).</div>';
+    let html = "";
+    if (matchedPorts.length > 0) {
+      countEl.textContent = `${matchedPorts.length} Ports, ${filtered.length} NtMs`;
     } else {
-      let html = "";
+      countEl.textContent = `${filtered.length} of ${NTM_STORE.length}`;
+    }
+  }
 
-      // 1. Port Search Results (Top Section)
-      if (matchedPorts.length > 0) {
-        html += `<div class="ntm-search-section-header"><span>⚓ WORLD PORTS & APPROACHES (${matchedPorts.length})</span></div>`;
+  if (listContainer) {
+    let html = "";
+    if (matchedPorts.length > 0) {
+        html += `<div class="ntm-search-section-header"><span>⚓ WORLD PORTS (${matchedPorts.length})</span></div>`;
         matchedPorts.forEach(port => {
-          const mainDepth = (port.fairways && port.fairways[0]) ? `${port.fairways[0].depth}m` : "12.5m";
-          const firstCoord = formatLatLonDMS(port.approachCoords[0], port.approachCoords[1]);
+          const cCode = port.countryCode || (port.country ? port.country.slice(0, 2).toUpperCase() : "UN");
           html += `
-            <div class="ntm-card-item ntm-port-search-card" data-port-id="${port.id}" onclick="jumpToPort('${port.id}')" title="Click to inspect ${port.name} fairway depths">
-              <div class="ntm-card-content">
-                <div class="ntm-card-top">
-                  <span class="ntm-card-id" style="color:#38bdf8;">${port.flag} ${port.name}</span>
-                  <span class="ntm-tag perm">${port.unlocode}</span>
+            <div class="ntm-card-item ntm-port-search-card" data-port-id="${port.id}" onclick="jumpToPort('${port.id}')" title="Click to inspect ${port.name} on map">
+              <div class="ntm-card-content" style="padding:0.55rem 0.75rem;">
+                <div class="ntm-card-top" style="align-items:center;gap:6px;">
+                  <span class="port-flag-symbol">${cCode}</span>
+                  <span class="ntm-card-id" style="color:var(--accent);font-weight:600;font-size:0.86rem;">${port.name}</span>
+                  <span class="ntm-tag perm" style="margin-left:auto;">${port.unlocode}</span>
                 </div>
-                <div class="ntm-card-subject">
-                  Fairway Depth: <strong style="color:#34d399;">${mainDepth} LAT</strong> • Max Draft: <strong>${port.maxDraftFloodTide || '15.0m'}</strong>
-                  <div style="font-size:0.68rem;color:var(--muted);margin-top:2px;">${port.authority}</div>
-                </div>
-                <div class="ntm-card-bottom">
-                  <span class="ntm-card-coords">📍 ${firstCoord}</span>
-                  <span class="ntm-tag" style="background:rgba(52,211,153,0.18);color:#34d399;border:1px solid rgba(52,211,153,0.3);">${port.auditStatus}</span>
+                <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;justify-content:space-between;">
+                  <span>${port.country}</span>
+                  <span style="color:#38bdf8;font-size:0.7rem;">View Chart &rarr;</span>
                 </div>
               </div>
             </div>
