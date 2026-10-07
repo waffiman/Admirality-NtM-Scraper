@@ -3049,8 +3049,10 @@ function renderPortDepthsOnMap(map) {
 
     const popupHtml = `
       <div style="min-width:240px;font-family:'Segoe UI', Tahoma, sans-serif;color:#f1f5f9;">
-        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(140,170,255,0.25);padding-bottom:5px;margin-bottom:6px;">
-          <h4 style="margin:0;font-size:0.88rem;color:#38bdf8;">${port.flag} ${port.name}</h4>
+          <h4 style="margin:0;font-size:0.88rem;color:#38bdf8;display:flex;align-items:center;gap:6px;">
+            <span class="port-flag-box"><img src="assets/flags/${(port.countryCode||'un').toLowerCase()}.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/${(port.countryCode||'un').toLowerCase()}.png';" alt="${port.countryCode||''}" class="port-flag-img"></span>
+            <span>${port.name}</span>
+          </h4>
           <span style="font-size:0.65rem;background:#0284c7;color:#fff;padding:1px 5px;border-radius:3px;font-weight:700;">${port.unlocode}</span>
         </div>
         <div style="font-size:0.74rem;line-height:1.45;color:#cad8f4;">
