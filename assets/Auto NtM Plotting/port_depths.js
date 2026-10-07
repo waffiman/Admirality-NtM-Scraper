@@ -3031,7 +3031,7 @@ function renderPortDepthsOnMap(map) {
     // 1. Port Anchor Marker
     const anchorHtml = `
       <div style="background:rgba(8,16,36,0.92);border:1px solid #38bdf8;border-radius:6px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,0.6);cursor:pointer;white-space:nowrap;">
-        <span style="font-size:0.85rem;">⚓</span>
+        <span style="font-size:0.85rem;"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;vertical-align:-0.15em;"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
         <span style="font-size:0.7rem;font-weight:700;color:#f1f5f9;">${port.flag} ${port.unlocode}</span>
         <span style="font-size:0.65rem;font-weight:700;color:#38bdf8;background:rgba(56,189,248,0.15);padding:1px 4px;border-radius:3px;">${port.fairways[0]?.depth || 12.5}m</span>
       </div>
@@ -3062,7 +3062,7 @@ function renderPortDepthsOnMap(map) {
           <div style="font-size:0.7rem;color:#94a3b8;margin-top:4px;font-style:italic;">${port.auditNotes}</div>
         </div>
         <div style="margin-top:8px;display:flex;gap:6px;">
-          <button type="button" onclick="auditSinglePort('${port.id}')" style="background:linear-gradient(180deg,#0284c7,#0369a1);border:1px solid #38bdf8;color:#fff;font-size:0.7rem;padding:3px 8px;border-radius:4px;cursor:pointer;font-weight:600;">🔄 Audit Fairway</button>
+          <button type="button" onclick="auditSinglePort('${port.id}')" style="background:linear-gradient(180deg,#0284c7,#0369a1);border:1px solid #38bdf8;color:#fff;font-size:0.7rem;padding:3px 8px;border-radius:4px;cursor:pointer;font-weight:600;"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-0.15em;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Audit Fairway</button>
         </div>
       </div>
     `;
@@ -3308,7 +3308,7 @@ function auditSinglePort(portId) {
   const port = PORT_DEPTHS_DB.find(p => p.id === portId);
   if (!port) return;
 
-  const msg = `⚓ Port Depth Audit [${port.unlocode}]:\n\n` +
+  const msg = `Port Depth Audit [${port.unlocode}]:\n\n` +
               `Port: ${port.name} (${port.country})\n` +
               `Authority: ${port.authority}\n` +
               `Fairway Depth: ${port.fairways[0]?.depth || 12.5}m LAT\n` +
@@ -3335,7 +3335,7 @@ function renderWeeklyAuditModal(data) {
       <div class="ntm-audit-modal-header">
         <div>
           <h3 style="margin:0;font-size:1.05rem;color:#38bdf8;display:flex;align-items:center;gap:6px;">
-            <span>🔄</span> Weekly Port Bathymetry &amp; Declared Depths Audit
+            <span><svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-0.15em;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span> Weekly Port Bathymetry &amp; Declared Depths Audit
           </h3>
           <span style="font-size:0.72rem;color:var(--muted);">Hydrographic Cycle: ${data.cycle} • Automated Verification</span>
         </div>
@@ -3363,7 +3363,7 @@ function renderWeeklyAuditModal(data) {
 
       <div style="background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:6px;padding:0.75rem;margin-bottom:1rem;">
         <h4 style="margin:0 0 0.5rem;font-size:0.8rem;color:#38bdf8;text-transform:uppercase;letter-spacing:0.04em;">
-          🌊 Recent Dredging &amp; Declared Depth Amendments
+          <svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-0.15em;"><path d="M2 6c3-2 6-2 9 0s6 2 9 0"/><path d="M2 12c3-2 6-2 9 0s6 2 9 0"/><path d="M2 18c3-2 6-2 9 0s6 2 9 0"/></svg> Recent Dredging &amp; Declared Depth Amendments
         </h4>
         <div style="display:flex;flex-direction:column;gap:0.5rem;">
           ${data.dredgingAlerts.map(item => `
