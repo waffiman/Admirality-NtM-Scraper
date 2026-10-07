@@ -1,7 +1,7 @@
-{
-  "": "https://openapi.vercel.sh/vercel.json",
+﻿{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": null,
+  "buildCommand": "echo 'Static PWA Ready'",
   "outputDirectory": ".",
   "cleanUrls": true,
   "headers": [
