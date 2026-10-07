@@ -2123,12 +2123,21 @@ function renderNtMListAndMap() {
     if (matchedPorts.length > 0) {
         html += `<div class="ntm-search-section-header"><span><svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg> WORLD PORTS (${matchedPorts.length})</span></div>`;
         matchedPorts.forEach(port => {
-          const cCode = port.countryCode || (port.country ? port.country.slice(0, 2).toUpperCase() : "UN");
+          const cCode = (port.countryCode || (port.country ? port.country.slice(0, 2) : "UN")).toUpperCase();
+          const cLower = cCode.toLowerCase();
           html += `
             <div class="ntm-card-item ntm-port-search-card" data-port-id="${port.id}" onclick="jumpToPort('${port.id}')" title="Click to inspect ${port.name} on map">
               <div class="ntm-card-content" style="padding:0.55rem 0.75rem;">
-                <div class="ntm-card-top" style="align-items:center;gap:6px;">
-                  <span class="port-flag-symbol">${cCode}</span>
+                <div class="ntm-card-top" style="align-items:center;gap:7px;">
+                  <span class="port-flag-box" title="${port.country}">
+                    <img src="assets/flags/${cLower}.png" 
+                         onerror="this.onerror=null;this.src='https://flagcdn.com/w40/${cLower}.png';" 
+                         alt="${cCode}" 
+                         class="port-flag-img" 
+                         width="21" 
+                         height="15" 
+                         loading="lazy" />
+                  </span>
                   <span class="ntm-card-id" style="color:var(--accent);font-weight:600;font-size:0.86rem;">${port.name}</span>
                   <span class="ntm-tag perm" style="margin-left:auto;">${port.unlocode}</span>
                 </div>
