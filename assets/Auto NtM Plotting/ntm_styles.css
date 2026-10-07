@@ -974,8 +974,75 @@
   font-size: 0.75rem !important;
 }
 
+.leaflet-control-layers {
+  background: rgba(10, 18, 42, 0.92) !important;
+  color: #e8eefc !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5) !important;
+  font-family: "Segoe UI", sans-serif !important;
+  font-size: 0.75rem !important;
+}
+
 .leaflet-control-layers-toggle {
-  filter: invert(1) hue-rotate(180deg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='12 2 2 7 12 12 22 7 12 2'/%3E%3Cpolyline points='2 17 12 22 22 17'/%3E%3Cpolyline points='2 12 12 17 22 12'/%3E%3C/svg%3E") !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: 20px 20px !important;
+  filter: none !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.leaflet-control-layers-toggle:hover {
+  background-color: rgba(56, 189, 248, 0.15) !important;
+  transform: scale(1.05);
+}
+
+.leaflet-control-layers-expanded {
+  background: rgba(13, 23, 46, 0.95) !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  font-family: inherit !important;
+  font-size: 0.8rem !important;
+  min-width: 190px !important;
+}
+
+.leaflet-control-layers-separator {
+  border-top: 1px solid rgba(140, 170, 255, 0.2) !important;
+  margin: 6px 0 !important;
+}
+
+.leaflet-control-layers-overlays label,
+.leaflet-control-layers-base label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 4px 0 !important;
+  cursor: pointer !important;
+  color: #cbd5e1 !important;
+  font-weight: 500 !important;
+  transition: color 0.15s ease !important;
+}
+
+.leaflet-control-layers-overlays label:hover,
+.leaflet-control-layers-base label:hover {
+  color: #38bdf8 !important;
+}
+
+.leaflet-control-layers input[type="checkbox"],
+.leaflet-control-layers input[type="radio"] {
+  accent-color: #0284c7 !important;
+  cursor: pointer !important;
+  width: 15px !important;
+  height: 15px !important;
 }
 
 /* Drag & Drop Overlay Zone */
@@ -3680,4 +3747,158 @@
   color: var(--muted);
   text-transform: uppercase;
   font-weight: 600;
+}
+
+
+/* ── Home HUD Alignment: UTC Centered, POS Right ── */
+.home-hud-top {
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+.home-hud-left {
+  justify-self: start !important;
+}
+.home-hud-center {
+  justify-self: center !important;
+}
+.home-hud-right {
+  justify-self: end !important;
+}
+
+/* ── Minimalist Excel Dock: Simple Title + Info Icon ── */
+.excel-tab-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.excel-tab-info-btn:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* ── Zero Vertical Scroll on Map Page ── */
+#tab-ntm {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+#tab-ntm .ntm-app-layout {
+  height: calc(100vh - 46px) !important;
+  max-height: calc(100vh - 46px) !important;
+  overflow: hidden !important;
+}
+
+/* ── Leaflet Layers Control Fix: Replace Empty Black Square with Crisp Layers SVG ── */
+.leaflet-control-layers {
+  background: rgba(14, 23, 42, 0.92) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+  color: #f1f5f9 !important;
+  backdrop-filter: blur(12px) !important;
+  transition: all 0.2s ease !important;
+}
+
+.leaflet-control-layers-toggle {
+  background-image: none !important;
+  background-color: rgba(14, 23, 42, 0.92) !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+
+.leaflet-control-layers-toggle::after {
+  content: "" !important;
+  display: block !important;
+  width: 20px !important;
+  height: 20px !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='12 2 2 7 12 12 22 7 12 2'%3E%3C/polygon%3E%3Cpolyline points='2 17 12 22 22 17'%3E%3C/polyline%3E%3Cpolyline points='2 12 12 17 22 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
+}
+
+.leaflet-control-layers-expanded {
+  padding: 10px 14px !important;
+  font-size: 0.8rem !important;
+  border-radius: 10px !important;
+  min-width: 190px !important;
+}
+
+.leaflet-control-layers-expanded label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: #e2e8f0 !important;
+  font-size: 0.78rem !important;
+  cursor: pointer !important;
+  text-transform: none !important;
+  letter-spacing: 0.02em !important;
+}
+
+.leaflet-control-layers-expanded label:hover {
+  color: #38bdf8 !important;
+}
+
+.leaflet-control-layers-expanded input[type="checkbox"],
+.leaflet-control-layers-expanded input[type="radio"] {
+  accent-color: #38bdf8 !important;
+  cursor: pointer !important;
+  width: 15px !important;
+  height: 15px !important;
+  margin: 0 !important;
+}
+
+/* ── Leaflet Dark Maritime Popups (Fix White Cards on Dark Theme) ── */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: #0d172e !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6) !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px !important;
+  line-height: 1.45 !important;
+  color: #f1f5f9 !important;
+  font-family: inherit !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  padding: 8px 8px 0 0 !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: #38bdf8 !important;
+}
+
+/* ── Port Flag Symbol Icon ── */
+.port-flag-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  line-height: 1.2;
+  margin-right: 6px;
 }
