@@ -76,23 +76,36 @@
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, rgba(60, 110, 220, 0.45), rgba(40, 70, 160, 0.55));
+  background: linear-gradient(135deg, rgba(240, 90, 54, 0.2), rgba(28, 48, 92, 0.65));
   color: #fff;
-  border-color: var(--accent);
-  box-shadow: 0 0 14px rgba(126, 182, 255, 0.35);
+  border-color: rgba(240, 90, 54, 0.65);
+  box-shadow: 0 0 14px rgba(240, 90, 54, 0.28), inset 0 0 10px rgba(240, 90, 54, 0.12);
+}
+
+.nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: #f05a36;
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 8px rgba(240, 90, 54, 0.7);
 }
 
 .nav-item .badge {
   position: absolute;
   top: -2px;
   right: -2px;
-  background: #ff5252;
+  background: #f05a36;
   color: #fff;
+  box-shadow: 0 2px 6px rgba(240, 90, 54, 0.45);
   font-size: 0.6rem;
   font-weight: 700;
   padding: 1px 4px;
   border-radius: 8px;
-  border: 1px solid #fff;
+  border: 1px solid rgba(255, 255, 255, 0.8);
   min-width: 14px;
   text-align: center;
   display: none;
@@ -3153,10 +3166,10 @@
 }
 
 .home-tool-tile:hover {
-  background: rgba(16, 36, 80, 0.82);
-  border-color: rgba(126, 182, 255, 0.65);
+  background: rgba(16, 36, 80, 0.85);
+  border-color: rgba(240, 90, 54, 0.55);
   transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(126, 182, 255, 0.3);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(240, 90, 54, 0.25);
 }
 
 .home-tool-tile:active {
@@ -3179,8 +3192,8 @@
 
 .home-tool-tile:hover .home-tool-icon-box {
   transform: scale(1.08);
-  background: rgba(126, 182, 255, 0.22);
-  border-color: rgba(126, 182, 255, 0.6);
+  background: rgba(240, 90, 54, 0.16);
+  border-color: rgba(240, 90, 54, 0.55);
 }
 
 .home-tool-title {
@@ -3202,9 +3215,9 @@
 .home-tool-badge {
   font-size: 0.58rem;
   font-weight: 700;
-  color: #7eb6ff;
-  background: rgba(126, 182, 255, 0.12);
-  border: 1px solid rgba(126, 182, 255, 0.3);
+  color: #ff8c70;
+  background: rgba(240, 90, 54, 0.12);
+  border: 1px solid rgba(240, 90, 54, 0.35);
   padding: 1px 6px;
   border-radius: 8px;
   letter-spacing: 0.04em;
@@ -3320,7 +3333,7 @@
     gap: 1.1rem;
   }
   .home-hero-logo {
-    max-width: 320px;
+    max-width: 288px;
     width: 90%;
     margin-bottom: 0.35rem;
   }
@@ -3374,13 +3387,13 @@
 
 /* SetSail Hero Horizontal Logo in Center Stage (Prominent & Commanding) */
 .home-hero-logo {
-  max-width: 640px;
+  max-width: 580px;
   width: 92%;
   height: auto;
   display: block;
   margin: 0 auto 0.5rem;
   object-fit: contain;
-  filter: drop-shadow(0 12px 36px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 45px rgba(56, 189, 248, 0.38));
+  filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 32px rgba(240, 90, 54, 0.24));
   cursor: default;
   user-select: none;
 }
@@ -3883,7 +3896,23 @@
 }
 
 .leaflet-container a.leaflet-popup-close-button:hover {
-  color: #38bdf8 !important;
+  color: #f05a36 !important;
+}
+
+/* ── Hardware-Accelerated Leaflet Tile & Layer Rendering (Zero Stutter on Deep Zoom) ── */
+.leaflet-tile {
+  will-change: transform, opacity;
+  image-rendering: -webkit-optimize-contrast;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+.leaflet-tile-container {
+  will-change: transform;
+}
+
+.leaflet-zoom-animated {
+  will-change: transform;
 }
 
 /* ── Port Flag Symbol & Graphic Badge ── */
@@ -3907,6 +3936,16 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* ── Port Anchor DivIcon Marker Reset ── */
+.ntm-port-anchor-marker {
+  background: transparent !important;
+  border: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
 }
 
 .port-flag-symbol {
@@ -4002,7 +4041,7 @@
 
 .home-hero-logo-wrap {
   display: block;
-  width: min(440px, 86vw);
+  width: min(396px, 78vw);
   height: auto;
   margin: 0 auto;
 }
