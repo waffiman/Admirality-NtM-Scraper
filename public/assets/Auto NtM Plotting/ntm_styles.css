@@ -2918,30 +2918,30 @@
   object-position: center center;
   z-index: 0;
   pointer-events: none;
-  filter: brightness(0.68) contrast(1.18) saturate(1.15);
+  filter: brightness(0.86) contrast(1.10) saturate(1.15);
   transform: scale(1.02);
 }
 
-/* Vignette Overlay (Dark edges, 70mm cinematic feel) */
+/* Vignette Overlay (Softer edges, luminous maritime atmosphere) */
 .home-vignette-overlay {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: radial-gradient(ellipse 90% 80% at 50% 45%, rgba(0, 0, 0, 0.1) 0%, rgba(3, 7, 20, 0.65) 60%, rgba(2, 5, 15, 0.94) 100%);
+  background: radial-gradient(ellipse 90% 80% at 50% 45%, rgba(0, 0, 0, 0.02) 0%, rgba(3, 7, 20, 0.38) 60%, rgba(2, 5, 15, 0.72) 100%);
 }
 
-/* Atmospheric Maritime Gradient */
+/* Atmospheric Maritime Gradient (Softer dark layers) */
 .home-gradient-overlay {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(180deg, 
-    rgba(5, 10, 26, 0.85) 0%, 
-    rgba(5, 10, 26, 0.25) 30%, 
-    rgba(5, 10, 26, 0.40) 65%, 
-    rgba(3, 7, 18, 0.96) 100%
+    rgba(5, 10, 26, 0.55) 0%, 
+    rgba(5, 10, 26, 0.12) 30%, 
+    rgba(5, 10, 26, 0.22) 65%, 
+    rgba(3, 7, 18, 0.78) 100%
   );
 }
 
@@ -4051,4 +4051,123 @@
   width: 100%;
   height: auto;
   image-rendering: auto;
+}
+
+
+/* --- Multi-Overlay Category Bar & Dynamic Filter Pills --- */
+.ntm-overlay-category-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  background: rgba(10, 18, 38, 0.75);
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ntm-overlay-category-bar::-webkit-scrollbar {
+  display: none;
+}
+.ntm-category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(140, 170, 255, 0.22);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.ntm-category-pill:hover {
+  background: rgba(255, 255, 255, 0.10);
+  color: #ffffff;
+  border-color: rgba(240, 90, 54, 0.45);
+}
+.ntm-category-pill.active {
+  background: rgba(240, 90, 54, 0.22);
+  border-color: #f05a36;
+  color: #ff7a5c;
+  box-shadow: 0 0 8px rgba(240, 90, 54, 0.25);
+}
+.cat-pill-count {
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  color: inherit;
+}
+.ntm-category-pill.active .cat-pill-count {
+  background: #f05a36;
+  color: #ffffff;
+}
+
+/* --- Route Waypoint Cards & Editor Button --- */
+.ntm-wpt-card {
+  border-left: 3px solid #0284c7 !important;
+  cursor: pointer;
+}
+.ntm-wpt-card:hover {
+  border-left-color: #38bdf8 !important;
+  background: rgba(2, 132, 199, 0.08) !important;
+}
+.ntm-btn-wpt-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-left: auto;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ntm-btn-wpt-edit:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.4);
+}
+
+/* --- Non-Intrusive Floating Toast --- */
+.setsail-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99999;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(240, 90, 54, 0.5);
+  color: #f1f5f9;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(240, 90, 54, 0.25);
+  transform: translateY(30px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+}
+.setsail-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.setsail-toast.setsail-toast-success {
+  border-color: rgba(16, 185, 129, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(16, 185, 129, 0.25);
+}
+.setsail-toast.setsail-toast-warning {
+  border-color: rgba(245, 158, 11, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(245, 158, 11, 0.25);
 }
