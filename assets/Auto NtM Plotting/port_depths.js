@@ -3030,9 +3030,10 @@ function renderPortDepthsOnMap(map) {
   PORT_DEPTHS_DB.forEach(port => {
     // 1. Port Anchor Marker
     const anchorHtml = `
-      <div style="background:rgba(8,16,36,0.92);border:1px solid #38bdf8;border-radius:6px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,0.6);cursor:pointer;white-space:nowrap;">
+      <div style="background:rgba(8,16,36,0.92);border:1px solid #38bdf8;border-radius:6px;padding:2px 7px;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.6);cursor:pointer;white-space:nowrap;">
         <span style="font-size:0.85rem;"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;vertical-align:-0.15em;"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
-        <span style="font-size:0.7rem;font-weight:700;color:#f1f5f9;">${port.flag} ${port.unlocode}</span>
+        <span class="port-flag-box" style="width:16px;height:11px;vertical-align:middle;display:inline-flex;"><img src="assets/flags/${(port.countryCode||'un').toLowerCase()}.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/${(port.countryCode||'un').toLowerCase()}.png';" alt="${port.countryCode||''}" class="port-flag-img"></span>
+        <span style="font-size:0.7rem;font-weight:700;color:#f1f5f9;">${port.unlocode}</span>
         <span style="font-size:0.65rem;font-weight:700;color:#38bdf8;background:rgba(56,189,248,0.15);padding:1px 4px;border-radius:3px;">${port.fairways[0]?.depth || 12.5}m</span>
       </div>
     `;
@@ -3040,8 +3041,8 @@ function renderPortDepthsOnMap(map) {
     const anchorIcon = L.divIcon({
       html: anchorHtml,
       className: "ntm-port-anchor-marker",
-      iconSize: [110, 24],
-      iconAnchor: [55, 12]
+      iconSize: [120, 24],
+      iconAnchor: [60, 12]
     });
 
     const marker = L.marker(port.approachCoords, { icon: anchorIcon });
@@ -3083,7 +3084,10 @@ function renderPortDepthsOnMap(map) {
 
       const fairwayPopupHtml = `
         <div style="min-width:230px;color:#f1f5f9;">
-          <h4 style="margin:0 0 4px;font-size:0.85rem;color:#38bdf8;">${port.flag} ${fairway.name}</h4>
+          <h4 style="margin:0 0 4px;font-size:0.85rem;color:#38bdf8;display:flex;align-items:center;gap:6px;">
+            <span class="port-flag-box" style="width:16px;height:11px;vertical-align:middle;display:inline-flex;"><img src="assets/flags/${(port.countryCode||'un').toLowerCase()}.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/${(port.countryCode||'un').toLowerCase()}.png';" alt="${port.countryCode||''}" class="port-flag-img"></span>
+            <span>${fairway.name}</span>
+          </h4>
           <div style="font-size:0.73rem;line-height:1.4;color:#cad8f4;">
             <div>Declared Depth: <strong style="font-size:0.85rem;color:#34d399;">${fairway.depth} ${fairway.depthUnit} LAT</strong></div>
             <div>Category: <strong>${fairway.category.toUpperCase()}</strong></div>
