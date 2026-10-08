@@ -3143,10 +3143,36 @@ function initExcelOverlayDock(map) {
   const dock = document.getElementById("excelOverlayDock");
   if (!dock) return;
 
+  // 1. Admiralty NtM Overlay Tab
+  const ntmTab = document.getElementById("tabOverlayNotices");
+  if (ntmTab) {
+    ntmTab.addEventListener("click", (e) => {
+      if (e.target && e.target.closest("#btnNtmOverlayInfo")) {
+        e.stopPropagation();
+        if (typeof window.openNtmOverlayInfoModal === "function") {
+          window.openNtmOverlayInfoModal();
+        }
+        return;
+      }
+      const isActive = !ntmTab.classList.contains("active");
+      setOverlayActive("notices", isActive, map);
+    });
+  }
+
+  const ntmInfoBtn = document.getElementById("btnNtmOverlayInfo");
+  if (ntmInfoBtn) {
+    ntmInfoBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (typeof window.openNtmOverlayInfoModal === "function") {
+        window.openNtmOverlayInfoModal();
+      }
+    });
+  }
+
+  // 2. Port Depths Overlay Tab
   const depthTab = document.getElementById("tabOverlayDepths");
   if (depthTab) {
     depthTab.addEventListener("click", (e) => {
-      // If user clicked the inline audit button, trigger audit modal and do not toggle tab
       if (e.target && e.target.closest("#btnWeeklyDepthAudit")) {
         e.stopPropagation();
         runWeeklyDepthAudit(true);
@@ -3162,6 +3188,32 @@ function initExcelOverlayDock(map) {
     auditBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       runWeeklyDepthAudit(true);
+    });
+  }
+
+  // 3. Route Track Overlay Tab
+  const routeTab = document.getElementById("tabOverlayRoute");
+  if (routeTab) {
+    routeTab.addEventListener("click", (e) => {
+      if (e.target && e.target.closest("#btnRouteOverlayInfo")) {
+        e.stopPropagation();
+        if (typeof window.showRouteInfoSummary === "function") {
+          window.showRouteInfoSummary();
+        }
+        return;
+      }
+      const isActive = !routeTab.classList.contains("active");
+      setOverlayActive("route", isActive, map);
+    });
+  }
+
+  const routeInfoBtn = document.getElementById("btnRouteOverlayInfo");
+  if (routeInfoBtn) {
+    routeInfoBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (typeof window.showRouteInfoSummary === "function") {
+        window.showRouteInfoSummary();
+      }
     });
   }
 
@@ -3186,41 +3238,49 @@ function setOverlayActive(overlayKey, isActive, map = null) {
     }
   }
 
-  if (!currentMap) return;
-
-  // Toggle map layers: depths and isobaths toggle together
-  if (overlayKey === "depths") {
-    OVERLAY_STATES.isobaths = isActive;
-    if (leafletPortDepthsLayer) {
-      if (isActive) currentMap.addLayer(leafletPortDepthsLayer);
-      else currentMap.removeLayer(leafletPortDepthsLayer);
-    }
-    if (leafletIsobathsLayer) {
-      if (isActive) currentMap.addLayer(leafletIsobathsLayer);
-      else currentMap.removeLayer(leafletIsobathsLayer);
-    }
-  } else if (overlayKey === "isobaths") {
-    if (leafletIsobathsLayer) {
-      if (isActive) currentMap.addLayer(leafletIsobathsLayer);
-      else currentMap.removeLayer(leafletIsobathsLayer);
-    }
-  } else if (overlayKey === "notices") {
-    if (typeof leafletMarkersLayer !== "undefined" && leafletMarkersLayer) {
-      if (isActive) currentMap.addLayer(leafletMarkersLayer);
-      else currentMap.removeLayer(leafletMarkersLayer);
-    }
-  } else if (overlayKey === "buoys") {
-    if (typeof seamarkLayer !== "undefined" && seamarkLayer) {
-      if (isActive) currentMap.addLayer(seamarkLayer);
-      else currentMap.removeLayer(seamarkLayer);
-    }
-  } else if (overlayKey === "route") {
-    if (typeof leafletRouteLayer !== "undefined" && leafletRouteLayer) {
-      if (isActive) currentMap.addLayer(leafletRouteLayer);
-      else currentMap.removeLayer(leafletRouteLayer);
+  if (currentMap) {
+    // Toggle map layers: depths and isobaths toggle together
+    if (overlayKey === "depths") {
+      OVERLAY_STATES.isobaths = isActive;
+      if (leafletPortDepthsLayer) {
+        if (isActive) currentMap.addLayer(leafletPortDepthsLayer);
+        else currentMap.removeLayer(leafletPortDepthsLayer);
+      }
+      if (leafletIsobathsLayer) {
+        if (isActive) currentMap.addLayer(leafletIsobathsLayer);
+        else currentMap.removeLayer(leafletIsobathsLayer);
+      }
+    } else if (overlayKey === "isobaths") {
+      if (leafletIsobathsLayer) {
+        if (isActive) currentMap.addLayer(leafletIsobathsLayer);
+        else currentMap.removeLayer(leafletIsobathsLayer);
+      }
+    } else if (overlayKey === "notices") {
+      if (typeof leafletMarkersLayer !== "undefined" && leafletMarkersLayer) {
+        if (isActive) currentMap.addLayer(leafletMarkersLayer);
+        else currentMap.removeLayer(leafletMarkersLayer);
+      }
+    } else if (overlayKey === "buoys") {
+      if (typeof seamarkLayer !== "undefined" && seamarkLayer) {
+        if (isActive) currentMap.addLayer(seamarkLayer);
+        else currentMap.removeLayer(seamarkLayer);
+      }
+    } else if (overlayKey === "route") {
+      if (typeof leafletRouteLayer !== "undefined" && leafletRouteLayer) {
+        if (isActive) currentMap.addLayer(leafletRouteLayer);
+        else currentMap.removeLayer(leafletRouteLayer);
+      }
     }
   }
+
+  // Synchronize Left Multi-Column List immediately!
+  if (typeof renderNtMListAndMap === "function") {
+    renderNtMListAndMap();
+  }
 }
+
+window.setOverlayActive = setOverlayActive;
+window.OVERLAY_STATES = OVERLAY_STATES;
 
 /**
  * Jump to Port on Map & Highlight Depths
