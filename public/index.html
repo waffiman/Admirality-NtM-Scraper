@@ -1800,6 +1800,12 @@
 
 
 
+            <button type="button" class="nav-item" data-tab="tab-route" aria-label="SetRoute — AI Passage Planner (Beta)" title="SetRoute — AI Passage Planner (Beta)">
+        <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="4.5" cy="19.5" r="2.5" fill="#f05a36"/><circle cx="19.5" cy="4.5" r="2.5" fill="#38bdf8"/><path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 2"/><polygon points="16.5 4 20 4.5 18.5 7.5" fill="#38bdf8"/><circle cx="12" cy="11.5" r="1.5" fill="#f05a36"/></svg>
+        <span class="badge" style="background:#f05a36;font-size:0.52rem;font-weight:800;letter-spacing:0.5px;padding:1px 3px;">BETA</span>
+        <span class="tooltip">SetRoute · AI Passage Planner (Beta)</span>
+      </button>
+
       <button type="button" class="nav-item nav-settings-item" data-tab="tab-settings" aria-label="Settings &amp; Support" style="margin-top:auto;" title="Settings &amp; Support">
 
         <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="#f05a36" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="1.2" fill="#f05a36"/></svg>
@@ -3761,7 +3767,7 @@
               <button type="button" class="ntm-category-pill active" data-category="ALL" id="catPillAll">All <span class="cat-pill-count" id="catCountAll">0</span></button>
               <button type="button" class="ntm-category-pill" data-category="NTM" id="catPillNtm">NtM <span class="cat-pill-count" id="catCountNtm">0</span></button>
               <button type="button" class="ntm-category-pill" data-category="PORTS" id="catPillPorts">Ports <span class="cat-pill-count" id="catCountPorts">0</span></button>
-              <button type="button" class="ntm-category-pill" data-category="ROUTE" id="catPillRoute" style="display:none;">Route <span class="cat-pill-count" id="catCountRoute">0</span></button>
+              <button type="button" class="ntm-category-pill" data-category="ROUTE" id="catPillRoute" style="display:none;">My Route <span class="cat-pill-count" id="catCountRoute">0</span></button>
             </div>
 
             <div class="ntm-items-scroll" id="ntmItemsScroll"></div>
@@ -3852,9 +3858,9 @@
                   <span class="excel-tab-name">Port Depths</span>
                   <span class="excel-tab-info-btn" id="btnWeeklyDepthAudit" title="Port Depths Information &amp; Weekly Audit"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
-                <button type="button" class="excel-tab active" data-overlay="route" id="tabOverlayRoute" title="Toggle Route Track &amp; Waypoints">
+                <button type="button" class="excel-tab active" data-overlay="route" id="tabOverlayRoute" title="Toggle My Route Overlay &amp; Passage Plan">
                   <span class="excel-tab-check">✓</span>
-                  <span class="excel-tab-name">Route Track</span>
+                  <span class="excel-tab-name">My Route</span>
                   <span class="excel-tab-info-btn" id="btnRouteOverlayInfo" title="Passage Plan &amp; Waypoint Information"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
               </div>
@@ -3877,6 +3883,143 @@
 
 
 
+
+            <!-- ── Tab 4: SetRoute™ — AI Autonomous Passage Planner (Beta) ── -->
+      <div id="tab-route" class="tab-pane">
+        <div class="setroute-container">
+          <div class="setroute-header">
+            <div class="setroute-header-left">
+              <div class="setroute-title-row">
+                <span class="setroute-brand-icon">
+                  <svg class="setsail-icon" viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#f05a36;">
+                    <circle cx="4.5" cy="19.5" r="2.5" fill="#f05a36"/>
+                    <circle cx="19.5" cy="4.5" r="2.5" fill="#38bdf8"/>
+                    <path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" fill="none" stroke-width="1.8" stroke-dasharray="3 2"/>
+                    <polygon points="16.5 4 20 4.5 18.5 7.5" fill="#38bdf8"/>
+                  </svg>
+                </span>
+                <h1 class="setroute-title">SetRoute<span class="setroute-tm">™</span></h1>
+                <span class="setroute-beta-pill">BETA AI ENGINE</span>
+              </div>
+              <p class="setroute-desc">
+                Autonomous Deep-Water Passage Planning Engine powered by <b>Cohere Command AI</b>. 
+                Dynamically cross-references <b>52 World Ports Bathymetry</b>, <b>Live UKHO Admiralty NtM Bulletins</b>, and the <b>Open Sea Buoys / Seamark TSS</b> layer for safe ocean navigation.
+              </p>
+            </div>
+            <div class="setroute-header-right">
+              <button type="button" class="setroute-btn-chart-jump" onclick="switchToTab('tab-ntm')">
+                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>
+                Open SetChart Map
+              </button>
+            </div>
+          </div>
+          <div class="setroute-grid">
+            <div class="setroute-card">
+              <div class="setroute-card-title">
+                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#f05a36;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/></svg>
+                Voyage Route: Departure &amp; Destination
+              </div>
+              <div class="setroute-ports-row">
+                <div class="setroute-port-group">
+                  <label class="setroute-label" for="setRouteOriginSelect"><span class="port-dir-badge dep">DEP</span> Departure Port (Origin)</label>
+                  <select id="setRouteOriginSelect" class="setroute-select"></select>
+                  <div class="setroute-port-preview" id="originPortPreview"><span class="preview-flag" id="originFlag"></span><span class="preview-text" id="originText">Select departure port...</span><span class="preview-depth" id="originDepth"></span></div>
+                </div>
+                <button type="button" class="setroute-swap-btn" id="btnSwapPorts" title="Swap Origin &amp; Destination"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12M17 20l4-4M17 20l-4-4"/></svg></button>
+                <div class="setroute-port-group">
+                  <label class="setroute-label" for="setRouteDestSelect"><span class="port-dir-badge dest">ARR</span> Destination Port (Target)</label>
+                  <select id="setRouteDestSelect" class="setroute-select"></select>
+                  <div class="setroute-port-preview" id="destPortPreview"><span class="preview-flag" id="destFlag"></span><span class="preview-text" id="destText">Select destination port...</span><span class="preview-depth" id="destDepth"></span></div>
+                </div>
+              </div>
+              <div class="setroute-depth-alert" id="setRouteDepthAlert" style="display:none;"></div>
+            </div>
+            <div class="setroute-card">
+              <div class="setroute-card-title">
+                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#38bdf8;"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                Vessel Dynamics &amp; Navigation Corridor
+              </div>
+              <div class="setroute-params-grid">
+                <div>
+                  <label class="setroute-label" for="setRouteSpeedInput">Planned Speed (knots)</label>
+                  <input type="number" id="setRouteSpeedInput" class="setroute-input" value="14.5" min="5" max="30" step="0.5" />
+                  <span class="setroute-hint">Cruising speed for ETA &amp; fuel profile</span>
+                </div>
+                <div>
+                  <label class="setroute-label" for="setRouteDraftInput">Vessel Max Draft (meters)</label>
+                  <input type="number" id="setRouteDraftInput" class="setroute-input" value="11.5" min="2" max="25" step="0.1" />
+                  <span class="setroute-hint">Cross-referenced against fairway soundings</span>
+                </div>
+                <div>
+                  <label class="setroute-label" for="setRouteXtdInput">Corridor Safety Margin (XTD NM)</label>
+                  <input type="number" id="setRouteXtdInput" class="setroute-input" value="0.20" min="0.05" max="3.0" step="0.05" />
+                  <span class="setroute-hint">Cross-track limit for COLREGs adherence</span>
+                </div>
+                <div>
+                  <label class="setroute-label" for="setRouteSailSelect">Navigation Geometry</label>
+                  <select id="setRouteSailSelect" class="setroute-select">
+                    <option value="HYBRID" selected>Smart Hybrid (RL straits / GC oceans)</option>
+                    <option value="RL">Rhumb Line / Loxodrome (RL)</option>
+                    <option value="GC">Great Circle / Orthodrome (GC)</option>
+                  </select>
+                  <span class="setroute-hint">Automatic leg calculation standard</span>
+                </div>
+              </div>
+            </div>
+            <div class="setroute-card setroute-intel-card">
+              <div class="setroute-card-title">
+                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#10b981;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                SetChart Overlays Fed into Cohere AI
+              </div>
+              <div class="setroute-intel-badges">
+                <div class="intel-badge active"><span class="intel-dot"></span><div class="intel-text"><b>UKHO Admiralty NtM Bulletins</b><span>Active notices, T&amp;P hazard polygons &amp; firing zones</span></div></div>
+                <div class="intel-badge active"><span class="intel-dot"></span><div class="intel-text"><b>52 World Ports Bathymetry</b><span>Declared fairway soundings, approach corridors &amp; tide windows</span></div></div>
+                <div class="intel-badge active"><span class="intel-dot"></span><div class="intel-text"><b>Open Sea Buoys / Seamarks</b><span>TSS lanes, light buoys, beacons &amp; Rule 10 COLREGs separation</span></div></div>
+                <div class="intel-badge active"><span class="intel-dot"></span><div class="intel-text"><b>Strategic Maritime Chokepoints</b><span>Singapore, Malacca, Suez, Gibraltar, Panama, Dover, Bab-el-Mandeb</span></div></div>
+              </div>
+              <div style="margin-top:16px;">
+                <button type="button" id="btnGenerateSetRoute" class="setroute-generate-btn">
+                  <svg class="setsail-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  <span>Generate Autonomous Route with Cohere AI</span>
+                </button>
+              </div>
+              <div id="setRouteProgressBox" class="setroute-progress-box" style="display:none;">
+                <div class="progress-spinner-row"><div class="setroute-spinner"></div><span id="setRouteProgressMsg" class="progress-msg">Initializing passage planning pipeline...</span></div>
+                <div class="progress-steps-list" id="setRouteStepsList"></div>
+              </div>
+            </div>
+            <div class="setroute-card setroute-results-card" id="setRouteResultsCard" style="display:none;">
+              <div class="setroute-card-title" style="justify-content:space-between;">
+                <span style="display:flex;align-items:center;gap:7px;">
+                  <svg class="setsail-icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#f05a36;"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                  <span id="resultsRouteTitle">Passage Plan Summary</span>
+                </span>
+                <span class="results-engine-badge">COHERE COMMAND-R</span>
+              </div>
+              <div class="setroute-metrics-grid">
+                <div class="metric-box"><span class="metric-label">Total Distance</span><span class="metric-value" id="metricDistance">0 NM</span></div>
+                <div class="metric-box"><span class="metric-label">Steaming Time</span><span class="metric-value" id="metricDays">0 Days</span></div>
+                <div class="metric-box"><span class="metric-label">Waypoints</span><span class="metric-value" id="metricWpts">0 WPTs</span></div>
+                <div class="metric-box"><span class="metric-label">Avg Speed</span><span class="metric-value" id="metricSpeed">14.5 kn</span></div>
+              </div>
+              <div class="setroute-chokepoints-box" id="resultsChokepointsBox" style="display:none;">
+                <span class="chokepoints-label">Strategic Fairways &amp; TSS Crossed:</span>
+                <div class="chokepoints-pills" id="resultsChokepointsPills"></div>
+              </div>
+              <div class="setroute-wpts-table-wrap">
+                <table class="setroute-wpts-table">
+                  <thead><tr><th>#</th><th>Waypoint Name</th><th>Coordinates (DMS)</th><th>Leg</th><th>Speed</th><th>XTD</th><th>Turn Rad</th></tr></thead>
+                  <tbody id="resultsWptsTableBody"></tbody>
+                </table>
+              </div>
+              <div class="setroute-actions-row">
+                <button type="button" id="btnViewOnSetChart" class="setroute-btn-chart"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:15px;height:15px;stroke:#fff;"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg> Plot &amp; Inspect on SetChart ("My Route") &rarr;</button>
+                <button type="button" id="btnExportSetRouteGeoJson" class="setroute-btn-export"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export ECDIS GeoJSON</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- ── Tab 3: System Settings & Engineering Support ── -->
 
