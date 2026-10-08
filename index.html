@@ -8898,6 +8898,50 @@
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js"></script>
   <script src="assets/Auto NtM Plotting/port_depths.js"></script>
+    <script>
+    // Bulletproof Fallback Guards for Multi-Overlay & Export functions
+    if (typeof window.initCategoryPills !== 'function') {
+      window.initCategoryPills = function() {
+        const pills = document.querySelectorAll('.ntm-category-pill');
+        pills.forEach(pill => {
+          pill.addEventListener('click', () => {
+            pills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            window.activeOverlayCategory = pill.dataset.category || 'ALL';
+            if (typeof renderNtMListAndMap === 'function') renderNtMListAndMap();
+          });
+        });
+      };
+    }
+    if (typeof window.initWaypointEditModal !== 'function') {
+      window.initWaypointEditModal = function() {
+        const modal = document.getElementById('ntmWaypointEditModal');
+        if (!modal) return;
+        const closeBtn = document.getElementById('wptEditCloseBtn');
+        const cancelBtn = document.getElementById('wptEditCancelBtn');
+        const saveBtn = document.getElementById('wptEditSaveBtn');
+        if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.remove('open'));
+        if (cancelBtn) cancelBtn.addEventListener('click', () => modal.classList.remove('open'));
+        if (saveBtn && typeof saveWaypointFromModal === 'function') saveBtn.addEventListener('click', saveWaypointFromModal);
+      };
+    }
+    if (typeof window.initNtmOverlayInfoModal !== 'function') {
+      window.initNtmOverlayInfoModal = function() {
+        const modal = document.getElementById('ntmOverlayInfoModal');
+        if (!modal) return;
+        const closeBtn = document.getElementById('ntmOverlayInfoClose');
+        const closeBtn2 = document.getElementById('ntmOverlayInfoCloseBtn');
+        if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.remove('open'));
+        if (closeBtn2) closeBtn2.addEventListener('click', () => modal.classList.remove('open'));
+      };
+    }
+    if (typeof window.openNtmOverlayInfoModal !== 'function') {
+      window.openNtmOverlayInfoModal = function() {
+        const modal = document.getElementById('ntmOverlayInfoModal');
+        if (modal) modal.classList.add('open');
+      };
+    }
+  </script>
   <script src="assets/Auto NtM Plotting/setsail_core.js"></script>
 
 <script>
