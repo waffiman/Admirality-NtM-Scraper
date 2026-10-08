@@ -1,855 +1,1710 @@
 <!DOCTYPE html>
 
+
+
 <html lang="en">
+
+
 
 <head>
 
+
+
   <meta charset="UTF-8" />
+
+
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+
+
   <link rel="manifest" href="manifest.json" />
+
+
 
   <meta name="theme-color" content="#080e20" />
 
+
+
   <title>SetSail — Integrated Bridge Navigation Suite</title>
+
+
 
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
 
+
+
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png" />
+
+
 
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png" />
 
+
+
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+
+
 
   <link rel="stylesheet" href="assets/leaflet/leaflet.css" />
 
+
+
   <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css" />
+
+
 
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
+
+
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_horizontal.png" />
+
+
 
   <style>
 
+
+
     :root {
+
+
 
       --bg0: #060d1a;
 
+
+
       --bg1: #0d172e;
+
+
 
       --card: rgba(16, 29, 56, 0.76);
 
+
+
       --line: rgba(72, 112, 178, 0.22);
+
+
 
       --text: #f1f5f9;
 
+
+
       --muted: #94a3b8;
+
+
 
       --accent: #38bdf8;
 
+
+
       --brand-navy: #152f54;
+
+
 
       --brand-coral: #ea4c25;
 
+
+
       --star: #cbd5e1;
+
+
 
       --manual: rgba(234, 76, 37, 0.12);
 
+
+
       --calc: rgba(56, 189, 248, 0.12);
+
+
 
       --ok: #34d399;
 
+
+
       --warn: #fbbf24;
 
+
+
     }
+
+
 
     * { box-sizing: border-box; }
 
+
+
     body {
+
+
 
       margin: 0; min-height: 100vh; color: var(--text);
 
+
+
       font-family: "Segoe UI", Tahoma, sans-serif;
 
+
+
       background:
+
+
 
         radial-gradient(ellipse 80% 50% at 20% -10%, rgba(80,120,255,0.18), transparent 55%),
 
+
+
         radial-gradient(ellipse 60% 40% at 90% 10%, rgba(160,100,255,0.12), transparent 50%),
+
+
 
         radial-gradient(circle at 50% 120%, rgba(40,80,160,0.25), transparent 45%),
 
+
+
         linear-gradient(180deg, var(--bg0), var(--bg1) 40%, #070b18);
+
+
 
       padding: 1.25rem; position: relative; overflow-x: hidden;
 
+
+
     }
+
+
 
     /* Slow-drifting purple aurora — subtle, doesn't compete with content */
 
+
+
     @keyframes orb-drift {
+
+
 
       0%   { transform: translate(0px,   0px)  scale(1);    opacity: 0.55; }
 
+
+
       25%  { transform: translate(38px, -22px) scale(1.06); opacity: 0.62; }
+
+
 
       50%  { transform: translate(18px,  28px) scale(0.97); opacity: 0.50; }
 
+
+
       75%  { transform: translate(-28px, 14px) scale(1.04); opacity: 0.58; }
+
+
 
       100% { transform: translate(0px,   0px)  scale(1);    opacity: 0.55; }
 
+
+
     }
+
+
 
     @keyframes orb-drift2 {
 
+
+
       0%   { transform: translate(0px,   0px)  scale(1);    opacity: 0.40; }
+
+
 
       30%  { transform: translate(-32px, 18px) scale(1.05); opacity: 0.48; }
 
+
+
       60%  { transform: translate(22px, -24px) scale(0.96); opacity: 0.36; }
+
+
 
       100% { transform: translate(0px,   0px)  scale(1);    opacity: 0.40; }
 
+
+
     }
+
+
 
     body::after {
 
+
+
       content: ""; pointer-events: none; z-index: 0;
+
+
 
       position: fixed; inset: 0;
 
+
+
       /* Purple orb */
+
+
 
       background:
 
+
+
         radial-gradient(ellipse 52% 38% at 72% 28%, rgba(160,90,255,0.11), transparent 70%),
+
+
 
         radial-gradient(ellipse 40% 30% at 30% 60%, rgba(100,80,220,0.09), transparent 65%);
 
+
+
       animation: orb-drift 28s ease-in-out infinite;
+
+
 
       will-change: transform, opacity;
 
+
+
     }
+
+
 
     body::before {
 
+
+
       content: ""; position: fixed; inset: 0; pointer-events: none; opacity: 0.85; z-index: 0;
+
+
 
       /* Star field — static, unchanged */
 
+
+
       background-image:
+
+
 
         radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.7), transparent),
 
+
+
         radial-gradient(1px 1px at 28% 42%, rgba(200,220,255,0.55), transparent),
+
+
 
         radial-gradient(1.5px 1.5px at 44% 12%, rgba(255,255,255,0.8), transparent),
 
+
+
         radial-gradient(1px 1px at 61% 33%, rgba(180,200,255,0.5), transparent),
+
+
 
         radial-gradient(1px 1px at 73% 58%, rgba(255,255,255,0.55), transparent),
 
+
+
         radial-gradient(1.5px 1.5px at 86% 22%, rgba(220,230,255,0.7), transparent),
+
+
 
         radial-gradient(1px 1px at 18% 72%, rgba(255,255,255,0.4), transparent),
 
+
+
         radial-gradient(1px 1px at 52% 78%, rgba(190,210,255,0.45), transparent),
+
+
 
         radial-gradient(1px 1px at 91% 81%, rgba(255,255,255,0.5), transparent),
 
+
+
         radial-gradient(1px 1px at 37% 88%, rgba(170,190,255,0.4), transparent);
 
+
+
     }
+
+
 
     @media (prefers-reduced-motion: reduce) {
 
+
+
       body::after { animation: none; }
 
+
+
     }
+
+
 
     .wrap { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; }
 
+
+
     h1 { margin: 0 0 0.85rem; font-size: 1.2rem; font-weight: 600; letter-spacing: 0.04em; color: var(--star); }    .panel {
+
+
 
       background: var(--card); border: 1px solid var(--line); border-radius: 10px;
 
+
+
       padding: 0.75rem 0.9rem; margin-bottom: 0.65rem; backdrop-filter: blur(10px);
 
+
+
     }
+
+
 
     .panel h2 {
 
+
+
       margin: 0 0 0.5rem; font-size: 0.82rem; font-weight: 600; color: #e2e8f0;
 
+
+
       letter-spacing: 0.05em; text-transform: uppercase;
+
       display: flex; align-items: center; gap: 0.45rem;
 
+
+
     }
 
+
+
     .panel h2::before {
+
       content: ""; display: inline-block; width: 3px; height: 11px;
+
       background: #f05a36; border-radius: 2px; box-shadow: 0 0 6px rgba(240, 90, 54, 0.6);
+
       flex-shrink: 0;
+
     }
+
+
 
     table.devedit td { padding: 0.18rem 0.25rem; }
 
+
+
     table.devedit .head-label { color: var(--muted); font-size: 0.75rem; min-width: 2.8rem; }
+
+
 
     table.devedit .dev-inputs {
 
+
+
       display: grid; grid-template-columns: 3.8rem 2.8rem; gap: 0.2rem; align-items: center; justify-content: center;
 
+
+
     }
+
+
 
     table.devedit input[type="number"] {
 
+
+
       padding: 0.2rem 0.25rem; font-size: 0.8rem; text-align: center; margin: 0;
 
+
+
     }
+
+
 
     table.devedit select {
 
+
+
       padding: 0.2rem 0.1rem; font-size: 0.75rem; margin: 0;
 
+
+
     }
+
+
 
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 0.5rem 0.65rem; }
 
+
+
     label {
+
+
 
       display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.68rem; color: var(--muted);
 
+
+
       font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
 
+
+
     }
+
+
 
     input, select {
 
+
+
       font: inherit; font-size: 0.85rem; font-weight: 500; color: var(--text);
+
+
 
       text-transform: none; letter-spacing: 0; padding: 0.35rem 0.45rem;
 
+
+
       border: 1px solid var(--line); border-radius: 6px; background: rgba(5, 10, 28, 0.65);
+
+
 
       width: 100%; color-scheme: dark;
 
+
+
     }
+
+
 
     input:focus, select:focus { outline: 1px solid rgba(126,182,255,0.55); border-color: rgba(126,182,255,0.45); }
 
+
+
     .row-ew { display: grid; grid-template-columns: 1fr 56px; gap: 0.25rem; }
+
+
 
     .hint { font-size: 0.75rem; color: var(--muted); margin: 0.25rem 0 0; font-weight: 400; text-transform: none; letter-spacing: 0; line-height: 1.3; }
 
+
+
     .note { font-size: 0.75rem; color: var(--warn); margin-top: 0.5rem; line-height: 1.35; }
+
+
 
     .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: rgba(5, 10, 28, 0.45); }
 
+
+
     table.log { border-collapse: collapse; width: max-content; min-width: 100%; font-size: 0.76rem; }
+
+
 
     table.log th, table.log td {
 
+
+
       border: 1px solid var(--line); padding: 0.38rem 0.45rem; text-align: center; vertical-align: middle; white-space: nowrap;
 
+
+
     }
+
+
 
     table.log th {
 
+
+
       background: rgba(40, 70, 140, 0.55); color: var(--star); font-weight: 600;
+
+
 
       font-size: 0.65rem; line-height: 1.2; max-width: 95px; white-space: normal;
 
+
+
     }
+
+
 
     table.log td.manual { background: var(--manual); }
 
+
+
     table.log td.calc { background: var(--calc); font-weight: 600; color: #d7ecff; }
+
+
 
     table.log td.empty { color: #5e6d8a; font-weight: 400; }
 
+
+
     .legend { display: flex; gap: 0.8rem; flex-wrap: wrap; font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; }
+
+
 
     .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; border: 1px solid var(--line); vertical-align: -1px; margin-right: 0.2rem; }
 
+
+
     .swatch.m { background: var(--manual); }
+
+
 
     .swatch.c { background: var(--calc); }
 
+
+
     button {
+
+
 
       margin-top: 0.65rem; background: linear-gradient(180deg, #3a6fd0, #2a4fa8); color: #fff;
 
+
+
       border: 1px solid rgba(160,190,255,0.35); border-radius: 6px; padding: 0.42rem 0.9rem;
+
+
 
       font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; letter-spacing: 0.02em;
 
+
+
     }
+
+
 
     button:hover { filter: brightness(1.1); }
 
+
+
     button.secondary {
+
+
 
       background: linear-gradient(180deg, #2a3a5c, #1a2740);
 
+
+
       margin-left: 0.4rem;
 
+
+
     }
+
+
 
     #btnCalc {
+
       background: linear-gradient(135deg, #f05a36, #cf3818);
+
       border-color: rgba(255, 120, 90, 0.45);
+
       box-shadow: 0 2px 12px rgba(240, 90, 54, 0.32);
+
       padding: 0.45rem 1.25rem;
+
       font-weight: 700;
+
       letter-spacing: 0.03em;
+
       transition: all 0.2s ease;
+
     }
 
+
+
     #btnCalc:hover {
+
       background: linear-gradient(135deg, #ff6b46, #dc4220);
+
       box-shadow: 0 4px 16px rgba(240, 90, 54, 0.48);
+
       filter: none;
+
     }
+
+
 
     .copy-msg { display: inline-block; margin-left: 0.6rem; font-size: 0.78rem; color: var(--ok); }
 
 
 
+
+
+
+
     .dev-head {
+
+
 
       display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap;
 
+
+
       margin-bottom: 0.5rem;
 
+
+
     }
+
+
 
     .dev-head h2 { margin: 0; }
 
+
+
     .dev-actions {
+
+
 
       display: flex;
 
+
+
       align-items: center;
+
+
 
       gap: 0.4rem;
 
+
+
       flex-wrap: wrap;
 
+
+
     }
+
+
 
     .dev-actions button {
 
+
+
       margin-top: 0;
+
+
 
       padding: 0.32rem 0.65rem;
 
+
+
       font-size: 0.76rem;
 
+
+
     }
+
+
 
     .dev-layout {
 
+
+
       display: grid;
+
+
 
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 
+
+
       grid-template-rows: 480px;
+
+
 
       gap: 0.75rem;
 
+
+
       height: 480px;
+
+
 
       max-height: 480px;
 
+
+
       overflow: hidden;
+
+
 
       box-sizing: border-box;
 
+
+
     }
+
+
 
     .dev-table-wrap {
 
+
+
       overflow-y: scroll;
+
+
 
       overflow-x: hidden;
 
+
+
       height: 480px;
+
+
 
       max-height: 480px;
 
+
+
       min-height: 0;
+
+
 
       min-width: 0;
 
+
+
       border: 1px solid var(--line);
+
+
 
       border-radius: 8px;
 
+
+
       background: rgba(5, 10, 28, 0.45);
+
+
 
       box-sizing: border-box;
 
+
+
     }
+
+
 
     .dev-table-wrap table.devedit { width: 100%; min-width: 0; font-size: 0.72rem; }
 
+
+
     .dev-table-wrap table.devedit th { max-width: none; font-size: 0.62rem; padding: 0.25rem 0.2rem; }
+
+
 
     .dev-chart-wrap {
 
+
+
       border: 1px solid var(--line);
+
+
 
       border-radius: 8px;
 
+
+
       background: rgba(5, 10, 28, 0.45);
+
+
 
       padding: 0;
 
+
+
       height: 480px;
+
+
 
       max-height: 480px;
 
+
+
       min-height: 0;
 
+
+
       min-width: 0;
+
+
 
       position: relative;
 
+
+
       overflow: hidden;
+
+
 
       box-sizing: border-box;
 
+
+
     }
+
+
 
     #devChart {
 
+
+
       position: absolute;
+
+
 
       top: 0;
 
+
+
       left: 0;
+
+
 
       width: 100% !important;
 
+
+
       height: 100% !important;
+
+
 
       display: block;
 
+
+
       min-width: 0;
+
+
 
       min-height: 0;
 
+
+
     }
+
+
+
+
 
 
 
     @media (max-width: 900px) {
 
+
+
       .dev-layout {
+
+
 
         grid-template-columns: 1fr;
 
+
+
         grid-template-rows: 360px 420px;
+
+
 
         height: auto;
 
+
+
         max-height: none;
+
+
 
       }
 
+
+
       .dev-table-wrap { height: 360px; max-height: 360px; }
+
+
 
       .dev-chart-wrap { height: 420px; max-height: 420px; }
 
+
+
     }
+
+
+
+
 
 
 
     /* ── Star Almanac sidebar ── */
 
+
+
     .inputs-row {
 
+
+
       display: flex;
+
+
 
       gap: 0.65rem;
 
+
+
       align-items: stretch;
+
+
 
       margin-bottom: 0.65rem;
 
+
+
     }
+
+
 
     .inputs-row > .panel {
 
+
+
       margin-bottom: 0;
+
+
 
       flex: 1 1 auto;
 
+
+
       min-width: 0;
 
+
+
     }
+
+
 
     .almanac-side {
 
+
+
       flex: 0 0 262px;
+
+
 
       width: 262px;
 
+
+
       background: var(--card);
+
+
 
       border: 1px solid var(--line);
 
+
+
       border-radius: 10px;
+
+
 
       padding: 0.75rem 0.7rem 0.6rem;
 
+
+
       backdrop-filter: blur(10px);
+
+
 
       display: flex;
 
+
+
       flex-direction: column;
+
+
 
       min-width: 0;
 
+
+
       min-height: 0;
+
+
 
       box-sizing: border-box;
 
+
+
       overflow: hidden;
 
+
+
     }
+
+
 
     .almanac-side h2 {
 
+
+
       margin: 0 0 0.3rem;
+
+
 
       font-size: 0.82rem;
 
+
+
       font-weight: 600;
+
+
 
       color: var(--accent);
 
+
+
       letter-spacing: 0.05em;
+
+
 
       text-transform: uppercase;
 
+
+
       flex-shrink: 0;
 
+
+
     }
+
+
 
     .almanac-epoch {
 
+
+
       font-size: 0.61rem;
+
+
 
       color: var(--muted);
 
+
+
       margin-bottom: 0.38rem;
+
+
 
       letter-spacing: 0.01em;
 
+
+
       font-weight: 400;
+
+
 
       flex-shrink: 0;
 
+
+
     }
+
+
 
     .almanac-scroll {
 
+
+
       overflow-y: auto;
+
+
 
       flex: 1 1 0;
 
+
+
       min-height: 0;
 
+
+
     }
+
+
 
     table.alm {
 
+
+
       width: 100%;
+
+
 
       border-collapse: collapse;
 
+
+
       font-size: 0.67rem;
 
+
+
     }
+
+
 
     table.alm thead th {
 
+
+
       position: sticky;
+
+
 
       top: 0;
 
+
+
       background: rgba(18, 32, 72, 0.96);
 
+
+
       color: var(--star);
+
+
 
       font-size: 0.61rem;
 
+
+
       font-weight: 600;
+
+
 
       letter-spacing: 0.04em;
 
+
+
       padding: 0.22rem 0.26rem;
+
+
 
       border-bottom: 1px solid var(--line);
 
+
+
       text-align: left;
+
+
 
       white-space: nowrap;
 
+
+
     }
+
+
 
     table.alm thead th:not(:first-child) { text-align: right; }
 
+
+
     table.alm tbody tr:hover td { background: rgba(126,182,255,0.07); }
+
+
 
     table.alm td {
 
+
+
       padding: 0.17rem 0.26rem;
+
+
 
       border-bottom: 1px solid rgba(140,170,255,0.08);
 
+
+
       white-space: nowrap;
+
+
 
       vertical-align: middle;
 
+
+
     }
+
+
 
     table.alm td.alm-n {
 
+
+
       color: var(--star);
+
+
 
       font-weight: 600;
 
+
+
       font-size: 0.65rem;
 
+
+
     }
+
+
 
     table.alm td.alm-v {
 
+
+
       text-align: right;
 
+
+
       font-variant-numeric: tabular-nums;
+
+
 
       color: #b0d4ff;
 
+
+
       font-size: 0.65rem;
 
+
+
     }
+
+
 
     table.alm td.alm-az {
 
+
+
       text-align: right;
+
+
 
       font-variant-numeric: tabular-nums;
 
+
+
       color: #a8d8a8;
+
+
 
       font-size: 0.65rem;
 
+
+
     }
+
+
 
     /* Sun row */
 
+
+
     table.alm tr.alm-sun td { background: rgba(255, 200, 80, 0.07); }
+
+
 
     table.alm tr.alm-sun td.alm-n { color: #ffd580; }
 
+
+
     table.alm tr.alm-sun:hover td { background: rgba(255, 200, 80, 0.14); }
+
+
 
     /* Moon row */
 
+
+
     table.alm tr.alm-moon td { background: rgba(180, 210, 255, 0.06); }
+
+
 
     table.alm tr.alm-moon td.alm-n { color: #c8e0ff; }
 
+
+
     table.alm tr.alm-moon:hover td { background: rgba(180, 210, 255, 0.12); }
+
+
 
     /* Selected / highlighted body */
 
+
+
     table.alm tr.alm-selected td {
+
+
 
       background: rgba(126, 182, 255, 0.18) !important;
 
+
+
       box-shadow: inset 3px 0 0 #7eb6ff;
 
+
+
     }
+
+
 
     table.alm tr.alm-selected td.alm-n { color: #fff; font-weight: 700; }
 
+
+
     table.alm tr.alm-selected td.alm-v { color: #e0f0ff; font-weight: 600; }
+
+
 
     table.alm tr.alm-selected td.alm-az { color: #b8f0b8; font-weight: 600; }
 
+
+
     /* Divider between planets and stars */
+
+
 
     table.alm tr.alm-divider td {
 
+
+
       padding: 0.08rem 0;
+
+
 
       border-bottom: 1px solid rgba(140,170,255,0.22);
 
+
+
       background: none !important;
+
+
 
       pointer-events: none;
 
+
+
     }
+
+
 
     @media (max-width: 900px) {
 
+
+
       .inputs-row { flex-direction: column; }
+
+
 
       .almanac-side { width: 100%; flex: none; overflow: visible; }
 
+
+
       .almanac-scroll { max-height: 260px; }
 
+
+
     }
+
+
+
+
 
 
 
     /* ── WAFFi footer ── */
 
+
+
     .site-footer {
+
+
 
       position: relative; z-index: 1;
 
+
+
       padding: 2rem 1.5rem 1.5rem;
+
+
 
       display: flex; justify-content: center; align-items: center;
 
+
+
     }
+
+
 
     .site-footer-inner {
 
+
+
       display: flex; flex-direction: column; align-items: center; gap: 8px;
 
+
+
     }
+
+
 
     .waffi-credit {
 
+
+
       display: inline-flex; align-items: center; gap: 8px;
+
+
 
       padding: 4px 2px 10px; text-decoration: none; color: inherit;
 
+
+
       opacity: 0.35; overflow: visible;
+
+
 
       transition: opacity 0.2s ease;
 
+
+
     }
+
+
 
     .waffi-credit:hover, .waffi-credit:focus-visible { outline: none; opacity: 0.70; }
 
+
+
     .waffi-credit-eyebrow {
+
+
 
       font-size: 0.66rem; font-weight: 500; letter-spacing: 0.06em;
 
+
+
       text-transform: uppercase; color: var(--muted);
 
+
+
     }
+
+
 
     .waffi-credit-sep { font-size: 0.75rem; line-height: 1; color: var(--line); user-select: none; }
 
+
+
     .waffi-credit-logo { display: block; height: 17px; width: auto; opacity: 0.90; filter: brightness(1.35); flex-shrink: 0; }
+
+
 
     .waffi-logo-wrap { position: relative; display: inline-block; line-height: 0; overflow: visible; }
 
+
+
     .waffi-drip-layer {
+
+
 
       position: absolute; left: 0; top: 0; width: 100%; height: 100%;
 
+
+
       overflow: visible; pointer-events: none;
 
+
+
     }
+
+
 
     .waffi-drip-layer .syrup-pool { opacity: 0; transition: opacity 0.18s; }
 
+
+
     .waffi-drip-layer .syrup-drip { transform-box: fill-box; transform-origin: 50% 0%; opacity: 0; }
+
+
 
     .waffi-drip-layer .syrup-drop { opacity: 0; }
 
+
+
     .waffi-credit:hover .waffi-drip-layer .syrup-pool,
+
+
 
     .waffi-credit:focus-visible .waffi-drip-layer .syrup-pool { opacity: 1; }
 
+
+
     .waffi-credit:hover .waffi-drip-layer .syrup-drip-a,
+
+
 
     .waffi-credit:focus-visible .waffi-drip-layer .syrup-drip-a { opacity: 1; animation: waffi-drip-a 1.35s ease-in-out infinite; }
 
+
+
     .waffi-credit:hover .waffi-drip-layer .syrup-drip-b,
+
+
 
     .waffi-credit:focus-visible .waffi-drip-layer .syrup-drip-b { opacity: 1; animation: waffi-drip-b 1.35s ease-in-out 0.12s infinite; }
 
+
+
     .waffi-credit:hover .waffi-drip-layer .syrup-drop,
+
+
 
     .waffi-credit:focus-visible .waffi-drip-layer .syrup-drop { animation: waffi-drop 1.35s ease-in infinite 0.2s; }
 
+
+
     @keyframes waffi-drip-a { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(1.42)} }
+
+
 
     @keyframes waffi-drip-b { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(1.55)} }
 
+
+
     @keyframes waffi-drop {
+
+
 
       0%  { opacity:0; transform:translateY(0) scale(0.7); }
 
+
+
       18% { opacity:1; transform:translateY(1px) scale(1); }
+
+
 
       72% { opacity:0.75; transform:translateY(10px) scale(0.82); }
 
+
+
       100%{ opacity:0; transform:translateY(16px) scale(0.4); }
 
+
+
     }
+
+
 
     .waffi-credit-url {
 
+
+
       position: relative; font-size: 0.70rem; font-weight: 500;
+
+
 
       color: var(--muted); letter-spacing: 0.01em;
 
+
+
     }
+
+
 
     .waffi-credit-url::after {
 
+
+
       content: ''; position: absolute; left: 0; right: 0; bottom: -1px;
+
+
 
       height: 1px; background: #f9c416; opacity: 0.55;
 
+
+
       transform: scaleX(0); transform-origin: left center;
+
+
 
       transition: transform 0.22s ease;
 
+
+
     }
+
+
 
     .waffi-credit:hover .waffi-credit-url::after,
 
+
+
     .waffi-credit:focus-visible .waffi-credit-url::after { transform: scaleX(1); }
+
+
 
     .waffi-credit-arrow {
 
+
+
       flex-shrink: 0; opacity: 0; color: var(--muted);
+
+
 
       transform: translateX(-2px);
 
+
+
       transition: opacity 0.2s ease, transform 0.22s ease;
 
+
+
     }
+
+
 
     .waffi-credit:hover .waffi-credit-arrow,
 
+
+
     .waffi-credit:focus-visible .waffi-credit-arrow { opacity: 0.6; transform: translateX(0); }
+
+
 
     @media (prefers-reduced-motion: reduce) {
 
+
+
       .waffi-credit:hover .waffi-drip-layer .syrup-drip-a,
+
+
 
       .waffi-credit:hover .waffi-drip-layer .syrup-drip-b,
 
+
+
       .waffi-credit:hover .waffi-drip-layer .syrup-drop { animation: none; opacity: 0; }
 
+
+
     }
+
+
+
+
 
 
 
@@ -857,235 +1712,473 @@
 
 
 
+
+
+
+
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_horizontal.webp" type="image/webp" fetchpriority="high" />
+
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.webp" type="image/webp" fetchpriority="high" />
+
 </head>
+
+
 
 <body>
 
+
+
   <div class="app-container">
 
-    <!-- ── Left Navigation Sidebar ── -->
+
 
     <!-- ── Left Navigation Sidebar ── -->
+
+
+
+    <!-- ── Left Navigation Sidebar ── -->
+
+
 
     <nav class="nav-sidebar no-print" aria-label="Main Navigation">
 
+
+
       <button type="button" class="nav-item nav-logo-btn active" data-tab="tab-home" aria-label="SetSail Home &bull; Overview" title="SetSail Home &bull; Overview">
+
+
 
         <picture><source srcset="assets/SetSail LOGOS/setsail_logo_square.webp" type="image/webp" /><img src="assets/SetSail LOGOS/setsail_logo_square.png" alt="SetSail Logo" class="nav-logo-img" width="34" height="34" decoding="sync" fetchpriority="high" /></picture>
 
+
+
         <span class="tooltip">Home · Overview</span>
 
+
+
       </button>
+
+
+
+
 
 
 
       <button type="button" class="nav-item" data-tab="tab-ntm" aria-label="SetChart — Live Marine Chart &amp; NtM Plotter" title="SetChart — Live Marine Chart &amp; NtM Plotter">
+
         <svg class="setsail-icon" viewBox="0 0 24 24"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2 8.5h20M7 3.5v2M17 3.5v2" stroke="currentColor" stroke-width="1.2" opacity="0.6"/><path d="M4 17c3-2 6-1 9-3s4-3.5 7-3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 1.5" opacity="0.75"/><path d="M4 13.5c2.5-1 5.5 0.5 8-1s5-2 8-1.5" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8" stroke-linecap="round"/><circle cx="18.5" cy="7.5" r="2.2" fill="#f05a36"/><circle cx="10.5" cy="12" r="1.4" fill="#ffffff"/></svg>
+
         <span class="badge" id="ntmBadge">0</span>
+
+
 
         <span class="tooltip">SetChart · Marine Chart</span>
 
+
+
       </button>
+
+
+
+
 
 
 
       <button type="button" class="nav-item" data-tab="tab-gyro" aria-label="SetStar — Celestial Almanac &amp; Compass Calculator">
+
         <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="6.8" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.4" stroke-dasharray="1.5 1.5"/><line x1="12" y1="1" x2="12" y2="4" stroke="#f05a36" stroke-width="2"/><line x1="12" y1="20" x2="12" y2="23" stroke="currentColor" stroke-width="1.5"/><line x1="1" y1="12" x2="4" y2="12" stroke="currentColor" stroke-width="1.5"/><line x1="20" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="1.5"/><polygon points="12 4 13.6 10.4 20 12 13.6 13.6 12 20 10.4 13.6 4 12 10.4 10.4" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-width="1.2"/><polygon points="12 4 13.6 10.4 12 12" fill="#f05a36"/><polygon points="12 20 10.4 13.6 12 12" fill="currentColor" opacity="0.6"/><circle cx="12" cy="12" r="1.8" fill="#ffffff" stroke="#f05a36" stroke-width="1"/></svg>
+
         <span class="tooltip">SetStar · Astro &amp; Compass</span>
 
+
+
       </button>
+
+
+
+
 
 
 
       <button type="button" class="nav-item nav-settings-item" data-tab="tab-settings" aria-label="Settings &amp; Support" style="margin-top:auto;" title="Settings &amp; Support">
+
         <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="#f05a36" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="1.2" fill="#f05a36"/></svg>
+
         <span class="tooltip">Settings &amp; Support</span>
 
+
+
       </button>
+
+
 
     </nav>
 
 
 
+
+
+
+
     <!-- ── Main Viewport Content ── -->
+
+
 
     <main class="app-content">
 
+
+
       <!-- ── Tab 0: Cinematic Home / Overview ── -->
+
+
 
       <div id="tab-home" class="tab-pane active">
 
+
+
         <div class="home-hero-viewport">
+
+
 
           <!-- Background Video (Pure Design Element, No Player Controls, Full Coverage) -->
 
+
+
           <video class="home-hero-video" id="homeHeroVideo" autoplay muted loop playsinline preload="auto" poster="assets/home_bg_poster.jpg" src="assets/home_bg.mp4"><source src="assets/home_bg.mp4" type="video/mp4" /><source src="assets/Video horizontal for Home page background.mp4" type="video/mp4" /></video>
 
+
+
           
+
+
 
           <!-- Cinematic Atmosphere Overlays -->
 
+
+
           <div class="home-vignette-overlay"></div>
+
+
 
           <div class="home-gradient-overlay"></div>
 
+
+
           
+
+
+
+
 
 
 
           <!-- Content Foreground: 100% Locked Viewport, Zero Scroll -->
 
+
+
           <div class="home-hero-content">
+
+
 
             <!-- Top Bridge HUD Bar -->
 
+
+
             <div class="home-hud-top">
 
+
+
               <div class="home-hud-pill home-hud-left">
+
                 <span class="home-hud-dot live-pulse"></span>
+
+
 
                 <span class="home-hud-text">SETSAIL</span>
 
+
+
               </div>
 
+
+
               <div class="home-hud-pill home-hud-center">
+
                 <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v3M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12 8.5 12 13 15.5 14.5" fill="none" stroke="#f05a36" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="13" r="1.4" fill="#ffffff"/></svg></span>
+
+
 
                 <span class="home-hud-text" id="homeUtcClock">00:00:00 UTC</span>
 
+
+
               </div>
+
+
 
               <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" title="Live Vessel Navigation Position (Click to inspect on ECDIS)">
 
+
+
                 <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9" r="2.8" fill="#f05a36"/><circle cx="12" cy="9" r="1" fill="#ffffff"/></svg></span>
+
+
 
                 <span class="home-hud-text" id="homeVesselHudCoords">POS: WAITING GPS...</span>
 
+
+
               </div>
 
+
+
             </div>
+
+
+
+
 
 
 
             <!-- Central Minimalist Brand & Tool Launchpad -->
 
+
+
             <div class="home-center-stage">
+
+
 
               <div class="home-brand-block">
 
+
+
                 <picture class="home-hero-logo-wrap"><source srcset="assets/SetSail LOGOS/setsail_logo_horizontal.webp" type="image/webp" /><img src="assets/SetSail LOGOS/setsail_logo_horizontal.png" alt="SetSail" class="home-hero-logo" width="862" height="321" decoding="sync" fetchpriority="high" /></picture>
+
+
 
                 <div class="home-brand-sub">INTEGRATED BRIDGE NAVIGATION SUITE</div>
 
+
+
               </div>
+
+
+
+
 
 
 
               <!-- Sleek Extensible Tool Launcher Grid -->
 
+
+
               <div class="home-tool-grid" aria-label="SetSail Bridge Applications">
+
+
 
                 <!-- Tool 1: Auto-NtM ECDIS Plotter -->
 
+
+
                 <button type="button" class="home-tool-tile" data-switch-tab="tab-ntm" title="Launch Auto-NtM Plotter">
+
+
 
                   <div class="home-tool-icon-box">
 
+
+
                     <span class="home-tool-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2 8.5h20M7 3.5v2M17 3.5v2" stroke="currentColor" stroke-width="1.2" opacity="0.6"/><path d="M4 17c3-2 6-1 9-3s4-3.5 7-3" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 1.5" opacity="0.75"/><path d="M4 13.5c2.5-1 5.5 0.5 8-1s5-2 8-1.5" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8" stroke-linecap="round"/><circle cx="18.5" cy="7.5" r="2.2" fill="#f05a36"/><circle cx="10.5" cy="12" r="1.4" fill="#ffffff"/></svg></span>
+
+
 
                   </div>
 
+
+
                   <span class="home-tool-title">SetChart</span>
+
                   <span class="home-tool-desc">Marine Chart &amp; NtM Notices</span>
+
+
 
                   <span class="home-tool-badge" id="homeNoticeCount">86 Active</span>
 
+
+
                 </button>
+
+
+
+
 
 
 
                 <!-- Tool 2: Celestial & Gyro Compass Logbook -->
 
+
+
                 <button type="button" class="home-tool-tile" data-switch-tab="tab-gyro" title="Launch Compass Logbook">
+
+
 
                   <div class="home-tool-icon-box">
 
+
+
                     <span class="home-tool-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="6.8" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.4" stroke-dasharray="1.5 1.5"/><line x1="12" y1="1" x2="12" y2="4" stroke="#f05a36" stroke-width="2"/><line x1="12" y1="20" x2="12" y2="23" stroke="currentColor" stroke-width="1.5"/><line x1="1" y1="12" x2="4" y2="12" stroke="currentColor" stroke-width="1.5"/><line x1="20" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="1.5"/><polygon points="12 4 13.6 10.4 20 12 13.6 13.6 12 20 10.4 13.6 4 12 10.4 10.4" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-width="1.2"/><polygon points="12 4 13.6 10.4 12 12" fill="#f05a36"/><polygon points="12 20 10.4 13.6 12 12" fill="currentColor" opacity="0.6"/><circle cx="12" cy="12" r="1.8" fill="#ffffff" stroke="#f05a36" stroke-width="1"/></svg></span>
+
+
 
                   </div>
 
+
+
                   <span class="home-tool-title">SetStar</span>
+
                   <span class="home-tool-desc">Celestial &amp; Deviation</span>
+
+
 
                   <span class="home-tool-badge">Almanac</span>
 
+
+
                 </button>
+
+
+
+
 
 
 
                 <!-- Tool 3: Bridge Deck Settings -->
 
+
+
                 <button type="button" class="home-tool-tile" data-switch-tab="tab-settings" title="Open Bridge Settings">
+
+
 
                   <div class="home-tool-icon-box">
 
+
+
                     <span class="home-tool-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="#f05a36" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="1.2" fill="#f05a36"/></svg></span>
+
+
 
                   </div>
 
+
+
                   <span class="home-tool-title">Bridge Settings</span>
+
+
 
                   <span class="home-tool-desc">Cockpit &amp; Cache</span>
 
+
+
                   <span class="home-tool-badge">System</span>
+
+
 
                 </button>
 
+
+
               </div>
+
+
 
             </div>
 
 
 
+
+
+
+
             <!-- Floating Overlay Footer (Inside Video Viewport, Overlaid On Video Background) -->
 
+
+
             <footer class="site-footer no-print" role="contentinfo">
+
     <div class="site-footer-inner">
+
       <a href="https://waffiweb.com" target="_blank" rel="noopener noreferrer" class="waffi-credit" aria-label="Built by WAFFi — visit waffiweb.com">
+
         <span class="waffi-credit-eyebrow">Built by</span>
+
         <span class="waffi-credit-sep" aria-hidden="true">·</span>
+
         <span class="waffi-logo-wrap">
+
           <img class="waffi-credit-logo" src="assets/waffi-logo.png" alt="WAFFI" width="72" height="22" />
+
           <svg class="waffi-drip-layer" viewBox="0 0 281 123" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+
             <path class="syrup-pool" fill="#f9c416" opacity="0" d="M21.2 83.4C25.5 81.6 34.8 81.2 43.2 82.4C52.2 83.6 59.8 85.2 63.6 87.4C65.6 88.7 64.8 91.2 59.2 92C53.8 92.7 48.6 92.4 45.4 92.1C40.8 91.7 36.2 91.2 31.6 90.9C26.8 90.6 22.6 89.8 20.8 87.8C19.4 86.2 19.6 84.6 21.2 83.4Z"/>
+
             <path class="syrup-drip syrup-drip-a" fill="#f9c416" opacity="0" d="M32.2 90.9C33.8 90.5 36.2 90.8 36.9 92.6C37.3 93.8 36.9 100.2 36.7 106.5C36.5 112.2 36.6 115.2 34.4 116.8C32.4 118.2 31.5 115.8 31.7 111.2C31.9 105.2 31.8 98.4 31.8 94.2C31.8 92.4 31.4 91.2 32.2 90.9Z"/>
+
             <path class="syrup-drip syrup-drip-b" fill="#f0b400" opacity="0" d="M42.2 91.3C43.8 90.9 46.2 91.2 46.9 92.8C47.3 93.7 46.8 97.6 46.5 100.2C46.2 102.8 45.2 104.1 43.7 103.7C42.3 103.3 41.7 101.2 41.6 98.2C41.5 95.4 41.4 92.6 42.2 91.3Z"/>
+
             <ellipse class="syrup-drop" cx="34.2" cy="117.2" rx="2.3" ry="2.9" fill="#f9c416" opacity="0"/>
+
           </svg>
+
         </span>
+
         <span class="waffi-credit-sep" aria-hidden="true">·</span>
+
         <span class="waffi-credit-url">waffiweb.com</span>
+
         <svg class="waffi-credit-arrow" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+
           <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 8h10M9 4l4 4-4 4"/>
+
         </svg>
+
       </a>
+
     </div>
+
   </footer>
+
           </div>
+
         </div>
+
       </div><!-- end #tab-home -->
+
+
+
+
 
 
 
       <!-- ── Tab 1: Gyro / Magnetic Compass Logbook ── -->
 
+
+
       <div id="tab-gyro" class="tab-pane">
+
+
 
         <div class="wrap">
 
+
+
     <h1 class="no-print">SetStar · Celestial Almanac &amp; Gyro Compass</h1>
+
+
+
+
+
+
 
 
 
@@ -1095,191 +2188,383 @@
 
 
 
+
+
+
+
     <section class="panel no-print">
+
+
 
       <h2>Inputs</h2>
 
+
+
       <div class="grid">
+
+
 
         <label>Date (LT)<input type="date" id="ltDate" /></label>
 
+
+
         <label>Date UTC<input type="date" id="utcDate" /></label>
+
+
 
         <label>Time UTC<input type="time" id="utcTime" step="1" /></label>
 
+
+
         <label>Latitude
 
+
+
           <span class="row-ew">
+
+
 
             <input type="text" id="lat" placeholder="51 31.8" />
 
+
+
             <select id="latNS"><option>N</option><option>S</option></select>
+
+
 
           </span>
 
+
+
         </label>
+
+
 
         <label>Longitude
 
+
+
           <span class="row-ew">
+
+
 
             <input type="text" id="lon" placeholder="136 3.5" />
 
+
+
             <select id="lonEW"><option>E</option><option>W</option></select>
+
+
 
           </span>
 
+
+
         </label>
+
+
 
         <label>Celestial body
 
+
+
           <input type="text" id="body" list="bodies" />
+
+
 
           <datalist id="bodies">
 
+
+
             <option>Sun</option>
+
+
 
             <option>Moon</option>
 
+
+
             <option>Acamar</option><option>Achernar</option><option>Acrux</option><option>Adhara</option>
+
+
 
             <option>Aldebaran</option><option>Alioth</option><option>Alkaid</option><option>Al Na'ir</option>
 
+
+
             <option>Alnilam</option><option>Alphard</option><option>Alphecca</option><option>Alpheratz</option>
+
+
 
             <option>Altair</option><option>Ankaa</option><option>Antares</option><option>Arcturus</option>
 
+
+
             <option>Atria</option><option>Avior</option><option>Bellatrix</option><option>Betelgeuse</option>
+
+
 
             <option>Canopus</option><option>Capella</option><option>Deneb</option><option>Denebola</option>
 
+
+
             <option>Diphda</option><option>Dubhe</option><option>Elnath</option><option>Eltanin</option>
+
+
 
             <option>Enif</option><option>Formalhaut</option><option>Gacrux</option><option>Gienah</option>
 
+
+
             <option>Hadar</option><option>Hamal</option><option>Kaus Austr.</option><option>Kochab</option>
+
+
 
             <option>Markab</option><option>Menkar</option><option>Menkent</option><option>Miaplacidus</option>
 
+
+
             <option>Mirfak</option><option>Nunki</option><option>Peacock</option><option>Pollux</option>
+
+
 
             <option>Procyon</option><option>Rasalhague</option><option>Regulus</option><option>Rigel</option>
 
+
+
             <option>Rigil Kent</option><option>Sabik</option><option>Schedar</option><option>Shaula</option>
+
+
 
             <option>Sirius</option><option>Spica</option><option>Suhail</option><option>Vega</option>
 
+
+
             <option>Zuben'ubi</option>
+
+
 
           </datalist>
 
+
+
         </label>
+
+
 
         <label>Gyro heading
 
+
+
           <input type="number" id="gyroHead" step="0.5" min="0" max="359.9" />
 
+
+
         </label>
+
+
 
         <label>Variation
 
+
+
           <span class="row-ew">
+
+
 
             <input type="number" id="varMag" step="0.1" min="0" />
 
+
+
             <select id="varEW"><option>E</option><option>W</option></select>
+
+
 
           </span>
 
+
+
         </label>
 
+
+
       </div>
+
+
+
+
 
 
 
       <h2 style="margin-top:1.1rem">Overrides</h2>
 
+
+
       <div class="grid">
+
+
 
         <label>LHA<input type="text" id="lha" /></label>
 
+
+
         <label>Declination
 
+
+
           <span class="row-ew">
+
+
 
             <input type="text" id="dec" />
 
+
+
             <select id="decNS"><option>N</option><option>S</option></select>
+
+
 
           </span>
 
+
+
         </label>
+
+
 
         <label>True Azimuth
 
+
+
           <input type="number" id="trueAzOverride" step="0.1" min="0" max="359.9" />
 
+
+
         </label>
+
+
 
         <label>Deviation
 
+
+
           <span class="row-ew">
+
+
 
             <input type="number" id="devOverride" step="0.1" />
 
+
+
             <select id="devEW"><option>E</option><option>W</option></select>
+
+
 
           </span>
 
+
+
         </label>
+
+
 
       </div>
 
+
+
       <button type="button" id="btnCalc">Calculate</button>
 
+
+
       <span class="copy-msg" id="status"></span>
+
+
 
     </section>
 
 
 
+
+
+
+
     <!-- ── Star Almanac Sidebar ── -->
+
+
 
     <aside class="almanac-side no-print">
 
+
+
       <h2>Star Almanac</h2>
+
+
 
       <div class="almanac-epoch" id="almEpoch">Enter UTC date &amp; time</div>
 
+
+
       <div class="almanac-scroll">
+
+
 
         <table class="alm">
 
+
+
           <thead>
+
+
 
             <tr>
 
+
+
               <th>Body</th>
+
+
 
               <th>Alt</th>
 
+
+
               <th>Az</th>
+
+
 
             </tr>
 
+
+
           </thead>
+
+
 
           <tbody id="almBody">
 
+
+
             <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:0.6rem 0">—</td></tr>
+
+
 
           </tbody>
 
+
+
         </table>
+
+
 
       </div>
 
+
+
     </aside>
+
+
+
+
 
 
 
@@ -1287,744 +2572,1499 @@
 
 
 
+
+
+
+
     <section class="panel no-print">
+
+
 
       <h2>Logbook</h2>
 
+
+
       <div class="scroll">
+
+
 
         <table class="log">
 
+
+
           <thead>
+
+
 
             <tr>
 
+
+
               <th>1. Date<br/>(LT)</th>
+
+
 
               <th>2. Date / Time<br/>(UTC)</th>
 
+
+
               <th>3. Latitude<br/>(N/S)</th>
+
+
 
               <th>4. Longitude<br/>(E/W)</th>
 
+
+
               <th>5. Celestial<br/>body</th>
+
+
 
               <th>6. Gyro<br/>heading</th>
 
+
+
               <th>7. Magnetic<br/>heading</th>
+
+
 
               <th>8. LHA</th>
 
+
+
               <th>9. Declination</th>
+
+
 
               <th>10. True<br/>Azimuth</th>
 
+
+
               <th>11. Gyro<br/>bearing</th>
+
+
 
               <th>12. Magnetic<br/>bearing</th>
 
+
+
               <th>13. Gyro<br/>error</th>
+
+
 
               <th>14. Magnetic<br/>error</th>
 
+
+
               <th>15. Deviation</th>
+
+
 
               <th>16. Variation</th>
 
+
+
             </tr>
+
+
 
           </thead>
 
+
+
           <tbody>
+
+
 
             <tr id="row">
 
+
+
               <td class="manual empty" data-k="lt">—</td>
+
+
 
               <td class="manual empty" data-k="utc">—</td>
 
+
+
               <td class="manual empty" data-k="lat">—</td>
+
+
 
               <td class="manual empty" data-k="lon">—</td>
 
+
+
               <td class="manual empty" data-k="body">—</td>
+
+
 
               <td class="manual empty" data-k="gHead">—</td>
 
+
+
               <td class="calc empty" data-k="mHead">—</td>
+
+
 
               <td class="calc empty" data-k="lha">—</td>
 
+
+
               <td class="calc empty" data-k="dec">—</td>
+
+
 
               <td class="calc empty" data-k="tAz">—</td>
 
+
+
               <td class="calc empty" data-k="gBrg">—</td>
+
+
 
               <td class="calc empty" data-k="mBrg">—</td>
 
+
+
               <td class="calc empty" data-k="gErr">—</td>
+
+
 
               <td class="calc empty" data-k="mErr">—</td>
 
+
+
               <td class="calc empty" data-k="dev">—</td>
+
+
 
               <td class="manual empty" data-k="var">—</td>
 
+
+
             </tr>
+
+
 
           </tbody>
 
+
+
         </table>
+
+
 
       </div>
 
+
+
     </section>
+
+
+
+
 
 
 
     <section class="panel no-print" id="devPrintBlock">
 
+
+
       <div class="dev-head">
+
+
 
         <h2>Deviation Table (August 2026)</h2>
 
+
+
         <div class="dev-actions">
+
+
 
           <button type="button" class="secondary" id="btnSaveDev" title="Save current deviation table to browser memory"><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Table</button>
 
+
+
           <button type="button" class="secondary" id="btnResetDev" title="Reset table to August 2026 default values">↺ Reset Default</button>
+
+
 
           <button type="button" id="btnPrintDev" title="Print official A4 Deviation Card"><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Deviation Card</button>
 
+
+
           <span class="copy-msg" id="devSaveStatus"></span>
+
+
 
         </div>
 
+
+
       </div>
+
+
 
       <div class="dev-layout">
 
+
+
         <div class="dev-table-wrap">
+
+
 
           <table class="log devedit" id="devTableView"></table>
 
+
+
         </div>
+
+
 
         <div class="dev-chart-wrap">
 
+
+
           <canvas id="devChart" width="520" height="720"></canvas>
+
+
 
         </div>
 
+
+
       </div>
+
+
 
     </section>
 
+
+
         </div><!-- end .wrap -->
+
+
 
       </div><!-- end #tab-gyro -->
 
 
 
+
+
+
+
       <!-- ── Tab 2: Auto-NtM Plotter (Admiralty Notices & ECDIS Overlay) ── -->
+
+
 
       <div id="tab-ntm" class="tab-pane">
 
+
+
         <!-- ── Top Command Bar (Fixed Single Row) ── -->
+
+
 
         <div class="ntm-toolbar no-print">
 
+
+
           <div class="ntm-toolbar-left">
+
+
 
             <input type="file" id="ntmPdfInput" accept=".pdf" multiple style="display:none;" />
 
+
+
             
+
+
 
             <span id="ntmStatusMsg" class="ntm-status-msg"></span>
 
+
+
           </div>
+
+
+
+
 
 
 
           <!-- Mobile View Switcher (List vs Map) -->
 
+
+
           <div class="ntm-mobile-view-switcher" id="ntmMobileViewSwitcher">
+
+
 
             <button type="button" class="ntm-mview-btn active" id="ntmViewListBtn" title="Switch to List View"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/></svg> List</button>
 
+
+
             <button type="button" class="ntm-mview-btn" id="ntmViewMapBtn" title="Switch to Chart View"><svg class="setsail-icon" viewBox="0 0 24 24"><polygon points="1 6 8 2 16 6 23 2 23 18 16 22 8 18 1 22 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg> Chart</button>
 
+
+
           </div>
+
+
+
+
 
 
 
           <div class="ntm-toolbar-right">
 
+
+
             <!--<svg class="setsail-icon" viewBox="0 0 24 24"><path d="M12 2l4 7v9l-4 3-4-3V9l4-7z" fill="currentColor" fill-opacity="0.15"/><line x1="12" y1="2" x2="12" y2="8"/><circle cx="12" cy="13" r="1.5" fill="currentColor"/></svg> My Vessel Popover Anchor -->
+
+
 
             <div class="ntm-popover-anchor">
 
+
+
               <button type="button" class="ntm-btn-glass" id="ntmMyVesselBtn" title="Locate &amp; Plot Vessel Position on ECDIS"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M12 2l4 7v9l-4 3-4-3V9l4-7z" fill="currentColor" fill-opacity="0.15"/><line x1="12" y1="2" x2="12" y2="8"/><circle cx="12" cy="13" r="1.5" fill="currentColor"/></svg> My Vessel
 
+
+
               </button>
+
+
+
+
 
 
 
               <div class="ntm-popover ntm-vessel-popover" id="ntmVesselPopover">
 
+
+
                 <div class="ntm-popover-header">
+
+
 
                   <span><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg> Vessel Target</span>
 
+
+
                   <button type="button" class="ntm-popover-close" id="vesselPopClose">×</button>
+
+
 
                 </div>
 
+
+
                 <div class="ntm-popover-body">
+
+
 
                   <p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.5rem;">
 
+
+
                     Plot ECDIS crosshair target at vessel location:
+
+
 
                   </p>
 
+
+
                   <button type="button" class="ntm-btn-glass" id="vesselFetchGpsBtn" style="width:100%;padding:0.45rem;font-weight:600;font-size:0.78rem;justify-content:center;margin-bottom:0.4rem;"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="currentColor" fill-opacity="0.3"/></svg> Auto GPS Position
+
+
 
                   </button>
 
 
 
+
+
+
+
                   <div class="ntm-popover-divider"></div>
+
+
 
                   <div class="ntm-popover-subtitle">Manual Coordinates:</div>
 
 
 
+
+
+
+
                   <div class="form-group" style="margin-bottom:0.35rem;">
+
+
 
                     <label for="vesselLat" style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:2px;">Latitude:</label>
 
+
+
                     <input type="text" id="vesselLat" class="min-input" placeholder="e.g., 58° 37.70' N or 58.628" style="font-size:0.76rem;padding:0.35rem 0.5rem;" />
 
+
+
                   </div>
+
+
 
                   <div class="form-group" style="margin-bottom:0.5rem;">
 
+
+
                     <label for="vesselLon" style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:2px;">Longitude:</label>
+
+
 
                     <input type="text" id="vesselLon" class="min-input" placeholder="e.g., 017° 46.30' E or 17.771" style="font-size:0.76rem;padding:0.35rem 0.5rem;" />
 
+
+
                   </div>
+
+
+
+
 
 
 
                   <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
 
+
+
                     <button type="button" class="ntm-btn-glass" id="vesselClearBtn" style="color:var(--warn);margin-right:auto;display:none;font-size:0.72rem;padding:0.3rem 0.55rem;">Clear</button>
+
+
 
                     <button type="button" class="ntm-btn-primary" id="vesselApplyBtn" style="font-size:0.75rem;padding:0.35rem 0.7rem;">Plot Target <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg></button>
 
+
+
                   </div>
+
+
+
+
 
 
 
                   <div class="ntm-popover-divider"></div>
 
+
+
                   <div class="ntm-popover-subtitle">Passage Plan Route:</div>
+
+
 
                   <input type="file" id="vesselRouteFile" accept=".rtz,.csv,.rtm" style="display:none;" />
 
+
+
                   <button type="button" class="ntm-btn-glass" id="vesselUploadRouteBtn" style="width:100%;padding:0.45rem;font-weight:600;font-size:0.78rem;justify-content:center;margin-bottom:0.35rem;"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="4" cy="19" r="2"/><circle cx="20" cy="5" r="2"/><path d="M4 17c0-4 4-6 8-6s8-2 8-6" stroke-dasharray="3,3"/><polygon points="17 4 20 5 19 8" fill="currentColor"/></svg> Upload Route (.rtz, .csv, .rtm)
+
+
 
                   </button>
 
+
+
                   <div id="vesselRouteInfoBox" style="font-size:0.72rem;color:var(--muted);display:none;margin-bottom:0.4rem;padding:0.35rem 0.5rem;background:rgba(255,255,255,0.04);border-radius:6px;border:1px solid var(--line);">
+
+
 
                     <div id="vesselRouteName" style="color:var(--accent);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
 
+
+
                     <div id="vesselRouteMeta" style="color:var(--muted);font-size:0.7rem;margin-top:2px;"></div>
 
+
+
                   </div>
+
+
 
                   <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
 
+
+
                     <button type="button" class="ntm-btn-glass" id="vesselClearRouteBtn" style="color:var(--warn);display:none;font-size:0.72rem;padding:0.3rem 0.55rem;margin-right:auto;">Clear Route</button>
+
+
 
                     <button type="button" class="ntm-btn-glass" id="vesselFitRouteBtn" style="display:none;font-size:0.72rem;padding:0.3rem 0.55rem;">Fit Route <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg></button>
 
+
+
                   </div>
+
+
 
                 </div>
 
+
+
               </div>
 
+
+
             </div>
+
+
+
+
 
 
 
             <button type="button" class="ntm-btn-glass" id="ntmFitAllBtn" title="Fit all plotted notices into view"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg> Fit View
 
+
+
             </button>
+
+
 
             <button type="button" class="ntm-btn-export" id="ntmOpenExportBtn" title="Export notices to ECDIS / GeoJSON / CSV"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Export to ECDIS <span class="exp-badge" id="ntmExportBadge">0</span>
 
+
+
             </button>
+
+
 
           </div>
 
+
+
         </div>
+
+
+
+
 
 
 
         <!-- ── Split Workspace: Left Sidebar + Right Map ── -->
 
+
+
         <div class="ntm-workspace" id="ntmWorkspace">
+
+
 
           <!-- Sidebar: Active Notices & Integrated Search -->
 
+
+
           <aside class="ntm-sidebar-list" id="ntmSidebar">
+
+
 
             <div class="ntm-list-header">
 
+
+
               <div class="ntm-list-header-title">
+
+
 
                 <h3>Active Notices</h3>
 
+
+
                 <span class="ntm-list-count" id="ntmListCount">0 of 0</span>
+
+
 
               </div>
 
+
+
               <button type="button" class="ntm-sidebar-collapse-btn" id="ntmCollapseSidebarBtn" title="Collapse sidebar to maximize chart view">
+
+
 
                 ◀
 
+
+
               </button>
 
+
+
             </div>
+
+
+
+
 
 
 
             <!-- Integrated Search Box -->
 
+
+
             <div class="ntm-search-wrap">
+
+
 
               <span class="ntm-search-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg></span>
 
+
+
               <input type="text" id="ntmSearchInput" class="ntm-search-input" placeholder="Search notice, region, chart..." />
+
+
 
               <button type="button" id="ntmClearSearchBtn" class="ntm-search-clear" style="display:none;" title="Clear search">×</button>
 
+
+
             </div>
+
+
+
+
 
 
 
             <!-- Multi-Type Filter Pills Bar -->
 
+
+
             <!-- Selection Controls Bar with Filter (Funnel) & Sort (Arrows) Popover Menus -->
+
+
 
             <div class="ntm-select-bar">
 
+
+
               <div class="ntm-select-bar-left">
+
+
 
                 <!-- Funnel Filter Button & Popover -->
 
+
+
                 <div class="ntm-popover-anchor">
+
+
 
                   <button type="button" class="ntm-icon-btn" id="ntmFilterMenuBtn" title="Filter Notices by Type">
 
+
+
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+
+
 
                       <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
 
+
+
                     </svg>
+
+
 
                     <span class="filter-active-dot" id="filterActiveDot" style="display:none;"></span>
 
+
+
                   </button>
+
+
+
+
 
 
 
                   <div class="ntm-popover" id="ntmFilterPopover">
 
+
+
                     <div class="ntm-popover-header">
+
+
 
                       <span>Filter Notices</span>
 
+
+
                       <button type="button" class="ntm-popover-close" id="ntmFilterCloseBtn">×</button>
 
+
+
                     </div>
+
+
 
                     <div class="ntm-popover-body">
 
+
+
                       <label class="ntm-popover-chk-item">
+
+
 
                         <input type="checkbox" id="popChkAll" checked />
 
+
+
                         <span class="chk-label">All Active</span>
+
+
 
                       </label>
 
+
+
                       <div class="ntm-popover-divider"></div>
 
+
+
                       <label class="ntm-popover-chk-item">
+
+
 
                         <input type="checkbox" id="popChkT" checked />
 
+
+
                         <span class="chk-dot t-dot"></span>
+
+
 
                         <span class="chk-label">Temp (T)</span>
 
+
+
                         <span class="chk-count" id="popCntT">0</span>
+
+
 
                       </label>
 
+
+
                       <label class="ntm-popover-chk-item">
+
+
 
                         <input type="checkbox" id="popChkP" checked />
 
+
+
                         <span class="chk-dot p-dot"></span>
+
+
 
                         <span class="chk-label">Prelim (P)</span>
 
+
+
                         <span class="chk-count" id="popCntP">0</span>
+
+
 
                       </label>
 
+
+
                       <label class="ntm-popover-chk-item">
+
+
 
                         <input type="checkbox" id="popChkPerm" checked />
 
+
+
                         <span class="chk-dot perm-dot"></span>
+
+
 
                         <span class="chk-label">Permanent</span>
 
+
+
                         <span class="chk-count" id="popCntPerm">0</span>
 
+
+
                       </label>
+
+
 
                       <label class="ntm-popover-chk-item">
 
+
+
                         <input type="checkbox" id="popChkPoly" />
+
+
 
                         <span class="chk-dot poly-dot"></span>
 
+
+
                         <span class="chk-label">Areas</span>
+
+
 
                         <span class="chk-count" id="popCntPoly">0</span>
 
+
+
                       </label>
 
+
+
                       <div class="ntm-popover-divider"></div>
+
+
 
                       <label class="ntm-popover-chk-item" title="Strictly excluded from chart by default">
 
+
+
                         <input type="checkbox" id="popChkCancelled" />
+
+
 
                         <span class="chk-dot can-dot"></span>
 
+
+
                         <span class="chk-label"><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Cancelled</span>
 
+
+
                         <span class="chk-count" id="popCntCancelled">0</span>
+
+
 
                       </label>
 
 
 
+
+
+
+
                       <div class="ntm-popover-divider"></div>
+
+
 
                       <div class="ntm-popover-subtitle">NAVAREA:</div>
 
+
+
                       <select id="popSelectNavarea" class="ntm-navarea-select" title="Filter by IMO/IHO NAVAREA">
+
+
 
                         <option value="ALL">All NAVAREAs (Global)</option>
 
+
+
                         <option value="NAVAREA I">NAVAREA I (UK / North Sea / Baltic)</option>
+
+
 
                         <option value="NAVAREA II">NAVAREA II (East Atlantic / W Africa)</option>
 
+
+
                         <option value="NAVAREA III">NAVAREA III (Med / Black Sea)</option>
+
+
 
                         <option value="NAVAREA IV">NAVAREA IV (US / Canada East / Gulf)</option>
 
+
+
                         <option value="NAVAREA V">NAVAREA V (Brazil / S. Atlantic)</option>
+
+
 
                         <option value="NAVAREA VIII">NAVAREA VIII (India / Indian Ocean)</option>
 
+
+
                         <option value="NAVAREA IX">NAVAREA IX (Persian Gulf / Red Sea)</option>
+
+
 
                         <option value="NAVAREA XI">NAVAREA XI (East Asia / China / Malacca)</option>
 
+
+
                         <option value="NAVAREA XII">NAVAREA XII (US / Canada West)</option>
+
+
 
                         <option value="NAVAREA XIV">NAVAREA XIV (New Zealand / Pacific)</option>
 
+
+
                         <option value="NAVAREA XX">NAVAREA XX (Barents / White Sea)</option>
+
+
 
                       </select>
 
+
+
                     </div>
+
+
 
                   </div>
 
+
+
                 </div>
+
+
+
+
 
 
 
                 <!-- Two Arrows Sort Button & Popover -->
 
+
+
                 <div class="ntm-popover-anchor">
+
+
 
                   <button type="button" class="ntm-icon-btn" id="ntmSortMenuBtn" title="Sort Notices">
 
+
+
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+
+
 
                       <path d="m7 15 5 5 5-5"></path>
 
+
+
                       <path d="m7 9 5-5 5 5"></path>
+
+
 
                     </svg>
 
+
+
                   </button>
+
+
+
+
 
 
 
                   <div class="ntm-popover" id="ntmSortPopover">
 
+
+
                     <div class="ntm-popover-header">
+
+
 
                       <span>Sort Notices</span>
 
+
+
                       <button type="button" class="ntm-popover-close" id="ntmSortCloseBtn">×</button>
 
+
+
                     </div>
+
+
 
                     <div class="ntm-popover-body">
 
+
+
                       <label class="ntm-popover-radio-item">
+
+
 
                         <input type="radio" name="popSort" value="NUM_DESC" checked />
 
+
+
                         <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Notice # (Newest)</span>
+
+
 
                       </label>
 
+
+
                       <label class="ntm-popover-radio-item">
+
+
 
                         <input type="radio" name="popSort" value="NUM_ASC" />
 
+
+
                         <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg> Notice # (Oldest)</span>
+
+
 
                       </label>
 
+
+
                       <label class="ntm-popover-radio-item">
+
+
 
                         <input type="radio" name="popSort" value="COUNTRY" />
 
+
+
                         <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg> Country (A-Z)</span>
+
+
 
                       </label>
 
+
+
                       <label class="ntm-popover-radio-item">
+
+
 
                         <input type="radio" name="popSort" value="REGION" />
 
+
+
                         <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><polygon points="1 6 8 2 16 6 23 2 23 18 16 22 8 18 1 22 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg> Region (A-Z)</span>
+
+
 
                       </label>
 
+
+
                       <label class="ntm-popover-radio-item">
+
+
 
                         <input type="radio" name="popSort" value="CHARTS" />
 
-                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Most<svg class="setsail-icon" viewBox="0 0 24 24"><polygon points="1 6 8 2 16 6 23 2 23 18 16 22 8 18 1 22 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg> Charts</span>
+
+
+                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Most Charts</span>
+
+
 
                       </label>
 
+
+
                       <label class="ntm-popover-radio-item">
+
+
 
                         <input type="radio" name="popSort" value="POINTS" />
 
+
+
                         <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Most Points</span>
 
+
+
                       </label>
+
+
 
                       <label class="ntm-popover-radio-item">
 
+
+
                         <input type="radio" name="popSort" value="TYPE" />
+
+
 
                         <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Type (T→P→Perm)</span>
 
+
+
                       </label>
+
+
 
                     </div>
 
+
+
                   </div>
+
+
 
                 </div>
 
+
+
               </div>
+
+
+
+
 
 
 
               <div class="ntm-select-bar-right">
 
+
+
                 <span class="ntm-active-filters-label" id="ntmActiveFiltersLabel" style="font-size:0.72rem;color:var(--muted);">All Types</span>
 
+
+
               </div>
+
+
 
             </div>
 
 
 
+
+
+
+
+                        <!-- Multi-Overlay Quick Filter Pills Bar -->
+            <div class="ntm-overlay-category-bar" id="ntmOverlayCategoryBar">
+              <button type="button" class="ntm-category-pill active" data-category="ALL" id="catPillAll">All <span class="cat-pill-count" id="catCountAll">0</span></button>
+              <button type="button" class="ntm-category-pill" data-category="NTM" id="catPillNtm">NtM <span class="cat-pill-count" id="catCountNtm">0</span></button>
+              <button type="button" class="ntm-category-pill" data-category="PORTS" id="catPillPorts">Ports <span class="cat-pill-count" id="catCountPorts">0</span></button>
+              <button type="button" class="ntm-category-pill" data-category="ROUTE" id="catPillRoute" style="display:none;">Route <span class="cat-pill-count" id="catCountRoute">0</span></button>
+            </div>
+
             <div class="ntm-items-scroll" id="ntmItemsScroll"></div>
+
+
 
           </aside>
 
 
 
+
+
+
+
           <!-- Interactive Map Container -->
+
+
 
           <div class="ntm-map-container" id="ntmMapContainer">
 
+
+
             <button type="button" class="ntm-map-expand-btn" id="ntmExpandSidebarBtn" style="display:none;" title="Expand list sidebar">
+
+
 
               ▶
 
+
+
             </button>
+
+
 
             <div id="ntmMap" class="ntm-leaflet-map" style="width:100%; height:100%;"></div>
 
+
+
             <canvas id="ntmCanvasMap" class="ntm-canvas-map" style="display:none;"></canvas>
+
+
 
             <div class="ntm-coords-hud" id="ntmHudCoords">00° 00.00' N, 000° 00.00' E</div>
 
+
+
             <div class="ntm-vessel-hud" id="ntmVesselHud" style="display:none;"></div>
+
+
 
             <div class="ntm-dropzone" id="ntmDropzone">
 
+
+
               <div class="ntm-dropzone-icon"><svg class="setsail-icon" style="width:48px;height:48px;stroke:#f05a36;" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+
+
 
               <p>Drop UKHO NtM PDF bulletins here</p>
 
+
+
             </div>
+
+
+
+
 
 
 
             <!-- Excel-Style Bottom Overlays Dock Bar -->
 
+
+
             <!-- Excel-Style Bottom Overlays Dock Bar: Single Port Depths & Isobaths Tile -->
+
+
 
             <div class="excel-overlay-dock" id="excelOverlayDock" role="toolbar" aria-label="ECDIS Chart Overlays">
               <div class="excel-tabs-scroll">
-                <button type="button" class="excel-tab active" data-overlay="depths" id="tabOverlayDepths" title="Toggle Port Depths &amp; Isobaths">
+                <button type="button" class="excel-tab active" data-overlay="notices" id="tabOverlayNotices" title="Toggle Admiralty NtM Notices Overlay">
+                  <span class="excel-tab-check">✓</span>
+                  <span class="excel-tab-name">Admiralty NtM</span>
+                  <span class="excel-tab-info-btn" id="btnNtmOverlayInfo" title="UKHO NtM Database Status &amp; Bulletin Info"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
+                </button>
+                <button type="button" class="excel-tab active" data-overlay="depths" id="tabOverlayDepths" title="Toggle Port Depths &amp; Bathymetry">
+                  <span class="excel-tab-check">✓</span>
                   <span class="excel-tab-name">Port Depths</span>
-                  <span class="excel-tab-info-btn" id="btnWeeklyDepthAudit" title="Port Depths Information &amp; Audit"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
+                  <span class="excel-tab-info-btn" id="btnWeeklyDepthAudit" title="Port Depths Information &amp; Weekly Audit"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
+                </button>
+                <button type="button" class="excel-tab active" data-overlay="route" id="tabOverlayRoute" title="Toggle Route Track &amp; Waypoints">
+                  <span class="excel-tab-check">✓</span>
+                  <span class="excel-tab-name">Route Track</span>
+                  <span class="excel-tab-info-btn" id="btnRouteOverlayInfo" title="Passage Plan &amp; Waypoint Information"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
               </div>
             </div>
 
+
+
           </div>
 
+
+
         </div>
+
+
 
       </div><!-- end #tab-ntm -->
 
 
 
+
+
+
+
       <!-- ── Tab 3: System Settings & Engineering Support ── -->
+
+
 
       <div id="tab-settings" class="tab-pane">
 
+
+
         <div class="settings-wrap minimal-settings">
+
+
 
           <div class="settings-header">
 
+
+
             <h2><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</h2>
 
+
+
           </div>
+
+
+
+
 
 
 
           <div class="settings-grid-minimal">
 
+
+
             <!-- Card 1: Theme Switcher -->
+
+
 
             <div class="settings-card-min">
 
+
+
               <div class="min-card-title">Theme</div>
+
+
 
               <div class="min-theme-toggle">
 
+
+
                 <button type="button" class="theme-toggle-btn active" data-theme-val="dark" id="btnThemeDark"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Dark
 
+
+
                 </button>
+
+
 
                 <button type="button" class="theme-toggle-btn" data-theme-val="light" id="btnThemeLight"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg> Light
 
+
+
                 </button>
+
+
 
               </div>
 
+
+
             </div>
+
+
+
+
 
 
 
             <!-- Card 2: Contact Developers Form -->
 
+
+
             <div class="settings-card-min">
+
+
 
               <div class="min-card-title">Developer Feedback</div>
 
+
+
               <form id="setsailContactForm" class="min-contact-form" onsubmit="return false;">
 
+
+
                 <div class="form-group">
+
+
 
                   <input type="email" id="contactEmail" class="min-input" placeholder="Your reply email..." required />
 
+
+
                 </div>
+
+
 
                 <div class="form-group">
 
+
+
                   <textarea id="contactMessage" class="min-textarea" rows="3" placeholder="Message or report..." required></textarea>
 
+
+
                 </div>
+
+
 
                 <div class="form-actions" style="display:flex;align-items:center;gap:0.8rem;margin-top:0.3rem;">
 
+
+
                   <button type="button" class="min-btn-submit" id="contactSubmitBtn">
+
+
 
                     <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Send
 
+
+
                   </button>
+
+
 
                   <span class="contact-status-msg" id="contactStatusMsg"></span>
 
+
+
                 </div>
+
+
 
               </form>
 
+
+
             </div>
+
+
+
+
 
 
 
             <!-- Card 3: Storage & Cache Reset -->
 
+
+
             <div class="settings-card-min">
+
+
 
               <div class="min-card-title">Cache</div>
 
+
+
               <button type="button" class="min-btn-outline" id="settingsClearCacheBtn">
+
+
 
                 <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Reset Cache
 
+
+
               </button>
+
+
 
             </div>
 
+
+
           </div>
 
+
+
         </div>
+
+
 
       </div><!-- end #tab-settings -->
 
@@ -2034,165 +4074,335 @@
 
 
 
+
+
+
+
+
+
+
+
       <!-- Modal for Raw Text Paste -->
+
+
 
       <div class="ntm-modal" id="ntmPasteModal">
 
+
+
         <div class="ntm-modal-box">
+
+
 
           <h3>Paste Notices Text from Navtor or PDF</h3>
 
+
+
           <p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.6rem;">
+
+
 
             Paste UKHO Admiralty notices text (e.g., copied from Navtor or PDF bulletin):
 
+
+
           </p>
+
+
 
           <textarea id="ntmPasteText" class="ntm-modal-textarea" placeholder="52(T)/26 IRELAND - East Coast - Buoy.&#10;1. The Leac Buidhe light-buoy, Fl(4)R.6s, in position 53° 16.65'N., 6° 05.10'W. is reported off station.&#10;..."></textarea>
 
+
+
           <div class="ntm-modal-actions">
+
+
 
             <button type="button" class="secondary" id="ntmPasteCancel" style="margin-top:0;">Cancel</button>
 
+
+
             <button type="button" id="ntmPasteApply" style="margin-top:0;">Parse &amp; Plot on Map</button>
+
+
 
           </div>
 
+
+
         </div>
+
+
 
       </div>
 
 
 
+
+
+
+
       <!-- Modal for Export Configuration with Checkboxes -->
+
+
 
       <div class="ntm-modal" id="ntmExportModal">
 
+
+
         <div class="ntm-modal-box ntm-export-box">
+
+
 
           <div class="ntm-modal-header">
 
+
+
             <h3>Export Notices to ECDIS</h3>
+
+
 
             <button type="button" class="ntm-modal-close" id="expBtnClose" title="Close">×</button>
 
+
+
           </div>
+
+
+
+
 
 
 
           <div class="ntm-export-section">
 
+
+
             <div class="ntm-export-section-title">Notice Types to Include:</div>
+
+
 
             <div class="ntm-export-types-row">
 
+
+
               <label class="ntm-type-toggle-pill type-t">
+
+
 
                 <input type="checkbox" id="expChkT" checked />
 
+
+
                 <span class="pill-dot"></span>
+
+
 
                 <span class="pill-text">Temp (T)</span>
 
+
+
                 <span class="ntm-export-count-badge" id="expCountT">0</span>
 
+
+
               </label>
+
+
+
+
 
 
 
               <label class="ntm-type-toggle-pill type-p">
 
+
+
                 <input type="checkbox" id="expChkP" checked />
+
+
 
                 <span class="pill-dot"></span>
 
+
+
                 <span class="pill-text">Prelim (P)</span>
+
+
 
                 <span class="ntm-export-count-badge" id="expCountP">0</span>
 
+
+
               </label>
+
+
+
+
 
 
 
               <label class="ntm-type-toggle-pill type-perm">
 
+
+
                 <input type="checkbox" id="expChkPerm" checked />
+
+
 
                 <span class="pill-dot"></span>
 
+
+
                 <span class="pill-text">Perm</span>
+
+
 
                 <span class="ntm-export-count-badge" id="expCountPerm">0</span>
 
+
+
               </label>
+
+
 
             </div>
 
+
+
           </div>
+
+
+
+
 
 
 
           <div class="ntm-export-filter-option" style="padding:6px 0;font-size:0.75rem;color:var(--muted);display:flex;align-items:center;gap:6px;">
 
+
+
             <span>ℹ️</span>
+
+
 
             <span>All notices currently active on the chart are included automatically.</span>
 
+
+
           </div>
+
+
+
+
 
 
 
           <!-- Live Summary Banner -->
 
+
+
           <div class="ntm-export-summary-banner" id="expSummaryText">
+
+
 
             Ready to export: 0 notices
 
+
+
           </div>
+
+
+
+
 
 
 
           <!-- Primary Action: Prominent ECDIS Download Button -->
 
+
+
           <button type="button" class="ntm-btn-export-main" id="expBtnJrc">
 
+
+
             <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download JRC ECDIS (.uchm)
+
+
 
           </button>
 
 
 
+
+
+
+
           <!-- Secondary Format Options -->
+
+
 
           <div class="ntm-export-secondary-row">
 
+
+
             <span class="secondary-label">Other formats:</span>
+
+
 
             <button type="button" class="ntm-btn-format" id="expBtnGeoJson"><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg> GeoJSON</button>
 
+
+
             <button type="button" class="ntm-btn-format" id="expBtnCsv"><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> CSV</button>
+
+
 
           </div>
 
+
+
         </div>
+
+
 
       </div><script>
 
 
 
+
+
+
+
     const DEFAULT_DEV_TABLE = [
+
+
 
       [0, -0.1], [10, -0.1], [20, -0.1], [30, -0.1], [40, -0.2], [50, -0.2], [60, -0.8], [70, -1.2],
 
+
+
       [80, -1.5], [90, -1.7], [100, -1.9], [110, -1.9], [120, -1.9], [130, -1.8], [140, -1.6], [150, -1.2],
+
+
 
       [160, -0.7], [170, -0.2], [180, 0.3], [190, 0.6], [200, 0.9], [210, 1.1], [220, 1.3], [230, 1.3],
 
+
+
       [240, 1.1], [250, 0.8], [260, 0.5], [270, 0.3], [280, 0.0], [290, -0.4], [300, -0.9], [310, -1.6],
+
+
 
       [320, -1.8], [330, -1.7], [340, -1.3], [350, -0.7], [360, -0.1]
 
+
+
     ];
+
+
+
+
 
 
 
@@ -2200,99 +4410,199 @@
 
 
 
+
+
+
+
     function cloneTable(tbl) {
+
+
 
       return tbl.map(r => [r[0], r[1]]);
 
+
+
     }
+
+
+
+
 
 
 
     function loadSavedDevTable() {
 
+
+
       try {
+
+
 
         const raw = localStorage.getItem(STORAGE_KEY);
 
+
+
         if (raw) {
+
+
 
           const parsed = JSON.parse(raw);
 
+
+
           if (Array.isArray(parsed) && parsed.length === DEFAULT_DEV_TABLE.length) {
+
+
 
             return parsed.map((r, i) => [DEFAULT_DEV_TABLE[i][0], Number(r[1]) || 0]);
 
+
+
           }
+
+
 
         }
 
+
+
       } catch (e) {
+
+
 
         console.warn("Could not load saved deviation table:", e);
 
+
+
       }
+
+
 
       return cloneTable(DEFAULT_DEV_TABLE);
 
+
+
     }
+
+
+
+
 
 
 
     function saveDevTableToStorage(notify = false) {
 
+
+
       try {
+
+
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(DEV_TABLE));
 
+
+
         if (notify) showDevStatus("Saved to browser storage ✓", "#7dffa6");
+
+
 
       } catch (e) {
 
+
+
         console.warn("Could not save deviation table:", e);
+
+
 
         if (notify) showDevStatus("Save error!", "#ffc978");
 
+
+
       }
 
+
+
     }
+
+
+
+
 
 
 
     function showDevStatus(msg, color = "#7dffa6") {
 
+
+
       const el = document.getElementById("devSaveStatus");
+
+
 
       if (!el) return;
 
+
+
       el.textContent = msg;
+
+
 
       el.style.color = color;
 
+
+
       if (window._devStatusTimer) clearTimeout(window._devStatusTimer);
+
+
 
       window._devStatusTimer = setTimeout(() => {
 
+
+
         el.textContent = "";
+
+
 
       }, 2800);
 
+
+
     }
+
+
+
+
 
 
 
     function resetDevTableToDefault() {
 
+
+
       DEV_TABLE = cloneTable(DEFAULT_DEV_TABLE);
+
+
 
       saveDevTableToStorage(false);
 
+
+
       renderDevTableView();
+
+
 
       calculate();
 
+
+
       showDevStatus("Reset to default (Aug 2026) ✓", "#7dffa6");
 
+
+
     }
+
+
+
+
 
 
 
@@ -2300,765 +4610,1531 @@
 
 
 
+
+
+
+
     const STARS = [{"n": "Acamar", "ra": 2.97111111, "d": -40.31}, {"n": "Achernar", "ra": 1.62861111, "d": -57.24333333}, {"n": "Acrux", "ra": 12.44333333, "d": -63.09166667}, {"n": "Adhara", "ra": 6.9775, "d": -28.97333333}, {"n": "Aldebaran", "ra": 4.59888889, "d": 16.50833333}, {"n": "Alioth", "ra": 12.9, "d": 55.95666667}, {"n": "Alkaid", "ra": 13.79194444, "d": 49.31166667}, {"n": "Al Na'ir", "ra": 22.13638889, "d": -46.965}, {"n": "Alnilam", "ra": 5.60361111, "d": -1.195}, {"n": "Alphard", "ra": 9.46, "d": -8.65833333}, {"n": "Alphecca", "ra": 15.5775, "d": 26.715}, {"n": "Alpheratz", "ra": 0.13944444, "d": 29.09166667}, {"n": "Altair", "ra": 19.84583333, "d": 8.86833333}, {"n": "Ankaa", "ra": 0.43777778, "d": -42.31166667}, {"n": "Antares", "ra": 16.48944444, "d": -26.42833333}, {"n": "Arcturus", "ra": 14.26083333, "d": 19.18666667}, {"n": "Atria", "ra": 16.80972222, "d": -69.02333333}, {"n": "Avior", "ra": 8.37583333, "d": -59.50833333}, {"n": "Bellatrix", "ra": 5.41888889, "d": 6.34833333}, {"n": "Betelgeuse", "ra": 5.91972222, "d": 7.405}, {"n": "Canopus", "ra": 6.39972222, "d": -52.69833333}, {"n": "Capella", "ra": 5.27833333, "d": 45.99833333}, {"n": "Deneb", "ra": 20.69, "d": 45.28166667}, {"n": "Denebola", "ra": 11.8175, "d": 14.57166667}, {"n": "Diphda", "ra": 0.72611111, "d": -17.99}, {"n": "Dubhe", "ra": 11.06194444, "d": 61.74666667}, {"n": "Elnath", "ra": 5.43833333, "d": 28.60666667}, {"n": "Eltanin", "ra": 17.94277778, "d": 51.48833333}, {"n": "Enif", "ra": 21.73611111, "d": 9.875}, {"n": "Formalhaut", "ra": 22.96027778, "d": -29.62666667}, {"n": "Gacrux", "ra": 12.51944444, "d": -57.10666667}, {"n": "Gienah", "ra": 12.26333333, "d": -17.53833333}, {"n": "Hadar", "ra": 14.06333333, "d": -60.36666667}, {"n": "Hamal", "ra": 2.11944444, "d": 23.46333333}, {"n": "Kaus Austr.", "ra": 18.40194444, "d": -34.38333333}, {"n": "Kochab", "ra": 14.84416667, "d": 74.15333333}, {"n": "Markab", "ra": 23.07888889, "d": 15.205}, {"n": "Menkar", "ra": 3.03805556, "d": 4.08666667}, {"n": "Menkent", "ra": 14.11111111, "d": -36.365}, {"n": "Miaplacidus", "ra": 9.22111111, "d": -69.71333333}, {"n": "Mirfak", "ra": 3.40555556, "d": 49.86166667}, {"n": "Nunki", "ra": 18.92027778, "d": -26.295}, {"n": "Peacock", "ra": 20.42638889, "d": -56.73666667}, {"n": "Pollux", "ra": 7.75555556, "d": 28.025}, {"n": "Procyon", "ra": 7.65527778, "d": 5.225}, {"n": "Rasalhague", "ra": 17.58166667, "d": 12.56166667}, {"n": "Regulus", "ra": 10.13944444, "d": 11.96666667}, {"n": "Rigel", "ra": 5.2425, "d": -8.205}, {"n": "Rigil Kent", "ra": 14.66027778, "d": -60.83}, {"n": "Sabik", "ra": 17.17222222, "d": -15.72333333}, {"n": "Schedar", "ra": 0.675, "d": 56.54}, {"n": "Shaula", "ra": 17.55944444, "d": -37.10166667}, {"n": "Sirius", "ra": 6.75277778, "d": -16.715}, {"n": "Spica", "ra": 13.41972222, "d": -11.15833333}, {"n": "Suhail", "ra": 9.13361111, "d": -43.43}, {"n": "Vega", "ra": 18.615, "d": 38.78333333}, {"n": "Zuben'ubi", "ra": 14.8475, "d": -16.03833333}];
+
+
+
+
 
 
 
     function parseDM(text) {
 
+
+
       if (text == null) return NaN;
+
+
 
       const s = String(text).trim().replace(/,/g, ".");
 
+
+
       if (!s) return NaN;
+
+
 
       if (/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
 
+
+
       const m = s.match(/(-?\d+)\s*[°\s]+\s*(\d+(?:\.\d+)?)/);
+
+
 
       if (m) return parseInt(m[1], 10) + parseFloat(m[2]) / 60;
 
+
+
       const m2 = s.match(/(-?\d+)\s+(\d+(?:\.\d+)?)/);
+
+
 
       if (m2) return parseInt(m2[1], 10) + parseFloat(m2[2]) / 60;
 
+
+
       return NaN;
 
+
+
     }
+
+
+
+
 
 
 
     function toRad(d) { return d * Math.PI / 180; }
 
+
+
     function toDeg(r) { return r * 180 / Math.PI; }
+
+
 
     function norm360(d) { let x = d % 360; if (x < 0) x += 360; return x; }
 
+
+
     function roundHalf(d) { return Math.round(norm360(d) * 2) / 2; }
 
+
+
     function shortestDiff(a, b) { return ((a - b + 180) % 360 + 360) % 360 - 180; }
+
+
 
     function fmtComma(n, digits) { return n.toFixed(digits).replace(".", ","); }
 
 
 
+
+
+
+
     function fmtHead(d) {
+
+
 
       if (!Number.isFinite(d)) return "—";
 
+
+
       const x = norm360(d);
+
+
 
       const whole = Math.floor(x + 1e-9);
 
+
+
       const frac = Math.round((x - whole) * 10);
+
+
 
       return String(whole).padStart(3, "0") + "," + frac + "°";
 
+
+
     }
+
+
 
     function fmtHalf(d) {
 
+
+
       if (!Number.isFinite(d)) return "—";
+
+
 
       const x = roundHalf(d);
 
+
+
       const whole = Math.floor(x + 1e-9);
+
+
 
       const frac = Math.round((x - whole) * 10);
 
+
+
       return String(whole).padStart(3, "0") + "," + frac + "°";
 
+
+
     }
+
+
 
     function fmtTrueAz(d) {
 
+
+
       if (!Number.isFinite(d)) return "—";
+
+
 
       const x = norm360(d);
 
+
+
       const s = fmtComma(x, 1);
+
+
 
       const [a, b] = s.split(",");
 
+
+
       return a.padStart(3, "0") + "," + b + "°";
 
+
+
     }
+
+
 
     function fmtDM(deg, degPad) {
 
+
+
       if (!Number.isFinite(deg)) return "—";
+
+
 
       const a = Math.abs(deg);
 
+
+
       let d = Math.floor(a + 1e-10);
+
+
 
       let m = (a - d) * 60;
 
+
+
       if (m >= 59.95) { d += 1; m = 0; }
+
+
 
       const pad = degPad == null ? 3 : degPad;
 
+
+
       return String(d).padStart(pad, "0") + "° " + fmtComma(m, 1).padStart(4, "0") + "'";
 
+
+
     }
+
+
 
     function fmtPos(deg, hemi) { return Number.isFinite(deg) ? (fmtDM(deg, 3) + " " + hemi) : "—"; }
 
+
+
     function fmtErr(mag, hl) { return Number.isFinite(mag) ? (fmtComma(mag, 1) + " (" + hl + ")") : "—"; }
+
+
 
     function fmtSigned(mag, ew) {
 
+
+
       if (!Number.isFinite(mag)) return "—";
+
+
 
       if (Math.abs(mag) < 1e-9) return "0,0° NIL";
 
+
+
       return fmtComma(Math.abs(mag), 1) + "° " + ew;
 
+
+
     }
+
+
+
+
 
 
 
     function deviationFromTable(magHeadDeg) {
 
+
+
       const h = norm360(magHeadDeg);
+
+
 
       for (let i = 0; i < DEV_TABLE.length - 1; i++) {
 
+
+
         const [h0, d0] = DEV_TABLE[i];
+
+
 
         const [h1, d1] = DEV_TABLE[i + 1];
 
+
+
         if (h >= h0 && h <= h1) {
+
+
 
           if (h1 === h0) return d0;
 
+
+
           return d0 + (d1 - d0) * ((h - h0) / (h1 - h0));
+
+
 
         }
 
+
+
       }
+
+
 
       return DEV_TABLE[0][1];
 
+
+
     }
+
+
+
+
 
 
 
     /** MagBrg = True − Var − Dev; play Mag heading near Gyro heading for Dev ≈ table; MagHead from bearing diff */
 
+
+
     function solveMagneticPretty(trueAz, gBrg, gyroHead, varSigned) {
+
+
 
       let best = null;
 
+
+
       const approx = norm360(trueAz - varSigned);
+
+
 
       for (let k = -8; k <= 8; k++) {
 
+
+
         const mBrg = roundHalf(approx + k * 0.5);
+
+
 
         const neededMagErr = shortestDiff(trueAz, mBrg); // True − MagBrg
 
+
+
         const neededDev = neededMagErr - varSigned;
+
+
 
         const mHead = norm360(gyroHead - shortestDiff(gBrg, mBrg));
 
+
+
         const tableDev = deviationFromTable(mHead);
+
+
 
         const nearGyro = Math.abs(shortestDiff(mHead, gyroHead));
 
+
+
         const score = Math.abs(neededDev - tableDev) * 40 + nearGyro;
+
+
 
         if (!best || score < best.score) {
 
+
+
           best = { score, mBrg: norm360(mBrg), mHead: roundHalf(mHead), dev: neededDev, magErr: neededMagErr, tableDev };
+
+
 
         }
 
+
+
       }
+
+
 
       return best;
 
+
+
     }
+
+
+
+
 
 
 
     function renderDevTableView() {
 
+
+
       const tbl = document.getElementById("devTableView");
+
+
 
       if (!tbl) return;
 
+
+
       const rows = DEV_TABLE.filter(r => r[0] < 360);
 
+
+
       const n = Math.ceil(rows.length / 2);
+
+
 
       let html = "<thead><tr><th>Ship's Head</th><th>Deviation</th><th>Ship's Head</th><th>Deviation</th></tr></thead><tbody>";
 
 
 
+
+
+
+
       function cellPair(row) {
+
+
 
         if (!row) return "<td></td><td></td>";
 
+
+
         const h = row[0];
+
+
 
         const v = row[1];
 
+
+
         const mag = Math.abs(v).toFixed(1);
+
+
 
         const ew = v < 0 ? "W" : "E";
 
+
+
         const head = String(h).padStart(3, "0") + "°";
+
+
 
         return (
 
+
+
           '<td class="head-label">' + head + "</td>" +
+
+
 
           '<td><div class="dev-inputs">' +
 
+
+
           '<input type="number" step="0.1" min="0" data-head="' + h + '" class="dev-mag" value="' + mag + '" />' +
+
+
 
           '<select data-head="' + h + '" class="dev-ew"><option value="E"' + (ew === "E" ? " selected" : "") +
 
+
+
           '>E</option><option value="W"' + (ew === "W" ? " selected" : "") + ">W</option></select>" +
+
+
 
           "</div></td>"
 
+
+
         );
 
+
+
       }
+
+
+
+
 
 
 
       for (let i = 0; i < n; i++) {
 
+
+
         html += "<tr>" + cellPair(rows[i]) + cellPair(rows[i + n] || null) + "</tr>";
 
+
+
       }
+
+
 
       tbl.innerHTML = html + "</tbody>";
 
 
 
+
+
+
+
       tbl.querySelectorAll(".dev-mag, .dev-ew").forEach(el => {
+
+
 
         el.addEventListener("change", onDevTableEdit);
 
+
+
         el.addEventListener("input", onDevTableEdit);
+
+
 
       });
 
+
+
       drawDevChart();
 
+
+
     }
+
+
+
+
 
 
 
     function onDevTableEdit() {
 
+
+
       document.querySelectorAll("#devTableView .dev-mag").forEach(inp => {
+
+
 
         const head = Number(inp.getAttribute("data-head"));
 
+
+
         const sel = document.querySelector('#devTableView .dev-ew[data-head="' + head + '"]');
+
+
 
         const mag = parseFloat(String(inp.value).replace(",", "."));
 
+
+
         if (!Number.isFinite(mag) || !sel) return;
+
+
 
         const signed = sel.value === "W" ? -Math.abs(mag) : Math.abs(mag);
 
+
+
         const idx = DEV_TABLE.findIndex(r => r[0] === head);
+
+
 
         if (idx >= 0) DEV_TABLE[idx][1] = signed;
 
+
+
         if (head === 0) {
+
+
 
           const i360 = DEV_TABLE.findIndex(r => r[0] === 360);
 
+
+
           if (i360 >= 0) DEV_TABLE[i360][1] = signed;
+
+
 
         }
 
+
+
       });
+
+
 
       saveDevTableToStorage(false);
 
+
+
       drawDevChart();
+
+
 
       calculate();
 
+
+
     }
+
+
+
+
 
 
 
         // Live Interactive Mouse Crosshair State
+
     let _chartHoverHeading = null;
 
+
+
     function drawDevChart() {
+
       const canvas = document.getElementById("devChart");
+
       if (!canvas) return;
+
       const parent = canvas.parentElement;
+
       if (!parent) return;
 
+
+
       // Handle cases where container is hidden during initial load
+
       const measuredW = parent.clientWidth;
+
       const cssW = Math.max(260, measuredW || 420);
+
       const cssH = 480;
+
       const dpr = window.devicePixelRatio || 1;
 
+
+
       const targetW = Math.floor(cssW * dpr);
+
       const targetH = Math.floor(cssH * dpr);
+
       if (canvas.width !== targetW || canvas.height !== targetH) {
+
         canvas.width = targetW;
+
         canvas.height = targetH;
+
       }
+
       canvas.style.width = cssW + "px";
+
       canvas.style.height = cssH + "px";
 
+
+
       const ctx = canvas.getContext("2d");
+
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+
+
       const W = cssW, H = cssH;
+
       const pad = { l: 48, r: 24, t: 36, b: 32 };
+
       const plotW = Math.max(50, W - pad.l - pad.r);
+
       const plotH = Math.max(50, H - pad.t - pad.b);
 
+
+
       const xMin = -4, xMax = 4;
+
       const yMin = 0, yMax = 360;
 
+
+
       const xToPx = (x) => pad.l + ((x - xMin) / (xMax - xMin)) * plotW;
+
       const yToPx = (y) => pad.t + ((y - yMin) / (yMax - yMin)) * plotH;
+
       const pxToHeading = (py) => Math.max(0, Math.min(360, ((py - pad.t) / plotH) * 360));
 
+
+
       // Background
+
       ctx.fillStyle = "#070d1e";
+
       ctx.fillRect(0, 0, W, H);
+
       ctx.fillStyle = "rgba(16, 29, 56, 0.55)";
+
       ctx.fillRect(pad.l, pad.t, plotW, plotH);
 
+
+
       // Grid lines
+
       ctx.strokeStyle = "rgba(72, 112, 178, 0.22)";
+
       ctx.lineWidth = 1;
+
       ctx.font = "11px 'Segoe UI', Tahoma, sans-serif";
+
       ctx.fillStyle = "#94a3b8";
+
       ctx.textAlign = "center";
+
       ctx.textBaseline = "middle";
 
+
+
       for (let x = xMin; x <= xMax; x++) {
+
         const px = xToPx(x);
+
         ctx.beginPath();
+
         ctx.moveTo(px, pad.t);
+
         ctx.lineTo(px, pad.t + plotH);
+
         ctx.stroke();
+
         ctx.fillText(String(x) + (x !== 0 ? "°" : ""), px, pad.t - 14);
+
       }
+
       ctx.textAlign = "right";
+
       for (let y = 0; y <= 360; y += 30) {
+
         const py = yToPx(y);
+
         ctx.beginPath();
+
         ctx.moveTo(pad.l, py);
+
         ctx.lineTo(pad.l + plotW, py);
+
         ctx.stroke();
+
         ctx.fillText(String(y).padStart(3, "0") + "°", pad.l - 6, py);
+
       }
+
+
 
       // Zero deviation reference line
+
       ctx.strokeStyle = "rgba(56, 189, 248, 0.4)";
+
       ctx.lineWidth = 1.5;
+
       ctx.beginPath();
+
       ctx.moveTo(xToPx(0), pad.t);
+
       ctx.lineTo(xToPx(0), pad.t + plotH);
+
       ctx.stroke();
+
+
 
       // Plot border
+
       ctx.strokeStyle = "rgba(72, 112, 178, 0.45)";
+
       ctx.lineWidth = 1;
+
       ctx.strokeRect(pad.l, pad.t, plotW, plotH);
 
+
+
       // Axis Labels
+
       ctx.fillStyle = "#e2e8f0";
+
       ctx.font = "bold 11px 'Segoe UI', sans-serif";
+
       ctx.textAlign = "center";
+
       ctx.fillText("MAGNETIC DEVIATION (WEST / EAST)", pad.l + plotW / 2, 14);
+
       ctx.save();
+
       ctx.translate(14, pad.t + plotH / 2);
+
       ctx.rotate(-Math.PI / 2);
+
       ctx.fillText("COMPASS HEADING (000° - 360°)", 0, 0);
+
       ctx.restore();
+
+
 
       ctx.font = "10px 'Segoe UI', sans-serif";
+
       ctx.fillStyle = "#ea4c25";
+
       ctx.fillText("← WEST (-)", xToPx(-2.2), pad.t + plotH + 18);
+
       ctx.fillStyle = "#38bdf8";
+
       ctx.fillText("(+) EAST →", xToPx(2.2), pad.t + plotH + 18);
 
+
+
       // Smooth Curve from DEV_TABLE — Styled in Signature Brand Coral
+
       const pts = DEV_TABLE.map(r => ({ h: r[0], d: r[1] }));
+
       ctx.save();
+
       ctx.shadowColor = "rgba(240, 90, 54, 0.4)";
+
       ctx.shadowBlur = 6;
+
       ctx.strokeStyle = "#f05a36";
+
       ctx.lineWidth = 2.8;
+
       ctx.beginPath();
+
       pts.forEach((p, i) => {
+
         const x = xToPx(Math.max(xMin, Math.min(xMax, p.d)));
+
         const y = yToPx(p.h);
+
         if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+
       });
+
       ctx.stroke();
+
       ctx.restore();
 
+
+
       // Deviation calibration points in refined coral with center dot
+
       pts.forEach(p => {
+
         if (p.h === 360) return;
+
         const x = xToPx(Math.max(xMin, Math.min(xMax, p.d)));
+
         const y = yToPx(p.h);
+
         ctx.beginPath();
+
         ctx.arc(x, y, 3, 0, Math.PI * 2);
+
         ctx.fillStyle = "#f05a36";
+
         ctx.fill();
+
         ctx.beginPath();
+
         ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+
         ctx.fillStyle = "#ffffff";
+
         ctx.fill();
+
       });
 
+
+
       // ── DYNAMIC HEADING & DEVIATION CROSSHAIR INDICATOR ──
+
       // Check current ship heading from calculator inputs or table
+
       let activeHeading = null;
+
       const gHeadInp = parseFloat(String(document.getElementById("gyroHead")?.value || "").replace(",", "."));
+
       const mHeadCell = parseFloat(String(document.querySelector('#row td[data-k="mHead"]')?.textContent || "").replace(",", "."));
 
+
+
       if (Number.isFinite(mHeadCell)) {
+
         activeHeading = mHeadCell;
+
       } else if (Number.isFinite(gHeadInp)) {
+
         activeHeading = gHeadInp;
+
       }
+
+
 
       if (activeHeading !== null && Number.isFinite(activeHeading)) {
+
         const normH = norm360(activeHeading);
+
         const curDev = deviationFromTable(normH);
+
         const curX = xToPx(Math.max(xMin, Math.min(xMax, curDev)));
+
         const curY = yToPx(normH);
 
+
+
         // Horizontal dashed guideline
+
         ctx.save();
+
         ctx.setLineDash([4, 4]);
+
         ctx.strokeStyle = "rgba(234, 76, 37, 0.75)";
+
         ctx.lineWidth = 1.5;
+
         ctx.beginPath();
+
         ctx.moveTo(pad.l, curY);
+
         ctx.lineTo(pad.l + plotW, curY);
+
         ctx.stroke();
+
+
 
         // Vertical dashed guideline
+
         ctx.beginPath();
+
         ctx.moveTo(curX, pad.t);
+
         ctx.lineTo(curX, pad.t + plotH);
+
         ctx.stroke();
+
         ctx.restore();
+
+
 
         // Target Reticle on Curve
+
         ctx.beginPath();
+
         ctx.arc(curX, curY, 6, 0, Math.PI * 2);
+
         ctx.fillStyle = "#ea4c25";
+
         ctx.fill();
+
         ctx.lineWidth = 2;
+
         ctx.strokeStyle = "#ffffff";
+
         ctx.stroke();
+
+
 
         // Center dot
+
         ctx.beginPath();
+
         ctx.arc(curX, curY, 2, 0, Math.PI * 2);
+
         ctx.fillStyle = "#ffffff";
+
         ctx.fill();
+
+
 
         // Floating Target Badge
+
         const tagText = `HDG ${normH.toFixed(1)}° · DEV ${curDev >= 0 ? '+' : ''}${curDev.toFixed(1)}° (${curDev >= 0 ? 'E' : 'W'})`;
+
         ctx.font = "bold 10px 'Segoe UI', sans-serif";
+
         const tagW = ctx.measureText(tagText).width + 12;
+
         const tagX = Math.min(pad.l + plotW - tagW, Math.max(pad.l + 4, curX + 10));
+
         const tagY = Math.min(pad.t + plotH - 12, Math.max(pad.t + 16, curY - 10));
 
+
+
         ctx.fillStyle = "rgba(8, 14, 32, 0.9)";
+
         ctx.strokeStyle = "#ea4c25";
+
         ctx.lineWidth = 1;
+
         ctx.fillRect(tagX, tagY - 12, tagW, 18);
+
         ctx.strokeRect(tagX, tagY - 12, tagW, 18);
+
         ctx.fillStyle = "#f1f5f9";
+
         ctx.textAlign = "left";
+
         ctx.fillText(tagText, tagX + 6, tagY + 1);
+
       }
+
+
 
       // Interactive Mouse Hover Indicator
+
       if (_chartHoverHeading !== null) {
+
         const hDev = deviationFromTable(_chartHoverHeading);
+
         const hX = xToPx(Math.max(xMin, Math.min(xMax, hDev)));
+
         const hY = yToPx(_chartHoverHeading);
 
+
+
         ctx.save();
+
         ctx.setLineDash([2, 3]);
+
         ctx.strokeStyle = "rgba(240, 90, 54, 0.75)";
+
         ctx.lineWidth = 1;
+
         ctx.beginPath();
+
         ctx.moveTo(pad.l, hY);
+
         ctx.lineTo(pad.l + plotW, hY);
+
         ctx.stroke();
+
         ctx.restore();
 
+
+
         ctx.beginPath();
+
         ctx.arc(hX, hY, 4, 0, Math.PI * 2);
+
         ctx.fillStyle = "#f05a36";
+
         ctx.fill();
 
+
+
         ctx.font = "9px 'Segoe UI', sans-serif";
+
         ctx.fillStyle = "#f05a36";
+
         ctx.textAlign = "right";
+
         ctx.fillText(`${_chartHoverHeading.toFixed(0)}° → ${hDev.toFixed(1)}°`, pad.l + plotW - 6, hY - 4);
+
       }
+
     }
 
+
+
     // Attach Interactive Mouse Tracking to Deviation Chart
+
     window.addEventListener("DOMContentLoaded", () => {
+
       const canvas = document.getElementById("devChart");
+
       if (canvas) {
+
         canvas.addEventListener("mousemove", (e) => {
+
           const rect = canvas.getBoundingClientRect();
+
           const py = e.clientY - rect.top;
+
           const pad = { t: 36, b: 32 };
+
           const plotH = 480 - pad.t - pad.b;
+
           _chartHoverHeading = Math.max(0, Math.min(360, ((py - pad.t) / plotH) * 360));
+
           drawDevChart();
+
         });
+
         canvas.addEventListener("mouseleave", () => {
+
           _chartHoverHeading = null;
+
           drawDevChart();
+
         });
+
       }
+
     });
+
+
+
+
 
 
 
     function generateDeviationCardHtml() {
 
+
+
       let dateStr = "22-08-2026";
+
+
 
       const ltDate = document.getElementById("ltDate").value;
 
+
+
       if (ltDate) {
+
+
 
         const p = ltDate.split("-");
 
+
+
         if (p.length === 3) dateStr = `${p[2]}-${p[1]}-${p[0]}`;
 
+
+
       }
+
+
+
+
 
 
 
       let posStr = "23°54' N 112°46.2' W";
 
+
+
       const lat = parseDM(document.getElementById("lat").value);
+
+
 
       const latNS = document.getElementById("latNS").value;
 
+
+
       const lon = parseDM(document.getElementById("lon").value);
+
+
 
       const lonEW = document.getElementById("lonEW").value;
 
+
+
       if (Number.isFinite(lat) && Number.isFinite(lon)) {
+
+
 
         posStr = `${fmtDM(lat, 2)} ${latNS} ${fmtDM(lon, 3)} ${lonEW}`;
 
+
+
       }
+
+
+
+
 
 
 
       let varStr = "8.1 (EAST)";
 
+
+
       const varMag = parseFloat(String(document.getElementById("varMag").value).replace(",", "."));
+
+
 
       const varEW = document.getElementById("varEW").value;
 
+
+
       if (Number.isFinite(varMag)) {
+
+
 
         varStr = `${varMag.toFixed(1)} (${varEW === "E" ? "EAST" : "WEST"})`;
 
+
+
       }
+
+
+
+
 
 
 
       const headings = [0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0, 360.0];
 
+
+
       let tableRowsHtml = "";
+
+
 
       headings.forEach(h => {
 
+
+
         const val = deviationFromTable(h);
+
+
 
         const valStr = val.toFixed(1);
 
+
+
         tableRowsHtml += `<tr><td><strong>${h.toFixed(1)}</strong></td><td><strong>${valStr}</strong></td><td></td></tr>`;
 
+
+
       });
+
+
+
+
 
 
 
       const offscreen = document.createElement("canvas");
 
+
+
       const W = 1000, H = 1400;
+
+
 
       offscreen.width = W;
 
+
+
       offscreen.height = H;
+
+
 
       const ctx = offscreen.getContext("2d");
 
 
 
+
+
+
+
       const pad = { l: 90, r: 35, t: 70, b: 50 };
 
+
+
       const plotW = W - pad.l - pad.r;
+
+
 
       const plotH = H - pad.t - pad.b;
 
 
 
+
+
+
+
       const xMin = -4, xMax = 4;
+
+
 
       const yMin = 0, yMax = 360;
 
 
 
+
+
+
+
       const xToPx = (x) => pad.l + ((x - xMin) / (xMax - xMin)) * plotW;
+
+
 
       const yToPx = (y) => pad.t + ((y - yMin) / (yMax - yMin)) * plotH;
 
 
 
+
+
+
+
       ctx.fillStyle = "#ffffff";
+
+
 
       ctx.fillRect(0, 0, W, H);
 
 
 
+
+
+
+
       ctx.strokeStyle = "#8597ad";
+
+
 
       ctx.lineWidth = 1.5;
 
+
+
       ctx.font = "bold 20px Arial, sans-serif";
+
+
 
       ctx.fillStyle = "#000000";
 
+
+
       ctx.textAlign = "center";
+
+
 
       ctx.textBaseline = "middle";
 
 
 
+
+
+
+
       for (let x = xMin; x <= xMax; x++) {
+
+
 
         const px = xToPx(x);
 
+
+
         ctx.beginPath();
+
+
 
         ctx.moveTo(px, pad.t);
 
+
+
         ctx.lineTo(px, pad.t + plotH);
 
+
+
         ctx.stroke();
+
+
 
         ctx.fillText(String(x), px, pad.t - 22);
 
+
+
       }
+
+
 
       ctx.textAlign = "right";
 
+
+
       for (let y = 0; y <= 360; y += 20) {
+
+
 
         const py = yToPx(y);
 
+
+
         ctx.beginPath();
+
+
 
         ctx.moveTo(pad.l, py);
 
+
+
         ctx.lineTo(pad.l + plotW, py);
+
+
 
         ctx.stroke();
 
+
+
         ctx.fillText(String(y), pad.l - 12, py);
 
+
+
       }
+
+
+
+
 
 
 
       ctx.strokeStyle = "#1b2d42";
 
+
+
       ctx.lineWidth = 2.5;
+
+
 
       ctx.beginPath();
 
+
+
       ctx.moveTo(xToPx(0), pad.t);
+
+
 
       ctx.lineTo(xToPx(0), pad.t + plotH);
 
+
+
       ctx.stroke();
+
+
+
+
 
 
 
       ctx.strokeStyle = "#000000";
 
+
+
       ctx.lineWidth = 2.5;
+
+
 
       ctx.strokeRect(pad.l, pad.t, plotW, plotH);
 
 
 
+
+
+
+
       ctx.fillStyle = "#000000";
+
+
 
       ctx.font = "bold 24px Arial, sans-serif";
 
+
+
       ctx.textAlign = "center";
+
+
 
       ctx.fillText("DEVIATION", pad.l + plotW / 2, 24);
 
+
+
       ctx.save();
+
+
 
       ctx.translate(28, pad.t + plotH / 2);
 
+
+
       ctx.rotate(-Math.PI / 2);
 
+
+
       ctx.fillText("SHIP'S HEADING", 0, 0);
+
+
 
       ctx.restore();
 
 
 
+
+
+
+
       const pts = [];
+
+
 
       for (let deg = 0; deg <= 360; deg += 1) {
 
+
+
         pts.push({ h: deg, d: deviationFromTable(deg) });
+
+
 
       }
 
+
+
       ctx.strokeStyle = "#0c254e";
+
+
 
       ctx.lineWidth = 4.5;
 
+
+
       ctx.beginPath();
+
+
 
       pts.forEach((p, i) => {
 
+
+
         const x = xToPx(Math.max(xMin, Math.min(xMax, p.d)));
+
+
 
         const y = yToPx(p.h);
 
+
+
         if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+
+
 
       });
 
+
+
       ctx.stroke();
+
+
+
+
 
 
 
@@ -3066,795 +6142,1591 @@
 
 
 
+
+
+
+
       return `<!DOCTYPE html>
+
+
 
 <html>
 
+
+
 <head>
+
+
 
   <base href="${window.location.href}">
 
+
+
   <meta charset="UTF-8">
+
+
 
   <title>Magnetic Compass Deviation Card</title>
 
+
+
   <style>
+
+
 
     @page { size: A4 portrait; margin: 6mm 8mm; }
 
+
+
     * { box-sizing: border-box; }
+
+
 
     html, body {
 
+
+
       margin: 0; padding: 0; background: #fff !important; color: #000 !important;
+
+
 
       font-family: Arial, "Segoe UI", sans-serif;
 
+
+
       -webkit-print-color-adjust: exact; print-color-adjust: exact;
 
+
+
     }
+
+
 
     .card-sheet { width: 100%; max-width: 100%; margin: 0; padding: 0; background: #fff; }
 
+
+
     .card-border {
+
+
 
       border: 1.5px solid #000; padding: 5mm 6mm; min-height: 275mm; height: 275mm;
 
+
+
       display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;
+
+
 
     }
 
+
+
     .card-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+
+
 
     .card-logo-box { flex: 0 0 140px; }
 
+
+
     .card-logo-img { height: 32px; width: auto; object-fit: contain; display: block; }
+
+
 
     .card-main-title { flex: 1; font-size: 13.5pt; font-weight: 800; text-align: center; margin: 0; color: #000; letter-spacing: 0.04em; font-family: Arial, sans-serif; }
 
+
+
     .card-meta-table { margin-bottom: 10px; font-size: 8.5pt; line-height: 1.4; font-family: Arial, sans-serif; }
+
+
 
     .card-meta-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
 
+
+
     .meta-cell { flex: 1; }
+
+
 
     .meta-cell.text-right { text-align: right; }
 
+
+
     .card-meta-table .lbl { font-weight: bold; margin-right: 4px; color: #000; }
+
+
 
     .card-meta-table .val { font-weight: 500; color: #000; }
 
+
+
     .card-columns { display: flex; gap: 12px; align-items: stretch; flex: 1; margin-bottom: 4px; }
+
+
 
     .card-col-left { flex: 0 0 44%; display: flex; flex-direction: column; justify-content: space-between; }
 
+
+
     .card-heading-table { width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 9pt; font-family: Arial, sans-serif; }
+
+
 
     .card-heading-table th, .card-heading-table td { border: 1.5px solid #000; text-align: center; vertical-align: middle; color: #000; }
 
+
+
     .card-heading-table th { padding: 4px 2px; font-weight: 800; font-size: 8.5pt; background: #fff; }
+
+
 
     .card-heading-table td { padding: 4px 4px; font-weight: 700; font-size: 10pt; }
 
+
+
     .card-correctors-box { border: 1.5px solid #000; margin-top: 8px; font-size: 7.5pt; font-family: Arial, sans-serif; }
+
+
 
     .correctors-hdr { font-weight: 800; text-decoration: underline; padding: 3px 6px; }
 
+
+
     .corr-item { padding: 2px 6px; border-top: 1px solid #000; font-weight: 600; }
+
+
 
     .card-col-right { flex: 1; display: flex; align-items: stretch; border: 1.5px solid #000; background: #fff; padding: 2px; }
 
+
+
     .card-chart-container { width: 100%; height: 100%; min-height: 135mm; display: flex; align-items: stretch; }
+
+
 
     .card-chart-image { width: 100%; height: 100%; object-fit: contain; display: block; }
 
+
+
     .card-ftr { border-top: 1.5px solid #000; margin-top: 4px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-end; position: relative; }
+
+
 
     .card-remarks-box { font-size: 7.5pt; max-width: 60%; line-height: 1.25; padding-bottom: 2px; font-family: Arial, sans-serif; }
 
+
+
     .card-remarks-box .lbl { font-weight: bold; }
+
+
 
     .card-sign-box { display: flex; flex-direction: column; align-items: center; position: relative; width: 160px; }
 
+
+
     .stamp-container { position: absolute; bottom: 16px; right: 10px; width: 98px; height: 98px; opacity: 0.95; pointer-events: none; }
+
+
 
     .stamp-image { width: 100%; height: 100%; object-fit: contain; }
 
+
+
     .signature-line-box { width: 100%; text-align: center; margin-top: 35px; }
+
+
 
     .sig-line { border-bottom: 1.5px solid #000; width: 100%; margin-bottom: 2px; }
 
+
+
     .master-name { font-size: 9pt; font-weight: 800; letter-spacing: 0.05em; font-family: Arial, sans-serif; }
+
+
 
   </style>
 
+
+
 </head>
+
+
 
 <body>
 
+
+
   <div class="card-sheet">
+
+
 
     <div class="card-border">
 
+
+
       <div class="card-hdr">
+
+
 
         <div class="card-logo-box">
 
+
+
           <img src="assets/wilhelmsen_logo.png" alt="Wilhelmsen" class="card-logo-img" />
+
+
 
         </div>
 
+
+
         <h1 class="card-main-title">MAGNETIC COMPASS DEVIATION CARD</h1>
+
+
 
         <div style="width: 120px;"></div>
 
+
+
       </div>
+
+
+
+
 
 
 
       <div class="card-meta-table">
 
+
+
         <div class="card-meta-row">
+
+
 
           <div class="meta-cell"><span class="lbl">SHIP :</span> <span class="val">VLEC IINO INEOS VESTA</span></div>
 
+
+
           <div class="meta-cell text-right"><span class="lbl">Port Of Registry:</span> <span class="val">MONROVIA</span></div>
+
+
 
         </div>
 
+
+
         <div class="card-meta-row">
+
+
 
           <div class="meta-cell"><span class="lbl">Date:</span> <span class="val">${dateStr}</span></div>
 
+
+
           <div class="meta-cell text-right"><span class="lbl">Position:</span> <span class="val">${posStr}</span></div>
 
+
+
         </div>
+
+
 
         <div class="card-meta-row">
 
+
+
           <div class="meta-cell"><span class="lbl">Location:</span> <span class="val">Pacific Ocean</span></div>
+
+
 
           <div class="meta-cell"><span class="lbl">Sea State:</span> <span class="val">Slight Sea</span></div>
 
+
+
           <div class="meta-cell text-right"><span class="lbl">Variation:</span> <span class="val">${varStr}</span></div>
+
+
 
         </div>
 
+
+
       </div>
+
+
+
+
 
 
 
       <div class="card-columns">
 
+
+
         <div class="card-col-left">
+
+
 
           <table class="card-heading-table">
 
+
+
             <thead>
+
+
 
               <tr>
 
+
+
                 <th style="width: 44%;">SHIP'S HEAD</th>
+
+
 
                 <th style="width: 32%;">DEVIATION</th>
 
+
+
                 <th style="width: 24%; font-size: 7.5pt; line-height: 1.1;"><strong>+ EAST<br/>- WEST</strong></th>
+
+
 
               </tr>
 
+
+
             </thead>
+
+
 
             <tbody>
 
+
+
               ${tableRowsHtml}
 
+
+
             </tbody>
+
+
 
           </table>
 
 
 
+
+
+
+
           <div class="card-correctors-box">
+
+
 
             <div class="correctors-hdr">CORRECTORS:</div>
 
+
+
             <div class="corr-item">B (2) Magnets Red Aft Port:11 Stbd: 11</div>
+
+
 
             <div class="corr-item">C (6) Magnets Red Stbd 3,4,8,9,10,13</div>
 
+
+
             <div class="corr-item">D (2) Port :2 Stbd:2 Flinders Bar Fore:1 Pc</div>
+
+
 
             <div class="corr-item">Heeling Magnets : 1 Piece Red Up from Compass card : No. 3</div>
 
+
+
           </div>
 
+
+
         </div>
+
+
+
+
 
 
 
         <div class="card-col-right">
 
+
+
           <div class="card-chart-container">
+
+
 
             <img src="${chartDataUrl}" alt="Deviation Curve" class="card-chart-image" />
 
+
+
           </div>
+
+
 
         </div>
 
+
+
       </div>
+
+
+
+
 
 
 
       <div class="card-ftr">
 
+
+
         <div class="card-remarks-box">
+
+
 
           <span class="lbl">Remarks :</span>
 
+
+
           <span class="val">Partly Cloudy skies Clear weather/Visiblity &amp; confirmed by Gyro Compass</span>
 
+
+
         </div>
+
+
 
         <div class="card-sign-box">
 
+
+
           <div class="stamp-container">
+
+
 
             <img src="assets/ship_stamp.png" alt="Ship Stamp" class="stamp-image" />
 
+
+
           </div>
+
+
 
           <div class="signature-line-box">
 
+
+
             <div class="sig-line"></div>
+
+
 
             <div class="master-name">CAPT. MASTER</div>
 
+
+
           </div>
+
+
 
         </div>
 
+
+
       </div>
 
+
+
     </div>
+
+
 
   </div>
 
 
 
+
+
+
+
 </body>
+
+
 
 </html>`;
 
+
+
     }
+
+
+
+
 
 
 
     function printDeviationCard() {
 
+
+
       let iframe = document.getElementById("printFrame");
+
+
 
       if (!iframe) {
 
+
+
         iframe = document.createElement("iframe");
+
+
 
         iframe.id = "printFrame";
 
+
+
         iframe.style.position = "fixed";
+
+
 
         iframe.style.right = "0";
 
+
+
         iframe.style.bottom = "0";
+
+
 
         iframe.style.width = "0";
 
+
+
         iframe.style.height = "0";
+
+
 
         iframe.style.border = "0";
 
+
+
         iframe.style.opacity = "0";
+
+
 
         document.body.appendChild(iframe);
 
+
+
       }
+
+
+
+
 
 
 
       const fullHtml = generateDeviationCardHtml();
 
+
+
       const doc = iframe.contentWindow.document;
+
+
 
       doc.open();
 
+
+
       doc.write(fullHtml);
+
+
 
       doc.close();
 
 
 
+
+
+
+
       setTimeout(() => {
+
+
 
         try {
 
+
+
           iframe.contentWindow.focus();
+
+
 
           iframe.contentWindow.print();
 
+
+
         } catch (e) {
+
+
 
           console.error("Print error:", e);
 
+
+
         }
+
+
 
       }, 250);
 
+
+
     }
+
+
+
+
 
 
 
     function julianDate(utcDate, utcTime) {
 
+
+
       if (!utcDate || !utcTime) return NaN;
+
+
 
       const [Y, Mo, D] = utcDate.split("-").map(Number);
 
+
+
       const parts = utcTime.split(":").map(Number);
+
+
 
       const h = parts[0] || 0, mi = parts[1] || 0, s = parts[2] || 0;
 
+
+
       const dayFrac = (h + mi / 60 + s / 3600) / 24;
+
+
 
       let y = Y, m = Mo;
 
+
+
       if (m <= 2) { y -= 1; m += 12; }
+
+
 
       const A = Math.floor(y / 100);
 
+
+
       const B = 2 - A + Math.floor(A / 4);
+
+
 
       return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + D + B - 1524.5 + dayFrac;
 
+
+
     }
+
+
+
+
 
 
 
     function ghaAries(jd) {
 
+
+
       const T = (jd - 2451545.0) / 36525.0;
+
+
 
       return norm360(280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T - (T * T * T) / 38710000.0);
 
+
+
     }
+
+
+
+
 
 
 
     function precessRaDec(raDeg, decDeg, jd) {
 
+
+
       const T = (jd - 2451545.0) / 36525.0;
+
+
 
       let zeta = ((2306.2181 + 1.39656 * T - 0.000139 * T * T) * T + (0.30188 - 0.000344 * T) * T * T + 0.017998 * T * T * T) / 3600;
 
+
+
       let z = ((2306.2181 + 1.39656 * T - 0.000139 * T * T) * T + (1.09468 + 0.000066 * T) * T * T + 0.018203 * T * T * T) / 3600;
+
+
 
       let theta = ((2004.3109 - 0.85330 * T - 0.000217 * T * T) * T - (0.42665 + 0.000217 * T) * T * T - 0.041833 * T * T * T) / 3600;
 
+
+
       const ra0 = toRad(raDeg), dec0 = toRad(decDeg);
+
+
 
       const A = Math.cos(dec0) * Math.sin(ra0 + toRad(zeta));
 
+
+
       const B = Math.cos(toRad(theta)) * Math.cos(dec0) * Math.cos(ra0 + toRad(zeta)) - Math.sin(toRad(theta)) * Math.sin(dec0);
+
+
 
       const C = Math.sin(toRad(theta)) * Math.cos(dec0) * Math.cos(ra0 + toRad(zeta)) + Math.cos(toRad(theta)) * Math.sin(dec0);
 
+
+
       return { ra: norm360(toDeg(Math.atan2(A, B)) + z), dec: toDeg(Math.asin(Math.max(-1, Math.min(1, C)))) };
 
+
+
     }
+
+
+
+
 
 
 
     function sunGhaDec(jd) {
 
+
+
       const T = (jd - 2451545.0) / 36525.0;
+
+
 
       const L0 = norm360(280.46646 + 36000.76983 * T + 0.0003032 * T * T);
 
+
+
       const M = toRad(norm360(357.52911 + 35999.05029 * T - 0.0001537 * T * T));
+
+
 
       const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M) + (0.019993 - 0.000101 * T) * Math.sin(2 * M) + 0.000289 * Math.sin(3 * M);
 
+
+
       const trueLong = L0 + C;
+
+
 
       const omega = 125.04 - 1934.136 * T;
 
+
+
       const lam = toRad(trueLong - 0.00569 - 0.00478 * Math.sin(toRad(omega)));
+
+
 
       const eps0 = 23 + (26 + (21.448 - T * (46.8150 + T * (0.00059 - T * 0.001813))) / 60) / 60;
 
+
+
       const eps = toRad(eps0 + 0.00256 * Math.cos(toRad(omega)));
+
+
 
       const ra = norm360(toDeg(Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam))));
 
+
+
       const dec = toDeg(Math.asin(Math.sin(eps) * Math.sin(lam)));
+
+
 
       return { gha: norm360(ghaAries(jd) - ra), dec };
 
+
+
     }
+
+
+
+
 
 
 
     function moonGhaDec(jd) {
 
+
+
       const T = (jd - 2451545.0) / 36525.0;
+
+
 
       const T2 = T * T;
 
+
+
       const T3 = T2 * T;
+
+
 
       const T4 = T3 * T;
 
 
 
+
+
+
+
       const L_prime = norm360(218.3164477 + 481267.88123421 * T - 0.0015786 * T2 + T3 / 538841.0 - T4 / 65194000.0);
+
+
 
       const D = norm360(297.8501921 + 445267.1114034 * T - 0.0018819 * T2 + T3 / 545868.0 - T4 / 113065000.0);
 
+
+
       const M = norm360(357.5291092 + 35999.0502909 * T - 0.0001536 * T2 + T3 / 24490000.0);
 
+
+
       const M_prime = norm360(134.9633964 + 477198.8675055 * T + 0.0087414 * T2 + T3 / 69699.0 - T4 / 14712000.0);
+
+
 
       const F = norm360(93.2720950 + 483202.0175233 * T - 0.0036539 * T2 - T3 / 3526000.0 + T4 / 863310000.0);
 
 
 
+
+
+
+
       const E = 1.0 - 0.002516 * T - 0.0000074 * T2;
 
+
+
       const d2r = Math.PI / 180.0;
+
+
 
       const sin = (deg) => Math.sin(deg * d2r);
 
 
 
+
+
+
+
       const dL =
+
+
 
         6.288774 * sin(M_prime) +
 
+
+
         1.274027 * sin(2*D - M_prime) +
+
+
 
         0.658314 * sin(2*D) +
 
+
+
         0.213618 * sin(2*M_prime) -
+
+
 
         0.185116 * sin(M) * E -
 
+
+
         0.114332 * sin(2*F) +
+
+
 
         0.058793 * sin(2*D - 2*M_prime) +
 
+
+
         0.057066 * sin(2*D - M - M_prime) * E +
+
+
 
         0.053322 * sin(2*D + M_prime) +
 
+
+
         0.045758 * sin(2*D - M) * E -
+
+
 
         0.040923 * sin(M - M_prime) * E -
 
+
+
         0.034720 * sin(D) -
+
+
 
         0.030383 * sin(M + M_prime) * E +
 
+
+
         0.015327 * sin(2*D - 2*F) -
+
+
 
         0.012528 * sin(2*F + M_prime) +
 
+
+
         0.010980 * sin(2*F - M_prime) +
+
+
 
         0.010675 * sin(4*D - M_prime) +
 
+
+
         0.010034 * sin(3*M_prime) +
+
+
 
         0.008548 * sin(4*D - 2*M_prime) -
 
+
+
         0.007888 * sin(2*D + M - M_prime) * E -
+
+
 
         0.006766 * sin(2*D + M) * E -
 
+
+
         0.005163 * sin(D - M_prime) +
+
+
 
         0.004987 * sin(D + M) * E +
 
+
+
         0.004036 * sin(2*D - M + M_prime) * E +
+
+
 
         0.003994 * sin(2*D + 2*M_prime) +
 
+
+
         0.003861 * sin(4*D) +
+
+
 
         0.003665 * sin(2*D - 3*M_prime) -
 
+
+
         0.002689 * sin(M - 2*M_prime) * E +
+
+
 
         0.002390 * sin(2*D - M_prime - 2*F) -
 
+
+
         0.002348 * sin(D + M_prime) +
+
+
 
         0.002236 * sin(2*D - 2*M) * E * E -
 
+
+
         0.002120 * sin(M + 2*M_prime) * E -
+
+
 
         0.002069 * sin(2*M) * E * E +
 
+
+
         0.002048 * sin(2*D - 2*M - M_prime) * E * E -
+
+
 
         0.001773 * sin(2*D + M_prime - 2*F) -
 
+
+
         0.001595 * sin(2*D + 2*F) +
+
+
 
         0.001215 * sin(4*D - M - M_prime) * E -
 
+
+
         0.001110 * sin(2*M_prime + 2*F) +
 
+
+
         0.000892 * sin(D - 2*M_prime) -
+
+
 
         0.000811 * sin(2*D + M + M_prime) * E;
 
 
 
+
+
+
+
       const dB =
+
+
 
         5.128122 * sin(F) +
 
+
+
         0.280602 * sin(M_prime + F) +
+
+
 
         0.277693 * sin(M_prime - F) +
 
+
+
         0.173237 * sin(2*D - F) +
+
+
 
         0.055413 * sin(2*D - M_prime + F) +
 
+
+
         0.046271 * sin(2*D - M_prime - F) +
+
+
 
         0.032573 * sin(2*D + F) +
 
+
+
         0.017198 * sin(2*M_prime + F) +
+
+
 
         0.009266 * sin(2*D + M_prime - F) +
 
+
+
         0.008822 * sin(2*M_prime - F) +
+
+
 
         0.008216 * sin(2*D - M - F) * E +
 
+
+
         0.004324 * sin(2*D - 2*M_prime - F) +
+
+
 
         0.004200 * sin(2*D + M_prime + F) -
 
+
+
         0.003359 * sin(2*D + M - F) * E +
+
+
 
         0.002463 * sin(2*D - M - M_prime + F) * E +
 
+
+
         0.002211 * sin(2*D - M + F) * E +
+
+
 
         0.002065 * sin(2*D - M - M_prime - F) * E -
 
+
+
         0.001870 * sin(M - M_prime - F) * E +
+
+
 
         0.001828 * sin(4*D - M_prime - F) -
 
+
+
         0.001794 * sin(M + F) * E -
+
+
 
         0.001749 * sin(M - F) * E;
 
 
 
+
+
+
+
       const moonLon = norm360(L_prime + dL);
+
+
 
       const moonLat = dB;
 
 
 
+
+
+
+
       const eps0 = 23 + (26 + (21.448 - T * (46.8150 + T * (0.00059 - T * 0.001813))) / 60.0) / 60.0;
 
+
+
       const omega = 125.04452 - 1934.136261 * T;
+
+
 
       const eps = eps0 + 0.00256 * Math.cos(omega * d2r);
 
 
 
+
+
+
+
       const lam = moonLon * d2r;
 
+
+
       const bet = moonLat * d2r;
+
+
 
       const e = eps * d2r;
 
 
 
+
+
+
+
       const sin_dec = Math.sin(bet) * Math.cos(e) + Math.cos(bet) * Math.sin(e) * Math.sin(lam);
+
+
 
       const dec = Math.asin(Math.max(-1.0, Math.min(1.0, sin_dec)));
 
 
 
+
+
+
+
       const y = Math.sin(lam) * Math.cos(e) - Math.tan(bet) * Math.sin(e);
 
+
+
       const x = Math.cos(lam);
+
+
 
       const ra = norm360(toDeg(Math.atan2(y, x)));
 
 
 
+
+
+
+
       const gha = norm360(ghaAries(jd) - ra);
+
+
 
       return { gha, dec: toDeg(dec) };
 
+
+
     }
+
+
+
+
 
 
 
     function findStar(name) {
 
+
+
       const key = name.trim().toLowerCase();
+
+
 
       return STARS.find(s => s.n.toLowerCase() === key) || null;
 
+
+
     }
+
+
+
+
 
 
 
     function autoEphemeris(body, jd) {
 
+
+
       if (!body || !Number.isFinite(jd)) return null;
+
+
 
       const bKey = body.trim().toLowerCase();
 
+
+
       if (bKey === "sun" ) {
+
+
 
         const s = sunGhaDec(jd);
 
+
+
         return { gha: s.gha, dec: s.dec, source: "Sun" };
 
+
+
       }
+
+
 
       if (bKey === "moon" ) {
 
+
+
         const m = moonGhaDec(jd);
+
+
 
         return { gha: m.gha, dec: m.dec, source: "Moon" };
 
+
+
       }
+
+
 
       const star = findStar(body);
 
+
+
       if (!star) return null;
+
+
 
       const pr = precessRaDec(star.ra * 15, star.d, jd);
 
+
+
       return { gha: norm360(ghaAries(jd) + norm360(360 - pr.ra)), dec: pr.dec, source: star.n };
 
+
+
     }
+
+
+
+
 
 
 
     function lhaFromGhaLon(gha, lonDeg, lonEW) {
 
+
+
       const lon = Math.abs(lonDeg);
+
+
 
       return lonEW === "E" ? norm360(gha + lon) : norm360(gha - lon);
 
+
+
     }
+
+
+
+
 
 
 
     function calcTrueAzimuth(latDeg, latNS, lhaDeg, decDeg, decNS) {
 
+
+
       const lat = toRad((latNS === "S" ? -1 : 1) * Math.abs(latDeg));
+
+
 
       const dec = toRad((decNS === "S" ? -1 : 1) * Math.abs(decDeg));
 
+
+
       const LHA = toRad(norm360(Math.abs(lhaDeg)));
+
+
 
       const y = -Math.sin(LHA);
 
+
+
       const x = Math.cos(lat) * Math.tan(dec) - Math.sin(lat) * Math.cos(LHA);
+
+
 
       return norm360(toDeg(Math.atan2(y, x)));
 
+
+
     }
+
+
+
+
 
 
 
     function setCell(key, text, ok) {
 
+
+
       const td = document.querySelector('#row td[data-k="' + key + '"]');
+
+
 
       if (!td) return;
 
+
+
       td.textContent = text;
 
+
+
       td.classList.toggle("empty", !ok);
+
+
 
     }
 
 
 
+
+
+
+
     function calculate() {
 
+
+
       const status = document.getElementById("status");
+
+
 
       status.textContent = "";
 
 
 
+
+
+
+
       const ltDate = document.getElementById("ltDate").value;
+
+
 
       const utcDate = document.getElementById("utcDate").value;
 
+
+
       const utcTime = document.getElementById("utcTime").value;
+
+
 
       const body = document.getElementById("body").value.trim();
 
+
+
       const gyroHead = parseFloat(String(document.getElementById("gyroHead").value).replace(",", "."));
+
+
 
       const varMag = parseFloat(String(document.getElementById("varMag").value).replace(",", "."));
 
+
+
       const varEW = document.getElementById("varEW").value;
+
+
 
       const lat = parseDM(document.getElementById("lat").value);
 
+
+
       const latNS = document.getElementById("latNS").value;
 
+
+
       const lon = parseDM(document.getElementById("lon").value);
+
+
 
       const lonEW = document.getElementById("lonEW").value;
 
 
 
+
+
+
+
       setCell("lt", ltDate || "—", !!ltDate);
+
+
 
       const utcStr = (utcDate && utcTime) ? utcDate + " " + (utcTime.length === 5 ? utcTime + ":00" : utcTime) : "—";
 
+
+
       setCell("utc", utcStr, !!(utcDate && utcTime));
+
+
 
       setCell("lat", Number.isFinite(lat) ? fmtPos(lat, latNS) : "—", Number.isFinite(lat));
 
+
+
       setCell("lon", Number.isFinite(lon) ? fmtPos(lon, lonEW) : "—", Number.isFinite(lon));
+
+
 
       setCell("body", body || "—", !!body);
 
+
+
       setCell("gHead", Number.isFinite(gyroHead) ? fmtHead(gyroHead) : "—", Number.isFinite(gyroHead));
+
+
 
       setCell("var", Number.isFinite(varMag) ? fmtSigned(varMag, varEW) : "—", Number.isFinite(varMag));
 
 
 
+
+
+
+
       let lha = parseDM(document.getElementById("lha").value);
+
+
 
       let dec = parseDM(document.getElementById("dec").value);
 
+
+
       let decNS = document.getElementById("decNS").value;
+
+
 
       let ephNote = "";
 
+
+
       const jd = julianDate(utcDate, utcTime);
+
+
 
       const eph = autoEphemeris(body, jd);
 
 
 
+
+
+
+
       if ((!Number.isFinite(lha) || !Number.isFinite(dec)) && eph && Number.isFinite(lon)) {
+
+
 
         if (!Number.isFinite(lha)) lha = lhaFromGhaLon(eph.gha, lon, lonEW);
 
+
+
         if (!Number.isFinite(dec)) {
+
+
 
           dec = Math.abs(eph.dec);
 
+
+
           decNS = eph.dec >= 0 ? "N" : "S";
+
+
 
           document.getElementById("decNS").value = decNS;
 
+
+
         }
+
+
 
         ephNote = "auto " + eph.source;
 
+
+
       }
+
+
+
+
 
 
 
@@ -3862,191 +7734,383 @@
 
 
 
+
+
+
+
       // Declination for Col 9
+
+
 
       if (Number.isFinite(dec)) {
 
+
+
         setCell("dec", fmtDM(dec, 2) + " " + (decNS || "N"), true);
+
+
 
       } else {
 
+
+
         setCell("dec", "—", false);
 
+
+
       }
+
+
+
+
 
 
 
       let trueAz = parseFloat(String(document.getElementById("trueAzOverride").value).replace(",", "."));
 
+
+
       if (!Number.isFinite(trueAz) && Number.isFinite(lat) && Number.isFinite(lha) && Number.isFinite(dec)) {
+
+
 
         trueAz = calcTrueAzimuth(lat, latNS, lha, dec, decNS);
 
+
+
       }
+
+
+
+
 
 
 
       if (!Number.isFinite(trueAz) || !Number.isFinite(gyroHead) || !Number.isFinite(varMag)) {
 
+
+
         ["tAz","gBrg","mBrg","gErr","mErr","dev","mHead"].forEach(k => setCell(k, "—", false));
+
+
 
         status.textContent = "Need Gyro heading, Variation, and (Lat+Lon+UTC+Body) or overrides.";
 
+
+
         status.style.color = "#ffc978";
+
+
 
         renderStarAlmanac();
 
+
+
         return;
 
+
+
       }
+
+
+
+
 
 
 
       trueAz = norm360(trueAz);
 
+
+
       setCell("tAz", fmtTrueAz(trueAz), true);
+
+
+
+
 
 
 
       // Gyro: nearest .0/.5; error H if gyro > true, L if gyro < true
 
+
+
       const gBrg = roundHalf(trueAz);
+
+
 
       setCell("gBrg", fmtHalf(gBrg), true);
 
+
+
       const gSigned = shortestDiff(gBrg, trueAz);
+
+
 
       const gErr = Math.abs(gSigned);
 
+
+
       const gHL = gSigned > 1e-9 ? "H" : (gSigned < -1e-9 ? "L" : "");
+
+
 
       setCell("gErr", gErr < 1e-9 ? "0,0" : fmtErr(gErr, gHL), true);
 
 
 
+
+
+
+
       const varSigned = varEW === "E" ? varMag : -varMag;
 
+
+
       const devOverrideRaw = document.getElementById("devOverride").value;
+
+
 
       let mBrg, mHead, devSigned, magErrSigned;
 
 
 
+
+
+
+
       if (devOverrideRaw !== "") {
+
+
 
         const dMag = parseFloat(String(devOverrideRaw).replace(",", "."));
 
+
+
         const dEW = document.getElementById("devEW").value;
+
+
 
         if (!Number.isFinite(dMag)) {
 
+
+
           status.textContent = "Bad Deviation override.";
+
+
 
           status.style.color = "#ffc978";
 
+
+
           return;
+
+
 
         }
 
+
+
         devSigned = dEW === "E" ? dMag : -dMag;
+
+
 
         magErrSigned = varSigned + devSigned;
 
+
+
         mBrg = roundHalf(norm360(trueAz - magErrSigned));
+
+
 
         mHead = roundHalf(norm360(gyroHead - shortestDiff(gBrg, mBrg)));
 
+
+
       } else {
+
+
 
         const sol = solveMagneticPretty(trueAz, gBrg, gyroHead, varSigned);
 
+
+
         mBrg = sol.mBrg;
+
+
 
         mHead = sol.mHead;
 
+
+
         devSigned = sol.dev;
 
+
+
         magErrSigned = sol.magErr;
+
+
 
       }
 
 
 
+
+
+
+
       setCell("mBrg", fmtHalf(mBrg), true);
+
+
 
       setCell("mErr", fmtSigned(magErrSigned, magErrSigned >= 0 ? "E" : "W"), true);
 
+
+
       setCell("dev", fmtSigned(devSigned, devSigned >= 0 ? "E" : "W"), true);
+
+
 
       setCell("mHead", fmtHalf(mHead), true);
 
 
 
+
+
+
+
       status.textContent = ephNote ? ("OK · " + ephNote) : "OK";
+
+
 
       status.style.color = "#7dffa6";
 
+
+
       renderStarAlmanac();
 
+
+
     }
+
+
+
+
 
 
 
     /* ── Star Almanac ── */
 
+
+
     function fmtAlmAlt(deg) {
+
+
 
       // Format altitude as "59° 42,2'" — same style as fmtDM with 2-digit degree pad
 
+
+
       const a = Math.abs(deg);
+
+
 
       let d = Math.floor(a + 1e-10);
 
+
+
       let m = (a - d) * 60;
+
+
 
       if (m >= 59.95) { d += 1; m = 0; }
 
+
+
       return String(d).padStart(2, "0") + "° " + fmtComma(m, 1).padStart(4, "0") + "'";
+
+
 
     }
 
 
 
+
+
+
+
     function renderStarAlmanac() {
+
+
 
       const utcDate = document.getElementById("utcDate").value;
 
+
+
       const utcTime = document.getElementById("utcTime").value || "12:00:00";
+
+
 
       const tbody = document.getElementById("almBody");
 
+
+
       const epochEl = document.getElementById("almEpoch");
+
+
 
       if (!tbody) return;
 
 
 
+
+
+
+
       // Read observer position
+
+
 
       const latVal = parseDM(document.getElementById("lat").value);
 
+
+
       const latNS  = document.getElementById("latNS").value;
+
+
 
       const lonVal = parseDM(document.getElementById("lon").value);
 
+
+
       const lonEW  = document.getElementById("lonEW").value;
+
+
 
       const havPos = Number.isFinite(latVal) && Number.isFinite(lonVal);
 
 
 
+
+
+
+
       // Build status hint
+
+
 
       const missing = [];
 
+
+
       if (!utcDate)  missing.push("UTC Date");
 
+
+
       if (!havPos)   missing.push("Lat / Lon");
+
+
+
+
 
 
 
@@ -4054,123 +8118,247 @@
 
 
 
+
+
+
+
       // Epoch label
+
+
 
       if (utcDate && Number.isFinite(jd)) {
 
+
+
         const [yy, mm, dd] = utcDate.split("-");
+
+
 
         const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+
+
         const tPart = utcTime.substring(0, 5);
+
+
 
         const posHint = havPos ? "" : "  · enter position for Alt";
 
+
+
         epochEl.textContent = dd + " " + months[parseInt(mm,10)-1] + " " + yy + "  " + tPart + " UTC" + posHint;
+
+
 
       } else {
 
+
+
         epochEl.textContent = "Need: " + (missing.join(" + ") || "valid date");
 
+
+
       }
+
+
+
+
 
 
 
       // If no date at all — show placeholder list with star names but no values
 
+
+
       const ghaAr = (utcDate && Number.isFinite(jd)) ? ghaAries(jd) : NaN;
 
+
+
       const latR  = havPos ? toRad((latNS === "S" ? -1 : 1) * Math.abs(latVal)) : NaN;
+
+
 
       const canCalc = Number.isFinite(jd) && havPos;
 
 
 
+
+
+
+
       // Selected body from Inputs (for highlight)
+
+
 
       const selectedBody = document.getElementById("body").value.trim().toLowerCase();
 
 
 
+
+
+
+
       // Helper: compute alt + az for a given GHA_body (degrees) and Dec (degrees)
+
+
 
       function computeAltAz(ghaDeg, decDeg) {
 
+
+
         if (!canCalc) return { alt: NaN, az: NaN };
+
+
 
         const lhaDeg = lonEW === "E" ? norm360(ghaDeg + lonVal) : norm360(ghaDeg - lonVal);
 
+
+
         const decR = toRad(decDeg);
+
+
 
         const lhaR = toRad(lhaDeg);
 
+
+
         const sinAlt = Math.sin(latR) * Math.sin(decR) + Math.cos(latR) * Math.cos(decR) * Math.cos(lhaR);
+
+
 
         const alt = toDeg(Math.asin(Math.max(-1, Math.min(1, sinAlt))));
 
+
+
         const y = -Math.sin(lhaR);
+
+
 
         const x = Math.cos(latR) * Math.tan(decR) - Math.sin(latR) * Math.cos(lhaR);
 
+
+
         const az = norm360(toDeg(Math.atan2(y, x)));
+
+
 
         return { alt, az };
 
+
+
       }
+
+
+
+
 
 
 
       // Helper: format altitude/azimuth value cell
 
+
+
       function valCell(cls, altAz, field) {
+
+
 
         const v = field === "alt" ? altAz.alt : altAz.az;
 
+
+
         if (!canCalc)        return '<td class="' + cls + '" style="color:var(--muted);opacity:0.5">—</td>';
+
+
 
         if (isNaN(v))        return '<td class="' + cls + '" style="color:var(--muted)">—</td>';
 
+
+
         if (field === "alt" && altAz.alt < 0)
+
+
 
           return '<td class="' + cls + '" style="color:var(--muted);opacity:0.38">↓</td>';
 
+
+
         return '<td class="' + cls + '">' + fmtAlmAlt(Math.abs(v)) + "</td>";
 
+
+
       }
+
+
+
+
 
 
 
       // Helper: build one table row HTML
 
+
+
       function buildRow(name, altAz, rowClass, isSelected) {
+
+
 
         const sel    = isSelected ? " alm-selected" : "";
 
+
+
         const cls    = (rowClass + sel).trim();
+
+
 
         const trOpen = cls ? '<tr class="' + cls + '">' : "<tr>";
 
+
+
         // Az always shown even below horizon (useful to know direction)
+
+
 
         const azDisplay = (canCalc && !isNaN(altAz.az))
 
+
+
           ? '<td class="alm-az"' + (altAz.alt < 0 ? ' style="opacity:0.38"' : "") + ">" + fmtAlmAlt(altAz.az) + "</td>"
+
+
 
           : '<td class="alm-az" style="color:var(--muted);opacity:0.5">—</td>';
 
 
 
+
+
+
+
         return trOpen +
+
+
 
           '<td class="alm-n">' + name + "</td>" +
 
+
+
           valCell("alm-v", altAz, "alt") +
+
+
 
           azDisplay +
 
+
+
           "</tr>";
 
+
+
       }
+
+
+
+
 
 
 
@@ -4178,49 +8366,99 @@
 
 
 
+
+
+
+
       // ── Sun ──
 
+
+
       const sunAltAz  = Number.isFinite(jd) ? (() => { const s = sunGhaDec(jd);  return computeAltAz(s.gha, s.dec);  })() : { alt: NaN, az: NaN };
+
+
 
       rows += buildRow('<svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24" style="stroke:#fbbf24;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg> Sun',  sunAltAz,  "alm-sun",  selectedBody === "sun"  );
 
 
 
+
+
+
+
       // ── Moon ──
 
+
+
       const moonAltAz = Number.isFinite(jd) ? (() => { const m = moonGhaDec(jd); return computeAltAz(m.gha, m.dec); })() : { alt: NaN, az: NaN };
+
+
 
       rows += buildRow('<svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24" style="stroke:#cbd5e1;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Moon', moonAltAz, "alm-moon", selectedBody === "moon" );
 
 
 
+
+
+
+
       // ── Divider ──
+
+
 
       rows += '<tr class="alm-divider"><td colspan="3"></td></tr>';
 
 
 
+
+
+
+
       // ── 57 Navigational Stars — always listed, values fill in once inputs are ready ──
+
+
 
       STARS.forEach(function(star) {
 
+
+
         let altAz = { alt: NaN, az: NaN };
+
+
 
         if (Number.isFinite(jd)) {
 
+
+
           const pr = precessRaDec(star.ra * 15, star.d, jd);
+
+
 
           const sha = norm360(360 - pr.ra);
 
+
+
           altAz = computeAltAz(norm360(ghaAr + sha), pr.dec);
+
+
 
         }
 
+
+
         const isSelected = (star.n.toLowerCase() === selectedBody);
+
+
 
         rows += buildRow(star.n, altAz, "", isSelected);
 
+
+
       });
+
+
+
+
 
 
 
@@ -4228,137 +8466,342 @@
 
 
 
+
+
+
+
       // Auto-scroll to selected row
+
+
 
       if (selectedBody) {
 
+
+
         const selRow = tbody.querySelector("tr.alm-selected");
+
+
 
         if (selRow) selRow.scrollIntoView({ block: "nearest", behavior: "smooth" });
 
+
+
       }
 
+
+
     }
+
+
+
+
 
 
 
     document.getElementById("btnCalc").addEventListener("click", calculate);
 
+
+
     ["ltDate","utcDate","utcTime","body","gyroHead","varMag","varEW","lat","latNS","lon","lonEW","lha","dec","decNS","trueAzOverride","devOverride","devEW"]
+
+
 
       .forEach(id => {
 
+
+
         const el = document.getElementById(id);
+
+
 
         el.addEventListener("change", calculate);
 
+
+
         el.addEventListener("input", calculate);
 
+
+
       });
+
+
+
+
 
 
 
     // Hook almanac to UTC date & time, position, AND selected body changes
 
+
+
     ["utcDate","utcTime","lat","latNS","lon","lonEW","body"].forEach(id => {
+
       const el = document.getElementById(id);
+
       if (el) {
+
         el.addEventListener("change", renderStarAlmanac);
+
         el.addEventListener("input", renderStarAlmanac);
+
       }
+
     });
+
+
 
     window.renderDevTableView = renderDevTableView;
+
     window.drawDevChart = drawDevChart;
+
     window.renderStarAlmanac = renderStarAlmanac;
+
     window.calculate = calculate;
 
+
+
     try {
+
       const ltEl = document.getElementById("ltDate");
+
       if (ltEl) ltEl.valueAsDate = new Date();
+
       const utcEl = document.getElementById("utcDate");
+
       if (utcEl) utcEl.valueAsDate = new Date();
+
       renderDevTableView();
+
       renderStarAlmanac();
+
       calculate();
+
     } catch (err) {
+
       console.warn("SetStar initialization warning:", err);
+
     }
 
+
+
     const btnSave = document.getElementById("btnSaveDev");
+
     if (btnSave) btnSave.addEventListener("click", () => saveDevTableToStorage(true));
+
     const btnReset = document.getElementById("btnResetDev");
+
     if (btnReset) btnReset.addEventListener("click", resetDevTableToDefault);
+
     const btnPrint = document.getElementById("btnPrintDev");
+
     if (btnPrint) btnPrint.addEventListener("click", printDeviationCard);
 
+
+
     window.addEventListener("resize", () => {
+
       drawDevChart();
+
     });
 
+
+
   </script>
+
+
+
+
 
 
 
   </main><!-- end .app-content -->
 
-  </div><!-- end .app-container -->
 
 
+  </div>
 
-  <!-- Leaflet & Auto-NtM Module Scripts -->
+<!-- Modal: UKHO Notices to Mariners Bulletin Info & Audit -->
+      <div class="ntm-modal" id="ntmOverlayInfoModal">
+        <div class="ntm-modal-box" style="max-width:540px;">
+          <div class="ntm-modal-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px;">
+            <h3 style="margin:0;font-size:0.95rem;color:#f1f5f9;display:flex;align-items:center;gap:7px;">
+              <svg class="setsail-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#f05a36;"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke-width="1.6"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>
+              UKHO Notices to Mariners ? Status &amp; Bulletin Info
+            </h3>
+            <button type="button" class="ntm-modal-close" id="ntmOverlayInfoClose" title="Close" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">?</button>
+          </div>
+          <div style="font-size:0.75rem;color:#cad8f4;line-height:1.5;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:rgba(240,90,54,0.1);padding:6px 10px;border-radius:6px;border:1px solid rgba(240,90,54,0.25);">
+              <span style="font-weight:700;color:#ff7a5c;">Admiralty Weekly Edition &amp; File 27 T&amp;P</span>
+              <span style="font-size:0.7rem;background:#10b981;color:#fff;padding:1px 6px;border-radius:4px;font-weight:700;">LIVE ACTIVE</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+              <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
+                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Current Database Edition</div>
+                <div id="ntmModalEdition" style="font-size:0.88rem;font-weight:700;color:#f1f5f9;margin-top:2px;">Week 41 / 2026</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
+                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Total Notices In Force</div>
+                <div id="ntmModalCount" style="font-size:0.88rem;font-weight:700;color:#38bdf8;margin-top:2px;">86 Notices Plotted</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
+                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Temporary &amp; Preliminary</div>
+                <div id="ntmModalTpCount" style="font-size:0.85rem;font-weight:600;color:#fbbf24;margin-top:2px;">72 T&amp;P Notices</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
+                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Coverage Authority</div>
+                <div style="font-size:0.82rem;font-weight:600;color:#f1f5f9;margin-top:2px;">UK Hydrographic Office (Taunton, UK)</div>
+              </div>
+            </div>
+            <p style="margin:0 0 10px;color:var(--muted);font-size:0.72rem;">
+              Database contains worldwide Admiralty Notices to Mariners including Temporary (T), Preliminary (P), and Permanent navigational warnings. TSS zones, traffic separation schemes, and route hazards are rendered as interactive GIS vector polygons with continuous longitude wrapping across the Pacific antimeridian.
+            </p>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px;border-top:1px solid var(--line);padding-top:8px;">
+            <button type="button" class="secondary" id="ntmOverlayInfoCloseBtn" style="margin-top:0;padding:4px 14px;font-size:0.78rem;">Close</button>
+          </div>
+        </div>
+      </div>
 
-  <script src="assets/leaflet/leaflet.js"></script>
+      <!-- Modal: Interactive Passage Plan Waypoint Editor -->
+      <div class="ntm-modal" id="ntmWaypointEditModal">
+        <div class="ntm-modal-box" style="max-width:520px;">
+          <div class="ntm-modal-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px;">
+            <h3 style="margin:0;font-size:0.95rem;color:#f1f5f9;display:flex;align-items:center;gap:7px;">
+              <svg class="setsail-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#f05a36;"><circle cx="4" cy="19" r="2.5"/><circle cx="20" cy="5" r="2.5"/><path d="M4 16.5c0-4 4-5.5 8-5.5s8-2 8-5.5" stroke-dasharray="3 2"/><polygon points="17 4 20.5 5 19 8" fill="#f05a36"/></svg>
+              <span id="wptEditModalTitle">Edit Waypoint</span>
+            </h3>
+            <button type="button" class="ntm-modal-close" id="wptEditCloseBtn" title="Close" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">?</button>
+          </div>
+          <form id="wptEditForm" onsubmit="event.preventDefault();" style="display:flex;flex-direction:column;gap:10px;">
+            <input type="hidden" id="wptEditIndex" value="" />
+            <div>
+              <label style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:3px;display:block;">Waypoint Name / Description</label>
+              <input type="text" id="wptEditName" style="width:100%;padding:5px 8px;font-size:0.82rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:5px;color:#fff;box-sizing:border-box;" placeholder="e.g. OFF ATLANTIC ANCHORAGE" />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:3px;display:block;">Latitude (DMS)</label>
+                <div style="display:flex;gap:4px;">
+                  <input type="number" id="wptEditLatDeg" min="0" max="90" placeholder="Deg" style="width:50px;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;text-align:center;" />
+                  <input type="number" step="0.001" id="wptEditLatMin" min="0" max="59.999" placeholder="Min" style="flex:1;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;text-align:center;" />
+                  <select id="wptEditLatHem" style="width:45px;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;">
+                    <option value="N">N</option>
+                    <option value="S">S</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:3px;display:block;">Longitude (DMS)</label>
+                <div style="display:flex;gap:4px;">
+                  <input type="number" id="wptEditLonDeg" min="0" max="180" placeholder="Deg" style="width:55px;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;text-align:center;" />
+                  <input type="number" step="0.001" id="wptEditLonMin" min="0" max="59.999" placeholder="Min" style="flex:1;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;text-align:center;" />
+                  <select id="wptEditLonHem" style="width:45px;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;">
+                    <option value="E">E</option>
+                    <option value="W">W</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+              <div>
+                <label style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:3px;display:block;">Speed (kn)</label>
+                <input type="number" step="0.1" id="wptEditSpeed" style="width:100%;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;box-sizing:border-box;" />
+              </div>
+              <div>
+                <label style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:3px;display:block;">Port XTD (NM)</label>
+                <input type="number" step="0.01" id="wptEditPortXtd" style="width:100%;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;box-sizing:border-box;" />
+              </div>
+              <div>
+                <label style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:3px;display:block;">Stbd XTD (NM)</label>
+                <input type="number" step="0.01" id="wptEditStbdXtd" style="width:100%;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;box-sizing:border-box;" />
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+              <div>
+                <label style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:3px;display:block;">Turn Rad (NM)</label>
+                <input type="number" step="0.01" id="wptEditRadius" style="width:100%;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;box-sizing:border-box;" />
+              </div>
+              <div>
+                <label style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:3px;display:block;">Leg Type</label>
+                <select id="wptEditSail" style="width:100%;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;box-sizing:border-box;">
+                  <option value="RL">RL (Rhumb Line)</option>
+                  <option value="GC">GC (Great Circle)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:3px;display:block;">ROT (?/min)</label>
+                <input type="number" step="0.1" id="wptEditRot" style="width:100%;padding:4px;font-size:0.8rem;background:rgba(15,23,42,0.8);border:1px solid var(--line);border-radius:4px;color:#fff;box-sizing:border-box;" />
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;border-top:1px solid var(--line);padding-top:10px;">
+              <button type="button" class="ntm-btn-glass" id="wptEditCenterBtn" style="font-size:0.75rem;padding:4px 10px;color:var(--accent);">Center on Chart</button>
+              <div style="display:flex;gap:6px;">
+                <button type="button" class="secondary" id="wptEditCancelBtn" style="margin-top:0;font-size:0.78rem;padding:4px 12px;">Cancel</button>
+                <button type="button" id="wptEditSaveBtn" style="margin-top:0;font-size:0.78rem;padding:4px 14px;background:linear-gradient(135deg,#f05a36,#cf3818);border-color:rgba(255,120,90,0.45);color:#fff;font-weight:600;">Save Waypoint</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
 
-  <script src="assets/Auto NtM Plotting/pdf.min.js"></script>
-
-  <script>
-
-    if (window.pdfjsLib) {
-
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
-
-    }
-
-  </script>
-
-  <script src="assets/Auto NtM Plotting/ntm_module.js"></script>
-
-  <script src="assets/Auto NtM Plotting/port_depths.js"></script>
-
-  <script src="assets/Auto NtM Plotting/setsail_core.js"></script>
+      <script>
 
 
-
-  <!-- SetSail PWA Offline Service Worker Registration -->
-
-  <script>
 
     if ('serviceWorker' in navigator) {
 
+
+
       window.addEventListener('load', () => {
+
+
 
         navigator.serviceWorker.register('sw.js', { scope: './' })
 
+
+
           .then((reg) => {
+
+
 
             console.log('[SetSail PWA] Service Worker registered successfully, scope:', reg.scope);
 
+
+
           })
+
+
 
           .catch((err) => {
 
+
+
             console.warn('[SetSail PWA] Service Worker registration failed:', err);
+
+
 
           });
 
+
+
       });
+
+
 
     }
 
+
+
   </script>
+
+
 
 </body>
 
+
+
 </html>
+
+
 
