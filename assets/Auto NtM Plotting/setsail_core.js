@@ -3243,3 +3243,404 @@ window.initSetRoute = initSetRoute;
 window.refreshSetRouteUI = () => {
   if (typeof PORT_DEPTHS_DB !== "undefined") initSetRoute();
 };
+
+
+// ==========================================================================
+// MULTI-OVERLAY HELPERS, DIRECT 1-CLICK EXPORT & WAYPOINT EDITOR
+// ==========================================================================
+
+function initCategoryPills() {
+  const pills = document.querySelectorAll(".ntm-category-pill");
+  pills.forEach(pill => {
+    pill.addEventListener("click", () => {
+      pills.forEach(p => p.classList.remove("active"));
+      pill.classList.add("active");
+      activeOverlayCategory = pill.dataset.category || "ALL";
+      if (typeof renderNtMListAndMap === "function") {
+        renderNtMListAndMap();
+      }
+    });
+  });
+}
+
+function centerMapOnWaypoint(idx) {
+  if (!leafletMap || !activeRouteData || !activeRouteData.waypoints || !activeRouteData.waypoints[idx]) return;
+  const wp = activeRouteData.waypoints[idx];
+  leafletMap.flyTo([wp.lat, wp.lon], Math.max(leafletMap.getZoom(), 11), { duration: 0.9 });
+}
+
+function openWaypointEditModal(idx) {
+  if (!activeRouteData || !activeRouteData.waypoints || !activeRouteData.waypoints[idx]) return;
+  const wp = activeRouteData.waypoints[idx];
+  const modal = document.getElementById("ntmWaypointEditModal");
+  if (!modal) return;
+
+  const latDeg = Math.floor(Math.abs(wp.lat));
+  const latMin = ((Math.abs(wp.lat) - latDeg) * 60).toFixed(3);
+  const latHem = wp.lat >= 0 ? "N" : "S";
+
+  const normLon = ((wp.lon + 180) % 360 + 360) % 360 - 180;
+  const lonDeg = Math.floor(Math.abs(normLon));
+  const lonMin = ((Math.abs(normLon) - lonDeg) * 60).toFixed(3);
+  const lonHem = normLon >= 0 ? "E" : "W";
+
+  const elIdx = document.getElementById("wptEditIndex");
+  const elTitle = document.getElementById("wptEditModalTitle");
+  const elName = document.getElementById("wptEditName");
+  const elLatDeg = document.getElementById("wptEditLatDeg");
+  const elLatMin = document.getElementById("wptEditLatMin");
+  const elLatHem = document.getElementById("wptEditLatHem");
+  const elLonDeg = document.getElementById("wptEditLonDeg");
+  const elLonMin = document.getElementById("wptEditLonMin");
+  const elLonHem = document.getElementById("wptEditLonHem");
+  const elSpeed = document.getElementById("wptEditSpeed");
+  const elPortXtd = document.getElementById("wptEditPortXtd");
+  const elStbdXtd = document.getElementById("wptEditStbdXtd");
+  const elRadius = document.getElementById("wptEditRadius");
+  const elSail = document.getElementById("wptEditSail");
+  const elRot = document.getElementById("wptEditRot");
+
+  if (elIdx) elIdx.value = String(idx);
+  if (elTitle) elTitle.textContent = Edit Waypoint #;
+  if (elName) elName.value = wp.name || "";
+  if (elLatDeg) elLatDeg.value = latDeg;
+  if (elLatMin) elLatMin.value = latMin;
+  if (elLatHem) elLatHem.value = latHem;
+  if (elLonDeg) elLonDeg.value = lonDeg;
+  if (elLonMin) elLonMin.value = lonMin;
+  if (elLonHem) elLonHem.value = lonHem;
+  if (elSpeed) elSpeed.value = wp.speedKnots != null ? wp.speedKnots : 14.0;
+  if (elPortXtd) elPortXtd.value = wp.portsideXTD != null ? wp.portsideXTD : 0.1;
+  if (elStbdXtd) elStbdXtd.value = wp.starboardXTD != null ? wp.starboardXTD : 0.1;
+  if (elRadius) elRadius.value = wp.turnRadius != null ? wp.turnRadius : 0.5;
+  if (elSail) elSail.value = (wp.sail || "RL").toUpperCase();
+  if (elRot) elRot.value = wp.rot != null ? wp.rot : 0.0;
+
+  modal.classList.add("open");
+}
+
+function saveWaypointFromModal() {
+  const modal = document.getElementById("ntmWaypointEditModal");
+  if (!modal || !activeRouteData || !activeRouteData.waypoints) return;
+
+  const idx = parseInt(document.getElementById("wptEditIndex")?.value, 10);
+  if (isNaN(idx) || !activeRouteData.waypoints[idx]) return;
+
+  const wp = activeRouteData.waypoints[idx];
+  const name = document.getElementById("wptEditName")?.value.trim() || "";
+  const latDeg = parseFloat(document.getElementById("wptEditLatDeg")?.value) || 0;
+  const latMin = parseFloat(document.getElementById("wptEditLatMin")?.value) || 0;
+  const latHem = document.getElementById("wptEditLatHem")?.value || "N";
+  const lonDeg = parseFloat(document.getElementById("wptEditLonDeg")?.value) || 0;
+  const lonMin = parseFloat(document.getElementById("wptEditLonMin")?.value) || 0;
+  const lonHem = document.getElementById("wptEditLonHem")?.value || "E";
+
+  const speed = parseFloat(document.getElementById("wptEditSpeed")?.value) || 14.0;
+  const pXtd = parseFloat(document.getElementById("wptEditPortXtd")?.value) || 0.1;
+  const sXtd = parseFloat(document.getElementById("wptEditStbdXtd")?.value) || 0.1;
+  const turnRad = parseFloat(document.getElementById("wptEditRadius")?.value) || 0.5;
+  const sail = document.getElementById("wptEditSail")?.value || "RL";
+  const rot = parseFloat(document.getElementById("wptEditRot")?.value) || 0.0;
+
+  let newLat = latDeg + latMin / 60.0;
+  if (latHem === "S") newLat = -newLat;
+
+  let newLon = lonDeg + lonMin / 60.0;
+  if (lonHem === "W") newLon = -newLon;
+
+  wp.name = name;
+  wp.lat = newLat;
+  wp.lon = newLon;
+  wp.speedKnots = speed;
+  wp.portsideXTD = pXtd;
+  wp.starboardXTD = sXtd;
+  wp.turnRadius = turnRad;
+  wp.sail = sail;
+  wp.rot = rot;
+
+  try {
+    localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(activeRouteData));
+  } catch (e) {}
+
+  if (typeof renderRouteOnMap === "function") {
+    renderRouteOnMap(activeRouteData, false);
+  }
+  if (typeof renderNtMListAndMap === "function") {
+    renderNtMListAndMap();
+  }
+  modal.classList.remove("open");
+  showSetSailToast(Waypoint # updated successfully, "success");
+}
+
+function initWaypointEditModal() {
+  const modal = document.getElementById("ntmWaypointEditModal");
+  if (!modal) return;
+
+  const closeBtn = document.getElementById("wptEditCloseBtn");
+  const cancelBtn = document.getElementById("wptEditCancelBtn");
+  const saveBtn = document.getElementById("wptEditSaveBtn");
+  const centerBtn = document.getElementById("wptEditCenterBtn");
+
+  if (closeBtn) closeBtn.addEventListener("click", () => modal.classList.remove("open"));
+  if (cancelBtn) cancelBtn.addEventListener("click", () => modal.classList.remove("open"));
+  if (saveBtn) saveBtn.addEventListener("click", saveWaypointFromModal);
+  if (centerBtn) {
+    centerBtn.addEventListener("click", () => {
+      const latDeg = parseFloat(document.getElementById("wptEditLatDeg")?.value) || 0;
+      const latMin = parseFloat(document.getElementById("wptEditLatMin")?.value) || 0;
+      const latHem = document.getElementById("wptEditLatHem")?.value || "N";
+      const lonDeg = parseFloat(document.getElementById("wptEditLonDeg")?.value) || 0;
+      const lonMin = parseFloat(document.getElementById("wptEditLonMin")?.value) || 0;
+      const lonHem = document.getElementById("wptEditLonHem")?.value || "E";
+      let lat = (latDeg + latMin / 60.0) * (latHem === "S" ? -1 : 1);
+      let lon = (lonDeg + lonMin / 60.0) * (lonHem === "W" ? -1 : 1);
+      if (leafletMap) {
+        leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 11));
+      }
+    });
+  }
+}
+
+function openNtmOverlayInfoModal() {
+  const modal = document.getElementById("ntmOverlayInfoModal");
+  if (!modal) return;
+
+  const countEl = document.getElementById("ntmModalCount");
+  const tpCountEl = document.getElementById("ntmModalTpCount");
+  const editionEl = document.getElementById("ntmModalEdition");
+
+  const total = typeof NTM_STORE !== "undefined" ? NTM_STORE.length : 0;
+  const tpCount = typeof NTM_STORE !== "undefined" ? NTM_STORE.filter(n => n.type === "T" || n.type === "P").length : 0;
+
+  if (countEl) countEl.textContent = ${total} Notices Plotted;
+  if (tpCountEl) tpCountEl.textContent = ${tpCount} T&P Notices;
+
+  let latestEd = "Week 41 / 2026";
+  if (typeof NTM_STORE !== "undefined" && NTM_STORE.length > 0) {
+    const withEd = NTM_STORE.find(n => n.edition);
+    if (withEd) latestEd = withEd.edition;
+  }
+  if (editionEl) editionEl.textContent = latestEd;
+
+  modal.classList.add("open");
+}
+
+function initNtmOverlayInfoModal() {
+  const modal = document.getElementById("ntmOverlayInfoModal");
+  if (!modal) return;
+  const closeBtn = document.getElementById("ntmOverlayInfoClose");
+  const closeBtn2 = document.getElementById("ntmOverlayInfoCloseBtn");
+  if (closeBtn) closeBtn.addEventListener("click", () => modal.classList.remove("open"));
+  if (closeBtn2) closeBtn2.addEventListener("click", () => modal.classList.remove("open"));
+}
+
+function showRouteInfoSummary() {
+  if (activeRouteData && activeRouteData.waypoints && activeRouteData.waypoints.length > 0) {
+    const startWp = activeRouteData.waypoints[0]?.name || "Start";
+    const endWp = activeRouteData.waypoints[activeRouteData.waypoints.length - 1]?.name || "End";
+    showSetSailToast(Route:  ?  WPTs ( ? ), "info");
+  } else {
+    showSetSailToast("No passage plan loaded. Upload .rtz or .csv in My Vessel menu.", "warning");
+  }
+}
+
+/**
+ * Direct 1-Click Map Export: Exports all visible features on chart with active filters
+ */
+function executeDirectMapExport() {
+  const activeFeatures = [];
+  let ntmCount = 0;
+  let portCount = 0;
+  let wptCount = 0;
+
+  // 1. NtM Notices (if overlay is active)
+  const isNoticesActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.notices !== false : true;
+  if (isNoticesActive && typeof getFilteredNotices === "function") {
+    const filteredNotices = getFilteredNotices();
+    filteredNotices.forEach(item => {
+      ntmCount++;
+      const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
+      
+      // Polygons / TSS
+      if (item.subPolygons && item.subPolygons.length > 0) {
+        item.subPolygons.forEach((sub, sIdx) => {
+          const pts = sub.points || (sub.coords || []).map(c => [c.lon, c.lat]);
+          if (pts && pts.length >= 3) {
+            const ring = pts.map(p => Array.isArray(p) ? (p[0] > 90 ? [p[1], p[0]] : p) : [p.lon, p.lat]);
+            if (ring.length > 0 && (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])) {
+              ring.push([ring[0][0], ring[0][1]]);
+            }
+            activeFeatures.push({
+              type: "Feature",
+              geometry: {
+                type: "Polygon",
+                coordinates: [ring]
+              },
+              properties: {
+                layer: "Admiralty_NtM",
+                id: item.id,
+                subIndex: sIdx + 1,
+                type: item.type,
+                status: isItemCancelled ? "CANCELLED" : "ACTIVE",
+                category: sub.category || "hazard_area",
+                subject: item.subject || "",
+                country: item.country || "",
+                region: item.region || "",
+                charts: item.charts || []
+              }
+            });
+          }
+        });
+      }
+      
+      // Coords Points
+      if (item.coords && item.coords.length > 0) {
+        item.coords.forEach((c, cIdx) => {
+          activeFeatures.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [c.lon, c.lat]
+            },
+            properties: {
+              layer: "Admiralty_NtM",
+              id: item.id,
+              pointIndex: cIdx + 1,
+              type: item.type,
+              status: isItemCancelled ? "CANCELLED" : "ACTIVE",
+              dms: c.dms || "",
+              subject: item.subject || "",
+              country: item.country || "",
+              region: item.region || "",
+              charts: item.charts || []
+            }
+          });
+        });
+      }
+    });
+  }
+
+  // 2. Port Depths (if overlay is active)
+  const isDepthsActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.depths !== false : true;
+  if (isDepthsActive && typeof PORT_DEPTHS_DB !== "undefined") {
+    const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
+    let portsToExport = PORT_DEPTHS_DB;
+    if (searchVal) {
+      portsToExport = PORT_DEPTHS_DB.filter(p => {
+        return p.name.toLowerCase().includes(searchVal) ||
+               (p.nameCn && p.nameCn.toLowerCase().includes(searchVal)) ||
+               p.country.toLowerCase().includes(searchVal) ||
+               p.unlocode.toLowerCase().includes(searchVal);
+      });
+    }
+    portsToExport.forEach(port => {
+      portCount++;
+      activeFeatures.push({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [port.lon, port.lat]
+        },
+        properties: {
+          layer: "Port_Depths",
+          id: port.id,
+          name: port.name,
+          nameCn: port.nameCn || "",
+          unlocode: port.unlocode,
+          country: port.country,
+          authority: port.authority || "",
+          maxDraft: port.maxDraftMeters || null,
+          maxAirDraft: port.maxAirDraftMeters || null,
+          fairways: (port.fairways || []).map(f => ({ name: f.name, maintainedDepth: f.maintainedDepthMeters }))
+        }
+      });
+    });
+  }
+
+  // 3. Route Waypoints and Track (if overlay is active and route loaded)
+  const isRouteActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.route !== false : true;
+  if (isRouteActive && activeRouteData && activeRouteData.waypoints && activeRouteData.waypoints.length > 0) {
+    wptCount = activeRouteData.waypoints.length;
+    const lineCoords = activeRouteData.waypoints.map(w => [w.lon, w.lat]);
+    activeFeatures.push({
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: lineCoords
+      },
+      properties: {
+        layer: "Route_Track",
+        routeName: activeRouteData.name || "SetSail Passage Plan",
+        format: activeRouteData.format || "ECDIS",
+        waypointCount: activeRouteData.waypoints.length
+      }
+    });
+
+    activeRouteData.waypoints.forEach((wp, idx) => {
+      activeFeatures.push({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [wp.lon, wp.lat]
+        },
+        properties: {
+          layer: "Route_Waypoint",
+          wptIndex: idx + 1,
+          wptNo: wp.wptNo || ('00' + (idx + 1)).slice(-3),
+          name: wp.name || "",
+          lat: wp.lat,
+          lon: wp.lon,
+          speedKnots: wp.speedKnots != null ? wp.speedKnots : 14.0,
+          portsideXTD: wp.portsideXTD != null ? wp.portsideXTD : 0.1,
+          starboardXTD: wp.starboardXTD != null ? wp.starboardXTD : 0.1,
+          turnRadius: wp.turnRadius != null ? wp.turnRadius : 0.5,
+          sail: wp.sail || "RL",
+          rot: wp.rot != null ? wp.rot : 0.0
+        }
+      });
+    });
+  }
+
+  if (activeFeatures.length === 0) {
+    showSetSailToast("No visible chart items found to export. Ensure an overlay is enabled.", "warning");
+    return;
+  }
+
+  const exportGeoJson = {
+    type: "FeatureCollection",
+    name: "SetSail_ECDIS_Export",
+    crs: {
+      type: "name",
+      properties: { name: "urn:ogc:def:crs:OGC:1.3:CRS84" }
+    },
+    metadata: {
+      exportedAtUtc: new Date().toISOString(),
+      generator: "SetSail ECDIS Maritime Suite",
+      activeOverlays: {
+        notices: isNoticesActive,
+        depths: isDepthsActive,
+        route: isRouteActive
+      },
+      itemCounts: {
+        notices: ntmCount,
+        ports: portCount,
+        waypoints: wptCount,
+        totalFeatures: activeFeatures.length
+      }
+    },
+    features: activeFeatures
+  };
+
+  const filename = SetSail_ECDIS_Export_.geojson;
+  downloadTextFile(JSON.stringify(exportGeoJson, null, 2), filename, "application/geo+json");
+  showSetSailToast(Direct Export:  NtMs,  Ports,  Waypoints, "success");
+}
+
+window.initCategoryPills = initCategoryPills;
+window.initWaypointEditModal = initWaypointEditModal;
+window.initNtmOverlayInfoModal = initNtmOverlayInfoModal;
+window.openNtmOverlayInfoModal = openNtmOverlayInfoModal;
+window.openWaypointEditModal = openWaypointEditModal;
+window.centerMapOnWaypoint = centerMapOnWaypoint;
+window.showRouteInfoSummary = showRouteInfoSummary;
+window.executeDirectMapExport = executeDirectMapExport;
