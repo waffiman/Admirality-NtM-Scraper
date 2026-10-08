@@ -69,6 +69,26 @@ const THEME_STORAGE_KEY = "setsail_theme";
 const META_STORAGE_KEY = "setsail_meta_v1";
 
 let NTM_STORE = [];
+let activeOverlayCategory = "ALL";
+
+/**
+ * Non-Intrusive Floating Toast Notification
+ */
+function showSetSailToast(message, type = "info") {
+  let toastEl = document.getElementById("setsailToast");
+  if (!toastEl) {
+    toastEl = document.createElement("div");
+    toastEl.id = "setsailToast";
+    toastEl.className = "setsail-toast";
+    document.body.appendChild(toastEl);
+  }
+  toastEl.textContent = message;
+  toastEl.className = `setsail-toast setsail-toast-${type} show`;
+  clearTimeout(toastEl._timer);
+  toastEl._timer = setTimeout(() => {
+    toastEl.classList.remove("show");
+  }, 4200);
+}
 let NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM"]); // Default: all active notice types
 let NTM_FILTER_AREAS = false;
 let NTM_SHOW_CANCELLED = false; // Strictly isolated from map by default!
@@ -661,18 +681,22 @@ function initAutoNtmUI() {
 
 // Select All removed per user request (all visible chart notices auto-exported)
 
-  // Export Modal Open / Close
-  if (openExportBtn && exportModal) {
+  // 1-Click Direct Export (Per user requirement: Zero modals, exports all visible chart items directly)
+  if (openExportBtn) {
     openExportBtn.addEventListener("click", () => {
-      updateExportModalCounts();
-      exportModal.classList.add("open");
+      executeDirectMapExport();
     });
-    if (expBtnClose) {
-      expBtnClose.addEventListener("click", () => {
-        exportModal.classList.remove("open");
-      });
-    }
   }
+  if (expBtnClose && exportModal) {
+    expBtnClose.addEventListener("click", () => {
+      exportModal.classList.remove("open");
+    });
+  }
+
+  // Initialize category filter pills, waypoint editor & NtM info popups
+  initCategoryPills();
+  initWaypointEditModal();
+  initNtmOverlayInfoModal();
 
   // Checkbox listeners in Export modal
   [expChkT, expChkP, expChkPerm, expChkOnlyChecked].forEach(chk => {
@@ -894,11 +918,26 @@ function parseCsvRoute(csvStr, fallbackName) {
         let lon = lonDeg + (isNaN(lonMin) ? 0 : lonMin) / 60.0;
         if (lonHem === "W") lon = -lon;
         const wpName = (cols.length > 16 && cols[16]) ? cols[16] : `WPT ${cols[0]}`;
+        const portXtd = parseFloat(cols[7]) || 0.1;
+        const stbdXtd = parseFloat(cols[8]) || 0.1;
+        const arrRad = parseFloat(cols[9]) || 0.5;
+        const speed = parseFloat(cols[10]) || 14.0;
+        const sail = (cols[11] || "RL").toUpperCase();
+        const rot = parseFloat(cols[12]) || 0;
+        const turnRad = parseFloat(cols[13]) || arrRad || 0.5;
         waypoints.push({
           id: wpIdx + 1,
+          wptNo: cols[0],
           lat,
           lon,
-          name: wpName
+          name: wpName,
+          portsideXTD: portXtd,
+          starboardXTD: stbdXtd,
+          arrRadius: arrRad,
+          turnRadius: turnRad,
+          speedKnots: speed,
+          sail: sail,
+          rot: rot
         });
       }
     }
@@ -962,6 +1001,13 @@ function renderRouteOnMap(route, shouldFly = true) {
   }
   
   activeRouteData = route;
+  if (typeof setOverlayActive === "function") {
+    setOverlayActive("route", true, leafletMap);
+  } else if (typeof OVERLAY_STATES !== "undefined") {
+    OVERLAY_STATES.route = true;
+  }
+  const catPillRoute = document.getElementById("catPillRoute");
+  if (catPillRoute) catPillRoute.style.display = "inline-flex";
   try {
     localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(route));
   } catch (e) {}
@@ -1055,6 +1101,16 @@ function renderRouteOnMap(route, shouldFly = true) {
 }
 
 function clearActiveRoute() {
+  const catPillRoute = document.getElementById("catPillRoute");
+  if (catPillRoute) catPillRoute.style.display = "none";
+  if (activeOverlayCategory === "ROUTE") {
+    activeOverlayCategory = "ALL";
+    const pillAll = document.getElementById("catPillAll");
+    if (pillAll) {
+      document.querySelectorAll(".ntm-category-pill").forEach(p => p.classList.remove("active"));
+      pillAll.classList.add("active");
+    }
+  }
   activeRouteData = null;
   try {
     localStorage.removeItem(ROUTE_STORAGE_KEY);
@@ -2076,22 +2132,78 @@ function fitAllNoticesOnMap() {
 function renderNtMListAndMap() {
   const listContainer = document.getElementById("ntmItemsScroll");
   const countEl = document.getElementById("ntmListCount");
-  const filtered = getFilteredNotices();
+  const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
 
+  const isNoticesActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.notices !== false : true;
+  const isDepthsActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.depths !== false : true;
+  const isRouteActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.route !== false : true;
+
+  // 1. Gather filtered NtM items
+  const filteredNotices = isNoticesActive ? getFilteredNotices() : [];\n  const filtered = filteredNotices;
+
+  // 2. Gather filtered Ports items
+  let filteredPorts = [];
+  if (isDepthsActive && typeof PORT_DEPTHS_DB !== "undefined") {
+    filteredPorts = PORT_DEPTHS_DB.filter(p => {
+      if (!searchVal) return true;
+      return p.name.toLowerCase().includes(searchVal) ||
+             (p.nameCn && p.nameCn.toLowerCase().includes(searchVal)) ||
+             p.country.toLowerCase().includes(searchVal) ||
+             p.unlocode.toLowerCase().includes(searchVal) ||
+             (p.authority && p.authority.toLowerCase().includes(searchVal)) ||
+             (p.fairways && p.fairways.some(f => f.name.toLowerCase().includes(searchVal)));
+    });
+  }
+
+  // 3. Gather filtered Route Waypoints
+  let filteredWaypoints = [];
+  const hasRoute = isRouteActive && Boolean(activeRouteData && activeRouteData.waypoints && activeRouteData.waypoints.length > 0);
+  if (hasRoute) {
+    filteredWaypoints = activeRouteData.waypoints.filter((wp, idx) => {
+      if (!searchVal) return true;
+      const wptStr = (wp.wptNo || String(idx + 1)).toLowerCase();
+      const nameStr = (wp.name || "").toLowerCase();
+      const sailStr = (wp.sail || "").toLowerCase();
+      return wptStr.includes(searchVal) || nameStr.includes(searchVal) || sailStr.includes(searchVal);
+    });
+  }
+
+  // Update Category Badge Counters
+  const catPillRoute = document.getElementById("catPillRoute");
+  if (catPillRoute) {
+    catPillRoute.style.display = hasRoute ? "inline-flex" : "none";
+  }
+  const countAllBadge = document.getElementById("catCountAll");
+  const countNtmBadge = document.getElementById("catCountNtm");
+  const countPortsBadge = document.getElementById("catCountPorts");
+  const countRouteBadge = document.getElementById("catCountRoute");
+
+  const totalVisibleCount = (isNoticesActive ? filteredNotices.length : 0) +
+                            (isDepthsActive ? filteredPorts.length : 0) +
+                            (hasRoute ? filteredWaypoints.length : 0);
+
+  if (countAllBadge) countAllBadge.textContent = totalVisibleCount;
+  if (countNtmBadge) countNtmBadge.textContent = filteredNotices.length;
+  if (countPortsBadge) countPortsBadge.textContent = filteredPorts.length;
+  if (countRouteBadge) countRouteBadge.textContent = filteredWaypoints.length;
+
+  if (countEl) {
+    const parts = [];
+    if (isNoticesActive) parts.push(`${filteredNotices.length} NtMs`);
+    if (isDepthsActive) parts.push(`${filteredPorts.length} Ports`);
+    if (hasRoute) parts.push(`${filteredWaypoints.length} WPTs`);
+    countEl.textContent = parts.length > 0 ? parts.join(" • ") : "No active overlays";
+  }
+
+  // Update Popover Counts for NtM
   const activeNotices = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED");
   const cancelledNotices = NTM_STORE.filter(n => n.isCancelled || n.status === "CANCELLED");
-
   const countT = activeNotices.filter(n => n.type === "T").length;
   const countP = activeNotices.filter(n => n.type === "P").length;
   const countPerm = activeNotices.filter(n => n.type === "PERM").length;
   const countPoly = activeNotices.filter(n => n.isPolygon || (n.coords && n.coords.length >= 3)).length;
   const countCancelled = cancelledNotices.length;
 
-  if (countEl) {
-    countEl.textContent = `${filtered.length} of ${NTM_STORE.length}`;
-  }
-
-  // Update Popover Counts
   const elCntT = document.getElementById("popCntT");
   if (elCntT) elCntT.textContent = countT;
   const elCntP = document.getElementById("popCntP");
@@ -2118,74 +2230,118 @@ function renderNtMListAndMap() {
 
   updateSelectionCounter();
 
-  // Multi-Target Search: Check matching ports from PORT_DEPTHS_DB
-  const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
-  let matchedPorts = [];
-  if (searchVal && typeof PORT_DEPTHS_DB !== "undefined") {
-    matchedPorts = PORT_DEPTHS_DB.filter(p => {
-      return p.name.toLowerCase().includes(searchVal) ||
-             (p.nameCn && p.nameCn.toLowerCase().includes(searchVal)) ||
-             p.country.toLowerCase().includes(searchVal) ||
-             p.unlocode.toLowerCase().includes(searchVal) ||
-             p.authority.toLowerCase().includes(searchVal) ||
-             (p.fairways && p.fairways.some(f => f.name.toLowerCase().includes(searchVal)));
-    });
-  }
-
-  if (countEl) {
-    if (matchedPorts.length > 0) {
-      countEl.textContent = `${matchedPorts.length} Ports, ${filtered.length} NtMs`;
-    } else {
-      countEl.textContent = `${filtered.length} of ${NTM_STORE.length}`;
-    }
-  }
-
-  if (countEl) {
-    if (matchedPorts.length > 0) {
-      countEl.textContent = `${matchedPorts.length} Ports, ${filtered.length} NtMs`;
-    } else {
-      countEl.textContent = `${filtered.length} of ${NTM_STORE.length}`;
-    }
-  }
-
   if (listContainer) {
     let html = "";
-    if (matchedPorts.length > 0) {
-        html += `<div class="ntm-search-section-header"><span><svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg> WORLD PORTS (${matchedPorts.length})</span></div>`;
-        matchedPorts.forEach(port => {
-          const cCode = (port.countryCode || (port.country ? port.country.slice(0, 2) : "UN")).toUpperCase();
-          const cLower = cCode.toLowerCase();
-          html += `
-            <div class="ntm-card-item ntm-port-search-card" data-port-id="${port.id}" onclick="jumpToPort('${port.id}')" title="Click to inspect ${port.name} on map">
-              <div class="ntm-card-content" style="padding:0.55rem 0.75rem;">
-                <div class="ntm-card-top" style="align-items:center;gap:7px;">
-                  <span class="port-flag-box" title="${port.country}">
-                    <img src="assets/flags/${cLower}.png" 
-                         onerror="this.onerror=null;this.src='https://flagcdn.com/w40/${cLower}.png';" 
-                         alt="${cCode}" 
-                         class="port-flag-img" 
-                         width="21" 
-                         height="15" 
-                         loading="lazy" />
-                  </span>
-                  <span class="ntm-card-id" style="color:var(--accent);font-weight:600;font-size:0.86rem;">${port.name}</span>
-                  <span class="ntm-tag perm" style="margin-left:auto;">${port.unlocode}</span>
-                </div>
-                <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;justify-content:space-between;">
-                  <span>${port.country}</span>
-                  <span style="color:#f05a36;font-size:0.7rem;font-weight:600;">View Chart &rarr;</span>
-                </div>
+    const showRoute = hasRoute && (activeOverlayCategory === "ALL" || activeOverlayCategory === "ROUTE");
+    const showPorts = isDepthsActive && (activeOverlayCategory === "ALL" || activeOverlayCategory === "PORTS");
+    const showNotices = isNoticesActive && (activeOverlayCategory === "ALL" || activeOverlayCategory === "NTM");
+
+    // SECTION A: ROUTE WAYPOINTS
+    if (showRoute) {
+      html += `
+        <div class="ntm-search-section-header" style="background:rgba(2,132,199,0.12);border-color:rgba(56,189,248,0.3);">
+          <span style="color:#38bdf8;">
+            <svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;stroke:#38bdf8;"><circle cx="4" cy="19" r="2.5"/><circle cx="20" cy="5" r="2.5"/><path d="M4 16.5c0-4 4-5.5 8-5.5s8-2 8-5.5"/></svg>
+            ROUTE WAYPOINTS: ${activeRouteData.name || "Passage Plan"} (${filteredWaypoints.length})
+          </span>
+        </div>
+      `;
+
+      filteredWaypoints.forEach((wp, wIdx) => {
+        const globalIdx = activeRouteData.waypoints.indexOf(wp);
+        const isStart = globalIdx === 0;
+        const isEnd = globalIdx === activeRouteData.waypoints.length - 1;
+        const wptDisplayNum = wp.wptNo || ('00' + (globalIdx + 1)).slice(-3);
+        const wptLabel = wp.name ? wp.name : `WPT ${wptDisplayNum}`;
+        const dmsCoords = formatLatLonDMS(wp.lat, wp.lon);
+        const sail = wp.sail || "RL";
+        const speed = wp.speedKnots != null ? `${wp.speedKnots} kn` : "14.0 kn";
+        const pXtd = wp.portsideXTD != null ? wp.portsideXTD : 0.1;
+        const sXtd = wp.starboardXTD != null ? wp.starboardXTD : 0.1;
+        const turnRad = wp.turnRadius != null ? `${wp.turnRadius} NM` : "0.5 NM";
+        const typeBadgeClass = isStart ? "perm" : (isEnd ? "temp" : "prelim");
+        const typeBadgeText = isStart ? "DEP" : (isEnd ? "DEST" : sail);
+
+        html += `
+          <div class="ntm-card-item ntm-wpt-card" data-wpt-idx="${globalIdx}" onclick="centerMapOnWaypoint(${globalIdx})">
+            <div class="ntm-card-content" style="padding:0.6rem 0.75rem;">
+              <div class="ntm-card-top" style="align-items:center;">
+                <span class="ntm-card-id" style="color:#38bdf8;font-weight:700;">#${wptDisplayNum}</span>
+                <span class="ntm-tag ${typeBadgeClass}" style="margin-left:6px;font-size:0.68rem;">${typeBadgeText}</span>
+                <button type="button" class="ntm-btn-wpt-edit" onclick="event.stopPropagation();openWaypointEditModal(${globalIdx})" title="Edit Waypoint #${wptDisplayNum}">
+                  <svg class="setsail-icon" viewBox="0 0 24 24" style="width:11px;height:11px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Edit
+                </button>
+              </div>
+              <div class="ntm-card-subject" style="margin-top:2px;font-weight:600;color:#f1f5f9;">${wptLabel}</div>
+              <div style="font-size:0.72rem;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:4px;">
+                ${SetSailIcons.svg("pos")} <span>${dmsCoords}</span>
+              </div>
+              <div class="ntm-wpt-meta-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:5px;font-size:0.68rem;background:rgba(255,255,255,0.03);padding:4px 6px;border-radius:4px;border:1px solid var(--line);">
+                <div><span style="color:var(--muted);">SPD:</span> <b style="color:#f1f5f9;">${speed}</b></div>
+                <div><span style="color:var(--muted);">XTD:</span> <b style="color:#f1f5f9;">P${pXtd}/S${sXtd}</b></div>
+                <div><span style="color:var(--muted);">RAD:</span> <b style="color:#f1f5f9;">${turnRad}</b></div>
               </div>
             </div>
-          `;
-        });
-        if (filtered.length > 0) {
-          html += `<div class="ntm-search-section-header" style="margin-top:0.6rem;"><span><svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> UKHO NOTICES TO MARINERS (${filtered.length})</span></div>`;
-        }
+          </div>
+        `;
+      });
+    }
+
+    // SECTION B: WORLD PORTS
+    if (showPorts && filteredPorts.length > 0) {
+      html += `
+        <div class="ntm-search-section-header" style="${showRoute ? 'margin-top:0.6rem;' : ''}">
+          <span>
+            <svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg>
+            WORLD PORTS BATHYMETRY (${filteredPorts.length})
+          </span>
+        </div>
+      `;
+
+      filteredPorts.forEach(port => {
+        const cCode = (port.countryCode || (port.country ? port.country.slice(0, 2) : "UN")).toUpperCase();
+        const cLower = cCode.toLowerCase();
+        const maxDraft = port.maxDraftMeters ? `Max Draft: ${port.maxDraftMeters}m` : (port.maintainedDepthMeters ? `Depth: ${port.maintainedDepthMeters}m` : "");
+        html += `
+          <div class="ntm-card-item ntm-port-search-card" data-port-id="${port.id}" onclick="jumpToPort('${port.id}')" title="Click to inspect ${port.name} on map">
+            <div class="ntm-card-content" style="padding:0.55rem 0.75rem;">
+              <div class="ntm-card-top" style="align-items:center;gap:7px;">
+                <span class="port-flag-box" title="${port.country}">
+                  <img src="assets/flags/${cLower}.png" 
+                       onerror="this.onerror=null;this.src='https://flagcdn.com/w40/${cLower}.png';" 
+                       alt="${cCode}" 
+                       class="port-flag-img" 
+                       width="21" 
+                       height="15" 
+                       loading="lazy" />
+                </span>
+                <span class="ntm-card-id" style="color:var(--accent);font-weight:600;font-size:0.86rem;">${port.name}</span>
+                <span class="ntm-tag perm" style="margin-left:auto;">${port.unlocode}</span>
+              </div>
+              <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;justify-content:space-between;">
+                <span>${port.country}${maxDraft ? ` • ${maxDraft}` : ''}</span>
+                <span style="color:#f05a36;font-size:0.7rem;font-weight:600;">View Chart &rarr;</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // SECTION C: NOTICES TO MARINERS
+    if (showNotices) {
+      if ((showRoute || showPorts) && filteredNotices.length > 0) {
+        html += `
+          <div class="ntm-search-section-header" style="margin-top:0.6rem;">
+            <span>
+              <svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              UKHO NOTICES TO MARINERS (${filteredNotices.length})
+            </span>
+          </div>
+        `;
       }
 
-      // 2. Notices Cards
-      filtered.forEach(item => {
+      filteredNotices.forEach(item => {
         const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
         const tagClass = item.type === "T" ? "temp" : (item.type === "P" ? "prelim" : "perm");
         const typeLabel = item.type === "T" ? "TEMP (T)" : (item.type === "P" ? "PRELIM (P)" : "PERM");
@@ -2196,7 +2352,6 @@ function renderNtMListAndMap() {
           : `<span class="ntm-tag ${tagClass}">${typeLabel}</span>`;
 
         const firstCoord = item.coords && item.coords[0] ? item.coords[0].dms : "—";
-        const isChecked = item.checkedForExport !== false;
         const chartsStr = (item.charts && item.charts.length > 0) ? `Charts: ${item.charts.join(', ')}` : "";
         const cancelsBanner = (item.cancels && item.cancels.length > 0) ? `<div class="ntm-cancels-banner">${SetSailIcons.svg("cancelled")} Cancels: ${item.cancels.join(', ')}</div>` : "";
         const cancelledNoticeClass = isItemCancelled ? "cancelled" : "";
@@ -2219,8 +2374,19 @@ function renderNtMListAndMap() {
           </div>
         `;
       });
-      listContainer.innerHTML = html;
     }
+
+    if (!html) {
+      html = `
+        <div style="padding:2rem 1rem;text-align:center;color:var(--muted);font-size:0.8rem;">
+          No active items match the current filter or enabled overlays.<br>
+          <span style="font-size:0.72rem;opacity:0.8;">Enable overlays from the dock below or clear search filter.</span>
+        </div>
+      `;
+    }
+
+    listContainer.innerHTML = html;
+  }
 
   // Render Markers on Leaflet Map
   if (leafletMap && leafletMarkersLayer) {
