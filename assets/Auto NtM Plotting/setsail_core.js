@@ -707,10 +707,10 @@ function initAutoNtmUI() {
 
 // Select All removed per user request (all visible chart notices auto-exported)
 
-  // 1-Click Direct Export (Per user requirement: Zero modals, exports all visible chart items directly)
+  // Minimalist Export Dialog Opening & State Sync
   if (openExportBtn) {
     openExportBtn.addEventListener("click", () => {
-      executeDirectMapExport();
+      openNavDataExportModal();
     });
   }
   if (expBtnClose && exportModal) {
@@ -721,6 +721,8 @@ function initAutoNtmUI() {
 
   // Initialize category filter pills, waypoint editor & NtM info popups
   initCategoryPills();
+  initNavDataExportListeners();
+  initMasterFilterControls();
   initWaypointEditModal();
   initNtmOverlayInfoModal();
 
@@ -1086,15 +1088,86 @@ function renderRouteOnMap(route, shouldFly = true) {
     const fillColor = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#ffffff");
     const radius = isStart || isEnd ? 6 : 4;
     
-    const marker = L.circleMarker(wptCoords, {
-      radius,
-      color,
-      weight: 2,
-      fillColor,
-      fillOpacity: 0.95,
+    const marker = L.marker(wptCoords, {
+      draggable: true,
+      autoPan: true,
+      icon: L.divIcon({
+        className: 'route-wpt-div-icon',
+        html: `<div style="width:${radius*2}px;height:${radius*2}px;border-radius:50%;background:${fillColor};border:2px solid ${color};box-shadow:0 0 8px rgba(0,0,0,0.5);cursor:grab;transition:transform 0.15s ease;" title="Drag to reposition WPT #${idx+1}"></div>`,
+        iconSize: [radius*2, radius*2],
+        iconAnchor: [radius, radius]
+      }),
       zIndexOffset: 1000
     });
-    
+
+    marker.on('dragstart', function(e) {
+      const el = e.target.getElement();
+      if (el) {
+        const dot = el.querySelector('div');
+        if (dot) dot.style.cursor = 'grabbing';
+      }
+    });
+
+    marker.on('drag', function(e) {
+      const latlng = e.target.getLatLng();
+      unrolledCoords[idx] = [latlng.lat, latlng.lng];
+      trackGlow.setLatLngs(unrolledCoords);
+      trackLine.setLatLngs(unrolledCoords);
+    });
+
+    marker.on('dragend', function(e) {
+      const el = e.target.getElement();
+      if (el) {
+        const dot = el.querySelector('div');
+        if (dot) dot.style.cursor = 'grab';
+      }
+      const latlng = e.target.getLatLng();
+      let normLon = ((latlng.lng + 180) % 360 + 360) % 360 - 180;
+      let normLat = Math.max(-85, Math.min(85, latlng.lat));
+      
+      wp.lat = parseFloat(normLat.toFixed(5));
+      wp.lon = parseFloat(normLon.toFixed(5));
+
+      if (activeRouteData && activeRouteData.waypoints && activeRouteData.waypoints[idx]) {
+        activeRouteData.waypoints[idx].lat = wp.lat;
+        activeRouteData.waypoints[idx].lon = wp.lon;
+
+        let totalDist = 0;
+        for (let k = 0; k < activeRouteData.waypoints.length - 1; k++) {
+          totalDist += calculateHaversineDistanceNM(
+            activeRouteData.waypoints[k].lat, activeRouteData.waypoints[k].lon,
+            activeRouteData.waypoints[k+1].lat, activeRouteData.waypoints[k+1].lon
+          );
+        }
+        activeRouteData.totalDistanceNM = Math.round(totalDist);
+        const spd = ((activeRouteData.metadata && activeRouteData.metadata.speedKnots) || 14.5) || 14.5;
+        activeRouteData.steamingDays = (totalDist / (spd * 24)).toFixed(1);
+
+        try {
+          localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(activeRouteData));
+        } catch (err) {}
+
+        if (typeof displaySetRouteResults === "function") {
+          displaySetRouteResults(activeRouteData);
+        }
+
+        marker.setPopupContent(`
+          <div style="font-family:'Segoe UI',sans-serif;min-width:180px;color:#1e293b;">
+            <div style="font-weight:700;font-size:0.92rem;color:${color};border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:5px;">
+              ${isStart ? "Departure: " : (isEnd ? "Destination: " : "Waypoint: ")}${wp.name || wp.id}
+            </div>
+            <div style="font-size:0.78rem;color:#475569;margin-bottom:2px;"><b>Coordinates:</b> ${formatLatLonDMS(wp.lat, wp.lon)}</div>
+            <div style="font-size:0.72rem;color:#64748b;"><b>Route:</b> ${route.name} (WPT ${idx + 1} of ${route.waypoints.length})</div>
+            <div style="font-size:0.70rem;color:#10b981;font-weight:600;margin-top:4px;">✨ Repositioned on Chart</div>
+          </div>
+        `);
+
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast(`WPT #${idx + 1} moved to ${formatLatLonDMS(wp.lat, wp.lon)}`, "info");
+        }
+      }
+    });
+
     marker.bindPopup(`
       <div style="font-family:'Segoe UI',sans-serif;min-width:180px;color:#1e293b;">
         <div style="font-weight:700;font-size:0.92rem;color:${color};border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:5px;">
@@ -1228,7 +1301,7 @@ function initVesselTracking() {
     });
 
     routeFileInput.addEventListener("change", (e) => {
-      const file = e.target.files?.[0];
+      const file = (e.target.files && e.target.files[0]);
       if (!file) return;
       const ext = file.name.split(".").pop().toLowerCase();
 
@@ -1400,8 +1473,8 @@ function initVesselTracking() {
   // Manual Coordinates
   if (applyBtn) {
     applyBtn.addEventListener("click", () => {
-      const latVal = document.getElementById("vesselLat")?.value.trim() || "";
-      const lonVal = document.getElementById("vesselLon")?.value.trim() || "";
+      const latVal = (document.getElementById("vesselLat") ? document.getElementById("vesselLat").value : "").trim() || "";
+      const lonVal = (document.getElementById("vesselLon") ? document.getElementById("vesselLon").value : "").trim() || "";
 
       const parsedLat = parseCoordinateString(latVal);
       const parsedLon = parseCoordinateString(lonVal);
@@ -1544,8 +1617,8 @@ function initSettingsUI() {
 
   if (submitBtn) {
     submitBtn.addEventListener("click", async () => {
-      const email = document.getElementById("contactEmail")?.value.trim() || "";
-      const message = document.getElementById("contactMessage")?.value.trim() || "";
+      const email = (document.getElementById("contactEmail") ? document.getElementById("contactEmail").value : "").trim() || "";
+      const message = (document.getElementById("contactMessage") ? document.getElementById("contactMessage").value : "").trim() || "";
 
       if (!message || !email) {
         alert("Please provide your reply email address and message.");
@@ -1636,9 +1709,9 @@ window.toggleNoticeCheck = function(noticeId, isChecked) {
  * Get notices matching the export criteria checkboxes
  */
 function getExportSelectedNotices() {
-  const chkT = document.getElementById("expChkT")?.checked ?? true;
-  const chkP = document.getElementById("expChkP")?.checked ?? true;
-  const chkPerm = document.getElementById("expChkPerm")?.checked ?? true;
+  const chkT = (document.getElementById("expChkT") ? document.getElementById("expChkT").checked : true);
+  const chkP = (document.getElementById("expChkP") ? document.getElementById("expChkP").checked : true);
+  const chkPerm = (document.getElementById("expChkPerm") ? document.getElementById("expChkPerm").checked : true);
 
   // Automatically export all notices currently active on the chart (filtered by search and active filters)
   return getFilteredNotices().filter(item => {
@@ -2057,7 +2130,7 @@ function drawOfflineCanvasMap() {
  * Filter helper honoring popovers, NAVAREA, and search
  */
 function getFilteredNotices() {
-  const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
+  const searchVal = ((document.getElementById("ntmSearchInput") ? document.getElementById("ntmSearchInput").value : "") || "").toLowerCase().trim();
 
   let list = NTM_STORE.filter(item => {
     const isCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
@@ -2167,7 +2240,7 @@ function fitAllNoticesOnMap() {
 function renderNtMListAndMap() {
   const listContainer = document.getElementById("ntmItemsScroll");
   const countEl = document.getElementById("ntmListCount");
-  const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
+  const searchVal = ((document.getElementById("ntmSearchInput") ? document.getElementById("ntmSearchInput").value : "") || "").toLowerCase().trim();
 
   const isNoticesActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.notices !== false : true;
   const isDepthsActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.depths !== false : true;
@@ -2742,6 +2815,292 @@ const SETROUTE_COHERE_MODEL = "command-r-08-2024";
 /**
  * Initialize SetRoute Ports Selection and Event Listeners
  */
+
+// ==========================================================================
+// SETROUTE™ GLOBAL MARITIME DEEP-WATER PASSAGE ROUTING ENGINE
+// Physical sea corridor topology with Dijkstra shortest sea path
+// Strictly prevents routes traversing across landmasses worldwide.
+// ==========================================================================
+
+const MARITIME_SEA_NODES = {
+  // Northern Europe & English Channel
+  "ROTTERDAM_APP": [51.98, 4.02, "Rotterdam Fairway Approach"],
+  "ANTWERP_APP": [51.40, 3.80, "Westerschelde Fairway"],
+  "HAMBURG_APP": [54.00, 8.10, "Elbe Approach TSS"],
+  "SKAGERRAK": [57.85, 10.75, "Skagen / Skagerrak TSS"],
+  "KATTEGAT": [56.50, 11.80, "Kattegat Shipping Lane"],
+  "STOREBAELT": [55.35, 11.05, "Great Belt Corridor"],
+  "DOVER_STRAIT": [51.25, 1.70, "Dover Strait TSS"],
+  "ENGLISH_CHANNEL_MID": [50.10, -0.20, "English Channel Mid TSS"],
+  "CASQUETS": [49.75, -2.50, "Casquets TSS"],
+  "USHANT": [48.60, -5.40, "Ouessant / Ushant TSS"],
+
+  // Atlantic Europe & Africa
+  "BISCAY_MID": [45.50, -7.00, "Bay of Biscay Deepwater Lane"],
+  "FINISTERRE": [43.00, -9.50, "Cape Finisterre TSS"],
+  "LISBON_APP": [38.65, -9.40, "Lisbon Fairway"],
+  "ST_VINCENT": [36.90, -9.10, "Cape St. Vincent TSS"],
+  "CANARY_PASS": [28.20, -15.00, "Canary Islands Corridor"],
+  "CAPE_VERDE_PASS": [15.00, -25.00, "Cape Verde Deepsea Lane"],
+  "GULF_OF_GUINEA": [4.00, 3.00, "Gulf of Guinea Shipping Lane"],
+  "CAPE_AGULHAS": [-34.85, 20.00, "Cape of Good Hope / Agulhas Route"],
+
+  // Gibraltar & Mediterranean
+  "GIBRALTAR_W": [35.95, -5.90, "Gibraltar Strait West Approach"],
+  "GIBRALTAR_MID": [35.97, -5.35, "Strait of Gibraltar TSS"],
+  "GIBRALTAR_E": [36.10, -4.50, "Gibraltar East / Alboran Sea"],
+  "MED_WEST": [37.80, 2.50, "South Balearic Sea Transit"],
+  "MED_SICILY": [36.80, 11.80, "Sicily Channel / Pantelleria TSS"],
+  "MED_MALTA": [35.50, 14.50, "Malta Channel Deepwater Route"],
+  "MED_CRETE": [34.50, 24.50, "South of Crete Corridor"],
+  "PORT_SAID_APP": [31.50, 32.35, "Port Said Fairway (Suez North)"],
+
+  // Suez Canal & Red Sea
+  "SUEZ_CANAL_MID": [30.60, 32.35, "Suez Canal Transit Corridor"],
+  "SUEZ_SOUTH": [29.80, 32.55, "Suez Port Fairway (Suez South)"],
+  "RED_SEA_JUBAL": [27.60, 33.80, "Strait of Jubal TSS"],
+  "RED_SEA_MID": [21.50, 38.00, "Central Red Sea Deepwater Spine"],
+  "RED_SEA_SOUTH": [15.50, 41.50, "Hanish / Zubair TSS"],
+  "BAB_EL_MANDEB": [12.60, 43.35, "Bab-el-Mandeb Strait TSS"],
+  "GULF_OF_ADEN": [12.20, 45.00, "Gulf of Aden IRTC Corridor"],
+  "SOCOTRA_N": [13.00, 53.50, "Socotra North Corridor"],
+
+  // Persian Gulf
+  "RAS_TANURA_APP": [26.70, 50.25, "Ras Tanura Fairway Approach"],
+  "ARABIAN_GULF_MID": [26.00, 52.50, "Central Arabian Gulf Spine"],
+  "HORMUZ_STRAIT": [26.35, 56.50, "Strait of Hormuz TSS"],
+  "GULF_OF_OMAN": [24.50, 58.50, "Gulf of Oman Sea Lane"],
+
+  // Indian Ocean & Bay of Bengal
+  "ARABIAN_SEA_MID": [14.00, 60.00, "Arabian Sea Transit"],
+  "MUMBAI_APP": [18.90, 72.70, "Mumbai Fairway Approach"],
+  "DONDRA_HEAD": [5.80, 80.55, "Dondra Head TSS (Sri Lanka South)"],
+  "BAY_OF_BENGAL_S": [6.00, 88.00, "Bay of Bengal South Corridor"],
+  "SIX_DEGREE_CH": [6.00, 94.00, "Great Nicobar / Six Degree Channel"],
+
+  // Southeast Asia & Malacca
+  "MALACCA_N": [5.50, 97.50, "Malacca Strait North Entrance TSS"],
+  "MALACCA_MID": [2.90, 101.00, "One Fathom Bank TSS"],
+  "SINGAPORE_W": [1.20, 103.65, "Singapore Strait West TSS"],
+  "SINGAPORE_MAIN": [1.23, 103.85, "Singapore Main Strait TSS"],
+  "SINGAPORE_E": [1.32, 104.38, "Horsburgh Light / Singapore East TSS"],
+
+  // South China Sea & East Asia
+  "SCS_SOUTH": [3.50, 105.50, "South China Sea South Corridor"],
+  "SCS_MID": [10.00, 110.50, "South China Sea Deepwater Spine"],
+  "SCS_NORTH": [16.50, 114.50, "South China Sea Paracels East"],
+  "LUZON_STRAIT": [21.00, 120.50, "Luzon Strait / Bashi Channel"],
+  "TAIWAN_STRAIT": [24.00, 119.80, "Taiwan Strait TSS"],
+  "HONG_KONG_APP": [22.15, 114.25, "Hong Kong Fairway Approach"],
+  "EAST_CHINA_SEA": [29.50, 123.50, "East China Sea Corridor"],
+  "SHANGHAI_APP": [31.00, 122.50, "Yangtze / Shanghai Fairway"],
+  "OSUMI_STRAIT": [30.90, 131.00, "Osumi Strait (South Japan)"],
+  "TOKYO_APP": [34.80, 139.80, "Tokyo Bay / Uraga Suido Fairway"],
+  "BUSAN_APP": [35.00, 129.20, "Busan Port Fairway Approach"],
+
+  // North America East & Gulf
+  "NEW_YORK_APP": [40.40, -73.80, "Ambrose Channel / NY Approach"],
+  "CHESAPEAKE_APP": [36.90, -75.80, "Chesapeake Bay TSS"],
+  "HATTERAS_E": [35.20, -74.80, "Cape Hatteras Deepsea Route"],
+  "FLORIDA_STRAIT": [25.00, -79.80, "Straits of Florida TSS"],
+  "KEY_WEST_S": [24.30, -82.00, "Key West South Corridor"],
+  "GULF_MEXICO_MID": [26.00, -88.00, "Central Gulf of Mexico Transit"],
+  "HOUSTON_APP": [29.20, -94.60, "Galveston / Houston Fairway TSS"],
+  "CARIBBEAN_MID": [15.00, -75.00, "Central Caribbean Sea Lane"],
+  "PANAMA_COLON": [9.40, -79.95, "Panama Cristobal / Colon Fairway"],
+  "PANAMA_BALBOA": [8.85, -79.52, "Panama Balboa Pacific Fairway"],
+  "PACIFIC_PANAMA_APP": [7.50, -79.80, "Gulf of Panama Deepwater Transit"],
+
+  // Pacific Transits
+  "LONG_BEACH_APP": [33.60, -118.25, "Long Beach / Los Angeles TSS"],
+  "SAN_FRANCISCO_APP": [37.75, -122.60, "San Francisco Approach TSS"],
+  "PACIFIC_MID_N": [38.00, -165.00, "North Pacific Great Circle Spine"],
+  "PACIFIC_MID_W": [36.00, 175.00, "Western North Pacific Transit"]
+};
+
+const MARITIME_SEA_EDGES = [
+  // Europe
+  ["ROTTERDAM_APP", "DOVER_STRAIT"],
+  ["ANTWERP_APP", "DOVER_STRAIT"],
+  ["HAMBURG_APP", "SKAGERRAK"],
+  ["SKAGERRAK", "KATTEGAT"],
+  ["KATTEGAT", "STOREBAELT"],
+  ["DOVER_STRAIT", "ENGLISH_CHANNEL_MID"],
+  ["ENGLISH_CHANNEL_MID", "CASQUETS"],
+  ["CASQUETS", "USHANT"],
+  ["USHANT", "BISCAY_MID"],
+  ["BISCAY_MID", "FINISTERRE"],
+  ["FINISTERRE", "LISBON_APP"],
+  ["LISBON_APP", "ST_VINCENT"],
+  ["FINISTERRE", "ST_VINCENT"],
+
+  // Gibraltar & Med
+  ["ST_VINCENT", "GIBRALTAR_W"],
+  ["GIBRALTAR_W", "GIBRALTAR_MID"],
+  ["GIBRALTAR_MID", "GIBRALTAR_E"],
+  ["GIBRALTAR_E", "MED_WEST"],
+  ["MED_WEST", "MED_SICILY"],
+  ["MED_SICILY", "MED_MALTA"],
+  ["MED_MALTA", "MED_CRETE"],
+  ["MED_CRETE", "PORT_SAID_APP"],
+
+  // Suez & Red Sea
+  ["PORT_SAID_APP", "SUEZ_CANAL_MID"],
+  ["SUEZ_CANAL_MID", "SUEZ_SOUTH"],
+  ["SUEZ_SOUTH", "RED_SEA_JUBAL"],
+  ["RED_SEA_JUBAL", "RED_SEA_MID"],
+  ["RED_SEA_MID", "RED_SEA_SOUTH"],
+  ["RED_SEA_SOUTH", "BAB_EL_MANDEB"],
+  ["BAB_EL_MANDEB", "GULF_OF_ADEN"],
+  ["GULF_OF_ADEN", "SOCOTRA_N"],
+
+  // Persian Gulf
+  ["RAS_TANURA_APP", "ARABIAN_GULF_MID"],
+  ["ARABIAN_GULF_MID", "HORMUZ_STRAIT"],
+  ["HORMUZ_STRAIT", "GULF_OF_OMAN"],
+  ["GULF_OF_OMAN", "ARABIAN_SEA_MID"],
+
+  // Indian Ocean
+  ["SOCOTRA_N", "ARABIAN_SEA_MID"],
+  ["ARABIAN_SEA_MID", "MUMBAI_APP"],
+  ["MUMBAI_APP", "DONDRA_HEAD"],
+  ["ARABIAN_SEA_MID", "DONDRA_HEAD"],
+  ["DONDRA_HEAD", "BAY_OF_BENGAL_S"],
+  ["BAY_OF_BENGAL_S", "SIX_DEGREE_CH"],
+  ["DONDRA_HEAD", "SIX_DEGREE_CH"],
+
+  // Malacca & Singapore
+  ["SIX_DEGREE_CH", "MALACCA_N"],
+  ["MALACCA_N", "MALACCA_MID"],
+  ["MALACCA_MID", "SINGAPORE_W"],
+  ["SINGAPORE_W", "SINGAPORE_MAIN"],
+  ["SINGAPORE_MAIN", "SINGAPORE_E"],
+
+  // South China Sea & East Asia
+  ["SINGAPORE_E", "SCS_SOUTH"],
+  ["SCS_SOUTH", "SCS_MID"],
+  ["SCS_MID", "SCS_NORTH"],
+  ["SCS_NORTH", "HONG_KONG_APP"],
+  ["SCS_NORTH", "LUZON_STRAIT"],
+  ["SCS_NORTH", "TAIWAN_STRAIT"],
+  ["HONG_KONG_APP", "TAIWAN_STRAIT"],
+  ["TAIWAN_STRAIT", "EAST_CHINA_SEA"],
+  ["LUZON_STRAIT", "EAST_CHINA_SEA"],
+  ["EAST_CHINA_SEA", "SHANGHAI_APP"],
+  ["EAST_CHINA_SEA", "BUSAN_APP"],
+  ["EAST_CHINA_SEA", "OSUMI_STRAIT"],
+  ["OSUMI_STRAIT", "TOKYO_APP"],
+  ["BUSAN_APP", "TOKYO_APP"],
+
+  // Cape Route (Around Africa)
+  ["ST_VINCENT", "CANARY_PASS"],
+  ["CANARY_PASS", "CAPE_VERDE_PASS"],
+  ["CAPE_VERDE_PASS", "GULF_OF_GUINEA"],
+  ["GULF_OF_GUINEA", "CAPE_AGULHAS"],
+  ["CAPE_AGULHAS", "DONDRA_HEAD"],
+
+  // Transatlantic & Americas
+  ["USHANT", "NEW_YORK_APP"],
+  ["NEW_YORK_APP", "CHESAPEAKE_APP"],
+  ["CHESAPEAKE_APP", "HATTERAS_E"],
+  ["HATTERAS_E", "FLORIDA_STRAIT"],
+  ["FLORIDA_STRAIT", "KEY_WEST_S"],
+  ["KEY_WEST_S", "GULF_MEXICO_MID"],
+  ["GULF_MEXICO_MID", "HOUSTON_APP"],
+  ["FLORIDA_STRAIT", "CARIBBEAN_MID"],
+  ["CARIBBEAN_MID", "PANAMA_COLON"],
+  ["PANAMA_COLON", "PANAMA_BALBOA"],
+  ["PANAMA_BALBOA", "PACIFIC_PANAMA_APP"],
+  ["PACIFIC_PANAMA_APP", "LONG_BEACH_APP"],
+  ["LONG_BEACH_APP", "SAN_FRANCISCO_APP"],
+
+  // Transpacific
+  ["TOKYO_APP", "PACIFIC_MID_W"],
+  ["PACIFIC_MID_W", "PACIFIC_MID_N"],
+  ["PACIFIC_MID_N", "SAN_FRANCISCO_APP"],
+  ["PACIFIC_MID_N", "LONG_BEACH_APP"]
+];
+
+function findNearestMaritimeNode(lat, lon) {
+  let closestKey = null;
+  let minDistance = Infinity;
+  for (const [key, val] of Object.entries(MARITIME_SEA_NODES)) {
+    const d = calculateHaversineDistanceNM(lat, lon, val[0], val[1]);
+    if (d < minDistance) {
+      minDistance = d;
+      closestKey = key;
+    }
+  }
+  return closestKey;
+}
+
+function findMaritimeSeaCorridor(origCoords, destCoords) {
+  const startNode = findNearestMaritimeNode(origCoords[0], origCoords[1]);
+  const endNode = findNearestMaritimeNode(destCoords[0], destCoords[1]);
+
+  if (!startNode || !endNode || startNode === endNode) {
+    return [startNode || "ROTTERDAM_APP"];
+  }
+
+  // Build Adjacency List
+  const adj = {};
+  for (const k of Object.keys(MARITIME_SEA_NODES)) {
+    adj[k] = [];
+  }
+  for (const [u, v] of MARITIME_SEA_EDGES) {
+    if (MARITIME_SEA_NODES[u] && MARITIME_SEA_NODES[v]) {
+      const d = calculateHaversineDistanceNM(
+        MARITIME_SEA_NODES[u][0], MARITIME_SEA_NODES[u][1],
+        MARITIME_SEA_NODES[v][0], MARITIME_SEA_NODES[v][1]
+      );
+      adj[u].push({ node: v, dist: d });
+      adj[v].push({ node: u, dist: d });
+    }
+  }
+
+  // Dijkstra Shortest Sea Path
+  const dists = {};
+  const prev = {};
+  const visited = new Set();
+  for (const k of Object.keys(MARITIME_SEA_NODES)) {
+    dists[k] = Infinity;
+    prev[k] = null;
+  }
+  dists[startNode] = 0;
+
+  for (let step = 0; step < Object.keys(MARITIME_SEA_NODES).length; step++) {
+    let u = null;
+    let uDist = Infinity;
+    for (const [k, d] of Object.entries(dists)) {
+      if (!visited.has(k) && d < uDist) {
+        uDist = d;
+        u = k;
+      }
+    }
+    if (!u || u === endNode) break;
+    visited.add(u);
+
+    for (const edge of adj[u] || []) {
+      if (!visited.has(edge.node)) {
+        const alt = dists[u] + edge.dist;
+        if (alt < dists[edge.node]) {
+          dists[edge.node] = alt;
+          prev[edge.node] = u;
+        }
+      }
+    }
+  }
+
+  const path = [];
+  let curr = endNode;
+  while (curr) {
+    path.unshift(curr);
+    curr = prev[curr];
+  }
+  return path.length > 0 && path[0] === startNode ? path : [startNode, endNode];
+}
+
+
 function initSetRoute() {
   const originSel = document.getElementById("setRouteOriginSelect");
   const destSel = document.getElementById("setRouteDestSelect");
@@ -2852,8 +3211,8 @@ function updatePortPreview(type, portId) {
 function checkDraftClearance() {
   const alertEl = document.getElementById("setRouteDepthAlert");
   const draftInput = document.getElementById("setRouteDraftInput");
-  const origId = document.getElementById("setRouteOriginSelect")?.value;
-  const destId = document.getElementById("setRouteDestSelect")?.value;
+  const origId = (document.getElementById("setRouteOriginSelect") ? document.getElementById("setRouteOriginSelect").value : "");
+  const destId = (document.getElementById("setRouteDestSelect") ? document.getElementById("setRouteDestSelect").value : "");
 
   if (!alertEl || !draftInput) return;
 
@@ -2882,12 +3241,12 @@ function checkDraftClearance() {
  * Generate Autonomous Passage Plan with Cohere AI
  */
 async function generateSetRoutePassage() {
-  const origId = document.getElementById("setRouteOriginSelect")?.value;
-  const destId = document.getElementById("setRouteDestSelect")?.value;
-  const speed = parseFloat(document.getElementById("setRouteSpeedInput")?.value) || 14.5;
-  const draft = parseFloat(document.getElementById("setRouteDraftInput")?.value) || 11.5;
-  const xtd = parseFloat(document.getElementById("setRouteXtdInput")?.value) || 0.20;
-  const sailMode = document.getElementById("setRouteSailSelect")?.value || "HYBRID";
+  const origId = (document.getElementById("setRouteOriginSelect") ? document.getElementById("setRouteOriginSelect").value : "");
+  const destId = (document.getElementById("setRouteDestSelect") ? document.getElementById("setRouteDestSelect").value : "");
+  const speed = parseFloat((document.getElementById("setRouteSpeedInput") ? document.getElementById("setRouteSpeedInput").value : "")) || 14.5;
+  const draft = parseFloat((document.getElementById("setRouteDraftInput") ? document.getElementById("setRouteDraftInput").value : "")) || 11.5;
+  const xtd = parseFloat((document.getElementById("setRouteXtdInput") ? document.getElementById("setRouteXtdInput").value : "")) || 0.20;
+  const sailMode = (document.getElementById("setRouteSailSelect") ? document.getElementById("setRouteSailSelect").value : "") || "HYBRID";
 
   if (origId === destId) {
     showSetSailToast("Origin and Destination ports must be different.", "warning");
@@ -2940,6 +3299,13 @@ async function generateSetRoutePassage() {
 
   addStep("Calculating optimal deep-sea passage route...", false);
 
+  const seaCorridor = findMaritimeSeaCorridor(origCoords, destCoords);
+  const corridorNames = seaCorridor.map(k => (MARITIME_SEA_NODES[k] || [])[2] || k).join(" -> ");
+  const corridorCoords = seaCorridor.map(k => {
+    const n = MARITIME_SEA_NODES[k];
+    return n ? `${n[2]} (Lat: ${n[0].toFixed(2)}, Lon: ${n[1].toFixed(2)})` : k;
+  }).join("; ");
+
   const prompt = `You are an expert Chief Navigational Officer specializing in ECDIS Passage Planning and IMO Resolution A.893(21).
 Plan an autonomous, deep-water ocean passage from:
 - Origin: ${pOrig.name} (${pOrig.country}) [${pOrig.unlocode}] at Lat: ${origCoords[0].toFixed(3)}, Lon: ${origCoords[1].toFixed(3)}
@@ -2953,7 +3319,9 @@ Vessel constraints:
 
 Maritime rules:
 - Strictly deep-water navigable sea lanes only. Absolutely DO NOT route across land.
-- Utilize international shipping fairways and IMO-adopted TSS schemes under Rule 10 COLREGs (e.g. Singapore Strait, Malacca, Dover, Gibraltar, Suez, Panama, Taiwan Strait).
+- MANDATORY MARITIME TRANSIT CORRIDOR: ${corridorNames}.
+- Sequential deep-water waypoints along this corridor: ${corridorCoords}.
+- Connect departure fairway to destination fairway strictly traversing through these maritime coordinates. Do NOT cut across any landmass, peninsula, or cape.
 - Avoid active Admiralty NtM hazards: ${ntmContext}
 - Generate between 7 to 20 sequential waypoints connecting origin approach to destination approach.
 
@@ -3144,13 +3512,16 @@ function displaySetRouteResults(route) {
  * High-Accuracy Algorithmic Fallback Maritime Route Generator
  */
 function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode) {
+  const corridor = findMaritimeSeaCorridor(origCoords, destCoords);
   const waypoints = [];
+
+  // Departure Pilot Station WPT
   waypoints.push({
     wptNo: "001",
     name: `${pOrig.name.toUpperCase()} PILOT STATION`,
     lat: origCoords[0],
     lon: origCoords[1],
-    speedKnots: speed,
+    speedKnots: Math.min(speed, 10.0),
     portsideXTD: xtd,
     starboardXTD: xtd,
     turnRadius: 0.5,
@@ -3158,28 +3529,35 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
     rot: 10.0
   });
 
-  // Intermediate strategic points interpolation
-  const numSteps = 7;
-  for (let i = 1; i < numSteps; i++) {
-    const fraction = i / numSteps;
-    const lat = origCoords[0] + (destCoords[0] - origCoords[0]) * fraction;
-    let lon = origCoords[1] + (destCoords[1] - origCoords[1]) * fraction;
+  // Intermediate deep-water sea corridor waypoints
+  let wptCounter = 2;
+  const chokepoints = [];
+  for (const nodeKey of corridor) {
+    const node = MARITIME_SEA_NODES[nodeKey];
+    if (!node) continue;
+    const distOrig = calculateHaversineDistanceNM(origCoords[0], origCoords[1], node[0], node[1]);
+    const distDest = calculateHaversineDistanceNM(destCoords[0], destCoords[1], node[0], node[1]);
+    if (distOrig < 15 || distDest < 15) continue;
+
+    chokepoints.push(node[2]);
     waypoints.push({
-      wptNo: ('00' + (i + 1)).slice(-3),
-      name: `WAYPOINT ${i + 1} (${pOrig.countryCode || ''}-${pDest.countryCode || ''} FAIRWAY)`,
-      lat: parseFloat(lat.toFixed(4)),
-      lon: parseFloat(lon.toFixed(4)),
+      wptNo: ('00' + wptCounter).slice(-3),
+      name: node[2],
+      lat: parseFloat(node[0].toFixed(5)),
+      lon: parseFloat(node[1].toFixed(5)),
       speedKnots: speed,
       portsideXTD: xtd,
       starboardXTD: xtd,
       turnRadius: 0.8,
-      sail: fraction < 0.2 || fraction > 0.8 ? "RL" : (sailMode === "RL" ? "RL" : "GC"),
-      rot: 6.0
+      sail: sailMode === "RL" ? "RL" : "GC",
+      rot: 8.0
     });
+    wptCounter++;
   }
 
+  // Arrival Fairway WPT
   waypoints.push({
-    wptNo: ('00' + (numSteps + 1)).slice(-3),
+    wptNo: ('00' + wptCounter).slice(-3),
     name: `${pDest.name.toUpperCase()} FAIRWAY ARRIVAL`,
     lat: destCoords[0],
     lon: destCoords[1],
@@ -3192,11 +3570,18 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
   });
 
   return {
+    name: `${pOrig.name} to ${pDest.name}`,
     routeName: `${pOrig.name} to ${pDest.name}`,
     waypoints: waypoints,
-    chokepoints: ["Deepwater Coastal Fairway", "Open Sea Transit"],
+    chokepoints: chokepoints.length > 0 ? chokepoints : ["Deepwater Coastal Fairway", "Open Sea Transit"],
     totalDistanceNM: 0,
-    estimatedSteamingDays: 0
+    estimatedSteamingDays: 0,
+    metadata: {
+      speedKnots: speed,
+      draftMeters: 11.5,
+      xtdNM: xtd,
+      sailMode: sailMode
+    }
   };
 }
 
@@ -3351,24 +3736,24 @@ function saveWaypointFromModal() {
   const modal = document.getElementById("ntmWaypointEditModal");
   if (!modal || !activeRouteData || !activeRouteData.waypoints) return;
 
-  const idx = parseInt(document.getElementById("wptEditIndex")?.value, 10);
+  const idx = parseInt((document.getElementById("wptEditIndex") ? document.getElementById("wptEditIndex").value : ""), 10);
   if (isNaN(idx) || !activeRouteData.waypoints[idx]) return;
 
   const wp = activeRouteData.waypoints[idx];
-  const name = document.getElementById("wptEditName")?.value.trim() || "";
-  const latDeg = parseFloat(document.getElementById("wptEditLatDeg")?.value) || 0;
-  const latMin = parseFloat(document.getElementById("wptEditLatMin")?.value) || 0;
-  const latHem = document.getElementById("wptEditLatHem")?.value || "N";
-  const lonDeg = parseFloat(document.getElementById("wptEditLonDeg")?.value) || 0;
-  const lonMin = parseFloat(document.getElementById("wptEditLonMin")?.value) || 0;
-  const lonHem = document.getElementById("wptEditLonHem")?.value || "E";
+  const name = (document.getElementById("wptEditName") ? document.getElementById("wptEditName").value : "").trim() || "";
+  const latDeg = parseFloat((document.getElementById("wptEditLatDeg") ? document.getElementById("wptEditLatDeg").value : "")) || 0;
+  const latMin = parseFloat((document.getElementById("wptEditLatMin") ? document.getElementById("wptEditLatMin").value : "")) || 0;
+  const latHem = (document.getElementById("wptEditLatHem") ? document.getElementById("wptEditLatHem").value : "") || "N";
+  const lonDeg = parseFloat((document.getElementById("wptEditLonDeg") ? document.getElementById("wptEditLonDeg").value : "")) || 0;
+  const lonMin = parseFloat((document.getElementById("wptEditLonMin") ? document.getElementById("wptEditLonMin").value : "")) || 0;
+  const lonHem = (document.getElementById("wptEditLonHem") ? document.getElementById("wptEditLonHem").value : "") || "E";
 
-  const speed = parseFloat(document.getElementById("wptEditSpeed")?.value) || 14.0;
-  const pXtd = parseFloat(document.getElementById("wptEditPortXtd")?.value) || 0.1;
-  const sXtd = parseFloat(document.getElementById("wptEditStbdXtd")?.value) || 0.1;
-  const turnRad = parseFloat(document.getElementById("wptEditRadius")?.value) || 0.5;
-  const sail = document.getElementById("wptEditSail")?.value || "RL";
-  const rot = parseFloat(document.getElementById("wptEditRot")?.value) || 0.0;
+  const speed = parseFloat((document.getElementById("wptEditSpeed") ? document.getElementById("wptEditSpeed").value : "")) || 14.0;
+  const pXtd = parseFloat((document.getElementById("wptEditPortXtd") ? document.getElementById("wptEditPortXtd").value : "")) || 0.1;
+  const sXtd = parseFloat((document.getElementById("wptEditStbdXtd") ? document.getElementById("wptEditStbdXtd").value : "")) || 0.1;
+  const turnRad = parseFloat((document.getElementById("wptEditRadius") ? document.getElementById("wptEditRadius").value : "")) || 0.5;
+  const sail = (document.getElementById("wptEditSail") ? document.getElementById("wptEditSail").value : "") || "RL";
+  const rot = parseFloat((document.getElementById("wptEditRot") ? document.getElementById("wptEditRot").value : "")) || 0.0;
 
   let newLat = latDeg + latMin / 60.0;
   if (latHem === "S") newLat = -newLat;
@@ -3414,12 +3799,12 @@ function initWaypointEditModal() {
   if (saveBtn) saveBtn.addEventListener("click", saveWaypointFromModal);
   if (centerBtn) {
     centerBtn.addEventListener("click", () => {
-      const latDeg = parseFloat(document.getElementById("wptEditLatDeg")?.value) || 0;
-      const latMin = parseFloat(document.getElementById("wptEditLatMin")?.value) || 0;
-      const latHem = document.getElementById("wptEditLatHem")?.value || "N";
-      const lonDeg = parseFloat(document.getElementById("wptEditLonDeg")?.value) || 0;
-      const lonMin = parseFloat(document.getElementById("wptEditLonMin")?.value) || 0;
-      const lonHem = document.getElementById("wptEditLonHem")?.value || "E";
+      const latDeg = parseFloat((document.getElementById("wptEditLatDeg") ? document.getElementById("wptEditLatDeg").value : "")) || 0;
+      const latMin = parseFloat((document.getElementById("wptEditLatMin") ? document.getElementById("wptEditLatMin").value : "")) || 0;
+      const latHem = (document.getElementById("wptEditLatHem") ? document.getElementById("wptEditLatHem").value : "") || "N";
+      const lonDeg = parseFloat((document.getElementById("wptEditLonDeg") ? document.getElementById("wptEditLonDeg").value : "")) || 0;
+      const lonMin = parseFloat((document.getElementById("wptEditLonMin") ? document.getElementById("wptEditLonMin").value : "")) || 0;
+      const lonHem = (document.getElementById("wptEditLonHem") ? document.getElementById("wptEditLonHem").value : "") || "E";
       let lat = (latDeg + latMin / 60.0) * (latHem === "S" ? -1 : 1);
       let lon = (lonDeg + lonMin / 60.0) * (lonHem === "W" ? -1 : 1);
       if (leafletMap) {
@@ -3464,8 +3849,8 @@ function initNtmOverlayInfoModal() {
 
 function showRouteInfoSummary() {
   if (activeRouteData && activeRouteData.waypoints && activeRouteData.waypoints.length > 0) {
-    const startWp = activeRouteData.waypoints[0]?.name || "Start";
-    const endWp = activeRouteData.waypoints[activeRouteData.waypoints.length - 1]?.name || "End";
+    const startWp = (activeRouteData.waypoints[0] && activeRouteData.waypoints[0].name) || "Start";
+    const endWp = (activeRouteData.waypoints[activeRouteData.waypoints.length - 1] && activeRouteData.waypoints[activeRouteData.waypoints.length - 1].name) || "End";
     showSetSailToast("Route: " + activeRouteData.waypoints.length + " WPTs (" + startWp + " → " + endWp + ")", "info");
   } else {
     showSetSailToast("No passage plan loaded. Upload .rtz or .csv in My Vessel menu.", "warning");
@@ -3551,7 +3936,7 @@ function executeDirectMapExport() {
   // 2. Port Depths (if overlay is active)
   const isDepthsActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.depths !== false : true;
   if (isDepthsActive && typeof PORT_DEPTHS_DB !== "undefined") {
-    const searchVal = (document.getElementById("ntmSearchInput")?.value || "").toLowerCase().trim();
+    const searchVal = ((document.getElementById("ntmSearchInput") ? document.getElementById("ntmSearchInput").value : "") || "").toLowerCase().trim();
     let portsToExport = PORT_DEPTHS_DB;
     if (searchVal) {
       portsToExport = PORT_DEPTHS_DB.filter(p => {
@@ -3672,3 +4057,400 @@ window.openWaypointEditModal = openWaypointEditModal;
 window.centerMapOnWaypoint = centerMapOnWaypoint;
 window.showRouteInfoSummary = showRouteInfoSummary;
 window.executeDirectMapExport = executeDirectMapExport;
+
+
+// ==========================================================================
+// DEDICATED MARITIME EXPORTERS (IEC 61174 RTZ, JRC ROUTE, USER CHART LAYER)
+// ==========================================================================
+
+function escapeXmlAttr(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+
+function exportRouteToRtz(route) {
+  const targetRoute = route || activeRouteData;
+  if (!targetRoute || !targetRoute.waypoints || targetRoute.waypoints.length === 0) {
+    if (typeof showSetSailToast === "function") showSetSailToast("No active passage route to export.", "warning");
+    return;
+  }
+  const routeName = (targetRoute.name || "SetSail_Route").replace(/[^a-zA-Z0-9_\- ]/g, "").trim() || "Passage_Route";
+  const nowUtc = new Date().toISOString();
+  
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+  xml += `<route version="1.0" xmlns="http://www.cirm.org/RTZ/1/0">\n`;
+  xml += `  <routeInfo routeName="${escapeXmlAttr(routeName)}" optimizationMethod="Time" author="SetSail AI Passage Engine">\n`;
+  xml += `    <extension source="SetSail">\n`;
+  xml += `      <totalDistanceNM>${targetRoute.totalDistanceNM || 0}</totalDistanceNM>\n`;
+  xml += `      <steamingDays>${targetRoute.steamingDays || 0}</steamingDays>\n`;
+  xml += `      <createdUtc>${nowUtc}</createdUtc>\n`;
+  xml += `    </extension>\n`;
+  xml += `  </routeInfo>\n`;
+  xml += `  <waypoints>\n`;
+  
+  targetRoute.waypoints.forEach((wp, idx) => {
+    const wptName = (wp.name || `WPT ${idx + 1}`).replace(/[^a-zA-Z0-9_\- ]/g, "").trim();
+    const radius = wp.turnRadius || 0.50;
+    const speed = wp.speedKnots || ((targetRoute.metadata && targetRoute.metadata.speedKnots) || 14.5);
+    const portXtd = wp.portsideXTD || 0.20;
+    const stbdXtd = wp.starboardXTD || 0.20;
+    const geom = (wp.sail === "GC") ? "GreatCircle" : "Loxodrome";
+    
+    xml += `    <waypoint id="${idx + 1}" name="${escapeXmlAttr(wptName)}" radius="${radius.toFixed(2)}">\n`;
+    xml += `      <position lat="${wp.lat.toFixed(5)}" lon="${wp.lon.toFixed(5)}"/>\n`;
+    if (idx < targetRoute.waypoints.length - 1) {
+      xml += `      <leg portsideXTD="${portXtd.toFixed(2)}" starboardXTD="${stbdXtd.toFixed(2)}" geometryType="${geom}" speedMin="8.0" speedMax="${(speed * 1.2).toFixed(1)}" planSpeed="${speed.toFixed(1)}"/>\n`;
+    }
+    xml += `    </waypoint>\n`;
+  });
+  
+  xml += `  </waypoints>\n`;
+  xml += `</route>`;
+  
+  const fname = `${routeName.replace(/\s+/g, "_")}_${getExportUtcTimestamp()}.rtz`;
+  downloadTextFile(xml, fname, "application/xml");
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast(`Exported IEC 61174 Route: ${fname} (${targetRoute.waypoints.length} WPTs)`, "success");
+  }
+}
+
+function exportRouteToJrcCsv(route) {
+  const targetRoute = route || activeRouteData;
+  if (!targetRoute || !targetRoute.waypoints || targetRoute.waypoints.length === 0) {
+    if (typeof showSetSailToast === "function") showSetSailToast("No active passage route to export.", "warning");
+    return;
+  }
+  const routeName = (targetRoute.name || "SetSail_Route").trim();
+  let csv = `// ROUTE SHEET\n`;
+  csv += `// ${routeName}, Total Distance: ${targetRoute.totalDistanceNM || 0} NM, Steaming Days: ${targetRoute.steamingDays || 0}\n`;
+  csv += `// WPT No., WPT Name, Latitude, Longitude, Leg Type, Plan Speed, Port XTD, Stbd XTD, Turn Radius\n`;
+  
+  targetRoute.waypoints.forEach((wp, idx) => {
+    const no = ('00' + (idx + 1)).slice(-3);
+    const name = (wp.name || `WPT ${idx + 1}`).replace(/,/g, " ");
+    const latAbs = Math.abs(wp.lat);
+    const latDeg = Math.floor(latAbs);
+    const latMin = ((latAbs - latDeg) * 60).toFixed(2).padStart(5, '0');
+    const latStr = `${String(latDeg).padStart(2, '0')}-${latMin}${wp.lat >= 0 ? 'N' : 'S'}`;
+
+    const lonAbs = Math.abs(wp.lon);
+    const lonDeg = Math.floor(lonAbs);
+    const lonMin = ((lonAbs - lonDeg) * 60).toFixed(2).padStart(5, '0');
+    const lonStr = `${String(lonDeg).padStart(3, '0')}-${lonMin}${wp.lon >= 0 ? 'E' : 'W'}`;
+
+    const legType = wp.sail === "GC" ? "GC" : "RL";
+    const speed = (wp.speedKnots || 14.5).toFixed(1);
+    const pXtd = (wp.portsideXTD || 0.20).toFixed(2);
+    const sXtd = (wp.starboardXTD || 0.20).toFixed(2);
+    const radius = (wp.turnRadius || 0.50).toFixed(2);
+    csv += `${no}, ${name}, ${latStr}, ${lonStr}, ${legType}, ${speed}, ${pXtd}, ${sXtd}, ${radius}\n`;
+  });
+  
+  const fname = `${routeName.replace(/\s+/g, "_")}_JRC_Route_${getExportUtcTimestamp()}.csv`;
+  downloadTextFile(csv, fname, "text/csv");
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast(`Exported JRC Route CSV: ${fname}`, "success");
+  }
+}
+
+function exportUserChartGeoJson() {
+  const selectedNotices = typeof getExportSelectedNotices === "function" ? getExportSelectedNotices() : [];
+  const features = [];
+
+  // NtM Points & Polygons
+  selectedNotices.forEach(n => {
+    if (n.subPolygons && n.subPolygons.length > 0) {
+      n.subPolygons.forEach((sub, sIdx) => {
+        const pts = sub.points || (sub.coords || []).map(c => [c.lon, c.lat]);
+        if (pts && pts.length >= 3) {
+          const ring = pts.map(p => Array.isArray(p) ? (p[0] > 90 ? [p[1], p[0]] : p) : [p.lon, p.lat]);
+          if (ring.length > 0 && (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])) {
+            ring.push([ring[0][0], ring[0][1]]);
+          }
+          features.push({
+            type: "Feature",
+            geometry: { type: "Polygon", coordinates: [ring] },
+            properties: {
+              layer: "UserChart_Admiralty_NtM",
+              id: n.id,
+              type: n.type,
+              subject: n.subject || "",
+              category: sub.category || "hazard_area"
+            }
+          });
+        }
+      });
+    }
+    if (n.coords && n.coords.length > 0) {
+      n.coords.forEach((c, cIdx) => {
+        features.push({
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [c.lon, c.lat] },
+          properties: {
+            layer: "UserChart_Admiralty_NtM",
+            id: n.id,
+            type: n.type,
+            dms: c.dms || "",
+            subject: n.subject || ""
+          }
+        });
+      });
+    }
+  });
+
+  // Ports & Bathymetry
+  if (typeof PORT_DEPTHS_DB !== "undefined") {
+    PORT_DEPTHS_DB.forEach(p => {
+      features.push({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [p.coords[1], p.coords[0]] },
+        properties: {
+          layer: "UserChart_Port_Bathymetry",
+          name: p.name,
+          country: p.country,
+          fairwayDepthM: p.fairwayDepthM,
+          tideRangeM: p.tideRangeM
+        }
+      });
+    });
+  }
+
+  const geoJson = {
+    type: "FeatureCollection",
+    name: "SetSail_ECDIS_User_Chart_Layer",
+    metadata: {
+      exportedAtUtc: new Date().toISOString(),
+      noticesCount: selectedNotices.length,
+      portsCount: typeof PORT_DEPTHS_DB !== "undefined" ? PORT_DEPTHS_DB.length : 0
+    },
+    features: features
+  };
+
+  const fname = `ECDIS_User_Chart_Layer_${getExportUtcTimestamp()}.geojson`;
+  downloadTextFile(JSON.stringify(geoJson, null, 2), fname, "application/geo+json");
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast(`Exported ECDIS User Chart GeoJSON (${features.length} objects)`, "success");
+  }
+}
+
+function exportUserChartCsv() {
+  const selectedNotices = typeof getExportSelectedNotices === "function" ? getExportSelectedNotices() : [];
+  let csv = "Layer,Object_Type,Identifier,Subject,Latitude_Dec,Longitude_Dec,Coordinates_DMS,Depth_m\n";
+
+  selectedNotices.forEach(n => {
+    if (n.coords && n.coords.length > 0) {
+      n.coords.forEach(c => {
+        const subj = (n.subject || "").replace(/,/g, " ").replace(/"/g, '""');
+        csv += `Admiralty_NtM,Notice_${n.type},${n.id},"${subj}",${c.lat.toFixed(5)},${c.lon.toFixed(5)},"${c.dms || ''}",\n`;
+      });
+    }
+  });
+
+  if (typeof PORT_DEPTHS_DB !== "undefined") {
+    PORT_DEPTHS_DB.forEach(p => {
+      const pName = p.name.replace(/,/g, " ");
+      csv += `Port_Bathymetry,Port,${p.unlocode || p.id},"${pName}",${p.coords[0].toFixed(5)},${p.coords[1].toFixed(5)},,${p.fairwayDepthM || ''}\n`;
+    });
+  }
+
+  const fname = `ECDIS_User_Chart_Layer_${getExportUtcTimestamp()}.csv`;
+  downloadTextFile(csv, fname, "text/csv");
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast(`Exported User Chart CSV: ${fname}`, "success");
+  }
+}
+
+
+function openNavDataExportModal() {
+  const modal = document.getElementById("ntmExportModal");
+  if (!modal) return;
+
+  const hasRoute = Boolean(activeRouteData && activeRouteData.waypoints && activeRouteData.waypoints.length > 0);
+  const routeBadge = document.getElementById("expRouteBadge");
+  const routeSub = document.getElementById("expRouteSubtitle");
+  const btnRtz = document.getElementById("expBtnRtz");
+  const btnRouteCsv = document.getElementById("expBtnRouteCsv");
+  const btnRouteGeo = document.getElementById("expBtnRouteGeoJson");
+
+  if (routeBadge) {
+    routeBadge.textContent = hasRoute ? `${activeRouteData.waypoints.length} WPTs Active` : "No Active Route";
+    routeBadge.style.color = hasRoute ? "#38bdf8" : "#94a3b8";
+    routeBadge.style.borderColor = hasRoute ? "rgba(56, 189, 248, 0.4)" : "rgba(255, 255, 255, 0.1)";
+  }
+  if (routeSub) {
+    routeSub.textContent = hasRoute 
+      ? `Passage: "${activeRouteData.name}" (${activeRouteData.totalDistanceNM || 0} NM)`
+      : "Plot or generate a passage route in SetRoute to export route files.";
+  }
+  [btnRtz, btnRouteCsv, btnRouteGeo].forEach(btn => {
+    if (btn) btn.disabled = !hasRoute;
+  });
+
+  const chartSub = document.getElementById("expChartSubtitle");
+  const ntmCnt = typeof NTM_STORE !== "undefined" ? NTM_STORE.filter(n => !n.isCancelled).length : 0;
+  const portCnt = typeof PORT_DEPTHS_DB !== "undefined" ? PORT_DEPTHS_DB.length : 0;
+  if (chartSub) {
+    chartSub.textContent = `All chart objects: ${ntmCnt} NtM notices & ${portCnt} World Ports bathymetry`;
+  }
+
+  if (typeof updateExportModalCounts === "function") {
+    updateExportModalCounts();
+  }
+
+  modal.classList.add("open");
+}
+
+function initNavDataExportListeners() {
+  const btnRtz = document.getElementById("expBtnRtz");
+  const btnRouteCsv = document.getElementById("expBtnRouteCsv");
+  const btnRouteGeo = document.getElementById("expBtnRouteGeoJson");
+  const expBtnJrc = document.getElementById("expBtnJrc");
+  const expBtnGeo = document.getElementById("expBtnGeoJson");
+  const expBtnCsv = document.getElementById("expBtnCsv");
+  const modal = document.getElementById("ntmExportModal");
+
+  if (btnRtz) {
+    btnRtz.addEventListener("click", () => {
+      exportRouteToRtz(activeRouteData);
+      if (modal) modal.classList.remove("open");
+    });
+  }
+  if (btnRouteCsv) {
+    btnRouteCsv.addEventListener("click", () => {
+      exportRouteToJrcCsv(activeRouteData);
+      if (modal) modal.classList.remove("open");
+    });
+  }
+  if (btnRouteGeo) {
+    btnRouteGeo.addEventListener("click", () => {
+      exportSetRouteGeoJson();
+      if (modal) modal.classList.remove("open");
+    });
+  }
+  if (expBtnJrc) {
+    expBtnJrc.addEventListener("click", () => {
+      const selected = getExportSelectedNotices();
+      if (selected.length === 0) {
+        alert("No notices match the selected export criteria.");
+        return;
+      }
+      const fname = `Admiralty_NtM_Overlay_${getExportUtcTimestamp()}.uchm`;
+      if (typeof window.downloadJrcUchmFile === "function") {
+        window.downloadJrcUchmFile(selected, fname);
+      }
+      if (modal) modal.classList.remove("open");
+    });
+  }
+  if (expBtnGeo) {
+    expBtnGeo.addEventListener("click", () => {
+      exportUserChartGeoJson();
+      if (modal) modal.classList.remove("open");
+    });
+  }
+  if (expBtnCsv) {
+    expBtnCsv.addEventListener("click", () => {
+      exportUserChartCsv();
+      if (modal) modal.classList.remove("open");
+    });
+  }
+}
+
+
+let filterMinPortDepth = 0;
+
+function initMasterFilterControls() {
+  const chkNtm = document.getElementById("popMasterNtm");
+  const chkPorts = document.getElementById("popMasterPorts");
+  const chkRoute = document.getElementById("popMasterRoute");
+  const selDepth = document.getElementById("popSelectDepthMin");
+  const chkWpts = document.getElementById("popRouteShowWpts");
+  const chkLine = document.getElementById("popRouteShowLine");
+
+  const syncMapTilesFromFilterState = () => {
+    document.querySelectorAll(".ntm-map-tile").forEach(tile => {
+      const layer = tile.dataset.layer;
+      if (layer === "notices" && chkNtm) tile.classList.toggle("active", chkNtm.checked);
+      if (layer === "depths" && chkPorts) tile.classList.toggle("active", chkPorts.checked);
+      if (layer === "route" && chkRoute) tile.classList.toggle("active", chkRoute.checked);
+    });
+  };
+
+  if (chkNtm) {
+    chkNtm.checked = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.notices !== false : true;
+    chkNtm.addEventListener("change", function() {
+      if (typeof setOverlayActive === "function") {
+        setOverlayActive("notices", this.checked, leafletMap);
+      } else if (typeof OVERLAY_STATES !== "undefined") {
+        OVERLAY_STATES.notices = this.checked;
+      }
+      syncMapTilesFromFilterState();
+      renderNtMListAndMap();
+    });
+  }
+
+  if (chkPorts) {
+    chkPorts.checked = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.depths !== false : true;
+    chkPorts.addEventListener("change", function() {
+      if (typeof setOverlayActive === "function") {
+        setOverlayActive("depths", this.checked, leafletMap);
+      } else if (typeof OVERLAY_STATES !== "undefined") {
+        OVERLAY_STATES.depths = this.checked;
+      }
+      syncMapTilesFromFilterState();
+      renderNtMListAndMap();
+    });
+  }
+
+  if (chkRoute) {
+    chkRoute.checked = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.route !== false : true;
+    chkRoute.addEventListener("change", function() {
+      if (typeof setOverlayActive === "function") {
+        setOverlayActive("route", this.checked, leafletMap);
+      } else if (typeof OVERLAY_STATES !== "undefined") {
+        OVERLAY_STATES.route = this.checked;
+      }
+      if (leafletRouteLayer) {
+        if (this.checked) {
+          if (!leafletMap.hasLayer(leafletRouteLayer)) leafletMap.addLayer(leafletRouteLayer);
+        } else {
+          if (leafletMap.hasLayer(leafletRouteLayer)) leafletMap.removeLayer(leafletRouteLayer);
+        }
+      }
+      syncMapTilesFromFilterState();
+    });
+  }
+
+  if (selDepth) {
+    selDepth.addEventListener("change", function() {
+      filterMinPortDepth = parseFloat(this.value) || 0;
+      renderNtMListAndMap();
+    });
+  }
+
+  if (chkWpts || chkLine) {
+    const updateRouteVisibility = () => {
+      const showWpts = chkWpts ? chkWpts.checked : true;
+      const showLine = chkLine ? chkLine.checked : true;
+      document.querySelectorAll(".route-wpt-div-icon").forEach(el => {
+        el.style.display = showWpts ? "block" : "none";
+      });
+      if (leafletRouteLayer) {
+        leafletRouteLayer.eachLayer(layer => {
+          if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
+            layer.setStyle({ opacity: showLine ? 0.95 : 0 });
+          }
+        });
+      }
+    };
+    if (chkWpts) chkWpts.addEventListener("change", updateRouteVisibility);
+    if (chkLine) chkLine.addEventListener("change", updateRouteVisibility);
+  }
+}
+
+window.syncFilterMasterCheckboxes = function() {
+  const chkNtm = document.getElementById("popMasterNtm");
+  const chkPorts = document.getElementById("popMasterPorts");
+  const chkRoute = document.getElementById("popMasterRoute");
+  if (chkNtm && typeof OVERLAY_STATES !== "undefined") chkNtm.checked = Boolean(OVERLAY_STATES.notices);
+  if (chkPorts && typeof OVERLAY_STATES !== "undefined") chkPorts.checked = Boolean(OVERLAY_STATES.depths);
+  if (chkRoute && typeof OVERLAY_STATES !== "undefined") chkRoute.checked = Boolean(OVERLAY_STATES.route);
+};
