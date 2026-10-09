@@ -4769,3 +4769,545 @@
     gap: 0.35rem !important;
   }
 }
+
+
+/* ==========================================================================
+   UNIFIED PAGE CORNER BADGE (SetRoute Style on all tabs)
+   ========================================================================== */
+.page-top-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  background: rgba(14, 26, 54, 0.65) !important;
+  border: 1px solid var(--line) !important;
+  padding: 5px 13px 5px 8px !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+.page-badge-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 8px !important;
+  background: rgba(240, 90, 54, 0.12) !important;
+  border: 1px solid rgba(240, 90, 54, 0.35) !important;
+  box-shadow: 0 0 10px rgba(240, 90, 54, 0.18) !important;
+  flex-shrink: 0 !important;
+}
+
+.page-badge-icon svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+
+.page-badge-text {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.page-badge-title {
+  font-size: 1.12rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--text) !important;
+  line-height: 1 !important;
+}
+
+.page-badge-tm {
+  font-size: 0.65rem !important;
+  color: #f05a36 !important;
+  vertical-align: super !important;
+  margin-left: 1px !important;
+}
+
+.page-badge-pill {
+  background: linear-gradient(135deg, rgba(240, 90, 54, 0.22), rgba(240, 90, 54, 0.08)) !important;
+  border: 1px solid #f05a36 !important;
+  color: #ff7a5c !important;
+  font-size: 0.62rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em !important;
+  padding: 2px 7px !important;
+  border-radius: 10px !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+.setstar-top-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 1.1rem !important;
+  padding-bottom: 0.85rem !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+/* SetStar 8-column single line inputs */
+.setstar-inputs-grid {
+  display: grid !important;
+  grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+  gap: 0.45rem 0.5rem !important;
+  align-items: flex-end !important;
+}
+
+@media (max-width: 1200px) {
+  .setstar-inputs-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 650px) {
+  .setstar-inputs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* SetStar compact single-row deviation buttons */
+.dev-mgmt-btn-row {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0.55rem !important;
+  width: 100% !important;
+}
+
+.btn-dev-compact {
+  flex: 1 !important;
+  padding: 0.55rem 0.6rem !important;
+  font-size: 0.74rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+}
+
+/* My Vessel Popover enhanced styling */
+.ntm-vessel-popover {
+  background: rgba(10, 20, 44, 0.94) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.12) !important;
+  width: 320px !important;
+}
+
+.ntm-vessel-popover .ntm-popover-header {
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2) !important;
+  padding: 0.65rem 0.85rem !important;
+  font-weight: 700 !important;
+  color: #38bdf8 !important;
+}
+
+.ntm-vessel-popover .ntm-popover-body {
+  padding: 0.75rem 0.85rem !important;
+}
+
+.vessel-coords-row .min-input {
+  background: rgba(4, 10, 24, 0.7) !important;
+  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+.vessel-coords-row .min-input:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4) !important;
+}
+
+/* ==========================================================================
+   COMPREHENSIVE DAYTIME LIGHT THEME (Bridge Navigation Light Deck)
+   ========================================================================== */
+[data-theme="light"] {
+  --bg0: #f4f7fb !important;
+  --bg1: #e9eff7 !important;
+  --card: #ffffff !important;
+  --line: #cbd8e6 !important;
+  --text: #0d172a !important;
+  --muted: #536b88 !important;
+  --accent: #0284c7 !important;
+  --brand-navy: #152f54 !important;
+  --brand-coral: #f05a36 !important;
+  --star: #334155 !important;
+  --manual: rgba(240, 90, 54, 0.1) !important;
+  --calc: rgba(2, 132, 199, 0.1) !important;
+  --ok: #15803d !important;
+  --warn: #c2410c !important;
+}
+
+[data-theme="light"] body {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] body::after {
+  display: none !important;
+}
+
+/* Containers & Wrappers */
+[data-theme="light"] .app-content {
+  background: #f1f5f9 !important;
+}
+
+[data-theme="light"] .wrap {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .setstar-top-bar {
+  border-bottom-color: #cbd8e6 !important;
+}
+
+[data-theme="light"] .setstar-top-title h1 {
+  color: #0f172a !important;
+}
+
+/* Page Top Badge in Light Theme */
+[data-theme="light"] .page-top-badge {
+  background: #ffffff !important;
+  border-color: #cbd8e6 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .page-badge-title {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .page-badge-icon {
+  background: rgba(240, 90, 54, 0.08) !important;
+  border-color: rgba(240, 90, 54, 0.25) !important;
+}
+
+/* SetStar Panels, Cards & Inputs */
+[data-theme="light"] .panel {
+  background: #ffffff !important;
+  border: 1px solid #cbd8e6 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .panel h2 {
+  color: #0f172a !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea,
+[data-theme="light"] .min-input,
+[data-theme="light"] .min-textarea {
+  background: #ffffff !important;
+  border: 1px solid #cbd8e6 !important;
+  color: #0f172a !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus,
+[data-theme="light"] .min-input:focus,
+[data-theme="light"] .min-textarea:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
+}
+
+[data-theme="light"] label {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .setstar-subtle-link {
+  color: #0284c7 !important;
+}
+
+[data-theme="light"] .setstar-overrides-toggle {
+  background: #f8fafc !important;
+  border-color: #cbd8e6 !important;
+  color: #334155 !important;
+}
+
+[data-theme="light"] .setstar-overrides-content {
+  background: #f8fafc !important;
+  border-color: #cbd8e6 !important;
+}
+
+[data-theme="light"] button#btnCalc {
+  background: linear-gradient(135deg, #f05a36, #cf3818) !important;
+  color: #ffffff !important;
+}
+
+/* SetStar Deviation Management Card & Chart */
+[data-theme="light"] .dev-mgmt-card {
+  background: #ffffff !important;
+  border: 1px solid #cbd8e6 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .dev-mgmt-card h3 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .dev-mgmt-desc {
+  color: #536b88 !important;
+}
+
+[data-theme="light"] .dev-chart-wrap {
+  background: #ffffff !important;
+  border: 1px solid #cbd8e6 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .btn-dev-manual {
+  background: #f8fafc !important;
+  border-color: #cbd8e6 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .btn-dev-upload {
+  background: #f8fafc !important;
+  border-color: #cbd8e6 !important;
+  color: #0f172a !important;
+}
+
+/* SetStar Tables */
+[data-theme="light"] table.log {
+  border-color: #cbd8e6 !important;
+}
+
+[data-theme="light"] table.log th {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd8e6 !important;
+}
+
+[data-theme="light"] table.log td {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] table.log tr:hover td {
+  background: #f8fafc !important;
+}
+
+/* SetRoute in Light Theme */
+[data-theme="light"] .setroute-container {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .setroute-header {
+  border-bottom-color: #cbd8e6 !important;
+}
+
+[data-theme="light"] .setroute-title {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .setroute-desc {
+  color: #536b88 !important;
+}
+
+[data-theme="light"] .setroute-btn-chart-jump {
+  background: #ffffff !important;
+  border-color: #cbd8e6 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .setroute-card {
+  background: #ffffff !important;
+  border: 1px solid #cbd8e6 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .setroute-card-title {
+  color: #0f172a !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .setroute-label {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .setroute-hint {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .setroute-input,
+[data-theme="light"] .setroute-select {
+  background: #ffffff !important;
+  border-color: #cbd8e6 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .setroute-port-preview {
+  background: #f8fafc !important;
+  border-color: #cbd8e6 !important;
+}
+
+[data-theme="light"] .preview-text {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .intel-badge {
+  background: #f8fafc !important;
+  border-color: #cbd8e6 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .metric-box {
+  background: #f8fafc !important;
+  border-color: #cbd8e6 !important;
+}
+
+[data-theme="light"] .metric-label {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .metric-value {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .setroute-wpts-table th {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd8e6 !important;
+}
+
+[data-theme="light"] .setroute-wpts-table td {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* SetChart in Light Theme */
+[data-theme="light"] .ntm-toolbar {
+  background: #ffffff !important;
+  border-bottom: 1px solid #cbd8e6 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .ntm-sidebar-list {
+  background: #ffffff !important;
+  border-right: 1px solid #cbd8e6 !important;
+}
+
+[data-theme="light"] .ntm-list-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .ntm-list-header h3 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .ntm-search-wrap {
+  border-bottom: 1px solid #e2e8f0 !important;
+  background: #f8fafc !important;
+}
+
+[data-theme="light"] .ntm-search-input {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd8e6 !important;
+}
+
+[data-theme="light"] .ntm-select-bar {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .ntm-item-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme="light"] .ntm-item-card:hover {
+  background: #f8fafc !important;
+  border-color: #cbd8e6 !important;
+}
+
+[data-theme="light"] .ntm-card-title {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .ntm-card-desc {
+  color: #536b88 !important;
+}
+
+/* SetChart Layer Tiles (under map) */
+[data-theme="light"] .ntm-overlay-tile,
+[data-theme="light"] .ntm-card-grid .tile {
+  background: #ffffff !important;
+  border-color: #cbd8e6 !important;
+  color: #0f172a !important;
+}
+
+/* Popovers & Modals in Light Theme */
+[data-theme="light"] .ntm-popover,
+[data-theme="light"] .ntm-vessel-popover {
+  background: #ffffff !important;
+  border: 1px solid #cbd8e6 !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .ntm-vessel-popover .ntm-popover-header {
+  border-bottom-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .ntm-vessel-popover .ntm-popover-subtitle {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .ntm-vessel-popover .vessel-coords-row .min-input {
+  background: #f8fafc !important;
+  border: 1px solid #cbd8e6 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .ntm-modal-box {
+  background: #ffffff !important;
+  border: 1px solid #cbd8e6 !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .setstar-modal-table-scroll {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Settings in Light Theme */
+[data-theme="light"] .settings-wrap h2 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .settings-card-min {
+  background: #ffffff !important;
+  border: 1px solid #cbd8e6 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .min-card-title {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .settings-sources-card {
+  background: #ffffff !important;
+  border-color: #cbd8e6 !important;
+}
+
+[data-theme="light"] .settings-sources-title {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .settings-source-item {
+  color: #64748b !important;
+}
