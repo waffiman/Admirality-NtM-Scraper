@@ -1830,7 +1830,7 @@
           const hh = String(now.getUTCHours()).padStart(2, '0');
           const mm = String(now.getUTCMinutes()).padStart(2, '0');
           const ss = String(now.getUTCSeconds()).padStart(2, '0');
-          clockEl.textContent = ${hh}:: UTC;
+          clockEl.textContent = hh + ':' + mm + ':' + ss + ' UTC';
         }
       }
     }
@@ -2181,6 +2181,18 @@
 
 
 
+
+                <!-- Tool: SetRoute AI Passage Planner (Beta) -->
+                <button type="button" class="home-tool-tile" data-switch-tab="tab-route" title="Launch SetRoute AI Passage Planner">
+                  <div class="home-tool-icon-box">
+                    <span class="home-tool-icon">
+                      <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="4" cy="19" r="2.5" fill="#f05a36"/><circle cx="20" cy="5" r="2.5" fill="#f05a36"/><path d="M4 16.5c0-4 4-5.5 8-5.5s8-2 8-5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 2"/><polygon points="17 4 20.5 5 19 8" fill="#f05a36"/></svg>
+                    </span>
+                  </div>
+                  <span class="home-tool-title">SetRoute</span>
+                  <span class="home-tool-desc">AI Passage Planner</span>
+                  <span class="home-tool-badge" style="background:rgba(240,90,54,0.18);color:#f05a36;border:1px solid rgba(240,90,54,0.35);">Beta AI</span>
+                </button>
 
                 <!-- Tool 3: Bridge Deck Settings -->
 
@@ -6618,130 +6630,7 @@
 
 
   <!-- =========================================================================
-       SETSAIL ZERO-DEPENDENCY INLINE NAVIGATION & TELEMETRY ENGINE
-       Guarantees tab switching & button responsiveness ALWAYS work instantly,
-       completely independent of external scripts, offline mode, or network state.
-       ========================================================================= -->
-  <script>
-    // 1. Programmatic Tab Switching Engine
-    function switchToTab(targetTab) {
-      if (!targetTab) return;
-      try {
-        const navItems = document.querySelectorAll('.nav-sidebar .nav-item');
-        navItems.forEach(n => {
-          n.classList.toggle('active', n.getAttribute('data-tab') === targetTab);
-        });
-
-        document.querySelectorAll('.tab-pane').forEach(pane => {
-          pane.classList.remove('active');
-        });
-
-        const activePane = document.getElementById(targetTab);
-        if (activePane) {
-          activePane.classList.add('active');
-        }
-
-        const appContent = document.querySelector('.app-content');
-        const waffiFooter = document.querySelector('.waffi-credit-footer');
-
-        if (targetTab === 'tab-route') {
-          if (appContent) {
-            appContent.style.overflowY = 'auto';
-            appContent.style.maxHeight = 'none';
-          }
-          if (waffiFooter) waffiFooter.style.display = 'block';
-          if (typeof window.refreshSetRouteUI === 'function') window.refreshSetRouteUI();
-        } else if (targetTab === 'tab-home') {
-          if (appContent) appContent.style.overflowY = 'hidden';
-          if (waffiFooter) waffiFooter.style.display = 'none';
-          if (typeof window.initHomeVideo === 'function') window.initHomeVideo();
-        } else if (targetTab === 'tab-ntm') {
-          if (appContent) {
-            appContent.style.overflowY = 'hidden';
-            appContent.style.maxHeight = '100vh';
-          }
-          if (waffiFooter) waffiFooter.style.display = 'none';
-          setTimeout(() => {
-            if (window.leafletMap) window.leafletMap.invalidateSize();
-            else if (typeof window.initNtMMap === 'function') window.initNtMMap();
-          }, 120);
-        } else if (targetTab === 'tab-gyro') {
-          setTimeout(() => {
-            if (typeof window.renderDevTableView === 'function') window.renderDevTableView();
-            if (typeof window.drawDevChart === 'function') window.drawDevChart();
-            if (typeof window.renderStarAlmanac === 'function') window.renderStarAlmanac();
-            if (typeof window.calculate === 'function') window.calculate();
-          }, 40);
-        } else {
-          if (appContent) {
-            appContent.style.overflowY = '';
-            appContent.style.maxHeight = '';
-          }
-          if (waffiFooter) waffiFooter.style.display = '';
-        }
-      } catch (err) {
-        console.warn('[SetSail] switchToTab error:', err);
-      }
-    }
-    window.switchToTab = switchToTab;
-
-    // 2. High-Priority Global Click Delegation with Capture (Cannot be stopped by inner elements)
-    document.addEventListener('click', function(e) {
-      const switchBtn = e.target.closest('[data-switch-tab]');
-      if (switchBtn) {
-        e.preventDefault();
-        const target = switchBtn.getAttribute('data-switch-tab');
-        if (target) switchToTab(target);
-        return;
-      }
-      const tabBtn = e.target.closest('.nav-sidebar .nav-item');
-      if (tabBtn) {
-        e.preventDefault();
-        const target = tabBtn.getAttribute('data-tab');
-        if (target) switchToTab(target);
-        return;
-      }
-    }, true);
-
-    // 3. Real-Time Bridge Home Telemetry (UTC Clock & Online/Offline Dot Indicator)
-    function updateHomeTelemetry() {
-      const isOffline = (typeof navigator !== 'undefined' && navigator.onLine === false);
-      const clockEl = document.getElementById('homeUtcClock');
-      const dotEl = document.querySelector('.home-hud-dot');
-
-      if (dotEl) {
-        if (isOffline) {
-          dotEl.classList.remove('live-pulse');
-          dotEl.classList.add('offline');
-        } else {
-          dotEl.classList.remove('offline');
-          dotEl.classList.add('live-pulse');
-        }
-      }
-
-      if (clockEl) {
-        if (isOffline) {
-          clockEl.textContent = '--:--:-- UTC';
-        } else {
-          const now = new Date();
-          const hh = String(now.getUTCHours()).padStart(2, '0');
-          const mm = String(now.getUTCMinutes()).padStart(2, '0');
-          const ss = String(now.getUTCSeconds()).padStart(2, '0');
-          clockEl.textContent = ${hh}:: UTC;
-        }
-      }
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', updateHomeTelemetry);
-    } else {
-      updateHomeTelemetry();
-    }
-    setInterval(updateHomeTelemetry, 1000);
-    window.addEventListener('online', updateHomeTelemetry);
-    window.addEventListener('offline', updateHomeTelemetry);
-  </script>
-</head>
+       </head>
 
 
 
