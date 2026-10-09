@@ -276,14 +276,33 @@ function initHomeChronometer() {
   if (!clockEl) return;
 
   function update() {
-    const now = new Date();
-    const hh = String(now.getUTCHours()).padStart(2, "0");
-    const mm = String(now.getUTCMinutes()).padStart(2, "0");
-    const ss = String(now.getUTCSeconds()).padStart(2, "0");
-    clockEl.textContent = `${hh}:${mm}:${ss} UTC`;
+    const isOffline = (typeof navigator !== "undefined" && navigator.onLine === false);
+    const dotEl = document.querySelector(".home-hud-dot");
+
+    if (dotEl) {
+      if (isOffline) {
+        dotEl.classList.remove("live-pulse");
+        dotEl.classList.add("offline");
+      } else {
+        dotEl.classList.remove("offline");
+        dotEl.classList.add("live-pulse");
+      }
+    }
+
+    if (isOffline) {
+      clockEl.textContent = "--:--:-- UTC";
+    } else {
+      const now = new Date();
+      const hh = String(now.getUTCHours()).padStart(2, "0");
+      const mm = String(now.getUTCMinutes()).padStart(2, "0");
+      const ss = String(now.getUTCSeconds()).padStart(2, "0");
+      clockEl.textContent = ${hh}:: UTC;
+    }
   }
   update();
   setInterval(update, 1000);
+  window.addEventListener("online", update);
+  window.addEventListener("offline", update);
 }
 
 /**
