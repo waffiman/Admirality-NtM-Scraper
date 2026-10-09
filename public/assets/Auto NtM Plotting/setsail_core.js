@@ -2935,10 +2935,10 @@ async function generateSetRoutePassage() {
   addStep("Scanning active UKHO Admiralty NtM hazards & TSS polygons...", true);
   await new Promise(r => setTimeout(r, 300));
 
-  addStep("Injecting Open Sea Buoys, TSS lanes & bathymetry into Cohere AI prompt...", true);
+  addStep("Injecting Open Sea Buoys, TSS lanes & bathymetry into passage planning pipeline...", true);
   await new Promise(r => setTimeout(r, 300));
 
-  addStep("Contacting Cohere Command AI engine for autonomous passage plan...", false);
+  addStep("Calculating optimal deep-sea passage route...", false);
 
   const prompt = `You are an expert Chief Navigational Officer specializing in ECDIS Passage Planning and IMO Resolution A.893(21).
 Plan an autonomous, deep-water ocean passage from:
@@ -3013,7 +3013,7 @@ Output ONLY valid JSON matching:
     addStep("Engaging SetSail High-Precision Geodetic Maritime Corridor Engine...", true);
     parsedRoute = generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode);
   } else {
-    addStep("Cohere AI passage plan successfully synthesized!", true);
+    addStep("Maritime passage plan successfully synthesized!", true);
   }
 
   // Normalize waypoints & IDs
@@ -3257,7 +3257,7 @@ function exportSetRouteGeoJson() {
     metadata: {
       routeName: activeRouteData.name,
       exportedAtUtc: new Date().toISOString(),
-      engine: "SetRoute AI (Cohere Command-R)"
+      engine: "SetRoute AI Passage Engine"
     },
     features: features
   };
