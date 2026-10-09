@@ -97,7 +97,7 @@
 * Automatically plots the generated route onto the SetChart map under the "My Route" overlay.
 
 ### 5. Bridge Settings (`tab-settings`)
-* Visual cockpit theme toggle (Dark Cockpit vs Light Bridge).
+* **Comprehensive Daytime / Night Cockpit Themes:** Full dual-palette design system with complete light bridge theme (clean slate backgrounds, dark readable navy text, white cards, light borders) and dark bridge cockpit mode.
 * Developer feedback submission form.
 * **Connected Data Sources & Standards (3-Column Roster):** Unobtrusive, muted gray 3-column roster of all 15 authoritative maritime feeds read by SetSail (UKHO Admiralty NtM, OpenSeaMap NavAids, IHO NAVAREA Warnings, World Port Index Pub 150, Admiralty List of Lights, GEBCO Bathymetry, NOAA Hydrography, USNO Nautical Almanac, World Magnetic Model WMM, Open-Meteo Marine Data, IEC 61174 RTZ Routes, JRC ECDIS Format, Vessel Deviation Profile, OpenStreetMap Marine, Cohere AI Engine) with miniature green indicator dots (`#10b981`).
 * PWA cache reset and offline diagnostics.
