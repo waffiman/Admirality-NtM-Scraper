@@ -3034,7 +3034,7 @@ function renderPortDepthsOnMap(map) {
         <span style="font-size:0.85rem;"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;vertical-align:-0.15em;"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
         <span class="port-flag-box" style="width:16px;height:11px;vertical-align:middle;display:inline-flex;"><img src="assets/flags/${(port.countryCode||'un').toLowerCase()}.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/${(port.countryCode||'un').toLowerCase()}.png';" alt="${port.countryCode||''}" class="port-flag-img"></span>
         <span style="font-size:0.7rem;font-weight:700;color:#f1f5f9;">${port.unlocode}</span>
-        <span style="font-size:0.65rem;font-weight:700;color:#38bdf8;background:rgba(56,189,248,0.15);padding:1px 4px;border-radius:3px;">${port.fairways[0]?.depth || 12.5}m</span>
+        <span style="font-size:0.65rem;font-weight:700;color:#38bdf8;background:rgba(56,189,248,0.15);padding:1px 4px;border-radius:3px;">${((port.fairways && port.fairways[0]) ? port.fairways[0].depth : 12.5) || 12.5}m</span>
       </div>
     `;
 
@@ -3377,7 +3377,7 @@ function auditSinglePort(portId) {
   const msg = `Port Depth Audit [${port.unlocode}]:\n\n` +
               `Port: ${port.name} (${port.country})\n` +
               `Authority: ${port.authority}\n` +
-              `Fairway Depth: ${port.fairways[0]?.depth || 12.5}m LAT\n` +
+              `Fairway Depth: ${((port.fairways && port.fairways[0]) ? port.fairways[0].depth : 12.5) || 12.5}m LAT\n` +
               `Max Draft (Flood Tide): ${port.maxDraftFloodTide}\n` +
               `Survey Verified: ${port.lastSurvey}\n` +
               `Status: ${port.auditStatus}\n` +
