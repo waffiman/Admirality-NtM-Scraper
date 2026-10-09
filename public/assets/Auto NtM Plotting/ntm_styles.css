@@ -4711,3 +4711,13 @@
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
 }
+
+/* Offline / Red HUD Telemetry Dot Indicator */
+.home-hud-dot.offline {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ef4444 !important;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.9), 0 0 4px #ef4444 !important;
+  animation: none !important;
+}
