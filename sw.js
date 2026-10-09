@@ -4,7 +4,7 @@
  * Fully offline-capable bridge cockpit — Zero Google Dinosaur!
  */
 
-const CACHE_NAME = 'setsail-cache-v2.9';
+const CACHE_NAME = 'setsail-cache-v3.0';
 const TILE_CACHE_NAME = 'setsail-tiles-cache-v2';
 
 const OFFLINE_CORE_ASSETS = [
@@ -13,6 +13,7 @@ const OFFLINE_CORE_ASSETS = [
   'manifest.json',
   'notices.json',
   'assets/home_bg.mp4',
+  'assets/home_bg_poster.jpg',
   'assets/gyro_compass_logbook.ico',
   'assets/ship_stamp.png',
   'assets/wilhelmsen_logo.png',
@@ -22,12 +23,15 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
   'assets/Auto NtM Plotting/ntm_styles.css',
-  'assets/Auto NtM Plotting/ntm_ui.js',
-  'assets/Auto NtM Plotting/setsail_ui.js',
   'assets/Auto NtM Plotting/port_depths.js',
   'assets/Auto NtM Plotting/ntm_module.js',
+  'assets/Auto NtM Plotting/setsail_core.js',
   'assets/Auto NtM Plotting/pdf.min.js',
-  'assets/Auto NtM Plotting/pdf.worker.min.js'
+  'assets/Auto NtM Plotting/pdf.worker.min.js',
+  'assets/SetSail LOGOS/setsail_logo_square.webp',
+  'assets/SetSail LOGOS/setsail_logo_horizontal.webp',
+  'assets/SetSail LOGOS/setsail_logo_square.png',
+  'assets/SetSail LOGOS/setsail_logo_horizontal.png'
 ];
 
 // Pre-cache all core assets on install
