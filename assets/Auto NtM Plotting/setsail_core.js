@@ -542,15 +542,15 @@ function initFilterAndSortPopovers() {
     const vesselPop = document.getElementById("ntmVesselPopover");
     const myVesselBtn = document.getElementById("ntmMyVesselBtn");
 
-    if (filterPop && !filterPop.contains(e.target) && e.target !== filterBtn && !filterBtn?.contains(e.target)) {
+    if (filterPop && !filterPop.contains(e.target) && e.target !== filterBtn && !(filterBtn && filterBtn.contains(e.target))) {
       filterPop.classList.remove("open");
       if (filterBtn) filterBtn.classList.remove("active");
     }
-    if (sortPop && !sortPop.contains(e.target) && e.target !== sortBtn && !sortBtn?.contains(e.target)) {
+    if (sortPop && !sortPop.contains(e.target) && e.target !== sortBtn && !(sortBtn && sortBtn.contains(e.target))) {
       sortPop.classList.remove("open");
       if (sortBtn) sortBtn.classList.remove("active");
     }
-    if (vesselPop && !vesselPop.contains(e.target) && e.target !== myVesselBtn && !myVesselBtn?.contains(e.target)) {
+    if (vesselPop && !vesselPop.contains(e.target) && e.target !== myVesselBtn && !(myVesselBtn && myVesselBtn.contains(e.target))) {
       vesselPop.classList.remove("open");
       if (myVesselBtn) myVesselBtn.classList.remove("active");
     }
@@ -886,7 +886,7 @@ function parseRtzRoute(xmlStr, fallbackName) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(xmlStr, "text/xml");
   const routeInfo = doc.querySelector("routeInfo");
-  let routeName = routeInfo?.getAttribute("routeName") || fallbackName.replace(/\.rtz$/i, "");
+  let routeName = (routeInfo ? routeInfo.getAttribute("routeName") : null) || fallbackName.replace(/\.rtz$/i, "");
   
   const waypoints = [];
   const wpNodes = doc.querySelectorAll("waypoint");
@@ -2990,7 +2990,7 @@ Output ONLY valid JSON matching:
 
     if (cohereResp.ok) {
       const data = await cohereResp.json();
-      const text = data.message?.content?.[0]?.text || "";
+      const text = (((data.message || {}).content || [])[0] ? data.message.content[0].text : "") || "";
       const jsonMatch = text.match(/\{.*\}/s);
       if (jsonMatch) {
         parsedRoute = JSON.parse(jsonMatch[0]);
@@ -3106,7 +3106,7 @@ function displaySetRouteResults(route) {
   if (distEl) distEl.textContent = `${route.totalDistanceNM} NM`;
   if (daysEl) daysEl.textContent = `${route.steamingDays} Days`;
   if (wptsEl) wptsEl.textContent = `${route.waypoints.length} WPTs`;
-  if (speedEl) speedEl.textContent = `${route.metadata?.speedKnots || 14.5} kn`;
+  if (speedEl) speedEl.textContent = `${((route.metadata && route.metadata.speedKnots) || 14.5) || 14.5} kn`;
 
   if (cpBox && cpPills) {
     if (route.chokepoints && route.chokepoints.length > 0) {
