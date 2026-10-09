@@ -38,7 +38,7 @@
 
 | Service / Resource | Key / Token | Purpose | Location |
 | :--- | :--- | :--- | :--- |
-| **GitHub Personal Access Token** | `ghp_XGljoy... (Full token stored locally in deploy_production.py and local OVERVIEW.md)` | Deploying releases to `waffiman/Admirality-NtM-Scraper` | `deploy_production.py` |
+| **GitHub Personal Access Token** | `ghp_XGljoyx5JK...[SAVED_LOCALLY_ON_VESSEL]...04CT` | Deploying releases to `waffiman/Admirality-NtM-Scraper` | `deploy_production.py` |
 | **Cohere AI API Key** | `C7hDWfhYDGBiFrGtNn5PJ6SItO1tx1EqXkf2t4rR` | SetRoute AI passage planning & Deviation card OCR fallback | Client & deployer |
 | **Vercel Production Host** | `https://setsail-ai.vercel.app` | Main live progressive web application | Live Cloud |
 | **GitHub Repository** | `waffiman/Admirality-NtM-Scraper` (`main`) | Code repository & GitHub Actions runner | GitHub |
@@ -70,7 +70,7 @@
 * Real-time bridge HUD top bar with UTC digital chronometer (`#homeUtcClock`) and connection status dot (`.home-hud-dot`).
 * **Offline behavior:** When disconnected (`!navigator.onLine`), clock displays `--:--:-- UTC` and status dot turns static red (`#ef4444`). When online, live UTC time and pulsating green dot (`#10b981 live-pulse`).
 * Cinematic marine background video with graceful fallback to poster image.
-* 4 Launchpad tiles: SetChart, SetStar, SetRoute, Bridge Settings.
+* 3 Core Nautical Launchpad tiles: SetChart, SetStar, SetRoute (Settings accessible directly via left sidebar nav).
 
 ### 2. SetChart (`tab-ntm`)
 * Interactive marine chart with Leaflet engine, OpenSeaMap navigation aids, TSS corridors.
@@ -99,6 +99,7 @@
 ### 5. Bridge Settings (`tab-settings`)
 * Visual cockpit theme toggle (Dark Cockpit vs Light Bridge).
 * Developer feedback submission form.
+* **Connected Data Sources & Standards (3-Column Roster):** Unobtrusive, muted gray 3-column roster of all 15 authoritative maritime feeds read by SetSail (UKHO Admiralty NtM, OpenSeaMap NavAids, IHO NAVAREA Warnings, World Port Index Pub 150, Admiralty List of Lights, GEBCO Bathymetry, NOAA Hydrography, USNO Nautical Almanac, World Magnetic Model WMM, Open-Meteo Marine Data, IEC 61174 RTZ Routes, JRC ECDIS Format, Vessel Deviation Profile, OpenStreetMap Marine, Cohere AI Engine) with miniature green indicator dots (`#10b981`).
 * PWA cache reset and offline diagnostics.
 
 ---
