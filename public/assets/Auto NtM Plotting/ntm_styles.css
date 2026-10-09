@@ -4721,3 +4721,51 @@
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.9), 0 0 4px #ef4444 !important;
   animation: none !important;
 }
+
+
+/* Connected Data Sources List (Settings Tab) */
+.settings-sources-card {
+  padding: 0.9rem 1.25rem !important;
+}
+.settings-sources-title {
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+  color: var(--muted, #94a3b8) !important;
+  margin-bottom: 0.65rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+.settings-sources-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 0.45rem 0.9rem !important;
+}
+.settings-source-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+  font-size: 0.72rem !important;
+  color: var(--muted, #94a3b8) !important;
+  line-height: 1.35 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.settings-source-item .source-dot {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: #10b981 !important;
+  box-shadow: 0 0 5px rgba(16, 185, 129, 0.5) !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+}
+@media (max-width: 560px) {
+  .settings-sources-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.35rem !important;
+  }
+}
