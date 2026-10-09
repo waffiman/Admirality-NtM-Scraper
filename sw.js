@@ -4,7 +4,7 @@
  * Fully offline-capable bridge cockpit — Zero Google Dinosaur!
  */
 
-const CACHE_NAME = 'setsail-cache-v3.2';
+const CACHE_NAME = 'setsail-cache-v3.3';
 const TILE_CACHE_NAME = 'setsail-tiles-cache-v2';
 
 const OFFLINE_CORE_ASSETS = [
@@ -88,7 +88,7 @@ self.addEventListener('fetch', (event) => {
           // Fast network race (2.5s)
           const netPromise = fetch(event.request);
           const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Network timeout')), 2500)
+            setTimeout(() => reject(new Error('Network timeout')), 6000)
           );
           const response = await Promise.race([netPromise, timeoutPromise]);
           if (response && response.ok) {
