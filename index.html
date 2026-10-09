@@ -3050,14 +3050,14 @@
 
     <div class="setstar-top-bar no-print">
       <div class="setstar-top-title">
-        <h1 style="margin:0;font-size:1.25rem;font-weight:700;">SetStar · Celestial Almanac &amp; Gyro Compass</h1>
+        <h1 style="margin:0;font-size:1.35rem;font-weight:800;letter-spacing:-0.02em;">SetStar · Celestial Almanac &amp; Gyro Compass</h1>
       </div>
       <div class="page-top-badge">
         <span class="page-badge-icon">
           <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="6.8" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.4" stroke-dasharray="1.5 1.5"/><polygon points="12 4 13.6 10.4 12 12" fill="#f05a36"/><circle cx="12" cy="12" r="1.8" fill="#fff" stroke="#f05a36" stroke-width="1"/></svg>
         </span>
         <div class="page-badge-text">
-          <span class="page-badge-title">SetStar<span class="page-badge-tm">™</span></span>
+          <span class="page-badge-title">SetStar</span>
           <span class="page-badge-pill">ALMANAC &amp; GYRO</span>
         </div>
       </div>
@@ -3741,7 +3741,7 @@
                 <svg class="setsail-icon" viewBox="0 0 24 24"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8"/><circle cx="18.5" cy="7.5" r="2.2" fill="#f05a36"/></svg>
               </span>
               <div class="page-badge-text">
-                <span class="page-badge-title">SetChart<span class="page-badge-tm">™</span></span>
+                <span class="page-badge-title">SetChart</span>
                 <span class="page-badge-pill">LIVE ECDIS</span>
               </div>
             </div>
@@ -4095,256 +4095,131 @@
 
 
                   <div class="ntm-popover" id="ntmFilterPopover">
-
-
-
                     <div class="ntm-popover-header">
-
-
-
-                      <span>Filter Notices</span>
-
-
-
+                      <div style="display:flex;align-items:center;gap:6px;">
+                        <svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#38bdf8;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                        <span style="font-weight:700;font-size:0.86rem;">Filter Chart &amp; Overlays</span>
+                      </div>
                       <button type="button" class="ntm-popover-close" id="ntmFilterCloseBtn">×</button>
-
-
-
                     </div>
-
-
 
                     <div class="ntm-popover-body">
-
-
-
-                      <label class="ntm-popover-chk-item">
-
-
-
-                        <input type="checkbox" id="popChkAll" checked />
-
-
-
-                        <span class="chk-label">All Active</span>
-
-
-
+                      <!-- Primary Master Layer Toggles (Synchronized with Map Overlay Tiles) -->
+                      <div class="ntm-popover-subtitle" style="margin-top:2px;">MASTER MAP LAYERS:</div>
+                      
+                      <label class="ntm-popover-chk-item ntm-master-toggle-item" title="Toggle Admiralty Notices to Mariners overlay">
+                        <input type="checkbox" id="popMasterNtm" checked />
+                        <span class="chk-dot" style="background:#f05a36;box-shadow:0 0 6px #f05a36;"></span>
+                        <span class="chk-label" style="font-weight:700;">Admiralty NtM Notices</span>
+                        <span class="chk-count" id="popCntNtmTotal">0</span>
                       </label>
 
+                      <label class="ntm-popover-chk-item ntm-master-toggle-item" title="Toggle World Ports &amp; Fairways Bathymetry overlay">
+                        <input type="checkbox" id="popMasterPorts" checked />
+                        <span class="chk-dot" style="background:#06b6d4;box-shadow:0 0 6px #06b6d4;"></span>
+                        <span class="chk-label" style="font-weight:700;">World Ports Bathymetry</span>
+                        <span class="chk-count" id="popCntPortsTotal">0</span>
+                      </label>
 
+                      <label class="ntm-popover-chk-item ntm-master-toggle-item" title="Toggle Active Passage Route overlay">
+                        <input type="checkbox" id="popMasterRoute" checked />
+                        <span class="chk-dot" style="background:#38bdf8;box-shadow:0 0 6px #38bdf8;"></span>
+                        <span class="chk-label" style="font-weight:700;">Passage Route Layer</span>
+                        <span class="chk-count" id="popCntRouteTotal">0</span>
+                      </label>
 
                       <div class="ntm-popover-divider"></div>
 
-
+                      <!-- Sub-filters: Admiralty NtM Notices -->
+                      <div class="ntm-popover-subtitle">NTM NOTICE SUB-FILTERS:</div>
 
                       <label class="ntm-popover-chk-item">
-
-
-
                         <input type="checkbox" id="popChkT" checked />
-
-
-
                         <span class="chk-dot t-dot"></span>
-
-
-
                         <span class="chk-label">Temp (T)</span>
-
-
-
                         <span class="chk-count" id="popCntT">0</span>
-
-
-
                       </label>
 
-
-
                       <label class="ntm-popover-chk-item">
-
-
-
                         <input type="checkbox" id="popChkP" checked />
-
-
-
                         <span class="chk-dot p-dot"></span>
-
-
-
                         <span class="chk-label">Prelim (P)</span>
-
-
-
                         <span class="chk-count" id="popCntP">0</span>
-
-
-
                       </label>
 
-
-
                       <label class="ntm-popover-chk-item">
-
-
-
                         <input type="checkbox" id="popChkPerm" checked />
-
-
-
                         <span class="chk-dot perm-dot"></span>
-
-
-
                         <span class="chk-label">Permanent</span>
-
-
-
                         <span class="chk-count" id="popCntPerm">0</span>
-
-
-
                       </label>
-
-
 
                       <label class="ntm-popover-chk-item">
-
-
-
                         <input type="checkbox" id="popChkPoly" />
-
-
-
                         <span class="chk-dot poly-dot"></span>
-
-
-
-                        <span class="chk-label">Areas</span>
-
-
-
+                        <span class="chk-label">Polygons / TSS Areas</span>
                         <span class="chk-count" id="popCntPoly">0</span>
-
-
-
                       </label>
-
-
-
-                      <div class="ntm-popover-divider"></div>
-
-
 
                       <label class="ntm-popover-chk-item" title="Strictly excluded from chart by default">
-
-
-
                         <input type="checkbox" id="popChkCancelled" />
-
-
-
                         <span class="chk-dot can-dot"></span>
-
-
-
-                        <span class="chk-label"><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Cancelled</span>
-
-
-
-                        <span class="chk-count" id="popCntCancelled">0</span>
-
-
-
+                        <span class="chk-label">Cancelled Notices</span>
+                        <span class="chk-count" id="popCntCan">0</span>
                       </label>
-
-
-
-
-
-
 
                       <div class="ntm-popover-divider"></div>
 
+                      <!-- Sub-filters: Ports Bathymetry -->
+                      <div class="ntm-popover-subtitle">PORT FAIRWAY DEPTH:</div>
+                      <div style="padding:4px 0 8px;">
+                        <select id="popSelectDepthMin" style="width:100%;background:rgba(18,28,58,0.7);border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:0.78rem;padding:4px 8px;">
+                          <option value="0">All Port Depths (0m+)</option>
+                          <option value="10">10m+ (Handymax / Panamax)</option>
+                          <option value="12.5">12.5m+ (Post-Panamax)</option>
+                          <option value="15">15.0m+ (Capesize)</option>
+                          <option value="17.5">17.5m+ (VLCC / ULCC)</option>
+                        </select>
+                      </div>
 
+                      <div class="ntm-popover-divider"></div>
 
+                      <!-- Sub-filters: Route Display -->
+                      <div class="ntm-popover-subtitle">ROUTE DISPLAY:</div>
+                      <label class="ntm-popover-chk-item">
+                        <input type="checkbox" id="popRouteShowWpts" checked />
+                        <span class="chk-dot" style="background:#10b981;"></span>
+                        <span class="chk-label">Show Waypoints</span>
+                      </label>
+                      <label class="ntm-popover-chk-item">
+                        <input type="checkbox" id="popRouteShowLine" checked />
+                        <span class="chk-dot" style="background:#38bdf8;"></span>
+                        <span class="chk-label">Show Track Line</span>
+                      </label>
+
+                      <div class="ntm-popover-divider"></div>
+
+                      <!-- NAVAREA -->
                       <div class="ntm-popover-subtitle">NAVAREA:</div>
-
-
-
-                      <select id="popSelectNavarea" class="ntm-navarea-select" title="Filter by IMO/IHO NAVAREA">
-
-
-
-                        <option value="ALL">All NAVAREAs (Global)</option>
-
-
-
-                        <option value="NAVAREA I">NAVAREA I (UK / North Sea / Baltic)</option>
-
-
-
-                        <option value="NAVAREA II">NAVAREA II (East Atlantic / W Africa)</option>
-
-
-
-                        <option value="NAVAREA III">NAVAREA III (Med / Black Sea)</option>
-
-
-
-                        <option value="NAVAREA IV">NAVAREA IV (US / Canada East / Gulf)</option>
-
-
-
-                        <option value="NAVAREA V">NAVAREA V (Brazil / S. Atlantic)</option>
-
-
-
-                        <option value="NAVAREA VIII">NAVAREA VIII (India / Indian Ocean)</option>
-
-
-
-                        <option value="NAVAREA IX">NAVAREA IX (Persian Gulf / Red Sea)</option>
-
-
-
-                        <option value="NAVAREA XI">NAVAREA XI (East Asia / China / Malacca)</option>
-
-
-
-                        <option value="NAVAREA XII">NAVAREA XII (US / Canada West)</option>
-
-
-
-                        <option value="NAVAREA XIV">NAVAREA XIV (New Zealand / Pacific)</option>
-
-
-
-                        <option value="NAVAREA XX">NAVAREA XX (Barents / White Sea)</option>
-
-
-
-                      </select>
-
-
-
+                      <label class="ntm-popover-radio-item">
+                        <input type="radio" name="popNavarea" value="" checked />
+                        <span class="radio-label">All Regions</span>
+                      </label>
+                      <label class="ntm-popover-radio-item">
+                        <input type="radio" name="popNavarea" value="NAVAREA I" />
+                        <span class="radio-label">NAVAREA I (North Sea / UK)</span>
+                      </label>
+                      <label class="ntm-popover-radio-item">
+                        <input type="radio" name="popNavarea" value="NAVAREA II" />
+                        <span class="radio-label">NAVAREA II (Atlantic)</span>
+                      </label>
+                      <label class="ntm-popover-radio-item">
+                        <input type="radio" name="popNavarea" value="NAVAREA III" />
+                        <span class="radio-label">NAVAREA III (Med / Black Sea)</span>
+                      </label>
                     </div>
-
-
-
                   </div>
-
-
-
                 </div>
-
-
-
-
-
-
 
                 <!-- Two Arrows Sort Button & Popover -->
 
@@ -4558,13 +4433,7 @@
 
 
 
-                        <!-- Multi-Overlay Quick Filter Pills Bar -->
-            <div class="ntm-overlay-category-bar" id="ntmOverlayCategoryBar">
-              <button type="button" class="ntm-category-pill active" data-category="ALL" id="catPillAll">All <span class="cat-pill-count" id="catCountAll">0</span></button>
-              <button type="button" class="ntm-category-pill" data-category="NTM" id="catPillNtm">NtM <span class="cat-pill-count" id="catCountNtm">0</span></button>
-              <button type="button" class="ntm-category-pill" data-category="PORTS" id="catPillPorts">Ports <span class="cat-pill-count" id="catCountPorts">0</span></button>
-              <button type="button" class="ntm-category-pill" data-category="ROUTE" id="catPillRoute" style="display:none;">My Route <span class="cat-pill-count" id="catCountRoute">0</span></button>
-            </div>
+                        
 
             <div class="ntm-items-scroll" id="ntmItemsScroll"></div>
 
@@ -4694,7 +4563,7 @@
                     <polygon points="16.5 4 20 4.5 18.5 7.5" fill="#38bdf8"/>
                   </svg>
                 </span>
-                <h1 class="setroute-title">SetRoute<span class="setroute-tm">™</span></h1>
+                <h1 class="setroute-title">SetRoute</h1>
                 <span class="setroute-beta-pill">BETA AI ENGINE</span>
               </div>
               <p class="setroute-desc">
@@ -4711,7 +4580,7 @@
                   <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="4.5" cy="19.5" r="2.5" fill="#f05a36"/><circle cx="19.5" cy="4.5" r="2.5" fill="#38bdf8"/><path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" fill="none" stroke-width="1.8" stroke-dasharray="3 2"/><polygon points="16.5 4 20 4.5 18.5 7.5" fill="#38bdf8"/></svg>
                 </span>
                 <div class="page-badge-text">
-                  <span class="page-badge-title">SetRoute<span class="page-badge-tm">™</span></span>
+                  <span class="page-badge-title">SetRoute</span>
                   <span class="page-badge-pill">PASSAGE PLANNER</span>
                 </div>
               </div>
@@ -4838,7 +4707,7 @@
 
 
           <div class="settings-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
-            <h2 style="margin:0;"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</h2>
+            <h2 style="margin:0;font-size:1.35rem;font-weight:800;letter-spacing:-0.02em;display:flex;align-items:center;gap:10px;"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</h2>
             <div class="page-top-badge" style="margin-left:auto;">
               <span class="page-badge-icon">
                 <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="#f05a36" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
@@ -5157,225 +5026,93 @@
 
 
       <div class="ntm-modal" id="ntmExportModal">
-
-
-
         <div class="ntm-modal-box ntm-export-box">
-
-
-
           <div class="ntm-modal-header">
-
-
-
-            <h3>Export Notices to ECDIS</h3>
-
-
-
+            <div style="display:flex;align-items:center;gap:8px;">
+              <svg class="setsail-icon" viewBox="0 0 24 24" style="stroke:#38bdf8;width:18px;height:18px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <h3 style="margin:0;font-size:1.05rem;font-weight:700;">Export Navigational Data</h3>
+            </div>
             <button type="button" class="ntm-modal-close" id="expBtnClose" title="Close">×</button>
-
-
-
           </div>
 
-
-
-
-
-
-
-          <div class="ntm-export-section">
-
-
-
-            <div class="ntm-export-section-title">Notice Types to Include:</div>
-
-
-
-            <div class="ntm-export-types-row">
-
-
-
-              <label class="ntm-type-toggle-pill type-t">
-
-
-
-                <input type="checkbox" id="expChkT" checked />
-
-
-
-                <span class="pill-dot"></span>
-
-
-
-                <span class="pill-text">Temp (T)</span>
-
-
-
-                <span class="ntm-export-count-badge" id="expCountT">0</span>
-
-
-
-              </label>
-
-
-
-
-
-
-
-              <label class="ntm-type-toggle-pill type-p">
-
-
-
-                <input type="checkbox" id="expChkP" checked />
-
-
-
-                <span class="pill-dot"></span>
-
-
-
-                <span class="pill-text">Prelim (P)</span>
-
-
-
-                <span class="ntm-export-count-badge" id="expCountP">0</span>
-
-
-
-              </label>
-
-
-
-
-
-
-
-              <label class="ntm-type-toggle-pill type-perm">
-
-
-
-                <input type="checkbox" id="expChkPerm" checked />
-
-
-
-                <span class="pill-dot"></span>
-
-
-
-                <span class="pill-text">Perm</span>
-
-
-
-                <span class="ntm-export-count-badge" id="expCountPerm">0</span>
-
-
-
-              </label>
-
-
-
+          <!-- Choice 1: Passage Route Plan (Dedicated Route Formats) -->
+          <div class="ntm-export-choice-card" id="expCardRoute">
+            <div class="ntm-export-card-header">
+              <span class="ntm-export-card-icon" style="color:#38bdf8;">
+                <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="4.5" cy="19.5" r="2.5"/><circle cx="19.5" cy="4.5" r="2.5"/><path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" stroke-dasharray="3 2"/><polygon points="16.5 4 20 4.5 18.5 7.5"/></svg>
+              </span>
+              <div class="ntm-export-card-title-wrap">
+                <div class="ntm-export-card-title">Passage Route Plan</div>
+                <div class="ntm-export-card-subtitle" id="expRouteSubtitle">Vessel passage route track, sequential waypoints &amp; safety corridor</div>
+              </div>
+              <span class="ntm-export-badge" id="expRouteBadge">Route Loaded</span>
+            </div>
+            <div class="ntm-export-btn-group">
+              <button type="button" class="exp-btn-pill" id="expBtnRtz" title="Export IEC 61174 RTZ Route for ECDIS (JRC, Furuno, Transas, Sperry)">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                IEC 61174 (.rtz)
+              </button>
+              <button type="button" class="exp-btn-pill" id="expBtnRouteCsv" title="Export JRC ECDIS Route Sheet CSV">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+                JRC Route (.csv)
+              </button>
+              <button type="button" class="exp-btn-pill" id="expBtnRouteGeoJson" title="Export Route as GeoJSON">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+                GeoJSON (.geojson)
+              </button>
+            </div>
+          </div>
+
+          <!-- Choice 2: ECDIS User Chart Layer (All Other Chart Objects) -->
+          <div class="ntm-export-choice-card" id="expCardUserChart">
+            <div class="ntm-export-card-header">
+              <span class="ntm-export-card-icon" style="color:#f05a36;">
+                <svg class="setsail-icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              </span>
+              <div class="ntm-export-card-title-wrap">
+                <div class="ntm-export-card-title">ECDIS User Chart Layer</div>
+                <div class="ntm-export-card-subtitle" id="expChartSubtitle">All chart objects: NtM notices, bathymetry, fairway hazards &amp; TSS</div>
+              </div>
+              <span class="ntm-export-badge" id="expChartBadge" style="background:rgba(240,90,54,0.15);color:#ff7a5c;border-color:rgba(240,90,54,0.3);">User Chart</span>
             </div>
 
+            <div class="ntm-export-types-row" style="margin-bottom:10px;">
+              <label class="ntm-type-toggle-pill type-t">
+                <input type="checkbox" id="expChkT" checked />
+                <span class="pill-dot"></span>
+                <span class="pill-text">Temp (T)</span>
+                <span class="ntm-export-count-badge" id="expCountT">0</span>
+              </label>
+              <label class="ntm-type-toggle-pill type-p">
+                <input type="checkbox" id="expChkP" checked />
+                <span class="pill-dot"></span>
+                <span class="pill-text">Prelim (P)</span>
+                <span class="ntm-export-count-badge" id="expCountP">0</span>
+              </label>
+              <label class="ntm-type-toggle-pill type-perm">
+                <input type="checkbox" id="expChkPerm" checked />
+                <span class="pill-dot"></span>
+                <span class="pill-text">Perm</span>
+                <span class="ntm-export-count-badge" id="expCountPerm">0</span>
+              </label>
+            </div>
 
-
+            <div class="ntm-export-btn-group">
+              <button type="button" class="exp-btn-pill exp-btn-primary" id="expBtnJrc" title="Download JRC ECDIS User Chart (.uchm)">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                JRC User Chart (.uchm)
+              </button>
+              <button type="button" class="exp-btn-pill" id="expBtnGeoJson" title="Download User Chart Layer as GeoJSON">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+                GeoJSON (.geojson)
+              </button>
+              <button type="button" class="exp-btn-pill" id="expBtnCsv" title="Download User Chart Layer as CSV">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+                CSV (.csv)
+              </button>
+            </div>
           </div>
-
-
-
-
-
-
-
-          <div class="ntm-export-filter-option" style="padding:6px 0;font-size:0.75rem;color:var(--muted);display:flex;align-items:center;gap:6px;">
-
-
-
-            <span>ℹ️</span>
-
-
-
-            <span>All notices currently active on the chart are included automatically.</span>
-
-
-
-          </div>
-
-
-
-
-
-
-
-          <!-- Live Summary Banner -->
-
-
-
-          <div class="ntm-export-summary-banner" id="expSummaryText">
-
-
-
-            Ready to export: 0 notices
-
-
-
-          </div>
-
-
-
-
-
-
-
-          <!-- Primary Action: Prominent ECDIS Download Button -->
-
-
-
-          <button type="button" class="ntm-btn-export-main" id="expBtnJrc">
-
-
-
-            <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download JRC ECDIS (.uchm)
-
-
-
-          </button>
-
-
-
-
-
-
-
-          <!-- Secondary Format Options -->
-
-
-
-          <div class="ntm-export-secondary-row">
-
-
-
-            <span class="secondary-label">Other formats:</span>
-
-
-
-            <button type="button" class="ntm-btn-format" id="expBtnGeoJson"><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg> GeoJSON</button>
-
-
-
-            <button type="button" class="ntm-btn-format" id="expBtnCsv"><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> CSV</button>
-
-
-
-          </div>
-
-
-
         </div>
-
-
-
       </div><script>
 
 
@@ -9596,6 +9333,180 @@
 
 
     
+    
+    // ==========================================================================
+    // WORLD MAGNETIC MODEL (WMM 2025-2030) - AUTOMATIC VARIATION CALCULATION
+    // ==========================================================================
+    // World Magnetic Model (WMM 2025-2030) - High Precision Spherical Harmonics
+const WMM2025 = {
+  epoch: 2025,
+  nMax: 12,
+  nSec: 12,
+  g: [0, -29351.8, -1410.8, -2556.6, 2951.1, 1649.3, 1361, -2404.1, 1243.8, 453.6, 895, 799.5, 55.7, -281.1, 12.1, -233.2, 368.9, 187.2, -138.7, -142, 20.9, 64.4, 63.8, 76.9, -115.7, -40.9, 14.9, -60.7, 79.5, -77, -8.8, 59.3, 15.8, 2.5, -11.1, 14.2, 23.2, 10.8, -17.5, 2, -21.7, 16.9, 15, -16.8, 0.9, 4.6, 7.8, 3, -0.2, -2.5, -13.1, 2.4, 8.6, -8.7, -12.9, -1.3, -6.4, 0.2, 2, -1, -0.6, -0.9, 1.5, 0.9, -2.7, -3.9, 2.9, -1.5, -2.5, 2.4, -0.6, -0.1, -0.6, -0.1, 1.1, -1, -0.2, 2.6, -2, -0.2, 0.3, 1.2, -1.3, 0.6, 0.6, 0.5, -0.1, -0.4, -0.2, -1.3, -0.7],
+  h: [0, 0, 4545.4, 0, -3133.6, -815.1, 0, -56.6, 237.5, -549.5, 0, 278.6, -133.9, 212, -375.6, 0, 45.4, 220.2, -122.9, 43, 106.1, 0, -18.4, 16.8, 48.8, -59.8, 10.9, 72.7, 0, -48.9, -14.4, -1, 23.4, -7.4, -25.1, -2.3, 0, 7.1, -12.6, 11.4, -9.7, 12.7, 0.7, -5.2, 3.9, 0, -24.8, 12.2, 8.3, -3.3, -5.2, 7.2, -0.6, 0.8, 10, 0, 3.3, 0, 2.4, 5.3, -9.1, 0.4, -4.2, -3.8, 0.9, -9.1, 0, 0, 2.9, -0.6, 0.2, 0.5, -0.3, -1.2, -1.7, -2.9, -1.8, -2.3, 0, -1.3, 0.7, 1, -1.4, 0, 0.6, -0.1, 0.8, 0.1, -1, 0.1, 0.2],
+  dg: [0, 12, 9.7, -11.6, -5.2, -8, -1.3, -4.2, 0.4, -15.6, -1.6, -2.4, -6, 5.6, -7, 0.6, 1.4, 0, 0.6, 2.2, 0.9, -0.2, -0.4, 0.9, 1.2, -0.9, 0.3, 0.9, 0, -0.1, -0.1, 0.5, -0.1, -0.8, -0.8, 0.8, -0.1, 0.2, 0, 0.5, -0.1, 0.3, 0.2, 0, 0.2, 0, -0.1, 0.1, 0.3, -0.3, 0, 0.3, -0.1, 0.1, -0.1, 0.1, 0, 0.1, 0.1, 0, -0.3, 0, -0.1, -0.1, 0, 0, 0, 0, 0, 0, 0, -0.1, 0, 0, -0.1, -0.1, -0.1, -0.1, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, -0.1, 0, -0.1],
+  dh: [0, 0, -21.5, 0, -27.7, -12.1, 0, 4, -0.3, -4.1, 0, -1.1, 4.1, 1.6, -4.4, 0, -0.5, 2.2, 0.4, 1.7, 1.9, 0, 0.3, -1.6, -0.4, 0.9, 0.7, 0.9, 0, 0.6, 0.5, -0.8, 0, -1, 0.6, -0.2, 0, -0.2, 0.5, -0.4, 0.4, -0.5, -0.6, 0.3, 0.2, 0, -0.3, 0.3, -0.3, 0.3, 0.2, -0.1, -0.2, 0.4, 0.1, 0, 0, 0, -0.2, 0.1, -0.1, 0.1, 0, -0.1, 0.2, 0, 0, 0, 0.1, 0, 0.1, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, -0.1, 0.1, 0, 0, 0, 0, 0, 0, 0, -0.1]
+};
+
+function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
+  if (!Number.isFinite(latDeg) || !Number.isFinite(lonDeg)) return null;
+  const d = dateObj instanceof Date ? dateObj : new Date();
+  const year = d.getUTCFullYear();
+  const startOfYear = Date.UTC(year, 0, 1);
+  const endOfYear = Date.UTC(year + 1, 0, 1);
+  const fracYear = year + (d.getTime() - startOfYear) / (endOfYear - startOfYear);
+  const dyear = fracYear - WMM2025.epoch;
+
+  const nMax = WMM2025.nMax;
+  const nSec = WMM2025.nSec;
+  const b = (nSec * (nSec + 1)) / 2 + nSec;
+
+  const g = WMM2025.g.slice();
+  const h = WMM2025.h.slice();
+  for (let i = 0; i < g.length; i++) {
+    if (i <= b) {
+      g[i] += dyear * WMM2025.dg[i];
+      h[i] += dyear * WMM2025.dh[i];
+    }
+  }
+
+  const aEll = 6378.137;
+  const bEll = 6356.7523142;
+  const re = 6371.2;
+  const epssq = 1 - (bEll * bEll) / (aEll * aEll);
+
+  const rad = Math.PI / 180.0;
+  const coslat = Math.cos(latDeg * rad);
+  const sinlat = Math.sin(latDeg * rad);
+  const rc = aEll / Math.sqrt(1 - epssq * sinlat * sinlat);
+  const xp = rc * coslat;
+  const zp = rc * (1 - epssq) * sinlat;
+  const r = Math.sqrt(xp * xp + zp * zp);
+  const phig = Math.asin(zp / r) / rad;
+
+  const cosLam = Math.cos(lonDeg * rad);
+  const sinLam = Math.sin(lonDeg * rad);
+  const cosMlam = [1.0, cosLam];
+  const sinMlam = [0.0, sinLam];
+  const relRadPow = [(re / r) * (re / r)];
+  for (let n = 1; n <= nMax; n++) {
+    relRadPow.push(relRadPow[n - 1] * (re / r));
+  }
+  for (let m = 2; m <= nMax; m++) {
+    cosMlam.push(cosMlam[m - 1] * cosLam - sinMlam[m - 1] * sinLam);
+    sinMlam.push(cosMlam[m - 1] * sinLam + sinMlam[m - 1] * cosLam);
+  }
+
+  const sinPhig = Math.sin(phig * rad);
+  const z = Math.sqrt(Math.max(0, (1 - sinPhig) * (1 + sinPhig)));
+  const pcup = [1.0];
+  const dpcup = [0.0];
+  for (let n = 1; n <= nMax; n++) {
+    for (let m = 0; m <= n; m++) {
+      const i = (n * (n + 1)) / 2 + m;
+      if (n === m) {
+        const i1 = ((n - 1) * n) / 2 + m - 1;
+        pcup.push(z * pcup[i1]);
+        dpcup.push(z * dpcup[i1] + sinPhig * pcup[i1]);
+      } else if (n === 1 && m === 0) {
+        const i1 = ((n - 1) * n) / 2 + m;
+        pcup.push(sinPhig * pcup[i1]);
+        dpcup.push(sinPhig * dpcup[i1] - z * pcup[i1]);
+      } else if (n > 1 && n !== m) {
+        const i1 = ((n - 2) * (n - 1)) / 2 + m;
+        const i2 = ((n - 1) * n) / 2 + m;
+        if (m > n - 2) {
+          pcup.push(sinPhig * pcup[i2]);
+          dpcup.push(sinPhig * dpcup[i2] - z * pcup[i2]);
+        } else {
+          const k = ((n - 1) * (n - 1) - m * m) / ((2 * n - 1) * (2 * n - 3));
+          pcup.push(sinPhig * pcup[i2] - k * pcup[i1]);
+          dpcup.push(sinPhig * dpcup[i2] - z * pcup[i2] - k * dpcup[i1]);
+        }
+      }
+    }
+  }
+
+  const schmidt = [1.0];
+  for (let n = 1; n <= nMax; n++) {
+    const i = (n * (n + 1)) / 2;
+    const i1 = ((n - 1) * n) / 2;
+    schmidt.push(schmidt[i1] * (2 * n - 1) / n);
+    for (let m = 1; m <= n; m++) {
+      const iM = (n * (n + 1)) / 2 + m;
+      const iM1 = (n * (n + 1)) / 2 + m - 1;
+      schmidt.push(schmidt[iM1] * Math.sqrt(((n - m + 1) * (m === 1 ? 2 : 1)) / (n + m)));
+    }
+  }
+
+  for (let n = 1; n <= nMax; n++) {
+    for (let m = 0; m <= n; m++) {
+      const idx = (n * (n + 1)) / 2 + m;
+      pcup[idx] *= schmidt[idx];
+      dpcup[idx] *= -schmidt[idx];
+    }
+  }
+
+  let bx = 0.0;
+  let by = 0.0;
+  let bz = 0.0;
+  for (let n = 1; n <= nMax; n++) {
+    for (let m = 0; m <= n; m++) {
+      const idx = (n * (n + 1)) / 2 + m;
+      bz -= relRadPow[n] * (g[idx] * cosMlam[m] + h[idx] * sinMlam[m]) * (n + 1) * pcup[idx];
+      by += relRadPow[n] * (g[idx] * sinMlam[m] - h[idx] * cosMlam[m]) * m * pcup[idx];
+      bx -= relRadPow[n] * (g[idx] * cosMlam[m] + h[idx] * sinMlam[m]) * dpcup[idx];
+    }
+  }
+
+  const cosPhig = Math.cos(phig * rad);
+  if (Math.abs(cosPhig) > 1e-10) {
+    by = by / cosPhig;
+  }
+
+  const psi = (phig - latDeg) * rad;
+  const bxGeo = bx * Math.cos(psi) - bz * Math.sin(psi);
+  const byGeo = by;
+
+  const declination = Math.atan2(byGeo, bxGeo) / rad;
+  return declination;
+}
+
+
+    function getCoordsFromSetStarInputs() {
+      var latEl = document.getElementById("lat");
+      var latNSEl = document.getElementById("latNS");
+      var lonEl = document.getElementById("lon");
+      var lonEWEl = document.getElementById("lonEW");
+      if (!latEl || !lonEl) return null;
+      var parseCoord = function(str) {
+        if (!str) return NaN;
+        var parts = str.trim().split(/\s+/);
+        if (parts.length === 1) return parseFloat(parts[0]);
+        var deg = parseFloat(parts[0]);
+        var min = parseFloat(parts[1]);
+        return deg + (min / 60);
+      };
+      var latVal = parseCoord(latEl.value);
+      var lonVal = parseCoord(lonEl.value);
+      if (!Number.isFinite(latVal) || !Number.isFinite(lonVal)) return null;
+      if (latNSEl && latNSEl.value === "S") latVal = -latVal;
+      if (lonEWEl && lonEWEl.value === "W") lonVal = -lonVal;
+      return { lat: latVal, lon: lonVal };
+    }
+
+    function autoSyncSetStarMagneticVariation(lat, lon, dateObj) {
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+      var dec = calculateWMMDeclination(lat, lon, dateObj || new Date());
+      if (Number.isFinite(dec)) {
+        var varMagEl = document.getElementById("varMag");
+        var varEWEl = document.getElementById("varEW");
+        if (varMagEl) varMagEl.value = Math.abs(dec).toFixed(1);
+        if (varEWEl) varEWEl.value = dec >= 0 ? "E" : "W";
+        return dec;
+      }
+      return null;
+    }
     // ?? SetStar UI Streamlining & Live Sync Engine ??
     function initSetStarCurrentData() {
       var btn = document.getElementById("btnUseCurrentData");
@@ -9641,10 +9552,12 @@
               if (lonEl) lonEl.value = lonDeg + " " + lonMin;
               if (lonEWEl) lonEWEl.value = lon >= 0 ? "E" : "W";
 
+              var dec = autoSyncSetStarMagneticVariation(lat, lon, now);
               if (typeof calculate === "function") calculate();
               if (typeof renderStarAlmanac === "function") renderStarAlmanac();
               if (typeof showSetSailToast === "function") {
-                showSetSailToast("Time & GPS position synced with live bridge", "success");
+                var decText = dec !== null ? " • Var: " + Math.abs(dec).toFixed(1) + "° " + (dec >= 0 ? "E" : "W") : "";
+                showSetSailToast("Time, GPS position & Magnetic Variation" + decText + " synced", "success");
               }
             },
             function(err) {
@@ -9657,10 +9570,13 @@
             { enableHighAccuracy: true, timeout: 8000 }
           );
         } else {
+          var c = getCoordsFromSetStarInputs();
+          var dec = c ? autoSyncSetStarMagneticVariation(c.lat, c.lon, now) : null;
           if (typeof calculate === "function") calculate();
           if (typeof renderStarAlmanac === "function") renderStarAlmanac();
           if (typeof showSetSailToast === "function") {
-            showSetSailToast("Local & UTC date/time synced", "info");
+            var decText = dec !== null ? " • Var: " + Math.abs(dec).toFixed(1) + "° " + (dec >= 0 ? "E" : "W") : "";
+            showSetSailToast("Local & UTC date/time" + decText + " synced", "info");
           }
         }
       });
