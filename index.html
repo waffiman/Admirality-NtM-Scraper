@@ -1883,7 +1883,55 @@
       max-width: 520px;
       width: 95%;
     }
-</style>
+
+    /* Connected Data Sources List (Settings Tab) */
+    .settings-sources-card {
+      padding: 0.9rem 1.25rem !important;
+    }
+    .settings-sources-title {
+      font-size: 0.72rem !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.6px !important;
+      color: var(--muted, #94a3b8) !important;
+      margin-bottom: 0.65rem !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.5rem !important;
+    }
+    .settings-sources-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 0.45rem 0.9rem !important;
+    }
+    .settings-source-item {
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.45rem !important;
+      font-size: 0.72rem !important;
+      color: var(--muted, #94a3b8) !important;
+      line-height: 1.35 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+    .settings-source-item .source-dot {
+      width: 5px !important;
+      height: 5px !important;
+      border-radius: 50% !important;
+      background: #10b981 !important;
+      box-shadow: 0 0 5px rgba(16, 185, 129, 0.5) !important;
+      flex-shrink: 0 !important;
+      display: inline-block !important;
+    }
+    @media (max-width: 560px) {
+      .settings-sources-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.35rem !important;
+      }
+    }
+
+  </style>
 
 
 
@@ -2369,39 +2417,7 @@
                   <span class="home-tool-badge" style="background:rgba(240,90,54,0.18);color:#f05a36;border:1px solid rgba(240,90,54,0.35);">Beta AI</span>
                 </button>
 
-                <!-- Tool 3: Bridge Deck Settings -->
-
-
-
-                <button type="button" class="home-tool-tile" data-switch-tab="tab-settings" title="Open Bridge Settings">
-
-
-
-                  <div class="home-tool-icon-box">
-
-
-
-                    <span class="home-tool-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="#f05a36" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="1.2" fill="#f05a36"/></svg></span>
-
-
-
-                  </div>
-
-
-
-                  <span class="home-tool-title">Bridge Settings</span>
-
-
-
-                  <span class="home-tool-desc">Cockpit &amp; Cache</span>
-
-
-
-                  <span class="home-tool-badge">System</span>
-
-
-
-                </button>
+                
 
 
 
@@ -4408,6 +4424,33 @@
 
             </div>
 
+            <!-- Card 3: Connected Data Sources -->
+            <div class="settings-card-min settings-sources-card">
+              <div class="min-card-title settings-sources-title">Connected Data Sources</div>
+              <div class="settings-sources-grid">
+                <!-- Column 1 -->
+                <div class="settings-source-item"><span class="source-dot"></span><span>UKHO Admiralty NtM</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>OpenSeaMap NavAids</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>IHO NAVAREA Warnings</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>World Port Index (Pub 150)</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>Admiralty List of Lights</span></div>
+
+                <!-- Column 2 -->
+                <div class="settings-source-item"><span class="source-dot"></span><span>GEBCO Bathymetry</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>NOAA Hydrography</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>USNO Nautical Almanac</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>World Magnetic Model (WMM)</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>Open-Meteo Marine Data</span></div>
+
+                <!-- Column 3 -->
+                <div class="settings-source-item"><span class="source-dot"></span><span>IEC 61174 RTZ Routes</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>JRC ECDIS Format (.uchm)</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>Vessel Deviation Profile</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>OpenStreetMap Marine</span></div>
+                <div class="settings-source-item"><span class="source-dot"></span><span>Cohere Route Intelligence</span></div>
+              </div>
+            </div>
+
 
 
 
@@ -5885,9 +5928,9 @@
 
       let activeHeading = null;
 
-      const gHeadInp = parseFloat(String(document.getElementById("gyroHead")?.value || "").replace(",", "."));
+      const gHeadInp = parseFloat(String((document.getElementById("gyroHead") ? document.getElementById("gyroHead").value : "") || "").replace(",", "."));
 
-      const mHeadCell = parseFloat(String(document.querySelector('#row td[data-k="mHead"]')?.textContent || "").replace(",", "."));
+      const mHeadCell = parseFloat(String((document.querySelector('#row td[data-k="mHead"]') ? document.querySelector('#row td[data-k="mHead"]').textContent : "") || "").replace(",", "."));
 
 
 
