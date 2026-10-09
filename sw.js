@@ -4,7 +4,7 @@
  * Fully offline-capable bridge cockpit — Zero Google Dinosaur!
  */
 
-const CACHE_NAME = 'setsail-cache-v3.5';
+const CACHE_NAME = 'setsail-cache-v3.6';
 const TILE_CACHE_NAME = 'setsail-tiles-cache-v2';
 
 const OFFLINE_CORE_ASSETS = [
