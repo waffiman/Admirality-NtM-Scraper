@@ -896,7 +896,7 @@ function parseRtzRoute(xmlStr, fallbackName) {
     const lat = parseFloat(pos.getAttribute("lat"));
     const lon = parseFloat(pos.getAttribute("lon"));
     if (isNaN(lat) || isNaN(lon)) return;
-    const wpName = wp.getAttribute("name") || wp.querySelector("defaultWaypoint")?.getAttribute("name") || `WPT ${idx + 1}`;
+    const wpName = wp.getAttribute("name") || (wp.querySelector("defaultWaypoint") ? wp.querySelector("defaultWaypoint").getAttribute("name") : null) || `WPT ${idx + 1}`;
     waypoints.push({
       id: idx + 1,
       lat,
@@ -1600,7 +1600,15 @@ function initSettingsUI() {
   const clearCacheBtn = document.getElementById("settingsClearCacheBtn");
   if (clearCacheBtn) {
     clearCacheBtn.addEventListener("click", () => {
-      if (!confirm("Reset NtM cache and re-download fresh bulletin from server?")) return;
+      if (!confirm("Reset SetSail cache and re-download fresh bulletin and assets from server?")) return;
+      if (typeof window !== "undefined" && "caches" in window) {
+        caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).then(() => {
+          console.log("[SetSail] Cleared CacheStorage");
+        });
+      }
+      if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister()));
+      }
       try { localStorage.removeItem(NTM_STORAGE_KEY); } catch (e) {}
       NTM_STORE = [];
       if (leafletMarkersLayer) leafletMarkersLayer.clearLayers();
