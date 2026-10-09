@@ -11,6 +11,7 @@ const OVERLAY_STATES = {
   isobaths: true,
   notices: true,
   buoys: false,
+  weather: true,
   route: true
 };
 
@@ -3191,7 +3192,33 @@ function initExcelOverlayDock(map) {
     });
   }
 
-  // 3. Route Track Overlay Tab
+  // 3. Marine Weather Overlay Tab
+  const weatherTab = document.getElementById("tabOverlayWeather");
+  if (weatherTab) {
+    weatherTab.addEventListener("click", (e) => {
+      if (e.target && e.target.closest("#btnWeatherOverlayInfo")) {
+        e.stopPropagation();
+        if (typeof window.showWeatherInfoModal === "function") {
+          window.showWeatherInfoModal();
+        }
+        return;
+      }
+      const isActive = !weatherTab.classList.contains("active");
+      setOverlayActive("weather", isActive, map);
+    });
+  }
+
+  const weatherInfoBtn = document.getElementById("btnWeatherOverlayInfo");
+  if (weatherInfoBtn) {
+    weatherInfoBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (typeof window.showWeatherInfoModal === "function") {
+        window.showWeatherInfoModal();
+      }
+    });
+  }
+
+  // 4. Route Track Overlay Tab
   const routeTab = document.getElementById("tabOverlayRoute");
   if (routeTab) {
     routeTab.addEventListener("click", (e) => {
@@ -3264,6 +3291,11 @@ function setOverlayActive(overlayKey, isActive, map = null) {
       if (typeof seamarkLayer !== "undefined" && seamarkLayer) {
         if (isActive) currentMap.addLayer(seamarkLayer);
         else currentMap.removeLayer(seamarkLayer);
+      }
+    } else if (overlayKey === "weather") {
+      if (typeof leafletWeatherLayer !== "undefined" && leafletWeatherLayer) {
+        if (isActive) currentMap.addLayer(leafletWeatherLayer);
+        else currentMap.removeLayer(leafletWeatherLayer);
       }
     } else if (overlayKey === "route") {
       if (typeof leafletRouteLayer !== "undefined" && leafletRouteLayer) {
