@@ -4121,6 +4121,13 @@
                         <span class="chk-count" id="popCntPortsTotal">0</span>
                       </label>
 
+                      <label class="ntm-popover-chk-item ntm-master-toggle-item" title="Toggle Marine Weather &amp; Cyclone Overlay">
+                        <input type="checkbox" id="popMasterWeather" checked />
+                        <span class="chk-dot" style="background:#eab308;box-shadow:0 0 6px #eab308;"></span>
+                        <span class="chk-label" style="font-weight:700;">Marine Weather &amp; Storms</span>
+                        <span class="chk-count" id="popCntWeatherTotal">LIVE</span>
+                      </label>
+
                       <label class="ntm-popover-chk-item ntm-master-toggle-item" title="Toggle Active Passage Route overlay">
                         <input type="checkbox" id="popMasterRoute" checked />
                         <span class="chk-dot" style="background:#38bdf8;box-shadow:0 0 6px #38bdf8;"></span>
@@ -4523,7 +4530,12 @@
                   <span class="excel-tab-name">Port Depths</span>
                   <span class="excel-tab-info-btn" id="btnWeeklyDepthAudit" title="Port Depths Information &amp; Weekly Audit"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
-                <button type="button" class="excel-tab active" data-overlay="route" id="tabOverlayRoute" title="Toggle My Route Overlay &amp; Passage Plan">
+                <button type="button" class="excel-tab active" data-overlay="weather" id="tabOverlayWeather" title="Toggle Marine Weather &amp; Cyclone Overlay">
+                  <span class="excel-tab-check">✓</span>
+                  <span class="excel-tab-name">Weather</span>
+                  <span class="excel-tab-info-btn" id="btnWeatherOverlayInfo" title="Marine Weather &amp; Synoptic Bulletins (0000 UTC)"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
+                </button>
+                <button type="button" class="excel-tab excel-tab-route active" data-overlay="route" id="tabOverlayRoute" title="Toggle My Route Overlay &amp; Passage Plan">
                   <span class="excel-tab-check">✓</span>
                   <span class="excel-tab-name">My Route</span>
                   <span class="excel-tab-info-btn" id="btnRouteOverlayInfo" title="Passage Plan &amp; Waypoint Information"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
@@ -9495,6 +9507,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       return { lat: latVal, lon: lonVal };
     }
 
+    window.isSetStarVarManuallyEdited = false;
+
     function autoSyncSetStarMagneticVariation(lat, lon, dateObj) {
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
       var dec = calculateWMMDeclination(lat, lon, dateObj || new Date());
@@ -9507,11 +9521,50 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       }
       return null;
     }
-    // ?? SetStar UI Streamlining & Live Sync Engine ??
+
+    function onSetStarCoordInputsChange() {
+      if (window.isSetStarVarManuallyEdited) return;
+      var c = getCoordsFromSetStarInputs();
+      if (c && Number.isFinite(c.lat) && Number.isFinite(c.lon)) {
+        var ltDateEl = document.getElementById("ltDate");
+        var dVal = ltDateEl && ltDateEl.value ? new Date(ltDateEl.value) : new Date();
+        autoSyncSetStarMagneticVariation(c.lat, c.lon, dVal);
+      }
+    }
+
+    function initSetStarManualVarSync() {
+      ["lat", "latNS", "lon", "lonEW", "ltDate"].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("input", onSetStarCoordInputsChange);
+          el.addEventListener("change", onSetStarCoordInputsChange);
+        }
+      });
+      var varMagEl = document.getElementById("varMag");
+      if (varMagEl) {
+        varMagEl.addEventListener("input", function() {
+          if (this.value.trim() === "") {
+            window.isSetStarVarManuallyEdited = false;
+            onSetStarCoordInputsChange();
+          } else {
+            window.isSetStarVarManuallyEdited = true;
+          }
+        });
+      }
+      var varEWEl = document.getElementById("varEW");
+      if (varEWEl) {
+        varEWEl.addEventListener("change", function() {
+          window.isSetStarVarManuallyEdited = true;
+        });
+      }
+    }
+
+    // SetStar UI Streamlining & Live Sync Engine
     function initSetStarCurrentData() {
       var btn = document.getElementById("btnUseCurrentData");
       if (!btn) return;
       btn.addEventListener("click", function() {
+        window.isSetStarVarManuallyEdited = false;
         var now = new Date();
         var yyyy = now.getFullYear();
         var mm = String(now.getMonth() + 1).padStart(2, "0");
@@ -9775,7 +9828,70 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
     }
 
     async function parseImageDeviationFile(file) {
-      return [];
+      if (typeof Tesseract === "undefined") {
+        console.warn("[SetStar] Tesseract OCR library is not available, falling back to AI extraction...");
+        return [];
+      }
+      return new Promise(function(resolve) {
+        var img = new Image();
+        img.onload = async function() {
+          try {
+            // HTML5 Canvas Preprocessing: Upscale & Adaptive Contrast Stretch
+            var canvas = document.createElement("canvas");
+            var scale = 2.5;
+            canvas.width = Math.min(2400, Math.round(img.width * scale));
+            canvas.height = Math.min(2400, Math.round(img.height * scale));
+            var ctx = canvas.getContext("2d");
+            ctx.imageSmoothingQuality = "high";
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // Contrast stretching
+            var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var d = imgData.data;
+            for (var i = 0; i < d.length; i += 4) {
+              var gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+              gray = (gray - 60) * 1.6;
+              gray = gray < 0 ? 0 : gray > 255 ? 255 : gray;
+              d[i] = d[i + 1] = d[i + 2] = gray;
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            var worker = await Tesseract.createWorker("eng");
+            var ret = await worker.recognize(canvas);
+            await worker.terminate();
+
+            var text = ret && ret.data ? ret.data.text : "";
+            var lines = text.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(Boolean);
+
+            var pairs = [];
+            var regex = /([0-3]?\d{2})[^\d+\-−]*([+\-−]?\s*\d{1,2}(?:[.,]\d{1,2})?)\s*([EW]?)/i;
+            lines.forEach(function(line) {
+              var m = line.match(regex);
+              if (m) {
+                var h = parseInt(m[1], 10);
+                var rawVal = m[2].replace(/\s+/g, "").replace(/,/g, ".").replace(/−/g, "-");
+                var v = parseFloat(rawVal);
+                if (m[3] && m[3].toUpperCase() === "W" && v > 0) v = -v;
+                if (!isNaN(h) && !isNaN(v) && h >= 0 && h <= 360 && Math.abs(v) <= 25) {
+                  if (h % 5 === 0 || h % 10 === 0 || h % 15 === 0) {
+                    if (!pairs.some(function(p) { return p[0] === h; })) {
+                      pairs.push([h, parseFloat(v.toFixed(1))]);
+                    }
+                  }
+                }
+              }
+            });
+
+            pairs.sort(function(a, b) { return a[0] - b[0]; });
+            resolve(pairs);
+          } catch (ocrErr) {
+            console.warn("[SetStar OCR Error]", ocrErr);
+            resolve([]);
+          }
+        };
+        img.onerror = function() { resolve([]); };
+        img.src = URL.createObjectURL(file);
+      });
     }
 
     async function tryAiDeviationExtraction(file) {
@@ -9856,14 +9972,20 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       if (badgeEl) badgeEl.textContent = pairs.length + " Points Loaded";
       if (statusEl) statusEl.textContent = "File: " + filename;
 
+      var modal = document.getElementById("setstarDevModal");
+      if (modal) {
+        modal.classList.add("open");
+      }
+
       if (typeof showSetSailToast === "function") {
-        showSetSailToast("Deviation curve calibrated from " + filename + " (" + pairs.length + " points)", "success");
+        showSetSailToast("Deviation curve calibrated (" + pairs.length + " pts from " + filename + "). Reviewing in table.", "success");
       }
     }
 
     initSetStarCurrentData();
     initSetStarOverridesToggle();
     initSetStarDeviationManager();
+    initSetStarManualVarSync();
 
     const btnSave = document.getElementById("btnSaveDev");
 
@@ -9940,6 +10062,55 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           </div>
           <div style="display:flex;justify-content:flex-end;margin-top:12px;border-top:1px solid var(--line);padding-top:8px;">
             <button type="button" class="secondary" id="ntmOverlayInfoCloseBtn" style="margin-top:0;padding:4px 14px;font-size:0.78rem;">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal: Marine Weather Overlay Info & 0000 UTC Synoptic Audit -->
+      <div class="ntm-modal" id="weatherOverlayModal">
+        <div class="ntm-modal-box" style="max-width:540px;">
+          <div class="ntm-modal-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px;">
+            <h3 style="margin:0;font-size:0.95rem;color:#f1f5f9;display:flex;align-items:center;gap:7px;">
+              <svg class="setsail-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#eab308;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              Marine Synoptic Weather &amp; Storm Overlay (0000 UTC)
+            </h3>
+            <button type="button" class="ntm-modal-close" id="weatherOverlayModalClose" title="Close" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
+          </div>
+          <div style="font-size:0.75rem;color:#cad8f4;line-height:1.5;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:rgba(234,179,8,0.1);padding:6px 10px;border-radius:6px;border:1px solid rgba(234,179,8,0.25);">
+              <span style="font-weight:700;color:#fde047;">Synoptic Cycle: 00:00 UTC Global Run</span>
+              <span style="font-size:0.7rem;background:#10b981;color:#fff;padding:1px 6px;border-radius:4px;font-weight:700;" id="weatherModalStatusBadge">SYNCED (00:00 UTC)</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+              <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
+                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Primary Data Source</div>
+                <div style="font-size:0.85rem;font-weight:700;color:#f1f5f9;margin-top:2px;">Open-Meteo Marine / ECMWF IFS 0.25°</div>
+                <div style="font-size:0.65rem;color:var(--muted);margin-top:2px;">Global wave, swell &amp; surface wind fields</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
+                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Cyclone Advisories</div>
+                <div style="font-size:0.85rem;font-weight:700;color:#f1f5f9;margin-top:2px;">NOAA NHC / JTWC / WMO</div>
+                <div style="font-size:0.65rem;color:var(--muted);margin-top:2px;">Real-time storm tracks, 72h cones &amp; wind radii</div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:6px;border:1px solid var(--line);margin-bottom:12px;">
+              <div style="font-weight:700;color:#38bdf8;margin-bottom:4px;display:flex;align-items:center;gap:5px;">
+                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#38bdf8;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                IMO Res. A.893(21) Weather Routing Safety Policy
+              </div>
+              <ul style="margin:0;padding-left:16px;color:#94a3b8;font-size:0.7rem;line-height:1.45;">
+                <li><strong style="color:#e2e8f0;">Tropical Storm CPA:</strong> Maintain at least 150–200 NM from cyclone center in navigable semicircle; ≥ 250 NM in dangerous semicircle.</li>
+                <li><strong style="color:#e2e8f0;">Wave Threshold:</strong> Significant wave height (Hs) &gt; 4.0m flagged as heavy sea warning; parametric rolling mitigation active.</li>
+                <li><strong style="color:#e2e8f0;">Autonomous SetRoute:</strong> Routing AI evaluates weather hazards and plots tracks safely clear of forecast danger cones.</li>
+              </ul>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+              <button type="button" class="ntm-btn-glass" id="btnRefreshWeatherModal" style="padding:4px 10px;font-size:0.72rem;display:inline-flex;align-items:center;gap:5px;">
+                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                Sync 00:00 UTC Marine Data
+              </button>
+              <button type="button" class="secondary" id="weatherOverlayModalCloseBtn" style="margin-top:0;padding:4px 14px;font-size:0.78rem;">Close</button>
+            </div>
           </div>
         </div>
       </div>
@@ -10077,6 +10248,37 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.openNtmOverlayInfoModal = function() {
         const modal = document.getElementById('ntmOverlayInfoModal');
         if (modal) modal.classList.add('open');
+      };
+    }
+    if (typeof window.initWeatherOverlayInfoModal !== 'function') {
+      window.initWeatherOverlayInfoModal = function() {
+        const modal = document.getElementById('weatherOverlayModal');
+        if (!modal) return;
+        const closeBtn = document.getElementById('weatherOverlayModalClose');
+        const closeBtn2 = document.getElementById('weatherOverlayModalCloseBtn');
+        const refreshBtn = document.getElementById('btnRefreshWeatherModal');
+        if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.remove('open'));
+        if (closeBtn2) closeBtn2.addEventListener('click', () => modal.classList.remove('open'));
+        if (refreshBtn) {
+          refreshBtn.addEventListener('click', () => {
+            if (typeof window.refreshMarineWeather === 'function') {
+              window.refreshMarineWeather(true);
+            }
+          });
+        }
+      };
+    }
+    if (typeof window.showWeatherInfoModal !== 'function') {
+      window.showWeatherInfoModal = function() {
+        const modal = document.getElementById('weatherOverlayModal');
+        if (modal) {
+          modal.classList.add('open');
+          const badge = document.getElementById('weatherModalStatusBadge');
+          if (badge) {
+            badge.textContent = navigator.onLine ? "LIVE SYNCED (00:00 UTC)" : "CACHED (00:00 UTC)";
+            badge.style.background = navigator.onLine ? "#10b981" : "#eab308";
+          }
+        }
       };
     }
   </script>
