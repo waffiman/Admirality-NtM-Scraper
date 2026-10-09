@@ -3461,6 +3461,8 @@
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   height: 100%;
+  flex: 1;
+  min-width: 0;
 }
 
 .excel-tabs-scroll::-webkit-scrollbar {
@@ -3497,6 +3499,72 @@
   border-color: #38bdf8;
   color: #ffffff;
   box-shadow: 0 -2px 8px rgba(56, 189, 248, 0.2);
+}
+
+/* Distinct Highlighting & Right Alignment for My Route Tab */
+.excel-tab-route {
+  margin-left: auto !important;
+  border-color: rgba(56, 189, 248, 0.55) !important;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(14, 165, 233, 0.06)) !important;
+  color: #38bdf8 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.excel-tab-route:hover {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.24), rgba(14, 165, 233, 0.12)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+}
+
+.excel-tab-route.active {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.35), rgba(56, 189, 248, 0.22)) !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+  box-shadow: 0 -2px 10px rgba(56, 189, 248, 0.35), 0 0 14px rgba(56, 189, 248, 0.25);
+}
+
+.excel-tab-route .excel-tab-check {
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.excel-tab-route.active .excel-tab-check {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+[data-theme="light"] .excel-tab-route {
+  margin-left: auto !important;
+  border-color: rgba(2, 132, 199, 0.45) !important;
+  background: linear-gradient(135deg, #e0f2fe, #bae6fd) !important;
+  color: #0369a1 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 8px rgba(2, 132, 199, 0.15);
+}
+
+[data-theme="light"] .excel-tab-route.active {
+  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+  border-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+/* Marine Weather Map Overlay Styles (SPOS & Windy Standard) */
+.weather-cyclone-icon {
+  animation: weather-spin 12s linear infinite;
+  transform-origin: center center;
+}
+
+@keyframes weather-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.weather-storm-div-icon,
+.weather-pc-div-icon,
+.weather-wind-div-icon {
+  background: transparent;
+  border: none;
 }
 
 .excel-tab-check {
