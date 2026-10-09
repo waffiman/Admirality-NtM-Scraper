@@ -296,7 +296,7 @@ function initHomeChronometer() {
       const hh = String(now.getUTCHours()).padStart(2, "0");
       const mm = String(now.getUTCMinutes()).padStart(2, "0");
       const ss = String(now.getUTCSeconds()).padStart(2, "0");
-      clockEl.textContent = ${hh}:: UTC;
+      clockEl.textContent = hh + ":" + mm + ":" + ss + " UTC";
     }
   }
   update();
@@ -2166,7 +2166,8 @@ function renderNtMListAndMap() {
   const isRouteActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.route !== false : true;
 
   // 1. Gather filtered NtM items
-  const filteredNotices = isNoticesActive ? getFilteredNotices() : [];\n  const filtered = filteredNotices;
+  const filteredNotices = isNoticesActive ? getFilteredNotices() : [];
+  const filtered = filteredNotices;
 
   // 2. Gather filtered Ports items
   let filteredPorts = [];
@@ -3320,7 +3321,7 @@ function openWaypointEditModal(idx) {
   const elRot = document.getElementById("wptEditRot");
 
   if (elIdx) elIdx.value = String(idx);
-  if (elTitle) elTitle.textContent = Edit Waypoint #;
+  if (elTitle) elTitle.textContent = "Edit Waypoint #" + (idx + 1);
   if (elName) elName.value = wp.name || "";
   if (elLatDeg) elLatDeg.value = latDeg;
   if (elLatMin) elLatMin.value = latMin;
@@ -3388,7 +3389,7 @@ function saveWaypointFromModal() {
     renderNtMListAndMap();
   }
   modal.classList.remove("open");
-  showSetSailToast(Waypoint # updated successfully, "success");
+  showSetSailToast("Waypoint #" + (idx + 1) + " updated successfully", "success");
 }
 
 function initWaypointEditModal() {
@@ -3431,8 +3432,8 @@ function openNtmOverlayInfoModal() {
   const total = typeof NTM_STORE !== "undefined" ? NTM_STORE.length : 0;
   const tpCount = typeof NTM_STORE !== "undefined" ? NTM_STORE.filter(n => n.type === "T" || n.type === "P").length : 0;
 
-  if (countEl) countEl.textContent = ${total} Notices Plotted;
-  if (tpCountEl) tpCountEl.textContent = ${tpCount} T&P Notices;
+  if (countEl) countEl.textContent = total + " Notices Plotted";
+  if (tpCountEl) tpCountEl.textContent = tpCount + " T&P Notices";
 
   let latestEd = "Week 41 / 2026";
   if (typeof NTM_STORE !== "undefined" && NTM_STORE.length > 0) {
@@ -3457,7 +3458,7 @@ function showRouteInfoSummary() {
   if (activeRouteData && activeRouteData.waypoints && activeRouteData.waypoints.length > 0) {
     const startWp = activeRouteData.waypoints[0]?.name || "Start";
     const endWp = activeRouteData.waypoints[activeRouteData.waypoints.length - 1]?.name || "End";
-    showSetSailToast(Route:  ?  WPTs ( ? ), "info");
+    showSetSailToast("Route: " + activeRouteData.waypoints.length + " WPTs (" + startWp + " → " + endWp + ")", "info");
   } else {
     showSetSailToast("No passage plan loaded. Upload .rtz or .csv in My Vessel menu.", "warning");
   }
@@ -3650,9 +3651,9 @@ function executeDirectMapExport() {
     features: activeFeatures
   };
 
-  const filename = SetSail_ECDIS_Export_.geojson;
+  const filename = "SetSail_ECDIS_Export_" + getExportUtcTimestamp() + ".geojson";
   downloadTextFile(JSON.stringify(exportGeoJson, null, 2), filename, "application/geo+json");
-  showSetSailToast(Direct Export:  NtMs,  Ports,  Waypoints, "success");
+  showSetSailToast("Direct Export: " + ntmCount + " NtMs, " + portCount + " Ports, " + wptCount + " Waypoints", "success");
 }
 
 window.initCategoryPills = initCategoryPills;
