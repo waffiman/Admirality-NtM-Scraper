@@ -1708,7 +1708,182 @@
 
 
 
-  </style>
+  
+    /* ?? SetStar UI Streamlining & Deviation Management ?? */
+    .setstar-subtle-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.73rem;
+      color: var(--muted);
+      background: none;
+      border: none;
+      padding: 3px 0;
+      margin-top: 4px;
+      cursor: pointer;
+      transition: color 0.18s ease;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: rgba(240, 90, 54, 0.4);
+    }
+    .setstar-subtle-link:hover {
+      color: #f05a36;
+      text-decoration-color: #f05a36;
+    }
+    .setstar-overrides-collapsible {
+      margin-top: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 0.5rem 0.75rem;
+      background: rgba(5, 10, 28, 0.25);
+    }
+    .setstar-overrides-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 2px 0;
+      text-align: left;
+    }
+    .setstar-overrides-toggle:hover {
+      color: #f1f5f9;
+    }
+    .dev-mgmt-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(5, 10, 28, 0.45);
+      padding: 1.25rem 1.1rem;
+      box-sizing: border-box;
+      height: 480px;
+      position: relative;
+    }
+    .dev-mgmt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .dev-mgmt-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(240, 90, 54, 0.12);
+      border: 1px solid rgba(240, 90, 54, 0.35);
+      color: #f05a36;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .dev-pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #f05a36;
+      box-shadow: 0 0 8px #f05a36;
+    }
+    .dev-mgmt-subtext {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .dev-mgmt-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.45;
+      margin: 0.5rem 0 1.2rem;
+    }
+    .dev-mgmt-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.2rem;
+    }
+    .btn-dev-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0.7rem 1.1rem;
+      font-size: 0.86rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      width: 100%;
+      text-decoration: none;
+    }
+    .btn-dev-manual {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.14);
+      color: #f1f5f9;
+    }
+    .btn-dev-manual:hover {
+      background: rgba(240, 90, 54, 0.12);
+      border-color: #f05a36;
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .btn-dev-upload {
+      background: linear-gradient(135deg, rgba(240, 90, 54, 0.95), rgba(207, 56, 24, 0.95));
+      border-color: rgba(255, 120, 90, 0.5);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(240, 90, 54, 0.25);
+    }
+    .btn-dev-upload:hover {
+      background: linear-gradient(135deg, #f05a36, #d93d1a);
+      box-shadow: 0 6px 18px rgba(240, 90, 54, 0.4);
+      transform: translateY(-1px);
+    }
+    .dev-mgmt-extra-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: auto;
+      border-top: 1px solid var(--line);
+      padding-top: 0.85rem;
+    }
+    .btn-dev-subaction {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      padding: 0.4rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .btn-dev-subaction:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f1f5f9;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .setstar-modal-table-scroll {
+      max-height: 500px;
+      overflow-y: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(5, 10, 28, 0.4);
+      margin: 10px 0;
+    }
+    .setstar-dev-modal-box {
+      max-width: 520px;
+      width: 95%;
+    }
+</style>
 
 
 
@@ -2346,7 +2521,10 @@
 
 
 
-        <label>Date (LT)<input type="date" id="ltDate" /></label>
+        <label>Date (LT)
+          <input type="date" id="ltDate" />
+          <button type="button" class="setstar-subtle-link" id="btnUseCurrentData" title="Sync live local date, UTC date/time and GPS position">? Use current data</button>
+        </label>
 
 
 
@@ -2538,78 +2716,31 @@
 
 
 
-      <h2 style="margin-top:1.1rem">Overrides</h2>
-
-
-
-      <div class="grid">
-
-
-
-        <label>LHA<input type="text" id="lha" /></label>
-
-
-
-        <label>Declination
-
-
-
-          <span class="row-ew">
-
-
-
-            <input type="text" id="dec" />
-
-
-
-            <select id="decNS"><option>N</option><option>S</option></select>
-
-
-
-          </span>
-
-
-
-        </label>
-
-
-
-        <label>True Azimuth
-
-
-
-          <input type="number" id="trueAzOverride" step="0.1" min="0" max="359.9" />
-
-
-
-        </label>
-
-
-
-        <label>Deviation
-
-
-
-          <span class="row-ew">
-
-
-
-            <input type="number" id="devOverride" step="0.1" />
-
-
-
-            <select id="devEW"><option>E</option><option>W</option></select>
-
-
-
-          </span>
-
-
-
-        </label>
-
-
-
+      <div class="setstar-overrides-collapsible">
+        <button type="button" class="setstar-overrides-toggle" id="btnToggleOverrides">
+          <svg class="setsail-icon toggle-arrow" viewBox="0 0 24 24" style="width:14px;height:14px;transition:transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
+          <span>Manual Overrides (LHA, Dec, Az, Dev)</span>
+        </button>
+        <div class="setstar-overrides-content" id="setstarOverridesContent" style="display:none;">
+          <div class="grid" style="margin-top:0.75rem;">
+            <label>LHA<input type="text" id="lha" /></label>
+            <label>Declination
+              <span class="row-ew">
+                <input type="text" id="dec" />
+                <select id="decNS"><option>N</option><option>S</option></select>
+              </span>
+            </label>
+            <label>True Azimuth
+              <input type="number" id="trueAzOverride" step="0.1" min="0" max="359.9" />
+            </label>
+            <label>Deviation
+              <span class="row-ew">
+                <input type="number" id="devOverride" step="0.1" />
+                <select id="devEW"><option>E</option><option>W</option></select>
+              </span>
+            </label>
+          </div>
+        </div>
       </div>
 
 
@@ -2911,77 +3042,51 @@
 
 
     <section class="panel no-print" id="devPrintBlock">
-
-
-
       <div class="dev-head">
-
-
-
-        <h2>Deviation Table (August 2026)</h2>
-
-
-
-        <div class="dev-actions">
-
-
-
-          <button type="button" class="secondary" id="btnSaveDev" title="Save current deviation table to browser memory"><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Table</button>
-
-
-
-          <button type="button" class="secondary" id="btnResetDev" title="Reset table to August 2026 default values">↺ Reset Default</button>
-
-
-
-          <button type="button" id="btnPrintDev" title="Print official A4 Deviation Card"><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Deviation Card</button>
-
-
-
-          <span class="copy-msg" id="devSaveStatus"></span>
-
-
-
-        </div>
-
-
-
+        <h2>Deviation Curve &amp; Calibration</h2>
+        <span class="copy-msg" id="devSaveStatus"></span>
       </div>
-
-
-
       <div class="dev-layout">
+        <!-- Compact Deviation Management Box (Replaces bulky table) -->
+        <div class="dev-mgmt-card">
+          <div>
+            <div class="dev-mgmt-header">
+              <div class="dev-mgmt-badge">
+                <span class="dev-pulse-dot"></span>
+                <span id="devPointsCountBadge">37 Points Active</span>
+              </div>
+              <span class="dev-mgmt-subtext" id="devSourceStatus">Calibrated Profile</span>
+            </div>
+            <h3 style="font-size:1.02rem;font-weight:700;margin:0.4rem 0 0.3rem;color:var(--text);">Magnetic Deviation Table</h3>
+            <p class="dev-mgmt-desc">
+              Manage magnetic compass deviation calibration. Inspect or edit values in the table popup, or import an official deviation card file (.xlsx, .xls, .csv, .pdf, images).
+            </p>
+          </div>
 
+          <div class="dev-mgmt-btn-group">
+            <button type="button" class="btn-dev-action btn-dev-manual" id="btnOpenDevModal">
+              <svg class="setsail-icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span>Manual Deviation Table</span>
+            </button>
 
+            <button type="button" class="btn-dev-action btn-dev-upload" id="btnUploadDevCard">
+              <svg class="setsail-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Upload Deviation Card</span>
+            </button>
+            <input type="file" id="devCardFileInput" accept=".xlsx,.xls,.csv,.pdf,.png,.jpg,.jpeg" style="display:none;" />
+          </div>
 
-        <div class="dev-table-wrap">
-
-
-
-          <table class="log devedit" id="devTableView"></table>
-
-
-
+          <div class="dev-mgmt-extra-actions">
+            <button type="button" class="btn-dev-subaction" id="btnPrintDev"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Card</button>
+            <button type="button" class="btn-dev-subaction" id="btnResetDev"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/></svg> Reset Default</button>
+          </div>
         </div>
 
-
-
+        <!-- Deviation Curve Chart (Design untouched) -->
         <div class="dev-chart-wrap">
-
-
-
           <canvas id="devChart" width="520" height="720"></canvas>
-
-
-
         </div>
-
-
-
       </div>
-
-
-
     </section>
 
 
@@ -4364,6 +4469,39 @@
       <!-- Modal for Raw Text Paste -->
 
 
+
+            <!-- Modal: Manual Magnetic Compass Deviation Table -->
+      <div class="ntm-modal" id="setstarDevModal">
+        <div class="ntm-modal-box setstar-dev-modal-box">
+          <div class="ntm-modal-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px;">
+            <div>
+              <h3 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;">
+                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--accent);"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="2" x2="12" y2="22" stroke="currentColor" stroke-width="1.5"/><line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.5"/></svg>
+                Manual Deviation Table
+              </h3>
+              <p style="margin:4px 0 0;font-size:0.75rem;color:var(--muted);">
+                Enter calibration values for each heading. Negative = West (-), Positive = East (+).
+              </p>
+            </div>
+            <button type="button" class="ntm-modal-close" id="devModalCloseBtn" title="Close" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;">?</button>
+          </div>
+
+          <div class="setstar-modal-table-scroll">
+            <table class="log devedit" id="devTableView"></table>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="btn-sec" id="btnModalResetDev" style="font-size:0.78rem;padding:5px 12px;">Reset Default</button>
+              <button type="button" class="btn-sec" id="btnModalPrintDev" style="font-size:0.78rem;padding:5px 12px;">Print Card</button>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button type="button" class="secondary" id="devModalCancelBtn" style="margin-top:0;font-size:0.8rem;padding:5px 14px;">Close</button>
+              <button type="button" id="btnSaveDev" style="margin-top:0;font-size:0.8rem;padding:5px 16px;background:linear-gradient(135deg,#f05a36,#cf3818);border-color:rgba(255,120,90,0.45);color:#fff;font-weight:600;border-radius:6px;">Save &amp; Apply</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="ntm-modal" id="ntmPasteModal">
 
@@ -8864,6 +9002,360 @@
 
 
 
+    
+    // ?? SetStar UI Streamlining & Live Sync Engine ??
+    function initSetStarCurrentData() {
+      var btn = document.getElementById("btnUseCurrentData");
+      if (!btn) return;
+      btn.addEventListener("click", function() {
+        var now = new Date();
+        var yyyy = now.getFullYear();
+        var mm = String(now.getMonth() + 1).padStart(2, "0");
+        var dd = String(now.getDate()).padStart(2, "0");
+        var ltDateEl = document.getElementById("ltDate");
+        if (ltDateEl) ltDateEl.value = yyyy + "-" + mm + "-" + dd;
+
+        var uYyyy = now.getUTCFullYear();
+        var uMm = String(now.getUTCMonth() + 1).padStart(2, "0");
+        var uDd = String(now.getUTCDate()).padStart(2, "0");
+        var uHh = String(now.getUTCHours()).padStart(2, "0");
+        var uMin = String(now.getUTCMinutes()).padStart(2, "0");
+        var uSec = String(now.getUTCSeconds()).padStart(2, "0");
+
+        var utcDateEl = document.getElementById("utcDate");
+        var utcTimeEl = document.getElementById("utcTime");
+        if (utcDateEl) utcDateEl.value = uYyyy + "-" + uMm + "-" + uDd;
+        if (utcTimeEl) utcTimeEl.value = uHh + ":" + uMin + ":" + uSec;
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function(pos) {
+              var lat = pos.coords.latitude;
+              var lon = pos.coords.longitude;
+              var latAbs = Math.abs(lat);
+              var latDeg = Math.floor(latAbs);
+              var latMin = ((latAbs - latDeg) * 60).toFixed(1);
+              var latEl = document.getElementById("lat");
+              var latNSEl = document.getElementById("latNS");
+              if (latEl) latEl.value = latDeg + " " + latMin;
+              if (latNSEl) latNSEl.value = lat >= 0 ? "N" : "S";
+
+              var lonAbs = Math.abs(lon);
+              var lonDeg = Math.floor(lonAbs);
+              var lonMin = ((lonAbs - lonDeg) * 60).toFixed(1);
+              var lonEl = document.getElementById("lon");
+              var lonEWEl = document.getElementById("lonEW");
+              if (lonEl) lonEl.value = lonDeg + " " + lonMin;
+              if (lonEWEl) lonEWEl.value = lon >= 0 ? "E" : "W";
+
+              if (typeof calculate === "function") calculate();
+              if (typeof renderStarAlmanac === "function") renderStarAlmanac();
+              if (typeof showSetSailToast === "function") {
+                showSetSailToast("Time & GPS position synced with live bridge", "success");
+              }
+            },
+            function(err) {
+              if (typeof calculate === "function") calculate();
+              if (typeof renderStarAlmanac === "function") renderStarAlmanac();
+              if (typeof showSetSailToast === "function") {
+                showSetSailToast("Date & time synced (GPS permission denied)", "info");
+              }
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+          );
+        } else {
+          if (typeof calculate === "function") calculate();
+          if (typeof renderStarAlmanac === "function") renderStarAlmanac();
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast("Local & UTC date/time synced", "info");
+          }
+        }
+      });
+    }
+
+    function initSetStarOverridesToggle() {
+      var btn = document.getElementById("btnToggleOverrides");
+      var content = document.getElementById("setstarOverridesContent");
+      if (!btn || !content) return;
+      btn.addEventListener("click", function() {
+        var isHidden = (content.style.display === "none" || !content.style.display);
+        content.style.display = isHidden ? "block" : "none";
+        var arrow = btn.querySelector(".toggle-arrow");
+        if (arrow) {
+          arrow.style.transform = isHidden ? "rotate(90deg)" : "rotate(0deg)";
+        }
+      });
+    }
+
+    function initSetStarDeviationManager() {
+      var modal = document.getElementById("setstarDevModal");
+      var openBtn = document.getElementById("btnOpenDevModal");
+      var closeBtn = document.getElementById("devModalCloseBtn");
+      var cancelBtn = document.getElementById("devModalCancelBtn");
+      var uploadBtn = document.getElementById("btnUploadDevCard");
+      var fileInput = document.getElementById("devCardFileInput");
+      var resetBtn2 = document.getElementById("btnModalResetDev");
+      var printBtn2 = document.getElementById("btnModalPrintDev");
+
+      if (openBtn && modal) {
+        openBtn.addEventListener("click", function() {
+          renderDevTableView();
+          modal.classList.add("open");
+        });
+      }
+      if (closeBtn && modal) closeBtn.addEventListener("click", function() { modal.classList.remove("open"); });
+      if (cancelBtn && modal) cancelBtn.addEventListener("click", function() { modal.classList.remove("open"); });
+      if (resetBtn2) resetBtn2.addEventListener("click", resetDevTableToDefault);
+      if (printBtn2) printBtn2.addEventListener("click", printDeviationCard);
+
+      if (uploadBtn && fileInput) {
+        uploadBtn.addEventListener("click", function() { fileInput.click(); });
+        fileInput.addEventListener("change", handleDeviationCardUpload);
+      }
+    }
+
+    async function handleDeviationCardUpload(e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      var ext = file.name.split(".").pop().toLowerCase();
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Analyzing " + file.name + "...", "info");
+      }
+
+      try {
+        var extractedPairs = [];
+        if (ext === "xlsx" || ext === "xls" || ext === "csv") {
+          extractedPairs = await parseExcelDeviationFile(file);
+        } else if (ext === "pdf") {
+          extractedPairs = await parsePdfDeviationFile(file);
+        } else if (["png", "jpg", "jpeg", "webp"].includes(ext)) {
+          extractedPairs = await parseImageDeviationFile(file);
+        } else {
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast("Unsupported file type: ." + ext, "warning");
+          }
+          return;
+        }
+
+        if (extractedPairs && extractedPairs.length >= 4) {
+          applyExtractedDeviation(extractedPairs, file.name);
+        } else {
+          var aiPairs = await tryAiDeviationExtraction(file);
+          if (aiPairs && aiPairs.length >= 4) {
+            applyExtractedDeviation(aiPairs, file.name);
+          } else {
+            if (typeof showSetSailToast === "function") {
+              showSetSailToast("Automatic table extraction uncertain. Opening manual table.", "warning");
+            }
+            var modal = document.getElementById("setstarDevModal");
+            if (modal) {
+              renderDevTableView();
+              modal.classList.add("open");
+            }
+          }
+        }
+      } catch (err) {
+        console.error("[SetStar] Deviation card processing error:", err);
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("Error processing file. Opening manual table.", "warning");
+        }
+        var modal = document.getElementById("setstarDevModal");
+        if (modal) {
+          renderDevTableView();
+          modal.classList.add("open");
+        }
+      } finally {
+        e.target.value = "";
+      }
+    }
+
+    function parseDevValue(val) {
+      if (val === null || val === undefined || val === "") return null;
+      var s = String(val).trim().toUpperCase();
+      var mult = 1.0;
+      if (s.includes("W")) {
+        mult = -1.0;
+        s = s.replace(/W/g, "").trim();
+      } else if (s.includes("E")) {
+        mult = 1.0;
+        s = s.replace(/E/g, "").trim();
+      }
+      s = s.replace(/,/g, ".");
+      var num = parseFloat(s);
+      if (!isNaN(num) && num >= -35.0 && num <= 35.0) {
+        return num * mult;
+      }
+      return null;
+    }
+
+    function extractDeviationPairsFromRows(rows) {
+      var bestTable = [];
+      var numCols = rows.reduce(function(max, r) { return Math.max(max, (r ? r.length : 0)); }, 0);
+
+      for (var cHead = 0; cHead < numCols; cHead++) {
+        for (var cDev = 0; cDev < numCols; cDev++) {
+          if (cHead === cDev) continue;
+          var pairs = [];
+          for (var r = 0; r < rows.length; r++) {
+            var row = rows[r];
+            if (!row || cHead >= row.length || cDev >= row.length) continue;
+            var hVal = parseFloat(String(row[cHead]).trim().replace(/,/g, "."));
+            var dVal = parseDevValue(row[cDev]);
+            if (!isNaN(hVal) && dVal !== null && hVal >= 0 && hVal <= 360) {
+              if (hVal % 5 === 0 || hVal % 10 === 0) {
+                pairs.push([Math.round(hVal), dVal]);
+              }
+            }
+          }
+
+          if (pairs.length >= 4) {
+            var isIncreasing = true;
+            for (var i = 0; i < pairs.length - 1; i++) {
+              if (pairs[i][0] >= pairs[i + 1][0]) {
+                isIncreasing = false;
+                break;
+              }
+            }
+            if (isIncreasing && pairs.length > bestTable.length) {
+              bestTable = pairs;
+            }
+          }
+        }
+      }
+      return bestTable;
+    }
+
+    async function parseExcelDeviationFile(file) {
+      if (typeof XLSX === "undefined") {
+        throw new Error("SheetJS XLSX library is not loaded");
+      }
+      var buffer = await file.arrayBuffer();
+      var wb = XLSX.read(new Uint8Array(buffer), { type: "array" });
+      var sheet = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      return extractDeviationPairsFromRows(rows);
+    }
+
+    async function parsePdfDeviationFile(file) {
+      if (typeof pdfjsLib === "undefined") {
+        throw new Error("PDF.js library is not loaded");
+      }
+      var buffer = await file.arrayBuffer();
+      var pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      var page = await pdf.getPage(1);
+      var textContent = await page.getTextContent();
+      var strings = textContent.items.map(function(it) { return it.str; });
+      
+      if (strings.length > 15) {
+        var syntheticRows = [];
+        var curRow = [];
+        for (var i = 0; i < strings.length; i++) {
+          var s = strings[i].trim();
+          if (!s) continue;
+          curRow.push(s);
+          if (curRow.length >= 4 || i === strings.length - 1) {
+            syntheticRows.push(curRow);
+            curRow = [];
+          }
+        }
+        var pairs = extractDeviationPairsFromRows(syntheticRows);
+        if (pairs.length >= 4) return pairs;
+      }
+      return [];
+    }
+
+    async function parseImageDeviationFile(file) {
+      return [];
+    }
+
+    async function tryAiDeviationExtraction(file) {
+      var apiKey = "C7hDWfhYDGBiFrGtNn5PJ6SItO1tx1EqXkf2t4rR";
+      try {
+        var rawText = "";
+        if (typeof pdfjsLib !== "undefined" && file.name.endsWith(".pdf")) {
+          var buffer = await file.arrayBuffer();
+          var pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+          var page = await pdf.getPage(1);
+          var textContent = await page.getTextContent();
+          rawText = textContent.items.map(function(it) { return it.str; }).join(" ");
+        }
+        if (!rawText) return [];
+
+        var prompt = "Given this text extracted from a magnetic compass deviation card, extract the table of headings and deviation values. Return ONLY a valid JSON array of [heading, deviation] number pairs (e.g. [[0, -0.1], [45, -0.2], [90, -1.7], ...]). Text:\n" + rawText;
+        var resp = await fetch("https://api.cohere.com/v2/chat", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + apiKey,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "command-r-plus-08-2024",
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+        var data = await resp.json();
+        var textOut = data.message.content[0].text.trim();
+        if (textOut.startsWith("```")) {
+          textOut = textOut.split("```")[1];
+          if (textOut.startsWith("json")) textOut = textOut.slice(4).trim();
+        }
+        var parsed = JSON.parse(textOut.trim());
+        if (Array.isArray(parsed) && parsed.length >= 4) {
+          return parsed;
+        }
+      } catch (e) {
+        console.warn("[SetStar] Cohere AI extraction fallback:", e);
+      }
+      return [];
+    }
+
+    function applyExtractedDeviation(pairs, filename) {
+      pairs.sort(function(a, b) { return a[0] - b[0]; });
+      if (pairs[pairs.length - 1][0] < 360) {
+        pairs.push([360, pairs[0][1]]);
+      }
+
+      function getInterpDev(deg) {
+        for (var i = 0; i < pairs.length - 1; i++) {
+          var h0 = pairs[i][0];
+          var d0 = pairs[i][1];
+          var h1 = pairs[i + 1][0];
+          var d1 = pairs[i + 1][1];
+          if (deg >= h0 && deg <= h1) {
+            if (h1 === h0) return d0;
+            return d0 + (d1 - d0) * ((deg - h0) / (h1 - h0));
+          }
+        }
+        return pairs[0][1];
+      }
+
+      var fullTable = [];
+      for (var deg = 0; deg <= 360; deg += 10) {
+        var d = parseFloat(getInterpDev(deg).toFixed(1));
+        fullTable.push([deg, d]);
+      }
+
+      DEV_TABLE = fullTable;
+      saveDevTableToStorage(true);
+      drawDevChart();
+      renderDevTableView();
+      if (typeof calculate === "function") calculate();
+
+      var badgeEl = document.getElementById("devPointsCountBadge");
+      var statusEl = document.getElementById("devSourceStatus");
+      if (badgeEl) badgeEl.textContent = pairs.length + " Points Loaded";
+      if (statusEl) statusEl.textContent = "File: " + filename;
+
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Deviation curve calibrated from " + filename + " (" + pairs.length + " points)", "success");
+      }
+    }
+
+    initSetStarCurrentData();
+    initSetStarOverridesToggle();
+    initSetStarDeviationManager();
+
     const btnSave = document.getElementById("btnSaveDev");
 
     if (btnSave) btnSave.addEventListener("click", () => saveDevTableToStorage(true));
@@ -9079,7 +9571,9 @@
       };
     }
   </script>
-  <script src="assets/Auto NtM Plotting/setsail_core.js"></script>
+    <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
+  <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js"></script>
 
 <script>
 
