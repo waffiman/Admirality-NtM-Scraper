@@ -5567,3 +5567,763 @@
 [data-theme="light"] .ntm-master-toggle-item {
   background: #f8fafc !important;
 }
+
+
+/* ==========================================================================
+   SETSAIL v3.9 — TOP SAAS SCROLL-DRIVEN 4-SLIDE HOME EXPERIENCE
+   ========================================================================== */
+.home-hero-viewport {
+  position: relative !important;
+  width: 100% !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+  user-select: none;
+}
+
+/* Static SaaS Background Layer (Crossfades in as Video Fades Out on Slide 1 -> 2) */
+.home-static-saas-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% -10%, rgba(56, 189, 248, 0.16), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 85% 95%, rgba(240, 90, 54, 0.13), transparent 65%),
+    radial-gradient(ellipse 55% 45% at 12% 80%, rgba(14, 116, 144, 0.14), transparent 65%),
+    linear-gradient(180deg, #040915 0%, #081226 52%, #050b18 100%);
+  will-change: opacity;
+}
+
+.home-static-saas-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(126, 182, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(126, 182, 255, 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 30%, transparent 100%);
+}
+
+[data-theme="light"] .home-static-saas-bg {
+  background:
+    radial-gradient(ellipse 80% 55% at 50% -10%, rgba(2, 132, 199, 0.12), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 85% 95%, rgba(240, 90, 54, 0.09), transparent 65%),
+    linear-gradient(180deg, #f8fafc 0%, #eef4fb 55%, #e5eef9 100%) !important;
+}
+
+[data-theme="light"] .home-static-saas-bg::before {
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+}
+
+/* Top HUD Bar Choreography */
+.home-hud-top {
+  position: relative !important;
+  z-index: 40 !important;
+  min-height: 44px !important;
+}
+
+.home-hud-left {
+  position: relative !important;
+  min-width: 170px !important;
+  height: 26px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.hud-left-layer {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+
+.home-hud-center {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none;
+}
+
+.hud-center-utc-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+
+[data-theme="light"] .home-hud-top {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(203, 213, 225, 0.95) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+[data-theme="light"] .home-hud-pill,
+[data-theme="light"] .home-hud-text {
+  color: #0f172a !important;
+}
+
+/* Gliding Hero Logo Wrapper */
+.home-brand-block {
+  position: relative;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+#homeHeroLogoWrap {
+  display: inline-block;
+  transform-origin: center center;
+  will-change: transform;
+  cursor: pointer;
+}
+
+/* Slide 1 Bottom Animated Scroll Hint Arrow */
+.home-scroll-hint {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 28;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: rgba(226, 232, 240, 0.9);
+  cursor: pointer;
+  padding: 6px 16px;
+  transition: color 0.2s ease;
+  will-change: opacity, transform;
+}
+
+.home-scroll-hint:hover {
+  color: #ffffff;
+}
+
+.home-scroll-hint-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(186, 206, 235, 0.88);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+}
+
+.home-scroll-chevrons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0;
+}
+
+.home-scroll-chevron {
+  width: 22px;
+  height: 11px;
+  stroke: #f05a36;
+  stroke-width: 2.2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 8px rgba(240, 90, 54, 0.6));
+  animation: homeScrollChevronPulse 1.8s ease-in-out infinite;
+}
+
+.home-scroll-chevron.chevron-2 {
+  margin-top: -4px;
+  stroke: #38bdf8;
+  animation-delay: 0.22s;
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+}
+
+@keyframes homeScrollChevronPulse {
+  0%, 100% { opacity: 0.35; transform: translateY(-2px); }
+  50% { opacity: 1; transform: translateY(4px); }
+}
+
+/* Slide 2 Section Header (Appears when tools disperse) */
+.home-slide2-header {
+  position: absolute;
+  top: 86px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 18;
+  opacity: 0;
+  pointer-events: none;
+  width: 92%;
+  max-width: 760px;
+  will-change: opacity, transform;
+}
+
+.saas-eyebrow-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  margin-bottom: 8px;
+}
+
+.saas-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f05a36;
+  box-shadow: 0 0 8px #f05a36;
+}
+
+.home-slide2-title {
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
+  margin: 0 0 4px;
+}
+
+.home-slide2-sub {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+[data-theme="light"] .home-slide2-title {
+  color: #0f172a;
+}
+
+[data-theme="light"] .home-slide2-sub {
+  color: #475569;
+}
+
+/* Tool Tiles Dispersion & Slide 2 Hover Description */
+.home-tool-grid {
+  position: relative;
+  z-index: 26;
+  perspective: 1100px;
+}
+
+.home-tool-tile {
+  will-change: transform, opacity;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, width 0.32s cubic-bezier(0.16, 1, 0.3, 1), padding 0.32s ease !important;
+}
+
+.home-tool-hover-drawer {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.34s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, margin-top 0.25s ease, padding-top 0.25s ease;
+  margin-top: 0;
+  padding-top: 0;
+  text-align: left;
+  width: 100%;
+  border-top: 1px solid transparent;
+  pointer-events: none;
+}
+
+.home-tool-hover-text {
+  font-size: 0.67rem;
+  line-height: 1.44;
+  color: #cbd5e1;
+  margin: 0 0 8px;
+  font-weight: 400;
+}
+
+.home-tool-hover-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 7px;
+}
+
+.home-tool-hover-tag {
+  font-size: 0.55rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #7dd3fc;
+}
+
+.home-tool-hover-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #f05a36;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* When on Slide 2, cards expand & reveal rich description on hover */
+.home-hero-viewport.on-slide-2 .home-tool-tile {
+  width: 245px;
+  max-width: 265px;
+  padding: 1.2rem 1.1rem 1.05rem;
+  background: rgba(10, 22, 48, 0.82);
+  border-color: rgba(126, 182, 255, 0.3);
+}
+
+.home-hero-viewport.on-slide-2 .home-tool-tile:hover {
+  background: rgba(14, 30, 66, 0.96);
+  border-color: rgba(240, 90, 54, 0.75);
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.65), 0 0 28px rgba(240, 90, 54, 0.28);
+  z-index: 45;
+}
+
+.home-hero-viewport.on-slide-2 .home-tool-tile:hover .home-tool-hover-drawer {
+  max-height: 180px;
+  opacity: 1;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top-color: rgba(148, 163, 184, 0.2);
+}
+
+[data-theme="light"] .home-hero-viewport.on-slide-2 .home-tool-tile {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: #cbd5e1;
+  color: #0f172a;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .home-hero-viewport.on-slide-2 .home-tool-tile .home-tool-title {
+  color: #0f172a;
+}
+
+[data-theme="light"] .home-hero-viewport.on-slide-2 .home-tool-tile .home-tool-desc,
+[data-theme="light"] .home-hero-viewport.on-slide-2 .home-tool-tile .home-tool-hover-text {
+  color: #475569;
+}
+
+[data-theme="light"] .home-hero-viewport.on-slide-2 .home-tool-tile .home-tool-hover-tag {
+  background: rgba(2, 132, 199, 0.08);
+  border-color: rgba(2, 132, 199, 0.25);
+  color: #0284c7;
+}
+
+/* Future / Extra Tools hidden on Slide 1, shown on Slide 2 */
+.home-tool-tile.home-tool-extra {
+  display: none;
+}
+
+.home-hero-viewport.show-extra-tools .home-tool-tile.home-tool-extra {
+  display: flex;
+}
+
+/* ==========================================================================
+   SLIDE 3: ABOUT SETSAIL (Top SaaS Narrative & Visual Showcase)
+   ========================================================================== */
+.home-slide-about {
+  position: absolute;
+  inset: 76px 32px 64px 32px;
+  z-index: 22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.home-about-container {
+  width: 100%;
+  max-width: 1060px;
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.home-about-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.home-about-headline {
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1.16;
+  letter-spacing: -0.025em;
+  color: #f8fafc;
+  margin: 0.35rem 0 0.85rem;
+}
+
+.home-about-headline span {
+  background: linear-gradient(135deg, #38bdf8 0%, #f05a36 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.home-about-lead {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin: 0 0 1.2rem;
+}
+
+.home-about-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.home-about-pillar {
+  background: rgba(12, 24, 52, 0.65);
+  border: 1px solid rgba(126, 182, 255, 0.18);
+  border-radius: 12px;
+  padding: 0.85rem 0.9rem;
+  backdrop-filter: blur(12px);
+}
+
+.home-about-pillar-num {
+  font-size: 0.64rem;
+  font-weight: 800;
+  color: #f05a36;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.home-about-pillar-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 4px;
+}
+
+.home-about-pillar-desc {
+  font-size: 0.67rem;
+  line-height: 1.4;
+  color: #94a3b8;
+}
+
+/* Visual Showcase Frame (Ready for Photo / Video) */
+.home-about-visual-card {
+  position: relative;
+  border-radius: 18px;
+  background: rgba(8, 18, 42, 0.78);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(56, 189, 248, 0.1);
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+}
+
+.home-about-visual-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(4, 10, 24, 0.65);
+  border-bottom: 1px solid rgba(126, 182, 255, 0.14);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+}
+
+.visual-window-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.visual-window-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.35);
+}
+
+.visual-window-dots span:first-child { background: #f05a36; }
+.visual-window-dots span:nth-child(2) { background: #eab308; }
+.visual-window-dots span:nth-child(3) { background: #10b981; }
+
+.home-about-media-slot {
+  position: relative;
+  height: 265px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.14) 0%, rgba(6, 13, 28, 0.92) 75%);
+  overflow: hidden;
+}
+
+.about-radar-rings {
+  position: relative;
+  width: 164px;
+  height: 164px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-radar-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px dashed rgba(56, 189, 248, 0.32);
+}
+
+.about-radar-ring.r1 { width: 160px; height: 160px; animation: radarSpin 28s linear infinite; }
+.about-radar-ring.r2 { width: 112px; height: 112px; border-style: solid; border-color: rgba(240, 90, 54, 0.28); }
+.about-radar-ring.r3 { width: 62px; height: 62px; }
+
+.about-radar-sweep {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(56, 189, 248, 0.28) 0deg, transparent 75deg, transparent 360deg);
+  animation: radarSpin 5s linear infinite;
+}
+
+@keyframes radarSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.about-media-placeholder-caption {
+  margin-top: 12px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7dd3fc;
+  background: rgba(14, 28, 58, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+[data-theme="light"] .home-about-headline { color: #0f172a; }
+[data-theme="light"] .home-about-lead { color: #334155; }
+[data-theme="light"] .home-about-pillar {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+}
+[data-theme="light"] .home-about-pillar-title { color: #0f172a; }
+[data-theme="light"] .home-about-pillar-desc { color: #475569; }
+[data-theme="light"] .home-about-visual-card {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+}
+
+/* ==========================================================================
+   SLIDE 4: NARROW INFINITE MARQUEE OF RECOGNIZABLE SOURCES (Transparent Logos)
+   ========================================================================== */
+.home-slide-sources {
+  position: absolute;
+  inset: 76px 0 64px 0;
+  z-index: 23;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.home-sources-header {
+  text-align: center;
+  margin-bottom: 1.4rem;
+  padding: 0 1.5rem;
+}
+
+.home-sources-kicker {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.home-sources-sub {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+/* Narrow Full-Width Marquee Ribbon */
+.home-sources-marquee-band {
+  position: relative;
+  width: 100%;
+  height: 74px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: transparent;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+}
+
+.home-sources-marquee-track {
+  display: flex;
+  align-items: center;
+  gap: 4.2rem;
+  width: max-content;
+  animation: homeSourcesRightToLeft 36s linear infinite;
+  will-change: transform;
+}
+
+.home-sources-marquee-band:hover .home-sources-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes homeSourcesRightToLeft {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Individual Transparent-Background Authority Logo Item */
+.source-authority-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px 6px;
+  color: #cbd5e1;
+  opacity: 0.74;
+  transition: opacity 0.25s ease, transform 0.25s ease, color 0.25s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.source-authority-logo:hover {
+  opacity: 1;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.source-authority-logo svg {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+}
+
+.source-logo-text-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+
+.source-logo-name {
+  font-size: 0.96rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: inherit;
+}
+
+.source-logo-sub {
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+[data-theme="light"] .source-authority-logo {
+  color: #1e293b;
+  opacity: 0.78;
+}
+
+[data-theme="light"] .source-authority-logo:hover {
+  color: #0f172a;
+  opacity: 1;
+}
+
+[data-theme="light"] .home-sources-marquee-band {
+  border-top-color: rgba(15, 23, 42, 0.1);
+  border-bottom-color: rgba(15, 23, 42, 0.1);
+}
+
+/* Right-Side Minimal Slide Progress Indicators */
+.home-slide-dots {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 38;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.home-slide-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.38);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: height 0.28s ease, background 0.28s ease, box-shadow 0.28s ease;
+}
+
+.home-slide-dot:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.home-slide-dot.active {
+  height: 22px;
+  background: #f05a36;
+  box-shadow: 0 0 10px rgba(240, 90, 54, 0.65);
+}
+
+@media (max-width: 900px) {
+  .home-about-container {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  .home-about-media-slot {
+    height: 165px;
+  }
+  .home-about-headline {
+    font-size: 1.45rem;
+  }
+  .home-hero-viewport.on-slide-2 .home-tool-tile {
+    width: 165px;
+    padding: 0.8rem;
+  }
+}
