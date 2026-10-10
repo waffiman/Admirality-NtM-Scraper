@@ -51,7 +51,7 @@
 
 
   <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.0" />
-      <style id="setsail-bundled-offline-css">
+        <style id="setsail-bundled-offline-css">
 /* required styles */
 
 .leaflet-pane,
@@ -7171,6 +7171,55 @@ svg.leaflet-image-layer.leaflet-interactive path {
   border-color: rgba(2, 132, 199, 0.45) !important;
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.14) !important;
 }
+
+/* Subtle UTC / LMT Toggle Button in Header HUD */
+.home-time-mode-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.32) !important;
+  color: inherit !important;
+  font-family: inherit !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  padding: 0 3px 1px 3px !important;
+  margin-left: 1px !important;
+  border-radius: 3px !important;
+  opacity: 0.72 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 55 !important;
+  line-height: 1.1 !important;
+  transition: opacity 0.18s ease, color 0.18s ease, border-color 0.18s ease, background 0.18s ease !important;
+}
+
+.home-time-mode-btn:hover {
+  opacity: 1 !important;
+  color: #38bdf8 !important;
+  border-bottom-color: rgba(56, 189, 248, 0.65) !important;
+  background: rgba(56, 189, 248, 0.08) !important;
+}
+
+.home-time-mode-btn.mode-lmt {
+  color: #7dd3fc !important;
+  border-bottom-color: rgba(56, 189, 248, 0.45) !important;
+  opacity: 0.88 !important;
+}
+
+[data-theme="light"] .home-time-mode-btn {
+  color: #334155 !important;
+  border-bottom-color: rgba(71, 85, 105, 0.35) !important;
+}
+
+[data-theme="light"] .home-time-mode-btn:hover,
+[data-theme="light"] .home-time-mode-btn.mode-lmt {
+  color: #0284c7 !important;
+  border-bottom-color: rgba(2, 132, 199, 0.55) !important;
+}
+
   </style>
 
 
@@ -9817,11 +9866,42 @@ svg.leaflet-image-layer.leaflet-interactive path {
       }
     }, true);
 
-    // 3. Real-Time Bridge Home Telemetry (UTC Clock & Online/Offline Dot Indicator)
+    // 3. Real-Time Bridge Home Telemetry (UTC / LMT Clock & Online/Offline Dot Indicator)
+    window._homeClockMode = 'UTC'; // 'UTC' or 'LMT'
+    window._homeGeoLon = null;
+
+    // Passive check if geolocation is already granted
+    if (navigator.geolocation && navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then(function(res) {
+        if (res.state === 'granted') {
+          navigator.geolocation.getCurrentPosition(function(pos) {
+            if (pos && pos.coords && Number.isFinite(pos.coords.longitude)) {
+              window._homeGeoLon = pos.coords.longitude;
+            }
+          }, function() {}, { timeout: 6000, maximumAge: 60000 });
+        }
+      }).catch(function() {});
+    }
+
+    function getActiveGeoLongitude() {
+      if (Number.isFinite(window._homeGeoLon)) return window._homeGeoLon;
+      try {
+        const raw = localStorage.getItem('setsail_vessel_pos_v2');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.source === 'GPS' && Number.isFinite(parsed.lon)) {
+            window._homeGeoLon = parsed.lon;
+            return parsed.lon;
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
+
     function updateHomeTelemetry() {
       const isOffline = (typeof navigator !== 'undefined' && navigator.onLine === false);
       const clockEl = document.getElementById('homeUtcClock');
-      const clockLeftEl = document.getElementById('homeUtcClockLeft');
+      const modeBtn = document.getElementById('homeTimeModeBtn');
       const dots = document.querySelectorAll('.home-hud-dot');
 
       dots.forEach(dotEl => {
@@ -9835,14 +9915,83 @@ svg.leaflet-image-layer.leaflet-interactive path {
       });
 
       const now = new Date();
-      const hh = String(now.getUTCHours()).padStart(2, '0');
-      const mm = String(now.getUTCMinutes()).padStart(2, '0');
-      const ss = String(now.getUTCSeconds()).padStart(2, '0');
-      const utcStr = hh + ':' + mm + ':' + ss + ' UTC';
+      let targetDate = now;
+      const geoLon = getActiveGeoLongitude();
 
-      if (clockEl) clockEl.textContent = utcStr;
-      if (clockLeftEl) clockLeftEl.textContent = utcStr;
+      if (window._homeClockMode === 'LMT' && Number.isFinite(geoLon)) {
+        // True Nautical Local Mean Time (LMT): UTC + (Longitude_deg * 4 minutes) = UTC + (Longitude_deg * 240,000 ms)
+        targetDate = new Date(now.getTime() + geoLon * 240000);
+        if (modeBtn && !modeBtn.dataset.tempMsg) {
+          modeBtn.textContent = 'LMT';
+          modeBtn.classList.add('mode-lmt');
+        }
+      } else {
+        window._homeClockMode = 'UTC';
+        if (modeBtn && !modeBtn.dataset.tempMsg) {
+          modeBtn.textContent = 'UTC';
+          modeBtn.classList.remove('mode-lmt');
+        }
+      }
+
+      const hh = String(targetDate.getUTCHours()).padStart(2, '0');
+      const mm = String(targetDate.getUTCMinutes()).padStart(2, '0');
+      const ss = String(targetDate.getUTCSeconds()).padStart(2, '0');
+      const timeStr = hh + ':' + mm + ':' + ss;
+
+      if (clockEl) clockEl.textContent = timeStr;
     }
+    window.updateHomeTelemetry = updateHomeTelemetry;
+
+    // Click handler for subtle UTC / LMT toggle button
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('#homeTimeModeBtn');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (window._homeClockMode === 'LMT') {
+        window._homeClockMode = 'UTC';
+        updateHomeTelemetry();
+        return;
+      }
+
+      // User wants to switch from UTC -> LMT: verify or request Browser Geolocation
+      const existingLon = getActiveGeoLongitude();
+      if (Number.isFinite(existingLon)) {
+        window._homeClockMode = 'LMT';
+        updateHomeTelemetry();
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        btn.dataset.tempMsg = '1';
+        btn.textContent = 'NO GPS';
+        setTimeout(() => { delete btn.dataset.tempMsg; updateHomeTelemetry(); }, 1600);
+        return;
+      }
+
+      btn.dataset.tempMsg = '1';
+      btn.textContent = 'LOC...';
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          delete btn.dataset.tempMsg;
+          if (pos && pos.coords && Number.isFinite(pos.coords.longitude)) {
+            window._homeGeoLon = pos.coords.longitude;
+            window._homeClockMode = 'LMT';
+            updateHomeTelemetry();
+          }
+        },
+        function() {
+          btn.textContent = 'NO GPS';
+          setTimeout(() => {
+            delete btn.dataset.tempMsg;
+            window._homeClockMode = 'UTC';
+            updateHomeTelemetry();
+          }, 1600);
+        },
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+      );
+    });
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', updateHomeTelemetry);
@@ -10004,7 +10153,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
               <div class="home-hud-pill home-hud-center" id="homeHudCenterAnchor">
                 <div class="hud-center-utc-wrap" id="homeHudCenterUtc">
                   <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v3M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12 8.5 12 13 15.5 14.5" fill="none" stroke="#f05a36" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="13" r="1.4" fill="#ffffff"/></svg></span>
-                  <span class="home-hud-text" id="homeUtcClock">00:00:00 UTC</span>
+                  <span class="home-hud-text" id="homeUtcClock">00:00:00</span>
+                  <button type="button" class="home-time-mode-btn" id="homeTimeModeBtn" title="Switch between UTC and Local Mean Time (LMT)">UTC</button>
                   <span class="home-hud-dot live-pulse" id="homeHudCenterUtcDot" style="opacity:0;width:7px;height:7px;transition:opacity 0.2s;"></span>
                 </div>
               </div>
