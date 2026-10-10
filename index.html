@@ -50,8 +50,8 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.0" />
-        <style id="setsail-bundled-offline-css">
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.1" />
+          <style id="setsail-bundled-offline-css">
 /* required styles */
 
 .leaflet-pane,
@@ -7220,6 +7220,108 @@ svg.leaflet-image-layer.leaflet-interactive path {
   border-bottom-color: rgba(2, 132, 199, 0.55) !important;
 }
 
+
+/* ==========================================================================
+   SETSAIL v4.1 — BULLETPROOF 3-COLUMN HEADER & STACKED FOOTER DOCK
+   ========================================================================== */
+.home-hud-top {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  padding: 0 1.2rem !important;
+  box-sizing: border-box !important;
+  z-index: 40 !important;
+}
+
+.home-hud-left,
+#homeHudLeftSlot {
+  grid-column: 1 !important;
+  justify-self: start !important;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 28px !important;
+  z-index: 5 !important;
+}
+
+.home-hud-center,
+#homeHudCenterAnchor {
+  grid-column: 2 !important;
+  justify-self: center !important;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto !important;
+  z-index: 6 !important;
+}
+
+.home-hud-right,
+#homeVesselHudPill {
+  grid-column: 3 !important;
+  justify-self: end !important;
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  transform: none !important;
+  margin: 0 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  z-index: 7 !important;
+}
+
+/* Stacked Bottom Dock: #homeScrollHint sits strictly ABOVE .site-footer in normal flex flow */
+.home-bottom-dock {
+  position: relative !important;
+  z-index: 28 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin-top: auto !important;
+  padding: 0 !important;
+}
+
+.home-scroll-hint,
+#homeScrollHint {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none;
+  z-index: 29 !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 2px 12px !important;
+  margin: 0 !important;
+}
+
+.home-hero-viewport .site-footer {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  z-index: 25 !important;
+}
+
   </style>
 
 
@@ -9768,13 +9870,109 @@ svg.leaflet-image-layer.leaflet-interactive path {
   color: #64748b !important;
 }
 
+
+/* ==========================================================================
+   SETSAIL v4.1 — BULLETPROOF 3-COLUMN HEADER & STACKED FOOTER DOCK
+   ========================================================================== */
+.home-hud-top {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  padding: 0 1.2rem !important;
+  box-sizing: border-box !important;
+  z-index: 40 !important;
+}
+
+.home-hud-left,
+#homeHudLeftSlot {
+  grid-column: 1 !important;
+  justify-self: start !important;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 28px !important;
+  z-index: 5 !important;
+}
+
+.home-hud-center,
+#homeHudCenterAnchor {
+  grid-column: 2 !important;
+  justify-self: center !important;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto !important;
+  z-index: 6 !important;
+}
+
+.home-hud-right,
+#homeVesselHudPill {
+  grid-column: 3 !important;
+  justify-self: end !important;
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  transform: none !important;
+  margin: 0 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  z-index: 7 !important;
+}
+
+/* Stacked Bottom Dock: #homeScrollHint sits strictly ABOVE .site-footer in normal flex flow */
+.home-bottom-dock {
+  position: relative !important;
+  z-index: 28 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin-top: auto !important;
+  padding: 0 !important;
+}
+
+.home-scroll-hint,
+#homeScrollHint {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none;
+  z-index: 29 !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 2px 12px !important;
+  margin: 0 !important;
+}
+
+.home-hero-viewport .site-footer {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  z-index: 25 !important;
+}
+
 </style>
-
-
-
-
-
-
 
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_horizontal.webp" type="image/webp" fetchpriority="high" />
 
@@ -10139,18 +10337,18 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
           <!-- Foreground Container: 100% Locked Viewport, Scroll-Scrubbed Choreography -->
           <div class="home-hero-content">
-            <!-- Top Bridge HUD Bar -->
-            <div class="home-hud-top" id="homeHudTop">
-              <!-- Left HUD Slot: "SETSAIL ●" on Slide 1; UTC Clock glides into this exact slot as Logo rises to center -->
-              <div class="home-hud-pill home-hud-left" id="homeHudLeftSlot">
+            <!-- Top Bridge HUD Bar (3-Column Grid: Col 1 Left, Col 2 Center, Col 3 Right) -->
+            <div class="home-hud-top" id="homeHudTop" style="display:grid !important;grid-template-columns:1fr auto 1fr !important;align-items:center !important;width:100% !important;position:relative !important;">
+              <!-- Column 1 (Left): "SETSAIL ●" on Slide 1; UTC Clock glides into this slot on Slide 2..4 -->
+              <div class="home-hud-pill home-hud-left" id="homeHudLeftSlot" style="grid-column:1 !important;justify-self:start !important;position:relative !important;">
                 <div class="hud-left-brand-wrap" id="homeHudLeftBrand">
                   <span class="home-hud-text">SETSAIL</span>
                   <span class="home-hud-dot live-pulse"></span>
                 </div>
               </div>
 
-              <!-- Center HUD Slot: UTC Clock on Slide 1 -> physically glides left to #homeHudLeftSlot as Hero Logo rises into center -->
-              <div class="home-hud-pill home-hud-center" id="homeHudCenterAnchor">
+              <!-- Column 2 (Center): UTC Clock on Slide 1 -> physically glides left to #homeHudLeftSlot as Hero Logo rises into center -->
+              <div class="home-hud-pill home-hud-center" id="homeHudCenterAnchor" style="grid-column:2 !important;justify-self:center !important;position:relative !important;left:auto !important;top:auto !important;transform:none !important;">
                 <div class="hud-center-utc-wrap" id="homeHudCenterUtc">
                   <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v3M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12 8.5 12 13 15.5 14.5" fill="none" stroke="#f05a36" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="13" r="1.4" fill="#ffffff"/></svg></span>
                   <span class="home-hud-text" id="homeUtcClock">00:00:00</span>
@@ -10159,8 +10357,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
                 </div>
               </div>
 
-              <!-- Right HUD Slot: Live Vessel Position (Always pinned to far right) -->
-              <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" title="Live Vessel Navigation Position (Click to inspect on ECDIS)">
+              <!-- Column 3 (Right): Live Vessel Position (Strictly locked in Column 3 on the far right at all times) -->
+              <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" style="grid-column:3 !important;justify-self:end !important;margin-left:auto !important;position:relative !important;" title="Live Vessel Navigation Position (Click to inspect on ECDIS)">
                 <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9" r="2.8" fill="#f05a36"/><circle cx="12" cy="9" r="1" fill="#ffffff"/></svg></span>
                 <span class="home-hud-text" id="homeVesselHudCoords">POS: WAITING GPS...</span>
               </div>
@@ -10521,8 +10719,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
               </div>
             </section>
 
+            <!-- Bottom Flex Stack: Scroll Hint strictly ABOVE WAFFi Footer (Zero overlap possible) -->
+            <div class="home-bottom-dock" style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;z-index:28;">
             <!-- Slide 1 Bottom Stylish Scroll Hint Arrow -->
-            <button type="button" class="home-scroll-hint no-print" id="homeScrollHint" aria-label="Scroll down to explore SetSail">
+            <button type="button" class="home-scroll-hint no-print" id="homeScrollHint" style="position:relative !important;bottom:auto !important;left:auto !important;transform:none;" aria-label="Scroll down to explore SetSail">
               <span class="home-scroll-hint-label">Scroll</span>
               <span class="home-scroll-chevrons">
                 <svg class="home-scroll-chevron chevron-1" viewBox="0 0 24 12"><polyline points="3 3 12 10 21 3"/></svg>
@@ -10531,7 +10731,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
             </button>
 
             <!-- Floating Overlay Footer -->
-            <footer class="site-footer no-print" role="contentinfo">
+            <footer class="site-footer no-print" role="contentinfo" style="padding:0 !important;margin:0 !important;">
               <div class="site-footer-inner">
                 <a href="https://waffiweb.com" target="_blank" rel="noopener noreferrer" class="waffi-credit" aria-label="Built by WAFFi — visit waffiweb.com">
                   <span class="waffi-credit-eyebrow">Built by</span>
@@ -10553,6 +10753,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
                 </a>
               </div>
             </footer>
+            </div><!-- end .home-bottom-dock -->
           </div>
         </div>
       </div><!-- end #tab-home -->
@@ -17703,8 +17904,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.0"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.0"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.1"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.1"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -17782,7 +17983,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.0"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.1"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -17857,7 +18058,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         if (scrollHint) {
           const hintAlpha = clamp(1 - t1 * 3.5, 0, 1);
           scrollHint.style.opacity = String(hintAlpha.toFixed(3));
-          scrollHint.style.transform = 'translate3d(-50%, ' + (t1 * 18).toFixed(1) + 'px, 0)';
+          scrollHint.style.transform = 'translate3d(0, ' + (t1 * 12).toFixed(1) + 'px, 0)';
           scrollHint.style.pointerEvents = hintAlpha > 0.2 ? 'auto' : 'none';
         }
 
@@ -18120,10 +18321,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v40') !== '1') {
+        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v41') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v4.0' && k !== 'setsail-tiles-cache-v4').map(k => caches.delete(k))
-          )).then(() => localStorage.setItem('setsail_sw_v40', '1')).catch(() => {});
+            keys.filter(k => k !== 'setsail-cache-v4.1' && k !== 'setsail-tiles-cache-v4').map(k => caches.delete(k))
+          )).then(() => localStorage.setItem('setsail_sw_v41', '1')).catch(() => {});
         }
         navigator.serviceWorker.register('sw.js', { scope: './' })
           .then((reg) => {
