@@ -4,8 +4,8 @@
  * Fully offline-capable bridge cockpit — Zero Google Dinosaur & Zero Unstyled Blocks!
  */
 
-const CACHE_NAME = 'setsail-cache-v3.9';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v2';
+const CACHE_NAME = 'setsail-cache-v4.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v4';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -23,10 +23,10 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css',
-  'assets/Auto NtM Plotting/port_depths.js',
-  'assets/Auto NtM Plotting/ntm_module.js',
-  'assets/Auto NtM Plotting/setsail_core.js',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=4.0',
+  'assets/Auto NtM Plotting/port_depths.js?v=4.0',
+  'assets/Auto NtM Plotting/ntm_module.js?v=4.0',
+  'assets/Auto NtM Plotting/setsail_core.js?v=4.0',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
   'assets/Auto NtM Plotting/tesseract.min.js',
   'assets/Auto NtM Plotting/pdf.min.js',
@@ -53,27 +53,27 @@ function fetchWithTimeout(request, timeoutMs) {
   });
 }
 
-// Helper: resilient cache lookup (exact -> ignoreSearch -> filename match across all caches)
+// Helper: resilient cache lookup for same-origin app assets only (never map tiles)
 async function matchAssetInCache(request) {
-  let hit = (await caches.match(request)) || (await caches.match(request, { ignoreSearch: true }));
-  if (hit) return hit;
-
   try {
     const reqUrl = new URL(request.url);
+    if (reqUrl.origin !== self.location.origin) {
+      return null;
+    }
+    const appCache = await caches.open(CACHE_NAME);
+    let hit = (await appCache.match(request)) || (await appCache.match(request, { ignoreSearch: true }));
+    if (hit) return hit;
+
     const decodedPath = decodeURIComponent(reqUrl.pathname);
     const baseName = decodedPath.split('/').pop();
     if (!baseName) return null;
 
-    const cacheNames = await caches.keys();
-    for (const cName of cacheNames) {
-      const cache = await caches.open(cName);
-      const keys = await cache.keys();
-      for (const k of keys) {
-        const kDecoded = decodeURIComponent(new URL(k.url).pathname);
-        if (kDecoded.endsWith('/' + baseName) || kDecoded === decodedPath) {
-          const matched = await cache.match(k);
-          if (matched) return matched;
-        }
+    const keys = await appCache.keys();
+    for (const k of keys) {
+      const kDecoded = decodeURIComponent(new URL(k.url).pathname);
+      if (kDecoded.endsWith('/' + baseName) || kDecoded === decodedPath) {
+        const matched = await appCache.match(k);
+        if (matched) return matched;
       }
     }
   } catch (e) {}
@@ -207,7 +207,9 @@ self.addEventListener('fetch', (event) => {
   const isMapTile = (
     url.hostname.includes('tile.openstreetmap.org') ||
     url.hostname.includes('arcgisonline.com') ||
-    url.hostname.includes('openseamap.org')
+    url.hostname.includes('openseamap.org') ||
+    url.hostname.includes('cartocdn.com') ||
+    url.hostname.includes('stadiamaps.com')
   );
 
   if (isMapTile) {
