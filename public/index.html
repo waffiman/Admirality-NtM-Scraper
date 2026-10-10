@@ -50,7 +50,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=3.8" />
 
 
 
@@ -2003,18 +2003,142 @@
 .setstar-top-bar {
   display: flex !important;
   align-items: center !important;
-  justify-content: space-between !important;
+  justify-content: flex-start !important;
   margin-bottom: 1.1rem !important;
   padding-bottom: 0.85rem !important;
   border-bottom: 1px solid var(--line) !important;
 }
 
-/* SetStar 8-column single line inputs */
+/* SetStar 8-column single line inputs — aligned at top so all input fields sit on the exact same horizontal line */
 .setstar-inputs-grid {
   display: grid !important;
   grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
   gap: 0.45rem 0.5rem !important;
-  align-items: flex-end !important;
+  align-items: flex-start !important;
+}
+.setstar-inputs-grid > label {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  white-space: nowrap !important;
+}
+.setstar-inputs-grid > label > input,
+.setstar-inputs-grid > label > select,
+.setstar-inputs-grid > label > .row-ew {
+  margin-top: 4px !important;
+  height: 34px !important;
+  box-sizing: border-box !important;
+}
+.setstar-inputs-grid > label > .row-ew > input,
+.setstar-inputs-grid > label > .row-ew > select {
+  height: 34px !important;
+  box-sizing: border-box !important;
+}
+.setstar-subtle-link {
+  margin-top: 5px !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+  align-self: flex-start !important;
+}
+
+/* SetRoute Ship-on-Waves Centered Progress Animation */
+.setroute-progress-box {
+  margin-top: 16px !important;
+  padding: 22px 18px 18px !important;
+  border-radius: 12px !important;
+  background: rgba(8, 17, 38, 0.72) !important;
+  border: 1px solid rgba(56, 189, 248, 0.28) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+}
+[data-theme="light"] .setroute-progress-box {
+  background: #f8fafc !important;
+  border-color: #cbd8e6 !important;
+}
+.setroute-ship-stage {
+  position: relative;
+  width: 200px;
+  height: 78px;
+  margin: 0 auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.setroute-ship-svg {
+  width: 82px;
+  height: 50px;
+  z-index: 2;
+  animation: setrouteShipBob 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 10px rgba(240, 90, 54, 0.35));
+}
+.setroute-waves-wrap {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  width: 200%;
+  height: 26px;
+  z-index: 3;
+  pointer-events: none;
+  display: flex;
+}
+.setroute-wave-layer {
+  width: 100%;
+  height: 26px;
+  animation: setrouteWaveSlide 2.6s linear infinite;
+}
+.setroute-wave-layer-back {
+  position: absolute;
+  bottom: 7px;
+  left: 0;
+  width: 200%;
+  height: 22px;
+  z-index: 1;
+  opacity: 0.45;
+  animation: setrouteWaveSlide 3.8s linear infinite reverse;
+}
+@keyframes setrouteShipBob {
+  0%, 100% { transform: translateY(0px) rotate(-2.5deg); }
+  50% { transform: translateY(-5px) rotate(2.8deg); }
+}
+@keyframes setrouteWaveSlide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.setroute-log-ticker {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.setroute-log-ticker .progress-msg {
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  color: #38bdf8 !important;
+  letter-spacing: 0.01em;
+  transition: opacity 0.24s ease, transform 0.24s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+[data-theme="light"] .setroute-log-ticker .progress-msg {
+  color: #0284c7 !important;
+}
+.setroute-log-ticker .progress-msg.fade-out {
+  opacity: 0 !important;
+  transform: translateY(-6px) !important;
+}
+.setroute-log-ticker .progress-msg.fade-in {
+  animation: setrouteMsgEnter 0.26s ease forwards;
+}
+@keyframes setrouteMsgEnter {
+  0% { opacity: 0; transform: translateY(7px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 1200px) {
@@ -3049,9 +3173,6 @@
 
 
     <div class="setstar-top-bar no-print">
-      <div class="setstar-top-title">
-        <h1 style="margin:0;font-size:1.35rem;font-weight:800;letter-spacing:-0.02em;">SetStar · Celestial Almanac &amp; Gyro Compass</h1>
-      </div>
       <div class="page-top-badge">
         <span class="page-badge-icon">
           <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="6.8" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.4" stroke-dasharray="1.5 1.5"/><polygon points="12 4 13.6 10.4 12 12" fill="#f05a36"/><circle cx="12" cy="12" r="1.8" fill="#fff" stroke="#f05a36" stroke-width="1"/></svg>
@@ -3095,7 +3216,7 @@
 
         <label>Date (LT)
           <input type="date" id="ltDate" />
-          <button type="button" class="setstar-subtle-link" id="btnUseCurrentData" title="Sync live local date, UTC date/time and GPS position"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:11px;height:11px;vertical-align:-1px;margin-right:3px;stroke:#38bdf8;"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="7"/></svg>Use current data</button>
+          <button type="button" class="setstar-subtle-link" id="btnUseCurrentData" title="Sync live local date, UTC date/time and GPS position">Use current data</button>
         </label>
 
 
@@ -3687,55 +3808,7 @@
 
 
           <div class="ntm-toolbar-left">
-
-
-
-            <input type="file" id="ntmPdfInput" accept=".pdf" multiple style="display:none;" />
-
-
-
-            
-
-
-
-            <span id="ntmStatusMsg" class="ntm-status-msg" style="display:none;"></span>
-
-
-
-          </div>
-
-
-
-
-
-
-
-          <!-- Mobile View Switcher (List vs Map) -->
-
-
-
-          <div class="ntm-mobile-view-switcher" id="ntmMobileViewSwitcher">
-
-
-
-            <button type="button" class="ntm-mview-btn active" id="ntmViewListBtn" title="Switch to List View"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/></svg> List</button>
-
-
-
-            <button type="button" class="ntm-mview-btn" id="ntmViewMapBtn" title="Switch to Chart View"><svg class="setsail-icon" viewBox="0 0 24 24"><polygon points="1 6 8 2 16 6 23 2 23 18 16 22 8 18 1 22 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg> Chart</button>
-
-
-
-          </div>
-
-
-
-
-
-
-
-          <div class="ntm-toolbar-right">
-            <!-- Top-Right Page Header Badge (SetRoute Style) -->
+            <!-- Top-Left Page Header Badge -->
             <div class="page-top-badge">
               <span class="page-badge-icon">
                 <svg class="setsail-icon" viewBox="0 0 24 24"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8"/><circle cx="18.5" cy="7.5" r="2.2" fill="#f05a36"/></svg>
@@ -3745,6 +3818,17 @@
                 <span class="page-badge-pill">LIVE ECDIS</span>
               </div>
             </div>
+            <input type="file" id="ntmPdfInput" accept=".pdf" multiple style="display:none;" />
+            <span id="ntmStatusMsg" class="ntm-status-msg" style="display:none;"></span>
+          </div>
+
+          <!-- Mobile View Switcher (List vs Map) -->
+          <div class="ntm-mobile-view-switcher" id="ntmMobileViewSwitcher">
+            <button type="button" class="ntm-mview-btn active" id="ntmViewListBtn" title="Switch to List View"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/></svg> List</button>
+            <button type="button" class="ntm-mview-btn" id="ntmViewMapBtn" title="Switch to Chart View"><svg class="setsail-icon" viewBox="0 0 24 24"><polygon points="1 6 8 2 16 6 23 2 23 18 16 22 8 18 1 22 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg> Chart</button>
+          </div>
+
+          <div class="ntm-toolbar-right">
 
 
 
@@ -4518,8 +4602,8 @@
 
 
 
-            <div class="excel-overlay-dock" id="excelOverlayDock" role="toolbar" aria-label="ECDIS Chart Overlays">
-              <div class="excel-tabs-scroll">
+            <div class="excel-overlay-dock" id="excelOverlayDock" role="toolbar" aria-label="ECDIS Chart Overlays" style="display:flex;width:100%;">
+              <div class="excel-tabs-scroll" style="display:flex;flex:1;width:100%;align-items:flex-end;">
                 <button type="button" class="excel-tab active" data-overlay="notices" id="tabOverlayNotices" title="Toggle Admiralty NtM Notices Overlay">
                   <span class="excel-tab-check">✓</span>
                   <span class="excel-tab-name">Admiralty NtM</span>
@@ -4535,7 +4619,7 @@
                   <span class="excel-tab-name">Weather</span>
                   <span class="excel-tab-info-btn" id="btnWeatherOverlayInfo" title="Marine Weather &amp; Synoptic Bulletins (0000 UTC)"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
-                <button type="button" class="excel-tab excel-tab-route active" data-overlay="route" id="tabOverlayRoute" title="Toggle My Route Overlay &amp; Passage Plan">
+                <button type="button" class="excel-tab excel-tab-route active" data-overlay="route" id="tabOverlayRoute" style="margin-left:auto;" title="Toggle My Route Overlay &amp; Passage Plan">
                   <span class="excel-tab-check">✓</span>
                   <span class="excel-tab-name">My Route</span>
                   <span class="excel-tab-info-btn" id="btnRouteOverlayInfo" title="Passage Plan &amp; Waypoint Information"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
@@ -4566,28 +4650,7 @@
         <div class="setroute-container">
           <div class="setroute-header">
             <div class="setroute-header-left">
-              <div class="setroute-title-row">
-                <span class="setroute-brand-icon">
-                  <svg class="setsail-icon" viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#f05a36;">
-                    <circle cx="4.5" cy="19.5" r="2.5" fill="#f05a36"/>
-                    <circle cx="19.5" cy="4.5" r="2.5" fill="#38bdf8"/>
-                    <path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" fill="none" stroke-width="1.8" stroke-dasharray="3 2"/>
-                    <polygon points="16.5 4 20 4.5 18.5 7.5" fill="#38bdf8"/>
-                  </svg>
-                </span>
-                <h1 class="setroute-title">SetRoute</h1>
-                <span class="setroute-beta-pill">BETA AI ENGINE</span>
-              </div>
-              <p class="setroute-desc">
-                Autonomous Deep-Water Passage Planning Engine. Cross-references port bathymetry, fairway corridors, and navigation hazards.
-              </p>
-            </div>
-            <div class="setroute-header-right" style="display:flex;align-items:center;gap:14px;">
-              <button type="button" class="setroute-btn-chart-jump" onclick="switchToTab('tab-ntm')">
-                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>
-                Open SetChart Map
-              </button>
-              <div class="page-top-badge">
+              <div class="page-top-badge" style="margin-bottom:6px;">
                 <span class="page-badge-icon">
                   <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="4.5" cy="19.5" r="2.5" fill="#f05a36"/><circle cx="19.5" cy="4.5" r="2.5" fill="#38bdf8"/><path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" fill="none" stroke-width="1.8" stroke-dasharray="3 2"/><polygon points="16.5 4 20 4.5 18.5 7.5" fill="#38bdf8"/></svg>
                 </span>
@@ -4596,6 +4659,15 @@
                   <span class="page-badge-pill">PASSAGE PLANNER</span>
                 </div>
               </div>
+              <p class="setroute-desc">
+                Autonomous Deep-Water Passage Planning Engine. Cross-references port bathymetry, fairway corridors, weather &amp; navigation hazards.
+              </p>
+            </div>
+            <div class="setroute-header-right" style="display:flex;align-items:center;gap:14px;">
+              <button type="button" class="setroute-btn-chart-jump" onclick="switchToTab('tab-ntm')">
+                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>
+                Open SetChart Map
+              </button>
             </div>
           </div>
           <div class="setroute-grid">
@@ -4669,8 +4741,38 @@
                 </button>
               </div>
               <div id="setRouteProgressBox" class="setroute-progress-box" style="display:none;">
-                <div class="progress-spinner-row"><div class="setroute-spinner"></div><span id="setRouteProgressMsg" class="progress-msg">Initializing passage planning pipeline...</span></div>
-                <div class="progress-steps-list" id="setRouteStepsList"></div>
+                <div class="setroute-ship-stage" aria-hidden="true">
+                  <!-- Animated Back Wave -->
+                  <svg class="setroute-wave-layer-back" viewBox="0 0 400 24" preserveAspectRatio="none">
+                    <path d="M0 12 Q 25 2, 50 12 T 100 12 T 150 12 T 200 12 T 250 12 T 300 12 T 350 12 T 400 12 L 400 24 L 0 24 Z" fill="rgba(56, 189, 248, 0.28)"/>
+                  </svg>
+                  <!-- Animated Vessel Sailing on Waves -->
+                  <svg class="setroute-ship-svg" viewBox="0 0 96 60" fill="none">
+                    <!-- Radar / Mast Signal Pulse -->
+                    <circle cx="38" cy="12" r="2.2" fill="#f05a36"/>
+                    <line x1="38" y1="14" x2="38" y2="24" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Bridge Superstructure -->
+                    <path d="M22 36 L26 24 L46 24 L50 36 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.6"/>
+                    <rect x="29" y="27" width="14" height="3.5" rx="1" fill="#38bdf8" opacity="0.85"/>
+                    <!-- Cargo / Gas Domes -->
+                    <path d="M53 36 C53 30, 62 30, 62 36" fill="rgba(240, 90, 54, 0.35)" stroke="#f05a36" stroke-width="1.5"/>
+                    <path d="M65 36 C65 30, 74 30, 74 36" fill="rgba(240, 90, 54, 0.35)" stroke="#f05a36" stroke-width="1.5"/>
+                    <!-- Ship Hull -->
+                    <path d="M12 36 L86 36 L76 48 L18 48 Z" fill="#0f172a" stroke="#f05a36" stroke-width="2" stroke-linejoin="round"/>
+                    <line x1="20" y1="41" x2="78" y2="41" stroke="#38bdf8" stroke-width="1.3" stroke-dasharray="4 3"/>
+                  </svg>
+                  <!-- Animated Front Wave -->
+                  <div class="setroute-waves-wrap">
+                    <svg class="setroute-wave-layer" viewBox="0 0 400 26" preserveAspectRatio="none">
+                      <path d="M0 13 Q 25 3, 50 13 T 100 13 T 150 13 T 200 13 T 250 13 T 300 13 T 350 13 T 400 13" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round"/>
+                      <path d="M0 13 Q 25 3, 50 13 T 100 13 T 150 13 T 200 13 T 250 13 T 300 13 T 350 13 T 400 13 L 400 26 L 0 26 Z" fill="rgba(2, 132, 199, 0.24)"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="setroute-log-ticker">
+                  <span id="setRouteProgressMsg" class="progress-msg">Initializing passage planning pipeline...</span>
+                </div>
+                <div class="progress-steps-list" id="setRouteStepsList" style="display:none;"></div>
               </div>
             </div>
             <div class="setroute-card setroute-results-card" id="setRouteResultsCard" style="display:none;">
@@ -4718,9 +4820,8 @@
 
 
 
-          <div class="settings-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
-            <h2 style="margin:0;font-size:1.35rem;font-weight:800;letter-spacing:-0.02em;display:flex;align-items:center;gap:10px;"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</h2>
-            <div class="page-top-badge" style="margin-left:auto;">
+          <div class="settings-header" style="display:flex;align-items:center;justify-content:flex-start;margin-bottom:1.5rem;">
+            <div class="page-top-badge">
               <span class="page-badge-icon">
                 <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="#f05a36" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
               </span>
@@ -6035,27 +6136,19 @@
 
 
 
+      const isLight = document.documentElement.getAttribute("data-theme") === "light";
+
       // Background
-
-      ctx.fillStyle = "#070d1e";
-
+      ctx.fillStyle = isLight ? "#ffffff" : "#070d1e";
       ctx.fillRect(0, 0, W, H);
-
-      ctx.fillStyle = "rgba(16, 29, 56, 0.55)";
-
+      ctx.fillStyle = isLight ? "#f8fafc" : "rgba(16, 29, 56, 0.55)";
       ctx.fillRect(pad.l, pad.t, plotW, plotH);
 
-
-
       // Grid lines
-
-      ctx.strokeStyle = "rgba(72, 112, 178, 0.22)";
-
+      ctx.strokeStyle = isLight ? "rgba(148, 163, 184, 0.35)" : "rgba(72, 112, 178, 0.22)";
       ctx.lineWidth = 1;
-
       ctx.font = "11px 'Segoe UI', Tahoma, sans-serif";
-
-      ctx.fillStyle = "#94a3b8";
+      ctx.fillStyle = isLight ? "#475569" : "#94a3b8";
 
       ctx.textAlign = "center";
 
@@ -6100,61 +6193,33 @@
 
 
       // Zero deviation reference line
-
-      ctx.strokeStyle = "rgba(56, 189, 248, 0.4)";
-
+      ctx.strokeStyle = isLight ? "rgba(2, 132, 199, 0.55)" : "rgba(56, 189, 248, 0.4)";
       ctx.lineWidth = 1.5;
-
       ctx.beginPath();
-
       ctx.moveTo(xToPx(0), pad.t);
-
       ctx.lineTo(xToPx(0), pad.t + plotH);
-
       ctx.stroke();
 
-
-
       // Plot border
-
-      ctx.strokeStyle = "rgba(72, 112, 178, 0.45)";
-
+      ctx.strokeStyle = isLight ? "#cbd8e6" : "rgba(72, 112, 178, 0.45)";
       ctx.lineWidth = 1;
-
       ctx.strokeRect(pad.l, pad.t, plotW, plotH);
 
-
-
       // Axis Labels
-
-      ctx.fillStyle = "#e2e8f0";
-
+      ctx.fillStyle = isLight ? "#0f172a" : "#e2e8f0";
       ctx.font = "bold 11px 'Segoe UI', sans-serif";
-
       ctx.textAlign = "center";
-
       ctx.fillText("MAGNETIC DEVIATION (WEST / EAST)", pad.l + plotW / 2, 14);
-
       ctx.save();
-
       ctx.translate(14, pad.t + plotH / 2);
-
       ctx.rotate(-Math.PI / 2);
-
       ctx.fillText("COMPASS HEADING (000° - 360°)", 0, 0);
-
       ctx.restore();
 
-
-
       ctx.font = "10px 'Segoe UI', sans-serif";
-
       ctx.fillStyle = "#ea4c25";
-
       ctx.fillText("← WEST (-)", xToPx(-2.2), pad.t + plotH + 18);
-
-      ctx.fillStyle = "#38bdf8";
-
+      ctx.fillStyle = isLight ? "#0284c7" : "#38bdf8";
       ctx.fillText("(+) EAST →", xToPx(2.2), pad.t + plotH + 18);
 
 
@@ -6335,17 +6400,12 @@
 
 
 
-        ctx.fillStyle = "rgba(8, 14, 32, 0.9)";
-
+        ctx.fillStyle = isLight ? "rgba(255, 255, 255, 0.95)" : "rgba(8, 14, 32, 0.9)";
         ctx.strokeStyle = "#ea4c25";
-
         ctx.lineWidth = 1;
-
         ctx.fillRect(tagX, tagY - 12, tagW, 18);
-
         ctx.strokeRect(tagX, tagY - 12, tagW, 18);
-
-        ctx.fillStyle = "#f1f5f9";
+        ctx.fillStyle = isLight ? "#0f172a" : "#f1f5f9";
 
         ctx.textAlign = "left";
 
@@ -10001,11 +10061,16 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
 
 
+    window.drawDevChart = drawDevChart;
     window.addEventListener("resize", () => {
-
       drawDevChart();
-
     });
+    try {
+      const themeObserver = new MutationObserver(() => {
+        drawDevChart();
+      });
+      themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    } catch (e) {}
 
 
 
@@ -10041,15 +10106,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
               <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
                 <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Current Database Edition</div>
-                <div id="ntmModalEdition" style="font-size:0.88rem;font-weight:700;color:#f1f5f9;margin-top:2px;">Week 41 / 2026</div>
+                <div id="ntmModalEdition" style="font-size:0.88rem;font-weight:700;color:#f1f5f9;margin-top:2px;">Week 42 / 2026</div>
               </div>
               <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
                 <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Total Notices In Force</div>
-                <div id="ntmModalCount" style="font-size:0.88rem;font-weight:700;color:#38bdf8;margin-top:2px;">86 Notices Plotted</div>
+                <div id="ntmModalCount" style="font-size:0.88rem;font-weight:700;color:#38bdf8;margin-top:2px;">158 Notices Plotted</div>
               </div>
               <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
                 <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Temporary &amp; Preliminary</div>
-                <div id="ntmModalTpCount" style="font-size:0.85rem;font-weight:600;color:#fbbf24;margin-top:2px;">72 T&amp;P Notices</div>
+                <div id="ntmModalTpCount" style="font-size:0.85rem;font-weight:600;color:#fbbf24;margin-top:2px;">52 T&amp;P Notices</div>
               </div>
               <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
                 <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Coverage Authority</div>
@@ -10205,8 +10270,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=3.8"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=3.8"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -10284,7 +10349,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=3.8"></script>
 
 <script>
 
@@ -10298,7 +10363,12 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
 
 
-        navigator.serviceWorker.register('sw.js', { scope: './' })
+        if ('caches' in window && localStorage.getItem('setsail_sw_v38') !== '1') {
+          caches.keys().then(keys => Promise.all(keys.filter(k => k !== 'setsail-cache-v3.8').map(k => caches.delete(k)))).then(() => {
+            localStorage.setItem('setsail_sw_v38', '1');
+          });
+        }
+        navigator.serviceWorker.register('sw.js?v=3.8', { scope: './' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker registered successfully, scope:', reg.scope);
             try { reg.update(); } catch(e) {}
