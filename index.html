@@ -50,8 +50,8 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css" />
-  <style id="setsail-bundled-offline-css">
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.0" />
+      <style id="setsail-bundled-offline-css">
 /* required styles */
 
 .leaflet-pane,
@@ -7044,6 +7044,133 @@ svg.leaflet-image-layer.leaflet-interactive path {
   }
 }
 
+
+/* ==========================================================================
+   SETSAIL v3.9.2 — HEADER HUD & SCROLL HINT PRECISION OVERRIDES
+   ========================================================================== */
+.home-hud-top {
+  position: relative !important;
+  display: flex !important;
+  grid-template-columns: none !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  padding: 0 1.15rem !important;
+  box-sizing: border-box !important;
+  z-index: 40 !important;
+}
+
+.home-hud-left {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  margin-right: auto !important;
+  min-width: 150px !important;
+  height: 28px !important;
+  z-index: 5 !important;
+}
+
+.hud-left-brand-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  white-space: nowrap !important;
+  will-change: transform, opacity;
+}
+
+.home-hud-center {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none !important;
+  z-index: 6 !important;
+  margin: 0 !important;
+}
+
+.hud-center-utc-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  white-space: nowrap !important;
+  will-change: transform, opacity;
+}
+
+.home-hud-right,
+#homeVesselHudPill {
+  position: relative !important;
+  margin-left: auto !important;
+  justify-self: end !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  z-index: 7 !important;
+}
+
+/* Prevent Scroll Arrow from overlapping WAFFi Footer on Slide 1 */
+.home-hero-viewport .site-footer {
+  position: relative !important;
+  z-index: 25 !important;
+  padding: 0.15rem 1rem 0.1rem !important;
+  margin: 0 !important;
+}
+
+.home-scroll-hint {
+  position: absolute !important;
+  bottom: 54px !important;
+  left: 50% !important;
+  transform: translateX(-50%);
+  z-index: 28 !important;
+  padding: 4px 14px !important;
+}
+
+/* Keep .home-tool-tile layout box constant so #homeBrandBlock never jumps vertically */
+.home-hero-viewport.on-slide-2 .home-tool-tile {
+  width: 165px !important;
+  max-width: 175px !important;
+  padding: 0.95rem 0.8rem 0.8rem !important;
+  overflow: visible !important;
+}
+
+.home-tool-hover-drawer {
+  position: absolute !important;
+  left: 50% !important;
+  top: calc(100% + 8px) !important;
+  transform: translateX(-50%) translateY(6px) !important;
+  width: 250px !important;
+  background: rgba(8, 18, 42, 0.96) !important;
+  border: 1px solid rgba(240, 90, 54, 0.55) !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 0.85rem !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.72), 0 0 20px rgba(240, 90, 54, 0.2) !important;
+  backdrop-filter: blur(16px) !important;
+  max-height: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s !important;
+  z-index: 60 !important;
+}
+
+.home-hero-viewport.on-slide-2 .home-tool-tile:hover .home-tool-hover-drawer {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateX(-50%) translateY(0) !important;
+  margin-top: 0 !important;
+}
+
+[data-theme="light"] .home-tool-hover-drawer {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(2, 132, 199, 0.45) !important;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.14) !important;
+}
   </style>
 
 
@@ -9865,28 +9992,24 @@ svg.leaflet-image-layer.leaflet-interactive path {
           <div class="home-hero-content">
             <!-- Top Bridge HUD Bar -->
             <div class="home-hud-top" id="homeHudTop">
-              <!-- Left HUD Slot: "SETSAIL ●" on Slide 1 -> morphs to "UTC Clock ●" on Slide 2..4 -->
-              <div class="home-hud-pill home-hud-left">
-                <div class="hud-left-layer" id="homeHudLeftBrand">
+              <!-- Left HUD Slot: "SETSAIL ●" on Slide 1; UTC Clock glides into this exact slot as Logo rises to center -->
+              <div class="home-hud-pill home-hud-left" id="homeHudLeftSlot">
+                <div class="hud-left-brand-wrap" id="homeHudLeftBrand">
                   <span class="home-hud-text">SETSAIL</span>
-                  <span class="home-hud-dot live-pulse"></span>
-                </div>
-                <div class="hud-left-layer" id="homeHudLeftUtc" style="opacity:0;transform:translate3d(28px,-50%,0);pointer-events:none;">
-                  <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v3M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12 8.5 12 13 15.5 14.5" fill="none" stroke="#f05a36" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="13" r="1.4" fill="#ffffff"/></svg></span>
-                  <span class="home-hud-text" id="homeUtcClockLeft">00:00:00 UTC</span>
                   <span class="home-hud-dot live-pulse"></span>
                 </div>
               </div>
 
-              <!-- Center HUD Slot: UTC Clock on Slide 1 -> vacates center as Hero Logo glides into center on Slide 2..4 -->
+              <!-- Center HUD Slot: UTC Clock on Slide 1 -> physically glides left to #homeHudLeftSlot as Hero Logo rises into center -->
               <div class="home-hud-pill home-hud-center" id="homeHudCenterAnchor">
                 <div class="hud-center-utc-wrap" id="homeHudCenterUtc">
                   <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v3M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12 8.5 12 13 15.5 14.5" fill="none" stroke="#f05a36" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="13" r="1.4" fill="#ffffff"/></svg></span>
                   <span class="home-hud-text" id="homeUtcClock">00:00:00 UTC</span>
+                  <span class="home-hud-dot live-pulse" id="homeHudCenterUtcDot" style="opacity:0;width:7px;height:7px;transition:opacity 0.2s;"></span>
                 </div>
               </div>
 
-              <!-- Right HUD Slot: Live Vessel Position -->
+              <!-- Right HUD Slot: Live Vessel Position (Always pinned to far right) -->
               <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" title="Live Vessel Navigation Position (Click to inspect on ECDIS)">
                 <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9" r="2.8" fill="#f05a36"/><circle cx="12" cy="9" r="1" fill="#ffffff"/></svg></span>
                 <span class="home-hud-text" id="homeVesselHudCoords">POS: WAITING GPS...</span>
@@ -17394,14 +17517,44 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
         <!-- Leaflet & Auto-NtM Module Scripts -->
   <script src="assets/leaflet/leaflet.js"></script>
+  <script>
+    // Guarantee Fast Coast Map never uses deprecated Stadia Maps API and always has dual-CDN fallback
+    if (window.L && L.tileLayer && !L.tileLayer._setsailPatched) {
+      const _origTileLayer = L.tileLayer;
+      L.tileLayer = function(url, options) {
+        if (typeof url === 'string' && (url.indexOf('stadiamaps') !== -1 || url.indexOf('cartocdn') !== -1)) {
+          url = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
+          options = Object.assign({}, options, {
+            subdomains: ['a', 'b', 'c', 'd'],
+            maxNativeZoom: 18,
+            maxZoom: 19,
+            attribution: '&copy; CARTO &bull; OpenStreetMap'
+          });
+          delete options.crossOrigin;
+        }
+        const layer = _origTileLayer.call(this, url, options);
+        if (typeof url === 'string' && url.indexOf('cartocdn') !== -1) {
+          layer.on('tileerror', function(errEvent) {
+            if (errEvent && errEvent.tile && !errEvent.tile.dataset.fallbackTried && errEvent.coords) {
+              errEvent.tile.dataset.fallbackTried = '1';
+              const c = errEvent.coords;
+              errEvent.tile.src = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/' + c.z + '/' + c.y + '/' + c.x;
+            }
+          });
+        }
+        return layer;
+      };
+      L.tileLayer._setsailPatched = true;
+    }
+  </script>
   <script src="assets/Auto NtM Plotting/pdf.min.js"></script>
   <script>
     if (window.pdfjsLib) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.0"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.0"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -17479,17 +17632,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.0"></script>
 
 
-  <script id="setsail-home-saas-scroll-engine">
+      <script id="setsail-home-saas-scroll-engine">
     (function() {
       const MAX_SLIDE = 3.0;
       let targetProgress = 0.0;
       let currentProgress = 0.0;
       let snapTimer = null;
-      let logoDeltaY = -220;
-      let logoTargetScale = 0.22;
       let touchStartY = null;
 
       function clamp(val, min, max) {
@@ -17502,26 +17653,6 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
       function easeOutCubic(x) {
         return 1 - Math.pow(1 - x, 3);
-      }
-
-      // Measure exact vertical distance from Hero Logo center to Top HUD Header center
-      function measureLogoHeaderGeometry() {
-        const logoWrap = document.getElementById('homeHeroLogoWrap');
-        const hudTop = document.getElementById('homeHudTop');
-        if (!logoWrap || !hudTop) return;
-
-        const prevTransform = logoWrap.style.transform;
-        logoWrap.style.transform = 'none';
-        const logoRect = logoWrap.getBoundingClientRect();
-        const hudRect = hudTop.getBoundingClientRect();
-        logoWrap.style.transform = prevTransform;
-
-        if (logoRect.height > 10 && hudRect.height > 10) {
-          const logoCenterY = logoRect.top + logoRect.height * 0.5;
-          const hudCenterY = hudRect.top + hudRect.height * 0.5;
-          logoDeltaY = hudCenterY - logoCenterY;
-          logoTargetScale = clamp((hudRect.height * 0.64) / logoRect.height, 0.16, 0.30);
-        }
       }
 
       // Extensible helper: any future tools added via window.registerSetSailTool({...}) will appear on Slide 2
@@ -17571,47 +17702,61 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           staticBg.style.opacity = String(e1.toFixed(4));
         }
 
-        // 2. Scroll hint arrow at bottom of Slide 1
+        // 2. Scroll hint arrow at bottom of Slide 1 (above footer)
         const scrollHint = document.getElementById('homeScrollHint');
         if (scrollHint) {
           const hintAlpha = clamp(1 - t1 * 3.5, 0, 1);
           scrollHint.style.opacity = String(hintAlpha.toFixed(3));
-          scrollHint.style.transform = 'translate3d(-50%, ' + (t1 * 24).toFixed(1) + 'px, 0)';
+          scrollHint.style.transform = 'translate3d(-50%, ' + (t1 * 18).toFixed(1) + 'px, 0)';
           scrollHint.style.pointerEvents = hintAlpha > 0.2 ? 'auto' : 'none';
         }
 
-        // 3. Top Header Choreography:
-        //    - Center UTC clock fades/glides left out of center
-        //    - Left "SETSAIL + green dot" fades out, replaced by Left UTC clock + green dot
-        //    - Hero Logo glides up from center stage into the exact center of the header!
+        // 3. Simultaneous Header & Logo Choreography (locked to e1):
+        //    - Left "SETSAIL + green dot" (#homeHudLeftBrand) fades out
+        //    - Center UTC clock (#homeHudCenterUtc) physically glides from the center of the header
+        //      all the way to the left slot (#homeHudLeftSlot)
+        //    - Hero Logo (#homeHeroLogoWrap) simultaneously glides up into the exact center of #homeHudTop!
+        const hudTop = document.getElementById('homeHudTop');
+        const leftSlot = document.getElementById('homeHudLeftSlot');
         const leftBrand = document.getElementById('homeHudLeftBrand');
-        const leftUtc = document.getElementById('homeHudLeftUtc');
+        const centerAnchor = document.getElementById('homeHudCenterAnchor');
         const centerUtc = document.getElementById('homeHudCenterUtc');
+        const centerUtcDot = document.getElementById('homeHudCenterUtcDot');
+        const brandBlock = document.getElementById('homeBrandBlock');
         const logoWrap = document.getElementById('homeHeroLogoWrap');
         const brandSub = document.getElementById('homeBrandSub');
 
         if (leftBrand) {
           const brandAlpha = clamp(1 - t1 * 2.4, 0, 1);
           leftBrand.style.opacity = String(brandAlpha.toFixed(3));
-          leftBrand.style.transform = 'translate3d(0, calc(-50% - ' + ((1 - brandAlpha) * 10).toFixed(1) + 'px), 0)';
+          leftBrand.style.transform = 'translate3d(' + (-t1 * 16).toFixed(1) + 'px, 0, 0) scale(' + (0.9 + 0.1 * brandAlpha).toFixed(3) + ')';
         }
-        if (centerUtc) {
-          const cAlpha = clamp(1 - t1 * 2.2, 0, 1);
-          centerUtc.style.opacity = String(cAlpha.toFixed(3));
-          centerUtc.style.transform = 'translate3d(' + (-t1 * 90).toFixed(1) + 'px, 0, 0) scale(' + (1 - t1 * 0.16).toFixed(3) + ')';
+
+        if (centerUtc && leftSlot && centerAnchor) {
+          const leftRect = leftSlot.getBoundingClientRect();
+          const anchorRect = centerAnchor.getBoundingClientRect();
+          const utcDeltaX = leftRect.left - anchorRect.left;
+          centerUtc.style.transform = 'translate3d(' + (utcDeltaX * e1).toFixed(2) + 'px, 0, 0)';
+          if (centerUtcDot) {
+            centerUtcDot.style.opacity = String(clamp((t1 - 0.3) / 0.5, 0, 1).toFixed(2));
+          }
         }
-        if (leftUtc) {
-          const uProg = clamp((t1 - 0.36) / 0.56, 0, 1);
-          const uEase = easeOutCubic(uProg);
-          leftUtc.style.opacity = String(uEase.toFixed(3));
-          leftUtc.style.transform = 'translate3d(' + ((1 - uEase) * 28).toFixed(1) + 'px, -50%, 0)';
-        }
+
         if (brandSub) {
           const subAlpha = clamp(1 - t1 * 2.8, 0, 1);
           brandSub.style.opacity = String(subAlpha.toFixed(3));
           brandSub.style.transform = 'translate3d(0, ' + (-t1 * 16).toFixed(1) + 'px, 0)';
         }
-        if (logoWrap) {
+
+        if (logoWrap && brandBlock && hudTop) {
+          const hudRect = hudTop.getBoundingClientRect();
+          const brandRect = brandBlock.getBoundingClientRect();
+          const logoNaturalH = logoWrap.offsetHeight || 120;
+          const originCenterY = brandRect.top + logoNaturalH * 0.5;
+          const targetCenterY = hudRect.top + hudRect.height * 0.5;
+          const logoDeltaY = targetCenterY - originCenterY;
+          const logoTargetScale = clamp((hudRect.height * 0.62) / logoNaturalH, 0.15, 0.27);
+
           const curY = logoDeltaY * e1;
           const curScale = 1 - (1 - logoTargetScale) * e1;
           logoWrap.style.transform = 'translate3d(0, ' + curY.toFixed(2) + 'px, 0) scale(' + curScale.toFixed(4) + ')';
@@ -17633,11 +17778,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
         const tiles = viewport.querySelectorAll('.home-tool-tile');
         const vw = Math.min(window.innerWidth || 1200, 1280);
-        const spreadXBase = clamp(vw * 0.115, 70, 145);
+        const spreadXBase = clamp(vw * 0.135, 80, 175);
 
         tiles.forEach((tile, idx) => {
           const isExtra = tile.classList.contains('home-tool-extra');
-          // Dispersion offsets on Slide 2: left tile goes left/up, center tile goes down/center, right tile goes right/up
           let dirX = 0;
           let dirY = 0;
           if (idx % 3 === 0) { dirX = -1; dirY = -0.35; }
@@ -17645,14 +17789,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           else { dirX = 1; dirY = -0.35; }
 
           const spreadX = dirX * spreadXBase * e1;
-          const spreadY = (dirY * 42 - 18) * e1;
+          const spreadY = (dirY * 44 - 22) * e1;
+          const slide2Scale = 1 + 0.18 * e1;
 
-          // Exit animation when scrolling from Slide 2 -> Slide 3 (t2: 0 -> 0.65)
+          // Exit animation when scrolling from Slide 2 -> Slide 3 (t2: 0 -> 0.62)
           const exitProg = clamp(t2 / 0.62, 0, 1);
           const exitEase = easeInOutCubic(exitProg);
-          const exitX = dirX * 130 * exitEase;
-          const exitY = (-95 + (idx % 2) * -25) * exitEase;
-          const exitScale = 1 - 0.24 * exitEase;
+          const exitX = dirX * 140 * exitEase;
+          const exitY = (-100 + (idx % 2) * -25) * exitEase;
+          const totalScale = slide2Scale * (1 - 0.26 * exitEase);
           let alpha = 1 - exitEase;
 
           if (isExtra) {
@@ -17663,11 +17808,11 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           const totalX = spreadX + exitX;
           const totalY = spreadY + exitY;
           tile.style.opacity = String(clamp(alpha, 0, 1).toFixed(3));
-          tile.style.transform = 'translate3d(' + totalX.toFixed(1) + 'px, ' + totalY.toFixed(1) + 'px, 0) scale(' + exitScale.toFixed(3) + ')';
+          tile.style.transform = 'translate3d(' + totalX.toFixed(1) + 'px, ' + totalY.toFixed(1) + 'px, 0) scale(' + totalScale.toFixed(3) + ')';
           tile.style.pointerEvents = alpha > 0.25 ? 'auto' : 'none';
         });
 
-        // 6. Slide 3: About SetSail (Appears on t2: 0.35 -> 1.0, exits on t3: 0 -> 0.58)
+        // 6. Slide 3: About SetSail (Appears on t2: 0.32 -> 1.0, exits on t3: 0 -> 0.58)
         const slideAbout = document.getElementById('homeSlideAbout');
         if (slideAbout) {
           const aboutIn = easeOutCubic(clamp((t2 - 0.32) / 0.68, 0, 1));
@@ -17681,7 +17826,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           slideAbout.style.pointerEvents = aboutAlpha > 0.45 ? 'auto' : 'none';
         }
 
-        // 7. Slide 4: Narrow Infinite Marquee of Recognizable Sources (Appears on t3: 0.32 -> 1.0)
+        // 7. Slide 4: Narrow Infinite Marquee of Recognizable Sources (Appears on t3: 0.30 -> 1.0)
         const slideSources = document.getElementById('homeSlideSources');
         if (slideSources) {
           const srcIn = easeOutCubic(clamp((t3 - 0.30) / 0.70, 0, 1));
@@ -17725,12 +17870,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       }
 
       function initHomeSaasScroll() {
-        measureLogoHeaderGeometry();
         renderHomeSlideFrame(0);
         requestAnimationFrame(tickLoop);
 
         window.addEventListener('resize', () => {
-          measureLogoHeaderGeometry();
           renderHomeSlideFrame(currentProgress);
         });
 
@@ -17813,7 +17956,6 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         if (homeNavBtn) {
           homeNavBtn.addEventListener('click', () => {
             targetProgress = 0;
-            setTimeout(measureLogoHeaderGeometry, 50);
           });
         }
       }
@@ -17828,6 +17970,11 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
+        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v40') !== '1') {
+          caches.keys().then(keys => Promise.all(
+            keys.filter(k => k !== 'setsail-cache-v4.0' && k !== 'setsail-tiles-cache-v4').map(k => caches.delete(k))
+          )).then(() => localStorage.setItem('setsail_sw_v40', '1')).catch(() => {});
+        }
         navigator.serviceWorker.register('sw.js', { scope: './' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker registered successfully, scope:', reg.scope);
