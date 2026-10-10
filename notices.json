@@ -1,19 +1,20 @@
 {
   "metadata": {
-    "generatedAt": "2026-10-03T17:12:57.191453Z",
-    "weeklyBulletin": "41wknm26.pdf",
-    "batchId": "64fd805d-9ae0-4303-a77b-1e8e7bf08be7",
-    "weekNumber": 41,
+    "generatedAt": "2026-10-10T08:30:50.820258+00:00",
+    "weeklyBulletin": "42wknm26.pdf",
+    "batchId": "aeefaa60-dad3-474e-ad04-e59aadd13ac0",
+    "weekNumber": 42,
     "year": 26,
-    "totalNotices": 86,
-    "countT": 14,
-    "countP": 11,
-    "countPerm": 61,
-    "countPoly": 13,
-    "countLine": 2,
-    "activeNotices": 86,
-    "lastGeometryUpdate": "2026-10-05T17:00:00Z",
-    "geometryNote": "TSS and Multi-Area notice sub-polygon segmentation applied"
+    "totalNotices": 176,
+    "activeNotices": 158,
+    "cancelledNotices": 18,
+    "countT": 36,
+    "countP": 16,
+    "countPerm": 106,
+    "countPoly": 28,
+    "countLine": 5,
+    "lastGeometryUpdate": "2026-10-10T08:30:50.820258+00:00",
+    "geometryNote": "UKHO Week 42/26 live update with TSS sub-polygon segmentation"
   },
   "cancelledIds": [
     "1246(T)/22",
@@ -21,9 +22,14 @@
     "2329(T)/26",
     "2409(T)/25",
     "2822(T)/17",
+    "3014(P)/26",
     "3026(P)/26",
     "3317(T)/26",
+    "3439(T)/26",
+    "3460(T)/26",
     "3514(P)/26",
+    "3671(T)/24",
+    "3774(T)/25",
     "4052(P)/26",
     "4080(P)/26",
     "4199(T)/26",
@@ -7440,6 +7446,6025 @@
       "isLine": false,
       "body": "4762(P)/26 UNITED STATES OF AMERICA - East Coast - Works. Restricted areas. Obstructions.\n          Source: United States ENC US5BALBB Edition 15                           \n          1. Construction works are taking place at the Francis Scott Key Bridge until 2028, in an area bounded by the following\n            positions:                                                            \n                                                                                  \n            39° 13´·47N., 76° 31´·27W.                                            \n            39° 13´·35N., 76° 31´·12W.                                            \n            39° 12´·68N., 76° 31´·98W.                                            \n            39° 12´·79N., 76° 32´·14W.                                            \n          2. Fixed and Floating obstructions, some submerged, may exist within this area.\n          3. Entry prohibited areas have been established in areas bounded by the following positions:\n            39° 13´·15N., 76° 31´·68W.                                            \n            39° 13´·46N., 76° 31´·27W.                                            \n            39° 13´·31N., 76° 31´·09W.",
       "checkedForExport": true
+    },
+    {
+      "id": "4819/26",
+      "num": "4819",
+      "type": "PERM",
+      "year": "26",
+      "country": "RUSSIA",
+      "region": "White Sea Coast",
+      "subject": "Foul.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 64.52867,
+          "lon": 40.51533,
+          "dms": "64° 31.72' N, 40° 30.92' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4819 RUSSIA - White Sea Coast - Foul.\nSource: Russian Notice 38/3561/26\nChart 2295 [ previous update 1913/26 ] WGS84 DATUM\nInsert «\n64° 31´·72N., 40° 30´·92E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4776/26",
+      "num": "4776",
+      "type": "PERM",
+      "year": "26",
+      "country": "SWEDEN",
+      "region": "East Coast",
+      "subject": "Buoy.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 59.25333,
+          "lon": 18.33817,
+          "dms": "59° 15.20' N, 18° 20.29' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4776 SWEDEN - East Coast - Buoy.\nSource: Swedish Notice 1136/20342/26\nChart 831 (INT 1769) [ previous update 2484/26 ] WGS84 DATUM\nInsert JrW\n59° 15´·20N., 18° 20´·29E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4778/26",
+      "num": "4778",
+      "type": "PERM",
+      "year": "26",
+      "country": "DENMARK",
+      "region": "Islands",
+      "subject": "Restricted area. Legend.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 55.7205,
+          "lon": 12.63583,
+          "dms": "55° 43.23' N, 12° 38.15' E"
+        },
+        {
+          "lat": 55.72017,
+          "lon": 12.6365,
+          "dms": "55° 43.21' N, 12° 38.19' E"
+        },
+        {
+          "lat": 55.718,
+          "lon": 12.63183,
+          "dms": "55° 43.08' N, 12° 37.91' E"
+        },
+        {
+          "lat": 55.71833,
+          "lon": 12.63117,
+          "dms": "55° 43.10' N, 12° 37.87' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4778 DENMARK - Islands - Restricted area. Legend.\nSource: Danish Chart Correction 29/198/26\nChart 903 (INT 1333) [ previous update 4276/26 ] WGS84 DATUM\nInsert limit of restricted area, entry prohibited, pecked line, joining: 55° 43´·23N., 12° 38´·15E.\n(a) 55° 43´·21N., 12° 38´·19E.\n(b) 55° 43´·08N., 12° 37´·91E.\n55° 43´·10N., 12° 37´·87E.\nlegend, buoyed, close E of: (a)-(b) above\n2.12\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4784/26",
+      "num": "4784",
+      "type": "PERM",
+      "year": "26",
+      "country": "DENMARK",
+      "region": "Islands",
+      "subject": "Rock.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 55.24767,
+          "lon": 11.2225,
+          "dms": "55° 14.86' N, 11° 13.35' E"
+        },
+        {
+          "lat": 55.24767,
+          "lon": 11.2225,
+          "dms": "55° 14.86' N, 11° 13.35' E"
+        },
+        {
+          "lat": 55.24767,
+          "lon": 11.2225,
+          "dms": "55° 14.86' N, 11° 13.35' E"
+        },
+        {
+          "lat": 55.24767,
+          "lon": 11.2225,
+          "dms": "55° 14.86' N, 11° 13.35' E"
+        },
+        {
+          "lat": 55.24767,
+          "lon": 11.2225,
+          "dms": "55° 14.86' N, 11° 13.35' E"
+        },
+        {
+          "lat": 54.952,
+          "lon": 17.35633,
+          "dms": "54° 57.12' N, 17° 21.38' E"
+        },
+        {
+          "lat": 54.94567,
+          "lon": 17.28333,
+          "dms": "54° 56.74' N, 17° 17.00' E"
+        },
+        {
+          "lat": 55.0125,
+          "lon": 17.24983,
+          "dms": "55° 00.75' N, 17° 14.99' E"
+        },
+        {
+          "lat": 55.03967,
+          "lon": 17.29033,
+          "dms": "55° 02.38' N, 17° 17.42' E"
+        },
+        {
+          "lat": 54.9985,
+          "lon": 17.52483,
+          "dms": "54° 59.91' N, 17° 31.49' E"
+        },
+        {
+          "lat": 54.95733,
+          "lon": 17.41283,
+          "dms": "54° 57.44' N, 17° 24.77' E"
+        },
+        {
+          "lat": 54.95317,
+          "lon": 17.37833,
+          "dms": "54° 57.19' N, 17° 22.70' E"
+        },
+        {
+          "lat": 54.956,
+          "lon": 17.356,
+          "dms": "54° 57.36' N, 17° 21.36' E"
+        },
+        {
+          "lat": 54.95017,
+          "lon": 17.28817,
+          "dms": "54° 57.01' N, 17° 17.29' E"
+        },
+        {
+          "lat": 55.01083,
+          "lon": 17.25783,
+          "dms": "55° 00.65' N, 17° 15.47' E"
+        },
+        {
+          "lat": 55.03483,
+          "lon": 17.29367,
+          "dms": "55° 02.09' N, 17° 17.62' E"
+        },
+        {
+          "lat": 54.99717,
+          "lon": 17.50867,
+          "dms": "54° 59.83' N, 17° 30.52' E"
+        },
+        {
+          "lat": 54.961,
+          "lon": 17.41017,
+          "dms": "54° 57.66' N, 17° 24.61' E"
+        },
+        {
+          "lat": 54.957,
+          "lon": 17.37733,
+          "dms": "54° 57.42' N, 17° 22.64' E"
+        },
+        {
+          "lat": 54.41317,
+          "lon": 18.65507,
+          "dms": "54° 24.790' N, 18° 39.304' E"
+        },
+        {
+          "lat": 54.41317,
+          "lon": 18.655,
+          "dms": "54° 24.79' N, 18° 39.30' E"
+        },
+        {
+          "lat": 54.61033,
+          "lon": 12.72583,
+          "dms": "54° 36.62' N, 12° 43.55' E"
+        },
+        {
+          "lat": 54.57567,
+          "lon": 12.4575,
+          "dms": "54° 34.54' N, 12° 27.45' E"
+        },
+        {
+          "lat": 54.61033,
+          "lon": 12.72583,
+          "dms": "54° 36.62' N, 12° 43.55' E"
+        },
+        {
+          "lat": 54.57567,
+          "lon": 12.4575,
+          "dms": "54° 34.54' N, 12° 27.45' E"
+        },
+        {
+          "lat": 54.57567,
+          "lon": 12.4575,
+          "dms": "54° 34.54' N, 12° 27.45' E"
+        },
+        {
+          "lat": 54.61033,
+          "lon": 12.72583,
+          "dms": "54° 36.62' N, 12° 43.55' E"
+        },
+        {
+          "lat": 54.57567,
+          "lon": 12.4575,
+          "dms": "54° 34.54' N, 12° 27.45' E"
+        },
+        {
+          "lat": 54.61033,
+          "lon": 12.72583,
+          "dms": "54° 36.62' N, 12° 43.55' E"
+        },
+        {
+          "lat": 54.61033,
+          "lon": 12.72583,
+          "dms": "54° 36.62' N, 12° 43.55' E"
+        },
+        {
+          "lat": 54.57833,
+          "lon": 12.4515,
+          "dms": "54° 34.70' N, 12° 27.09' E"
+        },
+        {
+          "lat": 54.58017,
+          "lon": 12.45767,
+          "dms": "54° 34.81' N, 12° 27.46' E"
+        },
+        {
+          "lat": 54.57833,
+          "lon": 12.46367,
+          "dms": "54° 34.70' N, 12° 27.82' E"
+        },
+        {
+          "lat": 54.55917,
+          "lon": 18.61683,
+          "dms": "54° 33.55' N, 18° 37.01' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4784 DENMARK - Islands - Rock.\nSource: Danish Chart Correction 28/192/26\nChart 938 (INT 1369) [ previous update 3760/26 ] WGS84 DATUM\nInsert . (16) Rep (2026)\n55° 14´·86N., 11° 13´·35E.\nChart 2583 (Panel A, Approaches to Skælskør) [ previous update 4154/26 ] WGS84 DATUM\nInsert . (16) Rep (2026)\n55° 14´·86N., 11° 13´·35E.\nChart 2583 [ previous update 4154/26 ] WGS84 DATUM\nInsert . (16) Rep (2026)\n55° 14´·86N., 11° 13´·35E.\nChart 2596 (INT 1370) [ previous update 3760/26 ] WGS84 DATUM\nInsert . (16) Rep (2026)\n55° 14´·86N., 11° 13´·35E.\nChart 2597 (INT 1368) [ previous update 3534/26 ] WGS84 DATUM\nInsert . (16) Rep (2026)\n55° 14´·86N., 11° 13´·35E.\n4800 POLAND - Restricted areas.\nSource: Polish Notice 30/371/26\nChart 2014 (INT 1219) [ previous update 3907/26 ] WGS84 DATUM\nInsert limit of restricted area, entry prohibited, pecked line, joining: 54° 57´·12N., 17° 21´·38E.\n54° 56´·74N., 17° 17´·00E.\n55° 00´·75N., 17° 14´·99E.\n55° 02´·38N., 17° 17´·42E.\n54° 59´·91N., 17° 31´·49E.\n54° 57´·44N., 17° 24´·77E.\n54° 57´·19N., 17° 22´·70E.\nDelete former limit of restricted area, entry prohibited, pecked line,\njoining: 54° 57´·36N., 17° 21´·36E.\n54° 57´·01N., 17° 17´·29E.\n55° 00´·65N., 17° 15´·47E.\n55° 02´·09N., 17° 17´·62E.\n54° 59´·83N., 17° 30´·52E.\n54° 57´·66N., 17° 24´·61E.\n54° 57´·42N., 17° 22´·64E.\n4820 POLAND - Wreck.\nSource: Polish Notice 31/383/26\nChart 2637 (INT 12902) [ previous update 4515/26 ] WGS84 DATUM\nInsert 3$+ Wk\n54° 24´·790N., 18° 39´·304E.\n2.13\nWk42/26\nII\n4820 POLAND -",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4782/26",
+      "num": "4782",
+      "type": "PERM",
+      "year": "26",
+      "country": "NORTH SEA",
+      "region": "Norwegian Sector",
+      "subject": "Submarine pipeline. Obstruction. Restricted area. Danger line. Legend.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 60.54167,
+          "lon": 3.045,
+          "dms": "60° 32.5' N, 3° 02.7' E"
+        },
+        {
+          "lat": 60.44,
+          "lon": 3.02333,
+          "dms": "60° 26.4' N, 3° 01.4' E"
+        },
+        {
+          "lat": 60.54167,
+          "lon": 3.045,
+          "dms": "60° 32.5' N, 3° 02.7' E"
+        },
+        {
+          "lat": 60.44,
+          "lon": 3.02333,
+          "dms": "60° 26.4' N, 3° 01.4' E"
+        },
+        {
+          "lat": 60.54167,
+          "lon": 3.045,
+          "dms": "60° 32.5' N, 3° 02.7' E"
+        },
+        {
+          "lat": 60.44,
+          "lon": 3.02333,
+          "dms": "60° 26.4' N, 3° 01.4' E"
+        },
+        {
+          "lat": 60.54167,
+          "lon": 3.045,
+          "dms": "60° 32.5' N, 3° 02.7' E"
+        },
+        {
+          "lat": 60.44,
+          "lon": 3.02333,
+          "dms": "60° 26.4' N, 3° 01.4' E"
+        },
+        {
+          "lat": 52.233,
+          "lon": 3.90267,
+          "dms": "52° 13.98' N, 3° 54.16' E"
+        },
+        {
+          "lat": 52.233,
+          "lon": 3.90267,
+          "dms": "52° 13.98' N, 3° 54.16' E"
+        },
+        {
+          "lat": 52.233,
+          "lon": 3.90267,
+          "dms": "52° 13.98' N, 3° 54.16' E"
+        },
+        {
+          "lat": 53.60117,
+          "lon": 9.58367,
+          "dms": "53° 36.07' N, 9° 35.02' E"
+        },
+        {
+          "lat": 53.6175,
+          "lon": 8.45517,
+          "dms": "53° 37.05' N, 8° 27.31' E"
+        },
+        {
+          "lat": 53.61367,
+          "lon": 8.45733,
+          "dms": "53° 36.82' N, 8° 27.44' E"
+        },
+        {
+          "lat": 53.609,
+          "lon": 8.45733,
+          "dms": "53° 36.54' N, 8° 27.44' E"
+        },
+        {
+          "lat": 53.8545,
+          "lon": 8.93567,
+          "dms": "53° 51.27' N, 8° 56.14' E"
+        },
+        {
+          "lat": 53.90583,
+          "lon": 8.67833,
+          "dms": "53° 54.35' N, 8° 40.70' E"
+        },
+        {
+          "lat": 54.007,
+          "lon": 8.68183,
+          "dms": "54° 00.42' N, 8° 40.91' E"
+        },
+        {
+          "lat": 54.00417,
+          "lon": 8.6845,
+          "dms": "54° 00.25' N, 8° 41.07' E"
+        },
+        {
+          "lat": 54.0205,
+          "lon": 8.741,
+          "dms": "54° 01.23' N, 8° 44.46' E"
+        },
+        {
+          "lat": 54.02233,
+          "lon": 8.74017,
+          "dms": "54° 01.34' N, 8° 44.41' E"
+        },
+        {
+          "lat": 53.8545,
+          "lon": 8.93567,
+          "dms": "53° 51.27' N, 8° 56.14' E"
+        },
+        {
+          "lat": 53.858,
+          "lon": 8.95267,
+          "dms": "53° 51.48' N, 8° 57.16' E"
+        },
+        {
+          "lat": 53.8605,
+          "lon": 8.9885,
+          "dms": "53° 51.63' N, 8° 59.31' E"
+        },
+        {
+          "lat": 53.86283,
+          "lon": 8.99117,
+          "dms": "53° 51.77' N, 8° 59.47' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4782 NORTH SEA - Norwegian Sector - Submarine pipeline. Obstruction. Restricted area. Danger line. Legend.\n(continued)\nChart 1427 (INT 1401) [ previous update 4125/26 ] WGS84 DATUM\nInsert submarine pipeline, È , joining:\n60° 32´·5N., 3° 02´·7E.\n(a) 60° 26´·4N., 3° 01´·4E.\n101-\nBestla\n(a) above\nÇ\ncircular limit of restricted area, radius 500m (0·27M), ,\ncentred on: (a) above\nDelete circular limit of danger line, radius 2950m (1·59M), dotted\nline, and associated legend, Obstn, centred on: (a) above\nChart 2182C (INT 1041) [ previous update 4394/26 ] WGS84 DATUM\nInsert submarine pipeline, È , joining:\n60° 32´·5N., 3° 02´·7E.\n(a) 60° 26´·4N., 3° 01´·4E.\n+\nBestla\n(a) above\nÇ\ncircular limit of restricted area, radius 500m (0·27M), ,\ncentred on: (a) above\nDelete circular limit of danger line, radius 2950m (1·59M), dotted\nline, and associated legend, Obstn, centred on: (a) above\nChart 2182D (INT 1040) [ previous update New Edition 10/09/2026 ] WGS84 DATUM\nInsert submarine pipeline, È , joining:\n60° 32´·5N., 3° 02´·7E.\n(a) 60° 26´·4N., 3° 01´·4E.\n+\nBestla\n(a) above\nÇ\ncircular limit of restricted area, radius 500m (0·27M), ,\ncentred on: (a) above\nDelete circular limit of danger line, radius 2950m (1·59M), dotted\nline, and associated legend, Obstn, centred on: (a) above\nChart 4140 (INT 140) [ previous update 3485/26 ] WGS84 DATUM\nInsert submarine pipeline, È , joining:\n60° 32´·5N., 3° 02´·7E.\n60° 26´·4N., 3° 01´·4E.\n4810 NETHERLANDS - Buoy.\nSource: Netherlands Notice 39/235/26\nChart 122",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4822/26",
+      "num": "4822",
+      "type": "PERM",
+      "year": "26",
+      "country": "FRANCE",
+      "region": "West Coast",
+      "subject": "Restricted area. Reported anchorage.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 47.39683,
+          "lon": -2.97567,
+          "dms": "47° 23.81' N, 2° 58.54' W"
+        },
+        {
+          "lat": 47.398,
+          "lon": -2.97367,
+          "dms": "47° 23.88' N, 2° 58.42' W"
+        },
+        {
+          "lat": 47.39733,
+          "lon": -2.9675,
+          "dms": "47° 23.84' N, 2° 58.05' W"
+        },
+        {
+          "lat": 47.3935,
+          "lon": -2.96883,
+          "dms": "47° 23.61' N, 2° 58.13' W"
+        },
+        {
+          "lat": 47.3965,
+          "lon": -2.97333,
+          "dms": "47° 23.79' N, 2° 58.40' W"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4822 FRANCE - West Coast - Restricted area. Reported anchorage.\nSource: French Notice 36/54/26\nChart 2835 [ previous update 552/25 ] WGS84 DATUM\nInsert limit of restricted area, ÇÅÇ , joining:\n47° 23´·81N., 2° 58´·54W.\n47° 23´·88N., 2° 58´·42W.\n47° 23´·84N., 2° 58´·05W.\n47° 23´·61N., 2° 58´·13W.\nDelete ½\n47° 23´·79N., 2° 58´·40W.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4840/26",
+      "num": "4840",
+      "type": "PERM",
+      "year": "26",
+      "country": "SPAIN",
+      "region": "North Coast",
+      "subject": "Buoy. Superbuoy. Automatic Identification System.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 43.85667,
+          "lon": -8.385,
+          "dms": "43° 51.4' N, 8° 23.1' W"
+        },
+        {
+          "lat": 43.85667,
+          "lon": -8.38333,
+          "dms": "43° 51.4' N, 8° 23.0' W"
+        },
+        {
+          "lat": 43.854,
+          "lon": -8.38483,
+          "dms": "43° 51.24' N, 8° 23.09' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4840 SPAIN - North Coast - Buoy. Superbuoy. Automatic Identification System.\nSource: Spanish Notice 36/214/26\nChart 87 [ previous update New Edition 24/09/2026 ] WGS84 DATUM\nReplace P;f Fl(5)Y with G;f VQ.Y\n43° 51´·4N., 8° 23´·1W.\nChart 1104 [ previous update 4706/26 ] WGS84 DATUM\nReplace P;f Fl(5)Y with G;f VQ.Y\n43° 51´·4N., 8° 23´·0W.\nChart 1111 (INT 1808) [ previous update 2934/25 ] WGS84 DATUM\nInsert G;f VQ.Y\n(a) 43° 51´·24N., 8° 23´·09W.\nDelete P;f Fl(5)Y and associated Automatic Identification System,\nAIS, close NE of: (a) above",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4880/26",
+      "num": "4880",
+      "type": "PERM",
+      "year": "26",
+      "country": "SPAIN",
+      "region": "North Coast",
+      "subject": "Danger line. Legend. Buoyage. Obstruction.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 43.56817,
+          "lon": -5.67983,
+          "dms": "43° 34.09' N, 5° 40.79' W"
+        },
+        {
+          "lat": 43.56833,
+          "lon": -5.68083,
+          "dms": "43° 34.100' N, 5° 40.850' W"
+        },
+        {
+          "lat": 43.5689,
+          "lon": -5.6795,
+          "dms": "43° 34.134' N, 5° 40.770' W"
+        },
+        {
+          "lat": 43.56795,
+          "lon": -5.67875,
+          "dms": "43° 34.077' N, 5° 40.725' W"
+        },
+        {
+          "lat": 43.5674,
+          "lon": -5.68005,
+          "dms": "43° 34.044' N, 5° 40.803' W"
+        },
+        {
+          "lat": 43.28667,
+          "lon": 29.03167,
+          "dms": "43° 17.2' N, 29° 01.9' E"
+        },
+        {
+          "lat": 43.22333,
+          "lon": 28.94333,
+          "dms": "43° 13.4' N, 28° 56.6' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4880 SPAIN - North Coast - Danger line. Legend. Buoyage. Obstruction.\nSource: Spanish Notice 37/219/26\nChart 1153 [ previous update 5789/25 ] WGS84 DATUM\nDelete + Obstn\n43° 34´·09N., 5° 40´·79W.\n2.18\nWk42/26\nII\n4880 SPAIN - North Coast - Danger line. Legend. Buoyage. Obstruction. (continued)\nChart 1154 (INT 1853) [ previous update 5789/25 ] WGS84 DATUM\nDelete danger line, dotted line, and associated legend, Obstn, within: (a) 43° 34´·100N., 5° 40´·850W.\n(b) 43° 34´·134N., 5° 40´·770W.\n(c) 43° 34´·077N., 5° 40´·725W.\n(d) 43° 34´·044N., 5° 40´·803W.\nB;f\nFl.Y.4s1M\n(a) above\n(b) above\n(c) above\n(d) above\n4789 BLACK SEA - Depths.\nSource: ENC TR2A0000\nChart 2230 [ previous update 4744/26 ] WGS84 DATUM\nInsert depth, 86 , enclosed by 100m contour 43° 17´·2N., 29° 01´·9E.\ndepth, 80, enclosed by 100m contour 43° 13´·4N., 28° 56´·6E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4791/26",
+      "num": "4791",
+      "type": "PERM",
+      "year": "26",
+      "country": "ITALY",
+      "region": "West Coast",
+      "subject": "NM Blocks.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 40.82667,
+          "lon": 14.28167,
+          "dms": "40° 49.6' N, 14° 16.9' E"
+        },
+        {
+          "lat": 40.825,
+          "lon": 14.28,
+          "dms": "40° 49.5' N, 14° 16.8' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4791 ITALY - West Coast - NM Blocks.\nSource: Italian Notice 19.5/26\nChart IT 84 (INT 3386) [ previous update 4613/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 40° 49´·6N., 14° 16´·9E.\nChart 914 [ previous update 4613/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 40° 49´·5N., 14° 16´·8E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4857/26",
+      "num": "4857",
+      "type": "PERM",
+      "year": "26",
+      "country": "ITALY",
+      "region": "West Coast",
+      "subject": "NM Block. Buoy. Restricted areas.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 44.395,
+          "lon": 8.88667,
+          "dms": "44° 23.7' N, 8° 53.2' E"
+        },
+        {
+          "lat": 44.3834,
+          "lon": 8.90888,
+          "dms": "44° 23.004' N, 8° 54.533' E"
+        },
+        {
+          "lat": 44.38608,
+          "lon": 8.9,
+          "dms": "44° 23.165' N, 8° 54.000' E"
+        },
+        {
+          "lat": 44.38765,
+          "lon": 8.8951,
+          "dms": "44° 23.259' N, 8° 53.706' E"
+        },
+        {
+          "lat": 44.38763,
+          "lon": 8.89812,
+          "dms": "44° 23.258' N, 8° 53.887' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4857 ITALY - West Coast - NM Block. Buoy. Restricted areas.\nSource: Italian Notice 14.2/26\nChart 355 (INT 3362) [ previous update 4073/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 44° 23´·7N., 8° 53´·2E.\nlimit of restricted area, entry prohibited, pecked line, joining: (a) 44° 23´·004N., 8° 54´·533E.\n(b) 44° 23´·165N., 8° 54´·000E.\n44° 23´·259N., 8° 53´·706E.\nJf\nFl.Y\n(b) above\nDelete former limit of restricted area, entry prohibited, pecked line,\njoining: (a) above\n44° 23´·258N., 8° 53´·887E.\n2.19\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4873/26",
+      "num": "4873",
+      "type": "PERM",
+      "year": "26",
+      "country": "MOROCCO",
+      "region": "North Coast",
+      "subject": "Buoy. Automatic Identification System. Lights.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 35.91417,
+          "lon": -5.48167,
+          "dms": "35° 54.85' N, 5° 28.90' W"
+        },
+        {
+          "lat": 35.91433,
+          "lon": -5.48233,
+          "dms": "35° 54.86' N, 5° 28.94' W"
+        },
+        {
+          "lat": 35.89683,
+          "lon": -5.5,
+          "dms": "35° 53.81' N, 5° 30.00' W"
+        },
+        {
+          "lat": 35.89483,
+          "lon": -5.501,
+          "dms": "35° 53.69' N, 5° 30.06' W"
+        },
+        {
+          "lat": 35.9141,
+          "lon": -5.4816,
+          "dms": "35° 54.846' N, 5° 28.896' W"
+        },
+        {
+          "lat": 35.91433,
+          "lon": -5.48233,
+          "dms": "35° 54.860' N, 5° 28.940' W"
+        },
+        {
+          "lat": 35.89683,
+          "lon": -5.5,
+          "dms": "35° 53.810' N, 5° 30.000' W"
+        },
+        {
+          "lat": 35.8949,
+          "lon": -5.50097,
+          "dms": "35° 53.694' N, 5° 30.058' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4873 MOROCCO - North Coast - Buoy. Automatic Identification System. Lights.\nSource: French Notice 36/150/26\nChart 141 (INT 1972) [ previous update 4471/26 ] WGS84 DATUM\nMove Jf; Fl(5)Y.20s ODAS and associated Automatic\nIdentification System, AIS, from: 35° 54´·85N., 5° 28´·90W.\nto: 35° 54´·86N., 5° 28´·94W.\nDelete ¶ VQ.G.4m and associated sectors\n35° 53´·81N., 5° 30´·00W.\n¶\nIso.G.4s1M\n35° 53´·69N., 5° 30´·06W.\nChart 145 (INT 1971) [ previous update 77/26 ] WGS84 DATUM\nMove Jf; Fl(5)Y.20s ODAS and associated Automatic\nIdentification System, AIS, from: 35° 54´·846N., 5° 28´·896W.\nto: 35° 54´·860N., 5° 28´·940W.\nDelete ¶ VQ and associated sectors\n35° 53´·810N., 5° 30´·000W.\n¶\nIso.G.4s\n35° 53´·694N., 5° 30´·058W.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4809/26",
+      "num": "4809",
+      "type": "PERM",
+      "year": "26",
+      "country": "MOROCCO",
+      "region": "West Coast",
+      "subject": "Anchorage areas. Legend. NM Block.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 33.65933,
+          "lon": -7.525,
+          "dms": "33° 39.56' N, 7° 31.50' W"
+        },
+        {
+          "lat": 33.7135,
+          "lon": -7.525,
+          "dms": "33° 42.81' N, 7° 31.50' W"
+        },
+        {
+          "lat": 33.71333,
+          "lon": -7.49867,
+          "dms": "33° 42.80' N, 7° 29.92' W"
+        },
+        {
+          "lat": 33.71333,
+          "lon": -7.48333,
+          "dms": "33° 42.80' N, 7° 29.00' W"
+        },
+        {
+          "lat": 33.67167,
+          "lon": -7.49917,
+          "dms": "33° 40.30' N, 7° 29.95' W"
+        },
+        {
+          "lat": 33.64667,
+          "lon": -7.55183,
+          "dms": "33° 38.80' N, 7° 33.11' W"
+        },
+        {
+          "lat": 33.71383,
+          "lon": -7.55167,
+          "dms": "33° 42.83' N, 7° 33.10' W"
+        },
+        {
+          "lat": 33.67317,
+          "lon": -7.4985,
+          "dms": "33° 40.39' N, 7° 29.91' W"
+        },
+        {
+          "lat": 33.68,
+          "lon": -7.51833,
+          "dms": "33° 40.8' N, 7° 31.1' W"
+        },
+        {
+          "lat": 33.66003,
+          "lon": -7.55098,
+          "dms": "33° 39.602' N, 7° 33.059' W"
+        },
+        {
+          "lat": 33.65972,
+          "lon": -7.55175,
+          "dms": "33° 39.583' N, 7° 33.105' W"
+        },
+        {
+          "lat": 33.65468,
+          "lon": -7.55175,
+          "dms": "33° 39.281' N, 7° 33.105' W"
+        },
+        {
+          "lat": 33.64965,
+          "lon": -7.55175,
+          "dms": "33° 38.979' N, 7° 33.105' W"
+        },
+        {
+          "lat": 33.64755,
+          "lon": -7.55,
+          "dms": "33° 38.853' N, 7° 33.000' W"
+        },
+        {
+          "lat": 33.64672,
+          "lon": -7.55175,
+          "dms": "33° 38.803' N, 7° 33.105' W"
+        },
+        {
+          "lat": 25.26833,
+          "lon": 51.77833,
+          "dms": "25° 16.1' N, 51° 46.7' E"
+        },
+        {
+          "lat": 25.27333,
+          "lon": 51.75167,
+          "dms": "25° 16.4' N, 51° 45.1' E"
+        },
+        {
+          "lat": 24.909,
+          "lon": 51.60833,
+          "dms": "24° 54.54' N, 51° 36.50' E"
+        },
+        {
+          "lat": 25.26633,
+          "lon": 51.78,
+          "dms": "25° 15.98' N, 51° 46.80' E"
+        },
+        {
+          "lat": 24.909,
+          "lon": 51.60833,
+          "dms": "24° 54.54' N, 51° 36.50' E"
+        },
+        {
+          "lat": 25.2665,
+          "lon": 51.78017,
+          "dms": "25° 15.99' N, 51° 46.81' E"
+        },
+        {
+          "lat": 25.27333,
+          "lon": 51.75117,
+          "dms": "25° 16.40' N, 51° 45.07' E"
+        },
+        {
+          "lat": 25.23267,
+          "lon": 51.758,
+          "dms": "25° 13.96' N, 51° 45.48' E"
+        },
+        {
+          "lat": 25.13917,
+          "lon": 51.701,
+          "dms": "25° 08.35' N, 51° 42.06' E"
+        },
+        {
+          "lat": 25.13917,
+          "lon": 51.701,
+          "dms": "25° 08.35' N, 51° 42.06' E"
+        },
+        {
+          "lat": 25.2325,
+          "lon": 51.7575,
+          "dms": "25° 13.95' N, 51° 45.45' E"
+        },
+        {
+          "lat": 25.13967,
+          "lon": 51.69917,
+          "dms": "25° 08.38' N, 51° 41.95' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4809 MOROCCO - West Coast - Anchorage areas. Legend. NM Block.\nSource: French Notice 36/153/26\nChart 856 [ previous update 4149/26 ] WGS84 DATUM\nInsert limit of anchorage area, pecked line, joining: (a) 33° 39´·56N., 7° 31´·50W.\n(b) 33° 42´·81N., 7° 31´·50W.\nand\n(c) 33° 42´·80N., 7° 29´·92W.\n33° 42´·80N., 7° 29´·00W.\n33° 40´·30N., 7° 29´·95W.\nDelete former limit of anchorage area, pecked line, joining: (a) above\n33° 38´·80N., 7° 33´·11W.\nand\n33° 42´·83N., 7° 33´·10W.\n(b) above\nand\n(c) above\n33° 40´·39N., 7° 29´·91W.\nChart 860 [ previous update 4149/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 33° 40´·8N., 7° 31´·1W.\n2.20\nWk42/26\nII\n4809 MOROCCO - West Coast - Anchorage areas. Legend. NM Block. (continued)\nChart 861 (INT 1976) [ previous update 5219/25 ] WGS84 DATUM\nDelete legend, Mouillage d'attente Waiting anchorage, orientated N/\nS, centred on: 33° 39´·602N., 7° 33´·059W.\nsymbol, anchorage, centred on: 33° 39´·583N., 7° 33´·105W.\n33° 39´·281N., 7° 33´·105W.\n33° 38´·979N., 7° 33´·105W.\nlimit of anchorage area, pecked line, joining: 33° 38´·853N., 7° 33´·000W.\n33° 38´·803N., 7° 33´·105W.\n4805* QATAR - Radar beacons. Buoy.\nSource: Qatar Energy and UKHO\nChart 2886 (INT 7243) [ previous update 4117/26 ] WGS84 DATUM\nInsert radar beacon, Racon(M), at Mishut light-buoy 25° 16´·1N., 51° 46´·7E.\nReplace ¸¥d Mo(D)12s8M Doha and associated radar beacon,\nGd\nRacon(D), with LFl.12s\n25° 16´·4N., 51° 45´·1E.\nChart 3783 [ previous update 3224/26 ] WGS84 DATUM\nReplace radar be",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4792/26",
+      "num": "4792",
+      "type": "PERM",
+      "year": "26",
+      "country": "INDIA",
+      "region": "East Coast",
+      "subject": "Firing practice areas. Legends. Notes. Buoyage.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 13.237,
+          "lon": 80.08783,
+          "dms": "13° 14.22' N, 80° 05.27' E"
+        },
+        {
+          "lat": 12.97833,
+          "lon": 80.3925,
+          "dms": "12° 58.70' N, 80° 23.55' E"
+        },
+        {
+          "lat": 13.13033,
+          "lon": 80.30483,
+          "dms": "13° 07.82' N, 80° 18.29' E"
+        },
+        {
+          "lat": 13.13067,
+          "lon": 80.30517,
+          "dms": "13° 07.84' N, 80° 18.31' E"
+        },
+        {
+          "lat": 13.29333,
+          "lon": 80.4465,
+          "dms": "13° 17.60' N, 80° 26.79' E"
+        },
+        {
+          "lat": 13.104,
+          "lon": 80.532,
+          "dms": "13° 06.24' N, 80° 31.92' E"
+        },
+        {
+          "lat": 12.96833,
+          "lon": 80.468,
+          "dms": "12° 58.10' N, 80° 28.08' E"
+        },
+        {
+          "lat": 12.928,
+          "lon": 80.42083,
+          "dms": "12° 55.68' N, 80° 25.25' E"
+        },
+        {
+          "lat": 12.8555,
+          "lon": 80.28433,
+          "dms": "12° 51.33' N, 80° 17.06' E"
+        },
+        {
+          "lat": 13.04533,
+          "lon": 80.28767,
+          "dms": "13° 02.72' N, 80° 17.26' E"
+        },
+        {
+          "lat": 12.784,
+          "lon": 80.67633,
+          "dms": "12° 47.04' N, 80° 40.58' E"
+        },
+        {
+          "lat": 12.784,
+          "lon": 80.81,
+          "dms": "12° 47.04' N, 80° 48.60' E"
+        },
+        {
+          "lat": 12.61567,
+          "lon": 80.81,
+          "dms": "12° 36.94' N, 80° 48.60' E"
+        },
+        {
+          "lat": 12.61567,
+          "lon": 80.67633,
+          "dms": "12° 36.94' N, 80° 40.58' E"
+        },
+        {
+          "lat": 14.90833,
+          "lon": 81.49667,
+          "dms": "14° 54.5' N, 81° 29.8' E"
+        },
+        {
+          "lat": 13.13,
+          "lon": 80.305,
+          "dms": "13° 07.8' N, 80° 18.3' E"
+        },
+        {
+          "lat": 13.13,
+          "lon": 80.305,
+          "dms": "13° 07.8' N, 80° 18.3' E"
+        },
+        {
+          "lat": 13.29333,
+          "lon": 80.44667,
+          "dms": "13° 17.6' N, 80° 26.8' E"
+        },
+        {
+          "lat": 13.10333,
+          "lon": 80.53167,
+          "dms": "13° 06.2' N, 80° 31.9' E"
+        },
+        {
+          "lat": 12.96833,
+          "lon": 80.46833,
+          "dms": "12° 58.1' N, 80° 28.1' E"
+        },
+        {
+          "lat": 12.92833,
+          "lon": 80.42,
+          "dms": "12° 55.7' N, 80° 25.2' E"
+        },
+        {
+          "lat": 12.855,
+          "lon": 80.285,
+          "dms": "12° 51.3' N, 80° 17.1' E"
+        },
+        {
+          "lat": 13.06333,
+          "lon": 80.28833,
+          "dms": "13° 03.8' N, 80° 17.3' E"
+        },
+        {
+          "lat": 12.78333,
+          "lon": 80.67667,
+          "dms": "12° 47.0' N, 80° 40.6' E"
+        },
+        {
+          "lat": 12.78333,
+          "lon": 80.81,
+          "dms": "12° 47.0' N, 80° 48.6' E"
+        },
+        {
+          "lat": 12.615,
+          "lon": 80.81,
+          "dms": "12° 36.9' N, 80° 48.6' E"
+        },
+        {
+          "lat": 12.615,
+          "lon": 80.67667,
+          "dms": "12° 36.9' N, 80° 40.6' E"
+        },
+        {
+          "lat": 12.55333,
+          "lon": 79.79833,
+          "dms": "12° 33.2' N, 79° 47.9' E"
+        },
+        {
+          "lat": 13.06333,
+          "lon": 80.28833,
+          "dms": "13° 03.8' N, 80° 17.3' E"
+        },
+        {
+          "lat": 12.855,
+          "lon": 80.285,
+          "dms": "12° 51.3' N, 80° 17.1' E"
+        },
+        {
+          "lat": 12.92833,
+          "lon": 80.42,
+          "dms": "12° 55.7' N, 80° 25.2' E"
+        },
+        {
+          "lat": 12.96833,
+          "lon": 80.46833,
+          "dms": "12° 58.1' N, 80° 28.1' E"
+        },
+        {
+          "lat": 13.10333,
+          "lon": 80.53167,
+          "dms": "13° 06.2' N, 80° 31.9' E"
+        },
+        {
+          "lat": 13.13333,
+          "lon": 80.51833,
+          "dms": "13° 08.0' N, 80° 31.1' E"
+        },
+        {
+          "lat": 12.785,
+          "lon": 80.67667,
+          "dms": "12° 47.1' N, 80° 40.6' E"
+        },
+        {
+          "lat": 12.78333,
+          "lon": 80.81,
+          "dms": "12° 47.0' N, 80° 48.6' E"
+        },
+        {
+          "lat": 12.615,
+          "lon": 80.81,
+          "dms": "12° 36.9' N, 80° 48.6' E"
+        },
+        {
+          "lat": 12.615,
+          "lon": 80.67667,
+          "dms": "12° 36.9' N, 80° 40.6' E"
+        },
+        {
+          "lat": 13.1835,
+          "lon": 80.4025,
+          "dms": "13° 11.01' N, 80° 24.15' E"
+        },
+        {
+          "lat": 13.3245,
+          "lon": 80.2825,
+          "dms": "13° 19.47' N, 80° 16.95' E"
+        },
+        {
+          "lat": 13.20167,
+          "lon": 80.39333,
+          "dms": "13° 12.10' N, 80° 23.60' E"
+        },
+        {
+          "lat": 13.177,
+          "lon": 80.47033,
+          "dms": "13° 10.62' N, 80° 28.22' E"
+        },
+        {
+          "lat": 13.06533,
+          "lon": 80.47767,
+          "dms": "13° 03.92' N, 80° 28.66' E"
+        },
+        {
+          "lat": 13.1305,
+          "lon": 80.305,
+          "dms": "13° 07.83' N, 80° 18.30' E"
+        },
+        {
+          "lat": 13.29333,
+          "lon": 80.4465,
+          "dms": "13° 17.60' N, 80° 26.79' E"
+        },
+        {
+          "lat": 13.10417,
+          "lon": 80.532,
+          "dms": "13° 06.25' N, 80° 31.92' E"
+        },
+        {
+          "lat": 12.99,
+          "lon": 80.47817,
+          "dms": "12° 59.40' N, 80° 28.69' E"
+        },
+        {
+          "lat": 13.06317,
+          "lon": 80.288,
+          "dms": "13° 03.79' N, 80° 17.28' E"
+        },
+        {
+          "lat": 12.99,
+          "lon": 80.28667,
+          "dms": "12° 59.40' N, 80° 17.20' E"
+        },
+        {
+          "lat": 13.15167,
+          "lon": 80.3234,
+          "dms": "13° 09.100' N, 80° 19.404' E"
+        },
+        {
+          "lat": 13.13025,
+          "lon": 80.3048,
+          "dms": "13° 07.815' N, 80° 18.288' E"
+        },
+        {
+          "lat": 13.13012,
+          "lon": 80.27978,
+          "dms": "13° 07.807' N, 80° 16.787' E"
+        },
+        {
+          "lat": 13.14482,
+          "lon": 80.38925,
+          "dms": "13° 08.689' N, 80° 23.355' E"
+        },
+        {
+          "lat": 13.0794,
+          "lon": 80.33802,
+          "dms": "13° 04.764' N, 80° 20.281' E"
+        },
+        {
+          "lat": 13.28395,
+          "lon": 80.43833,
+          "dms": "13° 17.037' N, 80° 26.300' E"
+        },
+        {
+          "lat": 13.28333,
+          "lon": 80.4378,
+          "dms": "13° 17.000' N, 80° 26.268' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4792 INDIA - East Coast - Firing practice areas. Legends. Notes. Buoyage.\nSource: Indian Notices 14/111-112/26\nNote:This update is included in New Edition IN3028, published late 2026.\nChart IN 313 [ previous update 2587/26 ] WGS84 DATUM\nDelete note, FIRING PRACTICE AREA, centred on: 13° 14´·22N., 80° 05´·27E.\nlegend, Firing Practice Area (see Note), centred on: 12° 58´·70N., 80° 23´·55E.\nlimit of firing practice area, pecked line, joining: 13° 07´·82N., 80° 18´·29E.\n13° 07´·84N., 80° 18´·31E.\n13° 17´·60N., 80° 26´·79E.\n13° 06´·24N., 80° 31´·92E.\n12° 58´·10N., 80° 28´·08E.\n12° 55´·68N., 80° 25´·25E.\n12° 51´·33N., 80° 17´·06E.\n13° 02´·72N., 80° 17´·26E.\nlimit of firing practice area, pecked line, and associated\nlegend, Firing Practice Area (see Note), joining: 12° 47´·04N., 80° 40´·58E.\n12° 47´·04N., 80° 48´·60E.\n12° 36´·94N., 80° 48´·60E.\n12° 36´·94N., 80° 40´·58E.\nChart 317 (INT 7400) [ previous update 2587/26 ] WGS84 DATUM\nDelete note, FIRING PRACTICE AREA, centred on: 14° 54´·5N., 81° 29´·8E.\nlimit of firing practice area, pecked line, and associated\nlegend, Firing Practice Area (see Note), joining: 13° 07´·8N., 80° 18´·3E.\n13° 07´·8N., 80° 18´·3E.\n13° 17´·6N., 80° 26´·8E.\n13° 06´·2N., 80° 31´·9E.\n12° 58´·1N., 80° 28´·1E.\n12° 55´·7N., 80° 25´·2E.\n12° 51´·3N., 80° 17´·1E.\n13° 03´·8N., 80° 17´·3E.\nand\n12° 47´·0N., 80° 40´·6E.\n12° 47´·0N., 80° 48´·6E.\n12° 36´·9N., 80° 48´·6E.\n12° 36´·9N., 80° 40´·6E.\n2.22\nWk42/26\nII\n4792 INDIA - East Coast - Firing practice areas. Legends. No",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true,
+      "subPolygons": [
+        {
+          "name": "Firing practice areas (Zone 1)",
+          "category": "general",
+          "coords": [
+            {
+              "lat": 13.237,
+              "lon": 80.08783,
+              "dms": "13° 14.22' N, 80° 05.27' E"
+            },
+            {
+              "lat": 12.97833,
+              "lon": 80.3925,
+              "dms": "12° 58.70' N, 80° 23.55' E"
+            },
+            {
+              "lat": 13.13033,
+              "lon": 80.30483,
+              "dms": "13° 07.82' N, 80° 18.29' E"
+            },
+            {
+              "lat": 13.13067,
+              "lon": 80.30517,
+              "dms": "13° 07.84' N, 80° 18.31' E"
+            },
+            {
+              "lat": 13.29333,
+              "lon": 80.4465,
+              "dms": "13° 17.60' N, 80° 26.79' E"
+            },
+            {
+              "lat": 13.104,
+              "lon": 80.532,
+              "dms": "13° 06.24' N, 80° 31.92' E"
+            },
+            {
+              "lat": 12.96833,
+              "lon": 80.468,
+              "dms": "12° 58.10' N, 80° 28.08' E"
+            },
+            {
+              "lat": 12.928,
+              "lon": 80.42083,
+              "dms": "12° 55.68' N, 80° 25.25' E"
+            },
+            {
+              "lat": 12.8555,
+              "lon": 80.28433,
+              "dms": "12° 51.33' N, 80° 17.06' E"
+            },
+            {
+              "lat": 13.04533,
+              "lon": 80.28767,
+              "dms": "13° 02.72' N, 80° 17.26' E"
+            },
+            {
+              "lat": 12.784,
+              "lon": 80.67633,
+              "dms": "12° 47.04' N, 80° 40.58' E"
+            },
+            {
+              "lat": 12.784,
+              "lon": 80.81,
+              "dms": "12° 47.04' N, 80° 48.60' E"
+            },
+            {
+              "lat": 12.61567,
+              "lon": 80.81,
+              "dms": "12° 36.94' N, 80° 48.60' E"
+            },
+            {
+              "lat": 12.61567,
+              "lon": 80.67633,
+              "dms": "12° 36.94' N, 80° 40.58' E"
+            },
+            {
+              "lat": 14.90833,
+              "lon": 81.49667,
+              "dms": "14° 54.5' N, 81° 29.8' E"
+            },
+            {
+              "lat": 13.13,
+              "lon": 80.305,
+              "dms": "13° 07.8' N, 80° 18.3' E"
+            },
+            {
+              "lat": 13.13,
+              "lon": 80.305,
+              "dms": "13° 07.8' N, 80° 18.3' E"
+            },
+            {
+              "lat": 13.29333,
+              "lon": 80.44667,
+              "dms": "13° 17.6' N, 80° 26.8' E"
+            },
+            {
+              "lat": 13.10333,
+              "lon": 80.53167,
+              "dms": "13° 06.2' N, 80° 31.9' E"
+            },
+            {
+              "lat": 12.96833,
+              "lon": 80.46833,
+              "dms": "12° 58.1' N, 80° 28.1' E"
+            },
+            {
+              "lat": 12.92833,
+              "lon": 80.42,
+              "dms": "12° 55.7' N, 80° 25.2' E"
+            },
+            {
+              "lat": 12.855,
+              "lon": 80.285,
+              "dms": "12° 51.3' N, 80° 17.1' E"
+            },
+            {
+              "lat": 13.06333,
+              "lon": 80.28833,
+              "dms": "13° 03.8' N, 80° 17.3' E"
+            }
+          ],
+          "points": [
+            [
+              13.237,
+              80.08783
+            ],
+            [
+              12.97833,
+              80.3925
+            ],
+            [
+              13.13033,
+              80.30483
+            ],
+            [
+              13.13067,
+              80.30517
+            ],
+            [
+              13.29333,
+              80.4465
+            ],
+            [
+              13.104,
+              80.532
+            ],
+            [
+              12.96833,
+              80.468
+            ],
+            [
+              12.928,
+              80.42083
+            ],
+            [
+              12.8555,
+              80.28433
+            ],
+            [
+              13.04533,
+              80.28767
+            ],
+            [
+              12.784,
+              80.67633
+            ],
+            [
+              12.784,
+              80.81
+            ],
+            [
+              12.61567,
+              80.81
+            ],
+            [
+              12.61567,
+              80.67633
+            ],
+            [
+              14.90833,
+              81.49667
+            ],
+            [
+              13.13,
+              80.305
+            ],
+            [
+              13.13,
+              80.305
+            ],
+            [
+              13.29333,
+              80.44667
+            ],
+            [
+              13.10333,
+              80.53167
+            ],
+            [
+              12.96833,
+              80.46833
+            ],
+            [
+              12.92833,
+              80.42
+            ],
+            [
+              12.855,
+              80.285
+            ],
+            [
+              13.06333,
+              80.28833
+            ]
+          ]
+        },
+        {
+          "name": "Firing practice areas (Zone 2)",
+          "category": "general",
+          "coords": [
+            {
+              "lat": 12.78333,
+              "lon": 80.67667,
+              "dms": "12° 47.0' N, 80° 40.6' E"
+            },
+            {
+              "lat": 12.78333,
+              "lon": 80.81,
+              "dms": "12° 47.0' N, 80° 48.6' E"
+            },
+            {
+              "lat": 12.615,
+              "lon": 80.81,
+              "dms": "12° 36.9' N, 80° 48.6' E"
+            },
+            {
+              "lat": 12.615,
+              "lon": 80.67667,
+              "dms": "12° 36.9' N, 80° 40.6' E"
+            },
+            {
+              "lat": 12.55333,
+              "lon": 79.79833,
+              "dms": "12° 33.2' N, 79° 47.9' E"
+            },
+            {
+              "lat": 13.06333,
+              "lon": 80.28833,
+              "dms": "13° 03.8' N, 80° 17.3' E"
+            },
+            {
+              "lat": 12.855,
+              "lon": 80.285,
+              "dms": "12° 51.3' N, 80° 17.1' E"
+            },
+            {
+              "lat": 12.92833,
+              "lon": 80.42,
+              "dms": "12° 55.7' N, 80° 25.2' E"
+            },
+            {
+              "lat": 12.96833,
+              "lon": 80.46833,
+              "dms": "12° 58.1' N, 80° 28.1' E"
+            },
+            {
+              "lat": 13.10333,
+              "lon": 80.53167,
+              "dms": "13° 06.2' N, 80° 31.9' E"
+            },
+            {
+              "lat": 13.13333,
+              "lon": 80.51833,
+              "dms": "13° 08.0' N, 80° 31.1' E"
+            }
+          ],
+          "points": [
+            [
+              12.78333,
+              80.67667
+            ],
+            [
+              12.78333,
+              80.81
+            ],
+            [
+              12.615,
+              80.81
+            ],
+            [
+              12.615,
+              80.67667
+            ],
+            [
+              12.55333,
+              79.79833
+            ],
+            [
+              13.06333,
+              80.28833
+            ],
+            [
+              12.855,
+              80.285
+            ],
+            [
+              12.92833,
+              80.42
+            ],
+            [
+              12.96833,
+              80.46833
+            ],
+            [
+              13.10333,
+              80.53167
+            ],
+            [
+              13.13333,
+              80.51833
+            ]
+          ]
+        },
+        {
+          "name": "Firing practice areas (Zone 3)",
+          "category": "general",
+          "coords": [
+            {
+              "lat": 12.785,
+              "lon": 80.67667,
+              "dms": "12° 47.1' N, 80° 40.6' E"
+            },
+            {
+              "lat": 12.78333,
+              "lon": 80.81,
+              "dms": "12° 47.0' N, 80° 48.6' E"
+            },
+            {
+              "lat": 12.615,
+              "lon": 80.81,
+              "dms": "12° 36.9' N, 80° 48.6' E"
+            },
+            {
+              "lat": 12.615,
+              "lon": 80.67667,
+              "dms": "12° 36.9' N, 80° 40.6' E"
+            },
+            {
+              "lat": 13.1835,
+              "lon": 80.4025,
+              "dms": "13° 11.01' N, 80° 24.15' E"
+            },
+            {
+              "lat": 13.3245,
+              "lon": 80.2825,
+              "dms": "13° 19.47' N, 80° 16.95' E"
+            },
+            {
+              "lat": 13.20167,
+              "lon": 80.39333,
+              "dms": "13° 12.10' N, 80° 23.60' E"
+            },
+            {
+              "lat": 13.177,
+              "lon": 80.47033,
+              "dms": "13° 10.62' N, 80° 28.22' E"
+            },
+            {
+              "lat": 13.06533,
+              "lon": 80.47767,
+              "dms": "13° 03.92' N, 80° 28.66' E"
+            },
+            {
+              "lat": 13.1305,
+              "lon": 80.305,
+              "dms": "13° 07.83' N, 80° 18.30' E"
+            },
+            {
+              "lat": 13.29333,
+              "lon": 80.4465,
+              "dms": "13° 17.60' N, 80° 26.79' E"
+            },
+            {
+              "lat": 13.10417,
+              "lon": 80.532,
+              "dms": "13° 06.25' N, 80° 31.92' E"
+            },
+            {
+              "lat": 12.99,
+              "lon": 80.47817,
+              "dms": "12° 59.40' N, 80° 28.69' E"
+            }
+          ],
+          "points": [
+            [
+              12.785,
+              80.67667
+            ],
+            [
+              12.78333,
+              80.81
+            ],
+            [
+              12.615,
+              80.81
+            ],
+            [
+              12.615,
+              80.67667
+            ],
+            [
+              13.1835,
+              80.4025
+            ],
+            [
+              13.3245,
+              80.2825
+            ],
+            [
+              13.20167,
+              80.39333
+            ],
+            [
+              13.177,
+              80.47033
+            ],
+            [
+              13.06533,
+              80.47767
+            ],
+            [
+              13.1305,
+              80.305
+            ],
+            [
+              13.29333,
+              80.4465
+            ],
+            [
+              13.10417,
+              80.532
+            ],
+            [
+              12.99,
+              80.47817
+            ]
+          ]
+        },
+        {
+          "name": "Firing practice areas (Zone 4)",
+          "category": "general",
+          "coords": [
+            {
+              "lat": 13.06317,
+              "lon": 80.288,
+              "dms": "13° 03.79' N, 80° 17.28' E"
+            },
+            {
+              "lat": 12.99,
+              "lon": 80.28667,
+              "dms": "12° 59.40' N, 80° 17.20' E"
+            },
+            {
+              "lat": 13.15167,
+              "lon": 80.3234,
+              "dms": "13° 09.100' N, 80° 19.404' E"
+            },
+            {
+              "lat": 13.13025,
+              "lon": 80.3048,
+              "dms": "13° 07.815' N, 80° 18.288' E"
+            },
+            {
+              "lat": 13.13012,
+              "lon": 80.27978,
+              "dms": "13° 07.807' N, 80° 16.787' E"
+            },
+            {
+              "lat": 13.14482,
+              "lon": 80.38925,
+              "dms": "13° 08.689' N, 80° 23.355' E"
+            },
+            {
+              "lat": 13.0794,
+              "lon": 80.33802,
+              "dms": "13° 04.764' N, 80° 20.281' E"
+            },
+            {
+              "lat": 13.28395,
+              "lon": 80.43833,
+              "dms": "13° 17.037' N, 80° 26.300' E"
+            },
+            {
+              "lat": 13.28333,
+              "lon": 80.4378,
+              "dms": "13° 17.000' N, 80° 26.268' E"
+            }
+          ],
+          "points": [
+            [
+              13.06317,
+              80.288
+            ],
+            [
+              12.99,
+              80.28667
+            ],
+            [
+              13.15167,
+              80.3234
+            ],
+            [
+              13.13025,
+              80.3048
+            ],
+            [
+              13.13012,
+              80.27978
+            ],
+            [
+              13.14482,
+              80.38925
+            ],
+            [
+              13.0794,
+              80.33802
+            ],
+            [
+              13.28395,
+              80.43833
+            ],
+            [
+              13.28333,
+              80.4378
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4824/26",
+      "num": "4824",
+      "type": "PERM",
+      "year": "26",
+      "country": "INDIA",
+      "region": "West Coast",
+      "subject": "Buoyage.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 22.39683,
+          "lon": 69.60633,
+          "dms": "22° 23.81' N, 69° 36.38' E"
+        },
+        {
+          "lat": 22.39433,
+          "lon": 69.61033,
+          "dms": "22° 23.66' N, 69° 36.62' E"
+        },
+        {
+          "lat": 1.2222,
+          "lon": 103.8633,
+          "dms": "1° 13.332' N, 103° 51.798' E"
+        },
+        {
+          "lat": 1.22217,
+          "lon": 103.86333,
+          "dms": "1° 13.33' N, 103° 51.80' E"
+        },
+        {
+          "lat": 1.22217,
+          "lon": 103.86333,
+          "dms": "1° 13.33' N, 103° 51.80' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4824 INDIA - West Coast - Buoyage.\nSource: Indian Notice 15/115/26\nChart IN 2051 (INT 7333) [ previous update New Edition 30/11/2025 ] WGS84 DATUM\nAmend designation of buoy to, No22 22° 23´·81N., 69° 36´·38E.\ndesignation of buoy to, No24 22° 23´·66N., 69° 36´·62E.\n2.23\nWk42/26\nII\n4788* SINGAPORE - Buoy.\nSource: Maritime and Port Authority of Singapore\nNote:Former Notice 3774(T)/25 is cancelled.\nChart 4037 [ previous update 620/26 ] WGS84 DATUM\nInsert Gf; Fl.Y.3s NTU-Kusu\n1° 13´·332N., 103° 51´·798E.\nChart 4040 [ previous update 4342/26 ] WGS84 DATUM\nInsert Gf; Fl.Y.3s NTU-Kusu\n1° 13´·33N., 103° 51´·80E.\nChart 4041 [ previous update 3615/26 ] WGS84 DATUM\nInsert Gf; Fl.Y.3s NTU-Kusu\n1° 13´·33N., 103° 51´·80E.",
+      "cancels": [
+        "3774(T)/25"
+      ],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4826/26",
+      "num": "4826",
+      "type": "PERM",
+      "year": "26",
+      "country": "INDONESIA",
+      "region": "Sumatera",
+      "subject": "NM Block. Submarine cables. Wells. Platforms.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 5.18167,
+          "lon": 97.15333,
+          "dms": "5° 10.9' N, 97° 09.2' E"
+        },
+        {
+          "lat": 5.19167,
+          "lon": 97.165,
+          "dms": "5° 11.5' N, 97° 09.9' E"
+        },
+        {
+          "lat": 5.255,
+          "lon": 97.17833,
+          "dms": "5° 15.3' N, 97° 10.7' E"
+        },
+        {
+          "lat": 5.295,
+          "lon": 97.16833,
+          "dms": "5° 17.7' N, 97° 10.1' E"
+        },
+        {
+          "lat": 5.30667,
+          "lon": 97.15833,
+          "dms": "5° 18.4' N, 97° 09.5' E"
+        },
+        {
+          "lat": 5.18167,
+          "lon": 97.15333,
+          "dms": "5° 10.9' N, 97° 09.2' E"
+        },
+        {
+          "lat": 5.21,
+          "lon": 97.20667,
+          "dms": "5° 12.6' N, 97° 12.4' E"
+        },
+        {
+          "lat": 5.27833,
+          "lon": 97.28833,
+          "dms": "5° 16.7' N, 97° 17.3' E"
+        },
+        {
+          "lat": 5.30833,
+          "lon": 97.35833,
+          "dms": "5° 18.5' N, 97° 21.5' E"
+        },
+        {
+          "lat": 5.325,
+          "lon": 97.38,
+          "dms": "5° 19.5' N, 97° 22.8' E"
+        },
+        {
+          "lat": 5.30667,
+          "lon": 97.29667,
+          "dms": "5° 18.4' N, 97° 17.8' E"
+        },
+        {
+          "lat": 5.29333,
+          "lon": 97.27667,
+          "dms": "5° 17.6' N, 97° 16.6' E"
+        },
+        {
+          "lat": 5.26333,
+          "lon": 97.29667,
+          "dms": "5° 15.8' N, 97° 17.8' E"
+        },
+        {
+          "lat": 5.24333,
+          "lon": 97.32167,
+          "dms": "5° 14.6' N, 97° 19.3' E"
+        },
+        {
+          "lat": 5.18167,
+          "lon": 97.15333,
+          "dms": "5° 10.9' N, 97° 09.2' E"
+        },
+        {
+          "lat": 5.19167,
+          "lon": 97.165,
+          "dms": "5° 11.5' N, 97° 09.9' E"
+        },
+        {
+          "lat": 5.255,
+          "lon": 97.17833,
+          "dms": "5° 15.3' N, 97° 10.7' E"
+        },
+        {
+          "lat": 5.295,
+          "lon": 97.16833,
+          "dms": "5° 17.7' N, 97° 10.1' E"
+        },
+        {
+          "lat": 5.30667,
+          "lon": 97.15833,
+          "dms": "5° 18.4' N, 97° 09.5' E"
+        },
+        {
+          "lat": 5.18167,
+          "lon": 97.15333,
+          "dms": "5° 10.9' N, 97° 09.2' E"
+        },
+        {
+          "lat": 5.21,
+          "lon": 97.20667,
+          "dms": "5° 12.6' N, 97° 12.4' E"
+        },
+        {
+          "lat": 5.27833,
+          "lon": 97.28833,
+          "dms": "5° 16.7' N, 97° 17.3' E"
+        },
+        {
+          "lat": 5.30833,
+          "lon": 97.35833,
+          "dms": "5° 18.5' N, 97° 21.5' E"
+        },
+        {
+          "lat": 5.325,
+          "lon": 97.38,
+          "dms": "5° 19.5' N, 97° 22.8' E"
+        },
+        {
+          "lat": 5.30667,
+          "lon": 97.29667,
+          "dms": "5° 18.4' N, 97° 17.8' E"
+        },
+        {
+          "lat": 5.29333,
+          "lon": 97.27667,
+          "dms": "5° 17.6' N, 97° 16.6' E"
+        },
+        {
+          "lat": 5.26333,
+          "lon": 97.29667,
+          "dms": "5° 15.8' N, 97° 17.8' E"
+        },
+        {
+          "lat": 5.24333,
+          "lon": 97.32167,
+          "dms": "5° 14.6' N, 97° 19.3' E"
+        },
+        {
+          "lat": 5.25667,
+          "lon": 97.26,
+          "dms": "5° 15.4' N, 97° 15.6' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": true,
+      "body": "4826 INDONESIA - Sumatera - NM Block. Submarine cables. Wells. Platforms.\nSource: ENC ID400025\nChart 3900 [ previous update 2423/26 ] WGS84 DATUM\nInsert submarine cable, É , joining:\n5° 10´·9N., 97° 09´·2E.\n5° 11´·5N., 97° 09´·9E.\n5° 15´·3N., 97° 10´·7E.\n5° 17´·7N., 97° 10´·1E.\n5° 18´·4N., 97° 09´·5E.\nand\n5° 10´·9N., 97° 09´·2E.\n5° 12´·6N., 97° 12´·4E.\n5° 16´·7N., 97° 17´·3E.\n5° 18´·5N., 97° 21´·5E.\n5° 19´·5N., 97° 22´·8E.\nReplace ¼{ with å Well\n5° 18´·4N., 97° 17´·8E.\n5° 17´·6N., 97° 16´·6E.\n5° 15´·8N., 97° 17´·8E.\n5° 14´·6N., 97° 19´·3E.\n2.24\nWk42/26\nII\n4826 INDONESIA - Sumatera - NM Block. Submarine cables. Wells. Platforms. (continued)\nChart 3901 [ previous update 3083/26 ] WGS84 DATUM\nInsert submarine cable, É , joining:\n5° 10´·9N., 97° 09´·2E.\n5° 11´·5N., 97° 09´·9E.\n5° 15´·3N., 97° 10´·7E.\n5° 17´·7N., 97° 10´·1E.\n5° 18´·4N., 97° 09´·5E.\nand\n5° 10´·9N., 97° 09´·2E.\n5° 12´·6N., 97° 12´·4E.\n5° 16´·7N., 97° 17´·3E.\n5° 18´·5N., 97° 21´·5E.\n5° 19´·5N., 97° 22´·8E.\nReplace ¼{ with å Well\n5° 18´·4N., 97° 17´·8E.\n5° 17´·6N., 97° 16´·6E.\n5° 15´·8N., 97° 17´·8E.\n5° 14´·6N., 97° 19´·3E.\nChart 3919 [ previous update 1916/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 5° 15´·4N., 97° 15´·6E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4841/26",
+      "num": "4841",
+      "type": "PERM",
+      "year": "26",
+      "country": "INDONESIA",
+      "region": "Sumatera",
+      "subject": "Depths.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 1.73833,
+          "lon": 102.18333,
+          "dms": "1° 44.3' N, 102° 11.0' E"
+        },
+        {
+          "lat": 1.73917,
+          "lon": 102.18267,
+          "dms": "1° 44.35' N, 102° 10.96' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4841 INDONESIA - Sumatera - Depths.\nSource: ENC ID300014\nChart 3902 [ previous update 3615/26 ] WGS84 DATUM\nInsert depth, 93, enclosed by 10m contour 1° 44´·3N., 102° 11´·0E.\nChart 3947 [ previous update 4504/26 ] WGS84 DATUM\nInsert depth, 93, enclosed by 10m contour (a) 1° 44´·35N., 102° 10´·96E.\nDelete depth, 102, close SW of: (a) above",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4876/26",
+      "num": "4876",
+      "type": "PERM",
+      "year": "26",
+      "country": "INDONESIA",
+      "region": "Sumatera",
+      "subject": "Depths.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": -1.98567,
+          "lon": 104.95183,
+          "dms": "1° 59.14' S, 104° 57.11' E"
+        },
+        {
+          "lat": -2.1275,
+          "lon": 105.13783,
+          "dms": "2° 07.65' S, 105° 08.27' E"
+        },
+        {
+          "lat": 1.312,
+          "lon": 104.04,
+          "dms": "1° 18.72' N, 104° 02.40' E"
+        },
+        {
+          "lat": 1.31367,
+          "lon": 104.04,
+          "dms": "1° 18.82' N, 104° 02.40' E"
+        },
+        {
+          "lat": 1.312,
+          "lon": 104.04,
+          "dms": "1° 18.72' N, 104° 02.40' E"
+        },
+        {
+          "lat": 1.31367,
+          "lon": 104.04,
+          "dms": "1° 18.82' N, 104° 02.40' E"
+        },
+        {
+          "lat": 1.312,
+          "lon": 104.04,
+          "dms": "1° 18.72' N, 104° 02.40' E"
+        },
+        {
+          "lat": 1.31367,
+          "lon": 104.04,
+          "dms": "1° 18.82' N, 104° 02.40' E"
+        },
+        {
+          "lat": 1.312,
+          "lon": 104.04,
+          "dms": "1° 18.72' N, 104° 02.40' E"
+        },
+        {
+          "lat": 1.31367,
+          "lon": 104.04,
+          "dms": "1° 18.82' N, 104° 02.40' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4876 INDONESIA - Sumatera - Depths.\nSource: ENC ID300052\nChart 3471 [ previous update 2878/26 ] WGS84 DATUM\nInsert depth, 18, enclosed by 20m contour (a) 1° 59´·14S., 104° 57´·11E.\nDelete depth, 26, close SW of: (a) above\nInsert depth, 139 (b) 2° 07´·65S., 105° 08´·27E.\nDelete depth, 16, close NE of: (b) above\n2.25\nWk42/26\nII\n4877 SINGAPORE - Buoy.\nSource: Maritime and Port Authority of Singapore\nChart 3831 [ previous update 4793/26 ] WGS84 DATUM\nMove Gf; Q.Y CNB-4 from:\n1° 18´·72N., 104° 02´·40E.\nto: 1° 18´·82N., 104° 02´·40E.\nChart 4041 [ previous update 4788/26 ] WGS84 DATUM\nMove Gf; Q.Y CNB-4 from:\n1° 18´·72N., 104° 02´·40E.\nto: 1° 18´·82N., 104° 02´·40E.\nChart 4042 [ previous update 3271/26 ] WGS84 DATUM\nMove Gf; Q.Y CNB-4 from:\n1° 18´·72N., 104° 02´·40E.\nto: 1° 18´·82N., 104° 02´·40E.\nChart 4043 [ previous update 1027/26 ] WGS84 DATUM\nMove Gf; Q.Y CNB-4 from:\n1° 18´·72N., 104° 02´·40E.\nto: 1° 18´·82N., 104° 02´·40E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4779/26",
+      "num": "4779",
+      "type": "PERM",
+      "year": "26",
+      "country": "CHINA",
+      "region": "South Coast",
+      "subject": "Buoy.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 22.11533,
+          "lon": 113.85583,
+          "dms": "22° 06.92' N, 113° 51.35' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4779 CHINA - South Coast - Buoy.\nSource: UKHO\nNote:This update is included in New Edition 341, published late 2026.\nChart 3026 [ previous update 4632/26 ] WGS84 DATUM\nInsert Gf; Q.Y W41-1\n22° 06´·92N., 113° 51´·35E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4787/26",
+      "num": "4787",
+      "type": "PERM",
+      "year": "26",
+      "country": "CHINA",
+      "region": "East Coast",
+      "subject": "Buoy.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 24.01367,
+          "lon": 117.90167,
+          "dms": "24° 00.82' N, 117° 54.10' E"
+        },
+        {
+          "lat": 0.795,
+          "lon": 105.46833,
+          "dms": "0° 47.7' N, 105° 28.1' E"
+        },
+        {
+          "lat": -0.99667,
+          "lon": 106.775,
+          "dms": "0° 59.8' S, 106° 46.5' E"
+        },
+        {
+          "lat": -2.74833,
+          "lon": 107.21167,
+          "dms": "2° 44.9' S, 107° 12.7' E"
+        },
+        {
+          "lat": -2.88833,
+          "lon": 107.18,
+          "dms": "2° 53.3' S, 107° 10.8' E"
+        },
+        {
+          "lat": -5.75917,
+          "lon": 106.95533,
+          "dms": "5° 45.55' S, 106° 57.32' E"
+        },
+        {
+          "lat": -5.75233,
+          "lon": 106.9485,
+          "dms": "5° 45.14' S, 106° 56.91' E"
+        },
+        {
+          "lat": -5.643,
+          "lon": 106.9815,
+          "dms": "5° 38.58' S, 106° 58.89' E"
+        },
+        {
+          "lat": -5.632,
+          "lon": 106.96733,
+          "dms": "5° 37.92' S, 106° 58.04' E"
+        },
+        {
+          "lat": -5.43067,
+          "lon": 107.0165,
+          "dms": "5° 25.84' S, 107° 00.99' E"
+        },
+        {
+          "lat": -1.6,
+          "lon": 106.92567,
+          "dms": "1° 36.00' S, 106° 55.54' E"
+        },
+        {
+          "lat": -2.749,
+          "lon": 107.21233,
+          "dms": "2° 44.94' S, 107° 12.74' E"
+        },
+        {
+          "lat": -2.89617,
+          "lon": 107.1785,
+          "dms": "2° 53.77' S, 107° 10.71' E"
+        },
+        {
+          "lat": -3.32083,
+          "lon": 107.29667,
+          "dms": "3° 19.25' S, 107° 17.80' E"
+        },
+        {
+          "lat": -3.54617,
+          "lon": 107.4575,
+          "dms": "3° 32.77' S, 107° 27.45' E"
+        },
+        {
+          "lat": -3.8165,
+          "lon": 107.40483,
+          "dms": "3° 48.99' S, 107° 24.29' E"
+        },
+        {
+          "lat": -0.99667,
+          "lon": 106.775,
+          "dms": "0° 59.8' S, 106° 46.5' E"
+        },
+        {
+          "lat": -2.11,
+          "lon": 107.05333,
+          "dms": "2° 06.6' S, 107° 03.2' E"
+        },
+        {
+          "lat": 1.22167,
+          "lon": 104.88333,
+          "dms": "1° 13.3' N, 104° 53.0' E"
+        },
+        {
+          "lat": 1.15833,
+          "lon": 105.02833,
+          "dms": "1° 09.5' N, 105° 01.7' E"
+        },
+        {
+          "lat": 0.79167,
+          "lon": 105.46333,
+          "dms": "0° 47.5' N, 105° 27.8' E"
+        },
+        {
+          "lat": -0.99667,
+          "lon": 106.775,
+          "dms": "0° 59.8' S, 106° 46.5' E"
+        },
+        {
+          "lat": -1.3,
+          "lon": 106.85,
+          "dms": "1° 18.0' S, 106° 51.0' E"
+        },
+        {
+          "lat": -0.48333,
+          "lon": 106.39833,
+          "dms": "0° 29.0' S, 106° 23.9' E"
+        },
+        {
+          "lat": -0.99667,
+          "lon": 106.775,
+          "dms": "0° 59.8' S, 106° 46.5' E"
+        },
+        {
+          "lat": -2.74833,
+          "lon": 107.21167,
+          "dms": "2° 44.9' S, 107° 12.7' E"
+        },
+        {
+          "lat": -2.89667,
+          "lon": 107.17833,
+          "dms": "2° 53.8' S, 107° 10.7' E"
+        },
+        {
+          "lat": -3.32167,
+          "lon": 107.29667,
+          "dms": "3° 19.3' S, 107° 17.8' E"
+        },
+        {
+          "lat": -3.54667,
+          "lon": 107.45667,
+          "dms": "3° 32.8' S, 107° 27.4' E"
+        },
+        {
+          "lat": -3.95167,
+          "lon": 107.37833,
+          "dms": "3° 57.1' S, 107° 22.7' E"
+        },
+        {
+          "lat": -5.0,
+          "lon": 107.12167,
+          "dms": "5° 00.0' S, 107° 07.3' E"
+        },
+        {
+          "lat": -5.75883,
+          "lon": 106.955,
+          "dms": "5° 45.53' S, 106° 57.30' E"
+        },
+        {
+          "lat": -5.75233,
+          "lon": 106.9485,
+          "dms": "5° 45.14' S, 106° 56.91' E"
+        },
+        {
+          "lat": -5.643,
+          "lon": 106.9815,
+          "dms": "5° 38.58' S, 106° 58.89' E"
+        },
+        {
+          "lat": -5.632,
+          "lon": 106.96733,
+          "dms": "5° 37.92' S, 106° 58.04' E"
+        },
+        {
+          "lat": -5.2775,
+          "lon": 107.054,
+          "dms": "5° 16.65' S, 107° 03.24' E"
+        },
+        {
+          "lat": 1.20167,
+          "lon": 104.15167,
+          "dms": "1° 12.10' N, 104° 09.10' E"
+        },
+        {
+          "lat": 1.23067,
+          "lon": 104.16167,
+          "dms": "1° 13.84' N, 104° 09.70' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4787 CHINA - East Coast - Buoy.\nSource: Chinese Notice 32/996/26\nChart 1720 [ previous update 4636/26 ] CGCS 2000 DATUM\nInsert Gf; Mo(O)Y.15s\n24° 00´·82N., 117° 54´·10E.\n4793 SOUTH CHINA SEA - Submarine cable.\nSource: Indonesian Notice 29/197/26\nChart 1312 [ previous update 4248/26 ] WGS84 DATUM\nInsert submarine cable, É , joining:\n0° 47´·7N., 105° 28´·1E.\n0° 59´·8S., 106° 46´·5E.\n2° 44´·9S., 107° 12´·7E.\n2° 53´·3S., 107° 10´·8E.\n2.26\nWk42/26\nII\n4793 SOUTH CHINA SEA - Submarine cable. (continued)\nChart 2056 [ previous update 4155/26 ] WGS84 DATUM\nInsert submarine cable, É , joining:\n5° 45´·55S., 106° 57´·32E.\n5° 45´·14S., 106° 56´·91E.\n5° 38´·58S., 106° 58´·89E.\n5° 37´·92S., 106° 58´·04E.\n5° 25´·84S., 107° 00´·99E.\nChart 2137 [ previous update 4407/26 ] WGS84 DATUM\nInsert submarine cable, É , joining:\n1° 36´·00S., 106° 55´·54E.\n2° 44´·94S., 107° 12´·74E.\n2° 53´·77S., 107° 10´·71E.\n3° 19´·25S., 107° 17´·80E.\n3° 32´·77S., 107° 27´·45E.\n3° 48´·99S., 107° 24´·29E.\nChart 2470 [ previous update 3744/26 ] WGS84 DATUM\nInsert submarine cable, É , joining:\n0° 59´·8S., 106° 46´·5E.\n2° 06´·6S., 107° 03´·2E.\nChart 2870 [ previous update 3744/26 ] WGS84 DATUM\nInsert submarine cable, É , joining:\n1° 13´·3N., 104° 53´·0E.\n1° 09´·5N., 105° 01´·7E.\n0° 47´·5N., 105° 27´·8E.\n0° 59´·8S., 106° 46´·5E.\n1° 18´·0S., 106° 51´·0E.\nChart 2873 [ previous update 4407/26 ] WGS84 DATUM\nInsert submarine cable, É , joining:\n0° 29´·0S., 106° 23´·9E.\n0° 59´·8S., 106° 46´·5E.\n2° 44´·9S., 107° 12´·7E.\n2° 53´·8S.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4825/26",
+      "num": "4825",
+      "type": "PERM",
+      "year": "26",
+      "country": "THAILAND",
+      "region": "Gulf of Thailand Coast",
+      "subject": "Buoy. Depths. Light-beacons. Tidal streams.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 13.45833,
+          "lon": 100.22967,
+          "dms": "13° 27.50' N, 100° 13.78' E"
+        },
+        {
+          "lat": 13.43233,
+          "lon": 100.31017,
+          "dms": "13° 25.94' N, 100° 18.61' E"
+        },
+        {
+          "lat": 13.43633,
+          "lon": 100.322,
+          "dms": "13° 26.18' N, 100° 19.32' E"
+        },
+        {
+          "lat": 13.42117,
+          "lon": 100.36883,
+          "dms": "13° 25.27' N, 100° 22.13' E"
+        },
+        {
+          "lat": 13.412,
+          "lon": 100.36883,
+          "dms": "13° 24.72' N, 100° 22.13' E"
+        },
+        {
+          "lat": 13.41233,
+          "lon": 100.35017,
+          "dms": "13° 24.74' N, 100° 21.01' E"
+        },
+        {
+          "lat": 13.40017,
+          "lon": 100.30967,
+          "dms": "13° 24.01' N, 100° 18.58' E"
+        },
+        {
+          "lat": 13.3855,
+          "lon": 100.24117,
+          "dms": "13° 23.13' N, 100° 14.47' E"
+        },
+        {
+          "lat": 13.41567,
+          "lon": 100.303,
+          "dms": "13° 24.94' N, 100° 18.18' E"
+        },
+        {
+          "lat": 13.42967,
+          "lon": 100.3105,
+          "dms": "13° 25.78' N, 100° 18.63' E"
+        },
+        {
+          "lat": 10.56367,
+          "lon": 106.838,
+          "dms": "10° 33.82' N, 106° 50.28' E"
+        },
+        {
+          "lat": 10.59083,
+          "lon": 106.86033,
+          "dms": "10° 35.45' N, 106° 51.62' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4825 THAILAND - Gulf of Thailand Coast - Buoy. Depths. Light-beacons. Tidal streams.\nSource: Thai Chart 222\nChart 3965 [ previous update 3710/26 ] WGS84 DATUM\nInsert Tj§ Fl.R.3s5M\n13° 27´·50N., 100° 13´·78E.\nIb]\nFl.G.3s5M No.1\n13° 25´·94N., 100° 18´·61E.\ndepth, 16, and extend 2m contour SE to enclose 13° 26´·18N., 100° 19´·32E.\ndepth, 35 13° 25´·27N., 100° 22´·13E.\ndepth, 39, and extend 5m contour S to enclose 13° 24´·72N., 100° 22´·13E.\n13° 24´·74N., 100° 21´·01E.\ndepth, 48, and extend 5m contour S to enclose (a) 13° 24´·01N., 100° 18´·58E.\nDelete depth, 58, close NE of: (a) above\nInsert depth, 49, and extend 5m contour S to enclose 13° 23´·13N., 100° 14´·47E.\nsymbol, ebb tide stream arrow, direction 170°, 0.5kn, centred\non: (b) 13° 24´·94N., 100° 18´·18E.\nsymbol, flood tide stream arrow, direction 330°, 0.6kn, close N\nof: (b) above\nDelete Th¨ Fl.G.3s7m5M\n13° 25´·78N., 100° 18´·63E.\n4828 VIETNAM - Depths.\nSource: ENC V14S0033\nChart 1039 [ previous update 3945/26 ] WGS84 DATUM\nInsert depth, 131 (a) 10° 33´·82N., 106° 50´·28E.\nDelete depth, 14, close SW of: (a) above\ndepth, 144, close NE of: (a) above\nReplace depth, 89, with depth, 82 10° 35´·45N., 106° 51´·62E.\n2.28\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4829/26",
+      "num": "4829",
+      "type": "PERM",
+      "year": "26",
+      "country": "CHINA",
+      "region": "East Coast",
+      "subject": "Legend. Submarine power cable. Wind farm.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 25.185,
+          "lon": 119.26,
+          "dms": "25° 11.1' N, 119° 15.6' E"
+        },
+        {
+          "lat": 25.16833,
+          "lon": 119.25833,
+          "dms": "25° 10.1' N, 119° 15.5' E"
+        },
+        {
+          "lat": 25.08167,
+          "lon": 119.3,
+          "dms": "25° 04.9' N, 119° 18.0' E"
+        },
+        {
+          "lat": 25.08333,
+          "lon": 119.3,
+          "dms": "25° 05.0' N, 119° 18.0' E"
+        },
+        {
+          "lat": 25.08667,
+          "lon": 119.30667,
+          "dms": "25° 05.2' N, 119° 18.4' E"
+        },
+        {
+          "lat": 25.03833,
+          "lon": 119.36,
+          "dms": "25° 02.3' N, 119° 21.6' E"
+        },
+        {
+          "lat": 25.01,
+          "lon": 119.31167,
+          "dms": "25° 00.6' N, 119° 18.7' E"
+        },
+        {
+          "lat": 25.01833,
+          "lon": 119.28333,
+          "dms": "25° 01.1' N, 119° 17.0' E"
+        },
+        {
+          "lat": 25.04333,
+          "lon": 119.31833,
+          "dms": "25° 02.6' N, 119° 19.1' E"
+        },
+        {
+          "lat": 25.18417,
+          "lon": 119.26,
+          "dms": "25° 11.05' N, 119° 15.60' E"
+        },
+        {
+          "lat": 25.16867,
+          "lon": 119.25767,
+          "dms": "25° 10.12' N, 119° 15.46' E"
+        },
+        {
+          "lat": 25.15933,
+          "lon": 119.2645,
+          "dms": "25° 09.56' N, 119° 15.87' E"
+        },
+        {
+          "lat": 25.15133,
+          "lon": 119.26517,
+          "dms": "25° 09.08' N, 119° 15.91' E"
+        },
+        {
+          "lat": 25.13817,
+          "lon": 119.27417,
+          "dms": "25° 08.29' N, 119° 16.45' E"
+        },
+        {
+          "lat": 25.11667,
+          "lon": 119.28383,
+          "dms": "25° 07.00' N, 119° 17.03' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4829 CHINA - East Coast - Legend. Submarine power cable. Wind farm.\nSource: Chinese Notices 33/1041-1042/26\nChart 1761 [ previous update 4392/26 ] WGS84 DATUM\nInsert submarine power cable, ÉÊÉ , joining:\n25° 11´·1N., 119° 15´·6E.\n25° 10´·1N., 119° 15´·5E.\n25° 04´·9N., 119° 18´·0E.\nlimit of wind farm, pecked line, joining: (a) 25° 05´·0N., 119° 18´·0E.\n(b) 25° 05´·2N., 119° 18´·4E.\n(c) 25° 02´·3N., 119° 21´·6E.\n(d) 25° 00´·6N., 119° 18´·7E.\n(e) 25° 01´·1N., 119° 17´·0E.\nsymbol, wind farm, within: (a)-(e) above\nDelete legend, Wind farm under construction (2025), centred on: 25° 02´·6N., 119° 19´·1E.\nChart 2401 [ previous update 4392/26 ] CGCS 2000 DATUM\nInsert submarine power cable, ÉÊÉ , joining:\n25° 11´·05N., 119° 15´·60E.\n25° 10´·12N., 119° 15´·46E.\n25° 09´·56N., 119° 15´·87E.\n25° 09´·08N., 119° 15´·91E.\n25° 08´·29N., 119° 16´·45E.\n25° 07´·00N., 119° 17´·03E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4831/26",
+      "num": "4831",
+      "type": "PERM",
+      "year": "26",
+      "country": "CHINA",
+      "region": "East Coast",
+      "subject": "Wreck.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 32.01667,
+          "lon": 120.76667,
+          "dms": "32° 01.00' N, 120° 46.00' E"
+        },
+        {
+          "lat": 12.25333,
+          "lon": 109.24,
+          "dms": "12° 15.2' N, 109° 14.4' E"
+        },
+        {
+          "lat": 12.19167,
+          "lon": 109.24,
+          "dms": "12° 11.5' N, 109° 14.4' E"
+        },
+        {
+          "lat": 12.4985,
+          "lon": 109.34967,
+          "dms": "12° 29.91' N, 109° 20.98' E"
+        },
+        {
+          "lat": 12.5065,
+          "lon": 109.3745,
+          "dms": "12° 30.39' N, 109° 22.47' E"
+        },
+        {
+          "lat": 12.55833,
+          "lon": 109.434,
+          "dms": "12° 33.50' N, 109° 26.04' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4831 CHINA - East Coast - Wreck.\nSource: Chinese Notice 37/1216/26\nChart 1605 (Panel A, Changshu Port to Minzhu Sha) [ previous update 4462/26 ] CGCS 2000 DATUM\nInsert ´ Rep (2026) PA\n32° 01´·00N., 120° 46´·00E.\n4833 VIETNAM - Legend. NM Blocks. Rock. Depth.\nSource: ENCs V14S0027 and V14S0028\nChart 3883 (Panel, Baie de Nha Trang) [ previous update 4072/26 ] WGS84 DATUM\nInsert the accompanying block A, centred on: 12° 15´·2N., 109° 14´·4E.\nthe accompanying block B, centred on: 12° 11´·5N., 109° 14´·4E.\nChart 3883 [ previous update 4072/26 ] WGS84 DATUM\nInsert legend, Buoyed, between: 12° 29´·91N., 109° 20´·98E.\n12° 30´·39N., 109° 22´·47E.\n2&+\n, with seabed type, R\n(a) 12° 33´·50N., 109° 26´·04E.\nDelete depth, 33, and associated 5·4m contour, close E of: (a) above\n2.29\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4834/26",
+      "num": "4834",
+      "type": "PERM",
+      "year": "26",
+      "country": "CHINA",
+      "region": "South Coast",
+      "subject": "NM Blocks. Submarine power cables.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 23.24333,
+          "lon": 116.96333,
+          "dms": "23° 14.6' N, 116° 57.8' E"
+        },
+        {
+          "lat": 23.23683,
+          "lon": 116.8055,
+          "dms": "23° 14.21' N, 116° 48.33' E"
+        },
+        {
+          "lat": 23.22667,
+          "lon": 116.85,
+          "dms": "23° 13.60' N, 116° 51.00' E"
+        },
+        {
+          "lat": 23.23667,
+          "lon": 116.80333,
+          "dms": "23° 14.20' N, 116° 48.20' E"
+        },
+        {
+          "lat": 23.2345,
+          "lon": 116.80583,
+          "dms": "23° 14.07' N, 116° 48.35' E"
+        },
+        {
+          "lat": 23.22417,
+          "lon": 116.85,
+          "dms": "23° 13.45' N, 116° 51.00' E"
+        },
+        {
+          "lat": 23.245,
+          "lon": 117.00667,
+          "dms": "23° 14.7' N, 117° 00.4' E"
+        },
+        {
+          "lat": 25.15283,
+          "lon": 121.29167,
+          "dms": "25° 09.17' N, 121° 17.50' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": true,
+      "body": "4834 CHINA - South Coast - NM Blocks. Submarine power cables.\nSource: Chinese Notices 39/1170/25, 50/1559/25, 29/850/26, 29/851/26, 30/898/26 and 30/899/26\nChart 1760 [ previous update 4634/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 23° 14´·6N., 116° 57´·8E.\nChart 1784 [ previous update 4474/26 ] CGCS 2000 DATUM\nInsert submarine power cable, ÉÊÉ , joining:\n23° 14´·21N., 116° 48´·33E.\n23° 13´·60N., 116° 51´·00E.\nand\n23° 14´·20N., 116° 48´·20E.\n23° 14´·07N., 116° 48´·35E.\n23° 13´·45N., 116° 51´·00E.\nChart 1962 [ previous update 4569/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 23° 14´·7N., 117° 00´·4E.\n4836 TAIWAN - Depth. Wreck.\nSource: UKHO\nChart 3658 [ previous update 4616/26 ] WGS84 DATUM\nReplace depth, 138 , with 12(, Wk\n25° 09´·17N., 121° 17´·50E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4843/26",
+      "num": "4843",
+      "type": "PERM",
+      "year": "26",
+      "country": "CHINA",
+      "region": "East Coast",
+      "subject": "NM Block. Submarine power cable.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 30.62667,
+          "lon": 121.54,
+          "dms": "30° 37.6' N, 121° 32.4' E"
+        },
+        {
+          "lat": 30.73617,
+          "lon": 121.38633,
+          "dms": "30° 44.17' N, 121° 23.18' E"
+        },
+        {
+          "lat": 30.733,
+          "lon": 121.3895,
+          "dms": "30° 43.98' N, 121° 23.37' E"
+        },
+        {
+          "lat": 30.72067,
+          "lon": 121.39,
+          "dms": "30° 43.24' N, 121° 23.40' E"
+        },
+        {
+          "lat": 30.70267,
+          "lon": 121.39067,
+          "dms": "30° 42.16' N, 121° 23.44' E"
+        },
+        {
+          "lat": 30.67333,
+          "lon": 121.40333,
+          "dms": "30° 40.40' N, 121° 24.20' E"
+        },
+        {
+          "lat": 30.6505,
+          "lon": 121.41317,
+          "dms": "30° 39.03' N, 121° 24.79' E"
+        },
+        {
+          "lat": 30.64217,
+          "lon": 121.4395,
+          "dms": "30° 38.53' N, 121° 26.37' E"
+        },
+        {
+          "lat": 30.6565,
+          "lon": 121.49617,
+          "dms": "30° 39.39' N, 121° 29.77' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": true,
+      "body": "4843 CHINA - East Coast - NM Block. Submarine power cable.\nSource: Chinese Notices 31/935/26 and 31/936/26\nChart 1143 [ previous update 4562/26 ] CGCS 2000 DATUM\nInsert the accompanying block, centred on: 30° 37´·6N., 121° 32´·4E.\nÉÊÉ\nsubmarine power cable, , joining:\n30° 44´·17N., 121° 23´·18E.\n30° 43´·98N., 121° 23´·37E.\n30° 43´·24N., 121° 23´·40E.\n30° 42´·16N., 121° 23´·44E.\n30° 40´·40N., 121° 24´·20E.\n30° 39´·03N., 121° 24´·79E.\n30° 38´·53N., 121° 26´·37E.\n30° 39´·39N., 121° 29´·77E.\n2.30\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4848/26",
+      "num": "4848",
+      "type": "PERM",
+      "year": "26",
+      "country": "CHINA",
+      "region": "East Coast",
+      "subject": "Pilot boarding places. Maritime limits.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 30.395,
+          "lon": 122.54667,
+          "dms": "30° 23.70' N, 122° 32.80' E"
+        },
+        {
+          "lat": 30.395,
+          "lon": 122.57333,
+          "dms": "30° 23.70' N, 122° 34.40' E"
+        },
+        {
+          "lat": 30.38333,
+          "lon": 122.57333,
+          "dms": "30° 23.00' N, 122° 34.40' E"
+        },
+        {
+          "lat": 30.38333,
+          "lon": 122.54667,
+          "dms": "30° 23.00' N, 122° 32.80' E"
+        },
+        {
+          "lat": 30.52667,
+          "lon": 122.57167,
+          "dms": "30° 31.60' N, 122° 34.30' E"
+        },
+        {
+          "lat": 30.52167,
+          "lon": 122.60167,
+          "dms": "30° 31.30' N, 122° 36.10' E"
+        },
+        {
+          "lat": 30.51333,
+          "lon": 122.6,
+          "dms": "30° 30.80' N, 122° 36.00' E"
+        },
+        {
+          "lat": 30.51833,
+          "lon": 122.57,
+          "dms": "30° 31.10' N, 122° 34.20' E"
+        },
+        {
+          "lat": 30.48667,
+          "lon": 122.56333,
+          "dms": "30° 29.20' N, 122° 33.80' E"
+        },
+        {
+          "lat": 30.48083,
+          "lon": 122.59167,
+          "dms": "30° 28.85' N, 122° 35.50' E"
+        },
+        {
+          "lat": 30.47167,
+          "lon": 122.58833,
+          "dms": "30° 28.30' N, 122° 35.30' E"
+        },
+        {
+          "lat": 30.4775,
+          "lon": 122.56,
+          "dms": "30° 28.65' N, 122° 33.60' E"
+        },
+        {
+          "lat": 19.565,
+          "lon": 105.81333,
+          "dms": "19° 33.9' N, 105° 48.8' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4848 CHINA - East Coast - Pilot boarding places. Maritime limits.\nSource: Chinese Notice 32/987/26\nChart 1305 [ previous update 4752/26 ] CGCS 2000 DATUM\nInsert maritime limit, pecked line, joining: 30° 23´·70N., 122° 32´·80E.\n30° 23´·70N., 122° 34´·40E.\n30° 23´·00N., 122° 34´·40E.\n30° 23´·00N., 122° 32´·80E.\nChart 1306 [ previous update 3361/26 ] CGCS 2000 DATUM\nInsert maritime limit, pecked line, joining: 30° 31´·60N., 122° 34´·30E.\n30° 31´·30N., 122° 36´·10E.\n30° 30´·80N., 122° 36´·00E.\n30° 31´·10N., 122° 34´·20E.\nand\n30° 29´·20N., 122° 33´·80E.\n30° 28´·85N., 122° 35´·50E.\n30° 28´·30N., 122° 35´·30E.\n30° 28´·65N., 122° 33´·60E.\n4854 VIETNAM - Light.\nSource: ENC V1300005\nChart 3990 [ previous update 4516/26 ] WGS84 DATUM\nInsert ¶ Fl(5)15s30m15M\n19° 33´·9N., 105° 48´·8E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4858/26",
+      "num": "4858",
+      "type": "PERM",
+      "year": "26",
+      "country": "CHINA",
+      "region": "East Coast",
+      "subject": "Channel limits.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 26.5,
+          "lon": 119.82517,
+          "dms": "26° 30.00' N, 119° 49.51' E"
+        },
+        {
+          "lat": 26.49217,
+          "lon": 119.82733,
+          "dms": "26° 29.53' N, 119° 49.64' E"
+        },
+        {
+          "lat": 26.5,
+          "lon": 119.82933,
+          "dms": "26° 30.00' N, 119° 49.76' E"
+        },
+        {
+          "lat": 26.49317,
+          "lon": 119.83133,
+          "dms": "26° 29.59' N, 119° 49.88' E"
+        },
+        {
+          "lat": 16.59667,
+          "lon": 107.705,
+          "dms": "16° 35.8' N, 107° 42.3' E"
+        },
+        {
+          "lat": 16.52167,
+          "lon": 107.80667,
+          "dms": "16° 31.3' N, 107° 48.4' E"
+        },
+        {
+          "lat": 16.61667,
+          "lon": 107.65667,
+          "dms": "16° 37.0' N, 107° 39.4' E"
+        },
+        {
+          "lat": 16.59667,
+          "lon": 107.705,
+          "dms": "16° 35.8' N, 107° 42.3' E"
+        },
+        {
+          "lat": 16.60667,
+          "lon": 107.72333,
+          "dms": "16° 36.4' N, 107° 43.4' E"
+        },
+        {
+          "lat": 16.52167,
+          "lon": 107.80667,
+          "dms": "16° 31.3' N, 107° 48.4' E"
+        },
+        {
+          "lat": 18.52667,
+          "lon": 105.93167,
+          "dms": "18° 31.6' N, 105° 55.9' E"
+        },
+        {
+          "lat": 18.51333,
+          "lon": 105.915,
+          "dms": "18° 30.8' N, 105° 54.9' E"
+        },
+        {
+          "lat": 16.61667,
+          "lon": 107.65667,
+          "dms": "16° 37.0' N, 107° 39.4' E"
+        },
+        {
+          "lat": 16.60667,
+          "lon": 107.72333,
+          "dms": "16° 36.4' N, 107° 43.4' E"
+        },
+        {
+          "lat": 16.59667,
+          "lon": 107.705,
+          "dms": "16° 35.8' N, 107° 42.3' E"
+        },
+        {
+          "lat": 31.275,
+          "lon": 122.99833,
+          "dms": "31° 16.5' N, 122° 59.9' E"
+        },
+        {
+          "lat": 30.98,
+          "lon": 123.63333,
+          "dms": "30° 58.8' N, 123° 38.0' E"
+        },
+        {
+          "lat": 31.55,
+          "lon": 122.41333,
+          "dms": "31° 33.00' N, 122° 24.80' E"
+        },
+        {
+          "lat": 31.50167,
+          "lon": 122.48167,
+          "dms": "31° 30.10' N, 122° 28.90' E"
+        },
+        {
+          "lat": 31.365,
+          "lon": 122.80817,
+          "dms": "31° 21.90' N, 122° 48.49' E"
+        },
+        {
+          "lat": 31.27367,
+          "lon": 123.0,
+          "dms": "31° 16.42' N, 123° 00.00' E"
+        },
+        {
+          "lat": 30.98,
+          "lon": 123.63333,
+          "dms": "30° 58.8' N, 123° 38.0' E"
+        },
+        {
+          "lat": 30.91167,
+          "lon": 123.8,
+          "dms": "30° 54.7' N, 123° 48.0' E"
+        },
+        {
+          "lat": 30.90667,
+          "lon": 123.635,
+          "dms": "30° 54.4' N, 123° 38.1' E"
+        },
+        {
+          "lat": 30.795,
+          "lon": 123.75833,
+          "dms": "30° 47.7' N, 123° 45.5' E"
+        },
+        {
+          "lat": 30.30667,
+          "lon": 124.76167,
+          "dms": "30° 18.4' N, 124° 45.7' E"
+        },
+        {
+          "lat": 29.965,
+          "lon": 126.185,
+          "dms": "29° 57.9' N, 126° 11.1' E"
+        },
+        {
+          "lat": 29.70333,
+          "lon": 126.19,
+          "dms": "29° 42.2' N, 126° 11.4' E"
+        },
+        {
+          "lat": 29.28333,
+          "lon": 126.65,
+          "dms": "29° 17.0' N, 126° 39.0' E"
+        },
+        {
+          "lat": 29.00833,
+          "lon": 126.73,
+          "dms": "29° 00.5' N, 126° 43.8' E"
+        },
+        {
+          "lat": 28.66833,
+          "lon": 126.59667,
+          "dms": "28° 40.1' N, 126° 35.8' E"
+        },
+        {
+          "lat": 28.07333,
+          "lon": 126.25167,
+          "dms": "28° 04.4' N, 126° 15.1' E"
+        },
+        {
+          "lat": 27.87,
+          "lon": 126.03833,
+          "dms": "27° 52.2' N, 126° 02.3' E"
+        },
+        {
+          "lat": 27.555,
+          "lon": 125.87333,
+          "dms": "27° 33.3' N, 125° 52.4' E"
+        },
+        {
+          "lat": 27.24167,
+          "lon": 125.77,
+          "dms": "27° 14.5' N, 125° 46.2' E"
+        },
+        {
+          "lat": 26.91,
+          "lon": 125.93833,
+          "dms": "26° 54.6' N, 125° 56.3' E"
+        },
+        {
+          "lat": 26.60833,
+          "lon": 125.93333,
+          "dms": "26° 36.5' N, 125° 56.0' E"
+        },
+        {
+          "lat": 26.37167,
+          "lon": 125.66333,
+          "dms": "26° 22.3' N, 125° 39.8' E"
+        },
+        {
+          "lat": 38.99333,
+          "lon": -123.72167,
+          "dms": "38° 59.6' N, 123° 43.3' W"
+        },
+        {
+          "lat": 39.00333,
+          "lon": -123.725,
+          "dms": "39° 00.2' N, 123° 43.5' W"
+        },
+        {
+          "lat": 39.12667,
+          "lon": -123.815,
+          "dms": "39° 07.6' N, 123° 48.9' W"
+        },
+        {
+          "lat": 39.15833,
+          "lon": -123.96,
+          "dms": "39° 09.5' N, 123° 57.6' W"
+        },
+        {
+          "lat": 38.99167,
+          "lon": -123.755,
+          "dms": "38° 59.5' N, 123° 45.3' W"
+        },
+        {
+          "lat": 38.94167,
+          "lon": -123.91667,
+          "dms": "38° 56.5' N, 123° 55.0' W"
+        },
+        {
+          "lat": 38.93333,
+          "lon": -123.93167,
+          "dms": "38° 56.0' N, 123° 55.9' W"
+        },
+        {
+          "lat": 31.46833,
+          "lon": 122.56,
+          "dms": "31° 28.1' N, 122° 33.6' E"
+        },
+        {
+          "lat": 31.355,
+          "lon": 122.83,
+          "dms": "31° 21.3' N, 122° 49.8' E"
+        },
+        {
+          "lat": 30.89833,
+          "lon": 123.81,
+          "dms": "30° 53.9' N, 123° 48.6' E"
+        },
+        {
+          "lat": 38.994,
+          "lon": -123.7225,
+          "dms": "38° 59.64' N, 123° 43.35' W"
+        },
+        {
+          "lat": 39.003,
+          "lon": -123.725,
+          "dms": "39° 00.18' N, 123° 43.50' W"
+        },
+        {
+          "lat": 39.12633,
+          "lon": -123.81583,
+          "dms": "39° 07.58' N, 123° 48.95' W"
+        },
+        {
+          "lat": 39.158,
+          "lon": -123.95967,
+          "dms": "39° 09.48' N, 123° 57.58' W"
+        },
+        {
+          "lat": 38.99217,
+          "lon": -123.755,
+          "dms": "38° 59.53' N, 123° 45.30' W"
+        },
+        {
+          "lat": 38.94167,
+          "lon": -123.91667,
+          "dms": "38° 56.50' N, 123° 55.00' W"
+        },
+        {
+          "lat": 38.93333,
+          "lon": -123.932,
+          "dms": "38° 56.00' N, 123° 55.92' W"
+        },
+        {
+          "lat": 12.2005,
+          "lon": 109.218,
+          "dms": "12° 12.03' N, 109° 13.08' E"
+        },
+        {
+          "lat": 12.20033,
+          "lon": 109.2185,
+          "dms": "12° 12.02' N, 109° 13.11' E"
+        },
+        {
+          "lat": 12.2,
+          "lon": 109.21867,
+          "dms": "12° 12.00' N, 109° 13.12' E"
+        },
+        {
+          "lat": 12.19917,
+          "lon": 109.21817,
+          "dms": "12° 11.95' N, 109° 13.09' E"
+        },
+        {
+          "lat": 12.19867,
+          "lon": 109.21783,
+          "dms": "12° 11.92' N, 109° 13.07' E"
+        },
+        {
+          "lat": 12.198,
+          "lon": 109.217,
+          "dms": "12° 11.88' N, 109° 13.02' E"
+        },
+        {
+          "lat": 12.19817,
+          "lon": 109.21683,
+          "dms": "12° 11.89' N, 109° 13.01' E"
+        },
+        {
+          "lat": 12.19917,
+          "lon": 109.218,
+          "dms": "12° 11.95' N, 109° 13.08' E"
+        },
+        {
+          "lat": 12.20017,
+          "lon": 109.2185,
+          "dms": "12° 12.01' N, 109° 13.11' E"
+        },
+        {
+          "lat": 12.20033,
+          "lon": 109.218,
+          "dms": "12° 12.02' N, 109° 13.08' E"
+        },
+        {
+          "lat": 12.2035,
+          "lon": 109.2185,
+          "dms": "12° 12.21' N, 109° 13.11' E"
+        },
+        {
+          "lat": 12.1915,
+          "lon": 109.2195,
+          "dms": "12° 11.49' N, 109° 13.17' E"
+        },
+        {
+          "lat": 12.189,
+          "lon": 109.21967,
+          "dms": "12° 11.34' N, 109° 13.18' E"
+        },
+        {
+          "lat": 12.16033,
+          "lon": 109.222,
+          "dms": "12° 09.62' N, 109° 13.32' E"
+        },
+        {
+          "lat": 12.16033,
+          "lon": 109.2185,
+          "dms": "12° 09.62' N, 109° 13.11' E"
+        },
+        {
+          "lat": 12.2275,
+          "lon": 109.2295,
+          "dms": "12° 13.65' N, 109° 13.77' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4858 CHINA - East Coast - Channel limits.\nSource: Chinese Notice 33/1039/26\nChart 2416 [ previous update 168/26 ] CGCS 2000 DATUM\nInsert limit of channel, pecked line, joining: 26° 30´·00N., 119° 49´·51E.\n26° 29´·53N., 119° 49´·64E.\nand\n26° 30´·00N., 119° 49´·76E.\n26° 29´·59N., 119° 49´·88E.\n4878 VIETNAM - Rocks.\nSource: ENCs V1300007 and V1300012\nChart 3488 (INT 552) [ previous update 4203/26 ] WGS84 DATUM\nInsert .\n16° 35´·8N., 107° 42´·3E.\n16° 31´·3N., 107° 48´·4E.\n2.31\nWk42/26\nII\n4878 VIETNAM - Rocks. (continued)\nChart 3988 [ previous update 4203/26 ] WGS84 DATUM\nInsert .\n16° 37´·0N., 107° 39´·4E.\n16° 35´·8N., 107° 42´·3E.\n16° 36´·4N., 107° 43´·4E.\n16° 31´·3N., 107° 48´·4E.\nChart 3989 [ previous update 3794/26 ] WGS84 DATUM\nInsert .\n18° 31´·6N., 105° 55´·9E.\n18° 30´·8N., 105° 54´·9E.\n16° 37´·0N., 107° 39´·4E.\n16° 36´·4N., 107° 43´·4E.\n16° 35´·8N., 107° 42´·3E.\n4879 EASTERN CHINA SEA - Submarine cables.\nSource: UKHO\nChart 1199 [ previous update 4685/26 ] CGCS 2000 DATUM\nInsert submarine cable, É , joining:\n31° 16´·5N., 122° 59´·9E.\n30° 58´·8N., 123° 38´·0E.\nChart 1602 [ previous update 4685/26 ] CGCS 2000 DATUM\nInsert submarine cable, É , joining:\n31° 33´·00N., 122° 24´·80E.\n31° 30´·10N., 122° 28´·90E.\n31° 21´·90N., 122° 48´·49E.\n31° 16´·42N., 123° 00´·00E.\n2.32\nWk42/26\nII\n4879 EASTERN CHINA SEA - Submarine cables. (continued)\nChart 2412 [ previous update 4718/26 ] WGS84 DATUM\nInsert submarine cable, É , joining:\n30° 58´·8N., 123° 38´·0E.\n30° 54´·7N., 123° 48´·0E.\nand\n30°",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4884/26",
+      "num": "4884",
+      "type": "PERM",
+      "year": "26",
+      "country": "THAILAND",
+      "region": "West Coast",
+      "subject": "Depths. Drying heights. Legends. Wreck.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 8.3715,
+          "lon": 98.101,
+          "dms": "8° 22.29' N, 98° 06.06' E"
+        },
+        {
+          "lat": 8.3715,
+          "lon": 98.101,
+          "dms": "8° 22.29' N, 98° 06.06' E"
+        },
+        {
+          "lat": 8.3305,
+          "lon": 98.219,
+          "dms": "8° 19.83' N, 98° 13.14' E"
+        },
+        {
+          "lat": 8.259,
+          "lon": 98.24567,
+          "dms": "8° 15.54' N, 98° 14.74' E"
+        },
+        {
+          "lat": 8.203,
+          "lon": 98.27867,
+          "dms": "8° 12.18' N, 98° 16.72' E"
+        },
+        {
+          "lat": 8.19817,
+          "lon": 98.276,
+          "dms": "8° 11.89' N, 98° 16.56' E"
+        },
+        {
+          "lat": 8.173,
+          "lon": 98.34683,
+          "dms": "8° 10.38' N, 98° 20.81' E"
+        },
+        {
+          "lat": 8.14983,
+          "lon": 98.35433,
+          "dms": "8° 08.99' N, 98° 21.26' E"
+        },
+        {
+          "lat": 8.2365,
+          "lon": 98.251,
+          "dms": "8° 14.19' N, 98° 15.06' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4884 THAILAND - West Coast - Depths. Drying heights. Legends. Wreck.\nSource: Thai Chart 376 and ENC TH300308\nChart 3052 [ previous update 3930/26 ] WGS84 DATUM\nInsert depth, 34 8° 22´·29N., 98° 06´·06E.\nChart 3941 [ previous update 3930/26 ] WGS84 DATUM\nInsert depth, 34 8° 22´·29N., 98° 06´·06E.\nlegend, Marine Farms (see Note), centred on: 8° 19´·83N., 98° 13´·14E.\nlegend, Fish Havens (see Note), centred on: 8° 15´·54N., 98° 14´·74E.\ndrying height,29 , and extend 0m low water line SW to\nenclose (a) 8° 12´·18N., 98° 16´·72E.\nDelete depth, 19 , close SW of: (a) above\nInsert drying height, 13 , and extend 0m low water line W to enclose 8° 11´·89N., 98° 16´·56E.\n®\n8° 10´·38N., 98° 20´·81E.\ndepth, 15 , enclosed by 2m contour (b) 8° 08´·99N., 98° 21´·26E.\nDelete depth, 28 , close SW of: (b) above\ndepth, 61 , close SE of: (b) above\nlegend, Marine Farms (see Note), centred on: 8° 14´·19N., 98° 15´·06E.\n2.34\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4885/26",
+      "num": "4885",
+      "type": "PERM",
+      "year": "26",
+      "country": "CHINA",
+      "region": "South Coast",
+      "subject": "Buoy.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 20.94167,
+          "lon": 111.98,
+          "dms": "20° 56.5' N, 111° 58.8' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4885 CHINA - South Coast - Buoy.\nSource: Chinese Notice 33/1046/26\nChart 1555 [ previous update 4737/26 ] CGCS 2000 DATUM\nDelete GoY Fl(2)5s L1\n20° 56´·5N., 111° 58´·8E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4827/26",
+      "num": "4827",
+      "type": "PERM",
+      "year": "26",
+      "country": "RUSSIA",
+      "region": "Pacific Ocean Coast",
+      "subject": "Buoyage. Automatic Identification Systems.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 49.12317,
+          "lon": 140.35083,
+          "dms": "49° 07.39' N, 140° 21.05' E"
+        },
+        {
+          "lat": 49.12083,
+          "lon": 140.35483,
+          "dms": "49° 07.25' N, 140° 21.29' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4827 RUSSIA - Pacific Ocean Coast - Buoyage. Automatic Identification Systems.\nSource: Russian Notice 38/3615/26\nNote:Former Notice 3671(T)/24 is cancelled.\nChart 2161 (Panel A, Port Vanino) [ previous update 3576/26 ] WGS84 DATUM\nInsert G\\d Fl.R.3s '4'\n(a) 49° 07´·39N., 140° 21´·05E.\nG\\d\nFl.R.3s '2'\n(b) 49° 07´·25N., 140° 21´·29E.\nAutomatic Identification System, AIS, at light-buoy (a) above\n(b) above",
+      "cancels": [
+        "3671(T)/24"
+      ],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4844/26",
+      "num": "4844",
+      "type": "PERM",
+      "year": "26",
+      "country": "KOREA",
+      "region": "West Coast",
+      "subject": "Buoy. Obstruction.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 34.242,
+          "lon": 126.139,
+          "dms": "34° 14.52' N, 126° 08.34' E"
+        },
+        {
+          "lat": 34.74267,
+          "lon": 126.21833,
+          "dms": "34° 44.56' N, 126° 13.10' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4844 KOREA - West Coast - Buoy. Obstruction.\nSource: Korean Notices 33/474-475/26\nChart 3928 [ previous update 3700/26 ] WGS84 DATUM\nInsert Ef ODAS\n34° 14´·52N., 126° 08´·34E.\nDelete 25, Obstn\n34° 44´·56N., 126° 13´·10E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4846/26",
+      "num": "4846",
+      "type": "PERM",
+      "year": "26",
+      "country": "KOREA",
+      "region": "South Coast",
+      "subject": "Light.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 35.04367,
+          "lon": 128.992,
+          "dms": "35° 02.62' N, 128° 59.52' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4846 KOREA - South Coast - Light.\nSource: Korean Notice 34/492/26\nNote:This update is included in New Edition 1259, published late 2026.\nChart 1065 [ previous update 4559/26 ] WGS84 DATUM\nAmend range of light to, 7M 35° 02´·62N., 128° 59´·52E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4882/26",
+      "num": "4882",
+      "type": "PERM",
+      "year": "26",
+      "country": "KOREA",
+      "region": "West Coast",
+      "subject": "NM Block.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 34.74667,
+          "lon": 126.35833,
+          "dms": "34° 44.8' N, 126° 21.5' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4882 KOREA - West Coast - NM Block.\nSource: Korean Notice 32/451/26\nChart 1007 [ previous update 4095/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 34° 44´·8N., 126° 21´·5E.\n2.35\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4838/26",
+      "num": "4838",
+      "type": "PERM",
+      "year": "26",
+      "country": "INDONESIA",
+      "region": "Kalimantan",
+      "subject": "NM Block. Light.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": -0.27833,
+          "lon": 109.07333,
+          "dms": "0° 16.7' S, 109° 04.4' E"
+        },
+        {
+          "lat": -0.275,
+          "lon": 109.04833,
+          "dms": "0° 16.5' S, 109° 02.9' E"
+        },
+        {
+          "lat": -0.27833,
+          "lon": 109.07333,
+          "dms": "0° 16.7' S, 109° 04.4' E"
+        },
+        {
+          "lat": -0.275,
+          "lon": 109.04833,
+          "dms": "0° 16.5' S, 109° 02.9' E"
+        },
+        {
+          "lat": -0.28167,
+          "lon": 109.06167,
+          "dms": "0° 16.9' S, 109° 03.7' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4838 INDONESIA - Kalimantan - NM Block. Light.\nSource: Indonesian Notice 34/245/26\nChart 1312 [ previous update 4793/26 ] WGS84 DATUM\nMove ¶ Fl(3)15s12M, from:\n0° 16´·7S., 109° 04´·4E.\nto: 0° 16´·5S., 109° 02´·9E.\nChart 2870 [ previous update 4793/26 ] WGS84 DATUM\nMove ¶ Fl(3)15s12M, from:\n0° 16´·7S., 109° 04´·4E.\nto: 0° 16´·5S., 109° 02´·9E.\nChart 3721 [ previous update New Edition 23/07/2026 ] WGS84 DATUM\nInsert the accompanying block, centred on: 0° 16´·9S., 109° 03´·7E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4802/26",
+      "num": "4802",
+      "type": "PERM",
+      "year": "26",
+      "country": "AUSTRALIA",
+      "region": "Western Australia",
+      "subject": "Buoy. Legend. Beacon.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": -20.81333,
+          "lon": 115.55333,
+          "dms": "20° 48.8' S, 115° 33.2' E"
+        },
+        {
+          "lat": -20.81533,
+          "lon": 115.555,
+          "dms": "20° 48.92' S, 115° 33.30' E"
+        },
+        {
+          "lat": -20.8125,
+          "lon": 115.54917,
+          "dms": "20° 48.75' S, 115° 32.95' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4802 AUSTRALIA - Western Australia - Buoy. Legend. Beacon.\nSource: Australian Notice 19/808/26\nChart Aus 327 [ previous update 4353/26 ] WGS84 DATUM\nDelete symbol, mooring buoy 20° 48´·8S., 115° 33´·2E.\nChart Aus 743 [ previous update 3225/26 ] WGS84 DATUM\nDelete symbol, mooring buoy and associated legend, Moorings 20° 48´·92S., 115° 33´·30E.\nK\n20° 48´·75S., 115° 32´·95E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4803/26",
+      "num": "4803",
+      "type": "PERM",
+      "year": "26",
+      "country": "AUSTRALIA",
+      "region": "Victoria",
+      "subject": "Wreck. Fouls.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": -37.92667,
+          "lon": 144.84833,
+          "dms": "37° 55.6' S, 144° 50.9' E"
+        },
+        {
+          "lat": -37.89983,
+          "lon": 144.89917,
+          "dms": "37° 53.99' S, 144° 53.95' E"
+        },
+        {
+          "lat": -37.88883,
+          "lon": 144.89833,
+          "dms": "37° 53.33' S, 144° 53.90' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4803 AUSTRALIA - Victoria - Wreck. Fouls.\nSource: Australian Notice 19/817/26\nChart Aus 143 [ previous update 4119/26 ] WGS84 DATUM\nReplace 10#, Wk with 10(, Wk\n37° 55´·6S., 144° 50´·9E.\nDelete «\n37° 53´·99S., 144° 53´·95E.\n37° 53´·33S., 144° 53´·90E.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4870/26",
+      "num": "4870",
+      "type": "PERM",
+      "year": "26",
+      "country": "NEW ZEALAND",
+      "region": "North Island",
+      "subject": "NM Block.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": -41.31,
+          "lon": 174.855,
+          "dms": "41° 18.6' S, 174° 51.3' E"
+        },
+        {
+          "lat": -64.9145,
+          "lon": -63.59383,
+          "dms": "64° 54.87' S, 63° 35.63' W"
+        },
+        {
+          "lat": -64.91267,
+          "lon": -63.59683,
+          "dms": "64° 54.76' S, 63° 35.81' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4870 NEW ZEALAND - North Island - NM Block.\nSource: New Zealand Notice 19/63/26\nChart NZ 463 [ previous update New Edition 01/09/2025 ] WGS84 DATUM\nInsert the accompanying block, centred on: 41° 18´·6S., 174° 51´·3E.\n2.36\nWk42/26\nII\n4821* ANTARCTICA - Light.\nSource: UKHO\nChart 446 (INT 9158) [ previous update 5171/24 ] WGS84 DATUM\nDelete ¶ Fl.13s7m5M\n64° 54´·87S., 63° 35´·63W.\nChart 3566 [ previous update 5167/24 ] UNDETERMINED DATUM\nDelete ¶ Fl.13s23ft5M\n64° 54´·76S., 63° 35´·81W.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4835/26",
+      "num": "4835",
+      "type": "PERM",
+      "year": "26",
+      "country": "BRAZIL",
+      "region": "South Coast",
+      "subject": "NM Block. Depths.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": -22.88,
+          "lon": -43.19833,
+          "dms": "22° 52.8' S, 43° 11.9' W"
+        },
+        {
+          "lat": -22.89217,
+          "lon": -43.15883,
+          "dms": "22° 53.53' S, 43° 09.53' W"
+        },
+        {
+          "lat": -22.89,
+          "lon": -43.14583,
+          "dms": "22° 53.40' S, 43° 08.75' W"
+        },
+        {
+          "lat": -22.9065,
+          "lon": -43.14317,
+          "dms": "22° 54.39' S, 43° 08.59' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4835 BRAZIL - South Coast - NM Block. Depths.\nSource: Brazilian Notice 12/S 62/26 and ENC BR501511\nChart 566 [ previous update 3542/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 22° 52´·8S., 43° 11´·9W.\ndepth, 285 (a) 22° 53´·53S., 43° 09´·53W.\nDelete depth, 21, close E of: (a) above\nInsert depth, 189, and extend 20m contour W to enclose (b) 22° 53´·40S., 43° 08´·75W.\nDelete depth, 215, close SW of: (b) above\nReplace depth, 151, with depth, 162 22° 54´·39S., 43° 08´·59W.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4855/26",
+      "num": "4855",
+      "type": "PERM",
+      "year": "26",
+      "country": "BRAZIL",
+      "region": "East Coast",
+      "subject": "NM Block.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": -14.765,
+          "lon": -39.03,
+          "dms": "14° 45.9' S, 39° 01.8' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4855 BRAZIL - East Coast - NM Block.\nSource: Brazilian Notice 13/E 69/26 and ENC BR501211\nChart 551 (Panel D, Ilhéus) [ previous update 3440/26 ] WGS84 DATUM\nInsert the accompanying block, centred on: 14° 45´·9S., 39° 01´·8W.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4774/26",
+      "num": "4774",
+      "type": "PERM",
+      "year": "26",
+      "country": "UNITED STATES OF AMERICA",
+      "region": "East Coast",
+      "subject": "Anchorage areas. Legends. Depths. Light.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 33.8,
+          "lon": -78.25,
+          "dms": "33° 48.0' N, 78° 15.0' W"
+        },
+        {
+          "lat": 33.8,
+          "lon": -78.10667,
+          "dms": "33° 48.0' N, 78° 06.4' W"
+        },
+        {
+          "lat": 33.76667,
+          "lon": -78.10667,
+          "dms": "33° 46.0' N, 78° 06.4' W"
+        },
+        {
+          "lat": 33.76667,
+          "lon": -78.25,
+          "dms": "33° 46.0' N, 78° 15.0' W"
+        },
+        {
+          "lat": 33.76667,
+          "lon": -78.28667,
+          "dms": "33° 46.0' N, 78° 17.2' W"
+        },
+        {
+          "lat": 33.8,
+          "lon": -78.28667,
+          "dms": "33° 48.0' N, 78° 17.2' W"
+        },
+        {
+          "lat": 33.79967,
+          "lon": -78.24967,
+          "dms": "33° 47.98' N, 78° 14.98' W"
+        },
+        {
+          "lat": 33.79967,
+          "lon": -78.107,
+          "dms": "33° 47.98' N, 78° 06.42' W"
+        },
+        {
+          "lat": 33.767,
+          "lon": -78.107,
+          "dms": "33° 46.02' N, 78° 06.42' W"
+        },
+        {
+          "lat": 33.767,
+          "lon": -78.24967,
+          "dms": "33° 46.02' N, 78° 14.98' W"
+        },
+        {
+          "lat": 33.767,
+          "lon": -78.28717,
+          "dms": "33° 46.02' N, 78° 17.23' W"
+        },
+        {
+          "lat": 33.79967,
+          "lon": -78.28717,
+          "dms": "33° 47.98' N, 78° 17.23' W"
+        },
+        {
+          "lat": 33.72317,
+          "lon": -78.02483,
+          "dms": "33° 43.39' N, 78° 01.49' W"
+        },
+        {
+          "lat": 33.79967,
+          "lon": -78.18,
+          "dms": "33° 47.98' N, 78° 10.80' W"
+        },
+        {
+          "lat": 33.79967,
+          "lon": -78.107,
+          "dms": "33° 47.98' N, 78° 06.42' W"
+        },
+        {
+          "lat": 33.767,
+          "lon": -78.107,
+          "dms": "33° 46.02' N, 78° 06.42' W"
+        },
+        {
+          "lat": 33.76683,
+          "lon": -78.18,
+          "dms": "33° 46.01' N, 78° 10.80' W"
+        },
+        {
+          "lat": 33.85417,
+          "lon": -78.02767,
+          "dms": "33° 51.25' N, 78° 01.66' W"
+        },
+        {
+          "lat": 33.8925,
+          "lon": -78.01333,
+          "dms": "33° 53.55' N, 78° 00.80' W"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4774 UNITED STATES OF AMERICA - East Coast - Anchorage areas. Legends. Depths. Light.\nSource: ENC US4NC1AC\nChart 2864 [ previous update 3327/26 ] NAD83 DATUM\nInsert limit of anchorage area, pecked line, joining: (a) 33° 48´·0N., 78° 15´·0W.\n(b) 33° 48´·0N., 78° 06´·4W.\n(c) 33° 46´·0N., 78° 06´·4W.\n(d) 33° 46´·0N., 78° 15´·0W.\nand\n(e) (d) above\n(f) 33° 46´·0N., 78° 17´·2W.\n(g) 33° 48´·0N., 78° 17´·2W.\n(h) (a) above\n½\nlegend, A, within:\n(a)-(d) above\n½\nlegend, B, within:\n(e)-(h) above\n2.37\nWk42/26\nII\n4774 UNITED STATES OF AMERICA - East Coast - Anchorage areas. Legends. Depths. Light. (continued)\nChart 3687 [ previous update 2235/26 ] NAD83 DATUM\nInsert limit of anchorage area, pecked line, joining: (a) 33° 47´·98N., 78° 14´·98W.\n(b) 33° 47´·98N., 78° 06´·42W.\n(c) 33° 46´·02N., 78° 06´·42W.\n(d) 33° 46´·02N., 78° 14´·98W.\nand\n(e) (d) above\n(f) 33° 46´·02N., 78° 17´·23W.\n(g) 33° 47´·98N., 78° 17´·23W.\n(h) (a) above\n½\nlegend, 'A' DW, within:\n(a)-(d) above\n½\nlegend, 'B' Explosives, within:\n(e)-(h) above\ndepth, 30, enclosed by 30ft contour 33° 43´·39N., 78° 01´·49W.\nChart 3688 [ previous update 4614/26 ] NAD83 DATUM\nInsert limit of anchorage area, pecked line, joining: (a) 33° 47´·98N., 78° 10´·80W.\n(b) 33° 47´·98N., 78° 06´·42W.\n(c) 33° 46´·02N., 78° 06´·42W.\n(d) 33° 46´·01N., 78° 10´·80W.\n½\nlegend, 'A' DW, within:\n(a)-(d) above\ndepth, 29, and extend 30ft contour N to enclose (e) 33° 51´·25N., 78° 01´·66W.\nDelete depth, 31, close S of: (e) above\nAmend light to, Iso.6s101ft & 2Fl.4",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true,
+      "subPolygons": [
+        {
+          "name": "Anchorage areas (Zone 1)",
+          "category": "anchorage_area",
+          "coords": [
+            {
+              "lat": 33.8,
+              "lon": -78.25,
+              "dms": "33° 48.0' N, 78° 15.0' W"
+            },
+            {
+              "lat": 33.8,
+              "lon": -78.10667,
+              "dms": "33° 48.0' N, 78° 06.4' W"
+            },
+            {
+              "lat": 33.76667,
+              "lon": -78.10667,
+              "dms": "33° 46.0' N, 78° 06.4' W"
+            },
+            {
+              "lat": 33.76667,
+              "lon": -78.25,
+              "dms": "33° 46.0' N, 78° 15.0' W"
+            }
+          ],
+          "points": [
+            [
+              33.8,
+              -78.25
+            ],
+            [
+              33.8,
+              -78.10667
+            ],
+            [
+              33.76667,
+              -78.10667
+            ],
+            [
+              33.76667,
+              -78.25
+            ]
+          ]
+        },
+        {
+          "name": "Anchorage areas (Zone 2)",
+          "category": "anchorage_area",
+          "coords": [
+            {
+              "lat": 33.76667,
+              "lon": -78.28667,
+              "dms": "33° 46.0' N, 78° 17.2' W"
+            },
+            {
+              "lat": 33.8,
+              "lon": -78.28667,
+              "dms": "33° 48.0' N, 78° 17.2' W"
+            },
+            {
+              "lat": 33.79967,
+              "lon": -78.24967,
+              "dms": "33° 47.98' N, 78° 14.98' W"
+            },
+            {
+              "lat": 33.79967,
+              "lon": -78.107,
+              "dms": "33° 47.98' N, 78° 06.42' W"
+            },
+            {
+              "lat": 33.767,
+              "lon": -78.107,
+              "dms": "33° 46.02' N, 78° 06.42' W"
+            },
+            {
+              "lat": 33.767,
+              "lon": -78.24967,
+              "dms": "33° 46.02' N, 78° 14.98' W"
+            }
+          ],
+          "points": [
+            [
+              33.76667,
+              -78.28667
+            ],
+            [
+              33.8,
+              -78.28667
+            ],
+            [
+              33.79967,
+              -78.24967
+            ],
+            [
+              33.79967,
+              -78.107
+            ],
+            [
+              33.767,
+              -78.107
+            ],
+            [
+              33.767,
+              -78.24967
+            ]
+          ]
+        },
+        {
+          "name": "Anchorage areas (Zone 3)",
+          "category": "anchorage_area",
+          "coords": [
+            {
+              "lat": 33.767,
+              "lon": -78.28717,
+              "dms": "33° 46.02' N, 78° 17.23' W"
+            },
+            {
+              "lat": 33.79967,
+              "lon": -78.28717,
+              "dms": "33° 47.98' N, 78° 17.23' W"
+            },
+            {
+              "lat": 33.72317,
+              "lon": -78.02483,
+              "dms": "33° 43.39' N, 78° 01.49' W"
+            },
+            {
+              "lat": 33.79967,
+              "lon": -78.18,
+              "dms": "33° 47.98' N, 78° 10.80' W"
+            },
+            {
+              "lat": 33.79967,
+              "lon": -78.107,
+              "dms": "33° 47.98' N, 78° 06.42' W"
+            },
+            {
+              "lat": 33.767,
+              "lon": -78.107,
+              "dms": "33° 46.02' N, 78° 06.42' W"
+            },
+            {
+              "lat": 33.76683,
+              "lon": -78.18,
+              "dms": "33° 46.01' N, 78° 10.80' W"
+            },
+            {
+              "lat": 33.85417,
+              "lon": -78.02767,
+              "dms": "33° 51.25' N, 78° 01.66' W"
+            },
+            {
+              "lat": 33.8925,
+              "lon": -78.01333,
+              "dms": "33° 53.55' N, 78° 00.80' W"
+            }
+          ],
+          "points": [
+            [
+              33.767,
+              -78.28717
+            ],
+            [
+              33.79967,
+              -78.28717
+            ],
+            [
+              33.72317,
+              -78.02483
+            ],
+            [
+              33.79967,
+              -78.18
+            ],
+            [
+              33.79967,
+              -78.107
+            ],
+            [
+              33.767,
+              -78.107
+            ],
+            [
+              33.76683,
+              -78.18
+            ],
+            [
+              33.85417,
+              -78.02767
+            ],
+            [
+              33.8925,
+              -78.01333
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4777/26",
+      "num": "4777",
+      "type": "PERM",
+      "year": "26",
+      "country": "CANADA",
+      "region": "Nova Scotia",
+      "subject": "Obstruction. Depth.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 42.765,
+          "lon": -66.36333,
+          "dms": "42° 45.9' N, 66° 21.8' W"
+        },
+        {
+          "lat": 42.765,
+          "lon": -66.36333,
+          "dms": "42° 45.9' N, 66° 21.8' W"
+        },
+        {
+          "lat": 42.765,
+          "lon": -66.36333,
+          "dms": "42° 45.9' N, 66° 21.8' W"
+        },
+        {
+          "lat": 42.765,
+          "lon": -66.36333,
+          "dms": "42° 45.9' N, 66° 21.8' W"
+        },
+        {
+          "lat": 42.765,
+          "lon": -66.36333,
+          "dms": "42° 45.9' N, 66° 21.8' W"
+        },
+        {
+          "lat": 42.765,
+          "lon": -66.36333,
+          "dms": "42° 45.9' N, 66° 21.8' W"
+        },
+        {
+          "lat": 42.765,
+          "lon": -66.36333,
+          "dms": "42° 45.9' N, 66° 21.8' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4777 CANADA - Nova Scotia - Obstruction. Depth.\nSource: Canadian Notice 7/4011-4012/26\nChart 2670 [ previous update 4409/26 ] WGS84 DATUM\nInsert + Obstn PA Rep (2026)\n42° 45´·9N., 66° 21´·8W.\nChart 4011 (INT 11) [ previous update 3425/26 ] WGS84 DATUM\nInsert + Obstn PA Rep (2026)\n(a) 42° 45´·9N., 66° 21´·8W.\nDelete depth, 29, close NE of: (a) above\nChart 4013 (INT 13) [ previous update New Edition 31/07/2025 ] WGS84 DATUM\nInsert + Obstn PA Rep (2026)\n(a) 42° 45´·9N., 66° 21´·8W.\nDelete depth, 29, close NE of: (a) above\nChart 4403 (INT 403) [ previous update 3774/26 ] WGS84 DATUM\nInsert + Obstn PA Rep (2026)\n42° 45´·9N., 66° 21´·8W.\n2.38\nWk42/26\nII\n4777 CANADA - Nova Scotia - Obstruction. Depth. (continued)\nChart 4404 (INT 404) [ previous update 1786/26 ] WGS84 DATUM\nInsert + Obstn PA Rep (2026)\n42° 45´·9N., 66° 21´·8W.\nChart 4746 [ previous update 4291/26 ] NAD83 DATUM\nInsert + Obstn PA Rep (2026)\n42° 45´·9N., 66° 21´·8W.\nChart 4747 [ previous update 3386/26 ] NAD83 DATUM\nInsert + Obstn PA Rep (2026)\n42° 45´·9N., 66° 21´·8W.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4780/26",
+      "num": "4780",
+      "type": "PERM",
+      "year": "26",
+      "country": "UNITED STATES OF AMERICA",
+      "region": "East Coast",
+      "subject": "Light.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 40.095,
+          "lon": -74.85433,
+          "dms": "40° 05.70' N, 74° 51.26' W"
+        },
+        {
+          "lat": 40.095,
+          "lon": -74.8545,
+          "dms": "40° 05.70' N, 74° 51.27' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4780 UNITED STATES OF AMERICA - East Coast - Light.\nSource: ENC US5PHLEH\nChart 2605 (Panel 2) [ previous update 3692/26 ] NAD83 DATUM\nAmend light to, F.G.35ft & Fl.4s.15ft 40° 05´·70N., 74° 51´·26W.\nChart 2605 (Panel 3) [ previous update 3692/26 ] NAD83 DATUM\nAmend light to, F.G.35ft & Fl.4s.15ft 40° 05´·70N., 74° 51´·27W.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4823/26",
+      "num": "4823",
+      "type": "PERM",
+      "year": "26",
+      "country": "UNITED STATES OF AMERICA",
+      "region": "East Coast",
+      "subject": "Buoyage.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 40.2825,
+          "lon": -73.35183,
+          "dms": "40° 16.95' N, 73° 21.11' W"
+        },
+        {
+          "lat": 40.26067,
+          "lon": -73.21983,
+          "dms": "40° 15.64' N, 73° 13.19' W"
+        },
+        {
+          "lat": 40.26,
+          "lon": -73.22,
+          "dms": "40° 15.6' N, 73° 13.2' W"
+        },
+        {
+          "lat": 40.28333,
+          "lon": -73.35167,
+          "dms": "40° 17.0' N, 73° 21.1' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4823 UNITED STATES OF AMERICA - East Coast - Buoyage.\nSource: ENC US3NY1AE\nChart 2755 [ previous update 447/26 ] NAD83 DATUM\nInsert Gf Fl.Y.4s 'NYB-SE'\n40° 16´·95N., 73° 21´·11W.\nDelete former Gf Fl.Y.4s 'NYB-SE'\n40° 15´·64N., 73° 13´·19W.\nChart 2860 [ previous update 4409/26 ] NAD83 DATUM\nMove Gf Fl.Y.4s 'NYB-SE', from:\n40° 15´·6N., 73° 13´·2W.\nto: 40° 17´·0N., 73° 21´·1W.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4851/26",
+      "num": "4851",
+      "type": "PERM",
+      "year": "26",
+      "country": "UNITED STATES OF AMERICA",
+      "region": "East Coast",
+      "subject": "Buoyage.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 40.98333,
+          "lon": -71.23667,
+          "dms": "40° 59.0' N, 71° 14.2' W"
+        },
+        {
+          "lat": 41.00833,
+          "lon": -71.22167,
+          "dms": "41° 00.5' N, 71° 13.3' W"
+        },
+        {
+          "lat": 40.98333,
+          "lon": -71.23667,
+          "dms": "40° 59.0' N, 71° 14.2' W"
+        },
+        {
+          "lat": 41.00833,
+          "lon": -71.22167,
+          "dms": "41° 00.5' N, 71° 13.3' W"
+        },
+        {
+          "lat": 40.98267,
+          "lon": -71.23667,
+          "dms": "40° 58.96' N, 71° 14.20' W"
+        },
+        {
+          "lat": 41.009,
+          "lon": -71.2215,
+          "dms": "41° 00.54' N, 71° 13.29' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4851 UNITED STATES OF AMERICA - East Coast - Buoyage.\nSource: ENC US2ATLPD\nChart 2492 [ previous update 4409/26 ] NAD83 DATUM\nDelete Gf Fl.Y.20s 'SP1'\n40° 59´·0N., 71° 14´·2W.\nGf\nFl.Y.20s 'SP2'\n41° 00´·5N., 71° 13´·3W.\n2.39\nWk42/26\nII\n4851 UNITED STATES OF AMERICA - East Coast - Buoyage. (continued)\nChart 2860 [ previous update 4823/26 ] NAD83 DATUM\nDelete Gf Fl.Y.20s 'SP1'\n40° 59´·0N., 71° 14´·2W.\nGf\nFl.Y.20s 'SP2'\n41° 00´·5N., 71° 13´·3W.\nChart 2890 [ previous update 2792/26 ] NAD83 DATUM\nDelete Gf Fl.Y.20s 'SP1'\n40° 58´·96N., 71° 14´·20W.\nGf\nFl.Y.20s 'SP2'\n41° 00´·54N., 71° 13´·29W.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4875/26",
+      "num": "4875",
+      "type": "PERM",
+      "year": "26",
+      "country": "CANADA",
+      "region": "Gulf of Saint Lawrence",
+      "subject": "Buoy.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 47.7085,
+          "lon": -64.66417,
+          "dms": "47° 42.51' N, 64° 39.85' W"
+        },
+        {
+          "lat": 47.71017,
+          "lon": -64.65417,
+          "dms": "47° 42.61' N, 64° 39.25' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4875 CANADA - Gulf of Saint Lawrence - Buoy.\nSource: Canadian Notice 8/4486/26\nChart 4768 [ previous update 3093/26 ] NAD83 DATUM\nMove Jw Mo(A) TJ, from:\n47° 42´·51N., 64° 39´·85W.\nto: 47° 42´·61N., 64° 39´·25W.",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4815(T)/26",
+      "num": "4815",
+      "type": "T",
+      "year": "26",
+      "country": "SCOTLAND",
+      "region": "Orkney Islands",
+      "subject": "Superbuoy.",
+      "charts": [
+        "2250",
+        "2584",
+        "2"
+      ],
+      "coords": [
+        {
+          "lat": 58.96183,
+          "lon": -2.80767,
+          "dms": "58° 57.71' N, 2° 48.46' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4815(T)/26 SCOTLAND - Orkney Islands - Superbuoy.\nSource: Leask Marine\n1. A yellow superbuoy, Fl Y. 5s, has been established in position 58° 57´·71N., 2° 48´·46W.\n2. Mariners are advised to navigate with caution in the area.\n(ETRS89 DATUM)\nCharts affected - 2250 - 2584\n2.40\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4817(P)/26",
+      "num": "4817",
+      "type": "P",
+      "year": "26",
+      "country": "ENGLAND",
+      "region": "South Coast",
+      "subject": "Pontoon. Works. Jetty.",
+      "charts": [
+        "2021",
+        "5600_6"
+      ],
+      "coords": [
+        {
+          "lat": 50.79965,
+          "lon": -1.41935,
+          "dms": "50° 47.979' N, 1° 25.161' W"
+        },
+        {
+          "lat": 50.79978,
+          "lon": -1.41683,
+          "dms": "50° 47.987' N, 1° 25.010' W"
+        },
+        {
+          "lat": 50.7996,
+          "lon": -1.41678,
+          "dms": "50° 47.976' N, 1° 25.007' W"
+        },
+        {
+          "lat": 50.7995,
+          "lon": -1.4193,
+          "dms": "50° 47.970' N, 1° 25.158' W"
+        },
+        {
+          "lat": 50.79998,
+          "lon": -1.42097,
+          "dms": "50° 47.999' N, 1° 25.258' W"
+        },
+        {
+          "lat": 50.79967,
+          "lon": -1.42055,
+          "dms": "50° 47.980' N, 1° 25.233' W"
+        },
+        {
+          "lat": 50.79955,
+          "lon": -1.42087,
+          "dms": "50° 47.973' N, 1° 25.252' W"
+        },
+        {
+          "lat": 50.79947,
+          "lon": -1.42102,
+          "dms": "50° 47.968' N, 1° 25.261' W"
+        },
+        {
+          "lat": 50.79947,
+          "lon": -1.42122,
+          "dms": "50° 47.968' N, 1° 25.273' W"
+        },
+        {
+          "lat": 50.79948,
+          "lon": -1.42128,
+          "dms": "50° 47.969' N, 1° 25.277' W"
+        },
+        {
+          "lat": 50.79982,
+          "lon": -1.4215,
+          "dms": "50° 47.989' N, 1° 25.290' W"
+        },
+        {
+          "lat": 50.79998,
+          "lon": -1.42142,
+          "dms": "50° 47.999' N, 1° 25.285' W"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4817(P)/26 ENGLAND - South Coast - Pontoon. Works. Jetty.\nSource: Marina Projects\n1. Pontoon extension works are taking place in an area bound by the following positions:\n50° 47´·979N., 1° 25´·161W.\n50° 47´·987N., 1° 25´·010W.\n50° 47´·976N., 1° 25´·007W.\n50° 47´·970N., 1° 25´·158W.\n2. Jetty replacement work are taking place in an area bound by the following positions:\n50° 47´·999N., 1° 25´·258W.\n50° 47´·980N., 1° 25´·233W.\n50° 47´·973N., 1° 25´·252W.\n50° 47´·968N., 1° 25´·261W.\n50° 47´·968N., 1° 25´·273W.\n50° 47´·969N., 1° 25´·277W.\n50° 47´·989N., 1° 25´·290W.\n50° 47´·999N., 1° 25´·285W.\n3. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(ETRS89 DATUM)\nCharts affected - 2021 - 5600_6",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true,
+      "subPolygons": [
+        {
+          "name": "Works Area",
+          "category": "works_area",
+          "coords": [
+            {
+              "lat": 50.79965,
+              "lon": -1.41935,
+              "dms": "50° 47.979' N, 1° 25.161' W"
+            },
+            {
+              "lat": 50.79978,
+              "lon": -1.41683,
+              "dms": "50° 47.987' N, 1° 25.010' W"
+            },
+            {
+              "lat": 50.7996,
+              "lon": -1.41678,
+              "dms": "50° 47.976' N, 1° 25.007' W"
+            },
+            {
+              "lat": 50.7995,
+              "lon": -1.4193,
+              "dms": "50° 47.970' N, 1° 25.158' W"
+            }
+          ],
+          "points": [
+            [
+              50.79965,
+              -1.41935
+            ],
+            [
+              50.79978,
+              -1.41683
+            ],
+            [
+              50.7996,
+              -1.41678
+            ],
+            [
+              50.7995,
+              -1.4193
+            ]
+          ]
+        },
+        {
+          "name": "Jetty replacement work are taking place in an area bound by the following positions:",
+          "category": "general",
+          "coords": [
+            {
+              "lat": 50.79998,
+              "lon": -1.42097,
+              "dms": "50° 47.999' N, 1° 25.258' W"
+            },
+            {
+              "lat": 50.79967,
+              "lon": -1.42055,
+              "dms": "50° 47.980' N, 1° 25.233' W"
+            },
+            {
+              "lat": 50.79955,
+              "lon": -1.42087,
+              "dms": "50° 47.973' N, 1° 25.252' W"
+            },
+            {
+              "lat": 50.79947,
+              "lon": -1.42102,
+              "dms": "50° 47.968' N, 1° 25.261' W"
+            },
+            {
+              "lat": 50.79947,
+              "lon": -1.42122,
+              "dms": "50° 47.968' N, 1° 25.273' W"
+            },
+            {
+              "lat": 50.79948,
+              "lon": -1.42128,
+              "dms": "50° 47.969' N, 1° 25.277' W"
+            },
+            {
+              "lat": 50.79982,
+              "lon": -1.4215,
+              "dms": "50° 47.989' N, 1° 25.290' W"
+            },
+            {
+              "lat": 50.79998,
+              "lon": -1.42142,
+              "dms": "50° 47.999' N, 1° 25.285' W"
+            }
+          ],
+          "points": [
+            [
+              50.79998,
+              -1.42097
+            ],
+            [
+              50.79967,
+              -1.42055
+            ],
+            [
+              50.79955,
+              -1.42087
+            ],
+            [
+              50.79947,
+              -1.42102
+            ],
+            [
+              50.79947,
+              -1.42122
+            ],
+            [
+              50.79948,
+              -1.42128
+            ],
+            [
+              50.79982,
+              -1.4215
+            ],
+            [
+              50.79998,
+              -1.42142
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4845(T)/26",
+      "num": "4845",
+      "type": "T",
+      "year": "26",
+      "country": "SCOTLAND",
+      "region": "West Coast",
+      "subject": "Scientific instruments.",
+      "charts": [
+        "1994"
+      ],
+      "coords": [
+        {
+          "lat": 56.01007,
+          "lon": -4.79282,
+          "dms": "56° 00.604' N, 4° 47.569' W"
+        },
+        {
+          "lat": 56.01178,
+          "lon": -4.78708,
+          "dms": "56° 00.707' N, 4° 47.225' W"
+        },
+        {
+          "lat": 55.99708,
+          "lon": -4.7623,
+          "dms": "55° 59.825' N, 4° 45.738' W"
+        },
+        {
+          "lat": 56.00212,
+          "lon": -4.7581,
+          "dms": "56° 00.127' N, 4° 45.486' W"
+        },
+        {
+          "lat": 56.00073,
+          "lon": -4.75453,
+          "dms": "56° 00.044' N, 4° 45.272' W"
+        },
+        {
+          "lat": 55.99843,
+          "lon": -4.75202,
+          "dms": "55° 59.906' N, 4° 45.121' W"
+        },
+        {
+          "lat": 55.99443,
+          "lon": -4.75962,
+          "dms": "55° 59.666' N, 4° 45.577' W"
+        },
+        {
+          "lat": 55.99192,
+          "lon": -4.76042,
+          "dms": "55° 59.515' N, 4° 45.625' W"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4845(T)/26 SCOTLAND - West Coast - Scientific instruments.\nSource: KHM Clyde NM 15/26\n1. Eight Passive Acoustic Monitoring instruments, have been established on the seabed in the following positions:\nPosition\n56° 00´·604N., 4° 47´·569W.\n56° 00´·707N., 4° 47´·225W.\n55° 59´·825N., 4° 45´·738W.\n56° 00´·127N., 4° 45´·486W.\n56° 00´·044N., 4° 45´·272W.\n55° 59´·906N., 4° 45´·121W.\n55° 59´·666N., 4° 45´·577W.\n55° 59´·515N., 4° 45´·625W.\n2. Mariners are advised to navigate with caution in the area\n(ETRS89 DATUM)\nCharts affected - 1994 (INT 1636) - 2000 - 5610_3",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4863(T)/26",
+      "num": "4863",
+      "type": "T",
+      "year": "26",
+      "country": "ENGLAND",
+      "region": "East Coast",
+      "subject": "Buoy.",
+      "charts": [
+        "106",
+        "1408",
+        "1506",
+        "2"
+      ],
+      "coords": [
+        {
+          "lat": 52.98383,
+          "lon": 2.30033,
+          "dms": "52° 59.03' N, 2° 18.02' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4863(T)/26 ENGLAND - East Coast - Buoy.\nSource: Perenco\n1. An isolated danger buoy, Fl(2)W, has been deployed, until the completion of the debris clearance campaign at Leman\nSouthwest, in position 52° 59´·03N., 2° 18´·02E.\n2. Mariners are advised to navigate with caution in the area.\n(ETRS89 DATUM)\nCharts affected - 106 - 1408 - 1506\n2.41\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4864(T)/26",
+      "num": "4864",
+      "type": "T",
+      "year": "26",
+      "country": "IRELAND",
+      "region": "South Coast",
+      "subject": "Works. Overhead cables. Vertical clearance.",
+      "charts": [
+        "2046",
+        "5622_4"
+      ],
+      "coords": [
+        {
+          "lat": 52.26617,
+          "lon": -7.12483,
+          "dms": "52° 15.97' N, 7° 07.49' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4864(T)/26 IRELAND - South Coast - Works. Overhead cables. Vertical clearance.\nSource: Port of Waterford\n1. Works are taking place until Summer 2027 to transfer conductors crossing the River Suir between Gibbet Hill and Mt\nMisery to new towers in the vicinity of position 52° 15´·97N., 7° 07´·49W.\n2. During the period of the works the vertical clearance of overhead cables will be reduced to 30m.\n3. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(ETRS89 DATUM)\nCharts affected - 2046 - 5622_4",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4811(T)/26",
+      "num": "4811",
+      "type": "T",
+      "year": "26",
+      "country": "RUSSIA",
+      "region": "Barents Sea Coast",
+      "subject": "Wreck.",
+      "charts": [
+        "2966"
+      ],
+      "coords": [
+        {
+          "lat": 69.10483,
+          "lon": 33.3695,
+          "dms": "69° 06.29' N, 33° 22.17' E"
+        },
+        {
+          "lat": 69.10733,
+          "lon": 33.37533,
+          "dms": "69° 06.44' N, 33° 22.52' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4811(T)/26 RUSSIA - Barents Sea Coast - Wreck.\nSource: Russian Notice 38/3559(T)/26\n1. A wreck, 58m in width, exists between positions 69° 06´·29N., 33° 22´·17E. and 69° 06´·44N., 33° 22´·52E.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nChart affected - 2966",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4772(T)/26",
+      "num": "4772",
+      "type": "T",
+      "year": "26",
+      "country": "SWEDEN",
+      "region": "East Coast",
+      "subject": "Fouls.",
+      "charts": [
+        "837"
+      ],
+      "coords": [
+        {
+          "lat": 58.98767,
+          "lon": 18.23967,
+          "dms": "58° 59.26' N, 18° 14.38' E"
+        },
+        {
+          "lat": 58.91533,
+          "lon": 18.059,
+          "dms": "58° 54.92' N, 18° 03.54' E"
+        },
+        {
+          "lat": 58.84933,
+          "lon": 18.06633,
+          "dms": "58° 50.96' N, 18° 03.98' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4772(T)/26 SWEDEN - East Coast - Fouls.\nSource: Swedish Notice 1136/20346(T)/26\n1. Foul grounds have been established in the following positions:\n58° 59´·26N., 18° 14´·38E.\n58° 54´·92N., 18° 03´·54E.\n58° 50´·96N., 18° 03´·98E.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nCharts affected - 837 (INT 1232) - 864 (INT 1764) - 2055 (INT 1204) - 2073 (INT 1205)",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4773(T)/26",
+      "num": "4773",
+      "type": "T",
+      "year": "26",
+      "country": "SWEDEN",
+      "region": "West Coast",
+      "subject": "Works.",
+      "charts": [
+        "869"
+      ],
+      "coords": [
+        {
+          "lat": 58.30583,
+          "lon": 11.69867,
+          "dms": "58° 18.35' N, 11° 41.92' E"
+        },
+        {
+          "lat": 54.50483,
+          "lon": 18.61333,
+          "dms": "54° 30.29' N, 18° 36.80' E"
+        },
+        {
+          "lat": 54.48283,
+          "lon": 18.61283,
+          "dms": "54° 28.97' N, 18° 36.77' E"
+        },
+        {
+          "lat": 54.49667,
+          "lon": 18.61333,
+          "dms": "54° 29.80' N, 18° 36.80' E"
+        },
+        {
+          "lat": 51.33217,
+          "lon": 3.1625,
+          "dms": "51° 19.93' N, 3° 09.75' E"
+        },
+        {
+          "lat": 51.32183,
+          "lon": 3.134,
+          "dms": "51° 19.31' N, 3° 08.04' E"
+        },
+        {
+          "lat": 51.33183,
+          "lon": 2.91283,
+          "dms": "51° 19.91' N, 2° 54.77' E"
+        },
+        {
+          "lat": 51.3395,
+          "lon": 2.84217,
+          "dms": "51° 20.37' N, 2° 50.53' E"
+        },
+        {
+          "lat": 51.38117,
+          "lon": 2.78633,
+          "dms": "51° 22.87' N, 2° 47.18' E"
+        },
+        {
+          "lat": 51.4615,
+          "lon": 2.6325,
+          "dms": "51° 27.69' N, 2° 37.95' E"
+        },
+        {
+          "lat": 51.51983,
+          "lon": 2.5075,
+          "dms": "51° 31.19' N, 2° 30.45' E"
+        },
+        {
+          "lat": 51.52917,
+          "lon": 2.51883,
+          "dms": "51° 31.75' N, 2° 31.13' E"
+        },
+        {
+          "lat": 51.471,
+          "lon": 2.64383,
+          "dms": "51° 28.26' N, 2° 38.63' E"
+        },
+        {
+          "lat": 51.3895,
+          "lon": 2.7995,
+          "dms": "51° 23.37' N, 2° 47.97' E"
+        },
+        {
+          "lat": 51.35033,
+          "lon": 2.85217,
+          "dms": "51° 21.02' N, 2° 51.13' E"
+        },
+        {
+          "lat": 51.34333,
+          "lon": 2.915,
+          "dms": "51° 20.60' N, 2° 54.90' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4773(T)/26 SWEDEN - West Coast - Works.\nSource: Swedish Notice 1136/20385(T)/26\n1. Maintenance works are taking place at Nötesundsbron Bridge, in position 58° 18´·35N., 11° 41´·92E.\n2. The works are being carried out by a floating platform and work boat. The floating platform is equipped with reflectors\nand lights.\n3. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nChart affected - 869 (INT 1311)\n2.42\nWk42/26\nII\n4818(T)/26 POLAND - Buoyage. Automatic Identification System.\nSource: Polish Notice 31/381(T)/26\n1. Survey gauges, marked by yellow special purpose light-buoys, Fl(5)Y.20s, each with associated Automatic Identification\nSystem, AIS, have been established, until further notice, in the following positions:\n54° 30´·29N., 18° 36´·80E.\n54° 28´·97N., 18° 36´·77E.\n54° 29´·80N., 18° 36´·80E.\n(WGS84 DATUM)\nChart affected - 2688 (INT 1288)\n4862(P)/26 BELGIUM - Submarine power cables. Works. Restricted area.\nSource: Belgian Notice 20/143(P)/26\n1. A submarine power cable area has been established.\n2. Submarine cable laying works are taking place in the area, bounded by the following positions:\n51° 19´·93N., 3° 09´·75E.\n51° 19´·31N., 3° 08´·04E.\n51° 19´·91N., 2° 54´·77E.\n51° 20´·37N., 2° 50´·53E.\n51° 22´·87N., 2° 47´·18E.\n51° 27´·69N., 2° 37´·95E.\n51° 31´·19N., 2° 30´·45E.\n51° 31´·75N., 2° 31´·13E.\n51° 28´·26N., 2° 38´·63E.\n51° 23´·37N., 2° 47´·97E.\n51° 21´·02N., 2° 51´·13E.\n51° 20´·60N., 2° 54´·90E.\n3. Anchoring and fishing are prohibited within the works",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4860(P)/26",
+      "num": "4860",
+      "type": "P",
+      "year": "26",
+      "country": "PORTUGAL",
+      "region": "West Coast",
+      "subject": "Depths.",
+      "charts": [
+        "3228",
+        "2"
+      ],
+      "coords": [
+        {
+          "lat": 40.13807,
+          "lon": -8.8762,
+          "dms": "40° 08.284' N, 8° 52.572' W"
+        },
+        {
+          "lat": 40.14103,
+          "lon": -8.87885,
+          "dms": "40° 08.462' N, 8° 52.731' W"
+        },
+        {
+          "lat": 40.13897,
+          "lon": -8.87705,
+          "dms": "40° 08.338' N, 8° 52.623' W"
+        },
+        {
+          "lat": 40.14218,
+          "lon": -8.87837,
+          "dms": "40° 08.531' N, 8° 52.702' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4860(P)/26 PORTUGAL - West Coast - Depths.\nSource: Portuguese Notice 7/228/26\n1. Numerous changes to depths within the approaches to Figueira da Foz\n2. Depths less than charted exist. The most significant are as follows:\nDepth Position\n3·9m 40° 08´·284N., 8° 52´·572W.\n4·1m 40° 08´·462N., 8° 52´·731W.\n7·3m 40° 08´·338N., 8° 52´·623W.\n5·9m 40° 08´·531N., 8° 52´·702W.\n3. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n4. These changes will be included in a New Edition of Chart 3228 to be published late 2026.\n5. Former Notice 3460(T)/26 is cancelled.\n(WGS84 DATUM)\nChart affected - 3228\n2.43\nWk42/26\nII",
+      "cancels": [
+        "3460(T)/26"
+      ],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4865(T)/26",
+      "num": "4865",
+      "type": "T",
+      "year": "26",
+      "country": "PORTUGAL",
+      "region": "West Coast",
+      "subject": "Buoy.",
+      "charts": [
+        "87",
+        "3634",
+        "3635"
+      ],
+      "coords": [
+        {
+          "lat": 40.18617,
+          "lon": -9.50083,
+          "dms": "40° 11.17' N, 9° 30.05' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4865(T)/26 PORTUGAL - West Coast - Buoy.\nSource: Portuguese Notice 7/232(T)/26\n1. The yellow ODAS light-buoy, Fl(5)Y.20s EOLOS E15, in position 40° 11´·17N., 9° 30´·05W., has been removed.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nCharts affected - 87 - 3634 - 3635",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4867(T)/26",
+      "num": "4867",
+      "type": "T",
+      "year": "26",
+      "country": "PORTUGAL",
+      "region": "West Coast",
+      "subject": "Buoy.",
+      "charts": [
+        "87",
+        "3635"
+      ],
+      "coords": [
+        {
+          "lat": 39.08683,
+          "lon": -9.63233,
+          "dms": "39° 05.21' N, 9° 37.94' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4867(T)/26 PORTUGAL - West Coast - Buoy.\nSource: Portuguese Notice 7/233(T)/26\n1. The yellow ODAS light-buoy, Fl(5)Y.20s EOLOS E42, in position 39° 05´·21N., 9° 37´·94W., has been removed.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(WGS84 DATUM)\nCharts affected - 87 - 3635",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4868(T)/26",
+      "num": "4868",
+      "type": "T",
+      "year": "26",
+      "country": "PORTUGAL",
+      "region": "South Coast",
+      "subject": "Anchorage area. Buoyage.",
+      "charts": [
+        "83",
+        "4847"
+      ],
+      "coords": [
+        {
+          "lat": 36.969,
+          "lon": -7.8725,
+          "dms": "36° 58.14' N, 7° 52.35' W"
+        },
+        {
+          "lat": 36.97133,
+          "lon": -7.87367,
+          "dms": "36° 58.28' N, 7° 52.42' W"
+        },
+        {
+          "lat": 36.9715,
+          "lon": -7.873,
+          "dms": "36° 58.29' N, 7° 52.38' W"
+        },
+        {
+          "lat": 36.96917,
+          "lon": -7.87183,
+          "dms": "36° 58.15' N, 7° 52.31' W"
+        },
+        {
+          "lat": 25.30667,
+          "lon": -15.17,
+          "dms": "25° 18.4' N, 15° 10.2' W"
+        },
+        {
+          "lat": 45.59533,
+          "lon": 13.61167,
+          "dms": "45° 35.72' N, 13° 36.70' E"
+        },
+        {
+          "lat": 25.124,
+          "lon": 52.44767,
+          "dms": "25° 07.44' N, 52° 26.86' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4868(T)/26 PORTUGAL - South Coast - Anchorage area. Buoyage.\nSource: Portuguese Notice 7/240(T)/26\n1. A temporary anchorage, marked by yellow special purpose light buoys, has been established in an area bounded by the\nfollowing positions:\n36° 58´·14N., 7° 52´·35W.\n36° 58´·28N., 7° 52´·42W.\n36° 58´·29N., 7° 52´·38W.\n36° 58´·15N., 7° 52´·31W.\n2. Anchoring is only permitted from sunrise to sunset, and only the use of anchors is allowed; the use of mooring buoys is\nprohibited.\n3. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(WGS84 DATUM)\nChart affected - 83\n4847(T)/26 NORTH ATLANTIC OCEAN - Wreck.\nSource: French Notice 36/1(P)/26\n1. A wreck has been reported in position 25° 18´·4N., 15° 10´·2W.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nChart affected - 3134\n2.44\nWk42/26\nII\n4790(T)/26 SLOVENIA - Military practice area.\nSource: Slovenian Notice 9/1(T)/26\n1. Military exercises using explosives are taking place, until 16 October 2026, in the vicinity of position\n45° 35´·72N., 13° 36´·70E.\n2. Mariners are required to maintain a minimum passing distance of 1,000m.\n(WGS84 DATUM)\nCharts affected - 204 - 1461\n4856(T)/26 QATAR - Buoy.\nSource: QatarEnergy\n1. A special purpose buoy, Mo(O)12s, has been established in position 25° 07´·44N., 52° 26´·86E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4881(P)/26",
+      "num": "4881",
+      "type": "P",
+      "year": "26",
+      "country": "INDIAN OCEAN",
+      "region": "Seychelles",
+      "subject": "Marine Reserves. Restricted areas.",
+      "charts": [
+        "716"
+      ],
+      "coords": [
+        {
+          "lat": -3.7285,
+          "lon": 55.08433,
+          "dms": "3° 43.71' S, 55° 05.06' E"
+        },
+        {
+          "lat": -3.6915,
+          "lon": 55.22167,
+          "dms": "3° 41.49' S, 55° 13.30' E"
+        },
+        {
+          "lat": -3.74583,
+          "lon": 55.25617,
+          "dms": "3° 44.75' S, 55° 15.37' E"
+        },
+        {
+          "lat": -3.781,
+          "lon": 55.11333,
+          "dms": "3° 46.86' S, 55° 06.80' E"
+        },
+        {
+          "lat": -5.40117,
+          "lon": 53.25667,
+          "dms": "5° 24.07' S, 53° 15.40' E"
+        },
+        {
+          "lat": -5.40083,
+          "lon": 53.31,
+          "dms": "5° 24.05' S, 53° 18.60' E"
+        },
+        {
+          "lat": -5.43917,
+          "lon": 53.31,
+          "dms": "5° 26.35' S, 53° 18.60' E"
+        },
+        {
+          "lat": -5.43933,
+          "lon": 53.25683,
+          "dms": "5° 26.36' S, 53° 15.41' E"
+        },
+        {
+          "lat": -5.72333,
+          "lon": 53.295,
+          "dms": "5° 43.4' S, 53° 17.7' E"
+        },
+        {
+          "lat": -5.46833,
+          "lon": 53.29667,
+          "dms": "5° 28.1' S, 53° 17.8' E"
+        },
+        {
+          "lat": -5.46667,
+          "lon": 53.18,
+          "dms": "5° 28.0' S, 53° 10.8' E"
+        },
+        {
+          "lat": -5.72333,
+          "lon": 53.17833,
+          "dms": "5° 43.4' S, 53° 10.7' E"
+        },
+        {
+          "lat": -6.17333,
+          "lon": 52.73667,
+          "dms": "6° 10.4' S, 52° 44.2' E"
+        },
+        {
+          "lat": -5.85,
+          "lon": 53.05,
+          "dms": "5° 51.0' S, 53° 03.0' E"
+        },
+        {
+          "lat": -6.155,
+          "lon": 53.165,
+          "dms": "6° 09.3' S, 53° 09.9' E"
+        },
+        {
+          "lat": -6.36167,
+          "lon": 52.965,
+          "dms": "6° 21.7' S, 52° 57.9' E"
+        },
+        {
+          "lat": -8.0,
+          "lon": 43.19833,
+          "dms": "8° 00.0' S, 43° 11.9' E"
+        },
+        {
+          "lat": -10.45,
+          "lon": 44.85,
+          "dms": "10° 27.0' S, 44° 51.0' E"
+        },
+        {
+          "lat": -11.14,
+          "lon": 45.76833,
+          "dms": "11° 08.4' S, 45° 46.1' E"
+        },
+        {
+          "lat": -10.65,
+          "lon": 46.91167,
+          "dms": "10° 39.0' S, 46° 54.7' E"
+        },
+        {
+          "lat": -11.02,
+          "lon": 48.485,
+          "dms": "11° 01.2' S, 48° 29.1' E"
+        },
+        {
+          "lat": -10.28333,
+          "lon": 49.43333,
+          "dms": "10° 17.0' S, 49° 26.0' E"
+        },
+        {
+          "lat": -11.03833,
+          "lon": 50.15667,
+          "dms": "11° 02.3' S, 50° 09.4' E"
+        },
+        {
+          "lat": -8.015,
+          "lon": 50.165,
+          "dms": "8° 00.9' S, 50° 09.9' E"
+        },
+        {
+          "lat": -3.66667,
+          "lon": 56.115,
+          "dms": "3° 40.0' S, 56° 06.9' E"
+        },
+        {
+          "lat": -3.5,
+          "lon": 55.18333,
+          "dms": "3° 30.0' S, 55° 11.0' E"
+        },
+        {
+          "lat": -4.5,
+          "lon": 53.29667,
+          "dms": "4° 30.0' S, 53° 17.8' E"
+        },
+        {
+          "lat": -6.38167,
+          "lon": 52.505,
+          "dms": "6° 22.9' S, 52° 30.3' E"
+        },
+        {
+          "lat": -8.0,
+          "lon": 52.5,
+          "dms": "8° 00.0' S, 52° 30.0' E"
+        },
+        {
+          "lat": -8.00333,
+          "lon": 57.5,
+          "dms": "8° 00.2' S, 57° 30.0' E"
+        },
+        {
+          "lat": -5.52167,
+          "lon": 57.5,
+          "dms": "5° 31.3' S, 57° 30.0' E"
+        },
+        {
+          "lat": -3.78067,
+          "lon": 55.64183,
+          "dms": "3° 46.84' S, 55° 38.51' E"
+        },
+        {
+          "lat": -3.78067,
+          "lon": 55.69017,
+          "dms": "3° 46.84' S, 55° 41.41' E"
+        },
+        {
+          "lat": -3.83283,
+          "lon": 55.69,
+          "dms": "3° 49.97' S, 55° 41.40' E"
+        },
+        {
+          "lat": -3.83283,
+          "lon": 55.64167,
+          "dms": "3° 49.97' S, 55° 38.50' E"
+        },
+        {
+          "lat": -5.57167,
+          "lon": 53.56,
+          "dms": "5° 34.3' S, 53° 33.6' E"
+        },
+        {
+          "lat": -5.57,
+          "lon": 53.735,
+          "dms": "5° 34.2' S, 53° 44.1' E"
+        },
+        {
+          "lat": -5.725,
+          "lon": 53.73667,
+          "dms": "5° 43.5' S, 53° 44.2' E"
+        },
+        {
+          "lat": -5.725,
+          "lon": 53.56,
+          "dms": "5° 43.5' S, 53° 33.6' E"
+        },
+        {
+          "lat": -5.72333,
+          "lon": 53.27667,
+          "dms": "5° 43.4' S, 53° 16.6' E"
+        },
+        {
+          "lat": -5.80333,
+          "lon": 53.27667,
+          "dms": "5° 48.2' S, 53° 16.6' E"
+        },
+        {
+          "lat": -5.80333,
+          "lon": 53.335,
+          "dms": "5° 48.2' S, 53° 20.1' E"
+        },
+        {
+          "lat": -5.72333,
+          "lon": 53.33333,
+          "dms": "5° 43.4' S, 53° 20.0' E"
+        },
+        {
+          "lat": -6.98167,
+          "lon": 52.70333,
+          "dms": "6° 58.9' S, 52° 42.2' E"
+        },
+        {
+          "lat": -6.98167,
+          "lon": 52.79,
+          "dms": "6° 58.9' S, 52° 47.4' E"
+        },
+        {
+          "lat": -7.18167,
+          "lon": 52.79167,
+          "dms": "7° 10.9' S, 52° 47.5' E"
+        },
+        {
+          "lat": -7.18167,
+          "lon": 52.70333,
+          "dms": "7° 10.9' S, 52° 42.2' E"
+        },
+        {
+          "lat": -8.65,
+          "lon": 51.2,
+          "dms": "8° 39.0' S, 51° 12.0' E"
+        },
+        {
+          "lat": -9.06667,
+          "lon": 50.46667,
+          "dms": "9° 04.0' S, 50° 28.0' E"
+        },
+        {
+          "lat": -10.5,
+          "lon": 50.76667,
+          "dms": "10° 30.0' S, 50° 46.0' E"
+        },
+        {
+          "lat": -10.33333,
+          "lon": 51.48333,
+          "dms": "10° 20.0' S, 51° 29.0' E"
+        },
+        {
+          "lat": -10.09533,
+          "lon": 51.0115,
+          "dms": "10° 05.72' S, 51° 00.69' E"
+        },
+        {
+          "lat": -10.09517,
+          "lon": 51.20233,
+          "dms": "10° 05.71' S, 51° 12.14' E"
+        },
+        {
+          "lat": -10.273,
+          "lon": 51.2025,
+          "dms": "10° 16.38' S, 51° 12.15' E"
+        },
+        {
+          "lat": -10.27317,
+          "lon": 51.0115,
+          "dms": "10° 16.39' S, 51° 00.69' E"
+        },
+        {
+          "lat": -9.56667,
+          "lon": 47.81667,
+          "dms": "9° 34.0' S, 47° 49.0' E"
+        },
+        {
+          "lat": -9.38333,
+          "lon": 47.56667,
+          "dms": "9° 23.0' S, 47° 34.0' E"
+        },
+        {
+          "lat": -9.65,
+          "lon": 47.23333,
+          "dms": "9° 39.0' S, 47° 14.0' E"
+        },
+        {
+          "lat": -10.3,
+          "lon": 47.6,
+          "dms": "10° 18.0' S, 47° 36.0' E"
+        },
+        {
+          "lat": -10.3,
+          "lon": 48.03333,
+          "dms": "10° 18.0' S, 48° 02.0' E"
+        },
+        {
+          "lat": 1.46167,
+          "lon": 104.45,
+          "dms": "1° 27.70' N, 104° 27.00' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4881(P)/26 INDIAN OCEAN - Seychelles - Marine Reserves. Restricted areas.\nSource: Seychelles Maritime Safety Authority\n1. Numerous Marine Protected Areas have been established within The Seychelles.\n2. New Marine National Parks, with numerous restrictions and prohibitions to fishing, dumping and mining, have been\nestablished joining:\nName Position\nBird Island (Île Aux Vaches) Marine National Park 3° 43´·71S., 55° 05´·06E.\n3° 41´·49S., 55° 13´·30E.\n3° 44´·75S., 55° 15´·37E.\n3° 46´·86S., 55° 06´·80E.\nD'Arros Atoll Marine National Park 5° 24´·07S., 53° 15´·40E.\n5° 24´·05S., 53° 18´·60E.\n5° 26´·35S., 53° 18´·60E.\n5° 26´·36S., 53° 15´·41E.\nD'Arros to Poivre Atolls Marine National Park 5° 43´·4S., 53° 17´·7E.\n5° 28´·1S., 53° 17´·8E.\n5° 28´·0S., 53° 10´·8E.\n5° 43´·4S., 53° 10´·7E.\nAmirantes South Marine National Park 6° 10´·4S., 52° 44´·2E.\n5° 51´·0S., 53° 03´·0E.\n6° 09´·3S., 53° 09´·9E.\n6° 21´·7S., 52° 57´·9E.\n3. and\nAldabra Group Marine National Park 8° 00´·0S., 43° 11´·9E.\n10° 27´·0S., 44° 51´·0E.\n11° 08´·4S., 45° 46´·1E.\n10° 39´·0S., 46° 54´·7E.\n11° 01´·2S., 48° 29´·1E.\n10° 17´·0S., 49° 26´·0E.\n11° 02´·3S., 50° 09´·4E.\n8° 00´·9S., 50° 09´·9E.\n2.45\nWk42/26\nII\n4881(P)/26 INDIAN OCEAN - Seychelles - Marine Reserves. Restricted areas. (continued)\n4. New Marine Sustainable Use Areas, with numerous restrictions and prohibitions to dumping and mining, have been\nestablished joining:\nName Position\nAmirantes to Fortune Bank Marine Sustainable Use Area 3° 40´·0S., 56° 06´·9E.\n3° 30´·0S.,",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4785(T)/26",
+      "num": "4785",
+      "type": "T",
+      "year": "26",
+      "country": "CHINA",
+      "region": "East Coast",
+      "subject": "Dredging area. Works.",
+      "charts": [
+        "1304",
+        "1592",
+        "4859"
+      ],
+      "coords": [
+        {
+          "lat": 29.949,
+          "lon": 121.8285,
+          "dms": "29° 56.94' N, 121° 49.71' E"
+        },
+        {
+          "lat": 29.948,
+          "lon": 121.831,
+          "dms": "29° 56.88' N, 121° 49.86' E"
+        },
+        {
+          "lat": 29.94667,
+          "lon": 121.83033,
+          "dms": "29° 56.80' N, 121° 49.82' E"
+        },
+        {
+          "lat": 29.94767,
+          "lon": 121.82783,
+          "dms": "29° 56.86' N, 121° 49.67' E"
+        },
+        {
+          "lat": 24.11983,
+          "lon": 120.24617,
+          "dms": "24° 07.19' N, 120° 14.77' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4785(T)/26 CHINA - East Coast - Dredging area. Works.\nSource: Chinese Notice 31/978(T)/26\n1. Dredging works are taking place, within an area bounded by the following positions:\n29° 56´·94N., 121° 49´·71E.\n29° 56´·88N., 121° 49´·86E.\n29° 56´·80N., 121° 49´·82E.\n29° 56´·86N., 121° 49´·67E.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(WGS84 DATUM)\nCharts affected - 1304 - 1592\n4859(T)/26 TAIWAN - Buoy.\nSource: Taiwanese Notice 134(T)/26\n1. A yellow spherical light-buoy, Fl(5)Y.20s Wave, has been established in position 24° 07´·19N., 120° 14´·77E.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nCharts affected - 2409 - 3231",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4832(T)/26",
+      "num": "4832",
+      "type": "T",
+      "year": "26",
+      "country": "KOREA",
+      "region": "South Coast",
+      "subject": "Buoy.",
+      "charts": [
+        "3365"
+      ],
+      "coords": [
+        {
+          "lat": 33.521,
+          "lon": 126.37483,
+          "dms": "33° 31.26' N, 126° 22.49' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4832(T)/26 KOREA - South Coast - Buoy.\nSource: Korean Notice 32/464(T)/26\n1. The light-buoy, Fl(5)Y.20s ODAS , in position 33° 31´·26N., 126° 22´·49E., has been temporarily extinguished.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nCharts affected - 3365 (INT 5252) - 3480",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4795(T)/26",
+      "num": "4795",
+      "type": "T",
+      "year": "26",
+      "country": "PAPUA NEW GUINEA",
+      "region": "Light. Light",
+      "subject": "beacon.",
+      "charts": [
+        "4622"
+      ],
+      "coords": [
+        {
+          "lat": -8.22033,
+          "lon": 148.28983,
+          "dms": "8° 13.22' S, 148° 17.39' E"
+        },
+        {
+          "lat": -8.5195,
+          "lon": 148.423,
+          "dms": "8° 31.17' S, 148° 25.38' E"
+        },
+        {
+          "lat": -9.19883,
+          "lon": 149.4785,
+          "dms": "9° 11.93' S, 149° 28.71' E"
+        },
+        {
+          "lat": -9.1805,
+          "lon": 149.45083,
+          "dms": "9° 10.83' S, 149° 27.05' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4795(T)/26 PAPUA NEW GUINEA - Light. Light-beacon.\nSource: Australian Notice 19/822(T)/26\n1. The light, Fl.5s 16m 10M ( 8° 13´·22S., 148° 17´·39E.), is unlit.\n2. The light beacon, Fl(2) 8s 16m 10M ( 8° 31´·17S., 148° 25´·38E.), is unlit.\n3. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nCharts affected - 4622 (INT 622) - PNG 521\n2.47\nWk42/26\nII\n4796(T)/26 PAPUA NEW GUINEA - Lights.\nSource: Australian Notice 19/823(T)/26\n1. The light, Fl.2·5s 9m 10M ( 9° 11´·93S., 149° 28´·71E.), is unlit.\n2. The light, Fl(3)12s 11m 10M ( 9° 10´·83S., 149° 27´·05E.), is unlit.\n3. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nCharts affected - PNG 519 - PNG 520",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4797(T)/26",
+      "num": "4797",
+      "type": "T",
+      "year": "26",
+      "country": "AUSTRALIA",
+      "region": "Western Australia",
+      "subject": "Obstruction.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": -20.81317,
+          "lon": 115.55533,
+          "dms": "20° 48.79' S, 115° 33.32' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4797(T)/26 AUSTRALIA - Western Australia - Obstruction.\nSource: Australian Notice 19/825(T)/26\n1. An obstruction exists on the seabed in position 20° 48´·79S., 115° 33´·32E.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nCharts affected - Aus 327 - Aus 743",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4799(T)/26",
+      "num": "4799",
+      "type": "T",
+      "year": "26",
+      "country": "AUSTRALIA",
+      "region": "Western Australia",
+      "subject": "Works.",
+      "charts": [
+        "4722"
+      ],
+      "coords": [
+        {
+          "lat": -19.48333,
+          "lon": 116.61,
+          "dms": "19° 29.0' S, 116° 36.6' E"
+        },
+        {
+          "lat": -19.51,
+          "lon": 116.605,
+          "dms": "19° 30.6' S, 116° 36.3' E"
+        },
+        {
+          "lat": -19.52167,
+          "lon": 116.58667,
+          "dms": "19° 31.3' S, 116° 35.2' E"
+        },
+        {
+          "lat": -19.52,
+          "lon": 116.11167,
+          "dms": "19° 31.2' S, 116° 06.7' E"
+        },
+        {
+          "lat": -19.525,
+          "lon": 116.09833,
+          "dms": "19° 31.5' S, 116° 05.9' E"
+        },
+        {
+          "lat": -19.76167,
+          "lon": 115.89,
+          "dms": "19° 45.7' S, 115° 53.4' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4799(T)/26 AUSTRALIA - Western Australia - Works.\nSource: Australian Notice 19/828(T)/26\n1. Vessels are conducting subsea operations which includes the recovery of pre-laid mooring lines in the vicinity of the\nfollowing positions:\n19° 29´·0S., 116° 36´·6E.\n19° 30´·6S., 116° 36´·3E.\n19° 31´·3S., 116° 35´·2E.\n19° 31´·2S., 116° 06´·7E.\n19° 31´·5S., 116° 05´·9E.\n19° 45´·7S., 115° 53´·4E.\n2. Mariners are advised to navigate with caution in the area.\n3. Former Notice 3439(T)/26 is cancelled.\n(WGS84 DATUM)\nCharts affected - 4722 (INT 722) - 4723 (INT 723) - Aus 327",
+      "cancels": [
+        "3439(T)/26"
+      ],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4801(T)/26",
+      "num": "4801",
+      "type": "T",
+      "year": "26",
+      "country": "AUSTRALIA",
+      "region": "South Australia",
+      "subject": "Buoy.",
+      "charts": [
+        "4709"
+      ],
+      "coords": [
+        {
+          "lat": -38.95667,
+          "lon": 142.26,
+          "dms": "38° 57.4' S, 142° 15.6' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4801(T)/26 AUSTRALIA - South Australia - Buoy.\nSource: Australian Notice 19/839(T)/26.\n1. A white buoy, marking fishing equipment on the seabed, exists in position 38° 57´·4S., 142° 15´·6E.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nChart affected - 4709 (INT 709)\n2.48\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4806(P)/26",
+      "num": "4806",
+      "type": "P",
+      "year": "26",
+      "country": "AUSTRALIA",
+      "region": "Western Australia",
+      "subject": "Depths.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": -20.615,
+          "lon": 115.62,
+          "dms": "20° 36.9' S, 115° 37.2' E"
+        },
+        {
+          "lat": -20.75,
+          "lon": 115.62,
+          "dms": "20° 45.0' S, 115° 37.2' E"
+        },
+        {
+          "lat": -20.79667,
+          "lon": 115.57167,
+          "dms": "20° 47.8' S, 115° 34.3' E"
+        },
+        {
+          "lat": -20.90167,
+          "lon": 115.46333,
+          "dms": "20° 54.1' S, 115° 27.8' E"
+        },
+        {
+          "lat": -20.97,
+          "lon": 115.35,
+          "dms": "20° 58.2' S, 115° 21.0' E"
+        },
+        {
+          "lat": -21.0,
+          "lon": 115.3,
+          "dms": "21° 00.0' S, 115° 18.0' E"
+        },
+        {
+          "lat": -20.97,
+          "lon": 115.26167,
+          "dms": "20° 58.2' S, 115° 15.7' E"
+        },
+        {
+          "lat": -20.84333,
+          "lon": 115.27167,
+          "dms": "20° 50.6' S, 115° 16.3' E"
+        },
+        {
+          "lat": -20.79667,
+          "lon": 115.29333,
+          "dms": "20° 47.8' S, 115° 17.6' E"
+        },
+        {
+          "lat": -20.67167,
+          "lon": 115.35,
+          "dms": "20° 40.3' S, 115° 21.0' E"
+        },
+        {
+          "lat": -20.615,
+          "lon": 115.375,
+          "dms": "20° 36.9' S, 115° 22.5' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4806(P)/26 AUSTRALIA - Western Australia - Depths.\nSource: Australian Notice 19/826(P)/26\n1. Latest survey indicates shoaler depths than those charted may exist within an area bounded by the following positions:\n20° 36´·9S., 115° 37´·2E.\n20° 45´·0S., 115° 37´·2E.\n20° 47´·8S., 115° 34´·3E.\n20° 54´·1S., 115° 27´·8E.\n20° 58´·2S., 115° 21´·0E.\n21° 00´·0S., 115° 18´·0E.\n20° 58´·2S., 115° 15´·7E.\n20° 50´·6S., 115° 16´·3E.\n20° 47´·8S., 115° 17´·6E.\n20° 40´·3S., 115° 21´·0E.\n20° 36´·9S., 115° 22´·5E.\n2. Mariners are advised to navigate with caution in the area.\n3. Charts will be updated be updated when full details are available.\n(WGS84 DATUM)\nCharts affected - Aus 327 - Aus 743",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4808(T)/26",
+      "num": "4808",
+      "type": "T",
+      "year": "26",
+      "country": "AUSTRALIA",
+      "region": "Victoria",
+      "subject": "General information. Tidal gauges. Buoyage.",
+      "charts": [
+        "4601"
+      ],
+      "coords": [
+        {
+          "lat": -39.37,
+          "lon": 147.45667,
+          "dms": "39° 22.2' S, 147° 27.4' E"
+        },
+        {
+          "lat": -39.50667,
+          "lon": 147.45667,
+          "dms": "39° 30.4' S, 147° 27.4' E"
+        },
+        {
+          "lat": -39.705,
+          "lon": 147.84333,
+          "dms": "39° 42.3' S, 147° 50.6' E"
+        },
+        {
+          "lat": -39.62167,
+          "lon": 148.03667,
+          "dms": "39° 37.3' S, 148° 02.2' E"
+        },
+        {
+          "lat": -39.26167,
+          "lon": 147.94,
+          "dms": "39° 15.7' S, 147° 56.4' E"
+        },
+        {
+          "lat": -39.27833,
+          "lon": 147.78167,
+          "dms": "39° 16.7' S, 147° 46.9' E"
+        },
+        {
+          "lat": -39.25167,
+          "lon": 147.94833,
+          "dms": "39° 15.1' S, 147° 56.9' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4808(T)/26 AUSTRALIA - Victoria - General information. Tidal gauges. Buoyage.\nSource: Australian Notice 19/841(T)/26\n1. On or about 1 October 2026, vessel Ocean Dynasty will begin conducting survey operations in an area bounded by the\nfollowing positions:\n39° 22´·2S., 147° 27´·4E.\n39° 30´·4S., 147° 27´·4E.\n39° 42´·3S., 147° 50´·6E.\n39° 37´·3S., 148° 02´·2E.\n39° 15´·7S., 147° 56´·4E.\n2. Tide gauges exist on the seabed in the following positions:\n39° 16´·7S., 147° 46´·9E.\n39° 15´·1S., 147° 56´·9E.\n3. Special light buoys, Fl.Y.3·2s, may be deployed in the vicinity of the above positions.\n4. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nCharts affected - 4601 (INT 601) - Aus 357\n2.49\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true,
+      "subPolygons": [
+        {
+          "name": "On or about 1 October 2026, vessel Ocean Dynasty will begin conducting survey operations in an area bounded by the",
+          "category": "general",
+          "coords": [
+            {
+              "lat": -39.37,
+              "lon": 147.45667,
+              "dms": "39° 22.2' S, 147° 27.4' E"
+            },
+            {
+              "lat": -39.50667,
+              "lon": 147.45667,
+              "dms": "39° 30.4' S, 147° 27.4' E"
+            },
+            {
+              "lat": -39.705,
+              "lon": 147.84333,
+              "dms": "39° 42.3' S, 147° 50.6' E"
+            },
+            {
+              "lat": -39.62167,
+              "lon": 148.03667,
+              "dms": "39° 37.3' S, 148° 02.2' E"
+            },
+            {
+              "lat": -39.26167,
+              "lon": 147.94,
+              "dms": "39° 15.7' S, 147° 56.4' E"
+            }
+          ],
+          "points": [
+            [
+              -39.37,
+              147.45667
+            ],
+            [
+              -39.50667,
+              147.45667
+            ],
+            [
+              -39.705,
+              147.84333
+            ],
+            [
+              -39.62167,
+              148.03667
+            ],
+            [
+              -39.26167,
+              147.94
+            ]
+          ]
+        },
+        {
+          "name": "Tide gauges exist on the seabed in the following positions:",
+          "category": "general",
+          "coords": [
+            {
+              "lat": -39.27833,
+              "lon": 147.78167,
+              "dms": "39° 16.7' S, 147° 46.9' E"
+            },
+            {
+              "lat": -39.25167,
+              "lon": 147.94833,
+              "dms": "39° 15.1' S, 147° 56.9' E"
+            }
+          ],
+          "points": [
+            [
+              -39.27833,
+              147.78167
+            ],
+            [
+              -39.25167,
+              147.94833
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4850(T)/26",
+      "num": "4850",
+      "type": "T",
+      "year": "26",
+      "country": "AUSTRALIA",
+      "region": "Queensland",
+      "subject": "General information. Tidal gauges.",
+      "charts": [
+        "3799",
+        "4603"
+      ],
+      "coords": [
+        {
+          "lat": -9.82333,
+          "lon": 141.425,
+          "dms": "9° 49.4' S, 141° 25.5' E"
+        },
+        {
+          "lat": -10.40017,
+          "lon": 141.46967,
+          "dms": "10° 24.01' S, 141° 28.18' E"
+        },
+        {
+          "lat": -10.28817,
+          "lon": 141.48383,
+          "dms": "10° 17.29' S, 141° 29.03' E"
+        },
+        {
+          "lat": -10.23167,
+          "lon": 141.82667,
+          "dms": "10° 13.9' S, 141° 49.6' E"
+        },
+        {
+          "lat": -10.045,
+          "lon": 141.82667,
+          "dms": "10° 02.7' S, 141° 49.6' E"
+        },
+        {
+          "lat": -9.925,
+          "lon": 141.74167,
+          "dms": "9° 55.5' S, 141° 44.5' E"
+        },
+        {
+          "lat": -10.25333,
+          "lon": 141.20333,
+          "dms": "10° 15.2' S, 141° 12.2' E"
+        },
+        {
+          "lat": -10.357,
+          "lon": 141.20317,
+          "dms": "10° 21.42' S, 141° 12.19' E"
+        },
+        {
+          "lat": -10.14833,
+          "lon": 141.385,
+          "dms": "10° 08.9' S, 141° 23.1' E"
+        },
+        {
+          "lat": -10.3,
+          "lon": 141.32333,
+          "dms": "10° 18.00' S, 141° 19.40' E"
+        },
+        {
+          "lat": -9.83833,
+          "lon": 141.40667,
+          "dms": "9° 50.3' S, 141° 24.4' E"
+        },
+        {
+          "lat": -10.38333,
+          "lon": 141.48,
+          "dms": "10° 23.00' S, 141° 28.80' E"
+        },
+        {
+          "lat": -10.345,
+          "lon": 141.195,
+          "dms": "10° 20.70' S, 141° 11.70' E"
+        }
+      ],
+      "isPolygon": true,
+      "isLine": false,
+      "body": "4850(T)/26 AUSTRALIA - Queensland - General information. Tidal gauges.\nSource: Australian Notice 19/824(T)/26\n1. On or about 1 October 2026, survey operations will begin in the vicinity of Turu Cay, 9° 49´·4S., 141° 25´·5E.and in an\narea bounded by the following positions:\n10° 24´·01S., 141° 28´·18E.\n10° 17´·29S., 141° 29´·03E.\n10° 13´·9S., 141° 49´·6E.\n10° 02´·7S., 141° 49´·6E.\n9° 55´·5S., 141° 44´·5E.\n10° 15´·2S., 141° 12´·2E.\n10° 21´·42S., 141° 12´·19E.\n2. Tide gauges exist as follows:\nPosition Remark\n10° 08´·9S., 141° 23´·1E. 2m above the seadbed\n10° 18´·00S., 141° 19´·40E. 2m above the seadbed\n9° 50´·3S., 141° 24´·4E. 2m above the seadbed\n10° 23´·00S., 141° 28´·80E. 3m above the seadbed\n10° 20´·70S., 141° 11´·70E. 2m above the seadbed\n3. A special buoy may be deployed in the vicinity of the above positions.\n4. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nCharts affected - 3799 - 4603 (INT 603) - Aus 700",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true,
+      "subPolygons": [
+        {
+          "name": "On or about 1 October 2026, survey operations will begin in the vicinity of Turu Cay, 9° 49´·4S., 141° 25´·5E.and in an — Area 1",
+          "category": "general",
+          "coords": [
+            {
+              "lat": -10.40017,
+              "lon": 141.46967,
+              "dms": "10° 24.01' S, 141° 28.18' E"
+            },
+            {
+              "lat": -10.28817,
+              "lon": 141.48383,
+              "dms": "10° 17.29' S, 141° 29.03' E"
+            },
+            {
+              "lat": -10.23167,
+              "lon": 141.82667,
+              "dms": "10° 13.9' S, 141° 49.6' E"
+            },
+            {
+              "lat": -10.045,
+              "lon": 141.82667,
+              "dms": "10° 02.7' S, 141° 49.6' E"
+            },
+            {
+              "lat": -9.925,
+              "lon": 141.74167,
+              "dms": "9° 55.5' S, 141° 44.5' E"
+            },
+            {
+              "lat": -10.25333,
+              "lon": 141.20333,
+              "dms": "10° 15.2' S, 141° 12.2' E"
+            },
+            {
+              "lat": -10.357,
+              "lon": 141.20317,
+              "dms": "10° 21.42' S, 141° 12.19' E"
+            }
+          ],
+          "points": [
+            [
+              -10.40017,
+              141.46967
+            ],
+            [
+              -10.28817,
+              141.48383
+            ],
+            [
+              -10.23167,
+              141.82667
+            ],
+            [
+              -10.045,
+              141.82667
+            ],
+            [
+              -9.925,
+              141.74167
+            ],
+            [
+              -10.25333,
+              141.20333
+            ],
+            [
+              -10.357,
+              141.20317
+            ]
+          ]
+        },
+        {
+          "name": "Tide gauges exist as follows: — Area 2",
+          "category": "general",
+          "coords": [
+            {
+              "lat": -10.14833,
+              "lon": 141.385,
+              "dms": "10° 08.9' S, 141° 23.1' E"
+            },
+            {
+              "lat": -10.3,
+              "lon": 141.32333,
+              "dms": "10° 18.00' S, 141° 19.40' E"
+            },
+            {
+              "lat": -9.83833,
+              "lon": 141.40667,
+              "dms": "9° 50.3' S, 141° 24.4' E"
+            },
+            {
+              "lat": -10.38333,
+              "lon": 141.48,
+              "dms": "10° 23.00' S, 141° 28.80' E"
+            },
+            {
+              "lat": -10.345,
+              "lon": 141.195,
+              "dms": "10° 20.70' S, 141° 11.70' E"
+            }
+          ],
+          "points": [
+            [
+              -10.14833,
+              141.385
+            ],
+            [
+              -10.3,
+              141.32333
+            ],
+            [
+              -9.83833,
+              141.40667
+            ],
+            [
+              -10.38333,
+              141.48
+            ],
+            [
+              -10.345,
+              141.195
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4786(T)/26",
+      "num": "4786",
+      "type": "T",
+      "year": "26",
+      "country": "NEW ZEALAND",
+      "region": "North Island",
+      "subject": "Buoy.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": -37.66815,
+          "lon": 176.17615,
+          "dms": "37° 40.089' S, 176° 10.569' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4786(T)/26 NEW ZEALAND - North Island - Buoy.\nSource: New Zealand Notice 19/69(T)/26\n1. A yellow light-buoy, Fl.Y.5s, has been deployed in position 37° 40´·089S., 176° 10´·569E., until further notice.\n2. Mariners are advised to navigate with caution in the area.\n(WGS84 DATUM)\nChart affected - NZ 5412",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4814(T)/26",
+      "num": "4814",
+      "type": "T",
+      "year": "26",
+      "country": "SOUTH PACIFIC OCEAN",
+      "region": "Fiji Islands",
+      "subject": "Buoy.",
+      "charts": [
+        "1244",
+        "2"
+      ],
+      "coords": [
+        {
+          "lat": -17.67983,
+          "lon": 178.84717,
+          "dms": "17° 40.79' S, 178° 50.83' E"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4814(T)/26 SOUTH PACIFIC OCEAN - Fiji Islands - Buoy.\nSource: Maritime Safety Authority of Fiji\n1. The lateral light-buoy, Fl.G.4s, in position 17° 40´·79S., 178° 50´·83E. is reported to be unlit.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(WGS84 DATUM)\nChart affected - 1244\n2.50\nWk42/26\nII",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4812(P)/26",
+      "num": "4812",
+      "type": "P",
+      "year": "26",
+      "country": "BRAZIL",
+      "region": "North Coast",
+      "subject": "Depth.",
+      "charts": [
+        "331",
+        "4775"
+      ],
+      "coords": [
+        {
+          "lat": -1.574,
+          "lon": -48.80517,
+          "dms": "1° 34.44' S, 48° 48.31' W"
+        },
+        {
+          "lat": 11.66667,
+          "lon": -70.2133,
+          "dms": "11° 40.000' N, 70° 12.798' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4812(P)/26 BRAZIL - North Coast - Depth.\nSource: Local Navigational Warning I 8175/26\n1. A depth less than charted exists in the vicinity of Porto De Vila Do Conde. 11·6m in position - 1° 34´·44S., 48° 48´·31W.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n3. Chart 331 will be updated when full details are available.\n(WGS84 DATUM)\nChart affected - 331\n4775(T)/26 VENEZUELA - Light.\nSource: Venezuelan Notice 37(T)/26\n1. Light, Fl(2)RG.12s37m11M, in position 11° 40´·000N., 70° 12´·798W. has been reported extinguished.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(SIRGAS DATUM)\nCharts affected - 2190 - 2193 - 2194",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4804(T)/26",
+      "num": "4804",
+      "type": "T",
+      "year": "26",
+      "country": "COLOMBIA",
+      "region": "Caribbean Sea Coast",
+      "subject": "Buoy.",
+      "charts": [
+        "2267"
+      ],
+      "coords": [
+        {
+          "lat": 12.26967,
+          "lon": -71.96833,
+          "dms": "12° 16.18' N, 71° 58.10' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4804(T)/26 COLOMBIA - Caribbean Sea Coast - Buoy.\nSource: Colombian Notice 222(T)/26\n1. The red starboard lateral light-buoy, Fl.R.3s ‘4’, in position 12° 16´·18N., 71° 58´·10W. is reported off station.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(WGS84 DATUM)\nChart affected - 2267",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4813(T)/26",
+      "num": "4813",
+      "type": "T",
+      "year": "26",
+      "country": "COLOMBIA",
+      "region": "Caribbean Sea Coast",
+      "subject": "Chains and anchors.",
+      "charts": [],
+      "coords": [
+        {
+          "lat": 11.10417,
+          "lon": -74.91483,
+          "dms": "11° 06.25' N, 74° 54.89' W"
+        }
+      ],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4813(T)/26 COLOMBIA - Caribbean Sea Coast - Chains and anchors.\nSource: Colombian Notice 225(T)/26\n1. A lost anchor and chain have been reported in position 11° 06´·25N., 74° 54´·89W.\n2. Mariners are advised to navigate with caution in the area and consult the local port authorities for the latest information.\n(WGS84 DATUM)\nC hart affected - 2261\n2.51\nWk42/26\nTo accompany Notice to Mariners 4791/26. Image Size (mm) 162.7 by 102.7\nWk42/26\nTo accompany Notice to Mariners 4791/26. Image Size (mm) 83.2 by 50.3\nWk42/26\nTo accompany Notice to Mariners 4809/26. Image Size (mm) 166.1 by 146.6\nWk42/26\nTo accompany Notice to Mariners 4826/26. Image Size (mm) 97 by 153.6\nWk42/26\nTo accompany Notice to Mariners 4833/26. Image Size (mm) 152.4 by 162.8\nWk42/26\nTo accompany Notice to Mariners 4833/26. Image Size (mm) 144.7 by 162.8\nWk42/26\nTo accompany Notice to Mariners 4834/26. Image Size (mm) 59.5 by 124.8\nWk42/26\nTo accompany Notice to Mariners 4834/26. Image Size (mm) 56.1 by 91\nWk42/26\nTo accompany Notice to Mariners 4835/26. Image Size (mm) 92.5 by 144.1\nWk42/26\nTo accompany Notice to Mariners 4838/26. Image Size (mm) 55 by 62.9\nWk42/26\nTo accompany Notice to Mariners 4843/26. Image Size (mm) 155.2 by 149\nWk42/26\nTo accompany Notice to Mariners 4855/26. Image Size (mm) 117.9 by 68.9\nWk42/26\nTo accompany Notice to Mariners 4857/26. Image Size (mm) 223.1 by 184\nWk42/26\nTo accompany Notice to Mariners 4870/26. Image Size (mm) 53.9 by 53.5\nWk42/26\nTo accompany Notice to Mariners 4882/26",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "4/26",
+      "num": "4",
+      "type": "PERM",
+      "year": "26",
+      "country": "- -",
+      "region": "- Standby light . . Lit . . 19 . . . .",
+      "subject": "- - - Emergency light . . Lit . . 16 . . . .",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "body": "4\n- - - - Standby light . . Lit . . 19 . . . .\n- - - - Emergency light . . Lit . . 16 . . . .\n* * * * * * * *\nCOOK STRAIT. WELLINGTON HARBOUR (PORT NICHOLSON)\nK4010·2 Remove from list; deleted\nCOOK STRAIT. WELLINGTON HARBOUR (PORT NICHOLSON)\nK4043 Remove from list; deleted\nK4199 - Tarakohe Harbour. E Outer 40 49·23 S Fl R 5s 6 7 Round metal tower fl 1·5.\nMole. Head 172 53·64 E 2 Obscured 201°-245°(44°) until about\n2·6 Miles from Harbour Entrance\n* *\nK4199·1 - Tarakohe Harbour. W 40 49·27 S Fl G 5s 6 7 Round metal tower fl 1·5\nOuter Mole. Head 172 53·58 E 2\n* *\nNP85, Vol M Edition 2026. Weekly Edition No. 42, Dated 15 October 2026.\nLast Updates: Weekly Edition No. 41, dated 08 October 2026.\nM4137·3 - Yeonpyeongdo. N 37 39·47 N Fl R 6s 14 9 Red round concrete . .\nKR, 410, 3724·6 Breakwater. E Head 125 42·85 E tower\n14\n*\nM4144 Soyeonpyeong Hang. W 37 36·83 N Fl R 4s 17 9 Red round steel tower . .\nKR, 410, 3722·1 Breakwater. Head 125 42·48 E 8\n* *\nM4145·5 Soyeonpyeong Do. 37 34·87 N Fl(2)W 10s 13 9 Black # on black . .\nKR, 410, 3721 Southward. Noleunyeo 125 43·00 E beacon, red band\nKR, 410, 4157 16\n- - - . . Racon . . . . . . ALRS Vol 2 Station 82295\n* *\nM4274·6 Daepyeong Hang. W 33 14·13 N Fl G 6s 12 7 White round metal . .\nKR, 410, 2655·5 Breakwater 126 21·70 E tower\n10\n* * * * *\nM4459·92 Daejin Hang 38 30·39 N Q(3)W 10s 12 8 * on black metal . .\nKR, 410, 1203·1 128 25·87 E post, yellow band\n14\n* * * * * * * *\nM4947·2 - Kyushu Sekiyu Seaberth 33 16·82 N Mo(U)R 8s 8 5 Dolphin .",
+      "cancels": [],
+      "isCancelled": false,
+      "status": "ACTIVE",
+      "checkedForExport": true
+    },
+    {
+      "id": "1246(T)/22",
+      "num": "1246",
+      "type": "T",
+      "year": "22",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 1246(T)/22 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "1927(P)/26",
+      "num": "1927",
+      "type": "P",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 1927(P)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "2329(T)/26",
+      "num": "2329",
+      "type": "T",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 2329(T)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "2409(T)/25",
+      "num": "2409",
+      "type": "T",
+      "year": "25",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 2409(T)/25 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "2822(T)/17",
+      "num": "2822",
+      "type": "T",
+      "year": "17",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 2822(T)/17 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "3014(P)/26",
+      "num": "3014",
+      "type": "P",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 3014(P)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "3026(P)/26",
+      "num": "3026",
+      "type": "P",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 3026(P)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "3317(T)/26",
+      "num": "3317",
+      "type": "T",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 3317(T)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "3439(T)/26",
+      "num": "3439",
+      "type": "T",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 3439(T)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "3460(T)/26",
+      "num": "3460",
+      "type": "T",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 3460(T)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "3514(P)/26",
+      "num": "3514",
+      "type": "P",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 3514(P)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "3671(T)/24",
+      "num": "3671",
+      "type": "T",
+      "year": "24",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 3671(T)/24 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "3774(T)/25",
+      "num": "3774",
+      "type": "T",
+      "year": "25",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 3774(T)/25 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "4052(P)/26",
+      "num": "4052",
+      "type": "P",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 4052(P)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "4080(P)/26",
+      "num": "4080",
+      "type": "P",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 4080(P)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "4199(T)/26",
+      "num": "4199",
+      "type": "T",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 4199(T)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "4249(P)/26",
+      "num": "4249",
+      "type": "P",
+      "year": "26",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 4249(P)/26 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
+    },
+    {
+      "id": "4314(T)/25",
+      "num": "4314",
+      "type": "T",
+      "year": "25",
+      "country": "UKHO",
+      "region": "Notice Cancelled",
+      "subject": "Notice 4314(T)/25 officially cancelled by UKHO Admiralty (Wk 42/26)",
+      "charts": [],
+      "coords": [],
+      "isPolygon": false,
+      "isLine": false,
+      "isCancelled": true,
+      "status": "CANCELLED",
+      "checkedForExport": false
     }
   ]
 }
