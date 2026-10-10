@@ -3028,7 +3028,12 @@ function renderPortDepthsOnMap(map) {
   leafletPortDepthsLayer.clearLayers();
   leafletIsobathsLayer.clearLayers();
 
+  const minDepthReq = parseFloat(window.filterMinPortDepth) || 0;
+  const pSub = window.PORTS_SUBFILTERS || { fairways: true, isobaths: true };
+
   PORT_DEPTHS_DB.forEach(port => {
+    const maxPortDepth = Math.max(0, ...((port.fairways || []).map(f => parseFloat(f.depth) || 0))) || 12.5;
+    if (minDepthReq > 0 && maxPortDepth < minDepthReq) return;
     // 1. Port Anchor Marker
     const anchorHtml = `
       <div style="background:rgba(8,16,36,0.92);border:1px solid #38bdf8;border-radius:6px;padding:2px 7px;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.6);cursor:pointer;white-space:nowrap;">
@@ -3075,7 +3080,8 @@ function renderPortDepthsOnMap(map) {
     leafletPortDepthsLayer.addLayer(marker);
 
     // 2. Fairway & Basin Polygons
-    port.fairways.forEach(fairway => {
+    (pSub.fairways !== false ? (port.fairways || []) : []).forEach(fairway => {
+      if (minDepthReq > 0 && (parseFloat(fairway.depth) || 0) < minDepthReq) return;
       const poly = L.polygon(fairway.coords, {
         color: fairway.color || "#06b6d4",
         weight: 2,
@@ -3122,7 +3128,7 @@ function renderPortDepthsOnMap(map) {
     });
 
     // 3. Depth Contours (Isobaths)
-    if (port.isobaths) {
+    if (pSub.isobaths !== false && port.isobaths) {
       port.isobaths.forEach(iso => {
         const line = L.polyline(iso.coords, {
           color: "#38bdf8",
