@@ -1,10 +1,10 @@
 /**
- * SetSail Marine Navigation Suite — Service Worker (PWA Offline Engine)
+ * SetSail Marine Navigation Suite — Service Worker (PWA Offline Engine v3.9)
  * Vessel: LPG/C IINO INEOS VESTA
- * Fully offline-capable bridge cockpit — Zero Google Dinosaur!
+ * Fully offline-capable bridge cockpit — Zero Google Dinosaur & Zero Unstyled Blocks!
  */
 
-const CACHE_NAME = 'setsail-cache-v3.8';
+const CACHE_NAME = 'setsail-cache-v3.9';
 const TILE_CACHE_NAME = 'setsail-tiles-cache-v2';
 
 const OFFLINE_CORE_ASSETS = [
@@ -17,6 +17,7 @@ const OFFLINE_CORE_ASSETS = [
   'assets/gyro_compass_logbook.ico',
   'assets/ship_stamp.png',
   'assets/wilhelmsen_logo.png',
+  'assets/waffi-logo.png',
   'assets/leaflet/leaflet.js',
   'assets/leaflet/leaflet.css',
   'assets/leaflet/images/marker-icon.png',
@@ -27,6 +28,7 @@ const OFFLINE_CORE_ASSETS = [
   'assets/Auto NtM Plotting/ntm_module.js',
   'assets/Auto NtM Plotting/setsail_core.js',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
+  'assets/Auto NtM Plotting/tesseract.min.js',
   'assets/Auto NtM Plotting/pdf.min.js',
   'assets/Auto NtM Plotting/pdf.worker.min.js',
   'assets/SetSail LOGOS/setsail_logo_square.webp',
@@ -34,6 +36,49 @@ const OFFLINE_CORE_ASSETS = [
   'assets/SetSail LOGOS/setsail_logo_square.png',
   'assets/SetSail LOGOS/setsail_logo_horizontal.png'
 ];
+
+// Helper: fetch with fast timeout for satellite/offline bridge networks
+function fetchWithTimeout(request, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Network timeout')), timeoutMs);
+    fetch(request)
+      .then((res) => {
+        clearTimeout(timer);
+        resolve(res);
+      })
+      .catch((err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+  });
+}
+
+// Helper: resilient cache lookup (exact -> ignoreSearch -> filename match across all caches)
+async function matchAssetInCache(request) {
+  let hit = (await caches.match(request)) || (await caches.match(request, { ignoreSearch: true }));
+  if (hit) return hit;
+
+  try {
+    const reqUrl = new URL(request.url);
+    const decodedPath = decodeURIComponent(reqUrl.pathname);
+    const baseName = decodedPath.split('/').pop();
+    if (!baseName) return null;
+
+    const cacheNames = await caches.keys();
+    for (const cName of cacheNames) {
+      const cache = await caches.open(cName);
+      const keys = await cache.keys();
+      for (const k of keys) {
+        const kDecoded = decodeURIComponent(new URL(k.url).pathname);
+        if (kDecoded.endsWith('/' + baseName) || kDecoded === decodedPath) {
+          const matched = await cache.match(k);
+          if (matched) return matched;
+        }
+      }
+    }
+  } catch (e) {}
+  return null;
+}
 
 // Pre-cache all core assets on install
 self.addEventListener('install', (event) => {
@@ -57,20 +102,24 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate immediately & purge obsolete caches
+// Activate immediately & migrate any missing entries before purging obsolete caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    Promise.all([
-      self.clients.claim(),
-      caches.keys().then((keys) => {
-        return Promise.all(
+    (async () => {
+      await self.clients.claim();
+      const newCache = await caches.open(CACHE_NAME);
+      const newKeys = await newCache.keys();
+      // Only remove older caches if the new cache successfully populated core files
+      if (newKeys.length >= 5) {
+        const keys = await caches.keys();
+        await Promise.all(
           keys.filter((key) => key !== CACHE_NAME && key !== TILE_CACHE_NAME).map((key) => {
             console.log('[SetSail SW] Removing deprecated cache:', key);
             return caches.delete(key);
           })
         );
-      })
-    ])
+      }
+    })()
   );
 });
 
@@ -85,12 +134,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       (async () => {
         try {
-          // Fast network race (2.5s)
-          const netPromise = fetch(event.request);
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Network timeout')), 6000)
-          );
-          const response = await Promise.race([netPromise, timeoutPromise]);
+          const response = await fetchWithTimeout(event.request, 4000);
           if (response && response.ok) {
             const cache = await caches.open(CACHE_NAME);
             cache.put(event.request, response.clone());
@@ -105,17 +149,20 @@ self.addEventListener('fetch', (event) => {
           (await caches.match(event.request)) ||
           (await caches.match('index.html')) ||
           (await caches.match('./index.html')) ||
-          (await caches.match('./'));
+          (await caches.match('./')) ||
+          (await matchAssetInCache(new Request(self.registration.scope + 'index.html')));
 
         if (cached) return cached;
 
-        // Fallback: search any html in cache
-        const cache = await caches.open(CACHE_NAME);
-        const keys = await cache.keys();
-        for (const req of keys) {
-          if (req.url.endsWith('index.html') || req.url.endsWith('/')) {
-            const match = await cache.match(req);
-            if (match) return match;
+        const cacheNames = await caches.keys();
+        for (const cName of cacheNames) {
+          const cache = await caches.open(cName);
+          const keys = await cache.keys();
+          for (const req of keys) {
+            if (req.url.endsWith('index.html') || req.url.endsWith('/')) {
+              const match = await cache.match(req);
+              if (match) return match;
+            }
           }
         }
 
@@ -128,10 +175,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. notices.json (Network-first with cached fallback)
+  // 2. notices.json (Network-first with 3s timeout & cached fallback)
   if (url.pathname.endsWith('notices.json')) {
     event.respondWith(
-      fetch(event.request)
+      fetchWithTimeout(event.request, 3000)
         .then((netRes) => {
           if (netRes && netRes.ok) {
             const copy = netRes.clone();
@@ -140,7 +187,7 @@ self.addEventListener('fetch', (event) => {
           return netRes;
         })
         .catch(async () => {
-          const cached = (await caches.match(event.request)) || (await caches.match('notices.json'));
+          const cached = await matchAssetInCache(event.request);
           if (cached) {
             const blob = await cached.blob();
             const headers = new Headers(cached.headers);
@@ -172,13 +219,12 @@ self.addEventListener('fetch', (event) => {
         }
 
         try {
-          const networkTile = await fetch(event.request);
+          const networkTile = await fetchWithTimeout(event.request, 4500);
           if (networkTile && (networkTile.ok || networkTile.type === 'opaque')) {
             tileCache.put(event.request, networkTile.clone());
           }
           return networkTile;
         } catch (fetchErr) {
-          // Transparent 1x1 fallback tile when offline and uncached
           return new Response(
             new Uint8Array([
               137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82,
@@ -194,10 +240,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4a. Core JS & CSS scripts: Network-First with Offline Cache Fallback (prevents stale JS/CSS mismatch)
+  // 4a. Core JS & CSS scripts: Fast Network-First (2.5s timeout) with Multi-Fallback Offline Cache
   if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
     event.respondWith(
-      fetch(event.request)
+      fetchWithTimeout(event.request, 2500)
         .then((networkResponse) => {
           if (networkResponse && networkResponse.ok) {
             const copy = networkResponse.clone();
@@ -206,9 +252,9 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(async () => {
-          const cached = (await caches.match(event.request)) || (await caches.match(event.request, { ignoreSearch: true }));
+          const cached = await matchAssetInCache(event.request);
           if (cached) return cached;
-          throw new Error('Offline and not in cache');
+          throw new Error('Offline and not in cache: ' + url.pathname);
         })
     );
     return;
@@ -216,10 +262,9 @@ self.addEventListener('fetch', (event) => {
 
   // 4. Static assets: Cache-First with Stale-While-Revalidate
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
+    matchAssetInCache(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Revalidate in background if online
-        fetch(event.request)
+        fetchWithTimeout(event.request, 3500)
           .then((networkResponse) => {
             if (networkResponse && networkResponse.ok) {
               caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
@@ -229,8 +274,7 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
 
-      // Not cached: fetch from network & store
-      return fetch(event.request)
+      return fetchWithTimeout(event.request, 4000)
         .then((networkResponse) => {
           if (networkResponse && networkResponse.ok) {
             const copy = networkResponse.clone();
@@ -239,16 +283,8 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(async (err) => {
-          // If offline request for Leaflet unpkg, fallback to local assets
-          if (url.hostname === 'unpkg.com' && url.pathname.includes('leaflet')) {
-            if (url.pathname.endsWith('.js')) {
-              const localJs = await caches.match('assets/leaflet/leaflet.js');
-              if (localJs) return localJs;
-            } else if (url.pathname.endsWith('.css')) {
-              const localCss = await caches.match('assets/leaflet/leaflet.css');
-              if (localCss) return localCss;
-            }
-          }
+          const fallback = await matchAssetInCache(event.request);
+          if (fallback) return fallback;
           throw err;
         });
     })
