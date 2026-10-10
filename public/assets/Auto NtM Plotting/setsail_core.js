@@ -2308,16 +2308,23 @@ function initNtMMap() {
       crossOrigin: true
     });
 
-    // 3. Fast High-Performance Global CDN Voyager Map (Fastly CDN, ultra-low latency)
-    const voyagerLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      subdomains: "abcd",
-      maxZoom: 20,
-      attribution: "&copy; CARTO",
+    // 3. Fast High-Performance Global CDN Coast Map (Dual-CDN CARTO + Esri Street fallback, zero API key required)
+    const voyagerLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png", {
+      subdomains: ["a", "b", "c", "d"],
+      maxNativeZoom: 18,
+      maxZoom: 19,
+      attribution: "&copy; CARTO &bull; OpenStreetMap",
       keepBuffer: 16,
       updateWhenIdle: false,
       updateWhenZooming: false,
-      updateInterval: 60,
-      crossOrigin: true
+      updateInterval: 60
+    });
+    voyagerLayer.on("tileerror", function(errEvent) {
+      if (errEvent && errEvent.tile && !errEvent.tile.dataset.fallbackTried && errEvent.coords) {
+        errEvent.tile.dataset.fallbackTried = "1";
+        const c = errEvent.coords;
+        errEvent.tile.src = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/" + c.z + "/" + c.y + "/" + c.x;
+      }
     });
 
     // 4. Satellite Imagery
@@ -2346,7 +2353,7 @@ function initNtMMap() {
 
     const baseMaps = {
       "Ocean Chart (Esri)": oceanLayer,
-      "Fast Coast Map (CARTO)": voyagerLayer,
+      "Fast Coast Map": voyagerLayer,
       "OpenStreetMap": osmLayer,
       "Satellite Imagery": satLayer
     };
