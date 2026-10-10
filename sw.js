@@ -4,7 +4,7 @@
  * Fully offline-capable bridge cockpit — Zero Google Dinosaur & Zero Unstyled Blocks!
  */
 
-const CACHE_NAME = 'setsail-cache-v4.2';
+const CACHE_NAME = 'setsail-cache-v4.3';
 const TILE_CACHE_NAME = 'setsail-tiles-cache-v4';
 
 const OFFLINE_CORE_ASSETS = [
@@ -23,10 +23,10 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=4.2',
-  'assets/Auto NtM Plotting/port_depths.js?v=4.2',
-  'assets/Auto NtM Plotting/ntm_module.js?v=4.2',
-  'assets/Auto NtM Plotting/setsail_core.js?v=4.2',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=4.3',
+  'assets/Auto NtM Plotting/port_depths.js?v=4.3',
+  'assets/Auto NtM Plotting/ntm_module.js?v=4.3',
+  'assets/Auto NtM Plotting/setsail_core.js?v=4.3',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
   'assets/Auto NtM Plotting/tesseract.min.js',
   'assets/Auto NtM Plotting/pdf.min.js',

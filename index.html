@@ -50,7 +50,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.2" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.3" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -9760,53 +9760,35 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 .setroute-ship-stage {
   position: relative;
-  width: 200px;
-  height: 78px;
-  margin: 0 auto 10px;
+  width: 180px;
+  height: 52px;
+  margin: 0 auto 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
 .setroute-ship-svg {
-  width: 82px;
-  height: 50px;
+  width: 78px;
+  height: 32px;
   z-index: 2;
-  animation: setrouteShipBob 2.4s ease-in-out infinite;
-  filter: drop-shadow(0 4px 10px rgba(240, 90, 54, 0.35));
+  animation: setrouteShipBob 3.8s ease-in-out infinite;
+  filter: drop-shadow(0 3px 8px rgba(56, 189, 248, 0.22));
 }
-.setroute-waves-wrap {
-  position: absolute;
-  bottom: 4px;
-  left: 0;
-  width: 200%;
-  height: 26px;
-  z-index: 3;
-  pointer-events: none;
-  display: flex;
-}
-.setroute-wave-layer {
-  width: 100%;
-  height: 26px;
-  animation: setrouteWaveSlide 2.6s linear infinite;
-}
-.setroute-wave-layer-back {
+.setroute-wave-line {
   position: absolute;
   bottom: 7px;
-  left: 0;
-  width: 200%;
-  height: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 144px;
+  height: 8px;
   z-index: 1;
-  opacity: 0.45;
-  animation: setrouteWaveSlide 3.8s linear infinite reverse;
+  opacity: 0.65;
+  pointer-events: none;
 }
 @keyframes setrouteShipBob {
-  0%, 100% { transform: translateY(0px) rotate(-2.5deg); }
-  50% { transform: translateY(-5px) rotate(2.8deg); }
-}
-@keyframes setrouteWaveSlide {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0%, 100% { transform: translateY(0px) rotate(-0.5deg); }
+  50% { transform: translateY(-2.5px) rotate(0.5deg); }
 }
 .setroute-log-ticker {
   min-height: 24px;
@@ -9816,27 +9798,29 @@ svg.leaflet-image-layer.leaflet-interactive path {
   width: 100%;
 }
 .setroute-log-ticker .progress-msg {
-  font-size: 0.82rem !important;
-  font-weight: 600 !important;
-  color: #38bdf8 !important;
-  letter-spacing: 0.01em;
-  transition: opacity 0.24s ease, transform 0.24s ease;
+  font-size: 0.80rem !important;
+  font-weight: 500 !important;
+  color: #7dd3fc !important;
+  letter-spacing: 0.015em;
+  transition: opacity 0.46s cubic-bezier(0.22, 1, 0.36, 1), transform 0.46s cubic-bezier(0.22, 1, 0.36, 1), filter 0.46s ease;
   opacity: 1;
   transform: translateY(0);
+  filter: blur(0px);
+  will-change: opacity, transform, filter;
 }
 [data-theme="light"] .setroute-log-ticker .progress-msg {
   color: #0284c7 !important;
 }
 .setroute-log-ticker .progress-msg.fade-out {
   opacity: 0 !important;
-  transform: translateY(-6px) !important;
+  transform: translateY(-4px) !important;
+  filter: blur(1px) !important;
 }
-.setroute-log-ticker .progress-msg.fade-in {
-  animation: setrouteMsgEnter 0.26s ease forwards;
-}
-@keyframes setrouteMsgEnter {
-  0% { opacity: 0; transform: translateY(7px); }
-  100% { opacity: 1; transform: translateY(0); }
+.setroute-log-ticker .progress-msg.fade-in-prep {
+  opacity: 0 !important;
+  transform: translateY(4px) !important;
+  filter: blur(1px) !important;
+  transition: none !important;
 }
 
 @media (max-width: 1200px) {
@@ -11291,6 +11275,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
                 </button>
               </div>
 
+              <!-- Slide 1 Scroll Chevron Directly Below the 3 Tool Tiles (No "Scroll" text) -->
+              <button type="button" class="home-scroll-hint no-print" id="homeScrollHint" style="position:relative !important;bottom:auto !important;left:auto !important;transform:none;margin-top:8px !important;padding:4px 14px !important;" aria-label="Scroll down to explore SetSail">
+                <span class="home-scroll-chevrons">
+                  <svg class="home-scroll-chevron chevron-1" viewBox="0 0 24 12"><polyline points="3 3 12 10 21 3"/></svg>
+                  <svg class="home-scroll-chevron chevron-2" viewBox="0 0 24 12"><polyline points="3 3 12 10 21 3"/></svg>
+                </span>
+              </button>
+
               <!-- Mobile Slide 2 Interactive Capability Inspector (Visible on Phone Slide 2) -->
               <div class="home-mobile-slide2-card no-print" id="homeMobileSlide2Card">
                 <div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:4px;">
@@ -11585,16 +11577,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
               </div>
             </section>
 
-            <!-- Bottom Flex Stack: Scroll Hint strictly ABOVE WAFFi Footer (Zero overlap possible) -->
+            <!-- Bottom Flex Stack: WAFFi Footer -->
             <div class="home-bottom-dock" style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;z-index:28;">
-            <!-- Slide 1 Bottom Stylish Scroll Hint Arrow -->
-            <button type="button" class="home-scroll-hint no-print" id="homeScrollHint" style="position:relative !important;bottom:auto !important;left:auto !important;transform:none;" aria-label="Scroll down to explore SetSail">
-              <span class="home-scroll-hint-label">Scroll</span>
-              <span class="home-scroll-chevrons">
-                <svg class="home-scroll-chevron chevron-1" viewBox="0 0 24 12"><polyline points="3 3 12 10 21 3"/></svg>
-                <svg class="home-scroll-chevron chevron-2" viewBox="0 0 24 12"><polyline points="3 3 12 10 21 3"/></svg>
-              </span>
-            </button>
 
             <!-- Floating Overlay Footer -->
             <footer class="site-footer no-print" role="contentinfo" style="padding:0 !important;margin:0 !important;">
@@ -12648,136 +12632,203 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 
-                  <div class="ntm-popover" id="ntmFilterPopover">
-                    <div class="ntm-popover-header">
-                      <div style="display:flex;align-items:center;gap:6px;">
-                        <svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#38bdf8;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                        <span style="font-weight:700;font-size:0.86rem;">Filter Chart &amp; Overlays</span>
+                  <div class="ntm-popover" id="ntmFilterPopover" style="width: 325px; max-height: 80vh; overflow-y: auto;">
+                    <div class="ntm-popover-header" style="position: sticky; top: 0; background: #0c1730; z-index: 5; border-bottom: 1px solid rgba(138,164,214,0.18);">
+                      <div style="display:flex;flex-direction:column;gap:1px;">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                          <svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#38bdf8;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                          <span style="font-weight:700;font-size:0.84rem;">Filter Active Layer Objects</span>
+                        </div>
+                        <span style="font-size:0.64rem;color:#64748b;font-weight:500;">Filters objects on layers active below the map</span>
                       </div>
                       <button type="button" class="ntm-popover-close" id="ntmFilterCloseBtn">×</button>
                     </div>
 
+                    <!-- Active Layers Indicator Bar -->
+                    <div id="filterActiveLayersBar" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px;background:rgba(6,12,26,0.65);border-bottom:1px solid rgba(138,164,214,0.14);font-size:0.65rem;">
+                    </div>
+
                     <div class="ntm-popover-body">
-                      <!-- Primary Master Layer Toggles (Synchronized with Map Overlay Tiles) -->
-                      <div class="ntm-popover-subtitle" style="margin-top:2px;">MASTER MAP LAYERS:</div>
-                      
-                      <label class="ntm-popover-chk-item ntm-master-toggle-item" title="Toggle Admiralty Notices to Mariners overlay">
-                        <input type="checkbox" id="popMasterNtm" checked />
-                        <span class="chk-dot" style="background:#f05a36;box-shadow:0 0 6px #f05a36;"></span>
-                        <span class="chk-label" style="font-weight:700;">Admiralty NtM Notices</span>
-                        <span class="chk-count" id="popCntNtmTotal">0</span>
-                      </label>
-
-                      <label class="ntm-popover-chk-item ntm-master-toggle-item" title="Toggle World Ports &amp; Fairways Bathymetry overlay">
-                        <input type="checkbox" id="popMasterPorts" checked />
-                        <span class="chk-dot" style="background:#06b6d4;box-shadow:0 0 6px #06b6d4;"></span>
-                        <span class="chk-label" style="font-weight:700;">World Ports Bathymetry</span>
-                        <span class="chk-count" id="popCntPortsTotal">0</span>
-                      </label>
-
-                      <label class="ntm-popover-chk-item ntm-master-toggle-item" title="Toggle Marine Weather &amp; Cyclone Overlay">
-                        <input type="checkbox" id="popMasterWeather" checked />
-                        <span class="chk-dot" style="background:#eab308;box-shadow:0 0 6px #eab308;"></span>
-                        <span class="chk-label" style="font-weight:700;">Marine Weather &amp; Storms</span>
-                        <span class="chk-count" id="popCntWeatherTotal">LIVE</span>
-                      </label>
-
-                      <label class="ntm-popover-chk-item ntm-master-toggle-item" title="Toggle Active Passage Route overlay">
-                        <input type="checkbox" id="popMasterRoute" checked />
-                        <span class="chk-dot" style="background:#38bdf8;box-shadow:0 0 6px #38bdf8;"></span>
-                        <span class="chk-label" style="font-weight:700;">Passage Route Layer</span>
-                        <span class="chk-count" id="popCntRouteTotal">0</span>
-                      </label>
-
-                      <div class="ntm-popover-divider"></div>
-
-                      <!-- Sub-filters: Admiralty NtM Notices -->
-                      <div class="ntm-popover-subtitle">NTM NOTICE SUB-FILTERS:</div>
-
-                      <label class="ntm-popover-chk-item">
-                        <input type="checkbox" id="popChkT" checked />
-                        <span class="chk-dot t-dot"></span>
-                        <span class="chk-label">Temp (T)</span>
-                        <span class="chk-count" id="popCntT">0</span>
-                      </label>
-
-                      <label class="ntm-popover-chk-item">
-                        <input type="checkbox" id="popChkP" checked />
-                        <span class="chk-dot p-dot"></span>
-                        <span class="chk-label">Prelim (P)</span>
-                        <span class="chk-count" id="popCntP">0</span>
-                      </label>
-
-                      <label class="ntm-popover-chk-item">
-                        <input type="checkbox" id="popChkPerm" checked />
-                        <span class="chk-dot perm-dot"></span>
-                        <span class="chk-label">Permanent</span>
-                        <span class="chk-count" id="popCntPerm">0</span>
-                      </label>
-
-                      <label class="ntm-popover-chk-item">
-                        <input type="checkbox" id="popChkPoly" />
-                        <span class="chk-dot poly-dot"></span>
-                        <span class="chk-label">Polygons / TSS Areas</span>
-                        <span class="chk-count" id="popCntPoly">0</span>
-                      </label>
-
-                      <label class="ntm-popover-chk-item" title="Strictly excluded from chart by default">
-                        <input type="checkbox" id="popChkCancelled" />
-                        <span class="chk-dot can-dot"></span>
-                        <span class="chk-label">Cancelled Notices</span>
-                        <span class="chk-count" id="popCntCan">0</span>
-                      </label>
-
-                      <div class="ntm-popover-divider"></div>
-
-                      <!-- Sub-filters: Ports Bathymetry -->
-                      <div class="ntm-popover-subtitle">PORT FAIRWAY DEPTH:</div>
-                      <div style="padding:4px 0 8px;">
-                        <select id="popSelectDepthMin" style="width:100%;background:rgba(18,28,58,0.7);border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:0.78rem;padding:4px 8px;">
-                          <option value="0">All Port Depths (0m+)</option>
-                          <option value="10">10m+ (Handymax / Panamax)</option>
-                          <option value="12.5">12.5m+ (Post-Panamax)</option>
-                          <option value="15">15.0m+ (Capesize)</option>
-                          <option value="17.5">17.5m+ (VLCC / ULCC)</option>
-                        </select>
+                      <!-- Empty State when NO map layer tiles are active -->
+                      <div id="filterSecEmpty" style="display:none;padding:14px 10px;text-align:center;color:#94a3b8;font-size:0.75rem;line-height:1.45;">
+                        <strong style="color:#e2e8f0;display:block;margin-bottom:4px;">No Map Layer Tiles Selected</strong>
+                        Select one or more layer tiles under the map (<b>Admiralty NtM</b>, <b>Port Depths</b>, <b>Weather</b>, or <b>My Route</b>) to filter their chart objects here.
                       </div>
 
-                      <div class="ntm-popover-divider"></div>
+                      <!-- SECTION 1: ADMIRALTY NtM OBJECT FILTERS (Visible when Admiralty NtM tile is active) -->
+                      <div id="filterSecNotices">
+                        <div class="ntm-popover-subtitle" style="display:flex;align-items:center;justify-content:space-between;color:#f59e0b;margin-top:2px;">
+                          <span>ADMIRALTY NTM OBJECTS:</span>
+                          <span class="chk-count" id="popCntNtmTotal" style="background:rgba(245,158,11,0.16);color:#fbbf24;">0</span>
+                        </div>
 
-                      <!-- Sub-filters: Route Display -->
-                      <div class="ntm-popover-subtitle">ROUTE DISPLAY:</div>
-                      <label class="ntm-popover-chk-item">
-                        <input type="checkbox" id="popRouteShowWpts" checked />
-                        <span class="chk-dot" style="background:#10b981;"></span>
-                        <span class="chk-label">Show Waypoints</span>
-                      </label>
-                      <label class="ntm-popover-chk-item">
-                        <input type="checkbox" id="popRouteShowLine" checked />
-                        <span class="chk-dot" style="background:#38bdf8;"></span>
-                        <span class="chk-label">Show Track Line</span>
-                      </label>
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popChkAll" checked />
+                          <span class="chk-dot" style="background:#38bdf8;"></span>
+                          <span class="chk-label" style="font-weight:600;">All Active Notice Types</span>
+                        </label>
 
-                      <div class="ntm-popover-divider"></div>
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popChkT" checked />
+                          <span class="chk-dot t-dot"></span>
+                          <span class="chk-label">Temporary &mdash; (T) Notices</span>
+                          <span class="chk-count" id="popCntT">0</span>
+                        </label>
 
-                      <!-- NAVAREA -->
-                      <div class="ntm-popover-subtitle">NAVAREA:</div>
-                      <label class="ntm-popover-radio-item">
-                        <input type="radio" name="popNavarea" value="" checked />
-                        <span class="radio-label">All Regions</span>
-                      </label>
-                      <label class="ntm-popover-radio-item">
-                        <input type="radio" name="popNavarea" value="NAVAREA I" />
-                        <span class="radio-label">NAVAREA I (North Sea / UK)</span>
-                      </label>
-                      <label class="ntm-popover-radio-item">
-                        <input type="radio" name="popNavarea" value="NAVAREA II" />
-                        <span class="radio-label">NAVAREA II (Atlantic)</span>
-                      </label>
-                      <label class="ntm-popover-radio-item">
-                        <input type="radio" name="popNavarea" value="NAVAREA III" />
-                        <span class="radio-label">NAVAREA III (Med / Black Sea)</span>
-                      </label>
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popChkP" checked />
+                          <span class="chk-dot p-dot"></span>
+                          <span class="chk-label">Preliminary &mdash; (P) Notices</span>
+                          <span class="chk-count" id="popCntP">0</span>
+                        </label>
+
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popChkPerm" checked />
+                          <span class="chk-dot perm-dot"></span>
+                          <span class="chk-label">Permanent Updates</span>
+                          <span class="chk-count" id="popCntPerm">0</span>
+                        </label>
+
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popChkPoly" />
+                          <span class="chk-dot poly-dot"></span>
+                          <span class="chk-label">Polygons / TSS Areas Only</span>
+                          <span class="chk-count" id="popCntPoly">0</span>
+                        </label>
+
+                        <label class="ntm-popover-chk-item" title="Strictly excluded from chart by default">
+                          <input type="checkbox" id="popChkCancelled" />
+                          <span class="chk-dot can-dot"></span>
+                          <span class="chk-label">Cancelled Notices</span>
+                          <span class="chk-count" id="popCntCan">0</span>
+                        </label>
+
+                        <div style="padding:4px 0 6px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span style="font-size:0.72rem;color:#94a3b8;font-weight:600;">NAVAREA:</span>
+                          <select id="popSelectNavarea" style="flex:1;background:rgba(18,28,58,0.7);border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:0.74rem;padding:3px 6px;">
+                            <option value="ALL">All Regions (I &ndash; XXI)</option>
+                            <option value="I">NAVAREA I (NE Atlantic / UK)</option>
+                            <option value="II">NAVAREA II (E Atlantic)</option>
+                            <option value="III">NAVAREA III (Med / Black Sea)</option>
+                            <option value="IV">NAVAREA IV (NW Atlantic)</option>
+                            <option value="V">NAVAREA V (SW Atlantic)</option>
+                            <option value="VI">NAVAREA VI (SE South America)</option>
+                            <option value="VII">NAVAREA VII (S Africa)</option>
+                            <option value="VIII">NAVAREA VIII (Indian Ocean)</option>
+                            <option value="IX">NAVAREA IX (Red Sea / Gulf)</option>
+                            <option value="X">NAVAREA X (Australia)</option>
+                            <option value="XI">NAVAREA XI (SE Asia / Far East)</option>
+                            <option value="XII">NAVAREA XII (NE Pacific)</option>
+                            <option value="XIII">NAVAREA XIII (NW Pacific)</option>
+                            <option value="XIV">NAVAREA XIV (SW Pacific)</option>
+                            <option value="XV">NAVAREA XV (SE Pacific)</option>
+                            <option value="XVI">NAVAREA XVI (Peru / Ecuador)</option>
+                            <option value="XVII">NAVAREA XVII (Arctic Canada)</option>
+                            <option value="XVIII">NAVAREA XVIII (Arctic North)</option>
+                            <option value="XIX">NAVAREA XIX (Arctic Norway)</option>
+                            <option value="XX">NAVAREA XX (Barents Sea)</option>
+                            <option value="XXI">NAVAREA XXI (E Siberian Sea)</option>
+                          </select>
+                        </div>
+
+                        <div class="ntm-popover-divider"></div>
+                      </div>
+
+                      <!-- SECTION 2: MARINE WEATHER OBJECT FILTERS (Visible when Weather tile is active) -->
+                      <div id="filterSecWeather">
+                        <div class="ntm-popover-subtitle" style="display:flex;align-items:center;justify-content:space-between;color:#38bdf8;">
+                          <span>WEATHER LAYER OBJECTS (00:00Z):</span>
+                          <span class="chk-count" id="popCntWeatherTotal" style="background:rgba(56,189,248,0.16);color:#38bdf8;">LIVE</span>
+                        </div>
+
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popWxCyclones" checked />
+                          <span class="chk-dot" style="background:#ef4444;box-shadow:0 0 5px #ef4444;"></span>
+                          <span class="chk-label">Tropical Cyclones &amp; Cones</span>
+                          <span class="chk-count" id="popCntWxCyclones">5</span>
+                        </label>
+
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popWxPressure" checked />
+                          <span class="chk-dot" style="background:#3b82f6;"></span>
+                          <span class="chk-label">Pressure Centers (High / Low)</span>
+                          <span class="chk-count" id="popCntWxPressure">6</span>
+                        </label>
+
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popWxWaves" checked />
+                          <span class="chk-dot" style="background:#0284c7;"></span>
+                          <span class="chk-label">Heavy Wave &amp; Swell Zones (&gt;4m)</span>
+                          <span class="chk-count" id="popCntWxWaves">4</span>
+                        </label>
+
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popWxWinds" checked />
+                          <span class="chk-dot" style="background:#38bdf8;"></span>
+                          <span class="chk-label">Synoptic Wind Vectors (Gales)</span>
+                          <span class="chk-count" id="popCntWxWinds">4</span>
+                        </label>
+
+                        <div class="ntm-popover-divider"></div>
+                      </div>
+
+                      <!-- SECTION 3: PORT DEPTHS & BATHYMETRY OBJECT FILTERS (Visible when Port Depths tile is active) -->
+                      <div id="filterSecDepths">
+                        <div class="ntm-popover-subtitle" style="display:flex;align-items:center;justify-content:space-between;color:#10b981;">
+                          <span>PORT DEPTHS &amp; BATHYMETRY:</span>
+                          <span class="chk-count" id="popCntPortsTotal" style="background:rgba(16,185,129,0.16);color:#34d399;">64</span>
+                        </div>
+
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popPortsFairways" checked />
+                          <span class="chk-dot" style="background:#10b981;"></span>
+                          <span class="chk-label">Fairway Polygons &amp; Soundings</span>
+                        </label>
+
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popPortsIsobaths" checked />
+                          <span class="chk-dot" style="background:#06b6d4;"></span>
+                          <span class="chk-label">Depth Contours (Isobaths)</span>
+                        </label>
+
+                        <div style="padding:4px 0 6px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span style="font-size:0.72rem;color:#94a3b8;font-weight:600;">Min. Fairway Depth:</span>
+                          <select id="popSelectDepthMin" style="flex:1;background:rgba(18,28,58,0.7);border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:0.74rem;padding:3px 6px;">
+                            <option value="0">All Depths (0m+)</option>
+                            <option value="10">10.0m+ (Handymax)</option>
+                            <option value="12.5">12.5m+ (Panamax)</option>
+                            <option value="15">15.0m+ (Capesize)</option>
+                            <option value="17.5">17.5m+ (VLCC / Deep)</option>
+                          </select>
+                        </div>
+
+                        <div class="ntm-popover-divider"></div>
+                      </div>
+
+                      <!-- SECTION 4: MY ROUTE OBJECT FILTERS (Visible when My Route tile is active) -->
+                      <div id="filterSecRoute">
+                        <div class="ntm-popover-subtitle" style="display:flex;align-items:center;justify-content:space-between;color:#a855f7;">
+                          <span>MY ROUTE OBJECTS:</span>
+                          <span class="chk-count" id="popCntRouteTotal" style="background:rgba(168,85,247,0.16);color:#c084fc;">0</span>
+                        </div>
+
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popRouteShowWpts" checked />
+                          <span class="chk-dot" style="background:#10b981;"></span>
+                          <span class="chk-label">Show Waypoints (WPTs)</span>
+                        </label>
+
+                        <label class="ntm-popover-chk-item">
+                          <input type="checkbox" id="popRouteShowLine" checked />
+                          <span class="chk-dot" style="background:#38bdf8;"></span>
+                          <span class="chk-label">Show Track Line</span>
+                        </label>
+                      </div>
+
+                      <!-- Reset Active Sub-Filters Footer -->
+                      <div style="padding-top:6px;display:flex;justify-content:flex-end;">
+                        <button type="button" id="popBtnResetFilters" style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);color:#38bdf8;font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:5px;cursor:pointer;">Reset Object Filters</button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -13212,32 +13263,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
               </div>
               <div id="setRouteProgressBox" class="setroute-progress-box" style="display:none;">
                 <div class="setroute-ship-stage" aria-hidden="true">
-                  <!-- Animated Back Wave -->
-                  <svg class="setroute-wave-layer-back" viewBox="0 0 400 24" preserveAspectRatio="none">
-                    <path d="M0 12 Q 25 2, 50 12 T 100 12 T 150 12 T 200 12 T 250 12 T 300 12 T 350 12 T 400 12 L 400 24 L 0 24 Z" fill="rgba(56, 189, 248, 0.28)"/>
+                  <!-- Minimalist Geometric Vessel Silhouette -->
+                  <svg class="setroute-ship-svg" viewBox="0 0 96 36" fill="none">
+                    <path d="M14 23 L22 15 L44 15 L48 9 L60 9 L63 15 L82 15 L74 23 Z" fill="rgba(56, 189, 248, 0.10)" stroke="#38bdf8" stroke-width="1.6" stroke-linejoin="round" />
+                    <line x1="54" y1="5" x2="54" y2="9" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" />
+                    <circle cx="54" cy="4.5" r="1.3" fill="#34d399" />
                   </svg>
-                  <!-- Animated Vessel Sailing on Waves -->
-                  <svg class="setroute-ship-svg" viewBox="0 0 96 60" fill="none">
-                    <!-- Radar / Mast Signal Pulse -->
-                    <circle cx="38" cy="12" r="2.2" fill="#f05a36"/>
-                    <line x1="38" y1="14" x2="38" y2="24" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
-                    <!-- Bridge Superstructure -->
-                    <path d="M22 36 L26 24 L46 24 L50 36 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.6"/>
-                    <rect x="29" y="27" width="14" height="3.5" rx="1" fill="#38bdf8" opacity="0.85"/>
-                    <!-- Cargo / Gas Domes -->
-                    <path d="M53 36 C53 30, 62 30, 62 36" fill="rgba(240, 90, 54, 0.35)" stroke="#f05a36" stroke-width="1.5"/>
-                    <path d="M65 36 C65 30, 74 30, 74 36" fill="rgba(240, 90, 54, 0.35)" stroke="#f05a36" stroke-width="1.5"/>
-                    <!-- Ship Hull -->
-                    <path d="M12 36 L86 36 L76 48 L18 48 Z" fill="#0f172a" stroke="#f05a36" stroke-width="2" stroke-linejoin="round"/>
-                    <line x1="20" y1="41" x2="78" y2="41" stroke="#38bdf8" stroke-width="1.3" stroke-dasharray="4 3"/>
+                  <!-- Single Clean Horizon Wave Line -->
+                  <svg class="setroute-wave-line" viewBox="0 0 144 8" fill="none">
+                    <path d="M4 4 Q 21 1.5, 38 4 T 72 4 T 106 4 T 140 4" stroke="#38bdf8" stroke-width="1.3" stroke-linecap="round" opacity="0.7" />
                   </svg>
-                  <!-- Animated Front Wave -->
-                  <div class="setroute-waves-wrap">
-                    <svg class="setroute-wave-layer" viewBox="0 0 400 26" preserveAspectRatio="none">
-                      <path d="M0 13 Q 25 3, 50 13 T 100 13 T 150 13 T 200 13 T 250 13 T 300 13 T 350 13 T 400 13" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round"/>
-                      <path d="M0 13 Q 25 3, 50 13 T 100 13 T 150 13 T 200 13 T 250 13 T 300 13 T 350 13 T 400 13 L 400 26 L 0 26 Z" fill="rgba(2, 132, 199, 0.24)"/>
-                    </svg>
-                  </div>
                 </div>
                 <div class="setroute-log-ticker">
                   <span id="setRouteProgressMsg" class="progress-msg">Initializing passage planning pipeline...</span>
@@ -18770,8 +18805,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.2"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.2"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.3"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.3"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -18849,7 +18884,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.2"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.3"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19214,7 +19249,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             window.location.reload();
           }
         });
-        navigator.serviceWorker.register('sw.js?v=4.2', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=4.3', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker registered successfully, scope:', reg.scope);
             if (navigator.onLine) {

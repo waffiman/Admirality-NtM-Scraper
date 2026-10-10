@@ -1052,11 +1052,14 @@ function renderRouteOnMap(route, shouldFly = true) {
     opacity: 0.95
   });
   
-  leafletRouteLayer.addLayer(trackGlow);
-  leafletRouteLayer.addLayer(trackLine);
+  const rtSub = window.ROUTE_SUBFILTERS || { waypoints: true, line: true };
+  if (rtSub.line !== false) {
+    leafletRouteLayer.addLayer(trackGlow);
+    leafletRouteLayer.addLayer(trackLine);
+  }
 
   // Add Waypoints
-  route.waypoints.forEach((wp, idx) => {
+  (rtSub.waypoints !== false ? route.waypoints : []).forEach((wp, idx) => {
     const isStart = idx === 0;
     const isEnd = idx === route.waypoints.length - 1;
     const wptCoords = unrolledCoords[idx];
@@ -1346,8 +1349,10 @@ function renderWeatherOnMap(map = null) {
 
   const NM_TO_METERS = 1852;
 
+  const wxSub = window.WEATHER_SUBFILTERS || { cyclones: true, pressure: true, waves: true, winds: true };
+
   // 1. Tropical Cyclones with Forecast Cones
-  (MARINE_WEATHER_STORE.storms || []).forEach(storm => {
+  (wxSub.cyclones !== false ? (MARINE_WEATHER_STORE.storms || []) : []).forEach(storm => {
     const dangerRadiusM = (storm.dangerRadiusNm || 100) * NM_TO_METERS;
     const dangerCircle = L.circle(storm.center, {
       radius: dangerRadiusM,
@@ -1440,7 +1445,7 @@ function renderWeatherOnMap(map = null) {
   });
 
   // 2. Severe Sea State Zones (> 4.0m)
-  (MARINE_WEATHER_STORE.waves || []).forEach(wave => {
+  (wxSub.waves !== false ? (MARINE_WEATHER_STORE.waves || []) : []).forEach(wave => {
     const waveRadiusM = wave.radiusNm * NM_TO_METERS;
     const waveCircle = L.circle(wave.center, {
       radius: waveRadiusM,
@@ -1471,7 +1476,7 @@ function renderWeatherOnMap(map = null) {
   });
 
   // 3. Barometric High/Low Centers
-  (MARINE_WEATHER_STORE.pressureCenters || []).forEach(pc => {
+  (wxSub.pressure !== false ? (MARINE_WEATHER_STORE.pressureCenters || []) : []).forEach(pc => {
     const isLow = pc.type === "L";
     const bgCol = isLow ? "#dc2626" : "#2563eb";
     const pcIcon = L.divIcon({
@@ -1492,7 +1497,7 @@ function renderWeatherOnMap(map = null) {
   });
 
   // 4. Marine Wind Vectors
-  (MARINE_WEATHER_STORE.windVectors || []).forEach(wv => {
+  (wxSub.winds !== false ? (MARINE_WEATHER_STORE.windVectors || []) : []).forEach(wv => {
     const rot = (wv.dir + 180) % 360;
     const windIcon = L.divIcon({
       className: "weather-wind-div-icon",
@@ -2338,9 +2343,7 @@ function initNtMMap() {
     }
 
     const overlayMaps = {
-      "OpenSeaMap Buoys": seamarkLayer,
-      "Marine Weather & Cyclones": leafletWeatherLayer,
-      "Passage Plan Route": leafletRouteLayer
+      "OpenSeaMap Buoys": seamarkLayer
     };
 
     L.control.layers(baseMaps, overlayMaps, { position: "topright" }).addTo(leafletMap);
@@ -2586,7 +2589,12 @@ function renderNtMListAndMap() {
   // 2. Gather filtered Ports items
   let filteredPorts = [];
   if (isDepthsActive && typeof PORT_DEPTHS_DB !== "undefined") {
+    const minDepthReq = parseFloat(window.filterMinPortDepth) || 0;
     filteredPorts = PORT_DEPTHS_DB.filter(p => {
+      if (minDepthReq > 0) {
+        const maxD = Math.max(0, ...((p.fairways || []).map(f => parseFloat(f.depth) || 0))) || parseFloat(p.maxDraftMeters) || 12.5;
+        if (maxD < minDepthReq) return false;
+      }
       if (!searchVal) return true;
       return p.name.toLowerCase().includes(searchVal) ||
              (p.nameCn && p.nameCn.toLowerCase().includes(searchVal)) ||
@@ -4721,126 +4729,162 @@ function initNavDataExportListeners() {
 
 
 let filterMinPortDepth = 0;
+window.filterMinPortDepth = 0;
+window.WEATHER_SUBFILTERS = { cyclones: true, pressure: true, waves: true, winds: true };
+window.PORTS_SUBFILTERS = { fairways: true, isobaths: true };
+window.ROUTE_SUBFILTERS = { waypoints: true, line: true };
 
-function initMasterFilterControls() {
-  const chkNtm = document.getElementById("popMasterNtm");
-  const chkPorts = document.getElementById("popMasterPorts");
-  const chkWeather = document.getElementById("popMasterWeather");
-  const chkRoute = document.getElementById("popMasterRoute");
-  const selDepth = document.getElementById("popSelectDepthMin");
-  const chkWpts = document.getElementById("popRouteShowWpts");
-  const chkLine = document.getElementById("popRouteShowLine");
+function syncDynamicFilterPopover() {
+  const isNotices = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.notices !== false : true;
+  const isDepths  = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.depths !== false : true;
+  const isWeather = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.weather !== false : true;
+  const isRoute   = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.route !== false : true;
 
-  const syncMapTilesFromFilterState = () => {
-    document.querySelectorAll(".ntm-map-tile").forEach(tile => {
-      const layer = tile.dataset.layer;
-      if (layer === "notices" && chkNtm) tile.classList.toggle("active", chkNtm.checked);
-      if (layer === "depths" && chkPorts) tile.classList.toggle("active", chkPorts.checked);
-      if (layer === "weather" && chkWeather) tile.classList.toggle("active", chkWeather.checked);
-      if (layer === "route" && chkRoute) tile.classList.toggle("active", chkRoute.checked);
-    });
-  };
+  const secNotices = document.getElementById("filterSecNotices");
+  const secWeather = document.getElementById("filterSecWeather");
+  const secDepths  = document.getElementById("filterSecDepths");
+  const secRoute   = document.getElementById("filterSecRoute");
+  const secEmpty   = document.getElementById("filterSecEmpty");
+  const activeBar  = document.getElementById("filterActiveLayersBar");
 
-  if (chkNtm) {
-    chkNtm.checked = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.notices !== false : true;
-    chkNtm.addEventListener("change", function() {
-      if (typeof setOverlayActive === "function") {
-        setOverlayActive("notices", this.checked, leafletMap);
-      } else if (typeof OVERLAY_STATES !== "undefined") {
-        OVERLAY_STATES.notices = this.checked;
-      }
-      syncMapTilesFromFilterState();
-      renderNtMListAndMap();
-    });
+  if (secNotices) secNotices.style.display = isNotices ? "block" : "none";
+  if (secWeather) secWeather.style.display = isWeather ? "block" : "none";
+  if (secDepths)  secDepths.style.display  = isDepths  ? "block" : "none";
+  if (secRoute)   secRoute.style.display   = isRoute   ? "block" : "none";
+
+  const anyActive = isNotices || isDepths || isWeather || isRoute;
+  if (secEmpty) secEmpty.style.display = anyActive ? "none" : "block";
+
+  if (activeBar) {
+    const badges = [];
+    if (isNotices) badges.push('<span style="background:rgba(245,158,11,0.16);color:#fbbf24;border:1px solid rgba(245,158,11,0.35);padding:1px 6px;border-radius:4px;font-weight:700;">Admiralty NtM</span>');
+    if (isDepths)  badges.push('<span style="background:rgba(16,185,129,0.16);color:#34d399;border:1px solid rgba(16,185,129,0.35);padding:1px 6px;border-radius:4px;font-weight:700;">Port Depths</span>');
+    if (isWeather) badges.push('<span style="background:rgba(56,189,248,0.16);color:#38bdf8;border:1px solid rgba(56,189,248,0.35);padding:1px 6px;border-radius:4px;font-weight:700;">Weather</span>');
+    if (isRoute)   badges.push('<span style="background:rgba(168,85,247,0.16);color:#c084fc;border:1px solid rgba(168,85,247,0.35);padding:1px 6px;border-radius:4px;font-weight:700;">My Route</span>');
+    activeBar.innerHTML = badges.length > 0
+      ? '<span style="color:#64748b;font-weight:600;margin-right:2px;align-self:center;">Active Layers:</span>' + badges.join("")
+      : '<span style="color:#ef4444;font-weight:600;">No active layers selected under map</span>';
   }
 
-  if (chkPorts) {
-    chkPorts.checked = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.depths !== false : true;
-    chkPorts.addEventListener("change", function() {
-      if (typeof setOverlayActive === "function") {
-        setOverlayActive("depths", this.checked, leafletMap);
-      } else if (typeof OVERLAY_STATES !== "undefined") {
-        OVERLAY_STATES.depths = this.checked;
-      }
-      syncMapTilesFromFilterState();
-      renderNtMListAndMap();
-    });
-  }
-
-  if (chkWeather) {
-    chkWeather.checked = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.weather !== false : true;
-    chkWeather.addEventListener("change", function() {
-      if (typeof setOverlayActive === "function") {
-        setOverlayActive("weather", this.checked, leafletMap);
-      } else if (typeof OVERLAY_STATES !== "undefined") {
-        OVERLAY_STATES.weather = this.checked;
-      }
-      if (leafletWeatherLayer) {
-        if (this.checked) {
-          if (!leafletMap.hasLayer(leafletWeatherLayer)) leafletMap.addLayer(leafletWeatherLayer);
-        } else {
-          if (leafletMap.hasLayer(leafletWeatherLayer)) leafletMap.removeLayer(leafletWeatherLayer);
-        }
-      }
-      syncMapTilesFromFilterState();
-    });
-  }
-
-  if (chkRoute) {
-    chkRoute.checked = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.route !== false : true;
-    chkRoute.addEventListener("change", function() {
-      if (typeof setOverlayActive === "function") {
-        setOverlayActive("route", this.checked, leafletMap);
-      } else if (typeof OVERLAY_STATES !== "undefined") {
-        OVERLAY_STATES.route = this.checked;
-      }
-      if (leafletRouteLayer) {
-        if (this.checked) {
-          if (!leafletMap.hasLayer(leafletRouteLayer)) leafletMap.addLayer(leafletRouteLayer);
-        } else {
-          if (leafletMap.hasLayer(leafletRouteLayer)) leafletMap.removeLayer(leafletRouteLayer);
-        }
-      }
-      syncMapTilesFromFilterState();
-    });
-  }
-
-  if (selDepth) {
-    selDepth.addEventListener("change", function() {
-      filterMinPortDepth = parseFloat(this.value) || 0;
-      renderNtMListAndMap();
-    });
-  }
-
-  if (chkWpts || chkLine) {
-    const updateRouteVisibility = () => {
-      const showWpts = chkWpts ? chkWpts.checked : true;
-      const showLine = chkLine ? chkLine.checked : true;
-      document.querySelectorAll(".route-wpt-div-icon").forEach(el => {
-        el.style.display = showWpts ? "block" : "none";
-      });
-      if (leafletRouteLayer) {
-        leafletRouteLayer.eachLayer(layer => {
-          if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
-            layer.setStyle({ opacity: showLine ? 0.95 : 0 });
-          }
-        });
-      }
-    };
-    if (chkWpts) chkWpts.addEventListener("change", updateRouteVisibility);
-    if (chkLine) chkLine.addEventListener("change", updateRouteVisibility);
+  // Update Weather sub-object counts
+  if (typeof MARINE_WEATHER_STORE !== "undefined") {
+    const cCyc = document.getElementById("popCntWxCyclones");
+    const cPrs = document.getElementById("popCntWxPressure");
+    const cWav = document.getElementById("popCntWxWaves");
+    const cWnd = document.getElementById("popCntWxWinds");
+    if (cCyc) cCyc.textContent = (MARINE_WEATHER_STORE.storms || []).length;
+    if (cPrs) cPrs.textContent = (MARINE_WEATHER_STORE.pressureCenters || []).length;
+    if (cWav) cWav.textContent = (MARINE_WEATHER_STORE.waves || []).length;
+    if (cWnd) cWnd.textContent = (MARINE_WEATHER_STORE.windVectors || []).length;
   }
 }
 
-window.syncFilterMasterCheckboxes = function() {
-  const chkNtm = document.getElementById("popMasterNtm");
-  const chkPorts = document.getElementById("popMasterPorts");
-  const chkWeather = document.getElementById("popMasterWeather");
-  const chkRoute = document.getElementById("popMasterRoute");
-  if (chkNtm && typeof OVERLAY_STATES !== "undefined") chkNtm.checked = Boolean(OVERLAY_STATES.notices);
-  if (chkPorts && typeof OVERLAY_STATES !== "undefined") chkPorts.checked = Boolean(OVERLAY_STATES.depths);
-  if (chkWeather && typeof OVERLAY_STATES !== "undefined") chkWeather.checked = Boolean(OVERLAY_STATES.weather);
-  if (chkRoute && typeof OVERLAY_STATES !== "undefined") chkRoute.checked = Boolean(OVERLAY_STATES.route);
-};
+window.syncDynamicFilterPopover = syncDynamicFilterPopover;
+window.syncFilterMasterCheckboxes = syncDynamicFilterPopover;
 
-window.initNtMMap = initNtMMap;
+function initMasterFilterControls() {
+  // Weather Sub-Filters
+  const chkWxCyclones = document.getElementById("popWxCyclones");
+  const chkWxPressure = document.getElementById("popWxPressure");
+  const chkWxWaves    = document.getElementById("popWxWaves");
+  const chkWxWinds    = document.getElementById("popWxWinds");
+
+  const updateWeatherSubfilters = () => {
+    window.WEATHER_SUBFILTERS = {
+      cyclones: chkWxCyclones ? chkWxCyclones.checked : true,
+      pressure: chkWxPressure ? chkWxPressure.checked : true,
+      waves:    chkWxWaves    ? chkWxWaves.checked    : true,
+      winds:    chkWxWinds    ? chkWxWinds.checked    : true
+    };
+    if (typeof renderWeatherOnMap === "function") {
+      renderWeatherOnMap(leafletMap);
+    }
+    syncFilterIndicators();
+  };
+
+  [chkWxCyclones, chkWxPressure, chkWxWaves, chkWxWinds].forEach(el => {
+    if (el) el.addEventListener("change", updateWeatherSubfilters);
+  });
+
+  // Port Depths Sub-Filters
+  const chkPortsFairways = document.getElementById("popPortsFairways");
+  const chkPortsIsobaths = document.getElementById("popPortsIsobaths");
+  const selDepthMin      = document.getElementById("popSelectDepthMin");
+
+  const updatePortsSubfilters = () => {
+    window.PORTS_SUBFILTERS = {
+      fairways: chkPortsFairways ? chkPortsFairways.checked : true,
+      isobaths: chkPortsIsobaths ? chkPortsIsobaths.checked : true
+    };
+    filterMinPortDepth = selDepthMin ? (parseFloat(selDepthMin.value) || 0) : 0;
+    window.filterMinPortDepth = filterMinPortDepth;
+    if (typeof renderPortDepthsOnMap === "function" && leafletMap) {
+      renderPortDepthsOnMap(leafletMap);
+    }
+    if (typeof renderNtMListAndMap === "function") {
+      renderNtMListAndMap();
+    }
+    syncFilterIndicators();
+  };
+
+  if (chkPortsFairways) chkPortsFairways.addEventListener("change", updatePortsSubfilters);
+  if (chkPortsIsobaths) chkPortsIsobaths.addEventListener("change", updatePortsSubfilters);
+  if (selDepthMin)      selDepthMin.addEventListener("change", updatePortsSubfilters);
+
+  // My Route Sub-Filters
+  const chkRouteWpts = document.getElementById("popRouteShowWpts");
+  const chkRouteLine = document.getElementById("popRouteShowLine");
+
+  const updateRouteSubfilters = () => {
+    window.ROUTE_SUBFILTERS = {
+      waypoints: chkRouteWpts ? chkRouteWpts.checked : true,
+      line:      chkRouteLine ? chkRouteLine.checked : true
+    };
+    if (activeRouteData && typeof renderRouteOnMap === "function") {
+      renderRouteOnMap(activeRouteData, false);
+    }
+    if (typeof renderNtMListAndMap === "function") {
+      renderNtMListAndMap();
+    }
+    syncFilterIndicators();
+  };
+
+  if (chkRouteWpts) chkRouteWpts.addEventListener("change", updateRouteSubfilters);
+  if (chkRouteLine) chkRouteLine.addEventListener("change", updateRouteSubfilters);
+
+  // Reset All Object Sub-Filters Button
+  const btnReset = document.getElementById("popBtnResetFilters");
+  if (btnReset) {
+    btnReset.addEventListener("click", () => {
+      const chkAll = document.getElementById("popChkAll");
+      if (chkAll) {
+        chkAll.checked = true;
+        chkAll.dispatchEvent(new Event("change"));
+      }
+      if (chkWxCyclones) chkWxCyclones.checked = true;
+      if (chkWxPressure) chkWxPressure.checked = true;
+      if (chkWxWaves)    chkWxWaves.checked = true;
+      if (chkWxWinds)    chkWxWinds.checked = true;
+      updateWeatherSubfilters();
+
+      if (chkPortsFairways) chkPortsFairways.checked = true;
+      if (chkPortsIsobaths) chkPortsIsobaths.checked = true;
+      if (selDepthMin)      selDepthMin.value = "0";
+      updatePortsSubfilters();
+
+      if (chkRouteWpts) chkRouteWpts.checked = true;
+      if (chkRouteLine) chkRouteLine.checked = true;
+      updateRouteSubfilters();
+    });
+  }
+
+  // Also sync dynamic sections whenever filter button is clicked
+  const filterBtn = document.getElementById("ntmFilterMenuBtn");
+  if (filterBtn) {
+    filterBtn.addEventListener("click", () => {
+      syncDynamicFilterPopover();
+    });
+  }
+
+  syncDynamicFilterPopover();
+}
