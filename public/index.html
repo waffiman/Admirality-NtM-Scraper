@@ -50,8 +50,8 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.1" />
-          <style id="setsail-bundled-offline-css">
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.2" />
+            <style id="setsail-bundled-offline-css">
 /* required styles */
 
 .leaflet-pane,
@@ -7222,17 +7222,19 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 /* ==========================================================================
-   SETSAIL v4.1 — BULLETPROOF 3-COLUMN HEADER & STACKED FOOTER DOCK
+   SETSAIL v4.2 — BULLETPROOF 3-COLUMN HEADER, STACKED DOCK & PHONE COMPATIBILITY
    ========================================================================== */
-.home-hud-top {
+.home-hud-top,
+#homeHudTop {
   position: relative !important;
   display: grid !important;
-  grid-template-columns: 1fr auto 1fr !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
   align-items: center !important;
+  gap: 0.5rem !important;
   width: 100% !important;
   height: 46px !important;
   min-height: 46px !important;
-  padding: 0 1.2rem !important;
+  padding: 0 1.15rem !important;
   box-sizing: border-box !important;
   z-index: 40 !important;
 }
@@ -7246,6 +7248,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
   top: auto !important;
   transform: none !important;
   margin: 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   display: inline-flex !important;
   align-items: center !important;
   height: 28px !important;
@@ -7261,6 +7265,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   top: auto !important;
   transform: none !important;
   margin: 0 !important;
+  min-width: 0 !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -7278,10 +7283,18 @@ svg.leaflet-image-layer.leaflet-interactive path {
   top: auto !important;
   transform: none !important;
   margin: 0 0 0 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   display: inline-flex !important;
   align-items: center !important;
-  flex-shrink: 0 !important;
+  flex-shrink: 1 !important;
   z-index: 7 !important;
+}
+
+#homeVesselHudCoords {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* Stacked Bottom Dock: #homeScrollHint sits strictly ABOVE .site-footer in normal flex flow */
@@ -7292,10 +7305,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
   flex-direction: column !important;
   align-items: center !important;
   justify-content: flex-end !important;
-  gap: 8px !important;
+  gap: 6px !important;
   width: 100% !important;
   margin-top: auto !important;
   padding: 0 !important;
+  flex-shrink: 0 !important;
 }
 
 .home-scroll-hint,
@@ -7308,7 +7322,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   display: inline-flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 3px !important;
   padding: 2px 12px !important;
   margin: 0 !important;
 }
@@ -7320,6 +7334,418 @@ svg.leaflet-image-layer.leaflet-interactive path {
   padding: 0 !important;
   margin: 0 !important;
   z-index: 25 !important;
+}
+
+.home-hero-viewport .waffi-credit {
+  padding: 2px 2px 4px !important;
+}
+
+/* Mobile Slide 2 Interactive Capability Card (Shown on Touch/Phone Screens on Slide 2) */
+.home-mobile-slide2-card {
+  display: none;
+}
+
+/* ==========================================================================
+   COMPREHENSIVE PHONE & MOBILE RESPONSIVENESS (@media max-width: 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  body:has(#tab-home.active) {
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #tab-home.active {
+    margin: 0 !important;
+    width: 100vw !important;
+    height: calc(100vh - 56px) !important;
+    height: calc(100dvh - 56px) !important;
+    max-height: calc(100vh - 56px) !important;
+    max-height: calc(100dvh - 56px) !important;
+    overflow: hidden !important;
+  }
+
+  .home-hero-viewport {
+    width: 100% !important;
+    height: calc(100vh - 56px) !important;
+    height: calc(100dvh - 56px) !important;
+    max-height: calc(100vh - 56px) !important;
+    max-height: calc(100dvh - 56px) !important;
+    border-radius: 0 !important;
+  }
+
+  .home-hero-content {
+    padding: 0.55rem 0.65rem 0.45rem !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  /* Compact 3-Column Header HUD on Phones — Zero Overlap Guaranteed */
+  .home-hud-top,
+  #homeHudTop {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 0.55rem !important;
+    gap: 0.25rem !important;
+    border-radius: 20px !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  }
+
+  .home-hud-pill {
+    gap: 0.3rem !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  .home-hud-left,
+  #homeHudLeftSlot {
+    min-width: 0 !important;
+    height: 24px !important;
+  }
+
+  .hud-left-brand-wrap {
+    gap: 0.3rem !important;
+  }
+
+  .hud-center-utc-wrap {
+    gap: 0.28rem !important;
+  }
+
+  .home-hud-icon .setsail-icon {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .home-time-mode-btn {
+    font-size: 0.58rem !important;
+    padding: 0 2px !important;
+  }
+
+  .home-hud-dot.live-pulse,
+  .home-hud-dot.offline {
+    width: 6px !important;
+    height: 6px !important;
+  }
+
+  .home-hud-vessel,
+  #homeVesselHudPill {
+    padding: 2px 7px !important;
+    max-width: 126px !important;
+    border-radius: 14px !important;
+  }
+
+  #homeVesselHudCoords {
+    font-size: 0.58rem !important;
+    max-width: 98px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  /* Center Stage & Brand Logo on Phone */
+  .home-center-stage {
+    gap: 0.85rem !important;
+    width: 100% !important;
+    padding: 0 0.2rem !important;
+    margin: auto 0 !important;
+  }
+
+  .home-hero-logo-wrap {
+    width: min(260px, 72vw) !important;
+  }
+
+  .home-brand-sub {
+    font-size: 0.56rem !important;
+    letter-spacing: 0.14em !important;
+    margin-top: 2px !important;
+  }
+
+  /* 3 Tool Tiles on Phone: Strictly Fit 100% Inside Screen Width */
+  .home-tool-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+    max-width: 400px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  .home-tool-tile,
+  .home-hero-viewport.on-slide-2 .home-tool-tile {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding: 0.65rem 0.35rem 0.55rem !important;
+    border-radius: 12px !important;
+  }
+
+  .home-tool-icon-box {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 9px !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .home-tool-icon-box .setsail-icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .home-tool-title {
+    font-size: 0.74rem !important;
+    margin-bottom: 0.12rem !important;
+  }
+
+  .home-tool-desc {
+    display: block !important;
+    font-size: 0.54rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.35rem !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .home-tool-badge {
+    font-size: 0.50rem !important;
+    padding: 1px 5px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Slide 2 Header on Phone */
+  .home-slide2-header {
+    top: 52px !important;
+    width: 94% !important;
+  }
+
+  .saas-eyebrow-pill {
+    font-size: 0.54rem !important;
+    padding: 3px 9px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .home-slide2-title {
+    font-size: 1.15rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .home-slide2-sub {
+    font-size: 0.66rem !important;
+  }
+
+  /* On Phone Slide 2: Center the hover drawer nicely below the 3-card grid so it never clips off-screen */
+  .home-tool-hover-drawer {
+    display: none !important;
+  }
+
+  .home-mobile-slide2-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+    max-width: 400px;
+    margin: 0.35rem auto 0;
+    padding: 0.75rem 0.85rem;
+    border-radius: 12px;
+    background: rgba(8, 18, 42, 0.92);
+    border: 1px solid rgba(56, 189, 248, 0.32);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(14px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .home-hero-viewport.on-slide-2 .home-mobile-slide2-card {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  [data-theme="light"] .home-mobile-slide2-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #cbd5e1;
+    color: #0f172a;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  /* Slide 3: About SetSail on Phone */
+  .home-slide-about {
+    inset: 48px 10px 52px 10px !important;
+  }
+
+  .home-about-container {
+    grid-template-columns: 1fr !important;
+    gap: 0.65rem !important;
+    max-height: 100% !important;
+  }
+
+  .home-about-headline {
+    font-size: 1.25rem !important;
+    line-height: 1.15 !important;
+    margin: 0.15rem 0 0.35rem !important;
+  }
+
+  .home-about-lead {
+    font-size: 0.72rem !important;
+    line-height: 1.38 !important;
+    margin: 0 0 0.55rem !important;
+  }
+
+  .home-about-pillars {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.38rem !important;
+  }
+
+  .home-about-pillar {
+    padding: 0.45rem 0.45rem !important;
+    border-radius: 9px !important;
+  }
+
+  .home-about-pillar-num {
+    font-size: 0.50rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .home-about-pillar-title {
+    font-size: 0.64rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .home-about-pillar-desc {
+    font-size: 0.54rem !important;
+    line-height: 1.22 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .home-about-visual-topbar {
+    padding: 6px 10px !important;
+    font-size: 0.52rem !important;
+  }
+
+  .home-about-media-slot {
+    height: 112px !important;
+  }
+
+  .about-radar-rings {
+    width: 86px !important;
+    height: 86px !important;
+  }
+
+  .about-radar-ring.r1,
+  .about-radar-sweep {
+    width: 84px !important;
+    height: 84px !important;
+  }
+
+  .about-radar-ring.r2 {
+    width: 58px !important;
+    height: 58px !important;
+  }
+
+  .about-radar-ring.r3 {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .about-media-placeholder-caption {
+    margin-top: 6px !important;
+    font-size: 0.52rem !important;
+    padding: 2px 8px !important;
+  }
+
+  /* Slide 4: Sources Marquee on Phone */
+  .home-slide-sources {
+    inset: 48px 0 52px 0 !important;
+  }
+
+  .home-sources-header {
+    margin-bottom: 0.85rem !important;
+    padding: 0 1rem !important;
+  }
+
+  .home-sources-kicker {
+    font-size: 0.56rem !important;
+    letter-spacing: 0.16em !important;
+  }
+
+  .home-sources-sub {
+    font-size: 0.72rem !important;
+  }
+
+  .home-sources-marquee-band {
+    height: 58px !important;
+  }
+
+  .home-sources-marquee-track {
+    gap: 2.2rem !important;
+  }
+
+  .source-authority-logo svg {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .source-logo-name {
+    font-size: 0.80rem !important;
+  }
+
+  .source-logo-sub {
+    font-size: 0.48rem !important;
+  }
+
+  /* Slide Progress Dots on Phone */
+  .home-slide-dots {
+    right: 6px !important;
+    gap: 7px !important;
+  }
+
+  .home-slide-dot {
+    width: 5px !important;
+    height: 5px !important;
+  }
+
+  .home-slide-dot.active {
+    height: 16px !important;
+  }
+
+  /* Bottom Dock (Scroll Arrow + WAFFi Footer) on Phone */
+  .home-bottom-dock {
+    gap: 3px !important;
+  }
+
+  .home-scroll-hint-label {
+    font-size: 0.52rem !important;
+  }
+
+  .home-scroll-chevron {
+    width: 18px !important;
+    height: 9px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .home-hud-pill {
+    font-size: 0.56rem !important;
+  }
+  #homeVesselHudPill {
+    max-width: 105px !important;
+    padding: 2px 5px !important;
+  }
+  #homeVesselHudCoords {
+    max-width: 80px !important;
+    font-size: 0.54rem !important;
+  }
+  .home-tool-desc {
+    display: none !important;
+  }
 }
 
   </style>
@@ -9872,17 +10298,19 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 /* ==========================================================================
-   SETSAIL v4.1 — BULLETPROOF 3-COLUMN HEADER & STACKED FOOTER DOCK
+   SETSAIL v4.2 — BULLETPROOF 3-COLUMN HEADER, STACKED DOCK & PHONE COMPATIBILITY
    ========================================================================== */
-.home-hud-top {
+.home-hud-top,
+#homeHudTop {
   position: relative !important;
   display: grid !important;
-  grid-template-columns: 1fr auto 1fr !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
   align-items: center !important;
+  gap: 0.5rem !important;
   width: 100% !important;
   height: 46px !important;
   min-height: 46px !important;
-  padding: 0 1.2rem !important;
+  padding: 0 1.15rem !important;
   box-sizing: border-box !important;
   z-index: 40 !important;
 }
@@ -9896,6 +10324,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
   top: auto !important;
   transform: none !important;
   margin: 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   display: inline-flex !important;
   align-items: center !important;
   height: 28px !important;
@@ -9911,6 +10341,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   top: auto !important;
   transform: none !important;
   margin: 0 !important;
+  min-width: 0 !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -9928,10 +10359,18 @@ svg.leaflet-image-layer.leaflet-interactive path {
   top: auto !important;
   transform: none !important;
   margin: 0 0 0 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   display: inline-flex !important;
   align-items: center !important;
-  flex-shrink: 0 !important;
+  flex-shrink: 1 !important;
   z-index: 7 !important;
+}
+
+#homeVesselHudCoords {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* Stacked Bottom Dock: #homeScrollHint sits strictly ABOVE .site-footer in normal flex flow */
@@ -9942,10 +10381,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
   flex-direction: column !important;
   align-items: center !important;
   justify-content: flex-end !important;
-  gap: 8px !important;
+  gap: 6px !important;
   width: 100% !important;
   margin-top: auto !important;
   padding: 0 !important;
+  flex-shrink: 0 !important;
 }
 
 .home-scroll-hint,
@@ -9958,7 +10398,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   display: inline-flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 3px !important;
   padding: 2px 12px !important;
   margin: 0 !important;
 }
@@ -9972,6 +10412,417 @@ svg.leaflet-image-layer.leaflet-interactive path {
   z-index: 25 !important;
 }
 
+.home-hero-viewport .waffi-credit {
+  padding: 2px 2px 4px !important;
+}
+
+/* Mobile Slide 2 Interactive Capability Card (Shown on Touch/Phone Screens on Slide 2) */
+.home-mobile-slide2-card {
+  display: none;
+}
+
+/* ==========================================================================
+   COMPREHENSIVE PHONE & MOBILE RESPONSIVENESS (@media max-width: 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  body:has(#tab-home.active) {
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #tab-home.active {
+    margin: 0 !important;
+    width: 100vw !important;
+    height: calc(100vh - 56px) !important;
+    height: calc(100dvh - 56px) !important;
+    max-height: calc(100vh - 56px) !important;
+    max-height: calc(100dvh - 56px) !important;
+    overflow: hidden !important;
+  }
+
+  .home-hero-viewport {
+    width: 100% !important;
+    height: calc(100vh - 56px) !important;
+    height: calc(100dvh - 56px) !important;
+    max-height: calc(100vh - 56px) !important;
+    max-height: calc(100dvh - 56px) !important;
+    border-radius: 0 !important;
+  }
+
+  .home-hero-content {
+    padding: 0.55rem 0.65rem 0.45rem !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  /* Compact 3-Column Header HUD on Phones — Zero Overlap Guaranteed */
+  .home-hud-top,
+  #homeHudTop {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 0.55rem !important;
+    gap: 0.25rem !important;
+    border-radius: 20px !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  }
+
+  .home-hud-pill {
+    gap: 0.3rem !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  .home-hud-left,
+  #homeHudLeftSlot {
+    min-width: 0 !important;
+    height: 24px !important;
+  }
+
+  .hud-left-brand-wrap {
+    gap: 0.3rem !important;
+  }
+
+  .hud-center-utc-wrap {
+    gap: 0.28rem !important;
+  }
+
+  .home-hud-icon .setsail-icon {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .home-time-mode-btn {
+    font-size: 0.58rem !important;
+    padding: 0 2px !important;
+  }
+
+  .home-hud-dot.live-pulse,
+  .home-hud-dot.offline {
+    width: 6px !important;
+    height: 6px !important;
+  }
+
+  .home-hud-vessel,
+  #homeVesselHudPill {
+    padding: 2px 7px !important;
+    max-width: 126px !important;
+    border-radius: 14px !important;
+  }
+
+  #homeVesselHudCoords {
+    font-size: 0.58rem !important;
+    max-width: 98px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  /* Center Stage & Brand Logo on Phone */
+  .home-center-stage {
+    gap: 0.85rem !important;
+    width: 100% !important;
+    padding: 0 0.2rem !important;
+    margin: auto 0 !important;
+  }
+
+  .home-hero-logo-wrap {
+    width: min(260px, 72vw) !important;
+  }
+
+  .home-brand-sub {
+    font-size: 0.56rem !important;
+    letter-spacing: 0.14em !important;
+    margin-top: 2px !important;
+  }
+
+  /* 3 Tool Tiles on Phone: Strictly Fit 100% Inside Screen Width */
+  .home-tool-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+    max-width: 400px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  .home-tool-tile,
+  .home-hero-viewport.on-slide-2 .home-tool-tile {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding: 0.65rem 0.35rem 0.55rem !important;
+    border-radius: 12px !important;
+  }
+
+  .home-tool-icon-box {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 9px !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .home-tool-icon-box .setsail-icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .home-tool-title {
+    font-size: 0.74rem !important;
+    margin-bottom: 0.12rem !important;
+  }
+
+  .home-tool-desc {
+    display: block !important;
+    font-size: 0.54rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.35rem !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .home-tool-badge {
+    font-size: 0.50rem !important;
+    padding: 1px 5px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Slide 2 Header on Phone */
+  .home-slide2-header {
+    top: 52px !important;
+    width: 94% !important;
+  }
+
+  .saas-eyebrow-pill {
+    font-size: 0.54rem !important;
+    padding: 3px 9px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .home-slide2-title {
+    font-size: 1.15rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .home-slide2-sub {
+    font-size: 0.66rem !important;
+  }
+
+  /* On Phone Slide 2: Center the hover drawer nicely below the 3-card grid so it never clips off-screen */
+  .home-tool-hover-drawer {
+    display: none !important;
+  }
+
+  .home-mobile-slide2-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+    max-width: 400px;
+    margin: 0.35rem auto 0;
+    padding: 0.75rem 0.85rem;
+    border-radius: 12px;
+    background: rgba(8, 18, 42, 0.92);
+    border: 1px solid rgba(56, 189, 248, 0.32);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(14px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .home-hero-viewport.on-slide-2 .home-mobile-slide2-card {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  [data-theme="light"] .home-mobile-slide2-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #cbd5e1;
+    color: #0f172a;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  /* Slide 3: About SetSail on Phone */
+  .home-slide-about {
+    inset: 48px 10px 52px 10px !important;
+  }
+
+  .home-about-container {
+    grid-template-columns: 1fr !important;
+    gap: 0.65rem !important;
+    max-height: 100% !important;
+  }
+
+  .home-about-headline {
+    font-size: 1.25rem !important;
+    line-height: 1.15 !important;
+    margin: 0.15rem 0 0.35rem !important;
+  }
+
+  .home-about-lead {
+    font-size: 0.72rem !important;
+    line-height: 1.38 !important;
+    margin: 0 0 0.55rem !important;
+  }
+
+  .home-about-pillars {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.38rem !important;
+  }
+
+  .home-about-pillar {
+    padding: 0.45rem 0.45rem !important;
+    border-radius: 9px !important;
+  }
+
+  .home-about-pillar-num {
+    font-size: 0.50rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .home-about-pillar-title {
+    font-size: 0.64rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .home-about-pillar-desc {
+    font-size: 0.54rem !important;
+    line-height: 1.22 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .home-about-visual-topbar {
+    padding: 6px 10px !important;
+    font-size: 0.52rem !important;
+  }
+
+  .home-about-media-slot {
+    height: 112px !important;
+  }
+
+  .about-radar-rings {
+    width: 86px !important;
+    height: 86px !important;
+  }
+
+  .about-radar-ring.r1,
+  .about-radar-sweep {
+    width: 84px !important;
+    height: 84px !important;
+  }
+
+  .about-radar-ring.r2 {
+    width: 58px !important;
+    height: 58px !important;
+  }
+
+  .about-radar-ring.r3 {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .about-media-placeholder-caption {
+    margin-top: 6px !important;
+    font-size: 0.52rem !important;
+    padding: 2px 8px !important;
+  }
+
+  /* Slide 4: Sources Marquee on Phone */
+  .home-slide-sources {
+    inset: 48px 0 52px 0 !important;
+  }
+
+  .home-sources-header {
+    margin-bottom: 0.85rem !important;
+    padding: 0 1rem !important;
+  }
+
+  .home-sources-kicker {
+    font-size: 0.56rem !important;
+    letter-spacing: 0.16em !important;
+  }
+
+  .home-sources-sub {
+    font-size: 0.72rem !important;
+  }
+
+  .home-sources-marquee-band {
+    height: 58px !important;
+  }
+
+  .home-sources-marquee-track {
+    gap: 2.2rem !important;
+  }
+
+  .source-authority-logo svg {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .source-logo-name {
+    font-size: 0.80rem !important;
+  }
+
+  .source-logo-sub {
+    font-size: 0.48rem !important;
+  }
+
+  /* Slide Progress Dots on Phone */
+  .home-slide-dots {
+    right: 6px !important;
+    gap: 7px !important;
+  }
+
+  .home-slide-dot {
+    width: 5px !important;
+    height: 5px !important;
+  }
+
+  .home-slide-dot.active {
+    height: 16px !important;
+  }
+
+  /* Bottom Dock (Scroll Arrow + WAFFi Footer) on Phone */
+  .home-bottom-dock {
+    gap: 3px !important;
+  }
+
+  .home-scroll-hint-label {
+    font-size: 0.52rem !important;
+  }
+
+  .home-scroll-chevron {
+    width: 18px !important;
+    height: 9px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .home-hud-pill {
+    font-size: 0.56rem !important;
+  }
+  #homeVesselHudPill {
+    max-width: 105px !important;
+    padding: 2px 5px !important;
+  }
+  #homeVesselHudCoords {
+    max-width: 80px !important;
+    font-size: 0.54rem !important;
+  }
+  .home-tool-desc {
+    display: none !important;
+  }
+}
 </style>
 
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_horizontal.webp" type="image/webp" fetchpriority="high" />
@@ -10338,9 +11189,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
           <!-- Foreground Container: 100% Locked Viewport, Scroll-Scrubbed Choreography -->
           <div class="home-hero-content">
             <!-- Top Bridge HUD Bar (3-Column Grid: Col 1 Left, Col 2 Center, Col 3 Right) -->
-            <div class="home-hud-top" id="homeHudTop" style="display:grid !important;grid-template-columns:1fr auto 1fr !important;align-items:center !important;width:100% !important;position:relative !important;">
+            <div class="home-hud-top" id="homeHudTop" style="display:grid !important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) !important;align-items:center !important;width:100% !important;position:relative !important;">
               <!-- Column 1 (Left): "SETSAIL ●" on Slide 1; UTC Clock glides into this slot on Slide 2..4 -->
-              <div class="home-hud-pill home-hud-left" id="homeHudLeftSlot" style="grid-column:1 !important;justify-self:start !important;position:relative !important;">
+              <div class="home-hud-pill home-hud-left" id="homeHudLeftSlot" style="grid-column:1 !important;justify-self:start !important;position:relative !important;min-width:0 !important;">
                 <div class="hud-left-brand-wrap" id="homeHudLeftBrand">
                   <span class="home-hud-text">SETSAIL</span>
                   <span class="home-hud-dot live-pulse"></span>
@@ -10348,7 +11199,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
               </div>
 
               <!-- Column 2 (Center): UTC Clock on Slide 1 -> physically glides left to #homeHudLeftSlot as Hero Logo rises into center -->
-              <div class="home-hud-pill home-hud-center" id="homeHudCenterAnchor" style="grid-column:2 !important;justify-self:center !important;position:relative !important;left:auto !important;top:auto !important;transform:none !important;">
+              <div class="home-hud-pill home-hud-center" id="homeHudCenterAnchor" style="grid-column:2 !important;justify-self:center !important;position:relative !important;left:auto !important;top:auto !important;transform:none !important;min-width:0 !important;">
                 <div class="hud-center-utc-wrap" id="homeHudCenterUtc">
                   <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v3M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12 8.5 12 13 15.5 14.5" fill="none" stroke="#f05a36" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="13" r="1.4" fill="#ffffff"/></svg></span>
                   <span class="home-hud-text" id="homeUtcClock">00:00:00</span>
@@ -10358,7 +11209,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
               </div>
 
               <!-- Column 3 (Right): Live Vessel Position (Strictly locked in Column 3 on the far right at all times) -->
-              <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" style="grid-column:3 !important;justify-self:end !important;margin-left:auto !important;position:relative !important;" title="Live Vessel Navigation Position (Click to inspect on ECDIS)">
+              <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" style="grid-column:3 !important;justify-self:end !important;margin-left:auto !important;position:relative !important;min-width:0 !important;" title="Live Vessel Navigation Position (Click to inspect on ECDIS)">
                 <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9" r="2.8" fill="#f05a36"/><circle cx="12" cy="9" r="1" fill="#ffffff"/></svg></span>
                 <span class="home-hud-text" id="homeVesselHudCoords">POS: WAITING GPS...</span>
               </div>
@@ -10438,6 +11289,21 @@ svg.leaflet-image-layer.leaflet-interactive path {
                     <span class="home-tool-hover-cta">Open SetRoute &rarr;</span>
                   </div>
                 </button>
+              </div>
+
+              <!-- Mobile Slide 2 Interactive Capability Inspector (Visible on Phone Slide 2) -->
+              <div class="home-mobile-slide2-card no-print" id="homeMobileSlide2Card">
+                <div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:4px;">
+                  <span style="font-size:0.68rem;font-weight:800;color:#38bdf8;letter-spacing:0.06em;text-transform:uppercase;" id="homeMobileToolTitle">SetChart &bull; ECDIS Plotter</span>
+                  <span style="font-size:0.56rem;color:#94a3b8;">Tap any module above</span>
+                </div>
+                <p style="font-size:0.64rem;line-height:1.38;color:#cbd5e1;margin:0 0 6px;" id="homeMobileToolDesc">Interactive ECDIS overlay plotting weekly UKHO Admiralty Notices to Mariners, 52 global port depths with dynamic UKC calculator, and daily 00:00 UTC synoptic cyclone tracking.</p>
+                <div class="home-tool-hover-tags" style="margin-bottom:0;">
+                  <span class="home-tool-hover-tag">UKHO NtM</span>
+                  <span class="home-tool-hover-tag">57 Stars Almanac</span>
+                  <span class="home-tool-hover-tag">AI Passage Planner</span>
+                  <span class="home-tool-hover-tag">100% Offline PWA</span>
+                </div>
               </div>
             </div>
 
@@ -17904,8 +18770,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.1"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.1"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.2"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.2"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -17983,7 +18849,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.1"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.2"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -18128,8 +18994,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         viewport.classList.toggle('show-extra-tools', p >= 0.35 && p <= 1.75);
 
         const tiles = viewport.querySelectorAll('.home-tool-tile');
-        const vw = Math.min(window.innerWidth || 1200, 1280);
-        const spreadXBase = clamp(vw * 0.135, 80, 175);
+        const winW = window.innerWidth || 1200;
+        const isPhone = winW <= 768;
+        const vw = Math.min(winW, 1280);
+        const spreadXBase = isPhone ? 0 : clamp(vw * 0.135, 80, 175);
 
         tiles.forEach((tile, idx) => {
           const isExtra = tile.classList.contains('home-tool-extra');
@@ -18140,8 +19008,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           else { dirX = 1; dirY = -0.35; }
 
           const spreadX = dirX * spreadXBase * e1;
-          const spreadY = (dirY * 44 - 22) * e1;
-          const slide2Scale = 1 + 0.18 * e1;
+          const spreadY = isPhone ? (dirY * 10 - 6) * e1 : (dirY * 44 - 22) * e1;
+          const slide2Scale = isPhone ? (1 + 0.03 * e1) : (1 + 0.18 * e1);
 
           // Exit animation when scrolling from Slide 2 -> Slide 3 (t2: 0 -> 0.62)
           const exitProg = clamp(t2 / 0.62, 0, 1);
@@ -18238,10 +19106,14 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           scheduleSoftSnap();
         }, { passive: false });
 
-        // Touch swipe scrubbing on mobile/tablets
+        // Touch swipe scrubbing & momentum slide snapping on phones/tablets
+        let touchOriginY = null;
+        let touchOriginSlide = 0;
         window.addEventListener('touchstart', (e) => {
           if (!isHomeActive() || !e.touches || !e.touches.length) return;
           touchStartY = e.touches[0].clientY;
+          touchOriginY = touchStartY;
+          touchOriginSlide = Math.round(targetProgress);
         }, { passive: true });
 
         window.addEventListener('touchmove', (e) => {
@@ -18249,12 +19121,22 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           const curY = e.touches[0].clientY;
           const dy = touchStartY - curY;
           touchStartY = curY;
-          targetProgress = clamp(targetProgress + dy * 0.0032, 0, MAX_SLIDE);
+          targetProgress = clamp(targetProgress + dy * 0.0042, 0, MAX_SLIDE);
           scheduleSoftSnap();
         }, { passive: true });
 
-        window.addEventListener('touchend', () => {
+        window.addEventListener('touchend', (e) => {
+          if (isHomeActive() && touchOriginY !== null && e.changedTouches && e.changedTouches.length) {
+            const totalDy = touchOriginY - e.changedTouches[0].clientY;
+            if (Math.abs(totalDy) > 36) {
+              const dir = totalDy > 0 ? 1 : -1;
+              targetProgress = clamp(touchOriginSlide + dir, 0, MAX_SLIDE);
+            } else {
+              targetProgress = clamp(Math.round(targetProgress), 0, MAX_SLIDE);
+            }
+          }
           touchStartY = null;
+          touchOriginY = null;
         }, { passive: true });
 
         // Keyboard Up/Down navigation on Home
@@ -18321,12 +19203,18 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v41') !== '1') {
+        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v42') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v4.1' && k !== 'setsail-tiles-cache-v4').map(k => caches.delete(k))
-          )).then(() => localStorage.setItem('setsail_sw_v41', '1')).catch(() => {});
+            keys.filter(k => k !== 'setsail-cache-v4.2' && k !== 'setsail-tiles-cache-v4').map(k => caches.delete(k))
+          )).then(() => localStorage.setItem('setsail_sw_v42', '1')).catch(() => {});
         }
-        navigator.serviceWorker.register('sw.js', { scope: './' })
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!sessionStorage.getItem('setsail_sw_reloaded_v42')) {
+            sessionStorage.setItem('setsail_sw_reloaded_v42', '1');
+            window.location.reload();
+          }
+        });
+        navigator.serviceWorker.register('sw.js?v=4.2', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker registered successfully, scope:', reg.scope);
             if (navigator.onLine) {

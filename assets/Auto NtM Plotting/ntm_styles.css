@@ -6506,17 +6506,19 @@
 
 
 /* ==========================================================================
-   SETSAIL v4.1 — BULLETPROOF 3-COLUMN HEADER & STACKED FOOTER DOCK
+   SETSAIL v4.2 — BULLETPROOF 3-COLUMN HEADER, STACKED DOCK & PHONE COMPATIBILITY
    ========================================================================== */
-.home-hud-top {
+.home-hud-top,
+#homeHudTop {
   position: relative !important;
   display: grid !important;
-  grid-template-columns: 1fr auto 1fr !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
   align-items: center !important;
+  gap: 0.5rem !important;
   width: 100% !important;
   height: 46px !important;
   min-height: 46px !important;
-  padding: 0 1.2rem !important;
+  padding: 0 1.15rem !important;
   box-sizing: border-box !important;
   z-index: 40 !important;
 }
@@ -6530,6 +6532,8 @@
   top: auto !important;
   transform: none !important;
   margin: 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   display: inline-flex !important;
   align-items: center !important;
   height: 28px !important;
@@ -6545,6 +6549,7 @@
   top: auto !important;
   transform: none !important;
   margin: 0 !important;
+  min-width: 0 !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -6562,10 +6567,18 @@
   top: auto !important;
   transform: none !important;
   margin: 0 0 0 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   display: inline-flex !important;
   align-items: center !important;
-  flex-shrink: 0 !important;
+  flex-shrink: 1 !important;
   z-index: 7 !important;
+}
+
+#homeVesselHudCoords {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* Stacked Bottom Dock: #homeScrollHint sits strictly ABOVE .site-footer in normal flex flow */
@@ -6576,10 +6589,11 @@
   flex-direction: column !important;
   align-items: center !important;
   justify-content: flex-end !important;
-  gap: 8px !important;
+  gap: 6px !important;
   width: 100% !important;
   margin-top: auto !important;
   padding: 0 !important;
+  flex-shrink: 0 !important;
 }
 
 .home-scroll-hint,
@@ -6592,7 +6606,7 @@
   display: inline-flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 3px !important;
   padding: 2px 12px !important;
   margin: 0 !important;
 }
@@ -6604,4 +6618,416 @@
   padding: 0 !important;
   margin: 0 !important;
   z-index: 25 !important;
+}
+
+.home-hero-viewport .waffi-credit {
+  padding: 2px 2px 4px !important;
+}
+
+/* Mobile Slide 2 Interactive Capability Card (Shown on Touch/Phone Screens on Slide 2) */
+.home-mobile-slide2-card {
+  display: none;
+}
+
+/* ==========================================================================
+   COMPREHENSIVE PHONE & MOBILE RESPONSIVENESS (@media max-width: 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  body:has(#tab-home.active) {
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #tab-home.active {
+    margin: 0 !important;
+    width: 100vw !important;
+    height: calc(100vh - 56px) !important;
+    height: calc(100dvh - 56px) !important;
+    max-height: calc(100vh - 56px) !important;
+    max-height: calc(100dvh - 56px) !important;
+    overflow: hidden !important;
+  }
+
+  .home-hero-viewport {
+    width: 100% !important;
+    height: calc(100vh - 56px) !important;
+    height: calc(100dvh - 56px) !important;
+    max-height: calc(100vh - 56px) !important;
+    max-height: calc(100dvh - 56px) !important;
+    border-radius: 0 !important;
+  }
+
+  .home-hero-content {
+    padding: 0.55rem 0.65rem 0.45rem !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  /* Compact 3-Column Header HUD on Phones — Zero Overlap Guaranteed */
+  .home-hud-top,
+  #homeHudTop {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 0.55rem !important;
+    gap: 0.25rem !important;
+    border-radius: 20px !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  }
+
+  .home-hud-pill {
+    gap: 0.3rem !important;
+    font-size: 0.62rem !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  .home-hud-left,
+  #homeHudLeftSlot {
+    min-width: 0 !important;
+    height: 24px !important;
+  }
+
+  .hud-left-brand-wrap {
+    gap: 0.3rem !important;
+  }
+
+  .hud-center-utc-wrap {
+    gap: 0.28rem !important;
+  }
+
+  .home-hud-icon .setsail-icon {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .home-time-mode-btn {
+    font-size: 0.58rem !important;
+    padding: 0 2px !important;
+  }
+
+  .home-hud-dot.live-pulse,
+  .home-hud-dot.offline {
+    width: 6px !important;
+    height: 6px !important;
+  }
+
+  .home-hud-vessel,
+  #homeVesselHudPill {
+    padding: 2px 7px !important;
+    max-width: 126px !important;
+    border-radius: 14px !important;
+  }
+
+  #homeVesselHudCoords {
+    font-size: 0.58rem !important;
+    max-width: 98px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  /* Center Stage & Brand Logo on Phone */
+  .home-center-stage {
+    gap: 0.85rem !important;
+    width: 100% !important;
+    padding: 0 0.2rem !important;
+    margin: auto 0 !important;
+  }
+
+  .home-hero-logo-wrap {
+    width: min(260px, 72vw) !important;
+  }
+
+  .home-brand-sub {
+    font-size: 0.56rem !important;
+    letter-spacing: 0.14em !important;
+    margin-top: 2px !important;
+  }
+
+  /* 3 Tool Tiles on Phone: Strictly Fit 100% Inside Screen Width */
+  .home-tool-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+    max-width: 400px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  .home-tool-tile,
+  .home-hero-viewport.on-slide-2 .home-tool-tile {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding: 0.65rem 0.35rem 0.55rem !important;
+    border-radius: 12px !important;
+  }
+
+  .home-tool-icon-box {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 9px !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .home-tool-icon-box .setsail-icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .home-tool-title {
+    font-size: 0.74rem !important;
+    margin-bottom: 0.12rem !important;
+  }
+
+  .home-tool-desc {
+    display: block !important;
+    font-size: 0.54rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.35rem !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .home-tool-badge {
+    font-size: 0.50rem !important;
+    padding: 1px 5px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Slide 2 Header on Phone */
+  .home-slide2-header {
+    top: 52px !important;
+    width: 94% !important;
+  }
+
+  .saas-eyebrow-pill {
+    font-size: 0.54rem !important;
+    padding: 3px 9px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .home-slide2-title {
+    font-size: 1.15rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .home-slide2-sub {
+    font-size: 0.66rem !important;
+  }
+
+  /* On Phone Slide 2: Center the hover drawer nicely below the 3-card grid so it never clips off-screen */
+  .home-tool-hover-drawer {
+    display: none !important;
+  }
+
+  .home-mobile-slide2-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+    max-width: 400px;
+    margin: 0.35rem auto 0;
+    padding: 0.75rem 0.85rem;
+    border-radius: 12px;
+    background: rgba(8, 18, 42, 0.92);
+    border: 1px solid rgba(56, 189, 248, 0.32);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(14px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .home-hero-viewport.on-slide-2 .home-mobile-slide2-card {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  [data-theme="light"] .home-mobile-slide2-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #cbd5e1;
+    color: #0f172a;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  /* Slide 3: About SetSail on Phone */
+  .home-slide-about {
+    inset: 48px 10px 52px 10px !important;
+  }
+
+  .home-about-container {
+    grid-template-columns: 1fr !important;
+    gap: 0.65rem !important;
+    max-height: 100% !important;
+  }
+
+  .home-about-headline {
+    font-size: 1.25rem !important;
+    line-height: 1.15 !important;
+    margin: 0.15rem 0 0.35rem !important;
+  }
+
+  .home-about-lead {
+    font-size: 0.72rem !important;
+    line-height: 1.38 !important;
+    margin: 0 0 0.55rem !important;
+  }
+
+  .home-about-pillars {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.38rem !important;
+  }
+
+  .home-about-pillar {
+    padding: 0.45rem 0.45rem !important;
+    border-radius: 9px !important;
+  }
+
+  .home-about-pillar-num {
+    font-size: 0.50rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .home-about-pillar-title {
+    font-size: 0.64rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .home-about-pillar-desc {
+    font-size: 0.54rem !important;
+    line-height: 1.22 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .home-about-visual-topbar {
+    padding: 6px 10px !important;
+    font-size: 0.52rem !important;
+  }
+
+  .home-about-media-slot {
+    height: 112px !important;
+  }
+
+  .about-radar-rings {
+    width: 86px !important;
+    height: 86px !important;
+  }
+
+  .about-radar-ring.r1,
+  .about-radar-sweep {
+    width: 84px !important;
+    height: 84px !important;
+  }
+
+  .about-radar-ring.r2 {
+    width: 58px !important;
+    height: 58px !important;
+  }
+
+  .about-radar-ring.r3 {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .about-media-placeholder-caption {
+    margin-top: 6px !important;
+    font-size: 0.52rem !important;
+    padding: 2px 8px !important;
+  }
+
+  /* Slide 4: Sources Marquee on Phone */
+  .home-slide-sources {
+    inset: 48px 0 52px 0 !important;
+  }
+
+  .home-sources-header {
+    margin-bottom: 0.85rem !important;
+    padding: 0 1rem !important;
+  }
+
+  .home-sources-kicker {
+    font-size: 0.56rem !important;
+    letter-spacing: 0.16em !important;
+  }
+
+  .home-sources-sub {
+    font-size: 0.72rem !important;
+  }
+
+  .home-sources-marquee-band {
+    height: 58px !important;
+  }
+
+  .home-sources-marquee-track {
+    gap: 2.2rem !important;
+  }
+
+  .source-authority-logo svg {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .source-logo-name {
+    font-size: 0.80rem !important;
+  }
+
+  .source-logo-sub {
+    font-size: 0.48rem !important;
+  }
+
+  /* Slide Progress Dots on Phone */
+  .home-slide-dots {
+    right: 6px !important;
+    gap: 7px !important;
+  }
+
+  .home-slide-dot {
+    width: 5px !important;
+    height: 5px !important;
+  }
+
+  .home-slide-dot.active {
+    height: 16px !important;
+  }
+
+  /* Bottom Dock (Scroll Arrow + WAFFi Footer) on Phone */
+  .home-bottom-dock {
+    gap: 3px !important;
+  }
+
+  .home-scroll-hint-label {
+    font-size: 0.52rem !important;
+  }
+
+  .home-scroll-chevron {
+    width: 18px !important;
+    height: 9px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .home-hud-pill {
+    font-size: 0.56rem !important;
+  }
+  #homeVesselHudPill {
+    max-width: 105px !important;
+    padding: 2px 5px !important;
+  }
+  #homeVesselHudCoords {
+    max-width: 80px !important;
+    font-size: 0.54rem !important;
+  }
+  .home-tool-desc {
+    display: none !important;
+  }
 }

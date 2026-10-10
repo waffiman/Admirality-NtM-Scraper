@@ -4,7 +4,7 @@
  * Fully offline-capable bridge cockpit — Zero Google Dinosaur & Zero Unstyled Blocks!
  */
 
-const CACHE_NAME = 'setsail-cache-v4.1';
+const CACHE_NAME = 'setsail-cache-v4.2';
 const TILE_CACHE_NAME = 'setsail-tiles-cache-v4';
 
 const OFFLINE_CORE_ASSETS = [
@@ -23,10 +23,10 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=4.1',
-  'assets/Auto NtM Plotting/port_depths.js?v=4.1',
-  'assets/Auto NtM Plotting/ntm_module.js?v=4.1',
-  'assets/Auto NtM Plotting/setsail_core.js?v=4.1',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=4.2',
+  'assets/Auto NtM Plotting/port_depths.js?v=4.2',
+  'assets/Auto NtM Plotting/ntm_module.js?v=4.2',
+  'assets/Auto NtM Plotting/setsail_core.js?v=4.2',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
   'assets/Auto NtM Plotting/tesseract.min.js',
   'assets/Auto NtM Plotting/pdf.min.js',
@@ -109,15 +109,20 @@ self.addEventListener('activate', (event) => {
       await self.clients.claim();
       const newCache = await caches.open(CACHE_NAME);
       const newKeys = await newCache.keys();
-      // Only remove older caches if the new cache successfully populated core files
-      if (newKeys.length >= 5) {
-        const keys = await caches.keys();
+      const keys = await caches.keys();
+      const oldCaches = keys.filter((key) => key !== CACHE_NAME && key !== TILE_CACHE_NAME);
+      if (oldCaches.length > 0) {
         await Promise.all(
-          keys.filter((key) => key !== CACHE_NAME && key !== TILE_CACHE_NAME).map((key) => {
+          oldCaches.map((key) => {
             console.log('[SetSail SW] Removing deprecated cache:', key);
             return caches.delete(key);
           })
         );
+        // Automatically refresh any open client tabs that were served by a deprecated Service Worker
+        const windowClients = await self.clients.matchAll({ type: 'window' });
+        for (const client of windowClients) {
+          try { await client.navigate(client.url); } catch (e) {}
+        }
       }
     })()
   );
