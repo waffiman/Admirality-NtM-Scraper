@@ -498,7 +498,7 @@ def main():
     print("=" * 70)
     
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    repo_root = os.path.dirname(script_dir)
+    repo_root = script_dir if os.path.basename(script_dir).lower() != "scripts" else os.path.dirname(script_dir)
     public_dir = os.path.join(repo_root, "public")
     cache_dir = os.path.join(script_dir, "cache")
     notices_json_path = os.path.join(public_dir, "notices.json")
