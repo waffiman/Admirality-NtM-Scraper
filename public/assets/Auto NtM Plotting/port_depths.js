@@ -3143,6 +3143,8 @@ function renderPortDepthsOnMap(map) {
 function initExcelOverlayDock(map) {
   const dock = document.getElementById("excelOverlayDock");
   if (!dock) return;
+  if (dock.dataset.initialized === "1") return;
+  dock.dataset.initialized = "1";
 
   // 1. Admiralty NtM Overlay Tab
   const ntmTab = document.getElementById("tabOverlayNotices");
@@ -3293,16 +3295,34 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         else currentMap.removeLayer(seamarkLayer);
       }
     } else if (overlayKey === "weather") {
-      if (typeof leafletWeatherLayer !== "undefined" && leafletWeatherLayer) {
-        if (isActive) currentMap.addLayer(leafletWeatherLayer);
-        else currentMap.removeLayer(leafletWeatherLayer);
+      const wLayer = (typeof window.leafletWeatherLayer !== "undefined" && window.leafletWeatherLayer)
+        ? window.leafletWeatherLayer
+        : (typeof leafletWeatherLayer !== "undefined" ? leafletWeatherLayer : null);
+      if (wLayer) {
+        if (isActive) {
+          if (!currentMap.hasLayer(wLayer)) currentMap.addLayer(wLayer);
+        } else {
+          if (currentMap.hasLayer(wLayer)) currentMap.removeLayer(wLayer);
+        }
+      } else if (isActive && typeof window.renderWeatherOnMap === "function") {
+        window.renderWeatherOnMap(currentMap);
       }
     } else if (overlayKey === "route") {
-      if (typeof leafletRouteLayer !== "undefined" && leafletRouteLayer) {
-        if (isActive) currentMap.addLayer(leafletRouteLayer);
-        else currentMap.removeLayer(leafletRouteLayer);
+      const rLayer = (typeof window.leafletRouteLayer !== "undefined" && window.leafletRouteLayer)
+        ? window.leafletRouteLayer
+        : (typeof leafletRouteLayer !== "undefined" ? leafletRouteLayer : null);
+      if (rLayer) {
+        if (isActive) {
+          if (!currentMap.hasLayer(rLayer)) currentMap.addLayer(rLayer);
+        } else {
+          if (currentMap.hasLayer(rLayer)) currentMap.removeLayer(rLayer);
+        }
       }
     }
+  }
+
+  if (typeof window.syncFilterMasterCheckboxes === "function") {
+    window.syncFilterMasterCheckboxes();
   }
 
   // Synchronize Left Multi-Column List immediately!
@@ -3351,7 +3371,11 @@ function jumpToPort(portId) {
 function runWeeklyDepthAudit(showModal = false) {
   const now = new Date();
   const year = now.getFullYear().toString().slice(-2);
-  const weekNum = 41; // Hydrographic Week 41/26
+  let weekNum = 42;
+  try {
+    const savedMeta = JSON.parse(localStorage.getItem("setsail_meta_v1") || "{}");
+    if (savedMeta && savedMeta.weekNumber) weekNum = savedMeta.weekNumber;
+  } catch (e) {}
   const cycleName = `WK ${weekNum}/${year}`;
 
   const auditData = {
