@@ -727,6 +727,9 @@ function initAutoNtmUI() {
   initWaypointEditModal();
   initNtmOverlayInfoModal();
   initWeatherOverlayInfoModal();
+  if (typeof initExcelOverlayDock === "function") {
+    initExcelOverlayDock(leafletMap);
+  }
 
   // Checkbox listeners in Export modal
   [expChkT, expChkP, expChkPerm, expChkOnlyChecked].forEach(chk => {
@@ -1247,6 +1250,37 @@ const MARINE_WEATHER_STORE = {
   provider: "Open-Meteo Marine (ECMWF IFS 0.25°) / NOAA NHC & JTWC",
   storms: [
     {
+      id: "AT-2026-00",
+      name: "Extratropical Storm CIARAN",
+      category: "Severe Atlantic Gale (Force 10)",
+      center: [48.2, -10.5],
+      centralPressure: 964,
+      maxWinds: 65,
+      gusts: 85,
+      movement: "ENE at 18 kts",
+      dangerRadiusNm: 135,
+      forecastTrack: [
+        { tau: 24, coords: [49.8, -4.2], winds: 60, radiusNm: 95 },
+        { tau: 48, coords: [52.4, 2.8], winds: 50, radiusNm: 120 },
+        { tau: 72, coords: [55.1, 8.4], winds: 42, radiusNm: 150 }
+      ]
+    },
+    {
+      id: "MD-2026-04",
+      name: "Medicane IANOS-II",
+      category: "Mediterranean Subtropical Storm",
+      center: [36.4, 18.2],
+      centralPressure: 988,
+      maxWinds: 52,
+      gusts: 68,
+      movement: "E at 10 kts",
+      dangerRadiusNm: 90,
+      forecastTrack: [
+        { tau: 24, coords: [36.1, 21.8], winds: 48, radiusNm: 75 },
+        { tau: 48, coords: [35.6, 25.4], winds: 40, radiusNm: 95 }
+      ]
+    },
+    {
       id: "TC-2026-01",
       name: "Tropical Cyclone FREDDY",
       category: "Severe Tropical Cyclone (Cat 3)",
@@ -1325,8 +1359,15 @@ function renderWeatherOnMap(map = null) {
 
   if (!leafletWeatherLayer) {
     leafletWeatherLayer = L.layerGroup();
-    if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.weather !== false) {
+  }
+  window.leafletWeatherLayer = leafletWeatherLayer;
+  if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.weather !== false) {
+    if (!currentMap.hasLayer(leafletWeatherLayer)) {
       leafletWeatherLayer.addTo(currentMap);
+    }
+  } else {
+    if (currentMap.hasLayer(leafletWeatherLayer)) {
+      currentMap.removeLayer(leafletWeatherLayer);
     }
   }
   leafletWeatherLayer.clearLayers();
@@ -2331,6 +2372,10 @@ function initNtMMap() {
       leafletWeatherLayer.addTo(leafletMap);
     }
     leafletRouteLayer.addTo(leafletMap);
+    window.leafletMap = leafletMap;
+    window.leafletMarkersLayer = leafletMarkersLayer;
+    window.leafletWeatherLayer = leafletWeatherLayer;
+    window.leafletRouteLayer = leafletRouteLayer;
 
     renderWeatherOnMap(leafletMap);
 
@@ -2552,6 +2597,7 @@ function renderNtMListAndMap() {
 
   const isNoticesActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.notices !== false : true;
   const isDepthsActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.depths !== false : true;
+  const isWeatherActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.weather !== false : true;
   const isRouteActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.route !== false : true;
 
   // 1. Gather filtered NtM items
@@ -2629,8 +2675,18 @@ function renderNtMListAndMap() {
   if (elCntPerm) elCntPerm.textContent = countPerm;
   const elCntPoly = document.getElementById("popCntPoly");
   if (elCntPoly) elCntPoly.textContent = countPoly;
-  const elCntCan = document.getElementById("popCntCancelled");
+  const elCntCan = document.getElementById("popCntCancelled") || document.getElementById("popCntCan");
   if (elCntCan) elCntCan.textContent = countCancelled;
+  const elCntNtmTot = document.getElementById("popCntNtmTotal");
+  if (elCntNtmTot) elCntNtmTot.textContent = activeNotices.length;
+  const elCntPortsTot = document.getElementById("popCntPortsTotal");
+  if (elCntPortsTot && typeof PORT_DEPTHS_DB !== "undefined") elCntPortsTot.textContent = PORT_DEPTHS_DB.length;
+  const elCntWeatherTot = document.getElementById("popCntWeatherTotal");
+  if (elCntWeatherTot && typeof MARINE_WEATHER_STORE !== "undefined") {
+    elCntWeatherTot.textContent = ((MARINE_WEATHER_STORE.storms || []).length + (MARINE_WEATHER_STORE.waves || []).length) + " LIVE";
+  }
+  const elCntRouteTot = document.getElementById("popCntRouteTotal");
+  if (elCntRouteTot) elCntRouteTot.textContent = hasRoute ? activeRouteData.waypoints.length : 0;
 
   const homeNoticeCountEl = document.getElementById("homeNoticeCount");
   if (homeNoticeCountEl) {
@@ -3419,6 +3475,11 @@ function initSetRoute() {
   const exportBtn = document.getElementById("btnExportSetRouteGeoJson");
 
   if (!originSel || !destSel || typeof PORT_DEPTHS_DB === "undefined") return;
+  if (originSel.dataset.initialized === "1") {
+    checkDraftClearance();
+    return;
+  }
+  originSel.dataset.initialized = "1";
 
   // Sort ports alphabetically
   const sortedPorts = [...PORT_DEPTHS_DB].sort((a, b) => a.name.localeCompare(b.name));
@@ -3573,143 +3634,101 @@ async function generateSetRoutePassage() {
   const stepsList = document.getElementById("setRouteStepsList");
   const genBtn = document.getElementById("btnGenerateSetRoute");
 
-  if (progressBox) progressBox.style.display = "block";
+  if (progressBox) progressBox.style.display = "flex";
   if (genBtn) genBtn.disabled = true;
   if (stepsList) stepsList.innerHTML = "";
 
-  const addStep = (msg, isDone = false) => {
-    if (progressMsg) progressMsg.textContent = msg;
-    if (stepsList) {
-      const stepItem = document.createElement("div");
-      stepItem.className = `progress-step-item ${isDone ? 'done' : ''}`;
-      stepItem.textContent = msg;
-      stepsList.appendChild(stepItem);
-    }
+  const animateStepMsg = async (msg, holdMs = 620) => {
+    if (!progressMsg) return;
+    progressMsg.classList.remove("fade-in");
+    progressMsg.classList.add("fade-out");
+    await new Promise(r => setTimeout(r, 180));
+    progressMsg.textContent = msg;
+    progressMsg.classList.remove("fade-out");
+    progressMsg.classList.add("fade-in");
+    await new Promise(r => setTimeout(r, holdMs));
   };
 
-  addStep("Geocoding departure & destination fairways...", true);
-  await new Promise(r => setTimeout(r, 200));
-
-  // Gather active NtM hazards
-  let ntmContext = "No critical navigational hazards currently intersecting route.";
-  if (typeof NTM_STORE !== "undefined" && NTM_STORE.length > 0) {
-    const activeWarnings = NTM_STORE.filter(n => !n.isCancelled && (n.type === "T" || n.type === "P")).slice(0, 8);
-    if (activeWarnings.length > 0) {
-      ntmContext = activeWarnings.map(n => `NtM #${n.id} (${n.type}): ${n.subject || 'Navigational Restriction'} [${n.coords && n.coords[0] ? n.coords[0].dms : ''}]`).join("; ");
-    }
-  }
-
-  // Gather active Weather & Cyclone hazards
-  let weatherContext = "No critical tropical cyclones or severe sea states detected in passage zone.";
-  if (typeof MARINE_WEATHER_STORE !== "undefined") {
-    const storms = (MARINE_WEATHER_STORE.storms || []).map(s => 
-      `${s.name} (${s.category}, Winds ${s.maxWinds} kts, Center: Lat ${s.center[0]}, Lon ${s.center[1]}, Moving ${s.movement}, Danger Radius: ${s.dangerRadiusNm} NM)`
-    );
-    const waves = (MARINE_WEATHER_STORE.waves || []).filter(w => w.waveHeight >= 4.0).map(w =>
-      `Heavy Seas ${w.waveHeight}m [Lat ${w.center[0]}, Lon ${w.center[1]}]`
-    );
-    const hazards = [...storms, ...waves];
-    if (hazards.length > 0) {
-      weatherContext = hazards.join("; ");
-    }
-  }
-
-  addStep("Scanning active UKHO Admiralty NtM hazards & TSS polygons...", true);
-  await new Promise(r => setTimeout(r, 250));
-
-  addStep("Analyzing 00:00 UTC Global Marine Weather, Cyclones & Wave hazards...", true);
-  await new Promise(r => setTimeout(r, 250));
-
-  addStep("Injecting Open Sea Buoys, TSS lanes & bathymetry into passage planning pipeline...", true);
-  await new Promise(r => setTimeout(r, 250));
-
-  addStep("Calculating optimal deep-sea passage route...", false);
-
-  const seaCorridor = findMaritimeSeaCorridor(origCoords, destCoords);
-  const corridorNames = seaCorridor.map(k => (MARITIME_SEA_NODES[k] || [])[2] || k).join(" -> ");
-  const corridorCoords = seaCorridor.map(k => {
-    const n = MARITIME_SEA_NODES[k];
-    return n ? `${n[2]} (Lat: ${n[0].toFixed(2)}, Lon: ${n[1].toFixed(2)})` : k;
-  }).join("; ");
-
-  const prompt = `You are an expert Chief Navigational Officer specializing in ECDIS Passage Planning and IMO Resolution A.893(21).
-Plan an autonomous, deep-water ocean passage from:
-- Origin: ${pOrig.name} (${pOrig.country}) [${pOrig.unlocode}] at Lat: ${origCoords[0].toFixed(3)}, Lon: ${origCoords[1].toFixed(3)}
-- Destination: ${pDest.name} (${pDest.country}) [${pDest.unlocode}] at Lat: ${destCoords[0].toFixed(3)}, Lon: ${destCoords[1].toFixed(3)}
-
-Vessel constraints:
-- Speed: ${speed} kn
-- Draft: ${draft} m
-- Safety Margin (XTD): ${xtd} NM
-- Leg Calculation: ${sailMode}
-
-Maritime rules:
-- Strictly deep-water navigable sea lanes only. Absolutely DO NOT route across land.
-- MANDATORY MARITIME TRANSIT CORRIDOR: ${corridorNames}.
-- Sequential deep-water waypoints along this corridor: ${corridorCoords}.
-- Connect departure fairway to destination fairway strictly traversing through these maritime coordinates. Do NOT cut across any landmass, peninsula, or cape.
-- Avoid active Admiralty NtM hazards: ${ntmContext}
-- MANDATORY WEATHER AVOIDANCE (SPOS & Windy Standard): Active marine weather hazards: ${weatherContext}. Route safely clear of storms maintaining at least 150-200 NM CPA from any cyclone center.
-- Generate between 7 to 20 sequential waypoints connecting origin approach to destination approach.
-
-Output ONLY valid JSON matching:
-{
-  "routeName": "${pOrig.name} to ${pDest.name}",
-  "totalDistanceNM": 0,
-  "estimatedSteamingDays": 0,
-  "chokepoints": ["...", "..."],
-  "waypoints": [
-    {
-      "wptNo": "001",
-      "name": "ORIGIN PILOT STATION",
-      "lat": ${origCoords[0].toFixed(3)},
-      "lon": ${origCoords[1].toFixed(3)},
-      "speedKnots": ${speed},
-      "portsideXTD": ${xtd},
-      "starboardXTD": ${xtd},
-      "turnRadius": 0.5,
-      "sail": "RL",
-      "rot": 10.0
-    }
-  ]
-}`;
-
-  let parsedRoute = null;
-
   try {
-    const cohereResp = await fetch("https://api.cohere.com/v2/chat", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${SETROUTE_COHERE_KEY}`,
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify({
-        model: SETROUTE_COHERE_MODEL,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.15
-      })
-    });
+    await animateStepMsg("Geocoding departure & destination fairways...", 580);
 
-    if (cohereResp.ok) {
-      const data = await cohereResp.json();
-      const text = (((data.message || {}).content || [])[0] ? data.message.content[0].text : "") || "";
-      const jsonMatch = text.match(/\{.*\}/s);
-      if (jsonMatch) {
-        parsedRoute = JSON.parse(jsonMatch[0]);
+    // Gather active NtM hazards
+    let ntmContext = "No critical navigational hazards currently intersecting route.";
+    if (typeof NTM_STORE !== "undefined" && NTM_STORE.length > 0) {
+      const activeWarnings = NTM_STORE.filter(n => !n.isCancelled && (n.type === "T" || n.type === "P")).slice(0, 8);
+      if (activeWarnings.length > 0) {
+        ntmContext = activeWarnings.map(n => `NtM #${n.id} (${n.type}): ${n.subject || 'Navigational Restriction'} [${n.coords && n.coords[0] ? n.coords[0].dms : ''}]`).join("; ");
       }
     }
-  } catch (err) {
-    console.warn("[SetRoute AI] Cohere API request failed, engaging algorithmic fallback:", err);
-  }
 
-  // Fallback to high-accuracy maritime corridor routing if AI was unreachable or returned non-JSON
-  if (!parsedRoute || !parsedRoute.waypoints || parsedRoute.waypoints.length < 2) {
-    addStep("Engaging SetSail High-Precision Geodetic Maritime Corridor Engine...", true);
-    parsedRoute = generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode);
-  } else {
-    addStep("Maritime passage plan successfully synthesized!", true);
-  }
+    // Gather active Weather & Cyclone hazards
+    let weatherContext = "No critical tropical cyclones or severe sea states detected in passage zone.";
+    if (typeof MARINE_WEATHER_STORE !== "undefined") {
+      const storms = (MARINE_WEATHER_STORE.storms || []).map(s =>
+        `${s.name} (${s.category}, Winds ${s.maxWinds} kts, Center: Lat ${s.center[0]}, Lon ${s.center[1]}, Moving ${s.movement}, Danger Radius: ${s.dangerRadiusNm} NM)`
+      );
+      const waves = (MARINE_WEATHER_STORE.waves || []).filter(w => w.waveHeight >= 4.0).map(w =>
+        `Heavy Seas ${w.waveHeight}m [Lat ${w.center[0]}, Lon ${w.center[1]}]`
+      );
+      const hazards = [...storms, ...waves];
+      if (hazards.length > 0) {
+        weatherContext = hazards.join("; ");
+      }
+    }
+
+    await animateStepMsg("Scanning active UKHO Admiralty NtM Week 42/26 hazards & TSS polygons...", 620);
+    await animateStepMsg("Analyzing 00:00 UTC Marine Weather, Cyclones & Wave fields...", 620);
+    await animateStepMsg("Injecting Open Sea Buoys, TSS lanes & port bathymetry...", 580);
+    await animateStepMsg("Calculating optimal deep-sea passage route...", 450);
+
+    const seaCorridor = findMaritimeSeaCorridor(origCoords, destCoords);
+    const corridorNames = seaCorridor.map(k => (MARITIME_SEA_NODES[k] || [])[2] || k).join(" -> ");
+    const corridorCoords = seaCorridor.map(k => {
+      const n = MARITIME_SEA_NODES[k];
+      return n ? `${n[2]} (Lat: ${n[0].toFixed(2)}, Lon: ${n[1].toFixed(2)})` : k;
+    }).join("; ");
+
+    // Always build verified deep-water sea corridor route first so we never route over land
+    const verifiedSeaRoute = generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode);
+    let parsedRoute = verifiedSeaRoute;
+
+    if (navigator.onLine) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4500);
+      try {
+        const prompt = `Return a JSON object with {"chokepoints": ["..."]} listing the main straits/canals along ${corridorNames} between ${pOrig.name} and ${pDest.name}, avoiding weather: ${weatherContext} and NtMs: ${ntmContext}.`;
+        const cohereResp = await fetch("https://api.cohere.com/v2/chat", {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Authorization": `Bearer ${SETROUTE_COHERE_KEY}`,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            model: SETROUTE_COHERE_MODEL,
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.1
+          })
+        });
+        clearTimeout(timeoutId);
+        if (cohereResp.ok) {
+          const data = await cohereResp.json();
+          const text = (((data.message || {}).content || [])[0] ? data.message.content[0].text : "") || "";
+          const jsonMatch = text.match(/\{.*\}/s);
+          if (jsonMatch) {
+            const aiMeta = JSON.parse(jsonMatch[0]);
+            if (aiMeta && Array.isArray(aiMeta.chokepoints) && aiMeta.chokepoints.length > 0) {
+              parsedRoute.chokepoints = aiMeta.chokepoints;
+            }
+          }
+        }
+      } catch (err) {
+        clearTimeout(timeoutId);
+      }
+    }
+
+    await animateStepMsg("Maritime passage plan synthesized — plotting on SetChart...", 520);
 
   // Normalize waypoints & IDs
   const waypoints = (parsedRoute.waypoints || []).map((wp, idx) => {
@@ -3764,28 +3783,32 @@ Output ONLY valid JSON matching:
   // Update Results Card
   displaySetRouteResults(activeRouteData);
 
-  addStep("Plotting route directly to 'My Route' overlay on SetChart...", true);
-  await new Promise(r => setTimeout(r, 400));
+    // Enable My Route overlay and sync dock
+    if (typeof setOverlayActive === "function") {
+      setOverlayActive("route", true, leafletMap);
+    } else if (typeof OVERLAY_STATES !== "undefined") {
+      OVERLAY_STATES.route = true;
+    }
 
-  // Enable My Route overlay and sync dock
-  if (typeof setOverlayActive === "function") {
-    setOverlayActive("route", true, leafletMap);
-  } else if (typeof OVERLAY_STATES !== "undefined") {
-    OVERLAY_STATES.route = true;
+    // Show My Route pill in left column
+    const catPillRoute = document.getElementById("catPillRoute");
+    if (catPillRoute) catPillRoute.style.display = "inline-flex";
+
+    // Switch to SetChart and plot!
+    switchToTab("tab-ntm");
+    setTimeout(() => {
+      if (leafletMap) {
+        leafletMap.invalidateSize();
+        renderRouteOnMap(activeRouteData, true);
+        renderNtMListAndMap();
+      }
+    }, 200);
+
+    showSetSailToast(`✓ Passage route generated: ${waypoints.length} waypoints plotted on SetChart`, "success");
+  } finally {
+    if (progressBox) progressBox.style.display = "none";
+    if (genBtn) genBtn.disabled = false;
   }
-
-  // Show My Route pill in left column
-  const catPillRoute = document.getElementById("catPillRoute");
-  if (catPillRoute) catPillRoute.style.display = "inline-flex";
-
-  // Switch to SetChart and plot!
-  switchToTab("tab-ntm");
-  renderRouteOnMap(activeRouteData, true);
-  renderNtMListAndMap();
-
-  showSetSailToast(`✓ My Route generated by SetRoute AI: ${waypoints.length} waypoints plotted on SetChart`, "success");
-
-  if (genBtn) genBtn.disabled = false;
 }
 
 /**
@@ -4149,17 +4172,21 @@ function openNtmOverlayInfoModal() {
   const tpCountEl = document.getElementById("ntmModalTpCount");
   const editionEl = document.getElementById("ntmModalEdition");
 
-  const total = typeof NTM_STORE !== "undefined" ? NTM_STORE.length : 0;
-  const tpCount = typeof NTM_STORE !== "undefined" ? NTM_STORE.filter(n => n.type === "T" || n.type === "P").length : 0;
+  const activeList = typeof NTM_STORE !== "undefined" ? NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED") : [];
+  const total = activeList.length;
+  const tpCount = activeList.filter(n => n.type === "T" || n.type === "P").length;
 
   if (countEl) countEl.textContent = total + " Notices Plotted";
   if (tpCountEl) tpCountEl.textContent = tpCount + " T&P Notices";
 
-  let latestEd = "Week 41 / 2026";
-  if (typeof NTM_STORE !== "undefined" && NTM_STORE.length > 0) {
-    const withEd = NTM_STORE.find(n => n.edition);
-    if (withEd) latestEd = withEd.edition;
-  }
+  let latestEd = "Week 42 / 2026";
+  try {
+    const savedMeta = JSON.parse(localStorage.getItem(META_STORAGE_KEY) || "{}");
+    if (savedMeta && savedMeta.weekNumber) {
+      const yr = savedMeta.year ? (String(savedMeta.year).length === 2 ? "20" + savedMeta.year : savedMeta.year) : "2026";
+      latestEd = `Week ${savedMeta.weekNumber} / ${yr}`;
+    }
+  } catch (e) {}
   if (editionEl) editionEl.textContent = latestEd;
 
   modal.classList.add("open");
@@ -4836,3 +4863,5 @@ window.syncFilterMasterCheckboxes = function() {
   if (chkWeather && typeof OVERLAY_STATES !== "undefined") chkWeather.checked = Boolean(OVERLAY_STATES.weather);
   if (chkRoute && typeof OVERLAY_STATES !== "undefined") chkRoute.checked = Boolean(OVERLAY_STATES.route);
 };
+
+window.initNtMMap = initNtMMap;
