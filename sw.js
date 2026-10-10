@@ -4,7 +4,7 @@
  * Fully offline-capable bridge cockpit — Zero Google Dinosaur!
  */
 
-const CACHE_NAME = 'setsail-cache-v3.6';
+const CACHE_NAME = 'setsail-cache-v3.8';
 const TILE_CACHE_NAME = 'setsail-tiles-cache-v2';
 
 const OFFLINE_CORE_ASSETS = [
@@ -194,9 +194,29 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // 4a. Core JS & CSS scripts: Network-First with Offline Cache Fallback (prevents stale JS/CSS mismatch)
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.ok) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cached = (await caches.match(event.request)) || (await caches.match(event.request, { ignoreSearch: true }));
+          if (cached) return cached;
+          throw new Error('Offline and not in cache');
+        })
+    );
+    return;
+  }
+
   // 4. Static assets: Cache-First with Stale-While-Revalidate
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
       if (cachedResponse) {
         // Revalidate in background if online
         fetch(event.request)
