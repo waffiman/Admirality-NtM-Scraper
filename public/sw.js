@@ -4,7 +4,7 @@
  * Fully offline-capable bridge cockpit — Zero Google Dinosaur!
  */
 
-const CACHE_NAME = 'setsail-cache-v2.9';
+const CACHE_NAME = 'setsail-cache-v3.8';
 const TILE_CACHE_NAME = 'setsail-tiles-cache-v2';
 
 const OFFLINE_CORE_ASSETS = [
@@ -13,6 +13,7 @@ const OFFLINE_CORE_ASSETS = [
   'manifest.json',
   'notices.json',
   'assets/home_bg.mp4',
+  'assets/home_bg_poster.jpg',
   'assets/gyro_compass_logbook.ico',
   'assets/ship_stamp.png',
   'assets/wilhelmsen_logo.png',
@@ -22,12 +23,16 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
   'assets/Auto NtM Plotting/ntm_styles.css',
-  'assets/Auto NtM Plotting/ntm_ui.js',
-  'assets/Auto NtM Plotting/setsail_ui.js',
   'assets/Auto NtM Plotting/port_depths.js',
   'assets/Auto NtM Plotting/ntm_module.js',
+  'assets/Auto NtM Plotting/setsail_core.js',
+  'assets/Auto NtM Plotting/xlsx.full.min.js',
   'assets/Auto NtM Plotting/pdf.min.js',
-  'assets/Auto NtM Plotting/pdf.worker.min.js'
+  'assets/Auto NtM Plotting/pdf.worker.min.js',
+  'assets/SetSail LOGOS/setsail_logo_square.webp',
+  'assets/SetSail LOGOS/setsail_logo_horizontal.webp',
+  'assets/SetSail LOGOS/setsail_logo_square.png',
+  'assets/SetSail LOGOS/setsail_logo_horizontal.png'
 ];
 
 // Pre-cache all core assets on install
@@ -83,7 +88,7 @@ self.addEventListener('fetch', (event) => {
           // Fast network race (2.5s)
           const netPromise = fetch(event.request);
           const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Network timeout')), 2500)
+            setTimeout(() => reject(new Error('Network timeout')), 6000)
           );
           const response = await Promise.race([netPromise, timeoutPromise]);
           if (response && response.ok) {
@@ -189,9 +194,29 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // 4a. Core JS & CSS scripts: Network-First with Offline Cache Fallback (prevents stale JS/CSS mismatch)
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.ok) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cached = (await caches.match(event.request)) || (await caches.match(event.request, { ignoreSearch: true }));
+          if (cached) return cached;
+          throw new Error('Offline and not in cache');
+        })
+    );
+    return;
+  }
+
   // 4. Static assets: Cache-First with Stale-While-Revalidate
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
       if (cachedResponse) {
         // Revalidate in background if online
         fetch(event.request)
