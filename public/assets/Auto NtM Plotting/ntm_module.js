@@ -1,3 +1,26 @@
+// Parse GMDSS NAVTEX / NAVAREA self-cancellation timestamp (e.g. "CANCEL THIS MSG 311830 UTC OCT 26")
+function extractNavtexCancelTimeIso(text, fallbackYearTwoDigit) {
+  if (!text) return null;
+  const monthMap = {
+    JAN: 0, FEB: 1, MAR: 2, APR: 3, ABR: 3, MAY: 4, MAI: 4, JUN: 5,
+    JUL: 6, AUG: 7, AGO: 7, SEP: 8, SET: 8, OCT: 9, OUT: 9, NOV: 10, DEC: 11, DEZ: 11
+  };
+  const rx = /(?:CANCEL\s+THIS\s+(?:MSG|MESSAGE|WARNING)|THIS\s+(?:MSG|MESSAGE|WARNING)\s+CANCELS\s+ITSELF|VALID\s+UNTIL)\s*[:\-]?\s*(\d{2})(\d{2})(\d{2})\s*(?:UTC|Z|GMT)?\s*([A-Z]{3})\s*(\d{2,4})?/i;
+  const m = String(text).match(rx);
+  if (!m) return null;
+  const day = parseInt(m[1], 10);
+  const hour = parseInt(m[2], 10);
+  const min = parseInt(m[3], 10);
+  const monStr = m[4].toUpperCase();
+  const monIdx = monthMap[monStr];
+  if (monIdx === undefined || day < 1 || day > 31 || hour > 23 || min > 59) return null;
+  let yr = m[5] ? parseInt(m[5], 10) : (2000 + (parseInt(fallbackYearTwoDigit, 10) || 26));
+  if (yr < 100) yr += 2000;
+  const dt = new Date(Date.UTC(yr, monIdx, day, hour, min, 0));
+  return isNaN(dt.getTime()) ? null : dt.toISOString();
+}
+window.extractNavtexCancelTimeIso = extractNavtexCancelTimeIso;
+
 /**
  * Auto-NtM Module for OPEN CALC
  * Parses ALL UKHO Admiralty Notices to Mariners (Permanent, Temporary T, Preliminary P, NAVAREA),
@@ -345,8 +368,15 @@ function parseAdmiraltyNtMText(fullText, defaultYear = "26") {
         body: navBlock.slice(0, 1500),
         rawText: navBlock.slice(0, 1500),
         cancels: msgCancels,
-        status: "ACTIVE",
-        isCancelled: false,
+        expires: extractNavtexCancelTimeIso(navBlock, numM ? numM[2].slice(-2) : detectedYear),
+        status: (function() {
+          const expIso = extractNavtexCancelTimeIso(navBlock, numM ? numM[2].slice(-2) : detectedYear);
+          return (expIso && Date.parse(expIso) <= Date.now()) ? "CANCELLED" : "ACTIVE";
+        })(),
+        isCancelled: (function() {
+          const expIso = extractNavtexCancelTimeIso(navBlock, numM ? numM[2].slice(-2) : detectedYear);
+          return Boolean(expIso && Date.parse(expIso) <= Date.now());
+        })(),
         checkedForExport: true
       });
     }

@@ -46,11 +46,18 @@
 
 
 
+    <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin />
+  <link rel="preconnect" href="https://b.basemaps.cartocdn.com" crossorigin />
+  <link rel="preconnect" href="https://c.basemaps.cartocdn.com" crossorigin />
+  <link rel="preconnect" href="https://server.arcgisonline.com" crossorigin />
+  <link rel="preconnect" href="https://tiles.openseamap.org" crossorigin />
+  <link rel="dns-prefetch" href="https://a.basemaps.cartocdn.com" />
+  <link rel="dns-prefetch" href="https://server.arcgisonline.com" />
   <link rel="stylesheet" href="assets/leaflet/leaflet.css" />
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.3" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.8" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -11039,6 +11046,103 @@ svg.leaflet-image-layer.leaflet-interactive path {
     window.addEventListener('online', updateHomeTelemetry);
     window.addEventListener('offline', updateHomeTelemetry);
   </script>
+
+  <style id="setsail-v48-critical-overrides">
+    /* 1. Top-Right Layer Switcher: never show active layer thumb to the left of the trigger button when collapsed */
+    .ntm-chart-layer-selector.collapsed .ntm-layer-thumb-btn:not(.always-trigger) {
+      display: none !important;
+    }
+    .ntm-chart-layer-selector.collapsed {
+      padding: 4px !important;
+      gap: 0 !important;
+      background: rgba(7, 13, 25, 0.9) !important;
+    }
+    /* 2. Filter Popover Window (#ntmFilterPopover): never clip or hide behind map */
+    #ntmSidebar,
+    .ntm-sidebar-list {
+      overflow: visible !important;
+      z-index: 1600 !important;
+    }
+    .ntm-sidebar-controls {
+      overflow: visible !important;
+      position: relative !important;
+      z-index: 2500 !important;
+    }
+    #ntmFilterPopover,
+    .ntm-popover.ntm-filter-compact-popover {
+      z-index: 9999 !important;
+      box-shadow: 0 22px 55px rgba(0, 0, 0, 0.88), 0 0 0 1px rgba(56, 189, 248, 0.32) !important;
+    }
+    /* 3. Home Header Top-Left Account + LogIn Button */
+    .home-hud-login-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      background: transparent !important;
+      border: none !important;
+      color: #f8fafc !important;
+      font-family: inherit !important;
+      font-size: inherit !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.05em !important;
+      padding: 0 2px !important;
+      margin: 0 !important;
+      cursor: pointer !important;
+      transition: color 0.18s ease, transform 0.18s ease !important;
+    }
+    .home-hud-login-btn:hover {
+      color: #38bdf8 !important;
+      transform: translateY(-1px);
+    }
+    .home-hud-login-btn.signed-in .home-hud-text {
+      color: #34d399 !important;
+    }
+    /* 4. Settings Top Account & Google Login Card */
+    .settings-account-card {
+      grid-column: 1 / -1 !important;
+      background: linear-gradient(145deg, rgba(15, 25, 48, 0.92), rgba(9, 16, 32, 0.96)) !important;
+      border: 1px solid rgba(56, 189, 248, 0.26) !important;
+      border-radius: 14px !important;
+      padding: 16px 18px !important;
+      margin-bottom: 4px !important;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.38) !important;
+    }
+    .settings-account-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+    @media (max-width: 768px) {
+      .settings-account-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .btn-google-signin {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 10px !important;
+      width: 100% !important;
+      padding: 9px 14px !important;
+      margin-top: 0 !important;
+      border-radius: 8px !important;
+      background: #ffffff !important;
+      color: #0f172a !important;
+      font-size: 0.8rem !important;
+      font-weight: 700 !important;
+      border: 1px solid rgba(255, 255, 255, 0.9) !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28) !important;
+      cursor: pointer !important;
+      transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    }
+    .btn-google-signin:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.28) !important;
+      background: #f8fafc !important;
+    }
+  </style>
+
 </head>
 
 
@@ -11181,8 +11285,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
               <!-- Column 1 (Left): "SETSAIL ●" on Slide 1; UTC Clock glides into this slot on Slide 2..4 -->
               <div class="home-hud-pill home-hud-left" id="homeHudLeftSlot" style="grid-column:1 !important;justify-self:start !important;position:relative !important;min-width:0 !important;">
                 <div class="hud-left-brand-wrap" id="homeHudLeftBrand">
-                  <span class="home-hud-text">SETSAIL</span>
-                  <span class="home-hud-dot live-pulse"></span>
+                  <button type="button" class="home-hud-login-btn" id="homeHudLeftLoginBtn" title="Sign in or manage your SetSail Account (Google OAuth / Bridge Profile)">
+                    <span class="home-hud-icon" style="display:inline-flex;align-items:center;"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg></span>
+                    <span class="home-hud-text" id="homeHudLeftLoginText">LogIn</span>
+                  </button>
                 </div>
               </div>
 
@@ -11358,26 +11464,89 @@ svg.leaflet-image-layer.leaflet-interactive path {
               </div>
               <div class="home-sources-marquee-band">
                 <div class="home-sources-marquee-track" id="homeSourcesMarqueeTrack">
-                  
+
                   <!-- 1. ADMIRALTY (UKHO) -->
-                  <div class="source-authority-logo" title="UK Hydrographic Office — ADMIRALTY Maritime Data Solutions">
+                  <div class="source-authority-logo" title="UK Hydrographic Office — Weekly ADMIRALTY Notices to Mariners">
                     <svg viewBox="0 0 36 36"><path d="M18 4l3 4 4-2-1.5 5H12.5L11 6l4 2 3-4z" stroke-width="1.6" stroke-linejoin="round"/><line x1="18" y1="13" x2="18" y2="30" stroke-width="1.9" stroke-linecap="round"/><line x1="13" y1="17" x2="23" y2="17" stroke-width="1.8" stroke-linecap="round"/><path d="M10 23c0 4.5 3.6 7.5 8 7.5s8-3 8-7.5" stroke-width="1.8" stroke-linecap="round"/><polyline points="8.5 24.5 10 22 12 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="24 24 26 22 27.5 24.5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <div class="source-logo-text-group">
                       <span class="source-logo-name">ADMIRALTY</span>
-                      <span class="source-logo-sub">UK Hydrographic Office</span>
+                      <span class="source-logo-sub">UKHO Weekly NtM</span>
                     </div>
                   </div>
 
-                  <!-- 2. IMO (International Maritime Organization) -->
-                  <div class="source-authority-logo" title="International Maritime Organization (UN)">
-                    <svg viewBox="0 0 36 36"><circle cx="18" cy="17" r="9.5" stroke-width="1.6"/><ellipse cx="18" cy="17" rx="4.5" ry="9.5" stroke-width="1.3"/><line x1="8.5" y1="17" x2="27.5" y2="17" stroke-width="1.3"/><path d="M7 24c2.2 4.5 6.2 7 11 7s8.8-2.5 11-7" stroke-width="1.8" stroke-linecap="round"/><path d="M6 12c-1 3.5-0.5 7.5 1.5 11M30 12c1 3.5 0.5 7.5-1.5 11" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 2"/></svg>
+                  <!-- 2. NAUTOSHARK (Global NAVAREA I–XXI Live) -->
+                  <div class="source-authority-logo" title="NautoShark Global NAVTEX &amp; NAVAREA I–XXI Broadcast Intelligence (6h Live Sync)">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="12.5" stroke-width="1.5"/><path d="M10 22c3-7 8-11 16-12-2 6-5 10-11 13l-5-1z" stroke-width="1.6" stroke-linejoin="round"/><circle cx="18" cy="18" r="2.2" fill="currentColor"/><path d="M7 11a15 15 0 0 1 22 0" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="2 2"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">NAUTOSHARK</span>
+                      <span class="source-logo-sub">NAVAREA I&ndash;XXI (6h)</span>
+                    </div>
+                  </div>
+
+                  <!-- 3. NGA MSI (US National Geospatial-Intelligence Agency) -->
+                  <div class="source-authority-logo" title="US National Geospatial-Intelligence Agency — Maritime Safety Information">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="12.5" stroke-width="1.6"/><path d="M6 18h24M18 5.5v25" stroke-width="1.2" opacity="0.65"/><ellipse cx="18" cy="18" rx="6.5" ry="12.5" stroke-width="1.4"/><polygon points="18 9 20 16 27 18 20 20 18 27 16 20 9 18 16 16" fill="currentColor" stroke="none"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">NGA MSI</span>
+                      <span class="source-logo-sub">NAVAREA IV &amp; XII</span>
+                    </div>
+                  </div>
+
+                  <!-- 4. USACE eHydro (U.S. Army Corps of Engineers Channel Surveys) -->
+                  <div class="source-authority-logo" title="USACE Hydrographic Surveys — Federal Ship Channel Controlling Depths">
+                    <svg viewBox="0 0 36 36"><rect x="6" y="10" width="24" height="17" rx="2.5" stroke-width="1.6"/><path d="M6 16h24M12 10V7h4v3M20 10V7h4v3" stroke-width="1.5" stroke-linecap="round"/><path d="M9 22c3-2 6-2 9 0s6 2 9 0" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">USACE eHydro</span>
+                      <span class="source-logo-sub">Channel Depth Surveys</span>
+                    </div>
+                  </div>
+
+                  <!-- 5. NOAA NHC & Coast Survey -->
+                  <div class="source-authority-logo" title="NOAA National Hurricane Center &amp; Office of Coast Survey ENC">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="13" stroke-width="1.7"/><path d="M6 21c3.5-2.5 7.5-2.5 11 0s7.5 2.5 13-1" stroke-width="1.8" stroke-linecap="round"/><path d="M11 15c3.5-3.5 7.5-4 13-1-3.5 0.5-6.5 2-9 4.5-1.5-2-2.5-2.8-4-3.5z" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">NOAA NHC</span>
+                      <span class="source-logo-sub">Cyclones &bull; ENC Charts</span>
+                    </div>
+                  </div>
+
+                  <!-- 6. JMA RSMC Tokyo -->
+                  <div class="source-authority-logo" title="Japan Meteorological Agency — RSMC Tokyo Typhoon Warning Center">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="5" stroke-width="1.7"/><path d="M18 13c5-4 11-2 12 4M18 23c-5 4-11 2-12-4" stroke-width="1.8" stroke-linecap="round"/><circle cx="18" cy="18" r="12.5" stroke-width="1.2" stroke-dasharray="2.5 2.5"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">JMA RSMC</span>
+                      <span class="source-logo-sub">Tokyo Typhoon Center</span>
+                    </div>
+                  </div>
+
+                  <!-- 7. JTWC (Joint Typhoon Warning Center) -->
+                  <div class="source-authority-logo" title="Joint Typhoon Warning Center — Pacific &amp; Indian Ocean Tropical Advisories">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="12" stroke-width="1.5"/><path d="M18 6v24M6 18h24" stroke-width="1.2" opacity="0.6"/><path d="M12 13c3-3 9-3 12 1s1 9-4 10-8-2-8-6" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">JTWC</span>
+                      <span class="source-logo-sub">Typhoon Advisories</span>
+                    </div>
+                  </div>
+
+                  <!-- 8. ECMWF & Open-Meteo Marine -->
+                  <div class="source-authority-logo" title="ECMWF IFS 0.25° &amp; Open-Meteo Global Wave &amp; Swell Model">
+                    <svg viewBox="0 0 36 36"><path d="M5 21c4.5-6 9.5-6 14 0s9.5 6 12-2" stroke-width="2" stroke-linecap="round"/><path d="M5 15c4.5-5 9.5-5 14 0s9.5 5 12-2" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/><circle cx="26" cy="10" r="2.2" fill="currentColor"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">ECMWF &bull; METEO</span>
+                      <span class="source-logo-sub">0.25&deg; Wave &amp; Wind IFS</span>
+                    </div>
+                  </div>
+
+                  <!-- 9. IMO (International Maritime Organization) -->
+                  <div class="source-authority-logo" title="International Maritime Organization (UN) — SOLAS V &amp; Res. A.893(21)">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="17" r="9.5" stroke-width="1.6"/><ellipse cx="18" cy="17" rx="4.5" ry="9.5" stroke-width="1.3"/><line x1="8.5" y1="17" x2="27.5" y2="17" stroke-width="1.3"/><path d="M7 24c2.2 4.5 6.2 7 11 7s8.8-2.5 11-7" stroke-width="1.8" stroke-linecap="round"/></svg>
                     <div class="source-logo-text-group">
                       <span class="source-logo-name">IMO</span>
-                      <span class="source-logo-sub">Int. Maritime Org</span>
+                      <span class="source-logo-sub">SOLAS Navigation</span>
                     </div>
                   </div>
 
-                  <!-- 3. IHO (International Hydrographic Organization) -->
+                  <!-- 10. IHO (International Hydrographic Organization) -->
                   <div class="source-authority-logo" title="International Hydrographic Organization — S-57 / S-100 Standards">
                     <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="13" stroke-width="1.5"/><polygon points="18 5 21 15 31 18 21 21 18 31 15 21 5 18 15 15" stroke-width="1.5" stroke-linejoin="round"/><circle cx="18" cy="18" r="2.5" fill="currentColor"/></svg>
                     <div class="source-logo-text-group">
@@ -11386,26 +11555,45 @@ svg.leaflet-image-layer.leaflet-interactive path {
                     </div>
                   </div>
 
-                  <!-- 4. NOAA (National Oceanic and Atmospheric Administration) -->
-                  <div class="source-authority-logo" title="National Oceanic and Atmospheric Administration">
-                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="13" stroke-width="1.7"/><path d="M6 21c3.5-2.5 7.5-2.5 11 0s7.5 2.5 13-1" stroke-width="1.8" stroke-linecap="round"/><path d="M11 15c3.5-3.5 7.5-4 13-1-3.5 0.5-6.5 2-9 4.5-1.5-2-2.5-2.8-4-3.5z" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                  <!-- 11. USNO / IERS (U.S. Naval Observatory Celestial Ephemeris) -->
+                  <div class="source-authority-logo" title="U.S. Naval Observatory &amp; IERS Astro Ephemeris + WMM">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="11" stroke-width="1.5"/><ellipse cx="18" cy="18" rx="14" ry="5.5" transform="rotate(-28 18 18)" stroke-width="1.5"/><polygon points="18 8 19.6 15.2 26.5 18 19.6 20.8 18 28 16.4 20.8 9.5 18 16.4 15.2" fill="currentColor" stroke="none"/></svg>
                     <div class="source-logo-text-group">
-                      <span class="source-logo-name">NOAA</span>
-                      <span class="source-logo-sub">NWS &bull; NHC &bull; NCEI</span>
+                      <span class="source-logo-name">USNO &bull; WMM</span>
+                      <span class="source-logo-sub">57 Stars Ephemeris</span>
                     </div>
                   </div>
 
-                  <!-- 5. USCG (U.S. Coast Guard Navigation Center) -->
-                  <div class="source-authority-logo" title="U.S. Coast Guard Navigation Center (NAVCEN)">
-                    <svg viewBox="0 0 36 36"><path d="M9 9l18 18M27 9L9 27" stroke-width="1.6" stroke-linecap="round"/><path d="M18 7l9 4v7c0 6.5-4 10.8-9 12.5C13 28.8 9 24.5 9 18v-7l9-4z" stroke-width="1.7" fill="rgba(8,16,36,0.6)" stroke-linejoin="round"/><line x1="13" y1="15" x2="23" y2="15" stroke-width="1.5"/></svg>
+                  <!-- 12. GLOBAL PORT AUTHORITIES (Rotterdam, MPA, ACP, SCA) -->
+                  <div class="source-authority-logo" title="Port of Rotterdam, MPA Singapore, Panama Canal (ACP) &amp; Suez Canal (SCA) Hydrographic Surveys">
+                    <svg viewBox="0 0 36 36"><path d="M6 25c3-2.5 6-2.5 9 0s6 2.5 9 0 6-2.5 6 0" stroke-width="1.7" stroke-linecap="round"/><path d="M9 21l3-9h12l3 9" stroke-width="1.6" stroke-linejoin="round"/><line x1="18" y1="7" x2="18" y2="12" stroke-width="1.8" stroke-linecap="round"/></svg>
                     <div class="source-logo-text-group">
-                      <span class="source-logo-name">USCG</span>
-                      <span class="source-logo-sub">NAVCEN &bull; Local NtM</span>
+                      <span class="source-logo-name">PORT SURVEYS</span>
+                      <span class="source-logo-sub">MPA &bull; Rotterdam &bull; ACP</span>
                     </div>
                   </div>
 
-                  <!-- 6. NGA (National Geospatial-Intelligence Agency) -->
-                  <div class="source-authority-logo" title="National Geospatial-Intelligence Agency — Maritime Safety Information">
+
+                  <!-- 1. ADMIRALTY (UKHO) -->
+                  <div class="source-authority-logo" title="UK Hydrographic Office — Weekly ADMIRALTY Notices to Mariners">
+                    <svg viewBox="0 0 36 36"><path d="M18 4l3 4 4-2-1.5 5H12.5L11 6l4 2 3-4z" stroke-width="1.6" stroke-linejoin="round"/><line x1="18" y1="13" x2="18" y2="30" stroke-width="1.9" stroke-linecap="round"/><line x1="13" y1="17" x2="23" y2="17" stroke-width="1.8" stroke-linecap="round"/><path d="M10 23c0 4.5 3.6 7.5 8 7.5s8-3 8-7.5" stroke-width="1.8" stroke-linecap="round"/><polyline points="8.5 24.5 10 22 12 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="24 24 26 22 27.5 24.5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">ADMIRALTY</span>
+                      <span class="source-logo-sub">UKHO Weekly NtM</span>
+                    </div>
+                  </div>
+
+                  <!-- 2. NAUTOSHARK (Global NAVAREA I–XXI Live) -->
+                  <div class="source-authority-logo" title="NautoShark Global NAVTEX &amp; NAVAREA I–XXI Broadcast Intelligence (6h Live Sync)">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="12.5" stroke-width="1.5"/><path d="M10 22c3-7 8-11 16-12-2 6-5 10-11 13l-5-1z" stroke-width="1.6" stroke-linejoin="round"/><circle cx="18" cy="18" r="2.2" fill="currentColor"/><path d="M7 11a15 15 0 0 1 22 0" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="2 2"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">NAUTOSHARK</span>
+                      <span class="source-logo-sub">NAVAREA I&ndash;XXI (6h)</span>
+                    </div>
+                  </div>
+
+                  <!-- 3. NGA MSI (US National Geospatial-Intelligence Agency) -->
+                  <div class="source-authority-logo" title="US National Geospatial-Intelligence Agency — Maritime Safety Information">
                     <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="12.5" stroke-width="1.6"/><path d="M6 18h24M18 5.5v25" stroke-width="1.2" opacity="0.65"/><ellipse cx="18" cy="18" rx="6.5" ry="12.5" stroke-width="1.4"/><polygon points="18 9 20 16 27 18 20 20 18 27 16 20 9 18 16 16" fill="currentColor" stroke="none"/></svg>
                     <div class="source-logo-text-group">
                       <span class="source-logo-name">NGA MSI</span>
@@ -11413,80 +11601,61 @@ svg.leaflet-image-layer.leaflet-interactive path {
                     </div>
                   </div>
 
-                  <!-- 7. ECMWF (European Centre for Medium-Range Weather Forecasts) -->
-                  <div class="source-authority-logo" title="European Centre for Medium-Range Weather Forecasts">
+                  <!-- 4. USACE eHydro (U.S. Army Corps of Engineers Channel Surveys) -->
+                  <div class="source-authority-logo" title="USACE Hydrographic Surveys — Federal Ship Channel Controlling Depths">
+                    <svg viewBox="0 0 36 36"><rect x="6" y="10" width="24" height="17" rx="2.5" stroke-width="1.6"/><path d="M6 16h24M12 10V7h4v3M20 10V7h4v3" stroke-width="1.5" stroke-linecap="round"/><path d="M9 22c3-2 6-2 9 0s6 2 9 0" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">USACE eHydro</span>
+                      <span class="source-logo-sub">Channel Depth Surveys</span>
+                    </div>
+                  </div>
+
+                  <!-- 5. NOAA NHC & Coast Survey -->
+                  <div class="source-authority-logo" title="NOAA National Hurricane Center &amp; Office of Coast Survey ENC">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="13" stroke-width="1.7"/><path d="M6 21c3.5-2.5 7.5-2.5 11 0s7.5 2.5 13-1" stroke-width="1.8" stroke-linecap="round"/><path d="M11 15c3.5-3.5 7.5-4 13-1-3.5 0.5-6.5 2-9 4.5-1.5-2-2.5-2.8-4-3.5z" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">NOAA NHC</span>
+                      <span class="source-logo-sub">Cyclones &bull; ENC Charts</span>
+                    </div>
+                  </div>
+
+                  <!-- 6. JMA RSMC Tokyo -->
+                  <div class="source-authority-logo" title="Japan Meteorological Agency — RSMC Tokyo Typhoon Warning Center">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="5" stroke-width="1.7"/><path d="M18 13c5-4 11-2 12 4M18 23c-5 4-11 2-12-4" stroke-width="1.8" stroke-linecap="round"/><circle cx="18" cy="18" r="12.5" stroke-width="1.2" stroke-dasharray="2.5 2.5"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">JMA RSMC</span>
+                      <span class="source-logo-sub">Tokyo Typhoon Center</span>
+                    </div>
+                  </div>
+
+                  <!-- 7. JTWC (Joint Typhoon Warning Center) -->
+                  <div class="source-authority-logo" title="Joint Typhoon Warning Center — Pacific &amp; Indian Ocean Tropical Advisories">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="12" stroke-width="1.5"/><path d="M18 6v24M6 18h24" stroke-width="1.2" opacity="0.6"/><path d="M12 13c3-3 9-3 12 1s1 9-4 10-8-2-8-6" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    <div class="source-logo-text-group">
+                      <span class="source-logo-name">JTWC</span>
+                      <span class="source-logo-sub">Typhoon Advisories</span>
+                    </div>
+                  </div>
+
+                  <!-- 8. ECMWF & Open-Meteo Marine -->
+                  <div class="source-authority-logo" title="ECMWF IFS 0.25° &amp; Open-Meteo Global Wave &amp; Swell Model">
                     <svg viewBox="0 0 36 36"><path d="M5 21c4.5-6 9.5-6 14 0s9.5 6 12-2" stroke-width="2" stroke-linecap="round"/><path d="M5 15c4.5-5 9.5-5 14 0s9.5 5 12-2" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/><circle cx="26" cy="10" r="2.2" fill="currentColor"/></svg>
                     <div class="source-logo-text-group">
-                      <span class="source-logo-name">ECMWF</span>
-                      <span class="source-logo-sub">Synoptic IFS Model</span>
+                      <span class="source-logo-name">ECMWF &bull; METEO</span>
+                      <span class="source-logo-sub">0.25&deg; Wave &amp; Wind IFS</span>
                     </div>
                   </div>
 
-                  <!-- 8. USNO / IERS (U.S. Naval Observatory Celestial Ephemeris) -->
-                  <div class="source-authority-logo" title="U.S. Naval Observatory &amp; IERS Astro Ephemeris">
-                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="11" stroke-width="1.5"/><ellipse cx="18" cy="18" rx="14" ry="5.5" transform="rotate(-28 18 18)" stroke-width="1.5"/><polygon points="18 8 19.6 15.2 26.5 18 19.6 20.8 18 28 16.4 20.8 9.5 18 16.4 15.2" fill="currentColor" stroke="none"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">USNO</span>
-                      <span class="source-logo-sub">Nautical Almanac</span>
-                    </div>
-                  </div>
-
-                  <!-- 9. SHOM (French Naval Hydrographic & Oceanographic Service) -->
-                  <div class="source-authority-logo" title="SHOM — Service Hydrographique et Océanographique de la Marine">
-                    <svg viewBox="0 0 36 36"><path d="M6 24c3-3 6-3 9 0s6 3 9 0 6-3 6 0" stroke-width="1.8" stroke-linecap="round"/><path d="M6 19c3-3 6-3 9 0s6 3 9 0 6-3 6 0" stroke-width="1.5" stroke-linecap="round" opacity="0.75"/><path d="M18 7v10M14 11h8" stroke-width="1.8" stroke-linecap="round"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">SHOM</span>
-                      <span class="source-logo-sub">Hydrographie France</span>
-                    </div>
-                  </div>
-
-                  <!-- 10. BSH (German Federal Maritime and Hydrographic Agency) -->
-                  <div class="source-authority-logo" title="BSH — Bundesamt für Seeschifffahrt und Hydrographie">
-                    <svg viewBox="0 0 36 36"><rect x="6" y="8" width="24" height="20" rx="4" stroke-width="1.6"/><path d="M9 21c3-2.5 6-2.5 9 0s6 2.5 9 0" stroke-width="1.7" stroke-linecap="round"/><circle cx="18" cy="14" r="2.5" stroke-width="1.6"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">BSH</span>
-                      <span class="source-logo-sub">Maritime Germany</span>
-                    </div>
-                  </div>
-
-                  <!-- 11. JCG (Japan Coast Guard Hydrographic Dept) -->
-                  <div class="source-authority-logo" title="Japan Coast Guard — Hydrographic and Oceanographic Department">
-                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="12" stroke-width="1.6"/><polygon points="18 7 20.5 15.5 29 18 20.5 20.5 18 29 15.5 20.5 7 18 15.5 15.5" stroke-width="1.5"/><circle cx="18" cy="18" r="3" fill="currentColor"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">JCG HYDRO</span>
-                      <span class="source-logo-sub">NAVAREA XI Japan</span>
-                    </div>
-                  </div>
-
-                  <!-- 12. AMSA (Australian Maritime Safety Authority) -->
-                  <div class="source-authority-logo" title="Australian Maritime Safety Authority">
-                    <svg viewBox="0 0 36 36"><path d="M7 25c4-3 8-3 12 0s7 3 10-1" stroke-width="1.8" stroke-linecap="round"/><circle cx="18" cy="10" r="1.8" fill="currentColor"/><circle cx="12" cy="15" r="1.5" fill="currentColor"/><circle cx="24" cy="14" r="1.5" fill="currentColor"/><circle cx="18" cy="19" r="1.6" fill="currentColor"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">AMSA</span>
-                      <span class="source-logo-sub">NAVAREA X Australia</span>
-                    </div>
-                  </div>
-
-                  
-                  <!-- 1. ADMIRALTY (UKHO) -->
-                  <div class="source-authority-logo" title="UK Hydrographic Office — ADMIRALTY Maritime Data Solutions">
-                    <svg viewBox="0 0 36 36"><path d="M18 4l3 4 4-2-1.5 5H12.5L11 6l4 2 3-4z" stroke-width="1.6" stroke-linejoin="round"/><line x1="18" y1="13" x2="18" y2="30" stroke-width="1.9" stroke-linecap="round"/><line x1="13" y1="17" x2="23" y2="17" stroke-width="1.8" stroke-linecap="round"/><path d="M10 23c0 4.5 3.6 7.5 8 7.5s8-3 8-7.5" stroke-width="1.8" stroke-linecap="round"/><polyline points="8.5 24.5 10 22 12 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="24 24 26 22 27.5 24.5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">ADMIRALTY</span>
-                      <span class="source-logo-sub">UK Hydrographic Office</span>
-                    </div>
-                  </div>
-
-                  <!-- 2. IMO (International Maritime Organization) -->
-                  <div class="source-authority-logo" title="International Maritime Organization (UN)">
-                    <svg viewBox="0 0 36 36"><circle cx="18" cy="17" r="9.5" stroke-width="1.6"/><ellipse cx="18" cy="17" rx="4.5" ry="9.5" stroke-width="1.3"/><line x1="8.5" y1="17" x2="27.5" y2="17" stroke-width="1.3"/><path d="M7 24c2.2 4.5 6.2 7 11 7s8.8-2.5 11-7" stroke-width="1.8" stroke-linecap="round"/><path d="M6 12c-1 3.5-0.5 7.5 1.5 11M30 12c1 3.5 0.5 7.5-1.5 11" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 2"/></svg>
+                  <!-- 9. IMO (International Maritime Organization) -->
+                  <div class="source-authority-logo" title="International Maritime Organization (UN) — SOLAS V &amp; Res. A.893(21)">
+                    <svg viewBox="0 0 36 36"><circle cx="18" cy="17" r="9.5" stroke-width="1.6"/><ellipse cx="18" cy="17" rx="4.5" ry="9.5" stroke-width="1.3"/><line x1="8.5" y1="17" x2="27.5" y2="17" stroke-width="1.3"/><path d="M7 24c2.2 4.5 6.2 7 11 7s8.8-2.5 11-7" stroke-width="1.8" stroke-linecap="round"/></svg>
                     <div class="source-logo-text-group">
                       <span class="source-logo-name">IMO</span>
-                      <span class="source-logo-sub">Int. Maritime Org</span>
+                      <span class="source-logo-sub">SOLAS Navigation</span>
                     </div>
                   </div>
 
-                  <!-- 3. IHO (International Hydrographic Organization) -->
+                  <!-- 10. IHO (International Hydrographic Organization) -->
                   <div class="source-authority-logo" title="International Hydrographic Organization — S-57 / S-100 Standards">
                     <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="13" stroke-width="1.5"/><polygon points="18 5 21 15 31 18 21 21 18 31 15 21 5 18 15 15" stroke-width="1.5" stroke-linejoin="round"/><circle cx="18" cy="18" r="2.5" fill="currentColor"/></svg>
                     <div class="source-logo-text-group">
@@ -11495,84 +11664,21 @@ svg.leaflet-image-layer.leaflet-interactive path {
                     </div>
                   </div>
 
-                  <!-- 4. NOAA (National Oceanic and Atmospheric Administration) -->
-                  <div class="source-authority-logo" title="National Oceanic and Atmospheric Administration">
-                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="13" stroke-width="1.7"/><path d="M6 21c3.5-2.5 7.5-2.5 11 0s7.5 2.5 13-1" stroke-width="1.8" stroke-linecap="round"/><path d="M11 15c3.5-3.5 7.5-4 13-1-3.5 0.5-6.5 2-9 4.5-1.5-2-2.5-2.8-4-3.5z" stroke-width="1.5" stroke-linejoin="round"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">NOAA</span>
-                      <span class="source-logo-sub">NWS &bull; NHC &bull; NCEI</span>
-                    </div>
-                  </div>
-
-                  <!-- 5. USCG (U.S. Coast Guard Navigation Center) -->
-                  <div class="source-authority-logo" title="U.S. Coast Guard Navigation Center (NAVCEN)">
-                    <svg viewBox="0 0 36 36"><path d="M9 9l18 18M27 9L9 27" stroke-width="1.6" stroke-linecap="round"/><path d="M18 7l9 4v7c0 6.5-4 10.8-9 12.5C13 28.8 9 24.5 9 18v-7l9-4z" stroke-width="1.7" fill="rgba(8,16,36,0.6)" stroke-linejoin="round"/><line x1="13" y1="15" x2="23" y2="15" stroke-width="1.5"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">USCG</span>
-                      <span class="source-logo-sub">NAVCEN &bull; Local NtM</span>
-                    </div>
-                  </div>
-
-                  <!-- 6. NGA (National Geospatial-Intelligence Agency) -->
-                  <div class="source-authority-logo" title="National Geospatial-Intelligence Agency — Maritime Safety Information">
-                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="12.5" stroke-width="1.6"/><path d="M6 18h24M18 5.5v25" stroke-width="1.2" opacity="0.65"/><ellipse cx="18" cy="18" rx="6.5" ry="12.5" stroke-width="1.4"/><polygon points="18 9 20 16 27 18 20 20 18 27 16 20 9 18 16 16" fill="currentColor" stroke="none"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">NGA MSI</span>
-                      <span class="source-logo-sub">NAVAREA IV &amp; XII</span>
-                    </div>
-                  </div>
-
-                  <!-- 7. ECMWF (European Centre for Medium-Range Weather Forecasts) -->
-                  <div class="source-authority-logo" title="European Centre for Medium-Range Weather Forecasts">
-                    <svg viewBox="0 0 36 36"><path d="M5 21c4.5-6 9.5-6 14 0s9.5 6 12-2" stroke-width="2" stroke-linecap="round"/><path d="M5 15c4.5-5 9.5-5 14 0s9.5 5 12-2" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/><circle cx="26" cy="10" r="2.2" fill="currentColor"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">ECMWF</span>
-                      <span class="source-logo-sub">Synoptic IFS Model</span>
-                    </div>
-                  </div>
-
-                  <!-- 8. USNO / IERS (U.S. Naval Observatory Celestial Ephemeris) -->
-                  <div class="source-authority-logo" title="U.S. Naval Observatory &amp; IERS Astro Ephemeris">
+                  <!-- 11. USNO / IERS (U.S. Naval Observatory Celestial Ephemeris) -->
+                  <div class="source-authority-logo" title="U.S. Naval Observatory &amp; IERS Astro Ephemeris + WMM">
                     <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="11" stroke-width="1.5"/><ellipse cx="18" cy="18" rx="14" ry="5.5" transform="rotate(-28 18 18)" stroke-width="1.5"/><polygon points="18 8 19.6 15.2 26.5 18 19.6 20.8 18 28 16.4 20.8 9.5 18 16.4 15.2" fill="currentColor" stroke="none"/></svg>
                     <div class="source-logo-text-group">
-                      <span class="source-logo-name">USNO</span>
-                      <span class="source-logo-sub">Nautical Almanac</span>
+                      <span class="source-logo-name">USNO &bull; WMM</span>
+                      <span class="source-logo-sub">57 Stars Ephemeris</span>
                     </div>
                   </div>
 
-                  <!-- 9. SHOM (French Naval Hydrographic & Oceanographic Service) -->
-                  <div class="source-authority-logo" title="SHOM — Service Hydrographique et Océanographique de la Marine">
-                    <svg viewBox="0 0 36 36"><path d="M6 24c3-3 6-3 9 0s6 3 9 0 6-3 6 0" stroke-width="1.8" stroke-linecap="round"/><path d="M6 19c3-3 6-3 9 0s6 3 9 0 6-3 6 0" stroke-width="1.5" stroke-linecap="round" opacity="0.75"/><path d="M18 7v10M14 11h8" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  <!-- 12. GLOBAL PORT AUTHORITIES (Rotterdam, MPA, ACP, SCA) -->
+                  <div class="source-authority-logo" title="Port of Rotterdam, MPA Singapore, Panama Canal (ACP) &amp; Suez Canal (SCA) Hydrographic Surveys">
+                    <svg viewBox="0 0 36 36"><path d="M6 25c3-2.5 6-2.5 9 0s6 2.5 9 0 6-2.5 6 0" stroke-width="1.7" stroke-linecap="round"/><path d="M9 21l3-9h12l3 9" stroke-width="1.6" stroke-linejoin="round"/><line x1="18" y1="7" x2="18" y2="12" stroke-width="1.8" stroke-linecap="round"/></svg>
                     <div class="source-logo-text-group">
-                      <span class="source-logo-name">SHOM</span>
-                      <span class="source-logo-sub">Hydrographie France</span>
-                    </div>
-                  </div>
-
-                  <!-- 10. BSH (German Federal Maritime and Hydrographic Agency) -->
-                  <div class="source-authority-logo" title="BSH — Bundesamt für Seeschifffahrt und Hydrographie">
-                    <svg viewBox="0 0 36 36"><rect x="6" y="8" width="24" height="20" rx="4" stroke-width="1.6"/><path d="M9 21c3-2.5 6-2.5 9 0s6 2.5 9 0" stroke-width="1.7" stroke-linecap="round"/><circle cx="18" cy="14" r="2.5" stroke-width="1.6"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">BSH</span>
-                      <span class="source-logo-sub">Maritime Germany</span>
-                    </div>
-                  </div>
-
-                  <!-- 11. JCG (Japan Coast Guard Hydrographic Dept) -->
-                  <div class="source-authority-logo" title="Japan Coast Guard — Hydrographic and Oceanographic Department">
-                    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="12" stroke-width="1.6"/><polygon points="18 7 20.5 15.5 29 18 20.5 20.5 18 29 15.5 20.5 7 18 15.5 15.5" stroke-width="1.5"/><circle cx="18" cy="18" r="3" fill="currentColor"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">JCG HYDRO</span>
-                      <span class="source-logo-sub">NAVAREA XI Japan</span>
-                    </div>
-                  </div>
-
-                  <!-- 12. AMSA (Australian Maritime Safety Authority) -->
-                  <div class="source-authority-logo" title="Australian Maritime Safety Authority">
-                    <svg viewBox="0 0 36 36"><path d="M7 25c4-3 8-3 12 0s7 3 10-1" stroke-width="1.8" stroke-linecap="round"/><circle cx="18" cy="10" r="1.8" fill="currentColor"/><circle cx="12" cy="15" r="1.5" fill="currentColor"/><circle cx="24" cy="14" r="1.5" fill="currentColor"/><circle cx="18" cy="19" r="1.6" fill="currentColor"/></svg>
-                    <div class="source-logo-text-group">
-                      <span class="source-logo-name">AMSA</span>
-                      <span class="source-logo-sub">NAVAREA X Australia</span>
+                      <span class="source-logo-name">PORT SURVEYS</span>
+                      <span class="source-logo-sub">MPA &bull; Rotterdam &bull; ACP</span>
                     </div>
                   </div>
 
@@ -13320,6 +13426,73 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 
+                        <!-- Card 0: SetSail Account & Google OAuth Sign-In (Top of Settings) -->
+            <div class="settings-card-min settings-account-card" id="settingsAccountCard">
+              <div class="settings-account-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+                <div class="settings-account-title-wrap" style="display:flex;align-items:center;gap:10px;">
+                  <div class="settings-account-avatar" id="settingsAccountAvatar" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(240,90,54,0.22));border:1px solid rgba(56,189,248,0.45);display:flex;align-items:center;justify-content:center;color:#f8fafc;font-weight:800;font-size:0.9rem;overflow:hidden;">
+                    <svg class="setsail-icon" viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#38bdf8;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke-width="1.8"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>
+                  </div>
+                  <div>
+                    <div class="min-card-title" style="margin-bottom:2px;" id="settingsAccountHeading">SetSail Account &amp; Cloud Bridge Sync</div>
+                    <div class="settings-account-sub" id="settingsAccountSub" style="font-size:0.72rem;color:#94a3b8;">Sign in with your Google Account or Bridge ID to sync custom NtM / NAVTEX edits, vessel drafts &amp; RTZ routes</div>
+                  </div>
+                </div>
+                <span class="settings-account-status-pill" id="settingsAccountStatusBadge" style="font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(148,163,184,0.14);color:#cbd5e1;border:1px solid rgba(148,163,184,0.3);letter-spacing:0.04em;">GUEST MODE</span>
+              </div>
+
+              <!-- Signed-Out Login Controls -->
+              <div id="settingsAuthSignedOutBox">
+                <div class="settings-account-layout">
+                  <!-- Left: 1-Click Sign in with Google -->
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <button type="button" class="btn-google-signin" id="btnGoogleSignIn" title="Sign in with your Google Account">
+                      <svg viewBox="0 0 24 24" style="width:18px;height:18px;flex-shrink:0;">
+                        <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+                        <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+                        <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
+                        <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.1 7.4 24 12 24z"/>
+                      </svg>
+                      <span>Sign in with Google</span>
+                    </button>
+                    <div style="font-size:0.65rem;color:#94a3b8;line-height:1.35;text-align:center;">
+                      Supports Google Identity Services (OAuth 2.0) &amp; Offline Bridge Profile
+                    </div>
+                  </div>
+
+                  <!-- Right: Direct Email / Bridge Credentials Login -->
+                  <form class="settings-login-fields" id="settingsDirectLoginForm" onsubmit="return false;" style="display:flex;flex-direction:column;gap:7px;">
+                    <div class="settings-login-row" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+                      <input type="email" id="settingsAuthEmail" class="min-input" placeholder="Email or Google address..." autocomplete="username" />
+                      <input type="password" id="settingsAuthPass" class="min-input" placeholder="Password / Vessel PIN..." autocomplete="current-password" />
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                      <button type="button" class="min-btn-submit" id="btnEmailSignIn" style="padding:6px 14px;font-size:0.74rem;">
+                        <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                        LogIn
+                      </button>
+                      <span id="settingsAuthStatusMsg" style="font-size:0.7rem;color:#38bdf8;font-weight:600;"></span>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Signed-In Profile Bar (Revealed when authenticated) -->
+              <div class="settings-auth-signedin-bar" id="settingsAuthSignedInBar" style="display:none;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:9px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.28);margin-top:4px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;display:inline-block;"></span>
+                  <div>
+                    <div style="font-size:0.78rem;font-weight:700;color:#f8fafc;" id="settingsSignedInName">Bridge Officer</div>
+                    <div style="font-size:0.68rem;color:#94a3b8;" id="settingsSignedInEmail">bridge@setsail.maritime</div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <button type="button" class="min-btn-outline" id="btnAuthSyncNow" style="padding:5px 10px;font-size:0.7rem;margin:0;">Sync Profile</button>
+                  <button type="button" class="min-btn-outline" id="btnAuthSignOut" style="padding:5px 10px;font-size:0.7rem;margin:0;border-color:rgba(244,63,94,0.4);color:#fda4af;">Sign Out</button>
+                </div>
+              </div>
+            </div>
+
             <!-- Card 1: Theme Switcher -->
 
 
@@ -13434,31 +13607,39 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
             </div>
 
-            <!-- Card 3: Connected Data Sources -->
+                                    <!-- Card 3: Connected Data Sources -->
             <div class="settings-card-min settings-sources-card">
-              <div class="min-card-title settings-sources-title">Connected Data Sources</div>
-              <div class="settings-sources-grid">
-                <!-- Column 1 -->
-                <div class="settings-source-item"><span class="source-dot"></span><span>UKHO Admiralty NtM</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>OpenSeaMap NavAids</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>IHO NAVAREA Warnings</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>World Port Index (Pub 150)</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>Admiralty List of Lights</span></div>
-
-                <!-- Column 2 -->
-                <div class="settings-source-item"><span class="source-dot"></span><span>GEBCO Bathymetry</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>NOAA Hydrography</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>USNO Nautical Almanac</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>World Magnetic Model (WMM)</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>Open-Meteo Marine Data</span></div>
-
-                <!-- Column 3 -->
-                <div class="settings-source-item"><span class="source-dot"></span><span>IEC 61174 RTZ Routes</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>JRC ECDIS Format (.uchm)</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>Vessel Deviation Profile</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>OpenStreetMap Marine</span></div>
-                <div class="settings-source-item"><span class="source-dot"></span><span>Cohere Route Intelligence</span></div>
+              <div class="min-card-title settings-sources-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+                <span>Connected &amp; Monitored Maritime Sources</span>
+                <span style="font-size:0.64rem;font-weight:700;color:#34d399;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);padding:2px 8px;border-radius:999px;">18 ACTIVE FEEDS &bull; 6H AUTO-SYNC</span>
               </div>
+              <div class="settings-sources-grid">
+                <!-- Column 1: Hydrographic & Navigational Warnings -->
+                <div class="settings-source-item" title="Weekly UKHO Admiralty Notices to Mariners (Sections II)"><span class="source-dot"></span><span>UKHO Admiralty Weekly NtM</span></div>
+                <div class="settings-source-item" title="6-Hourly Global NAVTEX &amp; NAVAREA I–XXI Warnings with Auto-Cancel"><span class="source-dot"></span><span>NautoShark NAVAREA I&ndash;XXI (6h)</span></div>
+                <div class="settings-source-item" title="U.S. National Geospatial-Intelligence Agency Broadcast Warnings"><span class="source-dot"></span><span>US NGA MSI (NAVAREA IV &amp; XII)</span></div>
+                <div class="settings-source-item" title="U.S. Coast Guard Navigation Center Local Notices"><span class="source-dot"></span><span>USCG NAVCEN Local NtM</span></div>
+                <div class="settings-source-item" title="International Hydrographic Organization S-57 / S-100 ENC"><span class="source-dot"></span><span>IHO S-57 &amp; S-100 ENC Standards</span></div>
+                <div class="settings-source-item" title="French (SHOM) &amp; German (BSH) Hydrographic Authorities"><span class="source-dot"></span><span>SHOM &amp; BSH Hydrographic Offices</span></div>
+
+                <!-- Column 2: Port Depths & Channel Bathymetry -->
+                <div class="settings-source-item" title="U.S. Army Corps of Engineers eHydro Federal Channel Controlling Depths"><span class="source-dot"></span><span>USACE eHydro Channel Surveys</span></div>
+                <div class="settings-source-item" title="NOAA Office of Coast Survey Electronic Navigational Charts"><span class="source-dot"></span><span>NOAA ENC &amp; Coast Survey Depths</span></div>
+                <div class="settings-source-item" title="Port of Rotterdam, MPA Singapore, Antwerp &amp; Port Hedland Official Depths"><span class="source-dot"></span><span>Rotterdam &bull; MPA &bull; Port Authorities</span></div>
+                <div class="settings-source-item" title="Suez Canal Authority (SCA) &amp; Panama Canal Authority (ACP) Transit Drafts"><span class="source-dot"></span><span>Suez (SCA) &amp; Panama (ACP) Drafts</span></div>
+                <div class="settings-source-item" title="NGA Publication 150 World Port Index"><span class="source-dot"></span><span>World Port Index (NGA Pub 150)</span></div>
+                <div class="settings-source-item" title="CARTO Voyager &amp; OpenSeaMap Nautical Seamarks"><span class="source-dot"></span><span>CARTO Coastal &amp; OpenSeaMap</span></div>
+
+                <!-- Column 3: Synoptic Weather, Celestial & Bridge Formats -->
+                <div class="settings-source-item" title="NOAA National Hurricane Center Active Tropical Cyclones"><span class="source-dot"></span><span>NOAA NHC Active Cyclones</span></div>
+                <div class="settings-source-item" title="Japan Meteorological Agency (RSMC Tokyo) &amp; Joint Typhoon Warning Center"><span class="source-dot"></span><span>JMA RSMC Tokyo &amp; JTWC</span></div>
+                <div class="settings-source-item" title="ECMWF IFS 0.25° &amp; Open-Meteo Global Wave/Swell/Wind Forecast"><span class="source-dot"></span><span>ECMWF IFS 0.25&deg; &amp; Open-Meteo</span></div>
+                <div class="settings-source-item" title="U.S. Naval Observatory &amp; IERS 57 Navigational Stars Ephemeris"><span class="source-dot"></span><span>USNO / IERS Nautical Almanac</span></div>
+                <div class="settings-source-item" title="NOAA / BGS World Magnetic Model (WMM 2025)"><span class="source-dot"></span><span>World Magnetic Model (WMM)</span></div>
+                <div class="settings-source-item" title="IEC 61174 RTZ &amp; JRC ECDIS (.uchm) Passage Exchange"><span class="source-dot"></span><span>IEC 61174 RTZ &amp; JRC ECDIS</span></div>
+              </div>
+            </div>
+            </div>
             </div>
 
 
@@ -18931,23 +19112,32 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
     if (window.L && L.tileLayer && !L.tileLayer._setsailPatched) {
       const _origTileLayer = L.tileLayer;
       L.tileLayer = function(url, options) {
-        if (typeof url === 'string' && (url.indexOf('stadiamaps') !== -1 || url.indexOf('cartocdn') !== -1)) {
-          url = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
+        if (typeof url === 'string' && (url.indexOf('stadiamaps') !== -1 || url.indexOf('thunderforest') !== -1)) {
+          url = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
           options = Object.assign({}, options, {
             subdomains: ['a', 'b', 'c', 'd'],
-            maxNativeZoom: 18,
-            maxZoom: 19,
+            maxNativeZoom: 19,
+            maxZoom: 20,
+            updateWhenIdle: true,
+            updateWhenZooming: false,
+            keepBuffer: 4,
             attribution: '&copy; CARTO &bull; OpenStreetMap'
           });
           delete options.crossOrigin;
+        } else {
+          options = Object.assign({
+            updateWhenIdle: true,
+            updateWhenZooming: false,
+            keepBuffer: 4
+          }, options);
         }
         const layer = _origTileLayer.call(this, url, options);
-        if (typeof url === 'string' && url.indexOf('cartocdn') !== -1) {
+        if (typeof url === 'string' && url.indexOf('voyager') !== -1) {
           layer.on('tileerror', function(errEvent) {
             if (errEvent && errEvent.tile && !errEvent.tile.dataset.fallbackTried && errEvent.coords) {
               errEvent.tile.dataset.fallbackTried = '1';
               const c = errEvent.coords;
-              errEvent.tile.src = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/' + c.z + '/' + c.y + '/' + c.x;
+              errEvent.tile.src = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/' + c.z + '/' + c.y + '/' + c.x;
             }
           });
         }
@@ -18962,8 +19152,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.6"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.6"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.8"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.8"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19041,7 +19231,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.6"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.8"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19395,20 +19585,20 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v46') !== '1') {
+        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v48') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v4.2' && k !== 'setsail-tiles-cache-v4').map(k => caches.delete(k))
-          )).then(() => localStorage.setItem('setsail_sw_v46', '1')).catch(() => {});
+            keys.filter(k => k !== 'setsail-cache-v4.8' && k !== 'setsail-tiles-cache-v4.8').map(k => caches.delete(k))
+          )).then(() => localStorage.setItem('setsail_sw_v48', '1')).catch(() => {});
         }
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!sessionStorage.getItem('setsail_sw_reloaded_v46')) {
-            sessionStorage.setItem('setsail_sw_reloaded_v46', '1');
+          if (!sessionStorage.getItem('setsail_sw_reloaded_v48')) {
+            sessionStorage.setItem('setsail_sw_reloaded_v48', '1');
             window.location.reload();
           }
         });
-        navigator.serviceWorker.register('sw.js?v=4.6', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=4.8', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker registered successfully, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v4.8 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }

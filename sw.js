@@ -1,17 +1,18 @@
 /**
- * SetSail Marine Navigation Suite — Service Worker (PWA Offline Engine v3.9)
+ * SetSail Marine Navigation Suite — Service Worker (PWA Offline Engine v4.8)
  * Vessel: LPG/C IINO INEOS VESTA
- * Fully offline-capable bridge cockpit — Zero Google Dinosaur & Zero Unstyled Blocks!
+ * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v4.4';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v4';
+const CACHE_NAME = 'setsail-cache-v4.8';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v4.8';
 
 const OFFLINE_CORE_ASSETS = [
   './',
   'index.html',
   'manifest.json',
   'notices.json',
+  'weather.json',
   'assets/home_bg.mp4',
   'assets/home_bg_poster.jpg',
   'assets/gyro_compass_logbook.ico',
@@ -23,10 +24,10 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=4.3',
-  'assets/Auto NtM Plotting/port_depths.js?v=4.3',
-  'assets/Auto NtM Plotting/ntm_module.js?v=4.3',
-  'assets/Auto NtM Plotting/setsail_core.js?v=4.3',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=4.8',
+  'assets/Auto NtM Plotting/port_depths.js?v=4.8',
+  'assets/Auto NtM Plotting/ntm_module.js?v=4.8',
+  'assets/Auto NtM Plotting/setsail_core.js?v=4.8',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
   'assets/Auto NtM Plotting/tesseract.min.js',
   'assets/Auto NtM Plotting/pdf.min.js',
@@ -37,7 +38,18 @@ const OFFLINE_CORE_ASSETS = [
   'assets/SetSail LOGOS/setsail_logo_horizontal.png'
 ];
 
-// Helper: fetch with fast timeout for satellite/offline bridge networks
+// World overview tiles (Zoom 1 & 2) pre-warmed asynchronously so Global Dark & Coast layers render in 0ms
+const PREWARM_WORLD_TILES = [];
+for (let z = 1; z <= 2; z++) {
+  const maxCoord = 1 << z;
+  for (let x = 0; x < maxCoord; x++) {
+    for (let y = 0; y < maxCoord; y++) {
+      PREWARM_WORLD_TILES.push(`https://a.basemaps.cartocdn.com/dark_all/${z}/${x}/${y}.png`);
+      PREWARM_WORLD_TILES.push(`https://a.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}.png`);
+    }
+  }
+}
+
 function fetchWithTimeout(request, timeoutMs) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('Network timeout')), timeoutMs);
@@ -53,7 +65,6 @@ function fetchWithTimeout(request, timeoutMs) {
   });
 }
 
-// Helper: resilient cache lookup for same-origin app assets only (never map tiles)
 async function matchAssetInCache(request) {
   try {
     const reqUrl = new URL(request.url);
@@ -80,75 +91,82 @@ async function matchAssetInCache(request) {
   return null;
 }
 
-// Pre-cache all core assets on install
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      console.log('[SetSail SW] Pre-caching core navigation assets...');
       const cachePromises = OFFLINE_CORE_ASSETS.map(async (assetUrl) => {
         try {
           const response = await fetch(assetUrl, { cache: 'reload' });
           if (response && (response.ok || response.type === 'opaque')) {
             await cache.put(assetUrl, response);
           }
-        } catch (err) {
-          console.warn('[SetSail SW] Could not pre-cache:', assetUrl, err);
-        }
+        } catch (err) {}
       });
       await Promise.all(cachePromises);
-      console.log('[SetSail SW] Pre-caching completed.');
+
+      // Non-blocking background pre-warm of Zoom 1-2 world base tiles
+      caches.open(TILE_CACHE_NAME).then((tileCache) => {
+        PREWARM_WORLD_TILES.forEach((tileUrl) => {
+          tileCache.match(tileUrl).then((hit) => {
+            if (!hit) {
+              fetch(tileUrl, { mode: 'cors' })
+                .then((res) => {
+                  if (res && (res.ok || res.type === 'opaque')) {
+                    tileCache.put(tileUrl, res);
+                  }
+                })
+                .catch(() => {});
+            }
+          });
+        });
+      }).catch(() => {});
     })
   );
 });
 
-// Activate immediately & migrate any missing entries before purging obsolete caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       await self.clients.claim();
-      const newCache = await caches.open(CACHE_NAME);
-      const newKeys = await newCache.keys();
       const keys = await caches.keys();
       const oldCaches = keys.filter((key) => key !== CACHE_NAME && key !== TILE_CACHE_NAME);
       if (oldCaches.length > 0) {
-        await Promise.all(
-          oldCaches.map((key) => {
-            console.log('[SetSail SW] Removing deprecated cache:', key);
-            return caches.delete(key);
-          })
-        );
-        // Automatically refresh any open client tabs that were served by a deprecated Service Worker
-        const windowClients = await self.clients.matchAll({ type: 'window' });
-        for (const client of windowClients) {
-          try { await client.navigate(client.url); } catch (e) {}
-        }
+        await Promise.all(oldCaches.map((key) => caches.delete(key)));
       }
     })()
   );
 });
 
-// Fetch routing
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+
+  // 0. Intercept any legacy Stadia Maps or Thunderforest tile request and rewrite to CARTO Voyager
+  if (url.hostname.includes('stadiamaps.com') || url.hostname.includes('thunderforest.com')) {
+    const matchZXY = url.pathname.match(/\/(\d+)\/(\d+)\/(\d+)/);
+    if (matchZXY) {
+      const [, z, x, y] = matchZXY;
+      const replacementUrl = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}.png`;
+      event.respondWith(fetch(replacementUrl));
+      return;
+    }
+  }
 
   // 1. Navigation (HTML pages)
   if (event.request.mode === 'navigate') {
     event.respondWith(
       (async () => {
         try {
-          const response = await fetchWithTimeout(new Request(event.request.url, { cache: 'no-cache' }), 4000);
+          const response = await fetchWithTimeout(new Request(event.request.url, { cache: 'no-cache' }), 3200);
           if (response && response.ok) {
             const cache = await caches.open(CACHE_NAME);
             cache.put(event.request, response.clone());
             cache.put('index.html', response.clone());
             return response;
           }
-        } catch (err) {
-          // Network failed or offline - serve from cache
-        }
+        } catch (err) {}
 
         const cached =
           (await caches.match(event.request)) ||
@@ -159,18 +177,6 @@ self.addEventListener('fetch', (event) => {
 
         if (cached) return cached;
 
-        const cacheNames = await caches.keys();
-        for (const cName of cacheNames) {
-          const cache = await caches.open(cName);
-          const keys = await cache.keys();
-          for (const req of keys) {
-            if (req.url.endsWith('index.html') || req.url.endsWith('/')) {
-              const match = await cache.match(req);
-              if (match) return match;
-            }
-          }
-        }
-
         return new Response(
           '<!DOCTYPE html><html><head><title>SetSail Offline</title></head><body style="background:#080e20;color:#e2e8f0;font-family:sans-serif;padding:40px;text-align:center;"><h2>SetSail Offline Mode</h2><p>Please open SetSail once with internet to enable complete offline caching.</p></body></html>',
           { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
@@ -180,10 +186,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. notices.json (Network-first with 3s timeout & cached fallback)
-  if (url.pathname.endsWith('notices.json')) {
+  // 2. notices.json & weather.json (Fast 2.2s timeout + Offline Cache fallback)
+  if (url.pathname.endsWith('notices.json') || url.pathname.endsWith('weather.json')) {
     event.respondWith(
-      fetchWithTimeout(event.request, 3000)
+      fetchWithTimeout(event.request, 2200)
         .then((netRes) => {
           if (netRes && netRes.ok) {
             const copy = netRes.clone();
@@ -208,13 +214,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Map Tiles: Persistent Tile Cache with 0ms local response
+  // 3. Map Tiles: Instant 0ms Cache-First + Stale-While-Revalidate refresh
   const isMapTile = (
     url.hostname.includes('tile.openstreetmap.org') ||
     url.hostname.includes('arcgisonline.com') ||
     url.hostname.includes('openseamap.org') ||
-    url.hostname.includes('cartocdn.com') ||
-    url.hostname.includes('stadiamaps.com')
+    url.hostname.includes('cartocdn.com')
   );
 
   if (isMapTile) {
@@ -226,7 +231,7 @@ self.addEventListener('fetch', (event) => {
         }
 
         try {
-          const networkTile = await fetchWithTimeout(event.request, 4500);
+          const networkTile = await fetchWithTimeout(event.request, 4000);
           if (networkTile && (networkTile.ok || networkTile.type === 'opaque')) {
             tileCache.put(event.request, networkTile.clone());
           }
@@ -247,53 +252,59 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4a. Core JS & CSS scripts: Fast Network-First (2.5s timeout) with Multi-Fallback Offline Cache
-  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+  // 4. Core JS & CSS scripts: Fast Network-First (2s timeout) with Offline Cache Fallback
+  const isCoreScriptOrStyle = (
+    url.origin === self.location.origin &&
+    (url.pathname.endsWith('.js') || url.pathname.endsWith('.css'))
+  );
+
+  if (isCoreScriptOrStyle) {
     event.respondWith(
-      fetchWithTimeout(event.request, 2500)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.ok) {
-            const copy = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+      (async () => {
+        try {
+          const netRes = await fetchWithTimeout(event.request, 2000);
+          if (netRes && netRes.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(event.request, netRes.clone());
+            return netRes;
           }
-          return networkResponse;
-        })
-        .catch(async () => {
-          const cached = await matchAssetInCache(event.request);
-          if (cached) return cached;
-          throw new Error('Offline and not in cache: ' + url.pathname);
-        })
+        } catch (e) {}
+        const cached = await matchAssetInCache(event.request);
+        if (cached) return cached;
+        return new Response('/* Offline */', {
+          status: 503,
+          headers: { 'Content-Type': url.pathname.endsWith('.css') ? 'text/css' : 'application/javascript' }
+        });
+      })()
     );
     return;
   }
 
-  // 4. Static assets: Cache-First with Stale-While-Revalidate
+  // 5. All other local assets: Cache-first with background refresh
   event.respondWith(
-    matchAssetInCache(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        fetchWithTimeout(event.request, 3500)
-          .then((networkResponse) => {
-            if (networkResponse && networkResponse.ok) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
+    (async () => {
+      const cached = await matchAssetInCache(event.request);
+      if (cached) {
+        fetch(event.request)
+          .then((netRes) => {
+            if (netRes && netRes.ok && url.origin === self.location.origin) {
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, netRes));
             }
           })
           .catch(() => {});
-        return cachedResponse;
+        return cached;
       }
 
-      return fetchWithTimeout(event.request, 4000)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.ok) {
-            const copy = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          }
-          return networkResponse;
-        })
-        .catch(async (err) => {
-          const fallback = await matchAssetInCache(event.request);
-          if (fallback) return fallback;
-          throw err;
-        });
-    })
+      try {
+        const netRes = await fetchWithTimeout(event.request, 3500);
+        if (netRes && netRes.ok && url.origin === self.location.origin) {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(event.request, netRes.clone());
+        }
+        return netRes;
+      } catch (err) {
+        return new Response('', { status: 503, statusText: 'Offline' });
+      }
+    })()
   );
 });
