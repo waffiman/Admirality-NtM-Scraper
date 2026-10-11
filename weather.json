@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "2000 UTC",
-  "lastSyncUtc": "2026-10-11T20:09:21.171342+00:00",
+  "synopticCycle": "2100 UTC",
+  "lastSyncUtc": "2026-10-11T21:35:27.963107+00:00",
   "provider": "NOAA NHC + JMA RSMC Tokyo + JTWC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -51,67 +51,67 @@
       "shortName": "Simon",
       "category": "Category 4 Hurricane (NOAA NHC)",
       "center": [
-        19.5,
-        -105.5
+        19.6,
+        -105.8
       ],
-      "centralPressure": 940,
-      "maxWinds": 120,
-      "gusts": 146,
-      "movement": "NNW at 7 kts",
-      "dangerRadiusNm": 138,
+      "centralPressure": 947,
+      "maxWinds": 115,
+      "gusts": 140,
+      "movement": "NNW at 6 kts",
+      "dangerRadiusNm": 132,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            19.9,
-            -105.6
+            20.2,
+            -106.1
           ],
-          "winds": 105,
+          "winds": 90,
           "radiusNm": 55
         },
         {
           "tau": 24,
           "coords": [
-            20.5,
-            -106.0
+            21.0,
+            -106.6
           ],
-          "winds": 85,
+          "winds": 80,
           "radiusNm": 75
         },
         {
           "tau": 36,
           "coords": [
-            21.1,
-            -106.4
+            21.6,
+            -106.9
           ],
-          "winds": 70,
+          "winds": 75,
           "radiusNm": 95
         },
         {
           "tau": 48,
           "coords": [
-            21.8,
-            -106.8
+            22.2,
+            -107.1
           ],
-          "winds": 60,
+          "winds": 75,
           "radiusNm": 115
         },
         {
           "tau": 60,
           "coords": [
-            22.5,
-            -106.9
+            22.8,
+            -107.0
           ],
-          "winds": 50,
+          "winds": 75,
           "radiusNm": 135
         },
         {
           "tau": 72,
           "coords": [
-            23.0,
-            -106.9
+            23.4,
+            -106.6
           ],
-          "winds": 50,
+          "winds": 75,
           "radiusNm": 155
         }
       ]
@@ -195,7 +195,7 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 3.1,
+      "waveHeight": 3.0,
       "swellPeriod": 8,
       "swellDir": "SW"
     },
@@ -207,8 +207,8 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.2,
-      "swellPeriod": 11,
+      "waveHeight": 3.1,
+      "swellPeriod": 10,
       "swellDir": "W"
     },
     {
@@ -219,7 +219,7 @@
         148.0
       ],
       "radiusNm": 260,
-      "waveHeight": 7.8,
+      "waveHeight": 8.5,
       "swellPeriod": 11,
       "swellDir": "SSE"
     },
