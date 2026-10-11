@@ -7309,3 +7309,149 @@
   pointer-events: none;
 }
 
+/* === NAVTEX / NAVAREA WARNINGS & CANCELLATION / EDIT UI (Task 29) === */
+.ntm-tag.navtex {
+  background: rgba(244, 63, 94, 0.16);
+  color: #fb7185;
+  border: 1px solid rgba(244, 63, 94, 0.42);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.ntm-tag.cancelled-badge {
+  background: rgba(148, 163, 184, 0.16);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  font-weight: 700;
+}
+.ntm-tag.edited-badge {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  font-weight: 600;
+}
+.ntm-tag.navarea-badge {
+  background: rgba(168, 85, 247, 0.14);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.32);
+  font-weight: 600;
+}
+.ntm-item-card.type-navtex {
+  border-left: 3px solid #f43f5e;
+}
+.ntm-item-card.is-cancelled-card {
+  opacity: 0.62;
+  border-left: 3px solid #64748b !important;
+  background: rgba(15, 23, 42, 0.45);
+}
+.ntm-item-card.is-cancelled-card .ntm-item-id,
+.ntm-item-card.is-cancelled-card .ntm-item-title {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+.ntm-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+.ntm-card-act-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(30, 41, 59, 0.75);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  transition: all 0.15s ease;
+}
+.ntm-card-act-btn:hover {
+  background: rgba(51, 65, 85, 0.9);
+  color: #f8fafc;
+  border-color: rgba(56, 189, 248, 0.45);
+}
+.ntm-card-act-btn.cancel-btn:hover {
+  border-color: rgba(244, 63, 94, 0.55);
+  color: #fda4af;
+}
+.ntm-card-act-btn.restore-btn {
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.35);
+}
+.ntm-popup-act-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+.ntm-popup-btn {
+  flex: 1;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  text-align: center;
+  transition: all 0.15s ease;
+}
+.ntm-popup-btn:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  color: #fff;
+}
+.ntm-popup-btn.danger:hover {
+  background: rgba(244, 63, 94, 0.22);
+  border-color: #f43f5e;
+  color: #fecdd3;
+}
+.ntm-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ntm-detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ntm-detail-field label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+.ntm-detail-input,
+.ntm-detail-select,
+.ntm-detail-textarea {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 6px;
+  color: #f1f5f9;
+  padding: 6px 9px;
+  font-size: 12px;
+  font-family: inherit;
+}
+.ntm-detail-textarea {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.45;
+  resize: vertical;
+}
+.ntm-detail-input:focus,
+.ntm-detail-select:focus,
+.ntm-detail-textarea:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.18);
+}

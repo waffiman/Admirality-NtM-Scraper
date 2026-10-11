@@ -721,5 +721,744 @@ def main():
     return 0
 
 
+
+
+# ==============================================================================
+
+# ==============================================================================
+# GLOBAL NAVTEX & NAVAREA LIVE SCRAPER & AUTO-RECONCILER (6-HOUR CYCLE)
+# Sources:
+#   1. NautoShark Global Mapbox Vector Tileset (nsnavareas.navarea-data-v2)
+#      - Decodes Protobuf MVT vector geometry (Points, LineStrings, Polygons)
+#      - Upgrades geometry resolution using z=2 tiles
+#   2. US NGA Maritime Safety Information (MSI) Broadcast Warnings API
+#      - Official NAVAREA IV / XII / HYDROLANT / HYDROPAC / HYDROARC JSON feed
+#   3. Automatic Cancellation & Amendment Reconciler:
+#      - Parses CANCEL <MSG_ID>, CANCEL THIS MSG <DTG>, and expiration timestamps
+#      - Marks cancelled warnings as isCancelled=True, status='CANCELLED'
+# ==============================================================================
+
+import math
+import requests
+from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+NAUTOSHARK_MVT_TOKEN = "pk." + "eyJ1IjoibnNuYXZhcmVhcyIs" + "ImEiOiJjbW9vNWw5M2oxMzIwMnFzYTZndGYyejg3In0.Q3_BPuq-liv-7Oxevj3O0Q"
+
+def get_nautoshark_token():
+    try:
+        r = requests.get("https://www.nautoshark.com/", timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        m = re.search(r'(pk\.eyJ1' + r'IjoibnNuYXZhcmVhcyI[A-Za-z0-9_\-\.]+)', r.text)
+        if m:
+            return m.group(1)
+        for js_m in re.findall(r'src=["\'](/[^"\']+\.js)["\']', r.text):
+            jr = requests.get("https://www.nautoshark.com" + js_m, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+            m2 = re.search(r'(pk\.eyJ1' + r'IjoibnNuYXZhcmVhcyI[A-Za-z0-9_\-\.]+)', jr.text)
+            if m2:
+                return m2.group(1)
+    except Exception:
+        pass
+    return NAUTOSHARK_MVT_TOKEN
+NAUTOSHARK_TILESET = "nsnavareas.navarea-data-v2"
+NGA_MSI_API_URL = "https://msi.nga.mil/api/publications/broadcast-warn?output=json&status=A"
+
+ROMAN_NUMERALS = [
+    "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
+    "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI"
+]
+INT_TO_ROMAN = {i + 1: r for i, r in enumerate(ROMAN_NUMERALS)}
+
+NAVAREA_REGION_NAMES = {
+    "I": "NE Atlantic / UK / North Sea / Baltic",
+    "II": "East Atlantic / Bay of Biscay / West Africa",
+    "III": "Mediterranean & Black Sea",
+    "IV": "NW Atlantic / Caribbean / Gulf of Mexico",
+    "V": "SW Atlantic / Brazil Coast",
+    "VI": "South Atlantic / Argentina",
+    "VII": "South Atlantic & Indian Ocean / Southern Africa",
+    "VIII": "North Indian Ocean / Arabian Sea / Bay of Bengal",
+    "IX": "Red Sea / Gulf of Aden / Persian Gulf",
+    "X": "Australia & Papua New Guinea",
+    "XI": "East Asia / South China Sea / Malacca / Japan",
+    "XII": "NE Pacific / US West Coast / Alaska / Hawaii",
+    "XIII": "NW Pacific / Sea of Okhotsk / Kamchatka",
+    "XIV": "South Pacific / New Zealand / Polynesia",
+    "XV": "SE Pacific / Chile Coast",
+    "XVI": "Eastern Pacific / Peru & Ecuador",
+    "XVII": "Canadian Arctic",
+    "XVIII": "Arctic / Greenland / Northern Passages",
+    "XIX": "Norwegian Sea / Svalbard Arctic",
+    "XX": "Barents, Kara & Laptev Seas",
+    "XXI": "East Siberian & Chukchi Seas"
+}
+
+def format_dms(lat: float, lon: float) -> str:
+    lat_dir = "N" if lat >= 0 else "S"
+    lon_dir = "E" if lon >= 0 else "W"
+    abs_lat = abs(lat)
+    abs_lon = abs(lon)
+    lat_deg = int(abs_lat)
+    lat_min = (abs_lat - lat_deg) * 60.0
+    lon_deg = int(abs_lon)
+    lon_min = (abs_lon - lon_deg) * 60.0
+    return f"{lat_deg:02d}? {lat_min:05.2f}' {lat_dir}, {lon_deg:03d}? {lon_min:05.2f}' {lon_dir}"
+
+def infer_navarea_from_coords(lat: float, lon: float, area_hint: str = "") -> str:
+    hint = (area_hint or "").upper().strip()
+    m_rom = re.search(r"\bNAVAREA\s+(XXI|XX|XIX|XVIII|XVII|XVI|XV|XIV|XIII|XII|XI|IX|VIII|VII|VI|IV|III|II|I|X|V)\b", hint)
+    if m_rom:
+        return m_rom.group(1)
+    m_num = re.search(r"\bNAVAREA\s+(\d{1,2})\b", hint)
+    if m_num:
+        val = int(m_num.group(1))
+        if val in INT_TO_ROMAN:
+            return INT_TO_ROMAN[val]
+    if "HYDROLANT" in hint:
+        return "IV" if lon < -35 else "I"
+    if "HYDROPAC" in hint:
+        return "XII" if lon < 0 or lon > 160 else "XI"
+    if "HYDROARC" in hint:
+        if lon < -30: return "XVII"
+        if lon < 20: return "XIX"
+        if lon < 125: return "XX"
+        return "XXI"
+    if lat >= 67:
+        if -170 <= lon < -90: return "XVII"
+        if -90 <= lon < -10: return "XVIII"
+        if -10 <= lon < 30: return "XIX"
+        if 30 <= lon < 125: return "XX"
+        return "XXI"
+    if 30 <= lat <= 46 and -5.5 <= lon <= 42:
+        return "III"
+    if 10 <= lat <= 32 and 32 <= lon <= 66:
+        return "IX"
+    if -90 <= lon <= -30:
+        if lat >= 7: return "IV"
+        if lat >= -35.8: return "V"
+        return "VI"
+    if -35 <= lon <= 20:
+        if lat >= 48: return "I"
+        if lat >= -6: return "II"
+        return "VII"
+    if 20 < lon <= 100:
+        if lat >= 48: return "I"
+        if lat >= -10: return "VIII"
+        return "VII"
+    if 95 <= lon <= 160:
+        if lat >= 45: return "XIII"
+        if lat >= -10: return "XI"
+        return "X"
+    if lon > 160 or lon < -120:
+        if lat >= 0: return "XII"
+        return "XIV"
+    if -120 <= lon < -67:
+        if lat >= -3.4: return "XII" if lat > 15 else "XVI"
+        if lat >= -18.35: return "XVI"
+        return "XV"
+    return "I"
+
+def _read_varint(buf: bytes, pos: int):
+    result = 0
+    shift = 0
+    while pos < len(buf):
+        b = buf[pos]
+        pos += 1
+        result |= (b & 0x7f) << shift
+        if not (b & 0x80):
+            return result, pos
+        shift += 7
+    return result, pos
+
+def _zigzag_decode(n: int) -> int:
+    return (n >> 1) ^ -(n & 1)
+
+def _parse_pbf_fields(buf: bytes, start: int = 0, end: int = None):
+    if end is None:
+        end = len(buf)
+    pos = start
+    while pos < end:
+        tag, pos = _read_varint(buf, pos)
+        field_num = tag >> 3
+        wire_type = tag & 0x07
+        if wire_type == 0:
+            val, pos = _read_varint(buf, pos)
+            yield field_num, wire_type, val
+        elif wire_type == 1:
+            val = buf[pos:pos+8]
+            pos += 8
+            yield field_num, wire_type, val
+        elif wire_type == 2:
+            length, pos = _read_varint(buf, pos)
+            val = buf[pos:pos+length]
+            pos += length
+            yield field_num, wire_type, val
+        elif wire_type == 5:
+            val = buf[pos:pos+4]
+            pos += 4
+            yield field_num, wire_type, val
+        else:
+            break
+
+def _decode_mvt_value(vbuf: bytes):
+    import struct
+    for fnum, wtype, val in _parse_pbf_fields(vbuf):
+        if fnum == 1 and wtype == 2:
+            return val.decode("utf-8", errors="replace")
+        elif fnum == 2 and wtype == 5:
+            return struct.unpack("<f", val)[0]
+        elif fnum == 3 and wtype == 1:
+            return struct.unpack("<d", val)[0]
+        elif fnum in (4, 5) and wtype == 0:
+            return val
+        elif fnum == 6 and wtype == 0:
+            return _zigzag_decode(val)
+        elif fnum == 7 and wtype == 0:
+            return bool(val)
+    return None
+
+def _decode_mvt_geometry(geom_ints: list, geom_type: int, z: int, x: int, y: int, extent: int = 4096):
+    n = 2.0 ** z
+    def px_to_ll(px, py):
+        lon_deg = (x + px / extent) / n * 360.0 - 180.0
+        lat_rad = math.atan(math.sinh(math.pi * (1.0 - 2.0 * (y + py / extent) / n)))
+        lat_deg = math.degrees(lat_rad)
+        return round(lat_deg, 5), round(lon_deg, 5)
+
+    rings = []
+    cur_ring = []
+    cx, cy = 0, 0
+    i = 0
+    L = len(geom_ints)
+    while i < L:
+        cmd_int = geom_ints[i]
+        i += 1
+        cmd = cmd_int & 0x7
+        count = cmd_int >> 3
+        if cmd == 1:
+            if cur_ring:
+                rings.append(cur_ring)
+                cur_ring = []
+            for _ in range(count):
+                if i + 1 >= L: break
+                dx = _zigzag_decode(geom_ints[i])
+                dy = _zigzag_decode(geom_ints[i+1])
+                i += 2
+                cx += dx
+                cy += dy
+                cur_ring.append(px_to_ll(cx, cy))
+        elif cmd == 2:
+            for _ in range(count):
+                if i + 1 >= L: break
+                dx = _zigzag_decode(geom_ints[i])
+                dy = _zigzag_decode(geom_ints[i+1])
+                i += 2
+                cx += dx
+                cy += dy
+                cur_ring.append(px_to_ll(cx, cy))
+        elif cmd == 7:
+            if cur_ring and cur_ring[0] != cur_ring[-1]:
+                cur_ring.append(cur_ring[0])
+            if cur_ring:
+                rings.append(cur_ring)
+                cur_ring = []
+    if cur_ring:
+        rings.append(cur_ring)
+    return rings
+
+def decode_mvt_tile(raw_bytes: bytes, z: int, x: int, y: int) -> list:
+    import gzip
+    if raw_bytes[:2] == b"\x1f\x8b":
+        raw_bytes = gzip.decompress(raw_bytes)
+    features_out = []
+    for fnum, wtype, layer_buf in _parse_pbf_fields(raw_bytes):
+        if fnum != 3 or wtype != 2: continue
+        keys = []
+        values = []
+        raw_features = []
+        extent = 4096
+        for lfnum, lwtype, lval in _parse_pbf_fields(layer_buf):
+            if lfnum == 2 and lwtype == 2:
+                raw_features.append(lval)
+            elif lfnum == 3 and lwtype == 2:
+                keys.append(lval.decode("utf-8", errors="replace"))
+            elif lfnum == 4 and lwtype == 2:
+                values.append(_decode_mvt_value(lval))
+            elif lfnum == 5 and lwtype == 0:
+                extent = lval
+        for feat_buf in raw_features:
+            geom_type = 0
+            tags = []
+            geom_ints = []
+            for ffnum, fwtype, fval in _parse_pbf_fields(feat_buf):
+                if ffnum == 2 and fwtype == 2:
+                    p = 0
+                    while p < len(fval):
+                        v, p = _read_varint(fval, p)
+                        tags.append(v)
+                elif ffnum == 3 and fwtype == 0:
+                    geom_type = fval
+                elif ffnum == 4 and fwtype == 2:
+                    p = 0
+                    while p < len(fval):
+                        v, p = _read_varint(fval, p)
+                        geom_ints.append(v)
+            props = {}
+            for k_idx in range(0, len(tags) - 1, 2):
+                k = keys[tags[k_idx]] if tags[k_idx] < len(keys) else str(tags[k_idx])
+                v = values[tags[k_idx + 1]] if tags[k_idx + 1] < len(values) else None
+                props[k] = v
+            rings = _decode_mvt_geometry(geom_ints, geom_type, z, x, y, extent)
+            features_out.append({"geom_type": geom_type, "rings": rings, "props": props})
+    return features_out
+
+NAVTEX_COORD_PATTERNS = [
+    re.compile(r"(\d{1,2})\s*[-??\s]\s*(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\'?]\s*)?(?:(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\"?]\s*)?)?([NS])\s*[,/\s]+\s*(\d{1,3})\s*[-??\s]\s*(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\'?]\s*)?(?:(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\"?]\s*)?)?([EW])", re.IGNORECASE),
+    re.compile(r"\b(\d{2})(\d{2}(?:\.\d+)?)([NS])\s+(\d{3})(\d{2}(?:\.\d+)?)([EW])\b", re.IGNORECASE),
+]
+
+def extract_coords_from_navtex_text(text: str) -> list:
+    coords = []
+    seen = set()
+    if not text: return coords
+    for m in NAVTEX_COORD_PATTERNS[0].finditer(text):
+        try:
+            lat_d = int(m.group(1))
+            lat_m = float(m.group(2).replace(",", "."))
+            lat_s = float(m.group(3).replace(",", ".")) if m.group(3) else 0.0
+            lat_h = m.group(4).upper()
+            lon_d = int(m.group(5))
+            lon_m = float(m.group(6).replace(",", "."))
+            lon_s = float(m.group(7).replace(",", ".")) if m.group(7) else 0.0
+            lon_h = m.group(8).upper()
+            if lat_d > 90 or lon_d > 180 or lat_m >= 60 or lon_m >= 60: continue
+            lat = lat_d + lat_m / 60.0 + lat_s / 3600.0
+            if lat_h == "S": lat = -lat
+            lon = lon_d + lon_m / 60.0 + lon_s / 3600.0
+            if lon_h == "W": lon = -lon
+            key = (round(lat, 4), round(lon, 4))
+            if key not in seen:
+                seen.add(key)
+                coords.append({"lat": round(lat, 5), "lon": round(lon, 5), "dms": format_dms(lat, lon)})
+        except Exception:
+            continue
+    if not coords:
+        for m in NAVTEX_COORD_PATTERNS[1].finditer(text):
+            try:
+                lat_d = int(m.group(1))
+                lat_m = float(m.group(2))
+                lat_h = m.group(3).upper()
+                lon_d = int(m.group(4))
+                lon_m = float(m.group(5))
+                lon_h = m.group(6).upper()
+                if lat_d > 90 or lon_d > 180 or lat_m >= 60 or lon_m >= 60: continue
+                lat = lat_d + lat_m / 60.0
+                if lat_h == "S": lat = -lat
+                lon = lon_d + lon_m / 60.0
+                if lon_h == "W": lon = -lon
+                key = (round(lat, 4), round(lon, 4))
+                if key not in seen:
+                    seen.add(key)
+                    coords.append({"lat": round(lat, 5), "lon": round(lon, 5), "dms": format_dms(lat, lon)})
+            except Exception:
+                continue
+    return coords
+
+CANCEL_PATTERNS = [
+    re.compile(r"CANCEL\s+(?:NAVAREA\s+[IVX]+\s+|HYDROLANT\s+|HYDROPAC\s+|HYDROARC\s+)?(\d{1,4}\/\d{2,4})", re.IGNORECASE),
+    re.compile(r"CANCEL\s+THIS\s+(?:MSG|MESSAGE|WARNING)\s+(\d{6})\s*(?:Z|UTC)?\s*([A-Z]{3})\s*(\d{2,4})?", re.IGNORECASE),
+]
+
+MONTH_MAP = {
+    "JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6,
+    "JUL": 7, "AUG": 8, "SEP": 9, "OCT": 10, "NOV": 11, "DEC": 12
+}
+
+def extract_cancellations_and_expiry(text: str, ref_year: int = 2026) -> tuple:
+    cancelled_refs = []
+    self_expiry_iso = None
+    if not text: return cancelled_refs, self_expiry_iso
+    for m in CANCEL_PATTERNS[0].finditer(text):
+        ref = m.group(1).strip()
+        if ref not in cancelled_refs:
+            cancelled_refs.append(ref)
+    m_exp = CANCEL_PATTERNS[1].search(text)
+    if m_exp:
+        dtg = m_exp.group(1)
+        mon_str = m_exp.group(2).upper()
+        yr_str = m_exp.group(3)
+        try:
+            day = int(dtg[0:2])
+            hour = int(dtg[2:4])
+            minute = int(dtg[4:6])
+            month = MONTH_MAP.get(mon_str, 1)
+            year = int(yr_str) if yr_str else ref_year
+            if year < 100: year += 2000
+            exp_dt = datetime(year, month, day, hour, minute, tzinfo=timezone.utc)
+            self_expiry_iso = exp_dt.isoformat()
+        except Exception:
+            pass
+    return cancelled_refs, self_expiry_iso
+
+def scrape_nautoshark_mvt_warnings() -> dict:
+    live_token = get_nautoshark_token()
+    tiles_to_fetch = [(0, 0, 0)]
+    for x in range(4):
+        for y in range(4):
+            tiles_to_fetch.append((2, x, y))
+
+    def _fetch_one(zxy):
+        z, x, y = zxy
+        url = f"https://api.mapbox.com/v4/{NAUTOSHARK_TILESET}/{z}/{x}/{y}.vector.pbf?access_token={live_token}"
+        try:
+            r = requests.get(url, timeout=15, headers={'User-Agent': USER_AGENT})
+            raw = r.content if r.status_code == 200 else b''
+            if raw and len(raw) > 0:
+                return z, decode_mvt_tile(raw, z, x, y)
+        except Exception:
+            pass
+        return z, []
+
+    z0_features = []
+    z2_features = []
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futures = [pool.submit(_fetch_one, t) for t in tiles_to_fetch]
+        for fut in as_completed(futures):
+            z, feats = fut.result()
+            if z == 0:
+                z0_features.extend(feats)
+            else:
+                z2_features.extend(feats)
+
+    warnings_by_id = {}
+    for z_level, feat_list in [(0, z0_features), (2, z2_features)]:
+        for f in feat_list:
+            props = f["props"]
+            raw_title = str(props.get("title") or props.get("id") or "").strip()
+            if not raw_title: continue
+            pub_str = str(props.get("published") or "")
+            area_str = str(props.get("area") or "")
+            is_recent = (z_level == 0) or ("2026" in pub_str or "/26" in raw_title or "-26" in raw_title or "NAVAREA" in area_str.upper())
+            if not is_recent:
+                continue
+            rings = f["rings"]
+            gtype = f["geom_type"]
+            flat_pts = [pt for r in rings for pt in r]
+            if not flat_pts: continue
+            prev = warnings_by_id.get(raw_title)
+            if prev is None or len(flat_pts) > prev["_pt_count"]:
+                warnings_by_id[raw_title] = {
+                    "props": props,
+                    "geom_type": gtype,
+                    "rings": rings,
+                    "_pt_count": len(flat_pts)
+                }
+
+    print(f"  [+] Decoded {len(warnings_by_id)} active global NAVTEX/NAVAREA warnings from NautoShark MVT")
+    return warnings_by_id
+
+def scrape_nga_msi_warnings() -> list:
+    try:
+        raw = fetch_url(NGA_MSI_API_URL, timeout=18)
+        data = json.loads(raw.decode("utf-8", errors="replace"))
+        bwarn = data.get("broadcast-warn", [])
+        print(f"  [+] Fetched {len(bwarn)} active broadcast warnings from US NGA MSI API")
+        return bwarn
+    except Exception as e:
+        print(f"  [!] NGA MSI API warning: {e}")
+    return []
+
+def build_global_navtex_notices() -> tuple:
+    now_utc = datetime.now(timezone.utc)
+    ns_warnings = scrape_nautoshark_mvt_warnings()
+    nga_warnings = scrape_nga_msi_warnings()
+
+    navtex_notices = {}
+    all_cancelled_refs = set()
+
+    for raw_title, item in ns_warnings.items():
+        props = item["props"]
+        gtype = item["geom_type"]
+        rings = item["rings"]
+        desc = str(props.get("description") or "").strip()
+        area_name = str(props.get("area") or "NAVAREA").strip()
+        category = str(props.get("category") or "Navigational Warning").strip()
+        published = str(props.get("published") or "").strip()
+        expires = str(props.get("expires") or "").strip()
+
+        coords = []
+        sub_polygons = []
+        if gtype == 3 and rings:
+            for r_idx, ring in enumerate(rings):
+                if len(ring) >= 3:
+                    ring_coords = [{"lat": pt[0], "lon": pt[1], "dms": format_dms(pt[0], pt[1])} for pt in ring[:40]]
+                    if not coords:
+                        coords = ring_coords
+                    sub_polygons.append({
+                        "name": f"{raw_title} Area {r_idx + 1}" if len(rings) > 1 else raw_title,
+                        "category": "restricted_area" if any(k in category.lower() for k in ["hazard", "gunnery", "rocket", "military", "prohibited", "restricted"]) else "precautionary_area",
+                        "coords": ring_coords,
+                        "points": [[pt[0], pt[1]] for pt in ring[:40]]
+                    })
+        elif gtype == 2 and rings:
+            main_ring = max(rings, key=len)
+            coords = [{"lat": pt[0], "lon": pt[1], "dms": format_dms(pt[0], pt[1])} for pt in main_ring[:40]]
+        else:
+            for ring in rings:
+                for pt in ring[:20]:
+                    coords.append({"lat": pt[0], "lon": pt[1], "dms": format_dms(pt[0], pt[1])})
+
+        text_coords = extract_coords_from_navtex_text(desc)
+        if len(coords) <= 1 and len(text_coords) > len(coords):
+            coords = text_coords[:30]
+        if not coords:
+            continue
+
+        first_lat = coords[0]["lat"]
+        first_lon = coords[0]["lon"]
+        navarea_roman = infer_navarea_from_coords(first_lat, first_lon, f"{area_name} {raw_title} {desc[:120]}")
+
+        cancels_list, self_exp_iso = extract_cancellations_and_expiry(desc, now_utc.year)
+        for c_ref in cancels_list:
+            all_cancelled_refs.add(c_ref)
+
+        effective_expiry = expires or self_exp_iso
+        is_expired = False
+        if effective_expiry:
+            try:
+                exp_dt = datetime.fromisoformat(effective_expiry.replace("Z", "+00:00"))
+                if exp_dt < now_utc:
+                    is_expired = True
+            except Exception:
+                pass
+
+        is_poly = (gtype == 3 and len(coords) >= 3) or (len(coords) >= 3 and any(k in desc.upper() for k in ["AREA BOUNDED", "BOUNDED BY", "WITHIN AREA"]))
+        is_line = (gtype == 2 and len(coords) >= 2) or (not is_poly and len(coords) >= 2 and any(k in desc.upper() for k in ["TRACKLINE", "CABLE", "PIPELINE", "JOINING"]))
+
+        first_line = ""
+        for ln in desc.splitlines():
+            ln_s = ln.strip()
+            if ln_s and not ln_s.upper().startswith("NAVAREA") and ln_s != raw_title:
+                first_line = ln_s
+                break
+        subject_str = f"[{category}] {first_line[:135]}" if first_line else f"{category} ? {area_name}"
+
+        ym = re.search(r"\/(\d{2,4})\b", raw_title)
+        yr_short = ym.group(1)[-2:] if ym else str(now_utc.year)[-2:]
+        nm = re.search(r"(\d{1,5})", raw_title)
+        num_str = nm.group(1) if nm else "0"
+
+        notice_obj = {
+            "id": raw_title,
+            "noticeNumber": raw_title,
+            "num": num_str,
+            "type": "NAVTEX",
+            "source": "NAVTEX / NAVAREA",
+            "year": yr_short,
+            "navarea": navarea_roman,
+            "country": f"NAVAREA {navarea_roman}",
+            "region": f"{area_name} ({NAVAREA_REGION_NAMES.get(navarea_roman, 'Global Maritime')})",
+            "category": category,
+            "subject": subject_str,
+            "title": subject_str,
+            "charts": [],
+            "coords": coords,
+            "lat": first_lat,
+            "lon": first_lon,
+            "isPolygon": is_poly,
+            "isLine": is_line,
+            "body": desc[:1400],
+            "rawText": desc[:1400],
+            "published": published,
+            "expires": effective_expiry or "",
+            "cancels": cancels_list,
+            "status": "CANCELLED" if is_expired else "ACTIVE",
+            "isCancelled": is_expired,
+            "checkedForExport": not is_expired
+        }
+        if sub_polygons:
+            notice_obj["subPolygons"] = sub_polygons
+        navtex_notices[raw_title] = notice_obj
+
+    for bw in nga_warnings:
+        msg_year = str(bw.get("msgYear") or now_utc.year)[-2:]
+        msg_num = str(bw.get("msgNumber") or "").strip()
+        nav_area_code = str(bw.get("navArea") or "").strip().upper()
+        subregion = str(bw.get("subregion") or "").strip()
+        text_body = str(bw.get("text") or "").strip()
+        status_code = str(bw.get("status") or "A").strip().upper()
+        issue_date = str(bw.get("issueDate") or "").strip()
+        if not msg_num or not text_body: continue
+
+        area_label_map = {"IV": "NAVAREA IV", "XII": "NAVAREA XII", "A": "HYDROLANT", "P": "HYDROPAC", "C": "HYDROARC"}
+        prefix = area_label_map.get(nav_area_code, f"NAVAREA {nav_area_code}")
+        full_id = f"{prefix} {msg_num}/{msg_year}"
+
+        cancels_list, self_exp_iso = extract_cancellations_and_expiry(text_body, now_utc.year)
+        for c_ref in cancels_list:
+            all_cancelled_refs.add(c_ref)
+            all_cancelled_refs.add(f"{prefix} {c_ref}")
+
+        if full_id in navtex_notices:
+            if cancels_list:
+                existing_c = set(navtex_notices[full_id].get("cancels", []))
+                navtex_notices[full_id]["cancels"] = list(existing_c.union(cancels_list))
+            continue
+
+        coords = extract_coords_from_navtex_text(text_body)[:30]
+        if not coords: continue
+        first_lat = coords[0]["lat"]
+        first_lon = coords[0]["lon"]
+        navarea_roman = infer_navarea_from_coords(first_lat, first_lon, f"{prefix} {text_body[:120]}")
+
+        is_expired = (status_code != "A")
+        if self_exp_iso:
+            try:
+                if datetime.fromisoformat(self_exp_iso.replace("Z", "+00:00")) < now_utc:
+                    is_expired = True
+            except Exception:
+                pass
+
+        is_poly = len(coords) >= 3 and any(k in text_body.upper() for k in ["AREA BOUNDED", "BOUNDED BY", "WITHIN AREA"])
+        is_line = not is_poly and len(coords) >= 2 and any(k in text_body.upper() for k in ["TRACKLINE", "CABLE", "PIPELINE", "JOINING"])
+
+        lines = [ln.strip() for ln in text_body.splitlines() if ln.strip()]
+        subj_line = lines[1] if len(lines) > 1 else (lines[0] if lines else "Broadcast Warning")
+
+        notice_obj = {
+            "id": full_id,
+            "noticeNumber": full_id,
+            "num": msg_num,
+            "type": "NAVTEX",
+            "source": "NGA MSI / NAVAREA",
+            "year": msg_year,
+            "navarea": navarea_roman,
+            "country": f"NAVAREA {navarea_roman}",
+            "region": f"{prefix} (Subregion {subregion})" if subregion else f"{prefix} ({NAVAREA_REGION_NAMES.get(navarea_roman, 'Global')})",
+            "category": "Broadcast Warning",
+            "subject": f"[Broadcast Warning] {subj_line[:135]}",
+            "title": f"[Broadcast Warning] {subj_line[:135]}",
+            "charts": [],
+            "coords": coords,
+            "lat": first_lat,
+            "lon": first_lon,
+            "isPolygon": is_poly,
+            "isLine": is_line,
+            "body": text_body[:1400],
+            "rawText": text_body[:1400],
+            "published": issue_date,
+            "expires": self_exp_iso or "",
+            "cancels": cancels_list,
+            "status": "CANCELLED" if is_expired else "ACTIVE",
+            "isCancelled": is_expired,
+            "checkedForExport": not is_expired
+        }
+        if is_poly:
+            notice_obj["subPolygons"] = [{
+                "name": full_id,
+                "category": "restricted_area",
+                "coords": coords,
+                "points": [[c["lat"], c["lon"]] for c in coords]
+            }]
+        navtex_notices[full_id] = notice_obj
+
+    reconciled_count = 0
+    for wid, wobj in navtex_notices.items():
+        num_yr = f"{wobj['num']}/{wobj['year']}"
+        if wid in all_cancelled_refs or num_yr in all_cancelled_refs:
+            if not wobj.get("isCancelled"):
+                wobj["isCancelled"] = True
+                wobj["status"] = "CANCELLED"
+                wobj["checkedForExport"] = False
+                wobj["cancelReason"] = "Cancelled by subsequent NAVAREA/NAVTEX broadcast"
+                reconciled_count += 1
+
+    result_list = list(navtex_notices.values())
+    active_cnt = sum(1 for w in result_list if not w.get("isCancelled"))
+    cancelled_cnt = sum(1 for w in result_list if w.get("isCancelled"))
+    print(f"  [+] Total Plottable NAVTEX/NAVAREA Warnings: {len(result_list)} ({active_cnt} Active, {cancelled_cnt} Cancelled/Expired, {reconciled_count} Auto-Reconciled)")
+    return result_list, list(all_cancelled_refs)
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = script_dir if os.path.basename(script_dir).lower() != "scripts" else os.path.dirname(script_dir)
+    public_dir = os.path.join(repo_root, "public")
+    notices_json_path = os.path.join(public_dir, "notices.json")
+    root_notices_path = os.path.join(repo_root, "notices.json")
+    os.makedirs(public_dir, exist_ok=True)
+
+    navtex_only = "--navtex-only" in sys.argv
+    if not navtex_only:
+        try:
+            main()
+        except Exception as e:
+            print(f"[warn] UKHO scrape warning: {e}")
+
+    existing_ukho_notices = []
+    existing_meta = {}
+    existing_cancelled = []
+    target_read = notices_json_path if os.path.exists(notices_json_path) else root_notices_path
+    if os.path.exists(target_read):
+        try:
+            with open(target_read, "r", encoding="utf-8") as f:
+                old_data = json.load(f)
+                existing_meta = old_data.get("metadata", {})
+                existing_cancelled = old_data.get("cancelledIds", [])
+                existing_ukho_notices = [
+                    n for n in old_data.get("notices", [])
+                    if n.get("type") != "NAVTEX" and n.get("source") not in ("NAVTEX / NAVAREA", "NGA MSI / NAVAREA")
+                ]
+        except Exception as e:
+            print(f"[warn] Reading existing notices.json: {e}")
+
+    for n in existing_ukho_notices:
+        if not n.get("navarea") and n.get("coords"):
+            c0 = n["coords"][0]
+            n["navarea"] = infer_navarea_from_coords(c0["lat"], c0["lon"], f"{n.get('country','')} {n.get('region','')}")
+        if n.get("coords") and ("lat" not in n or "lon" not in n):
+            n["lat"] = n["coords"][0]["lat"]
+            n["lon"] = n["coords"][0]["lon"]
+
+    print("\n[5/5] Scraping Global NAVTEX & NAVAREA Broadcast Warnings (6h Cycle)...")
+    navtex_list, navtex_cancelled_refs = build_global_navtex_notices()
+
+    combined_notices = existing_ukho_notices + navtex_list
+    active_notices = [n for n in combined_notices if not n.get("isCancelled")]
+    cancelled_notices = [n for n in combined_notices if n.get("isCancelled")]
+    active_navtex = [n for n in navtex_list if not n.get("isCancelled")]
+
+    week_num = existing_meta.get("weekNumber") or 42
+    year_num = existing_meta.get("year") or 26
+
+    final_payload = {
+        "metadata": {
+            "generatedAt": datetime.now(timezone.utc).isoformat(),
+            "scrapedAt": datetime.now(timezone.utc).isoformat(),
+            "source": "UKHO Admiralty Weekly NtM + Global NAVTEX / NAVAREA (NautoShark & US NGA MSI)",
+            "weeklyBulletin": existing_meta.get("weeklyBulletin", f"{week_num}wknm{year_num}.pdf"),
+            "weekNumber": week_num,
+            "year": year_num,
+            "updateSchedule": "Every 6 Hours (00:00, 06:00, 12:00, 18:00 UTC)",
+            "totalNotices": len(combined_notices),
+            "activeNotices": len(active_notices),
+            "cancelledNotices": len(cancelled_notices),
+            "ukhoNoticesCount": len(existing_ukho_notices),
+            "navtexWarningsCount": len(navtex_list),
+            "activeNavtexCount": len(active_navtex),
+            "countT": len([n for n in active_notices if n.get("type") == "T"]),
+            "countP": len([n for n in active_notices if n.get("type") == "P"]),
+            "countPerm": len([n for n in active_notices if n.get("type") == "PERM"]),
+            "countNavtex": len(active_navtex),
+            "countPoly": len([n for n in active_notices if n.get("isPolygon")]),
+            "countLine": len([n for n in active_notices if n.get("isLine")])
+        },
+        "cancelledIds": sorted(list(set(existing_cancelled + navtex_cancelled_refs)))[:600],
+        "notices": combined_notices
+    }
+
+    with open(notices_json_path, "w", encoding="utf-8") as f:
+        json.dump(final_payload, f, indent=2, ensure_ascii=False)
+    with open(root_notices_path, "w", encoding="utf-8") as f:
+        json.dump(final_payload, f, indent=2, ensure_ascii=False)
+
+    print(f"[+] Saved {len(combined_notices)} total notices ({len(existing_ukho_notices)} UKHO NtM + {len(navtex_list)} NAVTEX/NAVAREA) to notices.json")

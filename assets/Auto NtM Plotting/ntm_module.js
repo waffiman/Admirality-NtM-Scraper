@@ -212,6 +212,146 @@ function parseAdmiraltyNtMText(fullText, defaultYear = "26") {
     });
   }
 
+
+  // ?? 1B. Parse Raw NAVTEX / NAVAREA Broadcast Warnings & Cancellations ??
+  const NAVTEX_MSG_REGEX = /(?:^|\n)\s*(?:ZCZC\s+([A-Z]{2}\d{2})\s*\n+)?\s*((?:NAVAREA\s+(?:XXI|XX|XIX|XVIII|XVII|XVI|XV|XIV|XIII|XII|XI|IX|VIII|VII|VI|IV|III|II|I|X|V|\d{1,2})|HYDROLANT|HYDROPAC|HYDROARC|NAVTEX)\s+\d{1,5}\s*\/\s*\d{2,4})/gi;
+  const NAVTEX_CANCEL_REGEX = /CANCEL\s+((?:NAVAREA\s+(?:XXI|XX|XIX|XVIII|XVII|XVI|XV|XIV|XIII|XII|XI|IX|VIII|VII|VI|IV|III|II|I|X|V|\d{1,2})\s+|HYDROLANT\s+|HYDROPAC\s+|HYDROARC\s+)?\d{1,5}\s*\/\s*\d{2,4})/gi;
+  const NAVTEX_COMPACT_COORD_REGEX = /\b(\d{2})(\d{2}(?:\.\d+)?)\s*([NS])\s*[,/\s]+\s*(\d{3})(\d{2}(?:\.\d+)?)\s*([EW])\b/gi;
+
+  let navCancelMatch;
+  NAVTEX_CANCEL_REGEX.lastIndex = 0;
+  while ((navCancelMatch = NAVTEX_CANCEL_REGEX.exec(cleanText)) !== null) {
+    const rawRef = navCancelMatch[1].trim().replace(/\s+/g, " ");
+    cancelledIds.add(rawRef);
+    const shortNum = rawRef.match(/(\d{1,5}\/\d{2,4})$/);
+    if (shortNum) cancelledIds.add(shortNum[1]);
+  }
+
+  const navHeaders = [];
+  let nmMatch;
+  NAVTEX_MSG_REGEX.lastIndex = 0;
+  while ((nmMatch = NAVTEX_MSG_REGEX.exec(cleanText)) !== null) {
+    const b1b2 = nmMatch[1] ? nmMatch[1].toUpperCase() : "";
+    const msgId = nmMatch[2].trim().replace(/\s+/g, " ").toUpperCase();
+    navHeaders.push({
+      index: nmMatch.index,
+      id: msgId,
+      b1b2: b1b2
+    });
+  }
+
+  if (headers.length === 0 && navHeaders.length === 0 && /(?:ZCZC|NAVAREA|HYDROLANT|HYDROPAC|HYDROARC|NAVTEX|NNNN)/i.test(cleanText)) {
+    const zczcM = cleanText.match(/ZCZC\s+([A-Z]{2}\d{2})/i);
+    const fallbackId = zczcM ? `NAVTEX ${zczcM[1].toUpperCase()}/${detectedYear}` : `NAVTEX MSG/${detectedYear}`;
+    navHeaders.push({ index: 0, id: fallbackId, b1b2: zczcM ? zczcM[1].toUpperCase() : "" });
+  }
+
+  for (let j = 0; j < navHeaders.length; j++) {
+    const curNav = navHeaders[j];
+    const sPos = curNav.index;
+    const ePos = (j + 1 < navHeaders.length) ? navHeaders[j + 1].index : cleanText.length;
+    const navBlock = cleanText.substring(sPos, ePos).trim();
+
+    const navCoords = [];
+    let cM;
+    NTM_COORD_DASH_REGEX.lastIndex = 0;
+    while ((cM = NTM_COORD_DASH_REGEX.exec(navBlock)) !== null) {
+      const latD = parseInt(cM[1], 10);
+      const latM = parseFloat(cM[2].replace(",", "."));
+      let lat = latD + latM / 60.0;
+      if (cM[3].toUpperCase() === "S") lat = -lat;
+      const lonD = parseInt(cM[4], 10);
+      const lonM = parseFloat(cM[5].replace(",", "."));
+      let lon = lonD + lonM / 60.0;
+      if (cM[6].toUpperCase() === "W") lon = -lon;
+      navCoords.push({
+        lat: Number(lat.toFixed(5)),
+        lon: Number(lon.toFixed(5)),
+        dms: `${cM[1]}? ${cM[2]}' ${cM[3].toUpperCase()}, ${cM[4]}? ${cM[5]}' ${cM[6].toUpperCase()}`
+      });
+    }
+    if (navCoords.length === 0) {
+      NTM_COORD_STD_REGEX.lastIndex = 0;
+      while ((cM = NTM_COORD_STD_REGEX.exec(navBlock)) !== null) {
+        const latD = parseInt(cM[1], 10);
+        const latM = parseFloat(cM[2] + "." + cM[3]);
+        let lat = latD + latM / 60.0;
+        if (cM[4].toUpperCase() === "S") lat = -lat;
+        const lonD = parseInt(cM[5], 10);
+        const lonM = parseFloat(cM[6] + "." + cM[7]);
+        let lon = lonD + lonM / 60.0;
+        if (cM[8].toUpperCase() === "W") lon = -lon;
+        navCoords.push({
+          lat: Number(lat.toFixed(5)),
+          lon: Number(lon.toFixed(5)),
+          dms: `${cM[1]}? ${cM[2]}.${cM[3]}' ${cM[4].toUpperCase()}, ${cM[5]}? ${cM[6]}.${cM[7]}' ${cM[8].toUpperCase()}`
+        });
+      }
+    }
+    if (navCoords.length === 0) {
+      NAVTEX_COMPACT_COORD_REGEX.lastIndex = 0;
+      while ((cM = NAVTEX_COMPACT_COORD_REGEX.exec(navBlock)) !== null) {
+        const latD = parseInt(cM[1], 10);
+        const latM = parseFloat(cM[2]);
+        let lat = latD + latM / 60.0;
+        if (cM[3].toUpperCase() === "S") lat = -lat;
+        const lonD = parseInt(cM[4], 10);
+        const lonM = parseFloat(cM[5]);
+        let lon = lonD + lonM / 60.0;
+        if (cM[6].toUpperCase() === "W") lon = -lon;
+        navCoords.push({
+          lat: Number(lat.toFixed(5)),
+          lon: Number(lon.toFixed(5)),
+          dms: `${cM[1]}? ${cM[2]}' ${cM[3].toUpperCase()}, ${cM[4]}? ${cM[5]}' ${cM[6].toUpperCase()}`
+        });
+      }
+    }
+
+    const msgCancels = [];
+    NAVTEX_CANCEL_REGEX.lastIndex = 0;
+    let mc;
+    while ((mc = NAVTEX_CANCEL_REGEX.exec(navBlock)) !== null) {
+      msgCancels.push(mc[1].trim().replace(/\s+/g, " "));
+    }
+
+    const romMatch = curNav.id.match(/NAVAREA\s+(XXI|XX|XIX|XVIII|XVII|XVI|XV|XIV|XIII|XII|XI|IX|VIII|VII|VI|IV|III|II|I|X|V)/i);
+    const navareaRom = romMatch ? romMatch[1].toUpperCase() : "I";
+    const lines = navBlock.split(/\n+/).map(s => s.trim()).filter(Boolean);
+    const subjLine = lines.length > 1 ? lines[1] : (lines[0] || "NAVTEX Navigational Warning");
+    const isPoly = navCoords.length >= 3 && /AREA\s+BOUNDED|BOUNDED\s+BY|WITHIN\s+AREA/i.test(navBlock);
+    const isLn = !isPoly && navCoords.length >= 2 && /TRACKLINE|CABLE|PIPELINE|JOINING/i.test(navBlock);
+    const numM = curNav.id.match(/(\d{1,5})\s*\/\s*(\d{2,4})/);
+
+    if (navCoords.length > 0) {
+      results.push({
+        id: curNav.id,
+        noticeNumber: curNav.id,
+        num: numM ? numM[1] : "1",
+        type: "NAVTEX",
+        source: "NAVTEX / NAVAREA",
+        year: numM ? numM[2].slice(-2) : detectedYear,
+        navarea: navareaRom,
+        country: `NAVAREA ${navareaRom}`,
+        region: curNav.b1b2 ? `NAVTEX [${curNav.b1b2}]` : `NAVAREA ${navareaRom}`,
+        category: "Broadcast Warning",
+        subject: `[Broadcast Warning] ${subjLine.slice(0, 130)}`,
+        title: `[Broadcast Warning] ${subjLine.slice(0, 130)}`,
+        charts: [],
+        coords: navCoords,
+        lat: navCoords[0].lat,
+        lon: navCoords[0].lon,
+        isPolygon: isPoly,
+        isLine: isLn,
+        body: navBlock.slice(0, 1500),
+        rawText: navBlock.slice(0, 1500),
+        cancels: msgCancels,
+        status: "ACTIVE",
+        isCancelled: false,
+        checkedForExport: true
+      });
+    }
+  }
+
   return {
     notices: results,
     cancelledIds: Array.from(cancelledIds)

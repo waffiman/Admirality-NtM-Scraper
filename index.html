@@ -12641,7 +12641,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
                         <!-- SECTION 1: ADMIRALTY NtM OBJECT FILTERS -->
                         <div class="ntm-filter-sec-card" id="filterSecNotices">
                           <div class="ntm-filter-sec-head">
-                            <span>Admiralty NtM</span>
+                            <span>NtM &amp; NAVTEX</span>
                             <span class="chk-count" id="popCntNtmTotal">0</span>
                           </div>
 
@@ -12649,6 +12649,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
                             <label class="ntm-popover-chk-item">
                               <input type="checkbox" id="popChkAll" checked />
                               <span class="chk-label">All Active</span>
+                            </label>
+
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popChkNavtex" checked />
+                              <span class="chk-label">NAVTEX</span>
+                              <span class="chk-count" id="popCntNavtex">0</span>
                             </label>
 
                             <label class="ntm-popover-chk-item">
@@ -12964,7 +12970,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 
-                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Type (T→P→Perm)</span>
+                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Type (NAVTEX / T / P / Perm)</span>
 
 
 
@@ -13092,9 +13098,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
             <div class="excel-overlay-dock" id="excelOverlayDock" role="toolbar" aria-label="ECDIS Chart Overlays" style="display:flex;width:100%;">
               <div class="excel-tabs-scroll" style="display:flex;flex:1;width:100%;align-items:flex-end;">
-                <button type="button" class="excel-tab active" data-overlay="notices" id="tabOverlayNotices" title="Toggle Admiralty NtM Notices Overlay">
+                <button type="button" class="excel-tab active" data-overlay="notices" id="tabOverlayNotices" title="Toggle Admiralty NtM &amp; NAVTEX Warnings Overlay">
                   <span class="excel-tab-check">✓</span>
-                  <span class="excel-tab-name">Admiralty NtM</span>
+                  <span class="excel-tab-name">NtM &amp; NAVTEX</span>
                   <span class="excel-tab-info-btn" id="btnNtmOverlayInfo" title="UKHO NtM Database Status &amp; Bulletin Info"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
                 <button type="button" class="excel-tab active" data-overlay="depths" id="tabOverlayDepths" title="Toggle Port Depths &amp; Bathymetry">
@@ -13558,7 +13564,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 
-          <h3>Paste Notices Text from Navtor or PDF</h3>
+          <h3>Paste Admiralty NtM or NAVTEX / NAVAREA Warning</h3>
 
 
 
@@ -13566,7 +13572,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 
-            Paste UKHO Admiralty notices text (e.g., copied from Navtor or PDF bulletin):
+            Paste UKHO Admiralty NtM text OR a GMDSS NAVTEX / NAVAREA / HYDROLANT / HYDROPAC broadcast (including <code>CANCEL ...</code> directives to cancel existing warnings):
 
 
 
@@ -13661,7 +13667,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
               <span class="ntm-export-badge" id="expChartBadge" style="background:rgba(240,90,54,0.15);color:#ff7a5c;border-color:rgba(240,90,54,0.3);">User Chart</span>
             </div>
 
-            <div class="ntm-export-types-row" style="margin-bottom:10px;">
+            <div class="ntm-export-types-row" style="margin-bottom:10px;grid-template-columns:repeat(4,1fr);">
+              <label class="ntm-type-toggle-pill type-navtex" style="border-color:rgba(244,63,94,0.35);">
+                <input type="checkbox" id="expChkNavtex" checked />
+                <span class="pill-dot" style="background:#f43f5e;"></span>
+                <span class="pill-text">NAVTEX</span>
+                <span class="ntm-export-count-badge" id="expCountNavtex">0</span>
+              </label>
               <label class="ntm-type-toggle-pill type-t">
                 <input type="checkbox" id="expChkT" checked />
                 <span class="pill-dot"></span>
@@ -18644,45 +18656,139 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
   </div>
 
-<!-- Modal: UKHO Notices to Mariners Bulletin Info & Audit -->
+<!-- Modal: UKHO Notices to Mariners & Global NAVTEX / NAVAREA Info & Audit -->
       <div class="ntm-modal" id="ntmOverlayInfoModal">
-        <div class="ntm-modal-box" style="max-width:540px;">
+        <div class="ntm-modal-box" style="max-width:560px;">
           <div class="ntm-modal-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px;">
             <h3 style="margin:0;font-size:0.95rem;color:#f1f5f9;display:flex;align-items:center;gap:7px;">
-              <svg class="setsail-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#f05a36;"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke-width="1.6"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>
-              UKHO Notices to Mariners ? Status &amp; Bulletin Info
+              <svg class="setsail-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#f43f5e;"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke-width="1.6"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f43f5e" stroke-width="1.8"/></svg>
+              NtM &amp; NAVTEX Global Warnings &mdash; Status &amp; Bulletin Info
             </h3>
-            <button type="button" class="ntm-modal-close" id="ntmOverlayInfoClose" title="Close" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">?</button>
+            <button type="button" class="ntm-modal-close" id="ntmOverlayInfoClose" title="Close" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">&#10005;</button>
           </div>
           <div style="font-size:0.75rem;color:#cad8f4;line-height:1.5;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:rgba(240,90,54,0.1);padding:6px 10px;border-radius:6px;border:1px solid rgba(240,90,54,0.25);">
-              <span style="font-weight:700;color:#ff7a5c;">Admiralty Weekly Edition &amp; File 27 T&amp;P</span>
-              <span style="font-size:0.7rem;background:#10b981;color:#fff;padding:1px 6px;border-radius:4px;font-weight:700;">LIVE ACTIVE</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:rgba(244,63,94,0.12);padding:6px 10px;border-radius:6px;border:1px solid rgba(244,63,94,0.3);">
+              <span style="font-weight:700;color:#fb7185;">UKHO Weekly NtM + GMDSS NAVTEX / NAVAREA (I&ndash;XXI)</span>
+              <span style="font-size:0.7rem;background:#10b981;color:#fff;padding:1px 6px;border-radius:4px;font-weight:700;">6H AUTO-SYNC</span>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
               <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
                 <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Current Database Edition</div>
-                <div id="ntmModalEdition" style="font-size:0.88rem;font-weight:700;color:#f1f5f9;margin-top:2px;">Week 42 / 2026</div>
+                <div id="ntmModalEdition" style="font-size:0.86rem;font-weight:700;color:#f1f5f9;margin-top:2px;">Week 42 / 2026 + Live NAVTEX</div>
               </div>
               <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
-                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Total Notices In Force</div>
-                <div id="ntmModalCount" style="font-size:0.88rem;font-weight:700;color:#38bdf8;margin-top:2px;">158 Notices Plotted</div>
+                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Total Active In Force</div>
+                <div id="ntmModalCount" style="font-size:0.86rem;font-weight:700;color:#38bdf8;margin-top:2px;">Plotted Warnings</div>
               </div>
               <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
-                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Temporary &amp; Preliminary</div>
-                <div id="ntmModalTpCount" style="font-size:0.85rem;font-weight:600;color:#fbbf24;margin-top:2px;">52 T&amp;P Notices</div>
+                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">NAVTEX &amp; T/P Breakdown</div>
+                <div id="ntmModalTpCount" style="font-size:0.83rem;font-weight:600;color:#fb7185;margin-top:2px;">NAVTEX + T&amp;P</div>
               </div>
               <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
-                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Coverage Authority</div>
-                <div style="font-size:0.82rem;font-weight:600;color:#f1f5f9;margin-top:2px;">UK Hydrographic Office (Taunton, UK)</div>
+                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Sources &amp; Schedule</div>
+                <div style="font-size:0.8rem;font-weight:600;color:#f1f5f9;margin-top:2px;">UKHO + NautoShark + NGA MSI (6h)</div>
               </div>
             </div>
             <p style="margin:0 0 10px;color:var(--muted);font-size:0.72rem;">
-              Database contains worldwide Admiralty Notices to Mariners including Temporary (T), Preliminary (P), and Permanent navigational warnings. TSS zones, traffic separation schemes, and route hazards are rendered as interactive GIS vector polygons with continuous longitude wrapping across the Pacific antimeridian.
+              Combines official UKHO Admiralty Notices to Mariners (Temporary, Preliminary, Permanent) with global NAVTEX &amp; NAVAREA (I&ndash;XXI) broadcast warnings from NautoShark and US NGA Maritime Safety Information. Warnings are automatically updated every 6 hours, reconciled against <code>CANCEL</code> directives, and can be inspected, edited, or cancelled directly on the chart.
             </p>
           </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:12px;border-top:1px solid var(--line);padding-top:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;border-top:1px solid var(--line);padding-top:8px;gap:8px;">
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="secondary" onclick="document.getElementById('ntmOverlayInfoModal').classList.remove('active');document.getElementById('ntmOverlayInfoModal').style.display='none';if(window.openNtmPasteModal)window.openNtmPasteModal();" style="margin-top:0;padding:4px 10px;font-size:0.75rem;">+ Paste Warning / Cancel</button>
+              <button type="button" class="secondary" onclick="if(window.loadRemoteNoticesJson)window.loadRemoteNoticesJson(true);" style="margin-top:0;padding:4px 10px;font-size:0.75rem;">&#8635; Sync Live Warnings</button>
+            </div>
             <button type="button" class="secondary" id="ntmOverlayInfoCloseBtn" style="margin-top:0;padding:4px 14px;font-size:0.78rem;">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal: Inspect / Edit / Cancel NtM or NAVTEX Warning -->
+      <div class="ntm-modal" id="ntmNoticeDetailModal">
+        <div class="ntm-modal-box" style="max-width:560px;width:94%;">
+          <div class="ntm-modal-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="ntm-tag navtex" id="ntmDetailBadgeType">NAVTEX</span>
+              <h3 id="ntmDetailTitleHeader" style="margin:0;font-size:0.92rem;color:#f1f5f9;">Warning Details &amp; Editor</h3>
+            </div>
+            <button type="button" class="ntm-modal-close" onclick="if(window.closeNoticeDetailModal)window.closeNoticeDetailModal();" title="Close" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">&#10005;</button>
+          </div>
+          <div style="max-height:70vh;overflow-y:auto;padding-right:2px;">
+            <input type="hidden" id="ntmDetailOrigId" value="" />
+            <div id="ntmDetailCancelBanner" style="display:none;margin-bottom:10px;padding:7px 11px;border-radius:6px;background:rgba(244,63,94,0.14);border:1px solid rgba(244,63,94,0.4);color:#fda4af;font-size:0.74rem;font-weight:600;">
+              &#9888; This warning is currently marked as CANCELLED (inactive).
+            </div>
+            <div class="ntm-detail-grid">
+              <div class="ntm-detail-field">
+                <label>Warning / Notice ID</label>
+                <input type="text" class="ntm-detail-input" id="ntmDetailIdInput" readonly style="opacity:0.85;" />
+              </div>
+              <div class="ntm-detail-field">
+                <label>Category / Type</label>
+                <select class="ntm-detail-select" id="ntmDetailTypeSelect">
+                  <option value="NAVTEX">NAVTEX / NAVAREA</option>
+                  <option value="T">Temporary (T)</option>
+                  <option value="P">Preliminary (P)</option>
+                  <option value="PERM">Permanent (Perm)</option>
+                </select>
+              </div>
+              <div class="ntm-detail-field">
+                <label>NAVAREA (I &ndash; XXI)</label>
+                <select class="ntm-detail-select" id="ntmDetailNavareaSelect">
+                  <option value="I">NAVAREA I (NE Atlantic / North Sea / Baltic)</option>
+                  <option value="II">NAVAREA II (E Atlantic / West Africa)</option>
+                  <option value="III">NAVAREA III (Mediterranean &amp; Black Sea)</option>
+                  <option value="IV">NAVAREA IV (NW Atlantic / Caribbean / US East)</option>
+                  <option value="V">NAVAREA V (SW Atlantic / Brazil)</option>
+                  <option value="VI">NAVAREA VI (S Atlantic / Argentina)</option>
+                  <option value="VII">NAVAREA VII (S Atlantic / Southern Africa)</option>
+                  <option value="VIII">NAVAREA VIII (Indian Ocean / Arabian Sea / Bay of Bengal)</option>
+                  <option value="IX">NAVAREA IX (Red Sea / Persian Gulf / Arabian Sea)</option>
+                  <option value="X">NAVAREA X (Australia &amp; Tasman Sea)</option>
+                  <option value="XI">NAVAREA XI (NW Pacific / SE Asia / China &amp; Japan)</option>
+                  <option value="XII">NAVAREA XII (NE Pacific / US West Coast / Alaska)</option>
+                  <option value="XIII">NAVAREA XIII (Far East Russia / Sea of Okhotsk)</option>
+                  <option value="XIV">NAVAREA XIV (South Pacific / New Zealand)</option>
+                  <option value="XV">NAVAREA XV (SE Pacific / Chile)</option>
+                  <option value="XVI">NAVAREA XVI (E Pacific / Peru)</option>
+                  <option value="XVII">NAVAREA XVII (Arctic / Northern Canada)</option>
+                  <option value="XVIII">NAVAREA XVIII (Arctic / Canadian Archipelago)</option>
+                  <option value="XIX">NAVAREA XIX (Arctic / Norwegian &amp; Barents Sea)</option>
+                  <option value="XX">NAVAREA XX (Arctic / Kara &amp; Laptev Seas)</option>
+                  <option value="XXI">NAVAREA XXI (Arctic / East Siberian &amp; Chukchi Seas)</option>
+                </select>
+              </div>
+              <div class="ntm-detail-field">
+                <label>Geometry Plotting Type</label>
+                <select class="ntm-detail-select" id="ntmDetailGeomSelect">
+                  <option value="point">Point(s) Marker</option>
+                  <option value="line">Line / Track</option>
+                  <option value="polygon">Area / Polygon</option>
+                </select>
+              </div>
+            </div>
+            <div class="ntm-detail-field" style="margin-bottom:9px;">
+              <label>Subject / Area Title</label>
+              <input type="text" class="ntm-detail-input" id="ntmDetailSubjectInput" placeholder="e.g. NORTH SEA. GUNNERY EXERCISES." />
+            </div>
+            <div class="ntm-detail-field" style="margin-bottom:9px;">
+              <label>Plotted Coordinates (one lat, lon pair per line &mdash; editable)</label>
+              <textarea class="ntm-detail-textarea" id="ntmDetailCoordsInput" rows="4" placeholder="56.25000, 3.12500&#10;56.50000, 3.45000"></textarea>
+            </div>
+            <div class="ntm-detail-field">
+              <label>Full Broadcast / Notice Text (NAVTEX / NtM Body)</label>
+              <textarea class="ntm-detail-textarea" id="ntmDetailBodyInput" rows="6" placeholder="Full NAVTEX or Admiralty NtM message text..."></textarea>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;border-top:1px solid var(--line);padding-top:8px;gap:8px;">
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="secondary" id="ntmDetailToggleCancelBtn" onclick="if(window.toggleCancelNoticeFromModal)window.toggleCancelNoticeFromModal();" style="margin-top:0;padding:4px 10px;font-size:0.75rem;border-color:rgba(244,63,94,0.45);color:#fda4af;">Cancel Warning</button>
+              <button type="button" class="secondary" onclick="if(window.flyToNoticeFromModal)window.flyToNoticeFromModal();" style="margin-top:0;padding:4px 10px;font-size:0.75rem;">Center on Chart</button>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="secondary" onclick="if(window.closeNoticeDetailModal)window.closeNoticeDetailModal();" style="margin-top:0;padding:4px 12px;font-size:0.75rem;">Close</button>
+              <button type="button" onclick="if(window.saveNoticeDetailEdits)window.saveNoticeDetailEdits();" style="margin-top:0;padding:4px 14px;font-size:0.75rem;">Save Changes</button>
+            </div>
           </div>
         </div>
       </div>

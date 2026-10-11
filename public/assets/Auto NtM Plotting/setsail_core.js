@@ -89,7 +89,7 @@ function showSetSailToast(message, type = "info") {
     toastEl.classList.remove("show");
   }, 4200);
 }
-let NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM"]); // Default: all active notice types
+let NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM", "NAVTEX"]); // Default: all active NtM + NAVTEX types
 let NTM_FILTER_AREAS = false;
 let NTM_SHOW_CANCELLED = false; // Strictly isolated from map by default!
 let NTM_ACTIVE_NAVAREA = "ALL";
@@ -358,7 +358,7 @@ function updateNetworkStatusHUD(isOnline, customWk = null) {
   const activeCnt = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
 
   if (isOnline) {
-    statusEl.innerHTML = `<span class="ntm-live-status"><span class="ntm-live-dot" title="Live UKHO telemetry online"></span>Live NtM ${wkStr}: ${activeCnt} active</span>`;
+    statusEl.innerHTML = `<span class="ntm-live-status"><span class="ntm-live-dot" title="Live UKHO telemetry online"></span>Live NtM & NAVTEX ${wkStr}: ${activeCnt} active</span>`;
   } else {
     statusEl.innerHTML = `<span class="ntm-live-status" style="color:#ff6b81;"><span class="ntm-offline-dot" title="Offline mode — using cached NtM database"></span>Offline (Cached NtM ${wkStr}): ${activeCnt} active</span>`;
   }
@@ -369,6 +369,11 @@ function updateNetworkStatusHUD(isOnline, customWk = null) {
  * Maps notice to its corresponding NAVAREA (I through XXI) based on country, region and coordinates
  */
 function getNoticeNavarea(notice) {
+  if (!notice) return "NAVAREA I";
+  if (notice.navarea) {
+    const clean = String(notice.navarea).replace(/^NAVAREA\s+/i, "").trim().toUpperCase();
+    if (clean) return "NAVAREA " + clean;
+  }
   const country = (notice.country || "").toUpperCase();
   const region = (notice.region || "").toUpperCase();
 
@@ -531,6 +536,7 @@ function initFilterAndSortPopovers() {
 
   // Filter Checkbox Listeners
   const chkAll = document.getElementById("popChkAll");
+  const chkNavtex = document.getElementById("popChkNavtex");
   const chkT = document.getElementById("popChkT");
   const chkP = document.getElementById("popChkP");
   const chkPerm = document.getElementById("popChkPerm");
@@ -541,10 +547,11 @@ function initFilterAndSortPopovers() {
   if (chkAll) {
     chkAll.addEventListener("change", () => {
       if (chkAll.checked) {
-        NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM"]);
+        NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM", "NAVTEX"]);
         NTM_FILTER_AREAS = false;
         NTM_SHOW_CANCELLED = false;
         NTM_ACTIVE_NAVAREA = "ALL";
+        if (chkNavtex) chkNavtex.checked = true;
         if (chkT) chkT.checked = true;
         if (chkP) chkP.checked = true;
         if (chkPerm) chkPerm.checked = true;
@@ -559,17 +566,19 @@ function initFilterAndSortPopovers() {
 
   const handleTypeChange = () => {
     NTM_ACTIVE_TYPES.clear();
+    if (chkNavtex && chkNavtex.checked) NTM_ACTIVE_TYPES.add("NAVTEX");
     if (chkT && chkT.checked) NTM_ACTIVE_TYPES.add("T");
     if (chkP && chkP.checked) NTM_ACTIVE_TYPES.add("P");
     if (chkPerm && chkPerm.checked) NTM_ACTIVE_TYPES.add("PERM");
 
-    const allTypesChecked = NTM_ACTIVE_TYPES.size === 3 && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED && NTM_ACTIVE_NAVAREA === "ALL";
+    const allTypesChecked = NTM_ACTIVE_TYPES.size === 4 && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED && NTM_ACTIVE_NAVAREA === "ALL";
     if (chkAll) chkAll.checked = allTypesChecked;
 
     syncFilterIndicators();
     renderNtMListAndMap();
   };
 
+  if (chkNavtex) chkNavtex.addEventListener("change", handleTypeChange);
   if (chkT) chkT.addEventListener("change", handleTypeChange);
   if (chkP) chkP.addEventListener("change", handleTypeChange);
   if (chkPerm) chkPerm.addEventListener("change", handleTypeChange);
@@ -619,7 +628,7 @@ function initFilterAndSortPopovers() {
 function syncFilterIndicators() {
   const dot = document.getElementById("filterActiveDot");
   const label = document.getElementById("ntmActiveFiltersLabel");
-  const isDefault = NTM_ACTIVE_TYPES.has("T") && NTM_ACTIVE_TYPES.has("P") && NTM_ACTIVE_TYPES.has("PERM") && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED && NTM_ACTIVE_NAVAREA === "ALL";
+  const isDefault = NTM_ACTIVE_TYPES.has("NAVTEX") && NTM_ACTIVE_TYPES.has("T") && NTM_ACTIVE_TYPES.has("P") && NTM_ACTIVE_TYPES.has("PERM") && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED && NTM_ACTIVE_NAVAREA === "ALL";
 
   if (dot) dot.style.display = isDefault ? "none" : "block";
 
@@ -627,11 +636,13 @@ function syncFilterIndicators() {
     if (NTM_SHOW_CANCELLED) {
       label.innerHTML = SetSailIcons.svg("cancelled") + " Cancelled";
     } else if (NTM_ACTIVE_NAVAREA !== "ALL") {
-      label.textContent = NTM_ACTIVE_NAVAREA;
+      const cleanArea = String(NTM_ACTIVE_NAVAREA).replace(/^NAVAREA\s+/i, "");
+      label.textContent = "NAVAREA " + cleanArea;
     } else if (isDefault) {
       label.textContent = "All Active";
     } else {
       const parts = [];
+      if (NTM_ACTIVE_TYPES.has("NAVTEX")) parts.push("NAVTEX");
       if (NTM_ACTIVE_TYPES.has("T")) parts.push("T");
       if (NTM_ACTIVE_TYPES.has("P")) parts.push("P");
       if (NTM_ACTIVE_TYPES.has("Perm") || NTM_ACTIVE_TYPES.has("PERM")) parts.push("Perm");
@@ -656,6 +667,7 @@ function initAutoNtmUI() {
   const expBtnJrc = document.getElementById("expBtnJrc");
   const expBtnGeoJson = document.getElementById("expBtnGeoJson");
   const expBtnCsv = document.getElementById("expBtnCsv");
+  const expChkNavtex = document.getElementById("expChkNavtex");
   const expChkT = document.getElementById("expChkT");
   const expChkP = document.getElementById("expChkP");
   const expChkPerm = document.getElementById("expChkPerm");
@@ -704,7 +716,7 @@ function initAutoNtmUI() {
   }
 
   // Checkbox listeners in Export modal
-  [expChkT, expChkP, expChkPerm, expChkOnlyChecked].forEach(chk => {
+  [expChkNavtex, expChkT, expChkP, expChkPerm, expChkOnlyChecked].forEach(chk => {
     if (chk) {
       chk.addEventListener("change", updateExportModalCounts);
     }
@@ -2026,12 +2038,14 @@ window.toggleNoticeCheck = function(noticeId, isChecked) {
  * Get notices matching the export criteria checkboxes
  */
 function getExportSelectedNotices() {
+  const chkNavtex = (document.getElementById("expChkNavtex") ? document.getElementById("expChkNavtex").checked : true);
   const chkT = (document.getElementById("expChkT") ? document.getElementById("expChkT").checked : true);
   const chkP = (document.getElementById("expChkP") ? document.getElementById("expChkP").checked : true);
   const chkPerm = (document.getElementById("expChkPerm") ? document.getElementById("expChkPerm").checked : true);
 
   // Automatically export all notices currently active on the chart (filtered by search and active filters)
   return getFilteredNotices().filter(item => {
+    if (item.type === "NAVTEX" && !chkNavtex) return false;
     if (item.type === "T" && !chkT) return false;
     if (item.type === "P" && !chkP) return false;
     if (item.type === "PERM" && !chkPerm) return false;
@@ -2044,15 +2058,18 @@ function getExportSelectedNotices() {
  */
 function updateExportModalCounts() {
   const filtered = getFilteredNotices();
+  const countNavtex = filtered.filter(n => n.type === "NAVTEX").length;
   const countT = filtered.filter(n => n.type === "T").length;
   const countP = filtered.filter(n => n.type === "P").length;
   const countPerm = filtered.filter(n => n.type === "PERM").length;
 
+  const elNavtex = document.getElementById("expCountNavtex");
   const elT = document.getElementById("expCountT");
   const elP = document.getElementById("expCountP");
   const elPerm = document.getElementById("expCountPerm");
   const elSummary = document.getElementById("expSummaryText");
 
+  if (elNavtex) elNavtex.textContent = `${countNavtex}`;
   if (elT) elT.textContent = `${countT}`;
   if (elP) elP.textContent = `${countP}`;
   if (elPerm) elPerm.textContent = `${countPerm}`;
@@ -2136,25 +2153,153 @@ async function extractTextFromPdf(file) {
 /**
  * Add / update notices in store and process cancellations
  */
-function addNoticesToStore(newNotices, cancelledIds = []) {
-  if (cancelledIds && cancelledIds.length > 0) {
-    NTM_STORE.forEach(item => {
-      if (cancelledIds.includes(item.id)) {
-        item.status = "CANCELLED";
-        item.isCancelled = true;
+const NTM_OVERRIDES_KEY = "setsail_notice_overrides_v1";
+
+function getNoticeOverridesMap() {
+  try {
+    return JSON.parse(localStorage.getItem(NTM_OVERRIDES_KEY) || "{}");
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveNoticeOverridesMap(mapObj) {
+  try {
+    localStorage.setItem(NTM_OVERRIDES_KEY, JSON.stringify(mapObj || {}));
+  } catch (e) {}
+}
+
+function formatCoordDmsHelper(lat, lon) {
+  if (typeof formatDecimalToDMS === "function") {
+    return `${formatDecimalToDMS(lat, true)}, ${formatDecimalToDMS(lon, false)}`;
+  }
+  const toDms = (v, pos, neg) => {
+    const dir = v >= 0 ? pos : neg;
+    const a = Math.abs(v);
+    const d = Math.floor(a);
+    const m = ((a - d) * 60).toFixed(2);
+    return `${d}°${m}'${dir}`;
+  };
+  return `${toDms(lat, "N", "S")} ${toDms(lon, "E", "W")}`;
+}
+
+function reconcileAndApplyNoticeOverrides(extraCancelIds = []) {
+  const overrides = getNoticeOverridesMap();
+  const cancelSet = new Set((extraCancelIds || []).map(x => String(x).trim().toUpperCase()));
+
+  // Append any custom user-added notices from overrides
+  Object.keys(overrides).forEach(k => {
+    const ov = overrides[k];
+    if (ov && ov._isCustomAdded && !NTM_STORE.some(n => n.id === k)) {
+      NTM_STORE.unshift(Object.assign({}, ov));
+    }
+  });
+
+  // Pass 1: apply user overrides & normalize coords/lat/lon + collect CANCEL directives
+  const nowMs = Date.now();
+  NTM_STORE.forEach(item => {
+    if (!item) return;
+    const ov = overrides[item.id];
+    if (ov) {
+      if (ov.subject !== undefined) item.subject = ov.subject;
+      if (ov.body !== undefined) { item.body = ov.body; item.rawText = ov.body; }
+      if (ov.type !== undefined) item.type = ov.type;
+      if (ov.navarea !== undefined) item.navarea = ov.navarea;
+      if (ov.isPolygon !== undefined) item.isPolygon = ov.isPolygon;
+      if (ov.isLine !== undefined) item.isLine = ov.isLine;
+      if (Array.isArray(ov.coords) && ov.coords.length > 0) item.coords = ov.coords;
+      if (ov.isCancelled !== undefined) {
+        item.isCancelled = Boolean(ov.isCancelled);
+        item.status = item.isCancelled ? "CANCELLED" : "ACTIVE";
       }
+      if (ov.userEdited) item.userEdited = true;
+    }
+
+    // Ensure coords have .dms and item has .lat/.lon for 3D Globe
+    if (Array.isArray(item.coords) && item.coords.length > 0) {
+      item.coords.forEach(c => {
+        if (c && !c.dms && Number.isFinite(c.lat) && Number.isFinite(c.lon)) {
+          c.dms = formatCoordDmsHelper(c.lat, c.lon);
+        }
+      });
+      if (!Number.isFinite(item.lat) || !Number.isFinite(item.lon)) {
+        item.lat = item.coords[0].lat;
+        item.lon = item.coords[0].lon;
+      }
+    }
+
+    // Check expiration timestamp if not manually overridden
+    if ((!ov || ov.isCancelled === undefined) && item.expires) {
+      const expMs = Date.parse(item.expires);
+      if (Number.isFinite(expMs) && expMs < nowMs) {
+        item.isCancelled = true;
+        item.status = "CANCELLED";
+      }
+    }
+
+    // Collect cancelled IDs from item.cancels and body text
+    if (Array.isArray(item.cancels)) {
+      item.cancels.forEach(cid => {
+        if (cid) cancelSet.add(String(cid).trim().toUpperCase());
+      });
+    }
+    const bodyTxt = String(item.body || item.rawText || "");
+    if (bodyTxt) {
+      const rx = /CANCEL\s+(?:NAVAREA\s+[I|V|X]+\s+|HYDROLANT\s+|HYDROPAC\s+|HYDROARC\s+)?(\d{1,5}\s*\/\s*\d{2,4})/gi;
+      let m;
+      while ((m = rx.exec(bodyTxt)) !== null) {
+        cancelSet.add(m[1].replace(/\s+/g, "").toUpperCase());
+        cancelSet.add(m[0].replace(/^CANCEL\s+/i, "").trim().toUpperCase());
+      }
+    }
+  });
+
+  // Pass 2: mark cancelled notices unless user explicitly restored them
+  if (cancelSet.size > 0) {
+    NTM_STORE.forEach(item => {
+      if (!item) return;
+      const ov = overrides[item.id];
+      if (ov && ov.isCancelled === false) return; // User explicitly restored
+      const idUp = String(item.id || "").trim().toUpperCase();
+      const numUp = String(item.num || "").trim().toUpperCase();
+      if (cancelSet.has(idUp) || (numUp && cancelSet.has(numUp))) {
+        item.isCancelled = true;
+        item.status = "CANCELLED";
+      }
+    });
+  }
+}
+
+function addNoticesToStore(newNotices, cancelledIds = []) {
+  const overrides = getNoticeOverridesMap();
+  if (cancelledIds && cancelledIds.length > 0) {
+    cancelledIds.forEach(cid => {
+      const cleanC = String(cid).trim().toUpperCase();
+      NTM_STORE.forEach(item => {
+        const idUp = String(item.id || "").trim().toUpperCase();
+        const numUp = String(item.num || "").trim().toUpperCase();
+        if (idUp === cleanC || numUp === cleanC || idUp.endsWith(" " + cleanC)) {
+          item.status = "CANCELLED";
+          item.isCancelled = true;
+          overrides[item.id] = Object.assign(overrides[item.id] || {}, { isCancelled: true });
+        }
+      });
     });
   }
 
   newNotices.forEach(item => {
+    item.userEdited = true;
+    overrides[item.id] = Object.assign({}, item, { _isCustomAdded: true });
     const existingIdx = NTM_STORE.findIndex(n => n.id === item.id);
     if (existingIdx >= 0) {
       NTM_STORE[existingIdx] = item;
     } else {
-      NTM_STORE.push(item);
+      NTM_STORE.unshift(item);
     }
   });
 
+  saveNoticeOverridesMap(overrides);
+  reconcileAndApplyNoticeOverrides(cancelledIds);
   saveStoreToStorage();
 
   const badge = document.getElementById("ntmBadge");
@@ -2189,6 +2334,7 @@ function loadStoreFromStorage() {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
         NTM_STORE = parsed;
+        reconcileAndApplyNoticeOverrides();
         const activeCount = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
         const badge = document.getElementById("ntmBadge");
         if (badge) {
@@ -2208,17 +2354,24 @@ function loadStoreFromStorage() {
 /**
  * Attempt to load auto-synced notices.json
  */
-async function loadRemoteNoticesJson() {
+async function loadRemoteNoticesJson(showFeedback = false) {
   try {
     const res = await fetch("notices.json?t=" + Date.now(), { cache: "no-store" });
     if (!res.ok) {
       updateNetworkStatusHUD(false);
+      if (showFeedback && typeof showToast === "function") showToast("Offline ? using cached NtM & NAVTEX database", "warn");
       return false;
     }
     const data = await res.json();
     if (data && Array.isArray(data.notices) && data.notices.length > 0) {
       NTM_STORE = data.notices;
+      reconcileAndApplyNoticeOverrides();
       saveStoreToStorage();
+      if (showFeedback && typeof showToast === "function") {
+        const navCnt = NTM_STORE.filter(n => n.type === "NAVTEX" && !n.isCancelled).length;
+        const ukhoCnt = NTM_STORE.filter(n => n.type !== "NAVTEX" && !n.isCancelled).length;
+        showToast(`Synced ${navCnt} NAVTEX/NAVAREA warnings + ${ukhoCnt} UKHO NtMs`, "info");
+      }
       if (data.metadata) {
         try { localStorage.setItem(META_STORAGE_KEY, JSON.stringify(data.metadata)); } catch(e){}
       }
@@ -2494,14 +2647,15 @@ function getFilteredNotices() {
       }
     }
 
-    // NAVAREA filter
+    // NAVAREA filter (normalized Roman numeral I-XXI comparison)
     if (NTM_ACTIVE_NAVAREA !== "ALL") {
-      const itemNavarea = getNoticeNavarea(item);
-      if (itemNavarea !== NTM_ACTIVE_NAVAREA) return false;
+      const itemArea = getNoticeNavarea(item).replace(/^NAVAREA\s+/i, "").trim().toUpperCase();
+      const targetArea = String(NTM_ACTIVE_NAVAREA).replace(/^NAVAREA\s+/i, "").trim().toUpperCase();
+      if (itemArea !== targetArea) return false;
     }
 
     if (searchVal) {
-      const searchStr = `${item.id} ${item.country || ""} ${item.region || ""} ${item.subject || ""} ${(item.charts || []).join(" ")} ${item.cancels ? item.cancels.join(" ") : ""}`.toLowerCase();
+      const searchStr = `${item.id} ${item.country || ""} ${item.region || ""} ${item.subject || ""} ${item.body || item.rawText || ""} ${item.coordinator || ""} ${(item.charts || []).join(" ")} ${item.cancels ? item.cancels.join(" ") : ""}`.toLowerCase();
       if (!searchStr.includes(searchVal)) return false;
     }
 
@@ -2535,7 +2689,7 @@ function getFilteredNotices() {
       return pB - pA || (numB - numA);
     }
     if (NTM_ACTIVE_SORT === "TYPE") {
-      const typeOrder = { "T": 1, "P": 2, "PERM": 3 };
+      const typeOrder = { "NAVTEX": 0, "T": 1, "P": 2, "PERM": 3 };
       const oA = typeOrder[a.type] || 4;
       const oB = typeOrder[b.type] || 4;
       if (oA !== oB) return oA - oB;
@@ -2654,15 +2808,20 @@ function renderNtMListAndMap() {
     countEl.textContent = parts.length > 0 ? parts.join(" • ") : "No active overlays";
   }
 
-  // Update Popover Counts for NtM
+  // Update Popover Counts for NtM & NAVTEX
   const activeNotices = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED");
   const cancelledNotices = NTM_STORE.filter(n => n.isCancelled || n.status === "CANCELLED");
+  const countNavtex = activeNotices.filter(n => n.type === "NAVTEX").length;
   const countT = activeNotices.filter(n => n.type === "T").length;
   const countP = activeNotices.filter(n => n.type === "P").length;
   const countPerm = activeNotices.filter(n => n.type === "PERM").length;
   const countPoly = activeNotices.filter(n => n.isPolygon || (n.coords && n.coords.length >= 3)).length;
   const countCancelled = cancelledNotices.length;
 
+  const elCntAll = document.getElementById("popCntAll");
+  if (elCntAll) elCntAll.textContent = activeNotices.length;
+  const elCntNavtex = document.getElementById("popCntNavtex");
+  if (elCntNavtex) elCntNavtex.textContent = countNavtex;
   const elCntT = document.getElementById("popCntT");
   if (elCntT) elCntT.textContent = countT;
   const elCntP = document.getElementById("popCntP");
@@ -2797,14 +2956,14 @@ function renderNtMListAndMap() {
       });
     }
 
-    // SECTION C: NOTICES TO MARINERS
+    // SECTION C: NOTICES TO MARINERS & NAVTEX WARNINGS
     if (showNotices) {
       if ((showRoute || showPorts) && filteredNotices.length > 0) {
         html += `
           <div class="ntm-search-section-header" style="margin-top:0.6rem;">
             <span>
               <svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              UKHO NOTICES TO MARINERS (${filteredNotices.length})
+              NtM &amp; NAVTEX WARNINGS (${filteredNotices.length})
             </span>
           </div>
         `;
@@ -2812,32 +2971,41 @@ function renderNtMListAndMap() {
 
       filteredNotices.forEach(item => {
         const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
-        const tagClass = item.type === "T" ? "temp" : (item.type === "P" ? "prelim" : "perm");
-        const typeLabel = item.type === "T" ? "TEMP (T)" : (item.type === "P" ? "PRELIM (P)" : "PERM");
+        const tagClass = item.type === "NAVTEX" ? "navtex" : (item.type === "T" ? "temp" : (item.type === "P" ? "prelim" : "perm"));
+        const typeLabel = item.type === "NAVTEX" ? "NAVTEX" : (item.type === "T" ? "TEMP (T)" : (item.type === "P" ? "PRELIM (P)" : "PERM"));
         const navarea = getNoticeNavarea(item);
 
         const typeBadge = isItemCancelled
           ? `<span class="ntm-tag cancelled">CANCELLED</span>`
           : `<span class="ntm-tag ${tagClass}">${typeLabel}</span>`;
+        const editedBadge = item.userEdited ? `<span class="ntm-tag edited-badge" style="margin-left:4px;">EDITED</span>` : "";
 
-        const firstCoord = item.coords && item.coords[0] ? item.coords[0].dms : "—";
+        const firstCoord = item.coords && item.coords[0]
+          ? (item.coords[0].dms || formatCoordDmsHelper(item.coords[0].lat, item.coords[0].lon))
+          : "?";
         const chartsStr = (item.charts && item.charts.length > 0) ? `Charts: ${item.charts.join(', ')}` : "";
         const cancelsBanner = (item.cancels && item.cancels.length > 0) ? `<div class="ntm-cancels-banner">${SetSailIcons.svg("cancelled")} Cancels: ${item.cancels.join(', ')}</div>` : "";
-        const cancelledNoticeClass = isItemCancelled ? "cancelled" : "";
+        const cancelledNoticeClass = isItemCancelled ? "cancelled is-cancelled-card" : "";
+        const navtexCardClass = item.type === "NAVTEX" ? "type-navtex" : `type-${item.type}`;
+        const safeId = String(item.id || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 
         html += `
-          <div class="ntm-card-item type-${item.type} ${cancelledNoticeClass}" data-id="${item.id}" onclick="selectNtMNotice('${item.id}')">
+          <div class="ntm-card-item ${navtexCardClass} ${cancelledNoticeClass}" data-id="${item.id}" onclick="selectNtMNotice('${safeId}')">
             <div class="ntm-card-content">
               <div class="ntm-card-top">
                 <span class="ntm-card-id">${item.id}</span>
-                ${typeBadge}
+                <span style="display:inline-flex;align-items:center;gap:4px;">${typeBadge}${editedBadge}</span>
               </div>
               ${cancelsBanner}
-              <div class="ntm-card-region"><span class="ntm-card-navarea">${navarea}</span> ${item.country || 'Region'} — ${item.region || ''}</div>
+              <div class="ntm-card-region"><span class="ntm-card-navarea">${navarea}</span> ${item.country || item.coordinator || 'Global'} ${item.region ? `— ${item.region}` : ''}</div>
               <div class="ntm-card-subject">${item.subject || ''}</div>
               <div class="ntm-card-bottom">
                 <span class="ntm-card-coords" title="Center on chart">${SetSailIcons.svg("pos")} ${firstCoord} ${item.coords && item.coords.length > 1 ? `(+${item.coords.length-1})` : ''}</span>
                 ${chartsStr ? `<span class="ntm-card-charts">${chartsStr}</span>` : ''}
+              </div>
+              <div class="ntm-card-actions" onclick="event.stopPropagation();">
+                <button type="button" class="ntm-card-act-btn" onclick="window.openNoticeDetailModal('${safeId}')" title="Inspect or edit warning coordinates and text">&#9998; Inspect / Edit</button>
+                <button type="button" class="ntm-card-act-btn ${isItemCancelled ? 'restore-btn' : 'cancel-btn'}" onclick="window.toggleCancelNotice('${safeId}')" title="${isItemCancelled ? 'Restore this warning to active state' : 'Mark this warning as cancelled'}">${isItemCancelled ? '&#8634; Restore' : '&#10005; Cancel'}</button>
               </div>
             </div>
           </div>
@@ -2857,9 +3025,35 @@ function renderNtMListAndMap() {
     listContainer.innerHTML = html;
   }
 
-  // Render Markers on Leaflet Map
+  // Render Markers on Leaflet Map (UKHO NtM + NautoShark NAVTEX/NAVAREA)
   if (leafletMap && leafletMarkersLayer) {
     leafletMarkersLayer.clearLayers();
+
+    const buildPopupHtml = (item, extraLine = "") => {
+      const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
+      const safeId = String(item.id || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+      const navarea = getNoticeNavarea(item);
+      const rawBody = String(item.body || item.rawText || "").trim();
+      const bodyPreview = rawBody.length > 260 ? rawBody.slice(0, 260) + "..." : rawBody;
+      const badgeColor = item.type === "NAVTEX" ? "#f43f5e" : (item.type === "T" ? "#d97706" : (item.type === "P" ? "#7c3aed" : "#0284c7"));
+      return `
+        <div style="font-family:'Segoe UI',sans-serif;color:#111;min-width:240px;max-width:310px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:3px;">
+            <b style="color:#0a3888;font-size:1.02em;">${item.id}</b>
+            <span style="background:${isItemCancelled ? '#ef4444' : badgeColor};color:#fff;font-size:0.68em;font-weight:700;padding:1px 6px;border-radius:4px;">${isItemCancelled ? 'CANCELLED' : item.type}</span>
+          </div>
+          <div style="font-size:0.8em;color:#475569;font-weight:600;margin-bottom:4px;">[${navarea}] ${item.country || item.coordinator || ''} ${item.region ? '— ' + item.region : ''}</div>
+          <div style="font-size:0.88em;font-weight:600;color:#1e293b;margin-bottom:5px;line-height:1.3;">${item.subject || ''}</div>
+          ${bodyPreview ? `<div style="font-size:0.76em;color:#334155;background:#f1f5f9;padding:5px 7px;border-radius:4px;max-height:95px;overflow-y:auto;white-space:pre-wrap;font-family:Consolas,monospace;margin-bottom:5px;line-height:1.35;">${bodyPreview.replace(/</g, '&lt;')}</div>` : ''}
+          ${extraLine}
+          ${(item.charts && item.charts.length > 0) ? `<div style="font-size:0.76em;color:#64748b;"><b>Charts:</b> ${item.charts.join(', ')}</div>` : ''}
+          <div style="display:flex;gap:6px;margin-top:7px;padding-top:6px;border-top:1px solid #cbd5e1;">
+            <button type="button" onclick="window.openNoticeDetailModal('${safeId}')" style="flex:1;padding:4px 7px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid #94a3b8;background:#0f172a;color:#f8fafc;cursor:pointer;">&#9998; Inspect / Edit</button>
+            <button type="button" onclick="window.toggleCancelNotice('${safeId}')" style="padding:4px 8px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid ${isItemCancelled ? '#10b981' : '#f43f5e'};background:${isItemCancelled ? '#ecfdf5' : '#fff1f2'};color:${isItemCancelled ? '#047857' : '#be123c'};cursor:pointer;">${isItemCancelled ? 'Restore' : 'Cancel'}</button>
+          </div>
+        </div>
+      `;
+    };
 
     filtered.forEach(item => {
       if (!item.coords || item.coords.length === 0) return;
@@ -2867,7 +3061,7 @@ function renderNtMListAndMap() {
       const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
       const color = isItemCancelled
         ? "#ef4444"
-        : (item.type === "T" ? "#ffc850" : (item.type === "P" ? "#bb86fc" : "#4fc3f7"));
+        : (item.type === "NAVTEX" ? "#f43f5e" : (item.type === "T" ? "#ffc850" : (item.type === "P" ? "#bb86fc" : "#4fc3f7")));
 
       if (item.subPolygons && item.subPolygons.length > 0) {
         item.subPolygons.forEach(sub => {
@@ -2883,41 +3077,19 @@ function renderNtMListAndMap() {
 
             if (!isItemCancelled) {
               if (sub.category === "separation_zone") {
-                subColor = "#9333ea";
-                subFill = "#a855f7";
-                subFillOpacity = 0.38;
-                subWeight = 2.5;
+                subColor = "#9333ea"; subFill = "#a855f7"; subFillOpacity = 0.38; subWeight = 2.5;
               } else if (sub.category === "traffic_lane") {
-                subColor = "#0284c7";
-                subFill = "#38bdf8";
-                subFillOpacity = 0.18;
-                subWeight = 2;
-                subDash = "6, 4";
+                subColor = "#0284c7"; subFill = "#38bdf8"; subFillOpacity = 0.18; subWeight = 2; subDash = "6, 4";
               } else if (sub.category === "precautionary_area") {
-                subColor = "#eab308";
-                subFill = "#facc15";
-                subFillOpacity = 0.22;
-                subDash = "5, 5";
+                subColor = "#eab308"; subFill = "#facc15"; subFillOpacity = 0.22; subDash = "5, 5";
               } else if (sub.category === "restricted_area") {
-                subColor = "#e11d48";
-                subFill = "#fb7185";
-                subFillOpacity = 0.26;
-                subDash = "4, 4";
+                subColor = "#e11d48"; subFill = "#fb7185"; subFillOpacity = 0.26; subDash = "4, 4";
               } else if (sub.category === "anchorage_area") {
-                subColor = "#059669";
-                subFill = "#34d399";
-                subFillOpacity = 0.22;
-                subDash = "5, 5";
+                subColor = "#059669"; subFill = "#34d399"; subFillOpacity = 0.22; subDash = "5, 5";
               } else if (sub.category === "spoil_ground") {
-                subColor = "#ea580c";
-                subFill = "#fb923c";
-                subFillOpacity = 0.22;
-                subDash = "4, 4";
+                subColor = "#ea580c"; subFill = "#fb923c"; subFillOpacity = 0.22; subDash = "4, 4";
               } else if (sub.category === "works_area") {
-                subColor = "#f59e0b";
-                subFill = "#fbbf24";
-                subFillOpacity = 0.22;
-                subDash = "5, 5";
+                subColor = "#f59e0b"; subFill = "#fbbf24"; subFillOpacity = 0.22; subDash = "5, 5";
               }
             }
 
@@ -2928,20 +3100,7 @@ function renderNtMListAndMap() {
               fillOpacity: subFillOpacity,
               dashArray: subDash
             });
-
-            polygon.bindPopup(`
-              <div style="font-family:'Segoe UI',sans-serif;color:#111;min-width:230px;">
-                <div style="font-size:0.75em;text-transform:uppercase;color:#6b7280;letter-spacing:0.5px;font-weight:600;margin-bottom:2px;">
-                  ${(sub.category || 'MARITIME AREA').replace('_', ' ').toUpperCase()}
-                </div>
-                <b style="color:#0a3888;font-size:1.05em;">${item.id} — ${sub.name}</b>
-                ${isItemCancelled ? '<span style="color:#ef4444;font-weight:bold;"> [CANCELLED]</span>' : ''}
-                <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">[${getNoticeNavarea(item)}] ${item.country || ''} — ${item.region || ''}</div>
-                <div style="font-size:0.88em;margin-bottom:6px;line-height:1.35;">${item.subject || ''}</div>
-                <div style="font-size:0.8em;color:#475569;margin-bottom:4px;"><b>Area:</b> ${sub.name} (${pts.length} coordinates)</div>
-                <div style="font-size:0.8em;color:#666;"><b>Affected Charts:</b> ${(item.charts||[]).join(', ') || '—'}</div>
-              </div>
-            `);
+            polygon.bindPopup(buildPopupHtml(item, `<div style="font-size:0.78em;color:#475569;margin-bottom:3px;"><b>Area:</b> ${sub.name} (${pts.length} pts)</div>`));
             leafletMarkersLayer.addLayer(polygon);
           } else if (pts.length === 2) {
             const polyline = L.polyline(pts, {
@@ -2949,6 +3108,7 @@ function renderNtMListAndMap() {
               weight: 3,
               dashArray: isItemCancelled ? "3, 6" : "6, 6"
             });
+            polyline.bindPopup(buildPopupHtml(item));
             leafletMarkersLayer.addLayer(polyline);
           } else if (pts.length === 1) {
             const circle = L.circleMarker(pts[0], {
@@ -2958,14 +3118,7 @@ function renderNtMListAndMap() {
               weight: 2,
               fillOpacity: 0.9
             });
-            circle.bindPopup(`
-              <div style="font-family:'Segoe UI',sans-serif;color:#111;">
-                <b style="color:#0a3888;">${item.id} — ${sub.name}</b>
-                ${isItemCancelled ? '<span style="color:#ef4444;font-weight:bold;"> [CANCELLED]</span>' : ''}
-                <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">[${getNoticeNavarea(item)}] ${item.country || ''}</div>
-                <div style="font-size:0.85em;">${item.subject || ''}</div>
-              </div>
-            `);
+            circle.bindPopup(buildPopupHtml(item));
             leafletMarkersLayer.addLayer(circle);
           }
         });
@@ -2973,20 +3126,12 @@ function renderNtMListAndMap() {
         const polyPoints = item.coords.map(c => [c.lat, c.lon]);
         const polygon = L.polygon(polyPoints, {
           color: color,
-          weight: 2,
+          weight: item.type === "NAVTEX" ? 2.2 : 2,
           fillColor: color,
-          fillOpacity: isItemCancelled ? 0.1 : 0.25,
+          fillOpacity: isItemCancelled ? 0.1 : (item.type === "NAVTEX" ? 0.22 : 0.25),
           dashArray: isItemCancelled ? "3, 6" : (item.type === "T" ? "5, 5" : null)
         });
-
-        polygon.bindPopup(`
-          <div style="font-family:'Segoe UI',sans-serif;color:#111;">
-            <b style="color:#0a3888;font-size:1.05em;">${item.id} ${isItemCancelled ? '<span style="color:#ef4444;">[CANCELLED]</span>' : ''}</b>
-            <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">[${getNoticeNavarea(item)}] ${item.country || ''} — ${item.region || ''}</div>
-            <div style="font-size:0.9em;margin-bottom:6px;">${item.subject || ''}</div>
-            <div style="font-size:0.8em;color:#666;line-height:1.3;"><b>Affected Charts:</b> ${(item.charts||[]).join(', ') || '—'}</div>
-          </div>
-        `);
+        polygon.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Polygon (${item.coords.length} vertices)</div>`));
         leafletMarkersLayer.addLayer(polygon);
       } else if (item.isLine && item.coords.length >= 2) {
         const linePoints = item.coords.map(c => [c.lat, c.lon]);
@@ -2995,34 +3140,20 @@ function renderNtMListAndMap() {
           weight: 3,
           dashArray: isItemCancelled ? "3, 6" : (item.type === "T" ? "6, 6" : null)
         });
-        polyline.bindPopup(`
-          <div style="font-family:'Segoe UI',sans-serif;color:#111;">
-            <b style="color:#0a3888;">${item.id} ${isItemCancelled ? '<span style="color:#ef4444;">[CANCELLED]</span>' : ''}</b>
-            <div style="font-size:0.85em;color:#555;">[${getNoticeNavarea(item)}] ${item.country || ''} — ${item.region || ''}</div>
-            <div style="font-size:0.9em;margin:4px 0;">${item.subject || ''}</div>
-          </div>
-        `);
+        polyline.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points)</div>`));
         leafletMarkersLayer.addLayer(polyline);
       } else {
         item.coords.forEach(coord => {
           const circle = L.circleMarker([coord.lat, coord.lon], {
-            radius: 6,
+            radius: item.type === "NAVTEX" ? 5.5 : 6,
             fillColor: color,
             color: "#fff",
             weight: 1.5,
             opacity: 1,
             fillOpacity: isItemCancelled ? 0.4 : 0.9
           });
-
-          circle.bindPopup(`
-            <div style="font-family:'Segoe UI',sans-serif;color:#111;">
-              <b style="color:#0a3888;font-size:1.05em;">${item.id} ${isItemCancelled ? '<span style="color:#ef4444;">[CANCELLED]</span>' : ''}</b>
-              <div style="font-size:0.85em;color:#555;margin:2px 0 6px;">[${getNoticeNavarea(item)}] ${item.country || ''} — ${item.region || ''}</div>
-              <div style="font-size:0.9em;margin-bottom:6px;">${item.subject || ''}</div>
-              <div style="font-size:0.8em;color:#2e7d32;font-family:monospace;margin-bottom:4px;">${coord.dms}</div>
-              <div style="font-size:0.8em;color:#666;"><b>Charts:</b> ${(item.charts||[]).join(', ') || '—'}</div>
-            </div>
-          `);
+          const dmsStr = coord.dms || formatCoordDmsHelper(coord.lat, coord.lon);
+          circle.bindPopup(buildPopupHtml(item, `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`));
           leafletMarkersLayer.addLayer(circle);
         });
       }
@@ -4169,24 +4300,274 @@ function openNtmOverlayInfoModal() {
   const editionEl = document.getElementById("ntmModalEdition");
 
   const activeList = typeof NTM_STORE !== "undefined" ? NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED") : [];
+  const cancelledList = typeof NTM_STORE !== "undefined" ? NTM_STORE.filter(n => n.isCancelled || n.status === "CANCELLED") : [];
   const total = activeList.length;
-  const tpCount = activeList.filter(n => n.type === "T" || n.type === "P").length;
+  const navtexCount = activeList.filter(n => n.type === "NAVTEX").length;
+  const ukhoCount = activeList.filter(n => n.type !== "NAVTEX").length;
 
-  if (countEl) countEl.textContent = total + " Notices Plotted";
-  if (tpCountEl) tpCountEl.textContent = tpCount + " T&P Notices";
+  if (countEl) countEl.textContent = `${total} Active (${cancelledList.length} Cancelled)`;
+  if (tpCountEl) tpCountEl.textContent = `${navtexCount} NAVTEX ? ${ukhoCount} UKHO NtM`;
 
-  let latestEd = "Week 42 / 2026";
+  let latestEd = "Week 42 / 2026 + Live GMDSS";
   try {
     const savedMeta = JSON.parse(localStorage.getItem(META_STORAGE_KEY) || "{}");
     if (savedMeta && savedMeta.weekNumber) {
       const yr = savedMeta.year ? (String(savedMeta.year).length === 2 ? "20" + savedMeta.year : savedMeta.year) : "2026";
-      latestEd = `Week ${savedMeta.weekNumber} / ${yr}`;
+      latestEd = `Wk ${savedMeta.weekNumber}/${yr} + 6h NAVTEX`;
     }
   } catch (e) {}
   if (editionEl) editionEl.textContent = latestEd;
 
   modal.classList.add("open");
 }
+
+function openNtmPasteModal() {
+  const modal = document.getElementById("ntmPasteModal");
+  if (!modal) return;
+  modal.classList.add("open");
+  modal.style.display = "flex";
+}
+window.openNtmPasteModal = openNtmPasteModal;
+
+// Wire Paste Modal buttons if present
+document.addEventListener("DOMContentLoaded", () => {
+  const pasteModal = document.getElementById("ntmPasteModal");
+  const pasteCancel = document.getElementById("ntmPasteCancel");
+  const pasteApply = document.getElementById("ntmPasteApply");
+  const pasteArea = document.getElementById("ntmPasteTextarea");
+  if (pasteCancel && pasteModal) {
+    pasteCancel.addEventListener("click", () => {
+      pasteModal.classList.remove("open");
+      pasteModal.style.display = "none";
+    });
+  }
+  if (pasteApply && pasteArea) {
+    pasteApply.addEventListener("click", () => {
+      const raw = pasteArea.value.trim();
+      if (!raw) return;
+      if (typeof window.parseAdmiraltyNtMText === "function") {
+        const res = window.parseAdmiraltyNtMText(raw);
+        if ((res.notices && res.notices.length > 0) || (res.cancelledIds && res.cancelledIds.length > 0)) {
+          addNoticesToStore(res.notices || [], res.cancelledIds || []);
+          if (typeof showToast === "function") {
+            showToast(`Plotted ${(res.notices || []).length} warning(s), processed ${(res.cancelledIds || []).length} cancellation(s)`, "info");
+          }
+          pasteArea.value = "";
+          if (pasteModal) {
+            pasteModal.classList.remove("open");
+            pasteModal.style.display = "none";
+          }
+        } else if (typeof showToast === "function") {
+          showToast("No valid coordinates or CANCEL directives found in pasted text", "warn");
+        }
+      }
+    });
+  }
+});
+
+function openNoticeDetailModal(noticeOrId) {
+  const item = (typeof noticeOrId === "object" && noticeOrId !== null)
+    ? noticeOrId
+    : NTM_STORE.find(n => n.id === noticeOrId);
+  if (!item) return;
+
+  const modal = document.getElementById("ntmNoticeDetailModal");
+  if (!modal) return;
+
+  const isCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
+  const origInput = document.getElementById("ntmDetailOrigId");
+  const idInput = document.getElementById("ntmDetailIdInput");
+  const typeSelect = document.getElementById("ntmDetailTypeSelect");
+  const navSelect = document.getElementById("ntmDetailNavareaSelect");
+  const geomSelect = document.getElementById("ntmDetailGeomSelect");
+  const subjInput = document.getElementById("ntmDetailSubjectInput");
+  const coordsInput = document.getElementById("ntmDetailCoordsInput");
+  const bodyInput = document.getElementById("ntmDetailBodyInput");
+  const badgeEl = document.getElementById("ntmDetailBadgeType");
+  const headerEl = document.getElementById("ntmDetailTitleHeader");
+  const cancelBanner = document.getElementById("ntmDetailCancelBanner");
+  const toggleCancelBtn = document.getElementById("ntmDetailToggleCancelBtn");
+
+  if (origInput) origInput.value = item.id;
+  if (idInput) idInput.value = item.id;
+  if (typeSelect) typeSelect.value = item.type || "NAVTEX";
+
+  const cleanNav = getNoticeNavarea(item).replace(/^NAVAREA\s+/i, "").trim().toUpperCase() || "I";
+  if (navSelect) navSelect.value = cleanNav;
+
+  if (geomSelect) {
+    geomSelect.value = item.isPolygon ? "polygon" : (item.isLine ? "line" : "point");
+  }
+  if (subjInput) subjInput.value = item.subject || item.title || "";
+
+  if (coordsInput) {
+    const lines = (item.coords || []).map(c => `${Number(c.lat).toFixed(5)}, ${Number(c.lon).toFixed(5)}`);
+    coordsInput.value = lines.join("\n");
+  }
+  if (bodyInput) {
+    bodyInput.value = item.body || item.rawText || item.subject || "";
+  }
+  if (badgeEl) {
+    badgeEl.textContent = isCancelled ? "CANCELLED" : (item.type || "NAVTEX");
+    badgeEl.className = "ntm-tag " + (isCancelled ? "cancelled" : (item.type === "NAVTEX" ? "navtex" : (item.type === "T" ? "temp" : (item.type === "P" ? "prelim" : "perm"))));
+  }
+  if (headerEl) {
+    headerEl.textContent = `${item.id} — ${getNoticeNavarea(item)}`;
+  }
+  if (cancelBanner) {
+    cancelBanner.style.display = isCancelled ? "block" : "none";
+  }
+  if (toggleCancelBtn) {
+    toggleCancelBtn.textContent = isCancelled ? "Restore Warning" : "Cancel Warning";
+    toggleCancelBtn.style.color = isCancelled ? "#34d399" : "#fda4af";
+    toggleCancelBtn.style.borderColor = isCancelled ? "rgba(52,211,153,0.45)" : "rgba(244,63,94,0.45)";
+  }
+
+  modal.classList.add("open");
+  modal.style.display = "flex";
+}
+
+function closeNoticeDetailModal() {
+  const modal = document.getElementById("ntmNoticeDetailModal");
+  if (!modal) return;
+  modal.classList.remove("open");
+  modal.style.display = "none";
+}
+
+function parseEditedCoordsList(rawCoordsText) {
+  const out = [];
+  const lines = String(rawCoordsText || "").split(/[\r\n;]+/);
+  lines.forEach(line => {
+    const s = line.trim();
+    if (!s) return;
+    const m = s.match(/^([+-]?\d+(?:\.\d+)?)\s*[,\s]\s*([+-]?\d+(?:\.\d+)?)$/);
+    if (m) {
+      const lat = parseFloat(m[1]);
+      const lon = parseFloat(m[2]);
+      if (Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+        out.push({ lat, lon, dms: formatCoordDmsHelper(lat, lon) });
+        return;
+      }
+    }
+    if (typeof window.extractCoordinatesFromText === "function") {
+      const extracted = window.extractCoordinatesFromText(s);
+      if (extracted && extracted.length > 0) {
+        extracted.forEach(pt => out.push(pt));
+      }
+    }
+  });
+  return out;
+}
+
+function saveNoticeDetailEdits() {
+  const origId = (document.getElementById("ntmDetailOrigId") || {}).value;
+  if (!origId) return;
+  const item = NTM_STORE.find(n => n.id === origId);
+  if (!item) return;
+
+  const newType = (document.getElementById("ntmDetailTypeSelect") || {}).value || item.type;
+  const newNav = (document.getElementById("ntmDetailNavareaSelect") || {}).value || "I";
+  const newGeom = (document.getElementById("ntmDetailGeomSelect") || {}).value || "point";
+  const newSubj = (document.getElementById("ntmDetailSubjectInput") || {}).value || "";
+  const newCoordsRaw = (document.getElementById("ntmDetailCoordsInput") || {}).value || "";
+  const newBody = (document.getElementById("ntmDetailBodyInput") || {}).value || "";
+
+  const parsedCoords = parseEditedCoordsList(newCoordsRaw);
+  if (parsedCoords.length > 0) {
+    item.coords = parsedCoords;
+    item.lat = parsedCoords[0].lat;
+    item.lon = parsedCoords[0].lon;
+  }
+
+  item.type = newType;
+  item.navarea = newNav;
+  item.isPolygon = (newGeom === "polygon" && item.coords && item.coords.length >= 3);
+  item.isLine = (newGeom === "line" && item.coords && item.coords.length >= 2);
+  item.subject = newSubj;
+  item.title = newSubj;
+  item.body = newBody;
+  item.rawText = newBody;
+  item.userEdited = true;
+
+  // Also check if the edited body contains any CANCEL directives
+  if (typeof window.parseAdmiraltyNtMText === "function") {
+    const parsedCheck = window.parseAdmiraltyNtMText(newBody);
+    if (parsedCheck && parsedCheck.cancelledIds && parsedCheck.cancelledIds.length > 0) {
+      reconcileAndApplyNoticeOverrides(parsedCheck.cancelledIds);
+    }
+  }
+
+  const overrides = getNoticeOverridesMap();
+  overrides[item.id] = {
+    subject: item.subject,
+    body: item.body,
+    type: item.type,
+    navarea: item.navarea,
+    isPolygon: item.isPolygon,
+    isLine: item.isLine,
+    coords: item.coords,
+    isCancelled: Boolean(item.isCancelled),
+    userEdited: true
+  };
+  saveNoticeOverridesMap(overrides);
+  saveStoreToStorage();
+  renderNtMListAndMap();
+  if (typeof window.renderGlobe3D === "function") window.renderGlobe3D();
+  closeNoticeDetailModal();
+  if (typeof showToast === "function") {
+    showToast(`Saved edits to ${item.id}`, "info");
+  }
+}
+
+function toggleCancelNotice(noticeId) {
+  const item = NTM_STORE.find(n => n.id === noticeId);
+  if (!item) return;
+
+  const newCancelledState = !Boolean(item.isCancelled || item.status === "CANCELLED");
+  item.isCancelled = newCancelledState;
+  item.status = newCancelledState ? "CANCELLED" : "ACTIVE";
+  item.userEdited = true;
+
+  const overrides = getNoticeOverridesMap();
+  overrides[item.id] = Object.assign(overrides[item.id] || {}, {
+    isCancelled: newCancelledState,
+    userEdited: true
+  });
+  saveNoticeOverridesMap(overrides);
+  saveStoreToStorage();
+  renderNtMListAndMap();
+  if (typeof window.renderGlobe3D === "function") window.renderGlobe3D();
+
+  if (typeof showToast === "function") {
+    showToast(
+      newCancelledState ? `Cancelled warning ${item.id}` : `Restored warning ${item.id} to active chart`,
+      newCancelledState ? "warn" : "info"
+    );
+  }
+}
+
+function toggleCancelNoticeFromModal() {
+  const origId = (document.getElementById("ntmDetailOrigId") || {}).value;
+  if (!origId) return;
+  toggleCancelNotice(origId);
+  openNoticeDetailModal(origId);
+}
+
+function flyToNoticeFromModal() {
+  const origId = (document.getElementById("ntmDetailOrigId") || {}).value;
+  if (!origId) return;
+  closeNoticeDetailModal();
+  if (typeof selectNtMNotice === "function") {
+    selectNtMNotice(origId);
+  }
+}
+
+window.openNoticeDetailModal = openNoticeDetailModal;
+window.closeNoticeDetailModal = closeNoticeDetailModal;
+window.saveNoticeDetailEdits = saveNoticeDetailEdits;
+window.toggleCancelNotice = toggleCancelNotice;
+window.toggleCancelNoticeFromModal = toggleCancelNoticeFromModal;
+window.flyToNoticeFromModal = flyToNoticeFromModal;
 
 function initNtmOverlayInfoModal() {
   const modal = document.getElementById("ntmOverlayInfoModal");
@@ -5671,7 +6052,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         if (!Number.isFinite(n.lat) || !Number.isFinite(n.lon)) return;
         const p = project(n.lat, n.lon);
         if (!p) return;
-        const color = n.type === "T" ? "#f97316" : (n.type === "P" ? "#eab308" : "#38bdf8");
+        const color = n.type === "NAVTEX" ? "#f43f5e" : (n.type === "T" ? "#f97316" : (n.type === "P" ? "#eab308" : "#38bdf8"));
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
