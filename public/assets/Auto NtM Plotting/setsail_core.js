@@ -820,6 +820,11 @@ function initAutoNtmUI() {
       updateNetworkStatusHUD(false);
     }
   });
+
+  // Automatically sync live tropical cyclones & synoptic marine weather (weather.json + Open-Meteo)
+  if (typeof refreshMarineWeather === "function") {
+    refreshMarineWeather(false);
+  }
 }
 
 /**
@@ -1227,114 +1232,114 @@ function fitRouteBounds() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
-// ── SetSail Global Marine Weather Engine (00:00 UTC Synoptic Cycle) ──
-// Open-Meteo Marine (ECMWF IFS 0.25° / DWD ICON Wave) + NOAA NHC / JTWC
+// ── SetSail Global Marine Weather Engine (6h GMDSS / Synoptic Cycle) ──
+// Live NOAA NHC + JMA RSMC Tokyo + JTWC Tropical Cyclones + Open-Meteo ECMWF IFS
 // ════════════════════════════════════════════════════════════════════════════════
 
 const MARINE_WEATHER_STORE = {
-  synopticCycle: "0000 UTC",
-  lastSyncUtc: new Date().toISOString(),
-  provider: "Open-Meteo Marine (ECMWF IFS 0.25°) / NOAA NHC & JTWC",
+  synopticCycle: "2000 UTC",
+  lastSyncUtc: "2026-10-11T20:09:21Z",
+  provider: "NOAA NHC + JMA RSMC Tokyo + JTWC + Open-Meteo ECMWF IFS",
   storms: [
     {
-      id: "AT-2026-00",
-      name: "Extratropical Storm CIARAN",
-      category: "Severe Atlantic Gale (Force 10)",
-      center: [48.2, -10.5],
-      centralPressure: 964,
-      maxWinds: 65,
-      gusts: 85,
-      movement: "ENE at 18 kts",
-      dangerRadiusNm: 135,
+      id: "EP202026",
+      name: "Hurricane SIMON",
+      shortName: "Simon",
+      category: "Category 4 Hurricane (NOAA NHC)",
+      center: [19.5, -105.5],
+      centralPressure: 940,
+      maxWinds: 120,
+      gusts: 146,
+      movement: "NNW at 7 kts",
+      dangerRadiusNm: 138,
       forecastTrack: [
-        { tau: 24, coords: [49.8, -4.2], winds: 60, radiusNm: 95 },
-        { tau: 48, coords: [52.4, 2.8], winds: 50, radiusNm: 120 },
-        { tau: 72, coords: [55.1, 8.4], winds: 42, radiusNm: 150 }
+        { tau: 12, coords: [19.9, -105.6], winds: 105, radiusNm: 55 },
+        { tau: 24, coords: [20.5, -106.0], winds: 85, radiusNm: 75 },
+        { tau: 36, coords: [21.1, -106.4], winds: 70, radiusNm: 95 },
+        { tau: 48, coords: [21.8, -106.8], winds: 60, radiusNm: 115 },
+        { tau: 60, coords: [22.5, -106.9], winds: 50, radiusNm: 135 },
+        { tau: 72, coords: [23.0, -106.9], winds: 50, radiusNm: 155 }
       ]
     },
     {
-      id: "MD-2026-04",
-      name: "Medicane IANOS-II",
-      category: "Mediterranean Subtropical Storm",
-      center: [36.4, 18.2],
-      centralPressure: 988,
-      maxWinds: 52,
-      gusts: 68,
-      movement: "E at 10 kts",
-      dangerRadiusNm: 90,
+      id: "2629",
+      name: "Typhoon KOGUMA",
+      shortName: "Koguma",
+      category: "Category 3 Typhoon (JMA RSMC / JTWC)",
+      center: [27.1, 147.3],
+      centralPressure: 950,
+      maxWinds: 105,
+      gusts: 130,
+      movement: "NNE at 10 kts",
+      dangerRadiusNm: 126,
       forecastTrack: [
-        { tau: 24, coords: [36.1, 21.8], winds: 48, radiusNm: 75 },
-        { tau: 48, coords: [35.6, 25.4], winds: 40, radiusNm: 95 }
+        { tau: 12, coords: [29.7, 147.5], winds: 80, radiusNm: 30 },
+        { tau: 24, coords: [32.5, 149.3], winds: 70, radiusNm: 42 },
+        { tau: 48, coords: [38.0, 156.4], winds: 60, radiusNm: 85 },
+        { tau: 72, coords: [42.4, 164.5], winds: 45, radiusNm: 120 }
       ]
     },
     {
-      id: "TC-2026-01",
-      name: "Tropical Cyclone FREDDY",
-      category: "Severe Tropical Cyclone (Cat 3)",
-      center: [-18.4, 62.1],
-      centralPressure: 956,
-      maxWinds: 95,
-      gusts: 120,
-      movement: "WSW at 12 kts",
-      dangerRadiusNm: 140,
+      id: "2628",
+      name: "Tropical Storm NOLO",
+      shortName: "Nolo",
+      category: "Tropical Depression / TS (JMA RSMC)",
+      center: [32.0, 146.0],
+      centralPressure: 1004,
+      maxWinds: 35,
+      gusts: 44,
+      movement: "N (Slow)",
+      dangerRadiusNm: 65,
+      forecastTrack: []
+    },
+    {
+      id: "AL092026",
+      name: "Post-Tropical Cyclone ISAIAS",
+      shortName: "Isaias",
+      category: "Post-Tropical Cyclone (NOAA NHC)",
+      center: [37.5, -84.0],
+      centralPressure: 1010,
+      maxWinds: 20,
+      gusts: 24,
+      movement: "ENE at 22 kts",
+      dangerRadiusNm: 70,
       forecastTrack: [
-        { tau: 24, coords: [-19.2, 57.5], winds: 85, radiusNm: 90 },
-        { tau: 48, coords: [-20.1, 52.8], winds: 75, radiusNm: 130 },
-        { tau: 72, coords: [-21.4, 48.2], winds: 65, radiusNm: 180 }
+        { tau: 12, coords: [38.8, -80.2], winds: 20, radiusNm: 55 }
       ]
     },
     {
-      id: "TY-2026-02",
-      name: "Typhoon KONG-REY",
-      category: "Typhoon (Cat 2)",
-      center: [17.8, 128.5],
-      centralPressure: 968,
-      maxWinds: 80,
-      gusts: 105,
-      movement: "NW at 15 kts",
-      dangerRadiusNm: 110,
-      forecastTrack: [
-        { tau: 24, coords: [20.5, 124.8], winds: 85, radiusNm: 85 },
-        { tau: 48, coords: [23.4, 121.6], winds: 70, radiusNm: 125 },
-        { tau: 72, coords: [26.2, 120.2], winds: 55, radiusNm: 165 }
-      ]
-    },
-    {
-      id: "AL-2026-03",
-      name: "Tropical Storm HELEN",
-      category: "Tropical Storm",
-      center: [24.5, -86.2],
-      centralPressure: 992,
-      maxWinds: 55,
-      gusts: 70,
-      movement: "NNE at 11 kts",
-      dangerRadiusNm: 75,
-      forecastTrack: [
-        { tau: 24, coords: [27.8, -84.6], winds: 65, radiusNm: 65 },
-        { tau: 48, coords: [31.2, -82.1], winds: 50, radiusNm: 100 },
-        { tau: 72, coords: [34.5, -77.4], winds: 35, radiusNm: 140 }
-      ]
+      id: "EP182026",
+      name: "Post-Tropical Cyclone RACHEL",
+      shortName: "Rachel",
+      category: "Post-Tropical Cyclone (NOAA NHC)",
+      center: [35.8, -114.6],
+      centralPressure: 994,
+      maxWinds: 30,
+      gusts: 37,
+      movement: "NNE at 29 kts",
+      dangerRadiusNm: 70,
+      forecastTrack: []
     }
   ],
   waves: [
-    { id: "W1", name: "North Atlantic Storm Basin", center: [52.0, -25.0], radiusNm: 240, waveHeight: 5.8, swellPeriod: 12, swellDir: "WNW" },
-    { id: "W2", name: "Southern Ocean / Cape Horn Roaring Forties", center: [-42.0, 35.0], radiusNm: 300, waveHeight: 6.5, swellPeriod: 14, swellDir: "SW" },
-    { id: "W3", name: "North Pacific Gale Area", center: [48.0, 165.0], radiusNm: 280, waveHeight: 5.2, swellPeriod: 11, swellDir: "W" },
-    { id: "W4", name: "Arabian Sea Monsoon Swell", center: [14.0, 62.0], radiusNm: 180, waveHeight: 4.2, swellPeriod: 9, swellDir: "SW" }
+    { id: "W1", name: "North Atlantic Storm Basin", center: [52.0, -25.0], radiusNm: 240, waveHeight: 3.1, swellPeriod: 8, swellDir: "SW" },
+    { id: "W2", name: "Southern Ocean / Roaring Forties", center: [-42.0, 35.0], radiusNm: 300, waveHeight: 3.2, swellPeriod: 11, swellDir: "W" },
+    { id: "W3", name: "NW Pacific Typhoon Swell Basin (Koguma)", center: [28.0, 148.0], radiusNm: 260, waveHeight: 7.8, swellPeriod: 11, swellDir: "SSE" },
+    { id: "W4", name: "Eastern Pacific Hurricane Swell (Simon)", center: [19.5, -106.0], radiusNm: 210, waveHeight: 6.2, swellPeriod: 8, swellDir: "WNW" }
   ],
   pressureCenters: [
-    { type: "L", value: 978, name: "Intense Low", coords: [56.0, -28.0] },
-    { type: "L", value: 984, name: "Deep Ocean Low", coords: [49.0, 168.0] },
-    { type: "L", value: 972, name: "Sub-Polar Low", coords: [-46.0, 42.0] },
-    { type: "H", value: 1028, name: "Azores High", coords: [32.0, -38.0] },
-    { type: "H", value: 1024, name: "Pacific High", coords: [34.0, 142.0] },
-    { type: "H", value: 1026, name: "South Indian High", coords: [-30.0, 85.0] }
+    { type: "L", value: 940, name: "Hurricane Simon Core Low", coords: [19.5, -105.5] },
+    { type: "L", value: 950, name: "Typhoon Koguma Core Low", coords: [27.1, 147.3] },
+    { type: "L", value: 994, name: "PTC Rachel Low", coords: [35.8, -114.6] },
+    { type: "H", value: 1026, name: "Azores Subtropical High", coords: [33.0, -36.0] },
+    { type: "H", value: 1024, name: "North Pacific High", coords: [36.0, -145.0] },
+    { type: "H", value: 1025, name: "South Indian Ocean High", coords: [-30.0, 82.0] }
   ],
   windVectors: [
-    { coords: [46.5, -6.5], dir: 240, speed: 32, label: "WSW 32 kts" },
-    { coords: [-36.0, 20.0], dir: 260, speed: 38, label: "W 38 kts" },
-    { coords: [10.5, 112.0], dir: 60, speed: 22, label: "ENE 22 kts" },
-    { coords: [12.8, 46.5], dir: 90, speed: 20, label: "E 20 kts" }
+    { coords: [19.5, -105.5], dir: 150, speed: 120, label: "SSE 120 kts (Hurricane Simon)" },
+    { coords: [27.1, 147.3], dir: 200, speed: 105, label: "SSW 105 kts (Typhoon Koguma)" },
+    { coords: [32.0, 146.0], dir: 180, speed: 35, label: "S 35 kts (TS Nolo)" },
+    { coords: [35.8, -114.6], dir: 210, speed: 30, label: "SSW 30 kts (PTC Rachel)" }
   ]
 };
 
@@ -1428,21 +1433,32 @@ function renderWeatherOnMap(map = null) {
       leafletWeatherLayer.addLayer(trackLine);
     }
 
-    const cycloneSvg = `<svg viewBox="0 0 24 24" style="width:26px;height:26px;filter:drop-shadow(0 0 6px rgba(239,68,68,0.7));" class="weather-cyclone-icon"><circle cx="12" cy="12" r="9" fill="rgba(239,68,68,0.25)" stroke="#ef4444" stroke-width="2"/><path d="M12 3a9 9 0 0 0-9 9c0 3.5 2 6.5 5 8" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round"/><path d="M12 21a9 9 0 0 0 9-9c0-3.5-2-6.5-5-8" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="3" fill="#ef4444"/></svg>`;
+    const shortLabel = storm.shortName || storm.name.replace(/^(Hurricane|Typhoon|Tropical Storm|Tropical Depression|Post-Tropical Cyclone)\s+/i, "");
+    const cycloneHtml = `
+      <div style="display:flex;flex-direction:column;align-items:center;pointer-events:auto;">
+        <svg viewBox="0 0 24 24" style="width:26px;height:26px;filter:drop-shadow(0 0 6px rgba(239,68,68,0.8));" class="weather-cyclone-icon">
+          <circle cx="12" cy="12" r="9" fill="rgba(239,68,68,0.28)" stroke="#ef4444" stroke-width="2"/>
+          <path d="M12 3a9 9 0 0 0-9 9c0 3.5 2 6.5 5 8" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M12 21a9 9 0 0 0 9-9c0-3.5-2-6.5-5-8" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3" fill="#ef4444"/>
+        </svg>
+        <div style="background:rgba(15,23,42,0.92);color:#fca5a5;border:1px solid rgba(239,68,68,0.65);font-size:9px;font-weight:800;padding:0px 5px;border-radius:3px;white-space:nowrap;margin-top:1px;box-shadow:0 1px 4px rgba(0,0,0,0.5);">${shortLabel} (${storm.maxWinds}kn)</div>
+      </div>
+    `;
     const stormIcon = L.divIcon({
       className: "weather-storm-div-icon",
-      html: cycloneSvg,
-      iconSize: [26, 26],
-      iconAnchor: [13, 13]
+      html: cycloneHtml,
+      iconSize: [70, 42],
+      iconAnchor: [35, 14]
     });
     const stormMarker = L.marker(storm.center, { icon: stormIcon });
     stormMarker.bindPopup(`
-      <div style="font-family:sans-serif;font-size:11px;min-width:230px;line-height:1.45;">
-        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #cbd5e1;padding-bottom:4px;margin-bottom:6px;">
+      <div style="font-family:sans-serif;font-size:11px;min-width:235px;line-height:1.45;">
+        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #cbd5e1;padding-bottom:4px;margin-bottom:6px;gap:6px;">
           <strong style="color:#dc2626;font-size:12px;">🌀 ${storm.name}</strong>
           <span style="background:#fee2e2;color:#991b1b;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;">${storm.category}</span>
         </div>
-        <div><strong>Synoptic Cycle:</strong> 0000 UTC Analysis</div>
+        <div><strong>Synoptic Cycle:</strong> ${MARINE_WEATHER_STORE.synopticCycle || "Live Advisory"}</div>
         <div><strong>Position:</strong> ${Math.abs(storm.center[0]).toFixed(1)}°${storm.center[0] >= 0 ? "N":"S"}, ${Math.abs(storm.center[1]).toFixed(1)}°${storm.center[1] >= 0 ? "E":"W"}</div>
         <div><strong>Max Sustained Winds:</strong> <span style="color:#dc2626;font-weight:700;">${storm.maxWinds} kts</span> (Gusts: ${storm.gusts} kts)</div>
         <div><strong>Central Pressure:</strong> ${storm.centralPressure} hPa</div>
@@ -1456,7 +1472,7 @@ function renderWeatherOnMap(map = null) {
     leafletWeatherLayer.addLayer(stormMarker);
   });
 
-  // 2. Severe Sea State Zones (> 4.0m)
+  // 2. Severe Sea State Zones
   (wxSub.waves !== false ? (MARINE_WEATHER_STORE.waves || []) : []).forEach(wave => {
     const waveRadiusM = wave.radiusNm * NM_TO_METERS;
     const waveCircle = L.circle(wave.center, {
@@ -1472,7 +1488,7 @@ function renderWeatherOnMap(map = null) {
         <strong style="color:#0284c7;">🌊 ${wave.name}</strong><br>
         <strong>Significant Wave Height (Hs):</strong> ${wave.waveHeight} m<br>
         <strong>Swell Period:</strong> ${wave.swellPeriod} s (${wave.swellDir})<br>
-        <div style="font-size:9px;color:#64748b;margin-top:4px;">ECMWF IFS 0.25° Synoptic Wave Model (0000 UTC)</div>
+        <div style="font-size:9px;color:#64748b;margin-top:4px;">Open-Meteo Marine / ECMWF IFS 0.25° (${MARINE_WEATHER_STORE.synopticCycle || "Live"})</div>
       </div>
     `);
     leafletWeatherLayer.addLayer(waveCircle);
@@ -1526,38 +1542,77 @@ function renderWeatherOnMap(map = null) {
 window.renderWeatherOnMap = renderWeatherOnMap;
 
 async function refreshMarineWeather(force = false) {
-  if (!navigator.onLine) {
-    if (typeof showSetSailToast === "function") {
-      showSetSailToast("Offline: Serving cached 00:00 UTC Synoptic Weather analysis.", "info");
-    }
-    return;
-  }
   try {
-    const testLat = 15.0;
-    const testLon = 65.0;
-    const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${testLat}&longitude=${testLon}&daily=wave_height_max,wave_direction_dominant,wave_period_max&timezone=GMT`;
-    const resp = await fetch(url);
-    if (resp.ok) {
-      const data = await resp.json();
-      if (data && data.daily && data.daily.wave_height_max) {
-        const wh = data.daily.wave_height_max[0] || 4.2;
-        const wp = data.daily.wave_period_max ? data.daily.wave_period_max[0] : 9;
-        const arabianWave = MARINE_WEATHER_STORE.waves.find(w => w.id === "W4");
-        if (arabianWave) {
-          arabianWave.waveHeight = parseFloat(wh.toFixed(1));
-          arabianWave.swellPeriod = Math.round(wp);
+    const wxRes = await fetch("weather.json?t=" + Date.now(), { cache: "no-store" });
+    if (wxRes.ok) {
+      const wxData = await wxRes.json();
+      if (wxData && Array.isArray(wxData.storms) && wxData.storms.length > 0) {
+        MARINE_WEATHER_STORE.storms = wxData.storms;
+        if (Array.isArray(wxData.waves) && wxData.waves.length > 0) {
+          MARINE_WEATHER_STORE.waves = wxData.waves;
         }
+        if (Array.isArray(wxData.pressureCenters) && wxData.pressureCenters.length > 0) {
+          MARINE_WEATHER_STORE.pressureCenters = wxData.pressureCenters;
+        }
+        if (Array.isArray(wxData.windVectors) && wxData.windVectors.length > 0) {
+          MARINE_WEATHER_STORE.windVectors = wxData.windVectors;
+        }
+        if (wxData.synopticCycle) MARINE_WEATHER_STORE.synopticCycle = wxData.synopticCycle;
+        if (wxData.lastSyncUtc) MARINE_WEATHER_STORE.lastSyncUtc = wxData.lastSyncUtc;
+        if (wxData.provider) MARINE_WEATHER_STORE.provider = wxData.provider;
       }
     }
-    MARINE_WEATHER_STORE.lastSyncUtc = new Date().toISOString();
-    if (typeof renderWeatherOnMap === "function") {
-      renderWeatherOnMap();
+  } catch (e) {
+    console.warn("[SetSail Weather] weather.json fetch fallback:", e);
+  }
+
+  if (navigator.onLine) {
+    try {
+      const waves = MARINE_WEATHER_STORE.waves || [];
+      if (waves.length > 0) {
+        const lats = waves.map(w => w.center[0]).join(",");
+        const lons = waves.map(w => w.center[1]).join(",");
+        const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lats}&longitude=${lons}&current=wave_height,wave_direction,wave_period&timezone=GMT`;
+        const resp = await fetch(url);
+        if (resp.ok) {
+          const data = await resp.json();
+          const list = Array.isArray(data) ? data : [data];
+          const dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+          list.forEach((item, idx) => {
+            if (waves[idx] && item && item.current) {
+              if (item.current.wave_height != null) {
+                waves[idx].waveHeight = parseFloat(Number(item.current.wave_height).toFixed(1));
+              }
+              if (item.current.wave_period != null) {
+                waves[idx].swellPeriod = Math.round(Number(item.current.wave_period));
+              }
+              if (item.current.wave_direction != null) {
+                const deg = Number(item.current.wave_direction);
+                waves[idx].swellDir = dirs[Math.round(deg / 22.5) % 16];
+              }
+            }
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("[Open-Meteo Marine Live Sync]", err);
     }
-    if (typeof showSetSailToast === "function") {
-      showSetSailToast("Marine Weather synoptic fields synced (00:00 UTC Run)", "success");
-    }
-  } catch (err) {
-    console.warn("[Weather Sync Warning]", err);
+  } else if (force && typeof showSetSailToast === "function") {
+    showSetSailToast("Offline: Serving cached NOAA NHC / JMA / JTWC Cyclone & Synoptic analysis.", "info");
+  }
+
+  if (typeof renderWeatherOnMap === "function") {
+    renderWeatherOnMap();
+  }
+  if (typeof syncDynamicFilterPopover === "function") {
+    syncDynamicFilterPopover();
+  }
+  if (typeof updateWeatherModalActiveStorms === "function") {
+    updateWeatherModalActiveStorms();
+  }
+  if (force && typeof showSetSailToast === "function") {
+    const stormNames = (MARINE_WEATHER_STORE.storms || []).map(s => s.shortName || s.name).join(", ");
+    showSetSailToast(`Synced ${MARINE_WEATHER_STORE.storms.length} Active Cyclones (${stormNames})`, "success");
   }
 }
 
@@ -2929,9 +2984,14 @@ function renderNtMListAndMap() {
       filteredPorts.forEach(port => {
         const cCode = (port.countryCode || (port.country ? port.country.slice(0, 2) : "UN")).toUpperCase();
         const cLower = cCode.toLowerCase();
-        const maxDraft = port.maxDraftMeters ? `Max Draft: ${port.maxDraftMeters}m` : (port.maintainedDepthMeters ? `Depth: ${port.maintainedDepthMeters}m` : "");
+        const pDepths = (port.fairways || []).map(f => parseFloat(f.depth) || 0).filter(d => d > 0);
+        const minD = pDepths.length ? Math.min(...pDepths) : 12.5;
+        const maxD = pDepths.length ? Math.max(...pDepths) : 12.5;
+        const rangeTxt = (minD !== maxD) ? `${minD.toFixed(1)}–${maxD.toFixed(1)}m` : `${maxD.toFixed(1)}m`;
+        const reachesCnt = (port.fairways || []).length;
+        const depthSummary = `${reachesCnt} Reaches • ${rangeTxt}`;
         html += `
-          <div class="ntm-card-item ntm-port-search-card" data-port-id="${port.id}" onclick="jumpToPort('${port.id}')" title="Click to inspect ${port.name} on map">
+          <div class="ntm-card-item ntm-port-search-card" data-port-id="${port.id}" onclick="jumpToPort('${port.id}')" title="Click to inspect ${port.name} (${reachesCnt} surveyed reaches) on map">
             <div class="ntm-card-content" style="padding:0.55rem 0.75rem;">
               <div class="ntm-card-top" style="align-items:center;gap:7px;">
                 <span class="port-flag-box" title="${port.country}">
@@ -2947,7 +3007,7 @@ function renderNtMListAndMap() {
                 <span class="ntm-tag perm" style="margin-left:auto;">${port.unlocode}</span>
               </div>
               <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;justify-content:space-between;">
-                <span>${port.country}${maxDraft ? ` • ${maxDraft}` : ''}</span>
+                <span>${port.country} • <b style="color:#38bdf8;">${depthSummary}</b></span>
                 <span style="color:#f05a36;font-size:0.7rem;font-weight:600;">View Chart &rarr;</span>
               </div>
             </div>
@@ -4595,18 +4655,75 @@ function initWeatherOverlayInfoModal() {
   }
 }
 
+function flyToCycloneFromModal(lat, lon) {
+  const modal = document.getElementById("weatherOverlayModal");
+  if (modal) modal.classList.remove("open");
+  if (typeof setOverlayActive === "function") {
+    setOverlayActive("weather", true, leafletMap);
+  }
+  if (leafletMap && Number.isFinite(lat) && Number.isFinite(lon)) {
+    leafletMap.flyTo([lat, lon], 5, { duration: 1.2 });
+  }
+}
+
+function updateWeatherModalActiveStorms() {
+  const modal = document.getElementById("weatherOverlayModal");
+  if (!modal) return;
+  let listBox = document.getElementById("weatherModalActiveStormsList");
+  if (!listBox) {
+    const body = modal.querySelector(".ntm-modal-box > div:nth-child(2)");
+    if (body) {
+      listBox = document.createElement("div");
+      listBox.id = "weatherModalActiveStormsList";
+      listBox.style.cssText = "margin-bottom:10px;background:rgba(15,23,42,0.55);border:1px solid var(--line);border-radius:6px;padding:8px 10px;";
+      const gridEl = body.children[1];
+      if (gridEl) {
+        body.insertBefore(listBox, gridEl.nextSibling);
+      } else {
+        body.prepend(listBox);
+      }
+    }
+  }
+  if (!listBox) return;
+
+  const storms = (MARINE_WEATHER_STORE && MARINE_WEATHER_STORE.storms) || [];
+  let rowsHtml = `<div style="font-size:0.68rem;font-weight:700;color:#fca5a5;text-transform:uppercase;margin-bottom:6px;display:flex;justify-content:space-between;"><span>Active Tropical Cyclones (${storms.length})</span><span style="color:var(--muted);font-weight:500;">Click to center on chart</span></div><div style="display:grid;grid-template-columns:1fr;gap:5px;max-height:145px;overflow-y:auto;">`;
+  storms.forEach(s => {
+    const lat = Number(s.center[0]);
+    const lon = Number(s.center[1]);
+    const posStr = `${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(1)}°${lon >= 0 ? 'E' : 'W'}`;
+    rowsHtml += `
+      <div onclick="window.flyToCycloneFromModal(${lat}, ${lon})" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:5px;background:rgba(255,255,255,0.03);border:1px solid rgba(239,68,68,0.28);cursor:pointer;font-size:0.72rem;">
+        <div>
+          <strong style="color:#f8fafc;">🌀 ${s.name}</strong>
+          <span style="color:#94a3b8;font-size:0.66rem;margin-left:5px;">${s.category}</span>
+        </div>
+        <div style="text-align:right;white-space:nowrap;font-family:Consolas,monospace;font-size:0.68rem;color:#fca5a5;">
+          <b>${s.maxWinds} kt</b> &bull; ${s.centralPressure} hPa &bull; <span style="color:#38bdf8;">${posStr}</span>
+        </div>
+      </div>
+    `;
+  });
+  rowsHtml += `</div>`;
+  listBox.innerHTML = rowsHtml;
+}
+
 function showWeatherInfoModal() {
   const modal = document.getElementById("weatherOverlayModal");
   if (modal) {
     modal.classList.add("open");
     const badge = document.getElementById("weatherModalStatusBadge");
     if (badge) {
-      badge.textContent = navigator.onLine ? "LIVE SYNCED (00:00 UTC)" : "CACHED (00:00 UTC)";
+      const cyc = (MARINE_WEATHER_STORE && MARINE_WEATHER_STORE.synopticCycle) || "LIVE UTC";
+      badge.textContent = navigator.onLine ? `LIVE SYNCED (${cyc})` : `CACHED (${cyc})`;
       badge.style.background = navigator.onLine ? "#10b981" : "#eab308";
     }
+    updateWeatherModalActiveStorms();
   }
 }
 
+window.flyToCycloneFromModal = flyToCycloneFromModal;
+window.updateWeatherModalActiveStorms = updateWeatherModalActiveStorms;
 window.initWeatherOverlayInfoModal = initWeatherOverlayInfoModal;
 window.showWeatherInfoModal = showWeatherInfoModal;
 

@@ -1,0 +1,333 @@
+{
+  "synopticCycle": "2000 UTC",
+  "lastSyncUtc": "2026-10-11T20:09:21.171342+00:00",
+  "provider": "NOAA NHC + JMA RSMC Tokyo + JTWC + Open-Meteo ECMWF IFS",
+  "storms": [
+    {
+      "id": "AL092026",
+      "name": "Post-Tropical Cyclone ISAIAS",
+      "shortName": "Isaias",
+      "category": "Post-Tropical Cyclone (NOAA NHC)",
+      "center": [
+        37.5,
+        -84.0
+      ],
+      "centralPressure": 1010,
+      "maxWinds": 20,
+      "gusts": 24,
+      "movement": "ENE at 22 kts",
+      "dangerRadiusNm": 70,
+      "forecastTrack": [
+        {
+          "tau": 12,
+          "coords": [
+            38.8,
+            -80.2
+          ],
+          "winds": 20,
+          "radiusNm": 55
+        }
+      ]
+    },
+    {
+      "id": "EP182026",
+      "name": "Post-Tropical Cyclone RACHEL",
+      "shortName": "Rachel",
+      "category": "Post-Tropical Cyclone (NOAA NHC)",
+      "center": [
+        35.8,
+        -114.6
+      ],
+      "centralPressure": 994,
+      "maxWinds": 30,
+      "gusts": 37,
+      "movement": "NNE at 29 kts",
+      "dangerRadiusNm": 70,
+      "forecastTrack": []
+    },
+    {
+      "id": "EP202026",
+      "name": "Hurricane SIMON",
+      "shortName": "Simon",
+      "category": "Category 4 Hurricane (NOAA NHC)",
+      "center": [
+        19.5,
+        -105.5
+      ],
+      "centralPressure": 940,
+      "maxWinds": 120,
+      "gusts": 146,
+      "movement": "NNW at 7 kts",
+      "dangerRadiusNm": 138,
+      "forecastTrack": [
+        {
+          "tau": 12,
+          "coords": [
+            19.9,
+            -105.6
+          ],
+          "winds": 105,
+          "radiusNm": 55
+        },
+        {
+          "tau": 24,
+          "coords": [
+            20.5,
+            -106.0
+          ],
+          "winds": 85,
+          "radiusNm": 75
+        },
+        {
+          "tau": 36,
+          "coords": [
+            21.1,
+            -106.4
+          ],
+          "winds": 70,
+          "radiusNm": 95
+        },
+        {
+          "tau": 48,
+          "coords": [
+            21.8,
+            -106.8
+          ],
+          "winds": 60,
+          "radiusNm": 115
+        },
+        {
+          "tau": 60,
+          "coords": [
+            22.5,
+            -106.9
+          ],
+          "winds": 50,
+          "radiusNm": 135
+        },
+        {
+          "tau": 72,
+          "coords": [
+            23.0,
+            -106.9
+          ],
+          "winds": 50,
+          "radiusNm": 155
+        }
+      ]
+    },
+    {
+      "id": "2629",
+      "name": "Typhoon KOGUMA",
+      "shortName": "Koguma",
+      "category": "Category 3 Hurricane (JTWC/JMA)",
+      "center": [
+        27.1,
+        147.3
+      ],
+      "centralPressure": 950,
+      "maxWinds": 105,
+      "gusts": 130,
+      "movement": "NNE at 10 kts",
+      "dangerRadiusNm": 126,
+      "forecastTrack": [
+        {
+          "tau": 12,
+          "coords": [
+            29.7,
+            147.5
+          ],
+          "winds": 80,
+          "radiusNm": 30
+        },
+        {
+          "tau": 24,
+          "coords": [
+            32.5,
+            149.3
+          ],
+          "winds": 70,
+          "radiusNm": 42
+        },
+        {
+          "tau": 48,
+          "coords": [
+            38.0,
+            156.4
+          ],
+          "winds": 60,
+          "radiusNm": 85
+        },
+        {
+          "tau": 72,
+          "coords": [
+            42.4,
+            164.5
+          ],
+          "winds": 45,
+          "radiusNm": 120
+        }
+      ]
+    },
+    {
+      "id": "2628",
+      "name": "Tropical Storm NOLO",
+      "shortName": "Nolo",
+      "category": "Tropical Depression (JMA RSMC)",
+      "center": [
+        32.0,
+        146.0
+      ],
+      "centralPressure": 1004,
+      "maxWinds": 35,
+      "gusts": 44,
+      "movement": "N (Slow)",
+      "dangerRadiusNm": 65,
+      "forecastTrack": []
+    }
+  ],
+  "waves": [
+    {
+      "id": "W1",
+      "name": "North Atlantic Storm Basin",
+      "center": [
+        52.0,
+        -25.0
+      ],
+      "radiusNm": 240,
+      "waveHeight": 3.1,
+      "swellPeriod": 8,
+      "swellDir": "SW"
+    },
+    {
+      "id": "W2",
+      "name": "Southern Ocean / Roaring Forties",
+      "center": [
+        -42.0,
+        35.0
+      ],
+      "radiusNm": 300,
+      "waveHeight": 3.2,
+      "swellPeriod": 11,
+      "swellDir": "W"
+    },
+    {
+      "id": "W3",
+      "name": "NW Pacific Typhoon Swell Basin",
+      "center": [
+        28.0,
+        148.0
+      ],
+      "radiusNm": 260,
+      "waveHeight": 7.8,
+      "swellPeriod": 11,
+      "swellDir": "SSE"
+    },
+    {
+      "id": "W4",
+      "name": "Eastern Pacific Hurricane Swell",
+      "center": [
+        19.5,
+        -106.0
+      ],
+      "radiusNm": 210,
+      "waveHeight": 6.2,
+      "swellPeriod": 8,
+      "swellDir": "WNW"
+    }
+  ],
+  "pressureCenters": [
+    {
+      "type": "L",
+      "value": 940,
+      "name": "Hurricane Simon Core Low",
+      "coords": [
+        19.5,
+        -105.5
+      ]
+    },
+    {
+      "type": "L",
+      "value": 950,
+      "name": "Typhoon Koguma Core Low",
+      "coords": [
+        27.1,
+        147.3
+      ]
+    },
+    {
+      "type": "L",
+      "value": 976,
+      "name": "North Atlantic Sub-Polar Low",
+      "coords": [
+        56.0,
+        -28.0
+      ]
+    },
+    {
+      "type": "H",
+      "value": 1026,
+      "name": "Azores Subtropical High",
+      "coords": [
+        32.0,
+        -38.0
+      ]
+    },
+    {
+      "type": "H",
+      "value": 1024,
+      "name": "North Pacific High",
+      "coords": [
+        34.0,
+        -142.0
+      ]
+    },
+    {
+      "type": "H",
+      "value": 1025,
+      "name": "South Indian Ocean High",
+      "coords": [
+        -30.0,
+        85.0
+      ]
+    }
+  ],
+  "windVectors": [
+    {
+      "coords": [
+        19.8,
+        -105.8
+      ],
+      "dir": 165,
+      "speed": 95,
+      "label": "SSE 95 kts (Simon Eyewall)"
+    },
+    {
+      "coords": [
+        27.5,
+        147.8
+      ],
+      "dir": 180,
+      "speed": 85,
+      "label": "S 85 kts (Koguma Core)"
+    },
+    {
+      "coords": [
+        46.5,
+        -6.5
+      ],
+      "dir": 250,
+      "speed": 28,
+      "label": "WSW 28 kts (Biscay)"
+    },
+    {
+      "coords": [
+        -36.0,
+        20.0
+      ],
+      "dir": 260,
+      "speed": 36,
+      "label": "W 36 kts (Agulhas)"
+    }
+  ]
+}

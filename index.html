@@ -18805,7 +18805,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           </div>
           <div style="font-size:0.75rem;color:#cad8f4;line-height:1.5;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:rgba(234,179,8,0.1);padding:6px 10px;border-radius:6px;border:1px solid rgba(234,179,8,0.25);">
-              <span style="font-weight:700;color:#fde047;">Synoptic Cycle: 00:00 UTC Global Run</span>
+              <span style="font-weight:700;color:#fde047;">Synoptic Cycle: 6h Live Global Cyclone & Marine Run</span>
               <span style="font-size:0.7rem;background:#10b981;color:#fff;padding:1px 6px;border-radius:4px;font-weight:700;" id="weatherModalStatusBadge">SYNCED (00:00 UTC)</span>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
@@ -18816,7 +18816,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
               </div>
               <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
                 <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Cyclone Advisories</div>
-                <div style="font-size:0.85rem;font-weight:700;color:#f1f5f9;margin-top:2px;">NOAA NHC / JTWC / WMO</div>
+                <div style="font-size:0.85rem;font-weight:700;color:#f1f5f9;margin-top:2px;">NOAA NHC / JMA RSMC Tokyo / JTWC</div>
                 <div style="font-size:0.65rem;color:var(--muted);margin-top:2px;">Real-time storm tracks, 72h cones &amp; wind radii</div>
               </div>
             </div>
@@ -18962,8 +18962,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.3"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.3"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.6"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.6"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19041,7 +19041,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.3"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.6"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19395,18 +19395,18 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v42') !== '1') {
+        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v46') !== '1') {
           caches.keys().then(keys => Promise.all(
             keys.filter(k => k !== 'setsail-cache-v4.2' && k !== 'setsail-tiles-cache-v4').map(k => caches.delete(k))
-          )).then(() => localStorage.setItem('setsail_sw_v42', '1')).catch(() => {});
+          )).then(() => localStorage.setItem('setsail_sw_v46', '1')).catch(() => {});
         }
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!sessionStorage.getItem('setsail_sw_reloaded_v42')) {
-            sessionStorage.setItem('setsail_sw_reloaded_v42', '1');
+          if (!sessionStorage.getItem('setsail_sw_reloaded_v46')) {
+            sessionStorage.setItem('setsail_sw_reloaded_v46', '1');
             window.location.reload();
           }
         });
-        navigator.serviceWorker.register('sw.js?v=4.3', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=4.6', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker registered successfully, scope:', reg.scope);
             if (navigator.onLine) {

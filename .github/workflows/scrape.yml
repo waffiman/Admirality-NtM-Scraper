@@ -1,7 +1,7 @@
-name: Admiralty NtM & Global NAVTEX Auto-Scraper (6h Cycle)
+name: Admiralty NtM, Global NAVTEX & Live Cyclone Auto-Scraper (6h Cycle)
 
 on:
-  # Runs every 6 hours (00:00, 06:00, 12:00, 18:00 UTC) matching IMO GMDSS NAVTEX / SafetyNET broadcast cycles
+  # Runs every 6 hours (00:00, 06:00, 12:00, 18:00 UTC) matching IMO GMDSS NAVTEX / SafetyNET & Synoptic Weather cycles
   schedule:
     - cron: '0 */6 * * *'
   # Allow manual trigger anytime from GitHub Actions tab
@@ -28,15 +28,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Admiralty NtM & Global NAVTEX Scraper
+      - name: Run Admiralty NtM, Global NAVTEX & Live Cyclone Weather Scraper
         run: |
           python scraper_github.py
 
-      - name: Commit and push if notices changed
+      - name: Commit and push if notices or weather changed
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Automated UKHO NtM & Global NAVTEX/NAVAREA update [skip ci]"
-          file_pattern: "public/notices.json notices.json"
+          commit_message: "Automated UKHO NtM, Global NAVTEX/NAVAREA & Live Cyclone Weather update [skip ci]"
+          file_pattern: "public/notices.json notices.json public/weather.json weather.json"
 
       - name: Send Email Alert on Scraper Failure
         if: failure()
