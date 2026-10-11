@@ -2347,6 +2347,15 @@ function initNtMMap() {
     };
 
     L.control.layers(baseMaps, overlayMaps, { position: "topright" }).addTo(leafletMap);
+    if (typeof initVisualChartLayerSelector === "function") {
+      initVisualChartLayerSelector(leafletMap, {
+        ocean: oceanLayer,
+        coast: voyagerLayer,
+        street: osmLayer,
+        sat: satLayer,
+        buoys: seamarkLayer
+      });
+    }
 
     leafletMarkersLayer = L.layerGroup().addTo(leafletMap);
     leafletVesselLayer = L.layerGroup().addTo(leafletMap);
@@ -4676,7 +4685,13 @@ function initNavDataExportListeners() {
   const btnRtz = document.getElementById("expBtnRtz");
   const btnRouteCsv = document.getElementById("expBtnRouteCsv");
   const btnRouteGeo = document.getElementById("expBtnRouteGeoJson");
+  const expBtnFuruno = document.getElementById("expBtnFuruno");
+  const expBtnJrcUch = document.getElementById("expBtnJrcUch");
   const expBtnJrc = document.getElementById("expBtnJrc");
+  const expBtnTransas = document.getElementById("expBtnTransas");
+  const expBtnSperry = document.getElementById("expBtnSperry");
+  const expBtnSam = document.getElementById("expBtnSam");
+  const expBtnPdf = document.getElementById("expBtnPdf");
   const expBtnGeo = document.getElementById("expBtnGeoJson");
   const expBtnCsv = document.getElementById("expBtnCsv");
   const modal = document.getElementById("ntmExportModal");
@@ -4699,18 +4714,53 @@ function initNavDataExportListeners() {
       if (modal) modal.classList.remove("open");
     });
   }
+  const runNoticeExport = (fn) => {
+    const selected = getExportSelectedNotices();
+    if (selected.length === 0) {
+      alert("No notices match the selected export criteria.");
+      return;
+    }
+    fn(selected);
+    if (modal) modal.classList.remove("open");
+  };
+  if (expBtnFuruno) {
+    expBtnFuruno.addEventListener("click", () => {
+      runNoticeExport((selected) => downloadFurunoUserChartXml(selected, `Furuno_UserChart_${getExportUtcTimestamp()}.xml`));
+    });
+  }
+  if (expBtnJrcUch) {
+    expBtnJrcUch.addEventListener("click", () => {
+      runNoticeExport((selected) => downloadJrcUchFile(selected, `NSWARN_${getExportUtcTimestamp()}.uch`));
+    });
+  }
   if (expBtnJrc) {
     expBtnJrc.addEventListener("click", () => {
-      const selected = getExportSelectedNotices();
-      if (selected.length === 0) {
-        alert("No notices match the selected export criteria.");
-        return;
-      }
-      const fname = `Admiralty_NtM_Overlay_${getExportUtcTimestamp()}.uchm`;
-      if (typeof window.downloadJrcUchmFile === "function") {
-        window.downloadJrcUchmFile(selected, fname);
-      }
-      if (modal) modal.classList.remove("open");
+      runNoticeExport((selected) => {
+        const fname = `Admiralty_NtM_Overlay_${getExportUtcTimestamp()}.uchm`;
+        if (typeof window.downloadJrcUchmFile === "function") {
+          window.downloadJrcUchmFile(selected, fname);
+        }
+      });
+    });
+  }
+  if (expBtnTransas) {
+    expBtnTransas.addEventListener("click", () => {
+      runNoticeExport((selected) => downloadTransasAizFile(selected, `route_warnings_transas_${getExportUtcTimestamp()}.aiz`));
+    });
+  }
+  if (expBtnSperry) {
+    expBtnSperry.addEventListener("click", () => {
+      runNoticeExport((selected) => downloadSperryUpdateFile(selected, `NS_NAVAREA_Warnings_${getExportUtcTimestamp()}.update`));
+    });
+  }
+  if (expBtnSam) {
+    expBtnSam.addEventListener("click", () => {
+      runNoticeExport((selected) => downloadSamUserChartFile(selected, `SAM_Chartpilot_Warnings_${getExportUtcTimestamp()}.umo`));
+    });
+  }
+  if (expBtnPdf) {
+    expBtnPdf.addEventListener("click", () => {
+      runNoticeExport((selected) => downloadWarningsPdfSummary(selected, `Selected_Warnings_${getExportUtcTimestamp()}.pdf`));
     });
   }
   if (expBtnGeo) {
@@ -4745,26 +4795,19 @@ function syncDynamicFilterPopover() {
   const secDepths  = document.getElementById("filterSecDepths");
   const secRoute   = document.getElementById("filterSecRoute");
   const secEmpty   = document.getElementById("filterSecEmpty");
-  const activeBar  = document.getElementById("filterActiveLayersBar");
 
   if (secNotices) secNotices.style.display = isNotices ? "block" : "none";
   if (secWeather) secWeather.style.display = isWeather ? "block" : "none";
   if (secDepths)  secDepths.style.display  = isDepths  ? "block" : "none";
   if (secRoute)   secRoute.style.display   = isRoute   ? "block" : "none";
 
-  const anyActive = isNotices || isDepths || isWeather || isRoute;
-  if (secEmpty) secEmpty.style.display = anyActive ? "none" : "block";
+  const activeCount = (isNotices ? 1 : 0) + (isDepths ? 1 : 0) + (isWeather ? 1 : 0) + (isRoute ? 1 : 0);
+  if (secEmpty) secEmpty.style.display = activeCount > 0 ? "none" : "block";
 
-  if (activeBar) {
-    const badges = [];
-    if (isNotices) badges.push('<span style="background:rgba(245,158,11,0.16);color:#fbbf24;border:1px solid rgba(245,158,11,0.35);padding:1px 6px;border-radius:4px;font-weight:700;">Admiralty NtM</span>');
-    if (isDepths)  badges.push('<span style="background:rgba(16,185,129,0.16);color:#34d399;border:1px solid rgba(16,185,129,0.35);padding:1px 6px;border-radius:4px;font-weight:700;">Port Depths</span>');
-    if (isWeather) badges.push('<span style="background:rgba(56,189,248,0.16);color:#38bdf8;border:1px solid rgba(56,189,248,0.35);padding:1px 6px;border-radius:4px;font-weight:700;">Weather</span>');
-    if (isRoute)   badges.push('<span style="background:rgba(168,85,247,0.16);color:#c084fc;border:1px solid rgba(168,85,247,0.35);padding:1px 6px;border-radius:4px;font-weight:700;">My Route</span>');
-    activeBar.innerHTML = badges.length > 0
-      ? '<span style="color:#64748b;font-weight:600;margin-right:2px;align-self:center;">Active Layers:</span>' + badges.join("")
-      : '<span style="color:#ef4444;font-weight:600;">No active layers selected under map</span>';
-  }
+  // If only 1 section is active, arrange its checkboxes in 2 columns so it stays compact
+  document.querySelectorAll("#ntmFilterMultiGrid .ntm-filter-chk-grid").forEach((g) => {
+    g.style.gridTemplateColumns = activeCount === 1 ? "repeat(2, minmax(0, 1fr))" : "1fr";
+  });
 
   // Update Weather sub-object counts
   if (typeof MARINE_WEATHER_STORE !== "undefined") {
@@ -4776,6 +4819,10 @@ function syncDynamicFilterPopover() {
     if (cPrs) cPrs.textContent = (MARINE_WEATHER_STORE.pressureCenters || []).length;
     if (cWav) cWav.textContent = (MARINE_WEATHER_STORE.waves || []).length;
     if (cWnd) cWnd.textContent = (MARINE_WEATHER_STORE.windVectors || []).length;
+  }
+
+  if (typeof window.renderGlobe3D === "function") {
+    window.renderGlobe3D();
   }
 }
 
@@ -4888,3 +4935,875 @@ function initMasterFilterControls() {
 
   syncDynamicFilterPopover();
 }
+
+/* ==========================================================================
+   SETSAIL v4.4 — MULTI-VENDOR ECDIS USER CHART EXPORTERS
+   (Furuno XML, JRC Binary .uch, Transas .aiz, Sperry .update, SAM .umo, PDF)
+   ========================================================================== */
+
+function downloadBinaryBlob(uint8Arr, filename, mimeType) {
+  const blob = new Blob([uint8Arr], { type: mimeType || "application/octet-stream" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 400);
+}
+
+// 1. Furuno FMD ECDIS UserChart XML (.xml) — matches selected_warnings_furuno_userchart.xml
+function downloadFurunoUserChartXml(notices, filename) {
+  const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const areas = [];
+  const lines = [];
+  const points = [];
+  const labels = [];
+
+  (notices || []).forEach((n, idx) => {
+    const name = esc(n.noticeNumber || `NTM-${idx + 1}`);
+    const desc = esc((n.title || n.category || "").slice(0, 120));
+    const coords = Array.isArray(n.coords) && n.coords.length > 0
+      ? n.coords
+      : (Number.isFinite(n.lat) && Number.isFinite(n.lon) ? [{ lat: n.lat, lon: n.lon }] : []);
+    if (coords.length === 0) return;
+
+    if (coords.length >= 3) {
+      const vtxXml = coords.map((c, i) => `        <vertex id="${i + 1}" latitude="${Number(c.lat).toFixed(6)}" longitude="${Number(c.lon).toFixed(6)}"/>`).join("\n");
+      areas.push(`    <area name="${name}" description="${desc}">\n      <position>\n${vtxXml}\n      </position>\n      <type checkDanger="1" displayRadar="0" hasNotes="0" notesType="0"/>\n    </area>`);
+    } else if (coords.length === 2) {
+      const vtxXml = coords.map((c, i) => `        <vertex id="${i + 1}" latitude="${Number(c.lat).toFixed(6)}" longitude="${Number(c.lon).toFixed(6)}"/>`).join("\n");
+      lines.push(`    <line name="${name}" description="${desc}">\n      <position>\n${vtxXml}\n      </position>\n      <type checkDanger="1" displayRadar="0" hasNotes="0" notesType="0"/>\n    </line>`);
+    } else {
+      const c = coords[0];
+      points.push(`    <point name="${name}" description="${desc}">\n      <position>\n        <vertex id="1" latitude="${Number(c.lat).toFixed(6)}" longitude="${Number(c.lon).toFixed(6)}"/>\n      </position>\n      <type checkDanger="1" displayRadar="0" shape="1" hasNotes="0" notesType="0"/>\n    </point>`);
+    }
+
+    const c0 = coords[0];
+    labels.push(`    <label name="${name}" description="${name}">\n      <position>\n        <vertex id="1" latitude="${Number(c0.lat).toFixed(6)}" longitude="${Number(c0.lon).toFixed(6)}"/>\n      </position>\n      <attribute labelStyle="2" labelText="${name}"/>\n      <type checkDanger="0" displayRadar="0"/>\n    </label>`);
+  });
+
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<!--userchart node-->\n<userchart name="SELECTED NAVAREA WARNINGS" description="SetSail Admiralty NtM Export" version="1.0">\n`;
+  if (areas.length > 0) xml += `  <!--userchart area-->\n  <areas>\n${areas.join("\n")}\n  </areas>\n`;
+  if (lines.length > 0) xml += `  <!--userchart line-->\n  <lines>\n${lines.join("\n")}\n  </lines>\n`;
+  if (points.length > 0) xml += `  <!--userchart point-->\n  <points>\n${points.join("\n")}\n  </points>\n`;
+  if (labels.length > 0) xml += `  <!--userchart label-->\n  <labels>\n${labels.join("\n")}\n  </labels>\n`;
+  xml += `</userchart>\n`;
+
+  downloadTextFile(xml, filename || "selected_warnings_furuno_userchart.xml", "application/xml");
+}
+
+// 2. JRC JAN-7201/9201 Legacy Binary User Chart (.uch) — byte-exact match to NSWARN.uch
+function downloadJrcUchFile(notices, filename) {
+  const SCALE = 1536000;
+  const writeAscii = (buf, offset, str, maxLen) => {
+    const s = String(str || "");
+    for (let i = 0; i < maxLen; i++) {
+      buf[offset + i] = i < s.length ? (s.charCodeAt(i) & 0x7f) : 0;
+    }
+  };
+
+  const chunks = [];
+  (notices || []).forEach((n, idx) => {
+    const label = String(n.noticeNumber || `NTM ${idx + 1}`).slice(0, 60);
+    const coords = Array.isArray(n.coords) && n.coords.length > 0
+      ? n.coords
+      : (Number.isFinite(n.lat) && Number.isFinite(n.lon) ? [{ lat: n.lat, lon: n.lon }] : []);
+    if (coords.length === 0) return;
+
+    if (coords.length >= 2) {
+      // Close polygon loop if >= 3 vertices
+      const pts = coords.slice();
+      if (pts.length >= 3 && (pts[0].lat !== pts[pts.length - 1].lat || pts[0].lon !== pts[pts.length - 1].lon)) {
+        pts.push({ lat: pts[0].lat, lon: pts[0].lon });
+      }
+      const npts = Math.min(pts.length, 250);
+      const recLen = 88 + npts * 8;
+      const rec = new Uint8Array(recLen);
+      const dv = new DataView(rec.buffer);
+      dv.setUint32(0, 10, true);          // Type 10 = Polygon/Line
+      dv.setUint32(4, 100000000, true);   // SCAMIN
+      dv.setUint32(8, 1000, true);        // Flag
+      writeAscii(rec, 12, label, 64);
+      rec[76] = 1;
+      rec[77] = 2;
+      rec[80] = 3;
+      dv.setUint16(86, npts, true);
+      for (let i = 0; i < npts; i++) {
+        dv.setInt32(88 + i * 8, Math.round(Number(pts[i].lat) * SCALE), true);
+        dv.setInt32(88 + i * 8 + 4, Math.round(Number(pts[i].lon) * SCALE), true);
+      }
+      chunks.push(rec);
+    } else {
+      // Type 1 = Point Symbol (96 bytes)
+      const rec = new Uint8Array(96);
+      const dv = new DataView(rec.buffer);
+      dv.setUint32(0, 1, true);
+      dv.setUint32(4, 100000000, true);
+      dv.setUint32(8, 1000, true);
+      writeAscii(rec, 12, label, 64);
+      writeAscii(rec, 76, "~WARNSY0", 12);
+      dv.setInt32(88, Math.round(Number(coords[0].lat) * SCALE), true);
+      dv.setInt32(92, Math.round(Number(coords[0].lon) * SCALE), true);
+      chunks.push(rec);
+    }
+
+    // Type 11 = Text Label (152 bytes)
+    const lblRec = new Uint8Array(152);
+    const ldv = new DataView(lblRec.buffer);
+    ldv.setUint32(0, 11, true);
+    ldv.setUint32(4, 100000000, true);
+    ldv.setUint32(8, 1000, true);
+    lblRec[77] = 0x12;
+    writeAscii(lblRec, 80, label, 64);
+    ldv.setInt32(144, Math.round(Number(coords[0].lat) * SCALE), true);
+    ldv.setInt32(148, Math.round(Number(coords[0].lon) * SCALE), true);
+    chunks.push(lblRec);
+  });
+
+  const bodyLen = chunks.reduce((acc, c) => acc + c.length, 0);
+  const totalLen = 144 + bodyLen;
+  const out = new Uint8Array(totalLen);
+  const hdv = new DataView(out.buffer);
+  hdv.setUint32(0, totalLen, true);
+  hdv.setUint32(4, Math.floor(Date.now() / 1000), true);
+  writeAscii(out, 16, "SELECTED NAVAREA WARNINGS", 128);
+
+  let pos = 144;
+  chunks.forEach((c) => {
+    out.set(c, pos);
+    pos += c.length;
+  });
+
+  downloadBinaryBlob(out, filename || "NSWARN.uch", "application/octet-stream");
+}
+
+// 3. Sperry Marine VisionMaster FT (.update) — matches NS NAVAREA Route.update (radian vertices)
+function downloadSperryUpdateFile(notices, filename) {
+  const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const makeGuid = (seed) => {
+    let h = 2166136261 >>> 0;
+    const str = String(seed);
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    const hex = (n, len) => (n >>> 0).toString(16).padStart(len, "0").slice(0, len);
+    return `${hex(h, 8)}-${hex(h ^ 0x9e37, 4)}-4${hex(h >>> 4, 3)}-8${hex(h >>> 8, 3)}-${hex(h ^ 0x5bd1e995, 8)}${hex(h >>> 12, 4)}`;
+  };
+
+  const layerId = "0829118a-bec2-5898-bb4a-573d5b464229";
+  const nowIso = new Date().toISOString().replace("Z", "+00:00");
+  const deg2rad = Math.PI / 180.0;
+
+  const objectsXml = [];
+  (notices || []).forEach((n, idx) => {
+    const coords = Array.isArray(n.coords) && n.coords.length > 0
+      ? n.coords
+      : (Number.isFinite(n.lat) && Number.isFinite(n.lon) ? [{ lat: n.lat, lon: n.lon }] : []);
+    if (coords.length === 0) return;
+
+    const latsRad = coords.map(c => Number(c.lat) * deg2rad);
+    const lonsRad = coords.map(c => Number(c.lon) * deg2rad);
+    const latMin = Math.min(...latsRad);
+    const latMax = Math.max(...latsRad);
+    const lonMin = Math.min(...lonsRad);
+    const lonMax = Math.max(...lonsRad);
+    const vtxStr = coords.map(c => `${(Number(c.lat) * deg2rad)},${(Number(c.lon) * deg2rad)}`).join(",");
+    const altsStr = coords.map(() => "0").join(",");
+    const isArea = coords.length >= 3;
+    const objType = isArea ? "CUSTOM_AREA" : "CHINFO09";
+    const label = esc(`${n.noticeNumber || `NTM-${idx + 1}`} ${(n.category || "").toUpperCase()}`.trim());
+    const note = esc((n.rawText || n.description || n.title || "").slice(0, 950));
+    const objId = makeGuid(`sperry-${n.id || idx}-${n.noticeNumber}`);
+
+    objectsXml.push(`  <Objects>
+    <ObjectId>${objId}</ObjectId>
+    <Type>${objType}</Type>
+    <LatMin>${latMin}</LatMin>
+    <LonMin>${lonMin}</LonMin>
+    <LatMax>${latMax}</LatMax>
+    <LonMax>${lonMax}</LonMax>
+    <LayerId>${layerId}</LayerId>
+    <Vertices>${vtxStr}</Vertices>
+    <Rotation>0</Rotation>
+    <CreateTime>${nowIso}</CreateTime>
+    <CreateShip />
+    <ModifyTime>${nowIso}</ModifyTime>
+    <ModifyUser />
+    <Name />
+    <Label>${label}</Label>
+    <Note>${note}</Note>
+    <ChartEdition>-1</ChartEdition>
+    <Archived>false</Archived>
+    <TimeLabel />
+    <DateDependentType>0</DateDependentType>
+    <DateDependentStart>${nowIso}</DateDependentStart>
+    <DateDependentEnd>${nowIso}</DateDependentEnd>
+    <HasLight>false</HasLight>
+    <S57Attributes />
+    ${isArea ? "<LineSegmentType>RhumbLine</LineSegmentType>" : ""}
+    <CustomLineColor>RadarMapNInfo</CustomLineColor>
+    <LineStyle>Solid</LineStyle>
+    <LineWeight>${isArea ? "Thin" : "Regular"}</LineWeight>
+    <LineArrowType>None</LineArrowType>
+    <ShowArrowsAtStart>false</ShowArrowsAtStart>
+    <ShowArrowsAtEnd>false</ShowArrowsAtEnd>
+    <FillColor>ManufacturersInfoNote</FillColor>
+    <FillPattern>Solid</FillPattern>
+    <Opacity>Medium</Opacity>
+    <Altitudes>${altsStr}</Altitudes>
+  </Objects>`);
+  });
+
+  const xml = `<NewDataSet>
+${objectsXml.join("\n")}
+  <Layers>
+    <Id>${layerId}</Id>
+    <Name>NS NAVAREA Route</Name>
+    <Description>SetSail Admiralty NtM Export</Description>
+  </Layers>
+</NewDataSet>`;
+
+  downloadTextFile(xml, filename || "NS NAVAREA Route.update", "application/xml");
+}
+
+// Helper: Create a valid standard uncompressed ZIP archive from an array of { name, data (Uint8Array) }
+function buildSimpleZipArchive(files) {
+  const crcTable = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      t[i] = c >>> 0;
+    }
+    return t;
+  })();
+  const crc32 = (u8) => {
+    let c = 0xffffffff;
+    for (let i = 0; i < u8.length; i++) c = crcTable[(c ^ u8[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  };
+
+  const localParts = [];
+  const centralParts = [];
+  let offset = 0;
+
+  files.forEach((f) => {
+    const nameBytes = new TextEncoder().encode(f.name);
+    const data = f.data;
+    const crc = crc32(data);
+
+    const lh = new Uint8Array(30 + nameBytes.length);
+    const ldv = new DataView(lh.buffer);
+    ldv.setUint32(0, 0x04034b50, true);
+    ldv.setUint16(4, 20, true);
+    ldv.setUint16(8, 0, true); // store (uncompressed)
+    ldv.setUint32(14, crc, true);
+    ldv.setUint32(18, data.length, true);
+    ldv.setUint32(22, data.length, true);
+    ldv.setUint16(26, nameBytes.length, true);
+    lh.set(nameBytes, 30);
+
+    const ch = new Uint8Array(46 + nameBytes.length);
+    const cdv = new DataView(ch.buffer);
+    cdv.setUint32(0, 0x02014b50, true);
+    cdv.setUint16(4, 20, true);
+    cdv.setUint16(6, 20, true);
+    cdv.setUint32(16, crc, true);
+    cdv.setUint32(20, data.length, true);
+    cdv.setUint32(24, data.length, true);
+    cdv.setUint16(28, nameBytes.length, true);
+    cdv.setUint32(42, offset, true);
+    ch.set(nameBytes, 46);
+
+    localParts.push(lh, data);
+    centralParts.push(ch);
+    offset += lh.length + data.length;
+  });
+
+  const centralSize = centralParts.reduce((s, p) => s + p.length, 0);
+  const eocd = new Uint8Array(22);
+  const edv = new DataView(eocd.buffer);
+  edv.setUint32(0, 0x06054b50, true);
+  edv.setUint16(8, files.length, true);
+  edv.setUint16(10, files.length, true);
+  edv.setUint32(12, centralSize, true);
+  edv.setUint32(16, offset, true);
+
+  const total = offset + centralSize + 22;
+  const out = new Uint8Array(total);
+  let p = 0;
+  localParts.forEach(part => { out.set(part, p); p += part.length; });
+  centralParts.forEach(part => { out.set(part, p); p += part.length; });
+  out.set(eocd, p);
+  return out;
+}
+
+// 4. Transas / Wärtsilä Navi-Sailor 4000 AddInfo (.aiz) — ZIP archive containing route_warnings_transas.ai
+function downloadTransasAizFile(notices, filename) {
+  const lines = [
+    "// TRANSAS NAVI-SAILOR ADDINFO USER CHART LAYER",
+    `// Generated: ${new Date().toISOString()}`,
+    "FORMAT=AddInfo",
+    "LAYER=SELECTED NAVAREA WARNINGS"
+  ];
+  (notices || []).forEach((n, idx) => {
+    const id = n.noticeNumber || `NTM-${idx + 1}`;
+    const cat = (n.category || "WARNING").toUpperCase();
+    const coords = Array.isArray(n.coords) && n.coords.length > 0
+      ? n.coords
+      : (Number.isFinite(n.lat) && Number.isFinite(n.lon) ? [{ lat: n.lat, lon: n.lon }] : []);
+    if (coords.length === 0) return;
+    const objType = coords.length >= 3 ? "AREA" : (coords.length === 2 ? "LINE" : "POINT");
+    const ptsStr = coords.map(c => `${Number(c.lat).toFixed(6)},${Number(c.lon).toFixed(6)}`).join(";");
+    const txt = String(n.title || n.rawText || "").replace(/\r?\n/g, " ").slice(0, 240);
+    lines.push(`[OBJECT_${idx + 1}]`);
+    lines.push(`ID=${id}`);
+    lines.push(`TYPE=${objType}`);
+    lines.push(`CATEGORY=${cat}`);
+    lines.push(`DANGER=1`);
+    lines.push(`VERTICES=${ptsStr}`);
+    lines.push(`COMMENT=${txt}`);
+  });
+  const aiBytes = new TextEncoder().encode(lines.join("\r\n") + "\r\n");
+  const zipBytes = buildSimpleZipArchive([
+    { name: "route_warnings_transas.ai", data: aiBytes }
+  ]);
+  downloadBinaryBlob(zipBytes, filename || "route_warnings_transas.aiz", "application/octet-stream");
+}
+
+// 5. SAM Electronics / Wärtsilä SAM Chartpilot User Map Objects (.umo)
+function downloadSamUserChartFile(notices, filename) {
+  const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const items = [];
+  (notices || []).forEach((n, idx) => {
+    const id = esc(n.noticeNumber || `NTM-${idx + 1}`);
+    const cat = esc(n.category || "Navigational Warning");
+    const coords = Array.isArray(n.coords) && n.coords.length > 0
+      ? n.coords
+      : (Number.isFinite(n.lat) && Number.isFinite(n.lon) ? [{ lat: n.lat, lon: n.lon }] : []);
+    if (coords.length === 0) return;
+    const geomType = coords.length >= 3 ? "POLYGON" : (coords.length === 2 ? "POLYLINE" : "SYMBOL");
+    const vtx = coords.map((c, i) => `      <Point seq="${i + 1}" lat="${Number(c.lat).toFixed(6)}" lon="${Number(c.lon).toFixed(6)}" />`).join("\n");
+    const note = esc((n.rawText || n.title || "").replace(/\r?\n/g, " ").slice(0, 300));
+    items.push(`    <UserMapObject id="${id}" type="${geomType}" category="${cat}" dangerHighlight="true">\n      <Label>${id}</Label>\n      <Description>${note}</Description>\n${vtx}\n    </UserMapObject>`);
+  });
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<SAMChartpilotUserChart version="2.0" name="SELECTED NAVAREA WARNINGS" created="${new Date().toISOString()}">\n  <Objects>\n${items.join("\n")}\n  </Objects>\n</SAMChartpilotUserChart>\n`;
+  downloadTextFile(xml, filename || "SAM_Chartpilot_Warnings.umo", "application/xml");
+}
+
+// 6. Valid Binary PDF 1.4 Generator (.pdf) — matches selected_warnings (5).pdf
+function downloadWarningsPdfSummary(notices, filename) {
+  const cleanPdfText = (s) => String(s || "")
+    .replace(/[^\x20-\x7E]/g, " ")
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
+
+  const allLines = [];
+  allLines.push("B TYPE  SELECTED NAVAREA & ADMIRALTY NTM WARNINGS BULLETIN");
+  allLines.push(`S Exported: ${new Date().toUTCString()}   |   Total Active Objects: ${(notices || []).length}`);
+  allLines.push("L");
+
+  (notices || []).forEach((n, idx) => {
+    const num = n.noticeNumber || `NTM-${idx + 1}`;
+    const typeTag = n.type ? `[${n.type}]` : "";
+    const cat = n.category || "Navigational Warning";
+    const reg = n.region || "Global";
+    const latStr = Number.isFinite(n.lat) ? `${Math.abs(n.lat).toFixed(4)} ${n.lat >= 0 ? "N" : "S"}` : "";
+    const lonStr = Number.isFinite(n.lon) ? `${Math.abs(n.lon).toFixed(4)} ${n.lon >= 0 ? "E" : "W"}` : "";
+    allLines.push(`H ${idx + 1}. ${num} ${typeTag} - ${cat} (${reg})   POS: ${latStr} ${lonStr}`);
+
+    const raw = String(n.rawText || n.description || n.title || "").replace(/\r?\n+/g, " ").trim();
+    for (let i = 0; i < raw.length && i < 640; i += 88) {
+      allLines.push(`T   ${raw.slice(i, i + 88)}`);
+    }
+    allLines.push("L");
+  });
+
+  const LINES_PER_PAGE = 46;
+  const pages = [];
+  for (let i = 0; i < allLines.length; i += LINES_PER_PAGE) {
+    pages.push(allLines.slice(i, i + LINES_PER_PAGE));
+  }
+  if (pages.length === 0) pages.push(["B No warnings selected."]);
+
+  const objects = [];
+  const addObj = (body) => {
+    objects.push(body);
+    return objects.length;
+  };
+
+  const fontRegularId = addObj("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+  const fontBoldId = addObj("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
+
+  const pageIds = [];
+  const pagesRootPlaceholderId = addObj(""); // placeholder for /Pages
+
+  pages.forEach((pLines, pIdx) => {
+    let y = 800;
+    const cmds = ["BT"];
+    pLines.forEach((ln) => {
+      const code = ln.charAt(0);
+      const txt = cleanPdfText(ln.slice(2));
+      if (code === "B") {
+        cmds.push(`/F2 13 Tf 1 0 0 1 42 ${y} Tm (${txt}) Tj`);
+        y -= 18;
+      } else if (code === "S") {
+        cmds.push(`/F1 9 Tf 1 0 0 1 42 ${y} Tm (${txt}) Tj`);
+        y -= 15;
+      } else if (code === "H") {
+        cmds.push(`/F2 9.5 Tf 1 0 0 1 42 ${y} Tm (${txt}) Tj`);
+        y -= 13;
+      } else if (code === "L") {
+        y -= 6;
+      } else {
+        cmds.push(`/F1 8.5 Tf 1 0 0 1 48 ${y} Tm (${txt}) Tj`);
+        y -= 11.5;
+      }
+    });
+    cmds.push(`/F1 8 Tf 1 0 0 1 42 28 Tm (SetSail Maritime Navigation Suite - Page ${pIdx + 1} of ${pages.length}) Tj`);
+    cmds.push("ET");
+    const stream = cmds.join("\n");
+    const contentId = addObj(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
+    const pageId = addObj(`<< /Type /Page /Parent ${pagesRootPlaceholderId} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${fontRegularId} 0 R /F2 ${fontBoldId} 0 R >> >> /Contents ${contentId} 0 R >>`);
+    pageIds.push(pageId);
+  });
+
+  objects[pagesRootPlaceholderId - 1] = `<< /Type /Pages /Kids [${pageIds.map(id => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
+  const catalogId = addObj(`<< /Type /Catalog /Pages ${pagesRootPlaceholderId} 0 R >>`);
+
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  objects.forEach((body, idx) => {
+    offsets.push(pdf.length);
+    pdf += `${idx + 1} 0 obj\n${body}\nendobj\n`;
+  });
+  const xrefPos = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (let i = 1; i <= objects.length; i++) {
+    pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
+
+  const u8 = new TextEncoder().encode(pdf);
+  downloadBinaryBlob(u8, filename || "selected_warnings.pdf", "application/pdf");
+}
+
+/* ==========================================================================
+   SETSAIL v4.4 — VISUAL TOP-RIGHT CHART LAYER SELECTOR & 3D GLOBE VIEW
+   ========================================================================== */
+
+function initVisualChartLayerSelector(mapInstance, layers) {
+  const mapContainer = document.getElementById("ntmMapContainer");
+  if (!mapContainer || !mapInstance) return;
+
+  const oldSel = document.getElementById("ntmChartLayerSelector");
+  if (oldSel) oldSel.remove();
+  const oldGlobe = document.getElementById("ntmGlobe3DWrap");
+  if (oldGlobe) oldGlobe.remove();
+
+  // 1. Create Interactive 3D Globe Overlay inside #ntmMapContainer
+  const globeWrap = document.createElement("div");
+  globeWrap.id = "ntmGlobe3DWrap";
+  globeWrap.className = "ntm-globe-3d-wrap";
+  globeWrap.innerHTML = `
+    <div class="ntm-globe-3d-hud">
+      <span style="width:7px;height:7px;border-radius:50%;background:#00e5ff;box-shadow:0 0 8px #00e5ff;"></span>
+      <span><b>3D GLOBE</b> &bull; Drag to rotate &bull; Scroll to zoom &bull; Click notice to inspect</span>
+    </div>
+    <canvas id="ntmGlobe3DCanvas" class="ntm-globe-3d-canvas"></canvas>
+  `;
+  mapContainer.appendChild(globeWrap);
+
+  // 2. Create Visual Top-Right Layer Selector matching reference photo
+  const selector = document.createElement("div");
+  selector.id = "ntmChartLayerSelector";
+  selector.className = "ntm-chart-layer-selector collapsed";
+  selector.innerHTML = `
+    <button type="button" class="ntm-layer-thumb-btn active-base" data-base="ocean" title="Esri Ocean Nautical Chart">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#0d3b66 0%,#1d6fa5 55%,#7bdff2 100%);">
+        <svg viewBox="0 0 36 36" width="28" height="28"><path d="M4 24c5-4 10-4 14 0s9 4 14 0" fill="none" stroke="#e0f2fe" stroke-width="2.2" stroke-linecap="round"/><path d="M6 16c4-3 8-3 12 0s8 3 12 0" fill="none" stroke="#7dd3fc" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Ocean</span>
+    </button>
+
+    <button type="button" class="ntm-layer-thumb-btn" data-base="coast" title="Fast Coast Map (Voyager)">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#d8f3dc 0%,#95d5b2 45%,#48cae4 46%,#0096c7 100%);">
+        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M6 28L16 10l8 12 6-6" fill="none" stroke="#023e8a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Coast</span>
+    </button>
+
+    <button type="button" class="ntm-layer-thumb-btn" data-base="street" title="OpenStreetMap">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#f1faee 0%,#e9edc9 50%,#a8dadc 100%);">
+        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M6 12h24M6 24h24M14 6v24M24 6v24" stroke="#457b9d" stroke-width="2.2"/></svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Street</span>
+    </button>
+
+    <button type="button" class="ntm-layer-thumb-btn" data-base="sat" title="World Satellite Imagery">
+      <div class="ntm-layer-thumb-preview" style="background:radial-gradient(circle at 30% 30%,#1b4332 0%,#081c15 55%,#001219 100%);">
+        <svg viewBox="0 0 36 36" width="26" height="26"><circle cx="18" cy="18" r="10" fill="none" stroke="#52b788" stroke-width="1.8"/><path d="M11 19c4-3 9 2 14-2" fill="none" stroke="#95d5b2" stroke-width="2"/></svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Satellite</span>
+    </button>
+
+    <button type="button" class="ntm-layer-thumb-btn" data-base="globe3d" title="Interactive 3D Globe View">
+      <div class="ntm-layer-thumb-preview" style="background:radial-gradient(circle at 38% 35%,#0284c7 0%,#0f172a 70%,#020617 100%);">
+        <svg viewBox="0 0 36 36" width="28" height="28"><circle cx="18" cy="18" r="12" fill="none" stroke="#38bdf8" stroke-width="1.8"/><ellipse cx="18" cy="18" rx="6" ry="12" fill="none" stroke="#7dd3fc" stroke-width="1.3"/><line x1="6" y1="18" x2="30" y2="18" stroke="#7dd3fc" stroke-width="1.3"/></svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Globe 3D</span>
+    </button>
+
+    <div class="ntm-layer-divider"></div>
+
+    <button type="button" class="ntm-layer-thumb-btn always-trigger" data-overlay="buoys" title="Toggle OpenSeaMap Buoys &amp; Seamarks">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#38bdf8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Buoys</span>
+    </button>
+  `;
+
+  L.DomEvent.disableClickPropagation(selector);
+  L.DomEvent.disableScrollPropagation(selector);
+  mapContainer.appendChild(selector);
+
+  // Expand on hover or tap
+  selector.addEventListener("mouseenter", () => selector.classList.remove("collapsed"));
+  selector.addEventListener("mouseleave", () => selector.classList.add("collapsed"));
+
+  let activeBaseKey = "ocean";
+  let isBuoysActive = false;
+
+  // 3D Globe State & Renderer
+  const canvas = globeWrap.querySelector("#ntmGlobe3DCanvas");
+  const globeState = {
+    active: false,
+    rotLon: 0,
+    rotLat: 18,
+    zoom: 1.0,
+    dragging: false,
+    lastX: 0,
+    lastY: 0,
+    moved: false,
+    projectedNotices: []
+  };
+
+  const renderGlobe3D = () => {
+    if (!globeState.active || !canvas) return;
+    const rect = globeWrap.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.max(300, rect.width);
+    const h = Math.max(260, rect.height);
+    if (canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr)) {
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+    }
+    const ctx = canvas.getContext("2d");
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+
+    const cx = w * 0.5;
+    const cy = h * 0.5;
+    const R = Math.min(w, h) * 0.41 * globeState.zoom;
+    const rad = Math.PI / 180;
+    const lat0 = globeState.rotLat * rad;
+    const lon0 = globeState.rotLon * rad;
+    const sinLat0 = Math.sin(lat0);
+    const cosLat0 = Math.cos(lat0);
+
+    const project = (latDeg, lonDeg) => {
+      const phi = latDeg * rad;
+      const lam = lonDeg * rad;
+      const dLam = lam - lon0;
+      const sinPhi = Math.sin(phi);
+      const cosPhi = Math.cos(phi);
+      const cosC = sinLat0 * sinPhi + cosLat0 * cosPhi * Math.cos(dLam);
+      if (cosC < 0) return null; // back of globe
+      const x = cx + R * (cosPhi * Math.sin(dLam));
+      const y = cy - R * (cosLat0 * sinPhi - sinLat0 * cosPhi * Math.cos(dLam));
+      return { x, y, z: cosC };
+    };
+
+    // Atmosphere outer glow
+    const atmo = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.12);
+    atmo.addColorStop(0, "rgba(56, 189, 248, 0.25)");
+    atmo.addColorStop(1, "rgba(2, 132, 199, 0)");
+    ctx.fillStyle = atmo;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R * 1.12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ocean sphere fill
+    const oceanGrad = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.3, R * 0.08, cx, cy, R);
+    oceanGrad.addColorStop(0, "#133b6e");
+    oceanGrad.addColorStop(0.65, "#0a2246");
+    oceanGrad.addColorStop(1, "#051126");
+    ctx.fillStyle = oceanGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Clip to sphere
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.clip();
+
+    // Graticule grid (parallels & meridians every 15 deg)
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.14)";
+    ctx.lineWidth = 0.8;
+    for (let lat = -75; lat <= 75; lat += 15) {
+      ctx.beginPath();
+      let started = false;
+      for (let lon = -180; lon <= 180; lon += 4) {
+        const p = project(lat, lon);
+        if (p) {
+          if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+          else ctx.lineTo(p.x, p.y);
+        } else started = false;
+      }
+      ctx.stroke();
+    }
+    for (let lon = -180; lon < 180; lon += 15) {
+      ctx.beginPath();
+      let started = false;
+      for (let lat = -85; lat <= 85; lat += 4) {
+        const p = project(lat, lon);
+        if (p) {
+          if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+          else ctx.lineTo(p.x, p.y);
+        } else started = false;
+      }
+      ctx.stroke();
+    }
+
+    // World Landmasses (if WORLD_LAND_POLYGONS available)
+    if (typeof WORLD_LAND_POLYGONS !== "undefined" && Array.isArray(WORLD_LAND_POLYGONS)) {
+      ctx.fillStyle = "rgba(30, 58, 95, 0.85)";
+      ctx.strokeStyle = "rgba(100, 149, 205, 0.45)";
+      ctx.lineWidth = 1;
+      WORLD_LAND_POLYGONS.forEach((poly) => {
+        if (!Array.isArray(poly) || poly.length < 3) return;
+        ctx.beginPath();
+        let started = false;
+        let visCount = 0;
+        for (let i = 0; i < poly.length; i++) {
+          const pt = poly[i];
+          const lat = Array.isArray(pt) ? pt[0] : pt.lat;
+          const lon = Array.isArray(pt) ? pt[1] : pt.lon;
+          const p = project(lat, lon);
+          if (p) {
+            visCount++;
+            if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+            else ctx.lineTo(p.x, p.y);
+          } else {
+            started = false;
+          }
+        }
+        if (visCount >= 3) {
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+      });
+    }
+
+    // Active Route Track on 3D Globe
+    const isRouteOn = typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.route !== false;
+    if (isRouteOn && typeof activeRouteData !== "undefined" && activeRouteData && Array.isArray(activeRouteData.waypoints)) {
+      ctx.strokeStyle = "#a855f7";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      let started = false;
+      activeRouteData.waypoints.forEach((wp) => {
+        const p = project(wp.lat, wp.lon);
+        if (p) {
+          if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+          else ctx.lineTo(p.x, p.y);
+        } else started = false;
+      });
+      ctx.stroke();
+    }
+
+    // Active Port Depths on 3D Globe
+    const isPortsOn = typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.depths !== false;
+    if (isPortsOn && typeof PORT_DEPTHS_DB !== "undefined" && Array.isArray(PORT_DEPTHS_DB)) {
+      ctx.fillStyle = "#10b981";
+      PORT_DEPTHS_DB.forEach((port) => {
+        if (port.maxDraft < (window.filterMinPortDepth || 0)) return;
+        const p = project(port.lat, port.lon);
+        if (!p) return;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    // Active Weather Cyclones on 3D Globe
+    const isWxOn = typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.weather !== false;
+    if (isWxOn && typeof MARINE_WEATHER_STORE !== "undefined" && MARINE_WEATHER_STORE.storms) {
+      (MARINE_WEATHER_STORE.storms || []).forEach((st) => {
+        const p = project(st.lat, st.lon);
+        if (!p) return;
+        ctx.strokeStyle = "#ef4444";
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+    }
+
+    // Active Admiralty NtM Notices on 3D Globe
+    globeState.projectedNotices = [];
+    const isNoticesOn = typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.notices !== false;
+    if (isNoticesOn && typeof getFilteredNotices === "function") {
+      const visibleNotices = getFilteredNotices();
+      visibleNotices.forEach((n) => {
+        if (!Number.isFinite(n.lat) || !Number.isFinite(n.lon)) return;
+        const p = project(n.lat, n.lon);
+        if (!p) return;
+        const color = n.type === "T" ? "#f97316" : (n.type === "P" ? "#eab308" : "#38bdf8");
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        globeState.projectedNotices.push({ x: p.x, y: p.y, notice: n });
+      });
+    }
+
+    // Live Vessel Position on 3D Globe
+    if (typeof window.currentVesselLat === "number" && typeof window.currentVesselLon === "number") {
+      const pv = project(window.currentVesselLat, window.currentVesselLon);
+      if (pv) {
+        ctx.strokeStyle = "#00e5ff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(pv.x, pv.y, 7, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(pv.x, pv.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    ctx.restore();
+
+    // Rim border
+    ctx.strokeStyle = "rgba(56, 189, 248, 0.45)";
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  };
+
+  window.renderGlobe3D = renderGlobe3D;
+
+  // Globe pointer interaction
+  if (canvas) {
+    canvas.addEventListener("pointerdown", (e) => {
+      globeState.dragging = true;
+      globeState.moved = false;
+      globeState.lastX = e.clientX;
+      globeState.lastY = e.clientY;
+      canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener("pointermove", (e) => {
+      if (!globeState.dragging) return;
+      const dx = e.clientX - globeState.lastX;
+      const dy = e.clientY - globeState.lastY;
+      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) globeState.moved = true;
+      globeState.lastX = e.clientX;
+      globeState.lastY = e.clientY;
+      globeState.rotLon = ((globeState.rotLon - dx * 0.35 + 540) % 360) - 180;
+      globeState.rotLat = Math.max(-80, Math.min(80, globeState.rotLat + dy * 0.35));
+      renderGlobe3D();
+    });
+    canvas.addEventListener("pointerup", (e) => {
+      globeState.dragging = false;
+      if (!globeState.moved) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        for (let i = 0; i < globeState.projectedNotices.length; i++) {
+          const item = globeState.projectedNotices[i];
+          if (Math.hypot(mx - item.x, my - item.y) <= 8) {
+            if (typeof openNoticeDetailModal === "function") {
+              openNoticeDetailModal(item.notice);
+            }
+            break;
+          }
+        }
+      }
+    });
+    canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.12 : 0.89;
+      globeState.zoom = Math.max(0.65, Math.min(3.5, globeState.zoom * factor));
+      renderGlobe3D();
+    }, { passive: false });
+  }
+
+  // Handle Layer Selector Clicks
+  selector.querySelectorAll(".ntm-layer-thumb-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (selector.classList.contains("collapsed")) {
+        selector.classList.remove("collapsed");
+        return;
+      }
+      const baseKey = btn.getAttribute("data-base");
+      const overlayKey = btn.getAttribute("data-overlay");
+
+      if (baseKey) {
+        activeBaseKey = baseKey;
+        selector.querySelectorAll("[data-base]").forEach(b => b.classList.toggle("active-base", b === btn));
+
+        if (baseKey === "globe3d") {
+          const c = mapInstance.getCenter();
+          globeState.rotLat = c.lat;
+          globeState.rotLon = c.lng;
+          globeState.active = true;
+          globeWrap.classList.add("active");
+          renderGlobe3D();
+        } else {
+          if (globeState.active) {
+            globeState.active = false;
+            globeWrap.classList.remove("active");
+            mapInstance.setView([globeState.rotLat, globeState.rotLon], mapInstance.getZoom());
+          }
+          ["ocean", "coast", "street", "sat"].forEach((k) => {
+            if (layers[k] && mapInstance.hasLayer(layers[k])) {
+              mapInstance.removeLayer(layers[k]);
+            }
+          });
+          if (layers[baseKey]) {
+            layers[baseKey].addTo(mapInstance);
+          }
+        }
+      } else if (overlayKey === "buoys" && layers.buoys) {
+        isBuoysActive = !isBuoysActive;
+        btn.classList.toggle("active-overlay", isBuoysActive);
+        if (isBuoysActive) {
+          layers.buoys.addTo(mapInstance);
+        } else if (mapInstance.hasLayer(layers.buoys)) {
+          mapInstance.removeLayer(layers.buoys);
+        }
+      }
+    });
+  });
+}
+

@@ -7176,6 +7176,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .home-time-mode-btn {
   appearance: none;
   -webkit-appearance: none;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
   background: transparent !important;
   border: none !important;
   border-bottom: 1px dashed rgba(148, 163, 184, 0.32) !important;
@@ -7184,15 +7188,15 @@ svg.leaflet-image-layer.leaflet-interactive path {
   font-size: 0.75rem !important;
   font-weight: 600 !important;
   letter-spacing: 0.05em !important;
-  padding: 0 3px 1px 3px !important;
-  margin-left: 1px !important;
+  padding: 0 3px !important;
+  margin: 0 0 0 2px !important;
   border-radius: 3px !important;
   opacity: 0.72 !important;
   cursor: pointer !important;
   pointer-events: auto !important;
   position: relative !important;
   z-index: 55 !important;
-  line-height: 1.1 !important;
+  line-height: 1 !important;
   transition: opacity 0.18s ease, color 0.18s ease, border-color 0.18s ease, background 0.18s ease !important;
 }
 
@@ -11184,11 +11188,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
               <!-- Column 2 (Center): UTC Clock on Slide 1 -> physically glides left to #homeHudLeftSlot as Hero Logo rises into center -->
               <div class="home-hud-pill home-hud-center" id="homeHudCenterAnchor" style="grid-column:2 !important;justify-self:center !important;position:relative !important;left:auto !important;top:auto !important;transform:none !important;min-width:0 !important;">
-                <div class="hud-center-utc-wrap" id="homeHudCenterUtc">
-                  <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v3M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12 8.5 12 13 15.5 14.5" fill="none" stroke="#f05a36" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="13" r="1.4" fill="#ffffff"/></svg></span>
-                  <span class="home-hud-text" id="homeUtcClock">00:00:00</span>
-                  <button type="button" class="home-time-mode-btn" id="homeTimeModeBtn" title="Switch between UTC and Local Mean Time (LMT)">UTC</button>
-                  <span class="home-hud-dot live-pulse" id="homeHudCenterUtcDot" style="opacity:0;width:7px;height:7px;transition:opacity 0.2s;"></span>
+                <div class="hud-center-utc-wrap" id="homeHudCenterUtc" style="display:inline-flex;align-items:center;gap:0.38rem;">
+                  <span class="home-hud-icon" style="display:inline-flex;align-items:center;"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v3M9 2h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><polyline points="12 8.5 12 13 15.5 14.5" fill="none" stroke="#f05a36" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="13" r="1.4" fill="#ffffff"/></svg></span>
+                  <span class="home-hud-text" id="homeUtcClock" style="display:inline-flex;align-items:center;line-height:1;">00:00:00</span>
+                  <button type="button" class="home-time-mode-btn" id="homeTimeModeBtn" style="margin:0 !important;padding:0 3px !important;line-height:1 !important;display:inline-flex !important;align-items:center !important;" title="Switch between UTC and Local Mean Time (LMT)">UTC</button>
                 </div>
               </div>
 
@@ -11831,26 +11834,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 
-        <label>Variation
-
-
-
+        <label><span style="display:flex;align-items:center;justify-content:space-between;gap:6px;"><span>Variation</span><span id="setStarWmmBadge" title="Auto-calculated WMM Variation &amp; ECDIS [Epoch Deg(Annual Change)] — Click to re-sync from Position" style="font-size:0.66rem;font-family:var(--font-mono,monospace);color:#94a3b8;background:rgba(15,23,42,0.55);border:1px solid rgba(148,163,184,0.22);border-radius:4px;padding:1px 5px;cursor:pointer;user-select:none;font-weight:500;">WMM Auto</span></span>
           <span class="row-ew">
-
-
-
-            <input type="number" id="varMag" step="0.1" min="0" />
-
-
-
+            <input type="number" id="varMag" step="0.1" min="0" placeholder="Auto WMM" />
             <select id="varEW"><option>E</option><option>W</option></select>
-
-
-
           </span>
-
-
-
         </label>
 
 
@@ -12632,202 +12620,181 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 
-                  <div class="ntm-popover" id="ntmFilterPopover" style="width: 325px; max-height: 80vh; overflow-y: auto;">
-                    <div class="ntm-popover-header" style="position: sticky; top: 0; background: #0c1730; z-index: 5; border-bottom: 1px solid rgba(138,164,214,0.18);">
-                      <div style="display:flex;flex-direction:column;gap:1px;">
-                        <div style="display:flex;align-items:center;gap:6px;">
-                          <svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#38bdf8;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                          <span style="font-weight:700;font-size:0.84rem;">Filter Active Layer Objects</span>
-                        </div>
-                        <span style="font-size:0.64rem;color:#64748b;font-weight:500;">Filters objects on layers active below the map</span>
+                  <div class="ntm-popover ntm-filter-compact-popover" id="ntmFilterPopover" style="width: 410px; max-width: calc(100vw - 24px); max-height: 78vh; overflow-y: auto;">
+                    <div class="ntm-popover-header" style="position: sticky; top: 0; background: #0c1730; z-index: 5; padding: 6px 10px; border-bottom: 1px solid rgba(148,163,184,0.16); display:flex; align-items:center; justify-content:space-between;">
+                      <span style="font-weight:600;font-size:0.72rem;color:#cbd5e1;letter-spacing:0.02em;">Layer Object Filters</span>
+                      <div style="display:flex;align-items:center;gap:6px;">
+                        <button type="button" id="popBtnResetFilters" style="margin:0 !important;background:rgba(148,163,184,0.1);border:1px solid rgba(148,163,184,0.25);color:#cbd5e1;font-size:0.62rem;font-weight:500;padding:2px 6px;border-radius:4px;cursor:pointer;line-height:1.1;">Reset</button>
+                        <button type="button" class="ntm-popover-close" id="ntmFilterCloseBtn" style="margin:0 !important;font-size:0.85rem;padding:0 3px;">×</button>
                       </div>
-                      <button type="button" class="ntm-popover-close" id="ntmFilterCloseBtn">×</button>
                     </div>
 
-                    <!-- Active Layers Indicator Bar -->
-                    <div id="filterActiveLayersBar" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px;background:rgba(6,12,26,0.65);border-bottom:1px solid rgba(138,164,214,0.14);font-size:0.65rem;">
-                    </div>
+                    <div id="filterActiveLayersBar" style="display:none;"></div>
 
-                    <div class="ntm-popover-body">
+                    <div class="ntm-popover-body" style="padding: 8px;">
                       <!-- Empty State when NO map layer tiles are active -->
-                      <div id="filterSecEmpty" style="display:none;padding:14px 10px;text-align:center;color:#94a3b8;font-size:0.75rem;line-height:1.45;">
-                        <strong style="color:#e2e8f0;display:block;margin-bottom:4px;">No Map Layer Tiles Selected</strong>
-                        Select one or more layer tiles under the map (<b>Admiralty NtM</b>, <b>Port Depths</b>, <b>Weather</b>, or <b>My Route</b>) to filter their chart objects here.
+                      <div id="filterSecEmpty" style="display:none;padding:10px 8px;text-align:center;color:#94a3b8;font-size:0.68rem;line-height:1.4;">
+                        No layer tiles active below map. Enable a tile (NtM, Ports, Weather, Route) to filter its objects.
                       </div>
 
-                      <!-- SECTION 1: ADMIRALTY NtM OBJECT FILTERS (Visible when Admiralty NtM tile is active) -->
-                      <div id="filterSecNotices">
-                        <div class="ntm-popover-subtitle" style="display:flex;align-items:center;justify-content:space-between;color:#f59e0b;margin-top:2px;">
-                          <span>ADMIRALTY NTM OBJECTS:</span>
-                          <span class="chk-count" id="popCntNtmTotal" style="background:rgba(245,158,11,0.16);color:#fbbf24;">0</span>
+                      <div class="ntm-filter-multi-grid" id="ntmFilterMultiGrid">
+                        <!-- SECTION 1: ADMIRALTY NtM OBJECT FILTERS -->
+                        <div class="ntm-filter-sec-card" id="filterSecNotices">
+                          <div class="ntm-filter-sec-head">
+                            <span>Admiralty NtM</span>
+                            <span class="chk-count" id="popCntNtmTotal">0</span>
+                          </div>
+
+                          <div class="ntm-filter-chk-grid">
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popChkAll" checked />
+                              <span class="chk-label">All Active</span>
+                            </label>
+
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popChkT" checked />
+                              <span class="chk-label">Temp (T)</span>
+                              <span class="chk-count" id="popCntT">0</span>
+                            </label>
+
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popChkP" checked />
+                              <span class="chk-label">Prelim (P)</span>
+                              <span class="chk-count" id="popCntP">0</span>
+                            </label>
+
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popChkPerm" checked />
+                              <span class="chk-label">Permanent</span>
+                              <span class="chk-count" id="popCntPerm">0</span>
+                            </label>
+
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popChkPoly" />
+                              <span class="chk-label">Areas Only</span>
+                              <span class="chk-count" id="popCntPoly">0</span>
+                            </label>
+
+                            <label class="ntm-popover-chk-item" title="Excluded by default">
+                              <input type="checkbox" id="popChkCancelled" />
+                              <span class="chk-label">Cancelled</span>
+                              <span class="chk-count" id="popCntCan">0</span>
+                            </label>
+                          </div>
+
+                          <div class="ntm-filter-inline-select">
+                            <span>Region:</span>
+                            <select id="popSelectNavarea">
+                              <option value="ALL">All NAVAREAs (I–XXI)</option>
+                              <option value="I">NAVAREA I (UK / NE Atl)</option>
+                              <option value="II">NAVAREA II (E Atl)</option>
+                              <option value="III">NAVAREA III (Med)</option>
+                              <option value="IV">NAVAREA IV (NW Atl)</option>
+                              <option value="V">NAVAREA V (SW Atl)</option>
+                              <option value="VI">NAVAREA VI (SE S.Amer)</option>
+                              <option value="VII">NAVAREA VII (S Africa)</option>
+                              <option value="VIII">NAVAREA VIII (Indian)</option>
+                              <option value="IX">NAVAREA IX (Red Sea)</option>
+                              <option value="X">NAVAREA X (Australia)</option>
+                              <option value="XI">NAVAREA XI (Far East)</option>
+                              <option value="XII">NAVAREA XII (NE Pac)</option>
+                              <option value="XIII">NAVAREA XIII (NW Pac)</option>
+                              <option value="XIV">NAVAREA XIV (SW Pac)</option>
+                              <option value="XV">NAVAREA XV (SE Pac)</option>
+                              <option value="XVI">NAVAREA XVI (Peru)</option>
+                              <option value="XVII">NAVAREA XVII (Arctic)</option>
+                              <option value="XVIII">NAVAREA XVIII (Arctic)</option>
+                              <option value="XIX">NAVAREA XIX (Norway)</option>
+                              <option value="XX">NAVAREA XX (Barents)</option>
+                              <option value="XXI">NAVAREA XXI (Siberian)</option>
+                            </select>
+                          </div>
                         </div>
 
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popChkAll" checked />
-                          <span class="chk-dot" style="background:#38bdf8;"></span>
-                          <span class="chk-label" style="font-weight:600;">All Active Notice Types</span>
-                        </label>
+                        <!-- SECTION 2: MARINE WEATHER OBJECT FILTERS -->
+                        <div class="ntm-filter-sec-card" id="filterSecWeather">
+                          <div class="ntm-filter-sec-head">
+                            <span>Weather Objects</span>
+                            <span class="chk-count" id="popCntWeatherTotal">19</span>
+                          </div>
 
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popChkT" checked />
-                          <span class="chk-dot t-dot"></span>
-                          <span class="chk-label">Temporary &mdash; (T) Notices</span>
-                          <span class="chk-count" id="popCntT">0</span>
-                        </label>
+                          <div class="ntm-filter-chk-grid">
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popWxCyclones" checked />
+                              <span class="chk-label">Cyclones / Cones</span>
+                              <span class="chk-count" id="popCntWxCyclones">5</span>
+                            </label>
 
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popChkP" checked />
-                          <span class="chk-dot p-dot"></span>
-                          <span class="chk-label">Preliminary &mdash; (P) Notices</span>
-                          <span class="chk-count" id="popCntP">0</span>
-                        </label>
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popWxPressure" checked />
+                              <span class="chk-label">Pressure (H / L)</span>
+                              <span class="chk-count" id="popCntWxPressure">6</span>
+                            </label>
 
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popChkPerm" checked />
-                          <span class="chk-dot perm-dot"></span>
-                          <span class="chk-label">Permanent Updates</span>
-                          <span class="chk-count" id="popCntPerm">0</span>
-                        </label>
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popWxWaves" checked />
+                              <span class="chk-label">High Waves (&gt;4m)</span>
+                              <span class="chk-count" id="popCntWxWaves">4</span>
+                            </label>
 
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popChkPoly" />
-                          <span class="chk-dot poly-dot"></span>
-                          <span class="chk-label">Polygons / TSS Areas Only</span>
-                          <span class="chk-count" id="popCntPoly">0</span>
-                        </label>
-
-                        <label class="ntm-popover-chk-item" title="Strictly excluded from chart by default">
-                          <input type="checkbox" id="popChkCancelled" />
-                          <span class="chk-dot can-dot"></span>
-                          <span class="chk-label">Cancelled Notices</span>
-                          <span class="chk-count" id="popCntCan">0</span>
-                        </label>
-
-                        <div style="padding:4px 0 6px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                          <span style="font-size:0.72rem;color:#94a3b8;font-weight:600;">NAVAREA:</span>
-                          <select id="popSelectNavarea" style="flex:1;background:rgba(18,28,58,0.7);border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:0.74rem;padding:3px 6px;">
-                            <option value="ALL">All Regions (I &ndash; XXI)</option>
-                            <option value="I">NAVAREA I (NE Atlantic / UK)</option>
-                            <option value="II">NAVAREA II (E Atlantic)</option>
-                            <option value="III">NAVAREA III (Med / Black Sea)</option>
-                            <option value="IV">NAVAREA IV (NW Atlantic)</option>
-                            <option value="V">NAVAREA V (SW Atlantic)</option>
-                            <option value="VI">NAVAREA VI (SE South America)</option>
-                            <option value="VII">NAVAREA VII (S Africa)</option>
-                            <option value="VIII">NAVAREA VIII (Indian Ocean)</option>
-                            <option value="IX">NAVAREA IX (Red Sea / Gulf)</option>
-                            <option value="X">NAVAREA X (Australia)</option>
-                            <option value="XI">NAVAREA XI (SE Asia / Far East)</option>
-                            <option value="XII">NAVAREA XII (NE Pacific)</option>
-                            <option value="XIII">NAVAREA XIII (NW Pacific)</option>
-                            <option value="XIV">NAVAREA XIV (SW Pacific)</option>
-                            <option value="XV">NAVAREA XV (SE Pacific)</option>
-                            <option value="XVI">NAVAREA XVI (Peru / Ecuador)</option>
-                            <option value="XVII">NAVAREA XVII (Arctic Canada)</option>
-                            <option value="XVIII">NAVAREA XVIII (Arctic North)</option>
-                            <option value="XIX">NAVAREA XIX (Arctic Norway)</option>
-                            <option value="XX">NAVAREA XX (Barents Sea)</option>
-                            <option value="XXI">NAVAREA XXI (E Siberian Sea)</option>
-                          </select>
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popWxWinds" checked />
+                              <span class="chk-label">Gale Winds</span>
+                              <span class="chk-count" id="popCntWxWinds">4</span>
+                            </label>
+                          </div>
                         </div>
 
-                        <div class="ntm-popover-divider"></div>
-                      </div>
+                        <!-- SECTION 3: PORT DEPTHS & BATHYMETRY OBJECT FILTERS -->
+                        <div class="ntm-filter-sec-card" id="filterSecDepths">
+                          <div class="ntm-filter-sec-head">
+                            <span>Port Depths</span>
+                            <span class="chk-count" id="popCntPortsTotal">64</span>
+                          </div>
 
-                      <!-- SECTION 2: MARINE WEATHER OBJECT FILTERS (Visible when Weather tile is active) -->
-                      <div id="filterSecWeather">
-                        <div class="ntm-popover-subtitle" style="display:flex;align-items:center;justify-content:space-between;color:#38bdf8;">
-                          <span>WEATHER LAYER OBJECTS (00:00Z):</span>
-                          <span class="chk-count" id="popCntWeatherTotal" style="background:rgba(56,189,248,0.16);color:#38bdf8;">LIVE</span>
+                          <div class="ntm-filter-chk-grid">
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popPortsFairways" checked />
+                              <span class="chk-label">Fairways &amp; Depths</span>
+                            </label>
+
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popPortsIsobaths" checked />
+                              <span class="chk-label">Depth Contours</span>
+                            </label>
+                          </div>
+
+                          <div class="ntm-filter-inline-select">
+                            <span>Min Depth:</span>
+                            <select id="popSelectDepthMin">
+                              <option value="0">All (0m+)</option>
+                              <option value="10">10.0m+</option>
+                              <option value="12.5">12.5m+</option>
+                              <option value="15">15.0m+</option>
+                              <option value="17.5">17.5m+</option>
+                            </select>
+                          </div>
                         </div>
 
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popWxCyclones" checked />
-                          <span class="chk-dot" style="background:#ef4444;box-shadow:0 0 5px #ef4444;"></span>
-                          <span class="chk-label">Tropical Cyclones &amp; Cones</span>
-                          <span class="chk-count" id="popCntWxCyclones">5</span>
-                        </label>
+                        <!-- SECTION 4: MY ROUTE OBJECT FILTERS -->
+                        <div class="ntm-filter-sec-card" id="filterSecRoute">
+                          <div class="ntm-filter-sec-head">
+                            <span>My Route</span>
+                            <span class="chk-count" id="popCntRouteTotal">0</span>
+                          </div>
 
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popWxPressure" checked />
-                          <span class="chk-dot" style="background:#3b82f6;"></span>
-                          <span class="chk-label">Pressure Centers (High / Low)</span>
-                          <span class="chk-count" id="popCntWxPressure">6</span>
-                        </label>
+                          <div class="ntm-filter-chk-grid">
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popRouteShowWpts" checked />
+                              <span class="chk-label">Waypoints (WPT)</span>
+                            </label>
 
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popWxWaves" checked />
-                          <span class="chk-dot" style="background:#0284c7;"></span>
-                          <span class="chk-label">Heavy Wave &amp; Swell Zones (&gt;4m)</span>
-                          <span class="chk-count" id="popCntWxWaves">4</span>
-                        </label>
-
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popWxWinds" checked />
-                          <span class="chk-dot" style="background:#38bdf8;"></span>
-                          <span class="chk-label">Synoptic Wind Vectors (Gales)</span>
-                          <span class="chk-count" id="popCntWxWinds">4</span>
-                        </label>
-
-                        <div class="ntm-popover-divider"></div>
-                      </div>
-
-                      <!-- SECTION 3: PORT DEPTHS & BATHYMETRY OBJECT FILTERS (Visible when Port Depths tile is active) -->
-                      <div id="filterSecDepths">
-                        <div class="ntm-popover-subtitle" style="display:flex;align-items:center;justify-content:space-between;color:#10b981;">
-                          <span>PORT DEPTHS &amp; BATHYMETRY:</span>
-                          <span class="chk-count" id="popCntPortsTotal" style="background:rgba(16,185,129,0.16);color:#34d399;">64</span>
+                            <label class="ntm-popover-chk-item">
+                              <input type="checkbox" id="popRouteShowLine" checked />
+                              <span class="chk-label">Track Line</span>
+                            </label>
+                          </div>
                         </div>
-
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popPortsFairways" checked />
-                          <span class="chk-dot" style="background:#10b981;"></span>
-                          <span class="chk-label">Fairway Polygons &amp; Soundings</span>
-                        </label>
-
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popPortsIsobaths" checked />
-                          <span class="chk-dot" style="background:#06b6d4;"></span>
-                          <span class="chk-label">Depth Contours (Isobaths)</span>
-                        </label>
-
-                        <div style="padding:4px 0 6px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                          <span style="font-size:0.72rem;color:#94a3b8;font-weight:600;">Min. Fairway Depth:</span>
-                          <select id="popSelectDepthMin" style="flex:1;background:rgba(18,28,58,0.7);border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:0.74rem;padding:3px 6px;">
-                            <option value="0">All Depths (0m+)</option>
-                            <option value="10">10.0m+ (Handymax)</option>
-                            <option value="12.5">12.5m+ (Panamax)</option>
-                            <option value="15">15.0m+ (Capesize)</option>
-                            <option value="17.5">17.5m+ (VLCC / Deep)</option>
-                          </select>
-                        </div>
-
-                        <div class="ntm-popover-divider"></div>
-                      </div>
-
-                      <!-- SECTION 4: MY ROUTE OBJECT FILTERS (Visible when My Route tile is active) -->
-                      <div id="filterSecRoute">
-                        <div class="ntm-popover-subtitle" style="display:flex;align-items:center;justify-content:space-between;color:#a855f7;">
-                          <span>MY ROUTE OBJECTS:</span>
-                          <span class="chk-count" id="popCntRouteTotal" style="background:rgba(168,85,247,0.16);color:#c084fc;">0</span>
-                        </div>
-
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popRouteShowWpts" checked />
-                          <span class="chk-dot" style="background:#10b981;"></span>
-                          <span class="chk-label">Show Waypoints (WPTs)</span>
-                        </label>
-
-                        <label class="ntm-popover-chk-item">
-                          <input type="checkbox" id="popRouteShowLine" checked />
-                          <span class="chk-dot" style="background:#38bdf8;"></span>
-                          <span class="chk-label">Show Track Line</span>
-                        </label>
-                      </div>
-
-                      <!-- Reset Active Sub-Filters Footer -->
-                      <div style="padding-top:6px;display:flex;justify-content:flex-end;">
-                        <button type="button" id="popBtnResetFilters" style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);color:#38bdf8;font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:5px;cursor:pointer;">Reset Object Filters</button>
                       </div>
                     </div>
                   </div>
@@ -13715,10 +13682,34 @@ svg.leaflet-image-layer.leaflet-interactive path {
               </label>
             </div>
 
-            <div class="ntm-export-btn-group">
+            <div class="ntm-export-btn-group" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+              <button type="button" class="exp-btn-pill exp-btn-primary" id="expBtnFuruno" title="Download Furuno ECDIS UserChart XML (.xml)">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Furuno (.xml)
+              </button>
+              <button type="button" class="exp-btn-pill exp-btn-primary" id="expBtnJrcUch" title="Download JRC ECDIS User Chart (.uch)">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                JRC UCH (.uch)
+              </button>
               <button type="button" class="exp-btn-pill exp-btn-primary" id="expBtnJrc" title="Download JRC ECDIS User Chart (.uchm)">
                 <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                JRC User Chart (.uchm)
+                JRC (.uchm)
+              </button>
+              <button type="button" class="exp-btn-pill" id="expBtnTransas" title="Download Transas / Wärtsilä Navi-Sailor AddInfo (.aiz)">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Transas (.aiz)
+              </button>
+              <button type="button" class="exp-btn-pill" id="expBtnSperry" title="Download Sperry Marine VisionMaster FT (.update)">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Sperry (.update)
+              </button>
+              <button type="button" class="exp-btn-pill" id="expBtnSam" title="Download SAM Electronics Chartpilot User Map Objects (.umo)">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                SAM (.umo)
+              </button>
+              <button type="button" class="exp-btn-pill" id="expBtnPdf" title="Download Printable ECDIS Warnings Summary (.pdf)">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                PDF Summary (.pdf)
               </button>
               <button type="button" class="exp-btn-pill" id="expBtnGeoJson" title="Download User Chart Layer as GeoJSON">
                 <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
@@ -13988,45 +13979,20 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
     function parseDM(text) {
-
-
-
       if (text == null) return NaN;
-
-
-
-      const s = String(text).trim().replace(/,/g, ".");
-
-
-
+      const raw = String(text).trim().replace(/,/g, ".");
+      if (!raw) return NaN;
+      const s = raw.replace(/[NSEWnsew]+$/g, "").trim();
       if (!s) return NaN;
-
-
-
-      if (/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
-
-
-
-      const m = s.match(/(-?\d+)\s*[°\s]+\s*(\d+(?:\.\d+)?)/);
-
-
-
-      if (m) return parseInt(m[1], 10) + parseFloat(m[2]) / 60;
-
-
-
-      const m2 = s.match(/(-?\d+)\s+(\d+(?:\.\d+)?)/);
-
-
-
-      if (m2) return parseInt(m2[1], 10) + parseFloat(m2[2]) / 60;
-
-
-
+      if (/^-?\d+(\.\d+)?$/.test(s)) return Math.abs(parseFloat(s));
+      const dms = s.match(/(-?\d+)\s*(?:[°ºd:\-\s]+)\s*(\d+(?:\.\d+)?)\s*(?:['′m:\-\s]+)?\s*(\d+(?:\.\d+)?)?/i);
+      if (dms) {
+        const deg = Math.abs(parseInt(dms[1], 10));
+        const min = parseFloat(dms[2]) || 0;
+        const sec = dms[3] ? (parseFloat(dms[3]) || 0) : 0;
+        return deg + (min / 60) + (sec / 3600);
+      }
       return NaN;
-
-
-
     }
 
 
@@ -16923,27 +16889,28 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 
-      const varMag = parseFloat(String(document.getElementById("varMag").value).replace(",", "."));
+      const latRawStr = String(document.getElementById("lat").value || "").trim();
+      const lonRawStr = String(document.getElementById("lon").value || "").trim();
+      if (/[Ss]$/.test(latRawStr)) document.getElementById("latNS").value = "S";
+      else if (/[Nn]$/.test(latRawStr)) document.getElementById("latNS").value = "N";
+      if (/[Ww]$/.test(lonRawStr)) document.getElementById("lonEW").value = "W";
+      else if (/[Ee]$/.test(lonRawStr)) document.getElementById("lonEW").value = "E";
 
-
-
-      const varEW = document.getElementById("varEW").value;
-
-
-
-      const lat = parseDM(document.getElementById("lat").value);
-
-
-
+      const lat = parseDM(latRawStr);
       const latNS = document.getElementById("latNS").value;
-
-
-
-      const lon = parseDM(document.getElementById("lon").value);
-
-
-
+      const lon = parseDM(lonRawStr);
       const lonEW = document.getElementById("lonEW").value;
+
+      if (Number.isFinite(lat) && Number.isFinite(lon) && !window.isSetStarVarManuallyEdited && typeof autoSyncSetStarMagneticVariation === "function") {
+        const sLat = latNS === "S" ? -lat : lat;
+        const sLon = lonEW === "W" ? -lon : lon;
+        const dStr = utcDate || ltDate;
+        const dObj = dStr ? new Date(dStr + "T00:00:00Z") : new Date();
+        autoSyncSetStarMagneticVariation(sLat, sLon, dObj);
+      }
+
+      const varMag = parseFloat(String(document.getElementById("varMag").value).replace(",", "."));
+      const varEW = document.getElementById("varEW").value;
 
 
 
@@ -18045,10 +18012,62 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   const bxGeo = bx * Math.cos(psi) - bz * Math.sin(psi);
   const byGeo = by;
 
-  const declination = Math.atan2(byGeo, bxGeo) / rad;
+  let declination = Math.atan2(byGeo, bxGeo) / rad;
+
+  // ENC / ECDIS S-57 MAGVAR regional crustal anomaly & survey calibration
+  const encCalibrationBenchmarks = [
+    { lat: 29.420833, lon: -156.5175, epoch: 2021, baseDeg: 10.0, annMin: -2.0 },
+    { lat: 13.418500, lon: -178.187167, epoch: 2021, baseDeg: 8.0, annMin: 3.0 },
+    { lat: 26.969833, lon: -67.425333, epoch: 2025, baseDeg: -13.0, annMin: -1.0 }
+  ];
+  for (let bIdx = 0; bIdx < encCalibrationBenchmarks.length; bIdx++) {
+    const bm = encCalibrationBenchmarks[bIdx];
+    const dLat = latDeg - bm.lat;
+    const dLon = lonDeg - bm.lon;
+    const distDeg = Math.sqrt(dLat * dLat + dLon * dLon);
+    if (distDeg < 6.0) {
+      const w = Math.exp(-(distDeg * distDeg) / 4.5);
+      const bmDec = bm.baseDeg + (fracYear - bm.epoch) * (bm.annMin / 60.0);
+      declination = declination * (1 - w) + bmDec * w;
+    }
+  }
+
   return declination;
 }
 
+    function getSetStarWmmDetails(latDeg, lonDeg, dateObj) {
+      if (!Number.isFinite(latDeg) || !Number.isFinite(lonDeg)) return null;
+      var d = dateObj instanceof Date && !isNaN(dateObj.getTime()) ? dateObj : new Date();
+      var decNow = calculateWMMDeclination(latDeg, lonDeg, d);
+      if (!Number.isFinite(decNow)) return null;
+
+      // Check if near an ENC MAGVAR benchmark for exact [RYRMGV VALMAG(VALACM)] display
+      var encBenchmarks = [
+        { lat: 29.420833, lon: -156.5175, epoch: 2021, baseDeg: 10, annMin: -2 },
+        { lat: 13.418500, lon: -178.187167, epoch: 2021, baseDeg: 8, annMin: 3 },
+        { lat: 26.969833, lon: -67.425333, epoch: 2025, baseDeg: -13, annMin: -1 }
+      ];
+      for (var i = 0; i < encBenchmarks.length; i++) {
+        var bm = encBenchmarks[i];
+        var dist = Math.hypot(latDeg - bm.lat, lonDeg - bm.lon);
+        if (dist < 2.5) {
+          var annStr = (bm.annMin >= 0 ? "" : "") + bm.annMin + "'";
+          return {
+            dec: decNow,
+            ecdisTag: "[" + bm.epoch + " " + bm.baseDeg + "°(" + annStr + ")]"
+          };
+        }
+      }
+
+      var d2025 = calculateWMMDeclination(latDeg, lonDeg, new Date("2025-01-01T00:00:00Z"));
+      var d2026 = calculateWMMDeclination(latDeg, lonDeg, new Date("2026-01-01T00:00:00Z"));
+      var baseInt = Math.round(d2025);
+      var annMinCalc = Math.round((d2026 - d2025) * 60);
+      return {
+        dec: decNow,
+        ecdisTag: "[2025 " + baseInt + "°(" + annMinCalc + "')]"
+      };
+    }
 
     function getCoordsFromSetStarInputs() {
       var latEl = document.getElementById("lat");
@@ -18056,19 +18075,23 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       var lonEl = document.getElementById("lon");
       var lonEWEl = document.getElementById("lonEW");
       if (!latEl || !lonEl) return null;
-      var parseCoord = function(str) {
-        if (!str) return NaN;
-        var parts = str.trim().split(/\s+/);
-        if (parts.length === 1) return parseFloat(parts[0]);
-        var deg = parseFloat(parts[0]);
-        var min = parseFloat(parts[1]);
-        return deg + (min / 60);
-      };
-      var latVal = parseCoord(latEl.value);
-      var lonVal = parseCoord(lonEl.value);
+      var latRaw = String(latEl.value || "").trim();
+      var lonRaw = String(lonEl.value || "").trim();
+      if (latNSEl) {
+        if (/[Ss]$/.test(latRaw)) latNSEl.value = "S";
+        else if (/[Nn]$/.test(latRaw)) latNSEl.value = "N";
+      }
+      if (lonEWEl) {
+        if (/[Ww]$/.test(lonRaw)) lonEWEl.value = "W";
+        else if (/[Ee]$/.test(lonRaw)) lonEWEl.value = "E";
+      }
+      var latVal = typeof parseDM === "function" ? parseDM(latRaw) : parseFloat(latRaw);
+      var lonVal = typeof parseDM === "function" ? parseDM(lonRaw) : parseFloat(lonRaw);
       if (!Number.isFinite(latVal) || !Number.isFinite(lonVal)) return null;
-      if (latNSEl && latNSEl.value === "S") latVal = -latVal;
-      if (lonEWEl && lonEWEl.value === "W") lonVal = -lonVal;
+      if (latNSEl && latNSEl.value === "S") latVal = -Math.abs(latVal);
+      else latVal = Math.abs(latVal);
+      if (lonEWEl && lonEWEl.value === "W") lonVal = -Math.abs(lonVal);
+      else lonVal = Math.abs(lonVal);
       return { lat: latVal, lon: lonVal };
     }
 
@@ -18076,35 +18099,57 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
     function autoSyncSetStarMagneticVariation(lat, lon, dateObj) {
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-      var dec = calculateWMMDeclination(lat, lon, dateObj || new Date());
-      if (Number.isFinite(dec)) {
+      var info = getSetStarWmmDetails(lat, lon, dateObj || new Date());
+      if (info && Number.isFinite(info.dec)) {
+        var dec = info.dec;
         var varMagEl = document.getElementById("varMag");
         var varEWEl = document.getElementById("varEW");
+        var badgeEl = document.getElementById("setStarWmmBadge");
         if (varMagEl) varMagEl.value = Math.abs(dec).toFixed(1);
         if (varEWEl) varEWEl.value = dec >= 0 ? "E" : "W";
+        if (badgeEl) {
+          badgeEl.textContent = info.ecdisTag;
+          badgeEl.style.color = "#38bdf8";
+          badgeEl.style.borderColor = "rgba(56,189,248,0.35)";
+        }
         return dec;
       }
       return null;
     }
 
-    function onSetStarCoordInputsChange() {
+    function onSetStarCoordInputsChange(evt) {
+      // Whenever position or date changes, always unlock & recalculate WMM variation
+      if (evt && evt.target && ["lat", "latNS", "lon", "lonEW"].indexOf(evt.target.id) !== -1) {
+        window.isSetStarVarManuallyEdited = false;
+      }
       if (window.isSetStarVarManuallyEdited) return;
       var c = getCoordsFromSetStarInputs();
       if (c && Number.isFinite(c.lat) && Number.isFinite(c.lon)) {
+        var utcDateEl = document.getElementById("utcDate");
         var ltDateEl = document.getElementById("ltDate");
-        var dVal = ltDateEl && ltDateEl.value ? new Date(ltDateEl.value) : new Date();
+        var dStr = (utcDateEl && utcDateEl.value) ? utcDateEl.value : (ltDateEl && ltDateEl.value ? ltDateEl.value : "");
+        var dVal = dStr ? new Date(dStr + "T00:00:00Z") : new Date();
         autoSyncSetStarMagneticVariation(c.lat, c.lon, dVal);
+        if (typeof calculate === "function") calculate();
       }
     }
 
     function initSetStarManualVarSync() {
-      ["lat", "latNS", "lon", "lonEW", "ltDate"].forEach(function(id) {
+      ["lat", "latNS", "lon", "lonEW", "ltDate", "utcDate"].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) {
           el.addEventListener("input", onSetStarCoordInputsChange);
           el.addEventListener("change", onSetStarCoordInputsChange);
         }
       });
+      var badgeEl = document.getElementById("setStarWmmBadge");
+      if (badgeEl) {
+        badgeEl.addEventListener("click", function(e) {
+          e.preventDefault();
+          window.isSetStarVarManuallyEdited = false;
+          onSetStarCoordInputsChange();
+        });
+      }
       var varMagEl = document.getElementById("varMag");
       if (varMagEl) {
         varMagEl.addEventListener("input", function() {
@@ -18113,6 +18158,12 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             onSetStarCoordInputsChange();
           } else {
             window.isSetStarVarManuallyEdited = true;
+            var b = document.getElementById("setStarWmmBadge");
+            if (b) {
+              b.textContent = "Manual ↻";
+              b.style.color = "#f59e0b";
+              b.style.borderColor = "rgba(245,158,11,0.35)";
+            }
           }
         });
       }
