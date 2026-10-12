@@ -7,12 +7,12 @@
 
 // Global Overlay State
 const OVERLAY_STATES = {
-  depths: true,
-  isobaths: true,
-  notices: true,
+  depths: false,
+  isobaths: false,
+  notices: false,
   buoys: false,
-  weather: true,
-  route: true
+  weather: false,
+  route: false
 };
 
 let leafletPortDepthsLayer = null;
@@ -19692,13 +19692,17 @@ function initPortDepthsLayers(map) {
   if (!map || !window.L) return;
 
   if (!leafletPortDepthsLayer) {
-    leafletPortDepthsLayer = L.layerGroup().addTo(map);
+    leafletPortDepthsLayer = L.layerGroup();
+    if (OVERLAY_STATES.depths) leafletPortDepthsLayer.addTo(map);
   }
   if (!leafletIsobathsLayer) {
-    leafletIsobathsLayer = L.layerGroup().addTo(map);
+    leafletIsobathsLayer = L.layerGroup();
+    if (OVERLAY_STATES.isobaths) leafletIsobathsLayer.addTo(map);
   }
 
-  renderPortDepthsOnMap(map);
+  if (OVERLAY_STATES.depths) {
+    renderPortDepthsOnMap(map);
+  }
 }
 
 /**
@@ -20016,6 +20020,17 @@ function initExcelOverlayDock(map) {
     });
   }
 
+  // Sync initial dock tab visual states with OVERLAY_STATES (all OFF by default for fast map load)
+  ["notices", "depths", "weather", "route"].forEach((key) => {
+    const isAct = Boolean(OVERLAY_STATES[key]);
+    const tabEl = document.querySelector(`.excel-tab[data-overlay="${key}"]`);
+    if (tabEl) {
+      tabEl.classList.toggle("active", isAct);
+      const chk = tabEl.querySelector(".excel-tab-check");
+      if (chk) chk.textContent = isAct ? "✓" : "";
+    }
+  });
+
   // Restore or run weekly depth check on startup
   runWeeklyDepthAudit(false);
 }
@@ -20041,13 +20056,24 @@ function setOverlayActive(overlayKey, isActive, map = null) {
     // Toggle map layers: depths and isobaths toggle together
     if (overlayKey === "depths") {
       OVERLAY_STATES.isobaths = isActive;
+      if (isActive) {
+        renderPortDepthsOnMap(currentMap);
+      }
       if (leafletPortDepthsLayer) {
-        if (isActive) currentMap.addLayer(leafletPortDepthsLayer);
-        else currentMap.removeLayer(leafletPortDepthsLayer);
+        if (isActive) {
+          if (!currentMap.hasLayer(leafletPortDepthsLayer)) currentMap.addLayer(leafletPortDepthsLayer);
+        } else {
+          if (currentMap.hasLayer(leafletPortDepthsLayer)) currentMap.removeLayer(leafletPortDepthsLayer);
+          leafletPortDepthsLayer.clearLayers();
+        }
       }
       if (leafletIsobathsLayer) {
-        if (isActive) currentMap.addLayer(leafletIsobathsLayer);
-        else currentMap.removeLayer(leafletIsobathsLayer);
+        if (isActive) {
+          if (!currentMap.hasLayer(leafletIsobathsLayer)) currentMap.addLayer(leafletIsobathsLayer);
+        } else {
+          if (currentMap.hasLayer(leafletIsobathsLayer)) currentMap.removeLayer(leafletIsobathsLayer);
+          leafletIsobathsLayer.clearLayers();
+        }
       }
     } else if (overlayKey === "isobaths") {
       if (leafletIsobathsLayer) {
@@ -20065,28 +20091,25 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         else currentMap.removeLayer(seamarkLayer);
       }
     } else if (overlayKey === "weather") {
-      const wLayer = (typeof window.leafletWeatherLayer !== "undefined" && window.leafletWeatherLayer)
-        ? window.leafletWeatherLayer
-        : (typeof leafletWeatherLayer !== "undefined" ? leafletWeatherLayer : null);
-      if (wLayer) {
-        if (isActive) {
-          if (!currentMap.hasLayer(wLayer)) currentMap.addLayer(wLayer);
-        } else {
-          if (currentMap.hasLayer(wLayer)) currentMap.removeLayer(wLayer);
-        }
-      } else if (isActive && typeof window.renderWeatherOnMap === "function") {
+      if (typeof window.renderWeatherOnMap === "function") {
         window.renderWeatherOnMap(currentMap);
       }
     } else if (overlayKey === "route") {
       const rLayer = (typeof window.leafletRouteLayer !== "undefined" && window.leafletRouteLayer)
         ? window.leafletRouteLayer
         : (typeof leafletRouteLayer !== "undefined" ? leafletRouteLayer : null);
+      if (isActive && typeof activeRouteData !== "undefined" && activeRouteData && typeof window.renderRouteOnMap === "function") {
+        window.renderRouteOnMap(activeRouteData, false);
+      }
       if (rLayer) {
         if (isActive) {
           if (!currentMap.hasLayer(rLayer)) currentMap.addLayer(rLayer);
         } else {
           if (currentMap.hasLayer(rLayer)) currentMap.removeLayer(rLayer);
         }
+      }
+      if (typeof window.renderRouteBufferCorridorOnMap === "function") {
+        window.renderRouteBufferCorridorOnMap();
       }
     }
   }

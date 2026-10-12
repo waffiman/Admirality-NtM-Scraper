@@ -1387,14 +1387,15 @@ function renderWeatherOnMap(map = null) {
     leafletWeatherLayer = L.layerGroup();
   }
   window.leafletWeatherLayer = leafletWeatherLayer;
-  if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.weather !== false) {
-    if (!currentMap.hasLayer(leafletWeatherLayer)) {
-      leafletWeatherLayer.addTo(currentMap);
-    }
-  } else {
+  if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.weather === false) {
     if (currentMap.hasLayer(leafletWeatherLayer)) {
       currentMap.removeLayer(leafletWeatherLayer);
     }
+    leafletWeatherLayer.clearLayers();
+    return;
+  }
+  if (!currentMap.hasLayer(leafletWeatherLayer)) {
+    leafletWeatherLayer.addTo(currentMap);
   }
   leafletWeatherLayer.clearLayers();
 
@@ -2812,12 +2813,17 @@ function initNtMMap() {
       });
     }
 
-    leafletMarkersLayer = L.layerGroup().addTo(leafletMap);
+    leafletMarkersLayer = L.layerGroup();
+    if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.notices !== false) {
+      leafletMarkersLayer.addTo(leafletMap);
+    }
     leafletVesselLayer = L.layerGroup().addTo(leafletMap);
     if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.weather !== false) {
       leafletWeatherLayer.addTo(leafletMap);
     }
-    leafletRouteLayer.addTo(leafletMap);
+    if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.route !== false) {
+      leafletRouteLayer.addTo(leafletMap);
+    }
     window.leafletMap = leafletMap;
     window.leafletMarkersLayer = leafletMarkersLayer;
     window.leafletWeatherLayer = leafletWeatherLayer;
@@ -2831,18 +2837,27 @@ function initNtMMap() {
       const tier = getZoomLodTier(z);
       if (tier !== lastLodTier) {
         lastLodTier = tier;
-        renderNtMListAndMap(true);
-        renderWeatherOnMap(leafletMap);
+        if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.notices !== false) {
+          renderNtMListAndMap(true);
+        }
+        if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.weather !== false) {
+          renderWeatherOnMap(leafletMap);
+        }
       }
     });
 
-    renderWeatherOnMap(leafletMap);
+    if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.weather !== false) {
+      renderWeatherOnMap(leafletMap);
+    }
 
     try {
       const savedRouteStr = localStorage.getItem(ROUTE_STORAGE_KEY);
       if (savedRouteStr) {
         const savedRoute = JSON.parse(savedRouteStr);
-        renderRouteOnMap(savedRoute, false);
+        activeRouteData = savedRoute;
+        if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.route) {
+          renderRouteOnMap(savedRoute, false);
+        }
       }
     } catch (e) {}
 
@@ -3343,12 +3358,28 @@ function renderNtMListAndMap() {
     }
 
     if (!html) {
-      html = `
-        <div style="padding:2rem 1rem;text-align:center;color:var(--muted);font-size:0.8rem;">
-          No active items match the current filter or enabled overlays.<br>
-          <span style="font-size:0.72rem;opacity:0.8;">Enable overlays from the dock below or clear search filter.</span>
-        </div>
-      `;
+      const anyActiveOverlay = isNoticesActive || isDepthsActive || isWeatherActive || isRouteActive;
+      if (!anyActiveOverlay) {
+        html = `
+          <div style="padding:1.35rem 0.9rem;text-align:center;color:var(--muted);font-size:0.78rem;display:flex;flex-direction:column;gap:8px;">
+            <div style="color:#e2e8f0;font-weight:700;font-size:0.82rem;">⚡ Fast Chart Mode Active</div>
+            <div style="font-size:0.72rem;line-height:1.45;">Heavy overlays are off by default for instant chart loading. Click any layer below or in the bottom dock to display objects:</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
+              <button type="button" onclick="window.setOverlayActive('notices', true)" style="padding:6px 8px;border-radius:6px;border:1px solid rgba(249,115,22,0.4);background:rgba(249,115,22,0.12);color:#fdba74;font-size:0.7rem;font-weight:700;cursor:pointer;">+ NtM &amp; NAVTEX (${activeNotices.length})</button>
+              <button type="button" onclick="window.setOverlayActive('depths', true)" style="padding:6px 8px;border-radius:6px;border:1px solid rgba(6,182,212,0.4);background:rgba(6,182,212,0.12);color:#67e8f9;font-size:0.7rem;font-weight:700;cursor:pointer;">+ Port Depths (${typeof PORT_DEPTHS_DB !== 'undefined' ? PORT_DEPTHS_DB.length : 75})</button>
+              <button type="button" onclick="window.setOverlayActive('weather', true)" style="padding:6px 8px;border-radius:6px;border:1px solid rgba(234,179,8,0.4);background:rgba(234,179,8,0.12);color:#fde047;font-size:0.7rem;font-weight:700;cursor:pointer;">+ Weather (${((MARINE_WEATHER_STORE && MARINE_WEATHER_STORE.storms) || []).length} Cyclones)</button>
+              <button type="button" onclick="window.setOverlayActive('route', true)" style="padding:6px 8px;border-radius:6px;border:1px solid rgba(56,189,248,0.4);background:rgba(56,189,248,0.12);color:#7dd3fc;font-size:0.7rem;font-weight:700;cursor:pointer;">+ My Route</button>
+            </div>
+          </div>
+        `;
+      } else {
+        html = `
+          <div style="padding:2rem 1rem;text-align:center;color:var(--muted);font-size:0.8rem;">
+            No active items match the current filter or enabled overlays.<br>
+            <span style="font-size:0.72rem;opacity:0.8;">Enable overlays from the dock below or clear search filter.</span>
+          </div>
+        `;
+      }
     }
 
     listContainer.innerHTML = html;
@@ -6645,8 +6676,17 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
 const SETSAIL_AUTH_KEY = "setsail_auth_user_v1";
 const SETSAIL_GOOGLE_CLIENT_ID_KEY = "setsail_google_client_id";
-// Default configurable OAuth 2.0 Web Client ID (user can also paste their own in Settings)
-window.SETSAIL_GOOGLE_CLIENT_ID = localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || "";
+const DEFAULT_SETSAIL_GOOGLE_CLIENT_ID = "1072660724894-mbo68vdrl6t3a66s048qdhv8jb6sl6kd.apps.googleusercontent.com";
+
+function normalizeGoogleClientId(raw) {
+  const s = String(raw || "").trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "").trim();
+  return s || DEFAULT_SETSAIL_GOOGLE_CLIENT_ID;
+}
+
+window.SETSAIL_GOOGLE_CLIENT_ID = normalizeGoogleClientId(localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || DEFAULT_SETSAIL_GOOGLE_CLIENT_ID);
+try {
+  localStorage.setItem(SETSAIL_GOOGLE_CLIENT_ID_KEY, window.SETSAIL_GOOGLE_CLIENT_ID);
+} catch (e) {}
 
 function getSetSailAuthUser() {
   try {
@@ -6662,9 +6702,6 @@ function getUserHistoryStorageKey(email) {
   return `setsail_user_history_${clean}`;
 }
 
-/**
- * Persist all user work across SetSail into their Google Account profile bucket
- */
 function saveSetSailUserHistory() {
   const user = getSetSailAuthUser();
   if (!user || !user.email) return null;
@@ -6692,15 +6729,11 @@ function saveSetSailUserHistory() {
 }
 window.saveSetSailUserHistory = saveSetSailUserHistory;
 
-/**
- * Restore user work history when signing in with Google Account
- */
 function restoreSetSailUserHistory(email, silent = false) {
   if (!email) return false;
   try {
     const raw = localStorage.getItem(getUserHistoryStorageKey(email));
     if (!raw) {
-      // First login with this Google account: snapshot current workspace into their account
       saveSetSailUserHistory();
       return false;
     }
@@ -6732,7 +6765,7 @@ function restoreSetSailUserHistory(email, silent = false) {
     if (snap.activeRoute && Array.isArray(snap.activeRoute.waypoints) && snap.activeRoute.waypoints.length > 0) {
       activeRouteData = snap.activeRoute;
       localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(snap.activeRoute));
-      if (leafletMap && typeof renderRouteOnMap === "function") {
+      if (leafletMap && typeof renderRouteOnMap === "function" && typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.route) {
         renderRouteOnMap(snap.activeRoute, false);
       }
     }
@@ -6783,8 +6816,8 @@ function updateUserHistorySummaryUI(snapOverride = null) {
   const savedCnt = Array.isArray(newsProf.bookmarkedIds) ? newsProf.bookmarkedIds.length : 0;
 
   if (elRoute) elRoute.textContent = rName;
-  if (elEdits) elEdits.textContent = `${editsCnt} saved chart edits / cancellations`;
-  if (elNews) elNews.textContent = `${readCnt} read • ${savedCnt} bookmarked`;
+  if (elEdits) elEdits.textContent = `${editsCnt} saved chart edits`;
+  if (elNews) elNews.textContent = `${readCnt} read • ${savedCnt} saved`;
   if (elSyncTime) {
     const dt = (snap && snap.updatedAt) ? new Date(snap.updatedAt).toUTCString().replace("GMT", "UTC") : "Live Sync Active";
     elSyncTime.textContent = dt;
@@ -6824,7 +6857,7 @@ function syncSetSailAuthUI() {
           hudAvatar.innerHTML = initChar;
         }
       }
-      hudBtn.title = `Signed in with Google as ${user.email || disp} (Click to view synced history in Settings)`;
+      hudBtn.title = `Signed in with Google as ${user.email || disp}`;
     } else {
       hudBtn.classList.remove("logged-in");
       hudText.textContent = "LogIn";
@@ -6837,16 +6870,16 @@ function syncSetSailAuthUI() {
 
   const loggedOutBox = document.getElementById("settingsAuthLoggedOut");
   const loggedInBox = document.getElementById("settingsAuthLoggedIn");
-  const profileNameEl = document.getElementById("settingsAuthProfileName");
-  const profileEmailEl = document.getElementById("settingsAuthProfileEmail");
-  const profileAvatarEl = document.getElementById("settingsAuthProfileAvatar");
+  const profileNameEl = document.getElementById("settingsAuthProfileName") || document.getElementById("settingsProfileName");
+  const profileEmailEl = document.getElementById("settingsAuthProfileEmail") || document.getElementById("settingsProfileEmail");
+  const profileAvatarEl = document.getElementById("settingsAuthProfileAvatar") || document.getElementById("settingsProfileAvatar");
   const contactEmailEl = document.getElementById("contactEmail");
 
   if (user && (user.email || user.name)) {
     if (loggedOutBox) loggedOutBox.style.display = "none";
     if (loggedInBox) loggedInBox.style.display = "flex";
     if (profileNameEl) profileNameEl.textContent = user.name || user.email.split("@")[0];
-    if (profileEmailEl) profileEmailEl.textContent = `${user.email || ""} • Official Google Account Sync`;
+    if (profileEmailEl) profileEmailEl.textContent = `${user.email || ""} • Google Account Synced`;
     if (profileAvatarEl) {
       const initC = (user.name || user.email || "G").charAt(0).toUpperCase();
       if (user.picture) {
@@ -6876,12 +6909,9 @@ function decodeGoogleJwt(token) {
   }
 }
 
-/**
- * Non-blocking async loader for Google Identity Services (Mainland China safe)
- */
 function loadGoogleIdentityScriptAsync() {
   return new Promise((resolve) => {
-    if (window.google && window.google.accounts && window.google.accounts.id) {
+    if (window.google && window.google.accounts && (window.google.accounts.id || window.google.accounts.oauth2)) {
       resolve(true);
       return;
     }
@@ -6940,7 +6970,7 @@ function handleGoogleCredentialResponse(resp) {
 window.handleGoogleCredentialResponse = handleGoogleCredentialResponse;
 
 function renderOfficialGoogleButtonIfConfigured() {
-  const clientId = (localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID || "").trim();
+  const clientId = normalizeGoogleClientId(localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID);
   const container = document.getElementById("googleGsiButtonContainer");
   if (!clientId || !container) return;
   loadGoogleIdentityScriptAsync().then((loaded) => {
@@ -6960,7 +6990,7 @@ function renderOfficialGoogleButtonIfConfigured() {
         shape: "pill",
         text: "signin_with",
         logo_alignment: "left",
-        width: 280
+        width: 260
       });
     } catch (e) {
       console.warn("[SetSail Google OAuth] Render button warning:", e);
@@ -6975,7 +7005,6 @@ function initSetSailAuth() {
   }
   window._setsailAuthInitialized = true;
 
-  // 1. Homepage Top-Left "Account + LogIn" button click -> open Settings Google Account Card
   const hudBtn = document.getElementById("homeHudLeftLoginBtn");
   if (hudBtn) {
     hudBtn.addEventListener("click", (e) => {
@@ -6990,54 +7019,71 @@ function initSetSailAuth() {
     });
   }
 
-  // 2. Google OAuth Client ID Configuration Input inside Settings
-  const clientIdInput = document.getElementById("settingsGoogleClientIdInput");
-  const saveClientIdBtn = document.getElementById("btnSaveGoogleClientId");
-  if (clientIdInput) {
-    clientIdInput.value = localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID || "";
-  }
-  if (saveClientIdBtn && clientIdInput) {
-    saveClientIdBtn.addEventListener("click", () => {
-      const val = clientIdInput.value.trim();
-      if (val) {
-        localStorage.setItem(SETSAIL_GOOGLE_CLIENT_ID_KEY, val);
-        window.SETSAIL_GOOGLE_CLIENT_ID = val;
-        renderOfficialGoogleButtonIfConfigured();
-        if (typeof showSetSailToast === "function") {
-          showSetSailToast("Google OAuth 2.0 Client ID saved & activated!", "success");
-        }
-      } else {
-        localStorage.removeItem(SETSAIL_GOOGLE_CLIENT_ID_KEY);
-        window.SETSAIL_GOOGLE_CLIENT_ID = "";
-        if (typeof showSetSailToast === "function") {
-          showSetSailToast("Cleared custom Google OAuth Client ID.", "info");
-        }
-      }
-    });
-  }
-
-  // 3. Official Sign in with Google Button (GIS OAuth 2.0 Popup/OneTap + China/Offline Google Account Fallback)
   const googleBtn = document.getElementById("btnGoogleSignIn");
   if (googleBtn) {
     googleBtn.addEventListener("click", async () => {
-      const customClientId = (localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID || "").trim();
-      if (customClientId) {
-        const loaded = await loadGoogleIdentityScriptAsync();
-        if (loaded && window.google && window.google.accounts && window.google.accounts.id) {
+      const clientId = normalizeGoogleClientId(localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID);
+      const loaded = await loadGoogleIdentityScriptAsync();
+      if (loaded && window.google && window.google.accounts) {
+        // Prefer OAuth 2.0 Token Client popup for immediate userinfo retrieval
+        if (window.google.accounts.oauth2 && typeof window.google.accounts.oauth2.initTokenClient === "function") {
+          try {
+            const tokenClient = window.google.accounts.oauth2.initTokenClient({
+              client_id: clientId,
+              scope: "openid email profile",
+              callback: async (tokenResp) => {
+                if (tokenResp && tokenResp.access_token) {
+                  try {
+                    const uRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                      headers: { Authorization: `Bearer ${tokenResp.access_token}` }
+                    });
+                    if (uRes.ok) {
+                      const prof = await uRes.json();
+                      if (prof && prof.email) {
+                        setSetSailAuthUser({
+                          name: prof.name || prof.given_name || prof.email.split("@")[0],
+                          email: prof.email,
+                          picture: prof.picture || "",
+                          sub: prof.sub || "",
+                          provider: "google",
+                          signedInAt: new Date().toISOString()
+                        });
+                        if (typeof showSetSailToast === "function") {
+                          showSetSailToast(`Signed in with Google as ${prof.email}`, "success");
+                        }
+                        return;
+                      }
+                    }
+                  } catch (err) {
+                    console.warn("[SetSail Google UserInfo]", err);
+                  }
+                }
+                promptGoogleAccountChooserModal();
+              },
+              error_callback: () => {
+                promptGoogleAccountChooserModal();
+              }
+            });
+            tokenClient.requestAccessToken({ prompt: "select_account" });
+            return;
+          } catch (err) {
+            console.warn("[SetSail OAuth2 TokenClient]", err);
+          }
+        }
+        if (window.google.accounts.id) {
           try {
             window.google.accounts.id.initialize({
-              client_id: customClientId,
+              client_id: clientId,
               callback: handleGoogleCredentialResponse
             });
             window.google.accounts.id.prompt((notification) => {
               if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                // If OneTap prompt is suppressed by browser, trigger OAuth token/account chooser fallback
                 promptGoogleAccountChooserModal();
               }
             });
             return;
           } catch (err) {
-            console.warn("[SetSail Google OAuth]", err);
+            console.warn("[SetSail Google OneTap]", err);
           }
         }
       }
@@ -7045,7 +7091,6 @@ function initSetSailAuth() {
     });
   }
 
-  // 4. Export & Import User History Backup JSON
   const btnExportHist = document.getElementById("btnExportUserHistory");
   if (btnExportHist) {
     btnExportHist.addEventListener("click", () => {
@@ -7057,12 +7102,11 @@ function initSetSailAuth() {
         "application/json"
       );
       if (typeof showSetSailToast === "function") {
-        showSetSailToast("Exported Google Account Workspace History backup (.json)", "success");
+        showSetSailToast("Exported Google Account Workspace History (.json)", "success");
       }
     });
   }
 
-  // 5. Sign Out Button
   const signOutBtn = document.getElementById("btnSetSailSignOut");
   if (signOutBtn) {
     signOutBtn.addEventListener("click", () => {
@@ -7071,7 +7115,7 @@ function initSetSailAuth() {
       }
       setSetSailAuthUser(null);
       if (typeof showSetSailToast === "function") {
-        showSetSailToast("Signed out of Google Account. Workspace history safely stored.", "info");
+        showSetSailToast("Signed out of Google Account. Workspace history saved.", "info");
       }
     });
   }
@@ -7082,7 +7126,7 @@ function initSetSailAuth() {
 
 function promptGoogleAccountChooserModal() {
   const gEmail = prompt(
-    "Sign in with Google Account\nEnter your Google Email (@gmail.com or Google Workspace email) to sync & restore your SetSail history:",
+    "Sign in with Google Account\nEnter your Google Email (@gmail.com or Workspace email) to sync & restore your SetSail history:",
     "bridge.vesta@gmail.com"
   );
   if (!gEmail || !gEmail.trim()) return;
@@ -7112,10 +7156,6 @@ window.ROUTE_CORRIDOR_FILTER_ENABLED = false;
 window.ROUTE_CORRIDOR_BUFFER_NM = parseInt(localStorage.getItem("setsail_route_buffer_nm") || "25", 10) || 25;
 let leafletRouteBufferLayer = null;
 
-/**
- * Calculate minimum cross-track / segment distance (in Nautical Miles) from (lat, lon)
- * to any segment of activeRouteData.waypoints
- */
 function getMinDistanceToActiveRouteNM(lat, lon) {
   if (!activeRouteData || !Array.isArray(activeRouteData.waypoints) || activeRouteData.waypoints.length === 0) {
     return Infinity;
@@ -7136,11 +7176,8 @@ function getMinDistanceToActiveRouteNM(lat, lon) {
 window.getMinDistanceToActiveRouteNM = getMinDistanceToActiveRouteNM;
 
 function pointToSegmentDistanceNM(pLat, pLon, aLat, aLon, bLat, bLon) {
-  // Equirectangular local projection in NM around segment midpoint
   const midLatRad = ((aLat + bLat) * 0.5) * Math.PI / 180;
   const cosLat = Math.max(0.15, Math.cos(midLatRad));
-  const ax = 0;
-  const ay = 0;
   const bx = ((bLon - aLon) * 60) * cosLat;
   const by = (bLat - aLat) * 60;
   const px = ((pLon - aLon) * 60) * cosLat;
@@ -7187,9 +7224,6 @@ function doesNoticeIntersectRouteCorridor(item) {
 }
 window.doesNoticeIntersectRouteCorridor = doesNoticeIntersectRouteCorridor;
 
-/**
- * Draw visual buffer zone corridor around the active route on the Leaflet map
- */
 function renderRouteBufferCorridorOnMap() {
   if (!leafletMap) return;
   if (!leafletRouteBufferLayer) {
@@ -7205,7 +7239,6 @@ function renderRouteBufferCorridorOnMap() {
   const wpts = activeRouteData.waypoints;
   const isFilterOn = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
 
-  // Build left/right offset corridor polygon around route segments
   if (wpts.length >= 2) {
     const leftSide = [];
     const rightSide = [];
@@ -7220,7 +7253,6 @@ function renderRouteBufferCorridorOnMap() {
       const len = Math.hypot(dx, dy) || 1;
       dx /= len;
       dy /= len;
-      // Normal vector (-dy, dx)
       const degLatOffset = (-dy) * (bufNm / 60);
       const degLonOffset = (dx * (bufNm / 60)) / cosLat;
       leftSide.push([cur.lat + degLatOffset, cur.lon + degLonOffset]);
@@ -7240,15 +7272,13 @@ function renderRouteBufferCorridorOnMap() {
 }
 window.renderRouteBufferCorridorOnMap = renderRouteBufferCorridorOnMap;
 
-/**
- * Update the floating Route Snapshot & Corridor Buffer Mini Window (#ntmRouteMiniWindow)
- */
 function updateRouteMiniWindowUI() {
   const win = document.getElementById("ntmRouteMiniWindow");
   if (!win) return;
 
   const hasRoute = Boolean(activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0);
-  if (!hasRoute) {
+  const isRouteVisible = typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.route !== false;
+  if (!hasRoute || !isRouteVisible) {
     win.style.display = "none";
     return;
   }
@@ -7264,7 +7294,6 @@ function updateRouteMiniWindowUI() {
     activeRouteData.totalDistanceNM = totalDist;
   }
 
-  // Count how many active notices + ports fall inside the current buffer
   const ntmHits = (typeof NTM_STORE !== "undefined" ? NTM_STORE : []).filter(n => !n.isCancelled && n.status !== "CANCELLED" && doesNoticeIntersectRouteCorridor(n)).length;
   const portHits = (typeof PORT_DEPTHS_DB !== "undefined" ? PORT_DEPTHS_DB : []).filter(p => {
     const c = p.approachCoords || p.coords;
@@ -7301,7 +7330,6 @@ function initRouteMiniWindow() {
   const rngBuffer = document.getElementById("rngRouteBufferNm");
   const lblBuffer = document.getElementById("lblRouteBufferNm");
 
-  // Draggable pointer controller inside #ntmMapContainer
   if (header) {
     let dragging = false;
     let startX = 0;
@@ -7358,8 +7386,8 @@ function initRouteMiniWindow() {
     updateRouteMiniWindowUI();
     renderRouteBufferCorridorOnMap();
     if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
-    if (typeof renderPortDepthsOnMap === "function" && leafletMap) renderPortDepthsOnMap(leafletMap);
-    if (typeof renderWeatherOnMap === "function" && leafletMap) renderWeatherOnMap(leafletMap);
+    if (typeof renderPortDepthsOnMap === "function" && leafletMap && OVERLAY_STATES.depths) renderPortDepthsOnMap(leafletMap);
+    if (typeof renderWeatherOnMap === "function" && leafletMap && OVERLAY_STATES.weather) renderWeatherOnMap(leafletMap);
     if (typeof saveSetSailUserHistory === "function") saveSetSailUserHistory();
   };
 
@@ -7394,12 +7422,34 @@ window.initRouteMiniWindow = initRouteMiniWindow;
 
 
 /* ==========================================================================
-   SETNEWS (#tab-news) — GLOBAL MARITIME NEWS & "FOR YOU" RECOMMENDATION ENGINE
+   SETNEWS (#tab-news) & HOMEPAGE SLIDE #3 — MARITIME INTELLIGENCE ENGINE
    ========================================================================== */
-let SETNEWS_ARTICLES = [];
+const DEFAULT_SETNEWS_ARTICLES = [{"id": "SN-A8B4650176", "title": "Iran Weighs US Response as Hormuz Reopening Talks Stall", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "USA / Maritime Tech", "url": "https://www.marinelink.com/news/iran-weighs-us-response-hormuz-reopening-543600", "publishedAt": "2026-10-12T09:29:19Z", "category": "Geopolitics & Chokepoints", "region": "Strait of Hormuz & Persian Gulf", "regions": ["Strait of Hormuz & Persian Gulf"], "tags": ["hormuz"], "coords": [26.56, 56.25], "navarea": "IX", "image": "https://images.marinelink.com/images/maritime/w150/mproduction-adobe-stock-174245.jpeg", "summary": "Iran is still reviewing a US response to its proposal regarding the reopening of the Strait of Hormuz and will reply to Washington via intermediaries when the review is over, foreign ministry spokesperson Esmaeil Baghaei said on Monday.Baghaei…", "body": "Iran is still reviewing a US response to its proposal regarding the reopening of the Strait of Hormuz and will reply to Washington via intermediaries when the review is over, foreign ministry spokesperson Esmaeil Baghaei said on Monday.Baghaei…", "takeaways": ["Operational Area: Strait of Hormuz & Persian Gulf.", "Assess strait transit security posture, war-risk advisories, and routing alternatives."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-23E6D8EAFB", "title": "Chinese buyers snap up capesizes", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/chinese-buyers-snap-up-capesizes/", "publishedAt": "2026-10-12T09:24:00Z", "category": "Ports & Terminals", "region": "Baltic Sea & Northern Europe", "regions": ["Baltic Sea & Northern Europe", "China & East Asia"], "tags": ["tanker", "port"], "coords": [57.5, 19.5], "navarea": "I", "image": "https://splash247.com/wp-content/uploads/2021/08/Shanghai-free-pic-300x180.jpg", "summary": "While tankers have dominated headlines in October, Chinese buyers are quietly putting money on the table for more capesize tonnage, emerging behind some of the dry bulk market’s most eye-catching deals. Estonian outfit Klip Marine is reportedly exiting the segment by selling the Ekaterini V (173,555 dwt, built 2012...", "body": "While tankers have dominated headlines in October, Chinese buyers are quietly putting money on the table for more capesize tonnage, emerging behind some of the dry bulk market’s most eye-catching deals. Estonian outfit Klip Marine is reportedly exiting the segment by selling the Ekaterini V (173,555 dwt, built 2012 at Bohai Shipbuilding) to Chinese buyers …", "takeaways": ["While tankers have dominated headlines in October, Chinese buyers are quietly putting money on the table for more capesize tonnage, emerging behind some of the dry bulk market’s most eye-catching deals.", "Estonian outfit Klip Marine is reportedly exiting the segment by selling the Ekaterini V (173,555 dwt, built 2012 at Bohai Shipbuilding) to Chinese buyers …", "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-714B4A9FAE", "title": "Sky-high tanker rates change crude trade flows", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "UK / Global", "url": "https://www.seatrade-maritime.com/tankers/sky-high-tanker-rates-change-crude-trade-flows", "publishedAt": "2026-10-12T09:20:53Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["tanker"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt2471fe42bf6186ed/698b447382cad7f7f5eec669/Dynacom-tankers-Dynacom.jpg?width=720&quality=80&disable=upscale", "summary": "As average VLCC earnings hit $805,000 per day globally Asian oil refiners are looking at alternative sources of crude oil", "body": "As average VLCC earnings hit $805,000 per day globally Asian oil refiners are looking at alternative sources of crude oil", "takeaways": ["As average VLCC earnings hit $805,000 per day globally Asian oil refiners are looking at alternative sources of crude oil", "Operational Area: Global Maritime.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-C1BAB294DB", "title": "ADNOC broadens Asian horizons with Gulf Group LNG deal", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Netherlands / Energy", "url": "https://offshore-energy.biz/2026/10/12/adnoc-broadens-asian-horizons-with-gulf-group-lng-deal", "publishedAt": "2026-10-12T09:02:19Z", "category": "Shipping & Tankers", "region": "Strait of Hormuz & Persian Gulf", "regions": ["Strait of Hormuz & Persian Gulf", "Red Sea & Bab el-Mandeb"], "tags": ["lng"], "coords": [26.56, 56.25], "navarea": "IX", "image": "https://offshore-energy.biz/api/media/file/wp-import-1784734763330-1024x612-1024x612.jpg?prefix=media", "summary": "ADNOC has inked a multi-year agreement with Gulf Group to ship 2 million tonnes of liquefied natural gas (LNG) starting in 2027.", "body": "ADNOC has inked a multi-year agreement with Gulf Group to ship 2 million tonnes of liquefied natural gas (LNG) starting in 2027.", "takeaways": ["ADNOC has inked a multi-year agreement with Gulf Group to ship 2 million tonnes of liquefied natural gas (LNG) starting in 2027.", "Operational Area: Strait of Hormuz & Persian Gulf, Red Sea & Bab el-Mandeb.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-F14BFE8705", "title": "HAIAN BETA makes maiden Chennai call", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Europe / Liner & Ports", "url": "https://container-news.com/haian-beta-makes-maiden-chennai-call/", "publishedAt": "2026-10-12T09:00:47Z", "category": "Ports & Terminals", "region": "Singapore & Malacca Strait", "regions": ["Singapore & Malacca Strait", "China & East Asia", "India & Indian Ocean"], "tags": ["container", "port", "china"], "coords": [1.26, 103.82], "navarea": "XI", "image": "https://container-news.com/wp-content/uploads/2026/10/03-300x207.jpg", "summary": "M/V HAIAN BETA made its maiden call at Chennai Port on 3 October 2026, marking the launch of Hai An’s direct CVI service between Vietnam and India. The vessel is the first ship deployed on the new service by Hai An Container Transport Company Limited (HACT), a subsidiary of Hai An Transport and Stevedoring Joint […]", "body": "M/V HAIAN BETA made its maiden call at Chennai Port on 3 October 2026, marking the launch of Hai An’s direct CVI service between Vietnam and India. The vessel is the first ship deployed on the new service by Hai An Container Transport Company Limited (HACT), a subsidiary of Hai An Transport and Stevedoring Joint Stock Company (HATS). A welcome ceremony for the HAIAN BETA Chennai call took place at Chennai Container Terminal, which is operated by DP World. Representatives attending the event included Sachin S. Kurve, Chairperson of Chennai Port Authority, and Vu Thanh Hai, Chairman of HACT and HATS. Representatives from DP World Chennai and Samsara Shipping, Hai An’s general agent in India, also participated. CVI service links four Asian ports The CVI service operates monthly with the following rotation: Nansha – Hai Phong – Port Klang West – Chennai. The new service establishes an additional direct container shipping connection between Vietnam and India. It also links both markets with major trading hubs in southern China and Malaysia. Hai An said the CVI service is designed to support growing shipping requirements between Vietnam and India. Bilateral trade between the two countries reached US$13.4 billion during the first eight months of 2026, representing a year-on-year increase of 25%. Chennai Port Authority noted that the continued expansion of trade between India and Vietnam is creating further opportunities for container shipping connections between the two markets. The HAIAN BETA Chennai call represents another step in Hai An’s expansion into international container shipping services.", "takeaways": ["M/V HAIAN BETA made its maiden call at Chennai Port on 3 October 2026, marking the launch of Hai An’s direct CVI service between Vietnam and India.", "The vessel is the first ship deployed on the new service by Hai An Container Transport Company Limited (HACT), a subsidiary of Hai An Transport and Stevedoring Joint Stock Company (HATS).", "A welcome ceremony for the HAIAN BETA Chennai call took place at Chennai Container Terminal, which is operated by DP World."], "readingMinutes": 4, "readMinutes": 4}, {"id": "SN-175060C5B0", "title": "A platform launched to consolidate European port innovation knowledge", "source": "SetSail Metocean Watch", "sourceIcon": "🌀", "sourceRegion": "Europe / Liner & Ports", "url": "https://container-news.com/a-platform-launched-to-consolidate-european-port-innovation-knowledge/", "publishedAt": "2026-10-12T08:00:40Z", "category": "Weather & Cyclones", "region": "Rotterdam & North Sea", "regions": ["Rotterdam & North Sea", "Singapore & Malacca Strait"], "tags": ["port"], "coords": [51.95, 4.14], "navarea": "I", "image": "https://container-news.com/wp-content/uploads/2019/06/digital-300x153.jpg", "summary": "The Green Innovation Compass has been launched as a publicly accessible knowledge platform consolidating European expertise on innovative technologies and solutions for the port ecosystem, providing independent and practical insights for all port stakeholders. The platform is one of the key legacy outcomes of the EU...", "body": "The Green Innovation Compass has been launched as a publicly accessible knowledge platform consolidating European expertise on innovative technologies and solutions for the port ecosystem, providing independent and practical insights for all port stakeholders. The platform is one of the key legacy outcomes of the EU Horizon 2020-funded MAGPIE project, in which the Port of Rotterdam participated alongside ports, companies, knowledge institutions and governments collaborating on innovative solutions for the port of the future. A central lesson from the MAGPIE project was that knowledge about port innovations is often available in fragmented form across different organisations and geographies. The Green Innovation Compass addresses this gap by bringing together research findings, demonstration project results and practical experiences from ports, companies and knowledge institutions across Europe on a single accessible platform. To ensure the long-term continuity of the knowledge platform following the completion of the MAGPIE project, ALICE, the Alliance for Logistics Innovation through Collaboration in Europe, has taken on the role of legacy partner and will maintain and develop the platform going forward.", "takeaways": ["A central lesson from the MAGPIE project was that knowledge about port innovations is often available in fragmented form across different organisations and geographies.", "Operational Area: Rotterdam & North Sea, Singapore & Malacca Strait.", "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."], "readingMinutes": 3, "readMinutes": 3}, {"id": "SN-10B206FB12", "title": "Ship recycling drought leaves record ageing fleet afloat", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/ship-recycling-drought-leaves-record-ageing-fleet-afloat/", "publishedAt": "2026-10-12T08:00:00Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["shipping", "global"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://splash247.com/wp-content/uploads/2016/04/ShipBreaking_demolition_Bangladesh-300x218.jpg", "summary": "Ship recycling has sunk into its longest sustained slump in more than half a century, just as the global merchant fleet accumulates an unprecedented amount of ageing tonnage. Clarksons Research calculates that just 273 ships of 5.5m gt, equivalent to around 8m dwt, were sold for demolition in the first nine months of...", "body": "Ship recycling has sunk into its longest sustained slump in more than half a century, just as the global merchant fleet accumulates an unprecedented amount of ageing tonnage. Clarksons Research calculates that just 273 ships of 5.5m gt, equivalent to around 8m dwt, were sold for demolition in the first nine months of 2026, 13% …", "takeaways": ["Ship recycling has sunk into its longest sustained slump in more than half a century, just as the global merchant fleet accumulates an unprecedented amount of ageing tonnage.", "Clarksons Research calculates that just 273 ships of 5.5m gt, equivalent to around 8m dwt, were sold for demolition in the first nine months of 2026, 13% …", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-45F283530B", "title": "EU and China reach interim trade deal on hybrid vehicle exports", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "UK / Global", "url": "https://www.seatrade-maritime.com/regulations/eu-and-china-reach-interim-trade-deal-on-hybrid-vehicle-exports", "publishedAt": "2026-10-12T07:55:59Z", "category": "Ports & Terminals", "region": "China & East Asia", "regions": ["China & East Asia"], "tags": ["port", "china"], "coords": [30.6, 122.1], "navarea": "XI", "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt81615f513d94ecdb/694a686cbbf6bce0f41120f1/Shenzhen_port_BYD.JPG?width=720&quality=80&disable=upscale", "summary": "China and Europe are likely to cut Chinese hybrid vehicle exports by half", "body": "China and Europe are likely to cut Chinese hybrid vehicle exports by half", "takeaways": ["China and Europe are likely to cut Chinese hybrid vehicle exports by half", "Operational Area: China & East Asia.", "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-C7704D97E3", "title": "Shipping’s extraordinary boom refuses to peak", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/shippings-extraordinary-boom-refuses-to-peak/", "publishedAt": "2026-10-12T07:45:00Z", "category": "Ports & Terminals", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["tanker", "container"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://splash247.com/wp-content/uploads/2021/11/Monaco-champagne-300x180.jpg", "summary": "Global shipping earnings have reached another extraordinary milestone, with Clarksons Research’s cross-sector ClarkSea Index surging 12% in a week to an unprecedented $84,951 a day, its fifth consecutive all-time high. The index, a widely followed overall earnings barometer, measures average daily earnings across...", "body": "Global shipping earnings have reached another extraordinary milestone, with Clarksons Research’s cross-sector ClarkSea Index surging 12% in a week to an unprecedented $84,951 a day, its fifth consecutive all-time high. The index, a widely followed overall earnings barometer, measures average daily earnings across tankers, bulk carriers, containerships and gas carriers, weighted by vessel numbers in …", "takeaways": ["Global shipping earnings have reached another extraordinary milestone, with Clarksons Research’s cross-sector ClarkSea Index surging 12% in a week to an unprecedented $84,951 a day, its fifth consecutive all-time high.", "The index, a widely followed overall earnings barometer, measures average daily earnings across tankers, bulk carriers, containerships and gas carriers, weighted by vessel numbers in …", "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-87DDE30C20", "title": "Tanker war spreads across Gulf", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/tanker-war-spreads-across-gulf/", "publishedAt": "2026-10-12T07:30:15Z", "category": "Geopolitics & Chokepoints", "region": "Strait of Hormuz & Persian Gulf", "regions": ["Strait of Hormuz & Persian Gulf", "India & Indian Ocean"], "tags": ["tanker", "port", "hormuz"], "coords": [26.56, 56.25], "navarea": "IX", "image": "https://splash247.com/wp-content/uploads/2026/03/US-Central-Command-Epic-Fury-Iran-300x180.jpeg", "summary": "Attacks on commercial shipping are spreading across the Gulf region, with two Indian seafarers missing after a drone struck a tanker off Oman on Sunday and another tanker hit by a projectile while exiting the Strait of Hormuz. The Nicaragua-flagged Petro Dolphin was attacked at Sohar Anchorage on Sunday. India’s...", "body": "Attacks on commercial shipping are spreading across the Gulf region, with two Indian seafarers missing after a drone struck a tanker off Oman on Sunday and another tanker hit by a projectile while exiting the Strait of Hormuz. The Nicaragua-flagged Petro Dolphin was attacked at Sohar Anchorage on Sunday. India’s minister for ports, shipping and …", "takeaways": ["The Nicaragua-flagged Petro Dolphin was attacked at Sohar Anchorage on Sunday.", "India’s minister for ports, shipping and …", "Assess strait transit security posture, war-risk advisories, and routing alternatives."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-E3612BDF46", "title": "Danaos and Cetus push dry bulk listing plans in Oslo", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/danaos-plots-norwegian-listing-for-bulker-business/", "publishedAt": "2026-10-12T07:15:00Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["shipping", "global"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://splash247.com/wp-content/uploads/2026/02/John-Coustas-Danaos-300x180.jpg", "summary": "Oslo’s shipping listing pipeline is filling up, with Greek owner Danaos exploring a carve-out of its large-bulker business while handysize specialist Cetus Maritime has hired three banks for a proposed Euronext Growth Oslo float. Cetus has appointed Clarksons Securities, DNB Carnegie and Nordea to advise on the...", "body": "Oslo’s shipping listing pipeline is filling up, with Greek owner Danaos exploring a carve-out of its large-bulker business while handysize specialist Cetus Maritime has hired three banks for a proposed Euronext Growth Oslo float. Cetus has appointed Clarksons Securities, DNB Carnegie and Nordea to advise on the listing process, which would be preceded by a …", "takeaways": ["Cetus has appointed Clarksons Securities, DNB Carnegie and Nordea to advise on the listing process, which would be preceded by a …", "Operational Area: Global Maritime.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-A94357A23C", "title": "TGS-Galdor AI partnership targeting overlooked or underestimated North Sea exploration plays", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Netherlands / Energy", "url": "https://offshore-energy.biz/2026/10/12/tgs-galdor-ai-partnership-targeting-overlooked-or-underestimated-north-sea-exploration-plays", "publishedAt": "2026-10-12T07:10:52Z", "category": "Shipping & Tankers", "region": "Rotterdam & North Sea", "regions": ["Rotterdam & North Sea"], "tags": ["shipping", "rotterdam"], "coords": [51.95, 4.14], "navarea": "I", "image": "https://offshore-energy.biz/api/media/file/wp-import-1784731454324-860x484-860x484.jpg?prefix=media", "summary": "Galdor Exploration has forged a pact with TGS, combining subsurface expertise with cutting-edge AI to rewrite the playbook for North Sea discoveries.", "body": "Galdor Exploration has forged a pact with TGS, combining subsurface expertise with cutting-edge AI to rewrite the playbook for North Sea discoveries.", "takeaways": ["Galdor Exploration has forged a pact with TGS, combining subsurface expertise with cutting-edge AI to rewrite the playbook for North Sea discoveries.", "Operational Area: Rotterdam & North Sea.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-A1A888C7AE", "title": "Asian maritime security in Q3 – Theft and armed robbery trending downward", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "UK / Global", "url": "https://www.seatrade-maritime.com/security/asian-maritime-security-in-q3-theft-and-armed-robbery-trending-downward", "publishedAt": "2026-10-12T07:06:30Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["shipping", "global"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt1b16f4525961c046/6acc89384e2c21fb3a075f8e/Risk_Intelligence_graphic_Q3_2026.jpg?width=720&quality=80&disable=upscale", "summary": "Risk Intelligence examines security incidents and related concerns on Asian waters during the third quarter of 2026", "body": "Risk Intelligence examines security incidents and related concerns on Asian waters during the third quarter of 2026", "takeaways": ["Risk Intelligence examines security incidents and related concerns on Asian waters during the third quarter of 2026", "Operational Area: Global Maritime.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-72B608513C", "title": "Port Houston completes Project 11 Houston ship channel expansion", "source": "SetSail Hydrographic & Safety Desk", "sourceIcon": "🧭", "sourceRegion": "Europe / Liner & Ports", "url": "https://container-news.com/port-houston-completes-project-11-houston-ship-channel-expansion/", "publishedAt": "2026-10-12T07:00:14Z", "category": "Navigation & Safety", "region": "US Gulf & Port of Houston", "regions": ["US Gulf & Port of Houston", "Singapore & Malacca Strait"], "tags": ["port", "houston", "safety"], "coords": [29.35, -94.78], "navarea": "IV", "image": "https://container-news.com/wp-content/uploads/2026/10/Στιγμιότυπο-οθόνης-2026-10-12-083830-300x198.png", "summary": "Port Houston joined federal, state and local officials and industry partners on October 8 to celebrate the completion of Port Houston-led segments of Project 11, the eleventh major expansion of the Houston Ship Channel and one of the most significant infrastructure projects in the waterway’s history. The completed...", "body": "Port Houston joined federal, state and local officials and industry partners on October 8 to celebrate the completion of Port Houston-led segments of Project 11, the eleventh major expansion of the Houston Ship Channel and one of the most significant infrastructure projects in the waterway’s history. The completed work widened the channel by 170 feet along its Galveston Bay reach, from 530 feet to 700 feet, increasing safety and efficiency along the nation’s busiest waterway. The expanded channel is already delivering operational benefits. In 2025, the US Coast Guard, US Army Corps of Engineers and Houston Pilots recognised the widened 700-foot channel from Bolivar Roads to Morgans Point, effectively removing daylight restrictions for larger vessels transiting Galveston Bay and reducing the need for oversized ships to wait at berth or anchor before sailing. The project was delivered through an innovative funding partnership in which Port Houston and industry partners agreed to contribute financially, cutting years from the delivery timeline. Port Houston completed its portion on time, on budget and faster than any comparable project in the United States. The remainder of project funding came from several federal sources. Project 11 also created lasting environmental benefits through beneficial reuse of all suitable dredged material, producing 10 acres of bird islands, 324 acres of oyster reefs and 800 acres of marsh habitat. Port Houston CEO Charlie Jenkins described the completion as especially meaningful, recalling when the project was still a concept and crediting the collaboration between Port Houston, the Army Corps, industry and elected leaders in finding a way to deliver it. Commission Chairman Ric Campo highlighted the project as transformational and praised the", "takeaways": ["The completed work widened the channel by 170 feet along its Galveston Bay reach, from 530 feet to 700 feet, increasing safety and efficiency along the nation’s busiest waterway.", "The expanded channel is already delivering operational benefits.", "The project was delivered through an innovative funding partnership in which Port Houston and industry partners agreed to contribute financially, cutting years from the delivery timeline."], "readingMinutes": 4, "readMinutes": 4}, {"id": "SN-4EF07AF2D3", "title": "Chinese shipping investor makes play for asphalt tanker owner Xin Yuan", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/chinese-shipping-investor-makes-play-for-asphalt-tanker-owner-xin-yuan/", "publishedAt": "2026-10-12T06:45:00Z", "category": "Shipping & Tankers", "region": "China & East Asia", "regions": ["China & East Asia"], "tags": ["tanker"], "coords": [30.6, 122.1], "navarea": "XI", "image": "https://splash247.com/wp-content/uploads/2026/10/XIN-YUAN-Asphalt-tanker-300x180.jpg", "summary": "Chinese shipping entrepreneur Liu Jichun is seeking control of Hong Kong-listed asphalt tanker operator Xin Yuan Enterprises through a proposed cash takeover worth up to HK$771m ($99m). Liu’s investment vehicle Ocean Vivo has announced a voluntary conditional offer of HK$2.21 per share for the stock it does not...", "body": "Chinese shipping entrepreneur Liu Jichun is seeking control of Hong Kong-listed asphalt tanker operator Xin Yuan Enterprises through a proposed cash takeover worth up to HK$771m ($99m). Liu’s investment vehicle Ocean Vivo has announced a voluntary conditional offer of HK$2.21 per share for the stock it does not already own, valuing Xin Yuan’s entire equity …", "takeaways": ["Chinese shipping entrepreneur Liu Jichun is seeking control of Hong Kong-listed asphalt tanker operator Xin Yuan Enterprises through a proposed cash takeover worth up to HK$771m ($99m).", "Liu’s investment vehicle Ocean Vivo has announced a voluntary conditional offer of HK$2.21 per share for the stock it does not already own, valuing Xin Yuan’s entire equity …", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-3473A6D6E2", "title": "Shell and Equinor fuel $1.1 billion backlog uptick for Transocean", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Netherlands / Energy", "url": "https://offshore-energy.biz/2026/10/12/shell-and-equinor-fuel-dollar11-billion-backlog-uptick-for-transocean", "publishedAt": "2026-10-12T06:32:28Z", "category": "Shipping & Tankers", "region": "Rotterdam & North Sea", "regions": ["Rotterdam & North Sea"], "tags": ["shipping", "rotterdam"], "coords": [51.95, 4.14], "navarea": "I", "image": "https://offshore-energy.biz/api/media/file/wp-import-1784730348497-1024x652-1024x652.jpg?prefix=media", "summary": "Transocean gets its hands on a North Sea contract for a semi-submersible with Shell and a final approval for three rigs from Equinor.", "body": "Transocean gets its hands on a North Sea contract for a semi-submersible with Shell and a final approval for three rigs from Equinor.", "takeaways": ["Transocean gets its hands on a North Sea contract for a semi-submersible with Shell and a final approval for three rigs from Equinor.", "Operational Area: Rotterdam & North Sea.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-91D60171ED", "title": "Readers Speak: Smaller vessels gain favour in container ship orders", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Europe / Liner & Ports", "url": "https://container-news.com/readers-speak-smaller-vessels-gain-favour-in-container-ship-orders/", "publishedAt": "2026-10-12T06:00:45Z", "category": "Ports & Terminals", "region": "Panama Canal & Caribbean", "regions": ["Panama Canal & Caribbean", "Singapore & Malacca Strait", "Brazil & South Atlantic"], "tags": ["container", "port", "panama"], "coords": [9.08, -79.68], "navarea": "IV", "image": "https://container-news.com/wp-content/uploads/2026/10/Χρυσαφένιο-Λιμάνι-με-Πλοία-Κοντέινερ-cleaned-300x169.png", "summary": "As container shipping lines continue to evaluate their fleet expansion strategies, the question of which vessel sizes deserve priority in newbuilding orders remains an important industry consideration. The latest Readers Speak poll by Container News asked readers: “Which vessel size should container lines focus on...", "body": "As container shipping lines continue to evaluate their fleet expansion strategies, the question of which vessel sizes deserve priority in newbuilding orders remains an important industry consideration. The latest Readers Speak poll by Container News asked readers: “Which vessel size should container lines focus on for new orders?” The results reveal a clear preference for smaller and medium-sized container ships, with Panamax/Post-Panamax and Feeder/Feedermax vessels attracting the strongest support. Meanwhile, Ultra Large Container Vessels (ULCVs) received comparatively limited backing. The findings suggest that readers see considerable value in fleet flexibility and the ability to serve different shipping markets, rather than concentrating new investment primarily on the largest container ships. Panamax and Post-Panamax vessels attract strong support Panamax and Post-Panamax vessels emerged as a leading choice in the latest Readers Speak poll. Their strong showing may reflect the importance readers place on vessels that can operate across a variety of trade routes and service networks. Compared with the largest container ships, these vessel segments offer different deployment possibilities, potentially making them attractive to shipping lines seeking to balance capacity with operational flexibility. The preference also suggests that readers may view medium-sized tonnage as an important component of future fleet development. Rather than prioritising maximum carrying capacity alone, the results point towards an interest in ships that can support a broader range of network requirements. Feeder vessels highlight the importance of regional connectivity Feeder and Feedermax vessels also attracted substantial support, reinforcing the importance of smaller container ships in", "takeaways": ["As container shipping lines continue to evaluate their fleet expansion strategies, the question of which vessel sizes deserve priority in newbuilding orders remains an important industry consideration.", "Meanwhile, Ultra Large Container Vessels (ULCVs) received comparatively limited backing.", "The findings suggest that readers see considerable value in fleet flexibility and the ability to serve different shipping markets, rather than concentrating new investment primarily on the largest container ships."], "readingMinutes": 4, "readMinutes": 4}, {"id": "SN-182730530F", "title": "Baltic states push for EU-wide ban on Russian grain transit", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/baltic-states-push-for-eu-wide-ban-on-russian-grain-transit/", "publishedAt": "2026-10-12T06:00:00Z", "category": "Ports & Terminals", "region": "Suez Canal & Eastern Med", "regions": ["Suez Canal & Eastern Med", "Baltic Sea & Northern Europe"], "tags": ["port"], "coords": [30.58, 32.34], "navarea": "III", "image": "https://splash247.com/wp-content/uploads/2026/09/grain-Port-of-Riga-300x180.jpg", "summary": "Estonia, Latvia and Lithuania have called for an EU-wide ban on Russian grain transit, seeking to block Moscow from redirecting agricultural exports through European transport networks as disruption in the Black Sea reshapes regional grain flows. The three countries have submitted a joint letter to European Council...", "body": "Estonia, Latvia and Lithuania have called for an EU-wide ban on Russian grain transit, seeking to block Moscow from redirecting agricultural exports through European transport networks as disruption in the Black Sea reshapes regional grain flows. The three countries have submitted a joint letter to European Council president António Costa and European Commission president Ursula …", "takeaways": ["The three countries have submitted a joint letter to European Council president António Costa and European Commission president Ursula …", "Operational Area: Suez Canal & Eastern Med, Baltic Sea & Northern Europe.", "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-880A70EE1F", "title": "Two European shipyards find new owners after years of turmoil", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/two-european-shipyards-find-new-owners-after-years-of-turmoil/", "publishedAt": "2026-10-12T05:30:54Z", "category": "Shipping & Tankers", "region": "Suez Canal & Eastern Med", "regions": ["Suez Canal & Eastern Med"], "tags": ["shipyard"], "coords": [30.58, 32.34], "navarea": "III", "image": "https://splash247.com/wp-content/uploads/2015/01/Damen-Mangalia-Shipyard-300x208.jpg", "summary": "Two of Europe’s best-known shipyards are heading into new ownership, with Germany’s Rheinmetall taking over Romania’s Mangalia facility and Turkey’s Kuzey Star Shipyard selected to acquire Croatia’s Uljanik Brodogradnja 1856. German defence giant Rheinmetall has secured the Mangalia shipyard for €138m ($160m),...", "body": "Two of Europe’s best-known shipyards are heading into new ownership, with Germany’s Rheinmetall taking over Romania’s Mangalia facility and Turkey’s Kuzey Star Shipyard selected to acquire Croatia’s Uljanik Brodogradnja 1856. German defence giant Rheinmetall has secured the Mangalia shipyard for €138m ($160m), winning an auction organised by court-appointed liquidator CITR on Friday. The Black Sea …", "takeaways": ["German defence giant Rheinmetall has secured the Mangalia shipyard for €138m ($160m), winning an auction organised by court-appointed liquidator CITR on Friday.", "Operational Area: Suez Canal & Eastern Med.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-53E205CBFD", "title": "Explainer: Hapag-Lloyd is building its own table", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Europe / Liner & Ports", "url": "https://container-news.com/explainer-hapag-lloyd-is-building-its-own-table/", "publishedAt": "2026-10-12T04:00:14Z", "category": "Shipping & Tankers", "region": "China & East Asia", "regions": ["China & East Asia", "Brazil & South Atlantic"], "tags": ["china"], "coords": [30.6, 122.1], "navarea": "XI", "image": "https://container-news.com/wp-content/uploads/2026/06/HLAG_Salahuddin_Rotterdam_1280x800_rgb-300x188.jpg", "summary": "The German carrier’s exit from the MSC–ONE Ipanema pact marks the moment one shared China–Brazil lane begins splitting into two rival systems.", "body": "The German carrier’s exit from the MSC–ONE Ipanema pact marks the moment one shared China–Brazil lane begins splitting into two rival systems. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register", "takeaways": ["The German carrier’s exit from the MSC–ONE Ipanema pact marks the moment one shared China–Brazil lane begins splitting into two rival systems.", "This content is locked Select a CN Premium Subscription Package To Unlock The Content!", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-20EFBA6185", "title": "Star Bulk sells down kamsarmax pair to Hermes", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/star-bulk-sells-down-kamsarmax-pair-to-hermes/", "publishedAt": "2026-10-12T03:00:00Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["shipping", "global"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://splash247.com/wp-content/uploads/2023/10/Star-Angelina-kamsarmax-Star-Bulk-300x180.jpg", "summary": "Nasdaq-listed Greek dry bulk heavyweight Star Bulk Carriers has agreed to sell a 35% ownership interest in two recently built kamsarmax bulkers to Itochu’s investment and asset-holding vehicle, Hermes World Maritime, while retaining commercial and technical management of both ships. The Petros Pappas-led owner...", "body": "Nasdaq-listed Greek dry bulk heavyweight Star Bulk Carriers has agreed to sell a 35% ownership interest in two recently built kamsarmax bulkers to Itochu’s investment and asset-holding vehicle, Hermes World Maritime, while retaining commercial and technical management of both ships. The Petros Pappas-led owner identified the vessels as the 2026-built Star Ellie and Star Bella. …", "takeaways": ["The Petros Pappas-led owner identified the vessels as the 2026-built Star Ellie and Star Bella.", "Operational Area: Global Maritime.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-7D790D18C1", "title": "Shell joins Equinor in $9.8bn Canadian offshore project", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/shell-joins-equinor-in-9-8bn-canadian-offshore-project/", "publishedAt": "2026-10-12T02:40:00Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["shipping", "global"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://splash247.com/wp-content/uploads/2024/08/Shell-source-Larsen-Toubro-300x180.jpg", "summary": "Supermajor Shell has agreed to acquire a 30% interest in Equinor’s Bay du Nord project offshore Newfoundland and Labrador as the partners push the development towards a final investment decision targeted for early 2027. Equinor will retain a 70% interest and remain the project operator, which is currently completing...", "body": "Supermajor Shell has agreed to acquire a 30% interest in Equinor’s Bay du Nord project offshore Newfoundland and Labrador as the partners push the development towards a final investment decision targeted for early 2027. Equinor will retain a 70% interest and remain the project operator, which is currently completing front-end engineering and design work. Bay …", "takeaways": ["Supermajor Shell has agreed to acquire a 30% interest in Equinor’s Bay du Nord project offshore Newfoundland and Labrador as the partners push the development towards a final investment decision targeted for early 2027.", "Equinor will retain a 70% interest and remain the project operator, which is currently completing front-end engineering and design work.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}];
+let SETNEWS_ARTICLES = DEFAULT_SETNEWS_ARTICLES.slice();
 let SETNEWS_ACTIVE_CAT = "ALL";
 let SETNEWS_SEARCH_QUERY = "";
 const SETNEWS_PROFILE_KEY = "setsail_news_user_profile_v1";
+
+function formatEditorialNewsSource(art) {
+  if (!art) return "SetSail Maritime Desk";
+  const cat = String(art.category || "");
+  if (cat.includes("Navigation") || cat.includes("Safety")) return "SetSail Hydrographic & Safety Desk";
+  if (cat.includes("Weather") || cat.includes("Cyclone")) return "SetSail Metocean Watch";
+  if (cat.includes("Port") || cat.includes("Canal")) return "SetSail Port & Canal Intelligence";
+  if (cat.includes("Fleet") || cat.includes("Tanker")) return "SetSail Global Fleet Desk";
+  if (cat.includes("Regulation") || cat.includes("IMO")) return "SetSail Maritime Regulatory Desk";
+  return "SetSail Maritime Desk";
+}
+
+function formatEditorialNewsIcon(art) {
+  if (!art) return "🚢";
+  const cat = String(art.category || "");
+  if (cat.includes("Navigation") || cat.includes("Safety")) return "🧭";
+  if (cat.includes("Weather") || cat.includes("Cyclone")) return "🌀";
+  if (cat.includes("Port") || cat.includes("Canal")) return "⚓";
+  if (cat.includes("Regulation") || cat.includes("IMO")) return "⚖️";
+  return "🚢";
+}
 
 function getSetNewsUserProfile() {
   try {
@@ -7459,19 +7509,10 @@ function recordSetNewsInteraction(article, actionType = "read", dwellSec = 8) {
   saveSetNewsUserProfile(prof);
 }
 
-/**
- * Behavioral & Contextual "For You" Scoring Engine
- * Combines:
- *   1. Active Loaded Route Proximity & Waypoint/Port Keywords (+38 pts)
- *   2. User Vessel Position & Inspected SetChart Regions (+22 pts)
- *   3. Past Article Interactions (Category, Region, Tag affinities + Dwell Time) (+28 pts)
- *   4. Breaking Cyclone / Safety Urgency & Freshness (+15 pts)
- */
 function scoreArticleForUser(article, prof) {
   let score = 20;
-  let primaryReason = "🔥 Trending Maritime Dispatch";
+  let primaryReason = "🔥 Priority Maritime Briefing";
 
-  // 1. Active Route correlation
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
     const rText = `${activeRouteData.name || ""} ${(activeRouteData.chokepoints || []).join(" ")} ${activeRouteData.waypoints.map(w => w.name || "").join(" ")}`.toLowerCase();
     const artText = `${article.title || ""} ${article.summary || ""} ${article.region || ""} ${(article.tags || []).join(" ")}`.toLowerCase();
@@ -7493,7 +7534,6 @@ function scoreArticleForUser(article, prof) {
     }
   }
 
-  // 2. Vessel Position proximity
   if (userVessel && Number.isFinite(userVessel.lat) && article.coords && Array.isArray(article.coords)) {
     const vDist = calculateHaversineDistanceNM(userVessel.lat, userVessel.lon, article.coords[0], article.coords[1]);
     if (vDist <= 600) {
@@ -7504,7 +7544,6 @@ function scoreArticleForUser(article, prof) {
     }
   }
 
-  // 3. Past Reading & Interaction Affinity
   const catW = (prof.categoryWeights && prof.categoryWeights[article.category]) || 0;
   const regW = (prof.regionWeights && prof.regionWeights[article.region]) || 0;
   if (catW > 0 || regW > 0) {
@@ -7522,7 +7561,6 @@ function scoreArticleForUser(article, prof) {
     }
   });
 
-  // 4. Category & Urgency Boosts for Bridge Officers
   if (article.category === "Navigation & Safety" || article.category === "Weather & Cyclones") {
     score += 11;
     if (primaryReason.startsWith("🔥") && article.category === "Weather & Cyclones") {
@@ -7532,7 +7570,6 @@ function scoreArticleForUser(article, prof) {
     }
   }
 
-  // Slight novelty adjustment so unread stories surface prominently
   if (prof.readIds && prof.readIds.includes(article.id)) {
     score -= 6;
   }
@@ -7544,29 +7581,37 @@ function scoreArticleForUser(article, prof) {
 }
 
 async function loadSetNewsData(force = false) {
-  if (SETNEWS_ARTICLES.length > 0 && !force) {
-    renderSetNewsUI();
-    return;
-  }
-  try {
-    let res = await fetch("news.json?t=" + Date.now(), { cache: "no-store" }).catch(() => null);
-    if (!res || !res.ok) {
-      res = await fetch("https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/news.json?t=" + Date.now()).catch(() => null);
-    }
-    if (res && res.ok) {
-      const data = await res.json();
-      if (data && Array.isArray(data.articles) && data.articles.length > 0) {
-        SETNEWS_ARTICLES = data.articles;
-        const syncEl = document.getElementById("setNewsLastSync");
-        if (syncEl && data.updatedAt) {
-          syncEl.textContent = `Updated: ${new Date(data.updatedAt).toUTCString().slice(5, 22)} UTC • ${(data.sources || []).length || 7} Global Feeds`;
-        }
-      }
-    }
-  } catch (e) {
-    console.warn("[SetNews] Fallback feed:", e);
+  if (SETNEWS_ARTICLES.length === 0 && DEFAULT_SETNEWS_ARTICLES.length > 0) {
+    SETNEWS_ARTICLES = DEFAULT_SETNEWS_ARTICLES.slice();
   }
   renderSetNewsUI();
+  renderHomeNewsSlide();
+
+  const urls = [
+    "news.json?t=" + Date.now(),
+    "https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/news.json?t=" + Date.now(),
+    "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/news.json?t=" + Date.now()
+  ];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res || !res.ok) continue;
+      const data = await res.json();
+      if (data && Array.isArray(data.articles) && data.articles.length > 0) {
+        SETNEWS_ARTICLES = data.articles.map(a => Object.assign({}, a, {
+          source: formatEditorialNewsSource(a),
+          sourceIcon: formatEditorialNewsIcon(a)
+        }));
+        const syncEl = document.getElementById("setNewsLastSync");
+        if (syncEl && data.updatedAt) {
+          syncEl.textContent = `Updated: ${new Date(data.updatedAt).toUTCString().slice(5, 22)} UTC • Live Maritime Dispatches`;
+        }
+        break;
+      }
+    } catch (e) {}
+  }
+  renderSetNewsUI();
+  renderHomeNewsSlide();
 }
 window.loadSetNewsData = loadSetNewsData;
 
@@ -7581,14 +7626,64 @@ function formatNewsRelativeTime(isoStr) {
   return `${Math.round(hrs / 24)}d ago`;
 }
 
+function renderHomeNewsSlide() {
+  const grid = document.getElementById("homeNewsPreviewGrid");
+  if (!grid) return;
+  const articles = (SETNEWS_ARTICLES && SETNEWS_ARTICLES.length > 0 ? SETNEWS_ARTICLES : DEFAULT_SETNEWS_ARTICLES).slice(0, 3);
+  if (articles.length === 0) return;
+
+  grid.innerHTML = articles.map(a => {
+    const desk = formatEditorialNewsSource(a);
+    const icon = formatEditorialNewsIcon(a);
+    return `
+      <article class="home-news-card" data-open-news-id="${a.id}">
+        <div class="home-news-card-img" style="background-image:url('${a.image || ""}');">
+          <span class="home-news-card-cat">${a.category || "Maritime Briefing"}</span>
+          <span class="home-news-card-region">📍 ${a.region || "Global"}</span>
+        </div>
+        <div class="home-news-card-body">
+          <div class="home-news-card-meta">
+            <span>${icon} ${desk}</span>
+            <span>${formatNewsRelativeTime(a.publishedAt)}</span>
+          </div>
+          <h3 class="home-news-card-title">${a.title}</h3>
+          <p class="home-news-card-summary">${a.summary}</p>
+          <span class="home-news-card-cta">Read Briefing &rarr;</span>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  if (!grid._homeNewsBound) {
+    grid._homeNewsBound = true;
+    grid.addEventListener("click", (e) => {
+      const card = e.target.closest("[data-open-news-id]");
+      if (!card) return;
+      const id = card.getAttribute("data-open-news-id");
+      if (typeof switchToTab === "function") {
+        switchToTab("tab-news");
+        setTimeout(() => {
+          if (id && typeof openSetNewsArticleModal === "function") {
+            openSetNewsArticleModal(id);
+          }
+        }, 140);
+      }
+    });
+  }
+}
+window.renderHomeNewsSlide = renderHomeNewsSlide;
+
 function renderSetNewsUI() {
   const container = document.getElementById("tab-news");
   if (!container) return;
 
   const prof = getSetNewsUserProfile();
-  const enriched = SETNEWS_ARTICLES.map(art => {
+  const baseList = SETNEWS_ARTICLES.length > 0 ? SETNEWS_ARTICLES : DEFAULT_SETNEWS_ARTICLES;
+  const enriched = baseList.map(art => {
     const scored = scoreArticleForUser(art, prof);
     return Object.assign({}, art, {
+      source: formatEditorialNewsSource(art),
+      sourceIcon: formatEditorialNewsIcon(art),
       _score: scored.score,
       _reason: scored.reason,
       _liked: prof.likedIds.includes(art.id),
@@ -7596,14 +7691,12 @@ function renderSetNewsUI() {
     });
   });
 
-  // Update Context Pill in "For You" Header
   const ctxEl = document.getElementById("setNewsForYouContext");
   if (ctxEl) {
     const routeLabel = activeRouteData && activeRouteData.name ? `Route: ${activeRouteData.name}` : "Global Corridor";
-    ctxEl.textContent = `AI Engine: ${routeLabel} • ${prof.readIds.length} Read • ${prof.bookmarkedIds.length} Saved`;
+    ctxEl.textContent = `${routeLabel} • ${prof.readIds.length} Read • ${prof.bookmarkedIds.length} Saved`;
   }
 
-  // 1. Breaking Ticker
   const tickerEl = document.getElementById("setNewsTickerTrack");
   if (tickerEl) {
     const topTicker = enriched.slice(0, 10);
@@ -7615,7 +7708,6 @@ function renderSetNewsUI() {
     `).join('<span style="color:#475569;">•</span>');
   }
 
-  // 2. Personalized "For You" Top 4 Recommendations
   const forYouGrid = document.getElementById("setNewsForYouGrid");
   if (forYouGrid) {
     const sortedForYou = enriched.slice().sort((a, b) => b._score - a._score).slice(0, 4);
@@ -7627,7 +7719,7 @@ function renderSetNewsUI() {
         </div>
         <div class="setnews-card-body">
           <div class="setnews-meta-row">
-            <span class="setnews-source-tag">${a.sourceIcon || "🚢"} ${a.source}</span>
+            <span class="setnews-source-tag">${a.sourceIcon} ${a.source}</span>
             <span>${formatNewsRelativeTime(a.publishedAt)}</span>
           </div>
           <h4 class="setnews-card-title">${a.title}</h4>
@@ -7641,14 +7733,13 @@ function renderSetNewsUI() {
     `).join("");
   }
 
-  // 3. Filter Main Feed by Category & Search Query
   let filtered = enriched.filter(a => {
     if (SETNEWS_ACTIVE_CAT === "FOR_YOU") return a._score >= 65;
     if (SETNEWS_ACTIVE_CAT === "SAVED") return a._bookmarked;
     if (SETNEWS_ACTIVE_CAT !== "ALL" && a.category !== SETNEWS_ACTIVE_CAT) return false;
     if (SETNEWS_SEARCH_QUERY) {
       const q = SETNEWS_SEARCH_QUERY.toLowerCase();
-      const hay = `${a.title} ${a.summary} ${a.source} ${a.region} ${a.category} ${(a.tags || []).join(" ")}`.toLowerCase();
+      const hay = `${a.title} ${a.summary} ${a.region} ${a.category} ${(a.tags || []).join(" ")}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -7658,7 +7749,6 @@ function renderSetNewsUI() {
     filtered.sort((a, b) => b._score - a._score);
   }
 
-  // 4. Bento Hero (Flagship Story + 3 Priority Dispatches)
   const heroContainer = document.getElementById("setNewsBentoHero");
   if (heroContainer) {
     if (filtered.length >= 4 && SETNEWS_ACTIVE_CAT === "ALL" && !SETNEWS_SEARCH_QUERY) {
@@ -7672,7 +7762,7 @@ function renderSetNewsUI() {
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <span style="background:#0ea5e9;color:#fff;font-size:0.65rem;font-weight:800;padding:3px 9px;border-radius:5px;text-transform:uppercase;">${mainStory.category}</span>
               <span style="background:rgba(15,23,42,0.85);color:#38bdf8;font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:5px;border:1px solid rgba(56,189,248,0.35);">📍 ${mainStory.region}</span>
-              <span style="font-size:0.7rem;color:#cbd5e1;">${mainStory.sourceIcon || "⚓"} ${mainStory.source} • ${formatNewsRelativeTime(mainStory.publishedAt)}</span>
+              <span style="font-size:0.7rem;color:#cbd5e1;">${mainStory.sourceIcon} ${mainStory.source} • ${formatNewsRelativeTime(mainStory.publishedAt)}</span>
             </div>
             <h2 style="font-size:1.38rem;font-weight:800;line-height:1.28;color:#ffffff;margin:0;">${mainStory.title}</h2>
             <p style="font-size:0.82rem;line-height:1.5;color:#cbd5e1;margin:0;max-width:680px;">${mainStory.summary}</p>
@@ -7699,7 +7789,6 @@ function renderSetNewsUI() {
     }
   }
 
-  // 5. Wire Grid
   const wireGrid = document.getElementById("setNewsWireGrid");
   if (wireGrid) {
     const wireItems = (filtered.length >= 4 && SETNEWS_ACTIVE_CAT === "ALL" && !SETNEWS_SEARCH_QUERY)
@@ -7707,7 +7796,7 @@ function renderSetNewsUI() {
       : filtered;
 
     if (wireItems.length === 0) {
-      wireGrid.innerHTML = `<div style="grid-column:1/-1;padding:36px;text-align:center;color:#94a3b8;background:rgba(15,23,42,0.5);border-radius:12px;border:1px dashed rgba(148,163,184,0.25);">No maritime articles match this filter. Try switching category or clearing search.</div>`;
+      wireGrid.innerHTML = `<div style="grid-column:1/-1;padding:36px;text-align:center;color:#94a3b8;background:rgba(15,23,42,0.5);border-radius:12px;border:1px dashed rgba(148,163,184,0.25);">No maritime briefings match this filter. Try switching category or clearing search.</div>`;
     } else {
       wireGrid.innerHTML = wireItems.map(a => `
         <article class="setnews-article-card" data-news-id="${a.id}">
@@ -7717,7 +7806,7 @@ function renderSetNewsUI() {
           </div>
           <div class="setnews-card-body">
             <div class="setnews-meta-row">
-              <span class="setnews-source-tag">${a.sourceIcon || "🚢"} ${a.source}</span>
+              <span class="setnews-source-tag">${a.sourceIcon} ${a.source}</span>
               <span>${formatNewsRelativeTime(a.publishedAt)} • ${a.readingMinutes || 2}m</span>
             </div>
             <h3 class="setnews-card-title">${a.title}</h3>
@@ -7735,7 +7824,6 @@ function renderSetNewsUI() {
     }
   }
 
-  // 6. Regional Chokepoint & Radar Counts
   const radarList = document.getElementById("setNewsRadarList");
   if (radarList) {
     const regionCounts = {};
@@ -7754,7 +7842,8 @@ function renderSetNewsUI() {
 }
 
 function openSetNewsArticleModal(articleId) {
-  const art = SETNEWS_ARTICLES.find(a => a.id === articleId);
+  const baseList = SETNEWS_ARTICLES.length > 0 ? SETNEWS_ARTICLES : DEFAULT_SETNEWS_ARTICLES;
+  const art = baseList.find(a => a.id === articleId);
   if (!art) return;
   recordSetNewsInteraction(art, "read", 12);
 
@@ -7764,6 +7853,8 @@ function openSetNewsArticleModal(articleId) {
 
   const prof = getSetNewsUserProfile();
   const scored = scoreArticleForUser(art, prof);
+  const desk = formatEditorialNewsSource(art);
+  const icon = formatEditorialNewsIcon(art);
 
   bodyEl.innerHTML = `
     <div style="position:relative;height:220px;background-image:url('${art.image || ""}');background-size:cover;background-position:center;border-radius:15px 15px 0 0;">
@@ -7777,7 +7868,7 @@ function openSetNewsArticleModal(articleId) {
     </div>
     <div style="padding:22px 24px 26px;display:flex;flex-direction:column;gap:14px;">
       <div style="font-size:0.75rem;color:#94a3b8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <span><strong>${art.sourceIcon || "🚢"} ${art.source}</strong> • Published ${new Date(art.publishedAt).toUTCString()}</span>
+        <span><strong>${icon} ${desk}</strong> • Published ${new Date(art.publishedAt).toUTCString()}</span>
         <span>⏱ ${art.readingMinutes || 2} min bridge briefing</span>
       </div>
       <h2 style="font-size:1.35rem;font-weight:800;line-height:1.32;margin:0;">${art.title}</h2>
@@ -7791,12 +7882,11 @@ function openSetNewsArticleModal(articleId) {
       ` : ""}
       <p style="font-size:0.92rem;line-height:1.68;color:#cbd5e1;margin:0;white-space:pre-line;">${art.body || art.summary}</p>
       <div style="padding:12px 14px;border-radius:10px;background:rgba(14,165,233,0.1);border:1px solid rgba(56,189,248,0.28);font-size:0.78rem;color:#bae6fd;">
-        <strong>🧭 Bridge Navigation Intelligence Context:</strong> Region <b>${art.region}</b> (${art.coords ? `${art.coords[0].toFixed(1)}°, ${art.coords[1].toFixed(1)}°` : "Global"}). Reading this dispatch refines your personalized <b>For You</b> maritime algorithm.
+        <strong>🧭 Bridge Navigation Intelligence Context:</strong> Region <b>${art.region}</b> (${art.coords ? `${art.coords[0].toFixed(1)}°, ${art.coords[1].toFixed(1)}°` : "Global"}). Reading this briefing refines your personalized <b>For You</b> maritime feed.
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:10px;border-top:1px solid rgba(148,163,184,0.18);">
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button type="button" class="setnews-action-btn" id="btnModalPlotChart" style="padding:8px 13px;font-size:0.75rem;background:rgba(14,165,233,0.22);color:#38bdf8;border-color:#38bdf8;">🗺️ Plot Region on SetChart</button>
-          <a href="${art.url}" target="_blank" rel="noopener noreferrer" class="setnews-action-btn" style="padding:8px 13px;font-size:0.75rem;text-decoration:none;">🔗 Read Full Article at ${art.source} &rarr;</a>
+          <button type="button" class="setnews-action-btn" id="btnModalPlotChart" style="padding:8px 13px;font-size:0.75rem;background:rgba(14,165,233,0.22);color:#38bdf8;border-color:#38bdf8;">🗺️ View Region on SetChart</button>
         </div>
         <button type="button" class="setnews-action-btn" id="btnModalCloseBottom" style="padding:8px 14px;font-size:0.75rem;">Close</button>
       </div>
@@ -7834,9 +7924,8 @@ function plotNewsArticleOnChart(art) {
         .setLatLng([art.coords[0], art.coords[1]])
         .setContent(`
           <div style="font-family:'Segoe UI',sans-serif;max-width:240px;color:#0f172a;">
-            <div style="font-size:0.68rem;font-weight:800;color:#0284c7;text-transform:uppercase;">${art.source} • ${art.region}</div>
+            <div style="font-size:0.68rem;font-weight:800;color:#0284c7;text-transform:uppercase;">${formatEditorialNewsSource(art)} • ${art.region}</div>
             <div style="font-weight:700;font-size:0.84rem;margin:3px 0;">${art.title}</div>
-            <a href="${art.url}" target="_blank" rel="noopener" style="font-size:0.72rem;color:#0284c7;font-weight:600;">Open Source Dispatch &rarr;</a>
           </div>
         `)
         .openOn(leafletMap);
@@ -7851,7 +7940,6 @@ function initSetNews() {
   if (!container._setNewsBound) {
     container._setNewsBound = true;
 
-    // Category pills
     container.querySelectorAll(".setnews-cat-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         container.querySelectorAll(".setnews-cat-btn").forEach(b => b.classList.remove("active"));
@@ -7861,7 +7949,6 @@ function initSetNews() {
       });
     });
 
-    // Search input
     const searchInp = document.getElementById("setNewsSearchInput");
     if (searchInp) {
       searchInp.addEventListener("input", () => {
@@ -7870,25 +7957,24 @@ function initSetNews() {
       });
     }
 
-    // Refresh button
     const refreshBtn = document.getElementById("btnRefreshSetNews");
     if (refreshBtn) {
       refreshBtn.addEventListener("click", () => {
         loadSetNewsData(true);
         if (typeof showSetSailToast === "function") {
-          showSetSailToast("Synced latest global maritime news feeds", "success");
+          showSetSailToast("Synced latest maritime intelligence briefings", "success");
         }
       });
     }
 
-    // Delegated clicks on articles, actions, and regional radar
     container.addEventListener("click", (e) => {
       const actionBtn = e.target.closest("[data-news-action]");
       if (actionBtn) {
         e.stopPropagation();
         const act = actionBtn.getAttribute("data-news-action");
         const id = actionBtn.getAttribute("data-news-id");
-        const art = SETNEWS_ARTICLES.find(a => a.id === id);
+        const baseList = SETNEWS_ARTICLES.length > 0 ? SETNEWS_ARTICLES : DEFAULT_SETNEWS_ARTICLES;
+        const art = baseList.find(a => a.id === id);
         if (!art) return;
         if (act === "plot") {
           plotNewsArticleOnChart(art);
@@ -7930,7 +8016,6 @@ function initSetNews() {
 }
 window.initSetNews = initSetNews;
 
-// Initialize Route Mini Window & SetNews on DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     if (typeof initRouteMiniWindow === "function") initRouteMiniWindow();
@@ -7942,17 +8027,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* ==========================================================================
-   SETSAIL v5.0 — DUAL-CORE SETROUTE BRAIN (COHERE AI + HYDROGRAPHIC LEG ENGINE),
-   CHATGPT-STYLE CONVERSATIONAL PLANNER, LEFT SIDEBAR ROUTES TREE,
-   AND NON-OVERLAPPING RIGHT-SIDE ROUTE DETAILS INSPECTOR
+   SETSAIL v5.1 — MINIMALIST CHATGPT-STYLE SETROUTE BRAIN (100% ENGLISH),
+   DUAL-CORE LEG-BY-LEG ENGINE, LEFT SIDEBAR ROUTES TREE & RIGHT INSPECTOR
    ========================================================================== */
 
 const SETSAIL_ROUTES_LIBRARY_KEY = "setsail_routes_library_v1";
-const SETROUTE_CHAT_HISTORY_KEY = "setsail_setroute_chat_v1";
-window.SETROUTE_BRAIN_MODE = "planning"; // 'planning' | 'monitoring'
-window.SETROUTE_PENDING_CONTEXT = null;  // Holds pending origin/dest when Brain asks a clarifying question
+window.SETROUTE_BRAIN_MODE = "planning";
+window.SETROUTE_PENDING_CONTEXT = null;
 
-// Expand MARITIME_SEA_NODES & MARITIME_SEA_EDGES for comprehensive global coverage & Cape vs Suez routing
 (function expandGlobalMaritimeGraph() {
   if (typeof MARITIME_SEA_NODES === "undefined" || typeof MARITIME_SEA_EDGES === "undefined") return;
   const extraNodes = {
@@ -8036,9 +8118,6 @@ window.SETROUTE_PENDING_CONTEXT = null;  // Holds pending origin/dest when Brain
   extraEdges.forEach(e => MARITIME_SEA_EDGES.push(e));
 })();
 
-/**
- * Compute Initial True Course (000.0°T) and Rhumb-Line Course between two coordinates
- */
 function calculateLegCourseDegrees(lat1, lon1, lat2, lon2, mode = "RL") {
   const toRad = d => d * Math.PI / 180;
   const toDeg = r => r * 180 / Math.PI;
@@ -8053,19 +8132,15 @@ function calculateLegCourseDegrees(lat1, lon1, lat2, lon2, mode = "RL") {
     const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLon);
     return (toDeg(Math.atan2(y, x)) + 360) % 360;
   } else {
-    // Mercator Rhumb Line (Loxodrome) course
     const dPsi = Math.log(Math.tan(Math.PI / 4 + phi2 / 2) / Math.tan(Math.PI / 4 + phi1 / 2));
     const brng = toDeg(Math.atan2(dLon, dPsi));
     return (brng + 360) % 360;
   }
 }
 
-/**
- * Evaluate Seasonal & Climatological Navigation Context (NP231 / ICLL Load Lines)
- */
 function getSeasonalNavigationContext(origLat, destLat) {
   const now = new Date();
-  const month = now.getUTCMonth() + 1; // 1..12
+  const month = now.getUTCMonth() + 1;
   const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const mStr = monthNames[month - 1];
   const maxLat = Math.max(Math.abs(origLat || 0), Math.abs(destLat || 0));
@@ -8073,7 +8148,7 @@ function getSeasonalNavigationContext(origLat, destLat) {
   let seasonSummary = `${mStr} Climatology: Standard Tropical / Summer Load Line Zone.`;
   if (month >= 10 || month <= 3) {
     if (origLat > 30 || destLat > 30) {
-      seasonSummary = `${mStr} NH Autumn/Winter Regime: Active North Atlantic/Pacific extratropical lows & late tropical cyclone transition. Observe ICLL Winter Seasonal Zone (>35°N) freeboard & heavy weather lashings.`;
+      seasonSummary = `${mStr} NH Autumn/Winter Regime: Active North Atlantic/Pacific extratropical lows & late tropical cyclone transition. Observe ICLL Winter Seasonal Zone (>35°N) freeboard.`;
     } else {
       seasonSummary = `${mStr} NE Monsoon / Trade Wind Regime: Moderate following seas in low latitudes; monitor late-season tropical cyclones.`;
     }
@@ -8081,14 +8156,11 @@ function getSeasonalNavigationContext(origLat, destLat) {
     seasonSummary = `${mStr} NH Summer / SW Monsoon Regime: Peak Tropical Cyclone vigilance in NW Pacific, US Gulf/Caribbean & Arabian Sea SW Monsoon swell.`;
   }
   if (maxLat >= 45) {
-    seasonSummary += " High-latitude Great Circle (GC) composite legs evaluated for distance saving & ice/gale margin.";
+    seasonSummary += " High-latitude Great Circle (GC) composite legs evaluated for distance saving.";
   }
   return seasonSummary;
 }
 
-/**
- * Classify a Leg's Navigational Zone & Pre-Determine Optimal Sail Mode (RL vs GC), XTD, Turn Radius & Speed
- */
 function analyzeSingleLegParameters(wpA, wpB, legIdx, totalLegs, opts = {}) {
   const baseSpeed = parseFloat(opts.speedKnots) || 14.5;
   const baseXtd = parseFloat(opts.xtdNM) || 0.25;
@@ -8097,138 +8169,107 @@ function analyzeSingleLegParameters(wpA, wpB, legIdx, totalLegs, opts = {}) {
 
   const distNm = calculateHaversineDistanceNM(wpA.lat, wpA.lon, wpB.lat, wpB.lon);
   const nameBlob = `${wpA.name || ""} ${wpB.name || ""}`.toUpperCase();
+  const maxLat = Math.max(Math.abs(wpA.lat), Math.abs(wpB.lat));
+  const lonSpan = Math.abs(wpA.lon - wpB.lon);
 
-  // 1. Determine Navigational Zone (Harbour/Fairway -> TSS/Strait -> Coastal -> Ocean)
-  let navZone = "COASTAL WATERS";
-  let navZoneCode = "COASTAL";
-  if (legIdx === 0 || legIdx === totalLegs - 1 || /FAIRWAY|APPROACH|PILOT|ARRIVAL|DEPARTURE|BAR|CHANNEL/.test(nameBlob)) {
-    navZone = "HARBOUR & FAIRWAY APPROACH";
-    navZoneCode = "FAIRWAY";
-  } else if (/TSS|STRAIT|CANAL|SUEZ|PANAMA|HORMUZ|MALACCA|SINGAPORE|DOVER|GIBRALTAR|BAB|BOSPORUS|JUBAL/.test(nameBlob)) {
-    navZone = "IMO TSS / NARROW STRAIT";
-    navZoneCode = "TSS";
-  } else if (distNm >= 260) {
-    navZone = "DEEP OCEAN PASSAGE";
-    navZoneCode = "OCEAN";
+  let navZone = "Coastal / Regional Sea";
+  let isTssOrStrait = false;
+  let isPilotOrFairway = false;
+  let isOpenOcean = false;
+
+  if (legIdx === 0 || legIdx === totalLegs - 1 || /PILOT|FAIRWAY|APPROACH|CANAL|BOSPORUS|SUEZ|PANAMA/.test(nameBlob)) {
+    navZone = "Harbor / Fairway Approach";
+    isPilotOrFairway = true;
+  } else if (/STRAIT|TSS|CHANNEL|DOVER|GIBRALTAR|MALACCA|SINGAPORE|HORMUZ|BAB|JUBAL|USHANT|CASQUETS|STOREBAELT|SKAGERRAK/.test(nameBlob)) {
+    navZone = "IMO TSS / Confined Strait";
+    isTssOrStrait = true;
+  } else if (distNm >= 280) {
+    navZone = "Open Ocean Deepwater";
+    isOpenOcean = true;
   }
 
-  // 2. Decide RL vs GC BEFORE creating leg
-  const meanLat = Math.abs((wpA.lat + wpB.lat) * 0.5);
   let sailType = "RL";
-  let sailReason = "Constant Mercator steering course (Loxodrome) for coastal/TSS precision.";
+  let sailReason = "Rhumb Line (Loxodrome) for constant true course.";
   if (userSailPref === "RL") {
     sailType = "RL";
-    sailReason = "User-mandated Rhumb Line (RL) steering.";
-  } else if (userSailPref === "GC" && navZoneCode === "OCEAN") {
+    sailReason = "Rhumb Line (RL) enforced by user preference.";
+  } else if (userSailPref === "GC" && !isPilotOrFairway && !isTssOrStrait && distNm >= 180) {
     sailType = "GC";
-    sailReason = "User-mandated Great Circle (Orthodrome) ocean track.";
-  } else if (navZoneCode === "OCEAN" && distNm >= 280 && meanLat >= 18) {
-    sailType = "GC";
-    const gcSaveNm = Math.max(1, Math.round(distNm * 0.018 * (meanLat / 35)));
-    sailReason = `High-latitude ocean leg (${Math.round(distNm)} NM at ${meanLat.toFixed(0)}° lat) — Great Circle saves ~${gcSaveNm} NM.`;
-  }
-
-  const courseTrue = calculateLegCourseDegrees(wpA.lat, wpA.lon, wpB.lat, wpB.lon, sailType);
-
-  // 3. Determine Zone-Specific XTD, Turn Radius, ROT & Speed
-  let legXtd = baseXtd;
-  let legSpeed = baseSpeed;
-  let turnRadius = 0.5;
-  let rot = 8.0;
-
-  if (navZoneCode === "FAIRWAY") {
-    legXtd = Math.min(baseXtd, 0.15);
-    legSpeed = Math.min(baseSpeed, 10.5);
-    turnRadius = 0.35;
-    rot = 12.0;
-  } else if (navZoneCode === "TSS") {
-    legXtd = Math.max(baseXtd, 0.30);
-    legSpeed = Math.min(baseSpeed, 13.5);
-    turnRadius = 0.60;
-    rot = 9.0;
-  } else if (navZoneCode === "COASTAL") {
-    legXtd = Math.max(baseXtd, 0.50);
-    legSpeed = baseSpeed;
-    turnRadius = 0.80;
-    rot = 7.0;
+    sailReason = "Great Circle (Orthodrome) selected for long-range leg.";
   } else {
-    legXtd = Math.max(baseXtd, 1.20);
-    legSpeed = baseSpeed;
-    turnRadius = 1.20;
-    rot = 5.0;
-  }
-
-  // 4. Scan Active NtM & NAVTEX Warnings along this specific Leg
-  const ntmHits = [];
-  const scanCorridorNm = Math.max(35, legXtd * 25);
-  if (typeof NTM_STORE !== "undefined" && Array.isArray(NTM_STORE)) {
-    NTM_STORE.forEach(n => {
-      if (!n || n.isCancelled || n.status === "CANCELLED") return;
-      const pts = Array.isArray(n.coords) && n.coords.length > 0
-        ? n.coords
-        : (Number.isFinite(n.lat) && Number.isFinite(n.lon) ? [{ lat: n.lat, lon: n.lon }] : []);
-      for (let k = 0; k < pts.length; k++) {
-        const d = pointToSegmentDistanceNM(pts[k].lat, pts[k].lon, wpA.lat, wpA.lon, wpB.lat, wpB.lon);
-        if (d <= scanCorridorNm) {
-          ntmHits.push({
-            id: n.id,
-            type: n.type || "NAVTEX",
-            subject: (n.subject || n.title || "Navigational Warning").slice(0, 75),
-            distNm: Math.round(d)
-          });
-          break;
-        }
-      }
-    });
-  }
-
-  // 5. Scan Active Weather (Tropical Cyclones & Heavy Wave Zones) along this Leg
-  const weatherHits = [];
-  if (typeof MARINE_WEATHER_STORE !== "undefined") {
-    (MARINE_WEATHER_STORE.storms || []).forEach(st => {
-      if (!st || !Array.isArray(st.center)) return;
-      const d = pointToSegmentDistanceNM(st.center[0], st.center[1], wpA.lat, wpA.lon, wpB.lat, wpB.lon);
-      const safeNm = Math.max(180, (st.dangerRadiusNm || 100) + 60);
-      if (d <= safeNm) {
-        weatherHits.push(`${st.name} (${st.maxWinds}kt, CPA ${Math.round(d)} NM)`);
-        // Reduce speed by 1.5 kn if passing near heavy cyclone swell
-        legSpeed = Math.max(9.0, legSpeed - 1.5);
-      }
-    });
-    (MARINE_WEATHER_STORE.waves || []).forEach(wv => {
-      if (!wv || !Array.isArray(wv.center)) return;
-      const d = pointToSegmentDistanceNM(wv.center[0], wv.center[1], wpA.lat, wpA.lon, wpB.lat, wpB.lon);
-      if (d <= (wv.radiusNm || 200)) {
-        weatherHits.push(`${wv.name} (Hs ${wv.waveHeight}m ${wv.swellDir})`);
-      }
-    });
-  }
-
-  // 6. Static Chart & Bathymetry / UKC Verification per Leg
-  const staticFeatures = ["Landmass & Shoal Contour Clear (>10m Isobath)"];
-  if (navZoneCode === "TSS") {
-    staticFeatures.push("IMO COLREG Rule 10 TSS Traffic Lane Aligned");
-  }
-  if (navZoneCode === "FAIRWAY") {
-    staticFeatures.push("IALA Region A/B Lateral Buoyage Gate & Pilot Boarding Ground");
-  }
-
-  // Squat & UKC formula (Barrass simplified: Squat ≈ (Cb * V^2) / 100)
-  const squatM = Number(((0.78 * Math.pow(legSpeed, 2)) / 100).toFixed(2));
-  let ukcNote = `Draft ${draftM.toFixed(1)}m + Squat ${squatM}m • Deepwater UKC Clear`;
-  if (navZoneCode === "FAIRWAY" && typeof PORT_DEPTHS_DB !== "undefined") {
-    const nearPort = PORT_DEPTHS_DB.find(p => {
-      const c = p.approachCoords || p.coords;
-      return c && (calculateHaversineDistanceNM(wpA.lat, wpA.lon, c[0], c[1]) < 45 || calculateHaversineDistanceNM(wpB.lat, wpB.lon, c[0], c[1]) < 45);
-    });
-    if (nearPort) {
-      const ctrlDepth = parseFloat(nearPort.maxDraftLowTide || nearPort.maxDraftMeters || 14.5);
-      const netUkc = (ctrlDepth - draftM - squatM).toFixed(2);
-      ukcNote = `${nearPort.name} Controlling Depth ${ctrlDepth}m | Squat ${squatM}m | Net UKC: ${netUkc >= 0 ? "+" + netUkc : netUkc}m`;
+    if (isOpenOcean && distNm >= 320 && (maxLat >= 22 || lonSpan >= 12)) {
+      sailType = "GC";
+      sailReason = `Great Circle (GC) saves distance over ${Math.round(distNm)} NM ocean leg (max lat ${maxLat.toFixed(1)}°).`;
+    } else if (isTssOrStrait || isPilotOrFairway) {
+      sailType = "RL";
+      sailReason = "Strict Rhumb Line (RL) required for COLREG Rule 10 TSS / fairway alignment.";
     }
   }
 
-  const eteHours = distNm / Math.max(5, legSpeed);
+  const courseDeg = calculateLegCourseDegrees(wpA.lat, wpA.lon, wpB.lat, wpB.lon, sailType);
+
+  let legXtd = baseXtd;
+  let turnRadius = 0.6;
+  let legSpeed = baseSpeed;
+
+  if (isPilotOrFairway) {
+    legXtd = Math.min(baseXtd, 0.15);
+    turnRadius = 0.4;
+    legSpeed = Math.min(baseSpeed, 10.5);
+  } else if (isTssOrStrait) {
+    legXtd = Math.min(Math.max(baseXtd, 0.20), 0.30);
+    turnRadius = 0.6;
+    legSpeed = Math.min(baseSpeed, 13.5);
+  } else if (isOpenOcean) {
+    legXtd = Math.max(baseXtd, 1.00);
+    turnRadius = 1.2;
+    legSpeed = baseSpeed;
+  } else {
+    legXtd = Math.max(baseXtd, 0.35);
+    turnRadius = 0.8;
+    legSpeed = baseSpeed;
+  }
+
+  const eteHours = distNm / Math.max(4.0, legSpeed);
+
+  const ntmHits = [];
+  if (typeof NTM_STORE !== "undefined" && Array.isArray(NTM_STORE)) {
+    const checkRadiusNm = isOpenOcean ? 45 : 25;
+    for (let i = 0; i < NTM_STORE.length; i++) {
+      const n = NTM_STORE[i];
+      if (!n || n.isCancelled || n.status === "CANCELLED") continue;
+      const cLat = Number.isFinite(n.lat) ? n.lat : (n.coords && n.coords[0] ? n.coords[0].lat : NaN);
+      const cLon = Number.isFinite(n.lon) ? n.lon : (n.coords && n.coords[0] ? n.coords[0].lon : NaN);
+      if (!Number.isFinite(cLat) || !Number.isFinite(cLon)) continue;
+      const d = pointToSegmentDistanceNM(cLat, cLon, wpA.lat, wpA.lon, wpB.lat, wpB.lon);
+      if (d <= checkRadiusNm) {
+        ntmHits.push({
+          id: n.id,
+          type: n.type || "NAVTEX",
+          subject: (n.subject || n.title || "Navigational Warning").slice(0, 70),
+          distNm: Math.round(d * 10) / 10
+        });
+        if (ntmHits.length >= 4) break;
+      }
+    }
+  }
+
+  const weatherHits = [];
+  if (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.storms)) {
+    MARINE_WEATHER_STORE.storms.forEach(st => {
+      if (!st || !Array.isArray(st.center)) return;
+      const dStorm = pointToSegmentDistanceNM(st.center[0], st.center[1], wpA.lat, wpA.lon, wpB.lat, wpB.lon);
+      if (dStorm <= (st.dangerRadiusNm || 150) + 120) {
+        weatherHits.push(`${st.name} (${st.maxWinds} kt, CPA ${Math.round(dStorm)} NM)`);
+      }
+    });
+  }
+
+  const squatM = (isPilotOrFairway || isTssOrStrait)
+    ? ((0.78 * Math.pow(legSpeed, 2)) / 100) * 1.35
+    : ((0.78 * Math.pow(legSpeed, 2)) / 100);
+  const minReqDepthM = draftM + squatM + Math.max(1.0, draftM * 0.10);
+  const ukcNote = `Draft ${draftM.toFixed(1)}m + Squat ${squatM.toFixed(2)}m → Min Safe Depth ${minReqDepthM.toFixed(1)}m`;
 
   return {
     legNo: legIdx + 1,
@@ -8241,70 +8282,63 @@ function analyzeSingleLegParameters(wpA, wpB, legIdx, totalLegs, opts = {}) {
     toLat: wpB.lat,
     toLon: wpB.lon,
     navZone,
-    navZoneCode,
     sailType,
     sailReason,
-    courseTrue: Number(courseTrue.toFixed(1)),
-    courseFormatted: `${courseTrue.toFixed(1).padStart(5, "0")}° T`,
-    distanceNM: Number(distNm.toFixed(1)),
-    speedKnots: Number(legSpeed.toFixed(1)),
-    eteHours: Number(eteHours.toFixed(1)),
+    courseDeg: Math.round(courseDeg * 10) / 10,
+    courseFormatted: `${String(Math.round(courseDeg)).padStart(3, "0")}.0°T`,
+    distanceNM: Math.round(distNm * 10) / 10,
+    speedKnots: Math.round(legSpeed * 10) / 10,
+    eteHours: Math.round(eteHours * 10) / 10,
     xtdNM: Number(legXtd.toFixed(2)),
-    turnRadiusNM: turnRadius,
-    rotDegMin: rot,
-    ntmHits: ntmHits.slice(0, 4),
-    weatherHits,
-    staticFeatures,
-    ukcNote
+    turnRadiusNM: Number(turnRadius.toFixed(2)),
+    ukcNote,
+    ntmHits,
+    weatherHits
   };
 }
 
-/**
- * Enrich any route object with complete Leg-by-Leg Telemetry (`route.legs`)
- */
 function enrichRouteWithLegsTelemetry(route, opts = {}) {
   if (!route || !Array.isArray(route.waypoints) || route.waypoints.length < 2) return route;
-  const wpts = route.waypoints;
   const meta = Object.assign({}, route.metadata || {}, opts);
   const legs = [];
   let totalDist = 0;
   let totalHours = 0;
 
-  for (let i = 0; i < wpts.length - 1; i++) {
-    const leg = analyzeSingleLegParameters(wpts[i], wpts[i + 1], i, wpts.length - 1, meta);
-    legs.push(leg);
-    totalDist += leg.distanceNM;
-    totalHours += leg.eteHours;
+  for (let i = 0; i < route.waypoints.length - 1; i++) {
+    const wpA = route.waypoints[i];
+    const wpB = route.waypoints[i + 1];
+    const legInfo = analyzeSingleLegParameters(wpA, wpB, i, route.waypoints.length - 1, meta);
+    legs.push(legInfo);
 
-    // Sync calculated leg parameters onto the departure waypoint for ECDIS export
-    wpts[i].wptNo = leg.fromWptNo;
-    wpts[i].sail = leg.sailType;
-    wpts[i].speedKnots = leg.speedKnots;
-    wpts[i].portsideXTD = leg.xtdNM;
-    wpts[i].starboardXTD = leg.xtdNM;
-    wpts[i].turnRadius = leg.turnRadiusNM;
-    wpts[i].rot = leg.rotDegMin;
-    wpts[i].courseToNext = leg.courseTrue;
-    wpts[i].legDistNM = leg.distanceNM;
+    wpA.sail = legInfo.sailType;
+    wpA.speedKnots = legInfo.speedKnots;
+    wpA.portsideXTD = legInfo.xtdNM;
+    wpA.starboardXTD = legInfo.xtdNM;
+    wpA.turnRadius = legInfo.turnRadiusNM;
+    wpA.wptNo = ('00' + (i + 1)).slice(-3);
+
+    totalDist += legInfo.distanceNM;
+    totalHours += legInfo.eteHours;
   }
-  const lastIdx = wpts.length - 1;
-  wpts[lastIdx].wptNo = ('00' + wpts.length).slice(-3);
+
+  const lastWp = route.waypoints[route.waypoints.length - 1];
+  lastWp.wptNo = ('00' + route.waypoints.length).slice(-3);
 
   route.legs = legs;
   route.totalDistanceNM = Math.round(totalDist);
+  route.totalSteamingHours = Math.round(totalHours * 10) / 10;
   route.steamingDays = (totalHours / 24).toFixed(1);
-  route.totalSteamingHours = Math.round(totalHours);
-  route.seasonalContext = getSeasonalNavigationContext(wpts[0].lat, wpts[lastIdx].lat);
+  route.seasonalContext = getSeasonalNavigationContext(route.waypoints[0].lat, lastWp.lat);
   if (!route.id) {
     route.id = "rt-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
+  }
+  if (!route.createdAt) {
+    route.createdAt = new Date().toISOString();
   }
   return route;
 }
 window.enrichRouteWithLegsTelemetry = enrichRouteWithLegsTelemetry;
 
-/**
- * Saved Routes Library Manager (Persists all Brain-created & My Vessel uploaded routes)
- */
 function getSavedRoutesLibrary() {
   try {
     const raw = localStorage.getItem(SETSAIL_ROUTES_LIBRARY_KEY);
@@ -8326,9 +8360,8 @@ function saveRouteToLibrary(route) {
   } else {
     lib.unshift(route);
   }
-  if (lib.length > 25) lib.length = 25;
   try {
-    localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(lib));
+    localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(lib.slice(0, 35)));
   } catch (e) {}
   renderNavSavedRoutesTree();
 }
@@ -8342,7 +8375,7 @@ function deleteRouteFromLibrary(routeId) {
   if (activeRouteData && activeRouteData.id === routeId) {
     if (lib.length > 0) {
       selectSavedRouteFromSidebar(lib[0].id, false);
-    } else {
+    } else if (typeof clearActiveRoute === "function") {
       clearActiveRoute();
       const drawer = document.getElementById("setRouteRightDrawer");
       if (drawer) drawer.classList.remove("open");
@@ -8351,15 +8384,11 @@ function deleteRouteFromLibrary(routeId) {
   renderNavSavedRoutesTree();
 }
 
-/**
- * Render the expandable Saved Routes list under the SetRoute button in .nav-sidebar
- */
 function renderNavSavedRoutesTree() {
   const listEl = document.getElementById("navSavedRoutesList");
   const badgeEl = document.getElementById("navRoutesCountBadge");
   if (!listEl) return;
 
-  // Ensure activeRouteData is in the library if present
   let lib = getSavedRoutesLibrary();
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
     if (!lib.some(r => r.name === activeRouteData.name)) {
@@ -8387,7 +8416,7 @@ function renderNavSavedRoutesTree() {
         <span class="nav-saved-route-dot"></span>
         <div class="nav-saved-route-info">
           <span class="nav-saved-route-name">${rt.name || "Passage Route"}</span>
-          <span class="nav-saved-route-meta">${legsCnt} Legs • ${dist} NM • ${rt.format || "AI"}</span>
+          <span class="nav-saved-route-meta">${legsCnt} Legs • ${dist} NM</span>
         </div>
       </button>
     `;
@@ -8411,13 +8440,9 @@ function selectSavedRouteFromSidebar(routeId, openRightDrawer = true) {
   }
   displaySetRouteResults(found, openRightDrawer);
   renderNavSavedRoutesTree();
-  if (typeof renderRouteMonitoringView === "function" && window.SETROUTE_BRAIN_MODE === "monitoring") {
-    renderRouteMonitoringView();
-  }
 }
 window.selectSavedRouteFromSidebar = selectSavedRouteFromSidebar;
 
-// Hook renderRouteOnMap so ANY route (including manual upload via My Vessel .rtz/.csv/.rtm) is automatically added to the Left Sidebar Route Tree!
 const _origRenderRouteOnMapV49 = window.renderRouteOnMap || renderRouteOnMap;
 renderRouteOnMap = function(route, shouldFly = true) {
   if (route && Array.isArray(route.waypoints) && route.waypoints.length > 0) {
@@ -8432,9 +8457,6 @@ renderRouteOnMap = function(route, shouldFly = true) {
 };
 window.renderRouteOnMap = renderRouteOnMap;
 
-/**
- * Populate the Right-Side Non-Overlapping Route Details Inspector (#setRouteRightDrawer)
- */
 function displaySetRouteResults(route, autoOpenDrawer = true) {
   if (!route || !Array.isArray(route.waypoints) || route.waypoints.length === 0) return;
   enrichRouteWithLegsTelemetry(route);
@@ -8457,8 +8479,8 @@ function displaySetRouteResults(route, autoOpenDrawer = true) {
   if (titleEl) titleEl.textContent = route.name || "Passage Plan";
   if (badgeEl) {
     badgeEl.textContent = route.format === "SETROUTE_AI"
-      ? "DUAL-CORE BRAIN • IMO A.893(21)"
-      : `UPLOADED ROUTE (${route.format || "ECDIS"}) • AUDITED`;
+      ? "IMO A.893(21) • VERIFIED"
+      : `UPLOADED (${route.format || "ECDIS"})`;
   }
   const legs = route.legs || [];
   if (distEl) distEl.textContent = `${(route.totalDistanceNM || 0).toLocaleString()} NM`;
@@ -8468,18 +8490,15 @@ function displaySetRouteResults(route, autoOpenDrawer = true) {
   const drf = (route.metadata && route.metadata.draftMeters) || 11.5;
   if (speedEl) speedEl.textContent = `${spd} kn / ${drf}m`;
 
-  // Theory & Multi-Variable Audit Box
   if (theoryBox) {
     const totalNtmHits = legs.reduce((acc, l) => acc + (l.ntmHits ? l.ntmHits.length : 0), 0);
     const totalWxHits = legs.reduce((acc, l) => acc + (l.weatherHits ? l.weatherHits.length : 0), 0);
     const gcLegs = legs.filter(l => l.sailType === "GC").length;
     const rlLegs = legs.length - gcLegs;
     theoryBox.innerHTML = `
-      <div style="font-weight:800;color:#38bdf8;margin-bottom:4px;">🧭 Passage Appraisal &amp; Brain Audit (NP231 / IMO A.893)</div>
-      <div>• <b>Geometry:</b> ${rlLegs} Rhumb-Line (RL) legs + ${gcLegs} Great-Circle (GC) legs</div>
-      <div>• <b>Seasonality:</b> ${route.seasonalContext || "Standard Ocean Regime"}</div>
-      <div>• <b>Hazards Scanned:</b> ${totalNtmHits} nearby NtM/NAVTEX warnings • ${totalWxHits} Metocean/Cyclone zones</div>
-      <div>• <b>Land &amp; TSS:</b> 100% Deepwater &amp; COLREG Rule 10 TSS compliant</div>
+      <div style="font-weight:700;color:#e2e8f0;margin-bottom:3px;">Appraisal Summary</div>
+      <div>• <b>Geometry:</b> ${rlLegs} RL legs + ${gcLegs} GC legs</div>
+      <div>• <b>Hazards Audited:</b> ${totalNtmHits} NtM/NAVTEX • ${totalWxHits} Weather</div>
     `;
   }
 
@@ -8496,44 +8515,28 @@ function displaySetRouteResults(route, autoOpenDrawer = true) {
     legsListEl.innerHTML = legs.map((leg, idx) => {
       const hasWarn = (leg.ntmHits && leg.ntmHits.length > 0) || (leg.weatherHits && leg.weatherHits.length > 0);
       return `
-        <div class="sr-leg-inspector-card" data-leg-idx="${idx}" title="Click to focus on Leg #${leg.legNo} on SetChart">
+        <div class="sr-leg-inspector-card" data-leg-idx="${idx}" title="Click to view Leg #${leg.legNo} on SetChart">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
-            <strong style="font-size:0.76rem;color:#f8fafc;">Leg #${leg.legNo}: ${leg.fromName} &rarr; ${leg.toName}</strong>
+            <strong style="font-size:0.75rem;color:#f8fafc;">Leg ${leg.legNo}: ${leg.fromName} &rarr; ${leg.toName}</strong>
             <span class="sr-leg-pill ${leg.sailType === 'GC' ? 'gc' : ''}">${leg.sailType} • ${leg.courseFormatted}</span>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:0.68rem;color:#94a3b8;">
-            <span>📏 <b style="color:#e2e8f0;">${leg.distanceNM} NM</b></span>
-            <span>• ⏱ <b style="color:#e2e8f0;">${leg.eteHours}h</b> @ ${leg.speedKnots}kn</span>
-            <span>• ↔ XTD: <b style="color:#38bdf8;">±${leg.xtdNM} NM</b></span>
-            <span>• ↻ Rad: ${leg.turnRadiusNM} NM</span>
+            <span><b style="color:#e2e8f0;">${leg.distanceNM} NM</b></span>
+            <span>• ${leg.eteHours}h @ ${leg.speedKnots}kn</span>
+            <span>• XTD ±${leg.xtdNM} NM</span>
           </div>
-          <div style="font-size:0.66rem;color:#7dd3fc;">
-            🏷️ <b>${leg.navZone}:</b> ${leg.sailReason}
-          </div>
-          <div style="font-size:0.65rem;color:#cbd5e1;">
-            ⚓ ${leg.ukcNote}
-          </div>
+          <div style="font-size:0.65rem;color:#94a3b8;">${leg.ukcNote}</div>
           ${hasWarn ? `
-            <div style="font-size:0.65rem;color:#fbbf24;background:rgba(245,158,11,0.1);padding:4px 7px;border-radius:5px;border:1px solid rgba(245,158,11,0.28);">
-              ⚠️ ${[
-                ...(leg.ntmHits || []).map(h => `${h.id} (${h.distNm} NM)`),
-                ...(leg.weatherHits || [])
-              ].join(" • ")}
+            <div style="font-size:0.64rem;color:#fbbf24;">
+              ⚠️ ${[...(leg.ntmHits || []).map(h => h.id), ...(leg.weatherHits || [])].join(" • ")}
             </div>
-          ` : `
-            <div style="font-size:0.64rem;color:#34d399;">✓ Clear of active NtM/NAVTEX hazards &amp; cyclone cores</div>
-          `}
+          ` : ""}
         </div>
       `;
     }).join("");
   }
 }
 window.displaySetRouteResults = displaySetRouteResults;
-
-
-/* ==========================================================================
-   CONVERSATIONAL BRAIN ENGINE (NATURAL LANGUAGE PARSER + COHERE AI + LEG STREAM)
-   ========================================================================== */
 
 const PORT_RU_ALIASES = {
   "роттердам": "port-rotterdam",
@@ -8561,7 +8564,6 @@ const PORT_RU_ALIASES = {
   "суэц": "port-suez",
   "порт-саид": "port-port-said",
   "гибралтар": "port-gibraltar",
-  "альхесирас": "port-algeciras",
   "рас-танура": "port-ras-tanura",
   "фуджейра": "port-fujairah",
   "джебель-али": "port-jebel-ali",
@@ -8570,17 +8572,13 @@ const PORT_RU_ALIASES = {
   "коломбо": "port-colombo",
   "сантос": "port-santos",
   "буэнос-айрес": "port-buenos-aires",
-  "урбан": "port-durban",
   "дурбан": "port-durban",
   "хедленд": "port-hedland",
   "сидней": "port-sydney",
   "лиссабон": "port-lisbon",
-  "пирей": "port-piraeus",
-  "стамбул": "port-istanbul",
   "новороссийск": "port-novorossiysk",
   "санкт-петербург": "port-st-petersburg",
-  "гданьск": "port-gdansk",
-  "берген": "port-bergen"
+  "гданьск": "port-gdansk"
 };
 
 function findPortsInUserMessage(text) {
@@ -8588,7 +8586,6 @@ function findPortsInUserMessage(text) {
   const lower = text.toLowerCase();
   const hits = [];
 
-  // 1. Check Russian aliases with position index in string
   for (const [ruStem, portId] of Object.entries(PORT_RU_ALIASES)) {
     const idx = lower.indexOf(ruStem);
     if (idx !== -1) {
@@ -8599,10 +8596,13 @@ function findPortsInUserMessage(text) {
     }
   }
 
-  // 2. Check English port names & UN/LOCODEs
   PORT_DEPTHS_DB.forEach(p => {
     const pName = p.name.toLowerCase();
-    const idx = lower.indexOf(pName);
+    const shortName = pName.split("(")[0].trim();
+    let idx = lower.indexOf(pName);
+    if (idx === -1 && shortName.length >= 4) {
+      idx = lower.indexOf(shortName);
+    }
     if (idx !== -1 && !hits.some(h => h.port.id === p.id)) {
       hits.push({ port: p, pos: idx });
     }
@@ -8615,7 +8615,10 @@ function findPortsInUserMessage(text) {
 function appendChatMessage(role, htmlContent, quickChips = []) {
   const container = document.getElementById("setRouteChatMessages");
   const scrollWrap = document.getElementById("setRouteChatScroll");
+  const emptyHero = document.getElementById("setRouteEmptyHero");
   if (!container) return null;
+
+  if (emptyHero) emptyHero.style.display = "none";
 
   const msgEl = document.createElement("div");
   msgEl.className = `sr-msg ${role === "user" ? "user" : "brain"}`;
@@ -8642,9 +8645,6 @@ function appendChatMessage(role, htmlContent, quickChips = []) {
   return msgEl;
 }
 
-/**
- * Step-by-Step Animated Leg-by-Leg Deliberation Pipeline
- */
 async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const speed = parseFloat(options.speedKnots || (document.getElementById("setRouteSpeedInput") && document.getElementById("setRouteSpeedInput").value)) || 14.5;
   const draft = parseFloat(options.draftMeters || (document.getElementById("setRouteDraftInput") && document.getElementById("setRouteDraftInput").value)) || 11.5;
@@ -8652,7 +8652,6 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const sailMode = options.sailMode || (document.getElementById("setRouteSailSelect") && document.getElementById("setRouteSailSelect").value) || "HYBRID";
   const viaCape = Boolean(options.viaCape);
 
-  // Sync top/bottom inputs
   const origSel = document.getElementById("setRouteOriginSelect");
   const destSel = document.getElementById("setRouteDestSelect");
   const spdInp = document.getElementById("setRouteSpeedInput");
@@ -8667,7 +8666,6 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const origCoords = pOrig.approachCoords || pOrig.coords;
   const destCoords = pDest.approachCoords || pDest.coords;
 
-  // 1. Build base deep-water route (with optional Cape of Good Hope override)
   let baseRoute = generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode);
   if (viaCape) {
     const capeCorridor = ["ST_VINCENT", "CANARY_PASS", "CAPE_VERDE_PASS", "GULF_OF_GUINEA", "CAPE_AGULHAS", "MAURITIUS_PASS", "MALACCA_N", "SINGAPORE_MAIN"];
@@ -8705,21 +8703,17 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     generatedAt: new Date().toISOString()
   };
 
-  // 2. Run Deterministic Pre-Plot Leg-by-Leg Calculation
   enrichRouteWithLegsTelemetry(baseRoute, baseRoute.metadata);
   const legs = baseRoute.legs || [];
 
-  // 3. Create Live Brain Deliberation Message in Chat
   const msgEl = appendChatMessage("brain", `
     <div>
-      <strong>🧠 Dual-Core Brain Appraisal Initiated: ${baseRoute.name}</strong><br>
-      <span style="font-size:0.75rem;color:#94a3b8;">
-        <b>Stage 1 (Appraisal):</b> Draft <b>${draft}m</b>, Target Speed <b>${speed} kn</b>, Base XTD <b>±${xtd} NM</b>.<br>
-        <b>Climatology:</b> ${baseRoute.seasonalContext}<br>
-        <b>Stage 2 (Leg-by-Leg Synthesis):</b> Evaluating <b>${legs.length} sequential legs</b> for RL/GC geometry, land/TSS clearance, UKHO NtM/NAVTEX warnings, and active tropical cyclones before plotting...
+      <strong>Appraising &amp; Synthesizing Route: ${baseRoute.name}</strong><br>
+      <span style="font-size:0.78rem;color:#94a3b8;">
+        Draft <b>${draft}m</b> • Speed <b>${speed} kn</b> • Base XTD <b>±${xtd} NM</b> • Evaluating <b>${legs.length} legs</b> for RL/GC geometry, TSS clearance, UKC, and active NtM/NAVTEX &amp; cyclone hazards...
       </span>
       <div class="sr-leg-stream" id="srLiveLegStream_${Date.now()}"></div>
-      <div class="sr-ai-synthesis-footer" style="margin-top:10px;font-size:0.78rem;color:#7dd3fc;">⏳ Deliberating leg parameters...</div>
+      <div class="sr-ai-synthesis-footer" style="margin-top:8px;font-size:0.78rem;color:#94a3b8;">Calculating leg parameters...</div>
     </div>
   `);
 
@@ -8727,10 +8721,9 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const footerEl = msgEl ? msgEl.querySelector(".sr-ai-synthesis-footer") : null;
   const scrollWrap = document.getElementById("setRouteChatScroll");
 
-  // 4. Animate each Leg one by one so the user sees the Brain thinking through every Leg before plotting
   for (let i = 0; i < legs.length; i++) {
     const leg = legs[i];
-    await new Promise(r => setTimeout(r, 210));
+    await new Promise(r => setTimeout(r, 170));
     if (streamEl) {
       const card = document.createElement("div");
       card.className = "sr-leg-step-card";
@@ -8742,12 +8735,11 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
             <span class="sr-leg-pill ${leg.sailType === 'GC' ? 'gc' : ''}">${leg.sailType}</span>
             <span class="sr-leg-pill">${leg.courseFormatted}</span>
             <span class="sr-leg-pill">${leg.distanceNM} NM</span>
-            <span class="sr-leg-pill ${hasHaz ? 'warn' : 'ok'}">${hasHaz ? '⚠️ Hazard Monitored' : '✓ Clear'}</span>
+            <span class="sr-leg-pill ${hasHaz ? 'warn' : 'ok'}">${hasHaz ? '⚠️ Monitored' : '✓ Clear'}</span>
           </div>
         </div>
         <div style="color:#94a3b8;font-size:0.70rem;">
-          <b>[${leg.navZone}]</b> ${leg.sailReason} | Spd: <b>${leg.speedKnots}kn</b> (${leg.eteHours}h) | XTD: <b>±${leg.xtdNM}NM</b> | ${leg.ukcNote}
-          ${hasHaz ? `<br><span style="color:#fbbf24;">↳ Audited: ${[...(leg.ntmHits || []).map(h => h.id), ...(leg.weatherHits || [])].join(", ")}</span>` : ""}
+          ${leg.navZone} • Spd ${leg.speedKnots}kn (${leg.eteHours}h) • XTD ±${leg.xtdNM}NM • ${leg.ukcNote}
         </div>
       `;
       streamEl.appendChild(card);
@@ -8755,7 +8747,6 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     }
   }
 
-  // 5. Commit Route to Active Store, Saved Sidebar Tree, Right-Side Inspector, and SetChart!
   activeRouteData = baseRoute;
   try {
     localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(baseRoute));
@@ -8768,12 +8759,11 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     renderRouteOnMap(baseRoute, false);
   }
 
-  // 6. Query Cohere AI Captain's Executive Assessment (non-blocking / 4s timeout)
   let cohereNote = "";
   if (navigator.onLine && typeof SETROUTE_COHERE_KEY === "string" && SETROUTE_COHERE_KEY) {
     try {
       const ctrl = new AbortController();
-      const tid = setTimeout(() => ctrl.abort(), 3800);
+      const tid = setTimeout(() => ctrl.abort(), 3600);
       const legBrief = legs.map(l => `Leg ${l.legNo} (${l.fromName}->${l.toName}, ${l.sailType}, ${l.courseFormatted}, ${l.distanceNM}NM)`).join("; ");
       const resp = await fetch("https://api.cohere.com/v2/chat", {
         method: "POST",
@@ -8787,7 +8777,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
           model: SETROUTE_COHERE_MODEL,
           messages: [{
             role: "user",
-            content: `You are SetRoute Master Mariner AI. In 2 concise sentences (in Russian), give a professional navigation watchkeeping summary for ${baseRoute.name} (${baseRoute.totalDistanceNM} NM, ${legs.length} legs: ${legBrief}, draft ${draft}m).`
+            content: `You are SetRoute Master Mariner AI. In 2 concise sentences in English, give a professional navigation watchkeeping summary for ${baseRoute.name} (${baseRoute.totalDistanceNM} NM, ${legs.length} legs: ${legBrief}, draft ${draft}m).`
           }],
           temperature: 0.2
         })
@@ -8802,20 +8792,16 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
 
   if (footerEl) {
     footerEl.innerHTML = `
-      <div style="padding:9px 12px;border-radius:9px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.35);color:#e2e8f0;margin-top:6px;">
-        <strong style="color:#34d399;">✓ Маршрут «${baseRoute.name}» построен и добавлен в левое меню под SetRoute!</strong><br>
-        Всего: <b>${legs.length} легов (${baseRoute.waypoints.length} WPT)</b> • Длина: <b>${baseRoute.totalDistanceNM} NM</b> • Время в пути: <b>${baseRoute.steamingDays} сут. (${baseRoute.totalSteamingHours} ч)</b>.<br>
-        ${cohereNote ? `<span style="color:#bae6fd;display:block;margin-top:4px;">💬 <b>Заключение ИИ-штурмана (Cohere):</b> ${cohereNote}</span>` : ""}
-        <span style="font-size:0.72rem;color:#94a3b8;display:block;margin-top:4px;">Справа открыта панель деталей по каждому Leg. Вы можете написать в чат любые корректировки (например: «Измени скорость на 16 узлов», «Переключи океан на GC», «Увеличь XTD до 0.8 мили» или «Покажи на карте SetChart»).</span>
+      <div style="padding:10px 12px;border-radius:10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#e2e8f0;margin-top:6px;">
+        <strong style="color:#34d399;">✓ Passage plan "${baseRoute.name}" ready &amp; saved to SetRoute sidebar</strong><br>
+        Total: <b>${legs.length} legs (${baseRoute.waypoints.length} WPTs)</b> • Distance: <b>${baseRoute.totalDistanceNM} NM</b> • ETE: <b>${baseRoute.steamingDays} days (${baseRoute.totalSteamingHours}h)</b>.<br>
+        ${cohereNote ? `<span style="color:#bae6fd;display:block;margin-top:4px;"><b>Master Mariner Note:</b> ${cohereNote}</span>` : ""}
       </div>
     `;
   }
   if (scrollWrap) scrollWrap.scrollTop = scrollWrap.scrollHeight;
 }
 
-/**
- * Handle User Chat Input to the SetRoute Dual-Core Brain
- */
 async function handleSetRouteUserMessage(rawText) {
   const text = (rawText || "").trim();
   if (!text) return;
@@ -8823,23 +8809,21 @@ async function handleSetRouteUserMessage(rawText) {
   appendChatMessage("user", text);
   const lower = text.toLowerCase();
 
-  // 1. Extract any explicit numeric parameters from the user's message
-  const spdMatch = lower.match(/(?:скорост[ьию]|speed|spd)\s*(?:на|до|=|:)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:узл|kn|kts)/i);
-  const drfMatch = lower.match(/(?:осадк[ауи]|draft)\s*(?:на|до|=|:)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:м\b|метров|meters)/i);
-  const xtdMatch = lower.match(/(?:xtd|коридор|буфер)\s*(?:на|до|=|:)?\s*(\d+(?:[.,]\d+)?)/i);
+  const spdMatch = lower.match(/(?:скорост[ьию]|speed|spd)\s*(?:to|=|:)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:kn|kts|knots|узл)/i);
+  const drfMatch = lower.match(/(?:осадк[ауи]|draft)\s*(?:to|=|:)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:m\b|meters|м\b)/i);
+  const xtdMatch = lower.match(/(?:xtd|corridor|buffer)\s*(?:to|=|:)?\s*(\d+(?:[.,]\d+)?)/i);
 
   const parsedSpd = spdMatch ? parseFloat((spdMatch[1] || spdMatch[2]).replace(",", ".")) : null;
   const parsedDrf = drfMatch ? parseFloat((drfMatch[1] || drfMatch[2]).replace(",", ".")) : null;
   const parsedXtd = xtdMatch ? parseFloat(xtdMatch[1].replace(",", ".")) : null;
   let parsedSail = null;
-  if (/\bgc\b|great circle|большо\w+\s+круг|ортодром/i.test(lower)) parsedSail = "GC";
-  else if (/\brl\b|rhumb|локсодром/i.test(lower)) parsedSail = "RL";
+  if (/\bgc\b|great circle/i.test(lower)) parsedSail = "GC";
+  else if (/\brl\b|rhumb/i.test(lower)) parsedSail = "RL";
 
-  // 2. Check if we were waiting for a clarifying answer (e.g., Suez vs Cape of Good Hope, or missing destination port)
   if (window.SETROUTE_PENDING_CONTEXT) {
     const pending = window.SETROUTE_PENDING_CONTEXT;
     if (pending.type === "SUEZ_VS_CAPE") {
-      const chooseCape = /cape|африк|доброй надежд|юг|обход/i.test(lower);
+      const chooseCape = /cape|africa|good hope|aguhlas|agulhas/i.test(lower);
       window.SETROUTE_PENDING_CONTEXT = null;
       await executeBrainLegByLegRoutePlan(pending.origin, pending.dest, Object.assign({}, pending.opts, {
         viaCape: chooseCape,
@@ -8867,10 +8851,8 @@ async function handleSetRouteUserMessage(rawText) {
     }
   }
 
-  // 3. Detect mentioned ports in the message
   const mentionedPorts = findPortsInUserMessage(text);
 
-  // Case A: Two ports mentioned -> Check if we should ask a strategic clarifying question (e.g. Suez vs Cape or Draft warning) or build immediately
   if (mentionedPorts.length >= 2) {
     const pOrig = mentionedPorts[0];
     const pDest = mentionedPorts[1];
@@ -8881,26 +8863,23 @@ async function handleSetRouteUserMessage(rawText) {
       sailMode: parsedSail || (document.getElementById("setRouteSailSelect") || {}).value || "HYBRID"
     };
 
-    // Check if route crosses Europe/Americas <-> Asia and user didn't specify Suez vs Cape
     const isEuroOrUs = p => p.coords[1] < 30;
     const isAsia = p => p.coords[1] > 70;
     const crossesSuezOrCape = (isEuroOrUs(pOrig) && isAsia(pDest)) || (isAsia(pOrig) && isEuroOrUs(pDest));
-    const alreadySpecifiedSuezOrCape = /суэц|suez|cape|африк|доброй надежд|прямо|сразу/i.test(lower);
+    const alreadySpecifiedSuezOrCape = /suez|cape|africa|good hope|суэц|африк/i.test(lower);
 
     if (crossesSuezOrCape && !alreadySpecifiedSuezOrCape) {
       window.SETROUTE_PENDING_CONTEXT = { type: "SUEZ_VS_CAPE", origin: pOrig, dest: pDest, opts };
       appendChatMessage("brain", `
-        <strong>🧭 Уточняющий вопрос от мозга SetRoute (${pOrig.name} &rarr; ${pDest.name}):</strong><br>
-        Перед расчётом легов между <b>${pOrig.name}</b> и <b>${pDest.name}</b> я проанализировал обстановку в районе <b>NAVAREA IX (Красное море и Баб-эль-Мандебский пролив)</b>, где действуют навигационные предупреждения безопасности.<br><br>
-        Как вы предпочитаете проложить генеральный курс?
+        <strong>Routing Clarification (${pOrig.name} &rarr; ${pDest.name}):</strong><br>
+        Before computing the legs between <b>${pOrig.name}</b> and <b>${pDest.name}</b>, please confirm your preferred strategic corridor:
         <ul style="margin:6px 0;padding-left:18px;">
-          <li><b>Вариант 1 — Через Суэцкий канал и Красное море:</b> кратчайшее расстояние (~экономия 3 400 NM), проход по TSS Суэца и Баб-эль-Мандеба.</li>
-          <li><b>Вариант 2 — Вокруг Африки (мыс Доброй Надежды / Cape Agulhas):</b> обход зоны риска Красного моря по глубоководному океанскому коридору.</li>
+          <li><b>Option 1 — Via Suez Canal &amp; Red Sea:</b> Shortest distance (~3,400 NM saved), transiting Suez &amp; Bab-el-Mandeb TSS.</li>
+          <li><b>Option 2 — Via Cape of Good Hope:</b> Deep-ocean routing around southern Africa clear of NAVAREA IX Red Sea advisories.</li>
         </ul>
-        Выберите вариант ниже или напишите дополнительные параметры (осадку, скорость):
       `, [
-        { label: "⚡ Через Суэцкий канал (Кратчайший)", prompt: `Проложи через Суэцкий канал из ${pOrig.name} в ${pDest.name}` },
-        { label: "🌊 Вокруг Африки (Мыс Доброй Надежды)", prompt: `Проложи вокруг Африки через мыс Доброй Надежды из ${pOrig.name} в ${pDest.name}` }
+        { label: "⚡ Via Suez Canal", prompt: `Plan route via Suez Canal from ${pOrig.name} to ${pDest.name}` },
+        { label: "🌊 Via Cape of Good Hope", prompt: `Plan route via Cape of Good Hope from ${pOrig.name} to ${pDest.name}` }
       ]);
       return;
     }
@@ -8909,11 +8888,9 @@ async function handleSetRouteUserMessage(rawText) {
     return;
   }
 
-  // Case B: Only 1 port mentioned -> Ask clarifying question for the second port (or if user says "из текущего порта / добавь заход")
   if (mentionedPorts.length === 1) {
     const pOne = mentionedPorts[0];
-    if (/добавь|через|заход|via|add/i.test(lower) && activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2) {
-      // Insert intermediate port waypoint into activeRouteData!
+    if (/via|add|call|через|добавь/i.test(lower) && activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2) {
       const appC = pOne.approachCoords || pOne.coords;
       const midIdx = Math.max(1, Math.floor(activeRouteData.waypoints.length / 2));
       activeRouteData.waypoints.splice(midIdx, 0, {
@@ -8934,28 +8911,27 @@ async function handleSetRouteUserMessage(rawText) {
       displaySetRouteResults(activeRouteData, true);
       if (leafletMap) renderRouteOnMap(activeRouteData, false);
       appendChatMessage("brain", `
-        ✓ Я пересчитал маршрут и добавил промежуточный заход в <b>${pOne.name}</b>! Теперь в маршруте <b>${activeRouteData.legs.length} легов</b> (общая длина: <b>${activeRouteData.totalDistanceNM} NM</b>). Все параметры легов обновлены в правой панели.
+        ✓ Updated active route to include an intermediate call at <b>${pOne.name}</b> (${activeRouteData.legs.length} legs, total <b>${activeRouteData.totalDistanceNM} NM</b>).
       `);
       return;
     }
 
     window.SETROUTE_PENDING_CONTEXT = { type: "MISSING_PORT", origin: pOne };
     appendChatMessage("brain", `
-      Я зафиксировал порт <b>${pOne.name} (${pOne.country})</b> [контрольная глубина: ${pOne.maxDraftLowTide || pOne.maxDraftMeters || "14.5m"}].<br>
-      Уточните, пожалуйста, <b>второй порт (назначения или отправления)</b>, а также при необходимости <b>осадку судна (м)</b> и <b>планируемую скорость (узлы)</b>, чтобы я рассчитал все леги маршрута:
+      Selected port <b>${pOne.name} (${pOne.country})</b> [controlling depth: ${pOne.maxDraftLowTide || "14.5m"}].<br>
+      Please specify your <b>destination (or origin) port</b>, along with optional <b>draft (m)</b> and <b>speed (kn)</b>:
     `, [
-      { label: `${pOne.name} → Rotterdam`, prompt: `${pOne.name} to Rotterdam` },
-      { label: `${pOne.name} → Singapore`, prompt: `${pOne.name} to Singapore` },
-      { label: `${pOne.name} → Houston`, prompt: `${pOne.name} to Houston` },
-      { label: `${pOne.name} → Shanghai`, prompt: `${pOne.name} to Shanghai` }
+      { label: `${pOne.name} → Rotterdam`, prompt: `Plan route from ${pOne.name} to Rotterdam` },
+      { label: `${pOne.name} → Singapore`, prompt: `Plan route from ${pOne.name} to Singapore` },
+      { label: `${pOne.name} → Houston`, prompt: `Plan route from ${pOne.name} to Houston` },
+      { label: `${pOne.name} → Shanghai`, prompt: `Plan route from ${pOne.name} to Shanghai` }
     ]);
     return;
   }
 
-  // Case C: Modify existing activeRouteData via chat (speed, draft, XTD, GC/RL, reverse, cyclone avoidance)
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2) {
-    if (parsedSpd || parsedDrf || parsedXtd || parsedSail || /реверс|обратн|reverse|пересчитай/i.test(lower)) {
-      if (/реверс|обратн|reverse/i.test(lower)) {
+    if (parsedSpd || parsedDrf || parsedXtd || parsedSail || /reverse|recalculate|реверс/i.test(lower)) {
+      if (/reverse|реверс/i.test(lower)) {
         activeRouteData.waypoints.reverse();
         const parts = (activeRouteData.name || "").split(" to ");
         if (parts.length === 2) activeRouteData.name = `${parts[1]} to ${parts[0]}`;
@@ -8972,21 +8948,18 @@ async function handleSetRouteUserMessage(rawText) {
       if (leafletMap) renderRouteOnMap(activeRouteData, false);
 
       appendChatMessage("brain", `
-        <strong>✓ Параметры активной трассы «${activeRouteData.name}» пересчитаны по всем ${activeRouteData.legs.length} легам!</strong><br>
-        • Скорость: <b>${activeRouteData.metadata.speedKnots || 14.5} kn</b> | Осадка: <b>${activeRouteData.metadata.draftMeters || 11.5} m</b> | Базовый XTD: <b>±${activeRouteData.metadata.xtdNM || 0.25} NM</b> | Режим: <b>${activeRouteData.metadata.sailMode || "HYBRID"}</b><br>
-        • Новое время перехода: <b>${activeRouteData.steamingDays} сут. (${activeRouteData.totalSteamingHours} ч)</b> на дистанции <b>${activeRouteData.totalDistanceNM} NM</b>.<br>
-        Обновлённая таблица легов и расчёт Squat/UKC открыты в правой панели.
+        <strong>✓ Recalculated "${activeRouteData.name}" across all ${activeRouteData.legs.length} legs</strong><br>
+        Speed: <b>${activeRouteData.metadata.speedKnots || 14.5} kn</b> • Draft: <b>${activeRouteData.metadata.draftMeters || 11.5} m</b> • XTD: <b>±${activeRouteData.metadata.xtdNM || 0.25} NM</b> • ETE: <b>${activeRouteData.steamingDays} days (${activeRouteData.totalSteamingHours}h)</b>.
       `);
       return;
     }
   }
 
-  // Case D: General navigation / passage planning conversation or unclear request -> Ask clarifying questions or consult Cohere AI
   let aiReply = "";
   if (navigator.onLine && typeof SETROUTE_COHERE_KEY === "string" && SETROUTE_COHERE_KEY) {
     try {
       const ctrl = new AbortController();
-      const tid = setTimeout(() => ctrl.abort(), 4500);
+      const tid = setTimeout(() => ctrl.abort(), 4200);
       const curRouteInfo = activeRouteData
         ? `Current active route: ${activeRouteData.name} (${activeRouteData.totalDistanceNM} NM, ${(activeRouteData.legs || []).length} legs).`
         : "No route currently active.";
@@ -9002,7 +8975,7 @@ async function handleSetRouteUserMessage(rawText) {
           model: SETROUTE_COHERE_MODEL,
           messages: [{
             role: "user",
-            content: `You are SetRoute Dual-Core Maritime Brain (combining IMO A.893(21) / NP231 passage planning theory with hydrographic leg analysis). ${curRouteInfo} Reply helpfully and concisely in Russian to the navigator's message, and if they want to plan or edit a route, ask any needed clarifying questions (departure/arrival ports, draft, speed, Suez vs Cape): "${text}"`
+            content: `You are SetRoute Maritime Passage Planning Brain (IMO A.893(21) / NP231). ${curRouteInfo} Reply concisely and strictly in English to the navigator's message, and if they want to plan or modify a route, ask any needed clarifying questions (origin/destination ports, draft, speed, Suez vs Cape): "${text}"`
           }],
           temperature: 0.25
         })
@@ -9016,78 +8989,20 @@ async function handleSetRouteUserMessage(rawText) {
   }
 
   if (!aiReply) {
-    aiReply = `Я готов спроектировать или скорректировать маршрут по стандарту <b>IMO Resolution A.893(21) / Admiralty NP231</b> с предварительным расчётом каждого <b>Leg</b> (выбор RL/GC, истинный курс, длина, XTD, проверка глубин портов, TSS, активных извещений NtM/NAVTEX и тропических циклонов).<br><br>Укажите <b>порт отправления и порт назначения</b> (например: <i>«Построй маршрут из Houston в Rotterdam, осадка 11.8м, скорость 15 узлов»</i>) или выберите один из быстрых сценариев ниже:`;
+    aiReply = `Specify your <b>origin and destination ports</b>, along with optional <b>vessel draft (m)</b> and <b>speed (kn)</b> (for example: <i>"Plan route from Houston to Rotterdam, draft 11.8m, speed 15 kn"</i>), and I will appraise and calculate every leg.`;
   }
 
   appendChatMessage("brain", aiReply.replace(/\n/g, "<br>"), [
-    { label: "🚢 Houston → Rotterdam (11.8m, 15kn)", prompt: "Построй маршрут из Houston в Rotterdam, осадка 11.8м, скорость 15 узлов" },
-    { label: "⚓ Singapore → Shanghai (12.5m, 14.5kn)", prompt: "Построй маршрут из Singapore в Shanghai, осадка 12.5м, скорость 14.5 узлов" },
-    { label: "🌊 Rotterdam → Singapore (Выбор Суэц / Африка)", prompt: "Построй маршрут из Rotterdam в Singapore, осадка 12.0м" },
-    { label: "🌀 Tokyo → San Francisco (Тихоокеанский GC)", prompt: "Построй маршрут из Tokyo в San Francisco по дуге большого круга GC" }
+    { label: "Houston → Rotterdam (11.8m, 15kn)", prompt: "Plan route from Houston to Rotterdam, draft 11.8m, speed 15 kn" },
+    { label: "Singapore → Shanghai (12.5m, 14.5kn)", prompt: "Plan route from Singapore to Shanghai, draft 12.5m, speed 14.5 kn" },
+    { label: "Rotterdam → Singapore (Suez vs Cape)", prompt: "Plan route from Rotterdam to Singapore, draft 12.0m" },
+    { label: "Tokyo → San Francisco (Pacific GC)", prompt: "Plan route from Tokyo to San Francisco using Great Circle GC" }
   ]);
 }
 
-/**
- * Render the Route Monitoring Mode View (Brain Function #2)
- */
-function renderRouteMonitoringView() {
-  const box = document.getElementById("setRouteMonitoringContent");
-  if (!box) return;
-
-  const hasRoute = Boolean(activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2);
-  if (!hasRoute) {
-    box.innerHTML = `
-      <div class="sr-msg brain">
-        <div class="sr-msg-avatar">📡</div>
-        <div class="sr-msg-bubble">
-          <strong>📡 SetRoute Brain — Route Monitoring Mode</strong><br>
-          Для запуска мониторинга выберите сохранённую трассу под кнопкой <b>SetRoute</b> в левом меню, загрузите маршрут через <b>My Vessel</b> или создайте маршрут во вкладке <b>🧭 Route Planning</b>.
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  enrichRouteWithLegsTelemetry(activeRouteData);
-  const legs = activeRouteData.legs || [];
-  const vPos = userVessel && Number.isFinite(userVessel.lat)
-    ? `${formatLatLonDMS(userVessel.lat, userVessel.lon)}`
-    : "Ожидание GPS / ручного ввода в My Vessel";
-  const xtdDist = (userVessel && Number.isFinite(userVessel.lat) && typeof getMinDistanceToActiveRouteNM === "function")
-    ? `${getMinDistanceToActiveRouteNM(userVessel.lat, userVessel.lon).toFixed(2)} NM`
-    : "0.00 NM (On Track)";
-
-  box.innerHTML = `
-    <div class="sr-msg brain">
-      <div class="sr-msg-avatar">📡</div>
-      <div class="sr-msg-bubble" style="max-width:100%;width:100%;">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-          <div>
-            <strong style="font-size:0.95rem;color:#38bdf8;">📡 Live Route Monitoring Guard: ${activeRouteData.name}</strong>
-            <div style="font-size:0.72rem;color:#94a3b8;">IMO A.893(21) Stage 4 (Monitoring) • Continuous XTD, UKC &amp; Hazard Guard</div>
-          </div>
-          <span class="sr-leg-pill ok">ACTIVE GUARD</span>
-        </div>
-        <div class="sr-drawer-kpis" style="margin-bottom:12px;">
-          <div class="sr-drawer-kpi"><span class="sr-drawer-kpi-val">${vPos}</span><span class="sr-drawer-kpi-lbl">Vessel Position</span></div>
-          <div class="sr-drawer-kpi"><span class="sr-drawer-kpi-val">${xtdDist}</span><span class="sr-drawer-kpi-lbl">Current XTD</span></div>
-          <div class="sr-drawer-kpi"><span class="sr-drawer-kpi-val">${legs.length} Legs</span><span class="sr-drawer-kpi-lbl">Monitored Legs</span></div>
-          <div class="sr-drawer-kpi"><span class="sr-drawer-kpi-val">±${window.ROUTE_CORRIDOR_BUFFER_NM || 25} NM</span><span class="sr-drawer-kpi-lbl">Safety Buffer</span></div>
-        </div>
-        <div style="font-size:0.76rem;color:#cbd5e1;line-height:1.5;">
-          Режим <b>Route Monitoring</b> отслеживает положение судна относительно активного лега, контролирует выход за пределы XTD, приближение к точкам поворота (Wheel-Over Points) и появление новых навигационных предупреждений <b>NAVTEX / NtM</b> или тропических циклонов в буферном коридоре трассы.
-        </div>
-      </div>
-    </div>
-  `;
-}
-window.renderRouteMonitoringView = renderRouteMonitoringView;
-
-/**
- * Initialize SetRoute v5.0 Conversational Brain, Left Sidebar Route Tree & Right Drawer
- */
 function initSetRouteV50() {
   const chatMessages = document.getElementById("setRouteChatMessages");
+  const emptyHero = document.getElementById("setRouteEmptyHero");
   const chatForm = document.getElementById("setRouteChatForm");
   const chatInput = document.getElementById("setRouteChatInput");
   const genBtn = document.getElementById("btnGenerateSetRoute");
@@ -9100,8 +9015,10 @@ function initSetRouteV50() {
   const navExpandArrow = document.getElementById("navRouteExpandArrow");
   const navSavedList = document.getElementById("navSavedRoutesList");
   const navSidebar = document.querySelector(".nav-sidebar");
+  const btnParamsToggle = document.getElementById("btnToggleSetRouteParams");
+  const paramsPopover = document.getElementById("setRouteParamsPopover");
+  const btnBackToPlan = document.getElementById("btnMonitoringBackToPlanning");
 
-  // 1. Left Sidebar Expand/Collapse Arrow next to SetRoute
   if (navExpandArrow && !navExpandArrow._boundV50) {
     navExpandArrow._boundV50 = true;
     navExpandArrow.addEventListener("click", (e) => {
@@ -9116,7 +9033,6 @@ function initSetRouteV50() {
     });
   }
 
-  // Click handler on saved routes under SetRoute in .nav-sidebar
   if (navSavedList && !navSavedList._boundV50) {
     navSavedList._boundV50 = true;
     navSavedList.addEventListener("click", (e) => {
@@ -9131,7 +9047,6 @@ function initSetRouteV50() {
     });
   }
 
-  // Also ensure SetNews nav button works when clicked
   const navNewsBtn = document.getElementById("navItemSetNews");
   if (navNewsBtn && !navNewsBtn._boundV50) {
     navNewsBtn._boundV50 = true;
@@ -9140,62 +9055,44 @@ function initSetRouteV50() {
     });
   }
 
-  // 2. Brain Mode Switcher: Route Planning vs Route Monitoring
   const btnPlan = document.getElementById("btnBrainModePlanning");
   const btnMon = document.getElementById("btnBrainModeMonitoring");
   const chatScroll = document.getElementById("setRouteChatScroll");
   const monPanel = document.getElementById("setRouteMonitoringPanel");
   const compDock = document.getElementById("setRouteComposerDock");
 
-  if (btnPlan && btnMon && !btnPlan._boundV50) {
-    btnPlan._boundV50 = true;
-    btnPlan.addEventListener("click", () => {
-      window.SETROUTE_BRAIN_MODE = "planning";
-      btnPlan.classList.add("active");
-      btnMon.classList.remove("active");
-      if (chatScroll) chatScroll.style.display = "flex";
-      if (compDock) compDock.style.display = "block";
-      if (monPanel) monPanel.style.display = "none";
-    });
-    btnMon.addEventListener("click", () => {
-      window.SETROUTE_BRAIN_MODE = "monitoring";
-      btnMon.classList.add("active");
-      btnPlan.classList.remove("active");
-      if (chatScroll) chatScroll.style.display = "none";
-      if (compDock) compDock.style.display = "none";
-      if (monPanel) monPanel.style.display = "flex";
-      renderRouteMonitoringView();
-    });
-  }
-
-  // 3. Initial Welcome Message from SetRoute Dual-Core Brain
-  const renderWelcomeMessage = () => {
-    if (!chatMessages) return;
-    chatMessages.innerHTML = "";
-    appendChatMessage("brain", `
-      <strong>👋 Добро пожаловать в SetRoute Dual-Core Brain™ (Cohere AI + Hydrographic Leg Planner)!</strong><br>
-      Я работаю как два полушария единого штурманского мозга:
-      <ul style="margin:6px 0;padding-left:18px;">
-        <li><b>Детерминированное ядро (IMO A.893(21) &amp; Admiralty NP231):</b> перед нанесением каждого <b>Leg</b> (отрезка между вейпоинтами) заранее рассчитывает тип перехода (<code>RL</code> или <code>GC</code>), истинный курс (<code>°T</code>), дистанцию (<code>NM</code>), коридор безопасности <code>XTD</code>, радиус поворота, проверяет глубины портов и Squat/UKC, обход суши, схемы разделения движения <b>TSS</b>, буи, активные извещения <b>NtM/NAVTEX</b>, сезонность и тропические циклоны.</li>
-        <li><b>ИИ-стратег (Cohere AI):</b> ведёт с вами диалог, задаёт уточняющие вопросы при неоднозначных участках (например, Суэц или мыс Доброй Надежды) и мгновенно перестраивает трассу по вашим командам в чате.</li>
-      </ul>
-      Напишите ваш запрос ниже или выберите готовый сценарий:
-    `, [
-      { label: "🚢 Houston → Rotterdam (11.8m, 15kn)", prompt: "Построй маршрут из Houston в Rotterdam, осадка 11.8м, скорость 15 узлов" },
-      { label: "⚓ Singapore → Shanghai (12.5m, 14.5kn)", prompt: "Построй маршрут из Singapore в Shanghai, осадка 12.5м, скорость 14.5 узлов" },
-      { label: "🌊 Rotterdam → Singapore (Сравнить Суэц / Африку)", prompt: "Построй маршрут из Rotterdam в Singapore, осадка 12.0м" },
-      { label: "🌀 Tokyo → Long Beach (Тихоокеанский GC)", prompt: "Построй маршрут из Tokyo в Long Beach по дуге большого круга GC" }
-    ]);
+  const setBrainMode = (mode) => {
+    window.SETROUTE_BRAIN_MODE = mode;
+    if (btnPlan) btnPlan.classList.toggle("active", mode === "planning");
+    if (btnMon) btnMon.classList.toggle("active", mode === "monitoring");
+    if (chatScroll) chatScroll.style.display = mode === "planning" ? "flex" : "none";
+    if (compDock) compDock.style.display = mode === "planning" ? "block" : "none";
+    if (monPanel) monPanel.style.display = mode === "monitoring" ? "flex" : "none";
   };
 
-  if (chatMessages && chatMessages.children.length === 0) {
-    renderWelcomeMessage();
+  if (btnPlan && btnMon && !btnPlan._boundV50) {
+    btnPlan._boundV50 = true;
+    btnPlan.addEventListener("click", () => setBrainMode("planning"));
+    btnMon.addEventListener("click", () => setBrainMode("monitoring"));
+  }
+  if (btnBackToPlan && !btnBackToPlan._boundV50) {
+    btnBackToPlan._boundV50 = true;
+    btnBackToPlan.addEventListener("click", () => setBrainMode("planning"));
   }
 
-  // Delegated click for quick prompt chips inside chat
-  if (chatMessages && !chatMessages._boundV50) {
-    chatMessages._boundV50 = true;
-    chatMessages.addEventListener("click", (e) => {
+  if (btnParamsToggle && paramsPopover && !btnParamsToggle._boundV50) {
+    btnParamsToggle._boundV50 = true;
+    btnParamsToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      paramsPopover.classList.toggle("open");
+    });
+  }
+
+  // Delegated click for quick prompt chips inside #tab-route (both empty state & chat messages)
+  const routeShell = document.getElementById("setRouteGptShell");
+  if (routeShell && !routeShell._boundPromptsV51) {
+    routeShell._boundPromptsV51 = true;
+    routeShell.addEventListener("click", (e) => {
       const chip = e.target.closest("[data-sr-prompt]");
       if (chip) {
         const p = chip.getAttribute("data-sr-prompt");
@@ -9204,7 +9101,6 @@ function initSetRouteV50() {
     });
   }
 
-  // 4. Chat Composer Submit & Enter Key
   if (chatForm && !chatForm._boundV50) {
     chatForm._boundV50 = true;
     chatForm.addEventListener("submit", (e) => {
@@ -9230,10 +9126,8 @@ function initSetRouteV50() {
     });
   }
 
-  // 5. "⚡ Plan Selected Ports" button in toolbar
   if (genBtn && !genBtn._boundV50) {
     genBtn._boundV50 = true;
-    // Clone button to replace old v4.8 click listener cleanly
     const freshGenBtn = genBtn.cloneNode(true);
     freshGenBtn._boundV50 = true;
     genBtn.parentNode.replaceChild(freshGenBtn, genBtn);
@@ -9244,22 +9138,24 @@ function initSetRouteV50() {
       const pDest = (typeof PORT_DEPTHS_DB !== "undefined" ? PORT_DEPTHS_DB : []).find(p => p.id === destId);
       if (!pOrig || !pDest) return;
       if (pOrig.id === pDest.id) {
-        if (typeof showSetSailToast === "function") showSetSailToast("Выберите разные порты отправления и назначения", "warning");
+        if (typeof showSetSailToast === "function") showSetSailToast("Please select different origin and destination ports", "warning");
         return;
       }
+      if (paramsPopover) paramsPopover.classList.remove("open");
       const spd = (document.getElementById("setRouteSpeedInput") || {}).value || 14.5;
       const drf = (document.getElementById("setRouteDraftInput") || {}).value || 11.5;
-      appendChatMessage("user", `Построй маршрут ${pOrig.name} → ${pDest.name} (скорость ${spd} уз, осадка ${drf} м)`);
+      appendChatMessage("user", `Plan route from ${pOrig.name} to ${pDest.name} (speed ${spd} kn, draft ${drf} m)`);
       executeBrainLegByLegRoutePlan(pOrig, pDest, {});
     });
   }
 
-  // 6. Topbar & Right Drawer Controls
   if (newChatBtn && !newChatBtn._boundV50) {
     newChatBtn._boundV50 = true;
     newChatBtn.addEventListener("click", () => {
       window.SETROUTE_PENDING_CONTEXT = null;
-      renderWelcomeMessage();
+      if (chatMessages) chatMessages.innerHTML = "";
+      if (emptyHero) emptyHero.style.display = "flex";
+      setBrainMode("planning");
     });
   }
 
@@ -9288,6 +9184,9 @@ function initSetRouteV50() {
       setTimeout(() => {
         if (leafletMap && activeRouteData) {
           leafletMap.invalidateSize();
+          if (typeof setOverlayActive === "function") {
+            setOverlayActive("route", true, leafletMap);
+          }
           renderRouteOnMap(activeRouteData, true);
         }
       }, 180);
@@ -9298,7 +9197,7 @@ function initSetRouteV50() {
     drawerAuditBtn._boundV50 = true;
     drawerAuditBtn.addEventListener("click", () => {
       if (!activeRouteData) return;
-      handleSetRouteUserMessage(`Проведи детальный штурманский аудит активного маршрута ${activeRouteData.name} по всем легам, глубинам и опасностям.`);
+      handleSetRouteUserMessage(`Run a detailed navigation safety audit for ${activeRouteData.name} across all legs, depths, and hazards.`);
     });
   }
 
@@ -9311,7 +9210,6 @@ function initSetRouteV50() {
     });
   }
 
-  // Click on any Leg card in the Right Drawer -> Fly to that Leg on SetChart
   const legsListEl = document.getElementById("srDrawerLegsList");
   if (legsListEl && !legsListEl._boundV50) {
     legsListEl._boundV50 = true;
@@ -9325,6 +9223,9 @@ function initSetRouteV50() {
       setTimeout(() => {
         if (leafletMap) {
           leafletMap.invalidateSize();
+          if (typeof setOverlayActive === "function") {
+            setOverlayActive("route", true, leafletMap);
+          }
           const b = L.latLngBounds([[leg.fromLat, leg.fromLon], [leg.toLat, leg.toLon]]);
           if (b.isValid()) leafletMap.fitBounds(b.pad(0.25));
         }
@@ -9334,7 +9235,7 @@ function initSetRouteV50() {
 
   renderNavSavedRoutesTree();
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
-    displaySetRouteResults(activeRouteData, true);
+    displaySetRouteResults(activeRouteData, false);
   }
 }
 
@@ -9351,4 +9252,3 @@ document.addEventListener("DOMContentLoaded", () => {
     initSetRouteV50();
   }, 240);
 });
-

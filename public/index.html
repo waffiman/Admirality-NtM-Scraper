@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.0" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.1" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -11285,8 +11285,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
           <div class="home-slide-dots no-print" aria-label="Slide Navigation">
             <button type="button" class="home-slide-dot active" data-home-slide="0" title="Slide 1: Hero"></button>
             <button type="button" class="home-slide-dot" data-home-slide="1" title="Slide 2: SetSail Tools"></button>
-            <button type="button" class="home-slide-dot" data-home-slide="2" title="Slide 3: About SetSail"></button>
-            <button type="button" class="home-slide-dot" data-home-slide="3" title="Slide 4: Data Authorities"></button>
+            <button type="button" class="home-slide-dot" data-home-slide="2" title="Slide 3: Latest Maritime News"></button>
+            <button type="button" class="home-slide-dot" data-home-slide="3" title="Slide 4: About SetSail"></button>
+            <button type="button" class="home-slide-dot" data-home-slide="4" title="Slide 5: Data Authorities"></button>
           </div>
 
           <!-- Foreground Container: 100% Locked Viewport, Scroll-Scrubbed Choreography -->
@@ -11419,7 +11420,22 @@ svg.leaflet-image-layer.leaflet-interactive path {
               </div>
             </div>
 
-            <!-- SLIDE 3: ABOUT SETSAIL -->
+            <!-- SLIDE 3: LATEST MARITIME NEWS -->
+            <section class="home-slide-news" id="homeSlideNews" aria-label="Latest Maritime News">
+              <div style="text-align:center;margin-bottom:14px;">
+                <div class="saas-eyebrow-pill" style="margin:0 auto 6px;"><span class="saas-eyebrow-dot"></span>LIVE MARITIME INTELLIGENCE</div>
+                <h2 class="home-slide2-title" style="margin:0 0 4px;">Latest Maritime Briefings</h2>
+                <p class="home-slide2-sub" style="margin:0;">Real-time hydrographic, port, canal, and metocean dispatches curated for bridge watchkeepers</p>
+              </div>
+              <div class="home-news-preview-grid" id="homeNewsPreviewGrid"></div>
+              <div style="margin-top:16px;display:flex;justify-content:center;">
+                <button type="button" class="home-news-open-btn" data-switch-tab="tab-news">
+                  Explore All Briefings in SetNews &rarr;
+                </button>
+              </div>
+            </section>
+
+            <!-- SLIDE 4: ABOUT SETSAIL -->
             <section class="home-slide-about" id="homeSlideAbout" aria-label="About SetSail">
               <div class="home-about-container">
                 <div class="home-about-left">
@@ -13259,23 +13275,23 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
             <div class="excel-overlay-dock" id="excelOverlayDock" role="toolbar" aria-label="ECDIS Chart Overlays" style="display:flex;width:100%;">
               <div class="excel-tabs-scroll" style="display:flex;flex:1;width:100%;align-items:flex-end;">
-                <button type="button" class="excel-tab active" data-overlay="notices" id="tabOverlayNotices" title="Toggle Admiralty NtM &amp; NAVTEX Warnings Overlay">
-                  <span class="excel-tab-check">✓</span>
+                <button type="button" class="excel-tab" data-overlay="notices" id="tabOverlayNotices" title="Toggle Admiralty NtM &amp; NAVTEX Warnings Overlay">
+                  <span class="excel-tab-check"></span>
                   <span class="excel-tab-name">NtM &amp; NAVTEX</span>
                   <span class="excel-tab-info-btn" id="btnNtmOverlayInfo" title="UKHO NtM Database Status &amp; Bulletin Info"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
-                <button type="button" class="excel-tab active" data-overlay="depths" id="tabOverlayDepths" title="Toggle Port Depths &amp; Bathymetry">
-                  <span class="excel-tab-check">✓</span>
+                <button type="button" class="excel-tab" data-overlay="depths" id="tabOverlayDepths" title="Toggle Port Depths &amp; Bathymetry">
+                  <span class="excel-tab-check"></span>
                   <span class="excel-tab-name">Port Depths</span>
                   <span class="excel-tab-info-btn" id="btnWeeklyDepthAudit" title="Port Depths Information &amp; Weekly Audit"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
-                <button type="button" class="excel-tab active" data-overlay="weather" id="tabOverlayWeather" title="Toggle Marine Weather &amp; Cyclone Overlay">
-                  <span class="excel-tab-check">✓</span>
+                <button type="button" class="excel-tab" data-overlay="weather" id="tabOverlayWeather" title="Toggle Marine Weather &amp; Cyclone Overlay">
+                  <span class="excel-tab-check"></span>
                   <span class="excel-tab-name">Weather</span>
                   <span class="excel-tab-info-btn" id="btnWeatherOverlayInfo" title="Marine Weather &amp; Synoptic Bulletins (0000 UTC)"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
-                <button type="button" class="excel-tab excel-tab-route active" data-overlay="route" id="tabOverlayRoute" style="margin-left:auto;" title="Toggle My Route Overlay &amp; Passage Plan">
-                  <span class="excel-tab-check">✓</span>
+                <button type="button" class="excel-tab excel-tab-route" data-overlay="route" id="tabOverlayRoute" style="margin-left:auto;" title="Toggle My Route Overlay &amp; Passage Plan">
+                  <span class="excel-tab-check"></span>
                   <span class="excel-tab-name">My Route</span>
                   <span class="excel-tab-info-btn" id="btnRouteOverlayInfo" title="Passage Plan &amp; Waypoint Information"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
@@ -13303,61 +13319,87 @@ svg.leaflet-image-layer.leaflet-interactive path {
             <!-- ── Tab 4: SetRoute™ v5.0 — Dual-Core Conversational Passage Brain & Leg-by-Leg Inspector ── -->
       <div id="tab-route" class="tab-pane">
         <div class="setroute-gpt-shell" id="setRouteGptShell">
-          <!-- LEFT / MAIN WORKSPACE: ChatGPT-Style Conversational Brain (Cohere AI + Deterministic Leg Script) -->
+          <!-- Left Main Column: Minimalist ChatGPT-Style Workspace -->
           <div class="setroute-chat-col" id="setRouteMainChatCol">
-            <!-- Top Command Bar -->
+            <!-- Minimal Top Bar -->
             <header class="setroute-brain-topbar">
-              <div class="setroute-brain-brand">
-                <div class="setroute-brain-orb">
-                  <svg class="setsail-icon" viewBox="0 0 24 24" style="width:20px;height:20px;"><circle cx="4.5" cy="19.5" r="2.5" fill="#f05a36"/><circle cx="19.5" cy="4.5" r="2.5" fill="#38bdf8"/><path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="3 2"/><polygon points="16.5 4 20 4.5 18.5 7.5" fill="#38bdf8"/></svg>
+              <div class="setroute-gpt-brand">
+                <span class="setroute-gpt-title">SetRoute</span>
+                <div class="setroute-mode-switcher" role="tablist" aria-label="SetRoute Mode">
+                  <button type="button" class="setroute-mode-btn active" id="btnBrainModePlanning" data-brain-mode="planning">
+                    Route Planning
+                  </button>
+                  <button type="button" class="setroute-mode-btn" id="btnBrainModeMonitoring" data-brain-mode="monitoring">
+                    Route Monitoring <span class="sr-soon-pill">Soon</span>
+                  </button>
                 </div>
-                <div class="setroute-brain-title-wrap">
-                  <div class="setroute-brain-title">
-                    <span>SetRoute Dual-Core Brain™</span>
-                    <span style="font-size:0.62rem;padding:2px 7px;border-radius:999px;background:rgba(16,185,129,0.16);border:1px solid rgba(16,185,129,0.4);color:#34d399;font-weight:700;">COHERE AI + LEG ENGINE</span>
-                  </div>
-                  <span class="setroute-brain-sub">IMO A.893(21) &amp; NP231 Theory • Leg-by-Leg Hydrographic, TSS, NtM, Weather &amp; Seasonal Synthesis</span>
-                </div>
-              </div>
-
-              <!-- Brain Function Mode Switcher: Route Planning vs Route Monitoring -->
-              <div class="setroute-mode-switcher" role="tablist" aria-label="SetRoute Brain Mode">
-                <button type="button" class="setroute-mode-btn active" id="btnBrainModePlanning" data-brain-mode="planning">
-                  🧭 Route Planning
-                </button>
-                <button type="button" class="setroute-mode-btn" id="btnBrainModeMonitoring" data-brain-mode="monitoring">
-                  📡 Route Monitoring
-                </button>
               </div>
 
               <div class="setroute-topbar-actions">
-                <button type="button" class="setroute-top-btn" id="btnSetRouteNewChat" title="Start a fresh passage planning conversation">
-                  ＋ New Route Chat
+                <button type="button" class="setroute-top-btn" id="btnSetRouteNewChat" title="Start a new passage planning chat">
+                  + New Chat
                 </button>
-                <button type="button" class="setroute-top-btn" id="btnToggleRightDrawer" title="Show / Hide Right-Side Route Details Panel">
-                  📋 Route Details
+                <button type="button" class="setroute-top-btn" id="btnToggleRightDrawer" title="Show / Hide Route Details Panel">
+                  Route Details
                 </button>
                 <button type="button" class="setroute-top-btn primary" id="btnViewOnSetChart" onclick="switchToTab('tab-ntm')">
-                  🗺️ Open on SetChart
+                  Open on SetChart
                 </button>
               </div>
             </header>
 
-            <!-- ROUTE PLANNING MODE: Scrollable ChatGPT-Style Conversation Stream -->
+            <!-- ROUTE PLANNING MODE: Centered Empty Hero + Scrollable Chat Stream -->
             <div class="setroute-chat-scroll" id="setRouteChatScroll">
+              <div class="setroute-empty-hero" id="setRouteEmptyHero">
+                <div class="setroute-empty-icon">
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                </div>
+                <h2 class="setroute-empty-title">Where are we sailing today?</h2>
+                <p class="setroute-empty-sub">Describe your departure and arrival ports, vessel draft, or target speed. SetRoute evaluates every leg before plotting.</p>
+                <div class="setroute-empty-prompts">
+                  <button type="button" class="sr-empty-prompt-card" data-sr-prompt="Plan route from Houston to Rotterdam, draft 11.8m, speed 15 kn">
+                    <span class="sr-empty-prompt-title">Houston &rarr; Rotterdam</span>
+                    <span class="sr-empty-prompt-meta">Draft 11.8m &bull; 15.0 kn &bull; Atlantic GC/RL</span>
+                  </button>
+                  <button type="button" class="sr-empty-prompt-card" data-sr-prompt="Plan route from Singapore to Shanghai, draft 12.5m, speed 14.5 kn">
+                    <span class="sr-empty-prompt-title">Singapore &rarr; Shanghai</span>
+                    <span class="sr-empty-prompt-meta">Draft 12.5m &bull; 14.5 kn &bull; TSS &amp; Fairways</span>
+                  </button>
+                  <button type="button" class="sr-empty-prompt-card" data-sr-prompt="Plan route from Rotterdam to Singapore, draft 12.0m">
+                    <span class="sr-empty-prompt-title">Rotterdam &rarr; Singapore</span>
+                    <span class="sr-empty-prompt-meta">Compare Suez Canal vs. Cape of Good Hope</span>
+                  </button>
+                  <button type="button" class="sr-empty-prompt-card" data-sr-prompt="Plan route from Tokyo to San Francisco using Great Circle GC">
+                    <span class="sr-empty-prompt-title">Tokyo &rarr; San Francisco</span>
+                    <span class="sr-empty-prompt-meta">North Pacific Composite Great Circle</span>
+                  </button>
+                </div>
+              </div>
               <div class="setroute-chat-inner" id="setRouteChatMessages"></div>
             </div>
 
-            <!-- ROUTE MONITORING MODE: Live XTD / Leg / Hazard Telemetry View (Hidden until Monitoring tab clicked) -->
+            <!-- ROUTE MONITORING MODE: Minimalist Coming Soon View -->
             <div class="setroute-chat-scroll" id="setRouteMonitoringPanel" style="display:none;">
-              <div class="setroute-chat-inner" id="setRouteMonitoringContent"></div>
+              <div class="setroute-coming-soon-box" id="setRouteMonitoringContent">
+                <div class="sr-coming-soon-icon">📡</div>
+                <span class="sr-coming-soon-badge">COMING SOON</span>
+                <h3 class="sr-coming-soon-title">Live Route Monitoring</h3>
+                <p class="sr-coming-soon-desc">
+                  Real-time vessel track watch, automated XTD &amp; wheel-over alerts, and dynamic NAVTEX/cyclone hazard re-routing along your active passage plan are currently in development.
+                </p>
+                <button type="button" class="setroute-top-btn" id="btnMonitoringBackToPlanning">&larr; Back to Route Planning</button>
+              </div>
             </div>
 
-            <!-- Bottom ChatGPT-Style Composer + Quick Vessel/Port Parameters Strip -->
+            <!-- Bottom Minimalist ChatGPT Composer -->
             <div class="setroute-composer-dock" id="setRouteComposerDock">
-              <form class="setroute-composer-box" id="setRouteChatForm" onsubmit="return false;">
-                <!-- Quick Parameters Strip (Synchronized with Brain & Legacy Selectors) -->
-                <div class="setroute-params-toolbar">
+              <!-- Optional Collapsible Port & Vessel Parameters Popover -->
+              <div class="setroute-params-popover" id="setRouteParamsPopover">
+                <div class="sr-params-popover-head">
+                  <span>Route Parameters</span>
+                  <button type="button" onclick="document.getElementById('setRouteParamsPopover').classList.remove('open')" style="background:none;border:none;color:#94a3b8;cursor:pointer;">✕</button>
+                </div>
+                <div class="setroute-params-toolbar" style="border:none;padding:0;background:transparent;">
                   <div class="setroute-mini-field" title="Departure Port">
                     <span class="port-dir-badge dep">DEP</span>
                     <select id="setRouteOriginSelect" aria-label="Departure Port"></select>
@@ -13384,23 +13426,27 @@ svg.leaflet-image-layer.leaflet-interactive path {
                   </div>
                   <div class="setroute-mini-field" title="Navigation Geometry Standard">
                     <select id="setRouteSailSelect" aria-label="Sail Mode">
-                      <option value="HYBRID" selected>Hybrid (RL/GC per Leg)</option>
+                      <option value="HYBRID" selected>Hybrid (RL/GC)</option>
                       <option value="RL">Rhumb Line (RL)</option>
                       <option value="GC">Great Circle (GC)</option>
                     </select>
                   </div>
-                  <button type="button" id="btnGenerateSetRoute" class="setroute-top-btn" style="margin-left:auto;padding:3px 9px;font-size:0.69rem;border-color:rgba(56,189,248,0.45);color:#38bdf8;" title="Build leg-by-leg route from selected ports">
-                    ⚡ Plan Selected Ports
+                  <button type="button" id="btnGenerateSetRoute" class="setroute-top-btn primary" style="margin-left:auto;padding:4px 10px;font-size:0.7rem;">
+                    Build Route
                   </button>
                 </div>
-                <div id="setRouteDepthAlert" style="display:none;font-size:0.72rem;color:#fbbf24;padding:4px 8px;border-radius:6px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);"></div>
+                <div id="setRouteDepthAlert" style="display:none;font-size:0.72rem;color:#fbbf24;padding:4px 8px;margin-top:6px;border-radius:6px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);"></div>
+              </div>
 
-                <!-- Textarea + Send Button -->
-                <div class="setroute-input-row">
-                  <textarea id="setRouteChatInput" class="setroute-chat-textarea" rows="1" placeholder="Напишите мозгу SetRoute: например «Построй маршрут из Houston в Rotterdam, осадка 11.8м, обойди циклон Simon» или «Измени скорость на 15.5 узлов»..."></textarea>
-                  <button type="submit" id="setRouteChatSendBtn" class="setroute-send-btn">
-                    <span>Send to Brain</span>
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              <form class="setroute-composer-box" id="setRouteChatForm" onsubmit="return false;" style="padding:8px 12px;border-radius:999px;">
+                <div class="setroute-input-row" style="align-items:center;gap:8px;">
+                  <button type="button" class="sr-params-toggle-btn" id="btnToggleSetRouteParams" title="Manual Port &amp; Vessel Parameters">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+                  </button>
+                  <textarea id="setRouteChatInput" class="setroute-chat-textarea" rows="1" placeholder="Message SetRoute (e.g., Plan route from Houston to Rotterdam, draft 11.8m, speed 15 kn)..."></textarea>
+                  <button type="submit" id="setRouteChatSendBtn" class="setroute-send-btn" style="padding:7px 14px;border-radius:999px;">
+                    <span>Send</span>
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                   </button>
                 </div>
               </form>
@@ -13408,7 +13454,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           </div>
 
           <!-- RIGHT-SIDE NON-OVERLAPPING ROUTE DETAILS INSPECTOR (#setRouteRightDrawer) -->
-          <aside class="setroute-right-drawer" id="setRouteRightDrawer" aria-label="Selected Route Details &amp; Leg-by-Leg Telemetry">
+          <aside class="setroute-right-drawer" id="setRouteRightDrawer" aria-label="Selected Route Details &amp; Leg-by-Leg Schedule">
             <div class="setroute-drawer-header">
               <div style="min-width:0;flex:1;">
                 <div style="display:flex;align-items:center;gap:6px;">
@@ -13424,7 +13470,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
             </div>
 
             <div class="setroute-drawer-body" id="setRouteDrawerBody">
-              <!-- 4 Key Metrics -->
               <div class="sr-drawer-kpis">
                 <div class="sr-drawer-kpi">
                   <span class="sr-drawer-kpi-val" id="metricDistance">0 NM</span>
@@ -13444,38 +13489,33 @@ svg.leaflet-image-layer.leaflet-interactive path {
                 </div>
               </div>
 
-              <!-- Quick Action Row -->
               <div style="display:flex;gap:6px;flex-wrap:wrap;">
                 <button type="button" class="setroute-top-btn primary" id="btnDrawerPlotOnChart" style="flex:1;justify-content:center;">
-                  🗺️ Plot &amp; Focus on SetChart
+                  Plot on SetChart
                 </button>
                 <button type="button" class="setroute-top-btn" id="btnDrawerAskBrainAudit" style="justify-content:center;">
-                  🧠 Audit in Chat
+                  Audit Legs
                 </button>
-                <button type="button" class="setroute-top-btn" id="btnDrawerDeleteRoute" style="color:#fda4af;border-color:rgba(244,63,94,0.35);" title="Remove route from saved list">
-                  🗑️
+                <button type="button" class="setroute-top-btn" id="btnDrawerDeleteRoute" style="color:#fda4af;border-color:rgba(244,63,94,0.35);" title="Remove route">
+                  ✕
                 </button>
               </div>
 
-              <!-- Passage Theory & Multi-Factor Audit Summary -->
               <div id="srDrawerTheoryBox" style="padding:10px 12px;border-radius:10px;background:rgba(14,165,233,0.09);border:1px solid rgba(56,189,248,0.25);font-size:0.73rem;line-height:1.48;color:#cbd5e1;"></div>
 
-              <!-- Chokepoints & TSS Crossed -->
               <div id="resultsChokepointsBox" style="display:none;flex-direction:column;gap:5px;">
-                <span style="font-size:0.66rem;font-weight:700;text-transform:uppercase;color:#94a3b8;">Strategic Straits, Canals &amp; TSS Corridors:</span>
+                <span style="font-size:0.66rem;font-weight:700;text-transform:uppercase;color:#94a3b8;">Straits, Canals &amp; TSS Corridors:</span>
                 <div id="resultsChokepointsPills" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
               </div>
 
-              <!-- Leg-by-Leg Detailed Cards -->
               <div>
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                  <span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:#38bdf8;letter-spacing:0.04em;">📐 Leg-by-Leg Deliberation &amp; Waypoints</span>
-                  <span style="font-size:0.64rem;color:#64748b;">Click any leg to focus on chart</span>
+                  <span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:#38bdf8;letter-spacing:0.04em;">Leg-by-Leg Schedule</span>
+                  <span style="font-size:0.64rem;color:#64748b;">Click leg to inspect</span>
                 </div>
                 <div id="srDrawerLegsList" style="display:flex;flex-direction:column;gap:8px;"></div>
               </div>
 
-              <!-- Legacy table body kept hidden for backward compatibility -->
               <div id="setRouteResultsCard" style="display:none;">
                 <table><tbody id="resultsWptsTableBody"></tbody></table>
               </div>
@@ -13484,7 +13524,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         </div>
       </div>
 
-            <!-- ── Tab 4: SetNews — Global Maritime Intelligence & Personalized "For You" Feed ── -->
+      <!-- ── Tab 4: SetNews — Global Maritime Intelligence & Personalized "For You" Feed ── -->
     <div id="tab-news" class="tab-pane">
       <div class="setnews-container">
         <!-- Editorial Masthead -->
@@ -13492,7 +13532,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           <div class="setnews-brand-col">
             <div class="setnews-brand-row">
               <span class="setnews-live-pill"><span class="setnews-live-dot"></span> LIVE MARITIME WIRE</span>
-              <span id="setNewsLastSync" style="font-size:0.7rem;color:#64748b;font-weight:600;">Synced with 7 Global Maritime News Agencies</span>
+              <span id="setNewsLastSync" style="font-size:0.7rem;color:#64748b;font-weight:600;">Live Maritime Dispatches • Updated Every 6 Hours</span>
             </div>
             <h1 class="setnews-title">SetNews Maritime Intelligence</h1>
             <p class="setnews-subtitle">Real-time global shipping, hydrographic safety, port operations, and AI-personalized corridor dispatches</p>
@@ -13609,60 +13649,54 @@ svg.leaflet-image-layer.leaflet-interactive path {
                   </div>
                   <div>
                     <div class="min-card-title" style="margin-bottom:2px;" id="settingsAccountHeading">SetSail Account &amp; Cloud Bridge Sync</div>
-                    <div class="settings-account-sub" id="settingsAccountSub" style="font-size:0.72rem;color:#94a3b8;">Sign in with your Google Account or Bridge ID to sync custom NtM / NAVTEX edits, vessel drafts &amp; RTZ routes</div>
+                    <div class="settings-account-sub" id="settingsAccountSub" style="font-size:0.72rem;color:#94a3b8;">Sign in with your Google Account to automatically save and sync your SetRoute passage plans, chart edits, vessel position &amp; SetNews preferences</div>
                   </div>
                 </div>
                 <span class="settings-account-status-pill" id="settingsAccountStatusBadge" style="font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(148,163,184,0.14);color:#cbd5e1;border:1px solid rgba(148,163,184,0.3);letter-spacing:0.04em;">GUEST MODE</span>
               </div>
 
-              <!-- Signed-Out Login Controls -->
-              <div id="settingsAuthSignedOutBox">
-                <div class="settings-account-layout">
-                  <!-- Left: 1-Click Sign in with Google -->
-                  <div style="display:flex;flex-direction:column;gap:8px;">
-                    <button type="button" class="btn-google-signin" id="btnGoogleSignIn" title="Sign in with your Google Account">
-                      <svg viewBox="0 0 24 24" style="width:18px;height:18px;flex-shrink:0;">
-                        <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
-                        <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
-                        <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
-                        <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.1 7.4 24 12 24z"/>
-                      </svg>
-                      <span>Sign in with Google</span>
-                    </button>
-                    <div style="font-size:0.65rem;color:#94a3b8;line-height:1.35;text-align:center;">
-                      Supports Google Identity Services (OAuth 2.0) &amp; Offline Bridge Profile
-                    </div>
-                  </div>
-
-                  <!-- Right: Direct Email / Bridge Credentials Login -->
-                  <form class="settings-login-fields" id="settingsDirectLoginForm" onsubmit="return false;" style="display:flex;flex-direction:column;gap:7px;">
-                    <div class="settings-login-row" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
-                      <input type="email" id="settingsAuthEmail" class="min-input" placeholder="Email or Google address..." autocomplete="username" />
-                      <input type="password" id="settingsAuthPass" class="min-input" placeholder="Password / Vessel PIN..." autocomplete="current-password" />
-                    </div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                      <button type="button" class="min-btn-submit" id="btnEmailSignIn" style="padding:6px 14px;font-size:0.74rem;">
-                        <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                        LogIn
-                      </button>
-                      <span id="settingsAuthStatusMsg" style="font-size:0.7rem;color:#38bdf8;font-weight:600;"></span>
-                    </div>
-                  </form>
+              <!-- Signed-Out Google OAuth Controls (Official Google Sign-In Only) -->
+              <div id="settingsAuthLoggedOut" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                  <div id="googleGsiButtonContainer" style="min-height:40px;display:flex;align-items:center;"></div>
+                  <button type="button" class="btn-google-signin" id="btnGoogleSignIn" title="Sign in with your Google Account">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;flex-shrink:0;">
+                      <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+                      <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+                      <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
+                      <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.1 7.4 24 12 24z"/>
+                    </svg>
+                    <span>Sign in with Google</span>
+                  </button>
+                </div>
+                <div style="font-size:0.66rem;color:#94a3b8;line-height:1.38;">
+                  Official Google Identity Services (OAuth 2.0) &bull; Instant Bridge Workspace Persistence
                 </div>
               </div>
 
               <!-- Signed-In Profile Bar (Revealed when authenticated) -->
-              <div class="settings-auth-signedin-bar" id="settingsAuthSignedInBar" style="display:none;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:9px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.28);margin-top:4px;">
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <span style="width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;display:inline-block;"></span>
-                  <div>
-                    <div style="font-size:0.78rem;font-weight:700;color:#f8fafc;" id="settingsSignedInName">Bridge Officer</div>
-                    <div style="font-size:0.68rem;color:#94a3b8;" id="settingsSignedInEmail">bridge@setsail.maritime</div>
+              <div id="settingsAuthLoggedIn" style="display:none;flex-direction:column;gap:10px;margin-top:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:9px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.28);flex-wrap:wrap;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div id="settingsAuthProfileAvatar" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0284c7,#10b981);color:#fff;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;overflow:hidden;">G</div>
+                    <div>
+                      <div style="font-size:0.8rem;font-weight:700;color:#f8fafc;" id="settingsAuthProfileName">Bridge Officer</div>
+                      <div style="font-size:0.69rem;color:#34d399;" id="settingsAuthProfileEmail">Google Account Synced</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <button type="button" class="min-btn-outline" id="btnExportUserHistory" style="padding:5px 10px;font-size:0.7rem;margin:0;">Backup (.json)</button>
+                    <button type="button" class="min-btn-outline" id="btnSetSailSignOut" style="padding:5px 10px;font-size:0.7rem;margin:0;border-color:rgba(244,63,94,0.4);color:#fda4af;">Sign Out</button>
                   </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <button type="button" class="min-btn-outline" id="btnAuthSyncNow" style="padding:5px 10px;font-size:0.7rem;margin:0;">Sync Profile</button>
-                  <button type="button" class="min-btn-outline" id="btnAuthSignOut" style="padding:5px 10px;font-size:0.7rem;margin:0;border-color:rgba(244,63,94,0.4);color:#fda4af;">Sign Out</button>
+                <div id="settingsUserHistoryPanel" style="display:none;padding:10px 12px;border-radius:9px;background:rgba(15,23,42,0.55);border:1px solid rgba(148,163,184,0.18);font-size:0.72rem;color:#cbd5e1;">
+                  <div style="font-weight:700;color:#38bdf8;margin-bottom:6px;text-transform:uppercase;font-size:0.65rem;letter-spacing:0.05em;">Synced Workspace History</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                    <div><span style="color:#94a3b8;">Active Route:</span> <b id="histStatRoute">None</b></div>
+                    <div><span style="color:#94a3b8;">Chart Edits:</span> <b id="histStatEdits">0</b></div>
+                    <div><span style="color:#94a3b8;">SetNews Activity:</span> <b id="histStatNews">0 read</b></div>
+                    <div><span style="color:#94a3b8;">Last Sync:</span> <b id="histStatSyncTime">Live</b></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -19326,8 +19360,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.0"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.0"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.1"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.1"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19405,12 +19439,12 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.0"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.1"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
     (function() {
-      const MAX_SLIDE = 3.0;
+      const MAX_SLIDE = 4.0;
       let targetProgress = 0.0;
       let currentProgress = 0.0;
       let snapTimer = null;
@@ -19457,11 +19491,13 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
         // Stage progress segments:
         // t1: 0 -> 1 (Slide 1 Hero -> Slide 2 Dispersed Tools)
-        // t2: 0 -> 1 (Slide 2 Tools -> Slide 3 About)
-        // t3: 0 -> 1 (Slide 3 About -> Slide 4 Sources Marquee)
+        // t2: 0 -> 1 (Slide 2 Tools -> Slide 3 Latest Maritime News)
+        // t3: 0 -> 1 (Slide 3 Latest Maritime News -> Slide 4 About SetSail)
+        // t4: 0 -> 1 (Slide 4 About SetSail -> Slide 5 Sources Marquee)
         const t1 = clamp(p, 0, 1);
         const t2 = clamp(p - 1, 0, 1);
         const t3 = clamp(p - 2, 0, 1);
+        const t4 = clamp(p - 3, 0, 1);
         const e1 = easeInOutCubic(t1);
 
         // 1. Video -> Static SaaS Background crossfade
@@ -19587,11 +19623,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           tile.style.pointerEvents = alpha > 0.25 ? 'auto' : 'none';
         });
 
-        // 6. Slide 3: About SetSail (Appears on t2: 0.32 -> 1.0, exits on t3: 0 -> 0.58)
+        // 6. Slide 3: Latest Maritime News (Appears on t2: 0.32 -> 1.0, exits on t3: 0 -> 0.58)
+        const slideNews = document.getElementById('homeSlideNews');
+        if (slideNews) {
+          const newsIn = easeOutCubic(clamp((t2 - 0.32) / 0.68, 0, 1));
+          const newsOut = easeInOutCubic(clamp(t3 / 0.58, 0, 1));
+          const newsAlpha = newsIn * (1 - newsOut);
+          const newsY = (1 - newsIn) * 64 - newsOut * 72;
+          const newsScale = 0.94 + 0.06 * newsIn - 0.05 * newsOut;
+
+          slideNews.style.opacity = String(newsAlpha.toFixed(3));
+          slideNews.style.transform = 'translate3d(0, ' + newsY.toFixed(1) + 'px, 0) scale(' + newsScale.toFixed(3) + ')';
+          slideNews.style.pointerEvents = newsAlpha > 0.45 ? 'auto' : 'none';
+        }
+
+        // 7. Slide 4: About SetSail (Appears on t3: 0.32 -> 1.0, exits on t4: 0 -> 0.58)
         const slideAbout = document.getElementById('homeSlideAbout');
         if (slideAbout) {
-          const aboutIn = easeOutCubic(clamp((t2 - 0.32) / 0.68, 0, 1));
-          const aboutOut = easeInOutCubic(clamp(t3 / 0.58, 0, 1));
+          const aboutIn = easeOutCubic(clamp((t3 - 0.32) / 0.68, 0, 1));
+          const aboutOut = easeInOutCubic(clamp(t4 / 0.58, 0, 1));
           const aboutAlpha = aboutIn * (1 - aboutOut);
           const aboutY = (1 - aboutIn) * 64 - aboutOut * 72;
           const aboutScale = 0.94 + 0.06 * aboutIn - 0.05 * aboutOut;
@@ -19601,10 +19651,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           slideAbout.style.pointerEvents = aboutAlpha > 0.45 ? 'auto' : 'none';
         }
 
-        // 7. Slide 4: Narrow Infinite Marquee of Recognizable Sources (Appears on t3: 0.30 -> 1.0)
+        // 8. Slide 5: Narrow Infinite Marquee of Recognizable Sources (Appears on t4: 0.30 -> 1.0)
         const slideSources = document.getElementById('homeSlideSources');
         if (slideSources) {
-          const srcIn = easeOutCubic(clamp((t3 - 0.30) / 0.70, 0, 1));
+          const srcIn = easeOutCubic(clamp((t4 - 0.30) / 0.70, 0, 1));
           const srcY = (1 - srcIn) * 52;
           const srcScale = 0.96 + 0.04 * srcIn;
 
@@ -19770,7 +19820,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             window.location.reload();
           }
         });
-        navigator.serviceWorker.register('sw.js?v=5.0', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.1', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v4.8 registered, scope:', reg.scope);
             if (navigator.onLine) {
