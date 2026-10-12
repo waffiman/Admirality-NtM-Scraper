@@ -19725,6 +19725,10 @@ function renderPortDepthsOnMap(map) {
   }
 
   PORT_DEPTHS_DB.forEach(port => {
+    if (window.ROUTE_CORRIDOR_FILTER_ENABLED && typeof window.isPointInActiveRouteCorridor === "function") {
+      const pCoords = port.approachCoords || port.coords;
+      if (!pCoords || !window.isPointInActiveRouteCorridor(pCoords[0], pCoords[1])) return;
+    }
     const allDepths = (port.fairways || []).map(f => parseFloat(f.depth) || 0).filter(d => d > 0);
     const maxPortDepth = allDepths.length ? Math.max(...allDepths) : 12.5;
     const minPortDepth = allDepths.length ? Math.min(...allDepths) : maxPortDepth;

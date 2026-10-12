@@ -1745,3 +1745,19 @@ if __name__ == "__main__":
         with open(wx_p, "w", encoding="utf-8") as f:
             json.dump(wx_payload, f, indent=2, ensure_ascii=False)
     print("[+] Saved live marine weather & tropical cyclones to weather.json and public/weather.json")
+
+    # -------------------------------------------------------------------------
+    # 4. Scrape Global Maritime News Feeds -> news.json & public/news.json
+    # -------------------------------------------------------------------------
+    try:
+        from build_news_and_scraper_v49 import scrape_live_maritime_news
+        news_payload = scrape_live_maritime_news()
+        with open("news.json", "w", encoding="utf-8") as nf:
+            json.dump(news_payload, nf, ensure_ascii=False, indent=2)
+        os.makedirs("public", exist_ok=True)
+        with open(os.path.join("public", "news.json"), "w", encoding="utf-8") as nf2:
+            json.dump(news_payload, nf2, ensure_ascii=False, indent=2)
+        print(f"[+] Saved {news_payload.get('totalArticles', 0)} maritime news articles to news.json and public/news.json")
+    except Exception as news_err:
+        print(f"[!] Maritime news scrape warning: {news_err}")
+

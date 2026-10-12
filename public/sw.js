@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v4.8';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v4.8';
+const CACHE_NAME = 'setsail-cache-v4.9';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v4.9';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -13,6 +13,7 @@ const OFFLINE_CORE_ASSETS = [
   'manifest.json',
   'notices.json',
   'weather.json',
+  'news.json',
   'assets/home_bg.mp4',
   'assets/home_bg_poster.jpg',
   'assets/gyro_compass_logbook.ico',
@@ -24,10 +25,10 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=4.8',
-  'assets/Auto NtM Plotting/port_depths.js?v=4.8',
-  'assets/Auto NtM Plotting/ntm_module.js?v=4.8',
-  'assets/Auto NtM Plotting/setsail_core.js?v=4.8',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=4.9',
+  'assets/Auto NtM Plotting/port_depths.js?v=4.9',
+  'assets/Auto NtM Plotting/ntm_module.js?v=4.9',
+  'assets/Auto NtM Plotting/setsail_core.js?v=4.9',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
   'assets/Auto NtM Plotting/tesseract.min.js',
   'assets/Auto NtM Plotting/pdf.min.js',

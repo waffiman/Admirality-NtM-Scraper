@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.8" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.9" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -13172,6 +13172,50 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
             <div class="ntm-vessel-hud" id="ntmVesselHud" style="display:none;"></div>
 
+          <!-- ── SetSail v4.9: Floating Draggable Route Snapshot & Corridor Buffer HUD Window ── -->
+          <div class="ntm-route-mini-window" id="ntmRouteMiniWindow" style="display:none;">
+            <div class="ntm-route-mini-header" id="ntmRouteMiniDragHandle" title="Drag to reposition anywhere on chart">
+              <div class="ntm-route-mini-title-wrap">
+                <span class="ntm-route-mini-dot"></span>
+                <span class="ntm-route-mini-title" id="routeMiniTitle">Active Passage Plan</span>
+              </div>
+              <div class="ntm-route-mini-actions">
+                <button type="button" class="ntm-route-mini-icon-btn" id="btnRouteMiniFit" title="Zoom to Route Bounds">⌖</button>
+                <button type="button" class="ntm-route-mini-icon-btn" id="btnRouteMiniMinimize" title="Minimize / Expand">—</button>
+              </div>
+            </div>
+            <div class="ntm-route-mini-body">
+              <div class="ntm-route-mini-kpis">
+                <div class="ntm-route-mini-kpi">
+                  <span class="ntm-route-mini-kpi-val" id="routeMiniWpts">0</span>
+                  <span class="ntm-route-mini-kpi-lbl">Waypoints</span>
+                </div>
+                <div class="ntm-route-mini-kpi">
+                  <span class="ntm-route-mini-kpi-val" id="routeMiniDist">0 NM</span>
+                  <span class="ntm-route-mini-kpi-lbl">Total Length</span>
+                </div>
+                <div class="ntm-route-mini-kpi">
+                  <span class="ntm-route-mini-kpi-val" id="routeMiniHits" style="font-size:0.68rem;">0 NtM</span>
+                  <span class="ntm-route-mini-kpi-lbl">In Corridor</span>
+                </div>
+              </div>
+              <label class="ntm-route-mini-filter-row" for="chkRouteCorridorOnly">
+                <span class="ntm-route-mini-filter-lbl">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#38bdf8" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                  Filter objects along route
+                </span>
+                <input type="checkbox" class="ntm-route-mini-switch" id="chkRouteCorridorOnly">
+              </label>
+              <div class="ntm-route-mini-slider-wrap">
+                <div class="ntm-route-mini-slider-top">
+                  <span>Route Buffer Corridor</span>
+                  <span class="ntm-route-mini-slider-val" id="lblRouteBufferNm">±25 NM</span>
+                </div>
+                <input type="range" class="ntm-route-mini-slider" id="rngRouteBufferNm" min="5" max="250" step="5" value="25">
+              </div>
+            </div>
+          </div>
+
 
 
             <div class="ntm-dropzone" id="ntmDropzone">
@@ -13392,7 +13436,89 @@ svg.leaflet-image-layer.leaflet-interactive path {
         </div>
       </div>
 
-      <!-- ── Tab 3: System Settings & Engineering Support ── -->
+      <!-- ── Tab 4: SetNews — Global Maritime Intelligence & Personalized "For You" Feed ── -->
+    <div id="tab-news" class="tab-pane">
+      <div class="setnews-container">
+        <!-- Editorial Masthead -->
+        <header class="setnews-masthead">
+          <div class="setnews-brand-col">
+            <div class="setnews-brand-row">
+              <span class="setnews-live-pill"><span class="setnews-live-dot"></span> LIVE MARITIME WIRE</span>
+              <span id="setNewsLastSync" style="font-size:0.7rem;color:#64748b;font-weight:600;">Synced with 7 Global Maritime News Agencies</span>
+            </div>
+            <h1 class="setnews-title">SetNews Maritime Intelligence</h1>
+            <p class="setnews-subtitle">Real-time global shipping, hydrographic safety, port operations, and AI-personalized corridor dispatches</p>
+          </div>
+          <div class="setnews-controls-col">
+            <div class="setnews-search-wrap">
+              <svg class="setnews-search-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="search" id="setNewsSearchInput" class="setnews-search-input" placeholder="Search vessels, straits, ports, cyclones...">
+            </div>
+            <button type="button" id="btnRefreshSetNews" class="setnews-cat-btn" style="border-color:rgba(56,189,248,0.4);color:#38bdf8;">
+              ↻ Refresh Wire
+            </button>
+          </div>
+        </header>
+
+        <!-- Breaking Ticker -->
+        <div class="setnews-ticker-bar">
+          <span class="setnews-ticker-label">FLASH WIRE</span>
+          <div class="setnews-ticker-track" id="setNewsTickerTrack"></div>
+        </div>
+
+        <!-- Category Navigation Pills -->
+        <div class="setnews-cat-bar">
+          <div class="setnews-cat-scroll">
+            <button type="button" class="setnews-cat-btn active" data-news-cat="ALL">🌐 All Global Wire</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="FOR_YOU">✨ For You (AI Ranked)</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="Navigation & Safety">⚠️ Navigation & Safety</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="Ports & Terminals">⚓ Ports & Channels</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="Weather & Cyclones">🌀 Weather & Cyclones</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="Shipping & Tankers">🚢 Tankers & Fleet</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="Geopolitics & Chokepoints">🛡️ Chokepoints & Security</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="SAVED">🔖 Saved Briefings</button>
+          </div>
+        </div>
+
+        <!-- Personalized "For You" Spotlight Section -->
+        <section class="setnews-foryou-section">
+          <div class="setnews-foryou-header">
+            <div class="setnews-foryou-title-group">
+              <span class="setnews-foryou-badge">✨ FOR YOU</span>
+              <h2 class="setnews-foryou-title">Personalized Bridge Briefing</h2>
+            </div>
+            <span class="setnews-foryou-context" id="setNewsForYouContext">AI Engine: Matched to Active Route & Reading Telemetry</span>
+          </div>
+          <div class="setnews-foryou-grid" id="setNewsForYouGrid"></div>
+        </section>
+
+        <!-- Bento Hero (Flagship Story + 3 Priority Dispatches) -->
+        <section class="setnews-bento-hero" id="setNewsBentoHero"></section>
+
+        <!-- Main Wire Grid + Regional Chokepoint Radar Sidebar -->
+        <div class="setnews-main-layout">
+          <div class="setnews-wire-grid" id="setNewsWireGrid"></div>
+          <aside class="setnews-radar-sidebar">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <h3 style="font-size:0.88rem;font-weight:800;margin:0;color:#38bdf8;text-transform:uppercase;letter-spacing:0.05em;">📡 Maritime Region Radar</h3>
+              <span style="font-size:0.65rem;color:#64748b;">Click to filter</span>
+            </div>
+            <div id="setNewsRadarList" style="display:flex;flex-direction:column;gap:7px;"></div>
+            <div style="margin-top:6px;padding:11px;border-radius:10px;background:rgba(14,165,233,0.08);border:1px solid rgba(56,189,248,0.2);font-size:0.71rem;color:#94a3b8;line-height:1.45;">
+              <strong style="color:#e2e8f0;display:block;margin-bottom:3px;">🧠 How "For You" Works</strong>
+              Articles are dynamically scored in real time using your <b>loaded passage plan route</b>, <b>vessel GPS/manual coordinates</b>, and <b>past article dwell time & likes</b>.
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <!-- In-App Article Reader Modal -->
+      <div class="setnews-reader-modal" id="setNewsReaderModal">
+        <div class="setnews-reader-dialog" id="setNewsReaderContent"></div>
+      </div>
+    </div>
+
+    <!-- ── Tab 3: System Settings & Engineering Support ── -->
 
 
 
@@ -19152,8 +19278,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.8"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.8"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.9"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.9"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19231,7 +19357,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.8"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.9"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19596,7 +19722,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             window.location.reload();
           }
         });
-        navigator.serviceWorker.register('sw.js?v=4.8', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=4.9', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v4.8 registered, scope:', reg.scope);
             if (navigator.onLine) {

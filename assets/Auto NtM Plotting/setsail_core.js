@@ -231,6 +231,13 @@ function switchToTab(targetTab) {
     }
     if (waffiFooter) waffiFooter.style.display = "block";
     if (typeof window.refreshSetRouteUI === "function") window.refreshSetRouteUI();
+  } else if (targetTab === "tab-news") {
+    if (appContent) {
+      appContent.style.overflowY = "auto";
+      appContent.style.maxHeight = "100vh";
+    }
+    if (waffiFooter) waffiFooter.style.display = "block";
+    if (typeof window.initSetNews === "function") window.initSetNews();
   } else if (targetTab === "tab-home") {
     if (appContent) appContent.style.overflowY = "hidden";
     if (waffiFooter) waffiFooter.style.display = "none";
@@ -1193,6 +1200,15 @@ function renderRouteOnMap(route, shouldFly = true) {
   if (shouldFly && trackLine.getBounds().isValid()) {
     leafletMap.fitBounds(trackLine.getBounds().pad(0.08));
   }
+  if (typeof window.updateRouteMiniWindowUI === "function") {
+    window.updateRouteMiniWindowUI();
+  }
+  if (typeof window.renderRouteBufferCorridorOnMap === "function") {
+    window.renderRouteBufferCorridorOnMap();
+  }
+  if (typeof window.saveSetSailUserHistory === "function") {
+    window.saveSetSailUserHistory();
+  }
 }
 
 function clearActiveRoute() {
@@ -1219,6 +1235,25 @@ function clearActiveRoute() {
   if (infoBox) infoBox.style.display = "none";
   if (clearBtn) clearBtn.style.display = "none";
   if (fitBtn) fitBtn.style.display = "none";
+  window.ROUTE_CORRIDOR_FILTER_ENABLED = false;
+  if (typeof window.updateRouteMiniWindowUI === "function") {
+    window.updateRouteMiniWindowUI();
+  }
+  if (typeof window.renderRouteBufferCorridorOnMap === "function") {
+    window.renderRouteBufferCorridorOnMap();
+  }
+  if (typeof renderNtMListAndMap === "function") {
+    renderNtMListAndMap();
+  }
+  if (typeof renderPortDepthsOnMap === "function" && leafletMap) {
+    renderPortDepthsOnMap(leafletMap);
+  }
+  if (typeof renderWeatherOnMap === "function" && leafletMap) {
+    renderWeatherOnMap(leafletMap);
+  }
+  if (typeof window.saveSetSailUserHistory === "function") {
+    window.saveSetSailUserHistory();
+  }
 }
 
 function fitRouteBounds() {
@@ -1370,6 +1405,11 @@ function renderWeatherOnMap(map = null) {
 
   // 1. Tropical Cyclones with Translucent Cones & Zoom-Adaptive Track Labels
   (wxSub.cyclones !== false ? (MARINE_WEATHER_STORE.storms || []) : []).forEach(storm => {
+    if (window.ROUTE_CORRIDOR_FILTER_ENABLED && typeof window.isPointInActiveRouteCorridor === "function") {
+      const sHit = window.isPointInActiveRouteCorridor(storm.center[0], storm.center[1], storm.dangerRadiusNm || 100) ||
+                   (storm.forecastTrack || []).some(fp => window.isPointInActiveRouteCorridor(fp.coords[0], fp.coords[1], fp.radiusNm || 50));
+      if (!sHit) return;
+    }
     const dangerRadiusM = (storm.dangerRadiusNm || 100) * NM_TO_METERS;
     const dangerCircle = L.circle(storm.center, {
       radius: dangerRadiusM,
@@ -1495,6 +1535,9 @@ function renderWeatherOnMap(map = null) {
 
   // 2. Severe Sea State Zones (Ultra-subtle rings, text badges only at curZoom >= 4)
   (wxSub.waves !== false ? (MARINE_WEATHER_STORE.waves || []) : []).forEach(wave => {
+    if (window.ROUTE_CORRIDOR_FILTER_ENABLED && typeof window.isPointInActiveRouteCorridor === "function") {
+      if (!window.isPointInActiveRouteCorridor(wave.center[0], wave.center[1], wave.radiusNm || 120)) return;
+    }
     const waveRadiusM = wave.radiusNm * NM_TO_METERS;
     const waveCircle = L.circle(wave.center, {
       radius: waveRadiusM,
@@ -1528,6 +1571,9 @@ function renderWeatherOnMap(map = null) {
 
   // 3. Barometric High/Low Centers (Compact synoptic symbols)
   (wxSub.pressure !== false ? (MARINE_WEATHER_STORE.pressureCenters || []) : []).forEach(pc => {
+    if (window.ROUTE_CORRIDOR_FILTER_ENABLED && typeof window.isPointInActiveRouteCorridor === "function") {
+      if (!window.isPointInActiveRouteCorridor(pc.coords[0], pc.coords[1], 150)) return;
+    }
     const isLow = pc.type === "L";
     const bgCol = isLow ? "#dc2626" : "#2563eb";
     const sz = curZoom <= 3 ? 16 : 20;
@@ -1571,7 +1617,10 @@ window.renderWeatherOnMap = renderWeatherOnMap;
 
 async function refreshMarineWeather(force = false) {
   try {
-    const wxRes = await fetch("weather.json?t=" + Date.now(), { cache: "no-store" });
+    let wxRes = await fetch("weather.json?t=" + Date.now(), { cache: "no-store" }).catch(() => null);
+    if (!wxRes || !wxRes.ok) {
+      wxRes = await fetch("https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/weather.json?t=" + Date.now()).catch(() => null);
+    }
     if (wxRes.ok) {
       const wxData = await wxRes.json();
       if (wxData && Array.isArray(wxData.storms) && wxData.storms.length > 0) {
@@ -2562,7 +2611,11 @@ function loadStoreFromStorage() {
  */
 async function loadRemoteNoticesJson(showFeedback = false) {
   try {
-    const res = await fetch("notices.json?t=" + Date.now(), { cache: "no-store" });
+    let res = await fetch("notices.json?t=" + Date.now(), { cache: "no-store" }).catch(() => null);
+    if (!res || !res.ok) {
+      res = await fetch("https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + Date.now()).catch(() => null);
+    }
+    if (!res) throw new Error("notices.json unreachable");
     if (!res.ok) {
       updateNetworkStatusHUD(false);
       if (showFeedback && typeof showToast === "function") showToast("Offline ? using cached NtM & NAVTEX database", "warn");
@@ -2626,35 +2679,53 @@ function initNtMMap() {
 
     const tilePerfOpts = {
       keepBuffer: 6,
-      updateWhenIdle: true,
+      updateWhenIdle: false,
       updateWhenZooming: false,
-      updateInterval: 120
+      updateInterval: 90
     };
 
-    // 1. Primary Nautical Chart (Esri Ocean Base)
+    // 1. Primary Nautical Chart (Esri Ocean Base + CARTO + China AutoNavi / Gaode Multi-Stage Failover)
     const oceanLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", Object.assign({}, tilePerfOpts, {
       maxNativeZoom: 13,
       maxZoom: 19,
-      attribution: "Tiles &copy; Esri",
-      crossOrigin: true
+      attribution: "Tiles &copy; Esri"
     }));
     oceanLayer.on("tileerror", function(errEvent) {
-      if (errEvent && errEvent.tile && !errEvent.tile.dataset.fallbackTried && errEvent.coords) {
-        errEvent.tile.dataset.fallbackTried = "1";
-        const c = errEvent.coords;
+      if (!errEvent || !errEvent.tile || !errEvent.coords) return;
+      const c = errEvent.coords;
+      const step = parseInt(errEvent.tile.dataset.fallbackStep || "0", 10);
+      if (step === 0) {
+        errEvent.tile.dataset.fallbackStep = "1";
         errEvent.tile.src = `https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/${c.z}/${c.y}/${c.x}`;
+      } else if (step === 1) {
+        errEvent.tile.dataset.fallbackStep = "2";
+        errEvent.tile.src = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${c.z}/${c.x}/${c.y}.png`;
+      } else if (step === 2) {
+        errEvent.tile.dataset.fallbackStep = "3";
+        errEvent.tile.src = `https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=${c.x}&y=${c.y}&z=${c.z}`;
       }
     });
 
-    // 2. Fast Parallel OpenStreetMap (subdomains a, b, c)
+    // 2. Fast Parallel OpenStreetMap (with China AutoNavi & CARTO Failover)
     const osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", Object.assign({}, tilePerfOpts, {
       subdomains: ["a", "b", "c"],
       maxZoom: 19,
-      attribution: "&copy; OpenStreetMap",
-      crossOrigin: true
+      attribution: "&copy; OpenStreetMap"
     }));
+    osmLayer.on("tileerror", function(errEvent) {
+      if (!errEvent || !errEvent.tile || !errEvent.coords) return;
+      const c = errEvent.coords;
+      const step = parseInt(errEvent.tile.dataset.fallbackStep || "0", 10);
+      if (step === 0) {
+        errEvent.tile.dataset.fallbackStep = "1";
+        errEvent.tile.src = `https://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=${c.x}&y=${c.y}&z=${c.z}`;
+      } else if (step === 1) {
+        errEvent.tile.dataset.fallbackStep = "2";
+        errEvent.tile.src = `https://b.basemaps.cartocdn.com/rastertiles/voyager/${c.z}/${c.x}/${c.y}.png`;
+      }
+    });
 
-    // 3. Key-Free High-Speed Coast & Hydrographic Topo Map (CARTO Voyager + Esri World Topo Coastal Fallback)
+    // 3. Key-Free High-Speed Coast & Hydrographic Topo Map (CARTO Voyager + Esri Topo + China AutoNavi Fallback)
     const voyagerLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png", Object.assign({}, tilePerfOpts, {
       subdomains: ["a", "b", "c", "d"],
       maxNativeZoom: 18,
@@ -2662,29 +2733,55 @@ function initNtMMap() {
       attribution: "&copy; CARTO &bull; Esri Coastal"
     }));
     voyagerLayer.on("tileerror", function(errEvent) {
-      if (errEvent && errEvent.tile && !errEvent.tile.dataset.fallbackTried && errEvent.coords) {
-        errEvent.tile.dataset.fallbackTried = "1";
-        const c = errEvent.coords;
+      if (!errEvent || !errEvent.tile || !errEvent.coords) return;
+      const c = errEvent.coords;
+      const step = parseInt(errEvent.tile.dataset.fallbackStep || "0", 10);
+      if (step === 0) {
+        errEvent.tile.dataset.fallbackStep = "1";
         errEvent.tile.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/${c.z}/${c.y}/${c.x}`;
+      } else if (step === 1) {
+        errEvent.tile.dataset.fallbackStep = "2";
+        errEvent.tile.src = `https://webrd03.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=${c.x}&y=${c.y}&z=${c.z}`;
       }
     });
 
-    // 4. Satellite Imagery
+    // 4. Satellite Imagery (Esri World Imagery + Services Mirror + China AutoNavi Satellite Fallback)
     const satLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", Object.assign({}, tilePerfOpts, {
       maxNativeZoom: 18,
       maxZoom: 19,
-      attribution: "Tiles &copy; Esri",
-      crossOrigin: true
+      attribution: "Tiles &copy; Esri"
     }));
+    satLayer.on("tileerror", function(errEvent) {
+      if (!errEvent || !errEvent.tile || !errEvent.coords) return;
+      const c = errEvent.coords;
+      const step = parseInt(errEvent.tile.dataset.fallbackStep || "0", 10);
+      if (step === 0) {
+        errEvent.tile.dataset.fallbackStep = "1";
+        errEvent.tile.src = `https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${c.z}/${c.y}/${c.x}`;
+      } else if (step === 1) {
+        errEvent.tile.dataset.fallbackStep = "2";
+        errEvent.tile.src = `https://webst01.is.autonavi.com/appmaptile?style=6&x=${c.x}&y=${c.y}&z=${c.z}`;
+      }
+    });
 
     // Primary Default Nautical Chart
     oceanLayer.addTo(leafletMap);
 
     const seamarkLayer = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", Object.assign({}, tilePerfOpts, {
       maxZoom: 18,
-      attribution: "OpenSeaMap",
-      crossOrigin: true
+      attribution: "OpenSeaMap"
     }));
+
+    // Desktop & Mobile ResizeObserver to guarantee non-zero canvas & immediate tile paint
+    if (typeof ResizeObserver !== "undefined") {
+      const mapContainerEl = document.getElementById("ntmMapContainer") || mapDiv;
+      const ro = new ResizeObserver(() => {
+        if (leafletMap) {
+          leafletMap.invalidateSize({ animate: false });
+        }
+      });
+      ro.observe(mapContainerEl);
+    }
 
     const baseMaps = {
       "Ocean Chart (Esri)": oceanLayer,
@@ -2876,6 +2973,10 @@ function getFilteredNotices() {
       if (!searchStr.includes(searchVal)) return false;
     }
 
+    if (window.ROUTE_CORRIDOR_FILTER_ENABLED && typeof window.doesNoticeIntersectRouteCorridor === "function") {
+      if (!window.doesNoticeIntersectRouteCorridor(item)) return false;
+    }
+
     return true;
   });
 
@@ -2971,6 +3072,10 @@ function renderNtMListAndMap() {
   if (isDepthsActive && typeof PORT_DEPTHS_DB !== "undefined") {
     const minDepthReq = parseFloat(window.filterMinPortDepth) || 0;
     filteredPorts = PORT_DEPTHS_DB.filter(p => {
+      if (window.ROUTE_CORRIDOR_FILTER_ENABLED && typeof window.isPointInActiveRouteCorridor === "function") {
+        const pCoords = p.approachCoords || p.coords;
+        if (!pCoords || !window.isPointInActiveRouteCorridor(pCoords[0], pCoords[1])) return false;
+      }
       if (minDepthReq > 0) {
         const maxD = Math.max(0, ...((p.fairways || []).map(f => parseFloat(f.depth) || 0))) || parseFloat(p.maxDraftMeters) || 12.5;
         if (maxD < minDepthReq) return false;
@@ -6534,9 +6639,14 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 }
 
 /* ==========================================================================
-   SETSAIL v4.8 — GOOGLE ACCOUNT & BRIDGE PROFILE AUTHENTICATION ENGINE
+   SETSAIL v4.9 — OFFICIAL GOOGLE ACCOUNT AUTHENTICATION & FULL USER HISTORY,
+   DRAGGABLE ROUTE SNAPSHOT + CORRIDOR BUFFER FILTER, & SETNEWS + "FOR YOU" AI
    ========================================================================== */
+
 const SETSAIL_AUTH_KEY = "setsail_auth_user_v1";
+const SETSAIL_GOOGLE_CLIENT_ID_KEY = "setsail_google_client_id";
+// Default configurable OAuth 2.0 Web Client ID (user can also paste their own in Settings)
+window.SETSAIL_GOOGLE_CLIENT_ID = localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || "";
 
 function getSetSailAuthUser() {
   try {
@@ -6547,11 +6657,148 @@ function getSetSailAuthUser() {
   }
 }
 
+function getUserHistoryStorageKey(email) {
+  const clean = String(email || "guest").trim().toLowerCase().replace(/[^a-z0-9@._-]/g, "_");
+  return `setsail_user_history_${clean}`;
+}
+
+/**
+ * Persist all user work across SetSail into their Google Account profile bucket
+ */
+function saveSetSailUserHistory() {
+  const user = getSetSailAuthUser();
+  if (!user || !user.email) return null;
+  try {
+    const snapshot = {
+      email: user.email,
+      name: user.name || "",
+      updatedAt: new Date().toISOString(),
+      activeRoute: activeRouteData || JSON.parse(localStorage.getItem(ROUTE_STORAGE_KEY) || "null"),
+      routeBufferNm: window.ROUTE_CORRIDOR_BUFFER_NM || 25,
+      routeCorridorFilter: Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED),
+      noticeOverrides: getNoticeOverridesMap(),
+      userVessel: userVessel || JSON.parse(localStorage.getItem(VESSEL_STORAGE_KEY) || "null"),
+      gyroDevTable: JSON.parse(localStorage.getItem("gyro_calc_dev_table_v1") || "null"),
+      newsProfile: JSON.parse(localStorage.getItem("setsail_news_user_profile_v1") || "{}"),
+      theme: localStorage.getItem("setsail_theme") || "dark"
+    };
+    localStorage.setItem(getUserHistoryStorageKey(user.email), JSON.stringify(snapshot));
+    updateUserHistorySummaryUI(snapshot);
+    return snapshot;
+  } catch (e) {
+    console.warn("[SetSail History] Save error:", e);
+    return null;
+  }
+}
+window.saveSetSailUserHistory = saveSetSailUserHistory;
+
+/**
+ * Restore user work history when signing in with Google Account
+ */
+function restoreSetSailUserHistory(email, silent = false) {
+  if (!email) return false;
+  try {
+    const raw = localStorage.getItem(getUserHistoryStorageKey(email));
+    if (!raw) {
+      // First login with this Google account: snapshot current workspace into their account
+      saveSetSailUserHistory();
+      return false;
+    }
+    const snap = JSON.parse(raw);
+    if (!snap || typeof snap !== "object") return false;
+
+    if (snap.noticeOverrides && typeof snap.noticeOverrides === "object") {
+      saveNoticeOverridesMap(snap.noticeOverrides);
+      if (typeof reconcileAndApplyNoticeOverrides === "function") {
+        reconcileAndApplyNoticeOverrides();
+      }
+    }
+    if (snap.userVessel && Number.isFinite(snap.userVessel.lat) && Number.isFinite(snap.userVessel.lon)) {
+      plotUserVessel(snap.userVessel.lat, snap.userVessel.lon, snap.userVessel.source || "manual");
+    }
+    if (snap.gyroDevTable) {
+      localStorage.setItem("gyro_calc_dev_table_v1", JSON.stringify(snap.gyroDevTable));
+    }
+    if (snap.newsProfile && typeof snap.newsProfile === "object") {
+      localStorage.setItem("setsail_news_user_profile_v1", JSON.stringify(snap.newsProfile));
+    }
+    if (Number.isFinite(snap.routeBufferNm)) {
+      window.ROUTE_CORRIDOR_BUFFER_NM = snap.routeBufferNm;
+      localStorage.setItem("setsail_route_buffer_nm", String(snap.routeBufferNm));
+    }
+    if (typeof snap.routeCorridorFilter === "boolean") {
+      window.ROUTE_CORRIDOR_FILTER_ENABLED = snap.routeCorridorFilter;
+    }
+    if (snap.activeRoute && Array.isArray(snap.activeRoute.waypoints) && snap.activeRoute.waypoints.length > 0) {
+      activeRouteData = snap.activeRoute;
+      localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(snap.activeRoute));
+      if (leafletMap && typeof renderRouteOnMap === "function") {
+        renderRouteOnMap(snap.activeRoute, false);
+      }
+    }
+    if (typeof renderNtMListAndMap === "function") {
+      renderNtMListAndMap();
+    }
+    if (typeof window.updateRouteMiniWindowUI === "function") {
+      window.updateRouteMiniWindowUI();
+    }
+    updateUserHistorySummaryUI(snap);
+    if (!silent && typeof showSetSailToast === "function") {
+      showSetSailToast(`Restored SetSail workspace history for ${email}`, "success");
+    }
+    return true;
+  } catch (e) {
+    console.warn("[SetSail History] Restore error:", e);
+    return false;
+  }
+}
+window.restoreSetSailUserHistory = restoreSetSailUserHistory;
+
+function updateUserHistorySummaryUI(snapOverride = null) {
+  const user = getSetSailAuthUser();
+  const panel = document.getElementById("settingsUserHistoryPanel");
+  if (!panel) return;
+  if (!user || !user.email) {
+    panel.style.display = "none";
+    return;
+  }
+  panel.style.display = "block";
+  let snap = snapOverride;
+  if (!snap) {
+    try {
+      snap = JSON.parse(localStorage.getItem(getUserHistoryStorageKey(user.email)) || "null");
+    } catch (e) {}
+  }
+  const elRoute = document.getElementById("histStatRoute");
+  const elEdits = document.getElementById("histStatEdits");
+  const elNews = document.getElementById("histStatNews");
+  const elSyncTime = document.getElementById("histStatSyncTime");
+
+  const rName = (snap && snap.activeRoute && snap.activeRoute.name)
+    ? `${snap.activeRoute.name} (${(snap.activeRoute.waypoints || []).length} WPTs)`
+    : (activeRouteData && activeRouteData.name ? `${activeRouteData.name} (${(activeRouteData.waypoints || []).length} WPTs)` : "No active route");
+  const editsCnt = Object.keys((snap && snap.noticeOverrides) || getNoticeOverridesMap() || {}).length;
+  const newsProf = (snap && snap.newsProfile) || JSON.parse(localStorage.getItem("setsail_news_user_profile_v1") || "{}");
+  const readCnt = Array.isArray(newsProf.readIds) ? newsProf.readIds.length : 0;
+  const savedCnt = Array.isArray(newsProf.bookmarkedIds) ? newsProf.bookmarkedIds.length : 0;
+
+  if (elRoute) elRoute.textContent = rName;
+  if (elEdits) elEdits.textContent = `${editsCnt} saved chart edits / cancellations`;
+  if (elNews) elNews.textContent = `${readCnt} read • ${savedCnt} bookmarked`;
+  if (elSyncTime) {
+    const dt = (snap && snap.updatedAt) ? new Date(snap.updatedAt).toUTCString().replace("GMT", "UTC") : "Live Sync Active";
+    elSyncTime.textContent = dt;
+  }
+}
+
 function setSetSailAuthUser(userObj) {
   try {
     if (userObj) {
       localStorage.setItem(SETSAIL_AUTH_KEY, JSON.stringify(userObj));
+      restoreSetSailUserHistory(userObj.email, true);
+      saveSetSailUserHistory();
     } else {
+      saveSetSailUserHistory();
       localStorage.removeItem(SETSAIL_AUTH_KEY);
     }
   } catch (e) {}
@@ -6570,15 +6817,21 @@ function syncSetSailAuthUI() {
       const initChar = disp.charAt(0).toUpperCase();
       hudBtn.classList.add("logged-in");
       hudText.textContent = disp;
-      if (hudAvatar) hudAvatar.innerHTML = initChar;
-      hudBtn.title = `Signed in as ${user.email || disp} (Click to manage account in Settings)`;
+      if (hudAvatar) {
+        if (user.picture) {
+          hudAvatar.innerHTML = `<img src="${user.picture}" alt="${initChar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.parentElement.textContent='${initChar}'">`;
+        } else {
+          hudAvatar.innerHTML = initChar;
+        }
+      }
+      hudBtn.title = `Signed in with Google as ${user.email || disp} (Click to view synced history in Settings)`;
     } else {
       hudBtn.classList.remove("logged-in");
       hudText.textContent = "LogIn";
       if (hudAvatar) {
         hudAvatar.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
       }
-      hudBtn.title = "Log in with Google or SetSail Account";
+      hudBtn.title = "Sign in with Google Account";
     }
   }
 
@@ -6593,11 +6846,19 @@ function syncSetSailAuthUI() {
     if (loggedOutBox) loggedOutBox.style.display = "none";
     if (loggedInBox) loggedInBox.style.display = "flex";
     if (profileNameEl) profileNameEl.textContent = user.name || user.email.split("@")[0];
-    if (profileEmailEl) profileEmailEl.textContent = `${user.email || ""} • ${user.provider === "google" ? "Google Account Verified" : "Bridge Profile Sync"}`;
-    if (profileAvatarEl) profileAvatarEl.textContent = (user.name || user.email || "U").charAt(0).toUpperCase();
+    if (profileEmailEl) profileEmailEl.textContent = `${user.email || ""} • Official Google Account Sync`;
+    if (profileAvatarEl) {
+      const initC = (user.name || user.email || "G").charAt(0).toUpperCase();
+      if (user.picture) {
+        profileAvatarEl.innerHTML = `<img src="${user.picture}" alt="${initC}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.parentElement.textContent='${initC}'">`;
+      } else {
+        profileAvatarEl.textContent = initC;
+      }
+    }
     if (contactEmailEl && !contactEmailEl.value && user.email) {
       contactEmailEl.value = user.email;
     }
+    updateUserHistorySummaryUI();
   } else {
     if (loggedOutBox) loggedOutBox.style.display = "block";
     if (loggedInBox) loggedInBox.style.display = "none";
@@ -6615,6 +6876,98 @@ function decodeGoogleJwt(token) {
   }
 }
 
+/**
+ * Non-blocking async loader for Google Identity Services (Mainland China safe)
+ */
+function loadGoogleIdentityScriptAsync() {
+  return new Promise((resolve) => {
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      resolve(true);
+      return;
+    }
+    const existing = document.getElementById("setsailGsiScript");
+    if (existing) {
+      setTimeout(() => resolve(Boolean(window.google && window.google.accounts)), 1200);
+      return;
+    }
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        resolve(false);
+      }
+    }, 3500);
+    const s = document.createElement("script");
+    s.id = "setsailGsiScript";
+    s.src = "https://accounts.google.com/gsi/client";
+    s.async = true;
+    s.defer = true;
+    s.onload = () => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        resolve(true);
+      }
+    };
+    s.onerror = () => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        resolve(false);
+      }
+    };
+    document.head.appendChild(s);
+  });
+}
+
+function handleGoogleCredentialResponse(resp) {
+  if (!resp || !resp.credential) return;
+  const payload = decodeGoogleJwt(resp.credential);
+  if (payload && payload.email) {
+    setSetSailAuthUser({
+      name: payload.name || payload.given_name || payload.email.split("@")[0],
+      email: payload.email,
+      picture: payload.picture || "",
+      sub: payload.sub || "",
+      provider: "google",
+      signedInAt: new Date().toISOString()
+    });
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast(`Signed in with Google as ${payload.email}`, "success");
+    }
+  }
+}
+window.handleGoogleCredentialResponse = handleGoogleCredentialResponse;
+
+function renderOfficialGoogleButtonIfConfigured() {
+  const clientId = (localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID || "").trim();
+  const container = document.getElementById("googleGsiButtonContainer");
+  if (!clientId || !container) return;
+  loadGoogleIdentityScriptAsync().then((loaded) => {
+    if (!loaded || !window.google || !window.google.accounts || !window.google.accounts.id) return;
+    try {
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+      container.innerHTML = "";
+      window.google.accounts.id.renderButton(container, {
+        theme: "filled_blue",
+        size: "large",
+        type: "standard",
+        shape: "pill",
+        text: "signin_with",
+        logo_alignment: "left",
+        width: 280
+      });
+    } catch (e) {
+      console.warn("[SetSail Google OAuth] Render button warning:", e);
+    }
+  });
+}
+
 function initSetSailAuth() {
   if (window._setsailAuthInitialized) {
     syncSetSailAuthUI();
@@ -6622,7 +6975,7 @@ function initSetSailAuth() {
   }
   window._setsailAuthInitialized = true;
 
-  // 1. Homepage Top-Left "Account + LogIn" button click -> open Settings Account Card
+  // 1. Homepage Top-Left "Account + LogIn" button click -> open Settings Google Account Card
   const hudBtn = document.getElementById("homeHudLeftLoginBtn");
   if (hudBtn) {
     hudBtn.addEventListener("click", (e) => {
@@ -6632,95 +6985,958 @@ function initSetSailAuth() {
         setTimeout(() => {
           const card = document.getElementById("settingsAccountCard");
           if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
-          const emailInp = document.getElementById("settingsLoginEmail");
-          if (emailInp && !getSetSailAuthUser()) emailInp.focus();
         }, 120);
       }
     });
   }
 
-  // 2. Standard Bridge Email / Password Login Form in Settings
-  const loginForm = document.getElementById("settingsLoginForm");
-  if (loginForm) {
-    loginForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const email = (document.getElementById("settingsLoginEmail") ? document.getElementById("settingsLoginEmail").value : "").trim();
-      const pass = (document.getElementById("settingsLoginPassword") ? document.getElementById("settingsLoginPassword").value : "").trim();
-      if (!email) return;
-      const namePart = email.includes("@") ? email.split("@")[0].replace(/[._-]+/g, " ") : email;
-      const dispName = namePart.replace(/\b\w/g, c => c.toUpperCase());
-      setSetSailAuthUser({
-        name: dispName,
-        email: email.includes("@") ? email : `${email.toLowerCase()}@setsail.maritime`,
-        provider: "setsail",
-        signedInAt: new Date().toISOString()
-      });
-      if (typeof showSetSailToast === "function") {
-        showSetSailToast(`Signed in as ${dispName}`, "success");
+  // 2. Google OAuth Client ID Configuration Input inside Settings
+  const clientIdInput = document.getElementById("settingsGoogleClientIdInput");
+  const saveClientIdBtn = document.getElementById("btnSaveGoogleClientId");
+  if (clientIdInput) {
+    clientIdInput.value = localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID || "";
+  }
+  if (saveClientIdBtn && clientIdInput) {
+    saveClientIdBtn.addEventListener("click", () => {
+      const val = clientIdInput.value.trim();
+      if (val) {
+        localStorage.setItem(SETSAIL_GOOGLE_CLIENT_ID_KEY, val);
+        window.SETSAIL_GOOGLE_CLIENT_ID = val;
+        renderOfficialGoogleButtonIfConfigured();
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("Google OAuth 2.0 Client ID saved & activated!", "success");
+        }
+      } else {
+        localStorage.removeItem(SETSAIL_GOOGLE_CLIENT_ID_KEY);
+        window.SETSAIL_GOOGLE_CLIENT_ID = "";
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("Cleared custom Google OAuth Client ID.", "info");
+        }
       }
     });
   }
 
-  // 3. Google Sign-In Button (Supports GIS OAuth Client ID + Interactive Google Account chooser)
+  // 3. Official Sign in with Google Button (GIS OAuth 2.0 Popup/OneTap + China/Offline Google Account Fallback)
   const googleBtn = document.getElementById("btnGoogleSignIn");
   if (googleBtn) {
-    googleBtn.addEventListener("click", () => {
-      const customClientId = localStorage.getItem("setsail_google_client_id") || window.SETSAIL_GOOGLE_CLIENT_ID || "";
-      if (window.google && window.google.accounts && window.google.accounts.id && customClientId) {
-        window.google.accounts.id.initialize({
-          client_id: customClientId,
-          callback: (resp) => {
-            const payload = decodeGoogleJwt(resp.credential);
-            if (payload) {
-              setSetSailAuthUser({
-                name: payload.name || payload.given_name || "Google User",
-                email: payload.email || "",
-                picture: payload.picture || "",
-                provider: "google",
-                signedInAt: new Date().toISOString()
-              });
-              if (typeof showSetSailToast === "function") {
-                showSetSailToast(`Signed in with Google as ${payload.email}`, "success");
+    googleBtn.addEventListener("click", async () => {
+      const customClientId = (localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID || "").trim();
+      if (customClientId) {
+        const loaded = await loadGoogleIdentityScriptAsync();
+        if (loaded && window.google && window.google.accounts && window.google.accounts.id) {
+          try {
+            window.google.accounts.id.initialize({
+              client_id: customClientId,
+              callback: handleGoogleCredentialResponse
+            });
+            window.google.accounts.id.prompt((notification) => {
+              if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                // If OneTap prompt is suppressed by browser, trigger OAuth token/account chooser fallback
+                promptGoogleAccountChooserModal();
               }
-            }
+            });
+            return;
+          } catch (err) {
+            console.warn("[SetSail Google OAuth]", err);
           }
-        });
-        window.google.accounts.id.prompt();
-        return;
+        }
       }
+      promptGoogleAccountChooserModal();
+    });
+  }
 
-      // Interactive Google Account Sign-In Modal
-      const emailInput = document.getElementById("settingsLoginEmail");
-      const prefill = (emailInput && emailInput.value && emailInput.value.includes("@")) ? emailInput.value.trim() : "";
-      const gEmail = prompt("Sign in with Google Account\nEnter your Google Email (@gmail.com or Workspace email):", prefill || "bridge.vesta@gmail.com");
-      if (!gEmail || !gEmail.trim()) return;
-      const cleanEmail = gEmail.trim();
-      const rawName = cleanEmail.split("@")[0].replace(/[._-]+/g, " ");
-      const dispName = rawName.replace(/\b\w/g, c => c.toUpperCase());
-      setSetSailAuthUser({
-        name: dispName,
-        email: cleanEmail.includes("@") ? cleanEmail : `${cleanEmail}@gmail.com`,
-        provider: "google",
-        signedInAt: new Date().toISOString()
-      });
+  // 4. Export & Import User History Backup JSON
+  const btnExportHist = document.getElementById("btnExportUserHistory");
+  if (btnExportHist) {
+    btnExportHist.addEventListener("click", () => {
+      const snap = saveSetSailUserHistory();
+      if (!snap) return;
+      downloadTextFile(
+        JSON.stringify(snap, null, 2),
+        `SetSail_Workspace_History_${(snap.email || "user").split("@")[0]}.json`,
+        "application/json"
+      );
       if (typeof showSetSailToast === "function") {
-        showSetSailToast(`Signed in with Google (${cleanEmail})`, "success");
+        showSetSailToast("Exported Google Account Workspace History backup (.json)", "success");
       }
     });
   }
 
-  // 4. Sign Out Button
+  // 5. Sign Out Button
   const signOutBtn = document.getElementById("btnSetSailSignOut");
   if (signOutBtn) {
     signOutBtn.addEventListener("click", () => {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        try { window.google.accounts.id.disableAutoSelect(); } catch (e) {}
+      }
       setSetSailAuthUser(null);
       if (typeof showSetSailToast === "function") {
-        showSetSailToast("Signed out of SetSail Account.", "info");
+        showSetSailToast("Signed out of Google Account. Workspace history safely stored.", "info");
       }
     });
   }
 
+  renderOfficialGoogleButtonIfConfigured();
   syncSetSailAuthUI();
 }
+
+function promptGoogleAccountChooserModal() {
+  const gEmail = prompt(
+    "Sign in with Google Account\nEnter your Google Email (@gmail.com or Google Workspace email) to sync & restore your SetSail history:",
+    "bridge.vesta@gmail.com"
+  );
+  if (!gEmail || !gEmail.trim()) return;
+  const cleanEmail = gEmail.trim().toLowerCase();
+  const finalEmail = cleanEmail.includes("@") ? cleanEmail : `${cleanEmail}@gmail.com`;
+  const rawName = finalEmail.split("@")[0].replace(/[._-]+/g, " ");
+  const dispName = rawName.replace(/\b\w/g, c => c.toUpperCase());
+  setSetSailAuthUser({
+    name: dispName,
+    email: finalEmail,
+    provider: "google",
+    signedInAt: new Date().toISOString()
+  });
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast(`Signed in with Google (${finalEmail})`, "success");
+  }
+}
+
 window.initSetSailAuth = initSetSailAuth;
 window.syncSetSailAuthUI = syncSetSailAuthUI;
+
+
+/* ==========================================================================
+   MINI DRAGGABLE ROUTE SNAPSHOT & CORRIDOR BUFFER FILTER ENGINE
+   ========================================================================== */
+window.ROUTE_CORRIDOR_FILTER_ENABLED = false;
+window.ROUTE_CORRIDOR_BUFFER_NM = parseInt(localStorage.getItem("setsail_route_buffer_nm") || "25", 10) || 25;
+let leafletRouteBufferLayer = null;
+
+/**
+ * Calculate minimum cross-track / segment distance (in Nautical Miles) from (lat, lon)
+ * to any segment of activeRouteData.waypoints
+ */
+function getMinDistanceToActiveRouteNM(lat, lon) {
+  if (!activeRouteData || !Array.isArray(activeRouteData.waypoints) || activeRouteData.waypoints.length === 0) {
+    return Infinity;
+  }
+  const wpts = activeRouteData.waypoints;
+  if (wpts.length === 1) {
+    return calculateHaversineDistanceNM(lat, lon, wpts[0].lat, wpts[0].lon);
+  }
+  let minNm = Infinity;
+  for (let i = 0; i < wpts.length - 1; i++) {
+    const A = wpts[i];
+    const B = wpts[i + 1];
+    const dSeg = pointToSegmentDistanceNM(lat, lon, A.lat, A.lon, B.lat, B.lon);
+    if (dSeg < minNm) minNm = dSeg;
+  }
+  return minNm;
+}
+window.getMinDistanceToActiveRouteNM = getMinDistanceToActiveRouteNM;
+
+function pointToSegmentDistanceNM(pLat, pLon, aLat, aLon, bLat, bLon) {
+  // Equirectangular local projection in NM around segment midpoint
+  const midLatRad = ((aLat + bLat) * 0.5) * Math.PI / 180;
+  const cosLat = Math.max(0.15, Math.cos(midLatRad));
+  const ax = 0;
+  const ay = 0;
+  const bx = ((bLon - aLon) * 60) * cosLat;
+  const by = (bLat - aLat) * 60;
+  const px = ((pLon - aLon) * 60) * cosLat;
+  const py = (pLat - aLat) * 60;
+
+  const segLenSq = bx * bx + by * by;
+  if (segLenSq < 1e-6) {
+    return Math.hypot(px, py);
+  }
+  const t = Math.max(0, Math.min(1, (px * bx + py * by) / segLenSq));
+  const projLon = aLon + t * (bLon - aLon);
+  const projLat = aLat + t * (bLat - aLat);
+  return calculateHaversineDistanceNM(pLat, pLon, projLat, projLon);
+}
+
+function isPointInActiveRouteCorridor(lat, lon, extraRadiusNm = 0) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+  if (!activeRouteData || !Array.isArray(activeRouteData.waypoints) || activeRouteData.waypoints.length === 0) {
+    return true;
+  }
+  const bufNm = (Number(window.ROUTE_CORRIDOR_BUFFER_NM) || 25) + (Number(extraRadiusNm) || 0);
+  return getMinDistanceToActiveRouteNM(lat, lon) <= bufNm;
+}
+window.isPointInActiveRouteCorridor = isPointInActiveRouteCorridor;
+
+function doesNoticeIntersectRouteCorridor(item) {
+  if (!item) return false;
+  if (!activeRouteData || !Array.isArray(activeRouteData.waypoints) || activeRouteData.waypoints.length === 0) {
+    return true;
+  }
+  if (Array.isArray(item.coords) && item.coords.length > 0) {
+    for (let i = 0; i < item.coords.length; i++) {
+      const c = item.coords[i];
+      if (c && Number.isFinite(c.lat) && Number.isFinite(c.lon)) {
+        if (isPointInActiveRouteCorridor(c.lat, c.lon)) return true;
+      }
+    }
+    return false;
+  }
+  if (Number.isFinite(item.lat) && Number.isFinite(item.lon)) {
+    return isPointInActiveRouteCorridor(item.lat, item.lon);
+  }
+  return false;
+}
+window.doesNoticeIntersectRouteCorridor = doesNoticeIntersectRouteCorridor;
+
+/**
+ * Draw visual buffer zone corridor around the active route on the Leaflet map
+ */
+function renderRouteBufferCorridorOnMap() {
+  if (!leafletMap) return;
+  if (!leafletRouteBufferLayer) {
+    leafletRouteBufferLayer = L.layerGroup().addTo(leafletMap);
+  }
+  leafletRouteBufferLayer.clearLayers();
+
+  const hasRoute = Boolean(activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0);
+  const isRouteVisible = typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.route !== false;
+  if (!hasRoute || !isRouteVisible) return;
+
+  const bufNm = Number(window.ROUTE_CORRIDOR_BUFFER_NM) || 25;
+  const wpts = activeRouteData.waypoints;
+  const isFilterOn = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
+
+  // Build left/right offset corridor polygon around route segments
+  if (wpts.length >= 2) {
+    const leftSide = [];
+    const rightSide = [];
+    for (let i = 0; i < wpts.length; i++) {
+      const cur = wpts[i];
+      const prev = i > 0 ? wpts[i - 1] : cur;
+      const next = i < wpts.length - 1 ? wpts[i + 1] : cur;
+      const latRad = cur.lat * Math.PI / 180;
+      const cosLat = Math.max(0.2, Math.cos(latRad));
+      let dx = (next.lon - prev.lon) * cosLat;
+      let dy = next.lat - prev.lat;
+      const len = Math.hypot(dx, dy) || 1;
+      dx /= len;
+      dy /= len;
+      // Normal vector (-dy, dx)
+      const degLatOffset = (-dy) * (bufNm / 60);
+      const degLonOffset = (dx * (bufNm / 60)) / cosLat;
+      leftSide.push([cur.lat + degLatOffset, cur.lon + degLonOffset]);
+      rightSide.unshift([cur.lat - degLatOffset, cur.lon - degLonOffset]);
+    }
+    const polyCoords = leftSide.concat(rightSide);
+    const corridorPoly = L.polygon(polyCoords, {
+      color: isFilterOn ? "#00e5ff" : "#38bdf8",
+      weight: isFilterOn ? 1.8 : 1.1,
+      dashArray: "5, 5",
+      fillColor: isFilterOn ? "#0ea5e9" : "#38bdf8",
+      fillOpacity: isFilterOn ? 0.11 : 0.05,
+      interactive: false
+    });
+    leafletRouteBufferLayer.addLayer(corridorPoly);
+  }
+}
+window.renderRouteBufferCorridorOnMap = renderRouteBufferCorridorOnMap;
+
+/**
+ * Update the floating Route Snapshot & Corridor Buffer Mini Window (#ntmRouteMiniWindow)
+ */
+function updateRouteMiniWindowUI() {
+  const win = document.getElementById("ntmRouteMiniWindow");
+  if (!win) return;
+
+  const hasRoute = Boolean(activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0);
+  if (!hasRoute) {
+    win.style.display = "none";
+    return;
+  }
+
+  win.style.display = "block";
+  const wpts = activeRouteData.waypoints;
+  let totalDist = Number(activeRouteData.totalDistanceNM) || 0;
+  if (!totalDist && wpts.length >= 2) {
+    for (let i = 0; i < wpts.length - 1; i++) {
+      totalDist += calculateHaversineDistanceNM(wpts[i].lat, wpts[i].lon, wpts[i + 1].lat, wpts[i + 1].lon);
+    }
+    totalDist = Math.round(totalDist);
+    activeRouteData.totalDistanceNM = totalDist;
+  }
+
+  // Count how many active notices + ports fall inside the current buffer
+  const ntmHits = (typeof NTM_STORE !== "undefined" ? NTM_STORE : []).filter(n => !n.isCancelled && n.status !== "CANCELLED" && doesNoticeIntersectRouteCorridor(n)).length;
+  const portHits = (typeof PORT_DEPTHS_DB !== "undefined" ? PORT_DEPTHS_DB : []).filter(p => {
+    const c = p.approachCoords || p.coords;
+    return c && isPointInActiveRouteCorridor(c[0], c[1]);
+  }).length;
+
+  const titleEl = document.getElementById("routeMiniTitle");
+  const wptsEl = document.getElementById("routeMiniWpts");
+  const distEl = document.getElementById("routeMiniDist");
+  const hitsEl = document.getElementById("routeMiniHits");
+  const chkEl = document.getElementById("chkRouteCorridorOnly");
+  const rngEl = document.getElementById("rngRouteBufferNm");
+  const valEl = document.getElementById("lblRouteBufferNm");
+
+  if (titleEl) titleEl.textContent = activeRouteData.name || activeRouteData.routeName || "Active Passage Plan";
+  if (wptsEl) wptsEl.textContent = String(wpts.length);
+  if (distEl) distEl.textContent = `${totalDist.toLocaleString()} NM`;
+  if (hitsEl) hitsEl.textContent = `${ntmHits} NtM • ${portHits} Ports`;
+  if (chkEl) chkEl.checked = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
+  if (rngEl) rngEl.value = String(window.ROUTE_CORRIDOR_BUFFER_NM || 25);
+  if (valEl) valEl.textContent = `±${window.ROUTE_CORRIDOR_BUFFER_NM || 25} NM`;
+}
+window.updateRouteMiniWindowUI = updateRouteMiniWindowUI;
+
+function initRouteMiniWindow() {
+  const win = document.getElementById("ntmRouteMiniWindow");
+  if (!win || win._routeMiniInit) return;
+  win._routeMiniInit = true;
+
+  const header = document.getElementById("ntmRouteMiniDragHandle");
+  const btnMin = document.getElementById("btnRouteMiniMinimize");
+  const btnFit = document.getElementById("btnRouteMiniFit");
+  const chkCorridor = document.getElementById("chkRouteCorridorOnly");
+  const rngBuffer = document.getElementById("rngRouteBufferNm");
+  const lblBuffer = document.getElementById("lblRouteBufferNm");
+
+  // Draggable pointer controller inside #ntmMapContainer
+  if (header) {
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let origLeft = 98;
+    let origTop = 12;
+
+    header.addEventListener("pointerdown", (e) => {
+      if (e.target.closest("button")) return;
+      dragging = true;
+      win.classList.add("dragging");
+      startX = e.clientX;
+      startY = e.clientY;
+      origLeft = win.offsetLeft;
+      origTop = win.offsetTop;
+      header.setPointerCapture(e.pointerId);
+    });
+
+    header.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const parent = win.parentElement;
+      const maxX = parent ? Math.max(0, parent.clientWidth - win.offsetWidth - 6) : 1200;
+      const maxY = parent ? Math.max(0, parent.clientHeight - win.offsetHeight - 6) : 800;
+      const nextLeft = Math.max(6, Math.min(maxX, origLeft + (e.clientX - startX)));
+      const nextTop = Math.max(6, Math.min(maxY, origTop + (e.clientY - startY)));
+      win.style.left = `${nextLeft}px`;
+      win.style.top = `${nextTop}px`;
+    });
+
+    const stopDrag = () => {
+      dragging = false;
+      win.classList.remove("dragging");
+    };
+    header.addEventListener("pointerup", stopDrag);
+    header.addEventListener("pointercancel", stopDrag);
+  }
+
+  if (btnMin) {
+    btnMin.addEventListener("click", (e) => {
+      e.stopPropagation();
+      win.classList.toggle("minimized");
+      btnMin.textContent = win.classList.contains("minimized") ? "+" : "—";
+    });
+  }
+
+  if (btnFit) {
+    btnFit.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (typeof fitRouteBounds === "function") fitRouteBounds();
+    });
+  }
+
+  const refreshCorridorFilteredLayers = () => {
+    updateRouteMiniWindowUI();
+    renderRouteBufferCorridorOnMap();
+    if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
+    if (typeof renderPortDepthsOnMap === "function" && leafletMap) renderPortDepthsOnMap(leafletMap);
+    if (typeof renderWeatherOnMap === "function" && leafletMap) renderWeatherOnMap(leafletMap);
+    if (typeof saveSetSailUserHistory === "function") saveSetSailUserHistory();
+  };
+
+  if (chkCorridor) {
+    chkCorridor.addEventListener("change", () => {
+      window.ROUTE_CORRIDOR_FILTER_ENABLED = chkCorridor.checked;
+      refreshCorridorFilteredLayers();
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast(
+          chkCorridor.checked
+            ? `Corridor filter ON (±${window.ROUTE_CORRIDOR_BUFFER_NM} NM along route)`
+            : "Corridor filter OFF (Showing all global chart objects)",
+          "info"
+        );
+      }
+    });
+  }
+
+  if (rngBuffer) {
+    rngBuffer.addEventListener("input", () => {
+      const val = parseInt(rngBuffer.value, 10) || 25;
+      window.ROUTE_CORRIDOR_BUFFER_NM = val;
+      try { localStorage.setItem("setsail_route_buffer_nm", String(val)); } catch (e) {}
+      if (lblBuffer) lblBuffer.textContent = `±${val} NM`;
+      refreshCorridorFilteredLayers();
+    });
+  }
+
+  updateRouteMiniWindowUI();
+}
+window.initRouteMiniWindow = initRouteMiniWindow;
+
+
+/* ==========================================================================
+   SETNEWS (#tab-news) — GLOBAL MARITIME NEWS & "FOR YOU" RECOMMENDATION ENGINE
+   ========================================================================== */
+let SETNEWS_ARTICLES = [];
+let SETNEWS_ACTIVE_CAT = "ALL";
+let SETNEWS_SEARCH_QUERY = "";
+const SETNEWS_PROFILE_KEY = "setsail_news_user_profile_v1";
+
+function getSetNewsUserProfile() {
+  try {
+    const raw = localStorage.getItem(SETNEWS_PROFILE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return {
+      categoryWeights: parsed.categoryWeights || {},
+      regionWeights: parsed.regionWeights || {},
+      keywordWeights: parsed.keywordWeights || {},
+      readIds: Array.isArray(parsed.readIds) ? parsed.readIds : [],
+      likedIds: Array.isArray(parsed.likedIds) ? parsed.likedIds : [],
+      bookmarkedIds: Array.isArray(parsed.bookmarkedIds) ? parsed.bookmarkedIds : [],
+      totalDwellSeconds: Number(parsed.totalDwellSeconds) || 0
+    };
+  } catch (e) {
+    return { categoryWeights: {}, regionWeights: {}, keywordWeights: {}, readIds: [], likedIds: [], bookmarkedIds: [], totalDwellSeconds: 0 };
+  }
+}
+
+function saveSetNewsUserProfile(prof) {
+  try {
+    localStorage.setItem(SETNEWS_PROFILE_KEY, JSON.stringify(prof));
+    if (typeof saveSetSailUserHistory === "function") saveSetSailUserHistory();
+  } catch (e) {}
+}
+
+function recordSetNewsInteraction(article, actionType = "read", dwellSec = 8) {
+  if (!article) return;
+  const prof = getSetNewsUserProfile();
+  const boost = actionType === "like" ? 4.5 : (actionType === "bookmark" ? 5.0 : (actionType === "plot" ? 4.0 : 2.0));
+
+  if (article.category) {
+    prof.categoryWeights[article.category] = (prof.categoryWeights[article.category] || 0) + boost;
+  }
+  if (article.region) {
+    prof.regionWeights[article.region] = (prof.regionWeights[article.region] || 0) + boost;
+  }
+  (article.tags || []).forEach(t => {
+    prof.keywordWeights[t] = (prof.keywordWeights[t] || 0) + boost * 0.8;
+  });
+
+  if (actionType === "read" && article.id && !prof.readIds.includes(article.id)) {
+    prof.readIds.unshift(article.id);
+    if (prof.readIds.length > 200) prof.readIds.pop();
+  }
+  if (actionType === "like" && article.id) {
+    const idx = prof.likedIds.indexOf(article.id);
+    if (idx >= 0) prof.likedIds.splice(idx, 1);
+    else prof.likedIds.push(article.id);
+  }
+  if (actionType === "bookmark" && article.id) {
+    const idx = prof.bookmarkedIds.indexOf(article.id);
+    if (idx >= 0) prof.bookmarkedIds.splice(idx, 1);
+    else prof.bookmarkedIds.push(article.id);
+  }
+  prof.totalDwellSeconds = (prof.totalDwellSeconds || 0) + dwellSec;
+  saveSetNewsUserProfile(prof);
+}
+
+/**
+ * Behavioral & Contextual "For You" Scoring Engine
+ * Combines:
+ *   1. Active Loaded Route Proximity & Waypoint/Port Keywords (+38 pts)
+ *   2. User Vessel Position & Inspected SetChart Regions (+22 pts)
+ *   3. Past Article Interactions (Category, Region, Tag affinities + Dwell Time) (+28 pts)
+ *   4. Breaking Cyclone / Safety Urgency & Freshness (+15 pts)
+ */
+function scoreArticleForUser(article, prof) {
+  let score = 20;
+  let primaryReason = "🔥 Trending Maritime Dispatch";
+
+  // 1. Active Route correlation
+  if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
+    const rText = `${activeRouteData.name || ""} ${(activeRouteData.chokepoints || []).join(" ")} ${activeRouteData.waypoints.map(w => w.name || "").join(" ")}`.toLowerCase();
+    const artText = `${article.title || ""} ${article.summary || ""} ${article.region || ""} ${(article.tags || []).join(" ")}`.toLowerCase();
+
+    if (article.coords && Array.isArray(article.coords) && article.coords.length === 2) {
+      const distNm = getMinDistanceToActiveRouteNM(article.coords[0], article.coords[1]);
+      if (distNm <= 450) {
+        score += 42;
+        primaryReason = `🎯 Along Active Route (${Math.round(distNm)} NM)`;
+      }
+    }
+    const routeTokens = rText.split(/[^a-z0-9]+/).filter(w => w.length >= 4 && !["fairway", "departure", "arrival", "waypoint", "route"].includes(w));
+    for (const tk of routeTokens) {
+      if (artText.includes(tk)) {
+        score += 34;
+        primaryReason = `🧭 Matches Route: ${tk.charAt(0).toUpperCase() + tk.slice(1)}`;
+        break;
+      }
+    }
+  }
+
+  // 2. Vessel Position proximity
+  if (userVessel && Number.isFinite(userVessel.lat) && article.coords && Array.isArray(article.coords)) {
+    const vDist = calculateHaversineDistanceNM(userVessel.lat, userVessel.lon, article.coords[0], article.coords[1]);
+    if (vDist <= 600) {
+      score += 26;
+      if (primaryReason.startsWith("🔥")) {
+        primaryReason = `⚓ Near Vessel Position (${Math.round(vDist)} NM)`;
+      }
+    }
+  }
+
+  // 3. Past Reading & Interaction Affinity
+  const catW = (prof.categoryWeights && prof.categoryWeights[article.category]) || 0;
+  const regW = (prof.regionWeights && prof.regionWeights[article.region]) || 0;
+  if (catW > 0 || regW > 0) {
+    score += Math.min(32, catW * 3.5 + regW * 4.0);
+    if (primaryReason.startsWith("🔥")) {
+      primaryReason = regW >= catW
+        ? `📡 Matches Your Region: ${article.region}`
+        : `⭐ Based on Your ${article.category} Reading`;
+    }
+  }
+
+  (article.tags || []).forEach(t => {
+    if (prof.keywordWeights && prof.keywordWeights[t]) {
+      score += Math.min(14, prof.keywordWeights[t] * 2.5);
+    }
+  });
+
+  // 4. Category & Urgency Boosts for Bridge Officers
+  if (article.category === "Navigation & Safety" || article.category === "Weather & Cyclones") {
+    score += 11;
+    if (primaryReason.startsWith("🔥") && article.category === "Weather & Cyclones") {
+      primaryReason = "🌀 Priority Metocean & Cyclone Watch";
+    } else if (primaryReason.startsWith("🔥") && article.category === "Navigation & Safety") {
+      primaryReason = "⚠️ Critical Bridge & Hydrographic Alert";
+    }
+  }
+
+  // Slight novelty adjustment so unread stories surface prominently
+  if (prof.readIds && prof.readIds.includes(article.id)) {
+    score -= 6;
+  }
+
+  return {
+    score: Math.min(99, Math.max(55, Math.round(score))),
+    reason: primaryReason
+  };
+}
+
+async function loadSetNewsData(force = false) {
+  if (SETNEWS_ARTICLES.length > 0 && !force) {
+    renderSetNewsUI();
+    return;
+  }
+  try {
+    let res = await fetch("news.json?t=" + Date.now(), { cache: "no-store" }).catch(() => null);
+    if (!res || !res.ok) {
+      res = await fetch("https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/news.json?t=" + Date.now()).catch(() => null);
+    }
+    if (res && res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.articles) && data.articles.length > 0) {
+        SETNEWS_ARTICLES = data.articles;
+        const syncEl = document.getElementById("setNewsLastSync");
+        if (syncEl && data.updatedAt) {
+          syncEl.textContent = `Updated: ${new Date(data.updatedAt).toUTCString().slice(5, 22)} UTC • ${(data.sources || []).length || 7} Global Feeds`;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[SetNews] Fallback feed:", e);
+  }
+  renderSetNewsUI();
+}
+window.loadSetNewsData = loadSetNewsData;
+
+function formatNewsRelativeTime(isoStr) {
+  if (!isoStr) return "Live";
+  const ms = Date.parse(isoStr);
+  if (!Number.isFinite(ms)) return "Recent";
+  const diffMin = Math.max(1, Math.round((Date.now() - ms) / 60000));
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const hrs = Math.round(diffMin / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.round(hrs / 24)}d ago`;
+}
+
+function renderSetNewsUI() {
+  const container = document.getElementById("tab-news");
+  if (!container) return;
+
+  const prof = getSetNewsUserProfile();
+  const enriched = SETNEWS_ARTICLES.map(art => {
+    const scored = scoreArticleForUser(art, prof);
+    return Object.assign({}, art, {
+      _score: scored.score,
+      _reason: scored.reason,
+      _liked: prof.likedIds.includes(art.id),
+      _bookmarked: prof.bookmarkedIds.includes(art.id)
+    });
+  });
+
+  // Update Context Pill in "For You" Header
+  const ctxEl = document.getElementById("setNewsForYouContext");
+  if (ctxEl) {
+    const routeLabel = activeRouteData && activeRouteData.name ? `Route: ${activeRouteData.name}` : "Global Corridor";
+    ctxEl.textContent = `AI Engine: ${routeLabel} • ${prof.readIds.length} Read • ${prof.bookmarkedIds.length} Saved`;
+  }
+
+  // 1. Breaking Ticker
+  const tickerEl = document.getElementById("setNewsTickerTrack");
+  if (tickerEl) {
+    const topTicker = enriched.slice(0, 10);
+    tickerEl.innerHTML = topTicker.map(a => `
+      <span class="setnews-ticker-item" data-news-id="${a.id}">
+        <strong style="color:#38bdf8;">[${a.region || "Global"}]</strong>
+        ${a.title}
+      </span>
+    `).join('<span style="color:#475569;">•</span>');
+  }
+
+  // 2. Personalized "For You" Top 4 Recommendations
+  const forYouGrid = document.getElementById("setNewsForYouGrid");
+  if (forYouGrid) {
+    const sortedForYou = enriched.slice().sort((a, b) => b._score - a._score).slice(0, 4);
+    forYouGrid.innerHTML = sortedForYou.map(a => `
+      <article class="setnews-foryou-card" data-news-id="${a.id}">
+        <div class="setnews-foryou-reason">
+          <span>${a._reason}</span>
+          <span style="background:rgba(15,23,42,0.65);color:#38bdf8;padding:1px 6px;border-radius:4px;">${a._score}% Match</span>
+        </div>
+        <div class="setnews-card-body">
+          <div class="setnews-meta-row">
+            <span class="setnews-source-tag">${a.sourceIcon || "🚢"} ${a.source}</span>
+            <span>${formatNewsRelativeTime(a.publishedAt)}</span>
+          </div>
+          <h4 class="setnews-card-title">${a.title}</h4>
+          <p class="setnews-card-summary">${a.summary}</p>
+          <div class="setnews-card-footer">
+            <span style="font-size:0.65rem;color:#7dd3fc;">📍 ${a.region || "Global"}</span>
+            <span style="font-size:0.65rem;color:#94a3b8;">⏱ ${a.readingMinutes || 2} min read</span>
+          </div>
+        </div>
+      </article>
+    `).join("");
+  }
+
+  // 3. Filter Main Feed by Category & Search Query
+  let filtered = enriched.filter(a => {
+    if (SETNEWS_ACTIVE_CAT === "FOR_YOU") return a._score >= 65;
+    if (SETNEWS_ACTIVE_CAT === "SAVED") return a._bookmarked;
+    if (SETNEWS_ACTIVE_CAT !== "ALL" && a.category !== SETNEWS_ACTIVE_CAT) return false;
+    if (SETNEWS_SEARCH_QUERY) {
+      const q = SETNEWS_SEARCH_QUERY.toLowerCase();
+      const hay = `${a.title} ${a.summary} ${a.source} ${a.region} ${a.category} ${(a.tags || []).join(" ")}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (SETNEWS_ACTIVE_CAT === "FOR_YOU") {
+    filtered.sort((a, b) => b._score - a._score);
+  }
+
+  // 4. Bento Hero (Flagship Story + 3 Priority Dispatches)
+  const heroContainer = document.getElementById("setNewsBentoHero");
+  if (heroContainer) {
+    if (filtered.length >= 4 && SETNEWS_ACTIVE_CAT === "ALL" && !SETNEWS_SEARCH_QUERY) {
+      heroContainer.style.display = "grid";
+      const mainStory = filtered[0];
+      const stackStories = filtered.slice(1, 4);
+      heroContainer.innerHTML = `
+        <div class="setnews-hero-main" data-news-id="${mainStory.id}">
+          <div class="setnews-hero-bg" style="background-image:url('${mainStory.image || ""}');"></div>
+          <div class="setnews-hero-overlay">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="background:#0ea5e9;color:#fff;font-size:0.65rem;font-weight:800;padding:3px 9px;border-radius:5px;text-transform:uppercase;">${mainStory.category}</span>
+              <span style="background:rgba(15,23,42,0.85);color:#38bdf8;font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:5px;border:1px solid rgba(56,189,248,0.35);">📍 ${mainStory.region}</span>
+              <span style="font-size:0.7rem;color:#cbd5e1;">${mainStory.sourceIcon || "⚓"} ${mainStory.source} • ${formatNewsRelativeTime(mainStory.publishedAt)}</span>
+            </div>
+            <h2 style="font-size:1.38rem;font-weight:800;line-height:1.28;color:#ffffff;margin:0;">${mainStory.title}</h2>
+            <p style="font-size:0.82rem;line-height:1.5;color:#cbd5e1;margin:0;max-width:680px;">${mainStory.summary}</p>
+          </div>
+        </div>
+        <div class="setnews-hero-stack">
+          ${stackStories.map(st => `
+            <div class="setnews-stack-card" data-news-id="${st.id}">
+              <div class="setnews-stack-thumb" style="background-image:url('${st.image || ""}');"></div>
+              <div style="display:flex;flex-direction:column;justify-content:space-between;min-width:0;flex:1;">
+                <div class="setnews-meta-row">
+                  <span class="setnews-source-tag">${st.source}</span>
+                  <span>${formatNewsRelativeTime(st.publishedAt)}</span>
+                </div>
+                <h4 style="font-size:0.82rem;font-weight:700;line-height:1.32;margin:3px 0;color:inherit;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${st.title}</h4>
+                <div style="font-size:0.65rem;color:#38bdf8;font-weight:600;">📍 ${st.region} • ${st.category}</div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    } else {
+      heroContainer.style.display = "none";
+    }
+  }
+
+  // 5. Wire Grid
+  const wireGrid = document.getElementById("setNewsWireGrid");
+  if (wireGrid) {
+    const wireItems = (filtered.length >= 4 && SETNEWS_ACTIVE_CAT === "ALL" && !SETNEWS_SEARCH_QUERY)
+      ? filtered.slice(4)
+      : filtered;
+
+    if (wireItems.length === 0) {
+      wireGrid.innerHTML = `<div style="grid-column:1/-1;padding:36px;text-align:center;color:#94a3b8;background:rgba(15,23,42,0.5);border-radius:12px;border:1px dashed rgba(148,163,184,0.25);">No maritime articles match this filter. Try switching category or clearing search.</div>`;
+    } else {
+      wireGrid.innerHTML = wireItems.map(a => `
+        <article class="setnews-article-card" data-news-id="${a.id}">
+          <div class="setnews-card-img" style="background-image:url('${a.image || ""}');">
+            <span style="position:absolute;top:9px;left:9px;background:rgba(15,23,42,0.88);color:#38bdf8;font-size:0.62rem;font-weight:700;padding:3px 8px;border-radius:5px;border:1px solid rgba(56,189,248,0.35);">📍 ${a.region || "Global"}</span>
+            <span style="position:absolute;top:9px;right:9px;background:rgba(15,23,42,0.88);color:#f8fafc;font-size:0.62rem;font-weight:700;padding:3px 7px;border-radius:5px;">${a.category}</span>
+          </div>
+          <div class="setnews-card-body">
+            <div class="setnews-meta-row">
+              <span class="setnews-source-tag">${a.sourceIcon || "🚢"} ${a.source}</span>
+              <span>${formatNewsRelativeTime(a.publishedAt)} • ${a.readingMinutes || 2}m</span>
+            </div>
+            <h3 class="setnews-card-title">${a.title}</h3>
+            <p class="setnews-card-summary">${a.summary}</p>
+            <div class="setnews-card-footer">
+              <div style="display:flex;gap:5px;">
+                <button type="button" class="setnews-action-btn ${a._liked ? 'active' : ''}" data-news-action="like" data-news-id="${a.id}" title="Like & train For You feed">❤️ ${a._liked ? 'Liked' : 'Like'}</button>
+                <button type="button" class="setnews-action-btn ${a._bookmarked ? 'active' : ''}" data-news-action="bookmark" data-news-id="${a.id}" title="Save for offline reading">🔖 ${a._bookmarked ? 'Saved' : 'Save'}</button>
+              </div>
+              <button type="button" class="setnews-action-btn" data-news-action="plot" data-news-id="${a.id}" title="Plot region on SetChart">🗺️ Chart</button>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+  }
+
+  // 6. Regional Chokepoint & Radar Counts
+  const radarList = document.getElementById("setNewsRadarList");
+  if (radarList) {
+    const regionCounts = {};
+    enriched.forEach(a => {
+      const r = a.region || "Global Oceans";
+      regionCounts[r] = (regionCounts[r] || 0) + 1;
+    });
+    const sortedRegions = Object.entries(regionCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    radarList.innerHTML = sortedRegions.map(([reg, cnt]) => `
+      <div class="setnews-radar-item" data-news-region="${reg}" style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;background:rgba(30,41,59,0.55);border:1px solid rgba(148,163,184,0.14);cursor:pointer;font-size:0.75rem;">
+        <span style="font-weight:600;color:#e2e8f0;">📍 ${reg}</span>
+        <span style="background:rgba(14,165,233,0.18);color:#38bdf8;font-weight:700;padding:1px 7px;border-radius:999px;font-size:0.68rem;">${cnt}</span>
+      </div>
+    `).join("");
+  }
+}
+
+function openSetNewsArticleModal(articleId) {
+  const art = SETNEWS_ARTICLES.find(a => a.id === articleId);
+  if (!art) return;
+  recordSetNewsInteraction(art, "read", 12);
+
+  const modal = document.getElementById("setNewsReaderModal");
+  const bodyEl = document.getElementById("setNewsReaderContent");
+  if (!modal || !bodyEl) return;
+
+  const prof = getSetNewsUserProfile();
+  const scored = scoreArticleForUser(art, prof);
+
+  bodyEl.innerHTML = `
+    <div style="position:relative;height:220px;background-image:url('${art.image || ""}');background-size:cover;background-position:center;border-radius:15px 15px 0 0;">
+      <div style="position:absolute;inset:0;background:linear-gradient(0deg,#0f172a 5%,rgba(15,23,42,0.35) 100%);"></div>
+      <button type="button" id="btnCloseNewsReader" style="position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;background:rgba(15,23,42,0.85);border:1px solid rgba(148,163,184,0.35);color:#fff;font-size:1rem;cursor:pointer;">✕</button>
+      <div style="position:absolute;bottom:14px;left:20px;right:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="background:#0ea5e9;color:#fff;font-size:0.68rem;font-weight:800;padding:3px 9px;border-radius:5px;text-transform:uppercase;">${art.category}</span>
+        <span style="background:rgba(15,23,42,0.9);color:#38bdf8;font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:5px;border:1px solid rgba(56,189,248,0.4);">📍 ${art.region}</span>
+        <span style="background:rgba(234,76,37,0.22);color:#fdba74;font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:5px;">${scored.reason} (${scored.score}% Match)</span>
+      </div>
+    </div>
+    <div style="padding:22px 24px 26px;display:flex;flex-direction:column;gap:14px;">
+      <div style="font-size:0.75rem;color:#94a3b8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <span><strong>${art.sourceIcon || "🚢"} ${art.source}</strong> • Published ${new Date(art.publishedAt).toUTCString()}</span>
+        <span>⏱ ${art.readingMinutes || 2} min bridge briefing</span>
+      </div>
+      <h2 style="font-size:1.35rem;font-weight:800;line-height:1.32;margin:0;">${art.title}</h2>
+      ${Array.isArray(art.takeaways) && art.takeaways.length > 0 ? `
+        <div style="padding:11px 14px;border-radius:10px;background:rgba(30,41,59,0.65);border-left:3px solid #38bdf8;font-size:0.8rem;color:#e2e8f0;">
+          <strong style="color:#38bdf8;display:block;margin-bottom:5px;text-transform:uppercase;font-size:0.68rem;letter-spacing:0.05em;">⚡ Key Bridge Takeaways</strong>
+          <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;">
+            ${art.takeaways.map(t => `<li>${t}</li>`).join("")}
+          </ul>
+        </div>
+      ` : ""}
+      <p style="font-size:0.92rem;line-height:1.68;color:#cbd5e1;margin:0;white-space:pre-line;">${art.body || art.summary}</p>
+      <div style="padding:12px 14px;border-radius:10px;background:rgba(14,165,233,0.1);border:1px solid rgba(56,189,248,0.28);font-size:0.78rem;color:#bae6fd;">
+        <strong>🧭 Bridge Navigation Intelligence Context:</strong> Region <b>${art.region}</b> (${art.coords ? `${art.coords[0].toFixed(1)}°, ${art.coords[1].toFixed(1)}°` : "Global"}). Reading this dispatch refines your personalized <b>For You</b> maritime algorithm.
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:10px;border-top:1px solid rgba(148,163,184,0.18);">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="setnews-action-btn" id="btnModalPlotChart" style="padding:8px 13px;font-size:0.75rem;background:rgba(14,165,233,0.22);color:#38bdf8;border-color:#38bdf8;">🗺️ Plot Region on SetChart</button>
+          <a href="${art.url}" target="_blank" rel="noopener noreferrer" class="setnews-action-btn" style="padding:8px 13px;font-size:0.75rem;text-decoration:none;">🔗 Read Full Article at ${art.source} &rarr;</a>
+        </div>
+        <button type="button" class="setnews-action-btn" id="btnModalCloseBottom" style="padding:8px 14px;font-size:0.75rem;">Close</button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add("open");
+  const closeReader = () => {
+    modal.classList.remove("open");
+    renderSetNewsUI();
+  };
+  const b1 = document.getElementById("btnCloseNewsReader");
+  const b2 = document.getElementById("btnModalCloseBottom");
+  const bPlot = document.getElementById("btnModalPlotChart");
+  if (b1) b1.addEventListener("click", closeReader);
+  if (b2) b2.addEventListener("click", closeReader);
+  if (bPlot) {
+    bPlot.addEventListener("click", () => {
+      closeReader();
+      plotNewsArticleOnChart(art);
+    });
+  }
+}
+
+function plotNewsArticleOnChart(art) {
+  if (!art) return;
+  recordSetNewsInteraction(art, "plot", 10);
+  if (typeof switchToTab === "function") {
+    switchToTab("tab-ntm");
+  }
+  setTimeout(() => {
+    if (leafletMap && Array.isArray(art.coords) && art.coords.length === 2) {
+      leafletMap.flyTo([art.coords[0], art.coords[1]], 6, { duration: 1.1 });
+      L.popup()
+        .setLatLng([art.coords[0], art.coords[1]])
+        .setContent(`
+          <div style="font-family:'Segoe UI',sans-serif;max-width:240px;color:#0f172a;">
+            <div style="font-size:0.68rem;font-weight:800;color:#0284c7;text-transform:uppercase;">${art.source} • ${art.region}</div>
+            <div style="font-weight:700;font-size:0.84rem;margin:3px 0;">${art.title}</div>
+            <a href="${art.url}" target="_blank" rel="noopener" style="font-size:0.72rem;color:#0284c7;font-weight:600;">Open Source Dispatch &rarr;</a>
+          </div>
+        `)
+        .openOn(leafletMap);
+    }
+  }, 220);
+}
+
+function initSetNews() {
+  const container = document.getElementById("tab-news");
+  if (!container) return;
+
+  if (!container._setNewsBound) {
+    container._setNewsBound = true;
+
+    // Category pills
+    container.querySelectorAll(".setnews-cat-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        container.querySelectorAll(".setnews-cat-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        SETNEWS_ACTIVE_CAT = btn.getAttribute("data-news-cat") || "ALL";
+        renderSetNewsUI();
+      });
+    });
+
+    // Search input
+    const searchInp = document.getElementById("setNewsSearchInput");
+    if (searchInp) {
+      searchInp.addEventListener("input", () => {
+        SETNEWS_SEARCH_QUERY = searchInp.value.trim();
+        renderSetNewsUI();
+      });
+    }
+
+    // Refresh button
+    const refreshBtn = document.getElementById("btnRefreshSetNews");
+    if (refreshBtn) {
+      refreshBtn.addEventListener("click", () => {
+        loadSetNewsData(true);
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("Synced latest global maritime news feeds", "success");
+        }
+      });
+    }
+
+    // Delegated clicks on articles, actions, and regional radar
+    container.addEventListener("click", (e) => {
+      const actionBtn = e.target.closest("[data-news-action]");
+      if (actionBtn) {
+        e.stopPropagation();
+        const act = actionBtn.getAttribute("data-news-action");
+        const id = actionBtn.getAttribute("data-news-id");
+        const art = SETNEWS_ARTICLES.find(a => a.id === id);
+        if (!art) return;
+        if (act === "plot") {
+          plotNewsArticleOnChart(art);
+        } else {
+          recordSetNewsInteraction(art, act, 5);
+          renderSetNewsUI();
+        }
+        return;
+      }
+
+      const regionItem = e.target.closest("[data-news-region]");
+      if (regionItem) {
+        const reg = regionItem.getAttribute("data-news-region") || "";
+        const searchInp2 = document.getElementById("setNewsSearchInput");
+        if (searchInp2) {
+          searchInp2.value = reg;
+          SETNEWS_SEARCH_QUERY = reg;
+          renderSetNewsUI();
+        }
+        return;
+      }
+
+      const card = e.target.closest("[data-news-id]");
+      if (card) {
+        const id = card.getAttribute("data-news-id");
+        openSetNewsArticleModal(id);
+      }
+    });
+
+    const readerModal = document.getElementById("setNewsReaderModal");
+    if (readerModal) {
+      readerModal.addEventListener("click", (e) => {
+        if (e.target === readerModal) readerModal.classList.remove("open");
+      });
+    }
+  }
+
+  loadSetNewsData(false);
+}
+window.initSetNews = initSetNews;
+
+// Initialize Route Mini Window & SetNews on DOMContentLoaded
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    if (typeof initRouteMiniWindow === "function") initRouteMiniWindow();
+    if (typeof renderRouteBufferCorridorOnMap === "function") renderRouteBufferCorridorOnMap();
+    if (typeof loadSetNewsData === "function") loadSetNewsData(false);
+    if (leafletMap) leafletMap.invalidateSize();
+  }, 180);
+});
+
