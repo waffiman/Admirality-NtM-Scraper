@@ -19932,7 +19932,7 @@ function initExcelOverlayDock(map) {
         return;
       }
       const isActive = !ntmTab.classList.contains("active");
-      setOverlayActive("notices", isActive, map);
+      setOverlayActive("notices", isActive, window.leafletMap || map);
     });
   }
 
@@ -19956,7 +19956,7 @@ function initExcelOverlayDock(map) {
         return;
       }
       const isActive = !depthTab.classList.contains("active");
-      setOverlayActive("depths", isActive, map);
+      setOverlayActive("depths", isActive, window.leafletMap || map);
     });
   }
 
@@ -19980,7 +19980,7 @@ function initExcelOverlayDock(map) {
         return;
       }
       const isActive = !weatherTab.classList.contains("active");
-      setOverlayActive("weather", isActive, map);
+      setOverlayActive("weather", isActive, window.leafletMap || map);
     });
   }
 
@@ -20006,7 +20006,7 @@ function initExcelOverlayDock(map) {
         return;
       }
       const isActive = !routeTab.classList.contains("active");
-      setOverlayActive("route", isActive, map);
+      setOverlayActive("route", isActive, window.leafletMap || map);
     });
   }
 
@@ -20040,7 +20040,18 @@ function initExcelOverlayDock(map) {
  */
 function setOverlayActive(overlayKey, isActive, map = null) {
   OVERLAY_STATES[overlayKey] = isActive;
-  const currentMap = map || (typeof leafletMap !== "undefined" ? leafletMap : null);
+  if (window.OVERLAY_STATES) {
+    window.OVERLAY_STATES[overlayKey] = isActive;
+  }
+
+  if (!window.leafletMap && typeof window.initNtMMap === "function") {
+    const ntmPane = document.getElementById("tab-ntm");
+    if (ntmPane && ntmPane.classList.contains("active")) {
+      window.initNtMMap();
+    }
+  }
+
+  const currentMap = window.leafletMap || map || (typeof leafletMap !== "undefined" ? leafletMap : null);
 
   // Update Excel Tab UI
   const tab = document.querySelector(`.excel-tab[data-overlay="${overlayKey}"]`);
@@ -20081,9 +20092,21 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         else currentMap.removeLayer(leafletIsobathsLayer);
       }
     } else if (overlayKey === "notices") {
-      if (typeof leafletMarkersLayer !== "undefined" && leafletMarkersLayer) {
-        if (isActive) currentMap.addLayer(leafletMarkersLayer);
-        else currentMap.removeLayer(leafletMarkersLayer);
+      const mLayer = window.leafletMarkersLayer || (typeof leafletMarkersLayer !== "undefined" ? leafletMarkersLayer : null);
+      if (mLayer) {
+        if (isActive) {
+          if (!currentMap.hasLayer(mLayer)) {
+            currentMap.addLayer(mLayer);
+          }
+        } else {
+          mLayer.clearLayers();
+          if (currentMap.hasLayer(mLayer)) {
+            currentMap.removeLayer(mLayer);
+          }
+        }
+      }
+      if (isActive && typeof window.ensureNoticesReadyForOverlay === "function") {
+        window.ensureNoticesReadyForOverlay();
       }
     } else if (overlayKey === "buoys") {
       if (typeof seamarkLayer !== "undefined" && seamarkLayer) {
@@ -20118,8 +20141,10 @@ function setOverlayActive(overlayKey, isActive, map = null) {
     window.syncFilterMasterCheckboxes();
   }
 
-  // Synchronize Left Multi-Column List immediately!
-  if (typeof renderNtMListAndMap === "function") {
+  // Synchronize Left Multi-Column List & Map Markers immediately!
+  if (typeof window.renderNtMListAndMap === "function") {
+    window.renderNtMListAndMap();
+  } else if (typeof renderNtMListAndMap === "function") {
     renderNtMListAndMap();
   }
 }

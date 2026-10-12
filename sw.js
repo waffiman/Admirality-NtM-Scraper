@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.2';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.2';
+const CACHE_NAME = 'setsail-cache-v5.3';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.3';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -25,10 +25,10 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=5.2',
-  'assets/Auto NtM Plotting/port_depths.js?v=5.2',
-  'assets/Auto NtM Plotting/ntm_module.js?v=5.2',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.2',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=5.3',
+  'assets/Auto NtM Plotting/port_depths.js?v=5.3',
+  'assets/Auto NtM Plotting/ntm_module.js?v=5.3',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.3',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
   'assets/Auto NtM Plotting/tesseract.min.js',
   'assets/Auto NtM Plotting/pdf.min.js',
@@ -69,15 +69,16 @@ function fetchWithTimeout(request, timeoutMs) {
 async function matchAssetInCache(request) {
   try {
     const reqUrl = new URL(request.url);
-    if (reqUrl.origin !== self.location.origin) {
+    const decodedPath = decodeURIComponent(reqUrl.pathname);
+    const baseName = decodedPath.split('/').pop();
+    const isSharedJson = (baseName === 'notices.json' || baseName === 'weather.json' || baseName === 'news.json');
+    if (reqUrl.origin !== self.location.origin && !isSharedJson) {
       return null;
     }
     const appCache = await caches.open(CACHE_NAME);
     let hit = (await appCache.match(request)) || (await appCache.match(request, { ignoreSearch: true }));
     if (hit) return hit;
 
-    const decodedPath = decodeURIComponent(reqUrl.pathname);
-    const baseName = decodedPath.split('/').pop();
     if (!baseName) return null;
 
     const keys = await appCache.keys();
@@ -187,14 +188,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. notices.json & weather.json (Fast 2.2s timeout + Offline Cache fallback)
-  if (url.pathname.endsWith('notices.json') || url.pathname.endsWith('weather.json')) {
+  // 2. notices.json, weather.json & news.json (15s timeout for 1.8MB payload + Offline Cache fallback)
+  if (url.pathname.endsWith('notices.json') || url.pathname.endsWith('weather.json') || url.pathname.endsWith('news.json')) {
+    const jsonBaseName = url.pathname.split('/').pop();
     event.respondWith(
-      fetchWithTimeout(event.request, 2200)
+      fetchWithTimeout(event.request, 15000)
         .then((netRes) => {
           if (netRes && netRes.ok) {
             const copy = netRes.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+            const canonicalCopy = netRes.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, copy);
+              if (jsonBaseName) cache.put(jsonBaseName, canonicalCopy);
+            });
           }
           return netRes;
         })
@@ -210,6 +216,11 @@ self.addEventListener('fetch', (event) => {
               headers: headers
             });
           }
+          return new Response(JSON.stringify({ offline: true }), {
+            status: 503,
+            statusText: 'Service Unavailable (Offline)',
+            headers: { 'Content-Type': 'application/json' }
+          });
         })
     );
     return;

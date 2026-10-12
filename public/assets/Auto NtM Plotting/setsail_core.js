@@ -266,13 +266,21 @@ function switchToTab(targetTab) {
   }
 
   if (targetTab === "tab-ntm") {
+    if (!leafletMap) {
+      initNtMMap();
+    }
     setTimeout(() => {
       if (leafletMap) {
         leafletMap.invalidateSize();
       } else {
         initNtMMap();
       }
-    }, 150);
+    }, 60);
+    setTimeout(() => {
+      if (leafletMap) {
+        leafletMap.invalidateSize();
+      }
+    }, 200);
   }
 }
 
@@ -2490,15 +2498,28 @@ function reconcileAndApplyNoticeOverrides(extraCancelIds = []) {
     }
 
     if (Array.isArray(item.coords) && item.coords.length > 0) {
+      const normCoords = [];
       item.coords.forEach(c => {
-        if (c && !c.dms && Number.isFinite(c.lat) && Number.isFinite(c.lon)) {
-          c.dms = formatCoordDmsHelper(c.lat, c.lon);
+        if (!c) return;
+        const latNum = Array.isArray(c) ? Number(c[0]) : Number(c.lat);
+        const lonNum = Array.isArray(c) ? Number(c[1]) : Number(c.lon);
+        if (Number.isFinite(latNum) && Number.isFinite(lonNum)) {
+          normCoords.push({
+            lat: latNum,
+            lon: lonNum,
+            dms: (c && c.dms) ? c.dms : formatCoordDmsHelper(latNum, lonNum)
+          });
         }
       });
-      if (!Number.isFinite(item.lat) || !Number.isFinite(item.lon)) {
-        item.lat = item.coords[0].lat;
-        item.lon = item.coords[0].lon;
+      item.coords = normCoords;
+      if (normCoords.length > 0 && (!Number.isFinite(Number(item.lat)) || !Number.isFinite(Number(item.lon)))) {
+        item.lat = normCoords[0].lat;
+        item.lon = normCoords[0].lon;
       }
+    } else if (Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lon))) {
+      const latNum = Number(item.lat);
+      const lonNum = Number(item.lon);
+      item.coords = [{ lat: latNum, lon: lonNum, dms: formatCoordDmsHelper(latNum, lonNum) }];
     }
 
     // Automatic Self-Destruction based on Cancellation Time (expires / CANCEL THIS MSG ...)
@@ -2541,6 +2562,7 @@ function reconcileAndApplyNoticeOverrides(extraCancelIds = []) {
       }
     });
   }
+  window.NTM_STORE = NTM_STORE;
 }
 
 // Live 30-Second Watchdog for NAVTEX Cancellation Time Self-Destruction
@@ -2639,6 +2661,7 @@ function loadStoreFromStorage() {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
         NTM_STORE = parsed;
+        window.NTM_STORE = NTM_STORE;
         reconcileAndApplyNoticeOverrides();
         const activeCount = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
         const badge = document.getElementById("ntmBadge");
@@ -2647,7 +2670,7 @@ function loadStoreFromStorage() {
           badge.style.display = "block";
         }
         renderNtMListAndMap();
-        return true;
+        return parsed.length > 10;
       }
     }
   } catch (e) {
@@ -2657,29 +2680,54 @@ function loadStoreFromStorage() {
 }
 
 /**
- * Attempt to load auto-synced notices.json
+ * Attempt to load auto-synced notices.json with multi-endpoint failover
  */
 async function loadRemoteNoticesJson(showFeedback = false) {
   try {
-    let res = await fetch("notices.json?t=" + Date.now(), { cache: "no-store" }).catch(() => null);
-    if (!res || !res.ok) {
-      res = await fetch("https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + Date.now()).catch(() => null);
+    const bust = Date.now();
+    const endpoints = [
+      "notices.json?t=" + bust,
+      "https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/notices.json?t=" + bust,
+      "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + bust
+    ];
+    let res = null;
+    let data = null;
+    for (const url of endpoints) {
+      try {
+        const candidate = await fetch(url, { cache: "no-store" });
+        if (candidate && candidate.ok) {
+          const parsed = await candidate.json();
+          if (parsed && Array.isArray(parsed.notices) && parsed.notices.length > 0) {
+            res = candidate;
+            data = parsed;
+            break;
+          }
+        }
+      } catch (e) {}
     }
-    if (!res) throw new Error("notices.json unreachable");
-    if (!res.ok) {
+
+    if (!res || !data) {
       updateNetworkStatusHUD(false);
-      if (showFeedback && typeof showToast === "function") showToast("Offline ? using cached NtM & NAVTEX database", "warn");
+      if (showFeedback && typeof showSetSailToast === "function") {
+        showSetSailToast("Offline — using cached NtM & NAVTEX database", "warn");
+      }
       return false;
     }
-    const data = await res.json();
+
     if (data && Array.isArray(data.notices) && data.notices.length > 0) {
       NTM_STORE = data.notices;
+      window.NTM_STORE = NTM_STORE;
       reconcileAndApplyNoticeOverrides();
       saveStoreToStorage();
-      if (showFeedback && typeof showToast === "function") {
-        const navCnt = NTM_STORE.filter(n => n.type === "NAVTEX" && !n.isCancelled).length;
-        const ukhoCnt = NTM_STORE.filter(n => n.type !== "NAVTEX" && !n.isCancelled).length;
-        showToast(`Synced ${navCnt} NAVTEX/NAVAREA warnings + ${ukhoCnt} UKHO NtMs`, "info");
+      const navCnt = NTM_STORE.filter(n => n.type === "NAVTEX" && !n.isCancelled && n.status !== "CANCELLED").length;
+      const ukhoCnt = NTM_STORE.filter(n => n.type !== "NAVTEX" && !n.isCancelled && n.status !== "CANCELLED").length;
+      const badge = document.getElementById("ntmBadge");
+      if (badge) {
+        badge.textContent = navCnt + ukhoCnt;
+        badge.style.display = (navCnt + ukhoCnt) > 0 ? "block" : "none";
+      }
+      if (showFeedback && typeof showSetSailToast === "function") {
+        showSetSailToast(`Synced ${navCnt} NAVTEX/NAVAREA warnings + ${ukhoCnt} UKHO NtMs`, "info");
       }
       if (data.metadata) {
         try { localStorage.setItem(META_STORAGE_KEY, JSON.stringify(data.metadata)); } catch(e){}
@@ -2687,7 +2735,7 @@ async function loadRemoteNoticesJson(showFeedback = false) {
       renderNtMListAndMap();
       const meta = data.metadata || {};
       const wk = meta.weekNumber ? `Wk ${meta.weekNumber}/${meta.year}` : (meta.weeklyBulletin || "Live");
-      const isOfflineResp = res.headers.get("X-SetSail-Offline") === "true" || !navigator.onLine;
+      const isOfflineResp = (res.headers && res.headers.get && res.headers.get("X-SetSail-Offline") === "true") || !navigator.onLine;
       updateNetworkStatusHUD(!isOfflineResp, wk);
       return true;
     }
@@ -2696,6 +2744,30 @@ async function loadRemoteNoticesJson(showFeedback = false) {
   }
   return false;
 }
+window.loadRemoteNoticesJson = loadRemoteNoticesJson;
+
+function ensureNoticesReadyForOverlay() {
+  // Ensure notice type filters are not accidentally all unchecked when user enables the NtM & NAVTEX tile
+  if (!NTM_ACTIVE_TYPES || NTM_ACTIVE_TYPES.size === 0) {
+    NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM", "NAVTEX"]);
+    ["popChkAll", "popChkNavtex", "popChkT", "popChkP", "popChkPerm"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = true;
+    });
+  }
+  // Ensure sidebar category pill is not hiding notices behind PORTS or ROUTE filter
+  if (activeOverlayCategory === "PORTS" || activeOverlayCategory === "ROUTE") {
+    activeOverlayCategory = "ALL";
+    document.querySelectorAll(".ntm-category-pill").forEach(p => {
+      p.classList.toggle("active", (p.dataset.category || "ALL") === "ALL");
+    });
+  }
+  // If store hasn't loaded the full bulletin yet, sync immediately
+  if (!Array.isArray(NTM_STORE) || NTM_STORE.length <= 10) {
+    loadRemoteNoticesJson(true);
+  }
+}
+window.ensureNoticesReadyForOverlay = ensureNoticesReadyForOverlay;
 
 /**
  * Initialize Leaflet Map
@@ -2705,8 +2777,7 @@ function initNtMMap() {
   if (!mapDiv || leafletMap) return;
 
   if (window.L) {
-    const sharedCanvasRenderer = L.canvas({ padding: 0.5 });
-    window._setsailCanvasRenderer = sharedCanvasRenderer;
+    window._setsailCanvasRenderer = null;
 
     leafletMap = L.map("ntmMap", {
       center: [26.0, 12.0],
@@ -2718,7 +2789,6 @@ function initNtMMap() {
       wheelPxPerZoomLevel: 100,
       attributionControl: false,
       preferCanvas: true,
-      renderer: sharedCanvasRenderer,
       zoomAnimation: true,
       fadeAnimation: true,
       markerZoomAnimation: true,
@@ -2934,6 +3004,7 @@ function initNtMMap() {
     initOfflineCanvasMap();
   }
 }
+window.initNtMMap = initNtMMap;
 
 /**
  * Offline Canvas World Map fallback
@@ -3437,6 +3508,15 @@ function renderNtMListAndMap() {
   // Render Markers on Leaflet Map (Zoom-Adaptive ECDIS Palette & Decluttering)
   if (leafletMap && leafletMarkersLayer) {
     leafletMarkersLayer.clearLayers();
+    if (!isNoticesActive) {
+      if (leafletMap.hasLayer(leafletMarkersLayer)) {
+        leafletMap.removeLayer(leafletMarkersLayer);
+      }
+      return;
+    }
+    if (!leafletMap.hasLayer(leafletMarkersLayer)) {
+      leafletMap.addLayer(leafletMarkersLayer);
+    }
     const curZoom = leafletMap.getZoom ? leafletMap.getZoom() : 3;
     const canvasRenderer = window._setsailCanvasRenderer || null;
 
@@ -3593,6 +3673,7 @@ function renderNtMListAndMap() {
     drawOfflineCanvasMap();
   }
 }
+window.renderNtMListAndMap = renderNtMListAndMap;
 
 /**
  * Update selection counter text
