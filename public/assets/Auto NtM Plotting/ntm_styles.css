@@ -9820,3 +9820,26 @@ body.light-theme .setnews-reader-dialog {
   gap: 8px;
   flex-wrap: wrap;
 }
+
+
+/* SetNews Visual-First Magazine Overrides (v4.9) */
+.setnews-ticker-bar,
+.setnews-radar-sidebar {
+  display: none !important;
+}
+.setnews-main-layout {
+  grid-template-columns: 1fr !important;
+}
+.setnews-wire-grid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 18px !important;
+}
+.setnews-foryou-visual:hover .setnews-foryou-bg {
+  transform: scale(1.05);
+}
+.setnews-card-img {
+  height: 205px !important;
+}
+.setnews-reader-dialog {
+  max-width: 820px !important;
+}

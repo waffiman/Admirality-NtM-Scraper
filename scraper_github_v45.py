@@ -1399,29 +1399,93 @@ def deg_to_compass(deg):
     except Exception:
         return "NW"
 
+def _parse_atcf_best_line(basin: str, num: str, year: int, ua: dict) -> dict:
+    """Fetch latest BEST track record from NHC or UCAR open ATCF b-deck."""
+    b_low = basin.lower()
+    n_pad = str(num).zfill(2)
+    urls = []
+    if b_low in ("al", "ep", "cp"):
+        urls.append(f"https://ftp.nhc.noaa.gov/atcf/btk/b{b_low}{n_pad}{year}.dat")
+    urls.append(f"https://hurricanes.ral.ucar.edu/repository/data/bdecks_open/{year}/b{b_low}{n_pad}{year}.dat")
+
+    for u in urls:
+        try:
+            r = requests.get(u, timeout=10, headers=ua)
+            if r.status_code == 200 and r.text.strip():
+                lines = [ln.strip() for ln in r.text.strip().splitlines() if ln.strip()]
+                if not lines:
+                    continue
+                parts = [p.strip() for p in lines[-1].split(",")]
+                if len(parts) >= 10:
+                    ymdh = parts[2]
+                    lat_s = parts[6]
+                    lon_s = parts[7]
+                    kt_s = parts[8]
+                    mb_s = parts[9]
+                    ty_s = parts[10] if len(parts) > 10 else "TC"
+                    lat_v = float(lat_s[:-1]) / 10.0 * (-1.0 if lat_s.upper().endswith("S") else 1.0)
+                    lon_v = float(lon_s[:-1]) / 10.0 * (-1.0 if lon_s.upper().endswith("W") else 1.0)
+                    winds = int(float(kt_s or 25))
+                    press = int(float(mb_s or 1008))
+                    if press <= 800 or press > 1030:
+                        press = max(920, 1012 - int(winds * 0.65))
+                    return {
+                        "ymdh": ymdh,
+                        "lat": round(lat_v, 2),
+                        "lon": round(lon_v, 2),
+                        "winds": winds,
+                        "pressure": press,
+                        "type": ty_s
+                    }
+        except Exception:
+            pass
+    return {}
+
+
+def _calc_track_movement(lat1: float, lon1: float, lat2: float, lon2: float, hours: float = 12.0) -> str:
+    """Compute compass direction and speed in knots between two track points."""
+    import math
+    dlat = lat2 - lat1
+    dlon = (lon2 - lon1) * math.cos(math.radians((lat1 + lat2) * 0.5))
+    if abs(dlat) < 0.02 and abs(dlon) < 0.02:
+        return "Stationary"
+    brg = (math.degrees(math.atan2(dlon, dlat)) + 360.0) % 360.0
+    dist_nm = math.hypot(dlat, dlon) * 60.0
+    spd = max(1, int(round(dist_nm / max(1.0, hours))))
+    return f"{deg_to_compass(brg)} at {spd} kts"
+
+
 def scrape_live_marine_weather() -> dict:
     """
-    Scrapes real-time active tropical cyclones & forecast tracks from:
-      1. NOAA National Hurricane Center (CurrentStorms.json)
-      2. Japan Meteorological Agency RSMC Tokyo (targetTc.json + specifications.json)
-      3. JTWC / Cyclocane Global Tracker (cyclocane.com embedded GeoJSON)
-      4. Open-Meteo Marine & Synoptic GFS/ECMWF Grid (live waves, pressure, winds)
+    Scrapes real-time active tropical cyclones, tropical depressions & active Invests (e.g. 93E) from:
+      1. JTWC / NHC Global Tracker (cyclocane.com embedded GeoJSON: forecasts, official, models, formationAreas)
+      2. NOAA National Hurricane Center (CurrentStorms.json & ftp.nhc.noaa.gov/atcf/btk/)
+      3. UCAR / JTWC Open ATCF B-Decks (hurricanes.ral.ucar.edu/repository/data/bdecks_open/)
+      4. Japan Meteorological Agency RSMC Tokyo (targetTc.json + specifications.json)
+      5. Open-Meteo Marine & Synoptic GFS/ECMWF Grid (live waves, pressure, winds)
     """
-    now_iso = datetime.now(timezone.utc).isoformat()
+    now_dt = datetime.now(timezone.utc)
+    now_iso = now_dt.isoformat()
+    cur_year = now_dt.year
     storms_by_name = {}
     ua = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 
-    # A. Cyclocane Global Official Tracks & Forecasts (NHC + JTWC + Southern Hemisphere)
+    # A. Cyclocane Global Official Tracks, Forecasts, Invest Models & Formation Areas
     cyc_forecasts = {}
+    cyc_models = {}
+    cyc_formations = []
     try:
         r_cyc = requests.get("https://www.cyclocane.com/", timeout=15, headers=ua)
         if r_cyc.status_code == 200:
             html_c = r_cyc.text
             idx = html_c.find('"outlooks":{"type":"FeatureCollection"')
+            if idx == -1:
+                idx = html_c.find("FeatureCollection")
             if idx != -1:
                 sc_s = html_c.rfind(">", 0, idx) + 1
                 sc_e = html_c.find("</script>", idx)
                 c_obj = json.loads(html_c[sc_s:sc_e].strip()).get("data", {})
+
                 for f in c_obj.get("forecasts", {}).get("features", []):
                     p = f.get("properties", {})
                     g = f.get("geometry", {})
@@ -1430,6 +1494,8 @@ def scrape_live_marine_weather() -> dict:
                     if nm and len(coords) >= 2:
                         cyc_forecasts.setdefault(nm, []).append({
                             "storm_id": str(p.get("storm_id") or nm),
+                            "basin": str(p.get("basin") or ""),
+                            "number": str(p.get("number") or ""),
                             "name": nm,
                             "source": str(p.get("source") or "NHC/JTWC"),
                             "intensity": str(p.get("intensity") or "Tropical Cyclone"),
@@ -1438,8 +1504,57 @@ def scrape_live_marine_weather() -> dict:
                             "lat": round(float(coords[1]), 2),
                             "lon": round(float(coords[0]), 2)
                         })
+
+                for nm in cyc_forecasts:
+                    cyc_forecasts[nm].sort(key=lambda x: x.get("time", ""))
+
+                for f in c_obj.get("models", {}).get("features", []):
+                    p = f.get("properties", {})
+                    g = f.get("geometry", {})
+                    sid = str(p.get("storm_id") or "").strip().upper()
+                    mname = str(p.get("model_name") or "").strip().upper()
+                    coords = g.get("coordinates", [])
+                    if sid and mname and isinstance(coords, list) and len(coords) >= 2:
+                        cyc_models.setdefault(sid, {})[mname] = {
+                            "basin": str(p.get("basin") or sid.split("-")[0]),
+                            "number": str(p.get("number") or sid.split("-")[-1]),
+                            "coords": [[round(float(c[1]), 2), round(float(c[0]), 2)] for c in coords if isinstance(c, (list, tuple)) and len(c) >= 2]
+                        }
+
+                fa_raw = c_obj.get("formationAreas")
+                if isinstance(fa_raw, list):
+                    cyc_formations = fa_raw
     except Exception as e:
         print(f"  [!] Cyclocane parse warning: {e}")
+
+    def build_track_from_cyc(f_pts: list) -> list:
+        if not f_pts or len(f_pts) < 2:
+            return []
+        track_out = []
+        t0_str = f_pts[0].get("time", "")
+        t0_dt = None
+        if t0_str:
+            try:
+                t0_dt = datetime.fromisoformat(t0_str.replace("Z", "+00:00"))
+            except Exception:
+                t0_dt = None
+        for idx_pt, fp in enumerate(f_pts[1:8]):
+            tau = (idx_pt + 1) * 12
+            if t0_dt and fp.get("time"):
+                try:
+                    t_cur = datetime.fromisoformat(fp["time"].replace("Z", "+00:00"))
+                    diff_h = int(round((t_cur - t0_dt).total_seconds() / 3600.0))
+                    if diff_h > 0:
+                        tau = diff_h
+                except Exception:
+                    pass
+            track_out.append({
+                "tau": tau,
+                "coords": [fp["lat"], fp["lon"]],
+                "winds": fp["knots"],
+                "radiusNm": min(160, 40 + int(tau * 1.4))
+            })
+        return track_out
 
     # B. NOAA National Hurricane Center (CurrentStorms.json)
     try:
@@ -1475,15 +1590,7 @@ def scrape_live_marine_weather() -> dict:
                 elif winds >= 64: cat_label = "Category 1 Hurricane"
 
                 f_pts = cyc_forecasts.get(nm_up, [])
-                track_out = []
-                for idx_pt, fp in enumerate(f_pts[1:7]):
-                    tau = (idx_pt + 1) * 12
-                    track_out.append({
-                        "tau": tau,
-                        "coords": [fp["lat"], fp["lon"]],
-                        "winds": fp["knots"],
-                        "radiusNm": 55 + idx_pt * 20
-                    })
+                track_out = build_track_from_cyc(f_pts)
 
                 storms_by_name[nm_up] = {
                     "id": str(s.get("id") or nm_up).upper(),
@@ -1501,7 +1608,8 @@ def scrape_live_marine_weather() -> dict:
     except Exception as e:
         print(f"  [!] NHC CurrentStorms warning: {e}")
 
-    # C. Japan Meteorological Agency RSMC Tokyo (targetTc.json + specifications.json)
+    # C. JTWC / Official Active Cyclones from Cyclocane + ATCF B-Deck + JMA Cross-Check
+    jma_by_name = {}
     try:
         r_jma = requests.get("https://www.jma.go.jp/bosai/typhoon/data/targetTc.json", timeout=15, headers=ua)
         if r_jma.status_code == 200:
@@ -1518,100 +1626,192 @@ def scrape_live_marine_weather() -> dict:
                 title_part = specs[0]
                 anal_part = specs[1]
                 nm_en = str((title_part.get("name") or {}).get("en") or tc_id).strip()
-                nm_up = nm_en.upper()
-                cat_en = str((anal_part.get("category") or {}).get("en") or "TY").upper()
-                cat_full = "Typhoon" if cat_en == "TY" else ("Severe Tropical Storm" if cat_en == "STS" else ("Tropical Storm" if cat_en == "TS" else "Tropical Depression"))
-                pos_deg = (anal_part.get("position") or {}).get("deg") or [0, 0]
-                lat, lon = round(float(pos_deg[0]), 2), round(float(pos_deg[1]), 2)
-                press = int(float(anal_part.get("pressure") or 996))
-                mw = (anal_part.get("maximumWind") or {})
-                winds = int(float((mw.get("sustained") or {}).get("kt") or 35))
-                gusts = int(float((mw.get("gust") or {}).get("kt") or round(winds * 1.25)))
-                spd_obj = anal_part.get("speed") or {}
-                mspd = spd_obj.get("kt")
-                movement_str = f"NNE at {mspd} kts" if mspd else "N (Slow)"
-
-                # Check if JTWC / Cyclocane has 1-min sustained wind & forecast track
-                c_pts = cyc_forecasts.get(nm_up, [])
-                if c_pts and c_pts[0]["knots"] > winds:
-                    winds = c_pts[0]["knots"]
-                    cat_full = f"{c_pts[0]['intensity']} (JTWC/JMA)"
-                else:
-                    cat_full = f"{cat_full} (JMA RSMC)"
-
-                track_out = []
-                for f_part in specs[2:]:
-                    adv_h = f_part.get("advancedHours")
-                    f_pos = (f_part.get("position") or {}).get("deg")
-                    if adv_h and f_pos and len(f_pos) == 2:
-                        f_mw = (f_part.get("maximumWind") or {}).get("sustained") or {}
-                        f_kt = int(float(f_mw.get("kt") or max(30, winds - 10)))
-                        f_rad = int(float((f_part.get("probabilityCircleRadius") or {}).get("nm") or (45 + int(adv_h))))
-                        track_out.append({
-                            "tau": int(adv_h),
-                            "coords": [round(float(f_pos[0]), 2), round(float(f_pos[1]), 2)],
-                            "winds": f_kt,
-                            "radiusNm": f_rad
-                        })
-                if not track_out and len(c_pts) > 1:
-                    for idx_pt, fp in enumerate(c_pts[1:7]):
-                        track_out.append({
-                            "tau": (idx_pt + 1) * 12,
-                            "coords": [fp["lat"], fp["lon"]],
-                            "winds": fp["knots"],
-                            "radiusNm": 55 + idx_pt * 20
-                        })
-
-                storms_by_name[nm_up] = {
-                    "id": str(title_part.get("typhoonNumber") or tc_id),
-                    "name": f"{'Typhoon' if winds >= 64 else ('Tropical Storm' if winds >= 34 else 'Tropical Depression')} {nm_up}",
-                    "shortName": nm_en.title(),
-                    "category": cat_full,
-                    "center": [lat, lon],
-                    "centralPressure": press,
-                    "maxWinds": winds,
-                    "gusts": gusts,
-                    "movement": movement_str,
-                    "dangerRadiusNm": max(65, int(winds * 1.2)),
-                    "forecastTrack": track_out
-                }
+                if nm_en:
+                    jma_by_name[nm_en.upper()] = (title_part, anal_part, specs[2:])
     except Exception as e:
         print(f"  [!] JMA RSMC warning: {e}")
 
-    # D. Add any remaining JTWC / Southern Hemisphere storms from Cyclocane not already in NHC/JMA
     for nm_up, f_pts in cyc_forecasts.items():
-        if nm_up not in storms_by_name and f_pts:
-            p0 = f_pts[0]
-            winds = p0["knots"]
-            track_out = []
-            for idx_pt, fp in enumerate(f_pts[1:7]):
-                track_out.append({
-                    "tau": (idx_pt + 1) * 12,
-                    "coords": [fp["lat"], fp["lon"]],
-                    "winds": fp["knots"],
-                    "radiusNm": 55 + idx_pt * 20
-                })
-            storms_by_name[nm_up] = {
-                "id": p0["storm_id"],
-                "name": f"{p0['intensity']} {nm_up}",
-                "shortName": nm_up.title(),
-                "category": f"{p0['intensity']} ({p0['source']})",
-                "center": [p0["lat"], p0["lon"]],
-                "centralPressure": max(920, 1012 - int(winds * 0.65)),
-                "maxWinds": winds,
-                "gusts": int(round(winds * 1.22)),
-                "movement": "Tracked via JTWC/RSMC",
-                "dangerRadiusNm": max(70, int(winds * 1.15)),
-                "forecastTrack": track_out
-            }
+        if nm_up in storms_by_name or not f_pts:
+            continue
+        p0 = f_pts[0]
+        lat, lon = p0["lat"], p0["lon"]
+        winds = p0["knots"]
+        sid = p0.get("storm_id") or nm_up
+        basin = p0.get("basin") or (sid.split("-")[0] if "-" in sid else "WP")
+        num = p0.get("number") or (sid.split("-")[-1] if "-" in sid else "01")
 
-    # E. Query Open-Meteo Marine & Synoptic Grid for live wave basins, pressure centers, and winds
+        atcf_info = _parse_atcf_best_line(basin, num, cur_year, ua)
+        press = atcf_info.get("pressure") or max(920, 1012 - int(winds * 0.65))
+        if atcf_info.get("lat") is not None and atcf_info.get("lon") is not None:
+            lat, lon = atcf_info["lat"], atcf_info["lon"]
+        if atcf_info.get("winds"):
+            winds = max(winds, atcf_info["winds"])
+
+        jma_info = jma_by_name.get(nm_up)
+        if jma_info:
+            _, anal_part, _ = jma_info
+            if anal_part.get("pressure"):
+                press = int(float(anal_part["pressure"]))
+
+        track_out = build_track_from_cyc(f_pts)
+        if track_out:
+            movement_str = _calc_track_movement(lat, lon, track_out[0]["coords"][0], track_out[0]["coords"][1], track_out[0]["tau"])
+        else:
+            movement_str = "Tracked via JTWC"
+
+        intensity_lbl = p0.get("intensity") or "Tropical Cyclone"
+        if basin.upper() == "WP" and winds >= 64:
+            type_prefix = "Typhoon"
+            cat_str = f"Typhoon ({p0.get('source', 'JTWC')}/JMA)"
+        elif winds >= 64:
+            type_prefix = "Hurricane"
+            cat_str = f"{intensity_lbl} ({p0.get('source', 'JTWC')})"
+        elif winds >= 34:
+            type_prefix = "Tropical Storm"
+            cat_str = f"Tropical Storm ({p0.get('source', 'JTWC')})"
+        else:
+            type_prefix = "Tropical Depression"
+            cat_str = f"Tropical Depression ({p0.get('source', 'JTWC')})"
+
+        storms_by_name[nm_up] = {
+            "id": sid,
+            "name": f"{type_prefix} {nm_up}",
+            "shortName": nm_up.title(),
+            "category": cat_str,
+            "center": [lat, lon],
+            "centralPressure": press,
+            "maxWinds": winds,
+            "gusts": int(round(winds * 1.25)),
+            "movement": movement_str,
+            "dangerRadiusNm": max(65, int(winds * 1.2)),
+            "forecastTrack": track_out
+        }
+
+    # D. Active Invests / Disturbances (90–99, e.g., Invest 93E / EP-93) from Cyclocane Models + ATCF B-Deck
+    basin_suffix_map = {"EP": "E", "AL": "L", "CP": "C", "WP": "W", "IO": "I", "SH": "S"}
+    for sid, mdict in cyc_models.items():
+        sample_m = next(iter(mdict.values()), {})
+        basin = str(sample_m.get("basin") or sid.split("-")[0]).upper()
+        num = str(sample_m.get("number") or sid.split("-")[-1]).strip()
+        if not num.isdigit() or not (90 <= int(num) <= 99):
+            continue
+        b_let = basin_suffix_map.get(basin, basin[:1])
+        invest_code = f"{num}{b_let}"
+        if invest_code in storms_by_name:
+            continue
+
+        # Pick consensus model track (TVCN > HCCA > AVNI > AEMI > OCD5 > XTRP > any non-CARQ)
+        pref_models = ["TVCN", "HCCA", "AVNI", "AEMI", "GDMI", "OCD5", "HWFI", "HMNI", "XTRP"]
+        chosen_coords = []
+        for pm in pref_models:
+            if pm in mdict and len(mdict[pm]["coords"]) >= 2:
+                chosen_coords = mdict[pm]["coords"]
+                break
+        if not chosen_coords:
+            for k_m, v_m in mdict.items():
+                if k_m != "CARQ" and len(v_m["coords"]) >= 2:
+                    chosen_coords = v_m["coords"]
+                    break
+        if not chosen_coords:
+            continue
+
+        atcf_info = _parse_atcf_best_line(basin, num, cur_year, ua)
+        lat = atcf_info.get("lat") if atcf_info.get("lat") is not None else chosen_coords[0][0]
+        lon = atcf_info.get("lon") if atcf_info.get("lon") is not None else chosen_coords[0][1]
+        winds = atcf_info.get("winds") or 25
+        press = atcf_info.get("pressure") or 1008
+
+        # Dedup consecutive identical model coordinates and build 12h forecast steps
+        dedup_pts = []
+        for pt in chosen_coords[1:]:
+            if abs(pt[0] - lat) < 0.15 and abs(pt[1] - lon) < 0.15:
+                continue
+            if not dedup_pts or (abs(pt[0] - dedup_pts[-1][0]) >= 0.2 or abs(pt[1] - dedup_pts[-1][1]) >= 0.2):
+                dedup_pts.append(pt)
+
+        track_out = []
+        for idx_pt, pt in enumerate(dedup_pts[:5]):
+            tau = (idx_pt + 1) * 12
+            est_w = min(65, winds + (idx_pt + 1) * 5)
+            track_out.append({
+                "tau": tau,
+                "coords": [pt[0], pt[1]],
+                "winds": est_w,
+                "radiusNm": 45 + idx_pt * 15
+            })
+
+        movement_str = _calc_track_movement(lat, lon, track_out[0]["coords"][0], track_out[0]["coords"][1], 12.0) if track_out else "WNW at 10 kts"
+
+        # Match formation chance from formationAreas if nearby
+        chance_str = "Active Invest"
+        for fa in cyc_formations:
+            try:
+                fa_lat = float(fa.get("latitude") or 0)
+                fa_lon = float(fa.get("longitude") or 0)
+                if abs(fa_lat - lat) < 8.0 and abs(fa_lon - lon) < 8.0:
+                    ch_list = fa.get("chance_by_time_period") or []
+                    if ch_list and len(ch_list[0]) >= 2:
+                        chance_str = f"Formation Chance {ch_list[0][1]}"
+                    break
+            except Exception:
+                pass
+
+        storms_by_name[invest_code] = {
+            "id": f"{basin}{num}{cur_year}",
+            "name": f"Invest {invest_code}",
+            "shortName": invest_code,
+            "category": f"Tropical Disturbance ({chance_str})",
+            "center": [lat, lon],
+            "centralPressure": press,
+            "maxWinds": winds,
+            "gusts": int(round(winds * 1.3)),
+            "movement": movement_str,
+            "dangerRadiusNm": 65,
+            "forecastTrack": track_out
+        }
+
+    storms_list = list(storms_by_name.values())
+
+    # E. Dynamically build Wave Basins, Pressure Centers & Wind Vectors from live storm coordinates
     waves_list = [
-        {"id": "W1", "name": "North Atlantic Storm Basin", "center": [52.0, -25.0], "radiusNm": 240, "waveHeight": 5.4, "swellPeriod": 12, "swellDir": "WNW"},
-        {"id": "W2", "name": "Southern Ocean / Roaring Forties", "center": [-42.0, 35.0], "radiusNm": 300, "waveHeight": 6.2, "swellPeriod": 14, "swellDir": "SW"},
-        {"id": "W3", "name": "NW Pacific Typhoon Swell Basin", "center": [28.0, 148.0], "radiusNm": 260, "waveHeight": 6.8, "swellPeriod": 13, "swellDir": "NNE"},
-        {"id": "W4", "name": "Eastern Pacific Hurricane Swell", "center": [19.5, -106.0], "radiusNm": 210, "waveHeight": 5.9, "swellPeriod": 12, "swellDir": "NNW"}
+        {"id": "W1", "name": "North Atlantic Storm Basin", "center": [52.0, -25.0], "radiusNm": 240, "waveHeight": 4.2, "swellPeriod": 11, "swellDir": "WNW"},
+        {"id": "W2", "name": "Southern Ocean / Roaring Forties", "center": [-42.0, 35.0], "radiusNm": 300, "waveHeight": 5.1, "swellPeriod": 13, "swellDir": "SW"}
     ]
+    pressure_centers = []
+    wind_vectors = []
+
+    for idx_s, st in enumerate(storms_list):
+        c_lat, c_lon = st["center"][0], st["center"][1]
+        pressure_centers.append({
+            "type": "L",
+            "value": st["centralPressure"],
+            "name": f"{st['name']} Core Low",
+            "coords": [c_lat, c_lon]
+        })
+        wind_vectors.append({
+            "coords": [round(c_lat + 0.3, 2), round(c_lon + 0.3, 2)],
+            "dir": 160 if c_lon < 0 else 200,
+            "speed": st["maxWinds"],
+            "label": f"{st['maxWinds']} kts ({st['shortName']})"
+        })
+        if st["maxWinds"] >= 30:
+            waves_list.append({
+                "id": f"WS{idx_s + 1}",
+                "name": f"{st['shortName']} Cyclonic Wave Field",
+                "center": [c_lat, c_lon],
+                "radiusNm": max(150, st["dangerRadiusNm"] * 2),
+                "waveHeight": round(max(3.2, st["maxWinds"] * 0.075), 1),
+                "swellPeriod": max(9, int(round(st["maxWinds"] * 0.13))),
+                "swellDir": st["movement"].split()[0] if st.get("movement") else "WNW"
+            })
+
+    pressure_centers.extend([
+        {"type": "H", "value": 1026, "name": "Azores Subtropical High", "coords": [32.0, -38.0]},
+        {"type": "H", "value": 1024, "name": "North Pacific High", "coords": [34.0, -142.0]},
+        {"type": "H", "value": 1025, "name": "South Indian Ocean High", "coords": [-30.0, 85.0]}
+    ])
+
     try:
         lats = ",".join(str(w["center"][0]) for w in waves_list)
         lons = ",".join(str(w["center"][1]) for w in waves_list)
@@ -1631,28 +1831,15 @@ def scrape_live_marine_weather() -> dict:
     except Exception:
         pass
 
-    storms_list = list(storms_by_name.values())
-    print(f"  [+] Scraped {len(storms_list)} live active tropical cyclones: {[s['shortName'] for s in storms_list]}")
+    print(f"  [+] Scraped {len(storms_list)} live active tropical systems: {[s['shortName'] for s in storms_list]}")
     return {
-        "synopticCycle": datetime.now(timezone.utc).strftime("%H00 UTC"),
+        "synopticCycle": now_dt.strftime("%H00 UTC"),
         "lastSyncUtc": now_iso,
-        "provider": "NOAA NHC + JMA RSMC Tokyo + JTWC + Open-Meteo ECMWF IFS",
+        "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
         "storms": storms_list,
         "waves": waves_list,
-        "pressureCenters": [
-            {"type": "L", "value": 940, "name": "Hurricane Simon Core Low", "coords": [19.5, -105.5]},
-            {"type": "L", "value": 950, "name": "Typhoon Koguma Core Low", "coords": [27.1, 147.3]},
-            {"type": "L", "value": 976, "name": "North Atlantic Sub-Polar Low", "coords": [56.0, -28.0]},
-            {"type": "H", "value": 1026, "name": "Azores Subtropical High", "coords": [32.0, -38.0]},
-            {"type": "H", "value": 1024, "name": "North Pacific High", "coords": [34.0, -142.0]},
-            {"type": "H", "value": 1025, "name": "South Indian Ocean High", "coords": [-30.0, 85.0]}
-        ],
-        "windVectors": [
-            {"coords": [19.8, -105.8], "dir": 165, "speed": 95, "label": "SSE 95 kts (Simon Eyewall)"},
-            {"coords": [27.5, 147.8], "dir": 180, "speed": 85, "label": "S 85 kts (Koguma Core)"},
-            {"coords": [46.5, -6.5], "dir": 250, "speed": 28, "label": "WSW 28 kts (Biscay)"},
-            {"coords": [-36.0, 20.0], "dir": 260, "speed": 36, "label": "W 36 kts (Agulhas)"}
-        ]
+        "pressureCenters": pressure_centers,
+        "windVectors": wind_vectors
     }
 
 if __name__ == "__main__":

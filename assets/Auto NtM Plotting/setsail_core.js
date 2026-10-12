@@ -7473,7 +7473,7 @@ window.initRouteMiniWindow = initRouteMiniWindow;
 /* ==========================================================================
    SETNEWS (#tab-news) & HOMEPAGE SLIDE #3 — MARITIME INTELLIGENCE ENGINE
    ========================================================================== */
-const DEFAULT_SETNEWS_ARTICLES = [{"id": "SN-A8B4650176", "title": "Iran Weighs US Response as Hormuz Reopening Talks Stall", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "USA / Maritime Tech", "url": "https://www.marinelink.com/news/iran-weighs-us-response-hormuz-reopening-543600", "publishedAt": "2026-10-12T09:29:19Z", "category": "Geopolitics & Chokepoints", "region": "Strait of Hormuz & Persian Gulf", "regions": ["Strait of Hormuz & Persian Gulf"], "tags": ["hormuz"], "coords": [26.56, 56.25], "navarea": "IX", "image": "https://images.marinelink.com/images/maritime/w150/mproduction-adobe-stock-174245.jpeg", "summary": "Iran is still reviewing a US response to its proposal regarding the reopening of the Strait of Hormuz and will reply to Washington via intermediaries when the review is over, foreign ministry spokesperson Esmaeil Baghaei said on Monday.Baghaei…", "body": "Iran is still reviewing a US response to its proposal regarding the reopening of the Strait of Hormuz and will reply to Washington via intermediaries when the review is over, foreign ministry spokesperson Esmaeil Baghaei said on Monday.Baghaei…", "takeaways": ["Operational Area: Strait of Hormuz & Persian Gulf.", "Assess strait transit security posture, war-risk advisories, and routing alternatives."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-23E6D8EAFB", "title": "Chinese buyers snap up capesizes", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/chinese-buyers-snap-up-capesizes/", "publishedAt": "2026-10-12T09:24:00Z", "category": "Ports & Terminals", "region": "Baltic Sea & Northern Europe", "regions": ["Baltic Sea & Northern Europe", "China & East Asia"], "tags": ["tanker", "port"], "coords": [57.5, 19.5], "navarea": "I", "image": "https://splash247.com/wp-content/uploads/2021/08/Shanghai-free-pic-300x180.jpg", "summary": "While tankers have dominated headlines in October, Chinese buyers are quietly putting money on the table for more capesize tonnage, emerging behind some of the dry bulk market’s most eye-catching deals. Estonian outfit Klip Marine is reportedly exiting the segment by selling the Ekaterini V (173,555 dwt, built 2012...", "body": "While tankers have dominated headlines in October, Chinese buyers are quietly putting money on the table for more capesize tonnage, emerging behind some of the dry bulk market’s most eye-catching deals. Estonian outfit Klip Marine is reportedly exiting the segment by selling the Ekaterini V (173,555 dwt, built 2012 at Bohai Shipbuilding) to Chinese buyers …", "takeaways": ["While tankers have dominated headlines in October, Chinese buyers are quietly putting money on the table for more capesize tonnage, emerging behind some of the dry bulk market’s most eye-catching deals.", "Estonian outfit Klip Marine is reportedly exiting the segment by selling the Ekaterini V (173,555 dwt, built 2012 at Bohai Shipbuilding) to Chinese buyers …", "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-714B4A9FAE", "title": "Sky-high tanker rates change crude trade flows", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "UK / Global", "url": "https://www.seatrade-maritime.com/tankers/sky-high-tanker-rates-change-crude-trade-flows", "publishedAt": "2026-10-12T09:20:53Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["tanker"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt2471fe42bf6186ed/698b447382cad7f7f5eec669/Dynacom-tankers-Dynacom.jpg?width=720&quality=80&disable=upscale", "summary": "As average VLCC earnings hit $805,000 per day globally Asian oil refiners are looking at alternative sources of crude oil", "body": "As average VLCC earnings hit $805,000 per day globally Asian oil refiners are looking at alternative sources of crude oil", "takeaways": ["As average VLCC earnings hit $805,000 per day globally Asian oil refiners are looking at alternative sources of crude oil", "Operational Area: Global Maritime.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-C1BAB294DB", "title": "ADNOC broadens Asian horizons with Gulf Group LNG deal", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Netherlands / Energy", "url": "https://offshore-energy.biz/2026/10/12/adnoc-broadens-asian-horizons-with-gulf-group-lng-deal", "publishedAt": "2026-10-12T09:02:19Z", "category": "Shipping & Tankers", "region": "Strait of Hormuz & Persian Gulf", "regions": ["Strait of Hormuz & Persian Gulf", "Red Sea & Bab el-Mandeb"], "tags": ["lng"], "coords": [26.56, 56.25], "navarea": "IX", "image": "https://offshore-energy.biz/api/media/file/wp-import-1784734763330-1024x612-1024x612.jpg?prefix=media", "summary": "ADNOC has inked a multi-year agreement with Gulf Group to ship 2 million tonnes of liquefied natural gas (LNG) starting in 2027.", "body": "ADNOC has inked a multi-year agreement with Gulf Group to ship 2 million tonnes of liquefied natural gas (LNG) starting in 2027.", "takeaways": ["ADNOC has inked a multi-year agreement with Gulf Group to ship 2 million tonnes of liquefied natural gas (LNG) starting in 2027.", "Operational Area: Strait of Hormuz & Persian Gulf, Red Sea & Bab el-Mandeb.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-F14BFE8705", "title": "HAIAN BETA makes maiden Chennai call", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Europe / Liner & Ports", "url": "https://container-news.com/haian-beta-makes-maiden-chennai-call/", "publishedAt": "2026-10-12T09:00:47Z", "category": "Ports & Terminals", "region": "Singapore & Malacca Strait", "regions": ["Singapore & Malacca Strait", "China & East Asia", "India & Indian Ocean"], "tags": ["container", "port", "china"], "coords": [1.26, 103.82], "navarea": "XI", "image": "https://container-news.com/wp-content/uploads/2026/10/03-300x207.jpg", "summary": "M/V HAIAN BETA made its maiden call at Chennai Port on 3 October 2026, marking the launch of Hai An’s direct CVI service between Vietnam and India. The vessel is the first ship deployed on the new service by Hai An Container Transport Company Limited (HACT), a subsidiary of Hai An Transport and Stevedoring Joint […]", "body": "M/V HAIAN BETA made its maiden call at Chennai Port on 3 October 2026, marking the launch of Hai An’s direct CVI service between Vietnam and India. The vessel is the first ship deployed on the new service by Hai An Container Transport Company Limited (HACT), a subsidiary of Hai An Transport and Stevedoring Joint Stock Company (HATS). A welcome ceremony for the HAIAN BETA Chennai call took place at Chennai Container Terminal, which is operated by DP World. Representatives attending the event included Sachin S. Kurve, Chairperson of Chennai Port Authority, and Vu Thanh Hai, Chairman of HACT and HATS. Representatives from DP World Chennai and Samsara Shipping, Hai An’s general agent in India, also participated. CVI service links four Asian ports The CVI service operates monthly with the following rotation: Nansha – Hai Phong – Port Klang West – Chennai. The new service establishes an additional direct container shipping connection between Vietnam and India. It also links both markets with major trading hubs in southern China and Malaysia. Hai An said the CVI service is designed to support growing shipping requirements between Vietnam and India. Bilateral trade between the two countries reached US$13.4 billion during the first eight months of 2026, representing a year-on-year increase of 25%. Chennai Port Authority noted that the continued expansion of trade between India and Vietnam is creating further opportunities for container shipping connections between the two markets. The HAIAN BETA Chennai call represents another step in Hai An’s expansion into international container shipping services.", "takeaways": ["M/V HAIAN BETA made its maiden call at Chennai Port on 3 October 2026, marking the launch of Hai An’s direct CVI service between Vietnam and India.", "The vessel is the first ship deployed on the new service by Hai An Container Transport Company Limited (HACT), a subsidiary of Hai An Transport and Stevedoring Joint Stock Company (HATS).", "A welcome ceremony for the HAIAN BETA Chennai call took place at Chennai Container Terminal, which is operated by DP World."], "readingMinutes": 4, "readMinutes": 4}, {"id": "SN-175060C5B0", "title": "A platform launched to consolidate European port innovation knowledge", "source": "SetSail Metocean Watch", "sourceIcon": "🌀", "sourceRegion": "Europe / Liner & Ports", "url": "https://container-news.com/a-platform-launched-to-consolidate-european-port-innovation-knowledge/", "publishedAt": "2026-10-12T08:00:40Z", "category": "Weather & Cyclones", "region": "Rotterdam & North Sea", "regions": ["Rotterdam & North Sea", "Singapore & Malacca Strait"], "tags": ["port"], "coords": [51.95, 4.14], "navarea": "I", "image": "https://container-news.com/wp-content/uploads/2019/06/digital-300x153.jpg", "summary": "The Green Innovation Compass has been launched as a publicly accessible knowledge platform consolidating European expertise on innovative technologies and solutions for the port ecosystem, providing independent and practical insights for all port stakeholders. The platform is one of the key legacy outcomes of the EU...", "body": "The Green Innovation Compass has been launched as a publicly accessible knowledge platform consolidating European expertise on innovative technologies and solutions for the port ecosystem, providing independent and practical insights for all port stakeholders. The platform is one of the key legacy outcomes of the EU Horizon 2020-funded MAGPIE project, in which the Port of Rotterdam participated alongside ports, companies, knowledge institutions and governments collaborating on innovative solutions for the port of the future. A central lesson from the MAGPIE project was that knowledge about port innovations is often available in fragmented form across different organisations and geographies. The Green Innovation Compass addresses this gap by bringing together research findings, demonstration project results and practical experiences from ports, companies and knowledge institutions across Europe on a single accessible platform. To ensure the long-term continuity of the knowledge platform following the completion of the MAGPIE project, ALICE, the Alliance for Logistics Innovation through Collaboration in Europe, has taken on the role of legacy partner and will maintain and develop the platform going forward.", "takeaways": ["A central lesson from the MAGPIE project was that knowledge about port innovations is often available in fragmented form across different organisations and geographies.", "Operational Area: Rotterdam & North Sea, Singapore & Malacca Strait.", "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."], "readingMinutes": 3, "readMinutes": 3}, {"id": "SN-10B206FB12", "title": "Ship recycling drought leaves record ageing fleet afloat", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/ship-recycling-drought-leaves-record-ageing-fleet-afloat/", "publishedAt": "2026-10-12T08:00:00Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["shipping", "global"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://splash247.com/wp-content/uploads/2016/04/ShipBreaking_demolition_Bangladesh-300x218.jpg", "summary": "Ship recycling has sunk into its longest sustained slump in more than half a century, just as the global merchant fleet accumulates an unprecedented amount of ageing tonnage. Clarksons Research calculates that just 273 ships of 5.5m gt, equivalent to around 8m dwt, were sold for demolition in the first nine months of...", "body": "Ship recycling has sunk into its longest sustained slump in more than half a century, just as the global merchant fleet accumulates an unprecedented amount of ageing tonnage. Clarksons Research calculates that just 273 ships of 5.5m gt, equivalent to around 8m dwt, were sold for demolition in the first nine months of 2026, 13% …", "takeaways": ["Ship recycling has sunk into its longest sustained slump in more than half a century, just as the global merchant fleet accumulates an unprecedented amount of ageing tonnage.", "Clarksons Research calculates that just 273 ships of 5.5m gt, equivalent to around 8m dwt, were sold for demolition in the first nine months of 2026, 13% …", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-45F283530B", "title": "EU and China reach interim trade deal on hybrid vehicle exports", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "UK / Global", "url": "https://www.seatrade-maritime.com/regulations/eu-and-china-reach-interim-trade-deal-on-hybrid-vehicle-exports", "publishedAt": "2026-10-12T07:55:59Z", "category": "Ports & Terminals", "region": "China & East Asia", "regions": ["China & East Asia"], "tags": ["port", "china"], "coords": [30.6, 122.1], "navarea": "XI", "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt81615f513d94ecdb/694a686cbbf6bce0f41120f1/Shenzhen_port_BYD.JPG?width=720&quality=80&disable=upscale", "summary": "China and Europe are likely to cut Chinese hybrid vehicle exports by half", "body": "China and Europe are likely to cut Chinese hybrid vehicle exports by half", "takeaways": ["China and Europe are likely to cut Chinese hybrid vehicle exports by half", "Operational Area: China & East Asia.", "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-C7704D97E3", "title": "Shipping’s extraordinary boom refuses to peak", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/shippings-extraordinary-boom-refuses-to-peak/", "publishedAt": "2026-10-12T07:45:00Z", "category": "Ports & Terminals", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["tanker", "container"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://splash247.com/wp-content/uploads/2021/11/Monaco-champagne-300x180.jpg", "summary": "Global shipping earnings have reached another extraordinary milestone, with Clarksons Research’s cross-sector ClarkSea Index surging 12% in a week to an unprecedented $84,951 a day, its fifth consecutive all-time high. The index, a widely followed overall earnings barometer, measures average daily earnings across...", "body": "Global shipping earnings have reached another extraordinary milestone, with Clarksons Research’s cross-sector ClarkSea Index surging 12% in a week to an unprecedented $84,951 a day, its fifth consecutive all-time high. The index, a widely followed overall earnings barometer, measures average daily earnings across tankers, bulk carriers, containerships and gas carriers, weighted by vessel numbers in …", "takeaways": ["Global shipping earnings have reached another extraordinary milestone, with Clarksons Research’s cross-sector ClarkSea Index surging 12% in a week to an unprecedented $84,951 a day, its fifth consecutive all-time high.", "The index, a widely followed overall earnings barometer, measures average daily earnings across tankers, bulk carriers, containerships and gas carriers, weighted by vessel numbers in …", "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-87DDE30C20", "title": "Tanker war spreads across Gulf", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/tanker-war-spreads-across-gulf/", "publishedAt": "2026-10-12T07:30:15Z", "category": "Geopolitics & Chokepoints", "region": "Strait of Hormuz & Persian Gulf", "regions": ["Strait of Hormuz & Persian Gulf", "India & Indian Ocean"], "tags": ["tanker", "port", "hormuz"], "coords": [26.56, 56.25], "navarea": "IX", "image": "https://splash247.com/wp-content/uploads/2026/03/US-Central-Command-Epic-Fury-Iran-300x180.jpeg", "summary": "Attacks on commercial shipping are spreading across the Gulf region, with two Indian seafarers missing after a drone struck a tanker off Oman on Sunday and another tanker hit by a projectile while exiting the Strait of Hormuz. The Nicaragua-flagged Petro Dolphin was attacked at Sohar Anchorage on Sunday. India’s...", "body": "Attacks on commercial shipping are spreading across the Gulf region, with two Indian seafarers missing after a drone struck a tanker off Oman on Sunday and another tanker hit by a projectile while exiting the Strait of Hormuz. The Nicaragua-flagged Petro Dolphin was attacked at Sohar Anchorage on Sunday. India’s minister for ports, shipping and …", "takeaways": ["The Nicaragua-flagged Petro Dolphin was attacked at Sohar Anchorage on Sunday.", "India’s minister for ports, shipping and …", "Assess strait transit security posture, war-risk advisories, and routing alternatives."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-E3612BDF46", "title": "Danaos and Cetus push dry bulk listing plans in Oslo", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/danaos-plots-norwegian-listing-for-bulker-business/", "publishedAt": "2026-10-12T07:15:00Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["shipping", "global"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://splash247.com/wp-content/uploads/2026/02/John-Coustas-Danaos-300x180.jpg", "summary": "Oslo’s shipping listing pipeline is filling up, with Greek owner Danaos exploring a carve-out of its large-bulker business while handysize specialist Cetus Maritime has hired three banks for a proposed Euronext Growth Oslo float. Cetus has appointed Clarksons Securities, DNB Carnegie and Nordea to advise on the...", "body": "Oslo’s shipping listing pipeline is filling up, with Greek owner Danaos exploring a carve-out of its large-bulker business while handysize specialist Cetus Maritime has hired three banks for a proposed Euronext Growth Oslo float. Cetus has appointed Clarksons Securities, DNB Carnegie and Nordea to advise on the listing process, which would be preceded by a …", "takeaways": ["Cetus has appointed Clarksons Securities, DNB Carnegie and Nordea to advise on the listing process, which would be preceded by a …", "Operational Area: Global Maritime.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-A94357A23C", "title": "TGS-Galdor AI partnership targeting overlooked or underestimated North Sea exploration plays", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Netherlands / Energy", "url": "https://offshore-energy.biz/2026/10/12/tgs-galdor-ai-partnership-targeting-overlooked-or-underestimated-north-sea-exploration-plays", "publishedAt": "2026-10-12T07:10:52Z", "category": "Shipping & Tankers", "region": "Rotterdam & North Sea", "regions": ["Rotterdam & North Sea"], "tags": ["shipping", "rotterdam"], "coords": [51.95, 4.14], "navarea": "I", "image": "https://offshore-energy.biz/api/media/file/wp-import-1784731454324-860x484-860x484.jpg?prefix=media", "summary": "Galdor Exploration has forged a pact with TGS, combining subsurface expertise with cutting-edge AI to rewrite the playbook for North Sea discoveries.", "body": "Galdor Exploration has forged a pact with TGS, combining subsurface expertise with cutting-edge AI to rewrite the playbook for North Sea discoveries.", "takeaways": ["Galdor Exploration has forged a pact with TGS, combining subsurface expertise with cutting-edge AI to rewrite the playbook for North Sea discoveries.", "Operational Area: Rotterdam & North Sea.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-A1A888C7AE", "title": "Asian maritime security in Q3 – Theft and armed robbery trending downward", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "UK / Global", "url": "https://www.seatrade-maritime.com/security/asian-maritime-security-in-q3-theft-and-armed-robbery-trending-downward", "publishedAt": "2026-10-12T07:06:30Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["shipping", "global"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt1b16f4525961c046/6acc89384e2c21fb3a075f8e/Risk_Intelligence_graphic_Q3_2026.jpg?width=720&quality=80&disable=upscale", "summary": "Risk Intelligence examines security incidents and related concerns on Asian waters during the third quarter of 2026", "body": "Risk Intelligence examines security incidents and related concerns on Asian waters during the third quarter of 2026", "takeaways": ["Risk Intelligence examines security incidents and related concerns on Asian waters during the third quarter of 2026", "Operational Area: Global Maritime.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-72B608513C", "title": "Port Houston completes Project 11 Houston ship channel expansion", "source": "SetSail Hydrographic & Safety Desk", "sourceIcon": "🧭", "sourceRegion": "Europe / Liner & Ports", "url": "https://container-news.com/port-houston-completes-project-11-houston-ship-channel-expansion/", "publishedAt": "2026-10-12T07:00:14Z", "category": "Navigation & Safety", "region": "US Gulf & Port of Houston", "regions": ["US Gulf & Port of Houston", "Singapore & Malacca Strait"], "tags": ["port", "houston", "safety"], "coords": [29.35, -94.78], "navarea": "IV", "image": "https://container-news.com/wp-content/uploads/2026/10/Στιγμιότυπο-οθόνης-2026-10-12-083830-300x198.png", "summary": "Port Houston joined federal, state and local officials and industry partners on October 8 to celebrate the completion of Port Houston-led segments of Project 11, the eleventh major expansion of the Houston Ship Channel and one of the most significant infrastructure projects in the waterway’s history. The completed...", "body": "Port Houston joined federal, state and local officials and industry partners on October 8 to celebrate the completion of Port Houston-led segments of Project 11, the eleventh major expansion of the Houston Ship Channel and one of the most significant infrastructure projects in the waterway’s history. The completed work widened the channel by 170 feet along its Galveston Bay reach, from 530 feet to 700 feet, increasing safety and efficiency along the nation’s busiest waterway. The expanded channel is already delivering operational benefits. In 2025, the US Coast Guard, US Army Corps of Engineers and Houston Pilots recognised the widened 700-foot channel from Bolivar Roads to Morgans Point, effectively removing daylight restrictions for larger vessels transiting Galveston Bay and reducing the need for oversized ships to wait at berth or anchor before sailing. The project was delivered through an innovative funding partnership in which Port Houston and industry partners agreed to contribute financially, cutting years from the delivery timeline. Port Houston completed its portion on time, on budget and faster than any comparable project in the United States. The remainder of project funding came from several federal sources. Project 11 also created lasting environmental benefits through beneficial reuse of all suitable dredged material, producing 10 acres of bird islands, 324 acres of oyster reefs and 800 acres of marsh habitat. Port Houston CEO Charlie Jenkins described the completion as especially meaningful, recalling when the project was still a concept and crediting the collaboration between Port Houston, the Army Corps, industry and elected leaders in finding a way to deliver it. Commission Chairman Ric Campo highlighted the project as transformational and praised the", "takeaways": ["The completed work widened the channel by 170 feet along its Galveston Bay reach, from 530 feet to 700 feet, increasing safety and efficiency along the nation’s busiest waterway.", "The expanded channel is already delivering operational benefits.", "The project was delivered through an innovative funding partnership in which Port Houston and industry partners agreed to contribute financially, cutting years from the delivery timeline."], "readingMinutes": 4, "readMinutes": 4}, {"id": "SN-4EF07AF2D3", "title": "Chinese shipping investor makes play for asphalt tanker owner Xin Yuan", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/chinese-shipping-investor-makes-play-for-asphalt-tanker-owner-xin-yuan/", "publishedAt": "2026-10-12T06:45:00Z", "category": "Shipping & Tankers", "region": "China & East Asia", "regions": ["China & East Asia"], "tags": ["tanker"], "coords": [30.6, 122.1], "navarea": "XI", "image": "https://splash247.com/wp-content/uploads/2026/10/XIN-YUAN-Asphalt-tanker-300x180.jpg", "summary": "Chinese shipping entrepreneur Liu Jichun is seeking control of Hong Kong-listed asphalt tanker operator Xin Yuan Enterprises through a proposed cash takeover worth up to HK$771m ($99m). Liu’s investment vehicle Ocean Vivo has announced a voluntary conditional offer of HK$2.21 per share for the stock it does not...", "body": "Chinese shipping entrepreneur Liu Jichun is seeking control of Hong Kong-listed asphalt tanker operator Xin Yuan Enterprises through a proposed cash takeover worth up to HK$771m ($99m). Liu’s investment vehicle Ocean Vivo has announced a voluntary conditional offer of HK$2.21 per share for the stock it does not already own, valuing Xin Yuan’s entire equity …", "takeaways": ["Chinese shipping entrepreneur Liu Jichun is seeking control of Hong Kong-listed asphalt tanker operator Xin Yuan Enterprises through a proposed cash takeover worth up to HK$771m ($99m).", "Liu’s investment vehicle Ocean Vivo has announced a voluntary conditional offer of HK$2.21 per share for the stock it does not already own, valuing Xin Yuan’s entire equity …", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-3473A6D6E2", "title": "Shell and Equinor fuel $1.1 billion backlog uptick for Transocean", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Netherlands / Energy", "url": "https://offshore-energy.biz/2026/10/12/shell-and-equinor-fuel-dollar11-billion-backlog-uptick-for-transocean", "publishedAt": "2026-10-12T06:32:28Z", "category": "Shipping & Tankers", "region": "Rotterdam & North Sea", "regions": ["Rotterdam & North Sea"], "tags": ["shipping", "rotterdam"], "coords": [51.95, 4.14], "navarea": "I", "image": "https://offshore-energy.biz/api/media/file/wp-import-1784730348497-1024x652-1024x652.jpg?prefix=media", "summary": "Transocean gets its hands on a North Sea contract for a semi-submersible with Shell and a final approval for three rigs from Equinor.", "body": "Transocean gets its hands on a North Sea contract for a semi-submersible with Shell and a final approval for three rigs from Equinor.", "takeaways": ["Transocean gets its hands on a North Sea contract for a semi-submersible with Shell and a final approval for three rigs from Equinor.", "Operational Area: Rotterdam & North Sea.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-91D60171ED", "title": "Readers Speak: Smaller vessels gain favour in container ship orders", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Europe / Liner & Ports", "url": "https://container-news.com/readers-speak-smaller-vessels-gain-favour-in-container-ship-orders/", "publishedAt": "2026-10-12T06:00:45Z", "category": "Ports & Terminals", "region": "Panama Canal & Caribbean", "regions": ["Panama Canal & Caribbean", "Singapore & Malacca Strait", "Brazil & South Atlantic"], "tags": ["container", "port", "panama"], "coords": [9.08, -79.68], "navarea": "IV", "image": "https://container-news.com/wp-content/uploads/2026/10/Χρυσαφένιο-Λιμάνι-με-Πλοία-Κοντέινερ-cleaned-300x169.png", "summary": "As container shipping lines continue to evaluate their fleet expansion strategies, the question of which vessel sizes deserve priority in newbuilding orders remains an important industry consideration. The latest Readers Speak poll by Container News asked readers: “Which vessel size should container lines focus on...", "body": "As container shipping lines continue to evaluate their fleet expansion strategies, the question of which vessel sizes deserve priority in newbuilding orders remains an important industry consideration. The latest Readers Speak poll by Container News asked readers: “Which vessel size should container lines focus on for new orders?” The results reveal a clear preference for smaller and medium-sized container ships, with Panamax/Post-Panamax and Feeder/Feedermax vessels attracting the strongest support. Meanwhile, Ultra Large Container Vessels (ULCVs) received comparatively limited backing. The findings suggest that readers see considerable value in fleet flexibility and the ability to serve different shipping markets, rather than concentrating new investment primarily on the largest container ships. Panamax and Post-Panamax vessels attract strong support Panamax and Post-Panamax vessels emerged as a leading choice in the latest Readers Speak poll. Their strong showing may reflect the importance readers place on vessels that can operate across a variety of trade routes and service networks. Compared with the largest container ships, these vessel segments offer different deployment possibilities, potentially making them attractive to shipping lines seeking to balance capacity with operational flexibility. The preference also suggests that readers may view medium-sized tonnage as an important component of future fleet development. Rather than prioritising maximum carrying capacity alone, the results point towards an interest in ships that can support a broader range of network requirements. Feeder vessels highlight the importance of regional connectivity Feeder and Feedermax vessels also attracted substantial support, reinforcing the importance of smaller container ships in", "takeaways": ["As container shipping lines continue to evaluate their fleet expansion strategies, the question of which vessel sizes deserve priority in newbuilding orders remains an important industry consideration.", "Meanwhile, Ultra Large Container Vessels (ULCVs) received comparatively limited backing.", "The findings suggest that readers see considerable value in fleet flexibility and the ability to serve different shipping markets, rather than concentrating new investment primarily on the largest container ships."], "readingMinutes": 4, "readMinutes": 4}, {"id": "SN-182730530F", "title": "Baltic states push for EU-wide ban on Russian grain transit", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/baltic-states-push-for-eu-wide-ban-on-russian-grain-transit/", "publishedAt": "2026-10-12T06:00:00Z", "category": "Ports & Terminals", "region": "Suez Canal & Eastern Med", "regions": ["Suez Canal & Eastern Med", "Baltic Sea & Northern Europe"], "tags": ["port"], "coords": [30.58, 32.34], "navarea": "III", "image": "https://splash247.com/wp-content/uploads/2026/09/grain-Port-of-Riga-300x180.jpg", "summary": "Estonia, Latvia and Lithuania have called for an EU-wide ban on Russian grain transit, seeking to block Moscow from redirecting agricultural exports through European transport networks as disruption in the Black Sea reshapes regional grain flows. The three countries have submitted a joint letter to European Council...", "body": "Estonia, Latvia and Lithuania have called for an EU-wide ban on Russian grain transit, seeking to block Moscow from redirecting agricultural exports through European transport networks as disruption in the Black Sea reshapes regional grain flows. The three countries have submitted a joint letter to European Council president António Costa and European Commission president Ursula …", "takeaways": ["The three countries have submitted a joint letter to European Council president António Costa and European Commission president Ursula …", "Operational Area: Suez Canal & Eastern Med, Baltic Sea & Northern Europe.", "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-880A70EE1F", "title": "Two European shipyards find new owners after years of turmoil", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/two-european-shipyards-find-new-owners-after-years-of-turmoil/", "publishedAt": "2026-10-12T05:30:54Z", "category": "Shipping & Tankers", "region": "Suez Canal & Eastern Med", "regions": ["Suez Canal & Eastern Med"], "tags": ["shipyard"], "coords": [30.58, 32.34], "navarea": "III", "image": "https://splash247.com/wp-content/uploads/2015/01/Damen-Mangalia-Shipyard-300x208.jpg", "summary": "Two of Europe’s best-known shipyards are heading into new ownership, with Germany’s Rheinmetall taking over Romania’s Mangalia facility and Turkey’s Kuzey Star Shipyard selected to acquire Croatia’s Uljanik Brodogradnja 1856. German defence giant Rheinmetall has secured the Mangalia shipyard for €138m ($160m),...", "body": "Two of Europe’s best-known shipyards are heading into new ownership, with Germany’s Rheinmetall taking over Romania’s Mangalia facility and Turkey’s Kuzey Star Shipyard selected to acquire Croatia’s Uljanik Brodogradnja 1856. German defence giant Rheinmetall has secured the Mangalia shipyard for €138m ($160m), winning an auction organised by court-appointed liquidator CITR on Friday. The Black Sea …", "takeaways": ["German defence giant Rheinmetall has secured the Mangalia shipyard for €138m ($160m), winning an auction organised by court-appointed liquidator CITR on Friday.", "Operational Area: Suez Canal & Eastern Med.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-53E205CBFD", "title": "Explainer: Hapag-Lloyd is building its own table", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Europe / Liner & Ports", "url": "https://container-news.com/explainer-hapag-lloyd-is-building-its-own-table/", "publishedAt": "2026-10-12T04:00:14Z", "category": "Shipping & Tankers", "region": "China & East Asia", "regions": ["China & East Asia", "Brazil & South Atlantic"], "tags": ["china"], "coords": [30.6, 122.1], "navarea": "XI", "image": "https://container-news.com/wp-content/uploads/2026/06/HLAG_Salahuddin_Rotterdam_1280x800_rgb-300x188.jpg", "summary": "The German carrier’s exit from the MSC–ONE Ipanema pact marks the moment one shared China–Brazil lane begins splitting into two rival systems.", "body": "The German carrier’s exit from the MSC–ONE Ipanema pact marks the moment one shared China–Brazil lane begins splitting into two rival systems. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register", "takeaways": ["The German carrier’s exit from the MSC–ONE Ipanema pact marks the moment one shared China–Brazil lane begins splitting into two rival systems.", "This content is locked Select a CN Premium Subscription Package To Unlock The Content!", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-20EFBA6185", "title": "Star Bulk sells down kamsarmax pair to Hermes", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/star-bulk-sells-down-kamsarmax-pair-to-hermes/", "publishedAt": "2026-10-12T03:00:00Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["shipping", "global"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://splash247.com/wp-content/uploads/2023/10/Star-Angelina-kamsarmax-Star-Bulk-300x180.jpg", "summary": "Nasdaq-listed Greek dry bulk heavyweight Star Bulk Carriers has agreed to sell a 35% ownership interest in two recently built kamsarmax bulkers to Itochu’s investment and asset-holding vehicle, Hermes World Maritime, while retaining commercial and technical management of both ships. The Petros Pappas-led owner...", "body": "Nasdaq-listed Greek dry bulk heavyweight Star Bulk Carriers has agreed to sell a 35% ownership interest in two recently built kamsarmax bulkers to Itochu’s investment and asset-holding vehicle, Hermes World Maritime, while retaining commercial and technical management of both ships. The Petros Pappas-led owner identified the vessels as the 2026-built Star Ellie and Star Bella. …", "takeaways": ["The Petros Pappas-led owner identified the vessels as the 2026-built Star Ellie and Star Bella.", "Operational Area: Global Maritime.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-7D790D18C1", "title": "Shell joins Equinor in $9.8bn Canadian offshore project", "source": "SetSail Maritime Desk", "sourceIcon": "🚢", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/shell-joins-equinor-in-9-8bn-canadian-offshore-project/", "publishedAt": "2026-10-12T02:40:00Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["shipping", "global"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://splash247.com/wp-content/uploads/2024/08/Shell-source-Larsen-Toubro-300x180.jpg", "summary": "Supermajor Shell has agreed to acquire a 30% interest in Equinor’s Bay du Nord project offshore Newfoundland and Labrador as the partners push the development towards a final investment decision targeted for early 2027. Equinor will retain a 70% interest and remain the project operator, which is currently completing...", "body": "Supermajor Shell has agreed to acquire a 30% interest in Equinor’s Bay du Nord project offshore Newfoundland and Labrador as the partners push the development towards a final investment decision targeted for early 2027. Equinor will retain a 70% interest and remain the project operator, which is currently completing front-end engineering and design work. Bay …", "takeaways": ["Supermajor Shell has agreed to acquire a 30% interest in Equinor’s Bay du Nord project offshore Newfoundland and Labrador as the partners push the development towards a final investment decision targeted for early 2027.", "Equinor will retain a 70% interest and remain the project operator, which is currently completing front-end engineering and design work.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}];
+const DEFAULT_SETNEWS_ARTICLES = [{"id": "SN-A58F30EE68", "title": "Baltic Dry Index Falls to More Than 7-Week Low", "source": "Hellenic Shipping News", "sourceIcon": "📊", "sourceRegion": "Greece / Markets", "url": "https://www.hellenicshippingnews.com/baltic-dry-index-falls-to-more-than-7-week-low/", "publishedAt": "2026-10-12T21:00:59Z", "category": "Ports & Terminals", "region": "Panama Canal & Caribbean", "regions": ["Panama Canal & Caribbean", "Baltic Sea & Northern Europe"], "tags": ["port", "panama"], "coords": [9.08, -79.68], "navarea": "IV", "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=1000&q=85", "summary": "in Dry Bulk Market , International Shipping News 13/10/2026", "body": "in Dry Bulk Market , International Shipping News 13/10/2026\n\nThe Baltic Exchange Dry index fell 2.2% to 2,852 on Monday, its lowest level since August 21.\n\nThe capesize index, which typically transports 150,000-ton cargoes including iron ore and coal, tumbled 4.4% to 4,148, its lowest level since late July.\n\nOn the other hand, the panamax index, which usually carries 60,000 to 70,000 tons of coal or grain, increased 0.3% to 2,432 and the supramax index rose 0.4% to 1,821. Source: Trading Economics\n\nAcross Panama Canal & Caribbean (9.1°N 79.7°W), terminal operators, harbour authorities, and liner networks are adjusting berth windows, channel draft allocations, and feeder rotations to accommodate shifting trade flows and next-generation vessel deployments.\n\nFleet operations teams and Masters bound for Panama Canal & Caribbean should verify declared low-water fairway depths, pilot boarding ground updates, and tidal window constraints in the SetChart Port Bathymetry layer.", "takeaways": ["in Dry Bulk Market , International Shipping News 13/10/2026  The Baltic Exchange Dry index fell 2.2% to 2,852 on Monday, its lowest level since August 21.", "The capesize index, which typically transports 150,000-ton cargoes including iron ore and coal, tumbled 4.4% to 4,148, its lowest level since late July.", "On the other hand, the panamax index, which usually carries 60,000 to 70,000 tons of coal or grain, increased 0.3% to 2,432 and the supramax index rose 0.4% to 1,821."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-B9C7352AB9", "title": "Diesel Availability a Boost for Product Tankers", "source": "Hellenic Shipping News", "sourceIcon": "📊", "sourceRegion": "Greece / Markets", "url": "https://www.hellenicshippingnews.com/diesel-availability-a-boost-for-product-tankers/", "publishedAt": "2026-10-12T21:00:59Z", "category": "Ports & Terminals", "region": "Singapore & Malacca Strait", "regions": ["Singapore & Malacca Strait", "China & East Asia", "Japan & Korea"], "tags": ["tanker", "port", "china"], "coords": [1.26, 103.82], "navarea": "XI", "image": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1000&q=85", "summary": "According to Head of Research Department, Mr. Nikos Tagoulis, “supply uncertainty is also mounting elsewhere. China suspended refined-product exports around the Golden Week holiday, following a sharp increase in diesel...", "body": "According to Head of Research Department, Mr. Nikos Tagoulis, “supply uncertainty is also mounting elsewhere. China suspended refined-product exports around the Golden Week holiday, following a sharp increase in diesel exports during September, leaving uncertainty over policy thereafter. Russia, meanwhile, remains largely sidelined from the export market following the extension of its diesel restrictions through October and continued disruption to refining infrastructure from Ukrainian attacks. In the Middle East, the recovery in crude exports observed has not been matched by refined products. Vortexa data indicate regional diesel/gasoil exports reached 1.12 mbpd in September, down 36% y-o-y, while flows to Europe were roughly 50% lower. Lower Middle Eastern product exports are particularly relevant for Europe, given its dependence on the region for diesel imports”.\n\n“Across the Atlantic, the US remains a critical diesel supplier. US diesel/gasoil exports reached around 1.57 mbpd in Q3 2026, up 28% y-o-y, supported by strong flows into Central and South America alongside increasing long-haul shipments to Europe by approx. 35% y-o-y. While intra-American trades are relatively short-haul, stronger US Gulf-Europe shipments add ton miles and provide meaningful support for MR employment. Keeping US exports unrestricted also preserves a crucial source of incremental Atlantic Basin diesel supply”, Mr. Tagoulis said.\n\nHe added that “within this constrained supply environment, Europe is increasingly turning to alternative suppliers beyond the US, with India emerging as a more prominent source. October arrivals of diesel/gasoil from India are currently expected at around 228k bpd, up approximately 65% m-o-m. India is well placed to respond to the global supply deficit, supported by a large refining base fed by crude mainly from Russia and the Middle East, while New Delhi’s recent reduction in the diesel export levy provides further support for increased export flows. Strong European margins could attract more Indian barrels westward, providing further support to LR1/LR2 employment and ton-mile demand”.\n\nMeanwhile, “longer-haul arbitrage opportunities may also emerge from Northeast Asia, with a 90,000-ton South Korean diesel cargo reportedly fixed for Northwest Europe. This trade stands out, given Korea’s traditional focus on more proximate markets such as Australia and East Asia. However, Korea’s ability to respond more broadly to stronger global diesel demand remains constrained by government energy-security measures, which cap monthly exports of regular gasoline, automotive diesel and heating kerosene at the volumes shipped in the corresponding month of 2025”, Mr. Tagoulis said.\n\n“For product tanker demand, these developments are broadly supportive. Europe’s need to source barrels from the US Gulf, India and potentially South Korea, supports ton-mile demand across both the MR and LR segments. European strategic-stock releases could temporarily reduce prompt import requirements, but unless underlying supply constraints ease materially, the redirection of diesel trade flows towards more distant suppliers should remain supportive of tanker utilisation. More broadly, should elevated diesel prices and constrained market conditions persist, the impact could extend beyond the product-tanker market. Heavy industry, road transportation and agriculture remain highly reliant on diesel, while short-term demand is relatively inelastic . Persistently high costs could intensify inflationary pressures and weigh on agricultural economics, affecting production and exports and create a secondary spillover beyond product tankers into dry bulk, impacting seaborne grain volumes”, Intermodal’s analyst said.\n\nHe concluded that “overall, the current diesel imbalance is increasingly reshaping trade routes, as Europe’s search for replacement barrels supports longer-haul product flows. However, given diesel’s critical role in the global economy, persistently elevated prices or prolonged supply shortages could have consequences extending well beyond shipping, with broader implications for global economic activity”. Nikos Roussanoglou, Hellenic Shipping News Worldwide", "takeaways": ["According to Head of Research Department, Mr.", "Nikos Tagoulis, “supply uncertainty is also mounting elsewhere.", "China suspended refined-product exports around the Golden Week holiday, following a sharp increase in diesel exports during September, leaving uncertainty over policy thereafter."], "readingMinutes": 3, "readMinutes": 3}, {"id": "SN-6F5DE0A6DC", "title": "Russia’s shadow fleet freight rates fracture on Black Sea premiums", "source": "Hellenic Shipping News", "sourceIcon": "📊", "sourceRegion": "Greece / Markets", "url": "https://www.hellenicshippingnews.com/russias-shadow-fleet-freight-rates-fracture-on-black-sea-premiums/", "publishedAt": "2026-10-12T21:00:57Z", "category": "Geopolitics & Chokepoints", "region": "Suez Canal & Eastern Med", "regions": ["Suez Canal & Eastern Med", "Baltic Sea & Northern Europe", "Singapore & Malacca Strait"], "tags": ["tanker", "port", "suez", "imo"], "coords": [30.58, 32.34], "navarea": "III", "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=1000&q=85", "summary": "Black Sea tanker economics strengthened sharply in late September and early October as attacks on commercial shipping, disruption to Russian energy flows and tighter scrutiny of Russia-linked tonnage increased the cost...", "body": "Black Sea tanker economics strengthened sharply in late September and early October as attacks on commercial shipping, disruption to Russian energy flows and tighter scrutiny of Russia-linked tonnage increased the cost and complexity of moving cargoes. Baltic routes moved in the opposite direction: Aframax spreads fell further into discount territory against global benchmarks even as outright earnings rose.\n\nThe divergence reflects a growing segmentation in Russian seaborne trade. Vessels operating from the Black Sea are attracting higher compensation for security, insurance and voyage-execution risks, while Baltic routes continue to trade below their relevant benchmarks amid the operational and commercial constraints associated with Russia-linked tonnage.\n\nThe UK added 12 tankers to its sanctions list on Oct. 8, alongside measures against Russian oil companies Zarubezhneft and INK Capital.\n\nThe move followed the Joint War Committee’s decision on Sept. 16 to add the Black Sea to its Listed Areas, increasing war-risk insurance considerations for vessels operating in the region. Sanctions and attacks have not removed Russian oil from global trade, but they have changed the vessels, routes, counterparties and risk premiums required to move it.\n\nMore than 1,600 vessels linked to Russian trade over the past two years accounted for 73% of the total shadow fleet at the end of August, according to S&P Global Commodities at Sea(opens in a new tab) data. The size of the Russia-linked fleet, combined with the latest designations, highlights the widening separation between tonnage active in Russian trade and vessels readily accepted by mainstream charterers, insurers, banks and terminals.\n\nThe latest pricing reflects that shift. Black Sea Suezmaxes command the strongest relative returns as owners seek compensation for elevated security and execution risks. Baltic Aframaxes remain at the deepest discount to their relevant benchmark, while clean MR economics continue to vary sharply by loading region and destination.\n\nBlack Sea dirty tanker shadow fleet The Black Sea-West Coast India Suezmax spread for Russia’s shadow fleet against the Global Suezmax Index for non-scrubber-fitted, non-eco vessels widened to $83.36/mt on Oct. 8, from $47.22/mt on Sept. 29, according to Platts data. Platts is part of S&P Global Energy.\n\nNovorossiysk-Vadinar TCE earnings rose to $879,766/day on Oct. 8, from $517,674/day on Sept. 29 and $493,692/day on Sept. 16. The route had been assessed at $288,088/day on Sept. 8.\n\nMarket participants said the deteriorating security environment had made Black Sea fixtures more difficult to execute. Uncertainty around vessel acceptance, insurance coverage and voyage execution has supported higher returns on trades where owners require greater compensation.\n\nThe widening Suezmax premium also came against a broader rise in dirty tanker earnings. The implied spread depends on how each Russian-linked route performs against its relevant Platts index. Black Sea Suezmax earnings strengthened relative to the benchmark, while the Baltic Aframax route lagged behind its benchmark.\n\nBaltic dirty tanker shadow fleet The Baltic-West Coast India Aframax spread for Russia’s shadow fleet against the Global Aframax Index widened to minus $44.71/mt on Oct. 8, from minus $19.93/mt on Sept. 29, according to Platts data.\n\nUst Luga-Sikka TCE earnings nevertheless rose to $227,957/day on Oct. 8, from $178,125/day on Sept. 29 and $116,671/day on Sept. 16.\n\nThe deeper discount does not indicate a fall in Baltic earnings. It shows that the relevant Aframax benchmark strengthened faster than the Russian-linked route. Baltic Aframax TCE earnings have remained below the Global Aframax Index since Sept. 9.\n\nRussian seaborne crude exports increased to 4.09 million b/d in September, from 3.82 million b/d in August, while non-G7 tankers carried 2.89 million b/d, according to S&P Global Platts.\n\nMR clean tankers shadow fleet Russian product flows provided an important backdrop to the clean tanker market. Black Sea diesel exports fell to zero in the week to Sept. 24. Across all Russian ports, diesel and gasoil exports totaled 479,000 mt in September, the lowest monthly level recorded by CAS, according toPlatts data. The Black Sea-Mediterranean MR spread against the Global Medium Range Index for non-scrubber-fitted, non-eco vessels widened to $24.56/mt on Oct. 8, from $4.78/mt on Sept. 29.\n\nNovorossiysk-Port Said TCE earnings rose to $108,940/day on Oct. 8, from $67,042/day on Sept. 29 and $56,458/day on Sept. 16.\n\nBaltic clean MR discounts narrowed but remained negative. The Baltic-Mediterranean MR spread against the Global Medium Range Index narrowed to minus $4.82/mt on Oct. 8, from minus $29.56/mt on Sept. 29. Primorsk-Mersin TCE earnings rose to $42,267/day, from $26,817/day over the same period and $15,512/day on Sept. 16.\n\nThe longer-haul Baltic-East Coast South America MR discount narrowed to minus $16.88/mt on Oct. 8, from minus $41.11/mt on Sept. 29. Ust Luga-Santos TCE earnings rose to $35,041/day on Oct. 8, from $26,186/day on Sept. 29.", "takeaways": ["Baltic routes moved in the opposite direction: Aframax spreads fell further into discount territory against global benchmarks even as outright earnings rose.", "The divergence reflects a growing segmentation in Russian seaborne trade.", "The UK added 12 tankers to its sanctions list on Oct."], "readingMinutes": 4, "readMinutes": 4}, {"id": "SN-77A8DF0C95", "title": "Lower container rates are not a return to predictable service, Sogese says", "source": "Hellenic Shipping News", "sourceIcon": "📊", "sourceRegion": "Greece / Markets", "url": "https://www.hellenicshippingnews.com/lower-container-rates-are-not-a-return-to-predictable-service-sogese-says/", "publishedAt": "2026-10-12T21:00:57Z", "category": "Weather & Cyclones", "region": "Red Sea & Bab el-Mandeb", "regions": ["Red Sea & Bab el-Mandeb", "Suez Canal & Eastern Med", "Rotterdam & North Sea"], "tags": ["container", "port", "red sea", "suez", "typhoon"], "coords": [13.5, 42.8], "navarea": "IX", "image": "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=1000&q=85", "summary": "“Europe is entering the final quarter with two forces moving in opposite directions. Capacity is becoming more available as Suez routings return, while carriers are simultaneously trying to protect utilisation through...", "body": "“Europe is entering the final quarter with two forces moving in opposite directions. Capacity is becoming more available as Suez routings return, while carriers are simultaneously trying to protect utilisation through blank sailings. For shippers, this means lower rates may offer an opportunity, but they should not be mistaken for a return to predictable service. The next few weeks will be defined by how quickly carriers can bring capacity back into balance with demand.” said Andrea Monti, CEO & MD, Sogese.\n\nFor a shipper, Sogese says, the working number is the delay. The report advises adding at least eight days to Far East to Italy arrival dates until Xeneta’s September scorecard, due this month, shows Far East to Europe arrivals above 20% on time. Xeneta’s August figure was 6%, a level last seen in late 2021, according to the report, and Xeneta counted 1.1m TEU held at anchor off Ningbo, Shanghai and Yantian after the typhoons. Monti’s advice to importers: “Book on the rate and date your stock on the delay.”\n\nThe rate fall is real. On Drewry’s World Container Index, Shanghai to Genoa is 43% below 9 July ($6,463 to $3,696 per 40ft on 8 October) and Shanghai to Rotterdam is 32% below ($4,933 to $3,337). Sogese calculates that a shipper moving 100 FEU a month from Shanghai to Genoa pays about $277,000 less per month than at the 9 July rate. The WCI excludes destination terminal handling, so demurrage, detention, terminal charges and inland haulage can keep landed costs from falling with the index.\n\nA BOOKING THAT LOOKS SECURE CAN STILL ARRIVE LATE\n\nPublished schedules show more capacity than the network can deliver, the report says. A booking can look secure on the schedule and still arrive late, be rolled to a later sailing, or land together with the vessel behind it. Sea-Intelligence’s 24 September analysis supports the point: scheduled Asia-North Europe capacity across Golden Week is 27% above last year, with 12 double sailings and no blank sailings planned for the two peak weeks. TrasportoEuropa, citing Sea-Intelligence, reports Asia-Mediterranean capacity 49% above last year.\n\nTiming decides the impact, Sogese notes. A sailing blanked in weeks 40 or 41 removes arrivals in Europe four to six weeks later, from late October to late November. Cargo produced before the holiday leaves in weeks 42 and 43 on full vessels, and a late booking risks rolling to week 44.\n\n“The cargo held back by the holiday ships in weeks 42 and 43 and lands in Europe between mid-November and early December. Shippers who book those departures now will get space. Those who wait will roll.” said Andrea Monti, CEO & MD, Sogese.\n\nSUEZ IS A NETWORK SHIFT WITH A SECURITY CONDITION\n\nSogese reads the Suez return as a network shift whose pace depends on security. On 14 September Maersk and Hapag-Lloyd moved Gemini services AE5, AE11, AE12 and ME2 back to Suez and said further changes depend on stability in the Red Sea area and no escalation of regional conflicts. Drewry counted 48 container transits in week 38, up from 41, and 68% above the same week of 2025 in week 39. On 8 October Drewry called a faster-than-expected return to Suez “the biggest threat to carrier efforts to support rates”.\n\n“Suez is returning service by service, and each conversion takes one to two weeks off the voyage. That lowers freight immediately and helps cargo planning only where the receiving terminal is ready for earlier arrivals. Maersk and Hapag-Lloyd have made the return conditional on no escalation, so every plan needs a Cape-routing contingency.” said Andrea Monti, CEO & MD, Sogese.\n\nTHE MEDITERRANEAN PREMIUM HAS GONE, AND LIGURIAN PORTS ARE LAST IN THE QUEUE\n\nSogese notes that Genoa’s premium over Rotterdam on Drewry’s index has fallen from $1,530 on 9 July to $359 on 8 October. Xeneta puts the Far East to Mediterranean premium over North Europe at about $400 on 1 October, against $2,000 on 1 January. Sea-Intelligence data cited in the report show Gemini adding a net 22,402 TEU a week to Asia-Mediterranean.\n\nCheaper does not mean faster. On Maersk’s AE11, moved to Suez from 19 September, the rotation runs Shanghai, Yantian, Tanjung Pelepas, Suez, Tangier, Valencia, Barcelona, La Spezia, Genoa and Vado Ligure. Italian importers are the last discharge, so delay accumulated at earlier calls reaches them last, Sogese notes.\n\n“If North Europe keeps falling, the Mediterranean follows. Importers should not fix Mediterranean rates beyond three months until weekly Suez transits stop rising.” said Andrea Monti, CEO & MD, Sogese.\n\nWHAT SOGESE IS WATCHING: BLANK SAILINGS AFTER GOLDEN WEEK\n\nSogese’s base case is a further fall in rates through the fourth quarter, because Suez capacity is arriving faster than carriers can blank it. It reads a blank sailing count that stays at or below seven a week in weeks 43 and 44 as pointing to further declines, and a count well above it as pointing to a floor. Drewry counts six Asia-Europe blank sailings announced for next week, up from five, and the report notes its judgement that seven a week do not offset the Suez capacity returning. In Sogese’s scenario where Suez capacity outpaces demand, rates reach January levels: $2,763 for Shanghai to Rotterdam, 17% below the 8 October figure, and about $3,100 for Genoa, 16% below. Xeneta chief analyst Peter Sand said on 8 October that “we are not at the floor yet”.\n\n“Unless blanks rise well above seven a week, Rotterdam’s January rate of $2,763 and Genoa near $3,100 are the next stops.” said Andrea Monti, CEO & MD, Sogese. Source: Sogese", "takeaways": ["“Europe is entering the final quarter with two forces moving in opposite directions.", "Capacity is becoming more available as Suez routings return, while carriers are simultaneously trying to protect utilisation through blank sailings.", "For shippers, this means lower rates may offer an opportunity, but they should not be mistaken for a return to predictable service."], "readingMinutes": 5, "readMinutes": 5}, {"id": "SN-CADC7F176C", "title": "Drewry: Cancelled Sailings Tracker Shows Capacity Gradually Returning", "source": "Hellenic Shipping News", "sourceIcon": "📊", "sourceRegion": "Greece / Markets", "url": "https://www.hellenicshippingnews.com/drewry-cancelled-sailings-tracker-shows-capacity-gradually-returning/", "publishedAt": "2026-10-12T21:00:55Z", "category": "Ports & Terminals", "region": "Suez Canal & Eastern Med", "regions": ["Suez Canal & Eastern Med", "US West Coast & Pacific"], "tags": ["container", "port", "suez"], "coords": [30.58, 32.34], "navarea": "III", "image": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1000&q=85", "summary": "Our weekly tracker provides a snapshot of blank sailings announced by each Alliance versus the total number of scheduled sailings.", "body": "Our weekly tracker provides a snapshot of blank sailings announced by each Alliance versus the total number of scheduled sailings.\n\nThe post-Golden Week market is entering a new phase, with capacity gradually returning but pricing pressure building unevenly across the major trades.\n\nDrewry’s World Container Index (WCI) stood at $4,351 per 40ft on 8 October, down 2% WoW, as rates eased across the Transpacific, Asia–Europe/Med and Transatlantic trades. Major pressure remains on Asia–Europe/Med, where the gradual return of services via Suez is adding effective capacity as carriers adjust to changing routing conditions.\n\nAcross the major East–West trades, 34 blank sailings are expected from week 42 (12–18 October) to week 46 (9–15 November) out of 713 planned sailings, representing a 5% cancellation rate, with 95% of scheduled sailings expected to operate. Disruptions are concentrated on Asia–North Europe/Med, accounting for 50% of cancellations, followed by the Transpacific eastbound at 32% and the Transatlantic at 18%.\n\nFor shippers, higher effective capacity and fewer cancellations could gradually ease supply pressure, although congestion and ongoing network adjustments may continue to constrain capacity and keep rates elevated on some trades.\n\nIn the next edition of Container Capacity Insight, we will continue to track changes in blank-sailing programmes, effective capacity, Suez routings and global port congestion as post-Golden Week operations settle. Source: Drewry", "takeaways": ["Our weekly tracker provides a snapshot of blank sailings announced by each Alliance versus the total number of scheduled sailings.", "The post-Golden Week market is entering a new phase, with capacity gradually returning but pricing pressure building unevenly across the major trades.", "Drewry’s World Container Index (WCI) stood at $4,351 per 40ft on 8 October, down 2% WoW, as rates eased across the Transpacific, Asia–Europe/Med and Transatlantic trades."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-D6534FBFDE", "title": "Xclusiv Shipbrokers Weekly 12th October 2026", "source": "Hellenic Shipping News", "sourceIcon": "📊", "sourceRegion": "Greece / Markets", "url": "https://www.hellenicshippingnews.com/xclusiv-shipbrokers-weekly-12th-october-2026/", "publishedAt": "2026-10-12T21:00:54Z", "category": "Shipping & Tankers", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["tanker", "port", "bunker", "shipyard"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=1000&q=85", "summary": "Tanker fleet growth has accelerated considerably over the past two years, marking a clear shift from the unusually restrained supply Source: Xclusiv Shipbrokers Inc.", "body": "Tanker fleet growth has accelerated considerably over the past two years, marking a clear shift from the unusually restrained supply Source: Xclusiv Shipbrokers Inc.\n\nMarket movements and fleet deployment shifts linked to Xclusiv Shipbrokers Weekly 12th October 2026 reflect broader structural trends across global wet, dry, and gas carrier segments operating through Global Maritime (25.0°N 40.0°W). Charterers, shipmanagers, and commercial operators are closely weighing freight rate volatility, shipyard slot availability, and regulatory compliance timelines.\n\nFrom an operational perspective, vessels trading along Global Maritime corridors continue to optimize service speeds, bunker stems, and port turnaround schedules while monitoring regional NAVAREA GLOBAL navigational updates.", "takeaways": ["Tanker fleet growth has accelerated considerably over the past two years, marking a clear shift from the unusually restrained supply Source: Xclusiv Shipbrokers Inc.", "Charterers, shipmanagers, and commercial operators are closely weighing freight rate volatility, shipyard slot availability, and regulatory compliance timelines.", "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-4FA5204442", "title": "Singapore LNG starts work on new jetty to boost LNG bunker supply", "source": "Hellenic Shipping News", "sourceIcon": "📊", "sourceRegion": "Greece / Markets", "url": "https://www.hellenicshippingnews.com/singapore-lng-starts-work-on-new-jetty-to-boost-lng-bunker-supply/", "publishedAt": "2026-10-12T21:00:53Z", "category": "Ports & Terminals", "region": "Singapore & Malacca Strait", "regions": ["Singapore & Malacca Strait"], "tags": ["lng", "port", "singapore", "bunker"], "coords": [1.26, 103.82], "navarea": "XI", "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=1000&q=85", "summary": "Terminal operator Singapore LNG (SLNG) has started construction of a third jetty at its Jurong Island terminal, which could increase its LNG bunkering capacity to 3 million mt/year.", "body": "Terminal operator Singapore LNG (SLNG) has started construction of a third jetty at its Jurong Island terminal, which could increase its LNG bunkering capacity to 3 million mt/year.\n\nThe new jetty is scheduled for completion in the second half of 2028 and will be capable of handling LNG carriers ranging from 5,800-80,000 cbm.\n\nUnlike SLNG’s existing jetties, the new facility will be dedicated to small and mid-sized vessels, allowing the terminal to handle more LNG bunker reloads along with break-bulk operations.\n\nOnce operational, the jetty will be able to support around 2 million mt/year of LNG bunker reload demand. The total infrastructure will be able to handle up to 3 million mt/year.\n\n“As demand for LNG bunkering continues to grow, Jetty 3 will strengthen Singapore’s ability to support the next phase of growth…” Leong Wei Hung, chief executive of SLNG said.\n\nSeparately, SLNG has secured ISCC EU certification for handling liquefied biomethane (LBM) at its terminal. The certification covers storage, regasification, bunkering and trucking operations, allowing customers to trace and account for certified LBM handled through the facility.\n\nThe new jetty will also be capable of handling LBM, giving SLNG additional flexibility to support demand for the lower-emission fuel. Source: By Konica Bhatt, ENGINE, https://www.engine.online/news/", "takeaways": ["Terminal operator Singapore LNG (SLNG) has started construction of a third jetty at its Jurong Island terminal, which could increase its LNG bunkering capacity to 3 million mt/year.", "The new jetty is scheduled for completion in the second half of 2028 and will be capable of handling LNG carriers ranging from 5,800-80,000 cbm.", "Unlike SLNG’s existing jetties, the new facility will be dedicated to small and mid-sized vessels, allowing the terminal to handle more LNG bunker reloads along with break-bulk operations."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-ABA18F163A", "title": "Dualog Launches Secure Messaging For Ship And Shore", "source": "Hellenic Shipping News", "sourceIcon": "📊", "sourceRegion": "Greece / Markets", "url": "https://www.hellenicshippingnews.com/dualog-launches-secure-messaging-for-ship-and-shore/", "publishedAt": "2026-10-12T21:00:51Z", "category": "Ports & Terminals", "region": "Singapore & Malacca Strait", "regions": ["Singapore & Malacca Strait"], "tags": ["port", "imo"], "coords": [1.26, 103.82], "navarea": "XI", "image": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1000&q=85", "summary": "Dualog has launched Dualog Chat, a secure messaging service built for shipping. The first service in Workspace by Dualog, Chat gives crews and shore teams a company-controlled space to communicate, with channels...", "body": "Dualog has launched Dualog Chat, a secure messaging service built for shipping. The first service in Workspace by Dualog, Chat gives crews and shore teams a company-controlled space to communicate, with channels organised by vessel, rank and role. Every user has a secure identity, with no shared logins.\n\nCommunication at sea is often fragmented. In a 2026 Dualog survey of 1,187 seafarers, 68% said important information is lost during crew handovers. Many rely on personal messaging apps to contact the office because there is no official channel available to the whole crew. Chat addresses this gap while running alongside the tools companies already use ashore.\n\nFor crew, Chat brings onboard and ship-to-shore communication into one place. Message histories stay with the role, giving officers signing on immediate access to the context they need. Shore teams can reach everyone in a particular rank across the fleet with a single message, or contact an individual directly. Users can exchange messages and voice notes and make audio and video calls over the connections available at sea.\n\nFor shore teams, operational conversations, sensitive information and the context behind decisions remain within a company-controlled platform. Details such as rates and port instructions are retained centrally, reducing reliance on personal messaging accounts.\n\nIntegration with crew management systems automatically updates access as crews rotate, reducing manual onboarding and offboarding. Fleets already using Dualog crew accounts can get started quickly. Individual user identities make communication traceable and support the unique identity and controlled access requirements set out by IMO and IACS.\n\n“Dualog Chat connects people in a way that reflects how shipping operates,” said Silje Moan, Chief Commercial Officer at Dualog. “By organising communication around the vessel, the rank and the rotation, it helps crews retain context through each handover and shore teams reach the right person. The information that matters stays within the company.”\n\nChat is available on web, iOS and Android and is designed for maritime connectivity. Early access is open now. Further services planned for Workspace by Dualog include file sharing, maritime email and a native AI assistant. Source: Dualog", "takeaways": ["Dualog has launched Dualog Chat, a secure messaging service built for shipping.", "The first service in Workspace by Dualog, Chat gives crews and shore teams a company-controlled space to communicate, with channels organised by vessel, rank and role.", "Every user has a secure identity, with no shared logins."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-79AA3615D8", "title": "Britain urges ships to prepare for life without reliable GPS", "source": "Splash247", "sourceIcon": "🌊", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/britain-urges-ships-to-prepare-for-life-without-reliable-gps/", "publishedAt": "2026-10-12T20:29:00Z", "category": "Navigation & Safety", "region": "Strait of Hormuz & Persian Gulf", "regions": ["Strait of Hormuz & Persian Gulf", "Suez Canal & Eastern Med", "Rotterdam & North Sea"], "tags": ["tanker", "port"], "coords": [26.56, 56.25], "navarea": "IX", "image": "https://splash247.com/wp-content/uploads/2026/02/LEO-satellite-2025_.jpg", "summary": "Britain has warned shipowners that satellite navigation can no longer be taken for granted in some of the world’s busiest shipping regions, urging crews to practise navigating without GPS as jamming and spoofing become...", "body": "Britain has warned shipowners that satellite navigation can no longer be taken for granted in some of the world’s busiest shipping regions, urging crews to practise navigating without GPS as jamming and spoofing become increasingly widespread.\n\nIn a new Marine Guidance Note, MGN 719, the UK’s Maritime and Coastguard Agency (MCA) warns that interference across the Baltic, Black Sea, Middle East Gulf and parts of East Asia means satellite-derived positioning, navigation and timing information can no longer be relied upon everywhere.\n\nThe warning extends well beyond electronic charts. The agency identifies a long list of potentially vulnerable equipment, including ECDIS, AIS, autopilots, dynamic positioning systems, radar, gyrocompasses and GMDSS communications equipment. Ashore, vessel traffic services, pilotage systems, port management platforms and automated logistics systems are also exposed.\n\nThe financial implications are considerable. Citing earlier UK government research, the MCA estimates that a seven-day GNSS outage could cost the British maritime economy £1.5bn ($2bn), including £1.3bn in port operations alone.\n\nThe guidance urges operators to identify precisely which systems depend on satellite-derived data, establish procedures for detecting interference and regularly drill crews in alternative navigation methods. Radar fixing, visual bearings, celestial navigation and dead reckoning are all recommended.\n\nThe notice follows growing evidence that satellite navigation interference is becoming a routine operational hazard rather than an occasional inconvenience in conflict zones.\n\nMaritime intelligence firm Windward’s latest figures show an average of 5,131 GPS jamming incidents a day during the third quarter, with more than 124,000 individual vessels affected.\n\nResearch published earlier this year by the Royal Institute of Navigation found that 14% of survey respondents had experienced an unsafe or unlawful situation resulting from GNSS interference.\n\nIn July, SplashTech reported on a government questionnaire, believed to have originated in Britain, asking ship operators whether their crews had conducted GNSS-denial drills, understood the vulnerabilities of interconnected bridge equipment and could operate ECDIS in dead-reckoning mode.\n\nMore recently, SplashTech reported how four tankers in the Black Sea had apparently broadcast positions placing them in Lima, Peru, more than 12,000 km away. Separate monitoring identified 1,702 impossible position jumps involving 379 vessels in the Gulf of Oman over a single week in September.\n\nThe UK is investing in a terrestrial navigation backup through its enhanced Loran, or eLoran, programme, but the MCA’s latest guidance makes clear that technological alternatives will take time to become widely available.\n\nBritain’s planned eLoran network is not expected to provide an initial timing capability until 2028, with full positioning and navigation services targeted for 2030.", "takeaways": ["The warning extends well beyond electronic charts.", "The agency identifies a long list of potentially vulnerable equipment, including ECDIS, AIS, autopilots, dynamic positioning systems, radar, gyrocompasses and GMDSS communications equipment.", "Ashore, vessel traffic services, pilotage systems, port management platforms and automated logistics systems are also exposed."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-0FA61BC96E", "title": "Moxie Media to Launch Moxie Connect 2026 Event Alongside the International WorkBoat Show", "source": "gCaptain", "sourceIcon": "⚓", "sourceRegion": "USA / Global", "url": "https://gcaptain.com/moxie-media-to-launch-moxie-connect-2026-event-alongside-the-international-workboat-show/", "publishedAt": "2026-10-12T20:25:25Z", "category": "Navigation & Safety", "region": "US Gulf & Port of Houston", "regions": ["US Gulf & Port of Houston"], "tags": ["port", "safety"], "coords": [29.35, -94.78], "navarea": "IV", "image": "https://gcaptain.com/wp-content/uploads/2026/10/mariner_OFFuser-Trainingportal_dashboard.jpg", "summary": "Essential news coupled with the finest maritime content sourced from across the globe.", "body": "Essential news coupled with the finest maritime content sourced from across the globe.\n\nMoxie Media will host its first dedicated user event, Moxie Connect: User Conference 2026, a complimentary event open to all maritime professionals, on Wednesday, December 2, at the Ernest N. Morial Convention Center in New Orleans, alongside the International WorkBoat Show. The half-day event will bring together Moxie customers and professionals in maritime training, safety, compliance and workforce development for discussions, demonstrations and industry perspectives on the evolving role of technology in maritime learning.\n\nMoxie Connect comes at an important point in Moxie Media’s evolution. In 2025, Moxie became part of Mintra, a global provider of digital learning and workforce management solutions. The combination brings together Moxie’s longstanding U.S. maritime training expertise, content and customer support with Mintra’s broader portfolio of learning technology, competency management and workforce solutions.\n\n“For our customers, becoming part of Mintra has expanded what we can offer while allowing Moxie to continue doing what we do best in the U.S. maritime market,” said Martin Glenday, President of Moxie Media. “Moxie Connect is a chance to bring that expanded offering into one conversation and give customers and the broader maritime community a closer look at where training, technology and workforce management are headed.”\n\nA key part of the expanded offering is Trainingportal, Mintra’s Learning and Competency Management System, which combines Moxie’s established approach to maritime learning with Mintra’s expanded capabilities for managing training, competency and compliance. Moxie Connect will allow customers and maritime organizations to see the platform in action, with demonstrations on user experience, mobile and offline learning capabilities, maritime training content and tools for managing workforce training.\n\nThe event will also explore the growing connection between training and competency management. Trainingportal includes capabilities that can help organizations establish role-based requirements, manage assessments and maintain evidence of competency alongside training records. The program will also introduce Mentor AI, Mintra’s AI solution, and discuss practical applications for using AI and digital learning tools to support continuous learning and workforce readiness.\n\n“Technology is most useful when it helps organizations make better use of the information they already have about their people, their training and their requirements,” said Parker Hillery, Operations Manager and LMS Lead at Moxie Media. “The combination of competency management, training data and AI gives organizations new ways to understand workforce readiness while keeping the experience practical for the people responsible for training and compliance.”\n\nMoxie Connect will also feature an Integration Partner Showcase, demonstrating how Trainingportal connects with vessel management systems to share training and competency information across an organization’s systems.\n\nA regulatory update session will provide an industry perspective on current developments affecting maritime organizations. Additional sessions will address the future of Moxie’s maritime training content, including new and upcoming Coast Guard-related courses and other resources supporting maritime training and compliance.\n\nThe event is open to existing Moxie customers as well as maritime organizations interested in learning more about Moxie, Mintra and Trainingportal. Moxie Connect is free to attend, but space is limited and advance registration is required.\n\nAs an added benefit, registered attendees will receive a complimentary International WorkBoat Show exhibit hall pass, allowing participants to attend the morning event and then visit the WorkBoat exhibition.\n\nA Southern-style breakfast, coffee and refreshments will be provided.\n\nSign up for gCaptain’s newsletter and never miss an update\n\nEssential maritime and offshore news, insights, and updates delivered daily straight to your inbox\n\nDive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits!\n\nSubscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news\n\nStay informed with the latest maritime and offshore news, delivered daily straight to your inbox\n\nStay informed with the latest maritime and offshore news, delivered straight to your inbox", "takeaways": ["Essential news coupled with the finest maritime content sourced from across the globe.", "Moxie Media will host its first dedicated user event, Moxie Connect: User Conference 2026, a complimentary event open to all maritime professionals, on Wednesday, December 2, at the Ernest N.", "Morial Convention Center in New Orleans, alongside the International WorkBoat Show."], "readingMinutes": 4, "readMinutes": 4}, {"id": "SN-C60148E348", "title": "Europe’s shore power deadline is racing ahead of the grid", "source": "Splash247", "sourceIcon": "🌊", "sourceRegion": "Singapore / Global", "url": "https://splash247.com/europes-shore-power-deadline-is-racing-ahead-of-the-grid/", "publishedAt": "2026-10-12T20:23:00Z", "category": "Ports & Terminals", "region": "Rotterdam & North Sea", "regions": ["Rotterdam & North Sea", "Singapore & Malacca Strait"], "tags": ["container", "port", "imo", "bunker"], "coords": [51.95, 4.14], "navarea": "I", "image": "https://splash247.com/wp-content/uploads/2021/02/Shore-power.jpg", "summary": "Two EU regulations will require ports to provide shore power and ships to use it from 2030. But with grid upgrades taking up to a decade, the infrastructure needed to meet the deadline is struggling to keep pace. Alex...", "body": "Two EU regulations will require ports to provide shore power and ships to use it from 2030. But with grid upgrades taking up to a decade, the infrastructure needed to meet the deadline is struggling to keep pace. Alex Byelyavtsev reports.\n\nBy 2030 two EU rules meet at the quay. AFIR tells TEN-T core and comprehensive ports above a traffic threshold, not only the big hubs, to put shore power on the berth for 90% of qualifying container and passenger calls. FuelEU Maritime tells those ships, if they stay more than two hours, to connect and take their electrical load from it. One rule builds the socket. The other requires the ship to plug into it. The date, from Fit for 55, is already doing the ordering. It is not building the grid.\n\nOn the ship the box can be bought. In July 2026 Cavotec took an order to retrofit containerships with a containerised cable system while they stay in service. DNV had about 20% of world containerships equipped with a shore-power connection. Hapag-Lloyd is further along, about 35%. A company can fit a ship. FuelEU still names that company even when the quay has no live point, or a charter ship has no socket.\n\nIn the port the iron is thinner. Transport & Environment, from DNV, put guaranteed container connections at about 11% of what 31 European ports need by 2030. Much of the OPS already advertised is low voltage. Deepsea boxes need high voltage. The 90% test is still ahead of the cable.\n\nThe calendar does not match. From October 2026 to 31 December 2029 is a little over three years. ESPO, setting out the commission’s grid-connection guidance, puts extra grid build at four to ten years, against two to three for the port-side connection. If the request is not already in the queue, parts of the required build may not fit the time left. Rotterdam is aiming for the second half of 2028. ABB says that kit is meant to supply up to 32 containerships at once. The port’s own strategy still records grid congestion. Installed megawatts are not the event the grid sees. The event is coincidence. A 90% coverage test does not ask whether those megawatts are free at 07:00 on a Saturday.\n\nThe clock starts when the ship is alongside, not when the cable is live. Hamburg’s routine connection is about an hour to an hour and a half. If the commercial berth has no socket, the stay can still be a FuelEU call of more than two hours.\n\nWhat a master can do is ask before arrival. Article 6 already lists the misses: no point, not enough power or grid stability, incompatibility on a certified ship installation, emergency. From 1 January 2035 those availability exceptions tighten to the lower of 10% of a ship’s annual calls or ten calls, unless the company shows it could not reasonably have known. That showing sits on the information exchanged before entry. A dead cabinet is a legal category. After 2035 an unasked miss can become a counted one, and a FuelEU penalty on the electricity that should have come from shore. That is not a hole found later. It is how a duty stays on the books when the connection cannot. IMO 2020 did not need that. A 0.50% fuel could be blended. A substation cannot.\n\nThe bill is separate. A parliament study759345) finds the EU can mandate the socket and still have no common price rule. Under the Energy Taxation Directive, electricity produced on board at berth must be exempt. Shore-side electricity is not covered by that exemption. A member state needs a Council authorisation to apply a reduced rate. Germany obtained one in June 2026, through 31 December 2029. In tramp trades the OPS invoice may not follow the bunker. The visible shore bill is still stacked against the auxiliary engines.\n\nThere is no sign of a general 2030 delay. If the megawatts, the berth and the cable are there, the auxiliaries stop. If they are not, the ship stays on its own plant and the call sits on the exception list. Article 6 already holds those misses. AFIR is due a review by 31 December 2026. A date that cannot be followed as written is then followed through exceptions, then through reviews. A date can mandate a connection. It cannot manufacture grid capacity. The plug is not the power.", "takeaways": ["Two EU regulations will require ports to provide shore power and ships to use it from 2030.", "But with grid upgrades taking up to a decade, the infrastructure needed to meet the deadline is struggling to keep pace.", "AFIR tells TEN-T core and comprehensive ports above a traffic threshold, not only the big hubs, to put shore power on the berth for 90% of qualifying container and passenger calls."], "readingMinutes": 4, "readMinutes": 4}, {"id": "SN-E9D10B8C42", "title": "Connecting maritime digitalisation to process", "source": "gCaptain", "sourceIcon": "⚓", "sourceRegion": "USA / Global", "url": "https://gcaptain.com/connecting-maritime-digitalisation-to-process/", "publishedAt": "2026-10-12T20:19:32Z", "category": "Ports & Terminals", "region": "Rotterdam & North Sea", "regions": ["Rotterdam & North Sea", "Singapore & Malacca Strait", "Brazil & South Atlantic"], "tags": ["container", "port"], "coords": [51.95, 4.14], "navarea": "I", "image": "https://gcaptain.com/wp-content/uploads/2026/10/Panel-2.jpg", "summary": "Essential news coupled with the finest maritime content sourced from across the globe.", "body": "Essential news coupled with the finest maritime content sourced from across the globe.\n\nWhile the technology needed to digitalise maritime operations is already here, much remains to be done to ensure organisations and their people are equipped to use it effectively, according to panellists at a recent Inmarsat Maritime ‘Connected to Perform’ seminar.\n\nThe maritime sector is awash with digital technology and data – but gaps still need to be bridged before stakeholders can extract maximum value from the tools available. This was the consensus among a panel of industry experts at a recent Inmarsat Maritime ‘Connected to Perform’ seminar in Hamburg.\n\nThe panel discussion, held during SMM Hamburg, explored how shipping can enable a digital, secure, and human-centric fleet – and how modern connectivity can support this objective.\n\nAsked to identify the most significant gap between “what connectivity and technology can provide and what is being used by shipping companies”, Audra Drablos, Strategy Director at Inmarsat Maritime, argued that technology itself is no longer the issue.\n\n“We’re connecting global fleets,” she said. “We’re using advanced analytics. We’re using preventative maintenance. So the technology, I think, is definitely there.” Instead, she indicated, the gap may lie in how organisations are using those technologies: “If we want to digitalise things, we also have to transform all the decision processes that we have.”\n\nDrablos’s co-panellists outlined how their companies are using modern technology to digitalise their operations.\n\nPatrick Briest, Senior Director of Operations for IT Products at Hapag-Lloyd, pointed to the container carrier’s adoption of real-time cargo tracking and voyage optimisation to maximise speed and flexibility. Konstantin Pohsin, Fleet Captain at Fairplay Towage, described the way predictive maintenance preserved operational readiness. And Matthias Becker, Managing Director of Anglo-Eastern Germany, highlighted the ship manager’s use of artificial intelligence to manage vessel emissions.\n\nWhile these organisations have already implemented modern technology on a fleet-wide scale, their representatives nevertheless echoed Drablos’s point, with each identifying areas where further work is underway to optimise digital- and data-driven processes.\n\nFor Anglo-Eastern, the focus is on integrating disparate systems. “We get a lot of data today, and that’s in isolated systems and products,” said Becker, who added that the company could “uncover more savings and make better decisions when [it connects] all the different systems”.\n\nIn comparable remarks, Briest said Hapag-Lloyd had established its Fleet Data Ecosystem to bring all its data together so that it can “look at it holistically, interconnect it, and then drive the right insights out of it”. Referring back to Drablos’s comments, he continued: “Even if you have the dashboard – the tool that tells you what you should be doing – you have to change the way the whole organisation works, that processes work, that people work, to actually make it happen.”\n\nAt Fairplay Towage, the emphasis is on training to address what Pohsin called a “gap in knowledge” regarding connected onboard systems. “We have to investigate what is the proper way for educating all our employees in the application of these facilities,” he commented.\n\nIn Becker’s view, however, the industry can only achieve so much through training alone; managing the “complex challenge” of digital transformation will also depend on interdepartmental and cross-industry collaboration.\n\n“Seafarers will not become IT experts,” he said. “Technicians remain technicians, and we have to bridge the gap in some way. So we have to bring together the crew, the offshore personnel, and the data analytics and IT side. We also need cooperation between operators, owners, managers, OEMs, and providers of IT systems.”\n\nSupporting crews with the tools to perform their roles effectively was a recurring theme throughout the session. The purpose of technologies like AI, the panellists suggested, is not to replace human expertise – “don’t stop thinking with your own brain” was Pohsin’s message to seafarers – but to relieve personnel of time-consuming data-analysis and compliance-related tasks.\n\n“I think that’s where AI could really help,” Drablos commented, pointing to a recent Seafarers Happiness Index report that revealed the seafarers with the lowest happiness scores are those with the most responsibility. “It could help in prioritising all that data and helping [seafarers] make better decisions,” she said.\n\nBuilding on Drablos’s remarks, Briest added that AI could allow crews to focus on running their vessels, while an increasing use of cloud-based AI applications could drive greater demand for connectivity. “I believe the general connectivity requirement for these more intelligent, AI-driven systems is probably going to get bigger,” he said.\n\nAs the maritime industry’s “general connectivity requirement” grows, so too does the need for robust cyber-security solutions. Yet, as Drablos noted, “the question isn’t really about connectivity versus security. The question is how you can build security as your basis when you’re implementing your connectivity. I think that’s the important part: making it secure by design.”", "takeaways": ["Essential news coupled with the finest maritime content sourced from across the globe.", "The maritime sector is awash with digital technology and data – but gaps still need to be bridged before stakeholders can extract maximum value from the tools available.", "This was the consensus among a panel of industry experts at a recent Inmarsat Maritime ‘Connected to Perform’ seminar in Hamburg."], "readingMinutes": 4, "readMinutes": 4}, {"id": "SN-120B507321", "title": "ABS, U.S. Energy Department Team Up on Nuclear-Powered Ships", "source": "gCaptain", "sourceIcon": "⚓", "sourceRegion": "USA / Global", "url": "https://gcaptain.com/abs-u-s-energy-department-team-up-on-nuclear-powered-ships/", "publishedAt": "2026-10-12T20:02:26Z", "category": "Ports & Terminals", "region": "Global Maritime", "regions": ["Global Maritime"], "tags": ["port"], "coords": [25.0, -40.0], "navarea": "GLOBAL", "image": "https://gcaptain.com/wp-content/uploads/2026/10/unnamed-5.jpg", "summary": "Essential news coupled with the finest maritime content sourced from across the globe.", "body": "Essential news coupled with the finest maritime content sourced from across the globe.\n\nPhoto caption (L to R): Ted Garrish, United States Assistant Secretary for Nuclear Energy, and John McDonald, ABS Chairman and CEO\n\nThe American Bureau of Shipping (ABS) and the U.S. Department of Energy (DOE) have signed an agreement to advance the use of nuclear power in commercial shipping, including nuclear-powered vessels, floating power plants and the infrastructure needed to support them.\n\nThe memorandum of understanding, signed with DOE’s Office of Nuclear Energy, establishes a framework for joint work on advanced nuclear technologies and their potential maritime applications. The effort will also examine what would be required to develop a U.S. shipbuilding industry capable of constructing, operating and maintaining nuclear-powered vessels and offshore facilities.\n\nUnder the agreement, ABS and DOE will pursue concept and feasibility studies covering floating nuclear power systems and nuclear transportation corridors. The work will also address technical, regulatory, economic and policy challenges that have so far limited the commercial adoption of nuclear technology at sea.\n\n“Advanced nuclear technology is moving from concept to application, and the maritime industry needs to be ready for it,” said ABS Chairman and CEO John McDonald.\n\n“This agreement with DOE reflects the depth of work already underway and provides a framework to go further,” McDonald added.\n\nABS will also co-manage the Maritime Nuclear Applications Group (MNAG) and coordinate related work through the U.S. Maritime Administration’s U.S. Center for Maritime Innovation, where ABS serves as secretariat.\n\nThe agreement comes as interest in commercial maritime nuclear power continues to grow, driven by advances in smaller reactor designs that could make nuclear propulsion and floating power generation more practical.\n\nWhile nuclear propulsion has been used aboard naval vessels for decades, its commercial adoption remains limited. Significant questions remain over reactor licensing, port access, liability, crew training and the regulatory responsibilities of flag and coastal states.\n\nThe U.S. government has stepped up efforts to address those barriers. In August, the Department of Energy hosted the launch of the International Atomic Energy Agency’s Atomic Technologies Licensed for Applications at Sea (ATLAS) initiative, aimed at developing an international framework for the safe and secure use of nuclear technology aboard ships and floating facilities.\n\nABS has also been expanding its work in the sector. The classification society has published rules for floating nuclear power plants and issued approvals in principle for several nuclear-powered vessel concepts, including a cargo ship propulsion system developed through an MIT-led maritime consortium .\n\nEarlier this year, the U.S. Center for Maritime Innovation convened industry and government officials to examine regulatory barriers to deploying nuclear-powered ships and offshore energy platforms.\n\n“Advanced nuclear technology has the potential to transform the commercial maritime industry and open new markets for American innovation,” said Assistant Secretary for Nuclear Energy Ted Garrish.\n\nGarrish said the partnership would draw on decades of U.S. nuclear experience to examine how next-generation reactors could be safely introduced into commercial maritime operations.\n\nThe new agreement does not announce a specific vessel construction project or deployment schedule. Instead, it expands cooperation between the federal government and ABS as the industry works toward making commercial nuclear power at sea technically and economically viable.\n\nSign up for gCaptain’s newsletter and never miss an update\n\nEssential maritime and offshore news, insights, and updates delivered daily straight to your inbox", "takeaways": ["Essential news coupled with the finest maritime content sourced from across the globe.", "Photo caption (L to R): Ted Garrish, United States Assistant Secretary for Nuclear Energy, and John McDonald, ABS Chairman and CEO  The American Bureau of Shipping (ABS) and the U.S.", "Department of Energy (DOE) have signed an agreement to advance the use of nuclear power in commercial shipping, including nuclear-powered vessels, floating power plants and the infrastructure needed to support them."], "readingMinutes": 3, "readMinutes": 3}, {"id": "SN-ECAE295132", "title": "Hambantota port reaches TEU milestone", "source": "Container News", "sourceIcon": "📦", "sourceRegion": "Europe / Liner & Ports", "url": "https://container-news.com/hambantota-port-reaches-teu-milestone/", "publishedAt": "2026-10-12T20:00:13Z", "category": "Ports & Terminals", "region": "Singapore & Malacca Strait", "regions": ["Singapore & Malacca Strait", "Brazil & South Atlantic"], "tags": ["container", "port"], "coords": [1.26, 103.82], "navarea": "XI", "image": "https://container-news.com/wp-content/uploads/2026/04/hip-expands-capacity-as-middle-east-crisis-drives-surge-in-shipping-volumes-2.png", "summary": "Hambantota International Port has surpassed one million TEUs in cumulative container throughput since the commissioning of new quay cranes in 2025, marking a significant milestone in the rapid growth of its container...", "body": "Hambantota International Port has surpassed one million TEUs in cumulative container throughput since the commissioning of new quay cranes in 2025, marking a significant milestone in the rapid growth of its container operations.\n\nThe port handled 428,036 TEUs in 2025 and 574,196 TEUs year-to-date in 2026, bringing combined volume to 1,002,232 TEUs.\n\nMSC, HIP’s principal container customer, has contributed significantly to the growth trajectory. In April 2026, the MSC Marie Leslie set a new single-vessel handling record of 7,968 container moves, equivalent to 13,260 TEUs, during a single call.\n\nHIP subsequently achieved its highest-ever monthly throughput of 80,325 TEUs in June, reflecting operational preparedness and available capacity during a period of uncertainty affecting major global trade routes.\n\nTo support sustained growth toward a long-term target of two million TEUs annual capacity, HIP is undertaking a US$ 108 million expansion programme encompassing six new quay cranes and 16 rubber-tyred gantry cranes, expected to be commissioned by the end of February 2027.\n\nOnce operational, the new equipment will strengthen ship-to-shore and yard-handling capacity, support utilisation of an additional 1,300 metres of berth space and take total container quay length to nearly two kilometres.\n\nThe container yard will be expanded by 30% to accommodate rising throughput, and reefer capacity will also be increased.\n\nHIPG CEO Wilson Qu described the one million TEU milestone as a strong indication of customer confidence built through close shipping line engagement, operational reliability and responsiveness to changing requirements.\n\nChief Operations Officer Tommy Yang characterised the investment strategy as focused on developing capacity ahead of demand while maintaining operational efficiency and financial sustainability, creating the scale required to achieve the two million TEU target.", "takeaways": ["The port handled 428,036 TEUs in 2025 and 574,196 TEUs year-to-date in 2026, bringing combined volume to 1,002,232 TEUs.", "MSC, HIP’s principal container customer, has contributed significantly to the growth trajectory.", "In April 2026, the MSC Marie Leslie set a new single-vessel handling record of 7,968 container moves, equivalent to 13,260 TEUs, during a single call."], "readingMinutes": 2, "readMinutes": 2}, {"id": "SN-DE29AB8D94", "title": "ABS and U.S. Department of Energy Sign MOU on Maritime Applications of Advanced Nuclear Technology", "source": "gCaptain", "sourceIcon": "⚓", "sourceRegion": "USA / Global", "url": "https://gcaptain.com/abs-and-u-s-department-of-energy-sign-mou-on-maritime-applications-of-advanced-nuclear-technology/", "publishedAt": "2026-10-12T19:36:41Z", "category": "Ports & Terminals", "region": "Japan & Korea", "regions": ["Japan & Korea", "Brazil & South Atlantic"], "tags": ["port", "shipyard"], "coords": [35.1, 129.04], "navarea": "XI", "image": "https://gcaptain.com/wp-content/uploads/2026/10/unnamed-5.jpg", "summary": "Essential news coupled with the finest maritime content sourced from across the globe.", "body": "Essential news coupled with the finest maritime content sourced from across the globe.\n\nABS and the U.S. Department of Energy’s (DOE) Office of Nuclear Energy have signed a memorandum of understanding to advance modern commercial nuclear technology at sea. The agreement spans floating power solutions, nuclear-powered vessels and the development of the ports, shipyards and industrial base needed to build and sustain them.\n\nKey priorities include concept and feasibility studies for floating nuclear power and nuclear transportation corridors, and support for developing a U.S. shipbuilding sector capable of building and operating nuclear-powered assets safely. ABS will also coordinate related work through the U.S. Maritime Administration’s (MARAD’s) U.S. Center for Maritime Innovation (USCMI), for which ABS serves as Secretariat.\n\n“Advanced nuclear technology is moving from concept to application, and the maritime industry needs to be ready for it,” said John McDonald, ABS Chairman and CEO. “This agreement with DOE reflects the depth of work already underway and provides a framework to go further. Through our collaborations with the DOE and industry leaders, ABS is pioneering the future of nuclear energy in maritime. We’re well-positioned to help turn this technology into a safe, real and practical option for commercial maritime applications.”\n\nDOE is leading U.S. government initiatives on maritime nuclear applications. Under the MOU, ABS will co-manage the Maritime Nuclear Applications Group (MNAG) and provide technical, regulatory, economic and policy support on concept and feasibility studies. ABS will work with DOE to foster interagency coordination to develop a viable U.S. maritime nuclear sector.\n\n“Advanced nuclear technology has the potential to transform the commercial maritime industry and open new markets for American innovation,” said Assistant Secretary for Nuclear Energy Ted Garrish. “The Department of Energy’s partnership with the American Bureau of Shipping will help explore how we can build on decades of experience to safely bring next-generation nuclear technologies to the maritime sector and position America to lead this emerging industry.”\n\nABS is at the forefront of efforts to bring nuclear energy to maritime applications. It published the industry’s first comprehensive classification rules for floating nuclear power plants and has awarded approvals in principle for a range of nuclear projects.\n\nLearn more about ABS nuclear maritime research here .\n\nSign up for gCaptain’s newsletter and never miss an update\n\nEssential maritime and offshore news, insights, and updates delivered daily straight to your inbox\n\nDive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits!\n\nABS has issued approval in principle (AIP) and completed a basic design review (BDR) for a natural gas liquefaction system developed by Samsung Heavy Industries (SHI) for the topside of...\n\nABS has signed a memorandum of understanding (MOU) with three Korean maritime organizations to advance the development of international standards for the next generation of smart ships and shipyards. The...\n\nABS and JB Energy have signed a memorandum of understanding (MOU) to collaborate on strategic studies for the proposed Aura Sul Wind Project, a floating offshore wind pilot under consideration...\n\nSubscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news\n\nStay informed with the latest maritime and offshore news, delivered daily straight to your inbox\n\nStay informed with the latest maritime and offshore news, delivered straight to your inbox\n\nFor general inquiries and to contact us, please email: [email protected]", "takeaways": ["Essential news coupled with the finest maritime content sourced from across the globe.", "Department of Energy’s (DOE) Office of Nuclear Energy have signed a memorandum of understanding to advance modern commercial nuclear technology at sea.", "The agreement spans floating power solutions, nuclear-powered vessels and the development of the ports, shipyards and industrial base needed to build and sustain them."], "readingMinutes": 3, "readMinutes": 3}, {"id": "SN-3F02396DCF", "title": "New Reports Reveal Five More Ships Hit Near Hormuz", "source": "gCaptain", "sourceIcon": "⚓", "sourceRegion": "USA / Global", "url": "https://gcaptain.com/new-reports-reveal-five-more-ships-hit-near-hormuz/", "publishedAt": "2026-10-12T19:27:18Z", "category": "Geopolitics & Chokepoints", "region": "Strait of Hormuz & Persian Gulf", "regions": ["Strait of Hormuz & Persian Gulf", "Red Sea & Bab el-Mandeb", "Singapore & Malacca Strait"], "tags": ["tanker", "container", "port", "hormuz"], "coords": [26.56, 56.25], "navarea": "IX", "image": "https://gcaptain.com/wp-content/uploads/2026/08/2026-07-31T061146Z_355163413_RC2ROMAOX291_RTRMADP_3_IRAN-CRISIS-OMAN-HORMUZ.jpg", "summary": "Essential news coupled with the finest maritime content sourced from across the globe.", "body": "Essential news coupled with the finest maritime content sourced from across the globe.\n\nVessels in the Strait of Hormuz, as seen from Musandam, Oman, July 31, 2026. REUTERS/Stringer\n\nFive more commercial vessels were struck in and around the Strait of Hormuz on Sunday, including a containership and four tankers, as attacks on merchant shipping continue to escalate across the region.\n\nUK Maritime Trade Operations (UKMTO) disclosed four of the incidents in time-late reports on Monday, adding to an already growing number of attacks reported in recent weeks. Four vessels were struck while transiting the Strait of Hormuz, while a fifth tanker was hit by a drone near Sohar anchorage, Oman.\n\nThe latest reports include an outbound product tanker, an outbound crude oil tanker, another outbound tanker and a container ship transiting inbound through the strait. All four were struck by unidentified projectiles, according to UKMTO.\n\nIn one incident, UKMTO confirmed that the crew of an outbound tanker was safe, although the environmental impact remained unknown. The other reports provided no details on casualties or the extent of damage.\n\nThe fifth incident involved a tanker near Sohar anchorage that was struck by an uncrewed aerial vehicle (UAV). UKMTO initially classified the incident as suspicious activity before upgrading it to an attack. Local authorities were assisting with the evacuation of the crew, while damage and environmental assessments remained incomplete.\n\nThe reports follow a particularly violent weekend for commercial shipping in the region, including earlier attacks on tankers in Hormuz and a U.S. military strike that disabled a commercial cargo vessel in the Gulf of Oman.\n\nThe new incidents also follow the release of the Joint Maritime Information Center’s October 11 advisory , which classified the security threat in the Strait of Hormuz as SEVERE , its second-highest threat category.\n\nThat assessment, covering incidents confirmed through approximately 1500 UTC Sunday, had already identified three recent tanker attacks in the strait, including one reported late. It warned that further deliberate attacks were highly likely and cited continued harassment, surveillance and pressure on commercial vessels by Iran’s Islamic Revolutionary Guard Corps.\n\nThe advisory also highlighted an expanding geographic threat, with attacks no longer confined to vessels passing through the strait itself. Recent strikes have targeted ships anchored off the United Arab Emirates and vessels operating elsewhere inside the Persian Gulf.\n\nThe widening pattern of attacks comes as commercial traffic through Hormuz remains sharply reduced despite U.S. efforts to restore shipping flows.\n\nAccording to JMIC, U.S. Naval Cooperation and Guidance for Shipping (NCAGS) figures showed approximately 29 vessel transits per day over the 72 hours ending October 10, compared with a historical average of roughly 138 per day. Independent tracking data indicated substantially fewer transits, reflecting differences in reporting and methodology.\n\nThe continuing attacks raise further questions about the sustainability of any recovery in commercial shipping through the strait.\n\nThey also underscore the limitations of official incident counts. With multiple attacks reported after the fact, even the most recent security assessments may not fully reflect conditions facing merchant vessels and their crews.\n\nUKMTO has urged ships to transit with caution and report suspicious activity as authorities investigate the latest incidents.\n\nSign up for gCaptain’s newsletter and never miss an update\n\nEssential maritime and offshore news, insights, and updates delivered daily straight to your inbox", "takeaways": ["Essential news coupled with the finest maritime content sourced from across the globe.", "Vessels in the Strait of Hormuz, as seen from Musandam, Oman, July 31, 2026.", "REUTERS/Stringer  Five more commercial vessels were struck in and around the Strait of Hormuz on Sunday, including a containership and four tankers, as attacks on merchant shipping continue to escalate across the region."], "readingMinutes": 3, "readMinutes": 3}];
 let SETNEWS_ARTICLES = DEFAULT_SETNEWS_ARTICLES.slice();
 let SETNEWS_ACTIVE_CAT = "ALL";
 let SETNEWS_SEARCH_QUERY = "";
@@ -7676,7 +7676,7 @@ function formatNewsRelativeTime(isoStr) {
 }
 
 function renderHomeNewsSlide() {
-  const grid = document.getElementById("homeNewsPreviewGrid");
+  const grid = document.getElementById("homeNewsGrid");
   if (!grid) return;
   const articles = (SETNEWS_ARTICLES && SETNEWS_ARTICLES.length > 0 ? SETNEWS_ARTICLES : DEFAULT_SETNEWS_ARTICLES).slice(0, 3);
   if (articles.length === 0) return;
@@ -7684,20 +7684,20 @@ function renderHomeNewsSlide() {
   grid.innerHTML = articles.map(a => {
     const desk = formatEditorialNewsSource(a);
     const icon = formatEditorialNewsIcon(a);
+    const readMin = a.readingMinutes || a.readMinutes || 3;
     return `
       <article class="home-news-card" data-open-news-id="${a.id}">
-        <div class="home-news-card-img" style="background-image:url('${a.image || ""}');">
+        <div class="home-news-card-img" style="background-image:url('${a.image || ""}');height:200px;">
           <span class="home-news-card-cat">${a.category || "Maritime Briefing"}</span>
           <span class="home-news-card-region">📍 ${a.region || "Global"}</span>
         </div>
-        <div class="home-news-card-body">
+        <div class="home-news-card-body" style="padding:14px 16px;">
           <div class="home-news-card-meta">
             <span>${icon} ${desk}</span>
-            <span>${formatNewsRelativeTime(a.publishedAt)}</span>
+            <span>${formatNewsRelativeTime(a.publishedAt)} • ${readMin}m read</span>
           </div>
-          <h3 class="home-news-card-title">${a.title}</h3>
-          <p class="home-news-card-summary">${a.summary}</p>
-          <span class="home-news-card-cta">Read Briefing &rarr;</span>
+          <h3 class="home-news-card-title" style="font-size:0.98rem;-webkit-line-clamp:2;margin-bottom:6px;">${a.title}</h3>
+          <span class="home-news-card-cta">Read Full Story &rarr;</span>
         </div>
       </article>
     `;
@@ -7742,40 +7742,30 @@ function renderSetNewsUI() {
 
   const ctxEl = document.getElementById("setNewsForYouContext");
   if (ctxEl) {
-    const routeLabel = activeRouteData && activeRouteData.name ? `Route: ${activeRouteData.name}` : "Global Corridor";
-    ctxEl.textContent = `${routeLabel} • ${prof.readIds.length} Read • ${prof.bookmarkedIds.length} Saved`;
+    const routeLabel = activeRouteData && activeRouteData.name ? `Route: ${activeRouteData.name}` : "Global Visual Feed";
+    ctxEl.textContent = `${routeLabel} • ${prof.bookmarkedIds.length} Saved`;
   }
 
-  const tickerEl = document.getElementById("setNewsTickerTrack");
-  if (tickerEl) {
-    const topTicker = enriched.slice(0, 10);
-    tickerEl.innerHTML = topTicker.map(a => `
-      <span class="setnews-ticker-item" data-news-id="${a.id}">
-        <strong style="color:#38bdf8;">[${a.region || "Global"}]</strong>
-        ${a.title}
-      </span>
-    `).join('<span style="color:#475569;">•</span>');
-  }
-
+  // Visual-First "For You" Spotlight Cards (Large photo overlay, zero paragraph clutter)
   const forYouGrid = document.getElementById("setNewsForYouGrid");
   if (forYouGrid) {
     const sortedForYou = enriched.slice().sort((a, b) => b._score - a._score).slice(0, 4);
     forYouGrid.innerHTML = sortedForYou.map(a => `
-      <article class="setnews-foryou-card" data-news-id="${a.id}">
-        <div class="setnews-foryou-reason">
-          <span>${a._reason}</span>
-          <span style="background:rgba(15,23,42,0.65);color:#38bdf8;padding:1px 6px;border-radius:4px;">${a._score}% Match</span>
-        </div>
-        <div class="setnews-card-body">
-          <div class="setnews-meta-row">
-            <span class="setnews-source-tag">${a.sourceIcon} ${a.source}</span>
-            <span>${formatNewsRelativeTime(a.publishedAt)}</span>
+      <article class="setnews-foryou-card setnews-foryou-visual" data-news-id="${a.id}" style="position:relative;height:215px;border-radius:14px;overflow:hidden;border:1px solid rgba(56,189,248,0.25);">
+        <div class="setnews-foryou-bg" style="position:absolute;inset:0;background-image:url('${a.image || ""}');background-size:cover;background-position:center;transition:transform 0.35s ease;"></div>
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,14,26,0.55) 0%,rgba(7,14,26,0.2) 38%,rgba(7,14,26,0.94) 100%);"></div>
+        <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:12px 14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+            <span style="background:rgba(234,76,37,0.88);color:#fff;font-size:0.63rem;font-weight:800;padding:3px 8px;border-radius:6px;backdrop-filter:blur(4px);">${a._reason}</span>
+            <span style="background:rgba(15,23,42,0.85);color:#38bdf8;font-size:0.63rem;font-weight:800;padding:3px 7px;border-radius:6px;border:1px solid rgba(56,189,248,0.35);">${a._score}%</span>
           </div>
-          <h4 class="setnews-card-title">${a.title}</h4>
-          <p class="setnews-card-summary">${a.summary}</p>
-          <div class="setnews-card-footer">
-            <span style="font-size:0.65rem;color:#7dd3fc;">📍 ${a.region || "Global"}</span>
-            <span style="font-size:0.65rem;color:#94a3b8;">⏱ ${a.readingMinutes || 2} min read</span>
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:0.65rem;color:#7dd3fc;font-weight:700;margin-bottom:5px;">
+              <span>📍 ${a.region || "Global"}</span>
+              <span>•</span>
+              <span style="color:#cbd5e1;">${formatNewsRelativeTime(a.publishedAt)}</span>
+            </div>
+            <h4 style="font-size:0.92rem;font-weight:800;line-height:1.32;color:#ffffff;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 2px 8px rgba(0,0,0,0.6);">${a.title}</h4>
           </div>
         </div>
       </article>
@@ -7798,6 +7788,7 @@ function renderSetNewsUI() {
     filtered.sort((a, b) => b._score - a._score);
   }
 
+  // Bento Hero: Flagship Visual Cover + 3 Visual Side Cards (No body text clutter)
   const heroContainer = document.getElementById("setNewsBentoHero");
   if (heroContainer) {
     if (filtered.length >= 4 && SETNEWS_ACTIVE_CAT === "ALL" && !SETNEWS_SEARCH_QUERY) {
@@ -7805,29 +7796,28 @@ function renderSetNewsUI() {
       const mainStory = filtered[0];
       const stackStories = filtered.slice(1, 4);
       heroContainer.innerHTML = `
-        <div class="setnews-hero-main" data-news-id="${mainStory.id}">
+        <div class="setnews-hero-main" data-news-id="${mainStory.id}" style="min-height:390px;">
           <div class="setnews-hero-bg" style="background-image:url('${mainStory.image || ""}');"></div>
-          <div class="setnews-hero-overlay">
+          <div class="setnews-hero-overlay" style="padding:28px 26px 24px;">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <span style="background:#0ea5e9;color:#fff;font-size:0.65rem;font-weight:800;padding:3px 9px;border-radius:5px;text-transform:uppercase;">${mainStory.category}</span>
-              <span style="background:rgba(15,23,42,0.85);color:#38bdf8;font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:5px;border:1px solid rgba(56,189,248,0.35);">📍 ${mainStory.region}</span>
-              <span style="font-size:0.7rem;color:#cbd5e1;">${mainStory.sourceIcon} ${mainStory.source} • ${formatNewsRelativeTime(mainStory.publishedAt)}</span>
+              <span style="background:#0ea5e9;color:#fff;font-size:0.66rem;font-weight:800;padding:4px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:0.04em;">${mainStory.category}</span>
+              <span style="background:rgba(15,23,42,0.85);color:#38bdf8;font-size:0.66rem;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid rgba(56,189,248,0.35);">📍 ${mainStory.region}</span>
+              <span style="font-size:0.72rem;color:#e2e8f0;font-weight:600;">${formatNewsRelativeTime(mainStory.publishedAt)} • ${mainStory.readingMinutes || mainStory.readMinutes || 3} min read</span>
             </div>
-            <h2 style="font-size:1.38rem;font-weight:800;line-height:1.28;color:#ffffff;margin:0;">${mainStory.title}</h2>
-            <p style="font-size:0.82rem;line-height:1.5;color:#cbd5e1;margin:0;max-width:680px;">${mainStory.summary}</p>
+            <h2 style="font-size:1.5rem;font-weight:800;line-height:1.25;color:#ffffff;margin:4px 0 0;text-shadow:0 2px 12px rgba(0,0,0,0.65);">${mainStory.title}</h2>
           </div>
         </div>
         <div class="setnews-hero-stack">
           ${stackStories.map(st => `
-            <div class="setnews-stack-card" data-news-id="${st.id}">
-              <div class="setnews-stack-thumb" style="background-image:url('${st.image || ""}');"></div>
-              <div style="display:flex;flex-direction:column;justify-content:space-between;min-width:0;flex:1;">
-                <div class="setnews-meta-row">
-                  <span class="setnews-source-tag">${st.source}</span>
-                  <span>${formatNewsRelativeTime(st.publishedAt)}</span>
+            <div class="setnews-stack-card" data-news-id="${st.id}" style="padding:10px 12px;align-items:center;">
+              <div class="setnews-stack-thumb" style="width:118px;height:86px;border-radius:10px;background-image:url('${st.image || ""}');"></div>
+              <div style="display:flex;flex-direction:column;justify-content:center;gap:6px;min-width:0;flex:1;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:0.65rem;color:#38bdf8;font-weight:700;">
+                  <span>📍 ${st.region}</span>
+                  <span style="color:#94a3b8;font-weight:600;">${formatNewsRelativeTime(st.publishedAt)}</span>
                 </div>
-                <h4 style="font-size:0.82rem;font-weight:700;line-height:1.32;margin:3px 0;color:inherit;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${st.title}</h4>
-                <div style="font-size:0.65rem;color:#38bdf8;font-weight:600;">📍 ${st.region} • ${st.category}</div>
+                <h4 style="font-size:0.88rem;font-weight:750;line-height:1.32;margin:0;color:inherit;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${st.title}</h4>
+                <span style="font-size:0.64rem;color:#64748b;font-weight:600;">${st.category} • ${st.readingMinutes || st.readMinutes || 3}m read</span>
               </div>
             </div>
           `).join("")}
@@ -7838,6 +7828,7 @@ function renderSetNewsUI() {
     }
   }
 
+  // Main Visual Photo Grid (205px HD image, floating quick actions, 2-line headline, NO paragraph summary on card)
   const wireGrid = document.getElementById("setNewsWireGrid");
   if (wireGrid) {
     const wireItems = (filtered.length >= 4 && SETNEWS_ACTIVE_CAT === "ALL" && !SETNEWS_SEARCH_QUERY)
@@ -7845,56 +7836,67 @@ function renderSetNewsUI() {
       : filtered;
 
     if (wireItems.length === 0) {
-      wireGrid.innerHTML = `<div style="grid-column:1/-1;padding:36px;text-align:center;color:#94a3b8;background:rgba(15,23,42,0.5);border-radius:12px;border:1px dashed rgba(148,163,184,0.25);">No maritime briefings match this filter. Try switching category or clearing search.</div>`;
+      wireGrid.innerHTML = `<div style="grid-column:1/-1;padding:36px;text-align:center;color:#94a3b8;background:rgba(15,23,42,0.5);border-radius:12px;border:1px dashed rgba(148,163,184,0.25);">No maritime stories match this filter. Try switching category or clearing search.</div>`;
     } else {
-      wireGrid.innerHTML = wireItems.map(a => `
+      wireGrid.innerHTML = wireItems.map(a => {
+        const readMin = a.readingMinutes || a.readMinutes || 3;
+        return `
         <article class="setnews-article-card" data-news-id="${a.id}">
-          <div class="setnews-card-img" style="background-image:url('${a.image || ""}');">
-            <span style="position:absolute;top:9px;left:9px;background:rgba(15,23,42,0.88);color:#38bdf8;font-size:0.62rem;font-weight:700;padding:3px 8px;border-radius:5px;border:1px solid rgba(56,189,248,0.35);">📍 ${a.region || "Global"}</span>
-            <span style="position:absolute;top:9px;right:9px;background:rgba(15,23,42,0.88);color:#f8fafc;font-size:0.62rem;font-weight:700;padding:3px 7px;border-radius:5px;">${a.category}</span>
-          </div>
-          <div class="setnews-card-body">
-            <div class="setnews-meta-row">
-              <span class="setnews-source-tag">${a.sourceIcon} ${a.source}</span>
-              <span>${formatNewsRelativeTime(a.publishedAt)} • ${a.readingMinutes || 2}m</span>
+          <div class="setnews-card-img" style="height:205px;background-image:url('${a.image || ""}');">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,14,26,0.45) 0%,transparent 45%,rgba(7,14,26,0.75) 100%);"></div>
+            <span style="position:absolute;top:10px;left:10px;background:rgba(15,23,42,0.88);color:#38bdf8;font-size:0.63rem;font-weight:700;padding:4px 9px;border-radius:6px;border:1px solid rgba(56,189,248,0.35);backdrop-filter:blur(4px);">📍 ${a.region || "Global"}</span>
+            <div style="position:absolute;top:10px;right:10px;display:flex;gap:5px;z-index:3;">
+              <button type="button" class="setnews-action-btn ${a._liked ? 'active' : ''}" data-news-action="like" data-news-id="${a.id}" title="Like story" style="padding:4px 7px;background:rgba(15,23,42,0.85);backdrop-filter:blur(4px);">${a._liked ? '❤️' : '🤍'}</button>
+              <button type="button" class="setnews-action-btn ${a._bookmarked ? 'active' : ''}" data-news-action="bookmark" data-news-id="${a.id}" title="Save briefing" style="padding:4px 7px;background:rgba(15,23,42,0.85);backdrop-filter:blur(4px);">🔖</button>
+              <button type="button" class="setnews-action-btn" data-news-action="plot" data-news-id="${a.id}" title="Plot region on SetChart" style="padding:4px 7px;background:rgba(15,23,42,0.85);backdrop-filter:blur(4px);">🗺️</button>
             </div>
-            <h3 class="setnews-card-title">${a.title}</h3>
-            <p class="setnews-card-summary">${a.summary}</p>
-            <div class="setnews-card-footer">
-              <div style="display:flex;gap:5px;">
-                <button type="button" class="setnews-action-btn ${a._liked ? 'active' : ''}" data-news-action="like" data-news-id="${a.id}" title="Like & train For You feed">❤️ ${a._liked ? 'Liked' : 'Like'}</button>
-                <button type="button" class="setnews-action-btn ${a._bookmarked ? 'active' : ''}" data-news-action="bookmark" data-news-id="${a.id}" title="Save for offline reading">🔖 ${a._bookmarked ? 'Saved' : 'Save'}</button>
-              </div>
-              <button type="button" class="setnews-action-btn" data-news-action="plot" data-news-id="${a.id}" title="Plot region on SetChart">🗺️ Chart</button>
+            <span style="position:absolute;bottom:10px;left:10px;background:rgba(2,132,199,0.9);color:#fff;font-size:0.6rem;font-weight:800;padding:3px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:0.04em;">${a.category}</span>
+          </div>
+          <div class="setnews-card-body" style="padding:14px 15px 15px;gap:8px;">
+            <h3 class="setnews-card-title" style="font-size:0.96rem;line-height:1.36;-webkit-line-clamp:2;">${a.title}</h3>
+            <div class="setnews-meta-row" style="margin-top:auto;padding-top:6px;border-top:1px solid rgba(148,163,184,0.12);">
+              <span class="setnews-source-tag" style="font-size:0.64rem;">${a.sourceIcon} ${a.source}</span>
+              <span style="font-size:0.65rem;color:#94a3b8;">${formatNewsRelativeTime(a.publishedAt)} • ${readMin} min read</span>
             </div>
           </div>
         </article>
-      `).join("");
+      `;
+      }).join("");
     }
   }
+}
 
-  const radarList = document.getElementById("setNewsRadarList");
-  if (radarList) {
-    const regionCounts = {};
-    enriched.forEach(a => {
-      const r = a.region || "Global Oceans";
-      regionCounts[r] = (regionCounts[r] || 0) + 1;
+function formatFullArticleParagraphsHtml(art) {
+  const raw = String((art && (art.body || art.summary)) || "").trim();
+  if (!raw) return "<p class="setnews-reader-paragraph">No additional text available for this dispatch.</p>";
+
+  let blocks = raw.split(/\n\s*\n+/).map(p => p.trim()).filter(Boolean);
+  if (blocks.length === 1 && blocks[0].length > 420) {
+    // Split long single-block text into 3-sentence paragraphs for comfortable reading
+    const sentences = blocks[0].match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g) || [blocks[0]];
+    blocks = [];
+    let cur = [];
+    sentences.forEach((s) => {
+      cur.push(s.trim());
+      if (cur.join(" ").length >= 340 || cur.length >= 3) {
+        blocks.push(cur.join(" "));
+        cur = [];
+      }
     });
-    const sortedRegions = Object.entries(regionCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
-    radarList.innerHTML = sortedRegions.map(([reg, cnt]) => `
-      <div class="setnews-radar-item" data-news-region="${reg}" style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;background:rgba(30,41,59,0.55);border:1px solid rgba(148,163,184,0.14);cursor:pointer;font-size:0.75rem;">
-        <span style="font-weight:600;color:#e2e8f0;">📍 ${reg}</span>
-        <span style="background:rgba(14,165,233,0.18);color:#38bdf8;font-weight:700;padding:1px 7px;border-radius:999px;font-size:0.68rem;">${cnt}</span>
-      </div>
-    `).join("");
+    if (cur.length > 0) blocks.push(cur.join(" "));
   }
+
+  return blocks.map(p => {
+    const safe = p.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return `<p class="setnews-reader-paragraph" style="font-size:0.98rem;line-height:1.78;color:#e2e8f0;margin:0 0 14px 0;">${safe}</p>`;
+  }).join("");
 }
 
 function openSetNewsArticleModal(articleId) {
   const baseList = SETNEWS_ARTICLES.length > 0 ? SETNEWS_ARTICLES : DEFAULT_SETNEWS_ARTICLES;
   const art = baseList.find(a => a.id === articleId);
   if (!art) return;
-  recordSetNewsInteraction(art, "read", 12);
+  recordSetNewsInteraction(art, "read", 15);
 
   const modal = document.getElementById("setNewsReaderModal");
   const bodyEl = document.getElementById("setNewsReaderContent");
@@ -7904,40 +7906,46 @@ function openSetNewsArticleModal(articleId) {
   const scored = scoreArticleForUser(art, prof);
   const desk = formatEditorialNewsSource(art);
   const icon = formatEditorialNewsIcon(art);
+  const paragraphsHtml = formatFullArticleParagraphsHtml(art);
+  const wordCount = String(art.body || art.summary || "").split(/\s+/).filter(Boolean).length;
+  const readMins = art.readingMinutes || art.readMinutes || Math.max(2, Math.round(wordCount / 180));
 
   bodyEl.innerHTML = `
-    <div style="position:relative;height:220px;background-image:url('${art.image || ""}');background-size:cover;background-position:center;border-radius:15px 15px 0 0;">
-      <div style="position:absolute;inset:0;background:linear-gradient(0deg,#0f172a 5%,rgba(15,23,42,0.35) 100%);"></div>
-      <button type="button" id="btnCloseNewsReader" style="position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;background:rgba(15,23,42,0.85);border:1px solid rgba(148,163,184,0.35);color:#fff;font-size:1rem;cursor:pointer;">✕</button>
-      <div style="position:absolute;bottom:14px;left:20px;right:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <span style="background:#0ea5e9;color:#fff;font-size:0.68rem;font-weight:800;padding:3px 9px;border-radius:5px;text-transform:uppercase;">${art.category}</span>
-        <span style="background:rgba(15,23,42,0.9);color:#38bdf8;font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:5px;border:1px solid rgba(56,189,248,0.4);">📍 ${art.region}</span>
-        <span style="background:rgba(234,76,37,0.22);color:#fdba74;font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:5px;">${scored.reason} (${scored.score}% Match)</span>
+    <div style="position:relative;height:300px;background-image:url('${art.image || ""}');background-size:cover;background-position:center;border-radius:15px 15px 0 0;">
+      <div style="position:absolute;inset:0;background:linear-gradient(0deg,#0f172a 4%,rgba(15,23,42,0.25) 55%,rgba(15,23,42,0.65) 100%);"></div>
+      <button type="button" id="btnCloseNewsReader" style="position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;background:rgba(15,23,42,0.88);border:1px solid rgba(148,163,184,0.4);color:#fff;font-size:1.05rem;cursor:pointer;z-index:5;">✕</button>
+      <div style="position:absolute;bottom:16px;left:24px;right:24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="background:#0ea5e9;color:#fff;font-size:0.7rem;font-weight:800;padding:4px 10px;border-radius:6px;text-transform:uppercase;">${art.category}</span>
+        <span style="background:rgba(15,23,42,0.9);color:#38bdf8;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid rgba(56,189,248,0.4);">📍 ${art.region}</span>
+        <span style="background:rgba(234,76,37,0.85);color:#fff;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:6px;">${scored.reason} (${scored.score}% Match)</span>
       </div>
     </div>
-    <div style="padding:22px 24px 26px;display:flex;flex-direction:column;gap:14px;">
-      <div style="font-size:0.75rem;color:#94a3b8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div style="padding:24px 28px 30px;display:flex;flex-direction:column;gap:16px;">
+      <div style="font-size:0.76rem;color:#94a3b8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-bottom:10px;border-bottom:1px solid rgba(148,163,184,0.15);">
         <span><strong>${icon} ${desk}</strong> • Published ${new Date(art.publishedAt).toUTCString()}</span>
-        <span>⏱ ${art.readingMinutes || 2} min bridge briefing</span>
+        <span>⏱ ${readMins} min read (${wordCount} words)</span>
       </div>
-      <h2 style="font-size:1.35rem;font-weight:800;line-height:1.32;margin:0;">${art.title}</h2>
+      <h2 style="font-size:1.5rem;font-weight:800;line-height:1.3;margin:0;color:#f8fafc;">${art.title}</h2>
       ${Array.isArray(art.takeaways) && art.takeaways.length > 0 ? `
-        <div style="padding:11px 14px;border-radius:10px;background:rgba(30,41,59,0.65);border-left:3px solid #38bdf8;font-size:0.8rem;color:#e2e8f0;">
-          <strong style="color:#38bdf8;display:block;margin-bottom:5px;text-transform:uppercase;font-size:0.68rem;letter-spacing:0.05em;">⚡ Key Bridge Takeaways</strong>
-          <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;">
+        <div style="padding:13px 16px;border-radius:10px;background:rgba(30,41,59,0.7);border-left:3px solid #38bdf8;font-size:0.84rem;color:#e2e8f0;">
+          <strong style="color:#38bdf8;display:block;margin-bottom:6px;text-transform:uppercase;font-size:0.7rem;letter-spacing:0.05em;">⚡ Executive Summary &amp; Bridge Takeaways</strong>
+          <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;line-height:1.5;">
             ${art.takeaways.map(t => `<li>${t}</li>`).join("")}
           </ul>
         </div>
       ` : ""}
-      <p style="font-size:0.92rem;line-height:1.68;color:#cbd5e1;margin:0;white-space:pre-line;">${art.body || art.summary}</p>
-      <div style="padding:12px 14px;border-radius:10px;background:rgba(14,165,233,0.1);border:1px solid rgba(56,189,248,0.28);font-size:0.78rem;color:#bae6fd;">
-        <strong>🧭 Bridge Navigation Intelligence Context:</strong> Region <b>${art.region}</b> (${art.coords ? `${art.coords[0].toFixed(1)}°, ${art.coords[1].toFixed(1)}°` : "Global"}). Reading this briefing refines your personalized <b>For You</b> maritime feed.
+      <div class="setnews-reader-article-body" style="padding-top:4px;">
+        ${paragraphsHtml}
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:10px;border-top:1px solid rgba(148,163,184,0.18);">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button type="button" class="setnews-action-btn" id="btnModalPlotChart" style="padding:8px 13px;font-size:0.75rem;background:rgba(14,165,233,0.22);color:#38bdf8;border-color:#38bdf8;">🗺️ View Region on SetChart</button>
+      <div style="padding:12px 15px;border-radius:10px;background:rgba(14,165,233,0.1);border:1px solid rgba(56,189,248,0.28);font-size:0.78rem;color:#bae6fd;">
+        <strong>🧭 Bridge Navigation Intelligence Context:</strong> Operational Region <b>${art.region}</b> (${art.coords ? `${art.coords[0].toFixed(1)}°, ${art.coords[1].toFixed(1)}°` : "Global"}).
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:12px;border-top:1px solid rgba(148,163,184,0.18);">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" class="setnews-action-btn" id="btnModalPlotChart" style="padding:9px 14px;font-size:0.78rem;background:rgba(14,165,233,0.22);color:#38bdf8;border-color:#38bdf8;">🗺️ View Region on SetChart</button>
+          ${art.url ? `<a href="${art.url}" target="_blank" rel="noopener noreferrer" class="setnews-action-btn" style="padding:9px 14px;font-size:0.78rem;text-decoration:none;">🔗 Original Source</a>` : ""}
         </div>
-        <button type="button" class="setnews-action-btn" id="btnModalCloseBottom" style="padding:8px 14px;font-size:0.75rem;">Close</button>
+        <button type="button" class="setnews-action-btn" id="btnModalCloseBottom" style="padding:9px 16px;font-size:0.78rem;">Close Reader</button>
       </div>
     </div>
   `;
@@ -8093,30 +8101,68 @@ window.SETROUTE_PENDING_CONTEXT = null;
     "ST_PETERSBURG_APP": [60.00, 29.20, "St. Petersburg Fairway Approach"],
     "NORTH_SEA_MID": [56.20, 3.50, "Central North Sea Deepwater Route"],
     "BERGEN_APP": [60.35, 4.85, "Bergen / Fedjeosen Fairway"],
+    "FELIXSTOWE_APP": [51.92, 1.45, "Felixstowe / Thames Estuary Sunk TSS"],
+    "LE_HAVRE_APP": [49.50, 0.00, "Baie de Seine / Le Havre Approach"],
+    "BILBAO_APP": [43.42, -3.12, "Bay of Biscay / Bilbao Fairway"],
+    "BARCELONA_APP": [41.30, 2.22, "Barcelona Western Med Approach"],
+    "GENOA_APP": [44.32, 8.88, "Ligurian Sea / Genoa Fairway"],
+    "PIRAEUS_APP": [37.85, 23.58, "Saronikos Gulf / Piraeus Approach"],
     "BOSPORUS_S": [40.98, 28.98, "Turkish Straits / Bosporus South TSS"],
     "BLACK_SEA_MID": [43.20, 34.00, "Central Black Sea Transit"],
     "NOVOROSSIYSK_APP": [44.60, 37.75, "Novorossiysk Fairway Approach"],
+    "CONSTANTA_APP": [44.12, 28.75, "Constanta Black Sea Fairway"],
+    "CASABLANCA_APP": [33.68, -7.68, "Casablanca Atlantic Approach"],
+    "DAKAR_APP": [14.62, -17.52, "Cap Vert / Dakar Fairway"],
     "BONNY_APP": [4.30, 7.05, "Bonny / Niger Delta Fairway"],
+    "LUANDA_APP": [-8.72, 13.15, "Luanda Deepwater Approach"],
+    "CAPE_TOWN_APP": [-33.85, 18.32, "Table Bay / Cape Town Approach"],
     "DURBAN_APP": [-29.88, 31.12, "Durban Fairway Approach"],
     "MOZAMBIQUE_CH": [-18.00, 41.50, "Mozambique Channel Deepsea Lane"],
+    "MOMBASA_APP": [-4.08, 39.75, "Mombasa East Africa Fairway"],
+    "JEDDAH_APP": [21.45, 39.05, "Jeddah Islamic Port Red Sea Approach"],
+    "SALALAH_APP": [16.88, 54.05, "Salalah Arabian Sea Approach"],
+    "KARACHI_APP": [24.70, 66.90, "Karachi Arabian Sea Fairway"],
+    "CHENNAI_APP": [13.10, 80.40, "Chennai Bay of Bengal Approach"],
     "MAURITIUS_PASS": [-20.20, 57.30, "Mascarene / Mauritius Deepsea Corridor"],
     "SUNDA_STRAIT": [-6.05, 105.75, "Sunda Strait Deepwater Channel"],
+    "JAKARTA_APP": [-6.00, 106.88, "Jakarta / Tanjung Priok Fairway"],
     "LOMBOK_STRAIT": [-8.55, 115.70, "Lombok Strait Archipelagic Sea Lane"],
     "HEDLAND_APP": [-20.15, 118.55, "Port Hedland / Pilbara Fairway"],
+    "FREMANTLE_APP": [-32.05, 115.62, "Fremantle / Gage Roads Approach"],
+    "MELBOURNE_APP": [-38.32, 144.60, "Port Phillip Heads / Melbourne Approach"],
     "SYDNEY_APP": [-33.85, 151.35, "Sydney / Botany Bay Approach"],
+    "BRISBANE_APP": [-27.05, 153.30, "Moreton Bay / Brisbane Fairway"],
+    "AUCKLAND_APP": [-36.70, 174.95, "Hauraki Gulf / Auckland Approach"],
+    "LAEM_CHABANG_APP": [12.95, 100.78, "Gulf of Thailand / Laem Chabang Fairway"],
+    "HO_CHI_MINH_APP": [10.25, 107.08, "Vung Tau / Cai Mep Fairway"],
+    "MANILA_APP": [14.42, 120.55, "Manila Bay Corregidor Approach"],
+    "KAOHSIUNG_APP": [22.58, 120.22, "Kaohsiung Taiwan Strait Approach"],
     "BOHAI_STRAIT": [38.35, 121.00, "Bohai / Laotieshan Channel TSS"],
+    "TIANJIN_APP": [38.92, 118.05, "Tianjin / Bohai Bay Fairway"],
+    "DALIAN_APP": [38.82, 121.75, "Dalian Fairway Approach"],
     "QINGDAO_APP": [35.95, 120.50, "Qingdao Fairway Approach"],
     "NINGBO_APP": [29.90, 122.35, "Ningbo-Zhoushan Fairway"],
+    "VLADIVOSTOK_APP": [42.95, 131.95, "Peter the Great Gulf / Vladivostok Approach"],
+    "UNIMAK_PASS": [54.30, -165.00, "Unimak Pass Aleutian Great Circle Gate"],
+    "SEATTLE_APP": [48.38, -124.72, "Juan de Fuca Strait TSS (Seattle / Vancouver)"],
+    "MANZANILLO_APP": [18.98, -104.42, "Manzanillo Mexican Pacific Approach"],
+    "CALLAO_APP": [-12.08, -77.28, "Callao / Lima Pacific Fairway"],
+    "VALPARAISO_APP": [-33.00, -71.72, "Valparaiso Pacific Fairway"],
     "SANTOS_APP": [-24.08, -46.25, "Santos Fairway Approach"],
     "BUENOS_AIRES_APP": [-35.15, -56.10, "Rio de la Plata / Recalada Pilot"],
     "MAGELLAN_E": [-52.50, -68.20, "Strait of Magellan East Entrance"],
     "MAGELLAN_W": [-52.75, -74.65, "Strait of Magellan West / Pacific Exit"],
+    "CARTAGENA_APP": [10.32, -75.62, "Cartagena Caribbean Approach"],
     "YUCATAN_CH": [21.80, -85.65, "Yucatan Channel TSS"],
     "NEW_ORLEANS_APP": [28.90, -89.40, "Southwest Pass / Mississippi Fairway"],
+    "MIAMI_APP": [25.75, -80.05, "Miami Government Cut Fairway"],
     "SAVANNAH_APP": [31.95, -80.65, "Savannah Fairway Approach"],
+    "HALIFAX_APP": [44.48, -63.45, "Halifax Nova Scotia Approach"],
+    "MONTREAL_APP": [48.85, -64.00, "Gulf of St. Lawrence / Cabot Strait"],
     "NATL_GC_WEST": [42.20, -50.00, "North Atlantic Grand Banks S. Waypoint"],
     "NATL_GC_MID": [47.00, -30.00, "Mid-Atlantic Great Circle Vertex"],
     "NPAC_GC_WEST": [42.50, 160.00, "NW Pacific Great Circle Waypoint"],
+    "NPAC_GC_MID": [46.50, 180.00, "International Date Line North Pacific Vertex"],
     "NPAC_GC_EAST": [44.00, -145.00, "NE Pacific Great Circle Waypoint"]
   };
   Object.assign(MARITIME_SEA_NODES, extraNodes);
@@ -8127,44 +8173,186 @@ window.SETROUTE_PENDING_CONTEXT = null;
     ["BALTIC_GOTLAND", "FINLAND_GULF"],
     ["FINLAND_GULF", "ST_PETERSBURG_APP"],
     ["ROTTERDAM_APP", "NORTH_SEA_MID"],
+    ["DOVER_STRAIT", "FELIXSTOWE_APP"],
+    ["FELIXSTOWE_APP", "ROTTERDAM_APP"],
+    ["CASQUETS", "LE_HAVRE_APP"],
+    ["LE_HAVRE_APP", "DOVER_STRAIT"],
+    ["USHANT", "BILBAO_APP"],
+    ["BILBAO_APP", "FINISTERRE"],
     ["NORTH_SEA_MID", "SKAGERRAK"],
     ["NORTH_SEA_MID", "BERGEN_APP"],
+    ["GIBRALTAR_W", "CASABLANCA_APP"],
+    ["CASABLANCA_APP", "CANARY_PASS"],
+    ["CAPE_VERDE_PASS", "DAKAR_APP"],
+    ["GIBRALTAR_E", "BARCELONA_APP"],
+    ["BARCELONA_APP", "GENOA_APP"],
+    ["GENOA_APP", "MESSINA_N"],
+    ["MED_CRETE", "PIRAEUS_APP"],
+    ["PIRAEUS_APP", "BOSPORUS_S"],
     ["MED_CRETE", "BOSPORUS_S"],
     ["BOSPORUS_S", "BLACK_SEA_MID"],
     ["BLACK_SEA_MID", "NOVOROSSIYSK_APP"],
+    ["BLACK_SEA_MID", "CONSTANTA_APP"],
     ["GULF_OF_GUINEA", "BONNY_APP"],
+    ["GULF_OF_GUINEA", "LUANDA_APP"],
+    ["LUANDA_APP", "CAPE_TOWN_APP"],
+    ["CAPE_TOWN_APP", "CAPE_AGULHAS"],
     ["CAPE_AGULHAS", "DURBAN_APP"],
     ["DURBAN_APP", "MOZAMBIQUE_CH"],
+    ["MOZAMBIQUE_CH", "MOMBASA_APP"],
+    ["MOMBASA_APP", "SOCOTRA_N"],
     ["MOZAMBIQUE_CH", "ARABIAN_SEA_MID"],
+    ["RED_SEA_MID", "JEDDAH_APP"],
+    ["SOCOTRA_N", "SALALAH_APP"],
+    ["SALALAH_APP", "GULF_OF_OMAN"],
+    ["GULF_OF_OMAN", "KARACHI_APP"],
+    ["KARACHI_APP", "MUMBAI_APP"],
+    ["DONDRA_HEAD", "CHENNAI_APP"],
+    ["CHENNAI_APP", "BAY_OF_BENGAL_S"],
     ["DURBAN_APP", "MAURITIUS_PASS"],
     ["MAURITIUS_PASS", "DONDRA_HEAD"],
     ["MAURITIUS_PASS", "SUNDA_STRAIT"],
+    ["SUNDA_STRAIT", "JAKARTA_APP"],
+    ["JAKARTA_APP", "SINGAPORE_E"],
     ["SUNDA_STRAIT", "SCS_SOUTH"],
+    ["SINGAPORE_E", "LAEM_CHABANG_APP"],
+    ["SCS_SOUTH", "HO_CHI_MINH_APP"],
+    ["SCS_MID", "MANILA_APP"],
+    ["MANILA_APP", "LUZON_STRAIT"],
+    ["TAIWAN_STRAIT", "KAOHSIUNG_APP"],
+    ["KAOHSIUNG_APP", "LUZON_STRAIT"],
     ["LOMBOK_STRAIT", "HEDLAND_APP"],
+    ["HEDLAND_APP", "FREMANTLE_APP"],
+    ["FREMANTLE_APP", "MELBOURNE_APP"],
+    ["MELBOURNE_APP", "SYDNEY_APP"],
+    ["SYDNEY_APP", "BRISBANE_APP"],
+    ["SYDNEY_APP", "AUCKLAND_APP"],
     ["HEDLAND_APP", "SYDNEY_APP"],
     ["EAST_CHINA_SEA", "NINGBO_APP"],
+    ["NINGBO_APP", "SHANGHAI_APP"],
+    ["NINGBO_APP", "OSUMI_STRAIT"],
+    ["SHANGHAI_APP", "OSUMI_STRAIT"],
     ["EAST_CHINA_SEA", "QINGDAO_APP"],
     ["QINGDAO_APP", "BOHAI_STRAIT"],
+    ["BOHAI_STRAIT", "DALIAN_APP"],
+    ["BOHAI_STRAIT", "TIANJIN_APP"],
+    ["BUSAN_APP", "VLADIVOSTOK_APP"],
+    ["VLADIVOSTOK_APP", "TOKYO_APP"],
     ["CAPE_VERDE_PASS", "SANTOS_APP"],
     ["SANTOS_APP", "BUENOS_AIRES_APP"],
     ["BUENOS_AIRES_APP", "MAGELLAN_E"],
     ["MAGELLAN_E", "MAGELLAN_W"],
-    ["MAGELLAN_W", "PACIFIC_PANAMA_APP"],
+    ["MAGELLAN_W", "VALPARAISO_APP"],
+    ["VALPARAISO_APP", "CALLAO_APP"],
+    ["CALLAO_APP", "PACIFIC_PANAMA_APP"],
+    ["PACIFIC_PANAMA_APP", "MANZANILLO_APP"],
+    ["MANZANILLO_APP", "LONG_BEACH_APP"],
+    ["CARIBBEAN_MID", "CARTAGENA_APP"],
+    ["CARTAGENA_APP", "PANAMA_COLON"],
     ["GULF_MEXICO_MID", "NEW_ORLEANS_APP"],
     ["GULF_MEXICO_MID", "YUCATAN_CH"],
     ["YUCATAN_CH", "CARIBBEAN_MID"],
+    ["FLORIDA_STRAIT", "MIAMI_APP"],
+    ["MIAMI_APP", "SAVANNAH_APP"],
     ["HATTERAS_E", "SAVANNAH_APP"],
     ["SAVANNAH_APP", "FLORIDA_STRAIT"],
+    ["NEW_YORK_APP", "HALIFAX_APP"],
+    ["HALIFAX_APP", "MONTREAL_APP"],
+    ["HALIFAX_APP", "NATL_GC_WEST"],
     ["USHANT", "NATL_GC_MID"],
     ["NATL_GC_MID", "NATL_GC_WEST"],
     ["NATL_GC_WEST", "NEW_YORK_APP"],
     ["NATL_GC_WEST", "CHESAPEAKE_APP"],
     ["TOKYO_APP", "NPAC_GC_WEST"],
+    ["OSUMI_STRAIT", "NPAC_GC_WEST"],
+    ["NPAC_GC_WEST", "NPAC_GC_MID"],
+    ["NPAC_GC_MID", "UNIMAK_PASS"],
+    ["UNIMAK_PASS", "SEATTLE_APP"],
+    ["NPAC_GC_MID", "NPAC_GC_EAST"],
     ["NPAC_GC_WEST", "NPAC_GC_EAST"],
+    ["NPAC_GC_EAST", "SEATTLE_APP"],
+    ["SEATTLE_APP", "SAN_FRANCISCO_APP"],
     ["NPAC_GC_EAST", "SAN_FRANCISCO_APP"],
     ["NPAC_GC_EAST", "LONG_BEACH_APP"]
   ];
   extraEdges.forEach(e => MARITIME_SEA_EDGES.push(e));
+
+  // Expand PORT_DEPTHS_DB with 60+ additional major world ports so any port pair works out-of-the-box
+  if (typeof PORT_DEPTHS_DB !== "undefined" && Array.isArray(PORT_DEPTHS_DB)) {
+    const extraPorts = [
+      { id: "port-ningbo-alias", name: "Ningbo", unlocode: "CNNGB", country: "China", countryCode: "CN", coords: [29.87, 122.05], approachCoords: [29.90, 122.35], maxDraftMeters: 22.0, maxDraftLowTide: "21.0m" },
+      { id: "port-los-angeles-alias", name: "Los Angeles", unlocode: "USLAX", country: "United States", countryCode: "US", coords: [33.74, -118.27], approachCoords: [33.70, -118.25], maxDraftMeters: 16.2, maxDraftLowTide: "16.2m" },
+      { id: "port-long-beach-alias", name: "Long Beach", unlocode: "USLGB", country: "United States", countryCode: "US", coords: [33.75, -118.20], approachCoords: [33.70, -118.25], maxDraftMeters: 16.5, maxDraftLowTide: "16.5m" },
+      { id: "port-san-francisco", name: "San Francisco & Oakland", unlocode: "USSFO", country: "United States", countryCode: "US", coords: [37.80, -122.40], approachCoords: [37.75, -122.65], maxDraftMeters: 15.2, maxDraftLowTide: "15.2m" },
+      { id: "port-seattle", name: "Seattle & Tacoma", unlocode: "USSEA", country: "United States", countryCode: "US", coords: [47.60, -122.35], approachCoords: [48.38, -124.72], maxDraftMeters: 15.5, maxDraftLowTide: "15.5m" },
+      { id: "port-vancouver", name: "Vancouver", unlocode: "CAVAN", country: "Canada", countryCode: "CA", coords: [49.29, -123.11], approachCoords: [48.38, -124.72], maxDraftMeters: 15.8, maxDraftLowTide: "15.8m" },
+      { id: "port-manzanillo", name: "Manzanillo", unlocode: "MXZLO", country: "Mexico", countryCode: "MX", coords: [19.05, -104.32], approachCoords: [18.98, -104.42], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-callao", name: "Callao (Lima)", unlocode: "PECLL", country: "Peru", countryCode: "PE", coords: [-12.05, -77.15], approachCoords: [-12.08, -77.28], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-valparaiso", name: "Valparaiso", unlocode: "CLVAP", country: "Chile", countryCode: "CL", coords: [-33.03, -71.63], approachCoords: [-33.00, -71.72], maxDraftMeters: 14.5, maxDraftLowTide: "14.5m" },
+      { id: "port-cartagena", name: "Cartagena", unlocode: "COCTG", country: "Colombia", countryCode: "CO", coords: [10.40, -75.53], approachCoords: [10.32, -75.62], maxDraftMeters: 15.0, maxDraftLowTide: "15.0m" },
+      { id: "port-rio-de-janeiro", name: "Rio de Janeiro", unlocode: "BRRIO", country: "Brazil", countryCode: "BR", coords: [-22.89, -43.18], approachCoords: [-23.05, -43.12], maxDraftMeters: 15.2, maxDraftLowTide: "15.2m" },
+      { id: "port-miami", name: "Miami", unlocode: "USMIA", country: "United States", countryCode: "US", coords: [25.77, -80.17], approachCoords: [25.75, -80.05], maxDraftMeters: 15.2, maxDraftLowTide: "15.2m" },
+      { id: "port-charleston", name: "Charleston", unlocode: "USCHS", country: "United States", countryCode: "US", coords: [32.78, -79.92], approachCoords: [32.68, -79.72], maxDraftMeters: 15.8, maxDraftLowTide: "15.8m" },
+      { id: "port-norfolk", name: "Norfolk (Hampton Roads)", unlocode: "USORF", country: "United States", countryCode: "US", coords: [36.95, -76.33], approachCoords: [36.95, -75.90], maxDraftMeters: 16.5, maxDraftLowTide: "16.5m" },
+      { id: "port-baltimore", name: "Baltimore", unlocode: "USBAL", country: "United States", countryCode: "US", coords: [39.27, -76.58], approachCoords: [36.95, -75.90], maxDraftMeters: 15.2, maxDraftLowTide: "15.2m" },
+      { id: "port-halifax", name: "Halifax", unlocode: "CAHAL", country: "Canada", countryCode: "CA", coords: [44.65, -63.57], approachCoords: [44.48, -63.45], maxDraftMeters: 16.5, maxDraftLowTide: "16.5m" },
+      { id: "port-montreal", name: "Montreal", unlocode: "CAMTR", country: "Canada", countryCode: "CA", coords: [45.50, -73.55], approachCoords: [48.85, -64.00], maxDraftMeters: 11.3, maxDraftLowTide: "11.3m" },
+      { id: "port-felixstowe", name: "Felixstowe", unlocode: "GBFXT", country: "United Kingdom", countryCode: "GB", coords: [51.95, 1.32], approachCoords: [51.92, 1.45], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-southampton", name: "Southampton", unlocode: "GBSOU", country: "United Kingdom", countryCode: "GB", coords: [50.89, -1.40], approachCoords: [50.65, -1.10], maxDraftMeters: 15.5, maxDraftLowTide: "15.5m" },
+      { id: "port-le-havre", name: "Le Havre", unlocode: "FRLEH", country: "France", countryCode: "FR", coords: [49.48, 0.12], approachCoords: [49.50, 0.00], maxDraftMeters: 17.5, maxDraftLowTide: "17.5m" },
+      { id: "port-marseille", name: "Marseille-Fos", unlocode: "FRMRS", country: "France", countryCode: "FR", coords: [43.40, 4.88], approachCoords: [43.25, 4.92], maxDraftMeters: 20.0, maxDraftLowTide: "20.0m" },
+      { id: "port-bilbao", name: "Bilbao", unlocode: "ESBIO", country: "Spain", countryCode: "ES", coords: [43.35, -3.05], approachCoords: [43.42, -3.12], maxDraftMeters: 20.0, maxDraftLowTide: "20.0m" },
+      { id: "port-barcelona", name: "Barcelona", unlocode: "ESBCN", country: "Spain", countryCode: "ES", coords: [41.35, 2.17], approachCoords: [41.30, 2.22], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-valencia", name: "Valencia", unlocode: "ESVLC", country: "Spain", countryCode: "ES", coords: [39.45, -0.32], approachCoords: [39.42, -0.22], maxDraftMeters: 16.5, maxDraftLowTide: "16.5m" },
+      { id: "port-genoa", name: "Genoa", unlocode: "ITGOA", country: "Italy", countryCode: "IT", coords: [44.40, 8.92], approachCoords: [44.32, 8.88], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-trieste", name: "Trieste", unlocode: "ITTRS", country: "Italy", countryCode: "IT", coords: [45.65, 13.75], approachCoords: [45.55, 13.55], maxDraftMeters: 18.0, maxDraftLowTide: "18.0m" },
+      { id: "port-piraeus", name: "Piraeus (Athens)", unlocode: "GRPIR", country: "Greece", countryCode: "GR", coords: [37.94, 23.64], approachCoords: [37.85, 23.58], maxDraftMeters: 18.0, maxDraftLowTide: "18.0m" },
+      { id: "port-istanbul", name: "Istanbul (Ambarli)", unlocode: "TRIST", country: "Turkey", countryCode: "TR", coords: [40.98, 28.68], approachCoords: [40.98, 28.98], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-constanta", name: "Constanta", unlocode: "ROCND", country: "Romania", countryCode: "RO", coords: [44.16, 28.65], approachCoords: [44.12, 28.75], maxDraftMeters: 18.5, maxDraftLowTide: "18.5m" },
+      { id: "port-gothenburg", name: "Gothenburg", unlocode: "SEGOT", country: "Sweden", countryCode: "SE", coords: [57.69, 11.89], approachCoords: [57.60, 11.55], maxDraftMeters: 16.5, maxDraftLowTide: "16.5m" },
+      { id: "port-helsinki", name: "Helsinki", unlocode: "FIHEL", country: "Finland", countryCode: "FI", coords: [60.16, 24.95], approachCoords: [59.85, 25.50], maxDraftMeters: 13.0, maxDraftLowTide: "13.0m" },
+      { id: "port-casablanca", name: "Casablanca", unlocode: "MACAS", country: "Morocco", countryCode: "MA", coords: [33.60, -7.62], approachCoords: [33.68, -7.68], maxDraftMeters: 14.0, maxDraftLowTide: "14.0m" },
+      { id: "port-tangier", name: "Tangier Med", unlocode: "MATNG", country: "Morocco", countryCode: "MA", coords: [35.89, -5.50], approachCoords: [35.95, -5.60], maxDraftMeters: 18.0, maxDraftLowTide: "18.0m" },
+      { id: "port-dakar", name: "Dakar", unlocode: "SNDKR", country: "Senegal", countryCode: "SN", coords: [14.68, -17.43], approachCoords: [14.62, -17.52], maxDraftMeters: 13.5, maxDraftLowTide: "13.5m" },
+      { id: "port-lagos", name: "Lagos (Apapa & Lekki)", unlocode: "NGLOS", country: "Nigeria", countryCode: "NG", coords: [6.43, 3.40], approachCoords: [6.30, 3.40], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-luanda", name: "Luanda", unlocode: "AOLAD", country: "Angola", countryCode: "AO", coords: [-8.79, 13.24], approachCoords: [-8.72, 13.15], maxDraftMeters: 14.5, maxDraftLowTide: "14.5m" },
+      { id: "port-cape-town", name: "Cape Town", unlocode: "ZACPT", country: "South Africa", countryCode: "ZA", coords: [-33.90, 18.43], approachCoords: [-33.85, 18.32], maxDraftMeters: 15.5, maxDraftLowTide: "15.5m" },
+      { id: "port-mombasa", name: "Mombasa", unlocode: "KEMBA", country: "Kenya", countryCode: "KE", coords: [-4.05, 39.66], approachCoords: [-4.08, 39.75], maxDraftMeters: 15.0, maxDraftLowTide: "15.0m" },
+      { id: "port-jeddah", name: "Jeddah", unlocode: "SAJED", country: "Saudi Arabia", countryCode: "SA", coords: [21.48, 39.17], approachCoords: [21.45, 39.05], maxDraftMeters: 16.5, maxDraftLowTide: "16.5m" },
+      { id: "port-salalah", name: "Salalah", unlocode: "OMSLL", country: "Oman", countryCode: "OM", coords: [16.94, 54.00], approachCoords: [16.88, 54.05], maxDraftMeters: 18.0, maxDraftLowTide: "18.0m" },
+      { id: "port-sohar", name: "Sohar", unlocode: "OMSOH", country: "Oman", countryCode: "OM", coords: [24.50, 56.63], approachCoords: [24.58, 56.72], maxDraftMeters: 18.5, maxDraftLowTide: "18.5m" },
+      { id: "port-doha", name: "Doha & Ras Laffan", unlocode: "QADOH", country: "Qatar", countryCode: "QA", coords: [25.90, 51.58], approachCoords: [26.05, 51.75], maxDraftMeters: 15.0, maxDraftLowTide: "15.0m" },
+      { id: "port-dammam", name: "Dammam", unlocode: "SADMM", country: "Saudi Arabia", countryCode: "SA", coords: [26.50, 50.20], approachCoords: [26.65, 50.30], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-karachi", name: "Karachi", unlocode: "PKKHI", country: "Pakistan", countryCode: "PK", coords: [24.83, 66.97], approachCoords: [24.70, 66.90], maxDraftMeters: 15.5, maxDraftLowTide: "15.5m" },
+      { id: "port-mundra", name: "Mundra", unlocode: "INMUN", country: "India", countryCode: "IN", coords: [22.74, 69.70], approachCoords: [22.65, 69.55], maxDraftMeters: 17.5, maxDraftLowTide: "17.5m" },
+      { id: "port-chennai", name: "Chennai", unlocode: "INMAA", country: "India", countryCode: "IN", coords: [13.09, 80.29], approachCoords: [13.10, 80.40], maxDraftMeters: 16.5, maxDraftLowTide: "16.5m" },
+      { id: "port-port-klang", name: "Port Klang", unlocode: "MYPKG", country: "Malaysia", countryCode: "MY", coords: [3.00, 101.39], approachCoords: [2.92, 101.25], maxDraftMeters: 17.5, maxDraftLowTide: "17.5m" },
+      { id: "port-jakarta", name: "Jakarta (Tanjung Priok)", unlocode: "IDJKT", country: "Indonesia", countryCode: "ID", coords: [-6.10, 106.88], approachCoords: [-6.00, 106.88], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-laem-chabang", name: "Laem Chabang (Bangkok)", unlocode: "THLCH", country: "Thailand", countryCode: "TH", coords: [13.08, 100.88], approachCoords: [12.95, 100.78], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-ho-chi-minh", name: "Ho Chi Minh (Cai Mep)", unlocode: "VNSGN", country: "Vietnam", countryCode: "VN", coords: [10.50, 107.02], approachCoords: [10.25, 107.08], maxDraftMeters: 16.5, maxDraftLowTide: "16.5m" },
+      { id: "port-manila", name: "Manila", unlocode: "PHMNL", country: "Philippines", countryCode: "PH", coords: [14.58, 120.95], approachCoords: [14.42, 120.55], maxDraftMeters: 14.5, maxDraftLowTide: "14.5m" },
+      { id: "port-kaohsiung", name: "Kaohsiung", unlocode: "TWKHH", country: "Taiwan", countryCode: "TW", coords: [22.61, 120.29], approachCoords: [22.58, 120.22], maxDraftMeters: 17.5, maxDraftLowTide: "17.5m" },
+      { id: "port-shenzhen", name: "Shenzhen (Yantian & Shekou)", unlocode: "CNSZX", country: "China", countryCode: "CN", coords: [22.57, 114.27], approachCoords: [22.15, 114.30], maxDraftMeters: 17.5, maxDraftLowTide: "17.5m" },
+      { id: "port-guangzhou", name: "Guangzhou (Nansha)", unlocode: "CNCAN", country: "China", countryCode: "CN", coords: [22.66, 113.66], approachCoords: [22.15, 114.30], maxDraftMeters: 17.0, maxDraftLowTide: "17.0m" },
+      { id: "port-xiamen", name: "Xiamen", unlocode: "CNXMN", country: "China", countryCode: "CN", coords: [24.45, 118.05], approachCoords: [24.38, 118.18], maxDraftMeters: 17.0, maxDraftLowTide: "17.0m" },
+      { id: "port-tianjin", name: "Tianjin (Xingang)", unlocode: "CNTSN", country: "China", countryCode: "CN", coords: [38.98, 117.75], approachCoords: [38.92, 118.05], maxDraftMeters: 19.5, maxDraftLowTide: "19.5m" },
+      { id: "port-dalian", name: "Dalian", unlocode: "CNDLC", country: "China", countryCode: "CN", coords: [38.92, 121.65], approachCoords: [38.82, 121.75], maxDraftMeters: 18.5, maxDraftLowTide: "18.5m" },
+      { id: "port-ulsan", name: "Ulsan", unlocode: "KRUSN", country: "South Korea", countryCode: "KR", coords: [35.50, 129.38], approachCoords: [35.42, 129.45], maxDraftMeters: 18.0, maxDraftLowTide: "18.0m" },
+      { id: "port-incheon", name: "Incheon", unlocode: "KRICN", country: "South Korea", countryCode: "KR", coords: [37.45, 126.60], approachCoords: [37.30, 126.35], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-nagoya", name: "Nagoya", unlocode: "JPNGO", country: "Japan", countryCode: "JP", coords: [35.03, 136.85], approachCoords: [34.50, 137.05], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-osaka", name: "Osaka & Kobe", unlocode: "JPOSA", country: "Japan", countryCode: "JP", coords: [34.65, 135.42], approachCoords: [33.80, 134.90], maxDraftMeters: 16.5, maxDraftLowTide: "16.5m" },
+      { id: "port-vladivostok", name: "Vladivostok", unlocode: "RUVVO", country: "Russia", countryCode: "RU", coords: [43.11, 131.88], approachCoords: [42.95, 131.95], maxDraftMeters: 15.0, maxDraftLowTide: "15.0m" },
+      { id: "port-fremantle", name: "Fremantle (Perth)", unlocode: "AUFRE", country: "Australia", countryCode: "AU", coords: [-32.05, 115.74], approachCoords: [-32.05, 115.62], maxDraftMeters: 14.7, maxDraftLowTide: "14.7m" },
+      { id: "port-melbourne", name: "Melbourne", unlocode: "AUMEL", country: "Australia", countryCode: "AU", coords: [-37.84, 144.92], approachCoords: [-38.32, 144.60], maxDraftMeters: 14.0, maxDraftLowTide: "14.0m" },
+      { id: "port-brisbane", name: "Brisbane", unlocode: "AUBNE", country: "Australia", countryCode: "AU", coords: [-27.38, 153.17], approachCoords: [-27.05, 153.30], maxDraftMeters: 14.0, maxDraftLowTide: "14.0m" },
+      { id: "port-auckland", name: "Auckland", unlocode: "NZAKL", country: "New Zealand", countryCode: "NZ", coords: [-36.84, 174.77], approachCoords: [-36.70, 174.95], maxDraftMeters: 13.5, maxDraftLowTide: "13.5m" }
+    ];
+    extraPorts.forEach(ep => {
+      if (!PORT_DEPTHS_DB.some(p => p.id === ep.id || p.unlocode === ep.unlocode)) {
+        PORT_DEPTHS_DB.push(ep);
+      }
+    });
+  }
 })();
 
 function calculateLegCourseDegrees(lat1, lon1, lat2, lon2, mode = "RL") {
@@ -8630,35 +8818,251 @@ const PORT_RU_ALIASES = {
   "гданьск": "port-gdansk"
 };
 
+const PORT_EN_ALIASES = {
+  "ningbo": "CNNGB",
+  "zhoushan": "CNNGB",
+  "los angeles": "USLAX",
+  "long beach": "USLAX",
+  "san pedro": "USLAX",
+  "san francisco": "USSFO",
+  "oakland": "USSFO",
+  "seattle": "USSEA",
+  "tacoma": "USSEA",
+  "vancouver": "CAVAN",
+  "manzanillo": "MXZLO",
+  "callao": "PECLL",
+  "lima": "PECLL",
+  "valparaiso": "CLVAP",
+  "panama": "PAPTY",
+  "balboa": "PAPTY",
+  "colon": "PAONX",
+  "cristobal": "PAONX",
+  "cartagena": "COCTG",
+  "santos": "BRSSZ",
+  "rio de janeiro": "BRRIO",
+  "buenos aires": "ARBUE",
+  "houston": "USHOU",
+  "galveston": "USHOU",
+  "new orleans": "USMSY",
+  "miami": "USMIA",
+  "savannah": "USSAV",
+  "charleston": "USCHS",
+  "norfolk": "USORF",
+  "baltimore": "USBAL",
+  "new york": "USNYC",
+  "newark": "USNYC",
+  "halifax": "CAHAL",
+  "montreal": "CAMTR",
+  "rotterdam": "NLRTM",
+  "europoort": "NLRTM",
+  "antwerp": "BEANR",
+  "hamburg": "DEHAM",
+  "felixstowe": "GBFXT",
+  "southampton": "GBSOU",
+  "le havre": "FRLEH",
+  "marseille": "FRMRS",
+  "bilbao": "ESBIO",
+  "algeciras": "ESALG",
+  "gibraltar": "GIGIB",
+  "barcelona": "ESBCN",
+  "valencia": "ESVLC",
+  "lisbon": "PTLIS",
+  "genoa": "ITGOA",
+  "trieste": "ITTRS",
+  "piraeus": "GRPIR",
+  "athens": "GRPIR",
+  "istanbul": "TRIST",
+  "constanta": "ROCND",
+  "novorossiysk": "RUNVS",
+  "gdansk": "PLGDN",
+  "st petersburg": "RULED",
+  "saint petersburg": "RULED",
+  "helsinki": "FIHEL",
+  "gothenburg": "SEGOT",
+  "bergen": "NOBGO",
+  "casablanca": "MACAS",
+  "tangier": "MATNG",
+  "dakar": "SNDKR",
+  "lagos": "NGLOS",
+  "bonny": "NGBON",
+  "luanda": "AOLAD",
+  "cape town": "ZACPT",
+  "durban": "ZADUR",
+  "mombasa": "KEMBA",
+  "jeddah": "SAJED",
+  "suez": "EGSUZ",
+  "port said": "EGPSD",
+  "fujairah": "AEFJR",
+  "jebel ali": "AEJEA",
+  "dubai": "AEJEA",
+  "ras tanura": "SARTA",
+  "dammam": "SADMM",
+  "doha": "QADOH",
+  "ras laffan": "QADOH",
+  "sohar": "OMSOH",
+  "salalah": "OMSLL",
+  "karachi": "PKKHI",
+  "mundra": "INMUN",
+  "mumbai": "INBOM",
+  "nhava sheva": "INBOM",
+  "chennai": "INMAA",
+  "colombo": "LKCMB",
+  "port klang": "MYPKG",
+  "singapore": "SGSIN",
+  "jakarta": "IDJKT",
+  "laem chabang": "THLCH",
+  "bangkok": "THLCH",
+  "ho chi minh": "VNSGN",
+  "saigon": "VNSGN",
+  "manila": "PHMNL",
+  "hong kong": "HKHKG",
+  "shenzhen": "CNSZX",
+  "yantian": "CNSZX",
+  "guangzhou": "CNCAN",
+  "nansha": "CNCAN",
+  "xiamen": "CNXMN",
+  "kaohsiung": "TWKHH",
+  "shanghai": "CNSHA",
+  "qingdao": "CNTAO",
+  "tianjin": "CNTSN",
+  "xingang": "CNTSN",
+  "dalian": "CNDLC",
+  "busan": "KRPUS",
+  "pusan": "KRPUS",
+  "ulsan": "KRUSN",
+  "incheon": "KRICN",
+  "tokyo": "JPTYO",
+  "yokohama": "JPYOK",
+  "nagoya": "JPNGO",
+  "osaka": "JPOSA",
+  "kobe": "JPOSA",
+  "vladivostok": "RUVVO",
+  "port hedland": "AUPHE",
+  "hedland": "AUPHE",
+  "fremantle": "AUFRE",
+  "perth": "AUFRE",
+  "melbourne": "AUMEL",
+  "sydney": "AUSYD",
+  "brisbane": "AUBNE",
+  "auckland": "NZAKL"
+};
+
+window.SETROUTE_CHAT_HISTORY = window.SETROUTE_CHAT_HISTORY || [];
+window.SETROUTE_LAST_PORTS = window.SETROUTE_LAST_PORTS || { origin: null, dest: null, opts: {} };
+
 function findPortsInUserMessage(text) {
   if (!text || typeof PORT_DEPTHS_DB === "undefined") return [];
-  const lower = text.toLowerCase();
+  const lower = text.toLowerCase().replace(/\s+/g, " ");
   const hits = [];
 
+  const addHit = (p, idx) => {
+    if (!p || idx < 0) return;
+    const existing = hits.find(h => h.port.id === p.id || (p.unlocode && h.port.unlocode === p.unlocode));
+    if (!existing) {
+      hits.push({ port: p, pos: idx });
+    } else if (idx < existing.pos) {
+      existing.pos = idx;
+    }
+  };
+
+  // 1. Check Russian aliases
   for (const [ruStem, portId] of Object.entries(PORT_RU_ALIASES)) {
     const idx = lower.indexOf(ruStem);
     if (idx !== -1) {
       const p = PORT_DEPTHS_DB.find(x => x.id === portId || x.name.toLowerCase().includes(portId.replace("port-", "")));
-      if (p && !hits.some(h => h.port.id === p.id)) {
-        hits.push({ port: p, pos: idx });
-      }
+      addHit(p, idx);
     }
   }
 
+  // 2. Check English aliases (sorted longest first so "los angeles" matches before short tokens)
+  const sortedAliases = Object.entries(PORT_EN_ALIASES).sort((a, b) => b[0].length - a[0].length);
+  for (const [alias, locode] of sortedAliases) {
+    const esc = alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const rx = new RegExp(`(?:^|[^a-z0-9])(${esc})(?=$|[^a-z0-9])`, "i");
+    const m = rx.exec(lower);
+    if (m) {
+      const matchPos = m.index + (m[0].length - m[1].length);
+      const p = PORT_DEPTHS_DB.find(x => x.unlocode === locode || x.name.toLowerCase().includes(alias));
+      addHit(p, matchPos);
+    }
+  }
+
+  // 3. Check PORT_DEPTHS_DB names & sub-tokens (splitting on parentheses, hyphens, slashes, ampersands)
+  const stopTokens = new Set(["port", "harbor", "harbour", "terminal", "channel", "ship", "approaches", "approach", "canal", "strait", "island", "anchorage", "delta", "north", "south", "east", "west", "main", "deep", "water", "europort", "zone"]);
   PORT_DEPTHS_DB.forEach(p => {
     const pName = p.name.toLowerCase();
-    const shortName = pName.split("(")[0].trim();
-    let idx = lower.indexOf(pName);
-    if (idx === -1 && shortName.length >= 4) {
-      idx = lower.indexOf(shortName);
-    }
-    if (idx !== -1 && !hits.some(h => h.port.id === p.id)) {
-      hits.push({ port: p, pos: idx });
+    const candidates = [pName];
+    pName.split(/[()\/&,-]+/).forEach(part => {
+      const clean = part.replace(/\b(port|of|ship|channel|approaches|terminal|harbor|harbour|island|strait|canal)\b/gi, "").trim();
+      if (clean.length >= 4 && !stopTokens.has(clean)) {
+        candidates.push(clean);
+      }
+    });
+    for (const cand of candidates) {
+      if (cand.length < 4) continue;
+      const esc = cand.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const rx = new RegExp(`(?:^|[^a-z0-9])(${esc})(?=$|[^a-z0-9])`, "i");
+      const m = rx.exec(lower);
+      if (m) {
+        const matchPos = m.index + (m[0].length - m[1].length);
+        addHit(p, matchPos);
+        break;
+      }
     }
   });
 
   hits.sort((a, b) => a.pos - b.pos);
   return hits.map(h => h.port);
+}
+
+async function resolveUnknownPortsFromText(text, currentPorts) {
+  if (currentPorts.length >= 2 || !navigator.onLine) return currentPorts;
+  // Look for patterns like "from X to Y" or "between X and Y" or "X -> Y"
+  const m = text.match(/(?:from|between)\s+([A-Za-z][A-Za-z\s.-]{2,28}?)\s+(?:to|and|->|→)\s+([A-Za-z][A-Za-z\s.-]{2,28}?)(?:$|[,.?;]|\s+(?:with|draft|speed|at|via|using|in|on))/i)
+         || text.match(/([A-Za-z][A-Za-z\s.-]{2,24}?)\s*(?:->|→|\bto\b)\s*([A-Za-z][A-Za-z\s.-]{2,24}?)$/i);
+  if (!m) return currentPorts;
+
+  const rawNames = [m[1].trim(), m[2].trim()].map(s =>
+    s.replace(/^(?:make|plan|build|create|the|a|route|passage|from|to)\s+/gi, "").trim()
+  );
+
+  const resolved = [];
+  for (const candName of rawNames) {
+    if (!candName || candName.length < 3) continue;
+    const localMatch = findPortsInUserMessage(candName);
+    if (localMatch.length > 0) {
+      resolved.push(localMatch[0]);
+      continue;
+    }
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 3200);
+      const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(candName)}&count=1&language=en&format=json`;
+      const resp = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(tid);
+      if (resp.ok) {
+        const data = await resp.json();
+        const hit = (data.results || [])[0];
+        if (hit && Number.isFinite(hit.latitude) && Number.isFinite(hit.longitude)) {
+          const dynPort = {
+            id: `port-dyn-${hit.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+            name: hit.name,
+            unlocode: `${(hit.country_code || "UN").toUpperCase()}${hit.name.slice(0, 3).toUpperCase()}`,
+            country: hit.country || "Maritime Port",
+            countryCode: (hit.country_code || "UN").toUpperCase(),
+            coords: [hit.latitude, hit.longitude],
+            approachCoords: [hit.latitude, hit.longitude],
+            maxDraftMeters: 15.0,
+            maxDraftLowTide: "15.0m"
+          };
+          PORT_DEPTHS_DB.push(dynPort);
+          resolved.push(dynPort);
+        }
+      }
+    } catch (e) {}
+  }
+
+  return resolved.length >= 2 ? resolved : (resolved.length === 1 && currentPorts.length === 0 ? resolved : currentPorts);
 }
 
 function appendChatMessage(role, htmlContent, quickChips = []) {
@@ -8700,6 +9104,13 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const xtd = parseFloat(options.xtdNM || (document.getElementById("setRouteXtdInput") && document.getElementById("setRouteXtdInput").value)) || 0.25;
   const sailMode = options.sailMode || (document.getElementById("setRouteSailSelect") && document.getElementById("setRouteSailSelect").value) || "HYBRID";
   const viaCape = Boolean(options.viaCape);
+  const viaPorts = Array.isArray(options.viaPorts) ? options.viaPorts : [];
+
+  window.SETROUTE_LAST_PORTS = {
+    origin: pOrig,
+    dest: pDest,
+    opts: { speedKnots: speed, draftMeters: draft, xtdNM: xtd, sailMode, viaCape }
+  };
 
   const origSel = document.getElementById("setRouteOriginSelect");
   const destSel = document.getElementById("setRouteDestSelect");
@@ -8718,8 +9129,10 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   let baseRoute = generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode);
   if (viaCape) {
     const capeCorridor = ["ST_VINCENT", "CANARY_PASS", "CAPE_VERDE_PASS", "GULF_OF_GUINEA", "CAPE_AGULHAS", "MAURITIUS_PASS", "MALACCA_N", "SINGAPORE_MAIN"];
+    const isEastbound = origCoords[1] < destCoords[1];
+    const orderedCorridor = isEastbound ? capeCorridor : capeCorridor.slice().reverse();
     const wpts = [baseRoute.waypoints[0]];
-    capeCorridor.forEach((nk, idx) => {
+    orderedCorridor.forEach((nk, idx) => {
       const node = MARITIME_SEA_NODES[nk];
       if (node) {
         wpts.push({
@@ -8739,6 +9152,26 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     wpts.push(baseRoute.waypoints[baseRoute.waypoints.length - 1]);
     baseRoute.waypoints = wpts;
     baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Cape of Good Hope)`;
+  }
+
+  if (viaPorts.length > 0) {
+    viaPorts.forEach(vp => {
+      const vpC = vp.approachCoords || vp.coords;
+      const midIdx = Math.max(1, Math.floor(baseRoute.waypoints.length / 2));
+      baseRoute.waypoints.splice(midIdx, 0, {
+        wptNo: ('00' + (midIdx + 1)).slice(-3),
+        name: `${vp.name.toUpperCase()} CALL / APPROACH`,
+        lat: vpC[0],
+        lon: vpC[1],
+        speedKnots: speed,
+        portsideXTD: xtd,
+        starboardXTD: xtd,
+        turnRadius: 0.6,
+        sail: "RL",
+        rot: 8.0
+      });
+    });
+    baseRoute.name = `${pOrig.name} to ${pDest.name} (via ${viaPorts.map(v => v.name).join(", ")})`;
   }
 
   baseRoute.format = "SETROUTE_AI";
@@ -8772,7 +9205,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
 
   for (let i = 0; i < legs.length; i++) {
     const leg = legs[i];
-    await new Promise(r => setTimeout(r, 170));
+    await new Promise(r => setTimeout(r, 120));
     if (streamEl) {
       const card = document.createElement("div");
       card.className = "sr-leg-step-card";
@@ -8812,7 +9245,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   if (navigator.onLine && typeof SETROUTE_COHERE_KEY === "string" && SETROUTE_COHERE_KEY) {
     try {
       const ctrl = new AbortController();
-      const tid = setTimeout(() => ctrl.abort(), 3600);
+      const tid = setTimeout(() => ctrl.abort(), 7500);
       const legBrief = legs.map(l => `Leg ${l.legNo} (${l.fromName}->${l.toName}, ${l.sailType}, ${l.courseFormatted}, ${l.distanceNM}NM)`).join("; ");
       const resp = await fetch("https://api.cohere.com/v2/chat", {
         method: "POST",
@@ -8839,15 +9272,45 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     } catch (e) {}
   }
 
+  // Check if Europe/Med <-> Asia so we can offer a 1-click toggle chip between Suez and Cape without blocking
+  const isEuropeOrMed = p => p.coords[1] >= -15 && p.coords[1] <= 38 && p.coords[0] >= 25;
+  const isAsiaOrGulf = p => p.coords[1] >= 48;
+  const canToggleSuezCape = (isEuropeOrMed(pOrig) && isAsiaOrGulf(pDest)) || (isAsiaOrGulf(pOrig) && isEuropeOrMed(pDest));
+
+  const refineChips = [
+    { label: `⚡ Speed 16 kn`, prompt: `Set speed to 16 knots` },
+    { label: `⚓ Draft 13.5m`, prompt: `Set draft to 13.5m` },
+    { label: `🌐 Great Circle (GC)`, prompt: `Recalculate using Great Circle GC` },
+    { label: `🔄 Reverse Route`, prompt: `Reverse route` }
+  ];
+  if (canToggleSuezCape) {
+    refineChips.unshift(
+      viaCape
+        ? { label: `⚡ Switch to Suez Canal`, prompt: `Plan route via Suez Canal from ${pOrig.name} to ${pDest.name}` }
+        : { label: `🌊 Switch to Cape of Good Hope`, prompt: `Plan route via Cape of Good Hope from ${pOrig.name} to ${pDest.name}` }
+    );
+  }
+
   if (footerEl) {
     footerEl.innerHTML = `
       <div style="padding:10px 12px;border-radius:10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#e2e8f0;margin-top:6px;">
         <strong style="color:#34d399;">✓ Passage plan "${baseRoute.name}" ready &amp; saved to SetRoute sidebar</strong><br>
         Total: <b>${legs.length} legs (${baseRoute.waypoints.length} WPTs)</b> • Distance: <b>${baseRoute.totalDistanceNM} NM</b> • ETE: <b>${baseRoute.steamingDays} days (${baseRoute.totalSteamingHours}h)</b>.<br>
-        ${cohereNote ? `<span style="color:#bae6fd;display:block;margin-top:4px;"><b>Master Mariner Note:</b> ${cohereNote}</span>` : ""}
+        <span style="font-size:0.74rem;color:#94a3b8;">You can refine draft, speed, XTD, GC/RL mode, or intermediate ports anytime in chat.</span>
+        ${cohereNote ? `<span style="color:#bae6fd;display:block;margin-top:5px;"><b>Master Mariner Note:</b> ${cohereNote}</span>` : ""}
+      </div>
+      <div class="sr-quick-chips" style="margin-top:8px;">
+        ${refineChips.map(c => `<button type="button" class="sr-quick-chip" data-sr-prompt="${c.prompt.replace(/"/g, '&quot;')}">${c.label}</button>`).join("")}
       </div>
     `;
   }
+
+  window.SETROUTE_CHAT_HISTORY.push({
+    role: "assistant",
+    content: `Generated passage plan ${baseRoute.name} (${baseRoute.totalDistanceNM} NM, ${legs.length} legs, speed ${speed} kn, draft ${draft}m).`
+  });
+  if (window.SETROUTE_CHAT_HISTORY.length > 14) window.SETROUTE_CHAT_HISTORY.shift();
+
   if (scrollWrap) scrollWrap.scrollTop = scrollWrap.scrollHeight;
 }
 
@@ -8856,11 +9319,14 @@ async function handleSetRouteUserMessage(rawText) {
   if (!text) return;
 
   appendChatMessage("user", text);
+  window.SETROUTE_CHAT_HISTORY.push({ role: "user", content: text });
+  if (window.SETROUTE_CHAT_HISTORY.length > 14) window.SETROUTE_CHAT_HISTORY.shift();
+
   const lower = text.toLowerCase();
 
-  const spdMatch = lower.match(/(?:скорост[ьию]|speed|spd)\s*(?:to|=|:)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:kn|kts|knots|узл)/i);
-  const drfMatch = lower.match(/(?:осадк[ауи]|draft)\s*(?:to|=|:)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:m\b|meters|м\b)/i);
-  const xtdMatch = lower.match(/(?:xtd|corridor|buffer)\s*(?:to|=|:)?\s*(\d+(?:[.,]\d+)?)/i);
+  const spdMatch = lower.match(/(?:скорост[ьию]|speed|spd)\s*(?:to|=|:|of)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:kn|kts|knots|узл)/i);
+  const drfMatch = lower.match(/(?:осадк[ауи]|draft|draught)\s*(?:to|=|:|of)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:m\b|meters|metres|м\b)/i);
+  const xtdMatch = lower.match(/(?:xtd|corridor|buffer)\s*(?:to|=|:|of)?\s*(\d+(?:[.,]\d+)?)/i);
 
   const parsedSpd = spdMatch ? parseFloat((spdMatch[1] || spdMatch[2]).replace(",", ".")) : null;
   const parsedDrf = drfMatch ? parseFloat((drfMatch[1] || drfMatch[2]).replace(",", ".")) : null;
@@ -8868,78 +9334,89 @@ async function handleSetRouteUserMessage(rawText) {
   let parsedSail = null;
   if (/\bgc\b|great circle/i.test(lower)) parsedSail = "GC";
   else if (/\brl\b|rhumb/i.test(lower)) parsedSail = "RL";
+  const chooseCape = /cape of good hope|via cape|around africa|agulhas/i.test(lower);
 
+  const defaultOpts = {
+    speedKnots: parsedSpd || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.speedKnots) || parseFloat((document.getElementById("setRouteSpeedInput") || {}).value) || 14.5,
+    draftMeters: parsedDrf || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.draftMeters) || parseFloat((document.getElementById("setRouteDraftInput") || {}).value) || 11.5,
+    xtdNM: parsedXtd || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.xtdNM) || parseFloat((document.getElementById("setRouteXtdInput") || {}).value) || 0.25,
+    sailMode: parsedSail || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.sailMode) || (document.getElementById("setRouteSailSelect") || {}).value || "HYBRID",
+    viaCape: chooseCape
+  };
+
+  // 1. Handle pending context if any
   if (window.SETROUTE_PENDING_CONTEXT) {
     const pending = window.SETROUTE_PENDING_CONTEXT;
-    if (pending.type === "SUEZ_VS_CAPE") {
-      const chooseCape = /cape|africa|good hope|aguhlas|agulhas/i.test(lower);
+    if (pending.type === "SUEZ_VS_CAPE" && pending.origin && pending.dest) {
       window.SETROUTE_PENDING_CONTEXT = null;
-      await executeBrainLegByLegRoutePlan(pending.origin, pending.dest, Object.assign({}, pending.opts, {
-        viaCape: chooseCape,
-        speedKnots: parsedSpd || pending.opts.speedKnots,
-        draftMeters: parsedDrf || pending.opts.draftMeters
+      await executeBrainLegByLegRoutePlan(pending.origin, pending.dest, Object.assign({}, pending.opts, defaultOpts, {
+        viaCape: chooseCape
       }));
       return;
     }
     if (pending.type === "MISSING_PORT") {
-      const newPorts = findPortsInUserMessage(text);
+      const newPorts = await resolveUnknownPortsFromText(text, findPortsInUserMessage(text));
       if (newPorts.length >= 1) {
         const orig = pending.origin || newPorts[0];
         const dest = pending.origin ? newPorts[0] : (newPorts[1] || null);
         if (orig && dest && orig.id !== dest.id) {
           window.SETROUTE_PENDING_CONTEXT = null;
-          await executeBrainLegByLegRoutePlan(orig, dest, {
-            speedKnots: parsedSpd,
-            draftMeters: parsedDrf,
-            xtdNM: parsedXtd,
-            sailMode: parsedSail
-          });
+          await executeBrainLegByLegRoutePlan(orig, dest, defaultOpts);
           return;
         }
       }
     }
   }
 
-  const mentionedPorts = findPortsInUserMessage(text);
+  // 2. Detect ports in current message (including live geocoding fallback for any unlisted port)
+  let mentionedPorts = findPortsInUserMessage(text);
+  if (mentionedPorts.length < 2) {
+    mentionedPorts = await resolveUnknownPortsFromText(text, mentionedPorts);
+  }
 
+  // 3. Action-First: If 2+ ports are found, IMMEDIATELY build the route without blocking!
   if (mentionedPorts.length >= 2) {
     const pOrig = mentionedPorts[0];
     const pDest = mentionedPorts[1];
-    const opts = {
-      speedKnots: parsedSpd || parseFloat((document.getElementById("setRouteSpeedInput") || {}).value) || 14.5,
-      draftMeters: parsedDrf || parseFloat((document.getElementById("setRouteDraftInput") || {}).value) || 11.5,
-      xtdNM: parsedXtd || parseFloat((document.getElementById("setRouteXtdInput") || {}).value) || 0.25,
-      sailMode: parsedSail || (document.getElementById("setRouteSailSelect") || {}).value || "HYBRID"
-    };
-
-    const isEuroOrUs = p => p.coords[1] < 30;
-    const isAsia = p => p.coords[1] > 70;
-    const crossesSuezOrCape = (isEuroOrUs(pOrig) && isAsia(pDest)) || (isAsia(pOrig) && isEuroOrUs(pDest));
-    const alreadySpecifiedSuezOrCape = /suez|cape|africa|good hope|суэц|африк/i.test(lower);
-
-    if (crossesSuezOrCape && !alreadySpecifiedSuezOrCape) {
-      window.SETROUTE_PENDING_CONTEXT = { type: "SUEZ_VS_CAPE", origin: pOrig, dest: pDest, opts };
-      appendChatMessage("brain", `
-        <strong>Routing Clarification (${pOrig.name} &rarr; ${pDest.name}):</strong><br>
-        Before computing the legs between <b>${pOrig.name}</b> and <b>${pDest.name}</b>, please confirm your preferred strategic corridor:
-        <ul style="margin:6px 0;padding-left:18px;">
-          <li><b>Option 1 — Via Suez Canal &amp; Red Sea:</b> Shortest distance (~3,400 NM saved), transiting Suez &amp; Bab-el-Mandeb TSS.</li>
-          <li><b>Option 2 — Via Cape of Good Hope:</b> Deep-ocean routing around southern Africa clear of NAVAREA IX Red Sea advisories.</li>
-        </ul>
-      `, [
-        { label: "⚡ Via Suez Canal", prompt: `Plan route via Suez Canal from ${pOrig.name} to ${pDest.name}` },
-        { label: "🌊 Via Cape of Good Hope", prompt: `Plan route via Cape of Good Hope from ${pOrig.name} to ${pDest.name}` }
-      ]);
-      return;
-    }
-
-    await executeBrainLegByLegRoutePlan(pOrig, pDest, opts);
+    const viaPorts = mentionedPorts.slice(2);
+    window.SETROUTE_PENDING_CONTEXT = null;
+    await executeBrainLegByLegRoutePlan(pOrig, pDest, Object.assign({}, defaultOpts, { viaPorts }));
     return;
   }
 
+  // 4. If user says "make the route first / specify later / just make it / use defaults"
+  if (/make\s+(?:the\s+)?route|route\s+first|specify\s+later|just\s+(?:make|plan|build)|build\s+it|do\s+it\s+now|use\s+default/i.test(lower)) {
+    // Check earlier chat history for any ports mentioned previously
+    let histPorts = [];
+    for (let i = window.SETROUTE_CHAT_HISTORY.length - 1; i >= 0; i--) {
+      const h = window.SETROUTE_CHAT_HISTORY[i];
+      if (h.role === "user") {
+        const fp = await resolveUnknownPortsFromText(h.content, findPortsInUserMessage(h.content));
+        fp.forEach(p => {
+          if (!histPorts.some(x => x.id === p.id)) histPorts.push(p);
+        });
+        if (histPorts.length >= 2) break;
+      }
+    }
+    let pOrig = histPorts[0] || window.SETROUTE_LAST_PORTS.origin;
+    let pDest = histPorts[1] || window.SETROUTE_LAST_PORTS.dest;
+    if (!pOrig || !pDest) {
+      const origId = (document.getElementById("setRouteOriginSelect") || {}).value;
+      const destId = (document.getElementById("setRouteDestSelect") || {}).value;
+      pOrig = pOrig || PORT_DEPTHS_DB.find(p => p.id === origId) || PORT_DEPTHS_DB[0];
+      pDest = pDest || PORT_DEPTHS_DB.find(p => p.id === destId) || PORT_DEPTHS_DB[1];
+    }
+    if (pOrig && pDest && pOrig.id !== pDest.id) {
+      window.SETROUTE_PENDING_CONTEXT = null;
+      await executeBrainLegByLegRoutePlan(pOrig, pDest, defaultOpts);
+      return;
+    }
+  }
+
+  // 5. If 1 port is mentioned, check if it's a waypoint call ("via X"), destination update ("to X"), or origin update ("from X")
   if (mentionedPorts.length === 1) {
     const pOne = mentionedPorts[0];
-    if (/via|add|call|через|добавь/i.test(lower) && activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2) {
+    if (/\b(?:via|add|call|stop|through|через|добавь)\b/i.test(lower) && activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2) {
       const appC = pOne.approachCoords || pOne.coords;
       const midIdx = Math.max(1, Math.floor(activeRouteData.waypoints.length / 2));
       activeRouteData.waypoints.splice(midIdx, 0, {
@@ -8965,22 +9442,35 @@ async function handleSetRouteUserMessage(rawText) {
       return;
     }
 
+    // If user said "to <Port>" or "instead" and we already have a previous origin port, plan immediately!
+    if ((/\bto\s+/i.test(lower) || /instead/i.test(lower)) && window.SETROUTE_LAST_PORTS.origin && window.SETROUTE_LAST_PORTS.origin.id !== pOne.id) {
+      await executeBrainLegByLegRoutePlan(window.SETROUTE_LAST_PORTS.origin, pOne, defaultOpts);
+      return;
+    }
+    // If user said "from <Port>" and we already have a previous destination port, plan immediately!
+    if (/\bfrom\s+/i.test(lower) && window.SETROUTE_LAST_PORTS.dest && window.SETROUTE_LAST_PORTS.dest.id !== pOne.id) {
+      await executeBrainLegByLegRoutePlan(pOne, window.SETROUTE_LAST_PORTS.dest, defaultOpts);
+      return;
+    }
+
     window.SETROUTE_PENDING_CONTEXT = { type: "MISSING_PORT", origin: pOne };
+    window.SETROUTE_LAST_PORTS.origin = pOne;
     appendChatMessage("brain", `
-      Selected port <b>${pOne.name} (${pOne.country})</b> [controlling depth: ${pOne.maxDraftLowTide || "14.5m"}].<br>
-      Please specify your <b>destination (or origin) port</b>, along with optional <b>draft (m)</b> and <b>speed (kn)</b>:
+      Origin locked: <b>${pOne.name} (${pOne.country})</b> [controlling depth: ${pOne.maxDraftLowTide || "15.0m"}].<br>
+      Which <b>destination port</b> should I build the route to? (Click a preset below or type any port name):
     `, [
-      { label: `${pOne.name} → Rotterdam`, prompt: `Plan route from ${pOne.name} to Rotterdam` },
-      { label: `${pOne.name} → Singapore`, prompt: `Plan route from ${pOne.name} to Singapore` },
-      { label: `${pOne.name} → Houston`, prompt: `Plan route from ${pOne.name} to Houston` },
-      { label: `${pOne.name} → Shanghai`, prompt: `Plan route from ${pOne.name} to Shanghai` }
+      { label: `${pOne.name} → Los Angeles`, prompt: `Make the route from ${pOne.name} to Los Angeles` },
+      { label: `${pOne.name} → Rotterdam`, prompt: `Make the route from ${pOne.name} to Rotterdam` },
+      { label: `${pOne.name} → Singapore`, prompt: `Make the route from ${pOne.name} to Singapore` },
+      { label: `${pOne.name} → Houston`, prompt: `Make the route from ${pOne.name} to Houston` }
     ]);
     return;
   }
 
+  // 6. Parameter modifications on the active route (speed, draft, XTD, GC/RL, reverse)
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2) {
-    if (parsedSpd || parsedDrf || parsedXtd || parsedSail || /reverse|recalculate|реверс/i.test(lower)) {
-      if (/reverse|реверс/i.test(lower)) {
+    if (parsedSpd || parsedDrf || parsedXtd || parsedSail || /reverse|recalculate|invert|реверс/i.test(lower)) {
+      if (/reverse|invert|реверс/i.test(lower)) {
         activeRouteData.waypoints.reverse();
         const parts = (activeRouteData.name || "").split(" to ");
         if (parts.length === 2) activeRouteData.name = `${parts[1]} to ${parts[0]}`;
@@ -9004,14 +9494,30 @@ async function handleSetRouteUserMessage(rawText) {
     }
   }
 
+  // 7. Full Cohere AI Brain Conversation & Intent Extraction (with 11s timeout + live thinking state)
+  const thinkingEl = appendChatMessage("brain", `<span style="color:#94a3b8;">🧭 Analyzing passage parameters &amp; maritime context...</span>`);
   let aiReply = "";
+  let aiExtractedPlan = null;
+
   if (navigator.onLine && typeof SETROUTE_COHERE_KEY === "string" && SETROUTE_COHERE_KEY) {
     try {
       const ctrl = new AbortController();
-      const tid = setTimeout(() => ctrl.abort(), 4200);
+      const tid = setTimeout(() => ctrl.abort(), 11000);
       const curRouteInfo = activeRouteData
-        ? `Current active route: ${activeRouteData.name} (${activeRouteData.totalDistanceNM} NM, ${(activeRouteData.legs || []).length} legs).`
+        ? `Current active route: ${activeRouteData.name} (${activeRouteData.totalDistanceNM} NM, ${(activeRouteData.legs || []).length} legs, speed ${(activeRouteData.metadata && activeRouteData.metadata.speedKnots) || 14.5} kn, draft ${(activeRouteData.metadata && activeRouteData.metadata.draftMeters) || 11.5}m).`
         : "No route currently active.";
+
+      const recentMsgs = window.SETROUTE_CHAT_HISTORY.slice(-6).map(m => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content
+      }));
+
+      const sysInstruction = `You are SetRoute Master Mariner AI (IMO A.893(21) & Admiralty NP231 Passage Planning Brain). ${curRouteInfo}
+Rules:
+1. Always respond in clear, helpful English.
+2. If the user is asking to create or modify a route between two ports/regions (even indirectly, e.g. "largest port in China to California"), include a JSON block at the very end of your response: {"action":"plan","origin":"PortA","destination":"PortB","speedKnots":14.5,"draftMeters":11.5}
+3. Never repeat robotic boilerplate. Answer questions about seamanship, COLREGs, TSS, UKC, weather routing, or the active passage plan directly and intelligently.`;
+
       const resp = await fetch("https://api.cohere.com/v2/chat", {
         method: "POST",
         signal: ctrl.signal,
@@ -9022,30 +9528,62 @@ async function handleSetRouteUserMessage(rawText) {
         },
         body: JSON.stringify({
           model: SETROUTE_COHERE_MODEL,
-          messages: [{
-            role: "user",
-            content: `You are SetRoute Maritime Passage Planning Brain (IMO A.893(21) / NP231). ${curRouteInfo} Reply concisely and strictly in English to the navigator's message, and if they want to plan or modify a route, ask any needed clarifying questions (origin/destination ports, draft, speed, Suez vs Cape): "${text}"`
-          }],
+          messages: [
+            { role: "system", content: sysInstruction },
+            ...recentMsgs
+          ],
           temperature: 0.25
         })
       });
       clearTimeout(tid);
       if (resp.ok) {
         const d = await resp.json();
-        aiReply = (((d.message || {}).content || [])[0] ? d.message.content[0].text : "").trim();
+        const rawAi = (((d.message || {}).content || [])[0] ? d.message.content[0].text : "").trim();
+        const jMatch = rawAi.match(/\{[\s\S]*?"action"\s*:\s*"plan"[\s\S]*?\}/);
+        if (jMatch) {
+          try {
+            aiExtractedPlan = JSON.parse(jMatch[0]);
+          } catch (e) {}
+          aiReply = rawAi.replace(jMatch[0], "").trim();
+        } else {
+          aiReply = rawAi;
+        }
       }
     } catch (e) {}
   }
 
-  if (!aiReply) {
-    aiReply = `Specify your <b>origin and destination ports</b>, along with optional <b>vessel draft (m)</b> and <b>speed (kn)</b> (for example: <i>"Plan route from Houston to Rotterdam, draft 11.8m, speed 15 kn"</i>), and I will appraise and calculate every leg.`;
+  if (thinkingEl && thinkingEl.parentNode) {
+    thinkingEl.parentNode.removeChild(thinkingEl);
   }
 
+  if (aiExtractedPlan && aiExtractedPlan.origin && aiExtractedPlan.destination) {
+    const extPorts = await resolveUnknownPortsFromText(`from ${aiExtractedPlan.origin} to ${aiExtractedPlan.destination}`, findPortsInUserMessage(`${aiExtractedPlan.origin} to ${aiExtractedPlan.destination}`));
+    if (extPorts.length >= 2) {
+      await executeBrainLegByLegRoutePlan(extPorts[0], extPorts[1], {
+        speedKnots: aiExtractedPlan.speedKnots || defaultOpts.speedKnots,
+        draftMeters: aiExtractedPlan.draftMeters || defaultOpts.draftMeters,
+        xtdNM: defaultOpts.xtdNM,
+        sailMode: defaultOpts.sailMode
+      });
+      return;
+    }
+  }
+
+  if (!aiReply) {
+    if (activeRouteData && activeRouteData.name) {
+      aiReply = `Active route <b>${activeRouteData.name}</b> is loaded (<b>${activeRouteData.totalDistanceNM} NM</b> across <b>${(activeRouteData.legs || []).length} legs</b>). You can adjust parameters anytime — e.g. <i>"Speed 16 kn, draft 12.8m"</i>, <i>"Via Tokyo"</i>, <i>"Switch to Great Circle"</i> — or name any two ports to build a new passage plan immediately.`;
+    } else {
+      aiReply = `Tell me any two ports worldwide (for example: <i>"Make the route from Ningbo to Los Angeles"</i>) and I will immediately generate and plot the full leg-by-leg passage plan using standard vessel defaults (14.5 kn, 11.5m draft), which you can refine afterward.`;
+    }
+  }
+
+  window.SETROUTE_CHAT_HISTORY.push({ role: "assistant", content: aiReply });
+
   appendChatMessage("brain", aiReply.replace(/\n/g, "<br>"), [
-    { label: "Houston → Rotterdam (11.8m, 15kn)", prompt: "Plan route from Houston to Rotterdam, draft 11.8m, speed 15 kn" },
-    { label: "Singapore → Shanghai (12.5m, 14.5kn)", prompt: "Plan route from Singapore to Shanghai, draft 12.5m, speed 14.5 kn" },
-    { label: "Rotterdam → Singapore (Suez vs Cape)", prompt: "Plan route from Rotterdam to Singapore, draft 12.0m" },
-    { label: "Tokyo → San Francisco (Pacific GC)", prompt: "Plan route from Tokyo to San Francisco using Great Circle GC" }
+    { label: "Ningbo → Los Angeles", prompt: "Make the route from Ningbo to Los Angeles" },
+    { label: "Houston → Rotterdam", prompt: "Make the route from Houston to Rotterdam" },
+    { label: "Singapore → Shanghai", prompt: "Make the route from Singapore to Shanghai" },
+    { label: "Rotterdam → Singapore", prompt: "Make the route from Rotterdam to Singapore" }
   ]);
 }
 
