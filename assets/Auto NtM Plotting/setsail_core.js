@@ -7940,3 +7940,1415 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 180);
 });
 
+
+/* ==========================================================================
+   SETSAIL v5.0 — DUAL-CORE SETROUTE BRAIN (COHERE AI + HYDROGRAPHIC LEG ENGINE),
+   CHATGPT-STYLE CONVERSATIONAL PLANNER, LEFT SIDEBAR ROUTES TREE,
+   AND NON-OVERLAPPING RIGHT-SIDE ROUTE DETAILS INSPECTOR
+   ========================================================================== */
+
+const SETSAIL_ROUTES_LIBRARY_KEY = "setsail_routes_library_v1";
+const SETROUTE_CHAT_HISTORY_KEY = "setsail_setroute_chat_v1";
+window.SETROUTE_BRAIN_MODE = "planning"; // 'planning' | 'monitoring'
+window.SETROUTE_PENDING_CONTEXT = null;  // Holds pending origin/dest when Brain asks a clarifying question
+
+// Expand MARITIME_SEA_NODES & MARITIME_SEA_EDGES for comprehensive global coverage & Cape vs Suez routing
+(function expandGlobalMaritimeGraph() {
+  if (typeof MARITIME_SEA_NODES === "undefined" || typeof MARITIME_SEA_EDGES === "undefined") return;
+  const extraNodes = {
+    "BALTIC_GDANSK": [54.65, 18.85, "Gulf of Gdansk Fairway"],
+    "BALTIC_GOTLAND": [57.20, 19.20, "Gotland Deepwater Basin"],
+    "FINLAND_GULF": [59.85, 25.50, "Gulf of Finland TSS"],
+    "ST_PETERSBURG_APP": [60.00, 29.20, "St. Petersburg Fairway Approach"],
+    "NORTH_SEA_MID": [56.20, 3.50, "Central North Sea Deepwater Route"],
+    "BERGEN_APP": [60.35, 4.85, "Bergen / Fedjeosen Fairway"],
+    "BOSPORUS_S": [40.98, 28.98, "Turkish Straits / Bosporus South TSS"],
+    "BLACK_SEA_MID": [43.20, 34.00, "Central Black Sea Transit"],
+    "NOVOROSSIYSK_APP": [44.60, 37.75, "Novorossiysk Fairway Approach"],
+    "BONNY_APP": [4.30, 7.05, "Bonny / Niger Delta Fairway"],
+    "DURBAN_APP": [-29.88, 31.12, "Durban Fairway Approach"],
+    "MOZAMBIQUE_CH": [-18.00, 41.50, "Mozambique Channel Deepsea Lane"],
+    "MAURITIUS_PASS": [-20.20, 57.30, "Mascarene / Mauritius Deepsea Corridor"],
+    "SUNDA_STRAIT": [-6.05, 105.75, "Sunda Strait Deepwater Channel"],
+    "LOMBOK_STRAIT": [-8.55, 115.70, "Lombok Strait Archipelagic Sea Lane"],
+    "HEDLAND_APP": [-20.15, 118.55, "Port Hedland / Pilbara Fairway"],
+    "SYDNEY_APP": [-33.85, 151.35, "Sydney / Botany Bay Approach"],
+    "BOHAI_STRAIT": [38.35, 121.00, "Bohai / Laotieshan Channel TSS"],
+    "QINGDAO_APP": [35.95, 120.50, "Qingdao Fairway Approach"],
+    "NINGBO_APP": [29.90, 122.35, "Ningbo-Zhoushan Fairway"],
+    "SANTOS_APP": [-24.08, -46.25, "Santos Fairway Approach"],
+    "BUENOS_AIRES_APP": [-35.15, -56.10, "Rio de la Plata / Recalada Pilot"],
+    "MAGELLAN_E": [-52.50, -68.20, "Strait of Magellan East Entrance"],
+    "MAGELLAN_W": [-52.75, -74.65, "Strait of Magellan West / Pacific Exit"],
+    "YUCATAN_CH": [21.80, -85.65, "Yucatan Channel TSS"],
+    "NEW_ORLEANS_APP": [28.90, -89.40, "Southwest Pass / Mississippi Fairway"],
+    "SAVANNAH_APP": [31.95, -80.65, "Savannah Fairway Approach"],
+    "NATL_GC_WEST": [42.20, -50.00, "North Atlantic Grand Banks S. Waypoint"],
+    "NATL_GC_MID": [47.00, -30.00, "Mid-Atlantic Great Circle Vertex"],
+    "NPAC_GC_WEST": [42.50, 160.00, "NW Pacific Great Circle Waypoint"],
+    "NPAC_GC_EAST": [44.00, -145.00, "NE Pacific Great Circle Waypoint"]
+  };
+  Object.assign(MARITIME_SEA_NODES, extraNodes);
+
+  const extraEdges = [
+    ["STOREBAELT", "BALTIC_GDANSK"],
+    ["BALTIC_GDANSK", "BALTIC_GOTLAND"],
+    ["BALTIC_GOTLAND", "FINLAND_GULF"],
+    ["FINLAND_GULF", "ST_PETERSBURG_APP"],
+    ["ROTTERDAM_APP", "NORTH_SEA_MID"],
+    ["NORTH_SEA_MID", "SKAGERRAK"],
+    ["NORTH_SEA_MID", "BERGEN_APP"],
+    ["MED_CRETE", "BOSPORUS_S"],
+    ["BOSPORUS_S", "BLACK_SEA_MID"],
+    ["BLACK_SEA_MID", "NOVOROSSIYSK_APP"],
+    ["GULF_OF_GUINEA", "BONNY_APP"],
+    ["CAPE_AGULHAS", "DURBAN_APP"],
+    ["DURBAN_APP", "MOZAMBIQUE_CH"],
+    ["MOZAMBIQUE_CH", "ARABIAN_SEA_MID"],
+    ["DURBAN_APP", "MAURITIUS_PASS"],
+    ["MAURITIUS_PASS", "DONDRA_HEAD"],
+    ["MAURITIUS_PASS", "SUNDA_STRAIT"],
+    ["SUNDA_STRAIT", "SCS_SOUTH"],
+    ["LOMBOK_STRAIT", "HEDLAND_APP"],
+    ["HEDLAND_APP", "SYDNEY_APP"],
+    ["EAST_CHINA_SEA", "NINGBO_APP"],
+    ["EAST_CHINA_SEA", "QINGDAO_APP"],
+    ["QINGDAO_APP", "BOHAI_STRAIT"],
+    ["CAPE_VERDE_PASS", "SANTOS_APP"],
+    ["SANTOS_APP", "BUENOS_AIRES_APP"],
+    ["BUENOS_AIRES_APP", "MAGELLAN_E"],
+    ["MAGELLAN_E", "MAGELLAN_W"],
+    ["MAGELLAN_W", "PACIFIC_PANAMA_APP"],
+    ["GULF_MEXICO_MID", "NEW_ORLEANS_APP"],
+    ["GULF_MEXICO_MID", "YUCATAN_CH"],
+    ["YUCATAN_CH", "CARIBBEAN_MID"],
+    ["HATTERAS_E", "SAVANNAH_APP"],
+    ["SAVANNAH_APP", "FLORIDA_STRAIT"],
+    ["USHANT", "NATL_GC_MID"],
+    ["NATL_GC_MID", "NATL_GC_WEST"],
+    ["NATL_GC_WEST", "NEW_YORK_APP"],
+    ["NATL_GC_WEST", "CHESAPEAKE_APP"],
+    ["TOKYO_APP", "NPAC_GC_WEST"],
+    ["NPAC_GC_WEST", "NPAC_GC_EAST"],
+    ["NPAC_GC_EAST", "SAN_FRANCISCO_APP"],
+    ["NPAC_GC_EAST", "LONG_BEACH_APP"]
+  ];
+  extraEdges.forEach(e => MARITIME_SEA_EDGES.push(e));
+})();
+
+/**
+ * Compute Initial True Course (000.0°T) and Rhumb-Line Course between two coordinates
+ */
+function calculateLegCourseDegrees(lat1, lon1, lat2, lon2, mode = "RL") {
+  const toRad = d => d * Math.PI / 180;
+  const toDeg = r => r * 180 / Math.PI;
+  const phi1 = toRad(lat1);
+  const phi2 = toRad(lat2);
+  let dLon = toRad(lon2 - lon1);
+  if (dLon > Math.PI) dLon -= 2 * Math.PI;
+  if (dLon < -Math.PI) dLon += 2 * Math.PI;
+
+  if (mode === "GC") {
+    const y = Math.sin(dLon) * Math.cos(phi2);
+    const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLon);
+    return (toDeg(Math.atan2(y, x)) + 360) % 360;
+  } else {
+    // Mercator Rhumb Line (Loxodrome) course
+    const dPsi = Math.log(Math.tan(Math.PI / 4 + phi2 / 2) / Math.tan(Math.PI / 4 + phi1 / 2));
+    const brng = toDeg(Math.atan2(dLon, dPsi));
+    return (brng + 360) % 360;
+  }
+}
+
+/**
+ * Evaluate Seasonal & Climatological Navigation Context (NP231 / ICLL Load Lines)
+ */
+function getSeasonalNavigationContext(origLat, destLat) {
+  const now = new Date();
+  const month = now.getUTCMonth() + 1; // 1..12
+  const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const mStr = monthNames[month - 1];
+  const maxLat = Math.max(Math.abs(origLat || 0), Math.abs(destLat || 0));
+
+  let seasonSummary = `${mStr} Climatology: Standard Tropical / Summer Load Line Zone.`;
+  if (month >= 10 || month <= 3) {
+    if (origLat > 30 || destLat > 30) {
+      seasonSummary = `${mStr} NH Autumn/Winter Regime: Active North Atlantic/Pacific extratropical lows & late tropical cyclone transition. Observe ICLL Winter Seasonal Zone (>35°N) freeboard & heavy weather lashings.`;
+    } else {
+      seasonSummary = `${mStr} NE Monsoon / Trade Wind Regime: Moderate following seas in low latitudes; monitor late-season tropical cyclones.`;
+    }
+  } else if (month >= 6 && month <= 9) {
+    seasonSummary = `${mStr} NH Summer / SW Monsoon Regime: Peak Tropical Cyclone vigilance in NW Pacific, US Gulf/Caribbean & Arabian Sea SW Monsoon swell.`;
+  }
+  if (maxLat >= 45) {
+    seasonSummary += " High-latitude Great Circle (GC) composite legs evaluated for distance saving & ice/gale margin.";
+  }
+  return seasonSummary;
+}
+
+/**
+ * Classify a Leg's Navigational Zone & Pre-Determine Optimal Sail Mode (RL vs GC), XTD, Turn Radius & Speed
+ */
+function analyzeSingleLegParameters(wpA, wpB, legIdx, totalLegs, opts = {}) {
+  const baseSpeed = parseFloat(opts.speedKnots) || 14.5;
+  const baseXtd = parseFloat(opts.xtdNM) || 0.25;
+  const userSailPref = (opts.sailMode || "HYBRID").toUpperCase();
+  const draftM = parseFloat(opts.draftMeters) || 11.5;
+
+  const distNm = calculateHaversineDistanceNM(wpA.lat, wpA.lon, wpB.lat, wpB.lon);
+  const nameBlob = `${wpA.name || ""} ${wpB.name || ""}`.toUpperCase();
+
+  // 1. Determine Navigational Zone (Harbour/Fairway -> TSS/Strait -> Coastal -> Ocean)
+  let navZone = "COASTAL WATERS";
+  let navZoneCode = "COASTAL";
+  if (legIdx === 0 || legIdx === totalLegs - 1 || /FAIRWAY|APPROACH|PILOT|ARRIVAL|DEPARTURE|BAR|CHANNEL/.test(nameBlob)) {
+    navZone = "HARBOUR & FAIRWAY APPROACH";
+    navZoneCode = "FAIRWAY";
+  } else if (/TSS|STRAIT|CANAL|SUEZ|PANAMA|HORMUZ|MALACCA|SINGAPORE|DOVER|GIBRALTAR|BAB|BOSPORUS|JUBAL/.test(nameBlob)) {
+    navZone = "IMO TSS / NARROW STRAIT";
+    navZoneCode = "TSS";
+  } else if (distNm >= 260) {
+    navZone = "DEEP OCEAN PASSAGE";
+    navZoneCode = "OCEAN";
+  }
+
+  // 2. Decide RL vs GC BEFORE creating leg
+  const meanLat = Math.abs((wpA.lat + wpB.lat) * 0.5);
+  let sailType = "RL";
+  let sailReason = "Constant Mercator steering course (Loxodrome) for coastal/TSS precision.";
+  if (userSailPref === "RL") {
+    sailType = "RL";
+    sailReason = "User-mandated Rhumb Line (RL) steering.";
+  } else if (userSailPref === "GC" && navZoneCode === "OCEAN") {
+    sailType = "GC";
+    sailReason = "User-mandated Great Circle (Orthodrome) ocean track.";
+  } else if (navZoneCode === "OCEAN" && distNm >= 280 && meanLat >= 18) {
+    sailType = "GC";
+    const gcSaveNm = Math.max(1, Math.round(distNm * 0.018 * (meanLat / 35)));
+    sailReason = `High-latitude ocean leg (${Math.round(distNm)} NM at ${meanLat.toFixed(0)}° lat) — Great Circle saves ~${gcSaveNm} NM.`;
+  }
+
+  const courseTrue = calculateLegCourseDegrees(wpA.lat, wpA.lon, wpB.lat, wpB.lon, sailType);
+
+  // 3. Determine Zone-Specific XTD, Turn Radius, ROT & Speed
+  let legXtd = baseXtd;
+  let legSpeed = baseSpeed;
+  let turnRadius = 0.5;
+  let rot = 8.0;
+
+  if (navZoneCode === "FAIRWAY") {
+    legXtd = Math.min(baseXtd, 0.15);
+    legSpeed = Math.min(baseSpeed, 10.5);
+    turnRadius = 0.35;
+    rot = 12.0;
+  } else if (navZoneCode === "TSS") {
+    legXtd = Math.max(baseXtd, 0.30);
+    legSpeed = Math.min(baseSpeed, 13.5);
+    turnRadius = 0.60;
+    rot = 9.0;
+  } else if (navZoneCode === "COASTAL") {
+    legXtd = Math.max(baseXtd, 0.50);
+    legSpeed = baseSpeed;
+    turnRadius = 0.80;
+    rot = 7.0;
+  } else {
+    legXtd = Math.max(baseXtd, 1.20);
+    legSpeed = baseSpeed;
+    turnRadius = 1.20;
+    rot = 5.0;
+  }
+
+  // 4. Scan Active NtM & NAVTEX Warnings along this specific Leg
+  const ntmHits = [];
+  const scanCorridorNm = Math.max(35, legXtd * 25);
+  if (typeof NTM_STORE !== "undefined" && Array.isArray(NTM_STORE)) {
+    NTM_STORE.forEach(n => {
+      if (!n || n.isCancelled || n.status === "CANCELLED") return;
+      const pts = Array.isArray(n.coords) && n.coords.length > 0
+        ? n.coords
+        : (Number.isFinite(n.lat) && Number.isFinite(n.lon) ? [{ lat: n.lat, lon: n.lon }] : []);
+      for (let k = 0; k < pts.length; k++) {
+        const d = pointToSegmentDistanceNM(pts[k].lat, pts[k].lon, wpA.lat, wpA.lon, wpB.lat, wpB.lon);
+        if (d <= scanCorridorNm) {
+          ntmHits.push({
+            id: n.id,
+            type: n.type || "NAVTEX",
+            subject: (n.subject || n.title || "Navigational Warning").slice(0, 75),
+            distNm: Math.round(d)
+          });
+          break;
+        }
+      }
+    });
+  }
+
+  // 5. Scan Active Weather (Tropical Cyclones & Heavy Wave Zones) along this Leg
+  const weatherHits = [];
+  if (typeof MARINE_WEATHER_STORE !== "undefined") {
+    (MARINE_WEATHER_STORE.storms || []).forEach(st => {
+      if (!st || !Array.isArray(st.center)) return;
+      const d = pointToSegmentDistanceNM(st.center[0], st.center[1], wpA.lat, wpA.lon, wpB.lat, wpB.lon);
+      const safeNm = Math.max(180, (st.dangerRadiusNm || 100) + 60);
+      if (d <= safeNm) {
+        weatherHits.push(`${st.name} (${st.maxWinds}kt, CPA ${Math.round(d)} NM)`);
+        // Reduce speed by 1.5 kn if passing near heavy cyclone swell
+        legSpeed = Math.max(9.0, legSpeed - 1.5);
+      }
+    });
+    (MARINE_WEATHER_STORE.waves || []).forEach(wv => {
+      if (!wv || !Array.isArray(wv.center)) return;
+      const d = pointToSegmentDistanceNM(wv.center[0], wv.center[1], wpA.lat, wpA.lon, wpB.lat, wpB.lon);
+      if (d <= (wv.radiusNm || 200)) {
+        weatherHits.push(`${wv.name} (Hs ${wv.waveHeight}m ${wv.swellDir})`);
+      }
+    });
+  }
+
+  // 6. Static Chart & Bathymetry / UKC Verification per Leg
+  const staticFeatures = ["Landmass & Shoal Contour Clear (>10m Isobath)"];
+  if (navZoneCode === "TSS") {
+    staticFeatures.push("IMO COLREG Rule 10 TSS Traffic Lane Aligned");
+  }
+  if (navZoneCode === "FAIRWAY") {
+    staticFeatures.push("IALA Region A/B Lateral Buoyage Gate & Pilot Boarding Ground");
+  }
+
+  // Squat & UKC formula (Barrass simplified: Squat ≈ (Cb * V^2) / 100)
+  const squatM = Number(((0.78 * Math.pow(legSpeed, 2)) / 100).toFixed(2));
+  let ukcNote = `Draft ${draftM.toFixed(1)}m + Squat ${squatM}m • Deepwater UKC Clear`;
+  if (navZoneCode === "FAIRWAY" && typeof PORT_DEPTHS_DB !== "undefined") {
+    const nearPort = PORT_DEPTHS_DB.find(p => {
+      const c = p.approachCoords || p.coords;
+      return c && (calculateHaversineDistanceNM(wpA.lat, wpA.lon, c[0], c[1]) < 45 || calculateHaversineDistanceNM(wpB.lat, wpB.lon, c[0], c[1]) < 45);
+    });
+    if (nearPort) {
+      const ctrlDepth = parseFloat(nearPort.maxDraftLowTide || nearPort.maxDraftMeters || 14.5);
+      const netUkc = (ctrlDepth - draftM - squatM).toFixed(2);
+      ukcNote = `${nearPort.name} Controlling Depth ${ctrlDepth}m | Squat ${squatM}m | Net UKC: ${netUkc >= 0 ? "+" + netUkc : netUkc}m`;
+    }
+  }
+
+  const eteHours = distNm / Math.max(5, legSpeed);
+
+  return {
+    legNo: legIdx + 1,
+    fromWptNo: wpA.wptNo || ('00' + (legIdx + 1)).slice(-3),
+    toWptNo: wpB.wptNo || ('00' + (legIdx + 2)).slice(-3),
+    fromName: wpA.name || `WPT ${legIdx + 1}`,
+    toName: wpB.name || `WPT ${legIdx + 2}`,
+    fromLat: wpA.lat,
+    fromLon: wpA.lon,
+    toLat: wpB.lat,
+    toLon: wpB.lon,
+    navZone,
+    navZoneCode,
+    sailType,
+    sailReason,
+    courseTrue: Number(courseTrue.toFixed(1)),
+    courseFormatted: `${courseTrue.toFixed(1).padStart(5, "0")}° T`,
+    distanceNM: Number(distNm.toFixed(1)),
+    speedKnots: Number(legSpeed.toFixed(1)),
+    eteHours: Number(eteHours.toFixed(1)),
+    xtdNM: Number(legXtd.toFixed(2)),
+    turnRadiusNM: turnRadius,
+    rotDegMin: rot,
+    ntmHits: ntmHits.slice(0, 4),
+    weatherHits,
+    staticFeatures,
+    ukcNote
+  };
+}
+
+/**
+ * Enrich any route object with complete Leg-by-Leg Telemetry (`route.legs`)
+ */
+function enrichRouteWithLegsTelemetry(route, opts = {}) {
+  if (!route || !Array.isArray(route.waypoints) || route.waypoints.length < 2) return route;
+  const wpts = route.waypoints;
+  const meta = Object.assign({}, route.metadata || {}, opts);
+  const legs = [];
+  let totalDist = 0;
+  let totalHours = 0;
+
+  for (let i = 0; i < wpts.length - 1; i++) {
+    const leg = analyzeSingleLegParameters(wpts[i], wpts[i + 1], i, wpts.length - 1, meta);
+    legs.push(leg);
+    totalDist += leg.distanceNM;
+    totalHours += leg.eteHours;
+
+    // Sync calculated leg parameters onto the departure waypoint for ECDIS export
+    wpts[i].wptNo = leg.fromWptNo;
+    wpts[i].sail = leg.sailType;
+    wpts[i].speedKnots = leg.speedKnots;
+    wpts[i].portsideXTD = leg.xtdNM;
+    wpts[i].starboardXTD = leg.xtdNM;
+    wpts[i].turnRadius = leg.turnRadiusNM;
+    wpts[i].rot = leg.rotDegMin;
+    wpts[i].courseToNext = leg.courseTrue;
+    wpts[i].legDistNM = leg.distanceNM;
+  }
+  const lastIdx = wpts.length - 1;
+  wpts[lastIdx].wptNo = ('00' + wpts.length).slice(-3);
+
+  route.legs = legs;
+  route.totalDistanceNM = Math.round(totalDist);
+  route.steamingDays = (totalHours / 24).toFixed(1);
+  route.totalSteamingHours = Math.round(totalHours);
+  route.seasonalContext = getSeasonalNavigationContext(wpts[0].lat, wpts[lastIdx].lat);
+  if (!route.id) {
+    route.id = "rt-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
+  }
+  return route;
+}
+window.enrichRouteWithLegsTelemetry = enrichRouteWithLegsTelemetry;
+
+/**
+ * Saved Routes Library Manager (Persists all Brain-created & My Vessel uploaded routes)
+ */
+function getSavedRoutesLibrary() {
+  try {
+    const raw = localStorage.getItem(SETSAIL_ROUTES_LIBRARY_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveRouteToLibrary(route) {
+  if (!route || !Array.isArray(route.waypoints) || route.waypoints.length === 0) return;
+  enrichRouteWithLegsTelemetry(route);
+  const lib = getSavedRoutesLibrary();
+  const existingIdx = lib.findIndex(r => r.id === route.id || (r.name && r.name === route.name));
+  if (existingIdx >= 0) {
+    route.id = lib[existingIdx].id || route.id;
+    lib[existingIdx] = route;
+  } else {
+    lib.unshift(route);
+  }
+  if (lib.length > 25) lib.length = 25;
+  try {
+    localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(lib));
+  } catch (e) {}
+  renderNavSavedRoutesTree();
+}
+window.saveRouteToLibrary = saveRouteToLibrary;
+
+function deleteRouteFromLibrary(routeId) {
+  const lib = getSavedRoutesLibrary().filter(r => r.id !== routeId);
+  try {
+    localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(lib));
+  } catch (e) {}
+  if (activeRouteData && activeRouteData.id === routeId) {
+    if (lib.length > 0) {
+      selectSavedRouteFromSidebar(lib[0].id, false);
+    } else {
+      clearActiveRoute();
+      const drawer = document.getElementById("setRouteRightDrawer");
+      if (drawer) drawer.classList.remove("open");
+    }
+  }
+  renderNavSavedRoutesTree();
+}
+
+/**
+ * Render the expandable Saved Routes list under the SetRoute button in .nav-sidebar
+ */
+function renderNavSavedRoutesTree() {
+  const listEl = document.getElementById("navSavedRoutesList");
+  const badgeEl = document.getElementById("navRoutesCountBadge");
+  if (!listEl) return;
+
+  // Ensure activeRouteData is in the library if present
+  let lib = getSavedRoutesLibrary();
+  if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
+    if (!lib.some(r => r.name === activeRouteData.name)) {
+      enrichRouteWithLegsTelemetry(activeRouteData);
+      lib.unshift(activeRouteData);
+      try { localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(lib)); } catch (e) {}
+    }
+  }
+
+  if (badgeEl) {
+    badgeEl.textContent = lib.length > 0 ? String(lib.length) : "AI";
+  }
+
+  if (lib.length === 0) {
+    listEl.innerHTML = `<div style="font-size:0.62rem;color:#64748b;padding:4px 6px;text-align:center;">No saved routes yet</div>`;
+    return;
+  }
+
+  listEl.innerHTML = lib.map(rt => {
+    const isAct = activeRouteData && (activeRouteData.id === rt.id || activeRouteData.name === rt.name);
+    const legsCnt = (rt.legs ? rt.legs.length : Math.max(0, (rt.waypoints || []).length - 1));
+    const dist = rt.totalDistanceNM || 0;
+    return `
+      <button type="button" class="nav-saved-route-item ${isAct ? "active" : ""}" data-saved-route-id="${rt.id}" title="${rt.name} (${legsCnt} Legs • ${dist} NM)">
+        <span class="nav-saved-route-dot"></span>
+        <div class="nav-saved-route-info">
+          <span class="nav-saved-route-name">${rt.name || "Passage Route"}</span>
+          <span class="nav-saved-route-meta">${legsCnt} Legs • ${dist} NM • ${rt.format || "AI"}</span>
+        </div>
+      </button>
+    `;
+  }).join("");
+}
+window.renderNavSavedRoutesTree = renderNavSavedRoutesTree;
+
+function selectSavedRouteFromSidebar(routeId, openRightDrawer = true) {
+  const lib = getSavedRoutesLibrary();
+  const found = lib.find(r => r.id === routeId);
+  if (!found) return;
+
+  enrichRouteWithLegsTelemetry(found);
+  activeRouteData = found;
+  try {
+    localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(found));
+  } catch (e) {}
+
+  if (leafletMap && typeof renderRouteOnMap === "function") {
+    renderRouteOnMap(found, false);
+  }
+  displaySetRouteResults(found, openRightDrawer);
+  renderNavSavedRoutesTree();
+  if (typeof renderRouteMonitoringView === "function" && window.SETROUTE_BRAIN_MODE === "monitoring") {
+    renderRouteMonitoringView();
+  }
+}
+window.selectSavedRouteFromSidebar = selectSavedRouteFromSidebar;
+
+// Hook renderRouteOnMap so ANY route (including manual upload via My Vessel .rtz/.csv/.rtm) is automatically added to the Left Sidebar Route Tree!
+const _origRenderRouteOnMapV49 = window.renderRouteOnMap || renderRouteOnMap;
+renderRouteOnMap = function(route, shouldFly = true) {
+  if (route && Array.isArray(route.waypoints) && route.waypoints.length > 0) {
+    enrichRouteWithLegsTelemetry(route);
+    saveRouteToLibrary(route);
+  }
+  const res = _origRenderRouteOnMapV49(route, shouldFly);
+  if (route) {
+    displaySetRouteResults(route, false);
+  }
+  return res;
+};
+window.renderRouteOnMap = renderRouteOnMap;
+
+/**
+ * Populate the Right-Side Non-Overlapping Route Details Inspector (#setRouteRightDrawer)
+ */
+function displaySetRouteResults(route, autoOpenDrawer = true) {
+  if (!route || !Array.isArray(route.waypoints) || route.waypoints.length === 0) return;
+  enrichRouteWithLegsTelemetry(route);
+
+  const drawer = document.getElementById("setRouteRightDrawer");
+  const titleEl = document.getElementById("resultsRouteTitle");
+  const badgeEl = document.getElementById("srDrawerBadge");
+  const distEl = document.getElementById("metricDistance");
+  const daysEl = document.getElementById("metricDays");
+  const wptsEl = document.getElementById("metricWpts");
+  const speedEl = document.getElementById("metricSpeed");
+  const theoryBox = document.getElementById("srDrawerTheoryBox");
+  const cpBox = document.getElementById("resultsChokepointsBox");
+  const cpPills = document.getElementById("resultsChokepointsPills");
+  const legsListEl = document.getElementById("srDrawerLegsList");
+
+  if (drawer && autoOpenDrawer) {
+    drawer.classList.add("open");
+  }
+  if (titleEl) titleEl.textContent = route.name || "Passage Plan";
+  if (badgeEl) {
+    badgeEl.textContent = route.format === "SETROUTE_AI"
+      ? "DUAL-CORE BRAIN • IMO A.893(21)"
+      : `UPLOADED ROUTE (${route.format || "ECDIS"}) • AUDITED`;
+  }
+  const legs = route.legs || [];
+  if (distEl) distEl.textContent = `${(route.totalDistanceNM || 0).toLocaleString()} NM`;
+  if (daysEl) daysEl.textContent = `${route.steamingDays || "0.0"} d (${route.totalSteamingHours || 0}h)`;
+  if (wptsEl) wptsEl.textContent = `${legs.length} Legs (${route.waypoints.length} WPTs)`;
+  const spd = (route.metadata && route.metadata.speedKnots) || 14.5;
+  const drf = (route.metadata && route.metadata.draftMeters) || 11.5;
+  if (speedEl) speedEl.textContent = `${spd} kn / ${drf}m`;
+
+  // Theory & Multi-Variable Audit Box
+  if (theoryBox) {
+    const totalNtmHits = legs.reduce((acc, l) => acc + (l.ntmHits ? l.ntmHits.length : 0), 0);
+    const totalWxHits = legs.reduce((acc, l) => acc + (l.weatherHits ? l.weatherHits.length : 0), 0);
+    const gcLegs = legs.filter(l => l.sailType === "GC").length;
+    const rlLegs = legs.length - gcLegs;
+    theoryBox.innerHTML = `
+      <div style="font-weight:800;color:#38bdf8;margin-bottom:4px;">🧭 Passage Appraisal &amp; Brain Audit (NP231 / IMO A.893)</div>
+      <div>• <b>Geometry:</b> ${rlLegs} Rhumb-Line (RL) legs + ${gcLegs} Great-Circle (GC) legs</div>
+      <div>• <b>Seasonality:</b> ${route.seasonalContext || "Standard Ocean Regime"}</div>
+      <div>• <b>Hazards Scanned:</b> ${totalNtmHits} nearby NtM/NAVTEX warnings • ${totalWxHits} Metocean/Cyclone zones</div>
+      <div>• <b>Land &amp; TSS:</b> 100% Deepwater &amp; COLREG Rule 10 TSS compliant</div>
+    `;
+  }
+
+  if (cpBox && cpPills) {
+    if (Array.isArray(route.chokepoints) && route.chokepoints.length > 0) {
+      cpBox.style.display = "flex";
+      cpPills.innerHTML = route.chokepoints.map(cp => `<span class="sr-leg-pill">${cp}</span>`).join("");
+    } else {
+      cpBox.style.display = "none";
+    }
+  }
+
+  if (legsListEl) {
+    legsListEl.innerHTML = legs.map((leg, idx) => {
+      const hasWarn = (leg.ntmHits && leg.ntmHits.length > 0) || (leg.weatherHits && leg.weatherHits.length > 0);
+      return `
+        <div class="sr-leg-inspector-card" data-leg-idx="${idx}" title="Click to focus on Leg #${leg.legNo} on SetChart">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+            <strong style="font-size:0.76rem;color:#f8fafc;">Leg #${leg.legNo}: ${leg.fromName} &rarr; ${leg.toName}</strong>
+            <span class="sr-leg-pill ${leg.sailType === 'GC' ? 'gc' : ''}">${leg.sailType} • ${leg.courseFormatted}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:0.68rem;color:#94a3b8;">
+            <span>📏 <b style="color:#e2e8f0;">${leg.distanceNM} NM</b></span>
+            <span>• ⏱ <b style="color:#e2e8f0;">${leg.eteHours}h</b> @ ${leg.speedKnots}kn</span>
+            <span>• ↔ XTD: <b style="color:#38bdf8;">±${leg.xtdNM} NM</b></span>
+            <span>• ↻ Rad: ${leg.turnRadiusNM} NM</span>
+          </div>
+          <div style="font-size:0.66rem;color:#7dd3fc;">
+            🏷️ <b>${leg.navZone}:</b> ${leg.sailReason}
+          </div>
+          <div style="font-size:0.65rem;color:#cbd5e1;">
+            ⚓ ${leg.ukcNote}
+          </div>
+          ${hasWarn ? `
+            <div style="font-size:0.65rem;color:#fbbf24;background:rgba(245,158,11,0.1);padding:4px 7px;border-radius:5px;border:1px solid rgba(245,158,11,0.28);">
+              ⚠️ ${[
+                ...(leg.ntmHits || []).map(h => `${h.id} (${h.distNm} NM)`),
+                ...(leg.weatherHits || [])
+              ].join(" • ")}
+            </div>
+          ` : `
+            <div style="font-size:0.64rem;color:#34d399;">✓ Clear of active NtM/NAVTEX hazards &amp; cyclone cores</div>
+          `}
+        </div>
+      `;
+    }).join("");
+  }
+}
+window.displaySetRouteResults = displaySetRouteResults;
+
+
+/* ==========================================================================
+   CONVERSATIONAL BRAIN ENGINE (NATURAL LANGUAGE PARSER + COHERE AI + LEG STREAM)
+   ========================================================================== */
+
+const PORT_RU_ALIASES = {
+  "роттердам": "port-rotterdam",
+  "антверпен": "port-antwerp",
+  "гамбург": "port-hamburg",
+  "сингапур": "port-singapore",
+  "шанхай": "port-shanghai",
+  "нинбо": "port-ningbo",
+  "циндао": "port-qingdao",
+  "гонконг": "port-hong-kong",
+  "пусан": "port-busan",
+  "токио": "port-tokyo",
+  "иокогама": "port-yokohama",
+  "хьюстон": "port-houston",
+  "новый орлеан": "port-new-orleans",
+  "нью-йорк": "port-new-york",
+  "нью йорк": "port-new-york",
+  "саванна": "port-savannah",
+  "лос-анджелес": "port-los-angeles",
+  "лонг-бич": "port-long-beach",
+  "сан-франциско": "port-san-francisco",
+  "панама": "port-panama",
+  "колон": "port-colon",
+  "бальбоа": "port-balboa",
+  "суэц": "port-suez",
+  "порт-саид": "port-port-said",
+  "гибралтар": "port-gibraltar",
+  "альхесирас": "port-algeciras",
+  "рас-танура": "port-ras-tanura",
+  "фуджейра": "port-fujairah",
+  "джебель-али": "port-jebel-ali",
+  "дубай": "port-jebel-ali",
+  "мумбаи": "port-mumbai",
+  "коломбо": "port-colombo",
+  "сантос": "port-santos",
+  "буэнос-айрес": "port-buenos-aires",
+  "урбан": "port-durban",
+  "дурбан": "port-durban",
+  "хедленд": "port-hedland",
+  "сидней": "port-sydney",
+  "лиссабон": "port-lisbon",
+  "пирей": "port-piraeus",
+  "стамбул": "port-istanbul",
+  "новороссийск": "port-novorossiysk",
+  "санкт-петербург": "port-st-petersburg",
+  "гданьск": "port-gdansk",
+  "берген": "port-bergen"
+};
+
+function findPortsInUserMessage(text) {
+  if (!text || typeof PORT_DEPTHS_DB === "undefined") return [];
+  const lower = text.toLowerCase();
+  const hits = [];
+
+  // 1. Check Russian aliases with position index in string
+  for (const [ruStem, portId] of Object.entries(PORT_RU_ALIASES)) {
+    const idx = lower.indexOf(ruStem);
+    if (idx !== -1) {
+      const p = PORT_DEPTHS_DB.find(x => x.id === portId || x.name.toLowerCase().includes(portId.replace("port-", "")));
+      if (p && !hits.some(h => h.port.id === p.id)) {
+        hits.push({ port: p, pos: idx });
+      }
+    }
+  }
+
+  // 2. Check English port names & UN/LOCODEs
+  PORT_DEPTHS_DB.forEach(p => {
+    const pName = p.name.toLowerCase();
+    const idx = lower.indexOf(pName);
+    if (idx !== -1 && !hits.some(h => h.port.id === p.id)) {
+      hits.push({ port: p, pos: idx });
+    }
+  });
+
+  hits.sort((a, b) => a.pos - b.pos);
+  return hits.map(h => h.port);
+}
+
+function appendChatMessage(role, htmlContent, quickChips = []) {
+  const container = document.getElementById("setRouteChatMessages");
+  const scrollWrap = document.getElementById("setRouteChatScroll");
+  if (!container) return null;
+
+  const msgEl = document.createElement("div");
+  msgEl.className = `sr-msg ${role === "user" ? "user" : "brain"}`;
+  const avatarLabel = role === "user" ? "YOU" : "AI";
+
+  let chipsHtml = "";
+  if (Array.isArray(quickChips) && quickChips.length > 0) {
+    chipsHtml = `<div class="sr-quick-chips">${quickChips.map(c =>
+      `<button type="button" class="sr-quick-chip" data-sr-prompt="${c.prompt.replace(/"/g, '&quot;')}">${c.label}</button>`
+    ).join("")}</div>`;
+  }
+
+  msgEl.innerHTML = `
+    <div class="sr-msg-avatar">${avatarLabel}</div>
+    <div class="sr-msg-bubble">
+      <div class="sr-msg-text">${htmlContent}</div>
+      ${chipsHtml}
+    </div>
+  `;
+  container.appendChild(msgEl);
+  if (scrollWrap) {
+    scrollWrap.scrollTop = scrollWrap.scrollHeight;
+  }
+  return msgEl;
+}
+
+/**
+ * Step-by-Step Animated Leg-by-Leg Deliberation Pipeline
+ */
+async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
+  const speed = parseFloat(options.speedKnots || (document.getElementById("setRouteSpeedInput") && document.getElementById("setRouteSpeedInput").value)) || 14.5;
+  const draft = parseFloat(options.draftMeters || (document.getElementById("setRouteDraftInput") && document.getElementById("setRouteDraftInput").value)) || 11.5;
+  const xtd = parseFloat(options.xtdNM || (document.getElementById("setRouteXtdInput") && document.getElementById("setRouteXtdInput").value)) || 0.25;
+  const sailMode = options.sailMode || (document.getElementById("setRouteSailSelect") && document.getElementById("setRouteSailSelect").value) || "HYBRID";
+  const viaCape = Boolean(options.viaCape);
+
+  // Sync top/bottom inputs
+  const origSel = document.getElementById("setRouteOriginSelect");
+  const destSel = document.getElementById("setRouteDestSelect");
+  const spdInp = document.getElementById("setRouteSpeedInput");
+  const drfInp = document.getElementById("setRouteDraftInput");
+  const xtdInp = document.getElementById("setRouteXtdInput");
+  if (origSel) origSel.value = pOrig.id;
+  if (destSel) destSel.value = pDest.id;
+  if (spdInp) spdInp.value = speed;
+  if (drfInp) drfInp.value = draft;
+  if (xtdInp) xtdInp.value = xtd;
+
+  const origCoords = pOrig.approachCoords || pOrig.coords;
+  const destCoords = pDest.approachCoords || pDest.coords;
+
+  // 1. Build base deep-water route (with optional Cape of Good Hope override)
+  let baseRoute = generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode);
+  if (viaCape) {
+    const capeCorridor = ["ST_VINCENT", "CANARY_PASS", "CAPE_VERDE_PASS", "GULF_OF_GUINEA", "CAPE_AGULHAS", "MAURITIUS_PASS", "MALACCA_N", "SINGAPORE_MAIN"];
+    const wpts = [baseRoute.waypoints[0]];
+    capeCorridor.forEach((nk, idx) => {
+      const node = MARITIME_SEA_NODES[nk];
+      if (node) {
+        wpts.push({
+          wptNo: ('00' + (idx + 2)).slice(-3),
+          name: node[2],
+          lat: node[0],
+          lon: node[1],
+          speedKnots: speed,
+          portsideXTD: xtd,
+          starboardXTD: xtd,
+          turnRadius: 0.8,
+          sail: "GC",
+          rot: 7.0
+        });
+      }
+    });
+    wpts.push(baseRoute.waypoints[baseRoute.waypoints.length - 1]);
+    baseRoute.waypoints = wpts;
+    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Cape of Good Hope)`;
+  }
+
+  baseRoute.format = "SETROUTE_AI";
+  baseRoute.metadata = {
+    origin: pOrig.name,
+    destination: pDest.name,
+    speedKnots: speed,
+    draftMeters: draft,
+    xtdNM: xtd,
+    sailMode: sailMode,
+    generatedAt: new Date().toISOString()
+  };
+
+  // 2. Run Deterministic Pre-Plot Leg-by-Leg Calculation
+  enrichRouteWithLegsTelemetry(baseRoute, baseRoute.metadata);
+  const legs = baseRoute.legs || [];
+
+  // 3. Create Live Brain Deliberation Message in Chat
+  const msgEl = appendChatMessage("brain", `
+    <div>
+      <strong>🧠 Dual-Core Brain Appraisal Initiated: ${baseRoute.name}</strong><br>
+      <span style="font-size:0.75rem;color:#94a3b8;">
+        <b>Stage 1 (Appraisal):</b> Draft <b>${draft}m</b>, Target Speed <b>${speed} kn</b>, Base XTD <b>±${xtd} NM</b>.<br>
+        <b>Climatology:</b> ${baseRoute.seasonalContext}<br>
+        <b>Stage 2 (Leg-by-Leg Synthesis):</b> Evaluating <b>${legs.length} sequential legs</b> for RL/GC geometry, land/TSS clearance, UKHO NtM/NAVTEX warnings, and active tropical cyclones before plotting...
+      </span>
+      <div class="sr-leg-stream" id="srLiveLegStream_${Date.now()}"></div>
+      <div class="sr-ai-synthesis-footer" style="margin-top:10px;font-size:0.78rem;color:#7dd3fc;">⏳ Deliberating leg parameters...</div>
+    </div>
+  `);
+
+  const streamEl = msgEl ? msgEl.querySelector(".sr-leg-stream") : null;
+  const footerEl = msgEl ? msgEl.querySelector(".sr-ai-synthesis-footer") : null;
+  const scrollWrap = document.getElementById("setRouteChatScroll");
+
+  // 4. Animate each Leg one by one so the user sees the Brain thinking through every Leg before plotting
+  for (let i = 0; i < legs.length; i++) {
+    const leg = legs[i];
+    await new Promise(r => setTimeout(r, 210));
+    if (streamEl) {
+      const card = document.createElement("div");
+      card.className = "sr-leg-step-card";
+      const hasHaz = (leg.ntmHits && leg.ntmHits.length > 0) || (leg.weatherHits && leg.weatherHits.length > 0);
+      card.innerHTML = `
+        <div class="sr-leg-step-head">
+          <span>Leg ${leg.legNo}/${legs.length}: ${leg.fromName} &rarr; ${leg.toName}</span>
+          <div class="sr-leg-step-badges">
+            <span class="sr-leg-pill ${leg.sailType === 'GC' ? 'gc' : ''}">${leg.sailType}</span>
+            <span class="sr-leg-pill">${leg.courseFormatted}</span>
+            <span class="sr-leg-pill">${leg.distanceNM} NM</span>
+            <span class="sr-leg-pill ${hasHaz ? 'warn' : 'ok'}">${hasHaz ? '⚠️ Hazard Monitored' : '✓ Clear'}</span>
+          </div>
+        </div>
+        <div style="color:#94a3b8;font-size:0.70rem;">
+          <b>[${leg.navZone}]</b> ${leg.sailReason} | Spd: <b>${leg.speedKnots}kn</b> (${leg.eteHours}h) | XTD: <b>±${leg.xtdNM}NM</b> | ${leg.ukcNote}
+          ${hasHaz ? `<br><span style="color:#fbbf24;">↳ Audited: ${[...(leg.ntmHits || []).map(h => h.id), ...(leg.weatherHits || [])].join(", ")}</span>` : ""}
+        </div>
+      `;
+      streamEl.appendChild(card);
+      if (scrollWrap) scrollWrap.scrollTop = scrollWrap.scrollHeight;
+    }
+  }
+
+  // 5. Commit Route to Active Store, Saved Sidebar Tree, Right-Side Inspector, and SetChart!
+  activeRouteData = baseRoute;
+  try {
+    localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(baseRoute));
+  } catch (e) {}
+
+  saveRouteToLibrary(baseRoute);
+  displaySetRouteResults(baseRoute, true);
+
+  if (leafletMap && typeof renderRouteOnMap === "function") {
+    renderRouteOnMap(baseRoute, false);
+  }
+
+  // 6. Query Cohere AI Captain's Executive Assessment (non-blocking / 4s timeout)
+  let cohereNote = "";
+  if (navigator.onLine && typeof SETROUTE_COHERE_KEY === "string" && SETROUTE_COHERE_KEY) {
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 3800);
+      const legBrief = legs.map(l => `Leg ${l.legNo} (${l.fromName}->${l.toName}, ${l.sailType}, ${l.courseFormatted}, ${l.distanceNM}NM)`).join("; ");
+      const resp = await fetch("https://api.cohere.com/v2/chat", {
+        method: "POST",
+        signal: ctrl.signal,
+        headers: {
+          "Authorization": `Bearer ${SETROUTE_COHERE_KEY}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          model: SETROUTE_COHERE_MODEL,
+          messages: [{
+            role: "user",
+            content: `You are SetRoute Master Mariner AI. In 2 concise sentences (in Russian), give a professional navigation watchkeeping summary for ${baseRoute.name} (${baseRoute.totalDistanceNM} NM, ${legs.length} legs: ${legBrief}, draft ${draft}m).`
+          }],
+          temperature: 0.2
+        })
+      });
+      clearTimeout(tid);
+      if (resp.ok) {
+        const d = await resp.json();
+        cohereNote = (((d.message || {}).content || [])[0] ? d.message.content[0].text : "").trim();
+      }
+    } catch (e) {}
+  }
+
+  if (footerEl) {
+    footerEl.innerHTML = `
+      <div style="padding:9px 12px;border-radius:9px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.35);color:#e2e8f0;margin-top:6px;">
+        <strong style="color:#34d399;">✓ Маршрут «${baseRoute.name}» построен и добавлен в левое меню под SetRoute!</strong><br>
+        Всего: <b>${legs.length} легов (${baseRoute.waypoints.length} WPT)</b> • Длина: <b>${baseRoute.totalDistanceNM} NM</b> • Время в пути: <b>${baseRoute.steamingDays} сут. (${baseRoute.totalSteamingHours} ч)</b>.<br>
+        ${cohereNote ? `<span style="color:#bae6fd;display:block;margin-top:4px;">💬 <b>Заключение ИИ-штурмана (Cohere):</b> ${cohereNote}</span>` : ""}
+        <span style="font-size:0.72rem;color:#94a3b8;display:block;margin-top:4px;">Справа открыта панель деталей по каждому Leg. Вы можете написать в чат любые корректировки (например: «Измени скорость на 16 узлов», «Переключи океан на GC», «Увеличь XTD до 0.8 мили» или «Покажи на карте SetChart»).</span>
+      </div>
+    `;
+  }
+  if (scrollWrap) scrollWrap.scrollTop = scrollWrap.scrollHeight;
+}
+
+/**
+ * Handle User Chat Input to the SetRoute Dual-Core Brain
+ */
+async function handleSetRouteUserMessage(rawText) {
+  const text = (rawText || "").trim();
+  if (!text) return;
+
+  appendChatMessage("user", text);
+  const lower = text.toLowerCase();
+
+  // 1. Extract any explicit numeric parameters from the user's message
+  const spdMatch = lower.match(/(?:скорост[ьию]|speed|spd)\s*(?:на|до|=|:)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:узл|kn|kts)/i);
+  const drfMatch = lower.match(/(?:осадк[ауи]|draft)\s*(?:на|до|=|:)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:м\b|метров|meters)/i);
+  const xtdMatch = lower.match(/(?:xtd|коридор|буфер)\s*(?:на|до|=|:)?\s*(\d+(?:[.,]\d+)?)/i);
+
+  const parsedSpd = spdMatch ? parseFloat((spdMatch[1] || spdMatch[2]).replace(",", ".")) : null;
+  const parsedDrf = drfMatch ? parseFloat((drfMatch[1] || drfMatch[2]).replace(",", ".")) : null;
+  const parsedXtd = xtdMatch ? parseFloat(xtdMatch[1].replace(",", ".")) : null;
+  let parsedSail = null;
+  if (/\bgc\b|great circle|большо\w+\s+круг|ортодром/i.test(lower)) parsedSail = "GC";
+  else if (/\brl\b|rhumb|локсодром/i.test(lower)) parsedSail = "RL";
+
+  // 2. Check if we were waiting for a clarifying answer (e.g., Suez vs Cape of Good Hope, or missing destination port)
+  if (window.SETROUTE_PENDING_CONTEXT) {
+    const pending = window.SETROUTE_PENDING_CONTEXT;
+    if (pending.type === "SUEZ_VS_CAPE") {
+      const chooseCape = /cape|африк|доброй надежд|юг|обход/i.test(lower);
+      window.SETROUTE_PENDING_CONTEXT = null;
+      await executeBrainLegByLegRoutePlan(pending.origin, pending.dest, Object.assign({}, pending.opts, {
+        viaCape: chooseCape,
+        speedKnots: parsedSpd || pending.opts.speedKnots,
+        draftMeters: parsedDrf || pending.opts.draftMeters
+      }));
+      return;
+    }
+    if (pending.type === "MISSING_PORT") {
+      const newPorts = findPortsInUserMessage(text);
+      if (newPorts.length >= 1) {
+        const orig = pending.origin || newPorts[0];
+        const dest = pending.origin ? newPorts[0] : (newPorts[1] || null);
+        if (orig && dest && orig.id !== dest.id) {
+          window.SETROUTE_PENDING_CONTEXT = null;
+          await executeBrainLegByLegRoutePlan(orig, dest, {
+            speedKnots: parsedSpd,
+            draftMeters: parsedDrf,
+            xtdNM: parsedXtd,
+            sailMode: parsedSail
+          });
+          return;
+        }
+      }
+    }
+  }
+
+  // 3. Detect mentioned ports in the message
+  const mentionedPorts = findPortsInUserMessage(text);
+
+  // Case A: Two ports mentioned -> Check if we should ask a strategic clarifying question (e.g. Suez vs Cape or Draft warning) or build immediately
+  if (mentionedPorts.length >= 2) {
+    const pOrig = mentionedPorts[0];
+    const pDest = mentionedPorts[1];
+    const opts = {
+      speedKnots: parsedSpd || parseFloat((document.getElementById("setRouteSpeedInput") || {}).value) || 14.5,
+      draftMeters: parsedDrf || parseFloat((document.getElementById("setRouteDraftInput") || {}).value) || 11.5,
+      xtdNM: parsedXtd || parseFloat((document.getElementById("setRouteXtdInput") || {}).value) || 0.25,
+      sailMode: parsedSail || (document.getElementById("setRouteSailSelect") || {}).value || "HYBRID"
+    };
+
+    // Check if route crosses Europe/Americas <-> Asia and user didn't specify Suez vs Cape
+    const isEuroOrUs = p => p.coords[1] < 30;
+    const isAsia = p => p.coords[1] > 70;
+    const crossesSuezOrCape = (isEuroOrUs(pOrig) && isAsia(pDest)) || (isAsia(pOrig) && isEuroOrUs(pDest));
+    const alreadySpecifiedSuezOrCape = /суэц|suez|cape|африк|доброй надежд|прямо|сразу/i.test(lower);
+
+    if (crossesSuezOrCape && !alreadySpecifiedSuezOrCape) {
+      window.SETROUTE_PENDING_CONTEXT = { type: "SUEZ_VS_CAPE", origin: pOrig, dest: pDest, opts };
+      appendChatMessage("brain", `
+        <strong>🧭 Уточняющий вопрос от мозга SetRoute (${pOrig.name} &rarr; ${pDest.name}):</strong><br>
+        Перед расчётом легов между <b>${pOrig.name}</b> и <b>${pDest.name}</b> я проанализировал обстановку в районе <b>NAVAREA IX (Красное море и Баб-эль-Мандебский пролив)</b>, где действуют навигационные предупреждения безопасности.<br><br>
+        Как вы предпочитаете проложить генеральный курс?
+        <ul style="margin:6px 0;padding-left:18px;">
+          <li><b>Вариант 1 — Через Суэцкий канал и Красное море:</b> кратчайшее расстояние (~экономия 3 400 NM), проход по TSS Суэца и Баб-эль-Мандеба.</li>
+          <li><b>Вариант 2 — Вокруг Африки (мыс Доброй Надежды / Cape Agulhas):</b> обход зоны риска Красного моря по глубоководному океанскому коридору.</li>
+        </ul>
+        Выберите вариант ниже или напишите дополнительные параметры (осадку, скорость):
+      `, [
+        { label: "⚡ Через Суэцкий канал (Кратчайший)", prompt: `Проложи через Суэцкий канал из ${pOrig.name} в ${pDest.name}` },
+        { label: "🌊 Вокруг Африки (Мыс Доброй Надежды)", prompt: `Проложи вокруг Африки через мыс Доброй Надежды из ${pOrig.name} в ${pDest.name}` }
+      ]);
+      return;
+    }
+
+    await executeBrainLegByLegRoutePlan(pOrig, pDest, opts);
+    return;
+  }
+
+  // Case B: Only 1 port mentioned -> Ask clarifying question for the second port (or if user says "из текущего порта / добавь заход")
+  if (mentionedPorts.length === 1) {
+    const pOne = mentionedPorts[0];
+    if (/добавь|через|заход|via|add/i.test(lower) && activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2) {
+      // Insert intermediate port waypoint into activeRouteData!
+      const appC = pOne.approachCoords || pOne.coords;
+      const midIdx = Math.max(1, Math.floor(activeRouteData.waypoints.length / 2));
+      activeRouteData.waypoints.splice(midIdx, 0, {
+        wptNo: ('00' + (midIdx + 1)).slice(-3),
+        name: `${pOne.name.toUpperCase()} CALL / APPROACH`,
+        lat: appC[0],
+        lon: appC[1],
+        speedKnots: (activeRouteData.metadata && activeRouteData.metadata.speedKnots) || 14.5,
+        portsideXTD: 0.3,
+        starboardXTD: 0.3,
+        turnRadius: 0.6,
+        sail: "RL",
+        rot: 8.0
+      });
+      activeRouteData.name = `${activeRouteData.name} (via ${pOne.name})`;
+      enrichRouteWithLegsTelemetry(activeRouteData);
+      saveRouteToLibrary(activeRouteData);
+      displaySetRouteResults(activeRouteData, true);
+      if (leafletMap) renderRouteOnMap(activeRouteData, false);
+      appendChatMessage("brain", `
+        ✓ Я пересчитал маршрут и добавил промежуточный заход в <b>${pOne.name}</b>! Теперь в маршруте <b>${activeRouteData.legs.length} легов</b> (общая длина: <b>${activeRouteData.totalDistanceNM} NM</b>). Все параметры легов обновлены в правой панели.
+      `);
+      return;
+    }
+
+    window.SETROUTE_PENDING_CONTEXT = { type: "MISSING_PORT", origin: pOne };
+    appendChatMessage("brain", `
+      Я зафиксировал порт <b>${pOne.name} (${pOne.country})</b> [контрольная глубина: ${pOne.maxDraftLowTide || pOne.maxDraftMeters || "14.5m"}].<br>
+      Уточните, пожалуйста, <b>второй порт (назначения или отправления)</b>, а также при необходимости <b>осадку судна (м)</b> и <b>планируемую скорость (узлы)</b>, чтобы я рассчитал все леги маршрута:
+    `, [
+      { label: `${pOne.name} → Rotterdam`, prompt: `${pOne.name} to Rotterdam` },
+      { label: `${pOne.name} → Singapore`, prompt: `${pOne.name} to Singapore` },
+      { label: `${pOne.name} → Houston`, prompt: `${pOne.name} to Houston` },
+      { label: `${pOne.name} → Shanghai`, prompt: `${pOne.name} to Shanghai` }
+    ]);
+    return;
+  }
+
+  // Case C: Modify existing activeRouteData via chat (speed, draft, XTD, GC/RL, reverse, cyclone avoidance)
+  if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2) {
+    if (parsedSpd || parsedDrf || parsedXtd || parsedSail || /реверс|обратн|reverse|пересчитай/i.test(lower)) {
+      if (/реверс|обратн|reverse/i.test(lower)) {
+        activeRouteData.waypoints.reverse();
+        const parts = (activeRouteData.name || "").split(" to ");
+        if (parts.length === 2) activeRouteData.name = `${parts[1]} to ${parts[0]}`;
+      }
+      activeRouteData.metadata = activeRouteData.metadata || {};
+      if (parsedSpd) activeRouteData.metadata.speedKnots = parsedSpd;
+      if (parsedDrf) activeRouteData.metadata.draftMeters = parsedDrf;
+      if (parsedXtd) activeRouteData.metadata.xtdNM = parsedXtd;
+      if (parsedSail) activeRouteData.metadata.sailMode = parsedSail;
+
+      enrichRouteWithLegsTelemetry(activeRouteData, activeRouteData.metadata);
+      saveRouteToLibrary(activeRouteData);
+      displaySetRouteResults(activeRouteData, true);
+      if (leafletMap) renderRouteOnMap(activeRouteData, false);
+
+      appendChatMessage("brain", `
+        <strong>✓ Параметры активной трассы «${activeRouteData.name}» пересчитаны по всем ${activeRouteData.legs.length} легам!</strong><br>
+        • Скорость: <b>${activeRouteData.metadata.speedKnots || 14.5} kn</b> | Осадка: <b>${activeRouteData.metadata.draftMeters || 11.5} m</b> | Базовый XTD: <b>±${activeRouteData.metadata.xtdNM || 0.25} NM</b> | Режим: <b>${activeRouteData.metadata.sailMode || "HYBRID"}</b><br>
+        • Новое время перехода: <b>${activeRouteData.steamingDays} сут. (${activeRouteData.totalSteamingHours} ч)</b> на дистанции <b>${activeRouteData.totalDistanceNM} NM</b>.<br>
+        Обновлённая таблица легов и расчёт Squat/UKC открыты в правой панели.
+      `);
+      return;
+    }
+  }
+
+  // Case D: General navigation / passage planning conversation or unclear request -> Ask clarifying questions or consult Cohere AI
+  let aiReply = "";
+  if (navigator.onLine && typeof SETROUTE_COHERE_KEY === "string" && SETROUTE_COHERE_KEY) {
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 4500);
+      const curRouteInfo = activeRouteData
+        ? `Current active route: ${activeRouteData.name} (${activeRouteData.totalDistanceNM} NM, ${(activeRouteData.legs || []).length} legs).`
+        : "No route currently active.";
+      const resp = await fetch("https://api.cohere.com/v2/chat", {
+        method: "POST",
+        signal: ctrl.signal,
+        headers: {
+          "Authorization": `Bearer ${SETROUTE_COHERE_KEY}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          model: SETROUTE_COHERE_MODEL,
+          messages: [{
+            role: "user",
+            content: `You are SetRoute Dual-Core Maritime Brain (combining IMO A.893(21) / NP231 passage planning theory with hydrographic leg analysis). ${curRouteInfo} Reply helpfully and concisely in Russian to the navigator's message, and if they want to plan or edit a route, ask any needed clarifying questions (departure/arrival ports, draft, speed, Suez vs Cape): "${text}"`
+          }],
+          temperature: 0.25
+        })
+      });
+      clearTimeout(tid);
+      if (resp.ok) {
+        const d = await resp.json();
+        aiReply = (((d.message || {}).content || [])[0] ? d.message.content[0].text : "").trim();
+      }
+    } catch (e) {}
+  }
+
+  if (!aiReply) {
+    aiReply = `Я готов спроектировать или скорректировать маршрут по стандарту <b>IMO Resolution A.893(21) / Admiralty NP231</b> с предварительным расчётом каждого <b>Leg</b> (выбор RL/GC, истинный курс, длина, XTD, проверка глубин портов, TSS, активных извещений NtM/NAVTEX и тропических циклонов).<br><br>Укажите <b>порт отправления и порт назначения</b> (например: <i>«Построй маршрут из Houston в Rotterdam, осадка 11.8м, скорость 15 узлов»</i>) или выберите один из быстрых сценариев ниже:`;
+  }
+
+  appendChatMessage("brain", aiReply.replace(/\n/g, "<br>"), [
+    { label: "🚢 Houston → Rotterdam (11.8m, 15kn)", prompt: "Построй маршрут из Houston в Rotterdam, осадка 11.8м, скорость 15 узлов" },
+    { label: "⚓ Singapore → Shanghai (12.5m, 14.5kn)", prompt: "Построй маршрут из Singapore в Shanghai, осадка 12.5м, скорость 14.5 узлов" },
+    { label: "🌊 Rotterdam → Singapore (Выбор Суэц / Африка)", prompt: "Построй маршрут из Rotterdam в Singapore, осадка 12.0м" },
+    { label: "🌀 Tokyo → San Francisco (Тихоокеанский GC)", prompt: "Построй маршрут из Tokyo в San Francisco по дуге большого круга GC" }
+  ]);
+}
+
+/**
+ * Render the Route Monitoring Mode View (Brain Function #2)
+ */
+function renderRouteMonitoringView() {
+  const box = document.getElementById("setRouteMonitoringContent");
+  if (!box) return;
+
+  const hasRoute = Boolean(activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2);
+  if (!hasRoute) {
+    box.innerHTML = `
+      <div class="sr-msg brain">
+        <div class="sr-msg-avatar">📡</div>
+        <div class="sr-msg-bubble">
+          <strong>📡 SetRoute Brain — Route Monitoring Mode</strong><br>
+          Для запуска мониторинга выберите сохранённую трассу под кнопкой <b>SetRoute</b> в левом меню, загрузите маршрут через <b>My Vessel</b> или создайте маршрут во вкладке <b>🧭 Route Planning</b>.
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  enrichRouteWithLegsTelemetry(activeRouteData);
+  const legs = activeRouteData.legs || [];
+  const vPos = userVessel && Number.isFinite(userVessel.lat)
+    ? `${formatLatLonDMS(userVessel.lat, userVessel.lon)}`
+    : "Ожидание GPS / ручного ввода в My Vessel";
+  const xtdDist = (userVessel && Number.isFinite(userVessel.lat) && typeof getMinDistanceToActiveRouteNM === "function")
+    ? `${getMinDistanceToActiveRouteNM(userVessel.lat, userVessel.lon).toFixed(2)} NM`
+    : "0.00 NM (On Track)";
+
+  box.innerHTML = `
+    <div class="sr-msg brain">
+      <div class="sr-msg-avatar">📡</div>
+      <div class="sr-msg-bubble" style="max-width:100%;width:100%;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          <div>
+            <strong style="font-size:0.95rem;color:#38bdf8;">📡 Live Route Monitoring Guard: ${activeRouteData.name}</strong>
+            <div style="font-size:0.72rem;color:#94a3b8;">IMO A.893(21) Stage 4 (Monitoring) • Continuous XTD, UKC &amp; Hazard Guard</div>
+          </div>
+          <span class="sr-leg-pill ok">ACTIVE GUARD</span>
+        </div>
+        <div class="sr-drawer-kpis" style="margin-bottom:12px;">
+          <div class="sr-drawer-kpi"><span class="sr-drawer-kpi-val">${vPos}</span><span class="sr-drawer-kpi-lbl">Vessel Position</span></div>
+          <div class="sr-drawer-kpi"><span class="sr-drawer-kpi-val">${xtdDist}</span><span class="sr-drawer-kpi-lbl">Current XTD</span></div>
+          <div class="sr-drawer-kpi"><span class="sr-drawer-kpi-val">${legs.length} Legs</span><span class="sr-drawer-kpi-lbl">Monitored Legs</span></div>
+          <div class="sr-drawer-kpi"><span class="sr-drawer-kpi-val">±${window.ROUTE_CORRIDOR_BUFFER_NM || 25} NM</span><span class="sr-drawer-kpi-lbl">Safety Buffer</span></div>
+        </div>
+        <div style="font-size:0.76rem;color:#cbd5e1;line-height:1.5;">
+          Режим <b>Route Monitoring</b> отслеживает положение судна относительно активного лега, контролирует выход за пределы XTD, приближение к точкам поворота (Wheel-Over Points) и появление новых навигационных предупреждений <b>NAVTEX / NtM</b> или тропических циклонов в буферном коридоре трассы.
+        </div>
+      </div>
+    </div>
+  `;
+}
+window.renderRouteMonitoringView = renderRouteMonitoringView;
+
+/**
+ * Initialize SetRoute v5.0 Conversational Brain, Left Sidebar Route Tree & Right Drawer
+ */
+function initSetRouteV50() {
+  const chatMessages = document.getElementById("setRouteChatMessages");
+  const chatForm = document.getElementById("setRouteChatForm");
+  const chatInput = document.getElementById("setRouteChatInput");
+  const genBtn = document.getElementById("btnGenerateSetRoute");
+  const newChatBtn = document.getElementById("btnSetRouteNewChat");
+  const toggleDrawerBtn = document.getElementById("btnToggleRightDrawer");
+  const closeDrawerBtn = document.getElementById("btnCloseRightDrawer");
+  const drawerPlotBtn = document.getElementById("btnDrawerPlotOnChart");
+  const drawerAuditBtn = document.getElementById("btnDrawerAskBrainAudit");
+  const drawerDelBtn = document.getElementById("btnDrawerDeleteRoute");
+  const navExpandArrow = document.getElementById("navRouteExpandArrow");
+  const navSavedList = document.getElementById("navSavedRoutesList");
+  const navSidebar = document.querySelector(".nav-sidebar");
+
+  // 1. Left Sidebar Expand/Collapse Arrow next to SetRoute
+  if (navExpandArrow && !navExpandArrow._boundV50) {
+    navExpandArrow._boundV50 = true;
+    navExpandArrow.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = navSavedList ? navSavedList.classList.toggle("open") : false;
+      navExpandArrow.classList.toggle("open", isOpen);
+      navExpandArrow.textContent = isOpen ? "▴" : "▾";
+      if (navSidebar) {
+        navSidebar.classList.toggle("routes-tree-open", isOpen);
+      }
+      renderNavSavedRoutesTree();
+    });
+  }
+
+  // Click handler on saved routes under SetRoute in .nav-sidebar
+  if (navSavedList && !navSavedList._boundV50) {
+    navSavedList._boundV50 = true;
+    navSavedList.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-saved-route-id]");
+      if (!btn) return;
+      e.stopPropagation();
+      const rtId = btn.getAttribute("data-saved-route-id");
+      if (typeof switchToTab === "function") {
+        switchToTab("tab-route");
+      }
+      selectSavedRouteFromSidebar(rtId, true);
+    });
+  }
+
+  // Also ensure SetNews nav button works when clicked
+  const navNewsBtn = document.getElementById("navItemSetNews");
+  if (navNewsBtn && !navNewsBtn._boundV50) {
+    navNewsBtn._boundV50 = true;
+    navNewsBtn.addEventListener("click", () => {
+      if (typeof switchToTab === "function") switchToTab("tab-news");
+    });
+  }
+
+  // 2. Brain Mode Switcher: Route Planning vs Route Monitoring
+  const btnPlan = document.getElementById("btnBrainModePlanning");
+  const btnMon = document.getElementById("btnBrainModeMonitoring");
+  const chatScroll = document.getElementById("setRouteChatScroll");
+  const monPanel = document.getElementById("setRouteMonitoringPanel");
+  const compDock = document.getElementById("setRouteComposerDock");
+
+  if (btnPlan && btnMon && !btnPlan._boundV50) {
+    btnPlan._boundV50 = true;
+    btnPlan.addEventListener("click", () => {
+      window.SETROUTE_BRAIN_MODE = "planning";
+      btnPlan.classList.add("active");
+      btnMon.classList.remove("active");
+      if (chatScroll) chatScroll.style.display = "flex";
+      if (compDock) compDock.style.display = "block";
+      if (monPanel) monPanel.style.display = "none";
+    });
+    btnMon.addEventListener("click", () => {
+      window.SETROUTE_BRAIN_MODE = "monitoring";
+      btnMon.classList.add("active");
+      btnPlan.classList.remove("active");
+      if (chatScroll) chatScroll.style.display = "none";
+      if (compDock) compDock.style.display = "none";
+      if (monPanel) monPanel.style.display = "flex";
+      renderRouteMonitoringView();
+    });
+  }
+
+  // 3. Initial Welcome Message from SetRoute Dual-Core Brain
+  const renderWelcomeMessage = () => {
+    if (!chatMessages) return;
+    chatMessages.innerHTML = "";
+    appendChatMessage("brain", `
+      <strong>👋 Добро пожаловать в SetRoute Dual-Core Brain™ (Cohere AI + Hydrographic Leg Planner)!</strong><br>
+      Я работаю как два полушария единого штурманского мозга:
+      <ul style="margin:6px 0;padding-left:18px;">
+        <li><b>Детерминированное ядро (IMO A.893(21) &amp; Admiralty NP231):</b> перед нанесением каждого <b>Leg</b> (отрезка между вейпоинтами) заранее рассчитывает тип перехода (<code>RL</code> или <code>GC</code>), истинный курс (<code>°T</code>), дистанцию (<code>NM</code>), коридор безопасности <code>XTD</code>, радиус поворота, проверяет глубины портов и Squat/UKC, обход суши, схемы разделения движения <b>TSS</b>, буи, активные извещения <b>NtM/NAVTEX</b>, сезонность и тропические циклоны.</li>
+        <li><b>ИИ-стратег (Cohere AI):</b> ведёт с вами диалог, задаёт уточняющие вопросы при неоднозначных участках (например, Суэц или мыс Доброй Надежды) и мгновенно перестраивает трассу по вашим командам в чате.</li>
+      </ul>
+      Напишите ваш запрос ниже или выберите готовый сценарий:
+    `, [
+      { label: "🚢 Houston → Rotterdam (11.8m, 15kn)", prompt: "Построй маршрут из Houston в Rotterdam, осадка 11.8м, скорость 15 узлов" },
+      { label: "⚓ Singapore → Shanghai (12.5m, 14.5kn)", prompt: "Построй маршрут из Singapore в Shanghai, осадка 12.5м, скорость 14.5 узлов" },
+      { label: "🌊 Rotterdam → Singapore (Сравнить Суэц / Африку)", prompt: "Построй маршрут из Rotterdam в Singapore, осадка 12.0м" },
+      { label: "🌀 Tokyo → Long Beach (Тихоокеанский GC)", prompt: "Построй маршрут из Tokyo в Long Beach по дуге большого круга GC" }
+    ]);
+  };
+
+  if (chatMessages && chatMessages.children.length === 0) {
+    renderWelcomeMessage();
+  }
+
+  // Delegated click for quick prompt chips inside chat
+  if (chatMessages && !chatMessages._boundV50) {
+    chatMessages._boundV50 = true;
+    chatMessages.addEventListener("click", (e) => {
+      const chip = e.target.closest("[data-sr-prompt]");
+      if (chip) {
+        const p = chip.getAttribute("data-sr-prompt");
+        if (p) handleSetRouteUserMessage(p);
+      }
+    });
+  }
+
+  // 4. Chat Composer Submit & Enter Key
+  if (chatForm && !chatForm._boundV50) {
+    chatForm._boundV50 = true;
+    chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!chatInput) return;
+      const val = chatInput.value.trim();
+      if (!val) return;
+      chatInput.value = "";
+      handleSetRouteUserMessage(val);
+    });
+  }
+
+  if (chatInput && !chatInput._boundV50) {
+    chatInput._boundV50 = true;
+    chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        const val = chatInput.value.trim();
+        if (!val) return;
+        chatInput.value = "";
+        handleSetRouteUserMessage(val);
+      }
+    });
+  }
+
+  // 5. "⚡ Plan Selected Ports" button in toolbar
+  if (genBtn && !genBtn._boundV50) {
+    genBtn._boundV50 = true;
+    // Clone button to replace old v4.8 click listener cleanly
+    const freshGenBtn = genBtn.cloneNode(true);
+    freshGenBtn._boundV50 = true;
+    genBtn.parentNode.replaceChild(freshGenBtn, genBtn);
+    freshGenBtn.addEventListener("click", () => {
+      const origId = (document.getElementById("setRouteOriginSelect") || {}).value;
+      const destId = (document.getElementById("setRouteDestSelect") || {}).value;
+      const pOrig = (typeof PORT_DEPTHS_DB !== "undefined" ? PORT_DEPTHS_DB : []).find(p => p.id === origId);
+      const pDest = (typeof PORT_DEPTHS_DB !== "undefined" ? PORT_DEPTHS_DB : []).find(p => p.id === destId);
+      if (!pOrig || !pDest) return;
+      if (pOrig.id === pDest.id) {
+        if (typeof showSetSailToast === "function") showSetSailToast("Выберите разные порты отправления и назначения", "warning");
+        return;
+      }
+      const spd = (document.getElementById("setRouteSpeedInput") || {}).value || 14.5;
+      const drf = (document.getElementById("setRouteDraftInput") || {}).value || 11.5;
+      appendChatMessage("user", `Построй маршрут ${pOrig.name} → ${pDest.name} (скорость ${spd} уз, осадка ${drf} м)`);
+      executeBrainLegByLegRoutePlan(pOrig, pDest, {});
+    });
+  }
+
+  // 6. Topbar & Right Drawer Controls
+  if (newChatBtn && !newChatBtn._boundV50) {
+    newChatBtn._boundV50 = true;
+    newChatBtn.addEventListener("click", () => {
+      window.SETROUTE_PENDING_CONTEXT = null;
+      renderWelcomeMessage();
+    });
+  }
+
+  const drawer = document.getElementById("setRouteRightDrawer");
+  if (toggleDrawerBtn && drawer && !toggleDrawerBtn._boundV50) {
+    toggleDrawerBtn._boundV50 = true;
+    toggleDrawerBtn.addEventListener("click", () => {
+      if (activeRouteData) {
+        displaySetRouteResults(activeRouteData, false);
+      }
+      drawer.classList.toggle("open");
+    });
+  }
+
+  if (closeDrawerBtn && drawer && !closeDrawerBtn._boundV50) {
+    closeDrawerBtn._boundV50 = true;
+    closeDrawerBtn.addEventListener("click", () => {
+      drawer.classList.remove("open");
+    });
+  }
+
+  if (drawerPlotBtn && !drawerPlotBtn._boundV50) {
+    drawerPlotBtn._boundV50 = true;
+    drawerPlotBtn.addEventListener("click", () => {
+      if (typeof switchToTab === "function") switchToTab("tab-ntm");
+      setTimeout(() => {
+        if (leafletMap && activeRouteData) {
+          leafletMap.invalidateSize();
+          renderRouteOnMap(activeRouteData, true);
+        }
+      }, 180);
+    });
+  }
+
+  if (drawerAuditBtn && !drawerAuditBtn._boundV50) {
+    drawerAuditBtn._boundV50 = true;
+    drawerAuditBtn.addEventListener("click", () => {
+      if (!activeRouteData) return;
+      handleSetRouteUserMessage(`Проведи детальный штурманский аудит активного маршрута ${activeRouteData.name} по всем легам, глубинам и опасностям.`);
+    });
+  }
+
+  if (drawerDelBtn && !drawerDelBtn._boundV50) {
+    drawerDelBtn._boundV50 = true;
+    drawerDelBtn.addEventListener("click", () => {
+      if (activeRouteData && activeRouteData.id) {
+        deleteRouteFromLibrary(activeRouteData.id);
+      }
+    });
+  }
+
+  // Click on any Leg card in the Right Drawer -> Fly to that Leg on SetChart
+  const legsListEl = document.getElementById("srDrawerLegsList");
+  if (legsListEl && !legsListEl._boundV50) {
+    legsListEl._boundV50 = true;
+    legsListEl.addEventListener("click", (e) => {
+      const card = e.target.closest("[data-leg-idx]");
+      if (!card || !activeRouteData || !Array.isArray(activeRouteData.legs)) return;
+      const idx = parseInt(card.getAttribute("data-leg-idx"), 10);
+      const leg = activeRouteData.legs[idx];
+      if (!leg) return;
+      if (typeof switchToTab === "function") switchToTab("tab-ntm");
+      setTimeout(() => {
+        if (leafletMap) {
+          leafletMap.invalidateSize();
+          const b = L.latLngBounds([[leg.fromLat, leg.fromLon], [leg.toLat, leg.toLon]]);
+          if (b.isValid()) leafletMap.fitBounds(b.pad(0.25));
+        }
+      }, 200);
+    });
+  }
+
+  renderNavSavedRoutesTree();
+  if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
+    displaySetRouteResults(activeRouteData, true);
+  }
+}
+
+window.initSetRouteV50 = initSetRouteV50;
+const _origRefreshSetRouteUI = window.refreshSetRouteUI;
+window.refreshSetRouteUI = function() {
+  if (typeof _origRefreshSetRouteUI === "function") _origRefreshSetRouteUI();
+  initSetRouteV50();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    if (typeof initSetRoute === "function") initSetRoute();
+    initSetRouteV50();
+  }, 240);
+});
+

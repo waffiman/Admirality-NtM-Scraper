@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=4.9" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.0" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -11223,10 +11223,21 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 
-            <button type="button" class="nav-item" data-tab="tab-route" aria-label="SetRoute — AI Passage Planner (Beta)" title="SetRoute — AI Passage Planner (Beta)">
-        <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="4.5" cy="19.5" r="2.5" fill="#f05a36"/><circle cx="19.5" cy="4.5" r="2.5" fill="#38bdf8"/><path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 2"/><polygon points="16.5 4 20 4.5 18.5 7.5" fill="#38bdf8"/><circle cx="12" cy="11.5" r="1.5" fill="#f05a36"/></svg>
-        <span class="badge" style="background:#f05a36;font-size:0.52rem;font-weight:800;letter-spacing:0.5px;padding:1px 3px;">BETA</span>
-        <span class="tooltip">SetRoute · AI Passage Planner (Beta)</span>
+      <div class="nav-route-group" id="navRouteGroup">
+        <div class="nav-route-btn-wrap">
+          <button type="button" class="nav-item" data-tab="tab-route" id="navItemSetRoute" aria-label="SetRoute — AI Dual-Core Passage Brain" title="SetRoute — AI Dual-Core Passage Brain">
+            <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="4.5" cy="19.5" r="2.5" fill="#f05a36"/><circle cx="19.5" cy="4.5" r="2.5" fill="#38bdf8"/><path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 2"/><polygon points="16.5 4 20 4.5 18.5 7.5" fill="#38bdf8"/><circle cx="12" cy="11.5" r="1.5" fill="#f05a36"/></svg>
+            <span class="badge" id="navRoutesCountBadge" style="display:inline-block;background:#0284c7;font-size:0.52rem;font-weight:800;padding:1px 4px;">AI</span>
+            <span class="tooltip">SetRoute · Passage Brain</span>
+          </button>
+          <button type="button" class="nav-route-expand-arrow" id="navRouteExpandArrow" title="Expand / Collapse Saved Routes List" aria-label="Toggle Saved Routes">▾</button>
+        </div>
+        <div class="nav-saved-routes-list" id="navSavedRoutesList" role="region" aria-label="Saved &amp; Generated Routes"></div>
+      </div>
+
+      <button type="button" class="nav-item" data-tab="tab-news" id="navItemSetNews" aria-label="SetNews — Global Maritime Intelligence &amp; For You" title="SetNews — Global Maritime Intelligence &amp; For You">
+        <svg class="setsail-icon" viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M18 14h-8M15 18h-5" stroke="#38bdf8" stroke-width="1.6" stroke-linecap="round"/><rect x="10" y="6" width="8" height="4" rx="1" fill="none" stroke="#f05a36" stroke-width="1.6"/></svg>
+        <span class="tooltip">SetNews · Maritime Wire</span>
       </button>
 
       <button type="button" class="nav-item nav-settings-item" data-tab="tab-settings" aria-label="Settings &amp; Support" style="margin-top:auto;" title="Settings &amp; Support">
@@ -13289,154 +13300,191 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 
 
-            <!-- ── Tab 4: SetRoute™ — AI Autonomous Passage Planner (Beta) ── -->
+            <!-- ── Tab 4: SetRoute™ v5.0 — Dual-Core Conversational Passage Brain & Leg-by-Leg Inspector ── -->
       <div id="tab-route" class="tab-pane">
-        <div class="setroute-container">
-          <div class="setroute-header">
-            <div class="setroute-header-left">
-              <div class="page-top-badge" style="margin-bottom:6px;">
-                <span class="page-badge-icon">
-                  <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="4.5" cy="19.5" r="2.5" fill="#f05a36"/><circle cx="19.5" cy="4.5" r="2.5" fill="#38bdf8"/><path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" fill="none" stroke-width="1.8" stroke-dasharray="3 2"/><polygon points="16.5 4 20 4.5 18.5 7.5" fill="#38bdf8"/></svg>
-                </span>
-                <div class="page-badge-text">
-                  <span class="page-badge-title">SetRoute</span>
-                  <span class="page-badge-pill">PASSAGE PLANNER</span>
+        <div class="setroute-gpt-shell" id="setRouteGptShell">
+          <!-- LEFT / MAIN WORKSPACE: ChatGPT-Style Conversational Brain (Cohere AI + Deterministic Leg Script) -->
+          <div class="setroute-chat-col" id="setRouteMainChatCol">
+            <!-- Top Command Bar -->
+            <header class="setroute-brain-topbar">
+              <div class="setroute-brain-brand">
+                <div class="setroute-brain-orb">
+                  <svg class="setsail-icon" viewBox="0 0 24 24" style="width:20px;height:20px;"><circle cx="4.5" cy="19.5" r="2.5" fill="#f05a36"/><circle cx="19.5" cy="4.5" r="2.5" fill="#38bdf8"/><path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="3 2"/><polygon points="16.5 4 20 4.5 18.5 7.5" fill="#38bdf8"/></svg>
+                </div>
+                <div class="setroute-brain-title-wrap">
+                  <div class="setroute-brain-title">
+                    <span>SetRoute Dual-Core Brain™</span>
+                    <span style="font-size:0.62rem;padding:2px 7px;border-radius:999px;background:rgba(16,185,129,0.16);border:1px solid rgba(16,185,129,0.4);color:#34d399;font-weight:700;">COHERE AI + LEG ENGINE</span>
+                  </div>
+                  <span class="setroute-brain-sub">IMO A.893(21) &amp; NP231 Theory • Leg-by-Leg Hydrographic, TSS, NtM, Weather &amp; Seasonal Synthesis</span>
                 </div>
               </div>
-              <p class="setroute-desc">
-                Autonomous Deep-Water Passage Planning Engine. Cross-references port bathymetry, fairway corridors, weather &amp; navigation hazards.
-              </p>
-            </div>
-            <div class="setroute-header-right" style="display:flex;align-items:center;gap:14px;">
-              <button type="button" class="setroute-btn-chart-jump" onclick="switchToTab('tab-ntm')">
-                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>
-                Open SetChart Map
-              </button>
-            </div>
-          </div>
-          <div class="setroute-grid">
-            <div class="setroute-card">
-              <div class="setroute-card-title">
-                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#f05a36;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/></svg>
-                Voyage Route: Departure &amp; Destination
-              </div>
-              <div class="setroute-ports-row">
-                <div class="setroute-port-group">
-                  <label class="setroute-label" for="setRouteOriginSelect"><span class="port-dir-badge dep">DEP</span> Departure Port (Origin)</label>
-                  <select id="setRouteOriginSelect" class="setroute-select"></select>
-                  <div class="setroute-port-preview" id="originPortPreview"><span class="preview-flag" id="originFlag"></span><span class="preview-text" id="originText">Select departure port...</span><span class="preview-depth" id="originDepth"></span></div>
-                </div>
-                <button type="button" class="setroute-swap-btn" id="btnSwapPorts" title="Swap Origin &amp; Destination"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12M17 20l4-4M17 20l-4-4"/></svg></button>
-                <div class="setroute-port-group">
-                  <label class="setroute-label" for="setRouteDestSelect"><span class="port-dir-badge dest">ARR</span> Destination Port (Target)</label>
-                  <select id="setRouteDestSelect" class="setroute-select"></select>
-                  <div class="setroute-port-preview" id="destPortPreview"><span class="preview-flag" id="destFlag"></span><span class="preview-text" id="destText">Select destination port...</span><span class="preview-depth" id="destDepth"></span></div>
-                </div>
-              </div>
-              <div class="setroute-depth-alert" id="setRouteDepthAlert" style="display:none;"></div>
-            </div>
-            <div class="setroute-card">
-              <div class="setroute-card-title">
-                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#38bdf8;"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                Vessel Dynamics &amp; Navigation Corridor
-              </div>
-              <div class="setroute-params-grid">
-                <div>
-                  <label class="setroute-label" for="setRouteSpeedInput">Planned Speed (knots)</label>
-                  <input type="number" id="setRouteSpeedInput" class="setroute-input" value="14.5" min="5" max="30" step="0.5" />
-                  <span class="setroute-hint">Cruising speed for ETA &amp; fuel profile</span>
-                </div>
-                <div>
-                  <label class="setroute-label" for="setRouteDraftInput">Vessel Max Draft (meters)</label>
-                  <input type="number" id="setRouteDraftInput" class="setroute-input" value="11.5" min="2" max="25" step="0.1" />
-                  <span class="setroute-hint">Cross-referenced against fairway soundings</span>
-                </div>
-                <div>
-                  <label class="setroute-label" for="setRouteXtdInput">Corridor Safety Margin (XTD NM)</label>
-                  <input type="number" id="setRouteXtdInput" class="setroute-input" value="0.20" min="0.05" max="3.0" step="0.05" />
-                  <span class="setroute-hint">Cross-track limit for COLREGs adherence</span>
-                </div>
-                <div>
-                  <label class="setroute-label" for="setRouteSailSelect">Navigation Geometry</label>
-                  <select id="setRouteSailSelect" class="setroute-select">
-                    <option value="HYBRID" selected>Smart Hybrid (RL straits / GC oceans)</option>
-                    <option value="RL">Rhumb Line / Loxodrome (RL)</option>
-                    <option value="GC">Great Circle / Orthodrome (GC)</option>
-                  </select>
-                  <span class="setroute-hint">Automatic leg calculation standard</span>
-                </div>
-              </div>
-            </div>
-            <div class="setroute-card setroute-intel-card">
-              <div class="setroute-card-title">
-                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#10b981;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                Active Navigation Feeds &amp; Overlays
-              </div>
-              <div class="setroute-intel-badges">
-                <div class="intel-badge active"><span class="intel-dot"></span><div class="intel-text"><b>UKHO Admiralty NtM Bulletins</b></div></div>
-                <div class="intel-badge active"><span class="intel-dot"></span><div class="intel-text"><b>52 World Ports Bathymetry</b></div></div>
-                <div class="intel-badge active"><span class="intel-dot"></span><div class="intel-text"><b>Open Sea Buoys &amp; TSS Corridors</b></div></div>
-                <div class="intel-badge active"><span class="intel-dot"></span><div class="intel-text"><b>Strategic Maritime Chokepoints</b></div></div>
-              </div>
-              <div style="margin-top:16px;">
-                <button type="button" id="btnGenerateSetRoute" class="setroute-generate-btn">
-                  <svg class="setsail-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                  <span>Generate Autonomous Passage Route</span>
+
+              <!-- Brain Function Mode Switcher: Route Planning vs Route Monitoring -->
+              <div class="setroute-mode-switcher" role="tablist" aria-label="SetRoute Brain Mode">
+                <button type="button" class="setroute-mode-btn active" id="btnBrainModePlanning" data-brain-mode="planning">
+                  🧭 Route Planning
+                </button>
+                <button type="button" class="setroute-mode-btn" id="btnBrainModeMonitoring" data-brain-mode="monitoring">
+                  📡 Route Monitoring
                 </button>
               </div>
-              <div id="setRouteProgressBox" class="setroute-progress-box" style="display:none;">
-                <div class="setroute-ship-stage" aria-hidden="true">
-                  <!-- Minimalist Geometric Vessel Silhouette -->
-                  <svg class="setroute-ship-svg" viewBox="0 0 96 36" fill="none">
-                    <path d="M14 23 L22 15 L44 15 L48 9 L60 9 L63 15 L82 15 L74 23 Z" fill="rgba(56, 189, 248, 0.10)" stroke="#38bdf8" stroke-width="1.6" stroke-linejoin="round" />
-                    <line x1="54" y1="5" x2="54" y2="9" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" />
-                    <circle cx="54" cy="4.5" r="1.3" fill="#34d399" />
-                  </svg>
-                  <!-- Single Clean Horizon Wave Line -->
-                  <svg class="setroute-wave-line" viewBox="0 0 144 8" fill="none">
-                    <path d="M4 4 Q 21 1.5, 38 4 T 72 4 T 106 4 T 140 4" stroke="#38bdf8" stroke-width="1.3" stroke-linecap="round" opacity="0.7" />
-                  </svg>
-                </div>
-                <div class="setroute-log-ticker">
-                  <span id="setRouteProgressMsg" class="progress-msg">Initializing passage planning pipeline...</span>
-                </div>
-                <div class="progress-steps-list" id="setRouteStepsList" style="display:none;"></div>
+
+              <div class="setroute-topbar-actions">
+                <button type="button" class="setroute-top-btn" id="btnSetRouteNewChat" title="Start a fresh passage planning conversation">
+                  ＋ New Route Chat
+                </button>
+                <button type="button" class="setroute-top-btn" id="btnToggleRightDrawer" title="Show / Hide Right-Side Route Details Panel">
+                  📋 Route Details
+                </button>
+                <button type="button" class="setroute-top-btn primary" id="btnViewOnSetChart" onclick="switchToTab('tab-ntm')">
+                  🗺️ Open on SetChart
+                </button>
               </div>
+            </header>
+
+            <!-- ROUTE PLANNING MODE: Scrollable ChatGPT-Style Conversation Stream -->
+            <div class="setroute-chat-scroll" id="setRouteChatScroll">
+              <div class="setroute-chat-inner" id="setRouteChatMessages"></div>
             </div>
-            <div class="setroute-card setroute-results-card" id="setRouteResultsCard" style="display:none;">
-              <div class="setroute-card-title" style="justify-content:space-between;">
-                <span style="display:flex;align-items:center;gap:7px;">
-                  <svg class="setsail-icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#f05a36;"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-                  <span id="resultsRouteTitle">Passage Plan Summary</span>
-                </span>
-                <span class="results-engine-badge">AUTONOMOUS ROUTE ENGINE</span>
-              </div>
-              <div class="setroute-metrics-grid">
-                <div class="metric-box"><span class="metric-label">Total Distance</span><span class="metric-value" id="metricDistance">0 NM</span></div>
-                <div class="metric-box"><span class="metric-label">Steaming Time</span><span class="metric-value" id="metricDays">0 Days</span></div>
-                <div class="metric-box"><span class="metric-label">Waypoints</span><span class="metric-value" id="metricWpts">0 WPTs</span></div>
-                <div class="metric-box"><span class="metric-label">Avg Speed</span><span class="metric-value" id="metricSpeed">14.5 kn</span></div>
-              </div>
-              <div class="setroute-chokepoints-box" id="resultsChokepointsBox" style="display:none;">
-                <span class="chokepoints-label">Strategic Fairways &amp; TSS Crossed:</span>
-                <div class="chokepoints-pills" id="resultsChokepointsPills"></div>
-              </div>
-              <div class="setroute-wpts-table-wrap">
-                <table class="setroute-wpts-table">
-                  <thead><tr><th>#</th><th>Waypoint Name</th><th>Coordinates (DMS)</th><th>Leg</th><th>Speed</th><th>XTD</th><th>Turn Rad</th></tr></thead>
-                  <tbody id="resultsWptsTableBody"></tbody>
-                </table>
-              </div>
-              <div class="setroute-actions-row">
-                <button type="button" id="btnViewOnSetChart" class="setroute-btn-chart"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:15px;height:15px;stroke:#fff;"><rect x="2" y="3.5" width="20" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><polyline points="5.5 17.5 10.5 12 15 14 18.5 7.5" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg> Plot &amp; Inspect on SetChart ("My Route") &rarr;</button>
-                <button type="button" id="btnExportSetRouteGeoJson" class="setroute-btn-export"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export ECDIS GeoJSON</button>
-              </div>
+
+            <!-- ROUTE MONITORING MODE: Live XTD / Leg / Hazard Telemetry View (Hidden until Monitoring tab clicked) -->
+            <div class="setroute-chat-scroll" id="setRouteMonitoringPanel" style="display:none;">
+              <div class="setroute-chat-inner" id="setRouteMonitoringContent"></div>
+            </div>
+
+            <!-- Bottom ChatGPT-Style Composer + Quick Vessel/Port Parameters Strip -->
+            <div class="setroute-composer-dock" id="setRouteComposerDock">
+              <form class="setroute-composer-box" id="setRouteChatForm" onsubmit="return false;">
+                <!-- Quick Parameters Strip (Synchronized with Brain & Legacy Selectors) -->
+                <div class="setroute-params-toolbar">
+                  <div class="setroute-mini-field" title="Departure Port">
+                    <span class="port-dir-badge dep">DEP</span>
+                    <select id="setRouteOriginSelect" aria-label="Departure Port"></select>
+                  </div>
+                  <button type="button" id="btnSwapPorts" class="setroute-top-btn" style="padding:2px 7px;font-size:0.7rem;" title="Swap Origin &amp; Destination">⇄</button>
+                  <div class="setroute-mini-field" title="Destination Port">
+                    <span class="port-dir-badge dest">ARR</span>
+                    <select id="setRouteDestSelect" aria-label="Destination Port"></select>
+                  </div>
+                  <div class="setroute-mini-field" title="Planned Vessel Speed (knots)">
+                    <span>SPD:</span>
+                    <input type="number" id="setRouteSpeedInput" value="14.5" min="5" max="28" step="0.5" style="width:44px;">
+                    <span>kn</span>
+                  </div>
+                  <div class="setroute-mini-field" title="Vessel Max Draft (meters)">
+                    <span>DRAFT:</span>
+                    <input type="number" id="setRouteDraftInput" value="11.5" min="2" max="24" step="0.1" style="width:44px;">
+                    <span>m</span>
+                  </div>
+                  <div class="setroute-mini-field" title="Base XTD Safety Corridor (NM)">
+                    <span>XTD:</span>
+                    <input type="number" id="setRouteXtdInput" value="0.25" min="0.05" max="5.0" step="0.05" style="width:44px;">
+                    <span>NM</span>
+                  </div>
+                  <div class="setroute-mini-field" title="Navigation Geometry Standard">
+                    <select id="setRouteSailSelect" aria-label="Sail Mode">
+                      <option value="HYBRID" selected>Hybrid (RL/GC per Leg)</option>
+                      <option value="RL">Rhumb Line (RL)</option>
+                      <option value="GC">Great Circle (GC)</option>
+                    </select>
+                  </div>
+                  <button type="button" id="btnGenerateSetRoute" class="setroute-top-btn" style="margin-left:auto;padding:3px 9px;font-size:0.69rem;border-color:rgba(56,189,248,0.45);color:#38bdf8;" title="Build leg-by-leg route from selected ports">
+                    ⚡ Plan Selected Ports
+                  </button>
+                </div>
+                <div id="setRouteDepthAlert" style="display:none;font-size:0.72rem;color:#fbbf24;padding:4px 8px;border-radius:6px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);"></div>
+
+                <!-- Textarea + Send Button -->
+                <div class="setroute-input-row">
+                  <textarea id="setRouteChatInput" class="setroute-chat-textarea" rows="1" placeholder="Напишите мозгу SetRoute: например «Построй маршрут из Houston в Rotterdam, осадка 11.8м, обойди циклон Simon» или «Измени скорость на 15.5 узлов»..."></textarea>
+                  <button type="submit" id="setRouteChatSendBtn" class="setroute-send-btn">
+                    <span>Send to Brain</span>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
+
+          <!-- RIGHT-SIDE NON-OVERLAPPING ROUTE DETAILS INSPECTOR (#setRouteRightDrawer) -->
+          <aside class="setroute-right-drawer" id="setRouteRightDrawer" aria-label="Selected Route Details &amp; Leg-by-Leg Telemetry">
+            <div class="setroute-drawer-header">
+              <div style="min-width:0;flex:1;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;"></span>
+                  <span id="srDrawerBadge" style="font-size:0.62rem;font-weight:800;color:#38bdf8;text-transform:uppercase;letter-spacing:0.05em;">IMO A.893(21) PASSAGE PLAN</span>
+                </div>
+                <h3 id="resultsRouteTitle" style="font-size:0.95rem;font-weight:800;margin:2px 0 0;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Active Passage Plan</h3>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <button type="button" id="btnExportSetRouteGeoJson" class="setroute-top-btn" style="padding:4px 9px;font-size:0.68rem;" title="Export Route GeoJSON">⬇ GeoJSON</button>
+                <button type="button" id="btnCloseRightDrawer" class="setroute-top-btn" style="padding:4px 8px;font-size:0.75rem;" title="Close Route Details Panel">✕</button>
+              </div>
+            </div>
+
+            <div class="setroute-drawer-body" id="setRouteDrawerBody">
+              <!-- 4 Key Metrics -->
+              <div class="sr-drawer-kpis">
+                <div class="sr-drawer-kpi">
+                  <span class="sr-drawer-kpi-val" id="metricDistance">0 NM</span>
+                  <span class="sr-drawer-kpi-lbl">Total Dist</span>
+                </div>
+                <div class="sr-drawer-kpi">
+                  <span class="sr-drawer-kpi-val" id="metricDays">0 Days</span>
+                  <span class="sr-drawer-kpi-lbl">Steaming</span>
+                </div>
+                <div class="sr-drawer-kpi">
+                  <span class="sr-drawer-kpi-val" id="metricWpts">0 Legs</span>
+                  <span class="sr-drawer-kpi-lbl">Legs / WPTs</span>
+                </div>
+                <div class="sr-drawer-kpi">
+                  <span class="sr-drawer-kpi-val" id="metricSpeed">14.5 kn</span>
+                  <span class="sr-drawer-kpi-lbl">Planned Spd</span>
+                </div>
+              </div>
+
+              <!-- Quick Action Row -->
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button type="button" class="setroute-top-btn primary" id="btnDrawerPlotOnChart" style="flex:1;justify-content:center;">
+                  🗺️ Plot &amp; Focus on SetChart
+                </button>
+                <button type="button" class="setroute-top-btn" id="btnDrawerAskBrainAudit" style="justify-content:center;">
+                  🧠 Audit in Chat
+                </button>
+                <button type="button" class="setroute-top-btn" id="btnDrawerDeleteRoute" style="color:#fda4af;border-color:rgba(244,63,94,0.35);" title="Remove route from saved list">
+                  🗑️
+                </button>
+              </div>
+
+              <!-- Passage Theory & Multi-Factor Audit Summary -->
+              <div id="srDrawerTheoryBox" style="padding:10px 12px;border-radius:10px;background:rgba(14,165,233,0.09);border:1px solid rgba(56,189,248,0.25);font-size:0.73rem;line-height:1.48;color:#cbd5e1;"></div>
+
+              <!-- Chokepoints & TSS Crossed -->
+              <div id="resultsChokepointsBox" style="display:none;flex-direction:column;gap:5px;">
+                <span style="font-size:0.66rem;font-weight:700;text-transform:uppercase;color:#94a3b8;">Strategic Straits, Canals &amp; TSS Corridors:</span>
+                <div id="resultsChokepointsPills" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+              </div>
+
+              <!-- Leg-by-Leg Detailed Cards -->
+              <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:#38bdf8;letter-spacing:0.04em;">📐 Leg-by-Leg Deliberation &amp; Waypoints</span>
+                  <span style="font-size:0.64rem;color:#64748b;">Click any leg to focus on chart</span>
+                </div>
+                <div id="srDrawerLegsList" style="display:flex;flex-direction:column;gap:8px;"></div>
+              </div>
+
+              <!-- Legacy table body kept hidden for backward compatibility -->
+              <div id="setRouteResultsCard" style="display:none;">
+                <table><tbody id="resultsWptsTableBody"></tbody></table>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
 
-      <!-- ── Tab 4: SetNews — Global Maritime Intelligence & Personalized "For You" Feed ── -->
+            <!-- ── Tab 4: SetNews — Global Maritime Intelligence & Personalized "For You" Feed ── -->
     <div id="tab-news" class="tab-pane">
       <div class="setnews-container">
         <!-- Editorial Masthead -->
@@ -19278,8 +19326,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=4.9"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=4.9"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.0"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.0"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19357,7 +19405,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=4.9"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.0"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19722,7 +19770,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             window.location.reload();
           }
         });
-        navigator.serviceWorker.register('sw.js?v=4.9', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.0', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v4.8 registered, scope:', reg.scope);
             if (navigator.onLine) {
