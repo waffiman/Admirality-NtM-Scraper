@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.1" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.2" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -19364,8 +19364,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.1"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.1"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.2"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.2"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19824,7 +19824,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             window.location.reload();
           }
         });
-        navigator.serviceWorker.register('sw.js?v=5.1', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.2', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v4.8 registered, scope:', reg.scope);
             if (navigator.onLine) {

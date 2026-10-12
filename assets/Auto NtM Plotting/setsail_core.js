@@ -7868,7 +7868,7 @@ function renderSetNewsUI() {
 
 function formatFullArticleParagraphsHtml(art) {
   const raw = String((art && (art.body || art.summary)) || "").trim();
-  if (!raw) return "<p class="setnews-reader-paragraph">No additional text available for this dispatch.</p>";
+  if (!raw) return '<p class="setnews-reader-paragraph">No additional text available for this dispatch.</p>';
 
   let blocks = raw.split(/\n\s*\n+/).map(p => p.trim()).filter(Boolean);
   if (blocks.length === 1 && blocks[0].length > 420) {
