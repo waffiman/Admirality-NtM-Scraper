@@ -1,117 +1,75 @@
 {
-  "synopticCycle": "2100 UTC",
-  "lastSyncUtc": "2026-10-11T21:35:27.963107+00:00",
+  "synopticCycle": "0400 UTC",
+  "lastSyncUtc": "2026-10-12T04:43:07.648362+00:00",
   "provider": "NOAA NHC + JMA RSMC Tokyo + JTWC + Open-Meteo ECMWF IFS",
   "storms": [
-    {
-      "id": "AL092026",
-      "name": "Post-Tropical Cyclone ISAIAS",
-      "shortName": "Isaias",
-      "category": "Post-Tropical Cyclone (NOAA NHC)",
-      "center": [
-        37.5,
-        -84.0
-      ],
-      "centralPressure": 1010,
-      "maxWinds": 20,
-      "gusts": 24,
-      "movement": "ENE at 22 kts",
-      "dangerRadiusNm": 70,
-      "forecastTrack": [
-        {
-          "tau": 12,
-          "coords": [
-            38.8,
-            -80.2
-          ],
-          "winds": 20,
-          "radiusNm": 55
-        }
-      ]
-    },
-    {
-      "id": "EP182026",
-      "name": "Post-Tropical Cyclone RACHEL",
-      "shortName": "Rachel",
-      "category": "Post-Tropical Cyclone (NOAA NHC)",
-      "center": [
-        35.8,
-        -114.6
-      ],
-      "centralPressure": 994,
-      "maxWinds": 30,
-      "gusts": 37,
-      "movement": "NNE at 29 kts",
-      "dangerRadiusNm": 70,
-      "forecastTrack": []
-    },
     {
       "id": "EP202026",
       "name": "Hurricane SIMON",
       "shortName": "Simon",
-      "category": "Category 4 Hurricane (NOAA NHC)",
+      "category": "Category 3 Major Hurricane (NOAA NHC)",
       "center": [
-        19.6,
-        -105.8
+        19.8,
+        -106.0
       ],
-      "centralPressure": 947,
-      "maxWinds": 115,
-      "gusts": 140,
-      "movement": "NNW at 6 kts",
-      "dangerRadiusNm": 132,
+      "centralPressure": 956,
+      "maxWinds": 105,
+      "gusts": 128,
+      "movement": "NW at 5 kts",
+      "dangerRadiusNm": 120,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            20.2,
-            -106.1
+            20.5,
+            -106.3
           ],
-          "winds": 90,
+          "winds": 95,
           "radiusNm": 55
         },
         {
           "tau": 24,
           "coords": [
-            21.0,
-            -106.6
+            21.2,
+            -106.8
           ],
-          "winds": 80,
+          "winds": 85,
           "radiusNm": 75
         },
         {
           "tau": 36,
           "coords": [
-            21.6,
-            -106.9
+            21.8,
+            -107.1
           ],
-          "winds": 75,
+          "winds": 80,
           "radiusNm": 95
         },
         {
           "tau": 48,
           "coords": [
-            22.2,
-            -107.1
+            22.4,
+            -107.0
           ],
-          "winds": 75,
+          "winds": 80,
           "radiusNm": 115
         },
         {
           "tau": 60,
           "coords": [
-            22.8,
-            -107.0
+            23.0,
+            -106.7
           ],
-          "winds": 75,
+          "winds": 80,
           "radiusNm": 135
         },
         {
           "tau": 72,
           "coords": [
             23.4,
-            -106.6
+            -106.4
           ],
-          "winds": 75,
+          "winds": 65,
           "radiusNm": 155
         }
       ]
@@ -122,50 +80,41 @@
       "shortName": "Koguma",
       "category": "Category 3 Hurricane (JTWC/JMA)",
       "center": [
-        27.1,
-        147.3
+        29.1,
+        147.4
       ],
-      "centralPressure": 950,
-      "maxWinds": 105,
-      "gusts": 130,
-      "movement": "NNE at 10 kts",
-      "dangerRadiusNm": 126,
+      "centralPressure": 955,
+      "maxWinds": 100,
+      "gusts": 120,
+      "movement": "NNE at 14 kts",
+      "dangerRadiusNm": 120,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            29.7,
-            147.5
+            32.0,
+            149.0
           ],
-          "winds": 80,
-          "radiusNm": 30
+          "winds": 75,
+          "radiusNm": 25
         },
         {
           "tau": 24,
           "coords": [
-            32.5,
-            149.3
+            34.8,
+            152.2
           ],
-          "winds": 70,
-          "radiusNm": 42
+          "winds": 65,
+          "radiusNm": 35
         },
         {
-          "tau": 48,
+          "tau": 45,
           "coords": [
-            38.0,
-            156.4
+            39.7,
+            158.4
           ],
-          "winds": 60,
-          "radiusNm": 85
-        },
-        {
-          "tau": 72,
-          "coords": [
-            42.4,
-            164.5
-          ],
-          "winds": 45,
-          "radiusNm": 120
+          "winds": 55,
+          "radiusNm": 70
         }
       ]
     },
@@ -184,6 +133,59 @@
       "movement": "N (Slow)",
       "dangerRadiusNm": 65,
       "forecastTrack": []
+    },
+    {
+      "id": "WP-28",
+      "name": "Tropical Depression TWENTYEIGHT",
+      "shortName": "Twentyeight",
+      "category": "Tropical Depression (JTWC)",
+      "center": [
+        16.4,
+        150.8
+      ],
+      "centralPressure": 996,
+      "maxWinds": 25,
+      "gusts": 30,
+      "movement": "Tracked via JTWC/RSMC",
+      "dangerRadiusNm": 70,
+      "forecastTrack": [
+        {
+          "tau": 12,
+          "coords": [
+            17.3,
+            149.7
+          ],
+          "winds": 30,
+          "radiusNm": 55
+        },
+        {
+          "tau": 24,
+          "coords": [
+            18.2,
+            148.1
+          ],
+          "winds": 25,
+          "radiusNm": 75
+        },
+        {
+          "tau": 36,
+          "coords": [
+            19.4,
+            146.3
+          ],
+          "winds": 25,
+          "radiusNm": 95
+        },
+        {
+          "tau": 48,
+          "coords": [
+            20.8,
+            144.5
+          ],
+          "winds": 20,
+          "radiusNm": 115
+        }
+      ]
     }
   ],
   "waves": [
@@ -195,7 +197,7 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 3.0,
+      "waveHeight": 2.8,
       "swellPeriod": 8,
       "swellDir": "SW"
     },
@@ -207,9 +209,9 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.1,
+      "waveHeight": 3.2,
       "swellPeriod": 10,
-      "swellDir": "W"
+      "swellDir": "WNW"
     },
     {
       "id": "W3",
@@ -219,9 +221,9 @@
         148.0
       ],
       "radiusNm": 260,
-      "waveHeight": 8.5,
-      "swellPeriod": 11,
-      "swellDir": "SSE"
+      "waveHeight": 6.2,
+      "swellPeriod": 9,
+      "swellDir": "SSW"
     },
     {
       "id": "W4",
@@ -231,9 +233,9 @@
         -106.0
       ],
       "radiusNm": 210,
-      "waveHeight": 6.2,
-      "swellPeriod": 8,
-      "swellDir": "WNW"
+      "waveHeight": 4.0,
+      "swellPeriod": 9,
+      "swellDir": "WSW"
     }
   ],
   "pressureCenters": [
