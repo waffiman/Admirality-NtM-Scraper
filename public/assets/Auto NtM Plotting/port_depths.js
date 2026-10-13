@@ -19912,6 +19912,31 @@ function renderPortDepthsOnMap(map) {
 }
 
 /**
+ * Toggle loading spinner on NtM & NAVTEX Dock Tab
+ */
+function setOverlayNoticesLoading(isLoading) {
+  const tab = document.getElementById("tabOverlayNotices");
+  if (!tab) return;
+  if (isLoading) {
+    tab.classList.add("is-loading");
+    tab.setAttribute("title", "Loading NtM & NAVTEX objects onto chart...");
+    if (!tab.querySelector(".excel-tab-spinner")) {
+      const sp = document.createElement("span");
+      sp.className = "excel-tab-spinner";
+      sp.id = "tabNoticesSpinner";
+      sp.setAttribute("aria-hidden", "true");
+      const chk = tab.querySelector(".excel-tab-check");
+      if (chk) tab.insertBefore(sp, chk);
+      else tab.prepend(sp);
+    }
+  } else {
+    tab.classList.remove("is-loading");
+    tab.setAttribute("title", "Toggle Admiralty NtM & NAVTEX Warnings Overlay");
+  }
+}
+window.setOverlayNoticesLoading = setOverlayNoticesLoading;
+
+/**
  * Initialize Excel-Style Overlays Dock Bar
  */
 function initExcelOverlayDock(map) {
@@ -19932,6 +19957,11 @@ function initExcelOverlayDock(map) {
         return;
       }
       const isActive = !ntmTab.classList.contains("active");
+      if (isActive) {
+        setOverlayNoticesLoading(true);
+      } else {
+        setOverlayNoticesLoading(false);
+      }
       setOverlayActive("notices", isActive, window.leafletMap || map);
     });
   }
@@ -20105,8 +20135,17 @@ function setOverlayActive(overlayKey, isActive, map = null) {
           }
         }
       }
-      if (isActive && typeof window.ensureNoticesReadyForOverlay === "function") {
-        window.ensureNoticesReadyForOverlay();
+      if (isActive) {
+        if (typeof window.setOverlayNoticesLoading === "function") {
+          window.setOverlayNoticesLoading(true);
+        }
+        if (typeof window.ensureNoticesReadyForOverlay === "function") {
+          window.ensureNoticesReadyForOverlay();
+        }
+      } else {
+        if (typeof window.setOverlayNoticesLoading === "function") {
+          window.setOverlayNoticesLoading(false);
+        }
       }
     } else if (overlayKey === "buoys") {
       if (typeof seamarkLayer !== "undefined" && seamarkLayer) {
@@ -20142,10 +20181,21 @@ function setOverlayActive(overlayKey, isActive, map = null) {
   }
 
   // Synchronize Left Multi-Column List & Map Markers immediately!
-  if (typeof window.renderNtMListAndMap === "function") {
-    window.renderNtMListAndMap();
-  } else if (typeof renderNtMListAndMap === "function") {
-    renderNtMListAndMap();
+  if (overlayKey === "notices" && isActive) {
+    // Yield to the event loop so the browser immediately paints the loading spinner before compiling objects
+    setTimeout(() => {
+      if (typeof window.renderNtMListAndMap === "function") {
+        window.renderNtMListAndMap();
+      } else if (typeof renderNtMListAndMap === "function") {
+        renderNtMListAndMap();
+      }
+    }, 35);
+  } else {
+    if (typeof window.renderNtMListAndMap === "function") {
+      window.renderNtMListAndMap();
+    } else if (typeof renderNtMListAndMap === "function") {
+      renderNtMListAndMap();
+    }
   }
 }
 

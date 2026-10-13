@@ -2738,6 +2738,9 @@ async function loadRemoteNoticesJson(showFeedback = false) {
 
     if (!res || !data) {
       updateNetworkStatusHUD(false);
+      if (typeof window.setOverlayNoticesLoading === "function") {
+        window.setOverlayNoticesLoading(false);
+      }
       if (showFeedback && typeof showSetSailToast === "function") {
         showSetSailToast("Offline — using cached NtM & NAVTEX database", "warn");
       }
@@ -2771,12 +2774,40 @@ async function loadRemoteNoticesJson(showFeedback = false) {
     }
   } catch (err) {
     updateNetworkStatusHUD(false);
+    if (typeof window.setOverlayNoticesLoading === "function") {
+      window.setOverlayNoticesLoading(false);
+    }
   }
   return false;
 }
 window.loadRemoteNoticesJson = loadRemoteNoticesJson;
 
+function setOverlayNoticesLoading(isLoading) {
+  const tab = document.getElementById("tabOverlayNotices");
+  if (!tab) return;
+  if (isLoading) {
+    tab.classList.add("is-loading");
+    tab.setAttribute("title", "Loading NtM & NAVTEX objects onto chart...");
+    if (!tab.querySelector(".excel-tab-spinner")) {
+      const sp = document.createElement("span");
+      sp.className = "excel-tab-spinner";
+      sp.id = "tabNoticesSpinner";
+      sp.setAttribute("aria-hidden", "true");
+      const chk = tab.querySelector(".excel-tab-check");
+      if (chk) tab.insertBefore(sp, chk);
+      else tab.prepend(sp);
+    }
+  } else {
+    tab.classList.remove("is-loading");
+    tab.setAttribute("title", "Toggle Admiralty NtM & NAVTEX Warnings Overlay");
+  }
+}
+window.setOverlayNoticesLoading = setOverlayNoticesLoading;
+
 function ensureNoticesReadyForOverlay() {
+  if (typeof window.setOverlayNoticesLoading === "function") {
+    window.setOverlayNoticesLoading(true);
+  }
   // Ensure notice type filters are not accidentally all unchecked when user enables the NtM & NAVTEX tile
   if (!NTM_ACTIVE_TYPES || NTM_ACTIVE_TYPES.size === 0) {
     NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM", "NAVTEX"]);
@@ -2794,8 +2825,9 @@ function ensureNoticesReadyForOverlay() {
   }
   // If store hasn't loaded the full bulletin yet, sync immediately
   if (!Array.isArray(NTM_STORE) || NTM_STORE.length <= 10) {
-    loadRemoteNoticesJson(true);
+    return loadRemoteNoticesJson(true);
   }
+  return Promise.resolve(true);
 }
 window.ensureNoticesReadyForOverlay = ensureNoticesReadyForOverlay;
 
@@ -3707,6 +3739,13 @@ function renderNtMListAndMap() {
     });
   } else {
     drawOfflineCanvasMap();
+  }
+
+  // Clear loading spinner on NtM & NAVTEX dock tab now that all objects are plotted on the map
+  if (typeof window.setOverlayNoticesLoading === "function") {
+    requestAnimationFrame(() => {
+      window.setOverlayNoticesLoading(false);
+    });
   }
 }
 window.renderNtMListAndMap = renderNtMListAndMap;

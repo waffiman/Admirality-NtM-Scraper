@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.5';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.5';
+const CACHE_NAME = 'setsail-cache-v5.6';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.6';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -25,10 +25,10 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=5.5',
-  'assets/Auto NtM Plotting/port_depths.js?v=5.5',
-  'assets/Auto NtM Plotting/ntm_module.js?v=5.5',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.5',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=5.6',
+  'assets/Auto NtM Plotting/port_depths.js?v=5.6',
+  'assets/Auto NtM Plotting/ntm_module.js?v=5.6',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.6',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
   'assets/Auto NtM Plotting/tesseract.min.js',
   'assets/Auto NtM Plotting/pdf.min.js',

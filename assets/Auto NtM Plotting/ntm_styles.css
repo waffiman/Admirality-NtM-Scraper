@@ -3588,6 +3588,42 @@
   color: #ffffff;
 }
 
+/* Excel Dock Tab Loading Spinner */
+.excel-tab-spinner {
+  display: none;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(56, 189, 248, 0.22);
+  border-top-color: #38bdf8;
+  border-right-color: #f97316;
+  border-radius: 50%;
+  animation: excelTabSpinnerRotate 0.65s linear infinite;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+@keyframes excelTabSpinnerRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.excel-tab.is-loading .excel-tab-spinner {
+  display: inline-flex !important;
+}
+
+.excel-tab.is-loading .excel-tab-check {
+  display: none !important;
+}
+
+.excel-tab.is-loading {
+  cursor: wait !important;
+}
+
+.excel-tab.is-loading .excel-tab-name {
+  opacity: 0.85;
+}
+
 .excel-tab-icon {
   font-size: 0.85rem;
   line-height: 1;
