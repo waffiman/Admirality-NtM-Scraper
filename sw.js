@@ -1,11 +1,11 @@
-/**
- * SetSail Marine Navigation Suite — Service Worker (PWA Offline Engine v4.8)
+﻿/**
+ * SetSail Marine Navigation Suite вЂ” Service Worker (PWA Offline Engine v4.8)
  * Vessel: LPG/C IINO INEOS VESTA
- * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
+ * High-Speed Satellite & Offline Engine вЂ” Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.6';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.6';
+const CACHE_NAME = 'setsail-cache-v5.7';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.7';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -25,10 +25,12 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=5.6',
-  'assets/Auto NtM Plotting/port_depths.js?v=5.6',
-  'assets/Auto NtM Plotting/ntm_module.js?v=5.6',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.6',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=5.7',
+  'assets/Auto NtM Plotting/port_depths.js?v=5.7',
+  'assets/Auto NtM Plotting/ntm_module.js?v=5.7',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.7',
+  'assets/authority-logos/noaa.svg',
+  'assets/authority-logos/nasa.svg',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
   'assets/Auto NtM Plotting/tesseract.min.js',
   'assets/Auto NtM Plotting/pdf.min.js',
@@ -390,3 +392,4 @@ self.addEventListener('fetch', (event) => {
     })()
   );
 });
+

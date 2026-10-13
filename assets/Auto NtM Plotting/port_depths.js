@@ -20160,7 +20160,7 @@ function setOverlayActive(overlayKey, isActive, map = null) {
       const rLayer = (typeof window.leafletRouteLayer !== "undefined" && window.leafletRouteLayer)
         ? window.leafletRouteLayer
         : (typeof leafletRouteLayer !== "undefined" ? leafletRouteLayer : null);
-      if (isActive && typeof activeRouteData !== "undefined" && activeRouteData && typeof window.renderRouteOnMap === "function") {
+      if (isActive && typeof activeRouteData !== "undefined" && activeRouteData && typeof window.renderRouteOnMap === "function" && !window._setsailRenderingRoute) {
         window.renderRouteOnMap(activeRouteData, false);
       }
       if (rLayer) {
