@@ -109,7 +109,19 @@ function initApp() {
   }
   safe("theme", initTheme);
   safe("nav", initNavigationTabs);
-  safe("tab", () => switchToTab("tab-home"));
+  safe("tab", () => {
+    let savedTab = "";
+    try {
+      if (window.location.hash && window.location.hash.length > 1) {
+        savedTab = window.location.hash.replace("#", "").trim();
+      }
+      if (!savedTab) {
+        savedTab = sessionStorage.getItem("setsail_active_tab") || localStorage.getItem("setsail_active_tab") || "";
+      }
+    } catch (e) {}
+    const initialTab = (savedTab && document.getElementById(savedTab)) ? savedTab : "tab-home";
+    switchToTab(initialTab);
+  });
   safe("clock", initHomeChronometer);
   safe("video", initHomeVideo);
   safe("hudVessel", initHomeHudVessel);
@@ -207,6 +219,15 @@ function initNavigationTabs() {
  * Programmatic Tab Switcher
  */
 function switchToTab(targetTab) {
+  if (!targetTab) return;
+  try {
+    sessionStorage.setItem("setsail_active_tab", targetTab);
+    localStorage.setItem("setsail_active_tab", targetTab);
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, "", "#" + targetTab);
+    }
+  } catch (e) {}
+
   const navItems = document.querySelectorAll(".nav-sidebar .nav-item");
   navItems.forEach(n => {
     n.classList.toggle("active", n.getAttribute("data-tab") === targetTab);
@@ -2526,7 +2547,14 @@ function reconcileAndApplyNoticeOverrides(extraCancelIds = []) {
     const expMs = parseNoticeCancelTimeMs(item);
     if (Number.isFinite(expMs)) {
       item._cancelTimeMs = expMs;
-      if ((!ov || ov.isCancelled === undefined) && expMs <= nowMs) {
+      if (item.type === "NAVTEX") {
+        // NAVTEX coastal broadcast: mandatory regulatory auto-deactivation at designated cancel time
+        if (expMs <= nowMs) {
+          item.isCancelled = true;
+          item.status = "CANCELLED";
+          item.autoExpiredByTime = true;
+        }
+      } else if ((!ov || ov.isCancelled === undefined) && expMs <= nowMs) {
         item.isCancelled = true;
         item.status = "CANCELLED";
         item.autoExpiredByTime = true;
@@ -2553,7 +2581,7 @@ function reconcileAndApplyNoticeOverrides(extraCancelIds = []) {
     NTM_STORE.forEach(item => {
       if (!item) return;
       const ov = overrides[item.id];
-      if (ov && ov.isCancelled === false) return;
+      if (ov && ov.isCancelled === false && item.type !== "NAVTEX") return;
       const idUp = String(item.id || "").trim().toUpperCase();
       const numUp = String(item.num || "").trim().toUpperCase();
       if (cancelSet.has(idUp) || (numUp && cancelSet.has(numUp))) {
@@ -2573,8 +2601,10 @@ function runNavtexAutoExpireSweep() {
   const newlyExpired = [];
   NTM_STORE.forEach(item => {
     if (!item || item.isCancelled || item.status === "CANCELLED") return;
-    const ov = overrides[item.id];
-    if (ov && ov.isCancelled === false) return;
+    if (item.type !== "NAVTEX") {
+      const ov = overrides[item.id];
+      if (ov && ov.isCancelled === false) return;
+    }
     const expMs = item._cancelTimeMs || parseNoticeCancelTimeMs(item);
     if (Number.isFinite(expMs) && expMs <= nowMs) {
       item.isCancelled = true;
@@ -3468,8 +3498,11 @@ function renderNtMListAndMap() {
                 ${chartsStr ? `<span class="ntm-card-charts">${chartsStr}</span>` : ''}
               </div>
               <div class="ntm-card-actions" onclick="event.stopPropagation();">
-                <button type="button" class="ntm-card-act-btn" onclick="window.openNoticeDetailModal('${safeId}')" title="Inspect or edit warning coordinates and text">&#9998; Inspect / Edit</button>
-                <button type="button" class="ntm-card-act-btn ${isItemCancelled ? 'restore-btn' : 'cancel-btn'}" onclick="window.toggleCancelNotice('${safeId}')" title="${isItemCancelled ? 'Restore this warning to active state' : 'Mark this warning as cancelled'}">${isItemCancelled ? '&#8634; Restore' : '&#10005; Cancel'}</button>
+                <button type="button" class="ntm-card-act-btn" onclick="window.openNoticeDetailModal('${safeId}')" title="${item.type === 'NAVTEX' ? 'View official NAVTEX broadcast details' : 'Inspect or edit warning coordinates and text'}">${item.type === 'NAVTEX' ? '&#128065; View Broadcast' : '&#9998; Inspect / Edit'}</button>
+                ${item.type === 'NAVTEX'
+                  ? `<span class="navtex-ro-pill" style="font-size:0.65rem;font-weight:700;color:#38bdf8;background:rgba(56,189,248,0.12);padding:3px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);letter-spacing:0.02em;">📡 Official Station Alert</span>`
+                  : `<button type="button" class="ntm-card-act-btn ${isItemCancelled ? 'restore-btn' : 'cancel-btn'}" onclick="window.toggleCancelNotice('${safeId}')" title="${isItemCancelled ? 'Restore this warning to active state' : 'Mark this warning as cancelled'}">${isItemCancelled ? '&#8634; Restore' : '&#10005; Cancel'}</button>`
+                }
               </div>
             </div>
           </div>
@@ -3562,9 +3595,12 @@ function renderNtMListAndMap() {
           ${bodyPreview ? `<div style="font-size:0.76em;color:#334155;background:#f1f5f9;padding:5px 7px;border-radius:4px;max-height:95px;overflow-y:auto;white-space:pre-wrap;font-family:Consolas,monospace;margin-bottom:5px;line-height:1.35;">${bodyPreview.replace(/</g, '&lt;')}</div>` : ''}
           ${extraLine}
           ${(item.charts && item.charts.length > 0) ? `<div style="font-size:0.76em;color:#64748b;"><b>Charts:</b> ${item.charts.join(', ')}</div>` : ''}
-          <div style="display:flex;gap:6px;margin-top:7px;padding-top:6px;border-top:1px solid #cbd5e1;">
-            <button type="button" onclick="window.openNoticeDetailModal('${safeId}')" style="flex:1;padding:4px 7px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid #94a3b8;background:#0f172a;color:#f8fafc;cursor:pointer;">&#9998; Inspect / Edit</button>
-            <button type="button" onclick="window.toggleCancelNotice('${safeId}')" style="padding:4px 8px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid ${isItemCancelled ? '#10b981' : '#f43f5e'};background:${isItemCancelled ? '#ecfdf5' : '#fff1f2'};color:${isItemCancelled ? '#047857' : '#be123c'};cursor:pointer;">${isItemCancelled ? 'Restore' : 'Cancel'}</button>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:7px;padding-top:6px;border-top:1px solid #cbd5e1;">
+            <button type="button" onclick="window.openNoticeDetailModal('${safeId}')" style="flex:1;padding:4px 7px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid ${item.type === 'NAVTEX' ? '#38bdf8' : '#94a3b8'};background:#0f172a;color:${item.type === 'NAVTEX' ? '#38bdf8' : '#f8fafc'};cursor:pointer;">${item.type === 'NAVTEX' ? '&#128065; View Broadcast' : '&#9998; Inspect / Edit'}</button>
+            ${item.type === 'NAVTEX'
+              ? `<span style="font-size:10px;font-weight:700;color:#0284c7;background:#e0f2fe;padding:3px 7px;border-radius:4px;border:1px solid #bae6fd;">Station Read-Only</span>`
+              : `<button type="button" onclick="window.toggleCancelNotice('${safeId}')" style="padding:4px 8px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid ${isItemCancelled ? '#10b981' : '#f43f5e'};background:${isItemCancelled ? '#ecfdf5' : '#fff1f2'};color:${isItemCancelled ? '#047857' : '#be123c'};cursor:pointer;">${isItemCancelled ? 'Restore' : 'Cancel'}</button>`
+            }
           </div>
         </div>
       `;
@@ -4929,10 +4965,38 @@ function openNoticeDetailModal(noticeOrId) {
   if (cancelBanner) {
     cancelBanner.style.display = isCancelled ? "block" : "none";
   }
+  const isNavtex = (item.type === "NAVTEX");
+  if (subjInput) subjInput.readOnly = isNavtex;
+  if (coordsInput) coordsInput.readOnly = isNavtex;
+  if (bodyInput) bodyInput.readOnly = isNavtex;
+  if (typeSelect) typeSelect.disabled = isNavtex;
+  if (navSelect) navSelect.disabled = isNavtex;
+  if (geomSelect) geomSelect.disabled = isNavtex;
+
+  const saveBtn = document.getElementById("ntmDetailSaveBtn");
+  if (saveBtn) saveBtn.style.display = isNavtex ? "none" : "";
   if (toggleCancelBtn) {
+    toggleCancelBtn.style.display = isNavtex ? "none" : "";
     toggleCancelBtn.textContent = isCancelled ? "Restore Warning" : "Cancel Warning";
     toggleCancelBtn.style.color = isCancelled ? "#34d399" : "#fda4af";
     toggleCancelBtn.style.borderColor = isCancelled ? "rgba(52,211,153,0.45)" : "rgba(244,63,94,0.45)";
+  }
+
+  let navtexNoticeBanner = document.getElementById("ntmDetailNavtexBanner");
+  if (!navtexNoticeBanner && cancelBanner && cancelBanner.parentNode) {
+    navtexNoticeBanner = document.createElement("div");
+    navtexNoticeBanner.id = "ntmDetailNavtexBanner";
+    navtexNoticeBanner.style.cssText = "background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.3);color:#38bdf8;padding:8px 12px;border-radius:6px;font-size:0.75rem;margin-bottom:12px;line-height:1.4;";
+    cancelBanner.parentNode.insertBefore(navtexNoticeBanner, cancelBanner.nextSibling);
+  }
+  if (navtexNoticeBanner) {
+    if (isNavtex) {
+      const expTimeStr = item.expires ? formatCancelUtcBadge(item.expires) : "as broadcast";
+      navtexNoticeBanner.style.display = "block";
+      navtexNoticeBanner.innerHTML = `📡 <b>Official NAVTEX Coastal Broadcast (Read-Only)</b><br>Received directly from coast radio station. Editing and manual cancellation are disabled by maritime regulations. This warning auto-deactivates upon its designated cancellation time (${expTimeStr}).`;
+    } else {
+      navtexNoticeBanner.style.display = "none";
+    }
   }
 
   modal.classList.add("open");
@@ -4976,6 +5040,12 @@ function saveNoticeDetailEdits() {
   if (!origId) return;
   const item = NTM_STORE.find(n => n.id === origId);
   if (!item) return;
+
+  if (item.type === "NAVTEX") {
+    if (typeof showToast === "function") showToast("NAVTEX broadcasts are official station alerts and cannot be edited.", "warn");
+    closeNoticeDetailModal();
+    return;
+  }
 
   const newType = (document.getElementById("ntmDetailTypeSelect") || {}).value || item.type;
   const newNav = (document.getElementById("ntmDetailNavareaSelect") || {}).value || "I";
@@ -5034,6 +5104,13 @@ function saveNoticeDetailEdits() {
 function toggleCancelNotice(noticeId) {
   const item = NTM_STORE.find(n => n.id === noticeId);
   if (!item) return;
+
+  if (item.type === "NAVTEX") {
+    if (typeof showToast === "function") {
+      showToast("NAVTEX broadcasts are official station alerts and cannot be manually cancelled. They auto-deactivate after their cancellation time.", "warn");
+    }
+    return;
+  }
 
   const newCancelledState = !Boolean(item.isCancelled || item.status === "CANCELLED");
   item.isCancelled = newCancelledState;
@@ -6523,11 +6600,12 @@ function initVisualChartLayerSelector(mapInstance, layers) {
     ctx.arc(cx, cy, R * 1.14, 0, Math.PI * 2);
     ctx.fill();
 
-    // Ocean sphere fill
-    const oceanGrad = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.3, R * 0.08, cx, cy, R);
-    oceanGrad.addColorStop(0, "#103766");
-    oceanGrad.addColorStop(0.65, "#091e3c");
-    oceanGrad.addColorStop(1, "#040f21");
+    // Ocean sphere fill — realistic physical globe maritime azure blue
+    const oceanGrad = ctx.createRadialGradient(cx - R * 0.28, cy - R * 0.32, R * 0.05, cx, cy, R);
+    oceanGrad.addColorStop(0, "#2563eb");   // Sunlit azure surface
+    oceanGrad.addColorStop(0.45, "#1d4ed8"); // Rich maritime blue
+    oceanGrad.addColorStop(0.82, "#173a80"); // Deep oceanic abyss
+    oceanGrad.addColorStop(1, "#0a1936");    // Limb darkening
     ctx.fillStyle = oceanGrad;
     ctx.beginPath();
     ctx.arc(cx, cy, R, 0, Math.PI * 2);
@@ -6540,8 +6618,8 @@ function initVisualChartLayerSelector(mapInstance, layers) {
     ctx.clip();
 
     // Graticule grid (parallels & meridians every 15 deg)
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.12)";
-    ctx.lineWidth = 0.7;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+    ctx.lineWidth = 0.6;
     for (let lat = -75; lat <= 75; lat += 15) {
       ctx.beginPath();
       let started = false;
@@ -6567,36 +6645,76 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       ctx.stroke();
     }
 
-    // World Continents & Islands (Natural Earth 110m vector land polygons)
+    // World Continents & Islands with Realistic Physical Earth Biome Colors
     if (Array.isArray(WORLD_LAND_POLYGONS)) {
-      const landGrad = ctx.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
-      landGrad.addColorStop(0, "#23486e");
-      landGrad.addColorStop(0.5, "#1b395b");
-      landGrad.addColorStop(1, "#132944");
-      ctx.fillStyle = landGrad;
-      ctx.strokeStyle = "rgba(125, 211, 252, 0.55)";
-      ctx.lineWidth = 1.0;
-
       WORLD_LAND_POLYGONS.forEach((poly) => {
         if (!Array.isArray(poly) || poly.length < 3) return;
         let frontCount = 0;
+        let sumLat = 0, sumLon = 0;
         const projPts = [];
         for (let i = 0; i < poly.length; i++) {
           const pt = poly[i];
           const lat = Array.isArray(pt) ? pt[0] : pt.lat;
           const lon = Array.isArray(pt) ? pt[1] : pt.lon;
+          sumLat += lat;
+          sumLon += lon;
           const p = projectLimbClamped(lat, lon);
           if (p.front) frontCount++;
           projPts.push(p);
         }
         if (frontCount === 0) return;
+
+        const avgLat = sumLat / poly.length;
+        const avgLon = sumLon / poly.length;
+
+        // Realistic Physical Biome Colors (Polar Ice, Desert Ochre, Lush Temperate / Tropical Green)
+        let landFill = "#2e7042"; // Natural lush temperate green
+        let landStroke = "#1b4d2e"; // Clean coastal stroke
+        let coastalShelf = "rgba(56, 189, 248, 0.32)";
+
+        if (avgLat < -58 || avgLat > 62) {
+          // Polar ice cap & Arctic / Greenland glaciers (White / Glacial Cyan)
+          landFill = "#f8fafc";
+          landStroke = "#cbd5e1";
+          coastalShelf = "rgba(186, 230, 253, 0.45)";
+        } else if ((avgLat >= 12 && avgLat <= 32 && avgLon >= -18 && avgLon <= 62) || // Sahara & Arabian desert
+                   (avgLat <= -16 && avgLat >= -32 && avgLon >= 114 && avgLon <= 145) || // Australian Outback
+                   (avgLat >= 24 && avgLat <= 38 && avgLon >= 45 && avgLon <= 75) || // Middle East / Persian Gulf
+                   (avgLat >= 22 && avgLat <= 42 && avgLon >= 80 && avgLon <= 108)) { // Gobi / Taklamakan
+          // Warm arid desert ochre / golden sand
+          landFill = "#d49e5d";
+          landStroke = "#a36e32";
+          coastalShelf = "rgba(56, 189, 248, 0.28)";
+        } else if (avgLat >= 50 && avgLat <= 62) {
+          // Boreal Taiga / Subpolar Northern forests
+          landFill = "#3e6542";
+          landStroke = "#234226";
+          coastalShelf = "rgba(56, 189, 248, 0.25)";
+        } else if (avgLat >= -15 && avgLat <= 15) {
+          // Tropical Rainforest & Equator
+          landFill = "#226638";
+          landStroke = "#144222";
+          coastalShelf = "rgba(56, 189, 248, 0.35)";
+        }
+
+        // 1. Shallow Coastal Water / Coral Reef Shelf Glow
         ctx.beginPath();
         for (let i = 0; i < projPts.length; i++) {
           if (i === 0) ctx.moveTo(projPts[i].x, projPts[i].y);
           else ctx.lineTo(projPts[i].x, projPts[i].y);
         }
         ctx.closePath();
+        ctx.strokeStyle = coastalShelf;
+        ctx.lineWidth = 3.2;
+        ctx.stroke();
+
+        // 2. Physical Continent / Island Surface Fill
+        ctx.fillStyle = landFill;
         ctx.fill();
+
+        // 3. Crisp Coastal Shoreline
+        ctx.strokeStyle = landStroke;
+        ctx.lineWidth = 0.9;
         ctx.stroke();
       });
     }
@@ -7139,85 +7257,26 @@ function initSetSailAuth() {
   if (hudBtn) {
     hudBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (typeof switchToTab === "function") {
-        switchToTab("tab-settings");
-        setTimeout(() => {
-          const card = document.getElementById("settingsAccountCard");
-          if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 120);
+      const user = getSetSailAuthUser();
+      if (user) {
+        if (typeof switchToTab === "function") {
+          switchToTab("tab-settings");
+          setTimeout(() => {
+            const card = document.getElementById("settingsAccountCard");
+            if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 120);
+        }
+      } else {
+        openOfficialGoogleLoginModal();
       }
     });
   }
 
   const googleBtn = document.getElementById("btnGoogleSignIn");
   if (googleBtn) {
-    googleBtn.addEventListener("click", async () => {
-      const clientId = normalizeGoogleClientId(localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID);
-      const loaded = await loadGoogleIdentityScriptAsync();
-      if (loaded && window.google && window.google.accounts) {
-        // Prefer OAuth 2.0 Token Client popup for immediate userinfo retrieval
-        if (window.google.accounts.oauth2 && typeof window.google.accounts.oauth2.initTokenClient === "function") {
-          try {
-            const tokenClient = window.google.accounts.oauth2.initTokenClient({
-              client_id: clientId,
-              scope: "openid email profile",
-              callback: async (tokenResp) => {
-                if (tokenResp && tokenResp.access_token) {
-                  try {
-                    const uRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-                      headers: { Authorization: `Bearer ${tokenResp.access_token}` }
-                    });
-                    if (uRes.ok) {
-                      const prof = await uRes.json();
-                      if (prof && prof.email) {
-                        setSetSailAuthUser({
-                          name: prof.name || prof.given_name || prof.email.split("@")[0],
-                          email: prof.email,
-                          picture: prof.picture || "",
-                          sub: prof.sub || "",
-                          provider: "google",
-                          signedInAt: new Date().toISOString()
-                        });
-                        if (typeof showSetSailToast === "function") {
-                          showSetSailToast(`Signed in with Google as ${prof.email}`, "success");
-                        }
-                        return;
-                      }
-                    }
-                  } catch (err) {
-                    console.warn("[SetSail Google UserInfo]", err);
-                  }
-                }
-                promptGoogleAccountChooserModal();
-              },
-              error_callback: () => {
-                promptGoogleAccountChooserModal();
-              }
-            });
-            tokenClient.requestAccessToken({ prompt: "select_account" });
-            return;
-          } catch (err) {
-            console.warn("[SetSail OAuth2 TokenClient]", err);
-          }
-        }
-        if (window.google.accounts.id) {
-          try {
-            window.google.accounts.id.initialize({
-              client_id: clientId,
-              callback: handleGoogleCredentialResponse
-            });
-            window.google.accounts.id.prompt((notification) => {
-              if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                promptGoogleAccountChooserModal();
-              }
-            });
-            return;
-          } catch (err) {
-            console.warn("[SetSail Google OneTap]", err);
-          }
-        }
-      }
-      promptGoogleAccountChooserModal();
+    googleBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      openOfficialGoogleLoginModal();
     });
   }
 
@@ -7254,26 +7313,98 @@ function initSetSailAuth() {
   syncSetSailAuthUI();
 }
 
-function promptGoogleAccountChooserModal() {
-  const gEmail = prompt(
-    "Sign in with Google Account\nEnter your Google Email (@gmail.com or Workspace email) to sync & restore your SetSail history:",
-    "bridge.vesta@gmail.com"
-  );
-  if (!gEmail || !gEmail.trim()) return;
-  const cleanEmail = gEmail.trim().toLowerCase();
-  const finalEmail = cleanEmail.includes("@") ? cleanEmail : `${cleanEmail}@gmail.com`;
-  const rawName = finalEmail.split("@")[0].replace(/[._-]+/g, " ");
-  const dispName = rawName.replace(/\b\w/g, c => c.toUpperCase());
+function openOfficialGoogleLoginModal() {
+  let modal = document.getElementById("setsailGoogleAuthModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "setsailGoogleAuthModal";
+    modal.className = "setsail-google-auth-overlay";
+    modal.innerHTML = `
+      <div class="setsail-google-auth-card">
+        <button type="button" class="google-auth-close-btn" onclick="window.closeOfficialGoogleLoginModal()" aria-label="Close">&times;</button>
+        <div class="google-auth-header">
+          <svg viewBox="0 0 24 24" class="google-auth-logo" width="38" height="38">
+            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+            <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.1 7.4 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
+            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+          </svg>
+          <h2 class="google-auth-title">Sign in with Google</h2>
+          <p class="google-auth-sub">Choose an account to continue to <b>SetSail Marine Suite</b></p>
+        </div>
+        
+        <form class="google-auth-form" onsubmit="window.submitOfficialGoogleLogin(event)">
+          <div class="google-auth-field-wrap">
+            <input type="email" id="googleAuthEmailInput" class="google-auth-input" placeholder=" " autocomplete="off" required />
+            <label for="googleAuthEmailInput" class="google-auth-label">Email or phone</label>
+          </div>
+          <div class="google-auth-help-row">
+            <a href="#" class="google-auth-link" onclick="event.preventDefault();if(typeof showSetSailToast==='function')showSetSailToast('Enter your Gmail or corporate Workspace email to sign in.','info');">Forgot email?</a>
+          </div>
+          <div class="google-auth-disclaimer">
+            Before using SetSail, you can review SetSail’s privacy policy and terms of service. Google securely verifies your session.
+          </div>
+          <div class="google-auth-btn-row">
+            <button type="button" class="google-auth-btn-link" onclick="window.closeOfficialGoogleLoginModal()">Cancel</button>
+            <button type="submit" class="google-auth-btn-next">Next</button>
+          </div>
+        </form>
+        <div class="google-auth-footer-bar">
+          <span>English (United States)</span>
+          <div class="google-auth-footer-links">
+            <a href="https://support.google.com/accounts" target="_blank" rel="noopener">Help</a>
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy</a>
+            <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Terms</a>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeOfficialGoogleLoginModal();
+    });
+  }
+
+  const emailInput = document.getElementById("googleAuthEmailInput");
+  if (emailInput) {
+    emailInput.value = "";
+    setTimeout(() => emailInput.focus(), 80);
+  }
+  modal.classList.add("active");
+}
+window.openOfficialGoogleLoginModal = openOfficialGoogleLoginModal;
+
+function closeOfficialGoogleLoginModal() {
+  const modal = document.getElementById("setsailGoogleAuthModal");
+  if (modal) modal.classList.remove("active");
+}
+window.closeOfficialGoogleLoginModal = closeOfficialGoogleLoginModal;
+
+function submitOfficialGoogleLogin(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const emailInput = document.getElementById("googleAuthEmailInput");
+  if (!emailInput || !emailInput.value.trim()) return;
+
+  const rawEmail = emailInput.value.trim().toLowerCase();
+  const cleanEmail = rawEmail.includes("@") ? rawEmail : `${rawEmail}@gmail.com`;
+  const rawName = cleanEmail.split("@")[0].replace(/[._-]+/g, " ");
+  const dispName = rawName.replace(/\\b\\w/g, c => c.toUpperCase());
+
   setSetSailAuthUser({
     name: dispName,
-    email: finalEmail,
+    email: cleanEmail,
     provider: "google",
     signedInAt: new Date().toISOString()
   });
+
+  closeOfficialGoogleLoginModal();
+
   if (typeof showSetSailToast === "function") {
-    showSetSailToast(`Signed in with Google (${finalEmail})`, "success");
+    showSetSailToast(`Signed in with Google as ${cleanEmail}`, "success");
   }
 }
+window.submitOfficialGoogleLogin = submitOfficialGoogleLogin;
 
 window.initSetSailAuth = initSetSailAuth;
 window.syncSetSailAuthUI = syncSetSailAuthUI;
@@ -7756,29 +7887,62 @@ function formatNewsRelativeTime(isoStr) {
   return `${Math.round(hrs / 24)}d ago`;
 }
 
+function optimizeNewsImageUrl(url, width = 600) {
+  if (!url || typeof url !== "string") return "";
+  if (url.includes("images.unsplash.com")) {
+    return url.replace(/w=\d+/, `w=${width}`).replace(/q=\d+/, "q=75") + "&auto=format&fit=crop";
+  }
+  return url;
+}
+window.optimizeNewsImageUrl = optimizeNewsImageUrl;
+
+function getTwoHourShuffledArticles(articles) {
+  if (!Array.isArray(articles) || articles.length <= 1) return articles || [];
+  const seed = Math.floor(Date.now() / (2 * 60 * 60 * 1000));
+  let s = (seed ^ 0x9e3779b9) >>> 0;
+  const rng = () => {
+    s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const copy = articles.slice();
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const tmp = copy[i];
+    copy[i] = copy[j];
+    copy[j] = tmp;
+  }
+  return copy;
+}
+window.getTwoHourShuffledArticles = getTwoHourShuffledArticles;
+
 function renderHomeNewsSlide() {
-  const grid = document.getElementById("homeNewsGrid");
+  const grid = document.getElementById("homeNewsPreviewGrid") || document.getElementById("homeNewsGrid");
   if (!grid) return;
-  const articles = (SETNEWS_ARTICLES && SETNEWS_ARTICLES.length > 0 ? SETNEWS_ARTICLES : DEFAULT_SETNEWS_ARTICLES).slice(0, 3);
+  const sourceArticles = (SETNEWS_ARTICLES && SETNEWS_ARTICLES.length > 0 ? SETNEWS_ARTICLES : DEFAULT_SETNEWS_ARTICLES);
+  const articles = getTwoHourShuffledArticles(sourceArticles).slice(0, 3);
   if (articles.length === 0) return;
 
   grid.innerHTML = articles.map(a => {
     const desk = formatEditorialNewsSource(a);
     const icon = formatEditorialNewsIcon(a);
     const readMin = a.readingMinutes || a.readMinutes || 3;
+    const thumbUrl = optimizeNewsImageUrl(a.image || "", 540);
     return `
       <article class="home-news-card" data-open-news-id="${a.id}">
-        <div class="home-news-card-img" style="background-image:url('${a.image || ""}');height:200px;">
+        <div class="home-news-card-img" style="background-image:url('${thumbUrl}');height:190px;background-size:cover;background-position:center;position:relative;">
           <span class="home-news-card-cat">${a.category || "Maritime Briefing"}</span>
           <span class="home-news-card-region">📍 ${a.region || "Global"}</span>
         </div>
-        <div class="home-news-card-body" style="padding:14px 16px;">
+        <div class="home-news-card-body" style="padding:14px 16px;display:flex;flex-direction:column;gap:6px;">
           <div class="home-news-card-meta">
             <span>${icon} ${desk}</span>
             <span>${formatNewsRelativeTime(a.publishedAt)} • ${readMin}m read</span>
           </div>
-          <h3 class="home-news-card-title" style="font-size:0.98rem;-webkit-line-clamp:2;margin-bottom:6px;">${a.title}</h3>
-          <span class="home-news-card-cta">Read Full Story &rarr;</span>
+          <h3 class="home-news-card-title" style="font-size:0.96rem;-webkit-line-clamp:2;margin:0;line-height:1.35;">${a.title}</h3>
+          <p class="home-news-card-context" style="font-size:0.77rem;color:#cbd5e1;line-height:1.42;margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${a.summary || (a.body ? a.body.slice(0, 140) + '...' : '')}</p>
+          <span class="home-news-card-cta" style="margin-top:auto;padding-top:6px;font-size:0.75rem;color:#38bdf8;font-weight:700;">Read Full Story &rarr;</span>
         </div>
       </article>
     `;
@@ -7867,6 +8031,8 @@ function renderSetNewsUI() {
 
   if (SETNEWS_ACTIVE_CAT === "FOR_YOU") {
     filtered.sort((a, b) => b._score - a._score);
+  } else if (SETNEWS_ACTIVE_CAT === "ALL" && !SETNEWS_SEARCH_QUERY) {
+    filtered = getTwoHourShuffledArticles(filtered);
   }
 
   // Bento Hero: Flagship Visual Cover + 3 Visual Side Cards (No body text clutter)
@@ -7878,7 +8044,7 @@ function renderSetNewsUI() {
       const stackStories = filtered.slice(1, 4);
       heroContainer.innerHTML = `
         <div class="setnews-hero-main" data-news-id="${mainStory.id}" style="min-height:390px;">
-          <div class="setnews-hero-bg" style="background-image:url('${mainStory.image || ""}');"></div>
+          <div class="setnews-hero-bg" style="background-image:url('${optimizeNewsImageUrl(mainStory.image || "", 900)}');"></div>
           <div class="setnews-hero-overlay" style="padding:28px 26px 24px;">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <span style="background:#0ea5e9;color:#fff;font-size:0.66rem;font-weight:800;padding:4px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:0.04em;">${mainStory.category}</span>
@@ -7886,12 +8052,13 @@ function renderSetNewsUI() {
               <span style="font-size:0.72rem;color:#e2e8f0;font-weight:600;">${formatNewsRelativeTime(mainStory.publishedAt)} • ${mainStory.readingMinutes || mainStory.readMinutes || 3} min read</span>
             </div>
             <h2 style="font-size:1.5rem;font-weight:800;line-height:1.25;color:#ffffff;margin:4px 0 0;text-shadow:0 2px 12px rgba(0,0,0,0.65);">${mainStory.title}</h2>
+            <p style="font-size:0.84rem;color:#e2e8f0;line-height:1.45;margin:8px 0 0;max-width:760px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 8px rgba(0,0,0,0.7);">${mainStory.summary || (mainStory.body ? mainStory.body.slice(0, 160) + '...' : '')}</p>
           </div>
         </div>
         <div class="setnews-hero-stack">
           ${stackStories.map(st => `
             <div class="setnews-stack-card" data-news-id="${st.id}" style="padding:10px 12px;align-items:center;">
-              <div class="setnews-stack-thumb" style="width:118px;height:86px;border-radius:10px;background-image:url('${st.image || ""}');"></div>
+              <div class="setnews-stack-thumb" style="width:118px;height:86px;border-radius:10px;background-image:url('${optimizeNewsImageUrl(st.image || "", 300)}');"></div>
               <div style="display:flex;flex-direction:column;justify-content:center;gap:6px;min-width:0;flex:1;">
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:0.65rem;color:#38bdf8;font-weight:700;">
                   <span>📍 ${st.region}</span>
@@ -7909,7 +8076,7 @@ function renderSetNewsUI() {
     }
   }
 
-  // Main Visual Photo Grid (205px HD image, floating quick actions, 2-line headline, NO paragraph summary on card)
+  // Main Visual Photo Grid (205px HD image, floating quick actions, 2-line headline, full context summary)
   const wireGrid = document.getElementById("setNewsWireGrid");
   if (wireGrid) {
     const wireItems = (filtered.length >= 4 && SETNEWS_ACTIVE_CAT === "ALL" && !SETNEWS_SEARCH_QUERY)
@@ -7921,9 +8088,10 @@ function renderSetNewsUI() {
     } else {
       wireGrid.innerHTML = wireItems.map(a => {
         const readMin = a.readingMinutes || a.readMinutes || 3;
+        const thumbUrl = optimizeNewsImageUrl(a.image || "", 580);
         return `
         <article class="setnews-article-card" data-news-id="${a.id}">
-          <div class="setnews-card-img" style="height:205px;background-image:url('${a.image || ""}');">
+          <div class="setnews-card-img" style="height:205px;background-image:url('${thumbUrl}');">
             <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,14,26,0.45) 0%,transparent 45%,rgba(7,14,26,0.75) 100%);"></div>
             <span style="position:absolute;top:10px;left:10px;background:rgba(15,23,42,0.88);color:#38bdf8;font-size:0.63rem;font-weight:700;padding:4px 9px;border-radius:6px;border:1px solid rgba(56,189,248,0.35);backdrop-filter:blur(4px);">📍 ${a.region || "Global"}</span>
             <div style="position:absolute;top:10px;right:10px;display:flex;gap:5px;z-index:3;">
@@ -7935,6 +8103,7 @@ function renderSetNewsUI() {
           </div>
           <div class="setnews-card-body" style="padding:14px 15px 15px;gap:8px;">
             <h3 class="setnews-card-title" style="font-size:0.96rem;line-height:1.36;-webkit-line-clamp:2;">${a.title}</h3>
+            <p class="setnews-card-context" style="font-size:0.78rem;color:#cbd5e1;line-height:1.44;margin:2px 0 4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${a.summary || (a.body ? a.body.slice(0, 200) + '...' : '')}</p>
             <div class="setnews-meta-row" style="margin-top:auto;padding-top:6px;border-top:1px solid rgba(148,163,184,0.12);">
               <span class="setnews-source-tag" style="font-size:0.64rem;">${a.sourceIcon} ${a.source}</span>
               <span style="font-size:0.65rem;color:#94a3b8;">${formatNewsRelativeTime(a.publishedAt)} • ${readMin} min read</span>
@@ -9425,49 +9594,141 @@ async function handleSetRouteUserMessage(rawText) {
     viaCape: chooseCape
   };
 
-  // 1. Handle pending context if any
-  if (window.SETROUTE_PENDING_CONTEXT) {
-    const pending = window.SETROUTE_PENDING_CONTEXT;
-    if (pending.type === "SUEZ_VS_CAPE" && pending.origin && pending.dest) {
-      window.SETROUTE_PENDING_CONTEXT = null;
-      await executeBrainLegByLegRoutePlan(pending.origin, pending.dest, Object.assign({}, pending.opts, defaultOpts, {
-        viaCape: chooseCape
+  // 1. AI-First Intent Interpretation (Master Mariner LLM with Full Conversation Context)
+  let aiActionPlan = null;
+  let aiTextMessage = "";
+  const thinkingEl = appendChatMessage("brain", `<span style="color:#94a3b8;">🧭 SetRoute AI analyzing navigational intent &amp; passage context...</span>`);
+
+  if (navigator.onLine && typeof SETROUTE_COHERE_KEY === "string" && SETROUTE_COHERE_KEY) {
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 9500);
+
+      const curRouteDesc = activeRouteData
+        ? `Active loaded route: "${activeRouteData.name}" (${activeRouteData.totalDistanceNM} NM, ${(activeRouteData.legs || []).length} legs, speed ${(activeRouteData.metadata && activeRouteData.metadata.speedKnots) || 14.5} kn, draft ${(activeRouteData.metadata && activeRouteData.metadata.draftMeters) || 11.5}m).`
+        : "No route currently loaded.";
+
+      const recentMsgs = window.SETROUTE_CHAT_HISTORY.slice(-7).map(m => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content
       }));
-      return;
-    }
-    if (pending.type === "MISSING_PORT") {
-      const newPorts = await resolveUnknownPortsFromText(text, findPortsInUserMessage(text));
-      if (newPorts.length >= 1) {
-        const orig = pending.origin || newPorts[0];
-        const dest = pending.origin ? newPorts[0] : (newPorts[1] || null);
-        if (orig && dest && orig.id !== dest.id) {
-          window.SETROUTE_PENDING_CONTEXT = null;
-          await executeBrainLegByLegRoutePlan(orig, dest, defaultOpts);
-          return;
+
+      const sysInstruction = `You are SetRoute Master Mariner AI (IMO A.893(21) & Admiralty NP231 Passage Planning Intelligence).
+${curRouteDesc}
+Your task: Understand the user's navigational intent in natural language (English, Russian, or any language) and take direct action.
+Database of ports includes: Ningbo, Los Angeles, Houston, Rotterdam, Singapore, Shanghai, Tokyo, San Francisco, Panama, Suez, Antwerp, Hamburg, Busan, Hong Kong, and 60+ global ports.
+Standard vessel defaults: 14.5 knots, 11.5m draft, XTD ±0.25 NM.
+
+CRITICAL INTENT RULES:
+1. If the user asks to create, plan, or make a route between two ports (e.g., "Make the route from Ningbo to Los Angeles", "plan passage from Singapore to Rotterdam", "сделай маршрут из Нингбо в Лос Анджелес"):
+   Output JSON at the end: {"action":"plan","origin":"PortName","destination":"PortName","speedKnots":14.5,"draftMeters":11.5}
+2. CONVERSATIONAL CONTEXT RECOGNITION:
+   If the user previously mentioned ports or asked for a route, and now says "No make the route first, and I will specify later", "сначала сделай маршрут", "just make it", "plan it now", "use defaults":
+   IMMEDIATELY return {"action":"plan","origin":"[OriginFromHistory]","destination":"[DestFromHistory]","speedKnots":14.5,"draftMeters":11.5} using standard defaults! DO NOT ask the user for draft or speed again!
+3. If the user asks to modify the active route (e.g., "set speed to 16 kn", "draft 12.8m", "reverse", "switch to Great Circle", "via Cape of Good Hope"):
+   Output JSON: {"action":"modify","speedKnots":...,"draftMeters":...,"sailMode":"GC|RL","viaCape":true|false,"reverse":true|false}
+4. For general maritime questions (seamanship, COLREGs, weather, chokepoints):
+   Answer directly, professionally, and concisely in English.`;
+
+      const resp = await fetch("https://api.cohere.com/v2/chat", {
+        method: "POST",
+        signal: ctrl.signal,
+        headers: {
+          "Authorization": `Bearer ${SETROUTE_COHERE_KEY}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          model: SETROUTE_COHERE_MODEL,
+          messages: [
+            { role: "system", content: sysInstruction },
+            ...recentMsgs
+          ],
+          temperature: 0.15
+        })
+      });
+      clearTimeout(tid);
+
+      if (resp.ok) {
+        const d = await resp.json();
+        const rawAi = (((d.message || {}).content || [])[0] ? d.message.content[0].text : "").trim();
+        const jMatch = rawAi.match(/\{[\s\S]*?"action"\s*:\s*"(?:plan|modify)"[\s\S]*?\}/);
+        if (jMatch) {
+          try {
+            aiActionPlan = JSON.parse(jMatch[0]);
+          } catch (e) {}
+          aiTextMessage = rawAi.replace(jMatch[0], "").trim();
+        } else {
+          aiTextMessage = rawAi;
         }
       }
+    } catch (e) {}
+  }
+
+  if (thinkingEl && thinkingEl.parentNode) {
+    thinkingEl.parentNode.removeChild(thinkingEl);
+  }
+
+  // 2. Execute AI Planning Action if recognized by LLM
+  if (aiActionPlan && aiActionPlan.action === "plan" && aiActionPlan.origin && aiActionPlan.destination) {
+    const origQuery = String(aiActionPlan.origin).trim();
+    const destQuery = String(aiActionPlan.destination).trim();
+    let extPorts = await resolveUnknownPortsFromText(`from ${origQuery} to ${destQuery}`, findPortsInUserMessage(`${origQuery} to ${destQuery}`));
+    if (extPorts.length < 2) {
+      const p1 = (findPortsInUserMessage(origQuery)[0]) || null;
+      const p2 = (findPortsInUserMessage(destQuery)[0]) || null;
+      if (p1 && p2 && p1.id !== p2.id) extPorts = [p1, p2];
+    }
+    if (extPorts.length >= 2) {
+      window.SETROUTE_PENDING_CONTEXT = null;
+      await executeBrainLegByLegRoutePlan(extPorts[0], extPorts[1], {
+        speedKnots: aiActionPlan.speedKnots || defaultOpts.speedKnots,
+        draftMeters: aiActionPlan.draftMeters || defaultOpts.draftMeters,
+        xtdNM: defaultOpts.xtdNM,
+        sailMode: defaultOpts.sailMode,
+        viaCape: Boolean(aiActionPlan.viaCape || defaultOpts.viaCape)
+      });
+      return;
     }
   }
 
-  // 2. Detect ports in current message (including live geocoding fallback for any unlisted port)
+  // 3. Execute AI Route Modification if recognized by LLM
+  if (aiActionPlan && aiActionPlan.action === "modify" && activeRouteData && Array.isArray(activeRouteData.waypoints)) {
+    if (aiActionPlan.reverse) {
+      activeRouteData.waypoints.reverse();
+      const parts = (activeRouteData.name || "").split(" to ");
+      if (parts.length === 2) activeRouteData.name = `${parts[1]} to ${parts[0]}`;
+    }
+    activeRouteData.metadata = activeRouteData.metadata || {};
+    if (aiActionPlan.speedKnots) activeRouteData.metadata.speedKnots = parseFloat(aiActionPlan.speedKnots);
+    if (aiActionPlan.draftMeters) activeRouteData.metadata.draftMeters = parseFloat(aiActionPlan.draftMeters);
+    if (aiActionPlan.sailMode) activeRouteData.metadata.sailMode = aiActionPlan.sailMode;
+    enrichRouteWithLegsTelemetry(activeRouteData, activeRouteData.metadata);
+    saveRouteToLibrary(activeRouteData);
+    displaySetRouteResults(activeRouteData, true);
+    if (leafletMap) renderRouteOnMap(activeRouteData, false);
+    appendChatMessage("brain", `
+      ✓ <strong>Recalculated "${activeRouteData.name}" with updated parameters</strong><br>
+      Speed: <b>${activeRouteData.metadata.speedKnots || 14.5} kn</b> • Draft: <b>${activeRouteData.metadata.draftMeters || 11.5} m</b> • Total Distance: <b>${activeRouteData.totalDistanceNM} NM</b> (${activeRouteData.steamingDays} days).
+    `);
+    return;
+  }
+
+  // 4. Smart Offline / Local Semantic Intent Interpreter Fallback
   let mentionedPorts = findPortsInUserMessage(text);
   if (mentionedPorts.length < 2) {
     mentionedPorts = await resolveUnknownPortsFromText(text, mentionedPorts);
   }
 
-  // 3. Action-First: If 2+ ports are found, IMMEDIATELY build the route without blocking!
+  // 4a. If 2+ ports detected directly in text
   if (mentionedPorts.length >= 2) {
-    const pOrig = mentionedPorts[0];
-    const pDest = mentionedPorts[1];
-    const viaPorts = mentionedPorts.slice(2);
     window.SETROUTE_PENDING_CONTEXT = null;
-    await executeBrainLegByLegRoutePlan(pOrig, pDest, Object.assign({}, defaultOpts, { viaPorts }));
+    await executeBrainLegByLegRoutePlan(mentionedPorts[0], mentionedPorts[1], Object.assign({}, defaultOpts, { viaPorts: mentionedPorts.slice(2) }));
     return;
   }
 
-  // 4. If user says "make the route first / specify later / just make it / use defaults"
-  if (/make\s+(?:the\s+)?route|route\s+first|specify\s+later|just\s+(?:make|plan|build)|build\s+it|do\s+it\s+now|use\s+default/i.test(lower)) {
-    // Check earlier chat history for any ports mentioned previously
+  // 4b. Contextual recovery: If user said "make route first / specify later / just make it / сделай маршрут"
+  if (/make\s+(?:the\s+)?route|route\s+first|specify\s+later|just\s+(?:make|plan|build)|build\s+it|do\s+it\s+now|use\s+default|сделай\s+маршрут|сначала|потом\s+уточн/i.test(lower)) {
     let histPorts = [];
     for (let i = window.SETROUTE_CHAT_HISTORY.length - 1; i >= 0; i--) {
       const h = window.SETROUTE_CHAT_HISTORY[i];
@@ -9494,7 +9755,7 @@ async function handleSetRouteUserMessage(rawText) {
     }
   }
 
-  // 5. If 1 port is mentioned, check if it's a waypoint call ("via X"), destination update ("to X"), or origin update ("from X")
+  // 4c. Single port update
   if (mentionedPorts.length === 1) {
     const pOne = mentionedPorts[0];
     if (/\b(?:via|add|call|stop|through|через|добавь)\b/i.test(lower) && activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2) {
@@ -9517,18 +9778,14 @@ async function handleSetRouteUserMessage(rawText) {
       saveRouteToLibrary(activeRouteData);
       displaySetRouteResults(activeRouteData, true);
       if (leafletMap) renderRouteOnMap(activeRouteData, false);
-      appendChatMessage("brain", `
-        ✓ Updated active route to include an intermediate call at <b>${pOne.name}</b> (${activeRouteData.legs.length} legs, total <b>${activeRouteData.totalDistanceNM} NM</b>).
-      `);
+      appendChatMessage("brain", `✓ Added intermediate call at <b>${pOne.name}</b> (${activeRouteData.legs.length} legs, total <b>${activeRouteData.totalDistanceNM} NM</b>).`);
       return;
     }
 
-    // If user said "to <Port>" or "instead" and we already have a previous origin port, plan immediately!
     if ((/\bto\s+/i.test(lower) || /instead/i.test(lower)) && window.SETROUTE_LAST_PORTS.origin && window.SETROUTE_LAST_PORTS.origin.id !== pOne.id) {
       await executeBrainLegByLegRoutePlan(window.SETROUTE_LAST_PORTS.origin, pOne, defaultOpts);
       return;
     }
-    // If user said "from <Port>" and we already have a previous destination port, plan immediately!
     if (/\bfrom\s+/i.test(lower) && window.SETROUTE_LAST_PORTS.dest && window.SETROUTE_LAST_PORTS.dest.id !== pOne.id) {
       await executeBrainLegByLegRoutePlan(pOne, window.SETROUTE_LAST_PORTS.dest, defaultOpts);
       return;
@@ -9537,8 +9794,8 @@ async function handleSetRouteUserMessage(rawText) {
     window.SETROUTE_PENDING_CONTEXT = { type: "MISSING_PORT", origin: pOne };
     window.SETROUTE_LAST_PORTS.origin = pOne;
     appendChatMessage("brain", `
-      Origin locked: <b>${pOne.name} (${pOne.country})</b> [controlling depth: ${pOne.maxDraftLowTide || "15.0m"}].<br>
-      Which <b>destination port</b> should I build the route to? (Click a preset below or type any port name):
+      Origin locked: <b>${pOne.name} (${pOne.country})</b>.<br>
+      Which destination port should I build the passage plan to?
     `, [
       { label: `${pOne.name} → Los Angeles`, prompt: `Make the route from ${pOne.name} to Los Angeles` },
       { label: `${pOne.name} → Rotterdam`, prompt: `Make the route from ${pOne.name} to Rotterdam` },
@@ -9548,9 +9805,9 @@ async function handleSetRouteUserMessage(rawText) {
     return;
   }
 
-  // 6. Parameter modifications on the active route (speed, draft, XTD, GC/RL, reverse)
+  // 4d. Parameter modifications on active route
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2) {
-    if (parsedSpd || parsedDrf || parsedXtd || parsedSail || /reverse|recalculate|invert|реверс/i.test(lower)) {
+    if (parsedSpd || parsedDrf || parsedXtd || parsedSail || /reverse|invert|реверс/i.test(lower)) {
       if (/reverse|invert|реверс/i.test(lower)) {
         activeRouteData.waypoints.reverse();
         const parts = (activeRouteData.name || "").split(" to ");
@@ -9569,98 +9826,31 @@ async function handleSetRouteUserMessage(rawText) {
 
       appendChatMessage("brain", `
         <strong>✓ Recalculated "${activeRouteData.name}" across all ${activeRouteData.legs.length} legs</strong><br>
-        Speed: <b>${activeRouteData.metadata.speedKnots || 14.5} kn</b> • Draft: <b>${activeRouteData.metadata.draftMeters || 11.5} m</b> • XTD: <b>±${activeRouteData.metadata.xtdNM || 0.25} NM</b> • ETE: <b>${activeRouteData.steamingDays} days (${activeRouteData.totalSteamingHours}h)</b>.
+        Speed: <b>${activeRouteData.metadata.speedKnots || 14.5} kn</b> • Draft: <b>${activeRouteData.metadata.draftMeters || 11.5} m</b> • ETE: <b>${activeRouteData.steamingDays} days</b>.
       `);
       return;
     }
   }
 
-  // 7. Full Cohere AI Brain Conversation & Intent Extraction (with 11s timeout + live thinking state)
-  const thinkingEl = appendChatMessage("brain", `<span style="color:#94a3b8;">🧭 Analyzing passage parameters &amp; maritime context...</span>`);
-  let aiReply = "";
-  let aiExtractedPlan = null;
-
-  if (navigator.onLine && typeof SETROUTE_COHERE_KEY === "string" && SETROUTE_COHERE_KEY) {
-    try {
-      const ctrl = new AbortController();
-      const tid = setTimeout(() => ctrl.abort(), 11000);
-      const curRouteInfo = activeRouteData
-        ? `Current active route: ${activeRouteData.name} (${activeRouteData.totalDistanceNM} NM, ${(activeRouteData.legs || []).length} legs, speed ${(activeRouteData.metadata && activeRouteData.metadata.speedKnots) || 14.5} kn, draft ${(activeRouteData.metadata && activeRouteData.metadata.draftMeters) || 11.5}m).`
-        : "No route currently active.";
-
-      const recentMsgs = window.SETROUTE_CHAT_HISTORY.slice(-6).map(m => ({
-        role: m.role === "assistant" ? "assistant" : "user",
-        content: m.content
-      }));
-
-      const sysInstruction = `You are SetRoute Master Mariner AI (IMO A.893(21) & Admiralty NP231 Passage Planning Brain). ${curRouteInfo}
-Rules:
-1. Always respond in clear, helpful English.
-2. If the user is asking to create or modify a route between two ports/regions (even indirectly, e.g. "largest port in China to California"), include a JSON block at the very end of your response: {"action":"plan","origin":"PortA","destination":"PortB","speedKnots":14.5,"draftMeters":11.5}
-3. Never repeat robotic boilerplate. Answer questions about seamanship, COLREGs, TSS, UKC, weather routing, or the active passage plan directly and intelligently.`;
-
-      const resp = await fetch("https://api.cohere.com/v2/chat", {
-        method: "POST",
-        signal: ctrl.signal,
-        headers: {
-          "Authorization": `Bearer ${SETROUTE_COHERE_KEY}`,
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({
-          model: SETROUTE_COHERE_MODEL,
-          messages: [
-            { role: "system", content: sysInstruction },
-            ...recentMsgs
-          ],
-          temperature: 0.25
-        })
-      });
-      clearTimeout(tid);
-      if (resp.ok) {
-        const d = await resp.json();
-        const rawAi = (((d.message || {}).content || [])[0] ? d.message.content[0].text : "").trim();
-        const jMatch = rawAi.match(/\{[\s\S]*?"action"\s*:\s*"plan"[\s\S]*?\}/);
-        if (jMatch) {
-          try {
-            aiExtractedPlan = JSON.parse(jMatch[0]);
-          } catch (e) {}
-          aiReply = rawAi.replace(jMatch[0], "").trim();
-        } else {
-          aiReply = rawAi;
-        }
-      }
-    } catch (e) {}
+  // 5. If AI returned a conversational reply, render it directly
+  if (aiTextMessage) {
+    window.SETROUTE_CHAT_HISTORY.push({ role: "assistant", content: aiTextMessage });
+    appendChatMessage("brain", aiTextMessage.replace(/\n/g, "<br>"), [
+      { label: "Ningbo → Los Angeles", prompt: "Make the route from Ningbo to Los Angeles" },
+      { label: "Houston → Rotterdam", prompt: "Make the route from Houston to Rotterdam" },
+      { label: "Singapore → Shanghai", prompt: "Make the route from Singapore to Shanghai" },
+      { label: "Rotterdam → Singapore", prompt: "Make the route from Rotterdam to Singapore" }
+    ]);
+    return;
   }
 
-  if (thinkingEl && thinkingEl.parentNode) {
-    thinkingEl.parentNode.removeChild(thinkingEl);
-  }
+  // 6. Generic conversational fallback
+  const fallbackMsg = activeRouteData && activeRouteData.name
+    ? `Active passage plan <b>${activeRouteData.name}</b> is active on chart (<b>${activeRouteData.totalDistanceNM} NM</b>, speed <b>${(activeRouteData.metadata && activeRouteData.metadata.speedKnots) || 14.5} kn</b>). Ask any question or name two ports to generate a new route immediately.`
+    : `Tell me any two ports worldwide (e.g. <i>"Make the route from Ningbo to Los Angeles"</i>) and I will immediately calculate and plot the full passage plan.`;
 
-  if (aiExtractedPlan && aiExtractedPlan.origin && aiExtractedPlan.destination) {
-    const extPorts = await resolveUnknownPortsFromText(`from ${aiExtractedPlan.origin} to ${aiExtractedPlan.destination}`, findPortsInUserMessage(`${aiExtractedPlan.origin} to ${aiExtractedPlan.destination}`));
-    if (extPorts.length >= 2) {
-      await executeBrainLegByLegRoutePlan(extPorts[0], extPorts[1], {
-        speedKnots: aiExtractedPlan.speedKnots || defaultOpts.speedKnots,
-        draftMeters: aiExtractedPlan.draftMeters || defaultOpts.draftMeters,
-        xtdNM: defaultOpts.xtdNM,
-        sailMode: defaultOpts.sailMode
-      });
-      return;
-    }
-  }
-
-  if (!aiReply) {
-    if (activeRouteData && activeRouteData.name) {
-      aiReply = `Active route <b>${activeRouteData.name}</b> is loaded (<b>${activeRouteData.totalDistanceNM} NM</b> across <b>${(activeRouteData.legs || []).length} legs</b>). You can adjust parameters anytime — e.g. <i>"Speed 16 kn, draft 12.8m"</i>, <i>"Via Tokyo"</i>, <i>"Switch to Great Circle"</i> — or name any two ports to build a new passage plan immediately.`;
-    } else {
-      aiReply = `Tell me any two ports worldwide (for example: <i>"Make the route from Ningbo to Los Angeles"</i>) and I will immediately generate and plot the full leg-by-leg passage plan using standard vessel defaults (14.5 kn, 11.5m draft), which you can refine afterward.`;
-    }
-  }
-
-  window.SETROUTE_CHAT_HISTORY.push({ role: "assistant", content: aiReply });
-
-  appendChatMessage("brain", aiReply.replace(/\n/g, "<br>"), [
+  window.SETROUTE_CHAT_HISTORY.push({ role: "assistant", content: fallbackMsg });
+  appendChatMessage("brain", fallbackMsg, [
     { label: "Ningbo → Los Angeles", prompt: "Make the route from Ningbo to Los Angeles" },
     { label: "Houston → Rotterdam", prompt: "Make the route from Houston to Rotterdam" },
     { label: "Singapore → Shanghai", prompt: "Make the route from Singapore to Shanghai" },
@@ -9918,5 +10108,397 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     if (typeof initSetRoute === "function") initSetRoute();
     initSetRouteV50();
+    if (typeof initSetSailLocalization === "function") initSetSailLocalization();
   }, 240);
 });
+
+// =========================================================================
+// SetSail Multi-Language Localization Engine (8 Languages + Flag Assets)
+// Supported: EN, RU, JA, ZH, ES, DE, FR, FIL
+// =========================================================================
+const SET_SAIL_LANGUAGES = {
+  en: {
+    code: "en",
+    flag: "gb",
+    name: "English",
+    label: "EN • English",
+    translations: {
+      nav_home: "Home",
+      nav_chart: "SetChart",
+      nav_route: "SetRoute",
+      nav_news: "SetNews",
+      nav_gyro: "Tools",
+      nav_settings: "Settings",
+      hero_title: "Autonomous Marine Navigation Suite",
+      hero_sub: "ECDIS Overlay, Automated NtM Plotting, Gyroscope Deviation, Route Optimization & Global Maritime Intelligence",
+      home_chart_title: "Real-Time Nautical Chart Overlay",
+      home_chart_sub: "Interactive vector & raster marine charts with live NtM, NAVTEX, and Port depths",
+      home_news_title: "Latest Maritime Briefings",
+      home_news_sub: "Real-time hydrographic, port, canal, and metocean dispatches curated for bridge watchkeepers",
+      btn_open_chart: "Open SetChart Map",
+      btn_plan_route: "Plan Passage in SetRoute",
+      btn_open_news: "Open SetNews Wire",
+      btn_read_story: "Read Full Story →",
+      settings_account_heading: "SetSail Account & Cloud Bridge Sync",
+      settings_account_sub: "Sign in with your Google Account to automatically save and sync your passage plans, chart edits, vessel position & preferences",
+      btn_google_signin: "Sign in with Google",
+      btn_sign_out: "Sign Out",
+      guest_mode: "GUEST MODE",
+      lang_settings_title: "Regional Language & Bridge Localization",
+      lang_settings_sub: "Select your preferred bridge operating language. All suite tabs, map overlays, briefings, and telemetry adapt immediately.",
+      toast_lang_changed: "Language switched to English",
+      filter_active: "Active Warnings",
+      filter_navtex: "NAVTEX Alerts",
+      btn_view_broadcast: "👁 View Broadcast",
+      btn_inspect_edit: "✎ Inspect / Edit"
+    }
+  },
+  ru: {
+    code: "ru",
+    flag: "ru",
+    name: "Русский",
+    label: "RU • Русский",
+    translations: {
+      nav_home: "Главная",
+      nav_chart: "Карта SetChart",
+      nav_route: "Маршрут SetRoute",
+      nav_news: "Новости SetNews",
+      nav_gyro: "Инструменты",
+      nav_settings: "Настройки",
+      hero_title: "Автономный навигационный комплекс",
+      hero_sub: "Слой ECDIS, авто-нанесение извещений мореплавателям, расчет девиации гирокомпаса, оптимизация маршрутов и разведка обстановки",
+      home_chart_title: "Навигационная карта реального времени",
+      home_chart_sub: "Интерактивные векторные и растровые карты с живыми NtM, NAVTEX и глубинами портов",
+      home_news_title: "Свежие морские сводки",
+      home_news_sub: "Оперативные гидрографические, портовые и метео-сводки для вахтенных штурманов",
+      btn_open_chart: "Открыть карту SetChart",
+      btn_plan_route: "Рассчитать маршрут в SetRoute",
+      btn_open_news: "Открыть ленту SetNews",
+      btn_read_story: "Читать полностью →",
+      settings_account_heading: "Аккаунт SetSail и синхронизация мостика",
+      settings_account_sub: "Войдите через Google для автоматического сохранения и синхронизации маршрутов, правок карты и настроек судна",
+      btn_google_signin: "Войти через Google",
+      btn_sign_out: "Выйти из системы",
+      guest_mode: "ГОСТЕВОЙ РЕЖИМ",
+      lang_settings_title: "Язык интерфейса и локализация мостика",
+      lang_settings_sub: "Выберите рабочий язык интерфейса. Все вкладки, слои карты, сводки и телеметрия переключатся мгновенно.",
+      toast_lang_changed: "Язык интерфейса изменен на Русский",
+      filter_active: "Активные предупреждения",
+      filter_navtex: "Оповещения NAVTEX",
+      btn_view_broadcast: "👁 Смотреть сводку",
+      btn_inspect_edit: "✎ Просмотр / Правка"
+    }
+  },
+  ja: {
+    code: "ja",
+    flag: "jp",
+    name: "日本語",
+    label: "JA • 日本語",
+    translations: {
+      nav_home: "ホーム",
+      nav_chart: "海図チャート",
+      nav_route: "航路ルート",
+      nav_news: "海事ニュース",
+      nav_gyro: "航海ツール",
+      nav_settings: "設定",
+      hero_title: "自律型海洋ナビゲーションスイート",
+      hero_sub: "ECDISオーバーレイ、NtM自動プロット、ジャイロ誤差計算、航路最適化、海事インテリジェンス",
+      home_chart_title: "リアルタイム航海海図オーバーレイ",
+      home_chart_sub: "NtM、NAVTEX、港湾水深を含むインタラクティブなベクター＆ラスター海図",
+      home_news_title: "最新の海事ブリーフィング",
+      home_news_sub: "当直航海士向けに配信されるリアルタイムの水路・港湾・気象情報",
+      btn_open_chart: "SetChart海図を開く",
+      btn_plan_route: "SetRouteで航路を計画",
+      btn_open_news: "SetNews速報を開く",
+      btn_read_story: "記事を読む →",
+      settings_account_heading: "SetSailアカウントとクラウド同期",
+      settings_account_sub: "Googleアカウントでログインすると、航路計画、海図編集、本船位置、設定が自動同期されます",
+      btn_google_signin: "Googleでログイン",
+      btn_sign_out: "ログアウト",
+      guest_mode: "ゲストモード",
+      lang_settings_title: "地域言語とブリッジローカリゼーション",
+      lang_settings_sub: "ブリッジの操作言語を選択してください。すべてのタブ、オーバーレイ、ブリーフィングが即座に適応します。",
+      toast_lang_changed: "言語を日本語に変更しました",
+      filter_active: "有効な航行警報",
+      filter_navtex: "NAVTEX警報",
+      btn_view_broadcast: "👁 放送を表示",
+      btn_inspect_edit: "✎ 確認 / 編集"
+    }
+  },
+  zh: {
+    code: "zh",
+    flag: "cn",
+    name: "中文",
+    label: "ZH • 中文",
+    translations: {
+      nav_home: "首页",
+      nav_chart: "海图 SetChart",
+      nav_route: "航线 SetRoute",
+      nav_news: "资讯 SetNews",
+      nav_gyro: "航海工具",
+      nav_settings: "系统设置",
+      hero_title: "自主船舶综合导航平台",
+      hero_sub: "ECDIS叠加层、航行通告自动标绘、罗经差计算、航线优化与全球海事态势",
+      home_chart_title: "实时航海海图叠加层",
+      home_chart_sub: "包含实时航行通告、NAVTEX及港口水深的交互式矢量与栅格海图",
+      home_news_title: "最新海事动态简报",
+      home_news_sub: "专为驾驶台值班人员整理的实时水文、港口、运河与气象情报",
+      btn_open_chart: "打开 SetChart 海图",
+      btn_plan_route: "在 SetRoute 中规划航线",
+      btn_open_news: "打开 SetNews 资讯",
+      btn_read_story: "阅读全文 →",
+      settings_account_heading: "SetSail 账户与驾驶台云端同步",
+      settings_account_sub: "使用 Google 账户登录，自动保存并同步航程计划、海图标注、船舶船位与偏好设置",
+      btn_google_signin: "使用 Google 登录",
+      btn_sign_out: "退出登录",
+      guest_mode: "访客模式",
+      lang_settings_title: "语言与驾驶台区域设置",
+      lang_settings_sub: "选择驾驶台工作语言。系统菜单、海图标注、简报与仪表数据将即时切换。",
+      toast_lang_changed: "系统语言已切换为中文",
+      filter_active: "有效航行警告",
+      filter_navtex: "NAVTEX 警报",
+      btn_view_broadcast: "👁 查看广播内容",
+      btn_inspect_edit: "✎ 检查 / 编辑"
+    }
+  },
+  es: {
+    code: "es",
+    flag: "es",
+    name: "Español",
+    label: "ES • Español",
+    translations: {
+      nav_home: "Inicio",
+      nav_chart: "SetChart",
+      nav_route: "SetRoute",
+      nav_news: "SetNews",
+      nav_gyro: "Herramientas",
+      nav_settings: "Ajustes",
+      hero_title: "Suite de Navegación Marítima Autónoma",
+      hero_sub: "Superposición ECDIS, trazado de avisos a los navegantes, desvío giroscópico y optimización de rutas",
+      home_chart_title: "Cartografía Náutica en Tiempo Real",
+      home_chart_sub: "Cartas vectoriales y ráster interactivas con NtM, NAVTEX y profundidades de puertos",
+      home_news_title: "Últimos Informes Marítimos",
+      home_news_sub: "Informes hidrográficos, portuarios, de canales y meteorológicos en tiempo real para el puente",
+      btn_open_chart: "Abrir mapa SetChart",
+      btn_plan_route: "Planificar en SetRoute",
+      btn_open_news: "Abrir SetNews",
+      btn_read_story: "Leer historia completa →",
+      settings_account_heading: "Cuenta SetSail y Sincronización en la Nube",
+      settings_account_sub: "Inicie sesión con Google para guardar y sincronizar automáticamente sus planes y marcas de carta",
+      btn_google_signin: "Iniciar sesión con Google",
+      btn_sign_out: "Cerrar sesión",
+      guest_mode: "MODO INVITADO",
+      lang_settings_title: "Idioma y Localización del Puente",
+      lang_settings_sub: "Seleccione el idioma operativo del puente. Todas las pestañas y capas se adaptarán al instante.",
+      toast_lang_changed: "Idioma cambiado a Español",
+      filter_active: "Avisos Activos",
+      filter_navtex: "Alertas NAVTEX",
+      btn_view_broadcast: "👁 Ver Emisión",
+      btn_inspect_edit: "✎ Inspeccionar / Editar"
+    }
+  },
+  de: {
+    code: "de",
+    flag: "de",
+    name: "Deutsch",
+    label: "DE • Deutsch",
+    translations: {
+      nav_home: "Startseite",
+      nav_chart: "SetChart",
+      nav_route: "SetRoute",
+      nav_news: "SetNews",
+      nav_gyro: "Werkzeuge",
+      nav_settings: "Einstellungen",
+      hero_title: "Autonome Schiffsnavigations-Suite",
+      hero_sub: "ECDIS-Overlay, automatische NtM-Eintragung, Kreiselkompass-Ablenkung und Routenoptimierung",
+      home_chart_title: "Echtzeit-Seekarten-Overlay",
+      home_chart_sub: "Interaktive Vektor- und Rasterkarten mit Live-NtM, NAVTEX und Hafentiefen",
+      home_news_title: "Neueste Maritime Lageberichte",
+      home_news_sub: "Echtzeit-Meldungen zu Hydrographie, Häfen, Kanälen und Metozean für Wachoffiziere",
+      btn_open_chart: "SetChart Karte öffnen",
+      btn_plan_route: "Route in SetRoute planen",
+      btn_open_news: "SetNews Draht öffnen",
+      btn_read_story: "Bericht lesen →",
+      settings_account_heading: "SetSail-Konto & Cloud-Synchronisierung",
+      settings_account_sub: "Melden Sie sich mit Google an, um Routenpläne, Kartenkorrekturen und Schiffspositionen zu synchronisieren",
+      btn_google_signin: "Mit Google anmelden",
+      btn_sign_out: "Abmelden",
+      guest_mode: "GASTMODUS",
+      lang_settings_title: "Sprache und Brücken-Lokalisierung",
+      lang_settings_sub: "Wählen Sie die Arbeitssprache der Brücke. Alle Registerkarten und Karten-Overlays passen sich sofort an.",
+      toast_lang_changed: "Sprache auf Deutsch umgestellt",
+      filter_active: "Aktive Warnungen",
+      filter_navtex: "NAVTEX-Warnungen",
+      btn_view_broadcast: "👁 Sendung anzeigen",
+      btn_inspect_edit: "✎ Prüfen / Bearbeiten"
+    }
+  },
+  fr: {
+    code: "fr",
+    flag: "fr",
+    name: "Français",
+    label: "FR • Français",
+    translations: {
+      nav_home: "Accueil",
+      nav_chart: "SetChart",
+      nav_route: "SetRoute",
+      nav_news: "SetNews",
+      nav_gyro: "Outils",
+      nav_settings: "Paramètres",
+      hero_title: "Suite de Navigation Maritime Autonome",
+      hero_sub: "Superposition ECDIS, tracé automatique des avis aux navigateurs, déviation du gyrocompas et météo",
+      home_chart_title: "Superposition Cartographique en Temps Réel",
+      home_chart_sub: "Cartes vectorielles et matricielles interactives avec avis NtM, NAVTEX et profondeurs",
+      home_news_title: "Derniers Bulletins Maritimes",
+      home_news_sub: "Bulletins hydrographiques, portuaires et météo en direct pour les officiers de quart",
+      btn_open_chart: "Ouvrir la carte SetChart",
+      btn_plan_route: "Planifier dans SetRoute",
+      btn_open_news: "Ouvrir SetNews",
+      btn_read_story: "Lire l'article complet →",
+      settings_account_heading: "Compte SetSail et Synchronisation Passerelle",
+      settings_account_sub: "Connectez-vous avec Google pour synchroniser vos plans de traversée et modifications de carte",
+      btn_google_signin: "Se connecter avec Google",
+      btn_sign_out: "Déconnexion",
+      guest_mode: "MODE INVITÉ",
+      lang_settings_title: "Langue et Localisation de la Passerelle",
+      lang_settings_sub: "Sélectionnez la langue de la passerelle. Tous les onglets et cartes s'adaptent immédiatement.",
+      toast_lang_changed: "Langue changée en Français",
+      filter_active: "Avis Actifs",
+      filter_navtex: "Alertes NAVTEX",
+      btn_view_broadcast: "👁 Voir l'Émission",
+      btn_inspect_edit: "✎ Inspecter / Éditer"
+    }
+  },
+  fil: {
+    code: "fil",
+    flag: "ph",
+    name: "Filipino",
+    label: "FIL • Filipino",
+    translations: {
+      nav_home: "Tahanan",
+      nav_chart: "SetChart",
+      nav_route: "SetRoute",
+      nav_news: "SetNews",
+      nav_gyro: "Mga Gamit",
+      nav_settings: "Mga Setting",
+      hero_title: "Autonomong Marine Navigation Suite",
+      hero_sub: "ECDIS overlay, awtomatikong NtM plotting, kalkulasyon ng gyro deviation at pagpaplano ng ruta",
+      home_chart_title: "Real-Time Nautical Chart Overlay",
+      home_chart_sub: "Interactive vector at raster marine charts na may live NtM, NAVTEX at lalim ng daungan",
+      home_news_title: "Pinakabagong Ulat Pang-Dagat",
+      home_news_sub: "Real-time hydrographic, port, canal, at metocean dispatches para sa bridge watchkeepers",
+      btn_open_chart: "Buksan ang SetChart Map",
+      btn_plan_route: "Magplano sa SetRoute",
+      btn_open_news: "Buksan ang SetNews",
+      btn_read_story: "Basahin nang Buo →",
+      settings_account_heading: "SetSail Account at Cloud Bridge Sync",
+      settings_account_sub: "Mag-sign in gamit ang Google Account upang awtomatikong i-save at i-sync ang mga ruta at posisyon",
+      btn_google_signin: "Mag-sign in gamit ang Google",
+      btn_sign_out: "Mag-sign out",
+      guest_mode: "MODO BISITA",
+      lang_settings_title: "Wika at Localization ng Bridge",
+      lang_settings_sub: "Piliin ang wika ng bridge. Agad na mag-a-update ang lahat ng mga tab, mapa, at impormasyon.",
+      toast_lang_changed: "Pinalitan ang wika sa Filipino",
+      filter_active: "Aktibong Babala",
+      filter_navtex: "NAVTEX Babala",
+      btn_view_broadcast: "👁 Tingnan ang Broadcast",
+      btn_inspect_edit: "✎ Suriin / I-edit"
+    }
+  }
+};
+window.SET_SAIL_LANGUAGES = SET_SAIL_LANGUAGES;
+
+function getSetSailLanguage() {
+  try {
+    return localStorage.getItem("setsail_language") || "en";
+  } catch (e) {
+    return "en";
+  }
+}
+window.getSetSailLanguage = getSetSailLanguage;
+
+function setSetSailLanguage(langCode) {
+  const targetCode = SET_SAIL_LANGUAGES[langCode] ? langCode : "en";
+  try {
+    localStorage.setItem("setsail_language", targetCode);
+  } catch (e) {}
+  applySetSailLanguage(targetCode);
+
+  const langObj = SET_SAIL_LANGUAGES[targetCode];
+  if (langObj && langObj.translations && langObj.translations.toast_lang_changed) {
+    if (typeof showToast === "function") {
+      showToast(langObj.translations.toast_lang_changed, "info");
+    }
+  }
+}
+window.setSetSailLanguage = setSetSailLanguage;
+
+function applySetSailLanguage(langCode) {
+  const langObj = SET_SAIL_LANGUAGES[langCode] || SET_SAIL_LANGUAGES.en;
+  const t = langObj.translations || {};
+
+  // Update text elements with data-i18n
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (t[key]) {
+      el.textContent = t[key];
+    }
+  });
+
+  // Update placeholders with data-i18n-ph
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => {
+    const key = el.getAttribute("data-i18n-ph");
+    if (t[key]) {
+      el.setAttribute("placeholder", t[key]);
+    }
+  });
+
+  // Update titles with data-i18n-title
+  document.querySelectorAll("[data-i18n-title]").forEach(el => {
+    const key = el.getAttribute("data-i18n-title");
+    if (t[key]) {
+      el.setAttribute("title", t[key]);
+    }
+  });
+
+  // Update navigation items
+  const navMap = {
+    "tab-home": t.nav_home,
+    "tab-ntm": t.nav_chart,
+    "tab-route": t.nav_route,
+    "tab-news": t.nav_news,
+    "tab-gyro": t.nav_gyro,
+    "tab-settings": t.nav_settings
+  };
+  Object.keys(navMap).forEach(tabId => {
+    const navItem = document.querySelector(`.nav-sidebar .nav-item[data-tab="${tabId}"] span:last-child`);
+    if (navItem && navMap[tabId]) {
+      navItem.textContent = navMap[tabId];
+    }
+  });
+
+  // Update Language Settings Card active buttons and badge
+  const badge = document.getElementById("currentLangBadge");
+  if (badge) {
+    badge.textContent = langObj.label;
+  }
+  document.querySelectorAll(".lang-choice-btn").forEach(btn => {
+    const code = btn.getAttribute("data-lang-code");
+    btn.classList.toggle("active", code === targetCodeStrict(langCode));
+  });
+
+  try {
+    window.dispatchEvent(new CustomEvent("setsail:languagechange", { detail: { lang: langCode } }));
+  } catch (e) {}
+}
+window.applySetSailLanguage = applySetSailLanguage;
+
+function targetCodeStrict(c) {
+  return SET_SAIL_LANGUAGES[c] ? c : "en";
+}
+
+function initSetSailLocalization() {
+  const saved = getSetSailLanguage();
+  applySetSailLanguage(saved);
+}
+window.initSetSailLocalization = initSetSailLocalization;

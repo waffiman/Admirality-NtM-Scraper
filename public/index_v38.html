@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.3" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.4" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -10834,6 +10834,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
     function switchToTab(targetTab) {
       if (!targetTab) return;
       try {
+        sessionStorage.setItem('setsail_active_tab', targetTab);
+        localStorage.setItem('setsail_active_tab', targetTab);
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', '#' + targetTab);
+        }
+      } catch (e) {}
+      try {
         const navItems = document.querySelectorAll('.nav-sidebar .nav-item');
         navItems.forEach(n => {
           n.classList.toggle('active', n.getAttribute('data-tab') === targetTab);
@@ -10891,6 +10898,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
       }
     }
     window.switchToTab = switchToTab;
+
+    // Restore preserved active tab on startup so user is never reset to Home unexpectedly
+    try {
+      const initSaved = (window.location.hash && window.location.hash.length > 1) ? window.location.hash.replace('#', '').trim() : (sessionStorage.getItem('setsail_active_tab') || localStorage.getItem('setsail_active_tab') || '');
+      if (initSaved && initSaved !== 'tab-home' && document.getElementById(initSaved)) {
+        setTimeout(() => switchToTab(initSaved), 20);
+      }
+    } catch (e) {}
 
     // 2. High-Priority Global Click Delegation with Capture (Cannot be stopped by inner elements)
     document.addEventListener('click', function(e) {
@@ -11299,7 +11314,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
                 <div class="hud-left-brand-wrap" id="homeHudLeftBrand">
                   <button type="button" class="home-hud-login-btn" id="homeHudLeftLoginBtn" title="Sign in or manage your SetSail Account (Google OAuth / Bridge Profile)">
                     <span class="home-hud-icon" style="display:inline-flex;align-items:center;"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg></span>
-                    <span class="home-hud-text" id="homeHudLeftLoginText">LogIn</span>
+                    <span class="home-hud-text" id="homeHudLeftLoginText" data-i18n="btn_google_signin">LogIn</span>
                   </button>
                 </div>
               </div>
@@ -11331,7 +11346,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
             <div class="home-center-stage" id="homeCenterStage">
               <div class="home-brand-block" id="homeBrandBlock">
                 <picture class="home-hero-logo-wrap" id="homeHeroLogoWrap" title="SetSail"><source srcset="assets/SetSail LOGOS/setsail_logo_horizontal.webp" type="image/webp" /><img src="assets/SetSail LOGOS/setsail_logo_horizontal.png" alt="SetSail" class="home-hero-logo" width="862" height="321" decoding="sync" fetchpriority="high" /></picture>
-                <div class="home-brand-sub" id="homeBrandSub">INTEGRATED BRIDGE NAVIGATION SUITE</div>
+                <div class="home-brand-sub" id="homeBrandSub" data-i18n="hero_title">INTEGRATED BRIDGE NAVIGATION SUITE</div>
               </div>
 
               <!-- Extensible Tool Launcher Grid (3 Core Hero Tiles + Any Future Modules) -->
@@ -11424,12 +11439,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
             <section class="home-slide-news" id="homeSlideNews" aria-label="Latest Maritime News">
               <div style="text-align:center;margin-bottom:14px;">
                 <div class="saas-eyebrow-pill" style="margin:0 auto 6px;"><span class="saas-eyebrow-dot"></span>LIVE MARITIME INTELLIGENCE</div>
-                <h2 class="home-slide2-title" style="margin:0 0 4px;">Latest Maritime Briefings</h2>
-                <p class="home-slide2-sub" style="margin:0;">Real-time hydrographic, port, canal, and metocean dispatches curated for bridge watchkeepers</p>
+                <h2 class="home-slide2-title" style="margin:0 0 4px;" data-i18n="home_news_title">Latest Maritime Briefings</h2>
+                <p class="home-slide2-sub" style="margin:0;" data-i18n="home_news_sub">Real-time hydrographic, port, canal, and metocean dispatches curated for bridge watchkeepers</p>
               </div>
               <div class="home-news-preview-grid" id="homeNewsPreviewGrid"></div>
               <div style="margin-top:16px;display:flex;justify-content:center;">
-                <button type="button" class="home-news-open-btn" data-switch-tab="tab-news">
+                <button type="button" class="home-news-open-btn" data-switch-tab="tab-news" data-i18n="btn_open_news">
                   Explore All Briefings in SetNews &rarr;
                 </button>
               </div>
@@ -13702,6 +13717,64 @@ svg.leaflet-image-layer.leaflet-interactive path {
                     <div><span style="color:#94a3b8;">Last Sync:</span> <b id="histStatSyncTime">Live</b></div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <!-- Card 0.5: Language / Regional Settings -->
+            <div class="settings-card-min settings-language-card" id="settingsLanguageCard">
+              <div class="settings-language-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(16,185,129,0.22));border:1px solid rgba(56,189,248,0.45);display:flex;align-items:center;justify-content:center;color:#38bdf8;font-size:1.15rem;">
+                    🌐
+                  </div>
+                  <div>
+                    <div class="min-card-title" style="margin-bottom:2px;" data-i18n="lang_settings_title" id="settingsLangHeading">Regional Language &amp; Bridge Localization</div>
+                    <div style="font-size:0.72rem;color:#94a3b8;" data-i18n="lang_settings_sub" id="settingsLangSub">Select your preferred bridge operating language. All suite tabs, map overlays, briefings, and telemetry adapt immediately.</div>
+                  </div>
+                </div>
+                <span id="currentLangBadge" style="font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.3);letter-spacing:0.04em;">EN • ENGLISH</span>
+              </div>
+              <div class="settings-lang-grid">
+                <button type="button" class="lang-choice-btn active" data-lang-code="en" onclick="window.setSetSailLanguage('en')">
+                  <img src="assets/flags/gb.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/gb.png';" class="lang-flag-icon" alt="EN" />
+                  <span class="lang-choice-name">English</span>
+                  <span class="lang-choice-sub">EN</span>
+                </button>
+                <button type="button" class="lang-choice-btn" data-lang-code="ru" onclick="window.setSetSailLanguage('ru')">
+                  <img src="assets/flags/ru.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/ru.png';" class="lang-flag-icon" alt="RU" />
+                  <span class="lang-choice-name">Русский</span>
+                  <span class="lang-choice-sub">RU</span>
+                </button>
+                <button type="button" class="lang-choice-btn" data-lang-code="ja" onclick="window.setSetSailLanguage('ja')">
+                  <img src="assets/flags/jp.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/jp.png';" class="lang-flag-icon" alt="JA" />
+                  <span class="lang-choice-name">日本語</span>
+                  <span class="lang-choice-sub">JA</span>
+                </button>
+                <button type="button" class="lang-choice-btn" data-lang-code="zh" onclick="window.setSetSailLanguage('zh')">
+                  <img src="assets/flags/cn.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/cn.png';" class="lang-flag-icon" alt="ZH" />
+                  <span class="lang-choice-name">中文</span>
+                  <span class="lang-choice-sub">ZH</span>
+                </button>
+                <button type="button" class="lang-choice-btn" data-lang-code="es" onclick="window.setSetSailLanguage('es')">
+                  <img src="assets/flags/es.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/es.png';" class="lang-flag-icon" alt="ES" />
+                  <span class="lang-choice-name">Español</span>
+                  <span class="lang-choice-sub">ES</span>
+                </button>
+                <button type="button" class="lang-choice-btn" data-lang-code="de" onclick="window.setSetSailLanguage('de')">
+                  <img src="assets/flags/de.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/de.png';" class="lang-flag-icon" alt="DE" />
+                  <span class="lang-choice-name">Deutsch</span>
+                  <span class="lang-choice-sub">DE</span>
+                </button>
+                <button type="button" class="lang-choice-btn" data-lang-code="fr" onclick="window.setSetSailLanguage('fr')">
+                  <img src="assets/flags/fr.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/fr.png';" class="lang-flag-icon" alt="FR" />
+                  <span class="lang-choice-name">Français</span>
+                  <span class="lang-choice-sub">FR</span>
+                </button>
+                <button type="button" class="lang-choice-btn" data-lang-code="fil" onclick="window.setSetSailLanguage('fil')">
+                  <img src="assets/flags/ph.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/ph.png';" class="lang-flag-icon" alt="FIL" />
+                  <span class="lang-choice-name">Filipino</span>
+                  <span class="lang-choice-sub">PH</span>
+                </button>
               </div>
             </div>
 
@@ -19364,8 +19437,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.3"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.3"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.4"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.4"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19443,7 +19516,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.3"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.4"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19813,20 +19886,20 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v53') !== '1') {
+        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v54') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.3' && k !== 'setsail-tiles-cache-v5.3').map(k => caches.delete(k))
-          )).then(() => localStorage.setItem('setsail_sw_v53', '1')).catch(() => {});
+            keys.filter(k => k !== 'setsail-cache-v5.4' && k !== 'setsail-tiles-cache-v5.4').map(k => caches.delete(k))
+          )).then(() => localStorage.setItem('setsail_sw_v54', '1')).catch(() => {});
         }
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!sessionStorage.getItem('setsail_sw_reloaded_v53')) {
-            sessionStorage.setItem('setsail_sw_reloaded_v53', '1');
+          if (!sessionStorage.getItem('setsail_sw_reloaded_v54')) {
+            sessionStorage.setItem('setsail_sw_reloaded_v54', '1');
             window.location.reload();
           }
         });
-        navigator.serviceWorker.register('sw.js?v=5.3', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.4', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.3 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }

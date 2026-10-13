@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.3';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.3';
+const CACHE_NAME = 'setsail-cache-v5.4';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.4';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -25,10 +25,10 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=5.3',
-  'assets/Auto NtM Plotting/port_depths.js?v=5.3',
-  'assets/Auto NtM Plotting/ntm_module.js?v=5.3',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.3',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=5.4',
+  'assets/Auto NtM Plotting/port_depths.js?v=5.4',
+  'assets/Auto NtM Plotting/ntm_module.js?v=5.4',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.4',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
   'assets/Auto NtM Plotting/tesseract.min.js',
   'assets/Auto NtM Plotting/pdf.min.js',
@@ -36,7 +36,40 @@ const OFFLINE_CORE_ASSETS = [
   'assets/SetSail LOGOS/setsail_logo_square.webp',
   'assets/SetSail LOGOS/setsail_logo_horizontal.webp',
   'assets/SetSail LOGOS/setsail_logo_square.png',
-  'assets/SetSail LOGOS/setsail_logo_horizontal.png'
+  'assets/SetSail LOGOS/setsail_logo_horizontal.png',
+  'assets/flags/ae.png',
+  'assets/flags/au.png',
+  'assets/flags/be.png',
+  'assets/flags/br.png',
+  'assets/flags/ca.png',
+  'assets/flags/cn.png',
+  'assets/flags/de.png',
+  'assets/flags/eg.png',
+  'assets/flags/es.png',
+  'assets/flags/fr.png',
+  'assets/flags/gb.png',
+  'assets/flags/gr.png',
+  'assets/flags/hk.png',
+  'assets/flags/id.png',
+  'assets/flags/in.png',
+  'assets/flags/it.png',
+  'assets/flags/jp.png',
+  'assets/flags/kr.png',
+  'assets/flags/lk.png',
+  'assets/flags/ma.png',
+  'assets/flags/my.png',
+  'assets/flags/nl.png',
+  'assets/flags/pa.png',
+  'assets/flags/ph.png',
+  'assets/flags/pl.png',
+  'assets/flags/ru.png',
+  'assets/flags/sa.png',
+  'assets/flags/sg.png',
+  'assets/flags/th.png',
+  'assets/flags/tw.png',
+  'assets/flags/us.png',
+  'assets/flags/vn.png',
+  'assets/flags/za.png'
 ];
 
 // World overview tiles (Zoom 1 & 2) pre-warmed asynchronously so Global Dark & Coast layers render in 0ms
@@ -258,6 +291,43 @@ self.addEventListener('fetch', (event) => {
             ]),
             { headers: { 'Content-Type': 'image/png' } }
           );
+        }
+      })
+    );
+    return;
+  }
+
+  // 3.5. Images (Unsplash, news thumbnails & national flags): Cache-First + Background Refresh
+  const isImageRequest = (
+    url.pathname.match(/\.(png|jpg|jpeg|webp|svg|ico)$/i) ||
+    url.hostname.includes('images.unsplash.com') ||
+    url.hostname.includes('flagcdn.com') ||
+    url.hostname.includes('gcaptain.com')
+  );
+
+  if (isImageRequest && !isMapTile) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(async (cache) => {
+        const cached = await cache.match(event.request);
+        if (cached) {
+          fetch(event.request)
+            .then((netRes) => {
+              if (netRes && (netRes.ok || netRes.type === 'opaque')) {
+                cache.put(event.request, netRes.clone());
+              }
+            })
+            .catch(() => {});
+          return cached;
+        }
+
+        try {
+          const netRes = await fetchWithTimeout(event.request, 4500);
+          if (netRes && (netRes.ok || netRes.type === 'opaque')) {
+            cache.put(event.request, netRes.clone());
+          }
+          return netRes;
+        } catch (fetchErr) {
+          return new Response('', { status: 404 });
         }
       })
     );
