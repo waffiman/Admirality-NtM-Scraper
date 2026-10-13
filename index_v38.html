@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.4" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.5" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -19437,8 +19437,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.4"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.4"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.5"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.5"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19516,7 +19516,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.4"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.5"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19886,18 +19886,18 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v54') !== '1') {
+        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v55') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.4' && k !== 'setsail-tiles-cache-v5.4').map(k => caches.delete(k))
-          )).then(() => localStorage.setItem('setsail_sw_v54', '1')).catch(() => {});
+            keys.filter(k => k !== 'setsail-cache-v5.5' && k !== 'setsail-tiles-cache-v5.5').map(k => caches.delete(k))
+          )).then(() => localStorage.setItem('setsail_sw_v55', '1')).catch(() => {});
         }
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!sessionStorage.getItem('setsail_sw_reloaded_v54')) {
-            sessionStorage.setItem('setsail_sw_reloaded_v54', '1');
+          if (!sessionStorage.getItem('setsail_sw_reloaded_v55')) {
+            sessionStorage.setItem('setsail_sw_reloaded_v55', '1');
             window.location.reload();
           }
         });
-        navigator.serviceWorker.register('sw.js?v=5.4', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.5', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
