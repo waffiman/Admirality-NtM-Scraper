@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "2100 UTC",
-  "lastSyncUtc": "2026-10-12T21:07:06.945067+00:00",
+  "synopticCycle": "0000 UTC",
+  "lastSyncUtc": "2026-10-13T00:14:20.817940+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,8 +9,8 @@
       "shortName": "Simon",
       "category": "Category 2 Hurricane (NOAA NHC)",
       "center": [
-        20.2,
-        -106.8
+        20.3,
+        -106.9
       ],
       "centralPressure": 969,
       "maxWinds": 85,
@@ -19,61 +19,61 @@
       "dangerRadiusNm": 97,
       "forecastTrack": [
         {
-          "tau": 9,
+          "tau": 6,
           "coords": [
             20.5,
             -107.0
           ],
           "winds": 75,
-          "radiusNm": 52
+          "radiusNm": 48
         },
         {
-          "tau": 21,
+          "tau": 18,
           "coords": [
             20.9,
             -107.5
           ],
           "winds": 65,
-          "radiusNm": 69
+          "radiusNm": 65
         },
         {
-          "tau": 33,
+          "tau": 30,
           "coords": [
             21.2,
             -107.7
           ],
           "winds": 70,
-          "radiusNm": 86
+          "radiusNm": 82
         },
         {
-          "tau": 45,
+          "tau": 42,
           "coords": [
             21.5,
             -107.7
           ],
           "winds": 75,
-          "radiusNm": 102
+          "radiusNm": 98
         },
         {
-          "tau": 57,
+          "tau": 54,
           "coords": [
             22.2,
             -107.4
           ],
           "winds": 80,
-          "radiusNm": 119
+          "radiusNm": 115
         },
         {
-          "tau": 69,
+          "tau": 66,
           "coords": [
             23.0,
             -107.0
           ],
           "winds": 85,
-          "radiusNm": 136
+          "radiusNm": 132
         },
         {
-          "tau": 93,
+          "tau": 90,
           "coords": [
             24.2,
             -106.6
@@ -145,7 +145,7 @@
         32.2,
         149.6
       ],
-      "centralPressure": 970,
+      "centralPressure": 975,
       "maxWinds": 75,
       "gusts": 94,
       "movement": "NE at 19 kts",
@@ -202,7 +202,7 @@
       "id": "EP932026",
       "name": "Invest 93E",
       "shortName": "93E",
-      "category": "Tropical Disturbance (Formation Chance 90%)",
+      "category": "Tropical Disturbance (Formation Chance 100%)",
       "center": [
         8.1,
         -93.9
@@ -282,7 +282,7 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.4,
+      "waveHeight": 3.3,
       "swellPeriod": 9,
       "swellDir": "NW"
     },
@@ -290,12 +290,12 @@
       "id": "WS1",
       "name": "Simon Cyclonic Wave Field",
       "center": [
-        20.2,
-        -106.8
+        20.3,
+        -106.9
       ],
       "radiusNm": 194,
-      "waveHeight": 4.9,
-      "swellPeriod": 9,
+      "waveHeight": 3.7,
+      "swellPeriod": 10,
       "swellDir": "W"
     },
     {
@@ -307,8 +307,8 @@
       ],
       "radiusNm": 150,
       "waveHeight": 2.5,
-      "swellPeriod": 7,
-      "swellDir": "NNE"
+      "swellPeriod": 8,
+      "swellDir": "NE"
     },
     {
       "id": "WS3",
@@ -318,9 +318,9 @@
         149.6
       ],
       "radiusNm": 180,
-      "waveHeight": 6.2,
-      "swellPeriod": 9,
-      "swellDir": "SW"
+      "waveHeight": 4.3,
+      "swellPeriod": 8,
+      "swellDir": "W"
     }
   ],
   "pressureCenters": [
@@ -329,8 +329,8 @@
       "value": 969,
       "name": "Hurricane SIMON Core Low",
       "coords": [
-        20.2,
-        -106.8
+        20.3,
+        -106.9
       ]
     },
     {
@@ -344,7 +344,7 @@
     },
     {
       "type": "L",
-      "value": 970,
+      "value": 975,
       "name": "Typhoon KOGUMA Core Low",
       "coords": [
         32.2,
@@ -391,8 +391,8 @@
   "windVectors": [
     {
       "coords": [
-        20.5,
-        -106.5
+        20.6,
+        -106.6
       ],
       "dir": 160,
       "speed": 85,
