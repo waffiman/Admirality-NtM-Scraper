@@ -1,84 +1,164 @@
 {
-  "synopticCycle": "1300 UTC",
-  "lastSyncUtc": "2026-10-13T13:42:43.444939+00:00",
+  "synopticCycle": "2200 UTC",
+  "lastSyncUtc": "2026-10-13T22:22:18.503714+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
+    {
+      "id": "EP212026",
+      "name": "Tropical Storm TRUDY",
+      "shortName": "Trudy",
+      "category": "Tropical Storm (NOAA NHC)",
+      "center": [
+        10.6,
+        -96.5
+      ],
+      "centralPressure": 1005,
+      "maxWinds": 35,
+      "gusts": 43,
+      "movement": "NW at 8 kts",
+      "dangerRadiusNm": 70,
+      "forecastTrack": [
+        {
+          "tau": 9,
+          "coords": [
+            11.3,
+            -97.5
+          ],
+          "winds": 45,
+          "radiusNm": 52
+        },
+        {
+          "tau": 21,
+          "coords": [
+            12.0,
+            -99.0
+          ],
+          "winds": 60,
+          "radiusNm": 69
+        },
+        {
+          "tau": 33,
+          "coords": [
+            12.7,
+            -100.1
+          ],
+          "winds": 75,
+          "radiusNm": 86
+        },
+        {
+          "tau": 45,
+          "coords": [
+            13.5,
+            -100.8
+          ],
+          "winds": 90,
+          "radiusNm": 102
+        },
+        {
+          "tau": 57,
+          "coords": [
+            14.3,
+            -101.2
+          ],
+          "winds": 105,
+          "radiusNm": 119
+        },
+        {
+          "tau": 69,
+          "coords": [
+            15.3,
+            -101.6
+          ],
+          "winds": 115,
+          "radiusNm": 136
+        },
+        {
+          "tau": 93,
+          "coords": [
+            17.1,
+            -103.3
+          ],
+          "winds": 115,
+          "radiusNm": 160
+        }
+      ]
+    },
     {
       "id": "EP202026",
       "name": "Hurricane SIMON",
       "shortName": "Simon",
       "category": "Category 1 Hurricane (NOAA NHC)",
       "center": [
-        20.4,
-        -107.2
+        20.2,
+        -107.5
       ],
       "centralPressure": 977,
       "maxWinds": 80,
       "gusts": 98,
-      "movement": "WNW at 3 kts",
+      "movement": "W at 2 kts",
       "dangerRadiusNm": 92,
       "forecastTrack": [
         {
-          "tau": 6,
+          "tau": 9,
           "coords": [
-            20.7,
-            -107.4
+            20.0,
+            -107.8
           ],
-          "winds": 75,
-          "radiusNm": 48
+          "winds": 85,
+          "radiusNm": 52
         },
         {
-          "tau": 18,
+          "tau": 21,
           "coords": [
-            20.9,
-            -107.7
+            19.8,
+            -108.1
           ],
-          "winds": 75,
-          "radiusNm": 65
+          "winds": 90,
+          "radiusNm": 69
         },
         {
-          "tau": 30,
+          "tau": 33,
+          "coords": [
+            19.5,
+            -108.0
+          ],
+          "winds": 90,
+          "radiusNm": 86
+        },
+        {
+          "tau": 45,
+          "coords": [
+            19.8,
+            -107.6
+          ],
+          "winds": 85,
+          "radiusNm": 102
+        },
+        {
+          "tau": 57,
           "coords": [
             21.0,
             -107.8
           ],
-          "winds": 75,
-          "radiusNm": 82
-        },
-        {
-          "tau": 42,
-          "coords": [
-            21.2,
-            -107.9
-          ],
-          "winds": 75,
-          "radiusNm": 98
-        },
-        {
-          "tau": 54,
-          "coords": [
-            21.8,
-            -108.0
-          ],
           "winds": 70,
-          "radiusNm": 115
+          "radiusNm": 119
         },
         {
-          "tau": 66,
+          "tau": 69,
           "coords": [
-            23.0,
-            -108.1
+            22.6,
+            -108.8
           ],
-          "winds": 65,
-          "radiusNm": 132
+          "winds": 60,
+          "radiusNm": 136
         },
         {
-          "tau": 90,
+          "tau": 93,
           "coords": [
-            24.2,
-            -108.1
+            24.4,
+            -110.2
           ],
-          "winds": 55,
+          "winds": 45,
           "radiusNm": 160
         }
       ]
@@ -89,10 +169,10 @@
       "shortName": "Twentyeight",
       "category": "Tropical Depression (JTWC)",
       "center": [
-        18.8,
-        146.3
+        20.1,
+        144.5
       ],
-      "centralPressure": 1007,
+      "centralPressure": 1008,
       "maxWinds": 25,
       "gusts": 31,
       "movement": "NW at 10 kts",
@@ -101,8 +181,8 @@
         {
           "tau": 12,
           "coords": [
-            20.0,
-            144.5
+            21.2,
+            142.8
           ],
           "winds": 25,
           "radiusNm": 56
@@ -110,8 +190,8 @@
         {
           "tau": 24,
           "coords": [
-            21.0,
-            142.7
+            22.2,
+            141.2
           ],
           "winds": 25,
           "radiusNm": 73
@@ -119,8 +199,8 @@
         {
           "tau": 36,
           "coords": [
-            22.0,
-            140.8
+            23.0,
+            139.5
           ],
           "winds": 20,
           "radiusNm": 90
@@ -129,54 +209,36 @@
     },
     {
       "id": "WP-27",
-      "name": "Typhoon KOGUMA",
+      "name": "Tropical Storm KOGUMA",
       "shortName": "Koguma",
-      "category": "Typhoon (JTWC/JMA)",
+      "category": "Tropical Storm (JTWC)",
       "center": [
-        35.4,
-        153.7
+        38.3,
+        157.2
       ],
       "centralPressure": 985,
-      "maxWinds": 70,
-      "gusts": 88,
-      "movement": "NE at 20 kts",
-      "dangerRadiusNm": 84,
+      "maxWinds": 50,
+      "gusts": 62,
+      "movement": "NE at 18 kts",
+      "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            38.2,
-            157.4
+            40.6,
+            160.9
           ],
-          "winds": 60,
+          "winds": 40,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            40.6,
-            161.2
+            42.0,
+            165.3
           ],
-          "winds": 55,
+          "winds": 35,
           "radiusNm": 73
-        },
-        {
-          "tau": 36,
-          "coords": [
-            42.3,
-            166.0
-          ],
-          "winds": 50,
-          "radiusNm": 90
-        },
-        {
-          "tau": 48,
-          "coords": [
-            43.2,
-            171.2
-          ],
-          "winds": 45,
-          "radiusNm": 107
         }
       ]
     },
@@ -184,7 +246,7 @@
       "id": "EP932026",
       "name": "Invest 93E",
       "shortName": "93E",
-      "category": "Tropical Disturbance (Formation Chance 100%)",
+      "category": "Tropical Disturbance (Active Invest)",
       "center": [
         9.5,
         -96.1
@@ -248,20 +310,20 @@
       "shortName": "96W",
       "category": "Tropical Disturbance (Active Invest)",
       "center": [
-        9.7,
-        163.8
+        10.1,
+        161.6
       ],
       "centralPressure": 1006,
       "maxWinds": 20,
       "gusts": 26,
-      "movement": "WNW at 12 kts",
+      "movement": "WNW at 96 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            10.9,
-            161.6
+            18.7,
+            143.9
           ],
           "winds": 25,
           "radiusNm": 45
@@ -269,8 +331,8 @@
         {
           "tau": 24,
           "coords": [
-            11.9,
-            159.8
+            19.2,
+            143.3
           ],
           "winds": 30,
           "radiusNm": 60
@@ -278,8 +340,8 @@
         {
           "tau": 36,
           "coords": [
-            11.9,
-            158.5
+            19.8,
+            142.8
           ],
           "winds": 35,
           "radiusNm": 75
@@ -287,8 +349,8 @@
         {
           "tau": 48,
           "coords": [
-            12.2,
-            157.5
+            20.3,
+            142.6
           ],
           "winds": 40,
           "radiusNm": 90
@@ -296,8 +358,8 @@
         {
           "tau": 60,
           "coords": [
-            12.4,
-            156.5
+            21.9,
+            140.2
           ],
           "winds": 45,
           "radiusNm": 105
@@ -314,9 +376,9 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 4.6,
-      "swellPeriod": 9,
-      "swellDir": "WSW"
+      "waveHeight": 6.6,
+      "swellPeriod": 10,
+      "swellDir": "SW"
     },
     {
       "id": "W2",
@@ -326,36 +388,48 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.0,
+      "waveHeight": 2.8,
       "swellPeriod": 9,
-      "swellDir": "WNW"
+      "swellDir": "W"
     },
     {
       "id": "WS1",
-      "name": "Simon Cyclonic Wave Field",
+      "name": "Trudy Cyclonic Wave Field",
       "center": [
-        20.4,
-        -107.2
+        10.6,
+        -96.5
       ],
-      "radiusNm": 184,
-      "waveHeight": 2.6,
-      "swellPeriod": 11,
-      "swellDir": "WSW"
+      "radiusNm": 150,
+      "waveHeight": 3.3,
+      "swellPeriod": 10,
+      "swellDir": "SSE"
     },
     {
-      "id": "WS3",
-      "name": "Koguma Cyclonic Wave Field",
+      "id": "WS2",
+      "name": "Simon Cyclonic Wave Field",
       "center": [
-        35.4,
-        153.7
+        20.2,
+        -107.5
       ],
-      "radiusNm": 168,
-      "waveHeight": 4.5,
-      "swellPeriod": 9,
-      "swellDir": "WSW"
+      "radiusNm": 184,
+      "waveHeight": 2.5,
+      "swellPeriod": 10,
+      "swellDir": "W"
     },
     {
       "id": "WS4",
+      "name": "Koguma Cyclonic Wave Field",
+      "center": [
+        38.3,
+        157.2
+      ],
+      "radiusNm": 150,
+      "waveHeight": 6.6,
+      "swellPeriod": 11,
+      "swellDir": "SSW"
+    },
+    {
+      "id": "WS5",
       "name": "93E Cyclonic Wave Field",
       "center": [
         9.5,
@@ -370,29 +444,38 @@
   "pressureCenters": [
     {
       "type": "L",
-      "value": 977,
-      "name": "Hurricane SIMON Core Low",
+      "value": 1005,
+      "name": "Tropical Storm TRUDY Core Low",
       "coords": [
-        20.4,
-        -107.2
+        10.6,
+        -96.5
       ]
     },
     {
       "type": "L",
-      "value": 1007,
+      "value": 977,
+      "name": "Hurricane SIMON Core Low",
+      "coords": [
+        20.2,
+        -107.5
+      ]
+    },
+    {
+      "type": "L",
+      "value": 1008,
       "name": "Tropical Depression TWENTYEIGHT Core Low",
       "coords": [
-        18.8,
-        146.3
+        20.1,
+        144.5
       ]
     },
     {
       "type": "L",
       "value": 985,
-      "name": "Typhoon KOGUMA Core Low",
+      "name": "Tropical Storm KOGUMA Core Low",
       "coords": [
-        35.4,
-        153.7
+        38.3,
+        157.2
       ]
     },
     {
@@ -409,8 +492,8 @@
       "value": 1006,
       "name": "Invest 96W Core Low",
       "coords": [
-        9.7,
-        163.8
+        10.1,
+        161.6
       ]
     },
     {
@@ -444,8 +527,17 @@
   "windVectors": [
     {
       "coords": [
-        20.7,
-        -106.9
+        10.9,
+        -96.2
+      ],
+      "dir": 160,
+      "speed": 35,
+      "label": "35 kts (Trudy)"
+    },
+    {
+      "coords": [
+        20.5,
+        -107.2
       ],
       "dir": 160,
       "speed": 80,
@@ -453,8 +545,8 @@
     },
     {
       "coords": [
-        19.1,
-        146.6
+        20.4,
+        144.8
       ],
       "dir": 200,
       "speed": 25,
@@ -462,12 +554,12 @@
     },
     {
       "coords": [
-        35.7,
-        154.0
+        38.6,
+        157.5
       ],
       "dir": 200,
-      "speed": 70,
-      "label": "70 kts (Koguma)"
+      "speed": 50,
+      "label": "50 kts (Koguma)"
     },
     {
       "coords": [
@@ -480,8 +572,8 @@
     },
     {
       "coords": [
-        10.0,
-        164.1
+        10.4,
+        161.9
       ],
       "dir": 200,
       "speed": 20,
