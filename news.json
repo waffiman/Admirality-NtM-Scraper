@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-14T11:21:29Z",
-  "generatedAt": "2026-10-14T11:21:29Z",
+  "updatedAt": "2026-10-14T16:42:09Z",
+  "generatedAt": "2026-10-14T16:42:09Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -11,8 +11,928 @@
     "Hellenic Shipping News",
     "Container News"
   ],
-  "totalArticles": 60,
+  "totalArticles": 70,
   "articles": [
+    {
+      "id": "SN-5863736ED0",
+      "title": "Yemen’s Houthis Vow More Attacks on Saudi Airports, Oil Facilities After Aramco HQ Hit",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/yemens-houthis-vow-more-attacks-on-saudi-airports-oil-facilities-after-aramco-hq-hit/",
+      "publishedAt": "2026-10-14T16:34:09Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "summary": "Yemen's Houthis vowed on Wednesday to press on with attacks on airports and oil facilities in Saudi Arabia, a day after a strike that sources said caused extensive damage to the headquarters of oil giant Saudi Aramco2223.SE.",
+      "body": "Yemen's Houthis vowed on Wednesday to press on with attacks on airports and oil facilities in Saudi Arabia, a day after a strike that sources said caused extensive damage to the headquarters of oil giant Saudi Aramco2223.SE.",
+      "takeaways": [
+        "Operational Area: Red Sea & Bab el-Mandeb.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A716A93632",
+      "title": "Starnav takes delivery of Brazil-built hybrid offshore vessel",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/starnav-takes-delivery-of-brazil-built-hybrid-offshore-vessel/",
+      "publishedAt": "2026-10-14T16:00:03Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "port",
+        "safety",
+        "imo",
+        "shipyard"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/fb4b53a72c76488e811e71df359e5f8a-300x169.jpeg",
+      "summary": "Starnav Serviços Marítimos has taken delivery of Starnav Elektra, the first hybrid platform supply vessel (PSV) designed and built in Brazil. The vessel was constructed by Detroit Brasil at its Itajaí shipyard and delivered to ABS class. The 92.1-metre vessel has a deadweight capacity of 5,500 tonnes and will operate...",
+      "body": "Starnav Serviços Marítimos has taken delivery of Starnav Elektra , the first hybrid platform supply vessel (PSV) designed and built in Brazil. The vessel was constructed by Detroit Brasil at its Itajaí shipyard and delivered to ABS class. The 92.1-metre vessel has a deadweight capacity of 5,500 tonnes and will operate under a long-term charter with Petrobras. It will support the company’s offshore logistics activities in Brazilian waters. The delivery is part of Starnav’s plans to expand its hybrid fleet. The company is planning a series of up to 10 vessels, including six PSVs and four oil spill response vessels. Battery system improves operational efficiency Starnav Elektra is equipped with a 1,322 kWh battery system that supports its dynamic positioning operations. If one engine fails, the batteries can keep the vessel in position for up to 20 minutes. This capability forms part of its DP2 requirements. The batteries are installed on the main deck, making them easier to access for maintenance. The system also allows the vessel to operate with fewer generators while maintaining the required safety margins. This can help reduce fuel consumption, emissions and engine maintenance. The vessel has received the ABS ESS-LiBATTERY, HYBRID and SUSTAIN-1 class notations. It is also designed to use renewable fuels such as hydrotreated vegetable oil (HVO). With Starnav Elektra now delivered, Starnav has introduced battery-hybrid technology into its Brazilian offshore support operations. Further vessels are planned as part of the company’s fleet development programme.",
+      "takeaways": [
+        "Starnav Serviços Marítimos has taken delivery of Starnav Elektra , the first hybrid platform supply vessel (PSV) designed and built in Brazil.",
+        "The vessel was constructed by Detroit Brasil at its Itajaí shipyard and delivered to ABS class.",
+        "The 92.1-metre vessel has a deadweight capacity of 5,500 tonnes and will operate under a long-term charter with Petrobras."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-AA108C9DFD",
+      "title": "U.S. Shipping Regulator Proposes $200,000 Fees on Spanish Ships Over Port Ban",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/u-s-shipping-regulator-proposes-200000-fees-on-spanish-ships-over-port-ban/",
+      "publishedAt": "2026-10-14T15:56:37Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
+      "summary": "The U.S. Federal Maritime Commission (FMC) is proposing $200,000 fees on Spanish-flagged vessels entering American ports, along with restrictions on billions of dollars in Spanish imports, after concluding that Spain’s...",
+      "body": "The U.S. Federal Maritime Commission (FMC) is proposing $200,000 fees on Spanish-flagged vessels entering American ports, along with restrictions on billions of dollars in Spanish imports, after concluding that Spain’s...",
+      "takeaways": [
+        "Federal Maritime Commission (FMC) is proposing $200,000 fees on Spanish-flagged vessels entering American ports, along with restrictions on billions of dollars in Spanish imports, after concluding that Spain’s...",
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-C8778137F4",
+      "title": "PMorganChase Announces New Leadership for $1.5 Trillion Security and Resiliency Initiative",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/pmorganchase-announces-new-leadership-543685",
+      "publishedAt": "2026-10-14T15:41:35Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.marinelink.com/images/maritime/w150/katherine-welles-stockadobecom-174330.jpeg",
+      "summary": "JPMorganChase has added two senior leaders to support shipbuilding and maritime efforts within its Security and Resiliency Initiative (SRI), the firm's $1.5 trillion, 10-year effort focused on strengthening industries critical to economic and national security.",
+      "body": "JPMorganChase has added two senior leaders to support shipbuilding and maritime efforts within its Security and Resiliency Initiative (SRI), the firm's $1.5 trillion, 10-year effort focused on strengthening industries critical to economic and national security.",
+      "takeaways": [
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-2782644D70",
+      "title": "EuroDry adds third $37m kamsarmax at Hengli",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/eurodry-adds-third-37m-kamsarmax-at-hengli/",
+      "publishedAt": "2026-10-14T15:36:02Z",
+      "category": "Shipping & Tankers",
+      "region": "China & East Asia",
+      "regions": [
+        "China & East Asia"
+      ],
+      "tags": [
+        "china"
+      ],
+      "coords": [
+        30.6,
+        122.1
+      ],
+      "navarea": "XI",
+      "image": "https://splash247.com/wp-content/uploads/2025/10/Hengli-Heavy-Industries-bulkers-300x180.jpg",
+      "summary": "Aristides Pittas-led EuroDry has returned to China’s Hengli Shipbuilding for another kamsarmax, adding a third 82,000 dwt newbuilding to a fleet renewal programme now worth almost $183m. The Nasdaq-listed dry bulk owner is paying about $37m for the latest vessel, which is scheduled for delivery in the third quarter...",
+      "body": "Aristides Pittas-led EuroDry has returned to China’s Hengli Shipbuilding for another kamsarmax, adding a third 82,000 dwt newbuilding to a fleet renewal programme now worth almost $183m. The Nasdaq-listed dry bulk owner is paying about $37m for the latest vessel, which is scheduled for delivery in the third quarter of 2029. The contract remains conditional …",
+      "takeaways": [
+        "Aristides Pittas-led EuroDry has returned to China’s Hengli Shipbuilding for another kamsarmax, adding a third 82,000 dwt newbuilding to a fleet renewal programme now worth almost $183m.",
+        "The Nasdaq-listed dry bulk owner is paying about $37m for the latest vessel, which is scheduled for delivery in the third quarter of 2029.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-D51B1B0633",
+      "title": "FMC Proposes Remedies to Counteract Unfavorable Spanish Shipping Conditions",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/fmc-proposes-remedies-counteract-543682",
+      "publishedAt": "2026-10-14T15:35:22Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.marinelink.com/images/maritime/w150/adobe-stockzerophoto-174329.jpeg",
+      "summary": "After investigating reports of restrictive port practices by the Government of Spain, the Federal Maritime Commission (FMC) has determined that Spain has created unfavorable shipping conditions against U.S.-flagged vessels. As a result, the…",
+      "body": "After investigating reports of restrictive port practices by the Government of Spain, the Federal Maritime Commission (FMC) has determined that Spain has created unfavorable shipping conditions against U.S.-flagged vessels. As a result, the…",
+      "takeaways": [
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-C6B8A8A4BB",
+      "title": "NASA Engineer Corey Harris Joins BroCoTec to Strengthen Marine IT Operations",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/nasa-engineer-corey-harris-joins-brocotec-543683",
+      "publishedAt": "2026-10-14T15:04:41Z",
+      "category": "Navigation & Safety",
+      "region": "US Gulf & Port of Houston",
+      "regions": [
+        "US Gulf & Port of Houston"
+      ],
+      "tags": [
+        "houston"
+      ],
+      "coords": [
+        29.35,
+        -94.78
+      ],
+      "navarea": "IV",
+      "image": "https://images.marinelink.com/images/maritime/w150/brocotec-174327.jpg",
+      "summary": "Houston-based maritime IT network specialist BroCoTec is bringing space age tech expertise to its expanding team with the appointment of NASA engineer Corey Harris. Harris, who has spent several years upgrading networks on board the International Space Station and mission control center…",
+      "body": "Houston-based maritime IT network specialist BroCoTec is bringing space age tech expertise to its expanding team with the appointment of NASA engineer Corey Harris. Harris, who has spent several years upgrading networks on board the International Space Station and mission control center…",
+      "takeaways": [
+        "Houston-based maritime IT network specialist BroCoTec is bringing space age tech expertise to its expanding team with the appointment of NASA engineer Corey Harris.",
+        "Harris, who has spent several years upgrading networks on board the International Space Station and mission control center…",
+        "Watchkeepers transiting affected waters should cross-check active NAVAREA & UKMTO advisories on SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-7EAB418F7E",
+      "title": "Agility agrees to sell Tristar to Aegis Logistics in US$1.5 billion deal",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/agility-agrees-to-sell-tristar-to-aegis-logistics-in-us1-5-billion-deal/",
+      "publishedAt": "2026-10-14T15:00:39Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "India & Indian Ocean",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/Press-Release-01-1024x727.png-300x213.webp",
+      "summary": "Agility Global has agreed to sell its entire stake in energy logistics company Tristar to India’s Aegis Logistics in a transaction valued at US$1.5 billion. The deal values Tristar’s equity at US$882 million and is expected to close before the end of March 2027, subject to regulatory approvals. The enterprise...",
+      "body": "Agility Global has agreed to sell its entire stake in energy logistics company Tristar to India’s Aegis Logistics in a transaction valued at US$1.5 billion. The deal values Tristar’s equity at US$882 million and is expected to close before the end of March 2027, subject to regulatory approvals. The enterprise valuation represents approximately six times Tristar’s 2025 EBITDA. The proposed acquisition would give Aegis Logistics control of an international energy logistics business with operations spanning maritime transport, road freight and fuel storage. Tristar operates across more than 30 countries Tristar has expanded from a regional road transport operator into a global energy logistics provider under Agility’s ownership. By 2025, the company operated in more than 30 countries, with a fleet of over 1,000 trucks and 26 ocean-going and coastal vessels. Its infrastructure also included 14 fuel storage facilities and more than 60 remote fuel sites. The company reported annual revenue of US$1.4 billion and EBITDA of US$257 million in 2025. Tristar’s expansion has included investments in maritime logistics and fuel storage. In 2022, it acquired a majority stake in Aquarius Energy, a joint venture with Glencore, adding exposure to a fuel storage platform with 3.5 million cubic metres of capacity. Agility prepares for another major divestment Agility acquired Tristar in 2003 for approximately US$7 million and invested a further US$123 million during the following seven years, including investments in fuel storage assets. According to Agility, its investment in the fuel logistics business is expected to generate a return exceeding US$1 billion over its 23-year holding period, representing an internal rate of return of approximately 16%. The sale would mark Agility’s second m",
+      "takeaways": [
+        "Agility Global has agreed to sell its entire stake in energy logistics company Tristar to India’s Aegis Logistics in a transaction valued at US$1.5 billion.",
+        "The deal values Tristar’s equity at US$882 million and is expected to close before the end of March 2027, subject to regulatory approvals.",
+        "The enterprise valuation represents approximately six times Tristar’s 2025 EBITDA."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-BB2CC18098",
+      "title": "JPMorganChase Names Shipbuilding Leaders Under $1.5 Trillion Industrial Initiative",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/jpmorganchase-names-shipbuilding-leaders-under-1-5-trillion-industrial-initiative/",
+      "publishedAt": "2026-10-14T14:56:11Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "summary": "JPMorganChase has appointed two senior leaders to help expand its support for U.S. shipbuilding and the maritime industry under its $1.5 trillion Security and Resiliency Initiative (SRI), a 10-year effort...",
+      "body": "JPMorganChase has appointed two senior leaders to help expand its support for U.S. shipbuilding and the maritime industry under its $1.5 trillion Security and Resiliency Initiative (SRI), a 10-year effort...",
+      "takeaways": [
+        "JPMorganChase has appointed two senior leaders to help expand its support for U.S.",
+        "shipbuilding and the maritime industry under its $1.5 trillion Security and Resiliency Initiative (SRI), a 10-year effort...",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-13ED678BFC",
+      "title": "Containership Sinks as Hormuz Attacks Spiral Out of Control",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/containership-sinks-as-hormuz-attacks-spiral-out-of-control/",
+      "publishedAt": "2026-10-14T14:44:55Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "container",
+        "hormuz",
+        "singapore"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "summary": "A Singapore-flagged containership has sunk after being struck by a projectile in the Strait of Hormuz, as a widening series of attacks on merchant shipping raises fresh questions about U.S....",
+      "body": "A Singapore-flagged containership has sunk after being struck by a projectile in the Strait of Hormuz, as a widening series of attacks on merchant shipping raises fresh questions about U.S....",
+      "takeaways": [
+        "A Singapore-flagged containership has sunk after being struck by a projectile in the Strait of Hormuz, as a widening series of attacks on merchant shipping raises fresh questions about U.S....",
+        "Operational Area: Strait of Hormuz & Persian Gulf, Singapore & Malacca Strait.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-3B44D89435",
+      "title": "Most Efficient Inland Port System Named",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/efficient-inland-port-system-named-543681",
+      "publishedAt": "2026-10-14T14:15:48Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.marinelink.com/images/maritime/w150/image-courtesy-st-louis-regional-174326.jpg",
+      "summary": "The St. Louis Metro Port system remains the nation’s most efficient inland port system, according to the latest U.S. Army Corps of Engineers data, ranking first in cargo tonnage per river mile and fourth in total tonnage among seven major inland port districts.In 2024…",
+      "body": "The St. Louis Metro Port system remains the nation’s most efficient inland port system, according to the latest U.S. Army Corps of Engineers data, ranking first in cargo tonnage per river mile and fourth in total tonnage among seven major inland port districts.In 2024…",
+      "takeaways": [
+        "Louis Metro Port system remains the nation’s most efficient inland port system, according to the latest U.S.",
+        "Army Corps of Engineers data, ranking first in cargo tonnage per river mile and fourth in total tonnage among seven major inland port districts.In 2024…",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A9E645C54E",
+      "title": "LX Pantos opens logistics technology lab to advance robotics and AI",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/lx-pantos-opens-logistics-technology-lab-to-advance-robotics-and-ai/",
+      "publishedAt": "2026-10-14T14:00:36Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Japan & Korea"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "autonomous"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/20261014_102448378_73763-300x200.jpg",
+      "summary": "LX Pantos has opened a new technology laboratory at its MegaWise Cheongna Logistics Center in Incheon, South Korea, as the company expands its use of robotics and artificial intelligence in warehouse operations. The facility, known as the Technology-Driven Logistics (TDL) Lab, will test automation technologies and...",
+      "body": "LX Pantos has opened a new technology laboratory at its MegaWise Cheongna Logistics Center in Incheon, South Korea, as the company expands its use of robotics and artificial intelligence in warehouse operations. The facility, known as the Technology-Driven Logistics (TDL) Lab, will test automation technologies and assess how they can be integrated into daily logistics activities. The initiative focuses on improving warehouse processes, reducing manual work and developing more automated logistics centers. The project is part of LX Pantos’ wider strategy to strengthen its contract logistics business through robotics and AI. Seven technology partners support the initiative LX Pantos has established partnerships with seven technology companies to develop and test logistics automation solutions. The initiative began in April 2026, with the company signing memoranda of understanding with LG CNS, Hai Robotics, Libiao Robotics, XYZ Robotics, SUM, Twinny and Deepfine. The partnerships cover several areas of warehouse operations, including automated storage, order picking, parcel sorting and cargo handling. LG CNS will focus on integrated warehouse automation, while Hai Robotics and Libiao Robotics will contribute storage, picking and sorting technologies. XYZ Robotics will work on robotic solutions for container loading and unloading, alongside pallet handling. Other partners will support autonomous cargo transport, mobile robotics and vision-based inspection systems. The laboratory will allow LX Pantos to evaluate these technologies before introducing them into its wider logistics operations. Executives and employees from LX Pantos and LG CNS pose for a commemorative photo at the signing ceremony for an MOU on next-generation smart logistics development on June 1, 2026. Among t",
+      "takeaways": [
+        "LX Pantos has opened a new technology laboratory at its MegaWise Cheongna Logistics Center in Incheon, South Korea, as the company expands its use of robotics and artificial intelligence in warehouse operations.",
+        "The facility, known as the Technology-Driven Logistics (TDL) Lab, will test automation technologies and assess how they can be integrated into daily logistics activities.",
+        "The initiative focuses on improving warehouse processes, reducing manual work and developing more automated logistics centers."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-1648BEF605",
+      "title": "Royal Navy’s Only Ice Patrol Ship Faces Uncertain Future After Defect",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/royal-navys-only-ice-patrol-ship-faces-uncertain-future-after-defect/",
+      "publishedAt": "2026-10-14T13:33:41Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "summary": "The Royal Navy’s only dedicated ice patrol ship has been towed from Teesside to Devonport following a reported defect, raising questions about Britain’s ability to maintain its maritime presence in the polar regions as the government works toward a replacement.",
+      "body": "The Royal Navy’s only dedicated ice patrol ship has been towed from Teesside to Devonport following a reported defect, raising questions about Britain’s ability to maintain its maritime presence in the polar regions as the government works toward a replacement.",
+      "takeaways": [
+        "Operational Area: Rotterdam & North Sea.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-906B33BD6E",
+      "title": "Voyant Demonstrates Navigation Software for UK MOD",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/voyant-demonstrates-navigation-software-543680",
+      "publishedAt": "2026-10-14T13:18:23Z",
+      "category": "Ports & Terminals",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "port",
+        "autonomous"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://images.marinelink.com/images/maritime/w150/voyant-174325.png",
+      "summary": "Voyant has successfully demonstrated its navigation software to the UK Ministry of Defence (MOD), marking an important step in the development of resilient Position, Navigation and Timing (PNT) capabilities for autonomous maritime systems operating in contested environments.",
+      "body": "Voyant has successfully demonstrated its navigation software to the UK Ministry of Defence (MOD), marking an important step in the development of resilient Position, Navigation and Timing (PNT) capabilities for autonomous maritime systems operating in contested environments.",
+      "takeaways": [
+        "Operational Area: Rotterdam & North Sea.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-DF0C575BD1",
+      "title": "JERA deepens Australian LNG foothold with larger stake in Chevron’s project",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/14/jera-deepens-australian-lng-foothold-with-larger-stake-in-chevrons-project",
+      "publishedAt": "2026-10-14T13:18:00Z",
+      "category": "Shipping & Tankers",
+      "region": "Australia & Pilbara",
+      "regions": [
+        "Australia & Pilbara"
+      ],
+      "tags": [
+        "lng"
+      ],
+      "coords": [
+        -20.31,
+        118.58
+      ],
+      "navarea": "X",
+      "image": "https://offshore-energy.biz/api/media/file/wp-import-1784735146111-1024x576-1024x576.jpg?prefix=media",
+      "summary": "JERA has boosted its indirect participation in Chevron's LNG project to 50.1% following a strategic share acquisition from JOGMEC.",
+      "body": "JERA has boosted its indirect participation in Chevron's LNG project to 50.1% following a strategic share acquisition from JOGMEC.",
+      "takeaways": [
+        "JERA has boosted its indirect participation in Chevron's LNG project to 50.1% following a strategic share acquisition from JOGMEC.",
+        "Operational Area: Australia & Pilbara.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-50183050A3",
+      "title": "Trump Touts Taiwan-Alaska LNG Deal Taipei Hasn’t Finalized",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/trump-touts-taiwan-alaska-lng-deal-taipei-hasnt-finalized/",
+      "publishedAt": "2026-10-14T13:17:00Z",
+      "category": "Shipping & Tankers",
+      "region": "China & East Asia",
+      "regions": [
+        "China & East Asia",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "lng"
+      ],
+      "coords": [
+        30.6,
+        122.1
+      ],
+      "navarea": "XI",
+      "image": "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?auto=format&fit=crop&w=900&q=80",
+      "summary": "President Donald Trump said Taiwan had agreed to buy 30% of the liquefied natural gas from a planned project in Alaska for 20 years, even as Taipei indicated that no binding commitments have been finalized.",
+      "body": "President Donald Trump said Taiwan had agreed to buy 30% of the liquefied natural gas from a planned project in Alaska for 20 years, even as Taipei indicated that no binding commitments have been finalized.",
+      "takeaways": [
+        "President Donald Trump said Taiwan had agreed to buy 30% of the liquefied natural gas from a planned project in Alaska for 20 years, even as Taipei indicated that no binding commitments have been finalized.",
+        "Operational Area: China & East Asia, US West Coast & Pacific.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-4531A9E783",
+      "title": "ENGIE and CMA CGM advance Le Havre biomethane project",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/engie-and-cma-cgm-advance-le-havre-biomethane-project/",
+      "publishedAt": "2026-10-14T13:00:02Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "lng",
+        "port",
+        "bunker"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/media-300x111.webp",
+      "summary": "ENGIE and CMA CGM have signed a framework agreement to develop a biomethane production facility in the industrial-port area of Le Havre, France. ENGIE will lead the project’s technical development and permitting process. Subject to a final investment decision, the energy group will also oversee the construction and...",
+      "body": "ENGIE and CMA CGM have signed a framework agreement to develop a biomethane production facility in the industrial-port area of Le Havre, France. ENGIE will lead the project’s technical development and permitting process. Subject to a final investment decision, the energy group will also oversee the construction and operation of the facility. From 2029, the plant is expected to supply CMA CGM’s fleet with 7,000 tonnes of biomethane annually, equivalent to approximately 100 GWh. The companies estimate that its use could avoid around 23,000 tonnes of carbon dioxide emissions each year. The biomethane will be supplied through the European gas grid under a certified mass-balance system. It can be used by CMA CGM’s LNG-powered vessels without modifications to their engines or existing bunkering infrastructure. The facility will process livestock waste, household biowaste and agricultural residues. It is also expected to produce 100,000 tonnes of digestate for use as natural fertiliser and recover 13,000 tonnes of biogenic carbon dioxide for commercialisation. The development builds on the partnership established by ENGIE and CMA CGM in 2021 to support the production and distribution of renewable fuels for shipping. “With the construction of this new facility, we are pursuing our ambition to expand biomethane production capacity in support of the energy transition,” said Catherine MacGregor, Chief Executive Officer of ENGIE. “This partnership with CMA CGM demonstrates how industrial and energy players can work together to develop concrete solutions to decarbonise hard-to-electrify sectors, while strengthening energy sovereignty and the development of renewable gases,” she added. ENGIE aims to increase its annual biomethane production capacity in Europe from 1.2 TWh currently t",
+      "takeaways": [
+        "ENGIE and CMA CGM have signed a framework agreement to develop a biomethane production facility in the industrial-port area of Le Havre, France.",
+        "ENGIE will lead the project’s technical development and permitting process.",
+        "Subject to a final investment decision, the energy group will also oversee the construction and operation of the facility."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-BBED32F063",
+      "title": "Container Ship Sinks Near Hormuz After Being Hit by Projectile, Sources Say",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/container-ship-sinks-near-hormuz-after-being-hit-by-projectile-sources-say/",
+      "publishedAt": "2026-10-14T12:45:47Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf"
+      ],
+      "tags": [
+        "container",
+        "hormuz"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "summary": "A container ship has sunk near the Strait of Hormuz after being hit by a projectile and a separate dry bulk vessel is sinking in another incident, maritime security sources said on Wednesday.",
+      "body": "A container ship has sunk near the Strait of Hormuz after being hit by a projectile and a separate dry bulk vessel is sinking in another incident, maritime security sources said on Wednesday.",
+      "takeaways": [
+        "A container ship has sunk near the Strait of Hormuz after being hit by a projectile and a separate dry bulk vessel is sinking in another incident, maritime security sources said on Wednesday.",
+        "Operational Area: Strait of Hormuz & Persian Gulf.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A2C9BDCF1A",
+      "title": "MoU charts the path for tidal and ocean current energy projects in Chile",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/14/mou-charts-the-path-for-tidal-and-ocean-current-energy-projects-in-chile",
+      "publishedAt": "2026-10-14T12:41:50Z",
+      "category": "Shipping & Tankers",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "shipping",
+        "global"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://offshore-energy.biz/api/media/file/minesto-1048x703.jpg?prefix=media",
+      "summary": "Swedish ocean energy developer Minesto has signed a memorandum of understanding (MoU) with Chilean energy project developer Trayen Power to work...",
+      "body": "Swedish ocean energy developer Minesto has signed a memorandum of understanding (MoU) with Chilean energy project developer Trayen Power to work...",
+      "takeaways": [
+        "Swedish ocean energy developer Minesto has signed a memorandum of understanding (MoU) with Chilean energy project developer Trayen Power to work...",
+        "Operational Area: Global Maritime.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-AA061535DB",
+      "title": "USCG Issues Warning Following Incident",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/uscg-issues-warning-following-incident-543679",
+      "publishedAt": "2026-10-14T12:30:29Z",
+      "category": "Navigation & Safety",
+      "region": "US Gulf & Port of Houston",
+      "regions": [
+        "US Gulf & Port of Houston"
+      ],
+      "tags": [
+        "uscg"
+      ],
+      "coords": [
+        29.35,
+        -94.78
+      ],
+      "navarea": "IV",
+      "image": "https://images.marinelink.com/images/maritime/w150/copyright-marinelinkcom-gt-174324.jpg",
+      "summary": "The U.S. Coast Guard (USCG) recently investigated a marine casualty involving a recreational vessel that was swamped and capsized by the wake of a commercial towing vessel. The investigation found that both the credentialed Master of the towing…",
+      "body": "The U.S. Coast Guard (USCG) recently investigated a marine casualty involving a recreational vessel that was swamped and capsized by the wake of a commercial towing vessel. The investigation found that both the credentialed Master of the towing…",
+      "takeaways": [
+        "Coast Guard (USCG) recently investigated a marine casualty involving a recreational vessel that was swamped and capsized by the wake of a commercial towing vessel.",
+        "The investigation found that both the credentialed Master of the towing…",
+        "Watchkeepers transiting affected waters should cross-check active NAVAREA & UKMTO advisories on SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-C4589E4A01",
+      "title": "Shipyard of the Future will be Built on Robotics, AI",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/shipyard-future-built-robotics-ai-543677",
+      "publishedAt": "2026-10-14T12:04:15Z",
+      "category": "Weather & Cyclones",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "shipyard"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.marinelink.com/images/maritime/w150/image-courtesy-fincantieri-174320.jpg",
+      "summary": "Fincantieri is accelerating the integration of robotics, artificial intelligence (AI) and automation across its global shipyard network, moving from technology experimentation toward industrial-scale deployment under its BOOST² – The Shipyard of the Future initiative.Launched three years ago…",
+      "body": "Fincantieri is accelerating the integration of robotics, artificial intelligence (AI) and automation across its global shipyard network, moving from technology experimentation toward industrial-scale deployment under its BOOST² – The Shipyard of the Future initiative.Launched three years ago…",
+      "takeaways": [
+        "Operational Area: Global Maritime.",
+        "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-BA82274DA7",
+      "title": "China signs $336 million deal to build two container jetties at Bangladesh’s Mongla Port",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/china-signs-336-million-deal-to-build-two-container-jetties-at-bangladeshs-mongla-port/",
+      "publishedAt": "2026-10-14T12:00:13Z",
+      "category": "Navigation & Safety",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb",
+        "China & East Asia",
+        "India & Indian Ocean"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "china"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/Επέκταση-εμπορευματικού-λιμανιού-στο-Μπανγκλαντές_cleaned-300x169.png",
+      "summary": "After long delays, China has finally granted and signed a $336 million loan agreement with Bangladesh to build two container jetties at Mongla Port, the country’s second-largest seaport. The deal was signed in Dhaka on Monday, October 12, by Economic Relations Division (ERD) Joint Secretary Alia Meher on behalf of...",
+      "body": "After long delays, China has finally granted and signed a $336 million loan agreement with Bangladesh to build two container jetties at Mongla Port, the country’s second-largest seaport. The deal was signed in Dhaka on Monday, October 12, by Economic Relations Division (ERD) Joint Secretary Alia Meher on behalf of Bangladesh and EXIM Bank Assistant General Manager Fengjun Tian on behalf of China. A press statement issued by the ERD said China will charge 2% interest on the loan, as it is concessional credit. With the Chinese funding, Mongla Port will build two container jetties, each with a total length of 368 metres. A laden container yard spanning 87,600 square metres will also be built, along with a 34,170-square-metre empty container yard and a 4,260-square-metre hazardous cargo-handling yard. The funding will also be used to acquire modern equipment for the faster handling of containers and other cargo. Mongla Port officials said four gantry cranes, seven rubber-tyred gantry cranes and 33 other pieces of jetty-related equipment will be purchased under the project to modernise operations. The expansion of container and cargo-handling facilities with modern equipment will help increase Mongla Port’s annual handling capacity by 394,000 TEUs. The Chinese government nominated China Civil Engineering Construction Corporation (CCECC) as the project’s implementing agency. In June, Bangladesh and China signed a framework agreement to finance the construction of the Mongla Port project. Earlier, India had also pledged funding for the construction of jetties at Mongla Port. After being nominated by the Indian government, Egis India Consulting Engineers Private Limited signed an agreement with Mongla Port in December 2022 to act as a consultant for the capacity-building projec",
+      "takeaways": [
+        "After long delays, China has finally granted and signed a $336 million loan agreement with Bangladesh to build two container jetties at Mongla Port, the country’s second-largest seaport.",
+        "The deal was signed in Dhaka on Monday, October 12, by Economic Relations Division (ERD) Joint Secretary Alia Meher on behalf of Bangladesh and EXIM Bank Assistant General Manager Fengjun Tian on behalf of China.",
+        "A press statement issued by the ERD said China will charge 2% interest on the loan, as it is concessional credit."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-901DEA2C53",
+      "title": "Baltic Dry Index falls to 2667 down 134 points",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/baltic-dry-index-falls-to-2667-down-134-points/",
+      "publishedAt": "2026-10-14T12:00:07Z",
+      "category": "Ports & Terminals",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "summary": "Today, Wednesday, October 14 2026, the Baltic Dry Index decreased by 134 points, reaching 2667 points. Baltic Dry Index is compiled by the London-based Baltic Exchange and covers prices for transported cargo such as coal, grain and iron ore. The index is based on a daily survey of agents all over the world. Baltic...",
+      "body": "Today, Wednesday, October 14 2026, the Baltic Dry Index decreased by 134 points, reaching 2667 points. Baltic Dry Index is compiled by the London-based Baltic Exchange and covers prices for transported cargo such as coal, grain and iron ore. The index is based on a daily survey of agents all over the world. Baltic Dry ...",
+      "takeaways": [
+        "Today, Wednesday, October 14 2026, the Baltic Dry Index decreased by 134 points, reaching 2667 points.",
+        "Baltic Dry Index is compiled by the London-based Baltic Exchange and covers prices for transported cargo such as coal, grain and iron ore.",
+        "The index is based on a daily survey of agents all over the world."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-4B013F008A",
+      "title": "Seadrill hit with $55 million bill after appeals court upholds rig breach ruling",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/14/seadrill-hit-with-dollar55-million-bill-after-appeals-court-upholds-rig-breach-ruling",
+      "publishedAt": "2026-10-14T11:58:37Z",
+      "category": "Shipping & Tankers",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "shipping",
+        "rotterdam"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://offshore-energy.biz/api/media/file/wp-import-1784749214119-1536x864-1536x864.jpg?prefix=media",
+      "summary": "SFL Corporation has won a legal battle, with Norway's appeals court ordering Seadrill to pay $55 million over a 2022 rig redelivery breach.",
+      "body": "SFL Corporation has won a legal battle, with Norway's appeals court ordering Seadrill to pay $55 million over a 2022 rig redelivery breach.",
+      "takeaways": [
+        "SFL Corporation has won a legal battle, with Norway's appeals court ordering Seadrill to pay $55 million over a 2022 rig redelivery breach.",
+        "Operational Area: Rotterdam & North Sea.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-BC0F7A994D",
+      "title": "Partnership Aims to Advance Bio-LNG as Marine Fuel",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/partnership-aims-advance-biolng-marine-543675",
+      "publishedAt": "2026-10-14T11:49:05Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "lng",
+        "port",
+        "singapore"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://images.marinelink.com/images/maritime/w150/copyright-boygekadobestock-174319.jpeg",
+      "summary": "The Maritime and Port Authority of Singapore (MPA), CMA CGM Group and Singapore LNG Corporation (SLNG) signed a Memorandum of Understanding (MOU) to explore the supply and use of liquefied bio-methane, or bio-LNG, as a marine fuel, leveraging…",
+      "body": "The Maritime and Port Authority of Singapore (MPA), CMA CGM Group and Singapore LNG Corporation (SLNG) signed a Memorandum of Understanding (MOU) to explore the supply and use of liquefied bio-methane, or bio-LNG, as a marine fuel, leveraging…",
+      "takeaways": [
+        "Operational Area: Singapore & Malacca Strait.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-77F68209CF",
+      "title": "Is optimistic shipping in denial over NZF?",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/regulations/is-optimistic-shipping-in-denial-over-nzf-",
+      "publishedAt": "2026-10-14T11:48:44Z",
+      "category": "Shipping & Tankers",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "shipping",
+        "global"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt6050accd4ce79d55/6acf6d86c13815166305c61d/cyprus-london-conference.jpeg?width=720&quality=80&disable=upscale",
+      "summary": "An upbeat panel of industry leaders talked up the chances of the Net Zero Framework (NZF) being approved, if not this year in the near future.",
+      "body": "An upbeat panel of industry leaders talked up the chances of the Net Zero Framework (NZF) being approved, if not this year in the near future.",
+      "takeaways": [
+        "An upbeat panel of industry leaders talked up the chances of the Net Zero Framework (NZF) being approved, if not this year in the near future.",
+        "Operational Area: Global Maritime.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-1BF6434D78",
+      "title": "Update: Singapore confirms container ship sunk in Hormuz amid fresh Iran attacks",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/security/iran-claims-mine-sank-container-ship-amid-fresh-hormuz-attacks",
+      "publishedAt": "2026-10-14T11:45:34Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Red Sea & Bab el-Mandeb",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "hormuz",
+        "singapore"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt920b75b4c9d0b0d1/69e62032dae5c8e79b107a8c/Hormuz3-US-Central-Command.jpg?width=720&quality=80&disable=upscale",
+      "summary": "UKMTO reported four separate attacks on 13 October, with one container ship reportedly sunk and the month's tally of warnings reaching 24",
+      "body": "UKMTO reported four separate attacks on 13 October, with one container ship reportedly sunk and the month's tally of warnings reaching 24",
+      "takeaways": [
+        "UKMTO reported four separate attacks on 13 October, with one container ship reportedly sunk and the month's tally of warnings reaching 24",
+        "Operational Area: Strait of Hormuz & Persian Gulf, Red Sea & Bab el-Mandeb, Singapore & Malacca Strait.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-CD451F97D1",
+      "title": "DOF Inks Extension Deal for Skandi Nomad Subsea Vessel",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/dof-inks-extension-deal-skandi-nomad-543674",
+      "publishedAt": "2026-10-14T11:26:01Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.marinelink.com/images/maritime/w150/credit-dof-group-174318.jpg",
+      "summary": "Norwegian offshore vessel owner DOF Group has secured a contract extension for its construction support vessel (CSV) Skandi Nomad.The 12-month extension will keep the vessel on firm contract until November 2027.The extension follows the exercise of an existing contract option…",
+      "body": "Norwegian offshore vessel owner DOF Group has secured a contract extension for its construction support vessel (CSV) Skandi Nomad.The 12-month extension will keep the vessel on firm contract until November 2027.The extension follows the exercise of an existing contract option…",
+      "takeaways": [
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
     {
       "id": "SN-E2A3588559",
       "title": "Axpo completes first LNG bunkering of containership in Valencia",
@@ -215,6 +1135,270 @@
       "readMinutes": 2
     },
     {
+      "id": "SN-BB45BFDD46",
+      "title": "Ammonia cargo sails through Strait of Hormuz for first time since July: CAS",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/ammonia-cargo-sails-through-strait-of-hormuz-for-first-time-since-july-cas/",
+      "publishedAt": "2026-10-14T10:00:59Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf"
+      ],
+      "tags": [
+        "hormuz"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "summary": "An ammonia cargo has sailed through the Strait of Hormuz for the first time since July, according to S&P Global Commodities at Sea(opens in a new tab) data. The 25,000 mt Gas Aqua loaded at Ras al Khair in the Persian Gulf over Oct. 3-6, and arrived at Fujairah in the Gulf of Oman Oct. ...",
+      "body": "An ammonia cargo has sailed through the Strait of Hormuz for the first time since July, according to S&P Global Commodities at Sea(opens in a new tab) data. The 25,000 mt Gas Aqua loaded at Ras al Khair in the Persian Gulf over Oct. 3-6, and arrived at Fujairah in the Gulf of Oman Oct. ...",
+      "takeaways": [
+        "An ammonia cargo has sailed through the Strait of Hormuz for the first time since July, according to S&P Global Commodities at Sea(opens in a new tab) data.",
+        "The 25,000 mt Gas Aqua loaded at Ras al Khair in the Persian Gulf over Oct.",
+        "3-6, and arrived at Fujairah in the Gulf of Oman Oct."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-B23D1D8DF9",
+      "title": "Russia oil freight rates to India hit record high in October",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/russia-oil-freight-rates-to-india-hit-record-high-in-october/",
+      "publishedAt": "2026-10-14T10:00:57Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Baltic Sea & Northern Europe",
+        "India & Indian Ocean"
+      ],
+      "tags": [
+        "tanker",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "summary": "Freight rates for Russian oil shipments from western ports to India reached record highs in early October. The increase reflects heightened risks in the Black Sea and a continuing rally in the global tanker market, according to a Reuters report. The rising freight costs prevent Russia from fully benefiting from high...",
+      "body": "Freight rates for Russian oil shipments from western ports to India reached record highs in early October. The increase reflects heightened risks in the Black Sea and a continuing rally in the global tanker market, according to a Reuters report. The rising freight costs prevent Russia from fully benefiting from high oil prices, the report ...",
+      "takeaways": [
+        "Freight rates for Russian oil shipments from western ports to India reached record highs in early October.",
+        "The increase reflects heightened risks in the Black Sea and a continuing rally in the global tanker market, according to a Reuters report.",
+        "The rising freight costs prevent Russia from fully benefiting from high oil prices, the report ..."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A9F7A891F3",
+      "title": "New project: Shipping must be a key part of Denmark’s electric future",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/new-project-shipping-must-be-a-key-part-of-denmarks-electric-future/",
+      "publishedAt": "2026-10-14T10:00:55Z",
+      "category": "Ports & Terminals",
+      "region": "Baltic Sea & Northern Europe",
+      "regions": [
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        57.5,
+        19.5
+      ],
+      "navarea": "I",
+      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
+      "summary": "The electrification of Danish shipping is advancing rapidly. Access to electricity and sufficient grid capacity remains the biggest barrier. A new project will provide practical recom­men­da­tions for policymakers and other key stakeholders, paving the way to unlock its full potential. Danish Shipping, Danish...",
+      "body": "The electrification of Danish shipping is advancing rapidly. Access to electricity and sufficient grid capacity remains the biggest barrier. A new project will provide practical recom­men­da­tions for policymakers and other key stakeholders, paving the way to unlock its full potential. Danish Shipping, Danish Maritime, Danish Ports and Green Power Denmark have joined forces on a ...",
+      "takeaways": [
+        "The electrification of Danish shipping is advancing rapidly.",
+        "Access to electricity and sufficient grid capacity remains the biggest barrier.",
+        "A new project will provide practical recom­men­da­tions for policymakers and other key stakeholders, paving the way to unlock its full potential."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-6B1C8EA8F6",
+      "title": "CMA CGM and ENGIE join forces to invest in biomethane production in Le Havre",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/cma-cgm-and-engie-join-forces-to-invest-in-biomethane-production-in-le-havre/",
+      "publishedAt": "2026-10-14T10:00:53Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "summary": "The CMA CGM Group, a global player in sea, land, air and logistics solutions, and ENGIE Group, a major player in the energy transition, are joining forces to develop a major biomethane production facility at the heart of the Le Havre industrial-port zone. This major logistics hub in Europe, is a strategic location...",
+      "body": "The CMA CGM Group, a global player in sea, land, air and logistics solutions, and ENGIE Group, a major player in the energy transition, are joining forces to develop a major biomethane production facility at the heart of the Le Havre industrial-port zone. This major logistics hub in Europe, is a strategic location for the ...",
+      "takeaways": [
+        "This major logistics hub in Europe, is a strategic location for the ...",
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A1577DF0BD",
+      "title": "Veson Platform Updates: What’s New Across IMOS, Q88, Shipfix & VesselsValue",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/veson-platform-updates-whats-new-across-imos-q88-shipfix-vesselsvalue/",
+      "publishedAt": "2026-10-14T10:00:51Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port",
+        "imo"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
+      "summary": "Earlier this year, Veson Nautical launched the Veson Platform to unify workflows, data, and collaboration with contextual AI into one integrated workspace. This advancement enabled teams to gain instant access to voyage data, historical port calls, and counterparty insights directly within the workflow without having...",
+      "body": "Earlier this year, Veson Nautical launched the Veson Platform to unify workflows, data, and collaboration with contextual AI into one integrated workspace. This advancement enabled teams to gain instant access to voyage data, historical port calls, and counterparty insights directly within the workflow without having to move between systems. We’ve expanded the Veson Platform to ...",
+      "takeaways": [
+        "Earlier this year, Veson Nautical launched the Veson Platform to unify workflows, data, and collaboration with contextual AI into one integrated workspace.",
+        "This advancement enabled teams to gain instant access to voyage data, historical port calls, and counterparty insights directly within the workflow without having to move between systems.",
+        "We’ve expanded the Veson Platform to ..."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-C99D380306",
+      "title": "Maersk Asia Pacific Market Update – October 2026",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/maersk-asia-pacific-market-update-october-2026/",
+      "publishedAt": "2026-10-14T10:00:49Z",
+      "category": "Shipping & Tankers",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "China & East Asia",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "china"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=900&q=80",
+      "summary": "Summary: As Q4 gets underway, supply chains across Asia Pacific continue to adapt to shifting demand and changing network conditions. This month’s Market Update covers post-Golden Week ocean and air developments, expanding inland connectivity across the Mekong region and Malaysia, and new trade regulations affecting...",
+      "body": "Summary: As Q4 gets underway, supply chains across Asia Pacific continue to adapt to shifting demand and changing network conditions. This month’s Market Update covers post-Golden Week ocean and air developments, expanding inland connectivity across the Mekong region and Malaysia, and new trade regulations affecting businesses in China. Ocean Market Update Golden Week Brings Sailing ...",
+      "takeaways": [
+        "Summary: As Q4 gets underway, supply chains across Asia Pacific continue to adapt to shifting demand and changing network conditions.",
+        "This month’s Market Update covers post-Golden Week ocean and air developments, expanding inland connectivity across the Mekong region and Malaysia, and new trade regulations affecting businesses in China.",
+        "Ocean Market Update Golden Week Brings Sailing ..."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-6AA8FDD095",
+      "title": "Korean shipbuilders push wind-assisted propulsion to decarbonize LNG and container fleets",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/korean-shipbuilders-push-wind-assisted-propulsion-to-decarbonize-lng-and-container-fleets/",
+      "publishedAt": "2026-10-14T10:00:47Z",
+      "category": "Weather & Cyclones",
+      "region": "Japan & Korea",
+      "regions": [
+        "Japan & Korea"
+      ],
+      "tags": [
+        "lng",
+        "container",
+        "imo"
+      ],
+      "coords": [
+        35.1,
+        129.04
+      ],
+      "navarea": "XI",
+      "image": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=900&q=80",
+      "summary": "As the International Maritime Organization (IMO) tightens its carbon-reduction rules, more ships are adopting wind-assisted propulsion systems (WAPS) that use wind as thrust. The method installs wind devices on ships to supplement propulsion with wind power, reducing main engine fuel consumption and associated carbon...",
+      "body": "As the International Maritime Organization (IMO) tightens its carbon-reduction rules, more ships are adopting wind-assisted propulsion systems (WAPS) that use wind as thrust. The method installs wind devices on ships to supplement propulsion with wind power, reducing main engine fuel consumption and associated carbon emissions, and is drawing attention as a decarbonization technology. According to ...",
+      "takeaways": [
+        "As the International Maritime Organization (IMO) tightens its carbon-reduction rules, more ships are adopting wind-assisted propulsion systems (WAPS) that use wind as thrust.",
+        "The method installs wind devices on ships to supplement propulsion with wind power, reducing main engine fuel consumption and associated carbon emissions, and is drawing attention as a decarbonization technology.",
+        "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-CADBA5853E",
+      "title": "Green methanol, ammonia drive proposed VOC Port–EU corridor",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/green-methanol-ammonia-drive-proposed-voc-port-eu-corridor/",
+      "publishedAt": "2026-10-14T10:00:45Z",
+      "category": "Ports & Terminals",
+      "region": "India & Indian Ocean",
+      "regions": [
+        "India & Indian Ocean"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        13.08,
+        80.29
+      ],
+      "navarea": "VIII",
+      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "summary": "An industry coalition has been formally launched to develop a green shipping corridor between India’s VO Chidambaranar (VOC) Port and Europe, with a focus on green methanol and green ammonia. Indian and European officials signed a letter of intent to formally launch the industry coalition, according to India’s...",
+      "body": "An industry coalition has been formally launched to develop a green shipping corridor between India’s VO Chidambaranar (VOC) Port and Europe, with a focus on green methanol and green ammonia. Indian and European officials signed a letter of intent to formally launch the industry coalition, according to India’s Ministry of Ports, Shipping and Waterways. The ...",
+      "takeaways": [
+        "An industry coalition has been formally launched to develop a green shipping corridor between India’s VO Chidambaranar (VOC) Port and Europe, with a focus on green methanol and green ammonia.",
+        "Indian and European officials signed a letter of intent to formally launch the industry coalition, according to India’s Ministry of Ports, Shipping and Waterways.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
       "id": "SN-2DB22FC38A",
       "title": "Africa shipping costs: What CMA CGM, Maersk and Hapag-Lloyd surcharges reveal",
       "source": "Container News",
@@ -243,6 +1427,40 @@
         "The latest measures cover several trade corridors, including Asia–South Africa, Southeast Asia–West Africa and exports from Angola.",
         "Although announced within a relatively short period, they differ significantly in scope, application and underlying pricing mechanisms.",
         "This content is locked Select a CN Premium Subscription Package To Unlock The Content!"
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-8CE342C4C5",
+      "title": "Axpo conducts its first LNG bunkering in Valencia",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/axpo-conducts-its-first-lng-bunkering-in-valencia/",
+      "publishedAt": "2026-10-14T10:00:43Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "lng",
+        "port",
+        "bunker"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
+      "summary": "The Axpo bunkering vessel Alisios completed the ship-to-ship refuelling on Tuesday, 13 October 2026, with bio-LNG constituting more than half of the LNG supplied. The successful operation marks another milestone in the development of alternative marine fuels infrastructure and services in Spain. Axpo’s Head of...",
+      "body": "The Axpo bunkering vessel Alisios completed the ship-to-ship refuelling on Tuesday, 13 October 2026, with bio-LNG constituting more than half of the LNG supplied. The successful operation marks another milestone in the development of alternative marine fuels infrastructure and services in Spain. Axpo’s Head of Small-Scale LNG Daniele Corti said: “As Spain’s largest port for ...",
+      "takeaways": [
+        "The Axpo bunkering vessel Alisios completed the ship-to-ship refuelling on Tuesday, 13 October 2026, with bio-LNG constituting more than half of the LNG supplied.",
+        "The successful operation marks another milestone in the development of alternative marine fuels infrastructure and services in Spain.",
+        "Axpo’s Head of Small-Scale LNG Daniele Corti said: “As Spain’s largest port for ..."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -515,37 +1733,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-FD6728A6B6",
-      "title": "NYK-Led Consortium Develops Floating Data Center Concept for Ports",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/nykled-consortium-develops-floating-data-543668",
-      "publishedAt": "2026-10-14T08:29:52Z",
-      "category": "Ports & Terminals",
-      "region": "Japan & Korea",
-      "regions": [
-        "Japan & Korea"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        35.1,
-        129.04
-      ],
-      "navarea": "XI",
-      "image": "https://images.marinelink.com/images/maritime/w150/image-courtesy-nyk-174311.jpg",
-      "summary": "A Japanese consortium led by shipping giant NYK Line has developed a new port-based floating data center concept designed to accelerate the commercialization of offshore data centers while addressing growing constraints on land availability…",
-      "body": "A Japanese consortium led by shipping giant NYK Line has developed a new port-based floating data center concept designed to accelerate the commercialization of offshore data centers while addressing growing constraints on land availability…",
-      "takeaways": [
-        "Operational Area: Japan & Korea.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-CCDDEBC837",
       "title": "EIB backs Fugro's USV technology development with €150 million",
       "source": "Offshore Energy",
@@ -566,49 +1753,13 @@
         -40.0
       ],
       "navarea": "GLOBAL",
-      "image": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=900&q=80",
       "summary": "Dutch Fugro has secured long-term funding with a new facility from the European Investment Bank (EIB) to support the phased expansion of its...",
       "body": "Dutch Fugro has secured long-term funding with a new facility from the European Investment Bank (EIB) to support the phased expansion of its...",
       "takeaways": [
         "Dutch Fugro has secured long-term funding with a new facility from the European Investment Bank (EIB) to support the phased expansion of its...",
         "Operational Area: Global Maritime.",
         "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-30E991BBE2",
-      "title": "Suez Canal Container Ship Transits Rebound",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/suez-canal-container-ship-transits-543667",
-      "publishedAt": "2026-10-14T08:19:30Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Red Sea & Bab el-Mandeb",
-      "regions": [
-        "Red Sea & Bab el-Mandeb",
-        "Suez Canal & Eastern Med",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "container",
-        "red sea",
-        "suez"
-      ],
-      "coords": [
-        13.5,
-        42.8
-      ],
-      "navarea": "IX",
-      "image": "https://images.marinelink.com/images/maritime/w150/image-courtesy-bimco-174310.jpg",
-      "summary": "\"During the first two weeks of October, weekly container ship capacity transiting the Suez Canal averaged 753k TEU, according to Clarksons Research, compared with 1,457k TEU during the same period in 2023. Since the Houthi attacks began in the Red Sea…",
-      "body": "\"During the first two weeks of October, weekly container ship capacity transiting the Suez Canal averaged 753k TEU, according to Clarksons Research, compared with 1,457k TEU during the same period in 2023. Since the Houthi attacks began in the Red Sea…",
-      "takeaways": [
-        "\"During the first two weeks of October, weekly container ship capacity transiting the Suez Canal averaged 753k TEU, according to Clarksons Research, compared with 1,457k TEU during the same period in 2023.",
-        "Since the Houthi attacks began in the Red Sea…",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -644,37 +1795,6 @@
         "India’s Aegis Logistics has struck a deal to acquire 89.8% of Dubai-based Tristar for $809m, taking control of a global energy logistics group with a sizeable tanker and dry bulk shipping operation.",
         "The Mumbai-listed group is buying the stake through Singapore-based Aegis Logistics International from shareholders including Agility, Gulf Investment Corporation and Diamond Holdings.",
         "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-7593A88DC2",
-      "title": "Iran Steps Up Gulf Shipping Strikes to Keep Oil Prices High Before US Vote",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/iran-steps-gulf-shipping-strikes-keep-oil-543665",
-      "publishedAt": "2026-10-14T08:10:51Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf"
-      ],
-      "tags": [
-        "hormuz"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.marinelink.com/images/maritime/w150/pixels-stock-adobe-stock-174309.jpeg",
-      "summary": "Iran is deploying new tactics to target ships sailing through the Strait of Hormuz as it seeks to keep oil prices high and influence the US midterm elections, two senior Iranian officials told Reuters.Tehran has tried to exert control over the…",
-      "body": "Iran is deploying new tactics to target ships sailing through the Strait of Hormuz as it seeks to keep oil prices high and influence the US midterm elections, two senior Iranian officials told Reuters.Tehran has tried to exert control over the…",
-      "takeaways": [
-        "Operational Area: Strait of Hormuz & Persian Gulf.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -738,1121 +1858,6 @@
       "body": "Splash Maritime Group has officially launched Splash Cruise, a new international news platform dedicated to the business of cruise shipping, bringing the editorial approach that has made Splash a leading independent voice in maritime journalism to the global cruise industry. Available at splashcruise.com, the new publication delivers daily news, exclusive interviews, analysis and features covering everything …",
       "takeaways": [
         "Available at splashcruise.com, the new publication delivers daily news, exclusive interviews, analysis and features covering everything …",
-        "Operational Area: Global Maritime.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-7B23F9EC3F",
-      "title": "New oil & gas discovery set to join North Sea fast-track plays fuelling Europe’s energy security",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://offshore-energy.biz/2026/10/14/new-oil-and-gas-discovery-set-to-join-north-sea-fast-track-plays-fuelling-europes-energy-security",
-      "publishedAt": "2026-10-14T07:52:17Z",
-      "category": "Shipping & Tankers",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "shipping",
-        "rotterdam"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://offshore-energy.biz/api/media/file/deepsea-bergen-odfjell-drilling-1600x900.jpg?prefix=media",
-      "summary": "Equinor, Petoro, and TotalEnergies have found up to 50 million barrels in the North Sea and are eyeing first production in under three years.",
-      "body": "Equinor, Petoro, and TotalEnergies have found up to 50 million barrels in the North Sea and are eyeing first production in under three years.",
-      "takeaways": [
-        "Equinor, Petoro, and TotalEnergies have found up to 50 million barrels in the North Sea and are eyeing first production in under three years.",
-        "Operational Area: Rotterdam & North Sea.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-9EAC1454BB",
-      "title": "Elisabeth Braw: The Undersea War",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/elisabeth-braw-the-undersea-war/",
-      "publishedAt": "2026-10-14T07:45:22Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "tanker",
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://splash247.com/wp-content/uploads/2026/10/Elisabeth-Braw-300x180.jpg",
-      "summary": "A ship’s anchor can wreak havoc on the world’s undersea infrastructure, something that has provided plenty of rich material for Splash reporting in recent years. For Elisabeth Braw, the Cook Islands-flagged tanker Eagle S provides one of the most brazen examples. On Christmas Day 2024, the vessel was accused of...",
-      "body": "A ship’s anchor can wreak havoc on the world’s undersea infrastructure, something that has provided plenty of rich material for Splash reporting in recent years. For Elisabeth Braw, the Cook Islands-flagged tanker Eagle S provides one of the most brazen examples. On Christmas Day 2024, the vessel was accused of dragging its anchor 90 km …",
-      "takeaways": [
-        "A ship’s anchor can wreak havoc on the world’s undersea infrastructure, something that has provided plenty of rich material for Splash reporting in recent years.",
-        "For Elisabeth Braw, the Cook Islands-flagged tanker Eagle S provides one of the most brazen examples.",
-        "On Christmas Day 2024, the vessel was accused of dragging its anchor 90 km …"
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-14FCA535A9",
-      "title": "Germany Puts Ukrainian Ex-Officer on Trial Over Nord Stream Attack",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/germany-puts-ukrainian-exofficer-trial-543663",
-      "publishedAt": "2026-10-14T07:44:03Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Baltic Sea & Northern Europe",
-      "regions": [
-        "Baltic Sea & Northern Europe"
-      ],
-      "tags": [
-        "geopolitics",
-        "baltic"
-      ],
-      "coords": [
-        57.5,
-        19.5
-      ],
-      "navarea": "I",
-      "image": "https://images.marinelink.com/images/maritime/w150/danish-defense-174307.jpg",
-      "summary": "A Ukrainian ex-military officer goes on trial in Germany on Wednesday, accused of organising the secret operation that blew up the Nord Stream gas pipelines in September 2022, severing western Europe from the biggest source of Russian natural gas.The suspect…",
-      "body": "A Ukrainian ex-military officer goes on trial in Germany on Wednesday, accused of organising the secret operation that blew up the Nord Stream gas pipelines in September 2022, severing western Europe from the biggest source of Russian natural gas.The suspect…",
-      "takeaways": [
-        "Operational Area: Baltic Sea & Northern Europe.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-692C1D5CAD",
-      "title": "Hormuz shock briefly makes biofuel the cheapest bunker option",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/hormuz-shock-briefly-makes-biofuel-the-cheapest-bunker-option/",
-      "publishedAt": "2026-10-14T07:25:51Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "hormuz",
-        "bunker"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://splash247.com/wp-content/uploads/2022/12/BHP-Oldendorff-Biofuels-Bunkering-Singapore-300x180.jpg",
-      "summary": "The upheaval in global energy markets caused by the war in the Middle East has produced an unexpected winner in the marine fuels market, with biodiesel briefly emerging as the cheapest bunkering option in Rotterdam once European carbon costs are factored in. A new white paper from energy pricing specialist General...",
-      "body": "The upheaval in global energy markets caused by the war in the Middle East has produced an unexpected winner in the marine fuels market, with biodiesel briefly emerging as the cheapest bunkering option in Rotterdam once European carbon costs are factored in. A new white paper from energy pricing specialist General Index and the London …",
-      "takeaways": [
-        "A new white paper from energy pricing specialist General Index and the London …",
-        "Operational Area: Strait of Hormuz & Persian Gulf, Rotterdam & North Sea.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-C79F21FEF5",
-      "title": "MISC and NYK joint venture bags LNG carrier charter",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/tankers/misc-and-nyk-joint-venture-bags-lng-carrier-charter",
-      "publishedAt": "2026-10-14T07:11:42Z",
-      "category": "Ports & Terminals",
-      "region": "Japan & Korea",
-      "regions": [
-        "Japan & Korea"
-      ],
-      "tags": [
-        "lng",
-        "port"
-      ],
-      "coords": [
-        35.1,
-        129.04
-      ],
-      "navarea": "XI",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt4d633c89af6dc0e1/6acf2bc097bb40c42896f6e8/misc-nyk.jpg?width=720&quality=80&disable=upscale",
-      "summary": "The newbuild to be delivered in 2028 will be deployed to transport LNG to Japan",
-      "body": "The newbuild to be delivered in 2028 will be deployed to transport LNG to Japan",
-      "takeaways": [
-        "The newbuild to be delivered in 2028 will be deployed to transport LNG to Japan",
-        "Operational Area: Japan & Korea.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-5B5BD9691C",
-      "title": "Pacifico Energy launches survey campaign for 1.8 GW offshore wind projects in Vietnam",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://offshore-energy.biz/2026/10/14/pacifico-energy-launches-survey-campaign-for-18-gw-offshore-wind-projects-in-vietnam",
-      "publishedAt": "2026-10-14T07:03:19Z",
-      "category": "Shipping & Tankers",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "shipping",
-        "singapore"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://offshore-energy.biz/api/media/file/Vietnam-1060x769.jpg?prefix=media",
-      "summary": "Pacifico Energy Vietnam has launched an offshore technical survey campaign for two projects with a combined capacity of 1.8 GW, following the...",
-      "body": "Pacifico Energy Vietnam has launched an offshore technical survey campaign for two projects with a combined capacity of 1.8 GW, following the...",
-      "takeaways": [
-        "Pacifico Energy Vietnam has launched an offshore technical survey campaign for two projects with a combined capacity of 1.8 GW, following the...",
-        "Operational Area: Singapore & Malacca Strait, US West Coast & Pacific.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-2A3AE50EEA",
-      "title": "ABS and US Department of Energy partner on maritime nuclear technology",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/abs-and-us-department-of-energy-partner-on-maritime-nuclear-technology/",
-      "publishedAt": "2026-10-14T07:00:32Z",
-      "category": "Weather & Cyclones",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port",
-        "shipyard"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/02c15f276b794be189c71d9cb53dadc4-300x200.jpg",
-      "summary": "The American Bureau of Shipping (ABS) and the US Department of Energy (DOE) have signed a memorandum of understanding to advance the development of nuclear technology for commercial maritime applications. The agreement covers nuclear-powered vessels, floating nuclear power facilities and the infrastructure required...",
-      "body": "The American Bureau of Shipping (ABS) and the US Department of Energy (DOE) have signed a memorandum of understanding to advance the development of nuclear technology for commercial maritime applications. The agreement covers nuclear-powered vessels, floating nuclear power facilities and the infrastructure required to support their operation. It also aims to strengthen US shipbuilding capabilities and examine how advanced nuclear systems could be safely introduced into the maritime industry. The partnership will focus on technical and feasibility studies, including the potential development of nuclear-powered shipping routes and floating power solutions. It will also examine the requirements for ports, shipyards and other facilities involved in building and maintaining nuclear-powered maritime assets. Cooperation on technology and maritime infrastructure Under the agreement, ABS will work with the DOE’s Office of Nuclear Energy on technical, regulatory, economic and policy assessments. The classification society will also co-manage the Maritime Nuclear Applications Group (MNAG), supporting coordination between government agencies and industry stakeholders. Additional activities will be coordinated through the US Maritime Administration’s Center for Maritime Innovation, where ABS serves as Secretariat. “Advanced nuclear technology is moving from concept to application, and the maritime industry needs to be ready for it,” said John McDonald, Chairman and CEO of ABS. The cooperation builds on ABS’s existing work in maritime nuclear technology, including the publication of classification rules for floating nuclear power plants and approvals in principle for several nuclear-related projects. Focus on future commercial applications The DOE sees advanced nuclear technology as",
-      "takeaways": [
-        "The American Bureau of Shipping (ABS) and the US Department of Energy (DOE) have signed a memorandum of understanding to advance the development of nuclear technology for commercial maritime applications.",
-        "The agreement covers nuclear-powered vessels, floating nuclear power facilities and the infrastructure required to support their operation.",
-        "It also aims to strengthen US shipbuilding capabilities and examine how advanced nuclear systems could be safely introduced into the maritime industry."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
-      "id": "SN-8CE41BF743",
-      "title": "Pyxis buys out boss’s ultramax stake in $6.8m deal",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/pyxis-buys-out-bosss-ultramax-stake-in-6-8m-deal/",
-      "publishedAt": "2026-10-14T07:00:00Z",
-      "category": "Shipping & Tankers",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "tanker"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://splash247.com/wp-content/uploads/2026/10/Konkar-Ormi-ultramax-Pyxis-Tankers-300x180.jpg",
-      "summary": "Nasdaq-listed Greek shipowner Pyxis Tankers has agreed to acquire the remaining 40% stake in one of its ultramax bulkers from a company linked to its chairman and chief executive, Eddie Valentis. The deal, valued at approximately $6.83m before a separate working capital adjustment, will give Pyxis full ownership of...",
-      "body": "Nasdaq-listed Greek shipowner Pyxis Tankers has agreed to acquire the remaining 40% stake in one of its ultramax bulkers from a company linked to its chairman and chief executive, Eddie Valentis. The deal, valued at approximately $6.83m before a separate working capital adjustment, will give Pyxis full ownership of the company holding the 2016-built Japanese …",
-      "takeaways": [
-        "Nasdaq-listed Greek shipowner Pyxis Tankers has agreed to acquire the remaining 40% stake in one of its ultramax bulkers from a company linked to its chairman and chief executive, Eddie Valentis.",
-        "The deal, valued at approximately $6.83m before a separate working capital adjustment, will give Pyxis full ownership of the company holding the 2016-built Japanese …",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-959B8E20C5",
-      "title": "Kistos strengthens its presence in North Sea oil & gas hub with Vår Energi deal",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://offshore-energy.biz/2026/10/14/kistos-strengthens-its-presence-in-north-sea-oil-and-gas-hub-with-var-energi-deal",
-      "publishedAt": "2026-10-14T06:34:56Z",
-      "category": "Ports & Terminals",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://offshore-energy.biz/api/media/file/wp-import-1784743217688-1536x1022-1536x1022.jpg?prefix=media",
-      "summary": "Kistos is expanding its North Sea footprint through a multimillion-dollar acquisition with Vår Energi, boosting its hydrocarbon portfolio.",
-      "body": "Kistos is expanding its North Sea footprint through a multimillion-dollar acquisition with Vår Energi, boosting its hydrocarbon portfolio.",
-      "takeaways": [
-        "Kistos is expanding its North Sea footprint through a multimillion-dollar acquisition with Vår Energi, boosting its hydrocarbon portfolio.",
-        "Operational Area: Rotterdam & North Sea.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-5110D6F3C9",
-      "title": "Tsakos returns to containership contracting in China",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/tsakos-returns-to-containership-contracting-in-china/",
-      "publishedAt": "2026-10-14T06:30:00Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "china"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://splash247.com/wp-content/uploads/2026/01/Hengli-Shipbuilding-300x180.jpg",
-      "summary": "Greek shipping group Tsakos has returned to the containership newbuilding market, emerging behind an order for two 3,200 teu vessels at China’s Hengli Heavy Industries. The pair appear in the Athens-based owner’s latest fleet register, with both scheduled for delivery in the fourth quarter of 2028. Both will be...",
-      "body": "Greek shipping group Tsakos has returned to the containership newbuilding market, emerging behind an order for two 3,200 teu vessels at China’s Hengli Heavy Industries. The pair appear in the Athens-based owner’s latest fleet register, with both scheduled for delivery in the fourth quarter of 2028. Both will be scrubber-fitted and equipped with alternative maritime …",
-      "takeaways": [
-        "Greek shipping group Tsakos has returned to the containership newbuilding market, emerging behind an order for two 3,200 teu vessels at China’s Hengli Heavy Industries.",
-        "The pair appear in the Athens-based owner’s latest fleet register, with both scheduled for delivery in the fourth quarter of 2028.",
-        "Both will be scrubber-fitted and equipped with alternative maritime …"
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-0A7CB91485",
-      "title": "DHL expands healthcare cold chain network with six new air corridors",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/dhl-expands-healthcare-cold-chain-network-with-six-new-air-corridors/",
-      "publishedAt": "2026-10-14T06:00:30Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "port",
-        "singapore"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/dgf-network-expansion-1592x896.web_.796.448-300x169.jpg",
-      "summary": "DHL Global Forwarding has expanded its healthcare cold chain network with six new dedicated air cargo corridors connecting Europe and North America with major pharmaceutical markets across Asia. The expansion is designed to improve the transportation of temperature-sensitive healthcare products, including...",
-      "body": "DHL Global Forwarding has expanded its healthcare cold chain network with six new dedicated air cargo corridors connecting Europe and North America with major pharmaceutical markets across Asia. The expansion is designed to improve the transportation of temperature-sensitive healthcare products, including pharmaceuticals, vaccines, biologics and clinical trial materials. It also provides customers with additional routing options and access to temperature-controlled air freight capacity. The six new corridors connect Liège with Shanghai, Brussels with Shanghai and Singapore, and Cincinnati with Singapore, Tokyo Narita and Seoul Incheon. Strengthening temperature-controlled air cargo operations The new connections form part of DHL Health Logistics’ Cold Chain Network, which combines dedicated healthcare corridors with specialized handling procedures and temperature-controlled infrastructure. Most flights supporting the corridors operate within DHL’s own air network, reducing the number of cargo handovers and allowing greater control over shipment conditions. DHL uses Boeing 777 freighters with three compartments that can be configured for different temperature requirements. The network also incorporates thermal blankets and validated handling procedures to limit temperature exposure during cargo transfers. “These new corridors further expand our Cold Chain Network into strategically important healthcare markets across Asia,” said Henk Venema, Global Head of Air Freight at DHL Global Forwarding. The expansion follows the introduction of a Brussels–Cincinnati healthcare air corridor earlier this year. Supporting healthcare logistics growth in Asia The new Brussels–Singapore and Cincinnati–Singapore corridors reinforce Singapore’s position as a gateway for DHL’s healthcare l",
-      "takeaways": [
-        "DHL Global Forwarding has expanded its healthcare cold chain network with six new dedicated air cargo corridors connecting Europe and North America with major pharmaceutical markets across Asia.",
-        "The expansion is designed to improve the transportation of temperature-sensitive healthcare products, including pharmaceuticals, vaccines, biologics and clinical trial materials.",
-        "It also provides customers with additional routing options and access to temperature-controlled air freight capacity."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
-      "id": "SN-504F045D65",
-      "title": "CEVA Almajdouie and Port of NEOM collaborate on multimodal freight connectivity",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/ceva-almajdouie-and-port-of-neom-collaborate-on-multimodal-freight-connectivity/",
-      "publishedAt": "2026-10-14T05:00:29Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Red Sea & Bab el-Mandeb",
-      "regions": [
-        "Red Sea & Bab el-Mandeb",
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "red sea",
-        "imo"
-      ],
-      "coords": [
-        13.5,
-        42.8
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/CAL-Port-of-NEOM-1-300x169.webp",
-      "summary": "CEVA Almajdouie Logistics and Port of NEOM are working together to strengthen multimodal freight connections between the Red Sea and inland markets across the Middle East. The collaboration aims to improve cargo movements between Europe, Egypt, the Gulf Cooperation Council (GCC) countries and Iraq by combining...",
-      "body": "CEVA Almajdouie Logistics and Port of NEOM are working together to strengthen multimodal freight connections between the Red Sea and inland markets across the Middle East. The collaboration aims to improve cargo movements between Europe, Egypt, the Gulf Cooperation Council (GCC) countries and Iraq by combining maritime access with road transport, warehousing and customs services. The initiative brings together Port of NEOM’s location on the Red Sea and CEVA Almajdouie Logistics’ regional trucking network, cross-border transport capabilities and customs brokerage services. Connecting maritime and inland transport networks The collaboration focuses on improving cargo movement beyond the port by linking maritime services with inland logistics infrastructure. The partners aim to support several cargo segments, including containerized freight, RoPax traffic, bulk and general cargo, as well as heavy-lift and project shipments. Bonded warehousing and customs clearance services are also expected to support cross-border movements, providing customers with additional options for transporting goods between regional and international markets. “Connecting maritime gateways directly to high-capacity inland networks is critical to modern supply chain resilience,” said Stefano Pollotti, CEO of CEVA Almajdouie Logistics. The initiative could also support the movement of oversized equipment and infrastructure components through specialized inland transport services. By combining port access with regional distribution capabilities, the partners intend to improve connectivity between maritime routes and destinations across Saudi Arabia and neighboring markets. The announcement does not specify new scheduled freight services, additional transport capacity or an implementation timetable for",
-      "takeaways": [
-        "CEVA Almajdouie Logistics and Port of NEOM are working together to strengthen multimodal freight connections between the Red Sea and inland markets across the Middle East.",
-        "The collaboration aims to improve cargo movements between Europe, Egypt, the Gulf Cooperation Council (GCC) countries and Iraq by combining maritime access with road transport, warehousing and customs services.",
-        "The initiative brings together Port of NEOM’s location on the Red Sea and CEVA Almajdouie Logistics’ regional trucking network, cross-border transport capabilities and customs brokerage services."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
-      "id": "SN-1AD5160ECA",
-      "title": "Lloyd’s Register and Sagar Defence partner on maritime autonomy certification",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/lloyds-register-and-sagar-defence-partner-on-maritime-autonomy-certification/",
-      "publishedAt": "2026-10-14T04:00:28Z",
-      "category": "Weather & Cyclones",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port",
-        "safety",
-        "autonomous"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/sagar-certificate-final-sq-website-300x300.png",
-      "summary": "Lloyd’s Register (LR) and Sagar Defence Engineering Limited (SDEL) have signed a memorandum of understanding (MoU) to support the certification and regulatory acceptance of autonomous and remotely operated maritime systems. The collaboration aims to establish practical procedures for assessing the safety and...",
-      "body": "Lloyd’s Register (LR) and Sagar Defence Engineering Limited (SDEL) have signed a memorandum of understanding (MoU) to support the certification and regulatory acceptance of autonomous and remotely operated maritime systems. The collaboration aims to establish practical procedures for assessing the safety and reliability of autonomous technologies before their deployment. It will combine LR’s expertise in classification and regulatory compliance with Sagar Defence’s experience in developing autonomous maritime platforms. The agreement covers potential applications across commercial shipping, government operations and the defence sector. Developing certification pathways for autonomous systems Under the agreement, the two organisations will develop approaches to testing, verification and validation, alongside assessments of whether autonomous systems are ready for classification and certification. Their work will also address operational requirements, safety assessments and the interaction between vessels, sensors, communications systems and remote operators. The partners plan to engage with regulators, government agencies and industry stakeholders to support the development of certification frameworks for emerging maritime technologies. “Autonomous maritime capability is moving rapidly from experimentation to operational deployment,” said David Lloyd, Vice President, Naval and Government Business at Lloyd’s Register. The collaboration will also examine how autonomous systems perform under normal operating conditions and during equipment failures or communication disruptions. By incorporating safety assessments into the development process, LR and Sagar Defence aim to help operators demonstrate that autonomous technologies meet the requirements for operational acceptance.",
-      "takeaways": [
-        "The collaboration aims to establish practical procedures for assessing the safety and reliability of autonomous technologies before their deployment.",
-        "It will combine LR’s expertise in classification and regulatory compliance with Sagar Defence’s experience in developing autonomous maritime platforms.",
-        "The agreement covers potential applications across commercial shipping, government operations and the defence sector."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
-      "id": "SN-28D3A165B8",
-      "title": "Trio eyes bio-methane as Singapore’s next step for LNG Bunkering",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/bunkering/trio-eyes-bio-methane-as-singapore-s-next-step-for-lng-bunkering",
-      "publishedAt": "2026-10-14T03:16:32Z",
-      "category": "Shipping & Tankers",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "lng",
-        "singapore",
-        "bunker"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt16351eff0ffed658/670889d4f1df747eb83a846a/CMA-CGM-Cortreal-resize-Credit-Marcus-Hand.jpg?width=720&quality=80&disable=upscale",
-      "summary": "MPA, CMA CGM and SLNG to study liquefied bio-methane supply and bunkering in Singapore",
-      "body": "MPA, CMA CGM and SLNG to study liquefied bio-methane supply and bunkering in Singapore",
-      "takeaways": [
-        "MPA, CMA CGM and SLNG to study liquefied bio-methane supply and bunkering in Singapore",
-        "Operational Area: Singapore & Malacca Strait, Brazil & South Atlantic.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-AB359AE969",
-      "title": "The floating container platform turning heads",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/the-floating-container-platform-turning-heads/",
-      "publishedAt": "2026-10-14T03:00:48Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "china"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://splash247.com/wp-content/uploads/2026/10/Mega-Deckship-300x178.jpg",
-      "summary": "Every so often a ship comes along that makes even seasoned shipping watchers look twice. Meet the Fan Zhou 8, an extraordinary floating container platform that has just carried more than 3,000 teu out of China. According to Alphaliner, German independent carrier Carrier53′ Shipping chartered the 2024-built, 58,405...",
-      "body": "Every so often a ship comes along that makes even seasoned shipping watchers look twice. Meet the Fan Zhou 8, an extraordinary floating container platform that has just carried more than 3,000 teu out of China. According to Alphaliner, German independent carrier Carrier53′ Shipping chartered the 2024-built, 58,405 dwt heavy-load deckship from China’s Jiangsu Fanzhou …",
-      "takeaways": [
-        "Every so often a ship comes along that makes even seasoned shipping watchers look twice.",
-        "Meet the Fan Zhou 8, an extraordinary floating container platform that has just carried more than 3,000 teu out of China.",
-        "According to Alphaliner, German independent carrier Carrier53′ Shipping chartered the 2024-built, 58,405 dwt heavy-load deckship from China’s Jiangsu Fanzhou …"
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-C1DE2A8858",
-      "title": "Eurogate orders automated stacking cranes for Wilhelmshaven terminal",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/eurogate-orders-automated-stacking-cranes-for-wilhelmshaven-terminal/",
-      "publishedAt": "2026-10-14T03:00:03Z",
-      "category": "Weather & Cyclones",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://container-news.com/wp-content/uploads/2024/12/medium_hyvinkaa_Finland_2014_07_Konecranes-e1733304953209-300x233.jpg",
-      "summary": "Eurogate has ordered four Automated Stacking Cranes (ASCs) from Konecranes for its Container Terminal Wilhelmshaven in Germany, as part of its efforts to expand terminal automation. The order was placed through Eurogate Terminal Solutions GmbH and booked by Konecranes in the third quarter of 2026. The cranes are...",
-      "body": "Eurogate has ordered four Automated Stacking Cranes (ASCs) from Konecranes for its Container Terminal Wilhelmshaven in Germany, as part of its efforts to expand terminal automation. The order was placed through Eurogate Terminal Solutions GmbH and booked by Konecranes in the third quarter of 2026. The cranes are scheduled for handover in the second quarter of 2028. The agreement also includes an option for four additional ASCs at Eurogate’s Container Terminal Hamburg. Supporting automated container yard operations The new cranes will support Eurogate’s plans to introduce automated container handling at Wilhelmshaven. They will be integrated with existing terminal equipment to enable automated container transport within the yard. Eurogate is adopting a supplier-independent approach to automation. This allows equipment from different manufacturers to connect with the terminal’s equipment control system, providing greater flexibility as operations develop. Konecranes was selected for its automation technology and ability to meet the terminal’s operational and technical requirements. “Konecranes has demonstrated a strong willingness to support ETS-MT in further developing our operations and accompanying us on our journey towards automated yard operations,” said Axel Jachens, Project Manager at Eurogate Technical Services GmbH. Technology and future expansion The Automated Stacking Cranes will feature Konecranes’ Active Load Control technology, designed to improve container handling accuracy by reducing load sway and supporting precise positioning. The cranes are also designed to operate within terminal automation systems that incorporate equipment from multiple suppliers. The order extends a relationship between Eurogate and Konecranes spanning more than five decades, durin",
-      "takeaways": [
-        "Eurogate has ordered four Automated Stacking Cranes (ASCs) from Konecranes for its Container Terminal Wilhelmshaven in Germany, as part of its efforts to expand terminal automation.",
-        "The order was placed through Eurogate Terminal Solutions GmbH and booked by Konecranes in the third quarter of 2026.",
-        "The cranes are scheduled for handover in the second quarter of 2028."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
-      "id": "SN-E7220B7E87",
-      "title": "Shipyards as the new front of great-power competition",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/shipyards-as-the-new-front-of-great-power-competition/",
-      "publishedAt": "2026-10-14T02:00:44Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Japan & Korea",
-      "regions": [
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "shipyard"
-      ],
-      "coords": [
-        35.1,
-        129.04
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/cleaned_Ναυπηγείο-υπό-κυρώσεις-300x169.png",
-      "summary": "EU sanctions on Russia’s naval yards and a Hanwha-built Jones Act containership show two sides of the same contest.",
-      "body": "EU sanctions on Russia’s naval yards and a Hanwha-built Jones Act containership show two sides of the same contest. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register",
-      "takeaways": [
-        "EU sanctions on Russia’s naval yards and a Hanwha-built Jones Act containership show two sides of the same contest.",
-        "This content is locked Select a CN Premium Subscription Package To Unlock The Content!",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-02AD1F3F2D",
-      "title": "The end of the lag: Maritime meets AI in real time",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/maritime-technology/the-end-of-the-lag-maritime-meets-ai-in-real-time",
-      "publishedAt": "2026-10-14T00:37:36Z",
-      "category": "Weather & Cyclones",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "weather",
-        "global"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt45cb661652616a9d/6aced061831f9d344fcdcefc/Nakul_pic_4.jpg?width=720&quality=80&disable=upscale",
-      "summary": "When it comes to technology adoption shipping has had luxury of seeing what works on shore first, but when it comes to AI this is not the case",
-      "body": "When it comes to technology adoption shipping has had luxury of seeing what works on shore first, but when it comes to AI this is not the case",
-      "takeaways": [
-        "When it comes to technology adoption shipping has had luxury of seeing what works on shore first, but when it comes to AI this is not the case",
-        "Operational Area: Global Maritime.",
-        "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-3224F39B86",
-      "title": "Port of Los Angeles Sets All-Time Cargo Record as Imports Surge",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/port-of-los-angeles-sets-all-time-cargo-record-as-imports-surge/",
-      "publishedAt": "2026-10-13T20:26:08Z",
-      "category": "Ports & Terminals",
-      "region": "US West Coast & Pacific",
-      "regions": [
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        33.73,
-        -118.26
-      ],
-      "navarea": "XII",
-      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
-      "summary": "The Port of Los Angeles handled a record 1,042,652 twenty-foot equivalent units (TEUs) in September, marking the busiest month in its 118-year history as strong consumer demand and shifting global...",
-      "body": "The Port of Los Angeles handled a record 1,042,652 twenty-foot equivalent units (TEUs) in September, marking the busiest month in its 118-year history as strong consumer demand and shifting global...",
-      "takeaways": [
-        "The Port of Los Angeles handled a record 1,042,652 twenty-foot equivalent units (TEUs) in September, marking the busiest month in its 118-year history as strong consumer demand and shifting global...",
-        "Operational Area: US West Coast & Pacific.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-FC1AAE3558",
-      "title": "Ben Rogers Moves into Expanded Role at Brenock Technology",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/ben-rogers-moves-expanded-role-brenock-543660",
-      "publishedAt": "2026-10-13T19:09:41Z",
-      "category": "Weather & Cyclones",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "weather",
-        "global"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.marinelink.com/images/maritime/w150/brenock-technology-174304.png",
-      "summary": "Brenock Technology, LLC, a provider of software applications and consulting services for the cruise and marine sectors, announced that Ben Rogers, senior vice president of technology, engineering and product development, will lead its day-to…",
-      "body": "Brenock Technology, LLC, a provider of software applications and consulting services for the cruise and marine sectors, announced that Ben Rogers, senior vice president of technology, engineering and product development, will lead its day-to…",
-      "takeaways": [
-        "Operational Area: Global Maritime.",
-        "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-DD18348C62",
-      "title": "Taiwan Coast Guard Administration Acquires MARTAC Devil Ray T24 USVs",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/taiwan-coast-guard-administration-543659",
-      "publishedAt": "2026-10-13T19:06:45Z",
-      "category": "Shipping & Tankers",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia"
-      ],
-      "tags": [
-        "autonomous"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://images.marinelink.com/images/maritime/w150/martac-174303.jpg",
-      "summary": "Maritime Tactical Systems, Inc. (MARTAC), a U.S. provider of fully autonomous unmanned surface vessels (USVs), announced that the Taiwan Coast Guard Administration (CGA) is acquiring an undisclosed number of Devil Ray T24 autonomous surface vessels.",
-      "body": "Maritime Tactical Systems, Inc. (MARTAC), a U.S. provider of fully autonomous unmanned surface vessels (USVs), announced that the Taiwan Coast Guard Administration (CGA) is acquiring an undisclosed number of Devil Ray T24 autonomous surface vessels.",
-      "takeaways": [
-        "provider of fully autonomous unmanned surface vessels (USVs), announced that the Taiwan Coast Guard Administration (CGA) is acquiring an undisclosed number of Devil Ray T24 autonomous surface vessels.",
-        "Operational Area: China & East Asia.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-A8A049EA9F",
-      "title": "Saudi Arabia Strikes Houthi Targets as Red Sea War Escalates",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/saudi-arabia-strikes-houthi-targets-as-red-sea-war-escalates/",
-      "publishedAt": "2026-10-13T18:48:46Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Red Sea & Bab el-Mandeb"
-      ],
-      "tags": [
-        "red sea"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
-      "summary": "Yemen's Iran-allied Houthis said Saudi Arabia was attacking the Yemeni capital Sanaa on Tuesday after a Saudi-led coalition warned civilians to stay away from an oil depot on the city's outskirts, part of a rapidly escalating war between the sides.",
-      "body": "Yemen's Iran-allied Houthis said Saudi Arabia was attacking the Yemeni capital Sanaa on Tuesday after a Saudi-led coalition warned civilians to stay away from an oil depot on the city's outskirts, part of a rapidly escalating war between the sides.",
-      "takeaways": [
-        "Operational Area: Strait of Hormuz & Persian Gulf, Red Sea & Bab el-Mandeb.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-7AFD1ABC91",
-      "title": "Op-Ed: The Scripps Award Sets a Precedent Small U.S. Shipyards Cannot Survive",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/oped-scripps-award-sets-a-precedent-small-543658",
-      "publishedAt": "2026-10-13T18:20:27Z",
-      "category": "Shipping & Tankers",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "shipyard"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.marinelink.com/images/maritime/w150/the-author-daniel-zech-works-174302.jpg",
-      "summary": "Scripps Institution of Oceanography is building its next coastal research vessel in Chile. If that award stands as the model for how publicly funded institutions replace their fleets, the small American shipyards that build this country’s research…",
-      "body": "Scripps Institution of Oceanography is building its next coastal research vessel in Chile. If that award stands as the model for how publicly funded institutions replace their fleets, the small American shipyards that build this country’s research…",
-      "takeaways": [
-        "Scripps Institution of Oceanography is building its next coastal research vessel in Chile.",
-        "If that award stands as the model for how publicly funded institutions replace their fleets, the small American shipyards that build this country’s research…",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-A917F0CFE2",
-      "title": "ABS Helps Industry Put Augmented Reality to the Test",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/abs-helps-industry-put-augmented-reality-to-the-test/",
-      "publishedAt": "2026-10-13T17:16:14Z",
-      "category": "Navigation & Safety",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "safety"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&q=80",
-      "summary": "Augmented reality (AR) can help industrial crews perform tasks more efficiently and consistently, but widespread deployment will depend on demonstrating that productivity gains can be achieved without compromising safety. That’s...",
-      "body": "Augmented reality (AR) can help industrial crews perform tasks more efficiently and consistently, but widespread deployment will depend on demonstrating that productivity gains can be achieved without compromising safety. That’s...",
-      "takeaways": [
-        "Operational Area: Global Maritime.",
-        "Watchkeepers transiting affected waters should cross-check active NAVAREA & UKMTO advisories on SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-7CE7CA369A",
-      "title": "EU Wheat Prices Rise After Another Black Sea Attack, Algerian tender",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/eu-wheat-prices-rise-black-sea-attack-543657",
-      "publishedAt": "2026-10-13T16:56:34Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://images.marinelink.com/images/maritime/w150/adobe-stockromanwhale-studio-174298.jpeg",
-      "summary": "Euronext wheat prices rose on Tuesday, tracking a rebound in Chicago futures as another attack on ships in the Black Sea kept attention on disruption to export trade.An international tender being held by Algeria also underpinned the market,…",
-      "body": "Euronext wheat prices rose on Tuesday, tracking a rebound in Chicago futures as another attack on ships in the Black Sea kept attention on disruption to export trade.An international tender being held by Algeria also underpinned the market,…",
-      "takeaways": [
-        "Operational Area: Suez Canal & Eastern Med.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-34BF034173",
-      "title": "Russia says it Hit Vessels Delivering Military Cargo to Ukraine",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/russia-says-hit-vessels-delivering-543656",
-      "publishedAt": "2026-10-13T16:54:43Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Baltic Sea & Northern Europe",
-      "regions": [
-        "Baltic Sea & Northern Europe"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        57.5,
-        19.5
-      ],
-      "navarea": "I",
-      "image": "https://images.marinelink.com/images/maritime/w150/adobe-stock-174301.jpeg",
-      "summary": "Russian forces hit two ships delivering military and dual-use cargo to Ukraine's port city of Mykolaiv, the Russian defence ministry said on Tuesday, without mentioning any energy facilities following US President Donald Trump's announcement…",
-      "body": "Russian forces hit two ships delivering military and dual-use cargo to Ukraine's port city of Mykolaiv, the Russian defence ministry said on Tuesday, without mentioning any energy facilities following US President Donald Trump's announcement…",
-      "takeaways": [
-        "Operational Area: Baltic Sea & Northern Europe.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-B59B80D3D5",
-      "title": "Fire Forces Crew to Abandon Research Vessel Off Louisiana",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/fire-forces-crew-to-abandon-research-vessel-off-louisiana/",
-      "publishedAt": "2026-10-13T16:36:02Z",
-      "category": "Navigation & Safety",
-      "region": "US Gulf & Port of Houston",
-      "regions": [
-        "US Gulf & Port of Houston"
-      ],
-      "tags": [
-        "navigation",
-        "us"
-      ],
-      "coords": [
-        29.35,
-        -94.78
-      ],
-      "navarea": "IV",
-      "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80",
-      "summary": "A fire aboard a seismic research vessel in the Gulf of Mexico forced dozens of crew members to abandon ship Monday, with nearby offshore supply vessels helping bring the evacuees...",
-      "body": "A fire aboard a seismic research vessel in the Gulf of Mexico forced dozens of crew members to abandon ship Monday, with nearby offshore supply vessels helping bring the evacuees...",
-      "takeaways": [
-        "A fire aboard a seismic research vessel in the Gulf of Mexico forced dozens of crew members to abandon ship Monday, with nearby offshore supply vessels helping bring the evacuees...",
-        "Operational Area: US Gulf & Port of Houston.",
-        "Watchkeepers transiting affected waters should cross-check active NAVAREA & UKMTO advisories on SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-46C4230E49",
-      "title": "Supertankers Turn From Gulf Oil Transfer Hub Amid Iran’s Attacks",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/supertankers-turn-from-gulf-oil-transfer-hub-amid-irans-attacks/",
-      "publishedAt": "2026-10-13T16:23:19Z",
-      "category": "Shipping & Tankers",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf"
-      ],
-      "tags": [
-        "tanker"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=900&q=80",
-      "summary": "A growing number of empty supertankers have been turning away from the Persian Gulf as escalating Iranian attacks threaten a critical transfer hub for wartime oil shipments.",
-      "body": "A growing number of empty supertankers have been turning away from the Persian Gulf as escalating Iranian attacks threaten a critical transfer hub for wartime oil shipments.",
-      "takeaways": [
-        "A growing number of empty supertankers have been turning away from the Persian Gulf as escalating Iranian attacks threaten a critical transfer hub for wartime oil shipments.",
-        "Operational Area: Strait of Hormuz & Persian Gulf.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-6970BEBCE4",
-      "title": "Trump’s Diesel Deal Irks Allies and Is Unlikely to Reduce Prices",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/trumps-diesel-deal-irks-allies-and-is-unlikely-to-reduce-prices/",
-      "publishedAt": "2026-10-13T16:17:54Z",
-      "category": "Shipping & Tankers",
-      "region": "Baltic Sea & Northern Europe",
-      "regions": [
-        "Baltic Sea & Northern Europe"
-      ],
-      "tags": [
-        "shipping",
-        "baltic"
-      ],
-      "coords": [
-        57.5,
-        19.5
-      ],
-      "navarea": "I",
-      "image": "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?auto=format&fit=crop&w=900&q=80",
-      "summary": "President Donald Trump’s deal for Russian diesel exposed the US to legal questions, opened a rift with his Republican allies and European leaders and heightened tensions with Ukraine — all in exchange for an outcome that experts suggest is unlikely to succeed.",
-      "body": "President Donald Trump’s deal for Russian diesel exposed the US to legal questions, opened a rift with his Republican allies and European leaders and heightened tensions with Ukraine — all in exchange for an outcome that experts suggest is unlikely to succeed.",
-      "takeaways": [
-        "Operational Area: Baltic Sea & Northern Europe.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-3E4545A540",
-      "title": "11 Missing as Drone Attacks Strike Two Ships Near NATO Waters",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/11-missing-as-drone-attacks-strike-two-ships-near-nato-waters/",
-      "publishedAt": "2026-10-13T16:07:50Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "geopolitics",
-        "global"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
-      "summary": "Eleven sailors were missing at sea on Tuesday from a ship sunk by a drone attack off the coast of Bulgaria, possibly the second deadly sinking of a cargo vessel in the area in a week, prompting Bulgaria to summon Russia's ambassador.",
-      "body": "Eleven sailors were missing at sea on Tuesday from a ship sunk by a drone attack off the coast of Bulgaria, possibly the second deadly sinking of a cargo vessel in the area in a week, prompting Bulgaria to summon Russia's ambassador.",
-      "takeaways": [
-        "Operational Area: Global Maritime.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-4E3A253213",
-      "title": "11 seafarers missing in Black Sea attacks off Bulgaria",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/security/11-seafarers-missing-in-black-sea-attacks-off-bulgaria",
-      "publishedAt": "2026-10-13T14:24:56Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "geopolitics",
-        "suez"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltfed2be903df510d7/6ace3fb37a30c823d4c71ca8/Chelsea-3-Credit-Bulgarian-Border-Police.jpg?width=720&quality=80&disable=upscale",
-      "summary": "One cargo ship sank and another was damaged in suspected drone strikes off Bulgaria, leaving 11 seafarers missing and five injured.",
-      "body": "One cargo ship sank and another was damaged in suspected drone strikes off Bulgaria, leaving 11 seafarers missing and five injured.",
-      "takeaways": [
-        "One cargo ship sank and another was damaged in suspected drone strikes off Bulgaria, leaving 11 seafarers missing and five injured.",
-        "Operational Area: Suez Canal & Eastern Med.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-5D8C56E146",
-      "title": "Shell, GTT, and Lloyd’s Register eye hybrid-electric LNG carrier design",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://offshore-energy.biz/2026/10/13/shell-gtt-and-lloyds-register-eye-hybrid-electric-lng-carrier-design",
-      "publishedAt": "2026-10-13T14:14:12Z",
-      "category": "Shipping & Tankers",
-      "region": "Brazil & South Atlantic",
-      "regions": [
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "lng"
-      ],
-      "coords": [
-        -23.96,
-        -46.33
-      ],
-      "navarea": "V",
-      "image": "https://offshore-energy.biz/api/media/file/wp-import-1787894404812-1200x390-1200x390.jpg?prefix=media",
-      "summary": "The trio has teamed up on a conceptual hybrid-electric tech 200,000-cubic-meter (cbm) LNG carrier to cut emissions without sacrificing cargo space.",
-      "body": "The trio has teamed up on a conceptual hybrid-electric tech 200,000-cubic-meter (cbm) LNG carrier to cut emissions without sacrificing cargo space.",
-      "takeaways": [
-        "The trio has teamed up on a conceptual hybrid-electric tech 200,000-cubic-meter (cbm) LNG carrier to cut emissions without sacrificing cargo space.",
-        "Operational Area: Brazil & South Atlantic.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-E780E0FF6F",
-      "title": "France Seizes Another ‘Shadow Fleet’ Tanker; Russia Decries ‘Piracy’",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/france-seizes-another-shadow-fleet-tanker-russia-decries-piracy/",
-      "publishedAt": "2026-10-13T12:56:21Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "tanker"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
-      "summary": "France's military was taking a tanker suspected to be part of Russia's \"shadow fleet\" skirting Western sanctions to Reunion island on Tuesday in what Moscow called another act of \"piracy.\"",
-      "body": "France's military was taking a tanker suspected to be part of Russia's \"shadow fleet\" skirting Western sanctions to Reunion island on Tuesday in what Moscow called another act of \"piracy.\"",
-      "takeaways": [
-        "France's military was taking a tanker suspected to be part of Russia's \"shadow fleet\" skirting Western sanctions to Reunion island on Tuesday in what Moscow called another act of \"piracy.\"",
-        "Operational Area: Global Maritime.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-963DD50B48",
-      "title": "Equinor to feed Dutch grid with low-emission Norwegian gas through 2031",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://offshore-energy.biz/2026/10/13/equinor-to-feed-dutch-grid-with-low-emission-norwegian-gas-through-2031",
-      "publishedAt": "2026-10-13T12:52:01Z",
-      "category": "Shipping & Tankers",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "shipping",
-        "global"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://offshore-energy.biz/api/media/file/Kollnes%20Ole%20J%C3%B8rgen%20Bratland%20Equinor-1560x878.jpg?prefix=media",
-      "summary": "Equinor has secured a multi-year deal to supply Eneco with roughly 0.9 billion cubic meters of Norwegian natural gas annually.",
-      "body": "Equinor has secured a multi-year deal to supply Eneco with roughly 0.9 billion cubic meters of Norwegian natural gas annually.",
-      "takeaways": [
-        "Equinor has secured a multi-year deal to supply Eneco with roughly 0.9 billion cubic meters of Norwegian natural gas annually.",
         "Operational Area: Global Maritime.",
         "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
       ],
