@@ -20,8 +20,8 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 
-SCRAPER_DIR = r"D:\IINO INEOS VESTA\Admirality-NtM-Scraper"
-GYRO_DIR = r"D:\IINO INEOS VESTA\6. GYRO ERROR CALC"
+SCRAPER_DIR = os.path.dirname(os.path.abspath(__file__))
+GYRO_DIR = os.path.join(r"E:\IINO INEOS VESTA", "SetSail")
 
 
 def safe_write_text(path, content):
@@ -95,6 +95,60 @@ def strip_html_tags(raw_html):
     text = re.sub(r"\s+", " ", text).strip()
     text = re.sub(r"The post .*? appeared first on .*?\.$", "", text, flags=re.I).strip()
     return text
+
+
+def extract_article_body_from_html(page_html):
+    """Pull main article prose from a publisher HTML page (best-effort)."""
+    if not page_html:
+        return ""
+    chunk = page_html
+    # Prefer common article containers
+    patterns = [
+        r'<article[^>]*>([\s\S]*?)</article>',
+        r'<div[^>]+class=["\'][^"\']*(?:entry-content|post-content|article-content|article-body|story-body|td-post-content|content-body)[^"\']*["\'][^>]*>([\s\S]*?)</div>',
+        r'<div[^>]+itemprop=["\']articleBody["\'][^>]*>([\s\S]*?)</div>',
+    ]
+    best = ""
+    for pat in patterns:
+        for m in re.finditer(pat, chunk, re.I):
+            text = strip_html_tags(m.group(1))
+            if len(text) > len(best):
+                best = text
+    if len(best) < 400:
+        # Fallback: concatenate <p> tags
+        paras = re.findall(r"<p[^>]*>([\s\S]*?)</p>", chunk, re.I)
+        joined = strip_html_tags(" ".join(paras[:80]))
+        if len(joined) > len(best):
+            best = joined
+    # Hard cap to keep news.json reasonable (~80 KB/article max edge)
+    if len(best) > 60000:
+        best = best[:60000].rsplit(" ", 1)[0] + "…"
+    return best.strip()
+
+
+def fetch_full_article_text(url, timeout=14):
+    if not url or not url.startswith("http"):
+        return ""
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; SetSailNewsBot/5.12; +https://setsail-ai.vercel.app)",
+                "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.8",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            raw = resp.read()
+        # charset guess
+        try:
+            page = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            page = raw.decode("latin-1", errors="replace")
+        return extract_article_body_from_html(page)
+    except Exception as e:
+        print(f"    [!] full-text fetch miss: {e}")
+        return ""
 
 
 def classify_article_category(title, summary):
@@ -236,17 +290,25 @@ def scrape_live_maritime_news():
                 if not summary:
                     summary = title
 
-                body_text = clean_full[:1800].strip()
+                # Prefer full publisher article text (not RSS excerpt)
+                body_text = clean_full.strip()
+                if link and len(body_text) < 1200:
+                    fetched = fetch_full_article_text(link)
+                    if len(fetched) > len(body_text):
+                        body_text = fetched
                 if not body_text or len(body_text) < 80:
                     body_text = summary
+                # Keep full article (cap only extreme outliers)
+                if len(body_text) > 60000:
+                    body_text = body_text[:60000].rsplit(" ", 1)[0] + "…"
 
                 category = classify_article_category(title, body_text)
                 regions, coords, navarea = detect_article_geo(title, body_text)
                 primary_region = regions[0] if regions else "Global Maritime"
                 takeaways = extract_key_takeaways(title, body_text, category, regions)
                 tags = extract_tags(title, body_text, category, primary_region)
-                word_count = max(180, len(body_text.split()) * 3)
-                read_mins = max(2, min(7, round(word_count / 190)))
+                word_count = max(180, len(body_text.split()))
+                read_mins = max(2, min(18, round(word_count / 190)))
 
                 art_id = "SN-" + hashlib.md5(f"{source_name}:{title}".encode("utf-8")).hexdigest()[:10].upper()
                 if not img_url:

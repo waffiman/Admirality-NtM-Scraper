@@ -12,7 +12,8 @@ const OVERLAY_STATES = {
   notices: false,
   buoys: false,
   weather: false,
-  route: false
+  route: false,
+  ais: false
 };
 
 let leafletPortDepthsLayer = null;
@@ -20024,6 +20025,27 @@ function initExcelOverlayDock(map) {
     });
   }
 
+  // 3b. AIS Overlay Tab (non-exportable)
+  const aisTab = document.getElementById("tabOverlayAis");
+  if (aisTab) {
+    aisTab.addEventListener("click", (e) => {
+      if (e.target && e.target.closest("#btnAisOverlayInfo")) {
+        e.stopPropagation();
+        if (typeof window.showAisInfoModal === "function") window.showAisInfoModal();
+        return;
+      }
+      const isActive = !aisTab.classList.contains("active");
+      setOverlayActive("ais", isActive, window.leafletMap || map);
+    });
+  }
+  const aisInfoBtn = document.getElementById("btnAisOverlayInfo");
+  if (aisInfoBtn) {
+    aisInfoBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (typeof window.showAisInfoModal === "function") window.showAisInfoModal();
+    });
+  }
+
   // 4. Route Track Overlay Tab
   const routeTab = document.getElementById("tabOverlayRoute");
   if (routeTab) {
@@ -20051,7 +20073,7 @@ function initExcelOverlayDock(map) {
   }
 
   // Sync initial dock tab visual states with OVERLAY_STATES (all OFF by default for fast map load)
-  ["notices", "depths", "weather", "route"].forEach((key) => {
+  ["notices", "depths", "weather", "ais", "route"].forEach((key) => {
     const isAct = Boolean(OVERLAY_STATES[key]);
     const tabEl = document.querySelector(`.excel-tab[data-overlay="${key}"]`);
     if (tabEl) {
@@ -20093,7 +20115,7 @@ function setOverlayActive(overlayKey, isActive, map = null) {
   if (window.OVERLAY_STATES) {
     window.OVERLAY_STATES[overlayKey] = isActive;
   }
-  if (isActive && (overlayKey === "depths" || overlayKey === "weather" || overlayKey === "route" || overlayKey === "notices")) {
+  if (isActive && (overlayKey === "depths" || overlayKey === "weather" || overlayKey === "route" || overlayKey === "notices" || overlayKey === "ais")) {
     setOverlayTileLoading(overlayKey, true);
   } else if (!isActive) {
     setOverlayTileLoading(overlayKey, false);
@@ -20183,6 +20205,14 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         window.renderWeatherOnMap(currentMap);
       }
       setTimeout(() => setOverlayTileLoading("weather", false), 350);
+    } else if (overlayKey === "ais") {
+      if (isActive) {
+        if (typeof window.startAisPolling === "function") window.startAisPolling();
+        else if (typeof window.refreshAisOverlay === "function") window.refreshAisOverlay(true);
+      } else {
+        if (typeof window.stopAisPolling === "function") window.stopAisPolling();
+      }
+      setTimeout(() => setOverlayTileLoading("ais", false), 400);
     } else if (overlayKey === "route") {
       const rLayer = (typeof window.leafletRouteLayer !== "undefined" && window.leafletRouteLayer)
         ? window.leafletRouteLayer

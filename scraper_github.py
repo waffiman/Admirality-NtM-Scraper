@@ -1455,6 +1455,86 @@ def _calc_track_movement(lat1: float, lon1: float, lat2: float, lon2: float, hou
     return f"{deg_to_compass(brg)} at {spd} kts"
 
 
+def scrape_digitraffic_ais_snapshot() -> dict:
+    """
+    Official open AIS positions from Digitraffic Marine (Finland / Baltic).
+    VesselFinder / MarineTraffic are NOT scraped — no bulk public dump of all global AIS.
+    """
+    import gzip
+    ua = {
+        "User-Agent": "SetSailMarineSuite/5.12 (+https://setsail-ai.vercel.app)",
+        "Digitraffic-User": "SetSailMarineSuite/AIS",
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip",
+    }
+    loc_url = "https://meri.digitraffic.fi/api/ais/v1/locations"
+    ves_url = "https://meri.digitraffic.fi/api/ais/v1/vessels"
+
+    def _get_json(url):
+        session = get_http_session()
+        if session is not None:
+            resp = session.get(url, headers=ua, timeout=60)
+            resp.raise_for_status()
+            raw = resp.content
+        else:
+            req = urllib.request.Request(url, headers=ua)
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                raw = resp.read()
+        try:
+            raw = gzip.decompress(raw)
+        except Exception:
+            pass
+        return json.loads(raw.decode("utf-8", errors="replace"))
+
+    geo = _get_json(loc_url)
+    meta = {}
+    try:
+        vessels = _get_json(ves_url)
+        arr = vessels if isinstance(vessels, list) else (vessels.get("vessels") or [])
+        for v in arr:
+            mmsi = v.get("mmsi")
+            if mmsi is None:
+                continue
+            meta[int(mmsi)] = {
+                "name": (v.get("name") or "").strip(),
+                "destination": (v.get("destination") or "").strip(),
+                "shipType": v.get("shipType") or v.get("shipTypeName") or "",
+            }
+    except Exception as e:
+        print(f"[AIS] vessel meta warning: {e}")
+
+    targets = []
+    for f in geo.get("features") or []:
+        p = f.get("properties") or {}
+        c = (f.get("geometry") or {}).get("coordinates") or []
+        if len(c) < 2:
+            continue
+        mmsi = p.get("mmsi")
+        m = meta.get(int(mmsi), {}) if mmsi is not None else {}
+        targets.append({
+            "mmsi": mmsi,
+            "lat": c[1],
+            "lon": c[0],
+            "sog": p.get("sog"),
+            "cog": p.get("cog"),
+            "heading": p.get("heading"),
+            "navStat": p.get("navStat"),
+            "name": m.get("name") or "",
+            "destination": m.get("destination") or "",
+            "shipType": m.get("shipType") or "",
+            "source": "Digitraffic open AIS (Baltic/FI)",
+        })
+
+    return {
+        "updatedAt": datetime.now(timezone.utc).isoformat(),
+        "source": "Digitraffic Marine AIS (open)",
+        "note": "Not VesselFinder/MarineTraffic. Global all-vessel AIS requires a commercial AIS API key.",
+        "updateHintSec": 90,
+        "count": len(targets),
+        "targets": targets,
+    }
+
+
 def scrape_live_marine_weather() -> dict:
     """
     Scrapes real-time active tropical cyclones, tropical depressions & active Invests (e.g. 93E) from:
@@ -1947,4 +2027,21 @@ if __name__ == "__main__":
         print(f"[+] Saved {news_payload.get('totalArticles', 0)} maritime news articles to news.json and public/news.json")
     except Exception as news_err:
         print(f"[!] Maritime news scrape warning: {news_err}")
+
+    # -------------------------------------------------------------------------
+    # AIS snapshot (Digitraffic open AIS — Baltic/FI). Not VesselFinder/MarineTraffic:
+    # those sites do not provide a legal bulk "all global vessels" feed for scrapers.
+    # Client refreshes live ~90s when AIS overlay is on; this JSON is CORS/offline fallback.
+    # -------------------------------------------------------------------------
+    try:
+        ais_payload = scrape_digitraffic_ais_snapshot()
+        for ais_path in [
+            os.path.join(public_dir, "ais.json"),
+            os.path.join(repo_root, "ais.json"),
+        ]:
+            with open(ais_path, "w", encoding="utf-8") as af:
+                json.dump(ais_payload, af, separators=(",", ":"), ensure_ascii=False)
+        print(f"[+] Saved AIS snapshot ({ais_payload.get('count', 0)} targets) to ais.json")
+    except Exception as ais_err:
+        print(f"[!] AIS snapshot warning: {ais_err}")
 
