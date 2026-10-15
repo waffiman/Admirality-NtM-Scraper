@@ -128,3 +128,29 @@ The local copy often lives on a USB flash drive that can suddenly enter an NTFS 
 4. **Antigravity / other devices** must follow the same loop: pull server → edit → push → sync local. If local and server diverge, **server wins**.
 5. Prefer Python file I/O when the IDE cannot write to a locked/corrupt volume.
 
+
+## Local project folder layout (multi-device / Antigravity)
+
+Canonical local folder name: **`SetSail`** (formerly `6. GYRO ERROR CALC`).
+
+Recommended layout on the flash / shared drive:
+
+```
+SetSail/
+  index.html          # app shell (PWA)
+  sw.js               # service worker
+  OVERVIEW.md         # this file — sync rules for all agents
+  AGENTS.md           # short agent playbook
+  news.json / weather.json / notices.json
+  assets/             # logos, leaflet, Auto NtM Plotting/*
+  scraper/            # scraper helpers (server cron is source of scrape truth)
+  .github/workflows/  # GitHub Actions scrape schedule
+```
+
+Rules for every agent / device:
+1. **Server wins** — pull from GitHub/`setsail-ai.vercel.app` before editing.
+2. Edit on a healthy disk (prefer `C:\Users\...\setsail_work_*` if the flash shows WinError 1392).
+3. Push to `main`, then mirror into local `SetSail/`.
+4. If a local file is corrupt, write to `SetSail/_setsail_server_mirror/` or `*_v59` sidecars — never trust the corrupt inode.
+5. Google Sign-In is **official GIS/OAuth only** (real Google popup). Authorized JavaScript origins must include `https://setsail-ai.vercel.app` (and localhost for tests) in Google Cloud Console for Client ID `1072660724894-mbo68vdrl6t3a66s048qdhv8jb6sl6kd.apps.googleusercontent.com`.
+

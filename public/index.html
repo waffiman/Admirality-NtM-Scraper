@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.8" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.9" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -10957,6 +10957,10 @@ select option {
     // 1. Programmatic Tab Switching Engine
     function switchToTab(targetTab) {
       if (!targetTab) return;
+      if (!document.getElementById(targetTab)) {
+        console.warn('[SetSail] switchToTab ignored unknown tab:', targetTab);
+        return;
+      }
       try {
         sessionStorage.setItem('setsail_active_tab', targetTab);
         localStorage.setItem('setsail_active_tab', targetTab);
@@ -11023,13 +11027,33 @@ select option {
     }
     window.switchToTab = switchToTab;
 
-    // Restore preserved active tab on startup so user is never reset to Home unexpectedly
-    try {
-      const initSaved = (window.location.hash && window.location.hash.length > 1) ? window.location.hash.replace('#', '').trim() : (sessionStorage.getItem('setsail_active_tab') || localStorage.getItem('setsail_active_tab') || '');
-      if (initSaved && document.getElementById(initSaved)) {
-        switchToTab(initSaved);
-      }
-    } catch (e) {}
+    // Restore preserved active tab AFTER panes exist — never flash/force Home during load
+    function restoreSetSailTab() {
+      try {
+        const initSaved = (window.location.hash && window.location.hash.length > 1)
+          ? window.location.hash.replace('#', '').trim()
+          : (sessionStorage.getItem('setsail_active_tab') || localStorage.getItem('setsail_active_tab') || '');
+        if (initSaved && document.getElementById(initSaved)) {
+          switchToTab(initSaved);
+        }
+      } catch (e) {}
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', restoreSetSailTab);
+    } else {
+      restoreSetSailTab();
+    }
+    // Guard: if an unknown hash is cleared by the browser, do not bounce to Home
+    window.addEventListener('hashchange', function () {
+      try {
+        const h = (window.location.hash || '').replace('#', '').trim();
+        if (!h) return;
+        if (document.getElementById(h) && typeof switchToTab === 'function') {
+          const active = document.querySelector('.tab-pane.active');
+          if (!active || active.id !== h) switchToTab(h);
+        }
+      } catch (e) {}
+    });
 
     // 2. High-Priority Global Click Delegation with Capture (Cannot be stopped by inner elements)
     document.addEventListener('click', function(e) {
@@ -11424,7 +11448,7 @@ select option {
           <div class="home-slide-dots no-print" aria-label="Slide Navigation">
             <button type="button" class="home-slide-dot active" data-home-slide="0" title="Slide 1: Hero"></button>
             <button type="button" class="home-slide-dot" data-home-slide="1" title="Slide 2: SetSail Tools"></button>
-            <button type="button" class="home-slide-dot" data-home-slide="2" title="Slide 3: Latest Maritime News"></button>
+            <button type="button" class="home-slide-dot" data-home-slide="2" title="Slide 3: What's happening in the world"></button>
             <button type="button" class="home-slide-dot" data-home-slide="3" title="Slide 4: About SetSail"></button>
             <button type="button" class="home-slide-dot" data-home-slide="4" title="Slide 5: Data Authorities"></button>
           </div>
@@ -11560,16 +11584,16 @@ select option {
             </div>
 
             <!-- SLIDE 3: LATEST MARITIME NEWS -->
-            <section class="home-slide-news" id="homeSlideNews" aria-label="Latest Maritime News">
+            <section class="home-slide-news" id="homeSlideNews" aria-label="What is happening in the world">
               <div style="text-align:center;margin-bottom:14px;">
                 <div class="saas-eyebrow-pill" style="margin:0 auto 6px;"><span class="saas-eyebrow-dot"></span>LIVE MARITIME INTELLIGENCE</div>
-                <h2 class="home-slide2-title" style="margin:0 0 4px;" data-i18n="home_news_title">Latest Maritime Briefings</h2>
-                <p class="home-slide2-sub" style="margin:0;" data-i18n="home_news_sub">Real-time hydrographic, port, canal, and metocean dispatches curated for bridge watchkeepers</p>
+                <h2 class="home-slide2-title" style="margin:0 0 4px;" data-i18n="home_news_title">See what's happening in the world</h2>
+                <p class="home-slide2-sub" style="margin:0;" data-i18n="home_news_sub">From ports and canals to coasts and open ocean — live stories shaping land and sea right now</p>
               </div>
               <div class="home-news-preview-grid" id="homeNewsPreviewGrid"></div>
               <div style="margin-top:16px;display:flex;justify-content:center;">
                 <button type="button" class="home-news-open-btn" data-switch-tab="tab-news" data-i18n="btn_open_news">
-                  Explore All Briefings in SetNews &rarr;
+                  See everything happening on land &amp; at sea &rarr;
                 </button>
               </div>
             </section>
@@ -13491,7 +13515,7 @@ select option {
               <span class="setnews-live-pill"><span class="setnews-live-dot"></span> LIVE MARITIME WIRE</span>
               <span id="setNewsLastSync" style="font-size:0.7rem;color:#64748b;font-weight:600;">Live Maritime Dispatches • Updated Every 6 Hours</span>
             </div>
-            <h1 class="setnews-title">SetNews Maritime Intelligence</h1>
+            <h1 class="setnews-title">SetNews — What's happening on land &amp; at sea</h1>
             <p class="setnews-subtitle">Real-time global shipping, hydrographic safety, port operations, and AI-personalized corridor dispatches</p>
           </div>
           <div class="setnews-controls-col">
@@ -13521,7 +13545,7 @@ select option {
             <button type="button" class="setnews-cat-btn" data-news-cat="Weather & Cyclones">🌀 Weather & Cyclones</button>
             <button type="button" class="setnews-cat-btn" data-news-cat="Shipping & Tankers">🚢 Tankers & Fleet</button>
             <button type="button" class="setnews-cat-btn" data-news-cat="Geopolitics & Chokepoints">🛡️ Chokepoints & Security</button>
-            <button type="button" class="setnews-cat-btn" data-news-cat="SAVED">🔖 Saved Briefings</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="SAVED">🔖 Saved stories</button>
           </div>
         </div>
 
@@ -13530,7 +13554,7 @@ select option {
           <div class="setnews-foryou-header">
             <div class="setnews-foryou-title-group">
               <span class="setnews-foryou-badge">✨ FOR YOU</span>
-              <h2 class="setnews-foryou-title">Personalized Bridge Briefing</h2>
+              <h2 class="setnews-foryou-title">For you — land &amp; sea right now</h2>
             </div>
             <span class="setnews-foryou-context" id="setNewsForYouContext">AI Engine: Matched to Active Route & Reading Telemetry</span>
           </div>
@@ -19417,8 +19441,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.8"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.8"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.9"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.9"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19496,7 +19520,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.8"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.9"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19866,14 +19890,14 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v56') !== '1') {
+        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v59') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.6' && k !== 'setsail-tiles-cache-v5.6').map(k => caches.delete(k))
-          )).then(() => localStorage.setItem('setsail_sw_v56', '1')).catch(() => {});
+            keys.filter(k => k !== 'setsail-cache-v5.9' && k !== 'setsail-tiles-cache-v5.9').map(k => caches.delete(k))
+          )).then(() => localStorage.setItem('setsail_sw_v59', '1')).catch(() => {});
         }
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!sessionStorage.getItem('setsail_sw_reloaded_v56')) {
-            sessionStorage.setItem('setsail_sw_reloaded_v56', '1');
+          if (!sessionStorage.getItem('setsail_sw_reloaded_v59')) {
+            sessionStorage.setItem('setsail_sw_reloaded_v59', '1');
             window.location.reload();
           }
         });

@@ -110,6 +110,8 @@ function initApp() {
   safe("theme", initTheme);
   safe("nav", initNavigationTabs);
   safe("tab", () => {
+    // Preserve whatever tab the user already opened; never force Home during late boot.
+    const already = document.querySelector(".tab-pane.active");
     let savedTab = "";
     try {
       if (window.location.hash && window.location.hash.length > 1) {
@@ -119,8 +121,21 @@ function initApp() {
         savedTab = sessionStorage.getItem("setsail_active_tab") || localStorage.getItem("setsail_active_tab") || "";
       }
     } catch (e) {}
-    const initialTab = (savedTab && document.getElementById(savedTab)) ? savedTab : "tab-home";
-    switchToTab(initialTab);
+    if (already && already.id && already.id !== "tab-home") {
+      if (savedTab !== already.id) {
+        try {
+          sessionStorage.setItem("setsail_active_tab", already.id);
+          localStorage.setItem("setsail_active_tab", already.id);
+        } catch (e) {}
+      }
+      return;
+    }
+    if (savedTab && document.getElementById(savedTab)) {
+      if (!already || already.id !== savedTab) switchToTab(savedTab);
+      return;
+    }
+    // Only land on Home when nothing else is selected / saved
+    if (!already) switchToTab("tab-home");
   });
   safe("clock", initHomeChronometer);
   safe("video", () => {
@@ -225,6 +240,10 @@ function initNavigationTabs() {
  */
 function switchToTab(targetTab) {
   if (!targetTab) return;
+  if (!document.getElementById(targetTab)) {
+    console.warn("[SetSail] switchToTab ignored unknown tab:", targetTab);
+    return;
+  }
   try {
     sessionStorage.setItem("setsail_active_tab", targetTab);
     localStorage.setItem("setsail_active_tab", targetTab);
@@ -2903,14 +2922,19 @@ function initNtMMap() {
       markerZoomAnimation: true,
       zoomAnimationThreshold: 8,
       inertia: true,
-      inertiaDeceleration: 3000
+      inertiaDeceleration: 3000,
+      worldCopyJump: false,
+      maxBounds: [[-85, -180], [85, 180]],
+      maxBoundsViscosity: 1.0
     });
 
     const tilePerfOpts = {
       keepBuffer: 6,
       updateWhenIdle: false,
       updateWhenZooming: false,
-      updateInterval: 90
+      updateInterval: 90,
+      noWrap: true,
+      bounds: [[-85, -180], [85, 180]]
     };
 
     // 1. Primary Nautical Chart (Esri Ocean Base + CARTO + China AutoNavi / Gaode Multi-Stage Failover)
@@ -6996,7 +7020,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 }
 
 /* ==========================================================================
-   SETSAIL v5.8 — OFFICIAL GOOGLE ACCOUNT AUTHENTICATION & FULL USER HISTORY,
+   SETSAIL v5.9 — OFFICIAL GOOGLE ACCOUNT AUTHENTICATION & FULL USER HISTORY,
    DRAGGABLE ROUTE SNAPSHOT + CORRIDOR BUFFER FILTER, & SETNEWS + "FOR YOU" AI
    ========================================================================== */
 
@@ -7391,96 +7415,166 @@ function initSetSailAuth() {
   syncSetSailAuthUI();
 }
 
-function openOfficialGoogleLoginModal() {
+function showGoogleAuthBusy(on, msg) {
   let modal = document.getElementById("setsailGoogleAuthModal");
+  if (!on) {
+    if (modal) modal.classList.remove("active");
+    return;
+  }
   if (!modal) {
     modal = document.createElement("div");
     modal.id = "setsailGoogleAuthModal";
     modal.className = "setsail-google-auth-overlay";
     modal.innerHTML = `
-      <div class="setsail-google-auth-card">
+      <div class="setsail-google-auth-card" style="max-width:360px;text-align:center;padding:28px 22px;">
         <button type="button" class="google-auth-close-btn" onclick="window.closeOfficialGoogleLoginModal()" aria-label="Close">&times;</button>
-        <div class="google-auth-header">
+        <div class="google-auth-header" style="margin-bottom:8px;">
           <svg viewBox="0 0 24 24" class="google-auth-logo" width="38" height="38">
             <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
             <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.1 7.4 24 12 24z"/>
             <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
             <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
           </svg>
-          <h2 class="google-auth-title">Sign in with Google</h2>
-          <p class="google-auth-sub">Choose an account to continue to <b>SetSail Marine Suite</b></p>
+          <h2 class="google-auth-title">Google Sign-In</h2>
+          <p class="google-auth-sub" id="googleAuthBusyMsg">Opening official Google account picker…</p>
         </div>
-        
-        <form class="google-auth-form" onsubmit="window.submitOfficialGoogleLogin(event)">
-          <div class="google-auth-field-wrap">
-            <input type="email" id="googleAuthEmailInput" class="google-auth-input" placeholder=" " autocomplete="off" required />
-            <label for="googleAuthEmailInput" class="google-auth-label">Email or phone</label>
-          </div>
-          <div class="google-auth-help-row">
-            <a href="#" class="google-auth-link" onclick="event.preventDefault();if(typeof showSetSailToast==='function')showSetSailToast('Enter your Gmail or corporate Workspace email to sign in.','info');">Forgot email?</a>
-          </div>
-          <div class="google-auth-disclaimer">
-            Before using SetSail, you can review SetSail’s privacy policy and terms of service. Google securely verifies your session.
-          </div>
-          <div class="google-auth-btn-row">
-            <button type="button" class="google-auth-btn-link" onclick="window.closeOfficialGoogleLoginModal()">Cancel</button>
-            <button type="submit" class="google-auth-btn-next">Next</button>
-          </div>
-        </form>
-        <div class="google-auth-footer-bar">
-          <span>English (United States)</span>
-          <div class="google-auth-footer-links">
-            <a href="https://support.google.com/accounts" target="_blank" rel="noopener">Help</a>
-            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy</a>
-            <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Terms</a>
-          </div>
-        </div>
+        <div id="googleGsiButtonContainer" style="display:flex;justify-content:center;min-height:44px;margin-top:10px;"></div>
+        <p style="font-size:0.72rem;color:#94a3b8;margin-top:14px;line-height:1.4;">Only real Google accounts can sign in. Fake/manual emails are disabled.</p>
       </div>
     `;
     document.body.appendChild(modal);
-
     modal.addEventListener("click", (e) => {
       if (e.target === modal) closeOfficialGoogleLoginModal();
     });
   }
-
-  const emailInput = document.getElementById("googleAuthEmailInput");
-  if (emailInput) {
-    emailInput.value = "";
-    setTimeout(() => emailInput.focus(), 80);
-  }
+  const msgEl = document.getElementById("googleAuthBusyMsg");
+  if (msgEl && msg) msgEl.textContent = msg;
   modal.classList.add("active");
+}
+
+async function fetchGoogleUserInfo(accessToken) {
+  const resp = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+    headers: { Authorization: "Bearer " + accessToken }
+  });
+  if (!resp.ok) throw new Error("userinfo " + resp.status);
+  return resp.json();
+}
+
+function openOfficialGoogleLoginModal() {
+  const clientId = normalizeGoogleClientId(localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID);
+  if (!clientId) {
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Google Client ID is not configured.", "error");
+    }
+    return;
+  }
+  showGoogleAuthBusy(true, "Opening official Google account picker…");
+  loadGoogleIdentityScriptAsync().then((loaded) => {
+    if (!loaded || !window.google || !window.google.accounts) {
+      showGoogleAuthBusy(true, "Google Sign-In script blocked. Check network / allowed origins.");
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Could not load Google Identity Services.", "error");
+      }
+      return;
+    }
+    try {
+      // Official GIS credential button (Google-rendered — not a SetSail clone form)
+      if (window.google.accounts.id) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: (resp) => {
+            handleGoogleCredentialResponse(resp);
+            closeOfficialGoogleLoginModal();
+          },
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          ux_mode: "popup",
+          context: "signin",
+          use_fedcm_for_prompt: false
+        });
+        const container = document.getElementById("googleGsiButtonContainer");
+        if (container) {
+          container.innerHTML = "";
+          window.google.accounts.id.renderButton(container, {
+            theme: "filled_blue",
+            size: "large",
+            type: "standard",
+            shape: "pill",
+            text: "signin_with",
+            logo_alignment: "left",
+            width: 280
+          });
+        }
+      }
+      // Also open the official OAuth token popup (real Google account chooser)
+      if (window.google.accounts.oauth2 && typeof window.google.accounts.oauth2.initTokenClient === "function") {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: "openid email profile",
+          prompt: "select_account",
+          callback: (tokenResponse) => {
+            if (!tokenResponse || !tokenResponse.access_token) {
+              if (tokenResponse && tokenResponse.error) {
+                if (typeof showSetSailToast === "function") {
+                  showSetSailToast("Google sign-in cancelled or failed.", "info");
+                }
+              }
+              return;
+            }
+            fetchGoogleUserInfo(tokenResponse.access_token).then((profile) => {
+              if (!profile || !profile.email) throw new Error("no email");
+              setSetSailAuthUser({
+                name: profile.name || profile.given_name || profile.email.split("@")[0],
+                email: profile.email,
+                picture: profile.picture || "",
+                sub: profile.sub || "",
+                provider: "google",
+                signedInAt: new Date().toISOString()
+              });
+              closeOfficialGoogleLoginModal();
+              if (typeof showSetSailToast === "function") {
+                showSetSailToast("Signed in with Google as " + profile.email, "success");
+              }
+            }).catch((err) => {
+              console.warn("[SetSail Google OAuth] userinfo failed", err);
+              if (typeof showSetSailToast === "function") {
+                showSetSailToast("Google verified the popup, but profile fetch failed.", "error");
+              }
+            });
+          },
+          error_callback: (err) => {
+            console.warn("[SetSail Google OAuth]", err);
+            if (typeof showSetSailToast === "function") {
+              showSetSailToast("Google sign-in was closed or blocked by the browser.", "info");
+            }
+          }
+        });
+        tokenClient.requestAccessToken({ prompt: "select_account" });
+        const msgEl = document.getElementById("googleAuthBusyMsg");
+        if (msgEl) msgEl.textContent = "Complete sign-in in the Google popup. Or use the official button below.";
+      } else {
+        const msgEl = document.getElementById("googleAuthBusyMsg");
+        if (msgEl) msgEl.textContent = "Use the official Google button below to continue.";
+      }
+    } catch (e) {
+      console.warn("[SetSail Google OAuth] init error", e);
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Google Sign-In failed to start. Verify Client ID origins.", "error");
+      }
+    }
+  });
 }
 window.openOfficialGoogleLoginModal = openOfficialGoogleLoginModal;
 
 function closeOfficialGoogleLoginModal() {
-  const modal = document.getElementById("setsailGoogleAuthModal");
-  if (modal) modal.classList.remove("active");
+  showGoogleAuthBusy(false);
 }
 window.closeOfficialGoogleLoginModal = closeOfficialGoogleLoginModal;
 
+// Fake email/password clone login removed — only official Google GIS / OAuth popup is allowed.
 function submitOfficialGoogleLogin(e) {
   if (e && e.preventDefault) e.preventDefault();
-  const emailInput = document.getElementById("googleAuthEmailInput");
-  if (!emailInput || !emailInput.value.trim()) return;
-
-  const rawEmail = emailInput.value.trim().toLowerCase();
-  const cleanEmail = rawEmail.includes("@") ? rawEmail : `${rawEmail}@gmail.com`;
-  const rawName = cleanEmail.split("@")[0].replace(/[._-]+/g, " ");
-  const dispName = rawName.replace(/\\b\\w/g, c => c.toUpperCase());
-
-  setSetSailAuthUser({
-    name: dispName,
-    email: cleanEmail,
-    provider: "google",
-    signedInAt: new Date().toISOString()
-  });
-
-  closeOfficialGoogleLoginModal();
-
-  if (typeof showSetSailToast === "function") {
-    showSetSailToast(`Signed in with Google as ${cleanEmail}`, "success");
-  }
+  openOfficialGoogleLoginModal();
 }
 window.submitOfficialGoogleLogin = submitOfficialGoogleLogin;
 
@@ -7850,7 +7944,7 @@ function recordSetNewsInteraction(article, actionType = "read", dwellSec = 8) {
 
 function scoreArticleForUser(article, prof) {
   let score = 20;
-  let primaryReason = "🔥 Priority Maritime Briefing";
+  let primaryReason = "🌍 What's happening on land & at sea";
 
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
     const rText = `${activeRouteData.name || ""} ${(activeRouteData.chokepoints || []).join(" ")} ${activeRouteData.waypoints.map(w => w.name || "").join(" ")}`.toLowerCase();
@@ -8010,7 +8104,7 @@ function renderHomeNewsSlide() {
     return `
       <article class="home-news-card" data-open-news-id="${a.id}">
         <div class="home-news-card-img" style="background-image:url('${thumbUrl}');height:190px;background-size:cover;background-position:center;position:relative;">
-          <span class="home-news-card-cat">${a.category || "Maritime Briefing"}</span>
+          <span class="home-news-card-cat">${a.category || "Land & Sea"}</span>
           <span class="home-news-card-region">📍 ${a.region || "Global"}</span>
         </div>
         <div class="home-news-card-body" style="padding:14px 16px;display:flex;flex-direction:column;gap:6px;">
@@ -10180,12 +10274,12 @@ const SET_SAIL_LANGUAGES = {
       hero_sub: "ECDIS Overlay, Automated NtM Plotting, Gyroscope Deviation, Route Optimization & Global Maritime Intelligence",
       home_chart_title: "Real-Time Nautical Chart Overlay",
       home_chart_sub: "Interactive vector & raster marine charts with live NtM, NAVTEX, and Port depths",
-      home_news_title: "Latest Maritime Briefings",
-      home_news_sub: "Real-time hydrographic, port, canal, and metocean dispatches curated for bridge watchkeepers",
+      home_news_title: "See what's happening in the world",
+      home_news_sub: "From ports and canals to coasts and open ocean — live stories shaping land and sea right now",
       btn_open_chart: "Open SetChart Map",
       btn_plan_route: "Plan Passage in SetRoute",
-      btn_open_news: "Open SetNews Wire",
-      btn_read_story: "Read Full Story →",
+      btn_open_news: "See all world stories →",
+      btn_read_story: "Read what's happening →",
       settings_account_heading: "SetSail Account & Cloud Bridge Sync",
       settings_account_sub: "Sign in with your Google Account to automatically save and sync your passage plans, chart edits, vessel position & preferences",
       btn_google_signin: "Sign-In",
@@ -10468,7 +10562,7 @@ const SET_SAIL_LANGUAGES = {
       hero_sub: "ECDIS ओवरले, स्वचालित NtM प्लॉटिंग, जायरो विचलन, मार्ग अनुकूलन और समुद्री खुफिया",
       home_chart_title: "रीयल-टाइम नौवहन चार्ट ओवरले",
       home_chart_sub: "लाइव NtM, NAVTEX और पोर्ट गहराई के साथ इंटरैक्टिव समुद्री चार्ट",
-      home_news_title: "नवीनतम समुद्री ब्रिफिंग",
+      home_news_title: "दुनिया में क्या हो रहा है देखें",
       home_news_sub: "ब्रिज वॉचकीपर के लिए रीयल-टाइम हाइड्रोग्राफिक, पोर्ट और मौसम डिस्पैच",
       btn_open_chart: "SetChart मानचित्र खोलें",
       btn_plan_route: "SetRoute में मार्ग योजना",
