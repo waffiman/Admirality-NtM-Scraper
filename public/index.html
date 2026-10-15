@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.9" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.10" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -10955,12 +10955,28 @@ select option {
        ========================================================================= -->
   <script>
     // 1. Programmatic Tab Switching Engine
-    function switchToTab(targetTab) {
+    function switchToTab(targetTab, source) {
       if (!targetTab) return;
       if (!document.getElementById(targetTab)) {
         console.warn('[SetSail] switchToTab ignored unknown tab:', targetTab);
         return;
       }
+      source = source || 'code';
+      var cur = window._setsailActiveTab || ((document.querySelector('.tab-pane.active') || {}).id) || '';
+      if (targetTab === 'tab-home' && source !== 'user' && source !== 'restore') {
+        if (cur && cur !== 'tab-home') {
+          console.warn('[SetSail] blocked auto Home redirect from', source, 'while on', cur);
+          return;
+        }
+        try {
+          var saved = sessionStorage.getItem('setsail_active_tab') || localStorage.getItem('setsail_active_tab') || '';
+          if (saved && saved !== 'tab-home' && document.getElementById(saved)) {
+            targetTab = saved;
+            source = 'restore';
+          }
+        } catch (e0) {}
+      }
+      window._setsailActiveTab = targetTab;
       try {
         sessionStorage.setItem('setsail_active_tab', targetTab);
         localStorage.setItem('setsail_active_tab', targetTab);
@@ -11034,7 +11050,7 @@ select option {
           ? window.location.hash.replace('#', '').trim()
           : (sessionStorage.getItem('setsail_active_tab') || localStorage.getItem('setsail_active_tab') || '');
         if (initSaved && document.getElementById(initSaved)) {
-          switchToTab(initSaved);
+          switchToTab(initSaved, 'restore');
         }
       } catch (e) {}
     }
@@ -11061,14 +11077,14 @@ select option {
       if (switchBtn) {
         e.preventDefault();
         const target = switchBtn.getAttribute('data-switch-tab');
-        if (target) switchToTab(target);
+        if (target) switchToTab(target, 'user');
         return;
       }
       const tabBtn = e.target.closest('.nav-sidebar .nav-item');
       if (tabBtn) {
         e.preventDefault();
         const target = tabBtn.getAttribute('data-tab');
-        if (target) switchToTab(target);
+        if (target) switchToTab(target, 'user');
         return;
       }
     }, true);
@@ -13319,7 +13335,7 @@ select option {
                 <button type="button" class="setroute-top-btn" id="btnToggleRightDrawer" title="Show / Hide Route Details Panel">
                   Route Details
                 </button>
-                <button type="button" class="setroute-top-btn primary" id="btnViewOnSetChart" onclick="switchToTab('tab-ntm')">
+                <button type="button" class="setroute-top-btn primary" id="btnViewOnSetChart" onclick="switchToTab('tab-ntm','user')">
                   Open on SetChart
                 </button>
               </div>
@@ -19441,8 +19457,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.9"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.9"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.10"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.10"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19520,7 +19536,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.9"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.10"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19890,18 +19906,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v59') !== '1') {
+        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v510') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.9' && k !== 'setsail-tiles-cache-v5.9').map(k => caches.delete(k))
-          )).then(() => localStorage.setItem('setsail_sw_v59', '1')).catch(() => {});
+            keys.filter(k => k !== 'setsail-cache-v5.10' && k !== 'setsail-tiles-cache-v5.10').map(k => caches.delete(k))
+          )).then(() => localStorage.setItem('setsail_sw_v510', '1')).catch(() => {});
         }
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!sessionStorage.getItem('setsail_sw_reloaded_v59')) {
-            sessionStorage.setItem('setsail_sw_reloaded_v59', '1');
-            window.location.reload();
-          }
+navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.6', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.10', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {

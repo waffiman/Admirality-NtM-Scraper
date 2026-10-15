@@ -110,7 +110,7 @@ function initApp() {
   safe("theme", initTheme);
   safe("nav", initNavigationTabs);
   safe("tab", () => {
-    // Preserve whatever tab the user already opened; never force Home during late boot.
+    // NEVER force Home. Only restore a saved/hash tab; leave HTML default alone otherwise.
     const already = document.querySelector(".tab-pane.active");
     let savedTab = "";
     try {
@@ -122,20 +122,20 @@ function initApp() {
       }
     } catch (e) {}
     if (already && already.id && already.id !== "tab-home") {
-      if (savedTab !== already.id) {
-        try {
-          sessionStorage.setItem("setsail_active_tab", already.id);
-          localStorage.setItem("setsail_active_tab", already.id);
-        } catch (e) {}
-      }
+      window._setsailActiveTab = already.id;
+      try {
+        sessionStorage.setItem("setsail_active_tab", already.id);
+        localStorage.setItem("setsail_active_tab", already.id);
+      } catch (e) {}
       return;
     }
-    if (savedTab && document.getElementById(savedTab)) {
-      if (!already || already.id !== savedTab) switchToTab(savedTab);
+    if (savedTab && savedTab !== "tab-home" && document.getElementById(savedTab)) {
+      switchToTab(savedTab, "restore");
       return;
     }
-    // Only land on Home when nothing else is selected / saved
-    if (!already) switchToTab("tab-home");
+    if (already && already.id) {
+      window._setsailActiveTab = already.id;
+    }
   });
   safe("clock", initHomeChronometer);
   safe("video", () => {
@@ -165,14 +165,14 @@ document.addEventListener("click", (e) => {
   if (switchBtn) {
     e.preventDefault();
     const target = switchBtn.getAttribute("data-switch-tab");
-    if (target) switchToTab(target);
+    if (target) switchToTab(target, "user");
     return;
   }
   const tabBtn = e.target.closest(".nav-sidebar .nav-item");
   if (tabBtn) {
     e.preventDefault();
     const target = tabBtn.getAttribute("data-tab");
-    if (target) switchToTab(target);
+    if (target) switchToTab(target, "user");
     return;
   }
 });
@@ -222,7 +222,7 @@ function initNavigationTabs() {
   navItems.forEach(item => {
     item.addEventListener("click", () => {
       const targetTab = item.getAttribute("data-tab");
-      if (targetTab) switchToTab(targetTab);
+      if (targetTab) switchToTab(targetTab, "user");
     });
   });
 
@@ -230,7 +230,7 @@ function initNavigationTabs() {
   document.querySelectorAll("[data-switch-tab]").forEach(btn => {
     btn.addEventListener("click", () => {
       const targetTab = btn.getAttribute("data-switch-tab");
-      if (targetTab) switchToTab(targetTab);
+      if (targetTab) switchToTab(targetTab, "user");
     });
   });
 }
@@ -238,12 +238,32 @@ function initNavigationTabs() {
 /**
  * Programmatic Tab Switcher
  */
-function switchToTab(targetTab) {
+function switchToTab(targetTab, source) {
   if (!targetTab) return;
   if (!document.getElementById(targetTab)) {
     console.warn("[SetSail] switchToTab ignored unknown tab:", targetTab);
     return;
   }
+  source = source || "code";
+  const cur = window._setsailActiveTab
+    || (document.querySelector(".tab-pane.active") && document.querySelector(".tab-pane.active").id)
+    || "";
+  // Block ANY non-explicit bounce to Home once the user is on another page
+  if (targetTab === "tab-home" && source !== "user" && source !== "restore") {
+    if (cur && cur !== "tab-home") {
+      console.warn("[SetSail] blocked auto Home redirect from", source, "while on", cur);
+      return;
+    }
+    try {
+      const saved = sessionStorage.getItem("setsail_active_tab") || localStorage.getItem("setsail_active_tab") || "";
+      if (saved && saved !== "tab-home") {
+        console.warn("[SetSail] blocked auto Home redirect; restoring", saved);
+        targetTab = saved;
+        source = "restore";
+      }
+    } catch (e) {}
+  }
+  window._setsailActiveTab = targetTab;
   try {
     sessionStorage.setItem("setsail_active_tab", targetTab);
     localStorage.setItem("setsail_active_tab", targetTab);
@@ -1103,7 +1123,7 @@ function renderRouteOnMap(route, shouldFly = true) {
     localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(route));
   } catch (e) {}
 
-  // Build clean lat/lng path: drop bad/duplicate points, split on antimeridian (no fake loops)
+  // Build clean path with continuous longitude unrolling (Pacific / antimeridian safe)
   const cleanWps = [];
   for (let i = 0; i < route.waypoints.length; i++) {
     const wp = route.waypoints[i];
@@ -1120,54 +1140,65 @@ function renderRouteOnMap(route, shouldFly = true) {
     return;
   }
 
-  const routeSegments = [];
-  let seg = [];
-  let prevLon = null;
+  // Unroll longitudes so consecutive legs never jump ±360° across the dateline
   const unrolledCoords = [];
-  for (let i = 0; i < cleanWps.length; i++) {
-    const lon = cleanWps[i].lon;
-    const lat = cleanWps[i].lat;
-    if (prevLon !== null && Math.abs(lon - prevLon) > 170) {
-      if (seg.length >= 2) routeSegments.push(seg);
-      else if (seg.length === 1) routeSegments.push(seg);
-      seg = [];
-    }
-    const pt = [lat, lon];
-    seg.push(pt);
-    unrolledCoords.push(pt);
-    prevLon = lon;
+  let runLon = cleanWps[0].lon;
+  unrolledCoords.push([cleanWps[0].lat, runLon]);
+  for (let i = 1; i < cleanWps.length; i++) {
+    let lon = cleanWps[i].lon;
+    while (lon - runLon > 180) lon -= 360;
+    while (lon - runLon < -180) lon += 360;
+    runLon = lon;
+    unrolledCoords.push([cleanWps[i].lat, runLon]);
   }
-  if (seg.length) routeSegments.push(seg);
+  // Keep a copy for buffer corridor (same unrolled geometry)
+  window._setsailRouteUnrolled = unrolledCoords.slice();
 
   const rtSub = window.ROUTE_SUBFILTERS || { waypoints: true, line: true };
   let trackLine = null;
-  if (rtSub.line !== false) {
-    routeSegments.forEach((coords) => {
-      if (!coords || coords.length < 2) return;
-      const glow = L.polyline(coords, {
-        color: "#0678c8",
-        weight: 12,
-        opacity: 0.38,
-        interactive: false,
-        lineCap: "round",
-        lineJoin: "round"
-      });
-      const line = L.polyline(coords, {
-        color: "#22d3ee",
-        weight: 5,
-        opacity: 1,
-        interactive: true,
-        lineCap: "round",
-        lineJoin: "round"
-      });
-      leafletRouteLayer.addLayer(glow);
-      leafletRouteLayer.addLayer(line);
-      if (!trackLine) trackLine = line;
+  if (rtSub.line !== false && unrolledCoords.length >= 2) {
+    // High-visibility route: dark outline + bright cyan core + outer glow
+    const outline = L.polyline(unrolledCoords, {
+      color: "#0b1e33",
+      weight: 10,
+      opacity: 0.85,
+      interactive: false,
+      lineCap: "round",
+      lineJoin: "round"
     });
+    const glow = L.polyline(unrolledCoords, {
+      color: "#00e5ff",
+      weight: 14,
+      opacity: 0.35,
+      interactive: false,
+      lineCap: "round",
+      lineJoin: "round"
+    });
+    const line = L.polyline(unrolledCoords, {
+      color: "#ff3b1f",
+      weight: 4.5,
+      opacity: 1,
+      interactive: true,
+      lineCap: "round",
+      lineJoin: "round"
+    });
+    const core = L.polyline(unrolledCoords, {
+      color: "#ffe566",
+      weight: 2,
+      opacity: 0.95,
+      interactive: false,
+      lineCap: "round",
+      lineJoin: "round"
+    });
+    leafletRouteLayer.addLayer(glow);
+    leafletRouteLayer.addLayer(outline);
+    leafletRouteLayer.addLayer(line);
+    leafletRouteLayer.addLayer(core);
+    trackLine = line;
   }
-  if (!trackLine && unrolledCoords.length) {
-    trackLine = L.polyline(unrolledCoords, { color: "#22d3ee", weight: 5, opacity: 1 });
-    leafletRouteLayer.addLayer(trackLine);
+
+  if (typeof window.renderRouteBufferCorridorOnMap === "function") {
+    window.renderRouteBufferCorridorOnMap(); // v5.10 after unroll
   }
 
   // Add Waypoints
@@ -7020,7 +7051,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 }
 
 /* ==========================================================================
-   SETSAIL v5.9 — OFFICIAL GOOGLE ACCOUNT AUTHENTICATION & FULL USER HISTORY,
+   SETSAIL v5.10 — OFFICIAL GOOGLE ACCOUNT AUTHENTICATION & FULL USER HISTORY,
    DRAGGABLE ROUTE SNAPSHOT + CORRIDOR BUFFER FILTER, & SETNEWS + "FOR YOU" AI
    ========================================================================== */
 
@@ -7669,35 +7700,58 @@ function renderRouteBufferCorridorOnMap() {
   if (!hasRoute || !isRouteVisible) return;
 
   const bufNm = Number(window.ROUTE_CORRIDOR_BUFFER_NM) || 25;
-  const wpts = activeRouteData.waypoints;
+  // Prefer the same unrolled geometry used for the track line (Pacific / dateline safe)
+  let pts = Array.isArray(window._setsailRouteUnrolled) && window._setsailRouteUnrolled.length >= 2
+    ? window._setsailRouteUnrolled
+    : null;
+  if (!pts) {
+    const raw = activeRouteData.waypoints;
+    pts = [];
+    let runLon = null;
+    for (let i = 0; i < raw.length; i++) {
+      let lat = Number(raw[i].lat);
+      let lon = Number(raw[i].lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+      lon = ((lon + 180) % 360 + 360) % 360 - 180;
+      if (runLon === null) runLon = lon;
+      else {
+        while (lon - runLon > 180) lon -= 360;
+        while (lon - runLon < -180) lon += 360;
+        runLon = lon;
+      }
+      pts.push([lat, lon]);
+    }
+  }
   const isFilterOn = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
 
-  if (wpts.length >= 2) {
+  if (pts.length >= 2) {
     const leftSide = [];
     const rightSide = [];
-    for (let i = 0; i < wpts.length; i++) {
-      const cur = wpts[i];
-      const prev = i > 0 ? wpts[i - 1] : cur;
-      const next = i < wpts.length - 1 ? wpts[i + 1] : cur;
-      const latRad = cur.lat * Math.PI / 180;
+    for (let i = 0; i < pts.length; i++) {
+      const curLat = pts[i][0];
+      const curLon = pts[i][1];
+      const prev = i > 0 ? pts[i - 1] : pts[i];
+      const next = i < pts.length - 1 ? pts[i + 1] : pts[i];
+      const latRad = curLat * Math.PI / 180;
       const cosLat = Math.max(0.2, Math.cos(latRad));
-      let dx = (next.lon - prev.lon) * cosLat;
-      let dy = next.lat - prev.lat;
+      let dx = (next[1] - prev[1]) * cosLat;
+      let dy = next[0] - prev[0];
       const len = Math.hypot(dx, dy) || 1;
       dx /= len;
       dy /= len;
-      const degLatOffset = (-dy) * (bufNm / 60);
-      const degLonOffset = (dx * (bufNm / 60)) / cosLat;
-      leftSide.push([cur.lat + degLatOffset, cur.lon + degLonOffset]);
-      rightSide.unshift([cur.lat - degLatOffset, cur.lon - degLonOffset]);
+      // Perpendicular offset in NM → degrees (unrolled lon space)
+      const degLatOffset = (-dx) * (bufNm / 60);
+      const degLonOffset = (dy * (bufNm / 60)) / cosLat;
+      leftSide.push([curLat + degLatOffset, curLon + degLonOffset]);
+      rightSide.unshift([curLat - degLatOffset, curLon - degLonOffset]);
     }
     const polyCoords = leftSide.concat(rightSide);
     const corridorPoly = L.polygon(polyCoords, {
-      color: isFilterOn ? "#00e5ff" : "#38bdf8",
-      weight: isFilterOn ? 1.8 : 1.1,
-      dashArray: "5, 5",
-      fillColor: isFilterOn ? "#0ea5e9" : "#38bdf8",
-      fillOpacity: isFilterOn ? 0.11 : 0.05,
+      color: isFilterOn ? "#00e5ff" : "#f59e0b",
+      weight: isFilterOn ? 2.2 : 1.6,
+      dashArray: "6, 4",
+      fillColor: isFilterOn ? "#0ea5e9" : "#f59e0b",
+      fillOpacity: isFilterOn ? 0.14 : 0.10,
       interactive: false
     });
     leafletRouteBufferLayer.addLayer(corridorPoly);
