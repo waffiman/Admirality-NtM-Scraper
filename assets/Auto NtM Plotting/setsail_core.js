@@ -123,7 +123,12 @@ function initApp() {
     switchToTab(initialTab);
   });
   safe("clock", initHomeChronometer);
-  safe("video", initHomeVideo);
+  safe("video", () => {
+    const homePane = document.getElementById("tab-home");
+    if (homePane && homePane.classList.contains("active") && typeof initHomeVideo === "function") {
+      initHomeVideo();
+    }
+  });
   safe("hudVessel", initHomeHudVessel);
   safe("ntmUI", initAutoNtmUI);
   safe("filters", initFilterAndSortPopovers);
@@ -1079,51 +1084,77 @@ function renderRouteOnMap(route, shouldFly = true) {
     localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(route));
   } catch (e) {}
 
-  // Continuous longitude unwrapping for Pacific / antimeridian crossing
-  const unrolledCoords = [];
-  let prevLon = null;
-  let lonOffset = 0;
-
+  // Build clean lat/lng path: drop bad/duplicate points, split on antimeridian (no fake loops)
+  const cleanWps = [];
   for (let i = 0; i < route.waypoints.length; i++) {
     const wp = route.waypoints[i];
-    let curLon = wp.lon;
-    if (prevLon !== null) {
-      let diff = curLon - (prevLon - lonOffset);
-      if (diff > 180) {
-        lonOffset -= 360;
-      } else if (diff < -180) {
-        lonOffset += 360;
-      }
-    }
-    const adjustedLon = curLon + lonOffset;
-    unrolledCoords.push([wp.lat, adjustedLon]);
-    prevLon = adjustedLon;
+    let lat = Number(wp.lat);
+    let lon = Number(wp.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 360) continue;
+    lon = ((lon + 180) % 360 + 360) % 360 - 180;
+    const prev = cleanWps.length ? cleanWps[cleanWps.length - 1] : null;
+    if (prev && Math.abs(prev.lat - lat) < 1e-7 && Math.abs(prev.lon - lon) < 1e-7) continue;
+    cleanWps.push({ lat, lon, name: wp.name, id: wp.id, _src: wp });
+  }
+  if (cleanWps.length === 0) {
+    return;
   }
 
-  // Draw Route Track Polyline
-  const trackGlow = L.polyline(unrolledCoords, {
-    color: "#0284c7",
-    weight: 7,
-    opacity: 0.35,
-    interactive: false
-  });
-  const trackLine = L.polyline(unrolledCoords, {
-    color: "#38bdf8",
-    weight: 3.5,
-    dashArray: "8, 6",
-    opacity: 0.95
-  });
-  
+  const routeSegments = [];
+  let seg = [];
+  let prevLon = null;
+  const unrolledCoords = [];
+  for (let i = 0; i < cleanWps.length; i++) {
+    const lon = cleanWps[i].lon;
+    const lat = cleanWps[i].lat;
+    if (prevLon !== null && Math.abs(lon - prevLon) > 170) {
+      if (seg.length >= 2) routeSegments.push(seg);
+      else if (seg.length === 1) routeSegments.push(seg);
+      seg = [];
+    }
+    const pt = [lat, lon];
+    seg.push(pt);
+    unrolledCoords.push(pt);
+    prevLon = lon;
+  }
+  if (seg.length) routeSegments.push(seg);
+
   const rtSub = window.ROUTE_SUBFILTERS || { waypoints: true, line: true };
+  let trackLine = null;
   if (rtSub.line !== false) {
-    leafletRouteLayer.addLayer(trackGlow);
+    routeSegments.forEach((coords) => {
+      if (!coords || coords.length < 2) return;
+      const glow = L.polyline(coords, {
+        color: "#0678c8",
+        weight: 12,
+        opacity: 0.38,
+        interactive: false,
+        lineCap: "round",
+        lineJoin: "round"
+      });
+      const line = L.polyline(coords, {
+        color: "#22d3ee",
+        weight: 5,
+        opacity: 1,
+        interactive: true,
+        lineCap: "round",
+        lineJoin: "round"
+      });
+      leafletRouteLayer.addLayer(glow);
+      leafletRouteLayer.addLayer(line);
+      if (!trackLine) trackLine = line;
+    });
+  }
+  if (!trackLine && unrolledCoords.length) {
+    trackLine = L.polyline(unrolledCoords, { color: "#22d3ee", weight: 5, opacity: 1 });
     leafletRouteLayer.addLayer(trackLine);
   }
 
   // Add Waypoints
-  (rtSub.waypoints !== false ? route.waypoints : []).forEach((wp, idx) => {
+  (rtSub.waypoints !== false ? cleanWps : []).forEach((wp, idx) => {
     const isStart = idx === 0;
-    const isEnd = idx === route.waypoints.length - 1;
+    const isEnd = idx === cleanWps.length - 1;
     const wptCoords = unrolledCoords[idx];
     
     const color = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#38bdf8");
@@ -2798,6 +2829,9 @@ window.loadRemoteNoticesJson = loadRemoteNoticesJson;
 function setOverlayNoticesLoading(isLoading) {
   const tab = document.getElementById("tabOverlayNotices");
   if (!tab) return;
+  if (typeof window.setOverlayTileLoading === "function") {
+    window.setOverlayTileLoading("notices", isLoading);
+  }
   if (isLoading) {
     tab.classList.add("is-loading");
     tab.setAttribute("title", "Loading NtM & NAVTEX objects onto chart...");
@@ -6643,10 +6677,10 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
     // Ocean sphere fill — realistic physical globe maritime azure blue
     const oceanGrad = ctx.createRadialGradient(cx - R * 0.28, cy - R * 0.32, R * 0.05, cx, cy, R);
-    oceanGrad.addColorStop(0, "#2563eb");   // Sunlit azure surface
-    oceanGrad.addColorStop(0.45, "#1d4ed8"); // Rich maritime blue
-    oceanGrad.addColorStop(0.82, "#173a80"); // Deep oceanic abyss
-    oceanGrad.addColorStop(1, "#0a1936");    // Limb darkening
+    oceanGrad.addColorStop(0, "#3aa0c8");   // Esri-Ocean sunlit sea
+    oceanGrad.addColorStop(0.45, "#1d6fa5");
+    oceanGrad.addColorStop(0.82, "#0d3b66");
+    oceanGrad.addColorStop(1, "#071d33");
     ctx.fillStyle = oceanGrad;
     ctx.beginPath();
     ctx.arc(cx, cy, R, 0, Math.PI * 2);
@@ -6708,37 +6742,11 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         const avgLat = sumLat / poly.length;
         const avgLon = sumLon / poly.length;
 
-        // Realistic Physical Biome Colors (Polar Ice, Desert Ochre, Lush Temperate / Tropical Green)
-        let landFill = "#2e7042"; // Natural lush temperate green
-        let landStroke = "#1b4d2e"; // Clean coastal stroke
-        let coastalShelf = "rgba(56, 189, 248, 0.32)";
+        // Nautical-chart land (match Esri Ocean look — muted tan, not biome rainbow)
+        let landFill = (avgLat < -58 || avgLat > 70) ? "#eef2f6" : "#cbb89a";
+        let landStroke = (avgLat < -58 || avgLat > 70) ? "#cbd5e1" : "#8a7355";
+        let coastalShelf = "rgba(56, 189, 248, 0.28)";
 
-        if (avgLat < -58 || avgLat > 62) {
-          // Polar ice cap & Arctic / Greenland glaciers (White / Glacial Cyan)
-          landFill = "#f8fafc";
-          landStroke = "#cbd5e1";
-          coastalShelf = "rgba(186, 230, 253, 0.45)";
-        } else if ((avgLat >= 12 && avgLat <= 32 && avgLon >= -18 && avgLon <= 62) || // Sahara & Arabian desert
-                   (avgLat <= -16 && avgLat >= -32 && avgLon >= 114 && avgLon <= 145) || // Australian Outback
-                   (avgLat >= 24 && avgLat <= 38 && avgLon >= 45 && avgLon <= 75) || // Middle East / Persian Gulf
-                   (avgLat >= 22 && avgLat <= 42 && avgLon >= 80 && avgLon <= 108)) { // Gobi / Taklamakan
-          // Warm arid desert ochre / golden sand
-          landFill = "#d49e5d";
-          landStroke = "#a36e32";
-          coastalShelf = "rgba(56, 189, 248, 0.28)";
-        } else if (avgLat >= 50 && avgLat <= 62) {
-          // Boreal Taiga / Subpolar Northern forests
-          landFill = "#3e6542";
-          landStroke = "#234226";
-          coastalShelf = "rgba(56, 189, 248, 0.25)";
-        } else if (avgLat >= -15 && avgLat <= 15) {
-          // Tropical Rainforest & Equator
-          landFill = "#226638";
-          landStroke = "#144222";
-          coastalShelf = "rgba(56, 189, 248, 0.35)";
-        }
-
-        // 1. Shallow Coastal Water / Coral Reef Shelf Glow
         ctx.beginPath();
         for (let i = 0; i < projPts.length; i++) {
           if (i === 0) ctx.moveTo(projPts[i].x, projPts[i].y);
@@ -6921,14 +6929,22 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       if (baseKey) {
         activeBaseKey = baseKey;
         selector.querySelectorAll("[data-base]").forEach(b => b.classList.toggle("active-base", b === btn));
+        const triggerBtn = selector.querySelector(".ntm-layer-trigger-btn");
+        const setBaseLoading = (on) => {
+          selector.classList.toggle("is-loading-base", on);
+          if (triggerBtn) triggerBtn.classList.toggle("is-loading", on);
+          btn.classList.toggle("is-loading", on);
+        };
 
         if (baseKey === "globe3d") {
+          setBaseLoading(true);
           const c = mapInstance.getCenter();
           globeState.rotLat = c.lat;
           globeState.rotLon = c.lng;
           globeState.active = true;
           globeWrap.classList.add("active");
           renderGlobe3D();
+          setTimeout(() => setBaseLoading(false), 280);
         } else {
           if (globeState.active) {
             globeState.active = false;
@@ -6941,7 +6957,28 @@ function initVisualChartLayerSelector(mapInstance, layers) {
             }
           });
           if (layers[baseKey]) {
-            layers[baseKey].addTo(mapInstance);
+            setBaseLoading(true);
+            const lyr = layers[baseKey];
+            let pending = 0;
+            let settled = false;
+            const finish = () => {
+              if (settled) return;
+              settled = true;
+              lyr.off("loading", onLoading);
+              lyr.off("load", onLoad);
+              lyr.off("tileerror", onLoad);
+              setBaseLoading(false);
+            };
+            const onLoading = () => { pending++; };
+            const onLoad = () => {
+              pending = Math.max(0, pending - 1);
+              if (pending === 0) setTimeout(finish, 120);
+            };
+            lyr.on("loading", onLoading);
+            lyr.on("load", onLoad);
+            lyr.on("tileerror", onLoad);
+            lyr.addTo(mapInstance);
+            setTimeout(finish, 4500);
           }
         }
         selector.classList.add("collapsed");
@@ -6959,7 +6996,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 }
 
 /* ==========================================================================
-   SETSAIL v4.9 — OFFICIAL GOOGLE ACCOUNT AUTHENTICATION & FULL USER HISTORY,
+   SETSAIL v5.8 — OFFICIAL GOOGLE ACCOUNT AUTHENTICATION & FULL USER HISTORY,
    DRAGGABLE ROUTE SNAPSHOT + CORRIDOR BUFFER FILTER, & SETNEWS + "FOR YOU" AI
    ========================================================================== */
 
@@ -10414,7 +10451,44 @@ const SET_SAIL_LANGUAGES = {
       btn_view_broadcast: "👁 Tingnan ang Broadcast",
       btn_inspect_edit: "✎ Suriin / I-edit"
     }
+  },
+  hi: {
+    code: "hi",
+    flag: "in",
+    name: "हिन्दी",
+    label: "HI • हिन्दी",
+    translations: {
+      nav_home: "होम",
+      nav_chart: "SetChart मानचित्र",
+      nav_route: "SetRoute मार्ग",
+      nav_news: "SetNews समाचार",
+      nav_gyro: "उपकरण",
+      nav_settings: "सेटिंग्स",
+      hero_title: "YOUR AI-POWERED BRIDGE",
+      hero_sub: "ECDIS ओवरले, स्वचालित NtM प्लॉटिंग, जायरो विचलन, मार्ग अनुकूलन और समुद्री खुफिया",
+      home_chart_title: "रीयल-टाइम नौवहन चार्ट ओवरले",
+      home_chart_sub: "लाइव NtM, NAVTEX और पोर्ट गहराई के साथ इंटरैक्टिव समुद्री चार्ट",
+      home_news_title: "नवीनतम समुद्री ब्रिफिंग",
+      home_news_sub: "ब्रिज वॉचकीपर के लिए रीयल-टाइम हाइड्रोग्राफिक, पोर्ट और मौसम डिस्पैच",
+      btn_open_chart: "SetChart मानचित्र खोलें",
+      btn_plan_route: "SetRoute में मार्ग योजना",
+      btn_open_news: "SetNews खोलें",
+      btn_read_story: "पूरी खबर पढ़ें →",
+      settings_account_heading: "SetSail खाता और क्लाउड सिंक",
+      settings_account_sub: "मार्ग योजना, चार्ट संपादन और प्राथमिकताओं को सिंक करने के लिए Google से साइन इन करें",
+      btn_google_signin: "साइन-इन",
+      btn_sign_out: "साइन आउट",
+      guest_mode: "अतिथि मोड",
+      lang_settings_title: "क्षेत्रीय भाषा और ब्रिज लोकलाइज़ेशन",
+      lang_settings_sub: "अपनी पसंदीदा ब्रिज भाषा चुनें। सभी टैब, मानचित्र परतें और ब्रिफिंग तुरंत अनुकूलित होंगी।",
+      toast_lang_changed: "भाषा हिन्दी में बदली गई",
+      filter_active: "सक्रिय चेतावनियाँ",
+      filter_navtex: "NAVTEX अलर्ट",
+      btn_view_broadcast: "👁 प्रसारण देखें",
+      btn_inspect_edit: "✎ जाँच / संपादन"
+    }
   }
+
 };
 window.SET_SAIL_LANGUAGES = SET_SAIL_LANGUAGES;
 

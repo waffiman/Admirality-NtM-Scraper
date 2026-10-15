@@ -20068,10 +20068,35 @@ function initExcelOverlayDock(map) {
 /**
  * Toggle an overlay on/off and sync Excel dock tab UI
  */
+
+function setOverlayTileLoading(overlayKey, isLoading) {
+  const tab = document.querySelector('.excel-tab[data-overlay="' + overlayKey + '"]');
+  if (!tab) return;
+  if (isLoading) {
+    tab.classList.add("is-loading");
+    if (!tab.querySelector(".excel-tab-spinner")) {
+      const sp = document.createElement("span");
+      sp.className = "excel-tab-spinner";
+      sp.setAttribute("aria-hidden", "true");
+      const chk = tab.querySelector(".excel-tab-check");
+      if (chk) tab.insertBefore(sp, chk);
+      else tab.prepend(sp);
+    }
+  } else {
+    tab.classList.remove("is-loading");
+  }
+}
+window.setOverlayTileLoading = setOverlayTileLoading;
+
 function setOverlayActive(overlayKey, isActive, map = null) {
   OVERLAY_STATES[overlayKey] = isActive;
   if (window.OVERLAY_STATES) {
     window.OVERLAY_STATES[overlayKey] = isActive;
+  }
+  if (isActive && (overlayKey === "depths" || overlayKey === "weather" || overlayKey === "route" || overlayKey === "notices")) {
+    setOverlayTileLoading(overlayKey, true);
+  } else if (!isActive) {
+    setOverlayTileLoading(overlayKey, false);
   }
 
   if (!window.leafletMap && typeof window.initNtMMap === "function") {
@@ -20099,6 +20124,7 @@ function setOverlayActive(overlayKey, isActive, map = null) {
       OVERLAY_STATES.isobaths = isActive;
       if (isActive) {
         renderPortDepthsOnMap(currentMap);
+        setTimeout(() => setOverlayTileLoading("depths", false), 400);
       }
       if (leafletPortDepthsLayer) {
         if (isActive) {
@@ -20156,6 +20182,7 @@ function setOverlayActive(overlayKey, isActive, map = null) {
       if (typeof window.renderWeatherOnMap === "function") {
         window.renderWeatherOnMap(currentMap);
       }
+      setTimeout(() => setOverlayTileLoading("weather", false), 350);
     } else if (overlayKey === "route") {
       const rLayer = (typeof window.leafletRouteLayer !== "undefined" && window.leafletRouteLayer)
         ? window.leafletRouteLayer
@@ -20173,6 +20200,7 @@ function setOverlayActive(overlayKey, isActive, map = null) {
       if (typeof window.renderRouteBufferCorridorOnMap === "function") {
         window.renderRouteBufferCorridorOnMap();
       }
+      setTimeout(() => setOverlayTileLoading("route", false), 300);
     }
   }
 

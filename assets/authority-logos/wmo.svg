@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="WMO">
+  <circle cx="60" cy="48" r="26" fill="none" stroke="#1565c0" stroke-width="3"/>
+  <ellipse cx="60" cy="48" rx="12" ry="26" fill="none" stroke="#1565c0" stroke-width="1.8"/>
+  <path d="M34 48h52M60 22v52" fill="none" stroke="#1565c0" stroke-width="1.6"/>
+  <path d="M38 38c7 4 15 4 22 0s15-4 22 0M38 58c7 4 15 4 22 0s15-4 22 0" fill="none" stroke="#1565c0" stroke-width="1.4"/>
+  <path d="M28 78c9 12 23 18 32 18s23-6 32-18" fill="none" stroke="#1565c0" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 70c7 9 16 15 24 18M96 70c-7 9-16 15-24 18" fill="none" stroke="#1565c0" stroke-width="2.2" stroke-linecap="round"/>
+  <text x="60" y="112" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#1565c0">WMO</text>
+</svg>

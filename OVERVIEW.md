@@ -111,3 +111,20 @@ Run from PowerShell or terminal:
 python "d:\IINO INEOS VESTA\Admirality-NtM-Scraper\deploy_production.py"
 ```
 The deployer script computes SHA1 hashes of all 86 project files and pushes only changed assets directly to GitHub, triggering immediate Vercel redeployment.
+
+---
+
+## Local Flash Drive ↔ Server Sync Policy (Antigravity / Multi-Device)
+
+**Source of truth is always the online repository / production host:**
+- Production: https://setsail-ai.vercel.app
+- GitHub: https://github.com/waffiman/Admirality-NtM-Scraper (`main`)
+
+The local copy often lives on a USB flash drive that can suddenly enter an NTFS *corrupted / unreadable* state (`WinError 1392`) where files cannot be edited or even deleted. Therefore:
+
+1. **Never trust local files as authoritative.** Before any feature work, pull or download the latest `index.html`, `sw.js`, `assets/Auto NtM Plotting/*`, `news.json`, `weather.json`, `notices.json` from GitHub/Vercel.
+2. **Apply edits only on a clean working copy** (e.g. `C:\Users\<user>\setsail_work_*`), never on a corrupted flash path.
+3. **After a successful push to `main`**, mirror the updated files back onto the flash drive when it is healthy — keep the same folder layout as the repo (`index.html`, `sw.js`, `assets/...`, data JSON).
+4. **Antigravity / other devices** must follow the same loop: pull server → edit → push → sync local. If local and server diverge, **server wins**.
+5. Prefer Python file I/O when the IDE cannot write to a locked/corrupt volume.
+

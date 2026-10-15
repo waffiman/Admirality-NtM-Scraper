@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="IHO">
+  <circle cx="60" cy="60" r="54" fill="none" stroke="#0b4f6c" stroke-width="4"/>
+  <path d="M26 58c8-10 16-10 24 0s16 10 24 0 16-10 24 0" fill="none" stroke="#0b4f6c" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M26 72c8-10 16-10 24 0s16 10 24 0 16-10 24 0" fill="none" stroke="#14919b" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M48 34h8v28h16v8H48z" fill="#0b4f6c"/>
+  <text x="60" y="108" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#0b4f6c">IHO</text>
+</svg>

@@ -10213,3 +10213,34 @@ body.light-theme .setnews-reader-dialog {
     gap: 4px;
   }
 }
+
+
+/* v5.8 — basemap layer spinner + overlay dock spinner polish */
+.ntm-layer-thumb-btn.is-loading .ntm-layer-thumb-preview,
+.ntm-chart-layer-selector.is-loading-base .ntm-layer-trigger-btn .ntm-layer-thumb-preview {
+  position: relative;
+}
+.ntm-layer-thumb-btn.is-loading .ntm-layer-thumb-preview::after,
+.ntm-chart-layer-selector.is-loading-base .ntm-layer-trigger-btn .ntm-layer-thumb-preview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(56,189,248,0.25);
+  border-top-color: #38bdf8;
+  animation: setsailSpin 0.7s linear infinite;
+}
+@keyframes setsailSpin { to { transform: rotate(360deg); } }
+.excel-tab.is-loading .excel-tab-spinner {
+  display: inline-block !important;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(56,189,248,0.25);
+  border-top-color: #38bdf8;
+  animation: setsailSpin 0.7s linear infinite;
+  margin-right: 4px;
+}

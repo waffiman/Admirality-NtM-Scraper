@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.7" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.8" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -11026,8 +11026,8 @@ select option {
     // Restore preserved active tab on startup so user is never reset to Home unexpectedly
     try {
       const initSaved = (window.location.hash && window.location.hash.length > 1) ? window.location.hash.replace('#', '').trim() : (sessionStorage.getItem('setsail_active_tab') || localStorage.getItem('setsail_active_tab') || '');
-      if (initSaved && initSaved !== 'tab-home' && document.getElementById(initSaved)) {
-        setTimeout(() => switchToTab(initSaved), 20);
+      if (initSaved && document.getElementById(initSaved)) {
+        switchToTab(initSaved);
       }
     } catch (e) {}
 
@@ -11375,7 +11375,7 @@ select option {
       </div>
 
       <button type="button" class="nav-item" data-tab="tab-news" id="navItemSetNews" aria-label="SetNews — Global Maritime Intelligence &amp; For You" title="SetNews — Global Maritime Intelligence &amp; For You">
-        <svg class="setsail-icon" viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M18 14h-8M15 18h-5" stroke="#38bdf8" stroke-width="1.6" stroke-linecap="round"/><rect x="10" y="6" width="8" height="4" rx="1" fill="none" stroke="#f05a36" stroke-width="1.6"/></svg>
+        <svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1.8 3.2 1.2 5.4.8 7.2-.3 1.2.3 2.3 1.4 2.8 1.6.7 2.8 2.3 2.8 4.2A5 5 0 0 1 12 21a5 5 0 0 1-5-4.8c0-2.6 1.5-4.2 3.2-5.6C9 9.2 8.2 7.4 8.6 5.2 9.2 3.4 10.4 2.4 12 2z" fill="none" stroke="#f05a36" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 11.2c.9 1.3 1.1 2.2.9 3.2-.2.9-.9 1.6-1.8 1.8" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/></svg>
         <span class="tooltip">SetNews · Maritime Wire</span>
       </button>
 
@@ -11629,32 +11629,38 @@ select option {
                 <div class="home-sources-sub">Aggregating official hydrographic, astronomical, and meteorological authorities worldwide</div>
               </div>
               <div class="home-sources-marquee-band">
-                                <div class="home-sources-marquee-track" id="homeSourcesMarqueeTrack">
+                                                                                <div class="home-sources-marquee-track" id="homeSourcesMarqueeTrack">
                   <div class="source-authority-logo" title="NOAA"><img class="source-authority-img" src="assets/authority-logos/noaa.svg" alt="NOAA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NOAA NHC</span><span class="source-logo-sub">Cyclones • ENC</span></div></div>
-                  <div class="source-authority-logo" title="IMO"><img class="source-authority-img" src="https://upload.wikimedia.org/wikipedia/commons/4/4e/International_Maritime_Organization_logo.svg" alt="IMO" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'" /><div class="source-logo-text-group"><span class="source-logo-name">IMO</span><span class="source-logo-sub">SOLAS Navigation</span></div></div>
-                  <div class="source-authority-logo" title="ECMWF"><img class="source-authority-img" src="https://upload.wikimedia.org/wikipedia/commons/8/8f/ECMWF_logo.svg" alt="ECMWF" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'" /><div class="source-logo-text-group"><span class="source-logo-name">ECMWF</span><span class="source-logo-sub">Wave &amp; Wind IFS</span></div></div>
-                  <div class="source-authority-logo" title="IHO"><img class="source-authority-img" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/International_Hydrographic_Organization_logo.svg" alt="IHO" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'" /><div class="source-logo-text-group"><span class="source-logo-name">IHO</span><span class="source-logo-sub">S-57 • S-100</span></div></div>
-                  <div class="source-authority-logo" title="NASA"><img class="source-authority-img" src="assets/authority-logos/nasa.svg" alt="NASA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NASA</span><span class="source-logo-sub">Ephemeris Support</span></div></div>
-                  <div class="source-authority-logo" title="USACE"><img class="source-authority-img" src="https://upload.wikimedia.org/wikipedia/commons/8/80/US-ArmyCorpsOfEngineers-COA.svg" alt="USACE" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'" /><div class="source-logo-text-group"><span class="source-logo-name">USACE</span><span class="source-logo-sub">Channel Depths</span></div></div>
-                  <div class="source-authority-logo" title="NGA"><img class="source-authority-img" src="https://upload.wikimedia.org/wikipedia/commons/e/e2/Seal_of_the_National_Geospatial-Intelligence_Agency.svg" alt="NGA" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'" /><div class="source-logo-text-group"><span class="source-logo-name">NGA MSI</span><span class="source-logo-sub">NAVAREA IV/XII</span></div></div>
-                  <div class="source-authority-logo" title="ADMIRALTY UKHO"><div class="source-logo-text-group"><span class="source-logo-name">ADMIRALTY</span><span class="source-logo-sub">UKHO Weekly NtM</span></div></div>
+                  <div class="source-authority-logo" title="NASA"><img class="source-authority-img" src="assets/authority-logos/nasa.svg" alt="NASA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NASA</span><span class="source-logo-sub">Ephemeris</span></div></div>
+                  <div class="source-authority-logo" title="IMO"><img class="source-authority-img" src="assets/authority-logos/imo.svg" alt="IMO" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">IMO</span><span class="source-logo-sub">SOLAS</span></div></div>
+                  <div class="source-authority-logo" title="ECMWF"><img class="source-authority-img" src="assets/authority-logos/ecmwf.svg" alt="ECMWF" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">ECMWF</span><span class="source-logo-sub">Wave &amp; Wind</span></div></div>
+                  <div class="source-authority-logo" title="IHO"><img class="source-authority-img" src="assets/authority-logos/iho.svg" alt="IHO" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">IHO</span><span class="source-logo-sub">S-57 / S-100</span></div></div>
+                  <div class="source-authority-logo" title="USACE"><img class="source-authority-img" src="assets/authority-logos/usace.svg" alt="USACE" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">USACE</span><span class="source-logo-sub">Channel Depths</span></div></div>
+                  <div class="source-authority-logo" title="NGA"><img class="source-authority-img" src="assets/authority-logos/nga.svg" alt="NGA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NGA MSI</span><span class="source-logo-sub">NAVAREA IV/XII</span></div></div>
+                  <div class="source-authority-logo" title="WMO"><img class="source-authority-img" src="assets/authority-logos/wmo.svg" alt="WMO" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">WMO</span><span class="source-logo-sub">MetOcean</span></div></div>
+                  <div class="source-authority-logo" title="ESA"><img class="source-authority-img" src="assets/authority-logos/esa.svg" alt="ESA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">ESA</span><span class="source-logo-sub">Earth Observation</span></div></div>
+                  <div class="source-authority-logo" title="UKHO ADMIRALTY"><img class="source-authority-img" src="assets/authority-logos/ukho.svg" alt="UKHO" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">ADMIRALTY</span><span class="source-logo-sub">UKHO Weekly NtM</span></div></div>
                   <div class="source-authority-logo" title="NautoShark"><div class="source-logo-text-group"><span class="source-logo-name">NAUTOSHARK</span><span class="source-logo-sub">NAVAREA I–XXI</span></div></div>
-                  <div class="source-authority-logo" title="JMA"><div class="source-logo-text-group"><span class="source-logo-name">JMA RSMC</span><span class="source-logo-sub">Tokyo Typhoon</span></div></div>
+                  <div class="source-authority-logo" title="JMA RSMC"><div class="source-logo-text-group"><span class="source-logo-name">JMA RSMC</span><span class="source-logo-sub">Tokyo Typhoon</span></div></div>
                   <div class="source-authority-logo" title="JTWC"><div class="source-logo-text-group"><span class="source-logo-name">JTWC</span><span class="source-logo-sub">Typhoon Advisories</span></div></div>
-                  <div class="source-authority-logo" title="Ports"><div class="source-logo-text-group"><span class="source-logo-name">PORT SURVEYS</span><span class="source-logo-sub">MPA • ACP • SCA</span></div></div>
+                  <div class="source-authority-logo" title="Copernicus Marine"><div class="source-logo-text-group"><span class="source-logo-name">COPERNICUS</span><span class="source-logo-sub">Marine Service</span></div></div>
+                  <div class="source-authority-logo" title="Port Surveys"><div class="source-logo-text-group"><span class="source-logo-name">PORT SURVEYS</span><span class="source-logo-sub">MPA • ACP • SCA</span></div></div>
 
                   <div class="source-authority-logo" title="NOAA"><img class="source-authority-img" src="assets/authority-logos/noaa.svg" alt="NOAA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NOAA NHC</span><span class="source-logo-sub">Cyclones • ENC</span></div></div>
-                  <div class="source-authority-logo" title="IMO"><img class="source-authority-img" src="https://upload.wikimedia.org/wikipedia/commons/4/4e/International_Maritime_Organization_logo.svg" alt="IMO" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'" /><div class="source-logo-text-group"><span class="source-logo-name">IMO</span><span class="source-logo-sub">SOLAS Navigation</span></div></div>
-                  <div class="source-authority-logo" title="ECMWF"><img class="source-authority-img" src="https://upload.wikimedia.org/wikipedia/commons/8/8f/ECMWF_logo.svg" alt="ECMWF" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'" /><div class="source-logo-text-group"><span class="source-logo-name">ECMWF</span><span class="source-logo-sub">Wave &amp; Wind IFS</span></div></div>
-                  <div class="source-authority-logo" title="IHO"><img class="source-authority-img" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/International_Hydrographic_Organization_logo.svg" alt="IHO" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'" /><div class="source-logo-text-group"><span class="source-logo-name">IHO</span><span class="source-logo-sub">S-57 • S-100</span></div></div>
-                  <div class="source-authority-logo" title="NASA"><img class="source-authority-img" src="assets/authority-logos/nasa.svg" alt="NASA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NASA</span><span class="source-logo-sub">Ephemeris Support</span></div></div>
-                  <div class="source-authority-logo" title="USACE"><img class="source-authority-img" src="https://upload.wikimedia.org/wikipedia/commons/8/80/US-ArmyCorpsOfEngineers-COA.svg" alt="USACE" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'" /><div class="source-logo-text-group"><span class="source-logo-name">USACE</span><span class="source-logo-sub">Channel Depths</span></div></div>
-                  <div class="source-authority-logo" title="NGA"><img class="source-authority-img" src="https://upload.wikimedia.org/wikipedia/commons/e/e2/Seal_of_the_National_Geospatial-Intelligence_Agency.svg" alt="NGA" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none'" /><div class="source-logo-text-group"><span class="source-logo-name">NGA MSI</span><span class="source-logo-sub">NAVAREA IV/XII</span></div></div>
-                  <div class="source-authority-logo" title="ADMIRALTY UKHO"><div class="source-logo-text-group"><span class="source-logo-name">ADMIRALTY</span><span class="source-logo-sub">UKHO Weekly NtM</span></div></div>
+                  <div class="source-authority-logo" title="NASA"><img class="source-authority-img" src="assets/authority-logos/nasa.svg" alt="NASA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NASA</span><span class="source-logo-sub">Ephemeris</span></div></div>
+                  <div class="source-authority-logo" title="IMO"><img class="source-authority-img" src="assets/authority-logos/imo.svg" alt="IMO" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">IMO</span><span class="source-logo-sub">SOLAS</span></div></div>
+                  <div class="source-authority-logo" title="ECMWF"><img class="source-authority-img" src="assets/authority-logos/ecmwf.svg" alt="ECMWF" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">ECMWF</span><span class="source-logo-sub">Wave &amp; Wind</span></div></div>
+                  <div class="source-authority-logo" title="IHO"><img class="source-authority-img" src="assets/authority-logos/iho.svg" alt="IHO" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">IHO</span><span class="source-logo-sub">S-57 / S-100</span></div></div>
+                  <div class="source-authority-logo" title="USACE"><img class="source-authority-img" src="assets/authority-logos/usace.svg" alt="USACE" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">USACE</span><span class="source-logo-sub">Channel Depths</span></div></div>
+                  <div class="source-authority-logo" title="NGA"><img class="source-authority-img" src="assets/authority-logos/nga.svg" alt="NGA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NGA MSI</span><span class="source-logo-sub">NAVAREA IV/XII</span></div></div>
+                  <div class="source-authority-logo" title="WMO"><img class="source-authority-img" src="assets/authority-logos/wmo.svg" alt="WMO" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">WMO</span><span class="source-logo-sub">MetOcean</span></div></div>
+                  <div class="source-authority-logo" title="ESA"><img class="source-authority-img" src="assets/authority-logos/esa.svg" alt="ESA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">ESA</span><span class="source-logo-sub">Earth Observation</span></div></div>
+                  <div class="source-authority-logo" title="UKHO ADMIRALTY"><img class="source-authority-img" src="assets/authority-logos/ukho.svg" alt="UKHO" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">ADMIRALTY</span><span class="source-logo-sub">UKHO Weekly NtM</span></div></div>
                   <div class="source-authority-logo" title="NautoShark"><div class="source-logo-text-group"><span class="source-logo-name">NAUTOSHARK</span><span class="source-logo-sub">NAVAREA I–XXI</span></div></div>
-                  <div class="source-authority-logo" title="JMA"><div class="source-logo-text-group"><span class="source-logo-name">JMA RSMC</span><span class="source-logo-sub">Tokyo Typhoon</span></div></div>
+                  <div class="source-authority-logo" title="JMA RSMC"><div class="source-logo-text-group"><span class="source-logo-name">JMA RSMC</span><span class="source-logo-sub">Tokyo Typhoon</span></div></div>
                   <div class="source-authority-logo" title="JTWC"><div class="source-logo-text-group"><span class="source-logo-name">JTWC</span><span class="source-logo-sub">Typhoon Advisories</span></div></div>
-                  <div class="source-authority-logo" title="Ports"><div class="source-logo-text-group"><span class="source-logo-name">PORT SURVEYS</span><span class="source-logo-sub">MPA • ACP • SCA</span></div></div>
+                  <div class="source-authority-logo" title="Copernicus Marine"><div class="source-logo-text-group"><span class="source-logo-name">COPERNICUS</span><span class="source-logo-sub">Marine Service</span></div></div>
+                  <div class="source-authority-logo" title="Port Surveys"><div class="source-logo-text-group"><span class="source-logo-name">PORT SURVEYS</span><span class="source-logo-sub">MPA • ACP • SCA</span></div></div>
                 </div>
               </div>
             </section>
@@ -13706,6 +13712,11 @@ select option {
                   <img src="assets/flags/ph.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/ph.png';" class="lang-flag-icon" alt="FIL" />
                   <span class="lang-choice-name">Filipino</span>
                   <span class="lang-choice-sub">PH</span>
+                </button>
+                <button type="button" class="lang-choice-btn" data-lang-code="hi" onclick="window.setSetSailLanguage('hi')">
+                  <img src="assets/flags/in.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/in.png';" class="lang-flag-icon" alt="HI" />
+                  <span class="lang-choice-name">हिन्दी</span>
+                  <span class="lang-choice-sub">HI</span>
                 </button>
               </div>
             </div>
@@ -16046,7 +16057,44 @@ select option {
 
 
 
-  </style>
+  
+/* v5.8 force branded selects over embedded SetStar rules */
+#tab-gyro select,
+#tab-ntm select,
+#tab-route select,
+#tab-settings select,
+#tab-news select,
+select.ntm-compact-select,
+select.ntm-navarea-select,
+select.setroute-select,
+select.min-input,
+.panel select,
+.devedit select,
+.setstar-inputs-grid select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-color: rgba(8, 16, 38, 0.95) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2338bdf8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 12px 8px !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  border-radius: 8px !important;
+  padding: 0.45rem 2rem 0.45rem 0.7rem !important;
+  color-scheme: dark !important;
+}
+[data-theme="light"] #tab-gyro select,
+[data-theme="light"] #tab-ntm select,
+[data-theme="light"] #tab-route select,
+[data-theme="light"] select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+  color-scheme: light !important;
+}
+</style>
 
 
 
@@ -19369,8 +19417,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.7"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.7"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.8"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.8"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19448,7 +19496,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.7"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.8"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19764,10 +19812,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
             e.preventDefault();
             targetProgress = clamp(Math.ceil(targetProgress - 0.15) - 1, 0, MAX_SLIDE);
-          } else if (e.key === 'Home') {
+          } else if (e.key === 'Home' && typeof isHomeActive === 'function' && isHomeActive()) {
             e.preventDefault();
             targetProgress = 0;
-          } else if (e.key === 'End') {
+          } else if (e.key === 'End' && typeof isHomeActive === 'function' && isHomeActive()) {
             e.preventDefault();
             targetProgress = MAX_SLIDE;
           }
