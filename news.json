@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-14T21:21:03Z",
-  "generatedAt": "2026-10-14T21:21:03Z",
+  "updatedAt": "2026-10-15T03:32:56Z",
+  "generatedAt": "2026-10-15T03:32:56Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -11,8 +11,414 @@
     "Hellenic Shipping News",
     "Container News"
   ],
-  "totalArticles": 60,
+  "totalArticles": 70,
   "articles": [
+    {
+      "id": "SN-B733B9155A",
+      "title": "Suez Canal container ship transits exceed half of pre-crisis levels",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/suez-canal-container-ship-transits-exceed-half-of-pre-crisis-levels/",
+      "publishedAt": "2026-10-15T01:00:05Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb",
+        "Suez Canal & Eastern Med",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "red sea",
+        "suez"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2026/03/12-2-300x200.jpg",
+      "summary": "Container ship traffic through the Suez Canal has reached its highest level since the Red Sea disruptions began, with weekly transiting capacity exceeding half of pre-crisis levels for the first time. According to BIMCO, citing Clarksons Research data, an average of 753,000 TEU of container ship capacity passed...",
+      "body": "Container ship traffic through the Suez Canal has reached its highest level since the Red Sea disruptions began, with weekly transiting capacity exceeding half of pre-crisis levels for the first time. According to BIMCO, citing Clarksons Research data, an average of 753,000 TEU of container ship capacity passed through the canal each week during the first two weeks of October 2026. This compares with 1.46 million TEU during the same period in 2023. The increase follows a series of decisions by major container shipping lines to restore services through the Red Sea after nearly three years of widespread diversions around the Cape of Good Hope. Shipping lines accelerate return to Suez BIMCO reported that 36% of container ship capacity travelling via either the Suez Canal or the Cape of Good Hope used the canal during the first two weeks of October. This represents a sharp increase from the average of 8% recorded between 2024 and mid-2026. However, it remains below the 80% share seen before the Red Sea attacks. The recovery began gathering pace in July 2026, when Maersk and Hapag-Lloyd announced the return of their AE15/SE3 Asia–Mediterranean service to the canal. Further changes followed across the Gemini Cooperation network, while members of the Ocean Alliance and Premier Alliance, along with MSC, also announced revised routings. In total, shipping lines have announced routing changes affecting 16 services since early July. The recovery has also become more balanced between sailing directions. During the third quarter, northbound capacity was equivalent to 75% of southbound capacity. That figure increased to 81% in early October. Capacity recovery could affect freight markets The return to shorter routes could have significant implications for global container shipping ca",
+      "takeaways": [
+        "Container ship traffic through the Suez Canal has reached its highest level since the Red Sea disruptions began, with weekly transiting capacity exceeding half of pre-crisis levels for the first time.",
+        "According to BIMCO, citing Clarksons Research data, an average of 753,000 TEU of container ship capacity passed through the canal each week during the first two weeks of October 2026.",
+        "This compares with 1.46 million TEU during the same period in 2023."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-5BD366F34E",
+      "title": "Port of Oakland records container volume growth in September",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/port-of-oakland-records-container-volume-growth-in-september/",
+      "publishedAt": "2026-10-14T23:00:15Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "US West Coast & Pacific",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2025/02/Port_of_Oakland_-_Aerial_-300x201.jpg",
+      "summary": "The Port of Oakland handled 188,517 TEUs in September 2026, a 5.4% increase compared to September 2025, with growth in both loaded imports and exports driving the improvement. Combined loaded container volume rose 7.7% year-on-year, with loaded imports reaching 82,975 TEUs, up 9.6% and reversing declines recorded in...",
+      "body": "The Port of Oakland handled 188,517 TEUs in September 2026, a 5.4% increase compared to September 2025, with growth in both loaded imports and exports driving the improvement. Combined loaded container volume rose 7.7% year-on-year, with loaded imports reaching 82,975 TEUs, up 9.6% and reversing declines recorded in July and August, while loaded exports reached 63,299 TEUs, up 5.3% and marking their third consecutive month of month-on-month growth. Empty container volume of 42,243 TEUs was down 2.0 percent year-on-year. The port recorded 88 vessel calls in September, up 7.3 percent year-on-year, and total container volume increased 8.5 percent compared to August. Through the first nine months of 2026, the Port of Oakland has handled 1,656,999 TEUs, down 3.5% compared to the same period in 2025. Loaded imports are down 3.1 percent year-to-date at 706,177 TEUs, while loaded exports of 590,434 TEUs are up 0.7%. Combined loaded container volume is down 1.4% year-to-date, and empty container movements have declined 10.4 percent. Acting Director of Maritime Jason Garben described the September results as encouraging, noting growth in both import and export directions, and reaffirmed the port’s focus on delivering reliable and efficient service while working with terminal operators and ocean carriers to strengthen Oakland’s competitive position and attract additional cargo.",
+      "takeaways": [
+        "The Port of Oakland handled 188,517 TEUs in September 2026, a 5.4% increase compared to September 2025, with growth in both loaded imports and exports driving the improvement.",
+        "Empty container volume of 42,243 TEUs was down 2.0 percent year-on-year.",
+        "The port recorded 88 vessel calls in September, up 7.3 percent year-on-year, and total container volume increased 8.5 percent compared to August."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-4377991DCE",
+      "title": "Deliveries Are Still Being Delayed As Container Freight Rates Fluctuate",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/deliveries-are-still-being-delayed-as-container-freight-rates-fluctuate/",
+      "publishedAt": "2026-10-14T21:00:59Z",
+      "category": "Ports & Terminals",
+      "region": "China & East Asia",
+      "regions": [
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.6,
+        122.1
+      ],
+      "navarea": "XI",
+      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "summary": "Container freight rates from Asia to Europe have fallen significantly since July, but shipping delays remain a challenge for importers in Europe, according to Sogese’s October Europe Container Market Update, published earlier this week. Drewry’s Shanghai–Genoa spot rate fell from $6,463 per 40-foot container on 9...",
+      "body": "Container freight rates from Asia to Europe have fallen significantly since July, but shipping delays remain a challenge for importers in Europe, according to Sogese’s October Europe Container Market Update, published earlier this week. Drewry’s Shanghai–Genoa spot rate fell from $6,463 per 40-foot container on 9 July to $3,702 on 1 October, a reduction of ...",
+      "takeaways": [
+        "Drewry’s Shanghai–Genoa spot rate fell from $6,463 per 40-foot container on 9 July to $3,702 on 1 October, a reduction of ...",
+        "Operational Area: China & East Asia.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A385CF8262",
+      "title": "Ship Recycling Markets Maintain Their Resilience",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/ship-recycling-markets-maintain-their-resilience/",
+      "publishedAt": "2026-10-14T21:00:59Z",
+      "category": "Ports & Terminals",
+      "region": "India & Indian Ocean",
+      "regions": [
+        "India & Indian Ocean"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        13.08,
+        80.29
+      ],
+      "navarea": "VIII",
+      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
+      "summary": "The ship recycling markets were stable over the past week. In its latest weekly report, Best Oasis (www.best-oasis.com), a leading cash buyer of ships, said that “the Indian recycling market remained broadly similar to last week, with little change in overall market conditions. However, the strengthening of the US...",
+      "body": "The ship recycling markets were stable over the past week. In its latest weekly report, Best Oasis (www.best-oasis.com), a leading cash buyer of ships, said that “the Indian recycling market remained broadly similar to last week, with little change in overall market conditions. However, the strengthening of the US dollar against the Indian rupee has ...",
+      "takeaways": [
+        "The ship recycling markets were stable over the past week.",
+        "In its latest weekly report, Best Oasis (www.best-oasis.com), a leading cash buyer of ships, said that “the Indian recycling market remained broadly similar to last week, with little change in overall market conditions.",
+        "However, the strengthening of the US dollar against the Indian rupee has ..."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-5534FE4441",
+      "title": "Suez Canal container ship transits exceed 50% of pre-disruption levels",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/suez-canal-container-ship-transits-exceed-50-of-pre-disruption-levels/",
+      "publishedAt": "2026-10-14T21:00:58Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb",
+        "Suez Canal & Eastern Med",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "container",
+        "red sea",
+        "suez"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "summary": "“During the first two weeks of October, weekly container ship capacity transiting the Suez Canal averaged 753k TEU, according to Clarksons Research, compared with 1,457k TEU during the same period in 2023. Since the Houthi attacks began in the Red Sea, this is the first time that transits have exceeded 50% of...",
+      "body": "“During the first two weeks of October, weekly container ship capacity transiting the Suez Canal averaged 753k TEU, according to Clarksons Research, compared with 1,457k TEU during the same period in 2023. Since the Houthi attacks began in the Red Sea, this is the first time that transits have exceeded 50% of pre-disruption levels,” says ...",
+      "takeaways": [
+        "“During the first two weeks of October, weekly container ship capacity transiting the Suez Canal averaged 753k TEU, according to Clarksons Research, compared with 1,457k TEU during the same period in 2023.",
+        "Since the Houthi attacks began in the Red Sea, this is the first time that transits have exceeded 50% of pre-disruption levels,” says ...",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-C0201AB2FB",
+      "title": "MPA, CMA CGM and SLNG Sign Memorandum of Understanding to Advance Liquefied Bio-Methane as Marine Fuel Pathway",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/mpa-cma-cgm-and-slng-sign-memorandum-of-understanding-to-advance-liquefied-bio-methane-as-marine-fuel-pathway/",
+      "publishedAt": "2026-10-14T21:00:57Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "lng",
+        "port",
+        "singapore"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
+      "summary": "The Maritime and Port Authority of Singapore (MPA), the CMA CGM Group, and Singapore LNG Corporation Pte Ltd (SLNG) have signed a Memorandum of Understanding (MOU) to explore the supply and use of liquefied bio-methane as a marine fuel in Singapore. The MOU was signed by Mr Ang Wee Keong, Chief Executive of MPA, Mr ...",
+      "body": "The Maritime and Port Authority of Singapore (MPA), the CMA CGM Group, and Singapore LNG Corporation Pte Ltd (SLNG) have signed a Memorandum of Understanding (MOU) to explore the supply and use of liquefied bio-methane as a marine fuel in Singapore. The MOU was signed by Mr Ang Wee Keong, Chief Executive of MPA, Mr ...",
+      "takeaways": [
+        "The MOU was signed by Mr Ang Wee Keong, Chief Executive of MPA, Mr ...",
+        "Operational Area: Singapore & Malacca Strait.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-3354EFDC5C",
+      "title": "Black Sea Steel Flows Weaken as Shipping Risks Rise",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/black-sea-steel-flows-weaken-as-shipping-risks-rise/",
+      "publishedAt": "2026-10-14T21:00:57Z",
+      "category": "Shipping & Tankers",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "shipping",
+        "suez"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=900&q=80",
+      "summary": "Recorded Black Sea steel loadings declined sharply in Q3 2026. Volumes, including scrap, fell 65.6% y/y to 0.65 Mt across 51 voyages, compared with 129 in Q3 2025. The year-on-year decline deepened through the quarter: July −28.0%, August −80.6%, and September −96.0%. September’s recorded volume totalled 20,690 t,...",
+      "body": "Recorded Black Sea steel loadings declined sharply in Q3 2026. Volumes, including scrap, fell 65.6% y/y to 0.65 Mt across 51 voyages, compared with 129 in Q3 2025. The year-on-year decline deepened through the quarter: July −28.0%, August −80.6%, and September −96.0%. September’s recorded volume totalled 20,690 t, comprising loadings from Turkey (12,750 t), Romania ...",
+      "takeaways": [
+        "Recorded Black Sea steel loadings declined sharply in Q3 2026.",
+        "Volumes, including scrap, fell 65.6% y/y to 0.65 Mt across 51 voyages, compared with 129 in Q3 2025.",
+        "The year-on-year decline deepened through the quarter: July −28.0%, August −80.6%, and September −96.0%."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-181192F8DA",
+      "title": "An Ageing Fleet Needs Greater Care",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/an-ageing-fleet-needs-greater-care/",
+      "publishedAt": "2026-10-14T21:00:55Z",
+      "category": "Weather & Cyclones",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "weather",
+        "global"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=900&q=80",
+      "summary": "Shipping is investing heavily in the next generation of vessels, fuels and propulsion technologies, but a large part of the existing fleet will still be trading well into the next decade. This will mean the steel structure must be protected for much longer. For instance, Clarksons data from July 2025 showed that 38%...",
+      "body": "Shipping is investing heavily in the next generation of vessels, fuels and propulsion technologies, but a large part of the existing fleet will still be trading well into the next decade. This will mean the steel structure must be protected for much longer. For instance, Clarksons data from July 2025 showed that 38% of global ...",
+      "takeaways": [
+        "Shipping is investing heavily in the next generation of vessels, fuels and propulsion technologies, but a large part of the existing fleet will still be trading well into the next decade.",
+        "This will mean the steel structure must be protected for much longer.",
+        "For instance, Clarksons data from July 2025 showed that 38% of global ..."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-8648F7D406",
+      "title": "Fearnleys Week 42 2026",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/fearnleys-week-42-2026/",
+      "publishedAt": "2026-10-14T21:00:54Z",
+      "category": "Shipping & Tankers",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "shipping",
+        "global"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=900&q=80",
+      "summary": "The VLCC market has gone a tad quiet on the surface but there is more going on than meets the eye. Earlier on in the week Source: Fearnleys A.S",
+      "body": "The VLCC market has gone a tad quiet on the surface but there is more going on than meets the eye. Earlier on in the week Source: Fearnleys A.S",
+      "takeaways": [
+        "The VLCC market has gone a tad quiet on the surface but there is more going on than meets the eye.",
+        "Earlier on in the week Source: Fearnleys A.S",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-173E2E36AE",
+      "title": "Security Worries Reshape Russia’s September Oil Exports",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/security-worries-reshape-russias-september-oil-exports/",
+      "publishedAt": "2026-10-14T21:00:53Z",
+      "category": "Ports & Terminals",
+      "region": "Brazil & South Atlantic",
+      "regions": [
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        -23.96,
+        -46.33
+      ],
+      "navarea": "V",
+      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
+      "summary": "Russia shipped 142.7 million barrels of crude, clean petroleum products (CPP) in September, according to Windward analysis using Vortexa data. Crude made up 110.4 million barrels, a pace of some 3.7 million barrels per day, broadly level with the prior month, which the IEA reported as 3.78 million bpd. CPP accounted...",
+      "body": "Russia shipped 142.7 million barrels of crude, clean petroleum products (CPP) in September, according to Windward analysis using Vortexa data. Crude made up 110.4 million barrels, a pace of some 3.7 million barrels per day, broadly level with the prior month, which the IEA reported as 3.78 million bpd. CPP accounted for 14.9 million barrels, ...",
+      "takeaways": [
+        "Russia shipped 142.7 million barrels of crude, clean petroleum products (CPP) in September, according to Windward analysis using Vortexa data.",
+        "Crude made up 110.4 million barrels, a pace of some 3.7 million barrels per day, broadly level with the prior month, which the IEA reported as 3.78 million bpd.",
+        "CPP accounted for 14.9 million barrels, ..."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-E7E2C7A24E",
+      "title": "ENGINE: Europe & Africa Bunker Fuel Availability Outlook",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/engine-europe-africa-bunker-fuel-availability-outlook-203/",
+      "publishedAt": "2026-10-14T21:00:51Z",
+      "category": "Ports & Terminals",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "port",
+        "bunker"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "summary": "Northwest Europe Fuel availability is tight for prompt supplies in ARA ports, and buyers are advised lead times of 5-7 days to get good coverage from suppliers, a trader said. B100 has remained at significant price discounts to LSMGO in Rotterdam, which has increased its demand in the port lately. The ARA’s...",
+      "body": "Northwest Europe Fuel availability is tight for prompt supplies in ARA ports, and buyers are advised lead times of 5-7 days to get good coverage from suppliers, a trader said. B100 has remained at significant price discounts to LSMGO in Rotterdam, which has increased its demand in the port lately. The ARA’s independently held fuel ...",
+      "takeaways": [
+        "Northwest Europe Fuel availability is tight for prompt supplies in ARA ports, and buyers are advised lead times of 5-7 days to get good coverage from suppliers, a trader said.",
+        "B100 has remained at significant price discounts to LSMGO in Rotterdam, which has increased its demand in the port lately.",
+        "The ARA’s independently held fuel ..."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-AA7246493C",
+      "title": "Singapore Strengthens Multi-Fuel Bunkering Capabilities and Digitalisation at SIBCON 2026",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/singapore-strengthens-multi-fuel-bunkering-capabilities-and-digitalisation-at-sibcon-2026/",
+      "publishedAt": "2026-10-14T21:00:49Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port",
+        "singapore",
+        "bunker"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
+      "summary": "The 24th Singapore International Bunkering Conference (SIBCON), organised by the Maritime and Port Authority of Singapore (MPA), was opened today by Mr Murali Pillai, Senior Minister of State (SMS), Ministry of Law and Ministry of Transport. Themed “Charting a Resilient Multi-Fuel Future”, the biennial conference...",
+      "body": "The 24th Singapore International Bunkering Conference (SIBCON), organised by the Maritime and Port Authority of Singapore (MPA), was opened today by Mr Murali Pillai, Senior Minister of State (SMS), Ministry of Law and Ministry of Transport. Themed “Charting a Resilient Multi-Fuel Future”, the biennial conference that is being held from 13 to 15 October 2026 ...",
+      "takeaways": [
+        "Themed “Charting a Resilient Multi-Fuel Future”, the biennial conference that is being held from 13 to 15 October 2026 ...",
+        "Operational Area: Singapore & Malacca Strait.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
     {
       "id": "SN-AEA14F1E75",
       "title": "Singapore launches multi-fuel bunkering initiatives and digitalisation advances",
@@ -980,41 +1386,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-A9E645C54E",
-      "title": "LX Pantos opens logistics technology lab to advance robotics and AI",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/lx-pantos-opens-logistics-technology-lab-to-advance-robotics-and-ai/",
-      "publishedAt": "2026-10-14T14:00:36Z",
-      "category": "Weather & Cyclones",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "autonomous"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/20261014_102448378_73763-300x200.jpg",
-      "summary": "LX Pantos has opened a new technology laboratory at its MegaWise Cheongna Logistics Center in Incheon, South Korea, as the company expands its use of robotics and artificial intelligence in warehouse operations. The facility, known as the Technology-Driven Logistics (TDL) Lab, will test automation technologies and...",
-      "body": "LX Pantos has opened a new technology laboratory at its MegaWise Cheongna Logistics Center in Incheon, South Korea, as the company expands its use of robotics and artificial intelligence in warehouse operations. The facility, known as the Technology-Driven Logistics (TDL) Lab, will test automation technologies and assess how they can be integrated into daily logistics activities. The initiative focuses on improving warehouse processes, reducing manual work and developing more automated logistics centers. The project is part of LX Pantos’ wider strategy to strengthen its contract logistics business through robotics and AI. Seven technology partners support the initiative LX Pantos has established partnerships with seven technology companies to develop and test logistics automation solutions. The initiative began in April 2026, with the company signing memoranda of understanding with LG CNS, Hai Robotics, Libiao Robotics, XYZ Robotics, SUM, Twinny and Deepfine. The partnerships cover several areas of warehouse operations, including automated storage, order picking, parcel sorting and cargo handling. LG CNS will focus on integrated warehouse automation, while Hai Robotics and Libiao Robotics will contribute storage, picking and sorting technologies. XYZ Robotics will work on robotic solutions for container loading and unloading, alongside pallet handling. Other partners will support autonomous cargo transport, mobile robotics and vision-based inspection systems. The laboratory will allow LX Pantos to evaluate these technologies before introducing them into its wider logistics operations. Executives and employees from LX Pantos and LG CNS pose for a commemorative photo at the signing ceremony for an MOU on next-generation smart logistics development on June 1, 2026. Among t",
-      "takeaways": [
-        "LX Pantos has opened a new technology laboratory at its MegaWise Cheongna Logistics Center in Incheon, South Korea, as the company expands its use of robotics and artificial intelligence in warehouse operations.",
-        "The facility, known as the Technology-Driven Logistics (TDL) Lab, will test automation technologies and assess how they can be integrated into daily logistics activities.",
-        "The initiative focuses on improving warehouse processes, reducing manual work and developing more automated logistics centers."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
       "id": "SN-1648BEF605",
       "title": "Royal Navy’s Only Ice Patrol Ship Faces Uncertain Future After Defect",
       "source": "gCaptain",
@@ -1141,40 +1512,6 @@
       ],
       "readingMinutes": 2,
       "readMinutes": 2
-    },
-    {
-      "id": "SN-4531A9E783",
-      "title": "ENGIE and CMA CGM advance Le Havre biomethane project",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/engie-and-cma-cgm-advance-le-havre-biomethane-project/",
-      "publishedAt": "2026-10-14T13:00:02Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "lng",
-        "port",
-        "bunker"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/media-300x111.webp",
-      "summary": "ENGIE and CMA CGM have signed a framework agreement to develop a biomethane production facility in the industrial-port area of Le Havre, France. ENGIE will lead the project’s technical development and permitting process. Subject to a final investment decision, the energy group will also oversee the construction and...",
-      "body": "ENGIE and CMA CGM have signed a framework agreement to develop a biomethane production facility in the industrial-port area of Le Havre, France. ENGIE will lead the project’s technical development and permitting process. Subject to a final investment decision, the energy group will also oversee the construction and operation of the facility. From 2029, the plant is expected to supply CMA CGM’s fleet with 7,000 tonnes of biomethane annually, equivalent to approximately 100 GWh. The companies estimate that its use could avoid around 23,000 tonnes of carbon dioxide emissions each year. The biomethane will be supplied through the European gas grid under a certified mass-balance system. It can be used by CMA CGM’s LNG-powered vessels without modifications to their engines or existing bunkering infrastructure. The facility will process livestock waste, household biowaste and agricultural residues. It is also expected to produce 100,000 tonnes of digestate for use as natural fertiliser and recover 13,000 tonnes of biogenic carbon dioxide for commercialisation. The development builds on the partnership established by ENGIE and CMA CGM in 2021 to support the production and distribution of renewable fuels for shipping. “With the construction of this new facility, we are pursuing our ambition to expand biomethane production capacity in support of the energy transition,” said Catherine MacGregor, Chief Executive Officer of ENGIE. “This partnership with CMA CGM demonstrates how industrial and energy players can work together to develop concrete solutions to decarbonise hard-to-electrify sectors, while strengthening energy sovereignty and the development of renewable gases,” she added. ENGIE aims to increase its annual biomethane production capacity in Europe from 1.2 TWh currently t",
-      "takeaways": [
-        "ENGIE and CMA CGM have signed a framework agreement to develop a biomethane production facility in the industrial-port area of Le Havre, France.",
-        "ENGIE will lead the project’s technical development and permitting process.",
-        "Subject to a final investment decision, the energy group will also oversee the construction and operation of the facility."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
     },
     {
       "id": "SN-A2C9BDCF1A",
@@ -1539,340 +1876,6 @@
       "takeaways": [
         "Container shipping’s return to Suez Canal transits is in full swing with ONE and HMM expected to be the next lines to transit the Red Sea and canal route",
         "Operational Area: Red Sea & Bab el-Mandeb, Suez Canal & Eastern Med.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-27F058D5C2",
-      "title": "Crewing for the Future: Why Seafarers Stay",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/crewing/crewing-for-the-future-why-seafarers-stay",
-      "publishedAt": "2026-10-14T09:36:25Z",
-      "category": "Shipping & Tankers",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "shipping",
-        "global"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt9edf72fe1f67e9f9/6acf4eadba96a0f708e8b328/In-Conversation-2026_(1)-2-youtube-cover_1_(1).png?width=720&quality=80&disable=upscale",
-      "summary": "The future of the seagoing workforce and retaining existing talent are key topics for the industry and we discuss these challenges with Fleet Management",
-      "body": "The future of the seagoing workforce and retaining existing talent are key topics for the industry and we discuss these challenges with Fleet Management",
-      "takeaways": [
-        "The future of the seagoing workforce and retaining existing talent are key topics for the industry and we discuss these challenges with Fleet Management",
-        "Operational Area: Global Maritime.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-C95BD115C8",
-      "title": "Zhonggu steps up boxship investments with larger newbuilds",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/zhonggu-steps-up-boxship-investments-with-larger-newbuilds/",
-      "publishedAt": "2026-10-14T09:29:47Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "china"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://splash247.com/wp-content/uploads/2026/01/Zhonggu-Logistics-300x180.jpg",
-      "summary": "China’s Zhonggu Shipping Group has signed up for two 14,000 teu containerships at Hudong-Zhonghua Shipbuilding, moving into significantly larger tonnage as investment across the group gathers pace. The Shanghai-based company has contracted the conventionally fuelled pair, without disclosing the value or delivery...",
-      "body": "China’s Zhonggu Shipping Group has signed up for two 14,000 teu containerships at Hudong-Zhonghua Shipbuilding, moving into significantly larger tonnage as investment across the group gathers pace. The Shanghai-based company has contracted the conventionally fuelled pair, without disclosing the value or delivery dates. The agreement adds another large containership series to Hudong-Zhonghua’s expanding orderbook. Last …",
-      "takeaways": [
-        "China’s Zhonggu Shipping Group has signed up for two 14,000 teu containerships at Hudong-Zhonghua Shipbuilding, moving into significantly larger tonnage as investment across the group gathers pace.",
-        "The Shanghai-based company has contracted the conventionally fuelled pair, without disclosing the value or delivery dates.",
-        "The agreement adds another large containership series to Hudong-Zhonghua’s expanding orderbook."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-37828FF089",
-      "title": "Recyclers face double whammy on both supply and demand",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/shipyards/recyclers-face-double-whammy-on-both-supply-and-demand",
-      "publishedAt": "2026-10-14T09:17:35Z",
-      "category": "Shipping & Tankers",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "shipping",
-        "global"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt840ac2497aa57476/6ac32cd3dc6c9e1fc101b4f6/Rakesh-Khetan-CEO-Wirana-Shipping.jpg?width=720&quality=80&disable=upscale",
-      "summary": "Recyclers face double whammy on both supply and demand",
-      "body": "Recyclers face double whammy on both supply and demand",
-      "takeaways": [
-        "Operational Area: Global Maritime.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-1D305F8B89",
-      "title": "Japan prepares to pay for oil’s long way round",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/japan-prepares-to-pay-for-oils-long-way-round/",
-      "publishedAt": "2026-10-14T08:30:40Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "tanker",
-        "port",
-        "hormuz"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://splash247.com/wp-content/uploads/2026/03/NYK-VLCC-300x175.jpg",
-      "summary": "Japan is preparing to subsidise the additional cost of importing oil from suppliers outside the Strait of Hormuz, in a significant government intervention aimed at reducing the country’s dependence on the increasingly dangerous waterway. The Japanese cabinet approved three bills yesterday designed to diversify energy...",
-      "body": "Japan is preparing to subsidise the additional cost of importing oil from suppliers outside the Strait of Hormuz, in a significant government intervention aimed at reducing the country’s dependence on the increasingly dangerous waterway. The Japanese cabinet approved three bills yesterday designed to diversify energy imports, support tanker insurance and finance alternative oil transport infrastructure. …",
-      "takeaways": [
-        "The Japanese cabinet approved three bills yesterday designed to diversify energy imports, support tanker insurance and finance alternative oil transport infrastructure.",
-        "Operational Area: Strait of Hormuz & Persian Gulf, Japan & Korea.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-CCDDEBC837",
-      "title": "EIB backs Fugro's USV technology development with €150 million",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://offshore-energy.biz/2026/10/14/eib-backs-fugros-usv-technology-development-with-euro150-million",
-      "publishedAt": "2026-10-14T08:26:26Z",
-      "category": "Weather & Cyclones",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=900&q=80",
-      "summary": "Dutch Fugro has secured long-term funding with a new facility from the European Investment Bank (EIB) to support the phased expansion of its...",
-      "body": "Dutch Fugro has secured long-term funding with a new facility from the European Investment Bank (EIB) to support the phased expansion of its...",
-      "takeaways": [
-        "Dutch Fugro has secured long-term funding with a new facility from the European Investment Bank (EIB) to support the phased expansion of its...",
-        "Operational Area: Global Maritime.",
-        "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-322387A92E",
-      "title": "India’s Aegis takes over Dubai tanker and logistics group Tristar",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/indias-aegis-takes-over-dubai-tanker-and-logistics-group-tristar/",
-      "publishedAt": "2026-10-14T08:15:28Z",
-      "category": "Shipping & Tankers",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Singapore & Malacca Strait",
-        "India & Indian Ocean"
-      ],
-      "tags": [
-        "tanker",
-        "singapore"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://splash247.com/wp-content/uploads/2026/10/Solar-Ailene-tanker-Tristar-Eships-300x180.jpg",
-      "summary": "India’s Aegis Logistics has struck a deal to acquire 89.8% of Dubai-based Tristar for $809m, taking control of a global energy logistics group with a sizeable tanker and dry bulk shipping operation. The Mumbai-listed group is buying the stake through Singapore-based Aegis Logistics International from shareholders...",
-      "body": "India’s Aegis Logistics has struck a deal to acquire 89.8% of Dubai-based Tristar for $809m, taking control of a global energy logistics group with a sizeable tanker and dry bulk shipping operation. The Mumbai-listed group is buying the stake through Singapore-based Aegis Logistics International from shareholders including Agility, Gulf Investment Corporation and Diamond Holdings. The …",
-      "takeaways": [
-        "India’s Aegis Logistics has struck a deal to acquire 89.8% of Dubai-based Tristar for $809m, taking control of a global energy logistics group with a sizeable tanker and dry bulk shipping operation.",
-        "The Mumbai-listed group is buying the stake through Singapore-based Aegis Logistics International from shareholders including Agility, Gulf Investment Corporation and Diamond Holdings.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-7E8F1A90F9",
-      "title": "Splash Cruise launches with a fresh take on the global cruise business",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/splash-cruise-launches-with-a-fresh-take-on-the-global-cruise-business/",
-      "publishedAt": "2026-10-14T08:00:00Z",
-      "category": "Shipping & Tankers",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "shipping",
-        "global"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://splash247.com/wp-content/uploads/2026/10/Splash-Cruise-Homepage-Launch-300x180.jpg",
-      "summary": "Splash Maritime Group has officially launched Splash Cruise, a new international news platform dedicated to the business of cruise shipping, bringing the editorial approach that has made Splash a leading independent voice in maritime journalism to the global cruise industry. Available at splashcruise.com, the new...",
-      "body": "Splash Maritime Group has officially launched Splash Cruise, a new international news platform dedicated to the business of cruise shipping, bringing the editorial approach that has made Splash a leading independent voice in maritime journalism to the global cruise industry. Available at splashcruise.com, the new publication delivers daily news, exclusive interviews, analysis and features covering everything …",
-      "takeaways": [
-        "Available at splashcruise.com, the new publication delivers daily news, exclusive interviews, analysis and features covering everything …",
-        "Operational Area: Global Maritime.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-7B23F9EC3F",
-      "title": "New oil & gas discovery set to join North Sea fast-track plays fuelling Europe’s energy security",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://offshore-energy.biz/2026/10/14/new-oil-and-gas-discovery-set-to-join-north-sea-fast-track-plays-fuelling-europes-energy-security",
-      "publishedAt": "2026-10-14T07:52:17Z",
-      "category": "Shipping & Tankers",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "shipping",
-        "rotterdam"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://offshore-energy.biz/api/media/file/deepsea-bergen-odfjell-drilling-1600x900.jpg?prefix=media",
-      "summary": "Equinor, Petoro, and TotalEnergies have found up to 50 million barrels in the North Sea and are eyeing first production in under three years.",
-      "body": "Equinor, Petoro, and TotalEnergies have found up to 50 million barrels in the North Sea and are eyeing first production in under three years.",
-      "takeaways": [
-        "Equinor, Petoro, and TotalEnergies have found up to 50 million barrels in the North Sea and are eyeing first production in under three years.",
-        "Operational Area: Rotterdam & North Sea.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-9EAC1454BB",
-      "title": "Elisabeth Braw: The Undersea War",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/elisabeth-braw-the-undersea-war/",
-      "publishedAt": "2026-10-14T07:45:22Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "tanker",
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://splash247.com/wp-content/uploads/2026/10/Elisabeth-Braw-300x180.jpg",
-      "summary": "A ship’s anchor can wreak havoc on the world’s undersea infrastructure, something that has provided plenty of rich material for Splash reporting in recent years. For Elisabeth Braw, the Cook Islands-flagged tanker Eagle S provides one of the most brazen examples. On Christmas Day 2024, the vessel was accused of...",
-      "body": "A ship’s anchor can wreak havoc on the world’s undersea infrastructure, something that has provided plenty of rich material for Splash reporting in recent years. For Elisabeth Braw, the Cook Islands-flagged tanker Eagle S provides one of the most brazen examples. On Christmas Day 2024, the vessel was accused of dragging its anchor 90 km …",
-      "takeaways": [
-        "A ship’s anchor can wreak havoc on the world’s undersea infrastructure, something that has provided plenty of rich material for Splash reporting in recent years.",
-        "For Elisabeth Braw, the Cook Islands-flagged tanker Eagle S provides one of the most brazen examples.",
-        "On Christmas Day 2024, the vessel was accused of dragging its anchor 90 km …"
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-692C1D5CAD",
-      "title": "Hormuz shock briefly makes biofuel the cheapest bunker option",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/hormuz-shock-briefly-makes-biofuel-the-cheapest-bunker-option/",
-      "publishedAt": "2026-10-14T07:25:51Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "hormuz",
-        "bunker"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://splash247.com/wp-content/uploads/2022/12/BHP-Oldendorff-Biofuels-Bunkering-Singapore-300x180.jpg",
-      "summary": "The upheaval in global energy markets caused by the war in the Middle East has produced an unexpected winner in the marine fuels market, with biodiesel briefly emerging as the cheapest bunkering option in Rotterdam once European carbon costs are factored in. A new white paper from energy pricing specialist General...",
-      "body": "The upheaval in global energy markets caused by the war in the Middle East has produced an unexpected winner in the marine fuels market, with biodiesel briefly emerging as the cheapest bunkering option in Rotterdam once European carbon costs are factored in. A new white paper from energy pricing specialist General Index and the London …",
-      "takeaways": [
-        "A new white paper from energy pricing specialist General Index and the London …",
-        "Operational Area: Strait of Hormuz & Persian Gulf, Rotterdam & North Sea.",
         "Assess strait transit security posture, war-risk advisories, and routing alternatives."
       ],
       "readingMinutes": 2,
