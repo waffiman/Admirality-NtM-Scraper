@@ -5594,8 +5594,11 @@ function executeDirectMapExport() {
       activeOverlays: {
         notices: isNoticesActive,
         depths: isDepthsActive,
-        route: isRouteActive
+        route: isRouteActive,
+        weather: false,
+        ais: false
       },
+      nonExportableOverlays: ["weather", "ais"],
       itemCounts: {
         notices: ntmCount,
         ports: portCount,

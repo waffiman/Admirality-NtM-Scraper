@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.11" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.12" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -11322,6 +11322,31 @@ select option {
     }
   </style>
 
+
+  <script>
+    // v5.12 — force clients off stale SW caches so users stop seeing old builds
+    (function(){
+      try {
+        if (localStorage.getItem('setsail_force_v512') === '1') return;
+        if (!('serviceWorker' in navigator)) { localStorage.setItem('setsail_force_v512','1'); return; }
+        navigator.serviceWorker.getRegistrations().then(function(regs){
+          return Promise.all(regs.map(function(r){ return r.update(); }));
+        }).then(function(){
+          if (!('caches' in window)) return null;
+          return caches.keys().then(function(keys){
+            return Promise.all(keys.filter(function(k){ return k.indexOf('v5.12') === -1; }).map(function(k){ return caches.delete(k); }));
+          });
+        }).then(function(){
+          localStorage.setItem('setsail_force_v512', '1');
+          if (!sessionStorage.getItem('setsail_reloaded_v512')) {
+            sessionStorage.setItem('setsail_reloaded_v512', '1');
+            location.reload();
+          }
+        }).catch(function(){});
+      } catch (e) {}
+    })();
+  </script>
+
 </head>
 
 
@@ -13285,7 +13310,14 @@ select option {
                   <span class="excel-tab-name">Weather</span>
                   <span class="excel-tab-info-btn" id="btnWeatherOverlayInfo" title="Marine Weather &amp; Synoptic Bulletins (0000 UTC)"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
-                <button type="button" class="excel-tab excel-tab-route" data-overlay="route" id="tabOverlayRoute">
+                                <button type="button" class="excel-tab" data-overlay="ais" id="tabOverlayAis">
+                  <span class="excel-tab-spinner" aria-hidden="true"></span>
+                  <span class="excel-tab-check"></span>
+                  <span class="excel-tab-name">AIS</span>
+                  <span class="excel-tab-badge" style="display:inline-block;min-width:1.2em;"></span>
+                  <span class="excel-tab-info-btn" id="btnAisOverlayInfo" title="AIS vessels (Digitraffic open feed) — not exportable"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
+                </button>
+<button type="button" class="excel-tab excel-tab-route" data-overlay="route" id="tabOverlayRoute">
                   <span class="excel-tab-spinner" aria-hidden="true"></span>
                   <span class="excel-tab-check"></span>
                   <span class="excel-tab-name">My Route</span>
@@ -19457,8 +19489,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.11"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.11"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.12"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.12"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.12"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.12"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19536,7 +19570,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.11"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.12"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19908,13 +19942,13 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.11' && k !== 'setsail-tiles-cache-v5.11').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.12' && k !== 'setsail-tiles-cache-v5.12').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.11', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.12', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {

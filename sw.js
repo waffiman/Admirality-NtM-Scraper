@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine вЂ” Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.11';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.11';
+const CACHE_NAME = 'setsail-cache-v5.12';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.12';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -14,6 +14,7 @@ const OFFLINE_CORE_ASSETS = [
   'notices.json',
   'weather.json',
   'news.json',
+  'ais.json',
   'assets/home_bg.mp4',
   'assets/home_bg_poster.jpg',
   'assets/gyro_compass_logbook.ico',
@@ -25,10 +26,11 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=5.11',
-  'assets/Auto NtM Plotting/port_depths.js?v=5.11',
-  'assets/Auto NtM Plotting/ntm_module.js?v=5.11',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.11',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=5.12',
+  'assets/Auto NtM Plotting/port_depths.js?v=5.12',
+  'assets/Auto NtM Plotting/ntm_module.js?v=5.12',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.12',
+  'assets/Auto NtM Plotting/ais_overlay.js?v=5.12',
   'assets/authority-logos/noaa.svg',
   'assets/authority-logos/nasa.svg',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
@@ -224,7 +226,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 2. notices.json, weather.json & news.json (15s timeout for 1.8MB payload + Offline Cache fallback)
-  if (url.pathname.endsWith('notices.json') || url.pathname.endsWith('weather.json') || url.pathname.endsWith('news.json')) {
+  if (url.pathname.endsWith('notices.json') || url.pathname.endsWith('weather.json') || url.pathname.endsWith('news.json') || url.pathname.endsWith('ais.json')) {
     const jsonBaseName = url.pathname.split('/').pop();
     event.respondWith(
       fetchWithTimeout(event.request, 15000)
