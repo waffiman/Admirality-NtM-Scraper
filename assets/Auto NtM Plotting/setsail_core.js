@@ -3048,8 +3048,31 @@ function initNtMMap() {
       }
     });
 
-    // Primary Default Nautical Chart
+    // Primary Default Nautical Chart — show Layers-button spinner until first basemap is fully loaded
     oceanLayer.addTo(leafletMap);
+    setTimeout(() => {
+      const sel = document.getElementById("ntmChartLayerSelector");
+      const trig = sel && sel.querySelector(".ntm-layer-trigger-btn");
+      const mark = (on) => {
+        if (!sel) return;
+        sel.classList.toggle("is-loading-base", !!on);
+        if (trig) {
+          trig.classList.toggle("is-loading", !!on);
+          trig.setAttribute("aria-busy", on ? "true" : "false");
+          trig.title = on ? "Loading chart layer…" : "Select Chart Layer";
+        }
+      };
+      mark(true);
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        oceanLayer.off("load", finish);
+        mark(false);
+      };
+      oceanLayer.on("load", finish);
+      setTimeout(finish, 12000);
+    }, 0);
 
     const seamarkLayer = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", Object.assign({}, tilePerfOpts, {
       maxZoom: 18,
@@ -6730,12 +6753,12 @@ function initVisualChartLayerSelector(mapInstance, layers) {
     ctx.arc(cx, cy, R * 1.14, 0, Math.PI * 2);
     ctx.fill();
 
-    // Ocean sphere fill — realistic physical globe maritime azure blue
+    // Ocean sphere fill — match Esri World Ocean Base (teal-blue bathymetry look)
     const oceanGrad = ctx.createRadialGradient(cx - R * 0.28, cy - R * 0.32, R * 0.05, cx, cy, R);
-    oceanGrad.addColorStop(0, "#3aa0c8");   // Esri-Ocean sunlit sea
-    oceanGrad.addColorStop(0.45, "#1d6fa5");
-    oceanGrad.addColorStop(0.82, "#0d3b66");
-    oceanGrad.addColorStop(1, "#071d33");
+    oceanGrad.addColorStop(0, "#5eb3d1");
+    oceanGrad.addColorStop(0.35, "#2f86b0");
+    oceanGrad.addColorStop(0.7, "#1a5f8a");
+    oceanGrad.addColorStop(1, "#0c3558");
     ctx.fillStyle = oceanGrad;
     ctx.beginPath();
     ctx.arc(cx, cy, R, 0, Math.PI * 2);
@@ -6748,8 +6771,8 @@ function initVisualChartLayerSelector(mapInstance, layers) {
     ctx.clip();
 
     // Graticule grid (parallels & meridians every 15 deg)
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
-    ctx.lineWidth = 0.6;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+    ctx.lineWidth = 0.45;
     for (let lat = -75; lat <= 75; lat += 15) {
       ctx.beginPath();
       let started = false;
@@ -6797,10 +6820,10 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         const avgLat = sumLat / poly.length;
         const avgLon = sumLon / poly.length;
 
-        // Nautical-chart land (match Esri Ocean look — muted tan, not biome rainbow)
-        let landFill = (avgLat < -58 || avgLat > 70) ? "#eef2f6" : "#cbb89a";
-        let landStroke = (avgLat < -58 || avgLat > 70) ? "#cbd5e1" : "#8a7355";
-        let coastalShelf = "rgba(56, 189, 248, 0.28)";
+        // Flat Esri-Ocean land tint (single cartographic tan — no biome rainbow)
+        const isIce = (avgLat < -58 || avgLat > 72);
+        const landFill = isIce ? "#e8eef3" : "#d7c7a6";
+        const landStroke = isIce ? "#b7c4d1" : "#9a8664";
 
         ctx.beginPath();
         for (let i = 0; i < projPts.length; i++) {
@@ -6808,17 +6831,10 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           else ctx.lineTo(projPts[i].x, projPts[i].y);
         }
         ctx.closePath();
-        ctx.strokeStyle = coastalShelf;
-        ctx.lineWidth = 3.2;
-        ctx.stroke();
-
-        // 2. Physical Continent / Island Surface Fill
         ctx.fillStyle = landFill;
         ctx.fill();
-
-        // 3. Crisp Coastal Shoreline
         ctx.strokeStyle = landStroke;
-        ctx.lineWidth = 0.9;
+        ctx.lineWidth = 0.75;
         ctx.stroke();
       });
     }
@@ -6986,9 +7002,33 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         selector.querySelectorAll("[data-base]").forEach(b => b.classList.toggle("active-base", b === btn));
         const triggerBtn = selector.querySelector(".ntm-layer-trigger-btn");
         const setBaseLoading = (on) => {
-          selector.classList.toggle("is-loading-base", on);
-          if (triggerBtn) triggerBtn.classList.toggle("is-loading", on);
-          btn.classList.toggle("is-loading", on);
+          selector.classList.toggle("is-loading-base", !!on);
+          if (triggerBtn) {
+            triggerBtn.classList.toggle("is-loading", !!on);
+            triggerBtn.setAttribute("aria-busy", on ? "true" : "false");
+            triggerBtn.title = on ? "Loading chart layer…" : "Select Chart Layer";
+          }
+          btn.classList.toggle("is-loading", !!on);
+        };
+        // Track full tile settle: Leaflet fires "loading" when tiles start, "load" when ALL visible tiles done
+        const waitLayerFullyLoaded = (lyr, done) => {
+          let settled = false;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            lyr.off("loading", onLoading);
+            lyr.off("load", onLoad);
+            lyr.off("tileerror", onTileErr);
+            done();
+          };
+          const onLoading = () => setBaseLoading(true);
+          const onLoad = () => finish();
+          const onTileErr = () => { /* keep waiting for remaining tiles; load still fires */ };
+          lyr.on("loading", onLoading);
+          lyr.on("load", onLoad);
+          lyr.on("tileerror", onTileErr);
+          // Safety: never spin forever
+          setTimeout(finish, 12000);
         };
 
         if (baseKey === "globe3d") {
@@ -6998,8 +7038,11 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           globeState.rotLon = c.lng;
           globeState.active = true;
           globeWrap.classList.add("active");
-          renderGlobe3D();
-          setTimeout(() => setBaseLoading(false), 280);
+          requestAnimationFrame(() => {
+            renderGlobe3D();
+            // Globe is canvas — wait one paint + short settle
+            requestAnimationFrame(() => setTimeout(() => setBaseLoading(false), 180));
+          });
         } else {
           if (globeState.active) {
             globeState.active = false;
@@ -7014,26 +7057,16 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           if (layers[baseKey]) {
             setBaseLoading(true);
             const lyr = layers[baseKey];
-            let pending = 0;
-            let settled = false;
-            const finish = () => {
-              if (settled) return;
-              settled = true;
-              lyr.off("loading", onLoading);
-              lyr.off("load", onLoad);
-              lyr.off("tileerror", onLoad);
-              setBaseLoading(false);
-            };
-            const onLoading = () => { pending++; };
-            const onLoad = () => {
-              pending = Math.max(0, pending - 1);
-              if (pending === 0) setTimeout(finish, 120);
-            };
-            lyr.on("loading", onLoading);
-            lyr.on("load", onLoad);
-            lyr.on("tileerror", onLoad);
+            waitLayerFullyLoaded(lyr, () => setBaseLoading(false));
             lyr.addTo(mapInstance);
-            setTimeout(finish, 4500);
+            // If tiles already cached, "load" may have already fired — poll once
+            setTimeout(() => {
+              try {
+                if (lyr._loading === false || (lyr._tiles && Object.keys(lyr._tiles).length && !lyr._loading)) {
+                  setBaseLoading(false);
+                }
+              } catch (e) {}
+            }, 80);
           }
         }
         selector.classList.add("collapsed");

@@ -26,7 +26,7 @@
 
 
 
-  <title>SetSail — Integrated Bridge Navigation Suite</title>
+  <title>SetSail — Your AI-Powered Bridge</title>
 
 
 
@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.10" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.11" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -11414,8 +11414,8 @@ select option {
         <div class="nav-saved-routes-list" id="navSavedRoutesList" role="region" aria-label="Saved &amp; Generated Routes"></div>
       </div>
 
-      <button type="button" class="nav-item" data-tab="tab-news" id="navItemSetNews" aria-label="SetNews — Global Maritime Intelligence &amp; For You" title="SetNews — Global Maritime Intelligence &amp; For You">
-        <svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1.8 3.2 1.2 5.4.8 7.2-.3 1.2.3 2.3 1.4 2.8 1.6.7 2.8 2.3 2.8 4.2A5 5 0 0 1 12 21a5 5 0 0 1-5-4.8c0-2.6 1.5-4.2 3.2-5.6C9 9.2 8.2 7.4 8.6 5.2 9.2 3.4 10.4 2.4 12 2z" fill="none" stroke="#f05a36" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 11.2c.9 1.3 1.1 2.2.9 3.2-.2.9-.9 1.6-1.8 1.8" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <button type="button" class="nav-item" data-tab="tab-news" id="navItemSetNews" aria-label="SetNews — What's happening on land &amp; at sea" title="SetNews — Land &amp; Sea">
+        <svg class="setsail-icon setsail-icon-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1.8 3.2 1.2 5.4.8 7.2-.3 1.2.3 2.3 1.4 2.8 1.6.7 2.8 2.3 2.8 4.2A5 5 0 0 1 12 21a5 5 0 0 1-5-4.8c0-2.6 1.5-4.2 3.2-5.6C9 9.2 8.2 7.4 8.6 5.2 9.2 3.4 10.4 2.4 12 2z"/><path d="M12 11.2c.9 1.3 1.1 2.2.9 3.2-.2.9-.9 1.6-1.8 1.8"/></svg>
         <span class="tooltip">SetNews · Maritime Wire</span>
       </button>
 
@@ -19457,8 +19457,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.10"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.10"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.11"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.11"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19536,7 +19536,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.10"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.11"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19906,15 +19906,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v510') !== '1') {
+        if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.10' && k !== 'setsail-tiles-cache-v5.10').map(k => caches.delete(k))
-          )).then(() => localStorage.setItem('setsail_sw_v510', '1')).catch(() => {});
+            keys.filter(k => k !== 'setsail-cache-v5.11' && k !== 'setsail-tiles-cache-v5.11').map(k => caches.delete(k))
+          )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.10', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.11', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {

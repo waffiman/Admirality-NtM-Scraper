@@ -10215,25 +10215,65 @@ body.light-theme .setnews-reader-dialog {
 }
 
 
-/* v5.8 — basemap layer spinner + overlay dock spinner polish */
+/* v5.11 — basemap spinner REPLACES Layers icon until tiles fully loaded */
 .ntm-layer-thumb-btn.is-loading .ntm-layer-thumb-preview,
-.ntm-chart-layer-selector.is-loading-base .ntm-layer-trigger-btn .ntm-layer-thumb-preview {
+.ntm-chart-layer-selector.is-loading-base .ntm-layer-trigger-btn .ntm-layer-thumb-preview,
+.ntm-layer-trigger-btn.is-loading .ntm-layer-thumb-preview {
   position: relative;
 }
+.ntm-layer-trigger-btn.is-loading .ntm-layer-thumb-preview > svg,
+.ntm-chart-layer-selector.is-loading-base .ntm-layer-trigger-btn .ntm-layer-thumb-preview > svg,
+.ntm-layer-thumb-btn.is-loading .ntm-layer-thumb-preview > svg {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
 .ntm-layer-thumb-btn.is-loading .ntm-layer-thumb-preview::after,
-.ntm-chart-layer-selector.is-loading-base .ntm-layer-trigger-btn .ntm-layer-thumb-preview::after {
+.ntm-chart-layer-selector.is-loading-base .ntm-layer-trigger-btn .ntm-layer-thumb-preview::after,
+.ntm-layer-trigger-btn.is-loading .ntm-layer-thumb-preview::after {
   content: "";
   position: absolute;
   inset: 0;
   margin: auto;
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 2px solid rgba(56,189,248,0.25);
+  border: 2.5px solid rgba(56,189,248,0.22);
   border-top-color: #38bdf8;
-  animation: setsailSpin 0.7s linear infinite;
+  border-right-color: #7dd3fc;
+  animation: setsailSpin 0.65s linear infinite;
+  box-shadow: 0 0 10px rgba(56,189,248,0.35);
+  z-index: 2;
 }
 @keyframes setsailSpin { to { transform: rotate(360deg); } }
+
+/* SetNews flame — keep brand orange/cyan (don't inherit grey nav stroke) */
+.nav-item .setsail-icon.setsail-icon-flame,
+.setsail-icon.setsail-icon-flame {
+  stroke: none !important;
+  filter: none !important;
+}
+.nav-item .setsail-icon.setsail-icon-flame path:nth-child(1),
+.setsail-icon.setsail-icon-flame path:nth-child(1) {
+  stroke: #f05a36 !important;
+  stroke-width: 1.75 !important;
+  fill: rgba(240, 90, 54, 0.18) !important;
+}
+.nav-item .setsail-icon.setsail-icon-flame path:nth-child(2),
+.setsail-icon.setsail-icon-flame path:nth-child(2) {
+  stroke: #38bdf8 !important;
+  stroke-width: 1.55 !important;
+  fill: none !important;
+}
+.nav-item:hover .setsail-icon.setsail-icon-flame path:nth-child(1),
+.nav-item.active .setsail-icon.setsail-icon-flame path:nth-child(1) {
+  stroke: #ff6a3d !important;
+  fill: rgba(255, 106, 61, 0.28) !important;
+  filter: drop-shadow(0 0 6px rgba(240, 90, 54, 0.55));
+}
+.nav-item:hover .setsail-icon.setsail-icon-flame path:nth-child(2),
+.nav-item.active .setsail-icon.setsail-icon-flame path:nth-child(2) {
+  stroke: #7dd3fc !important;
+}
 .excel-tab.is-loading .excel-tab-spinner {
   display: inline-block !important;
   width: 12px;

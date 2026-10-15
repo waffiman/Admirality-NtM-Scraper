@@ -1,7 +1,7 @@
 {
-  "name": "SetSail \u2014 Bridge Navigation Suite",
+  "name": "SetSail — Your AI-Powered Bridge",
   "short_name": "SetSail",
-  "description": "Integrated Marine Navigation Suite: ECDIS Notices to Mariners, Compass Logbook, Star Almanac & Bridge Utilities",
+  "description": "Your AI-Powered Bridge: ECDIS overlays, NtM & NAVTEX, routing, weather and bridge intelligence",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
