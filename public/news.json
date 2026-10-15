@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-15T10:58:20Z",
-  "generatedAt": "2026-10-15T10:58:20Z",
+  "updatedAt": "2026-10-15T16:27:25Z",
+  "generatedAt": "2026-10-15T16:27:25Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -13,6 +13,628 @@
   ],
   "totalArticles": 70,
   "articles": [
+    {
+      "id": "SN-E09F5F0EB3",
+      "title": "Only 38% of UK operators use alternative fuel vehicles, GXO finds",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/only-38-of-uk-operators-use-alternative-fuel-vehicles-gxo-finds/",
+      "publishedAt": "2026-10-15T16:00:22Z",
+      "category": "Weather & Cyclones",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "Singapore & Malacca Strait",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://container-news.com/wp-content/uploads/2026/08/GXO_rgb_DigitalUse-300x110.png",
+      "summary": "Only 38% of UK transport operators surveyed are currently using alternative fuel vehicles, despite widespread efforts to reduce emissions, according to new research from GXO Logistics. The company’s latest Future of Transport report, published on 14 October 2026, surveyed more than 1,000 supply chain, transport and...",
+      "body": "Only 38% of UK transport operators surveyed are currently using alternative fuel vehicles, despite widespread efforts to reduce emissions, according to new research from GXO Logistics. The company’s latest Future of Transport report, published on 14 October 2026, surveyed more than 1,000 supply chain, transport and logistics decision-makers across the United Kingdom. The findings show that 87% of respondents consider emissions reduction a key priority. However, rising operating costs are increasingly influencing decisions about fleet investment. Some 63% said higher fuel costs are accelerating their interest in alternative fuel vehicles, while 76% believe that demonstrating cost savings or operational efficiencies is essential before committing to new investments. Operators focus on immediate cost savings High vehicle purchase costs, limited infrastructure and uncertainty over future fuel technologies continue to slow the transition. Instead, many businesses are focusing on improving the efficiency of their existing transport operations. According to the survey, 43% of respondents are reducing partially loaded journeys, while 41% are working to cut empty vehicle movements. Another 41% are exploring fleet sharing, and 39% are optimising delivery routes. All four measures have become more common since GXO’s previous survey in 2024. Investment in supporting infrastructure also remains limited. Only 25% of businesses have started planning investments in charging or refuelling facilities, while 30% have begun procurement planning for future energy requirements. Multiple fuel technologies expected to play a role The research suggests that UK logistics businesses do not expect a single technology to replace diesel across all transport operations. Around 70% of respondents beli",
+      "takeaways": [
+        "Only 38% of UK transport operators surveyed are currently using alternative fuel vehicles, despite widespread efforts to reduce emissions, according to new research from GXO Logistics.",
+        "The company’s latest Future of Transport report, published on 14 October 2026, surveyed more than 1,000 supply chain, transport and logistics decision-makers across the United Kingdom.",
+        "The findings show that 87% of respondents consider emissions reduction a key priority."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-012E23C01A",
+      "title": "HYDRA SUBSEA, Shell to Install Pipelines on Subsea Tie-Ins",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/hydra-subsea-shell-install-pipelines-543717",
+      "publishedAt": "2026-10-15T15:16:02Z",
+      "category": "Shipping & Tankers",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "shipping",
+        "global"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.marinelink.com/images/maritime/w150/hydra-subsea-174368.jpeg",
+      "summary": "HYDRA SUBSEA announced the execution of a commercial agreement with Shell Offshore Inc. for a standardized deepwater pipeline installation solution for selected short distance subsea tie-ins in the Gulf of America. Shell’s Appomattox gas lift line is the first project proposed…",
+      "body": "HYDRA SUBSEA announced the execution of a commercial agreement with Shell Offshore Inc. for a standardized deepwater pipeline installation solution for selected short distance subsea tie-ins in the Gulf of America. Shell’s Appomattox gas lift line is the first project proposed…",
+      "takeaways": [
+        "HYDRA SUBSEA announced the execution of a commercial agreement with Shell Offshore Inc.",
+        "for a standardized deepwater pipeline installation solution for selected short distance subsea tie-ins in the Gulf of America.",
+        "Shell’s Appomattox gas lift line is the first project proposed…"
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-15EEAE44E1",
+      "title": "Georgia Ports secures Army Corps permit for Savannah Container Terminal",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/georgia-ports-secures-army-corps-permit-for-savannah-container-terminal/",
+      "publishedAt": "2026-10-15T15:00:33Z",
+      "category": "Ports & Terminals",
+      "region": "US East Coast & New York",
+      "regions": [
+        "US East Coast & New York",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        40.5,
+        -73.95
+      ],
+      "navarea": "IV",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/261014-GPA-State-of-the-Port-Group-1536x1024-1-300x200.jpg",
+      "summary": "Georgia Ports Authority has announced that the US Army Corps of Engineers has approved the permit for the Savannah Container Terminal following a three-year review process, with the announcement made by President Kevin Price at the annual State of the Port of Savannah event. Construction on the new terminal is...",
+      "body": "Georgia Ports Authority has announced that the US Army Corps of Engineers has approved the permit for the Savannah Container Terminal following a three-year review process, with the announcement made by President Kevin Price at the annual State of the Port of Savannah event. Construction on the new terminal is scheduled to begin in January 2028, with completion anticipated in the mid-2030s. The USD 2.3 billion Savannah Container Terminal will be located on Hutchison Island in Savannah, covering 350 acres and capable of handling the largest container ships. The facility will add 3.5 million TEUs of capacity, taking Savannah’s total capacity from its current 7.75 million TEUs toward the port’s long-term target of a 12 million TEU gateway container port. The terminal development is part of Georgia Ports’ US$ 5 billion infrastructure investment programme, described by GPA Chairman Alec Poitevint as the largest in the nation, building on the US$ 4.13 billion invested in port and inland infrastructure over the preceding decade. The Savannah Container Terminal announcement was accompanied by the disclosure that CEO Griff Lynch will retire on August 1, 2027, after 16 years with Georgia Ports. During his tenure spanning roles as Chief Operating Officer from 2011 and CEO, revenues have increased 213%, container volumes are up 90% and RoRo volumes have grown 60%. Lynch attributed the port’s trajectory to talented employees, a supportive board and the partnership of state government and agencies under Governor Kemp and the Georgia Legislature. The terminal permit follows other major ongoing investments, including the US$ 1.6 billion upgrade of Ocean Terminal from 200,000 TEUs to 1.75 million TEUs capacity, expected to be completed by the end of 2028.",
+      "takeaways": [
+        "Construction on the new terminal is scheduled to begin in January 2028, with completion anticipated in the mid-2030s.",
+        "The USD 2.3 billion Savannah Container Terminal will be located on Hutchison Island in Savannah, covering 350 acres and capable of handling the largest container ships.",
+        "The facility will add 3.5 million TEUs of capacity, taking Savannah’s total capacity from its current 7.75 million TEUs toward the port’s long-term target of a 12 million TEU gateway container port."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-29FBD5C4C9",
+      "title": "Shipnext Adds Business Networking Features to Digital Freight Platform",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/shipnext-adds-business-networking-543716",
+      "publishedAt": "2026-10-15T14:46:28Z",
+      "category": "Shipping & Tankers",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "shipping",
+        "global"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.marinelink.com/images/maritime/w150/image-courtesy-shipnext-174366.jpg",
+      "summary": "Belgium-based Shipnext has introduced business networking capabilities to its digital shipping marketplace, enabling charterers, brokers, carriers and cargo owners to communicate and exchange freight information within a single platform.Launched October 16, 2026, the new functionality integrates pro",
+      "body": "Belgium-based Shipnext has introduced business networking capabilities to its digital shipping marketplace, enabling charterers, brokers, carriers and cargo owners to communicate and exchange freight information within a single platform.Launched October 16, 2026, the new functionality integrates pro",
+      "takeaways": [
+        "Operational Area: Global Maritime.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-7FC072A179",
+      "title": "Alabama port records strong revenue",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/alabama-port-records-strong-revenue/",
+      "publishedAt": "2026-10-15T14:00:13Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "dredging"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/LowerHarbor_Aerial-1024x682-1-300x200.jpg",
+      "summary": "The Alabama Port Authority has closed fiscal year 2026 with revenue of approximately US$ 245 million, an increase of more than 20% over the previous fiscal year, marking the strongest revenue year in the organisation’s history. The record result came just over one year after the Mobile Ship Channel reached its...",
+      "body": "The Alabama Port Authority has closed fiscal year 2026 with revenue of approximately US$ 245 million, an increase of more than 20% over the previous fiscal year, marking the strongest revenue year in the organisation’s history. The record result came just over one year after the Mobile Ship Channel reached its authorised depth of 50 feet on October 3, 2025, with increased customer demand, higher bulk cargo volumes, strong rail activity and the added capacity of the deeper channel all contributing to the outcome. Since the channel opened to its full depth, 168 vessels have transited with a recorded draft greater than 45 feet, enabling shippers to move more cargo per trip without the restrictions imposed by the previous channel depth. The US$ 425 million Mobile Harbor Modernization Project, a state-federal partnership between the Alabama Port Authority and the US Army Corps of Engineers, deepened and widened the ship channel for larger modern cargo vessels, with dredging beginning in 2020. In addition to the greater depth, the project widened a portion of the channel to enable two-way vessel traffic. The project was authorised by Congress in the 2018 Water Resources Development Act, with federal funding of more than US$ 270 million secured through the efforts of former US Senator Richard Shelby and Alabama’s congressional delegation. The State of Alabama invested US$ 150 million through the 2019 Rebuild Alabama Act to cover its share of the expansion and fund additional berth dredging, championed by Governor Kay Ivey with bipartisan legislative support. The channel expansion is part of more than US$ 2 billion in capital investments the Port Authority is making across the Port of Mobile, including a major container terminal expansion, development of inland rail facilities",
+      "takeaways": [
+        "In addition to the greater depth, the project widened a portion of the channel to enable two-way vessel traffic.",
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-4344AEAFCB",
+      "title": "LR Publishes Alternative Fuel Retrofit Guidelines",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/lr-publishes-alternative-fuel-retrofit-543714",
+      "publishedAt": "2026-10-15T13:48:00Z",
+      "category": "Shipping & Tankers",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "shipping",
+        "global"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.marinelink.com/images/maritime/w150/the-bow-of-a-large-174364.jpeg",
+      "summary": "Lloyd’s Register (LR) has published new Guidance Notes for Retrofit of Alternative Fuels and Energy Saving Devices highlighting the growing complexity of ship retrofit projects.As regulatory and commercial pressures increase through measures such as FuelEU Maritime…",
+      "body": "Lloyd’s Register (LR) has published new Guidance Notes for Retrofit of Alternative Fuels and Energy Saving Devices highlighting the growing complexity of ship retrofit projects.As regulatory and commercial pressures increase through measures such as FuelEU Maritime…",
+      "takeaways": [
+        "Operational Area: Global Maritime.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-7746F5BA30",
+      "title": "Med Subsea Cable Project Applies to Resume Seabed Research",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/med-subsea-cable-project-applies-resume-543712",
+      "publishedAt": "2026-10-15T13:47:55Z",
+      "category": "Shipping & Tankers",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med"
+      ],
+      "tags": [
+        "shipping",
+        "suez"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.marinelink.com/images/maritime/w150/us-secretary-of-state-marco-174363.jpg",
+      "summary": "Greece said on Thursday the developer of an EU-backed undersea power cable scheme in the eastern Mediterranean has applied for a license to resume seabed surveying, key for the long-delayed project to move ahead.Construction of the Great Sea…",
+      "body": "Greece said on Thursday the developer of an EU-backed undersea power cable scheme in the eastern Mediterranean has applied for a license to resume seabed surveying, key for the long-delayed project to move ahead.Construction of the Great Sea…",
+      "takeaways": [
+        "Operational Area: Suez Canal & Eastern Med.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-AE49B6FFF2",
+      "title": "Ship Fuel Market Fragments as Middle East Conflict Hits Trade",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/ship-fuel-market-fragments-as-middle-east-conflict-hits-trade/",
+      "publishedAt": "2026-10-15T13:35:58Z",
+      "category": "Shipping & Tankers",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "shipping",
+        "global"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=900&q=80",
+      "summary": "Shipowners are facing an increasingly fragmented fuel market as disruptions triggered by the Middle East conflict raise concerns about the availability and quality of supply.",
+      "body": "Shipowners are facing an increasingly fragmented fuel market as disruptions triggered by the Middle East conflict raise concerns about the availability and quality of supply.",
+      "takeaways": [
+        "Shipowners are facing an increasingly fragmented fuel market as disruptions triggered by the Middle East conflict raise concerns about the availability and quality of supply.",
+        "Operational Area: Global Maritime.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-B209A7D01E",
+      "title": "Minesto reports 'record' 48-hour service intervention on its tidal power plant",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/15/minesto-reports-record-48-hour-service-intervention-on-its-tidal-power-plant",
+      "publishedAt": "2026-10-15T13:34:08Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://offshore-energy.biz/api/media/file/Minesto%20reports%20'record'%2048-hour%20service%20intervention%20of%20its%20tidal%20power%20plant-1600x900.jpg?prefix=media",
+      "summary": "Minesto has performed a service intervention on its Dragon 4 tidal power plant in record time, carrying out the recovery, inspection, and...",
+      "body": "Minesto has performed a service intervention on its Dragon 4 tidal power plant in record time, carrying out the recovery, inspection, and...",
+      "takeaways": [
+        "Minesto has performed a service intervention on its Dragon 4 tidal power plant in record time, carrying out the recovery, inspection, and...",
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-91117A32CF",
+      "title": "Two Ships Ablaze Off Romanian Black Sea Coast, 7 Sailors Missing",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/two-ships-ablaze-off-romanian-black-sea-coast-7-sailors-missing/",
+      "publishedAt": "2026-10-15T13:31:19Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "tanker"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "summary": "Rescuers were searching for seven missing crew on Thursday from one of two chemical tankers that caught fire overnight just outside Romanian territorial waters in the Black Sea, after Russian drones strayed into national airspace, Romanian officials said.",
+      "body": "Rescuers were searching for seven missing crew on Thursday from one of two chemical tankers that caught fire overnight just outside Romanian territorial waters in the Black Sea, after Russian drones strayed into national airspace, Romanian officials said.",
+      "takeaways": [
+        "Operational Area: Suez Canal & Eastern Med, Baltic Sea & Northern Europe.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-5A63C09EA7",
+      "title": "Hapag-Lloyd ends CPF feeder and revises TWX rotation",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/hapag-lloyd-ends-cpf-feeder-and-revises-twx-rotation/",
+      "publishedAt": "2026-10-15T13:00:26Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "China & East Asia"
+      ],
+      "tags": [
+        "port",
+        "singapore",
+        "china"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/06/HLAG_Salahuddin_Rotterdam_1280x800_rgb-300x188.jpg",
+      "summary": "Hapag-Lloyd will discontinue its China Philippines Feeder service and revise the rotation of its Taichung Express as part of changes to its Intra-Asia feeder network. The final CPF sailings will be operated by Hazira Express on voyages 645S and 649N. Port Vessel and voyage Final departure Nansha Hazira Express 645S...",
+      "body": "Hapag-Lloyd will discontinue its China Philippines Feeder service and revise the rotation of its Taichung Express as part of changes to its Intra-Asia feeder network. The final CPF sailings will be operated by Hazira Express on voyages 645S and 649N. Port Vessel and voyage Final departure Nansha Hazira Express 645S 22 November 2026 Singapore Hazira Express 649N 1 December 2026 Subic Bay Hazira Express 649N 10 December 2026 Following the withdrawal of the CPF service, Hapag-Lloyd will use third-party feeder services to handle cargo moving to and from the Philippines. The carrier will also restructure its Taichung Express service to retain coverage at Nansha. The revised TWX rotation will be: Tanjung Pelepas – Singapore – Kaohsiung – Taichung – Nansha – Tanjung Pelepas The new rotation will begin with Little Concert voyage 648S. Port Vessel and voyage Departure Kaohsiung Little Concert 648S 23 November 2026 Taichung Little Concert 648S 25 November 2026 Nansha Little Concert 648S 29 November 2026 The changes will affect feeder connections across Hapag-Lloyd’s Intra-Asia network from late November.",
+      "takeaways": [
+        "Hapag-Lloyd will discontinue its China Philippines Feeder service and revise the rotation of its Taichung Express as part of changes to its Intra-Asia feeder network.",
+        "The final CPF sailings will be operated by Hazira Express on voyages 645S and 649N.",
+        "The carrier will also restructure its Taichung Express service to retain coverage at Nansha."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-2691E39F42",
+      "title": "Rig provider and other contractors revealed for Timor-Leste's oil field",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/15/rig-provider-and-other-contractors-revealed-for-timor-lestes-oil-field",
+      "publishedAt": "2026-10-15T12:32:59Z",
+      "category": "Shipping & Tankers",
+      "region": "Japan & Korea",
+      "regions": [
+        "Japan & Korea"
+      ],
+      "tags": [
+        "imo"
+      ],
+      "coords": [
+        35.1,
+        129.04
+      ],
+      "navarea": "XI",
+      "image": "https://offshore-energy.biz/api/media/file/finder-1048x755.jpg?prefix=media",
+      "summary": "Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the...",
+      "body": "Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the...",
+      "takeaways": [
+        "Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the...",
+        "Operational Area: Japan & Korea.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-37E931D513",
+      "title": "Explainer: Arctic option, on four conditions",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/explainer-arctic-option-on-four-conditions/",
+      "publishedAt": "2026-10-15T12:00:36Z",
+      "category": "Shipping & Tankers",
+      "region": "Baltic Sea & Northern Europe",
+      "regions": [
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "shipping",
+        "baltic"
+      ],
+      "coords": [
+        57.5,
+        19.5
+      ],
+      "navarea": "I",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/cleaned_Αρκτική-Διαδρομή-προς-την-Κορέα-300x169.png",
+      "summary": "Seoul hails the Northern Sea Route as a crisis lane. Season, tonnage, Russian permission and a split liner market decide whether it can be one.",
+      "body": "Seoul hails the Northern Sea Route as a crisis lane. Season, tonnage, Russian permission and a split liner market decide whether it can be one. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register",
+      "takeaways": [
+        "Seoul hails the Northern Sea Route as a crisis lane.",
+        "Season, tonnage, Russian permission and a split liner market decide whether it can be one.",
+        "This content is locked Select a CN Premium Subscription Package To Unlock The Content!"
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-FB4D590C53",
+      "title": "Inside Iran's Precision Strikes on Port, Energy Infrastructure",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/inside-irans-precision-strikes-port-543707",
+      "publishedAt": "2026-10-15T11:42:13Z",
+      "category": "Ports & Terminals",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.marinelink.com/images/maritime/w150/copyright-tritoothadobestock-174358.jpeg",
+      "summary": "Iran and its proxies have carried out dozens of pinpoint strikes on infrastructure in the Gulf since the start of the war, systematically disabling critical equipment and causing cascading failures and economic damage region-wide in a deft campaign…",
+      "body": "Iran and its proxies have carried out dozens of pinpoint strikes on infrastructure in the Gulf since the start of the war, systematically disabling critical equipment and causing cascading failures and economic damage region-wide in a deft campaign…",
+      "takeaways": [
+        "Operational Area: Strait of Hormuz & Persian Gulf, Singapore & Malacca Strait.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-D820165423",
+      "title": "Subsea7 contracts Worley for Northern Lights' key subsea structures",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/15/subsea7-contracts-worley-for-northern-lights-key-subsea-structures",
+      "publishedAt": "2026-10-15T11:37:05Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://offshore-energy.biz/api/media/file/Subsea7%20contracts%20Worley%20for%20Northern%20Lights'%20key%20subsea%20structures-896x568.jpg?prefix=media",
+      "summary": "Subsea7 has awarded Worley Rosenberg a contract for the fabrication of key subsea structures and spools supporting the second phase of the...",
+      "body": "Subsea7 has awarded Worley Rosenberg a contract for the fabrication of key subsea structures and spools supporting the second phase of the...",
+      "takeaways": [
+        "Subsea7 has awarded Worley Rosenberg a contract for the fabrication of key subsea structures and spools supporting the second phase of the...",
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-5F4C3D1F9B",
+      "title": "4,700-Year-Old Shipwreck Discovered off Turkish Coast",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/yearold-shipwreck-discovered-off-turkish-543706",
+      "publishedAt": "2026-10-15T11:33:17Z",
+      "category": "Shipping & Tankers",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med"
+      ],
+      "tags": [
+        "shipping",
+        "suez"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.marinelink.com/images/maritime/w150/screenshot-from-video-of-the-174357.jpg",
+      "summary": "Underwater archaeologists from Akdeniz University have recovered Early Bronze Age pottery off Kekova Island, offering new evidence of Mediterranean maritime trade and life aboard ships nearly five millennia ago.Underwater archaeologists from…",
+      "body": "Underwater archaeologists from Akdeniz University have recovered Early Bronze Age pottery off Kekova Island, offering new evidence of Mediterranean maritime trade and life aboard ships nearly five millennia ago.Underwater archaeologists from…",
+      "takeaways": [
+        "Operational Area: Suez Canal & Eastern Med.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-F982A2B87D",
+      "title": "Green ammonia could be cheaper than VLSFO by 2035 under IMO NZF",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/regulations/green-ammonia-could-be-cheaper-than-vlsfo-by-2035-under-imo-nzf",
+      "publishedAt": "2026-10-15T11:10:50Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port",
+        "imo"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt8522761a1b200208/6ad0bce9d717664d1331b692/Inga-2-Credit-Ivanhoe-Mines.jpg?width=720&quality=80&disable=upscale",
+      "summary": "UCL report on Grand Inga hydropower shows beneficial link between green ammonia production and renewable energy demand.",
+      "body": "UCL report on Grand Inga hydropower shows beneficial link between green ammonia production and renewable energy demand.",
+      "takeaways": [
+        "UCL report on Grand Inga hydropower shows beneficial link between green ammonia production and renewable energy demand.",
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-C4D4C63C09",
+      "title": "Gary Cobbing appointed CEO of Ellerman City Liners",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/gary-cobbing-appointed-ceo-of-ellerman-city-liners/",
+      "publishedAt": "2026-10-15T11:00:34Z",
+      "category": "Navigation & Safety",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/Warm-Executive-Portrait-in-a-Modern-Office-1536x807.png-300x158.webp",
+      "summary": "Ellerman City Liners has appointed Gary Cobbing as its new Chief Executive Officer. Cobbing has worked within the GB Global Group for more than 17 years, holding several senior leadership positions across its shipping, logistics and supply chain operations. In his new role, he will lead Ellerman City Liners’...",
+      "body": "Ellerman City Liners has appointed Gary Cobbing as its new Chief Executive Officer. Cobbing has worked within the GB Global Group for more than 17 years, holding several senior leadership positions across its shipping, logistics and supply chain operations. In his new role, he will lead Ellerman City Liners’ strategic direction, with responsibility for customer service, operational performance, network development and sustainable growth. His appointment comes as Ellerman City Liners continues integrating Viasea into its network. The integration is expected to expand the carrier’s shortsea capabilities, service portfolio and geographical reach across Europe. “I am honoured to be appointed Chief Executive Officer of Ellerman City Liners at such an exciting time for the business. We have strong foundations, a talented team and a clear vision for the future,” said Cobbing. “As global trade continues to evolve, our focus remains on delivering reliable, customer-focused shortsea shipping solutions while continuing to strengthen our network, enhance our capabilities and create value for our customers,” he added.",
+      "takeaways": [
+        "Ellerman City Liners has appointed Gary Cobbing as its new Chief Executive Officer.",
+        "Cobbing has worked within the GB Global Group for more than 17 years, holding several senior leadership positions across its shipping, logistics and supply chain operations.",
+        "In his new role, he will lead Ellerman City Liners’ strategic direction, with responsibility for customer service, operational performance, network development and sustainable growth."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-446C54769D",
+      "title": "Ofgem to launch record tender looking for owner of Hornsea 3 offshore transmission assets",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/15/ofgem-to-launch-record-tender-looking-for-owner-of-hornsea-3-offshore-transmission-assets",
+      "publishedAt": "2026-10-15T10:50:34Z",
+      "category": "Shipping & Tankers",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "shipping",
+        "rotterdam"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://offshore-energy.biz/api/media/file/ofgem-935x700.jpg?prefix=media",
+      "summary": "The UK energy regulator Ofgem will launch a tender round covering the transmission infrastructure for Ørsted’s 2.9 GW Hornsea 3 offshore wind...",
+      "body": "The UK energy regulator Ofgem will launch a tender round covering the transmission infrastructure for Ørsted’s 2.9 GW Hornsea 3 offshore wind...",
+      "takeaways": [
+        "The UK energy regulator Ofgem will launch a tender round covering the transmission infrastructure for Ørsted’s 2.9 GW Hornsea 3 offshore wind...",
+        "Operational Area: Rotterdam & North Sea.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
     {
       "id": "SN-9993875C1B",
       "title": "Regional container operators adjust to Middle East conflict",
@@ -899,37 +1521,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-BC99A9F2DC",
-      "title": "LD Armateurs Installs Six Rotor Sails on Airbus RoRo Carrier",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/ld-armateurs-installs-six-rotor-sails-543698",
-      "publishedAt": "2026-10-15T08:29:53Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.marinelink.com/images/maritime/w150/image-courtesy-ld-armateurs-and-174342.jpg",
-      "summary": "LD Armateurs and Norsepower completed installation of six rotor sails aboard Spirit of Toulouse, the first of three low-emission RoRo vessels being built to transport aircraft components for Airbus between Europe and North America.The installation…",
-      "body": "LD Armateurs and Norsepower completed installation of six rotor sails aboard Spirit of Toulouse, the first of three low-emission RoRo vessels being built to transport aircraft components for Airbus between Europe and North America.The installation…",
-      "takeaways": [
-        "Operational Area: Global Maritime.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-646E0B886C",
       "title": "Hormuz claims two more ships in fresh wave of strikes",
       "source": "Splash247",
@@ -1000,39 +1591,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-6108BBC294",
-      "title": "Oil Markets Brace for Years of High Prices as Iran War Drags On",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/oil-markets-brace-years-high-prices-iran-543696",
-      "publishedAt": "2026-10-15T08:01:50Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf"
-      ],
-      "tags": [
-        "geopolitics",
-        "strait"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.marinelink.com/images/maritime/w150/mproduction-adobe-stock-174341.jpeg",
-      "summary": "Oil markets initially treated the Iran war as a brief bullish disruption in a long-term bearish trend. But traders are now betting that oil prices will remain elevated through 2028, forcing a rethink of the global inflation outlook.Eight months into the war…",
-      "body": "Oil markets initially treated the Iran war as a brief bullish disruption in a long-term bearish trend. But traders are now betting that oil prices will remain elevated through 2028, forcing a rethink of the global inflation outlook.Eight months into the war…",
-      "takeaways": [
-        "Oil markets initially treated the Iran war as a brief bullish disruption in a long-term bearish trend.",
-        "But traders are now betting that oil prices will remain elevated through 2028, forcing a rethink of the global inflation outlook.Eight months into the war…",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-663DE9A5D9",
       "title": "Explainer: The corridor is the target",
       "source": "Container News",
@@ -1094,42 +1652,6 @@
         "A chemical tanker has reported a suspected drone strike inside Romanian territorial waters.",
         "The Comoros-flagged Yara J was anchored approximately 10 nautical miles southeast of Sulina on Wednesday evening when its crew reported an explosion and fire onboard.",
         "The vessel, which was in ballast and reportedly preparing to enter the Danube, extinguished the fire without …"
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-29BD79D480",
-      "title": "PetroChina Launches LNG Bunkering Ops in Singapore",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/petrochina-launches-lng-bunkering-ops-543695",
-      "publishedAt": "2026-10-15T07:46:26Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia"
-      ],
-      "tags": [
-        "lng",
-        "port",
-        "singapore",
-        "china",
-        "bunker"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://images.marinelink.com/images/maritime/w150/vladsv-adobe-stock-174340.jpeg",
-      "summary": "PetroChina International on Thursday will use liquefied natural gas to bunker a vessel in Singapore for the first time, Chairman Wu Junli said, widening the alternative-fuel options it can offer shipowners at the world's top refuelling port.The trading arm of Chinese state major PetroChina 601857.SS",
-      "body": "PetroChina International on Thursday will use liquefied natural gas to bunker a vessel in Singapore for the first time, Chairman Wu Junli said, widening the alternative-fuel options it can offer shipowners at the world's top refuelling port.The trading arm of Chinese state major PetroChina 601857.SS",
-      "takeaways": [
-        "Operational Area: Singapore & Malacca Strait, China & East Asia.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1235,210 +1757,6 @@
       "readMinutes": 4
     },
     {
-      "id": "SN-4275E47D90",
-      "title": "Explainer: The Eastern Mediterranean’s contested logistics order",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/explainer-the-eastern-mediterraneans-contested-logistics-order/",
-      "publishedAt": "2026-10-15T06:00:34Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "port",
-        "suez"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2026/08/800_dji_20260811162901_0433_d-300x169.jpg",
-      "summary": "As carriers return to Suez, the basin’s ports are being rebuilt less as commercial hubs than as instruments of influence, and their value increasingly depends on who stands behind them.",
-      "body": "As carriers return to Suez, the basin’s ports are being rebuilt less as commercial hubs than as instruments of influence, and their value increasingly depends on who stands behind them. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register",
-      "takeaways": [
-        "As carriers return to Suez, the basin’s ports are being rebuilt less as commercial hubs than as instruments of influence, and their value increasingly depends on who stands behind them.",
-        "This content is locked Select a CN Premium Subscription Package To Unlock The Content!",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-40275F840C",
-      "title": "FMC proposes shipping fees and trade restrictions against Spain",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/fmc-proposes-shipping-fees-and-trade-restrictions-against-spain/",
-      "publishedAt": "2026-10-15T05:00:30Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2021/11/FMC-300x164.png",
-      "summary": "The US Federal Maritime Commission (FMC) has proposed new fees on Spanish-flagged vessels and restrictions on certain Spanish imports after concluding that Spain denied US-flagged ships access to its ports. In a statement issued on 14 October 2026, the FMC said its investigation found evidence that Spain had created...",
-      "body": "The US Federal Maritime Commission (FMC) has proposed new fees on Spanish-flagged vessels and restrictions on certain Spanish imports after concluding that Spain denied US-flagged ships access to its ports. In a statement issued on 14 October 2026, the FMC said its investigation found evidence that Spain had created unfavorable conditions for US shipping. The regulator is now seeking public comments before deciding whether to introduce measures in response. The proposals include a $200,000 fee per voyage for all Spanish-flagged vessels and possible restrictions on imports of selected Spanish products into the United States. FMC investigation finds restrictions on US vessels The FMC launched its investigation in December 2024 following reports that Spanish authorities had refused port access to certain vessels, including ships participating in the US Maritime Administration’s Maritime Security Program. According to the Commission, its findings confirmed that Spain had denied entry to US-flagged vessels, creating unfavorable conditions for shipping in US foreign trade. The regulator said these restrictions could affect the efficiency and reliability of international maritime supply chains, while also undermining efforts to support US exports and the American merchant marine. In response, the FMC is considering two sets of measures. The first would impose a $200,000 fee on each voyage by a Spanish-flagged vessel. The second would restrict imports of certain Spanish goods. Products potentially affected include perfumes, cosmetics, oils and fats, ceramics, stone products, sugar and confectionery. Proposed measures remain under review The FMC has invited public comments on the proposed actions, including their potential impact on shipping and international trade. The Commissi",
-      "takeaways": [
-        "The US Federal Maritime Commission (FMC) has proposed new fees on Spanish-flagged vessels and restrictions on certain Spanish imports after concluding that Spain denied US-flagged ships access to its ports.",
-        "In a statement issued on 14 October 2026, the FMC said its investigation found evidence that Spain had created unfavorable conditions for US shipping.",
-        "The regulator is now seeking public comments before deciding whether to introduce measures in response."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
-      "id": "SN-E8710CC576",
-      "title": "Rhenus opens humanitarian logistics office in Dubai",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/rhenus-opens-humanitarian-logistics-office-in-dubai/",
-      "publishedAt": "2026-10-15T04:00:26Z",
-      "category": "Ports & Terminals",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/DH-1_1000-300x225.jpg",
-      "summary": "Rhenus has opened a permanent humanitarian logistics office within Dubai Humanitarian, expanding its ability to coordinate emergency relief shipments across international markets. The new office, inaugurated on 14 October 2026, brings Rhenus closer to United Nations agencies, non-governmental organisations and other...",
-      "body": "Rhenus has opened a permanent humanitarian logistics office within Dubai Humanitarian, expanding its ability to coordinate emergency relief shipments across international markets. The new office, inaugurated on 14 October 2026, brings Rhenus closer to United Nations agencies, non-governmental organisations and other humanitarian partners operating from the Dubai hub. The opening follows the launch of Rhenus’ humanitarian logistics services in the United Arab Emirates earlier this year. During 2026, the company also developed regional transport solutions, expanded its network of humanitarian partners and secured a licence to operate within the Dubai Humanitarian Free Zone. Supporting international relief operations From its new office, Rhenus will coordinate air, ocean and road freight shipments carrying essential supplies to areas affected by emergencies. These shipments include medical equipment, pharmaceuticals, food aid, shelter materials and emergency response supplies. The company will use its global transport network to help humanitarian organisations plan routes, secure freight capacity and manage deliveries under time-sensitive conditions. The location also allows Rhenus to work more closely with humanitarian agencies and logistics partners based within Dubai Humanitarian. “Being part of this community allows us to work more closely with our partners and better support their logistics requirements when and where they are needed,” said Hassan Alzeer, Managing Director of Rhenus Middle East. The new office brings together the company’s specialist Aid & Relief team and its wider international freight network. It also strengthens Rhenus’ presence in Dubai as the company continues developing its humanitarian logistics activities.",
-      "takeaways": [
-        "Rhenus has opened a permanent humanitarian logistics office within Dubai Humanitarian, expanding its ability to coordinate emergency relief shipments across international markets.",
-        "The new office, inaugurated on 14 October 2026, brings Rhenus closer to United Nations agencies, non-governmental organisations and other humanitarian partners operating from the Dubai hub.",
-        "The opening follows the launch of Rhenus’ humanitarian logistics services in the United Arab Emirates earlier this year."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
-      "id": "SN-B733B9155A",
-      "title": "Suez Canal container ship transits exceed half of pre-crisis levels",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/suez-canal-container-ship-transits-exceed-half-of-pre-crisis-levels/",
-      "publishedAt": "2026-10-15T01:00:05Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Red Sea & Bab el-Mandeb",
-      "regions": [
-        "Red Sea & Bab el-Mandeb",
-        "Suez Canal & Eastern Med",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "red sea",
-        "suez"
-      ],
-      "coords": [
-        13.5,
-        42.8
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/03/12-2-300x200.jpg",
-      "summary": "Container ship traffic through the Suez Canal has reached its highest level since the Red Sea disruptions began, with weekly transiting capacity exceeding half of pre-crisis levels for the first time. According to BIMCO, citing Clarksons Research data, an average of 753,000 TEU of container ship capacity passed...",
-      "body": "Container ship traffic through the Suez Canal has reached its highest level since the Red Sea disruptions began, with weekly transiting capacity exceeding half of pre-crisis levels for the first time. According to BIMCO, citing Clarksons Research data, an average of 753,000 TEU of container ship capacity passed through the canal each week during the first two weeks of October 2026. This compares with 1.46 million TEU during the same period in 2023. The increase follows a series of decisions by major container shipping lines to restore services through the Red Sea after nearly three years of widespread diversions around the Cape of Good Hope. Shipping lines accelerate return to Suez BIMCO reported that 36% of container ship capacity travelling via either the Suez Canal or the Cape of Good Hope used the canal during the first two weeks of October. This represents a sharp increase from the average of 8% recorded between 2024 and mid-2026. However, it remains below the 80% share seen before the Red Sea attacks. The recovery began gathering pace in July 2026, when Maersk and Hapag-Lloyd announced the return of their AE15/SE3 Asia–Mediterranean service to the canal. Further changes followed across the Gemini Cooperation network, while members of the Ocean Alliance and Premier Alliance, along with MSC, also announced revised routings. In total, shipping lines have announced routing changes affecting 16 services since early July. The recovery has also become more balanced between sailing directions. During the third quarter, northbound capacity was equivalent to 75% of southbound capacity. That figure increased to 81% in early October. Capacity recovery could affect freight markets The return to shorter routes could have significant implications for global container shipping ca",
-      "takeaways": [
-        "Container ship traffic through the Suez Canal has reached its highest level since the Red Sea disruptions began, with weekly transiting capacity exceeding half of pre-crisis levels for the first time.",
-        "According to BIMCO, citing Clarksons Research data, an average of 753,000 TEU of container ship capacity passed through the canal each week during the first two weeks of October 2026.",
-        "This compares with 1.46 million TEU during the same period in 2023."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
-      "id": "SN-5BD366F34E",
-      "title": "Port of Oakland records container volume growth in September",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/port-of-oakland-records-container-volume-growth-in-september/",
-      "publishedAt": "2026-10-14T23:00:15Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "US West Coast & Pacific",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2025/02/Port_of_Oakland_-_Aerial_-300x201.jpg",
-      "summary": "The Port of Oakland handled 188,517 TEUs in September 2026, a 5.4% increase compared to September 2025, with growth in both loaded imports and exports driving the improvement. Combined loaded container volume rose 7.7% year-on-year, with loaded imports reaching 82,975 TEUs, up 9.6% and reversing declines recorded in...",
-      "body": "The Port of Oakland handled 188,517 TEUs in September 2026, a 5.4% increase compared to September 2025, with growth in both loaded imports and exports driving the improvement. Combined loaded container volume rose 7.7% year-on-year, with loaded imports reaching 82,975 TEUs, up 9.6% and reversing declines recorded in July and August, while loaded exports reached 63,299 TEUs, up 5.3% and marking their third consecutive month of month-on-month growth. Empty container volume of 42,243 TEUs was down 2.0 percent year-on-year. The port recorded 88 vessel calls in September, up 7.3 percent year-on-year, and total container volume increased 8.5 percent compared to August. Through the first nine months of 2026, the Port of Oakland has handled 1,656,999 TEUs, down 3.5% compared to the same period in 2025. Loaded imports are down 3.1 percent year-to-date at 706,177 TEUs, while loaded exports of 590,434 TEUs are up 0.7%. Combined loaded container volume is down 1.4% year-to-date, and empty container movements have declined 10.4 percent. Acting Director of Maritime Jason Garben described the September results as encouraging, noting growth in both import and export directions, and reaffirmed the port’s focus on delivering reliable and efficient service while working with terminal operators and ocean carriers to strengthen Oakland’s competitive position and attract additional cargo.",
-      "takeaways": [
-        "The Port of Oakland handled 188,517 TEUs in September 2026, a 5.4% increase compared to September 2025, with growth in both loaded imports and exports driving the improvement.",
-        "Empty container volume of 42,243 TEUs was down 2.0 percent year-on-year.",
-        "The port recorded 88 vessel calls in September, up 7.3 percent year-on-year, and total container volume increased 8.5 percent compared to August."
-      ],
-      "readingMinutes": 3,
-      "readMinutes": 3
-    },
-    {
-      "id": "SN-A09C6C960C",
-      "title": "Why One Shipper Stops Paying for Air in the Caribbean Trade",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/why-one-shipper-stops-paying-for-air-in-the-caribbean-trade/",
-      "publishedAt": "2026-10-14T21:49:32Z",
-      "category": "Weather & Cyclones",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/pexels-markus-winkler-1430818-18609057-300x200.jpg",
-      "summary": "Three years ago a hardware buyer in Port of Spain was flying in forty kilos of fasteners every other week because it felt safer than committing to a container. Then a storm shut the airport for four days and his shelves went bare while a competitor’s container was already sitting on a dock, untouched. That […]",
-      "body": "Three years ago a hardware buyer in Port of Spain was flying in forty kilos of fasteners every other week because it felt safer than committing to a container. Then a storm shut the airport for four days and his shelves went bare while a competitor’s container was already sitting on a dock, untouched. That competitor wasn’t smarter. They had just stopped treating a container like a gamble. Here’s the math most importers run backward. They compare the freight invoice to the air waybill, see a bigger number on the container, and walk away. What they’ve skipped is the freight paid per unit moving through the box. Once you divide the container rate by the number of cases inside it, the margin usually flips, and it flips hard in favor of the ocean move. That’s the whole case for full container load shipping in a nutshell: you’re not buying space, you’re buying the unit cost hiding behind a scary total. If your cargo is going to the Caribbean, the operator matters as much as the rate. Companies like full container load shipping specialists run fixed-day sailings into island ports where schedule slips cost real money, and a missed connection on a small lane can mean a week, not a day. What Actually Changes When You Own the Box Your freight stops sharing space with strangers. That’s the part people gloss over. With a shared load, your pallets sit next to someone else’s chemicals, someone else’s returns, someone else’s mislabeled freight that customs decides to inspect. Your cargo waits for the problem to clear even though you did nothing wrong. When you book a dedicated container, the only freight the port has to examine is yours. That alone can save a week on a lane where berth windows are tight. Dwell time is where island shipping gets expensive. A container sitting on a dock",
-      "takeaways": [
-        "Three years ago a hardware buyer in Port of Spain was flying in forty kilos of fasteners every other week because it felt safer than committing to a container.",
-        "Then a storm shut the airport for four days and his shelves went bare while a competitor’s container was already sitting on a dock, untouched.",
-        "They had just stopped treating a container like a gamble."
-      ],
-      "readingMinutes": 5,
-      "readMinutes": 5
-    },
-    {
       "id": "SN-F09F9F584F",
       "title": "U.S. Forces Destroy Iranian-Linked Dhow Accused of Targeting Navy Ships",
       "source": "gCaptain",
@@ -1467,101 +1785,6 @@
         "forces destroyed an Iranian-affiliated dhow in the Gulf of Oman on October 6 after determining that the vessel was conducting surveillance and helping target American warships, U.S.",
         "Operational Area: Strait of Hormuz & Persian Gulf.",
         "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-99ECB6FF4A",
-      "title": "Bulgaria to Join NATO Anti-Drone Initiative",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/bulgaria-join-nato-antidrone-initiative-543693",
-      "publishedAt": "2026-10-14T18:31:39Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "geopolitics",
-        "suez"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://images.marinelink.com/images/maritime/w150/adobe-stockalejandro-bernal-174338.jpeg",
-      "summary": "Bulgaria expects to join a NATO anti-drone initiative by the end of October, Defence Minister Dimitar Stoyanov said on Wednesday, a day after a drone attack sank a cargo vessel off the country's Black Sea coast for the second time in a week.The…",
-      "body": "Bulgaria expects to join a NATO anti-drone initiative by the end of October, Defence Minister Dimitar Stoyanov said on Wednesday, a day after a drone attack sank a cargo vessel off the country's Black Sea coast for the second time in a week.The…",
-      "takeaways": [
-        "Operational Area: Suez Canal & Eastern Med.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-E781BB5020",
-      "title": "SMH Postpones Rescue Mission Amidst Soaring Fuel Costs",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/smh-postpones-rescue-mission-amidst-543692",
-      "publishedAt": "2026-10-14T18:28:58Z",
-      "category": "Navigation & Safety",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "navigation",
-        "suez"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://images.marinelink.com/images/maritime/w150/imag3s-stockadobecom-174337.jpeg",
-      "summary": "Spanish humanitarian rescue charity SMH has postponed its next mission in the central Mediterranean until 2027 due to soaring fuel costs, the group said on Wednesday, highlighting the financial pressures facing humanitarian efforts along one of the world's deadliest migration routes.SMH…",
-      "body": "Spanish humanitarian rescue charity SMH has postponed its next mission in the central Mediterranean until 2027 due to soaring fuel costs, the group said on Wednesday, highlighting the financial pressures facing humanitarian efforts along one of the world's deadliest migration routes.SMH…",
-      "takeaways": [
-        "Operational Area: Suez Canal & Eastern Med.",
-        "Watchkeepers transiting affected waters should cross-check active NAVAREA & UKMTO advisories on SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-D76E267CF7",
-      "title": "Novatek Acquires Two Ice-Class LNG Carriers",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/novatek-acquires-two-iceclass-lng-543691",
-      "publishedAt": "2026-10-14T18:26:20Z",
-      "category": "Shipping & Tankers",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "lng"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.marinelink.com/images/maritime/w150/timon-stockadobecom-174336.jpeg",
-      "summary": "Russia's largest liquefied natural gas producer Novatek is expanding its fleet serving Arctic projects through the acquisition of at least two Arc4 ice-class LNG carriers, registration and shipping data showed on Wednesday.Acquisition of the vessels is a significant development for Novatek…",
-      "body": "Russia's largest liquefied natural gas producer Novatek is expanding its fleet serving Arctic projects through the acquisition of at least two Arc4 ice-class LNG carriers, registration and shipping data showed on Wednesday.Acquisition of the vessels is a significant development for Novatek…",
-      "takeaways": [
-        "Operational Area: Global Maritime.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1628,235 +1851,6 @@
         "Norwegian appeals court upholds a breach of contract ruling against Seadrill over the redelivery of SFL’s semi-submersible drilling rig in 2022.",
         "Operational Area: Global Maritime.",
         "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-2E9246A0DB",
-      "title": "Bulk Carrier Sinks Weeks After Deadly Strait of Hormuz Strike",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/bulk-carrier-sinks-weeks-after-deadly-strait-of-hormuz-strike/",
-      "publishedAt": "2026-10-14T17:22:39Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "container",
-        "hormuz"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
-      "summary": "By Jonathan Saul and Renee Maltezou LONDON, Oct 14 (Reuters) – A container ship and a dry bulk carrier have both sunk near the Strait of Hormuz in the past...",
-      "body": "By Jonathan Saul and Renee Maltezou LONDON, Oct 14 (Reuters) – A container ship and a dry bulk carrier have both sunk near the Strait of Hormuz in the past...",
-      "takeaways": [
-        "By Jonathan Saul and Renee Maltezou LONDON, Oct 14 (Reuters) – A container ship and a dry bulk carrier have both sunk near the Strait of Hormuz in the past...",
-        "Operational Area: Strait of Hormuz & Persian Gulf, Rotterdam & North Sea.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-5836505907",
-      "title": "Qatar Rewrites Its Gas Playbook With Old Tankers and New Tactics",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/qatar-rewrites-its-gas-playbook-with-old-tankers-and-new-tactics/",
-      "publishedAt": "2026-10-14T17:15:02Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf"
-      ],
-      "tags": [
-        "tanker",
-        "hormuz"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
-      "summary": "Six months into a war that sowed upheaval in the Persian Gulf, Qatar found itself stuck. By late August, even limited shipments from the gas heavyweight had all but stopped following a projectile attack on one of its tankers outside the Strait of Hormuz. Pressure was growing, not only from energy-starved clients but...",
-      "body": "Six months into a war that sowed upheaval in the Persian Gulf, Qatar found itself stuck. By late August, even limited shipments from the gas heavyweight had all but stopped following a projectile attack on one of its tankers outside the Strait of Hormuz. Pressure was growing, not only from energy-starved clients but also from inside an economy built on regular deliveries.",
-      "takeaways": [
-        "Six months into a war that sowed upheaval in the Persian Gulf, Qatar found itself stuck.",
-        "By late August, even limited shipments from the gas heavyweight had all but stopped following a projectile attack on one of its tankers outside the Strait of Hormuz.",
-        "Pressure was growing, not only from energy-starved clients but also from inside an economy built on regular deliveries."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-96B5B28F81",
-      "title": "FMC proposes $200,000 voyage fee on Spanish ships",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/regulations/fmc-proposes-200-000-voyage-fee-on-spanish-ships",
-      "publishedAt": "2026-10-14T17:10:22Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltad05a874f3a7b140/6acfb7d580fc16ce72e60680/Maersk-Credit-Port-of_Los_Angeles.jpg?width=720&quality=80&disable=upscale",
-      "summary": "The move follows an investigation into Spain denying port access to US Maritime Security Program vessels.",
-      "body": "The move follows an investigation into Spain denying port access to US Maritime Security Program vessels.",
-      "takeaways": [
-        "The move follows an investigation into Spain denying port access to US Maritime Security Program vessels.",
-        "Operational Area: Global Maritime.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-5863736ED0",
-      "title": "Yemen’s Houthis Vow More Attacks on Saudi Airports, Oil Facilities After Aramco HQ Hit",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/yemens-houthis-vow-more-attacks-on-saudi-airports-oil-facilities-after-aramco-hq-hit/",
-      "publishedAt": "2026-10-14T16:34:09Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Red Sea & Bab el-Mandeb",
-      "regions": [
-        "Red Sea & Bab el-Mandeb"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        13.5,
-        42.8
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
-      "summary": "Yemen's Houthis vowed on Wednesday to press on with attacks on airports and oil facilities in Saudi Arabia, a day after a strike that sources said caused extensive damage to the headquarters of oil giant Saudi Aramco2223.SE.",
-      "body": "Yemen's Houthis vowed on Wednesday to press on with attacks on airports and oil facilities in Saudi Arabia, a day after a strike that sources said caused extensive damage to the headquarters of oil giant Saudi Aramco2223.SE.",
-      "takeaways": [
-        "Operational Area: Red Sea & Bab el-Mandeb.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-AA108C9DFD",
-      "title": "U.S. Shipping Regulator Proposes $200,000 Fees on Spanish Ships Over Port Ban",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/u-s-shipping-regulator-proposes-200000-fees-on-spanish-ships-over-port-ban/",
-      "publishedAt": "2026-10-14T15:56:37Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
-      "summary": "The U.S. Federal Maritime Commission (FMC) is proposing $200,000 fees on Spanish-flagged vessels entering American ports, along with restrictions on billions of dollars in Spanish imports, after concluding that Spain’s...",
-      "body": "The U.S. Federal Maritime Commission (FMC) is proposing $200,000 fees on Spanish-flagged vessels entering American ports, along with restrictions on billions of dollars in Spanish imports, after concluding that Spain’s...",
-      "takeaways": [
-        "Federal Maritime Commission (FMC) is proposing $200,000 fees on Spanish-flagged vessels entering American ports, along with restrictions on billions of dollars in Spanish imports, after concluding that Spain’s...",
-        "Operational Area: Global Maritime.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-BB2CC18098",
-      "title": "JPMorganChase Names Shipbuilding Leaders Under $1.5 Trillion Industrial Initiative",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/jpmorganchase-names-shipbuilding-leaders-under-1-5-trillion-industrial-initiative/",
-      "publishedAt": "2026-10-14T14:56:11Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
-      "summary": "JPMorganChase has appointed two senior leaders to help expand its support for U.S. shipbuilding and the maritime industry under its $1.5 trillion Security and Resiliency Initiative (SRI), a 10-year effort...",
-      "body": "JPMorganChase has appointed two senior leaders to help expand its support for U.S. shipbuilding and the maritime industry under its $1.5 trillion Security and Resiliency Initiative (SRI), a 10-year effort...",
-      "takeaways": [
-        "JPMorganChase has appointed two senior leaders to help expand its support for U.S.",
-        "shipbuilding and the maritime industry under its $1.5 trillion Security and Resiliency Initiative (SRI), a 10-year effort...",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-13ED678BFC",
-      "title": "Containership Sinks as Hormuz Attacks Spiral Out of Control",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/containership-sinks-as-hormuz-attacks-spiral-out-of-control/",
-      "publishedAt": "2026-10-14T14:44:55Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "container",
-        "hormuz",
-        "singapore"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
-      "summary": "A Singapore-flagged containership has sunk after being struck by a projectile in the Strait of Hormuz, as a widening series of attacks on merchant shipping raises fresh questions about U.S....",
-      "body": "A Singapore-flagged containership has sunk after being struck by a projectile in the Strait of Hormuz, as a widening series of attacks on merchant shipping raises fresh questions about U.S....",
-      "takeaways": [
-        "A Singapore-flagged containership has sunk after being struck by a projectile in the Strait of Hormuz, as a widening series of attacks on merchant shipping raises fresh questions about U.S....",
-        "Operational Area: Strait of Hormuz & Persian Gulf, Singapore & Malacca Strait.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
