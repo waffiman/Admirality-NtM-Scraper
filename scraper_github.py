@@ -1455,29 +1455,76 @@ def _calc_track_movement(lat1: float, lon1: float, lat2: float, lon2: float, hou
     return f"{deg_to_compass(brg)} at {spd} kts"
 
 
+# Worldwide coastal / chokepoint tiles for Open Waters AIS (each ≤ ~100 sq deg anonymous cap).
+# MarineTraffic / VesselFinder are NOT scraped.
+OPEN_WATERS_AIS_CORRIDORS = [
+    # SE Asia / Mid-East
+    (0.5, 103.0, 2.5, 105.5),       # Singapore / Malacca
+    (5.0, 99.5, 8.0, 104.0),        # Malacca north
+    (21.0, 113.0, 23.5, 118.0),     # Hong Kong / PRD
+    (30.0, 120.5, 32.5, 123.5),     # Shanghai approaches
+    (34.0, 128.0, 36.5, 132.0),     # Busan / Korea Strait
+    (34.5, 139.0, 36.0, 141.5),     # Tokyo Bay
+    (24.0, 120.0, 26.5, 123.0),     # Taiwan Strait
+    (11.0, 99.0, 14.0, 102.0),      # Gulf of Thailand
+    (24.5, 54.0, 27.0, 57.5),       # Hormuz / Gulf
+    (21.0, 38.0, 24.0, 42.0),       # Red Sea north / Suez
+    (12.0, 42.5, 15.0, 46.0),       # Bab el-Mandeb
+    (18.0, 71.0, 20.5, 74.0),       # Mumbai approaches
+    # Europe / Med / Atlantic
+    (50.5, -1.5, 52.5, 3.5),        # English Channel
+    (51.0, 3.0, 54.0, 8.5),         # North Sea / Rotterdam
+    (53.0, 8.5, 56.0, 12.5),        # German Bight / Baltic mouth
+    (59.0, 17.0, 61.0, 25.0),        # Stockholm / Gulf of Finland W
+    (35.5, -6.5, 37.5, -4.5),       # Gibraltar
+    (40.5, 13.5, 42.5, 16.5),       # Central Med / Naples
+    (30.5, 31.5, 32.5, 33.5),       # Suez Canal approaches
+    (40.5, 28.0, 42.0, 30.5),       # Bosporus / Marmara
+    (43.0, -10.0, 45.5, -6.0),      # Bay of Biscay / Finisterre
+    # Americas
+    (8.5, -80.5, 10.0, -78.5),      # Panama Canal
+    (25.5, -80.5, 27.5, -78.5),     # Florida Strait
+    (28.5, -95.5, 30.5, -93.0),     # Houston / Gulf US
+    (39.5, -75.0, 41.5, -72.5),     # NY / New Jersey
+    (32.5, -80.5, 34.0, -78.0),     # Charleston approaches
+    (33.0, -119.5, 34.5, -117.5),   # LA / Long Beach
+    (37.0, -123.5, 38.5, -121.5),   # SF Bay
+    (48.0, -126.0, 50.0, -122.5),   # Juan de Fuca / Vancouver
+    (22.0, -98.0, 24.0, -96.0),     # SW Gulf of Mexico
+    (-24.5, -47.0, -22.5, -43.5),   # Santos / Rio approaches
+    # Africa / Oceania
+    (-35.5, 17.5, -33.5, 20.0),     # Cape of Good Hope
+    (-34.0, 150.5, -32.5, 152.5),   # Sydney approaches
+    (-38.5, 144.0, -37.0, 146.0),   # Bass Strait / Melbourne
+    (-27.5, 152.5, -26.0, 154.0),   # Brisbane
+    (24.5, 50.0, 27.0, 52.5),       # Arabian Gulf west
+]
+
+
 def scrape_digitraffic_ais_snapshot() -> dict:
     """
-    Official open AIS positions from Digitraffic Marine (Finland / Baltic).
-    VesselFinder / MarineTraffic are NOT scraped — no bulk public dump of all global AIS.
+    Worldwide open AIS snapshot: Digitraffic (Baltic/FI) + Open Waters corridor tiles.
+    VesselFinder / MarineTraffic are NOT scraped (ToS forbid automated extraction).
     """
     import gzip
+    import time as _time
+
     ua = {
-        "User-Agent": "SetSailMarineSuite/5.12 (+https://setsail-ai.vercel.app)",
+        "User-Agent": "SetSailMarineSuite/5.14 (+https://setsail-ai.vercel.app)",
         "Digitraffic-User": "SetSailMarineSuite/AIS",
         "Accept": "application/json",
         "Accept-Encoding": "gzip",
     }
-    loc_url = "https://meri.digitraffic.fi/api/ais/v1/locations"
-    ves_url = "https://meri.digitraffic.fi/api/ais/v1/vessels"
 
-    def _get_json(url):
+    def _get_json(url, headers=None):
+        hdrs = headers or ua
         session = get_http_session()
         if session is not None:
-            resp = session.get(url, headers=ua, timeout=60)
+            resp = session.get(url, headers=hdrs, timeout=60)
             resp.raise_for_status()
             raw = resp.content
         else:
-            req = urllib.request.Request(url, headers=ua)
+            req = urllib.request.Request(url, headers=hdrs)
             with urllib.request.urlopen(req, timeout=60) as resp:
                 raw = resp.read()
         try:
@@ -1486,49 +1533,111 @@ def scrape_digitraffic_ais_snapshot() -> dict:
             pass
         return json.loads(raw.decode("utf-8", errors="replace"))
 
-    geo = _get_json(loc_url)
-    meta = {}
-    try:
-        vessels = _get_json(ves_url)
-        arr = vessels if isinstance(vessels, list) else (vessels.get("vessels") or [])
-        for v in arr:
-            mmsi = v.get("mmsi")
-            if mmsi is None:
-                continue
-            meta[int(mmsi)] = {
-                "name": (v.get("name") or "").strip(),
-                "destination": (v.get("destination") or "").strip(),
-                "shipType": v.get("shipType") or v.get("shipTypeName") or "",
-            }
-    except Exception as e:
-        print(f"[AIS] vessel meta warning: {e}")
+    by_mmsi = {}
 
-    targets = []
-    for f in geo.get("features") or []:
-        p = f.get("properties") or {}
-        c = (f.get("geometry") or {}).get("coordinates") or []
-        if len(c) < 2:
-            continue
-        mmsi = p.get("mmsi")
-        m = meta.get(int(mmsi), {}) if mmsi is not None else {}
-        targets.append({
-            "mmsi": mmsi,
-            "lat": c[1],
-            "lon": c[0],
-            "sog": p.get("sog"),
-            "cog": p.get("cog"),
-            "heading": p.get("heading"),
-            "navStat": p.get("navStat"),
-            "name": m.get("name") or "",
-            "destination": m.get("destination") or "",
-            "shipType": m.get("shipType") or "",
-            "source": "Digitraffic open AIS (Baltic/FI)",
-        })
+    def _put(t):
+        mmsi = t.get("mmsi")
+        if mmsi is None:
+            return
+        key = int(mmsi) if str(mmsi).isdigit() else mmsi
+        prev = by_mmsi.get(key)
+        if not prev:
+            by_mmsi[key] = t
+            return
+        if (not prev.get("name") and t.get("name")) or (float(t.get("sog") or 0) > float(prev.get("sog") or 0)):
+            merged = dict(prev)
+            merged.update({k: v for k, v in t.items() if v not in (None, "")})
+            by_mmsi[key] = merged
+
+    # --- Digitraffic (dense Baltic / FI) ---
+    try:
+        loc_url = "https://meri.digitraffic.fi/api/ais/v1/locations"
+        ves_url = "https://meri.digitraffic.fi/api/ais/v1/vessels"
+        geo = _get_json(loc_url)
+        meta = {}
+        try:
+            vessels = _get_json(ves_url)
+            arr = vessels if isinstance(vessels, list) else (vessels.get("vessels") or [])
+            for v in arr:
+                mmsi = v.get("mmsi")
+                if mmsi is None:
+                    continue
+                meta[int(mmsi)] = {
+                    "name": (v.get("name") or "").strip(),
+                    "destination": (v.get("destination") or "").strip(),
+                    "shipType": v.get("shipType") or v.get("shipTypeName") or "",
+                }
+        except Exception as e:
+            print(f"[AIS] Digitraffic meta warning: {e}")
+
+        for f in geo.get("features") or []:
+            p = f.get("properties") or {}
+            c = (f.get("geometry") or {}).get("coordinates") or []
+            if len(c) < 2:
+                continue
+            mmsi = p.get("mmsi")
+            m = meta.get(int(mmsi), {}) if mmsi is not None else {}
+            _put({
+                "mmsi": mmsi,
+                "lat": c[1],
+                "lon": c[0],
+                "sog": p.get("sog"),
+                "cog": p.get("cog"),
+                "heading": p.get("heading"),
+                "navStat": p.get("navStat"),
+                "name": m.get("name") or "",
+                "destination": m.get("destination") or "",
+                "shipType": m.get("shipType") or "",
+                "source": "Digitraffic open AIS (Baltic/FI)",
+            })
+        print(f"[AIS] Digitraffic targets so far: {len(by_mmsi)}")
+    except Exception as e:
+        print(f"[AIS] Digitraffic failed: {e}")
+
+    # --- Open Waters worldwide corridor tiles ---
+    ow_hdrs = {
+        "User-Agent": "SetSailMarineSuite/5.14 (+https://setsail-ai.vercel.app)",
+        "Accept": "application/geo+json, application/json",
+    }
+    ow_ok = 0
+    for (min_lat, min_lon, max_lat, max_lon) in OPEN_WATERS_AIS_CORRIDORS:
+        bbox = f"{min_lat},{min_lon},{max_lat},{max_lon}"
+        url = f"https://ais.openwaters.io/v1/vessels?bbox={bbox}"
+        try:
+            geo = _get_json(url, headers=ow_hdrs)
+            for f in geo.get("features") or []:
+                p = f.get("properties") or {}
+                c = (f.get("geometry") or {}).get("coordinates") or []
+                if len(c) < 2:
+                    continue
+                _put({
+                    "mmsi": p.get("mmsi"),
+                    "lat": c[1],
+                    "lon": c[0],
+                    "sog": p.get("sog"),
+                    "cog": p.get("cog"),
+                    "heading": p.get("heading"),
+                    "navStat": p.get("nav_status") if p.get("nav_status") is not None else p.get("navStat"),
+                    "name": (p.get("name") or "").strip(),
+                    "destination": (p.get("destination") or "").strip(),
+                    "shipType": p.get("type") or p.get("shipType") or "",
+                    "source": f"Open Waters AIS ({p.get('source') or 'community'})",
+                })
+            ow_ok += 1
+            _time.sleep(0.35)  # stay well under 120 req/min
+        except Exception as e:
+            print(f"[AIS] Open Waters tile fail {bbox}: {e}")
+
+    targets = list(by_mmsi.values())
+    print(f"[AIS] Open Waters tiles ok={ow_ok}/{len(OPEN_WATERS_AIS_CORRIDORS)}; unique={len(targets)}")
 
     return {
         "updatedAt": datetime.now(timezone.utc).isoformat(),
-        "source": "Digitraffic Marine AIS (open)",
-        "note": "Not VesselFinder/MarineTraffic. Global all-vessel AIS requires a commercial AIS API key.",
+        "source": "Digitraffic + Open Waters open AIS corridors",
+        "note": (
+            "Not VesselFinder/MarineTraffic. Live overlay uses Open Waters viewport tiles "
+            "worldwide; this snapshot densifies major chokepoints for zoomed-out / offline use."
+        ),
         "updateHintSec": 90,
         "count": len(targets),
         "targets": targets,
@@ -2029,9 +2138,9 @@ if __name__ == "__main__":
         print(f"[!] Maritime news scrape warning: {news_err}")
 
     # -------------------------------------------------------------------------
-    # AIS snapshot (Digitraffic open AIS — Baltic/FI). Not VesselFinder/MarineTraffic:
-    # those sites do not provide a legal bulk "all global vessels" feed for scrapers.
-    # Client refreshes live ~90s when AIS overlay is on; this JSON is CORS/offline fallback.
+    # AIS snapshot: Digitraffic (Baltic) + Open Waters worldwide corridor tiles.
+    # Not VesselFinder/MarineTraffic (ToS forbid scrape). Client also loads live
+    # Open Waters for the current map viewport when AIS overlay is on.
     # -------------------------------------------------------------------------
     try:
         ais_payload = scrape_digitraffic_ais_snapshot()
