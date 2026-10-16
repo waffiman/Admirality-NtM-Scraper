@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine вЂ” Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.18';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.18';
+const CACHE_NAME = 'setsail-cache-v5.19';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.19';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -16,6 +16,7 @@ const OFFLINE_CORE_ASSETS = [
   'news.json',
   'ais.json',
   'ais/zones/index.json',
+  'ais/zones/names.json',
   'assets/home_bg.mp4',
   'assets/home_bg_poster.jpg',
   'assets/gyro_compass_logbook.ico',
@@ -30,7 +31,7 @@ const OFFLINE_CORE_ASSETS = [
   'assets/Auto NtM Plotting/ntm_styles.css?v=5.17',
   'assets/Auto NtM Plotting/port_depths.js?v=5.17',
   'assets/Auto NtM Plotting/ntm_module.js?v=5.17',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.17',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.18',
   'assets/Auto NtM Plotting/ais_overlay.js?v=5.17',
   'assets/authority-logos/noaa.svg',
   'assets/authority-logos/nasa.svg',

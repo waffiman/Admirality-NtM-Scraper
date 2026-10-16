@@ -282,15 +282,20 @@ async function ensureAisNameIndex() {
   if (_aisNameIndex) return _aisNameIndex;
   if (_aisNameIndexPromise) return _aisNameIndexPromise;
   _aisNameIndexPromise = (async () => {
-    const out = [];
     try {
-      const man = await fetch("ais/zones/index.json?t=" + Date.now(), { cache: "no-store" }).then((r) => {
-        if (!r.ok) throw new Error("zones index HTTP " + r.status);
+      const data = await fetch("ais/zones/names.json?t=" + Date.now(), { cache: "no-store" }).then((r) => {
+        if (!r.ok) throw new Error("names.json HTTP " + r.status);
         return r.json();
       });
-      const zones = man.zones || [];
-      await Promise.all(
-        zones.map(async (z) => {
+      _aisNameIndex = Array.isArray(data.names) ? data.names : [];
+      console.info("[SetSail Vessel] AIS name index ready:", _aisNameIndex.length);
+      return _aisNameIndex;
+    } catch (e) {
+      console.warn("[SetSail Vessel] names.json failed, falling back to zone scan", e);
+      const out = [];
+      try {
+        const man = await fetch("ais/zones/index.json?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json());
+        for (const z of man.zones || []) {
           try {
             const data = await fetch(z.file + "?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json());
             (data.targets || []).forEach((t) => {
@@ -304,21 +309,18 @@ async function ensureAisNameIndex() {
                 sog: t.sog,
                 cog: t.cog,
                 heading: t.heading,
-                shipType: t.shipType || t.type || "",
+                shipType: t.shipType || "",
                 destination: t.destination || "",
-                callSign: t.callSign || t.callsign || "",
-                navStat: t.navStat,
+                callSign: t.callSign || "",
                 source: t.source || "AIS zone"
               });
             });
-          } catch (e) { /* skip zone */ }
-        })
-      );
-    } catch (e) {
-      console.warn("[SetSail Vessel] AIS name index failed", e);
+          } catch (e2) { /* skip */ }
+        }
+      } catch (e3) { /* empty */ }
+      _aisNameIndex = out;
+      return out;
     }
-    _aisNameIndex = out;
-    return out;
   })();
   return _aisNameIndexPromise;
 }
@@ -360,7 +362,8 @@ function renderVesselSuggest(which, hits) {
     .join("");
   box.hidden = false;
   box.querySelectorAll("button[data-ais-hit]").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("mousedown", (ev) => {
+      ev.preventDefault();
       const t = hits[Number(btn.getAttribute("data-ais-hit"))];
       if (!t) return;
       applyVesselProfile(
@@ -396,22 +399,33 @@ function bindVesselNameAutocomplete(which) {
       hideVesselSuggest(which);
       return;
     }
+    const mbox = vesselFormMap(which);
+    const box = document.getElementById(mbox.suggest);
+    if (box) {
+      box.hidden = false;
+      box.innerHTML = '<div class="vas-meta" style="padding:0.45rem 0.55rem;">Searching AIS…</div>';
+    }
     _vesselSuggestTimer = setTimeout(async () => {
-      const idx = await ensureAisNameIndex();
-      const starts = [];
-      const contains = [];
-      for (let i = 0; i < idx.length; i++) {
-        const n = String(idx[i].name || "").toLowerCase();
-        if (n.startsWith(q)) starts.push(idx[i]);
-        else if (n.includes(q)) contains.push(idx[i]);
-        if (starts.length >= 12) break;
+      try {
+        const idx = await ensureAisNameIndex();
+        const starts = [];
+        const contains = [];
+        for (let i = 0; i < idx.length; i++) {
+          const n = String(idx[i].name || "").toLowerCase();
+          if (n.startsWith(q)) starts.push(idx[i]);
+          else if (n.includes(q)) contains.push(idx[i]);
+          if (starts.length >= 12) break;
+        }
+        const hits = starts.concat(contains).slice(0, 12);
+        renderVesselSuggest(which, hits);
+      } catch (err) {
+        console.warn("[SetSail Vessel] suggest error", err);
+        hideVesselSuggest(which);
       }
-      const hits = starts.concat(contains).slice(0, 12);
-      renderVesselSuggest(which, hits);
-    }, 220);
+    }, 180);
   });
   input.addEventListener("blur", () => {
-    setTimeout(() => hideVesselSuggest(which), 180);
+    setTimeout(() => hideVesselSuggest(which), 220);
   });
 }
 
@@ -2494,6 +2508,35 @@ function getEcdisCrosshairIcon() {
   });
 }
 
+/** ECDIS-style own-ship outline (bow up); rotate by true heading/COG degrees. */
+function getOwnShipSilhouetteIcon(headingDeg) {
+  const rot = ((Number(headingDeg) % 360) + 360) % 360;
+  const html = `
+    <div class="own-ship-wrap" style="transform:rotate(${rot}deg);transform-origin:center center;">
+      <svg class="own-ship-svg" width="28" height="44" viewBox="0 0 28 44" aria-hidden="true">
+        <path d="M14 2 L22 14 L20 38 L14 42 L8 38 L6 14 Z"
+          fill="rgba(0,229,255,0.22)" stroke="#00e5ff" stroke-width="1.8"/>
+        <path d="M14 8 L18 16 L14 15 L10 16 Z" fill="#00e5ff" opacity="0.85"/>
+        <circle cx="14" cy="22" r="2.2" fill="#ffffff" stroke="#00e5ff" stroke-width="1"/>
+      </svg>
+    </div>`;
+  return L.divIcon({
+    html,
+    className: "own-ship-marker",
+    iconSize: [28, 44],
+    iconAnchor: [14, 22]
+  });
+}
+
+function resolveOwnShipHeading(v) {
+  if (!v) return null;
+  const h = Number(v.heading);
+  if (Number.isFinite(h) && h >= 0 && h < 360) return h;
+  const c = Number(v.cog);
+  if (Number.isFinite(c) && c >= 0 && c < 360) return c;
+  return null;
+}
+
 /**
  * Plot user vessel crosshair on map
  */
@@ -2510,8 +2553,9 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
   if (leafletMap && leafletVesselLayer) {
     leafletVesselLayer.clearLayers();
 
+    const hdg = resolveOwnShipHeading(userVessel);
     const marker = L.marker([lat, lon], {
-      icon: getEcdisCrosshairIcon(),
+      icon: hdg != null ? getOwnShipSilhouetteIcon(hdg) : getEcdisCrosshairIcon(),
       zIndexOffset: 1200
     });
 
@@ -2536,9 +2580,8 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
   const hud = document.getElementById("ntmVesselHud");
   if (hud) {
-    hud.style.display = "flex";
-    const label = (userVessel.name && String(userVessel.name).trim()) || formatLatLonDMS(lat, lon);
-    hud.innerHTML = `${SetSailIcons.svg("vessel")} <strong>Vessel:</strong> ${label}`;
+    // Keep bottom-left for cursor coordinates only (ECDIS-style)
+    hud.style.display = "none";
   }
 
   updateHomeVesselHudLabel();
@@ -3486,6 +3529,12 @@ function initNtMMap() {
         hud.textContent = formatLatLonDMS(e.latlng.lat, e.latlng.lng);
       }
     });
+    // ECDIS-style broken crosshair cursor over the chart
+    const mapEl = document.getElementById("ntmMap");
+    if (mapEl) {
+      mapEl.classList.add("ecdis-cursor-map");
+    }
+    leafletMap.getContainer().classList.add("ecdis-cursor-map");
 
     if (userVessel) {
       plotUserVessel(userVessel.lat, userVessel.lon, userVessel.source);

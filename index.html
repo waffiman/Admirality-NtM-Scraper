@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.18" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.19" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -5724,6 +5724,70 @@ svg.leaflet-image-layer.leaflet-interactive path {
   max-width: 100%;
 }
 .home-vessel-hud-btn:hover { opacity: 0.92; }
+
+/* v5.19: Home vessel HUD vertical center + AIS suggest + ECDIS cursor */
+.home-vessel-hud-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.4rem !important;
+  line-height: 1 !important;
+  height: 100%;
+  min-height: 1.6rem;
+}
+.home-vessel-hud-btn .home-hud-icon,
+.home-vessel-hud-btn .setsail-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 0 !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+}
+.home-vessel-hud-btn .home-hud-text,
+#homeVesselHudCoords {
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1.1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  vertical-align: middle !important;
+}
+#homeVesselHudPill.home-hud-vessel {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+.vessel-profile-fields .form-group {
+  overflow: visible !important;
+  position: relative;
+}
+.vessel-ais-suggest {
+  z-index: 20000 !important;
+  display: block;
+}
+.vessel-ais-suggest[hidden] { display: none !important; }
+.ntm-vessel-popover,
+.home-vessel-popover {
+  overflow: visible !important;
+}
+.ntm-vessel-popover .ntm-popover-body,
+.home-vessel-popover .ntm-popover-body {
+  overflow: auto !important;
+  max-height: min(70vh, 560px);
+}
+/* ECDIS broken-crosshair cursor (gap at center) */
+.ecdis-cursor-map,
+.ecdis-cursor-map .leaflet-container,
+.leaflet-container.ecdis-cursor-map,
+#ntmMap.ecdis-cursor-map,
+#ntmMap .leaflet-grab,
+#ntmMap .leaflet-dragging,
+#ntmMap .leaflet-marker-draggable {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7' fill='none' stroke='%2300e5ff' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E") 12 12, crosshair !important;
+}
+.own-ship-marker { background: transparent !important; border: none !important; }
+.own-ship-wrap { width: 28px; height: 44px; }
+.own-ship-svg { display: block; filter: drop-shadow(0 0 3px rgba(0,229,255,0.55)); }
+
 .home-vessel-popover {
   position: absolute !important;
   top: calc(100% + 8px) !important;
@@ -11430,20 +11494,20 @@ select option {
   </style>
 
   <script>
-    // v5.18 — hard kill stale SW/HTML so flame + AIS zones actually show
+    // v5.19 — hard kill stale SW/HTML so flame + AIS zones actually show
     (function(){
       try {
-        if (localStorage.getItem('setsail_force_v518') === '1') return;
+        if (localStorage.getItem('setsail_force_v519') === '1') return;
         var finish = function(){
-          localStorage.setItem('setsail_force_v518', '1');
+          localStorage.setItem('setsail_force_v519', '1');
           // clear ALL old force/reload flags that blocked later bumps
           try {
             ['setsail_force_v512','setsail_force_v513','setsail_force_v514','setsail_force_v515','setsail_force_v516',
              'setsail_reloaded_v512','setsail_reloaded_v513','setsail_reloaded_v514','setsail_reloaded_v515','setsail_reloaded_v516'
             ].forEach(function(k){ localStorage.removeItem(k); sessionStorage.removeItem(k); });
           } catch (e0) {}
-          if (!sessionStorage.getItem('setsail_reloaded_v518')) {
-            sessionStorage.setItem('setsail_reloaded_v518', '1');
+          if (!sessionStorage.getItem('setsail_reloaded_v519')) {
+            sessionStorage.setItem('setsail_reloaded_v519', '1');
             location.reload(true);
           }
         };
@@ -19618,9 +19682,9 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.18"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.18"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.18"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.19"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.19"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.19"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19698,7 +19762,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.18"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.19"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20070,13 +20134,13 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.18' && k !== 'setsail-tiles-cache-v5.18').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.19' && k !== 'setsail-tiles-cache-v5.19').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.18', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.19', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {

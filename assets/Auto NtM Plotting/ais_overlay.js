@@ -1,10 +1,6 @@
 /**
- * SetSail AIS Overlay — all targets in view (non-exportable)
- *
- * Live: Open Waters (viewport tiles) + Digitraffic when Baltic in view
- * Fallback/coverage: ais/zones/*.json ocean-sea snapshots (ALL ships in intersecting zones)
- *
- * No MarineTraffic / VesselFinder scrape. Refresh ~90s + moveend.
+ * SetSail AIS Overlay — progressive load by zoom (non-exportable)
+ * Live Open Waters for viewport; zone snapshots only when zoomed in enough.
  */
 (function () {
   const AIS_REFRESH_MS = 90 * 1000;
@@ -13,9 +9,11 @@
   const DIGITRAFFIC_LOC = "https://meri.digitraffic.fi/api/ais/v1/locations";
   const DIGITRAFFIC_VES = "https://meri.digitraffic.fi/api/ais/v1/vessels";
   const OW_AREA_CAP = 95;
-  const OW_MAX_TILES = 16;
-  /** Hard browser safety only — not a "priority" sample. */
-  const ABS_MARKER_CAP = 20000;
+  const OW_MAX_TILES = 12;
+  const ABS_MARKER_CAP = 12000;
+  /** Zone JSON only at/above this zoom (avoids loading world oceans at once). */
+  const MIN_ZOOM_ZONES = 5;
+  const MIN_ZOOM_DENSE_ZONES = 7;
 
   let leafletAisLayer = null;
   let aisTimer = null;
@@ -24,6 +22,7 @@
   let aisMoveTimer = null;
   let zonesManifest = null;
   let zoneCache = Object.create(null);
+  let aisRefreshSeq = 0;
 
   function ensureLayer(map) {
     if (!leafletAisLayer) {
@@ -65,14 +64,13 @@
 
     let list = targets;
     if (list.length > ABS_MARKER_CAP) {
-      // Uniform stride — every Nth ship, NOT priority filtering
       const step = Math.ceil(list.length / ABS_MARKER_CAP);
       const sampled = [];
       for (let i = 0; i < list.length; i += step) sampled.push(list[i]);
       list = sampled;
     }
 
-    const useCanvasDots = list.length > 800;
+    const useCanvasDots = list.length > 600;
     list.forEach((v) => {
       const lat = Number(v.lat);
       const lon = Number(v.lon);
@@ -81,11 +79,11 @@
       const col = shipColor(v.navStat, v.sog);
       if (useCanvasDots) {
         const m = L.circleMarker([lat, lon], {
-          radius: Number(v.sog) >= 0.5 ? 3.2 : 2.4,
+          radius: Number(v.sog) >= 0.5 ? 3 : 2.2,
           color: "#0f172a",
-          weight: 0.6,
+          weight: 0.5,
           fillColor: col,
-          fillOpacity: 0.92
+          fillOpacity: 0.9
         });
         m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
         layer.addLayer(m);
@@ -202,12 +200,26 @@
     let dLon = maxLon - minLon;
     if (dLon <= 0) dLon += 360;
     const area = dLat * dLon;
+    const zoom = map.getZoom ? map.getZoom() : 3;
+
+    // Very zoomed out: one coarse live box only (no world dump)
+    if (zoom < 4 || area > 4000) {
+      return {
+        mode: "live",
+        boxes: [[minLat, normalizeLon(minLon), maxLat, normalizeLon(maxLon)]],
+        area,
+        zoom,
+        skipZones: true
+      };
+    }
 
     if (area <= OW_AREA_CAP) {
       return {
         mode: "live",
         boxes: [[minLat, normalizeLon(minLon), maxLat, normalizeLon(maxLon)]],
-        area
+        area,
+        zoom,
+        skipZones: zoom < MIN_ZOOM_ZONES
       };
     }
     const side = Math.sqrt(OW_AREA_CAP);
@@ -226,7 +238,7 @@
       }
       if (boxes.length >= OW_MAX_TILES) break;
     }
-    return { mode: "live", boxes, area, tiled: true };
+    return { mode: "live", boxes, area, zoom, skipZones: zoom < MIN_ZOOM_ZONES, tiled: true };
   }
 
   function overlapsBaltic(boxes) {
@@ -234,13 +246,19 @@
   }
 
   function bboxOverlaps(a, b) {
-    // a,b = [minLat,minLon,maxLat,maxLon]
     const a0 = a[0], o0 = a[1], a1 = a[2], o1 = a[3];
     const b0 = b[0], p0 = b[1], b1 = b[2], p1 = b[3];
     if (a1 < b0 || a0 > b1) return false;
-    // simplify lon (no dateline math for zone files that wrap — treat as overlap if either wraps world)
     if (o0 <= o1 && p0 <= p1) return !(o1 < p0 || o0 > p1);
     return true;
+  }
+
+  function zoneAreaSqDeg(bbox) {
+    if (!bbox || bbox.length < 4) return 99999;
+    const dLat = Math.abs(bbox[2] - bbox[0]);
+    let dLon = Math.abs(bbox[3] - bbox[1]);
+    if (dLon > 180) dLon = 360 - dLon;
+    return dLat * dLon;
   }
 
   async function loadZonesManifest() {
@@ -259,19 +277,28 @@
     return targets;
   }
 
-  async function loadZonesForMap(map) {
+  async function loadZonesForMap(map, zoom) {
+    if (zoom < MIN_ZOOM_ZONES) return [];
     const man = await loadZonesManifest();
     const b = map.getBounds();
     const view = [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()];
-    const lists = [];
-    for (const z of man.zones || []) {
-      if (!z.bbox || !bboxOverlaps(view, z.bbox)) continue;
-      try {
-        lists.push(await loadZoneFile(z.file));
-      } catch (e) {
-        console.warn("[SetSail AIS] zone fail", z.id, e);
-      }
+    let zones = (man.zones || []).filter((z) => z.bbox && bboxOverlaps(view, z.bbox));
+    // When mid-zoom, skip huge ocean zones (load live feed instead)
+    if (zoom < MIN_ZOOM_DENSE_ZONES) {
+      zones = zones.filter((z) => zoneAreaSqDeg(z.bbox) < 8000);
     }
+    // Cap concurrent zone files
+    zones = zones.slice(0, zoom >= 8 ? 6 : 3);
+    const lists = await Promise.all(
+      zones.map(async (z) => {
+        try {
+          return await loadZoneFile(z.file);
+        } catch (e) {
+          console.warn("[SetSail AIS] zone fail", z.id, e);
+          return [];
+        }
+      })
+    );
     return mergeByMmsi(lists);
   }
 
@@ -347,44 +374,48 @@
     const map = window.leafletMap;
     if (!map) return;
     if (!(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
+    const seq = ++aisRefreshSeq;
     if (typeof window.setOverlayTileLoading === "function") {
       window.setOverlayTileLoading("ais", true);
     }
 
-    let targets = [];
     const plan = mapViewportBoxes(map);
+    let targets = [];
     try {
-      const zoneAll = await loadZonesForMap(map);
+      // 1) Live viewport first (fast)
       let live = [];
       try {
         live = await loadOpenWatersBoxes(plan.boxes);
-      } catch (e) { /* zones still apply */ }
+      } catch (e) { /* continue */ }
+      if (seq !== aisRefreshSeq) return;
       let digi = [];
       if (overlapsBaltic(plan.boxes)) {
         try {
           digi = await loadLiveDigitraffic();
         } catch (e) { /* optional */ }
       }
-      // Merge: live densifies zones; show ALL in current view
-      targets = filterToViewport(mergeByMmsi([zoneAll, live, digi]), map);
-      // If view filter emptied (dateline edge), keep merged set
-      if (!targets.length) targets = mergeByMmsi([zoneAll, live, digi]);
+      if (seq !== aisRefreshSeq) return;
+      targets = filterToViewport(mergeByMmsi([live, digi]), map);
+      renderAisTargets(targets, map);
+
+      // 2) Zone densify only when zoomed in
+      if (!plan.skipZones) {
+        const zoneAll = await loadZonesForMap(map, plan.zoom || map.getZoom());
+        if (seq !== aisRefreshSeq) return;
+        targets = filterToViewport(mergeByMmsi([targets, zoneAll]), map);
+        renderAisTargets(targets, map);
+      }
     } catch (e) {
       console.warn("[SetSail AIS] refresh failed", e);
-      try {
-        targets = filterToViewport(await loadZonesForMap(map), map);
-      } catch (e2) {
-        console.warn("[SetSail AIS] zones failed", e2);
-      }
     }
 
     aisLastPayload = {
       at: new Date().toISOString(),
       count: targets.length,
       mode: plan.mode,
-      area: plan.area
+      area: plan.area,
+      zoom: plan.zoom
     };
-    renderAisTargets(targets, map);
     if (typeof window.setOverlayTileLoading === "function") {
       window.setOverlayTileLoading("ais", false);
     }
@@ -398,15 +429,16 @@
     const map = window.leafletMap;
     if (map && !map._setsailAisMoveHooked) {
       map._setsailAisMoveHooked = true;
-      map.on("moveend", () => {
+      map.on("moveend zoomend", () => {
         if (!(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
         clearTimeout(aisMoveTimer);
-        aisMoveTimer = setTimeout(() => refreshAisOverlay(), 500);
+        aisMoveTimer = setTimeout(() => refreshAisOverlay(), 450);
       });
     }
   }
 
   function stopAisPolling() {
+    aisRefreshSeq++;
     if (aisTimer) {
       clearInterval(aisTimer);
       aisTimer = null;
@@ -422,8 +454,8 @@
     const n = aisLastPayload && aisLastPayload.count;
     if (typeof showSetSailToast === "function") {
       showSetSailToast(
-        "AIS: all vessels in view (ocean-zone snapshots + live Open Waters; Digitraffic densifies Baltic). Not MT/VF. Not exportable." +
-          (n != null ? " In view now: " + n + "." : ""),
+        "AIS loads with zoom: live Open Waters in view first; zone snapshots densify from zoom ≥5. Digitraffic densifies Baltic. Not exportable." +
+          (n != null ? " In view: " + n + "." : ""),
         "info"
       );
     }

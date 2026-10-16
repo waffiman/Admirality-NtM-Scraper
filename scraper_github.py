@@ -740,7 +740,8 @@ def main():
 
 import math
 import requests
-from datetime import datetime, timezone
+from datetime import timezone
+# keep module `datetime` (imported at top) — do not shadow
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 NAUTOSHARK_MVT_TOKEN = "pk." + "eyJ1IjoibnNuYXZhcmVhcyIs" + "ImEiOiJjbW9vNWw5M2oxMzIwMnFzYTZndGYyejg3In0.Q3_BPuq-liv-7Oxevj3O0Q"
@@ -1168,7 +1169,7 @@ def scrape_nga_msi_warnings() -> list:
     return []
 
 def build_global_navtex_notices() -> tuple:
-    now_utc = datetime.now(timezone.utc)
+    now_utc = datetime.datetime.now(timezone.utc)
     ns_warnings = scrape_nautoshark_mvt_warnings()
     nga_warnings = scrape_nga_msi_warnings()
 
@@ -1632,7 +1633,7 @@ def scrape_digitraffic_ais_snapshot() -> dict:
     print(f"[AIS] Open Waters tiles ok={ow_ok}/{len(OPEN_WATERS_AIS_CORRIDORS)}; unique={len(targets)}")
 
     return {
-        "updatedAt": datetime.now(timezone.utc).isoformat(),
+        "updatedAt": datetime.datetime.now(timezone.utc).isoformat(),
         "source": "Digitraffic + Open Waters open AIS corridors",
         "note": (
             "Not VesselFinder/MarineTraffic. Live overlay uses Open Waters viewport tiles "
@@ -1653,7 +1654,7 @@ def scrape_live_marine_weather() -> dict:
       4. Japan Meteorological Agency RSMC Tokyo (targetTc.json + specifications.json)
       5. Open-Meteo Marine & Synoptic GFS/ECMWF Grid (live waves, pressure, winds)
     """
-    now_dt = datetime.now(timezone.utc)
+    now_dt = datetime.datetime.now(timezone.utc)
     now_iso = now_dt.isoformat()
     cur_year = now_dt.year
     storms_by_name = {}
@@ -2084,8 +2085,8 @@ if __name__ == "__main__":
 
     final_payload = {
         "metadata": {
-            "generatedAt": datetime.now(timezone.utc).isoformat(),
-            "scrapedAt": datetime.now(timezone.utc).isoformat(),
+            "generatedAt": datetime.datetime.now(timezone.utc).isoformat(),
+            "scrapedAt": datetime.datetime.now(timezone.utc).isoformat(),
             "source": "UKHO Admiralty Weekly NtM + Global NAVTEX / NAVAREA (NautoShark & US NGA MSI)",
             "weeklyBulletin": existing_meta.get("weeklyBulletin", f"{week_num}wknm{year_num}.pdf"),
             "weekNumber": week_num,
