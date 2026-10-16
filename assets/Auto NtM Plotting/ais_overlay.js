@@ -1,38 +1,36 @@
 /**
- * SetSail AIS Overlay — live vessel positions (non-exportable)
+ * SetSail AIS Overlay — all targets in view (non-exportable)
  *
- * Live: Open Waters open AIS (ais.openwaters.io) for the map viewport
- *       + Digitraffic open AIS when Baltic/FI is in view.
- * Snapshot: ais.json from GitHub Actions (Digitraffic + worldwide corridor tiles).
+ * Live: Open Waters (viewport tiles) + Digitraffic when Baltic in view
+ * Fallback/coverage: ais/zones/*.json ocean-sea snapshots (ALL ships in intersecting zones)
  *
- * MarineTraffic / VesselFinder are NOT scraped (ToS forbid automated extraction).
- * Refresh: ~90s while ON + debounced moveend.
+ * No MarineTraffic / VesselFinder scrape. Refresh ~90s + moveend.
  */
 (function () {
   const AIS_REFRESH_MS = 90 * 1000;
-  const AIS_SNAPSHOT = "ais.json";
+  const ZONES_INDEX = "ais/zones/index.json";
   const OPENWATERS_VESSELS = "https://ais.openwaters.io/v1/vessels";
   const DIGITRAFFIC_LOC = "https://meri.digitraffic.fi/api/ais/v1/locations";
   const DIGITRAFFIC_VES = "https://meri.digitraffic.fi/api/ais/v1/vessels";
-  /** Anonymous Open Waters area cap (square degrees). */
   const OW_AREA_CAP = 95;
-  const OW_MAX_TILES = 6;
+  const OW_MAX_TILES = 16;
+  /** Hard browser safety only — not a "priority" sample. */
+  const ABS_MARKER_CAP = 20000;
 
   let leafletAisLayer = null;
   let aisTimer = null;
   let aisMetaByMmsi = Object.create(null);
   let aisLastPayload = null;
   let aisMoveTimer = null;
-  let aisSnapshotCache = null;
+  let zonesManifest = null;
+  let zoneCache = Object.create(null);
 
   function ensureLayer(map) {
     if (!leafletAisLayer) {
       leafletAisLayer = L.layerGroup();
       window.leafletAisLayer = leafletAisLayer;
     }
-    if (map && !map.hasLayer(leafletAisLayer)) {
-      leafletAisLayer.addTo(map);
-    }
+    if (map && !map.hasLayer(leafletAisLayer)) leafletAisLayer.addTo(map);
     return leafletAisLayer;
   }
 
@@ -49,15 +47,15 @@
     const cog = v.cog != null && Number(v.cog) < 360 ? Math.round(Number(v.cog)) + "°" : "—";
     const type = v.shipTypeName || v.shipType || v.type || "AIS target";
     const src = v.source || "AIS";
-    return `
-      <div style="min-width:200px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;">
-        <div style="font-weight:800;color:#0ea5e9;margin-bottom:4px;">🚢 ${name}</div>
-        <div><b>MMSI:</b> ${v.mmsi || "—"}</div>
-        <div><b>Type:</b> ${type}</div>
-        <div><b>SOG / COG:</b> ${sog} / ${cog}</div>
-        <div><b>Destination:</b> ${dest}</div>
-        <div style="margin-top:4px;font-size:10px;color:#64748b;">Source: ${src} · not exportable</div>
-      </div>`;
+    return (
+      '<div style="min-width:200px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;">' +
+      '<div style="font-weight:800;color:#0ea5e9;margin-bottom:4px;">🚢 ' + name + "</div>" +
+      "<div><b>MMSI:</b> " + (v.mmsi || "—") + "</div>" +
+      "<div><b>Type:</b> " + type + "</div>" +
+      "<div><b>SOG / COG:</b> " + sog + " / " + cog + "</div>" +
+      "<div><b>Destination:</b> " + dest + "</div>" +
+      '<div style="margin-top:4px;font-size:10px;color:#64748b;">Source: ' + src + " · not exportable</div></div>"
+    );
   }
 
   function renderAisTargets(targets, map) {
@@ -65,22 +63,34 @@
     layer.clearLayers();
     if (!Array.isArray(targets) || !targets.length) return;
 
-    const zoom = map.getZoom ? map.getZoom() : 5;
-    const max = zoom >= 8 ? 6000 : zoom >= 5 ? 3500 : 2000;
     let list = targets;
-    if (list.length > max) {
-      // Prefer moving ships when sampling
-      const moving = list.filter((v) => Number(v.sog) >= 0.5);
-      const rest = list.filter((v) => Number(v.sog) < 0.5);
-      list = moving.concat(rest).slice(0, max);
+    if (list.length > ABS_MARKER_CAP) {
+      // Uniform stride — every Nth ship, NOT priority filtering
+      const step = Math.ceil(list.length / ABS_MARKER_CAP);
+      const sampled = [];
+      for (let i = 0; i < list.length; i += step) sampled.push(list[i]);
+      list = sampled;
     }
 
+    const useCanvasDots = list.length > 800;
     list.forEach((v) => {
       const lat = Number(v.lat);
       const lon = Number(v.lon);
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
       if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return;
       const col = shipColor(v.navStat, v.sog);
+      if (useCanvasDots) {
+        const m = L.circleMarker([lat, lon], {
+          radius: Number(v.sog) >= 0.5 ? 3.2 : 2.4,
+          color: "#0f172a",
+          weight: 0.6,
+          fillColor: col,
+          fillOpacity: 0.92
+        });
+        m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
+        layer.addLayer(m);
+        return;
+      }
       const heading = Number(v.heading);
       const rot =
         Number.isFinite(heading) && heading < 360
@@ -90,9 +100,12 @@
             : 0;
       const icon = L.divIcon({
         className: "ais-target-icon",
-        html: `<div style="width:14px;height:14px;transform:rotate(${rot}deg);transform-origin:center center;">
-          <svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 2 L20 20 L12 16 L4 20 Z" fill="${col}" stroke="#0f172a" stroke-width="1.2"/></svg>
-        </div>`,
+        html:
+          '<div style="width:14px;height:14px;transform:rotate(' +
+          rot +
+          'deg);transform-origin:center center;"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 2 L20 20 L12 16 L4 20 Z" fill="' +
+          col +
+          '" stroke="#0f172a" stroke-width="1.2"/></svg></div>',
         iconSize: [14, 14],
         iconAnchor: [7, 7]
       });
@@ -101,7 +114,6 @@
       layer.addLayer(m);
     });
 
-    // AIS dock tile: no target count (user request)
     const badge = document.querySelector('.excel-tab[data-overlay="ais"] .excel-tab-badge');
     if (badge) {
       badge.textContent = "";
@@ -128,7 +140,6 @@
         by[key] = t;
         return;
       }
-      // Prefer named / newer-looking records
       if ((!prev.name && t.name) || (Number(t.sog) || 0) > (Number(prev.sog) || 0)) {
         by[key] = Object.assign({}, prev, t);
       }
@@ -139,7 +150,6 @@
   function openWatersFeatureToTarget(f) {
     const p = f.properties || {};
     const c = (f.geometry && f.geometry.coordinates) || [];
-    const nav = p.nav_status != null ? p.nav_status : p.navStat;
     return {
       mmsi: p.mmsi,
       lat: c[1],
@@ -147,11 +157,10 @@
       sog: p.sog,
       cog: p.cog,
       heading: p.heading,
-      navStat: nav,
+      navStat: p.nav_status != null ? p.nav_status : p.navStat,
       name: p.name || "",
       destination: p.destination || "",
       shipType: p.type || p.shipType || "",
-      callSign: p.callsign || "",
       source: "Open Waters AIS (" + (p.source || "community") + ")"
     };
   }
@@ -184,22 +193,15 @@
 
   function mapViewportBoxes(map) {
     const b = map.getBounds();
-    let minLat = b.getSouth();
-    let maxLat = b.getNorth();
+    let minLat = Math.max(-85, Math.min(85, b.getSouth()));
+    let maxLat = Math.max(-85, Math.min(85, b.getNorth()));
+    if (maxLat <= minLat) maxLat = minLat + 0.5;
     let minLon = b.getWest();
     let maxLon = b.getEast();
-    // Clamp latitude
-    minLat = Math.max(-85, Math.min(85, minLat));
-    maxLat = Math.max(-85, Math.min(85, maxLat));
-    if (maxLat <= minLat) maxLat = minLat + 0.5;
-
     const dLat = maxLat - minLat;
     let dLon = maxLon - minLon;
     if (dLon <= 0) dLon += 360;
     const area = dLat * dLon;
-
-    // Very zoomed out: caller uses snapshot instead of live tiles
-    if (area > 2500) return { mode: "snapshot", boxes: [], area };
 
     if (area <= OW_AREA_CAP) {
       return {
@@ -208,8 +210,6 @@
         area
       };
     }
-
-    // Tile viewport into cells of ~sqrt(cap) degrees
     const side = Math.sqrt(OW_AREA_CAP);
     const boxes = [];
     const nLat = Math.max(1, Math.ceil(dLat / side));
@@ -221,9 +221,8 @@
         if (boxes.length >= OW_MAX_TILES) break;
         const a0 = minLat + i * stepLat;
         const a1 = Math.min(maxLat, a0 + stepLat);
-        let o0 = minLon + j * stepLon;
-        let o1 = o0 + stepLon;
-        boxes.push([a0, normalizeLon(o0), a1, normalizeLon(o1)]);
+        const o0 = minLon + j * stepLon;
+        boxes.push([a0, normalizeLon(o0), a1, normalizeLon(o0 + stepLon)]);
       }
       if (boxes.length >= OW_MAX_TILES) break;
     }
@@ -231,37 +230,74 @@
   }
 
   function overlapsBaltic(boxes) {
-    // Rough Baltic/FI box
-    const bMinLat = 53,
-      bMaxLat = 66,
-      bMinLon = 9,
-      bMaxLon = 31;
-    return boxes.some(([a0, o0, a1, o1]) => {
-      return !(a1 < bMinLat || a0 > bMaxLat || o1 < bMinLon || o0 > bMaxLon);
-    });
+    return boxes.some(([a0, o0, a1, o1]) => !(a1 < 53 || a0 > 66 || o1 < 9 || o0 > 31));
+  }
+
+  function bboxOverlaps(a, b) {
+    // a,b = [minLat,minLon,maxLat,maxLon]
+    const a0 = a[0], o0 = a[1], a1 = a[2], o1 = a[3];
+    const b0 = b[0], p0 = b[1], b1 = b[2], p1 = b[3];
+    if (a1 < b0 || a0 > b1) return false;
+    // simplify lon (no dateline math for zone files that wrap — treat as overlap if either wraps world)
+    if (o0 <= o1 && p0 <= p1) return !(o1 < p0 || o0 > p1);
+    return true;
+  }
+
+  async function loadZonesManifest() {
+    if (zonesManifest) return zonesManifest;
+    zonesManifest = await fetchJson(ZONES_INDEX + "?t=" + Date.now());
+    return zonesManifest;
+  }
+
+  async function loadZoneFile(file) {
+    if (zoneCache[file] && Date.now() - zoneCache[file].at < 15 * 60 * 1000) {
+      return zoneCache[file].targets;
+    }
+    const geo = await fetchJson(file + "?t=" + Date.now());
+    const targets = Array.isArray(geo.targets) ? geo.targets : [];
+    zoneCache[file] = { at: Date.now(), targets };
+    return targets;
+  }
+
+  async function loadZonesForMap(map) {
+    const man = await loadZonesManifest();
+    const b = map.getBounds();
+    const view = [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()];
+    const lists = [];
+    for (const z of man.zones || []) {
+      if (!z.bbox || !bboxOverlaps(view, z.bbox)) continue;
+      try {
+        lists.push(await loadZoneFile(z.file));
+      } catch (e) {
+        console.warn("[SetSail AIS] zone fail", z.id, e);
+      }
+    }
+    return mergeByMmsi(lists);
   }
 
   async function loadOpenWatersBoxes(boxes) {
     const out = [];
-    for (const box of boxes) {
-      const [minLat, minLon, maxLat, maxLon] = box;
-      const url =
-        OPENWATERS_VESSELS +
-        "?bbox=" +
-        [minLat, minLon, maxLat, maxLon].map((n) => Number(n).toFixed(4)).join(",");
-      try {
-        const geo = await fetchJson(url, {
-          Accept: "application/geo+json, application/json",
-          "User-Agent": "SetSailMarineSuite/AIS"
-        });
-        (geo.features || []).forEach((f) => {
-          const t = openWatersFeatureToTarget(f);
-          if (Number.isFinite(t.lat) && Number.isFinite(t.lon)) out.push(t);
-        });
-      } catch (e) {
-        console.warn("[SetSail AIS] Open Waters tile failed", box, e);
-      }
-    }
+    await Promise.all(
+      boxes.map(async (box) => {
+        const [minLat, minLon, maxLat, maxLon] = box;
+        const url =
+          OPENWATERS_VESSELS +
+          "?bbox=" +
+          [minLat, minLon, maxLat, maxLon].map((n) => Number(n).toFixed(4)).join(",");
+        try {
+          const geo = await fetchJson(url, {
+            Accept: "application/geo+json, application/json",
+            "User-Agent": "SetSailMarineSuite/AIS"
+          });
+          (geo.features || []).forEach((f) => {
+            const t = openWatersFeatureToTarget(f);
+            if (Number.isFinite(t.lat) && Number.isFinite(t.lon)) out.push(t);
+          });
+        } catch (e) {
+          console.warn("[SetSail AIS] Open Waters tile failed", box, e);
+        }
+      })
+    );
     return out;
   }
 
@@ -282,9 +318,7 @@
           callSign: v.callSign || ""
         };
       });
-    } catch (e) {
-      /* optional */
-    }
+    } catch (e) { /* optional */ }
   }
 
   async function loadLiveDigitraffic() {
@@ -296,36 +330,6 @@
     return (geo.features || [])
       .map(digitrafficFeatureToTarget)
       .filter((t) => Number.isFinite(t.lat) && Number.isFinite(t.lon));
-  }
-
-  async function loadSnapshotAis() {
-    if (aisSnapshotCache && Date.now() - aisSnapshotCache.at < 10 * 60 * 1000) {
-      return aisSnapshotCache.targets;
-    }
-    const geo = await fetchJson(AIS_SNAPSHOT + "?t=" + Date.now());
-    let targets = [];
-    if (Array.isArray(geo.targets)) targets = geo.targets;
-    else if (geo.features) {
-      targets = (geo.features || []).map((f) => {
-        const p = f.properties || {};
-        const c = (f.geometry && f.geometry.coordinates) || [];
-        return {
-          mmsi: p.mmsi,
-          lat: c[1],
-          lon: c[0],
-          sog: p.sog,
-          cog: p.cog,
-          heading: p.heading,
-          navStat: p.navStat || p.nav_status,
-          name: p.name || "",
-          destination: p.destination || "",
-          shipType: p.shipType || p.type || "",
-          source: geo.source || "ais.json snapshot"
-        };
-      });
-    }
-    aisSnapshotCache = { at: Date.now(), targets };
-    return targets;
   }
 
   function filterToViewport(targets, map) {
@@ -343,44 +347,34 @@
     const map = window.leafletMap;
     if (!map) return;
     if (!(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
-
     if (typeof window.setOverlayTileLoading === "function") {
       window.setOverlayTileLoading("ais", true);
     }
 
     let targets = [];
     const plan = mapViewportBoxes(map);
-
     try {
-      if (plan.mode === "snapshot") {
-        const snap = await loadSnapshotAis();
-        targets = filterToViewport(snap, map);
-        if (targets.length < 50) targets = snap;
-      } else {
-        const live = await loadOpenWatersBoxes(plan.boxes);
-        let digi = [];
-        if (overlapsBaltic(plan.boxes)) {
-          try {
-            digi = await loadLiveDigitraffic();
-          } catch (e) {
-            /* optional densify */
-          }
-        }
-        targets = mergeByMmsi([live, digi]);
-        if (targets.length < 30) {
-          try {
-            const snap = await loadSnapshotAis();
-            targets = mergeByMmsi([targets, filterToViewport(snap, map)]);
-          } catch (e2) {
-            /* ignore */
-          }
-        }
-      }
-    } catch (e) {
+      const zoneAll = await loadZonesForMap(map);
+      let live = [];
       try {
-        targets = await loadSnapshotAis();
+        live = await loadOpenWatersBoxes(plan.boxes);
+      } catch (e) { /* zones still apply */ }
+      let digi = [];
+      if (overlapsBaltic(plan.boxes)) {
+        try {
+          digi = await loadLiveDigitraffic();
+        } catch (e) { /* optional */ }
+      }
+      // Merge: live densifies zones; show ALL in current view
+      targets = filterToViewport(mergeByMmsi([zoneAll, live, digi]), map);
+      // If view filter emptied (dateline edge), keep merged set
+      if (!targets.length) targets = mergeByMmsi([zoneAll, live, digi]);
+    } catch (e) {
+      console.warn("[SetSail AIS] refresh failed", e);
+      try {
+        targets = filterToViewport(await loadZonesForMap(map), map);
       } catch (e2) {
-        console.warn("[SetSail AIS] all feeds failed", e, e2);
+        console.warn("[SetSail AIS] zones failed", e2);
       }
     }
 
@@ -407,7 +401,7 @@
       map.on("moveend", () => {
         if (!(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
         clearTimeout(aisMoveTimer);
-        aisMoveTimer = setTimeout(() => refreshAisOverlay(), 700);
+        aisMoveTimer = setTimeout(() => refreshAisOverlay(), 500);
       });
     }
   }
@@ -428,9 +422,8 @@
     const n = aisLastPayload && aisLastPayload.count;
     if (typeof showSetSailToast === "function") {
       showSetSailToast(
-        "AIS: Open Waters (worldwide, live in view) + Digitraffic (Baltic). " +
-          "MT/VF not scraped. View-only, not exportable. ~90s refresh." +
-          (n != null ? " Now showing ~" + n + " targets." : ""),
+        "AIS: all vessels in view (ocean-zone snapshots + live Open Waters; Digitraffic densifies Baltic). Not MT/VF. Not exportable." +
+          (n != null ? " In view now: " + n + "." : ""),
         "info"
       );
     }
