@@ -1094,7 +1094,7 @@ def extract_cancellations_and_expiry(text: str, ref_year: int = 2026) -> tuple:
             month = MONTH_MAP.get(mon_str, 1)
             year = int(yr_str) if yr_str else ref_year
             if year < 100: year += 2000
-            exp_dt = datetime(year, month, day, hour, minute, tzinfo=timezone.utc)
+            exp_dt = datetime.datetime(year, month, day, hour, minute, tzinfo=timezone.utc)
             self_expiry_iso = exp_dt.isoformat()
         except Exception:
             pass

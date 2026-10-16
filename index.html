@@ -5752,9 +5752,27 @@ svg.leaflet-image-layer.leaflet-interactive path {
   padding: 0 !important;
   vertical-align: middle !important;
 }
-#homeVesselHudPill.home-hud-vessel {
+#homeVesselHudPill.home-hud-vessel,
+#homeVesselHudPill {
   display: inline-flex !important;
   align-items: center !important;
+  align-self: center !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  box-sizing: border-box !important;
+}
+#homeVesselHudBtn.home-vessel-hud-btn {
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+#homeVesselHudBtn .home-hud-icon,
+#homeVesselHudBtn .setsail-icon {
+  width: 1.05em !important;
+  height: 1.05em !important;
+  display: block !important;
+  flex-shrink: 0 !important;
 }
 .vessel-profile-fields .form-group {
   overflow: visible !important;
