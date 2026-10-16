@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.17" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.18" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -5709,6 +5709,80 @@ svg.leaflet-image-layer.leaflet-interactive path {
   white-space: nowrap !important;
 }
 
+
+/* Home vessel HUD button + shared profile popover */
+.home-vessel-hud-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  max-width: 100%;
+}
+.home-vessel-hud-btn:hover { opacity: 0.92; }
+.home-vessel-popover {
+  position: absolute !important;
+  top: calc(100% + 8px) !important;
+  right: 0 !important;
+  left: auto !important;
+  z-index: 12050 !important;
+  display: none;
+  width: 340px !important;
+  max-width: min(340px, 92vw) !important;
+}
+.home-vessel-popover.open { display: block; }
+.vessel-ais-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 0.45rem;
+}
+.vessel-ais-grid .form-group { margin: 0; }
+.vessel-ais-grid label {
+  font-size: 0.65rem;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+.vessel-ais-grid .min-input {
+  font-size: 0.72rem;
+  padding: 0.32rem 0.45rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+.vessel-ais-grid .vessel-span2 { grid-column: 1 / -1; }
+.vessel-ais-suggest {
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(100% + 2px);
+  z-index: 30;
+  max-height: 180px;
+  overflow: auto;
+  background: rgba(8, 16, 36, 0.98);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+}
+.vessel-ais-suggest button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: #e2e8f0;
+  padding: 0.42rem 0.55rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(148,163,184,0.12);
+}
+.vessel-ais-suggest button:hover { background: rgba(56, 189, 248, 0.12); }
+.vessel-ais-suggest .vas-meta { color: #94a3b8; font-size: 0.65rem; }
+.ntm-vessel-popover { width: 340px !important; max-height: min(78vh, 640px); overflow: auto; }
+
 /* My Vessel Popover enhanced styling */
 .ntm-vessel-popover {
   background: rgba(10, 20, 44, 0.94) !important;
@@ -11356,20 +11430,20 @@ select option {
   </style>
 
   <script>
-    // v5.17 — hard kill stale SW/HTML so flame + AIS zones actually show
+    // v5.18 — hard kill stale SW/HTML so flame + AIS zones actually show
     (function(){
       try {
-        if (localStorage.getItem('setsail_force_v517') === '1') return;
+        if (localStorage.getItem('setsail_force_v518') === '1') return;
         var finish = function(){
-          localStorage.setItem('setsail_force_v517', '1');
+          localStorage.setItem('setsail_force_v518', '1');
           // clear ALL old force/reload flags that blocked later bumps
           try {
             ['setsail_force_v512','setsail_force_v513','setsail_force_v514','setsail_force_v515','setsail_force_v516',
              'setsail_reloaded_v512','setsail_reloaded_v513','setsail_reloaded_v514','setsail_reloaded_v515','setsail_reloaded_v516'
             ].forEach(function(k){ localStorage.removeItem(k); sessionStorage.removeItem(k); });
           } catch (e0) {}
-          if (!sessionStorage.getItem('setsail_reloaded_v517')) {
-            sessionStorage.setItem('setsail_reloaded_v517', '1');
+          if (!sessionStorage.getItem('setsail_reloaded_v518')) {
+            sessionStorage.setItem('setsail_reloaded_v518', '1');
             location.reload(true);
           }
         };
@@ -11563,10 +11637,56 @@ select option {
                 </div>
               </div>
 
-              <!-- Column 3 (Right): Live Vessel Position (Strictly locked in Column 3 on the far right at all times) -->
-              <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" style="grid-column:3 !important;justify-self:end !important;margin-left:auto !important;position:relative !important;min-width:0 !important;" title="Live Vessel Navigation Position (Click to inspect on ECDIS)">
-                <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9" r="2.8" fill="#f05a36"/><circle cx="12" cy="9" r="1" fill="#ffffff"/></svg></span>
-                <span class="home-hud-text" id="homeVesselHudCoords">POS: WAITING GPS...</span>
+              <!-- Column 3 (Right): My Vessel profile (no auto GPS prompt) -->
+              <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" style="grid-column:3 !important;justify-self:end !important;margin-left:auto !important;position:relative !important;min-width:0 !important;" title="My Vessel — name, position &amp; AIS details">
+                <button type="button" class="home-vessel-hud-btn" id="homeVesselHudBtn" aria-haspopup="dialog" aria-expanded="false">
+                  <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l4.5 7.5v10l-4.5 2.5-4.5-2.5v-10L12 2z" fill="currentColor" fill-opacity="0.16" stroke="currentColor" stroke-width="1.6"/><line x1="12" y1="2" x2="12" y2="9" stroke="#f05a36" stroke-width="1.8"/><circle cx="12" cy="13.5" r="1.8" fill="#f05a36"/></svg></span>
+                  <span class="home-hud-text" id="homeVesselHudCoords">NOT SET</span>
+                </button>
+                <div class="ntm-popover ntm-vessel-popover home-vessel-popover" id="homeVesselPopover" role="dialog" aria-label="My Vessel settings">
+                  <div class="ntm-popover-header">
+                    <span><svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l4.5 7.5v10l-4.5 2.5-4.5-2.5v-10L12 2z" fill="currentColor" fill-opacity="0.16" stroke="currentColor" stroke-width="1.6"/><line x1="12" y1="2" x2="12" y2="9" stroke="#f05a36" stroke-width="1.8"/><circle cx="12" cy="13.5" r="1.8" fill="#f05a36"/></svg> My Vessel</span>
+                    <button type="button" class="ntm-popover-close" id="homeVesselPopClose">×</button>
+                  </div>
+                  <div class="ntm-popover-body">
+                    <div class="vessel-profile-fields" data-vessel-form="home">
+                      <div class="form-group" style="margin-bottom:0.45rem;position:relative;">
+                        <label for="homeVesselName" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Vessel Name</label>
+                        <input type="text" id="homeVesselName" class="min-input vessel-field-name" placeholder="Type to search AIS…" autocomplete="off" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                        <div class="vessel-ais-suggest" id="homeVesselAisSuggest" hidden></div>
+                      </div>
+                      <div class="form-group" style="margin-bottom:0.45rem;">
+                        <label for="homeVesselCallSign" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Call Sign</label>
+                        <input type="text" id="homeVesselCallSign" class="min-input vessel-field-callsign" placeholder="e.g. 3EAB9" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                      </div>
+                      <div class="ntm-popover-subtitle">Position</div>
+                      <div class="vessel-coords-row" style="display:flex;gap:8px;margin-bottom:0.35rem;align-items:flex-end;">
+                        <div class="form-group" style="flex:1;margin-bottom:0;">
+                          <label for="homeVesselLat" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Latitude</label>
+                          <input type="text" id="homeVesselLat" class="min-input vessel-field-lat" placeholder="58° 37.7' N" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                        </div>
+                        <div class="form-group" style="flex:1;margin-bottom:0;">
+                          <label for="homeVesselLon" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Longitude</label>
+                          <input type="text" id="homeVesselLon" class="min-input vessel-field-lon" placeholder="017° 46.3' E" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                        </div>
+                        <button type="button" class="ntm-btn-glass vessel-gps-btn" id="homeVesselGpsBtn" title="Use browser GPS (asks permission only when clicked)" style="padding:0.38rem 0.55rem;font-size:0.72rem;font-weight:700;flex-shrink:0;">GPS</button>
+                      </div>
+                      <div class="ntm-popover-subtitle">AIS Details</div>
+                      <div class="vessel-ais-grid">
+                        <div class="form-group"><label for="homeVesselMmsi">MMSI</label><input type="text" id="homeVesselMmsi" class="min-input vessel-field-mmsi" /></div>
+                        <div class="form-group"><label for="homeVesselType">Ship Type</label><input type="text" id="homeVesselType" class="min-input vessel-field-type" /></div>
+                        <div class="form-group vessel-span2"><label for="homeVesselDest">Destination</label><input type="text" id="homeVesselDest" class="min-input vessel-field-dest" /></div>
+                        <div class="form-group"><label for="homeVesselSog">SOG (kn)</label><input type="text" id="homeVesselSog" class="min-input vessel-field-sog" /></div>
+                        <div class="form-group"><label for="homeVesselCog">COG (°)</label><input type="text" id="homeVesselCog" class="min-input vessel-field-cog" /></div>
+                        <div class="form-group"><label for="homeVesselHeading">Heading (°)</label><input type="text" id="homeVesselHeading" class="min-input vessel-field-heading" /></div>
+                      </div>
+                      <div style="display:flex;gap:0.4rem;justify-content:flex-end;margin-top:0.55rem;">
+                        <button type="button" class="ntm-btn-glass" id="homeVesselClearBtn" style="color:var(--warn);margin-right:auto;font-size:0.72rem;padding:0.3rem 0.55rem;">Clear</button>
+                        <button type="button" class="ntm-btn-primary" id="homeVesselApplyBtn" style="font-size:0.75rem;padding:0.35rem 0.7rem;">Save</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -12499,7 +12619,7 @@ select option {
 
 
 
-                  <span><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg> Vessel Target</span>
+                  <span><svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l4.5 7.5v10l-4.5 2.5-4.5-2.5v-10L12 2z" fill="currentColor" fill-opacity="0.16" stroke="currentColor" stroke-width="1.6"/><line x1="12" y1="2" x2="12" y2="9" stroke="#f05a36" stroke-width="1.8"/><circle cx="12" cy="13.5" r="1.8" fill="#f05a36"/></svg> My Vessel</span>
 
 
 
@@ -12515,80 +12635,43 @@ select option {
 
 
 
-                  <p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.5rem;">
-
-
-
-                    Plot ECDIS crosshair target at vessel location:
-
-
-
-                  </p>
-
-
-
-                  <button type="button" class="ntm-btn-glass" id="vesselFetchGpsBtn" style="width:100%;padding:0.45rem;font-weight:600;font-size:0.78rem;justify-content:center;margin-bottom:0.4rem;"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="currentColor" fill-opacity="0.3"/></svg> Auto GPS Position
-
-
-
-                  </button>
-
-
-
-
-
-
-
-                  <div class="ntm-popover-divider"></div>
-
-
-
-                  <div class="ntm-popover-subtitle">Manual Coordinates:</div>
-
-
-
-
-
-
-
-                  <div class="vessel-coords-row" style="display:flex;gap:8px;margin-bottom:0.5rem;">
-                    <div class="form-group" style="flex:1;margin-bottom:0;">
-                      <label for="vesselLat" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Latitude:</label>
-                      <input type="text" id="vesselLat" class="min-input" placeholder="e.g. 58° 37.7' N" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
-                    </div>
-                    <div class="form-group" style="flex:1;margin-bottom:0;">
-                      <label for="vesselLon" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Longitude:</label>
-                      <input type="text" id="vesselLon" class="min-input" placeholder="e.g. 017° 46.3' E" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
-                    </div>
+                                    <div class="vessel-profile-fields" data-vessel-form="chart">
+                      <div class="form-group" style="margin-bottom:0.45rem;position:relative;">
+                        <label for="vesselName" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Vessel Name</label>
+                        <input type="text" id="vesselName" class="min-input vessel-field-name" placeholder="Type to search AIS…" autocomplete="off" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                        <div class="vessel-ais-suggest" id="vesselAisSuggest" hidden></div>
+                      </div>
+                      <div class="form-group" style="margin-bottom:0.45rem;">
+                        <label for="vesselCallSign" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Call Sign</label>
+                        <input type="text" id="vesselCallSign" class="min-input vessel-field-callsign" placeholder="e.g. 3EAB9" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                      </div>
+                      <div class="ntm-popover-subtitle">Position</div>
+                      <div class="vessel-coords-row" style="display:flex;gap:8px;margin-bottom:0.35rem;align-items:flex-end;">
+                        <div class="form-group" style="flex:1;margin-bottom:0;">
+                          <label for="vesselLat" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Latitude</label>
+                          <input type="text" id="vesselLat" class="min-input vessel-field-lat" placeholder="e.g. 58° 37.7' N" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                        </div>
+                        <div class="form-group" style="flex:1;margin-bottom:0;">
+                          <label for="vesselLon" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Longitude</label>
+                          <input type="text" id="vesselLon" class="min-input vessel-field-lon" placeholder="e.g. 017° 46.3' E" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                        </div>
+                        <button type="button" class="ntm-btn-glass vessel-gps-btn" id="vesselFetchGpsBtn" title="Use browser GPS (asks permission only when clicked)" style="padding:0.38rem 0.55rem;font-size:0.72rem;font-weight:700;flex-shrink:0;">GPS</button>
+                      </div>
+                      <div class="ntm-popover-subtitle">AIS Details</div>
+                      <div class="vessel-ais-grid">
+                        <div class="form-group"><label for="vesselMmsi">MMSI</label><input type="text" id="vesselMmsi" class="min-input vessel-field-mmsi" /></div>
+                        <div class="form-group"><label for="vesselType">Ship Type</label><input type="text" id="vesselType" class="min-input vessel-field-type" /></div>
+                        <div class="form-group vessel-span2"><label for="vesselDest">Destination</label><input type="text" id="vesselDest" class="min-input vessel-field-dest" /></div>
+                        <div class="form-group"><label for="vesselSog">SOG (kn)</label><input type="text" id="vesselSog" class="min-input vessel-field-sog" /></div>
+                        <div class="form-group"><label for="vesselCog">COG (°)</label><input type="text" id="vesselCog" class="min-input vessel-field-cog" /></div>
+                        <div class="form-group"><label for="vesselHeading">Heading (°)</label><input type="text" id="vesselHeading" class="min-input vessel-field-heading" /></div>
+                      </div>
+                      <div style="display:flex;gap:0.4rem;justify-content:flex-end;margin-top:0.55rem;">
+                        <button type="button" class="ntm-btn-glass" id="vesselClearBtn" style="color:var(--warn);margin-right:auto;display:none;font-size:0.72rem;padding:0.3rem 0.55rem;">Clear</button>
+                        <button type="button" class="ntm-btn-primary" id="vesselApplyBtn" style="font-size:0.75rem;padding:0.35rem 0.7rem;">Save &amp; Plot</button>
+                      </div>
                   </div>
-
-
-
-
-
-
-
-                  <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
-
-
-
-                    <button type="button" class="ntm-btn-glass" id="vesselClearBtn" style="color:var(--warn);margin-right:auto;display:none;font-size:0.72rem;padding:0.3rem 0.55rem;">Clear</button>
-
-
-
-                    <button type="button" class="ntm-btn-primary" id="vesselApplyBtn" style="font-size:0.75rem;padding:0.35rem 0.7rem;">Plot Target <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg></button>
-
-
-
-                  </div>
-
-
-
-
-
-
-
-                  <div class="ntm-popover-divider"></div>
+<div class="ntm-popover-divider"></div>
 
 
 
@@ -19535,9 +19618,9 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.17"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.17"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.17"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.18"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.18"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.18"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19615,7 +19698,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.17"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.18"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19987,13 +20070,13 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.17' && k !== 'setsail-tiles-cache-v5.17').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.18' && k !== 'setsail-tiles-cache-v5.18').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.17', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.18', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {

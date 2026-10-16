@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine вЂ” Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.17';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.17';
+const CACHE_NAME = 'setsail-cache-v5.18';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.18';
 
 const OFFLINE_CORE_ASSETS = [
   './',

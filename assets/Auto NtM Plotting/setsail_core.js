@@ -100,6 +100,380 @@ let leafletMarkersLayer = null;
 let leafletVesselLayer = null;
 let leafletWeatherLayer = null;
 let userVessel = null; // { lat, lon, source: "gps" | "manual" }
+
+// ===== My Vessel profile (Home HUD + SetChart) — synced, no auto-geo on load =====
+const VESSEL_STORAGE_KEY_V2 = "setsail_vessel_state_v2";
+let _aisNameIndex = null;
+let _aisNameIndexPromise = null;
+let _vesselSuggestTimer = null;
+
+function loadUserVesselFromStorage() {
+  try {
+    const raw2 = localStorage.getItem(VESSEL_STORAGE_KEY_V2);
+    if (raw2) {
+      userVessel = JSON.parse(raw2);
+      return userVessel;
+    }
+    const raw1 = localStorage.getItem(VESSEL_STORAGE_KEY);
+    if (raw1) {
+      userVessel = JSON.parse(raw1);
+      persistUserVessel();
+      return userVessel;
+    }
+  } catch (e) {}
+  return null;
+}
+
+function persistUserVessel() {
+  try {
+    if (userVessel) {
+      localStorage.setItem(VESSEL_STORAGE_KEY_V2, JSON.stringify(userVessel));
+      localStorage.setItem(VESSEL_STORAGE_KEY, JSON.stringify({
+        lat: userVessel.lat,
+        lon: userVessel.lon,
+        source: userVessel.source || "manual",
+        updatedAt: userVessel.updatedAt
+      }));
+    } else {
+      localStorage.removeItem(VESSEL_STORAGE_KEY_V2);
+      localStorage.removeItem(VESSEL_STORAGE_KEY);
+    }
+  } catch (e) {}
+}
+
+function getHomeVesselHudLabel() {
+  if (!userVessel) return "NOT SET";
+  const name = (userVessel.name || "").trim();
+  if (name) return name;
+  if (Number.isFinite(Number(userVessel.lat)) && Number.isFinite(Number(userVessel.lon))) {
+    return formatLatLonDMS(Number(userVessel.lat), Number(userVessel.lon));
+  }
+  return "NOT SET";
+}
+
+function updateHomeVesselHudLabel() {
+  const el = document.getElementById("homeVesselHudCoords");
+  if (el) el.textContent = getHomeVesselHudLabel();
+}
+
+function vesselFormMap(which) {
+  if (which === "home") {
+    return {
+      name: "homeVesselName",
+      callSign: "homeVesselCallSign",
+      lat: "homeVesselLat",
+      lon: "homeVesselLon",
+      mmsi: "homeVesselMmsi",
+      type: "homeVesselType",
+      dest: "homeVesselDest",
+      sog: "homeVesselSog",
+      cog: "homeVesselCog",
+      heading: "homeVesselHeading",
+      suggest: "homeVesselAisSuggest"
+    };
+  }
+  return {
+    name: "vesselName",
+    callSign: "vesselCallSign",
+    lat: "vesselLat",
+    lon: "vesselLon",
+    mmsi: "vesselMmsi",
+    type: "vesselType",
+    dest: "vesselDest",
+    sog: "vesselSog",
+    cog: "vesselCog",
+    heading: "vesselHeading",
+    suggest: "vesselAisSuggest"
+  };
+}
+
+function setInputVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val == null || val === "" ? "" : String(val);
+}
+
+function getInputVal(id) {
+  const el = document.getElementById(id);
+  return el ? String(el.value || "").trim() : "";
+}
+
+function fillVesselFormsFromState() {
+  const v = userVessel || {};
+  ["home", "chart"].forEach((which) => {
+    const m = vesselFormMap(which);
+    setInputVal(m.name, v.name || "");
+    setInputVal(m.callSign, v.callSign || "");
+    if (Number.isFinite(Number(v.lat)) && Number.isFinite(Number(v.lon))) {
+      setInputVal(m.lat, formatLatLonDMS(Number(v.lat), Number(v.lon)).split(/\s{2,}| (?=[0-9]+\°)/)[0] || formatLatLonDMS(Number(v.lat), Number(v.lon)));
+      // Prefer separate DMS strings if formatLatLonDMS returns combined
+      const dms = formatLatLonDMS(Number(v.lat), Number(v.lon));
+      const parts = dms.split(/\s+/);
+      // format is typically "DD° MM.MM' N  DDD° MM.MM' E" — split at hemisphere of lat
+      const mlat = dms.match(/([0-9]+°[^NSEW]*[NS])/i);
+      const mlon = dms.match(/([0-9]+°[^NSEW]*[EW])/i);
+      setInputVal(m.lat, mlat ? mlat[1].trim() : String(v.lat));
+      setInputVal(m.lon, mlon ? mlon[1].trim() : String(v.lon));
+    } else {
+      setInputVal(m.lat, "");
+      setInputVal(m.lon, "");
+    }
+    setInputVal(m.mmsi, v.mmsi || "");
+    setInputVal(m.type, v.shipType || "");
+    setInputVal(m.dest, v.destination || "");
+    setInputVal(m.sog, v.sog != null ? v.sog : "");
+    setInputVal(m.cog, v.cog != null ? v.cog : "");
+    setInputVal(m.heading, v.heading != null ? v.heading : "");
+  });
+  const clearBtn = document.getElementById("vesselClearBtn");
+  const homeClear = document.getElementById("homeVesselClearBtn");
+  const has = !!(userVessel && (userVessel.name || (Number.isFinite(Number(userVessel.lat)) && Number.isFinite(Number(userVessel.lon)))));
+  if (clearBtn) clearBtn.style.display = has ? "inline-block" : "none";
+  if (homeClear) homeClear.style.display = has ? "inline-block" : "none";
+  updateHomeVesselHudLabel();
+}
+
+function readVesselForm(which) {
+  const m = vesselFormMap(which);
+  const lat = parseCoordinateString(getInputVal(m.lat));
+  const lon = parseCoordinateString(getInputVal(m.lon));
+  const sogRaw = getInputVal(m.sog);
+  const cogRaw = getInputVal(m.cog);
+  const hdgRaw = getInputVal(m.heading);
+  return {
+    name: getInputVal(m.name),
+    callSign: getInputVal(m.callSign),
+    lat: lat,
+    lon: lon,
+    mmsi: getInputVal(m.mmsi),
+    shipType: getInputVal(m.type),
+    destination: getInputVal(m.dest),
+    sog: sogRaw === "" ? null : Number(sogRaw),
+    cog: cogRaw === "" ? null : Number(cogRaw),
+    heading: hdgRaw === "" ? null : Number(hdgRaw),
+    source: (userVessel && userVessel.source) || "manual"
+  };
+}
+
+function applyVesselProfile(data, opts) {
+  opts = opts || {};
+  const prev = userVessel || {};
+  userVessel = Object.assign({}, prev, data, {
+    updatedAt: new Date().toISOString()
+  });
+  if (!Number.isFinite(Number(userVessel.lat)) || !Number.isFinite(Number(userVessel.lon))) {
+    // Keep name/details without position
+    userVessel.lat = Number.isFinite(Number(data.lat)) ? Number(data.lat) : prev.lat;
+    userVessel.lon = Number.isFinite(Number(data.lon)) ? Number(data.lon) : prev.lon;
+  }
+  persistUserVessel();
+  fillVesselFormsFromState();
+
+  if (Number.isFinite(Number(userVessel.lat)) && Number.isFinite(Number(userVessel.lon))) {
+    plotUserVessel(Number(userVessel.lat), Number(userVessel.lon), userVessel.source || "manual", true);
+  } else {
+    updateHomeVesselHudLabel();
+  }
+  if (opts.toast && typeof showSetSailToast === "function") {
+    showSetSailToast(opts.toast, "success");
+  }
+}
+
+async function ensureAisNameIndex() {
+  if (_aisNameIndex) return _aisNameIndex;
+  if (_aisNameIndexPromise) return _aisNameIndexPromise;
+  _aisNameIndexPromise = (async () => {
+    const out = [];
+    try {
+      const man = await fetch("ais/zones/index.json?t=" + Date.now(), { cache: "no-store" }).then((r) => {
+        if (!r.ok) throw new Error("zones index HTTP " + r.status);
+        return r.json();
+      });
+      const zones = man.zones || [];
+      await Promise.all(
+        zones.map(async (z) => {
+          try {
+            const data = await fetch(z.file + "?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json());
+            (data.targets || []).forEach((t) => {
+              const n = (t.name || "").trim();
+              if (n.length < 2) return;
+              out.push({
+                name: n,
+                mmsi: t.mmsi,
+                lat: t.lat,
+                lon: t.lon,
+                sog: t.sog,
+                cog: t.cog,
+                heading: t.heading,
+                shipType: t.shipType || t.type || "",
+                destination: t.destination || "",
+                callSign: t.callSign || t.callsign || "",
+                navStat: t.navStat,
+                source: t.source || "AIS zone"
+              });
+            });
+          } catch (e) { /* skip zone */ }
+        })
+      );
+    } catch (e) {
+      console.warn("[SetSail Vessel] AIS name index failed", e);
+    }
+    _aisNameIndex = out;
+    return out;
+  })();
+  return _aisNameIndexPromise;
+}
+
+function hideVesselSuggest(which) {
+  const m = vesselFormMap(which);
+  const box = document.getElementById(m.suggest);
+  if (box) {
+    box.hidden = true;
+    box.innerHTML = "";
+  }
+}
+
+function renderVesselSuggest(which, hits) {
+  const m = vesselFormMap(which);
+  const box = document.getElementById(m.suggest);
+  if (!box) return;
+  if (!hits.length) {
+    hideVesselSuggest(which);
+    return;
+  }
+  box.innerHTML = hits
+    .map((t, i) => {
+      const pos =
+        Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon))
+          ? Number(t.lat).toFixed(3) + ", " + Number(t.lon).toFixed(3)
+          : "";
+      const meta = [t.mmsi ? "MMSI " + t.mmsi : "", t.callSign || "", pos].filter(Boolean).join(" · ");
+      return (
+        '<button type="button" data-ais-hit="' +
+        i +
+        '"><div style="font-weight:700;color:#7dd3fc;">' +
+        String(t.name).replace(/[<>&]/g, "") +
+        '</div><div class="vas-meta">' +
+        meta.replace(/[<>&]/g, "") +
+        "</div></button>"
+      );
+    })
+    .join("");
+  box.hidden = false;
+  box.querySelectorAll("button[data-ais-hit]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const t = hits[Number(btn.getAttribute("data-ais-hit"))];
+      if (!t) return;
+      applyVesselProfile(
+        {
+          name: t.name,
+          callSign: t.callSign || "",
+          mmsi: t.mmsi != null ? String(t.mmsi) : "",
+          shipType: t.shipType || "",
+          destination: t.destination || "",
+          sog: t.sog,
+          cog: t.cog,
+          heading: t.heading,
+          lat: t.lat,
+          lon: t.lon,
+          source: "ais"
+        },
+        { toast: "Vessel details filled from AIS" }
+      );
+      hideVesselSuggest(which);
+    });
+  });
+}
+
+function bindVesselNameAutocomplete(which) {
+  const m = vesselFormMap(which);
+  const input = document.getElementById(m.name);
+  if (!input || input._aisBound) return;
+  input._aisBound = true;
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    clearTimeout(_vesselSuggestTimer);
+    if (q.length < 2) {
+      hideVesselSuggest(which);
+      return;
+    }
+    _vesselSuggestTimer = setTimeout(async () => {
+      const idx = await ensureAisNameIndex();
+      const starts = [];
+      const contains = [];
+      for (let i = 0; i < idx.length; i++) {
+        const n = String(idx[i].name || "").toLowerCase();
+        if (n.startsWith(q)) starts.push(idx[i]);
+        else if (n.includes(q)) contains.push(idx[i]);
+        if (starts.length >= 12) break;
+      }
+      const hits = starts.concat(contains).slice(0, 12);
+      renderVesselSuggest(which, hits);
+    }, 220);
+  });
+  input.addEventListener("blur", () => {
+    setTimeout(() => hideVesselSuggest(which), 180);
+  });
+}
+
+function requestGpsIntoForm(which) {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser. Please enter coordinates manually.");
+    return;
+  }
+  const btn = document.getElementById(which === "home" ? "homeVesselGpsBtn" : "vesselFetchGpsBtn");
+  const prev = btn ? btn.textContent : "GPS";
+  if (btn) btn.textContent = "…";
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      if (btn) btn.textContent = prev;
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      window._homeGeoLon = lon;
+      const m = vesselFormMap(which);
+      setInputVal(m.lat, lat.toFixed(5));
+      setInputVal(m.lon, lon.toFixed(5));
+      const data = readVesselForm(which);
+      data.lat = lat;
+      data.lon = lon;
+      data.source = "gps";
+      applyVesselProfile(data, { toast: "Position updated from GPS" });
+    },
+    (err) => {
+      if (btn) btn.textContent = prev;
+      alert("GPS Error: " + err.message + ". Enter coordinates manually if needed.");
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+  );
+}
+
+function saveVesselForm(which, closeFn) {
+  const data = readVesselForm(which);
+  const hasPos = Number.isFinite(data.lat) && Number.isFinite(data.lon);
+  const hasName = !!(data.name && data.name.trim());
+  if (!hasPos && !hasName && !data.callSign && !data.mmsi) {
+    alert("Enter at least a vessel name or coordinates.");
+    return;
+  }
+  if ((getInputVal(vesselFormMap(which).lat) || getInputVal(vesselFormMap(which).lon)) && !hasPos) {
+    alert("Please enter valid coordinates (e.g., 58° 37.70' N / 017° 46.3' E) or leave both blank.");
+    return;
+  }
+  data.source = data.source === "gps" ? "gps" : (hasPos ? (userVessel && userVessel.source === "gps" ? "gps" : "manual") : (userVessel && userVessel.source) || "manual");
+  applyVesselProfile(data, { toast: "Vessel profile saved" });
+  if (typeof closeFn === "function") closeFn();
+}
+
+function clearVesselProfile(closeFn) {
+  userVessel = null;
+  persistUserVessel();
+  if (leafletVesselLayer) leafletVesselLayer.clearLayers();
+  const hud = document.getElementById("ntmVesselHud");
+  if (hud) hud.style.display = "none";
+  fillVesselFormsFromState();
+  updateHomeVesselHudLabel();
+  if (typeof closeFn === "function") closeFn();
+}
+
 let mobileCurrentView = "list"; // "list" | "map"
 
 // Safe and immediate initialization
@@ -1869,57 +2243,53 @@ async function refreshMarineWeather(force = false) {
 window.refreshMarineWeather = refreshMarineWeather;
 
 function initHomeHudVessel() {
-  const homeHudCoords = document.getElementById("homeVesselHudCoords");
-  const homeHudPill = document.getElementById("homeVesselHudPill");
+  loadUserVesselFromStorage();
+  updateHomeVesselHudLabel();
+  fillVesselFormsFromState();
 
-  if (homeHudPill) {
-    homeHudPill.addEventListener("click", () => {
-      switchToTab("tab-ntm");
-      if (userVessel && leafletMap) {
-        leafletMap.flyTo([userVessel.lat, userVessel.lon], Math.max(leafletMap.getZoom(), 9));
-      } else {
-        const myVesselBtn = document.getElementById("ntmMyVesselBtn");
-        if (myVesselBtn) myVesselBtn.click();
-      }
+  const pillBtn = document.getElementById("homeVesselHudBtn");
+  const pop = document.getElementById("homeVesselPopover");
+  const closeBtn = document.getElementById("homeVesselPopClose");
+
+  const closeHomePop = () => {
+    if (pop) pop.classList.remove("open");
+    if (pillBtn) pillBtn.setAttribute("aria-expanded", "false");
+  };
+  const openHomePop = () => {
+    // close chart vessel popover if open
+    const chartPop = document.getElementById("ntmVesselPopover");
+    const chartBtn = document.getElementById("ntmMyVesselBtn");
+    if (chartPop) chartPop.classList.remove("open");
+    if (chartBtn) chartBtn.classList.remove("active");
+    fillVesselFormsFromState();
+    if (pop) pop.classList.add("open");
+    if (pillBtn) pillBtn.setAttribute("aria-expanded", "true");
+    bindVesselNameAutocomplete("home");
+  };
+
+  if (pillBtn) {
+    pillBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (pop && pop.classList.contains("open")) closeHomePop();
+      else openHomePop();
     });
   }
+  if (closeBtn) closeBtn.addEventListener("click", closeHomePop);
 
-  if (userVessel) {
-    if (homeHudCoords) {
-      homeHudCoords.innerHTML = `${SetSailIcons.svg("pos")} <strong>${formatLatLonDMS(userVessel.lat, userVessel.lon)}</strong>`;
-    }
-    return;
-  }
+  const gpsBtn = document.getElementById("homeVesselGpsBtn");
+  if (gpsBtn) gpsBtn.addEventListener("click", () => requestGpsIntoForm("home"));
+  const applyBtn = document.getElementById("homeVesselApplyBtn");
+  if (applyBtn) applyBtn.addEventListener("click", () => saveVesselForm("home", closeHomePop));
+  const clearBtn = document.getElementById("homeVesselClearBtn");
+  if (clearBtn) clearBtn.addEventListener("click", () => clearVesselProfile(closeHomePop));
 
-  // First-visit automatic geolocation prompt
-  const geoPrompted = localStorage.getItem("setsail_geo_prompted");
-  if (!geoPrompted) {
-    localStorage.setItem("setsail_geo_prompted", "1");
-    if (navigator.geolocation) {
-      if (homeHudCoords) homeHudCoords.textContent = "ACQUIRING GPS...";
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          plotUserVessel(lat, lon, "gps");
-          if (homeHudCoords) {
-            homeHudCoords.innerHTML = `${SetSailIcons.svg("pos")} <strong>${formatLatLonDMS(lat, lon)}</strong>`;
-          }
-        },
-        (err) => {
-          console.log("[SetSail Geo] First-visit GPS acquisition declined:", err.message);
-          if (homeHudCoords) {
-            homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
-          }
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-      );
-    } else {
-      if (homeHudCoords) homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
-    }
-  } else {
-    if (homeHudCoords) homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
-  }
+  document.addEventListener("click", (e) => {
+    if (!pop || !pop.classList.contains("open")) return;
+    const wrap = document.getElementById("homeVesselHudPill");
+    if (wrap && !wrap.contains(e.target)) closeHomePop();
+  });
+
+  // No automatic geolocation prompt on first visit
 }
 
 function initVesselTracking() {
@@ -2024,23 +2394,21 @@ function initVesselTracking() {
   const applyBtn = document.getElementById("vesselApplyBtn");
   const clearBtn = document.getElementById("vesselClearBtn");
 
-  // Load persisted vessel state
-  try {
-    const raw = localStorage.getItem(VESSEL_STORAGE_KEY);
-    if (raw) {
-      userVessel = JSON.parse(raw);
-    }
-  } catch (e) {}
+  // Load persisted vessel profile (v2 + legacy)
+  loadUserVesselFromStorage();
+  fillVesselFormsFromState();
+  bindVesselNameAutocomplete("chart");
 
   const togglePopover = () => {
     if (!vesselPop) return;
     const isOpen = vesselPop.classList.contains("open");
 
-    // Close filter and sort popovers
     const filterPop = document.getElementById("ntmFilterPopover");
     const sortPop = document.getElementById("ntmSortPopover");
     if (filterPop) filterPop.classList.remove("open");
     if (sortPop) sortPop.classList.remove("open");
+    const homePop = document.getElementById("homeVesselPopover");
+    if (homePop) homePop.classList.remove("open");
 
     if (isOpen) {
       vesselPop.classList.remove("open");
@@ -2048,15 +2416,8 @@ function initVesselTracking() {
     } else {
       vesselPop.classList.add("open");
       if (myVesselBtn) myVesselBtn.classList.add("active");
-      if (userVessel) {
-        const latEl = document.getElementById("vesselLat");
-        const lonEl = document.getElementById("vesselLon");
-        if (latEl) latEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
-        if (lonEl) lonEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
-        if (clearBtn) clearBtn.style.display = "inline-block";
-      } else {
-        if (clearBtn) clearBtn.style.display = "none";
-      }
+      fillVesselFormsFromState();
+      bindVesselNameAutocomplete("chart");
     }
   };
 
@@ -2073,70 +2434,16 @@ function initVesselTracking() {
   }
   if (closeBtn) closeBtn.addEventListener("click", closePopover);
 
-  // Auto GPS
   if (fetchGpsBtn) {
-    fetchGpsBtn.addEventListener("click", () => {
-      if (!navigator.geolocation) {
-        alert("Geolocation is not supported by your browser. Please enter coordinates manually.");
-        return;
-      }
-      fetchGpsBtn.innerHTML = `Acquiring GPS... ${SetSailIcons.svg("vessel")}`;
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          fetchGpsBtn.innerHTML = `${SetSailIcons.svg("pos")} Auto GPS Position`;
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-
-          const latEl = document.getElementById("vesselLat");
-          const lonEl = document.getElementById("vesselLon");
-          if (latEl) latEl.value = lat.toFixed(5);
-          if (lonEl) lonEl.value = lon.toFixed(5);
-
-          plotUserVessel(lat, lon, "gps");
-          closePopover();
-        },
-        (err) => {
-          fetchGpsBtn.innerHTML = `${SetSailIcons.svg("pos")} Auto GPS Position`;
-          alert(`GPS Error: ${err.message}. Please enter coordinates manually below.`);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    });
+    fetchGpsBtn.addEventListener("click", () => requestGpsIntoForm("chart"));
   }
 
-  // Manual Coordinates
   if (applyBtn) {
-    applyBtn.addEventListener("click", () => {
-      const latVal = (document.getElementById("vesselLat") ? document.getElementById("vesselLat").value : "").trim() || "";
-      const lonVal = (document.getElementById("vesselLon") ? document.getElementById("vesselLon").value : "").trim() || "";
-
-      const parsedLat = parseCoordinateString(latVal);
-      const parsedLon = parseCoordinateString(lonVal);
-
-      if (parsedLat === null || parsedLon === null) {
-        alert("Please enter valid coordinates (e.g., 58° 37.70' N or 58.6283).");
-        return;
-      }
-
-      plotUserVessel(parsedLat, parsedLon, "manual");
-      closePopover();
-    });
+    applyBtn.addEventListener("click", () => saveVesselForm("chart", closePopover));
   }
 
-  // Clear Vessel Target
   if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      userVessel = null;
-      try { localStorage.removeItem(VESSEL_STORAGE_KEY); } catch (e) {}
-      if (leafletVesselLayer) leafletVesselLayer.clearLayers();
-      const hud = document.getElementById("ntmVesselHud");
-      if (hud) hud.style.display = "none";
-      const homeHudCoords = document.getElementById("homeVesselHudCoords");
-      if (homeHudCoords) {
-        homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
-      }
-      closePopover();
-    });
+    clearBtn.addEventListener("click", () => clearVesselProfile(closePopover));
   }
 }
 
@@ -2190,12 +2497,15 @@ function getEcdisCrosshairIcon() {
 /**
  * Plot user vessel crosshair on map
  */
-function plotUserVessel(lat, lon, source = "manual") {
-  userVessel = { lat, lon, source, updatedAt: new Date().toISOString() };
-
-  try {
-    localStorage.setItem(VESSEL_STORAGE_KEY, JSON.stringify(userVessel));
-  } catch (e) {}
+function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
+  const prev = userVessel || {};
+  userVessel = Object.assign({}, prev, {
+    lat,
+    lon,
+    source,
+    updatedAt: new Date().toISOString()
+  });
+  persistUserVessel();
 
   if (leafletMap && leafletVesselLayer) {
     leafletVesselLayer.clearLayers();
@@ -2205,30 +2515,33 @@ function plotUserVessel(lat, lon, source = "manual") {
       zIndexOffset: 1200
     });
 
+    const title = (userVessel.name && String(userVessel.name).trim()) || "Vessel Position";
     marker.bindPopup(`
       <div style="font-family:'Segoe UI',sans-serif;color:#111;min-width:180px;">
         <div style="font-weight:700;color:#0a3888;font-size:1rem;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:5px;">
-          Vessel Position
+          ${title.replace(/[<>]/g, "")}
         </div>
         <div style="font-size:0.8rem;color:#333;margin-bottom:3px;"><b>Coordinates:</b> ${formatLatLonDMS(lat, lon)}</div>
-        <div style="font-size:0.75rem;color:#666;"><b>Source:</b> ${source === "gps" ? "Browser GPS" : "Manual Navigation Entry"}</div>
+        ${userVessel.callSign ? `<div style="font-size:0.75rem;color:#333;"><b>Call Sign:</b> ${String(userVessel.callSign).replace(/[<>]/g, "")}</div>` : ""}
+        ${userVessel.mmsi ? `<div style="font-size:0.75rem;color:#333;"><b>MMSI:</b> ${String(userVessel.mmsi).replace(/[<>]/g, "")}</div>` : ""}
+        <div style="font-size:0.75rem;color:#666;"><b>Source:</b> ${source === "gps" ? "Browser GPS" : source === "ais" ? "AIS match" : "Manual Navigation Entry"}</div>
       </div>
     `);
 
     leafletVesselLayer.addLayer(marker);
-    leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
+    if (!skipFly) {
+      leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
+    }
   }
 
   const hud = document.getElementById("ntmVesselHud");
   if (hud) {
     hud.style.display = "flex";
-    hud.innerHTML = `${SetSailIcons.svg("vessel")} <strong>Vessel:</strong> ${formatLatLonDMS(lat, lon)}`;
+    const label = (userVessel.name && String(userVessel.name).trim()) || formatLatLonDMS(lat, lon);
+    hud.innerHTML = `${SetSailIcons.svg("vessel")} <strong>Vessel:</strong> ${label}`;
   }
 
-  const homeHudCoords = document.getElementById("homeVesselHudCoords");
-  if (homeHudCoords) {
-    homeHudCoords.innerHTML = `${SetSailIcons.svg("pos")} <strong>${formatLatLonDMS(lat, lon)}</strong>`;
-  }
+  updateHomeVesselHudLabel();
 }
 
 /**
