@@ -1,6 +1,6 @@
 {
   "synopticCycle": "0900 UTC",
-  "lastSyncUtc": "2026-10-16T09:29:51.679142+00:00",
+  "lastSyncUtc": "2026-10-16T09:33:30.589672+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -420,7 +420,7 @@
       ],
       "radiusNm": 150,
       "waveHeight": 2.6,
-      "swellPeriod": 9,
+      "swellPeriod": 10,
       "swellDir": "SSE"
     },
     {
@@ -432,7 +432,7 @@
       ],
       "radiusNm": 150,
       "waveHeight": 2.5,
-      "swellPeriod": 6,
+      "swellPeriod": 7,
       "swellDir": "E"
     }
   ],
