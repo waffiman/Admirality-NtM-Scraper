@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.19" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.20" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -4802,7 +4802,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
 }
 
-/* SetNews flame — solid fill ONLY (must come AFTER .nav-item .setsail-icon stroke rules) */
+/* SetNews flame — same slate/cyan weight as other nav icons (shape kept, no orange pop) */
 .nav-item .setsail-icon.setsail-icon-flame,
 .setsail-icon.setsail-icon-flame {
   stroke: none !important;
@@ -4815,13 +4815,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
   stroke: none !important;
   stroke-width: 0 !important;
 }
-.setsail-icon-flame .flame-outer { fill: #f05a36 !important; }
-.setsail-icon-flame .flame-tongue { fill: #fb923c !important; }
-.setsail-icon-flame .flame-core { fill: #fde68a !important; }
-.nav-item:hover .setsail-icon-flame .flame-outer { fill: #ff6b45 !important; }
-.nav-item:hover .setsail-icon-flame .flame-tongue { fill: #fdba74 !important; }
+.setsail-icon-flame .flame-outer { fill: #94a3b8 !important; }
+.setsail-icon-flame .flame-tongue { fill: #64748b !important; }
+.setsail-icon-flame .flame-core { fill: #cbd5e1 !important; }
+.nav-item:hover .setsail-icon-flame .flame-outer { fill: #e2e8f0 !important; }
+.nav-item:hover .setsail-icon-flame .flame-tongue { fill: #94a3b8 !important; }
+.nav-item:hover .setsail-icon-flame .flame-core { fill: #f1f5f9 !important; }
+.nav-item.active .setsail-icon-flame .flame-outer { fill: #38bdf8 !important; }
+.nav-item.active .setsail-icon-flame .flame-tongue { fill: #0ea5e9 !important; }
+.nav-item.active .setsail-icon-flame .flame-core { fill: #7dd3fc !important; }
 .nav-item.active .setsail-icon.setsail-icon-flame {
-  filter: drop-shadow(0 0 8px rgba(240, 90, 54, 0.7)) !important;
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5)) !important;
 }
 
 
@@ -11541,9 +11545,9 @@ select option {
     // v5.19 — hard kill stale SW/HTML so flame + AIS zones actually show
     (function(){
       try {
-        if (localStorage.getItem('setsail_force_v519') === '1') return;
+        if (localStorage.getItem('setsail_force_v520') === '1') return;
         var finish = function(){
-          localStorage.setItem('setsail_force_v519', '1');
+          localStorage.setItem('setsail_force_v520', '1');
           // clear ALL old force/reload flags that blocked later bumps
           try {
             ['setsail_force_v512','setsail_force_v513','setsail_force_v514','setsail_force_v515','setsail_force_v516',
@@ -11668,7 +11672,7 @@ select option {
       </div>
 
       <button type="button" class="nav-item" data-tab="tab-news" id="navItemSetNews" aria-label="SetNews — What's happening on land &amp; at sea" title="SetNews — Land &amp; Sea">
-        <svg class="setsail-icon setsail-icon-flame" viewBox="0 0 24 24" aria-hidden="true" fill="none"><path class="flame-outer" fill="#f05a36" stroke="none" d="M12 1.2c2.2 3.8 5.8 6.2 5.8 11.2 0 3.7-2.7 6.6-5.8 6.6S6.2 16.1 6.2 12.4c0-2.6 1.1-4.5 2.4-6.1C7.8 8.8 7.2 10.6 7.6 12.2c.3 1.2 1.3 2 2.3 1.6-.9-1.8-.4-3.6.6-5.3C11.4 6.6 12 4.2 12 1.2z"/><path class="flame-tongue" fill="#fb923c" stroke="none" d="M12 6.2c1.3 2.2 3.2 3.6 3.2 6.4 0 2.1-1.5 3.7-3.2 3.7S8.8 14.7 8.8 12.6c0-1.5.6-2.6 1.4-3.5-.3.9-.2 1.9.4 2.6.5.6 1.2.7 1.7.3-.4-1.1-.1-2.3.6-3.4C12.2 8.1 12 7.2 12 6.2z"/><path class="flame-core" fill="#fde68a" stroke="none" d="M12 12.4c.7 1 1.1 1.8 1.1 2.8 0 1.2-.9 2.1-1.1 2.1s-1.1-.9-1.1-2.1c0-1 .4-1.8 1.1-2.8z"/></svg>
+        <svg class="setsail-icon setsail-icon-flame" viewBox="0 0 24 24" aria-hidden="true" fill="none"><path class="flame-outer" fill="#94a3b8" stroke="none" d="M12 1.2c2.2 3.8 5.8 6.2 5.8 11.2 0 3.7-2.7 6.6-5.8 6.6S6.2 16.1 6.2 12.4c0-2.6 1.1-4.5 2.4-6.1C7.8 8.8 7.2 10.6 7.6 12.2c.3 1.2 1.3 2 2.3 1.6-.9-1.8-.4-3.6.6-5.3C11.4 6.6 12 4.2 12 1.2z"/><path class="flame-tongue" fill="#64748b" stroke="none" d="M12 6.2c1.3 2.2 3.2 3.6 3.2 6.4 0 2.1-1.5 3.7-3.2 3.7S8.8 14.7 8.8 12.6c0-1.5.6-2.6 1.4-3.5-.3.9-.2 1.9.4 2.6.5.6 1.2.7 1.7.3-.4-1.1-.1-2.3.6-3.4C12.2 8.1 12 7.2 12 6.2z"/><path class="flame-core" fill="#cbd5e1" stroke="none" d="M12 12.4c.7 1 1.1 1.8 1.1 2.8 0 1.2-.9 2.1-1.1 2.1s-1.1-.9-1.1-2.1c0-1 .4-1.8 1.1-2.8z"/></svg>
         <span class="tooltip">SetNews · Maritime Wire</span>
       </button>
 
@@ -19726,9 +19730,9 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.19"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.19"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.19"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.20"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.20"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.20"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19806,7 +19810,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.19"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.20"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20184,7 +20188,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.19', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.20', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {

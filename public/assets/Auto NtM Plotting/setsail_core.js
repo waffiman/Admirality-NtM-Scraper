@@ -100,6 +100,609 @@ let leafletMarkersLayer = null;
 let leafletVesselLayer = null;
 let leafletWeatherLayer = null;
 let userVessel = null; // { lat, lon, source: "gps" | "manual" }
+
+// ===== My Vessel profile (Home HUD + SetChart) — synced, no auto-geo on load =====
+const VESSEL_STORAGE_KEY_V2 = "setsail_vessel_state_v2";
+let _aisNameIndex = null;
+let _aisNameIndexPromise = null;
+let _vesselSuggestTimer = null;
+
+function loadUserVesselFromStorage() {
+  try {
+    const raw2 = localStorage.getItem(VESSEL_STORAGE_KEY_V2);
+    if (raw2) {
+      userVessel = JSON.parse(raw2);
+      return userVessel;
+    }
+    const raw1 = localStorage.getItem(VESSEL_STORAGE_KEY);
+    if (raw1) {
+      userVessel = JSON.parse(raw1);
+      persistUserVessel();
+      return userVessel;
+    }
+  } catch (e) {}
+  return null;
+}
+
+function persistUserVessel() {
+  try {
+    if (userVessel) {
+      localStorage.setItem(VESSEL_STORAGE_KEY_V2, JSON.stringify(userVessel));
+      localStorage.setItem(VESSEL_STORAGE_KEY, JSON.stringify({
+        lat: userVessel.lat,
+        lon: userVessel.lon,
+        source: userVessel.source || "manual",
+        updatedAt: userVessel.updatedAt
+      }));
+    } else {
+      localStorage.removeItem(VESSEL_STORAGE_KEY_V2);
+      localStorage.removeItem(VESSEL_STORAGE_KEY);
+    }
+  } catch (e) {}
+}
+
+function getHomeVesselHudLabel() {
+  if (!userVessel) return "NOT SET";
+  const name = (userVessel.name || "").trim();
+  if (name) return name;
+  if (Number.isFinite(Number(userVessel.lat)) && Number.isFinite(Number(userVessel.lon))) {
+    return formatLatLonDMS(Number(userVessel.lat), Number(userVessel.lon));
+  }
+  return "NOT SET";
+}
+
+function updateHomeVesselHudLabel() {
+  const el = document.getElementById("homeVesselHudCoords");
+  if (el) el.textContent = getHomeVesselHudLabel();
+}
+
+function vesselFormMap(which) {
+  if (which === "home") {
+    return {
+      name: "homeVesselName",
+      callSign: "homeVesselCallSign",
+      lat: "homeVesselLat",
+      lon: "homeVesselLon",
+      mmsi: "homeVesselMmsi",
+      type: "homeVesselType",
+      dest: "homeVesselDest",
+      sog: "homeVesselSog",
+      cog: "homeVesselCog",
+      heading: "homeVesselHeading",
+      suggest: "homeVesselAisSuggest"
+    };
+  }
+  return {
+    name: "vesselName",
+    callSign: "vesselCallSign",
+    lat: "vesselLat",
+    lon: "vesselLon",
+    mmsi: "vesselMmsi",
+    type: "vesselType",
+    dest: "vesselDest",
+    sog: "vesselSog",
+    cog: "vesselCog",
+    heading: "vesselHeading",
+    suggest: "vesselAisSuggest"
+  };
+}
+
+function setInputVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val == null || val === "" ? "" : String(val);
+}
+
+function getInputVal(id) {
+  const el = document.getElementById(id);
+  return el ? String(el.value || "").trim() : "";
+}
+
+function fillVesselFormsFromState() {
+  const v = userVessel || {};
+  ["home", "chart"].forEach((which) => {
+    const m = vesselFormMap(which);
+    setInputVal(m.name, v.name || "");
+    setInputVal(m.callSign, v.callSign || "");
+    if (Number.isFinite(Number(v.lat)) && Number.isFinite(Number(v.lon))) {
+      setInputVal(m.lat, formatLatLonDMS(Number(v.lat), Number(v.lon)).split(/\s{2,}| (?=[0-9]+\°)/)[0] || formatLatLonDMS(Number(v.lat), Number(v.lon)));
+      // Prefer separate DMS strings if formatLatLonDMS returns combined
+      const dms = formatLatLonDMS(Number(v.lat), Number(v.lon));
+      const parts = dms.split(/\s+/);
+      // format is typically "DD° MM.MM' N  DDD° MM.MM' E" — split at hemisphere of lat
+      const mlat = dms.match(/([0-9]+°[^NSEW]*[NS])/i);
+      const mlon = dms.match(/([0-9]+°[^NSEW]*[EW])/i);
+      setInputVal(m.lat, mlat ? mlat[1].trim() : String(v.lat));
+      setInputVal(m.lon, mlon ? mlon[1].trim() : String(v.lon));
+    } else {
+      setInputVal(m.lat, "");
+      setInputVal(m.lon, "");
+    }
+    setInputVal(m.mmsi, v.mmsi || "");
+    setInputVal(m.type, v.shipType || "");
+    setInputVal(m.dest, v.destination || "");
+    setInputVal(m.sog, v.sog != null ? v.sog : "");
+    setInputVal(m.cog, v.cog != null ? v.cog : "");
+    setInputVal(m.heading, v.heading != null ? v.heading : "");
+  });
+  const clearBtn = document.getElementById("vesselClearBtn");
+  const homeClear = document.getElementById("homeVesselClearBtn");
+  const has = !!(userVessel && (userVessel.name || (Number.isFinite(Number(userVessel.lat)) && Number.isFinite(Number(userVessel.lon)))));
+  if (clearBtn) clearBtn.style.display = has ? "inline-block" : "none";
+  if (homeClear) homeClear.style.display = has ? "inline-block" : "none";
+  updateHomeVesselHudLabel();
+}
+
+function readVesselForm(which) {
+  const m = vesselFormMap(which);
+  const lat = parseCoordinateString(getInputVal(m.lat));
+  const lon = parseCoordinateString(getInputVal(m.lon));
+  const sogRaw = getInputVal(m.sog);
+  const cogRaw = getInputVal(m.cog);
+  const hdgRaw = getInputVal(m.heading);
+  return {
+    name: getInputVal(m.name),
+    callSign: getInputVal(m.callSign),
+    lat: lat,
+    lon: lon,
+    mmsi: getInputVal(m.mmsi),
+    shipType: getInputVal(m.type),
+    destination: getInputVal(m.dest),
+    sog: sogRaw === "" ? null : Number(sogRaw),
+    cog: cogRaw === "" ? null : Number(cogRaw),
+    heading: hdgRaw === "" ? null : Number(hdgRaw),
+    source: (userVessel && userVessel.source) || "manual"
+  };
+}
+
+function applyVesselProfile(data, opts) {
+  opts = opts || {};
+  const prev = userVessel || {};
+  userVessel = Object.assign({}, prev, data, {
+    updatedAt: new Date().toISOString()
+  });
+  if (!Number.isFinite(Number(userVessel.lat)) || !Number.isFinite(Number(userVessel.lon))) {
+    // Keep name/details without position
+    userVessel.lat = Number.isFinite(Number(data.lat)) ? Number(data.lat) : prev.lat;
+    userVessel.lon = Number.isFinite(Number(data.lon)) ? Number(data.lon) : prev.lon;
+  }
+  persistUserVessel();
+  fillVesselFormsFromState();
+
+  if (Number.isFinite(Number(userVessel.lat)) && Number.isFinite(Number(userVessel.lon))) {
+    plotUserVessel(Number(userVessel.lat), Number(userVessel.lon), userVessel.source || "manual", true);
+  } else {
+    updateHomeVesselHudLabel();
+  }
+  if (opts.toast && typeof showSetSailToast === "function") {
+    showSetSailToast(opts.toast, "success");
+  }
+  if (!opts.skipAisSchedule && userVessel && userVessel.mmsi) {
+    scheduleOwnVesselAisRefresh();
+  }
+}
+
+/** Hourly live refresh of the AIS target linked as My Vessel (MMSI). */
+const OWN_AIS_REFRESH_MS = 60 * 60 * 1000;
+let _ownAisRefreshTimer = null;
+
+async function fetchOwnVesselAisUpdate() {
+  const v = userVessel;
+  if (!v || !v.mmsi) return null;
+  const mmsi = String(v.mmsi).trim();
+  if (!/^\d{5,9}$/.test(mmsi)) return null;
+
+  const boxes = [];
+  const lat0 = Number(v.lat);
+  const lon0 = Number(v.lon);
+  if (Number.isFinite(lat0) && Number.isFinite(lon0)) {
+    boxes.push([lat0 - 1.2, lon0 - 1.2, lat0 + 1.2, lon0 + 1.2]);
+    boxes.push([lat0 - 3.5, lon0 - 3.5, lat0 + 3.5, lon0 + 3.5]);
+  }
+
+  async function fromOpenWaters() {
+    for (let i = 0; i < boxes.length; i++) {
+      const box = boxes[i];
+      const url =
+        "https://ais.openwaters.io/v1/vessels?bbox=" +
+        box.map((n) => Number(n).toFixed(4)).join(",");
+      try {
+        const geo = await fetch(url, {
+          headers: {
+            Accept: "application/geo+json, application/json",
+            "User-Agent": "SetSailMarineSuite/AIS"
+          },
+          cache: "no-store"
+        }).then((r) => (r.ok ? r.json() : null));
+        if (!geo) continue;
+        const feats = geo.features || [];
+        for (let j = 0; j < feats.length; j++) {
+          const f = feats[j];
+          const p = f.properties || {};
+          if (String(p.mmsi) !== mmsi) continue;
+          const c = (f.geometry && f.geometry.coordinates) || [];
+          return {
+            mmsi,
+            lat: c[1],
+            lon: c[0],
+            sog: p.sog,
+            cog: p.cog,
+            heading: p.heading,
+            name: p.name || v.name || "",
+            destination: p.destination || v.destination || "",
+            shipType: p.type || p.shipType || v.shipType || "",
+            callSign: p.callSign || v.callSign || "",
+            navStat: p.nav_status != null ? p.nav_status : p.navStat,
+            source: "ais"
+          };
+        }
+      } catch (e) {
+        /* try next box */
+      }
+    }
+    return null;
+  }
+
+  async function fromDigitraffic() {
+    try {
+      const geo = await fetch("https://meri.digitraffic.fi/api/ais/v1/locations", {
+        headers: {
+          Accept: "application/json",
+          "Digitraffic-User": "SetSailMarineSuite/AIS"
+        },
+        cache: "no-store"
+      }).then((r) => (r.ok ? r.json() : null));
+      if (!geo) return null;
+      const f = (geo.features || []).find((x) => String((x.properties || {}).mmsi) === mmsi);
+      if (!f) return null;
+      let meta = {};
+      try {
+        const vessels = await fetch("https://meri.digitraffic.fi/api/ais/v1/vessels", {
+          headers: {
+            Accept: "application/json",
+            "Digitraffic-User": "SetSailMarineSuite/AIS"
+          },
+          cache: "no-store"
+        }).then((r) => (r.ok ? r.json() : []));
+        const arr = Array.isArray(vessels) ? vessels : vessels.vessels || [];
+        const mv = arr.find((x) => String(x.mmsi || x.MMSI) === mmsi);
+        if (mv) {
+          meta = {
+            name: mv.name || mv.shipName || "",
+            destination: mv.destination || "",
+            shipType: mv.shipType || mv.shipTypeName || "",
+            callSign: mv.callSign || ""
+          };
+        }
+      } catch (e2) { /* meta optional */ }
+      const p = f.properties || {};
+      const c = (f.geometry && f.geometry.coordinates) || [];
+      return {
+        mmsi,
+        lat: c[1],
+        lon: c[0],
+        sog: p.sog,
+        cog: p.cog,
+        heading: p.heading,
+        name: meta.name || v.name || "",
+        destination: meta.destination || v.destination || "",
+        shipType: meta.shipType || v.shipType || "",
+        callSign: meta.callSign || v.callSign || "",
+        navStat: p.navStat,
+        source: "ais"
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  let hit = null;
+  if (boxes.length) hit = await fromOpenWaters();
+  if (!hit) hit = await fromDigitraffic();
+  if (!hit) {
+    try {
+      const idx = await ensureAisNameIndex();
+      const row = (idx || []).find((t) => String(t.mmsi) === mmsi);
+      if (row) {
+        hit = {
+          mmsi,
+          name: row.name || v.name || "",
+          callSign: row.callSign || v.callSign || "",
+          shipType: row.shipType || v.shipType || "",
+          destination: row.destination || v.destination || "",
+          lat: Number.isFinite(Number(row.lat)) ? Number(row.lat) : v.lat,
+          lon: Number.isFinite(Number(row.lon)) ? Number(row.lon) : v.lon,
+          sog: row.sog,
+          cog: row.cog,
+          heading: row.heading,
+          source: "ais"
+        };
+      }
+    } catch (e3) { /* ignore */ }
+  }
+  if (hit && Number.isFinite(Number(hit.lat)) && Number.isFinite(Number(hit.lon)) && !boxes.length) {
+    boxes.push([Number(hit.lat) - 1.2, Number(hit.lon) - 1.2, Number(hit.lat) + 1.2, Number(hit.lon) + 1.2]);
+    const live = await fromOpenWaters();
+    if (live) hit = live;
+  }
+  return hit;
+}
+
+async function refreshOwnVesselFromAis(opts) {
+  opts = opts || {};
+  if (!userVessel || !userVessel.mmsi) return;
+  try {
+    const hit = await fetchOwnVesselAisUpdate();
+    if (!hit) return;
+    applyVesselProfile(
+      Object.assign({}, userVessel, hit, {
+        source: "ais",
+        aisRefreshedAt: new Date().toISOString()
+      }),
+      {
+        toast: opts.toast
+          ? "Own vessel AIS updated (" + (hit.name || hit.mmsi) + ")"
+          : null,
+        skipAisSchedule: true
+      }
+    );
+  } catch (e) {
+    console.warn("[SetSail Vessel] own AIS hourly refresh failed", e);
+  }
+}
+
+function scheduleOwnVesselAisRefresh() {
+  if (_ownAisRefreshTimer) {
+    clearInterval(_ownAisRefreshTimer);
+    _ownAisRefreshTimer = null;
+  }
+  if (!userVessel || !userVessel.mmsi) return;
+  _ownAisRefreshTimer = setInterval(() => {
+    refreshOwnVesselFromAis({ toast: false });
+  }, OWN_AIS_REFRESH_MS);
+  if (!window._ownAisInitialKick) {
+    window._ownAisInitialKick = true;
+    setTimeout(() => refreshOwnVesselFromAis({ toast: false }), 6000);
+  }
+}
+window.refreshOwnVesselFromAis = refreshOwnVesselFromAis;
+window.scheduleOwnVesselAisRefresh = scheduleOwnVesselAisRefresh;
+
+async function ensureAisNameIndex() {
+  if (_aisNameIndex && _aisNameIndex.length) return _aisNameIndex;
+  if (_aisNameIndexPromise) return _aisNameIndexPromise;
+  _aisNameIndexPromise = (async () => {
+    const out = [];
+    const pushRow = (t) => {
+      const n = String((t && t.name) || "").trim();
+      if (n.length < 2 || !/[A-Za-z]/.test(n) || n.startsWith("!")) return;
+      out.push({
+        name: n,
+        mmsi: t.mmsi,
+        lat: t.lat,
+        lon: t.lon,
+        sog: t.sog,
+        cog: t.cog,
+        heading: t.heading,
+        shipType: t.shipType || t.type || "",
+        destination: t.destination || "",
+        callSign: t.callSign || t.callsign || "",
+        source: t.source || "AIS"
+      });
+    };
+    try {
+      const data = await fetch("ais/zones/names.json?t=" + Date.now(), { cache: "no-store" }).then((r) => {
+        if (!r.ok) throw new Error("names.json HTTP " + r.status);
+        return r.json();
+      });
+      (data.names || []).forEach(pushRow);
+      console.info("[SetSail Vessel] AIS name index ready:", out.length);
+    } catch (e) {
+      console.warn("[SetSail Vessel] names.json miss — Digitraffic meta fallback", e);
+      try {
+        const vessels = await fetch("https://meri.digitraffic.fi/api/ais/v1/vessels", {
+          headers: { Accept: "application/json", "Digitraffic-User": "SetSailMarineSuite/AIS" },
+          cache: "no-store"
+        }).then((r) => r.json());
+        const arr = Array.isArray(vessels) ? vessels : vessels.vessels || [];
+        arr.forEach((v) => {
+          pushRow({
+            name: v.name || v.shipName,
+            mmsi: v.mmsi || v.MMSI,
+            callSign: v.callSign || "",
+            shipType: v.shipType || v.shipTypeName || "",
+            destination: v.destination || "",
+            source: "Digitraffic"
+          });
+        });
+      } catch (e2) {
+        console.warn("[SetSail Vessel] Digitraffic name fallback failed", e2);
+      }
+    }
+    // Also fold in any currently plotted AIS markers
+    try {
+      if (window.leafletAisLayer && typeof window.leafletAisLayer.eachLayer === "function") {
+        window.leafletAisLayer.eachLayer((ly) => {
+          const p = ly && ly.getPopup && ly.getPopup();
+          /* skip — markers don't hold raw objects reliably */
+        });
+      }
+    } catch (e3) {}
+    _aisNameIndex = out;
+    return out;
+  })();
+  try {
+    return await _aisNameIndexPromise;
+  } finally {
+    /* keep promise cached for success; allow retry if empty */
+    if (_aisNameIndex && !_aisNameIndex.length) {
+      _aisNameIndexPromise = null;
+    }
+  }
+}
+
+function hideVesselSuggest(which) {
+  const m = vesselFormMap(which);
+  const box = document.getElementById(m.suggest);
+  if (box) {
+    box.hidden = true;
+    box.innerHTML = "";
+  }
+}
+
+function renderVesselSuggest(which, hits) {
+  const m = vesselFormMap(which);
+  const box = document.getElementById(m.suggest);
+  if (!box) return;
+  if (!hits.length) {
+    hideVesselSuggest(which);
+    return;
+  }
+  box.innerHTML = hits
+    .map((t, i) => {
+      const pos =
+        Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon))
+          ? Number(t.lat).toFixed(3) + ", " + Number(t.lon).toFixed(3)
+          : "";
+      const meta = [t.mmsi ? "MMSI " + t.mmsi : "", t.callSign || "", pos].filter(Boolean).join(" · ");
+      return (
+        '<button type="button" data-ais-hit="' +
+        i +
+        '"><div style="font-weight:700;color:#7dd3fc;">' +
+        String(t.name).replace(/[<>&]/g, "") +
+        '</div><div class="vas-meta">' +
+        meta.replace(/[<>&]/g, "") +
+        "</div></button>"
+      );
+    })
+    .join("");
+  box.hidden = false;
+  box.querySelectorAll("button[data-ais-hit]").forEach((btn) => {
+    btn.addEventListener("mousedown", (ev) => {
+      ev.preventDefault();
+      const t = hits[Number(btn.getAttribute("data-ais-hit"))];
+      if (!t) return;
+      applyVesselProfile(
+        {
+          name: t.name,
+          callSign: t.callSign || "",
+          mmsi: t.mmsi != null ? String(t.mmsi) : "",
+          shipType: t.shipType || "",
+          destination: t.destination || "",
+          sog: t.sog,
+          cog: t.cog,
+          heading: t.heading,
+          lat: t.lat,
+          lon: t.lon,
+          source: "ais"
+        },
+        { toast: "Vessel details filled from AIS" }
+      );
+      hideVesselSuggest(which);
+    });
+  });
+}
+
+function bindVesselNameAutocomplete(which) {
+  const m = vesselFormMap(which);
+  const input = document.getElementById(m.name);
+  if (!input || input._aisBound) return;
+  input._aisBound = true;
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    clearTimeout(_vesselSuggestTimer);
+    if (q.length < 2) {
+      hideVesselSuggest(which);
+      return;
+    }
+    const mbox = vesselFormMap(which);
+    const box = document.getElementById(mbox.suggest);
+    if (box) {
+      box.hidden = false;
+      box.innerHTML = '<div class="vas-meta" style="padding:0.45rem 0.55rem;">Searching AIS…</div>';
+    }
+    _vesselSuggestTimer = setTimeout(async () => {
+      try {
+        const idx = await ensureAisNameIndex();
+        const starts = [];
+        const contains = [];
+        for (let i = 0; i < idx.length; i++) {
+          const n = String(idx[i].name || "").toLowerCase();
+          if (n.startsWith(q)) starts.push(idx[i]);
+          else if (n.includes(q)) contains.push(idx[i]);
+          if (starts.length >= 12) break;
+        }
+        const hits = starts.concat(contains).slice(0, 12);
+        renderVesselSuggest(which, hits);
+      } catch (err) {
+        console.warn("[SetSail Vessel] suggest error", err);
+        hideVesselSuggest(which);
+      }
+    }, 180);
+  });
+  input.addEventListener("blur", () => {
+    setTimeout(() => hideVesselSuggest(which), 220);
+  });
+}
+
+function requestGpsIntoForm(which) {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser. Please enter coordinates manually.");
+    return;
+  }
+  const btn = document.getElementById(which === "home" ? "homeVesselGpsBtn" : "vesselFetchGpsBtn");
+  const prev = btn ? btn.textContent : "GPS";
+  if (btn) btn.textContent = "…";
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      if (btn) btn.textContent = prev;
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      window._homeGeoLon = lon;
+      const m = vesselFormMap(which);
+      setInputVal(m.lat, lat.toFixed(5));
+      setInputVal(m.lon, lon.toFixed(5));
+      const data = readVesselForm(which);
+      data.lat = lat;
+      data.lon = lon;
+      data.source = "gps";
+      applyVesselProfile(data, { toast: "Position updated from GPS" });
+    },
+    (err) => {
+      if (btn) btn.textContent = prev;
+      alert("GPS Error: " + err.message + ". Enter coordinates manually if needed.");
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+  );
+}
+
+function saveVesselForm(which, closeFn) {
+  const data = readVesselForm(which);
+  const hasPos = Number.isFinite(data.lat) && Number.isFinite(data.lon);
+  const hasName = !!(data.name && data.name.trim());
+  if (!hasPos && !hasName && !data.callSign && !data.mmsi) {
+    alert("Enter at least a vessel name or coordinates.");
+    return;
+  }
+  if ((getInputVal(vesselFormMap(which).lat) || getInputVal(vesselFormMap(which).lon)) && !hasPos) {
+    alert("Please enter valid coordinates (e.g., 58° 37.70' N / 017° 46.3' E) or leave both blank.");
+    return;
+  }
+  data.source = data.source === "gps" ? "gps" : (hasPos ? (userVessel && userVessel.source === "gps" ? "gps" : "manual") : (userVessel && userVessel.source) || "manual");
+  applyVesselProfile(data, { toast: "Vessel profile saved" });
+  if (typeof closeFn === "function") closeFn();
+}
+
+function clearVesselProfile(closeFn) {
+  userVessel = null;
+  persistUserVessel();
+  if (leafletVesselLayer) leafletVesselLayer.clearLayers();
+  const hud = document.getElementById("ntmVesselHud");
+  if (hud) hud.style.display = "none";
+  fillVesselFormsFromState();
+  updateHomeVesselHudLabel();
+  if (typeof closeFn === "function") closeFn();
+}
+
 let mobileCurrentView = "list"; // "list" | "map"
 
 // Safe and immediate initialization
@@ -110,6 +713,8 @@ function initApp() {
   safe("theme", initTheme);
   safe("nav", initNavigationTabs);
   safe("tab", () => {
+    // NEVER force Home. Only restore a saved/hash tab; leave HTML default alone otherwise.
+    const already = document.querySelector(".tab-pane.active");
     let savedTab = "";
     try {
       if (window.location.hash && window.location.hash.length > 1) {
@@ -119,11 +724,29 @@ function initApp() {
         savedTab = sessionStorage.getItem("setsail_active_tab") || localStorage.getItem("setsail_active_tab") || "";
       }
     } catch (e) {}
-    const initialTab = (savedTab && document.getElementById(savedTab)) ? savedTab : "tab-home";
-    switchToTab(initialTab);
+    if (already && already.id && already.id !== "tab-home") {
+      window._setsailActiveTab = already.id;
+      try {
+        sessionStorage.setItem("setsail_active_tab", already.id);
+        localStorage.setItem("setsail_active_tab", already.id);
+      } catch (e) {}
+      return;
+    }
+    if (savedTab && savedTab !== "tab-home" && document.getElementById(savedTab)) {
+      switchToTab(savedTab, "restore");
+      return;
+    }
+    if (already && already.id) {
+      window._setsailActiveTab = already.id;
+    }
   });
   safe("clock", initHomeChronometer);
-  safe("video", initHomeVideo);
+  safe("video", () => {
+    const homePane = document.getElementById("tab-home");
+    if (homePane && homePane.classList.contains("active") && typeof initHomeVideo === "function") {
+      initHomeVideo();
+    }
+  });
   safe("hudVessel", initHomeHudVessel);
   safe("ntmUI", initAutoNtmUI);
   safe("filters", initFilterAndSortPopovers);
@@ -145,14 +768,14 @@ document.addEventListener("click", (e) => {
   if (switchBtn) {
     e.preventDefault();
     const target = switchBtn.getAttribute("data-switch-tab");
-    if (target) switchToTab(target);
+    if (target) switchToTab(target, "user");
     return;
   }
   const tabBtn = e.target.closest(".nav-sidebar .nav-item");
   if (tabBtn) {
     e.preventDefault();
     const target = tabBtn.getAttribute("data-tab");
-    if (target) switchToTab(target);
+    if (target) switchToTab(target, "user");
     return;
   }
 });
@@ -202,7 +825,7 @@ function initNavigationTabs() {
   navItems.forEach(item => {
     item.addEventListener("click", () => {
       const targetTab = item.getAttribute("data-tab");
-      if (targetTab) switchToTab(targetTab);
+      if (targetTab) switchToTab(targetTab, "user");
     });
   });
 
@@ -210,7 +833,7 @@ function initNavigationTabs() {
   document.querySelectorAll("[data-switch-tab]").forEach(btn => {
     btn.addEventListener("click", () => {
       const targetTab = btn.getAttribute("data-switch-tab");
-      if (targetTab) switchToTab(targetTab);
+      if (targetTab) switchToTab(targetTab, "user");
     });
   });
 }
@@ -218,8 +841,32 @@ function initNavigationTabs() {
 /**
  * Programmatic Tab Switcher
  */
-function switchToTab(targetTab) {
+function switchToTab(targetTab, source) {
   if (!targetTab) return;
+  if (!document.getElementById(targetTab)) {
+    console.warn("[SetSail] switchToTab ignored unknown tab:", targetTab);
+    return;
+  }
+  source = source || "code";
+  const cur = window._setsailActiveTab
+    || (document.querySelector(".tab-pane.active") && document.querySelector(".tab-pane.active").id)
+    || "";
+  // Block ANY non-explicit bounce to Home once the user is on another page
+  if (targetTab === "tab-home" && source !== "user" && source !== "restore") {
+    if (cur && cur !== "tab-home") {
+      console.warn("[SetSail] blocked auto Home redirect from", source, "while on", cur);
+      return;
+    }
+    try {
+      const saved = sessionStorage.getItem("setsail_active_tab") || localStorage.getItem("setsail_active_tab") || "";
+      if (saved && saved !== "tab-home") {
+        console.warn("[SetSail] blocked auto Home redirect; restoring", saved);
+        targetTab = saved;
+        source = "restore";
+      }
+    } catch (e) {}
+  }
+  window._setsailActiveTab = targetTab;
   try {
     sessionStorage.setItem("setsail_active_tab", targetTab);
     localStorage.setItem("setsail_active_tab", targetTab);
@@ -1048,6 +1695,9 @@ function parseRtmRoute(arrayBuffer, fallbackName) {
  */
 function renderRouteOnMap(route, shouldFly = true) {
   if (!leafletMap) return;
+  if (window._setsailRenderingRoute) return;
+  window._setsailRenderingRoute = true;
+  try {
   if (!leafletRouteLayer) {
     leafletRouteLayer = L.layerGroup().addTo(leafletMap);
   }
@@ -1058,62 +1708,106 @@ function renderRouteOnMap(route, shouldFly = true) {
   }
   
   activeRouteData = route;
-  if (typeof setOverlayActive === "function") {
-    setOverlayActive("route", true, leafletMap);
-  } else if (typeof OVERLAY_STATES !== "undefined") {
+  // Avoid recursion: setOverlayActive('route') calls renderRouteOnMap again.
+  if (typeof OVERLAY_STATES !== "undefined") {
     OVERLAY_STATES.route = true;
   }
+  try {
+    const routeTab = document.querySelector('.excel-tab[data-overlay="route"]');
+    if (routeTab) {
+      routeTab.classList.add("active");
+      const chk = routeTab.querySelector(".excel-tab-check");
+      if (chk) chk.style.opacity = "1";
+    }
+  } catch (e) {}
   const catPillRoute = document.getElementById("catPillRoute");
   if (catPillRoute) catPillRoute.style.display = "inline-flex";
   try {
     localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(route));
   } catch (e) {}
 
-  // Continuous longitude unwrapping for Pacific / antimeridian crossing
-  const unrolledCoords = [];
-  let prevLon = null;
-  let lonOffset = 0;
-
+  // Build clean path with continuous longitude unrolling (Pacific / antimeridian safe)
+  const cleanWps = [];
   for (let i = 0; i < route.waypoints.length; i++) {
     const wp = route.waypoints[i];
-    let curLon = wp.lon;
-    if (prevLon !== null) {
-      let diff = curLon - (prevLon - lonOffset);
-      if (diff > 180) {
-        lonOffset -= 360;
-      } else if (diff < -180) {
-        lonOffset += 360;
-      }
-    }
-    const adjustedLon = curLon + lonOffset;
-    unrolledCoords.push([wp.lat, adjustedLon]);
-    prevLon = adjustedLon;
+    let lat = Number(wp.lat);
+    let lon = Number(wp.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 360) continue;
+    lon = ((lon + 180) % 360 + 360) % 360 - 180;
+    const prev = cleanWps.length ? cleanWps[cleanWps.length - 1] : null;
+    if (prev && Math.abs(prev.lat - lat) < 1e-7 && Math.abs(prev.lon - lon) < 1e-7) continue;
+    cleanWps.push({ lat, lon, name: wp.name, id: wp.id, _src: wp });
+  }
+  if (cleanWps.length === 0) {
+    return;
   }
 
-  // Draw Route Track Polyline
-  const trackGlow = L.polyline(unrolledCoords, {
-    color: "#0284c7",
-    weight: 7,
-    opacity: 0.35,
-    interactive: false
-  });
-  const trackLine = L.polyline(unrolledCoords, {
-    color: "#38bdf8",
-    weight: 3.5,
-    dashArray: "8, 6",
-    opacity: 0.95
-  });
-  
+  // Unroll longitudes so consecutive legs never jump ±360° across the dateline
+  const unrolledCoords = [];
+  let runLon = cleanWps[0].lon;
+  unrolledCoords.push([cleanWps[0].lat, runLon]);
+  for (let i = 1; i < cleanWps.length; i++) {
+    let lon = cleanWps[i].lon;
+    while (lon - runLon > 180) lon -= 360;
+    while (lon - runLon < -180) lon += 360;
+    runLon = lon;
+    unrolledCoords.push([cleanWps[i].lat, runLon]);
+  }
+  // Keep a copy for buffer corridor (same unrolled geometry)
+  window._setsailRouteUnrolled = unrolledCoords.slice();
+
   const rtSub = window.ROUTE_SUBFILTERS || { waypoints: true, line: true };
-  if (rtSub.line !== false) {
-    leafletRouteLayer.addLayer(trackGlow);
-    leafletRouteLayer.addLayer(trackLine);
+  let trackLine = null;
+  if (rtSub.line !== false && unrolledCoords.length >= 2) {
+    // High-visibility route: dark outline + bright cyan core + outer glow
+    const outline = L.polyline(unrolledCoords, {
+      color: "#0b1e33",
+      weight: 10,
+      opacity: 0.85,
+      interactive: false,
+      lineCap: "round",
+      lineJoin: "round"
+    });
+    const glow = L.polyline(unrolledCoords, {
+      color: "#00e5ff",
+      weight: 14,
+      opacity: 0.35,
+      interactive: false,
+      lineCap: "round",
+      lineJoin: "round"
+    });
+    const line = L.polyline(unrolledCoords, {
+      color: "#ff3b1f",
+      weight: 4.5,
+      opacity: 1,
+      interactive: true,
+      lineCap: "round",
+      lineJoin: "round"
+    });
+    const core = L.polyline(unrolledCoords, {
+      color: "#ffe566",
+      weight: 2,
+      opacity: 0.95,
+      interactive: false,
+      lineCap: "round",
+      lineJoin: "round"
+    });
+    leafletRouteLayer.addLayer(glow);
+    leafletRouteLayer.addLayer(outline);
+    leafletRouteLayer.addLayer(line);
+    leafletRouteLayer.addLayer(core);
+    trackLine = line;
+  }
+
+  if (typeof window.renderRouteBufferCorridorOnMap === "function") {
+    window.renderRouteBufferCorridorOnMap(); // v5.10 after unroll
   }
 
   // Add Waypoints
-  (rtSub.waypoints !== false ? route.waypoints : []).forEach((wp, idx) => {
+  (rtSub.waypoints !== false ? cleanWps : []).forEach((wp, idx) => {
     const isStart = idx === 0;
-    const isEnd = idx === route.waypoints.length - 1;
+    const isEnd = idx === cleanWps.length - 1;
     const wptCoords = unrolledCoords[idx];
     
     const color = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#38bdf8");
@@ -1237,6 +1931,9 @@ function renderRouteOnMap(route, shouldFly = true) {
   }
   if (typeof window.saveSetSailUserHistory === "function") {
     window.saveSetSailUserHistory();
+  }
+  } finally {
+    window._setsailRenderingRoute = false;
   }
 }
 
@@ -1775,57 +2472,54 @@ async function refreshMarineWeather(force = false) {
 window.refreshMarineWeather = refreshMarineWeather;
 
 function initHomeHudVessel() {
-  const homeHudCoords = document.getElementById("homeVesselHudCoords");
-  const homeHudPill = document.getElementById("homeVesselHudPill");
+  loadUserVesselFromStorage();
+  updateHomeVesselHudLabel();
+  fillVesselFormsFromState();
+  if (typeof scheduleOwnVesselAisRefresh === "function") scheduleOwnVesselAisRefresh();
 
-  if (homeHudPill) {
-    homeHudPill.addEventListener("click", () => {
-      switchToTab("tab-ntm");
-      if (userVessel && leafletMap) {
-        leafletMap.flyTo([userVessel.lat, userVessel.lon], Math.max(leafletMap.getZoom(), 9));
-      } else {
-        const myVesselBtn = document.getElementById("ntmMyVesselBtn");
-        if (myVesselBtn) myVesselBtn.click();
-      }
+  const pillBtn = document.getElementById("homeVesselHudBtn");
+  const pop = document.getElementById("homeVesselPopover");
+  const closeBtn = document.getElementById("homeVesselPopClose");
+
+  const closeHomePop = () => {
+    if (pop) pop.classList.remove("open");
+    if (pillBtn) pillBtn.setAttribute("aria-expanded", "false");
+  };
+  const openHomePop = () => {
+    // close chart vessel popover if open
+    const chartPop = document.getElementById("ntmVesselPopover");
+    const chartBtn = document.getElementById("ntmMyVesselBtn");
+    if (chartPop) chartPop.classList.remove("open");
+    if (chartBtn) chartBtn.classList.remove("active");
+    fillVesselFormsFromState();
+    if (pop) pop.classList.add("open");
+    if (pillBtn) pillBtn.setAttribute("aria-expanded", "true");
+    bindVesselNameAutocomplete("home");
+  };
+
+  if (pillBtn) {
+    pillBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (pop && pop.classList.contains("open")) closeHomePop();
+      else openHomePop();
     });
   }
+  if (closeBtn) closeBtn.addEventListener("click", closeHomePop);
 
-  if (userVessel) {
-    if (homeHudCoords) {
-      homeHudCoords.innerHTML = `${SetSailIcons.svg("pos")} <strong>${formatLatLonDMS(userVessel.lat, userVessel.lon)}</strong>`;
-    }
-    return;
-  }
+  const gpsBtn = document.getElementById("homeVesselGpsBtn");
+  if (gpsBtn) gpsBtn.addEventListener("click", () => requestGpsIntoForm("home"));
+  const applyBtn = document.getElementById("homeVesselApplyBtn");
+  if (applyBtn) applyBtn.addEventListener("click", () => saveVesselForm("home", closeHomePop));
+  const clearBtn = document.getElementById("homeVesselClearBtn");
+  if (clearBtn) clearBtn.addEventListener("click", () => clearVesselProfile(closeHomePop));
 
-  // First-visit automatic geolocation prompt
-  const geoPrompted = localStorage.getItem("setsail_geo_prompted");
-  if (!geoPrompted) {
-    localStorage.setItem("setsail_geo_prompted", "1");
-    if (navigator.geolocation) {
-      if (homeHudCoords) homeHudCoords.textContent = "ACQUIRING GPS...";
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          plotUserVessel(lat, lon, "gps");
-          if (homeHudCoords) {
-            homeHudCoords.innerHTML = `${SetSailIcons.svg("pos")} <strong>${formatLatLonDMS(lat, lon)}</strong>`;
-          }
-        },
-        (err) => {
-          console.log("[SetSail Geo] First-visit GPS acquisition declined:", err.message);
-          if (homeHudCoords) {
-            homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
-          }
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-      );
-    } else {
-      if (homeHudCoords) homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
-    }
-  } else {
-    if (homeHudCoords) homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
-  }
+  document.addEventListener("click", (e) => {
+    if (!pop || !pop.classList.contains("open")) return;
+    const wrap = document.getElementById("homeVesselHudPill");
+    if (wrap && !wrap.contains(e.target)) closeHomePop();
+  });
+
+  // No automatic geolocation prompt on first visit
 }
 
 function initVesselTracking() {
@@ -1930,23 +2624,22 @@ function initVesselTracking() {
   const applyBtn = document.getElementById("vesselApplyBtn");
   const clearBtn = document.getElementById("vesselClearBtn");
 
-  // Load persisted vessel state
-  try {
-    const raw = localStorage.getItem(VESSEL_STORAGE_KEY);
-    if (raw) {
-      userVessel = JSON.parse(raw);
-    }
-  } catch (e) {}
+  // Load persisted vessel profile (v2 + legacy)
+  loadUserVesselFromStorage();
+  fillVesselFormsFromState();
+  bindVesselNameAutocomplete("chart");
+  if (typeof scheduleOwnVesselAisRefresh === "function") scheduleOwnVesselAisRefresh();
 
   const togglePopover = () => {
     if (!vesselPop) return;
     const isOpen = vesselPop.classList.contains("open");
 
-    // Close filter and sort popovers
     const filterPop = document.getElementById("ntmFilterPopover");
     const sortPop = document.getElementById("ntmSortPopover");
     if (filterPop) filterPop.classList.remove("open");
     if (sortPop) sortPop.classList.remove("open");
+    const homePop = document.getElementById("homeVesselPopover");
+    if (homePop) homePop.classList.remove("open");
 
     if (isOpen) {
       vesselPop.classList.remove("open");
@@ -1954,15 +2647,8 @@ function initVesselTracking() {
     } else {
       vesselPop.classList.add("open");
       if (myVesselBtn) myVesselBtn.classList.add("active");
-      if (userVessel) {
-        const latEl = document.getElementById("vesselLat");
-        const lonEl = document.getElementById("vesselLon");
-        if (latEl) latEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
-        if (lonEl) lonEl.value = formatLatLonDMS(userVessel.lat, userVessel.lon);
-        if (clearBtn) clearBtn.style.display = "inline-block";
-      } else {
-        if (clearBtn) clearBtn.style.display = "none";
-      }
+      fillVesselFormsFromState();
+      bindVesselNameAutocomplete("chart");
     }
   };
 
@@ -1979,70 +2665,16 @@ function initVesselTracking() {
   }
   if (closeBtn) closeBtn.addEventListener("click", closePopover);
 
-  // Auto GPS
   if (fetchGpsBtn) {
-    fetchGpsBtn.addEventListener("click", () => {
-      if (!navigator.geolocation) {
-        alert("Geolocation is not supported by your browser. Please enter coordinates manually.");
-        return;
-      }
-      fetchGpsBtn.innerHTML = `Acquiring GPS... ${SetSailIcons.svg("vessel")}`;
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          fetchGpsBtn.innerHTML = `${SetSailIcons.svg("pos")} Auto GPS Position`;
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-
-          const latEl = document.getElementById("vesselLat");
-          const lonEl = document.getElementById("vesselLon");
-          if (latEl) latEl.value = lat.toFixed(5);
-          if (lonEl) lonEl.value = lon.toFixed(5);
-
-          plotUserVessel(lat, lon, "gps");
-          closePopover();
-        },
-        (err) => {
-          fetchGpsBtn.innerHTML = `${SetSailIcons.svg("pos")} Auto GPS Position`;
-          alert(`GPS Error: ${err.message}. Please enter coordinates manually below.`);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    });
+    fetchGpsBtn.addEventListener("click", () => requestGpsIntoForm("chart"));
   }
 
-  // Manual Coordinates
   if (applyBtn) {
-    applyBtn.addEventListener("click", () => {
-      const latVal = (document.getElementById("vesselLat") ? document.getElementById("vesselLat").value : "").trim() || "";
-      const lonVal = (document.getElementById("vesselLon") ? document.getElementById("vesselLon").value : "").trim() || "";
-
-      const parsedLat = parseCoordinateString(latVal);
-      const parsedLon = parseCoordinateString(lonVal);
-
-      if (parsedLat === null || parsedLon === null) {
-        alert("Please enter valid coordinates (e.g., 58° 37.70' N or 58.6283).");
-        return;
-      }
-
-      plotUserVessel(parsedLat, parsedLon, "manual");
-      closePopover();
-    });
+    applyBtn.addEventListener("click", () => saveVesselForm("chart", closePopover));
   }
 
-  // Clear Vessel Target
   if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      userVessel = null;
-      try { localStorage.removeItem(VESSEL_STORAGE_KEY); } catch (e) {}
-      if (leafletVesselLayer) leafletVesselLayer.clearLayers();
-      const hud = document.getElementById("ntmVesselHud");
-      if (hud) hud.style.display = "none";
-      const homeHudCoords = document.getElementById("homeVesselHudCoords");
-      if (homeHudCoords) {
-        homeHudCoords.innerHTML = "POS: <em>NOT SET</em>";
-      }
-      closePopover();
-    });
+    clearBtn.addEventListener("click", () => clearVesselProfile(closePopover));
   }
 }
 
@@ -2093,48 +2725,84 @@ function getEcdisCrosshairIcon() {
   });
 }
 
+/** ECDIS-style own-ship outline (bow up); rotate by true heading/COG degrees. */
+function getOwnShipSilhouetteIcon(headingDeg) {
+  const rot = ((Number(headingDeg) % 360) + 360) % 360;
+  const html = `
+    <div class="own-ship-wrap" style="transform:rotate(${rot}deg);transform-origin:center center;">
+      <svg class="own-ship-svg" width="32" height="52" viewBox="0 0 32 52" aria-hidden="true">
+        <path d="M16 1.5 L25 16 L23 44 L16 50.5 L9 44 L7 16 Z"
+          fill="rgba(0,229,255,0.28)" stroke="#00e5ff" stroke-width="2"/>
+        <path d="M16 9 L21 19 L16 17.5 L11 19 Z" fill="#f05a36"/>
+        <line x1="16" y1="17" x2="16" y2="40" stroke="#ffffff" stroke-width="1.4" opacity="0.7"/>
+        <circle cx="16" cy="26" r="2.4" fill="#ffffff" stroke="#00e5ff" stroke-width="1.2"/>
+      </svg>
+    </div>`;
+  return L.divIcon({
+    html,
+    className: "own-ship-marker",
+    iconSize: [32, 52],
+    iconAnchor: [16, 26]
+  });
+}
+
+function resolveOwnShipHeading(v) {
+  if (!v) return null;
+  const h = Number(v.heading);
+  if (Number.isFinite(h) && h >= 0 && h < 360) return h;
+  const c = Number(v.cog);
+  if (Number.isFinite(c) && c >= 0 && c < 360) return c;
+  return null;
+}
+
 /**
  * Plot user vessel crosshair on map
  */
-function plotUserVessel(lat, lon, source = "manual") {
-  userVessel = { lat, lon, source, updatedAt: new Date().toISOString() };
-
-  try {
-    localStorage.setItem(VESSEL_STORAGE_KEY, JSON.stringify(userVessel));
-  } catch (e) {}
+function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
+  const prev = userVessel || {};
+  userVessel = Object.assign({}, prev, {
+    lat,
+    lon,
+    source,
+    updatedAt: new Date().toISOString()
+  });
+  persistUserVessel();
 
   if (leafletMap && leafletVesselLayer) {
     leafletVesselLayer.clearLayers();
 
+    const hdg = resolveOwnShipHeading(userVessel);
     const marker = L.marker([lat, lon], {
-      icon: getEcdisCrosshairIcon(),
+      icon: hdg != null ? getOwnShipSilhouetteIcon(hdg) : getEcdisCrosshairIcon(),
       zIndexOffset: 1200
     });
 
+    const title = (userVessel.name && String(userVessel.name).trim()) || "Vessel Position";
     marker.bindPopup(`
       <div style="font-family:'Segoe UI',sans-serif;color:#111;min-width:180px;">
         <div style="font-weight:700;color:#0a3888;font-size:1rem;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:5px;">
-          Vessel Position
+          ${title.replace(/[<>]/g, "")}
         </div>
         <div style="font-size:0.8rem;color:#333;margin-bottom:3px;"><b>Coordinates:</b> ${formatLatLonDMS(lat, lon)}</div>
-        <div style="font-size:0.75rem;color:#666;"><b>Source:</b> ${source === "gps" ? "Browser GPS" : "Manual Navigation Entry"}</div>
+        ${userVessel.callSign ? `<div style="font-size:0.75rem;color:#333;"><b>Call Sign:</b> ${String(userVessel.callSign).replace(/[<>]/g, "")}</div>` : ""}
+        ${userVessel.mmsi ? `<div style="font-size:0.75rem;color:#333;"><b>MMSI:</b> ${String(userVessel.mmsi).replace(/[<>]/g, "")}</div>` : ""}
+        <div style="font-size:0.75rem;color:#666;"><b>Source:</b> ${source === "gps" ? "Browser GPS" : source === "ais" ? "AIS match" : "Manual Navigation Entry"}</div>
       </div>
     `);
 
     leafletVesselLayer.addLayer(marker);
-    leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
+    if (!skipFly) {
+      leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
+    }
   }
 
   const hud = document.getElementById("ntmVesselHud");
   if (hud) {
-    hud.style.display = "flex";
-    hud.innerHTML = `${SetSailIcons.svg("vessel")} <strong>Vessel:</strong> ${formatLatLonDMS(lat, lon)}`;
+    // Keep bottom-left for cursor coordinates only (ECDIS-style)
+    hud.style.display = "none";
   }
 
-  const homeHudCoords = document.getElementById("homeVesselHudCoords");
-  if (homeHudCoords) {
-    homeHudCoords.innerHTML = `${SetSailIcons.svg("pos")} <strong>${formatLatLonDMS(lat, lon)}</strong>`;
-  }
+  updateHomeVesselHudLabel();
 }
 
 /**
@@ -2785,6 +3453,9 @@ window.loadRemoteNoticesJson = loadRemoteNoticesJson;
 function setOverlayNoticesLoading(isLoading) {
   const tab = document.getElementById("tabOverlayNotices");
   if (!tab) return;
+  if (typeof window.setOverlayTileLoading === "function") {
+    window.setOverlayTileLoading("notices", isLoading);
+  }
   if (isLoading) {
     tab.classList.add("is-loading");
     tab.setAttribute("title", "Loading NtM & NAVTEX objects onto chart...");
@@ -2852,18 +3523,23 @@ function initNtMMap() {
       attributionControl: false,
       preferCanvas: true,
       zoomAnimation: true,
-      fadeAnimation: true,
+      fadeAnimation: false,
       markerZoomAnimation: true,
       zoomAnimationThreshold: 8,
       inertia: true,
-      inertiaDeceleration: 3000
+      inertiaDeceleration: 3000,
+      worldCopyJump: false,
+      maxBounds: [[-85, -180], [85, 180]],
+      maxBoundsViscosity: 1.0
     });
 
     const tilePerfOpts = {
-      keepBuffer: 6,
+      keepBuffer: 12,
       updateWhenIdle: false,
       updateWhenZooming: false,
-      updateInterval: 90
+      updateInterval: 50,
+      noWrap: true,
+      bounds: [[-85, -180], [85, 180]]
     };
 
     // 1. Primary Nautical Chart (Esri Ocean Base + CARTO + China AutoNavi / Gaode Multi-Stage Failover)
@@ -2946,8 +3622,31 @@ function initNtMMap() {
       }
     });
 
-    // Primary Default Nautical Chart
+    // Primary Default Nautical Chart — show Layers-button spinner until first basemap is fully loaded
     oceanLayer.addTo(leafletMap);
+    setTimeout(() => {
+      const sel = document.getElementById("ntmChartLayerSelector");
+      const trig = sel && sel.querySelector(".ntm-layer-trigger-btn");
+      const mark = (on) => {
+        if (!sel) return;
+        sel.classList.toggle("is-loading-base", !!on);
+        if (trig) {
+          trig.classList.toggle("is-loading", !!on);
+          trig.setAttribute("aria-busy", on ? "true" : "false");
+          trig.title = on ? "Loading chart layer…" : "Select Chart Layer";
+        }
+      };
+      mark(true);
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        oceanLayer.off("load", finish);
+        mark(false);
+      };
+      oceanLayer.on("load", finish);
+      setTimeout(finish, 12000);
+    }, 0);
 
     const seamarkLayer = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", Object.assign({}, tilePerfOpts, {
       maxZoom: 18,
@@ -3048,6 +3747,12 @@ function initNtMMap() {
         hud.textContent = formatLatLonDMS(e.latlng.lat, e.latlng.lng);
       }
     });
+    // ECDIS-style broken crosshair cursor over the chart
+    const mapEl = document.getElementById("ntmMap");
+    if (mapEl) {
+      mapEl.classList.add("ecdis-cursor-map");
+    }
+    leafletMap.getContainer().classList.add("ecdis-cursor-map");
 
     if (userVessel) {
       plotUserVessel(userVessel.lat, userVessel.lon, userVessel.source);
@@ -3545,18 +4250,7 @@ function renderNtMListAndMap() {
     if (!html) {
       const anyActiveOverlay = isNoticesActive || isDepthsActive || isWeatherActive || isRouteActive;
       if (!anyActiveOverlay) {
-        html = `
-          <div style="padding:1.35rem 0.9rem;text-align:center;color:var(--muted);font-size:0.78rem;display:flex;flex-direction:column;gap:8px;">
-            <div style="color:#e2e8f0;font-weight:700;font-size:0.82rem;">⚡ Fast Chart Mode Active</div>
-            <div style="font-size:0.72rem;line-height:1.45;">Heavy overlays are off by default for instant chart loading. Click any layer below or in the bottom dock to display objects:</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
-              <button type="button" onclick="window.setOverlayActive('notices', true)" style="padding:6px 8px;border-radius:6px;border:1px solid rgba(249,115,22,0.4);background:rgba(249,115,22,0.12);color:#fdba74;font-size:0.7rem;font-weight:700;cursor:pointer;">+ NtM &amp; NAVTEX (${activeNotices.length})</button>
-              <button type="button" onclick="window.setOverlayActive('depths', true)" style="padding:6px 8px;border-radius:6px;border:1px solid rgba(6,182,212,0.4);background:rgba(6,182,212,0.12);color:#67e8f9;font-size:0.7rem;font-weight:700;cursor:pointer;">+ Port Depths (${typeof PORT_DEPTHS_DB !== 'undefined' ? PORT_DEPTHS_DB.length : 75})</button>
-              <button type="button" onclick="window.setOverlayActive('weather', true)" style="padding:6px 8px;border-radius:6px;border:1px solid rgba(234,179,8,0.4);background:rgba(234,179,8,0.12);color:#fde047;font-size:0.7rem;font-weight:700;cursor:pointer;">+ Weather (${((MARINE_WEATHER_STORE && MARINE_WEATHER_STORE.storms) || []).length} Cyclones)</button>
-              <button type="button" onclick="window.setOverlayActive('route', true)" style="padding:6px 8px;border-radius:6px;border:1px solid rgba(56,189,248,0.4);background:rgba(56,189,248,0.12);color:#7dd3fc;font-size:0.7rem;font-weight:700;cursor:pointer;">+ My Route</button>
-            </div>
-          </div>
-        `;
+        html = "";
       } else {
         html = `
           <div style="padding:2rem 1rem;text-align:center;color:var(--muted);font-size:0.8rem;">
@@ -5480,8 +6174,11 @@ function executeDirectMapExport() {
       activeOverlays: {
         notices: isNoticesActive,
         depths: isDepthsActive,
-        route: isRouteActive
+        route: isRouteActive,
+        weather: false,
+        ais: false
       },
+      nonExportableOverlays: ["weather", "ais"],
       itemCounts: {
         notices: ntmCount,
         ports: portCount,
@@ -6639,12 +7336,12 @@ function initVisualChartLayerSelector(mapInstance, layers) {
     ctx.arc(cx, cy, R * 1.14, 0, Math.PI * 2);
     ctx.fill();
 
-    // Ocean sphere fill — realistic physical globe maritime azure blue
+    // Ocean sphere fill — match Esri World Ocean Base (teal-blue bathymetry look)
     const oceanGrad = ctx.createRadialGradient(cx - R * 0.28, cy - R * 0.32, R * 0.05, cx, cy, R);
-    oceanGrad.addColorStop(0, "#2563eb");   // Sunlit azure surface
-    oceanGrad.addColorStop(0.45, "#1d4ed8"); // Rich maritime blue
-    oceanGrad.addColorStop(0.82, "#173a80"); // Deep oceanic abyss
-    oceanGrad.addColorStop(1, "#0a1936");    // Limb darkening
+    oceanGrad.addColorStop(0, "#5eb3d1");
+    oceanGrad.addColorStop(0.35, "#2f86b0");
+    oceanGrad.addColorStop(0.7, "#1a5f8a");
+    oceanGrad.addColorStop(1, "#0c3558");
     ctx.fillStyle = oceanGrad;
     ctx.beginPath();
     ctx.arc(cx, cy, R, 0, Math.PI * 2);
@@ -6657,8 +7354,8 @@ function initVisualChartLayerSelector(mapInstance, layers) {
     ctx.clip();
 
     // Graticule grid (parallels & meridians every 15 deg)
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
-    ctx.lineWidth = 0.6;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+    ctx.lineWidth = 0.45;
     for (let lat = -75; lat <= 75; lat += 15) {
       ctx.beginPath();
       let started = false;
@@ -6706,54 +7403,21 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         const avgLat = sumLat / poly.length;
         const avgLon = sumLon / poly.length;
 
-        // Realistic Physical Biome Colors (Polar Ice, Desert Ochre, Lush Temperate / Tropical Green)
-        let landFill = "#2e7042"; // Natural lush temperate green
-        let landStroke = "#1b4d2e"; // Clean coastal stroke
-        let coastalShelf = "rgba(56, 189, 248, 0.32)";
+        // Flat Esri-Ocean land tint (single cartographic tan — no biome rainbow)
+        const isIce = (avgLat < -58 || avgLat > 72);
+        const landFill = isIce ? "#e8eef3" : "#d7c7a6";
+        const landStroke = isIce ? "#b7c4d1" : "#9a8664";
 
-        if (avgLat < -58 || avgLat > 62) {
-          // Polar ice cap & Arctic / Greenland glaciers (White / Glacial Cyan)
-          landFill = "#f8fafc";
-          landStroke = "#cbd5e1";
-          coastalShelf = "rgba(186, 230, 253, 0.45)";
-        } else if ((avgLat >= 12 && avgLat <= 32 && avgLon >= -18 && avgLon <= 62) || // Sahara & Arabian desert
-                   (avgLat <= -16 && avgLat >= -32 && avgLon >= 114 && avgLon <= 145) || // Australian Outback
-                   (avgLat >= 24 && avgLat <= 38 && avgLon >= 45 && avgLon <= 75) || // Middle East / Persian Gulf
-                   (avgLat >= 22 && avgLat <= 42 && avgLon >= 80 && avgLon <= 108)) { // Gobi / Taklamakan
-          // Warm arid desert ochre / golden sand
-          landFill = "#d49e5d";
-          landStroke = "#a36e32";
-          coastalShelf = "rgba(56, 189, 248, 0.28)";
-        } else if (avgLat >= 50 && avgLat <= 62) {
-          // Boreal Taiga / Subpolar Northern forests
-          landFill = "#3e6542";
-          landStroke = "#234226";
-          coastalShelf = "rgba(56, 189, 248, 0.25)";
-        } else if (avgLat >= -15 && avgLat <= 15) {
-          // Tropical Rainforest & Equator
-          landFill = "#226638";
-          landStroke = "#144222";
-          coastalShelf = "rgba(56, 189, 248, 0.35)";
-        }
-
-        // 1. Shallow Coastal Water / Coral Reef Shelf Glow
         ctx.beginPath();
         for (let i = 0; i < projPts.length; i++) {
           if (i === 0) ctx.moveTo(projPts[i].x, projPts[i].y);
           else ctx.lineTo(projPts[i].x, projPts[i].y);
         }
         ctx.closePath();
-        ctx.strokeStyle = coastalShelf;
-        ctx.lineWidth = 3.2;
-        ctx.stroke();
-
-        // 2. Physical Continent / Island Surface Fill
         ctx.fillStyle = landFill;
         ctx.fill();
-
-        // 3. Crisp Coastal Shoreline
         ctx.strokeStyle = landStroke;
-        ctx.lineWidth = 0.9;
+        ctx.lineWidth = 0.75;
         ctx.stroke();
       });
     }
@@ -6919,14 +7583,49 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       if (baseKey) {
         activeBaseKey = baseKey;
         selector.querySelectorAll("[data-base]").forEach(b => b.classList.toggle("active-base", b === btn));
+        const triggerBtn = selector.querySelector(".ntm-layer-trigger-btn");
+        const setBaseLoading = (on) => {
+          selector.classList.toggle("is-loading-base", !!on);
+          if (triggerBtn) {
+            triggerBtn.classList.toggle("is-loading", !!on);
+            triggerBtn.setAttribute("aria-busy", on ? "true" : "false");
+            triggerBtn.title = on ? "Loading chart layer…" : "Select Chart Layer";
+          }
+          btn.classList.toggle("is-loading", !!on);
+        };
+        // Track full tile settle: Leaflet fires "loading" when tiles start, "load" when ALL visible tiles done
+        const waitLayerFullyLoaded = (lyr, done) => {
+          let settled = false;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            lyr.off("loading", onLoading);
+            lyr.off("load", onLoad);
+            lyr.off("tileerror", onTileErr);
+            done();
+          };
+          const onLoading = () => setBaseLoading(true);
+          const onLoad = () => finish();
+          const onTileErr = () => { /* keep waiting for remaining tiles; load still fires */ };
+          lyr.on("loading", onLoading);
+          lyr.on("load", onLoad);
+          lyr.on("tileerror", onTileErr);
+          // Safety: never spin forever
+          setTimeout(finish, 12000);
+        };
 
         if (baseKey === "globe3d") {
+          setBaseLoading(true);
           const c = mapInstance.getCenter();
           globeState.rotLat = c.lat;
           globeState.rotLon = c.lng;
           globeState.active = true;
           globeWrap.classList.add("active");
-          renderGlobe3D();
+          requestAnimationFrame(() => {
+            renderGlobe3D();
+            // Globe is canvas — wait one paint + short settle
+            requestAnimationFrame(() => setTimeout(() => setBaseLoading(false), 180));
+          });
         } else {
           if (globeState.active) {
             globeState.active = false;
@@ -6939,7 +7638,18 @@ function initVisualChartLayerSelector(mapInstance, layers) {
             }
           });
           if (layers[baseKey]) {
-            layers[baseKey].addTo(mapInstance);
+            setBaseLoading(true);
+            const lyr = layers[baseKey];
+            waitLayerFullyLoaded(lyr, () => setBaseLoading(false));
+            lyr.addTo(mapInstance);
+            // If tiles already cached, "load" may have already fired — poll once
+            setTimeout(() => {
+              try {
+                if (lyr._loading === false || (lyr._tiles && Object.keys(lyr._tiles).length && !lyr._loading)) {
+                  setBaseLoading(false);
+                }
+              } catch (e) {}
+            }, 80);
           }
         }
         selector.classList.add("collapsed");
@@ -6957,7 +7667,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 }
 
 /* ==========================================================================
-   SETSAIL v4.9 — OFFICIAL GOOGLE ACCOUNT AUTHENTICATION & FULL USER HISTORY,
+   SETSAIL v5.10 — OFFICIAL GOOGLE ACCOUNT AUTHENTICATION & FULL USER HISTORY,
    DRAGGABLE ROUTE SNAPSHOT + CORRIDOR BUFFER FILTER, & SETNEWS + "FOR YOU" AI
    ========================================================================== */
 
@@ -7128,7 +7838,7 @@ function setSetSailAuthUser(userObj) {
 function syncSetSailAuthUI() {
   const user = getSetSailAuthUser();
   const hudBtn = document.getElementById("homeHudLeftLoginBtn");
-  const hudText = document.getElementById("homeHudAuthText");
+  const hudText = document.getElementById("homeHudLeftLoginText") || document.getElementById("homeHudAuthText");
   const hudAvatar = document.getElementById("homeHudAuthAvatar");
 
   if (hudBtn && hudText) {
@@ -7144,14 +7854,14 @@ function syncSetSailAuthUI() {
           hudAvatar.innerHTML = initChar;
         }
       }
-      hudBtn.title = `Signed in with Google as ${user.email || disp}`;
+      hudBtn.title = `Signed in as ${user.email || disp}`;
     } else {
       hudBtn.classList.remove("logged-in");
-      hudText.textContent = "LogIn";
+      hudText.textContent = "Sign-In";
       if (hudAvatar) {
         hudAvatar.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
       }
-      hudBtn.title = "Sign in with Google Account";
+      hudBtn.title = "Sign-In";
     }
   }
 
@@ -7352,96 +8062,191 @@ function initSetSailAuth() {
   syncSetSailAuthUI();
 }
 
-function openOfficialGoogleLoginModal() {
+function showGoogleAuthBusy(on, msg) {
   let modal = document.getElementById("setsailGoogleAuthModal");
+  if (!on) {
+    if (modal) modal.classList.remove("active");
+    return;
+  }
   if (!modal) {
     modal = document.createElement("div");
     modal.id = "setsailGoogleAuthModal";
     modal.className = "setsail-google-auth-overlay";
     modal.innerHTML = `
-      <div class="setsail-google-auth-card">
+      <div class="setsail-google-auth-card" style="max-width:360px;text-align:center;padding:28px 22px;">
         <button type="button" class="google-auth-close-btn" onclick="window.closeOfficialGoogleLoginModal()" aria-label="Close">&times;</button>
-        <div class="google-auth-header">
+        <div class="google-auth-header" style="margin-bottom:8px;">
           <svg viewBox="0 0 24 24" class="google-auth-logo" width="38" height="38">
             <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
             <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.1 7.4 24 12 24z"/>
             <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
             <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
           </svg>
-          <h2 class="google-auth-title">Sign in with Google</h2>
-          <p class="google-auth-sub">Choose an account to continue to <b>SetSail Marine Suite</b></p>
+          <h2 class="google-auth-title">Google Sign-In</h2>
+          <p class="google-auth-sub" id="googleAuthBusyMsg">Opening official Google account picker…</p>
         </div>
-        
-        <form class="google-auth-form" onsubmit="window.submitOfficialGoogleLogin(event)">
-          <div class="google-auth-field-wrap">
-            <input type="email" id="googleAuthEmailInput" class="google-auth-input" placeholder=" " autocomplete="off" required />
-            <label for="googleAuthEmailInput" class="google-auth-label">Email or phone</label>
-          </div>
-          <div class="google-auth-help-row">
-            <a href="#" class="google-auth-link" onclick="event.preventDefault();if(typeof showSetSailToast==='function')showSetSailToast('Enter your Gmail or corporate Workspace email to sign in.','info');">Forgot email?</a>
-          </div>
-          <div class="google-auth-disclaimer">
-            Before using SetSail, you can review SetSail’s privacy policy and terms of service. Google securely verifies your session.
-          </div>
-          <div class="google-auth-btn-row">
-            <button type="button" class="google-auth-btn-link" onclick="window.closeOfficialGoogleLoginModal()">Cancel</button>
-            <button type="submit" class="google-auth-btn-next">Next</button>
-          </div>
-        </form>
-        <div class="google-auth-footer-bar">
-          <span>English (United States)</span>
-          <div class="google-auth-footer-links">
-            <a href="https://support.google.com/accounts" target="_blank" rel="noopener">Help</a>
-            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy</a>
-            <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Terms</a>
-          </div>
-        </div>
+        <div id="googleGsiButtonContainer" style="display:flex;justify-content:center;min-height:44px;margin-top:10px;"></div>
+        <p style="font-size:0.72rem;color:#94a3b8;margin-top:14px;line-height:1.4;">Only real Google accounts can sign in. Fake/manual emails are disabled.</p>
       </div>
     `;
     document.body.appendChild(modal);
-
     modal.addEventListener("click", (e) => {
       if (e.target === modal) closeOfficialGoogleLoginModal();
     });
   }
-
-  const emailInput = document.getElementById("googleAuthEmailInput");
-  if (emailInput) {
-    emailInput.value = "";
-    setTimeout(() => emailInput.focus(), 80);
-  }
+  const msgEl = document.getElementById("googleAuthBusyMsg");
+  if (msgEl && msg) msgEl.textContent = msg;
   modal.classList.add("active");
+}
+
+async function fetchGoogleUserInfo(accessToken) {
+  const resp = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+    headers: { Authorization: "Bearer " + accessToken }
+  });
+  if (!resp.ok) throw new Error("userinfo " + resp.status);
+  return resp.json();
+}
+
+function openOfficialGoogleLoginModal() {
+  const clientId = normalizeGoogleClientId(localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID);
+  if (!clientId) {
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Google Client ID is not configured.", "error");
+    }
+    return;
+  }
+  showGoogleAuthBusy(true, "Looking for Google accounts already on this browser…");
+  loadGoogleIdentityScriptAsync().then((loaded) => {
+    if (!loaded || !window.google || !window.google.accounts) {
+      showGoogleAuthBusy(true, "Google Sign-In script blocked. Check network / allowed origins.");
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Could not load Google Identity Services.", "error");
+      }
+      return;
+    }
+    try {
+      // Official GIS: FedCM + One Tap / account chooser for sessions already in this browser
+      if (window.google.accounts.id) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: (resp) => {
+            handleGoogleCredentialResponse(resp);
+            closeOfficialGoogleLoginModal();
+          },
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          ux_mode: "popup",
+          context: "signin",
+          use_fedcm_for_prompt: true,
+          itp_support: true
+        });
+        const container = document.getElementById("googleGsiButtonContainer");
+        if (container) {
+          container.innerHTML = "";
+          window.google.accounts.id.renderButton(container, {
+            theme: "filled_blue",
+            size: "large",
+            type: "standard",
+            shape: "pill",
+            text: "signin_with",
+            logo_alignment: "left",
+            width: 280
+          });
+        }
+        try {
+          window.google.accounts.id.prompt((notification) => {
+            if (!notification) return;
+            const skipped = notification.isNotDisplayed && notification.isNotDisplayed();
+            const dismissed = notification.isSkippedMoment && notification.isSkippedMoment();
+            if (skipped || dismissed) {
+              const msgEl = document.getElementById("googleAuthBusyMsg");
+              if (msgEl) {
+                msgEl.textContent = "Pick a Google account already signed into this browser, or use another account.";
+              }
+            }
+          });
+        } catch (promptErr) {
+          console.warn("[SetSail Google OAuth] FedCM/One Tap prompt", promptErr);
+        }
+      }
+      // Official OAuth token popup with account chooser (lists browser Google sessions)
+      if (window.google.accounts.oauth2 && typeof window.google.accounts.oauth2.initTokenClient === "function") {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: "openid email profile",
+          prompt: "select_account",
+          callback: (tokenResponse) => {
+            if (!tokenResponse || !tokenResponse.access_token) {
+              if (tokenResponse && tokenResponse.error) {
+                if (typeof showSetSailToast === "function") {
+                  showSetSailToast("Google sign-in cancelled or failed.", "info");
+                }
+              }
+              return;
+            }
+            fetchGoogleUserInfo(tokenResponse.access_token).then((profile) => {
+              if (!profile || !profile.email) throw new Error("no email");
+              setSetSailAuthUser({
+                name: profile.name || profile.given_name || profile.email.split("@")[0],
+                email: profile.email,
+                picture: profile.picture || "",
+                sub: profile.sub || "",
+                provider: "google",
+                signedInAt: new Date().toISOString()
+              });
+              closeOfficialGoogleLoginModal();
+              if (typeof showSetSailToast === "function") {
+                showSetSailToast("Signed in with Google as " + profile.email, "success");
+              }
+            }).catch((err) => {
+              console.warn("[SetSail Google OAuth] userinfo failed", err);
+              if (typeof showSetSailToast === "function") {
+                showSetSailToast("Google verified the popup, but profile fetch failed.", "error");
+              }
+            });
+          },
+          error_callback: (err) => {
+            console.warn("[SetSail Google OAuth]", err);
+            if (typeof showSetSailToast === "function") {
+              showSetSailToast("Google sign-in was closed or blocked by the browser.", "info");
+            }
+          }
+        });
+        // Slight delay so FedCM/One Tap can surface first when available
+        setTimeout(() => {
+          try {
+            tokenClient.requestAccessToken({ prompt: "select_account" });
+          } catch (eReq) {
+            console.warn("[SetSail Google OAuth] requestAccessToken", eReq);
+          }
+        }, 350);
+        const msgEl = document.getElementById("googleAuthBusyMsg");
+        if (msgEl) {
+          msgEl.textContent = "Choose a Google account already on this browser (Chrome/Edge profile). Email field appears only for a new account.";
+        }
+      } else {
+        const msgEl = document.getElementById("googleAuthBusyMsg");
+        if (msgEl) msgEl.textContent = "Use the official Google button below to continue.";
+      }
+    } catch (e) {
+      console.warn("[SetSail Google OAuth] init error", e);
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Google Sign-In failed to start. Verify Client ID origins.", "error");
+      }
+    }
+  });
 }
 window.openOfficialGoogleLoginModal = openOfficialGoogleLoginModal;
 
 function closeOfficialGoogleLoginModal() {
-  const modal = document.getElementById("setsailGoogleAuthModal");
-  if (modal) modal.classList.remove("active");
+  showGoogleAuthBusy(false);
 }
 window.closeOfficialGoogleLoginModal = closeOfficialGoogleLoginModal;
 
+// Fake email/password clone login removed — only official Google GIS / OAuth popup is allowed.
 function submitOfficialGoogleLogin(e) {
   if (e && e.preventDefault) e.preventDefault();
-  const emailInput = document.getElementById("googleAuthEmailInput");
-  if (!emailInput || !emailInput.value.trim()) return;
-
-  const rawEmail = emailInput.value.trim().toLowerCase();
-  const cleanEmail = rawEmail.includes("@") ? rawEmail : `${rawEmail}@gmail.com`;
-  const rawName = cleanEmail.split("@")[0].replace(/[._-]+/g, " ");
-  const dispName = rawName.replace(/\\b\\w/g, c => c.toUpperCase());
-
-  setSetSailAuthUser({
-    name: dispName,
-    email: cleanEmail,
-    provider: "google",
-    signedInAt: new Date().toISOString()
-  });
-
-  closeOfficialGoogleLoginModal();
-
-  if (typeof showSetSailToast === "function") {
-    showSetSailToast(`Signed in with Google as ${cleanEmail}`, "success");
-  }
+  openOfficialGoogleLoginModal();
 }
 window.submitOfficialGoogleLogin = submitOfficialGoogleLogin;
 
@@ -7536,35 +8341,58 @@ function renderRouteBufferCorridorOnMap() {
   if (!hasRoute || !isRouteVisible) return;
 
   const bufNm = Number(window.ROUTE_CORRIDOR_BUFFER_NM) || 25;
-  const wpts = activeRouteData.waypoints;
+  // Prefer the same unrolled geometry used for the track line (Pacific / dateline safe)
+  let pts = Array.isArray(window._setsailRouteUnrolled) && window._setsailRouteUnrolled.length >= 2
+    ? window._setsailRouteUnrolled
+    : null;
+  if (!pts) {
+    const raw = activeRouteData.waypoints;
+    pts = [];
+    let runLon = null;
+    for (let i = 0; i < raw.length; i++) {
+      let lat = Number(raw[i].lat);
+      let lon = Number(raw[i].lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+      lon = ((lon + 180) % 360 + 360) % 360 - 180;
+      if (runLon === null) runLon = lon;
+      else {
+        while (lon - runLon > 180) lon -= 360;
+        while (lon - runLon < -180) lon += 360;
+        runLon = lon;
+      }
+      pts.push([lat, lon]);
+    }
+  }
   const isFilterOn = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
 
-  if (wpts.length >= 2) {
+  if (pts.length >= 2) {
     const leftSide = [];
     const rightSide = [];
-    for (let i = 0; i < wpts.length; i++) {
-      const cur = wpts[i];
-      const prev = i > 0 ? wpts[i - 1] : cur;
-      const next = i < wpts.length - 1 ? wpts[i + 1] : cur;
-      const latRad = cur.lat * Math.PI / 180;
+    for (let i = 0; i < pts.length; i++) {
+      const curLat = pts[i][0];
+      const curLon = pts[i][1];
+      const prev = i > 0 ? pts[i - 1] : pts[i];
+      const next = i < pts.length - 1 ? pts[i + 1] : pts[i];
+      const latRad = curLat * Math.PI / 180;
       const cosLat = Math.max(0.2, Math.cos(latRad));
-      let dx = (next.lon - prev.lon) * cosLat;
-      let dy = next.lat - prev.lat;
+      let dx = (next[1] - prev[1]) * cosLat;
+      let dy = next[0] - prev[0];
       const len = Math.hypot(dx, dy) || 1;
       dx /= len;
       dy /= len;
-      const degLatOffset = (-dy) * (bufNm / 60);
-      const degLonOffset = (dx * (bufNm / 60)) / cosLat;
-      leftSide.push([cur.lat + degLatOffset, cur.lon + degLonOffset]);
-      rightSide.unshift([cur.lat - degLatOffset, cur.lon - degLonOffset]);
+      // Perpendicular offset in NM → degrees (unrolled lon space)
+      const degLatOffset = (-dx) * (bufNm / 60);
+      const degLonOffset = (dy * (bufNm / 60)) / cosLat;
+      leftSide.push([curLat + degLatOffset, curLon + degLonOffset]);
+      rightSide.unshift([curLat - degLatOffset, curLon - degLonOffset]);
     }
     const polyCoords = leftSide.concat(rightSide);
     const corridorPoly = L.polygon(polyCoords, {
-      color: isFilterOn ? "#00e5ff" : "#38bdf8",
-      weight: isFilterOn ? 1.8 : 1.1,
-      dashArray: "5, 5",
-      fillColor: isFilterOn ? "#0ea5e9" : "#38bdf8",
-      fillOpacity: isFilterOn ? 0.11 : 0.05,
+      color: isFilterOn ? "#00e5ff" : "#f59e0b",
+      weight: isFilterOn ? 2.2 : 1.6,
+      dashArray: "6, 4",
+      fillColor: isFilterOn ? "#0ea5e9" : "#f59e0b",
+      fillOpacity: isFilterOn ? 0.14 : 0.10,
       interactive: false
     });
     leafletRouteBufferLayer.addLayer(corridorPoly);
@@ -7811,7 +8639,7 @@ function recordSetNewsInteraction(article, actionType = "read", dwellSec = 8) {
 
 function scoreArticleForUser(article, prof) {
   let score = 20;
-  let primaryReason = "🔥 Priority Maritime Briefing";
+  let primaryReason = "🌍 What's happening on land & at sea";
 
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
     const rText = `${activeRouteData.name || ""} ${(activeRouteData.chokepoints || []).join(" ")} ${activeRouteData.waypoints.map(w => w.name || "").join(" ")}`.toLowerCase();
@@ -7971,7 +8799,7 @@ function renderHomeNewsSlide() {
     return `
       <article class="home-news-card" data-open-news-id="${a.id}">
         <div class="home-news-card-img" style="background-image:url('${thumbUrl}');height:190px;background-size:cover;background-position:center;position:relative;">
-          <span class="home-news-card-cat">${a.category || "Maritime Briefing"}</span>
+          <span class="home-news-card-cat">${a.category || "Land & Sea"}</span>
           <span class="home-news-card-region">📍 ${a.region || "Global"}</span>
         </div>
         <div class="home-news-card-body" style="padding:14px 16px;display:flex;flex-direction:column;gap:6px;">
@@ -9479,44 +10307,15 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
 
   const msgEl = appendChatMessage("brain", `
     <div>
-      <strong>Appraising &amp; Synthesizing Route: ${baseRoute.name}</strong><br>
-      <span style="font-size:0.78rem;color:#94a3b8;">
-        Draft <b>${draft}m</b> • Speed <b>${speed} kn</b> • Base XTD <b>±${xtd} NM</b> • Evaluating <b>${legs.length} legs</b> for RL/GC geometry, TSS clearance, UKC, and active NtM/NAVTEX &amp; cyclone hazards...
-      </span>
-      <div class="sr-leg-stream" id="srLiveLegStream_${Date.now()}"></div>
-      <div class="sr-ai-synthesis-footer" style="margin-top:8px;font-size:0.78rem;color:#94a3b8;">Calculating leg parameters...</div>
+      <strong>Route ready: ${baseRoute.name}</strong>
+      <div class="sr-ai-synthesis-footer" style="margin-top:6px;font-size:0.78rem;color:#94a3b8;">
+        Draft <b>${draft}m</b> • Speed <b>${speed} kn</b> • XTD <b>±${xtd} NM</b> • Full leg analysis is in Route Details.
+      </div>
     </div>
   `);
 
-  const streamEl = msgEl ? msgEl.querySelector(".sr-leg-stream") : null;
   const footerEl = msgEl ? msgEl.querySelector(".sr-ai-synthesis-footer") : null;
   const scrollWrap = document.getElementById("setRouteChatScroll");
-
-  for (let i = 0; i < legs.length; i++) {
-    const leg = legs[i];
-    await new Promise(r => setTimeout(r, 120));
-    if (streamEl) {
-      const card = document.createElement("div");
-      card.className = "sr-leg-step-card";
-      const hasHaz = (leg.ntmHits && leg.ntmHits.length > 0) || (leg.weatherHits && leg.weatherHits.length > 0);
-      card.innerHTML = `
-        <div class="sr-leg-step-head">
-          <span>Leg ${leg.legNo}/${legs.length}: ${leg.fromName} &rarr; ${leg.toName}</span>
-          <div class="sr-leg-step-badges">
-            <span class="sr-leg-pill ${leg.sailType === 'GC' ? 'gc' : ''}">${leg.sailType}</span>
-            <span class="sr-leg-pill">${leg.courseFormatted}</span>
-            <span class="sr-leg-pill">${leg.distanceNM} NM</span>
-            <span class="sr-leg-pill ${hasHaz ? 'warn' : 'ok'}">${hasHaz ? '⚠️ Monitored' : '✓ Clear'}</span>
-          </div>
-        </div>
-        <div style="color:#94a3b8;font-size:0.70rem;">
-          ${leg.navZone} • Spd ${leg.speedKnots}kn (${leg.eteHours}h) • XTD ±${leg.xtdNM}NM • ${leg.ukcNote}
-        </div>
-      `;
-      streamEl.appendChild(card);
-      if (scrollWrap) scrollWrap.scrollTop = scrollWrap.scrollHeight;
-    }
-  }
 
   activeRouteData = baseRoute;
   try {
@@ -9582,11 +10381,9 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
 
   if (footerEl) {
     footerEl.innerHTML = `
-      <div style="padding:10px 12px;border-radius:10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#e2e8f0;margin-top:6px;">
-        <strong style="color:#34d399;">✓ Passage plan "${baseRoute.name}" ready &amp; saved to SetRoute sidebar</strong><br>
-        Total: <b>${legs.length} legs (${baseRoute.waypoints.length} WPTs)</b> • Distance: <b>${baseRoute.totalDistanceNM} NM</b> • ETE: <b>${baseRoute.steamingDays} days (${baseRoute.totalSteamingHours}h)</b>.<br>
-        <span style="font-size:0.74rem;color:#94a3b8;">You can refine draft, speed, XTD, GC/RL mode, or intermediate ports anytime in chat.</span>
-        ${cohereNote ? `<span style="color:#bae6fd;display:block;margin-top:5px;"><b>Master Mariner Note:</b> ${cohereNote}</span>` : ""}
+      <div style="padding:8px 10px;border-radius:10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#e2e8f0;margin-top:6px;">
+        <strong style="color:#34d399;">✓ ${baseRoute.totalDistanceNM} NM • ${baseRoute.steamingDays} days</strong>
+        ${cohereNote ? `<span style="color:#bae6fd;display:block;margin-top:4px;font-size:0.74rem;">${cohereNote}</span>` : ""}
       </div>
       <div class="sr-quick-chips" style="margin-top:8px;">
         ${refineChips.map(c => `<button type="button" class="sr-quick-chip" data-sr-prompt="${c.prompt.replace(/"/g, '&quot;')}">${c.label}</button>`).join("")}
@@ -10172,15 +10969,15 @@ const SET_SAIL_LANGUAGES = {
       hero_sub: "ECDIS Overlay, Automated NtM Plotting, Gyroscope Deviation, Route Optimization & Global Maritime Intelligence",
       home_chart_title: "Real-Time Nautical Chart Overlay",
       home_chart_sub: "Interactive vector & raster marine charts with live NtM, NAVTEX, and Port depths",
-      home_news_title: "Latest Maritime Briefings",
-      home_news_sub: "Real-time hydrographic, port, canal, and metocean dispatches curated for bridge watchkeepers",
+      home_news_title: "See what's happening in the world",
+      home_news_sub: "From ports and canals to coasts and open ocean — live stories shaping land and sea right now",
       btn_open_chart: "Open SetChart Map",
       btn_plan_route: "Plan Passage in SetRoute",
-      btn_open_news: "Open SetNews Wire",
-      btn_read_story: "Read Full Story →",
+      btn_open_news: "See all world stories →",
+      btn_read_story: "Read what's happening →",
       settings_account_heading: "SetSail Account & Cloud Bridge Sync",
       settings_account_sub: "Sign in with your Google Account to automatically save and sync your passage plans, chart edits, vessel position & preferences",
-      btn_google_signin: "Sign in with Google",
+      btn_google_signin: "Sign-In",
       btn_sign_out: "Sign Out",
       guest_mode: "GUEST MODE",
       lang_settings_title: "Regional Language & Bridge Localization",
@@ -10216,7 +11013,7 @@ const SET_SAIL_LANGUAGES = {
       btn_read_story: "Читать полностью →",
       settings_account_heading: "Аккаунт SetSail и синхронизация мостика",
       settings_account_sub: "Войдите через Google для автоматического сохранения и синхронизации маршрутов, правок карты и настроек судна",
-      btn_google_signin: "Войти через Google",
+      btn_google_signin: "Вход",
       btn_sign_out: "Выйти из системы",
       guest_mode: "ГОСТЕВОЙ РЕЖИМ",
       lang_settings_title: "Язык интерфейса и локализация мостика",
@@ -10252,7 +11049,7 @@ const SET_SAIL_LANGUAGES = {
       btn_read_story: "記事を読む →",
       settings_account_heading: "SetSailアカウントとクラウド同期",
       settings_account_sub: "Googleアカウントでログインすると、航路計画、海図編集、本船位置、設定が自動同期されます",
-      btn_google_signin: "Googleでログイン",
+      btn_google_signin: "サインイン",
       btn_sign_out: "ログアウト",
       guest_mode: "ゲストモード",
       lang_settings_title: "地域言語とブリッジローカリゼーション",
@@ -10288,7 +11085,7 @@ const SET_SAIL_LANGUAGES = {
       btn_read_story: "阅读全文 →",
       settings_account_heading: "SetSail 账户与驾驶台云端同步",
       settings_account_sub: "使用 Google 账户登录，自动保存并同步航程计划、海图标注、船舶船位与偏好设置",
-      btn_google_signin: "使用 Google 登录",
+      btn_google_signin: "登录",
       btn_sign_out: "退出登录",
       guest_mode: "访客模式",
       lang_settings_title: "语言与驾驶台区域设置",
@@ -10324,7 +11121,7 @@ const SET_SAIL_LANGUAGES = {
       btn_read_story: "Leer historia completa →",
       settings_account_heading: "Cuenta SetSail y Sincronización en la Nube",
       settings_account_sub: "Inicie sesión con Google para guardar y sincronizar automáticamente sus planes y marcas de carta",
-      btn_google_signin: "Iniciar sesión con Google",
+      btn_google_signin: "Acceder",
       btn_sign_out: "Cerrar sesión",
       guest_mode: "MODO INVITADO",
       lang_settings_title: "Idioma y Localización del Puente",
@@ -10360,7 +11157,7 @@ const SET_SAIL_LANGUAGES = {
       btn_read_story: "Bericht lesen →",
       settings_account_heading: "SetSail-Konto & Cloud-Synchronisierung",
       settings_account_sub: "Melden Sie sich mit Google an, um Routenpläne, Kartenkorrekturen und Schiffspositionen zu synchronisieren",
-      btn_google_signin: "Mit Google anmelden",
+      btn_google_signin: "Anmelden",
       btn_sign_out: "Abmelden",
       guest_mode: "GASTMODUS",
       lang_settings_title: "Sprache und Brücken-Lokalisierung",
@@ -10396,7 +11193,7 @@ const SET_SAIL_LANGUAGES = {
       btn_read_story: "Lire l'article complet →",
       settings_account_heading: "Compte SetSail et Synchronisation Passerelle",
       settings_account_sub: "Connectez-vous avec Google pour synchroniser vos plans de traversée et modifications de carte",
-      btn_google_signin: "Se connecter avec Google",
+      btn_google_signin: "Connexion",
       btn_sign_out: "Déconnexion",
       guest_mode: "MODE INVITÉ",
       lang_settings_title: "Langue et Localisation de la Passerelle",
@@ -10432,7 +11229,7 @@ const SET_SAIL_LANGUAGES = {
       btn_read_story: "Basahin nang Buo →",
       settings_account_heading: "SetSail Account at Cloud Bridge Sync",
       settings_account_sub: "Mag-sign in gamit ang Google Account upang awtomatikong i-save at i-sync ang mga ruta at posisyon",
-      btn_google_signin: "Mag-sign in gamit ang Google",
+      btn_google_signin: "Sign-In",
       btn_sign_out: "Mag-sign out",
       guest_mode: "MODO BISITA",
       lang_settings_title: "Wika at Localization ng Bridge",
@@ -10443,7 +11240,44 @@ const SET_SAIL_LANGUAGES = {
       btn_view_broadcast: "👁 Tingnan ang Broadcast",
       btn_inspect_edit: "✎ Suriin / I-edit"
     }
+  },
+  hi: {
+    code: "hi",
+    flag: "in",
+    name: "हिन्दी",
+    label: "HI • हिन्दी",
+    translations: {
+      nav_home: "होम",
+      nav_chart: "SetChart मानचित्र",
+      nav_route: "SetRoute मार्ग",
+      nav_news: "SetNews समाचार",
+      nav_gyro: "उपकरण",
+      nav_settings: "सेटिंग्स",
+      hero_title: "YOUR AI-POWERED BRIDGE",
+      hero_sub: "ECDIS ओवरले, स्वचालित NtM प्लॉटिंग, जायरो विचलन, मार्ग अनुकूलन और समुद्री खुफिया",
+      home_chart_title: "रीयल-टाइम नौवहन चार्ट ओवरले",
+      home_chart_sub: "लाइव NtM, NAVTEX और पोर्ट गहराई के साथ इंटरैक्टिव समुद्री चार्ट",
+      home_news_title: "दुनिया में क्या हो रहा है देखें",
+      home_news_sub: "ब्रिज वॉचकीपर के लिए रीयल-टाइम हाइड्रोग्राफिक, पोर्ट और मौसम डिस्पैच",
+      btn_open_chart: "SetChart मानचित्र खोलें",
+      btn_plan_route: "SetRoute में मार्ग योजना",
+      btn_open_news: "SetNews खोलें",
+      btn_read_story: "पूरी खबर पढ़ें →",
+      settings_account_heading: "SetSail खाता और क्लाउड सिंक",
+      settings_account_sub: "मार्ग योजना, चार्ट संपादन और प्राथमिकताओं को सिंक करने के लिए Google से साइन इन करें",
+      btn_google_signin: "साइन-इन",
+      btn_sign_out: "साइन आउट",
+      guest_mode: "अतिथि मोड",
+      lang_settings_title: "क्षेत्रीय भाषा और ब्रिज लोकलाइज़ेशन",
+      lang_settings_sub: "अपनी पसंदीदा ब्रिज भाषा चुनें। सभी टैब, मानचित्र परतें और ब्रिफिंग तुरंत अनुकूलित होंगी।",
+      toast_lang_changed: "भाषा हिन्दी में बदली गई",
+      filter_active: "सक्रिय चेतावनियाँ",
+      filter_navtex: "NAVTEX अलर्ट",
+      btn_view_broadcast: "👁 प्रसारण देखें",
+      btn_inspect_edit: "✎ जाँच / संपादन"
+    }
   }
+
 };
 window.SET_SAIL_LANGUAGES = SET_SAIL_LANGUAGES;
 

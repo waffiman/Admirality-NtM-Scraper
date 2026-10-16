@@ -276,7 +276,196 @@ function applyVesselProfile(data, opts) {
   if (opts.toast && typeof showSetSailToast === "function") {
     showSetSailToast(opts.toast, "success");
   }
+  if (!opts.skipAisSchedule && userVessel && userVessel.mmsi) {
+    scheduleOwnVesselAisRefresh();
+  }
 }
+
+/** Hourly live refresh of the AIS target linked as My Vessel (MMSI). */
+const OWN_AIS_REFRESH_MS = 60 * 60 * 1000;
+let _ownAisRefreshTimer = null;
+
+async function fetchOwnVesselAisUpdate() {
+  const v = userVessel;
+  if (!v || !v.mmsi) return null;
+  const mmsi = String(v.mmsi).trim();
+  if (!/^\d{5,9}$/.test(mmsi)) return null;
+
+  const boxes = [];
+  const lat0 = Number(v.lat);
+  const lon0 = Number(v.lon);
+  if (Number.isFinite(lat0) && Number.isFinite(lon0)) {
+    boxes.push([lat0 - 1.2, lon0 - 1.2, lat0 + 1.2, lon0 + 1.2]);
+    boxes.push([lat0 - 3.5, lon0 - 3.5, lat0 + 3.5, lon0 + 3.5]);
+  }
+
+  async function fromOpenWaters() {
+    for (let i = 0; i < boxes.length; i++) {
+      const box = boxes[i];
+      const url =
+        "https://ais.openwaters.io/v1/vessels?bbox=" +
+        box.map((n) => Number(n).toFixed(4)).join(",");
+      try {
+        const geo = await fetch(url, {
+          headers: {
+            Accept: "application/geo+json, application/json",
+            "User-Agent": "SetSailMarineSuite/AIS"
+          },
+          cache: "no-store"
+        }).then((r) => (r.ok ? r.json() : null));
+        if (!geo) continue;
+        const feats = geo.features || [];
+        for (let j = 0; j < feats.length; j++) {
+          const f = feats[j];
+          const p = f.properties || {};
+          if (String(p.mmsi) !== mmsi) continue;
+          const c = (f.geometry && f.geometry.coordinates) || [];
+          return {
+            mmsi,
+            lat: c[1],
+            lon: c[0],
+            sog: p.sog,
+            cog: p.cog,
+            heading: p.heading,
+            name: p.name || v.name || "",
+            destination: p.destination || v.destination || "",
+            shipType: p.type || p.shipType || v.shipType || "",
+            callSign: p.callSign || v.callSign || "",
+            navStat: p.nav_status != null ? p.nav_status : p.navStat,
+            source: "ais"
+          };
+        }
+      } catch (e) {
+        /* try next box */
+      }
+    }
+    return null;
+  }
+
+  async function fromDigitraffic() {
+    try {
+      const geo = await fetch("https://meri.digitraffic.fi/api/ais/v1/locations", {
+        headers: {
+          Accept: "application/json",
+          "Digitraffic-User": "SetSailMarineSuite/AIS"
+        },
+        cache: "no-store"
+      }).then((r) => (r.ok ? r.json() : null));
+      if (!geo) return null;
+      const f = (geo.features || []).find((x) => String((x.properties || {}).mmsi) === mmsi);
+      if (!f) return null;
+      let meta = {};
+      try {
+        const vessels = await fetch("https://meri.digitraffic.fi/api/ais/v1/vessels", {
+          headers: {
+            Accept: "application/json",
+            "Digitraffic-User": "SetSailMarineSuite/AIS"
+          },
+          cache: "no-store"
+        }).then((r) => (r.ok ? r.json() : []));
+        const arr = Array.isArray(vessels) ? vessels : vessels.vessels || [];
+        const mv = arr.find((x) => String(x.mmsi || x.MMSI) === mmsi);
+        if (mv) {
+          meta = {
+            name: mv.name || mv.shipName || "",
+            destination: mv.destination || "",
+            shipType: mv.shipType || mv.shipTypeName || "",
+            callSign: mv.callSign || ""
+          };
+        }
+      } catch (e2) { /* meta optional */ }
+      const p = f.properties || {};
+      const c = (f.geometry && f.geometry.coordinates) || [];
+      return {
+        mmsi,
+        lat: c[1],
+        lon: c[0],
+        sog: p.sog,
+        cog: p.cog,
+        heading: p.heading,
+        name: meta.name || v.name || "",
+        destination: meta.destination || v.destination || "",
+        shipType: meta.shipType || v.shipType || "",
+        callSign: meta.callSign || v.callSign || "",
+        navStat: p.navStat,
+        source: "ais"
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  let hit = null;
+  if (boxes.length) hit = await fromOpenWaters();
+  if (!hit) hit = await fromDigitraffic();
+  if (!hit) {
+    try {
+      const idx = await ensureAisNameIndex();
+      const row = (idx || []).find((t) => String(t.mmsi) === mmsi);
+      if (row) {
+        hit = {
+          mmsi,
+          name: row.name || v.name || "",
+          callSign: row.callSign || v.callSign || "",
+          shipType: row.shipType || v.shipType || "",
+          destination: row.destination || v.destination || "",
+          lat: Number.isFinite(Number(row.lat)) ? Number(row.lat) : v.lat,
+          lon: Number.isFinite(Number(row.lon)) ? Number(row.lon) : v.lon,
+          sog: row.sog,
+          cog: row.cog,
+          heading: row.heading,
+          source: "ais"
+        };
+      }
+    } catch (e3) { /* ignore */ }
+  }
+  if (hit && Number.isFinite(Number(hit.lat)) && Number.isFinite(Number(hit.lon)) && !boxes.length) {
+    boxes.push([Number(hit.lat) - 1.2, Number(hit.lon) - 1.2, Number(hit.lat) + 1.2, Number(hit.lon) + 1.2]);
+    const live = await fromOpenWaters();
+    if (live) hit = live;
+  }
+  return hit;
+}
+
+async function refreshOwnVesselFromAis(opts) {
+  opts = opts || {};
+  if (!userVessel || !userVessel.mmsi) return;
+  try {
+    const hit = await fetchOwnVesselAisUpdate();
+    if (!hit) return;
+    applyVesselProfile(
+      Object.assign({}, userVessel, hit, {
+        source: "ais",
+        aisRefreshedAt: new Date().toISOString()
+      }),
+      {
+        toast: opts.toast
+          ? "Own vessel AIS updated (" + (hit.name || hit.mmsi) + ")"
+          : null,
+        skipAisSchedule: true
+      }
+    );
+  } catch (e) {
+    console.warn("[SetSail Vessel] own AIS hourly refresh failed", e);
+  }
+}
+
+function scheduleOwnVesselAisRefresh() {
+  if (_ownAisRefreshTimer) {
+    clearInterval(_ownAisRefreshTimer);
+    _ownAisRefreshTimer = null;
+  }
+  if (!userVessel || !userVessel.mmsi) return;
+  _ownAisRefreshTimer = setInterval(() => {
+    refreshOwnVesselFromAis({ toast: false });
+  }, OWN_AIS_REFRESH_MS);
+  if (!window._ownAisInitialKick) {
+    window._ownAisInitialKick = true;
+    setTimeout(() => refreshOwnVesselFromAis({ toast: false }), 6000);
+  }
+}
+window.refreshOwnVesselFromAis = refreshOwnVesselFromAis;
+window.scheduleOwnVesselAisRefresh = scheduleOwnVesselAisRefresh;
 
 async function ensureAisNameIndex() {
   if (_aisNameIndex && _aisNameIndex.length) return _aisNameIndex;
@@ -2286,6 +2475,7 @@ function initHomeHudVessel() {
   loadUserVesselFromStorage();
   updateHomeVesselHudLabel();
   fillVesselFormsFromState();
+  if (typeof scheduleOwnVesselAisRefresh === "function") scheduleOwnVesselAisRefresh();
 
   const pillBtn = document.getElementById("homeVesselHudBtn");
   const pop = document.getElementById("homeVesselPopover");
@@ -2438,6 +2628,7 @@ function initVesselTracking() {
   loadUserVesselFromStorage();
   fillVesselFormsFromState();
   bindVesselNameAutocomplete("chart");
+  if (typeof scheduleOwnVesselAisRefresh === "function") scheduleOwnVesselAisRefresh();
 
   const togglePopover = () => {
     if (!vesselPop) return;
@@ -7924,7 +8115,7 @@ function openOfficialGoogleLoginModal() {
     }
     return;
   }
-  showGoogleAuthBusy(true, "Opening official Google account picker…");
+  showGoogleAuthBusy(true, "Looking for Google accounts already on this browser…");
   loadGoogleIdentityScriptAsync().then((loaded) => {
     if (!loaded || !window.google || !window.google.accounts) {
       showGoogleAuthBusy(true, "Google Sign-In script blocked. Check network / allowed origins.");
@@ -7934,7 +8125,7 @@ function openOfficialGoogleLoginModal() {
       return;
     }
     try {
-      // Official GIS credential button (Google-rendered — not a SetSail clone form)
+      // Official GIS: FedCM + One Tap / account chooser for sessions already in this browser
       if (window.google.accounts.id) {
         window.google.accounts.id.initialize({
           client_id: clientId,
@@ -7946,7 +8137,8 @@ function openOfficialGoogleLoginModal() {
           cancel_on_tap_outside: true,
           ux_mode: "popup",
           context: "signin",
-          use_fedcm_for_prompt: false
+          use_fedcm_for_prompt: true,
+          itp_support: true
         });
         const container = document.getElementById("googleGsiButtonContainer");
         if (container) {
@@ -7961,8 +8153,23 @@ function openOfficialGoogleLoginModal() {
             width: 280
           });
         }
+        try {
+          window.google.accounts.id.prompt((notification) => {
+            if (!notification) return;
+            const skipped = notification.isNotDisplayed && notification.isNotDisplayed();
+            const dismissed = notification.isSkippedMoment && notification.isSkippedMoment();
+            if (skipped || dismissed) {
+              const msgEl = document.getElementById("googleAuthBusyMsg");
+              if (msgEl) {
+                msgEl.textContent = "Pick a Google account already signed into this browser, or use another account.";
+              }
+            }
+          });
+        } catch (promptErr) {
+          console.warn("[SetSail Google OAuth] FedCM/One Tap prompt", promptErr);
+        }
       }
-      // Also open the official OAuth token popup (real Google account chooser)
+      // Official OAuth token popup with account chooser (lists browser Google sessions)
       if (window.google.accounts.oauth2 && typeof window.google.accounts.oauth2.initTokenClient === "function") {
         const tokenClient = window.google.accounts.oauth2.initTokenClient({
           client_id: clientId,
@@ -8005,9 +8212,18 @@ function openOfficialGoogleLoginModal() {
             }
           }
         });
-        tokenClient.requestAccessToken({ prompt: "select_account" });
+        // Slight delay so FedCM/One Tap can surface first when available
+        setTimeout(() => {
+          try {
+            tokenClient.requestAccessToken({ prompt: "select_account" });
+          } catch (eReq) {
+            console.warn("[SetSail Google OAuth] requestAccessToken", eReq);
+          }
+        }, 350);
         const msgEl = document.getElementById("googleAuthBusyMsg");
-        if (msgEl) msgEl.textContent = "Complete sign-in in the Google popup. Or use the official button below.";
+        if (msgEl) {
+          msgEl.textContent = "Choose a Google account already on this browser (Chrome/Edge profile). Email field appears only for a new account.";
+        }
       } else {
         const msgEl = document.getElementById("googleAuthBusyMsg");
         if (msgEl) msgEl.textContent = "Use the official Google button below to continue.";
