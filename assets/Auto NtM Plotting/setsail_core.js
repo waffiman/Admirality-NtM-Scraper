@@ -279,50 +279,76 @@ function applyVesselProfile(data, opts) {
 }
 
 async function ensureAisNameIndex() {
-  if (_aisNameIndex) return _aisNameIndex;
+  if (_aisNameIndex && _aisNameIndex.length) return _aisNameIndex;
   if (_aisNameIndexPromise) return _aisNameIndexPromise;
   _aisNameIndexPromise = (async () => {
+    const out = [];
+    const pushRow = (t) => {
+      const n = String((t && t.name) || "").trim();
+      if (n.length < 2 || !/[A-Za-z]/.test(n) || n.startsWith("!")) return;
+      out.push({
+        name: n,
+        mmsi: t.mmsi,
+        lat: t.lat,
+        lon: t.lon,
+        sog: t.sog,
+        cog: t.cog,
+        heading: t.heading,
+        shipType: t.shipType || t.type || "",
+        destination: t.destination || "",
+        callSign: t.callSign || t.callsign || "",
+        source: t.source || "AIS"
+      });
+    };
     try {
       const data = await fetch("ais/zones/names.json?t=" + Date.now(), { cache: "no-store" }).then((r) => {
         if (!r.ok) throw new Error("names.json HTTP " + r.status);
         return r.json();
       });
-      _aisNameIndex = Array.isArray(data.names) ? data.names : [];
-      console.info("[SetSail Vessel] AIS name index ready:", _aisNameIndex.length);
-      return _aisNameIndex;
+      (data.names || []).forEach(pushRow);
+      console.info("[SetSail Vessel] AIS name index ready:", out.length);
     } catch (e) {
-      console.warn("[SetSail Vessel] names.json failed, falling back to zone scan", e);
-      const out = [];
+      console.warn("[SetSail Vessel] names.json miss — Digitraffic meta fallback", e);
       try {
-        const man = await fetch("ais/zones/index.json?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json());
-        for (const z of man.zones || []) {
-          try {
-            const data = await fetch(z.file + "?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json());
-            (data.targets || []).forEach((t) => {
-              const n = (t.name || "").trim();
-              if (n.length < 2) return;
-              out.push({
-                name: n,
-                mmsi: t.mmsi,
-                lat: t.lat,
-                lon: t.lon,
-                sog: t.sog,
-                cog: t.cog,
-                heading: t.heading,
-                shipType: t.shipType || "",
-                destination: t.destination || "",
-                callSign: t.callSign || "",
-                source: t.source || "AIS zone"
-              });
-            });
-          } catch (e2) { /* skip */ }
-        }
-      } catch (e3) { /* empty */ }
-      _aisNameIndex = out;
-      return out;
+        const vessels = await fetch("https://meri.digitraffic.fi/api/ais/v1/vessels", {
+          headers: { Accept: "application/json", "Digitraffic-User": "SetSailMarineSuite/AIS" },
+          cache: "no-store"
+        }).then((r) => r.json());
+        const arr = Array.isArray(vessels) ? vessels : vessels.vessels || [];
+        arr.forEach((v) => {
+          pushRow({
+            name: v.name || v.shipName,
+            mmsi: v.mmsi || v.MMSI,
+            callSign: v.callSign || "",
+            shipType: v.shipType || v.shipTypeName || "",
+            destination: v.destination || "",
+            source: "Digitraffic"
+          });
+        });
+      } catch (e2) {
+        console.warn("[SetSail Vessel] Digitraffic name fallback failed", e2);
+      }
     }
+    // Also fold in any currently plotted AIS markers
+    try {
+      if (window.leafletAisLayer && typeof window.leafletAisLayer.eachLayer === "function") {
+        window.leafletAisLayer.eachLayer((ly) => {
+          const p = ly && ly.getPopup && ly.getPopup();
+          /* skip — markers don't hold raw objects reliably */
+        });
+      }
+    } catch (e3) {}
+    _aisNameIndex = out;
+    return out;
   })();
-  return _aisNameIndexPromise;
+  try {
+    return await _aisNameIndexPromise;
+  } finally {
+    /* keep promise cached for success; allow retry if empty */
+    if (_aisNameIndex && !_aisNameIndex.length) {
+      _aisNameIndexPromise = null;
+    }
+  }
 }
 
 function hideVesselSuggest(which) {
@@ -2513,18 +2539,19 @@ function getOwnShipSilhouetteIcon(headingDeg) {
   const rot = ((Number(headingDeg) % 360) + 360) % 360;
   const html = `
     <div class="own-ship-wrap" style="transform:rotate(${rot}deg);transform-origin:center center;">
-      <svg class="own-ship-svg" width="28" height="44" viewBox="0 0 28 44" aria-hidden="true">
-        <path d="M14 2 L22 14 L20 38 L14 42 L8 38 L6 14 Z"
-          fill="rgba(0,229,255,0.22)" stroke="#00e5ff" stroke-width="1.8"/>
-        <path d="M14 8 L18 16 L14 15 L10 16 Z" fill="#00e5ff" opacity="0.85"/>
-        <circle cx="14" cy="22" r="2.2" fill="#ffffff" stroke="#00e5ff" stroke-width="1"/>
+      <svg class="own-ship-svg" width="32" height="52" viewBox="0 0 32 52" aria-hidden="true">
+        <path d="M16 1.5 L25 16 L23 44 L16 50.5 L9 44 L7 16 Z"
+          fill="rgba(0,229,255,0.28)" stroke="#00e5ff" stroke-width="2"/>
+        <path d="M16 9 L21 19 L16 17.5 L11 19 Z" fill="#f05a36"/>
+        <line x1="16" y1="17" x2="16" y2="40" stroke="#ffffff" stroke-width="1.4" opacity="0.7"/>
+        <circle cx="16" cy="26" r="2.4" fill="#ffffff" stroke="#00e5ff" stroke-width="1.2"/>
       </svg>
     </div>`;
   return L.divIcon({
     html,
     className: "own-ship-marker",
-    iconSize: [28, 44],
-    iconAnchor: [14, 22]
+    iconSize: [32, 52],
+    iconAnchor: [16, 26]
   });
 }
 

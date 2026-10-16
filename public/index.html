@@ -5806,6 +5806,32 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .own-ship-wrap { width: 28px; height: 44px; }
 .own-ship-svg { display: block; filter: drop-shadow(0 0 3px rgba(0,229,255,0.55)); }
 
+/* v5.19b: lock Home vessel HUD vertical center in top bar */
+#homeHudTop {
+  align-items: center !important;
+}
+#homeHudTop .home-hud-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 28px !important;
+}
+#homeVesselHudPill .home-hud-icon svg {
+  display: block !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+#ntmMap.ecdis-cursor-map .leaflet-pane,
+#ntmMap.ecdis-cursor-map .leaflet-overlay-pane,
+#ntmMap.ecdis-cursor-map .leaflet-marker-pane,
+#ntmMap.ecdis-cursor-map .leaflet-tooltip-pane {
+  cursor: inherit !important;
+}
+.ntm-coords-hud {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+
 .home-vessel-popover {
   position: absolute !important;
   top: calc(100% + 8px) !important;

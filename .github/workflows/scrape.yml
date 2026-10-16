@@ -33,12 +33,22 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Include AIS snapshot — leaving it unstaged broke pull --rebase
           git add notices.json public/notices.json weather.json public/weather.json news.json public/news.json ais.json public/ais.json || true
           if git diff --staged --quiet; then
             echo "No data changes to commit."
             exit 0
           fi
           git commit -m "Auto-update Live Admiralty NtM, NAVTEX, Weather, SetNews & AIS ($(date -u +'%Y-%m-%d %H:%M UTC'))"
-          git pull --rebase origin main
-          git push origin main
+          # Prefer scraped files over concurrent main pushes (avoids rebase conflicts)
+          git pull --rebase -X theirs origin main || {
+            echo "Rebase conflicted — taking our scraped data"
+            git checkout --theirs -- notices.json public/notices.json weather.json public/weather.json news.json public/news.json ais.json public/ais.json || true
+            git add notices.json public/notices.json weather.json public/weather.json news.json public/news.json ais.json public/ais.json || true
+            GIT_EDITOR=true git rebase --continue || true
+          }
+          for i in 1 2 3; do
+            git push origin main && break
+            echo "Push attempt $i failed — retry after fetch"
+            git pull --rebase -X theirs origin main || true
+            sleep 5
+          done

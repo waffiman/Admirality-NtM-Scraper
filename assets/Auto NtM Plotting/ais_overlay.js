@@ -12,8 +12,8 @@
   const OW_MAX_TILES = 12;
   const ABS_MARKER_CAP = 12000;
   /** Zone JSON only at/above this zoom (avoids loading world oceans at once). */
-  const MIN_ZOOM_ZONES = 5;
-  const MIN_ZOOM_DENSE_ZONES = 7;
+  const MIN_ZOOM_ZONES = 6;
+  const MIN_ZOOM_DENSE_ZONES = 8;
 
   let leafletAisLayer = null;
   let aisTimer = null;
@@ -202,14 +202,15 @@
     const area = dLat * dLon;
     const zoom = map.getZoom ? map.getZoom() : 3;
 
-    // Very zoomed out: one coarse live box only (no world dump)
-    if (zoom < 4 || area > 4000) {
+    // Zoomed out: do not fetch world AIS (wait for user to zoom in)
+    if (zoom < 5 || area > 2500) {
       return {
         mode: "live",
-        boxes: [[minLat, normalizeLon(minLon), maxLat, normalizeLon(maxLon)]],
+        boxes: [],
         area,
         zoom,
-        skipZones: true
+        skipZones: true,
+        skipLive: true
       };
     }
 
@@ -288,7 +289,7 @@
       zones = zones.filter((z) => zoneAreaSqDeg(z.bbox) < 8000);
     }
     // Cap concurrent zone files
-    zones = zones.slice(0, zoom >= 8 ? 6 : 3);
+    zones = zones.slice(0, zoom >= 9 ? 4 : zoom >= 7 ? 2 : 1);
     const lists = await Promise.all(
       zones.map(async (z) => {
         try {
@@ -382,11 +383,13 @@
     const plan = mapViewportBoxes(map);
     let targets = [];
     try {
-      // 1) Live viewport first (fast)
+      // 1) Live viewport first (fast) — skipped when zoomed too far out
       let live = [];
-      try {
-        live = await loadOpenWatersBoxes(plan.boxes);
-      } catch (e) { /* continue */ }
+      if (!plan.skipLive && plan.boxes && plan.boxes.length) {
+        try {
+          live = await loadOpenWatersBoxes(plan.boxes);
+        } catch (e) { /* continue */ }
+      }
       if (seq !== aisRefreshSeq) return;
       let digi = [];
       if (overlapsBaltic(plan.boxes)) {
@@ -454,7 +457,7 @@
     const n = aisLastPayload && aisLastPayload.count;
     if (typeof showSetSailToast === "function") {
       showSetSailToast(
-        "AIS loads with zoom: live Open Waters in view first; zone snapshots densify from zoom ≥5. Digitraffic densifies Baltic. Not exportable." +
+        "AIS loads as you zoom in: live Open Waters from zoom ≥5; zone densify from zoom ≥6. Digitraffic densifies Baltic. Not exportable." +
           (n != null ? " In view: " + n + "." : ""),
         "info"
       );
