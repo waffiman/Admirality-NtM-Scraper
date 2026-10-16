@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "0800 UTC",
-  "lastSyncUtc": "2026-10-16T08:50:59.658832+00:00",
+  "synopticCycle": "0900 UTC",
+  "lastSyncUtc": "2026-10-16T09:06:04.246152+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,10 +9,10 @@
       "shortName": "Trudy",
       "category": "Category 3 Major Hurricane (NOAA NHC)",
       "center": [
-        14.0,
+        14.2,
         -102.4
       ],
-      "centralPressure": 957,
+      "centralPressure": 956,
       "maxWinds": 105,
       "gusts": 128,
       "movement": "NW at 6 kts",
@@ -21,26 +21,26 @@
         {
           "tau": 12,
           "coords": [
-            15.0,
-            -102.3
+            14.8,
+            -102.7
           ],
-          "winds": 105,
+          "winds": 120,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
             15.9,
-            -102.8
+            -103.4
           ],
-          "winds": 120,
+          "winds": 125,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            17.1,
-            -103.7
+            17.4,
+            -104.4
           ],
           "winds": 125,
           "radiusNm": 90
@@ -48,37 +48,37 @@
         {
           "tau": 48,
           "coords": [
-            18.4,
-            -104.8
+            19.0,
+            -105.5
           ],
-          "winds": 115,
+          "winds": 110,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            19.7,
-            -105.7
+            20.3,
+            -106.3
           ],
-          "winds": 100,
+          "winds": 85,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
-            20.7,
-            -106.4
+            21.0,
+            -107.0
           ],
-          "winds": 85,
+          "winds": 65,
           "radiusNm": 140
         },
         {
           "tau": 84,
           "coords": [
-            21.0,
-            -107.6
+            21.4,
+            -108.0
           ],
-          "winds": 55,
+          "winds": 45,
           "radiusNm": 157
         }
       ]
@@ -101,38 +101,29 @@
         {
           "tau": 12,
           "coords": [
-            20.1,
-            -109.1
+            20.7,
+            -109.7
           ],
-          "winds": 35,
+          "winds": 30,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            21.2,
-            -110.7
+            21.8,
+            -111.7
           ],
-          "winds": 30,
+          "winds": 25,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            22.1,
-            -112.4
-          ],
-          "winds": 25,
-          "radiusNm": 90
-        },
-        {
-          "tau": 48,
-          "coords": [
-            23.2,
-            -114.0
+            23.1,
+            -113.6
           ],
           "winds": 20,
-          "radiusNm": 107
+          "radiusNm": 90
         }
       ]
     },
@@ -388,13 +379,13 @@
       "id": "WS1",
       "name": "Trudy Cyclonic Wave Field",
       "center": [
-        14.0,
+        14.2,
         -102.4
       ],
       "radiusNm": 240,
-      "waveHeight": 3.7,
+      "waveHeight": 3.8,
       "swellPeriod": 8,
-      "swellDir": "W"
+      "swellDir": "WSW"
     },
     {
       "id": "WS2",
@@ -416,7 +407,7 @@
         152.7
       ],
       "radiusNm": 150,
-      "waveHeight": 4.6,
+      "waveHeight": 4.7,
       "swellPeriod": 9,
       "swellDir": "NNE"
     },
@@ -448,10 +439,10 @@
   "pressureCenters": [
     {
       "type": "L",
-      "value": 957,
+      "value": 956,
       "name": "Hurricane TRUDY Core Low",
       "coords": [
-        14.0,
+        14.2,
         -102.4
       ]
     },
@@ -522,7 +513,7 @@
   "windVectors": [
     {
       "coords": [
-        14.3,
+        14.5,
         -102.1
       ],
       "dir": 160,
