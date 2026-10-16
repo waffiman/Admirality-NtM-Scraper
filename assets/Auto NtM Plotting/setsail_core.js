@@ -2949,7 +2949,7 @@ function initNtMMap() {
       attributionControl: false,
       preferCanvas: true,
       zoomAnimation: true,
-      fadeAnimation: true,
+      fadeAnimation: false,
       markerZoomAnimation: true,
       zoomAnimationThreshold: 8,
       inertia: true,
@@ -2960,10 +2960,10 @@ function initNtMMap() {
     });
 
     const tilePerfOpts = {
-      keepBuffer: 6,
+      keepBuffer: 12,
       updateWhenIdle: false,
       updateWhenZooming: false,
-      updateInterval: 90,
+      updateInterval: 50,
       noWrap: true,
       bounds: [[-85, -180], [85, 180]]
     };

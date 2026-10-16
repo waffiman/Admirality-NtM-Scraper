@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.12" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.15" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -270,6 +270,16 @@ svg.leaflet-zoom-animated {
 .leaflet-zoom-anim .leaflet-zoom-hide {
 	visibility: hidden;
 	}
+
+/* Keep basemap visible while zooming — no fade-to-blank */
+.leaflet-fade-anim .leaflet-tile {
+  opacity: 1 !important;
+  transition: none !important;
+}
+.leaflet-tile-container {
+  opacity: 1 !important;
+}
+
 
 
 /* cursors */
@@ -4776,16 +4786,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .setsail-icon-lg { width: 22px; height: 22px; }
 .setsail-icon-xl { width: 32px; height: 32px; }
 
-/* SetNews flame: filled (global .setsail-icon uses fill:none/stroke) */
+/* SetNews flame — filled Heroicons fire (override global stroke icons) */
 .setsail-icon-flame {
   stroke: none !important;
   fill: none;
+  overflow: visible;
 }
 .setsail-icon-flame .flame-outer { fill: #f05a36; }
-.setsail-icon-flame .flame-mid { fill: #fb923c; }
-.setsail-icon-flame .flame-inner { fill: #fde68a; }
+.setsail-icon-flame .flame-inner { fill: #fcd34d; }
 .nav-item:hover .setsail-icon-flame .flame-outer { fill: #ff6b45; }
-.nav-item:hover .setsail-icon-flame .flame-mid { fill: #fdba74; }
+.nav-item:hover .setsail-icon-flame .flame-inner { fill: #fde68a; }
 .nav-item.active .setsail-icon-flame {
   filter: drop-shadow(0 0 7px rgba(240, 90, 54, 0.65)) !important;
 }
@@ -11340,20 +11350,20 @@ select option {
 
 
   <script>
-    // v5.13 — force clients off stale SW caches so users stop seeing old builds
+    // v5.15 — force clients off stale SW caches so users stop seeing old builds
     (function(){
       try {
-        if (localStorage.getItem('setsail_force_v513') === '1') return;
-        if (!('serviceWorker' in navigator)) { localStorage.setItem('setsail_force_v513','1'); return; }
+        if (localStorage.getItem('setsail_force_v515') === '1') return;
+        if (!('serviceWorker' in navigator)) { localStorage.setItem('setsail_force_v515','1'); return; }
         navigator.serviceWorker.getRegistrations().then(function(regs){
           return Promise.all(regs.map(function(r){ return r.update(); }));
         }).then(function(){
           if (!('caches' in window)) return null;
           return caches.keys().then(function(keys){
-            return Promise.all(keys.filter(function(k){ return k.indexOf('v5.13') === -1; }).map(function(k){ return caches.delete(k); }));
+            return Promise.all(keys.filter(function(k){ return k.indexOf('v5.15') === -1; }).map(function(k){ return caches.delete(k); }));
           });
         }).then(function(){
-          localStorage.setItem('setsail_force_v513', '1');
+          localStorage.setItem('setsail_force_v515', '1');
           if (!sessionStorage.getItem('setsail_reloaded_v512')) {
             sessionStorage.setItem('setsail_reloaded_v512', '1');
             location.reload();
@@ -11456,7 +11466,7 @@ select option {
       </div>
 
       <button type="button" class="nav-item" data-tab="tab-news" id="navItemSetNews" aria-label="SetNews — What's happening on land &amp; at sea" title="SetNews — Land &amp; Sea">
-        <svg class="setsail-icon setsail-icon-flame" viewBox="0 0 24 24" aria-hidden="true"><path class="flame-outer" d="M12 1.8s2.6 3.2 3.5 6.6c.7 2.5.2 4.4-1 5.8 2.4-.2 5 1.6 5 5.1C19.5 21.6 16.2 23.2 12 23.2S4.5 21.6 4.5 19.3c0-3.6 2.7-5.4 5.1-5.9C8.2 11.6 7.6 9.2 8.2 6.6 8.9 3.8 12 1.8 12 1.8z"/><path class="flame-mid" d="M12 8.2s1.5 2 1.9 3.9c.3 1.5-.1 2.6-.8 3.4 1.3 0 2.7.9 2.7 2.9 0 1.7-1.6 2.8-3.8 2.8s-3.8-1.1-3.8-2.8c0-2.1 1.4-3 2.7-3.1-.6-.7-1-1.8-.8-3.3C10.5 10.2 12 8.2 12 8.2z"/><path class="flame-inner" d="M12 13.2c.55.85.8 1.55.7 2.25-.15.8-.75 1.35-1.5 1.5 .4.25.85.7.85 1.35 0 .85-.7 1.45-1.55 1.45S8.95 18.15 8.95 17.3c0-1.7 1.15-2.55 2.1-3.3.35-.3.65-.75 1-1.8z"/></svg>
+        <svg class="setsail-icon setsail-icon-flame" viewBox="0 0 24 24" aria-hidden="true"><path class="flame-outer" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/><path class="flame-inner" d="M12 18a3.75 3.75 0 0 0 .495-7.467 5.99 5.99 0 0 0-1.925 3.546 5.974 5.974 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"/></svg>
         <span class="tooltip">SetNews · Maritime Wire</span>
       </button>
 
@@ -13330,8 +13340,8 @@ select option {
                   <span class="excel-tab-spinner" aria-hidden="true"></span>
                   <span class="excel-tab-check"></span>
                   <span class="excel-tab-name">AIS</span>
-                  <span class="excel-tab-badge" style="display:inline-block;min-width:1.2em;"></span>
-                  <span class="excel-tab-info-btn" id="btnAisOverlayInfo" title="AIS vessels (Digitraffic open feed) — not exportable"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
+                  <span class="excel-tab-badge" style="display:none;" aria-hidden="true"></span>
+                  <span class="excel-tab-info-btn" id="btnAisOverlayInfo" title="AIS vessels worldwide (Open Waters + Digitraffic) — not exportable"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
 <button type="button" class="excel-tab excel-tab-route" data-overlay="route" id="tabOverlayRoute">
                   <span class="excel-tab-spinner" aria-hidden="true"></span>
@@ -19471,17 +19481,17 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             subdomains: ['a', 'b', 'c', 'd'],
             maxNativeZoom: 19,
             maxZoom: 20,
-            updateWhenIdle: true,
+            updateWhenIdle: false,
             updateWhenZooming: false,
-            keepBuffer: 4,
+            keepBuffer: 12,
             attribution: '&copy; CARTO &bull; OpenStreetMap'
           });
           delete options.crossOrigin;
         } else {
           options = Object.assign({
-            updateWhenIdle: true,
+            updateWhenIdle: false,
             updateWhenZooming: false,
-            keepBuffer: 4
+            keepBuffer: 12
           }, options);
         }
         const layer = _origTileLayer.call(this, url, options);
@@ -19505,9 +19515,9 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.12"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.12"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.12"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.15"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.15"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.15"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19585,7 +19595,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.12"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.15"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19957,13 +19967,13 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.13' && k !== 'setsail-tiles-cache-v5.13').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.15' && k !== 'setsail-tiles-cache-v5.15').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.12', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.15', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
