@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.20" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.21" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -11545,9 +11545,9 @@ select option {
     // v5.19 — hard kill stale SW/HTML so flame + AIS zones actually show
     (function(){
       try {
-        if (localStorage.getItem('setsail_force_v520') === '1') return;
+        if (localStorage.getItem('setsail_force_v521') === '1') return;
         var finish = function(){
-          localStorage.setItem('setsail_force_v520', '1');
+          localStorage.setItem('setsail_force_v521', '1');
           // clear ALL old force/reload flags that blocked later bumps
           try {
             ['setsail_force_v512','setsail_force_v513','setsail_force_v514','setsail_force_v515','setsail_force_v516',
@@ -11785,7 +11785,7 @@ select option {
                       </div>
                       <div class="ntm-popover-subtitle">AIS Details</div>
                       <div class="vessel-ais-grid">
-                        <div class="form-group"><label for="homeVesselMmsi">MMSI</label><input type="text" id="homeVesselMmsi" class="min-input vessel-field-mmsi" /></div>
+                        <div class="form-group"><label for="homeVesselMmsi">MMSI <span style="opacity:.65;font-weight:500;">(Enter = lookup)</span></label><input type="text" id="homeVesselMmsi" class="min-input vessel-field-mmsi" placeholder="e.g. 636024827" title="Type MMSI and press Enter to search AIS" /></div>
                         <div class="form-group"><label for="homeVesselType">Ship Type</label><input type="text" id="homeVesselType" class="min-input vessel-field-type" /></div>
                         <div class="form-group vessel-span2"><label for="homeVesselDest">Destination</label><input type="text" id="homeVesselDest" class="min-input vessel-field-dest" /></div>
                         <div class="form-group"><label for="homeVesselSog">SOG (kn)</label><input type="text" id="homeVesselSog" class="min-input vessel-field-sog" /></div>
@@ -12771,7 +12771,7 @@ select option {
                       </div>
                       <div class="ntm-popover-subtitle">AIS Details</div>
                       <div class="vessel-ais-grid">
-                        <div class="form-group"><label for="vesselMmsi">MMSI</label><input type="text" id="vesselMmsi" class="min-input vessel-field-mmsi" /></div>
+                        <div class="form-group"><label for="vesselMmsi">MMSI <span style="opacity:.65;font-weight:500;">(Enter = lookup)</span></label><input type="text" id="vesselMmsi" class="min-input vessel-field-mmsi" placeholder="e.g. 636024827" title="Type MMSI and press Enter to search AIS" /></div>
                         <div class="form-group"><label for="vesselType">Ship Type</label><input type="text" id="vesselType" class="min-input vessel-field-type" /></div>
                         <div class="form-group vessel-span2"><label for="vesselDest">Destination</label><input type="text" id="vesselDest" class="min-input vessel-field-dest" /></div>
                         <div class="form-group"><label for="vesselSog">SOG (kn)</label><input type="text" id="vesselSog" class="min-input vessel-field-sog" /></div>
@@ -19730,9 +19730,9 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.20"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.20"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.20"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.21"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.21"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.21"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19810,7 +19810,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.20"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.21"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20188,7 +20188,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.20', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.21', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
