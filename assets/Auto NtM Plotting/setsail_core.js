@@ -1919,9 +1919,12 @@ function renderRouteOnMap(route, shouldFly = true) {
 
   const rtSub = window.ROUTE_SUBFILTERS || { waypoints: true, line: true };
   let trackLine = null;
+  let trackGlow = null;
+  let trackOutline = null;
+  let trackCore = null;
   if (rtSub.line !== false && unrolledCoords.length >= 2) {
     // High-visibility route: dark outline + bright cyan core + outer glow
-    const outline = L.polyline(unrolledCoords, {
+    trackOutline = L.polyline(unrolledCoords, {
       color: "#0b1e33",
       weight: 10,
       opacity: 0.85,
@@ -1929,7 +1932,7 @@ function renderRouteOnMap(route, shouldFly = true) {
       lineCap: "round",
       lineJoin: "round"
     });
-    const glow = L.polyline(unrolledCoords, {
+    trackGlow = L.polyline(unrolledCoords, {
       color: "#00e5ff",
       weight: 14,
       opacity: 0.35,
@@ -1937,7 +1940,7 @@ function renderRouteOnMap(route, shouldFly = true) {
       lineCap: "round",
       lineJoin: "round"
     });
-    const line = L.polyline(unrolledCoords, {
+    trackLine = L.polyline(unrolledCoords, {
       color: "#ff3b1f",
       weight: 4.5,
       opacity: 1,
@@ -1945,7 +1948,7 @@ function renderRouteOnMap(route, shouldFly = true) {
       lineCap: "round",
       lineJoin: "round"
     });
-    const core = L.polyline(unrolledCoords, {
+    trackCore = L.polyline(unrolledCoords, {
       color: "#ffe566",
       weight: 2,
       opacity: 0.95,
@@ -1953,11 +1956,10 @@ function renderRouteOnMap(route, shouldFly = true) {
       lineCap: "round",
       lineJoin: "round"
     });
-    leafletRouteLayer.addLayer(glow);
-    leafletRouteLayer.addLayer(outline);
-    leafletRouteLayer.addLayer(line);
-    leafletRouteLayer.addLayer(core);
-    trackLine = line;
+    leafletRouteLayer.addLayer(trackGlow);
+    leafletRouteLayer.addLayer(trackOutline);
+    leafletRouteLayer.addLayer(trackLine);
+    leafletRouteLayer.addLayer(trackCore);
   }
 
   if (typeof window.renderRouteBufferCorridorOnMap === "function") {
@@ -1997,8 +1999,10 @@ function renderRouteOnMap(route, shouldFly = true) {
     marker.on('drag', function(e) {
       const latlng = e.target.getLatLng();
       unrolledCoords[idx] = [latlng.lat, latlng.lng];
-      trackGlow.setLatLngs(unrolledCoords);
-      trackLine.setLatLngs(unrolledCoords);
+      if (trackGlow) trackGlow.setLatLngs(unrolledCoords);
+      if (trackOutline) trackOutline.setLatLngs(unrolledCoords);
+      if (trackLine) trackLine.setLatLngs(unrolledCoords);
+      if (trackCore) trackCore.setLatLngs(unrolledCoords);
     });
 
     marker.on('dragend', function(e) {
@@ -2018,23 +2022,62 @@ function renderRouteOnMap(route, shouldFly = true) {
         activeRouteData.waypoints[idx].lat = wp.lat;
         activeRouteData.waypoints[idx].lon = wp.lon;
 
-        let totalDist = 0;
-        for (let k = 0; k < activeRouteData.waypoints.length - 1; k++) {
-          totalDist += calculateHaversineDistanceNM(
-            activeRouteData.waypoints[k].lat, activeRouteData.waypoints[k].lon,
-            activeRouteData.waypoints[k+1].lat, activeRouteData.waypoints[k+1].lon
-          );
+        // Re-unroll coordinates cleanly across the entire route to maintain continuous geometry
+        if (cleanWps.length > 0) {
+          cleanWps[idx].lat = wp.lat;
+          cleanWps[idx].lon = wp.lon;
+          let rLon = cleanWps[0].lon;
+          unrolledCoords[0] = [cleanWps[0].lat, rLon];
+          for (let k = 1; k < cleanWps.length; k++) {
+            let cl = cleanWps[k].lon;
+            while (cl - rLon > 180) cl -= 360;
+            while (cl - rLon < -180) cl += 360;
+            rLon = cl;
+            unrolledCoords[k] = [cleanWps[k].lat, rLon];
+          }
+        } else {
+          unrolledCoords[idx] = [latlng.lat, latlng.lng];
         }
-        activeRouteData.totalDistanceNM = Math.round(totalDist);
-        const spd = ((activeRouteData.metadata && activeRouteData.metadata.speedKnots) || 14.5) || 14.5;
-        activeRouteData.steamingDays = (totalDist / (spd * 24)).toFixed(1);
+
+        window._setsailRouteUnrolled = unrolledCoords.slice();
+        if (trackGlow) trackGlow.setLatLngs(unrolledCoords);
+        if (trackOutline) trackOutline.setLatLngs(unrolledCoords);
+        if (trackLine) trackLine.setLatLngs(unrolledCoords);
+        if (trackCore) trackCore.setLatLngs(unrolledCoords);
+
+        if (typeof window.renderRouteBufferCorridorOnMap === "function") {
+          window.renderRouteBufferCorridorOnMap();
+        }
+
+        if (typeof enrichRouteWithLegsTelemetry === "function") {
+          enrichRouteWithLegsTelemetry(activeRouteData);
+        } else {
+          let totalDist = 0;
+          for (let k = 0; k < activeRouteData.waypoints.length - 1; k++) {
+            totalDist += calculateHaversineDistanceNM(
+              activeRouteData.waypoints[k].lat, activeRouteData.waypoints[k].lon,
+              activeRouteData.waypoints[k+1].lat, activeRouteData.waypoints[k+1].lon
+            );
+          }
+          activeRouteData.totalDistanceNM = Math.round(totalDist);
+          const spd = ((activeRouteData.metadata && activeRouteData.metadata.speedKnots) || 14.5) || 14.5;
+          activeRouteData.steamingDays = (totalDist / (spd * 24)).toFixed(1);
+        }
 
         try {
           localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(activeRouteData));
         } catch (err) {}
 
+        if (typeof saveRouteToLibrary === "function") {
+          saveRouteToLibrary(activeRouteData);
+        }
+
         if (typeof displaySetRouteResults === "function") {
-          displaySetRouteResults(activeRouteData);
+          displaySetRouteResults(activeRouteData, false);
+        }
+
+        if (typeof renderNtMListAndMap === "function") {
+          renderNtMListAndMap();
         }
 
         marker.setPopupContent(`
@@ -10217,29 +10260,83 @@ function displaySetRouteResults(route, autoOpenDrawer = true) {
     }
   }
 
+  const schedTitleEl = document.getElementById("srDrawerScheduleTitle");
+  if (schedTitleEl && route.waypoints) {
+    schedTitleEl.textContent = `Waypoint Schedule (${route.waypoints.length} WPTs)`;
+  }
+
   if (legsListEl) {
-    legsListEl.innerHTML = legs.map((leg, idx) => {
-      const hasWarn = (leg.ntmHits && leg.ntmHits.length > 0) || (leg.weatherHits && leg.weatherHits.length > 0);
-      return `
-        <div class="sr-leg-inspector-card" data-leg-idx="${idx}" title="Click to view Leg #${leg.legNo} on SetChart">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
-            <strong style="font-size:0.75rem;color:#f8fafc;">Leg ${leg.legNo}: ${leg.fromName} &rarr; ${leg.toName}</strong>
-            <span class="sr-leg-pill ${leg.sailType === 'GC' ? 'gc' : ''}">${leg.sailType} • ${leg.courseFormatted}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:0.68rem;color:#94a3b8;">
-            <span><b style="color:#e2e8f0;">${leg.distanceNM} NM</b></span>
-            <span>• ${leg.eteHours}h @ ${leg.speedKnots}kn</span>
-            <span>• XTD ±${leg.xtdNM} NM</span>
-          </div>
-          <div style="font-size:0.65rem;color:#94a3b8;">${leg.ukcNote}</div>
-          ${hasWarn ? `
-            <div style="font-size:0.64rem;color:#fbbf24;">
-              ⚠️ ${[...(leg.ntmHits || []).map(h => h.id), ...(leg.weatherHits || [])].join(" • ")}
-            </div>
-          ` : ""}
-        </div>
-      `;
-    }).join("");
+    const wps = route.waypoints || [];
+    const legs = route.legs || [];
+    legsListEl.innerHTML = `
+      <div class="sr-wpts-table-wrap">
+        <table class="sr-wpts-table">
+          <thead>
+            <tr>
+              <th style="width:34px;text-align:center;">WPT</th>
+              <th>Waypoint Name</th>
+              <th>Coordinates</th>
+              <th style="text-align:center;">CRS / Sail</th>
+              <th style="text-align:right;">Dist</th>
+              <th style="text-align:right;">Spd / XTD</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${wps.map((wp, idx) => {
+              const isStart = idx === 0;
+              const isEnd = idx === wps.length - 1;
+              const leg = legs[idx];
+              const numStr = wp.wptNo || ('00' + (idx + 1)).slice(-3);
+              const badgeClass = isStart ? 'dep' : (isEnd ? 'dest' : '');
+              const badgeLabel = isStart ? 'DEP' : (isEnd ? 'ARR' : `#${numStr}`);
+              const wpName = wp.name || (isStart ? "Departure Port" : (isEnd ? "Arrival Port" : `Waypoint ${numStr}`));
+              
+              const dms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(wp.lat, wp.lon) : `${wp.lat.toFixed(4)}, ${wp.lon.toFixed(4)}`;
+              const dmsParts = dms.split(",");
+              const latStr = (dmsParts[0] || "").trim();
+              const lonStr = (dmsParts[1] || "").trim();
+
+              const crsStr = leg ? leg.courseFormatted : "—";
+              const sailStr = leg ? leg.sailType : (wp.sail || "RL");
+              const distStr = leg ? `${leg.distanceNM} NM` : "—";
+              const spdStr = wp.speedKnots != null ? `${wp.speedKnots} kn` : (leg ? `${leg.speedKnots} kn` : "—");
+              const xtdVal = wp.portsideXTD != null ? wp.portsideXTD : (leg ? leg.xtdNM : 0.25);
+              const hasWarn = leg && ((leg.ntmHits && leg.ntmHits.length > 0) || (leg.weatherHits && leg.weatherHits.length > 0));
+
+              return `
+                <tr class="sr-wpt-row" data-wpt-idx="${idx}" title="Click to view WPT #${numStr} (${wpName}) on SetChart">
+                  <td style="text-align:center;">
+                    <span class="sr-wpt-num-badge ${badgeClass}">${badgeLabel}</span>
+                  </td>
+                  <td>
+                    <div class="sr-wpt-name" title="${wpName}">${wpName}</div>
+                    ${hasWarn ? `<div style="font-size:0.62rem;color:#fbbf24;margin-top:2px;">⚠️ Hazard alert</div>` : ""}
+                  </td>
+                  <td>
+                    <div class="sr-wpt-coords">
+                      <div>${latStr}</div>
+                      <div>${lonStr}</div>
+                    </div>
+                  </td>
+                  <td style="text-align:center;">
+                    <div style="font-weight:700;color:#f8fafc;font-size:0.72rem;">${crsStr}</div>
+                    ${leg ? `<span class="sr-leg-pill ${sailStr === 'GC' ? 'gc' : ''}" style="margin-top:2px;font-size:0.58rem;padding:1px 4px;">${sailStr}</span>` : ""}
+                  </td>
+                  <td style="text-align:right;">
+                    <span style="font-weight:700;color:#e2e8f0;font-size:0.72rem;">${distStr}</span>
+                    ${leg ? `<div style="font-size:0.62rem;color:#94a3b8;">${leg.eteHours}h</div>` : ""}
+                  </td>
+                  <td style="text-align:right;">
+                    <div style="font-size:0.70rem;color:#cbd5e1;">${spdStr}</div>
+                    <div style="font-size:0.62rem;color:#94a3b8;">±${xtdVal} NM</div>
+                  </td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
   }
 }
 window.displaySetRouteResults = displaySetRouteResults;
@@ -11260,22 +11357,38 @@ function initSetRouteV50() {
   if (legsListEl && !legsListEl._boundV50) {
     legsListEl._boundV50 = true;
     legsListEl.addEventListener("click", (e) => {
-      const card = e.target.closest("[data-leg-idx]");
-      if (!card || !activeRouteData || !Array.isArray(activeRouteData.legs)) return;
-      const idx = parseInt(card.getAttribute("data-leg-idx"), 10);
-      const leg = activeRouteData.legs[idx];
-      if (!leg) return;
-      if (typeof switchToTab === "function") switchToTab("tab-ntm");
-      setTimeout(() => {
-        if (leafletMap) {
-          leafletMap.invalidateSize();
-          if (typeof setOverlayActive === "function") {
-            setOverlayActive("route", true, leafletMap);
+      const row = e.target.closest("[data-wpt-idx], [data-leg-idx]");
+      if (!row || !activeRouteData) return;
+      if (row.hasAttribute("data-wpt-idx") && Array.isArray(activeRouteData.waypoints)) {
+        const idx = parseInt(row.getAttribute("data-wpt-idx"), 10);
+        const wp = activeRouteData.waypoints[idx];
+        if (!wp) return;
+        if (typeof switchToTab === "function") switchToTab("tab-ntm");
+        setTimeout(() => {
+          if (leafletMap) {
+            leafletMap.invalidateSize();
+            if (typeof setOverlayActive === "function") {
+              setOverlayActive("route", true, leafletMap);
+            }
+            leafletMap.flyTo([wp.lat, wp.lon], Math.max(leafletMap.getZoom(), 11), { duration: 0.8 });
           }
-          const b = L.latLngBounds([[leg.fromLat, leg.fromLon], [leg.toLat, leg.toLon]]);
-          if (b.isValid()) leafletMap.fitBounds(b.pad(0.25));
-        }
-      }, 200);
+        }, 200);
+      } else if (row.hasAttribute("data-leg-idx") && Array.isArray(activeRouteData.legs)) {
+        const idx = parseInt(row.getAttribute("data-leg-idx"), 10);
+        const leg = activeRouteData.legs[idx];
+        if (!leg) return;
+        if (typeof switchToTab === "function") switchToTab("tab-ntm");
+        setTimeout(() => {
+          if (leafletMap) {
+            leafletMap.invalidateSize();
+            if (typeof setOverlayActive === "function") {
+              setOverlayActive("route", true, leafletMap);
+            }
+            const b = L.latLngBounds([[leg.fromLat, leg.fromLon], [leg.toLat, leg.toLon]]);
+            if (b.isValid()) leafletMap.fitBounds(b.pad(0.25));
+          }
+        }, 200);
+      }
     });
   }
 

@@ -8739,6 +8739,14 @@ body.light-theme .setnews-reader-dialog {
     flex: 0 0 214px !important;
     align-items: stretch !important;
     padding: 0.85rem 0.55rem !important;
+    z-index: 12050 !important;
+    position: sticky !important;
+    background: rgba(8, 14, 32, 0.98) !important;
+    box-shadow: 8px 0 28px rgba(0, 0, 0, 0.45);
+  }
+  .app-content {
+    position: relative;
+    z-index: 1;
   }
   .nav-sidebar.routes-tree-open .nav-item {
     width: 100% !important;
@@ -9477,6 +9485,130 @@ body.light-theme .setnews-reader-dialog {
   background: rgba(14, 165, 233, 0.08);
 }
 
+/* SetRoute Waypoint Schedule Table */
+.sr-wpts-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.75);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .sr-wpts-table-wrap {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.sr-wpts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.sr-wpts-table th {
+  padding: 8px 8px;
+  font-weight: 700;
+  font-size: 0.63rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  white-space: nowrap;
+}
+
+[data-theme="light"] .sr-wpts-table th {
+  background: #f1f5f9;
+  color: #64748b;
+  border-bottom-color: #e2e8f0;
+}
+
+.sr-wpts-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  color: #cbd5e1;
+  vertical-align: middle;
+}
+
+[data-theme="light"] .sr-wpts-table td {
+  border-bottom-color: #e2e8f0;
+  color: #334155;
+}
+
+.sr-wpt-row {
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.sr-wpt-row:hover {
+  background: rgba(56, 189, 248, 0.12) !important;
+}
+
+[data-theme="light"] .sr-wpt-row:hover {
+  background: rgba(2, 132, 199, 0.08) !important;
+}
+
+.sr-wpt-row:last-child td {
+  border-bottom: none;
+}
+
+.sr-wpt-num-badge {
+  display: inline-block;
+  font-weight: 800;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.70rem;
+  color: #38bdf8;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  text-align: center;
+  min-width: 24px;
+}
+
+.sr-wpt-num-badge.dep {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.sr-wpt-num-badge.dest {
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.35);
+}
+
+.sr-wpt-coords {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  line-height: 1.25;
+}
+
+[data-theme="light"] .sr-wpt-coords {
+  color: #64748b;
+}
+
+.sr-wpt-name {
+  font-weight: 600;
+  color: #f8fafc;
+  font-size: 0.72rem;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-theme="light"] .sr-wpt-name {
+  color: #0f172a;
+}
+
+
 @media (max-width: 1024px) {
   .setroute-right-drawer {
     width: 380px;
@@ -10171,3 +10303,108 @@ body.light-theme .setnews-reader-dialog {
   border-radius: 3px;
 }
 
+
+
+/* SetSail mobile dock polish */
+@media (max-width: 768px) {
+  .nav-sidebar {
+    justify-content: space-evenly !important;
+    gap: 0 !important;
+    padding: 0 0.35rem !important;
+  }
+  .nav-item,
+  .nav-settings-item,
+  .nav-route-group {
+    flex: 1 1 0 !important;
+    max-width: 72px !important;
+    margin: 0 !important;
+    width: auto !important;
+  }
+  .nav-item .tooltip,
+  .nav-settings-item .tooltip {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  .excel-overlay-dock .excel-tab {
+    margin-left: 0 !important;
+  }
+  .excel-tab-route {
+    margin-left: 0 !important;
+  }
+  .excel-tabs-scroll {
+    justify-content: space-evenly;
+    gap: 4px;
+  }
+}
+
+
+/* v5.11 — basemap spinner REPLACES Layers icon until tiles fully loaded */
+.ntm-layer-thumb-btn.is-loading .ntm-layer-thumb-preview,
+.ntm-chart-layer-selector.is-loading-base .ntm-layer-trigger-btn .ntm-layer-thumb-preview,
+.ntm-layer-trigger-btn.is-loading .ntm-layer-thumb-preview {
+  position: relative;
+}
+.ntm-layer-trigger-btn.is-loading .ntm-layer-thumb-preview > svg,
+.ntm-chart-layer-selector.is-loading-base .ntm-layer-trigger-btn .ntm-layer-thumb-preview > svg,
+.ntm-layer-thumb-btn.is-loading .ntm-layer-thumb-preview > svg {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+.ntm-layer-thumb-btn.is-loading .ntm-layer-thumb-preview::after,
+.ntm-chart-layer-selector.is-loading-base .ntm-layer-trigger-btn .ntm-layer-thumb-preview::after,
+.ntm-layer-trigger-btn.is-loading .ntm-layer-thumb-preview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(56,189,248,0.22);
+  border-top-color: #38bdf8;
+  border-right-color: #7dd3fc;
+  animation: setsailSpin 0.65s linear infinite;
+  box-shadow: 0 0 10px rgba(56,189,248,0.35);
+  z-index: 2;
+}
+@keyframes setsailSpin { to { transform: rotate(360deg); } }
+
+/* SetNews flame — keep brand orange/cyan (don't inherit grey nav stroke) */
+.nav-item .setsail-icon.setsail-icon-flame,
+.setsail-icon.setsail-icon-flame {
+  stroke: none !important;
+  filter: none !important;
+}
+.nav-item .setsail-icon.setsail-icon-flame path:nth-child(1),
+.setsail-icon.setsail-icon-flame path:nth-child(1) {
+  stroke: #f05a36 !important;
+  stroke-width: 1.75 !important;
+  fill: rgba(240, 90, 54, 0.18) !important;
+}
+.nav-item .setsail-icon.setsail-icon-flame path:nth-child(2),
+.setsail-icon.setsail-icon-flame path:nth-child(2) {
+  stroke: #38bdf8 !important;
+  stroke-width: 1.55 !important;
+  fill: none !important;
+}
+.nav-item:hover .setsail-icon.setsail-icon-flame path:nth-child(1),
+.nav-item.active .setsail-icon.setsail-icon-flame path:nth-child(1) {
+  stroke: #ff6a3d !important;
+  fill: rgba(255, 106, 61, 0.28) !important;
+  filter: drop-shadow(0 0 6px rgba(240, 90, 54, 0.55));
+}
+.nav-item:hover .setsail-icon.setsail-icon-flame path:nth-child(2),
+.nav-item.active .setsail-icon.setsail-icon-flame path:nth-child(2) {
+  stroke: #7dd3fc !important;
+}
+.excel-tab.is-loading .excel-tab-spinner {
+  display: inline-block !important;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(56,189,248,0.25);
+  border-top-color: #38bdf8;
+  animation: setsailSpin 0.7s linear infinite;
+  margin-right: 4px;
+}

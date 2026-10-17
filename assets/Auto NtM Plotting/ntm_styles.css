@@ -9485,6 +9485,130 @@ body.light-theme .setnews-reader-dialog {
   background: rgba(14, 165, 233, 0.08);
 }
 
+/* SetRoute Waypoint Schedule Table */
+.sr-wpts-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.75);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .sr-wpts-table-wrap {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.sr-wpts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.sr-wpts-table th {
+  padding: 8px 8px;
+  font-weight: 700;
+  font-size: 0.63rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  white-space: nowrap;
+}
+
+[data-theme="light"] .sr-wpts-table th {
+  background: #f1f5f9;
+  color: #64748b;
+  border-bottom-color: #e2e8f0;
+}
+
+.sr-wpts-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  color: #cbd5e1;
+  vertical-align: middle;
+}
+
+[data-theme="light"] .sr-wpts-table td {
+  border-bottom-color: #e2e8f0;
+  color: #334155;
+}
+
+.sr-wpt-row {
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.sr-wpt-row:hover {
+  background: rgba(56, 189, 248, 0.12) !important;
+}
+
+[data-theme="light"] .sr-wpt-row:hover {
+  background: rgba(2, 132, 199, 0.08) !important;
+}
+
+.sr-wpt-row:last-child td {
+  border-bottom: none;
+}
+
+.sr-wpt-num-badge {
+  display: inline-block;
+  font-weight: 800;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.70rem;
+  color: #38bdf8;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  text-align: center;
+  min-width: 24px;
+}
+
+.sr-wpt-num-badge.dep {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.sr-wpt-num-badge.dest {
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.35);
+}
+
+.sr-wpt-coords {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  line-height: 1.25;
+}
+
+[data-theme="light"] .sr-wpt-coords {
+  color: #64748b;
+}
+
+.sr-wpt-name {
+  font-weight: 600;
+  color: #f8fafc;
+  font-size: 0.72rem;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-theme="light"] .sr-wpt-name {
+  color: #0f172a;
+}
+
+
 @media (max-width: 1024px) {
   .setroute-right-drawer {
     width: 380px;
