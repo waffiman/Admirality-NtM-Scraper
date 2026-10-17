@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-17T15:06:19Z",
-  "generatedAt": "2026-10-17T15:06:19Z",
+  "updatedAt": "2026-10-17T20:14:50Z",
+  "generatedAt": "2026-10-17T20:14:50Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -13,6 +13,177 @@
   ],
   "totalArticles": 70,
   "articles": [
+    {
+      "id": "SN-070854842C",
+      "title": "Arkas redirects Russia Express to St. Petersburg",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/arkas-redirects-russia-express-to-st-petersburg/",
+      "publishedAt": "2026-10-17T19:00:01Z",
+      "category": "Navigation & Safety",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2025/05/Arkas-vessel-300x204.jpg",
+      "summary": "Arkas Line has redirected its Russia Express Service (REX) from Novorossiysk to St. Petersburg, restoring Russian port coverage through the Baltic, according to DynaLiners. The carrier initially suspended the service following the sinking of the FESCO-operated containership FESCO Yanina near Novorossiysk in August....",
+      "body": "Services Top Right Arkas redirects Russia Express to St. Petersburg October 17, 2026 Facebook Twitter WhatsApp Linkedin Email Arkas Line has redirected its Russia Express Service (REX) from Novorossiysk to St. Petersburg, restoring Russian port coverage through the Baltic, according to DynaLiners. The carrier initially suspended the service following the sinking of the FESCO-operated containership FESCO Yanina near Novorossiysk in August. Under the revised configuration, Arkas has removed Novorossiysk from the REX rotation and introduced St. Petersburg as the service’s Russian gateway. Two container ships with an average capacity of approximately 1,200 TEUs operate the service at intervals of two to three weeks. Revised REX rotation The updated port sequence is: Alexandria – Mersin – St. Petersburg – Alexandria. The change shifts the Russia Express Service away from the Black Sea while maintaining connections between Russia, Türkiye and Egypt through the Baltic port of St. Petersburg. TAGS Arkas Line Facebook Twitter WhatsApp Linkedin Email Previous article Port of Montreal and Adani Group renew collaboration agreement Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "Services Top Right Arkas redirects Russia Express to St.",
+        "Petersburg October 17, 2026 Facebook Twitter WhatsApp Linkedin Email Arkas Line has redirected its Russia Express Service (REX) from Novorossiysk to St.",
+        "Petersburg, restoring Russian port coverage through the Baltic, according to DynaLiners."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-DDC971A725",
+      "title": "Port of Montreal and Adani Group renew collaboration agreement",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/port-of-montreal-and-adani-group-renew-collaboration-agreement/",
+      "publishedAt": "2026-10-17T17:20:33Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "India & Indian Ocean"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/2026-10-14-signature-mc-galarneau-adani-low-300x244.jpg",
+      "summary": "The Montreal Port Authority and the Adani Group have renewed their collaboration agreement during Team Canada’s trade mission to India, signed in Mumbai by Captain Sandeep Mehta representing the Adani Group and Marie-Claude Galarneau, Executive Vice-President and Chief Operating and Transformation Officer of the MPA,...",
+      "body": "The Montreal Port Authority and the Adani Group have renewed their collaboration agreement during Team Canada’s trade mission to India, signed in Mumbai by Captain Sandeep Mehta representing the Adani Group and Marie-Claude Galarneau, Executive Vice-President and Chief Operating and Transformation Officer of the MPA, in the presence of Canadian Minister of International Trade Maninder Sidhu. The renewal builds on a partnership that began with the first collaboration agreement in 2018. India has become one of the Port of Montreal’s most significant trading partners, ranking second among the port’s markets in 2025 with 1 million tonnes of goods exchanged, comprising 60 percent exports and 40% imports. Principal commodities include food products, ceramic products and plastics on the import side, and forestry and metal products on the export side. The renewed agreement focuses on developing trade through the Mundra-Montreal maritime corridor, joint promotion and information sharing to identify new business opportunities, sharing port and technological expertise to improve operations and road and rail transportation fluidity, and exploring new areas of collaboration including vehicle transportation. As part of its strengthened commitment to the Indian market, the MPA has appointed Prakash Tulsiani as its new agent in India, facilitating engagement with shipping lines, freight forwarders and importing and exporting companies and raising awareness of business development opportunities between the two countries. The initiative supports trade diversification and supply chain resilience against the backdrop of a changing global trade environment, with India projected by the IMF to become the world’s fourth-largest economy by 2027 to 2028. MPA President and CEO Paul Bird described India as a major trading partner and expressed ambition to facilitate trade and strengthen Montreal’s role as a strategic gateway between India and the economic heart of North America. Minister Sidhu highlighted the opportunity for Canadian businesses to reach one of the world’s fastest-growing economies, noting progress toward a Comprehensive Economic Partnership Agreement with India.",
+      "takeaways": [
+        "The renewal builds on a partnership that began with the first collaboration agreement in 2018.",
+        "India has become one of the Port of Montreal’s most significant trading partners, ranking second among the port’s markets in 2025 with 1 million tonnes of goods exchanged, comprising 60 percent exports and 40% imports.",
+        "Principal commodities include food products, ceramic products and plastics on the import side, and forestry and metal products on the export side."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-4C124A78C6",
+      "title": "Evergreen overhauls intra-Asia KTP service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/evergreen-overhauls-intra-asia-ktp-service/",
+      "publishedAt": "2026-10-17T15:41:07Z",
+      "category": "Ports & Terminals",
+      "region": "China & East Asia",
+      "regions": [
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.6,
+        122.1
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2024/03/3d85a535-2166-cfe0-77ce-53a1a0d372a2-300x169.jpg",
+      "summary": "Evergreen will restructure its intra-Far East KTP service by adding calls at Xiamen, Ho Chi Minh City, Qinzhou and Taipei, according to DynaLiners. As part of the overhaul, the carrier will remove Shenzhen (Shekou), Kaohsiung and Manila North from the service rotation. The revised KTP rotation will be: Dalian –...",
+      "body": "Services Top Right Evergreen overhauls intra-Asia KTP service October 17, 2026 Facebook Twitter WhatsApp Linkedin Email Ever Top / Source: Courtesy of HRDD Evergreen will restructure its intra-Far East KTP service by adding calls at Xiamen, Ho Chi Minh City, Qinzhou and Taipei, according to DynaLiners. As part of the overhaul, the carrier will remove Shenzhen (Shekou), Kaohsiung and Manila North from the service rotation. The revised KTP rotation will be: Dalian – Tianjin – Qingdao – Xiamen – Hong Kong – Ho Chi Minh City – Laem Chabang – Qinzhou – Hong Kong – Taipei – Dalian The Kaohsiung–Manila North connection will instead be covered by Evergreen’s reinstated TMS service. TAGS EVERGREEN Facebook Twitter WhatsApp Linkedin Email Previous article How Bangladesh is dividing its ports among rival partners Next article Port of Montreal and Adani Group renew collaboration agreement Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "As part of the overhaul, the carrier will remove Shenzhen (Shekou), Kaohsiung and Manila North from the service rotation.",
+        "Operational Area: China & East Asia.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A109F0AD11",
+      "title": "Iran’s Guards Say Two Tankers Hit Mines In Strait Of Hormuz",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/irans-guards-say-two-tankers-hit-mines-in-strait-of-hormuz/",
+      "publishedAt": "2026-10-17T14:44:46Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Red Sea & Bab el-Mandeb"
+      ],
+      "tags": [
+        "tanker",
+        "container",
+        "port",
+        "hormuz"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "summary": "DUBAI, Oct 17 (Reuters) – Iran’s Revolutionary Guards Navy said on Saturday that two oil tankers had caught fire after hitting naval mines while crossing the Strait of Hormuz, the official Iranian news agency...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Vessels in the Strait of Hormuz near the beach of Bandar Abbas, Iran, October 6, 2026. Amirhosein Khorgooi/ISNA/via WANA (West Asia News Agency) via REUTERS DUBAI, Oct 17 (Reuters) – Iran’s Revolutionary Guards Navy said on Saturday that two oil tankers had caught fire after hitting naval mines while crossing the Strait of Hormuz , the official Iranian news agency IRNA reported. State media said both tankers were carrying about 2 million barrels of crude oil. There was no independent confirmation of the reports. Read Also: Fog of War Deepens in Hormuz as UKMTO Says Most Ship Attacks Go Unreported IRNA reported that the vessels had switched off their positioning and radar systems and attempted to use an unauthorized route through the strategic waterway. The second vessel was left immobilized after striking a mine, it added. State media earlier reported that the other tanker had also struck a mine while attempting to transit the strait via a route not authorized by Iran. The incidents come amid heightened tensions around the strait, a key oil shipping route. Disruptions to shipping in the waterway due to the US-Israeli war on Iran have boosted global energy prices and inflation. Maritime officials said on Wednesday that a container ship and a dry bulk carrier sank near the strait after being hit by projectiles in separate incidents. Related Article: Containership Sinks as Hormuz Attacks Spiral Out of Control Attacks around the waterway have surged over the past two weeks, with Iran saying it is stepping up strikes in response to the US blockade of itsports and tougher sanctions imposed last month. (Reporting by Menna Alaa El-Din. Additional reporting by Dubai newsroom. Editing by Sam Holmes and Mark Potter) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Conflicting traffic figures and competing claims of control are making it increasingly difficult to establish what’s happening in the Strait of Hormuz, even as attacks on merchant shipping intensify. The... The cost ?of shipping oil on the largest tankers fell this week from record highs as demand eased following a wave of attacks on vessels in the Middle East and as the US considered easing sanctions on the so-called shadow fleet. The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Join the leading maritime news network Vessels in the Strait of Hormuz near the beach of Bandar Abbas, Iran, October 6, 2026.",
+        "State media said both tankers were carrying about 2 million barrels of crude oil."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-ADC40C9704",
+      "title": "Baltic Block Of Russian Grain May Open Black Sea, Latvia Says",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/baltic-block-of-russian-grain-may-open-black-sea-latvia-says/",
+      "publishedAt": "2026-10-17T14:21:57Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Rotterdam & North Sea",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "tanker",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "summary": "By Milda Seputyte and Aaron Eglitis Oct 16, 2026 (Bloomberg) –Europe should block the transit of Russian grain through Baltic ports as that may force Moscow to seek ways to open...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network General cargo vessel ABLE, one of the two vessels attacked in drone strikes in the Black Sea off NATO member Bulgaria, according to a October 6, 2026 statement by Bulgarian PM Radev, sails in Istanbul, Turkey, September 15, 2026, in this screengrab obtained from a handout video. Marine Traffic/Handout via REUTERS By Milda Seputyte and Aaron Eglitis Oct 16, 2026 (Bloomberg) –Europe should block the transit of Russian grain through Baltic ports as that may force Moscow to seek ways to open trading on the Black Sea, Latvian Prime Minister Andris Kulbergs said. Russia and Ukraine have attacked each other’s ports, terminals and shipping infrastructure in the Black Sea, sharply cutting exports of key commodities such as grain . Moscow has diverted some of these grain shipments to Latvian and Lithuanian ports over rail, sparking criticism in the Baltic countries, which are European Union and NATO members. “It’s needed that we put the right pressure in order for Russia to understand that they need themselves to open the Black Sea,” Kulbergs said in an interview in Brussels on Friday. Ukraine needs to be able to sell its grain, to partly fill in the financing gap its facing this winter , he added. Read Also: UK Tightens Russian Oil Sanctions as U.S. Weighs Relief Kulbergs said unilateral actions by the Baltic countries raised litigation risks and joined calls of Estonia and Lithuania for an EU ban. “ It’s in all of our interests ,” he said. “We’re now talking about money and support for Ukraine, which they need this winter. © 2026 Bloomberg L.P. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Britain has expanded its sanctions against Russia’s oil industry, targeting two more energy companies, a dozen shadow-fleet tankers and financial networks used to move money around Western restrictions. The measures,... Eleven sailors were missing at sea on Tuesday from a ship sunk by a drone attack off the coast of Bulgaria, possibly the second deadly sinking of a cargo vessel in the area in a week, prompting Bulgaria to summon Russia's ambassador. President Donald Trump said Friday that Russia has agreed to release millions of tons of diesel fuel into U.S. and global markets following a telephone call with Russian President Vladimir... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Russia and Ukraine have attacked each other’s ports, terminals and shipping infrastructure in the Black Sea, sharply cutting exports of key commodities such as grain .",
+        "Moscow has diverted some of these grain shipments to Latvian and Lithuanian ports over rail, sparking criticism in the Baltic countries, which are European Union and NATO members."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
     {
       "id": "SN-720A92895E",
       "title": "How Bangladesh is dividing its ports among rival partners",
@@ -40,7 +211,7 @@
       "navarea": "XI",
       "image": "https://container-news.com/wp-content/uploads/2023/06/MOL-ship-at-Payra-Port-e1687435165198-300x191.jpg",
       "summary": "Danish equity, Gulf operators, Japanese aid and Chinese credit each have a role and Dhaka keeps ownership of them all. In the space of six weeks, Bangladesh has signed three port deals with three different partners.",
-      "body": "CN Premium Articles Sticky News How Bangladesh is dividing its ports among rival partners October 17, 2026 Facebook Twitter WhatsApp Linkedin Email A MOL container ship at Payra Port in Bangladesh / Source: Payra Sea Port, Bangladesh (Facebook Page) Danish equity, Gulf operators, Japanese aid and Chinese credit each have a role and Dhaka keeps ownership of them all. In the space of six weeks, Bangladesh has signed three port deals with three different partners. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS Bangladesh Dhaka Indo-Pacific INVESTMENTS Laldia container terminal Facebook Twitter WhatsApp Linkedin Email Previous article Signal Ocean acquires maritime communications specialist Lgmar Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
+      "body": "CN Premium Articles Sticky News How Bangladesh is dividing its ports among rival partners October 17, 2026 Facebook Twitter WhatsApp Linkedin Email A MOL container ship at Payra Port in Bangladesh / Source: Payra Sea Port, Bangladesh (Facebook Page) Danish equity, Gulf operators, Japanese aid and Chinese credit each have a role and Dhaka keeps ownership of them all. In the space of six weeks, Bangladesh has signed three port deals with three different partners. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS Bangladesh Dhaka Indo-Pacific INVESTMENTS Laldia container terminal Facebook Twitter WhatsApp Linkedin Email Previous article Signal Ocean acquires maritime communications specialist Lgmar Next article Evergreen overhauls intra-Asia KTP service Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
       "takeaways": [
         "In the space of six weeks, Bangladesh has signed three port deals with three different partners.",
         "This content is locked Select a CN Premium Subscription Package To Unlock The Content!",
@@ -252,107 +423,6 @@
         "GXO Logistics has expanded its partnership with European retailer Action by opening operations at a new distribution center in Onnaing, northern France.",
         "The 80,000 sqm facility is the third Action distribution center managed by GXO in France.",
         "It will serve stores in France and Belgium, with capacity to supply up to 290 locations once fully operational."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-61F7A0DA5E",
-      "title": "Tarros restores direct Italy–Thessaloniki connection",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/tarros-restores-direct-italy-thessaloniki-connection/",
-      "publishedAt": "2026-10-17T01:12:20Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/Vento-di-Maestrale-300x200.jpg",
-      "summary": "Tarros Group will restore a direct container shipping connection between Italy and Thessaloniki as part of an expansion of its Mediterranean network. The carrier will deploy the Vento di Maestrale on the service, with the vessel scheduled to depart from Salerno for Thessaloniki. The new Italy–Thessaloniki connection...",
-      "body": "Services Top Right Tarros restores direct Italy–Thessaloniki connection October 17, 2026 Facebook Twitter WhatsApp Linkedin Email Vento di Maestrale; Source: VesselFinder Tarros Group will restore a direct container shipping connection between Italy and Thessaloniki as part of an expansion of its Mediterranean network. The carrier will deploy the Vento di Maestrale on the service, with the vessel scheduled to depart from Salerno for Thessaloniki. The new Italy–Thessaloniki connection will directly link the Italian ports of Salerno, La Spezia and Genoa with the northern Greek gateway. After Thessaloniki, the service will continue to the principal ports in the Marmara Sea and Aliaga near Izmir. Thessaloniki strengthens regional connectivity Tarros said Thessaloniki will serve as a gateway for cargo moving to and from the Balkans and Bulgaria. Customers will also gain access to North African destinations through the carrier’s transshipment hubs. The service will offer a range of container equipment for cargo moving across the Mediterranean network. TAGS Tarros Group Facebook Twitter WhatsApp Linkedin Email Previous article Capital Maritime Finance sets final IPO price after strong demand Next article GXO expands Action partnership with new distribution center in France Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The carrier will deploy the Vento di Maestrale on the service, with the vessel scheduled to depart from Salerno for Thessaloniki.",
-        "The new Italy–Thessaloniki connection will directly link the Italian ports of Salerno, La Spezia and Genoa with the northern Greek gateway.",
-        "After Thessaloniki, the service will continue to the principal ports in the Marmara Sea and Aliaga near Izmir."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-7D2C1B56EC",
-      "title": "Capital Maritime Finance sets final IPO price after strong demand",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/capital-maritime-finance-sets-final-ipo-price-after-strong-demand/",
-      "publishedAt": "2026-10-16T23:00:53Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/01/CAPITAL-ACTIVE-300x179.png",
-      "summary": "Capital Maritime Finance Corp. has set the final offer price for its Greek public offering at €7.50 per share after investor demand exceeded €1 billion. The public offering closed on 15 October 2026 and covered 40 million new common registered voting shares. The final price applies equally to qualified investors,...",
-      "body": "Capital Maritime Finance Corp. has set the final offer price for its Greek public offering at €7.50 per share after investor demand exceeded €1 billion. The public offering closed on 15 October 2026 and covered 40 million new common registered voting shares. The final price applies equally to qualified investors, cornerstone investors and retail investors. Valid demand reached approximately 144.7 million shares, equivalent to €1.086 billion at the final offer price. According to the official announcement, the offering was oversubscribed by more than 4.34 times against the company’s initial fundraising target of approximately €250 million. Following the strong demand, Capital Maritime Finance exercised an option approved by its Board of Directors to increase the total amount raised to €300 million. The company is seeking admission of all its shares to the Main Market of Euronext Athens. Details concerning the allocation of the new shares among investor categories are scheduled to be announced on 19 October 2026. The proceeds will support Capital Maritime Finance’s containership expansion programme. The company currently owns 13 vessels with an aggregate capacity of 27,891 TEUs and plans to add 23 containerships through 2028, bringing its intended fleet to 36 vessels.",
-      "takeaways": [
-        "has set the final offer price for its Greek public offering at €7.50 per share after investor demand exceeded €1 billion.",
-        "The public offering closed on 15 October 2026 and covered 40 million new common registered voting shares.",
-        "The final price applies equally to qualified investors, cornerstone investors and retail investors."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-9229FD3932",
-      "title": "EUROGATE secures €82 million financing for Wilhelmshaven automation project",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/eurogate-secures-e82-million-financing-for-wilhelmshaven-automation-project/",
-      "publishedAt": "2026-10-16T21:04:57Z",
-      "category": "Weather & Cyclones",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "autonomous"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/27.-August-2026_0000766__c_Wolfhard_Scheer_Eurogate-WHV_696x392-300x169.jpg",
-      "summary": "EUROGATE has secured an €82 million loan from KfW IPEX-Bank to develop and test automated container handling systems at its Wilhelmshaven terminal in Germany. The financing will support a pilot project focused on digital technology, autonomous vehicles and terminal automation. EUROGATE aims to improve container...",
-      "body": "EUROGATE has secured an €82 million loan from KfW IPEX-Bank to develop and test automated container handling systems at its Wilhelmshaven terminal in Germany. The financing will support a pilot project focused on digital technology, autonomous vehicles and terminal automation. EUROGATE aims to improve container handling efficiency, reduce operating costs and lower fuel consumption. The project could also support future automation plans at other German EUROGATE terminals. Testing automated container handling As part of the project, autonomous terminal trucks (ATTs) will transport containers between the quay and automated stacking cranes (ASCs). EUROGATE will also develop its own terminal management software to support automated operations. The company plans to test the technology under operating conditions before deciding whether to introduce it at other locations. The project also includes the electrification of container handling equipment. This is expected to reduce fossil fuel consumption while supporting more efficient terminal operations. According to KfW IPEX-Bank, the pilot will help assess the performance and operational readiness of the planned automated handling system. Potential expansion to other German terminals The results from Wilhelmshaven will help EUROGATE decide whether to expand the technology across its German network. Hamburg is expected to be the first location considered for a future rollout, followed by other EUROGATE terminals in Germany. However, these plans will depend on the outcome of the pilot project. “Together with EUROGATE, we are sending a clear signal in favour of modernising port logistics and the associated strengthening of Germany as a business location,” said Aida Welker, Member of the Management Board of KfW IPEX-Bank. EUROGATE Chief Financial Officer Kristian Ludwig also highlighted the bank’s role in supporting the financing of the project. The investment will allow EUROGATE to test how autonomous transport, automated cranes and digital systems can work together before considering wider deployment.",
-      "takeaways": [
-        "EUROGATE has secured an €82 million loan from KfW IPEX-Bank to develop and test automated container handling systems at its Wilhelmshaven terminal in Germany.",
-        "The financing will support a pilot project focused on digital technology, autonomous vehicles and terminal automation.",
-        "EUROGATE aims to improve container handling efficiency, reduce operating costs and lower fuel consumption."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1037,7 +1107,7 @@
       "navarea": "IX",
       "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
       "summary": "The cost ?of shipping oil on the largest tankers fell this week from record highs as demand eased following a wave of attacks on vessels in the Middle East and as the US considered easing sanctions on the so-called shadow fleet.",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo: Shutterstock/Sven Hansche LONDON, Oct 16 (Reuters) – The cost ?of shipping oil on the largest tankers fell this week from record highs as demand eased following a wave of attacks on vessels in the Middle East and as the US considered easing sanctions on the so-called shadow fleet. Freight rates ?for supertankers, also known as very large crude carriers (VLCCs), carrying oil ?from the Gulf of Oman to China fell to about 776 ?on the Worldscale basis, according to Baltic Exchange ?data. That was down from 841 last week, the highest since the rate was launched earlier this year, following gains since the outbreak of the Iran war. “Gulf of Oman VLCC rates dropped as demand on that route has softened since the fresh attacks, as higher Middle East Gulf freight rates and subsequently lower export volumes have reduced demand on this route,” said Kpler analyst Matthew Wright. Trump administration comments about potentially removing sanctions on some shadow-fleet tankers drove freight rates lower, Sparta Commodities analyst Michael Ryan said, adding a removal would increase the number of ships that can carry oil. Despite the drop, rates remain close to record highs. The US-Israeli war on Iran has increased the use of ship-to-ship transfers to move oil out of the Strait of Hormuz, boosting demand for tankers. If elevated shipping costs persist, they could add to inflationary pressures and raise costs for businesses and consumers. Rates have also eased from record highs on other routes this week, such as from West Africa to Asia. (Reporting by Enes Tunagur in London. Editing by Alex Lawler and Mark Potter) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Conflicting traffic figures and competing claims of control are making it increasingly difficult to establish what’s happening in the Strait of Hormuz, even as attacks on merchant shipping intensify. The... The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the... U.S. Central Command says the United States and its regional partners control the Strait of Hormuz, citing more than 40 commercial ships moving through the waterway in the past 24... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo: Shutterstock/Sven Hansche LONDON, Oct 16 (Reuters) – The cost ?of shipping oil on the largest tankers fell this week from record highs as demand eased following a wave of attacks on vessels in the Middle East and as the US considered easing sanctions on the so-called shadow fleet. Freight rates ?for supertankers, also known as very large crude carriers (VLCCs), carrying oil ?from the Gulf of Oman to China fell to about 776 ?on the Worldscale basis, according to Baltic Exchange ?data. That was down from 841 last week, the highest since the rate was launched earlier this year, following gains since the outbreak of the Iran war. “Gulf of Oman VLCC rates dropped as demand on that route has softened since the fresh attacks, as higher Middle East Gulf freight rates and subsequently lower export volumes have reduced demand on this route,” said Kpler analyst Matthew Wright. Trump administration comments about potentially removing sanctions on some shadow-fleet tankers drove freight rates lower, Sparta Commodities analyst Michael Ryan said, adding a removal would increase the number of ships that can carry oil. Despite the drop, rates remain close to record highs. The US-Israeli war on Iran has increased the use of ship-to-ship transfers to move oil out of the Strait of Hormuz, boosting demand for tankers. If elevated shipping costs persist, they could add to inflationary pressures and raise costs for businesses and consumers. Rates have also eased from record highs on other routes this week, such as from West Africa to Asia. (Reporting by Enes Tunagur in London. Editing by Alex Lawler and Mark Potter) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! DUBAI, Oct 17 (Reuters) – Iran’s Revolutionary Guards Navy said on Saturday that two oil tankers had caught fire after hitting naval mines while crossing the Strait of Hormuz, the official Iranian news agency... Conflicting traffic figures and competing claims of control are making it increasingly difficult to establish what’s happening in the Strait of Hormuz, even as attacks on merchant shipping intensify. The... The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
         "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
         "Freight rates ?for supertankers, also known as very large crude carriers (VLCCs), carrying oil ?from the Gulf of Oman to China fell to about 776 ?on the Worldscale basis, according to Baltic Exchange ?data.",
@@ -1111,7 +1181,7 @@
       "navarea": "IX",
       "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
       "summary": "The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the...",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo credit: Shutterstock/Igor Grochev The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the prolonged Strait of Hormuz crisis continues to strain global energy supplies. The decision, announced Thursday following a meeting of the agency’s Governing Board, comes amid mounting concerns over diesel shortages, high fuel prices and renewed attacks on commercial shipping in the Middle East. According to the IEA’s statement , member countries have already released approximately 330 million barrels under the emergency stock release agreed in March in response to the Iran war. The agency said it would take steps to accelerate the remaining releases, with more than 20 million barrels of diesel to be made available as soon as possible. The original agreement called for a record 400 million barrels of oil and petroleum products. However, some member countries have released more than initially pledged, while others plan to do the same, meaning the final total is expected to exceed 400 million barrels. The latest decision primarily speeds up previously committed releases rather than establishing an entirely new emergency stock drawdown. The IEA did not provide a specific timetable for completing the releases. The renewed push comes as the agency warns that the global diesel shortage could persist well into 2027. In its October Oil Market Report , published Wednesday, the IEA said disruptions to production and exports from the Middle East and Russia removed approximately 1.3 million barrels per day of diesel and gasoil exports from the market in September compared with a year earlier. While crude oil shipments from the Persian Gulf have recovered significantly from their lows earlier in the conflict, refined petroleum product exports remain severely constrained. Middle Eastern refined product shipments averaged 1.9 million barrels per day in September, compared with 4.7 million barrels per day before the war. Meanwhile, total oil flows through the Strait of Hormuz reached 10.9 million barrels per day during September, supported by increased tanker movements and ship-to-ship transfers in the Gulf of Oman. Attacks on commercial vessels have intensified in October, including the sinking of the Singapore-flagged containership GFS Pride after it was struck by a projectile while transiting the Strait of Hormuz. The continued disruption is also eroding global oil inventories. The IEA estimates that observed oil stocks at the end of September were 509 million barrels below their pre-war levels, leaving the market with reduced protection against further supply shocks. Despite a rebound in Gulf crude exports, the agency expects constrained diesel supplies and elevated transportation costs to continue weighing on global energy markets. It forecasts global oil demand will decline by 2.6 million barrels per day in 2026 as higher prices and weaker economic activity take their toll. The Governing Board also called on member countries with oil production and refining capacity to increase supplies, particularly diesel, and emphasized the importance of maintaining the free flow of energy trade. The IEA said it would continue monitoring the emergency releases and provide further recommendations to G7 leaders based on updated market assessments, with particular attention to diesel supplies. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Conflicting traffic figures and competing claims of control are making it increasingly difficult to establish what’s happening in the Strait of Hormuz, even as attacks on merchant shipping intensify. The... The cost ?of shipping oil on the largest tankers fell this week from record highs as demand eased following a wave of attacks on vessels in the Middle East and as the US considered easing sanctions on the so-called shadow fleet. Iran has managed to export some liquefied petroleum gas and jet fuel since July, despite a US naval blockade, shipping intelligence showed and people involved in security said. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo credit: Shutterstock/Igor Grochev The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the prolonged Strait of Hormuz crisis continues to strain global energy supplies. The decision, announced Thursday following a meeting of the agency’s Governing Board, comes amid mounting concerns over diesel shortages, high fuel prices and renewed attacks on commercial shipping in the Middle East. According to the IEA’s statement , member countries have already released approximately 330 million barrels under the emergency stock release agreed in March in response to the Iran war. The agency said it would take steps to accelerate the remaining releases, with more than 20 million barrels of diesel to be made available as soon as possible. The original agreement called for a record 400 million barrels of oil and petroleum products. However, some member countries have released more than initially pledged, while others plan to do the same, meaning the final total is expected to exceed 400 million barrels. The latest decision primarily speeds up previously committed releases rather than establishing an entirely new emergency stock drawdown. The IEA did not provide a specific timetable for completing the releases. The renewed push comes as the agency warns that the global diesel shortage could persist well into 2027. In its October Oil Market Report , published Wednesday, the IEA said disruptions to production and exports from the Middle East and Russia removed approximately 1.3 million barrels per day of diesel and gasoil exports from the market in September compared with a year earlier. While crude oil shipments from the Persian Gulf have recovered significantly from their lows earlier in the conflict, refined petroleum product exports remain severely constrained. Middle Eastern refined product shipments averaged 1.9 million barrels per day in September, compared with 4.7 million barrels per day before the war. Meanwhile, total oil flows through the Strait of Hormuz reached 10.9 million barrels per day during September, supported by increased tanker movements and ship-to-ship transfers in the Gulf of Oman. Attacks on commercial vessels have intensified in October, including the sinking of the Singapore-flagged containership GFS Pride after it was struck by a projectile while transiting the Strait of Hormuz. The continued disruption is also eroding global oil inventories. The IEA estimates that observed oil stocks at the end of September were 509 million barrels below their pre-war levels, leaving the market with reduced protection against further supply shocks. Despite a rebound in Gulf crude exports, the agency expects constrained diesel supplies and elevated transportation costs to continue weighing on global energy markets. It forecasts global oil demand will decline by 2.6 million barrels per day in 2026 as higher prices and weaker economic activity take their toll. The Governing Board also called on member countries with oil production and refining capacity to increase supplies, particularly diesel, and emphasized the importance of maintaining the free flow of energy trade. The IEA said it would continue monitoring the emergency releases and provide further recommendations to G7 leaders based on updated market assessments, with particular attention to diesel supplies. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! DUBAI, Oct 17 (Reuters) – Iran’s Revolutionary Guards Navy said on Saturday that two oil tankers had caught fire after hitting naval mines while crossing the Strait of Hormuz, the official Iranian news agency... Conflicting traffic figures and competing claims of control are making it increasingly difficult to establish what’s happening in the Strait of Hormuz, even as attacks on merchant shipping intensify. The... The cost ?of shipping oil on the largest tankers fell this week from record highs as demand eased following a wave of attacks on vessels in the Middle East and as the US considered easing sanctions on the so-called shadow fleet. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
         "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
         "The decision, announced Thursday following a meeting of the agency’s Governing Board, comes amid mounting concerns over diesel shortages, high fuel prices and renewed attacks on commercial shipping in the Middle East.",
@@ -1128,29 +1198,31 @@
       "sourceRegion": "USA / Maritime Tech",
       "url": "https://www.marinelink.com/news/american-marine-build-report-october-543744",
       "publishedAt": "2026-10-16T15:39:10Z",
-      "category": "Ports & Terminals",
-      "region": "US West Coast & Pacific",
+      "category": "Weather & Cyclones",
+      "region": "US Gulf & Port of Houston",
       "regions": [
+        "US Gulf & Port of Houston",
         "US West Coast & Pacific"
       ],
       "tags": [
-        "port"
+        "port",
+        "uscg"
       ],
       "coords": [
-        33.73,
-        -118.26
+        29.35,
+        -94.78
       ],
-      "navarea": "XII",
+      "navarea": "IV",
       "image": "https://images.marinelink.com/images/maritime/w150/credit-aam-174395.jpeg",
       "summary": "All American Marine recently launched M/V North Star, the second high-speed, long-range eco-tour vessel built for Phillips Cruises & Tours. Like her sistership, Chugach Express, North Star will operate from Whittier, Alaska, carrying passengers…",
-      "body": "All American Marine recently launched M/V North Star, the second high-speed, long-range eco-tour vessel built for Phillips Cruises & Tours. Like her sistership, Chugach Express, North Star will operate from Whittier, Alaska, carrying passengers…",
+      "body": "All American Marine Build Report: October 2026 Maritime Activity Reports, Inc. Ron Wille, President, All American Marine October 16, 2026 Credit: AAM All American Marine recently launched M/V North Star, the second high-speed, long-range eco-tour vessel built for Phillips Cruises & Tours. Like her sistership, Chugach Express, North Star will operate from Whittier, Alaska, carrying passengers through the tidewater glaciers and wildlife-filled waters of Prince William Sound. The 84.5-foot, hydrofoil-assisted aluminum catamaran features a Teknicraft Design semi-displacement hull and is certified to USCG Subchapter T standards for up to 150 passengers. Her propulsion package mirrors that of Chugach Express: four MJP 350X waterjets driven by quad 800 mhp Scania DI16 082M engines, paired with Teknicraft’s dynamic hydrofoil system and wave-piercing bow. A repeat order is performance data in its clearest form. After operating Chugach Express through three demanding Alaska seasons, with full passenger loads, long days, and changing conditions. Phillips knew this platform could deliver. One of the most notable changes is fuel capacity with Chugach Express carrying 1,200 gallons, while North Star carries 1,600. The increase did not require a redesign; it was made possible by proven performance. Chugach Express demonstrated that the hull could carry additional weight without sacrificing speed, efficiency, or ride quality. The second vessel uses that margin to add 400 gallons and extend its operating range. But range is only part of the story. The Teknicraft hull and dynamic hydrofoil system are designed to reduce vessel accelerations underway, while the hull form and foil provide added motion damping at rest. For passengers, that means a more comfortable ride. For operators, it means a broader usable weather window, supporting more operating days, greater schedule reliability, and stronger revenue potential. That capability matters in Prince William Sound. Maintaining comfortable speeds in changing sea conditions can preserve more time at the destination while keeping the return schedule within reach. It can also mean the difference between completing a tour and remaining at the dock. Last month, we examined how little fuel consumption changes between light and fully loaded conditions on a Teknicraft hull. North Star shows what an operator can do with that margin. Greater fuel capacity, strong seakeeping, and efficient performance combine to create something more valuable than any single specification: greater operating capacity. WHAT OPERATORS ARE ASKING Top speed tells only part of the story. Passenger vessel operators need to know how a vessel rides at full load in real conditions, how guests feel after five or six hours aboard, and how much of the schedule can be maintained when the weather turns. Those are seakeeping questions, and on a tour vessel, they show up in two places. The first is underway. During transit, the Teknicraft hull form and hydrofoil lift work together to reduce vertical accelerations, the pounding and slamming that wear on passengers and crew over a long day. The second is on scene. At a glacier’s face or alongside a pod of humpbacks, low-speed motion is often when passengers begin to feel unwell. Here, the hull form and foil help dampen that motion. Guests stay on deck, crews remain ready to work, and fewer people become what one of our operators calls “mal de mer zombies.” One additional advantage comes in the adjustable hydrofoil. By de-tuning it, captains can make the vessel ride “heavier” at wildlife-viewing speeds, settling the hull and creating a steadier viewing platform. The vessel remains light and fuel-efficient during transit, then becomes more planted once on scene. Weather is where seakeeping becomes operating capacity. These hulls can maintain comfortable speeds in conditions that force other vessels to slow down or remain at the dock. That broader operating window supports more completed trips, greater schedule reliability, and stronger revenue potential. WHAT IT SIGNALS As Alaska’s tour season winds down, passenger vessel operators head into the off-season with a full season of results in hand. That is when a vessel should be evaluated, by what it delivered through months of real service. What these operators have learned is straightforward: comfort is operating capacity. A vessel that can sail comfortably in more conditions completes more departures, issues fewer refunds, and protects revenue. A vessel that remains steady at low speed keeps guests on deck and engaged. A hull with additional carrying capacity gives operators options, and Phillips Cruises and Tours chose to turn that margin into greater range. Real performance is measured across the entire operating day: at full load, through a full season, and in the weather operators encounter, not the weather they started the season wishing for.",
       "takeaways": [
-        "All American Marine recently launched M/V North Star, the second high-speed, long-range eco-tour vessel built for Phillips Cruises & Tours.",
-        "Like her sistership, Chugach Express, North Star will operate from Whittier, Alaska, carrying passengers…",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+        "All American Marine Build Report: October 2026 Maritime Activity Reports, Inc.",
+        "Ron Wille, President, All American Marine October 16, 2026 Credit: AAM All American Marine recently launched M/V North Star, the second high-speed, long-range eco-tour vessel built for Phillips Cruises & Tours.",
+        "Like her sistership, Chugach Express, North Star will operate from Whittier, Alaska, carrying passengers through the tidewater glaciers and wildlife-filled waters of Prince William Sound."
       ],
-      "readingMinutes": 2,
-      "readMinutes": 2
+      "readingMinutes": 4,
+      "readMinutes": 4
     },
     {
       "id": "SN-9D644AA088",
@@ -1394,82 +1466,6 @@
       ],
       "readingMinutes": 2,
       "readMinutes": 2
-    },
-    {
-      "id": "SN-5F0A2BE9DF",
-      "title": "Iran Ships Some LPG, Jet Fuel Despite US Blockade, Data Shows",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/iran-ships-some-lpg-jet-fuel-despite-us-blockade-data-shows/",
-      "publishedAt": "2026-10-16T12:10:04Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Red Sea & Bab el-Mandeb",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "tanker",
-        "lpg",
-        "port",
-        "hormuz",
-        "china"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
-      "summary": "Iran has managed to export some liquefied petroleum gas and jet fuel since July, despite a US naval blockade, shipping intelligence showed and people involved in security said.",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network The guided-missile destroyer USS Spruance (DDG 111) on patrol as part of the U.S. blockade on ships underway to and from Iranian ports. Photo shared by US Central Command By Feras Dalatey and Jonathan Saul DAMASCUS/LONDON, Oct 16 (Reuters) – Iran has managed to export some liquefied petroleum gas and jet fuel since July, despite a US naval blockade, shipping intelligence showed and people involved in security said. Tehran has in recent weeks been concealing such cargoes among a growing volume of ship-to-ship transfers by other Gulf producers off Oman, four people in maritime security who track Gulf oil movements told Reuters. The Iranian exports and methodology are reported for the first time here. While a fraction of its former energy exports , the cargoes are rare evidence of petroleum products getting through a blockade that has halted Iran’s crude exports. Analysis by US advocacy group United Against Nuclear Iran (UANI), which monitors Iran-related tanker traffic using ship and satellite tracking, shows at least eight gas tankers carrying Iranian LPG have left the Gulf of Oman since mid-July. Another tanker carrying Iranian jet fuel reached Myanmar in September, additional satellite imagery and analysis by maritime intelligence group SynMax show. The US imposed targeted sanctions in 2023 on Myanmar’s jet-fuel industry, citing military airstrikes on civilians that the United Nations says have killed thousands of people. Myanmar’s military government has repeatedly denied targeting civilians, saying its operations are directed against armed groups. Six of the eight gas tankers and the jet fuel tanker are under US sanctions for transporting Iranian petroleum and petrochemical products, a Reuters analysis of the vessels and sanctions imposed on ships by the US Treasury showed. “What we have seen passing is a handful of tankers carrying Iranian LPG, but the overwhelming majority of tankers laden with Iranian products have been redirected by US forces,” said Jemima Shelley, senior research analyst with UANI. Shelley said some Iranian LPG tankers transferred cargoes near the Omani coastal towns of Shinas and Sohar, while others waited in the Gulf of Oman before heading past the US blockade, which US Central Command has said sits across the Gulf of Oman near the Iran-Pakistan border. The total amount of these LPG cargoes was estimated at 4.1 million barrels, Shelley said. Shelley said the shipments were driven “more by opportunism” than showing a new trend of Iran trying to export its oil and petrochemicals by using smaller ships. Most of the cargoes sailed to Malaysia’s Eastern Outer Port Limits to conduct further STS transfers for likely destinations in China, Shelley said, based on UANI’s analysis. The Iranian government did not respond to a request for comment. Myanmar’s military-backed government did not respond to a request for comment on whether the country had received Iranian jet fuel. US MILITARY SAYS BLOCKADE ‘IRONCLAD’ The US military’s Centcom said its naval blockade , which was first imposed on Iran-related oil exports on April 13, is “ironclad.” The blockade was lifted in June after the US reached a draft understanding with Iran, but it was reimposed on July 14 following the collapse of the agreement. A US military official told Reuters that the passage of a vessel does not necessarily mean it had evaded the blockade. Every ship was assessed individually, including through a review of its papers, and some vessels could be allowed through for humanitarian reasons, the official added. The official said the appearance of a vessel on US sanctions lists is not the only factor to make it subject to the blockade, adding that US forces are also closely monitoring some ships without taking action against them for operational reasons. Centcom said in an update on October 13 that during the three months of the latest blockade, four commercial vessels had been disabled and 135 ships had been turned around by US forces. The US military has turned around ships from Asia and also seized some tankers, previous Centcom statements said. Washington has coupled its blockade with a sanctions campaign aimed at severing Iran’s remaining financial links and depriving it of revenue. Last week, it imposed fresh sanctions on 17 vessels involved in transporting Iranian crude, petrochemicals and petroleum products. A US Treasury spokesperson questioned shipping data suggesting vessels had evaded the blockade, saying ships could spoof their locations or use false identities when loading. Such data “should be taken with a grain of salt,” the spokesperson said. The Treasury spokesperson said Operation Economic Outcast, together with the blockade, was “suffocating the Iranian regime.” Torbjorn Soltvedt, principal Middle East analyst at risk intelligence company Verisk Maplecroft, said although there was no sign of Washington easing its blockade, worsening economic conditions in Iran could push Tehran to take greater risks. “If Iran can move product tankers through, even in small numbers, jet fuel may be a good option. Iran’s aviation industry is under increasing pressure from US sanctions, with a growing number of planes grounded, and a potential surplus of jet fuel at Iranian refineries,” Soltvedt added. Iranian crude exports fell to zero in September, according to Kpler, the first month without a shipment since the analytics firm began tracking the producer in 2013. US Treasury Secretary Scott Bessent has said the blockade prevented most Chinese purchases of Iranian oil and left Iran unable to deliver crude to customers. (Reporting by Feras Dalatey in DAMASCUS, Jonathan Saul in LONDON; Additional reporting by Reuters bureaus; Editing by Alexander Smith) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Conflicting traffic figures and competing claims of control are making it increasingly difficult to establish what’s happening in the Strait of Hormuz, even as attacks on merchant shipping intensify. The... The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the... U.S. Central Command says the United States and its regional partners control the Strait of Hormuz, citing more than 40 commercial ships moving through the waterway in the past 24... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
-      "takeaways": [
-        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
-        "Join the leading maritime news network The guided-missile destroyer USS Spruance (DDG 111) on patrol as part of the U.S.",
-        "blockade on ships underway to and from Iranian ports."
-      ],
-      "readingMinutes": 6,
-      "readMinutes": 6
-    },
-    {
-      "id": "SN-411F9E3B84",
-      "title": "Ship-Fuel Crunch to Persist Despite More Oil, Vitol Says",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/ship-fuel-crunch-to-persist-despite-more-oil-vitol-says/",
-      "publishedAt": "2026-10-16T12:07:25Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Red Sea & Bab el-Mandeb",
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "port",
-        "hormuz",
-        "red sea",
-        "suez",
-        "singapore"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
-      "summary": "Accelerating crude exports through the Strait of Hormuz aren’t translating into higher production of a dirty shipping fuel, according to a top Vitol Group executive, tightening supplies and sending prices soaring.",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Holding tanks are seen in an aerial photograph at Colonial Pipeline's Dorsey Junction Station in Woodbine, Maryland, U.S. May 10, 2021. REUTERS/Drone Base By Serene Cheong and Nicholas Lua Oct 16, 2026 (Bloomberg) –Accelerating crude exports through the Strait of Hormuz aren’t translating into higher production of a dirty shipping fuel, according to a top Vitol Group executive, tightening supplies and sending prices soaring. The Middle East conflict has reduced fuel oil supply from the Persian Gulf, including from Iran, by 800,000 tons per month, while Ukrainian attacks on Russian refineries have cut supply by 1 million tons per month, Vitol’s Asia head Kieran Gallagher said at a conference in Singapore this week. “Many are looking to increased crude flows through the Strait of Hormuz as a silver bullet, but more crude does not necessarily mean more high-sulfur fuel oil,” Gallagher said at Sibcon . “Refining margins are exceptionally strong and refiners have been maximizing throughput to capture those returns,” he added, referring to refiners prioritizing other products such as diesel. The supply squeeze stemming from the two wars has driven prices of high-sulfur bunker fuel made with HSFO in Singapore to the highest level since April, according to data provider ClearLynx LLC. The city-state is the world’s biggest supplier of ship fuel. On Thursday, HSFO costs in Asia soared relative to crude, rising to a seven-month high, according to Bloomberg Fair Value data. Demand for HSFO as a refinery feedstock is adding to the squeeze. North Asian refiners are set to use more than 1 million tons of HSFO to feed upgrading units in November after disruptions to Saudi crude exports from the Red Sea, said Gallagher. Restoring medium and heavy oil supplies to those processors would reduce their reliance on fuel oil as a feedstock and release those barrels back into the bunker pool, he added. Read More: Ship Fuel Market Fragments as Middle East Conflict Hits Trade The picture is less strained for another shipping fuel, low-sulfur fuel oil. That market is “more benign” because China continues to export barrels, while Nigeria’s Dangote refinery has increased its operating rates since August and is exporting two to three Suezmax cargoes per month, Gallagher said. Even there, some pressure remains. Bunker suppliers and traders present at Sibcon said there’s fierce competition for blending components used to reduce impurities, flammability and viscosity in ship fuel to produce LSFO grades. © 2026 Bloomberg L.P. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Shipowners are facing an increasingly fragmented fuel market as disruptions triggered by the Middle East conflict raise concerns about the availability and quality of supply. Saudi Arabia is looking at ways to expand its oil pipeline capacity to destinations outside the Persian Gulf to 10 million barrels a day within two to three years, said Energy Minister Prince Abdulaziz bin Salman. Indian refiners have cut back Russian crude purchases for November delivery, as rising competition from China pushes up prices at a time when buyers can tap alternative shipments from the Middle East. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
-      "takeaways": [
-        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
-        "Join the leading maritime news network Holding tanks are seen in an aerial photograph at Colonial Pipeline's Dorsey Junction Station in Woodbine, Maryland, U.S.",
-        "“Many are looking to increased crude flows through the Strait of Hormuz as a silver bullet, but more crude does not necessarily mean more high-sulfur fuel oil,” Gallagher said at Sibcon ."
-      ],
-      "readingMinutes": 3,
-      "readMinutes": 3
     },
     {
       "id": "SN-0BF8CD7DA6",
