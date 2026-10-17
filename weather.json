@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "1000 UTC",
-  "lastSyncUtc": "2026-10-17T10:16:12.069129+00:00",
+  "synopticCycle": "1500 UTC",
+  "lastSyncUtc": "2026-10-17T15:06:16.831316+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,20 +9,20 @@
       "shortName": "Trudy",
       "category": "Category 1 Hurricane (NOAA NHC)",
       "center": [
-        16.0,
-        -103.4
+        16.6,
+        -103.9
       ],
       "centralPressure": 979,
       "maxWinds": 80,
       "gusts": 98,
-      "movement": "NW at 8 kts",
+      "movement": "NW at 10 kts",
       "dangerRadiusNm": 92,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            17.1,
-            -104.2
+            17.7,
+            -104.8
           ],
           "winds": 90,
           "radiusNm": 56
@@ -30,8 +30,8 @@
         {
           "tau": 24,
           "coords": [
-            18.6,
-            -105.4
+            19.1,
+            -105.7
           ],
           "winds": 90,
           "radiusNm": 73
@@ -39,8 +39,8 @@
         {
           "tau": 36,
           "coords": [
-            19.7,
-            -106.1
+            20.1,
+            -106.4
           ],
           "winds": 85,
           "radiusNm": 90
@@ -48,37 +48,37 @@
         {
           "tau": 48,
           "coords": [
-            20.5,
-            -106.9
+            20.7,
+            -107.0
           ],
-          "winds": 70,
+          "winds": 65,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            20.7,
-            -107.4
+            20.9,
+            -107.5
           ],
-          "winds": 55,
+          "winds": 45,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
             20.9,
-            -108.1
+            -108.2
           ],
-          "winds": 40,
+          "winds": 35,
           "radiusNm": 140
         },
         {
           "tau": 84,
           "coords": [
-            21.1,
-            -109.3
+            21.7,
+            -109.4
           ],
-          "winds": 30,
+          "winds": 25,
           "radiusNm": 157
         }
       ]
@@ -89,38 +89,38 @@
       "shortName": "Champi",
       "category": "Typhoon (JTWC/JMA)",
       "center": [
-        12.5,
-        147.3
+        12.6,
+        146.1
       ],
-      "centralPressure": 955,
-      "maxWinds": 115,
-      "gusts": 144,
-      "movement": "WNW at 12 kts",
-      "dangerRadiusNm": 138,
+      "centralPressure": 945,
+      "maxWinds": 120,
+      "gusts": 150,
+      "movement": "W at 12 kts",
+      "dangerRadiusNm": 144,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
             13.0,
-            144.8
+            143.7
           ],
-          "winds": 130,
+          "winds": 120,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            13.4,
-            142.5
+            13.5,
+            141.6
           ],
-          "winds": 140,
+          "winds": 135,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            14.1,
-            140.4
+            14.3,
+            139.5
           ],
           "winds": 140,
           "radiusNm": 90
@@ -128,8 +128,8 @@
         {
           "tau": 48,
           "coords": [
-            15.1,
-            138.3
+            15.3,
+            137.4
           ],
           "winds": 135,
           "radiusNm": 107
@@ -137,17 +137,17 @@
         {
           "tau": 60,
           "coords": [
-            16.1,
-            136.2
+            16.3,
+            135.1
           ],
-          "winds": 130,
+          "winds": 135,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
-            17.2,
-            133.9
+            17.3,
+            132.8
           ],
           "winds": 135,
           "radiusNm": 140
@@ -155,8 +155,8 @@
         {
           "tau": 84,
           "coords": [
-            19.3,
-            129.3
+            19.4,
+            128.6
           ],
           "winds": 125,
           "radiusNm": 157
@@ -244,8 +244,8 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 4.8,
-      "swellPeriod": 9,
+      "waveHeight": 4.9,
+      "swellPeriod": 10,
       "swellDir": "S"
     },
     {
@@ -256,7 +256,7 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.4,
+      "waveHeight": 3.2,
       "swellPeriod": 10,
       "swellDir": "W"
     },
@@ -264,25 +264,25 @@
       "id": "WS1",
       "name": "Trudy Cyclonic Wave Field",
       "center": [
-        16.0,
-        -103.4
+        16.6,
+        -103.9
       ],
       "radiusNm": 184,
-      "waveHeight": 7.0,
-      "swellPeriod": 10,
-      "swellDir": "SSE"
+      "waveHeight": 6.5,
+      "swellPeriod": 9,
+      "swellDir": "SE"
     },
     {
       "id": "WS2",
       "name": "Champi Cyclonic Wave Field",
       "center": [
-        12.5,
-        147.3
+        12.6,
+        146.1
       ],
-      "radiusNm": 276,
-      "waveHeight": 4.6,
-      "swellPeriod": 9,
-      "swellDir": "E"
+      "radiusNm": 288,
+      "waveHeight": 4.8,
+      "swellPeriod": 8,
+      "swellDir": "N"
     },
     {
       "id": "WS3",
@@ -292,7 +292,7 @@
         81.8
       ],
       "radiusNm": 150,
-      "waveHeight": 3.0,
+      "waveHeight": 3.1,
       "swellPeriod": 10,
       "swellDir": "SSE"
     }
@@ -303,17 +303,17 @@
       "value": 979,
       "name": "Hurricane TRUDY Core Low",
       "coords": [
-        16.0,
-        -103.4
+        16.6,
+        -103.9
       ]
     },
     {
       "type": "L",
-      "value": 955,
+      "value": 945,
       "name": "Typhoon CHAMPI Core Low",
       "coords": [
-        12.5,
-        147.3
+        12.6,
+        146.1
       ]
     },
     {
@@ -356,8 +356,8 @@
   "windVectors": [
     {
       "coords": [
-        16.3,
-        -103.1
+        16.9,
+        -103.6
       ],
       "dir": 160,
       "speed": 80,
@@ -365,12 +365,12 @@
     },
     {
       "coords": [
-        12.8,
-        147.6
+        12.9,
+        146.4
       ],
       "dir": 200,
-      "speed": 115,
-      "label": "115 kts (Champi)"
+      "speed": 120,
+      "label": "120 kts (Champi)"
     },
     {
       "coords": [
