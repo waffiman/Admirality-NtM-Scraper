@@ -8361,31 +8361,147 @@ function handleGoogleCredentialResponse(resp) {
 }
 window.handleGoogleCredentialResponse = handleGoogleCredentialResponse;
 
-function renderOfficialGoogleButtonIfConfigured() {
+let googleTokenClient = null;
+
+function initGoogleAuthClients() {
   const clientId = normalizeGoogleClientId(localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID);
-  const container = document.getElementById("googleGsiButtonContainer");
-  if (!clientId || !container) return;
-  loadGoogleIdentityScriptAsync().then((loaded) => {
-    if (!loaded || !window.google || !window.google.accounts || !window.google.accounts.id) return;
-    try {
+  if (!clientId || !window.google || !window.google.accounts) return;
+
+  // 1. GIS ID client initialization (One Tap / FedCM / official rendered button)
+  try {
+    if (window.google.accounts.id) {
       window.google.accounts.id.initialize({
         client_id: clientId,
         callback: handleGoogleCredentialResponse,
         auto_select: false,
-        cancel_on_tap_outside: true
+        cancel_on_tap_outside: true,
+        use_fedcm_for_prompt: true,
+        itp_support: true
       });
-      container.innerHTML = "";
-      window.google.accounts.id.renderButton(container, {
-        theme: "filled_blue",
-        size: "large",
-        type: "standard",
-        shape: "pill",
-        text: "signin_with",
-        logo_alignment: "left",
-        width: 260
+
+      const container = document.getElementById("googleGsiButtonContainer");
+      if (container) {
+        container.innerHTML = "";
+        window.google.accounts.id.renderButton(container, {
+          theme: "filled_blue",
+          size: "large",
+          type: "standard",
+          shape: "pill",
+          text: "signin_with",
+          logo_alignment: "left",
+          width: 240
+        });
+      }
+    }
+  } catch (e) {
+    console.warn("[SetSail Google Auth] id.initialize warning:", e);
+  }
+
+  // 2. OAuth2 Token Client for DIRECT synchronous popup on user click
+  try {
+    if (window.google.accounts.oauth2 && typeof window.google.accounts.oauth2.initTokenClient === "function") {
+      googleTokenClient = window.google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: "openid email profile",
+        prompt: "select_account",
+        callback: async (tokenResponse) => {
+          if (!tokenResponse || !tokenResponse.access_token) {
+            if (tokenResponse && tokenResponse.error) {
+              console.warn("[SetSail Google Auth] Token error:", tokenResponse.error);
+            }
+            return;
+          }
+          try {
+            const profile = await fetchGoogleUserInfo(tokenResponse.access_token);
+            if (profile && profile.email) {
+              setSetSailAuthUser({
+                name: profile.name || profile.given_name || profile.email.split("@")[0],
+                email: profile.email,
+                picture: profile.picture || "",
+                sub: profile.sub || "",
+                provider: "google",
+                signedInAt: new Date().toISOString()
+              });
+              syncSetSailAuthUI();
+              if (typeof showSetSailToast === "function") {
+                showSetSailToast(`Signed in with Google as ${profile.email}`, "success");
+              }
+            }
+          } catch (err) {
+            console.error("[SetSail Google Auth] userinfo fetch error:", err);
+            if (typeof showSetSailToast === "function") {
+              showSetSailToast("Authenticated with Google, but could not load profile details.", "error");
+            }
+          }
+        },
+        error_callback: (err) => {
+          console.warn("[SetSail Google Auth] Popup closed or blocked:", err);
+        }
       });
-    } catch (e) {
-      console.warn("[SetSail Google OAuth] Render button warning:", e);
+    }
+  } catch (e) {
+    console.warn("[SetSail Google Auth] initTokenClient error:", e);
+  }
+}
+
+async function fetchGoogleUserInfo(accessToken) {
+  const resp = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+    headers: { Authorization: "Bearer " + accessToken }
+  });
+  if (!resp.ok) throw new Error("userinfo " + resp.status);
+  return resp.json();
+}
+
+/**
+ * Direct official Google Sign-In trigger without ANY fake in-page modal.
+ * Opens the official Google account chooser popup synchronously in the user's click gesture stack.
+ */
+function triggerOfficialGoogleSignIn() {
+  const user = getSetSailAuthUser();
+  if (user) {
+    if (typeof switchToTab === "function") {
+      switchToTab("tab-settings");
+      setTimeout(() => {
+        const card = document.getElementById("settingsAccountCard");
+        if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 120);
+    }
+    return;
+  }
+
+  // Remove any fake modal that might still exist in the DOM
+  const fakeModal = document.getElementById("setsailGoogleAuthModal");
+  if (fakeModal) fakeModal.remove();
+
+  // If tokenClient is ready, invoke requestAccessToken SYNCHRONOUSLY in the click gesture!
+  if (googleTokenClient) {
+    try {
+      googleTokenClient.requestAccessToken({ prompt: "select_account" });
+      return;
+    } catch (err) {
+      console.warn("[SetSail Google Auth] requestAccessToken error:", err);
+    }
+  }
+
+  if (!navigator.onLine) {
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Google Sign-In requires an active internet connection.", "info");
+    }
+    return;
+  }
+
+  loadGoogleIdentityScriptAsync().then((loaded) => {
+    if (loaded) {
+      initGoogleAuthClients();
+      if (googleTokenClient) {
+        googleTokenClient.requestAccessToken({ prompt: "select_account" });
+      } else if (window.google && window.google.accounts && window.google.accounts.id) {
+        window.google.accounts.id.prompt();
+      }
+    } else {
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Could not load Google Identity Services. Please check connection.", "error");
+      }
     }
   });
 }
@@ -8401,18 +8517,7 @@ function initSetSailAuth() {
   if (hudBtn) {
     hudBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const user = getSetSailAuthUser();
-      if (user) {
-        if (typeof switchToTab === "function") {
-          switchToTab("tab-settings");
-          setTimeout(() => {
-            const card = document.getElementById("settingsAccountCard");
-            if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
-          }, 120);
-        }
-      } else {
-        openOfficialGoogleLoginModal();
-      }
+      triggerOfficialGoogleSignIn();
     });
   }
 
@@ -8420,7 +8525,7 @@ function initSetSailAuth() {
   if (googleBtn) {
     googleBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      openOfficialGoogleLoginModal();
+      triggerOfficialGoogleSignIn();
     });
   }
 
@@ -8447,203 +8552,44 @@ function initSetSailAuth() {
         try { window.google.accounts.id.disableAutoSelect(); } catch (e) {}
       }
       setSetSailAuthUser(null);
+      syncSetSailAuthUI();
       if (typeof showSetSailToast === "function") {
         showSetSailToast("Signed out of Google Account. Workspace history saved.", "info");
       }
     });
   }
 
-  renderOfficialGoogleButtonIfConfigured();
+  // Pre-load Google Identity Services and initialize clients on start
+  loadGoogleIdentityScriptAsync().then((loaded) => {
+    if (loaded) initGoogleAuthClients();
+  });
   syncSetSailAuthUI();
 }
 
-function showGoogleAuthBusy(on, msg) {
-  let modal = document.getElementById("setsailGoogleAuthModal");
-  if (!on) {
-    if (modal) modal.classList.remove("active");
-    return;
-  }
-  if (!modal) {
-    modal = document.createElement("div");
-    modal.id = "setsailGoogleAuthModal";
-    modal.className = "setsail-google-auth-overlay";
-    modal.innerHTML = `
-      <div class="setsail-google-auth-card" style="max-width:360px;text-align:center;padding:28px 22px;">
-        <button type="button" class="google-auth-close-btn" onclick="window.closeOfficialGoogleLoginModal()" aria-label="Close">&times;</button>
-        <div class="google-auth-header" style="margin-bottom:8px;">
-          <svg viewBox="0 0 24 24" class="google-auth-logo" width="38" height="38">
-            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
-            <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.1 7.4 24 12 24z"/>
-            <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.9z"/>
-            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
-          </svg>
-          <h2 class="google-auth-title">Google Sign-In</h2>
-          <p class="google-auth-sub" id="googleAuthBusyMsg">Opening official Google account picker…</p>
-        </div>
-        <div id="googleGsiButtonContainer" style="display:flex;justify-content:center;min-height:44px;margin-top:10px;"></div>
-        <p style="font-size:0.72rem;color:#94a3b8;margin-top:14px;line-height:1.4;">Only real Google accounts can sign in. Fake/manual emails are disabled.</p>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeOfficialGoogleLoginModal();
-    });
-  }
-  const msgEl = document.getElementById("googleAuthBusyMsg");
-  if (msgEl && msg) msgEl.textContent = msg;
-  modal.classList.add("active");
-}
-
-async function fetchGoogleUserInfo(accessToken) {
-  const resp = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-    headers: { Authorization: "Bearer " + accessToken }
-  });
-  if (!resp.ok) throw new Error("userinfo " + resp.status);
-  return resp.json();
-}
-
 function openOfficialGoogleLoginModal() {
-  const clientId = normalizeGoogleClientId(localStorage.getItem(SETSAIL_GOOGLE_CLIENT_ID_KEY) || window.SETSAIL_GOOGLE_CLIENT_ID);
-  if (!clientId) {
-    if (typeof showSetSailToast === "function") {
-      showSetSailToast("Google Client ID is not configured.", "error");
-    }
-    return;
-  }
-  showGoogleAuthBusy(true, "Looking for Google accounts already on this browser…");
-  loadGoogleIdentityScriptAsync().then((loaded) => {
-    if (!loaded || !window.google || !window.google.accounts) {
-      showGoogleAuthBusy(true, "Google Sign-In script blocked. Check network / allowed origins.");
-      if (typeof showSetSailToast === "function") {
-        showSetSailToast("Could not load Google Identity Services.", "error");
-      }
-      return;
-    }
-    try {
-      // Official GIS: FedCM + One Tap / account chooser for sessions already in this browser
-      if (window.google.accounts.id) {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: (resp) => {
-            handleGoogleCredentialResponse(resp);
-            closeOfficialGoogleLoginModal();
-          },
-          auto_select: false,
-          cancel_on_tap_outside: true,
-          ux_mode: "popup",
-          context: "signin",
-          use_fedcm_for_prompt: true,
-          itp_support: true
-        });
-        const container = document.getElementById("googleGsiButtonContainer");
-        if (container) {
-          container.innerHTML = "";
-          window.google.accounts.id.renderButton(container, {
-            theme: "filled_blue",
-            size: "large",
-            type: "standard",
-            shape: "pill",
-            text: "signin_with",
-            logo_alignment: "left",
-            width: 280
-          });
-        }
-        try {
-          window.google.accounts.id.prompt((notification) => {
-            if (!notification) return;
-            const skipped = notification.isNotDisplayed && notification.isNotDisplayed();
-            const dismissed = notification.isSkippedMoment && notification.isSkippedMoment();
-            if (skipped || dismissed) {
-              const msgEl = document.getElementById("googleAuthBusyMsg");
-              if (msgEl) {
-                msgEl.textContent = "Pick a Google account already signed into this browser, or use another account.";
-              }
-            }
-          });
-        } catch (promptErr) {
-          console.warn("[SetSail Google OAuth] FedCM/One Tap prompt", promptErr);
-        }
-      }
-      // Official OAuth token popup with account chooser (lists browser Google sessions)
-      if (window.google.accounts.oauth2 && typeof window.google.accounts.oauth2.initTokenClient === "function") {
-        const tokenClient = window.google.accounts.oauth2.initTokenClient({
-          client_id: clientId,
-          scope: "openid email profile",
-          prompt: "select_account",
-          callback: (tokenResponse) => {
-            if (!tokenResponse || !tokenResponse.access_token) {
-              if (tokenResponse && tokenResponse.error) {
-                if (typeof showSetSailToast === "function") {
-                  showSetSailToast("Google sign-in cancelled or failed.", "info");
-                }
-              }
-              return;
-            }
-            fetchGoogleUserInfo(tokenResponse.access_token).then((profile) => {
-              if (!profile || !profile.email) throw new Error("no email");
-              setSetSailAuthUser({
-                name: profile.name || profile.given_name || profile.email.split("@")[0],
-                email: profile.email,
-                picture: profile.picture || "",
-                sub: profile.sub || "",
-                provider: "google",
-                signedInAt: new Date().toISOString()
-              });
-              closeOfficialGoogleLoginModal();
-              if (typeof showSetSailToast === "function") {
-                showSetSailToast("Signed in with Google as " + profile.email, "success");
-              }
-            }).catch((err) => {
-              console.warn("[SetSail Google OAuth] userinfo failed", err);
-              if (typeof showSetSailToast === "function") {
-                showSetSailToast("Google verified the popup, but profile fetch failed.", "error");
-              }
-            });
-          },
-          error_callback: (err) => {
-            console.warn("[SetSail Google OAuth]", err);
-            if (typeof showSetSailToast === "function") {
-              showSetSailToast("Google sign-in was closed or blocked by the browser.", "info");
-            }
-          }
-        });
-        // Slight delay so FedCM/One Tap can surface first when available
-        setTimeout(() => {
-          try {
-            tokenClient.requestAccessToken({ prompt: "select_account" });
-          } catch (eReq) {
-            console.warn("[SetSail Google OAuth] requestAccessToken", eReq);
-          }
-        }, 350);
-        const msgEl = document.getElementById("googleAuthBusyMsg");
-        if (msgEl) {
-          msgEl.textContent = "Choose a Google account already on this browser (Chrome/Edge profile). Email field appears only for a new account.";
-        }
-      } else {
-        const msgEl = document.getElementById("googleAuthBusyMsg");
-        if (msgEl) msgEl.textContent = "Use the official Google button below to continue.";
-      }
-    } catch (e) {
-      console.warn("[SetSail Google OAuth] init error", e);
-      if (typeof showSetSailToast === "function") {
-        showSetSailToast("Google Sign-In failed to start. Verify Client ID origins.", "error");
-      }
-    }
-  });
+  triggerOfficialGoogleSignIn();
 }
 window.openOfficialGoogleLoginModal = openOfficialGoogleLoginModal;
+window.triggerOfficialGoogleSignIn = triggerOfficialGoogleSignIn;
 
 function closeOfficialGoogleLoginModal() {
-  showGoogleAuthBusy(false);
+  const modal = document.getElementById("setsailGoogleAuthModal");
+  if (modal) modal.remove();
 }
 window.closeOfficialGoogleLoginModal = closeOfficialGoogleLoginModal;
 
-// Fake email/password clone login removed — only official Google GIS / OAuth popup is allowed.
+function showGoogleAuthBusy(on, msg) {
+  const modal = document.getElementById("setsailGoogleAuthModal");
+  if (modal) modal.remove();
+}
+window.showGoogleAuthBusy = showGoogleAuthBusy;
+
 function submitOfficialGoogleLogin(e) {
   if (e && e.preventDefault) e.preventDefault();
-  openOfficialGoogleLoginModal();
+  triggerOfficialGoogleSignIn();
 }
 window.submitOfficialGoogleLogin = submitOfficialGoogleLogin;
+window.renderOfficialGoogleButtonIfConfigured = initGoogleAuthClients;
 
 window.initSetSailAuth = initSetSailAuth;
 window.syncSetSailAuthUI = syncSetSailAuthUI;

@@ -53,11 +53,12 @@
   <link rel="preconnect" href="https://tiles.openseamap.org" crossorigin />
   <link rel="dns-prefetch" href="https://a.basemaps.cartocdn.com" />
   <link rel="dns-prefetch" href="https://server.arcgisonline.com" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="stylesheet" href="assets/leaflet/leaflet.css" />
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.25" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.26" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -19816,7 +19817,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.25"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.26"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20194,7 +20195,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.24', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.26', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
