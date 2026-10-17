@@ -3789,8 +3789,14 @@ function initNtMMap() {
       ? createEcdisSimpleBaseLayer()
       : null;
 
-    // Primary Default Nautical Chart — show Layers-button spinner until first basemap is fully loaded
-    oceanLayer.addTo(leafletMap);
+    // Default basemap: ECDIS simple (detailed coastlines, no relief tiles)
+    const defaultBase = ecdisLayer || oceanLayer;
+    if (defaultBase) {
+      defaultBase.addTo(leafletMap);
+      if (ecdisLayer && leafletMap.getContainer()) {
+        leafletMap.getContainer().classList.add("ecdis-simple-base");
+      }
+    }
     setTimeout(() => {
       const sel = document.getElementById("ntmChartLayerSelector");
       const trig = sel && sel.querySelector(".ntm-layer-trigger-btn");
@@ -3808,11 +3814,14 @@ function initNtMMap() {
       const finish = () => {
         if (done) return;
         done = true;
-        oceanLayer.off("load", finish);
         mark(false);
       };
-      oceanLayer.on("load", finish);
-      setTimeout(finish, 12000);
+      if (ecdisLayer) {
+        requestAnimationFrame(() => setTimeout(finish, 120));
+      } else {
+        oceanLayer.on("load", finish);
+        setTimeout(finish, 12000);
+      }
     }, 0);
 
     const seamarkLayer = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", Object.assign({}, tilePerfOpts, {
@@ -3832,9 +3841,8 @@ function initNtMMap() {
     }
 
     const baseMaps = {
-      "ECDIS Simple": ecdisLayer,
+      "ECDIS Chart": ecdisLayer,
       "Ocean Chart (Esri)": oceanLayer,
-      "Fast Coast Map": voyagerLayer,
       "OpenStreetMap": osmLayer,
       "Satellite Imagery": satLayer
     };
@@ -3855,7 +3863,6 @@ function initNtMMap() {
       initVisualChartLayerSelector(leafletMap, {
         ecdis: ecdisLayer,
         ocean: oceanLayer,
-        coast: voyagerLayer,
         street: osmLayer,
         sat: satLayer,
         buoys: seamarkLayer
@@ -7335,11 +7342,11 @@ const WORLD_LAND_POLYGONS = [[[-80.04,-59.57],[-80.55,-59.87],[-81.0,-60.16],[-8
 window.WORLD_LAND_POLYGONS = WORLD_LAND_POLYGONS;
 
 
-/** ECDIS-style chart: solid blue water + yellow land (no bathymetry / terrain relief). */
+/** ECDIS-style chart: blue water + coarse yellow land + detailed Natural Earth coastlines. */
 function createEcdisSimpleBaseLayer() {
   const WATER = "#9DC9E8";
   const LAND = "#F0E2A0";
-  const LAND_EDGE = "#C4A86A";
+  const COAST = "#1a2744";
   const WaterGrid = L.GridLayer.extend({
     createTile: function () {
       const t = document.createElement("div");
@@ -7353,9 +7360,11 @@ function createEcdisSimpleBaseLayer() {
     maxZoom: 19,
     keepBuffer: 2,
     updateWhenZooming: false,
-    attribution: "ECDIS-style land/water"
+    attribution: "ECDIS land/water · Natural Earth coastlines"
   });
-  const land = L.layerGroup();
+
+  // Coarse land fill only (context) — coast detail comes from NE vectors
+  const landFill = L.layerGroup();
   const polys = (typeof WORLD_LAND_POLYGONS !== "undefined" && Array.isArray(WORLD_LAND_POLYGONS))
     ? WORLD_LAND_POLYGONS
     : (window.WORLD_LAND_POLYGONS || []);
@@ -7363,19 +7372,135 @@ function createEcdisSimpleBaseLayer() {
     const ring = polys[i];
     if (!ring || ring.length < 3) continue;
     L.polygon(ring, {
-      stroke: true,
-      color: LAND_EDGE,
-      weight: 0.55,
-      opacity: 0.95,
+      stroke: false,
       fillColor: LAND,
       fillOpacity: 1,
       interactive: false,
-      smoothFactor: 1.5
-    }).addTo(land);
+      smoothFactor: 2
+    }).addTo(landFill);
   }
-  const group = L.layerGroup([water, land]);
+
+  const coastLayer = L.layerGroup();
+  const group = L.layerGroup([water, landFill, coastLayer]);
   group._setsailEcdis = true;
   group._setsailEcdisWater = water;
+
+  const coastCache = Object.create(null);
+  let coastSeq = 0;
+  let boundMap = null;
+
+  function coastUrls(level) {
+    const local = "assets/geo/ne_" + level + "_coastline.geojson";
+    const cdn =
+      "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_" +
+      level +
+      "_coastline.geojson";
+    return [local + "?v=5.24", cdn];
+  }
+
+  async function loadCoastGeo(level) {
+    if (coastCache[level]) return coastCache[level];
+    const urls = coastUrls(level);
+    let lastErr = null;
+    for (let i = 0; i < urls.length; i++) {
+      try {
+        const geo = await fetch(urls[i], { cache: "force-cache" }).then((r) => {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        });
+        coastCache[level] = geo;
+        return geo;
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    throw lastErr || new Error("coast load failed");
+  }
+
+  function featureHitsBounds(feat, bounds) {
+    try {
+      const g = feat && feat.geometry;
+      if (!g) return false;
+      const type = g.type;
+      const coords = g.coordinates;
+      const checkPair = (lon, lat) => bounds.contains([lat, lon]);
+      const walk = (c) => {
+        if (!c || !c.length) return false;
+        if (typeof c[0] === "number") return checkPair(c[0], c[1]);
+        for (let i = 0; i < c.length; i++) {
+          if (walk(c[i])) return true;
+        }
+        return false;
+      };
+      if (type === "LineString" || type === "MultiLineString") return walk(coords);
+      return true;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  async function refreshEcdisCoast() {
+    const map = boundMap || group._map;
+    if (!map || !map.hasLayer(group)) return;
+    const z = map.getZoom();
+    // World view: coarse land fill is enough. Mid/close: add NE coastline detail.
+    const level = z >= 8 ? "10m" : z >= 4 ? "50m" : null;
+    coastLayer.clearLayers();
+    if (!level) return;
+    const seq = ++coastSeq;
+    try {
+      const geo = await loadCoastGeo(level);
+      if (seq !== coastSeq) return;
+      const pad = z >= 10 ? 0.08 : 0.2;
+      const bounds = map.getBounds().pad(pad);
+      const weight = z >= 11 ? 2.0 : z >= 9 ? 1.6 : z >= 6 ? 1.25 : 1.0;
+      const renderer = L.canvas({ padding: 0.5 });
+      L.geoJSON(geo, {
+        renderer,
+        interactive: false,
+        filter: function (feat) {
+          if (level === "50m" && z < 6) return true;
+          return featureHitsBounds(feat, bounds);
+        },
+        style: function () {
+          return {
+            color: COAST,
+            weight: weight,
+            opacity: 1,
+            fill: false,
+            lineCap: "round",
+            lineJoin: "round"
+          };
+        }
+      }).addTo(coastLayer);
+    } catch (e) {
+      console.warn("[SetSail ECDIS] coastline load failed", e);
+    }
+  }
+
+  group.on("add", function () {
+    boundMap = group._map;
+    if (!boundMap) return;
+    boundMap.getContainer().classList.add("ecdis-simple-base");
+    const bump = function () {
+      refreshEcdisCoast();
+    };
+    boundMap.on("zoomend moveend", bump);
+    group._ecdisCoastBump = bump;
+    refreshEcdisCoast();
+  });
+  group.on("remove", function () {
+    if (boundMap && group._ecdisCoastBump) {
+      boundMap.off("zoomend moveend", group._ecdisCoastBump);
+    }
+    if (boundMap && boundMap.getContainer()) {
+      // class cleared by layer selector when switching away
+    }
+    group._ecdisCoastBump = null;
+    boundMap = null;
+  });
+
+  group.refreshEcdisCoast = refreshEcdisCoast;
   return group;
 }
 window.createEcdisSimpleBaseLayer = createEcdisSimpleBaseLayer;
@@ -7408,25 +7533,18 @@ function initVisualChartLayerSelector(mapInstance, layers) {
   selector.id = "ntmChartLayerSelector";
   selector.className = "ntm-chart-layer-selector collapsed";
   selector.innerHTML = `
-    <button type="button" class="ntm-layer-thumb-btn" data-base="ecdis" title="ECDIS Simple — yellow land / blue water (no relief)">
+    <button type="button" class="ntm-layer-thumb-btn active-base" data-base="ecdis" title="ECDIS — blue water, yellow land, detailed coastline">
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#9DC9E8 0%,#9DC9E8 52%,#F0E2A0 52%,#F0E2A0 100%);">
-        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M4 22 L10 14 L16 18 L22 10 L32 22 Z" fill="#F0E2A0" stroke="#C4A86A" stroke-width="1.2"/><rect x="2" y="22" width="32" height="10" fill="#9DC9E8"/></svg>
+        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M4 22 L10 14 L16 18 L22 10 L32 22 Z" fill="#F0E2A0" stroke="#1a2744" stroke-width="1.4"/><rect x="2" y="22" width="32" height="10" fill="#9DC9E8"/></svg>
       </div>
       <span class="ntm-layer-thumb-label">ECDIS</span>
     </button>
 
-    <button type="button" class="ntm-layer-thumb-btn active-base" data-base="ocean" title="Esri Ocean Nautical Chart">
+    <button type="button" class="ntm-layer-thumb-btn" data-base="ocean" title="Esri Ocean Nautical Chart">
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#0d3b66 0%,#1d6fa5 55%,#7bdff2 100%);">
         <svg viewBox="0 0 36 36" width="28" height="28"><path d="M4 24c5-4 10-4 14 0s9 4 14 0" fill="none" stroke="#e0f2fe" stroke-width="2.2" stroke-linecap="round"/><path d="M6 16c4-3 8-3 12 0s8 3 12 0" fill="none" stroke="#7dd3fc" stroke-width="1.8" stroke-linecap="round"/></svg>
       </div>
       <span class="ntm-layer-thumb-label">Ocean</span>
-    </button>
-
-    <button type="button" class="ntm-layer-thumb-btn" data-base="coast" title="Fast Coast &amp; Hydrographic Map (Zero API Key)">
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#d8f3dc 0%,#95d5b2 45%,#48cae4 46%,#0096c7 100%);">
-        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M6 28L16 10l8 12 6-6" fill="none" stroke="#023e8a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <span class="ntm-layer-thumb-label">Coast</span>
     </button>
 
     <button type="button" class="ntm-layer-thumb-btn" data-base="street" title="OpenStreetMap">
@@ -7857,7 +7975,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
             globeWrap.classList.remove("active");
             mapInstance.setView([globeState.rotLat, globeState.rotLon], mapInstance.getZoom());
           }
-          ["ecdis", "ocean", "coast", "street", "sat"].forEach((k) => {
+          ["ecdis", "ocean", "street", "sat"].forEach((k) => {
             if (layers[k] && mapInstance.hasLayer(layers[k])) {
               mapInstance.removeLayer(layers[k]);
             }
