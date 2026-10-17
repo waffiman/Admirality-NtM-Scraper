@@ -13563,7 +13563,7 @@ select option {
                   <span class="excel-tab-check"></span>
                   <span class="excel-tab-name">AIS</span>
                   <span class="excel-tab-badge" style="display:none;" aria-hidden="true"></span>
-                  <span class="excel-tab-info-btn" id="btnAisOverlayInfo" title="AIS — all vessels in view (ocean zones + live Open Waters) — not exportable"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
+                  <span class="excel-tab-info-btn" id="btnAisOverlayInfo" title="AIS — Live AISStream.io satellite/terrestrial stream + fallback feeds (Click to configure API key)"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
 <button type="button" class="excel-tab excel-tab-route" data-overlay="route" id="tabOverlayRoute">
                   <span class="excel-tab-spinner" aria-hidden="true"></span>
@@ -19608,6 +19608,74 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         </div>
       </div>
 
+      <!-- SetSail AIS Live Overlay & AISStream.io Stream Modal -->
+      <div class="ntm-modal" id="aisOverlayInfoModal">
+        <div class="ntm-modal-box" style="max-width:540px;">
+          <div class="ntm-modal-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px;">
+            <h3 style="margin:0;font-size:0.95rem;color:#f1f5f9;display:flex;align-items:center;gap:7px;">
+              <svg class="setsail-icon" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#0284c7;"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3" fill="#0284c7"/></svg>
+              Live Global AIS Vessel Traffic Engine (AISStream.io)
+            </h3>
+            <button type="button" class="ntm-modal-close" id="aisOverlayModalClose" title="Close" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
+          </div>
+          <div style="font-size:0.75rem;color:#cad8f4;line-height:1.5;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:rgba(2,132,199,0.1);padding:6px 10px;border-radius:6px;border:1px solid rgba(2,132,199,0.25);">
+              <span style="font-weight:700;color:#38bdf8;" id="aisStreamStatusLabel">Live Global AISStream.io</span>
+              <span style="font-size:0.7rem;background:#10b981;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700;" id="aisStreamStatusBadge">CONNECTED (LIVE STREAM)</span>
+            </div>
+            
+            <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:6px;border:1px solid var(--line);margin-bottom:12px;">
+              <div style="font-weight:700;color:#f1f5f9;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+                <svg class="setsail-icon" viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#38bdf8;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Personal AISStream.io API Key
+              </div>
+              <p style="margin:0 0 8px 0;font-size:0.7rem;color:#94a3b8;line-height:1.4;">
+                <a href="https://aisstream.io" target="_blank" rel="noopener noreferrer" style="color:#38bdf8;text-decoration:underline;font-weight:600;">AISStream.io</a> provides free real-time global terrestrial and satellite AIS data via high-speed WebSocket. To receive 100% of global vessel targets in real-time, register for free at AISStream.io and enter your API key below.
+              </p>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input type="password" id="inputAisStreamApiKey" class="ntm-input" placeholder="Paste your AISStream.io API Key here..." autocomplete="off" style="flex:1;font-family:monospace;background:rgba(0,0,0,0.35);border:1px solid var(--line);color:#f8fafc;padding:6px 10px;border-radius:6px;font-size:0.75rem;">
+                <button type="button" class="ntm-btn-glass" id="btnSaveAisStreamKey" style="padding:6px 14px;font-size:0.75rem;font-weight:600;white-space:nowrap;background:rgba(2,132,199,0.2);border-color:#0284c7;color:#38bdf8;">Save &amp; Connect</button>
+              </div>
+              <div id="aisStreamKeyStatusNote" style="margin-top:6px;font-size:0.68rem;color:#10b981;display:none;">
+                ✓ API key stored securely in browser local storage.
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+              <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
+                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Stream Protocol</div>
+                <div style="font-size:0.82rem;font-weight:700;color:#f1f5f9;margin-top:2px;">WebSocket v0 (JSON)</div>
+                <div style="font-size:0.65rem;color:var(--muted);margin-top:2px;">Bounding-box auto-synced with map view</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;border:1px solid var(--line);">
+                <div style="color:var(--muted);font-size:0.68rem;text-transform:uppercase;">Fallback Feeds</div>
+                <div style="font-size:0.82rem;font-weight:700;color:#f1f5f9;margin-top:2px;">Open Waters &amp; Digitraffic</div>
+                <div style="font-size:0.65rem;color:var(--muted);margin-top:2px;">Community REST API + Baltic density</div>
+              </div>
+            </div>
+
+            <div style="background:rgba(255,255,255,0.02);padding:8px 10px;border-radius:6px;border:1px solid var(--line);margin-bottom:12px;">
+              <div style="font-weight:700;color:#94a3b8;margin-bottom:4px;font-size:0.7rem;">Target Symbology:</div>
+              <div style="display:flex;gap:12px;font-size:0.7rem;color:#cbd5e1;flex-wrap:wrap;">
+                <span><span style="display:inline-block;width:10px;height:10px;background:#22d3ee;border-radius:50%;margin-right:4px;vertical-align:middle;"></span>Underway (SOG ≥ 0.5 kn)</span>
+                <span><span style="display:inline-block;width:10px;height:10px;background:#94a3b8;border-radius:50%;margin-right:4px;vertical-align:middle;"></span>Moored / At Anchor</span>
+                <span><span style="display:inline-block;width:10px;height:10px;background:#38bdf8;border-radius:50%;margin-right:4px;vertical-align:middle;"></span>Engaged in Operations</span>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+              <span id="aisTargetsCountSummary" style="font-size:0.72rem;color:#94a3b8;font-weight:600;"></span>
+              <div style="display:flex;gap:8px;">
+                <a href="https://aisstream.io" target="_blank" rel="noopener noreferrer" class="ntm-btn-glass" style="padding:4px 10px;font-size:0.72rem;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+                  Register at AISStream.io ↗
+                </a>
+                <button type="button" class="secondary" id="aisOverlayModalCloseBtn" style="margin-top:0;padding:4px 14px;font-size:0.78rem;">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Modal: Interactive Passage Plan Waypoint Editor -->
       <div class="ntm-modal" id="ntmWaypointEditModal">
         <div class="ntm-modal-box" style="max-width:520px;">
@@ -19739,7 +19807,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.24"></script>
   <script src="assets/Auto NtM Plotting/port_depths.js?v=5.24"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.24"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.27"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {

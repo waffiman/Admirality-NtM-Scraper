@@ -1,17 +1,19 @@
 /**
- * SetSail AIS Overlay — progressive load by zoom (non-exportable)
- * Live Open Waters for viewport; zone snapshots only when zoomed in enough.
+ * SetSail AIS Overlay — AISStream.io Real-Time WebSocket + Open Waters & Digitraffic
+ * Live global satellite & terrestrial vessel traffic engine.
  */
 (function () {
-  const AIS_REFRESH_MS = 90 * 1000;
+  const AIS_REFRESH_MS = 60 * 1000;
   const ZONES_INDEX = "ais/zones/index.json";
   const OPENWATERS_VESSELS = "https://ais.openwaters.io/v1/vessels";
   const DIGITRAFFIC_LOC = "https://meri.digitraffic.fi/api/ais/v1/locations";
   const DIGITRAFFIC_VES = "https://meri.digitraffic.fi/api/ais/v1/vessels";
+  const AISSTREAM_WS_URL = "wss://stream.aisstream.io/v0/stream";
+  const AISSTREAM_KEY_STORAGE = "setsail_aisstream_api_key";
+
   const OW_AREA_CAP = 95;
   const OW_MAX_TILES = 12;
-  const ABS_MARKER_CAP = 12000;
-  /** Zone JSON only at/above this zoom (avoids loading world oceans at once). */
+  const ABS_MARKER_CAP = 15000;
   const MIN_ZOOM_ZONES = 6;
   const MIN_ZOOM_DENSE_ZONES = 8;
 
@@ -24,6 +26,22 @@
   let zoneCache = Object.create(null);
   let aisRefreshSeq = 0;
 
+  // AISStream.io WebSocket State
+  let aisStreamWs = null;
+  let aisStreamTargets = Object.create(null);
+  let aisStreamReconnectTimer = null;
+  let aisStreamRenderTimer = null;
+  let aisStreamPendingRender = false;
+  let lastRestTargets = [];
+
+  function getAisStreamApiKey() {
+    try {
+      return (localStorage.getItem(AISSTREAM_KEY_STORAGE) || window.SETSAIL_AISSTREAM_API_KEY || "").trim();
+    } catch (e) {
+      return "";
+    }
+  }
+
   function ensureLayer(map) {
     if (!leafletAisLayer) {
       leafletAisLayer = L.layerGroup();
@@ -34,8 +52,8 @@
   }
 
   function shipColor(navStat, sog) {
-    if (navStat === 1 || navStat === 5) return "#94a3b8";
-    if (Number(sog) >= 0.5) return "#22d3ee";
+    if (navStat === 1 || navStat === 5) return "#94a3b8"; // Anchored / Moored
+    if (Number(sog) >= 0.5) return "#22d3ee"; // Underway
     return "#38bdf8";
   }
 
@@ -44,16 +62,16 @@
     const dest = v.destination || "—";
     const sog = v.sog != null ? Number(v.sog).toFixed(1) + " kn" : "—";
     const cog = v.cog != null && Number(v.cog) < 360 ? Math.round(Number(v.cog)) + "°" : "—";
-    const type = v.shipTypeName || v.shipType || v.type || "AIS target";
+    const type = v.shipTypeName || v.shipType || v.type || "AIS vessel";
     const src = v.source || "AIS";
     return (
-      '<div style="min-width:200px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;">' +
-      '<div style="font-weight:800;color:#0ea5e9;margin-bottom:4px;">🚢 ' + name + "</div>" +
-      "<div><b>MMSI:</b> " + (v.mmsi || "—") + "</div>" +
+      '<div style="min-width:210px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;color:#1e293b;">' +
+      '<div style="font-weight:800;color:#0284c7;margin-bottom:4px;display:flex;align-items:center;gap:5px;">🚢 ' + name + "</div>" +
+      "<div><b>MMSI:</b> " + (v.mmsi || "—") + (v.callSign ? " · <b>Call:</b> " + v.callSign : "") + "</div>" +
       "<div><b>Type:</b> " + type + "</div>" +
       "<div><b>SOG / COG:</b> " + sog + " / " + cog + "</div>" +
       "<div><b>Destination:</b> " + dest + "</div>" +
-      '<div style="margin-top:4px;font-size:10px;color:#64748b;">Source: ' + src + " · not exportable</div></div>"
+      '<div style="margin-top:5px;padding-top:3px;border-top:1px solid #e2e8f0;font-size:10px;color:#64748b;">Source: ' + src + "</div></div>"
     );
   }
 
@@ -70,7 +88,7 @@
       list = sampled;
     }
 
-    const useCanvasDots = list.length > 600;
+    const useCanvasDots = list.length > 700;
     list.forEach((v) => {
       const lat = Number(v.lat);
       const lon = Number(v.lon);
@@ -99,11 +117,14 @@
       const icon = L.divIcon({
         className: "ais-target-icon",
         html:
-          '<div style="width:14px;height:14px;transform:rotate(' +
+          '<div style="transform:rotate(' +
           rot +
-          'deg);transform-origin:center center;"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 2 L20 20 L12 16 L4 20 Z" fill="' +
+          'deg);width:14px;height:14px;display:flex;align-items:center;justify-content:center;">' +
+          '<svg viewBox="0 0 24 24" width="14" height="14">' +
+          '<polygon points="12,2 20,20 12,16 4,20" fill="' +
           col +
-          '" stroke="#0f172a" stroke-width="1.2"/></svg></div>',
+          '" stroke="#0f172a" stroke-width="1.5"/>' +
+          "</svg></div>",
         iconSize: [14, 14],
         iconAnchor: [7, 7]
       });
@@ -114,239 +135,448 @@
 
     const badge = document.querySelector('.excel-tab[data-overlay="ais"] .excel-tab-badge');
     if (badge) {
-      badge.textContent = "";
-      badge.style.display = "none";
+      badge.textContent = list.length > 0 ? String(list.length) : "";
+      badge.style.display = list.length > 0 ? "inline-block" : "none";
+    }
+  }
+
+  function getCombinedAisTargets(map) {
+    const streamList = Object.values(aisStreamTargets);
+    const combined = mergeByMmsi([lastRestTargets, streamList]);
+    return filterToViewport(combined, map);
+  }
+
+  function pruneStaleStreamTargets() {
+    const cutoff = Date.now() - 30 * 60 * 1000;
+    for (const mmsi in aisStreamTargets) {
+      if (aisStreamTargets[mmsi].updatedAt < cutoff) {
+        delete aisStreamTargets[mmsi];
+      }
+    }
+  }
+
+  function scheduleAisStreamRender() {
+    if (aisStreamPendingRender) return;
+    aisStreamPendingRender = true;
+    clearTimeout(aisStreamRenderTimer);
+    aisStreamRenderTimer = setTimeout(() => {
+      aisStreamPendingRender = false;
+      const map = window.leafletMap;
+      if (!map || !(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
+      pruneStaleStreamTargets();
+      const allInView = getCombinedAisTargets(map);
+      renderAisTargets(allInView, map);
+      if (aisLastPayload) {
+        aisLastPayload.count = allInView.length;
+      }
+    }, 1200);
+  }
+
+  function getMapAisStreamBoxes(map) {
+    if (!map) return [[[-85, -180], [85, 180]]];
+    const b = map.getBounds();
+    let s = Math.max(-85, Math.min(85, b.getSouth()));
+    let n = Math.max(-85, Math.min(85, b.getNorth()));
+    let w = b.getWest();
+    let e = b.getEast();
+    if (n <= s) n = s + 0.5;
+
+    while (w < -180) w += 360;
+    while (w > 180) w -= 360;
+    while (e < -180) e += 360;
+    while (e > 180) e -= 360;
+
+    if (w > e) {
+      return [
+        [[Number(s.toFixed(4)), Number(w.toFixed(4))], [Number(n.toFixed(4)), 180]],
+        [[Number(s.toFixed(4)), -180], [Number(n.toFixed(4)), Number(e.toFixed(4))]]
+      ];
+    }
+    if (Math.abs(e - w) < 0.2) e = Math.min(180, w + 0.5);
+    return [[[Number(s.toFixed(4)), Number(w.toFixed(4))], [Number(n.toFixed(4)), Number(e.toFixed(4))]]];
+  }
+
+  function connectAisStream() {
+    const apiKey = getAisStreamApiKey();
+    const map = window.leafletMap;
+    if (!apiKey || !map || !(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) {
+      disconnectAisStream();
+      return;
+    }
+    if (aisStreamWs && (aisStreamWs.readyState === WebSocket.OPEN || aisStreamWs.readyState === WebSocket.CONNECTING)) {
+      sendAisStreamSubscription();
+      return;
+    }
+
+    try {
+      aisStreamWs = new WebSocket(AISSTREAM_WS_URL);
+    } catch (e) {
+      console.warn("[SetSail AIS] AISStream WS init error:", e);
+      return;
+    }
+
+    aisStreamWs.onopen = function () {
+      console.log("[SetSail AIS] Connected to AISStream.io live stream");
+      updateAisStreamStatusUI("CONNECTED");
+      sendAisStreamSubscription();
+    };
+
+    aisStreamWs.onmessage = function (event) {
+      try {
+        const msg = JSON.parse(event.data);
+        handleAisStreamMessage(msg);
+      } catch (e) {}
+    };
+
+    aisStreamWs.onerror = function (err) {
+      console.warn("[SetSail AIS] AISStream WS error:", err);
+      updateAisStreamStatusUI("ERROR");
+    };
+
+    aisStreamWs.onclose = function () {
+      updateAisStreamStatusUI("DISCONNECTED");
+      if (window.OVERLAY_STATES && window.OVERLAY_STATES.ais && getAisStreamApiKey()) {
+        clearTimeout(aisStreamReconnectTimer);
+        aisStreamReconnectTimer = setTimeout(connectAisStream, 6000);
+      }
+    };
+  }
+
+  function sendAisStreamSubscription() {
+    if (!aisStreamWs || aisStreamWs.readyState !== WebSocket.OPEN) return;
+    const apiKey = getAisStreamApiKey();
+    const map = window.leafletMap;
+    const boxes = getMapAisStreamBoxes(map);
+    if (!apiKey || !boxes) return;
+
+    try {
+      const sub = {
+        APIKey: apiKey,
+        BoundingBoxes: boxes,
+        FilterMessageTypes: ["PositionReport", "StandardClassBPositionReport", "ShipStaticData"]
+      };
+      aisStreamWs.send(JSON.stringify(sub));
+    } catch (e) {
+      console.warn("[SetSail AIS] send subscription error:", e);
+    }
+  }
+
+  function disconnectAisStream() {
+    clearTimeout(aisStreamReconnectTimer);
+    clearTimeout(aisStreamRenderTimer);
+    if (aisStreamWs) {
+      try {
+        aisStreamWs.onclose = null;
+        aisStreamWs.close();
+      } catch (e) {}
+      aisStreamWs = null;
+    }
+    updateAisStreamStatusUI("DISCONNECTED");
+  }
+
+  function handleAisStreamMessage(msg) {
+    if (!msg) return;
+    const meta = msg.MetaData || {};
+    const posMsg = (msg.Message && (msg.Message.PositionReport || msg.Message.StandardClassBPositionReport)) || {};
+    const staticMsg = (msg.Message && msg.Message.ShipStaticData) || {};
+
+    const mmsi = meta.MMSI || meta.MMSI_String || posMsg.UserID || staticMsg.UserID;
+    if (!mmsi) return;
+
+    let lat = Number(meta.latitude != null ? meta.latitude : (meta.Latitude != null ? meta.Latitude : posMsg.Latitude));
+    let lon = Number(meta.longitude != null ? meta.longitude : (meta.Longitude != null ? meta.Longitude : posMsg.Longitude));
+
+    const prev = aisStreamTargets[mmsi] || {};
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      if (prev.lat != null && prev.lon != null) {
+        lat = prev.lat;
+        lon = prev.lon;
+      } else {
+        return;
+      }
+    }
+
+    const shipName = (meta.ShipName || staticMsg.Name || prev.name || ("MMSI " + mmsi)).trim();
+    const callSign = (staticMsg.CallSign || prev.callSign || "").trim();
+    const sog = posMsg.Sog != null ? posMsg.Sog : prev.sog;
+    const cog = posMsg.Cog != null ? posMsg.Cog : prev.cog;
+    const heading = posMsg.TrueHeading != null && posMsg.TrueHeading < 360 ? posMsg.TrueHeading : prev.heading;
+    const navStat = posMsg.NavigationalStatus != null ? posMsg.NavigationalStatus : prev.navStat;
+    const destination = (staticMsg.Destination || prev.destination || "").trim();
+    const shipType = staticMsg.Type != null ? staticMsg.Type : prev.shipType;
+
+    aisStreamTargets[mmsi] = {
+      mmsi: mmsi,
+      lat: lat,
+      lon: lon,
+      name: shipName,
+      callSign: callSign,
+      sog: sog,
+      cog: cog,
+      heading: heading,
+      navStat: navStat,
+      destination: destination,
+      shipType: shipType,
+      source: "AISStream.io (Live Satellite/Terrestrial)",
+      updatedAt: Date.now()
+    };
+
+    scheduleAisStreamRender();
+  }
+
+  function updateAisStreamStatusUI(status) {
+    const badge = document.getElementById("aisStreamStatusBadge");
+    const label = document.getElementById("aisStreamStatusLabel");
+    if (!badge) return;
+    const key = getAisStreamApiKey();
+    if (status === "CONNECTED") {
+      badge.textContent = "CONNECTED (LIVE STREAM)";
+      badge.style.background = "#10b981";
+      if (label) label.textContent = "Live Global AISStream.io";
+    } else if (key) {
+      badge.textContent = "RECONNECTING";
+      badge.style.background = "#0284c7";
+      if (label) label.textContent = "Live Global AISStream.io";
+    } else {
+      badge.textContent = "COMMUNITY FALLBACK ONLY";
+      badge.style.background = "#eab308";
+      if (label) label.textContent = "Open Waters Community Feed";
     }
   }
 
   async function fetchJson(url, headers) {
-    const resp = await fetch(url, {
-      headers: headers || { Accept: "application/json" },
-      cache: "no-store"
-    });
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
-    return resp.json();
+    const res = await fetch(url, { headers: headers || {} });
+    if (!res.ok) throw new Error("HTTP " + res.status + " " + url);
+    return res.json();
   }
 
   function mergeByMmsi(lists) {
-    const by = Object.create(null);
-    lists.flat().forEach((t) => {
-      if (!t || t.mmsi == null) return;
-      const key = String(t.mmsi);
-      const prev = by[key];
-      if (!prev) {
-        by[key] = t;
-        return;
+    const map = Object.create(null);
+    for (const list of lists) {
+      if (!Array.isArray(list)) continue;
+      for (const t of list) {
+        if (!t) continue;
+        const key = t.mmsi ? String(t.mmsi) : t.lat.toFixed(3) + "," + t.lon.toFixed(3);
+        map[key] = Object.assign({}, map[key] || {}, t);
       }
-      if ((!prev.name && t.name) || (Number(t.sog) || 0) > (Number(prev.sog) || 0)) {
-        by[key] = Object.assign({}, prev, t);
-      }
-    });
-    return Object.keys(by).map((k) => by[k]);
+    }
+    return Object.values(map);
   }
 
   function openWatersFeatureToTarget(f) {
+    const g = f.geometry || {};
+    const c = g.coordinates || [];
     const p = f.properties || {};
-    const c = (f.geometry && f.geometry.coordinates) || [];
     return {
-      mmsi: p.mmsi,
-      lat: c[1],
-      lon: c[0],
-      sog: p.sog,
-      cog: p.cog,
+      mmsi: p.mmsi != null ? p.mmsi : p.mmsi_string,
+      name: p.name || p.vessel_name || "",
+      shipTypeName: p.ship_type || p.type_name || "",
+      lat: Number(c[1]),
+      lon: Number(c[0]),
+      sog: p.speed != null ? p.speed : p.sog,
+      cog: p.course != null ? p.course : p.cog,
       heading: p.heading,
-      navStat: p.nav_status != null ? p.nav_status : p.navStat,
-      name: p.name || "",
+      navStat: p.navigational_status != null ? p.navigational_status : p.status,
       destination: p.destination || "",
-      shipType: p.type || p.shipType || "",
-      source: "Open Waters AIS (" + (p.source || "community") + ")"
+      source: "Open Waters"
     };
   }
 
   function digitrafficFeatureToTarget(f) {
+    const g = f.geometry || {};
+    const c = g.coordinates || [];
     const p = f.properties || {};
-    const c = (f.geometry && f.geometry.coordinates) || [];
     const mmsi = p.mmsi;
-    const meta = aisMetaByMmsi[mmsi] || {};
+    const meta = (mmsi && aisMetaByMmsi[mmsi]) || {};
     return {
-      mmsi,
-      lat: c[1],
-      lon: c[0],
+      mmsi: mmsi,
+      name: meta.name || "",
+      shipTypeName: meta.shipType != null ? "Type " + meta.shipType : "",
+      destination: meta.destination || "",
+      lat: Number(c[1]),
+      lon: Number(c[0]),
       sog: p.sog,
       cog: p.cog,
       heading: p.heading,
       navStat: p.navStat,
-      name: meta.name || p.name || "",
-      destination: meta.destination || "",
-      shipType: meta.shipType || "",
-      source: "Digitraffic open AIS (Baltic/FI)"
+      source: "Digitraffic (Baltic)"
     };
   }
 
   function normalizeLon(lon) {
-    while (lon > 180) lon -= 360;
-    while (lon < -180) lon += 360;
-    return lon;
+    let x = Number(lon);
+    while (x < -180) x += 360;
+    while (x > 180) x -= 360;
+    return x;
   }
 
   function mapViewportBoxes(map) {
     const b = map.getBounds();
-    let minLat = Math.max(-85, Math.min(85, b.getSouth()));
-    let maxLat = Math.max(-85, Math.min(85, b.getNorth()));
-    if (maxLat <= minLat) maxLat = minLat + 0.5;
-    let minLon = b.getWest();
-    let maxLon = b.getEast();
-    const dLat = maxLat - minLat;
-    let dLon = maxLon - minLon;
-    if (dLon <= 0) dLon += 360;
-    const area = dLat * dLon;
-    const zoom = map.getZoom ? map.getZoom() : 3;
+    const zoom = map.getZoom();
+    const s = Math.max(-85, Math.min(85, b.getSouth()));
+    const n = Math.max(-85, Math.min(85, b.getNorth()));
+    const w = b.getWest();
+    const e = b.getEast();
 
-    // Zoomed out: do not fetch world AIS (wait for user to zoom in)
-    if (zoom < 5 || area > 2500) {
+    if (e - w >= 355 || zoom <= 4) {
       return {
-        mode: "live",
-        boxes: [],
-        area,
-        zoom,
-        skipZones: true,
-        skipLive: true
+        mode: "world",
+        zoom: zoom,
+        skipLive: true,
+        skipZones: zoom < MIN_ZOOM_ZONES,
+        boxes: []
       };
     }
 
-    if (area <= OW_AREA_CAP) {
+    const spanLon = e - w;
+    const spanLat = Math.max(0.01, n - s);
+    const approxArea = spanLon * spanLat;
+
+    if (approxArea > OW_AREA_CAP) {
       return {
-        mode: "live",
-        boxes: [[minLat, normalizeLon(minLon), maxLat, normalizeLon(maxLon)]],
-        area,
-        zoom,
-        skipZones: zoom < MIN_ZOOM_ZONES
+        mode: "overview",
+        zoom: zoom,
+        skipLive: true,
+        skipZones: zoom < MIN_ZOOM_ZONES,
+        boxes: []
       };
     }
-    const side = Math.sqrt(OW_AREA_CAP);
+
     const boxes = [];
-    const nLat = Math.max(1, Math.ceil(dLat / side));
-    const nLon = Math.max(1, Math.ceil(dLon / side));
-    const stepLat = dLat / nLat;
-    const stepLon = dLon / nLon;
-    for (let i = 0; i < nLat; i++) {
-      for (let j = 0; j < nLon; j++) {
-        if (boxes.length >= OW_MAX_TILES) break;
-        const a0 = minLat + i * stepLat;
-        const a1 = Math.min(maxLat, a0 + stepLat);
-        const o0 = minLon + j * stepLon;
-        boxes.push([a0, normalizeLon(o0), a1, normalizeLon(o0 + stepLon)]);
+    let curW = w;
+    while (curW < e) {
+      const nextW = Math.min(e, curW + 180);
+      const bW = normalizeLon(curW);
+      const bE = normalizeLon(nextW);
+      if (bW <= bE) {
+        boxes.push({ minLat: s, minLon: bW, maxLat: n, maxLon: bE });
+      } else {
+        boxes.push({ minLat: s, minLon: bW, maxLat: n, maxLon: 180 });
+        boxes.push({ minLat: s, minLon: -180, maxLat: n, maxLon: bE });
       }
-      if (boxes.length >= OW_MAX_TILES) break;
+      curW = nextW;
     }
-    return { mode: "live", boxes, area, zoom, skipZones: zoom < MIN_ZOOM_ZONES, tiled: true };
+    return {
+      mode: "viewport",
+      zoom: zoom,
+      skipLive: false,
+      skipZones: zoom < MIN_ZOOM_ZONES,
+      boxes: boxes.slice(0, OW_MAX_TILES)
+    };
   }
 
   function overlapsBaltic(boxes) {
-    return boxes.some(([a0, o0, a1, o1]) => !(a1 < 53 || a0 > 66 || o1 < 9 || o0 > 31));
+    if (!boxes || !boxes.length) return false;
+    const baltic = { minLat: 53.0, maxLat: 66.5, minLon: 9.0, maxLon: 30.5 };
+    return boxes.some((b) => bboxOverlaps(b, baltic));
   }
 
   function bboxOverlaps(a, b) {
-    const a0 = a[0], o0 = a[1], a1 = a[2], o1 = a[3];
-    const b0 = b[0], p0 = b[1], b1 = b[2], p1 = b[3];
-    if (a1 < b0 || a0 > b1) return false;
-    if (o0 <= o1 && p0 <= p1) return !(o1 < p0 || o0 > p1);
-    return true;
+    return (
+      a.minLat <= b.maxLat &&
+      a.maxLat >= b.minLat &&
+      a.minLon <= b.maxLon &&
+      a.maxLon >= b.minLon
+    );
   }
 
   function zoneAreaSqDeg(bbox) {
-    if (!bbox || bbox.length < 4) return 99999;
-    const dLat = Math.abs(bbox[2] - bbox[0]);
-    let dLon = Math.abs(bbox[3] - bbox[1]);
-    if (dLon > 180) dLon = 360 - dLon;
-    return dLat * dLon;
+    if (!bbox || bbox.length < 4) return 9999;
+    const [minLon, minLat, maxLon, maxLat] = bbox;
+    return Math.abs(maxLon - minLon) * Math.abs(maxLat - minLat);
   }
 
   async function loadZonesManifest() {
     if (zonesManifest) return zonesManifest;
-    zonesManifest = await fetchJson(ZONES_INDEX + "?t=" + Date.now());
+    try {
+      zonesManifest = await fetchJson(ZONES_INDEX);
+    } catch (e) {
+      zonesManifest = { zones: [] };
+    }
     return zonesManifest;
   }
 
   async function loadZoneFile(file) {
-    if (zoneCache[file] && Date.now() - zoneCache[file].at < 15 * 60 * 1000) {
-      return zoneCache[file].targets;
+    if (!file) return [];
+    if (zoneCache[file]) return zoneCache[file];
+    try {
+      const data = await fetchJson("ais/zones/" + file);
+      const list = Array.isArray(data) ? data : data.vessels || [];
+      zoneCache[file] = list;
+      return list;
+    } catch (e) {
+      return [];
     }
-    const geo = await fetchJson(file + "?t=" + Date.now());
-    const targets = Array.isArray(geo.targets) ? geo.targets : [];
-    zoneCache[file] = { at: Date.now(), targets };
-    return targets;
   }
 
   async function loadZonesForMap(map, zoom) {
-    if (zoom < MIN_ZOOM_ZONES) return [];
-    const man = await loadZonesManifest();
+    const z = zoom != null ? zoom : map.getZoom();
+    if (z < MIN_ZOOM_ZONES) return [];
+
     const b = map.getBounds();
-    const view = [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()];
-    let zones = (man.zones || []).filter((z) => z.bbox && bboxOverlaps(view, z.bbox));
-    // When mid-zoom, skip huge ocean zones (load live feed instead)
-    if (zoom < MIN_ZOOM_DENSE_ZONES) {
-      zones = zones.filter((z) => zoneAreaSqDeg(z.bbox) < 8000);
+    const vp = {
+      minLat: b.getSouth(),
+      maxLat: b.getNorth(),
+      minLon: b.getWest(),
+      maxLon: b.getEast()
+    };
+    const man = await loadZonesManifest();
+    const files = [];
+    for (const entry of man.zones || []) {
+      const [w, s, e, n] = entry.bbox || [];
+      if (w == null) continue;
+      const zb = { minLat: s, maxLat: n, minLon: w, maxLon: e };
+      if (!bboxOverlaps(vp, zb)) continue;
+      const area = zoneAreaSqDeg(entry.bbox);
+      if (area > 40 && z < MIN_ZOOM_DENSE_ZONES) continue;
+      files.push(entry.file);
     }
-    // Cap concurrent zone files
-    zones = zones.slice(0, zoom >= 9 ? 4 : zoom >= 7 ? 2 : 1);
-    const lists = await Promise.all(
-      zones.map(async (z) => {
-        try {
-          return await loadZoneFile(z.file);
-        } catch (e) {
-          console.warn("[SetSail AIS] zone fail", z.id, e);
-          return [];
-        }
-      })
-    );
-    return mergeByMmsi(lists);
+    const capFiles = files.slice(0, 16);
+    const loaded = await Promise.all(capFiles.map((f) => loadZoneFile(f)));
+    return loaded.flat();
   }
 
   async function loadOpenWatersBoxes(boxes) {
-    const out = [];
-    await Promise.all(
-      boxes.map(async (box) => {
-        const [minLat, minLon, maxLat, maxLon] = box;
-        const url =
-          OPENWATERS_VESSELS +
-          "?bbox=" +
-          [minLat, minLon, maxLat, maxLon].map((n) => Number(n).toFixed(4)).join(",");
-        try {
-          const geo = await fetchJson(url, {
-            Accept: "application/geo+json, application/json",
-            "User-Agent": "SetSailMarineSuite/AIS"
-          });
-          (geo.features || []).forEach((f) => {
-            const t = openWatersFeatureToTarget(f);
-            if (Number.isFinite(t.lat) && Number.isFinite(t.lon)) out.push(t);
-          });
-        } catch (e) {
-          console.warn("[SetSail AIS] Open Waters tile failed", box, e);
-        }
-      })
-    );
-    return out;
+    const fetches = boxes.map(async (box) => {
+      const q = new URLSearchParams({
+        min_latitude: box.minLat.toFixed(4),
+        min_longitude: box.minLon.toFixed(4),
+        max_latitude: box.maxLat.toFixed(4),
+        max_longitude: box.maxLon.toFixed(4)
+      });
+      try {
+        const gj = await fetchJson(OPENWATERS_VESSELS + "?" + q.toString(), {
+          Accept: "application/json"
+        });
+        const feats = gj.features || [];
+        return feats.map(openWatersFeatureToTarget);
+      } catch (e) {
+        return [];
+      }
+    });
+    const parts = await Promise.all(fetches);
+    return parts.flat();
   }
 
   async function loadDigitrafficMeta() {
     try {
-      const vessels = await fetchJson(DIGITRAFFIC_VES, {
+      const arr = await fetchJson(DIGITRAFFIC_VES, {
         Accept: "application/json",
         "Digitraffic-User": "SetSailMarineSuite/AIS"
       });
-      const arr = Array.isArray(vessels) ? vessels : vessels.vessels || vessels.data || [];
-      arr.forEach((v) => {
-        const mmsi = v.mmsi || v.MMSI;
-        if (!mmsi) return;
-        aisMetaByMmsi[mmsi] = {
-          name: v.name || v.shipName || "",
-          destination: v.destination || v.dest || "",
-          shipType: v.shipType || v.shipTypeName || v.type || "",
-          callSign: v.callSign || ""
-        };
-      });
-    } catch (e) { /* optional */ }
+      if (Array.isArray(arr)) {
+        arr.forEach((item) => {
+          if (!item.mmsi) return;
+          aisMetaByMmsi[item.mmsi] = {
+            name: item.name || "",
+            shipType: item.shipType,
+            destination: item.destination || "",
+            callSign: item.callSign || ""
+          };
+        });
+      }
+    } catch (e) {}
   }
 
   async function loadLiveDigitraffic() {
@@ -383,31 +613,31 @@
     const plan = mapViewportBoxes(map);
     let targets = [];
     try {
-      // 1) Live viewport first (fast) — skipped when zoomed too far out
       let live = [];
       if (!plan.skipLive && plan.boxes && plan.boxes.length) {
         try {
           live = await loadOpenWatersBoxes(plan.boxes);
-        } catch (e) { /* continue */ }
+        } catch (e) {}
       }
       if (seq !== aisRefreshSeq) return;
       let digi = [];
       if (overlapsBaltic(plan.boxes)) {
         try {
           digi = await loadLiveDigitraffic();
-        } catch (e) { /* optional */ }
+        } catch (e) {}
       }
       if (seq !== aisRefreshSeq) return;
-      targets = filterToViewport(mergeByMmsi([live, digi]), map);
-      renderAisTargets(targets, map);
+      let rest = filterToViewport(mergeByMmsi([live, digi]), map);
 
-      // 2) Zone densify only when zoomed in
       if (!plan.skipZones) {
         const zoneAll = await loadZonesForMap(map, plan.zoom || map.getZoom());
         if (seq !== aisRefreshSeq) return;
-        targets = filterToViewport(mergeByMmsi([targets, zoneAll]), map);
-        renderAisTargets(targets, map);
+        rest = filterToViewport(mergeByMmsi([rest, zoneAll]), map);
       }
+
+      lastRestTargets = rest;
+      targets = getCombinedAisTargets(map);
+      renderAisTargets(targets, map);
     } catch (e) {
       console.warn("[SetSail AIS] refresh failed", e);
     }
@@ -428,6 +658,7 @@
   function startAisPolling() {
     stopAisPolling();
     refreshAisOverlay();
+    connectAisStream();
     aisTimer = setInterval(() => refreshAisOverlay(), AIS_REFRESH_MS);
     const map = window.leafletMap;
     if (map && !map._setsailAisMoveHooked) {
@@ -435,7 +666,10 @@
       map.on("moveend zoomend", () => {
         if (!(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
         clearTimeout(aisMoveTimer);
-        aisMoveTimer = setTimeout(() => refreshAisOverlay(), 450);
+        aisMoveTimer = setTimeout(() => {
+          refreshAisOverlay();
+          sendAisStreamSubscription();
+        }, 450);
       });
     }
   }
@@ -446,6 +680,7 @@
       clearInterval(aisTimer);
       aisTimer = null;
     }
+    disconnectAisStream();
     if (leafletAisLayer) {
       leafletAisLayer.clearLayers();
       const map = window.leafletMap;
@@ -454,14 +689,79 @@
   }
 
   function showAisInfoModal() {
-    const n = aisLastPayload && aisLastPayload.count;
-    if (typeof showSetSailToast === "function") {
-      showSetSailToast(
-        "AIS loads as you zoom in: live Open Waters from zoom ≥5; zone densify from zoom ≥6. Digitraffic densifies Baltic. Not exportable." +
-          (n != null ? " In view: " + n + "." : ""),
-        "info"
-      );
+    const modal = document.getElementById("aisOverlayInfoModal");
+    if (!modal) {
+      const n = aisLastPayload && aisLastPayload.count;
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast(
+          "AISStream.io: Live global satellite/terrestrial stream active." + (n != null ? " Targets: " + n : ""),
+          "info"
+        );
+      }
+      return;
     }
+
+    const input = document.getElementById("inputAisStreamApiKey");
+    if (input) {
+      input.value = getAisStreamApiKey();
+    }
+
+    const countEl = document.getElementById("aisTargetsCountSummary");
+    if (countEl) {
+      const streamCount = Object.keys(aisStreamTargets).length;
+      const total = (aisLastPayload && aisLastPayload.count) || streamCount;
+      countEl.textContent = "Targets in view: " + total + " (Live stream: " + streamCount + ")";
+    }
+
+    updateAisStreamStatusUI(aisStreamWs && aisStreamWs.readyState === WebSocket.OPEN ? "CONNECTED" : "DISCONNECTED");
+    modal.classList.add("open");
+  }
+
+  function initAisModalEvents() {
+    const closeBtn1 = document.getElementById("aisOverlayModalClose");
+    const closeBtn2 = document.getElementById("aisOverlayModalCloseBtn");
+    const saveBtn = document.getElementById("btnSaveAisStreamKey");
+    const modal = document.getElementById("aisOverlayInfoModal");
+
+    if (closeBtn1 && modal) closeBtn1.addEventListener("click", () => modal.classList.remove("open"));
+    if (closeBtn2 && modal) closeBtn2.addEventListener("click", () => modal.classList.remove("open"));
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) modal.classList.remove("open");
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        const input = document.getElementById("inputAisStreamApiKey");
+        const val = (input ? input.value : "").trim();
+        try {
+          localStorage.setItem(AISSTREAM_KEY_STORAGE, val);
+        } catch (e) {}
+
+        const note = document.getElementById("aisStreamKeyStatusNote");
+        if (val) {
+          if (note) note.style.display = "block";
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast("AISStream.io key saved. Connecting to live stream...", "success");
+          }
+          disconnectAisStream();
+          connectAisStream();
+        } else {
+          if (note) note.style.display = "none";
+          disconnectAisStream();
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast("AISStream key cleared. Using fallback feeds.", "info");
+          }
+        }
+      });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initAisModalEvents);
+  } else {
+    initAisModalEvents();
   }
 
   window.refreshAisOverlay = refreshAisOverlay;
