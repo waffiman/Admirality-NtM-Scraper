@@ -57,7 +57,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.22" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.23" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -5802,7 +5802,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   overflow: auto !important;
   max-height: min(70vh, 560px);
 }
-/* ECDIS broken-crosshair cursor (gap at center) */
+/* ECDIS broken-crosshair cursor — black + white halo (readable on blue water & yellow land) */
 .ecdis-cursor-map,
 .ecdis-cursor-map .leaflet-container,
 .leaflet-container.ecdis-cursor-map,
@@ -5810,7 +5810,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 #ntmMap .leaflet-grab,
 #ntmMap .leaflet-dragging,
 #ntmMap .leaflet-marker-draggable {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7' fill='none' stroke='%2300e5ff' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E") 12 12, crosshair !important;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7' fill='none' stroke='%23ffffff' stroke-width='3.2' stroke-linecap='square'/%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7' fill='none' stroke='%23111a24' stroke-width='1.6' stroke-linecap='square'/%3E%3C/svg%3E") 12 12, crosshair !important;
 }
 .own-ship-marker { background: transparent !important; border: none !important; }
 .own-ship-wrap { width: 28px; height: 44px; }
@@ -11551,9 +11551,9 @@ select option {
     // v5.19 — hard kill stale SW/HTML so flame + AIS zones actually show
     (function(){
       try {
-        if (localStorage.getItem('setsail_force_v522') === '1') return;
+        if (localStorage.getItem('setsail_force_v523') === '1') return;
         var finish = function(){
-          localStorage.setItem('setsail_force_v522', '1');
+          localStorage.setItem('setsail_force_v523', '1');
           // clear ALL old force/reload flags that blocked later bumps
           try {
             ['setsail_force_v512','setsail_force_v513','setsail_force_v514','setsail_force_v515','setsail_force_v516',
@@ -19736,9 +19736,9 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.22"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.22"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.22"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.23"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.23"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.23"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19816,7 +19816,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.22"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.23"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20194,7 +20194,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.22', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.23', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
