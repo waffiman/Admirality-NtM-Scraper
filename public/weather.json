@@ -1,28 +1,28 @@
 {
-  "synopticCycle": "2000 UTC",
-  "lastSyncUtc": "2026-10-17T20:14:48.070314+00:00",
+  "synopticCycle": "0300 UTC",
+  "lastSyncUtc": "2026-10-18T03:24:17.953597+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
       "id": "EP212026",
       "name": "Hurricane TRUDY",
       "shortName": "Trudy",
-      "category": "Category 1 Hurricane (NOAA NHC)",
+      "category": "Category 2 Hurricane (NOAA NHC)",
       "center": [
-        17.0,
-        -104.3
+        18.2,
+        -105.7
       ],
-      "centralPressure": 979,
-      "maxWinds": 80,
-      "gusts": 98,
-      "movement": "NW at 10 kts",
-      "dangerRadiusNm": 92,
+      "centralPressure": 976,
+      "maxWinds": 85,
+      "gusts": 104,
+      "movement": "NW at 9 kts",
+      "dangerRadiusNm": 97,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            17.7,
-            -104.8
+            18.6,
+            -105.6
           ],
           "winds": 90,
           "radiusNm": 56
@@ -30,35 +30,35 @@
         {
           "tau": 24,
           "coords": [
-            19.1,
-            -105.7
+            19.8,
+            -106.4
           ],
-          "winds": 90,
+          "winds": 85,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            20.1,
-            -106.4
+            20.7,
+            -107.1
           ],
-          "winds": 85,
+          "winds": 70,
           "radiusNm": 90
         },
         {
           "tau": 48,
           "coords": [
-            20.7,
-            -107.0
+            21.0,
+            -107.6
           ],
-          "winds": 65,
+          "winds": 55,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            20.9,
-            -107.5
+            21.2,
+            -108.1
           ],
           "winds": 45,
           "radiusNm": 124
@@ -66,8 +66,8 @@
         {
           "tau": 72,
           "coords": [
-            20.9,
-            -108.2
+            21.5,
+            -108.7
           ],
           "winds": 35,
           "radiusNm": 140
@@ -75,8 +75,8 @@
         {
           "tau": 84,
           "coords": [
-            21.7,
-            -109.4
+            22.2,
+            -109.8
           ],
           "winds": 25,
           "radiusNm": 157
@@ -90,37 +90,37 @@
       "category": "Typhoon (JTWC/JMA)",
       "center": [
         13.1,
-        144.8
+        143.4
       ],
       "centralPressure": 945,
       "maxWinds": 130,
       "gusts": 162,
-      "movement": "W at 5 kts",
+      "movement": "WNW at 11 kts",
       "dangerRadiusNm": 156,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            13.0,
-            143.7
+            13.6,
+            141.2
           ],
-          "winds": 120,
+          "winds": 135,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            13.5,
-            141.6
+            14.4,
+            139.3
           ],
-          "winds": 135,
+          "winds": 140,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            14.3,
-            139.5
+            15.4,
+            137.3
           ],
           "winds": 140,
           "radiusNm": 90
@@ -128,17 +128,17 @@
         {
           "tau": 48,
           "coords": [
-            15.3,
-            137.4
+            16.4,
+            135.1
           ],
-          "winds": 135,
+          "winds": 140,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            16.3,
-            135.1
+            17.5,
+            132.5
           ],
           "winds": 135,
           "radiusNm": 124
@@ -146,8 +146,8 @@
         {
           "tau": 72,
           "coords": [
-            17.3,
-            132.8
+            18.6,
+            130.0
           ],
           "winds": 135,
           "radiusNm": 140
@@ -155,8 +155,8 @@
         {
           "tau": 84,
           "coords": [
-            19.4,
-            128.6
+            20.3,
+            126.8
           ],
           "winds": 125,
           "radiusNm": 157
@@ -165,24 +165,24 @@
     },
     {
       "id": "SH-01",
-      "name": "Tropical Storm WATI",
+      "name": "Hurricane WATI",
       "shortName": "Wati",
-      "category": "Tropical Storm (JTWC)",
+      "category": "Category 1 Hurricane (JTWC)",
       "center": [
         -14.2,
         81.8
       ],
       "centralPressure": 1004,
-      "maxWinds": 60,
-      "gusts": 75,
-      "movement": "W at 1183 kts",
-      "dangerRadiusNm": 72,
+      "maxWinds": 65,
+      "gusts": 81,
+      "movement": "W at 1178 kts",
+      "dangerRadiusNm": 78,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -14.9,
-            -162.6
+            -16.3,
+            -162.3
           ],
           "winds": 70,
           "radiusNm": 56
@@ -190,47 +190,38 @@
         {
           "tau": 24,
           "coords": [
-            -16.6,
-            -161.4
+            -18.1,
+            -160.7
           ],
-          "winds": 75,
+          "winds": 65,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            -18.5,
-            -159.1
+            -20.3,
+            -157.3
           ],
-          "winds": 65,
+          "winds": 60,
           "radiusNm": 90
         },
         {
           "tau": 48,
           "coords": [
-            -20.7,
-            -155.7
+            -23.1,
+            -152.3
           ],
-          "winds": 60,
+          "winds": 50,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            -23.5,
-            -150.9
+            -26.0,
+            -147.1
           ],
-          "winds": 50,
+          "winds": 40,
           "radiusNm": 124
-        },
-        {
-          "tau": 72,
-          "coords": [
-            -26.3,
-            -145.8
-          ],
-          "winds": 45,
-          "radiusNm": 140
         }
       ]
     }
@@ -244,9 +235,9 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 3.8,
-      "swellPeriod": 9,
-      "swellDir": "S"
+      "waveHeight": 3.6,
+      "swellPeriod": 10,
+      "swellDir": "SW"
     },
     {
       "id": "W2",
@@ -256,33 +247,33 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.6,
-      "swellPeriod": 10,
-      "swellDir": "W"
+      "waveHeight": 3.9,
+      "swellPeriod": 11,
+      "swellDir": "WSW"
     },
     {
       "id": "WS1",
       "name": "Trudy Cyclonic Wave Field",
       "center": [
-        17.0,
-        -104.3
+        18.2,
+        -105.7
       ],
-      "radiusNm": 184,
-      "waveHeight": 6.7,
-      "swellPeriod": 10,
-      "swellDir": "SSW"
+      "radiusNm": 194,
+      "waveHeight": 7.8,
+      "swellPeriod": 9,
+      "swellDir": "NNE"
     },
     {
       "id": "WS2",
       "name": "Champi Cyclonic Wave Field",
       "center": [
         13.1,
-        144.8
+        143.4
       ],
       "radiusNm": 312,
-      "waveHeight": 5.2,
-      "swellPeriod": 9,
-      "swellDir": "NE"
+      "waveHeight": 5.0,
+      "swellPeriod": 10,
+      "swellDir": "ENE"
     },
     {
       "id": "WS3",
@@ -291,20 +282,20 @@
         -14.2,
         81.8
       ],
-      "radiusNm": 150,
+      "radiusNm": 156,
       "waveHeight": 3.1,
-      "swellPeriod": 10,
+      "swellPeriod": 11,
       "swellDir": "SSE"
     }
   ],
   "pressureCenters": [
     {
       "type": "L",
-      "value": 979,
+      "value": 976,
       "name": "Hurricane TRUDY Core Low",
       "coords": [
-        17.0,
-        -104.3
+        18.2,
+        -105.7
       ]
     },
     {
@@ -313,13 +304,13 @@
       "name": "Typhoon CHAMPI Core Low",
       "coords": [
         13.1,
-        144.8
+        143.4
       ]
     },
     {
       "type": "L",
       "value": 1004,
-      "name": "Tropical Storm WATI Core Low",
+      "name": "Hurricane WATI Core Low",
       "coords": [
         -14.2,
         81.8
@@ -356,17 +347,17 @@
   "windVectors": [
     {
       "coords": [
-        17.3,
-        -104.0
+        18.5,
+        -105.4
       ],
       "dir": 160,
-      "speed": 80,
-      "label": "80 kts (Trudy)"
+      "speed": 85,
+      "label": "85 kts (Trudy)"
     },
     {
       "coords": [
         13.4,
-        145.1
+        143.7
       ],
       "dir": 200,
       "speed": 130,
@@ -378,8 +369,8 @@
         82.1
       ],
       "dir": 200,
-      "speed": 60,
-      "label": "60 kts (Wati)"
+      "speed": 65,
+      "label": "65 kts (Wati)"
     }
   ]
 }

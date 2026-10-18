@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-17T20:14:50Z",
-  "generatedAt": "2026-10-17T20:14:50Z",
+  "updatedAt": "2026-10-18T03:24:20Z",
+  "generatedAt": "2026-10-18T03:24:20Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -11,8 +11,149 @@
     "Hellenic Shipping News",
     "Container News"
   ],
-  "totalArticles": 70,
+  "totalArticles": 60,
   "articles": [
+    {
+      "id": "SN-CA018FABD4",
+      "title": "DP World appoints new CEO and Managing Director for Asia Pacific",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/dp-world-appoints-new-ceo-and-managing-director-for-asia-pacific/",
+      "publishedAt": "2026-10-18T01:30:48Z",
+      "category": "Ports & Terminals",
+      "region": "Australia & Pilbara",
+      "regions": [
+        "Australia & Pilbara",
+        "US West Coast & Pacific",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        -20.31,
+        118.58
+      ],
+      "navarea": "X",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/1920_jasonvarsamidis-chiefexecutiveofficerandmanagingdirectordpworldapac-253x300.jpg",
+      "summary": "DP World has appointed Jason Varsamidis as Chief Executive Officer and Managing Director of its Asia Pacific region, effective immediately. Varsamidis will lead DP World’s Asia Pacific portfolio of ports, terminals and logistics businesses across 22 geographies with more than 12,000 employees. Varsamidis brings close...",
+      "body": "DP World has appointed Jason Varsamidis as Chief Executive Officer and Managing Director of its Asia Pacific region, effective immediately. Varsamidis will lead DP World’s Asia Pacific portfolio of ports, terminals and logistics businesses across 22 geographies with more than 12,000 employees. Varsamidis brings close to three decades of experience with DP World and its predecessor P&O Ports, which he joined in 1997. He most recently served as Chief Financial Officer of DP World Asia Pacific since 2020, playing a central role in shaping the region’s strategy, investment agenda and business performance, and previously served as CFO of DP World Australia for seven years. Across his career he has overseen mergers and acquisitions, infrastructure projects and business turnaround programmes. In his new role, Varsamidis will focus on driving regional strategy and operational performance, strengthening end-to-end supply chains and expanding DP World’s integrated logistics capabilities across Asia Pacific. Group CEO Yuvraj Narayan described Varsamidis as a highly respected leader with deep understanding of the business and the markets in which it operates, noting that his track record and commercial acumen make him well placed to lead Asia Pacific as one of DP World’s key growth engines. Varsamidis expressed commitment to maintaining momentum, delivering for customers and partners and advancing strategic priorities across the region.",
+      "takeaways": [
+        "DP World has appointed Jason Varsamidis as Chief Executive Officer and Managing Director of its Asia Pacific region, effective immediately.",
+        "Varsamidis will lead DP World’s Asia Pacific portfolio of ports, terminals and logistics businesses across 22 geographies with more than 12,000 employees.",
+        "Varsamidis brings close to three decades of experience with DP World and its predecessor P&O Ports, which he joined in 1997."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-D798F6D53C",
+      "title": "MSC adds Southampton to Ireland feeder service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/msc-adds-southampton-to-ireland-feeder-service/",
+      "publishedAt": "2026-10-17T23:30:32Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Rotterdam & North Sea",
+        "Japan & Korea"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2026/08/MSC-ULSAN-III-300x225.jpg",
+      "summary": "MSC has added Southampton to its North West Continent–Ireland feeder service, expanding the loop to include the United Kingdom, according to DynaLiners. The feeder previously connected ports in Belgium and France with Ireland. The revised network now covers Antwerp, Zeebrugge, Cork, Dublin, Le Havre and Southampton....",
+      "body": "Services Sticky News MSC adds Southampton to Ireland feeder service October 18, 2026 Facebook Twitter WhatsApp Linkedin Email MSC ULSAN III; Source: VesselFinder MSC has added Southampton to its North West Continent–Ireland feeder service, expanding the loop to include the United Kingdom, according to DynaLiners. The feeder previously connected ports in Belgium and France with Ireland. The revised network now covers Antwerp, Zeebrugge, Cork, Dublin, Le Havre and Southampton. MSC operates the service with two container ships averaging approximately 1,500 TEUs. Revised Ireland feeder rotation The updated port sequence is: Antwerp – Zeebrugge – Cork – Dublin – Le Havre – Southampton – Antwerp. The additional call gives Southampton a direct feeder connection with Cork and Dublin, alongside the service’s existing links to Antwerp, Zeebrugge and Le Havre. TAGS Mediterranean Shipping Co. (MSC) Facebook Twitter WhatsApp Linkedin Email Previous article DP World deploys electric yard tractors at Busan Next article DP World appoints new CEO and Managing Director for Asia Pacific Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The feeder previously connected ports in Belgium and France with Ireland.",
+        "The revised network now covers Antwerp, Zeebrugge, Cork, Dublin, Le Havre and Southampton.",
+        "MSC operates the service with two container ships averaging approximately 1,500 TEUs."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-2C7B20A0AB",
+      "title": "Romanian Fighter Jets Shoot Down Two Drones Over Territorial Waters",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/romanian-fighter-jets-shoot-down-two-drones-over-territorial-waters/",
+      "publishedAt": "2026-10-17T22:58:23Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Baltic Sea & Northern Europe",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "tanker",
+        "port",
+        "imo"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "summary": "BUCHAREST, Oct 17 (Reuters) – Romanian F-16 fighter jets shot down two drones over the country’s territorial waters on Saturday, the defense ministry said. The drones were brought down days after two...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network A view shows a vessel that was hit by a drone in the Black Sea, in this handout image released by the Bulgarian Interior Ministry on October 13, 2026. Bulgarian Interior Ministry/Handout via REUTERS BUCHAREST, Oct 17 (Reuters) – Romanian F-16 fighter jets shot down two drones over the country’s territorial waters on Saturday, the defense ministry said. The drones were brought down days after two chemical tankers were hit by drones near Romania’s Black Sea coast, the latest in a series of attacks highlighting risks to commercial shipping on NATO’s eastern flank. Both vessels were anchored near the Sulina Canal , which links the Danube River to the Black Sea and is an export route for Ukraine. NATO member Romania shares a 614-km (381-mile) border with Ukraine, much of it along the Danube, and has repeatedly reported Russian drone incursions into its airspace since Moscow’s full-scale invasion of Ukraine in 2022. Romania started shooting down such drones earlier this year. The defense ministry said the two drones entered Romanian waters in the Black Sea on Saturday at 1459 GMT and 1501 GMT, respectively. The ministry did not specify the origin of the drones. The two tankers struck earlier this week were hit by Russian drones, a NATO military source told Reuters. Romanian officials are still searching for seven missing crew members . At least five other cargo ships have been hit near the coasts of Romania and neighboring Bulgaria in the past 10 days, with 23 sailors reported dead or missing. Most of those incidents occurred outside NATO territorial waters. In Moldova, on Romania’s northeast border, officials said a new drone had crashed in a northern district, near the border with Ukraine. Officials said there were no casualties or damage and specialists were trying to determine the drone’s origin. The number of drones violating Moldovan airspace has increased greatly in recent months. Five drones identified as Russian fell on Moldovan territory in a little more than 17 hours on Thursday and Friday, prompting the foreign ministry to issue a statement denouncing Russian actions. (Reporting by Luiza Ilie and by Alexander Tanas in Chisinau, Editing by Mark Potter, Timothy Heritage and Ron Popeski) (c) Copyright Thomson Reuters 202 6. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! By Catherine Lucey and María Paula Mijares Torres Oct 11, 2026 (Bloomberg) –President Donald Trump said Sunday that Russia and Ukraine had agreed to an “energy ceasefire” effective immediately. “Both parties... The crew of a merchant ship was missing on Tuesday after the vessel sank in the Black Sea off NATO member Bulgaria following a drone strike that Prime Minister Rumen Radev described as a gross violation of international law. KYIV, Oct 3 (Reuters) – Russia has attacked a Liberian-flagged cargo ship in one of Ukraine’s Black Sea ports in the Odesa region, killing one person and injuring three, the Ukrainian sea ports administration... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Join the leading maritime news network A view shows a vessel that was hit by a drone in the Black Sea, in this handout image released by the Bulgarian Interior Ministry on October 13, 2026.",
+        "Bulgarian Interior Ministry/Handout via REUTERS BUCHAREST, Oct 17 (Reuters) – Romanian F-16 fighter jets shot down two drones over the country’s territorial waters on Saturday, the defense ministry said."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-C8C9AC38B2",
+      "title": "DP World deploys electric yard tractors at Busan",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/dp-world-deploys-electric-yard-tractors-at-busan/",
+      "publishedAt": "2026-10-17T20:59:17Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Japan & Korea",
+        "Australia & Pilbara"
+      ],
+      "tags": [
+        "lng",
+        "container",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/800_dpworld039sfleetofelectrictractorsinbusan1-300x200.jpg",
+      "summary": "DP World has deployed 55 electric yard tractors at its Busan terminal in South Korea, replacing LNG-powered vehicles and accounting for approximately 36 percent of the terminal’s 154-strong yard tractor fleet. The new electric tractors are expected to reduce CO2 emissions by approximately 70% per unit compared to the...",
+      "body": "DP World has deployed 55 electric yard tractors at its Busan terminal in South Korea, replacing LNG-powered vehicles and accounting for approximately 36 percent of the terminal’s 154-strong yard tractor fleet. The new electric tractors are expected to reduce CO2 emissions by approximately 70% per unit compared to the LNG-powered machines they replace, representing a significant step in reducing emissions from terminal operations at one of Asia’s busiest container ports. As a participant in South Korea’s Emissions Trading Scheme, DP World Busan’s electrification programme aligns with both the company’s global decarbonisation commitments and South Korea’s broader ambitions for low-carbon logistics and greener port operations. Beyond emission reductions, the transition will reduce the use and disposal of engine fluids, minimising leak risks and the environmental impact of terminal operations. The electric tractors also offer quieter operation, smoother acceleration and more consistent performance during frequent stop-and-go movements, and with fewer moving parts than LNG-powered equivalents are expected to require less maintenance, supporting equipment availability and operational efficiency. Anders Dømmestrup, Chief Operating Officer for Ports and Terminals Asia Pacific at DP World, described the deployment as an important milestone demonstrating that progress on emissions reduction can be achieved while continuing to deliver safe, efficient and reliable customer services. The Busan deployment builds on similar electrification initiatives across DP World’s global terminal network, including the Port of Brisbane in Australia, Manila South Harbour in the Philippines and Laem Chabang International Terminal in Thailand. DP World Busan plans to continue expanding electric equipment adoption as part of its longer-term terminal emissions reduction strategy.",
+      "takeaways": [
+        "DP World has deployed 55 electric yard tractors at its Busan terminal in South Korea, replacing LNG-powered vehicles and accounting for approximately 36 percent of the terminal’s 154-strong yard tractor fleet.",
+        "Beyond emission reductions, the transition will reduce the use and disposal of engine fluids, minimising leak risks and the environmental impact of terminal operations.",
+        "DP World Busan plans to continue expanding electric equipment adoption as part of its longer-term terminal emissions reduction strategy."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
     {
       "id": "SN-070854842C",
       "title": "Arkas redirects Russia Express to St. Petersburg",
@@ -25,7 +166,8 @@
       "region": "Suez Canal & Eastern Med",
       "regions": [
         "Suez Canal & Eastern Med",
-        "Baltic Sea & Northern Europe"
+        "Baltic Sea & Northern Europe",
+        "Japan & Korea"
       ],
       "tags": [
         "container",
@@ -38,7 +180,7 @@
       "navarea": "III",
       "image": "https://container-news.com/wp-content/uploads/2025/05/Arkas-vessel-300x204.jpg",
       "summary": "Arkas Line has redirected its Russia Express Service (REX) from Novorossiysk to St. Petersburg, restoring Russian port coverage through the Baltic, according to DynaLiners. The carrier initially suspended the service following the sinking of the FESCO-operated containership FESCO Yanina near Novorossiysk in August....",
-      "body": "Services Top Right Arkas redirects Russia Express to St. Petersburg October 17, 2026 Facebook Twitter WhatsApp Linkedin Email Arkas Line has redirected its Russia Express Service (REX) from Novorossiysk to St. Petersburg, restoring Russian port coverage through the Baltic, according to DynaLiners. The carrier initially suspended the service following the sinking of the FESCO-operated containership FESCO Yanina near Novorossiysk in August. Under the revised configuration, Arkas has removed Novorossiysk from the REX rotation and introduced St. Petersburg as the service’s Russian gateway. Two container ships with an average capacity of approximately 1,200 TEUs operate the service at intervals of two to three weeks. Revised REX rotation The updated port sequence is: Alexandria – Mersin – St. Petersburg – Alexandria. The change shifts the Russia Express Service away from the Black Sea while maintaining connections between Russia, Türkiye and Egypt through the Baltic port of St. Petersburg. TAGS Arkas Line Facebook Twitter WhatsApp Linkedin Email Previous article Port of Montreal and Adani Group renew collaboration agreement Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "body": "Services Top Right Arkas redirects Russia Express to St. Petersburg October 17, 2026 Facebook Twitter WhatsApp Linkedin Email Arkas Line has redirected its Russia Express Service (REX) from Novorossiysk to St. Petersburg, restoring Russian port coverage through the Baltic, according to DynaLiners. The carrier initially suspended the service following the sinking of the FESCO-operated containership FESCO Yanina near Novorossiysk in August. Under the revised configuration, Arkas has removed Novorossiysk from the REX rotation and introduced St. Petersburg as the service’s Russian gateway. Two container ships with an average capacity of approximately 1,200 TEUs operate the service at intervals of two to three weeks. Revised REX rotation The updated port sequence is: Alexandria – Mersin – St. Petersburg – Alexandria. The change shifts the Russia Express Service away from the Black Sea while maintaining connections between Russia, Türkiye and Egypt through the Baltic port of St. Petersburg. TAGS Arkas Line Facebook Twitter WhatsApp Linkedin Email Previous article Port of Montreal and Adani Group renew collaboration agreement Next article DP World deploys electric yard tractors at Busan Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
       "takeaways": [
         "Services Top Right Arkas redirects Russia Express to St.",
         "Petersburg October 17, 2026 Facebook Twitter WhatsApp Linkedin Email Arkas Line has redirected its Russia Express Service (REX) from Novorossiysk to St.",
@@ -138,7 +280,7 @@
         56.25
       ],
       "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
       "summary": "DUBAI, Oct 17 (Reuters) – Iran’s Revolutionary Guards Navy said on Saturday that two oil tankers had caught fire after hitting naval mines while crossing the Strait of Hormuz, the official Iranian news agency...",
       "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Vessels in the Strait of Hormuz near the beach of Bandar Abbas, Iran, October 6, 2026. Amirhosein Khorgooi/ISNA/via WANA (West Asia News Agency) via REUTERS DUBAI, Oct 17 (Reuters) – Iran’s Revolutionary Guards Navy said on Saturday that two oil tankers had caught fire after hitting naval mines while crossing the Strait of Hormuz , the official Iranian news agency IRNA reported. State media said both tankers were carrying about 2 million barrels of crude oil. There was no independent confirmation of the reports. Read Also: Fog of War Deepens in Hormuz as UKMTO Says Most Ship Attacks Go Unreported IRNA reported that the vessels had switched off their positioning and radar systems and attempted to use an unauthorized route through the strategic waterway. The second vessel was left immobilized after striking a mine, it added. State media earlier reported that the other tanker had also struck a mine while attempting to transit the strait via a route not authorized by Iran. The incidents come amid heightened tensions around the strait, a key oil shipping route. Disruptions to shipping in the waterway due to the US-Israeli war on Iran have boosted global energy prices and inflation. Maritime officials said on Wednesday that a container ship and a dry bulk carrier sank near the strait after being hit by projectiles in separate incidents. Related Article: Containership Sinks as Hormuz Attacks Spiral Out of Control Attacks around the waterway have surged over the past two weeks, with Iran saying it is stepping up strikes in response to the US blockade of itsports and tougher sanctions imposed last month. (Reporting by Menna Alaa El-Din. Additional reporting by Dubai newsroom. Editing by Sam Holmes and Mark Potter) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Conflicting traffic figures and competing claims of control are making it increasingly difficult to establish what’s happening in the Strait of Hormuz, even as attacks on merchant shipping intensify. The... The cost ?of shipping oil on the largest tankers fell this week from record highs as demand eased following a wave of attacks on vessels in the Middle East and as the US considered easing sanctions on the so-called shadow fleet. The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
@@ -173,7 +315,7 @@
         32.34
       ],
       "navarea": "III",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
       "summary": "By Milda Seputyte and Aaron Eglitis Oct 16, 2026 (Bloomberg) –Europe should block the transit of Russian grain through Baltic ports as that may force Moscow to seek ways to open...",
       "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network General cargo vessel ABLE, one of the two vessels attacked in drone strikes in the Black Sea off NATO member Bulgaria, according to a October 6, 2026 statement by Bulgarian PM Radev, sails in Istanbul, Turkey, September 15, 2026, in this screengrab obtained from a handout video. Marine Traffic/Handout via REUTERS By Milda Seputyte and Aaron Eglitis Oct 16, 2026 (Bloomberg) –Europe should block the transit of Russian grain through Baltic ports as that may force Moscow to seek ways to open trading on the Black Sea, Latvian Prime Minister Andris Kulbergs said. Russia and Ukraine have attacked each other’s ports, terminals and shipping infrastructure in the Black Sea, sharply cutting exports of key commodities such as grain . Moscow has diverted some of these grain shipments to Latvian and Lithuanian ports over rail, sparking criticism in the Baltic countries, which are European Union and NATO members. “It’s needed that we put the right pressure in order for Russia to understand that they need themselves to open the Black Sea,” Kulbergs said in an interview in Brussels on Friday. Ukraine needs to be able to sell its grain, to partly fill in the financing gap its facing this winter , he added. Read Also: UK Tightens Russian Oil Sanctions as U.S. Weighs Relief Kulbergs said unilateral actions by the Baltic countries raised litigation risks and joined calls of Estonia and Lithuania for an EU ban. “ It’s in all of our interests ,” he said. “We’re now talking about money and support for Ukraine, which they need this winter. © 2026 Bloomberg L.P. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Britain has expanded its sanctions against Russia’s oil industry, targeting two more energy companies, a dozen shadow-fleet tankers and financial networks used to move money around Western restrictions. The measures,... Eleven sailors were missing at sea on Tuesday from a ship sunk by a drone attack off the coast of Bulgaria, possibly the second deadly sinking of a cargo vessel in the area in a week, prompting Bulgaria to summon Russia's ambassador. President Donald Trump said Friday that Russia has agreed to release millions of tons of diesel fuel into U.S. and global markets following a telephone call with Russian President Vladimir... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
@@ -318,111 +460,6 @@
         "WMCT is a joint venture between Moroccan port operator Marsa Maroc, which holds 50% plus one share, and MSC’s terminal subsidiary Terminal Investment Limited, which owns 50% minus one share.",
         "The terminal has an annual handling capacity of 1.2 million TEUs.",
         "Its infrastructure comprises two berths along a 750-metre quay equipped with ship-to-shore gantry cranes."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-0C2D528B1B",
-      "title": "CU Lines exits CNC’s Japan–Thailand service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/cu-lines-exits-cncs-japan-thailand-service/",
-      "publishedAt": "2026-10-17T07:00:50Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia",
-        "Japan & Korea",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "china"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2021/07/CULines-boxship-300x154.jpg",
-      "summary": "CU Lines has withdrawn from its slot charter arrangement on CNC Line’s Japan–Thailand Express (JTX) service. Following the withdrawal, CNC Line, the intra-Asia subsidiary of CMA CGM, continues to operate the service across Japan, China and Southeast Asia. The JTX port rotation is: Tokyo – Yokohama – Nagoya – Shantou...",
-      "body": "Services Top Right CU Lines exits CNC’s Japan–Thailand service October 17, 2026 Facebook Twitter WhatsApp Linkedin Email Source: CULines CU Lines has withdrawn from its slot charter arrangement on CNC Line’s Japan–Thailand Express (JTX) service. Following the withdrawal, CNC Line, the intra-Asia subsidiary of CMA CGM, continues to operate the service across Japan, China and Southeast Asia. The JTX port rotation is: Tokyo – Yokohama – Nagoya – Shantou – Nansha – Laem Chabang – Sihanoukville – Ho Chi Minh City (Cai Mep) – Batangas – Tokyo TAGS CMA CGM CNC Line CU Lines Intra-Asia Shipping Japan–Thailand Express Facebook Twitter WhatsApp Linkedin Email Previous article Port of Long Beach sets monthly cargo record in September Next article MSC-backed Nador terminal set to begin operations Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "Following the withdrawal, CNC Line, the intra-Asia subsidiary of CMA CGM, continues to operate the service across Japan, China and Southeast Asia.",
-        "Operational Area: China & East Asia, Japan & Korea, US West Coast & Pacific.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-A7EFE6EF2F",
-      "title": "Port of Long Beach sets monthly cargo record in September",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/port-of-long-beach-sets-monthly-cargo-record-in-september/",
-      "publishedAt": "2026-10-17T05:30:20Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "Singapore & Malacca Strait",
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "panama",
-        "china"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2024/08/Port-of-Long-Beach-POLB-300x200.jpg",
-      "summary": "The Port of Long Beach achieved its busiest month in 115 years of history in September 2026, handling 997,177 TEUs and eclipsing the previous record of 987,191 TEUs set in October 2024. The result represents a 25% increase compared to September 2025, with zero congestion reported during the record month. Imports...",
-      "body": "The Port of Long Beach achieved its busiest month in 115 years of history in September 2026, handling 997,177 TEUs and eclipsing the previous record of 987,191 TEUs set in October 2024. The result represents a 25% increase compared to September 2025, with zero congestion reported during the record month. Imports soared 31.3% year-on-year to 509,390 TEUs, exports increased 7.8% to 91,747 TEUs and empty containers rose 22.1% to 396,040 TEUs. Year-to-date through September, the port has handled 7,675,255 TEUs, up 3.9% compared to the same period last year. Total Terminals International set a new Port of Long Beach monthly rail record in September, handling 59,410 moves representing nearly half of the terminal’s total container volume. Port CEO Dr Noel Hacegaba attributed the historic result to shippers leaning on Long Beach as a reliable partner in cost-saving strategies driven by high diesel costs, Panama Canal access restrictions and progress toward a possible new US-China trade deal. Harbor Commission President Steven Neal credited the dockworkers and terminal operators for delivering the busiest month in the port’s history with speed and efficiency. Looking ahead, Hacegaba announced an extended gate incentive programme to help maintain cargo flow during the planned 16-month Vincent Thomas Bridge deck replacement project beginning November 7. Additional evening and Saturday gate hours at Long Beach container terminals will be offered starting in late October, continuing for six weeks excluding Thanksgiving week, in partnership with marine terminal operators, the ILWU and the Harbor Trucking Association to minimise traffic and cargo impacts during the bridge closure.",
-      "takeaways": [
-        "The Port of Long Beach achieved its busiest month in 115 years of history in September 2026, handling 997,177 TEUs and eclipsing the previous record of 987,191 TEUs set in October 2024.",
-        "The result represents a 25% increase compared to September 2025, with zero congestion reported during the record month.",
-        "Imports soared 31.3% year-on-year to 509,390 TEUs, exports increased 7.8% to 91,747 TEUs and empty containers rose 22.1% to 396,040 TEUs."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-4353E429C0",
-      "title": "GXO expands Action partnership with new distribution center in France",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/gxo-expands-action-partnership-with-new-distribution-center-in-france/",
-      "publishedAt": "2026-10-17T03:30:08Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/marcin-jozwiak-oh0DITWoHi4-unsplash-300x200.jpg",
-      "summary": "GXO Logistics has expanded its partnership with European retailer Action by opening operations at a new distribution center in Onnaing, northern France. The 80,000 sqm facility is the third Action distribution center managed by GXO in France. It will serve stores in France and Belgium, with capacity to supply up to...",
-      "body": "GXO Logistics has expanded its partnership with European retailer Action by opening operations at a new distribution center in Onnaing, northern France. The 80,000 sqm facility is the third Action distribution center managed by GXO in France. It will serve stores in France and Belgium, with capacity to supply up to 290 locations once fully operational. GXO already manages two Action distribution centers in France, located in Moissy-Cramayel and Labastide-Saint-Pierre. New facility supports Action’s store network At the Onnaing site, GXO will handle incoming goods, storage, order picking, shipping and returns. The new center will support Action’s growing retail network in northern France and Belgium. “The new distribution centre in Onnaing will play a key role in supplying our stores in Northern France and Belgium and supporting Action’s future growth,” said Jens Burgers, Director of Supply Chain at Action. The facility currently employs around 540 people. GXO expects this number to reach up to 1,000 by 2028 as operations expand. The company is also working with local organisations to recruit and train employees. Around 80% of candidates who complete its training programme are hired, according to GXO. Focus on efficient logistics operations The new distribution center has been designed to support warehouse operations while reducing its environmental impact. It is targeting BREEAM Outstanding certification, the highest rating under the building sustainability assessment system. GXO and Action have been expanding their logistics partnership to support the retailer’s growth across Europe. Alongside its three French facilities, GXO is also developing its partnership with Action in Italy. The Onnaing center adds capacity to Action’s supply chain and strengthens GXO’s contract logistics operations in the region.",
-      "takeaways": [
-        "GXO Logistics has expanded its partnership with European retailer Action by opening operations at a new distribution center in Onnaing, northern France.",
-        "The 80,000 sqm facility is the third Action distribution center managed by GXO in France.",
-        "It will serve stores in France and Belgium, with capacity to supply up to 290 locations once fully operational."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -817,7 +854,7 @@
         103.82
       ],
       "navarea": "XI",
-      "image": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=900&q=80",
       "summary": "French shipowner LD Armateurs has completed the installation of six towering rotor sails aboard Spirit of Toulouse, a new roll-on/roll-off vessel being built to transport aircraft components for Airbus across...",
       "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Caption: LD Armateurs’ Spirit of Toulouse, built for Airbus transatlantic transport operations, fitted with six 35-meter-tall Norsepower rotor sails at an outfitting site in Shanghai, China. Photo: LD Armateurs/Norsepower French shipowner LD Armateurs has completed the installation of six towering rotor sails aboard Spirit of Toulouse , a new roll-on/roll-off vessel being built to transport aircraft components for Airbus across the Atlantic. The installation, completed at a shipyard outfitting site in Shanghai, makes the 168-meter vessel the largest RoRo ship equipped with wind-assisted propulsion and gives it more mechanical sails than any other ship, according to LD Armateurs and Finnish wind propulsion specialist Norsepower. Each of the six rotor sails stands 35 meters tall and measures 5 meters in diameter. The rotating cylinders harness wind to generate additional thrust, reducing the workload on the ship’s main engines and, in turn, its fuel consumption. The vessel is also equipped with two dual-fuel main engines and two generator sets capable of operating on e-methanol, bio-methanol or marine diesel oil. The combination is intended to reduce fuel consumption and emissions without relying entirely on alternative fuels. Spirit of Toulouse is the first of three sister ships being built for LD Armateurs under charter to Airbus. The other two vessels, Spirit of Mobile and Spirit of Mirabel , will also receive six rotor sails each. The ships will transport large aircraft assemblies between Airbus production facilities in Europe and North America, replacing the manufacturer’s existing transatlantic fleet. Airbus expects the new fleet to cut annual emissions from its transatlantic shipping operations by more than half, from approximately 68,000 metric tons of CO2 in 2023 to 33,000 metric tons by 2030. Those reductions will depend on a combination of improved vessel efficiency, wind propulsion and the availability of lower-emission fuels. “Completing installation of six Norsepower Rotor Sails on Spirit of Toulouse is a significant milestone for wind propulsion in the RoRo segment,” said Heikki Pöntynen, CEO of Norsepower. The vessel was launched in February and is preparing for sea trials, during which the rotor sails will undergo testing. Further adjustments are planned during its maiden voyage from China to France. Wind Propulsion Gains Ground The project comes as wind-assisted propulsion moves beyond individual demonstration projects and finds wider use across the commercial shipping fleet. According to the International Windship Association (IWSA) , more than 100 large commercial vessels were equipped with wind propulsion systems as of June 2026, carrying more than 230 individual installations. That compares with just 21 large vessels in May 2022, representing nearly a fivefold increase in four years. Tankers and bulk carriers have led the expansion, although RoRo ships, ferries and general cargo vessels are increasingly adopting the technology. Earlier this year, Berge Bulk completed the installation of four folding rotor sails on its 208,000-dwt Newcastlemax bulk carrier Berge Meru , following a similar project aboard the larger Berge Neblina in 2024. In August, the Ultramax bulk carrier Maria Topic returned to commercial service after receiving a rigid wingsail during a retrofit at Tsuneishi Shipbuilding in Japan. And in September, Spanish shipowner Marflet Marine installed four 22-meter suction sails aboard the 49,999-dwt chemical tanker Santiago I , with technology supplier bound4blue estimating the system could reduce annual energy consumption by approximately 10% to 15%. The growing range of installations reflects the different approaches being used to capture wind energy. Rotor sails use spinning cylinders to generate thrust through the Magnus effect, while other systems employ rigid wings, suction sails or even kites. Unlike conventional sailing vessels, most wind-assisted merchant ships continue to rely on their main engines for propulsion, using wind power to reduce fuel consumption whenever conditions allow. The technology has also produced measurable results. In an earlier trial involving the Maersk Pelican product tanker, two Norsepower rotor sails delivered an independently validated 8.2% reduction in fuel consumption over one year. More recently, Cargill reported that the bulk carrier Pyxis Ocean , fitted with two large WindWings, achieved average fuel savings of approximately three metric tons per day during a six-month trial. With two more Airbus vessels to follow, the project will provide another test of how those technologies perform together in regular commercial service. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! For more than a century, commercial shipping steadily moved away from sails. Now they are coming back. Across the global fleet, shipowners are installing towering rotor sails, rigid wings and... Korean Register, HD Hyundai Heavy Industries, BAR Technologies and the Liberian Registry are teaming up to study the use of large wing sails on a new generation of LNG carriers. A.P. Moller-Maersk is preparing to test wind-assisted propulsion on one of its containerships, with plans to install a large Rotor Sail on an 8,700-TEU vessel next year. UK-based Anemoi Marine... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
@@ -887,7 +924,7 @@
         56.25
       ],
       "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
       "summary": "Conflicting traffic figures and competing claims of control are making it increasingly difficult to establish what’s happening in the Strait of Hormuz, even as attacks on merchant shipping intensify. The...",
       "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Vessels in the Strait of Hormuz near the beach of Bandar Abbas, Iran, September 28, 2026. Amirhosein Khorgooi/ISNA/via WANA (West Asia News Agency) via REUTERS Conflicting traffic figures and competing claims of control are making it increasingly difficult to establish what’s happening in the Strait of Hormuz, even as attacks on merchant shipping intensify. The true extent of attacks on merchant ships in the Strait of Hormuz remains unclear, with a new report from UK Maritime Trade Operations (UKMTO) acknowledging that most vessels struck in the region are not reporting incidents directly to the maritime security organization. The admission comes as the United States and Iran offer sharply different accounts of who controls the vital waterway, while conflicting transit figures raise further questions about how much commercial shipping has actually recovered. In its weekly overview published Friday , UKMTO said it is struggling to establish the true number of attacks because the majority of vessels targeted are refusing to submit reports. UKMTO said it is aware of additional incidents through other sources but cannot include them in its reporting without sufficient verification. The disclosure raises questions about the reliability of publicly available attack statistics, particularly following a sharp escalation in strikes against commercial vessels over the past two weeks. UKMTO recorded 12 attacks during its latest reporting period, including 10 in the Strait of Hormuz, one in the Arabian Gulf and one in the Gulf of Oman. Six vessels continued their voyages or reached port, two were disabled or left not under command, and three had unconfirmed damage or outcomes. One vessel, the Singapore-flagged containership GFS Pride , was lost after being struck by a projectile. The report also found that 55 of 74 documented projectile strikes since July 6 occurred along the southern route through the strait, accounting for nearly three-quarters of the reported attacks. The findings stand in contrast to increasingly confident statements from U.S. military officials about their control of the waterway. In a video statement Friday, Adm. Brad Cooper, commander of U.S. Central Command, said American forces and regional partners remain firmly in control of the strait despite continued Iranian attacks. “Let me be clear: the Strait of Hormuz is controlled by the United States and our regional partners, not Iran. And it remains open for business,” Cooper said. He reported that approximately 400 merchant ships had transited the strait over the preceding seven days, while U.S. forces helped Gulf partners move more than 100 million barrels of crude oil during the same period. Cooper said those shipments added to more than 1.3 billion barrels of crude transported with U.S. assistance in recent months. But the latest UKMTO figures paint a different picture. For the seven days ending October 14, UKMTO recorded 254 combined transits, including 129 inbound and 125 outbound movements. That was down from 275 the previous week, with traffic remaining approximately 70% below pre-conflict levels. Of those 254 movements, just 42 were observed through Automatic Identification System (AIS) data. The remaining 212 were drawn from U.S.-reported facilitated transits, which include ships operating without broadcasting AIS. UKMTO cautioned that the U.S.-supplied figures and associated totals cannot currently be independently verified. Cooper did not specify the exact dates covered by his 400-transit figure, leaving open the possibility that the difference reflects separate reporting periods or counting methods. Nevertheless, the gap illustrates the difficulty of establishing a consistent picture of commercial traffic through the strait. Iran, meanwhile, continues to dispute Washington’s account of control over the waterway. Iranian army chief Maj. Gen. Amir Hatami said Thursday that the strait would remain closed until the rights of the Iranian people were respected. The latest Joint Maritime Information Center (JMIC) advisory , published October 15, describes both a northern Iranian-controlled route and a southern Omani corridor, while warning that ships operating with AIS switched on face an elevated risk of targeting and instructions to divert toward the Iranian route. UKMTO’s latest report adds that most vessels broadcasting AIS continue to use the Iranian route, even as U.S.-facilitated traffic accounts for the majority of reported transits. The competing accounts reflect the increasingly complicated security environment for merchant shipping. U.S. forces are facilitating substantial traffic through the strait, while Iran continues to demonstrate an ability to strike vessels, including those using the southern corridor. And with UKMTO now acknowledging that most attacked vessels are not reporting incidents directly, even the growing number of documented strikes may offer only a partial picture of the dangers facing seafarers. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! DUBAI, Oct 17 (Reuters) – Iran’s Revolutionary Guards Navy said on Saturday that two oil tankers had caught fire after hitting naval mines while crossing the Strait of Hormuz, the official Iranian news agency... The cost ?of shipping oil on the largest tankers fell this week from record highs as demand eased following a wave of attacks on vessels in the Middle East and as the US considered easing sanctions on the so-called shadow fleet. The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
@@ -995,7 +1032,7 @@
         32.34
       ],
       "navarea": "III",
-      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
       "summary": "Deal adds four modern crude tankers as International Seaways reports sharply higher spot earnings entering the fourth quarter. International Seaways has agreed to acquire Oslo-listed Bruton Limited in a deal...",
       "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Aerial photo of an oil tanker at anchor. Stock Photo: Nickeo23/Shutterstock Deal adds four modern crude tankers as International Seaways reports sharply higher spot earnings entering the fourth quarter. International Seaways has agreed to acquire Oslo-listed Bruton Limited in a deal valued at approximately $370 million, adding four very large crude carriers (VLCCs) to its fleet as tanker earnings remain elevated. The New York-based tanker owner announced the agreement Friday, saying the acquisition will expand its fleet of approximately 70 crude oil and product tankers. The deal includes one VLCC already in operation and three newbuildings under construction at China’s New Times Shipyard. The acquisition comes alongside preliminary financial results showing strong tanker market conditions. International Seaways reported average blended spot earnings of approximately $68,000 per day during the third quarter, more than double the $29,000 per day recorded a year earlier. Rates have climbed further entering the fourth quarter. The company said it has secured blended spot earnings averaging approximately $180,000 per day for about 37% of its expected fourth-quarter revenue days. Under the acquisition agreement, International Seaways will initially acquire a 50.5% stake in Bruton through a share exchange with existing shareholders, expected to settle around October 20. The company will then acquire the remaining shares through a cash-and-stock merger. International Seaways expects to issue approximately 3.12 million shares as part of the transaction, accounting for roughly 96% of the total consideration. The remainder will be paid in cash. Bruton shareholders are scheduled to vote on the merger around October 30, with the transaction expected to close shortly afterward, subject to customary conditions. “We’re excited about the opportunity to expand and modernize our fleet through this accretive transaction with Bruton,” said Lois K. Zabrocky, president and CEO of International Seaways. “The transaction underscores our disciplined approach to growth.” Bruton’s fleet consists of the 300,000-dwt Mount Vision, delivered in July, and three sister vessels scheduled for delivery between November 2026 and October 2027. According to Bruton’s fleet information, Mount Vision is earning $95,000 per day under its existing charter, while the next vessel, Mount Horizon, has secured a charter at $105,700 per day. Bruton previously controlled a larger VLCC newbuilding program, but spun off eight vessels into OMC Tankers, which began trading in Oslo in August. Those eight newbuildings are not part of the International Seaways acquisition. International Seaways also expects third-quarter revenue of $480 million to $490 million and net income of $340 million to $350 million, including an approximately $50 million gain from the sale of a 2012-built Suezmax tanker. The company reported liquidity of approximately $965 million at September 30, including $455 million in cash and short-term investments. Its full third-quarter financial results are scheduled for release on November 5. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Dense heavy crude, which oil refiners around the world favor for its typically low cost, is piling up in the Americas as soaring freight rates have stifled exports and US refiners have been running close to their limits. For a sign of just how extraordinary oil shipping costs have become, consider this: It’s now more expensive to hire a tanker from the US to China than to launch a rocket into space. FBI and US Coast Guard investigators have found evidence that hackers accessed the propulsion system of an oil supertanker as it was approaching the Texas coast this summer, according to US officials familiar with the matter, an extraordinary breach that highlights the growing physical risks from cyberattacks. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
@@ -1032,7 +1069,7 @@
         32.34
       ],
       "navarea": "III",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
       "summary": "The ports of Los Angeles and Long Beach both set all-time monthly cargo records in September, handling a combined 2.04 million twenty-foot equivalent units (TEUs) as strong imports and shifting...",
       "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo courtesy Port of Long Beach The ports of Los Angeles and Long Beach both set all-time monthly cargo records in September, handling a combined 2.04 million twenty-foot equivalent units (TEUs) as strong imports and shifting global trade patterns continued to drive cargo through the nation’s busiest port complex. The Port of Long Beach reported Thursday that it handled 997,177 TEUs in September, up 25% from a year earlier and surpassing its previous record of 987,191 TEUs set in October 2024. It was the busiest month in the port’s 115-year history. The milestone follows last week’s record-breaking announcement from the Port of Los Angeles , which handled 1,042,652 TEUs in September, the highest monthly total in its 118-year history. Together, the neighboring ports moved 2,039,829 TEUs in September, including more than 1.05 million TEUs of loaded imports, as retailers continued replenishing inventories and shippers adjusted their routing strategies amid high fuel costs, trade uncertainty and disruptions along other major shipping routes. “Shippers continue to lean on the Port of Long Beach as a reliable partner in their business strategies, leading to our historic month for cargo,” said Port of Long Beach CEO Noel Hacegaba during the port’s monthly Supply Chain Insight briefing. Imports led the surge at Long Beach, climbing 31.3% from a year earlier to 509,390 TEUs. Exports increased 7.8% to 91,747 TEUs, while empty container movements rose 22.1% to 396,040 TEUs. Los Angeles reported similarly strong numbers, with loaded imports rising 19% to 545,696 TEUs. The port also handled 125,751 TEUs of exports and approximately 371,206 empty TEUs, both increases from a year earlier. Port officials have attributed the strong performance to several factors, including resilient consumer demand, lower U.S. tariffs and shippers seeking alternatives to traditional routes affected by Panama Canal restrictions and security concerns around the Suez Canal. High diesel prices have also made the shorter transpacific route to the U.S. West Coast more attractive. The record-breaking September comes as the National Retail Federation (NRF) expects the unusually long peak shipping season to finally wind down. In its latest Global Port Tracker report , released October 8, NRF and Hackett Associates projected that imports at major U.S. container ports would ease from 2.3 million TEUs in August to 2.28 million TEUs in September, followed by 2.25 million TEUs in October and 2 million TEUs in November. “Even with any fluctuations in final data, we’re likely past the busiest part of the year,” said Jonathan Gold, NRF vice president for supply chain and customs policy. The forecast follows months of stronger-than-expected imports that extended the traditional peak season well into the fall. Notably, both Southern California ports have reported handling the increased volumes without the congestion that disrupted operations during the pandemic. At Long Beach, Total Terminals International set a new monthly rail record in September, handling 59,410 rail moves, representing nearly half of the terminal’s container volume. Long Beach has now handled 7,675,255 TEUs through the first nine months of 2026, up 3.9% from the same period last year. Los Angeles has processed nearly 8.1 million TEUs over the same period, more than 3% ahead of last year’s pace. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Georgia Ports has secured federal approval for a $2.3 billion container terminal that will add 3.5 million TEUs of capacity at the Port of Savannah. The Port of Los Angeles handled a record 1,042,652 twenty-foot equivalent units (TEUs) in September, marking the busiest month in its 118-year history as strong consumer demand and shifting global... South Korean President Lee Jae Myung welcomed the PanStar Acro and its crew home on Tuesday after the container ship completed the country’s first round-trip commercial trial through the Arctic to Europe, hailing the voyage as a potential alternative to traditional shipping lanes even as questions remain over commercial viability and cooperation with Russia. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
@@ -1068,7 +1105,7 @@
         56.25
       ],
       "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
       "summary": "The Houthi attacks on Saudi Arabia are demonstrating the limits of the kingdom’s military prowess — despite defense spending that far outstrips that of its regional neighbors.",
       "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Protesters, predominantly Houthi supporters, rally on the first Friday of the fasting month of Ramadan, to show continued support to the Palestinians in the Gaza Strip, in Sanaa, Yemen, March 15, 2024. REUTERS/Khaled Abdullah By Gerry Doyle (Bloomberg) — The Houthi attacks on Saudi Arabia are demonstrating the limits of the kingdom’s military prowess — despite defense spending that far outstrips that of its regional neighbors. Missiles and drones fired by the Iran-backed group from Yemen have wreaked havoc in Saudi Arabia in recent days, killing at least 18 people and forcing the closure of the country’s main international airport in Riyadh. The Houthis are showing no sign of scaling back their campaign, targeting several Saudi Arabian cities in an assault this week that’s continued into Thursday. Saudi Arabia allocated between $64 billion and $96 billion this year for defense, according to data compiled by Bloomberg Economics. The upper end is more than twice as much as Israel, the next biggest Middle East spender. The kingdom operates Raytheon Co. Patriot missile batteries with the latest Lockheed Martin Corp. PAC-3 interceptors, flies hundreds of Boeing Co. F-15 fighters customized for its air force, and is the only Gulf country with mid-air refueling aircraft. One reason the Houthis have been able to cause such destruction with less advanced equipment is Saudi Arabia’s size, which complicates defense efforts. The kingdom covers more than 2.1 million square kilometers (830,000 square miles), with many strategic targets to protect, from oil infrastructure to air bases to several large cities. Defending against ballistic missiles is complex when protecting a single target, let alone sites sprinkled across a vast country. Thousands of Iranian strikes across the Arabian peninsula during the initial phase of the US and Israeli war on the Islamic Republic were largely thwarted by missile defenses, but even a 90% success rate can mean massive damage on the ground. Saudi Arabia’s military is also still in the process of modernizing and remains heavily reliant on the US for military intelligence. The Saudi government did not respond to a request for comment. The most recent rounds of Houthi strikes on Saudi Arabia have tended to involve a mix of weapons that further complicate defensive efforts: small drones, low-flying, cheap cruise missiles and ballistic missiles. In addition, the Houthis are a nimble, rapidly evolving opponent backed by Iran, capable of building and deploying missiles and drones that can challenge even advanced defense systems. Years of fighting in Yemen mean the group is battle hardened, resisting protracted military efforts to dislodge or contain them. “The Houthis are partly beneficiaries of good fortune, but they seem remarkably adaptive,” said Ankit Panda, Stanton Senior Fellow in the Nuclear Policy Program at the Carnegie Endowment for International Peace. “A determined attacker armed with missiles is still difficult to deal with.” The Houthi arsenal has now evolved to the point where the group can manufacture relatively precise drones and ballistic missiles — some of which rely on parts from Chinese companies. Those munitions might cost thousands, or hundreds of thousands of dollars, far cheaper than the multimillion-dollar air defense interceptors used to stop them. That means even a successfully intercepted attack imposes further costs on Saudi Arabia, and makes it more vulnerable to future strikes. Defensive weapons such as the Iranian-made 358 surface-to-air missiles — which can loiter at high altitudes and strike subsonic aircraft — make the skies over Yemen dangerous too. Another issue, said Bloomberg Economics defense lead Becca Wasser, is that Patriot air defense batteries are directional. They do not cover a 360-degree area, so if radars and launchers were positioned to intercept Iranian fire, they may not have been able to easily shoot down Houthi missiles, she said. Air and missile capabilities have improved as part of Saudi Arabia’s modernization efforts, Wasser said. Although pilots learned considerably from the long Yemen air war, their aircraft remain largely reliant on the US for targeting data, in particular. The situation has improved since Saudi Crown Prince Mohammed Bin Salman began a reform agenda, alongside “real-life experience in its first war against Yemen,” Wasser said. “But modernization is slow and confined to pockets of bright spots rather than upskilling across the force.” Although Riyadh has a fleet of more than 200 F-15 jets — almost as many as the US Air Force — it was unable to use them decisively in more than a decade of bombing the Houthis. Saudi Arabia went to war with the militant group in 2015 after it took control of the Yemeni capital, Saana, though fighting receded between a 2022 truce and the recent flare up. “Equipment and funding do not win wars,” said Wolf-Christian Paes, a senior fellow for armed conflict at the International Institute for Strategic Studies. “Training, motivation and leadership do.” US influence in the Middle East after 1990 — when Washington intervened after Iraq invaded Kuwait — prompted many countries in the region to rely on US firepower rather than fully develop their own capabilities. Saudi Arabia was not immune to this “protection curse,” said David Roberts, a reader in international security and Middle East studies at King’s College London. US struggles in Afghanistan, and incidents like the 2019 Houthi drone attack against oil facilities in Abqaiq, in the east of Saudi Arabia, punctured the image that “Uncle Sam would basically detect and protect,” Roberts said. US President Donald Trump has so far opted against intervening directly in the current conflict. In a post on Truth Social on Tuesday he said the Houthis were “behaving very badly,” without specifying what action the US could take. Saudi Oil Minister Prince Abdul Aziz Bin Salman said this week that “the events of recent weeks are serious,” adding that the kingdom’s response “must be equally serious, while remaining focused on the decades ahead.” The Houthis began threatening shipping in the Red Sea after the start of the war in Gaza, which prompted the US to briefly intervene, launching more than 1,000 strikes over three months. But hunting down hidden, mobile launchers and shutting down buried production facilities is difficult, especially in the rugged terrain in which the Houthis operate. The operation ended with a ceasefire. The Houthis show “there are very clear limits what an air campaign can do,” said April Longley Alley, a senior fellow at the Washington Institute for Near East Policy. Former US Defense Secretary Lloyd Austin, speaking at the Warsaw Defense Forum on Monday, said Saudi Arabia would most likely need help from friendly nations to counter the Houthi threat. “There will be a concerted effort to get the Houthi thing under control,” he said. “But it won’t be easy. They are much more resilient than most people recognize.” The conflicts in Iran and Ukraine have shown how the power of ballistic missiles, particularly those with a range of 1,000 kilometers or more, mean even countries whose millitaries are relatively weak can cause problems for more powerful adversaries. The Houthis’ strike arsenal includes indigenously produced Quds-1 cruise missiles, which have a reach of about 750 kilometers, according to the Center for Strategic and International Studies. Its homegrown ballistic arsenal is larger, with Burkan-1, -2, and -3 designs, which can fly 600 kilometers, 850 kilometers and 1,200 kilometers, respectively, giving the militants the range to hit nearly any site in Saudi Arabia. Riyadh’s struggles to extinguish the Houthi threat and defend against counterattacks reflects the difficulty of a task many others have failed at too. “Yemen is a hard nut to crack. The US couldn’t do it,” Longley Alley said. “This is something that can’t be solved with a military tool only.” © 2026 Bloomberg L.P. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Yemen's Iran-allied Houthis said Saudi Arabia was attacking the Yemeni capital Sanaa on Tuesday after a Saudi-led coalition warned civilians to stay away from an oil depot on the city's outskirts, part of a rapidly escalating war between the sides. This weekend’s deadly attacks on Riyadh’s main airport have demonstrated the ability of Yemen’s Houthis to strike at the heart of Saudi power, raising the risk of a dangerous escalation that could draw in the US. (Bloomberg) — Saudi Arabia is in talks with customers to offer oil loadings next year outside the Strait of Hormuz in long-term contracts, formalizing a system the kingdom has been... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
@@ -1105,7 +1142,7 @@
         56.25
       ],
       "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
       "summary": "The cost ?of shipping oil on the largest tankers fell this week from record highs as demand eased following a wave of attacks on vessels in the Middle East and as the US considered easing sanctions on the so-called shadow fleet.",
       "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo: Shutterstock/Sven Hansche LONDON, Oct 16 (Reuters) – The cost ?of shipping oil on the largest tankers fell this week from record highs as demand eased following a wave of attacks on vessels in the Middle East and as the US considered easing sanctions on the so-called shadow fleet. Freight rates ?for supertankers, also known as very large crude carriers (VLCCs), carrying oil ?from the Gulf of Oman to China fell to about 776 ?on the Worldscale basis, according to Baltic Exchange ?data. That was down from 841 last week, the highest since the rate was launched earlier this year, following gains since the outbreak of the Iran war. “Gulf of Oman VLCC rates dropped as demand on that route has softened since the fresh attacks, as higher Middle East Gulf freight rates and subsequently lower export volumes have reduced demand on this route,” said Kpler analyst Matthew Wright. Trump administration comments about potentially removing sanctions on some shadow-fleet tankers drove freight rates lower, Sparta Commodities analyst Michael Ryan said, adding a removal would increase the number of ships that can carry oil. Despite the drop, rates remain close to record highs. The US-Israeli war on Iran has increased the use of ship-to-ship transfers to move oil out of the Strait of Hormuz, boosting demand for tankers. If elevated shipping costs persist, they could add to inflationary pressures and raise costs for businesses and consumers. Rates have also eased from record highs on other routes this week, such as from West Africa to Asia. (Reporting by Enes Tunagur in London. Editing by Alex Lawler and Mark Potter) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! DUBAI, Oct 17 (Reuters) – Iran’s Revolutionary Guards Navy said on Saturday that two oil tankers had caught fire after hitting naval mines while crossing the Strait of Hormuz, the official Iranian news agency... Conflicting traffic figures and competing claims of control are making it increasingly difficult to establish what’s happening in the Strait of Hormuz, even as attacks on merchant shipping intensify. The... The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
@@ -1142,7 +1179,7 @@
         103.82
       ],
       "navarea": "XI",
-      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
       "summary": "Three senior House Republicans are calling on the Department of Homeland Security to revoke special inspection privileges granted to vessels operated by Chinese state-owned shipping giant COSCO, citing allegations that...",
       "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network A COSCO ship at the Port of Long Beach. File Photo: Port of Long Beach Three senior House Republicans are calling on the Department of Homeland Security to revoke special inspection privileges granted to vessels operated by Chinese state-owned shipping giant COSCO, citing allegations that the company’s ships have been used to collect intelligence near U.S. coastlines. In an October 14 letter to Homeland Security Secretary Markwayne Mullin, House Select Committee on China Chairman John Moolenaar, House Intelligence Committee Chairman Rick Crawford and Rep. Carlos Gimenez, chairman of the Homeland Security Subcommittee on Transportation and Maritime Security, called for COSCO vessels to be removed from the U.S. Coast Guard’s Qualship 21 program. The program rewards foreign-flagged vessels with strong safety and compliance records by allowing them to undergo fewer routine port state control inspections at U.S. ports. According to the lawmakers, at least 10 COSCO vessels were enrolled in the program as of July 15, despite the company’s designation by the Pentagon as a Chinese military company. An accompanying Coast Guard table identifies 11 vessels, including COSCO DEVELOPMENT , COSCO PRIDE and COSCO VIETNAM . The letter, which has now prompted a Coast Guard review, follows a September 1 Reuters investigation in which two senior Trump administration officials alleged that COSCO uses concealed equipment aboard its commercial ships to intercept military communications near the coastlines of the United States and other countries. The officials said the alleged intelligence-gathering operations were part of a decades-long relationship between COSCO and Beijing, allowing China to collect communications signals from ships and aircraft operating across Europe, North America and Asia. COSCO denied the allegations in a September statement, saying its onboard equipment serves legitimate commercial purposes, including navigation, communications and emergency response, and is not used for intelligence gathering or military surveillance. China’s embassy in Washington also rejected the allegations. The lawmakers argue that the reported activities warrant a review of whether COSCO should continue receiving preferential treatment under the Coast Guard program. “State-owned commercial vessels engaging in espionage is an expected breach of trust we regularly anticipate from the Chinese Communist Party,” the lawmakers wrote. They called on DHS to revoke COSCO vessels’ enrollment, refuse renewals and increase scrutiny of other companies suspected of conducting activities on behalf of China’s People’s Liberation Army. Beyond removing COSCO from Qualship 21, the lawmakers are seeking answers about what the Coast Guard knew about the alleged surveillance activities and when that information became available. They specifically asked whether Coast Guard Intelligence received warnings about COSCO from the Pentagon, intelligence agencies or other federal authorities before the September 1 Reuters report, and whether that information was considered when determining the vessels’ eligibility. In a statement to gCaptain, a Coast Guard spokesperson confirmed that on October 15, the Commandant has directed an immediate review of the vessels’ participation. “The U.S. Coast Guard is responsible for the safety and security of U.S. ports, waterways, and shipping, which are vital to our nation’s economic prosperity and national security. Every day, the Coast Guard takes decisive action to identify, mitigate, and address safety and security risks to our ports in the physical domain and cyberspace.” The lawmakers also questioned whether COSCO’s designation under Section 1260H, which identifies Chinese military companies operating in the United States, prompted a review of the company’s Qualship 21 status. Other questions concern whether the Coast Guard has conducted additional boardings of COSCO ships, whether it has sufficient authority to investigate suspected surveillance activities in U.S. waters, and whether analysts are examining historical vessel movements in the U.S. Exclusive Economic Zone for patterns that could indicate intelligence collection. The letter also calls for a review of Hong Kong’s continued eligibility as a qualified flag administration under Qualship 21, citing concerns about Beijing’s control over the territory. The Coast Guard updated its Qualship 21 eligibility criteria earlier this year, expanding the circumstances under which vessels can be removed from the program, including certain associations with sanctioned entities and companies facing federal criminal investigations. “The U.S. Coast Guard continuously evaluates and updates its programs to address the dynamic and evolving security and safety landscape of the maritime industry,” the Coast Guard told gCaptain. “ The congressional request raises a separate question of whether national security intelligence and military-company designations should factor into decisions about which foreign vessels qualify for reduced inspections. Qualship 21 enrollment does not exempt vessels from security inspections or other Coast Guard enforcement actions, and the lawmakers’ request does not itself revoke COSCO’s eligibility. The Department of Homeland Security has not publicly announced any action in response to the letter. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! By Timothy Gardner and Jarrett Renshaw WASHINGTON, Oct 14 (Reuters) – The Trump administration is considering easing sanctions on so-called shadow fleet vessels that have transported oil and petroleum products... The U.S. Federal Maritime Commission (FMC) is proposing $200,000 fees on Spanish-flagged vessels entering American ports, along with restrictions on billions of dollars in Spanish imports, after concluding that Spain’s... The American Bureau of Shipping (ABS) and the U.S. Department of Energy (DOE) have signed an agreement to advance the use of nuclear power in commercial shipping, including nuclear-powered vessels,... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
@@ -1152,43 +1189,6 @@
       ],
       "readingMinutes": 5,
       "readMinutes": 5
-    },
-    {
-      "id": "SN-EC3EFD699C",
-      "title": "IEA Moves to Accelerate Oil Reserve Releases as Hormuz Crisis Drags On",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/iea-moves-to-accelerate-oil-reserve-releases-as-hormuz-crisis-drags-on/",
-      "publishedAt": "2026-10-16T15:50:36Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "tanker",
-        "container",
-        "port",
-        "hormuz",
-        "singapore"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
-      "summary": "The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the...",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo credit: Shutterstock/Igor Grochev The International Energy Agency (IEA) has agreed to accelerate the release of approximately 100 million barrels of emergency oil stocks, including more than 20 million barrels of diesel, as the prolonged Strait of Hormuz crisis continues to strain global energy supplies. The decision, announced Thursday following a meeting of the agency’s Governing Board, comes amid mounting concerns over diesel shortages, high fuel prices and renewed attacks on commercial shipping in the Middle East. According to the IEA’s statement , member countries have already released approximately 330 million barrels under the emergency stock release agreed in March in response to the Iran war. The agency said it would take steps to accelerate the remaining releases, with more than 20 million barrels of diesel to be made available as soon as possible. The original agreement called for a record 400 million barrels of oil and petroleum products. However, some member countries have released more than initially pledged, while others plan to do the same, meaning the final total is expected to exceed 400 million barrels. The latest decision primarily speeds up previously committed releases rather than establishing an entirely new emergency stock drawdown. The IEA did not provide a specific timetable for completing the releases. The renewed push comes as the agency warns that the global diesel shortage could persist well into 2027. In its October Oil Market Report , published Wednesday, the IEA said disruptions to production and exports from the Middle East and Russia removed approximately 1.3 million barrels per day of diesel and gasoil exports from the market in September compared with a year earlier. While crude oil shipments from the Persian Gulf have recovered significantly from their lows earlier in the conflict, refined petroleum product exports remain severely constrained. Middle Eastern refined product shipments averaged 1.9 million barrels per day in September, compared with 4.7 million barrels per day before the war. Meanwhile, total oil flows through the Strait of Hormuz reached 10.9 million barrels per day during September, supported by increased tanker movements and ship-to-ship transfers in the Gulf of Oman. Attacks on commercial vessels have intensified in October, including the sinking of the Singapore-flagged containership GFS Pride after it was struck by a projectile while transiting the Strait of Hormuz. The continued disruption is also eroding global oil inventories. The IEA estimates that observed oil stocks at the end of September were 509 million barrels below their pre-war levels, leaving the market with reduced protection against further supply shocks. Despite a rebound in Gulf crude exports, the agency expects constrained diesel supplies and elevated transportation costs to continue weighing on global energy markets. It forecasts global oil demand will decline by 2.6 million barrels per day in 2026 as higher prices and weaker economic activity take their toll. The Governing Board also called on member countries with oil production and refining capacity to increase supplies, particularly diesel, and emphasized the importance of maintaining the free flow of energy trade. The IEA said it would continue monitoring the emergency releases and provide further recommendations to G7 leaders based on updated market assessments, with particular attention to diesel supplies. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! DUBAI, Oct 17 (Reuters) – Iran’s Revolutionary Guards Navy said on Saturday that two oil tankers had caught fire after hitting naval mines while crossing the Strait of Hormuz, the official Iranian news agency... Conflicting traffic figures and competing claims of control are making it increasingly difficult to establish what’s happening in the Strait of Hormuz, even as attacks on merchant shipping intensify. The... The cost ?of shipping oil on the largest tankers fell this week from record highs as demand eased following a wave of attacks on vessels in the Middle East and as the US considered easing sanctions on the so-called shadow fleet. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
-      "takeaways": [
-        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
-        "The decision, announced Thursday following a meeting of the agency’s Governing Board, comes amid mounting concerns over diesel shortages, high fuel prices and renewed attacks on commercial shipping in the Middle East.",
-        "According to the IEA’s statement , member countries have already released approximately 330 million barrels under the emergency stock release agreed in March in response to the Iran war."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
     },
     {
       "id": "SN-2FB79C06AA",
@@ -1604,74 +1604,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-8095D89069",
-      "title": "Equinor keeps Odfjell Drilling semisub busy into late 2027",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/equinor-keeps-odfjell-drilling-semisub-busy-into-late-2027/",
-      "publishedAt": "2026-10-16T10:00:00Z",
-      "category": "Shipping & Tankers",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "shipping",
-        "rotterdam"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://splash247.com/wp-content/uploads/2021/05/deepsea-atlantic-equinor-300x169.jpg",
-      "summary": "Norway’s Odfjell Drilling has secured more work for its Deepsea Atlantic semisubmersible drilling rig after compatriot energy major Equinor exercised options for two additional wells. The latest option exercise will keep the 2009-built rig employed until late in the fourth quarter of 2027, extending its existing...",
-      "body": "Europe Offshore Equinor keeps Odfjell Drilling semisub busy into late 2027 Bojan Lepic October 16, 2026 0 548 1 minute read Equinor Equinor Norway’s Odfjell Drilling has secured more work for its Deepsea Atlantic semisubmersible drilling rig after compatriot energy major Equinor exercised options for two additional wells. The latest option exercise will keep the 2009-built rig employed until late in the fourth quarter of 2027, extending its existing contract without interruption. The additional wells will be drilled at rates agreed under the original contract. Financial details of the latest extension were not disclosed. Equinor also retains priced options for another two wells, potentially extending the rig’s employment further. The latest extension follows a deal struck in January 2025, when Equinor extended the rig’s contract until the end of the second quarter of 2027. That agreement added approximately $148m to Odfjell Drilling’s backlog, excluding escalation fees, integrated services, performance bonuses, and fuel incentives. Under the previous arrangement, the rig was set to operate on existing terms until mid-2026 before moving into the extension period. The earlier deal was a 23-month contract worth about $290m, secured as part of a broader agreement between the two Norwegian companies. The January 2025 extension also included four priced one-well options and three additional optional periods of around one year each, with rates for those longer periods subject to agreement. If exercised, the remaining options could see the rig remain under contract into 2030. The Deepsea Atlantic has a long history with Equinor, having worked for the Norwegian energy giant since 2009. Tags Norway Bojan Lepic October 16, 2026 0 548 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "The latest option exercise will keep the 2009-built rig employed until late in the fourth quarter of 2027, extending its existing contract without interruption.",
-        "The additional wells will be drilled at rates agreed under the original contract.",
-        "Financial details of the latest extension were not disclosed."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-A35FD05168",
-      "title": "UK ports hit back at Brussels over ETS diversion claims",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/uk-ports-hit-back-at-brussels-over-ets-diversion-claims/",
-      "publishedAt": "2026-10-16T09:30:00Z",
-      "category": "Ports & Terminals",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://splash247.com/wp-content/uploads/2022/08/UK-ship-300x180.jpg",
-      "summary": "British ports have challenged European Union claims that shipping lines are diverting container traffic to the UK to escape carbon charges, warning that proposed anti-evasion measures risk penalising billions of pounds of investment in British terminals. The British Ports Association (BPA) has rejected findings from...",
-      "body": "Environment Europe Operations Ports and Logistics Regulatory UK ports hit back at Brussels over ETS diversion claims Adis Ajdin October 16, 2026 0 1,113 3 minutes read UK Government UK Government British ports have challenged European Union claims that shipping lines are diverting container traffic to the UK to escape carbon charges, warning that proposed anti-evasion measures risk penalising billions of pounds of investment in British terminals. The British Ports Association (BPA) has rejected findings from Spain’s EU ETS Observatory linking rising UK container activity to the bloc’s Emissions Trading System, arguing that new capacity, changing liner networks and commercial competition offer more convincing explanations. In a new report, the association said around 85% of the UK’s container traffic growth in 2025 was concentrated in London, following the opening of DP World’s £350m ($465m) fourth berth at London Gateway in late 2024. Government figures show UK ports handled 11% more containers last year, equivalent to an additional 600,000 units. London accounted for roughly 500,000 of those, with its growth driven largely by the additional capacity at London Gateway. The DP World terminal handled more than 3m teu in 2025, up 52% from 1.9m teu a year earlier. The increase followed the opening of the fourth berth, which boosted capacity by more than a third, and the arrival of Asia-Europe services operated by Maersk and Hapag-Lloyd’s Gemini Cooperation in February 2025. London Gateway has been challenging Felixstowe’s position as Britain’s busiest boxport, with Maersk’s departure from the Hutchison-operated facility reshaping the country’s container market. DP World is pressing ahead with another £1bn ($1.33bn) expansion, adding two all-electric berths and a second rail terminal. The BPA argues that such investment and network changes have been overlooked in assessments linking Britain’s expanding container business to EU carbon pricing. The dispute follows research by Spain’s Puertos del Estado, which found the UK’s share of northern European deepsea shipping activity, measured in teu-miles, rose from 17.5% in 2023 to 32.1% by July 2025. Subsequent analysis put the figure at around 36% in the first quarter of 2026, broadly mirroring declines in Germany and the Netherlands. The Spanish study also estimated that 76% of observed route changes were attributable to the EU ETS, raising concerns that containerlines were restructuring their networks to reduce carbon costs. But the BPA has questioned both the methodology and the conclusions. It argues that teu-miles, which combine vessel capacity with voyage distance, measure shipping network activity rather than actual containers handled. The metric can also be distorted by longer voyages around the Cape of Good Hope and changes to the sequence of port calls. The association also disputes treating the widely cited 76% figure as evidence of carbon-driven diversion specifically to Britain, arguing that the available analysis does not isolate the effects of ETS from alliance restructuring, congestion and new terminal capacity. Continental European ports have not uniformly lost ground either. Rotterdam’s container throughput increased 3.1% to 14.2m teu in 2025, Hamburg recorded 7.3% growth to 8.3m teu, while Antwerp-Bruges posted a 0.7% increase. The disagreement comes after the European Commission proposed tightening rules designed to prevent containerships from using neighbouring non-EU ports to reduce their ETS exposure. Under proposals unveiled in July, certain container ports within 150 nautical miles of an EU port could be excluded from the definition of a port of call for emissions accounting purposes. The threshold for transhipment activity at other qualifying non-EU ports within 300 nautical miles would also be lowered from 65% to 50%. The changes could bring more British terminals within the EU’s anti-evasion framework, potentially increasing carbon costs for shipping lines using them. The proposals have yet to be adopted. “It would be extraordinary if the EU responded to that success by introducing new measures to penalise British ports,” said Mark Simmonds, the BPA’s director of policy and external affairs. The association stressed that it supports shipping decarbonisation but warned against treating normal competition between ports as regulatory avoidance. Britain has already brought domestic shipping and emissions in UK ports into its own emissions trading scheme from July this year, while plans to extend carbon pricing to international voyages from 2028 are also under consideration. The BPA has urged the UK government and the European Commission to reassess the evidence before proceeding with measures that could affect port competitiveness and future investment on both sides of the Channel. Adis Ajdin October 16, 2026 0 1,113 3 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "In a new report, the association said around 85% of the UK’s container traffic growth in 2025 was concentrated in London, following the opening of DP World’s £350m ($465m) fourth berth at London Gateway in late 2024.",
-        "Government figures show UK ports handled 11% more containers last year, equivalent to an additional 600,000 units.",
-        "London accounted for roughly 500,000 of those, with its growth driven largely by the additional capacity at London Gateway."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
       "id": "SN-F339A6B655",
       "title": "Beyond the Flight: Malaysia Airlines on Marine Travel",
       "source": "Seatrade Maritime",
@@ -1732,117 +1664,6 @@
         "EMGS reported the signing of a letter of award with Mari Energies for controlled-source electromagnetic (CSEM) data acquisition across multiple offshore exploration blocks in Pakistan.",
         "\"We thank Mari Energies and its partners for their confidence in EMGS and look forward to working together on this important offshore exploration program.\" Reach the Offshore Energy industry in one go!",
         "Offshore Energy is read by thousands of professionals every day."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-748EF31BA7",
-      "title": "International Seaways seals $370m Bruton takeover deal",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/international-seaways-seals-370m-bruton-takeover-deal/",
-      "publishedAt": "2026-10-16T08:15:57Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "US East Coast & New York",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "tanker",
-        "lng",
-        "port",
-        "suez",
-        "china"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://splash247.com/wp-content/uploads/2026/10/Mount-Vision-VLCC-Bruton-300x180.jpg",
-      "summary": "New York-listed tanker owner International Seaways has struck a deal to take over Tor Olav Trøim-backed Bruton in a transaction valuing the Oslo-listed VLCC company at around $370m. The agreement, announced on Friday, will see the Lois Zabrocky-led group acquire Bruton’s entire four-ship supertanker portfolio, going...",
-      "body": "Americas Europe Tankers International Seaways seals $370m Bruton takeover deal Adis Ajdin October 16, 2026 0 1,424 3 minutes read Bruton Bruton New York-listed tanker owner International Seaways has struck a deal to take over Tor Olav Trøim-backed Bruton in a transaction valuing the Oslo-listed VLCC company at around $370m. The agreement, announced on Friday, will see the Lois Zabrocky-led group acquire Bruton’s entire four-ship supertanker portfolio, going considerably further than the sale of two newbuildings first linked to the US owner in market reports last week. International Seaways has secured agreements with shareholders representing 50.5% of Bruton, including Trøim’s Drew Holdings and Koch Inc, to exchange their holdings for newly issued shares in the US company. The exchange is set at 0.0519 International Seaways shares for each Bruton share, with the initial transaction expected to settle around October 20. The remaining shares will be acquired through a merger, with Seaways expecting to issue approximately 3.12m new shares, accounting for 96% of the total consideration. Smaller Bruton shareholders will receive cash at $6.3044 per share. The deal brings four 300,000 dwt VLCCs into the Seaways fold, including the LNG dual-fuel Mount Vision , which entered service in July, and sistership Mount Horizon , scheduled for delivery from China’s New Times Shipbuilding next month. The remaining two vessels, Mount Frontier and Mount Summit , are due in August and October 2027. The first two ships already have substantial charter cover. Mount Vision secured a 3+1+1-year arrangement with a trading house, earning $95,000 per day for the initial nine months before switching to an index-linked structure. Mount Horizon has been fixed for 12 to 15 months at $105,700 per day. The two 2027 newbuildings remain unchartered and have been at the centre of the recent sale speculation. Splash detailed the potential deal last week after Bruton acknowledged market rumours and launched a strategic review. At the time, International Seaways was linked to the purchase of at least two newbuildings, with brokers discussing values north of $200m per vessel. Bruton’s own figures put the original yard cost of the two 2027 ships at about $117m apiece, highlighting how sharply modern VLCC asset values have moved. The $370m announced on Friday, however, represents the valuation of Bruton’s equity rather than the gross value of its vessels. The takeover follows a major restructuring of Trøim’s tanker interests. Bruton originally built up a 12-ship VLCC programme before splitting the business in August, retaining its first four New Times ships and transferring another eight newbuildings into separately listed OMC Tankers. The demerger left Bruton with a concentrated fleet of near-term deliveries, substantial charter cover and financing arrangements with Chinese lessors covering 85% to 90% of construction costs. The eight vessels in OMC Tankers are not part of the International Seaways transaction. For International Seaways, the acquisition continues an aggressive fleet renewal programme that has seen the company dispose of older tonnage while selectively investing in younger ships. The US owner had a fleet of around 70 vessels, including newbuildings, before the deal. It sold seven older tankers, including two VLCCs, earlier this year for more than $216m and has also invested in LR1 newbuildings at South Korea’s K Shipbuilding. The company strengthened its crude tanker trading platform in January by taking full ownership of Tankers International, which subsequently expanded into the suezmax market. The latest acquisition comes against an exceptionally strong earnings backdrop. Alongside the takeover announcement, International Seaways unveiled preliminary third-quarter net income of $340m to $350m, including a roughly $50m gain from the sale of a suezmax. It reported liquidity of approximately $965m at the end of September. The transaction also brings together businesses associated with two familiar names in Norwegian shipping. Family trusts established by John Fredriksen, Trøim’s former longtime business partner, hold a 13.54% stake in International Seaways, according to the latest US regulatory filing. The pair went their separate ways in 2014 after nearly two decades working together. Bruton’s board has unanimously recommended the transaction, with a shareholder vote expected around October 30. Completion is targeted for early November, subject to the necessary approvals, after which Bruton intends to delist from Euronext Growth Oslo. Tags Norway United States Adis Ajdin October 16, 2026 0 1,424 3 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "International Seaways has secured agreements with shareholders representing 50.5% of Bruton, including Trøim’s Drew Holdings and Koch Inc, to exchange their holdings for newly issued shares in the US company.",
-        "The exchange is set at 0.0519 International Seaways shares for each Bruton share, with the initial transaction expected to settle around October 20.",
-        "The remaining shares will be acquired through a merger, with Seaways expecting to issue approximately 3.12m new shares, accounting for 96% of the total consideration."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
-      "id": "SN-51F58F314C",
-      "title": "West Africa’s ore boom meets China’s growing VLOC armada",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/west-africas-ore-boom-meets-chinas-growing-vloc-armada/",
-      "publishedAt": "2026-10-16T08:00:10Z",
-      "category": "Ports & Terminals",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait",
-        "China & East Asia"
-      ],
-      "tags": [
-        "port",
-        "china"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://splash247.com/wp-content/uploads/2023/09/WinningMax-VLOC-300x180.jpg",
-      "summary": "West Africa is fast becoming dry bulk shipping’s biggest growth engine, with its mineral export boom poised to absorb the equivalent of another 120 capesizes by 2030. UK consultancy Tradeviews forecasts in a new report that shipments from the region will surge 50% from 2025 levels to 303m tonnes by the end of the...",
-      "body": "Africa Dry Cargo West Africa’s ore boom meets China’s growing VLOC armada Sam Chambers October 16, 2026 0 2,004 3 minutes read Winning Winning West Africa is fast becoming dry bulk shipping’s biggest growth engine, with its mineral export boom poised to absorb the equivalent of another 120 capesizes by 2030. UK consultancy Tradeviews forecasts in a new report that shipments from the region will surge 50% from 2025 levels to 303m tonnes by the end of the decade, with Guinea’s giant Simandou iron ore project leading the charge. Crucially for shipowners, the long voyages to China will magnify the impact on vessel demand. “West Africa looks set to remain the fastest growing long-haul source of dry bulk cargo,” Tradeviews stated. The growth is already evident. The five West African exporters covered by the consultancy shipped 160.1m tonnes in their principal trades during the first eight months of this year, up 25% year on year. Liberian iron ore exports nearly doubled to 10.1m tonnes. Tradeviews expects regional exports to reach 267m tonnes next year, with Guinean iron ore shipments climbing to 45m tonnes in 2027 and approximately 112m tonnes by 2030. Bauxite exports, meanwhile, are forecast to retreat from a peak of nearly 194m tonnes this year to 153m tonnes by 2030 as Guinea pushes ahead with domestic alumina processing. A capesize round voyage between Guinea and China takes approximately 78 days, compared with just 29 days on the Australia-China route. Tradeviews calculates that moving a tonne from West Africa consequently absorbs around 2.6 times as much vessel time. On this basis, the consultancy estimates West African trades will require the equivalent of 330 capesizes by 2030, compared with 210 last year. There are, however, already signs that the region’s growth ambitions are running up against freight market realities. In its latest weekly report, BRS Shipbrokers noted that exceptionally high freight rates had priced some higher-cost Guinean bauxite miners out of the export market. Guinea shipped 15.61m tonnes of bauxite in September, down 12% from August, with freight costs at one point accounting for more than half the delivered value of the commodity. The subsequent easing in capesize rates could provide some relief. The C3 benchmark has fallen from $43.43 a tonne in late September to $32.95 on October 12, prompting BRS to suggest Guinean bauxite exports could recover by 5% to 10% month on month during November and December. The broker described the situation as a “test of elasticity” rather than the start of another cargo boom, pointing out that Shandong alumina refineries processing imported ore lost RMB261.8 per tonne in September. SSY has similarly warned that Guinean bauxite exports have retreated from early-September highs, observing that “shipping demand is turning more sensitive to margin levels on the mining side”. Tradeviews did also caution that potential Guinean bauxite export restrictions, Simandou project delays, dedicated ore carriers and the displacement of Australian iron ore shipments could reduce the benefits for the wider capesize market with much of the market increasingly looking like a Chinese conveyor belt. SSY noted in a market report from August that VLOCs of more than 220,000 dwt accounted for nearly half of Simandou shipments during the first half of 2026. More significant for independent owners is what is coming down the slipways. SSY data shows Chinese tonnage accounts for nearly 40% of the current VLOC orderbook, raising questions over how much of Simandou’s enormous prospective tonne-mile demand will ultimately filter through to the conventional capesize spot market. Bauxite’s growing importance to dry bulk shipping will be reflected at next April’s Geneva Dry , the world’s premier commodities shipping conference, with a standalone Bauxite Blitz session. Scheduled for April 28, the discussion will examine the expanding trade, shifting supply patterns and implications for future capesize demand. Confirmed speakers include Ernst Meyer, president and CEO of Torvald Klaveness, and Robert Haggquist, charterer and decarbonisation lead at South32. Braemar’s Derek Langston will moderate the session. Tags Guinea Sam Chambers October 16, 2026 0 2,004 3 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "Crucially for shipowners, the long voyages to China will magnify the impact on vessel demand.",
-        "“West Africa looks set to remain the fastest growing long-haul source of dry bulk cargo,” Tradeviews stated.",
-        "The five West African exporters covered by the consultancy shipped 160.1m tonnes in their principal trades during the first eight months of this year, up 25% year on year."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
-      "id": "SN-54C93EBA5D",
-      "title": "Splash Wrap: A missile from Riyadh",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/splash-wrap-a-missile-from-riyadh/",
-      "publishedAt": "2026-10-16T07:45:26Z",
-      "category": "Weather & Cyclones",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Suez Canal & Eastern Med",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "tanker",
-        "container",
-        "port",
-        "hormuz",
-        "singapore"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://splash247.com/wp-content/uploads/2024/06/Houthi-hypersonic-missile-300x180.jpg",
-      "summary": "Ongoing attacks in Hormuz and the Black Sea dominated Splash coverage once again this week – both maritime theatres of war expanding worryingly. Another dangerous missile for tanker owners came from a conference in Saudi Arabia, where the US energy secretary was reported to have suggested the Trump administration was...",
-      "body": "Americas Asia Containers Dry Cargo Europe Gas Middle East Operations Ports and Logistics Tankers Tech Splash Wrap: A missile from Riyadh Sam Chambers October 16, 2026 0 740 1 minute read Ongoing attacks in Hormuz and the Black Sea dominated Splash coverage once again this week – both maritime theatres of war expanding worryingly. Another dangerous missile for tanker owners came from a conference in Saudi Arabia, where the US energy secretary was reported to have suggested the Trump administration was mulling easing sanctions on some shadow tankers , something that could have a noticeable impact on today’s sky-high freight rates. In other important news this week, India’s Aegis Logistics struck a deal to acquire 89.8% of Dubai-based Tristar for $809m, taking control of a global energy logistics group with a sizeable tanker and dry bulk shipping operation, while Splash Ports covered news that A.P. Moller Capital has lined up another port acquisition , agreeing to take full control of Singapore-based terminal operator Portek International from Japanese trading house Mitsui & Co. Over at SplashTech , a survey of maritime technology bosses revealed growing frustration with software that traps data, demands duplicate entries and creates more work than it removes. KeelX chief executive Aristos Philis offered perhaps the simplest test for any technology purchase: “What work does this remove?” This week’s Maritime CEO interview was with Elisabeth Braw , whose new book The Undersea War examines how merchant ships and their anchors have become potential weapons against the undersea infrastructure on which the global economy depends. For our own news, there was an important addition to the Splash family this week with the launch of Splash Cruise , bringing our brand of independent maritime journalism to the rapidly expanding cruise sector. For readers not up to speed with this business, here’s a useful primer on how Wall Street views cruise for the coming couple of years. The remarkable ageing of the global merchant fleet amid a record earnings environment was one of the most read Splash articles this week and forms this week’s Splash Wrap podcast. Sam Chambers October 16, 2026 0 740 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "Moller Capital has lined up another port acquisition , agreeing to take full control of Singapore-based terminal operator Portek International from Japanese trading house Mitsui & Co.",
-        "Over at SplashTech , a survey of maritime technology bosses revealed growing frustration with software that traps data, demands duplicate entries and creates more work than it removes.",
-        "For our own news, there was an important addition to the Splash family this week with the launch of Splash Cruise , bringing our brand of independent maritime journalism to the rapidly expanding cruise sector."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1948,35 +1769,200 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-4E1F4659B5",
-      "title": "HMM commits $1.6bn to 12 more containerships",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/hmm-commits-1-6bn-to-12-more-containerships/",
-      "publishedAt": "2026-10-16T06:25:42Z",
+      "id": "SN-1BD150FB0B",
+      "title": "Record monthly container volumes at Port of Long Beach as imports soar",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/ports-logistics/record-monthly-container-volumes-at-port-of-long-beach-as-imports-soar",
+      "publishedAt": "2026-10-16T03:19:25Z",
       "category": "Ports & Terminals",
-      "region": "Japan & Korea",
+      "region": "US West Coast & Pacific",
       "regions": [
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        33.73,
+        -118.26
+      ],
+      "navarea": "XII",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt7f35174bc47eee38/6ad198b226d33c2536bc79fe/MSC-vessel-in-port-of-Long_Beach-credit-POLB.jpg?width=720&quality=80&disable=upscale",
+      "summary": "The US West Coast gateway port saw the ratio of imports to exports exceed 5:1 in September",
+      "body": "The US West Coast gateway port saw the ratio of imports to exports exceed 5:1 in September",
+      "takeaways": [
+        "The US West Coast gateway port saw the ratio of imports to exports exceed 5:1 in September",
+        "Operational Area: US West Coast & Pacific.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-9E6B1756A1",
+      "title": "A.P. Moller Capital buys Portek from Mitsui",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/ports-logistics/a-p-moller-capital-buys-portek-from-mitsui",
+      "publishedAt": "2026-10-15T22:18:07Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt6b9b81142692f08f/6ad152d652243f03aaee104a/VGT-Credit-VGT.jpg?width=720&quality=80&disable=upscale",
+      "summary": "Mitsui offloads feeder terminal operator after 15 years, fuelling A.P. Moller Capital's acquisition spree.",
+      "body": "Mitsui offloads feeder terminal operator after 15 years, fuelling A.P. Moller Capital's acquisition spree.",
+      "takeaways": [
+        "Mitsui offloads feeder terminal operator after 15 years, fuelling A.P.",
+        "Moller Capital's acquisition spree.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-B209A7D01E",
+      "title": "Minesto reports 'record' 48-hour service intervention on its tidal power plant",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/15/minesto-reports-record-48-hour-service-intervention-on-its-tidal-power-plant",
+      "publishedAt": "2026-10-15T13:34:08Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://offshore-energy.biz/api/media/file/Minesto%20reports%20'record'%2048-hour%20service%20intervention%20of%20its%20tidal%20power%20plant-1600x900.jpg?prefix=media",
+      "summary": "Minesto has performed a service intervention on its Dragon 4 tidal power plant in record time, carrying out the recovery, inspection, and...",
+      "body": "Marine Energy October 15, 2026 · 2 days ago Minesto reports 'record' 48-hour service intervention on its tidal power plant NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Minesto Minesto has performed a service intervention on its Dragon 4 tidal power plant in record time, carrying out the recovery, inspection, and redeployment offshore process in 48 hours, the Swedish ocean energy developer reported today, October 15. Minesto revealed that, after years of improving the process, it had achieved its fastest turnaround to date, with a complete service intervention of a Dragon 4 power plant performed within 48 hours in Vestmannasund, Faroe Islands. The intervention included recovery, extraction of the nacelle for inspection of the upgraded generator following its first ten weeks of operation, maintenance activities, reassembly, quality and functional checks, and redeployment offshore. The work was carried out during a low-production tidal period. Minesto \"The ability to complete a full service operation and return the system to power production in only 48 hours demonstrates a key competitive advantage of our technology,\" said Martin Edlund , Minesto's CEO. \"High performance is important, but equally important is the ability to maintain the system cost efficiently. Notably, our method does not rely on sophisticated and expensive infrastructure, making it suitable for remote locations and areas of the world without port infrastructure and access to advanced marine engineering capabilities.\" Minesto notes that the central feature of the concept is the ability to swap subsystems, such as the nacelle, during short intervention campaigns. By using spare modules, more extensive inspections, maintenance activities and upgrades can be performed onshore without impact on availability and energy yield. Related Articles Marine Energy Dragon roars with record power in Faroe Islands: Minesto hits new tidal energy output milestone 2 min read \"The successful turnaround demonstrates both the maturity of the Dragon Technology and the efficiency of our operational procedures. Through long-term cooperation with our local contractor SJH Offshore, we have progressively refined our methods through repeated campaigns, and today we can perform advanced service interventions while keeping downtime to a minimum. This capability becomes increasingly valuable as we move towards larger commercial deployments and multi-unit installations,\" said Bernt Erik Westre , CTO of Minesto. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Marine Energy Tidal & Wave Energy Business Developments & Projects Technology",
+      "takeaways": [
+        "The work was carried out during a low-production tidal period.",
+        "Minesto \"The ability to complete a full service operation and return the system to power production in only 48 hours demonstrates a key competitive advantage of our technology,\" said Martin Edlund , Minesto's CEO.",
+        "\"High performance is important, but equally important is the ability to maintain the system cost efficiently."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-2691E39F42",
+      "title": "Rig provider and other contractors revealed for Timor-Leste's oil field",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/15/rig-provider-and-other-contractors-revealed-for-timor-lestes-oil-field",
+      "publishedAt": "2026-10-15T12:32:59Z",
+      "category": "Navigation & Safety",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
         "Japan & Korea"
       ],
       "tags": [
-        "lng",
-        "container",
-        "shipyard"
+        "port",
+        "safety",
+        "imo"
       ],
       "coords": [
-        35.1,
-        129.04
+        1.26,
+        103.82
       ],
       "navarea": "XI",
-      "image": "https://splash247.com/wp-content/uploads/2022/06/HMM-Algeciras-24000-teu-300x180.jpg",
-      "summary": "South Korea’s HMM is pressing ahead with its fleet expansion programme, approving a $1.62bn investment in 12 containerships comprising eight 13,000 teu newbuildings and four smaller vessels. The Seoul-listed carrier’s board approved spending KRW2.168trn ($1.617bn) yesterday, according to a stock exchange filing. The...",
-      "body": "Asia Containers HMM commits $1.6bn to 12 more containerships Sam Chambers October 16, 2026 0 1,714 1 minute read HMM HMM South Korea’s HMM is pressing ahead with its fleet expansion programme, approving a $1.62bn investment in 12 containerships comprising eight 13,000 teu newbuildings and four smaller vessels. The Seoul-listed carrier’s board approved spending KRW2.168trn ($1.617bn) yesterday, according to a stock exchange filing. The investment includes fresh orders for eight 13,000 teu ships, alongside the acquisition of three 2,800 teu vessels and one 1,700 teu ship through resale transactions involving newbuildings already under construction. The 12 vessels will add a combined 114,100 teu of capacity, with deliveries scheduled to be completed by December 2029. HMM has yet to identify the shipyards responsible for the eight larger vessels or the sellers of the four smaller ships. Propulsion specifications have also not been disclosed. The latest investment follows last year’s KRW4trn ($2.8bn) commitment covering 12 LNG dual-fuel 13,000 teu containerships and two VLCCs, with HD Hyundai and Hanwha Ocean securing the boxship contracts. Under HMM’s business plan through to 2030, the carrier aims to expand its containership fleet to 166 vessels totalling 1.47m teu by the end of the decade, alongside 110 bulk carriers with a combined capacity of 13.52m dwt. Tags HMM South Korea Sam Chambers October 16, 2026 0 1,714 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "image": "https://offshore-energy.biz/api/media/file/finder-1048x755.jpg?prefix=media",
+      "summary": "Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the...",
+      "body": "Project & Tenders October 15, 2026 · 2 days ago Rig provider and other contractors revealed for Timor-Leste's oil field NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Hakuryu-5 semi-submersible rig. Source: ENEOS Drilling Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the development of its offshore oil field in Timor-Leste. ENEOS Drilling's Hakuryu-5 semi-submersible drilling unit will perform the drilling campaign at the Kuda Tasi and Jahal (KTJ) project, including three firm development wells, with options for two additional wells. The Japanese player will also provide the associated equipment and personnel. The contract is conditional upon receipt of the required joint venture, government and Finder board approvals by December 31, 2026, together with ENEOS parent company and board approvals by November 16, 2026. The campaign will begin on December 1, 2027, and has an estimated duration of approximately 150 days to drill and complete the wells for production, including running completion assemblies and installation of the wellheads and Christmas Trees ready for hook-up to the Petrojarl I FPSO. \"Securing the Hakuryu-5 is a major milestone for the KTJ Project which brings us a step closer to FID and providing clear visibility on the timing of the development drilling program,\" said Damon Neaves , Finder Energy CEO. \"This is also a strong signal of the progress being made towards delivering Timor-Leste's next offshore oil development.\" According to Finder Energy, the two optional drilling slots provide flexibility to accommodate participation by other operators or to undertake exploration or appraisal drilling targeting potential tie-back opportunities within PSC 19-11. As for other contractors selected for the project, Finder Energy reported that Sumitomo will manufacture, supply and deliver oil country tubular goods (OCTG) including casing, production liner and completion tubing, three Christmas Trees are under fabrication by OneSubsea , and that wellheads have been acquired from another joint venture. AGR will provide integrated drilling management services to support the planning, management and execution of the development drilling program on behalf of Finder, with Finder retaining overall responsibility as operator, and SLB will supply upper completion equipment for the development wells, including downhole flow-control valves, gauges, chemical-injection equipment, packers, subsurface safety valves, control lines, cables, protectors, splices, contingencies and spares. The final investment decision (FID) for the project is anticipated by November 30. Related Articles Fossil Energy Southeast Asian oil field development clears key environmental hurdle to move toward FID 2 min read Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Project & Tenders Fossil Energy Oil & Gas Subsea Exploration & Production Contracts & Tenders FPSO & Vessels Rigs",
       "takeaways": [
-        "The Seoul-listed carrier’s board approved spending KRW2.168trn ($1.617bn) yesterday, according to a stock exchange filing.",
-        "The investment includes fresh orders for eight 13,000 teu ships, alongside the acquisition of three 2,800 teu vessels and one 1,700 teu ship through resale transactions involving newbuildings already under construction.",
-        "The 12 vessels will add a combined 114,100 teu of capacity, with deliveries scheduled to be completed by December 2029."
+        "Project & Tenders October 15, 2026 · 2 days ago Rig provider and other contractors revealed for Timor-Leste's oil field NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Hakuryu-5 semi-submersible rig.",
+        "Source: ENEOS Drilling Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the development of its offshore oil field in Timor-Leste.",
+        "ENEOS Drilling's Hakuryu-5 semi-submersible drilling unit will perform the drilling campaign at the Kuda Tasi and Jahal (KTJ) project, including three firm development wells, with options for two additional wells."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-D820165423",
+      "title": "Subsea7 contracts Worley for Northern Lights' key subsea structures",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/15/subsea7-contracts-worley-for-northern-lights-key-subsea-structures",
+      "publishedAt": "2026-10-15T11:37:05Z",
+      "category": "Ports & Terminals",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://offshore-energy.biz/api/media/file/Subsea7%20contracts%20Worley%20for%20Northern%20Lights'%20key%20subsea%20structures-896x568.jpg?prefix=media",
+      "summary": "Subsea7 has awarded Worley Rosenberg a contract for the fabrication of key subsea structures and spools supporting the second phase of the...",
+      "body": "Carbon Capture Usage & Storage October 15, 2026 · 2 days ago Subsea7 contracts Worley for Northern Lights' key subsea structures NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Worley Subsea7 has awarded Worley Rosenberg a contract for the fabrication of key subsea structures and spools supporting the second phase of the Northern Lights carbon transport and storage project in Norway. The scope includes the fabrication of subsea spools and structures for Northern Lights Phase II and follows Worley Rosenberg's delivery of comparable subsea structures and spools for the project's first phase in 2023. “This award strengthens our position in the growing subsea market and further expands our role in delivering infrastructure that enables large‑scale CO2 reduction,\" said Jan Narvestad, Managing Director of Worley Rosenberg. “CCS will be a critical part of achieving global climate goals, particularly for industries where emissions are difficult to eliminate. Northern Lights is one of the most important CCS projects under development today. The award secures activity for our fabrication facilities and deepens our competitive reach in delivering infrastructure for the energy transition.” Related Articles Carbon Capture Usage & Storage Norway's CO2 transport and storage project gets second Swedish customer 2 min read Related Articles Fossil Energy Subsea7 and Aker Solutions tasked with work for Northern Lights Phase 2 3 min read To remind, the joint venture of Equinor, Shell and TotalEnergies injected and stored the first CO2 volumes as part of the Northern Lights project in August 2025, marking the start of operations of what is said to be the world’s first third-party CO2 transport and storage facility. The project’s first phase is part of Longship, the Norwegian Government’s full-scale carbon capture and storage project (CCS). Phase I is in operation from the Øygarden terminal outside Bergen. The JV partners announced in March 2025 the final investment decision (FID) for the second phase, which will increase the project's capacity from 1.5 million tons of CO2 per annum (mtpa) to more than 5 mtpa. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Carbon Capture Usage & Storage Project & Tenders Business Developments & Projects Storage Fossil Energy Low-Carbon Transition Subsea Surveys & Interventions Contracts & Tenders Transition",
+      "takeaways": [
+        "The scope includes the fabrication of subsea spools and structures for Northern Lights Phase II and follows Worley Rosenberg's delivery of comparable subsea structures and spools for the project's first phase in 2023.",
+        "“CCS will be a critical part of achieving global climate goals, particularly for industries where emissions are difficult to eliminate.",
+        "Northern Lights is one of the most important CCS projects under development today."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-F982A2B87D",
+      "title": "Green ammonia could be cheaper than VLSFO by 2035 under IMO NZF",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/regulations/green-ammonia-could-be-cheaper-than-vlsfo-by-2035-under-imo-nzf",
+      "publishedAt": "2026-10-15T11:10:50Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port",
+        "imo"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt8522761a1b200208/6ad0bce9d717664d1331b692/Inga-2-Credit-Ivanhoe-Mines.jpg?width=720&quality=80&disable=upscale",
+      "summary": "UCL report on Grand Inga hydropower shows beneficial link between green ammonia production and renewable energy demand.",
+      "body": "UCL report on Grand Inga hydropower shows beneficial link between green ammonia production and renewable energy demand.",
+      "takeaways": [
+        "UCL report on Grand Inga hydropower shows beneficial link between green ammonia production and renewable energy demand.",
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
