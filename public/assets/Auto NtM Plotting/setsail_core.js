@@ -7429,11 +7429,10 @@ const WORLD_LAND_POLYGONS = [[[-80.04,-59.57],[-80.55,-59.87],[-81.0,-60.16],[-8
 window.WORLD_LAND_POLYGONS = WORLD_LAND_POLYGONS;
 
 
-/** ECDIS-style chart: blue water + coarse yellow land + detailed Natural Earth coastlines. */
+/** ECDIS: blue water + yellow land. Land fill from Natural Earth polygons (no separate gray coast stroke). */
 function createEcdisSimpleBaseLayer() {
   const WATER = "#9DC9E8";
   const LAND = "#F0E2A0";
-  const COAST = "#1a2744";
   const WaterGrid = L.GridLayer.extend({
     createTile: function () {
       const t = document.createElement("div");
@@ -7447,47 +7446,61 @@ function createEcdisSimpleBaseLayer() {
     maxZoom: 19,
     keepBuffer: 2,
     updateWhenZooming: false,
-    attribution: "ECDIS land/water · Natural Earth coastlines"
+    attribution: "ECDIS land/water · Natural Earth"
   });
 
-  // Coarse land fill only (context) — coast detail comes from NE vectors
   const landFill = L.layerGroup();
-  const polys = (typeof WORLD_LAND_POLYGONS !== "undefined" && Array.isArray(WORLD_LAND_POLYGONS))
-    ? WORLD_LAND_POLYGONS
-    : (window.WORLD_LAND_POLYGONS || []);
-  for (let i = 0; i < polys.length; i++) {
-    const ring = polys[i];
-    if (!ring || ring.length < 3) continue;
-    L.polygon(ring, {
-      stroke: false,
-      fillColor: LAND,
-      fillOpacity: 1,
-      interactive: false,
-      smoothFactor: 2
-    }).addTo(landFill);
-  }
-
-  const coastLayer = L.layerGroup();
-  const group = L.layerGroup([water, landFill, coastLayer]);
+  const group = L.layerGroup([water, landFill]);
   group._setsailEcdis = true;
   group._setsailEcdisWater = water;
 
-  const coastCache = Object.create(null);
-  let coastSeq = 0;
+  const landCache = Object.create(null);
+  let landSeq = 0;
   let boundMap = null;
+  let lastLandKey = "";
 
-  function coastUrls(level) {
-    const local = "assets/geo/ne_" + level + "_coastline.geojson";
+  const coarsePolys =
+    typeof WORLD_LAND_POLYGONS !== "undefined" && Array.isArray(WORLD_LAND_POLYGONS)
+      ? WORLD_LAND_POLYGONS
+      : window.WORLD_LAND_POLYGONS || [];
+
+  function landStyle() {
+    // Same yellow for fill and edge — no gray coastline halo, no source mismatch.
+    return {
+      stroke: true,
+      color: LAND,
+      weight: 0.6,
+      opacity: 1,
+      fillColor: LAND,
+      fillOpacity: 1,
+      interactive: false,
+      smoothFactor: 1.2,
+      lineCap: "round",
+      lineJoin: "round"
+    };
+  }
+
+  function renderCoarseLand() {
+    landFill.clearLayers();
+    for (let i = 0; i < coarsePolys.length; i++) {
+      const ring = coarsePolys[i];
+      if (!ring || ring.length < 3) continue;
+      L.polygon(ring, landStyle()).addTo(landFill);
+    }
+  }
+
+  function landUrls(level) {
+    const local = "assets/geo/ne_" + level + "_land.geojson";
     const cdn =
       "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_" +
       level +
-      "_coastline.geojson";
-    return [local + "?v=5.24", cdn];
+      "_land.geojson";
+    return [local + "?v=5.29", cdn];
   }
 
-  async function loadCoastGeo(level) {
-    if (coastCache[level]) return coastCache[level];
-    const urls = coastUrls(level);
+  async function loadLandGeo(level) {
+    if (landCache[level]) return landCache[level];
+    const urls = landUrls(level);
     let lastErr = null;
     for (let i = 0; i < urls.length; i++) {
       try {
@@ -7495,20 +7508,19 @@ function createEcdisSimpleBaseLayer() {
           if (!r.ok) throw new Error("HTTP " + r.status);
           return r.json();
         });
-        coastCache[level] = geo;
+        landCache[level] = geo;
         return geo;
       } catch (e) {
         lastErr = e;
       }
     }
-    throw lastErr || new Error("coast load failed");
+    throw lastErr || new Error("land load failed");
   }
 
   function featureHitsBounds(feat, bounds) {
     try {
       const g = feat && feat.geometry;
       if (!g) return false;
-      const type = g.type;
       const coords = g.coordinates;
       const checkPair = (lon, lat) => bounds.contains([lat, lon]);
       const walk = (c) => {
@@ -7519,75 +7531,93 @@ function createEcdisSimpleBaseLayer() {
         }
         return false;
       };
-      if (type === "LineString" || type === "MultiLineString") return walk(coords);
-      return true;
+      return walk(coords);
     } catch (e) {
       return true;
     }
   }
 
-  async function refreshEcdisCoast() {
+  async function refreshEcdisLand() {
     const map = boundMap || group._map;
     if (!map || !map.hasLayer(group)) return;
     const z = map.getZoom();
-    // World view: coarse land fill is enough. Mid/close: add NE coastline detail.
-    const level = z >= 8 ? "10m" : z >= 4 ? "50m" : null;
-    coastLayer.clearLayers();
-    if (!level) return;
-    const seq = ++coastSeq;
+    // World overview: coarse fill only. Closer: Natural Earth land polygons (fill = edge).
+    if (z < 3) {
+      if (lastLandKey !== "coarse") {
+        lastLandKey = "coarse";
+        renderCoarseLand();
+      }
+      return;
+    }
+    const level = z >= 8 ? "10m" : z >= 4 ? "50m" : "110m";
+    const seq = ++landSeq;
     try {
-      const geo = await loadCoastGeo(level);
-      if (seq !== coastSeq) return;
-      const pad = z >= 10 ? 0.08 : 0.2;
+      const geo = await loadLandGeo(level);
+      if (seq !== landSeq) return;
+      const pad = z >= 10 ? 0.05 : z >= 6 ? 0.12 : 0.35;
       const bounds = map.getBounds().pad(pad);
-      const weight = z >= 11 ? 2.0 : z >= 9 ? 1.6 : z >= 6 ? 1.25 : 1.0;
+      const key =
+        level +
+        "|" +
+        Math.round(bounds.getSouth() * 20) +
+        "|" +
+        Math.round(bounds.getWest() * 20) +
+        "|" +
+        Math.round(bounds.getNorth() * 20) +
+        "|" +
+        Math.round(bounds.getEast() * 20);
+      if (key === lastLandKey) return;
+      lastLandKey = key;
       const renderer = L.canvas({ padding: 0.5 });
+      landFill.clearLayers();
       L.geoJSON(geo, {
         renderer,
         interactive: false,
         filter: function (feat) {
-          if (level === "50m" && z < 6) return true;
+          if (level === "110m") return true;
+          if (level === "50m" && z < 5) return true;
           return featureHitsBounds(feat, bounds);
         },
-        style: function () {
-          return {
-            color: COAST,
-            weight: weight,
-            opacity: 1,
-            fill: false,
-            lineCap: "round",
-            lineJoin: "round"
-          };
-        }
-      }).addTo(coastLayer);
+        style: landStyle
+      }).addTo(landFill);
     } catch (e) {
-      console.warn("[SetSail ECDIS] coastline load failed", e);
+      console.warn("[SetSail ECDIS] land load failed — coarse fallback", e);
+      if (lastLandKey !== "coarse") {
+        lastLandKey = "coarse";
+        renderCoarseLand();
+      }
     }
+  }
+
+  // Back-compat alias for any callers expecting the old name.
+  function refreshEcdisCoast() {
+    return refreshEcdisLand();
   }
 
   group.on("add", function () {
     boundMap = group._map;
     if (!boundMap) return;
     boundMap.getContainer().classList.add("ecdis-simple-base");
+    lastLandKey = "";
+    renderCoarseLand();
     const bump = function () {
-      refreshEcdisCoast();
+      refreshEcdisLand();
     };
     boundMap.on("zoomend moveend", bump);
     group._ecdisCoastBump = bump;
-    refreshEcdisCoast();
+    refreshEcdisLand();
   });
   group.on("remove", function () {
     if (boundMap && group._ecdisCoastBump) {
       boundMap.off("zoomend moveend", group._ecdisCoastBump);
     }
-    if (boundMap && boundMap.getContainer()) {
-      // class cleared by layer selector when switching away
-    }
     group._ecdisCoastBump = null;
     boundMap = null;
+    lastLandKey = "";
   });
 
   group.refreshEcdisCoast = refreshEcdisCoast;
+  group.refreshEcdisLand = refreshEcdisLand;
   return group;
 }
 window.createEcdisSimpleBaseLayer = createEcdisSimpleBaseLayer;

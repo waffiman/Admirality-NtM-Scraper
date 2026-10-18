@@ -11550,20 +11550,20 @@ select option {
   </style>
 
   <script>
-    // v5.28 — hard kill stale SW/HTML (vessel popover + AISStream shared key + ECDIS)
+    // v5.29 — ECDIS land/coast alignment (NE land polygons, no separate coastline stroke)
     (function(){
       try {
-        if (localStorage.getItem('setsail_force_v528') === '1') return;
+        if (localStorage.getItem('setsail_force_v529') === '1') return;
         var finish = function(){
-          localStorage.setItem('setsail_force_v528', '1');
+          localStorage.setItem('setsail_force_v529', '1');
           // clear ALL old force/reload flags that blocked later bumps
           try {
-            ['setsail_force_v512','setsail_force_v513','setsail_force_v514','setsail_force_v515','setsail_force_v516','setsail_force_v524',
-             'setsail_reloaded_v512','setsail_reloaded_v513','setsail_reloaded_v514','setsail_reloaded_v515','setsail_reloaded_v516','setsail_reloaded_v519'
+            ['setsail_force_v512','setsail_force_v513','setsail_force_v514','setsail_force_v515','setsail_force_v516','setsail_force_v524','setsail_force_v528',
+             'setsail_reloaded_v512','setsail_reloaded_v513','setsail_reloaded_v514','setsail_reloaded_v515','setsail_reloaded_v516','setsail_reloaded_v519','setsail_reloaded_v528'
             ].forEach(function(k){ localStorage.removeItem(k); sessionStorage.removeItem(k); });
           } catch (e0) {}
-          if (!sessionStorage.getItem('setsail_reloaded_v528')) {
-            sessionStorage.setItem('setsail_reloaded_v528', '1');
+          if (!sessionStorage.getItem('setsail_reloaded_v529')) {
+            sessionStorage.setItem('setsail_reloaded_v529', '1');
             location.reload(true);
           }
         };
@@ -19808,7 +19808,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.24"></script>
   <script src="assets/Auto NtM Plotting/port_depths.js?v=5.24"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.28"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.29"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19886,7 +19886,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.28"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.29"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
