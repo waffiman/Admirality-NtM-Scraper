@@ -1,10 +1,10 @@
-﻿/**
+/**
  * SetSail Marine Navigation Suite вЂ” Service Worker (PWA Offline Engine v4.8)
  * Vessel: LPG/C IINO INEOS VESTA
  * High-Speed Satellite & Offline Engine вЂ” Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.29.0';
+const CACHE_NAME = 'setsail-cache-v5.30.0';
 const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.29.0';
 
 const OFFLINE_CORE_ASSETS = [
