@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-18T03:24:20Z",
-  "generatedAt": "2026-10-18T03:24:20Z",
+  "updatedAt": "2026-10-18T10:31:41Z",
+  "generatedAt": "2026-10-18T10:31:41Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -11,8 +11,179 @@
     "Hellenic Shipping News",
     "Container News"
   ],
-  "totalArticles": 60,
+  "totalArticles": 70,
   "articles": [
+    {
+      "id": "SN-0C0EFDCD58",
+      "title": "Akkon Lines adds Iskenderun to Jeddah Express",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/akkon-lines-adds-iskenderun-to-jeddah-express/",
+      "publishedAt": "2026-10-18T10:30:44Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "red sea"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/pexels-njeromin-12567565-240x300.jpg",
+      "summary": "Akkon Lines has added Iskenderun to the rotation of its Jeddah Express Service (JXS), expanding its coverage between Türkiye and Saudi Arabia, according to DynaLiners. The service now connects five Turkish ports with Jeddah on the Red Sea. Akkon Lines deploys two container ships with an average capacity of...",
+      "body": "Services Top Right Akkon Lines adds Iskenderun to Jeddah Express October 18, 2026 Facebook Twitter WhatsApp Linkedin Email Akkon Lines has added Iskenderun to the rotation of its Jeddah Express Service (JXS), expanding its coverage between Türkiye and Saudi Arabia, according to DynaLiners. The service now connects five Turkish ports with Jeddah on the Red Sea. Akkon Lines deploys two container ships with an average capacity of approximately 1,100 TEUs on the JXS service. Sailings are offered at 10-day intervals. Revised JXS rotation The updated port sequence is: Izmit – Gemlik – Istanbul (Ambarli) – Aliaga – Iskenderun – Jeddah – Izmit. The addition provides Iskenderun with a direct connection to Jeddah through Akkon Lines’ regional network. TAGS AKKON LINES Facebook Twitter WhatsApp Linkedin Email Previous article CMA CGM raises BAF on France–Tunisia RoRo service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The service now connects five Turkish ports with Jeddah on the Red Sea.",
+        "Akkon Lines deploys two container ships with an average capacity of approximately 1,100 TEUs on the JXS service.",
+        "Sailings are offered at 10-day intervals."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-630AA882B8",
+      "title": "CMA CGM raises BAF on France–Tunisia RoRo service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/cma-cgm-raises-baf-on-france-tunisia-roro-service/",
+      "publishedAt": "2026-10-18T08:23:23Z",
+      "category": "Ports & Terminals",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "bunker"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2026/07/CMA-CGM-Notre-Dame-300x200.jpg",
+      "summary": "CMA CGM Short Sea Lines Intra Europe will increase its Bunker Adjustment Factor (BAF) on the RoRo South service connecting France and Tunisia. The revised France–Tunisia RoRo BAF will take effect on 1 November 2026 and apply to both import and export cargo. The carrier said the adjustment follows changes in bunker...",
+      "body": "Rates & Surcharges Top Right CMA CGM raises BAF on France–Tunisia RoRo service October 18, 2026 Facebook Twitter WhatsApp Linkedin Email CMA CGM Notre Dame CMA CGM Short Sea Lines Intra Europe will increase its Bunker Adjustment Factor (BAF) on the RoRo South service connecting France and Tunisia. The revised France–Tunisia RoRo BAF will take effect on 1 November 2026 and apply to both import and export cargo. The carrier said the adjustment follows changes in bunker prices since its previous surcharge revision. Revised BAF levels Cargo Current BAF BAF from 1 November Full rolling unit EUR 718/unit EUR 775/unit Empty rolling unit EUR 475/unit EUR 513/unit Other rolling units EUR 80/LM EUR 86/LM Passenger cars and minivans EUR 273/unit EUR 294/unit Breakbulk EUR 44/CBM EUR 47/CBM Other rolling units include trucks, earth-moving equipment on wheels or tracks, duty trucks, agricultural equipment and livestock trucks. The revised France–Tunisia RoRo BAF represents increases of approximately 7% to 8%, depending on the cargo category. TAGS CMA CGM Facebook Twitter WhatsApp Linkedin Email Previous article Maersk updates automatic booking cancellation timeline Next article Akkon Lines adds Iskenderun to Jeddah Express Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The revised France–Tunisia RoRo BAF will take effect on 1 November 2026 and apply to both import and export cargo.",
+        "The carrier said the adjustment follows changes in bunker prices since its previous surcharge revision.",
+        "The revised France–Tunisia RoRo BAF represents increases of approximately 7% to 8%, depending on the cargo category."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-726C704D7F",
+      "title": "Maersk updates automatic booking cancellation timeline",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/maersk-updates-automatic-booking-cancellation-timeline/",
+      "publishedAt": "2026-10-18T06:30:11Z",
+      "category": "Ports & Terminals",
+      "region": "China & East Asia",
+      "regions": [
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.6,
+        122.1
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/08/blue-maersk-container-being-moved-by-a-crane-in-a-terminal_1024x576-300x169.webp",
+      "summary": "Maersk has revised its automatic booking cancellation timeline for eligible shipments that have not materialised. Effective 15 October 2026, an eligible booking may be automatically cancelled when at least five days have passed since the first vessel’s estimated time of departure and the shipment has not...",
+      "body": "News Top Right Maersk updates automatic booking cancellation timeline October 18, 2026 Facebook Twitter WhatsApp Linkedin Email Maersk has revised its automatic booking cancellation timeline for eligible shipments that have not materialised. Effective 15 October 2026, an eligible booking may be automatically cancelled when at least five days have passed since the first vessel’s estimated time of departure and the shipment has not materialised. The carrier said the updated automatic booking cancellation process will allow unused capacity to be released earlier, supporting more effective capacity management and transport planning across its network. Customers have been advised to monitor their bookings closely. Where a shipment is expected to proceed but could be affected by the revised timeline, customers should contact Maersk Customer Service promptly. TAGS A.P. Moeller-Maersk Facebook Twitter WhatsApp Linkedin Email Previous article Shipowners expand orderbooks at Chinese yards Next article CMA CGM raises BAF on France–Tunisia RoRo service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "Effective 15 October 2026, an eligible booking may be automatically cancelled when at least five days have passed since the first vessel’s estimated time of departure and the shipment has not materialised.",
+        "The carrier said the updated automatic booking cancellation process will allow unused capacity to be released earlier, supporting more effective capacity management and transport planning across its network.",
+        "Customers have been advised to monitor their bookings closely."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-5B054B5494",
+      "title": "Shipowners expand orderbooks at Chinese yards",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/shipowners-expand-orderbooks-at-chinese-yards/",
+      "publishedAt": "2026-10-18T05:00:29Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "china",
+        "shipyard"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/pexels-igor-passchier-111147847-32344727-300x200.jpg",
+      "summary": "Zhonggu Shipping Group, Tsakos and Elbdeich Reederei have placed new containership orders at Chinese shipyards, covering vessels ranging from 3,200 TEU to 14,000 TEU, according to DynaLiners. Zhonggu orders its largest vessels Zhonggu Shipping Group has ordered two 14,000 TEU container ships from Hudong-Zhonghua...",
+      "body": "Zhonggu Shipping Group, Tsakos and Elbdeich Reederei have placed new containership orders at Chinese shipyards, covering vessels ranging from 3,200 TEU to 14,000 TEU, according to DynaLiners. Zhonggu orders its largest vessels Zhonggu Shipping Group has ordered two 14,000 TEU container ships from Hudong-Zhonghua Shipbuilding. The conventionally powered vessels will become the largest ships in the Chinese carrier’s fleet. Neither the contract value nor the delivery dates have been disclosed. Zhonggu had already contracted 18 smaller container ships earlier in 2026, comprising eight vessels of 6,300 TEU and ten units of 1,800 TEU. Tsakos returns to containership newbuildings Greek non-operating owner Tsakos has ordered two 3,200 TEU container ships from Hengli Heavy Industries. The contract marks the company’s first containership newbuilding order in four years. The vessels will be equipped with scrubbers and are scheduled for delivery during the fourth quarter of 2028. Elbdeich orders vessels in China German shipowner Elbdeich Reederei has also contracted two container ships at a Chinese shipyard. Although the full details have not been disclosed, the order is understood to comprise two 3,200 TEU vessels to be constructed by Hengli Heavy Industries. The newbuildings are expected to be delivered in 2028.",
+      "takeaways": [
+        "Zhonggu Shipping Group, Tsakos and Elbdeich Reederei have placed new containership orders at Chinese shipyards, covering vessels ranging from 3,200 TEU to 14,000 TEU, according to DynaLiners.",
+        "Zhonggu orders its largest vessels Zhonggu Shipping Group has ordered two 14,000 TEU container ships from Hudong-Zhonghua Shipbuilding.",
+        "The conventionally powered vessels will become the largest ships in the Chinese carrier’s fleet."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-0EE715C0E5",
+      "title": "X-Press Feeders restores Busan–Dalian connection",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/x-press-feeders-restores-busan-dalian-connection/",
+      "publishedAt": "2026-10-18T03:30:26Z",
+      "category": "Ports & Terminals",
+      "region": "China & East Asia",
+      "regions": [
+        "China & East Asia",
+        "Japan & Korea",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "china"
+      ],
+      "coords": [
+        30.6,
+        122.1
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2022/01/X-Press-Jersey-1-300x209.png",
+      "summary": "X-Press Feeders has launched the Bohai Feeder X-Press (BHF2), restoring its direct feeder connection between South Korea and China’s Bohai Sea region, accoring to DynaLiners. The carrier deploys a single vessel with a capacity of approximately 1,700 TEU on the service. BHF2 offers weekly sailings with the following...",
+      "body": "Services Top Right X-Press Feeders restores Busan–Dalian connection October 18, 2026 Facebook Twitter WhatsApp Linkedin Email X-Press Jersey / Source: X-Press Feeders X-Press Feeders has launched the Bohai Feeder X-Press (BHF2), restoring its direct feeder connection between South Korea and China’s Bohai Sea region, accoring to DynaLiners. The carrier deploys a single vessel with a capacity of approximately 1,700 TEU on the service. BHF2 offers weekly sailings with the following rotation: Busan – Dalian – Busan The launch returns X-Press Feeders to the Busan–Dalian corridor following the closure of its previous BHF2A service in 2025. TAGS X-Press Feeders Facebook Twitter WhatsApp Linkedin Email Previous article DP World appoints new CEO and Managing Director for Asia Pacific Next article Shipowners expand orderbooks at Chinese yards Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The carrier deploys a single vessel with a capacity of approximately 1,700 TEU on the service.",
+        "BHF2 offers weekly sailings with the following rotation: Busan – Dalian – Busan The launch returns X-Press Feeders to the Busan–Dalian corridor following the closure of its previous BHF2A service in 2025.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
     {
       "id": "SN-CA018FABD4",
       "title": "DP World appoints new CEO and Managing Director for Asia Pacific",
@@ -223,39 +394,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-4C124A78C6",
-      "title": "Evergreen overhauls intra-Asia KTP service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/evergreen-overhauls-intra-asia-ktp-service/",
-      "publishedAt": "2026-10-17T15:41:07Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2024/03/3d85a535-2166-cfe0-77ce-53a1a0d372a2-300x169.jpg",
-      "summary": "Evergreen will restructure its intra-Far East KTP service by adding calls at Xiamen, Ho Chi Minh City, Qinzhou and Taipei, according to DynaLiners. As part of the overhaul, the carrier will remove Shenzhen (Shekou), Kaohsiung and Manila North from the service rotation. The revised KTP rotation will be: Dalian –...",
-      "body": "Services Top Right Evergreen overhauls intra-Asia KTP service October 17, 2026 Facebook Twitter WhatsApp Linkedin Email Ever Top / Source: Courtesy of HRDD Evergreen will restructure its intra-Far East KTP service by adding calls at Xiamen, Ho Chi Minh City, Qinzhou and Taipei, according to DynaLiners. As part of the overhaul, the carrier will remove Shenzhen (Shekou), Kaohsiung and Manila North from the service rotation. The revised KTP rotation will be: Dalian – Tianjin – Qingdao – Xiamen – Hong Kong – Ho Chi Minh City – Laem Chabang – Qinzhou – Hong Kong – Taipei – Dalian The Kaohsiung–Manila North connection will instead be covered by Evergreen’s reinstated TMS service. TAGS EVERGREEN Facebook Twitter WhatsApp Linkedin Email Previous article How Bangladesh is dividing its ports among rival partners Next article Port of Montreal and Adani Group renew collaboration agreement Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "As part of the overhaul, the carrier will remove Shenzhen (Shekou), Kaohsiung and Manila North from the service rotation.",
-        "Operational Area: China & East Asia.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-A109F0AD11",
       "title": "Iran’s Guards Say Two Tankers Hit Mines In Strait Of Hormuz",
       "source": "gCaptain",
@@ -325,144 +463,6 @@
       ],
       "readingMinutes": 3,
       "readMinutes": 3
-    },
-    {
-      "id": "SN-720A92895E",
-      "title": "How Bangladesh is dividing its ports among rival partners",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/how-bangladesh-is-dividing-its-ports-among-rival-partners/",
-      "publishedAt": "2026-10-17T14:00:29Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia",
-        "Japan & Korea",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "imo"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2023/06/MOL-ship-at-Payra-Port-e1687435165198-300x191.jpg",
-      "summary": "Danish equity, Gulf operators, Japanese aid and Chinese credit each have a role and Dhaka keeps ownership of them all. In the space of six weeks, Bangladesh has signed three port deals with three different partners.",
-      "body": "CN Premium Articles Sticky News How Bangladesh is dividing its ports among rival partners October 17, 2026 Facebook Twitter WhatsApp Linkedin Email A MOL container ship at Payra Port in Bangladesh / Source: Payra Sea Port, Bangladesh (Facebook Page) Danish equity, Gulf operators, Japanese aid and Chinese credit each have a role and Dhaka keeps ownership of them all. In the space of six weeks, Bangladesh has signed three port deals with three different partners. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS Bangladesh Dhaka Indo-Pacific INVESTMENTS Laldia container terminal Facebook Twitter WhatsApp Linkedin Email Previous article Signal Ocean acquires maritime communications specialist Lgmar Next article Evergreen overhauls intra-Asia KTP service Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
-      "takeaways": [
-        "In the space of six weeks, Bangladesh has signed three port deals with three different partners.",
-        "This content is locked Select a CN Premium Subscription Package To Unlock The Content!",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-D82BBF9B74",
-      "title": "Signal Ocean acquires maritime communications specialist Lgmar",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/signal-ocean-acquires-maritime-communications-specialist-lgmar/",
-      "publishedAt": "2026-10-17T12:30:55Z",
-      "category": "Weather & Cyclones",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/6ad09db81eccfd8c4e5baf3c_Aligned-Ocean-Branding-Logos_edit_05-300x169.jpg",
-      "summary": "Signal Ocean has acquired Athens-based software company Lgmar, the developer of Telix, a maritime email and communications platform used by shipping professionals. The acquisition expands Signal Ocean’s technology portfolio beyond maritime data and market intelligence. The company aims to bring communication tools...",
-      "body": "Signal Ocean has acquired Athens-based software company Lgmar, the developer of Telix, a maritime email and communications platform used by shipping professionals. The acquisition expands Signal Ocean’s technology portfolio beyond maritime data and market intelligence. The company aims to bring communication tools and shipping data closer together, helping users manage their daily work. Founded in 1989, Lgmar serves hundreds of maritime companies and thousands of users. Its Telix platform is used by shipowners, ship managers, brokers, operators and other shipping professionals. Expanding maritime technology services Signal Ocean plans to combine its data, artificial intelligence and technology capabilities with Lgmar’s experience in maritime communications. The company sees email as an important part of shipping operations. It is widely used for chartering, commercial discussions and communication between shipping companies. “Email is an important part of the shipping workflow,” said Ioannis Martinos, CEO of Signal Ocean. Martinos also stressed that maintaining service continuity for existing customers will be an immediate priority. Helen Skourtis, Managing Director of Lgmar, said the decision to join Signal Ocean reflected the companies’ shared understanding of the shipping industry and its technology needs. The acquisition follows Signal Ocean’s purchases of AXSMarine and Alphaliner earlier in 2026. These deals have expanded its presence in maritime information and software services. Building a broader shipping platform Signal Ocean provides digital tools that help charterers, brokers and shipowners analyse shipping and commodity data. By adding Lgmar, the company is extending its activities into the communication systems used to manage commercial shipping operations. The acquisition is intended to support closer links between market information and everyday communication. However, Signal Ocean has not announced a timetable for integrating Telix into its existing platform. The financial terms of the transaction were not disclosed.",
-      "takeaways": [
-        "Signal Ocean has acquired Athens-based software company Lgmar, the developer of Telix, a maritime email and communications platform used by shipping professionals.",
-        "The acquisition expands Signal Ocean’s technology portfolio beyond maritime data and market intelligence.",
-        "The company aims to bring communication tools and shipping data closer together, helping users manage their daily work."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-63ADABE0FA",
-      "title": "CMA CGM removes Salerno from FEMEX1 service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/cma-cgm-removes-salerno-from-femex1-service/",
-      "publishedAt": "2026-10-17T10:13:30Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2026/06/WhatsApp-Image-2026-06-16-at-3.02.54-PM-1.jpeg-300x200.jpg",
-      "summary": "CMA CGM has removed the northbound Salerno call from its North Europe–East Mediterranean FEMEX1 service. The carrier operates the FEMEX1 service with seven container ships averaging approximately 5,000 TEUs. Following the removal of Salerno, the service will continue to connect Northern Europe with Malta, Greece,...",
-      "body": "Services Sticky News CMA CGM removes Salerno from FEMEX1 service October 17, 2026 Facebook Twitter WhatsApp Linkedin Email CMA CGM has removed the northbound Salerno call from its North Europe–East Mediterranean FEMEX1 service. The carrier operates the FEMEX1 service with seven container ships averaging approximately 5,000 TEUs. Following the removal of Salerno, the service will continue to connect Northern Europe with Malta, Greece, Türkiye and Spain. Revised FEMEX1 rotation The updated port sequence is: Felixstowe – Antwerp – Rotterdam – Hamburg – Malta – Piraeus – Istanbul (Ambarli) – Izmit (Gebze) – Gemlik – Aliaga – Algeciras – Felixstowe. Salerno is no longer included in the northbound schedule. TAGS CMA CGM Facebook Twitter WhatsApp Linkedin Email Previous article MSC-backed Nador terminal set to begin operations Next article Signal Ocean acquires maritime communications specialist Lgmar Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The carrier operates the FEMEX1 service with seven container ships averaging approximately 5,000 TEUs.",
-        "Following the removal of Salerno, the service will continue to connect Northern Europe with Malta, Greece, Türkiye and Spain.",
-        "Revised FEMEX1 rotation The updated port sequence is: Felixstowe – Antwerp – Rotterdam – Hamburg – Malta – Piraeus – Istanbul (Ambarli) – Izmit (Gebze) – Gemlik – Aliaga – Algeciras – Felixstowe."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-BAF1325662",
-      "title": "MSC-backed Nador terminal set to begin operations",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/msc-backed-nador-terminal-set-to-begin-operations/",
-      "publishedAt": "2026-10-17T08:30:19Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "US East Coast & New York",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/pexels-joolsmagools-37914074-2-300x225.jpg",
-      "summary": "West Med Container Terminal (WMCT) is preparing to commence commercial operations at Morocco’s Port of Nador West Med following a series of operational trials, according to DynaLiners. WMCT is a joint venture between Moroccan port operator Marsa Maroc, which holds 50% plus one share, and MSC’s terminal subsidiary...",
-      "body": "Port News Top Right MSC-backed Nador terminal set to begin operations October 17, 2026 Facebook Twitter WhatsApp Linkedin Email West Med Container Terminal (WMCT) is preparing to commence commercial operations at Morocco’s Port of Nador West Med following a series of operational trials, according to DynaLiners. WMCT is a joint venture between Moroccan port operator Marsa Maroc, which holds 50% plus one share, and MSC’s terminal subsidiary Terminal Investment Limited, which owns 50% minus one share. The terminal has an annual handling capacity of 1.2 million TEUs. Its infrastructure comprises two berths along a 750-metre quay equipped with ship-to-shore gantry cranes. MSC’s Mediterranean–US East Coast EMUSA service is expected to become the terminal’s first regular customer. Vessels operating on the service will call at Nador West Med before proceeding to New York. TAGS Nador West Med West Med Container Terminal Facebook Twitter WhatsApp Linkedin Email Previous article CU Lines exits CNC’s Japan–Thailand service Next article CMA CGM removes Salerno from FEMEX1 service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "WMCT is a joint venture between Moroccan port operator Marsa Maroc, which holds 50% plus one share, and MSC’s terminal subsidiary Terminal Investment Limited, which owns 50% minus one share.",
-        "The terminal has an annual handling capacity of 1.2 million TEUs.",
-        "Its infrastructure comprises two berths along a 750-metre quay equipped with ship-to-shore gantry cranes."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
     },
     {
       "id": "SN-CCF7E5494A",
@@ -1594,7 +1594,7 @@
       "navarea": "XI",
       "image": "https://offshore-energy.biz/api/media/file/panoro-1020x794.jpg?prefix=media",
       "summary": "UK-headquartered Panoro Energy and Oslo-listed BW Energy have encountered more oil at a permit offshore Gabon by drilling two open-water wells....",
-      "body": "Exploration & Production October 16, 2026 · 1 day ago More oil found at permit offshore Gabon NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Panoro Energy UK-headquartered Panoro Energy and Oslo-listed BW Energy have encountered more oil at a permit offshore Gabon by drilling two open-water wells. Panoro Energy reported on October 15 the conclusion of drilling two open-water wells to appraise the North-West Hibiscus area at the Dussafu Marin Permit offshore Gabon. Based on preliminary assessment, this represents an aggregate estimate of recoverable oil of approximately 8-9 million barrels. Dussafu is operated by BW Energy Gabon and Panoro’s interest in the license is 17.5%. The permit consists of multiple oil fields, including Moubenga, Walt Whitman, Ruche, Ruche North East, Tortue, Hibiscus and Hibiscus North. The latter five fields were discovered by Panoro and JV partners. According to the firm, the first well encountered a 16-meter oil column in high-quality Gamba reservoir sands adjacent to the Hibiscus field, while the second well, drilled as a side-track from the main well bore, confirmed the extension of the Hibiscus structure with the presence of a 30-meter oil column in high-quality Gamba sands within an as-yet undeveloped area of the Hibiscus field. The Borr Prospector 5 jack-up drilling rig is now mobilizing to the MaBoMo production platform, from where it will soon begin the planned MaBoMo Phase 2 drilling campaign, consisting of four new production infill wells in the Hibiscus and Hibiscus South fields. The first well is expected to come on stream in early 2027. As a result of the successful appraisal wells, the partners are assessing the addition of a fifth new production well at the end of the MaBoMo Phase 2 drilling campaign in the Hibiscus field. It is expected to drain an additional volume of at least 6 mmbls of oil. “The two latest successful appraisal wells further demonstrate the quality of the Hibiscus area and the substantial organic upside that remains within the Dussafu block,\" said Eric d’Argentré , Chief Operating Officer and President at Panoro Energy. \"By leveraging the existing MaBoMo infrastructure, we are able to move quickly from subsurface success to development, with the addition of a fifth well to the Phase 2 campaign which will take gross Dussafu production back to nameplate capacity of 40,000 bopd.” Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Exploration & Production Oil & Gas Fossil Energy Rigs",
+      "body": "Exploration & Production October 16, 2026 · 2 days ago More oil found at permit offshore Gabon NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Panoro Energy UK-headquartered Panoro Energy and Oslo-listed BW Energy have encountered more oil at a permit offshore Gabon by drilling two open-water wells. Panoro Energy reported on October 15 the conclusion of drilling two open-water wells to appraise the North-West Hibiscus area at the Dussafu Marin Permit offshore Gabon. Based on preliminary assessment, this represents an aggregate estimate of recoverable oil of approximately 8-9 million barrels. Dussafu is operated by BW Energy Gabon and Panoro’s interest in the license is 17.5%. The permit consists of multiple oil fields, including Moubenga, Walt Whitman, Ruche, Ruche North East, Tortue, Hibiscus and Hibiscus North. The latter five fields were discovered by Panoro and JV partners. According to the firm, the first well encountered a 16-meter oil column in high-quality Gamba reservoir sands adjacent to the Hibiscus field, while the second well, drilled as a side-track from the main well bore, confirmed the extension of the Hibiscus structure with the presence of a 30-meter oil column in high-quality Gamba sands within an as-yet undeveloped area of the Hibiscus field. The Borr Prospector 5 jack-up drilling rig is now mobilizing to the MaBoMo production platform, from where it will soon begin the planned MaBoMo Phase 2 drilling campaign, consisting of four new production infill wells in the Hibiscus and Hibiscus South fields. The first well is expected to come on stream in early 2027. As a result of the successful appraisal wells, the partners are assessing the addition of a fifth new production well at the end of the MaBoMo Phase 2 drilling campaign in the Hibiscus field. It is expected to drain an additional volume of at least 6 mmbls of oil. “The two latest successful appraisal wells further demonstrate the quality of the Hibiscus area and the substantial organic upside that remains within the Dussafu block,\" said Eric d’Argentré , Chief Operating Officer and President at Panoro Energy. \"By leveraging the existing MaBoMo infrastructure, we are able to move quickly from subsurface success to development, with the addition of a fifth well to the Phase 2 campaign which will take gross Dussafu production back to nameplate capacity of 40,000 bopd.” Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Exploration & Production Oil & Gas Fossil Energy Rigs",
       "takeaways": [
         "Panoro Energy reported on October 15 the conclusion of drilling two open-water wells to appraise the North-West Hibiscus area at the Dussafu Marin Permit offshore Gabon.",
         "Based on preliminary assessment, this represents an aggregate estimate of recoverable oil of approximately 8-9 million barrels.",
@@ -1602,6 +1602,74 @@
       ],
       "readingMinutes": 2,
       "readMinutes": 2
+    },
+    {
+      "id": "SN-8095D89069",
+      "title": "Equinor keeps Odfjell Drilling semisub busy into late 2027",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/equinor-keeps-odfjell-drilling-semisub-busy-into-late-2027/",
+      "publishedAt": "2026-10-16T10:00:00Z",
+      "category": "Shipping & Tankers",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "Singapore & Malacca Strait",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "shipping",
+        "rotterdam"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://splash247.com/wp-content/uploads/2021/05/deepsea-atlantic-equinor-300x169.jpg",
+      "summary": "Norway’s Odfjell Drilling has secured more work for its Deepsea Atlantic semisubmersible drilling rig after compatriot energy major Equinor exercised options for two additional wells. The latest option exercise will keep the 2009-built rig employed until late in the fourth quarter of 2027, extending its existing...",
+      "body": "Europe Offshore Equinor keeps Odfjell Drilling semisub busy into late 2027 Bojan Lepic October 16, 2026 0 662 1 minute read Equinor Equinor Norway’s Odfjell Drilling has secured more work for its Deepsea Atlantic semisubmersible drilling rig after compatriot energy major Equinor exercised options for two additional wells. The latest option exercise will keep the 2009-built rig employed until late in the fourth quarter of 2027, extending its existing contract without interruption. The additional wells will be drilled at rates agreed under the original contract. Financial details of the latest extension were not disclosed. Equinor also retains priced options for another two wells, potentially extending the rig’s employment further. The latest extension follows a deal struck in January 2025, when Equinor extended the rig’s contract until the end of the second quarter of 2027. That agreement added approximately $148m to Odfjell Drilling’s backlog, excluding escalation fees, integrated services, performance bonuses, and fuel incentives. Under the previous arrangement, the rig was set to operate on existing terms until mid-2026 before moving into the extension period. The earlier deal was a 23-month contract worth about $290m, secured as part of a broader agreement between the two Norwegian companies. The January 2025 extension also included four priced one-well options and three additional optional periods of around one year each, with rates for those longer periods subject to agreement. If exercised, the remaining options could see the rig remain under contract into 2030. The Deepsea Atlantic has a long history with Equinor, having worked for the Norwegian energy giant since 2009. Tags Norway Bojan Lepic October 16, 2026 0 662 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The latest option exercise will keep the 2009-built rig employed until late in the fourth quarter of 2027, extending its existing contract without interruption.",
+        "The additional wells will be drilled at rates agreed under the original contract.",
+        "Financial details of the latest extension were not disclosed."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A35FD05168",
+      "title": "UK ports hit back at Brussels over ETS diversion claims",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/uk-ports-hit-back-at-brussels-over-ets-diversion-claims/",
+      "publishedAt": "2026-10-16T09:30:00Z",
+      "category": "Ports & Terminals",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://splash247.com/wp-content/uploads/2022/08/UK-ship-300x180.jpg",
+      "summary": "British ports have challenged European Union claims that shipping lines are diverting container traffic to the UK to escape carbon charges, warning that proposed anti-evasion measures risk penalising billions of pounds of investment in British terminals. The British Ports Association (BPA) has rejected findings from...",
+      "body": "Environment Europe Operations Ports and Logistics Regulatory UK ports hit back at Brussels over ETS diversion claims Adis Ajdin October 16, 2026 0 1,365 3 minutes read UK Government UK Government British ports have challenged European Union claims that shipping lines are diverting container traffic to the UK to escape carbon charges, warning that proposed anti-evasion measures risk penalising billions of pounds of investment in British terminals. The British Ports Association (BPA) has rejected findings from Spain’s EU ETS Observatory linking rising UK container activity to the bloc’s Emissions Trading System, arguing that new capacity, changing liner networks and commercial competition offer more convincing explanations. In a new report, the association said around 85% of the UK’s container traffic growth in 2025 was concentrated in London, following the opening of DP World’s £350m ($465m) fourth berth at London Gateway in late 2024. Government figures show UK ports handled 11% more containers last year, equivalent to an additional 600,000 units. London accounted for roughly 500,000 of those, with its growth driven largely by the additional capacity at London Gateway. The DP World terminal handled more than 3m teu in 2025, up 52% from 1.9m teu a year earlier. The increase followed the opening of the fourth berth, which boosted capacity by more than a third, and the arrival of Asia-Europe services operated by Maersk and Hapag-Lloyd’s Gemini Cooperation in February 2025. London Gateway has been challenging Felixstowe’s position as Britain’s busiest boxport, with Maersk’s departure from the Hutchison-operated facility reshaping the country’s container market. DP World is pressing ahead with another £1bn ($1.33bn) expansion, adding two all-electric berths and a second rail terminal. The BPA argues that such investment and network changes have been overlooked in assessments linking Britain’s expanding container business to EU carbon pricing. The dispute follows research by Spain’s Puertos del Estado, which found the UK’s share of northern European deepsea shipping activity, measured in teu-miles, rose from 17.5% in 2023 to 32.1% by July 2025. Subsequent analysis put the figure at around 36% in the first quarter of 2026, broadly mirroring declines in Germany and the Netherlands. The Spanish study also estimated that 76% of observed route changes were attributable to the EU ETS, raising concerns that containerlines were restructuring their networks to reduce carbon costs. But the BPA has questioned both the methodology and the conclusions. It argues that teu-miles, which combine vessel capacity with voyage distance, measure shipping network activity rather than actual containers handled. The metric can also be distorted by longer voyages around the Cape of Good Hope and changes to the sequence of port calls. The association also disputes treating the widely cited 76% figure as evidence of carbon-driven diversion specifically to Britain, arguing that the available analysis does not isolate the effects of ETS from alliance restructuring, congestion and new terminal capacity. Continental European ports have not uniformly lost ground either. Rotterdam’s container throughput increased 3.1% to 14.2m teu in 2025, Hamburg recorded 7.3% growth to 8.3m teu, while Antwerp-Bruges posted a 0.7% increase. The disagreement comes after the European Commission proposed tightening rules designed to prevent containerships from using neighbouring non-EU ports to reduce their ETS exposure. Under proposals unveiled in July, certain container ports within 150 nautical miles of an EU port could be excluded from the definition of a port of call for emissions accounting purposes. The threshold for transhipment activity at other qualifying non-EU ports within 300 nautical miles would also be lowered from 65% to 50%. The changes could bring more British terminals within the EU’s anti-evasion framework, potentially increasing carbon costs for shipping lines using them. The proposals have yet to be adopted. “It would be extraordinary if the EU responded to that success by introducing new measures to penalise British ports,” said Mark Simmonds, the BPA’s director of policy and external affairs. The association stressed that it supports shipping decarbonisation but warned against treating normal competition between ports as regulatory avoidance. Britain has already brought domestic shipping and emissions in UK ports into its own emissions trading scheme from July this year, while plans to extend carbon pricing to international voyages from 2028 are also under consideration. The BPA has urged the UK government and the European Commission to reassess the evidence before proceeding with measures that could affect port competitiveness and future investment on both sides of the Channel. Adis Ajdin October 16, 2026 0 1,365 3 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "In a new report, the association said around 85% of the UK’s container traffic growth in 2025 was concentrated in London, following the opening of DP World’s £350m ($465m) fourth berth at London Gateway in late 2024.",
+        "Government figures show UK ports handled 11% more containers last year, equivalent to an additional 600,000 units.",
+        "London accounted for roughly 500,000 of those, with its growth driven largely by the additional capacity at London Gateway."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
     },
     {
       "id": "SN-F339A6B655",
@@ -1659,11 +1727,122 @@
       "navarea": "XI",
       "image": "https://offshore-energy.biz/api/media/file/emgs-1280x853.jpg?prefix=media",
       "summary": "Norwegian geophysical services company Electromagnetic Geoservices (EMGS) has been selected by a Pakistani upstream petroleum company for...",
-      "body": "Subsea October 16, 2026 · 1 day ago Pakistani upstream petroleum player picks Norwegian firm for data acquisition NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email EMGS via LinkedIn Norwegian geophysical services company Electromagnetic Geoservices (EMGS) has been selected by a Pakistani upstream petroleum company for geophysical data acquisition offshore Pakistan. EMGS reported the signing of a letter of award with Mari Energies for controlled-source electromagnetic (CSEM) data acquisition across multiple offshore exploration blocks in Pakistan. According to the Norwegian firm, the aim is to help improve prospect evaluation, reduce exploration uncertainty, and support better-informed drilling decisions by combining CSEM-derived resistivity information with seismic and geological data. \"We appreciate the opportunity to meet with Mari Energies' management and technical teams, together with their offshore joint venture partners for productive discussions on exploration opportunities and the integration of advanced geophysical technologies,\" EMGS stated on social media. \"We thank Mari Energies and its partners for their confidence in EMGS and look forward to working together on this important offshore exploration program.\" Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Subsea Surveys & Interventions Fossil Energy Exploration & Production Collaboration Business Developments & Projects Project & Tenders",
+      "body": "Subsea October 16, 2026 · 2 days ago Pakistani upstream petroleum player picks Norwegian firm for data acquisition NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email EMGS via LinkedIn Norwegian geophysical services company Electromagnetic Geoservices (EMGS) has been selected by a Pakistani upstream petroleum company for geophysical data acquisition offshore Pakistan. EMGS reported the signing of a letter of award with Mari Energies for controlled-source electromagnetic (CSEM) data acquisition across multiple offshore exploration blocks in Pakistan. According to the Norwegian firm, the aim is to help improve prospect evaluation, reduce exploration uncertainty, and support better-informed drilling decisions by combining CSEM-derived resistivity information with seismic and geological data. \"We appreciate the opportunity to meet with Mari Energies' management and technical teams, together with their offshore joint venture partners for productive discussions on exploration opportunities and the integration of advanced geophysical technologies,\" EMGS stated on social media. \"We thank Mari Energies and its partners for their confidence in EMGS and look forward to working together on this important offshore exploration program.\" Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Subsea Surveys & Interventions Fossil Energy Exploration & Production Collaboration Business Developments & Projects Project & Tenders",
       "takeaways": [
         "EMGS reported the signing of a letter of award with Mari Energies for controlled-source electromagnetic (CSEM) data acquisition across multiple offshore exploration blocks in Pakistan.",
         "\"We thank Mari Energies and its partners for their confidence in EMGS and look forward to working together on this important offshore exploration program.\" Reach the Offshore Energy industry in one go!",
         "Offshore Energy is read by thousands of professionals every day."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-748EF31BA7",
+      "title": "International Seaways seals $370m Bruton takeover deal",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/international-seaways-seals-370m-bruton-takeover-deal/",
+      "publishedAt": "2026-10-16T08:15:57Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "US East Coast & New York",
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "tanker",
+        "lng",
+        "port",
+        "suez",
+        "china"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://splash247.com/wp-content/uploads/2026/10/Mount-Vision-VLCC-Bruton-300x180.jpg",
+      "summary": "New York-listed tanker owner International Seaways has struck a deal to take over Tor Olav Trøim-backed Bruton in a transaction valuing the Oslo-listed VLCC company at around $370m. The agreement, announced on Friday, will see the Lois Zabrocky-led group acquire Bruton’s entire four-ship supertanker portfolio, going...",
+      "body": "Americas Europe Tankers International Seaways seals $370m Bruton takeover deal Adis Ajdin October 16, 2026 0 1,593 3 minutes read Bruton Bruton New York-listed tanker owner International Seaways has struck a deal to take over Tor Olav Trøim-backed Bruton in a transaction valuing the Oslo-listed VLCC company at around $370m. The agreement, announced on Friday, will see the Lois Zabrocky-led group acquire Bruton’s entire four-ship supertanker portfolio, going considerably further than the sale of two newbuildings first linked to the US owner in market reports last week. International Seaways has secured agreements with shareholders representing 50.5% of Bruton, including Trøim’s Drew Holdings and Koch Inc, to exchange their holdings for newly issued shares in the US company. The exchange is set at 0.0519 International Seaways shares for each Bruton share, with the initial transaction expected to settle around October 20. The remaining shares will be acquired through a merger, with Seaways expecting to issue approximately 3.12m new shares, accounting for 96% of the total consideration. Smaller Bruton shareholders will receive cash at $6.3044 per share. The deal brings four 300,000 dwt VLCCs into the Seaways fold, including the LNG dual-fuel Mount Vision , which entered service in July, and sistership Mount Horizon , scheduled for delivery from China’s New Times Shipbuilding next month. The remaining two vessels, Mount Frontier and Mount Summit , are due in August and October 2027. The first two ships already have substantial charter cover. Mount Vision secured a 3+1+1-year arrangement with a trading house, earning $95,000 per day for the initial nine months before switching to an index-linked structure. Mount Horizon has been fixed for 12 to 15 months at $105,700 per day. The two 2027 newbuildings remain unchartered and have been at the centre of the recent sale speculation. Splash detailed the potential deal last week after Bruton acknowledged market rumours and launched a strategic review. At the time, International Seaways was linked to the purchase of at least two newbuildings, with brokers discussing values north of $200m per vessel. Bruton’s own figures put the original yard cost of the two 2027 ships at about $117m apiece, highlighting how sharply modern VLCC asset values have moved. The $370m announced on Friday, however, represents the valuation of Bruton’s equity rather than the gross value of its vessels. The takeover follows a major restructuring of Trøim’s tanker interests. Bruton originally built up a 12-ship VLCC programme before splitting the business in August, retaining its first four New Times ships and transferring another eight newbuildings into separately listed OMC Tankers. The demerger left Bruton with a concentrated fleet of near-term deliveries, substantial charter cover and financing arrangements with Chinese lessors covering 85% to 90% of construction costs. The eight vessels in OMC Tankers are not part of the International Seaways transaction. For International Seaways, the acquisition continues an aggressive fleet renewal programme that has seen the company dispose of older tonnage while selectively investing in younger ships. The US owner had a fleet of around 70 vessels, including newbuildings, before the deal. It sold seven older tankers, including two VLCCs, earlier this year for more than $216m and has also invested in LR1 newbuildings at South Korea’s K Shipbuilding. The company strengthened its crude tanker trading platform in January by taking full ownership of Tankers International, which subsequently expanded into the suezmax market. The latest acquisition comes against an exceptionally strong earnings backdrop. Alongside the takeover announcement, International Seaways unveiled preliminary third-quarter net income of $340m to $350m, including a roughly $50m gain from the sale of a suezmax. It reported liquidity of approximately $965m at the end of September. The transaction also brings together businesses associated with two familiar names in Norwegian shipping. Family trusts established by John Fredriksen, Trøim’s former longtime business partner, hold a 13.54% stake in International Seaways, according to the latest US regulatory filing. The pair went their separate ways in 2014 after nearly two decades working together. Bruton’s board has unanimously recommended the transaction, with a shareholder vote expected around October 30. Completion is targeted for early November, subject to the necessary approvals, after which Bruton intends to delist from Euronext Growth Oslo. Tags Norway United States Adis Ajdin October 16, 2026 0 1,593 3 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "International Seaways has secured agreements with shareholders representing 50.5% of Bruton, including Trøim’s Drew Holdings and Koch Inc, to exchange their holdings for newly issued shares in the US company.",
+        "The exchange is set at 0.0519 International Seaways shares for each Bruton share, with the initial transaction expected to settle around October 20.",
+        "The remaining shares will be acquired through a merger, with Seaways expecting to issue approximately 3.12m new shares, accounting for 96% of the total consideration."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-51F58F314C",
+      "title": "West Africa’s ore boom meets China’s growing VLOC armada",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/west-africas-ore-boom-meets-chinas-growing-vloc-armada/",
+      "publishedAt": "2026-10-16T08:00:10Z",
+      "category": "Ports & Terminals",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "Singapore & Malacca Strait",
+        "China & East Asia"
+      ],
+      "tags": [
+        "port",
+        "china"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://splash247.com/wp-content/uploads/2023/09/WinningMax-VLOC-300x180.jpg",
+      "summary": "West Africa is fast becoming dry bulk shipping’s biggest growth engine, with its mineral export boom poised to absorb the equivalent of another 120 capesizes by 2030. UK consultancy Tradeviews forecasts in a new report that shipments from the region will surge 50% from 2025 levels to 303m tonnes by the end of the...",
+      "body": "Africa Dry Cargo West Africa’s ore boom meets China’s growing VLOC armada Sam Chambers October 16, 2026 0 2,321 3 minutes read Winning Winning West Africa is fast becoming dry bulk shipping’s biggest growth engine, with its mineral export boom poised to absorb the equivalent of another 120 capesizes by 2030. UK consultancy Tradeviews forecasts in a new report that shipments from the region will surge 50% from 2025 levels to 303m tonnes by the end of the decade, with Guinea’s giant Simandou iron ore project leading the charge. Crucially for shipowners, the long voyages to China will magnify the impact on vessel demand. “West Africa looks set to remain the fastest growing long-haul source of dry bulk cargo,” Tradeviews stated. The growth is already evident. The five West African exporters covered by the consultancy shipped 160.1m tonnes in their principal trades during the first eight months of this year, up 25% year on year. Liberian iron ore exports nearly doubled to 10.1m tonnes. Tradeviews expects regional exports to reach 267m tonnes next year, with Guinean iron ore shipments climbing to 45m tonnes in 2027 and approximately 112m tonnes by 2030. Bauxite exports, meanwhile, are forecast to retreat from a peak of nearly 194m tonnes this year to 153m tonnes by 2030 as Guinea pushes ahead with domestic alumina processing. A capesize round voyage between Guinea and China takes approximately 78 days, compared with just 29 days on the Australia-China route. Tradeviews calculates that moving a tonne from West Africa consequently absorbs around 2.6 times as much vessel time. On this basis, the consultancy estimates West African trades will require the equivalent of 330 capesizes by 2030, compared with 210 last year. There are, however, already signs that the region’s growth ambitions are running up against freight market realities. In its latest weekly report, BRS Shipbrokers noted that exceptionally high freight rates had priced some higher-cost Guinean bauxite miners out of the export market. Guinea shipped 15.61m tonnes of bauxite in September, down 12% from August, with freight costs at one point accounting for more than half the delivered value of the commodity. The subsequent easing in capesize rates could provide some relief. The C3 benchmark has fallen from $43.43 a tonne in late September to $32.95 on October 12, prompting BRS to suggest Guinean bauxite exports could recover by 5% to 10% month on month during November and December. The broker described the situation as a “test of elasticity” rather than the start of another cargo boom, pointing out that Shandong alumina refineries processing imported ore lost RMB261.8 per tonne in September. SSY has similarly warned that Guinean bauxite exports have retreated from early-September highs, observing that “shipping demand is turning more sensitive to margin levels on the mining side”. Tradeviews did also caution that potential Guinean bauxite export restrictions, Simandou project delays, dedicated ore carriers and the displacement of Australian iron ore shipments could reduce the benefits for the wider capesize market with much of the market increasingly looking like a Chinese conveyor belt. SSY noted in a market report from August that VLOCs of more than 220,000 dwt accounted for nearly half of Simandou shipments during the first half of 2026. More significant for independent owners is what is coming down the slipways. SSY data shows Chinese tonnage accounts for nearly 40% of the current VLOC orderbook, raising questions over how much of Simandou’s enormous prospective tonne-mile demand will ultimately filter through to the conventional capesize spot market. Bauxite’s growing importance to dry bulk shipping will be reflected at next April’s Geneva Dry , the world’s premier commodities shipping conference, with a standalone Bauxite Blitz session. Scheduled for April 28, the discussion will examine the expanding trade, shifting supply patterns and implications for future capesize demand. Confirmed speakers include Ernst Meyer, president and CEO of Torvald Klaveness, and Robert Haggquist, charterer and decarbonisation lead at South32. Braemar’s Derek Langston will moderate the session. Tags Guinea Sam Chambers October 16, 2026 0 2,321 3 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "Crucially for shipowners, the long voyages to China will magnify the impact on vessel demand.",
+        "“West Africa looks set to remain the fastest growing long-haul source of dry bulk cargo,” Tradeviews stated.",
+        "The five West African exporters covered by the consultancy shipped 160.1m tonnes in their principal trades during the first eight months of this year, up 25% year on year."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-54C93EBA5D",
+      "title": "Splash Wrap: A missile from Riyadh",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/splash-wrap-a-missile-from-riyadh/",
+      "publishedAt": "2026-10-16T07:45:26Z",
+      "category": "Weather & Cyclones",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Suez Canal & Eastern Med",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "tanker",
+        "container",
+        "port",
+        "hormuz",
+        "singapore"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://splash247.com/wp-content/uploads/2024/06/Houthi-hypersonic-missile-300x180.jpg",
+      "summary": "Ongoing attacks in Hormuz and the Black Sea dominated Splash coverage once again this week – both maritime theatres of war expanding worryingly. Another dangerous missile for tanker owners came from a conference in Saudi Arabia, where the US energy secretary was reported to have suggested the Trump administration was...",
+      "body": "Americas Asia Containers Dry Cargo Europe Gas Middle East Operations Ports and Logistics Tankers Tech Splash Wrap: A missile from Riyadh Sam Chambers October 16, 2026 0 858 1 minute read Ongoing attacks in Hormuz and the Black Sea dominated Splash coverage once again this week – both maritime theatres of war expanding worryingly. Another dangerous missile for tanker owners came from a conference in Saudi Arabia, where the US energy secretary was reported to have suggested the Trump administration was mulling easing sanctions on some shadow tankers , something that could have a noticeable impact on today’s sky-high freight rates. In other important news this week, India’s Aegis Logistics struck a deal to acquire 89.8% of Dubai-based Tristar for $809m, taking control of a global energy logistics group with a sizeable tanker and dry bulk shipping operation, while Splash Ports covered news that A.P. Moller Capital has lined up another port acquisition , agreeing to take full control of Singapore-based terminal operator Portek International from Japanese trading house Mitsui & Co. Over at SplashTech , a survey of maritime technology bosses revealed growing frustration with software that traps data, demands duplicate entries and creates more work than it removes. KeelX chief executive Aristos Philis offered perhaps the simplest test for any technology purchase: “What work does this remove?” This week’s Maritime CEO interview was with Elisabeth Braw , whose new book The Undersea War examines how merchant ships and their anchors have become potential weapons against the undersea infrastructure on which the global economy depends. For our own news, there was an important addition to the Splash family this week with the launch of Splash Cruise , bringing our brand of independent maritime journalism to the rapidly expanding cruise sector. For readers not up to speed with this business, here’s a useful primer on how Wall Street views cruise for the coming couple of years. The remarkable ageing of the global merchant fleet amid a record earnings environment was one of the most read Splash articles this week and forms this week’s Splash Wrap podcast. Sam Chambers October 16, 2026 0 858 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "Moller Capital has lined up another port acquisition , agreeing to take full control of Singapore-based terminal operator Portek International from Japanese trading house Mitsui & Co.",
+        "Over at SplashTech , a survey of maritime technology bosses revealed growing frustration with software that traps data, demands duplicate entries and creates more work than it removes.",
+        "For our own news, there was an important addition to the Splash family this week with the launch of Splash Cruise , bringing our brand of independent maritime journalism to the rapidly expanding cruise sector."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1726,7 +1905,7 @@
       "navarea": "I",
       "image": "https://offshore-energy.biz/api/media/file/Ithaca%20Energy%20seeking%20new%20CEO%20as%20current%20head%20announces%20retirement-1424x851.jpg?prefix=media",
       "summary": "UK-headquartered oil & gas operator and producer Ithaca Energy is on the lookout for a new chief executive officer (CEO) as Luciano Vasques is...",
-      "body": "Outlook & Strategy October 16, 2026 · 1 day ago Ithaca Energy seeking new CEO as current announces retirement NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Ithaca Energy UK-headquartered oil & gas operator and producer Ithaca Energy is on the lookout for a new chief executive officer (CEO) as Luciano Vasques is set to leave the company next year. Ithaca Energy reported today, October 16, that its current CEO, Luciano Vasques, had informed the board of his intention to retire from the company by March 31, 2027. The board has already started the process of finding a successor, with a further announcement to be made in due course, allowing for an orderly transition of responsibilities. “Following successful delivery of the Business Combination, our entry into the FTSE 100 and the establishment of a strong platform for future growth, I believe the Company is in excellent shape and that now is the right time for me to retire and hand over the reins. I look forward to supporting an orderly transition and watching Ithaca continue to thrive,” Vasques said. Vasques joined Ithaca Energy in October 2024 as CEO, after having held the role of Managing Director of Eni UK Limited and leading the acquisition and integration of Eni Energy UK, formerly Neptune Energy, into Eni UK’s operations. Prior to this, he held the role of Head of Central Asia for Eni S.p.A., overseeing interests in the Kashagan and Karachaganak oil & gas fields. Yaniv Friedman , Executive Chairman, said: “I would like to share my thanks to Luciano for his support during what has been a transformational time for the Company, including the successful integration of Eni UK. Together, we have built a combined culture we can all be proud of. I know I speak for everyone in wishing him the very best for a long, happy and well-deserved retirement.” Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Outlook & Strategy Human Capital Business & Finance Business Developments & Projects Fossil Energy Oil & Gas",
+      "body": "Outlook & Strategy October 16, 2026 · 2 days ago Ithaca Energy seeking new CEO as current announces retirement NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Ithaca Energy UK-headquartered oil & gas operator and producer Ithaca Energy is on the lookout for a new chief executive officer (CEO) as Luciano Vasques is set to leave the company next year. Ithaca Energy reported today, October 16, that its current CEO, Luciano Vasques, had informed the board of his intention to retire from the company by March 31, 2027. The board has already started the process of finding a successor, with a further announcement to be made in due course, allowing for an orderly transition of responsibilities. “Following successful delivery of the Business Combination, our entry into the FTSE 100 and the establishment of a strong platform for future growth, I believe the Company is in excellent shape and that now is the right time for me to retire and hand over the reins. I look forward to supporting an orderly transition and watching Ithaca continue to thrive,” Vasques said. Vasques joined Ithaca Energy in October 2024 as CEO, after having held the role of Managing Director of Eni UK Limited and leading the acquisition and integration of Eni Energy UK, formerly Neptune Energy, into Eni UK’s operations. Prior to this, he held the role of Head of Central Asia for Eni S.p.A., overseeing interests in the Kashagan and Karachaganak oil & gas fields. Yaniv Friedman , Executive Chairman, said: “I would like to share my thanks to Luciano for his support during what has been a transformational time for the Company, including the successful integration of Eni UK. Together, we have built a combined culture we can all be proud of. I know I speak for everyone in wishing him the very best for a long, happy and well-deserved retirement.” Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Outlook & Strategy Human Capital Business & Finance Business Developments & Projects Fossil Energy Oil & Gas",
       "takeaways": [
         "Ithaca Energy reported today, October 16, that its current CEO, Luciano Vasques, had informed the board of his intention to retire from the company by March 31, 2027.",
         "The board has already started the process of finding a successor, with a further announcement to be made in due course, allowing for an orderly transition of responsibilities.",
@@ -1759,7 +1938,7 @@
       "navarea": "I",
       "image": "https://offshore-energy.biz/api/media/file/East%20Anglia%20Two%20HDD%20-%20ScottishPower%20Renewables-1-1000x667.jpg?prefix=media",
       "summary": "ScottishPower Renewables has completed what it says was a record-breaking cable landfall operation for its 960 MW East Anglia Two offshore wind...",
-      "body": "Subsea October 16, 2026 · 1 day ago ScottishPower Renewables completes ‘record-breaking’ cable landfall operation 2 minutes read LinkedIn X Email ScottishPower Renewables ScottishPower Renewables has completed what it says was a record-breaking cable landfall operation for its 960 MW East Anglia Two offshore wind farm in the UK, installing two nearly 1.8-kilometer-long ducts beneath the Suffolk coastline and seabed for the project’s export cables. The ducts, each measuring 800 millimeters in diameter, were installed using horizontal directional drilling (HDD), a technique that creates an underground passage without excavating beaches or disturbing the coastline directly. ScottishPower Renewables says the operation involved the world’s longest continuous single sections of extruded polyethylene (PE) ducts and represents the largest electricity transmission landfall of its kind in the UK, based on the combination of duct length and diameter. Manufactured by Pipelife in Norway, the ducts were produced as single uninterrupted lengths, eliminating the need for welded joints. They will provide a protected route for the high-voltage export cables carrying electricity from the offshore wind farm to shore. The landfall works form part of the project’s onshore civil engineering program, led by OCU Group with support from its subsidiary Peter McCormack & Sons. ScottishPower Renewables said the operation also marked a manufacturing record for Pipelife, whose ducts measured approximately 1,793 meters each. “The completion of this colossal HDD, which is three times the length of our other East Anglia projects, is a huge achievement – quite literally – and a major milestone as we progress construction of our third windfarm in the region,” said Ross Ovens , ScottishPower Renewables’ Managing Director for Offshore. “Landfall works are known to be one of the most technically challenging aspects of building an offshore windfarm, but thanks to precision planning and a great partnership with our principal contactor OCU Group and duct manufacturer Pipelife, this programme has well and truly hit the mark – breaking UK and world records in the process.” The milestone comes as East Anglia Two advances towards offshore construction, with the first export cable expected to be installed in summer 2027, and commercial operation targeted for late 2028. The 960 MW offshore wind farm will be built at a site in the southern North Sea, around 33 kilometers off the Suffolk coast at its nearest point, where 64 Siemens Gamesa SG 14-236 DD wind turbines will be installed on monopile foundations. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Subsea Cabling Offshore Wind Grid Project & Tenders Business Developments & Projects",
+      "body": "Subsea October 16, 2026 · 2 days ago ScottishPower Renewables completes ‘record-breaking’ cable landfall operation 2 minutes read LinkedIn X Email ScottishPower Renewables ScottishPower Renewables has completed what it says was a record-breaking cable landfall operation for its 960 MW East Anglia Two offshore wind farm in the UK, installing two nearly 1.8-kilometer-long ducts beneath the Suffolk coastline and seabed for the project’s export cables. The ducts, each measuring 800 millimeters in diameter, were installed using horizontal directional drilling (HDD), a technique that creates an underground passage without excavating beaches or disturbing the coastline directly. ScottishPower Renewables says the operation involved the world’s longest continuous single sections of extruded polyethylene (PE) ducts and represents the largest electricity transmission landfall of its kind in the UK, based on the combination of duct length and diameter. Manufactured by Pipelife in Norway, the ducts were produced as single uninterrupted lengths, eliminating the need for welded joints. They will provide a protected route for the high-voltage export cables carrying electricity from the offshore wind farm to shore. The landfall works form part of the project’s onshore civil engineering program, led by OCU Group with support from its subsidiary Peter McCormack & Sons. ScottishPower Renewables said the operation also marked a manufacturing record for Pipelife, whose ducts measured approximately 1,793 meters each. “The completion of this colossal HDD, which is three times the length of our other East Anglia projects, is a huge achievement – quite literally – and a major milestone as we progress construction of our third windfarm in the region,” said Ross Ovens , ScottishPower Renewables’ Managing Director for Offshore. “Landfall works are known to be one of the most technically challenging aspects of building an offshore windfarm, but thanks to precision planning and a great partnership with our principal contactor OCU Group and duct manufacturer Pipelife, this programme has well and truly hit the mark – breaking UK and world records in the process.” The milestone comes as East Anglia Two advances towards offshore construction, with the first export cable expected to be installed in summer 2027, and commercial operation targeted for late 2028. The 960 MW offshore wind farm will be built at a site in the southern North Sea, around 33 kilometers off the Suffolk coast at its nearest point, where 64 Siemens Gamesa SG 14-236 DD wind turbines will be installed on monopile foundations. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Subsea Cabling Offshore Wind Grid Project & Tenders Business Developments & Projects",
       "takeaways": [
         "Manufactured by Pipelife in Norway, the ducts were produced as single uninterrupted lengths, eliminating the need for welded joints.",
         "They will provide a protected route for the high-voltage export cables carrying electricity from the offshore wind farm to shore.",
@@ -1769,200 +1948,35 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-1BD150FB0B",
-      "title": "Record monthly container volumes at Port of Long Beach as imports soar",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/ports-logistics/record-monthly-container-volumes-at-port-of-long-beach-as-imports-soar",
-      "publishedAt": "2026-10-16T03:19:25Z",
+      "id": "SN-4E1F4659B5",
+      "title": "HMM commits $1.6bn to 12 more containerships",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/hmm-commits-1-6bn-to-12-more-containerships/",
+      "publishedAt": "2026-10-16T06:25:42Z",
       "category": "Ports & Terminals",
-      "region": "US West Coast & Pacific",
+      "region": "Japan & Korea",
       "regions": [
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        33.73,
-        -118.26
-      ],
-      "navarea": "XII",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt7f35174bc47eee38/6ad198b226d33c2536bc79fe/MSC-vessel-in-port-of-Long_Beach-credit-POLB.jpg?width=720&quality=80&disable=upscale",
-      "summary": "The US West Coast gateway port saw the ratio of imports to exports exceed 5:1 in September",
-      "body": "The US West Coast gateway port saw the ratio of imports to exports exceed 5:1 in September",
-      "takeaways": [
-        "The US West Coast gateway port saw the ratio of imports to exports exceed 5:1 in September",
-        "Operational Area: US West Coast & Pacific.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-9E6B1756A1",
-      "title": "A.P. Moller Capital buys Portek from Mitsui",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/ports-logistics/a-p-moller-capital-buys-portek-from-mitsui",
-      "publishedAt": "2026-10-15T22:18:07Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt6b9b81142692f08f/6ad152d652243f03aaee104a/VGT-Credit-VGT.jpg?width=720&quality=80&disable=upscale",
-      "summary": "Mitsui offloads feeder terminal operator after 15 years, fuelling A.P. Moller Capital's acquisition spree.",
-      "body": "Mitsui offloads feeder terminal operator after 15 years, fuelling A.P. Moller Capital's acquisition spree.",
-      "takeaways": [
-        "Mitsui offloads feeder terminal operator after 15 years, fuelling A.P.",
-        "Moller Capital's acquisition spree.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-B209A7D01E",
-      "title": "Minesto reports 'record' 48-hour service intervention on its tidal power plant",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://offshore-energy.biz/2026/10/15/minesto-reports-record-48-hour-service-intervention-on-its-tidal-power-plant",
-      "publishedAt": "2026-10-15T13:34:08Z",
-      "category": "Weather & Cyclones",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://offshore-energy.biz/api/media/file/Minesto%20reports%20'record'%2048-hour%20service%20intervention%20of%20its%20tidal%20power%20plant-1600x900.jpg?prefix=media",
-      "summary": "Minesto has performed a service intervention on its Dragon 4 tidal power plant in record time, carrying out the recovery, inspection, and...",
-      "body": "Marine Energy October 15, 2026 · 2 days ago Minesto reports 'record' 48-hour service intervention on its tidal power plant NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Minesto Minesto has performed a service intervention on its Dragon 4 tidal power plant in record time, carrying out the recovery, inspection, and redeployment offshore process in 48 hours, the Swedish ocean energy developer reported today, October 15. Minesto revealed that, after years of improving the process, it had achieved its fastest turnaround to date, with a complete service intervention of a Dragon 4 power plant performed within 48 hours in Vestmannasund, Faroe Islands. The intervention included recovery, extraction of the nacelle for inspection of the upgraded generator following its first ten weeks of operation, maintenance activities, reassembly, quality and functional checks, and redeployment offshore. The work was carried out during a low-production tidal period. Minesto \"The ability to complete a full service operation and return the system to power production in only 48 hours demonstrates a key competitive advantage of our technology,\" said Martin Edlund , Minesto's CEO. \"High performance is important, but equally important is the ability to maintain the system cost efficiently. Notably, our method does not rely on sophisticated and expensive infrastructure, making it suitable for remote locations and areas of the world without port infrastructure and access to advanced marine engineering capabilities.\" Minesto notes that the central feature of the concept is the ability to swap subsystems, such as the nacelle, during short intervention campaigns. By using spare modules, more extensive inspections, maintenance activities and upgrades can be performed onshore without impact on availability and energy yield. Related Articles Marine Energy Dragon roars with record power in Faroe Islands: Minesto hits new tidal energy output milestone 2 min read \"The successful turnaround demonstrates both the maturity of the Dragon Technology and the efficiency of our operational procedures. Through long-term cooperation with our local contractor SJH Offshore, we have progressively refined our methods through repeated campaigns, and today we can perform advanced service interventions while keeping downtime to a minimum. This capability becomes increasingly valuable as we move towards larger commercial deployments and multi-unit installations,\" said Bernt Erik Westre , CTO of Minesto. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Marine Energy Tidal & Wave Energy Business Developments & Projects Technology",
-      "takeaways": [
-        "The work was carried out during a low-production tidal period.",
-        "Minesto \"The ability to complete a full service operation and return the system to power production in only 48 hours demonstrates a key competitive advantage of our technology,\" said Martin Edlund , Minesto's CEO.",
-        "\"High performance is important, but equally important is the ability to maintain the system cost efficiently."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-2691E39F42",
-      "title": "Rig provider and other contractors revealed for Timor-Leste's oil field",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://offshore-energy.biz/2026/10/15/rig-provider-and-other-contractors-revealed-for-timor-lestes-oil-field",
-      "publishedAt": "2026-10-15T12:32:59Z",
-      "category": "Navigation & Safety",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
         "Japan & Korea"
       ],
       "tags": [
-        "port",
-        "safety",
-        "imo"
+        "lng",
+        "container",
+        "shipyard"
       ],
       "coords": [
-        1.26,
-        103.82
+        35.1,
+        129.04
       ],
       "navarea": "XI",
-      "image": "https://offshore-energy.biz/api/media/file/finder-1048x755.jpg?prefix=media",
-      "summary": "Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the...",
-      "body": "Project & Tenders October 15, 2026 · 2 days ago Rig provider and other contractors revealed for Timor-Leste's oil field NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Hakuryu-5 semi-submersible rig. Source: ENEOS Drilling Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the development of its offshore oil field in Timor-Leste. ENEOS Drilling's Hakuryu-5 semi-submersible drilling unit will perform the drilling campaign at the Kuda Tasi and Jahal (KTJ) project, including three firm development wells, with options for two additional wells. The Japanese player will also provide the associated equipment and personnel. The contract is conditional upon receipt of the required joint venture, government and Finder board approvals by December 31, 2026, together with ENEOS parent company and board approvals by November 16, 2026. The campaign will begin on December 1, 2027, and has an estimated duration of approximately 150 days to drill and complete the wells for production, including running completion assemblies and installation of the wellheads and Christmas Trees ready for hook-up to the Petrojarl I FPSO. \"Securing the Hakuryu-5 is a major milestone for the KTJ Project which brings us a step closer to FID and providing clear visibility on the timing of the development drilling program,\" said Damon Neaves , Finder Energy CEO. \"This is also a strong signal of the progress being made towards delivering Timor-Leste's next offshore oil development.\" According to Finder Energy, the two optional drilling slots provide flexibility to accommodate participation by other operators or to undertake exploration or appraisal drilling targeting potential tie-back opportunities within PSC 19-11. As for other contractors selected for the project, Finder Energy reported that Sumitomo will manufacture, supply and deliver oil country tubular goods (OCTG) including casing, production liner and completion tubing, three Christmas Trees are under fabrication by OneSubsea , and that wellheads have been acquired from another joint venture. AGR will provide integrated drilling management services to support the planning, management and execution of the development drilling program on behalf of Finder, with Finder retaining overall responsibility as operator, and SLB will supply upper completion equipment for the development wells, including downhole flow-control valves, gauges, chemical-injection equipment, packers, subsurface safety valves, control lines, cables, protectors, splices, contingencies and spares. The final investment decision (FID) for the project is anticipated by November 30. Related Articles Fossil Energy Southeast Asian oil field development clears key environmental hurdle to move toward FID 2 min read Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Project & Tenders Fossil Energy Oil & Gas Subsea Exploration & Production Contracts & Tenders FPSO & Vessels Rigs",
+      "image": "https://splash247.com/wp-content/uploads/2022/06/HMM-Algeciras-24000-teu-300x180.jpg",
+      "summary": "South Korea’s HMM is pressing ahead with its fleet expansion programme, approving a $1.62bn investment in 12 containerships comprising eight 13,000 teu newbuildings and four smaller vessels. The Seoul-listed carrier’s board approved spending KRW2.168trn ($1.617bn) yesterday, according to a stock exchange filing. The...",
+      "body": "Asia Containers HMM commits $1.6bn to 12 more containerships Sam Chambers October 16, 2026 0 1,896 1 minute read HMM HMM South Korea’s HMM is pressing ahead with its fleet expansion programme, approving a $1.62bn investment in 12 containerships comprising eight 13,000 teu newbuildings and four smaller vessels. The Seoul-listed carrier’s board approved spending KRW2.168trn ($1.617bn) yesterday, according to a stock exchange filing. The investment includes fresh orders for eight 13,000 teu ships, alongside the acquisition of three 2,800 teu vessels and one 1,700 teu ship through resale transactions involving newbuildings already under construction. The 12 vessels will add a combined 114,100 teu of capacity, with deliveries scheduled to be completed by December 2029. HMM has yet to identify the shipyards responsible for the eight larger vessels or the sellers of the four smaller ships. Propulsion specifications have also not been disclosed. The latest investment follows last year’s KRW4trn ($2.8bn) commitment covering 12 LNG dual-fuel 13,000 teu containerships and two VLCCs, with HD Hyundai and Hanwha Ocean securing the boxship contracts. Under HMM’s business plan through to 2030, the carrier aims to expand its containership fleet to 166 vessels totalling 1.47m teu by the end of the decade, alongside 110 bulk carriers with a combined capacity of 13.52m dwt. Tags HMM South Korea Sam Chambers October 16, 2026 0 1,896 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
-        "Project & Tenders October 15, 2026 · 2 days ago Rig provider and other contractors revealed for Timor-Leste's oil field NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Hakuryu-5 semi-submersible rig.",
-        "Source: ENEOS Drilling Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the development of its offshore oil field in Timor-Leste.",
-        "ENEOS Drilling's Hakuryu-5 semi-submersible drilling unit will perform the drilling campaign at the Kuda Tasi and Jahal (KTJ) project, including three firm development wells, with options for two additional wells."
-      ],
-      "readingMinutes": 3,
-      "readMinutes": 3
-    },
-    {
-      "id": "SN-D820165423",
-      "title": "Subsea7 contracts Worley for Northern Lights' key subsea structures",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://offshore-energy.biz/2026/10/15/subsea7-contracts-worley-for-northern-lights-key-subsea-structures",
-      "publishedAt": "2026-10-15T11:37:05Z",
-      "category": "Ports & Terminals",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://offshore-energy.biz/api/media/file/Subsea7%20contracts%20Worley%20for%20Northern%20Lights'%20key%20subsea%20structures-896x568.jpg?prefix=media",
-      "summary": "Subsea7 has awarded Worley Rosenberg a contract for the fabrication of key subsea structures and spools supporting the second phase of the...",
-      "body": "Carbon Capture Usage & Storage October 15, 2026 · 2 days ago Subsea7 contracts Worley for Northern Lights' key subsea structures NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Worley Subsea7 has awarded Worley Rosenberg a contract for the fabrication of key subsea structures and spools supporting the second phase of the Northern Lights carbon transport and storage project in Norway. The scope includes the fabrication of subsea spools and structures for Northern Lights Phase II and follows Worley Rosenberg's delivery of comparable subsea structures and spools for the project's first phase in 2023. “This award strengthens our position in the growing subsea market and further expands our role in delivering infrastructure that enables large‑scale CO2 reduction,\" said Jan Narvestad, Managing Director of Worley Rosenberg. “CCS will be a critical part of achieving global climate goals, particularly for industries where emissions are difficult to eliminate. Northern Lights is one of the most important CCS projects under development today. The award secures activity for our fabrication facilities and deepens our competitive reach in delivering infrastructure for the energy transition.” Related Articles Carbon Capture Usage & Storage Norway's CO2 transport and storage project gets second Swedish customer 2 min read Related Articles Fossil Energy Subsea7 and Aker Solutions tasked with work for Northern Lights Phase 2 3 min read To remind, the joint venture of Equinor, Shell and TotalEnergies injected and stored the first CO2 volumes as part of the Northern Lights project in August 2025, marking the start of operations of what is said to be the world’s first third-party CO2 transport and storage facility. The project’s first phase is part of Longship, the Norwegian Government’s full-scale carbon capture and storage project (CCS). Phase I is in operation from the Øygarden terminal outside Bergen. The JV partners announced in March 2025 the final investment decision (FID) for the second phase, which will increase the project's capacity from 1.5 million tons of CO2 per annum (mtpa) to more than 5 mtpa. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Carbon Capture Usage & Storage Project & Tenders Business Developments & Projects Storage Fossil Energy Low-Carbon Transition Subsea Surveys & Interventions Contracts & Tenders Transition",
-      "takeaways": [
-        "The scope includes the fabrication of subsea spools and structures for Northern Lights Phase II and follows Worley Rosenberg's delivery of comparable subsea structures and spools for the project's first phase in 2023.",
-        "“CCS will be a critical part of achieving global climate goals, particularly for industries where emissions are difficult to eliminate.",
-        "Northern Lights is one of the most important CCS projects under development today."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-F982A2B87D",
-      "title": "Green ammonia could be cheaper than VLSFO by 2035 under IMO NZF",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/regulations/green-ammonia-could-be-cheaper-than-vlsfo-by-2035-under-imo-nzf",
-      "publishedAt": "2026-10-15T11:10:50Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port",
-        "imo"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt8522761a1b200208/6ad0bce9d717664d1331b692/Inga-2-Credit-Ivanhoe-Mines.jpg?width=720&quality=80&disable=upscale",
-      "summary": "UCL report on Grand Inga hydropower shows beneficial link between green ammonia production and renewable energy demand.",
-      "body": "UCL report on Grand Inga hydropower shows beneficial link between green ammonia production and renewable energy demand.",
-      "takeaways": [
-        "UCL report on Grand Inga hydropower shows beneficial link between green ammonia production and renewable energy demand.",
-        "Operational Area: Global Maritime.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+        "The Seoul-listed carrier’s board approved spending KRW2.168trn ($1.617bn) yesterday, according to a stock exchange filing.",
+        "The investment includes fresh orders for eight 13,000 teu ships, alongside the acquisition of three 2,800 teu vessels and one 1,700 teu ship through resale transactions involving newbuildings already under construction.",
+        "The 12 vessels will add a combined 114,100 teu of capacity, with deliveries scheduled to be completed by December 2029."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
