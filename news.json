@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-18T10:31:41Z",
-  "generatedAt": "2026-10-18T10:31:41Z",
+  "updatedAt": "2026-10-18T15:29:59Z",
+  "generatedAt": "2026-10-18T15:29:59Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -11,244 +11,38 @@
     "Hellenic Shipping News",
     "Container News"
   ],
-  "totalArticles": 70,
+  "totalArticles": 60,
   "articles": [
     {
-      "id": "SN-0C0EFDCD58",
-      "title": "Akkon Lines adds Iskenderun to Jeddah Express",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/akkon-lines-adds-iskenderun-to-jeddah-express/",
-      "publishedAt": "2026-10-18T10:30:44Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Red Sea & Bab el-Mandeb",
-      "regions": [
-        "Red Sea & Bab el-Mandeb"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "red sea"
-      ],
-      "coords": [
-        13.5,
-        42.8
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/pexels-njeromin-12567565-240x300.jpg",
-      "summary": "Akkon Lines has added Iskenderun to the rotation of its Jeddah Express Service (JXS), expanding its coverage between Türkiye and Saudi Arabia, according to DynaLiners. The service now connects five Turkish ports with Jeddah on the Red Sea. Akkon Lines deploys two container ships with an average capacity of...",
-      "body": "Services Top Right Akkon Lines adds Iskenderun to Jeddah Express October 18, 2026 Facebook Twitter WhatsApp Linkedin Email Akkon Lines has added Iskenderun to the rotation of its Jeddah Express Service (JXS), expanding its coverage between Türkiye and Saudi Arabia, according to DynaLiners. The service now connects five Turkish ports with Jeddah on the Red Sea. Akkon Lines deploys two container ships with an average capacity of approximately 1,100 TEUs on the JXS service. Sailings are offered at 10-day intervals. Revised JXS rotation The updated port sequence is: Izmit – Gemlik – Istanbul (Ambarli) – Aliaga – Iskenderun – Jeddah – Izmit. The addition provides Iskenderun with a direct connection to Jeddah through Akkon Lines’ regional network. TAGS AKKON LINES Facebook Twitter WhatsApp Linkedin Email Previous article CMA CGM raises BAF on France–Tunisia RoRo service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The service now connects five Turkish ports with Jeddah on the Red Sea.",
-        "Akkon Lines deploys two container ships with an average capacity of approximately 1,100 TEUs on the JXS service.",
-        "Sailings are offered at 10-day intervals."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-630AA882B8",
-      "title": "CMA CGM raises BAF on France–Tunisia RoRo service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/cma-cgm-raises-baf-on-france-tunisia-roro-service/",
-      "publishedAt": "2026-10-18T08:23:23Z",
-      "category": "Ports & Terminals",
-      "region": "Red Sea & Bab el-Mandeb",
-      "regions": [
-        "Red Sea & Bab el-Mandeb"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "bunker"
-      ],
-      "coords": [
-        13.5,
-        42.8
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/07/CMA-CGM-Notre-Dame-300x200.jpg",
-      "summary": "CMA CGM Short Sea Lines Intra Europe will increase its Bunker Adjustment Factor (BAF) on the RoRo South service connecting France and Tunisia. The revised France–Tunisia RoRo BAF will take effect on 1 November 2026 and apply to both import and export cargo. The carrier said the adjustment follows changes in bunker...",
-      "body": "Rates & Surcharges Top Right CMA CGM raises BAF on France–Tunisia RoRo service October 18, 2026 Facebook Twitter WhatsApp Linkedin Email CMA CGM Notre Dame CMA CGM Short Sea Lines Intra Europe will increase its Bunker Adjustment Factor (BAF) on the RoRo South service connecting France and Tunisia. The revised France–Tunisia RoRo BAF will take effect on 1 November 2026 and apply to both import and export cargo. The carrier said the adjustment follows changes in bunker prices since its previous surcharge revision. Revised BAF levels Cargo Current BAF BAF from 1 November Full rolling unit EUR 718/unit EUR 775/unit Empty rolling unit EUR 475/unit EUR 513/unit Other rolling units EUR 80/LM EUR 86/LM Passenger cars and minivans EUR 273/unit EUR 294/unit Breakbulk EUR 44/CBM EUR 47/CBM Other rolling units include trucks, earth-moving equipment on wheels or tracks, duty trucks, agricultural equipment and livestock trucks. The revised France–Tunisia RoRo BAF represents increases of approximately 7% to 8%, depending on the cargo category. TAGS CMA CGM Facebook Twitter WhatsApp Linkedin Email Previous article Maersk updates automatic booking cancellation timeline Next article Akkon Lines adds Iskenderun to Jeddah Express Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The revised France–Tunisia RoRo BAF will take effect on 1 November 2026 and apply to both import and export cargo.",
-        "The carrier said the adjustment follows changes in bunker prices since its previous surcharge revision.",
-        "The revised France–Tunisia RoRo BAF represents increases of approximately 7% to 8%, depending on the cargo category."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-726C704D7F",
-      "title": "Maersk updates automatic booking cancellation timeline",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/maersk-updates-automatic-booking-cancellation-timeline/",
-      "publishedAt": "2026-10-18T06:30:11Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/08/blue-maersk-container-being-moved-by-a-crane-in-a-terminal_1024x576-300x169.webp",
-      "summary": "Maersk has revised its automatic booking cancellation timeline for eligible shipments that have not materialised. Effective 15 October 2026, an eligible booking may be automatically cancelled when at least five days have passed since the first vessel’s estimated time of departure and the shipment has not...",
-      "body": "News Top Right Maersk updates automatic booking cancellation timeline October 18, 2026 Facebook Twitter WhatsApp Linkedin Email Maersk has revised its automatic booking cancellation timeline for eligible shipments that have not materialised. Effective 15 October 2026, an eligible booking may be automatically cancelled when at least five days have passed since the first vessel’s estimated time of departure and the shipment has not materialised. The carrier said the updated automatic booking cancellation process will allow unused capacity to be released earlier, supporting more effective capacity management and transport planning across its network. Customers have been advised to monitor their bookings closely. Where a shipment is expected to proceed but could be affected by the revised timeline, customers should contact Maersk Customer Service promptly. TAGS A.P. Moeller-Maersk Facebook Twitter WhatsApp Linkedin Email Previous article Shipowners expand orderbooks at Chinese yards Next article CMA CGM raises BAF on France–Tunisia RoRo service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "Effective 15 October 2026, an eligible booking may be automatically cancelled when at least five days have passed since the first vessel’s estimated time of departure and the shipment has not materialised.",
-        "The carrier said the updated automatic booking cancellation process will allow unused capacity to be released earlier, supporting more effective capacity management and transport planning across its network.",
-        "Customers have been advised to monitor their bookings closely."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-5B054B5494",
-      "title": "Shipowners expand orderbooks at Chinese yards",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/shipowners-expand-orderbooks-at-chinese-yards/",
-      "publishedAt": "2026-10-18T05:00:29Z",
+      "id": "SN-5B1898D42F",
+      "title": "World’s largest ethanol bunkering on Maersk ship in Singapore",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/bunkering/world-s-largest-ethanol-bunkering-on-maersk-ship-in-singapore",
+      "publishedAt": "2026-10-18T14:30:27Z",
       "category": "Ports & Terminals",
       "region": "Singapore & Malacca Strait",
       "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia"
+        "Singapore & Malacca Strait"
       ],
       "tags": [
         "container",
-        "china",
-        "shipyard"
+        "singapore",
+        "bunker"
       ],
       "coords": [
         1.26,
         103.82
       ],
       "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/pexels-igor-passchier-111147847-32344727-300x200.jpg",
-      "summary": "Zhonggu Shipping Group, Tsakos and Elbdeich Reederei have placed new containership orders at Chinese shipyards, covering vessels ranging from 3,200 TEU to 14,000 TEU, according to DynaLiners. Zhonggu orders its largest vessels Zhonggu Shipping Group has ordered two 14,000 TEU container ships from Hudong-Zhonghua...",
-      "body": "Zhonggu Shipping Group, Tsakos and Elbdeich Reederei have placed new containership orders at Chinese shipyards, covering vessels ranging from 3,200 TEU to 14,000 TEU, according to DynaLiners. Zhonggu orders its largest vessels Zhonggu Shipping Group has ordered two 14,000 TEU container ships from Hudong-Zhonghua Shipbuilding. The conventionally powered vessels will become the largest ships in the Chinese carrier’s fleet. Neither the contract value nor the delivery dates have been disclosed. Zhonggu had already contracted 18 smaller container ships earlier in 2026, comprising eight vessels of 6,300 TEU and ten units of 1,800 TEU. Tsakos returns to containership newbuildings Greek non-operating owner Tsakos has ordered two 3,200 TEU container ships from Hengli Heavy Industries. The contract marks the company’s first containership newbuilding order in four years. The vessels will be equipped with scrubbers and are scheduled for delivery during the fourth quarter of 2028. Elbdeich orders vessels in China German shipowner Elbdeich Reederei has also contracted two container ships at a Chinese shipyard. Although the full details have not been disclosed, the order is understood to comprise two 3,200 TEU vessels to be constructed by Hengli Heavy Industries. The newbuildings are expected to be delivered in 2028.",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltd6c85805786f90ba/6ad4da59b42d40d81bd73c73/Maersk_Halifax_ethanol_bunkering_in_Singapore_3.jpg?width=720&quality=80&disable=upscale",
+      "summary": "The refuelling was carried at berth in PSA during container handling operations on the vessel",
+      "body": "The refuelling was carried at berth in PSA during container handling operations on the vessel",
       "takeaways": [
-        "Zhonggu Shipping Group, Tsakos and Elbdeich Reederei have placed new containership orders at Chinese shipyards, covering vessels ranging from 3,200 TEU to 14,000 TEU, according to DynaLiners.",
-        "Zhonggu orders its largest vessels Zhonggu Shipping Group has ordered two 14,000 TEU container ships from Hudong-Zhonghua Shipbuilding.",
-        "The conventionally powered vessels will become the largest ships in the Chinese carrier’s fleet."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-0EE715C0E5",
-      "title": "X-Press Feeders restores Busan–Dalian connection",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/x-press-feeders-restores-busan-dalian-connection/",
-      "publishedAt": "2026-10-18T03:30:26Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia",
-        "Japan & Korea",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "container",
-        "china"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2022/01/X-Press-Jersey-1-300x209.png",
-      "summary": "X-Press Feeders has launched the Bohai Feeder X-Press (BHF2), restoring its direct feeder connection between South Korea and China’s Bohai Sea region, accoring to DynaLiners. The carrier deploys a single vessel with a capacity of approximately 1,700 TEU on the service. BHF2 offers weekly sailings with the following...",
-      "body": "Services Top Right X-Press Feeders restores Busan–Dalian connection October 18, 2026 Facebook Twitter WhatsApp Linkedin Email X-Press Jersey / Source: X-Press Feeders X-Press Feeders has launched the Bohai Feeder X-Press (BHF2), restoring its direct feeder connection between South Korea and China’s Bohai Sea region, accoring to DynaLiners. The carrier deploys a single vessel with a capacity of approximately 1,700 TEU on the service. BHF2 offers weekly sailings with the following rotation: Busan – Dalian – Busan The launch returns X-Press Feeders to the Busan–Dalian corridor following the closure of its previous BHF2A service in 2025. TAGS X-Press Feeders Facebook Twitter WhatsApp Linkedin Email Previous article DP World appoints new CEO and Managing Director for Asia Pacific Next article Shipowners expand orderbooks at Chinese yards Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The carrier deploys a single vessel with a capacity of approximately 1,700 TEU on the service.",
-        "BHF2 offers weekly sailings with the following rotation: Busan – Dalian – Busan The launch returns X-Press Feeders to the Busan–Dalian corridor following the closure of its previous BHF2A service in 2025.",
+        "The refuelling was carried at berth in PSA during container handling operations on the vessel",
+        "Operational Area: Singapore & Malacca Strait.",
         "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-CA018FABD4",
-      "title": "DP World appoints new CEO and Managing Director for Asia Pacific",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/dp-world-appoints-new-ceo-and-managing-director-for-asia-pacific/",
-      "publishedAt": "2026-10-18T01:30:48Z",
-      "category": "Ports & Terminals",
-      "region": "Australia & Pilbara",
-      "regions": [
-        "Australia & Pilbara",
-        "US West Coast & Pacific",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        -20.31,
-        118.58
-      ],
-      "navarea": "X",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/1920_jasonvarsamidis-chiefexecutiveofficerandmanagingdirectordpworldapac-253x300.jpg",
-      "summary": "DP World has appointed Jason Varsamidis as Chief Executive Officer and Managing Director of its Asia Pacific region, effective immediately. Varsamidis will lead DP World’s Asia Pacific portfolio of ports, terminals and logistics businesses across 22 geographies with more than 12,000 employees. Varsamidis brings close...",
-      "body": "DP World has appointed Jason Varsamidis as Chief Executive Officer and Managing Director of its Asia Pacific region, effective immediately. Varsamidis will lead DP World’s Asia Pacific portfolio of ports, terminals and logistics businesses across 22 geographies with more than 12,000 employees. Varsamidis brings close to three decades of experience with DP World and its predecessor P&O Ports, which he joined in 1997. He most recently served as Chief Financial Officer of DP World Asia Pacific since 2020, playing a central role in shaping the region’s strategy, investment agenda and business performance, and previously served as CFO of DP World Australia for seven years. Across his career he has overseen mergers and acquisitions, infrastructure projects and business turnaround programmes. In his new role, Varsamidis will focus on driving regional strategy and operational performance, strengthening end-to-end supply chains and expanding DP World’s integrated logistics capabilities across Asia Pacific. Group CEO Yuvraj Narayan described Varsamidis as a highly respected leader with deep understanding of the business and the markets in which it operates, noting that his track record and commercial acumen make him well placed to lead Asia Pacific as one of DP World’s key growth engines. Varsamidis expressed commitment to maintaining momentum, delivering for customers and partners and advancing strategic priorities across the region.",
-      "takeaways": [
-        "DP World has appointed Jason Varsamidis as Chief Executive Officer and Managing Director of its Asia Pacific region, effective immediately.",
-        "Varsamidis will lead DP World’s Asia Pacific portfolio of ports, terminals and logistics businesses across 22 geographies with more than 12,000 employees.",
-        "Varsamidis brings close to three decades of experience with DP World and its predecessor P&O Ports, which he joined in 1997."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-D798F6D53C",
-      "title": "MSC adds Southampton to Ireland feeder service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/msc-adds-southampton-to-ireland-feeder-service/",
-      "publishedAt": "2026-10-17T23:30:32Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "Rotterdam & North Sea",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2026/08/MSC-ULSAN-III-300x225.jpg",
-      "summary": "MSC has added Southampton to its North West Continent–Ireland feeder service, expanding the loop to include the United Kingdom, according to DynaLiners. The feeder previously connected ports in Belgium and France with Ireland. The revised network now covers Antwerp, Zeebrugge, Cork, Dublin, Le Havre and Southampton....",
-      "body": "Services Sticky News MSC adds Southampton to Ireland feeder service October 18, 2026 Facebook Twitter WhatsApp Linkedin Email MSC ULSAN III; Source: VesselFinder MSC has added Southampton to its North West Continent–Ireland feeder service, expanding the loop to include the United Kingdom, according to DynaLiners. The feeder previously connected ports in Belgium and France with Ireland. The revised network now covers Antwerp, Zeebrugge, Cork, Dublin, Le Havre and Southampton. MSC operates the service with two container ships averaging approximately 1,500 TEUs. Revised Ireland feeder rotation The updated port sequence is: Antwerp – Zeebrugge – Cork – Dublin – Le Havre – Southampton – Antwerp. The additional call gives Southampton a direct feeder connection with Cork and Dublin, alongside the service’s existing links to Antwerp, Zeebrugge and Le Havre. TAGS Mediterranean Shipping Co. (MSC) Facebook Twitter WhatsApp Linkedin Email Previous article DP World deploys electric yard tractors at Busan Next article DP World appoints new CEO and Managing Director for Asia Pacific Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The feeder previously connected ports in Belgium and France with Ireland.",
-        "The revised network now covers Antwerp, Zeebrugge, Cork, Dublin, Le Havre and Southampton.",
-        "MSC operates the service with two container ships averaging approximately 1,500 TEUs."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -288,110 +82,6 @@
       ],
       "readingMinutes": 3,
       "readMinutes": 3
-    },
-    {
-      "id": "SN-C8C9AC38B2",
-      "title": "DP World deploys electric yard tractors at Busan",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/dp-world-deploys-electric-yard-tractors-at-busan/",
-      "publishedAt": "2026-10-17T20:59:17Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Japan & Korea",
-        "Australia & Pilbara"
-      ],
-      "tags": [
-        "lng",
-        "container",
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/800_dpworld039sfleetofelectrictractorsinbusan1-300x200.jpg",
-      "summary": "DP World has deployed 55 electric yard tractors at its Busan terminal in South Korea, replacing LNG-powered vehicles and accounting for approximately 36 percent of the terminal’s 154-strong yard tractor fleet. The new electric tractors are expected to reduce CO2 emissions by approximately 70% per unit compared to the...",
-      "body": "DP World has deployed 55 electric yard tractors at its Busan terminal in South Korea, replacing LNG-powered vehicles and accounting for approximately 36 percent of the terminal’s 154-strong yard tractor fleet. The new electric tractors are expected to reduce CO2 emissions by approximately 70% per unit compared to the LNG-powered machines they replace, representing a significant step in reducing emissions from terminal operations at one of Asia’s busiest container ports. As a participant in South Korea’s Emissions Trading Scheme, DP World Busan’s electrification programme aligns with both the company’s global decarbonisation commitments and South Korea’s broader ambitions for low-carbon logistics and greener port operations. Beyond emission reductions, the transition will reduce the use and disposal of engine fluids, minimising leak risks and the environmental impact of terminal operations. The electric tractors also offer quieter operation, smoother acceleration and more consistent performance during frequent stop-and-go movements, and with fewer moving parts than LNG-powered equivalents are expected to require less maintenance, supporting equipment availability and operational efficiency. Anders Dømmestrup, Chief Operating Officer for Ports and Terminals Asia Pacific at DP World, described the deployment as an important milestone demonstrating that progress on emissions reduction can be achieved while continuing to deliver safe, efficient and reliable customer services. The Busan deployment builds on similar electrification initiatives across DP World’s global terminal network, including the Port of Brisbane in Australia, Manila South Harbour in the Philippines and Laem Chabang International Terminal in Thailand. DP World Busan plans to continue expanding electric equipment adoption as part of its longer-term terminal emissions reduction strategy.",
-      "takeaways": [
-        "DP World has deployed 55 electric yard tractors at its Busan terminal in South Korea, replacing LNG-powered vehicles and accounting for approximately 36 percent of the terminal’s 154-strong yard tractor fleet.",
-        "Beyond emission reductions, the transition will reduce the use and disposal of engine fluids, minimising leak risks and the environmental impact of terminal operations.",
-        "DP World Busan plans to continue expanding electric equipment adoption as part of its longer-term terminal emissions reduction strategy."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-070854842C",
-      "title": "Arkas redirects Russia Express to St. Petersburg",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/arkas-redirects-russia-express-to-st-petersburg/",
-      "publishedAt": "2026-10-17T19:00:01Z",
-      "category": "Navigation & Safety",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "Baltic Sea & Northern Europe",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2025/05/Arkas-vessel-300x204.jpg",
-      "summary": "Arkas Line has redirected its Russia Express Service (REX) from Novorossiysk to St. Petersburg, restoring Russian port coverage through the Baltic, according to DynaLiners. The carrier initially suspended the service following the sinking of the FESCO-operated containership FESCO Yanina near Novorossiysk in August....",
-      "body": "Services Top Right Arkas redirects Russia Express to St. Petersburg October 17, 2026 Facebook Twitter WhatsApp Linkedin Email Arkas Line has redirected its Russia Express Service (REX) from Novorossiysk to St. Petersburg, restoring Russian port coverage through the Baltic, according to DynaLiners. The carrier initially suspended the service following the sinking of the FESCO-operated containership FESCO Yanina near Novorossiysk in August. Under the revised configuration, Arkas has removed Novorossiysk from the REX rotation and introduced St. Petersburg as the service’s Russian gateway. Two container ships with an average capacity of approximately 1,200 TEUs operate the service at intervals of two to three weeks. Revised REX rotation The updated port sequence is: Alexandria – Mersin – St. Petersburg – Alexandria. The change shifts the Russia Express Service away from the Black Sea while maintaining connections between Russia, Türkiye and Egypt through the Baltic port of St. Petersburg. TAGS Arkas Line Facebook Twitter WhatsApp Linkedin Email Previous article Port of Montreal and Adani Group renew collaboration agreement Next article DP World deploys electric yard tractors at Busan Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "Services Top Right Arkas redirects Russia Express to St.",
-        "Petersburg October 17, 2026 Facebook Twitter WhatsApp Linkedin Email Arkas Line has redirected its Russia Express Service (REX) from Novorossiysk to St.",
-        "Petersburg, restoring Russian port coverage through the Baltic, according to DynaLiners."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-DDC971A725",
-      "title": "Port of Montreal and Adani Group renew collaboration agreement",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/port-of-montreal-and-adani-group-renew-collaboration-agreement/",
-      "publishedAt": "2026-10-17T17:20:33Z",
-      "category": "Weather & Cyclones",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "India & Indian Ocean"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/2026-10-14-signature-mc-galarneau-adani-low-300x244.jpg",
-      "summary": "The Montreal Port Authority and the Adani Group have renewed their collaboration agreement during Team Canada’s trade mission to India, signed in Mumbai by Captain Sandeep Mehta representing the Adani Group and Marie-Claude Galarneau, Executive Vice-President and Chief Operating and Transformation Officer of the MPA,...",
-      "body": "The Montreal Port Authority and the Adani Group have renewed their collaboration agreement during Team Canada’s trade mission to India, signed in Mumbai by Captain Sandeep Mehta representing the Adani Group and Marie-Claude Galarneau, Executive Vice-President and Chief Operating and Transformation Officer of the MPA, in the presence of Canadian Minister of International Trade Maninder Sidhu. The renewal builds on a partnership that began with the first collaboration agreement in 2018. India has become one of the Port of Montreal’s most significant trading partners, ranking second among the port’s markets in 2025 with 1 million tonnes of goods exchanged, comprising 60 percent exports and 40% imports. Principal commodities include food products, ceramic products and plastics on the import side, and forestry and metal products on the export side. The renewed agreement focuses on developing trade through the Mundra-Montreal maritime corridor, joint promotion and information sharing to identify new business opportunities, sharing port and technological expertise to improve operations and road and rail transportation fluidity, and exploring new areas of collaboration including vehicle transportation. As part of its strengthened commitment to the Indian market, the MPA has appointed Prakash Tulsiani as its new agent in India, facilitating engagement with shipping lines, freight forwarders and importing and exporting companies and raising awareness of business development opportunities between the two countries. The initiative supports trade diversification and supply chain resilience against the backdrop of a changing global trade environment, with India projected by the IMF to become the world’s fourth-largest economy by 2027 to 2028. MPA President and CEO Paul Bird described India as a major trading partner and expressed ambition to facilitate trade and strengthen Montreal’s role as a strategic gateway between India and the economic heart of North America. Minister Sidhu highlighted the opportunity for Canadian businesses to reach one of the world’s fastest-growing economies, noting progress toward a Comprehensive Economic Partnership Agreement with India.",
-      "takeaways": [
-        "The renewal builds on a partnership that began with the first collaboration agreement in 2018.",
-        "India has become one of the Port of Montreal’s most significant trading partners, ranking second among the port’s markets in 2025 with 1 million tonnes of goods exchanged, comprising 60 percent exports and 40% imports.",
-        "Principal commodities include food products, ceramic products and plastics on the import side, and forestry and metal products on the export side."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
     },
     {
       "id": "SN-A109F0AD11",
@@ -1422,7 +1112,7 @@
       "navarea": "I",
       "image": "https://offshore-energy.biz/api/media/file/Methanol-ready%20energy%20subsea%20construction%20vessel%20arrives%20in%20Norway%20for%20completion-1260x838.jpg?prefix=media",
       "summary": "Rem Offshore’s second energy subsea construction vessel (ESCV) has arrived in Norway from Vietnam, where it will now undergo outfitting and...",
-      "body": "Vessels October 16, 2026 · 1 day ago Methanol-ready energy subsea construction vessel arrives in Norway for completion NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email DeepOcean via LinkedIn Rem Offshore’s second energy subsea construction vessel (ESCV) has arrived in Norway from Vietnam, where it will now undergo outfitting and completion. REM Ocean was delivered from the hull yard at the Song Cam shipyard, Vietnam, on June 15. The tow started from the Hai Phong area two days later, and the vessel proceeded via Singapore on its journey towards Europe. At the Myklebust shipyard in Norway, REM Ocean will be outfitted with all major systems and mission equipment. DeepOcean via LinkedIn DeepOcean via LinkedIn DeepOcean via LinkedIn Once delivered in 2027, the vessel will enter an eight-year contract with DeepOcean, providing subsea inspection, maintenance and repair (IMR) services for Equinor until 2035. The vessel is being built and will be owned by Rem Offshore, while the company developed the design through collaboration with DeepOcean, Myklebust Verft, Skipsteknisk and other suppliers. REM Ocean will have dual-fuel engines capable of running on bio-methanol and biodiesel, along with a battery energy storage system and regenerative energy systems. The 111.7-meter-long vessel will be equipped with an autonomous inspection drone (AID), set to accelerate the digitalization of subsea asset inspection. It will feature Brunvoll’s thruster package, a 250-ton electric crane, two electric work-class remotely operated vehicles (WROVs) in a 350-square-metre inside hangar, and a 1,000-square-meter outside deck area, in addition to accommodation for 120 people. The first vessel, named REM Pioneer, is scheduled for delivery this year. Initial steel cutting for this vessel took place on July 3, 2024, with the keel laying ceremony on October 24, 2024. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Vessels Vessels & Vehicles Subsea Green Marine Alternative Fuels Methanol Surveys & Interventions",
+      "body": "Vessels October 16, 2026 · 2 days ago Methanol-ready energy subsea construction vessel arrives in Norway for completion NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email DeepOcean via LinkedIn Rem Offshore’s second energy subsea construction vessel (ESCV) has arrived in Norway from Vietnam, where it will now undergo outfitting and completion. REM Ocean was delivered from the hull yard at the Song Cam shipyard, Vietnam, on June 15. The tow started from the Hai Phong area two days later, and the vessel proceeded via Singapore on its journey towards Europe. At the Myklebust shipyard in Norway, REM Ocean will be outfitted with all major systems and mission equipment. DeepOcean via LinkedIn DeepOcean via LinkedIn DeepOcean via LinkedIn Once delivered in 2027, the vessel will enter an eight-year contract with DeepOcean, providing subsea inspection, maintenance and repair (IMR) services for Equinor until 2035. The vessel is being built and will be owned by Rem Offshore, while the company developed the design through collaboration with DeepOcean, Myklebust Verft, Skipsteknisk and other suppliers. REM Ocean will have dual-fuel engines capable of running on bio-methanol and biodiesel, along with a battery energy storage system and regenerative energy systems. The 111.7-meter-long vessel will be equipped with an autonomous inspection drone (AID), set to accelerate the digitalization of subsea asset inspection. It will feature Brunvoll’s thruster package, a 250-ton electric crane, two electric work-class remotely operated vehicles (WROVs) in a 350-square-metre inside hangar, and a 1,000-square-meter outside deck area, in addition to accommodation for 120 people. The first vessel, named REM Pioneer, is scheduled for delivery this year. Initial steel cutting for this vessel took place on July 3, 2024, with the keel laying ceremony on October 24, 2024. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Vessels Vessels & Vehicles Subsea Green Marine Alternative Fuels Methanol Surveys & Interventions",
       "takeaways": [
         "REM Ocean was delivered from the hull yard at the Song Cam shipyard, Vietnam, on June 15.",
         "The tow started from the Hai Phong area two days later, and the vessel proceeded via Singapore on its journey towards Europe.",
@@ -1492,7 +1182,7 @@
       "navarea": "I",
       "image": "https://offshore-energy.biz/api/media/file/odfjell-1211x718.jpg?prefix=media",
       "summary": "Norway's state-owned energy firm Equinor has exercised priced options for additional wells for a 17-year-old semi-submersible rig owned by...",
-      "body": "Rigs October 16, 2026 · 1 day ago Equinor employs 2009-built Odfjell Drilling rig for additional wells NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Odfjell Drilling Norway's state-owned energy firm Equinor has exercised priced options for additional wells for a 17-year-old semi-submersible rig owned by Scotland-headquartered Odfjell Drilling. The 2009-built Deepsea Atlantic sixth-generation deepwater and harsh-environment semi-submersible is a dual-derrick, dynamic-positioned unit of enhanced GVA 7500 design. Odfjell Drilling in August reported that the rig returned to work after spending a total of 106 days off-hire in following an equipment-handling incident, which occurred in April, when the blowout preventer (BOP) dropped to the seabed at an approximate depth of 1,100 meters. While the semi-submersible was off-hire, the firm was able to recover the dropped BOP before returning the rig to the yard to carry out repairs and install the spare blowout preventer it had in stock. It was reported today, October 16, that Equinor Energy had exercised priced options for two additional wells for Deepsea Atlantic, in direct continuation of the rig's current contract. The option exercise extends Deepsea Atlantic's firm contract to late Q4 2027 at the pricing agreed in the original contract. Equinor retains priced options for a further two wells. Furthermore, in a separate announcement, Eidesvik Offshore announced that it had received a contract extension from Equinor for the supply vessel Viking Avant, which runs in direct continuation of the current contract, extending the firm period to the end of 2027 with an option for further extension. \"Viking Avant has served Equinor since delivery in 2004, and we are pleased to extend our collaboration on current market terms. The extension reflects the consistent performance of the vessel and her crew,\" said Helga Cotgrove , CEO of Eidesvik Offshore. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Rigs Fossil Energy Oil & Gas Production & Processing Exploration & Production Contracts & Tenders Project & Tenders",
+      "body": "Rigs October 16, 2026 · 2 days ago Equinor employs 2009-built Odfjell Drilling rig for additional wells NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Odfjell Drilling Norway's state-owned energy firm Equinor has exercised priced options for additional wells for a 17-year-old semi-submersible rig owned by Scotland-headquartered Odfjell Drilling. The 2009-built Deepsea Atlantic sixth-generation deepwater and harsh-environment semi-submersible is a dual-derrick, dynamic-positioned unit of enhanced GVA 7500 design. Odfjell Drilling in August reported that the rig returned to work after spending a total of 106 days off-hire in following an equipment-handling incident, which occurred in April, when the blowout preventer (BOP) dropped to the seabed at an approximate depth of 1,100 meters. While the semi-submersible was off-hire, the firm was able to recover the dropped BOP before returning the rig to the yard to carry out repairs and install the spare blowout preventer it had in stock. It was reported today, October 16, that Equinor Energy had exercised priced options for two additional wells for Deepsea Atlantic, in direct continuation of the rig's current contract. The option exercise extends Deepsea Atlantic's firm contract to late Q4 2027 at the pricing agreed in the original contract. Equinor retains priced options for a further two wells. Furthermore, in a separate announcement, Eidesvik Offshore announced that it had received a contract extension from Equinor for the supply vessel Viking Avant, which runs in direct continuation of the current contract, extending the firm period to the end of 2027 with an option for further extension. \"Viking Avant has served Equinor since delivery in 2004, and we are pleased to extend our collaboration on current market terms. The extension reflects the consistent performance of the vessel and her crew,\" said Helga Cotgrove , CEO of Eidesvik Offshore. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Rigs Fossil Energy Oil & Gas Production & Processing Exploration & Production Contracts & Tenders Project & Tenders",
       "takeaways": [
         "The 2009-built Deepsea Atlantic sixth-generation deepwater and harsh-environment semi-submersible is a dual-derrick, dynamic-positioned unit of enhanced GVA 7500 design.",
         "While the semi-submersible was off-hire, the firm was able to recover the dropped BOP before returning the rig to the yard to carry out repairs and install the spare blowout preventer it had in stock.",
@@ -1525,7 +1215,7 @@
       "navarea": "I",
       "image": "https://offshore-energy.biz/api/media/file/nexans-1049x704.jpg?prefix=media",
       "summary": "Nexans has started the production of 525 kV high-voltage direct current (HVDC) subsea cables for the LanWin2 offshore grid connection in Germany....",
-      "body": "Grid October 16, 2026 · 1 day ago Nexans starts manufacturing 525 kV subsea cables for LanWin2 offshore wind grid connection 1 minutes read LinkedIn X Email Nexans Nexans has started the production of 525 kV high-voltage direct current (HVDC) subsea cables for the LanWin2 offshore grid connection in Germany. The France-based cable manufacturer says this marks the first industrial-scale production of its 525 kV HVDC cross-linked polyethylene (XLPE) subsea technology. Production is taking place at Nexans’ facility in Halden, Norway. Nexans secured the approximately €1 billion contract for LanWin2 in January 2025 under a framework agreement signed with TenneT in 2023. The contract covers the engineering, procurement, construction and installation of around 250 kilometers of 525 kV HVDC onshore and offshore export cable systems. The start of production follows the qualification of Nexans’ 525 kV HVDC XLPE subsea technology, moving the project from technology qualification into full-scale manufacturing and delivery, according to the company. LanWin2, the 2 GW grid connection designed to transmit offshore wind power from the German North Sea to the Heide region in Schleswig-Holstein, also includes an offshore converter platform being delivered by the Siemens Energy and Dragados Offshore consortium. First steel was cut for the platform in September 2025. LanWin2 is expected to be commissioned in 2031, according to Nexans and TenneT. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Grid Offshore Wind Cabling Subsea Project & Tenders Business Developments & Projects",
+      "body": "Grid October 16, 2026 · 2 days ago Nexans starts manufacturing 525 kV subsea cables for LanWin2 offshore wind grid connection 1 minutes read LinkedIn X Email Nexans Nexans has started the production of 525 kV high-voltage direct current (HVDC) subsea cables for the LanWin2 offshore grid connection in Germany. The France-based cable manufacturer says this marks the first industrial-scale production of its 525 kV HVDC cross-linked polyethylene (XLPE) subsea technology. Production is taking place at Nexans’ facility in Halden, Norway. Nexans secured the approximately €1 billion contract for LanWin2 in January 2025 under a framework agreement signed with TenneT in 2023. The contract covers the engineering, procurement, construction and installation of around 250 kilometers of 525 kV HVDC onshore and offshore export cable systems. The start of production follows the qualification of Nexans’ 525 kV HVDC XLPE subsea technology, moving the project from technology qualification into full-scale manufacturing and delivery, according to the company. LanWin2, the 2 GW grid connection designed to transmit offshore wind power from the German North Sea to the Heide region in Schleswig-Holstein, also includes an offshore converter platform being delivered by the Siemens Energy and Dragados Offshore consortium. First steel was cut for the platform in September 2025. LanWin2 is expected to be commissioned in 2031, according to Nexans and TenneT. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Grid Offshore Wind Cabling Subsea Project & Tenders Business Developments & Projects",
       "takeaways": [
         "The France-based cable manufacturer says this marks the first industrial-scale production of its 525 kV HVDC cross-linked polyethylene (XLPE) subsea technology.",
         "Production is taking place at Nexans’ facility in Halden, Norway.",
@@ -1977,6 +1667,319 @@
         "The Seoul-listed carrier’s board approved spending KRW2.168trn ($1.617bn) yesterday, according to a stock exchange filing.",
         "The investment includes fresh orders for eight 13,000 teu ships, alongside the acquisition of three 2,800 teu vessels and one 1,700 teu ship through resale transactions involving newbuildings already under construction.",
         "The 12 vessels will add a combined 114,100 teu of capacity, with deliveries scheduled to be completed by December 2029."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-04BA9AA160",
+      "title": "Liquimar lines up suezmax trio at New Hantong",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/liquimar-lines-up-suezmax-trio-at-new-hantong/",
+      "publishedAt": "2026-10-16T05:43:00Z",
+      "category": "Ports & Terminals",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Suez Canal & Eastern Med",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "tanker",
+        "container",
+        "port",
+        "suez",
+        "china"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://splash247.com/wp-content/uploads/2026/10/Afroditi-suezmax-Liquimar-300x180.jpg",
+      "summary": "Greek tanker owner Liquimar Tankers has been linked to an order for three suezmax newbuildings in China, adding fresh crude carrier capacity after cashing in on the strong secondhand tanker market. The Dimitris Papadimitriou-controlled company has contracted three 157,000 dwt vessels at Jiangsu New Hantong Ship Heavy...",
+      "body": "Europe Greater China Shipyards Tankers Liquimar lines up suezmax trio at New Hantong Adis Ajdin October 16, 2026 0 762 1 minute read Liquimar Liquimar Greek tanker owner Liquimar Tankers has been linked to an order for three suezmax newbuildings in China, adding fresh crude carrier capacity after cashing in on the strong secondhand tanker market. The Dimitris Papadimitriou-controlled company has contracted three 157,000 dwt vessels at Jiangsu New Hantong Ship Heavy Industry, according to shipbuilding sources. The conventionally fuelled tankers are scheduled for delivery in the second half of 2030, with pricing estimated at just under $86m apiece, putting the potential investment at close to $258m. The move follows Liquimar’s disposal of two ageing suezmaxes, the 2007-built Orpheas and Evridiki , to Dubai-based energy trader Onex DMCC. The pair changed hands for a reported $68m each, generating approximately $136m in gross sale proceeds. Both transactions were recorded in September market data. Liquimar has already emerged behind another Chinese tanker project this year. In August, shipbuilding intelligence identified the company as the owner of the 113,500 dwt aframax/LR2 Priamos under construction at Hengli Heavy Industries. That vessel marked the Athens-based owner’s return to newbuilding activity after a lengthy absence. Liquimar was set up in 1990, as a way for its parent company, Dioryx Maritime Corp, to expand from dry cargo and containerships into the oil tanker sector, before becoming a standalone entity in 1995. The latest reported deal would add another name to New Hantong’s suezmax orderbook. Earlier this year, Eyal Ofer’s Zodiac Maritime contracted four suezmaxes at the Chinese yard for 2029 delivery, taking its programme in the segment to nine vessels. Tags Greece Adis Ajdin October 16, 2026 0 762 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The Dimitris Papadimitriou-controlled company has contracted three 157,000 dwt vessels at Jiangsu New Hantong Ship Heavy Industry, according to shipbuilding sources.",
+        "The conventionally fuelled tankers are scheduled for delivery in the second half of 2030, with pricing estimated at just under $86m apiece, putting the potential investment at close to $258m.",
+        "The move follows Liquimar’s disposal of two ageing suezmaxes, the 2007-built Orpheas and Evridiki , to Dubai-based energy trader Onex DMCC."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-EE966F784C",
+      "title": "Chemnav steps up suezmax bet with Jinglu pair",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/chemnav-steps-up-suezmax-bet-with-jinglu-pair/",
+      "publishedAt": "2026-10-16T05:07:00Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Singapore & Malacca Strait",
+        "China & East Asia"
+      ],
+      "tags": [
+        "tanker",
+        "port",
+        "suez",
+        "singapore",
+        "china"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://splash247.com/wp-content/uploads/2026/10/Penglai-Zhongbai-Jinglu-Ship-Industry-300x180.jpg",
+      "summary": "Greek tanker owner Chemnav Shipmanagement has expanded its suezmax newbuilding programme with two more vessels in China, taking its orderbook in the segment to four ships. The Paul Coronis-backed company has been linked by shipbroking sources to a contract for two 158,000 dwt crude carriers at Penglai Zhongbai Jinglu...",
+      "body": "Europe Greater China Shipyards Tankers Chemnav steps up suezmax bet with Jinglu pair Adis Ajdin October 16, 2026 0 348 1 minute read Penglai Zhongbai Jinglu Ship Industry Penglai Zhongbai Jinglu Ship Industry Greek tanker owner Chemnav Shipmanagement has expanded its suezmax newbuilding programme with two more vessels in China, taking its orderbook in the segment to four ships. The Paul Coronis-backed company has been linked by shipbroking sources to a contract for two 158,000 dwt crude carriers at Penglai Zhongbai Jinglu Ship Industry, with deliveries expected in 2029. No price has been disclosed. The latest deal follows a low-profile order for two suezmaxes at New Times Shipbuilding in September last year, with delivery scheduled for the first quarter of 2029. Chemnav has since updated its website to confirm four suezmax newbuildings scheduled for early 2029 and early 2030, although it has not named the yards involved. The Athens-based outfit now has six tankers under construction across China and South Korea, including two 50,000 dwt MR product carriers booked at K Shipbuilding for delivery in 2027. Chemnav, established in 2006, currently manages 17 crude and product tankers, according to its website. The company has been rebuilding its newbuilding exposure since returning to South Korean yards in 2023 after a lengthy absence. The owner previously ordered three MR tankers at K Shipbuilding, a programme expanded in 2024, and had operated a secondhand suezmax several years ago after buying a 2003-built vessel from Teekay Tankers. For Penglai Jinglu, the latest contract adds to its move into larger crude carriers. The Chinese builder has also secured an order for four 157,000 dwt suezmaxes from Eastaway, the tanker arm of Singapore-based X-Press Feeders, with deliveries stretching into 2030. Those vessels were reported at around $80m apiece, although no price guidance has emerged for Chemnav’s latest pair. Tags Greece Adis Ajdin October 16, 2026 0 348 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The Paul Coronis-backed company has been linked by shipbroking sources to a contract for two 158,000 dwt crude carriers at Penglai Zhongbai Jinglu Ship Industry, with deliveries expected in 2029.",
+        "The latest deal follows a low-profile order for two suezmaxes at New Times Shipbuilding in September last year, with delivery scheduled for the first quarter of 2029.",
+        "Chemnav has since updated its website to confirm four suezmax newbuildings scheduled for early 2029 and early 2030, although it has not named the yards involved."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-19D29A2602",
+      "title": "GSI taps bridge builder to ease ship block bottleneck",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/gsi-taps-bridge-builder-to-ease-ship-block-bottleneck/",
+      "publishedAt": "2026-10-16T04:49:00Z",
+      "category": "Weather & Cyclones",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Singapore & Malacca Strait",
+        "China & East Asia"
+      ],
+      "tags": [
+        "tanker",
+        "lng",
+        "container",
+        "port",
+        "suez"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://splash247.com/wp-content/uploads/2023/08/GSI-300x180.jpg",
+      "summary": "Guangzhou Shipyard International (GSI) has turned to one of China’s oldest bridge builders for outsourced hull block construction, joining a growing number of shipyards tapping manufacturers outside the traditional maritime supply chain to keep pace with swelling orderbooks. The CSSC-controlled yard has signed a...",
+      "body": "Greater China Shipyards GSI taps bridge builder to ease ship block bottleneck Adis Ajdin October 16, 2026 0 388 2 minutes read GSI GSI Guangzhou Shipyard International (GSI) has turned to one of China’s oldest bridge builders for outsourced hull block construction, joining a growing number of shipyards tapping manufacturers outside the traditional maritime supply chain to keep pace with swelling orderbooks. The CSSC-controlled yard has signed a framework agreement with China Railway Shanhaiguan Bridge Group, bringing the heavy-steel fabricator into its shipbuilding operations. GSI said its expanding orderbook and increasingly complex vessel mix would drive up demand for hull blocks over the coming years, prompting the move to bring in additional manufacturing capacity. Shanhaiguan, founded in 1894, specialises in bridge steel structures and railway equipment and operates six production bases across China. Under the agreement, it will allocate fabrication resources to ship blocks and take responsibility for production quality, safety and delivery schedules. Neither the contract value nor the volume of work has been disclosed. The agreement comes with GSI’s production schedule already stretching towards the end of the decade. The Guangzhou-based builder disclosed earlier this year that its contracted business was approaching RMB100bn ($14bn), with overseas orders accounting for more than 95% and construction slots extending into 2030. Its most recent intake includes 10 MR tankers ordered by Greek owner Evangelos Pistiolis’ Central Group, four additional MR vessels for Advantage Tankers and more LNG dual-fuel car carriers for MSC-controlled Global Car Carriers. GSI is also expanding its physical footprint. In May, it signed a joint venture agreement with Guangdong Port and Shipping Group to develop the 360,000 sq m Xiaohudao shipbuilding base in Guangzhou. A separate project launched in September will see a new facility built at Longxue North, with GSI lined up to operate the yard once completed in 2029. The latter is designed to produce up to 18 vessels annually. The Shanhaiguan deal is not an isolated move. Several Chinese bridge and structural-steel manufacturers have entered shipbuilding this year, taking on fabrication work previously handled by established yards. In June, China Railway Baoji Bridge Group’s Yangzhou subsidiary began manufacturing hull sections for a 73,000 dwt self-propelled deck carrier. The project involves 110 blocks across the vessel’s cargo section, with the largest weighing about 190 tonnes. Jingjiang Nanyang Shipbuilding is providing construction coordination, with China Classification Society overseeing technical and quality requirements. Another bridge specialist, Jingjiang Heavy Industry, followed in September, starting work on blocks for a 40,400 dwt bulk carrier. The China Railway Construction Corporation subsidiary is fabricating 10 cargo-hold bottom sections weighing up to 96 tonnes each, which are to be transported to Shanghai for final assembly. The company has established three outdoor block assembly lines and is targeting annual ship block production of up to 100,000 tonnes, with longer-term ambitions to move into complete vessel construction. Other Chinese shipbuilders have opted to expand fabrication capacity closer to home. Qingdao Beihai Shipbuilding commissioned an expansion of its curved-block workshop in late 2025, adding nearly 23,000 sq m of production space. Shanghai Waigaoqiao Shipbuilding also proposed a new block fabrication and assembly facility last year to address capacity constraints and reduce its reliance on external subcontractors. The moves form part of a broader capacity buildout across China. Broker BRS Group identified at least seven dormant shipyards being reactivated and a further dozen established facilities expanding production capacity, developments covered by Splash earlier this year. South Korean builders have been taking similar steps to overcome production bottlenecks. In April, HD Hyundai Heavy Industries introduced a split-hull construction method for a 157,000 dwt suezmax, outsourcing the 168 m bow section to HSG Sungdong Shipbuilding before joining it to a stern section built at Ulsan. HJ Shipbuilding & Construction has also shifted work outside its Yeongdo yard, contracting Daesun Shipbuilding in February to manufacture deckhouse blocks for eight 7,900 teu containerships after its own facilities reached capacity. Adis Ajdin October 16, 2026 0 388 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The CSSC-controlled yard has signed a framework agreement with China Railway Shanhaiguan Bridge Group, bringing the heavy-steel fabricator into its shipbuilding operations.",
+        "GSI said its expanding orderbook and increasingly complex vessel mix would drive up demand for hull blocks over the coming years, prompting the move to bring in additional manufacturing capacity.",
+        "Shanhaiguan, founded in 1894, specialises in bridge steel structures and railway equipment and operates six production bases across China."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-1BD150FB0B",
+      "title": "Record monthly container volumes at Port of Long Beach as imports soar",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/ports-logistics/record-monthly-container-volumes-at-port-of-long-beach-as-imports-soar",
+      "publishedAt": "2026-10-16T03:19:25Z",
+      "category": "Ports & Terminals",
+      "region": "US West Coast & Pacific",
+      "regions": [
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        33.73,
+        -118.26
+      ],
+      "navarea": "XII",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt7f35174bc47eee38/6ad198b226d33c2536bc79fe/MSC-vessel-in-port-of-Long_Beach-credit-POLB.jpg?width=720&quality=80&disable=upscale",
+      "summary": "The US West Coast gateway port saw the ratio of imports to exports exceed 5:1 in September",
+      "body": "The US West Coast gateway port saw the ratio of imports to exports exceed 5:1 in September",
+      "takeaways": [
+        "The US West Coast gateway port saw the ratio of imports to exports exceed 5:1 in September",
+        "Operational Area: US West Coast & Pacific.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-8FAD16467C",
+      "title": "Shipping’s AI winners will build capability, not buy technology",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/shippings-ai-winners-will-build-capability-not-buy-technology/",
+      "publishedAt": "2026-10-16T03:00:00Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port",
+        "safety"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://splash247.com/wp-content/uploads/2023/03/artificial-intelligence-300x180.jpg",
+      "summary": "The technology is already widely available. The advantage will come from how shipping companies turn it into specialised systems, define its place in the team and manage adoption, says Michalis Gkontas, co-founder and CEO of AskChief. Today’s AI systems can already perform useful knowledge work. They can search and...",
+      "body": "Contributions Tech Shipping’s AI winners will build capability, not buy technology Splash October 16, 2026 0 455 3 minutes read Gerd Altmann via Pixabay Gerd Altmann via Pixabay The technology is already widely available. The advantage will come from how shipping companies turn it into specialised systems, define its place in the team and manage adoption, says Michalis Gkontas, co-founder and CEO of AskChief. Today’s AI systems can already perform useful knowledge work. They can search and interpret large volumes of information, compare documents, prepare drafts and help people work through complex tasks. The more important question now is whether organisations are ready to deploy them well. Giving employees access to a general-purpose AI tool is easy. Turning that access into better technical work, stronger compliance and additional team capacity is a management challenge. Leaders must decide where AI should be used, what knowledge it can draw on and where professional responsibility remains. Access is not capability As connectivity improves across fleets, many seafarers can access the same general-purpose AI tools as colleagues ashore, whether or not their company has formally deployed them. A report or proposed response may arrive in polished language without showing what evidence supports it, which company procedure applies or how much was generated by AI. Fluent output is not necessarily useful output. Generic AI can make weak reasoning look convincing or produce material that does not fit the vessel’s actual circumstances. The shore team must then reconstruct the context and verify the basis of what it has received. A generic model does not naturally know which version of a company’s safety management system is current, whether a manual applies to the equipment fitted on a particular vessel or who must approve a proposed SMS change. Specialisation comes from the system built around the model: the company’s knowledge, role-specific instructions, specialist tools, established workflows, permissions and review points. The underlying model may be general-purpose. The operational system should not be. Begin with work that matters The weakest deployment brief is simply to “use AI more”. It leaves each employee to decide what the technology is for, which information is appropriate to use and how much confidence to place in the result. A stronger starting point is a recurring piece of work the team already understands: investigating a technical issue, preparing for an inspection, answering an SMS question or assessing how a new requirement affects company procedures. The task should be meaningful enough to matter but bounded enough to manage. Once the team sees AI supporting a familiar workflow, expansion becomes an operational decision rather than an abstract technology initiative. Let AI do the work around the decision AI is well suited to locating relevant material, assembling context, comparing records, identifying potential gaps and preparing a first draft. People remain responsible for interpreting the evidence, challenging its relevance, resolving uncertainty and approving the action. Its purpose is not to diminish professional expertise, but to extend its reach. A useful shorthand is the 10-80-10 rule. It is not a literal allocation of time or effort, but a sequence for organising the work. In the first 10%, the expert defines the problem, supplies the context and sets the standard for a good outcome. AI carries much of the middle 80% by finding information, structuring it, comparing records and preparing the work. In the final 10%, the accountable professional challenges the result, corrects it and decides what happens next. The percentages should change with the risk. A safety-critical decision may require far more human review than a routine summary. Make adoption a team practice Leaders need to set expectations, appoint owners and create simple feedback loops. Teams should be able to share useful cases, flag weak outputs, and show where information or workflow design needs improvement. In shipping, caution is usually rational. A confident but incorrect answer can waste time or introduce risk. Trust grows when users can inspect the underlying evidence, understand the system’s boundaries and see that their professional judgement remains central. The same discipline should shape measurement. Logins and prompts reveal little. Better questions are whether the team reached a reviewed outcome faster, used relevant company history, avoided duplicate work and captured the decision for the next person. Deployment will create the advantage AI models will keep becoming more powerful and widely available. Access will not be scarce, and it will not provide a durable advantage on its own. The difference will come from deployment: choosing the right work, building specialised systems around it and helping teams incorporate those systems into everyday operations. For leaders, this means treating AI neither as a standalone IT purchase nor as an instruction to reduce headcount. It is an opportunity to give capable people better tools and increase what the organisation can accomplish without weakening accountability. The technology exists. The management challenge is to turn it into a working organisational capability. The shipping companies that do this well will not simply have more people using AI. They will have better-equipped teams, stronger company knowledge and more capacity to act. Splash October 16, 2026 0 455 3 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The advantage will come from how shipping companies turn it into specialised systems, define its place in the team and manage adoption, says Michalis Gkontas, co-founder and CEO of AskChief.",
+        "Today’s AI systems can already perform useful knowledge work.",
+        "They can search and interpret large volumes of information, compare documents, prepare drafts and help people work through complex tasks."
+      ],
+      "readingMinutes": 5,
+      "readMinutes": 5
+    },
+    {
+      "id": "SN-9E6B1756A1",
+      "title": "A.P. Moller Capital buys Portek from Mitsui",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/ports-logistics/a-p-moller-capital-buys-portek-from-mitsui",
+      "publishedAt": "2026-10-15T22:18:07Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt6b9b81142692f08f/6ad152d652243f03aaee104a/VGT-Credit-VGT.jpg?width=720&quality=80&disable=upscale",
+      "summary": "Mitsui offloads feeder terminal operator after 15 years, fuelling A.P. Moller Capital's acquisition spree.",
+      "body": "Mitsui offloads feeder terminal operator after 15 years, fuelling A.P. Moller Capital's acquisition spree.",
+      "takeaways": [
+        "Mitsui offloads feeder terminal operator after 15 years, fuelling A.P.",
+        "Moller Capital's acquisition spree.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-B209A7D01E",
+      "title": "Minesto reports 'record' 48-hour service intervention on its tidal power plant",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/15/minesto-reports-record-48-hour-service-intervention-on-its-tidal-power-plant",
+      "publishedAt": "2026-10-15T13:34:08Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://offshore-energy.biz/api/media/file/Minesto%20reports%20'record'%2048-hour%20service%20intervention%20of%20its%20tidal%20power%20plant-1600x900.jpg?prefix=media",
+      "summary": "Minesto has performed a service intervention on its Dragon 4 tidal power plant in record time, carrying out the recovery, inspection, and...",
+      "body": "Marine Energy October 15, 2026 · 3 days ago Minesto reports 'record' 48-hour service intervention on its tidal power plant NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Minesto Minesto has performed a service intervention on its Dragon 4 tidal power plant in record time, carrying out the recovery, inspection, and redeployment offshore process in 48 hours, the Swedish ocean energy developer reported today, October 15. Minesto revealed that, after years of improving the process, it had achieved its fastest turnaround to date, with a complete service intervention of a Dragon 4 power plant performed within 48 hours in Vestmannasund, Faroe Islands. The intervention included recovery, extraction of the nacelle for inspection of the upgraded generator following its first ten weeks of operation, maintenance activities, reassembly, quality and functional checks, and redeployment offshore. The work was carried out during a low-production tidal period. Minesto \"The ability to complete a full service operation and return the system to power production in only 48 hours demonstrates a key competitive advantage of our technology,\" said Martin Edlund , Minesto's CEO. \"High performance is important, but equally important is the ability to maintain the system cost efficiently. Notably, our method does not rely on sophisticated and expensive infrastructure, making it suitable for remote locations and areas of the world without port infrastructure and access to advanced marine engineering capabilities.\" Minesto notes that the central feature of the concept is the ability to swap subsystems, such as the nacelle, during short intervention campaigns. By using spare modules, more extensive inspections, maintenance activities and upgrades can be performed onshore without impact on availability and energy yield. Related Articles Marine Energy Dragon roars with record power in Faroe Islands: Minesto hits new tidal energy output milestone 2 min read \"The successful turnaround demonstrates both the maturity of the Dragon Technology and the efficiency of our operational procedures. Through long-term cooperation with our local contractor SJH Offshore, we have progressively refined our methods through repeated campaigns, and today we can perform advanced service interventions while keeping downtime to a minimum. This capability becomes increasingly valuable as we move towards larger commercial deployments and multi-unit installations,\" said Bernt Erik Westre , CTO of Minesto. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Marine Energy Tidal & Wave Energy Business Developments & Projects Technology",
+      "takeaways": [
+        "The work was carried out during a low-production tidal period.",
+        "Minesto \"The ability to complete a full service operation and return the system to power production in only 48 hours demonstrates a key competitive advantage of our technology,\" said Martin Edlund , Minesto's CEO.",
+        "\"High performance is important, but equally important is the ability to maintain the system cost efficiently."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-2691E39F42",
+      "title": "Rig provider and other contractors revealed for Timor-Leste's oil field",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/15/rig-provider-and-other-contractors-revealed-for-timor-lestes-oil-field",
+      "publishedAt": "2026-10-15T12:32:59Z",
+      "category": "Navigation & Safety",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Japan & Korea"
+      ],
+      "tags": [
+        "port",
+        "safety",
+        "imo"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://offshore-energy.biz/api/media/file/finder-1048x755.jpg?prefix=media",
+      "summary": "Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the...",
+      "body": "Project & Tenders October 15, 2026 · 3 days ago Rig provider and other contractors revealed for Timor-Leste's oil field NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Hakuryu-5 semi-submersible rig. Source: ENEOS Drilling Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the development of its offshore oil field in Timor-Leste. ENEOS Drilling's Hakuryu-5 semi-submersible drilling unit will perform the drilling campaign at the Kuda Tasi and Jahal (KTJ) project, including three firm development wells, with options for two additional wells. The Japanese player will also provide the associated equipment and personnel. The contract is conditional upon receipt of the required joint venture, government and Finder board approvals by December 31, 2026, together with ENEOS parent company and board approvals by November 16, 2026. The campaign will begin on December 1, 2027, and has an estimated duration of approximately 150 days to drill and complete the wells for production, including running completion assemblies and installation of the wellheads and Christmas Trees ready for hook-up to the Petrojarl I FPSO. \"Securing the Hakuryu-5 is a major milestone for the KTJ Project which brings us a step closer to FID and providing clear visibility on the timing of the development drilling program,\" said Damon Neaves , Finder Energy CEO. \"This is also a strong signal of the progress being made towards delivering Timor-Leste's next offshore oil development.\" According to Finder Energy, the two optional drilling slots provide flexibility to accommodate participation by other operators or to undertake exploration or appraisal drilling targeting potential tie-back opportunities within PSC 19-11. As for other contractors selected for the project, Finder Energy reported that Sumitomo will manufacture, supply and deliver oil country tubular goods (OCTG) including casing, production liner and completion tubing, three Christmas Trees are under fabrication by OneSubsea , and that wellheads have been acquired from another joint venture. AGR will provide integrated drilling management services to support the planning, management and execution of the development drilling program on behalf of Finder, with Finder retaining overall responsibility as operator, and SLB will supply upper completion equipment for the development wells, including downhole flow-control valves, gauges, chemical-injection equipment, packers, subsurface safety valves, control lines, cables, protectors, splices, contingencies and spares. The final investment decision (FID) for the project is anticipated by November 30. Related Articles Fossil Energy Southeast Asian oil field development clears key environmental hurdle to move toward FID 2 min read Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Project & Tenders Fossil Energy Oil & Gas Subsea Exploration & Production Contracts & Tenders FPSO & Vessels Rigs",
+      "takeaways": [
+        "Project & Tenders October 15, 2026 · 3 days ago Rig provider and other contractors revealed for Timor-Leste's oil field NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Hakuryu-5 semi-submersible rig.",
+        "Source: ENEOS Drilling Oil & gas exploration player Finder Energy has awarded Japanese ENEOS Drilling a contract to provide a semi-submersible drilling rig for the development of its offshore oil field in Timor-Leste.",
+        "ENEOS Drilling's Hakuryu-5 semi-submersible drilling unit will perform the drilling campaign at the Kuda Tasi and Jahal (KTJ) project, including three firm development wells, with options for two additional wells."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-D820165423",
+      "title": "Subsea7 contracts Worley for Northern Lights' key subsea structures",
+      "source": "Offshore Energy",
+      "sourceIcon": "⚡",
+      "sourceRegion": "Netherlands / Energy",
+      "url": "https://offshore-energy.biz/2026/10/15/subsea7-contracts-worley-for-northern-lights-key-subsea-structures",
+      "publishedAt": "2026-10-15T11:37:05Z",
+      "category": "Ports & Terminals",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://offshore-energy.biz/api/media/file/Subsea7%20contracts%20Worley%20for%20Northern%20Lights'%20key%20subsea%20structures-896x568.jpg?prefix=media",
+      "summary": "Subsea7 has awarded Worley Rosenberg a contract for the fabrication of key subsea structures and spools supporting the second phase of the...",
+      "body": "Carbon Capture Usage & Storage October 15, 2026 · 3 days ago Subsea7 contracts Worley for Northern Lights' key subsea structures NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Worley Subsea7 has awarded Worley Rosenberg a contract for the fabrication of key subsea structures and spools supporting the second phase of the Northern Lights carbon transport and storage project in Norway. The scope includes the fabrication of subsea spools and structures for Northern Lights Phase II and follows Worley Rosenberg's delivery of comparable subsea structures and spools for the project's first phase in 2023. “This award strengthens our position in the growing subsea market and further expands our role in delivering infrastructure that enables large‑scale CO2 reduction,\" said Jan Narvestad, Managing Director of Worley Rosenberg. “CCS will be a critical part of achieving global climate goals, particularly for industries where emissions are difficult to eliminate. Northern Lights is one of the most important CCS projects under development today. The award secures activity for our fabrication facilities and deepens our competitive reach in delivering infrastructure for the energy transition.” Related Articles Carbon Capture Usage & Storage Norway's CO2 transport and storage project gets second Swedish customer 2 min read Related Articles Fossil Energy Subsea7 and Aker Solutions tasked with work for Northern Lights Phase 2 3 min read To remind, the joint venture of Equinor, Shell and TotalEnergies injected and stored the first CO2 volumes as part of the Northern Lights project in August 2025, marking the start of operations of what is said to be the world’s first third-party CO2 transport and storage facility. The project’s first phase is part of Longship, the Norwegian Government’s full-scale carbon capture and storage project (CCS). Phase I is in operation from the Øygarden terminal outside Bergen. The JV partners announced in March 2025 the final investment decision (FID) for the second phase, which will increase the project's capacity from 1.5 million tons of CO2 per annum (mtpa) to more than 5 mtpa. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Carbon Capture Usage & Storage Project & Tenders Business Developments & Projects Storage Fossil Energy Low-Carbon Transition Subsea Surveys & Interventions Contracts & Tenders Transition",
+      "takeaways": [
+        "The scope includes the fabrication of subsea spools and structures for Northern Lights Phase II and follows Worley Rosenberg's delivery of comparable subsea structures and spools for the project's first phase in 2023.",
+        "“CCS will be a critical part of achieving global climate goals, particularly for industries where emissions are difficult to eliminate.",
+        "Northern Lights is one of the most important CCS projects under development today."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
