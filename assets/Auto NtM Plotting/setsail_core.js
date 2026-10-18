@@ -300,6 +300,40 @@ async function fetchOwnVesselAisUpdate() {
   }
 
   async function fromOpenWaters() {
+    function hitFromFeature(f) {
+      if (!f) return null;
+      const p = f.properties || {};
+      const c = (f.geometry && f.geometry.coordinates) || [];
+      return {
+        mmsi,
+        lat: c[1],
+        lon: c[0],
+        sog: p.sog,
+        cog: p.cog,
+        heading: p.heading,
+        name: p.name || v.name || "",
+        destination: p.destination || v.destination || "",
+        shipType: p.type || p.shipType || v.shipType || "",
+        callSign: p.callSign || v.callSign || "",
+        navStat: p.nav_status != null ? p.nav_status : p.navStat,
+        source: "ais"
+      };
+    }
+
+    // Direct MMSI lookup (most reliable on Open Waters).
+    try {
+      const geo = await fetch("https://ais.openwaters.io/v1/vessels?mmsi=" + encodeURIComponent(mmsi), {
+        headers: {
+          Accept: "application/geo+json, application/json",
+          "User-Agent": "SetSailMarineSuite/AIS"
+        },
+        cache: "no-store"
+      }).then((r) => (r.ok ? r.json() : null));
+      const f = geo && (geo.features || [])[0];
+      const hit = hitFromFeature(f);
+      if (hit && Number.isFinite(hit.lat) && Number.isFinite(hit.lon)) return hit;
+    } catch (e) { /* fall through to bbox */ }
+
     for (let i = 0; i < boxes.length; i++) {
       const box = boxes[i];
       const url =
@@ -319,21 +353,7 @@ async function fetchOwnVesselAisUpdate() {
           const f = feats[j];
           const p = f.properties || {};
           if (String(p.mmsi) !== mmsi) continue;
-          const c = (f.geometry && f.geometry.coordinates) || [];
-          return {
-            mmsi,
-            lat: c[1],
-            lon: c[0],
-            sog: p.sog,
-            cog: p.cog,
-            heading: p.heading,
-            name: p.name || v.name || "",
-            destination: p.destination || v.destination || "",
-            shipType: p.type || p.shipType || v.shipType || "",
-            callSign: p.callSign || v.callSign || "",
-            navStat: p.nav_status != null ? p.nav_status : p.navStat,
-            source: "ais"
-          };
+          return hitFromFeature(f);
         }
       } catch (e) {
         /* try next box */
@@ -2684,6 +2704,23 @@ function initHomeHudVessel() {
   const pop = document.getElementById("homeVesselPopover");
   const closeBtn = document.getElementById("homeVesselPopClose");
 
+  const placeHomePop = () => {
+    if (!pop || !pillBtn) return;
+    const r = pillBtn.getBoundingClientRect();
+    const gap = 8;
+    const width = Math.min(340, Math.max(260, window.innerWidth - 24));
+    let top = Math.round(r.bottom + gap);
+    let right = Math.round(Math.max(8, window.innerWidth - r.right));
+    // Keep panel on-screen if it would hang below the viewport.
+    const approxH = Math.min(560, window.innerHeight * 0.7);
+    if (top + approxH > window.innerHeight - 8) {
+      top = Math.max(8, Math.round(r.top - gap - approxH));
+    }
+    pop.style.width = width + "px";
+    pop.style.top = top + "px";
+    pop.style.right = right + "px";
+    pop.style.left = "auto";
+  };
   const closeHomePop = () => {
     if (pop) pop.classList.remove("open");
     if (pillBtn) pillBtn.setAttribute("aria-expanded", "false");
@@ -2695,11 +2732,18 @@ function initHomeHudVessel() {
     if (chartPop) chartPop.classList.remove("open");
     if (chartBtn) chartBtn.classList.remove("active");
     fillVesselFormsFromState();
+    placeHomePop();
     if (pop) pop.classList.add("open");
     if (pillBtn) pillBtn.setAttribute("aria-expanded", "true");
     bindVesselNameAutocomplete("home");
     bindVesselMmsiLookup("home");
   };
+  window.addEventListener("resize", () => {
+    if (pop && pop.classList.contains("open")) placeHomePop();
+  });
+  window.addEventListener("scroll", () => {
+    if (pop && pop.classList.contains("open")) placeHomePop();
+  }, true);
 
   if (pillBtn) {
     pillBtn.addEventListener("click", (e) => {

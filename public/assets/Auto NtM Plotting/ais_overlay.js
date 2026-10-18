@@ -10,6 +10,8 @@
   const DIGITRAFFIC_VES = "https://meri.digitraffic.fi/api/ais/v1/vessels";
   const AISSTREAM_WS_URL = "wss://stream.aisstream.io/v0/stream";
   const AISSTREAM_KEY_STORAGE = "setsail_aisstream_api_key";
+  // Shared SetSail key — all users connect by default; optional localStorage override.
+  const DEFAULT_AISSTREAM_API_KEY = "d340d8078f597170e53ff92ddd194609b2d5fc8b";
 
   const OW_AREA_CAP = 95;
   const OW_MAX_TILES = 12;
@@ -34,12 +36,26 @@
   let aisStreamPendingRender = false;
   let lastRestTargets = [];
 
-  function getAisStreamApiKey() {
+  function getPersonalAisStreamApiKey() {
     try {
-      return (localStorage.getItem(AISSTREAM_KEY_STORAGE) || window.SETSAIL_AISSTREAM_API_KEY || "").trim();
+      return (localStorage.getItem(AISSTREAM_KEY_STORAGE) || "").trim();
     } catch (e) {
       return "";
     }
+  }
+
+  function getAisStreamApiKey() {
+    const personal = getPersonalAisStreamApiKey();
+    if (personal) return personal;
+    try {
+      const winKey = (window.SETSAIL_AISSTREAM_API_KEY || "").trim();
+      if (winKey) return winKey;
+    } catch (e) {}
+    return DEFAULT_AISSTREAM_API_KEY;
+  }
+
+  function isUsingSharedAisStreamKey() {
+    return !getPersonalAisStreamApiKey();
   }
 
   function ensureLayer(map) {
@@ -250,6 +266,7 @@
     if (!apiKey || !boxes) return;
 
     try {
+      // Do NOT set FiltersShipMMSI here — it AND-restricts the stream to those MMSIs only.
       const sub = {
         APIKey: apiKey,
         BoundingBoxes: boxes,
@@ -538,15 +555,18 @@
   }
 
   async function loadOpenWatersBoxes(boxes) {
+    // Open Waters expects bbox=minLat,minLon,maxLat,maxLon (min_latitude=… params no longer work).
     const fetches = boxes.map(async (box) => {
-      const q = new URLSearchParams({
-        min_latitude: box.minLat.toFixed(4),
-        min_longitude: box.minLon.toFixed(4),
-        max_latitude: box.maxLat.toFixed(4),
-        max_longitude: box.maxLon.toFixed(4)
-      });
+      const bbox =
+        Number(box.minLat).toFixed(4) +
+        "," +
+        Number(box.minLon).toFixed(4) +
+        "," +
+        Number(box.maxLat).toFixed(4) +
+        "," +
+        Number(box.maxLon).toFixed(4);
       try {
-        const gj = await fetchJson(OPENWATERS_VESSELS + "?" + q.toString(), {
+        const gj = await fetchJson(OPENWATERS_VESSELS + "?bbox=" + bbox, {
           Accept: "application/json"
         });
         const feats = gj.features || [];
@@ -556,7 +576,7 @@
       }
     });
     const parts = await Promise.all(fetches);
-    return parts.flat();
+    return mergeByMmsi(parts);
   }
 
   async function loadDigitrafficMeta() {
@@ -703,7 +723,22 @@
 
     const input = document.getElementById("inputAisStreamApiKey");
     if (input) {
-      input.value = getAisStreamApiKey();
+      // Never prefill the shared key into the password field.
+      input.value = getPersonalAisStreamApiKey();
+      input.placeholder = isUsingSharedAisStreamKey()
+        ? "Optional override — leave blank for SetSail shared key"
+        : "Personal AISStream.io API key";
+    }
+
+    const note = document.getElementById("aisStreamKeyStatusNote");
+    if (note) {
+      if (isUsingSharedAisStreamKey()) {
+        note.style.display = "block";
+        note.textContent = "✓ Using SetSail shared AISStream.io key (live stream on by default).";
+      } else {
+        note.style.display = "block";
+        note.textContent = "✓ Personal API key stored in this browser (overrides shared key).";
+      }
     }
 
     const countEl = document.getElementById("aisTargetsCountSummary");
@@ -736,24 +771,27 @@
         const input = document.getElementById("inputAisStreamApiKey");
         const val = (input ? input.value : "").trim();
         try {
-          localStorage.setItem(AISSTREAM_KEY_STORAGE, val);
+          if (val) localStorage.setItem(AISSTREAM_KEY_STORAGE, val);
+          else localStorage.removeItem(AISSTREAM_KEY_STORAGE);
         } catch (e) {}
 
         const note = document.getElementById("aisStreamKeyStatusNote");
-        if (val) {
-          if (note) note.style.display = "block";
-          if (typeof showSetSailToast === "function") {
-            showSetSailToast("AISStream.io key saved. Connecting to live stream...", "success");
-          }
-          disconnectAisStream();
-          connectAisStream();
-        } else {
-          if (note) note.style.display = "none";
-          disconnectAisStream();
-          if (typeof showSetSailToast === "function") {
-            showSetSailToast("AISStream key cleared. Using fallback feeds.", "info");
-          }
+        if (note) {
+          note.style.display = "block";
+          note.textContent = val
+            ? "✓ Personal API key stored in this browser (overrides shared key)."
+            : "✓ Using SetSail shared AISStream.io key (live stream on by default).";
         }
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast(
+            val
+              ? "Personal AISStream key saved. Reconnecting..."
+              : "Using SetSail shared AISStream key. Reconnecting...",
+            "success"
+          );
+        }
+        disconnectAisStream();
+        connectAisStream();
       });
     }
   }
