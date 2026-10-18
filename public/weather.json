@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "1500 UTC",
-  "lastSyncUtc": "2026-10-18T15:29:57.682057+00:00",
+  "synopticCycle": "2000 UTC",
+  "lastSyncUtc": "2026-10-18T20:12:28.380904+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,14 +9,14 @@
       "shortName": "Trudy",
       "category": "Category 2 Hurricane (NOAA NHC)",
       "center": [
-        19.1,
+        19.3,
         -106.8
       ],
-      "centralPressure": 970,
-      "maxWinds": 90,
-      "gusts": 110,
+      "centralPressure": 974,
+      "maxWinds": 85,
+      "gusts": 104,
       "movement": "NW at 8 kts",
-      "dangerRadiusNm": 103,
+      "dangerRadiusNm": 97,
       "forecastTrack": [
         {
           "tau": 12,
@@ -80,13 +80,13 @@
       "shortName": "Champi",
       "category": "Typhoon (JTWC/JMA)",
       "center": [
-        13.5,
-        141.4
+        13.8,
+        140.2
       ],
       "centralPressure": 960,
       "maxWinds": 120,
       "gusts": 150,
-      "movement": "WNW at 10 kts",
+      "movement": "WNW at 5 kts",
       "dangerRadiusNm": 144,
       "forecastTrack": [
         {
@@ -206,6 +206,68 @@
           "radiusNm": 107
         }
       ]
+    },
+    {
+      "id": "IO962026",
+      "name": "Invest 96I",
+      "shortName": "96I",
+      "category": "Tropical Disturbance (Active Invest)",
+      "center": [
+        6.7,
+        60.3
+      ],
+      "centralPressure": 1009,
+      "maxWinds": 20,
+      "gusts": 26,
+      "movement": "NW at 14 kts",
+      "dangerRadiusNm": 65,
+      "forecastTrack": [
+        {
+          "tau": 12,
+          "coords": [
+            8.5,
+            58.2
+          ],
+          "winds": 25,
+          "radiusNm": 45
+        },
+        {
+          "tau": 24,
+          "coords": [
+            9.1,
+            57.5
+          ],
+          "winds": 30,
+          "radiusNm": 60
+        },
+        {
+          "tau": 36,
+          "coords": [
+            10.0,
+            56.7
+          ],
+          "winds": 35,
+          "radiusNm": 75
+        },
+        {
+          "tau": 48,
+          "coords": [
+            10.9,
+            56.1
+          ],
+          "winds": 40,
+          "radiusNm": 90
+        },
+        {
+          "tau": 60,
+          "coords": [
+            11.3,
+            55.3
+          ],
+          "winds": 45,
+          "radiusNm": 105
+        }
+      ]
     }
   ],
   "waves": [
@@ -217,7 +279,7 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 4.3,
+      "waveHeight": 4.1,
       "swellPeriod": 11,
       "swellDir": "W"
     },
@@ -229,7 +291,7 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.8,
+      "waveHeight": 3.5,
       "swellPeriod": 11,
       "swellDir": "WSW"
     },
@@ -237,23 +299,23 @@
       "id": "WS1",
       "name": "Trudy Cyclonic Wave Field",
       "center": [
-        19.1,
+        19.3,
         -106.8
       ],
-      "radiusNm": 206,
-      "waveHeight": 5.8,
+      "radiusNm": 194,
+      "waveHeight": 4.6,
       "swellPeriod": 9,
-      "swellDir": "NNW"
+      "swellDir": "WSW"
     },
     {
       "id": "WS2",
       "name": "Champi Cyclonic Wave Field",
       "center": [
-        13.5,
-        141.4
+        13.8,
+        140.2
       ],
       "radiusNm": 288,
-      "waveHeight": 8.0,
+      "waveHeight": 7.8,
       "swellPeriod": 9,
       "swellDir": "SSE"
     },
@@ -265,7 +327,7 @@
         81.8
       ],
       "radiusNm": 156,
-      "waveHeight": 3.2,
+      "waveHeight": 3.0,
       "swellPeriod": 10,
       "swellDir": "SSE"
     }
@@ -273,10 +335,10 @@
   "pressureCenters": [
     {
       "type": "L",
-      "value": 970,
+      "value": 974,
       "name": "Hurricane TRUDY Core Low",
       "coords": [
-        19.1,
+        19.3,
         -106.8
       ]
     },
@@ -285,8 +347,8 @@
       "value": 960,
       "name": "Typhoon CHAMPI Core Low",
       "coords": [
-        13.5,
-        141.4
+        13.8,
+        140.2
       ]
     },
     {
@@ -296,6 +358,15 @@
       "coords": [
         -14.2,
         81.8
+      ]
+    },
+    {
+      "type": "L",
+      "value": 1009,
+      "name": "Invest 96I Core Low",
+      "coords": [
+        6.7,
+        60.3
       ]
     },
     {
@@ -329,17 +400,17 @@
   "windVectors": [
     {
       "coords": [
-        19.4,
+        19.6,
         -106.5
       ],
       "dir": 160,
-      "speed": 90,
-      "label": "90 kts (Trudy)"
+      "speed": 85,
+      "label": "85 kts (Trudy)"
     },
     {
       "coords": [
-        13.8,
-        141.7
+        14.1,
+        140.5
       ],
       "dir": 200,
       "speed": 120,
@@ -353,6 +424,15 @@
       "dir": 200,
       "speed": 65,
       "label": "65 kts (Wati)"
+    },
+    {
+      "coords": [
+        7.0,
+        60.6
+      ],
+      "dir": 200,
+      "speed": 20,
+      "label": "20 kts (96I)"
     }
   ]
 }
