@@ -342,7 +342,8 @@ function parseAdmiraltyNtMText(fullText, defaultYear = "26") {
     const lines = navBlock.split(/\n+/).map(s => s.trim()).filter(Boolean);
     const subjLine = lines.length > 1 ? lines[1] : (lines[0] || "NAVTEX Navigational Warning");
     const isPoly = navCoords.length >= 3 && /AREA\s+BOUNDED|BOUNDED\s+BY|WITHIN\s+AREA/i.test(navBlock);
-    const isLn = !isPoly && navCoords.length >= 2 && /TRACKLINE|CABLE|PIPELINE|JOINING/i.test(navBlock);
+    // CENTERLINE / survey corridors (e.g. Arctic East Siberian coastal warnings) are real lines, not point clouds
+    const isLn = !isPoly && navCoords.length >= 2 && /TRACKLINE|CABLE|PIPELINE|JOINING|CENTERLINE|CENTRELINE|1\s+MILE\s+ON\s+EACH\s+SIDE/i.test(navBlock);
     const numM = curNav.id.match(/(\d{1,5})\s*\/\s*(\d{2,4})/);
 
     if (navCoords.length > 0) {
