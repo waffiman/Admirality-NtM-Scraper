@@ -4540,7 +4540,79 @@ function renderNtMListAndMap() {
       leafletMap.addLayer(leafletMarkersLayer);
     }
     const curZoom = leafletMap.getZoom ? leafletMap.getZoom() : 3;
-    const canvasRenderer = window._setsailCanvasRenderer || null;
+
+    // Keep NtM above ECDIS land and clickable (land pane z=350, ntm pane z=450)
+    if (!leafletMap.getPane("ecdisLandPane")) {
+      const lp = leafletMap.createPane("ecdisLandPane");
+      lp.style.zIndex = 350;
+      lp.style.pointerEvents = "none";
+    } else {
+      leafletMap.getPane("ecdisLandPane").style.pointerEvents = "none";
+    }
+    if (!leafletMap.getPane("ntmOverlayPane")) {
+      const np = leafletMap.createPane("ntmOverlayPane");
+      np.style.zIndex = 450;
+    }
+    if (!window._setsailNtmCanvasRenderer) {
+      window._setsailNtmCanvasRenderer = L.canvas({ pane: "ntmOverlayPane" });
+    }
+    const canvasRenderer = window._setsailNtmCanvasRenderer;
+
+    // Split polylines that cross the antimeridian so Leaflet does not draw a world-wrapping chord
+    const splitAntimeridianLatLngs = (latlngs) => {
+      const rings = [[]];
+      for (let i = 0; i < latlngs.length; i++) {
+        const cur = latlngs[i];
+        const ring = rings[rings.length - 1];
+        if (ring.length) {
+          const prev = ring[ring.length - 1];
+          if (Math.abs(Number(cur[1]) - Number(prev[1])) > 180) {
+            rings.push([cur]);
+            continue;
+          }
+        }
+        ring.push(cur);
+      }
+      return rings.filter((r) => r.length >= 2);
+    };
+
+    const noticeCentroid = (item) => {
+      const coords = item.coords || [];
+      let lat = 0;
+      let lon = 0;
+      let n = 0;
+      for (let i = 0; i < coords.length; i++) {
+        const c = coords[i];
+        if (!c || !Number.isFinite(Number(c.lat)) || !Number.isFinite(Number(c.lon))) continue;
+        lat += Number(c.lat);
+        lon += Number(c.lon);
+        n++;
+      }
+      return n ? [lat / n, lon / n] : null;
+    };
+
+    // World / low zoom: merge nearby notices into one clickable cluster that splits on zoom-in
+    const clusterNoticesForZoom = (notices, zoom) => {
+      if (zoom > 3.5) return null;
+      const cellDeg = zoom <= 2 ? 12 : zoom <= 2.5 ? 8 : zoom <= 3 ? 5 : 3;
+      const buckets = Object.create(null);
+      notices.forEach((item) => {
+        if (!item.coords || !item.coords.length) return;
+        const c = noticeCentroid(item);
+        if (!c) return;
+        const key =
+          Math.round(c[0] / cellDeg) + "|" + Math.round(c[1] / cellDeg);
+        if (!buckets[key]) buckets[key] = { items: [], latSum: 0, lonSum: 0 };
+        buckets[key].items.push(item);
+        buckets[key].latSum += c[0];
+        buckets[key].lonSum += c[1];
+      });
+      return Object.keys(buckets).map((k) => {
+        const b = buckets[k];
+        const n = b.items.length;
+        return { items: b.items, lat: b.latSum / n, lon: b.lonSum / n };
+      });
+    };
 
     // Cohesive ECDIS Color Hierarchy:
     // NAVTEX = Warm Amber-Orange (#fb923c / #f97316)
@@ -4562,6 +4634,11 @@ function renderNtMListAndMap() {
     const basePolyWeight = curZoom <= 3 ? 0.9 : (curZoom <= 5 ? 1.2 : (curZoom <= 7 ? 1.6 : 2.0));
     const basePolyFillOp = curZoom <= 3 ? 0.05 : (curZoom <= 5 ? 0.09 : (curZoom <= 7 ? 0.14 : 0.20));
     const baseLineWeight = curZoom <= 3 ? 1.3 : (curZoom <= 5 ? 1.8 : 2.5);
+
+    const pathPaneOpts = () => ({
+      pane: "ntmOverlayPane",
+      renderer: canvasRenderer
+    });
 
     const buildPopupHtml = (item, extraLine = "") => {
       const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
@@ -4595,7 +4672,7 @@ function renderNtMListAndMap() {
       `;
     };
 
-    filtered.forEach(item => {
+    const plotOneNotice = (item) => {
       if (!item.coords || item.coords.length === 0) return;
 
       const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
@@ -4607,36 +4684,35 @@ function renderNtMListAndMap() {
           if (!pts || pts.length === 0) return;
 
           if (pts.length >= 3) {
-            const pOpts = {
+            const pOpts = Object.assign({
               color: pal.stroke,
               weight: basePolyWeight,
               fillColor: pal.fill,
               fillOpacity: isItemCancelled ? 0.04 : basePolyFillOp,
               dashArray: isItemCancelled ? "4, 6" : null
-            };
-            if (canvasRenderer) pOpts.renderer = canvasRenderer;
+            }, pathPaneOpts());
             const polygon = L.polygon(pts, pOpts);
             polygon.bindPopup(buildPopupHtml(item, `<div style="font-size:0.78em;color:#475569;margin-bottom:3px;"><b>Area:</b> ${sub.name} (${pts.length} pts)</div>`));
             leafletMarkersLayer.addLayer(polygon);
           } else if (pts.length === 2) {
-            const lOpts = {
-              color: pal.stroke,
-              weight: baseLineWeight,
-              dashArray: isItemCancelled ? "3, 6" : "5, 4"
-            };
-            if (canvasRenderer) lOpts.renderer = canvasRenderer;
-            const polyline = L.polyline(pts, lOpts);
-            polyline.bindPopup(buildPopupHtml(item));
-            leafletMarkersLayer.addLayer(polyline);
+            splitAntimeridianLatLngs(pts).forEach((seg) => {
+              const lOpts = Object.assign({
+                color: pal.stroke,
+                weight: baseLineWeight,
+                dashArray: isItemCancelled ? "3, 6" : "5, 4"
+              }, pathPaneOpts());
+              const polyline = L.polyline(seg, lOpts);
+              polyline.bindPopup(buildPopupHtml(item));
+              leafletMarkersLayer.addLayer(polyline);
+            });
           } else if (pts.length === 1) {
-            const cOpts = {
+            const cOpts = Object.assign({
               radius: ptRadius,
               fillColor: pal.fill,
               color: ptRimColor,
               weight: ptRimWeight,
               fillOpacity: isItemCancelled ? 0.45 : 0.86
-            };
-            if (canvasRenderer) cOpts.renderer = canvasRenderer;
+            }, pathPaneOpts());
             const circle = L.circleMarker(pts[0], cOpts);
             circle.bindPopup(buildPopupHtml(item));
             leafletMarkersLayer.addLayer(circle);
@@ -4652,48 +4728,101 @@ function renderNtMListAndMap() {
           lonSpan = Math.max(...lons) - Math.min(...lons);
         }
         const isLargeRegionalArea = (latSpan > 3.5 || lonSpan > 3.5);
-        const pOpts = {
+        const pOpts = Object.assign({
           color: pal.stroke,
           weight: isLargeRegionalArea && curZoom <= 5 ? 0.8 : basePolyWeight,
           fillColor: pal.fill,
           fillOpacity: isItemCancelled ? 0.04 : (isLargeRegionalArea && curZoom <= 5 ? 0.025 : basePolyFillOp),
           dashArray: isItemCancelled ? "3, 6" : (item.type === "NAVTEX" || item.type === "T" ? "4, 4" : null)
-        };
-        if (canvasRenderer) pOpts.renderer = canvasRenderer;
+        }, pathPaneOpts());
         const polygon = L.polygon(polyPoints, pOpts);
         polygon.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Polygon (${item.coords.length} vertices)</div>`));
         leafletMarkersLayer.addLayer(polygon);
       } else if (item.isLine && item.coords.length >= 2) {
         const linePoints = item.coords.map(c => [c.lat, c.lon]);
-        const lOpts = {
-          color: pal.stroke,
-          weight: baseLineWeight,
-          dashArray: isItemCancelled ? "3, 6" : (item.type === "T" ? "5, 4" : null)
-        };
-        if (canvasRenderer) lOpts.renderer = canvasRenderer;
-        const polyline = L.polyline(linePoints, lOpts);
-        polyline.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points)</div>`));
-        leafletMarkersLayer.addLayer(polyline);
+        const segments = splitAntimeridianLatLngs(linePoints);
+        segments.forEach((seg) => {
+          const lOpts = Object.assign({
+            color: pal.stroke,
+            weight: baseLineWeight,
+            dashArray: isItemCancelled ? "3, 6" : (item.type === "T" ? "5, 4" : null)
+          }, pathPaneOpts());
+          const polyline = L.polyline(seg, lOpts);
+          polyline.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points${segments.length > 1 ? " · date-line split" : ""})</div>`));
+          leafletMarkersLayer.addLayer(polyline);
+        });
       } else {
-        // At global zoom <= 4, if a single notice has multiple points, plot only its primary point to avoid dot clusters
+        // At global zoom <= 4, if a single notice has multiple points, plot only its primary point
         const coordsToPlot = (curZoom <= 4 && item.coords.length > 2) ? [item.coords[0]] : item.coords;
         coordsToPlot.forEach(coord => {
-          const cOpts = {
+          const cOpts = Object.assign({
             radius: ptRadius,
             fillColor: pal.fill,
             color: ptRimColor,
             weight: ptRimWeight,
             opacity: 0.92,
             fillOpacity: isItemCancelled ? 0.4 : 0.85
-          };
-          if (canvasRenderer) cOpts.renderer = canvasRenderer;
+          }, pathPaneOpts());
           const circle = L.circleMarker([coord.lat, coord.lon], cOpts);
           const dmsStr = coord.dms || formatCoordDmsHelper(coord.lat, coord.lon);
           circle.bindPopup(buildPopupHtml(item, `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`));
           leafletMarkersLayer.addLayer(circle);
         });
       }
-    });
+    };
+
+    const clusters = clusterNoticesForZoom(filtered, curZoom);
+    if (clusters) {
+      clusters.forEach((cl) => {
+        if (cl.items.length === 1) {
+          plotOneNotice(cl.items[0]);
+          return;
+        }
+        const count = cl.items.length;
+        const types = {};
+        cl.items.forEach((it) => {
+          const t = it.type || "?";
+          types[t] = (types[t] || 0) + 1;
+        });
+        const typeSummary = Object.keys(types)
+          .map((t) => types[t] + " " + t)
+          .join(" · ");
+        const listPreview = cl.items
+          .slice(0, 8)
+          .map((it) => String(it.id || "").replace(/</g, "&lt;"))
+          .join("<br>");
+        const more = count > 8 ? `<div style="margin-top:4px;color:#64748b;">+${count - 8} more…</div>` : "";
+        const targetZoom = Math.min(Math.max(curZoom + 1.5, 4), 8);
+        const icon = L.divIcon({
+          className: "ntm-cluster-icon",
+          html:
+            '<div style="width:28px;height:28px;border-radius:50%;background:#f97316;border:2px solid #0f172a;color:#fff;font:700 11px/28px Segoe UI,sans-serif;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.45);">' +
+            count +
+            "</div>",
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        });
+        const m = L.marker([cl.lat, cl.lon], {
+          icon,
+          pane: "ntmOverlayPane",
+          keyboard: false
+        });
+        m.bindPopup(
+          `<div style="font-family:Segoe UI,sans-serif;min-width:200px;color:#111;">
+            <b style="color:#c2410c;">${count} NtM / NAVTEX</b>
+            <div style="font-size:0.78em;color:#64748b;margin:3px 0 6px;">${typeSummary}</div>
+            <div style="font-size:0.78em;line-height:1.35;">${listPreview}${more}</div>
+            <div style="margin-top:7px;font-size:0.72em;color:#0369a1;">Zoom in to split into individual objects</div>
+          </div>`
+        );
+        m.on("click", () => {
+          leafletMap.setView([cl.lat, cl.lon], targetZoom);
+        });
+        leafletMarkersLayer.addLayer(m);
+      });
+    } else {
+      filtered.forEach(plotOneNotice);
+    }
   } else {
     drawOfflineCanvasMap();
   }
@@ -7464,9 +7593,27 @@ function createEcdisSimpleBaseLayer() {
       ? WORLD_LAND_POLYGONS
       : window.WORLD_LAND_POLYGONS || [];
 
+  function ensureEcdisPanes(map) {
+    if (!map || !map.createPane) return;
+    if (!map.getPane("ecdisLandPane")) {
+      const p = map.createPane("ecdisLandPane");
+      // Below NtM/AIS overlay pane so land never covers clickable warnings
+      p.style.zIndex = 350;
+      p.style.pointerEvents = "none";
+    } else {
+      map.getPane("ecdisLandPane").style.pointerEvents = "none";
+    }
+    if (!map.getPane("ntmOverlayPane")) {
+      const n = map.createPane("ntmOverlayPane");
+      // Above land (350), below markers/popups (600+)
+      n.style.zIndex = 450;
+    }
+  }
+
   function landStyle() {
     // Same yellow for fill and edge — no gray coastline halo, no source mismatch.
     return {
+      pane: "ecdisLandPane",
       stroke: true,
       color: LAND,
       weight: 0.6,
@@ -7495,7 +7642,7 @@ function createEcdisSimpleBaseLayer() {
       "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_" +
       level +
       "_land.geojson";
-    return [local + "?v=5.31", cdn];
+    return [local + "?v=5.32", cdn];
   }
 
   async function loadLandGeo(level) {
@@ -7569,9 +7716,11 @@ function createEcdisSimpleBaseLayer() {
         Math.round(bounds.getEast() * 20);
       if (key === lastLandKey) return;
       lastLandKey = key;
-      const renderer = L.canvas({ padding: 0.5 });
+      ensureEcdisPanes(map);
+      const renderer = L.canvas({ padding: 0.5, pane: "ecdisLandPane" });
       landFill.clearLayers();
       L.geoJSON(geo, {
+        pane: "ecdisLandPane",
         renderer,
         interactive: false,
         filter: function (feat) {
@@ -7598,6 +7747,7 @@ function createEcdisSimpleBaseLayer() {
   group.on("add", function () {
     boundMap = group._map;
     if (!boundMap) return;
+    ensureEcdisPanes(boundMap);
     boundMap.getContainer().classList.add("ecdis-simple-base");
     lastLandKey = "";
     renderCoarseLand();
