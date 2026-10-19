@@ -13,11 +13,14 @@
   // Shared SetSail key — all users connect by default; optional localStorage override.
   const DEFAULT_AISSTREAM_API_KEY = "d340d8078f597170e53ff92ddd194609b2d5fc8b";
 
-  const OW_AREA_CAP = 95;
-  const OW_MAX_TILES = 12;
+  // Wide viewport still loads live AIS — targets appear without extreme zoom-in.
+  // OW_AREA_CAP is spanLon*spanLat (deg²); ~2800 ≈ continental / multi-sea view.
+  const OW_AREA_CAP = 2800;
+  const OW_MAX_TILES = 24;
   const ABS_MARKER_CAP = 15000;
-  const MIN_ZOOM_ZONES = 6;
-  const MIN_ZOOM_DENSE_ZONES = 8;
+  const MIN_ZOOM_ZONES = 2;
+  const MIN_ZOOM_DENSE_ZONES = 3;
+  const MIN_ZOOM_DIGITRAFFIC = 2;
 
   let leafletAisLayer = null;
   let aisTimer = null;
@@ -436,7 +439,7 @@
     const w = b.getWest();
     const e = b.getEast();
 
-    if (e - w >= 355 || zoom <= 4) {
+    if (e - w >= 355 || zoom <= 1) {
       return {
         mode: "world",
         zoom: zoom,
@@ -641,7 +644,27 @@
       }
       if (seq !== aisRefreshSeq) return;
       let digi = [];
-      if (overlapsBaltic(plan.boxes)) {
+      // Use map bounds (not only OW boxes) so Baltic AIS still loads in overview when boxes are empty.
+      const balticHit =
+        overlapsBaltic(plan.boxes) ||
+        (() => {
+          try {
+            const bb = map.getBounds();
+            return bboxOverlaps(
+              {
+                minLat: bb.getSouth(),
+                maxLat: bb.getNorth(),
+                minLon: bb.getWest(),
+                maxLon: bb.getEast()
+              },
+              { minLat: 53.0, maxLat: 66.5, minLon: 9.0, maxLon: 30.5 }
+            );
+          } catch (e) {
+            return false;
+          }
+        })();
+      const zNow = plan.zoom != null ? plan.zoom : map.getZoom();
+      if (balticHit && zNow >= MIN_ZOOM_DIGITRAFFIC) {
         try {
           digi = await loadLiveDigitraffic();
         } catch (e) {}
