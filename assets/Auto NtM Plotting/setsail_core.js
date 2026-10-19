@@ -1660,6 +1660,27 @@ function initAutoNtmUI() {
     });
   }
 
+  // Empty Multi Search hint chips → enable overlay via dock / setOverlayActive
+  const ntmItemsScroll = document.getElementById("ntmItemsScroll");
+  if (ntmItemsScroll && !ntmItemsScroll._boundEmptyHints) {
+    ntmItemsScroll._boundEmptyHints = true;
+    ntmItemsScroll.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-overlay-hint]");
+      if (!btn) return;
+      const key = btn.getAttribute("data-overlay-hint");
+      if (!key) return;
+      const dockTab = document.querySelector('.excel-tab[data-overlay="' + key + '"]');
+      if (dockTab) {
+        dockTab.click();
+        return;
+      }
+      if (typeof setOverlayActive === "function") {
+        setOverlayActive(key, true, leafletMap);
+        if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
+      }
+    });
+  }
+
   // Clear Search Button
   const clearSearchBtn = document.getElementById("ntmClearSearchBtn");
   if (searchInput && clearSearchBtn) {
@@ -4511,9 +4532,22 @@ function renderNtMListAndMap() {
     }
 
     if (!html) {
-      const anyActiveOverlay = isNoticesActive || isDepthsActive || isWeatherActive || isRouteActive;
+      const isAisActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.ais !== false : false;
+      const anyActiveOverlay = isNoticesActive || isDepthsActive || isWeatherActive || isRouteActive || isAisActive;
       if (!anyActiveOverlay) {
-        html = "";
+        html = `
+          <div class="ntm-empty-hints" style="padding:1.1rem 0.85rem;display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:0.78rem;font-weight:700;color:#e2e8f0;letter-spacing:0.03em;">Enable a chart layer</div>
+            <div style="font-size:0.68rem;color:#94a3b8;line-height:1.4;">Multi Search stays empty until an overlay is on. Tap a hint or use the dock below the chart.</div>
+            <div class="ntm-empty-hint-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="notices" title="Notices to Mariners &amp; NAVTEX">⚠️ NtM / NAVTEX</button>
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="depths" title="Port depths &amp; UKC">⚓ Port Depths</button>
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="weather" title="Cyclones &amp; weather">🌀 Weather</button>
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="ais" title="Live AIS targets">📡 AIS Targets</button>
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="route" title="My vessel route" style="grid-column:1/-1;">🧭 My Route</button>
+            </div>
+          </div>
+        `;
       } else {
         html = `
           <div style="padding:2rem 1rem;text-align:center;color:var(--muted);font-size:0.8rem;">
@@ -7734,6 +7768,18 @@ function createEcdisSimpleBaseLayer() {
     }
   }
 
+  function setEcdisLandLoading(on) {
+    const sel = document.getElementById("ntmChartLayerSelector");
+    if (!sel) return;
+    const trig = sel.querySelector(".ntm-layer-trigger-btn");
+    sel.classList.toggle("is-loading-base", !!on);
+    if (trig) {
+      trig.classList.toggle("is-loading", !!on);
+      trig.setAttribute("aria-busy", on ? "true" : "false");
+      trig.title = on ? "Loading ECDIS land detail…" : "Select Chart Layer";
+    }
+  }
+
   async function refreshEcdisLand() {
     const map = boundMap || group._map;
     if (!map || !map.hasLayer(group)) return;
@@ -7741,6 +7787,7 @@ function createEcdisSimpleBaseLayer() {
     // World overview: coarse fill only. Closer: Natural Earth land polygons (fill = edge).
     // Low thresholds — 50m from ~z2, detailed 10m from ~z3 (was z5).
     if (z < 1.5) {
+      setEcdisLandLoading(false);
       if (lastLandKey !== "coarse") {
         lastLandKey = "coarse";
         renderCoarseLand();
@@ -7749,6 +7796,8 @@ function createEcdisSimpleBaseLayer() {
     }
     const level = z >= 3 ? "10m" : z >= 2 ? "50m" : "110m";
     const seq = ++landSeq;
+    const needsFetch = !landCache[level];
+    if (needsFetch) setEcdisLandLoading(true);
     try {
       const geo = await loadLandGeo(level);
       if (seq !== landSeq) return;
@@ -7764,7 +7813,10 @@ function createEcdisSimpleBaseLayer() {
         Math.round(bounds.getNorth() * 20) +
         "|" +
         Math.round(bounds.getEast() * 20);
-      if (key === lastLandKey) return;
+      if (key === lastLandKey) {
+        setEcdisLandLoading(false);
+        return;
+      }
       lastLandKey = key;
       ensureEcdisPanes(map);
       const renderer = L.canvas({ padding: 0.5, pane: "ecdisLandPane" });
@@ -7786,6 +7838,8 @@ function createEcdisSimpleBaseLayer() {
         lastLandKey = "coarse";
         renderCoarseLand();
       }
+    } finally {
+      if (seq === landSeq) setEcdisLandLoading(false);
     }
   }
 
@@ -8796,13 +8850,7 @@ function initSetSailAuth() {
     });
   }
 
-  const googleBtn = document.getElementById("btnGoogleSignIn");
-  if (googleBtn) {
-    googleBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      triggerOfficialGoogleSignIn();
-    });
-  }
+  // Custom #btnGoogleSignIn removed — Settings uses only official GIS #googleGsiButtonContainer
 
   const btnExportHist = document.getElementById("btnExportUserHistory");
   if (btnExportHist) {
@@ -11364,6 +11412,97 @@ CRITICAL INTENT RULES:
   ]);
 }
 
+const SETROUTE_EMPTY_TITLES = [
+  "Where are we sailing today?",
+  "Ready for the next passage?",
+  "Plot the next leg of the voyage.",
+  "Which ports shall we connect?",
+  "Name the departure and arrival.",
+  "Chart a course — where next?",
+  "Set sail: origin and destination.",
+  "What's the next ocean crossing?",
+  "Bridge briefing: where to?",
+  "Plan the next fairway run.",
+  "From berth to berth — where?",
+  "Draft a passage in one sentence.",
+  "Pick the next trade lane.",
+  "Ocean routes start with two ports.",
+  "Where does this voyage begin and end?",
+  "Tell SetRoute the next call.",
+  "Course to steer — which ports?",
+  "Ready when you name the ports.",
+  "Next waypoint cluster: which cities?",
+  "Let's shape a Great Circle today.",
+  "Rhumb or GC — first, the ports.",
+  "Passage plan starts here.",
+  "Harbour to harbour — your call.",
+  "Where is the next landfall?",
+  "Give me two ports and a draft.",
+  "Trade route or coastal hop?",
+  "Which canal or cape this time?",
+  "SetRoute is standing by.",
+  "Map the next commercial run.",
+  "One prompt. Full leg table."
+];
+
+const SETROUTE_PROMPT_POOL = [
+  { title: "Ningbo → Los Angeles", meta: "Trans-Pacific GC/RL", prompt: "Make the route from Ningbo to Los Angeles" },
+  { title: "Houston → Rotterdam", meta: "Draft 11.8m · 15 kn", prompt: "Plan route from Houston to Rotterdam, draft 11.8m, speed 15 kn" },
+  { title: "Singapore → Shanghai", meta: "TSS & fairways", prompt: "Plan route from Singapore to Shanghai, draft 12.5m, speed 14.5 kn" },
+  { title: "Rotterdam → Singapore", meta: "Suez vs Cape", prompt: "Plan route from Rotterdam to Singapore, draft 12.0m" },
+  { title: "Tokyo → San Francisco", meta: "N. Pacific GC", prompt: "Plan route from Tokyo to San Francisco using Great Circle GC" },
+  { title: "Busan → Long Beach", meta: "Transpac container", prompt: "Plan route from Busan to Long Beach, draft 13.0m, speed 16 kn" },
+  { title: "Antwerp → New York", meta: "N. Atlantic", prompt: "Plan route from Antwerp to New York, draft 12.2m, speed 14 kn" },
+  { title: "Shanghai → Hamburg", meta: "Suez corridor", prompt: "Plan route from Shanghai to Hamburg via Suez, draft 12.5m" },
+  { title: "Dubai → Singapore", meta: "Arabian–Malacca", prompt: "Plan route from Dubai to Singapore, draft 14.0m, speed 13.5 kn" },
+  { title: "Santos → Qingdao", meta: "Cape / Suez options", prompt: "Plan route from Santos to Qingdao, draft 12.0m" },
+  { title: "Yokohama → Vancouver", meta: "N. Pacific", prompt: "Plan route from Yokohama to Vancouver, speed 15 kn" },
+  { title: "Gibraltar → Port Said", meta: "Med transit", prompt: "Plan route from Gibraltar to Port Said, draft 11.5m" },
+  { title: "Mumbai → Jeddah", meta: "Red Sea approaches", prompt: "Plan route from Mumbai to Jeddah, draft 12.0m, speed 14 kn" },
+  { title: "Valencia → Piraeus", meta: "West–East Med", prompt: "Plan route from Valencia to Piraeus, draft 10.5m" },
+  { title: "Cape Town → Singapore", meta: "Indian Ocean RL", prompt: "Plan route from Cape Town to Singapore, draft 12.8m, speed 14.5 kn" },
+  { title: "Baltimore → Rotterdam", meta: "Transatlantic", prompt: "Plan route from Baltimore to Rotterdam, draft 11.0m, speed 15 kn" },
+  { title: "Kaohsiung → Los Angeles", meta: "Transpac", prompt: "Plan route from Kaohsiung to Los Angeles, draft 13.5m" },
+  { title: "Le Havre → Montreal", meta: "St. Lawrence", prompt: "Plan route from Le Havre to Montreal, draft 10.8m, speed 13 kn" },
+  { title: "Jakarta → Fremantle", meta: "Indonesia–Australia", prompt: "Plan route from Jakarta to Fremantle, draft 11.5m" },
+  { title: "Odessa → Istanbul", meta: "Black Sea–Bosporus", prompt: "Plan route from Odessa to Istanbul, draft 9.5m, speed 12 kn" },
+  { title: "Panama → Busan", meta: "Pacific climb", prompt: "Plan route from Panama to Busan, draft 12.0m, speed 15 kn" },
+  { title: "Dalian → Rotterdam", meta: "Eurasia via Suez", prompt: "Plan route from Dalian to Rotterdam via Suez, draft 12.5m" },
+  { title: "Chennai → Singapore", meta: "Bay of Bengal", prompt: "Plan route from Chennai to Singapore, draft 11.8m" },
+  { title: "Naples → Alexandria", meta: "Central Med", prompt: "Plan route from Naples to Alexandria, draft 10.0m, speed 13 kn" }
+];
+
+function shufflePick(arr, n) {
+  const copy = arr.slice();
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = copy[i];
+    copy[i] = copy[j];
+    copy[j] = t;
+  }
+  return copy.slice(0, n);
+}
+
+function refreshSetRouteEmptyHero() {
+  const titleEl = document.querySelector("#setRouteEmptyHero .setroute-empty-title");
+  const promptsEl = document.querySelector("#setRouteEmptyHero .setroute-empty-prompts");
+  if (titleEl) {
+    titleEl.textContent = SETROUTE_EMPTY_TITLES[Math.floor(Math.random() * SETROUTE_EMPTY_TITLES.length)];
+  }
+  if (promptsEl) {
+    const picks = shufflePick(SETROUTE_PROMPT_POOL, 4);
+    promptsEl.innerHTML = picks
+      .map(
+        (p) =>
+          `<button type="button" class="sr-empty-prompt-card" data-sr-prompt="${String(p.prompt).replace(/"/g, "&quot;")}">` +
+          `<span class="sr-empty-prompt-title">${p.title}</span>` +
+          `<span class="sr-empty-prompt-meta">${p.meta}</span></button>`
+      )
+      .join("");
+  }
+}
+window.refreshSetRouteEmptyHero = refreshSetRouteEmptyHero;
+
 function initSetRouteV50() {
   const chatMessages = document.getElementById("setRouteChatMessages");
   const emptyHero = document.getElementById("setRouteEmptyHero");
@@ -11371,6 +11510,7 @@ function initSetRouteV50() {
   const chatInput = document.getElementById("setRouteChatInput");
   const genBtn = document.getElementById("btnGenerateSetRoute");
   const newChatBtn = document.getElementById("btnSetRouteNewChat");
+  refreshSetRouteEmptyHero();
   const toggleDrawerBtn = document.getElementById("btnToggleRightDrawer");
   const closeDrawerBtn = document.getElementById("btnCloseRightDrawer");
   const drawerPlotBtn = document.getElementById("btnDrawerPlotOnChart");
@@ -11519,6 +11659,7 @@ function initSetRouteV50() {
       window.SETROUTE_PENDING_CONTEXT = null;
       if (chatMessages) chatMessages.innerHTML = "";
       if (emptyHero) emptyHero.style.display = "flex";
+      refreshSetRouteEmptyHero();
       setBrainMode("planning");
     });
   }

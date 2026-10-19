@@ -71,9 +71,10 @@
   }
 
   function shipColor(navStat, sog) {
-    if (navStat === 1 || navStat === 5) return "#94a3b8"; // Anchored / Moored
-    if (Number(sog) >= 0.5) return "#22d3ee"; // Underway
-    return "#38bdf8";
+    // Brand coral for moving targets; muted slate when anchored/moored
+    if (navStat === 1 || navStat === 5) return "#94a3b8";
+    if (Number(sog) >= 0.5) return "#ea4c25"; // Underway — SetSail coral
+    return "#f05a36";
   }
 
   function formatAisPopup(v) {
@@ -85,7 +86,7 @@
     const src = v.source || "AIS";
     return (
       '<div style="min-width:210px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;color:#1e293b;">' +
-      '<div style="font-weight:800;color:#0284c7;margin-bottom:4px;display:flex;align-items:center;gap:5px;">🚢 ' + name + "</div>" +
+      '<div style="font-weight:800;color:#ea4c25;margin-bottom:4px;display:flex;align-items:center;gap:5px;">🚢 ' + name + "</div>" +
       "<div><b>MMSI:</b> " + (v.mmsi || "—") + (v.callSign ? " · <b>Call:</b> " + v.callSign : "") + "</div>" +
       "<div><b>Type:</b> " + type + "</div>" +
       "<div><b>SOG / COG:</b> " + sog + " / " + cog + "</div>" +
