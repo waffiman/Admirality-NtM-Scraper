@@ -7495,7 +7495,7 @@ function createEcdisSimpleBaseLayer() {
       "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_" +
       level +
       "_land.geojson";
-    return [local + "?v=5.29", cdn];
+    return [local + "?v=5.31", cdn];
   }
 
   async function loadLandGeo(level) {
@@ -7542,19 +7542,20 @@ function createEcdisSimpleBaseLayer() {
     if (!map || !map.hasLayer(group)) return;
     const z = map.getZoom();
     // World overview: coarse fill only. Closer: Natural Earth land polygons (fill = edge).
-    if (z < 3) {
+    // Low thresholds — 50m from ~z2, detailed 10m from ~z3 (was z5).
+    if (z < 1.5) {
       if (lastLandKey !== "coarse") {
         lastLandKey = "coarse";
         renderCoarseLand();
       }
       return;
     }
-    const level = z >= 8 ? "10m" : z >= 4 ? "50m" : "110m";
+    const level = z >= 3 ? "10m" : z >= 2 ? "50m" : "110m";
     const seq = ++landSeq;
     try {
       const geo = await loadLandGeo(level);
       if (seq !== landSeq) return;
-      const pad = z >= 10 ? 0.05 : z >= 6 ? 0.12 : 0.35;
+      const pad = z >= 6 ? 0.05 : z >= 3 ? 0.15 : 0.4;
       const bounds = map.getBounds().pad(pad);
       const key =
         level +
@@ -7575,7 +7576,7 @@ function createEcdisSimpleBaseLayer() {
         interactive: false,
         filter: function (feat) {
           if (level === "110m") return true;
-          if (level === "50m" && z < 5) return true;
+          // Always viewport-filter 50m/10m so we can load finer NE earlier without drawing the whole planet.
           return featureHitsBounds(feat, bounds);
         },
         style: landStyle
