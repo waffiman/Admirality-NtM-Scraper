@@ -3974,7 +3974,7 @@ function initNtMMap() {
 
     // Zoom-Adaptive Level of Detail (LOD) re-render when crossing zoom tiers
     let lastLodTier = -1;
-    const getZoomLodTier = (z) => (z <= 3 ? 0 : (z <= 5 ? 1 : (z <= 7 ? 2 : 3)));
+    const getZoomLodTier = (z) => (z <= 2.5 ? 0 : (z <= 3.5 ? 1 : (z <= 4.5 ? 2 : (z <= 7 ? 3 : 4))));
     leafletMap.on("zoomend", () => {
       const z = leafletMap.getZoom();
       const tier = getZoomLodTier(z);
@@ -4591,10 +4591,11 @@ function renderNtMListAndMap() {
       return n ? [lat / n, lon / n] : null;
     };
 
-    // World / low zoom: merge nearby notices into one clickable cluster that splits on zoom-in
+    // World / low zoom: aggressively merge nearby notices; split only after a clear zoom-in
     const clusterNoticesForZoom = (notices, zoom) => {
-      if (zoom > 3.5) return null;
-      const cellDeg = zoom <= 2 ? 12 : zoom <= 2.5 ? 8 : zoom <= 3 ? 5 : 3;
+      if (zoom > 4.5) return null;
+      // Larger cells = fewer numbered markers on a cluttered world view
+      const cellDeg = zoom <= 2 ? 36 : zoom <= 2.5 ? 26 : zoom <= 3 ? 18 : zoom <= 3.5 ? 12 : 7;
       const buckets = Object.create(null);
       notices.forEach((item) => {
         if (!item.coords || !item.coords.length) return;
@@ -4607,11 +4608,59 @@ function renderNtMListAndMap() {
         buckets[key].latSum += c[0];
         buckets[key].lonSum += c[1];
       });
-      return Object.keys(buckets).map((k) => {
+      let clusters = Object.keys(buckets).map((k) => {
         const b = buckets[k];
         const n = b.items.length;
         return { items: b.items, lat: b.latSum / n, lon: b.lonSum / n };
       });
+      // Absorb leftover singles into the nearest multi-cluster (or each other) so world view stays sparse
+      if (zoom <= 3.5 && clusters.length > 1) {
+        const absorbR = cellDeg * 1.6;
+        const absorbR2 = absorbR * absorbR;
+        let changed = true;
+        while (changed) {
+          changed = false;
+          const multi = [];
+          const singles = [];
+          clusters.forEach((c) => (c.items.length > 1 ? multi : singles).push(c));
+          if (!singles.length) break;
+          const nextSingles = [];
+          singles.forEach((s) => {
+            let best = null;
+            let bestD = Infinity;
+            const pool = multi.length ? multi : nextSingles;
+            pool.forEach((m) => {
+              const dLat = s.lat - m.lat;
+              const dLon = s.lon - m.lon;
+              const d2 = dLat * dLat + dLon * dLon;
+              if (d2 < bestD) {
+                bestD = d2;
+                best = m;
+              }
+            });
+            if (best && bestD <= absorbR2) {
+              best.items.push.apply(best.items, s.items);
+              const n = best.items.length;
+              let lat = 0;
+              let lon = 0;
+              best.items.forEach((it) => {
+                const c = noticeCentroid(it);
+                if (!c) return;
+                lat += c[0];
+                lon += c[1];
+              });
+              best.lat = lat / n;
+              best.lon = lon / n;
+              if (multi.indexOf(best) < 0) multi.push(best);
+              changed = true;
+            } else {
+              nextSingles.push(s);
+            }
+          });
+          clusters = multi.concat(nextSingles);
+        }
+      }
+      return clusters;
     };
 
     // Cohesive ECDIS Color Hierarchy:
@@ -4774,7 +4823,8 @@ function renderNtMListAndMap() {
     const clusters = clusterNoticesForZoom(filtered, curZoom);
     if (clusters) {
       clusters.forEach((cl) => {
-        if (cl.items.length === 1) {
+        // Below ~z3.5 keep even lone notices as compact badges (no full lines/polygons clutter)
+        if (cl.items.length === 1 && curZoom > 3.5) {
           plotOneNotice(cl.items[0]);
           return;
         }
@@ -4796,11 +4846,11 @@ function renderNtMListAndMap() {
         const icon = L.divIcon({
           className: "ntm-cluster-icon",
           html:
-            '<div style="width:28px;height:28px;border-radius:50%;background:#f97316;border:2px solid #0f172a;color:#fff;font:700 11px/28px Segoe UI,sans-serif;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.45);">' +
+            '<div style="width:20px;height:20px;border-radius:50%;background:#f97316;border:1.5px solid #0f172a;color:#fff;font:700 9px/20px Segoe UI,sans-serif;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.4);">' +
             count +
             "</div>",
-          iconSize: [28, 28],
-          iconAnchor: [14, 14]
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
         });
         const m = L.marker([cl.lat, cl.lon], {
           icon,
