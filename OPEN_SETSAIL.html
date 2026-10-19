@@ -8154,8 +8154,8 @@ select option {
 }
 /* Horizontal wordmarks — same visual height, wider */
 .source-authority-img--wide {
-  height: 36px;
-  max-width: 140px;
+  height: 38px;
+  max-width: 168px;
 }
 /* Dark-on-light logos: chip so they stay visible on dark Home */
 .source-authority-img--on-light {
@@ -11618,7 +11618,7 @@ select option {
   </style>
 
   <script>
-    // v5.32 — AIS/ECDIS zoom + authority logos marquee + ECDIS land/coast alignment (NE land polygons, no separate coastline stroke)
+    // v5.34 — cropped authority logos + JMA/USNO/IERS/CARTO + ECDIS land/coast alignment (NE land polygons, no separate coastline stroke)
     (function(){
       try {
         if (localStorage.getItem('setsail_force_v533') === '1') return;
@@ -12049,41 +12049,44 @@ select option {
               </div>
               <div class="home-sources-marquee-band">
                                                                                 <div class="home-sources-marquee-track" id="homeSourcesMarqueeTrack">
-                  <!-- Horizontal logos = mark only. Square/vertical = mark + text. Light-on-dark chips where needed. -->
+                  <!-- Horizontal logos = mark only. Square/vertical = mark + text. -->
                   <div class="source-authority-logo is-logo-only" title="UKHO ADMIRALTY"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/admiralty.webp" alt="ADMIRALTY" loading="lazy" decoding="async" /></div>
-                  <div class="source-authority-logo is-logo-only" title="NautoShark"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/nautoshark.webp" alt="NautoShark" loading="lazy" decoding="async" /></div>
-                  <div class="source-authority-logo" title="NGA"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/nga.jpg" alt="NGA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NGA MSI</span><span class="source-logo-sub">NAVAREA IV/XII</span></div></div>
+                  <div class="source-authority-logo is-logo-only" title="NautoShark"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/nautoshark.png" alt="NautoShark" loading="lazy" decoding="async" /></div>
+                  <div class="source-authority-logo" title="NGA MSI"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/nga.png" alt="NGA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NGA MSI</span><span class="source-logo-sub">NAVAREA IV/XII</span></div></div>
                   <div class="source-authority-logo" title="NOAA"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/noaa.svg" alt="NOAA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NOAA NHC</span><span class="source-logo-sub">Cyclones • ENC</span></div></div>
                   <div class="source-authority-logo" title="USACE"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/usace.svg" alt="USACE" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">USACE</span><span class="source-logo-sub">Channel Depths</span></div></div>
-                  <div class="source-authority-logo" title="ECMWF"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/ecmwf.svg" alt="ECMWF" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">ECMWF</span><span class="source-logo-sub">IFS via Open-Meteo</span></div></div>
+                  <div class="source-authority-logo is-logo-only" title="ECMWF — IFS via Open-Meteo"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/ecmwf.svg" alt="ECMWF" loading="lazy" decoding="async" /></div>
                   <div class="source-authority-logo is-logo-only" title="Open-Meteo"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/open-meteo.webp" alt="Open-Meteo" loading="lazy" decoding="async" /></div>
-                  <div class="source-authority-logo" title="JMA RSMC"><div class="source-logo-text-group"><span class="source-logo-name">JMA RSMC</span><span class="source-logo-sub">Tokyo Typhoon</span></div></div>
+                  <div class="source-authority-logo" title="JMA RSMC"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/jma-rsmc.png" alt="JMA RSMC" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">JMA RSMC</span><span class="source-logo-sub">Tokyo Typhoon</span></div></div>
                   <div class="source-authority-logo" title="JTWC"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/jtwc.png" alt="JTWC" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">JTWC</span><span class="source-logo-sub">Typhoon Advisories</span></div></div>
-                  <div class="source-authority-logo is-logo-only" title="AISStream.io"><img class="source-authority-img source-authority-img--wide source-authority-img--on-light" src="assets/authority-logos/aisstream.png" alt="aisstream.io" loading="lazy" decoding="async" /></div>
+                  <div class="source-authority-logo is-logo-only" title="AISStream.io"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/aisstream.png" alt="aisstream.io" loading="lazy" decoding="async" /></div>
                   <div class="source-authority-logo" title="Open Waters"><div class="source-logo-text-group"><span class="source-logo-name">OPEN WATERS</span><span class="source-logo-sub">Community AIS</span></div></div>
                   <div class="source-authority-logo" title="Digitraffic / Fintraffic"><img class="source-authority-img source-authority-img--mark source-authority-img--on-light" src="assets/authority-logos/digitraffic-fintraffic.png" alt="Fintraffic" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">DIGITRAFFIC</span><span class="source-logo-sub">Baltic AIS</span></div></div>
-                  <div class="source-authority-logo" title="CARTO"><div class="source-logo-text-group"><span class="source-logo-name">CARTO</span><span class="source-logo-sub">Voyager Basemap</span></div></div>
+                  <div class="source-authority-logo is-logo-only" title="CARTO Voyager Basemap"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/carto.png" alt="CARTO" loading="lazy" decoding="async" /></div>
                   <div class="source-authority-logo" title="OpenSeaMap"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/openseamap.webp" alt="OpenSeaMap" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">OPENSEAMAP</span><span class="source-logo-sub">Seamark Overlay</span></div></div>
                   <div class="source-authority-logo" title="Port Surveys"><div class="source-logo-text-group"><span class="source-logo-name">PORT SURVEYS</span><span class="source-logo-sub">MPA • ACP • SCA</span></div></div>
-                  <div class="source-authority-logo" title="USNO / IERS"><div class="source-logo-text-group"><span class="source-logo-name">USNO / IERS</span><span class="source-logo-sub">Nautical Almanac</span></div></div>
+                  <div class="source-authority-logo" title="USNO"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/usno.png" alt="USNO" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">USNO</span><span class="source-logo-sub">Nautical Almanac</span></div></div>
+                  <div class="source-authority-logo" title="IERS"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/iers.png" alt="IERS" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">IERS</span><span class="source-logo-sub">Earth Rotation</span></div></div>
                   <div class="source-authority-logo" title="WMM"><div class="source-logo-text-group"><span class="source-logo-name">WMM</span><span class="source-logo-sub">Magnetic Model</span></div></div>
 
+                  <!-- Horizontal logos = mark only. Square/vertical = mark + text. -->
                   <div class="source-authority-logo is-logo-only" title="UKHO ADMIRALTY"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/admiralty.webp" alt="ADMIRALTY" loading="lazy" decoding="async" /></div>
-                  <div class="source-authority-logo is-logo-only" title="NautoShark"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/nautoshark.webp" alt="NautoShark" loading="lazy" decoding="async" /></div>
-                  <div class="source-authority-logo" title="NGA"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/nga.jpg" alt="NGA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NGA MSI</span><span class="source-logo-sub">NAVAREA IV/XII</span></div></div>
+                  <div class="source-authority-logo is-logo-only" title="NautoShark"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/nautoshark.png" alt="NautoShark" loading="lazy" decoding="async" /></div>
+                  <div class="source-authority-logo" title="NGA MSI"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/nga.png" alt="NGA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NGA MSI</span><span class="source-logo-sub">NAVAREA IV/XII</span></div></div>
                   <div class="source-authority-logo" title="NOAA"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/noaa.svg" alt="NOAA" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">NOAA NHC</span><span class="source-logo-sub">Cyclones • ENC</span></div></div>
                   <div class="source-authority-logo" title="USACE"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/usace.svg" alt="USACE" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">USACE</span><span class="source-logo-sub">Channel Depths</span></div></div>
-                  <div class="source-authority-logo" title="ECMWF"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/ecmwf.svg" alt="ECMWF" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">ECMWF</span><span class="source-logo-sub">IFS via Open-Meteo</span></div></div>
+                  <div class="source-authority-logo is-logo-only" title="ECMWF — IFS via Open-Meteo"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/ecmwf.svg" alt="ECMWF" loading="lazy" decoding="async" /></div>
                   <div class="source-authority-logo is-logo-only" title="Open-Meteo"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/open-meteo.webp" alt="Open-Meteo" loading="lazy" decoding="async" /></div>
-                  <div class="source-authority-logo" title="JMA RSMC"><div class="source-logo-text-group"><span class="source-logo-name">JMA RSMC</span><span class="source-logo-sub">Tokyo Typhoon</span></div></div>
+                  <div class="source-authority-logo" title="JMA RSMC"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/jma-rsmc.png" alt="JMA RSMC" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">JMA RSMC</span><span class="source-logo-sub">Tokyo Typhoon</span></div></div>
                   <div class="source-authority-logo" title="JTWC"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/jtwc.png" alt="JTWC" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">JTWC</span><span class="source-logo-sub">Typhoon Advisories</span></div></div>
-                  <div class="source-authority-logo is-logo-only" title="AISStream.io"><img class="source-authority-img source-authority-img--wide source-authority-img--on-light" src="assets/authority-logos/aisstream.png" alt="aisstream.io" loading="lazy" decoding="async" /></div>
+                  <div class="source-authority-logo is-logo-only" title="AISStream.io"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/aisstream.png" alt="aisstream.io" loading="lazy" decoding="async" /></div>
                   <div class="source-authority-logo" title="Open Waters"><div class="source-logo-text-group"><span class="source-logo-name">OPEN WATERS</span><span class="source-logo-sub">Community AIS</span></div></div>
                   <div class="source-authority-logo" title="Digitraffic / Fintraffic"><img class="source-authority-img source-authority-img--mark source-authority-img--on-light" src="assets/authority-logos/digitraffic-fintraffic.png" alt="Fintraffic" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">DIGITRAFFIC</span><span class="source-logo-sub">Baltic AIS</span></div></div>
-                  <div class="source-authority-logo" title="CARTO"><div class="source-logo-text-group"><span class="source-logo-name">CARTO</span><span class="source-logo-sub">Voyager Basemap</span></div></div>
+                  <div class="source-authority-logo is-logo-only" title="CARTO Voyager Basemap"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/carto.png" alt="CARTO" loading="lazy" decoding="async" /></div>
                   <div class="source-authority-logo" title="OpenSeaMap"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/openseamap.webp" alt="OpenSeaMap" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">OPENSEAMAP</span><span class="source-logo-sub">Seamark Overlay</span></div></div>
                   <div class="source-authority-logo" title="Port Surveys"><div class="source-logo-text-group"><span class="source-logo-name">PORT SURVEYS</span><span class="source-logo-sub">MPA • ACP • SCA</span></div></div>
-                  <div class="source-authority-logo" title="USNO / IERS"><div class="source-logo-text-group"><span class="source-logo-name">USNO / IERS</span><span class="source-logo-sub">Nautical Almanac</span></div></div>
+                  <div class="source-authority-logo" title="USNO"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/usno.png" alt="USNO" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">USNO</span><span class="source-logo-sub">Nautical Almanac</span></div></div>
+                  <div class="source-authority-logo" title="IERS"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/iers.png" alt="IERS" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">IERS</span><span class="source-logo-sub">Earth Rotation</span></div></div>
                   <div class="source-authority-logo" title="WMM"><div class="source-logo-text-group"><span class="source-logo-name">WMM</span><span class="source-logo-sub">Magnetic Model</span></div></div>
                 </div>
               </div>
@@ -19881,7 +19884,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.24"></script>
   <script src="assets/Auto NtM Plotting/port_depths.js?v=5.24"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.33"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.34"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19959,7 +19962,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.33"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.34"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
