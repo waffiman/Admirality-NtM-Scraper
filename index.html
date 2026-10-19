@@ -3895,8 +3895,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
   text-align: center;
   backdrop-filter: blur(16px);
   cursor: pointer;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, transform 0.45s ease;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
   position: relative;
   overflow: hidden;
   color: #ffffff;
@@ -3906,14 +3906,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 
 .home-tool-tile:hover {
-  background: rgba(16, 36, 80, 0.85);
-  border-color: rgba(240, 90, 54, 0.55);
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(240, 90, 54, 0.25);
+  background: rgba(14, 32, 70, 0.78);
+  border-color: rgba(148, 180, 230, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.42);
 }
 
 .home-tool-tile:active {
-  transform: translateY(-2px) scale(0.99);
+  transform: translateY(-1px);
 }
 
 .home-tool-icon-box {
@@ -3931,9 +3931,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 
 .home-tool-tile:hover .home-tool-icon-box {
-  transform: scale(1.08);
-  background: rgba(240, 90, 54, 0.16);
-  border-color: rgba(240, 90, 54, 0.55);
+  transform: scale(1.03);
+  background: rgba(126, 182, 255, 0.16);
+  border-color: rgba(140, 180, 255, 0.42);
 }
 
 .home-tool-title {
@@ -5801,7 +5801,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .ntm-vessel-popover .ntm-popover-body,
 .home-vessel-popover .ntm-popover-body {
   overflow: auto !important;
-  max-height: min(70vh, 560px);
+  max-height: min(62vh, 420px);
 }
 /* ECDIS broken-crosshair cursor — black + white halo (readable on blue water & yellow land) */
 .ecdis-cursor-map,
@@ -5846,35 +5846,78 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .home-vessel-popover {
   /* Fixed — Home hero ancestors use overflow:hidden and would clip an absolute popover */
   position: fixed !important;
-  top: 56px;
-  right: 12px;
+  top: 52px;
+  right: 10px;
   left: auto !important;
   z-index: 50000 !important;
   display: none;
-  width: 340px !important;
-  max-width: min(340px, 92vw) !important;
+  width: 300px !important;
+  max-width: min(300px, 92vw) !important;
 }
 .home-vessel-popover.open { display: block !important; }
+
+/* Compact My Vessel form (Home + SetChart) — denser grid, less vertical stack */
+.vessel-profile-fields {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 0.28rem 0.4rem;
+  align-items: end;
+}
+.vessel-profile-fields > .form-group { margin: 0 !important; }
+.vessel-profile-fields > .ntm-popover-subtitle,
+.vessel-profile-fields > .vessel-coords-row,
+.vessel-profile-fields > .vessel-ais-grid,
+.vessel-profile-fields > div:last-child {
+  grid-column: 1 / -1;
+}
+.vessel-profile-fields .ntm-popover-subtitle {
+  margin: 0.15rem 0 0 !important;
+  padding: 0 !important;
+  font-size: 0.62rem !important;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+.vessel-profile-fields label {
+  font-size: 0.6rem !important;
+  margin-bottom: 1px !important;
+  line-height: 1.15;
+}
+.vessel-profile-fields .min-input {
+  font-size: 0.68rem !important;
+  padding: 0.26rem 0.4rem !important;
+  line-height: 1.25;
+}
+.vessel-coords-row {
+  gap: 6px !important;
+  margin-bottom: 0 !important;
+}
 .vessel-ais-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.35rem 0.45rem;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.22rem 0.35rem;
 }
 .vessel-ais-grid .form-group { margin: 0; }
 .vessel-ais-grid label {
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   color: var(--muted);
   display: block;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
   font-weight: 600;
 }
 .vessel-ais-grid .min-input {
-  font-size: 0.72rem;
-  padding: 0.32rem 0.45rem;
+  font-size: 0.68rem;
+  padding: 0.26rem 0.38rem;
   width: 100%;
   box-sizing: border-box;
 }
 .vessel-ais-grid .vessel-span2 { grid-column: 1 / -1; }
+.vessel-ais-grid .form-group:nth-child(1),
+.vessel-ais-grid .form-group:nth-child(2) {
+  grid-column: span 1;
+}
+/* MMSI + Type share first row as 1.5 / 1.5 of 3-col → use span */
+.vessel-ais-grid > .form-group:nth-child(1) { grid-column: 1 / 3; }
+.vessel-ais-grid > .form-group:nth-child(2) { grid-column: 3 / 4; }
 .vessel-ais-suggest {
   position: absolute;
   left: 0; right: 0;
@@ -5901,27 +5944,28 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 .vessel-ais-suggest button:hover { background: rgba(56, 189, 248, 0.12); }
 .vessel-ais-suggest .vas-meta { color: #94a3b8; font-size: 0.65rem; }
-.ntm-vessel-popover { width: 340px !important; max-height: min(78vh, 640px); overflow: auto; }
+.ntm-vessel-popover { width: 300px !important; max-height: min(72vh, 520px); overflow: auto; }
 
 /* My Vessel Popover enhanced styling */
 .ntm-vessel-popover {
   background: rgba(10, 20, 44, 0.94) !important;
   backdrop-filter: blur(20px) !important;
   border: 1px solid rgba(56, 189, 248, 0.3) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.12) !important;
-  width: 320px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 14px rgba(56, 189, 248, 0.1) !important;
+  width: 300px !important;
 }
 
 .ntm-vessel-popover .ntm-popover-header {
   border-bottom: 1px solid rgba(56, 189, 248, 0.2) !important;
-  padding: 0.65rem 0.85rem !important;
+  padding: 0.45rem 0.65rem !important;
   font-weight: 700 !important;
+  font-size: 0.82rem !important;
   color: #38bdf8 !important;
 }
 
 .ntm-vessel-popover .ntm-popover-body {
-  padding: 0.75rem 0.85rem !important;
+  padding: 0.5rem 0.65rem !important;
 }
 
 .vessel-coords-row .min-input {
@@ -6780,7 +6824,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 .home-tool-tile {
   will-change: transform, opacity;
-  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, width 0.32s cubic-bezier(0.16, 1, 0.3, 1), padding 0.32s ease !important;
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, transform 0.45s ease, width 0.4s ease, padding 0.4s ease !important;
 }
 
 .home-tool-hover-drawer {
@@ -6842,9 +6886,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 
 .home-hero-viewport.on-slide-2 .home-tool-tile:hover {
-  background: rgba(14, 30, 66, 0.96);
-  border-color: rgba(240, 90, 54, 0.75);
-  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.65), 0 0 28px rgba(240, 90, 54, 0.28);
+  background: rgba(14, 30, 66, 0.92);
+  border-color: rgba(148, 180, 230, 0.45);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
   z-index: 45;
 }
 
@@ -11577,9 +11621,9 @@ select option {
     // v5.32 — AIS/ECDIS zoom + authority logos marquee + ECDIS land/coast alignment (NE land polygons, no separate coastline stroke)
     (function(){
       try {
-        if (localStorage.getItem('setsail_force_v532') === '1') return;
+        if (localStorage.getItem('setsail_force_v533') === '1') return;
         var finish = function(){
-          localStorage.setItem('setsail_force_v532', '1');
+          localStorage.setItem('setsail_force_v533', '1');
           // clear ALL old force/reload flags that blocked later bumps
           try {
             ['setsail_force_v512','setsail_force_v513','setsail_force_v514','setsail_force_v515','setsail_force_v516','setsail_force_v524','setsail_force_v528',
@@ -19837,7 +19881,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.24"></script>
   <script src="assets/Auto NtM Plotting/port_depths.js?v=5.24"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.32"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.33"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19915,7 +19959,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.32"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.33"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20065,7 +20109,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         const winW = window.innerWidth || 1200;
         const isPhone = winW <= 768;
         const vw = Math.min(winW, 1280);
-        const spreadXBase = isPhone ? 0 : clamp(vw * 0.135, 80, 175);
+        const spreadXBase = isPhone ? 0 : clamp(vw * 0.085, 52, 110);
 
         tiles.forEach((tile, idx) => {
           const isExtra = tile.classList.contains('home-tool-extra');
@@ -20075,16 +20119,17 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           else if (idx % 3 === 1) { dirX = 0; dirY = 0.25; }
           else { dirX = 1; dirY = -0.35; }
 
-          const spreadX = dirX * spreadXBase * e1;
-          const spreadY = isPhone ? (dirY * 10 - 6) * e1 : (dirY * 44 - 22) * e1;
-          const slide2Scale = isPhone ? (1 + 0.03 * e1) : (1 + 0.18 * e1);
+          // Calmer dispersion — less travel and scale than before
+          const spreadX = dirX * spreadXBase * 0.62 * e1;
+          const spreadY = isPhone ? (dirY * 6 - 3) * e1 : (dirY * 22 - 10) * e1;
+          const slide2Scale = isPhone ? (1 + 0.02 * e1) : (1 + 0.08 * e1);
 
           // Exit animation when scrolling from Slide 2 -> Slide 3 (t2: 0 -> 0.62)
           const exitProg = clamp(t2 / 0.62, 0, 1);
           const exitEase = easeInOutCubic(exitProg);
-          const exitX = dirX * 140 * exitEase;
-          const exitY = (-100 + (idx % 2) * -25) * exitEase;
-          const totalScale = slide2Scale * (1 - 0.26 * exitEase);
+          const exitX = dirX * 72 * exitEase;
+          const exitY = (-48 + (idx % 2) * -12) * exitEase;
+          const totalScale = slide2Scale * (1 - 0.14 * exitEase);
           let alpha = 1 - exitEase;
 
           if (isExtra) {
