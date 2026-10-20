@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "1600 UTC",
-  "lastSyncUtc": "2026-10-20T16:28:15.916825+00:00",
+  "synopticCycle": "2100 UTC",
+  "lastSyncUtc": "2026-10-20T21:20:23.047564+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,20 +9,20 @@
       "shortName": "Champi",
       "category": "Typhoon (JTWC/JMA)",
       "center": [
-        17.0,
-        133.0
+        17.4,
+        131.5
       ],
-      "centralPressure": 905,
-      "maxWinds": 155,
-      "gusts": 194,
+      "centralPressure": 900,
+      "maxWinds": 160,
+      "gusts": 200,
       "movement": "WNW at 13 kts",
-      "dangerRadiusNm": 186,
+      "dangerRadiusNm": 192,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            18.1,
-            130.5
+            18.6,
+            129.1
           ],
           "winds": 155,
           "radiusNm": 56
@@ -30,8 +30,8 @@
         {
           "tau": 24,
           "coords": [
-            19.5,
-            128.3
+            19.8,
+            127.2
           ],
           "winds": 150,
           "radiusNm": 73
@@ -39,17 +39,17 @@
         {
           "tau": 36,
           "coords": [
-            20.6,
-            126.7
+            20.9,
+            125.8
           ],
-          "winds": 140,
+          "winds": 135,
           "radiusNm": 90
         },
         {
           "tau": 48,
           "coords": [
-            21.6,
-            125.5
+            22.2,
+            124.8
           ],
           "winds": 125,
           "radiusNm": 107
@@ -57,52 +57,52 @@
         {
           "tau": 60,
           "coords": [
-            23.1,
-            124.6
+            24.0,
+            123.9
           ],
-          "winds": 110,
+          "winds": 115,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
-            25.0,
-            123.9
+            25.8,
+            123.6
           ],
-          "winds": 105,
+          "winds": 95,
           "radiusNm": 140
         },
         {
           "tau": 84,
           "coords": [
-            29.5,
-            125.3
+            30.4,
+            126.2
           ],
-          "winds": 75,
+          "winds": 65,
           "radiusNm": 157
         }
       ]
     },
     {
       "id": "SH-02",
-      "name": "Tropical Storm TWO",
-      "shortName": "Two",
+      "name": "Tropical Storm AGUEDA",
+      "shortName": "Agueda",
       "category": "Tropical Storm (JTWC)",
       "center": [
         -5.6,
         59.7
       ],
       "centralPressure": 1007,
-      "maxWinds": 35,
-      "gusts": 44,
-      "movement": "W at 34 kts",
+      "maxWinds": 40,
+      "gusts": 50,
+      "movement": "W at 38 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -4.8,
-            53.0
+            -5.5,
+            52.1
           ],
           "winds": 40,
           "radiusNm": 56
@@ -110,8 +110,8 @@
         {
           "tau": 24,
           "coords": [
-            -5.3,
-            52.3
+            -6.1,
+            51.5
           ],
           "winds": 45,
           "radiusNm": 73
@@ -119,8 +119,8 @@
         {
           "tau": 36,
           "coords": [
-            -6.0,
-            51.7
+            -6.5,
+            50.8
           ],
           "winds": 50,
           "radiusNm": 90
@@ -128,35 +128,35 @@
         {
           "tau": 48,
           "coords": [
-            -6.5,
-            50.9
+            -6.7,
+            49.9
           ],
-          "winds": 50,
+          "winds": 45,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            -6.8,
-            50.0
+            -6.9,
+            48.7
           ],
-          "winds": 45,
+          "winds": 40,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
-            -6.9,
-            48.6
+            -7.0,
+            47.3
           ],
-          "winds": 40,
+          "winds": 35,
           "radiusNm": 140
         },
         {
           "tau": 84,
           "coords": [
-            -7.0,
-            45.6
+            -6.7,
+            44.3
           ],
           "winds": 30,
           "radiusNm": 157
@@ -169,20 +169,20 @@
       "shortName": "93L",
       "category": "Tropical Disturbance (Formation Chance 40%)",
       "center": [
-        35.6,
-        -70.2
+        36.3,
+        -69.4
       ],
-      "centralPressure": 1000,
+      "centralPressure": 997,
       "maxWinds": 45,
       "gusts": 58,
-      "movement": "NNE at 5 kts",
+      "movement": "NNE at 4 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            36.5,
-            -69.6
+            37.0,
+            -69.2
           ],
           "winds": 50,
           "radiusNm": 45
@@ -190,8 +190,8 @@
         {
           "tau": 24,
           "coords": [
-            36.8,
-            -69.6
+            37.5,
+            -69.3
           ],
           "winds": 55,
           "radiusNm": 60
@@ -199,8 +199,8 @@
         {
           "tau": 36,
           "coords": [
-            37.5,
-            -69.3
+            38.5,
+            -68.5
           ],
           "winds": 60,
           "radiusNm": 75
@@ -208,8 +208,8 @@
         {
           "tau": 48,
           "coords": [
-            38.8,
-            -67.6
+            39.8,
+            -65.9
           ],
           "winds": 65,
           "radiusNm": 90
@@ -217,8 +217,8 @@
         {
           "tau": 60,
           "coords": [
-            40.5,
-            -63.8
+            41.6,
+            -61.5
           ],
           "winds": 65,
           "radiusNm": 105
@@ -231,20 +231,20 @@
       "shortName": "94E",
       "category": "Tropical Disturbance (Formation Chance 90%)",
       "center": [
-        10.0,
-        -95.3
+        9.8,
+        -96.2
       ],
       "centralPressure": 1007,
       "maxWinds": 25,
       "gusts": 32,
-      "movement": "WSW at 10 kts",
+      "movement": "W at 8 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            9.6,
-            -97.2
+            9.5,
+            -97.8
           ],
           "winds": 30,
           "radiusNm": 45
@@ -252,8 +252,8 @@
         {
           "tau": 24,
           "coords": [
-            9.3,
-            -98.6
+            9.4,
+            -99.0
           ],
           "winds": 35,
           "radiusNm": 60
@@ -261,8 +261,8 @@
         {
           "tau": 36,
           "coords": [
-            9.2,
-            -99.7
+            9.7,
+            -99.8
           ],
           "winds": 40,
           "radiusNm": 75
@@ -270,8 +270,8 @@
         {
           "tau": 48,
           "coords": [
-            9.6,
-            -100.7
+            10.3,
+            -100.8
           ],
           "winds": 45,
           "radiusNm": 90
@@ -279,8 +279,8 @@
         {
           "tau": 60,
           "coords": [
-            10.3,
-            -101.8
+            10.9,
+            -102.0
           ],
           "winds": 50,
           "radiusNm": 105
@@ -297,8 +297,8 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 5.3,
-      "swellPeriod": 10,
+      "waveHeight": 5.5,
+      "swellPeriod": 11,
       "swellDir": "WNW"
     },
     {
@@ -311,23 +311,23 @@
       "radiusNm": 300,
       "waveHeight": 2.5,
       "swellPeriod": 8,
-      "swellDir": "NNE"
+      "swellDir": "N"
     },
     {
       "id": "WS1",
       "name": "Champi Cyclonic Wave Field",
       "center": [
-        17.0,
-        133.0
+        17.4,
+        131.5
       ],
-      "radiusNm": 372,
+      "radiusNm": 384,
       "waveHeight": 8.6,
-      "swellPeriod": 11,
-      "swellDir": "ESE"
+      "swellPeriod": 12,
+      "swellDir": "ENE"
     },
     {
       "id": "WS2",
-      "name": "Two Cyclonic Wave Field",
+      "name": "Agueda Cyclonic Wave Field",
       "center": [
         -5.6,
         59.7
@@ -335,35 +335,35 @@
       "radiusNm": 150,
       "waveHeight": 2.5,
       "swellPeriod": 8,
-      "swellDir": "ESE"
+      "swellDir": "SE"
     },
     {
       "id": "WS3",
       "name": "93L Cyclonic Wave Field",
       "center": [
-        35.6,
-        -70.2
+        36.3,
+        -69.4
       ],
       "radiusNm": 150,
-      "waveHeight": 3.6,
+      "waveHeight": 3.2,
       "swellPeriod": 8,
-      "swellDir": "N"
+      "swellDir": "E"
     }
   ],
   "pressureCenters": [
     {
       "type": "L",
-      "value": 905,
+      "value": 900,
       "name": "Typhoon CHAMPI Core Low",
       "coords": [
-        17.0,
-        133.0
+        17.4,
+        131.5
       ]
     },
     {
       "type": "L",
       "value": 1007,
-      "name": "Tropical Storm TWO Core Low",
+      "name": "Tropical Storm AGUEDA Core Low",
       "coords": [
         -5.6,
         59.7
@@ -371,11 +371,11 @@
     },
     {
       "type": "L",
-      "value": 1000,
+      "value": 997,
       "name": "Invest 93L Core Low",
       "coords": [
-        35.6,
-        -70.2
+        36.3,
+        -69.4
       ]
     },
     {
@@ -383,8 +383,8 @@
       "value": 1007,
       "name": "Invest 94E Core Low",
       "coords": [
-        10.0,
-        -95.3
+        9.8,
+        -96.2
       ]
     },
     {
@@ -418,12 +418,12 @@
   "windVectors": [
     {
       "coords": [
-        17.3,
-        133.3
+        17.7,
+        131.8
       ],
       "dir": 200,
-      "speed": 155,
-      "label": "155 kts (Champi)"
+      "speed": 160,
+      "label": "160 kts (Champi)"
     },
     {
       "coords": [
@@ -431,13 +431,13 @@
         60.0
       ],
       "dir": 200,
-      "speed": 35,
-      "label": "35 kts (Two)"
+      "speed": 40,
+      "label": "40 kts (Agueda)"
     },
     {
       "coords": [
-        35.9,
-        -69.9
+        36.6,
+        -69.1
       ],
       "dir": 160,
       "speed": 45,
@@ -445,8 +445,8 @@
     },
     {
       "coords": [
-        10.3,
-        -95.0
+        10.1,
+        -95.9
       ],
       "dir": 160,
       "speed": 25,
