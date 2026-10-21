@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "0300 UTC",
-  "lastSyncUtc": "2026-10-21T03:37:33.278287+00:00",
+  "synopticCycle": "1100 UTC",
+  "lastSyncUtc": "2026-10-21T11:18:56.282336+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,76 +9,76 @@
       "shortName": "Champi",
       "category": "Typhoon (JTWC/JMA)",
       "center": [
-        17.4,
-        131.5
+        18.1,
+        130.1
       ],
       "centralPressure": 900,
-      "maxWinds": 160,
-      "gusts": 200,
-      "movement": "WNW at 19 kts",
-      "dangerRadiusNm": 192,
+      "maxWinds": 155,
+      "gusts": 194,
+      "movement": "WNW at 17 kts",
+      "dangerRadiusNm": 186,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            19.3,
-            128.0
+            19.9,
+            127.0
           ],
-          "winds": 145,
+          "winds": 135,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            20.5,
-            126.3
+            21.0,
+            125.5
           ],
-          "winds": 130,
+          "winds": 120,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            21.6,
-            125.1
+            22.2,
+            124.4
           ],
-          "winds": 120,
+          "winds": 110,
           "radiusNm": 90
         },
         {
           "tau": 48,
           "coords": [
-            23.1,
-            124.1
+            23.9,
+            123.4
           ],
-          "winds": 115,
+          "winds": 105,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            24.9,
-            123.5
+            25.8,
+            123.0
           ],
-          "winds": 105,
+          "winds": 90,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
-            26.8,
+            28.1,
             123.6
           ],
-          "winds": 85,
+          "winds": 70,
           "radiusNm": 140
         },
         {
           "tau": 84,
           "coords": [
-            31.4,
-            127.1
+            31.8,
+            127.2
           ],
-          "winds": 55,
+          "winds": 50,
           "radiusNm": 157
         }
       ]
@@ -93,73 +93,64 @@
         59.7
       ],
       "centralPressure": 1007,
-      "maxWinds": 40,
-      "gusts": 50,
-      "movement": "W at 38 kts",
+      "maxWinds": 45,
+      "gusts": 56,
+      "movement": "W at 40 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -5.5,
-            52.1
+            -5.7,
+            51.7
           ],
-          "winds": 40,
+          "winds": 50,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            -6.1,
-            51.5
+            -6.0,
+            51.1
           ],
-          "winds": 45,
+          "winds": 50,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            -6.5,
-            50.8
+            -6.1,
+            50.3
           ],
-          "winds": 50,
+          "winds": 45,
           "radiusNm": 90
         },
         {
           "tau": 48,
           "coords": [
-            -6.7,
-            49.9
+            -6.2,
+            49.2
           ],
-          "winds": 45,
+          "winds": 40,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            -6.9,
-            48.7
+            -6.2,
+            47.7
           ],
-          "winds": 40,
+          "winds": 35,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
-            -7.0,
-            47.3
-          ],
-          "winds": 35,
-          "radiusNm": 140
-        },
-        {
-          "tau": 84,
-          "coords": [
-            -6.7,
-            44.3
+            -5.9,
+            46.0
           ],
           "winds": 30,
-          "radiusNm": 157
+          "radiusNm": 140
         }
       ]
     },
@@ -169,8 +160,8 @@
       "shortName": "94E",
       "category": "Tropical Disturbance (Formation Chance 90%)",
       "center": [
-        9.7,
-        -96.9
+        10.1,
+        -97.5
       ],
       "centralPressure": 1007,
       "maxWinds": 25,
@@ -181,8 +172,8 @@
         {
           "tau": 12,
           "coords": [
-            9.5,
-            -98.3
+            9.9,
+            -98.9
           ],
           "winds": 30,
           "radiusNm": 45
@@ -190,8 +181,8 @@
         {
           "tau": 24,
           "coords": [
-            9.4,
-            -99.3
+            10.0,
+            -99.8
           ],
           "winds": 35,
           "radiusNm": 60
@@ -199,8 +190,8 @@
         {
           "tau": 36,
           "coords": [
-            9.7,
-            -100.2
+            10.5,
+            -100.6
           ],
           "winds": 40,
           "radiusNm": 75
@@ -208,8 +199,8 @@
         {
           "tau": 48,
           "coords": [
-            10.3,
-            -101.2
+            11.1,
+            -101.6
           ],
           "winds": 45,
           "radiusNm": 90
@@ -217,8 +208,8 @@
         {
           "tau": 60,
           "coords": [
-            11.0,
-            -102.2
+            11.8,
+            -102.4
           ],
           "winds": 50,
           "radiusNm": 105
@@ -231,8 +222,8 @@
       "shortName": "93L",
       "category": "Tropical Disturbance (Formation Chance 40%)",
       "center": [
-        36.8,
-        -69.1
+        37.1,
+        -69.3
       ],
       "centralPressure": 997,
       "maxWinds": 45,
@@ -243,8 +234,8 @@
         {
           "tau": 12,
           "coords": [
-            37.3,
-            -69.3
+            37.6,
+            -69.5
           ],
           "winds": 50,
           "radiusNm": 45
@@ -252,8 +243,8 @@
         {
           "tau": 24,
           "coords": [
-            38.1,
-            -69.2
+            38.6,
+            -68.8
           ],
           "winds": 55,
           "radiusNm": 60
@@ -261,8 +252,8 @@
         {
           "tau": 36,
           "coords": [
-            39.2,
-            -67.6
+            40.1,
+            -66.1
           ],
           "winds": 60,
           "radiusNm": 75
@@ -270,8 +261,8 @@
         {
           "tau": 48,
           "coords": [
-            40.9,
-            -63.7
+            42.2,
+            -61.2
           ],
           "winds": 65,
           "radiusNm": 90
@@ -279,8 +270,8 @@
         {
           "tau": 60,
           "coords": [
-            43.2,
-            -58.5
+            44.6,
+            -56.1
           ],
           "winds": 65,
           "radiusNm": 105
@@ -297,9 +288,9 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 5.3,
-      "swellPeriod": 11,
-      "swellDir": "WNW"
+      "waveHeight": 5.2,
+      "swellPeriod": 10,
+      "swellDir": "W"
     },
     {
       "id": "W2",
@@ -309,20 +300,20 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 2.7,
-      "swellPeriod": 8,
-      "swellDir": "NNW"
+      "waveHeight": 3.2,
+      "swellPeriod": 9,
+      "swellDir": "WNW"
     },
     {
       "id": "WS1",
       "name": "Champi Cyclonic Wave Field",
       "center": [
-        17.4,
-        131.5
+        18.1,
+        130.1
       ],
-      "radiusNm": 384,
-      "waveHeight": 7.7,
-      "swellPeriod": 10,
+      "radiusNm": 372,
+      "waveHeight": 8.8,
+      "swellPeriod": 11,
       "swellDir": "S"
     },
     {
@@ -334,20 +325,20 @@
       ],
       "radiusNm": 150,
       "waveHeight": 2.5,
-      "swellPeriod": 8,
+      "swellPeriod": 9,
       "swellDir": "SE"
     },
     {
       "id": "WS4",
       "name": "93L Cyclonic Wave Field",
       "center": [
-        36.8,
-        -69.1
+        37.1,
+        -69.3
       ],
       "radiusNm": 150,
-      "waveHeight": 3.6,
-      "swellPeriod": 8,
-      "swellDir": "NE"
+      "waveHeight": 4.4,
+      "swellPeriod": 10,
+      "swellDir": "NNE"
     }
   ],
   "pressureCenters": [
@@ -356,8 +347,8 @@
       "value": 900,
       "name": "Typhoon CHAMPI Core Low",
       "coords": [
-        17.4,
-        131.5
+        18.1,
+        130.1
       ]
     },
     {
@@ -374,8 +365,8 @@
       "value": 1007,
       "name": "Invest 94E Core Low",
       "coords": [
-        9.7,
-        -96.9
+        10.1,
+        -97.5
       ]
     },
     {
@@ -383,8 +374,8 @@
       "value": 997,
       "name": "Invest 93L Core Low",
       "coords": [
-        36.8,
-        -69.1
+        37.1,
+        -69.3
       ]
     },
     {
@@ -418,12 +409,12 @@
   "windVectors": [
     {
       "coords": [
-        17.7,
-        131.8
+        18.4,
+        130.4
       ],
       "dir": 200,
-      "speed": 160,
-      "label": "160 kts (Champi)"
+      "speed": 155,
+      "label": "155 kts (Champi)"
     },
     {
       "coords": [
@@ -431,13 +422,13 @@
         60.0
       ],
       "dir": 200,
-      "speed": 40,
-      "label": "40 kts (Agueda)"
+      "speed": 45,
+      "label": "45 kts (Agueda)"
     },
     {
       "coords": [
-        10.0,
-        -96.6
+        10.4,
+        -97.2
       ],
       "dir": 160,
       "speed": 25,
@@ -445,8 +436,8 @@
     },
     {
       "coords": [
-        37.1,
-        -68.8
+        37.4,
+        -69.0
       ],
       "dir": 160,
       "speed": 45,
