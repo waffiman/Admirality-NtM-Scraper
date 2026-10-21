@@ -11,13 +11,25 @@
   const TIDES_EXTREMES = "https://api.openwaters.io/tides/extremes";
   const CURRENTS_EVENTS = "https://api.openwaters.io/currents/events";
 
-  const ML_CSS = "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css";
-  const ML_JS = "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js";
-  // Leaflet uses 256px CSS pixels; MapLibre vector styles are typically 512 → zoom − 1
+  // Prefer local MapLibre (no CDN flake); then unpkg / jsdelivr
+  const ML_BUNDLES = [
+    {
+      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css",
+      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js"
+    },
+    {
+      css: "https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.css",
+      js: "https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.js"
+    },
+    {
+      css: "https://cdn.jsdelivr.net/npm/maplibre-gl@5.0.1/dist/maplibre-gl.css",
+      js: "https://cdn.jsdelivr.net/npm/maplibre-gl@5.0.1/dist/maplibre-gl.js"
+    }
+  ];
+  // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
   const GL_ZOOM_OFFSET = 1;
 
   let readyPromise = null;
-  let seascapeStylePromise = null;
   let OwGlLayerClass = null;
 
   function loadCss(href) {
@@ -95,8 +107,10 @@
       onAdd: function (map) {
         this._map = map;
         const root = (this._container = L.DomUtil.create("div", "setsail-ow-gl-root"));
+        // Above basemap tiles, below controls; pointer-events none so map stays usable
         root.style.cssText =
-          "position:absolute;left:0;top:0;width:100%;height:100%;z-index:350;pointer-events:none;overflow:hidden;";
+          "position:absolute;left:0;top:0;right:0;bottom:0;width:100%;height:100%;" +
+          "z-index:550;pointer-events:none;overflow:hidden;background:transparent;";
         map.getContainer().appendChild(root);
 
         const center = map.getCenter();
@@ -224,11 +238,21 @@
     if (readyPromise) return readyPromise;
     readyPromise = (async () => {
       if (typeof global.maplibregl === "undefined") {
-        loadCss(ML_CSS);
-        await loadScript(ML_JS);
-      }
-      if (typeof global.maplibregl === "undefined") {
-        throw new Error("maplibre-gl failed to load (CDN blocked?)");
+        let lastErr = null;
+        for (let i = 0; i < ML_BUNDLES.length; i++) {
+          const b = ML_BUNDLES[i];
+          try {
+            loadCss(b.css);
+            await loadScript(b.js);
+            if (typeof global.maplibregl !== "undefined") break;
+            lastErr = new Error("maplibregl global missing after " + b.js);
+          } catch (err) {
+            lastErr = err;
+          }
+        }
+        if (typeof global.maplibregl === "undefined") {
+          throw lastErr || new Error("maplibre-gl failed to load (local+CDN)");
+        }
       }
       if (typeof L === "undefined") throw new Error("Leaflet required");
       ensureOwGlLayerClass();
@@ -239,35 +263,128 @@
     return readyPromise;
   }
 
-  async function getSeascapeOverlayStyle() {
-    if (seascapeStylePromise) return seascapeStylePromise;
-    seascapeStylePromise = fetch(SEASCAPE_STYLE, { credentials: "omit" })
-      .then((r) => {
-        if (!r.ok) throw new Error("Seascape style HTTP " + r.status);
-        return r.json();
-      })
-      .then((style) => {
-        const next = Object.assign({}, style);
-        next.sources = Object.assign({}, style.sources || {});
-        delete next.sources.osm;
-        next.layers = (style.layers || []).filter((l) => l && l.id !== "osm-base" && l.source !== "osm");
-        // Slight transparency so ECDIS/Ocean still readable underneath
-        next.layers.forEach((l) => {
-          if (!l || !l.paint) return;
-          if (l.id === "depth-areas" && l.paint["fill-opacity"] == null) {
-            l.paint["fill-opacity"] = 0.72;
+  /**
+   * Seascape official style uses `color-relief` (MapLibre 5+ / not in all builds) and OSM base.
+   * Build a lean overlay: transparent bg + DEM hillshade + depth area fills (no OSM, no color-relief).
+   */
+  function buildSeascapeOverlayStyle() {
+    return {
+      version: 8,
+      name: "SetSail Seascape overlay",
+      glyphs: "https://tiles.openwaters.io/fonts/{fontstack}/{range}.pbf",
+      sources: {
+        "seascape-dem": {
+          type: "raster-dem",
+          tiles: ["https://tiles.openwaters.io/seascape/{z}/{x}/{y}.webp"],
+          tileSize: 512,
+          maxzoom: 14,
+          encoding: "terrarium",
+          attribution: "Open Waters Seascape"
+        },
+        "seascape-vector": {
+          type: "vector",
+          tiles: ["https://tiles.openwaters.io/seascape/{z}/{x}/{y}.pbf"],
+          maxzoom: 14,
+          attribution: "Open Waters Seascape"
+        }
+      },
+      layers: [
+        {
+          id: "ow-transparent-bg",
+          type: "background",
+          paint: { "background-color": "rgba(0,0,0,0)" }
+        },
+        {
+          id: "ow-depth-hillshade",
+          type: "hillshade",
+          source: "seascape-dem",
+          paint: {
+            "hillshade-exaggeration": 0.7,
+            "hillshade-shadow-color": "#041526",
+            "hillshade-highlight-color": "#7dd3fc",
+            "hillshade-accent-color": "#0e7490",
+            "hillshade-illumination-direction": 315
           }
-          if (l.id === "depth-shading" && l.paint["color-relief-opacity"] == null) {
-            l.paint["color-relief-opacity"] = 0.85;
+        },
+        {
+          id: "ow-depth-areas",
+          type: "fill",
+          source: "seascape-vector",
+          "source-layer": "depare",
+          paint: {
+            "fill-color": [
+              "interpolate",
+              ["linear"],
+              ["coalesce", ["get", "DRVAL1"], ["get", "drval1"], 0],
+              -20, "#082f49",
+              -10, "#0c4a6e",
+              -5, "#0369a1",
+              0, "#0ea5e9",
+              5, "#67e8f9",
+              20, "#ecfeff"
+            ],
+            "fill-opacity": 0.48
           }
-        });
-        return next;
-      })
-      .catch((err) => {
-        seascapeStylePromise = null;
-        throw err;
-      });
-    return seascapeStylePromise;
+        },
+        {
+          id: "ow-contour-lines",
+          type: "line",
+          source: "seascape-vector",
+          "source-layer": "depcnt",
+          minzoom: 8,
+          paint: {
+            "line-color": "rgba(224,242,254,0.55)",
+            "line-width": 0.8
+          }
+        }
+      ]
+    };
+  }
+
+  function waitForGlStyle(layer, timeoutMs) {
+    return new Promise((resolve, reject) => {
+      const gl = layer && layer.getMaplibreMap && layer.getMaplibreMap();
+      if (!gl) {
+        reject(new Error("MapLibre map not created"));
+        return;
+      }
+      let settled = false;
+      const finish = (err) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        try {
+          gl.off("load", onLoad);
+          gl.off("error", onErr);
+        } catch (e) {}
+        if (err) reject(err);
+        else resolve();
+      };
+      const onLoad = () => finish(null);
+      const onErr = (e) => {
+        const msg = (e && e.error && e.error.message) || (e && e.message) || "";
+        // Ignore per-tile 404s; only fail hard on style parse failures
+        if (/style|parse|source|layer|color-relief|unsupported/i.test(String(msg))) {
+          finish(new Error(msg || "MapLibre style error"));
+        }
+      };
+      const timer = setTimeout(() => {
+        try {
+          if (gl.isStyleLoaded && gl.isStyleLoaded()) finish(null);
+          else finish(new Error("Style timeout (" + Math.round(timeoutMs / 1000) + "s) — tiles.openwaters.io slow/blocked?"));
+        } catch (e) {
+          finish(new Error("Style timeout"));
+        }
+      }, timeoutMs || 18000);
+      try {
+        if (gl.isStyleLoaded && gl.isStyleLoaded()) {
+          finish(null);
+          return;
+        }
+      } catch (e) {}
+      gl.on("load", onLoad);
+      gl.on("error", onErr);
+    });
   }
 
   function wireGlLayerResize(layer, map) {
@@ -301,8 +418,7 @@
 
   async function createSeascapeLayer() {
     await ensureMapLibreReady();
-    const style = await getSeascapeOverlayStyle();
-    return createMapLibreLayer(style, "Open Waters Seascape");
+    return createMapLibreLayer(buildSeascapeOverlayStyle(), "Open Waters Seascape");
   }
 
   function formatOwTime(iso) {
@@ -476,6 +592,7 @@
   global.createOpenWatersSeamapLayer = createSeamapLayer;
   global.createOpenWatersSeascapeLayer = createSeascapeLayer;
   global.wireOpenWatersGlLayerResize = wireGlLayerResize;
+  global.waitForOpenWatersGlStyle = waitForGlStyle;
   global.flashOpenWatersLayerStatus = flashOwStatus;
   global.togglePortOwHydro = togglePortHydro;
   global.buildPortOwHydroControlsHtml = buildPortHydroControlsHtml;

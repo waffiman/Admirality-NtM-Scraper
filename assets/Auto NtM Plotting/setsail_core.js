@@ -8039,6 +8039,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       flashOpenWatersLayerStatus("Loading " + label + "…", false);
     }
     try {
+      let lyr = null;
       if (isSeamap) {
         if (!seamapLayerRef) {
           if (typeof createOpenWatersSeamapLayer !== "function") {
@@ -8047,11 +8048,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           seamapLayerRef = await createOpenWatersSeamapLayer();
           layers.seamap = seamapLayerRef;
         }
-        seamapLayerRef.addTo(mapInstance);
-        if (typeof wireOpenWatersGlLayerResize === "function") {
-          wireOpenWatersGlLayerResize(seamapLayerRef, mapInstance);
-        }
-        isSeamapActive = true;
+        lyr = seamapLayerRef;
       } else {
         if (!seascapeLayerRef) {
           if (typeof createOpenWatersSeascapeLayer !== "function") {
@@ -8060,12 +8057,17 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           seascapeLayerRef = await createOpenWatersSeascapeLayer();
           layers.seascape = seascapeLayerRef;
         }
-        seascapeLayerRef.addTo(mapInstance);
-        if (typeof wireOpenWatersGlLayerResize === "function") {
-          wireOpenWatersGlLayerResize(seascapeLayerRef, mapInstance);
-        }
-        isSeascapeActive = true;
+        lyr = seascapeLayerRef;
       }
+      lyr.addTo(mapInstance);
+      if (typeof wireOpenWatersGlLayerResize === "function") {
+        wireOpenWatersGlLayerResize(lyr, mapInstance);
+      }
+      if (typeof waitForOpenWatersGlStyle === "function") {
+        await waitForOpenWatersGlStyle(lyr, isSeamap ? 20000 : 16000);
+      }
+      if (isSeamap) isSeamapActive = true;
+      else isSeascapeActive = true;
       btn.classList.add("active-overlay");
       setOverlayBusy(btn, false, idleTitle);
       if (typeof flashOpenWatersLayerStatus === "function") {
@@ -8073,6 +8075,17 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       }
     } catch (err) {
       console.warn("[SetSail] Open Waters overlay failed:", err);
+      try {
+        const bad = isSeamap ? seamapLayerRef : seascapeLayerRef;
+        if (bad && mapInstance.hasLayer(bad)) mapInstance.removeLayer(bad);
+        if (isSeamap) {
+          seamapLayerRef = null;
+          layers.seamap = null;
+        } else {
+          seascapeLayerRef = null;
+          layers.seascape = null;
+        }
+      } catch (e2) {}
       btn.classList.remove("active-overlay");
       setOverlayBusy(btn, false, idleTitle + " (unavailable)");
       if (isSeamap) isSeamapActive = false;
