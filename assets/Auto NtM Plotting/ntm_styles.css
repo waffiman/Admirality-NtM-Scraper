@@ -7243,15 +7243,19 @@
   flex-wrap: wrap;
   justify-content: flex-end;
 }
-/* MapLibre GL canvas overlays (Seamap / Seascape) — class from maplibre-gl-leaflet */
-.leaflet-gl-layer,
-.leaflet-gl-layer .maplibregl-map,
-.leaflet-gl-layer canvas,
-.setsail-ow-gl-canvas {
+/* Open Waters Seamap / Seascape — MapLibre host over Leaflet (clicks pass through) */
+.setsail-ow-gl-root,
+.setsail-ow-gl-root .maplibregl-map,
+.setsail-ow-gl-root canvas,
+.setsail-ow-gl-root .maplibregl-canvas,
+.setsail-ow-gl-root .maplibregl-control-container {
   pointer-events: none !important;
 }
-.leaflet-overlay-pane .leaflet-gl-layer {
-  z-index: 350;
+.setsail-ow-gl-root .maplibregl-ctrl-bottom-left,
+.setsail-ow-gl-root .maplibregl-ctrl-bottom-right,
+.setsail-ow-gl-root .maplibregl-ctrl-top-left,
+.setsail-ow-gl-root .maplibregl-ctrl-top-right {
+  display: none !important;
 }
 /* Compact collapsed Layers trigger (icon only) */
 .ntm-chart-layer-selector.collapsed {

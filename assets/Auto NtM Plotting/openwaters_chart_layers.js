@@ -1,8 +1,7 @@
 /**
- * Open Waters — Seamap / Seascape (MapLibre→Leaflet) + per-port Tides / Currents
- * Seamap  = Free Nautical Chart (vector ENC-style)
- * Seascape = bathymetry / depth shading (overlay; OSM base stripped)
- * Buoys   = separate OpenSeaMap PNG seamarks (not this module)
+ * Open Waters — Seamap / Seascape + per-port Tides / Currents
+ * Seamap/Seascape use a custom Leaflet layer that hosts MapLibre and syncs via jumpTo
+ * (no maplibre-gl-leaflet bridge — that breaks on MapLibre v4 transform API).
  */
 (function (global) {
   "use strict";
@@ -14,12 +13,12 @@
 
   const ML_CSS = "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css";
   const ML_JS = "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js";
-  // Local patched bridge (browser-globals only; safe canvas init for MapLibre v4)
-  const ML_LEAFLET_LOCAL = "assets/Auto%20NtM%20Plotting/maplibre_gl_leaflet.js";
-  const ML_LEAFLET_CDN = "https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js";
+  // Leaflet uses 256px CSS pixels; MapLibre vector styles are typically 512 → zoom − 1
+  const GL_ZOOM_OFFSET = 1;
 
   let readyPromise = null;
   let seascapeStylePromise = null;
+  let OwGlLayerClass = null;
 
   function loadCss(href) {
     if (document.querySelector('link[data-ow-ml="1"]')) return;
@@ -62,7 +61,7 @@
         el.style.cssText =
           "position:absolute;top:56px;right:12px;z-index:950;max-width:min(320px,70vw);" +
           "padding:8px 10px;border-radius:8px;font:600 12px/1.35 system-ui,sans-serif;" +
-          "pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.45);";
+          "pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.45);transition:opacity .25s ease;";
         const host = document.getElementById("ntmMapContainer") || document.body;
         host.appendChild(el);
       }
@@ -74,8 +73,151 @@
       clearTimeout(el._hideTimer);
       el._hideTimer = setTimeout(() => {
         el.style.opacity = "0";
-      }, isErr ? 6000 : 2800);
+      }, isErr ? 8000 : 3200);
     } catch (e) {}
+  }
+
+  function ensureOwGlLayerClass() {
+    if (OwGlLayerClass) return OwGlLayerClass;
+    if (typeof L === "undefined") throw new Error("Leaflet required");
+
+    OwGlLayerClass = L.Layer.extend({
+      options: {
+        style: null,
+        opacity: 1,
+        attribution: "Open Waters"
+      },
+
+      initialize: function (options) {
+        L.setOptions(this, options);
+      },
+
+      onAdd: function (map) {
+        this._map = map;
+        const root = (this._container = L.DomUtil.create("div", "setsail-ow-gl-root"));
+        root.style.cssText =
+          "position:absolute;left:0;top:0;width:100%;height:100%;z-index:350;pointer-events:none;overflow:hidden;";
+        map.getContainer().appendChild(root);
+
+        const center = map.getCenter();
+        const glZoom = Math.max(0, map.getZoom() - GL_ZOOM_OFFSET);
+
+        this._glMap = new global.maplibregl.Map({
+          container: root,
+          style: this.options.style,
+          center: [center.lng, center.lat],
+          zoom: glZoom,
+          bearing: 0,
+          pitch: 0,
+          interactive: false,
+          attributionControl: false,
+          fadeDuration: 0,
+          trackResize: true
+        });
+
+        this._onMove = this._syncView.bind(this);
+        this._onZoom = this._syncView.bind(this);
+        this._onResize = this._resizeGl.bind(this);
+
+        map.on("move", this._onMove);
+        map.on("zoom", this._onZoom);
+        map.on("resize", this._onResize);
+        map.on("zoomanim", this._onZoomanim, this);
+
+        this._glMap.on("load", () => {
+          this._resizeGl();
+          this._syncView();
+        });
+        this._glMap.on("error", (e) => {
+          const msg = (e && e.error && e.error.message) || (e && e.message) || "tile/style error";
+          console.warn("[SetSail] MapLibre error:", msg, e);
+        });
+
+        // Attribution
+        if (map.attributionControl && this.options.attribution) {
+          map.attributionControl.addAttribution(this.options.attribution);
+        }
+
+        setTimeout(() => this._resizeGl(), 50);
+        setTimeout(() => this._resizeGl(), 300);
+      },
+
+      onRemove: function (map) {
+        map.off("move", this._onMove);
+        map.off("zoom", this._onZoom);
+        map.off("resize", this._onResize);
+        map.off("zoomanim", this._onZoomanim, this);
+        if (map.attributionControl && this.options.attribution) {
+          map.attributionControl.removeAttribution(this.options.attribution);
+        }
+        try {
+          if (this._glMap) {
+            this._glMap.remove();
+            this._glMap = null;
+          }
+        } catch (e) {}
+        if (this._container && this._container.parentNode) {
+          this._container.parentNode.removeChild(this._container);
+        }
+        this._container = null;
+        this._map = null;
+      },
+
+      getMaplibreMap: function () {
+        return this._glMap;
+      },
+
+      _glZoom: function () {
+        return Math.max(0, this._map.getZoom() - GL_ZOOM_OFFSET);
+      },
+
+      _syncView: function () {
+        if (!this._glMap || !this._map || this._zooming) return;
+        try {
+          const c = this._map.getCenter();
+          this._glMap.jumpTo({
+            center: [c.lng, c.lat],
+            zoom: this._glZoom(),
+            bearing: 0,
+            pitch: 0
+          });
+        } catch (e) {}
+      },
+
+      _onZoomanim: function (e) {
+        if (!this._glMap || !this._map) return;
+        this._zooming = true;
+        try {
+          const center = e.center || this._map.getCenter();
+          const zoom = (typeof e.zoom === "number" ? e.zoom : this._map.getZoom()) - GL_ZOOM_OFFSET;
+          this._glMap.jumpTo({
+            center: [center.lng, center.lat],
+            zoom: Math.max(0, zoom),
+            bearing: 0,
+            pitch: 0
+          });
+        } catch (err) {}
+        const done = () => {
+          this._zooming = false;
+          this._syncView();
+        };
+        this._map.once("zoomend", done);
+        setTimeout(done, 400);
+      },
+
+      _resizeGl: function () {
+        if (!this._glMap || !this._map || !this._container) return;
+        try {
+          const size = this._map.getSize();
+          this._container.style.width = size.x + "px";
+          this._container.style.height = size.y + "px";
+          this._glMap.resize();
+          this._syncView();
+        } catch (e) {}
+      }
+    });
+
+    return OwGlLayerClass;
   }
 
   function ensureMapLibreReady() {
@@ -86,19 +228,10 @@
         await loadScript(ML_JS);
       }
       if (typeof global.maplibregl === "undefined") {
-        throw new Error("maplibre-gl failed to load");
+        throw new Error("maplibre-gl failed to load (CDN blocked?)");
       }
       if (typeof L === "undefined") throw new Error("Leaflet required");
-      if (typeof L.maplibreGL !== "function") {
-        try {
-          await loadScript(ML_LEAFLET_LOCAL);
-        } catch (e1) {
-          await loadScript(ML_LEAFLET_CDN);
-        }
-      }
-      if (typeof L.maplibreGL !== "function") {
-        throw new Error("maplibre-gl-leaflet unavailable");
-      }
+      ensureOwGlLayerClass();
     })().catch((err) => {
       readyPromise = null;
       throw err;
@@ -118,6 +251,16 @@
         next.sources = Object.assign({}, style.sources || {});
         delete next.sources.osm;
         next.layers = (style.layers || []).filter((l) => l && l.id !== "osm-base" && l.source !== "osm");
+        // Slight transparency so ECDIS/Ocean still readable underneath
+        next.layers.forEach((l) => {
+          if (!l || !l.paint) return;
+          if (l.id === "depth-areas" && l.paint["fill-opacity"] == null) {
+            l.paint["fill-opacity"] = 0.72;
+          }
+          if (l.id === "depth-shading" && l.paint["color-relief-opacity"] == null) {
+            l.paint["color-relief-opacity"] = 0.85;
+          }
+        });
         return next;
       })
       .catch((err) => {
@@ -131,30 +274,23 @@
     if (!layer || !map) return;
     const kick = () => {
       try {
-        const gl = layer.getMaplibreMap && layer.getMaplibreMap();
-        if (gl && typeof gl.resize === "function") gl.resize();
+        if (typeof layer._resizeGl === "function") layer._resizeGl();
+        else {
+          const gl = layer.getMaplibreMap && layer.getMaplibreMap();
+          if (gl && typeof gl.resize === "function") gl.resize();
+        }
         map.invalidateSize({ animate: false });
       } catch (e) {}
     };
     setTimeout(kick, 40);
-    setTimeout(kick, 250);
-    try {
-      const gl = layer.getMaplibreMap && layer.getMaplibreMap();
-      if (gl && typeof gl.once === "function") {
-        gl.once("load", kick);
-        gl.once("idle", kick);
-      }
-    } catch (e) {}
+    setTimeout(kick, 280);
   }
 
   function createMapLibreLayer(style, attribution) {
-    return L.maplibreGL({
+    const Cls = ensureOwGlLayerClass();
+    return new Cls({
       style: style,
-      interactive: false,
-      pane: "overlayPane",
-      padding: 0.08,
-      attribution: attribution || "Open Waters",
-      className: "setsail-ow-gl-canvas"
+      attribution: attribution || "Open Waters"
     });
   }
 
