@@ -1,46 +1,46 @@
 {
-  "synopticCycle": "1600 UTC",
-  "lastSyncUtc": "2026-10-21T16:45:13.871739+00:00",
+  "synopticCycle": "2100 UTC",
+  "lastSyncUtc": "2026-10-21T21:20:52.328096+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
-      "id": "EP222026",
-      "name": "Tropical Depression TWENTY-TWO-E",
-      "shortName": "Twenty-Two-E",
-      "category": "Tropical Depression (NOAA NHC)",
+      "id": "AL102026",
+      "name": "Subtropical Storm JOSEPHINE",
+      "shortName": "Josephine",
+      "category": "Subtropical Storm (NOAA NHC)",
       "center": [
-        9.5,
-        -99.3
+        37.4,
+        -69.5
       ],
-      "centralPressure": 1005,
-      "maxWinds": 30,
-      "gusts": 37,
-      "movement": "W at 7 kts",
+      "centralPressure": 990,
+      "maxWinds": 55,
+      "gusts": 67,
+      "movement": "N at 6 kts",
       "dangerRadiusNm": 70,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            9.4,
-            -100.1
+            38.1,
+            -69.0
           ],
-          "winds": 40,
+          "winds": 60,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            9.7,
-            -101.1
+            39.6,
+            -66.2
           ],
-          "winds": 55,
+          "winds": 65,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            10.2,
-            -102.0
+            41.4,
+            -61.6
           ],
           "winds": 70,
           "radiusNm": 90
@@ -48,35 +48,115 @@
         {
           "tau": 48,
           "coords": [
-            10.7,
-            -102.6
+            43.3,
+            -56.9
           ],
-          "winds": 85,
+          "winds": 60,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            11.5,
-            -103.2
+            44.1,
+            -53.5
           ],
-          "winds": 100,
+          "winds": 50,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
-            12.5,
-            -103.6
+            44.4,
+            -50.4
           ],
-          "winds": 95,
+          "winds": 45,
           "radiusNm": 140
         },
         {
           "tau": 84,
           "coords": [
-            14.2,
-            -104.4
+            43.5,
+            -37.5
+          ],
+          "winds": 40,
+          "radiusNm": 157
+        }
+      ]
+    },
+    {
+      "id": "EP222026",
+      "name": "Tropical Storm VANCE",
+      "shortName": "Vance",
+      "category": "Tropical Storm (NOAA NHC)",
+      "center": [
+        9.4,
+        -99.8
+      ],
+      "centralPressure": 1003,
+      "maxWinds": 35,
+      "gusts": 43,
+      "movement": "W at 7 kts",
+      "dangerRadiusNm": 70,
+      "forecastTrack": [
+        {
+          "tau": 12,
+          "coords": [
+            9.5,
+            -100.5
+          ],
+          "winds": 45,
+          "radiusNm": 56
+        },
+        {
+          "tau": 24,
+          "coords": [
+            9.8,
+            -101.3
+          ],
+          "winds": 60,
+          "radiusNm": 73
+        },
+        {
+          "tau": 36,
+          "coords": [
+            10.4,
+            -102.1
+          ],
+          "winds": 80,
+          "radiusNm": 90
+        },
+        {
+          "tau": 48,
+          "coords": [
+            11.2,
+            -102.7
+          ],
+          "winds": 95,
+          "radiusNm": 107
+        },
+        {
+          "tau": 60,
+          "coords": [
+            11.9,
+            -103.1
+          ],
+          "winds": 105,
+          "radiusNm": 124
+        },
+        {
+          "tau": 72,
+          "coords": [
+            12.8,
+            -103.5
+          ],
+          "winds": 100,
+          "radiusNm": 140
+        },
+        {
+          "tau": 84,
+          "coords": [
+            14.5,
+            -104.3
           ],
           "winds": 90,
           "radiusNm": 157
@@ -89,38 +169,38 @@
       "shortName": "Champi",
       "category": "Typhoon (JTWC/JMA)",
       "center": [
-        18.7,
-        128.9
+        19.3,
+        127.9
       ],
-      "centralPressure": 900,
-      "maxWinds": 150,
-      "gusts": 188,
-      "movement": "WNW at 15 kts",
-      "dangerRadiusNm": 180,
+      "centralPressure": 905,
+      "maxWinds": 145,
+      "gusts": 181,
+      "movement": "NW at 14 kts",
+      "dangerRadiusNm": 174,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            20.4,
-            126.2
+            20.9,
+            125.5
           ],
-          "winds": 130,
+          "winds": 120,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            21.4,
-            124.9
+            22.1,
+            124.3
           ],
-          "winds": 115,
+          "winds": 110,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            23.0,
-            123.9
+            23.9,
+            123.3
           ],
           "winds": 105,
           "radiusNm": 90
@@ -128,37 +208,37 @@
         {
           "tau": 48,
           "coords": [
-            24.7,
-            123.0
+            25.8,
+            122.8
           ],
-          "winds": 95,
+          "winds": 85,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            26.6,
-            123.1
+            28.1,
+            123.5
           ],
-          "winds": 75,
+          "winds": 70,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
-            29.0,
-            124.2
+            30.5,
+            125.4
           ],
-          "winds": 60,
+          "winds": 55,
           "radiusNm": 140
         },
         {
           "tau": 84,
           "coords": [
-            31.9,
-            127.8
+            32.5,
+            129.6
           ],
-          "winds": 45,
+          "winds": 40,
           "radiusNm": 157
         }
       ]
@@ -173,16 +253,16 @@
         59.7
       ],
       "centralPressure": 1007,
-      "maxWinds": 45,
-      "gusts": 56,
-      "movement": "W at 40 kts",
+      "maxWinds": 50,
+      "gusts": 62,
+      "movement": "W at 47 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -5.7,
-            51.7
+            -6.3,
+            50.2
           ],
           "winds": 50,
           "radiusNm": 56
@@ -190,17 +270,17 @@
         {
           "tau": 24,
           "coords": [
-            -6.0,
-            51.1
+            -6.5,
+            49.4
           ],
-          "winds": 50,
+          "winds": 45,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            -6.1,
-            50.3
+            -6.6,
+            48.1
           ],
           "winds": 45,
           "radiusNm": 90
@@ -208,8 +288,8 @@
         {
           "tau": 48,
           "coords": [
-            -6.2,
-            49.2
+            -6.6,
+            46.8
           ],
           "winds": 40,
           "radiusNm": 107
@@ -217,8 +297,8 @@
         {
           "tau": 60,
           "coords": [
-            -6.2,
-            47.7
+            -6.5,
+            45.3
           ],
           "winds": 35,
           "radiusNm": 124
@@ -226,8 +306,8 @@
         {
           "tau": 72,
           "coords": [
-            -5.9,
-            46.0
+            -6.0,
+            43.7
           ],
           "winds": 30,
           "radiusNm": 140
@@ -235,10 +315,72 @@
       ]
     },
     {
+      "id": "AL932026",
+      "name": "Invest 93L",
+      "shortName": "93L",
+      "category": "Tropical Disturbance (Formation Chance 70%)",
+      "center": [
+        37.1,
+        -69.6
+      ],
+      "centralPressure": 990,
+      "maxWinds": 55,
+      "gusts": 72,
+      "movement": "NNE at 6 kts",
+      "dangerRadiusNm": 65,
+      "forecastTrack": [
+        {
+          "tau": 12,
+          "coords": [
+            38.1,
+            -69.0
+          ],
+          "winds": 60,
+          "radiusNm": 45
+        },
+        {
+          "tau": 24,
+          "coords": [
+            39.4,
+            -66.5
+          ],
+          "winds": 65,
+          "radiusNm": 60
+        },
+        {
+          "tau": 36,
+          "coords": [
+            41.2,
+            -61.8
+          ],
+          "winds": 65,
+          "radiusNm": 75
+        },
+        {
+          "tau": 48,
+          "coords": [
+            43.2,
+            -57.0
+          ],
+          "winds": 65,
+          "radiusNm": 90
+        },
+        {
+          "tau": 60,
+          "coords": [
+            44.0,
+            -53.6
+          ],
+          "winds": 65,
+          "radiusNm": 105
+        }
+      ]
+    },
+    {
       "id": "EP942026",
       "name": "Invest 94E",
       "shortName": "94E",
-      "category": "Tropical Disturbance (Formation Chance 100%)",
+      "category": "Tropical Disturbance (Active Invest)",
       "center": [
         9.5,
         -99.0
@@ -295,68 +437,6 @@
           "radiusNm": 105
         }
       ]
-    },
-    {
-      "id": "AL932026",
-      "name": "Invest 93L",
-      "shortName": "93L",
-      "category": "Tropical Disturbance (Formation Chance 40%)",
-      "center": [
-        37.3,
-        -69.5
-      ],
-      "centralPressure": 992,
-      "maxWinds": 50,
-      "gusts": 65,
-      "movement": "N at 4 kts",
-      "dangerRadiusNm": 65,
-      "forecastTrack": [
-        {
-          "tau": 12,
-          "coords": [
-            38.1,
-            -69.3
-          ],
-          "winds": 55,
-          "radiusNm": 45
-        },
-        {
-          "tau": 24,
-          "coords": [
-            39.4,
-            -67.7
-          ],
-          "winds": 60,
-          "radiusNm": 60
-        },
-        {
-          "tau": 36,
-          "coords": [
-            41.3,
-            -63.7
-          ],
-          "winds": 65,
-          "radiusNm": 75
-        },
-        {
-          "tau": 48,
-          "coords": [
-            43.8,
-            -58.5
-          ],
-          "winds": 65,
-          "radiusNm": 90
-        },
-        {
-          "tau": 60,
-          "coords": [
-            45.8,
-            -53.2
-          ],
-          "winds": 65,
-          "radiusNm": 105
-        }
-      ]
     }
   ],
   "waves": [
@@ -368,7 +448,7 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 4.8,
+      "waveHeight": 4.3,
       "swellPeriod": 10,
       "swellDir": "W"
     },
@@ -380,36 +460,48 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 4.1,
-      "swellPeriod": 8,
+      "waveHeight": 4.2,
+      "swellPeriod": 9,
       "swellDir": "W"
     },
     {
       "id": "WS1",
-      "name": "Twenty-Two-E Cyclonic Wave Field",
+      "name": "Josephine Cyclonic Wave Field",
       "center": [
-        9.5,
-        -99.3
+        37.4,
+        -69.5
       ],
       "radiusNm": 150,
-      "waveHeight": 2.5,
+      "waveHeight": 4.7,
       "swellPeriod": 10,
-      "swellDir": "ENE"
+      "swellDir": "NNE"
     },
     {
       "id": "WS2",
-      "name": "Champi Cyclonic Wave Field",
+      "name": "Vance Cyclonic Wave Field",
       "center": [
-        18.7,
-        128.9
+        9.4,
+        -99.8
       ],
-      "radiusNm": 360,
-      "waveHeight": 8.0,
+      "radiusNm": 150,
+      "waveHeight": 2.6,
       "swellPeriod": 10,
-      "swellDir": "S"
+      "swellDir": "NE"
     },
     {
       "id": "WS3",
+      "name": "Champi Cyclonic Wave Field",
+      "center": [
+        19.3,
+        127.9
+      ],
+      "radiusNm": 348,
+      "waveHeight": 9.0,
+      "swellPeriod": 11,
+      "swellDir": "S"
+    },
+    {
+      "id": "WS4",
       "name": "Agueda Cyclonic Wave Field",
       "center": [
         -5.6,
@@ -421,47 +513,56 @@
       "swellDir": "SE"
     },
     {
-      "id": "WS4",
+      "id": "WS5",
+      "name": "93L Cyclonic Wave Field",
+      "center": [
+        37.1,
+        -69.6
+      ],
+      "radiusNm": 150,
+      "waveHeight": 5.6,
+      "swellPeriod": 9,
+      "swellDir": "NNW"
+    },
+    {
+      "id": "WS6",
       "name": "94E Cyclonic Wave Field",
       "center": [
         9.5,
         -99.0
       ],
       "radiusNm": 150,
-      "waveHeight": 2.5,
-      "swellPeriod": 10,
-      "swellDir": "ESE"
-    },
-    {
-      "id": "WS5",
-      "name": "93L Cyclonic Wave Field",
-      "center": [
-        37.3,
-        -69.5
-      ],
-      "radiusNm": 150,
-      "waveHeight": 5.0,
-      "swellPeriod": 10,
-      "swellDir": "NE"
+      "waveHeight": 2.7,
+      "swellPeriod": 9,
+      "swellDir": "S"
     }
   ],
   "pressureCenters": [
     {
       "type": "L",
-      "value": 1005,
-      "name": "Tropical Depression TWENTY-TWO-E Core Low",
+      "value": 990,
+      "name": "Subtropical Storm JOSEPHINE Core Low",
       "coords": [
-        9.5,
-        -99.3
+        37.4,
+        -69.5
       ]
     },
     {
       "type": "L",
-      "value": 900,
+      "value": 1003,
+      "name": "Tropical Storm VANCE Core Low",
+      "coords": [
+        9.4,
+        -99.8
+      ]
+    },
+    {
+      "type": "L",
+      "value": 905,
       "name": "Typhoon CHAMPI Core Low",
       "coords": [
-        18.7,
-        128.9
+        19.3,
+        127.9
       ]
     },
     {
@@ -475,20 +576,20 @@
     },
     {
       "type": "L",
+      "value": 990,
+      "name": "Invest 93L Core Low",
+      "coords": [
+        37.1,
+        -69.6
+      ]
+    },
+    {
+      "type": "L",
       "value": 1005,
       "name": "Invest 94E Core Low",
       "coords": [
         9.5,
         -99.0
-      ]
-    },
-    {
-      "type": "L",
-      "value": 992,
-      "name": "Invest 93L Core Low",
-      "coords": [
-        37.3,
-        -69.5
       ]
     },
     {
@@ -522,21 +623,30 @@
   "windVectors": [
     {
       "coords": [
-        9.8,
-        -99.0
+        37.7,
+        -69.2
       ],
       "dir": 160,
-      "speed": 30,
-      "label": "30 kts (Twenty-Two-E)"
+      "speed": 55,
+      "label": "55 kts (Josephine)"
     },
     {
       "coords": [
-        19.0,
-        129.2
+        9.7,
+        -99.5
+      ],
+      "dir": 160,
+      "speed": 35,
+      "label": "35 kts (Vance)"
+    },
+    {
+      "coords": [
+        19.6,
+        128.2
       ],
       "dir": 200,
-      "speed": 150,
-      "label": "150 kts (Champi)"
+      "speed": 145,
+      "label": "145 kts (Champi)"
     },
     {
       "coords": [
@@ -544,8 +654,17 @@
         60.0
       ],
       "dir": 200,
-      "speed": 45,
-      "label": "45 kts (Agueda)"
+      "speed": 50,
+      "label": "50 kts (Agueda)"
+    },
+    {
+      "coords": [
+        37.4,
+        -69.3
+      ],
+      "dir": 160,
+      "speed": 55,
+      "label": "55 kts (93L)"
     },
     {
       "coords": [
@@ -555,15 +674,6 @@
       "dir": 160,
       "speed": 30,
       "label": "30 kts (94E)"
-    },
-    {
-      "coords": [
-        37.6,
-        -69.2
-      ],
-      "dir": 160,
-      "speed": 50,
-      "label": "50 kts (93L)"
     }
   ]
 }
