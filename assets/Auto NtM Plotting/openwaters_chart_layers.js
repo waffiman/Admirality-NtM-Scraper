@@ -14,12 +14,34 @@
   // Prefer already-loaded <script> from index.html; then same-origin files (no CDN — SW/CDN flakes)
   const ML_BUNDLES = [
     {
-      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.44",
-      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.44"
+      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.45",
+      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.45"
     }
   ];
   // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
   const GL_ZOOM_OFFSET = 1;
+
+  // Official Seascape / Open Waters Bathymetry depth tint (from seascape style.json)
+  const BATHY_COLOR_RELIEF = [
+    "interpolate",
+    ["linear"],
+    ["elevation"],
+    -10000, "#e9f7ff",
+    -50, "#e9f7ff",
+    -49.9, "#c9e9fd",
+    -20, "#c9e9fd",
+    -19.9, "#a5d9fb",
+    -10, "#a5d9fb",
+    -9.9, "#7fc7f8",
+    -5, "#7fc7f8",
+    -4.9, "#5db5f0",
+    -2, "rgb(93,181,240)",
+    -1.99, "#1f86cb",
+    -0.00390625, "#1f86cb",
+    0, "#1f86cb",
+    0.00390625, "rgba(247,240,221,0)",
+    2, "rgba(247,240,221,0)"
+  ];
 
   let readyPromise = null;
   let OwGlLayerClass = null;
@@ -136,18 +158,22 @@
           trackResize: true
         });
 
-        this._onMove = this._syncView.bind(this);
-        this._onZoom = this._syncView.bind(this);
+        this._onMove = this._scheduleSync.bind(this);
+        this._onZoom = this._scheduleSync.bind(this);
         this._onResize = this._resizeGl.bind(this);
+        this._syncRaf = 0;
+        this._lastSyncKey = "";
 
         map.on("move", this._onMove);
         map.on("zoom", this._onZoom);
+        map.on("moveend", this._onMove);
+        map.on("zoomend", this._onMove);
         map.on("resize", this._onResize);
         map.on("zoomanim", this._onZoomanim, this);
 
         this._glMap.on("load", () => {
           this._resizeGl();
-          this._syncView();
+          this._syncView(true);
         });
         this._glMap.on("error", (e) => {
           const msg = (e && e.error && e.error.message) || (e && e.message) || "tile/style error";
@@ -166,8 +192,16 @@
       onRemove: function (map) {
         map.off("move", this._onMove);
         map.off("zoom", this._onZoom);
+        map.off("moveend", this._onMove);
+        map.off("zoomend", this._onMove);
         map.off("resize", this._onResize);
         map.off("zoomanim", this._onZoomanim, this);
+        if (this._syncRaf) {
+          try {
+            cancelAnimationFrame(this._syncRaf);
+          } catch (e) {}
+          this._syncRaf = 0;
+        }
         if (map.attributionControl && this.options.attribution) {
           map.attributionControl.removeAttribution(this.options.attribution);
         }
@@ -192,13 +226,26 @@
         return Math.max(0, this._map.getZoom() - GL_ZOOM_OFFSET);
       },
 
-      _syncView: function () {
+      _scheduleSync: function () {
+        if (!this._glMap || !this._map || this._zooming) return;
+        if (this._syncRaf) return;
+        this._syncRaf = requestAnimationFrame(() => {
+          this._syncRaf = 0;
+          this._syncView(false);
+        });
+      },
+
+      _syncView: function (force) {
         if (!this._glMap || !this._map || this._zooming) return;
         try {
           const c = this._map.getCenter();
+          const z = this._glZoom();
+          const key = c.lng.toFixed(5) + "," + c.lat.toFixed(5) + "," + z.toFixed(3);
+          if (!force && key === this._lastSyncKey) return;
+          this._lastSyncKey = key;
           this._glMap.jumpTo({
             center: [c.lng, c.lat],
-            zoom: this._glZoom(),
+            zoom: z,
             bearing: 0,
             pitch: 0
           });
@@ -211,16 +258,18 @@
         try {
           const center = e.center || this._map.getCenter();
           const zoom = (typeof e.zoom === "number" ? e.zoom : this._map.getZoom()) - GL_ZOOM_OFFSET;
+          const z = Math.max(0, zoom);
+          this._lastSyncKey = center.lng.toFixed(5) + "," + center.lat.toFixed(5) + "," + z.toFixed(3);
           this._glMap.jumpTo({
             center: [center.lng, center.lat],
-            zoom: Math.max(0, zoom),
+            zoom: z,
             bearing: 0,
             pitch: 0
           });
         } catch (err) {}
         const done = () => {
           this._zooming = false;
-          this._syncView();
+          this._syncView(true);
         };
         this._map.once("zoomend", done);
         setTimeout(done, 400);
@@ -233,7 +282,7 @@
           this._container.style.width = size.x + "px";
           this._container.style.height = size.y + "px";
           this._glMap.resize();
-          this._syncView();
+          this._syncView(true);
         } catch (e) {}
       }
     });
@@ -281,44 +330,63 @@
   }
 
   /**
-   * Official Seamap style mixes Free Nautical Chart with Seascape extras that break MapLibre 5.0:
-   * - color-relief on raster-dem (only hillshade allowed)
-   * - seascape .pbf tiles (Unimplemented type: 4)
-   * Keep chart sources + hillshade only.
+   * Seamap as a light Leaflet overlay: keep only Free Nautical Chart seamark layers.
+   * Full style.json also pulls VersaTiles (~320 layers) + Seascape DEM/vector — opaque base,
+   * blank-looking overlay on ECDIS/Ocean, and severe pan/zoom lag.
    */
   function sanitizeSeamapStyle(style) {
-    const next = Object.assign({}, style);
-    next.sources = Object.assign({}, style.sources || {});
-    delete next.sources["seascape-vector"];
-    delete next.sources["seascape-coverage"];
-    const demSources = {};
-    Object.keys(next.sources).forEach((k) => {
-      if (next.sources[k] && next.sources[k].type === "raster-dem") demSources[k] = true;
-    });
-    next.layers = (style.layers || []).filter((l) => {
-      if (!l) return false;
-      if (l.type === "color-relief") return false;
-      if (l.source === "seascape-vector" || l.source === "seascape-coverage") return false;
-      if (demSources[l.source] && l.type !== "hillshade") return false;
-      return true;
-    });
-    return next;
+    const src = (style && style.sources && style.sources.seamap) || {
+      type: "vector",
+      url: "https://tiles.openwaters.io/seamap/tiles.json"
+    };
+    const layers = (style.layers || []).filter((l) => l && l.source === "seamap");
+    let sprite = style && style.sprite;
+    // Prefer the Free Nautical Chart sprite sheet for seamark icons
+    if (Array.isArray(sprite)) {
+      const fnc = sprite.find((s) => s && /freenauticalchart|seamap/i.test(String(s.id || s.url || "")));
+      sprite = fnc
+        ? [fnc]
+        : sprite.filter((s) => s && /openwaters\.io\/seamap/i.test(String(s.url || "")));
+      if (!sprite.length) {
+        sprite = [{ id: "freenauticalchart", url: "https://tiles.openwaters.io/seamap/sprites/freenauticalchart" }];
+      }
+    } else if (!sprite) {
+      sprite = "https://tiles.openwaters.io/seamap/sprites/freenauticalchart";
+    }
+    return {
+      version: 8,
+      name: "SetSail Seamap overlay",
+      sources: { seamap: src },
+      sprite: sprite,
+      glyphs: (style && style.glyphs) || "https://tiles.openwaters.io/fonts/{fontstack}/{range}.pbf",
+      layers: [
+        {
+          id: "ow-transparent-bg",
+          type: "background",
+          paint: { "background-color": "rgba(0,0,0,0)" }
+        }
+      ].concat(layers)
+    };
   }
 
-  /** Seascape overlay: DEM hillshade only (webp terrarium). No vector .pbf — MapLibre can't parse them yet. */
+  function seascapeDemSource(attribution) {
+    return {
+      type: "raster-dem",
+      tiles: ["https://tiles.openwaters.io/seascape/{z}/{x}/{y}.webp"],
+      tileSize: 512,
+      maxzoom: 14,
+      encoding: "terrarium",
+      attribution: attribution || "Open Waters Seascape"
+    };
+  }
+
+  /** Seascape overlay: seabed relief via DEM hillshade (terrarium webp). */
   function buildSeascapeOverlayStyle() {
     return {
       version: 8,
       name: "SetSail Seascape overlay",
       sources: {
-        "seascape-dem": {
-          type: "raster-dem",
-          tiles: ["https://tiles.openwaters.io/seascape/{z}/{x}/{y}.webp"],
-          tileSize: 512,
-          maxzoom: 14,
-          encoding: "terrarium",
-          attribution: "Open Waters Seascape"
-        }
+        "seascape-dem": seascapeDemSource("Open Waters Seascape")
       },
       layers: [
         {
@@ -336,6 +404,36 @@
             "hillshade-highlight-color": "#7dd3fc",
             "hillshade-accent-color": "#0e7490",
             "hillshade-illumination-direction": 315
+          }
+        }
+      ]
+    };
+  }
+
+  /**
+   * Bathymetry overlay: Open Waters Seascape DEM as color-relief depth tint
+   * (TileJSON name: "Open Waters Bathymetry (raster)"). Needs MapLibre ≥ 5.6.
+   */
+  function buildBathymetryOverlayStyle() {
+    return {
+      version: 8,
+      name: "SetSail Bathymetry overlay",
+      sources: {
+        "seascape-dem": seascapeDemSource("Open Waters Bathymetry")
+      },
+      layers: [
+        {
+          id: "ow-transparent-bg",
+          type: "background",
+          paint: { "background-color": "rgba(0,0,0,0)" }
+        },
+        {
+          id: "ow-bathy-color-relief",
+          type: "color-relief",
+          source: "seascape-dem",
+          paint: {
+            "color-relief-color": BATHY_COLOR_RELIEF,
+            "color-relief-opacity": 0.78
           }
         }
       ]
@@ -378,7 +476,7 @@
           console.warn("[SetSail] MapLibre tile warning:", s);
           return;
         }
-        if (/color-relief|raster-dem source can only|unsupported/i.test(s)) {
+        if (/raster-dem source can only|unsupported layer type|unknown layer type/i.test(s)) {
           finish(new Error(s || "MapLibre style error"));
         }
       };
@@ -436,6 +534,11 @@
   async function createSeascapeLayer() {
     await ensureMapLibreReady();
     return createMapLibreLayer(buildSeascapeOverlayStyle(), "Open Waters Seascape");
+  }
+
+  async function createBathymetryLayer() {
+    await ensureMapLibreReady();
+    return createMapLibreLayer(buildBathymetryOverlayStyle(), "Open Waters Bathymetry");
   }
 
   function formatOwTime(iso) {
@@ -608,6 +711,7 @@
   global.ensureOpenWatersMapLibre = ensureMapLibreReady;
   global.createOpenWatersSeamapLayer = createSeamapLayer;
   global.createOpenWatersSeascapeLayer = createSeascapeLayer;
+  global.createOpenWatersBathymetryLayer = createBathymetryLayer;
   global.wireOpenWatersGlLayerResize = wireGlLayerResize;
   global.waitForOpenWatersGlStyle = waitForGlStyle;
   global.flashOpenWatersLayerStatus = flashOwStatus;

@@ -893,31 +893,25 @@ function initApp() {
   safe("theme", initTheme);
   safe("nav", initNavigationTabs);
   safe("tab", () => {
-    // NEVER force Home. Only restore a saved/hash tab; leave HTML default alone otherwise.
+    // Bare "/" keeps HTML default (Home). Only honor an explicit URL hash.
+    // Do NOT restore last chart visit from localStorage — that auto-kicked users to #tab-ntm.
     const already = document.querySelector(".tab-pane.active");
-    let savedTab = "";
+    let hashTab = "";
     try {
       if (window.location.hash && window.location.hash.length > 1) {
-        savedTab = window.location.hash.replace("#", "").trim();
-      }
-      if (!savedTab) {
-        savedTab = sessionStorage.getItem("setsail_active_tab") || localStorage.getItem("setsail_active_tab") || "";
+        hashTab = window.location.hash.replace("#", "").trim();
       }
     } catch (e) {}
-    if (already && already.id && already.id !== "tab-home") {
+    if (hashTab && document.getElementById(hashTab)) {
+      switchToTab(hashTab, "restore");
+      return;
+    }
+    if (already && already.id) {
       window._setsailActiveTab = already.id;
       try {
         sessionStorage.setItem("setsail_active_tab", already.id);
         localStorage.setItem("setsail_active_tab", already.id);
       } catch (e) {}
-      return;
-    }
-    if (savedTab && savedTab !== "tab-home" && document.getElementById(savedTab)) {
-      switchToTab(savedTab, "restore");
-      return;
-    }
-    if (already && already.id) {
-      window._setsailActiveTab = already.id;
     }
   });
   safe("clock", initHomeChronometer);
@@ -1657,6 +1651,29 @@ function initAutoNtmUI() {
       workspaceEl.classList.remove("sidebar-collapsed");
       expandBtn.style.display = "none";
       setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 250);
+    });
+  }
+
+  // Empty Multi Search hint chips → activate matching bottom dock tile
+  const ntmItemsScroll = document.getElementById("ntmItemsScroll");
+  if (ntmItemsScroll && !ntmItemsScroll._boundEmptyHints) {
+    ntmItemsScroll._boundEmptyHints = true;
+    ntmItemsScroll.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-overlay-hint]");
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const key = btn.getAttribute("data-overlay-hint");
+      if (!key) return;
+      const mapRef = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+      if (typeof window.initExcelOverlayDock === "function" && mapRef) {
+        try { window.initExcelOverlayDock(mapRef); } catch (err) { /* dock may already be live */ }
+      }
+      if (typeof window.setOverlayActive === "function") {
+        window.setOverlayActive(key, true, mapRef);
+      } else if (typeof setOverlayActive === "function") {
+        setOverlayActive(key, true, mapRef);
+      }
     });
   }
 
@@ -3974,7 +3991,7 @@ function initNtMMap() {
 
     // Zoom-Adaptive Level of Detail (LOD) re-render when crossing zoom tiers
     let lastLodTier = -1;
-    const getZoomLodTier = (z) => (z <= 3 ? 0 : (z <= 5 ? 1 : (z <= 7 ? 2 : 3)));
+    const getZoomLodTier = (z) => (z <= 2.5 ? 0 : (z <= 3.5 ? 1 : (z <= 4.5 ? 2 : (z <= 7 ? 3 : 4))));
     leafletMap.on("zoomend", () => {
       const z = leafletMap.getZoom();
       const tier = getZoomLodTier(z);
@@ -4511,9 +4528,22 @@ function renderNtMListAndMap() {
     }
 
     if (!html) {
-      const anyActiveOverlay = isNoticesActive || isDepthsActive || isWeatherActive || isRouteActive;
+      const isAisActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.ais !== false : false;
+      const anyActiveOverlay = isNoticesActive || isDepthsActive || isWeatherActive || isRouteActive || isAisActive;
       if (!anyActiveOverlay) {
-        html = "";
+        html = `
+          <div class="ntm-empty-hints">
+            <div class="ntm-empty-hints-title">Enable a chart layer</div>
+            <div class="ntm-empty-hints-sub">Choose an overlay below, or use the dock under the chart.</div>
+            <div class="ntm-empty-hint-grid">
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="notices" title="Notices to Mariners &amp; NAVTEX">NtM / NAVTEX</button>
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="depths" title="Ports &amp; UKC">Ports</button>
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="weather" title="Cyclones &amp; weather">Weather</button>
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="ais" title="Live AIS targets">AIS</button>
+              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--wide" data-overlay-hint="route" title="My vessel route">My Route</button>
+            </div>
+          </div>
+        `;
       } else {
         html = `
           <div style="padding:2rem 1rem;text-align:center;color:var(--muted);font-size:0.8rem;">
@@ -4540,7 +4570,128 @@ function renderNtMListAndMap() {
       leafletMap.addLayer(leafletMarkersLayer);
     }
     const curZoom = leafletMap.getZoom ? leafletMap.getZoom() : 3;
-    const canvasRenderer = window._setsailCanvasRenderer || null;
+
+    // Keep NtM above ECDIS land and clickable (land pane z=350, ntm pane z=450)
+    if (!leafletMap.getPane("ecdisLandPane")) {
+      const lp = leafletMap.createPane("ecdisLandPane");
+      lp.style.zIndex = 350;
+      lp.style.pointerEvents = "none";
+    } else {
+      leafletMap.getPane("ecdisLandPane").style.pointerEvents = "none";
+    }
+    if (!leafletMap.getPane("ntmOverlayPane")) {
+      const np = leafletMap.createPane("ntmOverlayPane");
+      np.style.zIndex = 450;
+    }
+    if (!window._setsailNtmCanvasRenderer) {
+      window._setsailNtmCanvasRenderer = L.canvas({ pane: "ntmOverlayPane" });
+    }
+    const canvasRenderer = window._setsailNtmCanvasRenderer;
+
+    // Split polylines that cross the antimeridian so Leaflet does not draw a world-wrapping chord
+    const splitAntimeridianLatLngs = (latlngs) => {
+      const rings = [[]];
+      for (let i = 0; i < latlngs.length; i++) {
+        const cur = latlngs[i];
+        const ring = rings[rings.length - 1];
+        if (ring.length) {
+          const prev = ring[ring.length - 1];
+          if (Math.abs(Number(cur[1]) - Number(prev[1])) > 180) {
+            rings.push([cur]);
+            continue;
+          }
+        }
+        ring.push(cur);
+      }
+      return rings.filter((r) => r.length >= 2);
+    };
+
+    const noticeCentroid = (item) => {
+      const coords = item.coords || [];
+      let lat = 0;
+      let lon = 0;
+      let n = 0;
+      for (let i = 0; i < coords.length; i++) {
+        const c = coords[i];
+        if (!c || !Number.isFinite(Number(c.lat)) || !Number.isFinite(Number(c.lon))) continue;
+        lat += Number(c.lat);
+        lon += Number(c.lon);
+        n++;
+      }
+      return n ? [lat / n, lon / n] : null;
+    };
+
+    // World / low zoom: aggressively merge nearby notices; split only after a clear zoom-in
+    const clusterNoticesForZoom = (notices, zoom) => {
+      if (zoom > 4.5) return null;
+      // Larger cells = fewer numbered markers on a cluttered world view
+      const cellDeg = zoom <= 2 ? 36 : zoom <= 2.5 ? 26 : zoom <= 3 ? 18 : zoom <= 3.5 ? 12 : 7;
+      const buckets = Object.create(null);
+      notices.forEach((item) => {
+        if (!item.coords || !item.coords.length) return;
+        const c = noticeCentroid(item);
+        if (!c) return;
+        const key =
+          Math.round(c[0] / cellDeg) + "|" + Math.round(c[1] / cellDeg);
+        if (!buckets[key]) buckets[key] = { items: [], latSum: 0, lonSum: 0 };
+        buckets[key].items.push(item);
+        buckets[key].latSum += c[0];
+        buckets[key].lonSum += c[1];
+      });
+      let clusters = Object.keys(buckets).map((k) => {
+        const b = buckets[k];
+        const n = b.items.length;
+        return { items: b.items, lat: b.latSum / n, lon: b.lonSum / n };
+      });
+      // Absorb leftover singles into the nearest multi-cluster (or each other) so world view stays sparse
+      if (zoom <= 3.5 && clusters.length > 1) {
+        const absorbR = cellDeg * 1.6;
+        const absorbR2 = absorbR * absorbR;
+        let changed = true;
+        while (changed) {
+          changed = false;
+          const multi = [];
+          const singles = [];
+          clusters.forEach((c) => (c.items.length > 1 ? multi : singles).push(c));
+          if (!singles.length) break;
+          const nextSingles = [];
+          singles.forEach((s) => {
+            let best = null;
+            let bestD = Infinity;
+            const pool = multi.length ? multi : nextSingles;
+            pool.forEach((m) => {
+              const dLat = s.lat - m.lat;
+              const dLon = s.lon - m.lon;
+              const d2 = dLat * dLat + dLon * dLon;
+              if (d2 < bestD) {
+                bestD = d2;
+                best = m;
+              }
+            });
+            if (best && bestD <= absorbR2) {
+              best.items.push.apply(best.items, s.items);
+              const n = best.items.length;
+              let lat = 0;
+              let lon = 0;
+              best.items.forEach((it) => {
+                const c = noticeCentroid(it);
+                if (!c) return;
+                lat += c[0];
+                lon += c[1];
+              });
+              best.lat = lat / n;
+              best.lon = lon / n;
+              if (multi.indexOf(best) < 0) multi.push(best);
+              changed = true;
+            } else {
+              nextSingles.push(s);
+            }
+          });
+          clusters = multi.concat(nextSingles);
+        }
+      }
+      return clusters;
+    };
 
     // Cohesive ECDIS Color Hierarchy:
     // NAVTEX = Warm Amber-Orange (#fb923c / #f97316)
@@ -4562,6 +4713,11 @@ function renderNtMListAndMap() {
     const basePolyWeight = curZoom <= 3 ? 0.9 : (curZoom <= 5 ? 1.2 : (curZoom <= 7 ? 1.6 : 2.0));
     const basePolyFillOp = curZoom <= 3 ? 0.05 : (curZoom <= 5 ? 0.09 : (curZoom <= 7 ? 0.14 : 0.20));
     const baseLineWeight = curZoom <= 3 ? 1.3 : (curZoom <= 5 ? 1.8 : 2.5);
+
+    const pathPaneOpts = () => ({
+      pane: "ntmOverlayPane",
+      renderer: canvasRenderer
+    });
 
     const buildPopupHtml = (item, extraLine = "") => {
       const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
@@ -4595,7 +4751,7 @@ function renderNtMListAndMap() {
       `;
     };
 
-    filtered.forEach(item => {
+    const plotOneNotice = (item) => {
       if (!item.coords || item.coords.length === 0) return;
 
       const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
@@ -4607,36 +4763,35 @@ function renderNtMListAndMap() {
           if (!pts || pts.length === 0) return;
 
           if (pts.length >= 3) {
-            const pOpts = {
+            const pOpts = Object.assign({
               color: pal.stroke,
               weight: basePolyWeight,
               fillColor: pal.fill,
               fillOpacity: isItemCancelled ? 0.04 : basePolyFillOp,
               dashArray: isItemCancelled ? "4, 6" : null
-            };
-            if (canvasRenderer) pOpts.renderer = canvasRenderer;
+            }, pathPaneOpts());
             const polygon = L.polygon(pts, pOpts);
             polygon.bindPopup(buildPopupHtml(item, `<div style="font-size:0.78em;color:#475569;margin-bottom:3px;"><b>Area:</b> ${sub.name} (${pts.length} pts)</div>`));
             leafletMarkersLayer.addLayer(polygon);
           } else if (pts.length === 2) {
-            const lOpts = {
-              color: pal.stroke,
-              weight: baseLineWeight,
-              dashArray: isItemCancelled ? "3, 6" : "5, 4"
-            };
-            if (canvasRenderer) lOpts.renderer = canvasRenderer;
-            const polyline = L.polyline(pts, lOpts);
-            polyline.bindPopup(buildPopupHtml(item));
-            leafletMarkersLayer.addLayer(polyline);
+            splitAntimeridianLatLngs(pts).forEach((seg) => {
+              const lOpts = Object.assign({
+                color: pal.stroke,
+                weight: baseLineWeight,
+                dashArray: isItemCancelled ? "3, 6" : "5, 4"
+              }, pathPaneOpts());
+              const polyline = L.polyline(seg, lOpts);
+              polyline.bindPopup(buildPopupHtml(item));
+              leafletMarkersLayer.addLayer(polyline);
+            });
           } else if (pts.length === 1) {
-            const cOpts = {
+            const cOpts = Object.assign({
               radius: ptRadius,
               fillColor: pal.fill,
               color: ptRimColor,
               weight: ptRimWeight,
               fillOpacity: isItemCancelled ? 0.45 : 0.86
-            };
-            if (canvasRenderer) cOpts.renderer = canvasRenderer;
+            }, pathPaneOpts());
             const circle = L.circleMarker(pts[0], cOpts);
             circle.bindPopup(buildPopupHtml(item));
             leafletMarkersLayer.addLayer(circle);
@@ -4652,48 +4807,102 @@ function renderNtMListAndMap() {
           lonSpan = Math.max(...lons) - Math.min(...lons);
         }
         const isLargeRegionalArea = (latSpan > 3.5 || lonSpan > 3.5);
-        const pOpts = {
+        const pOpts = Object.assign({
           color: pal.stroke,
           weight: isLargeRegionalArea && curZoom <= 5 ? 0.8 : basePolyWeight,
           fillColor: pal.fill,
           fillOpacity: isItemCancelled ? 0.04 : (isLargeRegionalArea && curZoom <= 5 ? 0.025 : basePolyFillOp),
           dashArray: isItemCancelled ? "3, 6" : (item.type === "NAVTEX" || item.type === "T" ? "4, 4" : null)
-        };
-        if (canvasRenderer) pOpts.renderer = canvasRenderer;
+        }, pathPaneOpts());
         const polygon = L.polygon(polyPoints, pOpts);
         polygon.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Polygon (${item.coords.length} vertices)</div>`));
         leafletMarkersLayer.addLayer(polygon);
       } else if (item.isLine && item.coords.length >= 2) {
         const linePoints = item.coords.map(c => [c.lat, c.lon]);
-        const lOpts = {
-          color: pal.stroke,
-          weight: baseLineWeight,
-          dashArray: isItemCancelled ? "3, 6" : (item.type === "T" ? "5, 4" : null)
-        };
-        if (canvasRenderer) lOpts.renderer = canvasRenderer;
-        const polyline = L.polyline(linePoints, lOpts);
-        polyline.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points)</div>`));
-        leafletMarkersLayer.addLayer(polyline);
+        const segments = splitAntimeridianLatLngs(linePoints);
+        segments.forEach((seg) => {
+          const lOpts = Object.assign({
+            color: pal.stroke,
+            weight: baseLineWeight,
+            dashArray: isItemCancelled ? "3, 6" : (item.type === "T" ? "5, 4" : null)
+          }, pathPaneOpts());
+          const polyline = L.polyline(seg, lOpts);
+          polyline.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points${segments.length > 1 ? " · date-line split" : ""})</div>`));
+          leafletMarkersLayer.addLayer(polyline);
+        });
       } else {
-        // At global zoom <= 4, if a single notice has multiple points, plot only its primary point to avoid dot clusters
+        // At global zoom <= 4, if a single notice has multiple points, plot only its primary point
         const coordsToPlot = (curZoom <= 4 && item.coords.length > 2) ? [item.coords[0]] : item.coords;
         coordsToPlot.forEach(coord => {
-          const cOpts = {
+          const cOpts = Object.assign({
             radius: ptRadius,
             fillColor: pal.fill,
             color: ptRimColor,
             weight: ptRimWeight,
             opacity: 0.92,
             fillOpacity: isItemCancelled ? 0.4 : 0.85
-          };
-          if (canvasRenderer) cOpts.renderer = canvasRenderer;
+          }, pathPaneOpts());
           const circle = L.circleMarker([coord.lat, coord.lon], cOpts);
           const dmsStr = coord.dms || formatCoordDmsHelper(coord.lat, coord.lon);
           circle.bindPopup(buildPopupHtml(item, `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`));
           leafletMarkersLayer.addLayer(circle);
         });
       }
-    });
+    };
+
+    const clusters = clusterNoticesForZoom(filtered, curZoom);
+    if (clusters) {
+      clusters.forEach((cl) => {
+        // Below ~z3.5 keep even lone notices as compact badges (no full lines/polygons clutter)
+        if (cl.items.length === 1 && curZoom > 3.5) {
+          plotOneNotice(cl.items[0]);
+          return;
+        }
+        const count = cl.items.length;
+        const types = {};
+        cl.items.forEach((it) => {
+          const t = it.type || "?";
+          types[t] = (types[t] || 0) + 1;
+        });
+        const typeSummary = Object.keys(types)
+          .map((t) => types[t] + " " + t)
+          .join(" · ");
+        const listPreview = cl.items
+          .slice(0, 8)
+          .map((it) => String(it.id || "").replace(/</g, "&lt;"))
+          .join("<br>");
+        const more = count > 8 ? `<div style="margin-top:4px;color:#64748b;">+${count - 8} more…</div>` : "";
+        const targetZoom = Math.min(Math.max(curZoom + 1.5, 4), 8);
+        const icon = L.divIcon({
+          className: "ntm-cluster-icon",
+          html:
+            '<div style="width:20px;height:20px;border-radius:50%;background:#f97316;border:1.5px solid #0f172a;color:#fff;font:700 9px/20px Segoe UI,sans-serif;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.4);">' +
+            count +
+            "</div>",
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+        const m = L.marker([cl.lat, cl.lon], {
+          icon,
+          pane: "ntmOverlayPane",
+          keyboard: false
+        });
+        m.bindPopup(
+          `<div style="font-family:Segoe UI,sans-serif;min-width:200px;color:#111;">
+            <b style="color:#c2410c;">${count} NtM / NAVTEX</b>
+            <div style="font-size:0.78em;color:#64748b;margin:3px 0 6px;">${typeSummary}</div>
+            <div style="font-size:0.78em;line-height:1.35;">${listPreview}${more}</div>
+            <div style="margin-top:7px;font-size:0.72em;color:#0369a1;">Zoom in to split into individual objects</div>
+          </div>`
+        );
+        m.on("click", () => {
+          leafletMap.setView([cl.lat, cl.lon], targetZoom);
+        });
+        leafletMarkersLayer.addLayer(m);
+      });
+    } else {
+      filtered.forEach(plotOneNotice);
+    }
   } else {
     drawOfflineCanvasMap();
   }
@@ -7464,9 +7673,27 @@ function createEcdisSimpleBaseLayer() {
       ? WORLD_LAND_POLYGONS
       : window.WORLD_LAND_POLYGONS || [];
 
+  function ensureEcdisPanes(map) {
+    if (!map || !map.createPane) return;
+    if (!map.getPane("ecdisLandPane")) {
+      const p = map.createPane("ecdisLandPane");
+      // Below NtM/AIS overlay pane so land never covers clickable warnings
+      p.style.zIndex = 350;
+      p.style.pointerEvents = "none";
+    } else {
+      map.getPane("ecdisLandPane").style.pointerEvents = "none";
+    }
+    if (!map.getPane("ntmOverlayPane")) {
+      const n = map.createPane("ntmOverlayPane");
+      // Above land (350), below markers/popups (600+)
+      n.style.zIndex = 450;
+    }
+  }
+
   function landStyle() {
     // Same yellow for fill and edge — no gray coastline halo, no source mismatch.
     return {
+      pane: "ecdisLandPane",
       stroke: true,
       color: LAND,
       weight: 0.6,
@@ -7495,7 +7722,7 @@ function createEcdisSimpleBaseLayer() {
       "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_" +
       level +
       "_land.geojson";
-    return [local + "?v=5.29", cdn];
+    return [local + "?v=5.32", cdn];
   }
 
   async function loadLandGeo(level) {
@@ -7537,24 +7764,40 @@ function createEcdisSimpleBaseLayer() {
     }
   }
 
+  function setEcdisLandLoading(on) {
+    const sel = document.getElementById("ntmChartLayerSelector");
+    if (!sel) return;
+    const trig = sel.querySelector(".ntm-layer-trigger-btn");
+    sel.classList.toggle("is-loading-base", !!on);
+    if (trig) {
+      trig.classList.toggle("is-loading", !!on);
+      trig.setAttribute("aria-busy", on ? "true" : "false");
+      trig.title = on ? "Loading ECDIS land detail…" : "Select Chart Layer";
+    }
+  }
+
   async function refreshEcdisLand() {
     const map = boundMap || group._map;
     if (!map || !map.hasLayer(group)) return;
     const z = map.getZoom();
     // World overview: coarse fill only. Closer: Natural Earth land polygons (fill = edge).
-    if (z < 3) {
+    // Low thresholds — 50m from ~z2, detailed 10m from ~z3 (was z5).
+    if (z < 1.5) {
+      setEcdisLandLoading(false);
       if (lastLandKey !== "coarse") {
         lastLandKey = "coarse";
         renderCoarseLand();
       }
       return;
     }
-    const level = z >= 8 ? "10m" : z >= 4 ? "50m" : "110m";
+    const level = z >= 3 ? "10m" : z >= 2 ? "50m" : "110m";
     const seq = ++landSeq;
+    const needsFetch = !landCache[level];
+    if (needsFetch) setEcdisLandLoading(true);
     try {
       const geo = await loadLandGeo(level);
       if (seq !== landSeq) return;
-      const pad = z >= 10 ? 0.05 : z >= 6 ? 0.12 : 0.35;
+      const pad = z >= 6 ? 0.05 : z >= 3 ? 0.15 : 0.4;
       const bounds = map.getBounds().pad(pad);
       const key =
         level +
@@ -7566,16 +7809,21 @@ function createEcdisSimpleBaseLayer() {
         Math.round(bounds.getNorth() * 20) +
         "|" +
         Math.round(bounds.getEast() * 20);
-      if (key === lastLandKey) return;
+      if (key === lastLandKey) {
+        setEcdisLandLoading(false);
+        return;
+      }
       lastLandKey = key;
-      const renderer = L.canvas({ padding: 0.5 });
+      ensureEcdisPanes(map);
+      const renderer = L.canvas({ padding: 0.5, pane: "ecdisLandPane" });
       landFill.clearLayers();
       L.geoJSON(geo, {
+        pane: "ecdisLandPane",
         renderer,
         interactive: false,
         filter: function (feat) {
           if (level === "110m") return true;
-          if (level === "50m" && z < 5) return true;
+          // Always viewport-filter 50m/10m so we can load finer NE earlier without drawing the whole planet.
           return featureHitsBounds(feat, bounds);
         },
         style: landStyle
@@ -7586,6 +7834,8 @@ function createEcdisSimpleBaseLayer() {
         lastLandKey = "coarse";
         renderCoarseLand();
       }
+    } finally {
+      if (seq === landSeq) setEcdisLandLoading(false);
     }
   }
 
@@ -7597,6 +7847,7 @@ function createEcdisSimpleBaseLayer() {
   group.on("add", function () {
     boundMap = group._map;
     if (!boundMap) return;
+    ensureEcdisPanes(boundMap);
     boundMap.getContainer().classList.add("ecdis-simple-base");
     lastLandKey = "";
     renderCoarseLand();
@@ -7687,18 +7938,53 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
     <div class="ntm-layer-divider"></div>
 
-    <button type="button" class="ntm-layer-thumb-btn" data-overlay="buoys" title="Toggle OpenSeaMap Buoys &amp; Seamarks">
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="buoys" title="Buoys — OpenSeaMap PNG seamarks (buoys, lights, beacons)">
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#38bdf8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/></svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <ellipse cx="12" cy="20.2" rx="5.2" ry="1.35" fill="#0ea5e9" opacity="0.35"/>
+          <path d="M8.2 17.2h7.6l-1.1-8.4H9.3z" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M9.4 12.4h5.2" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M9.4 14.8h5.2" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/>
+          <rect x="11.15" y="5.2" width="1.7" height="3.7" rx="0.4" fill="#e2e8f0"/>
+          <path d="M12 2.4l2.35 2.6H9.65z" fill="#fbbf24" stroke="#f59e0b" stroke-width="0.8" stroke-linejoin="round"/>
+        </svg>
       </div>
       <span class="ntm-layer-thumb-label">Buoys</span>
     </button>
 
-    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Select Chart Layer">
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#38bdf8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="seamap" title="Seamap — Open Waters Free Nautical Chart (vector ENC-style)">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(160deg,#0c4a6e 0%,#075985 45%,#e0f2fe 100%);">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#e0f2fe" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l4-6 4 3 4-7 6 10"/><circle cx="8" cy="8" r="1.4" fill="#38bdf8" stroke="none"/></svg>
       </div>
-      <span class="ntm-layer-thumb-label">Layers</span>
+      <span class="ntm-layer-thumb-label">Seamap</span>
+    </button>
+
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="seascape" title="Seascape — Open Waters seabed relief (DEM hillshade)">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#020617 0%,#0c4a6e 42%,#155e75 70%,#67e8f9 100%);">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M2 18.5c2.2-3.4 4.1-5.2 6.4-4.1 2.1 1 3.2 3.6 5.1 3.2 2.1-.4 3.2-2.8 5.2-2.2 1.6.5 2.8 2.1 3.3 3.1" fill="none" stroke="#a5f3fc" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M2 14.2c2.4-2.8 4.6-3.9 6.8-2.6 2.3 1.3 3.1 3.5 5.2 3.1 2.4-.4 3.6-2.6 5.5-2 1.4.45 2.5 1.7 2.5 1.7" fill="none" stroke="#22d3ee" stroke-width="1.45" stroke-linecap="round" opacity="0.9"/>
+          <path d="M3 20.4h18" stroke="#082f49" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M5.5 20.2c1.4-2.8 2.8-4.6 4.6-4.2 1.7.4 2.5 2.5 4.1 2.3 1.8-.25 2.7-2.1 4.3-1.7" fill="#0e7490" opacity="0.55"/>
+        </svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Seascape</span>
+    </button>
+
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="bathymetry" title="Bathymetry — Open Waters depth tint (Seascape DEM color-relief)">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#e9f7ff 0%,#7fc7f8 35%,#1f86cb 70%,#0c4a6e 100%);">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+          <path d="M3 7h18M5 12h14M7 17h10" stroke="#ecfeff" stroke-width="1.7" stroke-linecap="round" opacity="0.95"/>
+          <circle cx="12" cy="12" r="2.1" fill="#fef9c3" stroke="#fde68a" stroke-width="0.8"/>
+        </svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Bathymetry</span>
+    </button>
+
+    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Layers — ECDIS / Ocean / Buoys / Seamap / Seascape / Bathymetry" aria-label="Chart layers including Seamap, Seascape and Bathymetry">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#94a3b8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      </div>
     </button>
   `;
 
@@ -7706,11 +7992,153 @@ function initVisualChartLayerSelector(mapInstance, layers) {
   L.DomEvent.disableScrollPropagation(selector);
   mapContainer.appendChild(selector);
 
-  selector.addEventListener("mouseenter", () => selector.classList.remove("collapsed"));
-  selector.addEventListener("mouseleave", () => selector.classList.add("collapsed"));
+  let layerPanelLeaveTimer = null;
+  selector.addEventListener("mouseenter", () => {
+    if (layerPanelLeaveTimer) {
+      clearTimeout(layerPanelLeaveTimer);
+      layerPanelLeaveTimer = null;
+    }
+    selector.classList.remove("collapsed");
+  });
+  selector.addEventListener("mouseleave", () => {
+    if (layerPanelLeaveTimer) clearTimeout(layerPanelLeaveTimer);
+    layerPanelLeaveTimer = setTimeout(() => {
+      selector.classList.add("collapsed");
+      layerPanelLeaveTimer = null;
+    }, 500);
+  });
 
   let activeBaseKey = "ocean";
   let isBuoysActive = false;
+  let isSeamapActive = false;
+  let isSeascapeActive = false;
+  let isBathymetryActive = false;
+  let seamapLayerRef = layers.seamap || null;
+  let seascapeLayerRef = layers.seascape || null;
+  let bathymetryLayerRef = layers.bathymetry || null;
+  let owOverlayBusy = false;
+
+  const OW_OVERLAY_META = {
+    seamap: {
+      label: "Seamap",
+      title: "Seamap — Open Waters Free Nautical Chart (vector ENC-style)",
+      create: "createOpenWatersSeamapLayer",
+      getRef: () => seamapLayerRef,
+      setRef: (v) => {
+        seamapLayerRef = v;
+        layers.seamap = v;
+      },
+      getOn: () => isSeamapActive,
+      setOn: (v) => {
+        isSeamapActive = v;
+      },
+      waitMs: 20000
+    },
+    seascape: {
+      label: "Seascape",
+      title: "Seascape — Open Waters seabed relief (DEM hillshade)",
+      create: "createOpenWatersSeascapeLayer",
+      getRef: () => seascapeLayerRef,
+      setRef: (v) => {
+        seascapeLayerRef = v;
+        layers.seascape = v;
+      },
+      getOn: () => isSeascapeActive,
+      setOn: (v) => {
+        isSeascapeActive = v;
+      },
+      waitMs: 16000
+    },
+    bathymetry: {
+      label: "Bathymetry",
+      title: "Bathymetry — Open Waters depth tint (Seascape DEM color-relief)",
+      create: "createOpenWatersBathymetryLayer",
+      getRef: () => bathymetryLayerRef,
+      setRef: (v) => {
+        bathymetryLayerRef = v;
+        layers.bathymetry = v;
+      },
+      getOn: () => isBathymetryActive,
+      setOn: (v) => {
+        isBathymetryActive = v;
+      },
+      waitMs: 16000
+    }
+  };
+
+  const setOverlayBusy = (btn, on, titleIdle) => {
+    if (!btn) return;
+    btn.classList.toggle("is-loading", !!on);
+    btn.setAttribute("aria-busy", on ? "true" : "false");
+    if (on) btn.title = "Loading…";
+    else if (titleIdle) btn.title = titleIdle;
+  };
+
+  const toggleOwMapLibreOverlay = async (overlayKey, btn) => {
+    if (owOverlayBusy) return;
+    const meta = OW_OVERLAY_META[overlayKey];
+    if (!meta) return;
+    const turningOn = !meta.getOn();
+    const idleTitle = meta.title;
+    const label = meta.label;
+
+    if (!turningOn) {
+      const lyr = meta.getRef();
+      if (lyr && mapInstance.hasLayer(lyr)) mapInstance.removeLayer(lyr);
+      meta.setOn(false);
+      btn.classList.remove("active-overlay");
+      setOverlayBusy(btn, false, idleTitle);
+      if (typeof flashOpenWatersLayerStatus === "function") {
+        flashOpenWatersLayerStatus(label + " off", false);
+      }
+      return;
+    }
+
+    owOverlayBusy = true;
+    setOverlayBusy(btn, true, idleTitle);
+    if (typeof flashOpenWatersLayerStatus === "function") {
+      flashOpenWatersLayerStatus("Loading " + label + "…", false);
+    }
+    try {
+      let lyr = meta.getRef();
+      if (!lyr) {
+        const createFn = typeof window !== "undefined" ? window[meta.create] : null;
+        if (typeof createFn !== "function") {
+          throw new Error("Open Waters " + label + " helper missing");
+        }
+        lyr = await createFn();
+        meta.setRef(lyr);
+      }
+      lyr.addTo(mapInstance);
+      if (typeof wireOpenWatersGlLayerResize === "function") {
+        wireOpenWatersGlLayerResize(lyr, mapInstance);
+      }
+      if (typeof waitForOpenWatersGlStyle === "function") {
+        await waitForOpenWatersGlStyle(lyr, meta.waitMs);
+      }
+      meta.setOn(true);
+      btn.classList.add("active-overlay");
+      setOverlayBusy(btn, false, idleTitle);
+      if (typeof flashOpenWatersLayerStatus === "function") {
+        flashOpenWatersLayerStatus(label + " on", false);
+      }
+    } catch (err) {
+      console.warn("[SetSail] Open Waters overlay failed:", err);
+      try {
+        const bad = meta.getRef();
+        if (bad && mapInstance.hasLayer(bad)) mapInstance.removeLayer(bad);
+        meta.setRef(null);
+      } catch (e2) {}
+      btn.classList.remove("active-overlay");
+      setOverlayBusy(btn, false, idleTitle + " (unavailable)");
+      meta.setOn(false);
+      if (typeof flashOpenWatersLayerStatus === "function") {
+        flashOpenWatersLayerStatus(label + " failed: " + (err && err.message ? err.message : "error"), true);
+      }
+    } finally {
+      owOverlayBusy = false;
+    }
+  };
 
   // 3D Globe State & Renderer with Horizon-Limb Continental Projection
   const canvas = globeWrap.querySelector("#ntmGlobe3DCanvas");
@@ -8047,7 +8475,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           if (triggerBtn) {
             triggerBtn.classList.toggle("is-loading", !!on);
             triggerBtn.setAttribute("aria-busy", on ? "true" : "false");
-            triggerBtn.title = on ? "Loading chart layer…" : "Select Chart Layer";
+            triggerBtn.title = on ? "Loading chart layer…" : "Layers — ECDIS / Ocean / Buoys / Seamap / Seascape / Bathymetry";
           }
           btn.classList.toggle("is-loading", !!on);
         };
@@ -8130,6 +8558,13 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         } else if (mapInstance.hasLayer(layers.buoys)) {
           mapInstance.removeLayer(layers.buoys);
         }
+      } else if (overlayKey === "seamap" || overlayKey === "seascape" || overlayKey === "bathymetry") {
+        if (layerPanelLeaveTimer) {
+          clearTimeout(layerPanelLeaveTimer);
+          layerPanelLeaveTimer = null;
+        }
+        selector.classList.remove("collapsed");
+        toggleOwMapLibreOverlay(overlayKey, btn);
       }
     });
   });
@@ -8595,13 +9030,7 @@ function initSetSailAuth() {
     });
   }
 
-  const googleBtn = document.getElementById("btnGoogleSignIn");
-  if (googleBtn) {
-    googleBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      triggerOfficialGoogleSignIn();
-    });
-  }
+  // Custom #btnGoogleSignIn removed — Settings uses only official GIS #googleGsiButtonContainer
 
   const btnExportHist = document.getElementById("btnExportUserHistory");
   if (btnExportHist) {
@@ -11163,6 +11592,97 @@ CRITICAL INTENT RULES:
   ]);
 }
 
+const SETROUTE_EMPTY_TITLES = [
+  "Where are we sailing today?",
+  "Ready for the next passage?",
+  "Plot the next leg of the voyage.",
+  "Which ports shall we connect?",
+  "Name the departure and arrival.",
+  "Chart a course — where next?",
+  "Set sail: origin and destination.",
+  "What's the next ocean crossing?",
+  "Bridge briefing: where to?",
+  "Plan the next fairway run.",
+  "From berth to berth — where?",
+  "Draft a passage in one sentence.",
+  "Pick the next trade lane.",
+  "Ocean routes start with two ports.",
+  "Where does this voyage begin and end?",
+  "Tell SetRoute the next call.",
+  "Course to steer — which ports?",
+  "Ready when you name the ports.",
+  "Next waypoint cluster: which cities?",
+  "Let's shape a Great Circle today.",
+  "Rhumb or GC — first, the ports.",
+  "Passage plan starts here.",
+  "Harbour to harbour — your call.",
+  "Where is the next landfall?",
+  "Give me two ports and a draft.",
+  "Trade route or coastal hop?",
+  "Which canal or cape this time?",
+  "SetRoute is standing by.",
+  "Map the next commercial run.",
+  "One prompt. Full leg table."
+];
+
+const SETROUTE_PROMPT_POOL = [
+  { title: "Ningbo → Los Angeles", meta: "Trans-Pacific GC/RL", prompt: "Make the route from Ningbo to Los Angeles" },
+  { title: "Houston → Rotterdam", meta: "Draft 11.8m · 15 kn", prompt: "Plan route from Houston to Rotterdam, draft 11.8m, speed 15 kn" },
+  { title: "Singapore → Shanghai", meta: "TSS & fairways", prompt: "Plan route from Singapore to Shanghai, draft 12.5m, speed 14.5 kn" },
+  { title: "Rotterdam → Singapore", meta: "Suez vs Cape", prompt: "Plan route from Rotterdam to Singapore, draft 12.0m" },
+  { title: "Tokyo → San Francisco", meta: "N. Pacific GC", prompt: "Plan route from Tokyo to San Francisco using Great Circle GC" },
+  { title: "Busan → Long Beach", meta: "Transpac container", prompt: "Plan route from Busan to Long Beach, draft 13.0m, speed 16 kn" },
+  { title: "Antwerp → New York", meta: "N. Atlantic", prompt: "Plan route from Antwerp to New York, draft 12.2m, speed 14 kn" },
+  { title: "Shanghai → Hamburg", meta: "Suez corridor", prompt: "Plan route from Shanghai to Hamburg via Suez, draft 12.5m" },
+  { title: "Dubai → Singapore", meta: "Arabian–Malacca", prompt: "Plan route from Dubai to Singapore, draft 14.0m, speed 13.5 kn" },
+  { title: "Santos → Qingdao", meta: "Cape / Suez options", prompt: "Plan route from Santos to Qingdao, draft 12.0m" },
+  { title: "Yokohama → Vancouver", meta: "N. Pacific", prompt: "Plan route from Yokohama to Vancouver, speed 15 kn" },
+  { title: "Gibraltar → Port Said", meta: "Med transit", prompt: "Plan route from Gibraltar to Port Said, draft 11.5m" },
+  { title: "Mumbai → Jeddah", meta: "Red Sea approaches", prompt: "Plan route from Mumbai to Jeddah, draft 12.0m, speed 14 kn" },
+  { title: "Valencia → Piraeus", meta: "West–East Med", prompt: "Plan route from Valencia to Piraeus, draft 10.5m" },
+  { title: "Cape Town → Singapore", meta: "Indian Ocean RL", prompt: "Plan route from Cape Town to Singapore, draft 12.8m, speed 14.5 kn" },
+  { title: "Baltimore → Rotterdam", meta: "Transatlantic", prompt: "Plan route from Baltimore to Rotterdam, draft 11.0m, speed 15 kn" },
+  { title: "Kaohsiung → Los Angeles", meta: "Transpac", prompt: "Plan route from Kaohsiung to Los Angeles, draft 13.5m" },
+  { title: "Le Havre → Montreal", meta: "St. Lawrence", prompt: "Plan route from Le Havre to Montreal, draft 10.8m, speed 13 kn" },
+  { title: "Jakarta → Fremantle", meta: "Indonesia–Australia", prompt: "Plan route from Jakarta to Fremantle, draft 11.5m" },
+  { title: "Odessa → Istanbul", meta: "Black Sea–Bosporus", prompt: "Plan route from Odessa to Istanbul, draft 9.5m, speed 12 kn" },
+  { title: "Panama → Busan", meta: "Pacific climb", prompt: "Plan route from Panama to Busan, draft 12.0m, speed 15 kn" },
+  { title: "Dalian → Rotterdam", meta: "Eurasia via Suez", prompt: "Plan route from Dalian to Rotterdam via Suez, draft 12.5m" },
+  { title: "Chennai → Singapore", meta: "Bay of Bengal", prompt: "Plan route from Chennai to Singapore, draft 11.8m" },
+  { title: "Naples → Alexandria", meta: "Central Med", prompt: "Plan route from Naples to Alexandria, draft 10.0m, speed 13 kn" }
+];
+
+function shufflePick(arr, n) {
+  const copy = arr.slice();
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = copy[i];
+    copy[i] = copy[j];
+    copy[j] = t;
+  }
+  return copy.slice(0, n);
+}
+
+function refreshSetRouteEmptyHero() {
+  const titleEl = document.querySelector("#setRouteEmptyHero .setroute-empty-title");
+  const promptsEl = document.querySelector("#setRouteEmptyHero .setroute-empty-prompts");
+  if (titleEl) {
+    titleEl.textContent = SETROUTE_EMPTY_TITLES[Math.floor(Math.random() * SETROUTE_EMPTY_TITLES.length)];
+  }
+  if (promptsEl) {
+    const picks = shufflePick(SETROUTE_PROMPT_POOL, 4);
+    promptsEl.innerHTML = picks
+      .map(
+        (p) =>
+          `<button type="button" class="sr-empty-prompt-card" data-sr-prompt="${String(p.prompt).replace(/"/g, "&quot;")}">` +
+          `<span class="sr-empty-prompt-title">${p.title}</span>` +
+          `<span class="sr-empty-prompt-meta">${p.meta}</span></button>`
+      )
+      .join("");
+  }
+}
+window.refreshSetRouteEmptyHero = refreshSetRouteEmptyHero;
+
 function initSetRouteV50() {
   const chatMessages = document.getElementById("setRouteChatMessages");
   const emptyHero = document.getElementById("setRouteEmptyHero");
@@ -11170,6 +11690,7 @@ function initSetRouteV50() {
   const chatInput = document.getElementById("setRouteChatInput");
   const genBtn = document.getElementById("btnGenerateSetRoute");
   const newChatBtn = document.getElementById("btnSetRouteNewChat");
+  refreshSetRouteEmptyHero();
   const toggleDrawerBtn = document.getElementById("btnToggleRightDrawer");
   const closeDrawerBtn = document.getElementById("btnCloseRightDrawer");
   const drawerPlotBtn = document.getElementById("btnDrawerPlotOnChart");
@@ -11318,6 +11839,7 @@ function initSetRouteV50() {
       window.SETROUTE_PENDING_CONTEXT = null;
       if (chatMessages) chatMessages.innerHTML = "";
       if (emptyHero) emptyHero.style.display = "flex";
+      refreshSetRouteEmptyHero();
       setBrainMode("planning");
     });
   }

@@ -1,10 +1,10 @@
-﻿/**
+/**
  * SetSail Marine Navigation Suite вЂ” Service Worker (PWA Offline Engine v4.8)
  * Vessel: LPG/C IINO INEOS VESTA
  * High-Speed Satellite & Offline Engine вЂ” Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.29.0';
+const CACHE_NAME = 'setsail-cache-v5.45.0';
 const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.29.0';
 
 const OFFLINE_CORE_ASSETS = [
@@ -271,7 +271,9 @@ self.addEventListener('fetch', (event) => {
     url.hostname.includes('tile.openstreetmap.org') ||
     url.hostname.includes('arcgisonline.com') ||
     url.hostname.includes('openseamap.org') ||
-    url.hostname.includes('cartocdn.com')
+    url.hostname.includes('cartocdn.com') ||
+    url.hostname === 'tiles.openwaters.io' ||
+    url.hostname === 'tiles.versatiles.org'
   );
 
   if (isMapTile) {
@@ -341,17 +343,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4. Core JS & CSS scripts: Fast Network-First (2s timeout) with Offline Cache Fallback
+  // 4. Core JS & CSS: Network-First. Large MapLibre bundles need a long timeout
+  // (old 2s cap returned 503 "/* Offline */" and broke Seamap/Seascape).
   const isCoreScriptOrStyle = (
     url.origin === self.location.origin &&
     (url.pathname.endsWith('.js') || url.pathname.endsWith('.css'))
   );
 
   if (isCoreScriptOrStyle) {
+    const pathLower = decodeURIComponent(url.pathname).toLowerCase();
+    const isHeavyMapLibre =
+      pathLower.indexOf('maplibre-gl') !== -1 ||
+      pathLower.indexOf('maplibre_gl') !== -1;
+    const scriptTimeoutMs = isHeavyMapLibre ? 45000 : 8000;
     event.respondWith(
       (async () => {
         try {
-          const netRes = await fetchWithTimeout(event.request, 2000);
+          const netRes = await fetchWithTimeout(event.request, scriptTimeoutMs);
           if (netRes && netRes.ok) {
             const cache = await caches.open(CACHE_NAME);
             cache.put(event.request, netRes.clone());
@@ -360,6 +368,10 @@ self.addEventListener('fetch', (event) => {
         } catch (e) {}
         const cached = await matchAssetInCache(event.request);
         if (cached) return cached;
+        // Never serve a fake 503 JS stub for MapLibre — let the page see a real failure
+        if (isHeavyMapLibre) {
+          return fetch(event.request);
+        }
         return new Response('/* Offline */', {
           status: 503,
           headers: { 'Content-Type': url.pathname.endsWith('.css') ? 'text/css' : 'application/javascript' }

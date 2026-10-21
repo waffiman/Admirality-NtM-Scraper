@@ -7940,7 +7940,14 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
     <button type="button" class="ntm-layer-thumb-btn" data-overlay="buoys" title="Buoys — OpenSeaMap PNG seamarks (buoys, lights, beacons)">
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#38bdf8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/></svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <ellipse cx="12" cy="20.2" rx="5.2" ry="1.35" fill="#0ea5e9" opacity="0.35"/>
+          <path d="M8.2 17.2h7.6l-1.1-8.4H9.3z" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M9.4 12.4h5.2" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M9.4 14.8h5.2" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/>
+          <rect x="11.15" y="5.2" width="1.7" height="3.7" rx="0.4" fill="#e2e8f0"/>
+          <path d="M12 2.4l2.35 2.6H9.65z" fill="#fbbf24" stroke="#f59e0b" stroke-width="0.8" stroke-linejoin="round"/>
+        </svg>
       </div>
       <span class="ntm-layer-thumb-label">Buoys</span>
     </button>
@@ -7952,14 +7959,29 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       <span class="ntm-layer-thumb-label">Seamap</span>
     </button>
 
-    <button type="button" class="ntm-layer-thumb-btn" data-overlay="seascape" title="Seascape — Open Waters bathymetry / depth shading (not seamarks)">
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#082f49 0%,#0e7490 40%,#67e8f9 78%,#ecfeff 100%);">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ecfeff" stroke-width="1.7" stroke-linecap="round"><path d="M4 18c3-2 5-2 8 0s5 2 8 0"/><path d="M4 13c3-2 5-2 8 0s5 2 8 0"/><path d="M4 8c3-2 5-2 8 0s5 2 8 0"/></svg>
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="seascape" title="Seascape — Open Waters seabed relief (DEM hillshade)">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#020617 0%,#0c4a6e 42%,#155e75 70%,#67e8f9 100%);">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M2 18.5c2.2-3.4 4.1-5.2 6.4-4.1 2.1 1 3.2 3.6 5.1 3.2 2.1-.4 3.2-2.8 5.2-2.2 1.6.5 2.8 2.1 3.3 3.1" fill="none" stroke="#a5f3fc" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M2 14.2c2.4-2.8 4.6-3.9 6.8-2.6 2.3 1.3 3.1 3.5 5.2 3.1 2.4-.4 3.6-2.6 5.5-2 1.4.45 2.5 1.7 2.5 1.7" fill="none" stroke="#22d3ee" stroke-width="1.45" stroke-linecap="round" opacity="0.9"/>
+          <path d="M3 20.4h18" stroke="#082f49" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M5.5 20.2c1.4-2.8 2.8-4.6 4.6-4.2 1.7.4 2.5 2.5 4.1 2.3 1.8-.25 2.7-2.1 4.3-1.7" fill="#0e7490" opacity="0.55"/>
+        </svg>
       </div>
       <span class="ntm-layer-thumb-label">Seascape</span>
     </button>
 
-    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Layers — ECDIS / Ocean / Buoys / Seamap / Seascape" aria-label="Chart layers including Seamap and Seascape">
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="bathymetry" title="Bathymetry — Open Waters depth tint (Seascape DEM color-relief)">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#e9f7ff 0%,#7fc7f8 35%,#1f86cb 70%,#0c4a6e 100%);">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+          <path d="M3 7h18M5 12h14M7 17h10" stroke="#ecfeff" stroke-width="1.7" stroke-linecap="round" opacity="0.95"/>
+          <circle cx="12" cy="12" r="2.1" fill="#fef9c3" stroke="#fde68a" stroke-width="0.8"/>
+        </svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Bathymetry</span>
+    </button>
+
+    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Layers — ECDIS / Ocean / Buoys / Seamap / Seascape / Bathymetry" aria-label="Chart layers including Seamap, Seascape and Bathymetry">
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#94a3b8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
       </div>
@@ -7990,9 +8012,59 @@ function initVisualChartLayerSelector(mapInstance, layers) {
   let isBuoysActive = false;
   let isSeamapActive = false;
   let isSeascapeActive = false;
+  let isBathymetryActive = false;
   let seamapLayerRef = layers.seamap || null;
   let seascapeLayerRef = layers.seascape || null;
+  let bathymetryLayerRef = layers.bathymetry || null;
   let owOverlayBusy = false;
+
+  const OW_OVERLAY_META = {
+    seamap: {
+      label: "Seamap",
+      title: "Seamap — Open Waters Free Nautical Chart (vector ENC-style)",
+      create: "createOpenWatersSeamapLayer",
+      getRef: () => seamapLayerRef,
+      setRef: (v) => {
+        seamapLayerRef = v;
+        layers.seamap = v;
+      },
+      getOn: () => isSeamapActive,
+      setOn: (v) => {
+        isSeamapActive = v;
+      },
+      waitMs: 20000
+    },
+    seascape: {
+      label: "Seascape",
+      title: "Seascape — Open Waters seabed relief (DEM hillshade)",
+      create: "createOpenWatersSeascapeLayer",
+      getRef: () => seascapeLayerRef,
+      setRef: (v) => {
+        seascapeLayerRef = v;
+        layers.seascape = v;
+      },
+      getOn: () => isSeascapeActive,
+      setOn: (v) => {
+        isSeascapeActive = v;
+      },
+      waitMs: 16000
+    },
+    bathymetry: {
+      label: "Bathymetry",
+      title: "Bathymetry — Open Waters depth tint (Seascape DEM color-relief)",
+      create: "createOpenWatersBathymetryLayer",
+      getRef: () => bathymetryLayerRef,
+      setRef: (v) => {
+        bathymetryLayerRef = v;
+        layers.bathymetry = v;
+      },
+      getOn: () => isBathymetryActive,
+      setOn: (v) => {
+        isBathymetryActive = v;
+      },
+      waitMs: 16000
+    }
+  };
 
   const setOverlayBusy = (btn, on, titleIdle) => {
     if (!btn) return;
@@ -8004,21 +8076,16 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
   const toggleOwMapLibreOverlay = async (overlayKey, btn) => {
     if (owOverlayBusy) return;
-    const isSeamap = overlayKey === "seamap";
-    const turningOn = isSeamap ? !isSeamapActive : !isSeascapeActive;
-    const idleTitle = isSeamap
-      ? "Seamap — Open Waters Free Nautical Chart (vector ENC-style)"
-      : "Seascape — Open Waters bathymetry / depth shading (not seamarks)";
-    const label = isSeamap ? "Seamap" : "Seascape";
+    const meta = OW_OVERLAY_META[overlayKey];
+    if (!meta) return;
+    const turningOn = !meta.getOn();
+    const idleTitle = meta.title;
+    const label = meta.label;
 
     if (!turningOn) {
-      const lyr = isSeamap ? seamapLayerRef : seascapeLayerRef;
+      const lyr = meta.getRef();
       if (lyr && mapInstance.hasLayer(lyr)) mapInstance.removeLayer(lyr);
-      if (isSeamap) {
-        isSeamapActive = false;
-      } else {
-        isSeascapeActive = false;
-      }
+      meta.setOn(false);
       btn.classList.remove("active-overlay");
       setOverlayBusy(btn, false, idleTitle);
       if (typeof flashOpenWatersLayerStatus === "function") {
@@ -8033,35 +8100,23 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       flashOpenWatersLayerStatus("Loading " + label + "…", false);
     }
     try {
-      let lyr = null;
-      if (isSeamap) {
-        if (!seamapLayerRef) {
-          if (typeof createOpenWatersSeamapLayer !== "function") {
-            throw new Error("Open Waters Seamap helper missing");
-          }
-          seamapLayerRef = await createOpenWatersSeamapLayer();
-          layers.seamap = seamapLayerRef;
+      let lyr = meta.getRef();
+      if (!lyr) {
+        const createFn = typeof window !== "undefined" ? window[meta.create] : null;
+        if (typeof createFn !== "function") {
+          throw new Error("Open Waters " + label + " helper missing");
         }
-        lyr = seamapLayerRef;
-      } else {
-        if (!seascapeLayerRef) {
-          if (typeof createOpenWatersSeascapeLayer !== "function") {
-            throw new Error("Open Waters Seascape helper missing");
-          }
-          seascapeLayerRef = await createOpenWatersSeascapeLayer();
-          layers.seascape = seascapeLayerRef;
-        }
-        lyr = seascapeLayerRef;
+        lyr = await createFn();
+        meta.setRef(lyr);
       }
       lyr.addTo(mapInstance);
       if (typeof wireOpenWatersGlLayerResize === "function") {
         wireOpenWatersGlLayerResize(lyr, mapInstance);
       }
       if (typeof waitForOpenWatersGlStyle === "function") {
-        await waitForOpenWatersGlStyle(lyr, isSeamap ? 20000 : 16000);
+        await waitForOpenWatersGlStyle(lyr, meta.waitMs);
       }
-      if (isSeamap) isSeamapActive = true;
-      else isSeascapeActive = true;
+      meta.setOn(true);
       btn.classList.add("active-overlay");
       setOverlayBusy(btn, false, idleTitle);
       if (typeof flashOpenWatersLayerStatus === "function") {
@@ -8070,20 +8125,13 @@ function initVisualChartLayerSelector(mapInstance, layers) {
     } catch (err) {
       console.warn("[SetSail] Open Waters overlay failed:", err);
       try {
-        const bad = isSeamap ? seamapLayerRef : seascapeLayerRef;
+        const bad = meta.getRef();
         if (bad && mapInstance.hasLayer(bad)) mapInstance.removeLayer(bad);
-        if (isSeamap) {
-          seamapLayerRef = null;
-          layers.seamap = null;
-        } else {
-          seascapeLayerRef = null;
-          layers.seascape = null;
-        }
+        meta.setRef(null);
       } catch (e2) {}
       btn.classList.remove("active-overlay");
       setOverlayBusy(btn, false, idleTitle + " (unavailable)");
-      if (isSeamap) isSeamapActive = false;
-      else isSeascapeActive = false;
+      meta.setOn(false);
       if (typeof flashOpenWatersLayerStatus === "function") {
         flashOpenWatersLayerStatus(label + " failed: " + (err && err.message ? err.message : "error"), true);
       }
@@ -8427,7 +8475,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           if (triggerBtn) {
             triggerBtn.classList.toggle("is-loading", !!on);
             triggerBtn.setAttribute("aria-busy", on ? "true" : "false");
-            triggerBtn.title = on ? "Loading chart layer…" : "Layers — ECDIS / Ocean / Buoys / Seamap / Seascape";
+            triggerBtn.title = on ? "Loading chart layer…" : "Layers — ECDIS / Ocean / Buoys / Seamap / Seascape / Bathymetry";
           }
           btn.classList.toggle("is-loading", !!on);
         };
@@ -8510,7 +8558,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         } else if (mapInstance.hasLayer(layers.buoys)) {
           mapInstance.removeLayer(layers.buoys);
         }
-      } else if (overlayKey === "seamap" || overlayKey === "seascape") {
+      } else if (overlayKey === "seamap" || overlayKey === "seascape" || overlayKey === "bathymetry") {
         if (layerPanelLeaveTimer) {
           clearTimeout(layerPanelLeaveTimer);
           layerPanelLeaveTimer = null;
