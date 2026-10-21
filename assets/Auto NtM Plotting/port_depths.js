@@ -19824,10 +19824,11 @@ function renderPortDepthsOnMap(map) {
         <div style="margin-top:8px;display:flex;gap:6px;">
           <button type="button" onclick="auditSinglePort('${port.id}')" style="background:linear-gradient(180deg,#0891b2,#0e7490);border:1px solid #22d3ee;color:#fff;font-size:0.7rem;padding:3px 8px;border-radius:4px;cursor:pointer;font-weight:600;"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-0.15em;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Audit All ${zonesCount} Reaches</button>
         </div>
+        ${typeof buildPortOwHydroControlsHtml === "function" ? buildPortOwHydroControlsHtml(port) : ""}
       </div>
     `;
 
-    marker.bindPopup(popupHtml, { className: "ntm-dark-popup", maxWidth: 350 });
+    marker.bindPopup(popupHtml, { className: "ntm-dark-popup", maxWidth: 380 });
     leafletPortDepthsLayer.addLayer(marker);
 
     // 2. Fairway & Basin Polygons: only render polygons when zoomed in (curZoom >= 6) so global map stays ultra-clean

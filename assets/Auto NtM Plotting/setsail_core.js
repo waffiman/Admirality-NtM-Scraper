@@ -4543,7 +4543,7 @@ function renderNtMListAndMap() {
             <div class="ntm-empty-hints-sub">Choose an overlay below, or use the dock under the chart.</div>
             <div class="ntm-empty-hint-grid">
               <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="notices" title="Notices to Mariners &amp; NAVTEX">NtM / NAVTEX</button>
-              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="depths" title="Port depths &amp; UKC">Port Depths</button>
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="depths" title="Ports &amp; UKC">Ports</button>
               <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="weather" title="Cyclones &amp; weather">Weather</button>
               <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="ais" title="Live AIS targets">AIS</button>
               <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--wide" data-overlay-hint="route" title="My vessel route">My Route</button>
@@ -7944,11 +7944,25 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
     <div class="ntm-layer-divider"></div>
 
-    <button type="button" class="ntm-layer-thumb-btn" data-overlay="buoys" title="Toggle OpenSeaMap Buoys &amp; Seamarks">
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="buoys" title="Buoys — OpenSeaMap PNG seamarks (buoys, lights, beacons)">
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#38bdf8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/></svg>
       </div>
       <span class="ntm-layer-thumb-label">Buoys</span>
+    </button>
+
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="seamap" title="Seamap — Open Waters Free Nautical Chart (vector ENC-style)">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(160deg,#0c4a6e 0%,#075985 45%,#e0f2fe 100%);">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#e0f2fe" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l4-6 4 3 4-7 6 10"/><circle cx="8" cy="8" r="1.4" fill="#38bdf8" stroke="none"/></svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Seamap</span>
+    </button>
+
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="seascape" title="Seascape — Open Waters bathymetry / depth shading (not seamarks)">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#082f49 0%,#0e7490 40%,#67e8f9 78%,#ecfeff 100%);">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ecfeff" stroke-width="1.7" stroke-linecap="round"><path d="M4 18c3-2 5-2 8 0s5 2 8 0"/><path d="M4 13c3-2 5-2 8 0s5 2 8 0"/><path d="M4 8c3-2 5-2 8 0s5 2 8 0"/></svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Seascape</span>
     </button>
 
     <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Select Chart Layer" aria-label="Select Chart Layer">
@@ -7967,6 +7981,77 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
   let activeBaseKey = "ocean";
   let isBuoysActive = false;
+  let isSeamapActive = false;
+  let isSeascapeActive = false;
+  let seamapLayerRef = layers.seamap || null;
+  let seascapeLayerRef = layers.seascape || null;
+  let owOverlayBusy = false;
+
+  const setOverlayBusy = (btn, on, titleIdle) => {
+    if (!btn) return;
+    btn.classList.toggle("is-loading", !!on);
+    btn.setAttribute("aria-busy", on ? "true" : "false");
+    if (on) btn.title = "Loading…";
+    else if (titleIdle) btn.title = titleIdle;
+  };
+
+  const toggleOwMapLibreOverlay = async (overlayKey, btn) => {
+    if (owOverlayBusy) return;
+    const isSeamap = overlayKey === "seamap";
+    const turningOn = isSeamap ? !isSeamapActive : !isSeascapeActive;
+    const idleTitle = isSeamap
+      ? "Seamap — Open Waters Free Nautical Chart (vector ENC-style)"
+      : "Seascape — Open Waters bathymetry / depth shading (not seamarks)";
+
+    if (!turningOn) {
+      const lyr = isSeamap ? seamapLayerRef : seascapeLayerRef;
+      if (lyr && mapInstance.hasLayer(lyr)) mapInstance.removeLayer(lyr);
+      if (isSeamap) {
+        isSeamapActive = false;
+      } else {
+        isSeascapeActive = false;
+      }
+      btn.classList.remove("active-overlay");
+      setOverlayBusy(btn, false, idleTitle);
+      return;
+    }
+
+    owOverlayBusy = true;
+    setOverlayBusy(btn, true, idleTitle);
+    try {
+      if (isSeamap) {
+        if (!seamapLayerRef) {
+          if (typeof createOpenWatersSeamapLayer !== "function") {
+            throw new Error("Open Waters Seamap helper missing");
+          }
+          seamapLayerRef = await createOpenWatersSeamapLayer();
+          layers.seamap = seamapLayerRef;
+        }
+        seamapLayerRef.addTo(mapInstance);
+        isSeamapActive = true;
+      } else {
+        if (!seascapeLayerRef) {
+          if (typeof createOpenWatersSeascapeLayer !== "function") {
+            throw new Error("Open Waters Seascape helper missing");
+          }
+          seascapeLayerRef = await createOpenWatersSeascapeLayer();
+          layers.seascape = seascapeLayerRef;
+        }
+        seascapeLayerRef.addTo(mapInstance);
+        isSeascapeActive = true;
+      }
+      btn.classList.add("active-overlay");
+      setOverlayBusy(btn, false, idleTitle);
+    } catch (err) {
+      console.warn("[SetSail] Open Waters overlay failed:", err);
+      btn.classList.remove("active-overlay");
+      setOverlayBusy(btn, false, idleTitle + " (unavailable)");
+      if (isSeamap) isSeamapActive = false;
+      else isSeascapeActive = false;
+    } finally {
+      owOverlayBusy = false;
+    }
+  };
 
   // 3D Globe State & Renderer with Horizon-Limb Continental Projection
   const canvas = globeWrap.querySelector("#ntmGlobe3DCanvas");
@@ -8386,6 +8471,8 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         } else if (mapInstance.hasLayer(layers.buoys)) {
           mapInstance.removeLayer(layers.buoys);
         }
+      } else if (overlayKey === "seamap" || overlayKey === "seascape") {
+        toggleOwMapLibreOverlay(overlayKey, btn);
       }
     });
   });

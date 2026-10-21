@@ -7232,6 +7232,20 @@
   user-select: none;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.ntm-chart-layer-selector:not(.collapsed) {
+  max-width: min(96vw, 760px);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+/* MapLibre GL canvas overlays (Seamap / Seascape) sit under markers */
+.leaflet-maplibre-gl {
+  z-index: 350 !important;
+  pointer-events: none !important;
+}
+.leaflet-maplibre-gl .maplibregl-map,
+.leaflet-maplibre-gl canvas {
+  pointer-events: none !important;
+}
 /* Compact collapsed Layers trigger (icon only) */
 .ntm-chart-layer-selector.collapsed {
   padding: 3px !important;

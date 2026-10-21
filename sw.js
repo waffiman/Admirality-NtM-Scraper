@@ -4,7 +4,7 @@
  * High-Speed Satellite & Offline Engine вЂ” Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.36.0';
+const CACHE_NAME = 'setsail-cache-v5.37.0';
 const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.29.0';
 
 const OFFLINE_CORE_ASSETS = [
@@ -271,7 +271,9 @@ self.addEventListener('fetch', (event) => {
     url.hostname.includes('tile.openstreetmap.org') ||
     url.hostname.includes('arcgisonline.com') ||
     url.hostname.includes('openseamap.org') ||
-    url.hostname.includes('cartocdn.com')
+    url.hostname.includes('cartocdn.com') ||
+    url.hostname === 'tiles.openwaters.io' ||
+    url.hostname === 'tiles.versatiles.org'
   );
 
   if (isMapTile) {

@@ -51,6 +51,8 @@
   <link rel="preconnect" href="https://c.basemaps.cartocdn.com" crossorigin />
   <link rel="preconnect" href="https://server.arcgisonline.com" crossorigin />
   <link rel="preconnect" href="https://tiles.openseamap.org" crossorigin />
+  <link rel="preconnect" href="https://tiles.openwaters.io" crossorigin />
+  <link rel="preconnect" href="https://api.openwaters.io" crossorigin />
   <link rel="dns-prefetch" href="https://a.basemaps.cartocdn.com" />
   <link rel="dns-prefetch" href="https://server.arcgisonline.com" />
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -58,7 +60,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.36" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.37" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -13287,7 +13289,7 @@ select option {
                         <!-- SECTION 3: PORT DEPTHS & BATHYMETRY OBJECT FILTERS -->
                         <div class="ntm-filter-sec-card" id="filterSecDepths">
                           <div class="ntm-filter-sec-head">
-                            <span>Port Depths</span>
+                            <span>Ports</span>
                             <span class="chk-count" id="popCntPortsTotal">64</span>
                           </div>
 
@@ -13684,8 +13686,8 @@ select option {
                 <button type="button" class="excel-tab" data-overlay="depths" id="tabOverlayDepths">
                   <span class="excel-tab-spinner" aria-hidden="true"></span>
                   <span class="excel-tab-check"></span>
-                  <span class="excel-tab-name">Port Depths</span>
-                  <span class="excel-tab-info-btn" id="btnWeeklyDepthAudit" title="Port Depths Information &amp; Weekly Audit"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
+                  <span class="excel-tab-name">Ports</span>
+                  <span class="excel-tab-info-btn" id="btnWeeklyDepthAudit" title="Ports Information &amp; Weekly Audit"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
                 <button type="button" class="excel-tab" data-overlay="weather" id="tabOverlayWeather">
                   <span class="excel-tab-spinner" aria-hidden="true"></span>
@@ -19895,7 +19897,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
     }
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.24"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.24"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.37"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.37"></script>
   <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.36"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
@@ -19974,7 +19977,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.36"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.37"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
