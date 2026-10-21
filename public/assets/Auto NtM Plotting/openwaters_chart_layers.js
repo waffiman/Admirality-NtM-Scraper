@@ -1,21 +1,19 @@
 /**
- * Open Waters — Seamap / Seascape + per-port Tides / Currents
- * Seamap/Seascape use a custom Leaflet layer that hosts MapLibre and syncs via jumpTo
+ * Open Waters — Bathymetry overlay + per-port Tides / Currents
+ * Bathymetry uses a custom Leaflet layer that hosts MapLibre and syncs via jumpTo
  * (no maplibre-gl-leaflet bridge — that breaks on MapLibre v4 transform API).
  */
 (function (global) {
   "use strict";
 
-  const SEAMAP_STYLE = "https://tiles.openwaters.io/seamap/style.json";
-  const SEASCAPE_STYLE = "https://tiles.openwaters.io/seascape/style.json";
   const TIDES_EXTREMES = "https://api.openwaters.io/tides/extremes";
   const CURRENTS_EVENTS = "https://api.openwaters.io/currents/events";
 
   // Prefer already-loaded <script> from index.html; then same-origin files (no CDN — SW/CDN flakes)
   const ML_BUNDLES = [
     {
-      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.45",
-      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.45"
+      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.46",
+      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.46"
     }
   ];
   // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
@@ -330,96 +328,28 @@
   }
 
   /**
-   * Seamap as a light Leaflet overlay: keep only Free Nautical Chart seamark layers.
-   * Full style.json also pulls VersaTiles (~320 layers) + Seascape DEM/vector — opaque base,
-   * blank-looking overlay on ECDIS/Ocean, and severe pan/zoom lag.
-   */
-  function sanitizeSeamapStyle(style) {
-    const src = (style && style.sources && style.sources.seamap) || {
-      type: "vector",
-      url: "https://tiles.openwaters.io/seamap/tiles.json"
-    };
-    const layers = (style.layers || []).filter((l) => l && l.source === "seamap");
-    let sprite = style && style.sprite;
-    // Prefer the Free Nautical Chart sprite sheet for seamark icons
-    if (Array.isArray(sprite)) {
-      const fnc = sprite.find((s) => s && /freenauticalchart|seamap/i.test(String(s.id || s.url || "")));
-      sprite = fnc
-        ? [fnc]
-        : sprite.filter((s) => s && /openwaters\.io\/seamap/i.test(String(s.url || "")));
-      if (!sprite.length) {
-        sprite = [{ id: "freenauticalchart", url: "https://tiles.openwaters.io/seamap/sprites/freenauticalchart" }];
-      }
-    } else if (!sprite) {
-      sprite = "https://tiles.openwaters.io/seamap/sprites/freenauticalchart";
-    }
-    return {
-      version: 8,
-      name: "SetSail Seamap overlay",
-      sources: { seamap: src },
-      sprite: sprite,
-      glyphs: (style && style.glyphs) || "https://tiles.openwaters.io/fonts/{fontstack}/{range}.pbf",
-      layers: [
-        {
-          id: "ow-transparent-bg",
-          type: "background",
-          paint: { "background-color": "rgba(0,0,0,0)" }
-        }
-      ].concat(layers)
-    };
-  }
-
-  function seascapeDemSource(attribution) {
-    return {
-      type: "raster-dem",
-      tiles: ["https://tiles.openwaters.io/seascape/{z}/{x}/{y}.webp"],
-      tileSize: 512,
-      maxzoom: 14,
-      encoding: "terrarium",
-      attribution: attribution || "Open Waters Seascape"
-    };
-  }
-
-  /** Seascape overlay: seabed relief via DEM hillshade (terrarium webp). */
-  function buildSeascapeOverlayStyle() {
-    return {
-      version: 8,
-      name: "SetSail Seascape overlay",
-      sources: {
-        "seascape-dem": seascapeDemSource("Open Waters Seascape")
-      },
-      layers: [
-        {
-          id: "ow-transparent-bg",
-          type: "background",
-          paint: { "background-color": "rgba(0,0,0,0)" }
-        },
-        {
-          id: "ow-depth-hillshade",
-          type: "hillshade",
-          source: "seascape-dem",
-          paint: {
-            "hillshade-exaggeration": 0.85,
-            "hillshade-shadow-color": "#041526",
-            "hillshade-highlight-color": "#7dd3fc",
-            "hillshade-accent-color": "#0e7490",
-            "hillshade-illumination-direction": 315
-          }
-        }
-      ]
-    };
-  }
-
-  /**
-   * Bathymetry overlay: Open Waters Seascape DEM as color-relief depth tint
-   * (TileJSON name: "Open Waters Bathymetry (raster)"). Needs MapLibre ≥ 5.6.
+   * Bathymetry overlay: Open Waters Seascape DEM color-relief + isobath lines/labels
+   * (vector contours with depth_abs_m — ECDIS-style numerical labels along contours).
+   * Vector tiles may warn "Unimplemented type" on some builds; color tint still works.
    */
   function buildBathymetryOverlayStyle() {
     return {
       version: 8,
       name: "SetSail Bathymetry overlay",
+      glyphs: "https://tiles.openwaters.io/fonts/{fontstack}/{range}.pbf",
       sources: {
-        "seascape-dem": seascapeDemSource("Open Waters Bathymetry")
+        "seascape-dem": {
+          type: "raster-dem",
+          tiles: ["https://tiles.openwaters.io/seascape/{z}/{x}/{y}.webp"],
+          tileSize: 512,
+          maxzoom: 14,
+          encoding: "terrarium",
+          attribution: "Open Waters Bathymetry"
+        },
+        "seascape-vector": {
+          type: "vector",
+          url: "https://tiles.openwaters.io/seascape/vector.json"
+        }
       },
       layers: [
         {
@@ -433,17 +363,58 @@
           source: "seascape-dem",
           paint: {
             "color-relief-color": BATHY_COLOR_RELIEF,
-            "color-relief-opacity": 0.78
+            "color-relief-opacity": 0.72
+          }
+        },
+        {
+          id: "ow-bathy-contours",
+          type: "line",
+          source: "seascape-vector",
+          "source-layer": "contours",
+          filter: ["!=", ["get", "sys"], "ft"],
+          minzoom: 5,
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: {
+            "line-color": [
+              "case",
+              ["==", ["get", "depth_abs_m"], 10],
+              "#334155",
+              "#64748b"
+            ],
+            "line-width": [
+              "case",
+              ["==", ["get", "depth_abs_m"], 10],
+              1.35,
+              0.75
+            ],
+            "line-opacity": 0.85
+          }
+        },
+        {
+          id: "ow-bathy-contour-labels",
+          type: "symbol",
+          source: "seascape-vector",
+          "source-layer": "contours",
+          filter: ["!=", ["get", "sys"], "ft"],
+          minzoom: 8,
+          layout: {
+            "symbol-placement": "line",
+            "text-field": ["to-string", ["get", "depth_abs_m"]],
+            "text-size": ["interpolate", ["linear"], ["zoom"], 8, 11, 13, 15],
+            "text-font": ["Noto Sans Medium"],
+            "text-letter-spacing": 0.08,
+            "text-max-angle": 28,
+            "text-padding": 40,
+            "text-allow-overlap": false
+          },
+          paint: {
+            "text-color": "#1e293b",
+            "text-halo-color": "rgba(241,245,249,0.92)",
+            "text-halo-width": 1.4
           }
         }
       ]
     };
-  }
-
-  async function fetchSanitizedSeamapStyle() {
-    const res = await fetch(SEAMAP_STYLE, { credentials: "omit" });
-    if (!res.ok) throw new Error("Seamap style HTTP " + res.status);
-    return sanitizeSeamapStyle(await res.json());
   }
 
   function waitForGlStyle(layer, timeoutMs) {
@@ -523,17 +494,6 @@
       style: style,
       attribution: attribution || "Open Waters"
     });
-  }
-
-  async function createSeamapLayer() {
-    await ensureMapLibreReady();
-    const style = await fetchSanitizedSeamapStyle();
-    return createMapLibreLayer(style, "Open Waters Seamap");
-  }
-
-  async function createSeascapeLayer() {
-    await ensureMapLibreReady();
-    return createMapLibreLayer(buildSeascapeOverlayStyle(), "Open Waters Seascape");
   }
 
   async function createBathymetryLayer() {
@@ -709,8 +669,6 @@
   }
 
   global.ensureOpenWatersMapLibre = ensureMapLibreReady;
-  global.createOpenWatersSeamapLayer = createSeamapLayer;
-  global.createOpenWatersSeascapeLayer = createSeascapeLayer;
   global.createOpenWatersBathymetryLayer = createBathymetryLayer;
   global.wireOpenWatersGlLayerResize = wireGlLayerResize;
   global.waitForOpenWatersGlStyle = waitForGlStyle;

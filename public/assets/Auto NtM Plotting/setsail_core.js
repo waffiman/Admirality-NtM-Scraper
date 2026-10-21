@@ -7952,26 +7952,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       <span class="ntm-layer-thumb-label">Buoys</span>
     </button>
 
-    <button type="button" class="ntm-layer-thumb-btn" data-overlay="seamap" title="Seamap — Open Waters Free Nautical Chart (vector ENC-style)">
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(160deg,#0c4a6e 0%,#075985 45%,#e0f2fe 100%);">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#e0f2fe" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l4-6 4 3 4-7 6 10"/><circle cx="8" cy="8" r="1.4" fill="#38bdf8" stroke="none"/></svg>
-      </div>
-      <span class="ntm-layer-thumb-label">Seamap</span>
-    </button>
-
-    <button type="button" class="ntm-layer-thumb-btn" data-overlay="seascape" title="Seascape — Open Waters seabed relief (DEM hillshade)">
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#020617 0%,#0c4a6e 42%,#155e75 70%,#67e8f9 100%);">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-          <path d="M2 18.5c2.2-3.4 4.1-5.2 6.4-4.1 2.1 1 3.2 3.6 5.1 3.2 2.1-.4 3.2-2.8 5.2-2.2 1.6.5 2.8 2.1 3.3 3.1" fill="none" stroke="#a5f3fc" stroke-width="1.6" stroke-linecap="round"/>
-          <path d="M2 14.2c2.4-2.8 4.6-3.9 6.8-2.6 2.3 1.3 3.1 3.5 5.2 3.1 2.4-.4 3.6-2.6 5.5-2 1.4.45 2.5 1.7 2.5 1.7" fill="none" stroke="#22d3ee" stroke-width="1.45" stroke-linecap="round" opacity="0.9"/>
-          <path d="M3 20.4h18" stroke="#082f49" stroke-width="2.2" stroke-linecap="round"/>
-          <path d="M5.5 20.2c1.4-2.8 2.8-4.6 4.6-4.2 1.7.4 2.5 2.5 4.1 2.3 1.8-.25 2.7-2.1 4.3-1.7" fill="#0e7490" opacity="0.55"/>
-        </svg>
-      </div>
-      <span class="ntm-layer-thumb-label">Seascape</span>
-    </button>
-
-    <button type="button" class="ntm-layer-thumb-btn" data-overlay="bathymetry" title="Bathymetry — Open Waters depth tint (Seascape DEM color-relief)">
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="bathymetry" title="Bathymetry — Open Waters depth tint + isobath labels (metres)">
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#e9f7ff 0%,#7fc7f8 35%,#1f86cb 70%,#0c4a6e 100%);">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
           <path d="M3 7h18M5 12h14M7 17h10" stroke="#ecfeff" stroke-width="1.7" stroke-linecap="round" opacity="0.95"/>
@@ -7981,7 +7962,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       <span class="ntm-layer-thumb-label">Bathymetry</span>
     </button>
 
-    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Layers — ECDIS / Ocean / Buoys / Seamap / Seascape / Bathymetry" aria-label="Chart layers including Seamap, Seascape and Bathymetry">
+    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Layers — ECDIS / Ocean / Buoys / Bathymetry" aria-label="Chart layers including Bathymetry">
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#94a3b8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
       </div>
@@ -8010,48 +7991,14 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
   let activeBaseKey = "ocean";
   let isBuoysActive = false;
-  let isSeamapActive = false;
-  let isSeascapeActive = false;
   let isBathymetryActive = false;
-  let seamapLayerRef = layers.seamap || null;
-  let seascapeLayerRef = layers.seascape || null;
   let bathymetryLayerRef = layers.bathymetry || null;
   let owOverlayBusy = false;
 
   const OW_OVERLAY_META = {
-    seamap: {
-      label: "Seamap",
-      title: "Seamap — Open Waters Free Nautical Chart (vector ENC-style)",
-      create: "createOpenWatersSeamapLayer",
-      getRef: () => seamapLayerRef,
-      setRef: (v) => {
-        seamapLayerRef = v;
-        layers.seamap = v;
-      },
-      getOn: () => isSeamapActive,
-      setOn: (v) => {
-        isSeamapActive = v;
-      },
-      waitMs: 20000
-    },
-    seascape: {
-      label: "Seascape",
-      title: "Seascape — Open Waters seabed relief (DEM hillshade)",
-      create: "createOpenWatersSeascapeLayer",
-      getRef: () => seascapeLayerRef,
-      setRef: (v) => {
-        seascapeLayerRef = v;
-        layers.seascape = v;
-      },
-      getOn: () => isSeascapeActive,
-      setOn: (v) => {
-        isSeascapeActive = v;
-      },
-      waitMs: 16000
-    },
     bathymetry: {
       label: "Bathymetry",
-      title: "Bathymetry — Open Waters depth tint (Seascape DEM color-relief)",
+      title: "Bathymetry — Open Waters depth tint + isobath labels (metres)",
       create: "createOpenWatersBathymetryLayer",
       getRef: () => bathymetryLayerRef,
       setRef: (v) => {
@@ -8475,7 +8422,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           if (triggerBtn) {
             triggerBtn.classList.toggle("is-loading", !!on);
             triggerBtn.setAttribute("aria-busy", on ? "true" : "false");
-            triggerBtn.title = on ? "Loading chart layer…" : "Layers — ECDIS / Ocean / Buoys / Seamap / Seascape / Bathymetry";
+            triggerBtn.title = on ? "Loading chart layer…" : "Layers — ECDIS / Ocean / Buoys / Bathymetry";
           }
           btn.classList.toggle("is-loading", !!on);
         };
@@ -8558,7 +8505,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         } else if (mapInstance.hasLayer(layers.buoys)) {
           mapInstance.removeLayer(layers.buoys);
         }
-      } else if (overlayKey === "seamap" || overlayKey === "seascape" || overlayKey === "bathymetry") {
+      } else if (overlayKey === "bathymetry") {
         if (layerPanelLeaveTimer) {
           clearTimeout(layerPanelLeaveTimer);
           layerPanelLeaveTimer = null;
