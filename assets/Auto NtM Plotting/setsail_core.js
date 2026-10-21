@@ -1660,23 +1660,25 @@ function initAutoNtmUI() {
     });
   }
 
-  // Empty Multi Search hint chips → enable overlay via dock / setOverlayActive
+  // Empty Multi Search hint chips → activate matching bottom dock tile
   const ntmItemsScroll = document.getElementById("ntmItemsScroll");
   if (ntmItemsScroll && !ntmItemsScroll._boundEmptyHints) {
     ntmItemsScroll._boundEmptyHints = true;
     ntmItemsScroll.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-overlay-hint]");
       if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
       const key = btn.getAttribute("data-overlay-hint");
       if (!key) return;
-      const dockTab = document.querySelector('.excel-tab[data-overlay="' + key + '"]');
-      if (dockTab) {
-        dockTab.click();
-        return;
+      const mapRef = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+      if (typeof window.initExcelOverlayDock === "function" && mapRef) {
+        try { window.initExcelOverlayDock(mapRef); } catch (err) { /* dock may already be live */ }
       }
-      if (typeof setOverlayActive === "function") {
-        setOverlayActive(key, true, leafletMap);
-        if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
+      if (typeof window.setOverlayActive === "function") {
+        window.setOverlayActive(key, true, mapRef);
+      } else if (typeof setOverlayActive === "function") {
+        setOverlayActive(key, true, mapRef);
       }
     });
   }
@@ -4536,15 +4538,15 @@ function renderNtMListAndMap() {
       const anyActiveOverlay = isNoticesActive || isDepthsActive || isWeatherActive || isRouteActive || isAisActive;
       if (!anyActiveOverlay) {
         html = `
-          <div class="ntm-empty-hints" style="padding:1.1rem 0.85rem;display:flex;flex-direction:column;gap:10px;">
-            <div style="font-size:0.78rem;font-weight:700;color:#e2e8f0;letter-spacing:0.03em;">Enable a chart layer</div>
-            <div style="font-size:0.68rem;color:#94a3b8;line-height:1.4;">Multi Search stays empty until an overlay is on. Tap a hint or use the dock below the chart.</div>
-            <div class="ntm-empty-hint-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="notices" title="Notices to Mariners &amp; NAVTEX">⚠️ NtM / NAVTEX</button>
-              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="depths" title="Port depths &amp; UKC">⚓ Port Depths</button>
-              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="weather" title="Cyclones &amp; weather">🌀 Weather</button>
-              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="ais" title="Live AIS targets">📡 AIS Targets</button>
-              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="route" title="My vessel route" style="grid-column:1/-1;">🧭 My Route</button>
+          <div class="ntm-empty-hints">
+            <div class="ntm-empty-hints-title">Enable a chart layer</div>
+            <div class="ntm-empty-hints-sub">Choose an overlay below, or use the dock under the chart.</div>
+            <div class="ntm-empty-hint-grid">
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="notices" title="Notices to Mariners &amp; NAVTEX">NtM / NAVTEX</button>
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="depths" title="Port depths &amp; UKC">Port Depths</button>
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="weather" title="Cyclones &amp; weather">Weather</button>
+              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="ais" title="Live AIS targets">AIS</button>
+              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--wide" data-overlay-hint="route" title="My vessel route">My Route</button>
             </div>
           </div>
         `;
@@ -7949,11 +7951,10 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       <span class="ntm-layer-thumb-label">Buoys</span>
     </button>
 
-    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Select Chart Layer">
+    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Select Chart Layer" aria-label="Select Chart Layer">
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#38bdf8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#94a3b8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
       </div>
-      <span class="ntm-layer-thumb-label">Layers</span>
     </button>
   `;
 

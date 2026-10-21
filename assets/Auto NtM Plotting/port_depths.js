@@ -20258,6 +20258,7 @@ function setOverlayActive(overlayKey, isActive, map = null) {
 }
 
 window.setOverlayActive = setOverlayActive;
+window.initExcelOverlayDock = initExcelOverlayDock;
 window.OVERLAY_STATES = OVERLAY_STATES;
 
 /**

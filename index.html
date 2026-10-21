@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 
 
@@ -58,7 +58,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.35" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.36" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -1212,24 +1212,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   transition: opacity 0.2s ease;
 }
 
-.ntm-empty-hint-btn {
-  appearance: none;
-  border: 1px solid rgba(56,189,248,0.28);
-  background: rgba(15,23,42,0.55);
-  color: #e2e8f0;
-  border-radius: 8px;
-  padding: 10px 8px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: center;
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
-}
-.ntm-empty-hint-btn:hover {
-  background: rgba(56,189,248,0.12);
-  border-color: rgba(56,189,248,0.55);
-  transform: translateY(-1px);
-}
+/* empty hint styles live in ntm_styles.css */
 .ntm-workspace.sidebar-collapsed .ntm-sidebar-list {
   opacity: 0;
   pointer-events: none;
@@ -3326,9 +3309,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
    MINIMALIST SETTINGS PAGE STYLES
    ========================================================================== */
 .minimal-settings {
-  max-width: min(1180px, 96vw) !important;
+  max-width: min(1080px, 94vw) !important;
   margin: 0 auto !important;
-  padding: 1.4rem 1.25rem 2rem !important;
+  padding: 1.25rem 1rem 1.75rem !important;
   width: 100% !important;
   box-sizing: border-box !important;
 }
@@ -3336,12 +3319,23 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .settings-grid-minimal {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 1rem 1.15rem !important;
-  align-items: start !important;
+  gap: 0.85rem !important;
+  align-items: stretch !important;
 }
 .settings-grid-minimal > .settings-account-card,
 .settings-grid-minimal > .settings-language-card,
 .settings-grid-minimal > .settings-sources-card {
+  grid-column: 1 / -1 !important;
+}
+.settings-grid-minimal > .settings-card-min {
+  margin: 0 !important;
+  min-height: 0 !important;
+}
+.settings-grid-minimal > .settings-theme-card,
+.settings-grid-minimal > .settings-cache-card {
+  /* Theme | Cache side-by-side */
+}
+.settings-grid-minimal > .settings-feedback-card {
   grid-column: 1 / -1 !important;
 }
 @media (max-width: 820px) {
@@ -11682,7 +11676,7 @@ select option {
   </style>
 
   <script>
-    // v5.35 — cropped authority logos + JMA/USNO/IERS/CARTO + ECDIS land/coast alignment (NE land polygons, no separate coastline stroke)
+    // v5.36 — cropped authority logos + JMA/USNO/IERS/CARTO + ECDIS land/coast alignment (NE land polygons, no separate coastline stroke)
     (function(){
       try {
         if (localStorage.getItem('setsail_force_v533') === '1') return;
@@ -12124,7 +12118,7 @@ select option {
                   <div class="source-authority-logo" title="JMA RSMC"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/jma-rsmc.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/jma-rsmc.png'" alt="JMA RSMC" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">JMA RSMC</span><span class="source-logo-sub">Tokyo Typhoon</span></div></div>
                   <div class="source-authority-logo" title="JTWC"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/jtwc.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/jtwc.png'" alt="JTWC" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">JTWC</span><span class="source-logo-sub">Typhoon Advisories</span></div></div>
                   <div class="source-authority-logo is-logo-only" title="AISStream.io"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/aisstream.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/aisstream.png'" alt="aisstream.io" loading="lazy" decoding="async" /></div>
-                  <div class="source-authority-logo" title="Open Waters"><div class="source-logo-text-group"><span class="source-logo-name">OPEN WATERS</span><span class="source-logo-sub">Community AIS</span></div></div>
+                  <div class="source-authority-logo is-logo-only" title="Open Waters"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/open-waters.png" alt="Open Waters" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/open-waters.png'" /></div>
                   <div class="source-authority-logo" title="Digitraffic / Fintraffic"><img class="source-authority-img source-authority-img--mark source-authority-img--on-light" src="assets/authority-logos/digitraffic-fintraffic.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/digitraffic-fintraffic.png'" alt="Fintraffic" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">DIGITRAFFIC</span><span class="source-logo-sub">Baltic AIS</span></div></div>
                   <div class="source-authority-logo is-logo-only" title="CARTO Voyager Basemap"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/carto.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/carto.png'" alt="CARTO" loading="lazy" decoding="async" /></div>
                   <div class="source-authority-logo" title="OpenSeaMap"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/openseamap.webp" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/openseamap.webp'" alt="OpenSeaMap" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">OPENSEAMAP</span><span class="source-logo-sub">Seamark Overlay</span></div></div>
@@ -12144,7 +12138,7 @@ select option {
                   <div class="source-authority-logo" title="JMA RSMC"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/jma-rsmc.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/jma-rsmc.png'" alt="JMA RSMC" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">JMA RSMC</span><span class="source-logo-sub">Tokyo Typhoon</span></div></div>
                   <div class="source-authority-logo" title="JTWC"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/jtwc.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/jtwc.png'" alt="JTWC" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">JTWC</span><span class="source-logo-sub">Typhoon Advisories</span></div></div>
                   <div class="source-authority-logo is-logo-only" title="AISStream.io"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/aisstream.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/aisstream.png'" alt="aisstream.io" loading="lazy" decoding="async" /></div>
-                  <div class="source-authority-logo" title="Open Waters"><div class="source-logo-text-group"><span class="source-logo-name">OPEN WATERS</span><span class="source-logo-sub">Community AIS</span></div></div>
+                  <div class="source-authority-logo is-logo-only" title="Open Waters"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/open-waters.png" alt="Open Waters" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/open-waters.png'" /></div>
                   <div class="source-authority-logo" title="Digitraffic / Fintraffic"><img class="source-authority-img source-authority-img--mark source-authority-img--on-light" src="assets/authority-logos/digitraffic-fintraffic.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/digitraffic-fintraffic.png'" alt="Fintraffic" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">DIGITRAFFIC</span><span class="source-logo-sub">Baltic AIS</span></div></div>
                   <div class="source-authority-logo is-logo-only" title="CARTO Voyager Basemap"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/carto.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/carto.png'" alt="CARTO" loading="lazy" decoding="async" /></div>
                   <div class="source-authority-logo" title="OpenSeaMap"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/openseamap.webp" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/openseamap.webp'" alt="OpenSeaMap" loading="lazy" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">OPENSEAMAP</span><span class="source-logo-sub">Seamark Overlay</span></div></div>
@@ -14169,10 +14163,7 @@ select option {
             </div>
 
             <!-- Card 1: Theme Switcher -->
-
-
-
-            <div class="settings-card-min">
+            <div class="settings-card-min settings-theme-card">
 
 
 
@@ -14212,11 +14203,16 @@ select option {
 
 
 
+            <!-- Card: Cache -->
+            <div class="settings-card-min settings-cache-card">
+              <div class="min-card-title">Cache</div>
+              <button type="button" class="min-btn-outline" id="settingsClearCacheBtn">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Reset Cache
+              </button>
+            </div>
+
             <!-- Card 2: Contact Developers Form -->
-
-
-
-            <div class="settings-card-min">
+            <div class="settings-card-min settings-feedback-card">
 
 
 
@@ -14313,40 +14309,6 @@ select option {
                 <div class="settings-source-item" title="NOAA / BGS World Magnetic Model (WMM 2025)"><span class="source-dot"></span><span>World Magnetic Model (WMM)</span></div>
                 <div class="settings-source-item" title="IEC 61174 RTZ &amp; JRC ECDIS (.uchm) Passage Exchange"><span class="source-dot"></span><span>IEC 61174 RTZ &amp; JRC ECDIS</span></div>
               </div>
-            </div>
-            </div>
-            </div>
-
-
-
-
-
-
-
-            <!-- Card 3: Storage & Cache Reset -->
-
-
-
-            <div class="settings-card-min">
-
-
-
-              <div class="min-card-title">Cache</div>
-
-
-
-              <button type="button" class="min-btn-outline" id="settingsClearCacheBtn">
-
-
-
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Reset Cache
-
-
-
-              </button>
-
-
-
             </div>
 
 
@@ -19934,7 +19896,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.24"></script>
   <script src="assets/Auto NtM Plotting/port_depths.js?v=5.24"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.35"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.36"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20012,7 +19974,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.35"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.36"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">

@@ -7222,15 +7222,47 @@
   z-index: 920;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: 5px;
+  padding: 4px 6px;
   background: rgba(11, 20, 38, 0.92);
   border: 1px solid rgba(148, 163, 184, 0.24);
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
   user-select: none;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Compact collapsed Layers trigger (icon only) */
+.ntm-chart-layer-selector.collapsed {
+  padding: 3px !important;
+  border-radius: 10px !important;
+}
+.ntm-layer-trigger-btn .ntm-layer-thumb-preview {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  border-width: 1.5px !important;
+}
+.ntm-layer-trigger-btn .ntm-layer-thumb-label {
+  display: none !important;
+}
+
+/* Compact Leaflet zoom +/- */
+.leaflet-control-zoom a,
+.leaflet-touch .leaflet-control-zoom a {
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 28px !important;
+  font-size: 15px !important;
+}
+.leaflet-control-zoom {
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+.leaflet-bar a {
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 28px !important;
 }
 
 .ntm-chart-layer-selector.collapsed .ntm-layer-thumb-btn:not(.ntm-layer-trigger-btn) {
@@ -7263,10 +7295,10 @@
 }
 
 .ntm-layer-thumb-preview {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  border: 2px solid rgba(148, 163, 184, 0.28);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(148, 163, 184, 0.28);
   overflow: hidden;
   position: relative;
   display: flex;
@@ -7298,9 +7330,55 @@
 
 .ntm-layer-divider {
   width: 1px;
-  height: 42px;
+  height: 34px;
   background: rgba(148, 163, 184, 0.2);
   margin: 0 2px;
+}
+
+/* Neutral empty Multi Search hints */
+.ntm-empty-hints {
+  padding: 1rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ntm-empty-hints-title {
+  font-size: 0.76rem;
+  font-weight: 650;
+  color: #cbd5e1;
+  letter-spacing: 0.02em;
+}
+.ntm-empty-hints-sub {
+  font-size: 0.66rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+.ntm-empty-hint-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.ntm-empty-hint-btn {
+  appearance: none;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.4);
+  color: #94a3b8;
+  border-radius: 7px;
+  padding: 9px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.ntm-empty-hint-btn:hover {
+  background: rgba(30, 41, 59, 0.65);
+  border-color: rgba(148, 163, 184, 0.38);
+  color: #e2e8f0;
+}
+.ntm-empty-hint-btn--wide {
+  grid-column: 1 / -1;
 }
 
 /* Interactive 3D Globe View Overlay (#ntmGlobe3DWrap) */
