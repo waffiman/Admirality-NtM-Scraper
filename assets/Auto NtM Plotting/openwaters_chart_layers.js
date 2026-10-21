@@ -12,32 +12,32 @@
   // Prefer already-loaded <script> from index.html; then same-origin files (no CDN — SW/CDN flakes)
   const ML_BUNDLES = [
     {
-      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.46",
-      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.46"
+      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.47",
+      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.47"
     }
   ];
   // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
   const GL_ZOOM_OFFSET = 1;
 
-  // Official Seascape / Open Waters Bathymetry depth tint (from seascape style.json)
+  // ECDIS-like discrete depth bands (same cyan-blue family, stronger contrast).
+  // Sharp stop pairs keep band edges crisp; land (≥0) stays transparent.
   const BATHY_COLOR_RELIEF = [
     "interpolate",
     ["linear"],
     ["elevation"],
-    -10000, "#e9f7ff",
-    -50, "#e9f7ff",
-    -49.9, "#c9e9fd",
-    -20, "#c9e9fd",
-    -19.9, "#a5d9fb",
-    -10, "#a5d9fb",
-    -9.9, "#7fc7f8",
-    -5, "#7fc7f8",
-    -4.9, "#5db5f0",
-    -2, "rgb(93,181,240)",
-    -1.99, "#1f86cb",
-    -0.00390625, "#1f86cb",
-    0, "#1f86cb",
-    0.00390625, "rgba(247,240,221,0)",
+    -10000, "#f0f9ff",
+    -50.01, "#f0f9ff",
+    -50, "#93c5fd",
+    -20.01, "#93c5fd",
+    -20, "#38bdf8",
+    -10.01, "#38bdf8",
+    -10, "#0ea5e9",
+    -5.01, "#0ea5e9",
+    -5, "#0284c7",
+    -2.01, "#0284c7",
+    -2, "#0369a1",
+    -0.01, "#0369a1",
+    0, "rgba(247,240,221,0)",
     2, "rgba(247,240,221,0)"
   ];
 
@@ -328,11 +328,11 @@
   }
 
   /**
-   * Bathymetry overlay: Open Waters Seascape DEM color-relief + isobath lines/labels
-   * (vector contours with depth_abs_m — ECDIS-style numerical labels along contours).
+   * Bathymetry overlay: ECDIS-like depth bands + subtle isobath borders + numerical labels.
    * Vector tiles may warn "Unimplemented type" on some builds; color tint still works.
    */
   function buildBathymetryOverlayStyle() {
+    const majorDepths = [2, 5, 10, 20, 30, 50, 100, 200, 500, 1000];
     return {
       version: 8,
       name: "SetSail Bathymetry overlay",
@@ -363,54 +363,72 @@
           source: "seascape-dem",
           paint: {
             "color-relief-color": BATHY_COLOR_RELIEF,
-            "color-relief-opacity": 0.72
+            "color-relief-opacity": 0.78
           }
         },
+        // Thin, low-contrast borders between depth bands (ECDIS-like isobaths)
         {
           id: "ow-bathy-contours",
           type: "line",
           source: "seascape-vector",
           "source-layer": "contours",
           filter: ["!=", ["get", "sys"], "ft"],
-          minzoom: 5,
+          minzoom: 4,
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": [
               "case",
-              ["==", ["get", "depth_abs_m"], 10],
-              "#334155",
-              "#64748b"
+              ["in", ["get", "depth_abs_m"], ["literal", [10, 20, 50]]],
+              "rgba(15, 55, 90, 0.42)",
+              "rgba(30, 70, 110, 0.28)"
             ],
             "line-width": [
-              "case",
-              ["==", ["get", "depth_abs_m"], 10],
-              1.35,
-              0.75
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              4,
+              ["case", ["in", ["get", "depth_abs_m"], ["literal", [10, 20, 50]]], 0.7, 0.35],
+              11,
+              ["case", ["in", ["get", "depth_abs_m"], ["literal", [10, 20, 50]]], 1.05, 0.55]
             ],
-            "line-opacity": 0.85
+            "line-opacity": 1
           }
         },
+        // Numerical depth labels along isobaths (metres), ECDIS-style
         {
           id: "ow-bathy-contour-labels",
           type: "symbol",
           source: "seascape-vector",
           "source-layer": "contours",
-          filter: ["!=", ["get", "sys"], "ft"],
-          minzoom: 8,
+          filter: [
+            "all",
+            ["!=", ["get", "sys"], "ft"],
+            [
+              "any",
+              [">=", ["zoom"], 12],
+              ["in", ["get", "depth_abs_m"], ["literal", majorDepths]]
+            ]
+          ],
+          minzoom: 7,
           layout: {
             "symbol-placement": "line",
+            "symbol-spacing": 280,
             "text-field": ["to-string", ["get", "depth_abs_m"]],
-            "text-size": ["interpolate", ["linear"], ["zoom"], 8, 11, 13, 15],
+            "text-size": ["interpolate", ["linear"], ["zoom"], 7, 10, 10, 12, 14, 14],
             "text-font": ["Noto Sans Medium"],
-            "text-letter-spacing": 0.08,
-            "text-max-angle": 28,
-            "text-padding": 40,
-            "text-allow-overlap": false
+            "text-letter-spacing": 0.06,
+            "text-max-angle": 25,
+            "text-padding": 28,
+            "text-allow-overlap": false,
+            "text-ignore-placement": false,
+            "text-rotation-alignment": "map",
+            "text-pitch-alignment": "viewport"
           },
           paint: {
-            "text-color": "#1e293b",
-            "text-halo-color": "rgba(241,245,249,0.92)",
-            "text-halo-width": 1.4
+            "text-color": "#0f2744",
+            "text-halo-color": "rgba(240, 249, 255, 0.95)",
+            "text-halo-width": 1.75,
+            "text-halo-blur": 0.2
           }
         }
       ]
