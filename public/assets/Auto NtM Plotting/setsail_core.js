@@ -3778,35 +3778,49 @@ function initNtMMap() {
   if (window.L) {
     window._setsailCanvasRenderer = null;
 
+    // Weak devices: fewer concurrent tile fetches / softer animations (layers stay available)
+    const hwCores = (typeof navigator !== "undefined" && navigator.hardwareConcurrency) || 4;
+    const hwMem = (typeof navigator !== "undefined" && navigator.deviceMemory) || 8;
+    const lowEndMap = hwCores <= 4 || hwMem <= 4 ||
+      (typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
+    window._setsailLowEndMap = !!lowEndMap;
+
     leafletMap = L.map("ntmMap", {
       center: [26.0, 12.0],
       zoom: 3,
       minZoom: 2,
       maxZoom: 19,
-      zoomSnap: 0.5,
-      zoomDelta: 0.5,
-      wheelPxPerZoomLevel: 100,
+      zoomSnap: lowEndMap ? 1 : 0.5,
+      zoomDelta: lowEndMap ? 1 : 0.5,
+      wheelPxPerZoomLevel: lowEndMap ? 140 : 100,
       attributionControl: false,
       preferCanvas: true,
-      zoomAnimation: true,
+      zoomAnimation: !lowEndMap,
       fadeAnimation: false,
-      markerZoomAnimation: true,
-      zoomAnimationThreshold: 8,
+      markerZoomAnimation: !lowEndMap,
+      zoomAnimationThreshold: lowEndMap ? 2 : 8,
       inertia: true,
-      inertiaDeceleration: 3000,
+      inertiaDeceleration: lowEndMap ? 4500 : 3000,
       worldCopyJump: false,
       maxBounds: [[-85, -180], [85, 180]],
       maxBoundsViscosity: 1.0
     });
 
+    // keepBuffer 12 forced huge neighbour-chunk preload → jank on weak PCs.
+    // Overlays wait until pan/zoom settles; base still updates during drag but less often.
     const tilePerfOpts = {
-      keepBuffer: 12,
+      keepBuffer: lowEndMap ? 1 : 2,
       updateWhenIdle: false,
       updateWhenZooming: false,
-      updateInterval: 50,
+      updateInterval: lowEndMap ? 250 : 150,
       noWrap: true,
       bounds: [[-85, -180], [85, 180]]
     };
+    const overlayTilePerfOpts = Object.assign({}, tilePerfOpts, {
+      keepBuffer: lowEndMap ? 0 : 1,
+      updateWhenIdle: true,
+      updateInterval: lowEndMap ? 400 : 250
+    });
 
     // 1. Primary Nautical Chart (Esri Ocean Base + CARTO + China AutoNavi / Gaode Multi-Stage Failover)
     const oceanLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", Object.assign({}, tilePerfOpts, {
@@ -3928,7 +3942,7 @@ function initNtMMap() {
       }
     }, 0);
 
-    const seamarkLayer = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", Object.assign({}, tilePerfOpts, {
+    const seamarkLayer = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", Object.assign({}, overlayTilePerfOpts, {
       maxZoom: 18,
       attribution: "OpenSeaMap"
     }));

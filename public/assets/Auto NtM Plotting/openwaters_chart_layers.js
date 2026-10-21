@@ -12,8 +12,8 @@
   // Prefer already-loaded <script> from index.html; then same-origin files (no CDN — SW/CDN flakes)
   const ML_BUNDLES = [
     {
-      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.48",
-      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.48"
+      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.49",
+      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.49"
     }
   ];
   // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
@@ -142,6 +142,8 @@
 
         const center = map.getCenter();
         const glZoom = Math.max(0, map.getZoom() - GL_ZOOM_OFFSET);
+        const lowEnd = !!(global._setsailLowEndMap);
+        const dpr = (typeof window !== "undefined" && window.devicePixelRatio) || 1;
 
         this._glMap = new global.maplibregl.Map({
           container: root,
@@ -153,21 +155,30 @@
           interactive: false,
           attributionControl: false,
           fadeDuration: 0,
-          trackResize: true
+          trackResize: true,
+          antialias: false,
+          refreshExpiredTiles: false,
+          maxTileCacheSize: lowEnd ? 40 : 80,
+          pixelRatio: lowEnd ? Math.min(1, dpr) : Math.min(1.5, dpr)
         });
 
-        this._onMove = this._scheduleSync.bind(this);
-        this._onZoom = this._scheduleSync.bind(this);
-        this._onResize = this._resizeGl.bind(this);
         this._syncRaf = 0;
+        this._panRaf = 0;
         this._lastSyncKey = "";
+        this._freezeCenter = null;
+        this._onMoveStart = this._handleMoveStart.bind(this);
+        this._onMove = this._handleMove.bind(this);
+        this._onMoveEnd = this._handleMoveEnd.bind(this);
+        this._onZoomStart = this._handleZoomStart.bind(this);
+        this._onZoomEnd = this._handleZoomEnd.bind(this);
+        this._onResize = this._resizeGl.bind(this);
 
+        map.on("movestart", this._onMoveStart);
         map.on("move", this._onMove);
-        map.on("zoom", this._onZoom);
-        map.on("moveend", this._onMove);
-        map.on("zoomend", this._onMove);
+        map.on("moveend", this._onMoveEnd);
+        map.on("zoomstart", this._onZoomStart);
+        map.on("zoomend", this._onZoomEnd);
         map.on("resize", this._onResize);
-        map.on("zoomanim", this._onZoomanim, this);
 
         this._glMap.on("load", () => {
           this._resizeGl();
@@ -188,17 +199,19 @@
       },
 
       onRemove: function (map) {
+        map.off("movestart", this._onMoveStart);
         map.off("move", this._onMove);
-        map.off("zoom", this._onZoom);
-        map.off("moveend", this._onMove);
-        map.off("zoomend", this._onMove);
+        map.off("moveend", this._onMoveEnd);
+        map.off("zoomstart", this._onZoomStart);
+        map.off("zoomend", this._onZoomEnd);
         map.off("resize", this._onResize);
-        map.off("zoomanim", this._onZoomanim, this);
         if (this._syncRaf) {
-          try {
-            cancelAnimationFrame(this._syncRaf);
-          } catch (e) {}
+          try { cancelAnimationFrame(this._syncRaf); } catch (e) {}
           this._syncRaf = 0;
+        }
+        if (this._panRaf) {
+          try { cancelAnimationFrame(this._panRaf); } catch (e) {}
+          this._panRaf = 0;
         }
         if (map.attributionControl && this.options.attribution) {
           map.attributionControl.removeAttribution(this.options.attribution);
@@ -224,23 +237,70 @@
         return Math.max(0, this._map.getZoom() - GL_ZOOM_OFFSET);
       },
 
-      _scheduleSync: function () {
+      _clearPanTransform: function () {
+        if (!this._container) return;
+        this._container.style.transform = "";
+        this._container.style.willChange = "";
+      },
+
+      // Pan: CSS-translate overlay (no MapLibre tile reload mid-drag)
+      _handleMoveStart: function () {
         if (!this._glMap || !this._map || this._zooming) return;
-        if (this._syncRaf) return;
-        this._syncRaf = requestAnimationFrame(() => {
-          this._syncRaf = 0;
-          this._syncView(false);
+        this._panning = true;
+        this._freezeCenter = this._map.getCenter();
+        if (this._container) this._container.style.willChange = "transform";
+      },
+
+      _handleMove: function () {
+        if (!this._glMap || !this._map || this._zooming || !this._panning || !this._freezeCenter) return;
+        if (this._panRaf) return;
+        this._panRaf = requestAnimationFrame(() => {
+          this._panRaf = 0;
+          try {
+            const map = this._map;
+            const z = map.getZoom();
+            const p0 = map.project(this._freezeCenter, z);
+            const p1 = map.project(map.getCenter(), z);
+            const dx = Math.round(p0.x - p1.x);
+            const dy = Math.round(p0.y - p1.y);
+            this._container.style.transform = "translate3d(" + dx + "px," + dy + "px,0)";
+          } catch (e) {}
         });
       },
 
+      _handleMoveEnd: function () {
+        this._panning = false;
+        this._freezeCenter = null;
+        this._clearPanTransform();
+        this._syncView(true);
+      },
+
+      // Zoom: wait until idle — mid-zoom jumpTo was the main Bathymetry jank source
+      _handleZoomStart: function () {
+        this._zooming = true;
+        this._panning = false;
+        this._freezeCenter = null;
+        this._clearPanTransform();
+        try {
+          if (this._glMap && typeof this._glMap.stop === "function") this._glMap.stop();
+        } catch (e) {}
+      },
+
+      _handleZoomEnd: function () {
+        this._zooming = false;
+        this._clearPanTransform();
+        this._syncView(true);
+      },
+
       _syncView: function (force) {
-        if (!this._glMap || !this._map || this._zooming) return;
+        if (!this._glMap || !this._map || this._zooming || this._panning) return;
         try {
           const c = this._map.getCenter();
           const z = this._glZoom();
           const key = c.lng.toFixed(5) + "," + c.lat.toFixed(5) + "," + z.toFixed(3);
           if (!force && key === this._lastSyncKey) return;
           this._lastSyncKey = key;
+          this._clearPanTransform();
           this._glMap.jumpTo({
             center: [c.lng, c.lat],
             zoom: z,
@@ -248,29 +308,6 @@
             pitch: 0
           });
         } catch (e) {}
-      },
-
-      _onZoomanim: function (e) {
-        if (!this._glMap || !this._map) return;
-        this._zooming = true;
-        try {
-          const center = e.center || this._map.getCenter();
-          const zoom = (typeof e.zoom === "number" ? e.zoom : this._map.getZoom()) - GL_ZOOM_OFFSET;
-          const z = Math.max(0, zoom);
-          this._lastSyncKey = center.lng.toFixed(5) + "," + center.lat.toFixed(5) + "," + z.toFixed(3);
-          this._glMap.jumpTo({
-            center: [center.lng, center.lat],
-            zoom: z,
-            bearing: 0,
-            pitch: 0
-          });
-        } catch (err) {}
-        const done = () => {
-          this._zooming = false;
-          this._syncView(true);
-        };
-        this._map.once("zoomend", done);
-        setTimeout(done, 400);
       },
 
       _resizeGl: function () {
