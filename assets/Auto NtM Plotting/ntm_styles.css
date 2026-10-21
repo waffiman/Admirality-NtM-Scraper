@@ -7243,14 +7243,15 @@
   flex-wrap: wrap;
   justify-content: flex-end;
 }
-/* MapLibre GL canvas overlays (Seamap / Seascape) sit under markers */
-.leaflet-maplibre-gl {
-  z-index: 350 !important;
+/* MapLibre GL canvas overlays (Seamap / Seascape) — class from maplibre-gl-leaflet */
+.leaflet-gl-layer,
+.leaflet-gl-layer .maplibregl-map,
+.leaflet-gl-layer canvas,
+.setsail-ow-gl-canvas {
   pointer-events: none !important;
 }
-.leaflet-maplibre-gl .maplibregl-map,
-.leaflet-maplibre-gl canvas {
-  pointer-events: none !important;
+.leaflet-overlay-pane .leaflet-gl-layer {
+  z-index: 350;
 }
 /* Compact collapsed Layers trigger (icon only) */
 .ntm-chart-layer-selector.collapsed {

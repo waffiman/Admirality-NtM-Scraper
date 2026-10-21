@@ -8015,6 +8015,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
     const idleTitle = isSeamap
       ? "Seamap — Open Waters Free Nautical Chart (vector ENC-style)"
       : "Seascape — Open Waters bathymetry / depth shading (not seamarks)";
+    const label = isSeamap ? "Seamap" : "Seascape";
 
     if (!turningOn) {
       const lyr = isSeamap ? seamapLayerRef : seascapeLayerRef;
@@ -8026,11 +8027,17 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       }
       btn.classList.remove("active-overlay");
       setOverlayBusy(btn, false, idleTitle);
+      if (typeof flashOpenWatersLayerStatus === "function") {
+        flashOpenWatersLayerStatus(label + " off", false);
+      }
       return;
     }
 
     owOverlayBusy = true;
     setOverlayBusy(btn, true, idleTitle);
+    if (typeof flashOpenWatersLayerStatus === "function") {
+      flashOpenWatersLayerStatus("Loading " + label + "…", false);
+    }
     try {
       if (isSeamap) {
         if (!seamapLayerRef) {
@@ -8041,6 +8048,9 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           layers.seamap = seamapLayerRef;
         }
         seamapLayerRef.addTo(mapInstance);
+        if (typeof wireOpenWatersGlLayerResize === "function") {
+          wireOpenWatersGlLayerResize(seamapLayerRef, mapInstance);
+        }
         isSeamapActive = true;
       } else {
         if (!seascapeLayerRef) {
@@ -8051,16 +8061,25 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           layers.seascape = seascapeLayerRef;
         }
         seascapeLayerRef.addTo(mapInstance);
+        if (typeof wireOpenWatersGlLayerResize === "function") {
+          wireOpenWatersGlLayerResize(seascapeLayerRef, mapInstance);
+        }
         isSeascapeActive = true;
       }
       btn.classList.add("active-overlay");
       setOverlayBusy(btn, false, idleTitle);
+      if (typeof flashOpenWatersLayerStatus === "function") {
+        flashOpenWatersLayerStatus(label + " on", false);
+      }
     } catch (err) {
       console.warn("[SetSail] Open Waters overlay failed:", err);
       btn.classList.remove("active-overlay");
       setOverlayBusy(btn, false, idleTitle + " (unavailable)");
       if (isSeamap) isSeamapActive = false;
       else isSeascapeActive = false;
+      if (typeof flashOpenWatersLayerStatus === "function") {
+        flashOpenWatersLayerStatus(label + " failed: " + (err && err.message ? err.message : "error"), true);
+      }
     } finally {
       owOverlayBusy = false;
     }
@@ -8485,6 +8504,11 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           mapInstance.removeLayer(layers.buoys);
         }
       } else if (overlayKey === "seamap" || overlayKey === "seascape") {
+        if (layerPanelLeaveTimer) {
+          clearTimeout(layerPanelLeaveTimer);
+          layerPanelLeaveTimer = null;
+        }
+        selector.classList.remove("collapsed");
         toggleOwMapLibreOverlay(overlayKey, btn);
       }
     });

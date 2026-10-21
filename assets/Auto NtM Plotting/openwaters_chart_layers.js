@@ -12,9 +12,11 @@
   const TIDES_EXTREMES = "https://api.openwaters.io/tides/extremes";
   const CURRENTS_EVENTS = "https://api.openwaters.io/currents/events";
 
-  const ML_CSS = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css";
-  const ML_JS = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js";
-  const ML_LEAFLET = "https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js";
+  const ML_CSS = "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css";
+  const ML_JS = "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js";
+  // Local patched bridge (browser-globals only; safe canvas init for MapLibre v4)
+  const ML_LEAFLET_LOCAL = "assets/Auto%20NtM%20Plotting/maplibre_gl_leaflet.js";
+  const ML_LEAFLET_CDN = "https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js";
 
   let readyPromise = null;
   let seascapeStylePromise = null;
@@ -50,6 +52,32 @@
     });
   }
 
+  function flashOwStatus(msg, isErr) {
+    try {
+      let el = document.getElementById("setsailOwLayerStatus");
+      if (!el) {
+        el = document.createElement("div");
+        el.id = "setsailOwLayerStatus";
+        el.setAttribute("role", "status");
+        el.style.cssText =
+          "position:absolute;top:56px;right:12px;z-index:950;max-width:min(320px,70vw);" +
+          "padding:8px 10px;border-radius:8px;font:600 12px/1.35 system-ui,sans-serif;" +
+          "pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.45);";
+        const host = document.getElementById("ntmMapContainer") || document.body;
+        host.appendChild(el);
+      }
+      el.style.background = isErr ? "rgba(127,29,29,0.94)" : "rgba(8,47,73,0.94)";
+      el.style.color = isErr ? "#fecaca" : "#e0f2fe";
+      el.style.border = isErr ? "1px solid rgba(248,113,113,0.55)" : "1px solid rgba(56,189,248,0.45)";
+      el.textContent = msg;
+      el.style.opacity = "1";
+      clearTimeout(el._hideTimer);
+      el._hideTimer = setTimeout(() => {
+        el.style.opacity = "0";
+      }, isErr ? 6000 : 2800);
+    } catch (e) {}
+  }
+
   function ensureMapLibreReady() {
     if (readyPromise) return readyPromise;
     readyPromise = (async () => {
@@ -57,9 +85,16 @@
         loadCss(ML_CSS);
         await loadScript(ML_JS);
       }
+      if (typeof global.maplibregl === "undefined") {
+        throw new Error("maplibre-gl failed to load");
+      }
       if (typeof L === "undefined") throw new Error("Leaflet required");
       if (typeof L.maplibreGL !== "function") {
-        await loadScript(ML_LEAFLET);
+        try {
+          await loadScript(ML_LEAFLET_LOCAL);
+        } catch (e1) {
+          await loadScript(ML_LEAFLET_CDN);
+        }
       }
       if (typeof L.maplibreGL !== "function") {
         throw new Error("maplibre-gl-leaflet unavailable");
@@ -92,11 +127,34 @@
     return seascapeStylePromise;
   }
 
+  function wireGlLayerResize(layer, map) {
+    if (!layer || !map) return;
+    const kick = () => {
+      try {
+        const gl = layer.getMaplibreMap && layer.getMaplibreMap();
+        if (gl && typeof gl.resize === "function") gl.resize();
+        map.invalidateSize({ animate: false });
+      } catch (e) {}
+    };
+    setTimeout(kick, 40);
+    setTimeout(kick, 250);
+    try {
+      const gl = layer.getMaplibreMap && layer.getMaplibreMap();
+      if (gl && typeof gl.once === "function") {
+        gl.once("load", kick);
+        gl.once("idle", kick);
+      }
+    } catch (e) {}
+  }
+
   function createMapLibreLayer(style, attribution) {
     return L.maplibreGL({
       style: style,
       interactive: false,
-      attribution: attribution || "Open Waters"
+      pane: "overlayPane",
+      padding: 0.08,
+      attribution: attribution || "Open Waters",
+      className: "setsail-ow-gl-canvas"
     });
   }
 
@@ -281,6 +339,8 @@
   global.ensureOpenWatersMapLibre = ensureMapLibreReady;
   global.createOpenWatersSeamapLayer = createSeamapLayer;
   global.createOpenWatersSeascapeLayer = createSeascapeLayer;
+  global.wireOpenWatersGlLayerResize = wireGlLayerResize;
+  global.flashOpenWatersLayerStatus = flashOwStatus;
   global.togglePortOwHydro = togglePortHydro;
   global.buildPortOwHydroControlsHtml = buildPortHydroControlsHtml;
 })(typeof window !== "undefined" ? window : globalThis);
