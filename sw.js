@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine вЂ” Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.49.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.49.0';
+const CACHE_NAME = 'setsail-cache-v5.50.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.50.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -184,6 +184,17 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+
+  // 0a. Open Waters API + Almanac CDN: network-only (do not cache / timeout-starve)
+  if (
+    url.hostname === 'api.openwaters.io' ||
+    url.hostname.includes('jsdelivr.net') ||
+    url.hostname === 'esm.sh' ||
+    url.hostname.endsWith('.esm.sh')
+  ) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
 
   // 0. Intercept any legacy Stadia Maps or Thunderforest tile request and rewrite to CARTO Voyager
   if (url.hostname.includes('stadiamaps.com') || url.hostname.includes('thunderforest.com')) {

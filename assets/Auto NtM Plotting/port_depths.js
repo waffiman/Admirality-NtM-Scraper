@@ -19707,7 +19707,8 @@ function initPortDepthsLayers(map) {
 }
 
 /**
- * Render Port Depths Polygons, Soundings, and Isobaths Contours
+ * Render Port markers only (fairway depth polygons removed — use Bathymetry layer).
+ * Port tags use a dedicated high pane so they stay above Open Waters Bathymetry.
  */
 function renderPortDepthsOnMap(map) {
   if (!map || !leafletPortDepthsLayer || !leafletIsobathsLayer) return;
@@ -19715,10 +19716,13 @@ function renderPortDepthsOnMap(map) {
   leafletPortDepthsLayer.clearLayers();
   leafletIsobathsLayer.clearLayers();
 
+  if (!map.getPane("portsPane")) {
+    const pane = map.createPane("portsPane");
+    pane.style.zIndex = 650;
+  }
+
   const minDepthReq = parseFloat(window.filterMinPortDepth) || 0;
-  const pSub = window.PORTS_SUBFILTERS || { fairways: true, isobaths: true };
   const curZoom = map.getZoom ? map.getZoom() : 4;
-  const canvasRenderer = window._setsailCanvasRenderer || null;
 
   if (!map._portDepthZoomHooked) {
     map._portDepthZoomHooked = true;
@@ -19729,53 +19733,60 @@ function renderPortDepthsOnMap(map) {
     });
   }
 
+  if (!map._owPortsExpandStarted && typeof window.expandPortsFromOpenWaters === "function") {
+    map._owPortsExpandStarted = true;
+    window.expandPortsFromOpenWaters().then((res) => {
+      if (res && res.added > 0 && OVERLAY_STATES.depths) {
+        renderPortDepthsOnMap(map);
+      }
+    }).catch(() => {});
+  }
+
   PORT_DEPTHS_DB.forEach(port => {
     if (window.ROUTE_CORRIDOR_FILTER_ENABLED && typeof window.isPointInActiveRouteCorridor === "function") {
       const pCoords = port.approachCoords || port.coords;
       if (!pCoords || !window.isPointInActiveRouteCorridor(pCoords[0], pCoords[1])) return;
     }
+    const markerLatLng = port.approachCoords || port.coords;
+    if (!markerLatLng || !Number.isFinite(Number(markerLatLng[0])) || !Number.isFinite(Number(markerLatLng[1]))) return;
+
     const allDepths = (port.fairways || []).map(f => parseFloat(f.depth) || 0).filter(d => d > 0);
-    const maxPortDepth = allDepths.length ? Math.max(...allDepths) : 12.5;
-    const minPortDepth = allDepths.length ? Math.min(...allDepths) : maxPortDepth;
-    if (minDepthReq > 0 && maxPortDepth < minDepthReq) return;
+    const maxPortDepth = allDepths.length ? Math.max(...allDepths) : (parseFloat(port.maxDraftMeters) || 0);
+    if (minDepthReq > 0 && maxPortDepth > 0 && maxPortDepth < minDepthReq) return;
+    if (minDepthReq > 0 && maxPortDepth <= 0 && !port.owStationId) return;
 
-    const depthRangeStr = (minPortDepth !== maxPortDepth)
-      ? `${minPortDepth.toFixed(1)}–${maxPortDepth.toFixed(1)}m`
-      : `${maxPortDepth.toFixed(1)}m`;
-    const zonesCount = (port.fairways || []).length;
+    const labelCode = port.unlocode || (port.source === "openwaters" ? "OW" : (port.countryCode || "PORT"));
+    const tipName = port.name || "Port";
 
-    // 1. Zoom-Adaptive Port Marker (LOD Tier 1: z<=4 micro node, Tier 2: z=5..6 compact pill, Tier 3: z>=7 full anchor badge)
     let anchorHtml = "";
     let iconSz = [14, 14];
     let iconAnc = [7, 7];
 
     if (curZoom <= 4) {
       anchorHtml = `
-        <div class="port-lod-dot" title="${port.name} (${port.unlocode}) • ${depthRangeStr}" style="width:10px;height:10px;border-radius:50%;background:#06b6d4;border:1.5px solid rgba(15,23,42,0.9);box-shadow:0 0 6px rgba(6,182,212,0.55);cursor:pointer;"></div>
+        <div class="port-lod-dot" title="${tipName}" style="width:10px;height:10px;border-radius:50%;background:#06b6d4;border:1.5px solid rgba(15,23,42,0.9);box-shadow:0 0 6px rgba(6,182,212,0.55);cursor:pointer;"></div>
       `;
       iconSz = [12, 12];
       iconAnc = [6, 6];
     } else if (curZoom <= 6) {
       anchorHtml = `
-        <div style="background:rgba(8,16,36,0.88);border:1px solid rgba(6,182,212,0.65);border-radius:5px;padding:1px 5px;display:inline-flex;align-items:center;gap:4px;box-shadow:0 1px 5px rgba(0,0,0,0.45);cursor:pointer;white-space:nowrap;">
+        <div style="background:rgba(8,16,36,0.92);border:1px solid rgba(6,182,212,0.65);border-radius:5px;padding:1px 6px;display:inline-flex;align-items:center;gap:4px;box-shadow:0 1px 5px rgba(0,0,0,0.45);cursor:pointer;white-space:nowrap;">
           <span style="width:6px;height:6px;border-radius:50%;background:#06b6d4;"></span>
-          <span style="font-size:0.62rem;font-weight:700;color:#e2e8f0;">${port.unlocode}</span>
-          <span style="font-size:0.58rem;font-weight:600;color:#22d3ee;">${maxPortDepth.toFixed(1)}m</span>
+          <span style="font-size:0.62rem;font-weight:700;color:#e2e8f0;">${labelCode}</span>
         </div>
       `;
-      iconSz = [86, 18];
-      iconAnc = [43, 9];
+      iconSz = [72, 18];
+      iconAnc = [36, 9];
     } else {
       anchorHtml = `
-        <div style="background:rgba(8,16,36,0.92);border:1px solid rgba(6,182,212,0.75);border-radius:6px;padding:2px 7px;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.55);cursor:pointer;white-space:nowrap;">
+        <div style="background:rgba(8,16,36,0.94);border:1px solid rgba(6,182,212,0.75);border-radius:6px;padding:2px 8px;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.55);cursor:pointer;white-space:nowrap;">
           <span style="font-size:0.82rem;color:#22d3ee;"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-0.15em;"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
           <span class="port-flag-box" style="width:15px;height:11px;vertical-align:middle;display:inline-flex;"><img src="assets/flags/${(port.countryCode||'un').toLowerCase()}.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/${(port.countryCode||'un').toLowerCase()}.png';" alt="${port.countryCode||''}" class="port-flag-img"></span>
-          <span style="font-size:0.68rem;font-weight:700;color:#f1f5f9;">${port.unlocode}</span>
-          <span style="font-size:0.63rem;font-weight:700;color:#22d3ee;background:rgba(6,182,212,0.15);padding:1px 4px;border-radius:3px;">${depthRangeStr}</span>
+          <span style="font-size:0.68rem;font-weight:700;color:#f1f5f9;">${labelCode}</span>
         </div>
       `;
-      iconSz = [140, 22];
-      iconAnc = [70, 11];
+      iconSz = [110, 22];
+      iconAnc = [55, 11];
     }
 
     const anchorIcon = L.divIcon({
@@ -19785,9 +19796,13 @@ function renderPortDepthsOnMap(map) {
       iconAnchor: iconAnc
     });
 
-    const marker = L.marker(port.approachCoords, { icon: anchorIcon });
+    const marker = L.marker(markerLatLng, {
+      icon: anchorIcon,
+      pane: "portsPane",
+      zIndexOffset: 800
+    });
     if (curZoom <= 6) {
-      marker.bindTooltip(`<b>${port.name} (${port.unlocode})</b> • ${depthRangeStr} (${zonesCount} reaches)`, {
+      marker.bindTooltip(`<b>${tipName}</b>${port.unlocode ? " · " + port.unlocode : ""}`, {
         direction: "top",
         offset: [0, -6],
         opacity: 0.94
@@ -19795,121 +19810,27 @@ function renderPortDepthsOnMap(map) {
     }
     port._mainMarker = marker;
 
-    const reachesListHtml = (port.fairways || []).map((fw, idx) => `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 5px;border-bottom:1px solid rgba(148,163,184,0.14);font-size:0.68rem;">
-        <span style="color:#e2e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${fw.name}">${idx + 1}. ${fw.name}</span>
-        <b style="color:${fw.color || '#22d3ee'};white-space:nowrap;">${Number(fw.depth).toFixed(1)}m</b>
-      </div>
-    `).join("");
+    const cardHtml = typeof buildPortCardHtml === "function"
+      ? buildPortCardHtml(port)
+      : (typeof buildPortOwHydroControlsHtml === "function" ? buildPortOwHydroControlsHtml(port) : "");
 
-    const popupHtml = `
-      <div style="min-width:270px;max-width:340px;font-family:'Segoe UI', Tahoma, sans-serif;color:#f1f5f9;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;">
-          <h4 style="margin:0;font-size:0.88rem;color:#22d3ee;display:flex;align-items:center;gap:6px;">
-            <span class="port-flag-box"><img src="assets/flags/${(port.countryCode||'un').toLowerCase()}.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/${(port.countryCode||'un').toLowerCase()}.png';" alt="${port.countryCode||''}" class="port-flag-img"></span>
-            <span>${port.name}</span>
-          </h4>
-          <span style="font-size:0.65rem;background:#0891b2;color:#fff;padding:1px 5px;border-radius:3px;font-weight:700;">${port.unlocode}</span>
-        </div>
-        <div style="font-size:0.73rem;line-height:1.45;color:#cad8f4;">
-          <div>Authority: <strong>${port.authority}</strong></div>
-          <div>Depth Range (${zonesCount} Surveyed Reaches): <strong style="color:#34d399;">${depthRangeStr}</strong></div>
-          <div>Last Survey: <strong>${port.lastSurvey}</strong> &bull; <span style="color:#34d399;font-weight:700;">${port.auditStatus}</span></div>
-          <div style="margin-top:6px;margin-bottom:3px;font-size:0.66rem;text-transform:uppercase;color:#94a3b8;font-weight:700;">Channel Reaches &amp; Basins (${zonesCount})</div>
-          <div style="max-height:135px;overflow-y:auto;background:rgba(15,23,42,0.65);border:1px solid rgba(148,163,184,0.22);border-radius:5px;padding:2px 4px;">
-            ${reachesListHtml}
-          </div>
-          <div style="font-size:0.68rem;color:#94a3b8;margin-top:5px;font-style:italic;">${port.auditNotes}</div>
-        </div>
-        <div style="margin-top:8px;display:flex;gap:6px;">
-          <button type="button" onclick="auditSinglePort('${port.id}')" style="background:linear-gradient(180deg,#0891b2,#0e7490);border:1px solid #22d3ee;color:#fff;font-size:0.7rem;padding:3px 8px;border-radius:4px;cursor:pointer;font-weight:600;"><svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-0.15em;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Audit All ${zonesCount} Reaches</button>
-        </div>
-        ${typeof buildPortOwHydroControlsHtml === "function" ? buildPortOwHydroControlsHtml(port) : ""}
-      </div>
-    `;
+    const popupHtml = `<div class="ss-port-popup-shell">${cardHtml}</div>`;
 
-    marker.bindPopup(popupHtml, { className: "ntm-dark-popup", maxWidth: 380 });
-    leafletPortDepthsLayer.addLayer(marker);
-
-    // 2. Fairway & Basin Polygons: only render polygons when zoomed in (curZoom >= 6) so global map stays ultra-clean
-    if (curZoom >= 6) {
-      const fairwaysList = pSub.fairways !== false ? (port.fairways || []) : [];
-      const showSoundingBadges = curZoom >= 9;
-      const labelStride = curZoom >= 12 ? 1 : (curZoom >= 10 ? Math.max(1, Math.ceil(fairwaysList.length / 8)) : Math.max(1, Math.ceil(fairwaysList.length / 3)));
-
-      fairwaysList.forEach((fairway, fIdx) => {
-        if (minDepthReq > 0 && (parseFloat(fairway.depth) || 0) < minDepthReq) return;
-        const polyOpts = {
-          color: fairway.color || "#06b6d4",
-          weight: curZoom >= 11 ? 1.8 : 1.1,
-          fillColor: fairway.color || "#06b6d4",
-          fillOpacity: curZoom >= 10 ? 0.30 : 0.18
-        };
-        if (canvasRenderer) polyOpts.renderer = canvasRenderer;
-        const poly = L.polygon(fairway.coords, polyOpts);
-
-        poly.bindTooltip(`<b>${fairway.name}</b> — ${fairway.depth}${fairway.depthUnit || 'm'}`, {
-          sticky: true,
-          direction: "top",
-          opacity: 0.92
-        });
-
-        const fairwayPopupHtml = `
-          <div style="min-width:235px;color:#f1f5f9;">
-            <h4 style="margin:0 0 4px;font-size:0.85rem;color:#22d3ee;display:flex;align-items:center;gap:6px;">
-              <span class="port-flag-box" style="width:16px;height:11px;vertical-align:middle;display:inline-flex;"><img src="assets/flags/${(port.countryCode||'un').toLowerCase()}.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/${(port.countryCode||'un').toLowerCase()}.png';" alt="${port.countryCode||''}" class="port-flag-img"></span>
-              <span>${fairway.name}</span>
-            </h4>
-            <div style="font-size:0.73rem;line-height:1.45;color:#cad8f4;">
-              <div>Port: <strong>${port.name} (${port.unlocode})</strong> — Zone ${fIdx + 1} of ${zonesCount}</div>
-              <div>Maintained Depth: <strong style="font-size:0.86rem;color:#34d399;">${fairway.depth} ${fairway.depthUnit || 'm'} (Chart Datum / MLLW)</strong></div>
-              <div>Zone Type: <strong>${(fairway.category || 'fairway').toUpperCase()}</strong></div>
-              <div>Authority: ${port.authority}</div>
-              <div>Survey Date: <strong>${port.lastSurvey}</strong></div>
-              <div>Status: <span style="color:#34d399;font-weight:700;">${port.auditStatus}</span></div>
-            </div>
-          </div>
-        `;
-
-        poly.bindPopup(fairwayPopupHtml, { className: "ntm-dark-popup", maxWidth: 310 });
-        leafletPortDepthsLayer.addLayer(poly);
-
-        if (showSoundingBadges && fIdx % labelStride === 0) {
-          const centerLat = fairway.coords.reduce((acc, c) => acc + c[0], 0) / fairway.coords.length;
-          const centerLon = fairway.coords.reduce((acc, c) => acc + c[1], 0) / fairway.coords.length;
-
-          const badgeClass = fairway.depth >= 18 ? "deep" : (fairway.depth < 12 ? "shallow" : "");
-          const soundingIcon = L.divIcon({
-            html: `<span class="ntm-sounding-badge ${badgeClass}">${fairway.depth}m</span>`,
-            className: "ntm-sounding-marker",
-            iconSize: [40, 15],
-            iconAnchor: [20, 7]
-          });
-
-          const soundingMarker = L.marker([centerLat, centerLon], {
-            icon: soundingIcon,
-            interactive: false
-          });
-          leafletPortDepthsLayer.addLayer(soundingMarker);
+    marker.bindPopup(popupHtml, {
+      className: "ntm-dark-popup ss-port-popup",
+      maxWidth: 420,
+      minWidth: 300
+    });
+    marker.on("popupopen", () => {
+      try {
+        const node = marker.getPopup() && marker.getPopup().getElement();
+        const card = node && node.querySelector(".ss-port-card");
+        if (card && typeof window.ssPortCardLoad === "function") {
+          window.ssPortCardLoad(card, "tides");
         }
-      });
-    }
-
-    // 3. Depth Contours (Isobaths): only at regional/approach zoom >= 7
-    if (curZoom >= 7 && pSub.isobaths !== false && port.isobaths) {
-      port.isobaths.forEach(iso => {
-        const lineOpts = {
-          color: "#22d3ee",
-          weight: 1.2,
-          dashArray: "5, 4",
-          opacity: 0.65
-        };
-        if (canvasRenderer) lineOpts.renderer = canvasRenderer;
-        const line = L.polyline(iso.coords, lineOpts);
-        line.bindTooltip(`Isobath: ${iso.depth}m LAT Depth Contour`, { sticky: true });
-        leafletIsobathsLayer.addLayer(line);
-      });
-    }
+      } catch (e) {}
+    });
+    leafletPortDepthsLayer.addLayer(marker);
   });
 }
 

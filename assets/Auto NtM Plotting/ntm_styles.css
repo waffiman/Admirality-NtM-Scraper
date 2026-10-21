@@ -4052,6 +4052,240 @@
   overflow: visible !important;
 }
 
+/* ── Port detail card (Tides / Currents / Sky) ── */
+.ss-port-popup .leaflet-popup-content {
+  margin: 10px 12px 12px;
+  min-width: 280px;
+}
+.ss-port-card {
+  color: #e2e8f0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  min-width: 280px;
+  max-width: 380px;
+}
+.ss-port-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ss-port-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+.ss-port-title h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.ss-port-flag {
+  width: 22px;
+  height: 15px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+.ss-port-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 0.66rem;
+  color: #94a3b8;
+}
+.ss-port-chip {
+  background: rgba(6, 182, 212, 0.18);
+  color: #67e8f9;
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  border-radius: 999px;
+  padding: 0 6px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.ss-port-coords {
+  font-size: 0.62rem;
+  color: #64748b;
+  white-space: nowrap;
+  padding-top: 2px;
+}
+.ss-port-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+.ss-port-tab {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 650;
+  padding: 7px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+.ss-port-tab:hover {
+  color: #e2e8f0;
+  background: rgba(51, 65, 85, 0.45);
+}
+.ss-port-tab.is-active {
+  color: #0f172a;
+  background: linear-gradient(180deg, #67e8f9, #22d3ee);
+  box-shadow: 0 4px 12px rgba(34, 211, 238, 0.25);
+}
+.ss-tab-ico {
+  opacity: 0.85;
+  margin-right: 2px;
+}
+.ss-port-panel {
+  display: none;
+  animation: ssPortFade 0.22s ease;
+}
+.ss-port-panel.is-active {
+  display: block;
+}
+@keyframes ssPortFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ss-port-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.ss-port-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.62rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.ss-port-date {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  color: #e2e8f0;
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: 0.72rem;
+}
+.ss-port-btn {
+  border: 0;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(180deg, #22d3ee, #0891b2);
+  color: #082f49;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.ss-port-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.ss-port-btn-ghost {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+.ss-port-content {
+  max-height: 220px;
+  overflow: auto;
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  padding: 6px 8px;
+}
+.ss-port-loading {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  padding: 10px 4px;
+}
+.ss-port-empty {
+  text-align: center;
+  padding: 16px 8px;
+  color: #94a3b8;
+}
+.ss-port-empty-ico {
+  display: block;
+  font-size: 1.2rem;
+  opacity: 0.55;
+  margin-bottom: 6px;
+}
+.ss-port-empty p {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+.ss-port-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.6rem;
+  color: #64748b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ss-port-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.7rem;
+}
+.ss-port-table th {
+  text-align: left;
+  color: #64748b;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 4px 6px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+.ss-port-table td {
+  padding: 5px 4px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  color: #cbd5e1;
+}
+.ss-port-table tr.hi td:first-child { color: #34d399; font-weight: 700; }
+.ss-port-table tr.lo td:first-child { color: #38bdf8; font-weight: 700; }
+.ss-sky-list { display: flex; flex-direction: column; gap: 2px; }
+.ss-sky-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  font-size: 0.72rem;
+}
+.ss-sky-kind { color: #cbd5e1; }
+.ss-sky-time { color: #e2e8f0; font-weight: 650; font-variant-numeric: tabular-nums; }
+.ss-sky-row.sun-up .ss-sky-kind { color: #fbbf24; font-weight: 700; }
+.ss-sky-row.sun-down .ss-sky-kind { color: #fb7185; font-weight: 700; }
+.ss-port-foot {
+  margin-top: 8px;
+  font-size: 0.6rem;
+  color: #64748b;
+}
+.ss-port-foot a { color: #67e8f9; text-decoration: none; }
+.ss-port-foot a:hover { text-decoration: underline; }
+.leaflet-ports-pane {
+  z-index: 650;
+}
+
 .port-flag-symbol {
   display: inline-flex;
   align-items: center;

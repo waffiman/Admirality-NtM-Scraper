@@ -12,8 +12,8 @@
   // Prefer already-loaded <script> from index.html; then same-origin files (no CDN — SW/CDN flakes)
   const ML_BUNDLES = [
     {
-      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.49",
-      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.49"
+      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.50",
+      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.50"
     }
   ];
   // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
@@ -133,12 +133,17 @@
 
       onAdd: function (map) {
         this._map = map;
+        // Host inside Leaflet map-pane stack (below marker/ports panes) so port tags stay above Bathymetry
+        if (!map.getPane("owBathyPane")) {
+          const pane = map.createPane("owBathyPane");
+          pane.style.zIndex = 450;
+          pane.style.pointerEvents = "none";
+        }
         const root = (this._container = L.DomUtil.create("div", "setsail-ow-gl-root"));
-        // Above basemap tiles, below controls; pointer-events none so map stays usable
         root.style.cssText =
-          "position:absolute;left:0;top:0;right:0;bottom:0;width:100%;height:100%;" +
-          "z-index:550;pointer-events:none;overflow:hidden;background:transparent;";
-        map.getContainer().appendChild(root);
+          "position:absolute;left:0;top:0;width:100%;height:100%;" +
+          "pointer-events:none;overflow:hidden;background:transparent;";
+        map.getPane("owBathyPane").appendChild(root);
 
         const center = map.getCenter();
         const glZoom = Math.max(0, map.getZoom() - GL_ZOOM_OFFSET);
@@ -166,15 +171,12 @@
         this._panRaf = 0;
         this._lastSyncKey = "";
         this._freezeCenter = null;
-        this._onMoveStart = this._handleMoveStart.bind(this);
-        this._onMove = this._handleMove.bind(this);
+        // Pane already moves with Leaflet — only re-sync MapLibre after pan/zoom settles
         this._onMoveEnd = this._handleMoveEnd.bind(this);
         this._onZoomStart = this._handleZoomStart.bind(this);
         this._onZoomEnd = this._handleZoomEnd.bind(this);
         this._onResize = this._resizeGl.bind(this);
 
-        map.on("movestart", this._onMoveStart);
-        map.on("move", this._onMove);
         map.on("moveend", this._onMoveEnd);
         map.on("zoomstart", this._onZoomStart);
         map.on("zoomend", this._onZoomEnd);
@@ -199,8 +201,6 @@
       },
 
       onRemove: function (map) {
-        map.off("movestart", this._onMoveStart);
-        map.off("move", this._onMove);
         map.off("moveend", this._onMoveEnd);
         map.off("zoomstart", this._onZoomStart);
         map.off("zoomend", this._onZoomEnd);
@@ -243,34 +243,7 @@
         this._container.style.willChange = "";
       },
 
-      // Pan: CSS-translate overlay (no MapLibre tile reload mid-drag)
-      _handleMoveStart: function () {
-        if (!this._glMap || !this._map || this._zooming) return;
-        this._panning = true;
-        this._freezeCenter = this._map.getCenter();
-        if (this._container) this._container.style.willChange = "transform";
-      },
-
-      _handleMove: function () {
-        if (!this._glMap || !this._map || this._zooming || !this._panning || !this._freezeCenter) return;
-        if (this._panRaf) return;
-        this._panRaf = requestAnimationFrame(() => {
-          this._panRaf = 0;
-          try {
-            const map = this._map;
-            const z = map.getZoom();
-            const p0 = map.project(this._freezeCenter, z);
-            const p1 = map.project(map.getCenter(), z);
-            const dx = Math.round(p0.x - p1.x);
-            const dy = Math.round(p0.y - p1.y);
-            this._container.style.transform = "translate3d(" + dx + "px," + dy + "px,0)";
-          } catch (e) {}
-        });
-      },
-
       _handleMoveEnd: function () {
-        this._panning = false;
-        this._freezeCenter = null;
         this._clearPanTransform();
         this._syncView(true);
       },
@@ -278,8 +251,6 @@
       // Zoom: wait until idle — mid-zoom jumpTo was the main Bathymetry jank source
       _handleZoomStart: function () {
         this._zooming = true;
-        this._panning = false;
-        this._freezeCenter = null;
         this._clearPanTransform();
         try {
           if (this._glMap && typeof this._glMap.stop === "function") this._glMap.stop();
@@ -293,7 +264,7 @@
       },
 
       _syncView: function (force) {
-        if (!this._glMap || !this._map || this._zooming || this._panning) return;
+        if (!this._glMap || !this._map || this._zooming) return;
         try {
           const c = this._map.getCenter();
           const z = this._glZoom();
@@ -566,16 +537,37 @@
     return createMapLibreLayer(buildBathymetryOverlayStyle(), "Open Waters Bathymetry");
   }
 
-  function formatOwTime(iso) {
+  const TIDES_STATIONS = "https://api.openwaters.io/tides/stations";
+  const ALMANAC_ESM = "https://cdn.jsdelivr.net/npm/@openwaters/almanac@0.8.0/+esm";
+  const OW_PORT_HUBS = [
+    [1.26, 103.85], [51.5, 0.1], [40.7, -74.0], [35.65, 139.75],
+    [22.3, 114.17], [-33.85, 151.2], [25.0, 55.3], [53.55, 9.97],
+    [31.2, 121.5], [-23.95, -46.3], [-6.1, 106.88], [13.7, 100.5],
+    [37.8, -122.4], [48.4, -4.5], [41.0, 28.98], [25.77, -80.18],
+    [35.1, 129.04], [19.07, 72.87], [-36.84, 174.76], [1.15, 104.0],
+    [33.75, -118.25], [51.95, 1.32], [22.61, 120.29], [24.83, 66.97]
+  ];
+
+  let almanacModPromise = null;
+  let owPortsExpandPromise = null;
+
+  function escHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function formatOwTime(iso, opts) {
     try {
       const d = new Date(iso);
       if (Number.isNaN(d.getTime())) return String(iso || "");
-      return d.toLocaleString(undefined, {
+      return d.toLocaleString(undefined, opts || {
         month: "short",
         day: "numeric",
         hour: "2-digit",
-        minute: "2-digit",
-        timeZoneName: "short"
+        minute: "2-digit"
       });
     } catch (e) {
       return String(iso || "");
@@ -598,138 +590,428 @@
     return kind || "Event";
   }
 
-  function renderTidesHtml(data) {
-    const extremes = (data && (data.extremes || data.events)) || [];
-    const now = Date.now();
-    const upcoming = extremes
-      .filter((e) => e && e.time && new Date(e.time).getTime() >= now - 3600000)
-      .slice(0, 6);
-    const rows = (upcoming.length ? upcoming : extremes.slice(0, 6)).map((e) => {
-      const label = e.label || (e.high ? "High" : e.low ? "Low" : "—");
-      const level = Number.isFinite(Number(e.level)) ? Number(e.level).toFixed(2) + " m" : "—";
-      const color = e.high || /high/i.test(label) ? "#34d399" : "#38bdf8";
-      return (
-        '<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid rgba(148,163,184,0.12);font-size:0.68rem;">' +
-        '<span style="color:' + color + ';font-weight:700;min-width:42px;">' + label + "</span>" +
-        '<span style="color:#94a3b8;flex:1;">' + formatOwTime(e.time) + "</span>" +
-        '<span style="color:#e2e8f0;font-weight:600;">' + level + "</span>" +
-        "</div>"
-      );
-    });
-    if (!rows.length) {
-      return '<div style="font-size:0.68rem;color:#94a3b8;padding:4px 0;">No tide extremes for this position.</div>';
-    }
-    return (
-      '<div style="margin-top:6px;padding:6px 7px;background:rgba(15,23,42,0.72);border:1px solid rgba(56,189,248,0.28);border-radius:6px;">' +
-      '<div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.04em;color:#7dd3fc;font-weight:700;margin-bottom:4px;">Tides · Open Waters</div>' +
-      rows.join("") +
-      "</div>"
-    );
+  function skyKindLabel(kind) {
+    const k = String(kind || "");
+    const map = {
+      rise: "Sunrise",
+      set: "Sunset",
+      transit: "Solar noon",
+      civilDawn: "Civil dawn",
+      civilDusk: "Civil dusk",
+      nauticalDawn: "Nautical dawn",
+      nauticalDusk: "Nautical dusk",
+      astronomicalDawn: "Astronomical dawn",
+      astronomicalDusk: "Astronomical dusk"
+    };
+    return map[k] || k;
   }
 
-  function renderCurrentsHtml(data) {
-    const events = (data && data.events) || [];
-    const now = Date.now();
-    const upcoming = events
-      .filter((e) => e && e.time && new Date(e.time).getTime() >= now - 3600000)
-      .slice(0, 6);
-    const rows = (upcoming.length ? upcoming : events.slice(0, 6)).map((e) => {
-      const dir =
-        Number.isFinite(Number(e.direction))
-          ? Math.round(Number(e.direction)) + "°"
-          : "—";
-      return (
-        '<div style="display:flex;justify-content:space-between;gap:6px;padding:3px 0;border-bottom:1px solid rgba(148,163,184,0.12);font-size:0.68rem;">' +
-        '<span style="color:#fbbf24;font-weight:700;min-width:72px;">' + kindLabel(e.kind) + "</span>" +
-        '<span style="color:#94a3b8;flex:1;">' + formatOwTime(e.time) + "</span>" +
-        '<span style="color:#e2e8f0;font-weight:600;white-space:nowrap;">' + formatSpeed(e.speed) +
-        (dir !== "—" ? " · " + dir : "") + "</span>" +
-        "</div>"
-      );
-    });
-    if (!rows.length) {
-      return '<div style="font-size:0.68rem;color:#94a3b8;padding:4px 0;">No current events for this position.</div>';
-    }
-    return (
-      '<div style="margin-top:6px;padding:6px 7px;background:rgba(15,23,42,0.72);border:1px solid rgba(251,191,36,0.28);border-radius:6px;">' +
-      '<div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.04em;color:#fcd34d;font-weight:700;margin-bottom:4px;">Currents · Open Waters</div>' +
-      rows.join("") +
-      "</div>"
-    );
+  function isoDayStart(d) {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x;
   }
 
-  const portHydroState = Object.create(null);
-
-  async function togglePortHydro(kind, portId, lat, lon, btn) {
-    const id = String(portId || "");
-    const panelId = "port-ow-" + kind + "-" + id;
-    const panel = document.getElementById(panelId);
-    if (!panel || !btn) return;
-
-    const st = portHydroState[id] || (portHydroState[id] = { tides: false, currents: false });
-    const turningOn = !st[kind];
-
-    if (!turningOn) {
-      st[kind] = false;
-      panel.style.display = "none";
-      panel.innerHTML = "";
-      btn.setAttribute("aria-pressed", "false");
-      btn.style.opacity = "0.85";
-      btn.style.outline = "none";
-      return;
-    }
-
-    btn.setAttribute("aria-pressed", "true");
-    btn.style.opacity = "1";
-    btn.style.outline = "1px solid rgba(34,211,238,0.7)";
-    panel.style.display = "block";
-    panel.innerHTML = '<div style="font-size:0.68rem;color:#94a3b8;padding:6px 0;">Loading…</div>';
-
-    const latN = Number(lat);
-    const lonN = Number(lon);
-    if (!Number.isFinite(latN) || !Number.isFinite(lonN)) {
-      panel.innerHTML = '<div style="font-size:0.68rem;color:#f87171;">Invalid port coordinates.</div>';
-      return;
-    }
-
-    try {
-      const url =
-        kind === "currents"
-          ? CURRENTS_EVENTS + "?latitude=" + encodeURIComponent(latN) + "&longitude=" + encodeURIComponent(lonN)
-          : TIDES_EXTREMES + "?latitude=" + encodeURIComponent(latN) + "&longitude=" + encodeURIComponent(lonN);
-      const res = await fetch(url, { credentials: "omit" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const data = await res.json();
-      st[kind] = true;
-      panel.innerHTML = kind === "currents" ? renderCurrentsHtml(data) : renderTidesHtml(data);
-    } catch (err) {
-      st[kind] = false;
-      btn.setAttribute("aria-pressed", "false");
-      btn.style.outline = "none";
-      panel.innerHTML =
-        '<div style="font-size:0.68rem;color:#f87171;">' +
-        (kind === "currents" ? "Currents" : "Tides") +
-        " unavailable here.</div>";
-    }
+  function toIsoZ(d) {
+    return new Date(d).toISOString();
   }
 
-  function buildPortHydroControlsHtml(port) {
-    const id = String((port && port.id) || "").replace(/[^a-zA-Z0-9_-]/g, "_");
+  function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const toR = (d) => (d * Math.PI) / 180;
+    const dLat = toR(lat2 - lat1);
+    const dLon = toR(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toR(lat1)) * Math.cos(toR(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function portLatLon(port) {
     const coords = (port && (port.approachCoords || port.coords)) || [];
-    const lat = Number(coords[0]);
-    const lon = Number(coords[1]);
-    if (!id || !Number.isFinite(lat) || !Number.isFinite(lon)) return "";
+    return { lat: Number(coords[0]), lon: Number(coords[1]) };
+  }
+
+  function emptyInfo(msg) {
     return (
-      '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">' +
-      '<button type="button" aria-pressed="false" title="Toggle Open Waters tides at this port" ' +
-      'onclick="window.togglePortOwHydro && window.togglePortOwHydro(\'tides\',\'' + id + "'," + lat + "," + lon + ',this)" ' +
-      'style="background:rgba(8,145,178,0.22);border:1px solid rgba(34,211,238,0.55);color:#e0f2fe;font-size:0.68rem;padding:3px 8px;border-radius:4px;cursor:pointer;font-weight:600;opacity:0.85;">Tides</button>' +
-      '<button type="button" aria-pressed="false" title="Toggle Open Waters currents at this port" ' +
-      'onclick="window.togglePortOwHydro && window.togglePortOwHydro(\'currents\',\'' + id + "'," + lat + "," + lon + ',this)" ' +
-      'style="background:rgba(180,83,9,0.22);border:1px solid rgba(251,191,36,0.55);color:#fef3c7;font-size:0.68rem;padding:3px 8px;border-radius:4px;cursor:pointer;font-weight:600;opacity:0.85;">Currents</button>' +
+      '<div class="ss-port-empty">' +
+      '<span class="ss-port-empty-ico" aria-hidden="true">◌</span>' +
+      "<p>" + escHtml(msg || "No information found for this port.") + "</p>" +
+      "</div>"
+    );
+  }
+
+  function renderTidesTableHtml(data, meta) {
+    const extremes = (data && (data.extremes || data.events)) || [];
+    if (!extremes.length) {
+      return emptyInfo("Tide information for this port was not found in Open Waters.");
+    }
+    const station = (data && data.station && data.station.name) || (meta && meta.station) || "";
+    const datum = (data && data.datum) || "";
+    const rows = extremes.map((e) => {
+      const label = e.label || (e.high ? "High" : e.low ? "Low" : "—");
+      const level = Number.isFinite(Number(e.level)) ? Number(e.level).toFixed(2) : "—";
+      const cls = e.high || /high/i.test(label) ? "hi" : "lo";
+      return (
+        "<tr class=\"" + cls + "\"><td>" + escHtml(label) + "</td><td>" +
+        escHtml(formatOwTime(e.time)) + "</td><td>" + escHtml(level) + " m</td></tr>"
+      );
+    }).join("");
+    return (
+      '<div class="ss-port-meta">' +
+      (station ? "<span>Station · " + escHtml(station) + "</span>" : "") +
+      (datum ? "<span>Datum · " + escHtml(datum) + "</span>" : "") +
+      '<span>Source · Open Waters</span></div>' +
+      '<div class="ss-port-table-wrap"><table class="ss-port-table"><thead><tr><th>Tide</th><th>Time</th><th>Height</th></tr></thead><tbody>' +
+      rows +
+      "</tbody></table></div>"
+    );
+  }
+
+  function renderCurrentsTableHtml(data) {
+    const events = (data && data.events) || [];
+    if (!events.length) {
+      return emptyInfo("Current information for this port was not found in Open Waters.");
+    }
+    const station = (data && data.station && data.station.name) || "";
+    const rows = events.map((e) => {
+      const dir = Number.isFinite(Number(e.direction)) ? Math.round(Number(e.direction)) + "°" : "—";
+      return (
+        "<tr><td>" + escHtml(kindLabel(e.kind)) + "</td><td>" +
+        escHtml(formatOwTime(e.time)) + "</td><td>" + escHtml(formatSpeed(e.speed)) +
+        "</td><td>" + escHtml(dir) + "</td></tr>"
+      );
+    }).join("");
+    return (
+      '<div class="ss-port-meta">' +
+      (station ? "<span>Station · " + escHtml(station) + "</span>" : "") +
+      '<span>Source · Open Waters</span></div>' +
+      '<div class="ss-port-table-wrap"><table class="ss-port-table"><thead><tr><th>Event</th><th>Time</th><th>Speed</th><th>Dir</th></tr></thead><tbody>' +
+      rows +
+      "</tbody></table></div>"
+    );
+  }
+
+  function renderSkyHtml(events, dayLabel) {
+    if (!events || !events.length) {
+      return emptyInfo("Sky information for this port was not found (Open Waters Almanac).");
+    }
+    const order = [
+      "astronomicalDawn", "nauticalDawn", "civilDawn", "rise", "transit",
+      "set", "civilDusk", "nauticalDusk", "astronomicalDusk"
+    ];
+    const sorted = events.slice().sort((a, b) => {
+      const ia = order.indexOf(a.kind);
+      const ib = order.indexOf(b.kind);
+      if (ia >= 0 && ib >= 0) return ia - ib;
+      return new Date(a.time) - new Date(b.time);
+    });
+    const rows = sorted.map((e) => {
+      const accent = e.kind === "rise" ? "sun-up" : e.kind === "set" ? "sun-down" : "";
+      return (
+        '<div class="ss-sky-row ' + accent + '"><span class="ss-sky-kind">' +
+        escHtml(skyKindLabel(e.kind)) + '</span><span class="ss-sky-time">' +
+        escHtml(formatOwTime(e.time, { hour: "2-digit", minute: "2-digit" })) +
+        "</span></div>"
+      );
+    }).join("");
+    return (
+      '<div class="ss-port-meta"><span>' + escHtml(dayLabel || "Selected day") +
+      "</span><span>Source · Open Waters Almanac</span></div>" +
+      '<div class="ss-sky-list">' + rows + "</div>"
+    );
+  }
+
+  function loadAlmanac() {
+    if (!almanacModPromise) {
+      almanacModPromise = import(ALMANAC_ESM).catch((err) => {
+        almanacModPromise = null;
+        throw err;
+      });
+    }
+    return almanacModPromise;
+  }
+
+  function buildPortCardHtml(port) {
+    const id = String((port && port.id) || "").replace(/[^a-zA-Z0-9_-]/g, "_");
+    const { lat, lon } = portLatLon(port);
+    if (!id || !Number.isFinite(lat) || !Number.isFinite(lon)) return "";
+    const cc = String((port && port.countryCode) || "un").toLowerCase();
+    const name = escHtml((port && port.name) || "Port");
+    const unlocode = escHtml((port && port.unlocode) || (port && port.owStationId ? "OW" : ""));
+    const country = escHtml((port && port.country) || "");
+    const region = escHtml((port && port.region) || "");
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10);
+    const weekEnd = new Date(today.getTime() + 6 * 86400000).toISOString().slice(0, 10);
+
+    return (
+      '<div class="ss-port-card" data-port-id="' + id + '" data-lat="' + lat + '" data-lon="' + lon + '">' +
+      '<div class="ss-port-head">' +
+      '<div class="ss-port-title">' +
+      '<span class="port-flag-box ss-port-flag"><img src="assets/flags/' + cc + '.png" onerror="this.onerror=null;this.src=\'https://flagcdn.com/w40/' + cc + '.png\';" alt="" class="port-flag-img"></span>' +
+      "<div><h4>" + name + "</h4>" +
+      '<div class="ss-port-sub">' +
+      (unlocode ? '<span class="ss-port-chip">' + unlocode + "</span>" : "") +
+      (country ? "<span>" + country + "</span>" : "") +
+      (region ? "<span>" + region + "</span>" : "") +
+      "</div></div></div>" +
+      '<div class="ss-port-coords">' + lat.toFixed(3) + "°, " + lon.toFixed(3) + "°</div>" +
       "</div>" +
-      '<div id="port-ow-tides-' + id + '" style="display:none;"></div>' +
-      '<div id="port-ow-currents-' + id + '" style="display:none;"></div>'
+      '<div class="ss-port-tabs" role="tablist">' +
+      '<button type="button" class="ss-port-tab is-active" data-tab="tides" role="tab" aria-selected="true" onclick="window.ssPortCardTab(this)">' +
+      '<span class="ss-tab-ico" aria-hidden="true">≋</span> Tides</button>' +
+      '<button type="button" class="ss-port-tab" data-tab="currents" role="tab" aria-selected="false" onclick="window.ssPortCardTab(this)">' +
+      '<span class="ss-tab-ico" aria-hidden="true">↝</span> Currents</button>' +
+      '<button type="button" class="ss-port-tab" data-tab="sky" role="tab" aria-selected="false" onclick="window.ssPortCardTab(this)">' +
+      '<span class="ss-tab-ico" aria-hidden="true">☀</span> Sky</button>' +
+      "</div>" +
+      '<div class="ss-port-body">' +
+      '<div class="ss-port-panel is-active" data-panel="tides">' +
+      '<div class="ss-port-toolbar">' +
+      '<label>From <input type="date" class="ss-port-date" data-role="tide-from" value="' + todayStr + '"></label>' +
+      '<label>To <input type="date" class="ss-port-date" data-role="tide-to" value="' + weekEnd + '"></label>' +
+      '<button type="button" class="ss-port-btn" onclick="window.ssPortCardLoad(this,\'tides\')">Show</button>' +
+      '<button type="button" class="ss-port-btn ss-port-btn-ghost" onclick="window.ssPortCardPrint(this,\'tides\')">Print</button>' +
+      "</div>" +
+      '<div class="ss-port-content" data-role="tide-out"><div class="ss-port-loading">Loading tides…</div></div>' +
+      "</div>" +
+      '<div class="ss-port-panel" data-panel="currents">' +
+      '<div class="ss-port-toolbar">' +
+      '<label>From <input type="date" class="ss-port-date" data-role="cur-from" value="' + todayStr + '"></label>' +
+      '<label>To <input type="date" class="ss-port-date" data-role="cur-to" value="' + weekEnd + '"></label>' +
+      '<button type="button" class="ss-port-btn" onclick="window.ssPortCardLoad(this,\'currents\')">Show</button>' +
+      "</div>" +
+      '<div class="ss-port-content" data-role="cur-out"><div class="ss-port-loading">Open the Currents tab to load…</div></div>' +
+      "</div>" +
+      '<div class="ss-port-panel" data-panel="sky">' +
+      '<div class="ss-port-toolbar">' +
+      '<label>Date <input type="date" class="ss-port-date" data-role="sky-date" value="' + todayStr + '"></label>' +
+      '<button type="button" class="ss-port-btn" onclick="window.ssPortCardLoad(this,\'sky\')">Show</button>' +
+      "</div>" +
+      '<div class="ss-port-content" data-role="sky-out"><div class="ss-port-loading">Open the Sky tab to load…</div></div>' +
+      "</div>" +
+      "</div>" +
+      '<div class="ss-port-foot">Hydro &amp; sky via <a href="https://openwaters.io" target="_blank" rel="noopener">Open Waters</a></div>' +
+      "</div>"
+    );
+  }
+
+  // Back-compat alias used by older popup builders
+  function buildPortHydroControlsHtml(port) {
+    return buildPortCardHtml(port);
+  }
+
+  function cardRootFromEl(el) {
+    return el && el.closest ? el.closest(".ss-port-card") : null;
+  }
+
+  function ssPortCardTab(btn) {
+    const card = cardRootFromEl(btn);
+    if (!card || !btn) return;
+    const tab = btn.getAttribute("data-tab");
+    card.querySelectorAll(".ss-port-tab").forEach((b) => {
+      const on = b === btn;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    card.querySelectorAll(".ss-port-panel").forEach((p) => {
+      p.classList.toggle("is-active", p.getAttribute("data-panel") === tab);
+    });
+    if (tab === "tides" || tab === "currents" || tab === "sky") {
+      ssPortCardLoad(btn, tab);
+    }
+  }
+
+  async function ssPortCardLoad(el, kind) {
+    const card = cardRootFromEl(el);
+    if (!card) return;
+    const lat = Number(card.getAttribute("data-lat"));
+    const lon = Number(card.getAttribute("data-lon"));
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+    if (kind === "tides") {
+      const out = card.querySelector('[data-role="tide-out"]');
+      const fromEl = card.querySelector('[data-role="tide-from"]');
+      const toEl = card.querySelector('[data-role="tide-to"]');
+      if (!out) return;
+      out.innerHTML = '<div class="ss-port-loading">Loading tides…</div>';
+      try {
+        const start = isoDayStart(fromEl && fromEl.value ? fromEl.value : new Date());
+        const endRaw = toEl && toEl.value ? toEl.value : start;
+        const end = new Date(isoDayStart(endRaw).getTime() + 86400000);
+        const url =
+          TIDES_EXTREMES +
+          "?latitude=" + encodeURIComponent(lat) +
+          "&longitude=" + encodeURIComponent(lon) +
+          "&start=" + encodeURIComponent(toIsoZ(start)) +
+          "&end=" + encodeURIComponent(toIsoZ(end));
+        const res = await fetch(url, { credentials: "omit" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        out.innerHTML = renderTidesTableHtml(data);
+      } catch (err) {
+        out.innerHTML = emptyInfo("Tide information for this port was not found in Open Waters.");
+      }
+      return;
+    }
+
+    if (kind === "currents") {
+      const out = card.querySelector('[data-role="cur-out"]');
+      const fromEl = card.querySelector('[data-role="cur-from"]');
+      const toEl = card.querySelector('[data-role="cur-to"]');
+      if (!out) return;
+      out.innerHTML = '<div class="ss-port-loading">Loading currents…</div>';
+      try {
+        const start = isoDayStart(fromEl && fromEl.value ? fromEl.value : new Date());
+        const endRaw = toEl && toEl.value ? toEl.value : start;
+        const end = new Date(isoDayStart(endRaw).getTime() + 86400000);
+        const url =
+          CURRENTS_EVENTS +
+          "?latitude=" + encodeURIComponent(lat) +
+          "&longitude=" + encodeURIComponent(lon) +
+          "&start=" + encodeURIComponent(toIsoZ(start)) +
+          "&end=" + encodeURIComponent(toIsoZ(end));
+        const res = await fetch(url, { credentials: "omit" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        out.innerHTML = renderCurrentsTableHtml(data);
+      } catch (err) {
+        out.innerHTML = emptyInfo("Current information for this port was not found in Open Waters.");
+      }
+      return;
+    }
+
+    if (kind === "sky") {
+      const out = card.querySelector('[data-role="sky-out"]');
+      const dateEl = card.querySelector('[data-role="sky-date"]');
+      if (!out) return;
+      out.innerHTML = '<div class="ss-port-loading">Computing sky…</div>';
+      try {
+        const mod = await loadAlmanac();
+        const sunEvents = mod && (mod.sunEvents || (mod.default && mod.default.sunEvents));
+        if (typeof sunEvents !== "function") throw new Error("sunEvents missing");
+        const day = isoDayStart(dateEl && dateEl.value ? dateEl.value : new Date());
+        const next = new Date(day.getTime() + 86400000);
+        const observer = { latitudeDeg: lat, longitudeDeg: lon };
+        const events = sunEvents(day, next, observer) || [];
+        const dayLabel = day.toLocaleDateString(undefined, {
+          weekday: "short", year: "numeric", month: "short", day: "numeric"
+        });
+        out.innerHTML = renderSkyHtml(events, dayLabel);
+      } catch (err) {
+        out.innerHTML = emptyInfo("Sky information for this port was not found (Open Waters Almanac).");
+      }
+    }
+  }
+
+  function ssPortCardPrint(el, kind) {
+    const card = cardRootFromEl(el);
+    if (!card) return;
+    const panel = card.querySelector('.ss-port-panel[data-panel="' + (kind || "tides") + '"] .ss-port-content');
+    const title = (card.querySelector(".ss-port-title h4") || {}).textContent || "Port";
+    if (!panel) return;
+    const w = global.open("", "_blank", "noopener,noreferrer,width=720,height=900");
+    if (!w) return;
+    w.document.write(
+      "<!DOCTYPE html><html><head><title>" + escHtml(title) + " — Tides</title>" +
+      "<style>body{font:14px/1.45 system-ui,sans-serif;color:#0f172a;padding:24px}" +
+      "h1{font-size:18px;margin:0 0 8px}table{width:100%;border-collapse:collapse}" +
+      "th,td{border-bottom:1px solid #cbd5e1;padding:6px 8px;text-align:left;font-size:13px}" +
+      "th{color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.04em}" +
+      ".meta{color:#64748b;font-size:12px;margin-bottom:12px;display:flex;gap:12px;flex-wrap:wrap}" +
+      "@media print{body{padding:0}}</style></head><body>" +
+      "<h1>" + escHtml(title) + " — Tide table</h1>" +
+      panel.innerHTML +
+      "<script>window.onload=function(){window.print();}<\/script></body></html>"
+    );
+    w.document.close();
+  }
+
+  function stationToPort(st) {
+    const lat = Number(st.latitude);
+    const lon = Number(st.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    const rawId = String(st.id || "").replace(/[^a-zA-Z0-9_-]/g, "_");
+    if (!rawId) return null;
+    const cc = String(st.country_code || "").slice(0, 2).toUpperCase() || "UN";
+    return {
+      id: "ow-" + rawId.slice(0, 48),
+      name: st.name || "Tide station",
+      country: st.country || "",
+      countryCode: cc,
+      region: st.region || st.locality || "",
+      unlocode: "",
+      coords: [lat, lon],
+      approachCoords: [lat, lon],
+      owStationId: st.id,
+      source: "openwaters",
+      fairways: [],
+      timezone: st.timezone || ""
+    };
+  }
+
+  function nearExistingPort(lat, lon, db, maxKm) {
+    for (let i = 0; i < db.length; i++) {
+      const p = db[i];
+      const c = portLatLon(p);
+      if (!Number.isFinite(c.lat) || !Number.isFinite(c.lon)) continue;
+      if (haversineKm(lat, lon, c.lat, c.lon) <= maxKm) return true;
+    }
+    return false;
+  }
+
+  async function expandPortsFromOpenWaters(opts) {
+    if (owPortsExpandPromise) return owPortsExpandPromise;
+    owPortsExpandPromise = (async () => {
+      const db = global.PORT_DEPTHS_DB;
+      if (!db || !Array.isArray(db)) return { added: 0 };
+      const maxPerHub = (opts && opts.maxPerHub) || 8;
+      const minSepKm = (opts && opts.minSepKm) || 35;
+      const added = [];
+      const seenIds = new Set(db.map((p) => p.id));
+
+      await Promise.all(
+        OW_PORT_HUBS.map(async ([lat, lon]) => {
+          try {
+            const url =
+              TIDES_STATIONS +
+              "?latitude=" + encodeURIComponent(lat) +
+              "&longitude=" + encodeURIComponent(lon) +
+              "&maxDistance=900&maxResults=" + encodeURIComponent(maxPerHub);
+            const res = await fetch(url, { credentials: "omit" });
+            if (!res.ok) return;
+            const list = await res.json();
+            if (!Array.isArray(list)) return;
+            for (let i = 0; i < list.length; i++) {
+              const port = stationToPort(list[i]);
+              if (!port || seenIds.has(port.id)) continue;
+              if (nearExistingPort(port.coords[0], port.coords[1], db.concat(added), minSepKm)) continue;
+              seenIds.add(port.id);
+              added.push(port);
+            }
+          } catch (e) {}
+        })
+      );
+
+      added.forEach((p) => db.push(p));
+      return { added: added.length };
+    })().catch((err) => {
+      owPortsExpandPromise = null;
+      throw err;
+    });
+    return owPortsExpandPromise;
+  }
+
+  // Auto-load tides when a port popup opens
+  if (typeof document !== "undefined") {
+    document.addEventListener(
+      "click",
+      (ev) => {
+        const tab = ev.target && ev.target.closest && ev.target.closest(".ss-port-tab");
+        if (tab && !tab.getAttribute("onclick")) ssPortCardTab(tab);
+      },
+      true
     );
   }
 
@@ -738,6 +1020,12 @@
   global.wireOpenWatersGlLayerResize = wireGlLayerResize;
   global.waitForOpenWatersGlStyle = waitForGlStyle;
   global.flashOpenWatersLayerStatus = flashOwStatus;
-  global.togglePortOwHydro = togglePortHydro;
   global.buildPortOwHydroControlsHtml = buildPortHydroControlsHtml;
+  global.buildPortCardHtml = buildPortCardHtml;
+  global.ssPortCardTab = ssPortCardTab;
+  global.ssPortCardLoad = ssPortCardLoad;
+  global.ssPortCardPrint = ssPortCardPrint;
+  global.expandPortsFromOpenWaters = expandPortsFromOpenWaters;
+  // Legacy no-op so old onclick handlers don't throw
+  global.togglePortOwHydro = function () {};
 })(typeof window !== "undefined" ? window : globalThis);
