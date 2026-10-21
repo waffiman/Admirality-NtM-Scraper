@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "2100 UTC",
-  "lastSyncUtc": "2026-10-20T21:20:23.047564+00:00",
+  "synopticCycle": "0300 UTC",
+  "lastSyncUtc": "2026-10-21T03:37:33.278287+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -15,70 +15,70 @@
       "centralPressure": 900,
       "maxWinds": 160,
       "gusts": 200,
-      "movement": "WNW at 13 kts",
+      "movement": "WNW at 19 kts",
       "dangerRadiusNm": 192,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            18.6,
-            129.1
+            19.3,
+            128.0
           ],
-          "winds": 155,
+          "winds": 145,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            19.8,
-            127.2
+            20.5,
+            126.3
           ],
-          "winds": 150,
+          "winds": 130,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            20.9,
-            125.8
+            21.6,
+            125.1
           ],
-          "winds": 135,
+          "winds": 120,
           "radiusNm": 90
         },
         {
           "tau": 48,
           "coords": [
-            22.2,
-            124.8
+            23.1,
+            124.1
           ],
-          "winds": 125,
+          "winds": 115,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            24.0,
-            123.9
+            24.9,
+            123.5
           ],
-          "winds": 115,
+          "winds": 105,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
-            25.8,
+            26.8,
             123.6
           ],
-          "winds": 95,
+          "winds": 85,
           "radiusNm": 140
         },
         {
           "tau": 84,
           "coords": [
-            30.4,
-            126.2
+            31.4,
+            127.1
           ],
-          "winds": 65,
+          "winds": 55,
           "radiusNm": 157
         }
       ]
@@ -164,87 +164,25 @@
       ]
     },
     {
-      "id": "AL932026",
-      "name": "Invest 93L",
-      "shortName": "93L",
-      "category": "Tropical Disturbance (Formation Chance 40%)",
-      "center": [
-        36.3,
-        -69.4
-      ],
-      "centralPressure": 997,
-      "maxWinds": 45,
-      "gusts": 58,
-      "movement": "NNE at 4 kts",
-      "dangerRadiusNm": 65,
-      "forecastTrack": [
-        {
-          "tau": 12,
-          "coords": [
-            37.0,
-            -69.2
-          ],
-          "winds": 50,
-          "radiusNm": 45
-        },
-        {
-          "tau": 24,
-          "coords": [
-            37.5,
-            -69.3
-          ],
-          "winds": 55,
-          "radiusNm": 60
-        },
-        {
-          "tau": 36,
-          "coords": [
-            38.5,
-            -68.5
-          ],
-          "winds": 60,
-          "radiusNm": 75
-        },
-        {
-          "tau": 48,
-          "coords": [
-            39.8,
-            -65.9
-          ],
-          "winds": 65,
-          "radiusNm": 90
-        },
-        {
-          "tau": 60,
-          "coords": [
-            41.6,
-            -61.5
-          ],
-          "winds": 65,
-          "radiusNm": 105
-        }
-      ]
-    },
-    {
       "id": "EP942026",
       "name": "Invest 94E",
       "shortName": "94E",
       "category": "Tropical Disturbance (Formation Chance 90%)",
       "center": [
-        9.8,
-        -96.2
+        9.7,
+        -96.9
       ],
       "centralPressure": 1007,
       "maxWinds": 25,
       "gusts": 32,
-      "movement": "W at 8 kts",
+      "movement": "W at 7 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
             9.5,
-            -97.8
+            -98.3
           ],
           "winds": 30,
           "radiusNm": 45
@@ -253,7 +191,7 @@
           "tau": 24,
           "coords": [
             9.4,
-            -99.0
+            -99.3
           ],
           "winds": 35,
           "radiusNm": 60
@@ -262,7 +200,7 @@
           "tau": 36,
           "coords": [
             9.7,
-            -99.8
+            -100.2
           ],
           "winds": 40,
           "radiusNm": 75
@@ -271,7 +209,7 @@
           "tau": 48,
           "coords": [
             10.3,
-            -100.8
+            -101.2
           ],
           "winds": 45,
           "radiusNm": 90
@@ -279,10 +217,72 @@
         {
           "tau": 60,
           "coords": [
-            10.9,
-            -102.0
+            11.0,
+            -102.2
           ],
           "winds": 50,
+          "radiusNm": 105
+        }
+      ]
+    },
+    {
+      "id": "AL932026",
+      "name": "Invest 93L",
+      "shortName": "93L",
+      "category": "Tropical Disturbance (Formation Chance 40%)",
+      "center": [
+        36.8,
+        -69.1
+      ],
+      "centralPressure": 997,
+      "maxWinds": 45,
+      "gusts": 58,
+      "movement": "NNW at 3 kts",
+      "dangerRadiusNm": 65,
+      "forecastTrack": [
+        {
+          "tau": 12,
+          "coords": [
+            37.3,
+            -69.3
+          ],
+          "winds": 50,
+          "radiusNm": 45
+        },
+        {
+          "tau": 24,
+          "coords": [
+            38.1,
+            -69.2
+          ],
+          "winds": 55,
+          "radiusNm": 60
+        },
+        {
+          "tau": 36,
+          "coords": [
+            39.2,
+            -67.6
+          ],
+          "winds": 60,
+          "radiusNm": 75
+        },
+        {
+          "tau": 48,
+          "coords": [
+            40.9,
+            -63.7
+          ],
+          "winds": 65,
+          "radiusNm": 90
+        },
+        {
+          "tau": 60,
+          "coords": [
+            43.2,
+            -58.5
+          ],
+          "winds": 65,
           "radiusNm": 105
         }
       ]
@@ -297,7 +297,7 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 5.5,
+      "waveHeight": 5.3,
       "swellPeriod": 11,
       "swellDir": "WNW"
     },
@@ -309,9 +309,9 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 2.5,
+      "waveHeight": 2.7,
       "swellPeriod": 8,
-      "swellDir": "N"
+      "swellDir": "NNW"
     },
     {
       "id": "WS1",
@@ -321,9 +321,9 @@
         131.5
       ],
       "radiusNm": 384,
-      "waveHeight": 8.6,
-      "swellPeriod": 12,
-      "swellDir": "ENE"
+      "waveHeight": 7.7,
+      "swellPeriod": 10,
+      "swellDir": "S"
     },
     {
       "id": "WS2",
@@ -338,16 +338,16 @@
       "swellDir": "SE"
     },
     {
-      "id": "WS3",
+      "id": "WS4",
       "name": "93L Cyclonic Wave Field",
       "center": [
-        36.3,
-        -69.4
+        36.8,
+        -69.1
       ],
       "radiusNm": 150,
-      "waveHeight": 3.2,
+      "waveHeight": 3.6,
       "swellPeriod": 8,
-      "swellDir": "E"
+      "swellDir": "NE"
     }
   ],
   "pressureCenters": [
@@ -371,20 +371,20 @@
     },
     {
       "type": "L",
-      "value": 997,
-      "name": "Invest 93L Core Low",
+      "value": 1007,
+      "name": "Invest 94E Core Low",
       "coords": [
-        36.3,
-        -69.4
+        9.7,
+        -96.9
       ]
     },
     {
       "type": "L",
-      "value": 1007,
-      "name": "Invest 94E Core Low",
+      "value": 997,
+      "name": "Invest 93L Core Low",
       "coords": [
-        9.8,
-        -96.2
+        36.8,
+        -69.1
       ]
     },
     {
@@ -436,21 +436,21 @@
     },
     {
       "coords": [
-        36.6,
-        -69.1
-      ],
-      "dir": 160,
-      "speed": 45,
-      "label": "45 kts (93L)"
-    },
-    {
-      "coords": [
-        10.1,
-        -95.9
+        10.0,
+        -96.6
       ],
       "dir": 160,
       "speed": 25,
       "label": "25 kts (94E)"
+    },
+    {
+      "coords": [
+        37.1,
+        -68.8
+      ],
+      "dir": 160,
+      "speed": 45,
+      "label": "45 kts (93L)"
     }
   ]
 }
