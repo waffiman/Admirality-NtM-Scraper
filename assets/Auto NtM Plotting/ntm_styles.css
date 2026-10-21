@@ -6229,11 +6229,17 @@
 
 .home-sources-marquee-track {
   display: flex;
-  align-items: center;
-  gap: 4.2rem;
+  align-items: stretch;
   width: max-content;
-  animation: homeSourcesRightToLeft 36s linear infinite;
+  animation: homeSourcesRightToLeft 48s linear infinite;
   will-change: transform;
+}
+.home-sources-marquee-set {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 4.2rem;
+  padding-right: 4.2rem;
 }
 
 .home-sources-marquee-band:hover .home-sources-marquee-track {

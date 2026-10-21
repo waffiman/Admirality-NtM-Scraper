@@ -7965,7 +7965,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       <span class="ntm-layer-thumb-label">Seascape</span>
     </button>
 
-    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Select Chart Layer" aria-label="Select Chart Layer">
+    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Layers — ECDIS / Ocean / Buoys / Seamap / Seascape" aria-label="Chart layers including Seamap and Seascape">
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#94a3b8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
       </div>
@@ -7976,8 +7976,21 @@ function initVisualChartLayerSelector(mapInstance, layers) {
   L.DomEvent.disableScrollPropagation(selector);
   mapContainer.appendChild(selector);
 
-  selector.addEventListener("mouseenter", () => selector.classList.remove("collapsed"));
-  selector.addEventListener("mouseleave", () => selector.classList.add("collapsed"));
+  let layerPanelLeaveTimer = null;
+  selector.addEventListener("mouseenter", () => {
+    if (layerPanelLeaveTimer) {
+      clearTimeout(layerPanelLeaveTimer);
+      layerPanelLeaveTimer = null;
+    }
+    selector.classList.remove("collapsed");
+  });
+  selector.addEventListener("mouseleave", () => {
+    if (layerPanelLeaveTimer) clearTimeout(layerPanelLeaveTimer);
+    layerPanelLeaveTimer = setTimeout(() => {
+      selector.classList.add("collapsed");
+      layerPanelLeaveTimer = null;
+    }, 500);
+  });
 
   let activeBaseKey = "ocean";
   let isBuoysActive = false;
@@ -8388,7 +8401,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           if (triggerBtn) {
             triggerBtn.classList.toggle("is-loading", !!on);
             triggerBtn.setAttribute("aria-busy", on ? "true" : "false");
-            triggerBtn.title = on ? "Loading chart layer…" : "Select Chart Layer";
+            triggerBtn.title = on ? "Loading chart layer…" : "Layers — ECDIS / Ocean / Buoys / Seamap / Seascape";
           }
           btn.classList.toggle("is-loading", !!on);
         };
