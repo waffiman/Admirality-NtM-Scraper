@@ -60,7 +60,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.42" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.43" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -19894,8 +19894,20 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
     }
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.24"></script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.42"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.42"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.43" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.43"></script>
+  <script>
+    try {
+      if (window.maplibregl) {
+        window.maplibregl.workerUrl = new URL(
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.43",
+          window.location.href
+        ).href;
+      }
+    } catch (e) {}
+  </script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.43"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.43"></script>
   <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.36"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
@@ -19974,7 +19986,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.42"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.43"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">

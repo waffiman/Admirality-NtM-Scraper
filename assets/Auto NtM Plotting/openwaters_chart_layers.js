@@ -11,19 +11,11 @@
   const TIDES_EXTREMES = "https://api.openwaters.io/tides/extremes";
   const CURRENTS_EVENTS = "https://api.openwaters.io/currents/events";
 
-  // Prefer local MapLibre (no CDN flake); then unpkg / jsdelivr
+  // Prefer already-loaded <script> from index.html; then same-origin files (no CDN — SW/CDN flakes)
   const ML_BUNDLES = [
     {
-      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css",
-      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js"
-    },
-    {
-      css: "https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.css",
-      js: "https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.js"
-    },
-    {
-      css: "https://cdn.jsdelivr.net/npm/maplibre-gl@5.0.1/dist/maplibre-gl.css",
-      js: "https://cdn.jsdelivr.net/npm/maplibre-gl@5.0.1/dist/maplibre-gl.js"
+      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.43",
+      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.43"
     }
   ];
   // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
@@ -380,12 +372,14 @@
         clearTimeout(timer);
         try {
           gl.off("load", onLoad);
+          gl.off("idle", onIdle);
           gl.off("error", onErr);
         } catch (e) {}
         if (err) reject(err);
         else resolve();
       };
       const onLoad = () => finish(null);
+      const onIdle = () => finish(null);
       const onErr = (e) => {
         const msg = (e && e.error && e.error.message) || (e && e.message) || "";
         // Ignore per-tile 404s; only fail hard on style parse failures
@@ -395,12 +389,13 @@
       };
       const timer = setTimeout(() => {
         try {
+          // Prefer success if anything rendered; avoid infinite spinner
           if (gl.isStyleLoaded && gl.isStyleLoaded()) finish(null);
-          else finish(new Error("Style timeout (" + Math.round(timeoutMs / 1000) + "s) — tiles.openwaters.io slow/blocked?"));
+          else finish(null); // still show layer; tiles may continue streaming
         } catch (e) {
-          finish(new Error("Style timeout"));
+          finish(null);
         }
-      }, timeoutMs || 18000);
+      }, timeoutMs || 12000);
       try {
         if (gl.isStyleLoaded && gl.isStyleLoaded()) {
           finish(null);
@@ -408,6 +403,7 @@
         }
       } catch (e) {}
       gl.on("load", onLoad);
+      gl.on("idle", onIdle);
       gl.on("error", onErr);
     });
   }
