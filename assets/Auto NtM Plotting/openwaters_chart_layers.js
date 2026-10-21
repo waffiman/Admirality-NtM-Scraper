@@ -14,8 +14,8 @@
   // Prefer already-loaded <script> from index.html; then same-origin files (no CDN — SW/CDN flakes)
   const ML_BUNDLES = [
     {
-      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.43",
-      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.43"
+      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.44",
+      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.44"
     }
   ];
   // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
@@ -281,14 +281,35 @@
   }
 
   /**
-   * Seascape official style uses `color-relief` (MapLibre 5+ / not in all builds) and OSM base.
-   * Build a lean overlay: transparent bg + DEM hillshade + depth area fills (no OSM, no color-relief).
+   * Official Seamap style mixes Free Nautical Chart with Seascape extras that break MapLibre 5.0:
+   * - color-relief on raster-dem (only hillshade allowed)
+   * - seascape .pbf tiles (Unimplemented type: 4)
+   * Keep chart sources + hillshade only.
    */
+  function sanitizeSeamapStyle(style) {
+    const next = Object.assign({}, style);
+    next.sources = Object.assign({}, style.sources || {});
+    delete next.sources["seascape-vector"];
+    delete next.sources["seascape-coverage"];
+    const demSources = {};
+    Object.keys(next.sources).forEach((k) => {
+      if (next.sources[k] && next.sources[k].type === "raster-dem") demSources[k] = true;
+    });
+    next.layers = (style.layers || []).filter((l) => {
+      if (!l) return false;
+      if (l.type === "color-relief") return false;
+      if (l.source === "seascape-vector" || l.source === "seascape-coverage") return false;
+      if (demSources[l.source] && l.type !== "hillshade") return false;
+      return true;
+    });
+    return next;
+  }
+
+  /** Seascape overlay: DEM hillshade only (webp terrarium). No vector .pbf — MapLibre can't parse them yet. */
   function buildSeascapeOverlayStyle() {
     return {
       version: 8,
       name: "SetSail Seascape overlay",
-      glyphs: "https://tiles.openwaters.io/fonts/{fontstack}/{range}.pbf",
       sources: {
         "seascape-dem": {
           type: "raster-dem",
@@ -296,12 +317,6 @@
           tileSize: 512,
           maxzoom: 14,
           encoding: "terrarium",
-          attribution: "Open Waters Seascape"
-        },
-        "seascape-vector": {
-          type: "vector",
-          tiles: ["https://tiles.openwaters.io/seascape/{z}/{x}/{y}.pbf"],
-          maxzoom: 14,
           attribution: "Open Waters Seascape"
         }
       },
@@ -316,46 +331,21 @@
           type: "hillshade",
           source: "seascape-dem",
           paint: {
-            "hillshade-exaggeration": 0.7,
+            "hillshade-exaggeration": 0.85,
             "hillshade-shadow-color": "#041526",
             "hillshade-highlight-color": "#7dd3fc",
             "hillshade-accent-color": "#0e7490",
             "hillshade-illumination-direction": 315
           }
-        },
-        {
-          id: "ow-depth-areas",
-          type: "fill",
-          source: "seascape-vector",
-          "source-layer": "depare",
-          paint: {
-            "fill-color": [
-              "interpolate",
-              ["linear"],
-              ["coalesce", ["get", "DRVAL1"], ["get", "drval1"], 0],
-              -20, "#082f49",
-              -10, "#0c4a6e",
-              -5, "#0369a1",
-              0, "#0ea5e9",
-              5, "#67e8f9",
-              20, "#ecfeff"
-            ],
-            "fill-opacity": 0.48
-          }
-        },
-        {
-          id: "ow-contour-lines",
-          type: "line",
-          source: "seascape-vector",
-          "source-layer": "depcnt",
-          minzoom: 8,
-          paint: {
-            "line-color": "rgba(224,242,254,0.55)",
-            "line-width": 0.8
-          }
         }
       ]
     };
+  }
+
+  async function fetchSanitizedSeamapStyle() {
+    const res = await fetch(SEAMAP_STYLE, { credentials: "omit" });
+    if (!res.ok) throw new Error("Seamap style HTTP " + res.status);
+    return sanitizeSeamapStyle(await res.json());
   }
 
   function waitForGlStyle(layer, timeoutMs) {
@@ -382,9 +372,14 @@
       const onIdle = () => finish(null);
       const onErr = (e) => {
         const msg = (e && e.error && e.error.message) || (e && e.message) || "";
-        // Ignore per-tile 404s; only fail hard on style parse failures
-        if (/style|parse|source|layer|color-relief|unsupported/i.test(String(msg))) {
-          finish(new Error(msg || "MapLibre style error"));
+        const s = String(msg);
+        // Tile stream errors shouldn't kill the overlay after style is accepted
+        if (/Unimplemented type|Unable to parse the tile|Failed to load tile/i.test(s)) {
+          console.warn("[SetSail] MapLibre tile warning:", s);
+          return;
+        }
+        if (/color-relief|raster-dem source can only|unsupported/i.test(s)) {
+          finish(new Error(s || "MapLibre style error"));
         }
       };
       const timer = setTimeout(() => {
@@ -434,7 +429,8 @@
 
   async function createSeamapLayer() {
     await ensureMapLibreReady();
-    return createMapLibreLayer(SEAMAP_STYLE, "Open Waters Seamap");
+    const style = await fetchSanitizedSeamapStyle();
+    return createMapLibreLayer(style, "Open Waters Seamap");
   }
 
   async function createSeascapeLayer() {
