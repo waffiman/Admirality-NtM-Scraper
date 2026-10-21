@@ -893,31 +893,25 @@ function initApp() {
   safe("theme", initTheme);
   safe("nav", initNavigationTabs);
   safe("tab", () => {
-    // NEVER force Home. Only restore a saved/hash tab; leave HTML default alone otherwise.
+    // Bare "/" keeps HTML default (Home). Only honor an explicit URL hash.
+    // Do NOT restore last chart visit from localStorage — that auto-kicked users to #tab-ntm.
     const already = document.querySelector(".tab-pane.active");
-    let savedTab = "";
+    let hashTab = "";
     try {
       if (window.location.hash && window.location.hash.length > 1) {
-        savedTab = window.location.hash.replace("#", "").trim();
-      }
-      if (!savedTab) {
-        savedTab = sessionStorage.getItem("setsail_active_tab") || localStorage.getItem("setsail_active_tab") || "";
+        hashTab = window.location.hash.replace("#", "").trim();
       }
     } catch (e) {}
-    if (already && already.id && already.id !== "tab-home") {
+    if (hashTab && document.getElementById(hashTab)) {
+      switchToTab(hashTab, "restore");
+      return;
+    }
+    if (already && already.id) {
       window._setsailActiveTab = already.id;
       try {
         sessionStorage.setItem("setsail_active_tab", already.id);
         localStorage.setItem("setsail_active_tab", already.id);
       } catch (e) {}
-      return;
-    }
-    if (savedTab && savedTab !== "tab-home" && document.getElementById(savedTab)) {
-      switchToTab(savedTab, "restore");
-      return;
-    }
-    if (already && already.id) {
-      window._setsailActiveTab = already.id;
     }
   });
   safe("clock", initHomeChronometer);

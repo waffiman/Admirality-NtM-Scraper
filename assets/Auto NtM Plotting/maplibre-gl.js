@@ -3,10 +3,10 @@
  * @license 3-Clause BSD. Full text of license: https://github.com/maplibre/maplibre-gl-js/blob/v5.0.1/LICENSE.txt
  */
 (function (global, factory) {
-typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-typeof define === 'function' && define.amd ? define(factory) :
-(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.maplibregl = factory());
-})(this, (function () { 'use strict';
+  // SetSail: force browser global (ignore AMD/CJS — they leave window.maplibregl unset)
+  global = typeof globalThis !== 'undefined' ? globalThis : (global || self);
+  global.maplibregl = factory();
+})(typeof window !== 'undefined' ? window : this, (function () { 'use strict';
 
 /* eslint-disable */
 

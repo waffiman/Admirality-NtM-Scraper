@@ -60,7 +60,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.41" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.42" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -11324,18 +11324,12 @@ select option {
       }
       source = source || 'code';
       var cur = window._setsailActiveTab || ((document.querySelector('.tab-pane.active') || {}).id) || '';
+      // Never hijack intentional Home. (Old logic rewrote Home → last SetChart from localStorage.)
       if (targetTab === 'tab-home' && source !== 'user' && source !== 'restore') {
         if (cur && cur !== 'tab-home') {
           console.warn('[SetSail] blocked auto Home redirect from', source, 'while on', cur);
           return;
         }
-        try {
-          var saved = sessionStorage.getItem('setsail_active_tab') || localStorage.getItem('setsail_active_tab') || '';
-          if (saved && saved !== 'tab-home' && document.getElementById(saved)) {
-            targetTab = saved;
-            source = 'restore';
-          }
-        } catch (e0) {}
       }
       window._setsailActiveTab = targetTab;
       try {
@@ -11404,14 +11398,12 @@ select option {
     }
     window.switchToTab = switchToTab;
 
-    // Restore preserved active tab AFTER panes exist — never flash/force Home during load
+    // Only restore when URL has an explicit hash (e.g. #tab-ntm). Bare "/" stays on Home.
     function restoreSetSailTab() {
       try {
-        const initSaved = (window.location.hash && window.location.hash.length > 1)
-          ? window.location.hash.replace('#', '').trim()
-          : (sessionStorage.getItem('setsail_active_tab') || localStorage.getItem('setsail_active_tab') || '');
-        if (initSaved && document.getElementById(initSaved)) {
-          switchToTab(initSaved, 'restore');
+        const hash = (window.location.hash || '').replace('#', '').trim();
+        if (hash && document.getElementById(hash)) {
+          switchToTab(hash, 'restore');
         }
       } catch (e) {}
     }
@@ -19902,8 +19894,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
     }
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.24"></script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.41"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.41"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.42"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.42"></script>
   <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.36"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
@@ -19982,7 +19974,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.41"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.42"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">

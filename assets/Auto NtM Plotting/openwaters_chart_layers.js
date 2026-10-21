@@ -33,15 +33,16 @@
   let OwGlLayerClass = null;
 
   function loadCss(href) {
-    if (document.querySelector('link[data-ow-ml="1"]')) return;
+    if (document.querySelector('link[data-ow-href="' + href + '"]')) return;
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = href;
     link.setAttribute("data-ow-ml", "1");
+    link.setAttribute("data-ow-href", href);
     document.head.appendChild(link);
   }
 
-  function loadScript(src) {
+  function loadScript(src, timeoutMs) {
     return new Promise((resolve, reject) => {
       const existing = document.querySelector('script[data-ow-src="' + src + '"]');
       if (existing) {
@@ -50,15 +51,29 @@
         existing.addEventListener("error", () => reject(new Error("Failed " + src)));
         return;
       }
+      let settled = false;
+      const timer = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        reject(new Error("Timeout loading MapLibre (" + Math.round((timeoutMs || 15000) / 1000) + "s)"));
+      }, timeoutMs || 15000);
       const s = document.createElement("script");
       s.src = src;
       s.async = true;
       s.setAttribute("data-ow-src", src);
       s.onload = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
         s.setAttribute("data-ow-loaded", "1");
         resolve();
       };
-      s.onerror = () => reject(new Error("Failed to load " + src));
+      s.onerror = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        reject(new Error("Failed to load " + src));
+      };
       document.head.appendChild(s);
     });
   }
@@ -243,7 +258,7 @@
           const b = ML_BUNDLES[i];
           try {
             loadCss(b.css);
-            await loadScript(b.js);
+            await loadScript(b.js, 18000);
             if (typeof global.maplibregl !== "undefined") break;
             lastErr = new Error("maplibregl global missing after " + b.js);
           } catch (err) {
@@ -251,9 +266,19 @@
           }
         }
         if (typeof global.maplibregl === "undefined") {
-          throw lastErr || new Error("maplibre-gl failed to load (local+CDN)");
+          throw lastErr || new Error("MapLibre failed to load");
         }
       }
+      // Self-hosted worker (avoids blob/CDN worker flakes)
+      try {
+        if (global.maplibregl && !global.maplibregl.workerUrl) {
+          const workerUrl = new URL(
+            "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js",
+            global.location.href
+          ).href;
+          global.maplibregl.workerUrl = workerUrl;
+        }
+      } catch (e) {}
       if (typeof L === "undefined") throw new Error("Leaflet required");
       ensureOwGlLayerClass();
     })().catch((err) => {
