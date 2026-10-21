@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine вЂ” Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.47.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.29.0';
+const CACHE_NAME = 'setsail-cache-v5.48.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.48.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -267,6 +267,9 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 3. Map Tiles: Instant 0ms Cache-First + Stale-While-Revalidate refresh
+  const isOpenWatersVector =
+    url.hostname === 'tiles.openwaters.io' &&
+    /\.(pbf|mvt|mlt)$/i.test(url.pathname);
   const isMapTile = (
     url.hostname.includes('tile.openstreetmap.org') ||
     url.hostname.includes('arcgisonline.com') ||
@@ -276,21 +279,59 @@ self.addEventListener('fetch', (event) => {
     url.hostname === 'tiles.versatiles.org'
   );
 
+  // Vector bathymetry contours/labels: never serve PNG fallback (breaks MapLibre MVT decode
+  // with "Unimplemented type: 4"). Network-first, longer timeout, cache only real protobuf.
+  if (isOpenWatersVector) {
+    event.respondWith(
+      (async () => {
+        try {
+          const networkTile = await fetchWithTimeout(event.request, 12000);
+          const ct = (networkTile && networkTile.headers && networkTile.headers.get('content-type')) || '';
+          const looksBinary =
+            networkTile &&
+            networkTile.ok &&
+            !/text\/html|application\/json|image\//i.test(ct);
+          if (looksBinary) {
+            const tileCache = await caches.open(TILE_CACHE_NAME);
+            tileCache.put(event.request, networkTile.clone());
+            return networkTile;
+          }
+          if (networkTile) return networkTile;
+        } catch (e) {}
+        const tileCache = await caches.open(TILE_CACHE_NAME);
+        const cached = await tileCache.match(event.request);
+        if (cached) {
+          const ct = cached.headers.get('content-type') || '';
+          if (!/image\/|text\/html/i.test(ct)) return cached;
+        }
+        return new Response('', { status: 204, statusText: 'No Content' });
+      })()
+    );
+    return;
+  }
+
   if (isMapTile) {
     event.respondWith(
       caches.open(TILE_CACHE_NAME).then(async (tileCache) => {
         const cachedTile = await tileCache.match(event.request);
+        // Drop corrupt PNG stubs previously cached for Open Waters vector URLs
         if (cachedTile) {
-          return cachedTile;
+          const ct = cachedTile.headers.get('content-type') || '';
+          if (/image\/png/i.test(ct) && url.hostname === 'tiles.openwaters.io') {
+            try { await tileCache.delete(event.request); } catch (e) {}
+          } else {
+            return cachedTile;
+          }
         }
 
         try {
-          const networkTile = await fetchWithTimeout(event.request, 4000);
+          const networkTile = await fetchWithTimeout(event.request, 8000);
           if (networkTile && (networkTile.ok || networkTile.type === 'opaque')) {
             tileCache.put(event.request, networkTile.clone());
           }
           return networkTile;
         } catch (fetchErr) {
+          // Raster-only fallback (never for .pbf — handled above)
           return new Response(
             new Uint8Array([
               137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82,

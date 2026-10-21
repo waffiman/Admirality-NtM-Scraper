@@ -12,8 +12,8 @@
   // Prefer already-loaded <script> from index.html; then same-origin files (no CDN — SW/CDN flakes)
   const ML_BUNDLES = [
     {
-      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.47",
-      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.47"
+      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.48",
+      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.48"
     }
   ];
   // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
@@ -329,10 +329,9 @@
 
   /**
    * Bathymetry overlay: ECDIS-like depth bands + subtle isobath borders + numerical labels.
-   * Vector tiles may warn "Unimplemented type" on some builds; color tint still works.
+   * Contours come from Open Waters Seascape vector tiles (MVT; MapLibre ≥5.14 also accepts MLT).
    */
   function buildBathymetryOverlayStyle() {
-    const majorDepths = [2, 5, 10, 20, 30, 50, 100, 200, 500, 1000];
     return {
       version: 8,
       name: "SetSail Bathymetry overlay",
@@ -348,7 +347,9 @@
         },
         "seascape-vector": {
           type: "vector",
-          url: "https://tiles.openwaters.io/seascape/vector.json"
+          tiles: ["https://tiles.openwaters.io/seascape/{z}/{x}/{y}.pbf"],
+          minzoom: 4,
+          maxzoom: 15
         }
       },
       layers: [
@@ -366,7 +367,6 @@
             "color-relief-opacity": 0.78
           }
         },
-        // Thin, low-contrast borders between depth bands (ECDIS-like isobaths)
         {
           id: "ow-bathy-contours",
           type: "line",
@@ -379,56 +379,66 @@
             "line-color": [
               "case",
               ["in", ["get", "depth_abs_m"], ["literal", [10, 20, 50]]],
-              "rgba(15, 55, 90, 0.42)",
-              "rgba(30, 70, 110, 0.28)"
+              "rgba(15, 55, 90, 0.45)",
+              "rgba(30, 70, 110, 0.32)"
             ],
             "line-width": [
               "interpolate",
               ["linear"],
               ["zoom"],
               4,
-              ["case", ["in", ["get", "depth_abs_m"], ["literal", [10, 20, 50]]], 0.7, 0.35],
+              ["case", ["in", ["get", "depth_abs_m"], ["literal", [10, 20, 50]]], 0.75, 0.4],
               11,
-              ["case", ["in", ["get", "depth_abs_m"], ["literal", [10, 20, 50]]], 1.05, 0.55]
-            ],
-            "line-opacity": 1
+              ["case", ["in", ["get", "depth_abs_m"], ["literal", [10, 20, 50]]], 1.1, 0.6]
+            ]
           }
         },
-        // Numerical depth labels along isobaths (metres), ECDIS-style
         {
           id: "ow-bathy-contour-labels",
           type: "symbol",
           source: "seascape-vector",
           "source-layer": "contours",
-          filter: [
-            "all",
-            ["!=", ["get", "sys"], "ft"],
-            [
-              "any",
-              [">=", ["zoom"], 12],
-              ["in", ["get", "depth_abs_m"], ["literal", majorDepths]]
-            ]
-          ],
-          minzoom: 7,
+          filter: ["!=", ["get", "sys"], "ft"],
+          minzoom: 6,
           layout: {
             "symbol-placement": "line",
-            "symbol-spacing": 280,
-            "text-field": ["to-string", ["get", "depth_abs_m"]],
-            "text-size": ["interpolate", ["linear"], ["zoom"], 7, 10, 10, 12, 14, 14],
-            "text-font": ["Noto Sans Medium"],
-            "text-letter-spacing": 0.06,
-            "text-max-angle": 25,
-            "text-padding": 28,
+            "symbol-spacing": 200,
+            "text-field": ["to-string", ["coalesce", ["get", "depth_abs_m"], ["get", "depth_m"]]],
+            "text-size": ["interpolate", ["linear"], ["zoom"], 6, 11, 10, 13, 14, 15],
+            "text-font": ["Noto Sans Regular"],
+            "text-letter-spacing": 0.04,
+            "text-max-angle": 35,
+            "text-padding": 12,
             "text-allow-overlap": false,
-            "text-ignore-placement": false,
+            "text-optional": true,
             "text-rotation-alignment": "map",
             "text-pitch-alignment": "viewport"
           },
           paint: {
-            "text-color": "#0f2744",
-            "text-halo-color": "rgba(240, 249, 255, 0.95)",
-            "text-halo-width": 1.75,
-            "text-halo-blur": 0.2
+            "text-color": "#082f49",
+            "text-halo-color": "rgba(255, 255, 255, 0.95)",
+            "text-halo-width": 2,
+            "text-halo-blur": 0.15
+          }
+        },
+        {
+          id: "ow-bathy-soundings",
+          type: "symbol",
+          source: "seascape-vector",
+          "source-layer": "soundings",
+          minzoom: 9,
+          layout: {
+            "text-field": ["to-string", ["round", ["get", "depth_m"]]],
+            "text-size": ["interpolate", ["linear"], ["zoom"], 9, 10, 13, 13],
+            "text-font": ["Noto Sans Regular"],
+            "text-padding": 10,
+            "text-optional": true,
+            "text-allow-overlap": false
+          },
+          paint: {
+            "text-color": "#0c4a6e",
+            "text-halo-color": "rgba(255, 255, 255, 0.9)",
+            "text-halo-width": 1.5
           }
         }
       ]
