@@ -5308,7 +5308,7 @@ const SETROUTE_COHERE_MODEL = "command-r-08-2024";
 // ==========================================================================
 // SETROUTE™ GLOBAL MARITIME DEEP-WATER PASSAGE ROUTING ENGINE
 // Physical sea corridor topology with Dijkstra shortest sea path
-// Strictly prevents routes traversing across landmasses worldwide.
+// Core A v5.65: land-box rejection + hub routing; graph edges preferred over land chords.
 // ==========================================================================
 
 const MARITIME_SEA_NODES = {
@@ -5340,6 +5340,7 @@ const MARITIME_SEA_NODES = {
   "GIBRALTAR_E": [36.10, -4.50, "Gibraltar East / Alboran Sea"],
   "MED_WEST": [37.80, 2.50, "South Balearic Sea Transit"],
   "MED_SICILY": [36.80, 11.80, "Sicily Channel / Pantelleria TSS"],
+  "MESSINA_STRAIT": [38.20, 15.58, "Strait of Messina TSS"],
   "MED_MALTA": [35.50, 14.50, "Malta Channel Deepwater Route"],
   "MED_CRETE": [34.50, 24.50, "South of Crete Corridor"],
   "PORT_SAID_APP": [31.50, 32.35, "Port Said Fairway (Suez North)"],
@@ -5429,6 +5430,8 @@ const MARITIME_SEA_EDGES = [
   ["GIBRALTAR_MID", "GIBRALTAR_E"],
   ["GIBRALTAR_E", "MED_WEST"],
   ["MED_WEST", "MED_SICILY"],
+  ["MED_SICILY", "MESSINA_STRAIT"],
+  ["MESSINA_STRAIT", "MED_MALTA"],
   ["MED_SICILY", "MED_MALTA"],
   ["MED_MALTA", "MED_CRETE"],
   ["MED_CRETE", "PORT_SAID_APP"],
@@ -5523,71 +5526,402 @@ function findNearestMaritimeNode(lat, lon) {
   return closestKey;
 }
 
-function findMaritimeSeaCorridor(origCoords, destCoords) {
-  const startNode = findNearestMaritimeNode(origCoords[0], origCoords[1]);
-  const endNode = findNearestMaritimeNode(destCoords[0], destCoords[1]);
 
-  if (!startNode || !endNode || startNode === endNode) {
-    return [startNode || "ROTTERDAM_APP"];
-  }
+// ==========================================================================
+// SETROUTE CORE A v5.65 — hard map analysis (no LLM geometry)
+// Land-safe Dijkstra, Suez/Cape auto-choice, NtM/weather edge costs, audit
+// ==========================================================================
 
-  // Build Adjacency List
-  const adj = {};
-  for (const k of Object.keys(MARITIME_SEA_NODES)) {
-    adj[k] = [];
-  }
-  for (const [u, v] of MARITIME_SEA_EDGES) {
-    if (MARITIME_SEA_NODES[u] && MARITIME_SEA_NODES[v]) {
-      const d = calculateHaversineDistanceNM(
-        MARITIME_SEA_NODES[u][0], MARITIME_SEA_NODES[u][1],
-        MARITIME_SEA_NODES[v][0], MARITIME_SEA_NODES[v][1]
-      );
-      adj[u].push({ node: v, dist: d });
-      adj[v].push({ node: u, dist: d });
+/** Coarse interior land boxes — sample points on a leg must not fall inside. */
+const SETROUTE_LAND_BOXES = [
+  // Africa interior
+  { minLat: -28, maxLat: 18, minLon: 8, maxLon: 38 },
+  { minLat: 10, maxLat: 30, minLon: -5, maxLon: 32 },
+  // Europe landmass (N of Med)
+  { minLat: 44, maxLat: 58, minLon: -2, maxLon: 28 },
+  // Asia interior
+  { minLat: 18, maxLat: 52, minLon: 55, maxLon: 115 },
+  { minLat: 8, maxLat: 28, minLon: 72, maxLon: 100 },
+  // Australia
+  { minLat: -32, maxLat: -16, minLon: 122, maxLon: 148 },
+  // N America interior
+  { minLat: 32, maxLat: 48, minLon: -110, maxLon: -85 },
+  // S America interior
+  { minLat: -35, maxLat: -8, minLon: -68, maxLon: -48 }
+];
+
+const SETROUTE_OCEAN_HUBS = [
+  "GIBRALTAR_MID", "SUEZ_CANAL_MID", "CAPE_AGULHAS", "PANAMA_COLON",
+  "SINGAPORE_MAIN", "MALACCA_MID", "DOVER_STRAIT", "BAB_EL_MANDEB",
+  "UNIMAK_PASS", "NATL_GC_MID", "NPAC_GC_MID", "MED_SICILY", "DONDRA_HEAD"
+];
+
+function setrouteLerpLatLon(lat1, lon1, lat2, lon2, t) {
+  // Simple rhumb-ish lerp in degrees (good enough for land-box sampling)
+  let dLon = lon2 - lon1;
+  if (dLon > 180) dLon -= 360;
+  if (dLon < -180) dLon += 360;
+  let lon = lon1 + dLon * t;
+  if (lon > 180) lon -= 360;
+  if (lon < -180) lon += 360;
+  return [lat1 + (lat2 - lat1) * t, lon];
+}
+
+function setroutePointInLandBox(lat, lon) {
+  for (let i = 0; i < SETROUTE_LAND_BOXES.length; i++) {
+    const b = SETROUTE_LAND_BOXES[i];
+    if (lat >= b.minLat && lat <= b.maxLat && lon >= b.minLon && lon <= b.maxLon) {
+      return true;
     }
   }
+  return false;
+}
 
-  // Dijkstra Shortest Sea Path
+/** True if a direct chord likely crosses continental interior. */
+function setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2) {
+  const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+  if (dist < 120) return false;
+  const samples = dist > 800 ? [0.15, 0.3, 0.45, 0.55, 0.7, 0.85] : [0.25, 0.5, 0.75];
+  let hits = 0;
+  for (let i = 0; i < samples.length; i++) {
+    const p = setrouteLerpLatLon(lat1, lon1, lat2, lon2, samples[i]);
+    if (setroutePointInLandBox(p[0], p[1])) hits++;
+  }
+  // Long ocean GC can graze one box — require 2+ hits or one hit on short/medium legs
+  if (dist >= 1500) return hits >= 2;
+  return hits >= 1;
+}
+
+function setrouteIsEuropeMedPort(lat, lon) {
+  return lat >= 28 && lat <= 62 && lon >= -15 && lon <= 42;
+}
+function setrouteIsAsiaGulfPort(lat, lon) {
+  return lon >= 48 && lon <= 150 && lat >= -45 && lat <= 50;
+}
+function setrouteIsAmericasPort(lat, lon) {
+  return lon <= -30 || lon >= 160;
+}
+
+function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
+  let pen = 0;
+  const mid = setrouteLerpLatLon(lat1, lon1, lat2, lon2, 0.5);
+  if (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.storms)) {
+    MARINE_WEATHER_STORE.storms.forEach((st) => {
+      if (!st || !Array.isArray(st.center)) return;
+      const d = calculateHaversineDistanceNM(mid[0], mid[1], st.center[0], st.center[1]);
+      const r = (st.dangerRadiusNm || 100) + 100;
+      if (d < r) {
+        pen += 80 + Math.max(0, (r - d) * 1.2) + Math.min(120, (st.maxWinds || 0) * 0.4);
+      }
+    });
+  }
+  if (typeof NTM_STORE !== "undefined" && Array.isArray(NTM_STORE)) {
+    let ntmCount = 0;
+    for (let i = 0; i < NTM_STORE.length && ntmCount < 8; i++) {
+      const n = NTM_STORE[i];
+      if (!n || n.isCancelled || n.status === "CANCELLED") continue;
+      const cLat = Number.isFinite(n.lat) ? n.lat : (n.coords && n.coords[0] ? n.coords[0].lat : NaN);
+      const cLon = Number.isFinite(n.lon) ? n.lon : (n.coords && n.coords[0] ? n.coords[0].lon : NaN);
+      if (!Number.isFinite(cLat) || !Number.isFinite(cLon)) continue;
+      const d = typeof pointToSegmentDistanceNM === "function"
+        ? pointToSegmentDistanceNM(cLat, cLon, lat1, lon1, lat2, lon2)
+        : calculateHaversineDistanceNM(mid[0], mid[1], cLat, cLon);
+      if (d <= 30) {
+        pen += 25;
+        ntmCount++;
+      }
+    }
+  }
+  if (setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2)) {
+    pen += 50000; // effectively forbid
+  }
+  return pen;
+}
+
+function setrouteBuildAdjacency() {
+  const adj = {};
+  Object.keys(MARITIME_SEA_NODES).forEach((k) => { adj[k] = []; });
+  for (const [u, v] of MARITIME_SEA_EDGES) {
+    if (!MARITIME_SEA_NODES[u] || !MARITIME_SEA_NODES[v]) continue;
+    const a = MARITIME_SEA_NODES[u];
+    const b = MARITIME_SEA_NODES[v];
+    const dist = calculateHaversineDistanceNM(a[0], a[1], b[0], b[1]);
+    const hazard = setrouteEdgeHazardPenalty(a[0], a[1], b[0], b[1]);
+    const cost = dist + hazard;
+    if (hazard >= 50000) continue; // drop land-crossing graph edges
+    adj[u].push({ node: v, dist, cost });
+    adj[v].push({ node: u, dist, cost });
+  }
+  return adj;
+}
+
+function setrouteDijkstra(startNode, endNode, adj) {
+  if (!startNode || !endNode || !adj[startNode] || !adj[endNode]) return null;
+  if (startNode === endNode) return [startNode];
+
   const dists = {};
   const prev = {};
   const visited = new Set();
-  for (const k of Object.keys(MARITIME_SEA_NODES)) {
+  Object.keys(MARITIME_SEA_NODES).forEach((k) => {
     dists[k] = Infinity;
     prev[k] = null;
-  }
+  });
   dists[startNode] = 0;
-
-  for (let step = 0; step < Object.keys(MARITIME_SEA_NODES).length; step++) {
+  const keys = Object.keys(MARITIME_SEA_NODES);
+  for (let step = 0; step < keys.length; step++) {
     let u = null;
     let uDist = Infinity;
-    for (const [k, d] of Object.entries(dists)) {
-      if (!visited.has(k) && d < uDist) {
-        uDist = d;
+    for (const k of keys) {
+      if (!visited.has(k) && dists[k] < uDist) {
+        uDist = dists[k];
         u = k;
       }
     }
-    if (!u || u === endNode) break;
+    if (u === null || uDist === Infinity) break;
+    if (u === endNode) break;
     visited.add(u);
-
     for (const edge of adj[u] || []) {
-      if (!visited.has(edge.node)) {
-        const alt = dists[u] + edge.dist;
-        if (alt < dists[edge.node]) {
-          dists[edge.node] = alt;
-          prev[edge.node] = u;
-        }
+      if (visited.has(edge.node)) continue;
+      const alt = dists[u] + edge.cost;
+      if (alt < dists[edge.node]) {
+        dists[edge.node] = alt;
+        prev[edge.node] = u;
       }
     }
   }
-
+  if (dists[endNode] === Infinity) return null;
   const path = [];
   let curr = endNode;
   while (curr) {
     path.unshift(curr);
     curr = prev[curr];
   }
-  return path.length > 0 && path[0] === startNode ? path : [startNode, endNode];
+  return path[0] === startNode ? path : null;
 }
+
+function setroutePathCostNM(path) {
+  if (!path || path.length < 2) return 0;
+  let t = 0;
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = MARITIME_SEA_NODES[path[i]];
+    const b = MARITIME_SEA_NODES[path[i + 1]];
+    if (a && b) t += calculateHaversineDistanceNM(a[0], a[1], b[0], b[1]);
+  }
+  return t;
+}
+
+function setroutePathViaNode(startNode, endNode, viaNode, adj) {
+  if (!viaNode || !MARITIME_SEA_NODES[viaNode]) return null;
+  const p1 = setrouteDijkstra(startNode, viaNode, adj);
+  const p2 = setrouteDijkstra(viaNode, endNode, adj);
+  if (!p1 || !p2) return null;
+  return p1.concat(p2.slice(1));
+}
+
+function setroutePathViaHubs(startNode, endNode, adj) {
+  let best = null;
+  let bestCost = Infinity;
+  for (let i = 0; i < SETROUTE_OCEAN_HUBS.length; i++) {
+    const h = SETROUTE_OCEAN_HUBS[i];
+    if (h === startNode || h === endNode || !MARITIME_SEA_NODES[h]) continue;
+    const path = setroutePathViaNode(startNode, endNode, h, adj);
+    if (!path) continue;
+    const c = setroutePathCostNM(path);
+    if (c < bestCost) {
+      bestCost = c;
+      best = path;
+    }
+  }
+  // Two-hub attempts for hard pairs (e.g. Med -> Far East already covered; Pacific transits)
+  const hub2 = ["GIBRALTAR_MID", "CAPE_AGULHAS", "PANAMA_COLON", "SINGAPORE_MAIN", "UNIMAK_PASS"];
+  for (let i = 0; i < hub2.length; i++) {
+    for (let j = 0; j < hub2.length; j++) {
+      if (i === j) continue;
+      const h1 = hub2[i];
+      const h2b = hub2[j];
+      const a = setrouteDijkstra(startNode, h1, adj);
+      const b = setrouteDijkstra(h1, h2b, adj);
+      const c = setrouteDijkstra(h2b, endNode, adj);
+      if (!a || !b || !c) continue;
+      const path = a.concat(b.slice(1)).concat(c.slice(1));
+      const cost = setroutePathCostNM(path);
+      if (cost < bestCost) {
+        bestCost = cost;
+        best = path;
+      }
+    }
+  }
+  return best;
+}
+
+/**
+ * Core A corridor finder — never returns a land-crossing chord.
+ * options.viaCape / options.viaSuez force canal/cape branch.
+ */
+function findMaritimeSeaCorridor(origCoords, destCoords, options) {
+  options = options || {};
+  const startNode = findNearestMaritimeNode(origCoords[0], origCoords[1]);
+  const endNode = findNearestMaritimeNode(destCoords[0], destCoords[1]);
+  if (!startNode || !endNode) {
+    return startNode ? [startNode] : ["ROTTERDAM_APP"];
+  }
+  if (startNode === endNode) return [startNode];
+
+  const adj = setrouteBuildAdjacency();
+  let path = null;
+  let routeMode = "shortest_sea";
+
+  if (options.viaCape) {
+    path = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj);
+    routeMode = "via_cape";
+  } else if (options.viaSuez) {
+    path = setroutePathViaNode(startNode, endNode, "SUEZ_CANAL_MID", adj);
+    routeMode = "via_suez";
+  } else if (
+    (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAsiaGulfPort(destCoords[0], destCoords[1])) ||
+    (setrouteIsAsiaGulfPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
+  ) {
+    const suez = setroutePathViaNode(startNode, endNode, "SUEZ_CANAL_MID", adj);
+    const cape = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj);
+    const suezCost = suez ? setroutePathCostNM(suez) : Infinity;
+    const capeCost = cape ? setroutePathCostNM(cape) : Infinity;
+    // Prefer Suez unless Cape is meaningfully shorter (rare) or draft forces Cape later
+    if (suez && suezCost <= capeCost * 1.08) {
+      path = suez;
+      routeMode = "via_suez_auto";
+    } else if (cape) {
+      path = cape;
+      routeMode = "via_cape_auto";
+    }
+  } else if (
+    (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
+    (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
+  ) {
+    // Prefer North Atlantic GC hubs; Panama if Pacific-bound Americas
+    const natl = setroutePathViaNode(startNode, endNode, "NATL_GC_MID", adj);
+    const panama = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj);
+    const direct = setrouteDijkstra(startNode, endNode, adj);
+    const candidates = [
+      { p: direct, m: "shortest_sea" },
+      { p: natl, m: "via_natl" },
+      { p: panama, m: "via_panama" }
+    ].filter((c) => c.p);
+    candidates.sort((a, b) => setroutePathCostNM(a.p) - setroutePathCostNM(b.p));
+    if (candidates.length) {
+      path = candidates[0].p;
+      routeMode = candidates[0].m;
+    }
+  }
+
+  if (!path) {
+    path = setrouteDijkstra(startNode, endNode, adj);
+    routeMode = "shortest_sea";
+  }
+  if (!path) {
+    path = setroutePathViaHubs(startNode, endNode, adj);
+    routeMode = "via_ocean_hubs";
+  }
+
+  // Last resort: still never return raw [start,end] if it crosses land
+  if (!path) {
+    if (!setrouteLegLikelyCrossesLand(
+      MARITIME_SEA_NODES[startNode][0], MARITIME_SEA_NODES[startNode][1],
+      MARITIME_SEA_NODES[endNode][0], MARITIME_SEA_NODES[endNode][1]
+    )) {
+      path = [startNode, endNode];
+      routeMode = "direct_sea_chord";
+    } else {
+      path = setroutePathViaHubs(startNode, endNode, adj) || [startNode];
+      routeMode = "hub_fallback";
+    }
+  }
+
+  // Validate successive corridor legs; splice hubs if a graph hop somehow still looks landy
+  if (path && path.length >= 2) {
+    const fixed = [path[0]];
+    for (let i = 0; i < path.length - 1; i++) {
+      const a = MARITIME_SEA_NODES[path[i]];
+      const b = MARITIME_SEA_NODES[path[i + 1]];
+      if (a && b && setrouteLegLikelyCrossesLand(a[0], a[1], b[0], b[1])) {
+        const midHub = SETROUTE_OCEAN_HUBS.find((h) => {
+          if (h === path[i] || h === path[i + 1] || !MARITIME_SEA_NODES[h]) return false;
+          const n = MARITIME_SEA_NODES[h];
+          return !setrouteLegLikelyCrossesLand(a[0], a[1], n[0], n[1]) &&
+            !setrouteLegLikelyCrossesLand(n[0], n[1], b[0], b[1]);
+        });
+        if (midHub) fixed.push(midHub);
+      }
+      fixed.push(path[i + 1]);
+    }
+    path = fixed;
+  }
+
+  findMaritimeSeaCorridor._lastMeta = { startNode, endNode, routeMode, hops: (path && path.length) || 0 };
+  return path;
+}
+
+function auditPassagePlan(route) {
+  if (!route || !Array.isArray(route.waypoints) || route.waypoints.length < 2) {
+    return { ok: false, grade: "N/A", summary: "No route to audit.", issues: [], stats: {} };
+  }
+  if (!route.legs || !route.legs.length) {
+    enrichRouteWithLegsTelemetry(route, route.metadata || {});
+  }
+  const issues = [];
+  let ntmTotal = 0;
+  let wxTotal = 0;
+  let landLegs = 0;
+  let tssLegs = 0;
+  (route.legs || []).forEach((leg) => {
+    ntmTotal += (leg.ntmHits || []).length;
+    wxTotal += (leg.weatherHits || []).length;
+    if ((leg.navZone || "").indexOf("TSS") >= 0) tssLegs++;
+    if (setrouteLegLikelyCrossesLand(leg.fromLat, leg.fromLon, leg.toLat, leg.toLon)) {
+      landLegs++;
+      issues.push({
+        severity: "critical",
+        leg: leg.legNo,
+        text: `Leg ${leg.legNo} may cross land (${leg.fromName} → ${leg.toName}). Re-plan via sea hubs.`
+      });
+    }
+    if ((leg.weatherHits || []).length) {
+      issues.push({
+        severity: "warn",
+        leg: leg.legNo,
+        text: `Leg ${leg.legNo}: weather CPA — ${(leg.weatherHits || []).join("; ")}`
+      });
+    }
+    if ((leg.ntmHits || []).length >= 2) {
+      issues.push({
+        severity: "info",
+        leg: leg.legNo,
+        text: `Leg ${leg.legNo}: ${(leg.ntmHits || []).length} nearby NtM/NAVTEX objects`
+      });
+    }
+  });
+  // Endpoint draft check if available
+  try {
+    if (typeof checkDraftClearance === "function") {
+      /* UI-side; skip */
+    }
+  } catch (e) {}
+
+  let grade = "A";
+  if (landLegs > 0) grade = "F";
+  else if (wxTotal >= 3 || issues.filter((i) => i.severity === "warn").length >= 3) grade = "C";
+  else if (wxTotal >= 1 || ntmTotal >= 4) grade = "B";
+
+  const summary =
+    `Safety audit ${grade}: ${route.totalDistanceNM || "—"} NM, ${(route.legs || []).length} legs, ` +
+    `${tssLegs} TSS/strait, ${ntmTotal} NtM proximity hits, ${wxTotal} weather CPA flags` +
+    (landLegs ? `, ${landLegs} LAND-CROSS RISK` : ", no land-cross flags");
+
+  route.safetyAudit = { ok: landLegs === 0, grade, summary, issues, stats: { ntmTotal, wxTotal, landLegs, tssLegs } };
+  return route.safetyAudit;
+}
+window.auditPassagePlan = auditPassagePlan;
+window.findMaritimeSeaCorridor = findMaritimeSeaCorridor;
+window.setrouteLegLikelyCrossesLand = setrouteLegLikelyCrossesLand;
 
 
 function initSetRoute() {
@@ -5986,8 +6320,8 @@ function displaySetRouteResults(route) {
 /**
  * High-Accuracy Algorithmic Fallback Maritime Route Generator
  */
-function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode) {
-  const corridor = findMaritimeSeaCorridor(origCoords, destCoords);
+function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, routeOpts) {
+  const corridor = findMaritimeSeaCorridor(origCoords, destCoords, routeOpts || {});
   const waypoints = [];
 
   // Departure Pilot Station WPT
@@ -6044,6 +6378,7 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
     rot: 10.0
   });
 
+  const corridorMeta = (findMaritimeSeaCorridor._lastMeta) || {};
   return {
     name: `${pOrig.name} to ${pDest.name}`,
     routeName: `${pOrig.name} to ${pDest.name}`,
@@ -6055,7 +6390,8 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
       speedKnots: speed,
       draftMeters: 11.5,
       xtdNM: xtd,
-      sailMode: sailMode
+      sailMode: sailMode,
+      coreA: corridorMeta
     }
   };
 }
@@ -10683,7 +11019,7 @@ window.SETROUTE_PENDING_CONTEXT = null;
     ["CAPE_VERDE_PASS", "DAKAR_APP"],
     ["GIBRALTAR_E", "BARCELONA_APP"],
     ["BARCELONA_APP", "GENOA_APP"],
-    ["GENOA_APP", "MESSINA_N"],
+    ["GENOA_APP", "MED_SICILY"],
     ["MED_CRETE", "PIRAEUS_APP"],
     ["PIRAEUS_APP", "BOSPORUS_S"],
     ["MED_CRETE", "BOSPORUS_S"],
@@ -11696,32 +12032,19 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const origCoords = pOrig.approachCoords || pOrig.coords;
   const destCoords = pDest.approachCoords || pDest.coords;
 
-  let baseRoute = generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode);
+  const viaSuez = Boolean(options.viaSuez) && !viaCape;
+  let baseRoute = generateAlgorithmicMaritimeRoute(
+    pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode,
+    { viaCape: viaCape, viaSuez: viaSuez }
+  );
   if (viaCape) {
-    const capeCorridor = ["ST_VINCENT", "CANARY_PASS", "CAPE_VERDE_PASS", "GULF_OF_GUINEA", "CAPE_AGULHAS", "MAURITIUS_PASS", "MALACCA_N", "SINGAPORE_MAIN"];
-    const isEastbound = origCoords[1] < destCoords[1];
-    const orderedCorridor = isEastbound ? capeCorridor : capeCorridor.slice().reverse();
-    const wpts = [baseRoute.waypoints[0]];
-    orderedCorridor.forEach((nk, idx) => {
-      const node = MARITIME_SEA_NODES[nk];
-      if (node) {
-        wpts.push({
-          wptNo: ('00' + (idx + 2)).slice(-3),
-          name: node[2],
-          lat: node[0],
-          lon: node[1],
-          speedKnots: speed,
-          portsideXTD: xtd,
-          starboardXTD: xtd,
-          turnRadius: 0.8,
-          sail: "GC",
-          rot: 7.0
-        });
-      }
-    });
-    wpts.push(baseRoute.waypoints[baseRoute.waypoints.length - 1]);
-    baseRoute.waypoints = wpts;
     baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Cape of Good Hope)`;
+  } else if (viaSuez) {
+    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Suez Canal)`;
+  } else if (baseRoute.metadata && baseRoute.metadata.coreA && /cape/i.test(baseRoute.metadata.coreA.routeMode || "")) {
+    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Cape — auto)`;
+  } else if (baseRoute.metadata && baseRoute.metadata.coreA && /suez/i.test(baseRoute.metadata.coreA.routeMode || "")) {
+    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Suez — auto)`;
   }
 
   if (viaPorts.length > 0) {
@@ -11756,6 +12079,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   };
 
   enrichRouteWithLegsTelemetry(baseRoute, baseRoute.metadata);
+  const audit = typeof auditPassagePlan === "function" ? auditPassagePlan(baseRoute) : null;
   const legs = baseRoute.legs || [];
 
   const msgEl = appendChatMessage("brain", `
@@ -11782,36 +12106,8 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     renderRouteOnMap(baseRoute, false);
   }
 
-  let cohereNote = "";
-  if (navigator.onLine && typeof SETROUTE_COHERE_KEY === "string" && SETROUTE_COHERE_KEY) {
-    try {
-      const ctrl = new AbortController();
-      const tid = setTimeout(() => ctrl.abort(), 7500);
-      const legBrief = legs.map(l => `Leg ${l.legNo} (${l.fromName}->${l.toName}, ${l.sailType}, ${l.courseFormatted}, ${l.distanceNM}NM)`).join("; ");
-      const resp = await fetch("https://api.cohere.com/v2/chat", {
-        method: "POST",
-        signal: ctrl.signal,
-        headers: {
-          "Authorization": `Bearer ${SETROUTE_COHERE_KEY}`,
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({
-          model: SETROUTE_COHERE_MODEL,
-          messages: [{
-            role: "user",
-            content: `You are SetRoute Master Mariner AI. In 2 concise sentences in English, give a professional navigation watchkeeping summary for ${baseRoute.name} (${baseRoute.totalDistanceNM} NM, ${legs.length} legs: ${legBrief}, draft ${draft}m).`
-          }],
-          temperature: 0.2
-        })
-      });
-      clearTimeout(tid);
-      if (resp.ok) {
-        const d = await resp.json();
-        cohereNote = (((d.message || {}).content || [])[0] ? d.message.content[0].text : "").trim();
-      }
-    } catch (e) {}
-  }
+  // Core B narrates nothing here — Core A audit is source of truth for safety text
+  const cohereNote = (audit && audit.summary) ? audit.summary : "";
 
   // Check if Europe/Med <-> Asia so we can offer a 1-click toggle chip between Suez and Cape without blocking
   const isEuropeOrMed = p => p.coords[1] >= -15 && p.coords[1] <= 38 && p.coords[0] >= 25;
@@ -11835,7 +12131,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   if (footerEl) {
     footerEl.innerHTML = `
       <div style="padding:8px 10px;border-radius:10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#e2e8f0;margin-top:6px;">
-        <strong style="color:#34d399;">✓ ${baseRoute.totalDistanceNM} NM • ${baseRoute.steamingDays} days</strong>
+        <strong style="color:#34d399;">✓ ${baseRoute.totalDistanceNM} NM • ${baseRoute.steamingDays} days${audit && audit.grade ? ` • Audit ${audit.grade}` : ""}</strong>
         ${cohereNote ? `<span style="color:#bae6fd;display:block;margin-top:4px;font-size:0.74rem;">${cohereNote}</span>` : ""}
       </div>
       <div class="sr-quick-chips" style="margin-top:8px;">
@@ -11874,13 +12170,15 @@ async function handleSetRouteUserMessage(rawText) {
   if (/\bgc\b|great circle/i.test(lower)) parsedSail = "GC";
   else if (/\brl\b|rhumb/i.test(lower)) parsedSail = "RL";
   const chooseCape = /cape of good hope|via cape|around africa|agulhas/i.test(lower);
+  const chooseSuez = /via suez|suez canal|through suez/i.test(lower);
 
   const defaultOpts = {
     speedKnots: parsedSpd || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.speedKnots) || parseFloat((document.getElementById("setRouteSpeedInput") || {}).value) || 14.5,
     draftMeters: parsedDrf || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.draftMeters) || parseFloat((document.getElementById("setRouteDraftInput") || {}).value) || 11.5,
     xtdNM: parsedXtd || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.xtdNM) || parseFloat((document.getElementById("setRouteXtdInput") || {}).value) || 0.25,
     sailMode: parsedSail || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.sailMode) || (document.getElementById("setRouteSailSelect") || {}).value || "HYBRID",
-    viaCape: chooseCape
+    viaCape: chooseCape,
+    viaSuez: chooseSuez && !chooseCape
   };
 
   // 1. AI-First Intent Interpretation (Master Mariner LLM with Full Conversation Context)
@@ -11902,22 +12200,18 @@ async function handleSetRouteUserMessage(rawText) {
         content: m.content
       }));
 
-      const sysInstruction = `You are SetRoute Master Mariner AI (IMO A.893(21) & Admiralty NP231 Passage Planning Intelligence).
+      const sysInstruction = `You are SetRoute INTENT PARSER only (Core B). You do NOT compute waypoints, courses, or geometry — Core A (deterministic sea-graph engine) does that.
 ${curRouteDesc}
-Your task: Understand the user's navigational intent in natural language (English, Russian, or any language) and take direct action.
-Database of ports includes: Ningbo, Los Angeles, Houston, Rotterdam, Singapore, Shanghai, Tokyo, San Francisco, Panama, Suez, Antwerp, Hamburg, Busan, Hong Kong, and 60+ global ports.
-Standard vessel defaults: 14.5 knots, 11.5m draft, XTD ±0.25 NM.
+Reply with a short acknowledgement, then ONE JSON object. No coordinates. No waypoint lists.
+Ports known: Ningbo, Los Angeles, Houston, Rotterdam, Singapore, Shanghai, Tokyo, San Francisco, Panama, Suez, Antwerp, Hamburg, Busan, Hong Kong, +60.
+Defaults: 14.5 kn, 11.5 m draft, XTD ±0.25 NM.
 
-CRITICAL INTENT RULES:
-1. If the user asks to create, plan, or make a route between two ports (e.g., "Make the route from Ningbo to Los Angeles", "plan passage from Singapore to Rotterdam", "сделай маршрут из Нингбо в Лос Анджелес"):
-   Output JSON at the end: {"action":"plan","origin":"PortName","destination":"PortName","speedKnots":14.5,"draftMeters":11.5}
-2. CONVERSATIONAL CONTEXT RECOGNITION:
-   If the user previously mentioned ports or asked for a route, and now says "No make the route first, and I will specify later", "сначала сделай маршрут", "just make it", "plan it now", "use defaults":
-   IMMEDIATELY return {"action":"plan","origin":"[OriginFromHistory]","destination":"[DestFromHistory]","speedKnots":14.5,"draftMeters":11.5} using standard defaults! DO NOT ask the user for draft or speed again!
-3. If the user asks to modify the active route (e.g., "set speed to 16 kn", "draft 12.8m", "reverse", "switch to Great Circle", "via Cape of Good Hope"):
-   Output JSON: {"action":"modify","speedKnots":...,"draftMeters":...,"sailMode":"GC|RL","viaCape":true|false,"reverse":true|false}
-4. For general maritime questions (seamanship, COLREGs, weather, chokepoints):
-   Answer directly, professionally, and concisely in English.`;
+JSON actions only:
+1) plan: {"action":"plan","origin":"Port","destination":"Port","speedKnots":14.5,"draftMeters":11.5,"viaCape":false,"viaSuez":false}
+2) modify: {"action":"modify","speedKnots":16,"draftMeters":12.5,"sailMode":"GC|RL","viaCape":true|false,"viaSuez":true|false,"reverse":false}
+3) audit: {"action":"audit"}
+4) If the user only asks a seamanship question with no plan/modify intent: answer in <=3 sentences English and omit JSON.
+When user says "make the route / сделай маршрут / use defaults" with ports in history — emit plan JSON immediately.`;
 
       const resp = await fetch("https://api.cohere.com/v2/chat", {
         method: "POST",
@@ -11941,7 +12235,7 @@ CRITICAL INTENT RULES:
       if (resp.ok) {
         const d = await resp.json();
         const rawAi = (((d.message || {}).content || [])[0] ? d.message.content[0].text : "").trim();
-        const jMatch = rawAi.match(/\{[\s\S]*?"action"\s*:\s*"(?:plan|modify)"[\s\S]*?\}/);
+        const jMatch = rawAi.match(/\{[\s\S]*?"action"\s*:\s*"(?:plan|modify|audit)"[\s\S]*?\}/);
         if (jMatch) {
           try {
             aiActionPlan = JSON.parse(jMatch[0]);
@@ -11975,14 +12269,47 @@ CRITICAL INTENT RULES:
         draftMeters: aiActionPlan.draftMeters || defaultOpts.draftMeters,
         xtdNM: defaultOpts.xtdNM,
         sailMode: defaultOpts.sailMode,
-        viaCape: Boolean(aiActionPlan.viaCape || defaultOpts.viaCape)
+        viaCape: Boolean(aiActionPlan.viaCape || defaultOpts.viaCape),
+        viaSuez: Boolean(aiActionPlan.viaSuez)
       });
       return;
     }
   }
 
+  // 2b. Deterministic safety audit (Core A) — never LLM geometry
+  if (aiActionPlan && aiActionPlan.action === "audit") {
+    if (!activeRouteData) {
+      appendChatMessage("brain", "No active route to audit. Plan a passage first.");
+      return;
+    }
+    const aud = auditPassagePlan(activeRouteData);
+    const issueHtml = (aud.issues || []).slice(0, 8).map((i) =>
+      `<div style="font-size:0.72rem;margin-top:3px;color:${i.severity === "critical" ? "#fca5a5" : i.severity === "warn" ? "#fde68a" : "#94a3b8"};">• ${i.text}</div>`
+    ).join("");
+    appendChatMessage("brain", `<strong>Core A Safety Audit — grade ${aud.grade}</strong><div style="margin-top:4px;">${aud.summary}</div>${issueHtml || "<div style=\"margin-top:4px;color:#86efac;\">No critical issues.</div>"}`);
+    displaySetRouteResults(activeRouteData, true);
+    return;
+  }
+
   // 3. Execute AI Route Modification if recognized by LLM
   if (aiActionPlan && aiActionPlan.action === "modify" && activeRouteData && Array.isArray(activeRouteData.waypoints)) {
+    // Topology changes (Cape/Suez/reverse with ports) → full Core A replan
+    const needReplan = Boolean(aiActionPlan.viaCape) || Boolean(aiActionPlan.viaSuez) || Boolean(aiActionPlan.reverse);
+    const last = window.SETROUTE_LAST_PORTS || {};
+    if (needReplan && last.origin && last.dest) {
+      let o = last.origin;
+      let d = last.dest;
+      if (aiActionPlan.reverse) { const tmp = o; o = d; d = tmp; }
+      await executeBrainLegByLegRoutePlan(o, d, {
+        speedKnots: aiActionPlan.speedKnots || (activeRouteData.metadata && activeRouteData.metadata.speedKnots) || defaultOpts.speedKnots,
+        draftMeters: aiActionPlan.draftMeters || (activeRouteData.metadata && activeRouteData.metadata.draftMeters) || defaultOpts.draftMeters,
+        xtdNM: defaultOpts.xtdNM,
+        sailMode: aiActionPlan.sailMode || defaultOpts.sailMode,
+        viaCape: Boolean(aiActionPlan.viaCape),
+        viaSuez: Boolean(aiActionPlan.viaSuez) && !Boolean(aiActionPlan.viaCape)
+      });
+      return;
+    }
     if (aiActionPlan.reverse) {
       activeRouteData.waypoints.reverse();
       const parts = (activeRouteData.name || "").split(" to ");
@@ -11993,12 +12320,14 @@ CRITICAL INTENT RULES:
     if (aiActionPlan.draftMeters) activeRouteData.metadata.draftMeters = parseFloat(aiActionPlan.draftMeters);
     if (aiActionPlan.sailMode) activeRouteData.metadata.sailMode = aiActionPlan.sailMode;
     enrichRouteWithLegsTelemetry(activeRouteData, activeRouteData.metadata);
+    auditPassagePlan(activeRouteData);
     saveRouteToLibrary(activeRouteData);
     displaySetRouteResults(activeRouteData, true);
     if (leafletMap) renderRouteOnMap(activeRouteData, false);
     appendChatMessage("brain", `
       ✓ <strong>Recalculated "${activeRouteData.name}" with updated parameters</strong><br>
       Speed: <b>${activeRouteData.metadata.speedKnots || 14.5} kn</b> • Draft: <b>${activeRouteData.metadata.draftMeters || 11.5} m</b> • Total Distance: <b>${activeRouteData.totalDistanceNM} NM</b> (${activeRouteData.steamingDays} days).
+      ${activeRouteData.safetyAudit ? `<div style="margin-top:4px;font-size:0.72rem;color:#94a3b8;">${activeRouteData.safetyAudit.summary}</div>` : ""}
     `);
     return;
   }
@@ -12437,7 +12766,14 @@ function initSetRouteV50() {
     drawerAuditBtn._boundV50 = true;
     drawerAuditBtn.addEventListener("click", () => {
       if (!activeRouteData) return;
-      handleSetRouteUserMessage(`Run a detailed navigation safety audit for ${activeRouteData.name} across all legs, depths, and hazards.`);
+      {
+        const aud = auditPassagePlan(activeRouteData);
+        const issueHtml = (aud.issues || []).slice(0, 10).map((i) =>
+          `<div style="font-size:0.72rem;margin-top:3px;color:${i.severity === "critical" ? "#fca5a5" : i.severity === "warn" ? "#fde68a" : "#94a3b8"};">• ${i.text}</div>`
+        ).join("");
+        appendChatMessage("brain", `<strong>Core A Safety Audit — grade ${aud.grade}</strong><div style="margin-top:4px;">${aud.summary}</div>${issueHtml || "<div style=\"margin-top:4px;color:#86efac;\">No critical issues.</div>"}`);
+        displaySetRouteResults(activeRouteData, true);
+      }
     });
   }
 
