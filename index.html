@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.61" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.62" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -6987,11 +6987,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 
 /* ==========================================================================
-   SLIDE 3: ABOUT SETSAIL — full-bleed mosaic strip + square logo + copy below
+   SLIDE 3: ABOUT SETSAIL — full-bleed narrow mosaic strip + square logo
    ========================================================================== */
 .home-slide-about {
   position: absolute;
-  inset: 48px 0 36px 0;
+  inset: 0;
   z-index: 22;
   display: flex;
   align-items: center;
@@ -7001,6 +7001,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
   will-change: transform, opacity;
   --about-p: 0;
   --about-logo: 0;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .home-about-life {
@@ -7011,30 +7016,37 @@ svg.leaflet-image-layer.leaflet-interactive path {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 1.1rem;
+  gap: 1rem;
   border-radius: 0;
   overflow: visible;
   isolation: isolate;
   background: transparent;
   padding: 0;
+  margin: 0;
 }
 
+/* True edge-to-edge of the Home viewport (not the 1200px content column) */
 .about-mosaic-band {
   position: relative;
   width: 100%;
-  height: clamp(148px, 22vh, 210px);
+  max-width: none;
+  height: clamp(96px, 12vh, 128px);
   overflow: hidden;
   background: #040810;
+  border-radius: 0;
+  margin: 0;
+  left: 0;
+  right: 0;
 }
 
 .about-mosaic {
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-columns: repeat(24, minmax(0, 1fr));
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-  gap: 2px;
-  padding: 2px;
+  grid-template-columns: repeat(40, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px;
   filter: brightness(calc(0.78 + 0.16 * var(--about-p)));
 }
 
@@ -7042,11 +7054,18 @@ svg.leaflet-image-layer.leaflet-interactive path {
   position: relative;
   margin: 0;
   overflow: hidden;
-  border-radius: 1px;
+  border-radius: 0;
   background: #0b1220;
   opacity: 1;
   transform: none;
   transition: opacity 0.35s ease, filter 0.35s ease;
+  min-width: 0;
+  min-height: 0;
+}
+
+.about-moz-tile.is-fallback {
+  background:
+    linear-gradient(135deg, #0c4a6e 0%, #082f49 45%, #0f172a 100%);
 }
 
 .about-moz-tile.is-shuffling {
@@ -7062,7 +7081,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   filter: saturate(0.92) contrast(1.05);
 }
 
-/* Square logo centered over the mosaic strip */
+/* Square mark centered over the mosaic strip — forced 1:1 box */
 .about-logo-over {
   position: absolute;
   inset: 0;
@@ -7070,15 +7089,33 @@ svg.leaflet-image-layer.leaflet-interactive path {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse 42% 70% at 50% 50%, rgba(4, 8, 18, 0.55) 0%, rgba(4, 8, 18, 0.12) 55%, transparent 72%);
+  background: radial-gradient(ellipse 38% 85% at 50% 50%, rgba(4, 8, 18, 0.62) 0%, rgba(4, 8, 18, 0.14) 52%, transparent 70%);
   opacity: calc(var(--about-logo) * 0.15 + var(--about-p) * 0.95);
   pointer-events: none;
 }
 
+.about-logo-over picture {
+  display: grid;
+  place-items: center;
+  width: clamp(76px, 9.5vw, 112px);
+  height: clamp(76px, 9.5vw, 112px);
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 10px;
+  background: rgba(6, 12, 28, 0.92);
+  border: 1px solid rgba(240, 90, 54, 0.4);
+  border-radius: 22px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
 .about-logo-over img {
-  width: clamp(72px, 11vw, 120px);
-  height: auto;
-  border-radius: 14px;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: contain !important;
+  border-radius: 12px;
   filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 18px rgba(240, 90, 54, 0.3));
   transform: scale(calc(0.9 + 0.1 * var(--about-p)));
 }
@@ -7141,7 +7178,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 [data-theme="light"] .about-mosaic-band { background: #e2e8f0; }
 [data-theme="light"] .about-logo-over {
-  background: radial-gradient(ellipse 42% 70% at 50% 50%, rgba(248, 250, 252, 0.65) 0%, rgba(248, 250, 252, 0.1) 55%, transparent 72%);
+  background: radial-gradient(ellipse 38% 85% at 50% 50%, rgba(248, 250, 252, 0.7) 0%, rgba(248, 250, 252, 0.12) 52%, transparent 70%);
 }
 [data-theme="light"] .about-headline { color: #0f172a; }
 [data-theme="light"] .about-headline em { color: #c2410c; }
@@ -7149,17 +7186,20 @@ svg.leaflet-image-layer.leaflet-interactive path {
 [data-theme="light"] .about-body strong { color: #0f172a; }
 
 @media (max-width: 900px) {
-  .home-slide-about { inset: 40px 0 44px 0 !important; }
-  .about-mosaic-band { height: clamp(130px, 20vh, 180px) !important; }
+  .home-slide-about { inset: 0 !important; left: 0 !important; right: 0 !important; }
+  .about-mosaic-band { height: clamp(84px, 11vh, 110px) !important; }
   .about-mosaic {
-    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
-    grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(24, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
     gap: 1px !important;
   }
   .about-copy { width: 92% !important; }
   .about-headline { font-size: 1.2rem !important; }
   .about-body { font-size: 0.72rem !important; }
-  .about-logo-over img { width: 68px !important; }
+  .about-logo-over picture {
+    width: 64px !important;
+    height: 64px !important;
+  }
 }
 
 
@@ -7891,9 +7931,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   }
 
-  /* Slide 3: About SetSail on Phone */
+  /* Slide 3: About — keep full-bleed (no side inset) */
   .home-slide-about {
-    inset: 48px 10px 52px 10px !important;
+    inset: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
   }
 
   .home-about-container {
@@ -11100,9 +11142,11 @@ select option {
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   }
 
-  /* Slide 3: About SetSail on Phone */
+  /* Slide 3: About — keep full-bleed (no side inset) */
   .home-slide-about {
-    inset: 48px 10px 52px 10px !important;
+    inset: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
   }
 
   .home-about-container {
@@ -11892,7 +11936,7 @@ select option {
               <!-- Column 3 (Right): My Vessel profile (no auto GPS prompt) -->
               <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" style="grid-column:3 !important;justify-self:end !important;margin-left:auto !important;position:relative !important;min-width:0 !important;" title="My Vessel — name, position &amp; AIS details">
                 <button type="button" class="home-vessel-hud-btn" id="homeVesselHudBtn" aria-haspopup="dialog" aria-expanded="false">
-                  <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8c1.7 0 3.1 1.5 3.1 3.4v11.2c0 1.5-1.2 2.8-3.1 2.8s-3.1-1.3-3.1-2.8V6.2c0-1.9 1.4-3.4 3.1-3.4z" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/><path d="M12 4.2 L14.6 7.2 L12 6.5 L9.4 7.2 Z" fill="#f05a36"/><line x1="12" y1="7.5" x2="12" y2="18.2" stroke="#f05a36" stroke-width="1.35" stroke-linecap="round"/></svg></span>
+                  <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 16.5 L12 8.5 L20.5 16.5 L18.8 17.2 L12 11.2 L5.2 17.2 Z" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/><path d="M5 18.2 H19 L17.6 20.2 H6.4 Z" fill="#f05a36" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><line x1="12" y1="8.5" x2="12" y2="5.2" stroke="#f05a36" stroke-width="1.6" stroke-linecap="round"/><path d="M12 5.2 L15.2 8.2 L12 7.4 L8.8 8.2 Z" fill="#f05a36"/></svg></span>
                   <span class="home-hud-text" id="homeVesselHudCoords">NOT SET</span>
                 </button>
                 <div class="ntm-popover ntm-vessel-popover home-vessel-popover" id="homeVesselPopover" role="dialog" aria-label="My Vessel settings">
@@ -12057,103 +12101,6 @@ select option {
               </div>
             </section>
 
-            <!-- SLIDE 4: ABOUT — full-bleed mosaic strip + square logo + copy below -->
-            <section class="home-slide-about" id="homeSlideAbout" aria-label="About SetSail">
-              <div class="home-about-life">
-                <div class="about-mosaic-band">
-                  <div class="about-mosaic" id="homeAboutMosaic" aria-hidden="true">
-                  <figure class="about-moz-tile" data-tile-i="0"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="1"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="2"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="3"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="4"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="5"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="6"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="7"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="8"><img src="https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="9"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="10"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="11"><img src="https://images.unsplash.com/photo-1471922694854-ff1b63b51dfc?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="12"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="13"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="14"><img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="15"><img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="16"><img src="https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="17"><img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="18"><img src="https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="19"><img src="https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="20"><img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="21"><img src="https://images.unsplash.com/photo-1476673160081-cf065607f449?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="22"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="23"><img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="24"><img src="https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="25"><img src="https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="26"><img src="https://images.unsplash.com/photo-1508700115892-45ecd05bd2d3?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="27"><img src="https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="28"><img src="https://images.unsplash.com/photo-1414609589552-1fc6f7c0f1e5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="29"><img src="https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="30"><img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="31"><img src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="32"><img src="https://images.unsplash.com/photo-1544551763-77ef2d0c9855?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="33"><img src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="34"><img src="https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="35"><img src="https://images.unsplash.com/photo-1590523277543-a94d2e4eb17b?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="36"><img src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="37"><img src="https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="38"><img src="https://images.unsplash.com/photo-1493558103817-58b2924bce98?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="39"><img src="https://images.unsplash.com/photo-1506953821633-555da4d77266?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="40"><img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="41"><img src="https://images.unsplash.com/photo-1468413253725-0d5181091126?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="42"><img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="43"><img src="https://images.unsplash.com/photo-1484291470158-b4f4ed1587e3?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="44"><img src="https://images.unsplash.com/photo-1476610182048-b716b8518fcf?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="45"><img src="https://images.unsplash.com/photo-1596003906949-67221c37965c?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="46"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="47"><img src="https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="48"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="49"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="50"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="51"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="52"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="53"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="54"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="55"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="56"><img src="https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="57"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="58"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="59"><img src="https://images.unsplash.com/photo-1471922694854-ff1b63b51dfc?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="60"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="61"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="62"><img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="63"><img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="64"><img src="https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="65"><img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="66"><img src="https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="67"><img src="https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="68"><img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="69"><img src="https://images.unsplash.com/photo-1476673160081-cf065607f449?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="70"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=edges&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="71"><img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=center&amp;w=280&amp;h=280&amp;q=70" alt="" decoding="async" loading="eager" width="280" height="280" /></figure>
-                  </div>
-                  <div class="about-logo-over" id="homeAboutLogoFinale" aria-hidden="true">
-                    <picture>
-                      <source srcset="assets/SetSail LOGOS/setsail_logo_square.webp" type="image/webp" />
-                      <img src="assets/SetSail LOGOS/setsail_logo_square.png" alt="SetSail" width="120" height="120" />
-                    </picture>
-                  </div>
-                </div>
-                <div class="about-copy" id="homeAboutCopy">
-                  <p class="about-kicker">About SetSail</p>
-                  <h2 class="about-headline">Made for the quiet hours when the chart is open and <em>the sea is loud.</em></h2>
-                  <p class="about-body">
-                    SetSail sits with the watch — <strong>NtM before coffee</strong>, a gyro check after breakfast, cyclone tracks before night orders.
-                    Not a sales pitch. A working companion for the day at sea.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-
             <!-- SLIDE 4: NARROW INFINITE MARQUEE OF RECOGNIZABLE SOURCES (Transparent Background Logos) -->
             <section class="home-slide-sources" id="homeSlideSources" aria-label="Integrated Maritime Data Sources">
               <div class="home-sources-header">
@@ -12230,6 +12177,110 @@ select option {
             </footer>
             </div><!-- end .home-bottom-dock -->
           </div>
+            <!-- SLIDE 4: ABOUT — full-bleed mosaic strip + square logo + copy below -->
+            <section class="home-slide-about" id="homeSlideAbout" aria-label="About SetSail">
+              <div class="home-about-life">
+                <div class="about-mosaic-band">
+                  <div class="about-mosaic" id="homeAboutMosaic" aria-hidden="true">
+                  <figure class="about-moz-tile" data-tile-i="0"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="1"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="2"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="3"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="4"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="5"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="6"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="7"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="8"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="9"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="10"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="11"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="12"><img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="13"><img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="14"><img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="15"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="16"><img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="17"><img src="https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="18"><img src="https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="19"><img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="20"><img src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="21"><img src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="22"><img src="https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="23"><img src="https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="24"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="25"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="26"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="27"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="28"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="29"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="30"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="31"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="32"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="33"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="34"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="35"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="36"><img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="37"><img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="38"><img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="39"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="40"><img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="41"><img src="https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="42"><img src="https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="43"><img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="44"><img src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="45"><img src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="46"><img src="https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="47"><img src="https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="48"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="49"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="50"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="51"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="52"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="53"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="54"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="55"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="56"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="57"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="58"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="59"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="60"><img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="61"><img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="62"><img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="63"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="64"><img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="65"><img src="https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="66"><img src="https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="67"><img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="68"><img src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="69"><img src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="70"><img src="https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="71"><img src="https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="72"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="73"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="74"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="75"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="76"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="77"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="78"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="79"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  </div>
+                  <div class="about-logo-over" id="homeAboutLogoFinale" aria-hidden="true">
+                    <picture>
+                      <source srcset="assets/SetSail LOGOS/setsail_logo_square.webp" type="image/webp" />
+                      <img src="assets/SetSail LOGOS/setsail_logo_square.png" alt="SetSail" width="112" height="112" />
+                    </picture>
+                  </div>
+                </div>
+                <div class="about-copy" id="homeAboutCopy">
+                  <p class="about-kicker">About SetSail</p>
+                  <h2 class="about-headline">Made for the quiet hours when the chart is open and <em>the sea is loud.</em></h2>
+                  <p class="about-body">
+                    SetSail sits with the watch — <strong>NtM before coffee</strong>, a gyro check after breakfast, cyclone tracks before night orders.
+                    Not a sales pitch. A working companion for the day at sea.
+                  </p>
+                </div>
+              </div>
+            </section>
+
         </div>
       </div><!-- end #tab-home -->
 
@@ -19826,23 +19877,23 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.61"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.61" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.61"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.62"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.62" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.62"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.61",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.62",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.61"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.61"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.61"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.62"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.62"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.62"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19920,7 +19971,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.61"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.62"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20189,10 +20240,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           const aboutOut = easeInOutCubic(clamp(t4 / 0.58, 0, 1));
           const aboutAlpha = aboutIn * (1 - aboutOut);
           const aboutY = (1 - aboutIn) * 64 - aboutOut * 72;
-          const aboutScale = 0.94 + 0.06 * aboutIn - 0.05 * aboutOut;
-
           slideAbout.style.opacity = String(aboutAlpha.toFixed(3));
-          slideAbout.style.transform = 'translate3d(0, ' + aboutY.toFixed(1) + 'px, 0) scale(' + aboutScale.toFixed(3) + ')';
+          slideAbout.style.transform = 'translate3d(0, ' + aboutY.toFixed(1) + 'px, 0)';
           slideAbout.style.pointerEvents = aboutAlpha > 0.45 ? 'auto' : 'none';
           if (typeof window.__setsailUpdateAboutMosaic === 'function') {
             window.__setsailUpdateAboutMosaic(aboutIn);
@@ -20369,7 +20418,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.61', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.62', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
