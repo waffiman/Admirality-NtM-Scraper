@@ -545,7 +545,9 @@
     [31.2, 121.5], [-23.95, -46.3], [-6.1, 106.88], [13.7, 100.5],
     [37.8, -122.4], [48.4, -4.5], [41.0, 28.98], [25.77, -80.18],
     [35.1, 129.04], [19.07, 72.87], [-36.84, 174.76], [1.15, 104.0],
-    [33.75, -118.25], [51.95, 1.32], [22.61, 120.29], [24.83, 66.97]
+    [33.75, -118.25], [51.95, 1.32], [22.61, 120.29], [24.83, 66.97],
+    [51.95, 4.14], [29.73, -95.12], [6.94, 79.84], [-20.31, 118.58],
+    [36.14, -5.43], [18.95, 72.95], [36.07, 120.32], [-33.85, 18.43]
   ];
 
   let almanacModPromise = null;
@@ -559,19 +561,103 @@
       .replace(/"/g, "&quot;");
   }
 
-  function formatOwTime(iso, opts) {
+  /** Always English nautical formatting; optional IANA tz or lon-based local offset. */
+  function formatOwTime(iso, opts, tzCtx) {
     try {
       const d = new Date(iso);
       if (Number.isNaN(d.getTime())) return String(iso || "");
-      return d.toLocaleString(undefined, opts || {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-      });
+      const base = Object.assign(
+        { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false },
+        opts || {}
+      );
+      const tz = resolvePortTimeZone(tzCtx);
+      if (tz && tz.iana) {
+        return d.toLocaleString("en-GB", Object.assign({}, base, { timeZone: tz.iana }));
+      }
+      if (tz && Number.isFinite(tz.offsetMin)) {
+        const shifted = new Date(d.getTime() + tz.offsetMin * 60000);
+        return shifted.toLocaleString("en-GB", Object.assign({}, base, { timeZone: "UTC" }));
+      }
+      return d.toLocaleString("en-GB", base);
     } catch (e) {
       return String(iso || "");
     }
+  }
+
+  function resolvePortTimeZone(tzCtx) {
+    if (!tzCtx) return null;
+    if (typeof tzCtx === "string" && tzCtx.trim()) return { iana: tzCtx.trim() };
+    const iana = tzCtx.timezone || tzCtx.tz || "";
+    if (iana) return { iana: String(iana) };
+    const lon = Number(tzCtx.lon != null ? tzCtx.lon : tzCtx.longitude);
+    if (Number.isFinite(lon)) {
+      return { offsetMin: Math.round(lon / 15) * 60 };
+    }
+    return null;
+  }
+
+  function portDayStartUtc(dateStr, tzCtx) {
+    const ymd = String(dateStr || "").slice(0, 10);
+    const tz = resolvePortTimeZone(tzCtx);
+    if (tz && tz.iana) {
+      // Binary-search UTC instant of local midnight for ymd in IANA zone
+      let lo = Date.parse(ymd + "T00:00:00Z") - 14 * 3600000;
+      let hi = Date.parse(ymd + "T00:00:00Z") + 14 * 3600000;
+      for (let i = 0; i < 40; i++) {
+        const mid = Math.floor((lo + hi) / 2);
+        const parts = new Intl.DateTimeFormat("en-CA", {
+          timeZone: tz.iana,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        }).formatToParts(new Date(mid));
+        const get = (t) => (parts.find((p) => p.type === t) || {}).value;
+        const localYmd = get("year") + "-" + get("month") + "-" + get("day");
+        const localMin = Number(get("hour")) * 60 + Number(get("minute"));
+        if (localYmd < ymd || (localYmd === ymd && localMin > 0)) hi = mid;
+        else if (localYmd > ymd) lo = mid;
+        else if (localMin === 0) return new Date(mid);
+        else hi = mid;
+      }
+      return new Date(lo);
+    }
+    const offsetMin = tz && Number.isFinite(tz.offsetMin) ? tz.offsetMin : 0;
+    return new Date(Date.parse(ymd + "T00:00:00Z") - offsetMin * 60000);
+  }
+
+  function minutesOfDayInTz(date, tzCtx) {
+    const tz = resolvePortTimeZone(tzCtx);
+    if (tz && tz.iana) {
+      const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: tz.iana,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).formatToParts(date);
+      const get = (t) => Number((parts.find((p) => p.type === t) || {}).value);
+      return get("hour") * 60 + get("minute");
+    }
+    const offsetMin = tz && Number.isFinite(tz.offsetMin) ? tz.offsetMin : 0;
+    const shifted = new Date(date.getTime() + offsetMin * 60000);
+    return shifted.getUTCHours() * 60 + shifted.getUTCMinutes();
+  }
+
+  function localYmdInTz(date, tzCtx) {
+    const tz = resolvePortTimeZone(tzCtx);
+    if (tz && tz.iana) {
+      return new Intl.DateTimeFormat("en-CA", {
+        timeZone: tz.iana,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(date);
+    }
+    const offsetMin = tz && Number.isFinite(tz.offsetMin) ? tz.offsetMin : 0;
+    const shifted = new Date(date.getTime() + offsetMin * 60000);
+    return shifted.toISOString().slice(0, 10);
   }
 
   function formatSpeed(speed) {
@@ -624,7 +710,7 @@
     );
   }
 
-  function renderTidesTableHtml(data) {
+  function renderTidesTableHtml(data, tzCtx) {
     const extremes = (data && (data.extremes || data.events)) || [];
     if (!extremes.length) {
       return emptyInfo("Tide information for this port was not found in Open Waters.");
@@ -636,19 +722,19 @@
       const cls = e.high || /high/i.test(label) ? "hi" : "lo";
       return (
         "<tr class=\"" + cls + "\"><td>" + escHtml(label) + "</td><td>" +
-        escHtml(formatOwTime(e.time, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })) +
+        escHtml(formatOwTime(e.time, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }, tzCtx)) +
         "</td><td>" + escHtml(level) + "</td></tr>"
       );
     }).join("");
     return (
-      (station ? '<div class="ss-port-meta">' + escHtml(station) + "</div>" : "") +
+      (station ? '<div class="ss-port-meta">' + escHtml(station) + " · local time</div>" : '<div class="ss-port-meta">Local time</div>') +
       '<div class="ss-port-table-wrap"><table class="ss-port-table"><thead><tr><th></th><th>Time</th><th>m</th></tr></thead><tbody>' +
       rows +
       "</tbody></table></div>"
     );
   }
 
-  function renderCurrentsTableHtml(data) {
+  function renderCurrentsTableHtml(data, tzCtx) {
     const events = (data && data.events) || [];
     if (!events.length) {
       return emptyInfo("Current information for this port was not found in Open Waters.");
@@ -657,7 +743,7 @@
       const dir = Number.isFinite(Number(e.direction)) ? Math.round(Number(e.direction)) + "°" : "—";
       return (
         "<tr><td>" + escHtml(kindLabel(e.kind)) + "</td><td>" +
-        escHtml(formatOwTime(e.time, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })) +
+        escHtml(formatOwTime(e.time, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }, tzCtx)) +
         "</td><td>" + escHtml(formatSpeed(e.speed)) + " " + escHtml(dir) + "</td></tr>"
       );
     }).join("");
@@ -685,45 +771,42 @@
     return null;
   }
 
-  function minutesOfDay(d) {
-    return d.getHours() * 60 + d.getMinutes();
-  }
-
   function dateAtMinutes(dayStart, mins) {
     return new Date(dayStart.getTime() + Math.max(0, Math.min(1439, mins)) * 60000);
   }
 
-  function formatSkyClock(d) {
+  function formatSkyClock(d, tzCtx) {
     try {
-      return d.toLocaleString(undefined, {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZoneName: "short"
-      });
+      return formatOwTime(
+        d,
+        { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" },
+        tzCtx
+      ) + " LT";
     } catch (e) {
       return d.toISOString();
     }
   }
 
-  /** Map az/alt onto south-facing E–S–W sky stage (percent). */
+  /**
+   * South-facing sky (E–S–W). Bodies below horizon or outside the southern arc are hidden
+   * (no edge-clamped ghosts that jump oddly while scrubbing).
+   */
   function skyStagePos(altDeg, azDeg) {
     let az = Number(azDeg);
     const alt = Number(altDeg);
     if (!Number.isFinite(az) || !Number.isFinite(alt)) return null;
     while (az < 0) az += 360;
     while (az >= 360) az -= 360;
-    // Prefer southern sky (90…270); wrap northern into edges
-    let x;
-    if (az >= 90 && az <= 270) x = ((az - 90) / 180) * 100;
-    else if (az < 90) x = 0 + (az / 90) * 8;
-    else x = 92 + ((az - 270) / 90) * 8;
-    const y = alt >= 0
-      ? 10 + (1 - Math.min(alt, 90) / 90) * 68
-      : 82 + Math.min(12, Math.abs(alt) / 6);
-    return { x: Math.max(2, Math.min(98, x)), y: Math.max(4, Math.min(96, y)), above: alt >= -0.5 };
+    if (alt < -0.35) return { visible: false, above: false };
+    if (az < 85 || az > 275) return { visible: false, above: true };
+    const x = ((az - 90) / 180) * 100;
+    const y = 12 + (1 - Math.min(Math.max(alt, 0), 90) / 90) * 62;
+    return {
+      visible: true,
+      above: true,
+      x: Math.max(4, Math.min(96, x)),
+      y: Math.max(8, Math.min(78, y))
+    };
   }
 
   function skyGradientForAlt(alt) {
@@ -733,6 +816,19 @@
     return "linear-gradient(180deg,#020617 0%,#0f172a 60%,#1e293b 100%)";
   }
 
+  const PRINT_ICON_SVG =
+    '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+    '<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>' +
+    '<rect x="6" y="14" width="12" height="8"/></svg>';
+
+  const SUN_UP_SVG =
+    '<svg class="ss-sky-ev-ico" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">' +
+    '<circle cx="12" cy="14" r="3.2"/><path d="M12 2v5M12 7l-2.2 2.2M12 7l2.2 2.2M5 14h2M17 14h2"/></svg>';
+
+  const SUN_DOWN_SVG =
+    '<svg class="ss-sky-ev-ico" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">' +
+    '<circle cx="12" cy="10" r="3.2"/><path d="M12 22v-5M12 17l-2.2-2.2M12 17l2.2-2.2M5 10h2M17 10h2"/></svg>';
+
   function buildPortCardHtml(port) {
     const id = String((port && port.id) || "").replace(/[^a-zA-Z0-9_-]/g, "_");
     const { lat, lon } = portLatLon(port);
@@ -740,28 +836,23 @@
     const cc = String((port && port.countryCode) || "un").toLowerCase();
     const name = escHtml((port && port.name) || "Port");
     const unlocode = escHtml((port && port.unlocode) || (port && port.owStationId ? "OW" : ""));
-    const today = new Date();
-    const todayStr =
-      today.getFullYear() +
-      "-" + String(today.getMonth() + 1).padStart(2, "0") +
-      "-" + String(today.getDate()).padStart(2, "0");
-    const weekEndDate = new Date(today.getTime() + 6 * 86400000);
-    const weekEnd =
-      weekEndDate.getFullYear() +
-      "-" + String(weekEndDate.getMonth() + 1).padStart(2, "0") +
-      "-" + String(weekEndDate.getDate()).padStart(2, "0");
+    const tz = escHtml((port && (port.timezone || port.tz)) || "");
+    const tzCtx = { timezone: (port && (port.timezone || port.tz)) || "", lon: lon };
+    const todayStr = localYmdInTz(new Date(), tzCtx);
+    const weekEnd = localYmdInTz(new Date(Date.now() + 6 * 86400000), tzCtx);
 
     return (
-      '<div class="ss-port-card" data-port-id="' + id + '" data-lat="' + lat + '" data-lon="' + lon + '">' +
-      '<div class="ss-port-tabs" role="tablist">' +
-      '<button type="button" class="ss-port-tab is-active" data-tab="tides" role="tab" aria-selected="true" onclick="window.ssPortCardTab(this)">Tides</button>' +
-      '<button type="button" class="ss-port-tab" data-tab="currents" role="tab" aria-selected="false" onclick="window.ssPortCardTab(this)">Currents</button>' +
-      '<button type="button" class="ss-port-tab" data-tab="sky" role="tab" aria-selected="false" onclick="window.ssPortCardTab(this)">Sky</button>' +
-      "</div>" +
+      '<div class="ss-port-card" data-port-id="' + id + '" data-lat="' + lat + '" data-lon="' + lon +
+      '" data-tz="' + tz + '">' +
       '<div class="ss-port-head">' +
       '<span class="port-flag-box ss-port-flag"><img src="assets/flags/' + cc + '.png" onerror="this.onerror=null;this.src=\'https://flagcdn.com/w40/' + cc + '.png\';" alt="" class="port-flag-img"></span>' +
       '<h4 class="ss-port-name">' + name + "</h4>" +
       (unlocode ? '<span class="ss-port-chip">' + unlocode + "</span>" : "") +
+      "</div>" +
+      '<div class="ss-port-tabs ss-port-tabs-mini" role="tablist">' +
+      '<button type="button" class="ss-port-tab is-active" data-tab="tides" role="tab" aria-selected="true" onclick="window.ssPortCardTab(this)">Tides</button>' +
+      '<button type="button" class="ss-port-tab" data-tab="currents" role="tab" aria-selected="false" onclick="window.ssPortCardTab(this)">Currents</button>' +
+      '<button type="button" class="ss-port-tab" data-tab="sky" role="tab" aria-selected="false" onclick="window.ssPortCardTab(this)">Sky</button>' +
       "</div>" +
       '<div class="ss-port-body">' +
       '<div class="ss-port-panel is-active" data-panel="tides">' +
@@ -769,7 +860,8 @@
       '<input type="date" class="ss-port-date" data-role="tide-from" value="' + todayStr + '" title="From" onchange="window.ssPortCardLoad(this,\'tides\')">' +
       '<span class="ss-port-dash">–</span>' +
       '<input type="date" class="ss-port-date" data-role="tide-to" value="' + weekEnd + '" title="To" onchange="window.ssPortCardLoad(this,\'tides\')">' +
-      '<button type="button" class="ss-port-icon-btn" title="Print" onclick="window.ssPortCardPrint(this,\'tides\')">⎙</button>' +
+      '<button type="button" class="ss-port-icon-btn" title="Print tide table" onclick="window.ssPortCardPrint(this,\'tides\')">' +
+      PRINT_ICON_SVG + "</button>" +
       "</div>" +
       '<div class="ss-port-content" data-role="tide-out"><div class="ss-port-loading">…</div></div>' +
       "</div>" +
@@ -785,7 +877,7 @@
       '<div class="ss-sky-widget" data-role="sky-widget">' +
       '<div class="ss-sky-topbar">' +
       '<input type="date" class="ss-port-date" data-role="sky-date" value="' + todayStr + '" onchange="window.ssSkyOnDateChange(this)">' +
-      '<span class="ss-sky-caption">Sun &amp; Moon</span>' +
+      '<span class="ss-sky-caption">Sun &amp; Moon · local</span>' +
       "</div>" +
       '<div class="ss-sky-stage" data-role="sky-stage">' +
       '<div class="ss-sky-grad" data-role="sky-grad"></div>' +
@@ -847,6 +939,13 @@
     }
   }
 
+  function cardTzCtx(card) {
+    return {
+      timezone: (card && card.getAttribute("data-tz")) || "",
+      lon: Number(card && card.getAttribute("data-lon"))
+    };
+  }
+
   async function ssPortCardLoad(el, kind) {
     const card = cardRootFromEl(el);
     if (!card) return;
@@ -854,6 +953,7 @@
     const lat = Number(card.getAttribute("data-lat"));
     const lon = Number(card.getAttribute("data-lon"));
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    const tzCtx = cardTzCtx(card);
 
     if (kind === "tides") {
       const out = card.querySelector('[data-role="tide-out"]');
@@ -864,9 +964,10 @@
       out.dataset.loading = "1";
       out.innerHTML = '<div class="ss-port-loading">Loading…</div>';
       try {
-        const start = isoDayStart(fromEl && fromEl.value ? fromEl.value : new Date());
-        const endRaw = toEl && toEl.value ? toEl.value : start;
-        const end = new Date(isoDayStart(endRaw).getTime() + 86400000);
+        const fromYmd = (fromEl && fromEl.value) || localYmdInTz(new Date(), tzCtx);
+        const toYmd = (toEl && toEl.value) || fromYmd;
+        const start = portDayStartUtc(fromYmd, tzCtx);
+        const end = new Date(portDayStartUtc(toYmd, tzCtx).getTime() + 86400000);
         const url =
           TIDES_EXTREMES +
           "?latitude=" + encodeURIComponent(lat) +
@@ -876,7 +977,7 @@
         const res = await fetch(url, { credentials: "omit" });
         if (!res.ok) throw new Error("HTTP " + res.status);
         const data = await res.json();
-        out.innerHTML = renderTidesTableHtml(data);
+        out.innerHTML = renderTidesTableHtml(data, tzCtx);
       } catch (err) {
         out.innerHTML = emptyInfo("Tide information for this port was not found in Open Waters.");
       }
@@ -893,9 +994,10 @@
       out.dataset.loading = "1";
       out.innerHTML = '<div class="ss-port-loading">Loading…</div>';
       try {
-        const start = isoDayStart(fromEl && fromEl.value ? fromEl.value : new Date());
-        const endRaw = toEl && toEl.value ? toEl.value : start;
-        const end = new Date(isoDayStart(endRaw).getTime() + 86400000);
+        const fromYmd = (fromEl && fromEl.value) || localYmdInTz(new Date(), tzCtx);
+        const toYmd = (toEl && toEl.value) || fromYmd;
+        const start = portDayStartUtc(fromYmd, tzCtx);
+        const end = new Date(portDayStartUtc(toYmd, tzCtx).getTime() + 86400000);
         const url =
           CURRENTS_EVENTS +
           "?latitude=" + encodeURIComponent(lat) +
@@ -905,7 +1007,7 @@
         const res = await fetch(url, { credentials: "omit" });
         if (!res.ok) throw new Error("HTTP " + res.status);
         const data = await res.json();
-        out.innerHTML = renderCurrentsTableHtml(data);
+        out.innerHTML = renderCurrentsTableHtml(data, tzCtx);
       } catch (err) {
         out.innerHTML = emptyInfo("Current information for this port was not found in Open Waters.");
       }
@@ -924,9 +1026,12 @@
     if (!widget) return;
     const lat = Number(card.getAttribute("data-lat"));
     const lon = Number(card.getAttribute("data-lon"));
+    const tzCtx = cardTzCtx(card);
     const dateEl = card.querySelector('[data-role="sky-date"]');
-    const day = isoDayStart(dateEl && dateEl.value ? dateEl.value : new Date());
+    const ymd = (dateEl && dateEl.value) || localYmdInTz(new Date(), tzCtx);
+    const day = portDayStartUtc(ymd, tzCtx);
     card._skyDay = day;
+    card._skyTz = tzCtx;
     card._skyObserver = { latitudeDeg: lat, longitudeDeg: lon };
 
     try {
@@ -939,9 +1044,21 @@
         const rise = events.find((e) => e.kind === "rise");
         const set = events.find((e) => e.kind === "set");
         const bits = [];
-        if (rise) bits.push("↑ " + formatOwTime(rise.time, { hour: "2-digit", minute: "2-digit" }));
-        if (set) bits.push("↓ " + formatOwTime(set.time, { hour: "2-digit", minute: "2-digit" }));
-        eventsEl.textContent = bits.length ? bits.join("   ") : "Sky data unavailable";
+        if (rise) {
+          bits.push(
+            '<span class="ss-sky-ev ss-sky-ev-rise">' + SUN_UP_SVG +
+            '<span>' + escHtml(formatOwTime(rise.time, { hour: "2-digit", minute: "2-digit" }, tzCtx)) +
+            "</span></span>"
+          );
+        }
+        if (set) {
+          bits.push(
+            '<span class="ss-sky-ev ss-sky-ev-set">' + SUN_DOWN_SVG +
+            '<span>' + escHtml(formatOwTime(set.time, { hour: "2-digit", minute: "2-digit" }, tzCtx)) +
+            "</span></span>"
+          );
+        }
+        eventsEl.innerHTML = bits.length ? bits.join("") : "Sky data unavailable";
       } else if (eventsEl) {
         eventsEl.textContent = "Sky data unavailable";
       }
@@ -951,22 +1068,20 @@
     }
 
     const now = new Date();
-    const sameDay =
-      now.getFullYear() === day.getFullYear() &&
-      now.getMonth() === day.getMonth() &&
-      now.getDate() === day.getDate();
-    const mins = sameDay ? minutesOfDay(now) : 12 * 60;
+    const sameDay = localYmdInTz(now, tzCtx) === ymd;
+    const mins = sameDay ? minutesOfDayInTz(now, tzCtx) : 12 * 60;
     const slider = card.querySelector('[data-role="sky-slider"]');
     if (slider) slider.value = String(mins);
     updateSkyFrame(card, mins);
   }
 
   function updateSkyFrame(card, mins) {
-    const day = card._skyDay || isoDayStart(new Date());
+    const day = card._skyDay || portDayStartUtc(localYmdInTz(new Date(), cardTzCtx(card)), cardTzCtx(card));
+    const tzCtx = card._skyTz || cardTzCtx(card);
     const minute = Number(mins) || 0;
     const t = dateAtMinutes(day, minute);
     const clock = card.querySelector('[data-role="sky-clock"]');
-    if (clock) clock.textContent = formatSkyClock(t);
+    if (clock) clock.textContent = formatSkyClock(t, tzCtx);
     const slider = card.querySelector('[data-role="sky-slider"]');
     if (slider) {
       const pct = (minute / 1439) * 100;
@@ -988,12 +1103,16 @@
         sunAlt = Number(s && (s.altDeg != null ? s.altDeg : s.altitudeDeg));
         const az = Number(s && (s.azDeg != null ? s.azDeg : s.azimuthDeg));
         const pos = skyStagePos(sunAlt, az);
-        if (sunEl && pos) {
-          sunEl.hidden = false;
-          sunEl.style.left = pos.x + "%";
-          sunEl.style.top = pos.y + "%";
-          sunEl.style.opacity = pos.above ? "1" : "0.35";
-          sunEl.classList.toggle("is-below", !pos.above);
+        if (sunEl) {
+          if (pos && pos.visible) {
+            sunEl.hidden = false;
+            sunEl.style.left = pos.x + "%";
+            sunEl.style.top = pos.y + "%";
+            sunEl.style.opacity = "1";
+            sunEl.classList.remove("is-below");
+          } else {
+            sunEl.hidden = true;
+          }
         }
       } catch (e) {
         if (sunEl) sunEl.hidden = true;
@@ -1010,8 +1129,9 @@
         const malt = Number(m && (m.altDeg != null ? m.altDeg : m.altitudeDeg));
         const maz = Number(m && (m.azDeg != null ? m.azDeg : m.azimuthDeg));
         const pos = skyStagePos(malt, maz);
-        const showMoon = pos && pos.above && sunAlt < 6;
-        if (pos && showMoon) {
+        // Moon only when above horizon and sun is down
+        const showMoon = pos && pos.visible && sunAlt < -0.5;
+        if (showMoon) {
           moonEl.hidden = false;
           moonEl.style.left = pos.x + "%";
           moonEl.style.top = pos.y + "%";
@@ -1046,11 +1166,7 @@
     const card = cardRootFromEl(el);
     if (!card) return;
     const dateEl = card.querySelector('[data-role="sky-date"]');
-    const now = new Date();
-    const local =
-      now.getFullYear() +
-      "-" + String(now.getMonth() + 1).padStart(2, "0") +
-      "-" + String(now.getDate()).padStart(2, "0");
+    const local = localYmdInTz(new Date(), cardTzCtx(card));
     if (dateEl) dateEl.value = local;
     initSkyWidget(card);
   }

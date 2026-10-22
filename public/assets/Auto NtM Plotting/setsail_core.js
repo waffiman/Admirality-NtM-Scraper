@@ -2477,7 +2477,26 @@ function renderWeatherOnMap(map = null) {
         opacity: 0.85
       };
       if (canvasRenderer) lineOpts.renderer = canvasRenderer;
-      leafletWeatherLayer.addLayer(L.polyline(trackPoints, lineOpts));
+      // Split antimeridian chords (same guard as NtM) so storm tracks never draw across the whole map
+      const splitWxTrack = (latlngs) => {
+        const rings = [[]];
+        for (let i = 0; i < latlngs.length; i++) {
+          const cur = latlngs[i];
+          const ring = rings[rings.length - 1];
+          if (ring.length) {
+            const prev = ring[ring.length - 1];
+            if (Math.abs(Number(cur[1]) - Number(prev[1])) > 180) {
+              rings.push([cur]);
+              continue;
+            }
+          }
+          ring.push(cur);
+        }
+        return rings.filter((r) => r.length >= 2);
+      };
+      splitWxTrack(trackPoints).forEach((seg) => {
+        leafletWeatherLayer.addLayer(L.polyline(seg, lineOpts));
+      });
     }
 
     const shortLabel = storm.shortName || storm.name.replace(/^(Hurricane|Typhoon|Tropical Storm|Tropical Depression|Post-Tropical Cyclone|Invest)\s+/i, "");
@@ -6461,10 +6480,28 @@ function showWeatherInfoModal() {
   if (modal) {
     modal.classList.add("open");
     const badge = document.getElementById("weatherModalStatusBadge");
+    const store = MARINE_WEATHER_STORE || {};
+    const cyc = store.synopticCycle || "LIVE UTC";
     if (badge) {
-      const cyc = (MARINE_WEATHER_STORE && MARINE_WEATHER_STORE.synopticCycle) || "LIVE UTC";
       badge.textContent = navigator.onLine ? `LIVE SYNCED (${cyc})` : `CACHED (${cyc})`;
       badge.style.background = navigator.onLine ? "#10b981" : "#eab308";
+    }
+    const meta = document.getElementById("weatherModalLiveMeta");
+    if (meta) {
+      const storms = (store.storms || []).length;
+      const waves = (store.waves || []).length;
+      const pressure = (store.pressureCenters || []).length;
+      const winds = (store.windVectors || []).length;
+      const sync = store.lastSyncUtc
+        ? new Date(store.lastSyncUtc).toUTCString().replace("GMT", "UTC")
+        : "—";
+      const provider = store.provider || "NOAA NHC · JMA RSMC · JTWC · Open-Meteo / ECMWF IFS";
+      meta.innerHTML =
+        `<div><span style="color:#94a3b8;">Last sync</span><br><b style="color:#e2e8f0;">${sync}</b></div>` +
+        `<div><span style="color:#94a3b8;">Active cyclones</span><br><b style="color:#fde68a;">${storms}</b></div>` +
+        `<div><span style="color:#94a3b8;">Wave stations</span><br><b style="color:#7dd3fc;">${waves}</b></div>` +
+        `<div><span style="color:#94a3b8;">Pressure / wind</span><br><b style="color:#cbd5e1;">${pressure} · ${winds}</b></div>` +
+        `<div style="grid-column:1/-1;font-size:0.65rem;color:#64748b;margin-top:2px;">Sources: ${provider}</div>`;
     }
     updateWeatherModalActiveStorms();
   }
@@ -10532,7 +10569,26 @@ window.SETROUTE_PENDING_CONTEXT = null;
       { id: "port-fremantle", name: "Fremantle (Perth)", unlocode: "AUFRE", country: "Australia", countryCode: "AU", coords: [-32.05, 115.74], approachCoords: [-32.05, 115.62], maxDraftMeters: 14.7, maxDraftLowTide: "14.7m" },
       { id: "port-melbourne", name: "Melbourne", unlocode: "AUMEL", country: "Australia", countryCode: "AU", coords: [-37.84, 144.92], approachCoords: [-38.32, 144.60], maxDraftMeters: 14.0, maxDraftLowTide: "14.0m" },
       { id: "port-brisbane", name: "Brisbane", unlocode: "AUBNE", country: "Australia", countryCode: "AU", coords: [-27.38, 153.17], approachCoords: [-27.05, 153.30], maxDraftMeters: 14.0, maxDraftLowTide: "14.0m" },
-      { id: "port-auckland", name: "Auckland", unlocode: "NZAKL", country: "New Zealand", countryCode: "NZ", coords: [-36.84, 174.77], approachCoords: [-36.70, 174.95], maxDraftMeters: 13.5, maxDraftLowTide: "13.5m" }
+      { id: "port-auckland", name: "Auckland", unlocode: "NZAKL", country: "New Zealand", countryCode: "NZ", coords: [-36.84, 174.77], approachCoords: [-36.70, 174.95], maxDraftMeters: 13.5, maxDraftLowTide: "13.5m" },
+      { id: "port-singapore", name: "Singapore", unlocode: "SGSIN", country: "Singapore", countryCode: "SG", coords: [1.26, 103.85], approachCoords: [1.20, 103.90], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-hong-kong", name: "Hong Kong", unlocode: "HKHKG", country: "Hong Kong", countryCode: "HK", coords: [22.30, 114.17], approachCoords: [22.20, 114.15], maxDraftMeters: 15.5, maxDraftLowTide: "15.5m" },
+      { id: "port-busan", name: "Busan", unlocode: "KRPUS", country: "South Korea", countryCode: "KR", coords: [35.10, 129.04], approachCoords: [35.05, 129.10], maxDraftMeters: 16.5, maxDraftLowTide: "16.5m" },
+      { id: "port-tokyo", name: "Tokyo", unlocode: "JPTYO", country: "Japan", countryCode: "JP", coords: [35.65, 139.77], approachCoords: [35.50, 139.85], maxDraftMeters: 15.0, maxDraftLowTide: "15.0m" },
+      { id: "port-yokohama", name: "Yokohama", unlocode: "JPYOK", country: "Japan", countryCode: "JP", coords: [35.45, 139.65], approachCoords: [35.40, 139.70], maxDraftMeters: 16.0, maxDraftLowTide: "16.0m" },
+      { id: "port-rotterdam", name: "Rotterdam", unlocode: "NLRTM", country: "Netherlands", countryCode: "NL", coords: [51.95, 4.14], approachCoords: [51.98, 3.90], maxDraftMeters: 23.0, maxDraftLowTide: "23.0m" },
+      { id: "port-antwerp", name: "Antwerp", unlocode: "BEANR", country: "Belgium", countryCode: "BE", coords: [51.27, 4.40], approachCoords: [51.40, 3.60], maxDraftMeters: 15.5, maxDraftLowTide: "15.5m" },
+      { id: "port-hamburg", name: "Hamburg", unlocode: "DEHAM", country: "Germany", countryCode: "DE", coords: [53.55, 9.97], approachCoords: [53.90, 8.70], maxDraftMeters: 15.0, maxDraftLowTide: "15.0m" },
+      { id: "port-new-york", name: "New York / New Jersey", unlocode: "USNYC", country: "United States", countryCode: "US", coords: [40.68, -74.04], approachCoords: [40.50, -73.90], maxDraftMeters: 15.2, maxDraftLowTide: "15.2m" },
+      { id: "port-houston", name: "Houston", unlocode: "USHOU", country: "United States", countryCode: "US", coords: [29.73, -95.12], approachCoords: [29.35, -94.75], maxDraftMeters: 13.7, maxDraftLowTide: "13.7m" },
+      { id: "port-santos", name: "Santos", unlocode: "BRSSZ", country: "Brazil", countryCode: "BR", coords: [-23.95, -46.33], approachCoords: [-24.05, -46.25], maxDraftMeters: 14.5, maxDraftLowTide: "14.5m" },
+      { id: "port-dubai", name: "Jebel Ali (Dubai)", unlocode: "AEJEA", country: "United Arab Emirates", countryCode: "AE", coords: [25.01, 55.06], approachCoords: [25.00, 54.95], maxDraftMeters: 17.0, maxDraftLowTide: "17.0m" },
+      { id: "port-colombo", name: "Colombo", unlocode: "LKCMB", country: "Sri Lanka", countryCode: "LK", coords: [6.94, 79.84], approachCoords: [6.95, 79.75], maxDraftMeters: 18.0, maxDraftLowTide: "18.0m" },
+      { id: "port-qingdao", name: "Qingdao", unlocode: "CNTAO", country: "China", countryCode: "CN", coords: [36.07, 120.32], approachCoords: [36.00, 120.50], maxDraftMeters: 18.0, maxDraftLowTide: "18.0m" },
+      { id: "port-sydney", name: "Sydney", unlocode: "AUSYD", country: "Australia", countryCode: "AU", coords: [-33.85, 151.21], approachCoords: [-33.82, 151.30], maxDraftMeters: 14.5, maxDraftLowTide: "14.5m" },
+      { id: "port-port-hedland", name: "Port Hedland", unlocode: "AUPHE", country: "Australia", countryCode: "AU", coords: [-20.31, 118.58], approachCoords: [-20.20, 118.55], maxDraftMeters: 19.0, maxDraftLowTide: "19.0m" },
+      { id: "port-algeciras", name: "Algeciras", unlocode: "ESALG", country: "Spain", countryCode: "ES", coords: [36.14, -5.43], approachCoords: [36.05, -5.40], maxDraftMeters: 18.5, maxDraftLowTide: "18.5m" },
+      { id: "port-tanjung-pelepas", name: "Tanjung Pelepas", unlocode: "MYTPP", country: "Malaysia", countryCode: "MY", coords: [1.36, 103.55], approachCoords: [1.30, 103.50], maxDraftMeters: 17.5, maxDraftLowTide: "17.5m" },
+      { id: "port-nhava-sheva", name: "Nhava Sheva (JNPT)", unlocode: "INNSA", country: "India", countryCode: "IN", coords: [18.95, 72.95], approachCoords: [18.90, 72.85], maxDraftMeters: 15.0, maxDraftLowTide: "15.0m" }
     ];
     extraPorts.forEach(ep => {
       if (!PORT_DEPTHS_DB.some(p => p.id === ep.id || p.unlocode === ep.unlocode)) {

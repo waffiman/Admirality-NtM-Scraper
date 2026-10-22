@@ -4083,6 +4083,14 @@
   box-sizing: border-box;
   padding: 8px 9px 9px;
 }
+.ss-port-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  min-width: 0;
+  flex-shrink: 0;
+}
 .ss-port-tabs {
   display: flex;
   gap: 2px;
@@ -4091,16 +4099,21 @@
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 8px;
   flex-shrink: 0;
+  margin-bottom: 6px;
+}
+.ss-port-tabs-mini {
+  padding: 1px;
+  border-radius: 6px;
 }
 .ss-port-tab {
   flex: 1;
   border: 0;
   background: transparent;
   color: #94a3b8;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 650;
-  padding: 5px 4px;
-  border-radius: 6px;
+  padding: 3px 4px;
+  border-radius: 5px;
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease;
 }
@@ -4108,14 +4121,6 @@
 .ss-port-tab.is-active {
   color: #082f49;
   background: #67e8f9;
-}
-.ss-port-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 7px 0 6px;
-  min-width: 0;
-  flex-shrink: 0;
 }
 .ss-port-flag {
   width: 16px;
@@ -4173,8 +4178,9 @@
   gap: 4px;
   margin-bottom: 5px;
   flex-shrink: 0;
+  min-height: 24px;
 }
-.ss-port-dash { color: #64748b; font-size: 0.65rem; }
+.ss-port-dash { color: #64748b; font-size: 0.65rem; line-height: 1; }
 .ss-port-date {
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.25);
@@ -4182,6 +4188,8 @@
   border-radius: 5px;
   padding: 2px 4px;
   font-size: 0.65rem;
+  height: 24px;
+  box-sizing: border-box;
   min-width: 0;
   flex: 1;
   max-width: 118px;
@@ -4189,17 +4197,21 @@
 }
 .ss-port-icon-btn {
   border: 1px solid rgba(148, 163, 184, 0.28);
-  background: transparent;
+  background: rgba(15, 23, 42, 0.55);
   color: #94a3b8;
   border-radius: 5px;
   width: 24px;
-  height: 22px;
-  line-height: 1;
+  height: 24px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
   cursor: pointer;
-  font-size: 0.75rem;
   flex-shrink: 0;
 }
-.ss-port-icon-btn:hover { color: #e2e8f0; border-color: rgba(103, 232, 249, 0.45); }
+.ss-port-icon-btn svg { display: block; }
+.ss-port-icon-btn:hover { color: #67e8f9; border-color: rgba(103, 232, 249, 0.5); }
 .ss-port-content {
   flex: 1 1 auto;
   min-height: 0;
@@ -4399,13 +4411,24 @@
   border: 2px solid #0ea5e9;
 }
 .ss-sky-events {
-  font-size: 0.6rem;
-  color: #64748b;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.62rem;
+  color: #94a3b8;
+  letter-spacing: 0.01em;
 }
+.ss-sky-ev {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #cbd5e1;
+  font-variant-numeric: tabular-nums;
+}
+.ss-sky-ev-rise { color: #fbbf24; }
+.ss-sky-ev-set { color: #fb7185; }
+.ss-sky-ev-ico { flex-shrink: 0; }
 .leaflet-ports-pane {
   z-index: 650;
 }
