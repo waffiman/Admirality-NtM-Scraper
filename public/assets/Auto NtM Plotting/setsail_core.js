@@ -2340,10 +2340,47 @@ const MARINE_WEATHER_STORE = {
     { coords: [17.8, 148.5], dir: 200, speed: 30, label: "30 kts (Twentyeight)" },
     { coords: [32.5, 149.9], dir: 200, speed: 75, label: "75 kts (Koguma)" },
     { coords: [8.4, -93.6], dir: 160, speed: 25, label: "25 kts (93E)" }
-  ]
+  ],
+  opcWarnings: [],
+  buoys: [],
+  pressureGrid: [],
+  currents: []
 };
 
 window.MARINE_WEATHER_STORE = MARINE_WEATHER_STORE;
+
+const WEATHER_LAYER_STORAGE_KEY = "setsail_weather_layers_v1";
+const DEFAULT_WEATHER_SUBFILTERS = {
+  cyclones: true,
+  waves: true,
+  opc: true,
+  buoys: true,
+  pressure: true,
+  winds: true,
+  currents: true
+};
+
+function loadWeatherSubfilters() {
+  let saved = {};
+  try {
+    saved = JSON.parse(localStorage.getItem(WEATHER_LAYER_STORAGE_KEY) || "{}") || {};
+  } catch (e) {
+    saved = {};
+  }
+  return Object.assign({}, DEFAULT_WEATHER_SUBFILTERS, saved);
+}
+
+function saveWeatherSubfilters(next) {
+  window.WEATHER_SUBFILTERS = Object.assign({}, DEFAULT_WEATHER_SUBFILTERS, next || {});
+  try {
+    localStorage.setItem(WEATHER_LAYER_STORAGE_KEY, JSON.stringify(window.WEATHER_SUBFILTERS));
+  } catch (e) {}
+  return window.WEATHER_SUBFILTERS;
+}
+
+window.WEATHER_SUBFILTERS = loadWeatherSubfilters();
+window.loadWeatherSubfilters = loadWeatherSubfilters;
+window.saveWeatherSubfilters = saveWeatherSubfilters;
 
 function renderWeatherOnMap(map = null) {
   const currentMap = map || (typeof leafletMap !== "undefined" ? leafletMap : null);
@@ -2368,7 +2405,7 @@ function renderWeatherOnMap(map = null) {
   const NM_TO_METERS = 1852;
   const curZoom = currentMap.getZoom ? currentMap.getZoom() : 3;
   const canvasRenderer = window._setsailCanvasRenderer || null;
-  const wxSub = window.WEATHER_SUBFILTERS || { cyclones: true, pressure: true, waves: true, winds: true };
+  const wxSub = window.WEATHER_SUBFILTERS || loadWeatherSubfilters();
   const activeStormCenters = (MARINE_WEATHER_STORE.storms || []).map(s => s.center).filter(Boolean);
 
   // 1. Tropical Cyclones with True Perpendicular Cones & Exact Center-Anchored Icons
@@ -2631,9 +2668,118 @@ function renderWeatherOnMap(map = null) {
       leafletWeatherLayer.addLayer(wvMarker);
     });
   }
+
+  // 5. OPC High Seas Gale / Storm / Hurricane warnings
+  if (wxSub.opc !== false) {
+    const sevColor = { HURRICANE: "#ef4444", STORM: "#f97316", "TROPICAL STORM": "#fb923c", GALE: "#eab308" };
+    (MARINE_WEATHER_STORE.opcWarnings || []).forEach((w) => {
+      if (!w || !w.center) return;
+      if (window.ROUTE_CORRIDOR_FILTER_ENABLED && typeof window.isPointInActiveRouteCorridor === "function") {
+        if (!window.isPointInActiveRouteCorridor(w.center[0], w.center[1], w.radiusNm || 120)) return;
+      }
+      const col = sevColor[w.severity] || "#f59e0b";
+      const circle = L.circle(w.center, {
+        radius: (w.radiusNm || 120) * NM_TO_METERS,
+        color: col,
+        weight: 1.2,
+        dashArray: "6, 4",
+        fillColor: col,
+        fillOpacity: 0.07
+      });
+      circle.bindPopup(
+        `<div style="font-family:sans-serif;font-size:11px;min-width:200px;line-height:1.4;">` +
+        `<strong style="color:${col};">${w.headline || w.severity}</strong><br>` +
+        `<div style="margin-top:4px;color:#334155;">${(w.summary || "").replace(/</g, "&lt;")}</div>` +
+        `<div style="font-size:9px;color:#64748b;margin-top:5px;">NOAA OPC High Seas · ${w.basin || ""}</div></div>`
+      );
+      leafletWeatherLayer.addLayer(circle);
+      if (curZoom >= 3) {
+        const badge = L.divIcon({
+          className: "weather-opc-badge",
+          html: `<div style="background:rgba(15,23,42,0.9);color:${col};font-size:8px;font-weight:800;padding:1px 5px;border-radius:3px;border:1px solid ${col};white-space:nowrap;">${w.severity || "OPC"}</div>`,
+          iconSize: [64, 14],
+          iconAnchor: [32, 7]
+        });
+        leafletWeatherLayer.addLayer(L.marker(w.center, { icon: badge, interactive: false }));
+      }
+    });
+  }
+
+  // 6. NDBC buoy observations
+  if (wxSub.buoys !== false && curZoom >= 3) {
+    (MARINE_WEATHER_STORE.buoys || []).forEach((b) => {
+      if (!b || !Number.isFinite(b.lat) || !Number.isFinite(b.lon)) return;
+      if (curZoom < 4.5 && (b.waveHs == null || b.waveHs < 2.5) && (b.windKt == null || b.windKt < 25)) return;
+      const windStr = b.windKt != null ? `${b.windKt} kn` : "—";
+      const hsStr = b.waveHs != null ? `${b.waveHs} m` : "—";
+      const icon = L.divIcon({
+        className: "weather-buoy-icon",
+        html: `<div style="width:9px;height:9px;border-radius:50%;background:#22d3ee;border:1.5px solid #0f172a;box-shadow:0 0 0 1px rgba(34,211,238,0.45);"></div>`,
+        iconSize: [9, 9],
+        iconAnchor: [4, 4]
+      });
+      const m = L.marker([b.lat, b.lon], { icon });
+      m.bindPopup(
+        `<div style="font-family:sans-serif;font-size:11px;min-width:170px;">` +
+        `<strong style="color:#0891b2;">NDBC ${b.id}</strong><br>` +
+        `<strong>Wind:</strong> ${windStr}${b.windDir != null ? ` @ ${b.windDir}°` : ""}${b.gustKt != null ? ` (G ${b.gustKt})` : ""}<br>` +
+        `<strong>Hs:</strong> ${hsStr}${b.wavePeriod != null ? ` · ${b.wavePeriod}s` : ""}<br>` +
+        `<strong>Pressure:</strong> ${b.pressureMb != null ? b.pressureMb + " mb" : "—"}<br>` +
+        `<strong>SST:</strong> ${b.sstC != null ? b.sstC + " °C" : "—"}<br>` +
+        `<div style="font-size:9px;color:#64748b;margin-top:3px;">${b.timeUtc || ""} · NOAA NDBC</div></div>`
+      );
+      leafletWeatherLayer.addLayer(m);
+    });
+  }
+
+  // 7. Pressure MSL grid labels
+  if (wxSub.pressure !== false && curZoom >= 3.5) {
+    (MARINE_WEATHER_STORE.pressureGrid || []).forEach((p) => {
+      if (!p || p.mslhPa == null) return;
+      if (curZoom < 5 && Math.abs(p.lat % 24) > 0.1 && Math.abs(p.lon % 24) > 0.1) return;
+      const icon = L.divIcon({
+        className: "weather-msl-label",
+        html: `<div style="font-size:8px;font-weight:700;color:#cbd5e1;background:rgba(15,23,42,0.55);padding:0 3px;border-radius:2px;">${Math.round(p.mslhPa)}</div>`,
+        iconSize: [28, 12],
+        iconAnchor: [14, 6]
+      });
+      leafletWeatherLayer.addLayer(L.marker([p.lat, p.lon], { icon, interactive: false }));
+    });
+  }
+
+  // 8. Ocean currents
+  if (wxSub.currents !== false && curZoom >= 3) {
+    (MARINE_WEATHER_STORE.currents || []).forEach((c) => {
+      if (!c || c.speedKn == null) return;
+      if (c.speedKn < 0.15 && curZoom < 5) return;
+      const rot = (Number(c.dirDeg) || 0) % 360;
+      const icon = L.divIcon({
+        className: "weather-current-icon",
+        html: `<div style="width:14px;height:14px;transform:rotate(${rot}deg);transform-origin:center;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:#a78bfa;opacity:0.9;"><path d="M12 2L5 20l7-3 7 3z"/></svg></div>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7]
+      });
+      const m = L.marker([c.lat, c.lon], { icon });
+      m.bindPopup(`<strong>Ocean current:</strong> ${c.speedKn} kn @ ${c.dirDeg}°<br><span style="font-size:9px;color:#64748b;">Open-Meteo Marine</span>`);
+      leafletWeatherLayer.addLayer(m);
+    });
+  }
 }
 
 window.renderWeatherOnMap = renderWeatherOnMap;
+
+function weatherPayloadHasData(data) {
+  if (!data || typeof data !== "object") return false;
+  return (
+    (Array.isArray(data.storms) && data.storms.length > 0) ||
+    (Array.isArray(data.waves) && data.waves.length > 0) ||
+    (Array.isArray(data.opcWarnings) && data.opcWarnings.length > 0) ||
+    (Array.isArray(data.buoys) && data.buoys.length > 0) ||
+    (Array.isArray(data.pressureGrid) && data.pressureGrid.length > 0) ||
+    (Array.isArray(data.currents) && data.currents.length > 0) ||
+    (Array.isArray(data.pressureCenters) && data.pressureCenters.length > 0)
+  );
+}
 
 async function refreshMarineWeather(force = false) {
   try {
@@ -2650,7 +2796,7 @@ async function refreshMarineWeather(force = false) {
       urls.map(u => fetch(u, { cache: "no-store" }).then(r => (r.ok ? r.json() : null)).catch(() => null))
     );
     for (const res of results) {
-      if (res.status === "fulfilled" && res.value && Array.isArray(res.value.storms) && res.value.storms.length > 0) {
+      if (res.status === "fulfilled" && weatherPayloadHasData(res.value)) {
         const candidateTs = Date.parse(res.value.lastSyncUtc || "") || 0;
         if (!bestData || candidateTs >= bestTs) {
           bestData = res.value;
@@ -2659,8 +2805,8 @@ async function refreshMarineWeather(force = false) {
       }
     }
 
-    if (bestData && Array.isArray(bestData.storms) && bestData.storms.length > 0) {
-      MARINE_WEATHER_STORE.storms = bestData.storms;
+    if (bestData && weatherPayloadHasData(bestData)) {
+      if (Array.isArray(bestData.storms)) MARINE_WEATHER_STORE.storms = bestData.storms;
       if (Array.isArray(bestData.waves) && bestData.waves.length > 0) {
         MARINE_WEATHER_STORE.waves = bestData.waves;
       }
@@ -2670,6 +2816,10 @@ async function refreshMarineWeather(force = false) {
       if (Array.isArray(bestData.windVectors) && bestData.windVectors.length > 0) {
         MARINE_WEATHER_STORE.windVectors = bestData.windVectors;
       }
+      if (Array.isArray(bestData.opcWarnings)) MARINE_WEATHER_STORE.opcWarnings = bestData.opcWarnings;
+      if (Array.isArray(bestData.buoys)) MARINE_WEATHER_STORE.buoys = bestData.buoys;
+      if (Array.isArray(bestData.pressureGrid)) MARINE_WEATHER_STORE.pressureGrid = bestData.pressureGrid;
+      if (Array.isArray(bestData.currents)) MARINE_WEATHER_STORE.currents = bestData.currents;
       if (bestData.synopticCycle) MARINE_WEATHER_STORE.synopticCycle = bestData.synopticCycle;
       if (bestData.lastSyncUtc) MARINE_WEATHER_STORE.lastSyncUtc = bestData.lastSyncUtc;
       if (bestData.provider) MARINE_WEATHER_STORE.provider = bestData.provider;
@@ -2723,8 +2873,16 @@ async function refreshMarineWeather(force = false) {
     updateWeatherModalActiveStorms();
   }
   if (force && typeof showSetSailToast === "function") {
-    const stormNames = (MARINE_WEATHER_STORE.storms || []).map(s => s.shortName || s.name).join(", ");
-    showSetSailToast(`Synced ${MARINE_WEATHER_STORE.storms.length} Active Cyclones (${stormNames})`, "success");
+    const nCyc = (MARINE_WEATHER_STORE.storms || []).length;
+    const nOpc = (MARINE_WEATHER_STORE.opcWarnings || []).length;
+    const nBuoy = (MARINE_WEATHER_STORE.buoys || []).length;
+    showSetSailToast(
+      `Weather synced: ${nCyc} cyclones · ${nOpc} OPC · ${nBuoy} buoys`,
+      "success"
+    );
+  }
+  if (typeof syncWeatherModalLayerChecks === "function") {
+    syncWeatherModalLayerChecks();
   }
 }
 
@@ -6389,6 +6547,50 @@ function initNtmOverlayInfoModal() {
   if (closeBtn2) closeBtn2.addEventListener("click", () => modal.classList.remove("open"));
 }
 
+function syncWeatherModalLayerChecks() {
+  const map = {
+    wxLayerCyclones: "cyclones",
+    wxLayerWaves: "waves",
+    wxLayerOpc: "opc",
+    wxLayerBuoys: "buoys",
+    wxLayerPressure: "pressure",
+    wxLayerWinds: "winds",
+    wxLayerCurrents: "currents"
+  };
+  const sub = window.WEATHER_SUBFILTERS || loadWeatherSubfilters();
+  Object.keys(map).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.checked = sub[map[id]] !== false;
+  });
+}
+
+function applyWeatherModalLayerChecks() {
+  const next = {
+    cyclones: !!(document.getElementById("wxLayerCyclones") || { checked: true }).checked,
+    waves: !!(document.getElementById("wxLayerWaves") || { checked: true }).checked,
+    opc: !!(document.getElementById("wxLayerOpc") || { checked: true }).checked,
+    buoys: !!(document.getElementById("wxLayerBuoys") || { checked: true }).checked,
+    pressure: !!(document.getElementById("wxLayerPressure") || { checked: true }).checked,
+    winds: !!(document.getElementById("wxLayerWinds") || { checked: true }).checked,
+    currents: !!(document.getElementById("wxLayerCurrents") || { checked: true }).checked
+  };
+  saveWeatherSubfilters(next);
+  // Keep filter-popover checkboxes in sync when present
+  const popMap = {
+    popWxCyclones: "cyclones",
+    popWxWaves: "waves",
+    popWxPressure: "pressure",
+    popWxWinds: "winds"
+  };
+  Object.keys(popMap).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.checked = next[popMap[id]] !== false;
+  });
+  if (typeof renderWeatherOnMap === "function") {
+    renderWeatherOnMap(typeof leafletMap !== "undefined" ? leafletMap : null);
+  }
+}
+
 function initWeatherOverlayInfoModal() {
   const modal = document.getElementById("weatherOverlayModal");
   if (!modal) return;
@@ -6404,7 +6606,26 @@ function initWeatherOverlayInfoModal() {
       }
     });
   }
+  [
+    "wxLayerCyclones",
+    "wxLayerWaves",
+    "wxLayerOpc",
+    "wxLayerBuoys",
+    "wxLayerPressure",
+    "wxLayerWinds",
+    "wxLayerCurrents"
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && !el._ssWxWired) {
+      el._ssWxWired = true;
+      el.addEventListener("change", applyWeatherModalLayerChecks);
+    }
+  });
+  syncWeatherModalLayerChecks();
 }
+
+window.syncWeatherModalLayerChecks = syncWeatherModalLayerChecks;
+window.applyWeatherModalLayerChecks = applyWeatherModalLayerChecks;
 
 function flyToCycloneFromModal(lat, lon) {
   const modal = document.getElementById("weatherOverlayModal");
@@ -6438,20 +6659,16 @@ function showWeatherInfoModal() {
     }
     const meta = document.getElementById("weatherModalLiveMeta");
     if (meta) {
-      const storms = (store.storms || []).length;
-      const waves = (store.waves || []).length;
-      const pressure = (store.pressureCenters || []).length;
-      const winds = (store.windVectors || []).length;
       const sync = store.lastSyncUtc
         ? new Date(store.lastSyncUtc).toISOString().slice(0, 16).replace("T", " ") + "Z"
         : "—";
-      const names = (store.storms || []).map((s) => s.shortName || s.name).filter(Boolean).slice(0, 4).join(", ");
       meta.innerHTML =
         `<div><span style="color:#94a3b8;">Last sync</span><br><b style="color:#e2e8f0;">${sync}</b></div>` +
-        `<div><span style="color:#94a3b8;">Cyclones</span><br><b style="color:#fde68a;">${storms}</b>${names ? ` <span style="color:#94a3b8;font-size:0.65rem;">${names}</span>` : ""}</div>` +
-        `<div><span style="color:#94a3b8;">Waves</span><br><b style="color:#7dd3fc;">${waves}</b></div>` +
-        `<div><span style="color:#94a3b8;">Pressure · wind</span><br><b style="color:#cbd5e1;">${pressure} · ${winds}</b></div>`;
+        `<div><span style="color:#94a3b8;">Cyclones · OPC</span><br><b style="color:#fde68a;">${(store.storms || []).length} · ${(store.opcWarnings || []).length}</b></div>` +
+        `<div><span style="color:#94a3b8;">Waves · Buoys</span><br><b style="color:#7dd3fc;">${(store.waves || []).length} · ${(store.buoys || []).length}</b></div>` +
+        `<div><span style="color:#94a3b8;">MSL · Currents</span><br><b style="color:#cbd5e1;">${(store.pressureGrid || []).length} · ${(store.currents || []).length}</b></div>`;
     }
+    syncWeatherModalLayerChecks();
     updateWeatherModalActiveStorms();
   }
 }
@@ -7015,7 +7232,9 @@ function initNavDataExportListeners() {
 
 let filterMinPortDepth = 0;
 window.filterMinPortDepth = 0;
-window.WEATHER_SUBFILTERS = { cyclones: true, pressure: true, waves: true, winds: true };
+if (!window.WEATHER_SUBFILTERS) {
+  window.WEATHER_SUBFILTERS = loadWeatherSubfilters();
+}
 window.PORTS_SUBFILTERS = { fairways: true, isobaths: true };
 window.ROUTE_SUBFILTERS = { waypoints: true, line: true };
 
@@ -7072,12 +7291,17 @@ function initMasterFilterControls() {
   const chkWxWinds    = document.getElementById("popWxWinds");
 
   const updateWeatherSubfilters = () => {
-    window.WEATHER_SUBFILTERS = {
-      cyclones: chkWxCyclones ? chkWxCyclones.checked : true,
-      pressure: chkWxPressure ? chkWxPressure.checked : true,
-      waves:    chkWxWaves    ? chkWxWaves.checked    : true,
-      winds:    chkWxWinds    ? chkWxWinds.checked    : true
-    };
+    const prev = window.WEATHER_SUBFILTERS || loadWeatherSubfilters();
+    saveWeatherSubfilters({
+      cyclones: chkWxCyclones ? chkWxCyclones.checked : prev.cyclones !== false,
+      pressure: chkWxPressure ? chkWxPressure.checked : prev.pressure !== false,
+      waves: chkWxWaves ? chkWxWaves.checked : prev.waves !== false,
+      winds: chkWxWinds ? chkWxWinds.checked : prev.winds !== false,
+      opc: prev.opc !== false,
+      buoys: prev.buoys !== false,
+      currents: prev.currents !== false
+    });
+    if (typeof syncWeatherModalLayerChecks === "function") syncWeatherModalLayerChecks();
     if (typeof renderWeatherOnMap === "function") {
       renderWeatherOnMap(leafletMap);
     }

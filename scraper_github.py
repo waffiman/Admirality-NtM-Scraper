@@ -2022,14 +2022,40 @@ def scrape_live_marine_weather() -> dict:
         pass
 
     print(f"  [+] Scraped {len(storms_list)} live active tropical systems: {[s['shortName'] for s in storms_list]}")
+
+    # F. OPC High Seas / NDBC buoys / MSL pressure grid / ocean currents
+    opc_warnings = []
+    ndbc_buoys = []
+    pressure_grid = []
+    ocean_currents = []
+    try:
+        from _weather_layers_scrape import (
+            scrape_opc_warnings,
+            scrape_ndbc_buoys,
+            scrape_pressure_grid,
+            scrape_ocean_currents,
+        )
+        sess = requests.Session() if requests else None
+        if sess is not None:
+            opc_warnings = scrape_opc_warnings(sess, ua)
+            ndbc_buoys = scrape_ndbc_buoys(sess, ua)
+            pressure_grid = scrape_pressure_grid(sess, ua)
+            ocean_currents = scrape_ocean_currents(sess, ua)
+    except Exception as e:
+        print(f"  [!] Extended weather layers scrape warning: {e}")
+
     return {
         "synopticCycle": now_dt.strftime("%H00 UTC"),
         "lastSyncUtc": now_iso,
-        "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
+        "provider": "NOAA NHC + JTWC + JMA RSMC + NOAA OPC High Seas + NDBC + Open-Meteo ECMWF IFS / Marine",
         "storms": storms_list,
         "waves": waves_list,
         "pressureCenters": pressure_centers,
-        "windVectors": wind_vectors
+        "windVectors": wind_vectors,
+        "opcWarnings": opc_warnings,
+        "buoys": ndbc_buoys,
+        "pressureGrid": pressure_grid,
+        "currents": ocean_currents,
     }
 
 if __name__ == "__main__":

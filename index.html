@@ -51,7 +51,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.54" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.55" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -19590,7 +19590,17 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
               <span style="font-size:0.68rem;background:#10b981;color:#fff;padding:2px 7px;border-radius:4px;font-weight:700;" id="weatherModalStatusBadge">LIVE</span>
             </div>
             <div id="weatherModalLiveMeta" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;font-size:0.72rem;"></div>
-            <div style="font-size:0.68rem;color:#64748b;margin-bottom:10px;">NOAA NHC · JMA · JTWC · Open-Meteo / ECMWF</div>
+            <div style="font-size:0.68rem;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Layers on chart</div>
+            <div id="weatherModalLayerChecks" style="display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-bottom:10px;font-size:0.72rem;color:#e2e8f0;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerCyclones" checked> Cyclones</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerWaves" checked> Waves</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerOpc" checked> OPC Gale/Storm</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerBuoys" checked> NDBC buoys</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerPressure" checked> Pressure MSL</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerWinds" checked> Wind</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerCurrents" checked> Ocean currents</label>
+            </div>
+            <div style="font-size:0.65rem;color:#64748b;margin-bottom:10px;">NOAA NHC · OPC · NDBC · JTWC · JMA · Open-Meteo / ECMWF</div>
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <button type="button" class="ntm-btn-glass" id="btnRefreshWeatherModal" style="padding:4px 10px;font-size:0.72rem;">Refresh</button>
               <button type="button" class="secondary" id="weatherOverlayModalCloseBtn" style="margin-top:0;padding:4px 14px;font-size:0.78rem;">Close</button>
@@ -19752,23 +19762,23 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.54"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.54" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.54"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.55"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.55" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.55"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.54",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.55",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.54"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.54"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.54"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.55"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.55"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.55"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19846,7 +19856,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.54"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.55"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20225,7 +20235,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.54', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.55', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
