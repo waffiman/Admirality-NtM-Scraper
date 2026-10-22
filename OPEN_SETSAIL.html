@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.57" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.58" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -11602,8 +11602,33 @@ select option {
       color: #38bdf8 !important;
       transform: translateY(-1px);
     }
-    .home-hud-login-btn.signed-in .home-hud-text {
+    .home-hud-login-btn.signed-in .home-hud-text,
+    .home-hud-login-btn.logged-in .home-hud-text {
       color: #34d399 !important;
+      text-transform: none !important;
+      letter-spacing: 0.02em !important;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .home-hud-auth-avatar {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 18px !important;
+      height: 18px !important;
+      border-radius: 50% !important;
+      overflow: hidden !important;
+      flex-shrink: 0 !important;
+      font-size: 0.62rem !important;
+      font-weight: 800 !important;
+      background: transparent;
+    }
+    .home-hud-auth-avatar.is-photo {
+      width: 22px !important;
+      height: 22px !important;
+      box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.45);
     }
     /* 4. Settings Top Account & Google Login Card */
     .settings-account-card {
@@ -11844,7 +11869,7 @@ select option {
               <div class="home-hud-pill home-hud-left" id="homeHudLeftSlot" style="grid-column:1 !important;justify-self:start !important;position:relative !important;min-width:0 !important;">
                 <div class="hud-left-brand-wrap" id="homeHudLeftBrand">
                   <button type="button" class="home-hud-login-btn" id="homeHudLeftLoginBtn" title="Sign in or manage your SetSail Account (Google OAuth / Bridge Profile)">
-                    <span class="home-hud-icon" style="display:inline-flex;align-items:center;"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg></span>
+                    <span class="home-hud-icon home-hud-auth-avatar" id="homeHudAuthAvatar" aria-hidden="true"><svg class="setsail-icon" viewBox="0 0 24 24" width="14" height="14"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg></span>
                     <span class="home-hud-text" id="homeHudLeftLoginText" data-i18n="btn_google_signin">Sign-In</span>
                   </button>
                 </div>
@@ -12031,20 +12056,20 @@ select option {
             <section class="home-slide-about" id="homeSlideAbout" aria-label="About SetSail">
               <div class="home-about-life">
                 <div class="about-mosaic" id="homeAboutMosaic" aria-hidden="true">
-                  <figure class="about-moz-tile" data-reveal="0.0" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.013" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.026" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.04" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.053" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.066" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.079" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.093" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.106" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.119" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.132" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.146" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1471922694854-ff1b63b51dfc?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.159" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
-                  <figure class="about-moz-tile" data-reveal="0.172" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.0" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.013" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.026" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.04" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.053" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.066" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.079" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.093" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.106" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.119" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.132" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.146" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1471922694854-ff1b63b51dfc?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.159" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.172" style="grid-column: span 1; grid-row: span 1;"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
                   <figure class="about-moz-tile" data-reveal="0.185" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
                   <figure class="about-moz-tile" data-reveal="0.199" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
                   <figure class="about-moz-tile" data-reveal="0.212" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
@@ -14847,7 +14872,7 @@ select option {
 
 
 
-    const STARS = [{"n": "Acamar", "ra": 2.97111111, "d": -40.31}, {"n": "Achernar", "ra": 1.62861111, "d": -57.24333333}, {"n": "Acrux", "ra": 12.44333333, "d": -63.09166667}, {"n": "Adhara", "ra": 6.9775, "d": -28.97333333}, {"n": "Aldebaran", "ra": 4.59888889, "d": 16.50833333}, {"n": "Alioth", "ra": 12.9, "d": 55.95666667}, {"n": "Alkaid", "ra": 13.79194444, "d": 49.31166667}, {"n": "Al Na'ir", "ra": 22.13638889, "d": -46.965}, {"n": "Alnilam", "ra": 5.60361111, "d": -1.195}, {"n": "Alphard", "ra": 9.46, "d": -8.65833333}, {"n": "Alphecca", "ra": 15.5775, "d": 26.715}, {"n": "Alpheratz", "ra": 0.13944444, "d": 29.09166667}, {"n": "Altair", "ra": 19.84583333, "d": 8.86833333}, {"n": "Ankaa", "ra": 0.43777778, "d": -42.31166667}, {"n": "Antares", "ra": 16.48944444, "d": -26.42833333}, {"n": "Arcturus", "ra": 14.26083333, "d": 19.18666667}, {"n": "Atria", "ra": 16.80972222, "d": -69.02333333}, {"n": "Avior", "ra": 8.37583333, "d": -59.50833333}, {"n": "Bellatrix", "ra": 5.41888889, "d": 6.34833333}, {"n": "Betelgeuse", "ra": 5.91972222, "d": 7.405}, {"n": "Canopus", "ra": 6.39972222, "d": -52.69833333}, {"n": "Capella", "ra": 5.27833333, "d": 45.99833333}, {"n": "Deneb", "ra": 20.69, "d": 45.28166667}, {"n": "Denebola", "ra": 11.8175, "d": 14.57166667}, {"n": "Diphda", "ra": 0.72611111, "d": -17.99}, {"n": "Dubhe", "ra": 11.06194444, "d": 61.74666667}, {"n": "Elnath", "ra": 5.43833333, "d": 28.60666667}, {"n": "Eltanin", "ra": 17.94277778, "d": 51.48833333}, {"n": "Enif", "ra": 21.73611111, "d": 9.875}, {"n": "Formalhaut", "ra": 22.96027778, "d": -29.62666667}, {"n": "Gacrux", "ra": 12.51944444, "d": -57.10666667}, {"n": "Gienah", "ra": 12.26333333, "d": -17.53833333}, {"n": "Hadar", "ra": 14.06333333, "d": -60.36666667}, {"n": "Hamal", "ra": 2.11944444, "d": 23.46333333}, {"n": "Kaus Austr.", "ra": 18.40194444, "d": -34.38333333}, {"n": "Kochab", "ra": 14.84416667, "d": 74.15333333}, {"n": "Markab", "ra": 23.07888889, "d": 15.205}, {"n": "Menkar", "ra": 3.03805556, "d": 4.08666667}, {"n": "Menkent", "ra": 14.11111111, "d": -36.365}, {"n": "Miaplacidus", "ra": 9.22111111, "d": -69.71333333}, {"n": "Mirfak", "ra": 3.40555556, "d": 49.86166667}, {"n": "Nunki", "ra": 18.92027778, "d": -26.295}, {"n": "Peacock", "ra": 20.42638889, "d": -56.73666667}, {"n": "Pollux", "ra": 7.75555556, "d": 28.025}, {"n": "Procyon", "ra": 7.65527778, "d": 5.225}, {"n": "Rasalhague", "ra": 17.58166667, "d": 12.56166667}, {"n": "Regulus", "ra": 10.13944444, "d": 11.96666667}, {"n": "Rigel", "ra": 5.2425, "d": -8.205}, {"n": "Rigil Kent", "ra": 14.66027778, "d": -60.83}, {"n": "Sabik", "ra": 17.17222222, "d": -15.72333333}, {"n": "Schedar", "ra": 0.675, "d": 56.54}, {"n": "Shaula", "ra": 17.55944444, "d": -37.10166667}, {"n": "Sirius", "ra": 6.75277778, "d": -16.715}, {"n": "Spica", "ra": 13.41972222, "d": -11.15833333}, {"n": "Suhail", "ra": 9.13361111, "d": -43.43}, {"n": "Vega", "ra": 18.615, "d": 38.78333333}, {"n": "Zuben'ubi", "ra": 14.8475, "d": -16.03833333}];
+    const STARS = [{"n": "Acamar", "ra": 2.97111111, "d": -40.31}, {"n": "Achernar", "ra": 1.62861111, "d": -57.24333333}, {"n": "Acrux", "ra": 12.44333333, "d": -63.09166667}, {"n": "Adhara", "ra": 6.9775, "d": -28.97333333}, {"n": "Aldebaran", "ra": 4.59888889, "d": 16.50833333}, {"n": "Alioth", "ra": 12.9, "d": 55.95666667}, {"n": "Alkaid", "ra": 13.79194444, "d": 49.31166667}, {"n": "Al Na'ir", "ra": 22.13638889, "d": -46.965}, {"n": "Alnilam", "ra": 5.60361111, "d": -1.195}, {"n": "Alphard", "ra": 9.46, "d": -8.65833333}, {"n": "Alphecca", "ra": 15.5875, "d": 26.715}, {"n": "Alpheratz", "ra": 0.13944444, "d": 29.09166667}, {"n": "Altair", "ra": 19.84583333, "d": 8.86833333}, {"n": "Ankaa", "ra": 0.43777778, "d": -42.31166667}, {"n": "Antares", "ra": 16.48944444, "d": -26.42833333}, {"n": "Arcturus", "ra": 14.26083333, "d": 19.18666667}, {"n": "Atria", "ra": 16.80972222, "d": -69.02333333}, {"n": "Avior", "ra": 8.37583333, "d": -59.50833333}, {"n": "Bellatrix", "ra": 5.41888889, "d": 6.34833333}, {"n": "Betelgeuse", "ra": 5.91972222, "d": 7.405}, {"n": "Canopus", "ra": 6.39972222, "d": -52.69833333}, {"n": "Capella", "ra": 5.27833333, "d": 45.99833333}, {"n": "Deneb", "ra": 20.69, "d": 45.28166667}, {"n": "Denebola", "ra": 11.8175, "d": 14.57166667}, {"n": "Diphda", "ra": 0.72611111, "d": -17.99}, {"n": "Dubhe", "ra": 11.06194444, "d": 61.74666667}, {"n": "Elnath", "ra": 5.43833333, "d": 28.60666667}, {"n": "Eltanin", "ra": 17.94277778, "d": 51.48833333}, {"n": "Enif", "ra": 21.73611111, "d": 9.875}, {"n": "Formalhaut", "ra": 22.96027778, "d": -29.62666667}, {"n": "Gacrux", "ra": 12.51944444, "d": -57.10666667}, {"n": "Gienah", "ra": 12.26333333, "d": -17.53833333}, {"n": "Hadar", "ra": 14.06333333, "d": -60.36666667}, {"n": "Hamal", "ra": 2.11944444, "d": 23.46333333}, {"n": "Kaus Austr.", "ra": 18.40194444, "d": -34.38333333}, {"n": "Kochab", "ra": 14.84416667, "d": 74.15333333}, {"n": "Markab", "ra": 23.07888889, "d": 15.205}, {"n": "Menkar", "ra": 3.03805556, "d": 4.08666667}, {"n": "Menkent", "ra": 14.11111111, "d": -36.365}, {"n": "Miaplacidus", "ra": 9.22111111, "d": -69.71333333}, {"n": "Mirfak", "ra": 3.40555556, "d": 49.86166667}, {"n": "Nunki", "ra": 18.92027778, "d": -26.295}, {"n": "Peacock", "ra": 20.42638889, "d": -56.73666667}, {"n": "Pollux", "ra": 7.75555556, "d": 28.025}, {"n": "Procyon", "ra": 7.65527778, "d": 5.225}, {"n": "Rasalhague", "ra": 17.58166667, "d": 12.56166667}, {"n": "Regulus", "ra": 10.13944444, "d": 11.96666667}, {"n": "Rigel", "ra": 5.2425, "d": -8.205}, {"n": "Rigil Kent", "ra": 14.66027778, "d": -60.83}, {"n": "Sabik", "ra": 17.17222222, "d": -15.72333333}, {"n": "Schedar", "ra": 0.675, "d": 56.54}, {"n": "Shaula", "ra": 17.55944444, "d": -37.10166667}, {"n": "Sirius", "ra": 6.75277778, "d": -16.715}, {"n": "Spica", "ra": 13.41972222, "d": -11.15833333}, {"n": "Suhail", "ra": 9.13361111, "d": -43.43}, {"n": "Vega", "ra": 18.615, "d": 38.78333333}, {"n": "Zuben'ubi", "ra": 14.8475, "d": -16.03833333}];
 
 
 
@@ -19794,22 +19819,22 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.57"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.57" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.57"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.58"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.58" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.58"></script>
   <script>
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.57",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.58",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.57"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.57"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.57"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.58"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.58"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.58"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19887,7 +19912,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.57"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.58"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19946,7 +19971,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         const tiles = slide.querySelectorAll('.about-moz-tile');
         tiles.forEach((tile) => {
           const need = parseFloat(tile.getAttribute('data-reveal') || '0') || 0;
-          const on = p >= need * 0.92;
+          const on = p >= Math.max(0, need * 0.72 - 0.04);
           if (on) {
             tile.classList.add('is-in');
             const img = tile.querySelector('img[data-src]');
@@ -20298,7 +20323,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.57', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.58', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {

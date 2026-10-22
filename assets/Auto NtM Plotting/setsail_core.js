@@ -8913,33 +8913,63 @@ function setSetSailAuthUser(userObj) {
   syncSetSailAuthUI();
 }
 
+function _setsailAuthAvatarHtml(user, initChar) {
+  if (user && user.picture) {
+    const safeInit = String(initChar || "G").replace(/'/g, "");
+    return `<img src="${String(user.picture).replace(/"/g, "&quot;")}" alt="${safeInit}" referrerpolicy="no-referrer" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;" onerror="this.parentElement.textContent='${safeInit}'">`;
+  }
+  return String(initChar || "G");
+}
+
+function _setsailGuestHudAvatarHtml() {
+  return `<svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>`;
+}
+
 function syncSetSailAuthUI() {
   const user = getSetSailAuthUser();
   const hudBtn = document.getElementById("homeHudLeftLoginBtn");
   const hudText = document.getElementById("homeHudLeftLoginText") || document.getElementById("homeHudAuthText");
-  const hudAvatar = document.getElementById("homeHudAuthAvatar");
+  let hudAvatar = document.getElementById("homeHudAuthAvatar");
+  // Legacy markup: promote the left icon span into the avatar host if id is missing
+  if (!hudAvatar && hudBtn) {
+    const iconHost = hudBtn.querySelector(".home-hud-icon");
+    if (iconHost) {
+      iconHost.id = "homeHudAuthAvatar";
+      iconHost.classList.add("home-hud-auth-avatar");
+      hudAvatar = iconHost;
+    }
+  }
 
   if (hudBtn && hudText) {
     if (user && (user.name || user.email)) {
       const disp = user.name || user.email.split("@")[0];
       const initChar = disp.charAt(0).toUpperCase();
-      hudBtn.classList.add("logged-in");
+      hudBtn.classList.add("logged-in", "signed-in");
+      // Prevent i18n from overwriting the Google display name on language refresh
+      hudText.removeAttribute("data-i18n");
       hudText.textContent = disp;
       if (hudAvatar) {
-        if (user.picture) {
-          hudAvatar.innerHTML = `<img src="${user.picture}" alt="${initChar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.parentElement.textContent='${initChar}'">`;
-        } else {
-          hudAvatar.innerHTML = initChar;
-        }
+        hudAvatar.classList.add("is-photo");
+        hudAvatar.innerHTML = _setsailAuthAvatarHtml(user, initChar);
       }
       hudBtn.title = `Signed in as ${user.email || disp}`;
+      hudBtn.setAttribute("aria-label", `Signed in as ${disp}. Open account settings.`);
     } else {
-      hudBtn.classList.remove("logged-in");
-      hudText.textContent = "Sign-In";
-      if (hudAvatar) {
-        hudAvatar.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+      hudBtn.classList.remove("logged-in", "signed-in");
+      hudText.setAttribute("data-i18n", "btn_google_signin");
+      try {
+        const lang = (typeof getSetSailLanguage === "function" && getSetSailLanguage()) || "en";
+        const pack = (typeof SET_SAIL_LANGUAGES !== "undefined" && SET_SAIL_LANGUAGES[lang]) || null;
+        hudText.textContent = (pack && pack.translations && pack.translations.btn_google_signin) || "Sign-In";
+      } catch (eLang) {
+        hudText.textContent = "Sign-In";
       }
-      hudBtn.title = "Sign-In";
+      if (hudAvatar) {
+        hudAvatar.classList.remove("is-photo");
+        hudAvatar.innerHTML = _setsailGuestHudAvatarHtml();
+      }
+      hudBtn.title = "Sign in or manage your SetSail Account (Google OAuth / Bridge Profile)";
+      hudBtn.setAttribute("aria-label", "Sign in with Google");
     }
   }
 
@@ -8948,21 +8978,27 @@ function syncSetSailAuthUI() {
   const profileNameEl = document.getElementById("settingsAuthProfileName") || document.getElementById("settingsProfileName");
   const profileEmailEl = document.getElementById("settingsAuthProfileEmail") || document.getElementById("settingsProfileEmail");
   const profileAvatarEl = document.getElementById("settingsAuthProfileAvatar") || document.getElementById("settingsProfileAvatar");
+  const accountAvatarEl = document.getElementById("settingsAccountAvatar");
+  const accountBadge = document.getElementById("settingsAccountStatusBadge");
+  const accountSub = document.getElementById("settingsAccountSub");
   const contactEmailEl = document.getElementById("contactEmail");
 
   if (user && (user.email || user.name)) {
     if (loggedOutBox) loggedOutBox.style.display = "none";
     if (loggedInBox) loggedInBox.style.display = "flex";
-    if (profileNameEl) profileNameEl.textContent = user.name || user.email.split("@")[0];
+    const dispName = user.name || user.email.split("@")[0];
+    const initC = dispName.charAt(0).toUpperCase();
+    if (profileNameEl) profileNameEl.textContent = dispName;
     if (profileEmailEl) profileEmailEl.textContent = `${user.email || ""} • Google Account Synced`;
-    if (profileAvatarEl) {
-      const initC = (user.name || user.email || "G").charAt(0).toUpperCase();
-      if (user.picture) {
-        profileAvatarEl.innerHTML = `<img src="${user.picture}" alt="${initC}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.parentElement.textContent='${initC}'">`;
-      } else {
-        profileAvatarEl.textContent = initC;
-      }
+    if (profileAvatarEl) profileAvatarEl.innerHTML = _setsailAuthAvatarHtml(user, initC);
+    if (accountAvatarEl) accountAvatarEl.innerHTML = _setsailAuthAvatarHtml(user, initC);
+    if (accountBadge) {
+      accountBadge.textContent = "SIGNED IN";
+      accountBadge.style.background = "rgba(16,185,129,0.14)";
+      accountBadge.style.color = "#34d399";
+      accountBadge.style.borderColor = "rgba(16,185,129,0.35)";
     }
+    if (accountSub) accountSub.textContent = user.email || "Google Account Synced";
     if (contactEmailEl && !contactEmailEl.value && user.email) {
       contactEmailEl.value = user.email;
     }
@@ -8970,6 +9006,16 @@ function syncSetSailAuthUI() {
   } else {
     if (loggedOutBox) loggedOutBox.style.display = "block";
     if (loggedInBox) loggedInBox.style.display = "none";
+    if (accountAvatarEl) accountAvatarEl.innerHTML = _setsailGuestHudAvatarHtml();
+    if (accountBadge) {
+      accountBadge.textContent = "GUEST MODE";
+      accountBadge.style.background = "rgba(148,163,184,0.14)";
+      accountBadge.style.color = "#cbd5e1";
+      accountBadge.style.borderColor = "rgba(148,163,184,0.3)";
+    }
+    if (accountSub) {
+      accountSub.textContent = "Sign in with your Google Account to automatically save and sync your SetRoute passage plans, chart edits, vessel position & SetNews preferences";
+    }
   }
   try {
     if (typeof window.syncSetSailAdminUi === "function") window.syncSetSailAdminUi();
@@ -9211,6 +9257,14 @@ function initSetSailAuth() {
   if (hudBtn) {
     hudBtn.addEventListener("click", (e) => {
       e.stopPropagation();
+      const signed = getSetSailAuthUser();
+      if (signed && (signed.email || signed.name)) {
+        // Already signed in → open Settings account card instead of re-prompting Google
+        const settingsTab = document.querySelector('.nav-item[data-tab="tab-settings"]');
+        if (settingsTab) settingsTab.click();
+        else if (typeof window.switchTab === "function") window.switchTab("tab-settings");
+        return;
+      }
       triggerOfficialGoogleSignIn();
     });
   }
@@ -12825,6 +12879,11 @@ function applySetSailLanguage(langCode) {
   try {
     window.dispatchEvent(new CustomEvent("setsail:languagechange", { detail: { lang: langCode } }));
   } catch (e) {}
+
+  // Re-apply auth HUD after i18n — language pass would otherwise overwrite the Google display name with "Sign-In"
+  try {
+    if (typeof syncSetSailAuthUI === "function") syncSetSailAuthUI();
+  } catch (eAuth) {}
 }
 window.applySetSailLanguage = applySetSailLanguage;
 
