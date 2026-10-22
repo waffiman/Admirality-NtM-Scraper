@@ -19818,13 +19818,20 @@ function renderPortDepthsOnMap(map) {
 
     marker.bindPopup(popupHtml, {
       className: "ntm-dark-popup ss-port-popup",
-      maxWidth: 420,
-      minWidth: 300
+      maxWidth: 300,
+      minWidth: 280,
+      autoPan: true,
+      keepInView: true,
+      autoPanPadding: [18, 18],
+      closeButton: true
     });
     marker.on("popupopen", () => {
       try {
         const node = marker.getPopup() && marker.getPopup().getElement();
         const card = node && node.querySelector(".ss-port-card");
+        if (card && typeof window.wirePortCardInteractions === "function") {
+          window.wirePortCardInteractions(card);
+        }
         if (card && typeof window.ssPortCardLoad === "function") {
           window.ssPortCardLoad(card, "tides");
         }

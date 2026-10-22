@@ -12,8 +12,8 @@
   // Prefer already-loaded <script> from index.html; then same-origin files (no CDN — SW/CDN flakes)
   const ML_BUNDLES = [
     {
-      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.50",
-      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.50"
+      css: "assets/Auto%20NtM%20Plotting/maplibre-gl.css?v=5.51",
+      js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.51"
     }
   ];
   // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
@@ -590,22 +590,6 @@
     return kind || "Event";
   }
 
-  function skyKindLabel(kind) {
-    const k = String(kind || "");
-    const map = {
-      rise: "Sunrise",
-      set: "Sunset",
-      transit: "Solar noon",
-      civilDawn: "Civil dawn",
-      civilDusk: "Civil dusk",
-      nauticalDawn: "Nautical dawn",
-      nauticalDusk: "Nautical dusk",
-      astronomicalDawn: "Astronomical dawn",
-      astronomicalDusk: "Astronomical dusk"
-    };
-    return map[k] || k;
-  }
-
   function isoDayStart(d) {
     const x = new Date(d);
     x.setHours(0, 0, 0, 0);
@@ -634,35 +618,31 @@
 
   function emptyInfo(msg) {
     return (
-      '<div class="ss-port-empty">' +
-      '<span class="ss-port-empty-ico" aria-hidden="true">◌</span>' +
-      "<p>" + escHtml(msg || "No information found for this port.") + "</p>" +
-      "</div>"
+      '<div class="ss-port-empty"><p>' +
+      escHtml(msg || "No information found for this port.") +
+      "</p></div>"
     );
   }
 
-  function renderTidesTableHtml(data, meta) {
+  function renderTidesTableHtml(data) {
     const extremes = (data && (data.extremes || data.events)) || [];
     if (!extremes.length) {
       return emptyInfo("Tide information for this port was not found in Open Waters.");
     }
-    const station = (data && data.station && data.station.name) || (meta && meta.station) || "";
-    const datum = (data && data.datum) || "";
+    const station = (data && data.station && data.station.name) || "";
     const rows = extremes.map((e) => {
       const label = e.label || (e.high ? "High" : e.low ? "Low" : "—");
       const level = Number.isFinite(Number(e.level)) ? Number(e.level).toFixed(2) : "—";
       const cls = e.high || /high/i.test(label) ? "hi" : "lo";
       return (
         "<tr class=\"" + cls + "\"><td>" + escHtml(label) + "</td><td>" +
-        escHtml(formatOwTime(e.time)) + "</td><td>" + escHtml(level) + " m</td></tr>"
+        escHtml(formatOwTime(e.time, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })) +
+        "</td><td>" + escHtml(level) + "</td></tr>"
       );
     }).join("");
     return (
-      '<div class="ss-port-meta">' +
-      (station ? "<span>Station · " + escHtml(station) + "</span>" : "") +
-      (datum ? "<span>Datum · " + escHtml(datum) + "</span>" : "") +
-      '<span>Source · Open Waters</span></div>' +
-      '<div class="ss-port-table-wrap"><table class="ss-port-table"><thead><tr><th>Tide</th><th>Time</th><th>Height</th></tr></thead><tbody>' +
+      (station ? '<div class="ss-port-meta">' + escHtml(station) + "</div>" : "") +
+      '<div class="ss-port-table-wrap"><table class="ss-port-table"><thead><tr><th></th><th>Time</th><th>m</th></tr></thead><tbody>' +
       rows +
       "</tbody></table></div>"
     );
@@ -673,52 +653,18 @@
     if (!events.length) {
       return emptyInfo("Current information for this port was not found in Open Waters.");
     }
-    const station = (data && data.station && data.station.name) || "";
     const rows = events.map((e) => {
       const dir = Number.isFinite(Number(e.direction)) ? Math.round(Number(e.direction)) + "°" : "—";
       return (
         "<tr><td>" + escHtml(kindLabel(e.kind)) + "</td><td>" +
-        escHtml(formatOwTime(e.time)) + "</td><td>" + escHtml(formatSpeed(e.speed)) +
-        "</td><td>" + escHtml(dir) + "</td></tr>"
+        escHtml(formatOwTime(e.time, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })) +
+        "</td><td>" + escHtml(formatSpeed(e.speed)) + " " + escHtml(dir) + "</td></tr>"
       );
     }).join("");
     return (
-      '<div class="ss-port-meta">' +
-      (station ? "<span>Station · " + escHtml(station) + "</span>" : "") +
-      '<span>Source · Open Waters</span></div>' +
-      '<div class="ss-port-table-wrap"><table class="ss-port-table"><thead><tr><th>Event</th><th>Time</th><th>Speed</th><th>Dir</th></tr></thead><tbody>' +
+      '<div class="ss-port-table-wrap"><table class="ss-port-table"><thead><tr><th></th><th>Time</th><th></th></tr></thead><tbody>' +
       rows +
       "</tbody></table></div>"
-    );
-  }
-
-  function renderSkyHtml(events, dayLabel) {
-    if (!events || !events.length) {
-      return emptyInfo("Sky information for this port was not found (Open Waters Almanac).");
-    }
-    const order = [
-      "astronomicalDawn", "nauticalDawn", "civilDawn", "rise", "transit",
-      "set", "civilDusk", "nauticalDusk", "astronomicalDusk"
-    ];
-    const sorted = events.slice().sort((a, b) => {
-      const ia = order.indexOf(a.kind);
-      const ib = order.indexOf(b.kind);
-      if (ia >= 0 && ib >= 0) return ia - ib;
-      return new Date(a.time) - new Date(b.time);
-    });
-    const rows = sorted.map((e) => {
-      const accent = e.kind === "rise" ? "sun-up" : e.kind === "set" ? "sun-down" : "";
-      return (
-        '<div class="ss-sky-row ' + accent + '"><span class="ss-sky-kind">' +
-        escHtml(skyKindLabel(e.kind)) + '</span><span class="ss-sky-time">' +
-        escHtml(formatOwTime(e.time, { hour: "2-digit", minute: "2-digit" })) +
-        "</span></div>"
-      );
-    }).join("");
-    return (
-      '<div class="ss-port-meta"><span>' + escHtml(dayLabel || "Selected day") +
-      "</span><span>Source · Open Waters Almanac</span></div>" +
-      '<div class="ss-sky-list">' + rows + "</div>"
     );
   }
 
@@ -732,6 +678,61 @@
     return almanacModPromise;
   }
 
+  function almanacFn(mod, name) {
+    if (!mod) return null;
+    if (typeof mod[name] === "function") return mod[name];
+    if (mod.default && typeof mod.default[name] === "function") return mod.default[name];
+    return null;
+  }
+
+  function minutesOfDay(d) {
+    return d.getHours() * 60 + d.getMinutes();
+  }
+
+  function dateAtMinutes(dayStart, mins) {
+    return new Date(dayStart.getTime() + Math.max(0, Math.min(1439, mins)) * 60000);
+  }
+
+  function formatSkyClock(d) {
+    try {
+      return d.toLocaleString(undefined, {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZoneName: "short"
+      });
+    } catch (e) {
+      return d.toISOString();
+    }
+  }
+
+  /** Map az/alt onto south-facing E–S–W sky stage (percent). */
+  function skyStagePos(altDeg, azDeg) {
+    let az = Number(azDeg);
+    const alt = Number(altDeg);
+    if (!Number.isFinite(az) || !Number.isFinite(alt)) return null;
+    while (az < 0) az += 360;
+    while (az >= 360) az -= 360;
+    // Prefer southern sky (90…270); wrap northern into edges
+    let x;
+    if (az >= 90 && az <= 270) x = ((az - 90) / 180) * 100;
+    else if (az < 90) x = 0 + (az / 90) * 8;
+    else x = 92 + ((az - 270) / 90) * 8;
+    const y = alt >= 0
+      ? 10 + (1 - Math.min(alt, 90) / 90) * 68
+      : 82 + Math.min(12, Math.abs(alt) / 6);
+    return { x: Math.max(2, Math.min(98, x)), y: Math.max(4, Math.min(96, y)), above: alt >= -0.5 };
+  }
+
+  function skyGradientForAlt(alt) {
+    if (alt > 12) return "linear-gradient(180deg,#1d4ed8 0%,#38bdf8 55%,#bae6fd 100%)";
+    if (alt > 0) return "linear-gradient(180deg,#1e3a8a 0%,#7c3aed 40%,#fb923c 78%,#fecaca 100%)";
+    if (alt > -6) return "linear-gradient(180deg,#0f172a 0%,#312e81 45%,#9a3412 100%)";
+    return "linear-gradient(180deg,#020617 0%,#0f172a 60%,#1e293b 100%)";
+  }
+
   function buildPortCardHtml(port) {
     const id = String((port && port.id) || "").replace(/[^a-zA-Z0-9_-]/g, "_");
     const { lat, lon } = portLatLon(port);
@@ -739,65 +740,76 @@
     const cc = String((port && port.countryCode) || "un").toLowerCase();
     const name = escHtml((port && port.name) || "Port");
     const unlocode = escHtml((port && port.unlocode) || (port && port.owStationId ? "OW" : ""));
-    const country = escHtml((port && port.country) || "");
-    const region = escHtml((port && port.region) || "");
     const today = new Date();
-    const todayStr = today.toISOString().slice(0, 10);
-    const weekEnd = new Date(today.getTime() + 6 * 86400000).toISOString().slice(0, 10);
+    const todayStr =
+      today.getFullYear() +
+      "-" + String(today.getMonth() + 1).padStart(2, "0") +
+      "-" + String(today.getDate()).padStart(2, "0");
+    const weekEndDate = new Date(today.getTime() + 6 * 86400000);
+    const weekEnd =
+      weekEndDate.getFullYear() +
+      "-" + String(weekEndDate.getMonth() + 1).padStart(2, "0") +
+      "-" + String(weekEndDate.getDate()).padStart(2, "0");
 
     return (
       '<div class="ss-port-card" data-port-id="' + id + '" data-lat="' + lat + '" data-lon="' + lon + '">' +
-      '<div class="ss-port-head">' +
-      '<div class="ss-port-title">' +
-      '<span class="port-flag-box ss-port-flag"><img src="assets/flags/' + cc + '.png" onerror="this.onerror=null;this.src=\'https://flagcdn.com/w40/' + cc + '.png\';" alt="" class="port-flag-img"></span>' +
-      "<div><h4>" + name + "</h4>" +
-      '<div class="ss-port-sub">' +
-      (unlocode ? '<span class="ss-port-chip">' + unlocode + "</span>" : "") +
-      (country ? "<span>" + country + "</span>" : "") +
-      (region ? "<span>" + region + "</span>" : "") +
-      "</div></div></div>" +
-      '<div class="ss-port-coords">' + lat.toFixed(3) + "°, " + lon.toFixed(3) + "°</div>" +
-      "</div>" +
       '<div class="ss-port-tabs" role="tablist">' +
-      '<button type="button" class="ss-port-tab is-active" data-tab="tides" role="tab" aria-selected="true" onclick="window.ssPortCardTab(this)">' +
-      '<span class="ss-tab-ico" aria-hidden="true">≋</span> Tides</button>' +
-      '<button type="button" class="ss-port-tab" data-tab="currents" role="tab" aria-selected="false" onclick="window.ssPortCardTab(this)">' +
-      '<span class="ss-tab-ico" aria-hidden="true">↝</span> Currents</button>' +
-      '<button type="button" class="ss-port-tab" data-tab="sky" role="tab" aria-selected="false" onclick="window.ssPortCardTab(this)">' +
-      '<span class="ss-tab-ico" aria-hidden="true">☀</span> Sky</button>' +
+      '<button type="button" class="ss-port-tab is-active" data-tab="tides" role="tab" aria-selected="true" onclick="window.ssPortCardTab(this)">Tides</button>' +
+      '<button type="button" class="ss-port-tab" data-tab="currents" role="tab" aria-selected="false" onclick="window.ssPortCardTab(this)">Currents</button>' +
+      '<button type="button" class="ss-port-tab" data-tab="sky" role="tab" aria-selected="false" onclick="window.ssPortCardTab(this)">Sky</button>' +
+      "</div>" +
+      '<div class="ss-port-head">' +
+      '<span class="port-flag-box ss-port-flag"><img src="assets/flags/' + cc + '.png" onerror="this.onerror=null;this.src=\'https://flagcdn.com/w40/' + cc + '.png\';" alt="" class="port-flag-img"></span>' +
+      '<h4 class="ss-port-name">' + name + "</h4>" +
+      (unlocode ? '<span class="ss-port-chip">' + unlocode + "</span>" : "") +
       "</div>" +
       '<div class="ss-port-body">' +
       '<div class="ss-port-panel is-active" data-panel="tides">' +
       '<div class="ss-port-toolbar">' +
-      '<label>From <input type="date" class="ss-port-date" data-role="tide-from" value="' + todayStr + '"></label>' +
-      '<label>To <input type="date" class="ss-port-date" data-role="tide-to" value="' + weekEnd + '"></label>' +
-      '<button type="button" class="ss-port-btn" onclick="window.ssPortCardLoad(this,\'tides\')">Show</button>' +
-      '<button type="button" class="ss-port-btn ss-port-btn-ghost" onclick="window.ssPortCardPrint(this,\'tides\')">Print</button>' +
+      '<input type="date" class="ss-port-date" data-role="tide-from" value="' + todayStr + '" title="From" onchange="window.ssPortCardLoad(this,\'tides\')">' +
+      '<span class="ss-port-dash">–</span>' +
+      '<input type="date" class="ss-port-date" data-role="tide-to" value="' + weekEnd + '" title="To" onchange="window.ssPortCardLoad(this,\'tides\')">' +
+      '<button type="button" class="ss-port-icon-btn" title="Print" onclick="window.ssPortCardPrint(this,\'tides\')">⎙</button>' +
       "</div>" +
-      '<div class="ss-port-content" data-role="tide-out"><div class="ss-port-loading">Loading tides…</div></div>' +
+      '<div class="ss-port-content" data-role="tide-out"><div class="ss-port-loading">…</div></div>' +
       "</div>" +
       '<div class="ss-port-panel" data-panel="currents">' +
       '<div class="ss-port-toolbar">' +
-      '<label>From <input type="date" class="ss-port-date" data-role="cur-from" value="' + todayStr + '"></label>' +
-      '<label>To <input type="date" class="ss-port-date" data-role="cur-to" value="' + weekEnd + '"></label>' +
-      '<button type="button" class="ss-port-btn" onclick="window.ssPortCardLoad(this,\'currents\')">Show</button>' +
+      '<input type="date" class="ss-port-date" data-role="cur-from" value="' + todayStr + '" title="From" onchange="window.ssPortCardLoad(this,\'currents\')">' +
+      '<span class="ss-port-dash">–</span>' +
+      '<input type="date" class="ss-port-date" data-role="cur-to" value="' + weekEnd + '" title="To" onchange="window.ssPortCardLoad(this,\'currents\')">' +
       "</div>" +
-      '<div class="ss-port-content" data-role="cur-out"><div class="ss-port-loading">Open the Currents tab to load…</div></div>' +
+      '<div class="ss-port-content" data-role="cur-out"><div class="ss-port-loading">…</div></div>' +
       "</div>" +
       '<div class="ss-port-panel" data-panel="sky">' +
-      '<div class="ss-port-toolbar">' +
-      '<label>Date <input type="date" class="ss-port-date" data-role="sky-date" value="' + todayStr + '"></label>' +
-      '<button type="button" class="ss-port-btn" onclick="window.ssPortCardLoad(this,\'sky\')">Show</button>' +
+      '<div class="ss-sky-widget" data-role="sky-widget">' +
+      '<div class="ss-sky-topbar">' +
+      '<input type="date" class="ss-port-date" data-role="sky-date" value="' + todayStr + '" onchange="window.ssSkyOnDateChange(this)">' +
+      '<span class="ss-sky-caption">Sun &amp; Moon</span>' +
       "</div>" +
-      '<div class="ss-port-content" data-role="sky-out"><div class="ss-port-loading">Open the Sky tab to load…</div></div>' +
+      '<div class="ss-sky-stage" data-role="sky-stage">' +
+      '<div class="ss-sky-grad" data-role="sky-grad"></div>' +
+      '<div class="ss-sky-body ss-sun" data-role="sky-sun" hidden></div>' +
+      '<div class="ss-sky-body ss-moon" data-role="sky-moon" hidden></div>' +
+      '<div class="ss-sky-horizon"><span>E</span><span>S</span><span>W</span></div>' +
+      "</div>" +
+      '<div class="ss-sky-controls">' +
+      '<div class="ss-sky-play">' +
+      '<button type="button" class="ss-sky-step" onclick="window.ssSkyStep(this,-30)" aria-label="Back">‹</button>' +
+      '<button type="button" class="ss-sky-now" onclick="window.ssSkyNow(this)">Now</button>' +
+      '<button type="button" class="ss-sky-step" onclick="window.ssSkyStep(this,30)" aria-label="Forward">›</button>' +
+      "</div>" +
+      '<div class="ss-sky-clock" data-role="sky-clock">—</div>' +
+      "</div>" +
+      '<input type="range" class="ss-sky-slider" data-role="sky-slider" min="0" max="1439" value="0" ' +
+      'oninput="window.ssSkyScrub(this)" ontouchstart="event.stopPropagation()" onmousedown="event.stopPropagation()">' +
+      '<div class="ss-sky-events" data-role="sky-events"></div>' +
       "</div>" +
       "</div>" +
-      '<div class="ss-port-foot">Hydro &amp; sky via <a href="https://openwaters.io" target="_blank" rel="noopener">Open Waters</a></div>' +
-      "</div>"
+      "</div></div>"
     );
   }
 
-  // Back-compat alias used by older popup builders
   function buildPortHydroControlsHtml(port) {
     return buildPortCardHtml(port);
   }
@@ -806,9 +818,21 @@
     return el && el.closest ? el.closest(".ss-port-card") : null;
   }
 
+  function wirePortCardInteractions(card) {
+    if (!card || card._ssWired) return;
+    card._ssWired = true;
+    try {
+      if (typeof L !== "undefined" && L.DomEvent) {
+        L.DomEvent.disableClickPropagation(card);
+        L.DomEvent.disableScrollPropagation(card);
+      }
+    } catch (e) {}
+  }
+
   function ssPortCardTab(btn) {
     const card = cardRootFromEl(btn);
     if (!card || !btn) return;
+    wirePortCardInteractions(card);
     const tab = btn.getAttribute("data-tab");
     card.querySelectorAll(".ss-port-tab").forEach((b) => {
       const on = b === btn;
@@ -826,6 +850,7 @@
   async function ssPortCardLoad(el, kind) {
     const card = cardRootFromEl(el);
     if (!card) return;
+    wirePortCardInteractions(card);
     const lat = Number(card.getAttribute("data-lat"));
     const lon = Number(card.getAttribute("data-lon"));
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
@@ -835,7 +860,9 @@
       const fromEl = card.querySelector('[data-role="tide-from"]');
       const toEl = card.querySelector('[data-role="tide-to"]');
       if (!out) return;
-      out.innerHTML = '<div class="ss-port-loading">Loading tides…</div>';
+      if (out.dataset.loading === "1") return;
+      out.dataset.loading = "1";
+      out.innerHTML = '<div class="ss-port-loading">Loading…</div>';
       try {
         const start = isoDayStart(fromEl && fromEl.value ? fromEl.value : new Date());
         const endRaw = toEl && toEl.value ? toEl.value : start;
@@ -853,6 +880,7 @@
       } catch (err) {
         out.innerHTML = emptyInfo("Tide information for this port was not found in Open Waters.");
       }
+      out.dataset.loading = "0";
       return;
     }
 
@@ -861,7 +889,9 @@
       const fromEl = card.querySelector('[data-role="cur-from"]');
       const toEl = card.querySelector('[data-role="cur-to"]');
       if (!out) return;
-      out.innerHTML = '<div class="ss-port-loading">Loading currents…</div>';
+      if (out.dataset.loading === "1") return;
+      out.dataset.loading = "1";
+      out.innerHTML = '<div class="ss-port-loading">Loading…</div>';
       try {
         const start = isoDayStart(fromEl && fromEl.value ? fromEl.value : new Date());
         const endRaw = toEl && toEl.value ? toEl.value : start;
@@ -879,37 +909,163 @@
       } catch (err) {
         out.innerHTML = emptyInfo("Current information for this port was not found in Open Waters.");
       }
+      out.dataset.loading = "0";
       return;
     }
 
     if (kind === "sky") {
-      const out = card.querySelector('[data-role="sky-out"]');
-      const dateEl = card.querySelector('[data-role="sky-date"]');
-      if (!out) return;
-      out.innerHTML = '<div class="ss-port-loading">Computing sky…</div>';
-      try {
-        const mod = await loadAlmanac();
-        const sunEvents = mod && (mod.sunEvents || (mod.default && mod.default.sunEvents));
-        if (typeof sunEvents !== "function") throw new Error("sunEvents missing");
-        const day = isoDayStart(dateEl && dateEl.value ? dateEl.value : new Date());
-        const next = new Date(day.getTime() + 86400000);
-        const observer = { latitudeDeg: lat, longitudeDeg: lon };
-        const events = sunEvents(day, next, observer) || [];
-        const dayLabel = day.toLocaleDateString(undefined, {
-          weekday: "short", year: "numeric", month: "short", day: "numeric"
-        });
-        out.innerHTML = renderSkyHtml(events, dayLabel);
-      } catch (err) {
-        out.innerHTML = emptyInfo("Sky information for this port was not found (Open Waters Almanac).");
-      }
+      await initSkyWidget(card);
     }
+  }
+
+  async function initSkyWidget(card) {
+    const widget = card.querySelector('[data-role="sky-widget"]');
+    const eventsEl = card.querySelector('[data-role="sky-events"]');
+    if (!widget) return;
+    const lat = Number(card.getAttribute("data-lat"));
+    const lon = Number(card.getAttribute("data-lon"));
+    const dateEl = card.querySelector('[data-role="sky-date"]');
+    const day = isoDayStart(dateEl && dateEl.value ? dateEl.value : new Date());
+    card._skyDay = day;
+    card._skyObserver = { latitudeDeg: lat, longitudeDeg: lon };
+
+    try {
+      const mod = await loadAlmanac();
+      card._skyMod = mod;
+      const sunEvents = almanacFn(mod, "sunEvents");
+      if (typeof sunEvents === "function" && eventsEl) {
+        const next = new Date(day.getTime() + 86400000);
+        const events = sunEvents(day, next, card._skyObserver) || [];
+        const rise = events.find((e) => e.kind === "rise");
+        const set = events.find((e) => e.kind === "set");
+        const bits = [];
+        if (rise) bits.push("↑ " + formatOwTime(rise.time, { hour: "2-digit", minute: "2-digit" }));
+        if (set) bits.push("↓ " + formatOwTime(set.time, { hour: "2-digit", minute: "2-digit" }));
+        eventsEl.textContent = bits.length ? bits.join("   ") : "Sky data unavailable";
+      } else if (eventsEl) {
+        eventsEl.textContent = "Sky data unavailable";
+      }
+    } catch (err) {
+      card._skyMod = null;
+      if (eventsEl) eventsEl.textContent = "Sky information not found";
+    }
+
+    const now = new Date();
+    const sameDay =
+      now.getFullYear() === day.getFullYear() &&
+      now.getMonth() === day.getMonth() &&
+      now.getDate() === day.getDate();
+    const mins = sameDay ? minutesOfDay(now) : 12 * 60;
+    const slider = card.querySelector('[data-role="sky-slider"]');
+    if (slider) slider.value = String(mins);
+    updateSkyFrame(card, mins);
+  }
+
+  function updateSkyFrame(card, mins) {
+    const day = card._skyDay || isoDayStart(new Date());
+    const minute = Number(mins) || 0;
+    const t = dateAtMinutes(day, minute);
+    const clock = card.querySelector('[data-role="sky-clock"]');
+    if (clock) clock.textContent = formatSkyClock(t);
+    const slider = card.querySelector('[data-role="sky-slider"]');
+    if (slider) {
+      const pct = (minute / 1439) * 100;
+      slider.style.background =
+        "linear-gradient(90deg,#38bdf8 0%,#38bdf8 " + pct + "%,#334155 " + pct + "%,#334155 100%)";
+    }
+    const grad = card.querySelector('[data-role="sky-grad"]');
+    const sunEl = card.querySelector('[data-role="sky-sun"]');
+    const moonEl = card.querySelector('[data-role="sky-moon"]');
+    const observer = card._skyObserver;
+    const mod = card._skyMod;
+    const sunAltAz = almanacFn(mod, "sunAltAz");
+    const moonAltAz = almanacFn(mod, "moonAltAz");
+
+    let sunAlt = -90;
+    if (typeof sunAltAz === "function" && observer) {
+      try {
+        const s = sunAltAz(t, observer);
+        sunAlt = Number(s && (s.altDeg != null ? s.altDeg : s.altitudeDeg));
+        const az = Number(s && (s.azDeg != null ? s.azDeg : s.azimuthDeg));
+        const pos = skyStagePos(sunAlt, az);
+        if (sunEl && pos) {
+          sunEl.hidden = false;
+          sunEl.style.left = pos.x + "%";
+          sunEl.style.top = pos.y + "%";
+          sunEl.style.opacity = pos.above ? "1" : "0.35";
+          sunEl.classList.toggle("is-below", !pos.above);
+        }
+      } catch (e) {
+        if (sunEl) sunEl.hidden = true;
+      }
+    } else if (sunEl) {
+      sunEl.hidden = true;
+    }
+
+    if (grad) grad.style.background = skyGradientForAlt(sunAlt);
+
+    if (typeof moonAltAz === "function" && observer && moonEl) {
+      try {
+        const m = moonAltAz(t, observer);
+        const malt = Number(m && (m.altDeg != null ? m.altDeg : m.altitudeDeg));
+        const maz = Number(m && (m.azDeg != null ? m.azDeg : m.azimuthDeg));
+        const pos = skyStagePos(malt, maz);
+        const showMoon = pos && pos.above && sunAlt < 6;
+        if (pos && showMoon) {
+          moonEl.hidden = false;
+          moonEl.style.left = pos.x + "%";
+          moonEl.style.top = pos.y + "%";
+        } else {
+          moonEl.hidden = true;
+        }
+      } catch (e) {
+        moonEl.hidden = true;
+      }
+    } else if (moonEl) {
+      moonEl.hidden = true;
+    }
+  }
+
+  function ssSkyScrub(el) {
+    const card = cardRootFromEl(el);
+    if (!card) return;
+    updateSkyFrame(card, Number(el.value) || 0);
+  }
+
+  function ssSkyStep(el, delta) {
+    const card = cardRootFromEl(el);
+    if (!card) return;
+    const slider = card.querySelector('[data-role="sky-slider"]');
+    if (!slider) return;
+    const next = Math.max(0, Math.min(1439, (Number(slider.value) || 0) + (Number(delta) || 0)));
+    slider.value = String(next);
+    updateSkyFrame(card, next);
+  }
+
+  function ssSkyNow(el) {
+    const card = cardRootFromEl(el);
+    if (!card) return;
+    const dateEl = card.querySelector('[data-role="sky-date"]');
+    const now = new Date();
+    const local =
+      now.getFullYear() +
+      "-" + String(now.getMonth() + 1).padStart(2, "0") +
+      "-" + String(now.getDate()).padStart(2, "0");
+    if (dateEl) dateEl.value = local;
+    initSkyWidget(card);
+  }
+
+  function ssSkyOnDateChange(el) {
+    const card = cardRootFromEl(el);
+    if (!card) return;
+    initSkyWidget(card);
   }
 
   function ssPortCardPrint(el, kind) {
     const card = cardRootFromEl(el);
     if (!card) return;
     const panel = card.querySelector('.ss-port-panel[data-panel="' + (kind || "tides") + '"] .ss-port-content');
-    const title = (card.querySelector(".ss-port-title h4") || {}).textContent || "Port";
+    const title = (card.querySelector(".ss-port-name") || {}).textContent || "Port";
     if (!panel) return;
     const w = global.open("", "_blank", "noopener,noreferrer,width=720,height=900");
     if (!w) return;
@@ -918,8 +1074,6 @@
       "<style>body{font:14px/1.45 system-ui,sans-serif;color:#0f172a;padding:24px}" +
       "h1{font-size:18px;margin:0 0 8px}table{width:100%;border-collapse:collapse}" +
       "th,td{border-bottom:1px solid #cbd5e1;padding:6px 8px;text-align:left;font-size:13px}" +
-      "th{color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.04em}" +
-      ".meta{color:#64748b;font-size:12px;margin-bottom:12px;display:flex;gap:12px;flex-wrap:wrap}" +
       "@media print{body{padding:0}}</style></head><body>" +
       "<h1>" + escHtml(title) + " — Tide table</h1>" +
       panel.innerHTML +
@@ -1025,6 +1179,11 @@
   global.ssPortCardTab = ssPortCardTab;
   global.ssPortCardLoad = ssPortCardLoad;
   global.ssPortCardPrint = ssPortCardPrint;
+  global.ssSkyScrub = ssSkyScrub;
+  global.ssSkyStep = ssSkyStep;
+  global.ssSkyNow = ssSkyNow;
+  global.ssSkyOnDateChange = ssSkyOnDateChange;
+  global.wirePortCardInteractions = wirePortCardInteractions;
   global.expandPortsFromOpenWaters = expandPortsFromOpenWaters;
   // Legacy no-op so old onclick handlers don't throw
   global.togglePortOwHydro = function () {};
