@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.58" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.59" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -11640,6 +11640,16 @@ select option {
       margin-bottom: 4px !important;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.38) !important;
     }
+    [data-theme="light"] .settings-account-card {
+      background: linear-gradient(145deg, #ffffff, #f8fafc) !important;
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06) !important;
+    }
+    [data-theme="light"] .settings-language-card {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06) !important;
+    }
     .settings-account-layout {
       display: grid;
       grid-template-columns: 1.15fr 1fr;
@@ -14100,11 +14110,11 @@ select option {
                     <svg class="setsail-icon" viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#38bdf8;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke-width="1.8"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>
                   </div>
                   <div>
-                    <div class="min-card-title" style="margin-bottom:2px;" id="settingsAccountHeading">SetSail Account &amp; Cloud Bridge Sync</div>
-                    <div class="settings-account-sub" id="settingsAccountSub" style="font-size:0.72rem;color:#94a3b8;">Sign in with your Google Account to automatically save and sync your SetRoute passage plans, chart edits, vessel position &amp; SetNews preferences</div>
+                    <div class="min-card-title" style="margin-bottom:2px;" id="settingsAccountHeading" data-i18n="settings_account_heading">SetSail Account</div>
+                    <div class="settings-account-sub" id="settingsAccountSub" data-i18n="settings_account_sub" class="settings-account-sub" style="font-size:0.72rem;color:var(--muted);">Sign in with Google to sync routes, chart edits and vessel data.</div>
                   </div>
                 </div>
-                <span class="settings-account-status-pill" id="settingsAccountStatusBadge" style="font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(148,163,184,0.14);color:#cbd5e1;border:1px solid rgba(148,163,184,0.3);letter-spacing:0.04em;">GUEST MODE</span>
+                <span class="settings-account-status-pill" id="settingsAccountStatusBadge" class="settings-account-status-pill" style="font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(148,163,184,0.14);color:var(--muted);border:1px solid var(--line);letter-spacing:0.04em;">GUEST MODE</span>
               </div>
 
               <!-- Signed-Out Google OAuth Controls (Official Google Sign-In Only) -->
@@ -14112,8 +14122,8 @@ select option {
                 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                   <div id="googleGsiButtonContainer" style="min-height:40px;display:flex;align-items:center;"></div>
                 </div>
-                <div style="font-size:0.66rem;color:#94a3b8;line-height:1.38;">
-                  Official Google Identity Services (OAuth 2.0) &bull; Instant Bridge Workspace Persistence
+                <div style="font-size:0.66rem;color:var(--muted);line-height:1.38;">
+                  Official Google Sign-In
                 </div>
               </div>
 
@@ -14123,7 +14133,7 @@ select option {
                   <div style="display:flex;align-items:center;gap:10px;">
                     <div id="settingsAuthProfileAvatar" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0284c7,#10b981);color:#fff;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;overflow:hidden;">G</div>
                     <div>
-                      <div style="font-size:0.8rem;font-weight:700;color:#f8fafc;" id="settingsAuthProfileName">Bridge Officer</div>
+                      <div style="font-size:0.8rem;font-weight:700;color:var(--text);" id="settingsAuthProfileName">Bridge Officer</div>
                       <div style="font-size:0.69rem;color:#34d399;" id="settingsAuthProfileEmail">Google Account Synced</div>
                     </div>
                   </div>
@@ -14153,8 +14163,8 @@ select option {
                     🌐
                   </div>
                   <div>
-                    <div class="min-card-title" style="margin-bottom:2px;" data-i18n="lang_settings_title" id="settingsLangHeading">Regional Language &amp; Bridge Localization</div>
-                    <div style="font-size:0.72rem;color:#94a3b8;" data-i18n="lang_settings_sub" id="settingsLangSub">Select your preferred bridge operating language. All suite tabs, map overlays, briefings, and telemetry adapt immediately.</div>
+                    <div class="min-card-title" style="margin-bottom:2px;" data-i18n="lang_settings_title" id="settingsLangHeading" data-i18n="lang_settings_title">Language</div>
+                    <div style="font-size:0.72rem;color:var(--muted);" data-i18n="lang_settings_sub" id="settingsLangSub">Applies to all tabs and map overlays.</div>
                   </div>
                 </div>
                 <span id="currentLangBadge" style="font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.3);letter-spacing:0.04em;">EN • ENGLISH</span>
@@ -14872,7 +14882,7 @@ select option {
 
 
 
-    const STARS = [{"n": "Acamar", "ra": 2.97111111, "d": -40.31}, {"n": "Achernar", "ra": 1.62861111, "d": -57.24333333}, {"n": "Acrux", "ra": 12.44333333, "d": -63.09166667}, {"n": "Adhara", "ra": 6.9775, "d": -28.97333333}, {"n": "Aldebaran", "ra": 4.59888889, "d": 16.50833333}, {"n": "Alioth", "ra": 12.9, "d": 55.95666667}, {"n": "Alkaid", "ra": 13.79194444, "d": 49.31166667}, {"n": "Al Na'ir", "ra": 22.13638889, "d": -46.965}, {"n": "Alnilam", "ra": 5.60361111, "d": -1.195}, {"n": "Alphard", "ra": 9.46, "d": -8.65833333}, {"n": "Alphecca", "ra": 15.5875, "d": 26.715}, {"n": "Alpheratz", "ra": 0.13944444, "d": 29.09166667}, {"n": "Altair", "ra": 19.84583333, "d": 8.86833333}, {"n": "Ankaa", "ra": 0.43777778, "d": -42.31166667}, {"n": "Antares", "ra": 16.48944444, "d": -26.42833333}, {"n": "Arcturus", "ra": 14.26083333, "d": 19.18666667}, {"n": "Atria", "ra": 16.80972222, "d": -69.02333333}, {"n": "Avior", "ra": 8.37583333, "d": -59.50833333}, {"n": "Bellatrix", "ra": 5.41888889, "d": 6.34833333}, {"n": "Betelgeuse", "ra": 5.91972222, "d": 7.405}, {"n": "Canopus", "ra": 6.39972222, "d": -52.69833333}, {"n": "Capella", "ra": 5.27833333, "d": 45.99833333}, {"n": "Deneb", "ra": 20.69, "d": 45.28166667}, {"n": "Denebola", "ra": 11.8175, "d": 14.57166667}, {"n": "Diphda", "ra": 0.72611111, "d": -17.99}, {"n": "Dubhe", "ra": 11.06194444, "d": 61.74666667}, {"n": "Elnath", "ra": 5.43833333, "d": 28.60666667}, {"n": "Eltanin", "ra": 17.94277778, "d": 51.48833333}, {"n": "Enif", "ra": 21.73611111, "d": 9.875}, {"n": "Formalhaut", "ra": 22.96027778, "d": -29.62666667}, {"n": "Gacrux", "ra": 12.51944444, "d": -57.10666667}, {"n": "Gienah", "ra": 12.26333333, "d": -17.53833333}, {"n": "Hadar", "ra": 14.06333333, "d": -60.36666667}, {"n": "Hamal", "ra": 2.11944444, "d": 23.46333333}, {"n": "Kaus Austr.", "ra": 18.40194444, "d": -34.38333333}, {"n": "Kochab", "ra": 14.84416667, "d": 74.15333333}, {"n": "Markab", "ra": 23.07888889, "d": 15.205}, {"n": "Menkar", "ra": 3.03805556, "d": 4.08666667}, {"n": "Menkent", "ra": 14.11111111, "d": -36.365}, {"n": "Miaplacidus", "ra": 9.22111111, "d": -69.71333333}, {"n": "Mirfak", "ra": 3.40555556, "d": 49.86166667}, {"n": "Nunki", "ra": 18.92027778, "d": -26.295}, {"n": "Peacock", "ra": 20.42638889, "d": -56.73666667}, {"n": "Pollux", "ra": 7.75555556, "d": 28.025}, {"n": "Procyon", "ra": 7.65527778, "d": 5.225}, {"n": "Rasalhague", "ra": 17.58166667, "d": 12.56166667}, {"n": "Regulus", "ra": 10.13944444, "d": 11.96666667}, {"n": "Rigel", "ra": 5.2425, "d": -8.205}, {"n": "Rigil Kent", "ra": 14.66027778, "d": -60.83}, {"n": "Sabik", "ra": 17.17222222, "d": -15.72333333}, {"n": "Schedar", "ra": 0.675, "d": 56.54}, {"n": "Shaula", "ra": 17.55944444, "d": -37.10166667}, {"n": "Sirius", "ra": 6.75277778, "d": -16.715}, {"n": "Spica", "ra": 13.41972222, "d": -11.15833333}, {"n": "Suhail", "ra": 9.13361111, "d": -43.43}, {"n": "Vega", "ra": 18.615, "d": 38.78333333}, {"n": "Zuben'ubi", "ra": 14.8475, "d": -16.03833333}];
+    const STARS = [{"n": "Acamar", "ra": 2.97111111, "d": -40.31}, {"n": "Achernar", "ra": 1.62861111, "d": -57.24333333}, {"n": "Acrux", "ra": 12.44333333, "d": -63.09166667}, {"n": "Adhara", "ra": 6.9775, "d": -28.97333333}, {"n": "Aldebaran", "ra": 4.59888889, "d": 16.50833333}, {"n": "Alioth", "ra": 12.9, "d": 55.95666667}, {"n": "Alkaid", "ra": 13.79194444, "d": 49.31166667}, {"n": "Al Na'ir", "ra": 22.13638889, "d": -46.965}, {"n": "Alnilam", "ra": 5.60361111, "d": -1.195}, {"n": "Alphard", "ra": 9.46, "d": -8.65833333}, {"n": "Alphecca", "ra": 15.5975, "d": 26.715}, {"n": "Alpheratz", "ra": 0.13944444, "d": 29.09166667}, {"n": "Altair", "ra": 19.84583333, "d": 8.86833333}, {"n": "Ankaa", "ra": 0.43777778, "d": -42.31166667}, {"n": "Antares", "ra": 16.48944444, "d": -26.42833333}, {"n": "Arcturus", "ra": 14.26083333, "d": 19.18666667}, {"n": "Atria", "ra": 16.80972222, "d": -69.02333333}, {"n": "Avior", "ra": 8.37583333, "d": -59.50833333}, {"n": "Bellatrix", "ra": 5.41888889, "d": 6.34833333}, {"n": "Betelgeuse", "ra": 5.91972222, "d": 7.405}, {"n": "Canopus", "ra": 6.39972222, "d": -52.69833333}, {"n": "Capella", "ra": 5.27833333, "d": 45.99833333}, {"n": "Deneb", "ra": 20.69, "d": 45.28166667}, {"n": "Denebola", "ra": 11.8175, "d": 14.57166667}, {"n": "Diphda", "ra": 0.72611111, "d": -17.99}, {"n": "Dubhe", "ra": 11.06194444, "d": 61.74666667}, {"n": "Elnath", "ra": 5.43833333, "d": 28.60666667}, {"n": "Eltanin", "ra": 17.94277778, "d": 51.48833333}, {"n": "Enif", "ra": 21.73611111, "d": 9.875}, {"n": "Formalhaut", "ra": 22.96027778, "d": -29.62666667}, {"n": "Gacrux", "ra": 12.51944444, "d": -57.10666667}, {"n": "Gienah", "ra": 12.26333333, "d": -17.53833333}, {"n": "Hadar", "ra": 14.06333333, "d": -60.36666667}, {"n": "Hamal", "ra": 2.11944444, "d": 23.46333333}, {"n": "Kaus Austr.", "ra": 18.40194444, "d": -34.38333333}, {"n": "Kochab", "ra": 14.84416667, "d": 74.15333333}, {"n": "Markab", "ra": 23.07888889, "d": 15.205}, {"n": "Menkar", "ra": 3.03805556, "d": 4.08666667}, {"n": "Menkent", "ra": 14.11111111, "d": -36.365}, {"n": "Miaplacidus", "ra": 9.22111111, "d": -69.71333333}, {"n": "Mirfak", "ra": 3.40555556, "d": 49.86166667}, {"n": "Nunki", "ra": 18.92027778, "d": -26.295}, {"n": "Peacock", "ra": 20.42638889, "d": -56.73666667}, {"n": "Pollux", "ra": 7.75555556, "d": 28.025}, {"n": "Procyon", "ra": 7.65527778, "d": 5.225}, {"n": "Rasalhague", "ra": 17.58166667, "d": 12.56166667}, {"n": "Regulus", "ra": 10.13944444, "d": 11.96666667}, {"n": "Rigel", "ra": 5.2425, "d": -8.205}, {"n": "Rigil Kent", "ra": 14.66027778, "d": -60.83}, {"n": "Sabik", "ra": 17.17222222, "d": -15.72333333}, {"n": "Schedar", "ra": 0.675, "d": 56.54}, {"n": "Shaula", "ra": 17.55944444, "d": -37.10166667}, {"n": "Sirius", "ra": 6.75277778, "d": -16.715}, {"n": "Spica", "ra": 13.41972222, "d": -11.15833333}, {"n": "Suhail", "ra": 9.13361111, "d": -43.43}, {"n": "Vega", "ra": 18.615, "d": 38.78333333}, {"n": "Zuben'ubi", "ra": 14.8475, "d": -16.03833333}];
 
 
 
@@ -19819,22 +19829,22 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.58"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.58" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.58"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.59"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.59" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.59"></script>
   <script>
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.58",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.59",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.58"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.58"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.58"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.59"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.59"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.59"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19912,7 +19922,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.58"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.59"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20323,7 +20333,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.58', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.59', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {

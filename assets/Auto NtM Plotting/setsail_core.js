@@ -9014,7 +9014,13 @@ function syncSetSailAuthUI() {
       accountBadge.style.borderColor = "rgba(148,163,184,0.3)";
     }
     if (accountSub) {
-      accountSub.textContent = "Sign in with your Google Account to automatically save and sync your SetRoute passage plans, chart edits, vessel position & SetNews preferences";
+      try {
+        const _lang = (typeof getSetSailLanguage === "function" && getSetSailLanguage()) || "en";
+        const _pack = (typeof SET_SAIL_LANGUAGES !== "undefined" && SET_SAIL_LANGUAGES[_lang]) || null;
+        accountSub.textContent = (_pack && _pack.translations && _pack.translations.settings_account_sub) || "Sign in with Google to sync routes, chart edits and vessel data.";
+      } catch (eSub) {
+        accountSub.textContent = "Sign in with Google to sync routes, chart edits and vessel data.";
+      }
     }
   }
   try {
@@ -10142,7 +10148,7 @@ function renderHomeNewsSlide() {
             <span>${formatNewsRelativeTime(a.publishedAt)} • ${readMin}m read</span>
           </div>
           <h3 class="home-news-card-title" style="font-size:0.96rem;-webkit-line-clamp:2;margin:0;line-height:1.35;">${a.title}</h3>
-          <p class="home-news-card-context" style="font-size:0.77rem;color:#cbd5e1;line-height:1.42;margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${a.summary || (a.body ? a.body.slice(0, 140) + '...' : '')}</p>
+          <p class="home-news-card-context" style="font-size:0.77rem;color:var(--muted);line-height:1.42;margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${a.summary || (a.body ? a.body.slice(0, 140) + '...' : '')}</p>
           <span class="home-news-card-cta" style="margin-top:auto;padding-top:6px;font-size:0.75rem;color:#38bdf8;font-weight:700;">Read Full Story &rarr;</span>
         </div>
       </article>
@@ -10304,7 +10310,7 @@ function renderSetNewsUI() {
           </div>
           <div class="setnews-card-body" style="padding:14px 15px 15px;gap:8px;">
             <h3 class="setnews-card-title" style="font-size:0.96rem;line-height:1.36;-webkit-line-clamp:2;">${a.title}</h3>
-            <p class="setnews-card-context" style="font-size:0.78rem;color:#cbd5e1;line-height:1.44;margin:2px 0 4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${a.summary || (a.body ? a.body.slice(0, 200) + '...' : '')}</p>
+            <p class="setnews-card-context" style="font-size:0.78rem;color:var(--muted);line-height:1.44;margin:2px 0 4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${a.summary || (a.body ? a.body.slice(0, 200) + '...' : '')}</p>
             <div class="setnews-meta-row" style="margin-top:auto;padding-top:6px;border-top:1px solid rgba(148,163,184,0.12);">
               <span class="setnews-source-tag" style="font-size:0.64rem;">${a.sourceIcon} ${a.source}</span>
               <span style="font-size:0.65rem;color:#94a3b8;">${formatNewsRelativeTime(a.publishedAt)} • ${readMin} min read</span>
@@ -10376,7 +10382,7 @@ function openSetNewsArticleModal(articleId) {
         <span><strong>${icon} ${desk}</strong> • Published ${new Date(art.publishedAt).toUTCString()}</span>
         <span>⏱ ${readMins} min read (${wordCount} words)</span>
       </div>
-      <h2 style="font-size:1.5rem;font-weight:800;line-height:1.3;margin:0;color:#f8fafc;">${art.title}</h2>
+      <h2 style="font-size:1.5rem;font-weight:800;line-height:1.3;margin:0;color:var(--text);">${art.title}</h2>
       ${Array.isArray(art.takeaways) && art.takeaways.length > 0 ? `
         <div style="padding:13px 16px;border-radius:10px;background:rgba(30,41,59,0.7);border-left:3px solid #38bdf8;font-size:0.84rem;color:#e2e8f0;">
           <strong style="color:#38bdf8;display:block;margin-bottom:6px;text-transform:uppercase;font-size:0.7rem;letter-spacing:0.05em;">⚡ Executive Summary &amp; Bridge Takeaways</strong>
@@ -12491,13 +12497,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Plan Passage in SetRoute",
       btn_open_news: "See all world stories →",
       btn_read_story: "Read what's happening →",
-      settings_account_heading: "SetSail Account & Cloud Bridge Sync",
-      settings_account_sub: "Sign in with your Google Account to automatically save and sync your passage plans, chart edits, vessel position & preferences",
+      settings_account_heading: "SetSail Account",
+      settings_account_sub: "Sign in with Google to sync routes, chart edits and vessel data.",
       btn_google_signin: "Sign-In",
       btn_sign_out: "Sign Out",
       guest_mode: "GUEST MODE",
-      lang_settings_title: "Regional Language & Bridge Localization",
-      lang_settings_sub: "Select your preferred bridge operating language. All suite tabs, map overlays, briefings, and telemetry adapt immediately.",
+      lang_settings_title: "Language",
+      lang_settings_sub: "Applies to all tabs and map overlays.",
       toast_lang_changed: "Language switched to English",
       filter_active: "Active Warnings",
       filter_navtex: "NAVTEX Alerts",
@@ -12527,13 +12533,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Рассчитать маршрут в SetRoute",
       btn_open_news: "Открыть ленту SetNews",
       btn_read_story: "Читать полностью →",
-      settings_account_heading: "Аккаунт SetSail и синхронизация мостика",
-      settings_account_sub: "Войдите через Google для автоматического сохранения и синхронизации маршрутов, правок карты и настроек судна",
+      settings_account_heading: "Аккаунт SetSail",
+      settings_account_sub: "Войдите через Google, чтобы синхронизировать маршруты и правки карты.",
       btn_google_signin: "Вход",
       btn_sign_out: "Выйти из системы",
       guest_mode: "ГОСТЕВОЙ РЕЖИМ",
-      lang_settings_title: "Язык интерфейса и локализация мостика",
-      lang_settings_sub: "Выберите рабочий язык интерфейса. Все вкладки, слои карты, сводки и телеметрия переключатся мгновенно.",
+      lang_settings_title: "Язык",
+      lang_settings_sub: "Применяется ко всем вкладкам и слоям карты.",
       toast_lang_changed: "Язык интерфейса изменен на Русский",
       filter_active: "Активные предупреждения",
       filter_navtex: "Оповещения NAVTEX",
@@ -12563,13 +12569,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "SetRouteで航路を計画",
       btn_open_news: "SetNews速報を開く",
       btn_read_story: "記事を読む →",
-      settings_account_heading: "SetSailアカウントとクラウド同期",
-      settings_account_sub: "Googleアカウントでログインすると、航路計画、海図編集、本船位置、設定が自動同期されます",
+      settings_account_heading: "SetSailアカウント",
+      settings_account_sub: "Googleでログインして航路と海図編集を同期します。",
       btn_google_signin: "サインイン",
       btn_sign_out: "ログアウト",
       guest_mode: "ゲストモード",
-      lang_settings_title: "地域言語とブリッジローカリゼーション",
-      lang_settings_sub: "ブリッジの操作言語を選択してください。すべてのタブ、オーバーレイ、ブリーフィングが即座に適応します。",
+      lang_settings_title: "言語",
+      lang_settings_sub: "すべてのタブと地図オーバーレイに適用されます。",
       toast_lang_changed: "言語を日本語に変更しました",
       filter_active: "有効な航行警報",
       filter_navtex: "NAVTEX警報",
@@ -12599,13 +12605,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "在 SetRoute 中规划航线",
       btn_open_news: "打开 SetNews 资讯",
       btn_read_story: "阅读全文 →",
-      settings_account_heading: "SetSail 账户与驾驶台云端同步",
-      settings_account_sub: "使用 Google 账户登录，自动保存并同步航程计划、海图标注、船舶船位与偏好设置",
+      settings_account_heading: "SetSail 账户",
+      settings_account_sub: "使用 Google 登录以同步航线与海图标注。",
       btn_google_signin: "登录",
       btn_sign_out: "退出登录",
       guest_mode: "访客模式",
-      lang_settings_title: "语言与驾驶台区域设置",
-      lang_settings_sub: "选择驾驶台工作语言。系统菜单、海图标注、简报与仪表数据将即时切换。",
+      lang_settings_title: "语言",
+      lang_settings_sub: "适用于所有标签页与海图图层。",
       toast_lang_changed: "系统语言已切换为中文",
       filter_active: "有效航行警告",
       filter_navtex: "NAVTEX 警报",
@@ -12635,13 +12641,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Planificar en SetRoute",
       btn_open_news: "Abrir SetNews",
       btn_read_story: "Leer historia completa →",
-      settings_account_heading: "Cuenta SetSail y Sincronización en la Nube",
-      settings_account_sub: "Inicie sesión con Google para guardar y sincronizar automáticamente sus planes y marcas de carta",
+      settings_account_heading: "Cuenta SetSail",
+      settings_account_sub: "Inicie sesión con Google para sincronizar rutas y marcas.",
       btn_google_signin: "Acceder",
       btn_sign_out: "Cerrar sesión",
       guest_mode: "MODO INVITADO",
-      lang_settings_title: "Idioma y Localización del Puente",
-      lang_settings_sub: "Seleccione el idioma operativo del puente. Todas las pestañas y capas se adaptarán al instante.",
+      lang_settings_title: "Idioma",
+      lang_settings_sub: "Se aplica a todas las pestañas y capas.",
       toast_lang_changed: "Idioma cambiado a Español",
       filter_active: "Avisos Activos",
       filter_navtex: "Alertas NAVTEX",
@@ -12671,13 +12677,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Route in SetRoute planen",
       btn_open_news: "SetNews Draht öffnen",
       btn_read_story: "Bericht lesen →",
-      settings_account_heading: "SetSail-Konto & Cloud-Synchronisierung",
-      settings_account_sub: "Melden Sie sich mit Google an, um Routenpläne, Kartenkorrekturen und Schiffspositionen zu synchronisieren",
+      settings_account_heading: "SetSail-Konto",
+      settings_account_sub: "Mit Google anmelden, um Routen und Kartenkorrekturen zu synchronisieren.",
       btn_google_signin: "Anmelden",
       btn_sign_out: "Abmelden",
       guest_mode: "GASTMODUS",
-      lang_settings_title: "Sprache und Brücken-Lokalisierung",
-      lang_settings_sub: "Wählen Sie die Arbeitssprache der Brücke. Alle Registerkarten und Karten-Overlays passen sich sofort an.",
+      lang_settings_title: "Sprache",
+      lang_settings_sub: "Gilt für alle Registerkarten und Karten-Overlays.",
       toast_lang_changed: "Sprache auf Deutsch umgestellt",
       filter_active: "Aktive Warnungen",
       filter_navtex: "NAVTEX-Warnungen",
@@ -12707,13 +12713,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Planifier dans SetRoute",
       btn_open_news: "Ouvrir SetNews",
       btn_read_story: "Lire l'article complet →",
-      settings_account_heading: "Compte SetSail et Synchronisation Passerelle",
-      settings_account_sub: "Connectez-vous avec Google pour synchroniser vos plans de traversée et modifications de carte",
+      settings_account_heading: "Compte SetSail",
+      settings_account_sub: "Connectez-vous avec Google pour synchroniser routes et cartes.",
       btn_google_signin: "Connexion",
       btn_sign_out: "Déconnexion",
       guest_mode: "MODE INVITÉ",
-      lang_settings_title: "Langue et Localisation de la Passerelle",
-      lang_settings_sub: "Sélectionnez la langue de la passerelle. Tous les onglets et cartes s'adaptent immédiatement.",
+      lang_settings_title: "Langue",
+      lang_settings_sub: "S'applique à tous les onglets et calques.",
       toast_lang_changed: "Langue changée en Français",
       filter_active: "Avis Actifs",
       filter_navtex: "Alertes NAVTEX",
@@ -12743,13 +12749,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Magplano sa SetRoute",
       btn_open_news: "Buksan ang SetNews",
       btn_read_story: "Basahin nang Buo →",
-      settings_account_heading: "SetSail Account at Cloud Bridge Sync",
-      settings_account_sub: "Mag-sign in gamit ang Google Account upang awtomatikong i-save at i-sync ang mga ruta at posisyon",
+      settings_account_heading: "SetSail Account",
+      settings_account_sub: "Mag-sign in sa Google para i-sync ang mga ruta at chart edits.",
       btn_google_signin: "Sign-In",
       btn_sign_out: "Mag-sign out",
       guest_mode: "MODO BISITA",
-      lang_settings_title: "Wika at Localization ng Bridge",
-      lang_settings_sub: "Piliin ang wika ng bridge. Agad na mag-a-update ang lahat ng mga tab, mapa, at impormasyon.",
+      lang_settings_title: "Wika",
+      lang_settings_sub: "Nalalapat sa lahat ng tab at map overlays.",
       toast_lang_changed: "Pinalitan ang wika sa Filipino",
       filter_active: "Aktibong Babala",
       filter_navtex: "NAVTEX Babala",
@@ -12779,13 +12785,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "SetRoute में मार्ग योजना",
       btn_open_news: "SetNews खोलें",
       btn_read_story: "पूरी खबर पढ़ें →",
-      settings_account_heading: "SetSail खाता और क्लाउड सिंक",
-      settings_account_sub: "मार्ग योजना, चार्ट संपादन और प्राथमिकताओं को सिंक करने के लिए Google से साइन इन करें",
+      settings_account_heading: "SetSail खाता",
+      settings_account_sub: "मार्ग और चार्ट संपादन सिंक करने के लिए Google से साइन इन करें।",
       btn_google_signin: "साइन-इन",
       btn_sign_out: "साइन आउट",
       guest_mode: "अतिथि मोड",
-      lang_settings_title: "क्षेत्रीय भाषा और ब्रिज लोकलाइज़ेशन",
-      lang_settings_sub: "अपनी पसंदीदा ब्रिज भाषा चुनें। सभी टैब, मानचित्र परतें और ब्रिफिंग तुरंत अनुकूलित होंगी।",
+      lang_settings_title: "भाषा",
+      lang_settings_sub: "सभी टैब और मानचित्र परतों पर लागू।",
       toast_lang_changed: "भाषा हिन्दी में बदली गई",
       filter_active: "सक्रिय चेतावनियाँ",
       filter_navtex: "NAVTEX अलर्ट",
