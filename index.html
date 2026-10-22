@@ -47,11 +47,15 @@
   <link rel="dns-prefetch" href="https://a.basemaps.cartocdn.com" />
   <link rel="dns-prefetch" href="https://server.arcgisonline.com" />
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="assets/leaflet/leaflet.css" />
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.55" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.57" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -6982,11 +6986,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 
 /* ==========================================================================
-   SLIDE 3: ABOUT SETSAIL (Top SaaS Narrative & Visual Showcase)
+   SLIDE 3: ABOUT SETSAIL — dense mosaic (scroll-reveal + logo finale)
    ========================================================================== */
 .home-slide-about {
   position: absolute;
-  inset: 76px 32px 64px 32px;
+  inset: 56px 16px 40px 16px;
   z-index: 22;
   display: flex;
   align-items: center;
@@ -6994,194 +6998,175 @@ svg.leaflet-image-layer.leaflet-interactive path {
   opacity: 0;
   pointer-events: none;
   will-change: transform, opacity;
+  --about-p: 0;
+  --about-logo: 0;
 }
 
-.home-about-container {
-  width: 100%;
-  max-width: 1060px;
-  display: grid;
-  grid-template-columns: 1.12fr 0.88fr;
-  gap: 2.5rem;
-  align-items: center;
-}
-
-.home-about-left {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-}
-
-.home-about-headline {
-  font-size: 2.1rem;
-  font-weight: 800;
-  line-height: 1.16;
-  letter-spacing: -0.025em;
-  color: #f8fafc;
-  margin: 0.35rem 0 0.85rem;
-}
-
-.home-about-headline span {
-  background: linear-gradient(135deg, #38bdf8 0%, #f05a36 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.home-about-lead {
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: #94a3b8;
-  margin: 0 0 1.2rem;
-}
-
-.home-about-pillars {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.85rem;
-  width: 100%;
-}
-
-.home-about-pillar {
-  background: rgba(12, 24, 52, 0.65);
-  border: 1px solid rgba(126, 182, 255, 0.18);
-  border-radius: 12px;
-  padding: 0.85rem 0.9rem;
-  backdrop-filter: blur(12px);
-}
-
-.home-about-pillar-num {
-  font-size: 0.64rem;
-  font-weight: 800;
-  color: #f05a36;
-  letter-spacing: 0.1em;
-  margin-bottom: 4px;
-}
-
-.home-about-pillar-title {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #f1f5f9;
-  margin-bottom: 4px;
-}
-
-.home-about-pillar-desc {
-  font-size: 0.67rem;
-  line-height: 1.4;
-  color: #94a3b8;
-}
-
-/* Visual Showcase Frame (Ready for Photo / Video) */
-.home-about-visual-card {
+.home-about-life {
   position: relative;
-  border-radius: 18px;
-  background: rgba(8, 18, 42, 0.78);
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(56, 189, 248, 0.1);
+  width: min(1360px, 98%);
+  height: min(720px, 78vh);
+  border-radius: 6px;
   overflow: hidden;
-  backdrop-filter: blur(16px);
+  isolation: isolate;
+  background: #040810;
 }
 
-.home-about-visual-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: rgba(4, 10, 24, 0.65);
-  border-bottom: 1px solid rgba(126, 182, 255, 0.14);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #94a3b8;
+.about-mosaic {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+  gap: 3px;
+  padding: 3px;
+  transform: scale(calc(1.02 - 0.012 * var(--about-p)));
+  filter: brightness(calc(0.72 + 0.18 * var(--about-p)));
 }
 
-.visual-window-dots {
-  display: flex;
-  gap: 6px;
-}
-
-.visual-window-dots span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(148, 163, 184, 0.35);
-}
-
-.visual-window-dots span:first-child { background: #f05a36; }
-.visual-window-dots span:nth-child(2) { background: #eab308; }
-.visual-window-dots span:nth-child(3) { background: #10b981; }
-
-.home-about-media-slot {
+.about-moz-tile {
   position: relative;
-  height: 265px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.14) 0%, rgba(6, 13, 28, 0.92) 75%);
+  margin: 0;
   overflow: hidden;
+  border-radius: 2px;
+  background: #0b1220;
+  opacity: 0;
+  transform: scale(0.92) translateY(10px);
+  transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.about-radar-rings {
-  position: relative;
-  width: 164px;
-  height: 164px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.about-moz-tile.is-in {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
 
-.about-radar-ring {
+.about-moz-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.9) contrast(1.06);
+}
+
+.about-moz-tile figcaption {
+  display: none;
   position: absolute;
-  border-radius: 50%;
-  border: 1px dashed rgba(56, 189, 248, 0.32);
-}
-
-.about-radar-ring.r1 { width: 160px; height: 160px; animation: radarSpin 28s linear infinite; }
-.about-radar-ring.r2 { width: 112px; height: 112px; border-style: solid; border-color: rgba(240, 90, 54, 0.28); }
-.about-radar-ring.r3 { width: 62px; height: 62px; }
-
-.about-radar-sweep {
-  position: absolute;
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, rgba(56, 189, 248, 0.28) 0deg, transparent 75deg, transparent 360deg);
-  animation: radarSpin 5s linear infinite;
-}
-
-@keyframes radarSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.about-media-placeholder-caption {
-  margin-top: 12px;
-  font-size: 0.66rem;
+  left: 5px;
+  bottom: 4px;
+  font-family: "Outfit", "Segoe UI", sans-serif;
+  font-size: 0.5rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #7dd3fc;
-  background: rgba(14, 28, 58, 0.75);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  padding: 4px 12px;
-  border-radius: 999px;
+  color: rgba(248, 250, 252, 0.72);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+  opacity: 0.85;
 }
 
-[data-theme="light"] .home-about-headline { color: #0f172a; }
-[data-theme="light"] .home-about-lead { color: #334155; }
-[data-theme="light"] .home-about-pillar {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+.about-copy {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, calc(-50% + (1 - var(--about-p)) * 22px));
+  width: min(400px, 84%);
+  z-index: 8;
+  text-align: center;
+  padding: 1.15rem 1.25rem 1.25rem;
+  background: linear-gradient(180deg, rgba(4, 8, 18, 0.15) 0%, rgba(4, 8, 18, 0.78) 45%, rgba(4, 8, 18, 0.9) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  opacity: calc(max(0, var(--about-p) * 1.35 - 0.12) * (1 - var(--about-logo) * 0.95));
+  pointer-events: none;
 }
-[data-theme="light"] .home-about-pillar-title { color: #0f172a; }
-[data-theme="light"] .home-about-pillar-desc { color: #475569; }
-[data-theme="light"] .home-about-visual-card {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+
+.about-kicker {
+  margin: 0 0 0.45rem;
+  font-family: "Outfit", "Segoe UI", sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f05a36;
 }
+
+.about-headline {
+  margin: 0 0 0.65rem;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(1.4rem, 2.4vw, 1.95rem);
+  line-height: 1.18;
+  color: #f8fafc;
+}
+
+.about-headline em {
+  font-style: italic;
+  color: #fda4af;
+}
+
+.about-body {
+  margin: 0;
+  font-family: "Outfit", "Segoe UI", sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.about-body strong {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+/* Logo rises over the mosaic at the end of the About scroll beat */
+.about-logo-finale {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse 55% 45% at 50% 48%, rgba(4, 8, 18, 0.55) 0%, rgba(4, 8, 18, 0.82) 70%);
+  opacity: var(--about-logo);
+  pointer-events: none;
+  transition: none;
+}
+
+.about-logo-finale img {
+  width: min(280px, 58vw);
+  height: auto;
+  filter: drop-shadow(0 8px 28px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 22px rgba(240, 90, 54, 0.35));
+  transform: scale(calc(0.88 + 0.12 * var(--about-logo)));
+}
+
+[data-theme="light"] .home-about-life { background: #0f172a; }
+[data-theme="light"] .about-copy {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(248, 250, 252, 0.94) 100%);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+[data-theme="light"] .about-headline { color: #0f172a; }
+[data-theme="light"] .about-headline em { color: #c2410c; }
+[data-theme="light"] .about-body { color: #334155; }
+[data-theme="light"] .about-body strong { color: #0f172a; }
+[data-theme="light"] .about-logo-finale {
+  background: radial-gradient(ellipse 55% 45% at 50% 48%, rgba(248, 250, 252, 0.55) 0%, rgba(15, 23, 42, 0.75) 75%);
+}
+
+@media (max-width: 900px) {
+  .home-slide-about { inset: 44px 8px 48px 8px !important; }
+  .home-about-life { height: min(640px, 82vh) !important; width: 100% !important; }
+  .about-mosaic {
+    grid-template-columns: repeat(6, 1fr) !important;
+    grid-template-rows: repeat(8, minmax(0, 1fr)) !important;
+    gap: 1px !important;
+  }
+  .about-moz-tile { grid-column: span 1 !important; grid-row: span 1 !important; }
+  .about-moz-tile figcaption { display: none; }
+  .about-copy { width: 92% !important; padding: 0.85rem 0.9rem !important; }
+  .about-headline { font-size: 1.25rem !important; }
+  .about-body { font-size: 0.7rem !important; }
+}
+
 
 /* ==========================================================================
    SLIDE 4: NARROW INFINITE MARQUEE OF RECOGNIZABLE SOURCES (Transparent Logos)
@@ -12042,53 +12027,100 @@ select option {
               </div>
             </section>
 
-            <!-- SLIDE 4: ABOUT SETSAIL -->
+            <!-- SLIDE 4: ABOUT SETSAIL — dense day-in-the-life mosaic -->
             <section class="home-slide-about" id="homeSlideAbout" aria-label="About SetSail">
-              <div class="home-about-container">
-                <div class="home-about-left">
-                  <div class="saas-eyebrow-pill"><span class="saas-eyebrow-dot"></span>ABOUT SETSAIL</div>
-                  <h2 class="home-about-headline">Built for the Modern <span>Navigation Bridge.</span></h2>
-                  <p class="home-about-lead">
-                    SetSail unifies hydrographic chart corrections, celestial compass verification, synoptic weather routing, and port depth intelligence into a single offline-first maritime platform &mdash; designed to reduce bridge workload and elevate situational awareness at sea.
-                  </p>
-                  <div class="home-about-pillars">
-                    <div class="home-about-pillar">
-                      <div class="home-about-pillar-num">01 &bull; ARCHITECTURE</div>
-                      <div class="home-about-pillar-title">Offline-First Engine</div>
-                      <div class="home-about-pillar-desc">Zero-latency operation on open-ocean passages regardless of satellite connectivity.</div>
-                    </div>
-                    <div class="home-about-pillar">
-                      <div class="home-about-pillar-num">02 &bull; PRECISION</div>
-                      <div class="home-about-pillar-title">Hydrographic Sync</div>
-                      <div class="home-about-pillar-desc">Automated ingestion of weekly Admiralty notices, ephemeris tables &amp; 00:00Z weather.</div>
-                    </div>
-                    <div class="home-about-pillar">
-                      <div class="home-about-pillar-num">03 &bull; ERGONOMICS</div>
-                      <div class="home-about-pillar-title">Bridge-Verified UX</div>
-                      <div class="home-about-pillar-desc">Instant dark night-watch and high-contrast daylight modes tailored for watchkeepers.</div>
-                    </div>
-                  </div>
+              <div class="home-about-life">
+                <div class="about-mosaic" id="homeAboutMosaic" aria-hidden="true">
+                  <figure class="about-moz-tile" data-reveal="0.0" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.013" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.026" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.04" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.053" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.066" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.079" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.093" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.106" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.119" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.132" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.146" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1471922694854-ff1b63b51dfc?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.159" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.172" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.185" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.199" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.212" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.225" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.238" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.252" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.265" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.278" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1476673160081-cf065607f449?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.291" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.305" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.318" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.331" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.344" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.357" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.371" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.384" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.397" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1508700115892-45ecd05bd2d3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.41" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.424" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1414609589552-1fc6f7c0f1e5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.437" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.45" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.463" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.477" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1544551763-77ef2d0c9855?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.49" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.503" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.516" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1590523277543-a94d2e4eb17b?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.53" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.543" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.556" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1493558103817-58b2924bce98?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.569" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1506953821633-555da4d77266?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.583" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.596" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1468413253725-0d5181091126?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.609" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.622" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.635" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1484291470158-b4f4ed1587e3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.649" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1476610182048-b716b8518fcf?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.662" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1596003906949-67221c37965c?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.675" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.688" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.702" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1718786229156-dd1ab630e098?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.715" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.728" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.741" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.755" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.768" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.781" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.794" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.808" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.821" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.834" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.847" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.861" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.874" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.887" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1471922694854-ff1b63b51dfc?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.9" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.914" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.927" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
+                  <figure class="about-moz-tile" data-reveal="0.93" style="grid-column: span 1; grid-row: span 1;"><img data-src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=edges&amp;w=720&amp;h=720&amp;q=78" alt="" decoding="async" width="720" height="720" /><figcaption></figcaption></figure>
                 </div>
-
-                <!-- Right Column: Visual Media Showcase (Photo / Video Ready) -->
-                <div class="home-about-visual-card">
-                  <div class="home-about-visual-topbar">
-                    <div class="visual-window-dots"><span></span><span></span><span></span></div>
-                    <span>SETSAIL VISUAL SHOWCASE &bull; BRIDGE CORE</span>
-                  </div>
-                  <div class="home-about-media-slot" id="homeAboutMediaSlot">
-                    <div class="about-radar-rings">
-                      <div class="about-radar-sweep"></div>
-                      <div class="about-radar-ring r1"></div>
-                      <div class="about-radar-ring r2"></div>
-                      <div class="about-radar-ring r3"></div>
-                      <picture><source srcset="assets/SetSail LOGOS/setsail_logo_square.webp" type="image/webp" /><img src="assets/SetSail LOGOS/setsail_logo_square.png" alt="SetSail" style="width:48px;height:48px;position:relative;z-index:2;filter:drop-shadow(0 0 14px rgba(240,90,54,0.5));" /></picture>
-                    </div>
-                    <div class="about-media-placeholder-caption">Integrated Maritime Visual &bull; Photo / Video Slot</div>
-                  </div>
+                <div class="about-copy" id="homeAboutCopy">
+                  <p class="about-kicker">Day in the life · Bridge &amp; deck</p>
+                  <h2 class="about-headline">Made for the quiet hours when the chart is open and <em>the sea is loud.</em></h2>
+                  <p class="about-body">
+                    SetSail sits with the watch — <strong>NtM before coffee</strong>, a gyro check after breakfast, cyclone tracks before night orders.
+                    Not a sales pitch. A working companion for the day at sea.
+                  </p>
+                </div>
+                <div class="about-logo-finale" id="homeAboutLogoFinale" aria-hidden="true">
+                  <picture>
+                    <source srcset="assets/SetSail LOGOS/setsail_logo_horizontal.webp" type="image/webp" />
+                    <img src="assets/SetSail LOGOS/setsail_logo_horizontal.png" alt="SetSail" width="280" height="72" />
+                  </picture>
                 </div>
               </div>
             </section>
+
 
             <!-- SLIDE 4: NARROW INFINITE MARQUEE OF RECOGNIZABLE SOURCES (Transparent Background Logos) -->
             <section class="home-slide-sources" id="homeSlideSources" aria-label="Integrated Maritime Data Sources">
@@ -19762,23 +19794,23 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.55"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.55" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.55"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.57"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.57" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.57"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.55",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.57",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.55"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.55"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.55"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.57"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.57"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.57"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19856,7 +19888,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.55"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.57"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19900,6 +19932,31 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             '<span class="home-tool-hover-cta">Open ' + toolConfig.title + ' &rarr;</span>' +
           '</div>';
         grid.appendChild(btn);
+      };
+
+
+      // About mosaic: progressive tile reveal + lazy load + logo finale
+      window.__setsailUpdateAboutMosaic = function(aboutP) {
+        const slide = document.getElementById('homeSlideAbout');
+        if (!slide) return;
+        const p = Math.max(0, Math.min(1, aboutP || 0));
+        slide.style.setProperty('--about-p', String(p.toFixed(3)));
+        // Logo appears in the last ~35% of the About beat
+        const logo = Math.max(0, Math.min(1, (p - 0.62) / 0.38));
+        slide.style.setProperty('--about-logo', String(logo.toFixed(3)));
+        const tiles = slide.querySelectorAll('.about-moz-tile');
+        tiles.forEach((tile) => {
+          const need = parseFloat(tile.getAttribute('data-reveal') || '0') || 0;
+          const on = p >= need * 0.92;
+          if (on) {
+            tile.classList.add('is-in');
+            const img = tile.querySelector('img[data-src]');
+            if (img) {
+              img.src = img.getAttribute('data-src');
+              img.removeAttribute('data-src');
+            }
+          }
+        });
       };
 
       function renderHomeSlideFrame(p) {
@@ -20067,6 +20124,13 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           slideAbout.style.opacity = String(aboutAlpha.toFixed(3));
           slideAbout.style.transform = 'translate3d(0, ' + aboutY.toFixed(1) + 'px, 0) scale(' + aboutScale.toFixed(3) + ')';
           slideAbout.style.pointerEvents = aboutAlpha > 0.45 ? 'auto' : 'none';
+          if (typeof window.__setsailUpdateAboutMosaic === 'function') {
+            window.__setsailUpdateAboutMosaic(aboutIn);
+          } else {
+            slideAbout.style.setProperty('--about-p', String(aboutIn.toFixed(3)));
+            const logoP = Math.max(0, Math.min(1, (aboutIn - 0.62) / 0.38));
+            slideAbout.style.setProperty('--about-logo', String(logoP.toFixed(3)));
+          }
         }
 
         // 8. Slide 5: Narrow Infinite Marquee of Recognizable Sources (Appears on t4: 0.30 -> 1.0)
@@ -20235,7 +20299,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.55', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.57', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
