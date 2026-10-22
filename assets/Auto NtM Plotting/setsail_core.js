@@ -2421,10 +2421,10 @@ function renderWeatherOnMap(map = null) {
     const dangerCircle = L.circle(storm.center, {
       radius: dangerRadiusM,
       color: primaryColor,
-      weight: curZoom <= 4 ? 1.0 : 1.4,
+      weight: curZoom <= 4 ? 1.8 : 2.2,
       dashArray: "4, 5",
       fillColor: primaryColor,
-      fillOpacity: curZoom <= 4 ? 0.05 : 0.09
+      fillOpacity: curZoom <= 4 ? 0.18 : 0.24
     });
     leafletWeatherLayer.addLayer(dangerCircle);
 
@@ -2502,7 +2502,7 @@ function renderWeatherOnMap(map = null) {
         weight: 0.9,
         dashArray: "3, 4",
         fillColor: "#f59e0b",
-        fillOpacity: curZoom <= 4 ? 0.06 : 0.10
+        fillOpacity: curZoom <= 4 ? 0.14 : 0.20
       };
       if (canvasRenderer) coneOpts.renderer = canvasRenderer;
       leafletWeatherLayer.addLayer(L.polygon(coneCoords, coneOpts));
@@ -2590,7 +2590,7 @@ function renderWeatherOnMap(map = null) {
       weight: 1.0,
       dashArray: "4, 6",
       fillColor: "#0284c7",
-      fillOpacity: curZoom <= 4 ? 0.04 : 0.08
+      fillOpacity: curZoom <= 4 ? 0.12 : 0.18
     });
     waveCircle.bindTooltip(`🌊 ${wave.name}: Hs ${wave.waveHeight}m (${wave.swellPeriod}s ${wave.swellDir})`, { direction: "top" });
     waveCircle.bindPopup(`
@@ -6708,26 +6708,6 @@ function showWeatherInfoModal() {
   const modal = document.getElementById("weatherOverlayModal");
   if (modal) {
     modal.classList.add("open");
-    const badge = document.getElementById("weatherModalStatusBadge");
-    const cycleLabel = document.getElementById("weatherModalCycleLabel");
-    const store = MARINE_WEATHER_STORE || {};
-    const cyc = store.synopticCycle || "6h UTC";
-    if (cycleLabel) cycleLabel.textContent = "Synoptic " + cyc;
-    if (badge) {
-      badge.textContent = navigator.onLine ? "LIVE" : "CACHED";
-      badge.style.background = navigator.onLine ? "#10b981" : "#eab308";
-    }
-    const meta = document.getElementById("weatherModalLiveMeta");
-    if (meta) {
-      const sync = store.lastSyncUtc
-        ? new Date(store.lastSyncUtc).toISOString().slice(0, 16).replace("T", " ") + "Z"
-        : "—";
-      meta.innerHTML =
-        `<div><span style="color:#94a3b8;">Last sync</span><br><b style="color:#e2e8f0;">${sync}</b></div>` +
-        `<div><span style="color:#94a3b8;">Cyclones · OPC</span><br><b style="color:#fde68a;">${(store.storms || []).length} · ${(store.opcWarnings || []).length}</b></div>` +
-        `<div><span style="color:#94a3b8;">Waves · Buoys</span><br><b style="color:#7dd3fc;">${(store.waves || []).length} · ${(store.buoys || []).length}</b></div>` +
-        `<div><span style="color:#94a3b8;">MSL · Currents</span><br><b style="color:#cbd5e1;">${(store.pressureGrid || []).length} · ${(store.currents || []).length}</b></div>`;
-    }
     syncWeatherModalLayerChecks();
     updateWeatherModalActiveStorms();
   }

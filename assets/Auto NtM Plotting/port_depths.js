@@ -20052,7 +20052,8 @@ function setOverlayActive(overlayKey, isActive, map = null) {
 
   if (!window.leafletMap && typeof window.initNtMMap === "function") {
     const ntmPane = document.getElementById("tab-ntm");
-    if (ntmPane && ntmPane.classList.contains("active")) {
+    const mapEl = document.getElementById("ntmMap") || document.getElementById("map");
+    if ((ntmPane && ntmPane.classList.contains("active")) || mapEl) {
       window.initNtMMap();
     }
   }
@@ -20132,13 +20133,27 @@ function setOverlayActive(overlayKey, isActive, map = null) {
     } else if (overlayKey === "weather") {
       if (isActive && typeof window.refreshMarineWeather === "function") {
         Promise.resolve(window.refreshMarineWeather(true)).finally(() => {
+          const mapNow = window.leafletMap || currentMap;
           if (typeof window.renderWeatherOnMap === "function") {
-            window.renderWeatherOnMap(currentMap);
+            window.renderWeatherOnMap(mapNow);
+          }
+          const n = (window.leafletWeatherLayer && window.leafletWeatherLayer.getLayers)
+            ? window.leafletWeatherLayer.getLayers().length : 0;
+          const storms = (window.MARINE_WEATHER_STORE && window.MARINE_WEATHER_STORE.storms) || [];
+          if (typeof window.showSetSailToast === "function") {
+            if (n > 0) {
+              window.showSetSailToast("Weather on: " + n + " objects" + (storms.length ? " (" + storms.length + " cyclones)" : "") + " — zoom oceans to see", "info");
+            } else {
+              window.showSetSailToast("Weather on, but no objects for current filters/zoom", "warning");
+            }
+          }
+          if (mapNow && storms.length && storms[0].center && typeof mapNow.flyTo === "function") {
+            try { mapNow.flyTo(storms[0].center, Math.max(mapNow.getZoom() || 3, 4), { duration: 0.9 }); } catch (e) {}
           }
           setOverlayTileLoading("weather", false);
         });
       } else if (typeof window.renderWeatherOnMap === "function") {
-        window.renderWeatherOnMap(currentMap);
+        window.renderWeatherOnMap(window.leafletMap || currentMap);
         setTimeout(() => setOverlayTileLoading("weather", false), 350);
       } else {
         setTimeout(() => setOverlayTileLoading("weather", false), 350);

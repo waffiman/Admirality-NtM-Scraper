@@ -2421,10 +2421,10 @@ function renderWeatherOnMap(map = null) {
     const dangerCircle = L.circle(storm.center, {
       radius: dangerRadiusM,
       color: primaryColor,
-      weight: curZoom <= 4 ? 1.0 : 1.4,
+      weight: curZoom <= 4 ? 1.8 : 2.2,
       dashArray: "4, 5",
       fillColor: primaryColor,
-      fillOpacity: curZoom <= 4 ? 0.05 : 0.09
+      fillOpacity: curZoom <= 4 ? 0.18 : 0.24
     });
     leafletWeatherLayer.addLayer(dangerCircle);
 
@@ -2502,7 +2502,7 @@ function renderWeatherOnMap(map = null) {
         weight: 0.9,
         dashArray: "3, 4",
         fillColor: "#f59e0b",
-        fillOpacity: curZoom <= 4 ? 0.06 : 0.10
+        fillOpacity: curZoom <= 4 ? 0.14 : 0.20
       };
       if (canvasRenderer) coneOpts.renderer = canvasRenderer;
       leafletWeatherLayer.addLayer(L.polygon(coneCoords, coneOpts));
@@ -2590,7 +2590,7 @@ function renderWeatherOnMap(map = null) {
       weight: 1.0,
       dashArray: "4, 6",
       fillColor: "#0284c7",
-      fillOpacity: curZoom <= 4 ? 0.04 : 0.08
+      fillOpacity: curZoom <= 4 ? 0.12 : 0.18
     });
     waveCircle.bindTooltip(`🌊 ${wave.name}: Hs ${wave.waveHeight}m (${wave.swellPeriod}s ${wave.swellDir})`, { direction: "top" });
     waveCircle.bindPopup(`
@@ -3142,51 +3142,102 @@ function parseCoordinateString(str) {
   return null;
 }
 
+/** Zoom at/above which own-ship switches from position circle → hull outline. */
+const OWN_SHIP_HULL_ZOOM = 14;
+
 /**
- * Generates Crosshair Target Marker
+ * Generates Crosshair Target Marker (legacy / fallback)
  */
 function getEcdisCrosshairIcon() {
-  const svgHtml = `
-    <div class="crosshair-wrapper">
-      <div class="crosshair-pulse-ring"></div>
-      <svg width="34" height="34" viewBox="-17 -17 34 34" class="crosshair-svg">
-        <circle cx="0" cy="0" r="13" fill="none" stroke="#00e5ff" stroke-width="1.2" opacity="0.5" />
-        <circle cx="0" cy="0" r="8" fill="none" stroke="#ffffff" stroke-width="1.8" />
-        <line x1="0" y1="-15" x2="0" y2="-9" stroke="#ffffff" stroke-width="2" />
-        <line x1="0" y1="9" x2="0" y2="15" stroke="#ffffff" stroke-width="2" />
-        <line x1="-15" y1="0" x2="-9" y2="0" stroke="#ffffff" stroke-width="2" />
-        <line x1="9" y1="0" x2="15" y2="0" stroke="#ffffff" stroke-width="2" />
-        <circle cx="0" cy="0" r="3" fill="#00e5ff" stroke="#ffffff" stroke-width="1" />
-      </svg>
-    </div>
-  `;
-  return L.divIcon({
-    html: svgHtml,
-    className: "ecdis-crosshair-marker",
-    iconSize: [34, 34],
-    iconAnchor: [17, 17]
-  });
+  return getOwnShipPositionIcon(null, false);
 }
 
-/** ECDIS-style own-ship outline (bow up); rotate by true heading/COG degrees. */
-function getOwnShipSilhouetteIcon(headingDeg) {
-  const rot = ((Number(headingDeg) % 360) + 360) % 360;
+/**
+ * Low/medium zoom: ECDIS position circle (bullseye) + short heading vector with tick marks.
+ * Bow = up in local SVG, then rotated by true heading/COG.
+ */
+function getOwnShipPositionIcon(headingDeg, showVector) {
+  const rot = Number.isFinite(Number(headingDeg))
+    ? ((Number(headingDeg) % 360) + 360) % 360
+    : 0;
+  const vec = showVector !== false && Number.isFinite(Number(headingDeg));
+  const vectorSvg = vec
+    ? `<g class="own-ship-vector" stroke="#0f172a" stroke-width="1.35" fill="none" stroke-linecap="round">
+         <line x1="24" y1="24" x2="24" y2="4" stroke-dasharray="2.2 2.2"/>
+         <line x1="20.5" y1="18" x2="27.5" y2="18"/>
+         <line x1="20.5" y1="12" x2="27.5" y2="12"/>
+         <line x1="20.5" y1="7" x2="27.5" y2="7"/>
+         <polyline points="20.5,5.5 24,2 27.5,5.5" stroke-width="1.5"/>
+       </g>`
+    : "";
   const html = `
-    <div class="own-ship-wrap" style="transform:rotate(${rot}deg);transform-origin:center center;">
-      <svg class="own-ship-svg" width="32" height="52" viewBox="0 0 32 52" aria-hidden="true">
-        <path d="M16 1.5 L25 16 L23 44 L16 50.5 L9 44 L7 16 Z"
-          fill="rgba(0,229,255,0.28)" stroke="#00e5ff" stroke-width="2"/>
-        <path d="M16 9 L21 19 L16 17.5 L11 19 Z" fill="#f05a36"/>
-        <line x1="16" y1="17" x2="16" y2="40" stroke="#ffffff" stroke-width="1.4" opacity="0.7"/>
-        <circle cx="16" cy="26" r="2.4" fill="#ffffff" stroke="#00e5ff" stroke-width="1.2"/>
+    <div class="own-ship-wrap own-ship-wrap--pos" style="transform:rotate(${rot}deg);transform-origin:center center;">
+      <svg class="own-ship-svg" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+        ${vectorSvg}
+        <circle cx="24" cy="24" r="9" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+        <circle cx="24" cy="24" r="5.2" fill="none" stroke="#0f172a" stroke-width="1.35"/>
+        <circle cx="24" cy="24" r="2.1" fill="#0f172a"/>
       </svg>
     </div>`;
   return L.divIcon({
     html,
     className: "own-ship-marker",
-    iconSize: [32, 52],
-    iconAnchor: [16, 26]
+    iconSize: [48, 48],
+    iconAnchor: [24, 24]
   });
+}
+
+/**
+ * High zoom: ECDIS own-ship hull outline (rounded bow, flat stern) + heading vector.
+ */
+function getOwnShipHullIcon(headingDeg, showVector) {
+  const rot = Number.isFinite(Number(headingDeg))
+    ? ((Number(headingDeg) % 360) + 360) % 360
+    : 0;
+  const vec = showVector !== false && Number.isFinite(Number(headingDeg));
+  // Local coords: bow toward -Y (up). Hull centered near (24, 34).
+  const vectorSvg = vec
+    ? `<line x1="24" y1="22" x2="24" y2="2" stroke="#0f172a" stroke-width="1.25"/>`
+    : "";
+  const html = `
+    <div class="own-ship-wrap own-ship-wrap--hull" style="transform:rotate(${rot}deg);transform-origin:24px 34px;">
+      <svg class="own-ship-svg" width="48" height="64" viewBox="0 0 48 64" aria-hidden="true">
+        ${vectorSvg}
+        <path d="M24 14
+          C28.5 14 31.5 18 31.5 24
+          L31.5 46
+          C31.5 49.5 29 51.5 24 51.5
+          C19 51.5 16.5 49.5 16.5 46
+          L16.5 24
+          C16.5 18 19.5 14 24 14 Z"
+          fill="none" stroke="#0f172a" stroke-width="2.1" stroke-linejoin="round"/>
+        <line x1="17.2" y1="44" x2="30.8" y2="44" stroke="#64748b" stroke-width="1.15"/>
+        <line x1="24" y1="16" x2="24" y2="50" stroke="#94a3b8" stroke-width="1"/>
+      </svg>
+    </div>`;
+  return L.divIcon({
+    html,
+    className: "own-ship-marker",
+    iconSize: [48, 64],
+    iconAnchor: [24, 34]
+  });
+}
+
+/** Pick position-circle vs hull outline from current chart zoom. */
+function getOwnShipMapIcon(headingDeg) {
+  const z = (typeof leafletMap !== "undefined" && leafletMap && leafletMap.getZoom)
+    ? leafletMap.getZoom()
+    : 8;
+  const hasHdg = Number.isFinite(Number(headingDeg));
+  if (z >= OWN_SHIP_HULL_ZOOM) {
+    return getOwnShipHullIcon(hasHdg ? headingDeg : 0, hasHdg);
+  }
+  return getOwnShipPositionIcon(hasHdg ? headingDeg : null, hasHdg);
+}
+
+/** ECDIS-style own-ship outline (legacy name → hull). */
+function getOwnShipSilhouetteIcon(headingDeg) {
+  return getOwnShipHullIcon(headingDeg, true);
 }
 
 function resolveOwnShipHeading(v) {
@@ -3216,7 +3267,7 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
     const hdg = resolveOwnShipHeading(userVessel);
     const marker = L.marker([lat, lon], {
-      icon: hdg != null ? getOwnShipSilhouetteIcon(hdg) : getEcdisCrosshairIcon(),
+      icon: getOwnShipMapIcon(hdg),
       zIndexOffset: 1200
     });
 
@@ -4182,6 +4233,7 @@ function initNtMMap() {
 
     // Zoom-Adaptive Level of Detail (LOD) re-render when crossing zoom tiers
     let lastLodTier = -1;
+    let lastOwnShipHullMode = null;
     const getZoomLodTier = (z) => (z <= 2.5 ? 0 : (z <= 3.5 ? 1 : (z <= 4.5 ? 2 : (z <= 7 ? 3 : 4))));
     leafletMap.on("zoomend", () => {
       const z = leafletMap.getZoom();
@@ -4193,6 +4245,14 @@ function initNtMMap() {
         }
         if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.weather !== false) {
           renderWeatherOnMap(leafletMap);
+        }
+      }
+      // Swap own-ship symbol: position circle ↔ hull outline at OWN_SHIP_HULL_ZOOM
+      const hullMode = z >= OWN_SHIP_HULL_ZOOM;
+      if (hullMode !== lastOwnShipHullMode) {
+        lastOwnShipHullMode = hullMode;
+        if (userVessel && Number.isFinite(userVessel.lat) && Number.isFinite(userVessel.lon)) {
+          plotUserVessel(userVessel.lat, userVessel.lon, userVessel.source || "manual", true);
         }
       }
     });
@@ -6648,26 +6708,6 @@ function showWeatherInfoModal() {
   const modal = document.getElementById("weatherOverlayModal");
   if (modal) {
     modal.classList.add("open");
-    const badge = document.getElementById("weatherModalStatusBadge");
-    const cycleLabel = document.getElementById("weatherModalCycleLabel");
-    const store = MARINE_WEATHER_STORE || {};
-    const cyc = store.synopticCycle || "6h UTC";
-    if (cycleLabel) cycleLabel.textContent = "Synoptic " + cyc;
-    if (badge) {
-      badge.textContent = navigator.onLine ? "LIVE" : "CACHED";
-      badge.style.background = navigator.onLine ? "#10b981" : "#eab308";
-    }
-    const meta = document.getElementById("weatherModalLiveMeta");
-    if (meta) {
-      const sync = store.lastSyncUtc
-        ? new Date(store.lastSyncUtc).toISOString().slice(0, 16).replace("T", " ") + "Z"
-        : "—";
-      meta.innerHTML =
-        `<div><span style="color:#94a3b8;">Last sync</span><br><b style="color:#e2e8f0;">${sync}</b></div>` +
-        `<div><span style="color:#94a3b8;">Cyclones · OPC</span><br><b style="color:#fde68a;">${(store.storms || []).length} · ${(store.opcWarnings || []).length}</b></div>` +
-        `<div><span style="color:#94a3b8;">Waves · Buoys</span><br><b style="color:#7dd3fc;">${(store.waves || []).length} · ${(store.buoys || []).length}</b></div>` +
-        `<div><span style="color:#94a3b8;">MSL · Currents</span><br><b style="color:#cbd5e1;">${(store.pressureGrid || []).length} · ${(store.currents || []).length}</b></div>`;
-    }
     syncWeatherModalLayerChecks();
     updateWeatherModalActiveStorms();
   }
@@ -8913,33 +8953,63 @@ function setSetSailAuthUser(userObj) {
   syncSetSailAuthUI();
 }
 
+function _setsailAuthAvatarHtml(user, initChar) {
+  if (user && user.picture) {
+    const safeInit = String(initChar || "G").replace(/'/g, "");
+    return `<img src="${String(user.picture).replace(/"/g, "&quot;")}" alt="${safeInit}" referrerpolicy="no-referrer" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;" onerror="this.parentElement.textContent='${safeInit}'">`;
+  }
+  return String(initChar || "G");
+}
+
+function _setsailGuestHudAvatarHtml() {
+  return `<svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>`;
+}
+
 function syncSetSailAuthUI() {
   const user = getSetSailAuthUser();
   const hudBtn = document.getElementById("homeHudLeftLoginBtn");
   const hudText = document.getElementById("homeHudLeftLoginText") || document.getElementById("homeHudAuthText");
-  const hudAvatar = document.getElementById("homeHudAuthAvatar");
+  let hudAvatar = document.getElementById("homeHudAuthAvatar");
+  // Legacy markup: promote the left icon span into the avatar host if id is missing
+  if (!hudAvatar && hudBtn) {
+    const iconHost = hudBtn.querySelector(".home-hud-icon");
+    if (iconHost) {
+      iconHost.id = "homeHudAuthAvatar";
+      iconHost.classList.add("home-hud-auth-avatar");
+      hudAvatar = iconHost;
+    }
+  }
 
   if (hudBtn && hudText) {
     if (user && (user.name || user.email)) {
       const disp = user.name || user.email.split("@")[0];
       const initChar = disp.charAt(0).toUpperCase();
-      hudBtn.classList.add("logged-in");
+      hudBtn.classList.add("logged-in", "signed-in");
+      // Prevent i18n from overwriting the Google display name on language refresh
+      hudText.removeAttribute("data-i18n");
       hudText.textContent = disp;
       if (hudAvatar) {
-        if (user.picture) {
-          hudAvatar.innerHTML = `<img src="${user.picture}" alt="${initChar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.parentElement.textContent='${initChar}'">`;
-        } else {
-          hudAvatar.innerHTML = initChar;
-        }
+        hudAvatar.classList.add("is-photo");
+        hudAvatar.innerHTML = _setsailAuthAvatarHtml(user, initChar);
       }
       hudBtn.title = `Signed in as ${user.email || disp}`;
+      hudBtn.setAttribute("aria-label", `Signed in as ${disp}. Open account settings.`);
     } else {
-      hudBtn.classList.remove("logged-in");
-      hudText.textContent = "Sign-In";
-      if (hudAvatar) {
-        hudAvatar.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+      hudBtn.classList.remove("logged-in", "signed-in");
+      hudText.setAttribute("data-i18n", "btn_google_signin");
+      try {
+        const lang = (typeof getSetSailLanguage === "function" && getSetSailLanguage()) || "en";
+        const pack = (typeof SET_SAIL_LANGUAGES !== "undefined" && SET_SAIL_LANGUAGES[lang]) || null;
+        hudText.textContent = (pack && pack.translations && pack.translations.btn_google_signin) || "Sign-In";
+      } catch (eLang) {
+        hudText.textContent = "Sign-In";
       }
-      hudBtn.title = "Sign-In";
+      if (hudAvatar) {
+        hudAvatar.classList.remove("is-photo");
+        hudAvatar.innerHTML = _setsailGuestHudAvatarHtml();
+      }
+      hudBtn.title = "Sign in or manage your SetSail Account (Google OAuth / Bridge Profile)";
+      hudBtn.setAttribute("aria-label", "Sign in with Google");
     }
   }
 
@@ -8948,21 +9018,27 @@ function syncSetSailAuthUI() {
   const profileNameEl = document.getElementById("settingsAuthProfileName") || document.getElementById("settingsProfileName");
   const profileEmailEl = document.getElementById("settingsAuthProfileEmail") || document.getElementById("settingsProfileEmail");
   const profileAvatarEl = document.getElementById("settingsAuthProfileAvatar") || document.getElementById("settingsProfileAvatar");
+  const accountAvatarEl = document.getElementById("settingsAccountAvatar");
+  const accountBadge = document.getElementById("settingsAccountStatusBadge");
+  const accountSub = document.getElementById("settingsAccountSub");
   const contactEmailEl = document.getElementById("contactEmail");
 
   if (user && (user.email || user.name)) {
     if (loggedOutBox) loggedOutBox.style.display = "none";
     if (loggedInBox) loggedInBox.style.display = "flex";
-    if (profileNameEl) profileNameEl.textContent = user.name || user.email.split("@")[0];
+    const dispName = user.name || user.email.split("@")[0];
+    const initC = dispName.charAt(0).toUpperCase();
+    if (profileNameEl) profileNameEl.textContent = dispName;
     if (profileEmailEl) profileEmailEl.textContent = `${user.email || ""} • Google Account Synced`;
-    if (profileAvatarEl) {
-      const initC = (user.name || user.email || "G").charAt(0).toUpperCase();
-      if (user.picture) {
-        profileAvatarEl.innerHTML = `<img src="${user.picture}" alt="${initC}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.parentElement.textContent='${initC}'">`;
-      } else {
-        profileAvatarEl.textContent = initC;
-      }
+    if (profileAvatarEl) profileAvatarEl.innerHTML = _setsailAuthAvatarHtml(user, initC);
+    if (accountAvatarEl) accountAvatarEl.innerHTML = _setsailAuthAvatarHtml(user, initC);
+    if (accountBadge) {
+      accountBadge.textContent = "SIGNED IN";
+      accountBadge.style.background = "rgba(16,185,129,0.14)";
+      accountBadge.style.color = "#34d399";
+      accountBadge.style.borderColor = "rgba(16,185,129,0.35)";
     }
+    if (accountSub) accountSub.textContent = user.email || "Google Account Synced";
     if (contactEmailEl && !contactEmailEl.value && user.email) {
       contactEmailEl.value = user.email;
     }
@@ -8970,6 +9046,22 @@ function syncSetSailAuthUI() {
   } else {
     if (loggedOutBox) loggedOutBox.style.display = "block";
     if (loggedInBox) loggedInBox.style.display = "none";
+    if (accountAvatarEl) accountAvatarEl.innerHTML = _setsailGuestHudAvatarHtml();
+    if (accountBadge) {
+      accountBadge.textContent = "GUEST MODE";
+      accountBadge.style.background = "rgba(148,163,184,0.14)";
+      accountBadge.style.color = "#cbd5e1";
+      accountBadge.style.borderColor = "rgba(148,163,184,0.3)";
+    }
+    if (accountSub) {
+      try {
+        const _lang = (typeof getSetSailLanguage === "function" && getSetSailLanguage()) || "en";
+        const _pack = (typeof SET_SAIL_LANGUAGES !== "undefined" && SET_SAIL_LANGUAGES[_lang]) || null;
+        accountSub.textContent = (_pack && _pack.translations && _pack.translations.settings_account_sub) || "Sign in with Google to sync routes, chart edits and vessel data.";
+      } catch (eSub) {
+        accountSub.textContent = "Sign in with Google to sync routes, chart edits and vessel data.";
+      }
+    }
   }
   try {
     if (typeof window.syncSetSailAdminUi === "function") window.syncSetSailAdminUi();
@@ -9211,6 +9303,14 @@ function initSetSailAuth() {
   if (hudBtn) {
     hudBtn.addEventListener("click", (e) => {
       e.stopPropagation();
+      const signed = getSetSailAuthUser();
+      if (signed && (signed.email || signed.name)) {
+        // Already signed in → open Settings account card instead of re-prompting Google
+        const settingsTab = document.querySelector('.nav-item[data-tab="tab-settings"]');
+        if (settingsTab) settingsTab.click();
+        else if (typeof window.switchTab === "function") window.switchTab("tab-settings");
+        return;
+      }
       triggerOfficialGoogleSignIn();
     });
   }
@@ -10088,7 +10188,7 @@ function renderHomeNewsSlide() {
             <span>${formatNewsRelativeTime(a.publishedAt)} • ${readMin}m read</span>
           </div>
           <h3 class="home-news-card-title" style="font-size:0.96rem;-webkit-line-clamp:2;margin:0;line-height:1.35;">${a.title}</h3>
-          <p class="home-news-card-context" style="font-size:0.77rem;color:#cbd5e1;line-height:1.42;margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${a.summary || (a.body ? a.body.slice(0, 140) + '...' : '')}</p>
+          <p class="home-news-card-context" style="font-size:0.77rem;color:var(--muted);line-height:1.42;margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${a.summary || (a.body ? a.body.slice(0, 140) + '...' : '')}</p>
           <span class="home-news-card-cta" style="margin-top:auto;padding-top:6px;font-size:0.75rem;color:#38bdf8;font-weight:700;">Read Full Story &rarr;</span>
         </div>
       </article>
@@ -10250,7 +10350,7 @@ function renderSetNewsUI() {
           </div>
           <div class="setnews-card-body" style="padding:14px 15px 15px;gap:8px;">
             <h3 class="setnews-card-title" style="font-size:0.96rem;line-height:1.36;-webkit-line-clamp:2;">${a.title}</h3>
-            <p class="setnews-card-context" style="font-size:0.78rem;color:#cbd5e1;line-height:1.44;margin:2px 0 4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${a.summary || (a.body ? a.body.slice(0, 200) + '...' : '')}</p>
+            <p class="setnews-card-context" style="font-size:0.78rem;color:var(--muted);line-height:1.44;margin:2px 0 4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${a.summary || (a.body ? a.body.slice(0, 200) + '...' : '')}</p>
             <div class="setnews-meta-row" style="margin-top:auto;padding-top:6px;border-top:1px solid rgba(148,163,184,0.12);">
               <span class="setnews-source-tag" style="font-size:0.64rem;">${a.sourceIcon} ${a.source}</span>
               <span style="font-size:0.65rem;color:#94a3b8;">${formatNewsRelativeTime(a.publishedAt)} • ${readMin} min read</span>
@@ -10322,7 +10422,7 @@ function openSetNewsArticleModal(articleId) {
         <span><strong>${icon} ${desk}</strong> • Published ${new Date(art.publishedAt).toUTCString()}</span>
         <span>⏱ ${readMins} min read (${wordCount} words)</span>
       </div>
-      <h2 style="font-size:1.5rem;font-weight:800;line-height:1.3;margin:0;color:#f8fafc;">${art.title}</h2>
+      <h2 style="font-size:1.5rem;font-weight:800;line-height:1.3;margin:0;color:var(--text);">${art.title}</h2>
       ${Array.isArray(art.takeaways) && art.takeaways.length > 0 ? `
         <div style="padding:13px 16px;border-radius:10px;background:rgba(30,41,59,0.7);border-left:3px solid #38bdf8;font-size:0.84rem;color:#e2e8f0;">
           <strong style="color:#38bdf8;display:block;margin-bottom:6px;text-transform:uppercase;font-size:0.7rem;letter-spacing:0.05em;">⚡ Executive Summary &amp; Bridge Takeaways</strong>
@@ -12437,13 +12537,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Plan Passage in SetRoute",
       btn_open_news: "See all world stories →",
       btn_read_story: "Read what's happening →",
-      settings_account_heading: "SetSail Account & Cloud Bridge Sync",
-      settings_account_sub: "Sign in with your Google Account to automatically save and sync your passage plans, chart edits, vessel position & preferences",
+      settings_account_heading: "SetSail Account",
+      settings_account_sub: "Sign in with Google to sync routes, chart edits and vessel data.",
       btn_google_signin: "Sign-In",
       btn_sign_out: "Sign Out",
       guest_mode: "GUEST MODE",
-      lang_settings_title: "Regional Language & Bridge Localization",
-      lang_settings_sub: "Select your preferred bridge operating language. All suite tabs, map overlays, briefings, and telemetry adapt immediately.",
+      lang_settings_title: "Language",
+      lang_settings_sub: "Applies to all tabs and map overlays.",
       toast_lang_changed: "Language switched to English",
       filter_active: "Active Warnings",
       filter_navtex: "NAVTEX Alerts",
@@ -12473,13 +12573,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Рассчитать маршрут в SetRoute",
       btn_open_news: "Открыть ленту SetNews",
       btn_read_story: "Читать полностью →",
-      settings_account_heading: "Аккаунт SetSail и синхронизация мостика",
-      settings_account_sub: "Войдите через Google для автоматического сохранения и синхронизации маршрутов, правок карты и настроек судна",
+      settings_account_heading: "Аккаунт SetSail",
+      settings_account_sub: "Войдите через Google, чтобы синхронизировать маршруты и правки карты.",
       btn_google_signin: "Вход",
       btn_sign_out: "Выйти из системы",
       guest_mode: "ГОСТЕВОЙ РЕЖИМ",
-      lang_settings_title: "Язык интерфейса и локализация мостика",
-      lang_settings_sub: "Выберите рабочий язык интерфейса. Все вкладки, слои карты, сводки и телеметрия переключатся мгновенно.",
+      lang_settings_title: "Язык",
+      lang_settings_sub: "Применяется ко всем вкладкам и слоям карты.",
       toast_lang_changed: "Язык интерфейса изменен на Русский",
       filter_active: "Активные предупреждения",
       filter_navtex: "Оповещения NAVTEX",
@@ -12509,13 +12609,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "SetRouteで航路を計画",
       btn_open_news: "SetNews速報を開く",
       btn_read_story: "記事を読む →",
-      settings_account_heading: "SetSailアカウントとクラウド同期",
-      settings_account_sub: "Googleアカウントでログインすると、航路計画、海図編集、本船位置、設定が自動同期されます",
+      settings_account_heading: "SetSailアカウント",
+      settings_account_sub: "Googleでログインして航路と海図編集を同期します。",
       btn_google_signin: "サインイン",
       btn_sign_out: "ログアウト",
       guest_mode: "ゲストモード",
-      lang_settings_title: "地域言語とブリッジローカリゼーション",
-      lang_settings_sub: "ブリッジの操作言語を選択してください。すべてのタブ、オーバーレイ、ブリーフィングが即座に適応します。",
+      lang_settings_title: "言語",
+      lang_settings_sub: "すべてのタブと地図オーバーレイに適用されます。",
       toast_lang_changed: "言語を日本語に変更しました",
       filter_active: "有効な航行警報",
       filter_navtex: "NAVTEX警報",
@@ -12545,13 +12645,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "在 SetRoute 中规划航线",
       btn_open_news: "打开 SetNews 资讯",
       btn_read_story: "阅读全文 →",
-      settings_account_heading: "SetSail 账户与驾驶台云端同步",
-      settings_account_sub: "使用 Google 账户登录，自动保存并同步航程计划、海图标注、船舶船位与偏好设置",
+      settings_account_heading: "SetSail 账户",
+      settings_account_sub: "使用 Google 登录以同步航线与海图标注。",
       btn_google_signin: "登录",
       btn_sign_out: "退出登录",
       guest_mode: "访客模式",
-      lang_settings_title: "语言与驾驶台区域设置",
-      lang_settings_sub: "选择驾驶台工作语言。系统菜单、海图标注、简报与仪表数据将即时切换。",
+      lang_settings_title: "语言",
+      lang_settings_sub: "适用于所有标签页与海图图层。",
       toast_lang_changed: "系统语言已切换为中文",
       filter_active: "有效航行警告",
       filter_navtex: "NAVTEX 警报",
@@ -12581,13 +12681,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Planificar en SetRoute",
       btn_open_news: "Abrir SetNews",
       btn_read_story: "Leer historia completa →",
-      settings_account_heading: "Cuenta SetSail y Sincronización en la Nube",
-      settings_account_sub: "Inicie sesión con Google para guardar y sincronizar automáticamente sus planes y marcas de carta",
+      settings_account_heading: "Cuenta SetSail",
+      settings_account_sub: "Inicie sesión con Google para sincronizar rutas y marcas.",
       btn_google_signin: "Acceder",
       btn_sign_out: "Cerrar sesión",
       guest_mode: "MODO INVITADO",
-      lang_settings_title: "Idioma y Localización del Puente",
-      lang_settings_sub: "Seleccione el idioma operativo del puente. Todas las pestañas y capas se adaptarán al instante.",
+      lang_settings_title: "Idioma",
+      lang_settings_sub: "Se aplica a todas las pestañas y capas.",
       toast_lang_changed: "Idioma cambiado a Español",
       filter_active: "Avisos Activos",
       filter_navtex: "Alertas NAVTEX",
@@ -12617,13 +12717,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Route in SetRoute planen",
       btn_open_news: "SetNews Draht öffnen",
       btn_read_story: "Bericht lesen →",
-      settings_account_heading: "SetSail-Konto & Cloud-Synchronisierung",
-      settings_account_sub: "Melden Sie sich mit Google an, um Routenpläne, Kartenkorrekturen und Schiffspositionen zu synchronisieren",
+      settings_account_heading: "SetSail-Konto",
+      settings_account_sub: "Mit Google anmelden, um Routen und Kartenkorrekturen zu synchronisieren.",
       btn_google_signin: "Anmelden",
       btn_sign_out: "Abmelden",
       guest_mode: "GASTMODUS",
-      lang_settings_title: "Sprache und Brücken-Lokalisierung",
-      lang_settings_sub: "Wählen Sie die Arbeitssprache der Brücke. Alle Registerkarten und Karten-Overlays passen sich sofort an.",
+      lang_settings_title: "Sprache",
+      lang_settings_sub: "Gilt für alle Registerkarten und Karten-Overlays.",
       toast_lang_changed: "Sprache auf Deutsch umgestellt",
       filter_active: "Aktive Warnungen",
       filter_navtex: "NAVTEX-Warnungen",
@@ -12653,13 +12753,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Planifier dans SetRoute",
       btn_open_news: "Ouvrir SetNews",
       btn_read_story: "Lire l'article complet →",
-      settings_account_heading: "Compte SetSail et Synchronisation Passerelle",
-      settings_account_sub: "Connectez-vous avec Google pour synchroniser vos plans de traversée et modifications de carte",
+      settings_account_heading: "Compte SetSail",
+      settings_account_sub: "Connectez-vous avec Google pour synchroniser routes et cartes.",
       btn_google_signin: "Connexion",
       btn_sign_out: "Déconnexion",
       guest_mode: "MODE INVITÉ",
-      lang_settings_title: "Langue et Localisation de la Passerelle",
-      lang_settings_sub: "Sélectionnez la langue de la passerelle. Tous les onglets et cartes s'adaptent immédiatement.",
+      lang_settings_title: "Langue",
+      lang_settings_sub: "S'applique à tous les onglets et calques.",
       toast_lang_changed: "Langue changée en Français",
       filter_active: "Avis Actifs",
       filter_navtex: "Alertes NAVTEX",
@@ -12689,13 +12789,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "Magplano sa SetRoute",
       btn_open_news: "Buksan ang SetNews",
       btn_read_story: "Basahin nang Buo →",
-      settings_account_heading: "SetSail Account at Cloud Bridge Sync",
-      settings_account_sub: "Mag-sign in gamit ang Google Account upang awtomatikong i-save at i-sync ang mga ruta at posisyon",
+      settings_account_heading: "SetSail Account",
+      settings_account_sub: "Mag-sign in sa Google para i-sync ang mga ruta at chart edits.",
       btn_google_signin: "Sign-In",
       btn_sign_out: "Mag-sign out",
       guest_mode: "MODO BISITA",
-      lang_settings_title: "Wika at Localization ng Bridge",
-      lang_settings_sub: "Piliin ang wika ng bridge. Agad na mag-a-update ang lahat ng mga tab, mapa, at impormasyon.",
+      lang_settings_title: "Wika",
+      lang_settings_sub: "Nalalapat sa lahat ng tab at map overlays.",
       toast_lang_changed: "Pinalitan ang wika sa Filipino",
       filter_active: "Aktibong Babala",
       filter_navtex: "NAVTEX Babala",
@@ -12725,13 +12825,13 @@ const SET_SAIL_LANGUAGES = {
       btn_plan_route: "SetRoute में मार्ग योजना",
       btn_open_news: "SetNews खोलें",
       btn_read_story: "पूरी खबर पढ़ें →",
-      settings_account_heading: "SetSail खाता और क्लाउड सिंक",
-      settings_account_sub: "मार्ग योजना, चार्ट संपादन और प्राथमिकताओं को सिंक करने के लिए Google से साइन इन करें",
+      settings_account_heading: "SetSail खाता",
+      settings_account_sub: "मार्ग और चार्ट संपादन सिंक करने के लिए Google से साइन इन करें।",
       btn_google_signin: "साइन-इन",
       btn_sign_out: "साइन आउट",
       guest_mode: "अतिथि मोड",
-      lang_settings_title: "क्षेत्रीय भाषा और ब्रिज लोकलाइज़ेशन",
-      lang_settings_sub: "अपनी पसंदीदा ब्रिज भाषा चुनें। सभी टैब, मानचित्र परतें और ब्रिफिंग तुरंत अनुकूलित होंगी।",
+      lang_settings_title: "भाषा",
+      lang_settings_sub: "सभी टैब और मानचित्र परतों पर लागू।",
       toast_lang_changed: "भाषा हिन्दी में बदली गई",
       filter_active: "सक्रिय चेतावनियाँ",
       filter_navtex: "NAVTEX अलर्ट",
@@ -12825,6 +12925,11 @@ function applySetSailLanguage(langCode) {
   try {
     window.dispatchEvent(new CustomEvent("setsail:languagechange", { detail: { lang: langCode } }));
   } catch (e) {}
+
+  // Re-apply auth HUD after i18n — language pass would otherwise overwrite the Google display name with "Sign-In"
+  try {
+    if (typeof syncSetSailAuthUI === "function") syncSetSailAuthUI();
+  } catch (eAuth) {}
 }
 window.applySetSailLanguage = applySetSailLanguage;
 
