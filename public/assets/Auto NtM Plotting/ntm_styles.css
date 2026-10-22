@@ -4329,8 +4329,9 @@
   margin: -7px 0 0 -7px;
   border-radius: 50%;
   z-index: 1;
-  transition: left 0.12s linear, top 0.12s linear, opacity 0.2s ease;
+  /* No left/top transition — scrub must track instantly without rubber-banding */
   pointer-events: none;
+  will-change: left, top;
 }
 .ss-sky-body.ss-sun {
   background: #facc15;
@@ -4422,13 +4423,25 @@
 .ss-sky-ev {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   color: #cbd5e1;
   font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 .ss-sky-ev-rise { color: #fbbf24; }
 .ss-sky-ev-set { color: #fb7185; }
-.ss-sky-ev-ico { flex-shrink: 0; }
+.ss-sky-ev-ico { flex-shrink: 0; display: block; }
+.ss-sky-ev-lbl {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+.ss-sky-ev-tm {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
 .leaflet-ports-pane {
   z-index: 650;
 }

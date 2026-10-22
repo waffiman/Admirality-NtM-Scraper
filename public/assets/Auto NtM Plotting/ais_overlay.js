@@ -13,11 +13,14 @@
   // Shared SetSail key — all users connect by default; optional localStorage override.
   const DEFAULT_AISSTREAM_API_KEY = "d340d8078f597170e53ff92ddd194609b2d5fc8b";
 
-  const OW_AREA_CAP = 95;
-  const OW_MAX_TILES = 12;
+  // Wide viewport still loads live AIS — targets appear without extreme zoom-in.
+  // OW_AREA_CAP is spanLon*spanLat (deg²); ~2800 ≈ continental / multi-sea view.
+  const OW_AREA_CAP = 2800;
+  const OW_MAX_TILES = 24;
   const ABS_MARKER_CAP = 15000;
-  const MIN_ZOOM_ZONES = 6;
-  const MIN_ZOOM_DENSE_ZONES = 8;
+  const MIN_ZOOM_ZONES = 2;
+  const MIN_ZOOM_DENSE_ZONES = 3;
+  const MIN_ZOOM_DIGITRAFFIC = 2;
 
   let leafletAisLayer = null;
   let aisTimer = null;
@@ -37,16 +40,10 @@
   let lastRestTargets = [];
 
   function getPersonalAisStreamApiKey() {
-    try {
-      return (localStorage.getItem(AISSTREAM_KEY_STORAGE) || "").trim();
-    } catch (e) {
-      return "";
-    }
+    return "";
   }
 
   function getAisStreamApiKey() {
-    const personal = getPersonalAisStreamApiKey();
-    if (personal) return personal;
     try {
       const winKey = (window.SETSAIL_AISSTREAM_API_KEY || "").trim();
       if (winKey) return winKey;
@@ -55,7 +52,7 @@
   }
 
   function isUsingSharedAisStreamKey() {
-    return !getPersonalAisStreamApiKey();
+    return true;
   }
 
   function ensureLayer(map) {
@@ -68,9 +65,10 @@
   }
 
   function shipColor(navStat, sog) {
-    if (navStat === 1 || navStat === 5) return "#94a3b8"; // Anchored / Moored
-    if (Number(sog) >= 0.5) return "#22d3ee"; // Underway
-    return "#38bdf8";
+    // Brand coral for moving targets; muted slate when anchored/moored
+    if (navStat === 1 || navStat === 5) return "#94a3b8";
+    if (Number(sog) >= 0.5) return "#ea4c25"; // Underway — SetSail coral
+    return "#f05a36";
   }
 
   function formatAisPopup(v) {
@@ -82,7 +80,7 @@
     const src = v.source || "AIS";
     return (
       '<div style="min-width:210px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;color:#1e293b;">' +
-      '<div style="font-weight:800;color:#0284c7;margin-bottom:4px;display:flex;align-items:center;gap:5px;">🚢 ' + name + "</div>" +
+      '<div style="font-weight:800;color:#ea4c25;margin-bottom:4px;display:flex;align-items:center;gap:5px;">🚢 ' + name + "</div>" +
       "<div><b>MMSI:</b> " + (v.mmsi || "—") + (v.callSign ? " · <b>Call:</b> " + v.callSign : "") + "</div>" +
       "<div><b>Type:</b> " + type + "</div>" +
       "<div><b>SOG / COG:</b> " + sog + " / " + cog + "</div>" +
@@ -436,7 +434,7 @@
     const w = b.getWest();
     const e = b.getEast();
 
-    if (e - w >= 355 || zoom <= 4) {
+    if (e - w >= 355 || zoom <= 1) {
       return {
         mode: "world",
         zoom: zoom,
@@ -641,7 +639,27 @@
       }
       if (seq !== aisRefreshSeq) return;
       let digi = [];
-      if (overlapsBaltic(plan.boxes)) {
+      // Use map bounds (not only OW boxes) so Baltic AIS still loads in overview when boxes are empty.
+      const balticHit =
+        overlapsBaltic(plan.boxes) ||
+        (() => {
+          try {
+            const bb = map.getBounds();
+            return bboxOverlaps(
+              {
+                minLat: bb.getSouth(),
+                maxLat: bb.getNorth(),
+                minLon: bb.getWest(),
+                maxLon: bb.getEast()
+              },
+              { minLat: 53.0, maxLat: 66.5, minLon: 9.0, maxLon: 30.5 }
+            );
+          } catch (e) {
+            return false;
+          }
+        })();
+      const zNow = plan.zoom != null ? plan.zoom : map.getZoom();
+      if (balticHit && zNow >= MIN_ZOOM_DIGITRAFFIC) {
         try {
           digi = await loadLiveDigitraffic();
         } catch (e) {}
@@ -766,34 +784,9 @@
       });
     }
 
-    if (saveBtn) {
-      saveBtn.addEventListener("click", () => {
-        const input = document.getElementById("inputAisStreamApiKey");
-        const val = (input ? input.value : "").trim();
-        try {
-          if (val) localStorage.setItem(AISSTREAM_KEY_STORAGE, val);
-          else localStorage.removeItem(AISSTREAM_KEY_STORAGE);
-        } catch (e) {}
-
-        const note = document.getElementById("aisStreamKeyStatusNote");
-        if (note) {
-          note.style.display = "block";
-          note.textContent = val
-            ? "✓ Personal API key stored in this browser (overrides shared key)."
-            : "✓ Using SetSail shared AISStream.io key (live stream on by default).";
-        }
-        if (typeof showSetSailToast === "function") {
-          showSetSailToast(
-            val
-              ? "Personal AISStream key saved. Reconnecting..."
-              : "Using SetSail shared AISStream key. Reconnecting...",
-            "success"
-          );
-        }
-        disconnectAisStream();
-        connectAisStream();
-      });
-    }
+    /* API key field removed — SetSail shared key only. */
+    if (saveBtn) saveBtn.style.display = "none";
+    try { localStorage.removeItem(AISSTREAM_KEY_STORAGE); } catch (e) {}
   }
 
   if (document.readyState === "loading") {

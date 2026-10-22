@@ -4548,11 +4548,8 @@ function renderNtMListAndMap() {
                 ${chartsStr ? `<span class="ntm-card-charts">${chartsStr}</span>` : ''}
               </div>
               <div class="ntm-card-actions" onclick="event.stopPropagation();">
-                <button type="button" class="ntm-card-act-btn" onclick="window.openNoticeDetailModal('${safeId}')" title="${item.type === 'NAVTEX' ? 'View official NAVTEX broadcast details' : 'Inspect or edit warning coordinates and text'}">${item.type === 'NAVTEX' ? '&#128065; View Broadcast' : '&#9998; Inspect / Edit'}</button>
-                ${item.type === 'NAVTEX'
-                  ? `<span class="navtex-ro-pill" style="font-size:0.65rem;font-weight:700;color:#38bdf8;background:rgba(56,189,248,0.12);padding:3px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);letter-spacing:0.02em;">📡 Official Station Alert</span>`
-                  : `<button type="button" class="ntm-card-act-btn ${isItemCancelled ? 'restore-btn' : 'cancel-btn'}" onclick="window.toggleCancelNotice('${safeId}')" title="${isItemCancelled ? 'Restore this warning to active state' : 'Mark this warning as cancelled'}">${isItemCancelled ? '&#8634; Restore' : '&#10005; Cancel'}</button>`
-                }
+                <button type="button" class="ntm-card-act-btn" onclick="window.openNoticeDetailModal('${safeId}')" title="View warning details">View</button>
+                <span class="navtex-ro-pill" style="font-size:0.65rem;font-weight:700;color:#94a3b8;background:rgba(148,163,184,0.12);padding:3px 8px;border-radius:4px;border:1px solid rgba(148,163,184,0.28);letter-spacing:0.02em;">Read-only</span>
               </div>
             </div>
           </div>
@@ -4774,11 +4771,8 @@ function renderNtMListAndMap() {
           ${extraLine}
           ${(item.charts && item.charts.length > 0) ? `<div style="font-size:0.76em;color:#64748b;"><b>Charts:</b> ${item.charts.join(', ')}</div>` : ''}
           <div style="display:flex;align-items:center;gap:6px;margin-top:7px;padding-top:6px;border-top:1px solid #cbd5e1;">
-            <button type="button" onclick="window.openNoticeDetailModal('${safeId}')" style="flex:1;padding:4px 7px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid ${item.type === 'NAVTEX' ? '#38bdf8' : '#94a3b8'};background:#0f172a;color:${item.type === 'NAVTEX' ? '#38bdf8' : '#f8fafc'};cursor:pointer;">${item.type === 'NAVTEX' ? '&#128065; View Broadcast' : '&#9998; Inspect / Edit'}</button>
-            ${item.type === 'NAVTEX'
-              ? `<span style="font-size:10px;font-weight:700;color:#0284c7;background:#e0f2fe;padding:3px 7px;border-radius:4px;border:1px solid #bae6fd;">Station Read-Only</span>`
-              : `<button type="button" onclick="window.toggleCancelNotice('${safeId}')" style="padding:4px 8px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid ${isItemCancelled ? '#10b981' : '#f43f5e'};background:${isItemCancelled ? '#ecfdf5' : '#fff1f2'};color:${isItemCancelled ? '#047857' : '#be123c'};cursor:pointer;">${isItemCancelled ? 'Restore' : 'Cancel'}</button>`
-            }
+            <button type="button" onclick="window.openNoticeDetailModal('${safeId}')" style="flex:1;padding:4px 7px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid #94a3b8;background:#0f172a;color:#f8fafc;cursor:pointer;">View</button>
+            <span style="font-size:10px;font-weight:700;color:#64748b;background:#f1f5f9;padding:3px 7px;border-radius:4px;border:1px solid #cbd5e1;">Read-only</span>
           </div>
         </div>
       `;
@@ -6108,10 +6102,12 @@ function openNtmOverlayInfoModal() {
 }
 
 function openNtmPasteModal() {
-  const modal = document.getElementById("ntmPasteModal");
-  if (!modal) return;
-  modal.classList.add("open");
-  modal.style.display = "flex";
+  /* User paste/add of NtM & NAVTEX is disabled — official feed only. */
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast("NtM & NAVTEX are read-only. Sync updates from the official bulletin.", "info");
+  } else if (typeof showToast === "function") {
+    showToast("NtM & NAVTEX are read-only.", "info");
+  }
 }
 window.openNtmPasteModal = openNtmPasteModal;
 
@@ -6127,28 +6123,18 @@ document.addEventListener("DOMContentLoaded", () => {
       pasteModal.style.display = "none";
     });
   }
-  if (pasteApply && pasteArea) {
+  if (pasteApply) {
     pasteApply.addEventListener("click", () => {
-      const raw = pasteArea.value.trim();
-      if (!raw) return;
-      if (typeof window.parseAdmiraltyNtMText === "function") {
-        const res = window.parseAdmiraltyNtMText(raw);
-        if ((res.notices && res.notices.length > 0) || (res.cancelledIds && res.cancelledIds.length > 0)) {
-          addNoticesToStore(res.notices || [], res.cancelledIds || []);
-          if (typeof showToast === "function") {
-            showToast(`Plotted ${(res.notices || []).length} warning(s), processed ${(res.cancelledIds || []).length} cancellation(s)`, "info");
-          }
-          pasteArea.value = "";
-          if (pasteModal) {
-            pasteModal.classList.remove("open");
-            pasteModal.style.display = "none";
-          }
-        } else if (typeof showToast === "function") {
-          showToast("No valid coordinates or CANCEL directives found in pasted text", "warn");
-        }
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("NtM & NAVTEX are read-only — paste/add disabled.", "info");
+      }
+      if (pasteModal) {
+        pasteModal.classList.remove("open");
+        pasteModal.style.display = "none";
       }
     });
   }
+  if (pasteModal) pasteModal.style.display = "none";
 });
 
 function openNoticeDetailModal(noticeOrId) {
@@ -6161,6 +6147,7 @@ function openNoticeDetailModal(noticeOrId) {
   if (!modal) return;
 
   const isCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
+  const isNavtex = (item.type === "NAVTEX");
   const origInput = document.getElementById("ntmDetailOrigId");
   const idInput = document.getElementById("ntmDetailIdInput");
   const typeSelect = document.getElementById("ntmDetailTypeSelect");
@@ -6173,68 +6160,52 @@ function openNoticeDetailModal(noticeOrId) {
   const headerEl = document.getElementById("ntmDetailTitleHeader");
   const cancelBanner = document.getElementById("ntmDetailCancelBanner");
   const toggleCancelBtn = document.getElementById("ntmDetailToggleCancelBtn");
+  const saveBtn = document.getElementById("ntmDetailSaveBtn");
+  const cleanNav = getNoticeNavarea(item).replace(/^NAVAREA\s+/i, "").trim().toUpperCase() || "I";
+  const geomLabel = item.isPolygon ? "Area / Polygon" : (item.isLine ? "Line / Track" : "Point(s)");
 
   if (origInput) origInput.value = item.id;
-  if (idInput) idInput.value = item.id;
-  if (typeSelect) typeSelect.value = item.type || "NAVTEX";
-
-  const cleanNav = getNoticeNavarea(item).replace(/^NAVAREA\s+/i, "").trim().toUpperCase() || "I";
-  if (navSelect) navSelect.value = cleanNav;
-
-  if (geomSelect) {
-    geomSelect.value = item.isPolygon ? "polygon" : (item.isLine ? "line" : "point");
+  if (idInput) { idInput.value = item.id; idInput.readOnly = true; }
+  if (typeSelect) {
+    typeSelect.value = item.type || "NAVTEX";
+    typeSelect.readOnly = true;
+    typeSelect.disabled = true;
   }
-  if (subjInput) subjInput.value = item.subject || item.title || "";
-
+  if (navSelect) {
+    navSelect.value = cleanNav;
+    navSelect.readOnly = true;
+    navSelect.disabled = true;
+  }
+  if (geomSelect) {
+    geomSelect.value = geomLabel;
+    geomSelect.readOnly = true;
+    geomSelect.disabled = true;
+  }
+  if (subjInput) { subjInput.value = item.subject || item.title || ""; subjInput.readOnly = true; }
   if (coordsInput) {
     const lines = (item.coords || []).map(c => `${Number(c.lat).toFixed(5)}, ${Number(c.lon).toFixed(5)}`);
     coordsInput.value = lines.join("\n");
+    coordsInput.readOnly = true;
   }
   if (bodyInput) {
     bodyInput.value = item.body || item.rawText || item.subject || "";
+    bodyInput.readOnly = true;
   }
   if (badgeEl) {
     badgeEl.textContent = isCancelled ? "CANCELLED" : (item.type || "NAVTEX");
     badgeEl.className = "ntm-tag " + (isCancelled ? "cancelled" : (item.type === "NAVTEX" ? "navtex" : (item.type === "T" ? "temp" : (item.type === "P" ? "prelim" : "perm"))));
   }
-  if (headerEl) {
-    headerEl.textContent = `${item.id} — ${getNoticeNavarea(item)}`;
-  }
-  if (cancelBanner) {
-    cancelBanner.style.display = isCancelled ? "block" : "none";
-  }
-  const isNavtex = (item.type === "NAVTEX");
-  if (subjInput) subjInput.readOnly = isNavtex;
-  if (coordsInput) coordsInput.readOnly = isNavtex;
-  if (bodyInput) bodyInput.readOnly = isNavtex;
-  if (typeSelect) typeSelect.disabled = isNavtex;
-  if (navSelect) navSelect.disabled = isNavtex;
-  if (geomSelect) geomSelect.disabled = isNavtex;
+  if (headerEl) headerEl.textContent = `${item.id} — ${getNoticeNavarea(item)}`;
+  if (cancelBanner) cancelBanner.style.display = isCancelled ? "block" : "none";
+  if (saveBtn) saveBtn.style.display = "none";
+  if (toggleCancelBtn) toggleCancelBtn.style.display = "none";
 
-  const saveBtn = document.getElementById("ntmDetailSaveBtn");
-  if (saveBtn) saveBtn.style.display = isNavtex ? "none" : "";
-  if (toggleCancelBtn) {
-    toggleCancelBtn.style.display = isNavtex ? "none" : "";
-    toggleCancelBtn.textContent = isCancelled ? "Restore Warning" : "Cancel Warning";
-    toggleCancelBtn.style.color = isCancelled ? "#34d399" : "#fda4af";
-    toggleCancelBtn.style.borderColor = isCancelled ? "rgba(52,211,153,0.45)" : "rgba(244,63,94,0.45)";
-  }
-
-  let navtexNoticeBanner = document.getElementById("ntmDetailNavtexBanner");
-  if (!navtexNoticeBanner && cancelBanner && cancelBanner.parentNode) {
-    navtexNoticeBanner = document.createElement("div");
-    navtexNoticeBanner.id = "ntmDetailNavtexBanner";
-    navtexNoticeBanner.style.cssText = "background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.3);color:#38bdf8;padding:8px 12px;border-radius:6px;font-size:0.75rem;margin-bottom:12px;line-height:1.4;";
-    cancelBanner.parentNode.insertBefore(navtexNoticeBanner, cancelBanner.nextSibling);
-  }
-  if (navtexNoticeBanner) {
-    if (isNavtex) {
-      const expTimeStr = item.expires ? formatCancelUtcBadge(item.expires) : "as broadcast";
-      navtexNoticeBanner.style.display = "block";
-      navtexNoticeBanner.innerHTML = `📡 <b>Official NAVTEX Coastal Broadcast (Read-Only)</b><br>Received directly from coast radio station. Editing and manual cancellation are disabled by maritime regulations. This warning auto-deactivates upon its designated cancellation time (${expTimeStr}).`;
-    } else {
-      navtexNoticeBanner.style.display = "none";
-    }
+  const roBanner = document.getElementById("ntmDetailNavtexBanner");
+  if (roBanner) {
+    roBanner.style.display = "block";
+    roBanner.textContent = isNavtex
+      ? "Official NAVTEX / NAVAREA broadcast — read-only."
+      : "Official UKHO NtM — read-only (no user add / edit / delete).";
   }
 
   modal.classList.add("open");
@@ -6274,6 +6245,13 @@ function parseEditedCoordsList(rawCoordsText) {
 }
 
 function saveNoticeDetailEdits() {
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast("NtM & NAVTEX cannot be edited.", "info");
+  } else if (typeof showToast === "function") {
+    showToast("NtM & NAVTEX cannot be edited.", "warn");
+  }
+  return;
+  /* unreachable — kept so older callers never mutate store */
   const origId = (document.getElementById("ntmDetailOrigId") || {}).value;
   if (!origId) return;
   const item = NTM_STORE.find(n => n.id === origId);
@@ -6340,6 +6318,12 @@ function saveNoticeDetailEdits() {
 }
 
 function toggleCancelNotice(noticeId) {
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast("NtM & NAVTEX cannot be cancelled or restored by users.", "info");
+  } else if (typeof showToast === "function") {
+    showToast("NtM & NAVTEX cannot be cancelled or restored by users.", "warn");
+  }
+  return;
   const item = NTM_STORE.find(n => n.id === noticeId);
   if (!item) return;
 
@@ -6434,45 +6418,9 @@ function flyToCycloneFromModal(lat, lon) {
 }
 
 function updateWeatherModalActiveStorms() {
-  const modal = document.getElementById("weatherOverlayModal");
-  if (!modal) return;
-  let listBox = document.getElementById("weatherModalActiveStormsList");
-  if (!listBox) {
-    const body = modal.querySelector(".ntm-modal-box > div:nth-child(2)");
-    if (body) {
-      listBox = document.createElement("div");
-      listBox.id = "weatherModalActiveStormsList";
-      listBox.style.cssText = "margin-bottom:10px;background:rgba(15,23,42,0.55);border:1px solid var(--line);border-radius:6px;padding:8px 10px;";
-      const gridEl = body.children[1];
-      if (gridEl) {
-        body.insertBefore(listBox, gridEl.nextSibling);
-      } else {
-        body.prepend(listBox);
-      }
-    }
-  }
-  if (!listBox) return;
-
-  const storms = (MARINE_WEATHER_STORE && MARINE_WEATHER_STORE.storms) || [];
-  let rowsHtml = `<div style="font-size:0.68rem;font-weight:700;color:#fca5a5;text-transform:uppercase;margin-bottom:6px;display:flex;justify-content:space-between;"><span>Active Tropical Cyclones (${storms.length})</span><span style="color:var(--muted);font-weight:500;">Click to center on chart</span></div><div style="display:grid;grid-template-columns:1fr;gap:5px;max-height:145px;overflow-y:auto;">`;
-  storms.forEach(s => {
-    const lat = Number(s.center[0]);
-    const lon = Number(s.center[1]);
-    const posStr = `${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(1)}°${lon >= 0 ? 'E' : 'W'}`;
-    rowsHtml += `
-      <div onclick="window.flyToCycloneFromModal(${lat}, ${lon})" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:5px;background:rgba(255,255,255,0.03);border:1px solid rgba(239,68,68,0.28);cursor:pointer;font-size:0.72rem;">
-        <div>
-          <strong style="color:#f8fafc;">🌀 ${s.name}</strong>
-          <span style="color:#94a3b8;font-size:0.66rem;margin-left:5px;">${s.category}</span>
-        </div>
-        <div style="text-align:right;white-space:nowrap;font-family:Consolas,monospace;font-size:0.68rem;color:#fca5a5;">
-          <b>${s.maxWinds} kt</b> &bull; ${s.centralPressure} hPa &bull; <span style="color:#38bdf8;">${posStr}</span>
-        </div>
-      </div>
-    `;
-  });
-  rowsHtml += `</div>`;
-  listBox.innerHTML = rowsHtml;
+  /* Compact Weather info modal — cyclone counts live in weatherModalLiveMeta only. */
+  const listBox = document.getElementById("weatherModalActiveStormsList");
+  if (listBox) listBox.remove();
 }
 
 function showWeatherInfoModal() {
@@ -6480,10 +6428,12 @@ function showWeatherInfoModal() {
   if (modal) {
     modal.classList.add("open");
     const badge = document.getElementById("weatherModalStatusBadge");
+    const cycleLabel = document.getElementById("weatherModalCycleLabel");
     const store = MARINE_WEATHER_STORE || {};
-    const cyc = store.synopticCycle || "LIVE UTC";
+    const cyc = store.synopticCycle || "6h UTC";
+    if (cycleLabel) cycleLabel.textContent = "Synoptic " + cyc;
     if (badge) {
-      badge.textContent = navigator.onLine ? `LIVE SYNCED (${cyc})` : `CACHED (${cyc})`;
+      badge.textContent = navigator.onLine ? "LIVE" : "CACHED";
       badge.style.background = navigator.onLine ? "#10b981" : "#eab308";
     }
     const meta = document.getElementById("weatherModalLiveMeta");
@@ -6493,15 +6443,14 @@ function showWeatherInfoModal() {
       const pressure = (store.pressureCenters || []).length;
       const winds = (store.windVectors || []).length;
       const sync = store.lastSyncUtc
-        ? new Date(store.lastSyncUtc).toUTCString().replace("GMT", "UTC")
+        ? new Date(store.lastSyncUtc).toISOString().slice(0, 16).replace("T", " ") + "Z"
         : "—";
-      const provider = store.provider || "NOAA NHC · JMA RSMC · JTWC · Open-Meteo / ECMWF IFS";
+      const names = (store.storms || []).map((s) => s.shortName || s.name).filter(Boolean).slice(0, 4).join(", ");
       meta.innerHTML =
         `<div><span style="color:#94a3b8;">Last sync</span><br><b style="color:#e2e8f0;">${sync}</b></div>` +
-        `<div><span style="color:#94a3b8;">Active cyclones</span><br><b style="color:#fde68a;">${storms}</b></div>` +
-        `<div><span style="color:#94a3b8;">Wave stations</span><br><b style="color:#7dd3fc;">${waves}</b></div>` +
-        `<div><span style="color:#94a3b8;">Pressure / wind</span><br><b style="color:#cbd5e1;">${pressure} · ${winds}</b></div>` +
-        `<div style="grid-column:1/-1;font-size:0.65rem;color:#64748b;margin-top:2px;">Sources: ${provider}</div>`;
+        `<div><span style="color:#94a3b8;">Cyclones</span><br><b style="color:#fde68a;">${storms}</b>${names ? ` <span style="color:#94a3b8;font-size:0.65rem;">${names}</span>` : ""}</div>` +
+        `<div><span style="color:#94a3b8;">Waves</span><br><b style="color:#7dd3fc;">${waves}</b></div>` +
+        `<div><span style="color:#94a3b8;">Pressure · wind</span><br><b style="color:#cbd5e1;">${pressure} · ${winds}</b></div>`;
     }
     updateWeatherModalActiveStorms();
   }

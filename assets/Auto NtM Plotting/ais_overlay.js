@@ -40,16 +40,10 @@
   let lastRestTargets = [];
 
   function getPersonalAisStreamApiKey() {
-    try {
-      return (localStorage.getItem(AISSTREAM_KEY_STORAGE) || "").trim();
-    } catch (e) {
-      return "";
-    }
+    return "";
   }
 
   function getAisStreamApiKey() {
-    const personal = getPersonalAisStreamApiKey();
-    if (personal) return personal;
     try {
       const winKey = (window.SETSAIL_AISSTREAM_API_KEY || "").trim();
       if (winKey) return winKey;
@@ -58,7 +52,7 @@
   }
 
   function isUsingSharedAisStreamKey() {
-    return !getPersonalAisStreamApiKey();
+    return true;
   }
 
   function ensureLayer(map) {
@@ -790,34 +784,9 @@
       });
     }
 
-    if (saveBtn) {
-      saveBtn.addEventListener("click", () => {
-        const input = document.getElementById("inputAisStreamApiKey");
-        const val = (input ? input.value : "").trim();
-        try {
-          if (val) localStorage.setItem(AISSTREAM_KEY_STORAGE, val);
-          else localStorage.removeItem(AISSTREAM_KEY_STORAGE);
-        } catch (e) {}
-
-        const note = document.getElementById("aisStreamKeyStatusNote");
-        if (note) {
-          note.style.display = "block";
-          note.textContent = val
-            ? "✓ Personal API key stored in this browser (overrides shared key)."
-            : "✓ Using SetSail shared AISStream.io key (live stream on by default).";
-        }
-        if (typeof showSetSailToast === "function") {
-          showSetSailToast(
-            val
-              ? "Personal AISStream key saved. Reconnecting..."
-              : "Using SetSail shared AISStream key. Reconnecting...",
-            "success"
-          );
-        }
-        disconnectAisStream();
-        connectAisStream();
-      });
-    }
+    /* API key field removed — SetSail shared key only. */
+    if (saveBtn) saveBtn.style.display = "none";
+    try { localStorage.removeItem(AISSTREAM_KEY_STORAGE); } catch (e) {}
   }
 
   if (document.readyState === "loading") {

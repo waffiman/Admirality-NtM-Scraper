@@ -20130,10 +20130,19 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         else currentMap.removeLayer(seamarkLayer);
       }
     } else if (overlayKey === "weather") {
-      if (typeof window.renderWeatherOnMap === "function") {
+      if (isActive && typeof window.refreshMarineWeather === "function") {
+        Promise.resolve(window.refreshMarineWeather(true)).finally(() => {
+          if (typeof window.renderWeatherOnMap === "function") {
+            window.renderWeatherOnMap(currentMap);
+          }
+          setOverlayTileLoading("weather", false);
+        });
+      } else if (typeof window.renderWeatherOnMap === "function") {
         window.renderWeatherOnMap(currentMap);
+        setTimeout(() => setOverlayTileLoading("weather", false), 350);
+      } else {
+        setTimeout(() => setOverlayTileLoading("weather", false), 350);
       }
-      setTimeout(() => setOverlayTileLoading("weather", false), 350);
     } else if (overlayKey === "ais") {
       if (isActive) {
         if (typeof window.startAisPolling === "function") window.startAisPolling();

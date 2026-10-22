@@ -788,8 +788,8 @@
   }
 
   /**
-   * South-facing sky (E–S–W). Bodies below horizon or outside the southern arc are hidden
-   * (no edge-clamped ghosts that jump oddly while scrubbing).
+   * South-facing sky dome: continuous E–S–W projection (no hard az cuts = no scrub jumps).
+   * Below horizon → hidden. Northern sky (behind viewer) → hidden at the limbs.
    */
   function skyStagePos(altDeg, azDeg) {
     let az = Number(azDeg);
@@ -797,15 +797,15 @@
     if (!Number.isFinite(az) || !Number.isFinite(alt)) return null;
     while (az < 0) az += 360;
     while (az >= 360) az -= 360;
-    if (alt < -0.35) return { visible: false, above: false };
-    if (az < 85 || az > 275) return { visible: false, above: true };
-    const x = ((az - 90) / 180) * 100;
-    const y = 12 + (1 - Math.min(Math.max(alt, 0), 90) / 90) * 62;
+    if (alt < -0.5) return { visible: false };
+    const rad = ((az - 180) * Math.PI) / 180;
+    if (Math.cos(rad) < -0.08) return { visible: false };
+    const x = 50 + Math.sin(rad) * 46;
+    const y = 10 + (1 - Math.min(alt, 90) / 90) * 68;
     return {
       visible: true,
-      above: true,
-      x: Math.max(4, Math.min(96, x)),
-      y: Math.max(8, Math.min(78, y))
+      x: Math.max(3, Math.min(97, x)),
+      y: Math.max(6, Math.min(82, y))
     };
   }
 
@@ -821,13 +821,20 @@
     '<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>' +
     '<rect x="6" y="14" width="12" height="8"/></svg>';
 
+  /* Simple rise/set marks: sun disc + horizon + arrow */
   const SUN_UP_SVG =
-    '<svg class="ss-sky-ev-ico" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">' +
-    '<circle cx="12" cy="14" r="3.2"/><path d="M12 2v5M12 7l-2.2 2.2M12 7l2.2 2.2M5 14h2M17 14h2"/></svg>';
+    '<svg class="ss-sky-ev-ico" viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">' +
+    '<circle cx="10" cy="11" r="3.2" fill="currentColor"/>' +
+    '<path d="M3 15h14" stroke="currentColor" stroke-width="1.6" fill="none"/>' +
+    '<path d="M10 3v5M7.5 5.5L10 3l2.5 2.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+    "</svg>";
 
   const SUN_DOWN_SVG =
-    '<svg class="ss-sky-ev-ico" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">' +
-    '<circle cx="12" cy="10" r="3.2"/><path d="M12 22v-5M12 17l-2.2-2.2M12 17l2.2-2.2M5 10h2M17 10h2"/></svg>';
+    '<svg class="ss-sky-ev-ico" viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">' +
+    '<circle cx="10" cy="9" r="3.2" fill="currentColor"/>' +
+    '<path d="M3 15h14" stroke="currentColor" stroke-width="1.6" fill="none"/>' +
+    '<path d="M10 17v-5M7.5 14.5L10 17l2.5-2.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+    "</svg>";
 
   function buildPortCardHtml(port) {
     const id = String((port && port.id) || "").replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -1046,15 +1053,17 @@
         const bits = [];
         if (rise) {
           bits.push(
-            '<span class="ss-sky-ev ss-sky-ev-rise">' + SUN_UP_SVG +
-            '<span>' + escHtml(formatOwTime(rise.time, { hour: "2-digit", minute: "2-digit" }, tzCtx)) +
+            '<span class="ss-sky-ev ss-sky-ev-rise" title="Sunrise (port local)">' + SUN_UP_SVG +
+            '<span class="ss-sky-ev-lbl">Rise</span>' +
+            '<span class="ss-sky-ev-tm">' + escHtml(formatOwTime(rise.time, { hour: "2-digit", minute: "2-digit" }, tzCtx)) +
             "</span></span>"
           );
         }
         if (set) {
           bits.push(
-            '<span class="ss-sky-ev ss-sky-ev-set">' + SUN_DOWN_SVG +
-            '<span>' + escHtml(formatOwTime(set.time, { hour: "2-digit", minute: "2-digit" }, tzCtx)) +
+            '<span class="ss-sky-ev ss-sky-ev-set" title="Sunset (port local)">' + SUN_DOWN_SVG +
+            '<span class="ss-sky-ev-lbl">Set</span>' +
+            '<span class="ss-sky-ev-tm">' + escHtml(formatOwTime(set.time, { hour: "2-digit", minute: "2-digit" }, tzCtx)) +
             "</span></span>"
           );
         }
@@ -1108,7 +1117,6 @@
             sunEl.hidden = false;
             sunEl.style.left = pos.x + "%";
             sunEl.style.top = pos.y + "%";
-            sunEl.style.opacity = "1";
             sunEl.classList.remove("is-below");
           } else {
             sunEl.hidden = true;
@@ -1129,8 +1137,8 @@
         const malt = Number(m && (m.altDeg != null ? m.altDeg : m.altitudeDeg));
         const maz = Number(m && (m.azDeg != null ? m.azDeg : m.azimuthDeg));
         const pos = skyStagePos(malt, maz);
-        // Moon only when above horizon and sun is down
-        const showMoon = pos && pos.visible && sunAlt < -0.5;
+        /* Moon only after civil dusk — never a daytime ghost */
+        const showMoon = !!(pos && pos.visible && sunAlt < -4);
         if (showMoon) {
           moonEl.hidden = false;
           moonEl.style.left = pos.x + "%";
