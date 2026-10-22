@@ -3142,51 +3142,102 @@ function parseCoordinateString(str) {
   return null;
 }
 
+/** Zoom at/above which own-ship switches from position circle → hull outline. */
+const OWN_SHIP_HULL_ZOOM = 14;
+
 /**
- * Generates Crosshair Target Marker
+ * Generates Crosshair Target Marker (legacy / fallback)
  */
 function getEcdisCrosshairIcon() {
-  const svgHtml = `
-    <div class="crosshair-wrapper">
-      <div class="crosshair-pulse-ring"></div>
-      <svg width="34" height="34" viewBox="-17 -17 34 34" class="crosshair-svg">
-        <circle cx="0" cy="0" r="13" fill="none" stroke="#00e5ff" stroke-width="1.2" opacity="0.5" />
-        <circle cx="0" cy="0" r="8" fill="none" stroke="#ffffff" stroke-width="1.8" />
-        <line x1="0" y1="-15" x2="0" y2="-9" stroke="#ffffff" stroke-width="2" />
-        <line x1="0" y1="9" x2="0" y2="15" stroke="#ffffff" stroke-width="2" />
-        <line x1="-15" y1="0" x2="-9" y2="0" stroke="#ffffff" stroke-width="2" />
-        <line x1="9" y1="0" x2="15" y2="0" stroke="#ffffff" stroke-width="2" />
-        <circle cx="0" cy="0" r="3" fill="#00e5ff" stroke="#ffffff" stroke-width="1" />
-      </svg>
-    </div>
-  `;
-  return L.divIcon({
-    html: svgHtml,
-    className: "ecdis-crosshair-marker",
-    iconSize: [34, 34],
-    iconAnchor: [17, 17]
-  });
+  return getOwnShipPositionIcon(null, false);
 }
 
-/** ECDIS-style own-ship outline (bow up); rotate by true heading/COG degrees. */
-function getOwnShipSilhouetteIcon(headingDeg) {
-  const rot = ((Number(headingDeg) % 360) + 360) % 360;
+/**
+ * Low/medium zoom: ECDIS position circle (bullseye) + short heading vector with tick marks.
+ * Bow = up in local SVG, then rotated by true heading/COG.
+ */
+function getOwnShipPositionIcon(headingDeg, showVector) {
+  const rot = Number.isFinite(Number(headingDeg))
+    ? ((Number(headingDeg) % 360) + 360) % 360
+    : 0;
+  const vec = showVector !== false && Number.isFinite(Number(headingDeg));
+  const vectorSvg = vec
+    ? `<g class="own-ship-vector" stroke="#0f172a" stroke-width="1.35" fill="none" stroke-linecap="round">
+         <line x1="24" y1="24" x2="24" y2="4" stroke-dasharray="2.2 2.2"/>
+         <line x1="20.5" y1="18" x2="27.5" y2="18"/>
+         <line x1="20.5" y1="12" x2="27.5" y2="12"/>
+         <line x1="20.5" y1="7" x2="27.5" y2="7"/>
+         <polyline points="20.5,5.5 24,2 27.5,5.5" stroke-width="1.5"/>
+       </g>`
+    : "";
   const html = `
-    <div class="own-ship-wrap" style="transform:rotate(${rot}deg);transform-origin:center center;">
-      <svg class="own-ship-svg" width="32" height="52" viewBox="0 0 32 52" aria-hidden="true">
-        <path d="M16 1.5 L25 16 L23 44 L16 50.5 L9 44 L7 16 Z"
-          fill="rgba(0,229,255,0.28)" stroke="#00e5ff" stroke-width="2"/>
-        <path d="M16 9 L21 19 L16 17.5 L11 19 Z" fill="#f05a36"/>
-        <line x1="16" y1="17" x2="16" y2="40" stroke="#ffffff" stroke-width="1.4" opacity="0.7"/>
-        <circle cx="16" cy="26" r="2.4" fill="#ffffff" stroke="#00e5ff" stroke-width="1.2"/>
+    <div class="own-ship-wrap own-ship-wrap--pos" style="transform:rotate(${rot}deg);transform-origin:center center;">
+      <svg class="own-ship-svg" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+        ${vectorSvg}
+        <circle cx="24" cy="24" r="9" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+        <circle cx="24" cy="24" r="5.2" fill="none" stroke="#0f172a" stroke-width="1.35"/>
+        <circle cx="24" cy="24" r="2.1" fill="#0f172a"/>
       </svg>
     </div>`;
   return L.divIcon({
     html,
     className: "own-ship-marker",
-    iconSize: [32, 52],
-    iconAnchor: [16, 26]
+    iconSize: [48, 48],
+    iconAnchor: [24, 24]
   });
+}
+
+/**
+ * High zoom: ECDIS own-ship hull outline (rounded bow, flat stern) + heading vector.
+ */
+function getOwnShipHullIcon(headingDeg, showVector) {
+  const rot = Number.isFinite(Number(headingDeg))
+    ? ((Number(headingDeg) % 360) + 360) % 360
+    : 0;
+  const vec = showVector !== false && Number.isFinite(Number(headingDeg));
+  // Local coords: bow toward -Y (up). Hull centered near (24, 34).
+  const vectorSvg = vec
+    ? `<line x1="24" y1="22" x2="24" y2="2" stroke="#0f172a" stroke-width="1.25"/>`
+    : "";
+  const html = `
+    <div class="own-ship-wrap own-ship-wrap--hull" style="transform:rotate(${rot}deg);transform-origin:24px 34px;">
+      <svg class="own-ship-svg" width="48" height="64" viewBox="0 0 48 64" aria-hidden="true">
+        ${vectorSvg}
+        <path d="M24 14
+          C28.5 14 31.5 18 31.5 24
+          L31.5 46
+          C31.5 49.5 29 51.5 24 51.5
+          C19 51.5 16.5 49.5 16.5 46
+          L16.5 24
+          C16.5 18 19.5 14 24 14 Z"
+          fill="none" stroke="#0f172a" stroke-width="2.1" stroke-linejoin="round"/>
+        <line x1="17.2" y1="44" x2="30.8" y2="44" stroke="#64748b" stroke-width="1.15"/>
+        <line x1="24" y1="16" x2="24" y2="50" stroke="#94a3b8" stroke-width="1"/>
+      </svg>
+    </div>`;
+  return L.divIcon({
+    html,
+    className: "own-ship-marker",
+    iconSize: [48, 64],
+    iconAnchor: [24, 34]
+  });
+}
+
+/** Pick position-circle vs hull outline from current chart zoom. */
+function getOwnShipMapIcon(headingDeg) {
+  const z = (typeof leafletMap !== "undefined" && leafletMap && leafletMap.getZoom)
+    ? leafletMap.getZoom()
+    : 8;
+  const hasHdg = Number.isFinite(Number(headingDeg));
+  if (z >= OWN_SHIP_HULL_ZOOM) {
+    return getOwnShipHullIcon(hasHdg ? headingDeg : 0, hasHdg);
+  }
+  return getOwnShipPositionIcon(hasHdg ? headingDeg : null, hasHdg);
+}
+
+/** ECDIS-style own-ship outline (legacy name → hull). */
+function getOwnShipSilhouetteIcon(headingDeg) {
+  return getOwnShipHullIcon(headingDeg, true);
 }
 
 function resolveOwnShipHeading(v) {
@@ -3216,7 +3267,7 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
     const hdg = resolveOwnShipHeading(userVessel);
     const marker = L.marker([lat, lon], {
-      icon: hdg != null ? getOwnShipSilhouetteIcon(hdg) : getEcdisCrosshairIcon(),
+      icon: getOwnShipMapIcon(hdg),
       zIndexOffset: 1200
     });
 
@@ -4182,6 +4233,7 @@ function initNtMMap() {
 
     // Zoom-Adaptive Level of Detail (LOD) re-render when crossing zoom tiers
     let lastLodTier = -1;
+    let lastOwnShipHullMode = null;
     const getZoomLodTier = (z) => (z <= 2.5 ? 0 : (z <= 3.5 ? 1 : (z <= 4.5 ? 2 : (z <= 7 ? 3 : 4))));
     leafletMap.on("zoomend", () => {
       const z = leafletMap.getZoom();
@@ -4193,6 +4245,14 @@ function initNtMMap() {
         }
         if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.weather !== false) {
           renderWeatherOnMap(leafletMap);
+        }
+      }
+      // Swap own-ship symbol: position circle ↔ hull outline at OWN_SHIP_HULL_ZOOM
+      const hullMode = z >= OWN_SHIP_HULL_ZOOM;
+      if (hullMode !== lastOwnShipHullMode) {
+        lastOwnShipHullMode = hullMode;
+        if (userVessel && Number.isFinite(userVessel.lat) && Number.isFinite(userVessel.lon)) {
+          plotUserVessel(userVessel.lat, userVessel.lon, userVessel.source || "manual", true);
         }
       }
     });

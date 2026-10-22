@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.59" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.60" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -5836,8 +5836,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7' fill='none' stroke='%23ffffff' stroke-width='3.2' stroke-linecap='square'/%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7' fill='none' stroke='%23111a24' stroke-width='1.6' stroke-linecap='square'/%3E%3C/svg%3E") 12 12, crosshair !important;
 }
 .own-ship-marker { background: transparent !important; border: none !important; }
-.own-ship-wrap { width: 28px; height: 44px; }
-.own-ship-svg { display: block; filter: drop-shadow(0 0 3px rgba(0,229,255,0.55)); }
+.own-ship-wrap { width: 48px; height: 48px; pointer-events: none; }
+.own-ship-wrap--hull { width: 48px; height: 64px; }
+.own-ship-svg { display: block; filter: drop-shadow(0 0 1.5px rgba(255,255,255,0.85)) drop-shadow(0 1px 2px rgba(15,23,42,0.35)); }
 
 /* v5.19b: lock Home vessel HUD vertical center in top bar */
 #homeHudTop {
@@ -11897,7 +11898,7 @@ select option {
               <!-- Column 3 (Right): My Vessel profile (no auto GPS prompt) -->
               <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" style="grid-column:3 !important;justify-self:end !important;margin-left:auto !important;position:relative !important;min-width:0 !important;" title="My Vessel — name, position &amp; AIS details">
                 <button type="button" class="home-vessel-hud-btn" id="homeVesselHudBtn" aria-haspopup="dialog" aria-expanded="false">
-                  <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l4.5 7.5v10l-4.5 2.5-4.5-2.5v-10L12 2z" fill="currentColor" fill-opacity="0.16" stroke="currentColor" stroke-width="1.6"/><line x1="12" y1="2" x2="12" y2="9" stroke="#f05a36" stroke-width="1.8"/><circle cx="12" cy="13.5" r="1.8" fill="#f05a36"/></svg></span>
+                  <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2.2" fill="#f05a36"/></svg></span>
                   <span class="home-hud-text" id="homeVesselHudCoords">NOT SET</span>
                 </button>
                 <div class="ntm-popover ntm-vessel-popover home-vessel-popover" id="homeVesselPopover" role="dialog" aria-label="My Vessel settings">
@@ -14882,7 +14883,7 @@ select option {
 
 
 
-    const STARS = [{"n": "Acamar", "ra": 2.97111111, "d": -40.31}, {"n": "Achernar", "ra": 1.62861111, "d": -57.24333333}, {"n": "Acrux", "ra": 12.44333333, "d": -63.09166667}, {"n": "Adhara", "ra": 6.9775, "d": -28.97333333}, {"n": "Aldebaran", "ra": 4.59888889, "d": 16.50833333}, {"n": "Alioth", "ra": 12.9, "d": 55.95666667}, {"n": "Alkaid", "ra": 13.79194444, "d": 49.31166667}, {"n": "Al Na'ir", "ra": 22.13638889, "d": -46.965}, {"n": "Alnilam", "ra": 5.60361111, "d": -1.195}, {"n": "Alphard", "ra": 9.46, "d": -8.65833333}, {"n": "Alphecca", "ra": 15.5975, "d": 26.715}, {"n": "Alpheratz", "ra": 0.13944444, "d": 29.09166667}, {"n": "Altair", "ra": 19.84583333, "d": 8.86833333}, {"n": "Ankaa", "ra": 0.43777778, "d": -42.31166667}, {"n": "Antares", "ra": 16.48944444, "d": -26.42833333}, {"n": "Arcturus", "ra": 14.26083333, "d": 19.18666667}, {"n": "Atria", "ra": 16.80972222, "d": -69.02333333}, {"n": "Avior", "ra": 8.37583333, "d": -59.50833333}, {"n": "Bellatrix", "ra": 5.41888889, "d": 6.34833333}, {"n": "Betelgeuse", "ra": 5.91972222, "d": 7.405}, {"n": "Canopus", "ra": 6.39972222, "d": -52.69833333}, {"n": "Capella", "ra": 5.27833333, "d": 45.99833333}, {"n": "Deneb", "ra": 20.69, "d": 45.28166667}, {"n": "Denebola", "ra": 11.8175, "d": 14.57166667}, {"n": "Diphda", "ra": 0.72611111, "d": -17.99}, {"n": "Dubhe", "ra": 11.06194444, "d": 61.74666667}, {"n": "Elnath", "ra": 5.43833333, "d": 28.60666667}, {"n": "Eltanin", "ra": 17.94277778, "d": 51.48833333}, {"n": "Enif", "ra": 21.73611111, "d": 9.875}, {"n": "Formalhaut", "ra": 22.96027778, "d": -29.62666667}, {"n": "Gacrux", "ra": 12.51944444, "d": -57.10666667}, {"n": "Gienah", "ra": 12.26333333, "d": -17.53833333}, {"n": "Hadar", "ra": 14.06333333, "d": -60.36666667}, {"n": "Hamal", "ra": 2.11944444, "d": 23.46333333}, {"n": "Kaus Austr.", "ra": 18.40194444, "d": -34.38333333}, {"n": "Kochab", "ra": 14.84416667, "d": 74.15333333}, {"n": "Markab", "ra": 23.07888889, "d": 15.205}, {"n": "Menkar", "ra": 3.03805556, "d": 4.08666667}, {"n": "Menkent", "ra": 14.11111111, "d": -36.365}, {"n": "Miaplacidus", "ra": 9.22111111, "d": -69.71333333}, {"n": "Mirfak", "ra": 3.40555556, "d": 49.86166667}, {"n": "Nunki", "ra": 18.92027778, "d": -26.295}, {"n": "Peacock", "ra": 20.42638889, "d": -56.73666667}, {"n": "Pollux", "ra": 7.75555556, "d": 28.025}, {"n": "Procyon", "ra": 7.65527778, "d": 5.225}, {"n": "Rasalhague", "ra": 17.58166667, "d": 12.56166667}, {"n": "Regulus", "ra": 10.13944444, "d": 11.96666667}, {"n": "Rigel", "ra": 5.2425, "d": -8.205}, {"n": "Rigil Kent", "ra": 14.66027778, "d": -60.83}, {"n": "Sabik", "ra": 17.17222222, "d": -15.72333333}, {"n": "Schedar", "ra": 0.675, "d": 56.54}, {"n": "Shaula", "ra": 17.55944444, "d": -37.10166667}, {"n": "Sirius", "ra": 6.75277778, "d": -16.715}, {"n": "Spica", "ra": 13.41972222, "d": -11.15833333}, {"n": "Suhail", "ra": 9.13361111, "d": -43.43}, {"n": "Vega", "ra": 18.615, "d": 38.78333333}, {"n": "Zuben'ubi", "ra": 14.8475, "d": -16.03833333}];
+    const STARS = [{"n": "Acamar", "ra": 2.97111111, "d": -40.31}, {"n": "Achernar", "ra": 1.62861111, "d": -57.24333333}, {"n": "Acrux", "ra": 12.44333333, "d": -63.09166667}, {"n": "Adhara", "ra": 6.9775, "d": -28.97333333}, {"n": "Aldebaran", "ra": 4.59888889, "d": 16.50833333}, {"n": "Alioth", "ra": 12.9, "d": 55.95666667}, {"n": "Alkaid", "ra": 13.79194444, "d": 49.31166667}, {"n": "Al Na'ir", "ra": 22.13638889, "d": -46.965}, {"n": "Alnilam", "ra": 5.60361111, "d": -1.195}, {"n": "Alphard", "ra": 9.46, "d": -8.65833333}, {"n": "Alphecca", "ra": 15.6075, "d": 26.715}, {"n": "Alpheratz", "ra": 0.13944444, "d": 29.09166667}, {"n": "Altair", "ra": 19.84583333, "d": 8.86833333}, {"n": "Ankaa", "ra": 0.43777778, "d": -42.31166667}, {"n": "Antares", "ra": 16.48944444, "d": -26.42833333}, {"n": "Arcturus", "ra": 14.26083333, "d": 19.18666667}, {"n": "Atria", "ra": 16.80972222, "d": -69.02333333}, {"n": "Avior", "ra": 8.37583333, "d": -59.50833333}, {"n": "Bellatrix", "ra": 5.41888889, "d": 6.34833333}, {"n": "Betelgeuse", "ra": 5.91972222, "d": 7.405}, {"n": "Canopus", "ra": 6.39972222, "d": -52.69833333}, {"n": "Capella", "ra": 5.27833333, "d": 45.99833333}, {"n": "Deneb", "ra": 20.69, "d": 45.28166667}, {"n": "Denebola", "ra": 11.8175, "d": 14.57166667}, {"n": "Diphda", "ra": 0.72611111, "d": -17.99}, {"n": "Dubhe", "ra": 11.06194444, "d": 61.74666667}, {"n": "Elnath", "ra": 5.43833333, "d": 28.60666667}, {"n": "Eltanin", "ra": 17.94277778, "d": 51.48833333}, {"n": "Enif", "ra": 21.73611111, "d": 9.875}, {"n": "Formalhaut", "ra": 22.96027778, "d": -29.62666667}, {"n": "Gacrux", "ra": 12.51944444, "d": -57.10666667}, {"n": "Gienah", "ra": 12.26333333, "d": -17.53833333}, {"n": "Hadar", "ra": 14.06333333, "d": -60.36666667}, {"n": "Hamal", "ra": 2.11944444, "d": 23.46333333}, {"n": "Kaus Austr.", "ra": 18.40194444, "d": -34.38333333}, {"n": "Kochab", "ra": 14.84416667, "d": 74.15333333}, {"n": "Markab", "ra": 23.07888889, "d": 15.205}, {"n": "Menkar", "ra": 3.03805556, "d": 4.08666667}, {"n": "Menkent", "ra": 14.11111111, "d": -36.365}, {"n": "Miaplacidus", "ra": 9.22111111, "d": -69.71333333}, {"n": "Mirfak", "ra": 3.40555556, "d": 49.86166667}, {"n": "Nunki", "ra": 18.92027778, "d": -26.295}, {"n": "Peacock", "ra": 20.42638889, "d": -56.73666667}, {"n": "Pollux", "ra": 7.75555556, "d": 28.025}, {"n": "Procyon", "ra": 7.65527778, "d": 5.225}, {"n": "Rasalhague", "ra": 17.58166667, "d": 12.56166667}, {"n": "Regulus", "ra": 10.13944444, "d": 11.96666667}, {"n": "Rigel", "ra": 5.2425, "d": -8.205}, {"n": "Rigil Kent", "ra": 14.66027778, "d": -60.83}, {"n": "Sabik", "ra": 17.17222222, "d": -15.72333333}, {"n": "Schedar", "ra": 0.675, "d": 56.54}, {"n": "Shaula", "ra": 17.55944444, "d": -37.10166667}, {"n": "Sirius", "ra": 6.75277778, "d": -16.715}, {"n": "Spica", "ra": 13.41972222, "d": -11.15833333}, {"n": "Suhail", "ra": 9.13361111, "d": -43.43}, {"n": "Vega", "ra": 18.615, "d": 38.78333333}, {"n": "Zuben'ubi", "ra": 14.8475, "d": -16.03833333}];
 
 
 
@@ -19829,22 +19830,22 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.59"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.59" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.59"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.60"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.60" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.60"></script>
   <script>
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.59",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.60",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.59"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.59"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.59"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.60"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.60"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.60"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19922,7 +19923,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.59"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.60"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20333,7 +20334,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.59', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.60', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {

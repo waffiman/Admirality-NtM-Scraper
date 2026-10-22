@@ -19,24 +19,25 @@
   // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
   const GL_ZOOM_OFFSET = 1;
 
-  // ECDIS-like discrete depth bands (same cyan-blue family, stronger contrast).
-  // Sharp stop pairs keep band edges crisp; land (≥0) stays transparent.
+  // ECDIS-like depth bands: deep/mid blues, pale green for shoals / very shallow (< ~10 m).
+  // Elevation is negative underwater (terrarium DEM). Land (≥0) stays transparent.
+  // Shoal threshold: depth_abs < 10 m → pale ECDIS green (#c5dfb8 family).
   const BATHY_COLOR_RELIEF = [
     "interpolate",
     ["linear"],
     ["elevation"],
-    -10000, "#f0f9ff",
-    -50.01, "#f0f9ff",
+    -10000, "#e8f4fc",
+    -50.01, "#e8f4fc",
     -50, "#93c5fd",
     -20.01, "#93c5fd",
     -20, "#38bdf8",
     -10.01, "#38bdf8",
-    -10, "#0ea5e9",
-    -5.01, "#0ea5e9",
-    -5, "#0284c7",
-    -2.01, "#0284c7",
-    -2, "#0369a1",
-    -0.01, "#0369a1",
+    -10, "#b9d6a8",
+    -5.01, "#b9d6a8",
+    -5, "#c8e0b6",
+    -2.01, "#c8e0b6",
+    -2, "#d5e9c6",
+    -0.01, "#d5e9c6",
     0, "rgba(247,240,221,0)",
     2, "rgba(247,240,221,0)"
   ];
