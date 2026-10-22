@@ -51,7 +51,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.51" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.52" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -14072,7 +14072,8 @@ select option {
                       <div style="font-size:0.69rem;color:#34d399;" id="settingsAuthProfileEmail">Google Account Synced</div>
                     </div>
                   </div>
-                  <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <button type="button" class="min-btn-outline" id="btnSetSailAdminPanel" style="display:none;padding:5px 10px;font-size:0.7rem;margin:0;border-color:rgba(251,191,36,0.45);color:#fbbf24;">Admin Panel</button>
                     <button type="button" class="min-btn-outline" id="btnExportUserHistory" style="padding:5px 10px;font-size:0.7rem;margin:0;">Backup (.json)</button>
                     <button type="button" class="min-btn-outline" id="btnSetSailSignOut" style="padding:5px 10px;font-size:0.7rem;margin:0;border-color:rgba(244,63,94,0.4);color:#fda4af;">Sign Out</button>
                   </div>
@@ -14313,12 +14314,38 @@ select option {
 
       </div><!-- end #tab-settings -->
 
-
-
-
-
-
-
+      <!-- SetSail Admin Panel (owner-only; toggled in JS) -->
+      <div class="ntm-modal" id="setsailAdminModal" aria-hidden="true">
+        <div class="ntm-modal-box setsail-admin-modal-box">
+          <div class="ntm-modal-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px;">
+            <div>
+              <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:var(--text);">Admin Panel</h3>
+              <p style="margin:4px 0 0;font-size:0.72rem;color:var(--muted);">Site visitors &amp; signed-in profiles</p>
+            </div>
+            <button type="button" class="ntm-modal-close" id="setsailAdminModalClose" title="Close" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;">&times;</button>
+          </div>
+          <div class="setsail-admin-toolbar">
+            <label>From <input type="date" id="adminStatsFrom" class="setsail-admin-date"></label>
+            <label>To <input type="date" id="adminStatsTo" class="setsail-admin-date"></label>
+            <button type="button" class="min-btn-outline" id="adminStatsRefreshBtn" style="padding:4px 10px;font-size:0.72rem;margin:0;">Refresh</button>
+          </div>
+          <div class="setsail-admin-grid">
+            <div class="setsail-admin-stat">
+              <div class="setsail-admin-stat-label">Visitors in range</div>
+              <div class="setsail-admin-stat-value" id="adminStatVisitors">—</div>
+            </div>
+            <div class="setsail-admin-stat">
+              <div class="setsail-admin-stat-label">Signed-in profiles (all time)</div>
+              <div class="setsail-admin-stat-value" id="adminStatProfiles">—</div>
+            </div>
+          </div>
+          <div class="setsail-admin-series-wrap">
+            <div class="setsail-admin-series-title">Daily visitors</div>
+            <div id="adminStatsSeries" class="setsail-admin-series"></div>
+          </div>
+          <div class="setsail-admin-note" id="adminStatsNote"></div>
+        </div>
+      </div>
 
 
 
@@ -19885,21 +19912,21 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
     }
   </script>
   <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.24"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.51" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.51"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.52" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.52"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.51",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.52",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.51"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.51"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.52"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.52"></script>
   <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.36"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
@@ -19978,7 +20005,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.51"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.52"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">

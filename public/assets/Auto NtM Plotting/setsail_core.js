@@ -8692,6 +8692,9 @@ function setSetSailAuthUser(userObj) {
       localStorage.setItem(SETSAIL_AUTH_KEY, JSON.stringify(userObj));
       restoreSetSailUserHistory(userObj.email, true);
       saveSetSailUserHistory();
+      try {
+        if (typeof window.trackSetSailLogin === "function") window.trackSetSailLogin(userObj.email);
+      } catch (eTrack) {}
     } else {
       saveSetSailUserHistory();
       localStorage.removeItem(SETSAIL_AUTH_KEY);
@@ -8758,6 +8761,9 @@ function syncSetSailAuthUI() {
     if (loggedOutBox) loggedOutBox.style.display = "block";
     if (loggedInBox) loggedInBox.style.display = "none";
   }
+  try {
+    if (typeof window.syncSetSailAdminUi === "function") window.syncSetSailAdminUi();
+  } catch (eAdmin) {}
 }
 
 function decodeGoogleJwt(token) {
@@ -8814,6 +8820,10 @@ function loadGoogleIdentityScriptAsync() {
 
 function handleGoogleCredentialResponse(resp) {
   if (!resp || !resp.credential) return;
+  try {
+    sessionStorage.setItem("setsail_google_auth_token", resp.credential);
+    sessionStorage.setItem("setsail_google_auth_kind", "id_token");
+  } catch (e) {}
   const payload = decodeGoogleJwt(resp.credential);
   if (payload && payload.email) {
     setSetSailAuthUser({
@@ -8882,6 +8892,10 @@ function initGoogleAuthClients() {
             return;
           }
           try {
+            try {
+              sessionStorage.setItem("setsail_google_auth_token", tokenResponse.access_token);
+              sessionStorage.setItem("setsail_google_auth_kind", "access_token");
+            } catch (eTok) {}
             const profile = await fetchGoogleUserInfo(tokenResponse.access_token);
             if (profile && profile.email) {
               setSetSailAuthUser({
@@ -9015,6 +9029,10 @@ function initSetSailAuth() {
       if (window.google && window.google.accounts && window.google.accounts.id) {
         try { window.google.accounts.id.disableAutoSelect(); } catch (e) {}
       }
+      try {
+        sessionStorage.removeItem("setsail_google_auth_token");
+        sessionStorage.removeItem("setsail_google_auth_kind");
+      } catch (e) {}
       setSetSailAuthUser(null);
       syncSetSailAuthUI();
       if (typeof showSetSailToast === "function") {
@@ -9057,6 +9075,253 @@ window.renderOfficialGoogleButtonIfConfigured = initGoogleAuthClients;
 
 window.initSetSailAuth = initSetSailAuth;
 window.syncSetSailAuthUI = syncSetSailAuthUI;
+
+/* ==========================================================================
+   SETSAIL ADMIN PANEL + LIGHT ANALYTICS (owner-only UI)
+   ========================================================================== */
+const SETSAIL_ADMIN_EMAIL = "michael200686@gmail.com";
+
+function isSetSailSiteHost() {
+  try {
+    const h = String(location.hostname || "").toLowerCase();
+    if (!h || h === "null") return false;
+    if (h === "localhost" || h === "127.0.0.1") return true;
+    if (h === "setsail-ai.vercel.app") return true;
+    if (h.endsWith(".vercel.app") && h.includes("setsail")) return true;
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+function isSetSailAdminUser(user) {
+  const u = user || getSetSailAuthUser();
+  const email = String((u && u.email) || "").trim().toLowerCase();
+  return email === SETSAIL_ADMIN_EMAIL;
+}
+
+function syncSetSailAdminUi() {
+  const btn = document.getElementById("btnSetSailAdminPanel");
+  if (!btn) return;
+  const show = isSetSailSiteHost() && isSetSailAdminUser();
+  btn.style.display = show ? "inline-flex" : "none";
+}
+window.syncSetSailAdminUi = syncSetSailAdminUi;
+
+function getOrCreateVisitSid() {
+  try {
+    let sid = sessionStorage.getItem("setsail_visit_sid");
+    if (!sid) {
+      sid = (crypto.randomUUID && crypto.randomUUID()) ||
+        ("v" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+      sessionStorage.setItem("setsail_visit_sid", sid);
+    }
+    return sid;
+  } catch (e) {
+    return "anon-" + Date.now();
+  }
+}
+
+async function sha256Hex(text) {
+  const data = new TextEncoder().encode(String(text || ""));
+  if (!crypto || !crypto.subtle) {
+    // Fallback non-crypto hash (only for very old browsers)
+    let h = 0;
+    for (let i = 0; i < data.length; i++) h = ((h << 5) - h + data[i]) | 0;
+    return ("00000000" + (h >>> 0).toString(16)).slice(-8).padStart(64, "0");
+  }
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function trackSetSailVisit() {
+  if (!isSetSailSiteHost()) return;
+  try {
+    const day = new Date().toISOString().slice(0, 10);
+    const flag = "setsail_visit_sent_" + day;
+    if (sessionStorage.getItem(flag) === "1") return;
+    sessionStorage.setItem(flag, "1");
+    const sid = getOrCreateVisitSid();
+    fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "visit", sid, day }),
+      credentials: "omit",
+      keepalive: true
+    }).catch(() => {});
+  } catch (e) {}
+}
+window.trackSetSailVisit = trackSetSailVisit;
+
+async function trackSetSailLogin(email) {
+  if (!isSetSailSiteHost()) return;
+  const clean = String(email || "").trim().toLowerCase();
+  if (!clean || !clean.includes("@")) return;
+  try {
+    const day = new Date().toISOString().slice(0, 10);
+    const flag = "setsail_login_sent_" + day + "_" + clean;
+    if (sessionStorage.getItem(flag) === "1") return;
+    sessionStorage.setItem(flag, "1");
+    const emailHash = await sha256Hex(clean);
+    fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "login", emailHash, day }),
+      credentials: "omit",
+      keepalive: true
+    }).catch(() => {});
+  } catch (e) {}
+}
+window.trackSetSailLogin = trackSetSailLogin;
+
+function openSetSailAdminPanel() {
+  if (!isSetSailSiteHost() || !isSetSailAdminUser()) return;
+  const modal = document.getElementById("setsailAdminModal");
+  if (!modal) return;
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  const to = new Date();
+  const from = new Date(to.getTime() - 6 * 86400000);
+  const toEl = document.getElementById("adminStatsTo");
+  const fromEl = document.getElementById("adminStatsFrom");
+  const iso = (d) =>
+    d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  if (toEl && !toEl.value) toEl.value = iso(to);
+  if (fromEl && !fromEl.value) fromEl.value = iso(from);
+  refreshSetSailAdminStats();
+}
+window.openSetSailAdminPanel = openSetSailAdminPanel;
+
+function closeSetSailAdminPanel() {
+  const modal = document.getElementById("setsailAdminModal");
+  if (!modal) return;
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+}
+window.closeSetSailAdminPanel = closeSetSailAdminPanel;
+
+async function refreshSetSailAdminStats() {
+  const visitorsEl = document.getElementById("adminStatVisitors");
+  const profilesEl = document.getElementById("adminStatProfiles");
+  const seriesEl = document.getElementById("adminStatsSeries");
+  const noteEl = document.getElementById("adminStatsNote");
+  const fromEl = document.getElementById("adminStatsFrom");
+  const toEl = document.getElementById("adminStatsTo");
+  if (visitorsEl) visitorsEl.textContent = "…";
+  if (profilesEl) profilesEl.textContent = "…";
+  if (seriesEl) seriesEl.innerHTML = '<div class="setsail-admin-series-row">Loading…</div>';
+  if (noteEl) noteEl.textContent = "";
+
+  const token = (() => {
+    try { return sessionStorage.getItem("setsail_google_auth_token") || ""; } catch (e) { return ""; }
+  })();
+  if (!token) {
+    if (visitorsEl) visitorsEl.textContent = "—";
+    if (profilesEl) profilesEl.textContent = "—";
+    if (seriesEl) seriesEl.innerHTML = "";
+    if (noteEl) {
+      noteEl.textContent = "Sign out and sign in again with Google so Admin Panel can verify your session, then Refresh.";
+    }
+    return;
+  }
+
+  const from = (fromEl && fromEl.value) || "";
+  const to = (toEl && toEl.value) || "";
+  const qs = new URLSearchParams();
+  if (from) qs.set("from", from);
+  if (to) qs.set("to", to);
+
+  try {
+    const res = await fetch("/api/stats?" + qs.toString(), {
+      headers: { Authorization: "Bearer " + token },
+      credentials: "omit",
+      cache: "no-store"
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error((data && (data.reason || data.error)) || ("HTTP " + res.status));
+    }
+    if (visitorsEl) visitorsEl.textContent = String(data.visitors != null ? data.visitors : 0);
+    if (profilesEl) profilesEl.textContent = String(data.profilesTotal != null ? data.profilesTotal : 0);
+    if (seriesEl) {
+      const series = Array.isArray(data.series) ? data.series : [];
+      if (!series.length) {
+        seriesEl.innerHTML = '<div class="setsail-admin-series-row">No visits in this range yet</div>';
+      } else {
+        seriesEl.innerHTML = series
+          .map((row) =>
+            '<div class="setsail-admin-series-row"><span>' +
+            String(row.day) +
+            "</span><b>" +
+            String(row.visitors) +
+            "</b></div>"
+          )
+          .join("");
+      }
+    }
+    if (noteEl) {
+      const bits = [];
+      if (data.updatedAt) bits.push("Updated " + new Date(data.updatedAt).toLocaleString());
+      if (data.readOnly || data.persistence === "static-readonly") {
+        bits.push("Persistence not configured on server (set SETSAIL_ANALYTICS_GITHUB_TOKEN in Vercel).");
+      } else if (data.persistence === "github") {
+        bits.push("Live GitHub-backed analytics");
+      }
+      noteEl.textContent = bits.join(" · ");
+    }
+  } catch (err) {
+    if (visitorsEl) visitorsEl.textContent = "—";
+    if (profilesEl) profilesEl.textContent = "—";
+    if (seriesEl) seriesEl.innerHTML = "";
+    if (noteEl) noteEl.textContent = "Could not load stats: " + (err && err.message ? err.message : "error");
+  }
+}
+window.refreshSetSailAdminStats = refreshSetSailAdminStats;
+
+function initSetSailAdminPanel() {
+  syncSetSailAdminUi();
+  const btn = document.getElementById("btnSetSailAdminPanel");
+  if (btn && !btn._ssAdminBound) {
+    btn._ssAdminBound = true;
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      openSetSailAdminPanel();
+    });
+  }
+  const closeBtn = document.getElementById("setsailAdminModalClose");
+  if (closeBtn && !closeBtn._ssAdminBound) {
+    closeBtn._ssAdminBound = true;
+    closeBtn.addEventListener("click", () => closeSetSailAdminPanel());
+  }
+  const modal = document.getElementById("setsailAdminModal");
+  if (modal && !modal._ssAdminBound) {
+    modal._ssAdminBound = true;
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeSetSailAdminPanel();
+    });
+  }
+  const refreshBtn = document.getElementById("adminStatsRefreshBtn");
+  if (refreshBtn && !refreshBtn._ssAdminBound) {
+    refreshBtn._ssAdminBound = true;
+    refreshBtn.addEventListener("click", () => refreshSetSailAdminStats());
+  }
+  trackSetSailVisit();
+  const user = getSetSailAuthUser();
+  if (user && user.email) trackSetSailLogin(user.email);
+}
+window.initSetSailAdminPanel = initSetSailAdminPanel;
+
+try {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      try { initSetSailAdminPanel(); } catch (e) {}
+    });
+  } else {
+    setTimeout(() => {
+      try { initSetSailAdminPanel(); } catch (e) {}
+    }, 0);
+  }
+} catch (e) {}
 
 
 /* ==========================================================================

@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine вЂ” Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.51.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.51.0';
+const CACHE_NAME = 'setsail-cache-v5.52.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.52.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -185,13 +185,23 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // 0a. Open Waters API + Almanac CDN: network-only (do not cache / timeout-starve)
+  // 0a. Same-origin API + Open Waters / Almanac CDN: network-only
+  if (url.origin === self.location.origin && url.pathname.startsWith('/api/')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
   if (
     url.hostname === 'api.openwaters.io' ||
     url.hostname.includes('jsdelivr.net') ||
     url.hostname === 'esm.sh' ||
     url.hostname.endsWith('.esm.sh')
   ) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // 0a2. SetSail analytics/admin API — never cache
+  if (url.origin === self.location.origin && url.pathname.startsWith('/api/')) {
     event.respondWith(fetch(event.request));
     return;
   }
