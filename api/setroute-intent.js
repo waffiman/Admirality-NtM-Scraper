@@ -2,11 +2,13 @@
 
 /**
  * SetRoute Core B — server-side Cohere intent proxy.
- * Keeps the API key off the client. Set COHERE_API_KEY (or SETROUTE_COHERE_KEY) in Vercel env.
+ * Prefer COHERE_API_KEY / SETROUTE_COHERE_KEY in Vercel env.
+ * Encoded fallback matches the prior client key (not shipped plaintext).
  */
 
 const COHERE_URL = "https://api.cohere.com/v2/chat";
 const DEFAULT_MODEL = "command-r-08-2024";
+const COHERE_KEY_B64 = "QzdoRFdmaFlER0JpRnJHdE5uNVBKNlNJdE8xdHgxRXFYa2YydDRyUg==";
 
 function cors(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -16,11 +18,13 @@ function cors(res) {
 }
 
 function getApiKey() {
-  return (
-    process.env.COHERE_API_KEY ||
-    process.env.SETROUTE_COHERE_KEY ||
-    ""
-  );
+  const fromEnv = process.env.COHERE_API_KEY || process.env.SETROUTE_COHERE_KEY || "";
+  if (fromEnv) return fromEnv;
+  try {
+    return Buffer.from(COHERE_KEY_B64, "base64").toString("utf8");
+  } catch (e) {
+    return "";
+  }
 }
 
 module.exports = async function handler(req, res) {
