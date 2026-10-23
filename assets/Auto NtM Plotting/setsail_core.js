@@ -9561,6 +9561,142 @@ function _setsailGuestHudAvatarHtml() {
   return `<svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>`;
 }
 
+function syncSetSailApiCardUI() {
+  const user = getSetSailAuthUser();
+  const guest = document.getElementById("settingsApiGuest");
+  const authed = document.getElementById("settingsApiAuthed");
+  const signed = !!(user && (user.email || user.name));
+  if (guest) guest.style.display = signed ? "none" : "flex";
+  if (authed) authed.style.display = signed ? "flex" : "none";
+  if (!signed) {
+    const box = document.getElementById("settingsApiKeyBox");
+    const copyBtn = document.getElementById("btnApiCopyKey");
+    const hideBtn = document.getElementById("btnApiHideKey");
+    if (box) box.style.display = "none";
+    if (copyBtn) copyBtn.style.display = "none";
+    if (hideBtn) hideBtn.style.display = "none";
+    window.__setsailAgentApiKey = null;
+  }
+}
+
+async function issueSetSailAgentApiKey() {
+  const user = getSetSailAuthUser();
+  if (!user || !user.email) {
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Sign in with Google first to create an API key.", "warning");
+    }
+    if (typeof triggerOfficialGoogleSignIn === "function") triggerOfficialGoogleSignIn();
+    return null;
+  }
+  let token = "";
+  try {
+    token = sessionStorage.getItem("setsail_google_auth_token") || "";
+  } catch (e) {}
+  if (!token) {
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Re-authenticate with Google to mint an API key…", "info");
+    }
+    if (typeof triggerOfficialGoogleSignIn === "function") triggerOfficialGoogleSignIn();
+    return null;
+  }
+  try {
+    const res = await fetch("/api/v1/keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ idToken: token }),
+      cache: "no-store"
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.apiKey) {
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast(data.message || "Could not issue API key. Sign in again.", "error");
+      }
+      return null;
+    }
+    window.__setsailAgentApiKey = data.apiKey;
+    const box = document.getElementById("settingsApiKeyBox");
+    const val = document.getElementById("settingsApiKeyValue");
+    const meta = document.getElementById("settingsApiKeyMeta");
+    const copyBtn = document.getElementById("btnApiCopyKey");
+    const hideBtn = document.getElementById("btnApiHideKey");
+    if (val) val.textContent = data.apiKey;
+    if (meta) {
+      meta.textContent =
+        "Expires " +
+        (data.expiresAt ? new Date(data.expiresAt).toUTCString().replace("GMT", "UTC") : "—") +
+        " · scopes " +
+        ((data.scopes || []).join(", ") || "chart.read, route.plan");
+    }
+    if (box) box.style.display = "block";
+    if (copyBtn) copyBtn.style.display = "inline-flex";
+    if (hideBtn) hideBtn.style.display = "inline-flex";
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Agent API key ready — copy it now.", "success");
+    }
+    return data.apiKey;
+  } catch (e) {
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("API key request failed (network).", "error");
+    }
+    return null;
+  }
+}
+
+function initSetSailAgentApiCard() {
+  if (window._setsailApiCardBound) {
+    syncSetSailApiCardUI();
+    return;
+  }
+  window._setsailApiCardBound = true;
+
+  const signInBtn = document.getElementById("btnApiSignInForKey");
+  if (signInBtn) {
+    signInBtn.addEventListener("click", () => {
+      if (typeof triggerOfficialGoogleSignIn === "function") triggerOfficialGoogleSignIn();
+      else {
+        const settingsTab = document.querySelector('.nav-item[data-tab="tab-settings"]');
+        if (settingsTab) settingsTab.click();
+      }
+    });
+  }
+
+  const revealBtn = document.getElementById("btnApiRevealKey");
+  if (revealBtn) {
+    revealBtn.addEventListener("click", () => {
+      issueSetSailAgentApiKey();
+    });
+  }
+
+  const copyBtn = document.getElementById("btnApiCopyKey");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      const key = window.__setsailAgentApiKey || (document.getElementById("settingsApiKeyValue") || {}).textContent || "";
+      if (!key) return;
+      try {
+        await navigator.clipboard.writeText(key);
+        if (typeof showSetSailToast === "function") showSetSailToast("API key copied.", "success");
+      } catch (e) {
+        if (typeof showSetSailToast === "function") showSetSailToast("Copy failed — select the key manually.", "warning");
+      }
+    });
+  }
+
+  const hideBtn = document.getElementById("btnApiHideKey");
+  if (hideBtn) {
+    hideBtn.addEventListener("click", () => {
+      const box = document.getElementById("settingsApiKeyBox");
+      const val = document.getElementById("settingsApiKeyValue");
+      if (box) box.style.display = "none";
+      if (val) val.textContent = "";
+      window.__setsailAgentApiKey = null;
+      copyBtn && (copyBtn.style.display = "none");
+      hideBtn.style.display = "none";
+    });
+  }
+
+  syncSetSailApiCardUI();
+}
+
 function syncSetSailAuthUI() {
   const user = getSetSailAuthUser();
   const hudBtn = document.getElementById("homeHudLeftLoginBtn");
@@ -9662,6 +9798,9 @@ function syncSetSailAuthUI() {
   try {
     if (typeof window.syncSetSailAdminUi === "function") window.syncSetSailAdminUi();
   } catch (eAdmin) {}
+  try {
+    syncSetSailApiCardUI();
+  } catch (eApi) {}
 }
 
 function decodeGoogleJwt(token) {
@@ -9951,6 +10090,9 @@ function initSetSailAuth() {
   loadGoogleIdentityScriptAsync().then((loaded) => {
     if (loaded) initGoogleAuthClients();
   });
+  try {
+    initSetSailAgentApiCard();
+  } catch (eApiInit) {}
   syncSetSailAuthUI();
 }
 
