@@ -1641,6 +1641,8 @@ function initAutoNtmUI() {
   if (collapseBtn && workspaceEl) {
     collapseBtn.addEventListener("click", () => {
       workspaceEl.classList.add("sidebar-collapsed");
+      const ntmTab = document.getElementById("tab-ntm");
+      if (ntmTab) ntmTab.classList.add("sidebar-collapsed");
       if (expandBtn) expandBtn.style.display = "block";
       setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 250);
     });
@@ -1649,6 +1651,8 @@ function initAutoNtmUI() {
   if (expandBtn && workspaceEl) {
     expandBtn.addEventListener("click", () => {
       workspaceEl.classList.remove("sidebar-collapsed");
+      const ntmTab = document.getElementById("tab-ntm");
+      if (ntmTab) ntmTab.classList.remove("sidebar-collapsed");
       expandBtn.style.display = "none";
       setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 250);
     });
