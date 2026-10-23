@@ -5298,8 +5298,32 @@ function loadSampleNtMData() {
 // ==========================================================================
 // SETROUTE™ — AUTONOMOUS AI PASSAGE PLANNER ENGINE (COHERE INTEGRATION)
 // ==========================================================================
-const SETROUTE_COHERE_KEY = atob("QzdoRFdmaFlER0JpRnJHdE5uNVBKNlNJdE8xdHgxRXFYa2YydDRyUg==");
 const SETROUTE_COHERE_MODEL = "command-r-08-2024";
+async function setrouteCohereChat(messages, options) {
+  options = options || {};
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), options.timeoutMs || 9500);
+  try {
+    const resp = await fetch("/api/setroute-intent", {
+      method: "POST",
+      signal: ctrl.signal,
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        messages: messages,
+        model: options.model || SETROUTE_COHERE_MODEL,
+        temperature: options.temperature != null ? options.temperature : 0.15
+      })
+    });
+    clearTimeout(tid);
+    if (!resp.ok) return { ok: false, text: "", status: resp.status };
+    const data = await resp.json();
+    return { ok: Boolean(data && data.ok), text: (data && data.text) || "", status: 200 };
+  } catch (e) {
+    clearTimeout(tid);
+    return { ok: false, text: "", error: e };
+  }
+}
+window.setrouteCohereChat = setrouteCohereChat;
 
 /**
  * Initialize SetRoute Ports Selection and Event Listeners
@@ -5528,7 +5552,7 @@ function findNearestMaritimeNode(lat, lon) {
 
 
 // ==========================================================================
-// SETROUTE CORE A v5.65 — hard map analysis (no LLM geometry)
+// SETROUTE CORE A v5.66 — hard map analysis (no LLM geometry)
 // Land-safe Dijkstra, Suez/Cape auto-choice, NtM/weather edge costs, audit
 // ==========================================================================
 
@@ -5556,6 +5580,128 @@ const SETROUTE_OCEAN_HUBS = [
   "UNIMAK_PASS", "NATL_GC_MID", "NPAC_GC_MID", "MED_SICILY", "DONDRA_HEAD"
 ];
 
+let SETROUTE_COAST_GRID = null;
+let SETROUTE_COAST_LOAD_PROMISE = null;
+function setrouteOrient(ax, ay, bx, by, cx, cy) {
+  const v = (by - ay) * (cx - bx) - (bx - ax) * (cy - by);
+  if (Math.abs(v) < 1e-12) return 0;
+  return v > 0 ? 1 : 2;
+}
+function setrouteOnSeg(ax, ay, bx, by, cx, cy) {
+  return Math.min(ax, bx) - 1e-9 <= cx && cx <= Math.max(ax, bx) + 1e-9 &&
+    Math.min(ay, by) - 1e-9 <= cy && cy <= Math.max(ay, by) + 1e-9;
+}
+function setrouteSegmentsIntersect(aLat, aLon, bLat, bLon, cLat, cLon, dLat, dLon) {
+  if (Math.abs(aLon - bLon) > 90 || Math.abs(cLon - dLon) > 90) return false;
+  const o1 = setrouteOrient(aLon, aLat, bLon, bLat, cLon, cLat);
+  const o2 = setrouteOrient(aLon, aLat, bLon, bLat, dLon, dLat);
+  const o3 = setrouteOrient(cLon, cLat, dLon, dLat, aLon, aLat);
+  const o4 = setrouteOrient(cLon, cLat, dLon, dLat, bLon, bLat);
+  if (o1 !== o2 && o3 !== o4) return true;
+  if (o1 === 0 && setrouteOnSeg(aLon, aLat, bLon, bLat, cLon, cLat)) return true;
+  if (o2 === 0 && setrouteOnSeg(aLon, aLat, bLon, bLat, dLon, dLat)) return true;
+  if (o3 === 0 && setrouteOnSeg(cLon, cLat, dLon, dLat, aLon, aLat)) return true;
+  if (o4 === 0 && setrouteOnSeg(cLon, cLat, dLon, dLat, bLon, bLat)) return true;
+  return false;
+}
+function setrouteCoastCellKey(lat, lon, cellDeg) {
+  return Math.floor(lat / cellDeg) + "_" + Math.floor(lon / cellDeg);
+}
+function setrouteLegCrossesCoastline(lat1, lon1, lat2, lon2) {
+  if (!SETROUTE_COAST_GRID || !SETROUTE_COAST_GRID.cells) return false;
+  const cellDeg = SETROUTE_COAST_GRID.cellDeg || 2.5;
+  const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+  if (dist < 40) return false;
+  const keys = new Set();
+  const steps = Math.min(24, Math.max(4, Math.ceil(dist / 80)));
+  for (let i = 0; i <= steps; i++) {
+    const p = setrouteLerpLatLon(lat1, lon1, lat2, lon2, i / steps);
+    keys.add(setrouteCoastCellKey(p[0], p[1], cellDeg));
+  }
+  let tested = 0;
+  for (const k of keys) {
+    const segs = SETROUTE_COAST_GRID.cells[k];
+    if (!segs) continue;
+    for (let s = 0; s < segs.length; s++) {
+      const seg = segs[s];
+      tested++;
+      if (tested > 400) return false;
+      if (setrouteSegmentsIntersect(lat1, lon1, lat2, lon2, seg[0], seg[1], seg[2], seg[3])) return true;
+    }
+  }
+  return false;
+}
+async function loadSetrouteCoastGrid(force) {
+  if (SETROUTE_COAST_GRID && !force) return SETROUTE_COAST_GRID;
+  if (SETROUTE_COAST_LOAD_PROMISE && !force) return SETROUTE_COAST_LOAD_PROMISE;
+  SETROUTE_COAST_LOAD_PROMISE = (async () => {
+    try {
+      const resp = await fetch("assets/geo/setroute_coast_grid.json", { cache: "force-cache" });
+      if (!resp.ok) throw new Error("coast_grid_http_" + resp.status);
+      SETROUTE_COAST_GRID = await resp.json();
+      window.SETROUTE_COAST_GRID = SETROUTE_COAST_GRID;
+      return SETROUTE_COAST_GRID;
+    } catch (e) {
+      console.warn("[SetRoute] coast grid load failed", e);
+      SETROUTE_COAST_GRID = null;
+      return null;
+    }
+  })();
+  return SETROUTE_COAST_LOAD_PROMISE;
+}
+window.loadSetrouteCoastGrid = loadSetrouteCoastGrid;
+function setroutePointInRing(lat, lon, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const yi = ring[i][0], xi = ring[i][1];
+    const yj = ring[j][0], xj = ring[j][1];
+    const intersect = ((yi > lat) !== (yj > lat)) &&
+      (lon < (xj - xi) * (lat - yi) / ((yj - yi) || 1e-12) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+function setrouteCollectNtmKeepoutRings() {
+  const rings = [];
+  if (typeof NTM_STORE === "undefined" || !Array.isArray(NTM_STORE)) return rings;
+  for (let i = 0; i < NTM_STORE.length; i++) {
+    const n = NTM_STORE[i];
+    if (!n || n.isCancelled || n.status === "CANCELLED") continue;
+    const blob = ((n.subject || "") + " " + (n.title || "") + " " + (n.type || "")).toUpperCase();
+    const isHazard = /DANGER|EXCLUSION|PROHIBITED|TSS|TRAFFIC SEPARATION|MINE|FIRING|GUNNERY|PIPE|CABLE|RESTRICTED/.test(blob) ||
+      n.type === "T" || n.type === "P";
+    if (!(n.subPolygons && n.subPolygons.length)) continue;
+    n.subPolygons.forEach((sub) => {
+      const pts = sub.points || (sub.coords || []).map((c) => [c.lat, c.lon]);
+      if (pts && pts.length >= 3) rings.push({ ring: pts, weight: isHazard ? 120 : 45 });
+    });
+  }
+  return rings;
+}
+function setrouteNtmPolygonPenalty(lat1, lon1, lat2, lon2) {
+  const rings = setrouteCollectNtmKeepoutRings();
+  if (!rings.length) return 0;
+  let pen = 0;
+  const samples = [0.2, 0.4, 0.6, 0.8];
+  for (let r = 0; r < rings.length && pen < 800; r++) {
+    const ring = rings[r].ring, weight = rings[r].weight;
+    let hit = false;
+    for (let s = 0; s < samples.length; s++) {
+      const p = setrouteLerpLatLon(lat1, lon1, lat2, lon2, samples[s]);
+      if (setroutePointInRing(p[0], p[1], ring)) { hit = true; break; }
+    }
+    if (!hit) {
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        if (setrouteSegmentsIntersect(lat1, lon1, lat2, lon2, ring[j][0], ring[j][1], ring[i][0], ring[i][1])) {
+          hit = true; break;
+        }
+      }
+    }
+    if (hit) pen += weight;
+  }
+  return pen;
+}
+
 function setrouteLerpLatLon(lat1, lon1, lat2, lon2, t) {
   // Simple rhumb-ish lerp in degrees (good enough for land-box sampling)
   let dLon = lon2 - lon1;
@@ -5580,7 +5726,8 @@ function setroutePointInLandBox(lat, lon) {
 /** True if a direct chord likely crosses continental interior. */
 function setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2) {
   const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
-  if (dist < 120) return false;
+  if (dist < 80) return false;
+  if (typeof setrouteLegCrossesCoastline === "function" && setrouteLegCrossesCoastline(lat1, lon1, lat2, lon2)) return true;
   const samples = dist > 800 ? [0.15, 0.3, 0.45, 0.55, 0.7, 0.85] : [0.25, 0.5, 0.75];
   let hits = 0;
   for (let i = 0; i < samples.length; i++) {
@@ -5631,6 +5778,9 @@ function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
         ntmCount++;
       }
     }
+  }
+  if (typeof setrouteNtmPolygonPenalty === "function") {
+    pen += setrouteNtmPolygonPenalty(lat1, lon1, lat2, lon2);
   }
   if (setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2)) {
     pen += 50000; // effectively forbid
@@ -6156,24 +6306,10 @@ async function generateSetRoutePassage() {
       const timeoutId = setTimeout(() => controller.abort(), 4500);
       try {
         const prompt = `Return a JSON object with {"chokepoints": ["..."]} listing the main straits/canals along ${corridorNames} between ${pOrig.name} and ${pDest.name}, avoiding weather: ${weatherContext} and NtMs: ${ntmContext}.`;
-        const cohereResp = await fetch("https://api.cohere.com/v2/chat", {
-          method: "POST",
-          signal: controller.signal,
-          headers: {
-            "Authorization": `Bearer ${SETROUTE_COHERE_KEY}`,
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify({
-            model: SETROUTE_COHERE_MODEL,
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.1
-          })
-        });
+                const cohereOut = await setrouteCohereChat([{ role: "user", content: prompt }], { temperature: 0.1, timeoutMs: 4500 });
         clearTimeout(timeoutId);
-        if (cohereResp.ok) {
-          const data = await cohereResp.json();
-          const text = (((data.message || {}).content || [])[0] ? data.message.content[0].text : "") || "";
+        if (cohereOut && cohereOut.ok) {
+          const text = cohereOut.text || "";
           const jsonMatch = text.match(/\{.*\}/s);
           if (jsonMatch) {
             const aiMeta = JSON.parse(jsonMatch[0]);
@@ -12005,6 +12141,9 @@ function appendChatMessage(role, htmlContent, quickChips = []) {
 }
 
 async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
+  if (typeof loadSetrouteCoastGrid === "function") {
+    try { await loadSetrouteCoastGrid(); } catch (e) {}
+  }
   const speed = parseFloat(options.speedKnots || (document.getElementById("setRouteSpeedInput") && document.getElementById("setRouteSpeedInput").value)) || 14.5;
   const draft = parseFloat(options.draftMeters || (document.getElementById("setRouteDraftInput") && document.getElementById("setRouteDraftInput").value)) || 11.5;
   const xtd = parseFloat(options.xtdNM || (document.getElementById("setRouteXtdInput") && document.getElementById("setRouteXtdInput").value)) || 0.25;
@@ -12186,11 +12325,8 @@ async function handleSetRouteUserMessage(rawText) {
   let aiTextMessage = "";
   const thinkingEl = appendChatMessage("brain", `<span style="color:#94a3b8;">🧭 SetRoute AI analyzing navigational intent &amp; passage context...</span>`);
 
-  if (navigator.onLine && typeof SETROUTE_COHERE_KEY === "string" && SETROUTE_COHERE_KEY) {
+  if (navigator.onLine && typeof setrouteCohereChat === "function") {
     try {
-      const ctrl = new AbortController();
-      const tid = setTimeout(() => ctrl.abort(), 9500);
-
       const curRouteDesc = activeRouteData
         ? `Active loaded route: "${activeRouteData.name}" (${activeRouteData.totalDistanceNM} NM, ${(activeRouteData.legs || []).length} legs, speed ${(activeRouteData.metadata && activeRouteData.metadata.speedKnots) || 14.5} kn, draft ${(activeRouteData.metadata && activeRouteData.metadata.draftMeters) || 11.5}m).`
         : "No route currently loaded.";
@@ -12213,28 +12349,13 @@ JSON actions only:
 4) If the user only asks a seamanship question with no plan/modify intent: answer in <=3 sentences English and omit JSON.
 When user says "make the route / сделай маршрут / use defaults" with ports in history — emit plan JSON immediately.`;
 
-      const resp = await fetch("https://api.cohere.com/v2/chat", {
-        method: "POST",
-        signal: ctrl.signal,
-        headers: {
-          "Authorization": `Bearer ${SETROUTE_COHERE_KEY}`,
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({
-          model: SETROUTE_COHERE_MODEL,
-          messages: [
-            { role: "system", content: sysInstruction },
-            ...recentMsgs
-          ],
-          temperature: 0.15
-        })
-      });
-      clearTimeout(tid);
+            const cohereOut = await setrouteCohereChat([
+        { role: "system", content: sysInstruction },
+        ...recentMsgs
+      ], { temperature: 0.15, timeoutMs: 9500 });
 
-      if (resp.ok) {
-        const d = await resp.json();
-        const rawAi = (((d.message || {}).content || [])[0] ? d.message.content[0].text : "").trim();
+      if (cohereOut && cohereOut.ok) {
+        const rawAi = (cohereOut.text || "").trim();
         const jMatch = rawAi.match(/\{[\s\S]*?"action"\s*:\s*"(?:plan|modify|audit)"[\s\S]*?\}/);
         if (jMatch) {
           try {
@@ -12832,6 +12953,9 @@ function initSetRouteV50() {
 }
 
 window.initSetRouteV50 = initSetRouteV50;
+if (typeof loadSetrouteCoastGrid === "function") {
+  try { loadSetrouteCoastGrid(); } catch (e) {}
+}
 const _origRefreshSetRouteUI = window.refreshSetRouteUI;
 window.refreshSetRouteUI = function() {
   if (typeof _origRefreshSetRouteUI === "function") _origRefreshSetRouteUI();
