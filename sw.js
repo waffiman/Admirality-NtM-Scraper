@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine вЂ” Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.78.1';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.78.1';
+const CACHE_NAME = 'setsail-cache-v5.79.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.79.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -30,16 +30,16 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=5.78.1',
-  'assets/Auto NtM Plotting/port_depths.js?v=5.78.1',
-  'assets/Auto NtM Plotting/ntm_module.js?v=5.78.1',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.78.1',
-  'assets/about/founder.jpg?v=5.78.1',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=5.79',
+  'assets/Auto NtM Plotting/port_depths.js?v=5.79',
+  'assets/Auto NtM Plotting/ntm_module.js?v=5.79',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.79',
+  'assets/about/founder.jpg?v=5.79',
   'assets/geo/setroute_corridor_templates.json',
   'assets/geo/setroute_passage_knowledge.json',
   'assets/about/mykhailo_byshliaha.jpg',
-  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.78.1',
-  'assets/Auto NtM Plotting/ais_overlay.js?v=5.78.1',
+  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.79',
+  'assets/Auto NtM Plotting/ais_overlay.js?v=5.79',
   'assets/authority-logos/noaa.svg',
   'assets/authority-logos/nasa.svg',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
@@ -176,12 +176,29 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
-      await self.clients.claim();
       const keys = await caches.keys();
       const oldCaches = keys.filter((key) => key !== CACHE_NAME && key !== TILE_CACHE_NAME);
       if (oldCaches.length > 0) {
         await Promise.all(oldCaches.map((key) => caches.delete(key)));
       }
+      // Drop stale shell HTML that still showed "Manual" + old Core A
+      try {
+        const appCache = await caches.open(CACHE_NAME);
+        const shellKeys = await appCache.keys();
+        await Promise.all(
+          shellKeys
+            .filter((req) => {
+              const p = new URL(req.url).pathname;
+              return p === '/' || p.endsWith('/index.html') || p.endsWith('OPEN_SETSAIL.html') || p.endsWith('/');
+            })
+            .map((req) => appCache.delete(req))
+        );
+      } catch (e) {}
+      await self.clients.claim();
+      const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      clients.forEach((c) => {
+        try { c.postMessage({ type: 'SETSAIL_SW_UPDATED', cache: CACHE_NAME }); } catch (e) {}
+      });
     })()
   );
 });
@@ -223,12 +240,13 @@ self.addEventListener('fetch', (event) => {
     }
   }
 
-  // 1. Navigation (HTML pages)
+  // 1. Navigation (HTML pages) — network-first with longer timeout (ship sat links)
+  // Stale cached index.html was trapping users on pre-v5.77 UI ("Manual") + land-chord Core A.
   if (event.request.mode === 'navigate') {
     event.respondWith(
       (async () => {
         try {
-          const response = await fetchWithTimeout(new Request(event.request.url, { cache: 'no-cache' }), 3200);
+          const response = await fetchWithTimeout(new Request(event.request.url, { cache: 'reload' }), 12000);
           if (response && response.ok) {
             const cache = await caches.open(CACHE_NAME);
             cache.put(event.request, response.clone());

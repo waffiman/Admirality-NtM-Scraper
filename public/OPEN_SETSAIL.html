@@ -20670,12 +20670,33 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             keys.filter(k => k !== 'setsail-cache-v5.19' && k !== 'setsail-tiles-cache-v5.19').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
-navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('[SetSail PWA] New service worker ready (no forced reload)');
+navigator.serviceWorker.addEventListener('message', (ev) => {
+          if (ev && ev.data && ev.data.type === 'SETSAIL_SW_UPDATED') {
+            const flag = 'setsail_sw_reloaded_' + String(ev.data.cache || 'x');
+            try {
+              if (!sessionStorage.getItem(flag)) {
+                sessionStorage.setItem(flag, '1');
+                window.location.reload();
+              }
+            } catch (e) {
+              window.location.reload();
+            }
+          }
         });
-        navigator.serviceWorker.register('sw.js?v=5.78.1', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          const flag = 'setsail_sw_controller_reload_v579';
+          try {
+            if (!sessionStorage.getItem(flag)) {
+              sessionStorage.setItem(flag, '1');
+              window.location.reload();
+            }
+          } catch (e) {
+            window.location.reload();
+          }
+        });
+        navigator.serviceWorker.register('sw.js?v=5.79', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.79 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
