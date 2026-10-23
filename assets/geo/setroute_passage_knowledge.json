@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "disclaimer": "Structural corridor + appraisal knowledge for SetRoute Core A. Not a verbatim copy of copyrighted NP136/SD text. Informed by publicly documented shipping geography and IMO voyage-planning principles (A.893(21), ships' routeing).",
+  "sources": [
+    {
+      "id": "imo_a893_21",
+      "title": "IMO Assembly Resolution A.893(21) Guidelines for Voyage Planning",
+      "role": "Appraisal/planning/execution/monitoring checklist mapped into Core A audit factors"
+    },
+    {
+      "id": "imo_ships_routeing",
+      "title": "IMO Ships' Routeing / A.572(14) General Provisions on Ships' Routeing",
+      "role": "TSS, deep-water routes, areas to be avoided, precautionary areas as graph choke nodes"
+    },
+    {
+      "id": "opw_style_ocean_corridors",
+      "title": "Ocean Passages for the World (NP136) — structural corridor patterns only",
+      "role": "Major deep-sea OD corridor seeds (Panama/Suez/Cape/NPAC/Malacca). Not OCR of NP136."
+    },
+    {
+      "id": "admiralty_sd_style",
+      "title": "Admiralty Sailing Directions — coastal/port approach discipline",
+      "role": "Pilot/fairway approach nodes and land-avoidance near coasts; live NtM/NAVTEX for currency"
+    },
+    {
+      "id": "live_ukho_ntm_navtex",
+      "title": "UKHO NtM + NAVTEX (SetSail live layers)",
+      "role": "Temporary/permanent hazards and radio navigational warnings along legs"
+    },
+    {
+      "id": "live_marine_weather",
+      "title": "Marine weather / OPC / waves / cyclones (SetSail Weather layer)",
+      "role": "Synoptic CPA avoidance and storm-radius penalties"
+    },
+    {
+      "id": "live_ais_traffic",
+      "title": "AIS traffic (SetSail AIS layer)",
+      "role": "Local traffic density near approaches and canals"
+    },
+    {
+      "id": "port_depths_db",
+      "title": "Port approach / draft database",
+      "role": "Berth-to-berth draft feasibility at origin/destination"
+    }
+  ],
+  "imoA893AppraisalMap": {
+    "charts_and_ntm": ["NTM_STORE", "NAVTEX", "coast_grid"],
+    "sailing_directions_proxy": ["corridor_templates", "maritime_sea_graph"],
+    "ships_routeing_tss": ["chokepoint_nodes", "TSS_leg_flags"],
+    "weather_climatology": ["MARINE_WEATHER_STORE"],
+    "traffic_volume": ["AIS_snapshot"],
+    "port_pilotage": ["approachCoords", "PORT_DEPTHS_DB"],
+    "draught_limits": ["draftMeters", "canal_limits"]
+  },
+  "canalLimitsMeters": {
+    "SUEZ_CANAL_MID": 20.1,
+    "PANAMA_COLON": 15.2,
+    "PANAMA_BALBOA": 15.2,
+    "STOREBAELT": 15.0,
+    "BOSPORUS_S": 17.0
+  },
+  "templates": [
+    {
+      "id": "fareast_china_us_gulf_panama",
+      "refs": ["opw_style_ocean_corridors", "imo_ships_routeing"],
+      "originHints": ["tianjin", "xingang", "shanghai", "ningbo", "qingdao", "dalian", "busan", "tokyo", "hong kong", "kaohsiung", "taixing"],
+      "destHints": ["houston", "galveston", "new orleans", "corpus"],
+      "nodeKeys": ["TIANJIN_APP", "BOHAI_STRAIT", "QINGDAO_APP", "EAST_CHINA_SEA", "OSUMI_STRAIT", "TOKYO_APP", "NPAC_GC_WEST", "NPAC_GC_MID", "NPAC_GC_EAST", "LONG_BEACH_APP", "MANZANILLO_APP", "PACIFIC_PANAMA_APP", "PANAMA_BALBOA", "PANAMA_COLON", "CARIBBEAN_MID", "YUCATAN_CH", "GULF_MEXICO_MID", "HOUSTON_APP"]
+    },
+    {
+      "id": "fareast_uswc_npac",
+      "refs": ["opw_style_ocean_corridors"],
+      "originHints": ["tianjin", "shanghai", "ningbo", "busan", "tokyo", "osaka", "qingdao"],
+      "destHints": ["los angeles", "long beach", "san francisco", "seattle", "vancouver", "oakland"],
+      "nodeKeys": ["EAST_CHINA_SEA", "OSUMI_STRAIT", "TOKYO_APP", "NPAC_GC_WEST", "NPAC_GC_MID", "NPAC_GC_EAST", "LONG_BEACH_APP"]
+    },
+    {
+      "id": "fareast_europe_suez",
+      "refs": ["opw_style_ocean_corridors", "imo_ships_routeing"],
+      "originHints": ["singapore", "shanghai", "hong kong", "busan", "tokyo", "ningbo", "tianjin"],
+      "destHints": ["rotterdam", "hamburg", "antwerp", "felixstowe", "le havre", "southampton"],
+      "nodeKeys": ["SINGAPORE_MAIN", "MALACCA_MID", "SIX_DEGREE_CH", "DONDRA_HEAD", "SOCOTRA_N", "BAB_EL_MANDEB", "SUEZ_CANAL_MID", "PORT_SAID_APP", "MED_SICILY", "GIBRALTAR_MID", "USHANT", "DOVER_STRAIT", "ROTTERDAM_APP"]
+    },
+    {
+      "id": "fareast_europe_cape",
+      "refs": ["opw_style_ocean_corridors"],
+      "originHints": ["singapore", "shanghai", "hong kong", "busan", "tokyo", "ningbo"],
+      "destHints": ["rotterdam", "hamburg", "antwerp", "lisbon"],
+      "nodeKeys": ["SINGAPORE_MAIN", "SCS_SOUTH", "SUNDA_STRAIT", "MAURITIUS_PASS", "CAPE_AGULHAS", "CAPE_VERDE_PASS", "CANARY_PASS", "ST_VINCENT", "USHANT", "DOVER_STRAIT", "ROTTERDAM_APP"]
+    },
+    {
+      "id": "useast_nweurope_natl",
+      "refs": ["opw_style_ocean_corridors"],
+      "originHints": ["new york", "norfolk", "baltimore", "charleston", "savannah", "halifax"],
+      "destHints": ["rotterdam", "hamburg", "antwerp", "southampton", "le havre", "felixstowe"],
+      "nodeKeys": ["NEW_YORK_APP", "NATL_GC_WEST", "NATL_GC_MID", "USHANT", "DOVER_STRAIT", "ROTTERDAM_APP"]
+    },
+    {
+      "id": "usgulf_nweurope_florida_natl",
+      "refs": ["opw_style_ocean_corridors"],
+      "originHints": ["houston", "galveston", "new orleans"],
+      "destHints": ["rotterdam", "hamburg", "antwerp"],
+      "nodeKeys": ["HOUSTON_APP", "GULF_MEXICO_MID", "KEY_WEST_S", "FLORIDA_STRAIT", "HATTERAS_E", "NATL_GC_WEST", "NATL_GC_MID", "USHANT", "DOVER_STRAIT", "ROTTERDAM_APP"]
+    },
+    {
+      "id": "med_asia_suez",
+      "refs": ["opw_style_ocean_corridors", "imo_ships_routeing"],
+      "originHints": ["gibraltar", "barcelona", "genoa", "piraeus", "istanbul"],
+      "destHints": ["singapore", "shanghai", "hong kong", "busan", "jeddah", "jebel ali"],
+      "nodeKeys": ["GIBRALTAR_MID", "MED_SICILY", "PORT_SAID_APP", "SUEZ_CANAL_MID", "BAB_EL_MANDEB", "DONDRA_HEAD", "MALACCA_MID", "SINGAPORE_MAIN"]
+    },
+    {
+      "id": "persian_gulf_singapore",
+      "refs": ["opw_style_ocean_corridors"],
+      "originHints": ["ras tanura", "jebel ali", "fujairah", "dammam", "doha", "sohar"],
+      "destHints": ["singapore", "port klang", "jakarta"],
+      "nodeKeys": ["HORMUZ_STRAIT", "GULF_OF_OMAN", "ARABIAN_SEA_MID", "DONDRA_HEAD", "SIX_DEGREE_CH", "MALACCA_N", "MALACCA_MID", "SINGAPORE_MAIN"]
+    },
+    {
+      "id": "australia_fareast_sunda",
+      "refs": ["opw_style_ocean_corridors"],
+      "originHints": ["port hedland", "fremantle", "melbourne", "sydney", "brisbane"],
+      "destHints": ["singapore", "shanghai", "ningbo", "busan", "tokyo"],
+      "nodeKeys": ["HEDLAND_APP", "SUNDA_STRAIT", "SCS_SOUTH", "SCS_MID", "SCS_NORTH", "EAST_CHINA_SEA"]
+    },
+    {
+      "id": "safrica_europe_cape",
+      "refs": ["opw_style_ocean_corridors"],
+      "originHints": ["cape town", "durban", "luanda", "lagos"],
+      "destHints": ["rotterdam", "lisbon", "gibraltar", "algeciras"],
+      "nodeKeys": ["CAPE_AGULHAS", "GULF_OF_GUINEA", "CAPE_VERDE_PASS", "CANARY_PASS", "ST_VINCENT", "GIBRALTAR_W"]
+    },
+    {
+      "id": "pacific_wcsa_panama",
+      "refs": ["opw_style_ocean_corridors"],
+      "originHints": ["callao", "valparaiso", "manzanillo", "long beach"],
+      "destHints": ["houston", "new orleans", "cartagena", "miami"],
+      "nodeKeys": ["PACIFIC_PANAMA_APP", "PANAMA_BALBOA", "PANAMA_COLON", "CARIBBEAN_MID", "YUCATAN_CH", "GULF_MEXICO_MID"]
+    },
+    {
+      "id": "npac_unimak_gc",
+      "refs": ["opw_style_ocean_corridors"],
+      "originHints": ["tokyo", "yokohama", "busan", "vladivostok"],
+      "destHints": ["seattle", "vancouver", "san francisco"],
+      "nodeKeys": ["TOKYO_APP", "NPAC_GC_WEST", "NPAC_GC_MID", "UNIMAK_PASS", "SEATTLE_APP"]
+    }
+  ]
+}

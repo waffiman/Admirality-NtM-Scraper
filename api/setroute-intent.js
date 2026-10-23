@@ -190,6 +190,22 @@ module.exports = async function handler(req, res) {
       content: String(m.content || "").slice(0, 8000)
     }));
 
+    // Server-side maritime guard: never let a bare chat model invent tourist itineraries
+    const MARITIME_GUARD =
+      "You are SetRoute Core B for merchant-ship PASSAGE PLANNING only. " +
+      "Never describe flights, trains, hotels, or city tourism. " +
+      "Output a short acknowledgement plus ONE JSON object with action plan|modify|audit|resolve_exception. " +
+      "Fields may include origin, destination, speedKnots, draftMeters, viaPanama, viaSuez, viaCape. " +
+      "No coordinates and no waypoint lists. Ports are seaports (e.g. Tianjin Xingang, Houston).";
+    if (!safeMessages.some((m) => m.role === "system")) {
+      safeMessages.unshift({ role: "system", content: MARITIME_GUARD });
+    } else {
+      safeMessages[0] = {
+        role: "system",
+        content: MARITIME_GUARD + "\n\n" + String(safeMessages[0].content || "").slice(0, 6000)
+      };
+    }
+
     const preferredModel = typeof body.model === "string" && body.model.length < 80
       ? body.model
       : "";

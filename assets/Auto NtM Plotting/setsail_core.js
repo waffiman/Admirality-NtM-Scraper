@@ -6091,23 +6091,97 @@ function setrouteIsUsGulfPort(lat, lon) {
 }
 
 let SETROUTE_CORRIDOR_TEMPLATES = null;
+let SETROUTE_PASSAGE_KNOWLEDGE = null;
 let SETROUTE_TEMPLATES_LOAD_PROMISE = null;
 async function loadSetrouteCorridorTemplates(force) {
   if (SETROUTE_CORRIDOR_TEMPLATES && !force) return SETROUTE_CORRIDOR_TEMPLATES;
   if (SETROUTE_TEMPLATES_LOAD_PROMISE && !force) return SETROUTE_TEMPLATES_LOAD_PROMISE;
   SETROUTE_TEMPLATES_LOAD_PROMISE = (async () => {
     try {
-      const resp = await fetch("assets/geo/setroute_corridor_templates.json", { cache: "force-cache" });
+      // Prefer expanded passage-knowledge pack (IMO A.893 + OPW-style corridors + live-layer map)
+      let resp = await fetch("assets/geo/setroute_passage_knowledge.json", { cache: "force-cache" });
+      if (!resp.ok) {
+        resp = await fetch("assets/geo/setroute_corridor_templates.json", { cache: "force-cache" });
+      }
       if (!resp.ok) throw new Error("templates_http_" + resp.status);
       const data = await resp.json();
+      SETROUTE_PASSAGE_KNOWLEDGE = data && data.sources ? data : null;
       SETROUTE_CORRIDOR_TEMPLATES = Array.isArray(data.templates) ? data.templates : [];
+      if (data.canalLimitsMeters) {
+        window.SETROUTE_CANAL_LIMITS_M = data.canalLimitsMeters;
+      }
     } catch (e) {
-      console.warn("[SetRoute] corridor templates load failed", e);
+      console.warn("[SetRoute] passage knowledge / corridor templates load failed", e);
       SETROUTE_CORRIDOR_TEMPLATES = [];
+      SETROUTE_PASSAGE_KNOWLEDGE = null;
     }
     return SETROUTE_CORRIDOR_TEMPLATES;
   })();
   return SETROUTE_TEMPLATES_LOAD_PROMISE;
+}
+
+/** IMO A.893(21)-style appraisal summary from live layers + knowledge pack (Core A, not LLM). */
+function setrouteBuildAppraisalFactors(route, opts) {
+  opts = opts || {};
+  const factors = [];
+  const pk = SETROUTE_PASSAGE_KNOWLEDGE;
+  if (pk && Array.isArray(pk.sources)) {
+    factors.push({
+      id: "knowledge_pack",
+      ok: true,
+      text: "Passage knowledge pack loaded (" + pk.sources.length + " source families)."
+    });
+  }
+  const ntmN = (typeof NTM_STORE !== "undefined" && Array.isArray(NTM_STORE))
+    ? NTM_STORE.filter((n) => n && !n.isCancelled && n.type !== "NAVTEX").length : 0;
+  const navtexN = (typeof NTM_STORE !== "undefined" && Array.isArray(NTM_STORE))
+    ? NTM_STORE.filter((n) => n && !n.isCancelled && n.type === "NAVTEX").length : 0;
+  factors.push({ id: "ntm", ok: true, text: "NtM active objects available: " + ntmN });
+  factors.push({ id: "navtex", ok: true, text: "NAVTEX active objects available: " + navtexN });
+  const wx = (typeof MARINE_WEATHER_STORE !== "undefined") ? MARINE_WEATHER_STORE : {};
+  factors.push({
+    id: "weather",
+    ok: true,
+    text: "Weather layer: storms=" + ((wx.storms || []).length) +
+      ", waves=" + ((wx.waves || []).length) +
+      ", opc=" + ((wx.opcWarnings || []).length)
+  });
+  let aisN = 0;
+  try {
+    if (typeof window.getAisTargetsSnapshot === "function") {
+      aisN = (window.getAisTargetsSnapshot(50) || []).length;
+    }
+  } catch (e) {}
+  factors.push({ id: "ais", ok: true, text: "AIS snapshot sample available: " + (aisN > 0 ? "yes" : "empty/offline") });
+  factors.push({
+    id: "coast_grid",
+    ok: !!SETROUTE_COAST_GRID,
+    text: SETROUTE_COAST_GRID ? "Coast grid loaded for land-cross tests." : "Coast grid missing — ocean OD fail-closed when required."
+  });
+  const draft = Number(opts.draftMeters || (route && route.metadata && route.metadata.draftMeters));
+  const canalLim = window.SETROUTE_CANAL_LIMITS_M || {};
+  if (Number.isFinite(draft) && route && Array.isArray(route.waypoints)) {
+    const hits = [];
+    (route.chokepoints || []).forEach(() => {});
+    Object.keys(canalLim).forEach((nodeKey) => {
+      const node = MARITIME_SEA_NODES[nodeKey];
+      if (!node) return;
+      const near = (route.waypoints || []).some((wp) =>
+        calculateHaversineDistanceNM(wp.lat, wp.lon, node[0], node[1]) < 40
+      );
+      if (near && draft > canalLim[nodeKey] + 0.05) {
+        hits.push(nodeKey + " max ~" + canalLim[nodeKey] + "m");
+      }
+    });
+    factors.push({
+      id: "canal_draft",
+      ok: hits.length === 0,
+      text: hits.length
+        ? ("Draft " + draft + "m may exceed canal/strait limits: " + hits.join(", "))
+        : ("Draft " + draft + "m checked against known canal limits.")
+    });
+  }
+  return factors;
 }
 
 function setrouteMatchCorridorTemplate(origName, destName) {
@@ -6412,12 +6486,31 @@ function auditPassagePlan(route) {
   else if (wxTotal >= 3 || issues.filter((i) => i.severity === "warn").length >= 3) grade = "C";
   else if (wxTotal >= 1 || ntmTotal >= 4) grade = "B";
 
+  const appraisal = typeof setrouteBuildAppraisalFactors === "function"
+    ? setrouteBuildAppraisalFactors(route, route.metadata || {})
+    : [];
+  (appraisal || []).forEach((f) => {
+    if (f && f.ok === false) {
+      issues.push({ severity: "critical", leg: null, text: f.text });
+      if (grade !== "F") grade = "D";
+    }
+  });
   const summary =
     `Safety audit ${grade}: ${route.totalDistanceNM || "—"} NM, ${(route.legs || []).length} legs, ` +
     `${tssLegs} TSS/strait, ${ntmTotal} NtM proximity hits, ${wxTotal} weather CPA flags` +
-    (landLegs ? `, ${landLegs} LAND-CROSS RISK` : ", no land-cross flags");
-
-  route.safetyAudit = { ok: landLegs === 0, grade, summary, issues, stats: { ntmTotal, wxTotal, landLegs, tssLegs } };
+    (landLegs ? `, ${landLegs} LAND-CROSS RISK` : ", no land-cross flags") +
+    ((SETROUTE_PASSAGE_KNOWLEDGE && SETROUTE_PASSAGE_KNOWLEDGE.sources)
+      ? `, knowledge:${SETROUTE_PASSAGE_KNOWLEDGE.sources.length}`
+      : "");
+  route.safetyAudit = {
+    ok: landLegs === 0 && !(appraisal || []).some((f) => f && f.ok === false),
+    grade,
+    summary,
+    issues,
+    stats: { ntmTotal, wxTotal, landLegs, tssLegs },
+    appraisal,
+    knowledgeSources: (SETROUTE_PASSAGE_KNOWLEDGE && SETROUTE_PASSAGE_KNOWLEDGE.sources) || []
+  };
   return route.safetyAudit;
 }
 window.auditPassagePlan = auditPassagePlan;
