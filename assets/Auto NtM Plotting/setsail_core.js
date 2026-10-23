@@ -3271,11 +3271,17 @@ function getEcdisCrosshairIcon() {
  * Low/medium zoom: ECDIS position circle (bullseye) + short heading vector with tick marks.
  * Bow = up in local SVG, then rotated by true heading/COG.
  */
+function hasOwnShipHeadingDeg(headingDeg) {
+  // Reject null/"" before Number() — Number(null)===0 would falsely show a 0° vector
+  if (headingDeg == null || headingDeg === "") return false;
+  const h = Number(headingDeg);
+  return Number.isFinite(h) && h >= 0 && h < 360;
+}
+
 function getOwnShipPositionIcon(headingDeg, showVector) {
-  const rot = Number.isFinite(Number(headingDeg))
-    ? ((Number(headingDeg) % 360) + 360) % 360
-    : 0;
-  const vec = showVector !== false && Number.isFinite(Number(headingDeg));
+  const has = hasOwnShipHeadingDeg(headingDeg);
+  const rot = has ? ((Number(headingDeg) % 360) + 360) % 360 : 0;
+  const vec = showVector !== false && has;
   const vectorSvg = vec
     ? `<g class="own-ship-vector" stroke="#0f172a" stroke-width="1.35" fill="none" stroke-linecap="round">
          <line x1="24" y1="24" x2="24" y2="4" stroke-dasharray="2.2 2.2"/>
@@ -3306,10 +3312,9 @@ function getOwnShipPositionIcon(headingDeg, showVector) {
  * High zoom: ECDIS own-ship hull outline (rounded bow, flat stern) + heading vector.
  */
 function getOwnShipHullIcon(headingDeg, showVector) {
-  const rot = Number.isFinite(Number(headingDeg))
-    ? ((Number(headingDeg) % 360) + 360) % 360
-    : 0;
-  const vec = showVector !== false && Number.isFinite(Number(headingDeg));
+  const has = hasOwnShipHeadingDeg(headingDeg);
+  const rot = has ? ((Number(headingDeg) % 360) + 360) % 360 : 0;
+  const vec = showVector !== false && has;
   // Local coords: bow toward -Y (up). Hull centered near (24, 34).
   const vectorSvg = vec
     ? `<line x1="24" y1="22" x2="24" y2="2" stroke="#0f172a" stroke-width="1.25"/>`
@@ -3343,7 +3348,7 @@ function getOwnShipMapIcon(headingDeg) {
   const z = (typeof leafletMap !== "undefined" && leafletMap && leafletMap.getZoom)
     ? leafletMap.getZoom()
     : 8;
-  const hasHdg = Number.isFinite(Number(headingDeg));
+  const hasHdg = hasOwnShipHeadingDeg(headingDeg);
   if (z >= OWN_SHIP_HULL_ZOOM) {
     return getOwnShipHullIcon(hasHdg ? headingDeg : 0, hasHdg);
   }
@@ -3352,16 +3357,15 @@ function getOwnShipMapIcon(headingDeg) {
 
 /** ECDIS-style own-ship outline (legacy name → hull). */
 function getOwnShipSilhouetteIcon(headingDeg) {
-  return getOwnShipHullIcon(headingDeg, true);
+  const has = hasOwnShipHeadingDeg(headingDeg);
+  return getOwnShipHullIcon(has ? headingDeg : 0, has);
 }
 
 function resolveOwnShipHeading(v) {
   if (!v) return null;
-  const h = Number(v.heading);
-  if (Number.isFinite(h) && h >= 0 && h < 360) return h;
-  const c = Number(v.cog);
-  if (Number.isFinite(c) && c >= 0 && c < 360) return c;
-  return null;
+  // Heading vector follows My Vessel heading only — never invent from COG.
+  if (!hasOwnShipHeadingDeg(v.heading)) return null;
+  return ((Number(v.heading) % 360) + 360) % 360;
 }
 
 /**

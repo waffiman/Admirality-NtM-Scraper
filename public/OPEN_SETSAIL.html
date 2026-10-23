@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.75" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.76" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -7191,7 +7191,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-columns: repeat(40, minmax(0, 1fr));
+  grid-template-columns: repeat(20, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 1px;
   padding: 1px;
@@ -7392,7 +7392,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .home-slide-about { inset: 0 !important; left: 0 !important; right: 0 !important; }
   .about-mosaic-band { height: clamp(120px, 15vh, 150px) !important; }
   .about-mosaic {
-    grid-template-columns: repeat(24, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(20, minmax(0, 1fr)) !important;
     grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
     gap: 1px !important;
   }
@@ -12410,7 +12410,7 @@ select option {
                     A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" src="assets/about/mykhailo_byshliaha.jpg" alt="" width="44" height="44" loading="lazy" decoding="async" />
+                    <img class="about-founder-photo" src="assets/about/founder.jpg?v=5.76" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · cadet &amp; future officer · IT agency co-founder</span>
@@ -20036,23 +20036,23 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.75"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.75" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.75"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.76"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.76" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.76"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.75",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.76",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.75"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.75"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.75"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.76"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.76"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.76"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20130,7 +20130,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.75"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.76"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20177,10 +20177,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       };
 
 
-      // About mosaic: always-full grid + simultaneous derangement shuffle
+      // About mosaic: unique tiles only (no duplicate photos on screen)
       window.__setsailAboutShuffleTimer = window.__setsailAboutShuffleTimer || null;
       window.__setsailAboutMosaicReady = window.__setsailAboutMosaicReady || false;
-      window.__setsailAboutPhotoPool = window.__setsailAboutPhotoPool || [
+      window.__setsailAboutPhotoPool = [
         "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&fit=crop&w=240&h=240&q=60",
@@ -20212,54 +20212,70 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=240&h=240&q=60"
+        "https://images.unsplash.com/photo-1454496522488-46d6e6db3d8d?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1519681393788-d28e6cdc5b7c?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1590523277543-a94d2e4eb17b?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1476673160081-cf76599dbc55?auto=format&fit=crop&w=240&h=240&q=60"
       ];
+
+      window.__setsailReflowAboutMosaicGrid = function(mosaic) {
+        if (!mosaic) return;
+        const n = mosaic.querySelectorAll('.about-moz-tile').length;
+        if (n < 2) return;
+        const cols = Math.max(2, Math.ceil(n / 2));
+        mosaic.style.gridTemplateColumns = 'repeat(' + cols + ', minmax(0, 1fr))';
+        mosaic.style.gridTemplateRows = 'repeat(2, minmax(0, 1fr))';
+      };
 
       window.__setsailBuildAboutMosaic = function() {
         const mosaic = document.getElementById('homeAboutMosaic');
         if (!mosaic || mosaic.dataset.built === '1') return mosaic;
-        const pool = window.__setsailAboutPhotoPool.slice();
-        // Desktop 40x2=80, mobile CSS shows 24x2 — still fill 80; extra tiles clip fine
-        const TILES = 80;
+        const seen = Object.create(null);
+        const pool = [];
+        (window.__setsailAboutPhotoPool || []).forEach(function(u) {
+          if (!u || seen[u]) return;
+          seen[u] = 1;
+          pool.push(u);
+        });
+        window.__setsailAboutPhotoPool = pool.slice();
         const frag = document.createDocumentFragment();
-        for (let i = 0; i < TILES; i++) {
+        pool.forEach(function(url, i) {
           const fig = document.createElement('figure');
           fig.className = 'about-moz-tile';
           fig.setAttribute('data-tile-i', String(i));
+          fig.setAttribute('data-photo-url', url);
           const img = document.createElement('img');
           img.alt = '';
           img.decoding = 'async';
-          img.loading = (i < 16) ? 'eager' : 'lazy';
+          img.loading = (i < 12) ? 'eager' : 'lazy';
           img.width = 200;
           img.height = 200;
-          img.src = pool[i % pool.length];
-          img.dataset.poolIdx = String(i % pool.length);
+          img.src = url;
+          img.dataset.poolIdx = String(i);
           img.onerror = function() {
-            const pool2 = window.__setsailAboutPhotoPool || [];
-            const fails = parseInt(this.dataset.failCount || '0', 10) + 1;
-            this.dataset.failCount = String(fails);
-            if (!pool2.length || fails > pool2.length) {
-              // Exhausted pool — keep tile filled with CSS fallback (never blank)
-              this.removeAttribute('src');
-              this.style.display = 'none';
-              if (this.parentElement) this.parentElement.classList.add('is-fallback');
-              return;
+            // Drop broken tile — never replace with another visible photo (would duplicate)
+            const tile = this.parentElement;
+            const host = tile && tile.parentElement;
+            if (tile && host) {
+              host.removeChild(tile);
+              if (typeof window.__setsailReflowAboutMosaicGrid === 'function') {
+                window.__setsailReflowAboutMosaicGrid(host);
+              }
             }
-            let next = (parseInt(this.dataset.poolIdx || '0', 10) + 1) % pool2.length;
-            this.dataset.poolIdx = String(next);
-            this.src = pool2[next];
-            // Keep img in layout — never leave an empty dark hole
-            this.style.display = 'block';
-            this.style.opacity = '1';
-            if (this.parentElement) this.parentElement.classList.remove('is-fallback');
           };
           fig.appendChild(img);
           frag.appendChild(fig);
-        }
+        });
         mosaic.innerHTML = '';
         mosaic.appendChild(frag);
         mosaic.dataset.built = '1';
         window.__setsailAboutMosaicReady = true;
+        window.__setsailReflowAboutMosaicGrid(mosaic);
         return mosaic;
       };
 
@@ -20269,27 +20285,13 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         let tiles = Array.from(mosaic.querySelectorAll('.about-moz-tile'));
         if (tiles.length < 2) return;
 
-        // Keep every tile filled — heal any missing/broken src from the pool
-        const pool = window.__setsailAboutPhotoPool || [];
-        tiles.forEach(function(tile, i) {
-          const im = tile.querySelector('img');
-          if (!im) return;
-          if (!im.getAttribute('src') && pool.length) {
-            im.src = pool[i % pool.length];
-          }
-          im.style.display = 'block';
-          im.style.opacity = '1';
-          tile.classList.remove('is-fallback');
-        });
-
-        // Fisher–Yates reorder of ALL tile DOM nodes (moves the whole mosaic layout)
+        // Fisher–Yates reorder of unique tiles only (each src stays 1:1)
         for (let i = tiles.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           const tmp = tiles[i];
           tiles[i] = tiles[j];
           tiles[j] = tmp;
         }
-        // Break residual fixed points: if index i stayed the same node, swap with i+1
         const before = Array.from(mosaic.querySelectorAll('.about-moz-tile'));
         for (let i = 0; i + 1 < tiles.length; i++) {
           if (tiles[i] === before[i]) {
@@ -20318,7 +20320,6 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
         const startShuffle = function() {
           if (window.__setsailAboutShuffleTimer) return;
-          // First beat immediately so layout changes as soon as About is in view
           try { window.__setsailShuffleAboutMosaic(); } catch (e) {}
           window.__setsailAboutShuffleTimer = setInterval(function() {
             try { window.__setsailShuffleAboutMosaic(); } catch (e) {}
@@ -20673,7 +20674,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.75', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.76', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
