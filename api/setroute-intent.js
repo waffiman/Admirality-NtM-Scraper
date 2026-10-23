@@ -8,7 +8,7 @@
 
 const COHERE_URL = "https://api.cohere.com/v2/chat";
 const COHERE_MODEL = "command-r-08-2024";
-const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"];
+const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"];
 const COHERE_KEY_B64 = "QzdoRFdmaFlER0JpRnJHdE5uNVBKNlNJdE8xdHgxRXFYa2YydDRyUg==";
 /* Gemini key fallback (prefer Vercel env). Rotate if leaked. */
 const GEMINI_KEY_B64 = "QUlemFN5RGN6QWVEVkxIWTlHdkpKQnZJYzEyQVowZ24zbDFaYW9R";
