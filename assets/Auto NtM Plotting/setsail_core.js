@@ -5422,7 +5422,7 @@ function loadSampleNtMData() {
 // ==========================================================================
 // SETROUTE™ — AUTONOMOUS AI PASSAGE PLANNER ENGINE (COHERE INTEGRATION)
 // ==========================================================================
-const SETROUTE_COHERE_MODEL = "command-r-08-2024";
+const SETROUTE_COHERE_MODEL = "gemini-2.5-flash";
 async function setrouteCohereChat(messages, options) {
   options = options || {};
   const ctrl = new AbortController();
@@ -5687,9 +5687,9 @@ const SETROUTE_LAND_BOXES = [
   { minLat: 10, maxLat: 30, minLon: -5, maxLon: 32 },
   // Europe landmass (N of Med)
   { minLat: 44, maxLat: 58, minLon: -2, maxLon: 28 },
-  // Asia interior
-  { minLat: 18, maxLat: 52, minLon: 55, maxLon: 115 },
-  { minLat: 8, maxLat: 28, minLon: 72, maxLon: 100 },
+  // Asia interior (keep coastal / SCS / Yellow Sea OUT of boxes)
+  { minLat: 22, maxLat: 50, minLon: 60, maxLon: 105 },
+  { minLat: 10, maxLat: 26, minLon: 74, maxLon: 95 },
   // Australia
   { minLat: -32, maxLat: -16, minLon: 122, maxLon: 148 },
   // N America interior
@@ -5715,17 +5715,33 @@ function setrouteOnSeg(ax, ay, bx, by, cx, cy) {
   return Math.min(ax, bx) - 1e-9 <= cx && cx <= Math.max(ax, bx) + 1e-9 &&
     Math.min(ay, by) - 1e-9 <= cy && cy <= Math.max(ay, by) + 1e-9;
 }
+function setrouteUnwrapLonPair(lonA, lonB) {
+  let a = lonA, b = lonB;
+  let d = b - a;
+  if (d > 180) b -= 360;
+  if (d < -180) b += 360;
+  return [a, b];
+}
 function setrouteSegmentsIntersect(aLat, aLon, bLat, bLon, cLat, cLon, dLat, dLon) {
-  if (Math.abs(aLon - bLon) > 90 || Math.abs(cLon - dLon) > 90) return false;
-  const o1 = setrouteOrient(aLon, aLat, bLon, bLat, cLon, cLat);
-  const o2 = setrouteOrient(aLon, aLat, bLon, bLat, dLon, dLat);
-  const o3 = setrouteOrient(cLon, cLat, dLon, dLat, aLon, aLat);
-  const o4 = setrouteOrient(cLon, cLat, dLon, dLat, bLon, bLat);
+  // Antimeridian-safe: unwrap long legs instead of bailing (|Δlon|>90 used to skip Pacific coast tests)
+  let A = aLon, B = bLon, C = cLon, D = dLon;
+  const ab = setrouteUnwrapLonPair(A, B);
+  A = ab[0]; B = ab[1];
+  // Shift coast segment into same unwrap frame as AB midpoint
+  const mid = (A + B) / 2;
+  while (C - mid > 180) { C -= 360; D -= 360; }
+  while (C - mid < -180) { C += 360; D += 360; }
+  const cd = setrouteUnwrapLonPair(C, D);
+  C = cd[0]; D = cd[1];
+  const o1 = setrouteOrient(A, aLat, B, bLat, C, cLat);
+  const o2 = setrouteOrient(A, aLat, B, bLat, D, dLat);
+  const o3 = setrouteOrient(C, cLat, D, dLat, A, aLat);
+  const o4 = setrouteOrient(C, cLat, D, dLat, B, bLat);
   if (o1 !== o2 && o3 !== o4) return true;
-  if (o1 === 0 && setrouteOnSeg(aLon, aLat, bLon, bLat, cLon, cLat)) return true;
-  if (o2 === 0 && setrouteOnSeg(aLon, aLat, bLon, bLat, dLon, dLat)) return true;
-  if (o3 === 0 && setrouteOnSeg(cLon, cLat, dLon, dLat, aLon, aLat)) return true;
-  if (o4 === 0 && setrouteOnSeg(cLon, cLat, dLon, dLat, bLon, bLat)) return true;
+  if (o1 === 0 && setrouteOnSeg(A, aLat, B, bLat, C, cLat)) return true;
+  if (o2 === 0 && setrouteOnSeg(A, aLat, B, bLat, D, dLat)) return true;
+  if (o3 === 0 && setrouteOnSeg(C, cLat, D, dLat, A, aLat)) return true;
+  if (o4 === 0 && setrouteOnSeg(C, cLat, D, dLat, B, bLat)) return true;
   return false;
 }
 function setrouteCoastCellKey(lat, lon, cellDeg) {
@@ -5876,8 +5892,9 @@ function setrouteIsAmericasPort(lat, lon) {
 function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
   let pen = 0;
   const mid = setrouteLerpLatLon(lat1, lon1, lat2, lon2, 0.5);
-  if (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.storms)) {
-    MARINE_WEATHER_STORE.storms.forEach((st) => {
+  // Weather layer: cyclones + heavy seas + OPC warnings
+  if (typeof MARINE_WEATHER_STORE !== "undefined") {
+    (MARINE_WEATHER_STORE.storms || []).forEach((st) => {
       if (!st || !Array.isArray(st.center)) return;
       const d = calculateHaversineDistanceNM(mid[0], mid[1], st.center[0], st.center[1]);
       const r = (st.dangerRadiusNm || 100) + 100;
@@ -5885,10 +5902,22 @@ function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
         pen += 80 + Math.max(0, (r - d) * 1.2) + Math.min(120, (st.maxWinds || 0) * 0.4);
       }
     });
+    (MARINE_WEATHER_STORE.waves || []).forEach((w) => {
+      if (!w || !Array.isArray(w.center) || !(w.waveHeight >= 4.0)) return;
+      const d = calculateHaversineDistanceNM(mid[0], mid[1], w.center[0], w.center[1]);
+      if (d < 120) pen += 15 + Math.min(40, (w.waveHeight - 4) * 8);
+    });
+    (MARINE_WEATHER_STORE.opcWarnings || []).forEach((w) => {
+      if (!w || !Array.isArray(w.center)) return;
+      const d = calculateHaversineDistanceNM(mid[0], mid[1], w.center[0], w.center[1]);
+      if (d < 150) pen += 20;
+    });
   }
+  // NtM + NAVTEX layer (NAVTEX weighted higher)
   if (typeof NTM_STORE !== "undefined" && Array.isArray(NTM_STORE)) {
     let ntmCount = 0;
-    for (let i = 0; i < NTM_STORE.length && ntmCount < 8; i++) {
+    let navtexCount = 0;
+    for (let i = 0; i < NTM_STORE.length && (ntmCount + navtexCount) < 14; i++) {
       const n = NTM_STORE[i];
       if (!n || n.isCancelled || n.status === "CANCELLED") continue;
       const cLat = Number.isFinite(n.lat) ? n.lat : (n.coords && n.coords[0] ? n.coords[0].lat : NaN);
@@ -5897,14 +5926,20 @@ function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
       const d = typeof pointToSegmentDistanceNM === "function"
         ? pointToSegmentDistanceNM(cLat, cLon, lat1, lon1, lat2, lon2)
         : calculateHaversineDistanceNM(mid[0], mid[1], cLat, cLon);
-      if (d <= 30) {
-        pen += 25;
-        ntmCount++;
+      const isNavtex = n.type === "NAVTEX";
+      const rad = isNavtex ? 40 : 30;
+      if (d <= rad) {
+        pen += isNavtex ? 40 : 25;
+        if (isNavtex) navtexCount++; else ntmCount++;
       }
     }
   }
   if (typeof setrouteNtmPolygonPenalty === "function") {
     pen += setrouteNtmPolygonPenalty(lat1, lon1, lat2, lon2);
+  }
+  // AIS layer: local traffic density near coastal / canal legs
+  if (typeof setrouteAisPenalty === "function") {
+    pen += setrouteAisPenalty(lat1, lon1, lat2, lon2);
   }
   if (setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2)) {
     pen += 50000; // effectively forbid
@@ -6028,6 +6063,156 @@ function setroutePathViaHubs(startNode, endNode, adj) {
   return best;
 }
 
+
+/** Prefer sea approach node coords over city-center geocode. */
+function setrouteSnapPortToSea(port) {
+  if (!port) return port;
+  const c = port.approachCoords || port.coords;
+  if (!c || !Number.isFinite(Number(c[0])) || !Number.isFinite(Number(c[1]))) return port;
+  if (typeof findNearestMaritimeNode !== "function" || typeof MARITIME_SEA_NODES === "undefined") return port;
+  const key = findNearestMaritimeNode(Number(c[0]), Number(c[1]));
+  const node = key && MARITIME_SEA_NODES[key];
+  if (!node) return port;
+  const d = calculateHaversineDistanceNM(Number(c[0]), Number(c[1]), node[0], node[1]);
+  // Only snap when the geocode is inland / far from a fairway (>25 NM) or missing approach
+  if (!port.approachCoords || d > 25) {
+    port.approachCoords = [node[0], node[1]];
+    port._setrouteSnapNode = key;
+  }
+  return port;
+}
+
+function setrouteIsFarEastPort(lat, lon) {
+  return lon >= 100 && lon <= 150 && lat >= 0 && lat <= 50;
+}
+
+function setrouteIsUsGulfPort(lat, lon) {
+  return lat >= 24 && lat <= 32 && lon <= -80 && lon >= -98;
+}
+
+let SETROUTE_CORRIDOR_TEMPLATES = null;
+let SETROUTE_TEMPLATES_LOAD_PROMISE = null;
+async function loadSetrouteCorridorTemplates(force) {
+  if (SETROUTE_CORRIDOR_TEMPLATES && !force) return SETROUTE_CORRIDOR_TEMPLATES;
+  if (SETROUTE_TEMPLATES_LOAD_PROMISE && !force) return SETROUTE_TEMPLATES_LOAD_PROMISE;
+  SETROUTE_TEMPLATES_LOAD_PROMISE = (async () => {
+    try {
+      const resp = await fetch("assets/geo/setroute_corridor_templates.json", { cache: "force-cache" });
+      if (!resp.ok) throw new Error("templates_http_" + resp.status);
+      const data = await resp.json();
+      SETROUTE_CORRIDOR_TEMPLATES = Array.isArray(data.templates) ? data.templates : [];
+    } catch (e) {
+      console.warn("[SetRoute] corridor templates load failed", e);
+      SETROUTE_CORRIDOR_TEMPLATES = [];
+    }
+    return SETROUTE_CORRIDOR_TEMPLATES;
+  })();
+  return SETROUTE_TEMPLATES_LOAD_PROMISE;
+}
+
+function setrouteMatchCorridorTemplate(origName, destName) {
+  const list = SETROUTE_CORRIDOR_TEMPLATES || [];
+  const o = String(origName || "").toLowerCase();
+  const d = String(destName || "").toLowerCase();
+  for (let i = 0; i < list.length; i++) {
+    const t = list[i];
+    if (!t || !Array.isArray(t.nodeKeys) || t.nodeKeys.length < 3) continue;
+    const oh = (t.originHints || []).some((h) => o.indexOf(String(h).toLowerCase()) >= 0);
+    const dh = (t.destHints || []).some((h) => d.indexOf(String(h).toLowerCase()) >= 0);
+    if (oh && dh) return t;
+  }
+  return null;
+}
+
+function setrouteValidateNodePath(nodeKeys) {
+  if (!nodeKeys || nodeKeys.length < 2) return null;
+  const path = [];
+  for (let i = 0; i < nodeKeys.length; i++) {
+    const k = nodeKeys[i];
+    if (!MARITIME_SEA_NODES[k]) continue;
+    if (path.length && path[path.length - 1] === k) continue;
+    path.push(k);
+  }
+  if (path.length < 2) return null;
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = MARITIME_SEA_NODES[path[i]];
+    const b = MARITIME_SEA_NODES[path[i + 1]];
+    if (setrouteLegLikelyCrossesLand(a[0], a[1], b[0], b[1])) return null;
+  }
+  return path;
+}
+
+function setroutePathHasCriticalLayerBlock(path) {
+  if (!path || path.length < 2) return false;
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = MARITIME_SEA_NODES[path[i]];
+    const b = MARITIME_SEA_NODES[path[i + 1]];
+    if (!a || !b) continue;
+    const pen = setrouteEdgeHazardPenalty(a[0], a[1], b[0], b[1]);
+    if (pen >= 50000) return true;
+  }
+  return false;
+}
+
+/** Densify long ocean legs so map polyline does not look like a land chord. */
+function setrouteDensifyWaypoints(waypoints, maxLegNm) {
+  const maxNm = Number(maxLegNm) || 350;
+  if (!Array.isArray(waypoints) || waypoints.length < 2) return waypoints;
+  const out = [waypoints[0]];
+  for (let i = 0; i < waypoints.length - 1; i++) {
+    const a = waypoints[i];
+    const b = waypoints[i + 1];
+    const dist = calculateHaversineDistanceNM(a.lat, a.lon, b.lat, b.lon);
+    if (dist > maxNm) {
+      const n = Math.min(12, Math.max(1, Math.ceil(dist / maxNm) - 1));
+      for (let s = 1; s <= n; s++) {
+        const p = setrouteLerpLatLon(a.lat, a.lon, b.lat, b.lon, s / (n + 1));
+        // Skip insert if densify sample is on land
+        if (setroutePointInLandBox(p[0], p[1])) continue;
+        out.push({
+          wptNo: "TMP",
+          name: "Ocean track",
+          lat: Number(p[0].toFixed(5)),
+          lon: Number(p[1].toFixed(5)),
+          speedKnots: a.speedKnots,
+          portsideXTD: a.portsideXTD,
+          starboardXTD: a.starboardXTD,
+          turnRadius: 0.8,
+          sail: a.sail || "GC",
+          rot: 8.0
+        });
+      }
+    }
+    out.push(b);
+  }
+  out.forEach((wp, idx) => { wp.wptNo = ("00" + (idx + 1)).slice(-3); wp.id = idx + 1; });
+  return out;
+}
+
+function setrouteAisPenalty(lat1, lon1, lat2, lon2) {
+  if (typeof window.getAisTargetsSnapshot !== "function") return 0;
+  let targets;
+  try { targets = window.getAisTargetsSnapshot(600); } catch (e) { return 0; }
+  if (!targets || !targets.length) return 0;
+  const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+  // Only apply local AIS clustering near coastal / canal legs
+  if (dist > 900) return 0;
+  let hits = 0;
+  const lim = Math.min(targets.length, 400);
+  for (let i = 0; i < lim; i++) {
+    const t = targets[i];
+    const d = typeof pointToSegmentDistanceNM === "function"
+      ? pointToSegmentDistanceNM(t.lat, t.lon, lat1, lon1, lat2, lon2)
+      : calculateHaversineDistanceNM((lat1 + lat2) / 2, (lon1 + lon2) / 2, t.lat, t.lon);
+    if (d <= 8) hits++;
+    if (hits >= 25) break;
+  }
+  if (hits >= 18) return 35 + hits * 1.5;
+  if (hits >= 8) return 12 + hits;
+  return 0;
+}
+
+
 /**
  * Core A corridor finder — never returns a land-crossing chord.
  * options.viaCape / options.viaSuez force canal/cape branch.
@@ -6048,6 +6233,10 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
   if (options.viaCape) {
     path = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj);
     routeMode = "via_cape";
+  } else if (options.viaPanama) {
+    path = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj)
+      || setroutePathViaNode(startNode, endNode, "PANAMA_BALBOA", adj);
+    routeMode = "via_panama";
   } else if (options.viaSuez) {
     path = setroutePathViaNode(startNode, endNode, "SUEZ_CANAL_MID", adj);
     routeMode = "via_suez";
@@ -6085,6 +6274,47 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
       path = candidates[0].p;
       routeMode = candidates[0].m;
     }
+  } else if (
+    (setrouteIsFarEastPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
+    (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsFarEastPort(destCoords[0], destCoords[1]))
+  ) {
+    // Far East ↔ Americas: never allow sparse GC — force ocean candidates via Panama / NPAC
+    const panama = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj)
+      || setroutePathViaNode(startNode, endNode, "PANAMA_BALBOA", adj);
+    const npac = setroutePathViaNode(startNode, endNode, "NPAC_GC_MID", adj);
+    const unimak = setroutePathViaNode(startNode, endNode, "UNIMAK_PASS", adj);
+    const cape = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj);
+    const direct = setrouteDijkstra(startNode, endNode, adj);
+    const candidates = [
+      { p: panama, m: "via_panama_fareast" },
+      { p: npac, m: "via_npac" },
+      { p: unimak, m: "via_unimak" },
+      { p: direct, m: "shortest_sea" },
+      { p: cape, m: "via_cape_fareast" }
+    ].filter((c) => c.p && c.p.length >= 4);
+    // Prefer Panama for US Gulf / Caribbean destinations
+    if (setrouteIsUsGulfPort(destCoords[0], destCoords[1]) || setrouteIsUsGulfPort(origCoords[0], origCoords[1])) {
+      candidates.sort((a, b) => {
+        const ap = a.m.indexOf("panama") >= 0 ? -5000 : 0;
+        const bp = b.m.indexOf("panama") >= 0 ? -5000 : 0;
+        return (setroutePathCostNM(a.p) + ap) - (setroutePathCostNM(b.p) + bp);
+      });
+    } else {
+      candidates.sort((a, b) => setroutePathCostNM(a.p) - setroutePathCostNM(b.p));
+    }
+    if (candidates.length) {
+      path = candidates[0].p;
+      routeMode = candidates[0].m;
+    }
+  }
+
+  // Optional OPW-style corridor template seed (still validated for land)
+  if ((!path || path.length < 4) && options.templatePath && options.templatePath.length >= 4) {
+    const tv = setrouteValidateNodePath(options.templatePath);
+    if (tv && !setroutePathHasCriticalLayerBlock(tv)) {
+      path = tv;
+      routeMode = "template_" + (options.templateId || "corridor");
+    }
   }
 
   if (!path) {
@@ -6096,18 +6326,15 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
     routeMode = "via_ocean_hubs";
   }
 
-  // Last resort: still never return raw [start,end] if it crosses land
+  // Last resort: hubs only — never invent a 2-node ocean chord (crosses land / antimeridian visually)
   if (!path) {
-    if (!setrouteLegLikelyCrossesLand(
-      MARITIME_SEA_NODES[startNode][0], MARITIME_SEA_NODES[startNode][1],
-      MARITIME_SEA_NODES[endNode][0], MARITIME_SEA_NODES[endNode][1]
-    )) {
-      path = [startNode, endNode];
-      routeMode = "direct_sea_chord";
-    } else {
-      path = setroutePathViaHubs(startNode, endNode, adj) || [startNode];
-      routeMode = "hub_fallback";
-    }
+    path = setroutePathViaHubs(startNode, endNode, adj);
+    routeMode = "hub_fallback";
+  }
+  if (!path) {
+    // Absolute fail-closed: single node signals "no safe corridor" to callers
+    path = [startNode];
+    routeMode = "no_safe_corridor";
   }
 
   // Validate successive corridor legs; splice hubs if a graph hop somehow still looks landy
@@ -6422,7 +6649,19 @@ async function generateSetRoutePassage() {
     }).join("; ");
 
     // Always build verified deep-water sea corridor route first so we never route over land
-    const verifiedSeaRoute = generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode);
+    let verifiedSeaRoute = generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode);
+    // Hard gate for Build Route panel (same as chat Core A)
+    if (verifiedSeaRoute && verifiedSeaRoute.metadata && verifiedSeaRoute.metadata.coreARefused) {
+      const recovery = generateAlgorithmicMaritimeRoute(
+        pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, { viaPanama: true }
+      );
+      if (recovery && !(recovery.metadata && recovery.metadata.coreARefused)) {
+        verifiedSeaRoute = recovery;
+      } else {
+        showSetSailToast("Core A refused unsafe land-crossing geometry for this OD pair.", "warning");
+        return;
+      }
+    }
     let parsedRoute = verifiedSeaRoute;
 
     if (navigator.onLine) {
@@ -6639,10 +6878,21 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
   });
 
   const corridorMeta = (findMaritimeSeaCorridor._lastMeta) || {};
+  let densified = waypoints;
+  if (typeof setrouteDensifyWaypoints === "function") {
+    densified = setrouteDensifyWaypoints(waypoints, 320);
+  }
+  // Ocean OD safety: too few corridor nodes → mark refused (caller must not publish)
+  const oceanOd = (typeof setrouteIsFarEastPort === "function" && typeof setrouteIsAmericasPort === "function")
+    && ((setrouteIsFarEastPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1]))
+      || (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsFarEastPort(destCoords[0], destCoords[1])));
+  const refused = Boolean(oceanOd && densified.length < 6)
+    || (corridorMeta.routeMode === "no_safe_corridor")
+    || (corridor && corridor.length < 2);
   return {
     name: `${pOrig.name} to ${pDest.name}`,
     routeName: `${pOrig.name} to ${pDest.name}`,
-    waypoints: waypoints,
+    waypoints: densified,
     chokepoints: chokepoints.length > 0 ? chokepoints : ["Deepwater Coastal Fairway", "Open Sea Transit"],
     totalDistanceNM: 0,
     estimatedSteamingDays: 0,
@@ -6651,7 +6901,8 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
       draftMeters: 11.5,
       xtdNM: xtd,
       sailMode: sailMode,
-      coreA: corridorMeta
+      coreA: corridorMeta,
+      coreARefused: refused
     }
   };
 }
@@ -11667,7 +11918,12 @@ window.SETROUTE_PENDING_CONTEXT = null;
     ["NPAC_GC_EAST", "SEATTLE_APP"],
     ["SEATTLE_APP", "SAN_FRANCISCO_APP"],
     ["NPAC_GC_EAST", "SAN_FRANCISCO_APP"],
-    ["NPAC_GC_EAST", "LONG_BEACH_APP"]
+    ["NPAC_GC_EAST", "LONG_BEACH_APP"],
+    ["LONG_BEACH_APP", "PACIFIC_PANAMA_APP"],
+    ["SAN_FRANCISCO_APP", "PACIFIC_PANAMA_APP"],
+    ["BOHAI_STRAIT", "EAST_CHINA_SEA"],
+    ["TIANJIN_APP", "QINGDAO_APP"],
+    ["HOUSTON_APP", "YUCATAN_CH"]
   ];
   extraEdges.forEach(e => MARITIME_SEA_EDGES.push(e));
 
@@ -12243,6 +12499,9 @@ function displaySetRouteResults(route, autoOpenDrawer = true) {
 window.displaySetRouteResults = displaySetRouteResults;
 
 const PORT_RU_ALIASES = {
+  "тяньцзинь": "port-tianjin",
+  "синган": "port-tianjin",
+  "тайсин": "port-taixing",
   "роттердам": "port-rotterdam",
   "антверпен": "port-antwerp",
   "гамбург": "port-hamburg",
@@ -12393,6 +12652,7 @@ const PORT_EN_ALIASES = {
   "qingdao": "CNTAO",
   "tianjin": "CNTSN",
   "xingang": "CNTSN",
+  "taixing": "CNTXG",
   "dalian": "CNDLC",
   "busan": "KRPUS",
   "pusan": "KRPUS",
@@ -12511,7 +12771,7 @@ async function resolveUnknownPortsFromText(text, currentPorts) {
         const data = await resp.json();
         const hit = (data.results || [])[0];
         if (hit && Number.isFinite(hit.latitude) && Number.isFinite(hit.longitude)) {
-          const dynPort = {
+          let dynPort = {
             id: `port-dyn-${hit.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
             name: hit.name,
             unlocode: `${(hit.country_code || "UN").toUpperCase()}${hit.name.slice(0, 3).toUpperCase()}`,
@@ -12522,6 +12782,7 @@ async function resolveUnknownPortsFromText(text, currentPorts) {
             maxDraftMeters: 15.0,
             maxDraftLowTide: "15.0m"
           };
+          if (typeof setrouteSnapPortToSea === "function") dynPort = setrouteSnapPortToSea(dynPort);
           PORT_DEPTHS_DB.push(dynPort);
           resolved.push(dynPort);
         }
@@ -12569,11 +12830,19 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   if (typeof loadSetrouteCoastGrid === "function") {
     try { await loadSetrouteCoastGrid(); } catch (e) {}
   }
+  if (typeof loadSetrouteCorridorTemplates === "function") {
+    try { await loadSetrouteCorridorTemplates(); } catch (e) {}
+  }
+  if (typeof setrouteSnapPortToSea === "function") {
+    pOrig = setrouteSnapPortToSea(pOrig);
+    pDest = setrouteSnapPortToSea(pDest);
+  }
   const speed = parseFloat(options.speedKnots || (document.getElementById("setRouteSpeedInput") && document.getElementById("setRouteSpeedInput").value)) || 14.5;
   const draft = parseFloat(options.draftMeters || (document.getElementById("setRouteDraftInput") && document.getElementById("setRouteDraftInput").value)) || 11.5;
   const xtd = parseFloat(options.xtdNM || (document.getElementById("setRouteXtdInput") && document.getElementById("setRouteXtdInput").value)) || 0.25;
   const sailMode = options.sailMode || (document.getElementById("setRouteSailSelect") && document.getElementById("setRouteSailSelect").value) || "HYBRID";
   const viaCape = Boolean(options.viaCape);
+  const viaPanama = Boolean(options.viaPanama);
   const viaPorts = Array.isArray(options.viaPorts) ? options.viaPorts : [];
 
   window.SETROUTE_LAST_PORTS = {
@@ -12596,11 +12865,57 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const origCoords = pOrig.approachCoords || pOrig.coords;
   const destCoords = pDest.approachCoords || pDest.coords;
 
-  const viaSuez = Boolean(options.viaSuez) && !viaCape;
+  const viaSuez = Boolean(options.viaSuez) && !viaCape && !viaPanama;
+  const tmpl = (typeof setrouteMatchCorridorTemplate === "function")
+    ? setrouteMatchCorridorTemplate(pOrig.name, pDest.name)
+    : null;
   let baseRoute = generateAlgorithmicMaritimeRoute(
     pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode,
-    { viaCape: viaCape, viaSuez: viaSuez }
+    {
+      viaCape: viaCape,
+      viaSuez: viaSuez,
+      viaPanama: viaPanama,
+      templatePath: tmpl && tmpl.nodeKeys,
+      templateId: tmpl && tmpl.id
+    }
   );
+  // Hard gate: never publish land-crossing / refused ocean geometry
+  enrichRouteWithLegsTelemetry(baseRoute, {
+    origin: pOrig.name, destination: pDest.name, speedKnots: speed, draftMeters: draft, xtdNM: xtd, sailMode
+  });
+  let auditPre = typeof auditPassagePlan === "function" ? auditPassagePlan(baseRoute) : null;
+  const refused = (baseRoute.metadata && baseRoute.metadata.coreARefused)
+    || (auditPre && auditPre.stats && auditPre.stats.landLegs > 0);
+  if (refused) {
+    // Deterministic recovery: force Panama then Cape
+    const retries = [
+      { viaPanama: true, viaCape: false, viaSuez: false },
+      { viaCape: true, viaPanama: false, viaSuez: false }
+    ];
+    let recovered = false;
+    for (let ri = 0; ri < retries.length; ri++) {
+      const alt = generateAlgorithmicMaritimeRoute(
+        pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode,
+        Object.assign({ templatePath: tmpl && tmpl.nodeKeys, templateId: tmpl && tmpl.id }, retries[ri])
+      );
+      enrichRouteWithLegsTelemetry(alt, {
+        origin: pOrig.name, destination: pDest.name, speedKnots: speed, draftMeters: draft, xtdNM: xtd, sailMode
+      });
+      const aud2 = typeof auditPassagePlan === "function" ? auditPassagePlan(alt) : null;
+      if (!(alt.metadata && alt.metadata.coreARefused) && !(aud2 && aud2.stats && aud2.stats.landLegs > 0)) {
+        baseRoute = alt;
+        auditPre = aud2;
+        recovered = true;
+        break;
+      }
+    }
+    if (!recovered) {
+      appendChatMessage("brain",
+        `<strong>Core A refused unsafe geometry</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No land-safe sea corridor found for <b>${pOrig.name}</b> → <b>${pDest.name}</b> after Panama/Cape recovery. Route was not plotted.</div>`
+      );
+      return null;
+    }
+  }
   if (viaCape) {
     baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Cape of Good Hope)`;
   } else if (viaSuez) {
@@ -12764,14 +13079,16 @@ async function handleSetRouteUserMessage(rawText) {
       const sysInstruction = `You are SetRoute INTENT PARSER only (Core B). You do NOT compute waypoints, courses, or geometry — Core A (deterministic sea-graph engine) does that.
 ${curRouteDesc}
 Reply with a short acknowledgement, then ONE JSON object. No coordinates. No waypoint lists.
-Ports known: Ningbo, Los Angeles, Houston, Rotterdam, Singapore, Shanghai, Tokyo, San Francisco, Panama, Suez, Antwerp, Hamburg, Busan, Hong Kong, +60.
+Ports known: Tianjin (Xingang), Taixing, Ningbo, Shanghai, Houston, Los Angeles, Rotterdam, Singapore, Tokyo, Panama, Suez, Antwerp, Hamburg, Busan, Hong Kong, +60.
 Defaults: 14.5 kn, 11.5 m draft, XTD ±0.25 NM.
+Far East China → US Gulf should prefer viaPanama:true unless user asks Cape.
 
 JSON actions only:
-1) plan: {"action":"plan","origin":"Port","destination":"Port","speedKnots":14.5,"draftMeters":11.5,"viaCape":false,"viaSuez":false}
-2) modify: {"action":"modify","speedKnots":16,"draftMeters":12.5,"sailMode":"GC|RL","viaCape":true|false,"viaSuez":true|false,"reverse":false}
+1) plan: {"action":"plan","origin":"Port","destination":"Port","speedKnots":14.5,"draftMeters":11.5,"viaCape":false,"viaSuez":false,"viaPanama":false}
+2) modify: {"action":"modify","speedKnots":16,"draftMeters":12.5,"sailMode":"GC|RL","viaCape":true|false,"viaSuez":true|false,"viaPanama":true|false,"reverse":false}
 3) audit: {"action":"audit"}
-4) If the user only asks a seamanship question with no plan/modify intent: answer in <=3 sentences English and omit JSON.
+4) resolve_exception: {"action":"resolve_exception","preferVia":"panama|cape|suez|none","avoidNodeKeys":[]}
+5) If the user only asks a seamanship question with no plan/modify intent: answer in <=3 sentences English and omit JSON.
 When user says "make the route / сделай маршрут / use defaults" with ports in history — emit plan JSON immediately.`;
 
             const cohereOut = await setrouteCohereChat([
@@ -12816,7 +13133,8 @@ When user says "make the route / сделай маршрут / use defaults" wit
         xtdNM: defaultOpts.xtdNM,
         sailMode: defaultOpts.sailMode,
         viaCape: Boolean(aiActionPlan.viaCape || defaultOpts.viaCape),
-        viaSuez: Boolean(aiActionPlan.viaSuez)
+        viaSuez: Boolean(aiActionPlan.viaSuez),
+        viaPanama: Boolean(aiActionPlan.viaPanama) || /panama/i.test(String(aiActionPlan.preferVia || ""))
       });
       return;
     }

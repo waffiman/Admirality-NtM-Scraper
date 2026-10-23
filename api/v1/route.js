@@ -3,8 +3,9 @@
 /**
  * POST /api/v1/route — plan a passage from chart context (Agent API).
  * Scope: route.plan
- * Returns a great-circle polyline + metadata. Does not expose Core A internals,
- * coastline grids, or source repos. Full land-safe Dijkstra remains in SetChart UI.
+ * Returns a great-circle polyline + metadata for agent tooling only.
+ * NOT a navigational passage plan — land-safe Core A lives in SetRoute UI
+ * (sea graph + NtM/NAVTEX/Weather/AIS). Response includes advisory flag.
  */
 
 const {
@@ -189,8 +190,10 @@ module.exports = async function handler(req, res) {
         }
       },
       limits: {
+        advisoryOnly: true,
+        navigational: false,
         note:
-          "Agent route is great-circle for planning context. Saved to the key owner's SetSail profile when persistence is configured. Land-safe Dijkstra remains in SetChart."
+          "ADVISORY ONLY — great-circle, may cross land. For passage-grade geometry use SetRoute Core A (sea graph + NtM/NAVTEX/Weather/AIS)."
       }
     });
   } catch (e) {

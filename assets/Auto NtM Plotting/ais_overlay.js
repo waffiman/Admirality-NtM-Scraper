@@ -800,4 +800,47 @@
   window.stopAisPolling = stopAisPolling;
   window.showAisInfoModal = showAisInfoModal;
   window.AIS_REFRESH_MS = AIS_REFRESH_MS;
+  /** Snapshot of live AIS targets for SetRoute Core A hazard costing (not UI). */
+  window.getAisTargetsSnapshot = function getAisTargetsSnapshot(limit) {
+    const out = [];
+    const cap = Math.max(50, Math.min(4000, Number(limit) || 800));
+    try {
+      const stream = aisStreamTargets || Object.create(null);
+      Object.keys(stream).forEach(function (mmsi) {
+        if (out.length >= cap) return;
+        const v = stream[mmsi];
+        if (!v) return;
+        const lat = Number(v.lat != null ? v.lat : v.latitude);
+        const lon = Number(v.lon != null ? v.lon : v.longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+        out.push({
+          mmsi: v.mmsi || mmsi,
+          lat: lat,
+          lon: lon,
+          sog: v.sog != null ? Number(v.sog) : null,
+          cog: v.cog != null ? Number(v.cog) : null,
+          name: v.name || v.shipName || null,
+          source: "aisstream"
+        });
+      });
+      if (out.length < cap && aisLastPayload && Array.isArray(aisLastPayload.vessels)) {
+        aisLastPayload.vessels.forEach(function (v) {
+          if (out.length >= cap || !v) return;
+          const lat = Number(v.lat != null ? v.lat : v.latitude);
+          const lon = Number(v.lon != null ? v.lon : v.longitude);
+          if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+          out.push({
+            mmsi: v.mmsi,
+            lat: lat,
+            lon: lon,
+            sog: v.sog != null ? Number(v.sog) : null,
+            cog: v.cog != null ? Number(v.cog) : null,
+            name: v.name || null,
+            source: v.source || "ais"
+          });
+        });
+      }
+    } catch (e) {}
+    return out;
+  };
 })();

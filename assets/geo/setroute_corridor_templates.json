@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "id": "fareast_china_us_gulf_panama",
+      "originHints": ["tianjin", "xingang", "shanghai", "ningbo", "qingdao", "dalian", "busan", "tokyo", "hong kong", "kaohsiung"],
+      "destHints": ["houston", "galveston", "new orleans", "corpus"],
+      "nodeKeys": [
+        "TIANJIN_APP",
+        "BOHAI_STRAIT",
+        "QINGDAO_APP",
+        "EAST_CHINA_SEA",
+        "OSUMI_STRAIT",
+        "TOKYO_APP",
+        "NPAC_GC_WEST",
+        "NPAC_GC_MID",
+        "NPAC_GC_EAST",
+        "LONG_BEACH_APP",
+        "MANZANILLO_APP",
+        "PACIFIC_PANAMA_APP",
+        "PANAMA_BALBOA",
+        "PANAMA_COLON",
+        "CARIBBEAN_MID",
+        "YUCATAN_CH",
+        "GULF_MEXICO_MID",
+        "HOUSTON_APP"
+      ]
+    },
+    {
+      "id": "fareast_uswc_npac",
+      "originHints": ["tianjin", "shanghai", "ningbo", "busan", "tokyo", "osaka"],
+      "destHints": ["los angeles", "long beach", "san francisco", "seattle", "vancouver"],
+      "nodeKeys": [
+        "EAST_CHINA_SEA",
+        "OSUMI_STRAIT",
+        "TOKYO_APP",
+        "NPAC_GC_WEST",
+        "NPAC_GC_MID",
+        "NPAC_GC_EAST",
+        "LONG_BEACH_APP"
+      ]
+    },
+    {
+      "id": "med_asia_suez",
+      "originHints": ["rotterdam", "hamburg", "antwerp", "gibraltar", "piraeus"],
+      "destHints": ["singapore", "shanghai", "hong kong", "busan", "tokyo"],
+      "nodeKeys": [
+        "GIBRALTAR_MID",
+        "MED_SICILY",
+        "PORT_SAID_APP",
+        "SUEZ_CANAL_MID",
+        "BAB_EL_MANDEB",
+        "DONDRA_HEAD",
+        "MALACCA_MID",
+        "SINGAPORE_MAIN"
+      ]
+    }
+  ]
+}
