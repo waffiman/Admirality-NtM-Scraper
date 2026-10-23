@@ -2714,14 +2714,22 @@ function renderWeatherOnMap(map = null) {
       const hsStr = b.waveHs != null ? `${b.waveHs} m` : "—";
       const icon = L.divIcon({
         className: "weather-buoy-icon",
-        html: `<div style="width:9px;height:9px;border-radius:50%;background:#22d3ee;border:1.5px solid #0f172a;box-shadow:0 0 0 1px rgba(34,211,238,0.45);"></div>`,
-        iconSize: [9, 9],
-        iconAnchor: [4, 4]
+        html:
+          `<div style="width:16px;height:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,0.45));" title="NDBC buoy">` +
+          `<svg viewBox="0 0 16 22" width="16" height="22" aria-hidden="true">` +
+          `<line x1="8" y1="1.5" x2="8" y2="8" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round"/>` +
+          `<circle cx="8" cy="2.2" r="1.7" fill="#fbbf24" stroke="#0f172a" stroke-width="0.7"/>` +
+          `<ellipse cx="8" cy="13" rx="6.2" ry="5.4" fill="#facc15" stroke="#0f172a" stroke-width="1.15"/>` +
+          `<path d="M2.4 12.2 H13.6 V14.4 H2.4 Z" fill="#f05a36"/>` +
+          `<ellipse cx="8" cy="18.6" rx="2.2" ry="1.1" fill="#0f172a" opacity="0.28"/>` +
+          `</svg></div>`,
+        iconSize: [16, 22],
+        iconAnchor: [8, 18]
       });
       const m = L.marker([b.lat, b.lon], { icon });
       m.bindPopup(
         `<div style="font-family:sans-serif;font-size:11px;min-width:170px;">` +
-        `<strong style="color:#0891b2;">NDBC ${b.id}</strong><br>` +
+        `<strong style="color:#ca8a04;">NDBC buoy ${b.id}</strong><br>` +
         `<strong>Wind:</strong> ${windStr}${b.windDir != null ? ` @ ${b.windDir}°` : ""}${b.gustKt != null ? ` (G ${b.gustKt})` : ""}<br>` +
         `<strong>Hs:</strong> ${hsStr}${b.wavePeriod != null ? ` · ${b.wavePeriod}s` : ""}<br>` +
         `<strong>Pressure:</strong> ${b.pressureMb != null ? b.pressureMb + " mb" : "—"}<br>` +
