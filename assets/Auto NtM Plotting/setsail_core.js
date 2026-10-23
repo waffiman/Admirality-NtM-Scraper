@@ -2705,41 +2705,7 @@ function renderWeatherOnMap(map = null) {
     });
   }
 
-  // 6. NDBC buoy observations
-  if (wxSub.buoys !== false && curZoom >= 3) {
-    (MARINE_WEATHER_STORE.buoys || []).forEach((b) => {
-      if (!b || !Number.isFinite(b.lat) || !Number.isFinite(b.lon)) return;
-      if (curZoom < 4.5 && (b.waveHs == null || b.waveHs < 2.5) && (b.windKt == null || b.windKt < 25)) return;
-      const windStr = b.windKt != null ? `${b.windKt} kn` : "—";
-      const hsStr = b.waveHs != null ? `${b.waveHs} m` : "—";
-      const icon = L.divIcon({
-        className: "weather-buoy-icon",
-        html:
-          `<div style="width:16px;height:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,0.45));" title="NDBC buoy">` +
-          `<svg viewBox="0 0 16 22" width="16" height="22" aria-hidden="true">` +
-          `<line x1="8" y1="1.5" x2="8" y2="8" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round"/>` +
-          `<circle cx="8" cy="2.2" r="1.7" fill="#fbbf24" stroke="#0f172a" stroke-width="0.7"/>` +
-          `<ellipse cx="8" cy="13" rx="6.2" ry="5.4" fill="#facc15" stroke="#0f172a" stroke-width="1.15"/>` +
-          `<path d="M2.4 12.2 H13.6 V14.4 H2.4 Z" fill="#f05a36"/>` +
-          `<ellipse cx="8" cy="18.6" rx="2.2" ry="1.1" fill="#0f172a" opacity="0.28"/>` +
-          `</svg></div>`,
-        iconSize: [16, 22],
-        iconAnchor: [8, 18]
-      });
-      const m = L.marker([b.lat, b.lon], { icon });
-      m.bindPopup(
-        `<div style="font-family:sans-serif;font-size:11px;min-width:170px;">` +
-        `<strong style="color:#ca8a04;">NDBC buoy ${b.id}</strong><br>` +
-        `<strong>Wind:</strong> ${windStr}${b.windDir != null ? ` @ ${b.windDir}°` : ""}${b.gustKt != null ? ` (G ${b.gustKt})` : ""}<br>` +
-        `<strong>Hs:</strong> ${hsStr}${b.wavePeriod != null ? ` · ${b.wavePeriod}s` : ""}<br>` +
-        `<strong>Pressure:</strong> ${b.pressureMb != null ? b.pressureMb + " mb" : "—"}<br>` +
-        `<strong>SST:</strong> ${b.sstC != null ? b.sstC + " °C" : "—"}<br>` +
-        `<div style="font-size:9px;color:#64748b;margin-top:3px;">${b.timeUtc || ""} · NOAA NDBC</div></div>`
-      );
-      leafletWeatherLayer.addLayer(m);
-    });
-  }
-
+  // 6. NDBC buoys — cursor probe + toolbar tile (no map markers)
   // 7. Pressure MSL grid labels
   if (wxSub.pressure !== false && curZoom >= 3.5) {
     (MARINE_WEATHER_STORE.pressureGrid || []).forEach((p) => {
@@ -2775,6 +2741,129 @@ function renderWeatherOnMap(map = null) {
 }
 
 window.renderWeatherOnMap = renderWeatherOnMap;
+
+
+/** Inverse-distance sample of NDBC buoys at chart cursor (no map markers). */
+function sampleNdbcAtLatLon(lat, lon) {
+  const buoys = (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.buoys))
+    ? MARINE_WEATHER_STORE.buoys : [];
+  if (!buoys.length || !Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return { ok: false, mode: "none", message: "No NDBC data loaded" };
+  }
+  const scored = [];
+  for (let i = 0; i < buoys.length; i++) {
+    const b = buoys[i];
+    if (!b || !Number.isFinite(b.lat) || !Number.isFinite(b.lon)) continue;
+    const d = calculateHaversineDistanceNM(lat, lon, b.lat, b.lon);
+    if (!Number.isFinite(d)) continue;
+    scored.push({ b, d });
+  }
+  if (!scored.length) return { ok: false, mode: "none", message: "No NDBC buoys" };
+  scored.sort((a, c) => a.d - c.d);
+  const nearest = scored[0];
+  const NEAR_NM = 60;
+  const BLEND_NM = 220;
+  const MAX_NM = 450;
+
+  if (nearest.d > MAX_NM) {
+    return { ok: false, mode: "far", nearestNm: Math.round(nearest.d), message: "No buoys within " + MAX_NM + " NM" };
+  }
+
+  const fields = ["windKt", "gustKt", "windDir", "waveHs", "wavePeriod", "waveDir", "pressureMb", "airC", "sstC"];
+  const out = { ok: true, lat, lon };
+
+  if (nearest.d <= NEAR_NM) {
+    const b = nearest.b;
+    fields.forEach((f) => { out[f] = b[f] != null && Number.isFinite(Number(b[f])) ? Number(b[f]) : null; });
+    out.mode = "nearest";
+    out.buoyId = b.id;
+    out.nearestNm = Math.round(nearest.d * 10) / 10;
+    out.timeUtc = b.timeUtc || null;
+    out.sourceNote = "NDBC " + (b.id || "") + " · " + out.nearestNm + " NM";
+    return out;
+  }
+
+  const neighbors = scored.filter((s) => s.d <= BLEND_NM).slice(0, 6);
+  const use = neighbors.length >= 2 ? neighbors : scored.slice(0, Math.min(4, scored.length));
+  const sums = {};
+  const wsum = {};
+  fields.forEach((f) => { sums[f] = 0; wsum[f] = 0; });
+  use.forEach(({ b, d }) => {
+    const w = 1 / Math.max(d, 0.5);
+    const w2 = w * w;
+    fields.forEach((f) => {
+      const v = b[f];
+      if (v == null || !Number.isFinite(Number(v))) return;
+      if (f === "windDir" || f === "waveDir") return;
+      sums[f] += Number(v) * w2;
+      wsum[f] += w2;
+    });
+  });
+  fields.forEach((f) => {
+    if (f === "windDir" || f === "waveDir") {
+      const withDir = use.find((s) => s.b[f] != null && Number.isFinite(Number(s.b[f])));
+      out[f] = withDir ? Number(withDir.b[f]) : null;
+    } else {
+      out[f] = wsum[f] > 0 ? sums[f] / wsum[f] : null;
+    }
+  });
+  out.mode = "interpolated";
+  out.buoyId = null;
+  out.nearestNm = Math.round(nearest.d * 10) / 10;
+  out.blendCount = use.length;
+  out.timeUtc = (use[0] && use[0].b && use[0].b.timeUtc) || null;
+  out.sourceNote = "Interp. " + use.length + " buoys · nearest " + out.nearestNm + " NM";
+  return out;
+}
+
+function fmtWxNum(v, digits) {
+  if (v == null || !Number.isFinite(Number(v))) return "—";
+  const n = Number(v);
+  return digits === 0 ? String(Math.round(n)) : n.toFixed(digits);
+}
+
+function syncNdbcCursorTileVisibility() {
+  const tile = document.getElementById("ntmWxCursorTile");
+  if (!tile) return;
+  const wxOn = typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.weather;
+  const buoyOn = !(window.WEATHER_SUBFILTERS && window.WEATHER_SUBFILTERS.buoys === false);
+  tile.hidden = !(wxOn && buoyOn);
+  if (tile.hidden) tile.classList.remove("is-live");
+}
+
+function updateNdbcCursorTile(lat, lon) {
+  const tile = document.getElementById("ntmWxCursorTile");
+  if (!tile || tile.hidden) return;
+  const body = document.getElementById("ntmWxCursorBody");
+  const meta = document.getElementById("ntmWxCursorMeta");
+  if (!body) return;
+  const s = sampleNdbcAtLatLon(lat, lon);
+  if (!s.ok) {
+    tile.classList.remove("is-live");
+    body.innerHTML = '<span class="wx-chip wx-muted">' + (s.message || "No data") + "</span>";
+    if (meta) meta.textContent = "";
+    return;
+  }
+  tile.classList.add("is-live");
+  const wind = s.windKt != null
+    ? (fmtWxNum(s.windKt, 0) + " kn" + (s.windDir != null ? " " + fmtWxNum(s.windDir, 0) + "\u00b0" : "") + (s.gustKt != null ? " G" + fmtWxNum(s.gustKt, 0) : ""))
+    : "\u2014";
+  const wave = s.waveHs != null
+    ? (fmtWxNum(s.waveHs, 1) + " m" + (s.wavePeriod != null ? " / " + fmtWxNum(s.wavePeriod, 0) + "s" : ""))
+    : "\u2014";
+  body.innerHTML =
+    '<span class="wx-chip" title="Wind"><span class="wx-ico" aria-hidden="true">\uD83D\uDCA8</span><b>' + wind + "</b></span>" +
+    '<span class="wx-chip" title="Waves Hs"><span class="wx-ico" aria-hidden="true">\uD83C\uDF0A</span><b>' + wave + "</b></span>" +
+    '<span class="wx-chip" title="Pressure"><span class="wx-ico" aria-hidden="true">\u25CE</span><b>' + fmtWxNum(s.pressureMb, 0) + " mb</b></span>" +
+    '<span class="wx-chip" title="Air / SST"><span class="wx-ico" aria-hidden="true">\uD83C\uDF21</span><b>' + fmtWxNum(s.airC, 0) + "\u00b0 / " + fmtWxNum(s.sstC, 0) + "\u00b0</b></span>";
+  if (meta) {
+    meta.textContent = s.sourceNote + (s.mode === "interpolated" ? " \u00b7 blended" : " \u00b7 buoy");
+  }
+}
+
+window.sampleNdbcAtLatLon = sampleNdbcAtLatLon;
+window.syncNdbcCursorTileVisibility = syncNdbcCursorTileVisibility;
+window.updateNdbcCursorTile = updateNdbcCursorTile;
 
 function weatherPayloadHasData(data) {
   if (!data || typeof data !== "object") return false;
@@ -4285,7 +4374,13 @@ function initNtMMap() {
       if (hud) {
         hud.textContent = formatLatLonDMS(e.latlng.lat, e.latlng.lng);
       }
+      if (typeof updateNdbcCursorTile === "function") {
+        updateNdbcCursorTile(e.latlng.lat, e.latlng.lng);
+      }
     });
+    if (typeof syncNdbcCursorTileVisibility === "function") {
+      syncNdbcCursorTileVisibility();
+    }
     // ECDIS-style broken crosshair cursor over the chart
     const mapEl = document.getElementById("ntmMap");
     if (mapEl) {
@@ -7128,6 +7223,9 @@ function applyWeatherModalLayerChecks() {
   });
   if (typeof renderWeatherOnMap === "function") {
     renderWeatherOnMap(typeof leafletMap !== "undefined" ? leafletMap : null);
+  }
+  if (typeof syncNdbcCursorTileVisibility === "function") {
+    syncNdbcCursorTileVisibility();
   }
 }
 

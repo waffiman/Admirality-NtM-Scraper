@@ -20150,10 +20150,14 @@ function setOverlayActive(overlayKey, isActive, map = null) {
           if (mapNow && storms.length && storms[0].center && typeof mapNow.flyTo === "function") {
             try { mapNow.flyTo(storms[0].center, Math.max(mapNow.getZoom() || 3, 4), { duration: 0.9 }); } catch (e) {}
           }
+          if (typeof window.syncNdbcCursorTileVisibility === "function") {
+            window.syncNdbcCursorTileVisibility();
+          }
           setOverlayTileLoading("weather", false);
         });
       } else if (typeof window.renderWeatherOnMap === "function") {
         window.renderWeatherOnMap(window.leafletMap || currentMap);
+        if (typeof window.syncNdbcCursorTileVisibility === "function") window.syncNdbcCursorTileVisibility();
         setTimeout(() => setOverlayTileLoading("weather", false), 350);
       } else {
         setTimeout(() => setOverlayTileLoading("weather", false), 350);
