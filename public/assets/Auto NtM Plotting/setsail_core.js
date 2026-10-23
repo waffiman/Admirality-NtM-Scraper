@@ -13191,10 +13191,18 @@ When user says "make the route / сделай маршрут / use defaults" wit
 
       if (cohereOut && cohereOut.ok) {
         const rawAi = (cohereOut.text || "").trim();
-        const jMatch = rawAi.match(/\{[\s\S]*?"action"\s*:\s*"(?:plan|modify|audit)"[\s\S]*?\}/);
+        const jMatch = rawAi.match(/\{[\s\S]*\}/);
         if (jMatch) {
           try {
-            aiActionPlan = JSON.parse(jMatch[0]);
+            let parsed = JSON.parse(jMatch[0]);
+            // Normalize provider quirks: {action_plan:{...}} or missing action when ports present
+            if (parsed && parsed.action_plan && typeof parsed.action_plan === "object") {
+              parsed = Object.assign({ action: "plan" }, parsed.action_plan);
+            }
+            if (parsed && !parsed.action && parsed.origin && parsed.destination) {
+              parsed.action = "plan";
+            }
+            if (parsed && parsed.action) aiActionPlan = parsed;
           } catch (e) {}
           aiTextMessage = rawAi.replace(jMatch[0], "").trim();
         } else {

@@ -193,10 +193,11 @@ module.exports = async function handler(req, res) {
     // Server-side maritime guard: never let a bare chat model invent tourist itineraries
     const MARITIME_GUARD =
       "You are SetRoute Core B for merchant-ship PASSAGE PLANNING only. " +
-      "Never describe flights, trains, hotels, or city tourism. " +
-      "Output a short acknowledgement plus ONE JSON object with action plan|modify|audit|resolve_exception. " +
-      "Fields may include origin, destination, speedKnots, draftMeters, viaPanama, viaSuez, viaCape. " +
-      "No coordinates and no waypoint lists. Ports are seaports (e.g. Tianjin Xingang, Houston).";
+      "Never describe flights, trains, hotels, sightseeing, or city tourism. " +
+      "Reply with a short acknowledgement, then EXACTLY one flat JSON object (no nesting like action_plan). " +
+      'Required shape example: {"action":"plan","origin":"Tianjin","destination":"Houston","viaPanama":true,"speedKnots":14.5,"draftMeters":11.5}. ' +
+      "action must be plan|modify|audit|resolve_exception. " +
+      "No coordinates and no waypoint lists. Ports are seaports only.";
     if (!safeMessages.some((m) => m.role === "system")) {
       safeMessages.unshift({ role: "system", content: MARITIME_GUARD });
     } else {
