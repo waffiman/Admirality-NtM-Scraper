@@ -20131,6 +20131,9 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         else currentMap.removeLayer(seamarkLayer);
       }
     } else if (overlayKey === "weather") {
+      if (typeof window.syncNdbcCursorTileVisibility === "function") {
+        try { window.syncNdbcCursorTileVisibility(); } catch (e) {}
+      }
       if (isActive && typeof window.refreshMarineWeather === "function") {
         Promise.resolve(window.refreshMarineWeather(true)).finally(() => {
           const mapNow = window.leafletMap || currentMap;

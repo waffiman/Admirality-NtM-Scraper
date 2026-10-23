@@ -47,11 +47,15 @@
   <link rel="dns-prefetch" href="https://a.basemaps.cartocdn.com" />
   <link rel="dns-prefetch" href="https://server.arcgisonline.com" />
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="assets/leaflet/leaflet.css" />
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.55" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.69" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -908,6 +912,98 @@ svg.leaflet-image-layer.leaflet-interactive path {
   flex-shrink: 0;
   position: relative !important;
   z-index: 2500 !important;
+}
+
+
+/* NDBC cursor weather readout in SetChart top toolbar */
+.ntm-wx-cursor-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: min(560px, 46vw);
+  min-height: 34px;
+  padding: 0.22rem 0.55rem 0.22rem 0.4rem;
+  border-radius: 8px;
+  background: rgba(8, 47, 73, 0.55);
+  border: 1px solid rgba(34, 211, 238, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.25);
+  overflow: hidden;
+}
+.ntm-wx-cursor-tile[hidden] { display: none !important; }
+.ntm-wx-cursor-tile.is-live {
+  border-color: rgba(250, 204, 21, 0.45);
+  background: rgba(15, 23, 42, 0.72);
+}
+.ntm-wx-cursor-badge {
+  flex-shrink: 0;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #facc15;
+  background: rgba(250, 204, 21, 0.12);
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  border-radius: 4px;
+  padding: 0.18rem 0.35rem;
+}
+.ntm-wx-cursor-body {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  overflow: hidden;
+}
+.ntm-wx-cursor-tile .wx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  color: #e2e8f0;
+  padding: 0.1rem 0.28rem;
+  border-radius: 4px;
+  background: rgba(30, 41, 59, 0.65);
+}
+.ntm-wx-cursor-tile .wx-chip b { font-weight: 700; color: #f8fafc; }
+.ntm-wx-cursor-tile .wx-chip.wx-muted { color: #94a3b8; font-weight: 600; background: transparent; }
+.ntm-wx-cursor-tile .wx-ico { font-size: 0.72rem; line-height: 1; opacity: 0.95; }
+.ntm-wx-cursor-meta {
+  flex-shrink: 0;
+  font-size: 0.58rem;
+  color: #94a3b8;
+  max-width: 9.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+[data-theme="light"] .ntm-wx-cursor-tile {
+  background: rgba(224, 242, 254, 0.95);
+  border-color: rgba(2, 132, 199, 0.35);
+}
+[data-theme="light"] .ntm-wx-cursor-tile .wx-chip {
+  background: rgba(255, 255, 255, 0.85);
+  color: #0f172a;
+}
+[data-theme="light"] .ntm-wx-cursor-tile .wx-chip b { color: #0f172a; }
+[data-theme="light"] .ntm-wx-cursor-meta { color: #64748b; }
+@media (max-width: 1100px) {
+  .ntm-wx-cursor-tile { max-width: min(420px, 40vw); }
+  .ntm-wx-cursor-meta { display: none; }
+}
+@media (max-width: 820px) {
+  .ntm-wx-cursor-tile {
+    max-width: min(100%, 58vw);
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .ntm-wx-cursor-meta { display: none; }
+}
+.ntm-toolbar-right .ntm-wx-cursor-tile {
+  order: -1;
+  margin-right: auto;
+  flex: 1 1 auto;
+  max-width: min(640px, 52vw);
 }
 
 .ntm-toolbar-left,
@@ -5832,8 +5928,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7' fill='none' stroke='%23ffffff' stroke-width='3.2' stroke-linecap='square'/%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7' fill='none' stroke='%23111a24' stroke-width='1.6' stroke-linecap='square'/%3E%3C/svg%3E") 12 12, crosshair !important;
 }
 .own-ship-marker { background: transparent !important; border: none !important; }
-.own-ship-wrap { width: 28px; height: 44px; }
-.own-ship-svg { display: block; filter: drop-shadow(0 0 3px rgba(0,229,255,0.55)); }
+.own-ship-wrap { width: 48px; height: 48px; pointer-events: none; }
+.own-ship-wrap--hull { width: 48px; height: 64px; }
+.own-ship-svg { display: block; filter: drop-shadow(0 0 1.5px rgba(255,255,255,0.85)) drop-shadow(0 1px 2px rgba(15,23,42,0.35)); }
 
 /* v5.19b: lock Home vessel HUD vertical center in top bar */
 #homeHudTop {
@@ -6982,11 +7079,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 
 /* ==========================================================================
-   SLIDE 3: ABOUT SETSAIL (Top SaaS Narrative & Visual Showcase)
+   SLIDE 3: ABOUT SETSAIL — full-bleed narrow mosaic strip + square logo
    ========================================================================== */
 .home-slide-about {
   position: absolute;
-  inset: 76px 32px 64px 32px;
+  inset: 0;
   z-index: 22;
   display: flex;
   align-items: center;
@@ -6994,194 +7091,209 @@ svg.leaflet-image-layer.leaflet-interactive path {
   opacity: 0;
   pointer-events: none;
   will-change: transform, opacity;
-}
-
-.home-about-container {
+  --about-p: 0;
+  --about-logo: 0;
   width: 100%;
-  max-width: 1060px;
-  display: grid;
-  grid-template-columns: 1.12fr 0.88fr;
-  gap: 2.5rem;
-  align-items: center;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
-.home-about-left {
+.home-about-life {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  height: auto;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
+  align-items: stretch;
+  gap: 1rem;
+  border-radius: 0;
+  overflow: visible;
+  isolation: isolate;
+  background: transparent;
+  padding: 0;
+  margin: 0;
 }
 
-.home-about-headline {
-  font-size: 2.1rem;
-  font-weight: 800;
-  line-height: 1.16;
-  letter-spacing: -0.025em;
-  color: #f8fafc;
-  margin: 0.35rem 0 0.85rem;
-}
-
-.home-about-headline span {
-  background: linear-gradient(135deg, #38bdf8 0%, #f05a36 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.home-about-lead {
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: #94a3b8;
-  margin: 0 0 1.2rem;
-}
-
-.home-about-pillars {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.85rem;
-  width: 100%;
-}
-
-.home-about-pillar {
-  background: rgba(12, 24, 52, 0.65);
-  border: 1px solid rgba(126, 182, 255, 0.18);
-  border-radius: 12px;
-  padding: 0.85rem 0.9rem;
-  backdrop-filter: blur(12px);
-}
-
-.home-about-pillar-num {
-  font-size: 0.64rem;
-  font-weight: 800;
-  color: #f05a36;
-  letter-spacing: 0.1em;
-  margin-bottom: 4px;
-}
-
-.home-about-pillar-title {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #f1f5f9;
-  margin-bottom: 4px;
-}
-
-.home-about-pillar-desc {
-  font-size: 0.67rem;
-  line-height: 1.4;
-  color: #94a3b8;
-}
-
-/* Visual Showcase Frame (Ready for Photo / Video) */
-.home-about-visual-card {
+/* True edge-to-edge of the Home viewport (not the 1200px content column) */
+.about-mosaic-band {
   position: relative;
-  border-radius: 18px;
-  background: rgba(8, 18, 42, 0.78);
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(56, 189, 248, 0.1);
+  width: 100%;
+  max-width: none;
+  height: clamp(140px, 17vh, 176px);
   overflow: hidden;
-  backdrop-filter: blur(16px);
+  background: #040810;
+  border-radius: 0;
+  margin: 0;
+  left: 0;
+  right: 0;
 }
 
-.home-about-visual-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: rgba(4, 10, 24, 0.65);
-  border-bottom: 1px solid rgba(126, 182, 255, 0.14);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #94a3b8;
+.about-mosaic {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(40, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px;
+  filter: brightness(calc(0.78 + 0.16 * var(--about-p)));
 }
 
-.visual-window-dots {
-  display: flex;
-  gap: 6px;
-}
-
-.visual-window-dots span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(148, 163, 184, 0.35);
-}
-
-.visual-window-dots span:first-child { background: #f05a36; }
-.visual-window-dots span:nth-child(2) { background: #eab308; }
-.visual-window-dots span:nth-child(3) { background: #10b981; }
-
-.home-about-media-slot {
+.about-moz-tile {
   position: relative;
-  height: 265px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 0;
+  background: #0b1220;
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.35s ease, filter 0.35s ease;
+  min-width: 0;
+  min-height: 0;
+}
+
+.about-moz-tile.is-fallback {
   background:
-    radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.14) 0%, rgba(6, 13, 28, 0.92) 75%);
-  overflow: hidden;
+    linear-gradient(135deg, #0c4a6e 0%, #082f49 45%, #0f172a 100%);
 }
 
-.about-radar-rings {
-  position: relative;
-  width: 164px;
-  height: 164px;
+.about-moz-tile.is-shuffling {
+  opacity: 0.35;
+  filter: blur(1px);
+}
+
+.about-moz-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.92) contrast(1.05);
+}
+
+/* Square mark centered over the mosaic strip — forced 1:1 box */
+.about-logo-over {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: radial-gradient(ellipse 38% 85% at 50% 50%, rgba(4, 8, 18, 0.62) 0%, rgba(4, 8, 18, 0.14) 52%, transparent 70%);
+  opacity: calc(var(--about-logo) * 0.15 + var(--about-p) * 0.95);
+  pointer-events: none;
 }
 
-.about-radar-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px dashed rgba(56, 189, 248, 0.32);
+.about-logo-over picture {
+  display: grid;
+  place-items: center;
+  width: clamp(72px, 8.5vw, 104px);
+  height: clamp(72px, 8.5vw, 104px);
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 10px;
+  background: rgba(6, 12, 28, 0.92);
+  border: 1px solid rgba(240, 90, 54, 0.4);
+  border-radius: 22px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 
-.about-radar-ring.r1 { width: 160px; height: 160px; animation: radarSpin 28s linear infinite; }
-.about-radar-ring.r2 { width: 112px; height: 112px; border-style: solid; border-color: rgba(240, 90, 54, 0.28); }
-.about-radar-ring.r3 { width: 62px; height: 62px; }
-
-.about-radar-sweep {
-  position: absolute;
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, rgba(56, 189, 248, 0.28) 0deg, transparent 75deg, transparent 360deg);
-  animation: radarSpin 5s linear infinite;
+.about-logo-over img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: contain !important;
+  border-radius: 12px;
+  filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 18px rgba(240, 90, 54, 0.3));
+  transform: scale(calc(0.9 + 0.1 * var(--about-p)));
 }
 
-@keyframes radarSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* About text sits UNDER the mosaic row */
+.about-copy {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  width: min(640px, 90%);
+  margin: 0 auto;
+  z-index: 8;
+  text-align: center;
+  padding: 0.35rem 1rem 0.5rem;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  opacity: calc(max(0, var(--about-p) * 1.25 - 0.08));
+  pointer-events: none;
 }
 
-.about-media-placeholder-caption {
-  margin-top: 12px;
-  font-size: 0.66rem;
+.about-kicker {
+  margin: 0 0 0.4rem;
+  font-family: "Outfit", "Segoe UI", sans-serif;
+  font-size: 0.62rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #7dd3fc;
-  background: rgba(14, 28, 58, 0.75);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  padding: 4px 12px;
-  border-radius: 999px;
+  color: #f05a36;
 }
 
-[data-theme="light"] .home-about-headline { color: #0f172a; }
-[data-theme="light"] .home-about-lead { color: #334155; }
-[data-theme="light"] .home-about-pillar {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+.about-headline {
+  margin: 0 0 0.55rem;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(1.35rem, 2.3vw, 1.9rem);
+  line-height: 1.18;
+  color: #f8fafc;
 }
-[data-theme="light"] .home-about-pillar-title { color: #0f172a; }
-[data-theme="light"] .home-about-pillar-desc { color: #475569; }
-[data-theme="light"] .home-about-visual-card {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+
+.about-headline em {
+  font-style: italic;
+  color: #fda4af;
 }
+
+.about-body {
+  margin: 0;
+  font-family: "Outfit", "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.about-body strong {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+[data-theme="light"] .about-mosaic-band { background: #e2e8f0; }
+[data-theme="light"] .about-logo-over {
+  background: radial-gradient(ellipse 38% 85% at 50% 50%, rgba(248, 250, 252, 0.7) 0%, rgba(248, 250, 252, 0.12) 52%, transparent 70%);
+}
+[data-theme="light"] .about-headline { color: #0f172a; }
+[data-theme="light"] .about-headline em { color: #c2410c; }
+[data-theme="light"] .about-body { color: #334155; }
+[data-theme="light"] .about-body strong { color: #0f172a; }
+
+@media (max-width: 900px) {
+  .home-slide-about { inset: 0 !important; left: 0 !important; right: 0 !important; }
+  .about-mosaic-band { height: clamp(120px, 15vh, 150px) !important; }
+  .about-mosaic {
+    grid-template-columns: repeat(24, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1px !important;
+  }
+  .about-copy { width: 92% !important; }
+  .about-headline { font-size: 1.2rem !important; }
+  .about-body { font-size: 0.72rem !important; }
+  .about-logo-over picture {
+    width: 64px !important;
+    height: 64px !important;
+  }
+}
+
 
 /* ==========================================================================
    SLIDE 4: NARROW INFINITE MARQUEE OF RECOGNIZABLE SOURCES (Transparent Logos)
@@ -7911,9 +8023,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   }
 
-  /* Slide 3: About SetSail on Phone */
+  /* Slide 3: About — keep full-bleed (no side inset) */
   .home-slide-about {
-    inset: 48px 10px 52px 10px !important;
+    inset: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
   }
 
   .home-about-container {
@@ -11120,9 +11234,11 @@ select option {
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   }
 
-  /* Slide 3: About SetSail on Phone */
+  /* Slide 3: About — keep full-bleed (no side inset) */
   .home-slide-about {
-    inset: 48px 10px 52px 10px !important;
+    inset: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
   }
 
   .home-about-container {
@@ -11617,8 +11733,33 @@ select option {
       color: #38bdf8 !important;
       transform: translateY(-1px);
     }
-    .home-hud-login-btn.signed-in .home-hud-text {
+    .home-hud-login-btn.signed-in .home-hud-text,
+    .home-hud-login-btn.logged-in .home-hud-text {
       color: #34d399 !important;
+      text-transform: none !important;
+      letter-spacing: 0.02em !important;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .home-hud-auth-avatar {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 18px !important;
+      height: 18px !important;
+      border-radius: 50% !important;
+      overflow: hidden !important;
+      flex-shrink: 0 !important;
+      font-size: 0.62rem !important;
+      font-weight: 800 !important;
+      background: transparent;
+    }
+    .home-hud-auth-avatar.is-photo {
+      width: 22px !important;
+      height: 22px !important;
+      box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.45);
     }
     /* 4. Settings Top Account & Google Login Card */
     .settings-account-card {
@@ -11629,6 +11770,16 @@ select option {
       padding: 16px 18px !important;
       margin-bottom: 4px !important;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.38) !important;
+    }
+    [data-theme="light"] .settings-account-card {
+      background: linear-gradient(145deg, #ffffff, #f8fafc) !important;
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06) !important;
+    }
+    [data-theme="light"] .settings-language-card {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06) !important;
     }
     .settings-account-layout {
       display: grid;
@@ -11859,7 +12010,7 @@ select option {
               <div class="home-hud-pill home-hud-left" id="homeHudLeftSlot" style="grid-column:1 !important;justify-self:start !important;position:relative !important;min-width:0 !important;">
                 <div class="hud-left-brand-wrap" id="homeHudLeftBrand">
                   <button type="button" class="home-hud-login-btn" id="homeHudLeftLoginBtn" title="Sign in or manage your SetSail Account (Google OAuth / Bridge Profile)">
-                    <span class="home-hud-icon" style="display:inline-flex;align-items:center;"><svg class="setsail-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg></span>
+                    <span class="home-hud-icon home-hud-auth-avatar" id="homeHudAuthAvatar" aria-hidden="true"><svg class="setsail-icon" viewBox="0 0 24 24" width="14" height="14"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg></span>
                     <span class="home-hud-text" id="homeHudLeftLoginText" data-i18n="btn_google_signin">Sign-In</span>
                   </button>
                 </div>
@@ -11877,7 +12028,7 @@ select option {
               <!-- Column 3 (Right): My Vessel profile (no auto GPS prompt) -->
               <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" style="grid-column:3 !important;justify-self:end !important;margin-left:auto !important;position:relative !important;min-width:0 !important;" title="My Vessel — name, position &amp; AIS details">
                 <button type="button" class="home-vessel-hud-btn" id="homeVesselHudBtn" aria-haspopup="dialog" aria-expanded="false">
-                  <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l4.5 7.5v10l-4.5 2.5-4.5-2.5v-10L12 2z" fill="currentColor" fill-opacity="0.16" stroke="currentColor" stroke-width="1.6"/><line x1="12" y1="2" x2="12" y2="9" stroke="#f05a36" stroke-width="1.8"/><circle cx="12" cy="13.5" r="1.8" fill="#f05a36"/></svg></span>
+                  <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.4 14.2 H15.6 L21.2 16.6 L19.6 19.2 H4.2 Z" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/><path d="M12.4 14.2 V9.2 H18 V14.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><rect x="14.2" y="5.4" width="2.4" height="3.8" rx="0.35" fill="#f05a36"/><path d="M3.4 16.85 H19.2" stroke="#f05a36" stroke-width="1.35" stroke-linecap="round"/><circle cx="7.2" cy="16.2" r="0.55" fill="currentColor" opacity="0.55"/><circle cx="10.2" cy="16.2" r="0.55" fill="currentColor" opacity="0.55"/></svg></span>
                   <span class="home-hud-text" id="homeVesselHudCoords">NOT SET</span>
                 </button>
                 <div class="ntm-popover ntm-vessel-popover home-vessel-popover" id="homeVesselPopover" role="dialog" aria-label="My Vessel settings">
@@ -11992,7 +12143,7 @@ select option {
                   <span class="home-tool-desc">AI Passage Planner</span>
                   <span class="home-tool-badge" style="background:rgba(240,90,54,0.18);color:#f05a36;border:1px solid rgba(240,90,54,0.35);">Beta AI</span>
                   <div class="home-tool-hover-drawer">
-                    <p class="home-tool-hover-text">Automated sea-lane &amp; TSS passage generation with coastline avoidance, active NtM hazard auditing, cyclone CPA weather checks, and GPX / ECDIS waypoint export.</p>
+                    <p class="home-tool-hover-text">Dual-core passage planner: deterministic sea-graph routing (land-safe Dijkstra, Suez/Cape auto, NtM/weather costs) + AI intent parsing; GPX / ECDIS export.</p>
                     <div class="home-tool-hover-tags">
                       <span class="home-tool-hover-tag">TSS Sea Lanes</span>
                       <span class="home-tool-hover-tag">Weather CPA</span>
@@ -12042,54 +12193,6 @@ select option {
               </div>
             </section>
 
-            <!-- SLIDE 4: ABOUT SETSAIL -->
-            <section class="home-slide-about" id="homeSlideAbout" aria-label="About SetSail">
-              <div class="home-about-container">
-                <div class="home-about-left">
-                  <div class="saas-eyebrow-pill"><span class="saas-eyebrow-dot"></span>ABOUT SETSAIL</div>
-                  <h2 class="home-about-headline">Built for the Modern <span>Navigation Bridge.</span></h2>
-                  <p class="home-about-lead">
-                    SetSail unifies hydrographic chart corrections, celestial compass verification, synoptic weather routing, and port depth intelligence into a single offline-first maritime platform &mdash; designed to reduce bridge workload and elevate situational awareness at sea.
-                  </p>
-                  <div class="home-about-pillars">
-                    <div class="home-about-pillar">
-                      <div class="home-about-pillar-num">01 &bull; ARCHITECTURE</div>
-                      <div class="home-about-pillar-title">Offline-First Engine</div>
-                      <div class="home-about-pillar-desc">Zero-latency operation on open-ocean passages regardless of satellite connectivity.</div>
-                    </div>
-                    <div class="home-about-pillar">
-                      <div class="home-about-pillar-num">02 &bull; PRECISION</div>
-                      <div class="home-about-pillar-title">Hydrographic Sync</div>
-                      <div class="home-about-pillar-desc">Automated ingestion of weekly Admiralty notices, ephemeris tables &amp; 00:00Z weather.</div>
-                    </div>
-                    <div class="home-about-pillar">
-                      <div class="home-about-pillar-num">03 &bull; ERGONOMICS</div>
-                      <div class="home-about-pillar-title">Bridge-Verified UX</div>
-                      <div class="home-about-pillar-desc">Instant dark night-watch and high-contrast daylight modes tailored for watchkeepers.</div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Right Column: Visual Media Showcase (Photo / Video Ready) -->
-                <div class="home-about-visual-card">
-                  <div class="home-about-visual-topbar">
-                    <div class="visual-window-dots"><span></span><span></span><span></span></div>
-                    <span>SETSAIL VISUAL SHOWCASE &bull; BRIDGE CORE</span>
-                  </div>
-                  <div class="home-about-media-slot" id="homeAboutMediaSlot">
-                    <div class="about-radar-rings">
-                      <div class="about-radar-sweep"></div>
-                      <div class="about-radar-ring r1"></div>
-                      <div class="about-radar-ring r2"></div>
-                      <div class="about-radar-ring r3"></div>
-                      <picture><source srcset="assets/SetSail LOGOS/setsail_logo_square.webp" type="image/webp" /><img src="assets/SetSail LOGOS/setsail_logo_square.png" alt="SetSail" style="width:48px;height:48px;position:relative;z-index:2;filter:drop-shadow(0 0 14px rgba(240,90,54,0.5));" /></picture>
-                    </div>
-                    <div class="about-media-placeholder-caption">Integrated Maritime Visual &bull; Photo / Video Slot</div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
             <!-- SLIDE 4: NARROW INFINITE MARQUEE OF RECOGNIZABLE SOURCES (Transparent Background Logos) -->
             <section class="home-slide-sources" id="homeSlideSources" aria-label="Integrated Maritime Data Sources">
               <div class="home-sources-header">
@@ -12113,7 +12216,7 @@ select option {
                   <div class="source-authority-logo" title="Digitraffic / Fintraffic"><img class="source-authority-img source-authority-img--mark source-authority-img--on-light" src="assets/authority-logos/digitraffic-fintraffic.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/digitraffic-fintraffic.png'" alt="Fintraffic" loading="eager" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">DIGITRAFFIC</span><span class="source-logo-sub">Baltic AIS</span></div></div>
                   <div class="source-authority-logo is-logo-only" title="CARTO Voyager Basemap"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/carto.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/carto.png'" alt="CARTO" loading="eager" decoding="async" /></div>
                   <div class="source-authority-logo" title="OpenSeaMap"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/openseamap.webp" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/openseamap.webp'" alt="OpenSeaMap" loading="eager" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">OPENSEAMAP</span><span class="source-logo-sub">Seamark Overlay</span></div></div>
-<div class="source-authority-logo" title="USNO"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/usno.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/usno.png'" alt="USNO" loading="eager" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">USNO</span><span class="source-logo-sub">Nautical Almanac</span></div></div>
+                  <div class="source-authority-logo" title="USNO"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/usno.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/usno.png'" alt="USNO" loading="eager" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">USNO</span><span class="source-logo-sub">Nautical Almanac</span></div></div>
                   <div class="source-authority-logo" title="IERS"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/iers.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/iers.png'" alt="IERS" loading="eager" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">IERS</span><span class="source-logo-sub">Earth Rotation</span></div></div>
                   </div>
                   <div class="home-sources-marquee-set" aria-hidden="true">
@@ -12131,7 +12234,7 @@ select option {
                   <div class="source-authority-logo" title="Digitraffic / Fintraffic"><img class="source-authority-img source-authority-img--mark source-authority-img--on-light" src="assets/authority-logos/digitraffic-fintraffic.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/digitraffic-fintraffic.png'" alt="Fintraffic" loading="eager" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">DIGITRAFFIC</span><span class="source-logo-sub">Baltic AIS</span></div></div>
                   <div class="source-authority-logo is-logo-only" title="CARTO Voyager Basemap"><img class="source-authority-img source-authority-img--wide" src="assets/authority-logos/carto.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/carto.png'" alt="CARTO" loading="eager" decoding="async" /></div>
                   <div class="source-authority-logo" title="OpenSeaMap"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/openseamap.webp" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/openseamap.webp'" alt="OpenSeaMap" loading="eager" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">OPENSEAMAP</span><span class="source-logo-sub">Seamark Overlay</span></div></div>
-<div class="source-authority-logo" title="USNO"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/usno.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/usno.png'" alt="USNO" loading="eager" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">USNO</span><span class="source-logo-sub">Nautical Almanac</span></div></div>
+                  <div class="source-authority-logo" title="USNO"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/usno.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/usno.png'" alt="USNO" loading="eager" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">USNO</span><span class="source-logo-sub">Nautical Almanac</span></div></div>
                   <div class="source-authority-logo" title="IERS"><img class="source-authority-img source-authority-img--mark" src="assets/authority-logos/iers.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/assets/authority-logos/iers.png'" alt="IERS" loading="eager" decoding="async" /><div class="source-logo-text-group"><span class="source-logo-name">IERS</span><span class="source-logo-sub">Earth Rotation</span></div></div>
                   </div>
                 </div>
@@ -12166,6 +12269,110 @@ select option {
             </footer>
             </div><!-- end .home-bottom-dock -->
           </div>
+            <!-- SLIDE 4: ABOUT — full-bleed mosaic strip + square logo + copy below -->
+            <section class="home-slide-about" id="homeSlideAbout" aria-label="About SetSail">
+              <div class="home-about-life">
+                <div class="about-mosaic-band">
+                  <div class="about-mosaic" id="homeAboutMosaic" aria-hidden="true">
+                  <figure class="about-moz-tile" data-tile-i="0"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="1"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="2"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="3"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="4"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="5"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="6"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="7"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="8"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="9"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="10"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="11"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="12"><img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="13"><img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="14"><img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="15"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="16"><img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="17"><img src="https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="18"><img src="https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="19"><img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="20"><img src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="21"><img src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="22"><img src="https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="23"><img src="https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="24"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="25"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="26"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="27"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="28"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="29"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="30"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="31"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="32"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="33"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="34"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="35"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="36"><img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="37"><img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="38"><img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="39"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="40"><img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="41"><img src="https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="42"><img src="https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="43"><img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="44"><img src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="45"><img src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="46"><img src="https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="47"><img src="https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="48"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="49"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="50"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="51"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="52"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="53"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="54"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="55"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="56"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="57"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="58"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="59"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="60"><img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="61"><img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="62"><img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="63"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="64"><img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="65"><img src="https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="66"><img src="https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="67"><img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="68"><img src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="69"><img src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="70"><img src="https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="71"><img src="https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="72"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="73"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="74"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="75"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="76"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="77"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="78"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  <figure class="about-moz-tile" data-tile-i="79"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
+                  </div>
+                  <div class="about-logo-over" id="homeAboutLogoFinale" aria-hidden="true">
+                    <picture>
+                      <source srcset="assets/SetSail LOGOS/setsail_logo_square.webp" type="image/webp" />
+                      <img src="assets/SetSail LOGOS/setsail_logo_square.png" alt="SetSail" width="112" height="112" />
+                    </picture>
+                  </div>
+                </div>
+                <div class="about-copy" id="homeAboutCopy">
+                  <p class="about-kicker">About SetSail</p>
+                  <h2 class="about-headline">Made for the quiet hours when the chart is open and <em>the sea is loud.</em></h2>
+                  <p class="about-body">
+                    SetSail sits with the watch — <strong>NtM before coffee</strong>, a gyro check after breakfast, cyclone tracks before night orders.
+                    Not a sales pitch. A working companion for the day at sea.
+                  </p>
+                </div>
+              </div>
+            </section>
+
         </div>
       </div><!-- end #tab-home -->
 
@@ -12828,7 +13035,14 @@ select option {
             <button type="button" class="ntm-mview-btn" id="ntmViewMapBtn" title="Switch to Chart View"><svg class="setsail-icon" viewBox="0 0 24 24"><polygon points="1 6 8 2 16 6 23 2 23 18 16 22 8 18 1 22 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg> Chart</button>
           </div>
 
-          <div class="ntm-toolbar-right">
+          <div class="ntm-toolbar-right" style="flex:1;justify-content:flex-end;min-width:0;gap:0.45rem;">
+            <div class="ntm-wx-cursor-tile" id="ntmWxCursorTile" hidden title="NDBC conditions at cursor (nearest buoy or interpolation)">
+              <span class="ntm-wx-cursor-badge">NDBC</span>
+              <div class="ntm-wx-cursor-body" id="ntmWxCursorBody">
+                <span class="wx-chip wx-muted">Move cursor over ocean…</span>
+              </div>
+              <span class="ntm-wx-cursor-meta" id="ntmWxCursorMeta"></span>
+            </div>
 
 
 
@@ -14043,11 +14257,11 @@ select option {
                     <svg class="setsail-icon" viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#38bdf8;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke-width="1.8"/><circle cx="12" cy="7" r="4" fill="none" stroke="#f05a36" stroke-width="1.8"/></svg>
                   </div>
                   <div>
-                    <div class="min-card-title" style="margin-bottom:2px;" id="settingsAccountHeading">SetSail Account &amp; Cloud Bridge Sync</div>
-                    <div class="settings-account-sub" id="settingsAccountSub" style="font-size:0.72rem;color:#94a3b8;">Sign in with your Google Account to automatically save and sync your SetRoute passage plans, chart edits, vessel position &amp; SetNews preferences</div>
+                    <div class="min-card-title" style="margin-bottom:2px;" id="settingsAccountHeading" data-i18n="settings_account_heading">SetSail Account</div>
+                    <div class="settings-account-sub" id="settingsAccountSub" data-i18n="settings_account_sub" class="settings-account-sub" style="font-size:0.72rem;color:var(--muted);">Sign in with Google to sync routes, chart edits and vessel data.</div>
                   </div>
                 </div>
-                <span class="settings-account-status-pill" id="settingsAccountStatusBadge" style="font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(148,163,184,0.14);color:#cbd5e1;border:1px solid rgba(148,163,184,0.3);letter-spacing:0.04em;">GUEST MODE</span>
+                <span class="settings-account-status-pill" id="settingsAccountStatusBadge" class="settings-account-status-pill" style="font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(148,163,184,0.14);color:var(--muted);border:1px solid var(--line);letter-spacing:0.04em;">GUEST MODE</span>
               </div>
 
               <!-- Signed-Out Google OAuth Controls (Official Google Sign-In Only) -->
@@ -14055,8 +14269,8 @@ select option {
                 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                   <div id="googleGsiButtonContainer" style="min-height:40px;display:flex;align-items:center;"></div>
                 </div>
-                <div style="font-size:0.66rem;color:#94a3b8;line-height:1.38;">
-                  Official Google Identity Services (OAuth 2.0) &bull; Instant Bridge Workspace Persistence
+                <div style="font-size:0.66rem;color:var(--muted);line-height:1.38;">
+                  Official Google Sign-In
                 </div>
               </div>
 
@@ -14066,7 +14280,7 @@ select option {
                   <div style="display:flex;align-items:center;gap:10px;">
                     <div id="settingsAuthProfileAvatar" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0284c7,#10b981);color:#fff;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;overflow:hidden;">G</div>
                     <div>
-                      <div style="font-size:0.8rem;font-weight:700;color:#f8fafc;" id="settingsAuthProfileName">Bridge Officer</div>
+                      <div style="font-size:0.8rem;font-weight:700;color:var(--text);" id="settingsAuthProfileName">Bridge Officer</div>
                       <div style="font-size:0.69rem;color:#34d399;" id="settingsAuthProfileEmail">Google Account Synced</div>
                     </div>
                   </div>
@@ -14096,8 +14310,8 @@ select option {
                     🌐
                   </div>
                   <div>
-                    <div class="min-card-title" style="margin-bottom:2px;" data-i18n="lang_settings_title" id="settingsLangHeading">Regional Language &amp; Bridge Localization</div>
-                    <div style="font-size:0.72rem;color:#94a3b8;" data-i18n="lang_settings_sub" id="settingsLangSub">Select your preferred bridge operating language. All suite tabs, map overlays, briefings, and telemetry adapt immediately.</div>
+                    <div class="min-card-title" style="margin-bottom:2px;" data-i18n="lang_settings_title" id="settingsLangHeading" data-i18n="lang_settings_title">Language</div>
+                    <div style="font-size:0.72rem;color:var(--muted);" data-i18n="lang_settings_sub" id="settingsLangSub">Applies to all tabs and map overlays.</div>
                   </div>
                 </div>
                 <span id="currentLangBadge" style="font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.3);letter-spacing:0.04em;">EN • ENGLISH</span>
@@ -14815,7 +15029,7 @@ select option {
 
 
 
-    const STARS = [{"n": "Acamar", "ra": 2.97111111, "d": -40.31}, {"n": "Achernar", "ra": 1.62861111, "d": -57.24333333}, {"n": "Acrux", "ra": 12.44333333, "d": -63.09166667}, {"n": "Adhara", "ra": 6.9775, "d": -28.97333333}, {"n": "Aldebaran", "ra": 4.59888889, "d": 16.50833333}, {"n": "Alioth", "ra": 12.9, "d": 55.95666667}, {"n": "Alkaid", "ra": 13.79194444, "d": 49.31166667}, {"n": "Al Na'ir", "ra": 22.13638889, "d": -46.965}, {"n": "Alnilam", "ra": 5.60361111, "d": -1.195}, {"n": "Alphard", "ra": 9.46, "d": -8.65833333}, {"n": "Alphecca", "ra": 15.5775, "d": 26.715}, {"n": "Alpheratz", "ra": 0.13944444, "d": 29.09166667}, {"n": "Altair", "ra": 19.84583333, "d": 8.86833333}, {"n": "Ankaa", "ra": 0.43777778, "d": -42.31166667}, {"n": "Antares", "ra": 16.48944444, "d": -26.42833333}, {"n": "Arcturus", "ra": 14.26083333, "d": 19.18666667}, {"n": "Atria", "ra": 16.80972222, "d": -69.02333333}, {"n": "Avior", "ra": 8.37583333, "d": -59.50833333}, {"n": "Bellatrix", "ra": 5.41888889, "d": 6.34833333}, {"n": "Betelgeuse", "ra": 5.91972222, "d": 7.405}, {"n": "Canopus", "ra": 6.39972222, "d": -52.69833333}, {"n": "Capella", "ra": 5.27833333, "d": 45.99833333}, {"n": "Deneb", "ra": 20.69, "d": 45.28166667}, {"n": "Denebola", "ra": 11.8175, "d": 14.57166667}, {"n": "Diphda", "ra": 0.72611111, "d": -17.99}, {"n": "Dubhe", "ra": 11.06194444, "d": 61.74666667}, {"n": "Elnath", "ra": 5.43833333, "d": 28.60666667}, {"n": "Eltanin", "ra": 17.94277778, "d": 51.48833333}, {"n": "Enif", "ra": 21.73611111, "d": 9.875}, {"n": "Formalhaut", "ra": 22.96027778, "d": -29.62666667}, {"n": "Gacrux", "ra": 12.51944444, "d": -57.10666667}, {"n": "Gienah", "ra": 12.26333333, "d": -17.53833333}, {"n": "Hadar", "ra": 14.06333333, "d": -60.36666667}, {"n": "Hamal", "ra": 2.11944444, "d": 23.46333333}, {"n": "Kaus Austr.", "ra": 18.40194444, "d": -34.38333333}, {"n": "Kochab", "ra": 14.84416667, "d": 74.15333333}, {"n": "Markab", "ra": 23.07888889, "d": 15.205}, {"n": "Menkar", "ra": 3.03805556, "d": 4.08666667}, {"n": "Menkent", "ra": 14.11111111, "d": -36.365}, {"n": "Miaplacidus", "ra": 9.22111111, "d": -69.71333333}, {"n": "Mirfak", "ra": 3.40555556, "d": 49.86166667}, {"n": "Nunki", "ra": 18.92027778, "d": -26.295}, {"n": "Peacock", "ra": 20.42638889, "d": -56.73666667}, {"n": "Pollux", "ra": 7.75555556, "d": 28.025}, {"n": "Procyon", "ra": 7.65527778, "d": 5.225}, {"n": "Rasalhague", "ra": 17.58166667, "d": 12.56166667}, {"n": "Regulus", "ra": 10.13944444, "d": 11.96666667}, {"n": "Rigel", "ra": 5.2425, "d": -8.205}, {"n": "Rigil Kent", "ra": 14.66027778, "d": -60.83}, {"n": "Sabik", "ra": 17.17222222, "d": -15.72333333}, {"n": "Schedar", "ra": 0.675, "d": 56.54}, {"n": "Shaula", "ra": 17.55944444, "d": -37.10166667}, {"n": "Sirius", "ra": 6.75277778, "d": -16.715}, {"n": "Spica", "ra": 13.41972222, "d": -11.15833333}, {"n": "Suhail", "ra": 9.13361111, "d": -43.43}, {"n": "Vega", "ra": 18.615, "d": 38.78333333}, {"n": "Zuben'ubi", "ra": 14.8475, "d": -16.03833333}];
+    const STARS = [{"n": "Acamar", "ra": 2.97111111, "d": -40.31}, {"n": "Achernar", "ra": 1.62861111, "d": -57.24333333}, {"n": "Acrux", "ra": 12.44333333, "d": -63.09166667}, {"n": "Adhara", "ra": 6.9775, "d": -28.97333333}, {"n": "Aldebaran", "ra": 4.59888889, "d": 16.50833333}, {"n": "Alioth", "ra": 12.9, "d": 55.95666667}, {"n": "Alkaid", "ra": 13.79194444, "d": 49.31166667}, {"n": "Al Na'ir", "ra": 22.13638889, "d": -46.965}, {"n": "Alnilam", "ra": 5.61361111, "d": -1.195}, {"n": "Alphard", "ra": 9.46, "d": -8.65833333}, {"n": "Alphecca", "ra": 15.6175, "d": 26.715}, {"n": "Alpheratz", "ra": 0.13944444, "d": 29.09166667}, {"n": "Altair", "ra": 19.84583333, "d": 8.86833333}, {"n": "Ankaa", "ra": 0.43777778, "d": -42.31166667}, {"n": "Antares", "ra": 16.48944444, "d": -26.42833333}, {"n": "Arcturus", "ra": 14.26083333, "d": 19.18666667}, {"n": "Atria", "ra": 16.80972222, "d": -69.02333333}, {"n": "Avior", "ra": 8.37583333, "d": -59.50833333}, {"n": "Bellatrix", "ra": 5.41888889, "d": 6.34833333}, {"n": "Betelgeuse", "ra": 5.91972222, "d": 7.405}, {"n": "Canopus", "ra": 6.39972222, "d": -52.69833333}, {"n": "Capella", "ra": 5.27833333, "d": 45.99833333}, {"n": "Deneb", "ra": 20.69, "d": 45.28166667}, {"n": "Denebola", "ra": 11.8175, "d": 14.57166667}, {"n": "Diphda", "ra": 0.72611111, "d": -17.99}, {"n": "Dubhe", "ra": 11.06194444, "d": 61.74666667}, {"n": "Elnath", "ra": 5.43833333, "d": 28.60666667}, {"n": "Eltanin", "ra": 17.94277778, "d": 51.48833333}, {"n": "Enif", "ra": 21.73611111, "d": 9.875}, {"n": "Formalhaut", "ra": 22.96027778, "d": -29.62666667}, {"n": "Gacrux", "ra": 12.51944444, "d": -57.10666667}, {"n": "Gienah", "ra": 12.26333333, "d": -17.53833333}, {"n": "Hadar", "ra": 14.06333333, "d": -60.36666667}, {"n": "Hamal", "ra": 2.11944444, "d": 23.46333333}, {"n": "Kaus Austr.", "ra": 18.40194444, "d": -34.38333333}, {"n": "Kochab", "ra": 14.84416667, "d": 74.15333333}, {"n": "Markab", "ra": 23.07888889, "d": 15.205}, {"n": "Menkar", "ra": 3.03805556, "d": 4.08666667}, {"n": "Menkent", "ra": 14.11111111, "d": -36.365}, {"n": "Miaplacidus", "ra": 9.22111111, "d": -69.71333333}, {"n": "Mirfak", "ra": 3.40555556, "d": 49.86166667}, {"n": "Nunki", "ra": 18.92027778, "d": -26.295}, {"n": "Peacock", "ra": 20.42638889, "d": -56.73666667}, {"n": "Pollux", "ra": 7.75555556, "d": 28.025}, {"n": "Procyon", "ra": 7.65527778, "d": 5.225}, {"n": "Rasalhague", "ra": 17.58166667, "d": 12.56166667}, {"n": "Regulus", "ra": 10.13944444, "d": 11.96666667}, {"n": "Rigel", "ra": 5.2425, "d": -8.205}, {"n": "Rigil Kent", "ra": 14.66027778, "d": -60.83}, {"n": "Sabik", "ra": 17.17222222, "d": -15.72333333}, {"n": "Schedar", "ra": 0.675, "d": 56.54}, {"n": "Shaula", "ra": 17.55944444, "d": -37.10166667}, {"n": "Sirius", "ra": 6.75277778, "d": -16.715}, {"n": "Spica", "ra": 13.41972222, "d": -11.15833333}, {"n": "Suhail", "ra": 9.13361111, "d": -43.43}, {"n": "Vega", "ra": 18.615, "d": 38.78333333}, {"n": "Zuben'ubi", "ra": 14.8475, "d": -16.03833333}];
 
 
 
@@ -19579,28 +19793,21 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
       <!-- Modal: Weather overlay info -->
       <div class="ntm-modal" id="weatherOverlayModal">
-        <div class="ntm-modal-box" style="max-width:380px;">
+        <div class="ntm-modal-box" style="max-width:320px;">
           <div class="ntm-modal-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:10px;">
-            <h3 style="margin:0;font-size:0.9rem;color:#f1f5f9;">Weather</h3>
+            <h3 style="margin:0;font-size:0.9rem;color:#f1f5f9;">Weather layers</h3>
             <button type="button" class="ntm-modal-close" id="weatherOverlayModalClose" title="Close" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">&#10005;</button>
           </div>
           <div style="font-size:0.78rem;color:#cad8f4;line-height:1.45;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-              <span style="font-weight:700;color:#fde047;" id="weatherModalCycleLabel">Synoptic 6h</span>
-              <span style="font-size:0.68rem;background:#10b981;color:#fff;padding:2px 7px;border-radius:4px;font-weight:700;" id="weatherModalStatusBadge">LIVE</span>
-            </div>
-            <div id="weatherModalLiveMeta" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;font-size:0.72rem;"></div>
-            <div style="font-size:0.68rem;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Layers on chart</div>
-            <div id="weatherModalLayerChecks" style="display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-bottom:10px;font-size:0.72rem;color:#e2e8f0;">
+            <div id="weatherModalLayerChecks" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-bottom:12px;font-size:0.75rem;color:#e2e8f0;">
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerCyclones" checked> Cyclones</label>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerWaves" checked> Waves</label>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerOpc" checked> OPC Gale/Storm</label>
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerBuoys" checked> NDBC buoys</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;" title="Read NDBC at chart cursor (no buoy icons on map)"><input type="checkbox" id="wxLayerBuoys" checked> NDBC at cursor</label>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerPressure" checked> Pressure MSL</label>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerWinds" checked> Wind</label>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerCurrents" checked> Ocean currents</label>
             </div>
-            <div style="font-size:0.65rem;color:#64748b;margin-bottom:10px;">NOAA NHC · OPC · NDBC · JTWC · JMA · Open-Meteo / ECMWF</div>
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <button type="button" class="ntm-btn-glass" id="btnRefreshWeatherModal" style="padding:4px 10px;font-size:0.72rem;">Refresh</button>
               <button type="button" class="secondary" id="weatherOverlayModalCloseBtn" style="margin-top:0;padding:4px 14px;font-size:0.78rem;">Close</button>
@@ -19762,22 +19969,23 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.55"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.55" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.55"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.69"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.69" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.69"></script>
   <script>
+    // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.55",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.69",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.55"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.55"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.55"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.69"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.69"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.69"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -19855,7 +20063,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.55"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.69"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -19900,6 +20108,69 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           '</div>';
         grid.appendChild(btn);
       };
+
+
+      // About mosaic: full-bleed strip — load all tiles + shuffle animation + logo over strip
+      window.__setsailAboutShuffleTimer = window.__setsailAboutShuffleTimer || null;
+      window.__setsailUpdateAboutMosaic = function(aboutP) {
+        const slide = document.getElementById('homeSlideAbout');
+        if (!slide) return;
+        const p = Math.max(0, Math.min(1, aboutP || 0));
+        slide.style.setProperty('--about-p', String(p.toFixed(3)));
+        // Square logo visible with the About beat (not only at the very end)
+        const logo = Math.max(0, Math.min(1, (p - 0.12) / 0.5));
+        slide.style.setProperty('--about-logo', String(logo.toFixed(3)));
+
+        const mosaic = document.getElementById('homeAboutMosaic');
+        if (!mosaic) return;
+        const imgs = mosaic.querySelectorAll('img');
+        // Ensure every tile has a resolved src (migrate any leftover data-src)
+        imgs.forEach((img) => {
+          const ds = img.getAttribute('data-src');
+          if (ds && !img.getAttribute('src')) {
+            img.src = ds;
+            img.removeAttribute('data-src');
+          }
+        });
+
+        const startShuffle = function() {
+          if (window.__setsailAboutShuffleTimer) return;
+          window.__setsailAboutShuffleTimer = setInterval(function() {
+            const list = Array.from(mosaic.querySelectorAll('img')).filter(function(im) {
+              return im.getAttribute('src');
+            });
+            if (list.length < 4) return;
+            // Swap 3–5 random pairs each tick
+            const swaps = 3 + Math.floor(Math.random() * 3);
+            for (let s = 0; s < swaps; s++) {
+              const a = list[Math.floor(Math.random() * list.length)];
+              const b = list[Math.floor(Math.random() * list.length)];
+              if (a === b) continue;
+              const ta = a.closest('.about-moz-tile');
+              const tb = b.closest('.about-moz-tile');
+              if (ta) ta.classList.add('is-shuffling');
+              if (tb) tb.classList.add('is-shuffling');
+              const tmp = a.src;
+              a.src = b.src;
+              b.src = tmp;
+              setTimeout(function() {
+                if (ta) ta.classList.remove('is-shuffling');
+                if (tb) tb.classList.remove('is-shuffling');
+              }, 320);
+            }
+          }, 1100);
+        };
+        const stopShuffle = function() {
+          if (window.__setsailAboutShuffleTimer) {
+            clearInterval(window.__setsailAboutShuffleTimer);
+            window.__setsailAboutShuffleTimer = null;
+          }
+        };
+
+        if (p > 0.18) startShuffle();
+        else stopShuffle();
+      };
+
 
       function renderHomeSlideFrame(p) {
         const viewport = document.getElementById('homeHeroViewport');
@@ -20061,11 +20332,16 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           const aboutOut = easeInOutCubic(clamp(t4 / 0.58, 0, 1));
           const aboutAlpha = aboutIn * (1 - aboutOut);
           const aboutY = (1 - aboutIn) * 64 - aboutOut * 72;
-          const aboutScale = 0.94 + 0.06 * aboutIn - 0.05 * aboutOut;
-
           slideAbout.style.opacity = String(aboutAlpha.toFixed(3));
-          slideAbout.style.transform = 'translate3d(0, ' + aboutY.toFixed(1) + 'px, 0) scale(' + aboutScale.toFixed(3) + ')';
+          slideAbout.style.transform = 'translate3d(0, ' + aboutY.toFixed(1) + 'px, 0)';
           slideAbout.style.pointerEvents = aboutAlpha > 0.45 ? 'auto' : 'none';
+          if (typeof window.__setsailUpdateAboutMosaic === 'function') {
+            window.__setsailUpdateAboutMosaic(aboutIn);
+          } else {
+            slideAbout.style.setProperty('--about-p', String(aboutIn.toFixed(3)));
+            const logoP = Math.max(0, Math.min(1, (aboutIn - 0.62) / 0.38));
+            slideAbout.style.setProperty('--about-logo', String(logoP.toFixed(3)));
+          }
         }
 
         // 8. Slide 5: Narrow Infinite Marquee of Recognizable Sources (Appears on t4: 0.30 -> 1.0)
@@ -20234,7 +20510,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.55', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.69', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {

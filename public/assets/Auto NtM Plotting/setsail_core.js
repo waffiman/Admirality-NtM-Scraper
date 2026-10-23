@@ -2825,10 +2825,24 @@ function fmtWxNum(v, digits) {
 function syncNdbcCursorTileVisibility() {
   const tile = document.getElementById("ntmWxCursorTile");
   if (!tile) return;
-  const wxOn = typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.weather;
+  const states = (typeof window !== "undefined" && window.OVERLAY_STATES)
+    ? window.OVERLAY_STATES
+    : (typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES : null);
+  const wxOn = !!(states && states.weather);
   const buoyOn = !(window.WEATHER_SUBFILTERS && window.WEATHER_SUBFILTERS.buoys === false);
-  tile.hidden = !(wxOn && buoyOn);
-  if (tile.hidden) tile.classList.remove("is-live");
+  const show = wxOn && buoyOn;
+  if (show) {
+    tile.hidden = false;
+    tile.removeAttribute("hidden");
+    tile.style.display = "flex";
+    tile.setAttribute("aria-hidden", "false");
+  } else {
+    tile.hidden = true;
+    tile.setAttribute("hidden", "");
+    tile.style.display = "none";
+    tile.setAttribute("aria-hidden", "true");
+    tile.classList.remove("is-live");
+  }
 }
 
 function updateNdbcCursorTile(lat, lon) {

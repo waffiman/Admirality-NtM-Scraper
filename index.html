@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.68" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.69" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -992,7 +992,18 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .ntm-wx-cursor-meta { display: none; }
 }
 @media (max-width: 820px) {
-  .ntm-wx-cursor-tile { display: none !important; }
+  .ntm-wx-cursor-tile {
+    max-width: min(100%, 58vw);
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .ntm-wx-cursor-meta { display: none; }
+}
+.ntm-toolbar-right .ntm-wx-cursor-tile {
+  order: -1;
+  margin-right: auto;
+  flex: 1 1 auto;
+  max-width: min(640px, 52vw);
 }
 
 .ntm-toolbar-left,
@@ -13024,7 +13035,7 @@ select option {
             <button type="button" class="ntm-mview-btn" id="ntmViewMapBtn" title="Switch to Chart View"><svg class="setsail-icon" viewBox="0 0 24 24"><polygon points="1 6 8 2 16 6 23 2 23 18 16 22 8 18 1 22 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg> Chart</button>
           </div>
 
-          <div class="ntm-toolbar-center" id="ntmToolbarCenter" style="flex:1;justify-content:center;min-width:0;">
+          <div class="ntm-toolbar-right" style="flex:1;justify-content:flex-end;min-width:0;gap:0.45rem;">
             <div class="ntm-wx-cursor-tile" id="ntmWxCursorTile" hidden title="NDBC conditions at cursor (nearest buoy or interpolation)">
               <span class="ntm-wx-cursor-badge">NDBC</span>
               <div class="ntm-wx-cursor-body" id="ntmWxCursorBody">
@@ -13032,9 +13043,6 @@ select option {
               </div>
               <span class="ntm-wx-cursor-meta" id="ntmWxCursorMeta"></span>
             </div>
-          </div>
-
-          <div class="ntm-toolbar-right">
 
 
 
@@ -19961,23 +19969,23 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.68"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.68" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.68"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.69"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.69" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.69"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.68",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.69",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.68"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.68"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.68"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.69"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.69"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.69"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20055,7 +20063,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.68"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.69"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20502,7 +20510,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.68', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.69', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
