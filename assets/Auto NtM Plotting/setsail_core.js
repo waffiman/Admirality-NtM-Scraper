@@ -4144,20 +4144,19 @@ function initNtMMap() {
       zoomAnimationThreshold: lowEndMap ? 2 : 8,
       inertia: true,
       inertiaDeceleration: lowEndMap ? 4500 : 3000,
-      worldCopyJump: false,
-      maxBounds: [[-85, -180], [85, 180]],
-      maxBoundsViscosity: 1.0
+      // Wrap the same world (objects stay with you across ±180°); do not clamp to one globe copy
+      worldCopyJump: true
     });
 
     // keepBuffer 12 forced huge neighbour-chunk preload → jank on weak PCs.
     // Overlays wait until pan/zoom settles; base still updates during drag but less often.
+    // noWrap:false + worldCopyJump → seamless 360° pan with markers/routes following.
     const tilePerfOpts = {
       keepBuffer: lowEndMap ? 1 : 2,
       updateWhenIdle: false,
       updateWhenZooming: false,
       updateInterval: lowEndMap ? 250 : 150,
-      noWrap: true,
-      bounds: [[-85, -180], [85, 180]]
+      noWrap: false
     };
     const overlayTilePerfOpts = Object.assign({}, tilePerfOpts, {
       keepBuffer: lowEndMap ? 0 : 1,
@@ -8510,8 +8509,7 @@ function createEcdisSimpleBaseLayer() {
     }
   });
   const water = new WaterGrid({
-    noWrap: true,
-    bounds: [[-85, -180], [85, 180]],
+    noWrap: false,
     maxZoom: 19,
     keepBuffer: 2,
     updateWhenZooming: false,
@@ -9649,10 +9647,14 @@ function setSetSailAuthUser(userObj) {
       try {
         syncAgentApiRoutesToProfile();
       } catch (eAgent) {}
+      try {
+        maybeOpenPendingAgentApiKeyModal();
+      } catch (eKey) {}
     } else {
       saveSetSailUserHistory();
       localStorage.removeItem(SETSAIL_AUTH_KEY);
       window.__setsailAgentRoutesCache = [];
+      window.__setsailPendingApiKeyModal = false;
     }
   } catch (e) {}
   syncSetSailAuthUI();
@@ -9671,43 +9673,84 @@ function _setsailGuestHudAvatarHtml() {
 }
 
 function syncSetSailApiCardUI() {
+  const btn = document.getElementById("btnApiShowKey");
+  if (!btn) return;
   const user = getSetSailAuthUser();
-  const guest = document.getElementById("settingsApiGuest");
-  const authed = document.getElementById("settingsApiAuthed");
   const signed = !!(user && (user.email || user.name));
-  if (guest) guest.style.display = signed ? "none" : "flex";
-  if (authed) authed.style.display = signed ? "flex" : "none";
-  if (!signed) {
-    const box = document.getElementById("settingsApiKeyBox");
-    const copyBtn = document.getElementById("btnApiCopyKey");
-    const hideBtn = document.getElementById("btnApiHideKey");
-    if (box) box.style.display = "none";
-    if (copyBtn) copyBtn.style.display = "none";
-    if (hideBtn) hideBtn.style.display = "none";
-    window.__setsailAgentApiKey = null;
+  btn.textContent = signed ? "Show API key" : "Show API key";
+  btn.title = signed
+    ? "Open your scoped Agent API key"
+    : "Sign in with Google, then your API key will appear";
+}
+
+function closeAgentApiKeyModal() {
+  const modal = document.getElementById("setsailAgentApiKeyModal");
+  if (modal) modal.remove();
+}
+
+function openAgentApiKeyModal(payload) {
+  closeAgentApiKeyModal();
+  const key = (payload && payload.apiKey) || window.__setsailAgentApiKey || "";
+  const meta =
+    (payload && payload.metaText) ||
+    ("Scopes: chart.read · route.plan" +
+      (payload && payload.expiresAt
+        ? " · expires " + new Date(payload.expiresAt).toUTCString().replace("GMT", "UTC")
+        : ""));
+  const overlay = document.createElement("div");
+  overlay.id = "setsailAgentApiKeyModal";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.style.cssText =
+    "position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(2,6,23,0.72);backdrop-filter:blur(6px);";
+  overlay.innerHTML =
+    '<div style="width:min(520px,100%);background:rgba(15,23,42,0.96);border:1px solid rgba(250,204,21,0.35);border-radius:14px;padding:1.15rem 1.25rem;box-shadow:0 24px 60px rgba(0,0,0,0.45);">' +
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:0.75rem;">' +
+        '<div><div style="font-size:0.95rem;font-weight:750;color:#f8fafc;">Your SetSail Agent API key</div>' +
+        '<div style="font-size:0.68rem;color:#94a3b8;margin-top:3px;">Treat like a password · chart.read &amp; route.plan only</div></div>' +
+        '<button type="button" id="btnAgentApiModalClose" style="background:transparent;border:none;color:#94a3b8;font-size:1.25rem;cursor:pointer;line-height:1;" aria-label="Close">×</button>' +
+      "</div>" +
+      '<code id="settingsApiKeyValue" style="display:block;padding:0.75rem 0.85rem;border-radius:9px;background:rgba(8,47,73,0.55);border:1px solid rgba(56,189,248,0.28);font-size:0.7rem;line-height:1.45;word-break:break-all;color:#e2e8f0;user-select:all;"></code>' +
+      '<div id="settingsApiKeyMeta" style="margin-top:0.55rem;font-size:0.65rem;color:#94a3b8;"></div>' +
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;flex-wrap:wrap;">' +
+        '<button type="button" class="min-btn-outline" id="btnAgentApiModalCopy" style="padding:7px 12px;font-size:0.74rem;">Copy key</button>' +
+        '<button type="button" class="min-btn-outline" id="btnAgentApiModalDone" style="padding:7px 12px;font-size:0.74rem;">Done</button>' +
+      "</div>" +
+    "</div>";
+  document.body.appendChild(overlay);
+  const valEl = overlay.querySelector("#settingsApiKeyValue");
+  const metaEl = overlay.querySelector("#settingsApiKeyMeta");
+  if (valEl) valEl.textContent = key;
+  if (metaEl) metaEl.textContent = meta;
+  const close = () => closeAgentApiKeyModal();
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) close();
+  });
+  const closeBtn = overlay.querySelector("#btnAgentApiModalClose");
+  const doneBtn = overlay.querySelector("#btnAgentApiModalDone");
+  if (closeBtn) closeBtn.addEventListener("click", close);
+  if (doneBtn) doneBtn.addEventListener("click", close);
+  const copyBtn = overlay.querySelector("#btnAgentApiModalCopy");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(key);
+        if (typeof showSetSailToast === "function") showSetSailToast("API key copied.", "success");
+      } catch (e) {
+        if (typeof showSetSailToast === "function") showSetSailToast("Copy failed — select the key manually.", "warning");
+      }
+    });
   }
 }
 
 async function issueSetSailAgentApiKey() {
   const user = getSetSailAuthUser();
-  if (!user || !user.email) {
-    if (typeof showSetSailToast === "function") {
-      showSetSailToast("Sign in with Google first to create an API key.", "warning");
-    }
-    if (typeof triggerOfficialGoogleSignIn === "function") triggerOfficialGoogleSignIn();
-    return null;
-  }
+  if (!user || !user.email) return null;
   let token = "";
   try {
     token = sessionStorage.getItem("setsail_google_auth_token") || "";
   } catch (e) {}
-  if (!token) {
-    if (typeof showSetSailToast === "function") {
-      showSetSailToast("Re-authenticate with Google to mint an API key…", "info");
-    }
-    if (typeof triggerOfficialGoogleSignIn === "function") triggerOfficialGoogleSignIn();
-    return null;
-  }
+  if (!token) return null;
   try {
     const res = await fetch("/api/v1/keys", {
       method: "POST",
@@ -9723,31 +9766,71 @@ async function issueSetSailAgentApiKey() {
       return null;
     }
     window.__setsailAgentApiKey = data.apiKey;
-    const box = document.getElementById("settingsApiKeyBox");
-    const val = document.getElementById("settingsApiKeyValue");
-    const meta = document.getElementById("settingsApiKeyMeta");
-    const copyBtn = document.getElementById("btnApiCopyKey");
-    const hideBtn = document.getElementById("btnApiHideKey");
-    if (val) val.textContent = data.apiKey;
-    if (meta) {
-      meta.textContent =
-        "Expires " +
-        (data.expiresAt ? new Date(data.expiresAt).toUTCString().replace("GMT", "UTC") : "—") +
-        " · scopes " +
-        ((data.scopes || []).join(", ") || "chart.read, route.plan");
-    }
-    if (box) box.style.display = "block";
-    if (copyBtn) copyBtn.style.display = "inline-flex";
-    if (hideBtn) hideBtn.style.display = "inline-flex";
-    if (typeof showSetSailToast === "function") {
-      showSetSailToast("Agent API key ready — copy it now.", "success");
-    }
-    return data.apiKey;
+    return data;
   } catch (e) {
     if (typeof showSetSailToast === "function") {
       showSetSailToast("API key request failed (network).", "error");
     }
     return null;
+  }
+}
+
+async function showOrMintAgentApiKeyFlow() {
+  const user = getSetSailAuthUser();
+  if (!user || !user.email) {
+    window.__setsailPendingApiKeyModal = true;
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Sign in with Google to get your API key…", "info");
+    }
+    if (typeof triggerOfficialGoogleSignIn === "function") triggerOfficialGoogleSignIn();
+    return;
+  }
+  let token = "";
+  try {
+    token = sessionStorage.getItem("setsail_google_auth_token") || "";
+  } catch (e) {}
+  if (!token) {
+    window.__setsailPendingApiKeyModal = true;
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Confirm Google sign-in to mint the key…", "info");
+    }
+    if (typeof triggerOfficialGoogleSignIn === "function") triggerOfficialGoogleSignIn();
+    return;
+  }
+  const data = await issueSetSailAgentApiKey();
+  if (!data || !data.apiKey) return;
+  openAgentApiKeyModal({
+    apiKey: data.apiKey,
+    expiresAt: data.expiresAt,
+    metaText:
+      "Expires " +
+      (data.expiresAt ? new Date(data.expiresAt).toUTCString().replace("GMT", "UTC") : "—") +
+      " · " +
+      ((data.scopes || []).join(", ") || "chart.read, route.plan")
+  });
+}
+
+async function maybeOpenPendingAgentApiKeyModal() {
+  if (!window.__setsailPendingApiKeyModal) return;
+  const user = getSetSailAuthUser();
+  if (!user || !user.email) return;
+  let token = "";
+  try {
+    token = sessionStorage.getItem("setsail_google_auth_token") || "";
+  } catch (e) {}
+  if (!token) return;
+  window.__setsailPendingApiKeyModal = false;
+  const data = await issueSetSailAgentApiKey();
+  if (data && data.apiKey) {
+    openAgentApiKeyModal({
+      apiKey: data.apiKey,
+      expiresAt: data.expiresAt,
+      metaText:
+        "Expires " +
+        (data.expiresAt ? new Date(data.expiresAt).toUTCString().replace("GMT", "UTC") : "—") +
+        " · " +
+        ((data.scopes || []).join(", ") || "chart.read, route.plan")
+    });
   }
 }
 
@@ -9757,52 +9840,12 @@ function initSetSailAgentApiCard() {
     return;
   }
   window._setsailApiCardBound = true;
-
-  const signInBtn = document.getElementById("btnApiSignInForKey");
-  if (signInBtn) {
-    signInBtn.addEventListener("click", () => {
-      if (typeof triggerOfficialGoogleSignIn === "function") triggerOfficialGoogleSignIn();
-      else {
-        const settingsTab = document.querySelector('.nav-item[data-tab="tab-settings"]');
-        if (settingsTab) settingsTab.click();
-      }
+  const showBtn = document.getElementById("btnApiShowKey");
+  if (showBtn) {
+    showBtn.addEventListener("click", () => {
+      showOrMintAgentApiKeyFlow();
     });
   }
-
-  const revealBtn = document.getElementById("btnApiRevealKey");
-  if (revealBtn) {
-    revealBtn.addEventListener("click", () => {
-      issueSetSailAgentApiKey();
-    });
-  }
-
-  const copyBtn = document.getElementById("btnApiCopyKey");
-  if (copyBtn) {
-    copyBtn.addEventListener("click", async () => {
-      const key = window.__setsailAgentApiKey || (document.getElementById("settingsApiKeyValue") || {}).textContent || "";
-      if (!key) return;
-      try {
-        await navigator.clipboard.writeText(key);
-        if (typeof showSetSailToast === "function") showSetSailToast("API key copied.", "success");
-      } catch (e) {
-        if (typeof showSetSailToast === "function") showSetSailToast("Copy failed — select the key manually.", "warning");
-      }
-    });
-  }
-
-  const hideBtn = document.getElementById("btnApiHideKey");
-  if (hideBtn) {
-    hideBtn.addEventListener("click", () => {
-      const box = document.getElementById("settingsApiKeyBox");
-      const val = document.getElementById("settingsApiKeyValue");
-      if (box) box.style.display = "none";
-      if (val) val.textContent = "";
-      window.__setsailAgentApiKey = null;
-      copyBtn && (copyBtn.style.display = "none");
-      hideBtn.style.display = "none";
-    });
-  }
-
   syncSetSailApiCardUI();
 }
 
