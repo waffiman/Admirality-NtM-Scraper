@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.71" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.72" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -7331,6 +7331,47 @@ svg.leaflet-image-layer.leaflet-interactive path {
   font-weight: 600;
 }
 
+.about-founder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin: 0.85rem auto 0;
+  max-width: 100%;
+  text-align: left;
+  pointer-events: none;
+}
+.about-founder-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 18%;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(248, 250, 252, 0.28);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  background: #0b1220;
+}
+.about-founder-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  min-width: 0;
+}
+.about-founder-name {
+  font-family: "Outfit", "Segoe UI", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: #e2e8f0;
+  letter-spacing: 0.01em;
+}
+.about-founder-role {
+  font-family: "Outfit", "Segoe UI", sans-serif;
+  font-size: 0.62rem;
+  line-height: 1.3;
+  color: #94a3b8;
+}
+
 [data-theme="light"] .about-mosaic-band { background: #e2e8f0; }
 [data-theme="light"] .about-logo-over {
   background: radial-gradient(ellipse 38% 85% at 50% 50%, rgba(248, 250, 252, 0.7) 0%, rgba(248, 250, 252, 0.12) 52%, transparent 70%);
@@ -7339,6 +7380,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
 [data-theme="light"] .about-headline em { color: #c2410c; }
 [data-theme="light"] .about-body { color: #334155; }
 [data-theme="light"] .about-body strong { color: #0f172a; }
+[data-theme="light"] .about-founder-photo {
+  border-color: rgba(15, 23, 42, 0.18);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+[data-theme="light"] .about-founder-name { color: #0f172a; }
+[data-theme="light"] .about-founder-role { color: #64748b; }
 
 @media (max-width: 900px) {
   .home-slide-about { inset: 0 !important; left: 0 !important; right: 0 !important; }
@@ -12351,17 +12398,23 @@ select option {
                     </picture>
                   </div>
                 </div>
-                                <div class="about-copy" id="homeAboutCopy">
+                <div class="about-copy" id="homeAboutCopy">
                   <p class="about-kicker">About SetSail</p>
-                  <h2 class="about-headline">Built on practice — between the chart table and the code editor.</h2>
+                  <h2 class="about-headline">Built where the chart is open and <em>the bandwidth is thin.</em></h2>
                   <p class="about-body">
-                    SetSail was made by <strong>Mykhailo Byshliaha</strong> — cadet and future officer, and co-founder of an IT agency — during sea practice on the LPG carrier <strong>IINO INEOS VESTA</strong>.
-                    The site was written in China, the United States, and mid-Pacific and mid-Atlantic watches, over the thin, limited thread of shipboard satellite internet.
+                    SetSail grew out of sea practice on the LPG carrier <strong>IINO INEOS VESTA</strong> — written between ports in China and the United States, and on watches mid-Pacific and mid-Atlantic, over limited shipboard satellite internet.
                   </p>
                   <p class="about-body about-body-gap">
-                    What made it possible sits at a seam: navigation learned at the <strong>Maritime University of Szczecin</strong>, and the craft of shipping working software.
-                    A pure programmer rarely feels the bridge; a pure mariner rarely ships a live tool. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
+                    It sits at a seam most tools miss: navigation craft from the <strong>Maritime University of Szczecin</strong>, and the habit of shipping working software.
+                    A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
+                  <div class="about-founder">
+                    <img class="about-founder-photo" src="assets/about/mykhailo_byshliaha.jpg" alt="" width="44" height="44" loading="lazy" decoding="async" />
+                    <div class="about-founder-meta">
+                      <span class="about-founder-name">Mykhailo Byshliaha</span>
+                      <span class="about-founder-role">Founder · cadet &amp; future officer · IT agency co-founder</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>
@@ -19962,23 +20015,23 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.71"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.71" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.71"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.72"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.72" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.72"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.71",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.72",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.71"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.71"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.71"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.72"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.72"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.72"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20056,7 +20109,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.71"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.72"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20599,7 +20652,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.71', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.72', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
