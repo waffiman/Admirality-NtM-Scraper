@@ -9530,7 +9530,112 @@ function updateUserHistorySummaryUI(snapOverride = null) {
     const dt = (snap && snap.updatedAt) ? new Date(snap.updatedAt).toUTCString().replace("GMT", "UTC") : "Live Sync Active";
     elSyncTime.textContent = dt;
   }
+  const cachedAgent = window.__setsailAgentRoutesCache;
+  const elAgent = document.getElementById("histStatAgentRoutes");
+  if (elAgent) {
+    elAgent.textContent = Array.isArray(cachedAgent) ? String(cachedAgent.length) : "…";
+  }
+  renderAgentRoutesInProfile(cachedAgent || []);
 }
+
+function renderAgentRoutesInProfile(routes) {
+  const listEl = document.getElementById("histAgentRoutesList");
+  if (!listEl) return;
+  const arr = Array.isArray(routes) ? routes : [];
+  if (!arr.length) {
+    listEl.style.display = "none";
+    listEl.innerHTML = "";
+    return;
+  }
+  listEl.style.display = "block";
+  listEl.innerHTML = arr.slice(0, 12).map((r) => {
+    const nm = String((r && r.name) || "Agent route").replace(/[<>&]/g, "");
+    const dist = (r && r.distanceNm != null) ? (Math.round(Number(r.distanceNm) * 10) / 10) + " NM" : "—";
+    const when = r && r.createdAt ? new Date(r.createdAt).toUTCString().replace("GMT", "UTC").slice(5, 22) : "";
+    const id = String((r && r.id) || "").replace(/"/g, "");
+    return (
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid rgba(148,163,184,0.1);">' +
+        '<div style="min-width:0;"><div style="font-weight:650;color:#e2e8f0;font-size:0.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + nm + '</div>' +
+        '<div style="font-size:0.62rem;color:#94a3b8;">' + dist + (when ? " · " + when : "") + " · Agent API</div></div>" +
+        (id ? '<button type="button" class="min-btn-outline hist-agent-load-btn" data-agent-route-id="' + id + '" style="padding:3px 8px;font-size:0.62rem;margin:0;flex-shrink:0;">Load</button>' : "") +
+      "</div>"
+    );
+  }).join("");
+  listEl.querySelectorAll(".hist-agent-load-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-agent-route-id");
+      const route = (window.__setsailAgentRoutesCache || []).find((x) => x && x.id === id);
+      if (!route) return;
+      if (typeof saveRouteToLibrary === "function") saveRouteToLibrary(route);
+      if (typeof selectSavedRouteFromSidebar === "function") {
+        try { selectSavedRouteFromSidebar(route.id, true); } catch (e) {}
+      } else if (typeof renderRouteOnMap === "function") {
+        try {
+          activeRouteData = route;
+          localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(route));
+          if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
+          renderRouteOnMap(route, false);
+        } catch (e2) {}
+      }
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Loaded Agent API route: " + (route.name || id), "success");
+      }
+    });
+  });
+}
+
+async function syncAgentApiRoutesToProfile() {
+  const user = getSetSailAuthUser();
+  if (!user || !user.email) {
+    window.__setsailAgentRoutesCache = [];
+    const elAgent = document.getElementById("histStatAgentRoutes");
+    if (elAgent) elAgent.textContent = "0";
+    renderAgentRoutesInProfile([]);
+    return [];
+  }
+  let token = "";
+  try {
+    token = sessionStorage.getItem("setsail_google_auth_token") || "";
+  } catch (e) {}
+  if (!token && window.__setsailAgentApiKey) token = window.__setsailAgentApiKey;
+  if (!token) {
+    const elAgent = document.getElementById("histStatAgentRoutes");
+    if (elAgent && !window.__setsailAgentRoutesCache) elAgent.textContent = "sign-in refresh";
+    return window.__setsailAgentRoutesCache || [];
+  }
+  try {
+    const res = await fetch("/api/v1/routes", {
+      method: "GET",
+      headers: { Authorization: "Bearer " + token },
+      cache: "no-store"
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !Array.isArray(data.routes)) {
+      return window.__setsailAgentRoutesCache || [];
+    }
+    window.__setsailAgentRoutesCache = data.routes;
+    // Merge into local SetRoute library so they appear in the sidebar tree
+    data.routes.forEach((r) => {
+      if (r && Array.isArray(r.waypoints) && r.waypoints.length && typeof saveRouteToLibrary === "function") {
+        const normalized = Object.assign({}, r, {
+          source: "agent_api",
+          metadata: Object.assign({}, r.metadata || {}, { fromAgentApi: true })
+        });
+        try { saveRouteToLibrary(normalized); } catch (eLib) {}
+      }
+    });
+    const elAgent = document.getElementById("histStatAgentRoutes");
+    if (elAgent) elAgent.textContent = String(data.routes.length);
+    renderAgentRoutesInProfile(data.routes);
+    if (typeof renderNavSavedRoutesTree === "function") {
+      try { renderNavSavedRoutesTree(); } catch (eTree) {}
+    }
+    return data.routes;
+  } catch (e) {
+    return window.__setsailAgentRoutesCache || [];
+  }
+}
+window.syncAgentApiRoutesToProfile = syncAgentApiRoutesToProfile;
 
 function setSetSailAuthUser(userObj) {
   try {
@@ -9541,9 +9646,13 @@ function setSetSailAuthUser(userObj) {
       try {
         if (typeof window.trackSetSailLogin === "function") window.trackSetSailLogin(userObj.email);
       } catch (eTrack) {}
+      try {
+        syncAgentApiRoutesToProfile();
+      } catch (eAgent) {}
     } else {
       saveSetSailUserHistory();
       localStorage.removeItem(SETSAIL_AUTH_KEY);
+      window.__setsailAgentRoutesCache = [];
     }
   } catch (e) {}
   syncSetSailAuthUI();
@@ -10094,6 +10203,9 @@ function initSetSailAuth() {
     initSetSailAgentApiCard();
   } catch (eApiInit) {}
   syncSetSailAuthUI();
+  try {
+    if (getSetSailAuthUser()) syncAgentApiRoutesToProfile();
+  } catch (eSyncRoutes) {}
 }
 
 function openOfficialGoogleLoginModal() {

@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.73" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.74" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -14343,7 +14343,9 @@ select option {
                     <div><span style="color:#94a3b8;">Chart Edits:</span> <b id="histStatEdits">0</b></div>
                     <div><span style="color:#94a3b8;">SetNews Activity:</span> <b id="histStatNews">0 read</b></div>
                     <div><span style="color:#94a3b8;">Last Sync:</span> <b id="histStatSyncTime">Live</b></div>
+                    <div style="grid-column:1 / -1;"><span style="color:#94a3b8;">Agent API routes:</span> <b id="histStatAgentRoutes">0</b></div>
                   </div>
+                  <div id="histAgentRoutesList" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(148,163,184,0.18);max-height:120px;overflow:auto;"></div>
                 </div>
               </div>
             </div>
@@ -20062,23 +20064,23 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.73"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.73" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.73"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.74"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.74" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.74"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.73",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.74",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.73"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.73"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.73"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.74"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.74"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.74"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20156,7 +20158,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.73"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.74"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20699,7 +20701,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.73', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.74', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {

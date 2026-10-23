@@ -13,6 +13,7 @@ const {
   verifyApiKey,
   requireScope
 } = require("../../lib/agentApiAuth");
+const { saveAgentRoute } = require("../../lib/agentRoutesStore");
 
 function readBody(req) {
   if (!req.body) return {};
@@ -143,6 +144,29 @@ module.exports = async function handler(req, res) {
 
     const speedKn = Number(body.speedKn) > 0 ? Number(body.speedKn) : 14;
     const etaHours = totalNm / speedKn;
+    const createdAt = new Date().toISOString();
+    const routePayload = {
+      id: "agent-" + Date.now().toString(36),
+      name: String(body.name || "Agent passage").slice(0, 80),
+      mode: "great_circle",
+      distanceNm: Math.round(totalNm * 10) / 10,
+      speedKn,
+      etaHours: Math.round(etaHours * 10) / 10,
+      createdAt,
+      waypoints: waypoints.map((p, i) => ({
+        i,
+        lat: Math.round(p.lat * 1e5) / 1e5,
+        lon: Math.round(p.lon * 1e5) / 1e5,
+        name: p.name || undefined
+      }))
+    };
+
+    let saved = null;
+    try {
+      saved = await saveAgentRoute(auth.email, routePayload);
+    } catch (eSave) {
+      saved = { ok: false, reason: "persist_failed" };
+    }
 
     res.statusCode = 200;
     return res.json({
@@ -150,31 +174,23 @@ module.exports = async function handler(req, res) {
       api: "setsail.agent.v1",
       owner: auth.email,
       scopesUsed: ["route.plan"],
-      generatedAt: new Date().toISOString(),
+      generatedAt: createdAt,
+      savedToProfile: !!(saved && saved.ok),
+      savedEphemeral: !!(saved && saved.ephemeral),
       route: {
-        name: String(body.name || "Agent passage").slice(0, 80),
-        mode: "great_circle",
-        distanceNm: Math.round(totalNm * 10) / 10,
-        speedKn,
-        etaHours: Math.round(etaHours * 10) / 10,
-        waypoints: waypoints.map((p, i) => ({
-          i,
-          lat: Math.round(p.lat * 1e5) / 1e5,
-          lon: Math.round(p.lon * 1e5) / 1e5,
-          name: p.name || undefined
-        })),
+        ...routePayload,
         geojson: {
           type: "Feature",
-          properties: { name: String(body.name || "Agent passage").slice(0, 80), distanceNm: totalNm },
+          properties: { name: routePayload.name, distanceNm: routePayload.distanceNm, id: routePayload.id },
           geometry: {
             type: "LineString",
-            coordinates: waypoints.map((p) => [p.lon, p.lat])
+            coordinates: routePayload.waypoints.map((p) => [p.lon, p.lat])
           }
         }
       },
       limits: {
         note:
-          "Agent route is great-circle for planning context. Land-safe Dijkstra / Suez-Cape / NtM costs run inside SetChart; this endpoint does not expose that engine."
+          "Agent route is great-circle for planning context. Saved to the key owner's SetSail profile when persistence is configured. Land-safe Dijkstra remains in SetChart."
       }
     });
   } catch (e) {
