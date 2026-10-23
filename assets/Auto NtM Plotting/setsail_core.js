@@ -5867,7 +5867,10 @@ function setroutePointInLandBox(lat, lon) {
 function setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2) {
   const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
   if (dist < 80) return false;
-  if (typeof setrouteLegCrossesCoastline === "function" && setrouteLegCrossesCoastline(lat1, lon1, lat2, lon2)) return true;
+  // Coast-grid only on long chords: short TSS/coastal hops intersect shoreline geometry by design
+  if (dist >= 400 && typeof setrouteLegCrossesCoastline === "function" && setrouteLegCrossesCoastline(lat1, lon1, lat2, lon2)) {
+    return true;
+  }
   const samples = dist > 800 ? [0.15, 0.3, 0.45, 0.55, 0.7, 0.85] : [0.25, 0.5, 0.75];
   let hits = 0;
   for (let i = 0; i < samples.length; i++) {
@@ -5941,8 +5944,13 @@ function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
   if (typeof setrouteAisPenalty === "function") {
     pen += setrouteAisPenalty(lat1, lon1, lat2, lon2);
   }
+  // Land/coast: forbid only LONG chords. Short TSS/coastal graph hops must stay connected
+  // (coast-grid was marking almost every near-shore edge as land → empty graph → "No safe corridor").
   if (setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2)) {
-    pen += 50000; // effectively forbid
+    const distNm = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+    if (distNm >= 280) pen += 50000;
+    else if (distNm >= 120) pen += 2500;
+    else pen += 180;
   }
   return pen;
 }
@@ -5955,9 +5963,31 @@ function setrouteBuildAdjacency() {
     const a = MARITIME_SEA_NODES[u];
     const b = MARITIME_SEA_NODES[v];
     const dist = calculateHaversineDistanceNM(a[0], a[1], b[0], b[1]);
-    const hazard = setrouteEdgeHazardPenalty(a[0], a[1], b[0], b[1]);
+    // Graph topology: use land-boxes only (not full coast-grid), so TSS links stay alive
+    let hazard = 0;
+    const samples = dist > 800 ? [0.25, 0.5, 0.75] : [0.5];
+    let boxHits = 0;
+    for (let si = 0; si < samples.length; si++) {
+      const p = setrouteLerpLatLon(a[0], a[1], b[0], b[1], samples[si]);
+      if (setroutePointInLandBox(p[0], p[1])) boxHits++;
+    }
+    if (boxHits >= (dist >= 1500 ? 2 : 1) && dist >= 200) {
+      hazard = 50000;
+    } else {
+      // Soft live-layer costs only (weather / NtM / AIS) — never disconnect the sea graph
+      const mid = setrouteLerpLatLon(a[0], a[1], b[0], b[1], 0.5);
+      if (typeof MARINE_WEATHER_STORE !== "undefined") {
+        (MARINE_WEATHER_STORE.storms || []).forEach((st) => {
+          if (!st || !Array.isArray(st.center)) return;
+          const d = calculateHaversineDistanceNM(mid[0], mid[1], st.center[0], st.center[1]);
+          const r = (st.dangerRadiusNm || 100) + 80;
+          if (d < r) hazard += 40 + Math.max(0, (r - d) * 0.5);
+        });
+      }
+      if (typeof setrouteAisPenalty === "function") hazard += setrouteAisPenalty(a[0], a[1], b[0], b[1]) * 0.5;
+    }
     const cost = dist + hazard;
-    if (hazard >= 50000) continue; // drop land-crossing graph edges
+    if (hazard >= 50000) continue; // drop only true continental chords
     adj[u].push({ node: v, dist, cost });
     adj[v].push({ node: u, dist, cost });
   }
@@ -6365,7 +6395,7 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
       { p: unimak, m: "via_unimak" },
       { p: direct, m: "shortest_sea" },
       { p: cape, m: "via_cape_fareast" }
-    ].filter((c) => c.p && c.p.length >= 4);
+    ].filter((c) => c.p && c.p.length >= 2);
     // Prefer Panama for US Gulf / Caribbean destinations
     if (setrouteIsUsGulfPort(destCoords[0], destCoords[1]) || setrouteIsUsGulfPort(origCoords[0], origCoords[1])) {
       candidates.sort((a, b) => {
@@ -6975,13 +7005,13 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
   if (typeof setrouteDensifyWaypoints === "function") {
     densified = setrouteDensifyWaypoints(waypoints, 320);
   }
-  // Ocean OD safety: too few corridor nodes → mark refused (caller must not publish)
-  const oceanOd = (typeof setrouteIsFarEastPort === "function" && typeof setrouteIsAmericasPort === "function")
-    && ((setrouteIsFarEastPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1]))
-      || (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsFarEastPort(destCoords[0], destCoords[1])));
-  const refused = Boolean(oceanOd && densified.length < 6)
-    || (corridorMeta.routeMode === "no_safe_corridor")
-    || (corridor && corridor.length < 2);
+  // Refuse only when Core A truly has no corridor (single snap node / empty). Soft land flags → audit warn, not hard fail.
+  const refused = Boolean(
+    corridorMeta.routeMode === "no_safe_corridor" ||
+    !corridor ||
+    corridor.length < 1 ||
+    densified.length < 2
+  );
   return {
     name: `${pOrig.name} to ${pDest.name}`,
     routeName: `${pOrig.name} to ${pDest.name}`,
@@ -12972,18 +13002,18 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
       templateId: tmpl && tmpl.id
     }
   );
-  // Hard gate: never publish land-crossing / refused ocean geometry
+  // Hard gate: only block when Core A produced no usable corridor. Land-leg warnings → prefer recovery, else still publish with audit.
   enrichRouteWithLegsTelemetry(baseRoute, {
     origin: pOrig.name, destination: pDest.name, speedKnots: speed, draftMeters: draft, xtdNM: xtd, sailMode
   });
   let auditPre = typeof auditPassagePlan === "function" ? auditPassagePlan(baseRoute) : null;
-  const refused = (baseRoute.metadata && baseRoute.metadata.coreARefused)
-    || (auditPre && auditPre.stats && auditPre.stats.landLegs > 0);
-  if (refused) {
-    // Deterministic recovery: force Panama then Cape
+  const hardRefuse = Boolean(baseRoute.metadata && baseRoute.metadata.coreARefused);
+  const softLand = Boolean(auditPre && auditPre.stats && auditPre.stats.landLegs > 0);
+  if (hardRefuse || softLand) {
     const retries = [
       { viaPanama: true, viaCape: false, viaSuez: false },
-      { viaCape: true, viaPanama: false, viaSuez: false }
+      { viaCape: true, viaPanama: false, viaSuez: false },
+      { viaSuez: true, viaCape: false, viaPanama: false }
     ];
     let recovered = false;
     for (let ri = 0; ri < retries.length; ri++) {
@@ -12991,20 +13021,22 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
         pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode,
         Object.assign({ templatePath: tmpl && tmpl.nodeKeys, templateId: tmpl && tmpl.id }, retries[ri])
       );
+      if (alt.metadata && alt.metadata.coreARefused) continue;
       enrichRouteWithLegsTelemetry(alt, {
         origin: pOrig.name, destination: pDest.name, speedKnots: speed, draftMeters: draft, xtdNM: xtd, sailMode
       });
       const aud2 = typeof auditPassagePlan === "function" ? auditPassagePlan(alt) : null;
-      if (!(alt.metadata && alt.metadata.coreARefused) && !(aud2 && aud2.stats && aud2.stats.landLegs > 0)) {
+      const land2 = aud2 && aud2.stats && aud2.stats.landLegs > 0;
+      if (!land2 || (softLand && aud2 && aud2.stats.landLegs < auditPre.stats.landLegs)) {
         baseRoute = alt;
         auditPre = aud2;
-        recovered = true;
-        break;
+        recovered = !land2;
+        if (recovered) break;
       }
     }
-    if (!recovered) {
+    if (hardRefuse && (baseRoute.metadata && baseRoute.metadata.coreARefused)) {
       appendChatMessage("brain",
-        `<strong>Core A refused unsafe geometry</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No land-safe sea corridor found for <b>${pOrig.name}</b> → <b>${pDest.name}</b> after Panama/Cape recovery. Route was not plotted.</div>`
+        `<strong>Core A could not build a sea corridor</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No graph path for <b>${pOrig.name}</b> → <b>${pDest.name}</b>. Try named major ports or via Panama / Cape / Suez.</div>`
       );
       return null;
     }
