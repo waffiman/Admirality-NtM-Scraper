@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.69" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.70" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -7157,12 +7157,20 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 .about-moz-tile.is-fallback {
   background:
+    radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.35), transparent 55%),
     linear-gradient(135deg, #0c4a6e 0%, #082f49 45%, #0f172a 100%);
 }
 
 .about-moz-tile.is-shuffling {
-  opacity: 0.35;
-  filter: blur(1px);
+  opacity: 0.78;
+  filter: saturate(0.88);
+}
+.about-moz-tile.is-shuffling img {
+  transform: scale(1.05);
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+.about-body-gap {
+  margin-top: 0.55rem;
 }
 
 .about-moz-tile img {
@@ -7218,7 +7226,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   left: auto;
   top: auto;
   transform: none;
-  width: min(640px, 90%);
+  width: min(720px, 92%);
   margin: 0 auto;
   z-index: 8;
   text-align: center;
@@ -7245,8 +7253,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
   margin: 0 0 0.55rem;
   font-family: "Instrument Serif", Georgia, serif;
   font-weight: 400;
-  font-size: clamp(1.35rem, 2.3vw, 1.9rem);
-  line-height: 1.18;
+  font-size: clamp(1.28rem, 2.2vw, 1.85rem);
+  line-height: 1.2;
   color: #f8fafc;
 }
 
@@ -7258,8 +7266,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .about-body {
   margin: 0;
   font-family: "Outfit", "Segoe UI", sans-serif;
-  font-size: 0.8rem;
-  line-height: 1.5;
+  font-size: 0.76rem;
+  line-height: 1.55;
   color: #cbd5e1;
 }
 
@@ -12274,86 +12282,6 @@ select option {
               <div class="home-about-life">
                 <div class="about-mosaic-band">
                   <div class="about-mosaic" id="homeAboutMosaic" aria-hidden="true">
-                  <figure class="about-moz-tile" data-tile-i="0"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="1"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="2"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="3"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="4"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="5"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="6"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="7"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="8"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="9"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="10"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="11"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="12"><img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="13"><img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="14"><img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="15"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="16"><img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="17"><img src="https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="18"><img src="https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="19"><img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="20"><img src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="21"><img src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="22"><img src="https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="23"><img src="https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="24"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="25"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="26"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="27"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="28"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="29"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="30"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="31"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="32"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="33"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="34"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="35"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="36"><img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="37"><img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="38"><img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="39"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="40"><img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="41"><img src="https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="42"><img src="https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="43"><img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="44"><img src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="45"><img src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="46"><img src="https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="47"><img src="https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="48"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="49"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="50"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="51"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="52"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="53"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="54"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="55"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="56"><img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="57"><img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="58"><img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="59"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="60"><img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="61"><img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="62"><img src="https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="63"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="64"><img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="65"><img src="https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="66"><img src="https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="67"><img src="https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="68"><img src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="69"><img src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="70"><img src="https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="71"><img src="https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="72"><img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="73"><img src="https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="74"><img src="https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="75"><img src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="76"><img src="https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="77"><img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&amp;fit=crop&amp;crop=center&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="78"><img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&amp;fit=crop&amp;crop=entropy&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
-                  <figure class="about-moz-tile" data-tile-i="79"><img src="https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&amp;fit=crop&amp;crop=edges&amp;w=200&amp;h=200&amp;q=65" alt="" decoding="async" loading="lazy" width="200" height="200" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-fallback')" /></figure>
                   </div>
                   <div class="about-logo-over" id="homeAboutLogoFinale" aria-hidden="true">
                     <picture>
@@ -12362,12 +12290,16 @@ select option {
                     </picture>
                   </div>
                 </div>
-                <div class="about-copy" id="homeAboutCopy">
+                                <div class="about-copy" id="homeAboutCopy">
                   <p class="about-kicker">About SetSail</p>
-                  <h2 class="about-headline">Made for the quiet hours when the chart is open and <em>the sea is loud.</em></h2>
+                  <h2 class="about-headline">Built on practice — between the chart table and the code editor.</h2>
                   <p class="about-body">
-                    SetSail sits with the watch — <strong>NtM before coffee</strong>, a gyro check after breakfast, cyclone tracks before night orders.
-                    Not a sales pitch. A working companion for the day at sea.
+                    SetSail was made by <strong>Mykhailo Byshliaha</strong> — cadet and future officer, and co-founder of an IT agency — during sea practice on the LPG carrier <strong>IINO INEOS VESTA</strong>.
+                    The site was written in China, the United States, and mid-Pacific and mid-Atlantic watches, over the thin, limited thread of shipboard satellite internet.
+                  </p>
+                  <p class="about-body about-body-gap">
+                    What made it possible sits at a seam: navigation learned at the <strong>Maritime University of Szczecin</strong>, and the craft of shipping working software.
+                    A pure programmer rarely feels the bridge; a pure mariner rarely ships a live tool. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                 </div>
               </div>
@@ -19969,23 +19901,23 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.69"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.69" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.69"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.70"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.70" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.70"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.69",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.70",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.69"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.69"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.69"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.70"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.70"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.70"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20063,7 +19995,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.69"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.70"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20110,55 +20042,152 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       };
 
 
-      // About mosaic: full-bleed strip — load all tiles + shuffle animation + logo over strip
+      // About mosaic: always-full grid + simultaneous derangement shuffle
       window.__setsailAboutShuffleTimer = window.__setsailAboutShuffleTimer || null;
+      window.__setsailAboutMosaicReady = window.__setsailAboutMosaicReady || false;
+      window.__setsailAboutPhotoPool = window.__setsailAboutPhotoPool || [
+        "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1605281317010-fe5ffe798630?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1505118380757-91f785d2c8f5?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=240&h=240&q=60"
+      ];
+
+      window.__setsailBuildAboutMosaic = function() {
+        const mosaic = document.getElementById('homeAboutMosaic');
+        if (!mosaic || mosaic.dataset.built === '1') return mosaic;
+        const pool = window.__setsailAboutPhotoPool.slice();
+        // Desktop 40x2=80, mobile CSS shows 24x2 — still fill 80; extra tiles clip fine
+        const TILES = 80;
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < TILES; i++) {
+          const fig = document.createElement('figure');
+          fig.className = 'about-moz-tile';
+          fig.setAttribute('data-tile-i', String(i));
+          const img = document.createElement('img');
+          img.alt = '';
+          img.decoding = 'async';
+          img.loading = (i < 16) ? 'eager' : 'lazy';
+          img.width = 200;
+          img.height = 200;
+          img.src = pool[i % pool.length];
+          img.dataset.poolIdx = String(i % pool.length);
+          img.onerror = function() {
+            const pool2 = window.__setsailAboutPhotoPool || [];
+            const fails = parseInt(this.dataset.failCount || '0', 10) + 1;
+            this.dataset.failCount = String(fails);
+            if (!pool2.length || fails > pool2.length) {
+              // Exhausted pool — keep tile filled with CSS fallback (never blank)
+              this.removeAttribute('src');
+              this.style.display = 'none';
+              if (this.parentElement) this.parentElement.classList.add('is-fallback');
+              return;
+            }
+            let next = (parseInt(this.dataset.poolIdx || '0', 10) + 1) % pool2.length;
+            this.dataset.poolIdx = String(next);
+            this.src = pool2[next];
+            // Keep img in layout — never leave an empty dark hole
+            this.style.display = 'block';
+            this.style.opacity = '1';
+            if (this.parentElement) this.parentElement.classList.remove('is-fallback');
+          };
+          fig.appendChild(img);
+          frag.appendChild(fig);
+        }
+        mosaic.innerHTML = '';
+        mosaic.appendChild(frag);
+        mosaic.dataset.built = '1';
+        window.__setsailAboutMosaicReady = true;
+        return mosaic;
+      };
+
+      window.__setsailShuffleAboutMosaic = function() {
+        const mosaic = document.getElementById('homeAboutMosaic') || window.__setsailBuildAboutMosaic();
+        if (!mosaic) return;
+        let tiles = Array.from(mosaic.querySelectorAll('.about-moz-tile'));
+        if (tiles.length < 2) return;
+
+        // Keep every tile filled — heal any missing/broken src from the pool
+        const pool = window.__setsailAboutPhotoPool || [];
+        tiles.forEach(function(tile, i) {
+          const im = tile.querySelector('img');
+          if (!im) return;
+          if (!im.getAttribute('src') && pool.length) {
+            im.src = pool[i % pool.length];
+          }
+          im.style.display = 'block';
+          im.style.opacity = '1';
+          tile.classList.remove('is-fallback');
+        });
+
+        // Fisher–Yates reorder of ALL tile DOM nodes (moves the whole mosaic layout)
+        for (let i = tiles.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const tmp = tiles[i];
+          tiles[i] = tiles[j];
+          tiles[j] = tmp;
+        }
+        // Break residual fixed points: if index i stayed the same node, swap with i+1
+        const before = Array.from(mosaic.querySelectorAll('.about-moz-tile'));
+        for (let i = 0; i + 1 < tiles.length; i++) {
+          if (tiles[i] === before[i]) {
+            const tmp = tiles[i];
+            tiles[i] = tiles[i + 1];
+            tiles[i + 1] = tmp;
+          }
+        }
+
+        tiles.forEach(function(t) { t.classList.add('is-shuffling'); });
+        tiles.forEach(function(t) { mosaic.appendChild(t); });
+        setTimeout(function() {
+          tiles.forEach(function(t) { t.classList.remove('is-shuffling'); });
+        }, 380);
+      };
+
       window.__setsailUpdateAboutMosaic = function(aboutP) {
         const slide = document.getElementById('homeSlideAbout');
         if (!slide) return;
         const p = Math.max(0, Math.min(1, aboutP || 0));
         slide.style.setProperty('--about-p', String(p.toFixed(3)));
-        // Square logo visible with the About beat (not only at the very end)
         const logo = Math.max(0, Math.min(1, (p - 0.12) / 0.5));
         slide.style.setProperty('--about-logo', String(logo.toFixed(3)));
 
-        const mosaic = document.getElementById('homeAboutMosaic');
-        if (!mosaic) return;
-        const imgs = mosaic.querySelectorAll('img');
-        // Ensure every tile has a resolved src (migrate any leftover data-src)
-        imgs.forEach((img) => {
-          const ds = img.getAttribute('data-src');
-          if (ds && !img.getAttribute('src')) {
-            img.src = ds;
-            img.removeAttribute('data-src');
-          }
-        });
+        window.__setsailBuildAboutMosaic();
 
         const startShuffle = function() {
           if (window.__setsailAboutShuffleTimer) return;
+          // First beat immediately so layout changes as soon as About is in view
+          try { window.__setsailShuffleAboutMosaic(); } catch (e) {}
           window.__setsailAboutShuffleTimer = setInterval(function() {
-            const list = Array.from(mosaic.querySelectorAll('img')).filter(function(im) {
-              return im.getAttribute('src');
-            });
-            if (list.length < 4) return;
-            // Swap 3–5 random pairs each tick
-            const swaps = 3 + Math.floor(Math.random() * 3);
-            for (let s = 0; s < swaps; s++) {
-              const a = list[Math.floor(Math.random() * list.length)];
-              const b = list[Math.floor(Math.random() * list.length)];
-              if (a === b) continue;
-              const ta = a.closest('.about-moz-tile');
-              const tb = b.closest('.about-moz-tile');
-              if (ta) ta.classList.add('is-shuffling');
-              if (tb) tb.classList.add('is-shuffling');
-              const tmp = a.src;
-              a.src = b.src;
-              b.src = tmp;
-              setTimeout(function() {
-                if (ta) ta.classList.remove('is-shuffling');
-                if (tb) tb.classList.remove('is-shuffling');
-              }, 320);
-            }
-          }, 1100);
+            try { window.__setsailShuffleAboutMosaic(); } catch (e) {}
+          }, 1600);
         };
         const stopShuffle = function() {
           if (window.__setsailAboutShuffleTimer) {
@@ -20167,10 +20196,9 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           }
         };
 
-        if (p > 0.18) startShuffle();
+        if (p > 0.12) startShuffle();
         else stopShuffle();
       };
-
 
       function renderHomeSlideFrame(p) {
         const viewport = document.getElementById('homeHeroViewport');
@@ -20510,7 +20538,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 navigator.serviceWorker.addEventListener('controllerchange', () => {
           console.log('[SetSail PWA] New service worker ready (no forced reload)');
         });
-        navigator.serviceWorker.register('sw.js?v=5.69', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.70', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.4 registered, scope:', reg.scope);
             if (navigator.onLine) {
