@@ -5895,16 +5895,8 @@ function setrouteIsAmericasPort(lat, lon) {
 function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
   let pen = 0;
   const mid = setrouteLerpLatLon(lat1, lon1, lat2, lon2, 0.5);
-  // Weather layer: cyclones + heavy seas + OPC warnings
+  // Waves / OPC only here. Tropical cyclones use space-time forecast search (setrouteSpaceTimeStormPenalty).
   if (typeof MARINE_WEATHER_STORE !== "undefined") {
-    (MARINE_WEATHER_STORE.storms || []).forEach((st) => {
-      if (!st || !Array.isArray(st.center)) return;
-      const d = calculateHaversineDistanceNM(mid[0], mid[1], st.center[0], st.center[1]);
-      const r = (st.dangerRadiusNm || 100) + 100;
-      if (d < r) {
-        pen += 80 + Math.max(0, (r - d) * 1.2) + Math.min(120, (st.maxWinds || 0) * 0.4);
-      }
-    });
     (MARINE_WEATHER_STORE.waves || []).forEach((w) => {
       if (!w || !Array.isArray(w.center) || !(w.waveHeight >= 4.0)) return;
       const d = calculateHaversineDistanceNM(mid[0], mid[1], w.center[0], w.center[1]);
@@ -6023,7 +6015,8 @@ function setrouteSpaceTimeStormPenalty(lat1, lon1, lat2, lon2, departHours, spee
   const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
   if (!(dist > 0)) return { penalty: 0, hits: [], severe: 0 };
   const transitH = dist / speed;
-  const nSamp = Math.min(14, Math.max(4, Math.ceil(dist / 35)));
+  // Dense sampling for quality (user accepts longer Core A planning)
+  const nSamp = Math.min(28, Math.max(6, Math.ceil(dist / 22)));
   let penalty = 0;
   let severe = 0;
   const hits = [];
@@ -6037,16 +6030,20 @@ function setrouteSpaceTimeStormPenalty(lat1, lon1, lat2, lon2, departHours, spee
       const s = setrouteStormStateAtTau(st, tShip);
       if (!s) continue;
       const d = calculateHaversineDistanceNM(p[0], p[1], s.lat, s.lon);
-      const bufferNm = 40 + Math.min(80, (s.winds || 0) * 0.35);
+      const bufferNm = 55 + Math.min(100, (s.winds || 0) * 0.45);
       const r = (s.radiusNm || 100) + bufferNm;
       if (d >= r) continue;
       const depth = Math.max(0, Math.min(1, (r - d) / Math.max(1, r)));
-      const windF = Math.min(1.8, (s.winds || 30) / 64);
-      penalty += weight * (55 + depth * 220 * windF + (s.winds || 0) * 0.55);
-      const coreR = (s.radiusNm || 100) * 0.62;
+      const windF = Math.min(2.2, (s.winds || 30) / 64);
+      penalty += weight * (70 + depth * 280 * windF + (s.winds || 0) * 0.7);
+      const coreR = (s.radiusNm || 100) * 0.7;
       if (d < coreR && (s.winds || 0) >= 34) {
         severe++;
-        penalty += weight * (1800 + (s.winds || 0) * 12);
+        penalty += weight * (2800 + (s.winds || 0) * 18);
+      }
+      if (d < (s.radiusNm || 100) * 0.35 && (s.winds || 0) >= 64) {
+        severe += 2;
+        penalty += weight * 9000;
       }
       const key = (st.id || st.name || "storm") + "@" + Math.round(tShip);
       if (!hitKeys[key]) {
@@ -6061,7 +6058,7 @@ function setrouteSpaceTimeStormPenalty(lat1, lon1, lat2, lon2, departHours, spee
       }
     }
   }
-  if (severe >= 3) penalty += weight * 12000;
+  if (severe >= 3) penalty += weight * 18000;
   return { penalty, hits, severe };
 }
 
@@ -6114,24 +6111,35 @@ function setrouteBuildAdjacency() {
 }
 
 /**
- * Multi-label time-dependent Dijkstra.
+ * Multi-label time-dependent Dijkstra (sync). Prefer setrouteDijkstraAsync for UI.
  * Edge cost = NM + static adj hazard + space-time cyclone penalty(departTime, speed).
- * Keeps up to maxLabels non-dominated (cost, arrivalTime) labels per node.
+ * Labels use stable ids (no splice) so heap prev pointers stay valid.
  */
 function setrouteDijkstra(startNode, endNode, adj, opts) {
+  // Sync wrapper around internal runner (no yields)
+  return setrouteDijkstraRun(startNode, endNode, adj, opts, null);
+}
+
+async function setrouteDijkstraAsync(startNode, endNode, adj, opts) {
+  return setrouteDijkstraRun(startNode, endNode, adj, opts, { yieldEvery: 1800 });
+}
+
+function setrouteDijkstraRun(startNode, endNode, adj, opts, asyncCfg) {
   opts = opts || {};
-  if (!startNode || !endNode || !adj[startNode] || !adj[endNode]) return null;
+  if (!startNode || !endNode || !adj[startNode] || !adj[endNode]) return asyncCfg ? Promise.resolve(null) : null;
   if (startNode === endNode) {
     setrouteDijkstra._lastMeta = { cost: 0, arrivalH: Number(opts.t0Hours) || 0, stormPenalty: 0 };
-    return [startNode];
+    return asyncCfg ? Promise.resolve([startNode]) : [startNode];
   }
 
   const speed = Math.max(1, Number(opts.speedKnots) || 14.5);
   const stormW = Math.max(0, Number(opts.stormWeight) || 1);
   const t0 = Number(opts.t0Hours) || 0;
-  const maxLabels = Math.max(2, Math.min(8, Number(opts.maxLabels) || 5));
+  const maxLabels = Math.max(3, Math.min(10, Number(opts.maxLabels) || 7));
   const timedWx = stormW > 0 && typeof MARINE_WEATHER_STORE !== "undefined" &&
     Array.isArray(MARINE_WEATHER_STORE.storms) && MARINE_WEATHER_STORE.storms.length > 0;
+
+  const finishSyncOrAsync = (val) => (asyncCfg ? Promise.resolve(val) : val);
 
   // Fast path: no live storms → classic static Dijkstra on adj.cost
   if (!timedWx) {
@@ -6159,25 +6167,177 @@ function setrouteDijkstra(startNode, endNode, adj, opts) {
         }
       }
     }
-    if (dists[endNode] === Infinity) return null;
+    if (dists[endNode] === Infinity) return finishSyncOrAsync(null);
     const path = [];
     let curr = endNode;
     while (curr) { path.unshift(curr); curr = prev[curr]; }
-    if (path[0] !== startNode) return null;
+    if (path[0] !== startNode) return finishSyncOrAsync(null);
     setrouteDijkstra._lastMeta = {
       cost: dists[endNode],
       arrivalH: t0 + setroutePathCostNM(path) / speed,
       stormPenalty: 0
     };
-    return path;
+    return finishSyncOrAsync(path);
   }
 
-  // Timed multi-label search
+  const runTimed = async () => {
+    const labels = {};
+    Object.keys(MARITIME_SEA_NODES).forEach((k) => { labels[k] = []; });
+    let nextId = 1;
+    const startLab = { id: nextId++, cost: 0, t: t0, prev: null, prevId: null, stormPen: 0, dead: false };
+    labels[startNode].push(startLab);
+
+    const heap = [];
+    const heapPush = (item) => {
+      heap.push(item);
+      let i = heap.length - 1;
+      while (i > 0) {
+        const p = (i - 1) >> 1;
+        if (heap[p].cost <= heap[i].cost) break;
+        const tmp = heap[p]; heap[p] = heap[i]; heap[i] = tmp; i = p;
+      }
+    };
+    const heapPop = () => {
+      if (!heap.length) return null;
+      const top = heap[0];
+      const last = heap.pop();
+      if (!heap.length) return top;
+      heap[0] = last;
+      let i = 0;
+      for (;;) {
+        let l = i * 2 + 1;
+        let r = l + 1;
+        let s = i;
+        if (l < heap.length && heap[l].cost < heap[s].cost) s = l;
+        if (r < heap.length && heap[r].cost < heap[s].cost) s = r;
+        if (s === i) break;
+        const tmp = heap[s]; heap[s] = heap[i]; heap[i] = tmp; i = s;
+      }
+      return top;
+    };
+    heapPush({ node: startNode, id: startLab.id, cost: 0 });
+
+    const findLab = (node, id) => {
+      const arr = labels[node] || [];
+      for (let i = 0; i < arr.length; i++) if (arr[i].id === id) return arr[i];
+      return null;
+    };
+
+    const tryInsertLabel = (node, lab) => {
+      const arr = labels[node];
+      for (let i = 0; i < arr.length; i++) {
+        const x = arr[i];
+        if (x.dead) continue;
+        if (x.cost <= lab.cost + 1e-6 && x.t <= lab.t + 1e-6) return false;
+      }
+      for (let i = 0; i < arr.length; i++) {
+        const x = arr[i];
+        if (x.dead) continue;
+        if (lab.cost <= x.cost + 1e-6 && lab.t <= x.t + 1e-6) x.dead = true;
+      }
+      arr.push(lab);
+      let live = 0;
+      for (let i = 0; i < arr.length; i++) if (!arr[i].dead) live++;
+      while (live > maxLabels) {
+        let worstI = -1;
+        let worstC = -1;
+        for (let i = 0; i < arr.length; i++) {
+          if (arr[i].dead) continue;
+          if (arr[i].cost > worstC) { worstC = arr[i].cost; worstI = i; }
+        }
+        if (worstI < 0) break;
+        arr[worstI].dead = true;
+        live--;
+      }
+      return true;
+    };
+
+    let expansions = 0;
+    const maxExpansions = Number(opts.maxExpansions) || 420000;
+    const yieldEvery = (asyncCfg && asyncCfg.yieldEvery) || 0;
+    const tSearchStart = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+
+    while (heap.length && expansions < maxExpansions) {
+      const cur = heapPop();
+      if (!cur) break;
+      const uLab = findLab(cur.node, cur.id);
+      if (!uLab || uLab.dead || Math.abs(uLab.cost - cur.cost) > 1e-2) continue;
+      expansions++;
+
+      const uNode = MARITIME_SEA_NODES[cur.node];
+      for (const edge of adj[cur.node] || []) {
+        const v = edge.node;
+        const vNode = MARITIME_SEA_NODES[v];
+        if (!uNode || !vNode) continue;
+        const dist = edge.dist;
+        const transitH = dist / speed;
+        const wx = setrouteSpaceTimeStormPenalty(
+          uNode[0], uNode[1], vNode[0], vNode[1], uLab.t, speed, stormW
+        );
+        const staticExtra = Math.max(0, edge.cost - dist);
+        const stepCost = dist + staticExtra + wx.penalty;
+        const newLab = {
+          id: nextId++,
+          cost: uLab.cost + stepCost,
+          t: uLab.t + transitH,
+          prev: cur.node,
+          prevId: uLab.id,
+          stormPen: uLab.stormPen + wx.penalty,
+          dead: false
+        };
+        if (tryInsertLabel(v, newLab)) heapPush({ node: v, id: newLab.id, cost: newLab.cost });
+      }
+
+      if (expansions % 2500 === 0 && typeof window !== "undefined") {
+        const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+        window.SETROUTE_PLAN_PROGRESS = {
+          phase: "timed_dijkstra",
+          expansions,
+          heap: heap.length,
+          stormWeight: stormW,
+          elapsedMs: Math.round(now - tSearchStart)
+        };
+      }
+      if (yieldEvery && expansions % yieldEvery === 0) {
+        await new Promise((r) => setTimeout(r, 0));
+      }
+    }
+
+    const endLabs = (labels[endNode] || []).filter((l) => !l.dead);
+    if (!endLabs.length) return null;
+    endLabs.sort((a, b) => a.cost - b.cost || a.t - b.t);
+    const best = endLabs[0];
+    const path = [];
+    let node = endNode;
+    let lab = best;
+    let guard = 0;
+    while (node && lab && guard++ < 500) {
+      path.unshift(node);
+      if (!lab.prev) break;
+      node = lab.prev;
+      lab = findLab(node, lab.prevId);
+    }
+    if (path[0] !== startNode) return null;
+    setrouteDijkstra._lastMeta = {
+      cost: best.cost,
+      arrivalH: best.t,
+      stormPenalty: best.stormPen,
+      expansions,
+      timed: true
+    };
+    return path;
+  };
+
+  if (asyncCfg) return runTimed();
+  // Sync: drive async runner without awaiting — not possible; run a blocking twin
+  // Use Atomics wait? Simpler: call runTimed and block via deasync unavailable.
+  // Fall through: execute timed loop synchronously by inlining without await.
+  let syncResult = null;
   const labels = {};
   Object.keys(MARITIME_SEA_NODES).forEach((k) => { labels[k] = []; });
-  labels[startNode].push({ cost: 0, t: t0, prev: null, prevLi: -1, stormPen: 0 });
-
-  // Binary min-heap of {node, li, cost}
+  let nextId = 1;
+  const startLab = { id: nextId++, cost: 0, t: t0, prev: null, prevId: null, stormPen: 0, dead: false };
+  labels[startNode].push(startLab);
   const heap = [];
   const heapPush = (item) => {
     heap.push(item);
@@ -6206,39 +6366,49 @@ function setrouteDijkstra(startNode, endNode, adj, opts) {
     }
     return top;
   };
-  heapPush({ node: startNode, li: 0, cost: 0 });
-
-  let expansions = 0;
-  const maxExpansions = Number(opts.maxExpansions) || 250000;
+  heapPush({ node: startNode, id: startLab.id, cost: 0 });
+  const findLab = (node, id) => {
+    const arr = labels[node] || [];
+    for (let i = 0; i < arr.length; i++) if (arr[i].id === id) return arr[i];
+    return null;
+  };
   const tryInsertLabel = (node, lab) => {
     const arr = labels[node];
-    // Dominated?
     for (let i = 0; i < arr.length; i++) {
-      if (arr[i].cost <= lab.cost + 1e-6 && arr[i].t <= lab.t + 1e-6) return -1;
+      const x = arr[i];
+      if (x.dead) continue;
+      if (x.cost <= lab.cost + 1e-6 && x.t <= lab.t + 1e-6) return false;
     }
-    // Remove labels this one dominates
-    for (let i = arr.length - 1; i >= 0; i--) {
-      if (lab.cost <= arr[i].cost + 1e-6 && lab.t <= arr[i].t + 1e-6) arr.splice(i, 1);
+    for (let i = 0; i < arr.length; i++) {
+      const x = arr[i];
+      if (x.dead) continue;
+      if (lab.cost <= x.cost + 1e-6 && lab.t <= x.t + 1e-6) x.dead = true;
     }
     arr.push(lab);
-    arr.sort((a, b) => a.cost - b.cost || a.t - b.t);
-    while (arr.length > maxLabels) arr.pop();
-    const idx = arr.indexOf(lab);
-    return idx;
+    let live = 0;
+    for (let i = 0; i < arr.length; i++) if (!arr[i].dead) live++;
+    while (live > maxLabels) {
+      let worstI = -1;
+      let worstC = -1;
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].dead) continue;
+        if (arr[i].cost > worstC) { worstC = arr[i].cost; worstI = i; }
+      }
+      if (worstI < 0) break;
+      arr[worstI].dead = true;
+      live--;
+    }
+    return true;
   };
-
+  let expansions = 0;
+  const maxExpansions = Number(opts.maxExpansions) || 420000;
+  const tSearchStart = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
   while (heap.length && expansions < maxExpansions) {
     const cur = heapPop();
     if (!cur) break;
+    const uLab = findLab(cur.node, cur.id);
+    if (!uLab || uLab.dead || Math.abs(uLab.cost - cur.cost) > 1e-2) continue;
     expansions++;
-    const uLabs = labels[cur.node];
-    const uLab = uLabs[cur.li];
-    if (!uLab || Math.abs(uLab.cost - cur.cost) > 1e-3) continue; // stale
-    if (cur.node === endNode) {
-      // Can finish early if best label on end is this and heap top is worse — still drain a bit
-      // Keep searching for better cost labels on end within reason
-      if (uLabs[0] && uLabs[0].cost + 1 < cur.cost) continue;
-    }
     const uNode = MARITIME_SEA_NODES[cur.node];
     for (const edge of adj[cur.node] || []) {
       const v = edge.node;
@@ -6249,48 +6419,43 @@ function setrouteDijkstra(startNode, endNode, adj, opts) {
       const wx = setrouteSpaceTimeStormPenalty(
         uNode[0], uNode[1], vNode[0], vNode[1], uLab.t, speed, stormW
       );
-      const staticExtra = Math.max(0, edge.cost - dist); // waves/AIS baked in adj
+      const staticExtra = Math.max(0, edge.cost - dist);
       const stepCost = dist + staticExtra + wx.penalty;
       const newLab = {
+        id: nextId++,
         cost: uLab.cost + stepCost,
         t: uLab.t + transitH,
         prev: cur.node,
-        prevLi: cur.li,
-        stormPen: uLab.stormPen + wx.penalty
+        prevId: uLab.id,
+        stormPen: uLab.stormPen + wx.penalty,
+        dead: false
       };
-      const newIdx = tryInsertLabel(v, newLab);
-      if (newIdx >= 0) heapPush({ node: v, li: newIdx, cost: newLab.cost });
+      if (tryInsertLabel(v, newLab)) heapPush({ node: v, id: newLab.id, cost: newLab.cost });
     }
-    if (expansions % 4000 === 0 && typeof window !== "undefined") {
+    if (expansions % 2500 === 0 && typeof window !== "undefined") {
+      const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
       window.SETROUTE_PLAN_PROGRESS = {
         phase: "timed_dijkstra",
         expansions,
         heap: heap.length,
-        stormWeight: stormW
+        stormWeight: stormW,
+        elapsedMs: Math.round(now - tSearchStart)
       };
     }
   }
-
-  const endLabs = labels[endNode];
-  if (!endLabs || !endLabs.length) return null;
+  const endLabs = (labels[endNode] || []).filter((l) => !l.dead);
+  if (!endLabs.length) return null;
   endLabs.sort((a, b) => a.cost - b.cost || a.t - b.t);
   const best = endLabs[0];
   const path = [];
   let node = endNode;
-  let li = 0;
-  // find index of best
-  for (let i = 0; i < endLabs.length; i++) {
-    if (endLabs[i] === best) { li = i; break; }
-  }
+  let lab = best;
   let guard = 0;
-  while (node && guard++ < 500) {
+  while (node && lab && guard++ < 500) {
     path.unshift(node);
-    const lab = labels[node][li];
-    if (!lab || !lab.prev) break;
-    const pNode = lab.prev;
-    const pLi = lab.prevLi;
-    node = pNode;
-    li = pLi;
+    if (!lab.prev) break;
+    node = lab.prev;
+    lab = findLab(node, lab.prevId);
   }
   if (path[0] !== startNode) return null;
   setrouteDijkstra._lastMeta = {
@@ -6300,7 +6465,8 @@ function setrouteDijkstra(startNode, endNode, adj, opts) {
     expansions,
     timed: true
   };
-  return path;
+  syncResult = path;
+  return syncResult;
 }
 
 function setroutePathCostNM(path) {
@@ -6343,9 +6509,32 @@ function setrouteDijkstraResultMeta() {
   return setrouteDijkstra._lastMeta || null;
 }
 
-function setroutePathViaNode(startNode, endNode, viaNode, adj, opts) {
+async function setroutePathViaNodeAsync(startNode, endNode, viaNode, adj, opts) {
   if (!viaNode || !MARITIME_SEA_NODES[viaNode]) return null;
   opts = opts || {};
+  const dijk = opts._asyncPlanning ? setrouteDijkstraAsync : setrouteDijkstra;
+  const p1 = await Promise.resolve(dijk(startNode, viaNode, adj, opts));
+  if (!p1) return null;
+  const midMeta = setrouteDijkstraResultMeta() || {};
+  const p2 = await Promise.resolve(dijk(viaNode, endNode, adj, Object.assign({}, opts, {
+    t0Hours: midMeta.arrivalH != null ? midMeta.arrivalH : (Number(opts.t0Hours) || 0)
+  })));
+  if (!p2) return null;
+  const path = p1.concat(p2.slice(1));
+  const score = setroutePathTimedScore(path, opts.speedKnots, opts.stormWeight, opts.t0Hours);
+  setrouteDijkstra._lastMeta = {
+    cost: score.cost,
+    arrivalH: score.arrivalH,
+    stormPenalty: score.stormPen,
+    timed: true
+  };
+  return path;
+}
+
+function setroutePathViaNode(startNode, endNode, viaNode, adj, opts) {
+  // Sync path for legacy callers (no UI yield)
+  if (!viaNode || !MARITIME_SEA_NODES[viaNode]) return null;
+  opts = Object.assign({}, opts || {}, { _asyncPlanning: false });
   const p1 = setrouteDijkstra(startNode, viaNode, adj, opts);
   if (!p1) return null;
   const midMeta = setrouteDijkstraResultMeta() || {};
@@ -6362,6 +6551,46 @@ function setroutePathViaNode(startNode, endNode, viaNode, adj, opts) {
     timed: true
   };
   return path;
+}
+
+async function setroutePathViaHubsAsync(startNode, endNode, adj, opts) {
+  opts = Object.assign({}, opts || {}, { _asyncPlanning: true });
+  let best = null;
+  let bestCost = Infinity;
+  for (let i = 0; i < SETROUTE_OCEAN_HUBS.length; i++) {
+    const h = SETROUTE_OCEAN_HUBS[i];
+    if (h === startNode || h === endNode || !MARITIME_SEA_NODES[h]) continue;
+    const path = await setroutePathViaNodeAsync(startNode, endNode, h, adj, opts);
+    if (!path) continue;
+    const score = setroutePathTimedScore(path, opts.speedKnots, opts.stormWeight, opts.t0Hours);
+    if (score.cost < bestCost) {
+      bestCost = score.cost;
+      best = path;
+    }
+  }
+  const hub2 = ["GIBRALTAR_MID", "CAPE_AGULHAS", "PANAMA_COLON", "SINGAPORE_MAIN", "UNIMAK_PASS", "NATL_GC_MID", "NPAC_GC_MID"];
+  for (let i = 0; i < hub2.length; i++) {
+    for (let j = 0; j < hub2.length; j++) {
+      if (i === j) continue;
+      const h1 = hub2[i];
+      const h2b = hub2[j];
+      const a = await setrouteDijkstraAsync(startNode, h1, adj, opts);
+      if (!a) continue;
+      const t1 = (setrouteDijkstraResultMeta() || {}).arrivalH || 0;
+      const b = await setrouteDijkstraAsync(h1, h2b, adj, Object.assign({}, opts, { t0Hours: t1 }));
+      if (!b) continue;
+      const t2 = (setrouteDijkstraResultMeta() || {}).arrivalH || t1;
+      const c = await setrouteDijkstraAsync(h2b, endNode, adj, Object.assign({}, opts, { t0Hours: t2 }));
+      if (!c) continue;
+      const path = a.concat(b.slice(1)).concat(c.slice(1));
+      const score = setroutePathTimedScore(path, opts.speedKnots, opts.stormWeight, opts.t0Hours);
+      if (score.cost < bestCost) {
+        bestCost = score.cost;
+        best = path;
+      }
+    }
+  }
+  return best;
 }
 
 function setroutePathViaHubs(startNode, endNode, adj, opts) {
@@ -6402,6 +6631,32 @@ function setroutePathViaHubs(startNode, endNode, adj, opts) {
     }
   }
   return best;
+}
+
+/** Space-time storm score on densified lat/lon waypoints (more accurate than graph nodes alone). */
+function setrouteSimulateWaypointStormTrack(waypoints, speedKnots, t0Hours) {
+  const speed = Math.max(1, Number(speedKnots) || 14.5);
+  let t = Number(t0Hours) || 0;
+  let nm = 0;
+  let stormPen = 0;
+  let severe = 0;
+  const hits = [];
+  if (!waypoints || waypoints.length < 2) {
+    return { cost: Infinity, nm: 0, arrivalH: t, stormPen: 0, severe: 0, hits };
+  }
+  for (let i = 0; i < waypoints.length - 1; i++) {
+    const a = waypoints[i];
+    const b = waypoints[i + 1];
+    if (!a || !b || !Number.isFinite(a.lat) || !Number.isFinite(b.lat)) continue;
+    const dist = calculateHaversineDistanceNM(a.lat, a.lon, b.lat, b.lon);
+    const wx = setrouteSpaceTimeStormPenalty(a.lat, a.lon, b.lat, b.lon, t, speed, 1);
+    nm += dist;
+    stormPen += wx.penalty;
+    severe += wx.severe;
+    (wx.hits || []).forEach((h) => hits.push(h));
+    t += dist / speed;
+  }
+  return { cost: nm + stormPen, nm, arrivalH: t, stormPen, severe, hits };
 }
 
 
@@ -6487,6 +6742,16 @@ function setrouteBuildAppraisalFactors(route, opts) {
       ", waves=" + ((wx.waves || []).length) +
       ", opc=" + ((wx.opcWarnings || []).length)
   });
+  const sa = (route && route.metadata && (route.metadata.stormAvoidance || (route.metadata.coreA && route.metadata.coreA.stormAvoidance))) || null;
+  if (sa) {
+    factors.push({
+      id: "cyclone_spacetime",
+      ok: !(sa.severeEncounters > 0),
+      text: sa.severeEncounters > 0
+        ? ("Space-time cyclone model: " + sa.severeEncounters + " residual core encounter(s) at voyage SOG; penalty " + (sa.stormPenalty || 0) + ".")
+        : ("Space-time cyclone model: clear vs forecast track at voyage SOG (penalty " + (sa.stormPenalty || 0) + ", ETA ~" + (sa.arrivalHours || "—") + " h).")
+    });
+  }
   let aisN = 0;
   try {
     if (typeof window.getAisTargetsSnapshot === "function") {
@@ -6646,7 +6911,8 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
 
   const speed = Math.max(1, Number(options.speedKnots) || 14.5);
   const t0 = Number(options.t0Hours) || 0;
-  const maxIter = Math.max(1, Math.min(5, Number(options.stormAvoidIters) || 4));
+  const maxIter = Math.max(1, Math.min(6, Number(options.stormAvoidIters) || 5));
+  const wantAsync = Boolean(options.asyncPlanning);
   const adj = setrouteBuildAdjacency();
 
   const pickBest = (cands, dOpts) => {
@@ -6657,7 +6923,6 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
         return Object.assign({}, c, { score: sc });
       });
     scored.sort((a, b) => {
-      // Prefer zero severe encounters, then timed cost
       const as = (a.score.severe || 0) * 1e7 + a.score.cost;
       const bs = (b.score.severe || 0) * 1e7 + b.score.cost;
       return as - bs;
@@ -6665,13 +6930,14 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
     return scored[0] || null;
   };
 
-  const searchOnce = (stormWeight) => {
+  const searchOnceAsync = async (stormWeight) => {
     const dOpts = {
       speedKnots: speed,
       stormWeight: stormWeight,
       t0Hours: t0,
-      maxLabels: 5,
-      maxExpansions: 280000
+      maxLabels: 7,
+      maxExpansions: 420000,
+      _asyncPlanning: wantAsync
     };
     if (typeof window !== "undefined") {
       window.SETROUTE_PLAN_PROGRESS = {
@@ -6681,30 +6947,39 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
       };
     }
 
+    const via = wantAsync
+      ? (a, b, v) => setroutePathViaNodeAsync(a, b, v, adj, dOpts)
+      : (a, b, v) => Promise.resolve(setroutePathViaNode(a, b, v, adj, dOpts));
+    const dijk = wantAsync
+      ? (a, b) => setrouteDijkstraAsync(a, b, adj, dOpts)
+      : (a, b) => Promise.resolve(setrouteDijkstra(a, b, adj, dOpts));
+    const hubs = wantAsync
+      ? () => setroutePathViaHubsAsync(startNode, endNode, adj, dOpts)
+      : () => Promise.resolve(setroutePathViaHubs(startNode, endNode, adj, dOpts));
+
     let path = null;
     let routeMode = "shortest_sea";
 
     if (options.viaCape) {
-      path = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj, dOpts);
+      path = await via(startNode, endNode, "CAPE_AGULHAS");
       routeMode = "via_cape";
     } else if (options.viaPanama) {
-      path = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj, dOpts)
-        || setroutePathViaNode(startNode, endNode, "PANAMA_BALBOA", adj, dOpts);
+      path = (await via(startNode, endNode, "PANAMA_COLON"))
+        || (await via(startNode, endNode, "PANAMA_BALBOA"));
       routeMode = "via_panama";
     } else if (options.viaSuez) {
-      path = setroutePathViaNode(startNode, endNode, "SUEZ_CANAL_MID", adj, dOpts);
+      path = await via(startNode, endNode, "SUEZ_CANAL_MID");
       routeMode = "via_suez";
     } else if (
       (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAsiaGulfPort(destCoords[0], destCoords[1])) ||
       (setrouteIsAsiaGulfPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
     ) {
-      const suez = setroutePathViaNode(startNode, endNode, "SUEZ_CANAL_MID", adj, dOpts);
-      const cape = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj, dOpts);
+      const suez = await via(startNode, endNode, "SUEZ_CANAL_MID");
+      const cape = await via(startNode, endNode, "CAPE_AGULHAS");
       const best = pickBest([
         { p: suez, m: "via_suez_auto" },
         { p: cape, m: "via_cape_auto" }
       ], dOpts);
-      // Prefer Suez if timed scores close and no severe storm on Suez
       if (suez && cape) {
         const ss = setroutePathTimedScore(suez, speed, stormWeight, t0);
         const cs = setroutePathTimedScore(cape, speed, stormWeight, t0);
@@ -6723,9 +6998,9 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
       (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
       (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
     ) {
-      const natl = setroutePathViaNode(startNode, endNode, "NATL_GC_MID", adj, dOpts);
-      const panama = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj, dOpts);
-      const direct = setrouteDijkstra(startNode, endNode, adj, dOpts);
+      const natl = await via(startNode, endNode, "NATL_GC_MID");
+      const panama = await via(startNode, endNode, "PANAMA_COLON");
+      const direct = await dijk(startNode, endNode);
       const best = pickBest([
         { p: direct, m: "shortest_sea" },
         { p: natl, m: "via_natl" },
@@ -6739,12 +7014,12 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
       (setrouteIsFarEastPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
       (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsFarEastPort(destCoords[0], destCoords[1]))
     ) {
-      const panama = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj, dOpts)
-        || setroutePathViaNode(startNode, endNode, "PANAMA_BALBOA", adj, dOpts);
-      const npac = setroutePathViaNode(startNode, endNode, "NPAC_GC_MID", adj, dOpts);
-      const unimak = setroutePathViaNode(startNode, endNode, "UNIMAK_PASS", adj, dOpts);
-      const cape = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj, dOpts);
-      const direct = setrouteDijkstra(startNode, endNode, adj, dOpts);
+      const panama = (await via(startNode, endNode, "PANAMA_COLON"))
+        || (await via(startNode, endNode, "PANAMA_BALBOA"));
+      const npac = await via(startNode, endNode, "NPAC_GC_MID");
+      const unimak = await via(startNode, endNode, "UNIMAK_PASS");
+      const cape = await via(startNode, endNode, "CAPE_AGULHAS");
+      const direct = await dijk(startNode, endNode);
       const cands = [
         { p: panama, m: "via_panama_fareast" },
         { p: npac, m: "via_npac" },
@@ -6753,7 +7028,6 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
         { p: cape, m: "via_cape_fareast" }
       ];
       if (setrouteIsUsGulfPort(destCoords[0], destCoords[1]) || setrouteIsUsGulfPort(origCoords[0], origCoords[1])) {
-        // Bias Panama for Gulf OD after timed score
         cands.forEach((c) => {
           if (c.m.indexOf("panama") >= 0 && c.p) c._bias = -4000;
         });
@@ -6782,15 +7056,15 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
     }
 
     if (!path) {
-      path = setrouteDijkstra(startNode, endNode, adj, dOpts);
+      path = await dijk(startNode, endNode);
       routeMode = "shortest_sea";
     }
     if (!path) {
-      path = setroutePathViaHubs(startNode, endNode, adj, dOpts);
+      path = await hubs();
       routeMode = "via_ocean_hubs";
     }
     if (!path) {
-      path = setroutePathViaHubs(startNode, endNode, adj, dOpts);
+      path = await hubs();
       routeMode = "hub_fallback";
     }
 
@@ -6800,70 +7074,89 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
     return { path, routeMode, score, stormWeight, dOpts };
   };
 
-  let bestResult = null;
-  for (let iter = 0; iter < maxIter; iter++) {
-    const stormWeight = (Number(options.stormWeight) || 1) * (1 + iter * 2.25);
-    const result = searchOnce(stormWeight);
-    if (!result.path || result.path.length < 2) continue;
-    if (!bestResult ||
-        result.score.severe < bestResult.score.severe ||
-        (result.score.severe === bestResult.score.severe && result.score.cost < bestResult.score.cost)) {
-      bestResult = result;
+  const finalizeCorridor = (bestResult) => {
+    let path = bestResult && bestResult.path;
+    let routeMode = (bestResult && bestResult.routeMode) || "shortest_sea";
+    let finalScore = (bestResult && bestResult.score) || null;
+    let usedStormWeight = (bestResult && bestResult.stormWeight) || 1;
+
+    if (!path) {
+      path = [startNode];
+      routeMode = "no_safe_corridor";
     }
-    // Clean enough — stop escalating
-    if (result.score.severe === 0 && result.score.stormPen < 400) break;
-    // Still severe after strong weight — keep best and continue one more escalate
-  }
 
-  let path = bestResult && bestResult.path;
-  let routeMode = (bestResult && bestResult.routeMode) || "shortest_sea";
-  let finalScore = (bestResult && bestResult.score) || null;
-  let usedStormWeight = (bestResult && bestResult.stormWeight) || 1;
-
-  if (!path) {
-    path = [startNode];
-    routeMode = "no_safe_corridor";
-  }
-
-  // Validate successive corridor legs; splice hubs if a graph hop somehow still looks landy
-  if (path && path.length >= 2) {
-    const fixed = [path[0]];
-    for (let i = 0; i < path.length - 1; i++) {
-      const a = MARITIME_SEA_NODES[path[i]];
-      const b = MARITIME_SEA_NODES[path[i + 1]];
-      if (a && b && setrouteLegLikelyCrossesLand(a[0], a[1], b[0], b[1])) {
-        const midHub = SETROUTE_OCEAN_HUBS.find((h) => {
-          if (h === path[i] || h === path[i + 1] || !MARITIME_SEA_NODES[h]) return false;
-          const n = MARITIME_SEA_NODES[h];
-          return !setrouteLegLikelyCrossesLand(a[0], a[1], n[0], n[1]) &&
-            !setrouteLegLikelyCrossesLand(n[0], n[1], b[0], b[1]);
-        });
-        if (midHub) fixed.push(midHub);
+    if (path && path.length >= 2) {
+      const fixed = [path[0]];
+      for (let i = 0; i < path.length - 1; i++) {
+        const a = MARITIME_SEA_NODES[path[i]];
+        const b = MARITIME_SEA_NODES[path[i + 1]];
+        if (a && b && setrouteLegLikelyCrossesLand(a[0], a[1], b[0], b[1])) {
+          const midHub = SETROUTE_OCEAN_HUBS.find((h) => {
+            if (h === path[i] || h === path[i + 1] || !MARITIME_SEA_NODES[h]) return false;
+            const n = MARITIME_SEA_NODES[h];
+            return !setrouteLegLikelyCrossesLand(a[0], a[1], n[0], n[1]) &&
+              !setrouteLegLikelyCrossesLand(n[0], n[1], b[0], b[1]);
+          });
+          if (midHub) fixed.push(midHub);
+        }
+        fixed.push(path[i + 1]);
       }
-      fixed.push(path[i + 1]);
+      path = fixed;
+      if (path.length >= 2) {
+        finalScore = setroutePathTimedScore(path, speed, usedStormWeight, t0);
+      }
     }
-    path = fixed;
-    if (path.length >= 2) {
-      finalScore = setroutePathTimedScore(path, speed, usedStormWeight, t0);
-    }
-  }
 
-  findMaritimeSeaCorridor._lastMeta = {
-    startNode,
-    endNode,
-    routeMode,
-    hops: (path && path.length) || 0,
-    speedKnots: speed,
-    stormWeight: usedStormWeight,
-    stormAvoidance: finalScore ? {
-      severeEncounters: finalScore.severe,
-      stormPenalty: Math.round(finalScore.stormPen),
-      timedCost: Math.round(finalScore.cost),
-      arrivalHours: Math.round(finalScore.arrivalH * 10) / 10,
-      hits: (finalScore.hits || []).slice(0, 8)
-    } : null
+    findMaritimeSeaCorridor._lastMeta = {
+      startNode,
+      endNode,
+      routeMode,
+      hops: (path && path.length) || 0,
+      speedKnots: speed,
+      stormWeight: usedStormWeight,
+      stormAvoidance: finalScore ? {
+        severeEncounters: finalScore.severe,
+        stormPenalty: Math.round(finalScore.stormPen),
+        timedCost: Math.round(finalScore.cost),
+        arrivalHours: Math.round(finalScore.arrivalH * 10) / 10,
+        hits: (finalScore.hits || []).slice(0, 12)
+      } : null
+    };
+    return path;
   };
-  return path;
+
+  const runIters = async () => {
+    let bestResult = null;
+    for (let iter = 0; iter < maxIter; iter++) {
+      const stormWeight = (Number(options.stormWeight) || 1) * (1 + iter * 2.25);
+      if (typeof window !== "undefined") {
+        window.SETROUTE_PLAN_PROGRESS = {
+          phase: "storm_avoid_iter",
+          iter: iter + 1,
+          maxIter,
+          stormWeight,
+          speedKnots: speed
+        };
+      }
+      const result = await searchOnceAsync(stormWeight);
+      if (!result.path || result.path.length < 2) continue;
+      if (!bestResult ||
+          result.score.severe < bestResult.score.severe ||
+          (result.score.severe === bestResult.score.severe && result.score.cost < bestResult.score.cost)) {
+        bestResult = result;
+      }
+      if (result.score.severe === 0 && result.score.stormPen < 350) break;
+    }
+    return finalizeCorridor(bestResult);
+  };
+
+  // Always return a Promise — sync dijkstra still used when asyncPlanning=false (no yields).
+  // Callers that need sync must use a known-sync subset; brain uses await.
+  return runIters();
+}
+
+async function findMaritimeSeaCorridorAsync(origCoords, destCoords, options) {
+  return findMaritimeSeaCorridor(origCoords, destCoords, Object.assign({}, options || {}, { asyncPlanning: true }));
 }
 
 function auditPassagePlan(route) {
@@ -6947,10 +7240,13 @@ function auditPassagePlan(route) {
 }
 window.auditPassagePlan = auditPassagePlan;
 window.findMaritimeSeaCorridor = findMaritimeSeaCorridor;
+window.findMaritimeSeaCorridorAsync = findMaritimeSeaCorridorAsync;
 window.setrouteLegLikelyCrossesLand = setrouteLegLikelyCrossesLand;
 window.setrouteStormStateAtTau = setrouteStormStateAtTau;
 window.setrouteSpaceTimeStormPenalty = setrouteSpaceTimeStormPenalty;
 window.setroutePathTimedScore = setroutePathTimedScore;
+window.setrouteSimulateWaypointStormTrack = setrouteSimulateWaypointStormTrack;
+window.generateAlgorithmicMaritimeRoute = generateAlgorithmicMaritimeRoute;
 
 
 function initSetRoute() {
@@ -7167,21 +7463,19 @@ async function generateSetRoutePassage() {
     await animateStepMsg("Scanning active UKHO Admiralty NtM Week 42/26 hazards & TSS polygons...", 620);
     await animateStepMsg("Analyzing 00:00 UTC Marine Weather, Cyclones & Wave fields...", 620);
     await animateStepMsg("Injecting Open Sea Buoys, TSS lanes & port bathymetry...", 580);
-    await animateStepMsg("Calculating optimal deep-sea passage route...", 450);
+    await animateStepMsg("Core A space-time cyclone search (forecast track × ship ETA)…", 400);
 
-    const seaCorridor = findMaritimeSeaCorridor(origCoords, destCoords);
+    const seaCorridor = await findMaritimeSeaCorridorAsync(origCoords, destCoords, { speedKnots: speed });
     const corridorNames = seaCorridor.map(k => (MARITIME_SEA_NODES[k] || [])[2] || k).join(" -> ");
     const corridorCoords = seaCorridor.map(k => {
       const n = MARITIME_SEA_NODES[k];
       return n ? `${n[2]} (Lat: ${n[0].toFixed(2)}, Lon: ${n[1].toFixed(2)})` : k;
     }).join("; ");
 
-    // Always build verified deep-water sea corridor route first so we never route over land
-    let verifiedSeaRoute = generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode);
-    // Hard gate for Build Route panel (same as chat Core A)
+    let verifiedSeaRoute = await generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, { asyncPlanning: true });
     if (verifiedSeaRoute && verifiedSeaRoute.metadata && verifiedSeaRoute.metadata.coreARefused) {
-      const recovery = generateAlgorithmicMaritimeRoute(
-        pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, { viaPanama: true }
+      const recovery = await generateAlgorithmicMaritimeRoute(
+        pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, { viaPanama: true, asyncPlanning: true }
       );
       if (recovery && !(recovery.metadata && recovery.metadata.coreARefused)) {
         verifiedSeaRoute = recovery;
@@ -7345,18 +7639,20 @@ function displaySetRouteResults(route) {
 }
 
 /**
- * High-Accuracy Algorithmic Fallback Maritime Route Generator
+ * High-Accuracy Algorithmic Fallback Maritime Route Generator (async — space-time cyclone search).
  */
-function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, routeOpts) {
+async function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, routeOpts) {
   routeOpts = routeOpts || {};
   const spd = Math.max(1, Number(speed) || Number(routeOpts.speedKnots) || 14.5);
-  const corridor = findMaritimeSeaCorridor(origCoords, destCoords, Object.assign({}, routeOpts, {
+  const asyncPlanning = routeOpts.asyncPlanning !== false;
+  const corridor = await findMaritimeSeaCorridor(origCoords, destCoords, Object.assign({}, routeOpts, {
     speedKnots: spd,
-    t0Hours: Number(routeOpts.t0Hours) || 0
+    t0Hours: Number(routeOpts.t0Hours) || 0,
+    asyncPlanning: asyncPlanning,
+    stormAvoidIters: Number(routeOpts.stormAvoidIters) || 5
   }));
   const waypoints = [];
 
-  // Departure Pilot Station WPT
   waypoints.push({
     wptNo: "001",
     name: `${pOrig.name.toUpperCase()} PILOT STATION`,
@@ -7370,7 +7666,6 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
     rot: 10.0
   });
 
-  // Intermediate deep-water sea corridor waypoints
   let wptCounter = 2;
   const chokepoints = [];
   for (const nodeKey of corridor) {
@@ -7396,7 +7691,6 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
     wptCounter++;
   }
 
-  // Arrival Fairway WPT
   waypoints.push({
     wptNo: ('00' + wptCounter).slice(-3),
     name: `${pDest.name.toUpperCase()} FAIRWAY ARRIVAL`,
@@ -7410,12 +7704,39 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
     rot: 10.0
   });
 
-  const corridorMeta = (findMaritimeSeaCorridor._lastMeta) || {};
+  const corridorMeta = Object.assign({}, (findMaritimeSeaCorridor._lastMeta) || {});
   let densified = waypoints;
   if (typeof setrouteDensifyWaypoints === "function") {
-    densified = setrouteDensifyWaypoints(waypoints, 320);
+    densified = setrouteDensifyWaypoints(waypoints, 280);
   }
-  // Refuse only when Core A truly has no corridor (single snap node / empty). Soft land flags → audit warn, not hard fail.
+  // Re-score densified track vs forecast (more accurate than graph nodes alone)
+  if (typeof setrouteSimulateWaypointStormTrack === "function" && densified.length >= 2) {
+    const trackScore = setrouteSimulateWaypointStormTrack(densified, spd, Number(routeOpts.t0Hours) || 0);
+    corridorMeta.stormAvoidance = {
+      severeEncounters: trackScore.severe,
+      stormPenalty: Math.round(trackScore.stormPen),
+      timedCost: Math.round(trackScore.cost),
+      arrivalHours: Math.round(trackScore.arrivalH * 10) / 10,
+      hits: (trackScore.hits || []).slice(0, 12),
+      densifiedCheck: true
+    };
+    // If densified track still punches storm core, escalate one more corridor pass
+    if (trackScore.severe > 0 && !routeOpts._stormEscalated) {
+      const alt = await generateAlgorithmicMaritimeRoute(
+        pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode,
+        Object.assign({}, routeOpts, {
+          stormWeight: (Number(routeOpts.stormWeight) || 1) * 5,
+          stormAvoidIters: 6,
+          _stormEscalated: true,
+          asyncPlanning: asyncPlanning
+        })
+      );
+      if (alt && alt.metadata && alt.metadata.stormAvoidance &&
+          (alt.metadata.stormAvoidance.severeEncounters || 0) < trackScore.severe) {
+        return alt;
+      }
+    }
+  }
   const refused = Boolean(
     corridorMeta.routeMode === "no_safe_corridor" ||
     !corridor ||
@@ -13427,16 +13748,41 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const tmpl = (typeof setrouteMatchCorridorTemplate === "function")
     ? setrouteMatchCorridorTemplate(pOrig.name, pDest.name)
     : null;
-  let baseRoute = generateAlgorithmicMaritimeRoute(
-    pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode,
-    {
-      viaCape: viaCape,
-      viaSuez: viaSuez,
-      viaPanama: viaPanama,
-      templatePath: tmpl && tmpl.nodeKeys,
-      templateId: tmpl && tmpl.id
-    }
+
+  const progressEl = appendChatMessage("brain",
+    `<span style="color:#7dd3fc;">Core A: space-time cyclone avoidance at <b>${speed} kn</b> (forecast track × ship ETA). Quality search may take up to ~1–3 min…</span>`
   );
+  const progressTimer = setInterval(() => {
+    const p = (typeof window !== "undefined") ? window.SETROUTE_PLAN_PROGRESS : null;
+    if (!progressEl || !p) return;
+    const txt = progressEl.querySelector(".sr-msg-text");
+    if (!txt) return;
+    const sec = p.elapsedMs ? Math.round(p.elapsedMs / 1000) : "";
+    txt.innerHTML =
+      `<span style="color:#7dd3fc;">Core A cyclone search… phase <b>${p.phase || "—"}</b>` +
+      (p.iter ? ` · iter ${p.iter}/${p.maxIter || "?"}` : "") +
+      (p.expansions ? ` · expansions ${p.expansions}` : "") +
+      (sec !== "" ? ` · ${sec}s` : "") +
+      ` · SOG <b>${speed} kn</b></span>`;
+  }, 700);
+
+  let baseRoute;
+  try {
+    baseRoute = await generateAlgorithmicMaritimeRoute(
+      pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode,
+      {
+        viaCape: viaCape,
+        viaSuez: viaSuez,
+        viaPanama: viaPanama,
+        templatePath: tmpl && tmpl.nodeKeys,
+        templateId: tmpl && tmpl.id,
+        asyncPlanning: true,
+        stormAvoidIters: 5
+      }
+    );
+  } finally {
+    clearInterval(progressTimer);
+  }
   // Hard gate: only block when Core A produced no usable corridor. Land-leg warnings → prefer recovery, else still publish with audit.
   enrichRouteWithLegsTelemetry(baseRoute, {
     origin: pOrig.name, destination: pDest.name, speedKnots: speed, draftMeters: draft, xtdNM: xtd, sailMode
@@ -13452,9 +13798,9 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     ];
     let recovered = false;
     for (let ri = 0; ri < retries.length; ri++) {
-      const alt = generateAlgorithmicMaritimeRoute(
+      const alt = await generateAlgorithmicMaritimeRoute(
         pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode,
-        Object.assign({ templatePath: tmpl && tmpl.nodeKeys, templateId: tmpl && tmpl.id }, retries[ri])
+        Object.assign({ templatePath: tmpl && tmpl.nodeKeys, templateId: tmpl && tmpl.id, asyncPlanning: true }, retries[ri])
       );
       if (alt.metadata && alt.metadata.coreARefused) continue;
       enrichRouteWithLegsTelemetry(alt, {
