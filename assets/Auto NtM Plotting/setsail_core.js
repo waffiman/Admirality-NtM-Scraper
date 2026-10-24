@@ -5955,6 +5955,134 @@ function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
   return pen;
 }
 
+/** Interpolate cyclone center / wind / danger radius at advisory +tau hours. */
+function setrouteStormStateAtTau(st, tauHours) {
+  if (!st || !Array.isArray(st.center)) return null;
+  const tau = Math.max(0, Number(tauHours) || 0);
+  const pts = [{
+    tau: 0,
+    coords: [Number(st.center[0]), Number(st.center[1])],
+    winds: Number(st.maxWinds) || 0,
+    radiusNm: Number(st.dangerRadiusNm) || 100
+  }];
+  (st.forecastTrack || []).forEach((fp) => {
+    if (!fp || !Array.isArray(fp.coords)) return;
+    pts.push({
+      tau: Number(fp.tau) || 0,
+      coords: [Number(fp.coords[0]), Number(fp.coords[1])],
+      winds: Number(fp.winds) || Number(st.maxWinds) || 0,
+      radiusNm: Number(fp.radiusNm) || Number(st.dangerRadiusNm) || 100
+    });
+  });
+  pts.sort((a, b) => a.tau - b.tau);
+  if (tau <= pts[0].tau) {
+    return { lat: pts[0].coords[0], lon: pts[0].coords[1], winds: pts[0].winds, radiusNm: pts[0].radiusNm, tau, name: st.name };
+  }
+  const last = pts[pts.length - 1];
+  if (tau >= last.tau) {
+    // Hold last forecast fix (conservative: radius grows slightly beyond advisory)
+    const over = Math.min(36, tau - last.tau);
+    return {
+      lat: last.coords[0],
+      lon: last.coords[1],
+      winds: last.winds,
+      radiusNm: last.radiusNm + over * 0.8,
+      tau,
+      name: st.name
+    };
+  }
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i];
+    const b = pts[i + 1];
+    if (tau < a.tau || tau > b.tau) continue;
+    const span = Math.max(0.01, b.tau - a.tau);
+    const f = (tau - a.tau) / span;
+    return {
+      lat: a.coords[0] + (b.coords[0] - a.coords[0]) * f,
+      lon: a.coords[1] + (b.coords[1] - a.coords[1]) * f,
+      winds: a.winds + (b.winds - a.winds) * f,
+      radiusNm: a.radiusNm + (b.radiusNm - a.radiusNm) * f,
+      tau,
+      name: st.name
+    };
+  }
+  return { lat: last.coords[0], lon: last.coords[1], winds: last.winds, radiusNm: last.radiusNm, tau, name: st.name };
+}
+
+/**
+ * Space-time cyclone penalty for a graph/route leg.
+ * Ship departs this chord at departHours (from voyage start), speedKnots constant.
+ * Samples ship position vs interpolated storm at matching tau.
+ */
+function setrouteSpaceTimeStormPenalty(lat1, lon1, lat2, lon2, departHours, speedKnots, stormWeight) {
+  const storms = (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.storms))
+    ? MARINE_WEATHER_STORE.storms : [];
+  if (!storms.length) return { penalty: 0, hits: [], severe: 0 };
+  const speed = Math.max(1, Number(speedKnots) || 14.5);
+  const weight = Math.max(0.25, Number(stormWeight) || 1);
+  const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+  if (!(dist > 0)) return { penalty: 0, hits: [], severe: 0 };
+  const transitH = dist / speed;
+  const nSamp = Math.min(14, Math.max(4, Math.ceil(dist / 35)));
+  let penalty = 0;
+  let severe = 0;
+  const hits = [];
+  const hitKeys = {};
+  for (let i = 0; i < nSamp; i++) {
+    const f = nSamp === 1 ? 0.5 : i / (nSamp - 1);
+    const p = setrouteLerpLatLon(lat1, lon1, lat2, lon2, f);
+    const tShip = (Number(departHours) || 0) + f * transitH;
+    for (let si = 0; si < storms.length; si++) {
+      const st = storms[si];
+      const s = setrouteStormStateAtTau(st, tShip);
+      if (!s) continue;
+      const d = calculateHaversineDistanceNM(p[0], p[1], s.lat, s.lon);
+      const bufferNm = 40 + Math.min(80, (s.winds || 0) * 0.35);
+      const r = (s.radiusNm || 100) + bufferNm;
+      if (d >= r) continue;
+      const depth = Math.max(0, Math.min(1, (r - d) / Math.max(1, r)));
+      const windF = Math.min(1.8, (s.winds || 30) / 64);
+      penalty += weight * (55 + depth * 220 * windF + (s.winds || 0) * 0.55);
+      const coreR = (s.radiusNm || 100) * 0.62;
+      if (d < coreR && (s.winds || 0) >= 34) {
+        severe++;
+        penalty += weight * (1800 + (s.winds || 0) * 12);
+      }
+      const key = (st.id || st.name || "storm") + "@" + Math.round(tShip);
+      if (!hitKeys[key]) {
+        hitKeys[key] = true;
+        hits.push({
+          name: st.name || "Cyclone",
+          tauH: Math.round(tShip * 10) / 10,
+          cpaNm: Math.round(d),
+          winds: Math.round(s.winds || 0),
+          radiusNm: Math.round(s.radiusNm || 0)
+        });
+      }
+    }
+  }
+  if (severe >= 3) penalty += weight * 12000;
+  return { penalty, hits, severe };
+}
+
+/** Static waves/OPC only — cyclones handled in timed search. */
+function setrouteStaticNonStormWeatherPenalty(lat1, lon1, lat2, lon2) {
+  let pen = 0;
+  if (typeof MARINE_WEATHER_STORE === "undefined") return 0;
+  const mid = setrouteLerpLatLon(lat1, lon1, lat2, lon2, 0.5);
+  (MARINE_WEATHER_STORE.waves || []).forEach((w) => {
+    if (!w || !Array.isArray(w.center) || !(w.waveHeight >= 4.0)) return;
+    const d = calculateHaversineDistanceNM(mid[0], mid[1], w.center[0], w.center[1]);
+    if (d < 120) pen += 15 + Math.min(40, (w.waveHeight - 4) * 8);
+  });
+  (MARINE_WEATHER_STORE.opcWarnings || []).forEach((w) => {
+    if (!w || !Array.isArray(w.center)) return;
+    const d = calculateHaversineDistanceNM(mid[0], mid[1], w.center[0], w.center[1]);
+    if (d < 150) pen += 20;
+  });
+  return pen;
+}
+
 function setrouteBuildAdjacency() {
   const adj = {};
   Object.keys(MARITIME_SEA_NODES).forEach((k) => { adj[k] = []; });
@@ -5963,7 +6091,7 @@ function setrouteBuildAdjacency() {
     const a = MARITIME_SEA_NODES[u];
     const b = MARITIME_SEA_NODES[v];
     const dist = calculateHaversineDistanceNM(a[0], a[1], b[0], b[1]);
-    // Graph topology: use land-boxes only (not full coast-grid), so TSS links stay alive
+    // Graph topology: land-boxes only (not coast-grid)
     let hazard = 0;
     const samples = dist > 800 ? [0.25, 0.5, 0.75] : [0.5];
     let boxHits = 0;
@@ -5974,68 +6102,205 @@ function setrouteBuildAdjacency() {
     if (boxHits >= (dist >= 1500 ? 2 : 1) && dist >= 200) {
       hazard = 50000;
     } else {
-      // Soft live-layer costs only (weather / NtM / AIS) — never disconnect the sea graph
-      const mid = setrouteLerpLatLon(a[0], a[1], b[0], b[1], 0.5);
-      if (typeof MARINE_WEATHER_STORE !== "undefined") {
-        (MARINE_WEATHER_STORE.storms || []).forEach((st) => {
-          if (!st || !Array.isArray(st.center)) return;
-          const d = calculateHaversineDistanceNM(mid[0], mid[1], st.center[0], st.center[1]);
-          const r = (st.dangerRadiusNm || 100) + 80;
-          if (d < r) hazard += 40 + Math.max(0, (r - d) * 0.5);
-        });
-      }
+      hazard += setrouteStaticNonStormWeatherPenalty(a[0], a[1], b[0], b[1]);
       if (typeof setrouteAisPenalty === "function") hazard += setrouteAisPenalty(a[0], a[1], b[0], b[1]) * 0.5;
     }
     const cost = dist + hazard;
-    if (hazard >= 50000) continue; // drop only true continental chords
+    if (hazard >= 50000) continue;
     adj[u].push({ node: v, dist, cost });
     adj[v].push({ node: u, dist, cost });
   }
   return adj;
 }
 
-function setrouteDijkstra(startNode, endNode, adj) {
+/**
+ * Multi-label time-dependent Dijkstra.
+ * Edge cost = NM + static adj hazard + space-time cyclone penalty(departTime, speed).
+ * Keeps up to maxLabels non-dominated (cost, arrivalTime) labels per node.
+ */
+function setrouteDijkstra(startNode, endNode, adj, opts) {
+  opts = opts || {};
   if (!startNode || !endNode || !adj[startNode] || !adj[endNode]) return null;
-  if (startNode === endNode) return [startNode];
+  if (startNode === endNode) {
+    setrouteDijkstra._lastMeta = { cost: 0, arrivalH: Number(opts.t0Hours) || 0, stormPenalty: 0 };
+    return [startNode];
+  }
 
-  const dists = {};
-  const prev = {};
-  const visited = new Set();
-  Object.keys(MARITIME_SEA_NODES).forEach((k) => {
-    dists[k] = Infinity;
-    prev[k] = null;
-  });
-  dists[startNode] = 0;
-  const keys = Object.keys(MARITIME_SEA_NODES);
-  for (let step = 0; step < keys.length; step++) {
-    let u = null;
-    let uDist = Infinity;
-    for (const k of keys) {
-      if (!visited.has(k) && dists[k] < uDist) {
-        uDist = dists[k];
-        u = k;
+  const speed = Math.max(1, Number(opts.speedKnots) || 14.5);
+  const stormW = Math.max(0, Number(opts.stormWeight) || 1);
+  const t0 = Number(opts.t0Hours) || 0;
+  const maxLabels = Math.max(2, Math.min(8, Number(opts.maxLabels) || 5));
+  const timedWx = stormW > 0 && typeof MARINE_WEATHER_STORE !== "undefined" &&
+    Array.isArray(MARINE_WEATHER_STORE.storms) && MARINE_WEATHER_STORE.storms.length > 0;
+
+  // Fast path: no live storms → classic static Dijkstra on adj.cost
+  if (!timedWx) {
+    const dists = {};
+    const prev = {};
+    const visited = new Set();
+    Object.keys(MARITIME_SEA_NODES).forEach((k) => { dists[k] = Infinity; prev[k] = null; });
+    dists[startNode] = 0;
+    const keys = Object.keys(MARITIME_SEA_NODES);
+    for (let step = 0; step < keys.length; step++) {
+      let u = null;
+      let uDist = Infinity;
+      for (const k of keys) {
+        if (!visited.has(k) && dists[k] < uDist) { uDist = dists[k]; u = k; }
+      }
+      if (u === null || uDist === Infinity) break;
+      if (u === endNode) break;
+      visited.add(u);
+      for (const edge of adj[u] || []) {
+        if (visited.has(edge.node)) continue;
+        const alt = dists[u] + edge.cost;
+        if (alt < dists[edge.node]) {
+          dists[edge.node] = alt;
+          prev[edge.node] = u;
+        }
       }
     }
-    if (u === null || uDist === Infinity) break;
-    if (u === endNode) break;
-    visited.add(u);
-    for (const edge of adj[u] || []) {
-      if (visited.has(edge.node)) continue;
-      const alt = dists[u] + edge.cost;
-      if (alt < dists[edge.node]) {
-        dists[edge.node] = alt;
-        prev[edge.node] = u;
-      }
+    if (dists[endNode] === Infinity) return null;
+    const path = [];
+    let curr = endNode;
+    while (curr) { path.unshift(curr); curr = prev[curr]; }
+    if (path[0] !== startNode) return null;
+    setrouteDijkstra._lastMeta = {
+      cost: dists[endNode],
+      arrivalH: t0 + setroutePathCostNM(path) / speed,
+      stormPenalty: 0
+    };
+    return path;
+  }
+
+  // Timed multi-label search
+  const labels = {};
+  Object.keys(MARITIME_SEA_NODES).forEach((k) => { labels[k] = []; });
+  labels[startNode].push({ cost: 0, t: t0, prev: null, prevLi: -1, stormPen: 0 });
+
+  // Binary min-heap of {node, li, cost}
+  const heap = [];
+  const heapPush = (item) => {
+    heap.push(item);
+    let i = heap.length - 1;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (heap[p].cost <= heap[i].cost) break;
+      const tmp = heap[p]; heap[p] = heap[i]; heap[i] = tmp; i = p;
+    }
+  };
+  const heapPop = () => {
+    if (!heap.length) return null;
+    const top = heap[0];
+    const last = heap.pop();
+    if (!heap.length) return top;
+    heap[0] = last;
+    let i = 0;
+    for (;;) {
+      let l = i * 2 + 1;
+      let r = l + 1;
+      let s = i;
+      if (l < heap.length && heap[l].cost < heap[s].cost) s = l;
+      if (r < heap.length && heap[r].cost < heap[s].cost) s = r;
+      if (s === i) break;
+      const tmp = heap[s]; heap[s] = heap[i]; heap[i] = tmp; i = s;
+    }
+    return top;
+  };
+  heapPush({ node: startNode, li: 0, cost: 0 });
+
+  let expansions = 0;
+  const maxExpansions = Number(opts.maxExpansions) || 250000;
+  const tryInsertLabel = (node, lab) => {
+    const arr = labels[node];
+    // Dominated?
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].cost <= lab.cost + 1e-6 && arr[i].t <= lab.t + 1e-6) return -1;
+    }
+    // Remove labels this one dominates
+    for (let i = arr.length - 1; i >= 0; i--) {
+      if (lab.cost <= arr[i].cost + 1e-6 && lab.t <= arr[i].t + 1e-6) arr.splice(i, 1);
+    }
+    arr.push(lab);
+    arr.sort((a, b) => a.cost - b.cost || a.t - b.t);
+    while (arr.length > maxLabels) arr.pop();
+    const idx = arr.indexOf(lab);
+    return idx;
+  };
+
+  while (heap.length && expansions < maxExpansions) {
+    const cur = heapPop();
+    if (!cur) break;
+    expansions++;
+    const uLabs = labels[cur.node];
+    const uLab = uLabs[cur.li];
+    if (!uLab || Math.abs(uLab.cost - cur.cost) > 1e-3) continue; // stale
+    if (cur.node === endNode) {
+      // Can finish early if best label on end is this and heap top is worse — still drain a bit
+      // Keep searching for better cost labels on end within reason
+      if (uLabs[0] && uLabs[0].cost + 1 < cur.cost) continue;
+    }
+    const uNode = MARITIME_SEA_NODES[cur.node];
+    for (const edge of adj[cur.node] || []) {
+      const v = edge.node;
+      const vNode = MARITIME_SEA_NODES[v];
+      if (!uNode || !vNode) continue;
+      const dist = edge.dist;
+      const transitH = dist / speed;
+      const wx = setrouteSpaceTimeStormPenalty(
+        uNode[0], uNode[1], vNode[0], vNode[1], uLab.t, speed, stormW
+      );
+      const staticExtra = Math.max(0, edge.cost - dist); // waves/AIS baked in adj
+      const stepCost = dist + staticExtra + wx.penalty;
+      const newLab = {
+        cost: uLab.cost + stepCost,
+        t: uLab.t + transitH,
+        prev: cur.node,
+        prevLi: cur.li,
+        stormPen: uLab.stormPen + wx.penalty
+      };
+      const newIdx = tryInsertLabel(v, newLab);
+      if (newIdx >= 0) heapPush({ node: v, li: newIdx, cost: newLab.cost });
+    }
+    if (expansions % 4000 === 0 && typeof window !== "undefined") {
+      window.SETROUTE_PLAN_PROGRESS = {
+        phase: "timed_dijkstra",
+        expansions,
+        heap: heap.length,
+        stormWeight: stormW
+      };
     }
   }
-  if (dists[endNode] === Infinity) return null;
+
+  const endLabs = labels[endNode];
+  if (!endLabs || !endLabs.length) return null;
+  endLabs.sort((a, b) => a.cost - b.cost || a.t - b.t);
+  const best = endLabs[0];
   const path = [];
-  let curr = endNode;
-  while (curr) {
-    path.unshift(curr);
-    curr = prev[curr];
+  let node = endNode;
+  let li = 0;
+  // find index of best
+  for (let i = 0; i < endLabs.length; i++) {
+    if (endLabs[i] === best) { li = i; break; }
   }
-  return path[0] === startNode ? path : null;
+  let guard = 0;
+  while (node && guard++ < 500) {
+    path.unshift(node);
+    const lab = labels[node][li];
+    if (!lab || !lab.prev) break;
+    const pNode = lab.prev;
+    const pLi = lab.prevLi;
+    node = pNode;
+    li = pLi;
+  }
+  if (path[0] !== startNode) return null;
+  setrouteDijkstra._lastMeta = {
+    cost: best.cost,
+    arrivalH: best.t,
+    stormPenalty: best.stormPen,
+    expansions,
+    timed: true
+  };
+  return path;
 }
 
 function setroutePathCostNM(path) {
@@ -6049,43 +6314,89 @@ function setroutePathCostNM(path) {
   return t;
 }
 
-function setroutePathViaNode(startNode, endNode, viaNode, adj) {
-  if (!viaNode || !MARITIME_SEA_NODES[viaNode]) return null;
-  const p1 = setrouteDijkstra(startNode, viaNode, adj);
-  const p2 = setrouteDijkstra(viaNode, endNode, adj);
-  if (!p1 || !p2) return null;
-  return p1.concat(p2.slice(1));
+/** Full path space-time score (for ranking candidates). */
+function setroutePathTimedScore(path, speedKnots, stormWeight, t0Hours) {
+  const speed = Math.max(1, Number(speedKnots) || 14.5);
+  const sw = Number(stormWeight) || 1;
+  let t = Number(t0Hours) || 0;
+  let nm = 0;
+  let stormPen = 0;
+  let severe = 0;
+  const hits = [];
+  if (!path || path.length < 2) return { cost: Infinity, nm: 0, arrivalH: t, stormPen: 0, severe: 0, hits };
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = MARITIME_SEA_NODES[path[i]];
+    const b = MARITIME_SEA_NODES[path[i + 1]];
+    if (!a || !b) continue;
+    const dist = calculateHaversineDistanceNM(a[0], a[1], b[0], b[1]);
+    const wx = setrouteSpaceTimeStormPenalty(a[0], a[1], b[0], b[1], t, speed, sw);
+    nm += dist;
+    stormPen += wx.penalty;
+    severe += wx.severe;
+    (wx.hits || []).forEach((h) => hits.push(h));
+    t += dist / speed;
+  }
+  return { cost: nm + stormPen, nm, arrivalH: t, stormPen, severe, hits };
 }
 
-function setroutePathViaHubs(startNode, endNode, adj) {
+function setrouteDijkstraResultMeta() {
+  return setrouteDijkstra._lastMeta || null;
+}
+
+function setroutePathViaNode(startNode, endNode, viaNode, adj, opts) {
+  if (!viaNode || !MARITIME_SEA_NODES[viaNode]) return null;
+  opts = opts || {};
+  const p1 = setrouteDijkstra(startNode, viaNode, adj, opts);
+  if (!p1) return null;
+  const midMeta = setrouteDijkstraResultMeta() || {};
+  const p2 = setrouteDijkstra(viaNode, endNode, adj, Object.assign({}, opts, {
+    t0Hours: midMeta.arrivalH != null ? midMeta.arrivalH : (Number(opts.t0Hours) || 0)
+  }));
+  if (!p2) return null;
+  const path = p1.concat(p2.slice(1));
+  const score = setroutePathTimedScore(path, opts.speedKnots, opts.stormWeight, opts.t0Hours);
+  setrouteDijkstra._lastMeta = {
+    cost: score.cost,
+    arrivalH: score.arrivalH,
+    stormPenalty: score.stormPen,
+    timed: true
+  };
+  return path;
+}
+
+function setroutePathViaHubs(startNode, endNode, adj, opts) {
+  opts = opts || {};
   let best = null;
   let bestCost = Infinity;
   for (let i = 0; i < SETROUTE_OCEAN_HUBS.length; i++) {
     const h = SETROUTE_OCEAN_HUBS[i];
     if (h === startNode || h === endNode || !MARITIME_SEA_NODES[h]) continue;
-    const path = setroutePathViaNode(startNode, endNode, h, adj);
+    const path = setroutePathViaNode(startNode, endNode, h, adj, opts);
     if (!path) continue;
-    const c = setroutePathCostNM(path);
-    if (c < bestCost) {
-      bestCost = c;
+    const score = setroutePathTimedScore(path, opts.speedKnots, opts.stormWeight, opts.t0Hours);
+    if (score.cost < bestCost) {
+      bestCost = score.cost;
       best = path;
     }
   }
-  // Two-hub attempts for hard pairs (e.g. Med -> Far East already covered; Pacific transits)
   const hub2 = ["GIBRALTAR_MID", "CAPE_AGULHAS", "PANAMA_COLON", "SINGAPORE_MAIN", "UNIMAK_PASS"];
   for (let i = 0; i < hub2.length; i++) {
     for (let j = 0; j < hub2.length; j++) {
       if (i === j) continue;
       const h1 = hub2[i];
       const h2b = hub2[j];
-      const a = setrouteDijkstra(startNode, h1, adj);
-      const b = setrouteDijkstra(h1, h2b, adj);
-      const c = setrouteDijkstra(h2b, endNode, adj);
-      if (!a || !b || !c) continue;
+      const a = setrouteDijkstra(startNode, h1, adj, opts);
+      if (!a) continue;
+      const t1 = (setrouteDijkstraResultMeta() || {}).arrivalH || 0;
+      const b = setrouteDijkstra(h1, h2b, adj, Object.assign({}, opts, { t0Hours: t1 }));
+      if (!b) continue;
+      const t2 = (setrouteDijkstraResultMeta() || {}).arrivalH || t1;
+      const c = setrouteDijkstra(h2b, endNode, adj, Object.assign({}, opts, { t0Hours: t2 }));
+      if (!c) continue;
       const path = a.concat(b.slice(1)).concat(c.slice(1));
-      const cost = setroutePathCostNM(path);
-      if (cost < bestCost) {
-        bestCost = cost;
+      const score = setroutePathTimedScore(path, opts.speedKnots, opts.stormWeight, opts.t0Hours);
+      if (score.cost < bestCost) {
+        bestCost = score.cost;
         best = path;
       }
     }
@@ -6319,7 +6630,10 @@ function setrouteAisPenalty(lat1, lon1, lat2, lon2) {
 
 /**
  * Core A corridor finder — never returns a land-crossing chord.
- * options.viaCape / options.viaSuez force canal/cape branch.
+ * options.viaCape / viaSuez / viaPanama force branch.
+ * options.speedKnots — constant SOG for space-time cyclone avoidance (default 14.5).
+ * options.stormWeight — escalate on iterative replan (default 1).
+ * Quality mode: up to several timed Dijkstra passes (may take tens of seconds on heavy weather).
  */
 function findMaritimeSeaCorridor(origCoords, destCoords, options) {
   options = options || {};
@@ -6330,113 +6644,183 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
   }
   if (startNode === endNode) return [startNode];
 
+  const speed = Math.max(1, Number(options.speedKnots) || 14.5);
+  const t0 = Number(options.t0Hours) || 0;
+  const maxIter = Math.max(1, Math.min(5, Number(options.stormAvoidIters) || 4));
   const adj = setrouteBuildAdjacency();
-  let path = null;
-  let routeMode = "shortest_sea";
 
-  if (options.viaCape) {
-    path = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj);
-    routeMode = "via_cape";
-  } else if (options.viaPanama) {
-    path = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj)
-      || setroutePathViaNode(startNode, endNode, "PANAMA_BALBOA", adj);
-    routeMode = "via_panama";
-  } else if (options.viaSuez) {
-    path = setroutePathViaNode(startNode, endNode, "SUEZ_CANAL_MID", adj);
-    routeMode = "via_suez";
-  } else if (
-    (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAsiaGulfPort(destCoords[0], destCoords[1])) ||
-    (setrouteIsAsiaGulfPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
-  ) {
-    const suez = setroutePathViaNode(startNode, endNode, "SUEZ_CANAL_MID", adj);
-    const cape = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj);
-    const suezCost = suez ? setroutePathCostNM(suez) : Infinity;
-    const capeCost = cape ? setroutePathCostNM(cape) : Infinity;
-    // Prefer Suez unless Cape is meaningfully shorter (rare) or draft forces Cape later
-    if (suez && suezCost <= capeCost * 1.08) {
-      path = suez;
-      routeMode = "via_suez_auto";
-    } else if (cape) {
-      path = cape;
-      routeMode = "via_cape_auto";
-    }
-  } else if (
-    (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
-    (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
-  ) {
-    // Prefer North Atlantic GC hubs; Panama if Pacific-bound Americas
-    const natl = setroutePathViaNode(startNode, endNode, "NATL_GC_MID", adj);
-    const panama = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj);
-    const direct = setrouteDijkstra(startNode, endNode, adj);
-    const candidates = [
-      { p: direct, m: "shortest_sea" },
-      { p: natl, m: "via_natl" },
-      { p: panama, m: "via_panama" }
-    ].filter((c) => c.p);
-    candidates.sort((a, b) => setroutePathCostNM(a.p) - setroutePathCostNM(b.p));
-    if (candidates.length) {
-      path = candidates[0].p;
-      routeMode = candidates[0].m;
-    }
-  } else if (
-    (setrouteIsFarEastPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
-    (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsFarEastPort(destCoords[0], destCoords[1]))
-  ) {
-    // Far East ↔ Americas: never allow sparse GC — force ocean candidates via Panama / NPAC
-    const panama = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj)
-      || setroutePathViaNode(startNode, endNode, "PANAMA_BALBOA", adj);
-    const npac = setroutePathViaNode(startNode, endNode, "NPAC_GC_MID", adj);
-    const unimak = setroutePathViaNode(startNode, endNode, "UNIMAK_PASS", adj);
-    const cape = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj);
-    const direct = setrouteDijkstra(startNode, endNode, adj);
-    const candidates = [
-      { p: panama, m: "via_panama_fareast" },
-      { p: npac, m: "via_npac" },
-      { p: unimak, m: "via_unimak" },
-      { p: direct, m: "shortest_sea" },
-      { p: cape, m: "via_cape_fareast" }
-    ].filter((c) => c.p && c.p.length >= 2);
-    // Prefer Panama for US Gulf / Caribbean destinations
-    if (setrouteIsUsGulfPort(destCoords[0], destCoords[1]) || setrouteIsUsGulfPort(origCoords[0], origCoords[1])) {
-      candidates.sort((a, b) => {
-        const ap = a.m.indexOf("panama") >= 0 ? -5000 : 0;
-        const bp = b.m.indexOf("panama") >= 0 ? -5000 : 0;
-        return (setroutePathCostNM(a.p) + ap) - (setroutePathCostNM(b.p) + bp);
+  const pickBest = (cands, dOpts) => {
+    const scored = (cands || [])
+      .filter((c) => c && c.p && c.p.length >= 2)
+      .map((c) => {
+        const sc = setroutePathTimedScore(c.p, dOpts.speedKnots, dOpts.stormWeight, dOpts.t0Hours);
+        return Object.assign({}, c, { score: sc });
       });
-    } else {
-      candidates.sort((a, b) => setroutePathCostNM(a.p) - setroutePathCostNM(b.p));
+    scored.sort((a, b) => {
+      // Prefer zero severe encounters, then timed cost
+      const as = (a.score.severe || 0) * 1e7 + a.score.cost;
+      const bs = (b.score.severe || 0) * 1e7 + b.score.cost;
+      return as - bs;
+    });
+    return scored[0] || null;
+  };
+
+  const searchOnce = (stormWeight) => {
+    const dOpts = {
+      speedKnots: speed,
+      stormWeight: stormWeight,
+      t0Hours: t0,
+      maxLabels: 5,
+      maxExpansions: 280000
+    };
+    if (typeof window !== "undefined") {
+      window.SETROUTE_PLAN_PROGRESS = {
+        phase: "corridor_search",
+        stormWeight,
+        speedKnots: speed
+      };
     }
-    if (candidates.length) {
-      path = candidates[0].p;
-      routeMode = candidates[0].m;
+
+    let path = null;
+    let routeMode = "shortest_sea";
+
+    if (options.viaCape) {
+      path = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj, dOpts);
+      routeMode = "via_cape";
+    } else if (options.viaPanama) {
+      path = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj, dOpts)
+        || setroutePathViaNode(startNode, endNode, "PANAMA_BALBOA", adj, dOpts);
+      routeMode = "via_panama";
+    } else if (options.viaSuez) {
+      path = setroutePathViaNode(startNode, endNode, "SUEZ_CANAL_MID", adj, dOpts);
+      routeMode = "via_suez";
+    } else if (
+      (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAsiaGulfPort(destCoords[0], destCoords[1])) ||
+      (setrouteIsAsiaGulfPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
+    ) {
+      const suez = setroutePathViaNode(startNode, endNode, "SUEZ_CANAL_MID", adj, dOpts);
+      const cape = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj, dOpts);
+      const best = pickBest([
+        { p: suez, m: "via_suez_auto" },
+        { p: cape, m: "via_cape_auto" }
+      ], dOpts);
+      // Prefer Suez if timed scores close and no severe storm on Suez
+      if (suez && cape) {
+        const ss = setroutePathTimedScore(suez, speed, stormWeight, t0);
+        const cs = setroutePathTimedScore(cape, speed, stormWeight, t0);
+        if (ss.severe <= cs.severe && ss.cost <= cs.cost * 1.12) {
+          path = suez;
+          routeMode = "via_suez_auto";
+        } else if (best) {
+          path = best.p;
+          routeMode = best.m;
+        }
+      } else if (best) {
+        path = best.p;
+        routeMode = best.m;
+      }
+    } else if (
+      (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
+      (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
+    ) {
+      const natl = setroutePathViaNode(startNode, endNode, "NATL_GC_MID", adj, dOpts);
+      const panama = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj, dOpts);
+      const direct = setrouteDijkstra(startNode, endNode, adj, dOpts);
+      const best = pickBest([
+        { p: direct, m: "shortest_sea" },
+        { p: natl, m: "via_natl" },
+        { p: panama, m: "via_panama" }
+      ], dOpts);
+      if (best) {
+        path = best.p;
+        routeMode = best.m;
+      }
+    } else if (
+      (setrouteIsFarEastPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
+      (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsFarEastPort(destCoords[0], destCoords[1]))
+    ) {
+      const panama = setroutePathViaNode(startNode, endNode, "PANAMA_COLON", adj, dOpts)
+        || setroutePathViaNode(startNode, endNode, "PANAMA_BALBOA", adj, dOpts);
+      const npac = setroutePathViaNode(startNode, endNode, "NPAC_GC_MID", adj, dOpts);
+      const unimak = setroutePathViaNode(startNode, endNode, "UNIMAK_PASS", adj, dOpts);
+      const cape = setroutePathViaNode(startNode, endNode, "CAPE_AGULHAS", adj, dOpts);
+      const direct = setrouteDijkstra(startNode, endNode, adj, dOpts);
+      const cands = [
+        { p: panama, m: "via_panama_fareast" },
+        { p: npac, m: "via_npac" },
+        { p: unimak, m: "via_unimak" },
+        { p: direct, m: "shortest_sea" },
+        { p: cape, m: "via_cape_fareast" }
+      ];
+      if (setrouteIsUsGulfPort(destCoords[0], destCoords[1]) || setrouteIsUsGulfPort(origCoords[0], origCoords[1])) {
+        // Bias Panama for Gulf OD after timed score
+        cands.forEach((c) => {
+          if (c.m.indexOf("panama") >= 0 && c.p) c._bias = -4000;
+        });
+      }
+      const scored = cands.filter((c) => c.p && c.p.length >= 2).map((c) => {
+        const sc = setroutePathTimedScore(c.p, speed, stormWeight, t0);
+        return { p: c.p, m: c.m, score: sc, rank: sc.severe * 1e7 + sc.cost + (c._bias || 0) };
+      });
+      scored.sort((a, b) => a.rank - b.rank);
+      if (scored.length) {
+        path = scored[0].p;
+        routeMode = scored[0].m;
+      }
     }
+
+    if ((!path || path.length < 4) && options.templatePath && options.templatePath.length >= 4) {
+      const tv = setrouteValidateNodePath(options.templatePath);
+      if (tv && !setroutePathHasCriticalLayerBlock(tv)) {
+        const ts = setroutePathTimedScore(tv, speed, stormWeight, t0);
+        const ps = path ? setroutePathTimedScore(path, speed, stormWeight, t0) : null;
+        if (!path || ts.severe < (ps.severe || 99) || ts.cost < (ps.cost || Infinity)) {
+          path = tv;
+          routeMode = "template_" + (options.templateId || "corridor");
+        }
+      }
+    }
+
+    if (!path) {
+      path = setrouteDijkstra(startNode, endNode, adj, dOpts);
+      routeMode = "shortest_sea";
+    }
+    if (!path) {
+      path = setroutePathViaHubs(startNode, endNode, adj, dOpts);
+      routeMode = "via_ocean_hubs";
+    }
+    if (!path) {
+      path = setroutePathViaHubs(startNode, endNode, adj, dOpts);
+      routeMode = "hub_fallback";
+    }
+
+    const score = path && path.length >= 2
+      ? setroutePathTimedScore(path, speed, stormWeight, t0)
+      : { cost: Infinity, severe: 99, stormPen: 0, hits: [], arrivalH: t0, nm: 0 };
+    return { path, routeMode, score, stormWeight, dOpts };
+  };
+
+  let bestResult = null;
+  for (let iter = 0; iter < maxIter; iter++) {
+    const stormWeight = (Number(options.stormWeight) || 1) * (1 + iter * 2.25);
+    const result = searchOnce(stormWeight);
+    if (!result.path || result.path.length < 2) continue;
+    if (!bestResult ||
+        result.score.severe < bestResult.score.severe ||
+        (result.score.severe === bestResult.score.severe && result.score.cost < bestResult.score.cost)) {
+      bestResult = result;
+    }
+    // Clean enough — stop escalating
+    if (result.score.severe === 0 && result.score.stormPen < 400) break;
+    // Still severe after strong weight — keep best and continue one more escalate
   }
 
-  // Optional OPW-style corridor template seed (still validated for land)
-  if ((!path || path.length < 4) && options.templatePath && options.templatePath.length >= 4) {
-    const tv = setrouteValidateNodePath(options.templatePath);
-    if (tv && !setroutePathHasCriticalLayerBlock(tv)) {
-      path = tv;
-      routeMode = "template_" + (options.templateId || "corridor");
-    }
-  }
+  let path = bestResult && bestResult.path;
+  let routeMode = (bestResult && bestResult.routeMode) || "shortest_sea";
+  let finalScore = (bestResult && bestResult.score) || null;
+  let usedStormWeight = (bestResult && bestResult.stormWeight) || 1;
 
   if (!path) {
-    path = setrouteDijkstra(startNode, endNode, adj);
-    routeMode = "shortest_sea";
-  }
-  if (!path) {
-    path = setroutePathViaHubs(startNode, endNode, adj);
-    routeMode = "via_ocean_hubs";
-  }
-
-  // Last resort: hubs only — never invent a 2-node ocean chord (crosses land / antimeridian visually)
-  if (!path) {
-    path = setroutePathViaHubs(startNode, endNode, adj);
-    routeMode = "hub_fallback";
-  }
-  if (!path) {
-    // Absolute fail-closed: single node signals "no safe corridor" to callers
     path = [startNode];
     routeMode = "no_safe_corridor";
   }
@@ -6459,9 +6843,26 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
       fixed.push(path[i + 1]);
     }
     path = fixed;
+    if (path.length >= 2) {
+      finalScore = setroutePathTimedScore(path, speed, usedStormWeight, t0);
+    }
   }
 
-  findMaritimeSeaCorridor._lastMeta = { startNode, endNode, routeMode, hops: (path && path.length) || 0 };
+  findMaritimeSeaCorridor._lastMeta = {
+    startNode,
+    endNode,
+    routeMode,
+    hops: (path && path.length) || 0,
+    speedKnots: speed,
+    stormWeight: usedStormWeight,
+    stormAvoidance: finalScore ? {
+      severeEncounters: finalScore.severe,
+      stormPenalty: Math.round(finalScore.stormPen),
+      timedCost: Math.round(finalScore.cost),
+      arrivalHours: Math.round(finalScore.arrivalH * 10) / 10,
+      hits: (finalScore.hits || []).slice(0, 8)
+    } : null
+  };
   return path;
 }
 
@@ -6490,10 +6891,11 @@ function auditPassagePlan(route) {
       });
     }
     if ((leg.weatherHits || []).length) {
+      const severeWx = (leg.weatherHits || []).some((h) => /@\+/.test(String(h)));
       issues.push({
-        severity: "warn",
+        severity: severeWx ? "warn" : "warn",
         leg: leg.legNo,
-        text: `Leg ${leg.legNo}: weather CPA — ${(leg.weatherHits || []).join("; ")}`
+        text: `Leg ${leg.legNo}: forecast weather CPA — ${(leg.weatherHits || []).join("; ")}`
       });
     }
     if ((leg.ntmHits || []).length >= 2) {
@@ -6546,6 +6948,9 @@ function auditPassagePlan(route) {
 window.auditPassagePlan = auditPassagePlan;
 window.findMaritimeSeaCorridor = findMaritimeSeaCorridor;
 window.setrouteLegLikelyCrossesLand = setrouteLegLikelyCrossesLand;
+window.setrouteStormStateAtTau = setrouteStormStateAtTau;
+window.setrouteSpaceTimeStormPenalty = setrouteSpaceTimeStormPenalty;
+window.setroutePathTimedScore = setroutePathTimedScore;
 
 
 function initSetRoute() {
@@ -6943,7 +7348,12 @@ function displaySetRouteResults(route) {
  * High-Accuracy Algorithmic Fallback Maritime Route Generator
  */
 function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, routeOpts) {
-  const corridor = findMaritimeSeaCorridor(origCoords, destCoords, routeOpts || {});
+  routeOpts = routeOpts || {};
+  const spd = Math.max(1, Number(speed) || Number(routeOpts.speedKnots) || 14.5);
+  const corridor = findMaritimeSeaCorridor(origCoords, destCoords, Object.assign({}, routeOpts, {
+    speedKnots: spd,
+    t0Hours: Number(routeOpts.t0Hours) || 0
+  }));
   const waypoints = [];
 
   // Departure Pilot Station WPT
@@ -6952,7 +7362,7 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
     name: `${pOrig.name.toUpperCase()} PILOT STATION`,
     lat: origCoords[0],
     lon: origCoords[1],
-    speedKnots: Math.min(speed, 10.0),
+    speedKnots: Math.min(spd, 10.0),
     portsideXTD: xtd,
     starboardXTD: xtd,
     turnRadius: 0.5,
@@ -6976,7 +7386,7 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
       name: node[2],
       lat: parseFloat(node[0].toFixed(5)),
       lon: parseFloat(node[1].toFixed(5)),
-      speedKnots: speed,
+      speedKnots: spd,
       portsideXTD: xtd,
       starboardXTD: xtd,
       turnRadius: 0.8,
@@ -6992,7 +7402,7 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
     name: `${pDest.name.toUpperCase()} FAIRWAY ARRIVAL`,
     lat: destCoords[0],
     lon: destCoords[1],
-    speedKnots: Math.min(speed, 10.0),
+    speedKnots: Math.min(spd, 10.0),
     portsideXTD: xtd,
     starboardXTD: xtd,
     turnRadius: 0.5,
@@ -7020,12 +7430,13 @@ function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, 
     totalDistanceNM: 0,
     estimatedSteamingDays: 0,
     metadata: {
-      speedKnots: speed,
+      speedKnots: spd,
       draftMeters: 11.5,
       xtdNM: xtd,
       sailMode: sailMode,
       coreA: corridorMeta,
-      coreARefused: refused
+      coreARefused: refused,
+      stormAvoidance: corridorMeta.stormAvoidance || null
     }
   };
 }
@@ -12284,7 +12695,20 @@ function analyzeSingleLegParameters(wpA, wpB, legIdx, totalLegs, opts = {}) {
   }
 
   const weatherHits = [];
-  if (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.storms)) {
+  // Space-time CPA vs forecast track (ship ETA on this leg uses cumulative departHours if provided)
+  const departH = Number.isFinite(Number(opts && opts.departHours))
+    ? Number(opts.departHours)
+    : (Number.isFinite(Number(wpA._eteAccumH)) ? Number(wpA._eteAccumH) : 0);
+  if (typeof setrouteSpaceTimeStormPenalty === "function") {
+    const wx = setrouteSpaceTimeStormPenalty(
+      wpA.lat, wpA.lon, wpB.lat, wpB.lon, departH, legSpeed, 1
+    );
+    (wx.hits || []).forEach((h) => {
+      weatherHits.push(
+        `${h.name} @+${h.tauH}h (CPA ${h.cpaNm} NM, ${h.winds} kt, R${h.radiusNm} NM)`
+      );
+    });
+  } else if (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.storms)) {
     MARINE_WEATHER_STORE.storms.forEach(st => {
       if (!st || !Array.isArray(st.center)) return;
       const dStorm = pointToSegmentDistanceNM(st.center[0], st.center[1], wpA.lat, wpA.lon, wpB.lat, wpB.lon);
@@ -12336,7 +12760,8 @@ function enrichRouteWithLegsTelemetry(route, opts = {}) {
   for (let i = 0; i < route.waypoints.length - 1; i++) {
     const wpA = route.waypoints[i];
     const wpB = route.waypoints[i + 1];
-    const legInfo = analyzeSingleLegParameters(wpA, wpB, i, route.waypoints.length - 1, meta);
+    const legMeta = Object.assign({}, meta, { departHours: totalHours });
+    const legInfo = analyzeSingleLegParameters(wpA, wpB, i, route.waypoints.length - 1, legMeta);
     legs.push(legInfo);
 
     wpA.sail = legInfo.sailType;
@@ -12345,6 +12770,7 @@ function enrichRouteWithLegsTelemetry(route, opts = {}) {
     wpA.starboardXTD = legInfo.xtdNM;
     wpA.turnRadius = legInfo.turnRadiusNM;
     wpA.wptNo = ('00' + (i + 1)).slice(-3);
+    wpA._eteAccumH = totalHours;
 
     totalDist += legInfo.distanceNM;
     totalHours += legInfo.eteHours;
@@ -12961,6 +13387,15 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     pDest = setrouteSnapPortToSea(pDest);
   }
   const speed = parseFloat(options.speedKnots || (document.getElementById("setRouteSpeedInput") && document.getElementById("setRouteSpeedInput").value)) || 14.5;
+  const nStorms = (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.storms))
+    ? MARINE_WEATHER_STORE.storms.length : 0;
+  const planHint = appendChatMessage("brain",
+    `<span style="color:#94a3b8;">Core A quality pass: sea-graph + space-time cyclone avoidance at <b>${speed} kn</b>` +
+    (nStorms ? ` · ${nStorms} active cyclone(s) with forecast tracks` : "") +
+    `. This may take up to ~1–3 minutes…</span>`
+  );
+  // Yield so the hint paints before heavy sync search
+  await new Promise((r) => setTimeout(r, 40));
   const draft = parseFloat(options.draftMeters || (document.getElementById("setRouteDraftInput") && document.getElementById("setRouteDraftInput").value)) || 11.5;
   const xtd = parseFloat(options.xtdNM || (document.getElementById("setRouteXtdInput") && document.getElementById("setRouteXtdInput").value)) || 0.25;
   const sailMode = options.sailMode || (document.getElementById("setRouteSailSelect") && document.getElementById("setRouteSailSelect").value) || "HYBRID";
@@ -13072,25 +13507,35 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   }
 
   baseRoute.format = "SETROUTE_AI";
-  baseRoute.metadata = {
+  const priorMeta = baseRoute.metadata || {};
+  baseRoute.metadata = Object.assign({}, priorMeta, {
     origin: pOrig.name,
     destination: pDest.name,
     speedKnots: speed,
     draftMeters: draft,
     xtdNM: xtd,
     sailMode: sailMode,
-    generatedAt: new Date().toISOString()
-  };
+    generatedAt: new Date().toISOString(),
+    coreA: priorMeta.coreA || null,
+    stormAvoidance: priorMeta.stormAvoidance || (priorMeta.coreA && priorMeta.coreA.stormAvoidance) || null
+  });
 
   enrichRouteWithLegsTelemetry(baseRoute, baseRoute.metadata);
   const audit = typeof auditPassagePlan === "function" ? auditPassagePlan(baseRoute) : null;
   const legs = baseRoute.legs || [];
+  const sa = baseRoute.metadata.stormAvoidance;
+  const stormLine = sa
+    ? (sa.severeEncounters > 0
+      ? `Cyclone model: <b>${sa.severeEncounters}</b> residual core encounter(s) at ${speed} kn — review legs flagged in audit.`
+      : `Cyclone model: space-time clear at <b>${speed} kn</b> (penalty ${sa.stormPenalty || 0}, ETA ~${sa.arrivalHours || "—"} h).`)
+    : `Cyclone model: forecast-aware search at <b>${speed} kn</b>.`;
 
   const msgEl = appendChatMessage("brain", `
     <div>
       <strong>Route ready: ${baseRoute.name}</strong>
       <div class="sr-ai-synthesis-footer" style="margin-top:6px;font-size:0.78rem;color:#94a3b8;">
         Draft <b>${draft}m</b> • Speed <b>${speed} kn</b> • XTD <b>±${xtd} NM</b> • Full leg analysis is in Route Details.
+        <div style="margin-top:4px;color:#7dd3fc;">${stormLine}</div>
       </div>
     </div>
   `);
