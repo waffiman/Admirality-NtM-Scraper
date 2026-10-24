@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-24T03:36:19Z",
-  "generatedAt": "2026-10-24T03:36:19Z",
+  "updatedAt": "2026-10-24T10:25:50Z",
+  "generatedAt": "2026-10-24T10:25:50Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -13,6 +13,180 @@
   ],
   "totalArticles": 70,
   "articles": [
+    {
+      "id": "SN-F8530F62BE",
+      "title": "Hanwha Power secures ABS approval for battery-powered containership",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/hanwha-power-secures-abs-approval-for-battery-powered-containership/",
+      "publishedAt": "2026-10-24T10:00:55Z",
+      "category": "Weather & Cyclones",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "Singapore & Malacca Strait",
+        "Japan & Korea"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/Hanwha-Power-ABS-300x190.jpg",
+      "summary": "Hanwha Power has received Approval in Principle (AiP) from the American Bureau of Shipping (ABS) for the design of a fully electric 1,700 TEU containership. The certificate was presented on 22 October during the Maritime Hybrid, Electric & Hydrogen Fuel Cells Conference & Exhibition 2026 in Bergen, Norway. Jong-kyu...",
+      "body": "Hanwha Power has received Approval in Principle (AiP) from the American Bureau of Shipping (ABS) for the design of a fully electric 1,700 TEU containership. The certificate was presented on 22 October during the Maritime Hybrid, Electric & Hydrogen Fuel Cells Conference & Exhibition 2026 in Bergen, Norway. Jong-kyu Hwang, Vice President of Technology Solutions at Hanwha Power, attended the ceremony alongside senior ABS representatives. The approved vessel concept incorporates a 151 MWh Energy Storage System as its primary source of propulsion power. Electricity stored in containerised battery units would power the vessel, with the batteries charged through port infrastructure. Hanwha Power said the use of containerised battery units would allow them to be handled and stowed similarly to standard containers. The arrangement is intended to improve space utilisation, support flexible battery replacement and allow the system to be scaled according to operational requirements. The concept is aimed primarily at short-sea and regional container transport, where access to port charging infrastructure could support fully electric operations without direct carbon emissions from the vessel. An AiP confirms that the concept has been reviewed against applicable class requirements at an early design stage. It does not represent final approval for construction or operation. Hanwha Power has also completed the basic design of a separate 1,000 TEU battery-powered containership. The company plans to develop a wider portfolio of electric vessels for different operating profiles and customer requirements. “This AiP from ABS marks an important step in extending Hanwha Power’s marine technology capabilities to fully electric vessels powered by large-scale battery systems,” said Jong-kyu Hwang, Vice President of Technology Solutions at Hanwha Power. “We will address the needs of the next-generation zero-carbon maritime transport market with integrated solutions that combine electric propulsion and containerised battery system technologies,” he added.",
+      "takeaways": [
+        "Hanwha Power has received Approval in Principle (AiP) from the American Bureau of Shipping (ABS) for the design of a fully electric 1,700 TEU containership.",
+        "The certificate was presented on 22 October during the Maritime Hybrid, Electric & Hydrogen Fuel Cells Conference & Exhibition 2026 in Bergen, Norway.",
+        "Jong-kyu Hwang, Vice President of Technology Solutions at Hanwha Power, attended the ceremony alongside senior ABS representatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-80511DED5D",
+      "title": "Port of Vigo clears strategic space for container operations",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/port-of-vigo-clears-strategic-space-for-container-operations/",
+      "publishedAt": "2026-10-24T08:30:06Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2025/02/Vigo-300x168.jpg",
+      "summary": "The Port Authority of Vigo has awarded a contract for the demolition of eight former cement silos located within the port’s container terminal. The project will release approximately 6,000 square metres of strategically located terminal space, supporting the reorganisation of container operations and addressing...",
+      "body": "The Port Authority of Vigo has awarded a contract for the demolition of eight former cement silos located within the port’s container terminal. The project will release approximately 6,000 square metres of strategically located terminal space, supporting the reorganisation of container operations and addressing growing logistics requirements. According to the port authority, container traffic at Vigo is expected to reach another record high in 2026, with volumes projected to increase by nearly 5%. The port also expects the upward trend to continue. The project will begin with the complete emptying of the eight silos, followed by their demolition and the preparation of the recovered area for terminal operations. The maximum execution period is eight months, although the port aims to make the space operational by spring 2027. The latest project follows the removal of eight other silos between 2015 and 2019. Those works reduced the visual impact of the facilities, released additional port space and improved cargo loading and unloading operations. Wider terminal reorganisation The demolition forms part of a broader plan to improve the efficiency of the Port of Vigo by reorganising the use of available land across the port complex. The release of the space will also support a larger project involving the construction of a new Border Control Post. The facility is expected to improve inspection services and facilitate international cargo movements through the port.",
+      "takeaways": [
+        "The Port Authority of Vigo has awarded a contract for the demolition of eight former cement silos located within the port’s container terminal.",
+        "The project will release approximately 6,000 square metres of strategically located terminal space, supporting the reorganisation of container operations and addressing growing logistics requirements.",
+        "According to the port authority, container traffic at Vigo is expected to reach another record high in 2026, with volumes projected to increase by nearly 5%."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-452BA5C601",
+      "title": "Latakia container terminal receives six new cranes under CMA CGM partnership",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/latakia-container-terminal-receives-six-new-cranes-under-cma-cgm-partnership/",
+      "publishedAt": "2026-10-24T07:00:12Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/07/NAVIRE-CMA-CGM-NOTRE-DAME.png-300x169.webp",
+      "summary": "Latakia International Container Terminal (LICT) in Syria has received six fifth-generation rubber-tyred gantry (RTG) cranes as part of its ongoing modernisation programme under its partnership with French shipping group CMA CGM. The delivery was confirmed on 21 October by Mazen Alloush, Director of International...",
+      "body": "Latakia International Container Terminal (LICT) in Syria has received six fifth-generation rubber-tyred gantry (RTG) cranes as part of its ongoing modernisation programme under its partnership with French shipping group CMA CGM. The delivery was confirmed on 21 October by Mazen Alloush, Director of International Relations and Cooperation at Syria’s General Authority for Borders and Customs. The new equipment is intended to strengthen container-handling capabilities, improve yard operations and support the terminal’s infrastructure development programme. According to the authority, the cranes incorporate advanced operating technologies designed to improve container stacking and storage, increase the efficiency of yard operations and make better use of available terminal space. New equipment to support terminal operations The six RTG cranes are expected to improve container-handling efficiency at LICT by supporting more organised stacking and storage operations. The authority also expects the equipment to accelerate cargo movements and reduce truck waiting times, contributing to smoother logistics operations within the terminal. The delivery forms part of a wider programme to modernise Latakia’s container-handling infrastructure and strengthen its ability to accommodate maritime trade. However, the announcement confirms the arrival of the cranes rather than their commissioning. The authority did not provide a date for their entry into commercial service or disclose the investment value associated with the equipment. No quantified increase in container-handling capacity or productivity was announced. Wider modernisation programme at Latakia Beyond the new cranes, the terminal’s development programme includes improvements to operational infrastructure, berths, container-handling yards and storage facilities. The authority outlined ongoing efforts to upgrade heavy equipment and technical facilities, improve traffic management within the terminal and modernise internal container transport systems. These measures are intended to support more efficient use of existing infrastructure and improve coordination between operational and administrative departments. Particular attention is being given to berth readiness, cargo-handling processes and the movement of containers through the terminal. The planned improvements are aimed at supporting shipping lines, freight operators, importers and exporters using the port. The authority said the investment programme is part of its broader strategy to modernise Syrian ports and strengthen their competitiveness through cooperation with international companies specialising in container terminal management and operations. Latakia remains an important maritime gateway for Syria, and the ongoing development programme is intended to improve its ability to accommodate future growth in shipping activity and international trade. The arrival of the six RTG cranes represents a further step in that programme, although their operational impact will depend on commissioning and subsequent integration into terminal activities.",
+      "takeaways": [
+        "The delivery was confirmed on 21 October by Mazen Alloush, Director of International Relations and Cooperation at Syria’s General Authority for Borders and Customs.",
+        "The new equipment is intended to strengthen container-handling capabilities, improve yard operations and support the terminal’s infrastructure development programme.",
+        "New equipment to support terminal operations The six RTG cranes are expected to improve container-handling efficiency at LICT by supporting more organised stacking and storage operations."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-2475D2803D",
+      "title": "Hapag-Lloyd and Wan Hai reduce Shanghai coverage on AA7 service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/hapag-lloyd-and-wan-hai-reduce-shanghai-coverage-on-aa7-service/",
+      "publishedAt": "2026-10-24T05:21:44Z",
+      "category": "Ports & Terminals",
+      "region": "US East Coast & New York",
+      "regions": [
+        "US East Coast & New York",
+        "Singapore & Malacca Strait",
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "singapore"
+      ],
+      "coords": [
+        40.5,
+        -73.95
+      ],
+      "navarea": "IV",
+      "image": "https://container-news.com/wp-content/uploads/2026/09/HLAG_Truck_Elbphilharnonie_150x100-300x200.jpg",
+      "summary": "Hapag-Lloyd and Wan Hai have reduced Shanghai coverage on their joint Far East–US East Coast AA7 service. Shanghai will now be served fortnightly, alternating with Ningbo, instead of receiving a weekly call. The AA7 service deploys 13 vessels ranging from approximately 6,500 to 13,500 TEU. The revised rotation is:...",
+      "body": "Services Top Right Hapag-Lloyd and Wan Hai reduce Shanghai coverage on AA7 service October 24, 2026 Facebook Twitter WhatsApp Linkedin Email Hapag-Lloyd and Wan Hai have reduced Shanghai coverage on their joint Far East–US East Coast AA7 service. Shanghai will now be served fortnightly, alternating with Ningbo, instead of receiving a weekly call. The AA7 service deploys 13 vessels ranging from approximately 6,500 to 13,500 TEU. The revised rotation is: Shanghai/Ningbo – Taipei – Shenzhen (Yantian) – Shenzhen (Shekou) – Ho Chi Minh City (Cai Mep) – Singapore – Colombo – Newark – Norfolk – Charleston – Savannah – Shanghai/Ningbo Shanghai and Ningbo will be served on alternating fortnightly sailings, while Colombo will be included on the Ningbo sailings. TAGS Hapag Lloyd WAN HAI LINES Facebook Twitter WhatsApp Linkedin Email Previous article CMA CGM adds seasonal Pisco call to PAD service Next article Latakia container terminal receives six new cranes under CMA CGM partnership Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "Shanghai will now be served fortnightly, alternating with Ningbo, instead of receiving a weekly call.",
+        "The AA7 service deploys 13 vessels ranging from approximately 6,500 to 13,500 TEU.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-C5D79F1D0E",
+      "title": "CMA CGM adds seasonal Pisco call to PAD service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/cma-cgm-adds-seasonal-pisco-call-to-pad-service/",
+      "publishedAt": "2026-10-24T04:00:43Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb",
+        "Panama Canal & Caribbean",
+        "US East Coast & New York"
+      ],
+      "tags": [
+        "container",
+        "red sea",
+        "panama",
+        "china"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2026/05/CCND-CMA-CGM-2-300x199.jpg",
+      "summary": "CMA CGM will introduce a seasonal call at Pisco, Peru, on its Panama Direct (PAD) service in December. The service connects Australia and New Zealand with the US East Coast and North Europe. According to DynaLiners, a new agreement filed with the US Federal Maritime Commission, together with CMA CGM’s planned vessel...",
+      "body": "Services Sticky News CMA CGM adds seasonal Pisco call to PAD service October 24, 2026 Facebook Twitter WhatsApp Linkedin Email CMA CGM will introduce a seasonal call at Pisco, Peru, on its Panama Direct (PAD) service in December. The service connects Australia and New Zealand with the US East Coast and North Europe. According to DynaLiners, a new agreement filed with the US Federal Maritime Commission, together with CMA CGM’s planned vessel deployment, indicates that the PAD service has become a standalone CMA CGM operation. Marfret, previously a vessel provider on the service, is understood to be continuing its participation as a slot charterer. The French carrier markets the service as NASP. The revised PAD rotation will be: Brisbane – Sydney – Melbourne – Tauranga – Pisco – Cartagena – Savannah – Philadelphia – Zeebrugge – Rotterdam – Dunkirk – Le Havre – Cork – New York – Savannah – Kingston – Papeete – Noumea – Brisbane TAGS CMA CGM Facebook Twitter WhatsApp Linkedin Email Previous article Emirates Shipping Line launches China–Red Sea service Next article Hapag-Lloyd and Wan Hai reduce Shanghai coverage on AA7 service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The service connects Australia and New Zealand with the US East Coast and North Europe.",
+        "According to DynaLiners, a new agreement filed with the US Federal Maritime Commission, together with CMA CGM’s planned vessel deployment, indicates that the PAD service has become a standalone CMA CGM operation.",
+        "Marfret, previously a vessel provider on the service, is understood to be continuing its participation as a slot charterer."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
     {
       "id": "SN-E63929B363",
       "title": "Emirates Shipping Line launches China–Red Sea service",
@@ -41,11 +215,11 @@
       "navarea": "IX",
       "image": "https://container-news.com/wp-content/uploads/2019/07/Emirates-Shipping-Line-300x166.jpg",
       "summary": "Emirates Shipping Line will introduce a new service connecting China with Egypt, Jordan and Saudi Arabia in November. According to DynaLiners, the new service will be marketed as the China Red Sea Connector (CRC). The carrier will deploy four container ships of approximately 2,500 TEU, providing sailings at an...",
-      "body": "Services Top Right Emirates Shipping Line launches China–Red Sea service October 24, 2026 Facebook Twitter WhatsApp Linkedin Email Photo: Emirates Shipping Line Emirates Shipping Line will introduce a new service connecting China with Egypt, Jordan and Saudi Arabia in November. According to DynaLiners, the new service will be marketed as the China Red Sea Connector (CRC). The carrier will deploy four container ships of approximately 2,500 TEU, providing sailings at an approximately fortnightly frequency. The published port sequence is: Shanghai – Ningbo – Nansha – Sokhna – Aqaba – Jeddah The CRC service will provide direct connections from three major Chinese ports to key Red Sea gateways in Egypt, Jordan and Saudi Arabia. TAGS Emirates Shipping Facebook Twitter WhatsApp Linkedin Email Previous article Carriers reinstate Busan call on South America service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "body": "Services Top Right Emirates Shipping Line launches China–Red Sea service October 24, 2026 Facebook Twitter WhatsApp Linkedin Email Photo: Emirates Shipping Line Emirates Shipping Line will introduce a new service connecting China with Egypt, Jordan and Saudi Arabia in November. According to DynaLiners, the new service will be marketed as the China Red Sea Connector (CRC). The carrier will deploy four container ships of approximately 2,500 TEU, providing sailings at an approximately fortnightly frequency. The published port sequence is: Shanghai – Ningbo – Nansha – Sokhna – Aqaba – Jeddah The CRC service will provide direct connections from three major Chinese ports to key Red Sea gateways in Egypt, Jordan and Saudi Arabia. TAGS Emirates Shipping Facebook Twitter WhatsApp Linkedin Email Previous article Carriers reinstate Busan call on South America service Next article CMA CGM adds seasonal Pisco call to PAD service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
       "takeaways": [
         "According to DynaLiners, the new service will be marketed as the China Red Sea Connector (CRC).",
         "The carrier will deploy four container ships of approximately 2,500 TEU, providing sailings at an approximately fortnightly frequency.",
-        "TAGS Emirates Shipping Facebook Twitter WhatsApp Linkedin Email Previous article Carriers reinstate Busan call on South America service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail"
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -628,13 +802,14 @@
       "sourceRegion": "USA / Maritime Tech",
       "url": "https://www.marinelink.com/news/thermal-dynamics-launches-new-cutmaster-x-543884",
       "publishedAt": "2026-10-23T19:52:46Z",
-      "category": "Ports & Terminals",
+      "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
         "Global Maritime"
       ],
       "tags": [
-        "port"
+        "shipping",
+        "global"
       ],
       "coords": [
         25.0,
@@ -643,46 +818,11 @@
       "navarea": "GLOBAL",
       "image": "https://images.marinelink.com/images/maritime/w150/credit-thermal-dynamics-174552.jpg",
       "summary": "Thermal Dynamics, an ESAB brand, unveiled its next generation of manual plasma cutters, Cutmaster 90X and Cutmaster 110X, in booth #S29025 at FABTECH 2026 in Las Vegas. The Cutmaster X series features a consumables design and patented arc starting mechanism that has no moving parts.",
-      "body": "Thermal Dynamics Launches New Cutmaster 90X and 110X Maritime Activity Reports, Inc. October 23, 2026 Credit: Thermal Dynamics Thermal Dynamics, an ESAB brand, unveiled its next generation of manual plasma cutters, Cutmaster 90X and Cutmaster 110X, in booth #S29025 at FABTECH 2026 in Las Vegas. The Cutmaster X series features a consumables design and patented arc starting mechanism that has no moving parts. After establishing airflow, it starts the arc in a few thousandths of a second, improving cutting performance. The Cutmaster X series also features the patented 1Torch X, which has an articulating head that can flex 30 to 90 degrees, then lock in place, to improve joint access for cutting and gouging. The Cutmaster X series enables location flexibility for the shop and field. It automatically connects to 200 – 600V, 1ph and 3ph primary power without manual linking and provides a steady arc even if primary voltage varies.The Cutmaster 90X has a rated pierce and cut capacity of 7/8 in. and a 1.75 in. sever capability. The Cutmaster 110X has a rated pierce and cut capacity of 1 in. and a 2 in. sever capability. At nameplate output, they have a 50% duty cycle using 208V, 1ph primary power, and duty cycle increases at higher power inputs. Both units weigh approximately 87 lbs. The machine ships with a cutting tip, gouging tip, two cups, and five caps for cutting. The 1Torch X has cable length options of 20, 40, 60, 80 or 100 ft. A new industrial housing protects the unit in rugged environments, and a large, digital display, intuitive menus and choice of 29 different languages makes operation and training easy. Other features include automatic inlet/outlet air pressure detection, automatic post-cut air purge to extend consumables life and a 14-pin CPC connection for semi-automated applications. Target markets include heavy industrial and general fabrication, manufacturing, construction, repair/maintenance, pipelines, foundries, railcars, marine, offshore and training schools.",
+      "body": "Thermal Dynamics, an ESAB brand, unveiled its next generation of manual plasma cutters, Cutmaster 90X and Cutmaster 110X, in booth #S29025 at FABTECH 2026 in Las Vegas. The Cutmaster X series features a consumables design and patented arc starting mechanism that has no moving parts.",
       "takeaways": [
-        "Thermal Dynamics Launches New Cutmaster 90X and 110X Maritime Activity Reports, Inc.",
-        "October 23, 2026 Credit: Thermal Dynamics Thermal Dynamics, an ESAB brand, unveiled its next generation of manual plasma cutters, Cutmaster 90X and Cutmaster 110X, in booth #S29025 at FABTECH 2026 in Las Vegas.",
-        "The Cutmaster X series features a consumables design and patented arc starting mechanism that has no moving parts."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-3DB10EE25A",
-      "title": "Maersk reinstates Buenaventura on Peru Feeder",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/maersk-reinstates-buenaventura-on-peru-feeder/",
-      "publishedAt": "2026-10-23T19:00:22Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "India & Indian Ocean"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "panama"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2025/05/Maersk-containers-in-new-style-300x194.jpeg",
-      "summary": "Maersk will reinstate Buenaventura, Colombia, on its Peru Feeder service in November. According to DynaLiners, the carrier will also retain the seasonal call at Pisco, Peru, until at least January 2027. The weekly service deploys two container ships of approximately 2,800 TEU and connects the Panamanian hub of Balboa...",
-      "body": "Services Top Right Maersk reinstates Buenaventura on Peru Feeder October 23, 2026 Facebook Twitter WhatsApp Linkedin Email Maersk will reinstate Buenaventura, Colombia, on its Peru Feeder service in November. According to DynaLiners, the carrier will also retain the seasonal call at Pisco, Peru, until at least January 2027. The weekly service deploys two container ships of approximately 2,800 TEU and connects the Panamanian hub of Balboa with ports in Colombia and Peru. The revised rotation will be: Balboa – Buenaventura – Pisco – Callao – Paita – Balboa TAGS MAERSK Facebook Twitter WhatsApp Linkedin Email Previous article RCL restructures Far East–India service Next article Emarat Maritime exercises feeder ship options Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "Services Top Right Maersk reinstates Buenaventura on Peru Feeder October 23, 2026 Facebook Twitter WhatsApp Linkedin Email Maersk will reinstate Buenaventura, Colombia, on its Peru Feeder service in November.",
-        "According to DynaLiners, the carrier will also retain the seasonal call at Pisco, Peru, until at least January 2027.",
-        "The weekly service deploys two container ships of approximately 2,800 TEU and connects the Panamanian hub of Balboa with ports in Colombia and Peru."
+        "Thermal Dynamics, an ESAB brand, unveiled its next generation of manual plasma cutters, Cutmaster 90X and Cutmaster 110X, in booth #S29025 at FABTECH 2026 in Las Vegas.",
+        "The Cutmaster X series features a consumables design and patented arc starting mechanism that has no moving parts.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -799,40 +939,6 @@
       "readMinutes": 5
     },
     {
-      "id": "SN-A21AB2931E",
-      "title": "RCL restructures Far East–India service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/rcl-restructures-far-east-india-service/",
-      "publishedAt": "2026-10-23T18:00:21Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "India & Indian Ocean"
-      ],
-      "tags": [
-        "container",
-        "singapore"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2020/10/RCL-Group-300x134.png",
-      "summary": "Regional Container Lines (RCL) is restructuring its Far East–India RCH9 service by adding calls at Qinzhou, Hai Phong and Tuticorin. As part of the changes, Singapore and Kolkata will be removed from the rotation. According to DynaLiners, RCL will deploy a second 1,100 TEU container ship on the RCH9 service,...",
-      "body": "Services Top Right RCL restructures Far East–India service October 23, 2026 Facebook Twitter WhatsApp Linkedin Email Regional Container Lines (RCL) is restructuring its Far East–India RCH9 service by adding calls at Qinzhou, Hai Phong and Tuticorin. As part of the changes, Singapore and Kolkata will be removed from the rotation. According to DynaLiners, RCL will deploy a second 1,100 TEU container ship on the RCH9 service, increasing its frequency to fortnightly. The revised rotation will be: Qinzhou – Hai Phong – Tuticorin – Kattupalli – Chu Lai – Qinzhou TAGS RCL Facebook Twitter WhatsApp Linkedin Email Previous article DynaLiners Shares Index retreats after record high Next article Maersk reinstates Buenaventura on Peru Feeder Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "As part of the changes, Singapore and Kolkata will be removed from the rotation.",
-        "According to DynaLiners, RCL will deploy a second 1,100 TEU container ship on the RCH9 service, increasing its frequency to fortnightly.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-9DD864ECC7",
       "title": "Rare Russian Diesel Shipment Expected in Norfolk November 2, Ahead of Tanker Bound for New York",
       "source": "gCaptain",
@@ -868,41 +974,6 @@
       ],
       "readingMinutes": 4,
       "readMinutes": 4
-    },
-    {
-      "id": "SN-2F32EC4D86",
-      "title": "DynaLiners Shares Index retreats after record high",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/dynaliners-shares-index-retreats-after-record-high/",
-      "publishedAt": "2026-10-23T17:00:49Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia",
-        "India & Indian Ocean"
-      ],
-      "tags": [
-        "container",
-        "china"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/02/cn-index-7-300x200.png",
-      "summary": "The DynaLiners Shares Index (DLSI) fell sharply after reaching an all-time high during the previous week. The overall index declined by 74 points, or 2.6%, bringing it back towards more typical levels after its record-setting performance. All sector indices ended the week lower. DLSI Owners recorded the steepest...",
-      "body": "Rates & Surcharges Top Right DynaLiners Shares Index retreats after record high October 23, 2026 Facebook Twitter WhatsApp Linkedin Email The DynaLiners Shares Index (DLSI) fell sharply after reaching an all-time high during the previous week. The overall index declined by 74 points, or 2.6%, bringing it back towards more typical levels after its record-setting performance. All sector indices ended the week lower. DLSI Owners recorded the steepest decline, losing 263 points, equivalent to a contraction of 6.7%. DLSI Carriers also posted a triple-digit points loss and fell by 2.6%. Negative sentiment was widespread, with 83 companies recording share-price declines and only 35 finishing the week higher. The average movement represented a decrease of more than 2% per company. Among the limited number of gainers, New Zealand-based Move Logistics led the advance with a 9% increase, while major container carrier HMM gained 6%. Nine companies recorded declines of at least 10%. China Merchants Energy Shipping fell 18%, while Indonesian stevedoring company Nusantara Pelabuhan Handal registered the largest drop of the week at 19%. TAGS DynaLiners Shares Index Facebook Twitter WhatsApp Linkedin Email Previous article Yang Ming joins Evergreen’s Levant Express Next article RCL restructures Far East–India service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The overall index declined by 74 points, or 2.6%, bringing it back towards more typical levels after its record-setting performance.",
-        "All sector indices ended the week lower.",
-        "DLSI Owners recorded the steepest decline, losing 263 points, equivalent to a contraction of 6.7%."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
     },
     {
       "id": "SN-F11568D135",
@@ -1084,75 +1155,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-EF6256FB26",
-      "title": "Yang Ming joins Evergreen’s Levant Express",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/yang-ming-joins-evergreens-levant-express/",
-      "publishedAt": "2026-10-23T16:00:44Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "China & East Asia"
-      ],
-      "tags": [
-        "lng",
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2026/02/image002-2-300x200.jpg",
-      "summary": "Yang Ming has begun chartering slots on Evergreen’s Levant Express (LEV), which connects the Greek transshipment hub of Piraeus with ports in Turkey and Israel. According to DynaLiners, the new arrangement replaces Yang Ming’s previous slot agreement on Cosco Shipping Lines’ GTS service. Yang Ming markets the...",
-      "body": "Services Top Right Yang Ming joins Evergreen’s Levant Express October 23, 2026 Facebook Twitter WhatsApp Linkedin Email YM WILLPOWER, a 15,500 TEU LNG dual-fuel container vessel owned by Yang Ming Marine Transport Corporation, delivered from Hyundai Heavy Industries and now under Synergy Marine Group’s technical management. Yang Ming has begun chartering slots on Evergreen’s Levant Express (LEV), which connects the Greek transshipment hub of Piraeus with ports in Turkey and Israel. According to DynaLiners, the new arrangement replaces Yang Ming’s previous slot agreement on Cosco Shipping Lines’ GTS service. Yang Ming markets the Evergreen-operated connection as the Levant–Israel Express (LIX). The service deploys two container ships of approximately 2,400 TEU on the following rotation: Piraeus – Aliaga – Iskenderun – Mersin – Ashdod – Haifa – Piraeus TAGS EVERGREEN Yang MIng Facebook Twitter WhatsApp Linkedin Email Previous article COSCO expands Qinzhou–Thailand service Next article DynaLiners Shares Index retreats after record high Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "Yang Ming has begun chartering slots on Evergreen’s Levant Express (LEV), which connects the Greek transshipment hub of Piraeus with ports in Turkey and Israel.",
-        "According to DynaLiners, the new arrangement replaces Yang Ming’s previous slot agreement on Cosco Shipping Lines’ GTS service.",
-        "Yang Ming markets the Evergreen-operated connection as the Levant–Israel Express (LIX)."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-8375F1B2B8",
-      "title": "COSCO expands Qinzhou–Thailand service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/cosco-expands-qinzhou-thailand-service/",
-      "publishedAt": "2026-10-23T15:00:22Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "china"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2025/06/1-16-300x189.jpg",
-      "summary": "COSCO Shipping Lines has expanded its weekly Qinzhou–Thailand Service (QTS), which connects South China with Vietnam and Thailand. According to DynaLiners, Hong Kong has been added to the service, together with a second call at Qinzhou during each rotation. COSCO has also allocated a third container ship of...",
-      "body": "Services Sticky News COSCO expands Qinzhou–Thailand service October 23, 2026 Facebook Twitter WhatsApp Linkedin Email Source: VesselFinder COSCO Shipping Lines has expanded its weekly Qinzhou–Thailand Service (QTS), which connects South China with Vietnam and Thailand. According to DynaLiners, Hong Kong has been added to the service, together with a second call at Qinzhou during each rotation. COSCO has also allocated a third container ship of approximately 1,800 TEU to support the expanded service. The revised QTS rotation is: Qinzhou – Yangpu – Ho Chi Minh City – Hong Kong – Qinzhou – Laem Chabang – Qinzhou TAGS COSCO SHIPPING LINES Facebook Twitter WhatsApp Linkedin Email Previous article China’s green shipping leverage lies upstream Next article Yang Ming joins Evergreen’s Levant Express Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "According to DynaLiners, Hong Kong has been added to the service, together with a second call at Qinzhou during each rotation.",
-        "COSCO has also allocated a third container ship of approximately 1,800 TEU to support the expanded service.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-E946C26B16",
       "title": "U.S. Navy Secretary Visits Fincantieri Wisconsin Shipyards",
       "source": "MarineLink",
@@ -1246,7 +1248,7 @@
       "navarea": "XI",
       "image": "https://offshore-energy.biz/api/media/file/FSO%20PTSC%20LDV%20moored%20offshore%20at%20Block%2015-1%2005%20in%20Vietnam%20Source%20Yinson%20Production-1600x900.png?prefix=media",
       "summary": "Yinson Production and PTSC have achieved first oil ahead of schedule at a floating storage and offloading (FSO) vessel deployed offshore Vietnam.",
-      "body": "Exploration & Production October 23, 2026 · 14 hours ago Yinson Production, PTSC cheer FSO’s first oil at Southeast Asian project Yinson Production and PTSC have achieved first oil ahead of schedule at a floating storage and offloading (FSO) vessel deployed offshore Vietnam. MC Melisa Cavcic Senior Editor 2 minutes read LinkedIn X Email FSO PTSC LDV moored offshore at Block 15-1 05 in Vietnam Source: Yinson Production Singapore’s Yinson Production, a subsidiary of Kuala Lumpur-based energy infrastructure and technology company Yinson, and PetroVietnam Technical Services Corporation (PTSC) have revealed a major operational milestone for a new dual-fuel floating storage and offloading unit, with first oil coming online at a field off the coast of Vietnam sooner than its expected fourth-quarter timeline. The FSO PTSC Lac Da Vang (FSO PTSC LDV) has reached its first oil operational milestone at the Lac Da Vang field in Block 15-1/05 offshore Vietnam on September 27, 2026, ahead of the previously communicated Q4 2026 schedule. The FSO features a storage capacity of 460,000 barrels and is designed to enhance operational efficiency while supporting sustainable offshore oilfield operations. Yinson Production emphasizes that this achievement represents a major milestone for the dual-fuel-powered newbuild FSO and the Lac Da Vang field, following provisional acceptance on September 20, 2026, which marked the start of the firm charter period. The FSO PTSC LDV is chartered to Murphy Cuu Long Bac Oil, a wholly owned subsidiary of Murphy Oil Corporation, under a ten-year firm contract with extension options of up to five additional years. The field's development is expected to ramp up through 2028 as additional wells are brought online, providing a vital new source of production to support Vietnam’s growing energy sector. Murphy Oil is the operator of Block 15-1/05 of the Cuu Long Basin with a 40% working interest, while its partners, PetroVietnam Exploration Production and SK Earthon, hold the remaining 35% and 25%, respectively. Related Articles Business & Finance Murphy closing in on first oil from Southeast Asian offshore project 2 min read The Lac Da Vang field contains an estimated ultimate recovery of 100 million barrels of oil equivalent (boe) gross resources, with a peak gross production of 30 to 40 million boepd and 10–15 million boepd net peak production. Flemming Guiducci Grønnegaard , Chief Executive Officer of Yinson Production, commented: \"Achieving first oil for FSO PTSC LDV is a proud moment for Yinson Production and a major operational milestone for the Lac Da Vang field. “This achievement reflects the strong collaboration, technical excellence, and shared commitment to safety among Yinson Production, our joint venture partner PTSC, and our client, Murphy Oil Corporation. We look forward to delivering safe, reliable, and successful operations alongside our partners for years to come.” With a current fleet of 11 vessels, Yinson Production has an orderbook of approximately $19 billion until 2050 and global presence in 12 countries. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Exploration & Production Business Developments & Projects Business & Finance Fossil Energy FPSO & Vessels Oil & Gas News",
+      "body": "Exploration & Production October 23, 2026 · 21 hours ago Yinson Production, PTSC cheer FSO’s first oil at Southeast Asian project Yinson Production and PTSC have achieved first oil ahead of schedule at a floating storage and offloading (FSO) vessel deployed offshore Vietnam. MC Melisa Cavcic Senior Editor 2 minutes read LinkedIn X Email FSO PTSC LDV moored offshore at Block 15-1 05 in Vietnam Source: Yinson Production Singapore’s Yinson Production, a subsidiary of Kuala Lumpur-based energy infrastructure and technology company Yinson, and PetroVietnam Technical Services Corporation (PTSC) have revealed a major operational milestone for a new dual-fuel floating storage and offloading unit, with first oil coming online at a field off the coast of Vietnam sooner than its expected fourth-quarter timeline. The FSO PTSC Lac Da Vang (FSO PTSC LDV) has reached its first oil operational milestone at the Lac Da Vang field in Block 15-1/05 offshore Vietnam on September 27, 2026, ahead of the previously communicated Q4 2026 schedule. The FSO features a storage capacity of 460,000 barrels and is designed to enhance operational efficiency while supporting sustainable offshore oilfield operations. Yinson Production emphasizes that this achievement represents a major milestone for the dual-fuel-powered newbuild FSO and the Lac Da Vang field, following provisional acceptance on September 20, 2026, which marked the start of the firm charter period. The FSO PTSC LDV is chartered to Murphy Cuu Long Bac Oil, a wholly owned subsidiary of Murphy Oil Corporation, under a ten-year firm contract with extension options of up to five additional years. The field's development is expected to ramp up through 2028 as additional wells are brought online, providing a vital new source of production to support Vietnam’s growing energy sector. Murphy Oil is the operator of Block 15-1/05 of the Cuu Long Basin with a 40% working interest, while its partners, PetroVietnam Exploration Production and SK Earthon, hold the remaining 35% and 25%, respectively. Related Articles Business & Finance Murphy closing in on first oil from Southeast Asian offshore project 2 min read The Lac Da Vang field contains an estimated ultimate recovery of 100 million barrels of oil equivalent (boe) gross resources, with a peak gross production of 30 to 40 million boepd and 10–15 million boepd net peak production. Flemming Guiducci Grønnegaard , Chief Executive Officer of Yinson Production, commented: \"Achieving first oil for FSO PTSC LDV is a proud moment for Yinson Production and a major operational milestone for the Lac Da Vang field. “This achievement reflects the strong collaboration, technical excellence, and shared commitment to safety among Yinson Production, our joint venture partner PTSC, and our client, Murphy Oil Corporation. We look forward to delivering safe, reliable, and successful operations alongside our partners for years to come.” With a current fleet of 11 vessels, Yinson Production has an orderbook of approximately $19 billion until 2050 and global presence in 12 countries. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Exploration & Production Business Developments & Projects Business & Finance Fossil Energy FPSO & Vessels Oil & Gas News",
       "takeaways": [
         "The FSO features a storage capacity of 460,000 barrels and is designed to enhance operational efficiency while supporting sustainable offshore oilfield operations.",
         "The FSO PTSC LDV is chartered to Murphy Cuu Long Bac Oil, a wholly owned subsidiary of Murphy Oil Corporation, under a ten-year firm contract with extension options of up to five additional years.",
@@ -1280,9 +1282,9 @@
       "navarea": "I",
       "image": "https://offshore-energy.biz/api/media/file/skandi-1324x748.jpg?prefix=media",
       "summary": "Norway's DOF Group is selling its 2018-built subsea construction vessel (CSV) Skandi Implementer to an undisclosed buyer. Mons S. Aase , CEO of...",
-      "body": "Vessels & Vehicles October 23, 2026 · 14 hours ago DOF opts to sell 2018-built subsea vessel as attractive offer emerges NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email Skandi Implementer. Source: DOF Norway's DOF Group is selling its 2018-built subsea construction vessel (CSV) Skandi Implementer to an undisclosed buyer. Mons S. Aase , CEO of DOF Group, said: “While we have not actively pursued a sale of this high-end subsea vessel, the terms are accretive for the DOF Group and its shareholders, making this the right decision.” The vessel is planned to be delivered to the new owner in the second quarter of 2027. The sale will contribute to a material reduction in the group’s net debt, the company said. Skandi Implementer was designed for subsea construction, inspection, repair and maintenance (IRM) and ROV services up to 3,000 meters of depth. The 137.6-meter-long vessel offers accommodation for 129 persons. Related Articles Fossil Energy DOF gets project awards for three vessels to keep working in North America 2 min read Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Vessels & Vehicles Vessels Subsea Fossil Energy FPSO & Vessels Business & Finance Business Developments & Projects Outlook & Strategy",
+      "body": "Vessels & Vehicles October 23, 2026 · 21 hours ago DOF opts to sell 2018-built subsea vessel as attractive offer emerges NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email Skandi Implementer. Source: DOF Norway's DOF Group is selling its 2018-built subsea construction vessel (CSV) Skandi Implementer to an undisclosed buyer. Mons S. Aase , CEO of DOF Group, said: “While we have not actively pursued a sale of this high-end subsea vessel, the terms are accretive for the DOF Group and its shareholders, making this the right decision.” The vessel is planned to be delivered to the new owner in the second quarter of 2027. The sale will contribute to a material reduction in the group’s net debt, the company said. Skandi Implementer was designed for subsea construction, inspection, repair and maintenance (IRM) and ROV services up to 3,000 meters of depth. The 137.6-meter-long vessel offers accommodation for 129 persons. Related Articles Fossil Energy DOF gets project awards for three vessels to keep working in North America 2 min read Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Vessels & Vehicles Vessels Subsea Fossil Energy FPSO & Vessels Business & Finance Business Developments & Projects Outlook & Strategy",
       "takeaways": [
-        "Vessels & Vehicles October 23, 2026 · 14 hours ago DOF opts to sell 2018-built subsea vessel as attractive offer emerges NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email Skandi Implementer.",
+        "Vessels & Vehicles October 23, 2026 · 21 hours ago DOF opts to sell 2018-built subsea vessel as attractive offer emerges NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email Skandi Implementer.",
         "Source: DOF Norway's DOF Group is selling its 2018-built subsea construction vessel (CSV) Skandi Implementer to an undisclosed buyer.",
         "The sale will contribute to a material reduction in the group’s net debt, the company said."
       ],
@@ -1381,7 +1383,7 @@
       "navarea": "XI",
       "image": "https://offshore-energy.biz/api/media/file/Oil%20India-981x660.png?prefix=media",
       "summary": "Oil India has found natural gas in the Krishna-Godavari Basin's shallow waters, augmenting India’s hydrocarbon arsenal.",
-      "body": "Exploration & Production October 23, 2026 · 14 hours ago Natural gas discovery springs up in India’s shallow waters Oil India has found natural gas in the Krishna-Godavari Basin's shallow waters, augmenting India’s hydrocarbon arsenal. MC Melisa Cavcic Senior Editor 2 minutes read LinkedIn X Email Illustration Source: Oil India Oil India Limited (OIL), an exploration and production company, has increased its offshore reserves with a new natural gas discovery in the previously unappraised Matsyapuri formation of the Krishna-Godavari Basin. Drilled as an appraisal well in the shallow offshore block KG-DSF/GSKW/2018, the Godavari-1 well yielded strong gas flows reaching up to 2 lakh standard cubic meters per day (scumd) alongside condensate, marking a promising new milestone for the Maharatna CPSE's hydrocarbon portfolio. Oil India emphasized: “Production testing of the zone started from 16th October 2026 and resulted in flow of natural gas to the surface at a flow rate of about 1 lakh scumd with maximum flow rate of 2 lakh scumd achieved on continuous testing with composition of condensate at the rate of about 170 bopd (API @ 60 °F is 55.8) and water with well head pressure of 1,815 psi.” According to the Asian player, out of the selected pay zones, the presence of hydrocarbon was reported in the depth range of 2,024 to 2,027 meters. Currently, preparations are on for testing the next higher-up zone. Oil India believes that it has made a significant stride in its quest for hydrocarbons with the discovery of natural gas in block KGDSF/GSKW/2018 of the Krishna-Godavari Basin, which was awarded to the company as a sole operator. Dolphin Drilling’s Blackford Dolphin deepwater-capable semi-submersible rig secured an extension at the end of summer to stay on contract with Oil India up to October 15, 2026, to complete drilling, testing, and abandonment work at locations east of India. The 1974-built rig began its 14-month hydrocarbon exploration campaign with the Asian player in November 2024. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Exploration & Production Business Developments & Projects Business & Finance Fossil Energy Oil & Gas Rigs News",
+      "body": "Exploration & Production October 23, 2026 · 21 hours ago Natural gas discovery springs up in India’s shallow waters Oil India has found natural gas in the Krishna-Godavari Basin's shallow waters, augmenting India’s hydrocarbon arsenal. MC Melisa Cavcic Senior Editor 2 minutes read LinkedIn X Email Illustration Source: Oil India Oil India Limited (OIL), an exploration and production company, has increased its offshore reserves with a new natural gas discovery in the previously unappraised Matsyapuri formation of the Krishna-Godavari Basin. Drilled as an appraisal well in the shallow offshore block KG-DSF/GSKW/2018, the Godavari-1 well yielded strong gas flows reaching up to 2 lakh standard cubic meters per day (scumd) alongside condensate, marking a promising new milestone for the Maharatna CPSE's hydrocarbon portfolio. Oil India emphasized: “Production testing of the zone started from 16th October 2026 and resulted in flow of natural gas to the surface at a flow rate of about 1 lakh scumd with maximum flow rate of 2 lakh scumd achieved on continuous testing with composition of condensate at the rate of about 170 bopd (API @ 60 °F is 55.8) and water with well head pressure of 1,815 psi.” According to the Asian player, out of the selected pay zones, the presence of hydrocarbon was reported in the depth range of 2,024 to 2,027 meters. Currently, preparations are on for testing the next higher-up zone. Oil India believes that it has made a significant stride in its quest for hydrocarbons with the discovery of natural gas in block KGDSF/GSKW/2018 of the Krishna-Godavari Basin, which was awarded to the company as a sole operator. Dolphin Drilling’s Blackford Dolphin deepwater-capable semi-submersible rig secured an extension at the end of summer to stay on contract with Oil India up to October 15, 2026, to complete drilling, testing, and abandonment work at locations east of India. The 1974-built rig began its 14-month hydrocarbon exploration campaign with the Asian player in November 2024. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Exploration & Production Business Developments & Projects Business & Finance Fossil Energy Oil & Gas Rigs News",
       "takeaways": [
         "Currently, preparations are on for testing the next higher-up zone.",
         "The 1974-built rig began its 14-month hydrocarbon exploration campaign with the Asian player in November 2024.",
@@ -1449,7 +1451,7 @@
       "navarea": "I",
       "image": "https://offshore-energy.biz/api/media/file/Prysmian's%20193-meter%20CLV%20Alessandro%20Volta%20performing%20sea%20trials-1280x719.jpg?prefix=media",
       "summary": "Prysmian’s new cable-laying vessel (CLV) Alessandro Volta, built by Norway's VARD, has begun sea trials in Norway. The Norwegian ship designer...",
-      "body": "Vessels & Vehicles October 23, 2026 · 15 hours ago Prysmian's 193-meter CLV Alessandro Volta performing sea trials NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email Prysmian via LinkedIn Prysmian’s new cable-laying vessel (CLV) Alessandro Volta, built by Norway's VARD, has begun sea trials in Norway. The Norwegian ship designer and shipbuilder commenced construction of the CLV in September 2024 at its shipyard in Tulcea, Romania, where the vessel’s hull was erected in September 2025. In mid-January this year, Alessandro Volta left the shipyard in Romania for Norway , where its construction was completed. Both Prysmian and VARD reported today, October 23, that the vessel was currently performing sea trials. Prysmian via LinkedIn With a length of 192.8 meters, the cable layer is the largest vessel ever launched by VARD, the shipbuilder said. Built on the VARD 9 18 design, the vessel is equipped with three carousels for a total load capacity of 19,000 tons, with the system of tensioners able to sustain a maximum tension of 60 tons, and capable of conducting power cable lay in up to 1,500 meters of water depth. Prysmian's new, latest-generation heavy-duty plough , developed by the UK’s SMD, will be deployed on Alessandro Volta, as well as on Monna Lisa. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Vessels & Vehicles Cabling Subsea Offshore Wind Vessels Grid Business Developments & Projects Outlook & Strategy",
+      "body": "Vessels & Vehicles October 23, 2026 · 22 hours ago Prysmian's 193-meter CLV Alessandro Volta performing sea trials NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email Prysmian via LinkedIn Prysmian’s new cable-laying vessel (CLV) Alessandro Volta, built by Norway's VARD, has begun sea trials in Norway. The Norwegian ship designer and shipbuilder commenced construction of the CLV in September 2024 at its shipyard in Tulcea, Romania, where the vessel’s hull was erected in September 2025. In mid-January this year, Alessandro Volta left the shipyard in Romania for Norway , where its construction was completed. Both Prysmian and VARD reported today, October 23, that the vessel was currently performing sea trials. Prysmian via LinkedIn With a length of 192.8 meters, the cable layer is the largest vessel ever launched by VARD, the shipbuilder said. Built on the VARD 9 18 design, the vessel is equipped with three carousels for a total load capacity of 19,000 tons, with the system of tensioners able to sustain a maximum tension of 60 tons, and capable of conducting power cable lay in up to 1,500 meters of water depth. Prysmian's new, latest-generation heavy-duty plough , developed by the UK’s SMD, will be deployed on Alessandro Volta, as well as on Monna Lisa. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Vessels & Vehicles Cabling Subsea Offshore Wind Vessels Grid Business Developments & Projects Outlook & Strategy",
       "takeaways": [
         "The Norwegian ship designer and shipbuilder commenced construction of the CLV in September 2024 at its shipyard in Tulcea, Romania, where the vessel’s hull was erected in September 2025.",
         "In mid-January this year, Alessandro Volta left the shipyard in Romania for Norway , where its construction was completed.",
@@ -1483,7 +1485,7 @@
       "navarea": "I",
       "image": "https://offshore-energy.biz/api/media/file/FPSO%20Montara%20Venture%3B%20Source%20Jadestone%20Energy-512x341.png?prefix=media",
       "summary": "Prima Energy has expanded its regional footprint with the strategic acquisition of an interest in Jadestone Energy.",
-      "body": "Business & Finance October 23, 2026 · 16 hours ago Prima Energy widens Southeast Asian footprint with stake in Jadestone Prima Energy has expanded its regional footprint with the strategic acquisition of an interest in Jadestone Energy. MC Melisa Cavcic Senior Editor 2 minutes read LinkedIn X Email FPSO Montara Venture Source Jadestone Energy Indonesian upstream operator PT Prima Petroleum Energi (Prima Energy) has acquired a stake in London-listed Jadestone Energy, deepening its commitment to the Southeast Asian oil and gas sector. Prima Energy has expanded its footprint in the exploration and production (E&P) industry with the recent acquisition of a 28.3% stake in AIM-listed and Southeast Asia-focused Jadestone Energy. This strategic investment was completed after an extensive in-house assessment of Jadestone’s assets in Australia, Indonesia, Malaysia, and Vietnam and demonstrates the Indonesian firm’s commitment to the industry in the region. The AIM-listed company, which is currently valued at £228 million (approximately $304.97 million), has ten assets in four countries and offices in five countries with over 400 staff. Related Articles Fossil Energy Jadestone steps up production restart and development activity across Asia-Pacific 2 min read Prima Energy, which was established in 2021, operates two PSCs, Bawean and Northwest Natuna, with 100% interest in Indonesia, where it is currently focused on adding value to older assets. The Asian player’s sister company, the Soechi Group, is involved with shipping and marine services, especially transporting and storing oil and gas, which continues to support the Indonesian firm’s expansion into more offshore oil and gas activities. Pieters Utomo , Chief Executive of Prima, commented: “Our acquisition of a material stake in Jadestone is an exciting development for our company as we look to build our presence within the industry more widely across SE Asia while we continue to progress our work on our Indonesian projects. “We believe there is excellent potential in Jadestone’s assets and look forward to working with the board and management to help create value for all stakeholders.” Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Business & Finance Business Developments & Projects Exploration & Production Fossil Energy Oil & Gas News",
+      "body": "Business & Finance October 23, 2026 · 23 hours ago Prima Energy widens Southeast Asian footprint with stake in Jadestone Prima Energy has expanded its regional footprint with the strategic acquisition of an interest in Jadestone Energy. MC Melisa Cavcic Senior Editor 2 minutes read LinkedIn X Email FPSO Montara Venture Source Jadestone Energy Indonesian upstream operator PT Prima Petroleum Energi (Prima Energy) has acquired a stake in London-listed Jadestone Energy, deepening its commitment to the Southeast Asian oil and gas sector. Prima Energy has expanded its footprint in the exploration and production (E&P) industry with the recent acquisition of a 28.3% stake in AIM-listed and Southeast Asia-focused Jadestone Energy. This strategic investment was completed after an extensive in-house assessment of Jadestone’s assets in Australia, Indonesia, Malaysia, and Vietnam and demonstrates the Indonesian firm’s commitment to the industry in the region. The AIM-listed company, which is currently valued at £228 million (approximately $304.97 million), has ten assets in four countries and offices in five countries with over 400 staff. Related Articles Fossil Energy Jadestone steps up production restart and development activity across Asia-Pacific 2 min read Prima Energy, which was established in 2021, operates two PSCs, Bawean and Northwest Natuna, with 100% interest in Indonesia, where it is currently focused on adding value to older assets. The Asian player’s sister company, the Soechi Group, is involved with shipping and marine services, especially transporting and storing oil and gas, which continues to support the Indonesian firm’s expansion into more offshore oil and gas activities. Pieters Utomo , Chief Executive of Prima, commented: “Our acquisition of a material stake in Jadestone is an exciting development for our company as we look to build our presence within the industry more widely across SE Asia while we continue to progress our work on our Indonesian projects. “We believe there is excellent potential in Jadestone’s assets and look forward to working with the board and management to help create value for all stakeholders.” Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Business & Finance Business Developments & Projects Exploration & Production Fossil Energy Oil & Gas News",
       "takeaways": [
         "Prima Energy has expanded its footprint in the exploration and production (E&P) industry with the recent acquisition of a 28.3% stake in AIM-listed and Southeast Asia-focused Jadestone Energy.",
         "The AIM-listed company, which is currently valued at £228 million (approximately $304.97 million), has ten assets in four countries and offices in five countries with over 400 staff.",
@@ -1551,7 +1553,7 @@
       "navarea": "XI",
       "image": "https://offshore-energy.biz/api/media/file/Petronas%2C%20TotalEnergies%20and%20Mitsui%20to%20develop%20CO2%20storage%20area%20off%20Peninsular%20Malaysia-929x815.png?prefix=media",
       "summary": "PETRONAS CCS Ventures (PCCSV), a wholly-owned subsidiary of Malaysia’s state-owned oil & gas firm Petronas, TotalEnergies EP CCS Malaysia and...",
-      "body": "Carbon Capture Usage & Storage October 23, 2026 · 16 hours ago Petronas, TotalEnergies and Mitsui to develop CO2 storage area off Peninsular Malaysia NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Development of Southern CCS Hub. Source: Petronas PETRONAS CCS Ventures (PCCSV), a wholly-owned subsidiary of Malaysia’s state-owned oil & gas firm Petronas, TotalEnergies EP CCS Malaysia and Mitsui & Co. have entered into a joint venture agreement (JVA) to develop a CO2 storage area offshore Peninsular Malaysia. The partners previously signed a carbon capture and storage (CCS) agreement in 2023 , as part of which they performed development studies and technical evaluations of potential storage areas offshore Peninsular Malaysia. In 2025, the partnership progressed into a key principles agreement, which laid the groundwork for front-end engineering and design (FEED) activities and the formation of the joint venture structure. With the JVA in place, the framework is set for incorporating a dedicated joint venture company to progress the development, commercialization, and operation of the carbon storage area offshore Peninsular Malaysia, described as a key component of Malaysia's Southern CCS Hub. The Southern CCS Hub is being developed to receive CO2 domestically and regionally, including potential cross-border CO2 shipments. The first phase primarily targets a depleted gas field with an expected injection capacity of up to 5 million tons per annum (mtpa), with first injection targeted as early as 2031, in line with industry readiness. Petronas, TotalEnergies and Mitsui will now focus on advancing the technical and commercial maturity of the initial carbon storage project ahead of a final investment decision (FID). \"The Joint Venture Agreement is a reflection of the strong partnership we have built with our strategic partners over the years. From our early development studies through to FEED activities, we have worked closely together to mature this opportunity and establish a shared vision for the Southern CCS Hub,\" said Emry Hisham Yusoff , PCCSV’s Chief Executive Officer. \"By bringing together PETRONAS’ subsurface expertise, with their global CCS experience, commercial and logistics capabilities, we are confident in maintaining this momentum towards achieving Final Investment Decision (FID) in the near future while advancing Malaysia’s ambition to become a leading regional CCS hub.” Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Carbon Capture Usage & Storage Collaboration Low-Carbon Transition Fossil Energy Subsea Surveys & Interventions Storage Outlook & Strategy Market Outlooks Energy Transition Business Developments & Projects",
+      "body": "Carbon Capture Usage & Storage October 23, 2026 · 23 hours ago Petronas, TotalEnergies and Mitsui to develop CO2 storage area off Peninsular Malaysia NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Development of Southern CCS Hub. Source: Petronas PETRONAS CCS Ventures (PCCSV), a wholly-owned subsidiary of Malaysia’s state-owned oil & gas firm Petronas, TotalEnergies EP CCS Malaysia and Mitsui & Co. have entered into a joint venture agreement (JVA) to develop a CO2 storage area offshore Peninsular Malaysia. The partners previously signed a carbon capture and storage (CCS) agreement in 2023 , as part of which they performed development studies and technical evaluations of potential storage areas offshore Peninsular Malaysia. In 2025, the partnership progressed into a key principles agreement, which laid the groundwork for front-end engineering and design (FEED) activities and the formation of the joint venture structure. With the JVA in place, the framework is set for incorporating a dedicated joint venture company to progress the development, commercialization, and operation of the carbon storage area offshore Peninsular Malaysia, described as a key component of Malaysia's Southern CCS Hub. The Southern CCS Hub is being developed to receive CO2 domestically and regionally, including potential cross-border CO2 shipments. The first phase primarily targets a depleted gas field with an expected injection capacity of up to 5 million tons per annum (mtpa), with first injection targeted as early as 2031, in line with industry readiness. Petronas, TotalEnergies and Mitsui will now focus on advancing the technical and commercial maturity of the initial carbon storage project ahead of a final investment decision (FID). \"The Joint Venture Agreement is a reflection of the strong partnership we have built with our strategic partners over the years. From our early development studies through to FEED activities, we have worked closely together to mature this opportunity and establish a shared vision for the Southern CCS Hub,\" said Emry Hisham Yusoff , PCCSV’s Chief Executive Officer. \"By bringing together PETRONAS’ subsurface expertise, with their global CCS experience, commercial and logistics capabilities, we are confident in maintaining this momentum towards achieving Final Investment Decision (FID) in the near future while advancing Malaysia’s ambition to become a leading regional CCS hub.” Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Carbon Capture Usage & Storage Collaboration Low-Carbon Transition Fossil Energy Subsea Surveys & Interventions Storage Outlook & Strategy Market Outlooks Energy Transition Business Developments & Projects",
       "takeaways": [
         "Source: Petronas PETRONAS CCS Ventures (PCCSV), a wholly-owned subsidiary of Malaysia’s state-owned oil & gas firm Petronas, TotalEnergies EP CCS Malaysia and Mitsui & Co.",
         "have entered into a joint venture agreement (JVA) to develop a CO2 storage area offshore Peninsular Malaysia.",
@@ -1688,7 +1690,7 @@
       "navarea": "IX",
       "image": "https://offshore-energy.biz/api/media/file/Hail%20and%20Ghasha%20island%20under%20construction%3B%20Source%20ADNOC-768x511.png?prefix=media",
       "summary": "PTTEP and Eni have created Seela Energies to streamline operations and combine their stakes in an ADNOC-operated concession off the coast of the UAE.",
-      "body": "Business & Finance October 23, 2026 · 18 hours ago Eni, PTTEP forge JV to consolidate stakes in ADNOC’s giant offshore sour gas asset PTTEP and Eni have created Seela Energies to streamline operations and combine their stakes in an ADNOC-operated concession off the coast of the UAE. MC Melisa Cavcic Senior Editor 3 minutes read LinkedIn X Email Hail and Ghasha island under construction Source ADNOC As one of the world’s largest sour gas mega-projects continues to take shape in the waters of the Arabian Gulf, two energy heavyweights, Thailand’s PTT Exploration and Production Public Company (PTTEP) and Italy’s Eni, have pooled their stakes in Abu Dhabi’s massive Ghasha concession, carving out a newly minted joint venture (JV) called Seela Energies to unlock financing, share deep technical expertise, and scale up their activities for the long haul. PTTEP MENA, PTTEP’s wholly owned subsidiary, together with Eni Abu Dhabi, has established Seela Energies, with each company holding a 50% shareholding. Each of the founders holds a 10% participating interest in the Ghasha concession project , which will now be transferred to the newly formed JV. As a result, the duo will hold an indirect 10% interest in the project. According to PTTEP, all required regulatory, governmental, and partner approvals have been obtained, and all conditions precedent have been fulfilled. “The establishment of Seela Energies strengthens the collaboration between PTTEP and Eni, enhances access to financing, builds capability, shares expertise and supports potential future mutual growth in Middle East region, in line with PTTEP’s strategy to deliver long-term value through strategic partnerships,” emphasized the Thai player. Related Articles Fossil Energy WATCH: First steel cut for mega gas project set on zero-emission ops by entwining smart tech, carbon capture, hydrogen, nuclear, and renewable power 7 min read The Ghasha concession offshore Abu Dhabi in the United Arab Emirates, which is operated by the Abu Dhabi National Oil Company (ADNOC), is expected to produce more than 1.8 billion standard cubic feet of gas per day and 150,000 barrels of oil and condensate per day over the long term. This concession is considered to be one of the world's largest sulfur-rich gas development projects and a cornerstone of the UAE's strategy to achieve gas self-sufficiency and support rising international export demand. The development concept encompasses multiple fields, including Hail and Ghasha , located in shallow waters. This project utilizes a series of artificial islands rather than traditional platforms to drill and manage operations while minimizing environmental disturbance. Related Articles Fossil Energy First jacket comes to slide into place at huge offshore gas project 3 min read The Hail and Ghasha project, designed with an emphasis on low-emissions technology, aims to operate with net-zero carbon emissions by integrating carbon capture with a target of around 1.5 million tonnes of CO2 per year, low-carbon hydrogen use to replace fuel gas, and relying on less-emission-intensive power sources, such as nuclear and solar. ADNOC’s partners in the Ghasha concession, aside from Eni and PTTEP, which consolidated their joint stakes under Seela Energies, involved other companies across the broader project lifecycle, including Wintershall Dea, OMV, and Lukoil. The Ghasha development is envisioned to employ smart technology across all operations, allowing operators, technicians, and site personnel remote access to the project’s operations. Aside from a fully unmanned facility, ADNOC has set its sights on artificial intelligence (AI), such as predictive maintenance, for all critical rotating equipment. A few months ago, the operator, in partnership with Eni and PTTEP, put into place a structured financing transaction of up to $11 billion (AED 40.4 billion) for Hail and Ghasha sour gas development. The UAE giant’s financing model follows a series of midstream and infrastructure transactions, including a $4.9 billion (AED 18 billion) oil pipeline partnership and a $10.1 billion (AED 37.1 billion) gas pipeline agreement. It also comes after build-own-operate-transfer (BOOT) projects, such as the $3.8 billion (AED 14 billion) project to power and decarbonize offshore operations and the $2.2 billion (AED 8.3 billion) project to deliver sustainable water supplies to onshore operations. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Business & Finance Collaboration Business Developments & Projects Fossil Energy Oil & Gas News",
+      "body": "Business & Finance October 23, 2026 · 1 day ago Eni, PTTEP forge JV to consolidate stakes in ADNOC’s giant offshore sour gas asset PTTEP and Eni have created Seela Energies to streamline operations and combine their stakes in an ADNOC-operated concession off the coast of the UAE. MC Melisa Cavcic Senior Editor 3 minutes read LinkedIn X Email Hail and Ghasha island under construction Source ADNOC As one of the world’s largest sour gas mega-projects continues to take shape in the waters of the Arabian Gulf, two energy heavyweights, Thailand’s PTT Exploration and Production Public Company (PTTEP) and Italy’s Eni, have pooled their stakes in Abu Dhabi’s massive Ghasha concession, carving out a newly minted joint venture (JV) called Seela Energies to unlock financing, share deep technical expertise, and scale up their activities for the long haul. PTTEP MENA, PTTEP’s wholly owned subsidiary, together with Eni Abu Dhabi, has established Seela Energies, with each company holding a 50% shareholding. Each of the founders holds a 10% participating interest in the Ghasha concession project , which will now be transferred to the newly formed JV. As a result, the duo will hold an indirect 10% interest in the project. According to PTTEP, all required regulatory, governmental, and partner approvals have been obtained, and all conditions precedent have been fulfilled. “The establishment of Seela Energies strengthens the collaboration between PTTEP and Eni, enhances access to financing, builds capability, shares expertise and supports potential future mutual growth in Middle East region, in line with PTTEP’s strategy to deliver long-term value through strategic partnerships,” emphasized the Thai player. Related Articles Fossil Energy WATCH: First steel cut for mega gas project set on zero-emission ops by entwining smart tech, carbon capture, hydrogen, nuclear, and renewable power 7 min read The Ghasha concession offshore Abu Dhabi in the United Arab Emirates, which is operated by the Abu Dhabi National Oil Company (ADNOC), is expected to produce more than 1.8 billion standard cubic feet of gas per day and 150,000 barrels of oil and condensate per day over the long term. This concession is considered to be one of the world's largest sulfur-rich gas development projects and a cornerstone of the UAE's strategy to achieve gas self-sufficiency and support rising international export demand. The development concept encompasses multiple fields, including Hail and Ghasha , located in shallow waters. This project utilizes a series of artificial islands rather than traditional platforms to drill and manage operations while minimizing environmental disturbance. Related Articles Fossil Energy First jacket comes to slide into place at huge offshore gas project 3 min read The Hail and Ghasha project, designed with an emphasis on low-emissions technology, aims to operate with net-zero carbon emissions by integrating carbon capture with a target of around 1.5 million tonnes of CO2 per year, low-carbon hydrogen use to replace fuel gas, and relying on less-emission-intensive power sources, such as nuclear and solar. ADNOC’s partners in the Ghasha concession, aside from Eni and PTTEP, which consolidated their joint stakes under Seela Energies, involved other companies across the broader project lifecycle, including Wintershall Dea, OMV, and Lukoil. The Ghasha development is envisioned to employ smart technology across all operations, allowing operators, technicians, and site personnel remote access to the project’s operations. Aside from a fully unmanned facility, ADNOC has set its sights on artificial intelligence (AI), such as predictive maintenance, for all critical rotating equipment. A few months ago, the operator, in partnership with Eni and PTTEP, put into place a structured financing transaction of up to $11 billion (AED 40.4 billion) for Hail and Ghasha sour gas development. The UAE giant’s financing model follows a series of midstream and infrastructure transactions, including a $4.9 billion (AED 18 billion) oil pipeline partnership and a $10.1 billion (AED 37.1 billion) gas pipeline agreement. It also comes after build-own-operate-transfer (BOOT) projects, such as the $3.8 billion (AED 14 billion) project to power and decarbonize offshore operations and the $2.2 billion (AED 8.3 billion) project to deliver sustainable water supplies to onshore operations. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Business & Finance Collaboration Business Developments & Projects Fossil Energy Oil & Gas News",
       "takeaways": [
         "PTTEP MENA, PTTEP’s wholly owned subsidiary, together with Eni Abu Dhabi, has established Seela Energies, with each company holding a 50% shareholding.",
         "Each of the founders holds a 10% participating interest in the Ghasha concession project , which will now be transferred to the newly formed JV.",
@@ -1827,7 +1829,7 @@
       "navarea": "XI",
       "image": "https://offshore-energy.biz/api/media/file/Malaysian%20soil%20investigations%20firm%20enters%20collaboration%20in%20Indonesia%20and%20Timor-Leste-1280x825.jpg?prefix=media",
       "summary": "Malaysian offshore soil investigation and geotechnical engineering services company Helms Geomarine has signed a memorandum of understanding...",
-      "body": "Surveys & Interventions October 23, 2026 · 19 hours ago Malaysian survey services firm enters collaboration in Indonesia and Timor-Leste NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email Helms Geomarine Malaysian offshore soil investigation and geotechnical engineering services company Helms Geomarine has signed a memorandum of understanding (MoU) with Indonesia's PT Elnusa Trans Samudera (ENTS) to jointly pursue offshore geotechnical investigation opportunities in Indonesia and Timor-Leste. The collaboration is said to combine HELMS’ specialist geotechnical expertise and drilling resources with ENTS’ marine capabilities, local market knowledge and logistics support. The proposed scope includes offshore geotechnical drilling, soil and rock sampling, seabed testing, laboratory testing and engineering reporting, supported by vessel preparation and mobilization. In addition to individual projects, the collaboration includes plans for establishing a local Helms entity to own strategic drilling resources, using Indonesian-flagged DP2 vessels, employing Indonesian personnel and developing a local laboratory, with technical training and knowledge sharing to strengthen local expertise. The MoU was signed by Dato’ Ir. Helmi Zulkawi, Managing Director of HELMS, and Kurniawati Adjie, Director of ENTS. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Surveys & Interventions Subsea Collaboration Outlook & Strategy Business Developments & Projects",
+      "body": "Surveys & Interventions October 23, 2026 · 1 day ago Malaysian survey services firm enters collaboration in Indonesia and Timor-Leste NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email Helms Geomarine Malaysian offshore soil investigation and geotechnical engineering services company Helms Geomarine has signed a memorandum of understanding (MoU) with Indonesia's PT Elnusa Trans Samudera (ENTS) to jointly pursue offshore geotechnical investigation opportunities in Indonesia and Timor-Leste. The collaboration is said to combine HELMS’ specialist geotechnical expertise and drilling resources with ENTS’ marine capabilities, local market knowledge and logistics support. The proposed scope includes offshore geotechnical drilling, soil and rock sampling, seabed testing, laboratory testing and engineering reporting, supported by vessel preparation and mobilization. In addition to individual projects, the collaboration includes plans for establishing a local Helms entity to own strategic drilling resources, using Indonesian-flagged DP2 vessels, employing Indonesian personnel and developing a local laboratory, with technical training and knowledge sharing to strengthen local expertise. The MoU was signed by Dato’ Ir. Helmi Zulkawi, Managing Director of HELMS, and Kurniawati Adjie, Director of ENTS. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Surveys & Interventions Subsea Collaboration Outlook & Strategy Business Developments & Projects",
       "takeaways": [
         "The collaboration is said to combine HELMS’ specialist geotechnical expertise and drilling resources with ENTS’ marine capabilities, local market knowledge and logistics support.",
         "The proposed scope includes offshore geotechnical drilling, soil and rock sampling, seabed testing, laboratory testing and engineering reporting, supported by vessel preparation and mobilization.",
