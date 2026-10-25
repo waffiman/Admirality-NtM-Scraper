@@ -210,26 +210,14 @@
     const lod = aisLodForZoom(z);
     let list = sampleEvenlyByGrid(targets, Math.min(lod.maxMarkers, ABS_MARKER_CAP), lod.cellDeg);
 
-    // Overview: always canvas dots. Triangles only when zoomed in (LOD.triangles).
-    const useTriangles = !!lod.triangles && list.length <= 900;
+    // Always triangles (heading wedges) — size scales with zoom LOD, never bare dots.
+    const px = z <= 3 ? 9 : z <= 5 ? 11 : 14;
     list.forEach((v) => {
       const lat = Number(v.lat);
       const lon = Number(v.lon);
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
       if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return;
       const col = shipColor(v.navStat, v.sog);
-      if (!useTriangles) {
-        const m = L.circleMarker([lat, lon], {
-          radius: Number(v.sog) >= 0.5 ? lod.radius : Math.max(1.6, lod.radius - 0.4),
-          color: "#0f172a",
-          weight: z <= 3 ? 0 : 0.4,
-          fillColor: col,
-          fillOpacity: z <= 3 ? 0.75 : 0.9
-        });
-        if (z >= 5) m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
-        layer.addLayer(m);
-        return;
-      }
       const heading = Number(v.heading);
       const rot =
         Number.isFinite(heading) && heading < 360
@@ -242,24 +230,33 @@
         html:
           '<div style="transform:rotate(' +
           rot +
-          'deg);width:14px;height:14px;display:flex;align-items:center;justify-content:center;">' +
-          '<svg viewBox="0 0 24 24" width="14" height="14">' +
+          "deg);width:" +
+          px +
+          "px;height:" +
+          px +
+          'px;display:flex;align-items:center;justify-content:center;">' +
+          '<svg viewBox="0 0 24 24" width="' +
+          px +
+          '" height="' +
+          px +
+          '">' +
           '<polygon points="12,2 20,20 12,16 4,20" fill="' +
           col +
           '" stroke="#0f172a" stroke-width="1.5"/>' +
           "</svg></div>",
-        iconSize: [14, 14],
-        iconAnchor: [7, 7]
+        iconSize: [px, px],
+        iconAnchor: [px / 2, px / 2]
       });
       const m = L.marker([lat, lon], { icon, keyboard: false });
-      m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
+      if (z >= 4) m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
       layer.addLayer(m);
     });
 
+    // No numeric badge on the AIS tile — clutter / false "Baltic monopoly" cue
     const badge = document.querySelector('.excel-tab[data-overlay="ais"] .excel-tab-badge');
     if (badge) {
-      badge.textContent = list.length > 0 ? String(list.length) : "";
-      badge.style.display = list.length > 0 ? "inline-block" : "none";
+      badge.textContent = "";
+      badge.style.display = "none";
     }
   }
 

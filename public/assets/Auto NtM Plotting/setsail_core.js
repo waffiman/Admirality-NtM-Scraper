@@ -282,7 +282,7 @@ function applyVesselProfile(data, opts) {
 }
 
 /** Hourly live refresh of the AIS target linked as My Vessel (MMSI). */
-const OWN_AIS_REFRESH_MS = 60 * 60 * 1000;
+const OWN_AIS_REFRESH_MS = 15 * 60 * 1000; // 15 min — hourly was leaving stale Japan fixes for days
 let _ownAisRefreshTimer = null;
 
 async function fetchOwnVesselAisUpdate() {
@@ -294,10 +294,20 @@ async function fetchOwnVesselAisUpdate() {
   const boxes = [];
   const lat0 = Number(v.lat);
   const lon0 = Number(v.lon);
-  if (Number.isFinite(lat0) && Number.isFinite(lon0)) {
+  const lastFresh =
+    v.aisRefreshedAt && (Date.now() - new Date(v.aisRefreshedAt).getTime() < 6 * 3600 * 1000);
+  // Only trust last-known area for bbox search if AIS was freshly confirmed.
+  // Stale Japan-local boxes otherwise lock the search forever away from the real ship.
+  if (lastFresh && Number.isFinite(lat0) && Number.isFinite(lon0)) {
     boxes.push([lat0 - 1.2, lon0 - 1.2, lat0 + 1.2, lon0 + 1.2]);
-    boxes.push([lat0 - 3.5, lon0 - 3.5, lat0 + 3.5, lon0 + 3.5]);
+    boxes.push([lat0 - 4, lon0 - 4, lat0 + 4, lon0 + 4]);
   }
+  // Always add global sample corridors so a ship that left the last bbox is still found
+  [
+    [30, -80, 45, -55], [0, 95, 20, 120], [20, 115, 42, 145],
+    [35, -20, 55, 10], [-40, 10, -20, 40], [5, 40, 25, 70],
+    [30, -150, 50, -120], [-35, 145, -15, 175]
+  ].forEach((b) => boxes.push(b));
 
   async function fromOpenWaters() {
     function hitFromFeature(f) {
@@ -416,33 +426,29 @@ async function fetchOwnVesselAisUpdate() {
   }
 
   let hit = null;
-  if (boxes.length) hit = await fromOpenWaters();
+  // Prefer live Open Waters MMSI (+ bbox). Never paint My Vessel from stale zone snapshots.
+  hit = await fromOpenWaters();
   if (!hit) hit = await fromDigitraffic();
-  if (!hit) {
+  try {
+    if (!hit && typeof window.getAisTargetsSnapshot === "function") {
+      const snap = window.getAisTargetsSnapshot(4000) || [];
+      const row = snap.find((t) => String(t.mmsi) === mmsi);
+      if (row && Number.isFinite(Number(row.lat)) && Number.isFinite(Number(row.lon))) {
+        hit = Object.assign({}, row, { mmsi, source: row.source || "ais-stream" });
+      }
+    }
+  } catch (eSnap) {}
+  // Static name index may fill name/callsign only — never lat/lon from zones (weeks-old Japan fix)
+  if (hit) {
     try {
       const idx = await ensureAisNameIndex();
       const row = (idx || []).find((t) => String(t.mmsi) === mmsi);
       if (row) {
-        hit = {
-          mmsi,
-          name: row.name || v.name || "",
-          callSign: row.callSign || v.callSign || "",
-          shipType: row.shipType || v.shipType || "",
-          destination: row.destination || v.destination || "",
-          lat: Number.isFinite(Number(row.lat)) ? Number(row.lat) : v.lat,
-          lon: Number.isFinite(Number(row.lon)) ? Number(row.lon) : v.lon,
-          sog: row.sog,
-          cog: row.cog,
-          heading: row.heading,
-          source: "ais"
-        };
+        if (!hit.name && row.name) hit.name = row.name;
+        if (!hit.callSign && row.callSign) hit.callSign = row.callSign;
+        if (!hit.shipType && row.shipType) hit.shipType = row.shipType;
       }
-    } catch (e3) { /* ignore */ }
-  }
-  if (hit && Number.isFinite(Number(hit.lat)) && Number.isFinite(Number(hit.lon)) && !boxes.length) {
-    boxes.push([Number(hit.lat) - 1.2, Number(hit.lon) - 1.2, Number(hit.lat) + 1.2, Number(hit.lon) + 1.2]);
-    const live = await fromOpenWaters();
-    if (live) hit = live;
+    } catch (e3) {}
   }
   return hit;
 }
@@ -479,10 +485,11 @@ function scheduleOwnVesselAisRefresh() {
   _ownAisRefreshTimer = setInterval(() => {
     refreshOwnVesselFromAis({ toast: false });
   }, OWN_AIS_REFRESH_MS);
-  if (!window._ownAisInitialKick) {
-    window._ownAisInitialKick = true;
-    setTimeout(() => refreshOwnVesselFromAis({ toast: false }), 6000);
-  }
+  const stale =
+    !userVessel.aisRefreshedAt ||
+    Date.now() - new Date(userVessel.aisRefreshedAt).getTime() > 3 * 3600 * 1000;
+  const delay = stale ? 2500 : 8000;
+  setTimeout(() => refreshOwnVesselFromAis({ toast: stale }), delay);
 }
 window.refreshOwnVesselFromAis = refreshOwnVesselFromAis;
 window.scheduleOwnVesselAisRefresh = scheduleOwnVesselAisRefresh;
@@ -2196,6 +2203,8 @@ function clearActiveRoute() {
   try {
     localStorage.removeItem(ROUTE_STORAGE_KEY);
   } catch (e) {}
+  try { restoreSetRouteChatTranscript([]); } catch (eChat) {}
+  try { syncSetRouteTopbarActions(); } catch (eTop) {}
   if (leafletRouteLayer) {
     leafletRouteLayer.clearLayers();
   }
@@ -13523,13 +13532,59 @@ function getSavedRoutesLibrary() {
   }
 }
 
+function captureSetRouteChatTranscript() {
+  const container = document.getElementById("setRouteChatMessages");
+  if (!container) return [];
+  return Array.from(container.querySelectorAll(".sr-msg")).map((el) => ({
+    role: el.classList.contains("user") ? "user" : "brain",
+    html: ((el.querySelector(".sr-msg-text") || {}).innerHTML) || ""
+  })).filter((m) => m.html && m.html.trim());
+}
+
+function restoreSetRouteChatTranscript(messages) {
+  const container = document.getElementById("setRouteChatMessages");
+  const emptyHero = document.getElementById("setRouteEmptyHero");
+  if (!container) return;
+  container.innerHTML = "";
+  if (!messages || !messages.length) {
+    if (emptyHero) emptyHero.style.display = "";
+    return;
+  }
+  if (emptyHero) emptyHero.style.display = "none";
+  messages.forEach((m) => {
+    if (!m || !m.html) return;
+    appendChatMessage(m.role === "user" ? "user" : "brain", m.html);
+  });
+}
+
+function syncSetRouteTopbarActions() {
+  const lib = typeof getSavedRoutesLibrary === "function" ? getSavedRoutesLibrary() : [];
+  const hasAny =
+    (lib && lib.length > 0) ||
+    (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0);
+  const btnDetails = document.getElementById("btnToggleRightDrawer");
+  const btnChart = document.getElementById("btnViewOnSetChart");
+  if (btnDetails) btnDetails.style.display = hasAny ? "" : "none";
+  if (btnChart) btnChart.style.display = hasAny ? "" : "none";
+}
+window.syncSetRouteTopbarActions = syncSetRouteTopbarActions;
+
 function saveRouteToLibrary(route) {
   if (!route || !Array.isArray(route.waypoints) || route.waypoints.length === 0) return;
   enrichRouteWithLegsTelemetry(route);
+  // Persist chat with this route so sidebar reopen restores the conversation
+  try {
+    const transcript = captureSetRouteChatTranscript();
+    if (transcript.length) route.chatTranscript = transcript;
+    else if (!route.chatTranscript) route.chatTranscript = [];
+  } catch (eChat) {}
   const lib = getSavedRoutesLibrary();
   const existingIdx = lib.findIndex(r => r.id === route.id || (r.name && r.name === route.name));
   if (existingIdx >= 0) {
     route.id = lib[existingIdx].id || route.id;
+    if (!route.chatTranscript || !route.chatTranscript.length) {
+      route.chatTranscript = lib[existingIdx].chatTranscript || [];
+    }
     lib[existingIdx] = route;
   } else {
     lib.unshift(route);
@@ -13538,6 +13593,7 @@ function saveRouteToLibrary(route) {
     localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(lib.slice(0, 35)));
   } catch (e) {}
   renderNavSavedRoutesTree();
+  syncSetRouteTopbarActions();
 }
 window.saveRouteToLibrary = saveRouteToLibrary;
 
@@ -13603,17 +13659,28 @@ function selectSavedRouteFromSidebar(routeId, openRightDrawer = true) {
   const found = lib.find(r => r.id === routeId);
   if (!found) return;
 
+  // Save current chat onto the previously active route before switching
+  try {
+    if (activeRouteData && activeRouteData.id && activeRouteData.id !== found.id) {
+      activeRouteData.chatTranscript = captureSetRouteChatTranscript();
+      saveRouteToLibrary(activeRouteData);
+    }
+  } catch (eSavePrev) {}
+
   enrichRouteWithLegsTelemetry(found);
   activeRouteData = found;
   try {
     localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(found));
   } catch (e) {}
 
+  restoreSetRouteChatTranscript(found.chatTranscript || []);
+
   if (leafletMap && typeof renderRouteOnMap === "function") {
     renderRouteOnMap(found, false);
   }
   displaySetRouteResults(found, openRightDrawer);
   renderNavSavedRoutesTree();
+  syncSetRouteTopbarActions();
 }
 window.selectSavedRouteFromSidebar = selectSavedRouteFromSidebar;
 
@@ -14091,6 +14158,18 @@ function appendChatMessage(role, htmlContent, quickChips = []) {
   if (scrollWrap) {
     scrollWrap.scrollTop = scrollWrap.scrollHeight;
   }
+  // Keep library transcript in sync with the live chat for the active route
+  try {
+    if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length) {
+      clearTimeout(window.__setsailChatSaveTimer);
+      window.__setsailChatSaveTimer = setTimeout(() => {
+        try {
+          activeRouteData.chatTranscript = captureSetRouteChatTranscript();
+          saveRouteToLibrary(activeRouteData);
+        } catch (e) {}
+      }, 450);
+    }
+  } catch (eSyncChat) {}
   return msgEl;
 }
 
@@ -14906,13 +14985,25 @@ function initSetRouteV50() {
   if (newChatBtn && !newChatBtn._boundV50) {
     newChatBtn._boundV50 = true;
     newChatBtn.addEventListener("click", () => {
+      try {
+        if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length) {
+          activeRouteData.chatTranscript = captureSetRouteChatTranscript();
+          saveRouteToLibrary(activeRouteData);
+        }
+      } catch (eSaveChat) {}
       window.SETROUTE_PENDING_CONTEXT = null;
+      activeRouteData = null;
+      try { localStorage.removeItem(ROUTE_STORAGE_KEY); } catch (e) {}
       if (chatMessages) chatMessages.innerHTML = "";
       if (emptyHero) emptyHero.style.display = "flex";
       refreshSetRouteEmptyHero();
       setBrainMode("planning");
+      syncSetRouteTopbarActions();
+      renderNavSavedRoutesTree();
     });
   }
+
+  try { syncSetRouteTopbarActions(); } catch (eTopInit) {}
 
   const drawer = document.getElementById("setRouteRightDrawer");
   if (toggleDrawerBtn && drawer && !toggleDrawerBtn._boundV50) {
