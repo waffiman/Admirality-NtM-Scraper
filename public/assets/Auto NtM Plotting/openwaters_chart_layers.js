@@ -164,6 +164,8 @@
           fadeDuration: 0,
           trackResize: false,
           antialias: false,
+          // Match Leaflet noWrap:false — keep bathymetry continuous across ±180°
+          renderWorldCopies: true,
           refreshExpiredTiles: true,
           maxTileCacheSize: lowEnd ? 64 : 160,
           pixelRatio: lowEnd ? Math.min(1, dpr) : Math.min(1.25, dpr)

@@ -4148,13 +4148,13 @@ function initNtMMap() {
       zoomAnimationThreshold: lowEndMap ? 2 : 8,
       inertia: true,
       inertiaDeceleration: lowEndMap ? 4500 : 3000,
-      // Wrap the same world (objects stay with you across ±180°); do not clamp to one globe copy
-      worldCopyJump: true
+      // false = continuous pan across ±180° (no snap/jerk). true would jump center back into [-180,180].
+      worldCopyJump: false
     });
 
     // keepBuffer 12 forced huge neighbour-chunk preload → jank on weak PCs.
     // Overlays wait until pan/zoom settles; base still updates during drag but less often.
-    // noWrap:false + worldCopyJump → seamless 360° pan with markers/routes following.
+    // noWrap:false → repeating world tiles for smooth antimeridian crossing.
     const tilePerfOpts = {
       keepBuffer: lowEndMap ? 1 : 2,
       updateWhenIdle: false,
