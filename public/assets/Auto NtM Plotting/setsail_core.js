@@ -14356,6 +14356,14 @@ async function resolveUnknownPortsFromText(text, currentPorts) {
   return resolved.length >= 2 ? resolved : (resolved.length === 1 && currentPorts.length === 0 ? resolved : currentPorts);
 }
 
+function escapeSetRouteChatText(s) {
+  return String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function appendChatMessage(role, htmlContent, quickChips = []) {
   const container = document.getElementById("setRouteChatMessages");
   const scrollWrap = document.getElementById("setRouteChatScroll");
@@ -14366,7 +14374,24 @@ function appendChatMessage(role, htmlContent, quickChips = []) {
 
   const msgEl = document.createElement("div");
   msgEl.className = `sr-msg ${role === "user" ? "user" : "brain"}`;
-  const avatarLabel = role === "user" ? "YOU" : "AI";
+
+  let avatarHtml = role === "user" ? "YOU" : "AI";
+  let authorHtml = "";
+  let avatarClass = "sr-msg-avatar";
+  if (role === "user") {
+    const user = typeof getSetSailAuthUser === "function" ? getSetSailAuthUser() : null;
+    if (user && (user.email || user.name)) {
+      const displayName = String(user.name || (user.email || "").split("@")[0] || "You").trim() || "You";
+      const init = (displayName.charAt(0) || "U").toUpperCase();
+      avatarHtml = typeof _setsailAuthAvatarHtml === "function"
+        ? _setsailAuthAvatarHtml(user, init)
+        : escapeSetRouteChatText(init);
+      const safeName = escapeSetRouteChatText(displayName);
+      authorHtml = `<div class="sr-msg-author" title="${safeName}">${safeName}</div>`;
+      avatarClass += " has-photo";
+      msgEl.classList.add("has-auth-user");
+    }
+  }
 
   let chipsHtml = "";
   if (Array.isArray(quickChips) && quickChips.length > 0) {
@@ -14376,8 +14401,9 @@ function appendChatMessage(role, htmlContent, quickChips = []) {
   }
 
   msgEl.innerHTML = `
-    <div class="sr-msg-avatar">${avatarLabel}</div>
+    <div class="${avatarClass}">${avatarHtml}</div>
     <div class="sr-msg-bubble">
+      ${authorHtml}
       <div class="sr-msg-text">${htmlContent}</div>
       ${chipsHtml}
     </div>

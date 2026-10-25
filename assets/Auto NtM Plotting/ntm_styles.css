@@ -9696,6 +9696,45 @@
   color: #38bdf8;
 }
 
+.sr-msg.user .sr-msg-avatar.has-photo {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(125, 211, 252, 0.55);
+  font-size: 0;
+  line-height: 0;
+}
+
+.sr-msg.user .sr-msg-avatar.has-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
+.sr-msg-author {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #7dd3fc;
+  margin: 0 0 0.28rem;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-msg.user .sr-msg-author {
+  text-align: right;
+}
+
+[data-theme="light"] .sr-msg-author {
+  color: #0369a1;
+}
+
 .sr-msg-bubble {
   max-width: 86%;
   padding: 13px 16px;
