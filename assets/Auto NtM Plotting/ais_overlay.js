@@ -19,23 +19,117 @@
   // OW_AREA_CAP is spanLon*spanLat (deg²). Above this we still show zone snapshots + stream.
   const OW_AREA_CAP = 4200;
   const OW_MAX_TILES = 28;
-  const ABS_MARKER_CAP = 15000;
+  const ABS_MARKER_CAP = 8000;
   const MIN_ZOOM_ZONES = 1;
-  const MIN_ZOOM_DENSE_ZONES = 2;
-  const MIN_ZOOM_DIGITRAFFIC = 1;
-  // At overview zoom, sample a coarse world grid for Open Waters so the ocean is never empty.
+  const MIN_ZOOM_DENSE_ZONES = 4;
+  // Digitraffic = dense Baltic-only feed — never at world overview (it crowds the map).
+  const MIN_ZOOM_DIGITRAFFIC = 6;
+  // Even world corridors for Open Waters (Baltic intentionally last / not privileged).
   const OVERVIEW_SAMPLE_BOXES = [
-    { minLat: 30, minLon: -80, maxLat: 45, maxLon: -60 },   // NW Atlantic
-    { minLat: 10, minLon: -70, maxLat: 25, maxLon: -50 },   // Caribbean / mid-At
-    { minLat: 0, minLon: -40, maxLat: 20, maxLon: -10 },    // tropical At
-    { minLat: 35, minLon: -20, maxLat: 50, maxLon: 0 },     // NE At / Europe W
-    { minLat: 0, minLon: 95, maxLat: 15, maxLon: 115 },     // Singapore / SCS
-    { minLat: 20, minLon: 115, maxLat: 40, maxLon: 140 },   // East China / Japan
-    { minLat: 30, minLon: -140, maxLat: 45, maxLon: -120 }, // NE Pacific
-    { minLat: -40, minLon: 10, maxLat: -20, maxLon: 40 },   // Cape approaches
-    { minLat: 10, minLon: 40, maxLat: 25, maxLon: 65 },     // Arabian Sea
-    { minLat: 50, minLon: 0, maxLat: 62, maxLon: 20 }       // North Sea / Baltic gate
+    { minLat: 25, minLon: -80, maxLat: 42, maxLon: -55 },   // NW Atlantic / US East
+    { minLat: 5, minLon: -95, maxLat: 28, maxLon: -60 },    // Gulf / Caribbean
+    { minLat: -40, minLon: -60, maxLat: -20, maxLon: -30 }, // SW Atlantic
+    { minLat: 35, minLon: -25, maxLat: 52, maxLon: 5 },     // NE Atlantic / Europe W
+    { minLat: 30, minLon: -20, maxLat: 45, maxLon: 10 },    // Med W approaches
+    { minLat: -38, minLon: 10, maxLat: -20, maxLon: 40 },   // Cape of Good Hope
+    { minLat: 5, minLon: 40, maxLat: 25, maxLon: 70 },      // Arabian Sea
+    { minLat: -10, minLon: 90, maxLat: 15, maxLon: 120 },   // Malacca / Singapore
+    { minLat: 20, minLon: 115, maxLat: 42, maxLon: 145 },   // East China / Japan
+    { minLat: 30, minLon: -150, maxLat: 48, maxLon: -120 }, // NE Pacific
+    { minLat: -35, minLon: 145, maxLat: -15, maxLon: 175 }, // Coral / Tasman
+    { minLat: 50, minLon: 0, maxLat: 62, maxLon: 22 }       // North Sea (Baltic gate — last)
   ];
+
+  /** Zoom LOD: fewer / coarser markers far out; denser as user zooms in. */
+  function aisLodForZoom(z) {
+    const zoom = Number(z) || 2;
+    if (zoom <= 2) {
+      return { maxMarkers: 320, cellDeg: 10, maxPerZone: 28, maxZones: 14, digi: false, triangles: false, radius: 2 };
+    }
+    if (zoom <= 3) {
+      return { maxMarkers: 520, cellDeg: 6, maxPerZone: 45, maxZones: 14, digi: false, triangles: false, radius: 2.2 };
+    }
+    if (zoom <= 5) {
+      return { maxMarkers: 1100, cellDeg: 3, maxPerZone: 120, maxZones: 12, digi: false, triangles: false, radius: 2.5 };
+    }
+    if (zoom <= 7) {
+      return { maxMarkers: 2200, cellDeg: 1.4, maxPerZone: 400, maxZones: 10, digi: true, triangles: false, radius: 2.8 };
+    }
+    if (zoom <= 10) {
+      return { maxMarkers: 4500, cellDeg: 0.6, maxPerZone: 2000, maxZones: 8, digi: true, triangles: true, radius: 3 };
+    }
+    return { maxMarkers: ABS_MARKER_CAP, cellDeg: 0.25, maxPerZone: 8000, maxZones: 6, digi: true, triangles: true, radius: 3.2 };
+  }
+
+  /**
+   * Even geographic sample — prevents Baltic/Europe from monopolizing the marker budget.
+   * Takes up to ceil(maxN / nCells) from each lat/lon cell, then fills remainder round-robin.
+   */
+  function sampleEvenlyByGrid(targets, maxN, cellDeg) {
+    if (!Array.isArray(targets) || !targets.length) return [];
+    const cap = Math.max(1, maxN | 0);
+    if (targets.length <= cap) return targets.slice();
+    const cell = Math.max(0.2, Number(cellDeg) || 5);
+    const buckets = Object.create(null);
+    const keys = [];
+    for (let i = 0; i < targets.length; i++) {
+      const t = targets[i];
+      const lat = Number(t.lat);
+      const lon = Number(t.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+      const ki = Math.floor(lat / cell);
+      const kj = Math.floor(lon / cell);
+      const key = ki + ":" + kj;
+      if (!buckets[key]) {
+        buckets[key] = [];
+        keys.push(key);
+      }
+      buckets[key].push(t);
+    }
+    if (!keys.length) return targets.slice(0, cap);
+    // Shuffle keys lightly by hash so no region is always first
+    keys.sort((a, b) => {
+      const ha = (a.charCodeAt(0) * 31 + a.length) % 97;
+      const hb = (b.charCodeAt(0) * 31 + b.length) % 97;
+      return ha - hb;
+    });
+    const perCell = Math.max(1, Math.ceil(cap / keys.length));
+    const out = [];
+    const cursor = Object.create(null);
+    keys.forEach((k) => { cursor[k] = 0; });
+    // First pass: equal share
+    keys.forEach((k) => {
+      const arr = buckets[k];
+      const n = Math.min(perCell, arr.length);
+      for (let i = 0; i < n && out.length < cap; i++) {
+        out.push(arr[i]);
+        cursor[k] = i + 1;
+      }
+    });
+    // Second pass: fill leftovers round-robin (prefer moving vessels)
+    let guard = 0;
+    while (out.length < cap && guard < targets.length * 2) {
+      guard++;
+      let added = false;
+      for (let k = 0; k < keys.length && out.length < cap; k++) {
+        const key = keys[k];
+        const arr = buckets[key];
+        let i = cursor[key] || 0;
+        while (i < arr.length) {
+          const t = arr[i++];
+          cursor[key] = i;
+          // Prefer underway when filling overflow
+          if (Number(t.sog) >= 0.5 || out.length < cap * 0.85) {
+            out.push(t);
+            added = true;
+            break;
+          }
+        }
+      }
+      if (!added) break;
+    }
+    return out;
+  }
 
   let leafletAisLayer = null;
   let aisTimer = null;
@@ -112,30 +206,27 @@
     layer.clearLayers();
     if (!Array.isArray(targets) || !targets.length) return;
 
-    let list = targets;
-    if (list.length > ABS_MARKER_CAP) {
-      const step = Math.ceil(list.length / ABS_MARKER_CAP);
-      const sampled = [];
-      for (let i = 0; i < list.length; i += step) sampled.push(list[i]);
-      list = sampled;
-    }
+    const z = map && map.getZoom ? map.getZoom() : 3;
+    const lod = aisLodForZoom(z);
+    let list = sampleEvenlyByGrid(targets, Math.min(lod.maxMarkers, ABS_MARKER_CAP), lod.cellDeg);
 
-    const useCanvasDots = list.length > 700;
+    // Overview: always canvas dots. Triangles only when zoomed in (LOD.triangles).
+    const useTriangles = !!lod.triangles && list.length <= 900;
     list.forEach((v) => {
       const lat = Number(v.lat);
       const lon = Number(v.lon);
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
       if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return;
       const col = shipColor(v.navStat, v.sog);
-      if (useCanvasDots) {
+      if (!useTriangles) {
         const m = L.circleMarker([lat, lon], {
-          radius: Number(v.sog) >= 0.5 ? 3 : 2.2,
+          radius: Number(v.sog) >= 0.5 ? lod.radius : Math.max(1.6, lod.radius - 0.4),
           color: "#0f172a",
-          weight: 0.5,
+          weight: z <= 3 ? 0 : 0.4,
           fillColor: col,
-          fillOpacity: 0.9
+          fillOpacity: z <= 3 ? 0.75 : 0.9
         });
-        m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
+        if (z >= 5) m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
         layer.addLayer(m);
         return;
       }
@@ -174,8 +265,11 @@
 
   function getCombinedAisTargets(map) {
     const streamList = Object.values(aisStreamTargets);
-    const combined = mergeByMmsi([lastRestTargets, streamList]);
-    return filterToViewport(combined, map);
+    let combined = mergeByMmsi([lastRestTargets, streamList]);
+    if (map) combined = filterToViewport(combined, map);
+    const z = map && map.getZoom ? map.getZoom() : 3;
+    const lod = aisLodForZoom(z);
+    return sampleEvenlyByGrid(combined, lod.maxMarkers, lod.cellDeg);
   }
 
   function pruneStaleStreamTargets() {
@@ -673,6 +767,7 @@
   async function loadZonesForMap(map, zoom) {
     const z = zoom != null ? zoom : map.getZoom();
     if (z < MIN_ZOOM_ZONES) return [];
+    const lod = aisLodForZoom(z);
 
     const b = map.getBounds();
     const vp = {
@@ -682,19 +777,28 @@
       maxLon: b.getEast()
     };
     const man = await loadZonesManifest();
-    const files = [];
+    const candidates = [];
     for (const entry of man.zones || []) {
       const [w, s, e, n] = entry.bbox || [];
       if (w == null) continue;
       const zb = { minLat: s, maxLat: n, minLon: w, maxLon: e };
       if (!bboxOverlaps(vp, zb)) continue;
       const area = zoneAreaSqDeg(entry.bbox);
-      if (area > 40 && z < MIN_ZOOM_DENSE_ZONES) continue;
-      files.push(entry.file);
+      // At overview skip ultra-dense regional packs unless we take a tiny sample from each ocean
+      if (area > 40 && z < MIN_ZOOM_DENSE_ZONES && z > 3) continue;
+      candidates.push(entry);
     }
-    const capFiles = files.slice(0, 16);
-    const loaded = await Promise.all(capFiles.map((f) => loadZoneFile(f)));
-    return loaded.flat();
+    // Prefer even ocean coverage: sort by id hash, not by European order in the manifest
+    candidates.sort((a, b) => String(a.id || a.file).localeCompare(String(b.id || b.file)));
+    // Interleave so Baltic is not always first among loaded files
+    const capFiles = candidates.slice(0, lod.maxZones);
+    const loaded = await Promise.all(
+      capFiles.map(async (entry) => {
+        const list = await loadZoneFile(entry.file);
+        return sampleEvenlyByGrid(list, lod.maxPerZone, Math.max(lod.cellDeg, 2));
+      })
+    );
+    return sampleEvenlyByGrid(loaded.flat(), lod.maxMarkers, lod.cellDeg);
   }
 
   async function loadOpenWatersBoxes(boxes) {
@@ -784,46 +888,49 @@
       }
       if (seq !== aisRefreshSeq) return;
       let digi = [];
-      // Use map bounds (not only OW boxes) so Baltic AIS still loads in overview when boxes are empty.
-      const balticHit =
-        overlapsBaltic(plan.boxes) ||
-        (() => {
-          try {
-            const bb = map.getBounds();
-            return bboxOverlaps(
-              {
-                minLat: bb.getSouth(),
-                maxLat: bb.getNorth(),
-                minLon: bb.getWest(),
-                maxLon: bb.getEast()
-              },
-              { minLat: 53.0, maxLat: 66.5, minLon: 9.0, maxLon: 30.5 }
-            );
-          } catch (e) {
-            return false;
-          }
-        })();
       const zNow = plan.zoom != null ? plan.zoom : map.getZoom();
-      if (balticHit && zNow >= MIN_ZOOM_DIGITRAFFIC) {
+      const lod = aisLodForZoom(zNow);
+      // Digitraffic only when zoomed into / near Baltic — never flood world overview
+      const balticFocused = (() => {
+        try {
+          const bb = map.getBounds();
+          const span = Math.abs(bb.getEast() - bb.getWest()) * Math.abs(bb.getNorth() - bb.getSouth());
+          if (span > 800) return false; // still a wide view — skip Digitraffic
+          const vp = {
+            minLat: bb.getSouth(),
+            maxLat: bb.getNorth(),
+            minLon: bb.getWest(),
+            maxLon: bb.getEast()
+          };
+          return bboxOverlaps(vp, { minLat: 53.0, maxLat: 66.5, minLon: 9.0, maxLon: 30.5 });
+        } catch (e) {
+          return false;
+        }
+      })();
+      if (lod.digi && balticFocused && zNow >= MIN_ZOOM_DIGITRAFFIC) {
         try {
           digi = await loadLiveDigitraffic();
+          digi = sampleEvenlyByGrid(digi, Math.min(800, lod.maxMarkers), lod.cellDeg);
         } catch (e) {}
       }
       if (seq !== aisRefreshSeq) return;
-      // At overview/world, keep sample-box targets even if slightly outside strict bounds
-      // so enabling the AIS tile immediately shows traffic density.
+      // Cap Open Waters per overview box so one corridor cannot dominate
+      if (live.length && (plan.mode === "overview" || plan.mode === "world")) {
+        live = sampleEvenlyByGrid(live, lod.maxMarkers, lod.cellDeg);
+      }
       let rest = mergeByMmsi([live, digi]);
       if (plan.mode === "viewport") {
         rest = filterToViewport(rest, map);
       }
 
       if (!plan.skipZones) {
-        const zoneAll = await loadZonesForMap(map, plan.zoom || map.getZoom());
+        const zoneAll = await loadZonesForMap(map, zNow);
         if (seq !== aisRefreshSeq) return;
-        const z = plan.mode === "viewport" ? filterToViewport(zoneAll, map) : zoneAll;
-        rest = mergeByMmsi([rest, z]);
+        const zFiltered = plan.mode === "viewport" ? filterToViewport(zoneAll, map) : zoneAll;
+        rest = mergeByMmsi([rest, zFiltered]);
       }
 
+      rest = sampleEvenlyByGrid(rest, lod.maxMarkers * 2, lod.cellDeg);
       lastRestTargets = rest;
       targets = getCombinedAisTargets(map);
       renderAisTargets(targets, map);
