@@ -1666,18 +1666,18 @@ function initAutoNtmUI() {
   }
 
   // Empty Multi Search hint chips → activate matching bottom dock tile
-  const ntmItemsScroll = document.getElementById("ntmItemsScroll");
-  if (ntmItemsScroll && !ntmItemsScroll._boundEmptyHints) {
-    ntmItemsScroll._boundEmptyHints = true;
-    ntmItemsScroll.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-overlay-hint]");
+  // Document-level delegation (survives list re-renders; works even if scroll node remounts).
+  if (!window._setsailBoundEmptyOverlayHints) {
+    window._setsailBoundEmptyOverlayHints = true;
+    document.addEventListener("click", (e) => {
+      const btn = e.target && e.target.closest && e.target.closest("[data-overlay-hint]");
       if (!btn) return;
       e.preventDefault();
       e.stopPropagation();
       const key = btn.getAttribute("data-overlay-hint");
       if (!key) return;
       const mapRef = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
-      if (typeof window.initExcelOverlayDock === "function" && mapRef) {
+      if (typeof window.initExcelOverlayDock === "function") {
         try { window.initExcelOverlayDock(mapRef); } catch (err) { /* dock may already be live */ }
       }
       if (typeof window.setOverlayActive === "function") {
@@ -1685,7 +1685,19 @@ function initAutoNtmUI() {
       } else if (typeof setOverlayActive === "function") {
         setOverlayActive(key, true, mapRef);
       }
-    });
+      // Ensure dock tile lights up even if map layer init is still pending
+      const tab = document.querySelector('.excel-tab[data-overlay="' + key + '"]');
+      if (tab) {
+        tab.classList.add("active");
+        const chk = tab.querySelector(".excel-tab-check");
+        if (chk) chk.textContent = "✓";
+      }
+      if (typeof window.renderNtMListAndMap === "function") {
+        try { window.renderNtMListAndMap(); } catch (errR) {}
+      } else if (typeof renderNtMListAndMap === "function") {
+        try { renderNtMListAndMap(); } catch (errR2) {}
+      }
+    }, true);
   }
 
   // Clear Search Button
@@ -4686,10 +4698,14 @@ function renderNtMListAndMap() {
   const countEl = document.getElementById("ntmListCount");
   const searchVal = ((document.getElementById("ntmSearchInput") ? document.getElementById("ntmSearchInput").value : "") || "").toLowerCase().trim();
 
-  const isNoticesActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.notices !== false : true;
-  const isDepthsActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.depths !== false : true;
-  const isWeatherActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.weather !== false : true;
-  const isRouteActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.route !== false : true;
+  const _ovStates = (typeof window !== "undefined" && window.OVERLAY_STATES)
+    ? window.OVERLAY_STATES
+    : (typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES : null);
+  // Default OFF when state missing — matches dock (all tiles off for fast chart load)
+  const isNoticesActive = _ovStates ? _ovStates.notices === true : false;
+  const isDepthsActive = _ovStates ? _ovStates.depths === true : false;
+  const isWeatherActive = _ovStates ? _ovStates.weather === true : false;
+  const isRouteActive = _ovStates ? _ovStates.route === true : false;
 
   // 1. Gather filtered NtM items
   const filteredNotices = isNoticesActive ? getFilteredNotices() : [];
@@ -4968,7 +4984,7 @@ function renderNtMListAndMap() {
     }
 
     if (!html) {
-      const isAisActive = typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES.ais !== false : false;
+      const isAisActive = _ovStates ? _ovStates.ais === true : false;
       const anyActiveOverlay = isNoticesActive || isDepthsActive || isWeatherActive || isRouteActive || isAisActive;
       if (!anyActiveOverlay) {
         html = `
@@ -8221,35 +8237,86 @@ function initWaypointEditModal() {
   }
 }
 
-function openNtmOverlayInfoModal() {
-  const modal = document.getElementById("ntmOverlayInfoModal");
-  if (!modal) return;
-
+function fillNtmOverlayInfoModalCounts() {
   const countEl = document.getElementById("ntmModalCount");
   const tpCountEl = document.getElementById("ntmModalTpCount");
   const editionEl = document.getElementById("ntmModalEdition");
 
-  const activeList = typeof NTM_STORE !== "undefined" ? NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED") : [];
-  const cancelledList = typeof NTM_STORE !== "undefined" ? NTM_STORE.filter(n => n.isCancelled || n.status === "CANCELLED") : [];
-  const total = activeList.length;
-  const navtexCount = activeList.filter(n => n.type === "NAVTEX").length;
-  const ukhoCount = activeList.filter(n => n.type !== "NAVTEX").length;
+  let store = (typeof window !== "undefined" && Array.isArray(window.NTM_STORE) && window.NTM_STORE.length)
+    ? window.NTM_STORE
+    : (typeof NTM_STORE !== "undefined" && Array.isArray(NTM_STORE) ? NTM_STORE : []);
 
-  if (countEl) countEl.textContent = `${total} Active (${cancelledList.length} Cancelled)`;
-  if (tpCountEl) tpCountEl.textContent = `${navtexCount} NAVTEX ? ${ukhoCount} UKHO NtM`;
+  // Hydrate from local cache if in-memory store is still empty (info works with tile off)
+  if (!store.length) {
+    try {
+      const raw = localStorage.getItem(NTM_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (Array.isArray(parsed) && parsed.length) {
+        store = parsed;
+        NTM_STORE = parsed;
+        window.NTM_STORE = parsed;
+      }
+    } catch (eHydrate) {}
+  }
 
-  let latestEd = "Week 42 / 2026 + Live GMDSS";
+  const activeList = store.filter(n => n && !n.isCancelled && n.status !== "CANCELLED");
+  const cancelledList = store.filter(n => n && (n.isCancelled || n.status === "CANCELLED"));
+  let total = activeList.length;
+  let cancelledN = cancelledList.length;
+  let navtexCount = activeList.filter(n => n.type === "NAVTEX").length;
+  let ukhoCount = activeList.filter(n => n.type !== "NAVTEX").length;
+
+  let latestEd = "UKHO Weekly + Live GMDSS";
+  let meta = null;
   try {
-    const savedMeta = JSON.parse(localStorage.getItem(META_STORAGE_KEY) || "{}");
-    if (savedMeta && savedMeta.weekNumber) {
-      const yr = savedMeta.year ? (String(savedMeta.year).length === 2 ? "20" + savedMeta.year : savedMeta.year) : "2026";
-      latestEd = `Wk ${savedMeta.weekNumber}/${yr} + 6h NAVTEX`;
+    meta = JSON.parse(localStorage.getItem(META_STORAGE_KEY) || "{}");
+  } catch (eMeta) { meta = null; }
+  if (meta && meta.weekNumber) {
+    const yr = meta.year ? (String(meta.year).length === 2 ? "20" + meta.year : meta.year) : "2026";
+    latestEd = `Wk ${meta.weekNumber}/${yr} + 6h NAVTEX`;
+  }
+  // Prefer authoritative metadata counts when store is still warming up
+  if ((!total && !cancelledN) && meta) {
+    if (Number.isFinite(meta.activeNotices)) total = meta.activeNotices;
+    if (Number.isFinite(meta.cancelledNotices)) cancelledN = meta.cancelledNotices;
+    if (Number.isFinite(meta.activeNavtexCount) || Number.isFinite(meta.countNavtex)) {
+      navtexCount = Number(meta.activeNavtexCount != null ? meta.activeNavtexCount : meta.countNavtex) || 0;
     }
-  } catch (e) {}
-  if (editionEl) editionEl.textContent = latestEd;
+    if (Number.isFinite(meta.ukhoNoticesCount)) {
+      ukhoCount = meta.ukhoNoticesCount;
+    } else if (total && navtexCount) {
+      ukhoCount = Math.max(0, total - navtexCount);
+    }
+  }
 
-  modal.classList.add("open");
+  if (countEl) {
+    countEl.textContent = store.length || total || cancelledN
+      ? `${total} Active (${cancelledN} Cancelled)`
+      : "Loading…";
+  }
+  if (tpCountEl) tpCountEl.textContent = `${navtexCount} NAVTEX · ${ukhoCount} UKHO NtM`;
+  if (editionEl) editionEl.textContent = latestEd;
 }
+
+function openNtmOverlayInfoModal() {
+  const modal = document.getElementById("ntmOverlayInfoModal");
+  if (!modal) return;
+
+  fillNtmOverlayInfoModalCounts();
+  modal.classList.add("open");
+
+  // If store still empty, pull live notices.json then refresh counts (tile need not be on)
+  const storeLen = (typeof NTM_STORE !== "undefined" && Array.isArray(NTM_STORE)) ? NTM_STORE.length : 0;
+  const winLen = (typeof window !== "undefined" && Array.isArray(window.NTM_STORE)) ? window.NTM_STORE.length : 0;
+  if (Math.max(storeLen, winLen) < 20 && typeof loadRemoteNoticesJson === "function") {
+    Promise.resolve(loadRemoteNoticesJson(false)).then(() => {
+      fillNtmOverlayInfoModalCounts();
+    }).catch(() => {
+      fillNtmOverlayInfoModalCounts();
+    });
+  }
+}
+window.fillNtmOverlayInfoModalCounts = fillNtmOverlayInfoModalCounts;
 
 function openNtmPasteModal() {
   /* User paste/add of NtM & NAVTEX is disabled — official feed only. */

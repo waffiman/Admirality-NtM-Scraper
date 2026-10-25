@@ -5,8 +5,9 @@
  * Covers China MSA, USACE eHydro, Havenbedrijf Rotterdam, MPA Singapore, Flemish Hydrography.
  */
 
-// Global Overlay State
-const OVERLAY_STATES = {
+// Global Overlay State — must be `var` + window so setsail_core.js can read the same object
+// (script-scoped `const` is invisible to other classic scripts → empty-hint / dock desync).
+var OVERLAY_STATES = window.OVERLAY_STATES || {
   depths: false,
   isobaths: false,
   notices: false,
@@ -15,6 +16,7 @@ const OVERLAY_STATES = {
   route: false,
   ais: false
 };
+window.OVERLAY_STATES = OVERLAY_STATES;
 
 let leafletPortDepthsLayer = null;
 let leafletIsobathsLayer = null;
@@ -22,7 +24,7 @@ let leafletIsobathsLayer = null;
 /**
  * Authoritative Database of World Ports & Approaches Depths
  */
-const PORT_DEPTHS_DB = [
+var PORT_DEPTHS_DB = window.PORT_DEPTHS_DB || [
   {
     "id": "port-shanghai",
     "name": "Shanghai (Changjiang Kou & Yangshan)",
@@ -19685,6 +19687,7 @@ const PORT_DEPTHS_DB = [
     ]
   }
 ];
+window.PORT_DEPTHS_DB = PORT_DEPTHS_DB;
 
 /**
  * Initialize Port Depths and Isobaths Layers on Leaflet Map
