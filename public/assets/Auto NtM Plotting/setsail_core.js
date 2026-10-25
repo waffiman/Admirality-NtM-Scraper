@@ -10653,6 +10653,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
    ========================================================================== */
 
 const SETSAIL_AUTH_KEY = "setsail_auth_user_v1";
+const SETSAIL_AGENT_API_KEY_STORE = "setsail_agent_api_key_v1";
 const SETSAIL_GOOGLE_CLIENT_ID_KEY = "setsail_google_client_id";
 const DEFAULT_SETSAIL_GOOGLE_CLIENT_ID = "1072660724894-mbo68vdrl6t3a66s048qdhv8jb6sl6kd.apps.googleusercontent.com";
 
@@ -10925,6 +10926,13 @@ function setSetSailAuthUser(userObj) {
     } else {
       saveSetSailUserHistory();
       localStorage.removeItem(SETSAIL_AUTH_KEY);
+      try {
+        localStorage.removeItem("setsail_google_auth_token");
+        localStorage.removeItem("setsail_google_auth_kind");
+        sessionStorage.removeItem("setsail_google_auth_token");
+        sessionStorage.removeItem("setsail_google_auth_kind");
+      } catch (eTok) {}
+      clearCachedAgentApiKey();
       window.__setsailAgentRoutesCache = [];
       window.__setsailPendingApiKeyModal = false;
     }
@@ -10949,10 +10957,90 @@ function syncSetSailApiCardUI() {
   if (!btn) return;
   const user = getSetSailAuthUser();
   const signed = !!(user && (user.email || user.name));
-  btn.textContent = signed ? "Show API key" : "Show API key";
-  btn.title = signed
-    ? "Open your scoped Agent API key"
-    : "Sign in with Google, then your API key will appear";
+  const cached = signed ? getCachedAgentApiKey(user.email) : null;
+  btn.textContent = cached ? "Show API key" : "Show API key";
+  btn.title = !signed
+    ? "Sign in with Google, then your API key will appear"
+    : cached
+      ? "Show your saved Agent API key"
+      : "Mint / show your scoped Agent API key";
+}
+
+function getCachedAgentApiKey(email) {
+  try {
+    const raw = localStorage.getItem(SETSAIL_AGENT_API_KEY_STORE);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.apiKey) return null;
+    const want = String(email || "").trim().toLowerCase();
+    if (want && data.email && String(data.email).toLowerCase() !== want) return null;
+    if (data.expiresAt && new Date(data.expiresAt).getTime() < Date.now() - 60 * 1000) return null;
+    return data;
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveCachedAgentApiKey(payload, email) {
+  if (!payload || !payload.apiKey) return;
+  try {
+    const row = {
+      email: String(email || (payload.owner || "")).trim().toLowerCase(),
+      apiKey: payload.apiKey,
+      expiresAt: payload.expiresAt || null,
+      scopes: payload.scopes || ["chart.read", "route.plan"],
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem(SETSAIL_AGENT_API_KEY_STORE, JSON.stringify(row));
+    window.__setsailAgentApiKey = row.apiKey;
+  } catch (e) {}
+}
+
+function clearCachedAgentApiKey() {
+  try { localStorage.removeItem(SETSAIL_AGENT_API_KEY_STORE); } catch (e) {}
+  window.__setsailAgentApiKey = "";
+}
+
+function getStoredGoogleAuthToken() {
+  try {
+    return sessionStorage.getItem("setsail_google_auth_token") ||
+      localStorage.getItem("setsail_google_auth_token") || "";
+  } catch (e) {
+    return "";
+  }
+}
+
+/** id_token JWT expiry check; opaque access_tokens assumed usable until API rejects. */
+function isGoogleAuthTokenLikelyFresh(token) {
+  const t = String(token || "").trim();
+  if (!t) return false;
+  const parts = t.split(".");
+  if (parts.length === 3) {
+    try {
+      const json = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const pad = json.length % 4 === 0 ? "" : "=".repeat(4 - (json.length % 4));
+      const payload = JSON.parse(atob(json + pad));
+      const expMs = Number(payload.exp) * 1000;
+      if (!Number.isFinite(expMs)) return true;
+      return expMs > Date.now() + 90 * 1000;
+    } catch (e) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function openAgentApiKeyModalFromPayload(data) {
+  if (!data || !data.apiKey) return;
+  openAgentApiKeyModal({
+    apiKey: data.apiKey,
+    expiresAt: data.expiresAt,
+    metaText:
+      "Expires " +
+      (data.expiresAt ? new Date(data.expiresAt).toUTCString().replace("GMT", "UTC") : "—") +
+      " · " +
+      ((data.scopes || []).join(", ") || "chart.read, route.plan")
+  });
 }
 
 function closeAgentApiKeyModal() {
@@ -11018,12 +11106,8 @@ function openAgentApiKeyModal(payload) {
 async function issueSetSailAgentApiKey() {
   const user = getSetSailAuthUser();
   if (!user || !user.email) return null;
-  let token = "";
-  try {
-    token = sessionStorage.getItem("setsail_google_auth_token") ||
-      localStorage.getItem("setsail_google_auth_token") || "";
-  } catch (e) {}
-  if (!token) return null;
+  const token = getStoredGoogleAuthToken();
+  if (!token || !isGoogleAuthTokenLikelyFresh(token)) return null;
   try {
     const res = await fetch("/api/v1/keys", {
       method: "POST",
@@ -11033,12 +11117,10 @@ async function issueSetSailAgentApiKey() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.apiKey) {
-      if (typeof showSetSailToast === "function") {
-        showSetSailToast(data.message || "Could not issue API key. Sign in again.", "error");
-      }
+      // Stale token — caller will refresh; avoid noisy toast on every silent retry
       return null;
     }
-    window.__setsailAgentApiKey = data.apiKey;
+    saveCachedAgentApiKey(data, user.email);
     return data;
   } catch (e) {
     if (typeof showSetSailToast === "function") {
@@ -11048,37 +11130,59 @@ async function issueSetSailAgentApiKey() {
   }
 }
 
-/** Force a fresh Google credential for API minting (even if profile already in localStorage). */
-function requestGoogleTokenForApiKey() {
+/**
+ * Refresh Google credential for API minting.
+ * Profile in localStorage ≠ live OAuth token. Prefer silent refresh; picker only if needed.
+ */
+function requestGoogleTokenForApiKey(opts) {
+  opts = opts || {};
   window.__setsailPendingApiKeyModal = true;
-  const askToken = () => {
-    if (googleTokenClient) {
+  const forcePicker = !!opts.forcePicker;
+
+  const askToken = (promptMode) => {
+    if (!googleTokenClient) return false;
+    try {
+      googleTokenClient.requestAccessToken({ prompt: promptMode });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const run = () => {
+    // 1) Silent refresh (no UI) when Google session still exists in the browser
+    if (!forcePicker && askToken("")) {
+      // If silent fails, GIS calls error_callback / empty token — escalate after short wait
+      clearTimeout(window.__setsailApiKeySilentTimer);
+      window.__setsailApiKeySilentTimer = setTimeout(() => {
+        if (!window.__setsailPendingApiKeyModal) return;
+        if (getStoredGoogleAuthToken() && isGoogleAuthTokenLikelyFresh(getStoredGoogleAuthToken())) {
+          maybeOpenPendingAgentApiKeyModal();
+          return;
+        }
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("Confirm your Google account once to unlock the API key…", "info");
+        }
+        askToken("select_account");
+      }, 1800);
+      return true;
+    }
+    if (askToken("select_account")) return true;
+    if (window.google && window.google.accounts && window.google.accounts.id) {
       try {
-        // Always show account picker when minting — profile in localStorage is not enough
-        googleTokenClient.requestAccessToken({ prompt: "select_account" });
+        window.google.accounts.id.prompt();
         return true;
-      } catch (e) {
-        try {
-          googleTokenClient.requestAccessToken({ prompt: "" });
-          return true;
-        } catch (e2) {}
-      }
+      } catch (e) {}
     }
     return false;
   };
-  if (askToken()) return true;
-  if (window.google && window.google.accounts && window.google.accounts.id) {
-    try {
-      window.google.accounts.id.prompt();
-      return true;
-    } catch (e) {}
-  }
-  // Bypass "already signed in → open Settings" path; init GIS then request token
+
+  if (run()) return true;
   if (typeof loadGoogleIdentityScriptAsync === "function") {
     loadGoogleIdentityScriptAsync().then((ok) => {
       if (!ok) return;
       try { initGoogleAuthClients(); } catch (e) {}
-      askToken();
+      run();
     });
     return true;
   }
@@ -11095,64 +11199,47 @@ async function showOrMintAgentApiKeyFlow() {
     if (typeof triggerOfficialGoogleSignIn === "function") triggerOfficialGoogleSignIn();
     return;
   }
-  let token = "";
+
+  // Already minted in this browser — show without re-login
+  const cached = getCachedAgentApiKey(user.email);
+  if (cached && cached.apiKey) {
+    openAgentApiKeyModalFromPayload(cached);
+    return;
+  }
+
+  const token = getStoredGoogleAuthToken();
+  if (token && isGoogleAuthTokenLikelyFresh(token)) {
+    const data = await issueSetSailAgentApiKey();
+    if (data && data.apiKey) {
+      openAgentApiKeyModalFromPayload(data);
+      return;
+    }
+  }
+
+  // Profile is logged in, but Google OAuth token is missing/expired — silent refresh first
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast("Account is signed in — refreshing Google session for API key…", "info");
+  }
   try {
-    token = sessionStorage.getItem("setsail_google_auth_token") ||
-      localStorage.getItem("setsail_google_auth_token") || "";
+    sessionStorage.removeItem("setsail_google_auth_token");
+    localStorage.removeItem("setsail_google_auth_token");
   } catch (e) {}
-  if (!token) {
-    if (typeof showSetSailToast === "function") {
-      showSetSailToast("Refreshing Google session to mint your API key…", "info");
-    }
-    requestGoogleTokenForApiKey();
-    return;
-  }
-  const data = await issueSetSailAgentApiKey();
-  if (!data || !data.apiKey) {
-    // Token may be stale — clear both stores, force GIS popup, retry via pending modal
-    if (typeof showSetSailToast === "function") {
-      showSetSailToast("Refreshing Google session to mint your API key…", "info");
-    }
-    try {
-      sessionStorage.removeItem("setsail_google_auth_token");
-      localStorage.removeItem("setsail_google_auth_token");
-    } catch (e) {}
-    requestGoogleTokenForApiKey();
-    return;
-  }
-  openAgentApiKeyModal({
-    apiKey: data.apiKey,
-    expiresAt: data.expiresAt,
-    metaText:
-      "Expires " +
-      (data.expiresAt ? new Date(data.expiresAt).toUTCString().replace("GMT", "UTC") : "—") +
-      " · " +
-      ((data.scopes || []).join(", ") || "chart.read, route.plan")
-  });
+  requestGoogleTokenForApiKey({ forcePicker: false });
 }
 
 async function maybeOpenPendingAgentApiKeyModal() {
   if (!window.__setsailPendingApiKeyModal) return;
   const user = getSetSailAuthUser();
   if (!user || !user.email) return;
-  let token = "";
-  try {
-    token = sessionStorage.getItem("setsail_google_auth_token") ||
-      localStorage.getItem("setsail_google_auth_token") || "";
-  } catch (e) {}
-  if (!token) return;
+  const token = getStoredGoogleAuthToken();
+  if (!token || !isGoogleAuthTokenLikelyFresh(token)) return;
+  clearTimeout(window.__setsailApiKeySilentTimer);
   window.__setsailPendingApiKeyModal = false;
   const data = await issueSetSailAgentApiKey();
   if (data && data.apiKey) {
-    openAgentApiKeyModal({
-      apiKey: data.apiKey,
-      expiresAt: data.expiresAt,
-      metaText:
-        "Expires " +
-        (data.expiresAt ? new Date(data.expiresAt).toUTCString().replace("GMT", "UTC") : "—") +
-        " · " +
-        ((data.scopes || []).join(", ") || "chart.read, route.plan")
-    });
+    openAgentApiKeyModalFromPayload(data);
+  } else if (typeof showSetSailToast === "function") {
+    showSetSailToast("Could not mint API key — try Show API key again.", "warning");
   }
 }
 
@@ -11416,6 +11503,7 @@ function initGoogleAuthClients() {
             } catch (eTok) {}
             const profile = await fetchGoogleUserInfo(tokenResponse.access_token);
             if (profile && profile.email) {
+              const already = getSetSailAuthUser();
               setSetSailAuthUser({
                 name: profile.name || profile.given_name || profile.email.split("@")[0],
                 email: profile.email,
@@ -11426,7 +11514,11 @@ function initGoogleAuthClients() {
               });
               syncSetSailAuthUI();
               if (typeof showSetSailToast === "function") {
-                showSetSailToast(`Signed in with Google as ${profile.email}`, "success");
+                if (window.__setsailPendingApiKeyModal) {
+                  showSetSailToast("Google session refreshed — opening API key…", "success");
+                } else if (!(already && already.email === profile.email)) {
+                  showSetSailToast(`Signed in with Google as ${profile.email}`, "success");
+                }
               }
               if (typeof maybeOpenPendingAgentApiKeyModal === "function") {
                 setTimeout(() => { try { maybeOpenPendingAgentApiKeyModal(); } catch (e) {} }, 200);
@@ -11561,7 +11653,10 @@ function initSetSailAuth() {
       try {
         sessionStorage.removeItem("setsail_google_auth_token");
         sessionStorage.removeItem("setsail_google_auth_kind");
+        localStorage.removeItem("setsail_google_auth_token");
+        localStorage.removeItem("setsail_google_auth_kind");
       } catch (e) {}
+      clearCachedAgentApiKey();
       setSetSailAuthUser(null);
       syncSetSailAuthUI();
       if (typeof showSetSailToast === "function") {
