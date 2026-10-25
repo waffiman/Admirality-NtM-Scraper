@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.99" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.100" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -7438,7 +7438,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 68% center;
+  /* Mirrored L↔R so LNG carrier sits under the copy (left), open wake under devices (right) */
+  object-position: 32% center;
+  transform: scaleX(-1);
   z-index: 0;
   pointer-events: none;
   user-select: none;
@@ -7449,9 +7451,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  /* After flip: slightly stronger veil on left for text, light on right so wake stays clear */
   background:
-    linear-gradient(105deg, rgba(4, 12, 24, 0.72) 0%, rgba(4, 12, 24, 0.42) 36%, rgba(4, 12, 24, 0.12) 58%, rgba(4, 12, 24, 0.28) 100%),
-    linear-gradient(180deg, rgba(4, 12, 24, 0.15) 0%, transparent 35%, rgba(4, 12, 24, 0.35) 100%);
+    linear-gradient(105deg, rgba(4, 12, 24, 0.55) 0%, rgba(4, 12, 24, 0.28) 40%, rgba(4, 12, 24, 0.18) 70%, rgba(4, 12, 24, 0.4) 100%),
+    linear-gradient(180deg, rgba(4, 12, 24, 0.12) 0%, transparent 40%, rgba(4, 12, 24, 0.32) 100%);
 }
 .home-install-stage::after {
   content: none;
@@ -8814,7 +8817,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.99" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.100" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12762,7 +12765,7 @@ select option {
                     A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.99" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.99';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.100" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.100';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · cadet &amp; future officer · IT agency co-founder</span>
@@ -20435,25 +20438,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.99"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.99" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.99"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.100"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.100" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.100"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.99",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.100",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.99"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.99"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.99"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.100"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.100"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.100"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.99"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.100"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20526,7 +20529,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.99"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.100"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21240,17 +21243,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.99', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.100', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.99 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.100 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.99') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.99.0'); }, 1200);
+              if (last && last.indexOf('v5.100') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.100.0'); }, 1200);
               }
             } catch (eTip) {}
           })
