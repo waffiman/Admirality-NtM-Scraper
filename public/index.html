@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.89" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.93" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -7240,6 +7240,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
   display: block;
   filter: saturate(0.92) contrast(1.05);
   will-change: transform, opacity;
+  opacity: 1;
+  transition: opacity 0.45s ease, transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), filter 0.55s ease;
 }
 
 /* Square mark centered over the mosaic strip — forced 1:1 box */
@@ -7392,6 +7394,208 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 [data-theme="light"] .about-founder-name { color: #0f172a; }
 [data-theme="light"] .about-founder-role { color: #64748b; }
+
+/* SLIDE 5: Install SetSail (PWA) */
+.home-slide-install {
+  position: absolute;
+  inset: 0;
+  z-index: 28;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.2rem, 3vh, 2.2rem) clamp(1rem, 4vw, 2.5rem);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 40px, 0);
+  will-change: opacity, transform;
+}
+.home-install-inner {
+  width: min(1080px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(240px, 0.85fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  align-items: center;
+}
+.home-install-kicker {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #38bdf8;
+}
+.home-install-title {
+  margin: 0 0 0.7rem;
+  font-size: clamp(1.35rem, 2.6vw, 2rem);
+  line-height: 1.2;
+  font-weight: 750;
+  color: #f1f5f9;
+  letter-spacing: -0.02em;
+}
+.home-install-lead {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #94a3b8;
+  max-width: 38rem;
+}
+.home-install-benefits {
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.home-install-benefits li {
+  position: relative;
+  padding-left: 1.15rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+.home-install-benefits li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f05a36;
+  box-shadow: 0 0 0 3px rgba(240, 90, 54, 0.18);
+}
+.home-install-benefits strong { color: #f8fafc; font-weight: 650; }
+.home-install-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+.home-install-btn {
+  appearance: none;
+  border-radius: 10px;
+  padding: 0.72rem 1.15rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
+}
+.home-install-btn.primary {
+  background: linear-gradient(135deg, #f05a36, #ea4c25);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(240, 90, 54, 0.28);
+}
+.home-install-btn.primary:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.home-install-btn.ghost {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+.home-install-btn.ghost:hover { border-color: #38bdf8; color: #fff; }
+.home-install-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #94a3b8;
+  max-width: 36rem;
+}
+.home-install-devices {
+  position: relative;
+  min-height: 220px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.home-install-laptop {
+  width: min(100%, 340px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.home-install-laptop-screen {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 10px 10px 4px 4px;
+  border: 2px solid rgba(148, 163, 184, 0.35);
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(56, 189, 248, 0.18), transparent 55%),
+    linear-gradient(160deg, #0b1220 0%, #071018 55%, #0a1628 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+.home-install-laptop-screen span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #e2e8f0;
+}
+.home-install-laptop-base {
+  width: 108%;
+  height: 10px;
+  margin-top: 2px;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(180deg, #334155, #1e293b);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+.home-install-phone {
+  position: absolute;
+  right: 4%;
+  bottom: 8px;
+  width: 92px;
+  height: 176px;
+  border-radius: 16px;
+  border: 2px solid rgba(148, 163, 184, 0.4);
+  background: #020617;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.5);
+  padding: 10px 6px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.home-install-phone-notch {
+  width: 36px;
+  height: 5px;
+  border-radius: 999px;
+  background: #1e293b;
+  margin-bottom: 10px;
+}
+.home-install-phone-screen {
+  flex: 1;
+  width: 100%;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(240, 90, 54, 0.22), transparent 60%),
+    linear-gradient(180deg, #0f172a, #020617);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+.home-install-phone-screen span {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: 0.08em;
+}
+@media (max-width: 820px) {
+  .home-install-inner { grid-template-columns: 1fr; }
+  .home-install-devices { min-height: 180px; order: -1; }
+  .home-install-laptop { width: min(100%, 280px); }
+  .home-install-phone { width: 72px; height: 140px; right: 8%; }
+}
+[data-theme="light"] .home-install-title { color: #0f172a; }
+[data-theme="light"] .home-install-lead { color: #475569; }
+[data-theme="light"] .home-install-benefits li { color: #334155; }
+[data-theme="light"] .home-install-benefits strong { color: #0f172a; }
 
 @media (max-width: 900px) {
   .home-slide-about { inset: 0 !important; left: 0 !important; right: 0 !important; }
@@ -12121,7 +12325,8 @@ select option {
             <button type="button" class="home-slide-dot" data-home-slide="1" title="Slide 2: SetSail Tools"></button>
             <button type="button" class="home-slide-dot" data-home-slide="2" title="Slide 3: What's happening in the world"></button>
             <button type="button" class="home-slide-dot" data-home-slide="3" title="Slide 4: About SetSail"></button>
-            <button type="button" class="home-slide-dot" data-home-slide="4" title="Slide 5: Data Authorities"></button>
+            <button type="button" class="home-slide-dot" data-home-slide="4" title="Slide 5: Install SetSail"></button>
+            <button type="button" class="home-slide-dot" data-home-slide="5" title="Slide 6: Data Authorities"></button>
           </div>
 
           <!-- Foreground Container: 100% Locked Viewport, Scroll-Scrubbed Choreography -->
@@ -12415,10 +12620,52 @@ select option {
                     A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" src="assets/about/founder.jpg?v=5.89" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';" />
+                    <img class="about-founder-photo" src="assets/about/founder.jpg?v=5.93" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · cadet &amp; future officer · IT agency co-founder</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- SLIDE 5: INSTALL — PWA download / Add to Home Screen -->
+            <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
+              <div class="home-install-inner">
+                <div class="home-install-copy">
+                  <p class="home-install-kicker">Take SetSail with you</p>
+                  <h2 class="home-install-title">Install the app — not just another browser tab.</h2>
+                  <p class="home-install-lead">On thin satellite links and closed laptops, an installed SetSail window loads faster, works offline from cache, and stays one tap away on your phone or bridge PC.</p>
+                  <ul class="home-install-benefits">
+                    <li><strong>Offline-ready chart stack</strong> — tiles, NtM &amp; NAVTEX cache, and bridge tools survive a drop in bandwidth.</li>
+                    <li><strong>Standalone window</strong> — no browser chrome, no accidental tab closes mid-watch.</li>
+                    <li><strong>Home-screen / dock icon</strong> — launch like a native app on Windows, macOS, Android, and iPhone.</li>
+                    <li><strong>Same live data</strong> — one install, same SetChart / SetRoute / SetNews you already use on the site.</li>
+                  </ul>
+                  <div class="home-install-actions">
+                    <button type="button" class="home-install-btn primary" id="btnInstallSetSailApp" title="Trigger your browser&rsquo;s Install / Add to Home Screen prompt">
+                      Install SetSail
+                    </button>
+                    <button type="button" class="home-install-btn ghost" id="btnInstallSetSailHelp" title="How to install if the prompt is unavailable">
+                      How to install
+                    </button>
+                  </div>
+                  <p class="home-install-hint" id="homeInstallHint" hidden></p>
+                </div>
+                <div class="home-install-devices" aria-hidden="true">
+                  <div class="home-install-laptop">
+                    <div class="home-install-laptop-screen">
+                      <img src="assets/SetSail LOGOS/setsail_logo_square.webp" alt="" width="72" height="72" onerror="this.onerror=null;this.src='assets/SetSail LOGOS/setsail_logo_square.png'" />
+                      <span>SetSail</span>
+                    </div>
+                    <div class="home-install-laptop-base"></div>
+                  </div>
+                  <div class="home-install-phone">
+                    <div class="home-install-phone-notch"></div>
+                    <div class="home-install-phone-screen">
+                      <img src="assets/icon-192.png" alt="" width="48" height="48" />
+                      <span>SetSail</span>
                     </div>
                   </div>
                 </div>
@@ -20044,25 +20291,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.89"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.89" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.89"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.93"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.93" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.93"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.89",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.93",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.89"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.89"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.89"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.93"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.93"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.93"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.89"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.93"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20140,12 +20387,12 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.89"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.93"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
     (function() {
-      const MAX_SLIDE = 4.0;
+      const MAX_SLIDE = 5.0;
       let targetProgress = 0.0;
       let currentProgress = 0.0;
       let snapTimer = null;
@@ -20187,9 +20434,11 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       };
 
 
-      // About mosaic: unique tiles only (no duplicate photos on screen)
+      // About mosaic — maritime-only pool (removed toys/amiibo & unrelated Unsplash IDs).
+      // Visible tiles < pool size so shuffle can crossfade in fresh unique photos.
       window.__setsailAboutShuffleTimer = window.__setsailAboutShuffleTimer || null;
       window.__setsailAboutMosaicReady = window.__setsailAboutMosaicReady || false;
+      window.__setsailAboutVisibleTiles = 22;
       window.__setsailAboutPhotoPool = [
         "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&fit=crop&w=240&h=240&q=60",
@@ -20202,35 +20451,24 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1559128010-7c1ad53b1107?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1528154291023-a6525fabe5b4?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1454496522488-46d6e6db3d8d?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1519681393788-d28e6cdc5b7c?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1473116763249-2faaef72aed7?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&w=240&h=240&q=60",
         "https://images.unsplash.com/photo-1590523277543-a94d2e4eb17b?auto=format&fit=crop&w=240&h=240&q=60",
-        "https://images.unsplash.com/photo-1476673160081-cf76599dbc55?auto=format&fit=crop&w=240&h=240&q=60"
+        "https://images.unsplash.com/photo-1476673160081-cf76599dbc55?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1510414842594-a61c69b5ae37?auto=format&fit=crop&w=240&h=240&q=60",
+        "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?auto=format&fit=crop&w=240&h=240&q=60"
       ];
 
       window.__setsailReflowAboutMosaicGrid = function(mosaic) {
@@ -20253,8 +20491,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           pool.push(u);
         });
         window.__setsailAboutPhotoPool = pool.slice();
+        // Shuffle pool once, show only a subset so unused URLs remain for smooth crossfades
+        for (let i = pool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+        }
+        const visibleN = Math.min(window.__setsailAboutVisibleTiles || 22, pool.length);
         const frag = document.createDocumentFragment();
-        pool.forEach(function(url, i) {
+        for (let i = 0; i < visibleN; i++) {
+          const url = pool[i];
           const fig = document.createElement('figure');
           fig.className = 'about-moz-tile';
           fig.setAttribute('data-tile-i', String(i));
@@ -20266,9 +20511,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           img.width = 200;
           img.height = 200;
           img.src = url;
-          img.dataset.poolIdx = String(i);
           img.onerror = function() {
-            // Drop broken tile — never replace with another visible photo (would duplicate)
             const tile = this.parentElement;
             const host = tile && tile.parentElement;
             if (tile && host) {
@@ -20280,7 +20523,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           };
           fig.appendChild(img);
           frag.appendChild(fig);
-        });
+        }
         mosaic.innerHTML = '';
         mosaic.appendChild(frag);
         mosaic.dataset.built = '1';
@@ -20291,33 +20534,60 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
       window.__setsailShuffleAboutMosaic = function() {
         const mosaic = document.getElementById('homeAboutMosaic') || window.__setsailBuildAboutMosaic();
-        if (!mosaic) return;
-        let tiles = Array.from(mosaic.querySelectorAll('.about-moz-tile'));
-        if (tiles.length < 2) return;
+        if (!mosaic || mosaic._shuffleBusy) return;
+        const tiles = Array.from(mosaic.querySelectorAll('.about-moz-tile'));
+        const pool = window.__setsailAboutPhotoPool || [];
+        if (tiles.length < 2 || pool.length < tiles.length + 1) return;
 
-        // Fisher–Yates reorder of unique tiles only (each src stays 1:1)
-        for (let i = tiles.length - 1; i > 0; i--) {
+        const used = Object.create(null);
+        tiles.forEach(function(t) { used[t.getAttribute('data-photo-url') || ''] = 1; });
+        const spare = pool.filter(function(u) { return u && !used[u]; });
+        if (!spare.length) return;
+
+        mosaic._shuffleBusy = true;
+        // Crossfade 3–5 random tiles to unused maritime photos (no DOM reorder jump)
+        const swapCount = Math.min(5, Math.max(3, Math.floor(tiles.length / 6)), spare.length, tiles.length);
+        const order = tiles.slice();
+        for (let i = order.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
-          const tmp = tiles[i];
-          tiles[i] = tiles[j];
-          tiles[j] = tmp;
+          const tmp = order[i]; order[i] = order[j]; order[j] = tmp;
         }
-        const before = Array.from(mosaic.querySelectorAll('.about-moz-tile'));
-        for (let i = 0; i + 1 < tiles.length; i++) {
-          if (tiles[i] === before[i]) {
-            const tmp = tiles[i];
-            tiles[i] = tiles[i + 1];
-            tiles[i + 1] = tmp;
-          }
+        let pending = swapCount;
+        const doneOne = function() {
+          pending -= 1;
+          if (pending <= 0) mosaic._shuffleBusy = false;
+        };
+        for (let s = 0; s < swapCount; s++) {
+          const tile = order[s];
+          const img = tile && tile.querySelector('img');
+          const nextUrl = spare[s % spare.length];
+          if (!img || !nextUrl) { doneOne(); continue; }
+          const oldUrl = tile.getAttribute('data-photo-url') || '';
+          tile.classList.add('is-shuffling');
+          const pre = new Image();
+          pre.decoding = 'async';
+          pre.onload = (function(tileEl, imgEl, url, prev) {
+            return function() {
+              imgEl.style.opacity = '0';
+              setTimeout(function() {
+                imgEl.src = url;
+                tileEl.setAttribute('data-photo-url', url);
+                imgEl.style.opacity = '1';
+                setTimeout(function() {
+                  tileEl.classList.remove('is-shuffling');
+                  doneOne();
+                }, 420);
+              }, 280);
+              // free previous into spare pool conceptually (used set rebuilt next tick)
+              void prev;
+            };
+          })(tile, img, nextUrl, oldUrl);
+          pre.onerror = function() {
+            tile.classList.remove('is-shuffling');
+            doneOne();
+          };
+          pre.src = nextUrl;
         }
-
-        tiles.forEach(function(t) { t.classList.add('is-shuffling'); });
-        requestAnimationFrame(function() {
-          tiles.forEach(function(t) { mosaic.appendChild(t); });
-          setTimeout(function() {
-            tiles.forEach(function(t) { t.classList.remove('is-shuffling'); });
-          }, 780);
-        });
       };
 
       window.__setsailUpdateAboutMosaic = function(aboutP) {
@@ -20335,7 +20605,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           try { window.__setsailShuffleAboutMosaic(); } catch (e) {}
           window.__setsailAboutShuffleTimer = setInterval(function() {
             try { window.__setsailShuffleAboutMosaic(); } catch (e) {}
-          }, 2800);
+          }, 3200);
         };
         const stopShuffle = function() {
           if (window.__setsailAboutShuffleTimer) {
@@ -20353,14 +20623,13 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         if (!viewport) return;
 
         // Stage progress segments:
-        // t1: 0 -> 1 (Slide 1 Hero -> Slide 2 Dispersed Tools)
-        // t2: 0 -> 1 (Slide 2 Tools -> Slide 3 Latest Maritime News)
-        // t3: 0 -> 1 (Slide 3 Latest Maritime News -> Slide 4 About SetSail)
-        // t4: 0 -> 1 (Slide 4 About SetSail -> Slide 5 Sources Marquee)
+        // t1: Hero -> Tools | t2: Tools -> News | t3: News -> About
+        // t4: About -> Install | t5: Install -> Sources
         const t1 = clamp(p, 0, 1);
         const t2 = clamp(p - 1, 0, 1);
         const t3 = clamp(p - 2, 0, 1);
         const t4 = clamp(p - 3, 0, 1);
+        const t5 = clamp(p - 4, 0, 1);
         const e1 = easeInOutCubic(t1);
 
         // 1. Video -> Static SaaS Background crossfade
@@ -20501,7 +20770,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           slideNews.style.pointerEvents = newsAlpha > 0.45 ? 'auto' : 'none';
         }
 
-        // 7. Slide 4: About SetSail (Appears on t3: 0.32 -> 1.0, exits on t4: 0 -> 0.58)
+        // 7. Slide 4: About SetSail (in on t3, out on t4)
         const slideAbout = document.getElementById('homeSlideAbout');
         if (slideAbout) {
           const aboutIn = easeOutCubic(clamp((t3 - 0.32) / 0.68, 0, 1));
@@ -20512,7 +20781,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           slideAbout.style.transform = 'translate3d(0, ' + aboutY.toFixed(1) + 'px, 0)';
           slideAbout.style.pointerEvents = aboutAlpha > 0.45 ? 'auto' : 'none';
           if (typeof window.__setsailUpdateAboutMosaic === 'function') {
-            window.__setsailUpdateAboutMosaic(aboutIn);
+            window.__setsailUpdateAboutMosaic(aboutIn * (1 - aboutOut * 0.85));
           } else {
             slideAbout.style.setProperty('--about-p', String(aboutIn.toFixed(3)));
             const logoP = Math.max(0, Math.min(1, (aboutIn - 0.62) / 0.38));
@@ -20520,10 +20789,22 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           }
         }
 
-        // 8. Slide 5: Narrow Infinite Marquee of Recognizable Sources (Appears on t4: 0.30 -> 1.0)
+        // 8. Slide 5: Install SetSail (in on t4, out on t5)
+        const slideInstall = document.getElementById('homeSlideInstall');
+        if (slideInstall) {
+          const instIn = easeOutCubic(clamp((t4 - 0.28) / 0.72, 0, 1));
+          const instOut = easeInOutCubic(clamp(t5 / 0.55, 0, 1));
+          const instAlpha = instIn * (1 - instOut);
+          const instY = (1 - instIn) * 56 - instOut * 64;
+          slideInstall.style.opacity = String(instAlpha.toFixed(3));
+          slideInstall.style.transform = 'translate3d(0, ' + instY.toFixed(1) + 'px, 0)';
+          slideInstall.style.pointerEvents = instAlpha > 0.45 ? 'auto' : 'none';
+        }
+
+        // 9. Slide 6: Sources marquee (in on t5)
         const slideSources = document.getElementById('homeSlideSources');
         if (slideSources) {
-          const srcIn = easeOutCubic(clamp((t4 - 0.30) / 0.70, 0, 1));
+          const srcIn = easeOutCubic(clamp((t5 - 0.28) / 0.72, 0, 1));
           const srcY = (1 - srcIn) * 52;
           const srcScale = 0.96 + 0.04 * srcIn;
 
@@ -20649,6 +20930,80 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           });
         });
 
+        // PWA install — capture browser prompt; Install button fires it on user gesture
+        window.__setsailDeferredInstallPrompt = window.__setsailDeferredInstallPrompt || null;
+        window.addEventListener('beforeinstallprompt', function(e) {
+          e.preventDefault();
+          window.__setsailDeferredInstallPrompt = e;
+          const btn = document.getElementById('btnInstallSetSailApp');
+          if (btn) btn.removeAttribute('disabled');
+        });
+        window.addEventListener('appinstalled', function() {
+          window.__setsailDeferredInstallPrompt = null;
+          const hint = document.getElementById('homeInstallHint');
+          if (hint) {
+            hint.hidden = false;
+            hint.textContent = 'SetSail is installed. Open it from your dock, Start menu, or home screen.';
+          }
+        });
+        function setsailIsStandalone() {
+          try {
+            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+          } catch (err) { return false; }
+        }
+        function setsailShowInstallHint(msg) {
+          const hint = document.getElementById('homeInstallHint');
+          if (!hint) return;
+          hint.hidden = false;
+          hint.textContent = msg;
+        }
+        const installBtn = document.getElementById('btnInstallSetSailApp');
+        if (installBtn && !installBtn._boundInstall) {
+          installBtn._boundInstall = true;
+          installBtn.addEventListener('click', async function() {
+            if (setsailIsStandalone()) {
+              setsailShowInstallHint('You are already running the installed SetSail app.');
+              return;
+            }
+            const deferred = window.__setsailDeferredInstallPrompt;
+            if (deferred && typeof deferred.prompt === 'function') {
+              try {
+                deferred.prompt();
+                const choice = await deferred.userChoice;
+                window.__setsailDeferredInstallPrompt = null;
+                if (choice && choice.outcome === 'accepted') {
+                  setsailShowInstallHint('Installing… Look for SetSail in your apps / home screen.');
+                } else {
+                  setsailShowInstallHint('Install dismissed. You can try again anytime from this page.');
+                }
+                return;
+              } catch (errPrompt) {}
+            }
+            // No Chromium prompt available (iOS / already offered / ineligible)
+            const ua = (navigator.userAgent || '').toLowerCase();
+            const isIOS = /iphone|ipad|ipod/.test(ua);
+            if (isIOS) {
+              setsailShowInstallHint('iPhone / iPad: tap Share in Safari, then “Add to Home Screen”.');
+            } else {
+              setsailShowInstallHint('Use your browser menu → “Install app” / “Add to Home screen”. On Chrome/Edge the Install icon appears in the address bar when available.');
+            }
+          });
+        }
+        const installHelpBtn = document.getElementById('btnInstallSetSailHelp');
+        if (installHelpBtn && !installHelpBtn._boundInstall) {
+          installHelpBtn._boundInstall = true;
+          installHelpBtn.addEventListener('click', function() {
+            const ua = (navigator.userAgent || '').toLowerCase();
+            if (/iphone|ipad|ipod/.test(ua)) {
+              setsailShowInstallHint('Safari → Share → Add to Home Screen. The SetSail icon will appear on your home screen.');
+            } else if (/android/.test(ua)) {
+              setsailShowInstallHint('Chrome menu ⋮ → “Install app” or “Add to Home screen”.');
+            } else {
+              setsailShowInstallHint('Chrome / Edge: install icon in the address bar, or menu → “Install SetSail”. Firefox: Add to Home Screen / taskbar from the page menu.');
+            }
+          });
+        }
+
         // Clicking the docked SetSail logo in the header returns to Slide 1
         const logoWrap = document.getElementById('homeHeroLogoWrap');
         if (logoWrap) {
@@ -20717,17 +21072,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.89', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.93', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.89 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.93 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.89') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.89.0'); }, 1200);
+              if (last && last.indexOf('v5.93') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.93.0'); }, 1200);
               }
             } catch (eTip) {}
           })

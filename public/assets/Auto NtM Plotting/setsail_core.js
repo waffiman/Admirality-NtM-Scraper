@@ -3725,17 +3725,19 @@ function saveNoticeOverridesMap(mapObj) {
 }
 
 function formatCoordDmsHelper(lat, lon) {
-  if (typeof formatDecimalToDMS === "function") {
-    return `${formatDecimalToDMS(lat, true)}, ${formatDecimalToDMS(lon, false)}`;
-  }
-  const toDms = (v, pos, neg) => {
-    const dir = v >= 0 ? pos : neg;
-    const a = Math.abs(v);
+  // Always build from numbers — stored .dms in notices.json often has "?" instead of °.
+  const deg = "\u00B0";
+  const toDms = (v, pos, neg, lonPad) => {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return "—";
+    const dir = n >= 0 ? pos : neg;
+    const a = Math.abs(n);
     const d = Math.floor(a);
-    const m = ((a - d) * 60).toFixed(2);
-    return `${d}°${m}'${dir}`;
+    const m = ((a - d) * 60).toFixed(2).padStart(5, "0");
+    const dStr = lonPad ? String(d).padStart(3, "0") : String(d);
+    return dStr + deg + " " + m + "' " + dir;
   };
-  return `${toDms(lat, "N", "S")} ${toDms(lon, "E", "W")}`;
+  return toDms(lat, "N", "S", false) + ", " + toDms(lon, "E", "W", true);
 }
 
 function parseNoticeCancelTimeMs(item) {
@@ -3818,7 +3820,7 @@ function reconcileAndApplyNoticeOverrides(extraCancelIds = []) {
           normCoords.push({
             lat: latNum,
             lon: lonNum,
-            dms: (c && c.dms) ? c.dms : formatCoordDmsHelper(latNum, lonNum)
+            dms: formatCoordDmsHelper(latNum, lonNum)
           });
         }
       });
@@ -4156,34 +4158,22 @@ function initNtMMap() {
       markerZoomAnimation: !lowEndMap,
       zoomAnimationThreshold: lowEndMap ? 2 : 8,
       inertia: true,
-      inertiaDeceleration: lowEndMap ? 4500 : 3000,
-      // Smooth drag across ±180°; we normalize lng on moveend (no mid-pan snap).
-      worldCopyJump: false,
-      // Allow ~1 world copy either side, then resist — prevents endless empty ocean.
-      maxBounds: [[-85, -400], [85, 400]],
-      maxBoundsViscosity: 0.85
+      inertiaDeceleration: lowEndMap ? 4000 : 2500,
+      inertiaMaxSpeed: lowEndMap ? 1500 : 2800,
+      easeLinearity: 0.22,
+      // Seamless ±180°: repeating tiles (noWrap:false below), no worldCopyJump snap,
+      // no moveend lng normalize (that caused the visible jump). Fit View still normalizes.
+      worldCopyJump: false
     });
 
-    // After pan/inertia ends, wrap center into [-180,180] so Fit View / overlays stay on the real globe.
-    leafletMap.on("moveend", () => {
-      if (leafletMap._setsailNormLngLock) return;
-      try {
-        leafletMap._setsailNormLngLock = true;
-        normalizeLeafletMapToPrimaryWorld(leafletMap);
-      } catch (eNorm) {
-      } finally {
-        setTimeout(() => { try { leafletMap._setsailNormLngLock = false; } catch (e) {} }, 50);
-      }
-    });
-
-    // keepBuffer 12 forced huge neighbour-chunk preload → jank on weak PCs.
+    // keepBuffer modest — enough for date-line preload without weak-PC jank.
     // Overlays wait until pan/zoom settles; base still updates during drag but less often.
-    // noWrap:false → repeating world tiles for smooth antimeridian crossing.
+    // noWrap:false → repeating world tiles for invisible antimeridian crossing.
     const tilePerfOpts = {
-      keepBuffer: lowEndMap ? 1 : 2,
+      keepBuffer: lowEndMap ? 2 : 3,
       updateWhenIdle: false,
       updateWhenZooming: false,
-      updateInterval: lowEndMap ? 250 : 150,
+      updateInterval: lowEndMap ? 220 : 120,
       noWrap: false
     };
     const overlayTilePerfOpts = Object.assign({}, tilePerfOpts, {
@@ -4626,8 +4616,8 @@ function wrapLongitudeDeg(lng) {
 }
 
 /**
- * Snap map center back to the primary world copy after crossing ±180°.
- * Keeps drag smooth (no worldCopyJump mid-pan); fixes "infinite ocean".
+ * Snap map center back to the primary world copy — Fit View / restore only.
+ * Do NOT call on every moveend (visible ±180° jump). Free pan uses wrapped tiles.
  */
 function normalizeLeafletMapToPrimaryWorld(map, opts) {
   if (!map || typeof map.getCenter !== "function") return false;
@@ -4921,36 +4911,33 @@ function renderNtMListAndMap() {
         const typeBadge = isItemCancelled
           ? `<span class="ntm-tag cancelled">CANCELLED</span>`
           : `<span class="ntm-tag ${tagClass}">${typeLabel}</span>`;
-        const editedBadge = item.userEdited ? `<span class="ntm-tag edited-badge" style="margin-left:4px;">EDITED</span>` : "";
 
-        const firstCoord = item.coords && item.coords[0]
-          ? (item.coords[0].dms || formatCoordDmsHelper(item.coords[0].lat, item.coords[0].lon))
-          : "?";
-        const chartsStr = (item.charts && item.charts.length > 0) ? `Charts: ${item.charts.join(', ')}` : "";
-        const expBadgeTxt = item.expires ? formatCancelUtcBadge(item.expires) : "";
-        const expBanner = expBadgeTxt ? `<div class="ntm-cancels-banner" style="color:${isItemCancelled ? '#fda4af' : '#fbbf24'};">⏱ ${isItemCancelled ? 'Expired:' : 'Auto-Cancel:'} ${expBadgeTxt}</div>` : "";
-        const cancelsBanner = ((item.cancels && item.cancels.length > 0) ? `<div class="ntm-cancels-banner">${SetSailIcons.svg("cancelled")} Cancels: ${item.cancels.join(', ')}</div>` : "") + expBanner;
+        // Always rebuild DMS from lat/lon (JSON .dms often has "?" instead of °).
+        const c0 = item.coords && item.coords[0];
+        const firstCoord = c0 && Number.isFinite(Number(c0.lat)) && Number.isFinite(Number(c0.lon))
+          ? formatCoordDmsHelper(c0.lat, c0.lon)
+          : "—";
+        const extraPts = item.coords && item.coords.length > 1 ? ` (+${item.coords.length - 1})` : "";
+        let titleText = String(item.id || "Notice");
+        if (titleText.length > 64) titleText = titleText.slice(0, 61) + "…";
         const cancelledNoticeClass = isItemCancelled ? "cancelled is-cancelled-card" : "";
         const navtexCardClass = item.type === "NAVTEX" ? "type-navtex" : `type-${item.type}`;
         const safeId = String(item.id || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+        const titleAttr = String(item.id || "").replace(/"/g, "&quot;");
 
         html += `
-          <div class="ntm-card-item ${navtexCardClass} ${cancelledNoticeClass}" data-id="${item.id}" onclick="selectNtMNotice('${safeId}')">
+          <div class="ntm-card-item ntm-card-item--compact ${navtexCardClass} ${cancelledNoticeClass}" data-id="${item.id}" onclick="selectNtMNotice('${safeId}')">
             <div class="ntm-card-content">
               <div class="ntm-card-top">
-                <span class="ntm-card-id">${item.id}</span>
-                <span style="display:inline-flex;align-items:center;gap:4px;">${typeBadge}${editedBadge}</span>
+                <span class="ntm-card-id" title="${titleAttr}">${titleText}</span>
+                ${typeBadge}
               </div>
-              ${cancelsBanner}
-              <div class="ntm-card-region"><span class="ntm-card-navarea">${navarea}</span> ${item.country || item.coordinator || 'Global'} ${item.region ? `— ${item.region}` : ''}</div>
-              <div class="ntm-card-subject">${item.subject || ''}</div>
-              <div class="ntm-card-bottom">
-                <span class="ntm-card-coords" title="Center on chart">${SetSailIcons.svg("pos")} ${firstCoord} ${item.coords && item.coords.length > 1 ? `(+${item.coords.length-1})` : ''}</span>
-                ${chartsStr ? `<span class="ntm-card-charts">${chartsStr}</span>` : ''}
+              <div class="ntm-card-meta-row">
+                <span class="ntm-card-navarea">${navarea}</span>
+                <span class="ntm-card-coords" title="Center on chart">${SetSailIcons.svg("pos")} ${firstCoord}${extraPts}</span>
               </div>
               <div class="ntm-card-actions" onclick="event.stopPropagation();">
                 <button type="button" class="ntm-card-act-btn" onclick="window.openNoticeDetailModal('${safeId}')" title="View warning details">View</button>
-                <span class="navtex-ro-pill" style="font-size:0.65rem;font-weight:700;color:#94a3b8;background:rgba(148,163,184,0.12);padding:3px 8px;border-radius:4px;border:1px solid rgba(148,163,184,0.28);letter-spacing:0.02em;">Read-only</span>
               </div>
             </div>
           </div>
@@ -4967,11 +4954,11 @@ function renderNtMListAndMap() {
             <div class="ntm-empty-hints-title">Enable a chart layer</div>
             <div class="ntm-empty-hints-sub">Choose an overlay below, or use the dock under the chart.</div>
             <div class="ntm-empty-hint-grid">
-              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="notices" title="Notices to Mariners &amp; NAVTEX">NtM / NAVTEX</button>
-              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="depths" title="Ports &amp; UKC">Ports</button>
-              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="weather" title="Cyclones &amp; weather">Weather</button>
-              <button type="button" class="ntm-empty-hint-btn" data-overlay-hint="ais" title="Live AIS targets">AIS</button>
-              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--wide" data-overlay-hint="route" title="My vessel route">My Route</button>
+              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--notices" data-overlay-hint="notices" title="Notices to Mariners &amp; NAVTEX"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>NtM / NAVTEX</span></button>
+              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--depths" data-overlay-hint="depths" title="Ports &amp; UKC"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V10l7-4 7 4v11"/><path d="M9 21v-6h6v6"/></svg><span>Ports</span></button>
+              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--weather" data-overlay-hint="weather" title="Cyclones &amp; weather"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 17.5a4 4 0 0 0-1.5-7.7A6 6 0 0 0 6.1 11 3.5 3.5 0 0 0 6 18h13.5z"/><path d="M8 21h.01M12 21h.01M16 21h.01"/></svg><span>Weather</span></button>
+              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--ais" data-overlay-hint="ais" title="Live AIS targets"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 3 20 20 12 16 4 20"/></svg><span>AIS</span></button>
+              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--route ntm-empty-hint-btn--wide" data-overlay-hint="route" title="My vessel route"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 16.5 15.5 7.5"/></svg><span>My Route</span></button>
             </div>
           </div>
         `;
@@ -13548,6 +13535,7 @@ function restoreSetRouteChatTranscript(messages) {
   container.innerHTML = "";
   if (!messages || !messages.length) {
     if (emptyHero) emptyHero.style.display = "";
+    try { syncSetRouteTopbarActions(); } catch (eTop) {}
     return;
   }
   if (emptyHero) emptyHero.style.display = "none";
@@ -13555,17 +13543,22 @@ function restoreSetRouteChatTranscript(messages) {
     if (!m || !m.html) return;
     appendChatMessage(m.role === "user" ? "user" : "brain", m.html);
   });
+  try { syncSetRouteTopbarActions(); } catch (eTop2) {}
 }
 
 function syncSetRouteTopbarActions() {
-  const lib = typeof getSavedRoutesLibrary === "function" ? getSavedRoutesLibrary() : [];
-  const hasAny =
-    (lib && lib.length > 0) ||
-    (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0);
+  // Only when THIS chat has an active plotted route — not merely because the library has old routes.
+  const hasActive =
+    activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0;
+  const emptyHero = document.getElementById("setRouteEmptyHero");
+  const emptyShown = !!(emptyHero && emptyHero.style.display !== "none" && getComputedStyle(emptyHero).display !== "none");
+  const show = !!hasActive && !emptyShown;
   const btnDetails = document.getElementById("btnToggleRightDrawer");
   const btnChart = document.getElementById("btnViewOnSetChart");
-  if (btnDetails) btnDetails.style.display = hasAny ? "" : "none";
-  if (btnChart) btnChart.style.display = hasAny ? "" : "none";
+  if (btnDetails) btnDetails.style.display = show ? "" : "none";
+  if (btnChart) btnChart.style.display = show ? "" : "none";
+  const actions = document.querySelector(".setroute-topbar-actions");
+  if (actions) actions.style.display = show ? "" : "none";
 }
 window.syncSetRouteTopbarActions = syncSetRouteTopbarActions;
 
@@ -14852,6 +14845,15 @@ function initSetRouteV50() {
   const paramsPopover = document.getElementById("setRouteParamsPopover");
   const btnBackToPlan = document.getElementById("btnMonitoringBackToPlanning");
 
+  function collapseNavRoutesTree() {
+    if (navSavedList) navSavedList.classList.remove("open");
+    if (navExpandArrow) {
+      navExpandArrow.classList.remove("open");
+      navExpandArrow.textContent = "▾";
+    }
+    if (navSidebar) navSidebar.classList.remove("routes-tree-open");
+  }
+
   if (navExpandArrow && !navExpandArrow._boundV50) {
     navExpandArrow._boundV50 = true;
     navExpandArrow.addEventListener("click", (e) => {
@@ -14866,6 +14868,15 @@ function initSetRouteV50() {
     });
   }
 
+  // Expanded routes panel collapses as soon as the pointer leaves the sidebar.
+  if (navSidebar && !navSidebar._boundRoutesMouseLeave) {
+    navSidebar._boundRoutesMouseLeave = true;
+    navSidebar.addEventListener("mouseleave", () => {
+      if (!navSidebar.classList.contains("routes-tree-open")) return;
+      collapseNavRoutesTree();
+    });
+  }
+
   if (navSavedList && !navSavedList._boundV50) {
     navSavedList._boundV50 = true;
     navSavedList.addEventListener("click", (e) => {
@@ -14877,6 +14888,7 @@ function initSetRouteV50() {
         switchToTab("tab-route");
       }
       selectSavedRouteFromSidebar(rtId, true);
+      collapseNavRoutesTree();
     });
   }
 

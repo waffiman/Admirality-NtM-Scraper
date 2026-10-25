@@ -132,6 +132,7 @@
   }
 
   let leafletAisLayer = null;
+  let aisCanvasRenderer = null;
   let aisTimer = null;
   let aisMetaByMmsi = Object.create(null);
   let aisLastPayload = null;
@@ -139,6 +140,14 @@
   let zonesManifest = null;
   let zoneCache = Object.create(null);
   let aisRefreshSeq = 0;
+
+  /** Shared canvas renderer — NAVTOR-like overview density without thousands of DOM icons. */
+  function getAisCanvasRenderer() {
+    if (!aisCanvasRenderer && typeof L !== "undefined" && L.canvas) {
+      aisCanvasRenderer = L.canvas({ padding: 0.4 });
+    }
+    return aisCanvasRenderer || undefined;
+  }
 
   // Live WebSocket feeds (AISStream + OpenSeaFeed) → one MMSI map (no duplicate markers)
   let aisStreamWs = null;
@@ -210,44 +219,61 @@
     const lod = aisLodForZoom(z);
     let list = sampleEvenlyByGrid(targets, Math.min(lod.maxMarkers, ABS_MARKER_CAP), lod.cellDeg);
 
-    // Always triangles (heading wedges) — size scales with zoom LOD, never bare dots.
+    // Overview: canvas circleMarkers (smooth pan). Close-in: heading triangles (DivIcon).
+    const useTriangles = !!lod.triangles;
     const px = z <= 3 ? 9 : z <= 5 ? 11 : 14;
+    const canvasR = getAisCanvasRenderer();
     list.forEach((v) => {
       const lat = Number(v.lat);
-      const lon = Number(v.lon);
-      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-      if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return;
+      const lonRaw = Number(v.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lonRaw)) return;
+      if (Math.abs(lat) > 90 || Math.abs(lonRaw) > 180) return;
+      const lon = lonOnVisibleCopy(lonRaw, map);
       const col = shipColor(v.navStat, v.sog);
-      const heading = Number(v.heading);
-      const rot =
-        Number.isFinite(heading) && heading < 360
-          ? heading
-          : Number(v.cog) < 360
-            ? Number(v.cog)
-            : 0;
-      const icon = L.divIcon({
-        className: "ais-target-icon",
-        html:
-          '<div style="transform:rotate(' +
-          rot +
-          "deg);width:" +
-          px +
-          "px;height:" +
-          px +
-          'px;display:flex;align-items:center;justify-content:center;">' +
-          '<svg viewBox="0 0 24 24" width="' +
-          px +
-          '" height="' +
-          px +
-          '">' +
-          '<polygon points="12,2 20,20 12,16 4,20" fill="' +
-          col +
-          '" stroke="#0f172a" stroke-width="1.5"/>' +
-          "</svg></div>",
-        iconSize: [px, px],
-        iconAnchor: [px / 2, px / 2]
-      });
-      const m = L.marker([lat, lon], { icon, keyboard: false });
+      let m;
+      if (!useTriangles) {
+        m = L.circleMarker([lat, lon], {
+          radius: lod.radius,
+          color: "#0f172a",
+          weight: 0.6,
+          fillColor: col,
+          fillOpacity: 0.92,
+          renderer: canvasR,
+          interactive: z >= 4,
+          keyboard: false
+        });
+      } else {
+        const heading = Number(v.heading);
+        const rot =
+          Number.isFinite(heading) && heading < 360
+            ? heading
+            : Number(v.cog) < 360
+              ? Number(v.cog)
+              : 0;
+        const icon = L.divIcon({
+          className: "ais-target-icon",
+          html:
+            '<div style="transform:rotate(' +
+            rot +
+            "deg);width:" +
+            px +
+            "px;height:" +
+            px +
+            'px;display:flex;align-items:center;justify-content:center;">' +
+            '<svg viewBox="0 0 24 24" width="' +
+            px +
+            '" height="' +
+            px +
+            '">' +
+            '<polygon points="12,2 20,20 12,16 4,20" fill="' +
+            col +
+            '" stroke="#0f172a" stroke-width="1.5"/>' +
+            "</svg></div>",
+          iconSize: [px, px],
+          iconAnchor: [px / 2, px / 2]
+        });
+        m = L.marker([lat, lon], { icon, keyboard: false });
+      }
       if (z >= 4) m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
       layer.addLayer(m);
     });
@@ -854,11 +880,26 @@
       .filter((t) => Number.isFinite(t.lat) && Number.isFinite(t.lon));
   }
 
+  /** Place lon on the world copy nearest the current map center (seamless ±180°). */
+  function lonOnVisibleCopy(lon, map) {
+    let x = Number(lon);
+    if (!Number.isFinite(x) || !map || typeof map.getCenter !== "function") return x;
+    const c = map.getCenter().lng;
+    while (x - c > 180) x -= 360;
+    while (x - c < -180) x += 360;
+    return x;
+  }
+
   function filterToViewport(targets, map) {
     const b = map.getBounds();
     return targets.filter((t) => {
       try {
-        return b.contains([Number(t.lat), Number(t.lon)]);
+        const lat = Number(t.lat);
+        const lon = Number(t.lon);
+        if (b.contains([lat, lon])) return true;
+        if (b.contains([lat, lon + 360])) return true;
+        if (b.contains([lat, lon - 360])) return true;
+        return false;
       } catch (e) {
         return true;
       }
