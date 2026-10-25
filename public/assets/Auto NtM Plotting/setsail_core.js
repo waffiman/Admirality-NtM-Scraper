@@ -9972,39 +9972,14 @@ function createEcdisSimpleBaseLayer() {
     };
   }
 
-  /** Shift lon onto the world copy nearest the current map center (circular ±180°). */
-  function lonOnMapCopy(lon, map) {
-    let x = Number(lon);
-    if (!Number.isFinite(x)) return x;
-    if (!map || typeof map.getCenter !== "function") return x;
-    const c = map.getCenter().lng;
-    while (x - c > 180) x -= 360;
-    while (x - c < -180) x += 360;
-    return x;
-  }
-
   function renderCoarseLand() {
     landFill.clearLayers();
-    const map = boundMap || group._map;
+    // Primary world only — ±360 copies / per-vertex lon shifts create antimeridian
+    // fill bands (solid yellow horizontal strips across the chart).
     for (let i = 0; i < coarsePolys.length; i++) {
       const ring = coarsePolys[i];
       if (!ring || ring.length < 3) continue;
-      // Draw primary + ±360 copies so land never vanishes while panning across the date line.
-      const offsets = map ? [0] : [0];
-      if (map) {
-        // One shifted ring (nearest copy) is enough with soft wrap; keep ±360 at low zoom for mid-pan.
-        const z = map.getZoom();
-        if (z < 4) offsets.push(-360, 360);
-      }
-      for (let oi = 0; oi < offsets.length; oi++) {
-        const off = offsets[oi];
-        const shifted = ring.map((pt) => {
-          if (!pt || pt.length < 2) return pt;
-          // Coarse polys are [lat, lon]
-          return [pt[0], pt[1] + off];
-        });
-        L.polygon(shifted, landStyle()).addTo(landFill);
-      }
+      L.polygon(ring, landStyle()).addTo(landFill);
     }
   }
 
@@ -10122,10 +10097,7 @@ function createEcdisSimpleBaseLayer() {
           // Always viewport-filter 50m/10m so we can load finer NE earlier without drawing the whole planet.
           return featureHitsBounds(feat, bounds);
         },
-        // Place each vertex on the world copy nearest the map center (seamless ±180°).
-        coordsToLatLng: function (coords) {
-          return L.latLng(coords[1], lonOnMapCopy(coords[0], map));
-        },
+        // Default GeoJSON [lon,lat] — do NOT remapped lon (causes yellow fill bands at ±180°).
         style: landStyle
       }).addTo(landFill);
     } catch (e) {
