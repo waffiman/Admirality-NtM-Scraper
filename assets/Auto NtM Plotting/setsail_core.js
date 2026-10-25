@@ -4148,8 +4148,23 @@ function initNtMMap() {
       zoomAnimationThreshold: lowEndMap ? 2 : 8,
       inertia: true,
       inertiaDeceleration: lowEndMap ? 4500 : 3000,
-      // false = continuous pan across ±180° (no snap/jerk). true would jump center back into [-180,180].
-      worldCopyJump: false
+      // Smooth drag across ±180°; we normalize lng on moveend (no mid-pan snap).
+      worldCopyJump: false,
+      // Allow ~1 world copy either side, then resist — prevents endless empty ocean.
+      maxBounds: [[-85, -400], [85, 400]],
+      maxBoundsViscosity: 0.85
+    });
+
+    // After pan/inertia ends, wrap center into [-180,180] so Fit View / overlays stay on the real globe.
+    leafletMap.on("moveend", () => {
+      if (leafletMap._setsailNormLngLock) return;
+      try {
+        leafletMap._setsailNormLngLock = true;
+        normalizeLeafletMapToPrimaryWorld(leafletMap);
+      } catch (eNorm) {
+      } finally {
+        setTimeout(() => { try { leafletMap._setsailNormLngLock = false; } catch (e) {} }, 50);
+      }
     });
 
     // keepBuffer 12 forced huge neighbour-chunk preload → jank on weak PCs.
@@ -4592,19 +4607,54 @@ function formatLatLonDMS(lat, lon) {
   return `${latDeg}° ${latMin.padStart(5, '0')}' ${latDir}, ${String(lonDeg).padStart(3, '0')}° ${lonMin.padStart(5, '0')}' ${lonDir}`;
 }
 
+/** Wrap longitude into (-180, 180]. */
+function wrapLongitudeDeg(lng) {
+  let x = Number(lng);
+  if (!Number.isFinite(x)) return 0;
+  while (x > 180) x -= 360;
+  while (x <= -180) x += 360;
+  return x;
+}
+
 /**
- * Fit all filtered notices into view on Leaflet map
+ * Snap map center back to the primary world copy after crossing ±180°.
+ * Keeps drag smooth (no worldCopyJump mid-pan); fixes "infinite ocean".
+ */
+function normalizeLeafletMapToPrimaryWorld(map, opts) {
+  if (!map || typeof map.getCenter !== "function") return false;
+  const c = map.getCenter();
+  const wrapped = wrapLongitudeDeg(c.lng);
+  if (Math.abs(c.lng - wrapped) < 1e-9) return false;
+  map.setView([c.lat, wrapped], map.getZoom(), Object.assign({ animate: false, reset: false }, opts || {}));
+  return true;
+}
+window.normalizeLeafletMapToPrimaryWorld = normalizeLeafletMapToPrimaryWorld;
+
+/**
+ * Fit all filtered notices into view — or reset to world overview if lost past ±180° / no points.
  */
 function fitAllNoticesOnMap() {
-  if (!leafletMap || NTM_STORE.length === 0) return;
+  if (!leafletMap) return;
+  normalizeLeafletMapToPrimaryWorld(leafletMap);
   const allPts = [];
-  const filtered = getFilteredNotices();
-  filtered.forEach(item => {
-    (item.coords || []).forEach(c => allPts.push([c.lat, c.lon]));
-  });
+  try {
+    const filtered = typeof getFilteredNotices === "function" ? getFilteredNotices() : [];
+    (filtered || []).forEach((item) => {
+      (item.coords || []).forEach((c) => {
+        if (Number.isFinite(c.lat) && Number.isFinite(c.lon)) {
+          allPts.push([c.lat, wrapLongitudeDeg(c.lon)]);
+        }
+      });
+    });
+  } catch (e) {}
   if (allPts.length > 0) {
-    leafletMap.fitBounds(L.latLngBounds(allPts).pad(0.15));
+    try {
+      leafletMap.fitBounds(L.latLngBounds(allPts).pad(0.15), { maxZoom: 8, animate: true });
+      return;
+    } catch (eFit) {}
   }
+  // No notices / empty filter / lost in wrapped ocean → bring continents back
+  leafletMap.setView([20, 10], 2, { animate: true });
 }
 
 /**
@@ -10974,7 +11024,12 @@ function getCachedAgentApiKey(email) {
     if (!data || !data.apiKey) return null;
     const want = String(email || "").trim().toLowerCase();
     if (want && data.email && String(data.email).toLowerCase() !== want) return null;
-    if (data.expiresAt && new Date(data.expiresAt).getTime() < Date.now() - 60 * 1000) return null;
+    // Keep showing the key until its own JWT exp (do not force Google remint on soft expiresAt)
+    if (data.expiresAt) {
+      const expMs = new Date(data.expiresAt).getTime();
+      // Grace: still show for 7 days past soft expiry so "Show API key" never re-logins spuriously
+      if (Number.isFinite(expMs) && expMs < Date.now() - 7 * 24 * 3600 * 1000) return null;
+    }
     return data;
   } catch (e) {
     return null;
@@ -11189,6 +11244,31 @@ function requestGoogleTokenForApiKey(opts) {
   return false;
 }
 
+/** After Google login succeeds, mint+cache API key so Show never needs a second popup. */
+async function ensureAgentApiKeyCachedQuiet() {
+  const user = getSetSailAuthUser();
+  if (!user || !user.email) return null;
+  const cached = getCachedAgentApiKey(user.email);
+  if (cached && cached.apiKey) return cached;
+  const token = getStoredGoogleAuthToken();
+  if (!token) return null;
+  // Try even if JWT looks stale — access_token may still work via userinfo
+  try {
+    const res = await fetch("/api/v1/keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ idToken: token }),
+      cache: "no-store"
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.apiKey) {
+      saveCachedAgentApiKey(data, user.email);
+      return data;
+    }
+  } catch (e) {}
+  return null;
+}
+
 async function showOrMintAgentApiKeyFlow() {
   const user = getSetSailAuthUser();
   if (!user || !user.email) {
@@ -11200,30 +11280,24 @@ async function showOrMintAgentApiKeyFlow() {
     return;
   }
 
-  // Already minted in this browser — show without re-login
+  // Already minted in this browser — show immediately (no Google UI)
   const cached = getCachedAgentApiKey(user.email);
   if (cached && cached.apiKey) {
     openAgentApiKeyModalFromPayload(cached);
     return;
   }
 
-  const token = getStoredGoogleAuthToken();
-  if (token && isGoogleAuthTokenLikelyFresh(token)) {
-    const data = await issueSetSailAgentApiKey();
-    if (data && data.apiKey) {
-      openAgentApiKeyModalFromPayload(data);
-      return;
-    }
+  // Try mint with whatever Google token we still have (do NOT clear it first)
+  const quiet = await ensureAgentApiKeyCachedQuiet();
+  if (quiet && quiet.apiKey) {
+    openAgentApiKeyModalFromPayload(quiet);
+    return;
   }
 
-  // Profile is logged in, but Google OAuth token is missing/expired — silent refresh first
+  // Last resort: silent OAuth refresh, then account picker only if silent fails
   if (typeof showSetSailToast === "function") {
-    showSetSailToast("Account is signed in — refreshing Google session for API key…", "info");
+    showSetSailToast("One Google confirm needed to create your API key (then it stays saved)…", "info");
   }
-  try {
-    sessionStorage.removeItem("setsail_google_auth_token");
-    localStorage.removeItem("setsail_google_auth_token");
-  } catch (e) {}
   requestGoogleTokenForApiKey({ forcePicker: false });
 }
 
@@ -11231,15 +11305,15 @@ async function maybeOpenPendingAgentApiKeyModal() {
   if (!window.__setsailPendingApiKeyModal) return;
   const user = getSetSailAuthUser();
   if (!user || !user.email) return;
-  const token = getStoredGoogleAuthToken();
-  if (!token || !isGoogleAuthTokenLikelyFresh(token)) return;
+  if (!getStoredGoogleAuthToken()) return;
   clearTimeout(window.__setsailApiKeySilentTimer);
-  window.__setsailPendingApiKeyModal = false;
-  const data = await issueSetSailAgentApiKey();
+  const data = await ensureAgentApiKeyCachedQuiet();
   if (data && data.apiKey) {
+    window.__setsailPendingApiKeyModal = false;
     openAgentApiKeyModalFromPayload(data);
   } else if (typeof showSetSailToast === "function") {
-    showSetSailToast("Could not mint API key — try Show API key again.", "warning");
+    // Keep pending so a second token event can retry; do not force another picker here
+    showSetSailToast("Still waiting for Google session… tap Show API key once more after confirm.", "warning");
   }
 }
 
@@ -11437,9 +11511,10 @@ function handleGoogleCredentialResponse(resp) {
     if (typeof showSetSailToast === "function") {
       showSetSailToast(`Signed in with Google as ${payload.email}`, "success");
     }
-    if (typeof maybeOpenPendingAgentApiKeyModal === "function") {
-      setTimeout(() => { try { maybeOpenPendingAgentApiKeyModal(); } catch (e) {} }, 200);
-    }
+    setTimeout(() => {
+      try { ensureAgentApiKeyCachedQuiet(); } catch (ePrefetch) {}
+      try { maybeOpenPendingAgentApiKeyModal(); } catch (e) {}
+    }, 200);
   }
 }
 window.handleGoogleCredentialResponse = handleGoogleCredentialResponse;
@@ -11520,9 +11595,11 @@ function initGoogleAuthClients() {
                   showSetSailToast(`Signed in with Google as ${profile.email}`, "success");
                 }
               }
-              if (typeof maybeOpenPendingAgentApiKeyModal === "function") {
-                setTimeout(() => { try { maybeOpenPendingAgentApiKeyModal(); } catch (e) {} }, 200);
-              }
+              // Prefetch Agent API key into localStorage so Show API key never re-prompts
+              setTimeout(() => {
+                try { ensureAgentApiKeyCachedQuiet(); } catch (ePrefetch) {}
+                try { maybeOpenPendingAgentApiKeyModal(); } catch (e) {}
+              }, 200);
             }
           } catch (err) {
             console.error("[SetSail Google Auth] userinfo fetch error:", err);
@@ -11674,7 +11751,11 @@ function initSetSailAuth() {
   } catch (eApiInit) {}
   syncSetSailAuthUI();
   try {
-    if (getSetSailAuthUser()) syncAgentApiRoutesToProfile();
+    if (getSetSailAuthUser()) {
+      syncAgentApiRoutesToProfile();
+      // If we already have a Google token from a prior session, mint API key quietly
+      setTimeout(() => { try { ensureAgentApiKeyCachedQuiet(); } catch (e) {} }, 400);
+    }
   } catch (eSyncRoutes) {}
 }
 
