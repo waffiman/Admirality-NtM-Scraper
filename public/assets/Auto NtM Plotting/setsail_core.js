@@ -4201,34 +4201,11 @@ function initNtMMap() {
       inertiaDeceleration: lowEndMap ? 4000 : 2500,
       inertiaMaxSpeed: lowEndMap ? 1500 : 2800,
       easeLinearity: 0.22,
-      // Circular globe: repeating tiles (noWrap:false) + worldCopyJump so overlays
-      // stay on the same continents after crossing ±180°. Soft wrap on moveend
-      // recenters into (-180,180] with no visible jump (same place, wrapped lng).
-      worldCopyJump: true
+      // True circular pan: tiles repeat (noWrap:false). Do NOT worldCopyJump /
+      // soft-wrap the center — that teleports the user to the “other” side of ±180°.
+      // Continents & overlays are drawn on lon / lon±360 world copies instead.
+      worldCopyJump: false
     });
-
-    // Invisible longitude wrap — same geography, primary world copy. Covers drag,
-    // inertia, keyboard pan, and programmatic moves so the user never drifts into
-    // a blank “second ocean” past ±180°.
-    const softWrapLeafletCenter = () => {
-      if (!leafletMap || leafletMap._setsailWrapLock) return;
-      try {
-        const c = leafletMap.getCenter();
-        if (!c || !Number.isFinite(c.lng)) return;
-        if (Math.abs(c.lng) <= 180) return;
-        const wrapped = typeof wrapLongitudeDeg === "function"
-          ? wrapLongitudeDeg(c.lng)
-          : ((((c.lng + 180) % 360) + 360) % 360) - 180;
-        if (!Number.isFinite(wrapped) || Math.abs(wrapped - c.lng) < 1e-9) return;
-        leafletMap._setsailWrapLock = true;
-        leafletMap.setView([c.lat, wrapped], leafletMap.getZoom(), { animate: false, reset: false });
-      } catch (eWrap) {
-      } finally {
-        setTimeout(() => { try { leafletMap._setsailWrapLock = false; } catch (e) {} }, 50);
-      }
-    };
-    leafletMap.on("dragend", softWrapLeafletCenter);
-    leafletMap.on("moveend", softWrapLeafletCenter);
 
     // keepBuffer high enough for date-line neighbour tiles (seamless wrap).
     const tilePerfOpts = {
@@ -4677,9 +4654,25 @@ function wrapLongitudeDeg(lng) {
   return x;
 }
 
+/** Longitude offsets for seamless circular chart (primary + left/right copies). */
+function setsailWorldCopyLonOffsets() {
+  return [0, -360, 360];
+}
+
+/** Call fn([lat, lon+offset], offset) for each world copy. */
+function setsailEachWorldLatLng(lat, lon, fn) {
+  const la = Number(lat);
+  const base = wrapLongitudeDeg(lon);
+  if (!Number.isFinite(la) || !Number.isFinite(base) || typeof fn !== "function") return;
+  const offs = setsailWorldCopyLonOffsets();
+  for (let i = 0; i < offs.length; i++) {
+    fn([la, base + offs[i]], offs[i]);
+  }
+}
+
 /**
  * Snap map center back to the primary world copy — Fit View / restore only.
- * Do NOT call on every moveend (visible ±180° jump). Free pan uses wrapped tiles.
+ * Never use on free pan (that feels like teleporting across ±180°).
  */
 function normalizeLeafletMapToPrimaryWorld(map, opts) {
   if (!map || typeof map.getCenter !== "function") return false;
@@ -4690,6 +4683,8 @@ function normalizeLeafletMapToPrimaryWorld(map, opts) {
   return true;
 }
 window.normalizeLeafletMapToPrimaryWorld = normalizeLeafletMapToPrimaryWorld;
+window.setsailWorldCopyLonOffsets = setsailWorldCopyLonOffsets;
+window.setsailEachWorldLatLng = setsailEachWorldLatLng;
 
 /**
  * Fit all filtered notices into view — or reset to world overview if lost past ±180° / no points.
@@ -5273,13 +5268,15 @@ function renderNtMListAndMap() {
               weight: ptRimWeight,
               fillOpacity: isItemCancelled ? 0.45 : 0.86
             }, pathPaneOpts());
-            const circle = L.circleMarker(pts[0], cOpts);
-            circle.bindPopup(buildPopupHtml(item));
-            leafletMarkersLayer.addLayer(circle);
+            setsailEachWorldLatLng(pts[0][0], pts[0][1], (ll) => {
+              const circle = L.circleMarker(ll, cOpts);
+              circle.bindPopup(buildPopupHtml(item));
+              leafletMarkersLayer.addLayer(circle);
+            });
           }
         });
       } else if (item.isPolygon && item.coords.length >= 3) {
-        const polyPoints = item.coords.map(c => [c.lat, c.lon]);
+        const polyPoints = item.coords.map(c => [c.lat, wrapLongitudeDeg(c.lon)]);
         let latSpan = 0, lonSpan = 0;
         if (polyPoints.length >= 3) {
           const lats = polyPoints.map(p => p[0]);
@@ -5295,11 +5292,14 @@ function renderNtMListAndMap() {
           fillOpacity: isItemCancelled ? 0.04 : (isLargeRegionalArea && curZoom <= 5 ? 0.025 : basePolyFillOp),
           dashArray: isItemCancelled ? "3, 6" : (item.type === "NAVTEX" || item.type === "T" ? "4, 4" : null)
         }, pathPaneOpts());
-        const polygon = L.polygon(polyPoints, pOpts);
-        polygon.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Polygon (${item.coords.length} vertices)</div>`));
-        leafletMarkersLayer.addLayer(polygon);
+        setsailWorldCopyLonOffsets().forEach((off) => {
+          const ring = off === 0 ? polyPoints : polyPoints.map((p) => [p[0], p[1] + off]);
+          const polygon = L.polygon(ring, pOpts);
+          polygon.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Polygon (${item.coords.length} vertices)</div>`));
+          leafletMarkersLayer.addLayer(polygon);
+        });
       } else if (item.isLine && item.coords.length >= 2) {
-        const linePoints = item.coords.map(c => [c.lat, c.lon]);
+        const linePoints = item.coords.map(c => [c.lat, wrapLongitudeDeg(c.lon)]);
         const segments = splitAntimeridianLatLngs(linePoints);
         segments.forEach((seg) => {
           const lOpts = Object.assign({
@@ -5307,9 +5307,12 @@ function renderNtMListAndMap() {
             weight: baseLineWeight,
             dashArray: isItemCancelled ? "3, 6" : (item.type === "T" ? "5, 4" : null)
           }, pathPaneOpts());
-          const polyline = L.polyline(seg, lOpts);
-          polyline.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points${segments.length > 1 ? " · date-line split" : ""})</div>`));
-          leafletMarkersLayer.addLayer(polyline);
+          setsailWorldCopyLonOffsets().forEach((off) => {
+            const shifted = off === 0 ? seg : seg.map((p) => [p[0], p[1] + off]);
+            const polyline = L.polyline(shifted, lOpts);
+            polyline.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points${segments.length > 1 ? " · date-line split" : ""})</div>`));
+            leafletMarkersLayer.addLayer(polyline);
+          });
         });
       } else {
         // At global zoom <= 4, if a single notice has multiple points, plot only its primary point
@@ -5323,10 +5326,12 @@ function renderNtMListAndMap() {
             opacity: 0.92,
             fillOpacity: isItemCancelled ? 0.4 : 0.85
           }, pathPaneOpts());
-          const circle = L.circleMarker([coord.lat, coord.lon], cOpts);
           const dmsStr = coord.dms || formatCoordDmsHelper(coord.lat, coord.lon);
-          circle.bindPopup(buildPopupHtml(item, `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`));
-          leafletMarkersLayer.addLayer(circle);
+          setsailEachWorldLatLng(coord.lat, coord.lon, (ll) => {
+            const circle = L.circleMarker(ll, cOpts);
+            circle.bindPopup(buildPopupHtml(item, `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`));
+            leafletMarkersLayer.addLayer(circle);
+          });
         });
       }
     };
@@ -5363,23 +5368,25 @@ function renderNtMListAndMap() {
           iconSize: [20, 20],
           iconAnchor: [10, 10]
         });
-        const m = L.marker([cl.lat, cl.lon], {
-          icon,
-          pane: "ntmOverlayPane",
-          keyboard: false
+        setsailEachWorldLatLng(cl.lat, cl.lon, (ll) => {
+          const m = L.marker(ll, {
+            icon,
+            pane: "ntmOverlayPane",
+            keyboard: false
+          });
+          m.bindPopup(
+            `<div style="font-family:Segoe UI,sans-serif;min-width:200px;color:#111;">
+              <b style="color:#c2410c;">${count} NtM / NAVTEX</b>
+              <div style="font-size:0.78em;color:#64748b;margin:3px 0 6px;">${typeSummary}</div>
+              <div style="font-size:0.78em;line-height:1.35;">${listPreview}${more}</div>
+              <div style="margin-top:7px;font-size:0.72em;color:#0369a1;">Zoom in to split into individual objects</div>
+            </div>`
+          );
+          m.on("click", () => {
+            leafletMap.setView(ll, targetZoom);
+          });
+          leafletMarkersLayer.addLayer(m);
         });
-        m.bindPopup(
-          `<div style="font-family:Segoe UI,sans-serif;min-width:200px;color:#111;">
-            <b style="color:#c2410c;">${count} NtM / NAVTEX</b>
-            <div style="font-size:0.78em;color:#64748b;margin:3px 0 6px;">${typeSummary}</div>
-            <div style="font-size:0.78em;line-height:1.35;">${listPreview}${more}</div>
-            <div style="margin-top:7px;font-size:0.72em;color:#0369a1;">Zoom in to split into individual objects</div>
-          </div>`
-        );
-        m.on("click", () => {
-          leafletMap.setView([cl.lat, cl.lon], targetZoom);
-        });
-        leafletMarkersLayer.addLayer(m);
       });
     } else {
       filtered.forEach(plotOneNotice);
@@ -10107,12 +10114,20 @@ function createEcdisSimpleBaseLayer() {
 
   function renderCoarseLand() {
     landFill.clearLayers();
-    // Primary world only — ±360 copies / per-vertex lon shifts create antimeridian
-    // fill bands (solid yellow horizontal strips across the chart).
+    // Full-ring world copies at lon±360 (never mix offsets inside one ring — that
+    // caused yellow antimeridian fill bands). Lets the chart spin past ±180°.
+    const style = landStyle();
+    const offs = typeof setsailWorldCopyLonOffsets === "function"
+      ? setsailWorldCopyLonOffsets()
+      : [0, -360, 360];
     for (let i = 0; i < coarsePolys.length; i++) {
       const ring = coarsePolys[i];
       if (!ring || ring.length < 3) continue;
-      L.polygon(ring, landStyle()).addTo(landFill);
+      for (let oi = 0; oi < offs.length; oi++) {
+        const off = offs[oi];
+        const shifted = off === 0 ? ring : ring.map((ll) => [ll[0], ll[1] + off]);
+        L.polygon(shifted, style).addTo(landFill);
+      }
     }
   }
 
@@ -10221,18 +10236,26 @@ function createEcdisSimpleBaseLayer() {
       ensureEcdisPanes(map);
       const renderer = L.canvas({ padding: 0.5, pane: "ecdisLandPane" });
       landFill.clearLayers();
-      L.geoJSON(geo, {
-        pane: "ecdisLandPane",
-        renderer,
-        interactive: false,
-        filter: function (feat) {
-          if (level === "110m") return true;
-          // Always viewport-filter 50m/10m so we can load finer NE earlier without drawing the whole planet.
-          return featureHitsBounds(feat, bounds);
-        },
-        // Default GeoJSON [lon,lat] — do NOT remapped lon (causes yellow fill bands at ±180°).
-        style: landStyle
-      }).addTo(landFill);
+      const offs = typeof setsailWorldCopyLonOffsets === "function"
+        ? setsailWorldCopyLonOffsets()
+        : [0, -360, 360];
+      // One GeoJSON layer per world copy — whole-feature lon shift only (no mixed vertices).
+      for (let oi = 0; oi < offs.length; oi++) {
+        const off = offs[oi];
+        L.geoJSON(geo, {
+          pane: "ecdisLandPane",
+          renderer,
+          interactive: false,
+          filter: function (feat) {
+            if (level === "110m") return true;
+            return featureHitsBounds(feat, bounds);
+          },
+          coordsToLatLng: function (coords) {
+            return L.latLng(coords[1], coords[0] + off);
+          },
+          style: landStyle
+        }).addTo(landFill);
+      }
     } catch (e) {
       console.warn("[SetSail ECDIS] land load failed — coarse fallback", e);
       if (lastLandKey !== "coarse") {
@@ -12599,13 +12622,31 @@ function getSetNewsUserProfile() {
       categoryWeights: parsed.categoryWeights || {},
       regionWeights: parsed.regionWeights || {},
       keywordWeights: parsed.keywordWeights || {},
+      sourceWeights: parsed.sourceWeights || {},
+      navareaWeights: parsed.navareaWeights || {},
       readIds: Array.isArray(parsed.readIds) ? parsed.readIds : [],
       likedIds: Array.isArray(parsed.likedIds) ? parsed.likedIds : [],
       bookmarkedIds: Array.isArray(parsed.bookmarkedIds) ? parsed.bookmarkedIds : [],
-      totalDwellSeconds: Number(parsed.totalDwellSeconds) || 0
+      skippedIds: Array.isArray(parsed.skippedIds) ? parsed.skippedIds : [],
+      plottedIds: Array.isArray(parsed.plottedIds) ? parsed.plottedIds : [],
+      openCounts: parsed.openCounts && typeof parsed.openCounts === "object" ? parsed.openCounts : {},
+      lastOpenedAt: parsed.lastOpenedAt && typeof parsed.lastOpenedAt === "object" ? parsed.lastOpenedAt : {},
+      searchTokens: parsed.searchTokens && typeof parsed.searchTokens === "object" ? parsed.searchTokens : {},
+      hourHistogram: Array.isArray(parsed.hourHistogram) && parsed.hourHistogram.length === 24
+        ? parsed.hourHistogram
+        : new Array(24).fill(0),
+      totalDwellSeconds: Number(parsed.totalDwellSeconds) || 0,
+      totalOpens: Number(parsed.totalOpens) || 0,
+      totalSkips: Number(parsed.totalSkips) || 0,
+      lastInteractionAt: parsed.lastInteractionAt || null
     };
   } catch (e) {
-    return { categoryWeights: {}, regionWeights: {}, keywordWeights: {}, readIds: [], likedIds: [], bookmarkedIds: [], totalDwellSeconds: 0 };
+    return {
+      categoryWeights: {}, regionWeights: {}, keywordWeights: {}, sourceWeights: {}, navareaWeights: {},
+      readIds: [], likedIds: [], bookmarkedIds: [], skippedIds: [], plottedIds: [],
+      openCounts: {}, lastOpenedAt: {}, searchTokens: {}, hourHistogram: new Array(24).fill(0),
+      totalDwellSeconds: 0, totalOpens: 0, totalSkips: 0, lastInteractionAt: null
+    };
   }
 }
 
@@ -12616,24 +12657,90 @@ function saveSetNewsUserProfile(prof) {
   } catch (e) {}
 }
 
+function _setNewsDecayWeights(map, factor) {
+  if (!map || typeof map !== "object") return;
+  Object.keys(map).forEach((k) => {
+    map[k] = Math.round((Number(map[k]) || 0) * factor * 100) / 100;
+    if (map[k] < 0.15) delete map[k];
+  });
+}
+
+function recordSetNewsSearchQuery(q) {
+  const raw = String(q || "").toLowerCase().trim();
+  if (raw.length < 3) return;
+  const prof = getSetNewsUserProfile();
+  raw.split(/[^a-z0-9]+/).filter((t) => t.length >= 3).slice(0, 8).forEach((t) => {
+    prof.searchTokens[t] = (prof.searchTokens[t] || 0) + 1.2;
+  });
+  _setNewsDecayWeights(prof.searchTokens, 0.995);
+  saveSetNewsUserProfile(prof);
+}
+
 function recordSetNewsInteraction(article, actionType = "read", dwellSec = 8) {
   if (!article) return;
   const prof = getSetNewsUserProfile();
-  const boost = actionType === "like" ? 4.5 : (actionType === "bookmark" ? 5.0 : (actionType === "plot" ? 4.0 : 2.0));
+  const dwell = Math.max(0, Number(dwellSec) || 0);
+  let boost = 2.0;
+  if (actionType === "like") boost = 4.5;
+  else if (actionType === "bookmark") boost = 5.0;
+  else if (actionType === "plot") boost = 4.2;
+  else if (actionType === "skip") boost = -2.8;
+  else if (actionType === "source") boost = 1.6;
+  else if (actionType === "read") boost = dwell >= 45 ? 3.4 : (dwell >= 20 ? 2.6 : (dwell < 4 ? 0.6 : 2.0));
+
+  // Soft decay so old tastes fade and recent behaviour dominates.
+  _setNewsDecayWeights(prof.categoryWeights, 0.992);
+  _setNewsDecayWeights(prof.regionWeights, 0.992);
+  _setNewsDecayWeights(prof.keywordWeights, 0.99);
+  _setNewsDecayWeights(prof.sourceWeights, 0.993);
+  _setNewsDecayWeights(prof.navareaWeights, 0.993);
 
   if (article.category) {
-    prof.categoryWeights[article.category] = (prof.categoryWeights[article.category] || 0) + boost;
+    prof.categoryWeights[article.category] = Math.max(0, (prof.categoryWeights[article.category] || 0) + boost);
   }
   if (article.region) {
-    prof.regionWeights[article.region] = (prof.regionWeights[article.region] || 0) + boost;
+    prof.regionWeights[article.region] = Math.max(0, (prof.regionWeights[article.region] || 0) + boost);
   }
-  (article.tags || []).forEach(t => {
-    prof.keywordWeights[t] = (prof.keywordWeights[t] || 0) + boost * 0.8;
+  (article.tags || []).forEach((t) => {
+    prof.keywordWeights[t] = Math.max(0, (prof.keywordWeights[t] || 0) + boost * 0.85);
   });
+  const srcKey = formatEditorialNewsSource(article);
+  if (srcKey) {
+    prof.sourceWeights[srcKey] = Math.max(0, (prof.sourceWeights[srcKey] || 0) + boost * 0.55);
+  }
+  if (article.navarea) {
+    prof.navareaWeights[String(article.navarea)] =
+      Math.max(0, (prof.navareaWeights[String(article.navarea)] || 0) + boost * 0.7);
+  }
 
-  if (actionType === "read" && article.id && !prof.readIds.includes(article.id)) {
-    prof.readIds.unshift(article.id);
-    if (prof.readIds.length > 200) prof.readIds.pop();
+  const hour = new Date().getHours();
+  if (hour >= 0 && hour < 24) prof.hourHistogram[hour] = (prof.hourHistogram[hour] || 0) + 1;
+
+  if (article.id) {
+    prof.openCounts[article.id] = (prof.openCounts[article.id] || 0) + (actionType === "skip" ? 0 : 1);
+    prof.lastOpenedAt[article.id] = new Date().toISOString();
+  }
+
+  if (actionType === "read" && article.id) {
+    prof.totalOpens += 1;
+    if (!prof.readIds.includes(article.id)) {
+      prof.readIds.unshift(article.id);
+      if (prof.readIds.length > 250) prof.readIds.pop();
+    }
+    if (dwell > 0 && dwell < 4) {
+      if (!prof.skippedIds.includes(article.id)) {
+        prof.skippedIds.unshift(article.id);
+        if (prof.skippedIds.length > 120) prof.skippedIds.pop();
+      }
+      prof.totalSkips += 1;
+    }
+  }
+  if (actionType === "skip" && article.id) {
+    if (!prof.skippedIds.includes(article.id)) {
+      prof.skippedIds.unshift(article.id);
+      if (prof.skippedIds.length > 120) prof.skippedIds.pop();
+    }
+    prof.totalSkips += 1;
   }
   if (actionType === "like" && article.id) {
     const idx = prof.likedIds.indexOf(article.id);
@@ -12645,23 +12752,32 @@ function recordSetNewsInteraction(article, actionType = "read", dwellSec = 8) {
     if (idx >= 0) prof.bookmarkedIds.splice(idx, 1);
     else prof.bookmarkedIds.push(article.id);
   }
-  prof.totalDwellSeconds = (prof.totalDwellSeconds || 0) + dwellSec;
+  if (actionType === "plot" && article.id) {
+    if (!prof.plottedIds.includes(article.id)) {
+      prof.plottedIds.unshift(article.id);
+      if (prof.plottedIds.length > 80) prof.plottedIds.pop();
+    }
+  }
+  prof.totalDwellSeconds = (prof.totalDwellSeconds || 0) + dwell;
+  prof.lastInteractionAt = new Date().toISOString();
   saveSetNewsUserProfile(prof);
 }
 
 function scoreArticleForUser(article, prof) {
-  let score = 20;
+  let score = 18;
   let primaryReason = "🌍 What's happening on land & at sea";
+  const artText = `${article.title || ""} ${article.summary || ""} ${article.region || ""} ${(article.tags || []).join(" ")}`.toLowerCase();
 
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
     const rText = `${activeRouteData.name || ""} ${(activeRouteData.chokepoints || []).join(" ")} ${activeRouteData.waypoints.map(w => w.name || "").join(" ")}`.toLowerCase();
-    const artText = `${article.title || ""} ${article.summary || ""} ${article.region || ""} ${(article.tags || []).join(" ")}`.toLowerCase();
 
     if (article.coords && Array.isArray(article.coords) && article.coords.length === 2) {
       const distNm = getMinDistanceToActiveRouteNM(article.coords[0], article.coords[1]);
       if (distNm <= 450) {
         score += 42;
         primaryReason = `🎯 Along Active Route (${Math.round(distNm)} NM)`;
+      } else if (distNm <= 900) {
+        score += 18;
       }
     }
     const routeTokens = rText.split(/[^a-z0-9]+/).filter(w => w.length >= 4 && !["fairway", "departure", "arrival", "waypoint", "route"].includes(w));
@@ -12678,44 +12794,86 @@ function scoreArticleForUser(article, prof) {
     const vDist = calculateHaversineDistanceNM(userVessel.lat, userVessel.lon, article.coords[0], article.coords[1]);
     if (vDist <= 600) {
       score += 26;
-      if (primaryReason.startsWith("🔥")) {
-        primaryReason = `⚓ Near Vessel Position (${Math.round(vDist)} NM)`;
-      }
+      primaryReason = `⚓ Near Vessel Position (${Math.round(vDist)} NM)`;
+    } else if (vDist <= 1200) {
+      score += 10;
     }
   }
 
   const catW = (prof.categoryWeights && prof.categoryWeights[article.category]) || 0;
   const regW = (prof.regionWeights && prof.regionWeights[article.region]) || 0;
   if (catW > 0 || regW > 0) {
-    score += Math.min(32, catW * 3.5 + regW * 4.0);
-    if (primaryReason.startsWith("🔥")) {
-      primaryReason = regW >= catW
-        ? `📡 Matches Your Region: ${article.region}`
-        : `⭐ Based on Your ${article.category} Reading`;
-    }
+    score += Math.min(36, catW * 3.2 + regW * 3.8);
+    primaryReason = regW >= catW
+      ? `📡 Matches Your Region: ${article.region}`
+      : `⭐ Based on Your ${article.category} Reading`;
   }
 
-  (article.tags || []).forEach(t => {
+  (article.tags || []).forEach((t) => {
     if (prof.keywordWeights && prof.keywordWeights[t]) {
-      score += Math.min(14, prof.keywordWeights[t] * 2.5);
+      score += Math.min(16, prof.keywordWeights[t] * 2.4);
     }
   });
 
+  const desk = formatEditorialNewsSource(article);
+  if (prof.sourceWeights && prof.sourceWeights[desk]) {
+    score += Math.min(12, prof.sourceWeights[desk] * 2.0);
+  }
+  if (article.navarea && prof.navareaWeights && prof.navareaWeights[String(article.navarea)]) {
+    score += Math.min(10, prof.navareaWeights[String(article.navarea)] * 2.2);
+  }
+
+  // Search affinity — tokens the user typed in SetNews search
+  if (prof.searchTokens) {
+    let searchHit = 0;
+    Object.keys(prof.searchTokens).forEach((tok) => {
+      if (tok.length >= 3 && artText.indexOf(tok) >= 0) searchHit += prof.searchTokens[tok];
+    });
+    if (searchHit > 0) {
+      score += Math.min(18, searchHit * 2.1);
+      if (primaryReason.startsWith("🌍")) primaryReason = "🔎 Matches topics you searched";
+    }
+  }
+
+  // Recency: fresher briefings rank higher when they already match the profile
+  const ageH = article.publishedAt ? (Date.now() - Date.parse(article.publishedAt)) / 3600000 : 999;
+  if (Number.isFinite(ageH)) {
+    if (ageH <= 12) score += 10;
+    else if (ageH <= 36) score += 6;
+    else if (ageH <= 96) score += 3;
+    else if (ageH > 240) score -= 4;
+  }
+
+  // Time-of-day preference (bridge watch patterns)
+  const hour = new Date().getHours();
+  const hourPref = (prof.hourHistogram && prof.hourHistogram[hour]) || 0;
+  const hourSum = (prof.hourHistogram || []).reduce((a, b) => a + (Number(b) || 0), 0);
+  if (hourSum >= 8 && hourPref > 0) {
+    score += Math.min(6, (hourPref / Math.max(1, hourSum / 24)) * 2);
+  }
+
   if (article.category === "Navigation & Safety" || article.category === "Weather & Cyclones") {
     score += 11;
-    if (primaryReason.startsWith("🔥") && article.category === "Weather & Cyclones") {
+    if (primaryReason.startsWith("🌍") && article.category === "Weather & Cyclones") {
       primaryReason = "🌀 Priority Metocean & Cyclone Watch";
-    } else if (primaryReason.startsWith("🔥") && article.category === "Navigation & Safety") {
+    } else if (primaryReason.startsWith("🌍") && article.category === "Navigation & Safety") {
       primaryReason = "⚠️ Critical Bridge & Hydrographic Alert";
     }
   }
 
-  if (prof.readIds && prof.readIds.includes(article.id)) {
-    score -= 6;
-  }
+  if (prof.likedIds && prof.likedIds.includes(article.id)) score += 8;
+  if (prof.bookmarkedIds && prof.bookmarkedIds.includes(article.id)) score += 10;
+  if (prof.plottedIds && prof.plottedIds.includes(article.id)) score += 5;
+  if (prof.readIds && prof.readIds.includes(article.id)) score -= 8;
+  if (prof.skippedIds && prof.skippedIds.includes(article.id)) score -= 14;
+  if (prof.openCounts && prof.openCounts[article.id] >= 3) score -= 5;
+
+  // Cold-start: keep a usable For You shelf before the profile has enough signal
+  const signal = (prof.totalOpens || 0) + (prof.likedIds || []).length + (prof.bookmarkedIds || []).length;
+  const floor = signal < 3 ? 48 : (signal < 8 ? 55 : 58);
 
   return {
-    score: Math.min(99, Math.max(55, Math.round(score))),
+    score: Math.min(99, Math.max(floor, Math.round(score))),
     reason: primaryReason
   };
 }
@@ -12873,7 +13031,22 @@ function renderSetNewsUI() {
   // Visual-First "For You" Spotlight Cards (Large photo overlay, zero paragraph clutter)
   const forYouGrid = document.getElementById("setNewsForYouGrid");
   if (forYouGrid) {
-    const sortedForYou = enriched.slice().sort((a, b) => b._score - a._score).slice(0, 4);
+    // Rank by score with light category diversity so For You is not 4× same desk.
+    const ranked = enriched.slice().sort((a, b) => b._score - a._score);
+    const sortedForYou = [];
+    const usedCats = Object.create(null);
+    for (let i = 0; i < ranked.length && sortedForYou.length < 4; i++) {
+      const a = ranked[i];
+      const cat = a.category || "other";
+      if (usedCats[cat] && sortedForYou.length < 3 && ranked.length > 6) continue;
+      usedCats[cat] = true;
+      sortedForYou.push(a);
+    }
+    while (sortedForYou.length < 4 && sortedForYou.length < ranked.length) {
+      const next = ranked.find((a) => !sortedForYou.includes(a));
+      if (!next) break;
+      sortedForYou.push(next);
+    }
     forYouGrid.innerHTML = sortedForYou.map(a => `
       <article class="setnews-foryou-card setnews-foryou-visual" data-news-id="${a.id}" style="position:relative;height:215px;border-radius:14px;overflow:hidden;border:1px solid rgba(56,189,248,0.25);">
         <div class="setnews-foryou-bg" style="position:absolute;inset:0;background-image:url('${a.image || ""}');background-size:cover;background-position:center;transition:transform 0.35s ease;"></div>
@@ -12897,7 +13070,11 @@ function renderSetNewsUI() {
   }
 
   let filtered = enriched.filter(a => {
-    if (SETNEWS_ACTIVE_CAT === "FOR_YOU") return a._score >= 65;
+    if (SETNEWS_ACTIVE_CAT === "FOR_YOU") {
+      const signal = (prof.totalOpens || 0) + (prof.likedIds || []).length + (prof.bookmarkedIds || []).length;
+      const minScore = signal < 3 ? 50 : (signal < 8 ? 58 : 62);
+      return a._score >= minScore;
+    }
     if (SETNEWS_ACTIVE_CAT === "SAVED") return a._bookmarked;
     if (SETNEWS_ACTIVE_CAT !== "ALL" && a.category !== SETNEWS_ACTIVE_CAT) return false;
     if (SETNEWS_SEARCH_QUERY) {
@@ -13025,11 +13202,14 @@ function openSetNewsArticleModal(articleId) {
   const baseList = SETNEWS_ARTICLES.length > 0 ? SETNEWS_ARTICLES : DEFAULT_SETNEWS_ARTICLES;
   const art = baseList.find(a => a.id === articleId);
   if (!art) return;
-  recordSetNewsInteraction(art, "read", 15);
 
   const modal = document.getElementById("setNewsReaderModal");
   const bodyEl = document.getElementById("setNewsReaderContent");
   if (!modal || !bodyEl) return;
+
+  const openedAt = Date.now();
+  window.__setNewsReaderOpenedAt = openedAt;
+  window.__setNewsReaderArticleId = art.id;
 
   const prof = getSetNewsUserProfile();
   const scored = scoreArticleForUser(art, prof);
@@ -13080,18 +13260,29 @@ function openSetNewsArticleModal(articleId) {
   `;
 
   modal.classList.add("open");
-  const closeReader = () => {
+  const closeReader = (opts) => {
+    opts = opts || {};
+    if (window.__setNewsReaderOpenedAt) {
+      const dwellSec = Math.max(1, Math.round((Date.now() - window.__setNewsReaderOpenedAt) / 1000));
+      if (!opts.skipRecord) {
+        recordSetNewsInteraction(art, dwellSec < 4 ? "skip" : "read", dwellSec);
+      }
+    }
+    window.__setNewsReaderOpenedAt = null;
+    window.__setNewsReaderArticleId = null;
     modal.classList.remove("open");
-    renderSetNewsUI();
+    if (!opts.skipRender) renderSetNewsUI();
   };
   const b1 = document.getElementById("btnCloseNewsReader");
   const b2 = document.getElementById("btnModalCloseBottom");
   const bPlot = document.getElementById("btnModalPlotChart");
-  if (b1) b1.addEventListener("click", closeReader);
-  if (b2) b2.addEventListener("click", closeReader);
+  if (b1) b1.addEventListener("click", () => closeReader());
+  if (b2) b2.addEventListener("click", () => closeReader());
   if (bPlot) {
     bPlot.addEventListener("click", () => {
-      closeReader();
+      const dwellSec = Math.max(1, Math.round((Date.now() - (window.__setNewsReaderOpenedAt || openedAt)) / 1000));
+      recordSetNewsInteraction(art, "read", dwellSec);
+      closeReader({ skipRecord: true, skipRender: true });
       plotNewsArticleOnChart(art);
     });
   }
@@ -13137,9 +13328,16 @@ function initSetNews() {
 
     const searchInp = document.getElementById("setNewsSearchInput");
     if (searchInp) {
+      let searchTimer = null;
       searchInp.addEventListener("input", () => {
         SETNEWS_SEARCH_QUERY = searchInp.value.trim();
-        renderSetNewsUI();
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+          if (SETNEWS_SEARCH_QUERY.length >= 3 && typeof recordSetNewsSearchQuery === "function") {
+            recordSetNewsSearchQuery(SETNEWS_SEARCH_QUERY);
+          }
+          renderSetNewsUI();
+        }, 280);
       });
     }
 
@@ -13193,7 +13391,21 @@ function initSetNews() {
     const readerModal = document.getElementById("setNewsReaderModal");
     if (readerModal) {
       readerModal.addEventListener("click", (e) => {
-        if (e.target === readerModal) readerModal.classList.remove("open");
+        if (e.target === readerModal) {
+          // Backdrop close — still credit dwell / skip for personalization
+          const id = window.__setNewsReaderArticleId;
+          const openedAt = window.__setNewsReaderOpenedAt;
+          if (id && openedAt) {
+            const baseList = SETNEWS_ARTICLES.length > 0 ? SETNEWS_ARTICLES : DEFAULT_SETNEWS_ARTICLES;
+            const art = baseList.find((a) => a.id === id);
+            const dwellSec = Math.max(1, Math.round((Date.now() - openedAt) / 1000));
+            if (art) recordSetNewsInteraction(art, dwellSec < 4 ? "skip" : "read", dwellSec);
+          }
+          window.__setNewsReaderOpenedAt = null;
+          window.__setNewsReaderArticleId = null;
+          readerModal.classList.remove("open");
+          renderSetNewsUI();
+        }
       });
     }
   }

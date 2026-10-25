@@ -1,0 +1,14 @@
+---
+description: Always commit and push completed work to GitHub/Vercel
+alwaysApply: true
+---
+
+# Always commit & push
+
+After finishing user-requested code changes that are ready to ship:
+
+1. Commit relevant files with a clear message (vX.Y style when cache-bumped).
+2. Push to `origin/main` (or the active tracked branch) so Vercel deploys.
+3. Do **not** wait for a separate “push please” — treat deploy as part of Done.
+
+Still follow Git Safety Protocol (no force-push to main, no secrets, no amend of pushed commits unless explicitly requested).
