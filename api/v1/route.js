@@ -1,11 +1,11 @@
 "use strict";
 
 /**
- * POST /api/v1/route — plan a passage from chart context (Agent API).
+ * POST /api/v1/route — multi-option passage geometry for Agent API.
  * Scope: route.plan
- * Returns a great-circle polyline + metadata for agent tooling only.
- * NOT a navigational passage plan — land-safe Core A lives in SetRoute UI
- * (sea graph + NtM/NAVTEX/Weather/AIS). Response includes advisory flag.
+ * Uses OPW-style corridor templates + classic ocean hubs (same knowledge as SetRoute),
+ * then densified GC legs. Returns primary + ranked alternatives.
+ * ADVISORY — land-safe Core A / storm space-time still lives in the SetSail UI.
  */
 
 const {
@@ -15,6 +15,7 @@ const {
   requireScope
 } = require("../../lib/agentApiAuth");
 const { saveAgentRoute } = require("../../lib/agentRoutesStore");
+const { planPassages, toGeoJson } = require("../../lib/passagePlanner");
 
 function readBody(req) {
   if (!req.body) return {};
@@ -28,13 +29,6 @@ function readBody(req) {
   return req.body || {};
 }
 
-function toRad(d) {
-  return (d * Math.PI) / 180;
-}
-function toDeg(r) {
-  return (r * 180) / Math.PI;
-}
-
 function parseCoord(v) {
   if (Array.isArray(v) && v.length >= 2) {
     const lat = Number(v[0]);
@@ -44,53 +38,15 @@ function parseCoord(v) {
   if (v && typeof v === "object") {
     const lat = Number(v.lat != null ? v.lat : v.latitude);
     const lon = Number(v.lon != null ? v.lon : v.lng != null ? v.lng : v.longitude);
-    if (Number.isFinite(lat) && Number.isFinite(lon)) return { lat, lon };
+    if (Number.isFinite(lat) && Number.isFinite(lon)) {
+      return {
+        lat,
+        lon,
+        name: v.name ? String(v.name).slice(0, 80) : undefined
+      };
+    }
   }
   return null;
-}
-
-function haversineNm(a, b) {
-  const R = 3440.065; // NM
-  const dLat = toRad(b.lat - a.lat);
-  const dLon = toRad(b.lon - a.lon);
-  const la1 = toRad(a.lat);
-  const la2 = toRad(b.lat);
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(la1) * Math.cos(la2) * Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
-}
-
-function intermediate(a, b, f) {
-  const lat1 = toRad(a.lat);
-  const lon1 = toRad(a.lon);
-  const lat2 = toRad(b.lat);
-  const lon2 = toRad(b.lon);
-  const d = 2 * Math.asin(
-    Math.sqrt(
-      Math.sin((lat2 - lat1) / 2) ** 2 +
-        Math.cos(lat1) * Math.cos(lat2) * Math.sin((lon2 - lon1) / 2) ** 2
-    )
-  );
-  if (!Number.isFinite(d) || d < 1e-9) return { lat: a.lat, lon: a.lon };
-  const A = Math.sin((1 - f) * d) / Math.sin(d);
-  const B = Math.sin(f * d) / Math.sin(d);
-  const x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2);
-  const y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2);
-  const z = A * Math.sin(lat1) + B * Math.sin(lat2);
-  const lat = Math.atan2(z, Math.sqrt(x * x + y * y));
-  const lon = Math.atan2(y, x);
-  return { lat: toDeg(lat), lon: ((toDeg(lon) + 540) % 360) - 180 };
-}
-
-function buildGreatCircle(origin, destination, maxLegs) {
-  const dist = haversineNm(origin, destination);
-  const legs = Math.max(2, Math.min(maxLegs || 24, Math.ceil(dist / 120) + 1));
-  const pts = [];
-  for (let i = 0; i <= legs; i++) {
-    pts.push(intermediate(origin, destination, i / legs));
-  }
-  return { waypoints: pts, distanceNm: Math.round(dist * 10) / 10, legs };
 }
 
 module.exports = async function handler(req, res) {
@@ -122,7 +78,7 @@ module.exports = async function handler(req, res) {
       res.statusCode = 400;
       return res.json({
         error: "origin_destination_required",
-        message: "Provide origin and destination as {lat,lon} or [lat,lon]."
+        message: "Provide origin and destination as {lat,lon,name?} or [lat,lon]."
       });
     }
     if (Math.abs(origin.lat) > 90 || Math.abs(destination.lat) > 90) {
@@ -131,43 +87,38 @@ module.exports = async function handler(req, res) {
     }
 
     const via = Array.isArray(body.via) ? body.via.map(parseCoord).filter(Boolean).slice(0, 12) : [];
-    const chain = [origin, ...via, destination];
-    let totalNm = 0;
-    const waypoints = [{ ...chain[0], name: "Origin" }];
-    for (let i = 0; i < chain.length - 1; i++) {
-      const seg = buildGreatCircle(chain[i], chain[i + 1], body.resolution || 16);
-      totalNm += seg.distanceNm;
-      for (let j = 1; j < seg.waypoints.length; j++) {
-        waypoints.push(seg.waypoints[j]);
-      }
-    }
-    waypoints[waypoints.length - 1].name = "Destination";
-
     const speedKn = Number(body.speedKn) > 0 ? Number(body.speedKn) : 14;
-    const etaHours = totalNm / speedKn;
-    const createdAt = new Date().toISOString();
-    const routePayload = {
-      id: "agent-" + Date.now().toString(36),
-      name: String(body.name || "Agent passage").slice(0, 80),
-      mode: "great_circle",
-      distanceNm: Math.round(totalNm * 10) / 10,
+    const planned = planPassages({
+      origin,
+      destination,
+      via,
       speedKn,
-      etaHours: Math.round(etaHours * 10) / 10,
-      createdAt,
-      waypoints: waypoints.map((p, i) => ({
-        i,
-        lat: Math.round(p.lat * 1e5) / 1e5,
-        lon: Math.round(p.lon * 1e5) / 1e5,
-        name: p.name || undefined
-      }))
-    };
+      originName: body.originName || origin.name || body.fromName || "",
+      destName: body.destName || destination.name || body.toName || "",
+      multi: body.multi !== false
+    });
+
+    const primary = planned.primary;
+    if (!primary) {
+      res.statusCode = 500;
+      return res.json({ error: "plan_failed" });
+    }
+    if (body.name) primary.name = String(body.name).slice(0, 80);
 
     let saved = null;
     try {
-      saved = await saveAgentRoute(auth.email, routePayload);
+      saved = await saveAgentRoute(auth.email, primary);
     } catch (eSave) {
       saved = { ok: false, reason: "persist_failed" };
     }
+
+    const wrap = (route) =>
+      route
+        ? {
+            ...route,
+            geojson: toGeoJson(route)
+          }
+        : null;
 
     res.statusCode = 200;
     return res.json({
@@ -175,29 +126,21 @@ module.exports = async function handler(req, res) {
       api: "setsail.agent.v1",
       owner: auth.email,
       scopesUsed: ["route.plan"],
-      generatedAt: createdAt,
+      generatedAt: new Date().toISOString(),
       savedToProfile: !!(saved && saved.ok),
       savedEphemeral: !!(saved && saved.ephemeral),
-      route: {
-        ...routePayload,
-        geojson: {
-          type: "Feature",
-          properties: { name: routePayload.name, distanceNm: routePayload.distanceNm, id: routePayload.id },
-          geometry: {
-            type: "LineString",
-            coordinates: routePayload.waypoints.map((p) => [p.lon, p.lat])
-          }
-        }
-      },
+      appraisal: planned.appraisal,
+      route: wrap(primary),
+      alternatives: (planned.alternatives || []).map(wrap),
       limits: {
         advisoryOnly: true,
         navigational: false,
         note:
-          "ADVISORY ONLY — great-circle, may cross land. For passage-grade geometry use SetRoute Core A (sea graph + NtM/NAVTEX/Weather/AIS)."
+          "ADVISORY — corridor templates + ocean hubs + densified GC. For bridge-grade land-safe / cyclone space-time geometry use SetRoute Core A in the SetSail UI. Pair with GET /api/v1/chart for weather & notices appraisal."
       }
     });
   } catch (e) {
     res.statusCode = 500;
-    return res.json({ error: "route_failed" });
+    return res.json({ error: "plan_failed", message: String((e && e.message) || e) });
   }
 };

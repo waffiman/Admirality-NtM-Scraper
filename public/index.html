@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.93" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.94" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -12620,7 +12620,7 @@ select option {
                     A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" src="assets/about/founder.jpg?v=5.93" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';" />
+                    <img class="about-founder-photo" src="assets/about/founder.jpg?v=5.94" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · cadet &amp; future officer · IT agency co-founder</span>
@@ -20291,25 +20291,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.93"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.93" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.93"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.94"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.94" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.94"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.93",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.94",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.93"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.93"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.93"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.94"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.94"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.94"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.93"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.94"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20387,7 +20387,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.93"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.94"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21047,12 +21047,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
             localStorage.setItem('setsail_last_seen_sw', ver);
           } catch (e) {}
           if (document.getElementById('setsailHardRefreshTip')) return;
+          const raw = String(cacheLabel || '');
+          const verMatch = raw.match(/v?\d+\.\d+(?:\.\d+)?/i);
+          const verLabel = verMatch
+            ? (verMatch[0].charAt(0).toLowerCase() === 'v' ? verMatch[0] : ('v' + verMatch[0]))
+            : 'latest';
           const tip = document.createElement('div');
           tip.id = 'setsailHardRefreshTip';
           tip.setAttribute('role', 'status');
-          tip.style.cssText = 'position:fixed;right:18px;bottom:18px;z-index:12000;max-width:min(340px,92vw);padding:12px 14px;border-radius:12px;background:rgba(15,23,42,0.96);border:1px solid rgba(56,189,248,0.35);box-shadow:0 16px 40px rgba(0,0,0,0.45);color:#e2e8f0;font:600 0.78rem/1.45 Segoe UI,system-ui,sans-serif;';
-          tip.innerHTML = '<div style="font-size:0.72rem;color:#7dd3fc;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">Update available</div>' +
-            '<div style="font-weight:500;color:#cbd5e1;">To see the latest SetSail, hard-refresh this page:</div>' +
+          tip.style.cssText = 'position:fixed;right:18px;bottom:18px;z-index:12000;max-width:min(360px,92vw);padding:12px 14px;border-radius:12px;background:rgba(15,23,42,0.96);border:1px solid rgba(56,189,248,0.35);box-shadow:0 16px 40px rgba(0,0,0,0.45);color:#e2e8f0;font:600 0.78rem/1.45 Segoe UI,system-ui,sans-serif;';
+          tip.innerHTML = '<div style="font-size:0.72rem;color:#7dd3fc;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">Update available - <span style="color:#f8fafc;letter-spacing:0.02em;text-transform:none;font-weight:750;">' + verLabel + '</span></div>' +
+            '<div style="font-weight:500;color:#cbd5e1;">Hard-refresh to load SetSail <b style="color:#e2e8f0;">' + verLabel + '</b>:</div>' +
             '<div style="margin-top:8px;font-family:ui-monospace,Consolas,monospace;font-size:0.85rem;color:#f8fafc;background:rgba(8,47,73,0.55);border:1px solid rgba(56,189,248,0.25);border-radius:8px;padding:7px 10px;">Ctrl + Shift + R</div>' +
             '<div style="margin-top:6px;font-size:0.65rem;color:#94a3b8;">Mac: Cmd + Shift + R</div>' +
             '<button type="button" id="setsailHardRefreshTipClose" style="position:absolute;top:8px;right:10px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1rem;line-height:1;">×</button>';
@@ -21072,17 +21077,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.93', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.94', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.93 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.94 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.93') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.93.0'); }, 1200);
+              if (last && last.indexOf('v5.94') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.94.0'); }, 1200);
               }
             } catch (eTip) {}
           })

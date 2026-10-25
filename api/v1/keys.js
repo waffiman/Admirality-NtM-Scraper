@@ -50,7 +50,12 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    const issued = issueApiKey(google.email, {});
+    // Non-expiring by default (forever: true). Pass body.ttlSec > 0 for a finite key if needed.
+    const ttlSec = body.ttlSec != null ? Number(body.ttlSec) : 0;
+    const issued = issueApiKey(google.email, {
+      forever: !(Number.isFinite(ttlSec) && ttlSec > 0),
+      ttlSec: ttlSec
+    });
     res.statusCode = 200;
     return res.json({
       ok: true,
@@ -58,9 +63,10 @@ module.exports = async function handler(req, res) {
       scopes: issued.scopes,
       createdAt: issued.createdAt,
       expiresAt: issued.expiresAt,
+      forever: !!issued.forever,
       owner: google.email,
       note:
-        "Capability key only: chart.read + route.plan. Does not grant admin, source, or account write access. Treat like a password."
+        "Capability key only: chart.read + route.plan. Non-expiring unless ttlSec is set. Does not grant admin/source access. Treat like a password — revoke by minting a new key and discarding the old one."
     });
   } catch (e) {
     res.statusCode = 500;

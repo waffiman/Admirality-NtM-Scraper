@@ -11020,10 +11020,9 @@ function getCachedAgentApiKey(email) {
     if (!data || !data.apiKey) return null;
     const want = String(email || "").trim().toLowerCase();
     if (want && data.email && String(data.email).toLowerCase() !== want) return null;
-    // Keep showing the key until its own JWT exp (do not force Google remint on soft expiresAt)
-    if (data.expiresAt) {
+    // Forever keys never drop from cache; finite keys keep a 7-day grace past soft expiry
+    if (!data.forever && data.expiresAt) {
       const expMs = new Date(data.expiresAt).getTime();
-      // Grace: still show for 7 days past soft expiry so "Show API key" never re-logins spuriously
       if (Number.isFinite(expMs) && expMs < Date.now() - 7 * 24 * 3600 * 1000) return null;
     }
     return data;
@@ -11039,6 +11038,7 @@ function saveCachedAgentApiKey(payload, email) {
       email: String(email || (payload.owner || "")).trim().toLowerCase(),
       apiKey: payload.apiKey,
       expiresAt: payload.expiresAt || null,
+      forever: payload.forever === true || !payload.expiresAt,
       scopes: payload.scopes || ["chart.read", "route.plan"],
       savedAt: new Date().toISOString()
     };
@@ -11083,12 +11083,15 @@ function isGoogleAuthTokenLikelyFresh(token) {
 
 function openAgentApiKeyModalFromPayload(data) {
   if (!data || !data.apiKey) return;
+  const forever = data.forever === true || !data.expiresAt;
   openAgentApiKeyModal({
     apiKey: data.apiKey,
     expiresAt: data.expiresAt,
+    forever,
     metaText:
-      "Expires " +
-      (data.expiresAt ? new Date(data.expiresAt).toUTCString().replace("GMT", "UTC") : "—") +
+      (forever
+        ? "Does not expire"
+        : ("Expires " + new Date(data.expiresAt).toUTCString().replace("GMT", "UTC"))) +
       " · " +
       ((data.scopes || []).join(", ") || "chart.read, route.plan")
   });
@@ -11102,12 +11105,15 @@ function closeAgentApiKeyModal() {
 function openAgentApiKeyModal(payload) {
   closeAgentApiKeyModal();
   const key = (payload && payload.apiKey) || window.__setsailAgentApiKey || "";
+  const forever = !!(payload && (payload.forever || !payload.expiresAt));
   const meta =
     (payload && payload.metaText) ||
     ("Scopes: chart.read · route.plan" +
-      (payload && payload.expiresAt
-        ? " · expires " + new Date(payload.expiresAt).toUTCString().replace("GMT", "UTC")
-        : ""));
+      (forever
+        ? " · does not expire"
+        : payload && payload.expiresAt
+          ? " · expires " + new Date(payload.expiresAt).toUTCString().replace("GMT", "UTC")
+          : ""));
   const overlay = document.createElement("div");
   overlay.id = "setsailAgentApiKeyModal";
   overlay.setAttribute("role", "dialog");
@@ -14166,13 +14172,78 @@ function appendChatMessage(role, htmlContent, quickChips = []) {
   return msgEl;
 }
 
+function friendlySetRoutePlanPhase(p) {
+  if (!p || !p.phase) return "Planning passage…";
+  const sec = p.elapsedMs != null ? Math.round(p.elapsedMs / 1000) : null;
+  const t = sec != null ? ` <span style="opacity:0.75">(${sec}s)</span>` : "";
+  if (p.phase === "corridor_search") {
+    return `Searching deep-water sea corridors at <b>${p.speedKnots || "—"} kn</b>…${t}`;
+  }
+  if (p.phase === "timed_dijkstra") {
+    return `Expanding sea graph` +
+      (p.expansions ? ` · <b>${p.expansions}</b> expansions` : "") +
+      (p.heap ? ` · queue ${p.heap}` : "") +
+      `…${t}`;
+  }
+  if (p.phase === "storm_avoid_iter") {
+    return `Cyclone space-time avoidance · pass <b>${p.iter || "?"}/${p.maxIter || "?"}</b>` +
+      (p.stormWeight != null ? ` · weight ${Number(p.stormWeight).toFixed(1)}` : "") +
+      `…${t}`;
+  }
+  return `Core A · ${p.phase}${t}`;
+}
+
+function beginSetRouteLiveLog(titleHtml) {
+  const el = appendChatMessage(
+    "brain",
+    `<div class="sr-live-log">` +
+      `<div style="font-size:0.78rem;font-weight:650;color:#e2e8f0;">${titleHtml}</div>` +
+      `<ul class="sr-live-log-list" style="list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:5px;"></ul>` +
+    `</div>`
+  );
+  const list = el && el.querySelector(".sr-live-log-list");
+  const scrollWrap = document.getElementById("setRouteChatScroll");
+  let lastKey = "";
+  const api = {
+    el,
+    step(html, opts) {
+      if (!list) return;
+      const key = String(html);
+      if (key === lastKey && !(opts && opts.force)) return;
+      lastKey = key;
+      const li = document.createElement("li");
+      li.style.cssText = "font-size:0.74rem;color:#94a3b8;display:flex;gap:7px;align-items:flex-start;line-height:1.4;";
+      li.innerHTML = `<span style="color:#38bdf8;flex-shrink:0;">▸</span><span class="sr-live-log-line">${html}</span>`;
+      list.appendChild(li);
+      while (list.children.length > 14) list.removeChild(list.firstChild);
+      if (scrollWrap) scrollWrap.scrollTop = scrollWrap.scrollHeight;
+    },
+    updateLast(html) {
+      if (!list || !list.lastChild) {
+        api.step(html, { force: true });
+        return;
+      }
+      const span = list.lastChild.querySelector(".sr-live-log-line");
+      if (span) span.innerHTML = html;
+      lastKey = String(html);
+      if (scrollWrap) scrollWrap.scrollTop = scrollWrap.scrollHeight;
+    }
+  };
+  return api;
+}
+
 async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
+  const live = beginSetRouteLiveLog(
+    `Planning <b>${(pOrig && pOrig.name) || "Origin"}</b> → <b>${(pDest && pDest.name) || "Destination"}</b>`
+  );
+  live.step("Loading coast grid & corridor knowledge…");
   if (typeof loadSetrouteCoastGrid === "function") {
     try { await loadSetrouteCoastGrid(); } catch (e) {}
   }
   if (typeof loadSetrouteCorridorTemplates === "function") {
     try { await loadSetrouteCorridorTemplates(); } catch (e) {}
   }
+  live.step("Snapping ports to approach / sea nodes…");
   if (typeof setrouteSnapPortToSea === "function") {
     pOrig = setrouteSnapPortToSea(pOrig);
     pDest = setrouteSnapPortToSea(pDest);
@@ -14180,12 +14251,11 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const speed = parseFloat(options.speedKnots || (document.getElementById("setRouteSpeedInput") && document.getElementById("setRouteSpeedInput").value)) || 14.5;
   const nStorms = (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.storms))
     ? MARINE_WEATHER_STORE.storms.length : 0;
-  const planHint = appendChatMessage("brain",
-    `<span style="color:#94a3b8;">Core A quality pass: sea-graph + space-time cyclone avoidance at <b>${speed} kn</b>` +
-    (nStorms ? ` · ${nStorms} active cyclone(s) with forecast tracks` : "") +
-    `. This may take up to ~1–3 minutes…</span>`
+  live.step(
+    `Appraisal: SOG <b>${speed} kn</b>` +
+    (nStorms ? ` · <b>${nStorms}</b> active cyclone track(s)` : " · no active cyclones in store") +
+    ` · sea-graph + space-time search (may take 1–3 min)`
   );
-  // Yield so the hint paints before heavy sync search
   await new Promise((r) => setTimeout(r, 40));
   const draft = parseFloat(options.draftMeters || (document.getElementById("setRouteDraftInput") && document.getElementById("setRouteDraftInput").value)) || 11.5;
   const xtd = parseFloat(options.xtdNM || (document.getElementById("setRouteXtdInput") && document.getElementById("setRouteXtdInput").value)) || 0.25;
@@ -14218,23 +14288,24 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const tmpl = (typeof setrouteMatchCorridorTemplate === "function")
     ? setrouteMatchCorridorTemplate(pOrig.name, pDest.name)
     : null;
+  if (tmpl && tmpl.id) {
+    live.step(`Matched OPW-style corridor template <b>${tmpl.id}</b>`);
+  } else if (viaCape) {
+    live.step("Forced via <b>Cape of Good Hope</b>");
+  } else if (viaSuez) {
+    live.step("Forced via <b>Suez Canal</b>");
+  } else if (viaPanama) {
+    live.step("Forced via <b>Panama Canal</b>");
+  } else {
+    live.step("No template match — Dijkstra over global sea graph + classic hubs");
+  }
 
-  const progressEl = appendChatMessage("brain",
-    `<span style="color:#7dd3fc;">Core A: space-time cyclone avoidance at <b>${speed} kn</b> (forecast track × ship ETA). Quality search may take up to ~1–3 min…</span>`
-  );
+  live.step("Core A: starting land-safe corridor search…");
   const progressTimer = setInterval(() => {
     const p = (typeof window !== "undefined") ? window.SETROUTE_PLAN_PROGRESS : null;
-    if (!progressEl || !p) return;
-    const txt = progressEl.querySelector(".sr-msg-text");
-    if (!txt) return;
-    const sec = p.elapsedMs ? Math.round(p.elapsedMs / 1000) : "";
-    txt.innerHTML =
-      `<span style="color:#7dd3fc;">Core A cyclone search… phase <b>${p.phase || "—"}</b>` +
-      (p.iter ? ` · iter ${p.iter}/${p.maxIter || "?"}` : "") +
-      (p.expansions ? ` · expansions ${p.expansions}` : "") +
-      (sec !== "" ? ` · ${sec}s` : "") +
-      ` · SOG <b>${speed} kn</b></span>`;
-  }, 700);
+    if (!p) return;
+    live.updateLast(friendlySetRoutePlanPhase(p));
+  }, 450);
 
   let baseRoute;
   try {
@@ -14253,6 +14324,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   } finally {
     clearInterval(progressTimer);
   }
+  live.step("Primary corridor candidate ready — auditing for land legs / refuse…");
   // Hard gate: only block when Core A produced no usable corridor. Land-leg warnings → prefer recovery, else still publish with audit.
   enrichRouteWithLegsTelemetry(baseRoute, {
     origin: pOrig.name, destination: pDest.name, speedKnots: speed, draftMeters: draft, xtdNM: xtd, sailMode
@@ -14261,18 +14333,27 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const hardRefuse = Boolean(baseRoute.metadata && baseRoute.metadata.coreARefused);
   const softLand = Boolean(auditPre && auditPre.stats && auditPre.stats.landLegs > 0);
   if (hardRefuse || softLand) {
+    live.step(
+      hardRefuse
+        ? "Primary path refused — trying Panama / Cape / Suez alternatives (independent-agent style)…"
+        : `Land-leg warning (${auditPre.stats.landLegs}) — ranking alternate ocean hubs…`
+    );
     const retries = [
-      { viaPanama: true, viaCape: false, viaSuez: false },
-      { viaCape: true, viaPanama: false, viaSuez: false },
-      { viaSuez: true, viaCape: false, viaPanama: false }
+      { viaPanama: true, viaCape: false, viaSuez: false, label: "Panama" },
+      { viaCape: true, viaPanama: false, viaSuez: false, label: "Cape" },
+      { viaSuez: true, viaCape: false, viaPanama: false, label: "Suez" }
     ];
     let recovered = false;
     for (let ri = 0; ri < retries.length; ri++) {
+      live.step(`Evaluating via <b>${retries[ri].label}</b>…`);
       const alt = await generateAlgorithmicMaritimeRoute(
         pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode,
         Object.assign({ templatePath: tmpl && tmpl.nodeKeys, templateId: tmpl && tmpl.id, asyncPlanning: true }, retries[ri])
       );
-      if (alt.metadata && alt.metadata.coreARefused) continue;
+      if (alt.metadata && alt.metadata.coreARefused) {
+        live.step(`Via ${retries[ri].label}: refused by Core A`);
+        continue;
+      }
       enrichRouteWithLegsTelemetry(alt, {
         origin: pOrig.name, destination: pDest.name, speedKnots: speed, draftMeters: draft, xtdNM: xtd, sailMode
       });
@@ -14282,10 +14363,16 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
         baseRoute = alt;
         auditPre = aud2;
         recovered = !land2;
+        live.step(
+          recovered
+            ? `Selected via <b>${retries[ri].label}</b> (sea corridor clear)`
+            : `Kept via <b>${retries[ri].label}</b> (fewer land legs)`
+        );
         if (recovered) break;
       }
     }
     if (hardRefuse && (baseRoute.metadata && baseRoute.metadata.coreARefused)) {
+      live.step("No sea corridor found for this OD pair.");
       appendChatMessage("brain",
         `<strong>Core A could not build a sea corridor</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No graph path for <b>${pOrig.name}</b> → <b>${pDest.name}</b>. Try named major ports or via Panama / Cape / Suez.</div>`
       );
@@ -14346,6 +14433,9 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
       : `Cyclone model: space-time clear at <b>${speed} kn</b> (penalty ${sa.stormPenalty || 0}, ETA ~${sa.arrivalHours || "—"} h).`)
     : `Cyclone model: forecast-aware search at <b>${speed} kn</b>.`;
 
+  live.step(
+    `Publishing route · <b>${(baseRoute.waypoints || []).length}</b> waypoints · <b>${baseRoute.totalDistanceNM || "—"} NM</b>`
+  );
   const msgEl = appendChatMessage("brain", `
     <div>
       <strong>Route ready: ${baseRoute.name}</strong>
