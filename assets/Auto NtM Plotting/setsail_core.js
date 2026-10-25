@@ -4161,19 +4161,41 @@ function initNtMMap() {
       inertiaDeceleration: lowEndMap ? 4000 : 2500,
       inertiaMaxSpeed: lowEndMap ? 1500 : 2800,
       easeLinearity: 0.22,
-      // Seamless ±180°: repeating tiles (noWrap:false below), no worldCopyJump snap,
-      // no moveend lng normalize (that caused the visible jump). Fit View still normalizes.
-      worldCopyJump: false
+      // Circular globe: repeating tiles (noWrap:false) + worldCopyJump so overlays
+      // stay on the same continents after crossing ±180°. Soft wrap on moveend
+      // recenters into (-180,180] with no visible jump (same place, wrapped lng).
+      worldCopyJump: true
     });
 
-    // keepBuffer modest — enough for date-line preload without weak-PC jank.
-    // Overlays wait until pan/zoom settles; base still updates during drag but less often.
-    // noWrap:false → repeating world tiles for invisible antimeridian crossing.
+    // Invisible longitude wrap — same geography, primary world copy. Covers drag,
+    // inertia, keyboard pan, and programmatic moves so the user never drifts into
+    // a blank “second ocean” past ±180°.
+    const softWrapLeafletCenter = () => {
+      if (!leafletMap || leafletMap._setsailWrapLock) return;
+      try {
+        const c = leafletMap.getCenter();
+        if (!c || !Number.isFinite(c.lng)) return;
+        if (Math.abs(c.lng) <= 180) return;
+        const wrapped = typeof wrapLongitudeDeg === "function"
+          ? wrapLongitudeDeg(c.lng)
+          : ((((c.lng + 180) % 360) + 360) % 360) - 180;
+        if (!Number.isFinite(wrapped) || Math.abs(wrapped - c.lng) < 1e-9) return;
+        leafletMap._setsailWrapLock = true;
+        leafletMap.setView([c.lat, wrapped], leafletMap.getZoom(), { animate: false, reset: false });
+      } catch (eWrap) {
+      } finally {
+        setTimeout(() => { try { leafletMap._setsailWrapLock = false; } catch (e) {} }, 50);
+      }
+    };
+    leafletMap.on("dragend", softWrapLeafletCenter);
+    leafletMap.on("moveend", softWrapLeafletCenter);
+
+    // keepBuffer high enough for date-line neighbour tiles (seamless wrap).
     const tilePerfOpts = {
-      keepBuffer: lowEndMap ? 2 : 3,
+      keepBuffer: lowEndMap ? 4 : 8,
       updateWhenIdle: false,
       updateWhenZooming: false,
-      updateInterval: lowEndMap ? 220 : 120,
+      updateInterval: lowEndMap ? 200 : 100,
       noWrap: false
     };
     const overlayTilePerfOpts = Object.assign({}, tilePerfOpts, {
@@ -9883,12 +9905,39 @@ function createEcdisSimpleBaseLayer() {
     };
   }
 
+  /** Shift lon onto the world copy nearest the current map center (circular ±180°). */
+  function lonOnMapCopy(lon, map) {
+    let x = Number(lon);
+    if (!Number.isFinite(x)) return x;
+    if (!map || typeof map.getCenter !== "function") return x;
+    const c = map.getCenter().lng;
+    while (x - c > 180) x -= 360;
+    while (x - c < -180) x += 360;
+    return x;
+  }
+
   function renderCoarseLand() {
     landFill.clearLayers();
+    const map = boundMap || group._map;
     for (let i = 0; i < coarsePolys.length; i++) {
       const ring = coarsePolys[i];
       if (!ring || ring.length < 3) continue;
-      L.polygon(ring, landStyle()).addTo(landFill);
+      // Draw primary + ±360 copies so land never vanishes while panning across the date line.
+      const offsets = map ? [0] : [0];
+      if (map) {
+        // One shifted ring (nearest copy) is enough with soft wrap; keep ±360 at low zoom for mid-pan.
+        const z = map.getZoom();
+        if (z < 4) offsets.push(-360, 360);
+      }
+      for (let oi = 0; oi < offsets.length; oi++) {
+        const off = offsets[oi];
+        const shifted = ring.map((pt) => {
+          if (!pt || pt.length < 2) return pt;
+          // Coarse polys are [lat, lon]
+          return [pt[0], pt[1] + off];
+        });
+        L.polygon(shifted, landStyle()).addTo(landFill);
+      }
     }
   }
 
@@ -9925,7 +9974,11 @@ function createEcdisSimpleBaseLayer() {
       const g = feat && feat.geometry;
       if (!g) return false;
       const coords = g.coordinates;
-      const checkPair = (lon, lat) => bounds.contains([lat, lon]);
+      // Also test ±360 so land near the antimeridian stays visible on wrapped pans.
+      const checkPair = (lon, lat) =>
+        bounds.contains([lat, lon]) ||
+        bounds.contains([lat, lon + 360]) ||
+        bounds.contains([lat, lon - 360]);
       const walk = (c) => {
         if (!c || !c.length) return false;
         if (typeof c[0] === "number") return checkPair(c[0], c[1]);
@@ -10001,6 +10054,10 @@ function createEcdisSimpleBaseLayer() {
           if (level === "110m") return true;
           // Always viewport-filter 50m/10m so we can load finer NE earlier without drawing the whole planet.
           return featureHitsBounds(feat, bounds);
+        },
+        // Place each vertex on the world copy nearest the map center (seamless ±180°).
+        coordsToLatLng: function (coords) {
+          return L.latLng(coords[1], lonOnMapCopy(coords[0], map));
         },
         style: landStyle
       }).addTo(landFill);
