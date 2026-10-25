@@ -4443,6 +4443,13 @@ function initNtMMap() {
       }
     } catch (e) {}
 
+    const setHudCoordsIdle = () => {
+      const hud = document.getElementById("ntmHudCoords");
+      if (!hud) return;
+      hud.textContent = "—° ——.—′ —, ———° ——.—′ —";
+      hud.removeAttribute("data-live");
+    };
+    setHudCoordsIdle();
     leafletMap.on("mousemove", (e) => {
       const hud = document.getElementById("ntmHudCoords");
       if (hud) {
@@ -4453,10 +4460,7 @@ function initNtMMap() {
         updateNdbcCursorTile(e.latlng.lat, e.latlng.lng);
       }
     });
-    leafletMap.on("mouseout", () => {
-      const hud = document.getElementById("ntmHudCoords");
-      if (hud) hud.removeAttribute("data-live");
-    });
+    leafletMap.getContainer().addEventListener("mouseleave", setHudCoordsIdle);
     if (typeof syncNdbcCursorTileVisibility === "function") {
       syncNdbcCursorTileVisibility();
     }
@@ -10117,14 +10121,30 @@ function createEcdisSimpleBaseLayer() {
     };
   }
 
-  function renderCoarseLand() {
+  /** World-copy lon offsets that intersect the current viewport (+1 world buffer). */
+  function visibleWorldLonOffsets(map) {
+    try {
+      const b = map.getBounds();
+      const west = b.getWest() - 40;
+      const east = b.getEast() + 40;
+      const minIdx = Math.floor((west + 180) / 360) - 1;
+      const maxIdx = Math.floor((east + 180) / 360) + 1;
+      const offs = [];
+      for (let i = minIdx; i <= maxIdx; i++) offs.push(i * 360);
+      return offs.length ? offs : [0, -360, 360];
+    } catch (e) {
+      return [0, -360, 360];
+    }
+  }
+
+  function renderCoarseLand(mapRef) {
     landFill.clearLayers();
-    // Full-ring world copies at lon±360 (never mix offsets inside one ring — that
-    // caused yellow antimeridian fill bands). Lets the chart spin past ±180°.
+    // Whole-ring shift only (never mix offsets inside one ring — that caused
+    // yellow antimeridian fill bands). Viewport-scoped copies so land continues
+    // past ±180° instead of ending on a hard vertical cut.
     const style = landStyle();
-    const offs = typeof setsailWorldCopyLonOffsets === "function"
-      ? setsailWorldCopyLonOffsets()
-      : [0, -360, 360];
+    const map = mapRef || boundMap || group._map;
+    const offs = map ? visibleWorldLonOffsets(map) : [0, -360, 360];
     for (let i = 0; i < coarsePolys.length; i++) {
       const ring = coarsePolys[i];
       if (!ring || ring.length < 3) continue;
@@ -10169,11 +10189,14 @@ function createEcdisSimpleBaseLayer() {
       const g = feat && feat.geometry;
       if (!g) return false;
       const coords = g.coordinates;
-      // Also test ±360 so land near the antimeridian stays visible on wrapped pans.
+      // Test primary + ±360 so Alaska/Chukotka stay selectable when the view is
+      // on a wrapped world copy past ±180°.
       const checkPair = (lon, lat) =>
         bounds.contains([lat, lon]) ||
         bounds.contains([lat, lon + 360]) ||
-        bounds.contains([lat, lon - 360]);
+        bounds.contains([lat, lon - 360]) ||
+        bounds.contains([lat, lon + 720]) ||
+        bounds.contains([lat, lon - 720]);
       const walk = (c) => {
         if (!c || !c.length) return false;
         if (typeof c[0] === "number") return checkPair(c[0], c[1]);
@@ -10210,7 +10233,7 @@ function createEcdisSimpleBaseLayer() {
       setEcdisLandLoading(false);
       if (lastLandKey !== "coarse") {
         lastLandKey = "coarse";
-        renderCoarseLand();
+        renderCoarseLand(map);
       }
       return;
     }
@@ -10223,6 +10246,7 @@ function createEcdisSimpleBaseLayer() {
       if (seq !== landSeq) return;
       const pad = z >= 6 ? 0.05 : z >= 3 ? 0.15 : 0.4;
       const bounds = map.getBounds().pad(pad);
+      const offs = visibleWorldLonOffsets(map);
       const key =
         level +
         "|" +
@@ -10232,29 +10256,36 @@ function createEcdisSimpleBaseLayer() {
         "|" +
         Math.round(bounds.getNorth() * 20) +
         "|" +
-        Math.round(bounds.getEast() * 20);
+        Math.round(bounds.getEast() * 20) +
+        "|w" +
+        offs.join(",");
       if (key === lastLandKey) {
         setEcdisLandLoading(false);
         return;
       }
       lastLandKey = key;
       ensureEcdisPanes(map);
-      const renderer = L.canvas({ padding: 0.5, pane: "ecdisLandPane" });
+
+      // Filter once, then stamp the hit set onto each visible world copy.
+      // (Re-parsing full 10m NE ×3 on one shared canvas was dropping copies at ±180.)
+      const srcFeats = (geo && geo.features) || [];
+      const hitFeats =
+        level === "110m"
+          ? srcFeats
+          : srcFeats.filter(function (feat) {
+              return featureHitsBounds(feat, bounds);
+            });
+      const hitGeo = { type: "FeatureCollection", features: hitFeats };
+
       landFill.clearLayers();
-      const offs = typeof setsailWorldCopyLonOffsets === "function"
-        ? setsailWorldCopyLonOffsets()
-        : [0, -360, 360];
-      // One GeoJSON layer per world copy — whole-feature lon shift only (no mixed vertices).
       for (let oi = 0; oi < offs.length; oi++) {
         const off = offs[oi];
-        L.geoJSON(geo, {
+        // Separate canvas per world — shared renderer + huge NE sets failed past ±180.
+        const renderer = L.canvas({ padding: 1, pane: "ecdisLandPane" });
+        L.geoJSON(hitGeo, {
           pane: "ecdisLandPane",
           renderer,
           interactive: false,
-          filter: function (feat) {
-            if (level === "110m") return true;
-            return featureHitsBounds(feat, bounds);
-          },
           coordsToLatLng: function (coords) {
             return L.latLng(coords[1], coords[0] + off);
           },
@@ -10263,10 +10294,8 @@ function createEcdisSimpleBaseLayer() {
       }
     } catch (e) {
       console.warn("[SetSail ECDIS] land load failed — coarse fallback", e);
-      if (lastLandKey !== "coarse") {
-        lastLandKey = "coarse";
-        renderCoarseLand();
-      }
+      lastLandKey = "coarse";
+      renderCoarseLand(map);
     } finally {
       if (seq === landSeq) setEcdisLandLoading(false);
     }
@@ -10283,19 +10312,42 @@ function createEcdisSimpleBaseLayer() {
     ensureEcdisPanes(boundMap);
     boundMap.getContainer().classList.add("ecdis-simple-base");
     lastLandKey = "";
-    renderCoarseLand();
+    renderCoarseLand(boundMap);
     const bump = function () {
       refreshEcdisLand();
     };
+    // moveend is enough for most pans; also refresh during move near ±180 so
+    // world-copy land appears before the gesture ends (no empty-blue flash).
+    let moveTick = 0;
+    const bumpNearDateline = function () {
+      try {
+        const c = boundMap.getCenter();
+        const wrapped = ((c.lng % 360) + 540) % 360 - 180;
+        if (Math.abs(wrapped) < 140 && Math.abs(c.lng) < 140) return;
+      } catch (eNear) {
+        return;
+      }
+      const now = Date.now();
+      if (now - moveTick < 120) return;
+      moveTick = now;
+      lastLandKey = "";
+      refreshEcdisLand();
+    };
     boundMap.on("zoomend moveend", bump);
+    boundMap.on("move", bumpNearDateline);
     group._ecdisCoastBump = bump;
+    group._ecdisCoastMoveBump = bumpNearDateline;
     refreshEcdisLand();
   });
   group.on("remove", function () {
     if (boundMap && group._ecdisCoastBump) {
       boundMap.off("zoomend moveend", group._ecdisCoastBump);
     }
+    if (boundMap && group._ecdisCoastMoveBump) {
+      boundMap.off("move", group._ecdisCoastMoveBump);
+    }
     group._ecdisCoastBump = null;
+    group._ecdisCoastMoveBump = null;
     boundMap = null;
     lastLandKey = "";
   });
@@ -14043,21 +14095,30 @@ function saveRouteToLibrary(route) {
 window.saveRouteToLibrary = saveRouteToLibrary;
 
 function deleteRouteFromLibrary(routeId) {
-  const lib = getSavedRoutesLibrary().filter(r => r.id !== routeId);
+  const wasActive = !!(activeRouteData && (activeRouteData.id === routeId || activeRouteData.name === routeId));
+  const lib = getSavedRoutesLibrary().filter((r) => r.id !== routeId);
   try {
     localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(lib));
   } catch (e) {}
-  if (activeRouteData && activeRouteData.id === routeId) {
+  if (wasActive || (activeRouteData && activeRouteData.id === routeId)) {
     if (lib.length > 0) {
       selectSavedRouteFromSidebar(lib[0].id, false);
-    } else if (typeof clearActiveRoute === "function") {
-      clearActiveRoute();
+    } else {
+      try { if (typeof clearActiveRoute === "function") clearActiveRoute(); } catch (eClr) {}
+      activeRouteData = null;
+      try { localStorage.removeItem(ROUTE_STORAGE_KEY); } catch (eLs) {}
+      restoreSetRouteChatTranscript([]);
       const drawer = document.getElementById("setRouteRightDrawer");
       if (drawer) drawer.classList.remove("open");
+      syncSetRouteTopbarActions();
     }
   }
   renderNavSavedRoutesTree();
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast("Route and chat deleted", "info");
+  }
 }
+window.deleteRouteFromLibrary = deleteRouteFromLibrary;
 
 function renderNavSavedRoutesTree() {
   const listEl = document.getElementById("navSavedRoutesList");
@@ -14082,18 +14143,31 @@ function renderNavSavedRoutesTree() {
     return;
   }
 
-  listEl.innerHTML = lib.map(rt => {
+  listEl.innerHTML = lib.map((rt) => {
     const isAct = activeRouteData && (activeRouteData.id === rt.id || activeRouteData.name === rt.name);
     const legsCnt = (rt.legs ? rt.legs.length : Math.max(0, (rt.waypoints || []).length - 1));
     const dist = rt.totalDistanceNM || 0;
+    const safeName = String(rt.name || "Passage Route").replace(/"/g, "&quot;");
+    const rid = String(rt.id || "").replace(/"/g, "&quot;");
     return `
-      <button type="button" class="nav-saved-route-item ${isAct ? "active" : ""}" data-saved-route-id="${rt.id}" title="${rt.name} (${legsCnt} Legs • ${dist} NM)">
-        <span class="nav-saved-route-dot"></span>
-        <div class="nav-saved-route-info">
-          <span class="nav-saved-route-name">${rt.name || "Passage Route"}</span>
-          <span class="nav-saved-route-meta">${legsCnt} Legs • ${dist} NM</span>
+      <div class="nav-saved-route-item ${isAct ? "active" : ""}" data-saved-route-id="${rid}">
+        <button type="button" class="nav-saved-route-main" data-saved-route-open="${rid}" title="${safeName} (${legsCnt} Legs • ${dist} NM)">
+          <span class="nav-saved-route-dot"></span>
+          <div class="nav-saved-route-info">
+            <span class="nav-saved-route-name">${safeName}</span>
+            <span class="nav-saved-route-meta">${legsCnt} Legs • ${dist} NM</span>
+          </div>
+        </button>
+        <div class="nav-saved-route-menu-wrap">
+          <button type="button" class="nav-saved-route-more" data-route-menu-toggle="${rid}" title="Route options" aria-label="Route options" aria-haspopup="true" aria-expanded="false">⋯</button>
+          <div class="nav-saved-route-menu" data-route-menu-panel="${rid}" hidden>
+            <button type="button" class="nav-saved-route-delete" data-route-delete="${rid}">
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              <span>Delete</span>
+            </button>
+          </div>
         </div>
-      </button>
+      </div>
     `;
   }).join("");
 }
@@ -15448,17 +15522,60 @@ function initSetRouteV50() {
 
   if (navSavedList && !navSavedList._boundV50) {
     navSavedList._boundV50 = true;
+    const closeAllRouteMenus = () => {
+      navSavedList.querySelectorAll(".nav-saved-route-menu").forEach((p) => { p.hidden = true; });
+      navSavedList.querySelectorAll(".nav-saved-route-more[aria-expanded='true']").forEach((b) => {
+        b.setAttribute("aria-expanded", "false");
+      });
+    };
     navSavedList.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-saved-route-id]");
-      if (!btn) return;
-      e.stopPropagation();
-      const rtId = btn.getAttribute("data-saved-route-id");
-      if (typeof switchToTab === "function") {
-        switchToTab("tab-route");
+      const delBtn = e.target.closest("[data-route-delete]");
+      if (delBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const rtId = delBtn.getAttribute("data-route-delete");
+        closeAllRouteMenus();
+        if (!rtId) return;
+        const ok = window.confirm("Delete this route and its chat transcript?");
+        if (!ok) return;
+        deleteRouteFromLibrary(rtId);
+        return;
       }
+      const moreBtn = e.target.closest("[data-route-menu-toggle]");
+      if (moreBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const rtId = moreBtn.getAttribute("data-route-menu-toggle");
+        const panel = navSavedList.querySelector(`[data-route-menu-panel="${rtId}"]`);
+        const wasOpen = panel && !panel.hidden;
+        closeAllRouteMenus();
+        if (panel && !wasOpen) {
+          panel.hidden = false;
+          moreBtn.setAttribute("aria-expanded", "true");
+        }
+        return;
+      }
+      const openBtn = e.target.closest("[data-saved-route-open]");
+      if (!openBtn) return;
+      e.stopPropagation();
+      closeAllRouteMenus();
+      const rtId = openBtn.getAttribute("data-saved-route-open");
+      if (typeof switchToTab === "function") switchToTab("tab-route");
       selectSavedRouteFromSidebar(rtId, true);
       collapseNavRoutesTree();
     });
+    if (!document._boundRouteMenuOutsideClose) {
+      document._boundRouteMenuOutsideClose = true;
+      document.addEventListener("click", (ev) => {
+        if (ev.target.closest && ev.target.closest(".nav-saved-route-menu-wrap")) return;
+        const list = document.getElementById("navSavedRoutesList");
+        if (!list) return;
+        list.querySelectorAll(".nav-saved-route-menu").forEach((p) => { p.hidden = true; });
+        list.querySelectorAll(".nav-saved-route-more[aria-expanded='true']").forEach((b) => {
+          b.setAttribute("aria-expanded", "false");
+        });
+      });
+    }
   }
 
   const navNewsBtn = document.getElementById("navItemSetNews");

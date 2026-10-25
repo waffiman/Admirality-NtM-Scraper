@@ -19839,11 +19839,7 @@ function renderPortDepthsOnMap(map) {
         if (card && typeof window.ssPortCardLoad === "function") {
           window.ssPortCardLoad(card, "tides");
         }
-        if (popup && map && typeof enableDraggablePortPopup === "function") {
-          enableDraggablePortPopup(map, popup);
-        } else if (popup && map) {
-          enableDraggablePortPopup(map, popup);
-        }
+        if (popup && map) enableDraggablePortPopup(map, popup);
       } catch (e) {}
     });
     leafletPortDepthsLayer.addLayer(marker);

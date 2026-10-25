@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.107" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.108" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -4383,13 +4383,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
   position: relative;
 }
 
-/* Cursor lat/lon lives in the dock row (left), tiles pack to the right */
+/* Cursor lat/lon lives in the dock row (left), tiles pack hard-right */
 .excel-dock-coords {
   position: static;
   bottom: auto;
   left: auto;
   z-index: 1;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   max-width: min(42vw, 280px);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4457,10 +4457,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   box-shadow: 0 -2px 8px rgba(56, 189, 248, 0.2);
 }
 
-/* My Route uses the same tile style as other overlay tabs (no special highlight). */
-.excel-tab-route {
-  /* keep class for selectors / JS; visuals inherit .excel-tab */
-}
+/* .excel-tab-route kept for JS hooks — same visuals as .excel-tab */
 
 /* Marine Weather Map Overlay Styles (SPOS & Windy Standard) */
 .weather-cyclone-icon {
@@ -8826,7 +8823,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.107" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.108" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12774,10 +12771,10 @@ select option {
                     A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.107" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.107';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.108" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.108';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
-                      <span class="about-founder-role">Founder · cadet &amp; future officer · IT agency co-founder</span>
+                      <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
                     </div>
                   </div>
                 </div>
@@ -14331,7 +14328,7 @@ select option {
 
 
             <div class="excel-overlay-dock" id="excelOverlayDock" role="toolbar" aria-label="ECDIS Chart Overlays">
-              <div class="ntm-coords-hud excel-dock-coords" id="ntmHudCoords" title="Cursor position on chart">00° 00.00' N, 000° 00.00' E</div>
+              <div class="ntm-coords-hud excel-dock-coords" id="ntmHudCoords" title="Cursor position on chart">—° ——.—′ —, ———° ——.—′ —</div>
               <div class="excel-tabs-scroll">
                 <button type="button" class="excel-tab" data-overlay="notices" id="tabOverlayNotices">
                   <span class="excel-tab-spinner" id="tabNoticesSpinner" aria-hidden="true"></span>
@@ -20447,25 +20444,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.107"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.107" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.107"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.108"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.108" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.108"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.107",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.108",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.107"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.107"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.107"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.108"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.108"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.108"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.107"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.108"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20538,7 +20535,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.107"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.108"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21221,6 +21218,13 @@ function showSetSailHardRefreshTip(cacheLabel) {
             sessionStorage.setItem(seenKey, '1');
             localStorage.setItem('setsail_last_seen_sw', ver);
           } catch (e) {}
+          // Desktop-only tip — mobile has no Ctrl+Shift+R, and the banner is noise there.
+          try {
+            const ua = navigator.userAgent || '';
+            const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+            const narrow = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            if (coarse || narrow || /Android|iPhone|iPad|iPod|Mobile/i.test(ua)) return;
+          } catch (eMob) {}
           if (document.getElementById('setsailHardRefreshTip')) return;
           const raw = String(cacheLabel || '');
           const verMatch = raw.match(/v?\d+\.\d+(?:\.\d+)?/i);
@@ -21253,17 +21257,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.107', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.108', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.107 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.108 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.107') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.107.0'); }, 1200);
+              if (last && last.indexOf('v5.108') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.108.0'); }, 1200);
               }
             } catch (eTip) {}
           })
