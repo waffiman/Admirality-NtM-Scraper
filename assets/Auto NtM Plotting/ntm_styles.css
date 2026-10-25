@@ -4035,6 +4035,27 @@
   color: #f05a36 !important;
 }
 
+/* Port popup: keep × clear of UN/LOCODE chip; drag handle = header */
+.ss-port-popup a.leaflet-popup-close-button {
+  top: 6px !important;
+  right: 6px !important;
+  width: 22px !important;
+  height: 22px !important;
+  padding: 0 !important;
+  line-height: 22px !important;
+  font-size: 16px !important;
+  text-align: center !important;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.88) !important;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  z-index: 5;
+}
+.ss-port-popup a.leaflet-popup-close-button:hover {
+  background: rgba(240, 90, 54, 0.25) !important;
+  border-color: rgba(240, 90, 54, 0.55);
+  color: #fdba74 !important;
+}
+
 /* ── Hardware-Accelerated Leaflet Tile & Layer Rendering (Zero Stutter on Deep Zoom) ── */
 .leaflet-tile {
   will-change: transform, opacity;
@@ -4120,9 +4141,13 @@
   align-items: center;
   gap: 6px;
   margin: 0 0 6px;
+  padding-right: 28px; /* room for Leaflet close × so it never covers UNLOCODE */
   min-width: 0;
   flex-shrink: 0;
+  cursor: grab;
+  user-select: none;
 }
+.ss-port-head:active { cursor: grabbing; }
 .ss-port-tabs {
   display: flex;
   gap: 2px;
@@ -4206,25 +4231,31 @@
 }
 .ss-port-toolbar {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   margin-bottom: 5px;
   flex-shrink: 0;
-  min-height: 24px;
+  min-height: 26px;
 }
-.ss-port-dash { color: #64748b; font-size: 0.65rem; line-height: 1; }
+.ss-port-dash {
+  color: #64748b;
+  font-size: 0.65rem;
+  line-height: 1;
+  flex: 0 0 auto;
+}
 .ss-port-date {
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.25);
   color: #e2e8f0;
   border-radius: 5px;
   padding: 2px 4px;
-  font-size: 0.65rem;
-  height: 24px;
+  font-size: 0.62rem;
+  height: 26px;
   box-sizing: border-box;
   min-width: 0;
-  flex: 1;
-  max-width: 118px;
+  flex: 1 1 0;
+  max-width: none;
   color-scheme: dark;
 }
 .ss-port-icon-btn {
@@ -4232,8 +4263,8 @@
   background: rgba(15, 23, 42, 0.55);
   color: #94a3b8;
   border-radius: 5px;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -4244,6 +4275,43 @@
 }
 .ss-port-icon-btn svg { display: block; }
 .ss-port-icon-btn:hover { color: #67e8f9; border-color: rgba(103, 232, 249, 0.5); }
+/* Print — visually distinct from date fields, same row height */
+.ss-port-print-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 26px;
+  min-width: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(34, 211, 238, 0.55);
+  background: linear-gradient(180deg, rgba(34, 211, 238, 0.28), rgba(14, 165, 233, 0.18));
+  color: #ecfeff;
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(8, 47, 73, 0.35), 0 2px 6px rgba(14, 165, 233, 0.2);
+  line-height: 1;
+}
+.ss-port-print-btn svg {
+  display: block;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+.ss-port-print-btn:hover {
+  background: linear-gradient(180deg, rgba(34, 211, 238, 0.42), rgba(14, 165, 233, 0.3));
+  border-color: #67e8f9;
+  color: #fff;
+}
+.ss-port-print-lbl { display: inline; }
+@media (max-width: 420px) {
+  .ss-port-print-lbl { display: none; }
+  .ss-port-print-btn { padding: 0; width: 26px; }
+}
 .ss-port-content {
   flex: 1 1 auto;
   min-height: 0;

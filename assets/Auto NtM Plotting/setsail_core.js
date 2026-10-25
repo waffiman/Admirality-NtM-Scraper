@@ -4447,10 +4447,15 @@ function initNtMMap() {
       const hud = document.getElementById("ntmHudCoords");
       if (hud) {
         hud.textContent = formatLatLonDMS(e.latlng.lat, e.latlng.lng);
+        hud.setAttribute("data-live", "1");
       }
       if (typeof updateNdbcCursorTile === "function") {
         updateNdbcCursorTile(e.latlng.lat, e.latlng.lng);
       }
+    });
+    leafletMap.on("mouseout", () => {
+      const hud = document.getElementById("ntmHudCoords");
+      if (hud) hud.removeAttribute("data-live");
     });
     if (typeof syncNdbcCursorTileVisibility === "function") {
       syncNdbcCursorTileVisibility();

@@ -899,10 +899,10 @@
       '<div class="ss-port-panel is-active" data-panel="tides">' +
       '<div class="ss-port-toolbar">' +
       '<input type="date" class="ss-port-date" data-role="tide-from" value="' + todayStr + '" title="From" onchange="window.ssPortCardLoad(this,\'tides\')">' +
-      '<span class="ss-port-dash">–</span>' +
+      '<span class="ss-port-dash" aria-hidden="true">–</span>' +
       '<input type="date" class="ss-port-date" data-role="tide-to" value="' + weekEnd + '" title="To" onchange="window.ssPortCardLoad(this,\'tides\')">' +
-      '<button type="button" class="ss-port-icon-btn" title="Print tide table" onclick="window.ssPortCardPrint(this,\'tides\')">' +
-      PRINT_ICON_SVG + "</button>" +
+      '<button type="button" class="ss-port-print-btn" title="Print tide table" aria-label="Print tide table" onclick="window.ssPortCardPrint(this,\'tides\')">' +
+      PRINT_ICON_SVG + "<span class=\"ss-port-print-lbl\">Print</span></button>" +
       "</div>" +
       '<div class="ss-port-content" data-role="tide-out"><div class="ss-port-loading">…</div></div>' +
       "</div>" +

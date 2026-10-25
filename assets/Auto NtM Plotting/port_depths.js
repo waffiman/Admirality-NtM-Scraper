@@ -19828,9 +19828,10 @@ function renderPortDepthsOnMap(map) {
       autoPanPadding: [18, 18],
       closeButton: true
     });
-    marker.on("popupopen", () => {
+    marker.on("popupopen", (ev) => {
       try {
-        const node = marker.getPopup() && marker.getPopup().getElement();
+        const popup = marker.getPopup();
+        const node = popup && popup.getElement();
         const card = node && node.querySelector(".ss-port-card");
         if (card && typeof window.wirePortCardInteractions === "function") {
           window.wirePortCardInteractions(card);
@@ -19838,11 +19839,46 @@ function renderPortDepthsOnMap(map) {
         if (card && typeof window.ssPortCardLoad === "function") {
           window.ssPortCardLoad(card, "tides");
         }
+        if (popup && map) enableDraggablePortPopup(map, popup);
       } catch (e) {}
     });
     leafletPortDepthsLayer.addLayer(marker);
   });
 }
+
+/** Drag port popup by its header so it can be moved anywhere on the chart. */
+function enableDraggablePortPopup(map, popup) {
+  if (!map || !popup || typeof L === "undefined" || !L.Draggable) return;
+  const el = popup.getElement && popup.getElement();
+  if (!el || el._ssPortDragBound) return;
+  const handle = el.querySelector(".ss-port-head") || el.querySelector(".leaflet-popup-content-wrapper");
+  if (!handle) return;
+  el._ssPortDragBound = true;
+  try {
+    // Anchor Leaflet's absolute position so L.Draggable can take over transform.
+    const startLatLng = popup.getLatLng();
+    if (startLatLng) {
+      const layerPt = map.latLngToLayerPoint(startLatLng);
+      L.DomUtil.setPosition(el, layerPt);
+    }
+    const draggable = new L.Draggable(el, handle);
+    el._ssPortDraggable = draggable;
+    draggable.enable();
+    L.DomEvent.disableClickPropagation(handle);
+    L.DomEvent.on(handle, "dblclick", L.DomEvent.stopPropagation);
+    draggable.on("dragend", () => {
+      try {
+        const pos = L.DomUtil.getPosition(el);
+        if (!pos) return;
+        const ll = map.layerPointToLatLng(pos);
+        popup.setLatLng(ll);
+      } catch (eDrag) {}
+    });
+  } catch (e) {
+    el._ssPortDragBound = false;
+  }
+}
+window.enableDraggablePortPopup = enableDraggablePortPopup;
 
 /**
  * Toggle loading spinner on NtM & NAVTEX Dock Tab
