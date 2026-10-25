@@ -16,7 +16,7 @@
       js: "assets/Auto%20NtM%20Plotting/maplibre-gl.js?v=5.51"
     }
   ];
-  // Leaflet 256px vs MapLibre 512px vector tiles → zoom − 1
+  // Open Waters seascape tiles are 512px; Leaflet basemap tiles are 256px → MapLibre zoom = Leaflet zoom − 1
   const GL_ZOOM_OFFSET = 1;
 
   // ECDIS-like depth bands: deep/mid blues, pale green for shoals / very shallow (< ~10 m).
@@ -134,16 +134,17 @@
 
       onAdd: function (map) {
         this._map = map;
-        // Host inside Leaflet map-pane stack (below marker/ports panes) so port tags stay above Bathymetry
+        // Overlay on the map container (NOT a CSS-transformed tile pane) so we fully own alignment.
+        // Continuous jumpTo on move/zoom keeps Bathymetry locked to the basemap.
         if (!map.getPane("owBathyPane")) {
           const pane = map.createPane("owBathyPane");
-          pane.style.zIndex = 450;
+          pane.style.zIndex = 350;
           pane.style.pointerEvents = "none";
         }
-        const root = (this._container = L.DomUtil.create("div", "setsail-ow-gl-root"));
+        const root = (this._container = L.DomUtil.create("div", "setsail-ow-gl-root leaflet-zoom-hide"));
         root.style.cssText =
           "position:absolute;left:0;top:0;width:100%;height:100%;" +
-          "pointer-events:none;overflow:hidden;background:transparent;";
+          "pointer-events:none;overflow:hidden;background:transparent;transform-origin:0 0;";
         map.getPane("owBathyPane").appendChild(root);
 
         const center = map.getCenter();
@@ -161,58 +162,57 @@
           interactive: false,
           attributionControl: false,
           fadeDuration: 0,
-          trackResize: true,
+          trackResize: false,
           antialias: false,
-          refreshExpiredTiles: false,
-          maxTileCacheSize: lowEnd ? 40 : 80,
-          pixelRatio: lowEnd ? Math.min(1, dpr) : Math.min(1.5, dpr)
+          refreshExpiredTiles: true,
+          maxTileCacheSize: lowEnd ? 64 : 160,
+          pixelRatio: lowEnd ? Math.min(1, dpr) : Math.min(1.25, dpr)
         });
 
         this._syncRaf = 0;
-        this._panRaf = 0;
         this._lastSyncKey = "";
-        this._freezeCenter = null;
-        // Pane already moves with Leaflet — only re-sync MapLibre after pan/zoom settles
-        this._onMoveEnd = this._handleMoveEnd.bind(this);
-        this._onZoomStart = this._handleZoomStart.bind(this);
-        this._onZoomEnd = this._handleZoomEnd.bind(this);
-        this._onResize = this._resizeGl.bind(this);
+        this._boundSchedule = this._scheduleSync.bind(this);
+        this._boundResize = this._resizeGl.bind(this);
+        this._boundZoomAnim = this._handleZoomAnim.bind(this);
 
-        map.on("moveend", this._onMoveEnd);
-        map.on("zoomstart", this._onZoomStart);
-        map.on("zoomend", this._onZoomEnd);
-        map.on("resize", this._onResize);
+        // Continuous sync — prevents bathymetry "swim" during pan/zoom
+        map.on("move", this._boundSchedule);
+        map.on("moveend", this._boundSchedule);
+        map.on("zoom", this._boundSchedule);
+        map.on("zoomend", this._boundSchedule);
+        map.on("zoomanim", this._boundZoomAnim);
+        map.on("resize", this._boundResize);
+        map.on("viewreset", this._boundSchedule);
 
         this._glMap.on("load", () => {
           this._resizeGl();
           this._syncView(true);
+          this._applyProgressiveDetail(map.getZoom());
         });
         this._glMap.on("error", (e) => {
           const msg = (e && e.error && e.error.message) || (e && e.message) || "tile/style error";
           console.warn("[SetSail] MapLibre error:", msg, e);
         });
 
-        // Attribution
         if (map.attributionControl && this.options.attribution) {
           map.attributionControl.addAttribution(this.options.attribution);
         }
 
-        setTimeout(() => this._resizeGl(), 50);
-        setTimeout(() => this._resizeGl(), 300);
+        setTimeout(() => this._resizeGl(), 40);
+        setTimeout(() => this._resizeGl(), 250);
       },
 
       onRemove: function (map) {
-        map.off("moveend", this._onMoveEnd);
-        map.off("zoomstart", this._onZoomStart);
-        map.off("zoomend", this._onZoomEnd);
-        map.off("resize", this._onResize);
+        map.off("move", this._boundSchedule);
+        map.off("moveend", this._boundSchedule);
+        map.off("zoom", this._boundSchedule);
+        map.off("zoomend", this._boundSchedule);
+        map.off("zoomanim", this._boundZoomAnim);
+        map.off("resize", this._boundResize);
+        map.off("viewreset", this._boundSchedule);
         if (this._syncRaf) {
           try { cancelAnimationFrame(this._syncRaf); } catch (e) {}
           this._syncRaf = 0;
-        }
-        if (this._panRaf) {
-          try { cancelAnimationFrame(this._panRaf); } catch (e) {}
-          this._panRaf = 0;
         }
         if (map.attributionControl && this.options.attribution) {
           map.attributionControl.removeAttribution(this.options.attribution);
@@ -234,51 +234,82 @@
         return this._glMap;
       },
 
-      _glZoom: function () {
-        return Math.max(0, this._map.getZoom() - GL_ZOOM_OFFSET);
+      _glZoomFromLeaflet: function (leafletZoom) {
+        const z = Number.isFinite(leafletZoom) ? leafletZoom : this._map.getZoom();
+        return Math.max(0, z - GL_ZOOM_OFFSET);
       },
 
-      _clearPanTransform: function () {
-        if (!this._container) return;
-        this._container.style.transform = "";
-        this._container.style.willChange = "";
+      _scheduleSync: function () {
+        if (this._syncRaf) return;
+        this._syncRaf = requestAnimationFrame(() => {
+          this._syncRaf = 0;
+          this._syncView(false);
+          if (this._map) this._applyProgressiveDetail(this._map.getZoom());
+        });
       },
 
-      _handleMoveEnd: function () {
-        this._clearPanTransform();
-        this._syncView(true);
-      },
-
-      // Zoom: wait until idle — mid-zoom jumpTo was the main Bathymetry jank source
-      _handleZoomStart: function () {
-        this._zooming = true;
-        this._clearPanTransform();
+      _handleZoomAnim: function (e) {
+        // Keep MapLibre locked during Leaflet CSS zoom animation
+        if (!this._glMap || !this._map || !e) return;
         try {
-          if (this._glMap && typeof this._glMap.stop === "function") this._glMap.stop();
-        } catch (e) {}
-      },
-
-      _handleZoomEnd: function () {
-        this._zooming = false;
-        this._clearPanTransform();
-        this._syncView(true);
+          const center = e.center || this._map.getCenter();
+          const z = this._glZoomFromLeaflet(e.zoom);
+          this._glMap.jumpTo({
+            center: [center.lng, center.lat],
+            zoom: z,
+            bearing: 0,
+            pitch: 0
+          });
+          this._lastSyncKey =
+            center.lng.toFixed(5) + "," + center.lat.toFixed(5) + "," + z.toFixed(3);
+        } catch (err) {}
       },
 
       _syncView: function (force) {
-        if (!this._glMap || !this._map || this._zooming) return;
+        if (!this._glMap || !this._map) return;
         try {
+          // Pin GL container to the visible map viewport (cancels any pane CSS transform drift)
+          const topLeft = this._map.containerPointToLayerPoint([0, 0]);
+          L.DomUtil.setPosition(this._container, topLeft);
+
           const c = this._map.getCenter();
-          const z = this._glZoom();
+          const z = this._glZoomFromLeaflet(this._map.getZoom());
           const key = c.lng.toFixed(5) + "," + c.lat.toFixed(5) + "," + z.toFixed(3);
           if (!force && key === this._lastSyncKey) return;
           this._lastSyncKey = key;
-          this._clearPanTransform();
           this._glMap.jumpTo({
             center: [c.lng, c.lat],
             zoom: z,
             bearing: 0,
             pitch: 0
           });
+        } catch (e) {}
+      },
+
+      /** Progressive bathymetry detail: tint first, contours/labels/soundings as zoom rises. */
+      _applyProgressiveDetail: function (leafletZoom) {
+        if (!this._glMap || !this._glMap.getLayer) return;
+        const z = Number(leafletZoom) || 0;
+        const setVis = (id, vis) => {
+          try {
+            if (this._glMap.getLayer(id)) {
+              this._glMap.setLayoutProperty(id, "visibility", vis ? "visible" : "none");
+            }
+          } catch (e) {}
+        };
+        // Always show color relief; unlock detail with zoom (faster tile budget at low z)
+        setVis("ow-bathy-color-relief", true);
+        setVis("ow-bathy-contours", z >= 5);
+        setVis("ow-bathy-contour-labels", z >= 7);
+        setVis("ow-bathy-soundings", z >= 10);
+        try {
+          if (this._glMap.getLayer("ow-bathy-color-relief")) {
+            this._glMap.setPaintProperty(
+              "ow-bathy-color-relief",
+              "color-relief-opacity",
+              z < 4 ? 0.55 : z < 7 ? 0.68 : 0.78
+            );
+          }
         } catch (e) {}
       },
 
@@ -382,7 +413,7 @@
           source: "seascape-vector",
           "source-layer": "contours",
           filter: ["!=", ["get", "sys"], "ft"],
-          minzoom: 4,
+          minzoom: 5,
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": [
@@ -408,10 +439,10 @@
           source: "seascape-vector",
           "source-layer": "contours",
           filter: ["!=", ["get", "sys"], "ft"],
-          minzoom: 6,
+          minzoom: 7,
           layout: {
             "symbol-placement": "line",
-            "symbol-spacing": 200,
+            "symbol-spacing": 220,
             "text-field": ["to-string", ["coalesce", ["get", "depth_abs_m"], ["get", "depth_m"]]],
             "text-size": ["interpolate", ["linear"], ["zoom"], 6, 11, 10, 13, 14, 15],
             "text-font": ["Noto Sans Regular"],
@@ -435,7 +466,7 @@
           type: "symbol",
           source: "seascape-vector",
           "source-layer": "soundings",
-          minzoom: 9,
+          minzoom: 10,
           layout: {
             "text-field": ["to-string", ["round", ["get", "depth_m"]]],
             "text-size": ["interpolate", ["linear"], ["zoom"], 9, 10, 13, 13],

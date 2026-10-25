@@ -5685,18 +5685,101 @@ const SETROUTE_LAND_BOXES = [
   // Africa interior
   { minLat: -28, maxLat: 18, minLon: 8, maxLon: 38 },
   { minLat: 10, maxLat: 30, minLon: -5, maxLon: 32 },
-  // Europe landmass (N of Med)
+  // Europe landmass (N of Med) — leave Channel / Biscay out
   { minLat: 44, maxLat: 58, minLon: -2, maxLon: 28 },
+  // Iberia / France interior
+  { minLat: 37.5, maxLat: 43.5, minLon: -8.5, maxLon: 2.5 },
   // Asia interior (keep coastal / SCS / Yellow Sea OUT of boxes)
   { minLat: 22, maxLat: 50, minLon: 60, maxLon: 105 },
   { minLat: 10, maxLat: 26, minLon: 74, maxLon: 95 },
+  // China / Mongolia interior
+  { minLat: 28, maxLat: 48, minLon: 100, maxLon: 118 },
   // Australia
   { minLat: -32, maxLat: -16, minLon: 122, maxLon: 148 },
   // N America interior
   { minLat: 32, maxLat: 48, minLon: -110, maxLon: -85 },
+  { minLat: 35, maxLat: 48, minLon: -120, maxLon: -102 },
   // S America interior
-  { minLat: -35, maxLat: -8, minLon: -68, maxLon: -48 }
+  { minLat: -35, maxLat: -8, minLon: -68, maxLon: -48 },
+  { minLat: -20, maxLat: 5, minLon: -72, maxLon: -55 },
+  // Archipelagos / island masses (chords must not cut interiors)
+  { minLat: -8.5, maxLat: 5.5, minLon: 95, maxLon: 120 },   // Sumatra / Borneo / Java belt
+  { minLat: 5, maxLat: 18, minLon: 118, maxLon: 126 },       // Philippines (central)
+  { minLat: 30, maxLat: 45, minLon: 130, maxLon: 142 },       // Honshu interior
+  { minLat: 18, maxLat: 26, minLon: -85, maxLon: -70 },       // Greater Antilles landmasses
+  { minLat: 36, maxLat: 41.5, minLon: 20.5, maxLon: 28.5 },   // Greece / Aegean islands mass
+  { minLat: 54, maxLat: 59, minLon: 10, maxLon: 20 },         // S Sweden / Baltic islands belt
+  { minLat: -47, maxLat: -34, minLon: 166, maxLon: 179 },     // NZ South Island interior
+  { minLat: 10, maxLat: 18, minLon: 42, maxLon: 50 },         // Horn of Africa / Yemen highland
+  // Smaller island / archipelago interiors (stop chords clipping land)
+  { minLat: -4.2, maxLat: 1.2, minLon: 99.5, maxLon: 104.2 }, // Sumatra W spine
+  { minLat: -8.8, maxLat: -5.8, minLon: 105.5, maxLon: 114.5 }, // Java interior
+  { minLat: 0.5, maxLat: 7.2, minLon: 109.5, maxLon: 117.5 },  // Borneo interior
+  { minLat: 9.5, maxLat: 14.5, minLon: 120.5, maxLon: 125.2 }, // Visayas / Luzon S
+  { minLat: 21.5, maxLat: 25.5, minLon: -78.5, maxLon: -74.2 }, // Cuba
+  { minLat: 17.5, maxLat: 19.2, minLon: -72.5, maxLon: -68.2 }, // Hispaniola
+  { minLat: 34.5, maxLat: 38.8, minLon: 135.5, maxLon: 140.8 }, // Honshu central
+  { minLat: 43.2, maxLat: 45.8, minLon: 141.2, maxLon: 145.5 }, // Hokkaido
+  { minLat: 35.0, maxLat: 36.8, minLon: 24.5, maxLon: 28.2 },   // Crete / Aegean E
+  { minLat: 54.8, maxLat: 57.2, minLon: 11.5, maxLon: 16.5 },   // S Sweden / Oland belt
+  { minLat: -42.5, maxLat: -36.5, minLon: 172.5, maxLon: 178.5 }, // NZ North Island
+  { minLat: 55.5, maxLat: 59.0, minLon: -7.5, maxLon: -2.5 },  // Scotland Highlands
+  { minLat: 36.0, maxLat: 40.0, minLon: -9.0, maxLon: -6.0 },  // Iberia W interior
+  { minLat: -34.5, maxLat: -30.0, minLon: 17.5, maxLon: 26.5 } // SA interior near Cape
 ];
+
+/**
+ * Proxy for bathymetry / shoal risk: continental shelf & known banks where depth is often < ~20–50 m.
+ * Soft edge cost so routes prefer deep water (stand-in until live DEM sampling is wired).
+ */
+const SETROUTE_SHOAL_BOXES = [
+  { minLat: 51, maxLat: 56, minLon: 1, maxLon: 6, pen: 220 },
+  { minLat: 42, maxLat: 46.5, minLon: -68, maxLon: -55, pen: 260 },
+  { minLat: 24, maxLat: 30, minLon: -96, maxLon: -82, pen: 180 },
+  { minLat: 30, maxLat: 36, minLon: -78, maxLon: -74, pen: 160 },
+  { minLat: 50, maxLat: 52.5, minLon: -6, maxLon: 2, pen: 200 },
+  { minLat: 1.0, maxLat: 4.5, minLon: 102.5, maxLon: 105.5, pen: 240 },
+  { minLat: 21, maxLat: 26, minLon: 112, maxLon: 122, pen: 200 },
+  { minLat: 28, maxLat: 35, minLon: 120, maxLon: 127, pen: 180 },
+  { minLat: -12, maxLat: -4, minLon: 105, maxLon: 116, pen: 200 },
+  { minLat: 10, maxLat: 16, minLon: 99, maxLon: 110, pen: 180 },
+  { minLat: 53, maxLat: 60, minLon: -5, maxLon: 8, pen: 160 },
+  { minLat: 18, maxLat: 23, minLon: -87, maxLon: -80, pen: 170 },
+  { minLat: -6, maxLat: 2, minLon: 95, maxLon: 102, pen: 190 },   // W Sumatra shelf
+  { minLat: 4, maxLat: 10, minLon: 115, maxLon: 122, pen: 170 },  // Sulu / N Borneo shelf
+  { minLat: 22, maxLat: 26.5, minLon: -83, maxLon: -78, pen: 200 }, // Florida / Bahamas banks
+  { minLat: 10, maxLat: 16, minLon: 72, maxLon: 78, pen: 180 },    // SW India shelf
+  { minLat: -25, maxLat: -15, minLon: 145, maxLon: 155, pen: 160 }, // GBR approaches
+  { minLat: 48, maxLat: 52, minLon: -6, maxLon: 2, pen: 150 },     // Celtic / Channel W
+  { minLat: 33, maxLat: 37, minLon: -7, maxLon: -1, pen: 140 },    // Gulf of Cadiz shelf
+  { minLat: 40, maxLat: 45, minLon: 12, maxLon: 19, pen: 150 }     // Adriatic shelf
+];
+
+function setrouteShoalPenalty(lat, lon) {
+  let pen = 0;
+  for (let i = 0; i < SETROUTE_SHOAL_BOXES.length; i++) {
+    const b = SETROUTE_SHOAL_BOXES[i];
+    if (lat >= b.minLat && lat <= b.maxLat && lon >= b.minLon && lon <= b.maxLon) {
+      pen += b.pen || 160;
+    }
+  }
+  return pen;
+}
+
+/** Soft “bathymetry gradient” proxy: prefer deep basins; penalize shelf chords. */
+function setrouteLegShoalPenalty(lat1, lon1, lat2, lon2) {
+  const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+  if (dist < 25) return 0;
+  const samples = dist > 600 ? [0.2, 0.4, 0.6, 0.8] : [0.35, 0.65];
+  let pen = 0;
+  for (let i = 0; i < samples.length; i++) {
+    const p = setrouteLerpLatLon(lat1, lon1, lat2, lon2, samples[i]);
+    pen += setrouteShoalPenalty(p[0], p[1]) * (0.35 + 0.15 * i);
+  }
+  // Long shelf-hugging chords are especially undesirable
+  if (pen > 0 && dist >= 250) pen *= 1.35;
+  return pen;
+}
 
 const SETROUTE_OCEAN_HUBS = [
   "GIBRALTAR_MID", "SUEZ_CANAL_MID", "CAPE_AGULHAS", "PANAMA_COLON",
@@ -5751,9 +5834,10 @@ function setrouteLegCrossesCoastline(lat1, lon1, lat2, lon2) {
   if (!SETROUTE_COAST_GRID || !SETROUTE_COAST_GRID.cells) return false;
   const cellDeg = SETROUTE_COAST_GRID.cellDeg || 2.5;
   const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
-  if (dist < 40) return false;
+  // Short TSS hops may graze coastline geometry — keep threshold low but not zero
+  if (dist < 28) return false;
   const keys = new Set();
-  const steps = Math.min(24, Math.max(4, Math.ceil(dist / 80)));
+  const steps = Math.min(36, Math.max(5, Math.ceil(dist / 55)));
   for (let i = 0; i <= steps; i++) {
     const p = setrouteLerpLatLon(lat1, lon1, lat2, lon2, i / steps);
     keys.add(setrouteCoastCellKey(p[0], p[1], cellDeg));
@@ -5863,22 +5947,24 @@ function setroutePointInLandBox(lat, lon) {
   return false;
 }
 
-/** True if a direct chord likely crosses continental interior. */
+/** True if a direct chord likely crosses continental / island interior. */
 function setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2) {
   const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
-  if (dist < 80) return false;
-  // Coast-grid only on long chords: short TSS/coastal hops intersect shoreline geometry by design
-  if (dist >= 400 && typeof setrouteLegCrossesCoastline === "function" && setrouteLegCrossesCoastline(lat1, lon1, lat2, lon2)) {
+  if (dist < 55) return false;
+  // Coast-grid: catch archipelago chords and continent edges earlier (was 400 NM — too late)
+  if (dist >= 110 && typeof setrouteLegCrossesCoastline === "function" && setrouteLegCrossesCoastline(lat1, lon1, lat2, lon2)) {
     return true;
   }
-  const samples = dist > 800 ? [0.15, 0.3, 0.45, 0.55, 0.7, 0.85] : [0.25, 0.5, 0.75];
+  const samples = dist > 800
+    ? [0.12, 0.25, 0.38, 0.5, 0.62, 0.75, 0.88]
+    : (dist > 200 ? [0.2, 0.4, 0.6, 0.8] : [0.3, 0.5, 0.7]);
   let hits = 0;
   for (let i = 0; i < samples.length; i++) {
     const p = setrouteLerpLatLon(lat1, lon1, lat2, lon2, samples[i]);
     if (setroutePointInLandBox(p[0], p[1])) hits++;
   }
-  // Long ocean GC can graze one box — require 2+ hits or one hit on short/medium legs
   if (dist >= 1500) return hits >= 2;
+  if (dist >= 250) return hits >= 1;
   return hits >= 1;
 }
 
@@ -5936,13 +6022,16 @@ function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
   if (typeof setrouteAisPenalty === "function") {
     pen += setrouteAisPenalty(lat1, lon1, lat2, lon2);
   }
+  // Bathymetry / shoal proxy — prefer deep water
+  if (typeof setrouteLegShoalPenalty === "function") {
+    pen += setrouteLegShoalPenalty(lat1, lon1, lat2, lon2);
+  }
   // Land/coast: forbid only LONG chords. Short TSS/coastal graph hops must stay connected
-  // (coast-grid was marking almost every near-shore edge as land → empty graph → "No safe corridor").
   if (setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2)) {
     const distNm = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
-    if (distNm >= 280) pen += 50000;
-    else if (distNm >= 120) pen += 2500;
-    else pen += 180;
+    if (distNm >= 220) pen += 50000;
+    else if (distNm >= 100) pen += 3500;
+    else pen += 280;
   }
   return pen;
 }
@@ -6096,11 +6185,15 @@ function setrouteBuildAdjacency() {
       const p = setrouteLerpLatLon(a[0], a[1], b[0], b[1], samples[si]);
       if (setroutePointInLandBox(p[0], p[1])) boxHits++;
     }
-    if (boxHits >= (dist >= 1500 ? 2 : 1) && dist >= 200) {
+    // Drop edges that cut land boxes OR cross coastline on medium+ hops
+    const coastHit = dist >= 90 && typeof setrouteLegCrossesCoastline === "function" &&
+      setrouteLegCrossesCoastline(a[0], a[1], b[0], b[1]);
+    if ((boxHits >= (dist >= 1500 ? 2 : 1) && dist >= 160) || (coastHit && dist >= 180)) {
       hazard = 50000;
     } else {
       hazard += setrouteStaticNonStormWeatherPenalty(a[0], a[1], b[0], b[1]);
       if (typeof setrouteAisPenalty === "function") hazard += setrouteAisPenalty(a[0], a[1], b[0], b[1]) * 0.5;
+      if (typeof setrouteLegShoalPenalty === "function") hazard += setrouteLegShoalPenalty(a[0], a[1], b[0], b[1]) * 0.85;
     }
     const cost = dist + hazard;
     if (hazard >= 50000) continue;
