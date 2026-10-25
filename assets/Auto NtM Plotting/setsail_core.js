@@ -2870,6 +2870,15 @@ function syncNdbcCursorTileVisibility() {
   }
 }
 
+function renderNdbcCursorChips(wind, wave, pressure, airSst) {
+  return (
+    '<span class="wx-chip" title="Wind"><span class="wx-ico" aria-hidden="true">\uD83D\uDCA8</span><b>' + wind + "</b></span>" +
+    '<span class="wx-chip" title="Waves Hs"><span class="wx-ico" aria-hidden="true">\uD83C\uDF0A</span><b>' + wave + "</b></span>" +
+    '<span class="wx-chip" title="Pressure"><span class="wx-ico" aria-hidden="true">\u25CE</span><b>' + pressure + "</b></span>" +
+    '<span class="wx-chip" title="Air / SST"><span class="wx-ico" aria-hidden="true">\uD83C\uDF21</span><b>' + airSst + "</b></span>"
+  );
+}
+
 function updateNdbcCursorTile(lat, lon) {
   const tile = document.getElementById("ntmWxCursorTile");
   if (!tile || tile.hidden) return;
@@ -2877,10 +2886,11 @@ function updateNdbcCursorTile(lat, lon) {
   const meta = document.getElementById("ntmWxCursorMeta");
   if (!body) return;
   const s = sampleNdbcAtLatLon(lat, lon);
+  // Always keep the same 4-chip skeleton so the tile footprint never jumps.
   if (!s.ok) {
     tile.classList.remove("is-live");
-    body.innerHTML = '<span class="wx-chip wx-muted">' + (s.message || "No data") + "</span>";
-    if (meta) meta.textContent = "";
+    body.innerHTML = renderNdbcCursorChips("\u2014", "\u2014", "\u2014 mb", "\u2014\u00b0 / \u2014\u00b0");
+    if (meta) meta.textContent = s.message || "Move cursor\u2026";
     return;
   }
   tile.classList.add("is-live");
@@ -2890,11 +2900,12 @@ function updateNdbcCursorTile(lat, lon) {
   const wave = s.waveHs != null
     ? (fmtWxNum(s.waveHs, 1) + " m" + (s.wavePeriod != null ? " / " + fmtWxNum(s.wavePeriod, 0) + "s" : ""))
     : "\u2014";
-  body.innerHTML =
-    '<span class="wx-chip" title="Wind"><span class="wx-ico" aria-hidden="true">\uD83D\uDCA8</span><b>' + wind + "</b></span>" +
-    '<span class="wx-chip" title="Waves Hs"><span class="wx-ico" aria-hidden="true">\uD83C\uDF0A</span><b>' + wave + "</b></span>" +
-    '<span class="wx-chip" title="Pressure"><span class="wx-ico" aria-hidden="true">\u25CE</span><b>' + fmtWxNum(s.pressureMb, 0) + " mb</b></span>" +
-    '<span class="wx-chip" title="Air / SST"><span class="wx-ico" aria-hidden="true">\uD83C\uDF21</span><b>' + fmtWxNum(s.airC, 0) + "\u00b0 / " + fmtWxNum(s.sstC, 0) + "\u00b0</b></span>";
+  body.innerHTML = renderNdbcCursorChips(
+    wind,
+    wave,
+    fmtWxNum(s.pressureMb, 0) + " mb",
+    fmtWxNum(s.airC, 0) + "\u00b0 / " + fmtWxNum(s.sstC, 0) + "\u00b0"
+  );
   if (meta) {
     meta.textContent = s.sourceNote + (s.mode === "interpolated" ? " \u00b7 blended" : " \u00b7 buoy");
   }
@@ -5603,9 +5614,12 @@ const MARITIME_SEA_NODES = {
   // Southeast Asia & Malacca
   "MALACCA_N": [5.50, 97.50, "Malacca Strait North Entrance TSS"],
   "MALACCA_MID": [2.90, 101.00, "One Fathom Bank TSS"],
+  "MALACCA_S": [1.85, 102.55, "Malacca Strait South / Port Klang Deepwater"],
   "SINGAPORE_W": [1.20, 103.65, "Singapore Strait West TSS"],
   "SINGAPORE_MAIN": [1.23, 103.85, "Singapore Main Strait TSS"],
   "SINGAPORE_E": [1.32, 104.38, "Horsburgh Light / Singapore East TSS"],
+  // Persian Gulf approaches
+  "JEBEL_ALI_APP": [25.00, 54.95, "Jebel Ali Fairway Approach"],
 
   // South China Sea & East Asia
   "SCS_SOUTH": [3.50, 105.50, "South China Sea South Corridor"],
@@ -5681,6 +5695,8 @@ const MARITIME_SEA_EDGES = [
   // Persian Gulf
   ["RAS_TANURA_APP", "ARABIAN_GULF_MID"],
   ["ARABIAN_GULF_MID", "HORMUZ_STRAIT"],
+  ["ARABIAN_GULF_MID", "JEBEL_ALI_APP"],
+  ["JEBEL_ALI_APP", "HORMUZ_STRAIT"],
   ["HORMUZ_STRAIT", "GULF_OF_OMAN"],
   ["GULF_OF_OMAN", "ARABIAN_SEA_MID"],
 
@@ -5693,10 +5709,11 @@ const MARITIME_SEA_EDGES = [
   ["BAY_OF_BENGAL_S", "SIX_DEGREE_CH"],
   ["DONDRA_HEAD", "SIX_DEGREE_CH"],
 
-  // Malacca & Singapore
+  // Malacca & Singapore (short hops stay inside the fairway)
   ["SIX_DEGREE_CH", "MALACCA_N"],
   ["MALACCA_N", "MALACCA_MID"],
-  ["MALACCA_MID", "SINGAPORE_W"],
+  ["MALACCA_MID", "MALACCA_S"],
+  ["MALACCA_S", "SINGAPORE_W"],
   ["SINGAPORE_W", "SINGAPORE_MAIN"],
   ["SINGAPORE_MAIN", "SINGAPORE_E"],
 
@@ -5786,8 +5803,12 @@ const SETROUTE_LAND_BOXES = [
   // S America interior
   { minLat: -35, maxLat: -8, minLon: -68, maxLon: -48 },
   { minLat: -20, maxLat: 5, minLon: -72, maxLon: -55 },
-  // Archipelagos / island masses (chords must not cut interiors)
-  { minLat: -8.5, maxLat: 5.5, minLon: 95, maxLon: 120 },   // Sumatra / Borneo / Java belt
+  // Archipelagos / island masses (chords must not cut interiors).
+  // Do NOT use a single Sumatra–Borneo belt over lon 95–120: that sealed the
+  // Strait of Malacca fairway and disconnected Persian Gulf ↔ Singapore.
+  { minLat: -5.5, maxLat: 5.2, minLon: 95.2, maxLon: 97.55 }, // N Sumatra / Aceh (W of Malacca)
+  { minLat: 2.6, maxLat: 6.5, minLon: 102.35, maxLon: 103.85 }, // Malay peninsula interior (E of Malacca fairway)
+  { minLat: -3.2, maxLat: 1.3, minLon: 105.0, maxLon: 109.8 }, // Karimata / Gaspar approaches
   { minLat: 5, maxLat: 18, minLon: 118, maxLon: 126 },       // Philippines (central)
   { minLat: 30, maxLat: 45, minLon: 130, maxLon: 142 },       // Honshu interior
   { minLat: 18, maxLat: 26, minLon: -85, maxLon: -70 },       // Greater Antilles landmasses
@@ -6057,6 +6078,14 @@ function setrouteIsEuropeMedPort(lat, lon) {
 }
 function setrouteIsAsiaGulfPort(lat, lon) {
   return lon >= 48 && lon <= 150 && lat >= -45 && lat <= 50;
+}
+/** Arabian / Persian Gulf ports (Jebel Ali, Ras Tanura, …) — not Singapore. */
+function setrouteIsPersianGulfPort(lat, lon) {
+  return lat >= 22 && lat <= 31 && lon >= 47 && lon <= 61;
+}
+/** Malacca / Singapore / W Indonesia approaches. */
+function setrouteIsSeAsiaMalaccaPort(lat, lon) {
+  return lat >= -9 && lat <= 8 && lon >= 95 && lon <= 120;
 }
 function setrouteIsAmericasPort(lat, lon) {
   return lon <= -30 || lon >= 160;
@@ -6870,6 +6899,29 @@ function setrouteIsUsGulfPort(lat, lon) {
   return lat >= 24 && lat <= 32 && lon <= -80 && lon >= -98;
 }
 
+/** OD-aware alternate corridors when primary Core A path is refused. */
+function setrouteAltCorridorRetries(origCoords, destCoords) {
+  const oLat = Number(origCoords && origCoords[0]);
+  const oLon = Number(origCoords && origCoords[1]);
+  const dLat = Number(destCoords && destCoords[0]);
+  const dLon = Number(destCoords && destCoords[1]);
+  const pgSe =
+    (setrouteIsPersianGulfPort(oLat, oLon) && (setrouteIsSeAsiaMalaccaPort(dLat, dLon) || setrouteIsFarEastPort(dLat, dLon))) ||
+    (setrouteIsPersianGulfPort(dLat, dLon) && (setrouteIsSeAsiaMalaccaPort(oLat, oLon) || setrouteIsFarEastPort(oLat, oLon)));
+  if (pgSe) {
+    return [
+      { viaMalacca: true, viaSunda: false, viaCape: false, viaPanama: false, viaSuez: false, label: "Malacca" },
+      { viaSunda: true, viaMalacca: false, viaCape: false, viaPanama: false, viaSuez: false, label: "Sunda" },
+      { viaCape: true, viaMalacca: false, viaSunda: false, viaPanama: false, viaSuez: false, label: "Cape" }
+    ];
+  }
+  return [
+    { viaPanama: true, viaCape: false, viaSuez: false, viaMalacca: false, viaSunda: false, label: "Panama" },
+    { viaCape: true, viaPanama: false, viaSuez: false, viaMalacca: false, viaSunda: false, label: "Cape" },
+    { viaSuez: true, viaCape: false, viaPanama: false, viaMalacca: false, viaSunda: false, label: "Suez" }
+  ];
+}
+
 let SETROUTE_CORRIDOR_TEMPLATES = null;
 let SETROUTE_PASSAGE_KNOWLEDGE = null;
 let SETROUTE_TEMPLATES_LOAD_PROMISE = null;
@@ -7198,6 +7250,37 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
     } else if (options.viaSuez) {
       path = await via(startNode, endNode, "SUEZ_CANAL_MID");
       routeMode = "via_suez";
+    } else if (options.viaMalacca) {
+      path = (await via(startNode, endNode, "MALACCA_MID"))
+        || (await via(startNode, endNode, "MALACCA_N"))
+        || (await via(startNode, endNode, "SIX_DEGREE_CH"));
+      routeMode = "via_malacca";
+    } else if (options.viaSunda) {
+      path = await via(startNode, endNode, "SUNDA_STRAIT");
+      routeMode = "via_sunda";
+    } else if (
+      (setrouteIsPersianGulfPort(origCoords[0], origCoords[1]) &&
+        (setrouteIsSeAsiaMalaccaPort(destCoords[0], destCoords[1]) || setrouteIsFarEastPort(destCoords[0], destCoords[1]))) ||
+      (setrouteIsPersianGulfPort(destCoords[0], destCoords[1]) &&
+        (setrouteIsSeAsiaMalaccaPort(origCoords[0], origCoords[1]) || setrouteIsFarEastPort(origCoords[0], origCoords[1])))
+    ) {
+      const malacca = (await via(startNode, endNode, "MALACCA_MID"))
+        || (await via(startNode, endNode, "MALACCA_N"));
+      const dondra = await via(startNode, endNode, "DONDRA_HEAD");
+      const six = await via(startNode, endNode, "SIX_DEGREE_CH");
+      const sunda = await via(startNode, endNode, "SUNDA_STRAIT");
+      const direct = await dijk(startNode, endNode);
+      const best = pickBest([
+        { p: malacca, m: "via_malacca_auto" },
+        { p: dondra, m: "via_dondra" },
+        { p: six, m: "via_six_degree" },
+        { p: sunda, m: "via_sunda_auto" },
+        { p: direct, m: "shortest_sea" }
+      ], dOpts);
+      if (best) {
+        path = best.p;
+        routeMode = best.m;
+      }
     } else if (
       (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAsiaGulfPort(destCoords[0], destCoords[1])) ||
       (setrouteIsAsiaGulfPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
@@ -14429,22 +14512,29 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const hardRefuse = Boolean(baseRoute.metadata && baseRoute.metadata.coreARefused);
   const softLand = Boolean(auditPre && auditPre.stats && auditPre.stats.landLegs > 0);
   if (hardRefuse || softLand) {
+    const retries = (typeof setrouteAltCorridorRetries === "function")
+      ? setrouteAltCorridorRetries(origCoords, destCoords)
+      : [
+        { viaPanama: true, viaCape: false, viaSuez: false, label: "Panama" },
+        { viaCape: true, viaPanama: false, viaSuez: false, label: "Cape" },
+        { viaSuez: true, viaCape: false, viaPanama: false, label: "Suez" }
+      ];
+    const altLabels = retries.map((r) => r.label).join(" / ");
     live.step(
       hardRefuse
-        ? "Primary path refused — trying Panama / Cape / Suez alternatives (independent-agent style)…"
-        : `Land-leg warning (${auditPre.stats.landLegs}) — ranking alternate ocean hubs…`
+        ? `Primary path refused — trying ${altLabels} alternatives (independent-agent style)…`
+        : `Land-leg warning (${auditPre.stats.landLegs}) — ranking alternate ocean hubs (${altLabels})…`
     );
-    const retries = [
-      { viaPanama: true, viaCape: false, viaSuez: false, label: "Panama" },
-      { viaCape: true, viaPanama: false, viaSuez: false, label: "Cape" },
-      { viaSuez: true, viaCape: false, viaPanama: false, label: "Suez" }
-    ];
     let recovered = false;
     for (let ri = 0; ri < retries.length; ri++) {
       live.step(`Evaluating via <b>${retries[ri].label}</b>…`);
+      const altOpts = Object.assign(
+        { templatePath: tmpl && tmpl.nodeKeys, templateId: tmpl && tmpl.id, asyncPlanning: true },
+        retries[ri]
+      );
+      delete altOpts.label;
       const alt = await generateAlgorithmicMaritimeRoute(
-        pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode,
-        Object.assign({ templatePath: tmpl && tmpl.nodeKeys, templateId: tmpl && tmpl.id, asyncPlanning: true }, retries[ri])
+        pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, altOpts
       );
       if (alt.metadata && alt.metadata.coreARefused) {
         live.step(`Via ${retries[ri].label}: refused by Core A`);
@@ -14470,7 +14560,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     if (hardRefuse && (baseRoute.metadata && baseRoute.metadata.coreARefused)) {
       live.step("No sea corridor found for this OD pair.");
       appendChatMessage("brain",
-        `<strong>Core A could not build a sea corridor</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No graph path for <b>${pOrig.name}</b> → <b>${pDest.name}</b>. Try named major ports or via Panama / Cape / Suez.</div>`
+        `<strong>Core A could not build a sea corridor</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No graph path for <b>${pOrig.name}</b> → <b>${pDest.name}</b>. Try named major ports or a regional via (Malacca / Sunda / Cape / Suez / Panama).</div>`
       );
       return null;
     }

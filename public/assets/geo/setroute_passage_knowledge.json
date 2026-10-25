@@ -112,9 +112,9 @@
     {
       "id": "persian_gulf_singapore",
       "refs": ["opw_style_ocean_corridors"],
-      "originHints": ["ras tanura", "jebel ali", "fujairah", "dammam", "doha", "sohar"],
-      "destHints": ["singapore", "port klang", "jakarta"],
-      "nodeKeys": ["HORMUZ_STRAIT", "GULF_OF_OMAN", "ARABIAN_SEA_MID", "DONDRA_HEAD", "SIX_DEGREE_CH", "MALACCA_N", "MALACCA_MID", "SINGAPORE_MAIN"]
+      "originHints": ["ras tanura", "jebel ali", "fujairah", "dammam", "doha", "sohar", "dubai"],
+      "destHints": ["singapore", "port klang", "jakarta", "tuas", "pasir panjang", "jurong"],
+      "nodeKeys": ["JEBEL_ALI_APP", "HORMUZ_STRAIT", "GULF_OF_OMAN", "ARABIAN_SEA_MID", "DONDRA_HEAD", "SIX_DEGREE_CH", "MALACCA_N", "MALACCA_MID", "MALACCA_S", "SINGAPORE_W", "SINGAPORE_MAIN"]
     },
     {
       "id": "australia_fareast_sunda",
