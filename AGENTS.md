@@ -33,3 +33,10 @@ Open Antigravity / Cursor / other agents **here**. Do **not** use the old `SetSa
 Authorized JavaScript origins must include:
 - `https://setsail-ai.vercel.app`
 - `http://localhost` (for local tests)
+
+## SetRoute Core A (edit this for routing skills)
+Standalone module (safe for Antigravity / Claude / other agents):
+- `assets/Auto NtM Plotting/setroute_core_a.js`
+
+Add TSS / COLREG / shoal / weather costing skills **here**. Keep chat UI & Dijkstra shell in `setsail_core.js`.
+Loaded in `index.html` **before** `setsail_core.js`. Exposes `window.SetRouteCoreA`.

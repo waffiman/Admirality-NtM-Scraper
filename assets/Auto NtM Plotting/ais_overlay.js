@@ -1,6 +1,6 @@
 /**
- * SetSail AIS Overlay — AISStream.io Real-Time WebSocket + Open Waters & Digitraffic
- * Live global satellite & terrestrial vessel traffic engine.
+ * SetSail AIS Overlay — multi-feed AIS (deduped by MMSI)
+ * Feeds: AISStream.io WS + OpenSeaFeed WS + Open Waters REST + Digitraffic (Baltic) + zone snapshots
  */
 (function () {
   const AIS_REFRESH_MS = 60 * 1000;
@@ -9,18 +9,33 @@
   const DIGITRAFFIC_LOC = "https://meri.digitraffic.fi/api/ais/v1/locations";
   const DIGITRAFFIC_VES = "https://meri.digitraffic.fi/api/ais/v1/vessels";
   const AISSTREAM_WS_URL = "wss://stream.aisstream.io/v0/stream";
+  // OpenSeaFeed — free community AIS, aisstream.io-compatible protocol (no key for free tier)
+  const OPENSEAFEED_WS_URL = "wss://stream.openseafeed.com/v1/stream";
   const AISSTREAM_KEY_STORAGE = "setsail_aisstream_api_key";
   // Shared SetSail key — all users connect by default; optional localStorage override.
   const DEFAULT_AISSTREAM_API_KEY = "d340d8078f597170e53ff92ddd194609b2d5fc8b";
 
-  // Wide viewport still loads live AIS — targets appear without extreme zoom-in.
-  // OW_AREA_CAP is spanLon*spanLat (deg²); ~2800 ≈ continental / multi-sea view.
-  const OW_AREA_CAP = 2800;
-  const OW_MAX_TILES = 24;
+  // Wide viewport still loads live AIS — targets appear as soon as the AIS tile is on.
+  // OW_AREA_CAP is spanLon*spanLat (deg²). Above this we still show zone snapshots + stream.
+  const OW_AREA_CAP = 4200;
+  const OW_MAX_TILES = 28;
   const ABS_MARKER_CAP = 15000;
-  const MIN_ZOOM_ZONES = 2;
-  const MIN_ZOOM_DENSE_ZONES = 3;
-  const MIN_ZOOM_DIGITRAFFIC = 2;
+  const MIN_ZOOM_ZONES = 1;
+  const MIN_ZOOM_DENSE_ZONES = 2;
+  const MIN_ZOOM_DIGITRAFFIC = 1;
+  // At overview zoom, sample a coarse world grid for Open Waters so the ocean is never empty.
+  const OVERVIEW_SAMPLE_BOXES = [
+    { minLat: 30, minLon: -80, maxLat: 45, maxLon: -60 },   // NW Atlantic
+    { minLat: 10, minLon: -70, maxLat: 25, maxLon: -50 },   // Caribbean / mid-At
+    { minLat: 0, minLon: -40, maxLat: 20, maxLon: -10 },    // tropical At
+    { minLat: 35, minLon: -20, maxLat: 50, maxLon: 0 },     // NE At / Europe W
+    { minLat: 0, minLon: 95, maxLat: 15, maxLon: 115 },     // Singapore / SCS
+    { minLat: 20, minLon: 115, maxLat: 40, maxLon: 140 },   // East China / Japan
+    { minLat: 30, minLon: -140, maxLat: 45, maxLon: -120 }, // NE Pacific
+    { minLat: -40, minLon: 10, maxLat: -20, maxLon: 40 },   // Cape approaches
+    { minLat: 10, minLon: 40, maxLat: 25, maxLon: 65 },     // Arabian Sea
+    { minLat: 50, minLon: 0, maxLat: 62, maxLon: 20 }       // North Sea / Baltic gate
+  ];
 
   let leafletAisLayer = null;
   let aisTimer = null;
@@ -31,13 +46,16 @@
   let zoneCache = Object.create(null);
   let aisRefreshSeq = 0;
 
-  // AISStream.io WebSocket State
+  // Live WebSocket feeds (AISStream + OpenSeaFeed) → one MMSI map (no duplicate markers)
   let aisStreamWs = null;
+  let openSeaFeedWs = null;
   let aisStreamTargets = Object.create(null);
   let aisStreamReconnectTimer = null;
+  let openSeaFeedReconnectTimer = null;
   let aisStreamRenderTimer = null;
   let aisStreamPendingRender = false;
   let lastRestTargets = [];
+  let liveFeedStatus = { aisstream: "DISCONNECTED", openseafeed: "DISCONNECTED" };
 
   function getPersonalAisStreamApiKey() {
     return "";
@@ -211,73 +229,134 @@
   }
 
   function connectAisStream() {
-    const apiKey = getAisStreamApiKey();
+    connectLiveAisFeeds();
+  }
+
+  function connectLiveAisFeeds() {
     const map = window.leafletMap;
-    if (!apiKey || !map || !(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) {
+    if (!map || !(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) {
       disconnectAisStream();
       return;
     }
+    connectAisStreamFeed();
+    connectOpenSeaFeed();
+  }
+
+  function openCompatibleAisWs(url, feedId, onOpen) {
+    let ws;
+    try {
+      ws = new WebSocket(url);
+    } catch (e) {
+      console.warn("[SetSail AIS] WS init error (" + feedId + "):", e);
+      liveFeedStatus[feedId] = "ERROR";
+      updateAisStreamStatusUI();
+      return null;
+    }
+    ws.onopen = function () {
+      liveFeedStatus[feedId] = "CONNECTED";
+      updateAisStreamStatusUI();
+      if (typeof onOpen === "function") onOpen(ws);
+    };
+    ws.onmessage = function (event) {
+      try {
+        const msg = JSON.parse(event.data);
+        handleAisStreamMessage(msg, feedId);
+      } catch (e) {}
+    };
+    ws.onerror = function () {
+      liveFeedStatus[feedId] = "ERROR";
+      updateAisStreamStatusUI();
+    };
+    return ws;
+  }
+
+  function connectAisStreamFeed() {
+    const apiKey = getAisStreamApiKey();
+    if (!apiKey) return;
     if (aisStreamWs && (aisStreamWs.readyState === WebSocket.OPEN || aisStreamWs.readyState === WebSocket.CONNECTING)) {
       sendAisStreamSubscription();
       return;
     }
-
-    try {
-      aisStreamWs = new WebSocket(AISSTREAM_WS_URL);
-    } catch (e) {
-      console.warn("[SetSail AIS] AISStream WS init error:", e);
-      return;
-    }
-
-    aisStreamWs.onopen = function () {
-      console.log("[SetSail AIS] Connected to AISStream.io live stream");
-      updateAisStreamStatusUI("CONNECTED");
+    aisStreamWs = openCompatibleAisWs(AISSTREAM_WS_URL, "aisstream", function () {
+      console.log("[SetSail AIS] Connected to AISStream.io");
       sendAisStreamSubscription();
-    };
-
-    aisStreamWs.onmessage = function (event) {
-      try {
-        const msg = JSON.parse(event.data);
-        handleAisStreamMessage(msg);
-      } catch (e) {}
-    };
-
-    aisStreamWs.onerror = function (err) {
-      console.warn("[SetSail AIS] AISStream WS error:", err);
-      updateAisStreamStatusUI("ERROR");
-    };
-
+    });
+    if (!aisStreamWs) return;
     aisStreamWs.onclose = function () {
-      updateAisStreamStatusUI("DISCONNECTED");
+      liveFeedStatus.aisstream = "DISCONNECTED";
+      updateAisStreamStatusUI();
+      aisStreamWs = null;
       if (window.OVERLAY_STATES && window.OVERLAY_STATES.ais && getAisStreamApiKey()) {
         clearTimeout(aisStreamReconnectTimer);
-        aisStreamReconnectTimer = setTimeout(connectAisStream, 6000);
+        aisStreamReconnectTimer = setTimeout(connectAisStreamFeed, 6000);
       }
     };
   }
 
-  function sendAisStreamSubscription() {
-    if (!aisStreamWs || aisStreamWs.readyState !== WebSocket.OPEN) return;
-    const apiKey = getAisStreamApiKey();
+  function connectOpenSeaFeed() {
+    if (openSeaFeedWs && (openSeaFeedWs.readyState === WebSocket.OPEN || openSeaFeedWs.readyState === WebSocket.CONNECTING)) {
+      sendOpenSeaFeedSubscription();
+      return;
+    }
+    openSeaFeedWs = openCompatibleAisWs(OPENSEAFEED_WS_URL, "openseafeed", function () {
+      console.log("[SetSail AIS] Connected to OpenSeaFeed (community)");
+      sendOpenSeaFeedSubscription();
+    });
+    if (!openSeaFeedWs) return;
+    openSeaFeedWs.onclose = function () {
+      liveFeedStatus.openseafeed = "DISCONNECTED";
+      updateAisStreamStatusUI();
+      openSeaFeedWs = null;
+      if (window.OVERLAY_STATES && window.OVERLAY_STATES.ais) {
+        clearTimeout(openSeaFeedReconnectTimer);
+        openSeaFeedReconnectTimer = setTimeout(connectOpenSeaFeed, 8000);
+      }
+    };
+  }
+
+  function buildAisstreamStyleSub(apiKey) {
     const map = window.leafletMap;
     const boxes = getMapAisStreamBoxes(map);
-    if (!apiKey || !boxes) return;
+    if (!boxes) return null;
+    const sub = {
+      BoundingBoxes: boxes,
+      FilterMessageTypes: ["PositionReport", "StandardClassBPositionReport", "ShipStaticData"]
+    };
+    if (apiKey) sub.APIKey = apiKey;
+    return sub;
+  }
 
+  function sendAisStreamSubscription() {
+    if (!aisStreamWs || aisStreamWs.readyState !== WebSocket.OPEN) return;
+    const sub = buildAisstreamStyleSub(getAisStreamApiKey());
+    if (!sub || !sub.APIKey) return;
     try {
-      // Do NOT set FiltersShipMMSI here — it AND-restricts the stream to those MMSIs only.
-      const sub = {
-        APIKey: apiKey,
-        BoundingBoxes: boxes,
-        FilterMessageTypes: ["PositionReport", "StandardClassBPositionReport", "ShipStaticData"]
-      };
       aisStreamWs.send(JSON.stringify(sub));
     } catch (e) {
-      console.warn("[SetSail AIS] send subscription error:", e);
+      console.warn("[SetSail AIS] AISStream subscribe error:", e);
     }
+  }
+
+  function sendOpenSeaFeedSubscription() {
+    if (!openSeaFeedWs || openSeaFeedWs.readyState !== WebSocket.OPEN) return;
+    // Free tier: omit APIKey (OpenSeaFeed docs)
+    const sub = buildAisstreamStyleSub(null);
+    if (!sub) return;
+    try {
+      openSeaFeedWs.send(JSON.stringify(sub));
+    } catch (e) {
+      console.warn("[SetSail AIS] OpenSeaFeed subscribe error:", e);
+    }
+  }
+
+  function sendAisStreamSubscriptionAll() {
+    sendAisStreamSubscription();
+    sendOpenSeaFeedSubscription();
   }
 
   function disconnectAisStream() {
     clearTimeout(aisStreamReconnectTimer);
+    clearTimeout(openSeaFeedReconnectTimer);
     clearTimeout(aisStreamRenderTimer);
     if (aisStreamWs) {
       try {
@@ -286,10 +365,19 @@
       } catch (e) {}
       aisStreamWs = null;
     }
-    updateAisStreamStatusUI("DISCONNECTED");
+    if (openSeaFeedWs) {
+      try {
+        openSeaFeedWs.onclose = null;
+        openSeaFeedWs.close();
+      } catch (e) {}
+      openSeaFeedWs = null;
+    }
+    liveFeedStatus.aisstream = "DISCONNECTED";
+    liveFeedStatus.openseafeed = "DISCONNECTED";
+    updateAisStreamStatusUI();
   }
 
-  function handleAisStreamMessage(msg) {
+  function handleAisStreamMessage(msg, feedId) {
     if (!msg) return;
     const meta = msg.MetaData || {};
     const posMsg = (msg.Message && (msg.Message.PositionReport || msg.Message.StandardClassBPositionReport)) || {};
@@ -297,11 +385,12 @@
 
     const mmsi = meta.MMSI || meta.MMSI_String || posMsg.UserID || staticMsg.UserID;
     if (!mmsi) return;
+    const mmsiKey = String(mmsi);
 
     let lat = Number(meta.latitude != null ? meta.latitude : (meta.Latitude != null ? meta.Latitude : posMsg.Latitude));
     let lon = Number(meta.longitude != null ? meta.longitude : (meta.Longitude != null ? meta.Longitude : posMsg.Longitude));
 
-    const prev = aisStreamTargets[mmsi] || {};
+    const prev = aisStreamTargets[mmsiKey] || {};
 
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
       if (prev.lat != null && prev.lon != null) {
@@ -312,6 +401,11 @@
       }
     }
 
+    const sourceLabel =
+      feedId === "openseafeed"
+        ? "OpenSeaFeed (community)"
+        : "AISStream.io (Live Satellite/Terrestrial)";
+
     const shipName = (meta.ShipName || staticMsg.Name || prev.name || ("MMSI " + mmsi)).trim();
     const callSign = (staticMsg.CallSign || prev.callSign || "").trim();
     const sog = posMsg.Sog != null ? posMsg.Sog : prev.sog;
@@ -321,42 +415,53 @@
     const destination = (staticMsg.Destination || prev.destination || "").trim();
     const shipType = staticMsg.Type != null ? staticMsg.Type : prev.shipType;
 
-    aisStreamTargets[mmsi] = {
+    // One marker per MMSI — later frames overwrite position; static fields fill gaps
+    const next = {
       mmsi: mmsi,
       lat: lat,
       lon: lon,
-      name: shipName,
-      callSign: callSign,
+      name: shipName || prev.name,
+      callSign: callSign || prev.callSign,
       sog: sog,
       cog: cog,
       heading: heading,
       navStat: navStat,
-      destination: destination,
-      shipType: shipType,
-      source: "AISStream.io (Live Satellite/Terrestrial)",
+      destination: destination || prev.destination,
+      shipType: shipType != null ? shipType : prev.shipType,
+      source: prev.source && prev.source !== sourceLabel
+        ? (String(prev.source).indexOf(sourceLabel) >= 0 ? prev.source : prev.source + " + " + sourceLabel)
+        : sourceLabel,
       updatedAt: Date.now()
     };
+    aisStreamTargets[mmsiKey] = next;
 
     scheduleAisStreamRender();
   }
 
-  function updateAisStreamStatusUI(status) {
+  function updateAisStreamStatusUI() {
     const badge = document.getElementById("aisStreamStatusBadge");
     const label = document.getElementById("aisStreamStatusLabel");
     if (!badge) return;
-    const key = getAisStreamApiKey();
-    if (status === "CONNECTED") {
-      badge.textContent = "CONNECTED (LIVE STREAM)";
+    const a = liveFeedStatus.aisstream === "CONNECTED";
+    const o = liveFeedStatus.openseafeed === "CONNECTED";
+    if (a || o) {
+      badge.textContent = a && o ? "CONNECTED (2 LIVE FEEDS)" : "CONNECTED (LIVE STREAM)";
       badge.style.background = "#10b981";
-      if (label) label.textContent = "Live Global AISStream.io";
-    } else if (key) {
+      if (label) {
+        label.textContent = a && o
+          ? "AISStream.io + OpenSeaFeed"
+          : a
+            ? "Live Global AISStream.io"
+            : "OpenSeaFeed (community)";
+      }
+    } else if (getAisStreamApiKey()) {
       badge.textContent = "RECONNECTING";
       badge.style.background = "#0284c7";
-      if (label) label.textContent = "Live Global AISStream.io";
+      if (label) label.textContent = "AISStream.io + OpenSeaFeed";
     } else {
-      badge.textContent = "COMMUNITY FALLBACK ONLY";
+      badge.textContent = "COMMUNITY FALLBACK";
       badge.style.background = "#eab308";
-      if (label) label.textContent = "Open Waters Community Feed";
+      if (label) label.textContent = "OpenSeaFeed + Open Waters";
     }
   }
 
@@ -372,8 +477,36 @@
       if (!Array.isArray(list)) continue;
       for (const t of list) {
         if (!t) continue;
-        const key = t.mmsi ? String(t.mmsi) : t.lat.toFixed(3) + "," + t.lon.toFixed(3);
-        map[key] = Object.assign({}, map[key] || {}, t);
+        const key = t.mmsi != null && t.mmsi !== ""
+          ? String(t.mmsi)
+          : (Number(t.lat).toFixed(3) + "," + Number(t.lon).toFixed(3));
+        const prev = map[key];
+        if (!prev) {
+          map[key] = Object.assign({}, t);
+          continue;
+        }
+        // Same MMSI from multiple feeds → keep one target; prefer fresher position, fill blanks
+        const prevTs = Number(prev.updatedAt) || 0;
+        const nextTs = Number(t.updatedAt) || 0;
+        const preferNewPos = nextTs >= prevTs;
+        const merged = Object.assign({}, prev);
+        Object.keys(t).forEach((k) => {
+          const v = t[k];
+          if (v == null || v === "") return;
+          if (k === "lat" || k === "lon" || k === "sog" || k === "cog" || k === "heading" || k === "navStat") {
+            if (preferNewPos || prev[k] == null || prev[k] === "") merged[k] = v;
+          } else if (k === "source") {
+            const a = String(prev.source || "");
+            const b = String(v);
+            if (a && b && a !== b && a.indexOf(b) < 0) merged.source = a + " + " + b;
+            else if (!a) merged.source = b;
+          } else if (k === "updatedAt") {
+            merged.updatedAt = Math.max(prevTs, nextTs) || nextTs || prevTs;
+          } else if (prev[k] == null || prev[k] === "") {
+            merged[k] = v;
+          }
+        });
+        map[key] = merged;
       }
     }
     return Object.values(map);
@@ -434,13 +567,24 @@
     const w = b.getWest();
     const e = b.getEast();
 
+    const pickOverviewBoxes = (limit) => {
+      const view = { minLat: s, maxLat: n, minLon: w, maxLon: e };
+      const scored = OVERVIEW_SAMPLE_BOXES.map((box) => {
+        const hit = bboxOverlaps(box, view);
+        return { box, hit };
+      });
+      const preferred = scored.filter((x) => x.hit).map((x) => x.box);
+      const rest = scored.filter((x) => !x.hit).map((x) => x.box);
+      return preferred.concat(rest).slice(0, limit || 10);
+    };
+
     if (e - w >= 355 || zoom <= 1) {
       return {
         mode: "world",
         zoom: zoom,
-        skipLive: true,
-        skipZones: zoom < MIN_ZOOM_ZONES,
-        boxes: []
+        skipLive: false,
+        skipZones: false,
+        boxes: pickOverviewBoxes(OVERVIEW_SAMPLE_BOXES.length)
       };
     }
 
@@ -449,12 +593,13 @@
     const approxArea = spanLon * spanLat;
 
     if (approxArea > OW_AREA_CAP) {
+      // Still fetch sample corridors so AIS tile shows traffic immediately (MarineTraffic-like density cue)
       return {
         mode: "overview",
         zoom: zoom,
-        skipLive: true,
-        skipZones: zoom < MIN_ZOOM_ZONES,
-        boxes: []
+        skipLive: false,
+        skipZones: false,
+        boxes: pickOverviewBoxes(8)
       };
     }
 
@@ -665,12 +810,18 @@
         } catch (e) {}
       }
       if (seq !== aisRefreshSeq) return;
-      let rest = filterToViewport(mergeByMmsi([live, digi]), map);
+      // At overview/world, keep sample-box targets even if slightly outside strict bounds
+      // so enabling the AIS tile immediately shows traffic density.
+      let rest = mergeByMmsi([live, digi]);
+      if (plan.mode === "viewport") {
+        rest = filterToViewport(rest, map);
+      }
 
       if (!plan.skipZones) {
         const zoneAll = await loadZonesForMap(map, plan.zoom || map.getZoom());
         if (seq !== aisRefreshSeq) return;
-        rest = filterToViewport(mergeByMmsi([rest, zoneAll]), map);
+        const z = plan.mode === "viewport" ? filterToViewport(zoneAll, map) : zoneAll;
+        rest = mergeByMmsi([rest, z]);
       }
 
       lastRestTargets = rest;
@@ -706,7 +857,7 @@
         clearTimeout(aisMoveTimer);
         aisMoveTimer = setTimeout(() => {
           refreshAisOverlay();
-          sendAisStreamSubscription();
+          sendAisStreamSubscriptionAll();
         }, 450);
       });
     }
@@ -732,7 +883,7 @@
       const n = aisLastPayload && aisLastPayload.count;
       if (typeof showSetSailToast === "function") {
         showSetSailToast(
-          "AISStream.io: Live global satellite/terrestrial stream active." + (n != null ? " Targets: " + n : ""),
+          "AIS live feeds: AISStream.io + OpenSeaFeed (MMSI-deduped)." + (n != null ? " Targets: " + n : ""),
           "info"
         );
       }
@@ -766,7 +917,7 @@
       countEl.textContent = "Targets in view: " + total + " (Live stream: " + streamCount + ")";
     }
 
-    updateAisStreamStatusUI(aisStreamWs && aisStreamWs.readyState === WebSocket.OPEN ? "CONNECTED" : "DISCONNECTED");
+    updateAisStreamStatusUI();
     modal.classList.add("open");
   }
 

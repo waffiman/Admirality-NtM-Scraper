@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.82" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.84" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -740,7 +740,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
    High-efficiency Maritime Cockpit / Workstation Layout
    ========================================================================== */
 
-/* в”Ђв”Ђ App Shell Layout в”Ђв”Ђ */
+/* ── App Shell Layout ── */
 .app-container {
   display: flex;
   min-height: 100vh;
@@ -748,7 +748,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   z-index: 1;
 }
 
-/* в”Ђв”Ђ Left Navigation Sidebar (Thin 58px) в”Ђв”Ђ */
+/* ── Left Navigation Sidebar (Thin 58px) ── */
 .nav-sidebar {
   width: 58px;
   flex: 0 0 58px;
@@ -872,7 +872,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   transform: translateX(0);
 }
 
-/* в”Ђв”Ђ Content Viewport в”Ђв”Ђ */
+/* ── Content Viewport ── */
 .app-content {
   flex: 1 1 auto;
   min-width: 0;
@@ -1331,7 +1331,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   grid-template-columns: 0px 1fr;
 }
 
-/* в”Ђв”Ђ Notices Sidebar в”Ђв”Ђ */
+/* ── Notices Sidebar ── */
 .ntm-sidebar-list {
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -2906,7 +2906,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
    MOBILE & DESKTOP RESPONSIVE ADAPTATIONS
    ========================================================================== */
 
-/* в”Ђв”Ђ DESKTOP DISPLAY (Screens >= 769px) в”Ђв”Ђ */
+/* ── DESKTOP DISPLAY (Screens >= 769px) ── */
 @media (min-width: 769px) {
   html, body {
     height: 100% !important;
@@ -2957,7 +2957,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   }
 }
 
-/* в”Ђв”Ђ MOBILE & TABLET DISPLAY (Screens <= 768px) в”Ђв”Ђ */
+/* ── MOBILE & TABLET DISPLAY (Screens <= 768px) ── */
 @media (max-width: 768px) {
   html, body {
     height: 100% !important;
@@ -4735,7 +4735,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 
 
-/* в”Ђв”Ђ Home HUD Alignment: UTC Centered, POS Right в”Ђв”Ђ */
+/* ── Home HUD Alignment: UTC Centered, POS Right ── */
 .home-hud-top {
   display: grid !important;
   grid-template-columns: 1fr auto 1fr !important;
@@ -4752,7 +4752,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   justify-self: end !important;
 }
 
-/* в”Ђв”Ђ Minimalist Excel Dock: Simple Title + Info Icon в”Ђв”Ђ */
+/* ── Minimalist Excel Dock: Simple Title + Info Icon ── */
 .excel-tab-info-btn {
   display: inline-flex;
   align-items: center;
@@ -4768,7 +4768,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   transform: scale(1.2);
 }
 
-/* в”Ђв”Ђ Zero Vertical Scroll on Map Page в”Ђв”Ђ */
+/* ── Zero Vertical Scroll on Map Page ── */
 #tab-ntm {
   height: 100vh !important;
   max-height: 100vh !important;
@@ -4781,7 +4781,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   overflow: hidden !important;
 }
 
-/* в”Ђв”Ђ Leaflet Layers Control Fix: Replace Empty Black Square with Crisp Layers SVG в”Ђв”Ђ */
+/* ── Leaflet Layers Control Fix: Replace Empty Black Square with Crisp Layers SVG ── */
 .leaflet-control-layers {
   background: rgba(14, 23, 42, 0.92) !important;
   border: 1px solid rgba(56, 189, 248, 0.35) !important;
@@ -4846,7 +4846,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   margin: 0 !important;
 }
 
-/* в”Ђв”Ђ Leaflet Dark Maritime Popups (Fix White Cards on Dark Theme) в”Ђв”Ђ */
+/* ── Leaflet Dark Maritime Popups (Fix White Cards on Dark Theme) ── */
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
   background: #0d172e !important;
@@ -4871,7 +4871,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   color: #f05a36 !important;
 }
 
-/* в”Ђв”Ђ Hardware-Accelerated Leaflet Tile & Layer Rendering (Zero Stutter on Deep Zoom) в”Ђв”Ђ */
+/* ── Hardware-Accelerated Leaflet Tile & Layer Rendering (Zero Stutter on Deep Zoom) ── */
 .leaflet-tile {
   will-change: transform, opacity;
   image-rendering: -webkit-optimize-contrast;
@@ -4887,7 +4887,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   will-change: transform;
 }
 
-/* в”Ђв”Ђ Port Flag Symbol & Graphic Badge в”Ђв”Ђ */
+/* ── Port Flag Symbol & Graphic Badge ── */
 .port-flag-box {
   display: inline-flex;
   align-items: center;
@@ -4910,7 +4910,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   display: block;
 }
 
-/* в”Ђв”Ђ Port Anchor DivIcon Marker Reset в”Ђв”Ђ */
+/* ── Port Anchor DivIcon Marker Reset ── */
 .ntm-port-anchor-marker {
   background: transparent !important;
   border: none !important;
@@ -5551,7 +5551,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   color: #34d399;
 }
 .progress-step-item.done::before {
-  content: "вњ“";
+  content: "✓";
   font-weight: 800;
 }
 
@@ -7218,12 +7218,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 
 .about-moz-tile.is-shuffling {
-  opacity: 0.78;
-  filter: saturate(0.88);
+  opacity: 0.55;
+  filter: saturate(0.75) brightness(1.05);
+  transition: opacity 0.7s ease, filter 0.7s ease, transform 0.7s ease;
 }
 .about-moz-tile.is-shuffling img {
-  transform: scale(1.05);
-  transition: transform 0.35s ease, opacity 0.35s ease;
+  transform: scale(1.08);
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease;
+}
+.about-moz-tile img {
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease, filter 0.55s ease;
 }
 .about-body-gap {
   margin-top: 0.55rem;
@@ -7235,6 +7239,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   object-fit: cover;
   display: block;
   filter: saturate(0.92) contrast(1.05);
+  will-change: transform, opacity;
 }
 
 /* Square mark centered over the mosaic strip — forced 1:1 box */
@@ -9350,7 +9355,7 @@ select option {
 
 
 
-    /* в”Ђв”Ђ Star Almanac sidebar в”Ђв”Ђ */
+    /* ── Star Almanac sidebar ── */
 
 
 
@@ -9834,7 +9839,7 @@ select option {
 
 
 
-    /* в”Ђв”Ђ WAFFi footer в”Ђв”Ђ */
+    /* ── WAFFi footer ── */
 
 
 
@@ -11984,11 +11989,11 @@ select option {
 
 
 
-    <!-- в”Ђв”Ђ Left Navigation Sidebar в”Ђв”Ђ -->
+    <!-- ── Left Navigation Sidebar ── -->
 
 
 
-    <!-- в”Ђв”Ђ Left Navigation Sidebar в”Ђв”Ђ -->
+    <!-- ── Left Navigation Sidebar ── -->
 
 
 
@@ -12059,7 +12064,7 @@ select option {
             <span class="badge" id="navRoutesCountBadge" style="display:inline-block;background:#0284c7;font-size:0.52rem;font-weight:800;padding:1px 4px;">AI</span>
             <span class="tooltip">SetRoute · Passage Brain</span>
           </button>
-          <button type="button" class="nav-route-expand-arrow" id="navRouteExpandArrow" title="Expand / Collapse Saved Routes List" aria-label="Toggle Saved Routes">в–ѕ</button>
+          <button type="button" class="nav-route-expand-arrow" id="navRouteExpandArrow" title="Expand / Collapse Saved Routes List" aria-label="Toggle Saved Routes">▾</button>
         </div>
         <div class="nav-saved-routes-list" id="navSavedRoutesList" role="region" aria-label="Saved &amp; Generated Routes"></div>
       </div>
@@ -12089,7 +12094,7 @@ select option {
 
 
 
-    <!-- в”Ђв”Ђ Main Viewport Content в”Ђв”Ђ -->
+    <!-- ── Main Viewport Content ── -->
 
 
 
@@ -12097,7 +12102,7 @@ select option {
 
 
 
-            <!-- в”Ђв”Ђ Tab 0: Cinematic Home / Overview (Top SaaS 4-Slide Scroll-Driven Experience) в”Ђв”Ђ -->
+            <!-- ── Tab 0: Cinematic Home / Overview (Top SaaS 4-Slide Scroll-Driven Experience) ── -->
       <div id="tab-home" class="tab-pane active">
         <div class="home-hero-viewport" id="homeHeroViewport">
           <!-- Slide 1 Background Video -->
@@ -12123,7 +12128,7 @@ select option {
           <div class="home-hero-content">
             <!-- Top Bridge HUD Bar (3-Column Grid: Col 1 Left, Col 2 Center, Col 3 Right) -->
             <div class="home-hud-top" id="homeHudTop" style="display:grid !important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) !important;align-items:center !important;width:100% !important;position:relative !important;">
-              <!-- Column 1 (Left): "SETSAIL в—Џ" on Slide 1; UTC Clock glides into this slot on Slide 2..4 -->
+              <!-- Column 1 (Left): "SETSAIL ●" on Slide 1; UTC Clock glides into this slot on Slide 2..4 -->
               <div class="home-hud-pill home-hud-left" id="homeHudLeftSlot" style="grid-column:1 !important;justify-self:start !important;position:relative !important;min-width:0 !important;">
                 <div class="hud-left-brand-wrap" id="homeHudLeftBrand">
                   <button type="button" class="home-hud-login-btn" id="homeHudLeftLoginBtn" title="Sign in or manage your SetSail Account (Google OAuth / Bridge Profile)">
@@ -12410,7 +12415,7 @@ select option {
                     A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" src="assets/about/founder.jpg?v=5.82" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';" />
+                    <img class="about-founder-photo" src="assets/about/founder.jpg?v=5.84" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · cadet &amp; future officer · IT agency co-founder</span>
@@ -12429,7 +12434,7 @@ select option {
 
 
 
-      <!-- в”Ђв”Ђ Tab 1: Gyro / Magnetic Compass Logbook в”Ђв”Ђ -->
+      <!-- ── Tab 1: Gyro / Magnetic Compass Logbook ── -->
 
 
 
@@ -12708,7 +12713,7 @@ select option {
 
 
 
-    <!-- в”Ђв”Ђ Star Almanac Sidebar в”Ђв”Ђ -->
+    <!-- ── Star Almanac Sidebar ── -->
 
 
 
@@ -13045,7 +13050,7 @@ select option {
 
 
 
-      <!-- в”Ђв”Ђ Tab 2: Auto-NtM Plotter (Admiralty Notices & ECDIS Overlay) в”Ђв”Ђ -->
+      <!-- ── Tab 2: Auto-NtM Plotter (Admiralty Notices & ECDIS Overlay) ── -->
 
 
 
@@ -13053,7 +13058,7 @@ select option {
 
 
 
-        <!-- в”Ђв”Ђ Top Command Bar (Fixed Single Row) в”Ђв”Ђ -->
+        <!-- ── Top Command Bar (Fixed Single Row) ── -->
 
 
 
@@ -13270,7 +13275,7 @@ select option {
 
 
 
-        <!-- в”Ђв”Ђ Split Workspace: Left Sidebar + Right Map в”Ђв”Ђ -->
+        <!-- ── Split Workspace: Left Sidebar + Right Map ── -->
 
 
 
@@ -13306,7 +13311,7 @@ select option {
 
 
 
-                в—Ђ
+                ◀
 
 
 
@@ -13826,7 +13831,7 @@ select option {
 
 
 
-              в–¶
+              ▶
 
 
 
@@ -13848,7 +13853,7 @@ select option {
 
             <div class="ntm-vessel-hud" id="ntmVesselHud" style="display:none;"></div>
 
-          <!-- в”Ђв”Ђ SetSail v4.9: Floating Draggable Route Snapshot & Corridor Buffer HUD Window в”Ђв”Ђ -->
+          <!-- ── SetSail v4.9: Floating Draggable Route Snapshot & Corridor Buffer HUD Window ── -->
           <div class="ntm-route-mini-window" id="ntmRouteMiniWindow" style="display:none;">
             <div class="ntm-route-mini-header" id="ntmRouteMiniDragHandle" title="Drag to reposition anywhere on chart">
               <div class="ntm-route-mini-title-wrap">
@@ -13856,7 +13861,7 @@ select option {
                 <span class="ntm-route-mini-title" id="routeMiniTitle">Active Passage Plan</span>
               </div>
               <div class="ntm-route-mini-actions">
-                <button type="button" class="ntm-route-mini-icon-btn" id="btnRouteMiniFit" title="Zoom to Route Bounds">вЊ–</button>
+                <button type="button" class="ntm-route-mini-icon-btn" id="btnRouteMiniFit" title="Zoom to Route Bounds">⌖</button>
                 <button type="button" class="ntm-route-mini-icon-btn" id="btnRouteMiniMinimize" title="Minimize / Expand">—</button>
               </div>
             </div>
@@ -13947,7 +13952,7 @@ select option {
                   <span class="excel-tab-check"></span>
                   <span class="excel-tab-name">AIS</span>
                   <span class="excel-tab-badge" style="display:none;" aria-hidden="true"></span>
-                  <span class="excel-tab-info-btn" id="btnAisOverlayInfo" title="AIS — Live AISStream.io (shared key) + Open Waters / Digitraffic / zones"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
+                  <span class="excel-tab-info-btn" id="btnAisOverlayInfo" title="AIS — AISStream.io + OpenSeaFeed (MMSI-deduped) + Open Waters / Digitraffic / zones"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
 <button type="button" class="excel-tab excel-tab-route" data-overlay="route" id="tabOverlayRoute">
                   <span class="excel-tab-spinner" aria-hidden="true"></span>
@@ -13976,7 +13981,7 @@ select option {
 
 
 
-            <!-- в”Ђв”Ђ Tab 4: SetRoute™ v5.0 — Dual-Core Conversational Passage Brain & Leg-by-Leg Inspector в”Ђв”Ђ -->
+            <!-- ── Tab 4: SetRoute™ v5.0 — Dual-Core Conversational Passage Brain & Leg-by-Leg Inspector ── -->
       <div id="tab-route" class="tab-pane">
         <div class="setroute-gpt-shell" id="setRouteGptShell">
           <!-- Left Main Column: Minimalist ChatGPT-Style Workspace -->
@@ -14037,7 +14042,7 @@ select option {
             <!-- ROUTE MONITORING MODE: Minimalist Coming Soon View -->
             <div class="setroute-chat-scroll" id="setRouteMonitoringPanel" style="display:none;">
               <div class="setroute-coming-soon-box" id="setRouteMonitoringContent">
-                <div class="sr-coming-soon-icon">рџ“Ў</div>
+                <div class="sr-coming-soon-icon">📡</div>
                 <span class="sr-coming-soon-badge">COMING SOON</span>
                 <h3 class="sr-coming-soon-title">Live Route Monitoring</h3>
                 <p class="sr-coming-soon-desc">
@@ -14053,14 +14058,14 @@ select option {
               <div class="setroute-params-popover" id="setRouteParamsPopover">
                 <div class="sr-params-popover-head">
                   <span>Route Parameters</span>
-                  <button type="button" onclick="document.getElementById('setRouteParamsPopover').classList.remove('open')" style="background:none;border:none;color:#94a3b8;cursor:pointer;">вњ•</button>
+                  <button type="button" onclick="document.getElementById('setRouteParamsPopover').classList.remove('open')" style="background:none;border:none;color:#94a3b8;cursor:pointer;">✕</button>
                 </div>
                 <div class="setroute-params-toolbar" style="border:none;padding:0;background:transparent;">
                   <div class="setroute-mini-field" title="Departure Port">
                     <span class="port-dir-badge dep">DEP</span>
                     <select id="setRouteOriginSelect" aria-label="Departure Port"></select>
                   </div>
-                  <button type="button" id="btnSwapPorts" class="setroute-top-btn" style="padding:2px 7px;font-size:0.7rem;" title="Swap Origin &amp; Destination">в‡„</button>
+                  <button type="button" id="btnSwapPorts" class="setroute-top-btn" style="padding:2px 7px;font-size:0.7rem;" title="Swap Origin &amp; Destination">⇄</button>
                   <div class="setroute-mini-field" title="Destination Port">
                     <span class="port-dir-badge dest">ARR</span>
                     <select id="setRouteDestSelect" aria-label="Destination Port"></select>
@@ -14123,8 +14128,8 @@ select option {
                 <h3 id="resultsRouteTitle" style="font-size:0.95rem;font-weight:800;margin:2px 0 0;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Active Passage Plan</h3>
               </div>
               <div style="display:flex;align-items:center;gap:6px;">
-                <button type="button" id="btnExportSetRouteGeoJson" class="setroute-top-btn" style="padding:4px 9px;font-size:0.68rem;" title="Export Route GeoJSON">в¬‡ GeoJSON</button>
-                <button type="button" id="btnCloseRightDrawer" class="setroute-top-btn" style="padding:4px 8px;font-size:0.75rem;" title="Close Route Details Panel">вњ•</button>
+                <button type="button" id="btnExportSetRouteGeoJson" class="setroute-top-btn" style="padding:4px 9px;font-size:0.68rem;" title="Export Route GeoJSON">⬇ GeoJSON</button>
+                <button type="button" id="btnCloseRightDrawer" class="setroute-top-btn" style="padding:4px 8px;font-size:0.75rem;" title="Close Route Details Panel">✕</button>
               </div>
             </div>
 
@@ -14156,7 +14161,7 @@ select option {
                   Audit Legs
                 </button>
                 <button type="button" class="setroute-top-btn" id="btnDrawerDeleteRoute" style="color:#fda4af;border-color:rgba(244,63,94,0.35);" title="Remove route">
-                  вњ•
+                  ✕
                 </button>
               </div>
 
@@ -14183,7 +14188,7 @@ select option {
         </div>
       </div>
 
-      <!-- в”Ђв”Ђ Tab 4: SetNews — Global Maritime Intelligence & Personalized "For You" Feed в”Ђв”Ђ -->
+      <!-- ── Tab 4: SetNews — Global Maritime Intelligence & Personalized "For You" Feed ── -->
     <div id="tab-news" class="tab-pane">
       <div class="setnews-container">
         <!-- Editorial Masthead -->
@@ -14202,7 +14207,7 @@ select option {
               <input type="search" id="setNewsSearchInput" class="setnews-search-input" placeholder="Search vessels, straits, ports, cyclones...">
             </div>
             <button type="button" id="btnRefreshSetNews" class="setnews-cat-btn" style="border-color:rgba(56,189,248,0.4);color:#38bdf8;">
-              в†» Refresh Wire
+              ↻ Refresh Wire
             </button>
           </div>
         </header>
@@ -14216,14 +14221,14 @@ select option {
         <!-- Category Navigation Pills -->
         <div class="setnews-cat-bar">
           <div class="setnews-cat-scroll">
-            <button type="button" class="setnews-cat-btn active" data-news-cat="ALL">рџЊђ All Global Wire</button>
-            <button type="button" class="setnews-cat-btn" data-news-cat="FOR_YOU">вњЁ For You (AI Ranked)</button>
-            <button type="button" class="setnews-cat-btn" data-news-cat="Navigation & Safety">вљ пёЏ Navigation & Safety</button>
-            <button type="button" class="setnews-cat-btn" data-news-cat="Ports & Terminals">вљ“ Ports & Channels</button>
-            <button type="button" class="setnews-cat-btn" data-news-cat="Weather & Cyclones">рџЊЂ Weather & Cyclones</button>
-            <button type="button" class="setnews-cat-btn" data-news-cat="Shipping & Tankers">рџљў Tankers & Fleet</button>
-            <button type="button" class="setnews-cat-btn" data-news-cat="Geopolitics & Chokepoints">рџ›ЎпёЏ Chokepoints & Security</button>
-            <button type="button" class="setnews-cat-btn" data-news-cat="SAVED">рџ”– Saved stories</button>
+            <button type="button" class="setnews-cat-btn active" data-news-cat="ALL">🌐 All Global Wire</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="FOR_YOU">✨ For You (AI Ranked)</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="Navigation & Safety">⚠️ Navigation & Safety</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="Ports & Terminals">⚓ Ports & Channels</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="Weather & Cyclones">🌀 Weather & Cyclones</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="Shipping & Tankers">🚢 Tankers & Fleet</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="Geopolitics & Chokepoints">🛡️ Chokepoints & Security</button>
+            <button type="button" class="setnews-cat-btn" data-news-cat="SAVED">🔖 Saved stories</button>
           </div>
         </div>
 
@@ -14231,7 +14236,7 @@ select option {
         <section class="setnews-foryou-section">
           <div class="setnews-foryou-header">
             <div class="setnews-foryou-title-group">
-              <span class="setnews-foryou-badge">вњЁ FOR YOU</span>
+              <span class="setnews-foryou-badge">✨ FOR YOU</span>
               <h2 class="setnews-foryou-title">For you — land &amp; sea right now</h2>
             </div>
             <span class="setnews-foryou-context" id="setNewsForYouContext">AI Engine: Matched to Active Route & Reading Telemetry</span>
@@ -14247,12 +14252,12 @@ select option {
           <div class="setnews-wire-grid" id="setNewsWireGrid"></div>
           <aside class="setnews-radar-sidebar">
             <div style="display:flex;align-items:center;justify-content:space-between;">
-              <h3 style="font-size:0.88rem;font-weight:800;margin:0;color:#38bdf8;text-transform:uppercase;letter-spacing:0.05em;">рџ“Ў Maritime Region Radar</h3>
+              <h3 style="font-size:0.88rem;font-weight:800;margin:0;color:#38bdf8;text-transform:uppercase;letter-spacing:0.05em;">📡 Maritime Region Radar</h3>
               <span style="font-size:0.65rem;color:#64748b;">Click to filter</span>
             </div>
             <div id="setNewsRadarList" style="display:flex;flex-direction:column;gap:7px;"></div>
             <div style="margin-top:6px;padding:11px;border-radius:10px;background:rgba(14,165,233,0.08);border:1px solid rgba(56,189,248,0.2);font-size:0.71rem;color:#94a3b8;line-height:1.45;">
-              <strong style="color:#e2e8f0;display:block;margin-bottom:3px;">рџ§  How "For You" Works</strong>
+              <strong style="color:#e2e8f0;display:block;margin-bottom:3px;">🧠  How "For You" Works</strong>
               Articles are dynamically scored in real time using your <b>loaded passage plan route</b>, <b>vessel GPS/manual coordinates</b>, and <b>past article dwell time & likes</b>.
             </div>
           </aside>
@@ -14265,7 +14270,7 @@ select option {
       </div>
     </div>
 
-    <!-- в”Ђв”Ђ Tab 3: System Settings & Engineering Support в”Ђв”Ђ -->
+    <!-- ── Tab 3: System Settings & Engineering Support ── -->
 
 
 
@@ -14377,7 +14382,7 @@ select option {
               <div class="settings-language-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
                 <div style="display:flex;align-items:center;gap:10px;">
                   <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(16,185,129,0.22));border:1px solid rgba(56,189,248,0.45);display:flex;align-items:center;justify-content:center;color:#38bdf8;font-size:1.15rem;">
-                    рџЊђ
+                    🌐
                   </div>
                   <div>
                     <div class="min-card-title" style="margin-bottom:2px;" data-i18n="lang_settings_title" id="settingsLangHeading" data-i18n="lang_settings_title">Language</div>
@@ -14394,17 +14399,17 @@ select option {
                 </button>
                 <button type="button" class="lang-choice-btn" data-lang-code="ru" onclick="window.setSetSailLanguage('ru')">
                   <img src="assets/flags/ru.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/ru.png';" class="lang-flag-icon" alt="RU" />
-                  <span class="lang-choice-name">Р СѓСЃСЃРєРёР№</span>
+                  <span class="lang-choice-name">Русский</span>
                   <span class="lang-choice-sub">RU</span>
                 </button>
                 <button type="button" class="lang-choice-btn" data-lang-code="ja" onclick="window.setSetSailLanguage('ja')">
                   <img src="assets/flags/jp.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/jp.png';" class="lang-flag-icon" alt="JA" />
-                  <span class="lang-choice-name">ж—Ґжњ¬иЄћ</span>
+                  <span class="lang-choice-name">日本語</span>
                   <span class="lang-choice-sub">JA</span>
                 </button>
                 <button type="button" class="lang-choice-btn" data-lang-code="zh" onclick="window.setSetSailLanguage('zh')">
                   <img src="assets/flags/cn.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/cn.png';" class="lang-flag-icon" alt="ZH" />
-                  <span class="lang-choice-name">дё­ж–‡</span>
+                  <span class="lang-choice-name">中文</span>
                   <span class="lang-choice-sub">ZH</span>
                 </button>
                 <button type="button" class="lang-choice-btn" data-lang-code="es" onclick="window.setSetSailLanguage('es')">
@@ -14429,7 +14434,7 @@ select option {
                 </button>
                 <button type="button" class="lang-choice-btn" data-lang-code="hi" onclick="window.setSetSailLanguage('hi')">
                   <img src="assets/flags/in.png" onerror="this.onerror=null;this.src='https://flagcdn.com/w40/in.png';" class="lang-flag-icon" alt="HI" />
-                  <span class="lang-choice-name">а¤№а¤їа¤ЁаҐЌа¤¦аҐЂ</span>
+                  <span class="lang-choice-name">हिन्दी</span>
                   <span class="lang-choice-sub">HI</span>
                 </button>
               </div>
@@ -14987,7 +14992,7 @@ select option {
 
 
 
-        if (notify) showDevStatus("Saved to browser storage вњ“", "#7dffa6");
+        if (notify) showDevStatus("Saved to browser storage ✓", "#7dffa6");
 
 
 
@@ -15079,7 +15084,7 @@ select option {
 
 
 
-      showDevStatus("Reset to default (Aug 2026) вњ“", "#7dffa6");
+      showDevStatus("Reset to default (Aug 2026) ✓", "#7dffa6");
 
 
 
@@ -15362,7 +15367,7 @@ select option {
 
 
 
-    /** MagBrg = True в€’ Var в€’ Dev; play Mag heading near Gyro heading for Dev ≈ table; MagHead from bearing diff */
+    /** MagBrg = True − Var − Dev; play Mag heading near Gyro heading for Dev ≈ table; MagHead from bearing diff */
 
 
 
@@ -15386,7 +15391,7 @@ select option {
 
 
 
-        const neededMagErr = shortestDiff(trueAz, mBrg); // True в€’ MagBrg
+        const neededMagErr = shortestDiff(trueAz, mBrg); // True − MagBrg
 
 
 
@@ -15886,7 +15891,7 @@ select option {
 
 
 
-      // в”Ђв”Ђ DYNAMIC HEADING & DEVIATION CROSSHAIR INDICATOR в”Ђв”Ђ
+      // ── DYNAMIC HEADING & DEVIATION CROSSHAIR INDICATOR ──
 
       // Check current ship heading from calculator inputs or table
 
@@ -18456,7 +18461,7 @@ select.min-input,
 
 
 
-    /* в”Ђв”Ђ Star Almanac в”Ђв”Ђ */
+    /* ── Star Almanac ── */
 
 
 
@@ -18736,7 +18741,7 @@ select.min-input,
 
 
 
-          return '<td class="' + cls + '" style="color:var(--muted);opacity:0.38">в†“</td>';
+          return '<td class="' + cls + '" style="color:var(--muted);opacity:0.38">↓</td>';
 
 
 
@@ -18828,7 +18833,7 @@ select.min-input,
 
 
 
-      // в”Ђв”Ђ Sun в”Ђв”Ђ
+      // ── Sun ──
 
 
 
@@ -18844,7 +18849,7 @@ select.min-input,
 
 
 
-      // в”Ђв”Ђ Moon в”Ђв”Ђ
+      // ── Moon ──
 
 
 
@@ -18860,7 +18865,7 @@ select.min-input,
 
 
 
-      // в”Ђв”Ђ Divider в”Ђв”Ђ
+      // ── Divider ──
 
 
 
@@ -18872,7 +18877,7 @@ select.min-input,
 
 
 
-      // в”Ђв”Ђ 57 Navigational Stars — always listed, values fill in once inputs are ready в”Ђв”Ђ
+      // ── 57 Navigational Stars — always listed, values fill in once inputs are ready ──
 
 
 
@@ -19326,7 +19331,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             window.isSetStarVarManuallyEdited = true;
             var b = document.getElementById("setStarWmmBadge");
             if (b) {
-              b.textContent = "Manual в†»";
+              b.textContent = "Manual ↻";
               b.style.color = "#f59e0b";
               b.style.borderColor = "rgba(245,158,11,0.35)";
             }
@@ -19646,12 +19651,12 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             var lines = text.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(Boolean);
 
             var pairs = [];
-            var regex = /([0-3]?\d{2})[^\d+\-в€’]*([+\-в€’]?\s*\d{1,2}(?:[.,]\d{1,2})?)\s*([EW]?)/i;
+            var regex = /([0-3]?\d{2})[^\d+\-−]*([+\-−]?\s*\d{1,2}(?:[.,]\d{1,2})?)\s*([EW]?)/i;
             lines.forEach(function(line) {
               var m = line.match(regex);
               if (m) {
                 var h = parseInt(m[1], 10);
-                var rawVal = m[2].replace(/\s+/g, "").replace(/,/g, ".").replace(/в€’/g, "-");
+                var rawVal = m[2].replace(/\s+/g, "").replace(/,/g, ".").replace(/−/g, "-");
                 var v = parseFloat(rawVal);
                 if (m[3] && m[3].toUpperCase() === "W" && v > 0) v = -v;
                 if (!isNaN(h) && !isNaN(v) && h >= 0 && h <= 360 && Math.abs(v) <= 25) {
@@ -19895,11 +19900,11 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           </div>
           <div style="font-size:0.78rem;color:#cad8f4;line-height:1.45;display:grid;gap:8px;">
             <div style="display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-weight:700;color:#38bdf8;" id="aisStreamStatusLabel">AISStream.io</span>
+              <span style="font-weight:700;color:#38bdf8;" id="aisStreamStatusLabel">AISStream.io + OpenSeaFeed</span>
               <span style="font-size:0.68rem;background:#10b981;color:#fff;padding:2px 7px;border-radius:4px;font-weight:700;" id="aisStreamStatusBadge">LIVE</span>
             </div>
             <div id="aisTargetsCountSummary" style="font-size:0.72rem;color:#94a3b8;font-weight:600;"></div>
-            <div style="font-size:0.68rem;color:#64748b;">Live stream on (shared key). Fallbacks: Open Waters · Digitraffic.</div>
+            <div style="font-size:0.68rem;color:#64748b;">Live: AISStream.io + OpenSeaFeed (one marker per MMSI). Also: Open Waters · Digitraffic · zones.</div>
             <div id="aisStreamKeyStatusNote" style="display:none;"></div>
             <input type="hidden" id="inputAisStreamApiKey" value="" />
             <button type="button" id="btnSaveAisStreamKey" style="display:none;" aria-hidden="true"></button>
@@ -20039,23 +20044,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.82"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.82" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.82"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.84"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.84" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.84"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.82",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.84",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.82"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.82"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.82"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.84"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.84"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.84"></script>
+  <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.84"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20133,7 +20140,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.82"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.84"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20305,10 +20312,12 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         }
 
         tiles.forEach(function(t) { t.classList.add('is-shuffling'); });
-        tiles.forEach(function(t) { mosaic.appendChild(t); });
-        setTimeout(function() {
-          tiles.forEach(function(t) { t.classList.remove('is-shuffling'); });
-        }, 380);
+        requestAnimationFrame(function() {
+          tiles.forEach(function(t) { mosaic.appendChild(t); });
+          setTimeout(function() {
+            tiles.forEach(function(t) { t.classList.remove('is-shuffling'); });
+          }, 780);
+        });
       };
 
       window.__setsailUpdateAboutMosaic = function(aboutP) {
@@ -20326,7 +20335,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           try { window.__setsailShuffleAboutMosaic(); } catch (e) {}
           window.__setsailAboutShuffleTimer = setInterval(function() {
             try { window.__setsailShuffleAboutMosaic(); } catch (e) {}
-          }, 1600);
+          }, 2800);
         };
         const stopShuffle = function() {
           if (window.__setsailAboutShuffleTimer) {
@@ -20698,9 +20707,9 @@ navigator.serviceWorker.addEventListener('message', (ev) => {
             window.location.reload();
           }
         });
-        navigator.serviceWorker.register('sw.js?v=5.82', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.84', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.82 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.84 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }

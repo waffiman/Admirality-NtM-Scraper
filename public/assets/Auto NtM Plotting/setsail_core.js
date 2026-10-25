@@ -6026,6 +6026,10 @@ function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
   if (typeof setrouteLegShoalPenalty === "function") {
     pen += setrouteLegShoalPenalty(lat1, lon1, lat2, lon2);
   }
+  // COLREG Rule 10 TSS (lanes prefer / wrong-way / separation hard via adjacency)
+  if (typeof setrouteTssEdgePenalty === "function") {
+    pen += setrouteTssEdgePenalty(lat1, lon1, lat2, lon2);
+  }
   // Land/coast: forbid only LONG chords. Short TSS/coastal graph hops must stay connected
   if (setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2)) {
     const distNm = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
@@ -6188,12 +6192,15 @@ function setrouteBuildAdjacency() {
     // Drop edges that cut land boxes OR cross coastline on medium+ hops
     const coastHit = dist >= 90 && typeof setrouteLegCrossesCoastline === "function" &&
       setrouteLegCrossesCoastline(a[0], a[1], b[0], b[1]);
-    if ((boxHits >= (dist >= 1500 ? 2 : 1) && dist >= 160) || (coastHit && dist >= 180)) {
+    // COLREG Rule 10 — never keep edges through a Traffic Separation Zone
+    const tssBan = typeof setrouteTssHardBan === "function" && setrouteTssHardBan(a[0], a[1], b[0], b[1]);
+    if (tssBan || (boxHits >= (dist >= 1500 ? 2 : 1) && dist >= 160) || (coastHit && dist >= 180)) {
       hazard = 50000;
     } else {
       hazard += setrouteStaticNonStormWeatherPenalty(a[0], a[1], b[0], b[1]);
       if (typeof setrouteAisPenalty === "function") hazard += setrouteAisPenalty(a[0], a[1], b[0], b[1]) * 0.5;
       if (typeof setrouteLegShoalPenalty === "function") hazard += setrouteLegShoalPenalty(a[0], a[1], b[0], b[1]) * 0.85;
+      if (typeof setrouteTssEdgePenalty === "function") hazard += setrouteTssEdgePenalty(a[0], a[1], b[0], b[1]);
     }
     const cost = dist + hazard;
     if (hazard >= 50000) continue;
@@ -6852,6 +6859,50 @@ function setrouteBuildAppraisalFactors(route, opts) {
     }
   } catch (e) {}
   factors.push({ id: "ais", ok: true, text: "AIS snapshot sample available: " + (aisN > 0 ? "yes" : "empty/offline") });
+  // COLREG Rule 10 / TSS (from setroute_core_a.js)
+  try {
+    const wps = (route && route.waypoints) || [];
+    let tssSepHits = 0;
+    let tssLaneOk = 0;
+    let tssWrong = 0;
+    const nearby = [];
+    if (typeof setrouteTssLegAnalysis === "function" && wps.length >= 2) {
+      for (let i = 0; i < wps.length - 1; i++) {
+        const a = wps[i];
+        const b = wps[i + 1];
+        const an = setrouteTssLegAnalysis(a.lat, a.lon, b.lat, b.lon);
+        if (an.hardBan) tssSepHits++;
+        (an.hits || []).forEach((h) => {
+          if (h.category === "traffic_lane") tssLaneOk++;
+          if (h.category === "traffic_lane_wrong_way") tssWrong++;
+        });
+      }
+    }
+    if (typeof setrouteNearbyTssSummary === "function" && wps.length) {
+      const mid = wps[Math.floor(wps.length / 2)];
+      (setrouteNearbyTssSummary(mid.lat, mid.lon, 120) || []).forEach((s) => nearby.push(s.name));
+    }
+    if (nearby.length || tssSepHits || tssLaneOk || tssWrong) {
+      factors.push({
+        id: "tss_colreg10",
+        ok: tssSepHits === 0 && tssWrong === 0,
+        text: tssSepHits
+          ? ("COLREG Rule 10: route intersects Traffic Separation Zone (" + tssSepHits + " leg(s)) — forbidden.")
+          : ("COLREG Rule 10 TSS: " +
+            (nearby.length ? nearby.join(", ") : "schemes checked") +
+            "; lane-aligned legs=" + tssLaneOk +
+            (tssWrong ? "; wrong-way=" + tssWrong : "") + ".")
+      });
+    } else if (typeof SetRouteCoreA !== "undefined") {
+      factors.push({
+        id: "tss_colreg10",
+        ok: true,
+        text: "COLREG Rule 10 module loaded (Core A " +
+          ((SetRouteCoreA && SetRouteCoreA.MODULE_VERSION) || "?") +
+          "); no TSS near this corridor."
+      });
+    }
+  } catch (eTss) {}
   factors.push({
     id: "coast_grid",
     ok: !!SETROUTE_COAST_GRID,
@@ -7268,6 +7319,24 @@ function auditPassagePlan(route) {
     ntmTotal += (leg.ntmHits || []).length;
     wxTotal += (leg.weatherHits || []).length;
     if ((leg.navZone || "").indexOf("TSS") >= 0) tssLegs++;
+    if (typeof setrouteTssHardBan === "function" &&
+        setrouteTssHardBan(leg.fromLat, leg.fromLon, leg.toLat, leg.toLon)) {
+      issues.push({
+        severity: "critical",
+        leg: leg.legNo,
+        text: `Leg ${leg.legNo}: COLREG Rule 10 — Traffic Separation Zone (hard ban). Stay in the traffic lane.`
+      });
+    } else if (typeof setrouteTssLegAnalysis === "function") {
+      const ta = setrouteTssLegAnalysis(leg.fromLat, leg.fromLon, leg.toLat, leg.toLon);
+      const wrong = (ta.hits || []).some((h) => h.category === "traffic_lane_wrong_way");
+      if (wrong) {
+        issues.push({
+          severity: "warn",
+          leg: leg.legNo,
+          text: `Leg ${leg.legNo}: COLREG Rule 10(b) — against TSS traffic flow; prefer the correct lane.`
+        });
+      }
+    }
     if (setrouteLegLikelyCrossesLand(leg.fromLat, leg.fromLon, leg.toLat, leg.toLon)) {
       landLegs++;
       issues.push({
@@ -10951,7 +11020,8 @@ async function issueSetSailAgentApiKey() {
   if (!user || !user.email) return null;
   let token = "";
   try {
-    token = sessionStorage.getItem("setsail_google_auth_token") || "";
+    token = sessionStorage.getItem("setsail_google_auth_token") ||
+      localStorage.getItem("setsail_google_auth_token") || "";
   } catch (e) {}
   if (!token) return null;
   try {
@@ -10978,6 +11048,43 @@ async function issueSetSailAgentApiKey() {
   }
 }
 
+/** Force a fresh Google credential for API minting (even if profile already in localStorage). */
+function requestGoogleTokenForApiKey() {
+  window.__setsailPendingApiKeyModal = true;
+  const askToken = () => {
+    if (googleTokenClient) {
+      try {
+        // Always show account picker when minting — profile in localStorage is not enough
+        googleTokenClient.requestAccessToken({ prompt: "select_account" });
+        return true;
+      } catch (e) {
+        try {
+          googleTokenClient.requestAccessToken({ prompt: "" });
+          return true;
+        } catch (e2) {}
+      }
+    }
+    return false;
+  };
+  if (askToken()) return true;
+  if (window.google && window.google.accounts && window.google.accounts.id) {
+    try {
+      window.google.accounts.id.prompt();
+      return true;
+    } catch (e) {}
+  }
+  // Bypass "already signed in → open Settings" path; init GIS then request token
+  if (typeof loadGoogleIdentityScriptAsync === "function") {
+    loadGoogleIdentityScriptAsync().then((ok) => {
+      if (!ok) return;
+      try { initGoogleAuthClients(); } catch (e) {}
+      askToken();
+    });
+    return true;
+  }
+  return false;
+}
+
 async function showOrMintAgentApiKeyFlow() {
   const user = getSetSailAuthUser();
   if (!user || !user.email) {
@@ -10990,18 +11097,29 @@ async function showOrMintAgentApiKeyFlow() {
   }
   let token = "";
   try {
-    token = sessionStorage.getItem("setsail_google_auth_token") || "";
+    token = sessionStorage.getItem("setsail_google_auth_token") ||
+      localStorage.getItem("setsail_google_auth_token") || "";
   } catch (e) {}
   if (!token) {
-    window.__setsailPendingApiKeyModal = true;
     if (typeof showSetSailToast === "function") {
-      showSetSailToast("Confirm Google sign-in to mint the key…", "info");
+      showSetSailToast("Refreshing Google session to mint your API key…", "info");
     }
-    if (typeof triggerOfficialGoogleSignIn === "function") triggerOfficialGoogleSignIn();
+    requestGoogleTokenForApiKey();
     return;
   }
   const data = await issueSetSailAgentApiKey();
-  if (!data || !data.apiKey) return;
+  if (!data || !data.apiKey) {
+    // Token may be stale — clear both stores, force GIS popup, retry via pending modal
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Refreshing Google session to mint your API key…", "info");
+    }
+    try {
+      sessionStorage.removeItem("setsail_google_auth_token");
+      localStorage.removeItem("setsail_google_auth_token");
+    } catch (e) {}
+    requestGoogleTokenForApiKey();
+    return;
+  }
   openAgentApiKeyModal({
     apiKey: data.apiKey,
     expiresAt: data.expiresAt,
@@ -11019,7 +11137,8 @@ async function maybeOpenPendingAgentApiKeyModal() {
   if (!user || !user.email) return;
   let token = "";
   try {
-    token = sessionStorage.getItem("setsail_google_auth_token") || "";
+    token = sessionStorage.getItem("setsail_google_auth_token") ||
+      localStorage.getItem("setsail_google_auth_token") || "";
   } catch (e) {}
   if (!token) return;
   window.__setsailPendingApiKeyModal = false;
@@ -11215,6 +11334,8 @@ function handleGoogleCredentialResponse(resp) {
   try {
     sessionStorage.setItem("setsail_google_auth_token", resp.credential);
     sessionStorage.setItem("setsail_google_auth_kind", "id_token");
+    localStorage.setItem("setsail_google_auth_token", resp.credential);
+    localStorage.setItem("setsail_google_auth_kind", "id_token");
   } catch (e) {}
   const payload = decodeGoogleJwt(resp.credential);
   if (payload && payload.email) {
@@ -11228,6 +11349,9 @@ function handleGoogleCredentialResponse(resp) {
     });
     if (typeof showSetSailToast === "function") {
       showSetSailToast(`Signed in with Google as ${payload.email}`, "success");
+    }
+    if (typeof maybeOpenPendingAgentApiKeyModal === "function") {
+      setTimeout(() => { try { maybeOpenPendingAgentApiKeyModal(); } catch (e) {} }, 200);
     }
   }
 }
@@ -11287,6 +11411,8 @@ function initGoogleAuthClients() {
             try {
               sessionStorage.setItem("setsail_google_auth_token", tokenResponse.access_token);
               sessionStorage.setItem("setsail_google_auth_kind", "access_token");
+              localStorage.setItem("setsail_google_auth_token", tokenResponse.access_token);
+              localStorage.setItem("setsail_google_auth_kind", "access_token");
             } catch (eTok) {}
             const profile = await fetchGoogleUserInfo(tokenResponse.access_token);
             if (profile && profile.email) {
@@ -11301,6 +11427,9 @@ function initGoogleAuthClients() {
               syncSetSailAuthUI();
               if (typeof showSetSailToast === "function") {
                 showSetSailToast(`Signed in with Google as ${profile.email}`, "success");
+              }
+              if (typeof maybeOpenPendingAgentApiKeyModal === "function") {
+                setTimeout(() => { try { maybeOpenPendingAgentApiKeyModal(); } catch (e) {} }, 200);
               }
             }
           } catch (err) {
