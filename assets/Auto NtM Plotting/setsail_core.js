@@ -2889,26 +2889,43 @@ function updateNdbcCursorTile(lat, lon) {
   // Always keep the same 4-chip skeleton so the tile footprint never jumps.
   if (!s.ok) {
     tile.classList.remove("is-live");
-    body.innerHTML = renderNdbcCursorChips("\u2014", "\u2014", "\u2014 mb", "\u2014\u00b0 / \u2014\u00b0");
+    body.innerHTML = renderNdbcCursorChips("\u2014", "\u2014", "\u2014 mb", "\u2014\u00b0/\u2014\u00b0");
     if (meta) meta.textContent = s.message || "Move cursor\u2026";
+    tile.removeAttribute("title");
     return;
   }
   tile.classList.add("is-live");
+  // Compact labels so fixed chip slots rarely ellipsize (gust / period go in title).
+  const windTitle = [
+    s.windKt != null ? (fmtWxNum(s.windKt, 0) + " kn") : null,
+    s.windDir != null ? (fmtWxNum(s.windDir, 0) + "\u00b0") : null,
+    s.gustKt != null ? ("gust " + fmtWxNum(s.gustKt, 0) + " kn") : null
+  ].filter(Boolean).join(" · ") || "Wind";
   const wind = s.windKt != null
-    ? (fmtWxNum(s.windKt, 0) + " kn" + (s.windDir != null ? " " + fmtWxNum(s.windDir, 0) + "\u00b0" : "") + (s.gustKt != null ? " G" + fmtWxNum(s.gustKt, 0) : ""))
+    ? (fmtWxNum(s.windKt, 0) + " kn" + (s.windDir != null ? " " + fmtWxNum(s.windDir, 0) + "\u00b0" : ""))
     : "\u2014";
-  const wave = s.waveHs != null
-    ? (fmtWxNum(s.waveHs, 1) + " m" + (s.wavePeriod != null ? " / " + fmtWxNum(s.wavePeriod, 0) + "s" : ""))
-    : "\u2014";
+  const waveTitle = s.waveHs != null
+    ? (fmtWxNum(s.waveHs, 1) + " m" + (s.wavePeriod != null ? " / " + fmtWxNum(s.wavePeriod, 0) + " s" : ""))
+    : "Waves";
+  const wave = s.waveHs != null ? (fmtWxNum(s.waveHs, 1) + " m") : "\u2014";
   body.innerHTML = renderNdbcCursorChips(
     wind,
     wave,
     fmtWxNum(s.pressureMb, 0) + " mb",
-    fmtWxNum(s.airC, 0) + "\u00b0 / " + fmtWxNum(s.sstC, 0) + "\u00b0"
+    fmtWxNum(s.airC, 0) + "\u00b0/" + fmtWxNum(s.sstC, 0) + "\u00b0"
   );
+  const chips = body.querySelectorAll(".wx-chip");
+  if (chips[0]) chips[0].title = windTitle;
+  if (chips[1]) chips[1].title = waveTitle;
   if (meta) {
-    meta.textContent = s.sourceNote + (s.mode === "interpolated" ? " \u00b7 blended" : " \u00b7 buoy");
+    const nMatch = String(s.sourceNote || "").match(/(\d+)\s*buoy/i);
+    const nm = s.nearestNm != null ? Math.round(s.nearestNm) : null;
+    meta.textContent = nMatch
+      ? (nMatch[1] + " buoy" + (nm != null ? " · " + nm + " NM" : ""))
+      : (s.mode === "nearest" ? ("buoy" + (nm != null ? " · " + nm + " NM" : "")) : (nm != null ? nm + " NM" : "NDBC"));
+    meta.title = (s.sourceNote || "") + (s.mode === "interpolated" ? " · blended" : " · buoy");
   }
+  tile.title = windTitle + " · " + waveTitle;
 }
 
 window.sampleNdbcAtLatLon = sampleNdbcAtLatLon;
@@ -7097,9 +7114,26 @@ function setrouteValidateNodePath(nodeKeys) {
   for (let i = 0; i < path.length - 1; i++) {
     const a = MARITIME_SEA_NODES[path[i]];
     const b = MARITIME_SEA_NODES[path[i + 1]];
-    if (setrouteLegLikelyCrossesLand(a[0], a[1], b[0], b[1])) return null;
+    if (!a || !b) return null;
+    const dist = calculateHaversineDistanceNM(a[0], a[1], b[0], b[1]);
+    // Long ocean template legs may clip coast-grid noise; only refuse short/coastal land hits.
+    if (dist < 500 && setrouteLegLikelyCrossesLand(a[0], a[1], b[0], b[1])) return null;
   }
   return path;
+}
+
+/** Stitch OD snap nodes onto a validated OPW template corridor. */
+function setrouteStitchTemplateCorridor(startNode, endNode, templateKeys) {
+  const mid = setrouteValidateNodePath(templateKeys);
+  if (!mid || mid.length < 2) return null;
+  const path = [];
+  if (startNode && MARITIME_SEA_NODES[startNode] && startNode !== mid[0]) path.push(startNode);
+  for (let i = 0; i < mid.length; i++) {
+    if (path.length && path[path.length - 1] === mid[i]) continue;
+    path.push(mid[i]);
+  }
+  if (endNode && MARITIME_SEA_NODES[endNode] && path[path.length - 1] !== endNode) path.push(endNode);
+  return path.length >= 2 ? path : null;
 }
 
 function setroutePathHasCriticalLayerBlock(path) {
@@ -7108,6 +7142,9 @@ function setroutePathHasCriticalLayerBlock(path) {
     const a = MARITIME_SEA_NODES[path[i]];
     const b = MARITIME_SEA_NODES[path[i + 1]];
     if (!a || !b) continue;
+    const dist = calculateHaversineDistanceNM(a[0], a[1], b[0], b[1]);
+    // Ignore soft coast-grid noise on long ocean legs (PG–Malacca templates).
+    if (dist >= 500) continue;
     const pen = setrouteEdgeHazardPenalty(a[0], a[1], b[0], b[1]);
     if (pen >= 50000) return true;
   }
@@ -7240,7 +7277,20 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
     let path = null;
     let routeMode = "shortest_sea";
 
-    if (options.viaCape) {
+    // Prefer OPW template early (e.g. persian_gulf_singapore) before hub/forced alts.
+    if (!options.viaCape && !options.viaPanama && !options.viaSuez &&
+        !options.viaMalacca && !options.viaSunda &&
+        options.templatePath && options.templatePath.length >= 4) {
+      const stitched = setrouteStitchTemplateCorridor(startNode, endNode, options.templatePath);
+      if (stitched && stitched.length >= 4 && !setroutePathHasCriticalLayerBlock(stitched)) {
+        path = stitched;
+        routeMode = "template_" + (options.templateId || "corridor");
+      }
+    }
+
+    if (path) {
+      // template already selected
+    } else if (options.viaCape) {
       path = await via(startNode, endNode, "CAPE_AGULHAS");
       routeMode = "via_cape";
     } else if (options.viaPanama) {
