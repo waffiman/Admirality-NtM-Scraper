@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.110" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.111" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -4466,10 +4466,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   box-shadow: 0 -2px 8px rgba(56, 189, 248, 0.2);
 }
 
-/* My Route uses the same tile style as other overlay tabs (no special highlight). */
-.excel-tab-route {
-  /* keep class for selectors / JS; visuals inherit .excel-tab */
-}
+/* .excel-tab-route kept for JS hooks — same visuals as .excel-tab */
 
 /* Marine Weather Map Overlay Styles (SPOS & Windy Standard) */
 .weather-cyclone-icon {
@@ -7499,8 +7496,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Mirrored L↔R so LNG carrier sits under the copy (left), open wake under devices (right) */
-  object-position: 32% center;
+  /* Mirrored L↔R; position tuned so the LNG hull stays inside the tile */
+  object-position: 48% center;
   transform: scaleX(-1);
   z-index: 0;
   pointer-events: none;
@@ -8352,7 +8349,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
     padding: 0.55rem 0.65rem 0.45rem !important;
     height: 100% !important;
     max-height: 100% !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
+    position: relative !important;
+    overscroll-behavior-y: none !important;
   }
 
   /* Compact 3-Column Header HUD on Phones — Zero Overlap Guaranteed */
@@ -8781,7 +8780,7 @@ select option {
 
 /* Hero vertical centering: logo + slogan + tiles + arrow mid-viewport */
 .home-hero-content {
-  justify-content: flex-start !important;
+  justify-content: center !important;
 }
 .home-center-stage {
   margin-top: auto !important;
@@ -8790,8 +8789,30 @@ select option {
 }
 @media (max-width: 768px) {
   .home-center-stage {
-    margin-top: auto !important;
-    margin-bottom: auto !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    flex: 0 0 auto !important;
+    z-index: 4;
+  }
+  .home-hud-top,
+  #homeHudTop {
+    position: absolute !important;
+    top: 0.55rem !important;
+    left: 0.65rem !important;
+    right: 0.65rem !important;
+    width: auto !important;
+    z-index: 6 !important;
+  }
+  .home-bottom-dock {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0.25rem !important;
+    z-index: 5 !important;
+  }
+  .home-center-stage {
+    padding-top: 2.6rem !important; /* clear absolute HUD */
+    padding-bottom: 2rem !important;
   }
 }
 
@@ -8878,7 +8899,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.110" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.111" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -11570,7 +11591,9 @@ select option {
     padding: 0.55rem 0.65rem 0.45rem !important;
     height: 100% !important;
     max-height: 100% !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
+    position: relative !important;
+    overscroll-behavior-y: none !important;
   }
 
   /* Compact 3-Column Header HUD on Phones — Zero Overlap Guaranteed */
@@ -11941,6 +11964,173 @@ select option {
   .home-tool-desc {
     display: none !important;
   }
+}
+
+/* ═══ Mobile polish pack (v5.111) — hero / dock / install / SetStar / SetRoute ═══ */
+.setstar-data-switch { display: none; }
+@media (max-width: 768px) {
+  html, body, #tab-home, #tab-home.active, .home-hero-viewport, .app-content {
+    overscroll-behavior-y: none !important;
+  }
+
+  .home-install-bg {
+    object-position: 72% center !important;
+  }
+
+  /* Chart dock: tiles only, swipeable; hide cursor HUD */
+  .excel-dock-coords,
+  #ntmHudCoords {
+    display: none !important;
+  }
+  .excel-overlay-dock {
+    justify-content: flex-start !important;
+    padding: 0 0.35rem !important;
+  }
+  .excel-tabs-scroll {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
+    scrollbar-width: none !important;
+  }
+  .excel-tabs-scroll::-webkit-scrollbar { display: none !important; }
+  .excel-tab {
+    flex: 0 0 auto !important;
+  }
+
+  /* About mosaic: fewer / larger tiles so photos actually paint */
+  .about-mosaic-band {
+    height: clamp(110px, 16vh, 148px) !important;
+  }
+  .about-mosaic {
+    grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* SetStar: Almanac ↔ Logbook toggle */
+  .setstar-data-switch {
+    display: flex !important;
+    gap: 6px;
+    margin: 0 0 0.65rem;
+    padding: 3px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+  }
+  .setstar-data-switch button {
+    flex: 1 1 0;
+    border: none;
+    border-radius: 8px;
+    padding: 0.45rem 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+    background: transparent;
+    cursor: pointer;
+  }
+  .setstar-data-switch button.active {
+    color: #f8fafc;
+    background: rgba(56, 189, 248, 0.22);
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
+  }
+  #tab-gyro .almanac-side {
+    display: none;
+    width: 100% !important;
+    flex: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #tab-gyro .panel-logbook {
+    display: none;
+  }
+  #tab-gyro.setstar-panel-almanac .almanac-side {
+    display: block !important;
+  }
+  #tab-gyro.setstar-panel-logbook .panel-logbook {
+    display: block !important;
+  }
+  #tab-gyro .almanac-scroll {
+    max-height: none !important;
+    min-height: 220px !important;
+    overflow: auto !important;
+  }
+  #tab-gyro table.alm {
+    width: 100% !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* Logbook → 2-column cards on phone */
+  #tab-gyro .panel-logbook .scroll {
+    overflow-x: hidden !important;
+  }
+  #tab-gyro table.log {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: block !important;
+  }
+  #tab-gyro table.log thead {
+    display: none !important;
+  }
+  #tab-gyro table.log tbody,
+  #tab-gyro table.log tr {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  #tab-gyro table.log tr {
+    margin: 0 0 0.75rem !important;
+    padding: 0.55rem !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    border-radius: 10px !important;
+    background: rgba(8, 15, 28, 0.55) !important;
+    box-sizing: border-box !important;
+  }
+  #tab-gyro table.log td {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0.35rem 0.4rem !important;
+    border: none !important;
+    background: rgba(15, 23, 42, 0.45) !important;
+    border-radius: 7px !important;
+    font-size: 0.72rem !important;
+  }
+  #tab-gyro table.log td::before {
+    content: attr(data-label);
+    font-size: 0.58rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    color: #94a3b8 !important;
+  }
+
+  /* SetRoute composer above bottom nav */
+  #tab-route.active {
+    height: calc(100vh - 56px - env(safe-area-inset-bottom, 0px)) !important;
+    max-height: calc(100dvh - 56px - env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: 0 !important;
+    box-sizing: border-box !important;
+  }
+  #tab-route .setroute-gpt-shell {
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+  #tab-route .setroute-composer-dock {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    position: relative !important;
+    z-index: 20 !important;
+  }
+}
+@media (min-width: 769px) {
+  .setstar-data-switch { display: none !important; }
 }
 </style>
 
@@ -12825,7 +13015,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.110" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.110';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.111" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.111';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -12901,7 +13091,7 @@ select option {
 
 
 
-      <div id="tab-gyro" class="tab-pane">
+      <div id="tab-gyro" class="tab-pane setstar-panel-almanac">
 
 
 
@@ -13176,6 +13366,12 @@ select option {
 
 
 
+    <!-- Mobile: Almanac ↔ Logbook switch (desktop keeps side-by-side) -->
+    <div class="setstar-data-switch no-print" id="setstarDataSwitch" role="tablist" aria-label="SetStar data panels">
+      <button type="button" class="active" data-setstar-panel="almanac" role="tab" aria-selected="true">Star Almanac</button>
+      <button type="button" data-setstar-panel="logbook" role="tab" aria-selected="false">Logbook</button>
+    </div>
+
     <!-- ── Star Almanac Sidebar ── -->
 
 
@@ -13264,7 +13460,7 @@ select option {
 
 
 
-    <section class="panel no-print">
+    <section class="panel panel-logbook no-print">
 
 
 
@@ -13368,67 +13564,67 @@ select option {
 
 
 
-              <td class="manual empty" data-k="lt">—</td>
+              <td class="manual empty" data-k="lt" data-label="Date (LT)">—</td>
 
 
 
-              <td class="manual empty" data-k="utc">—</td>
+              <td class="manual empty" data-k="utc" data-label="Date / Time (UTC)">—</td>
 
 
 
-              <td class="manual empty" data-k="lat">—</td>
+              <td class="manual empty" data-k="lat" data-label="Latitude">—</td>
 
 
 
-              <td class="manual empty" data-k="lon">—</td>
+              <td class="manual empty" data-k="lon" data-label="Longitude">—</td>
 
 
 
-              <td class="manual empty" data-k="body">—</td>
+              <td class="manual empty" data-k="body" data-label="Celestial body">—</td>
 
 
 
-              <td class="manual empty" data-k="gHead">—</td>
+              <td class="manual empty" data-k="gHead" data-label="Gyro heading">—</td>
 
 
 
-              <td class="calc empty" data-k="mHead">—</td>
+              <td class="calc empty" data-k="mHead" data-label="Magnetic heading">—</td>
 
 
 
-              <td class="calc empty" data-k="lha">—</td>
+              <td class="calc empty" data-k="lha" data-label="LHA">—</td>
 
 
 
-              <td class="calc empty" data-k="dec">—</td>
+              <td class="calc empty" data-k="dec" data-label="Declination">—</td>
 
 
 
-              <td class="calc empty" data-k="tAz">—</td>
+              <td class="calc empty" data-k="tAz" data-label="True Azimuth">—</td>
 
 
 
-              <td class="calc empty" data-k="gBrg">—</td>
+              <td class="calc empty" data-k="gBrg" data-label="Gyro bearing">—</td>
 
 
 
-              <td class="calc empty" data-k="mBrg">—</td>
+              <td class="calc empty" data-k="mBrg" data-label="Magnetic bearing">—</td>
 
 
 
-              <td class="calc empty" data-k="gErr">—</td>
+              <td class="calc empty" data-k="gErr" data-label="Gyro error">—</td>
 
 
 
-              <td class="calc empty" data-k="mErr">—</td>
+              <td class="calc empty" data-k="mErr" data-label="Magnetic error">—</td>
 
 
 
-              <td class="calc empty" data-k="dev">—</td>
+              <td class="calc empty" data-k="dev" data-label="Deviation">—</td>
 
 
 
-              <td class="manual empty" data-k="var">—</td>
+              <td class="manual empty" data-k="var" data-label="Variation">—</td>
 
 
 
@@ -19482,6 +19678,32 @@ select.min-input,
 
     window.renderStarAlmanac = renderStarAlmanac;
 
+    // Mobile Almanac ↔ Logbook panel switch
+    (function initSetstarDataSwitch() {
+      const tab = document.getElementById('tab-gyro');
+      const sw = document.getElementById('setstarDataSwitch');
+      if (!tab || !sw || sw._boundSetstar) return;
+      sw._boundSetstar = true;
+      if (!tab.classList.contains('setstar-panel-almanac') && !tab.classList.contains('setstar-panel-logbook')) {
+        tab.classList.add('setstar-panel-almanac');
+      }
+      sw.addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-setstar-panel]');
+        if (!btn) return;
+        const panel = btn.getAttribute('data-setstar-panel');
+        tab.classList.toggle('setstar-panel-almanac', panel === 'almanac');
+        tab.classList.toggle('setstar-panel-logbook', panel === 'logbook');
+        sw.querySelectorAll('[data-setstar-panel]').forEach(function (b) {
+          const on = b === btn;
+          b.classList.toggle('active', on);
+          b.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        if (panel === 'almanac' && typeof renderStarAlmanac === 'function') {
+          try { renderStarAlmanac(); } catch (err) {}
+        }
+      });
+    })();
+
     window.calculate = calculate;
 
 
@@ -20506,25 +20728,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.110"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.110" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.110"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.111"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.111" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.111"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.110",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.111",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.110"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.110"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.110"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.111"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.111"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.111"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.110"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.111"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20597,7 +20819,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.110"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.111"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -20648,8 +20870,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       // Visible tiles < pool size so shuffle can crossfade in fresh unique photos.
       window.__setsailAboutShuffleTimer = window.__setsailAboutShuffleTimer || null;
       window.__setsailAboutMosaicReady = window.__setsailAboutMosaicReady || false;
-      // Denser mosaic: more / smaller tiles; pool >> visible for crossfade variety
-      window.__setsailAboutVisibleTiles = 48;
+      // Desktop denser; mobile fewer larger tiles so Unsplash actually paints
+      window.__setsailAboutVisibleTiles = (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) ? 16 : 48;
       window.__setsailAboutPhotoPool = [
         "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=140&h=140&q=55",
         "https://images.unsplash.com/photo-1524522173746-f628baad3644?auto=format&fit=crop&w=140&h=140&q=55",
@@ -20713,8 +20935,9 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
         if (!mosaic) return;
         const n = mosaic.querySelectorAll('.about-moz-tile').length;
         if (n < 2) return;
-        // More columns → visually smaller tiles across the strip
-        const cols = Math.max(12, Math.ceil(n / 2));
+        const mobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+        // Mobile: fewer columns so each photo is large enough to load/read.
+        const cols = mobile ? Math.max(6, Math.min(8, Math.ceil(n / 2))) : Math.max(12, Math.ceil(n / 2));
         mosaic.style.gridTemplateColumns = 'repeat(' + cols + ', minmax(0, 1fr))';
         mosaic.style.gridTemplateRows = 'repeat(2, minmax(0, 1fr))';
       };
@@ -20746,19 +20969,16 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           const img = document.createElement('img');
           img.alt = '';
           img.decoding = 'async';
-          img.loading = (i < 12) ? 'eager' : 'lazy';
+          img.loading = (i < 16) ? 'eager' : 'lazy';
+          img.fetchPriority = (i < 8) ? 'high' : 'low';
           img.width = 200;
           img.height = 200;
           img.src = url;
           img.onerror = function() {
+            // Keep the cell filled — removing tiles left empty mosaic holes on mobile.
             const tile = this.parentElement;
-            const host = tile && tile.parentElement;
-            if (tile && host) {
-              host.removeChild(tile);
-              if (typeof window.__setsailReflowAboutMosaicGrid === 'function') {
-                window.__setsailReflowAboutMosaicGrid(host);
-              }
-            }
+            if (tile) tile.classList.add('is-fallback');
+            this.style.display = 'none';
           };
           fig.appendChild(img);
           frag.appendChild(fig);
@@ -21101,7 +21321,8 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           scheduleSoftSnap();
         }, { passive: false });
 
-        // Touch swipe scrubbing & momentum slide snapping on phones/tablets
+        // Touch swipe scrubbing & momentum slide snapping on phones/tablets.
+        // passive:false so we can block browser pull-to-refresh when scrubbing Home upward.
         let touchOriginY = null;
         let touchOriginSlide = 0;
         window.addEventListener('touchstart', (e) => {
@@ -21116,9 +21337,11 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
           const curY = e.touches[0].clientY;
           const dy = touchStartY - curY;
           touchStartY = curY;
+          // Block Chrome/Android pull-to-refresh when gesturing on Home (esp. reverse scrub).
+          if (e.cancelable) e.preventDefault();
           targetProgress = clamp(targetProgress + dy * 0.0042, 0, MAX_SLIDE);
           scheduleSoftSnap();
-        }, { passive: true });
+        }, { passive: false });
 
         window.addEventListener('touchend', (e) => {
           if (isHomeActive() && touchOriginY !== null && e.changedTouches && e.changedTouches.length) {
@@ -21319,16 +21542,16 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.110', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.111', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.110 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.111 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.110') < 0) {
+              if (last && last.indexOf('v5.111') < 0) {
                 setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.110.0'); }, 1200);
               }
             } catch (eTip) {}

@@ -10409,11 +10409,23 @@
 @media (max-width: 768px) {
   .setroute-gpt-shell {
     flex-direction: column;
+    height: 100%;
+    max-height: 100%;
+  }
+  .setroute-chat-col {
+    min-height: 0;
+    padding-bottom: 0;
+  }
+  .setroute-composer-dock {
+    /* Sit above the fixed 56px bottom nav — never hide under it */
+    padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, transparent, rgba(6, 13, 27, 0.98) 18%);
+    z-index: 30;
   }
   .setroute-right-drawer {
     width: 100%;
     max-width: 100%;
-    flex: 0 0 48vh;
+    flex: 0 0 42vh;
     border-left: none;
     border-top: 2px solid rgba(56, 189, 248, 0.45);
   }
