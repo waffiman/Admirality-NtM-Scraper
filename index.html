@@ -167,7 +167,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.119" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.120" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -7570,7 +7570,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   border-color: rgba(14, 165, 233, 0.35);
 }
 
-/* SLIDE 5: Install — LNG-wake photo + laptop/phone mockups (SetSail navy/cyan) */
+/* SLIDE 5: Install — LNG-wake photo + real laptop/phone product shot */
 .home-slide-install {
   position: absolute;
   inset: 0;
@@ -7699,190 +7699,22 @@ svg.leaflet-image-layer.leaflet-interactive path {
   position: relative;
   z-index: 2;
   justify-self: end;
-  width: min(100%, 340px);
-  height: clamp(220px, 38vh, 300px);
-  margin-bottom: 0.15rem;
+  align-self: end;
+  width: min(100%, 380px);
+  margin-bottom: 0;
+  filter: drop-shadow(0 18px 36px rgba(2, 8, 23, 0.55));
 }
-/* Laptop */
-.home-install-laptop {
-  position: absolute;
-  left: 0;
-  bottom: 8px;
-  width: 78%;
-  transform: rotate(-2deg);
-  filter: drop-shadow(0 22px 36px rgba(2, 8, 23, 0.55));
-}
-.home-install-laptop-lid {
-  border-radius: 10px 10px 4px 4px;
-  padding: 7px 7px 5px;
-  background: linear-gradient(165deg, #1e293b 0%, #0f172a 55%, #020617 100%);
-  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.22);
-}
-.home-install-laptop-screen {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  border-radius: 4px;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(56, 189, 248, 0.18), transparent 65%),
-    linear-gradient(160deg, #0c1a2e 0%, #07111f 55%, #040a14 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-.home-install-laptop-screen::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
-  background-size: 18px 18px;
-  opacity: 0.7;
-  pointer-events: none;
-}
-.home-install-laptop-logo {
-  position: relative;
-  z-index: 1;
-  width: clamp(48px, 22%, 72px);
-  height: auto;
-  border-radius: 12px;
-  box-shadow: 0 8px 28px rgba(2, 8, 23, 0.45), 0 0 0 1px rgba(56, 189, 248, 0.2);
-}
-.home-install-laptop-wordmark {
-  position: relative;
-  z-index: 1;
-  font-size: 0.62rem;
-  font-weight: 750;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #e0f2fe;
-}
-.home-install-laptop-base {
-  height: 9px;
-  margin: 0 -2%;
-  border-radius: 0 0 8px 8px;
-  background: linear-gradient(180deg, #334155 0%, #1e293b 40%, #0f172a 100%);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset;
-}
-.home-install-laptop-base::after {
-  content: "";
+.home-install-devices-photo {
   display: block;
-  width: 18%;
-  height: 3px;
-  margin: 3px auto 0;
-  border-radius: 999px;
-  background: rgba(148, 163, 184, 0.35);
-}
-/* Phone — overlaps laptop */
-.home-install-phone-hero {
-  position: absolute;
-  right: 2%;
-  bottom: 0;
-  z-index: 3;
-  width: min(38%, 118px);
-  aspect-ratio: 9 / 19.2;
-  border-radius: 22px;
-  padding: 6px;
-  background: linear-gradient(165deg, #1e3a5f 0%, #0b1628 42%, #060d18 100%);
-  box-shadow:
-    0 22px 40px rgba(2, 8, 23, 0.55),
-    0 0 0 1px rgba(56, 189, 248, 0.28),
-    0 1px 0 rgba(255, 255, 255, 0.1) inset;
-  transform: rotate(6deg) translateY(-6px);
-}
-.home-install-phone-hero-notch {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 38%;
-  height: 7px;
-  border-radius: 999px;
-  background: #020617;
-  z-index: 3;
-}
-.home-install-phone-hero-screen {
-  position: relative;
   width: 100%;
-  height: 100%;
-  border-radius: 16px;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse 90% 55% at 50% 18%, rgba(56, 189, 248, 0.22), transparent 55%),
-    linear-gradient(180deg, #0c1a2e 0%, #07111f 55%, #040a14 100%);
-}
-.home-install-phone-bg { display: none; }
-.home-install-phone-hero-screen::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
-  background-size: 12px 12px;
-  opacity: 0.55;
-  z-index: 0;
-}
-.home-install-phone-hero-ui {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 10px 9px 12px;
-  background: linear-gradient(180deg, rgba(4, 10, 20, 0.05) 15%, rgba(4, 10, 20, 0.78) 68%, rgba(4, 10, 20, 0.96) 100%);
-  z-index: 2;
-}
-.home-install-phone-brand {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: auto;
-  padding-top: 14px;
-}
-.home-install-phone-brand img {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.25);
-}
-.home-install-phone-brand span {
-  font-size: 0.48rem;
-  font-weight: 750;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #e0f2fe;
-}
-.home-install-phone-hero-ui h3 {
-  margin: 0 0 4px;
-  font-size: 0.68rem;
-  line-height: 1.15;
-  font-weight: 750;
-  color: #f8fafc;
-  letter-spacing: -0.02em;
-}
-.home-install-phone-hero-ui p {
-  margin: 0 0 8px;
-  font-size: 0.48rem;
-  line-height: 1.3;
-  color: rgba(186, 230, 253, 0.78);
-}
-.home-install-phone-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  padding: 5px 8px;
-  font-size: 0.48rem;
-  font-weight: 750;
-  background: linear-gradient(180deg, #38bdf8 0%, #0ea5e9 100%);
-  color: #04101c;
-  border: none;
-  width: 100%;
-  cursor: pointer;
+  height: auto;
+  max-height: clamp(200px, 42vh, 320px);
+  object-fit: contain;
+  object-position: center bottom;
+  pointer-events: none;
+  user-select: none;
+  /* Photo already has black studio bg — blend into navy tile */
+  mix-blend-mode: lighten;
 }
 @media (max-width: 720px) {
   .home-install-stage {
@@ -7901,15 +7733,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .home-install-lead { max-width: 22rem; }
   .home-install-devices {
     justify-self: center;
-    width: min(280px, 88%);
-    height: 200px;
+    width: min(320px, 92%);
     order: -1;
-    margin: 0 auto 0.5rem;
+    margin: 0 auto 0.35rem;
   }
-  .home-install-laptop { width: 82%; }
-  .home-install-phone-hero {
-    width: min(34%, 100px);
-    transform: rotate(5deg) translateY(-2px);
+  .home-install-devices-photo {
+    max-height: 210px;
   }
 }
 [data-theme="light"] .home-install-tile {
@@ -9023,7 +8852,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.119" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.120" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12090,7 +11919,7 @@ select option {
   }
 }
 
-/* ═══ Mobile polish pack (v5.119) — hero / dock / install / SetStar / SetRoute ═══ */
+/* ═══ Mobile polish pack (v5.120) — hero / dock / install / SetStar / SetRoute ═══ */
 .setstar-data-switch { display: none; }
 @media (max-width: 768px) {
   html, body, #tab-home, #tab-home.active, .home-hero-viewport, .app-content {
@@ -13369,7 +13198,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.119" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.119';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.120" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.120';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13404,29 +13233,7 @@ select option {
                     <p class="home-install-hint" id="homeInstallHint" hidden></p>
                   </div>
                   <div class="home-install-devices" aria-hidden="true">
-                    <div class="home-install-laptop">
-                      <div class="home-install-laptop-lid">
-                        <div class="home-install-laptop-screen">
-                          <img class="home-install-laptop-logo" src="assets/SetSail LOGOS/setsail_logo_square.webp" alt="" width="72" height="72" onerror="this.onerror=null;this.src='assets/SetSail LOGOS/setsail_logo_square.png'" />
-                          <span class="home-install-laptop-wordmark">SetSail</span>
-                        </div>
-                      </div>
-                      <div class="home-install-laptop-base"></div>
-                    </div>
-                    <div class="home-install-phone-hero">
-                      <div class="home-install-phone-hero-notch"></div>
-                      <div class="home-install-phone-hero-screen">
-                        <div class="home-install-phone-hero-ui">
-                          <div class="home-install-phone-brand">
-                            <img src="assets/icon-192.png" alt="" width="14" height="14" onerror="this.onerror=null;this.src='assets/SetSail LOGOS/setsail_logo_square.png'" />
-                            <span>SetSail</span>
-                          </div>
-                          <h3>Your AI-powered bridge.</h3>
-                          <p>Charts, routes &amp; warnings — one tap away.</p>
-                          <button type="button" class="home-install-phone-cta" id="btnInstallSetSailPhoneCta" tabindex="-1">Install SetSail</button>
-                        </div>
-                      </div>
-                    </div>
+                    <img class="home-install-devices-photo" src="assets/home/setsail_devices_splash.png" alt="" width="1024" height="572" decoding="async" fetchpriority="low" />
                   </div>
                 </div>
               </div>
@@ -21088,25 +20895,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.119"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.119" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.119"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.120"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.120" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.120"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.119",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.120",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.119"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.119"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.119"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.120"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.120"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.120"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.119"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.120"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21179,7 +20986,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.119"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.120"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21811,16 +21618,6 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
             }
           });
         }
-        const phoneCta = document.getElementById('btnInstallSetSailPhoneCta');
-        if (phoneCta && !phoneCta._boundInstall) {
-          phoneCta._boundInstall = true;
-          phoneCta.addEventListener('click', function(e) {
-            e.preventDefault();
-            const mainBtn = document.getElementById('btnInstallSetSailApp');
-            if (mainBtn) mainBtn.click();
-          });
-        }
-
         // Clicking the docked SetSail logo in the header returns to Slide 1
         const logoWrap = document.getElementById('homeHeroLogoWrap');
         if (logoWrap) {
@@ -21902,17 +21699,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.119', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.120', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.119 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.120 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.119') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.119.0'); }, 1200);
+              if (last && last.indexOf('v5.120') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.120.0'); }, 1200);
               }
             } catch (eTip) {}
           })
