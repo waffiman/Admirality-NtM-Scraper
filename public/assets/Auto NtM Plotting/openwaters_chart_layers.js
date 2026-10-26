@@ -7,6 +7,7 @@
   "use strict";
 
   const TIDES_EXTREMES = "https://api.openwaters.io/tides/extremes";
+  const TIDES_TIMELINE = "https://api.openwaters.io/tides/timeline";
   const CURRENTS_EVENTS = "https://api.openwaters.io/currents/events";
 
   // Prefer already-loaded <script> from index.html; then same-origin files (no CDN — SW/CDN flakes)
@@ -1219,25 +1220,435 @@
     initSkyWidget(card);
   }
 
-  function ssPortCardPrint(el, kind) {
+  function formatCoordDms(lat, lon) {
+    function one(v, pos, neg) {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return "";
+      const hem = n >= 0 ? pos : neg;
+      const a = Math.abs(n);
+      const deg = Math.floor(a);
+      const minFloat = (a - deg) * 60;
+      const min = Math.round(minFloat);
+      const dAdj = min === 60 ? deg + 1 : deg;
+      const mAdj = min === 60 ? 0 : min;
+      return dAdj + "°" + String(mAdj).padStart(2, "0") + "'" + hem;
+    }
+    const la = one(lat, "N", "S");
+    const lo = one(lon, "E", "W");
+    return la && lo ? la + " " + lo : "";
+  }
+
+  function pad2(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  /** Format YYYY-MM-DD → DD-MM-YYYY (Admiralty-style day header). */
+  function ymdToAdmiralty(ymd) {
+    const p = String(ymd || "").slice(0, 10).split("-");
+    if (p.length !== 3) return String(ymd || "");
+    return p[2] + "-" + p[1] + "-" + p[0];
+  }
+
+  function formatRangeLabel(fromYmd, toYmd) {
+    function pretty(ymd) {
+      try {
+        const d = new Date(String(ymd).slice(0, 10) + "T12:00:00Z");
+        return d.toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          timeZone: "UTC"
+        });
+      } catch (e) {
+        return ymd;
+      }
+    }
+    if (!fromYmd) return "";
+    if (!toYmd || toYmd === fromYmd) return pretty(fromYmd);
+    return pretty(fromYmd) + " – " + pretty(toYmd);
+  }
+
+  /**
+   * Subsample Open Waters timeline (default 10 min) to local-hour rows
+   * matching Admiralty hourly tide tables.
+   */
+  function hourlyRowsFromTimeline(timeline, tzCtx) {
+    if (!Array.isArray(timeline) || !timeline.length) return [];
+    const best = Object.create(null);
+    for (let i = 0; i < timeline.length; i++) {
+      const p = timeline[i];
+      const t = new Date(p.time);
+      if (Number.isNaN(t.getTime())) continue;
+      const level = Number(p.level);
+      if (!Number.isFinite(level)) continue;
+      const ymd = localYmdInTz(t, tzCtx);
+      const mins = minutesOfDayInTz(t, tzCtx);
+      const hour = Math.floor(mins / 60) % 24;
+      const rem = mins % 60;
+      const key = ymd + "|" + hour;
+      const prev = best[key];
+      if (!prev || rem < prev.rem) {
+        best[key] = { ymd: ymd, hour: hour, rem: rem, level: level, time: t };
+      }
+    }
+    const keys = Object.keys(best).sort();
+    const rows = [];
+    for (let i = 0; i < keys.length; i++) {
+      const r = best[keys[i]];
+      // Prefer samples within 15 min of the hour (skip sparse gaps)
+      if (r.rem > 15) continue;
+      rows.push({
+        ymd: r.ymd,
+        hour: r.hour,
+        timeLabel: pad2(r.hour) + ":00",
+        level: r.level,
+        levelLabel: (Math.round(r.level * 10) / 10).toFixed(1) + " m"
+      });
+    }
+    return rows;
+  }
+
+  /** Red while falling, green as soon as heights start rising. */
+  function applyTideTrendColors(rows) {
+    let trend = 0; // -1 falling, +1 rising
+    for (let i = 0; i < rows.length; i++) {
+      if (i > 0) {
+        const d = rows[i].level - rows[i - 1].level;
+        if (d < -0.001) trend = -1;
+        else if (d > 0.001) trend = 1;
+      }
+      rows[i].trend = trend;
+      rows[i].color = trend < 0 ? "#b91c1c" : trend > 0 ? "#15803d" : "#0f172a";
+    }
+    return rows;
+  }
+
+  function groupHourlyByDay(rows) {
+    const days = [];
+    let cur = null;
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      if (!cur || cur.ymd !== r.ymd) {
+        cur = { ymd: r.ymd, header: ymdToAdmiralty(r.ymd), rows: [] };
+        days.push(cur);
+      }
+      cur.rows.push(r);
+    }
+    return days;
+  }
+
+  /**
+   * Pack day chunks into 3-column Admiralty pages.
+   * When a day overflows a column, continue in the next column with a repeated date header.
+   */
+  function packTidePrintPages(days, opts) {
+    const colsPerPage = (opts && opts.cols) || 3;
+    const rowsPerCol = (opts && opts.rowsPerCol) || 46;
+    const headerCost = 1;
+    const pages = [];
+    let page = null;
+    let colIdx = 0;
+    let used = 0;
+
+    function newPage() {
+      page = [];
+      for (let c = 0; c < colsPerPage; c++) page.push([]);
+      pages.push(page);
+      colIdx = 0;
+      used = 0;
+    }
+
+    function advanceCol() {
+      colIdx += 1;
+      used = 0;
+      if (colIdx >= colsPerPage) newPage();
+    }
+
+    if (!days.length) return pages;
+    newPage();
+
+    for (let d = 0; d < days.length; d++) {
+      const day = days[d];
+      let offset = 0;
+      while (offset < day.rows.length) {
+        if (used + headerCost >= rowsPerCol) advanceCol();
+        const room = rowsPerCol - used - headerCost;
+        if (room <= 0) {
+          advanceCol();
+          continue;
+        }
+        const take = Math.min(room, day.rows.length - offset);
+        page[colIdx].push({
+          header: day.header,
+          rows: day.rows.slice(offset, offset + take)
+        });
+        used += headerCost + take;
+        offset += take;
+        if (offset < day.rows.length) advanceCol();
+      }
+    }
+    return pages;
+  }
+
+  function setsailLogoUrl() {
+    try {
+      return new URL("assets/SetSail%20LOGOS/setsail_logo_horizontal.png", global.location.href).href;
+    } catch (e) {
+      return "assets/SetSail LOGOS/setsail_logo_horizontal.png";
+    }
+  }
+
+  function buildAdmiraltyTidePrintHtml(meta) {
+    const pages = meta.pages || [];
+    const logo = escHtml(setsailLogoUrl());
+    const titleLine = escHtml(meta.title || "Tide table");
+    const subLine = escHtml(meta.subtitle || "");
+    const rangeLine = escHtml(meta.rangeLabel || "");
+    const datum = escHtml(meta.datum || "Chart Datum");
+    const credit = escHtml(
+      meta.credit ||
+        "Tide predictions via Open Waters / Slackwater (CC BY 4.0). Not for navigation."
+    );
+
+    const pageHtml = pages
+      .map(function (cols, pageIdx) {
+        const colHtml = cols
+          .map(function (chunks) {
+            if (!chunks.length) return '<div class="tt-col"></div>';
+            const body = chunks
+              .map(function (ch) {
+                const rows = (ch.rows || [])
+                  .map(function (r) {
+                    return (
+                      '<div class="tt-row">' +
+                      '<span class="tt-time">' +
+                      escHtml(r.timeLabel) +
+                      "</span>" +
+                      '<span class="tt-h" style="color:' +
+                      escHtml(r.color || "#0f172a") +
+                      '">' +
+                      escHtml(r.levelLabel) +
+                      "</span></div>"
+                    );
+                  })
+                  .join("");
+                return (
+                  '<div class="tt-day">' +
+                  '<div class="tt-day-h">' +
+                  escHtml(ch.header) +
+                  "</div>" +
+                  rows +
+                  "</div>"
+                );
+              })
+              .join("");
+            return '<div class="tt-col">' + body + "</div>";
+          })
+          .join("");
+        return (
+          '<section class="tt-page">' +
+          '<header class="tt-head">' +
+          '<div class="tt-title">' +
+          titleLine +
+          "</div>" +
+          '<div class="tt-sub">' +
+          subLine +
+          (rangeLine ? (subLine ? " · " : "") + rangeLine : "") +
+          "</div>" +
+          "</header>" +
+          '<div class="tt-cols">' +
+          colHtml +
+          "</div>" +
+          '<footer class="tt-foot">' +
+          '<div class="tt-foot-txt">' +
+          "<div>Predicted heights are in metres above " +
+          datum +
+          "</div>" +
+          "<div>" +
+          credit +
+          "</div></div>" +
+          '<img class="tt-logo" src="' +
+          logo +
+          '" alt="SetSail" />' +
+          "</footer></section>"
+        );
+      })
+      .join("");
+
+    return (
+      "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/>" +
+      "<title>" +
+      titleLine +
+      " — Tide table</title>" +
+      "<style>" +
+      "@page{size:A4 portrait;margin:10mm}" +
+      "*{box-sizing:border-box}" +
+      "html,body{margin:0;padding:0;background:#fff;color:#0f172a;" +
+      "font-family:'Segoe UI',Calibri,Arial,sans-serif}" +
+      ".tt-page{display:flex;flex-direction:column;min-height:277mm;padding:4mm 2mm 2mm;" +
+      "page-break-after:always}" +
+      ".tt-page:last-child{page-break-after:auto}" +
+      ".tt-head{text-align:center;margin:0 0 6mm;line-height:1.25}" +
+      ".tt-title{font-size:15pt;font-weight:700;letter-spacing:0.01em}" +
+      ".tt-sub{font-size:9.5pt;margin-top:2px;color:#1e293b}" +
+      ".tt-cols{flex:1;display:flex;gap:7mm;align-items:stretch;min-height:0}" +
+      ".tt-col{flex:1 1 0;min-width:0;font-size:8.5pt;line-height:1.22}" +
+      ".tt-day{margin:0 0 3.2mm}" +
+      ".tt-day-h{display:inline-block;border:1.5px solid #0f172a;padding:1px 7px;" +
+      "font-weight:700;font-size:8.5pt;margin:0 0 1.5mm;letter-spacing:0.02em}" +
+      ".tt-row{display:flex;justify-content:space-between;gap:8px;padding:0 1px}" +
+      ".tt-time{font-variant-numeric:tabular-nums;color:#0f172a}" +
+      ".tt-h{font-variant-numeric:tabular-nums;font-weight:600}" +
+      ".tt-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;" +
+      "margin-top:5mm;padding-top:2mm;border-top:1px solid #94a3b8;font-size:7.5pt;color:#334155}" +
+      ".tt-foot-txt{flex:1;min-width:0;line-height:1.35}" +
+      ".tt-logo{height:22px;width:auto;max-width:140px;object-fit:contain;flex-shrink:0}" +
+      "@media print{html,body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}" +
+      ".tt-page{min-height:auto;height:auto}}" +
+      "</style></head><body>" +
+      pageHtml +
+      "<script>window.onload=function(){setTimeout(function(){window.focus();window.print();},180);}<\/script>" +
+      "</body></html>"
+    );
+  }
+
+  async function fetchTideTimeline(lat, lon, start, end) {
+    const url =
+      TIDES_TIMELINE +
+      "?latitude=" +
+      encodeURIComponent(lat) +
+      "&longitude=" +
+      encodeURIComponent(lon) +
+      "&start=" +
+      encodeURIComponent(toIsoZ(start)) +
+      "&end=" +
+      encodeURIComponent(toIsoZ(end)) +
+      "&units=meters";
+    const res = await fetch(url, { credentials: "omit" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }
+
+  async function ssPortCardPrint(el, kind) {
     const card = cardRootFromEl(el);
     if (!card) return;
-    const panel = card.querySelector('.ss-port-panel[data-panel="' + (kind || "tides") + '"] .ss-port-content');
-    const title = (card.querySelector(".ss-port-name") || {}).textContent || "Port";
-    if (!panel) return;
-    const w = global.open("", "_blank", "noopener,noreferrer,width=720,height=900");
-    if (!w) return;
+    const title = ((card.querySelector(".ss-port-name") || {}).textContent || "Port").trim();
+    const k = kind || "tides";
+
+    if (k !== "tides") {
+      const panel = card.querySelector('.ss-port-panel[data-panel="' + k + '"] .ss-port-content');
+      if (!panel) return;
+      const w = global.open("", "_blank", "noopener,noreferrer,width=720,height=900");
+      if (!w) return;
+      w.document.write(
+        "<!DOCTYPE html><html><head><title>" +
+          escHtml(title) +
+          "</title>" +
+          "<style>body{font:14px/1.45 system-ui,sans-serif;color:#0f172a;padding:24px}" +
+          "h1{font-size:18px;margin:0 0 8px}table{width:100%;border-collapse:collapse}" +
+          "th,td{border-bottom:1px solid #cbd5e1;padding:6px 8px;text-align:left;font-size:13px}" +
+          "@media print{body{padding:0}}</style></head><body>" +
+          "<h1>" +
+          escHtml(title) +
+          "</h1>" +
+          panel.innerHTML +
+          "<script>window.onload=function(){window.print();}<\/script></body></html>"
+      );
+      w.document.close();
+      return;
+    }
+
+    const lat = Number(card.getAttribute("data-lat"));
+    const lon = Number(card.getAttribute("data-lon"));
+    const tzCtx = cardTzCtx(card);
+    const fromEl = card.querySelector('[data-role="tide-from"]');
+    const toEl = card.querySelector('[data-role="tide-to"]');
+    const fromYmd = (fromEl && fromEl.value) || localYmdInTz(new Date(), tzCtx);
+    const toYmd = (toEl && toEl.value) || fromYmd;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+    const btn = el && el.closest ? el.closest(".ss-port-print-btn") || el : el;
+    const prevDisabled = btn && btn.disabled;
+    if (btn) {
+      btn.disabled = true;
+      btn.classList.add("is-busy");
+    }
+
+    const w = global.open("", "_blank", "noopener,noreferrer,width=900,height=1100");
+    if (!w) {
+      if (btn) {
+        btn.disabled = !!prevDisabled;
+        btn.classList.remove("is-busy");
+      }
+      if (typeof global.showSetSailToast === "function") {
+        global.showSetSailToast("Allow pop-ups to print the tide table.", "info");
+      }
+      return;
+    }
     w.document.write(
-      "<!DOCTYPE html><html><head><title>" + escHtml(title) + " — Tides</title>" +
-      "<style>body{font:14px/1.45 system-ui,sans-serif;color:#0f172a;padding:24px}" +
-      "h1{font-size:18px;margin:0 0 8px}table{width:100%;border-collapse:collapse}" +
-      "th,td{border-bottom:1px solid #cbd5e1;padding:6px 8px;text-align:left;font-size:13px}" +
-      "@media print{body{padding:0}}</style></head><body>" +
-      "<h1>" + escHtml(title) + " — Tide table</h1>" +
-      panel.innerHTML +
-      "<script>window.onload=function(){window.print();}<\/script></body></html>"
+      "<!DOCTYPE html><html><head><title>Tide table</title></head>" +
+        "<body style=\"font:14px system-ui;padding:32px;color:#334155\">Loading tide table…</body></html>"
     );
     w.document.close();
+
+    try {
+      const start = portDayStartUtc(fromYmd, tzCtx);
+      const end = new Date(portDayStartUtc(toYmd, tzCtx).getTime() + 86400000);
+      const data = await fetchTideTimeline(lat, lon, start, end);
+      const station = (data && data.station) || {};
+      const stationName = station.name || title;
+      const stLat = Number(station.latitude);
+      const stLon = Number(station.longitude);
+      const useLat = Number.isFinite(stLat) ? stLat : lat;
+      const useLon = Number.isFinite(stLon) ? stLon : lon;
+      const coords = formatCoordDms(useLat, useLon);
+      const country = station.country || station.region || "";
+      const printTz = {
+        timezone: station.timezone || tzCtx.timezone || "",
+        lon: useLon
+      };
+      let rows = hourlyRowsFromTimeline(data.timeline || [], printTz);
+      rows = applyTideTrendColors(rows);
+      const days = groupHourlyByDay(rows);
+      if (!days.length) throw new Error("empty timeline");
+      const pages = packTidePrintPages(days, { cols: 3, rowsPerCol: 46 });
+      const datumName = data.datum || station.chart_datum || "Chart Datum";
+      let credit =
+        "Tide predictions via Open Waters / Slackwater. Not for navigation.";
+      if (station.license && station.license.type) {
+        credit =
+          "Source: Open Waters / Slackwater (" +
+          String(station.license.type).toUpperCase() +
+          "). Not for navigation.";
+      }
+      const html = buildAdmiraltyTidePrintHtml({
+        title: stationName,
+        subtitle: [coords, country].filter(Boolean).join("  "),
+        rangeLabel: formatRangeLabel(fromYmd, toYmd),
+        datum: datumName,
+        credit: credit,
+        pages: pages
+      });
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+    } catch (err) {
+      try {
+        w.document.open();
+        w.document.write(
+          "<!DOCTYPE html><html><body style=\"font:14px system-ui;padding:32px;color:#b91c1c\">" +
+            "Could not build tide table for this range. Try again or shorten the date range." +
+            "</body></html>"
+        );
+        w.document.close();
+      } catch (e2) {}
+      console.warn("[SetSail] tide print failed", err);
+    } finally {
+      if (btn) {
+        btn.disabled = !!prevDisabled;
+        btn.classList.remove("is-busy");
+      }
+    }
   }
 
   function stationToPort(st) {

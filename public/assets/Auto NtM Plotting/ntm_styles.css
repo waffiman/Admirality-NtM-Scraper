@@ -4302,6 +4302,11 @@
   height: 12px;
   flex-shrink: 0;
 }
+.ss-port-print-btn.is-busy {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 .ss-port-print-btn:hover {
   background: linear-gradient(180deg, rgba(34, 211, 238, 0.42), rgba(14, 165, 233, 0.3));
   border-color: #67e8f9;
