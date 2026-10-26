@@ -9563,6 +9563,23 @@
   display: block;
 }
 
+/* SetRoute live planning title spinner */
+.sr-live-log-spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(56, 189, 248, 0.25);
+  border-top-color: #38bdf8;
+  flex: 0 0 auto;
+  animation: srLiveSpin 0.7s linear infinite;
+}
+.sr-live-log-spinner.is-done {
+  display: none;
+}
+@keyframes srLiveSpin {
+  to { transform: rotate(360deg); }
+}
+
 .nav-saved-route-delete {
   display: flex;
   align-items: center;

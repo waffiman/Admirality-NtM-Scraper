@@ -5891,8 +5891,10 @@ const SETROUTE_LAND_BOXES = [
   { minLat: 2.6, maxLat: 6.5, minLon: 102.35, maxLon: 103.85 }, // Malay peninsula interior (E of Malacca fairway)
   { minLat: -3.2, maxLat: 1.3, minLon: 105.0, maxLon: 109.8 }, // Karimata / Gaspar approaches
   { minLat: 5, maxLat: 18, minLon: 118, maxLon: 126 },       // Philippines (central)
-  { minLat: 30, maxLat: 45, minLon: 130, maxLon: 142 },       // Honshu interior
-  { minLat: 18, maxLat: 26, minLon: -85, maxLon: -70 },       // Greater Antilles landmasses
+  // Honshu interior only — do NOT span Osumi→Tokyo Pacific approaches
+  { minLat: 34.2, maxLat: 40.5, minLon: 136.2, maxLon: 140.9 },
+  // Greater Antilles: use island-specific boxes below — a 18–26°N / 85–70°W belt
+  // was sealing Caribbean_MID→Yucatan / Key West→GoM fairways (Far East→Houston OD).
   { minLat: 36, maxLat: 41.5, minLon: 20.5, maxLon: 28.5 },   // Greece / Aegean islands mass
   { minLat: 54, maxLat: 59, minLon: 10, maxLon: 20 },         // S Sweden / Baltic islands belt
   { minLat: -47, maxLat: -34, minLon: 166, maxLon: 179 },     // NZ South Island interior
@@ -6383,12 +6385,14 @@ function setrouteBuildAdjacency() {
       const p = setrouteLerpLatLon(a[0], a[1], b[0], b[1], samples[si]);
       if (setroutePointInLandBox(p[0], p[1])) boxHits++;
     }
-    // Drop edges that cut land boxes OR cross coastline on medium+ hops
+    // Soft-penalize land/coast hits; only TSS is a hard drop. Curated sea-graph edges must
+    // stay connected — dropping land-box hits was isolating Far East ↔ US Gulf (Panama/Cape/Suez all refused).
     const coastHit = dist >= 90 && typeof setrouteLegCrossesCoastline === "function" &&
       setrouteLegCrossesCoastline(a[0], a[1], b[0], b[1]);
     // COLREG Rule 10 — never keep edges through a Traffic Separation Zone
     const tssBan = typeof setrouteTssHardBan === "function" && setrouteTssHardBan(a[0], a[1], b[0], b[1]);
-    if (tssBan || (boxHits >= (dist >= 1500 ? 2 : 1) && dist >= 160) || (coastHit && dist >= 180)) {
+    if (tssBan) continue;
+    if ((boxHits >= (dist >= 1500 ? 2 : 1) && dist >= 160) || (coastHit && dist >= 180)) {
       hazard = 50000;
     } else {
       hazard += setrouteStaticNonStormWeatherPenalty(a[0], a[1], b[0], b[1]);
@@ -6397,7 +6401,6 @@ function setrouteBuildAdjacency() {
       if (typeof setrouteTssEdgePenalty === "function") hazard += setrouteTssEdgePenalty(a[0], a[1], b[0], b[1]);
     }
     const cost = dist + hazard;
-    if (hazard >= 50000) continue;
     adj[u].push({ node: v, dist, cost });
     adj[v].push({ node: u, dist, cost });
   }
@@ -14824,15 +14827,25 @@ function beginSetRouteLiveLog(titleHtml) {
   const el = appendChatMessage(
     "brain",
     `<div class="sr-live-log">` +
-      `<div style="font-size:0.78rem;font-weight:650;color:#e2e8f0;">${titleHtml}</div>` +
+      `<div class="sr-live-log-title" style="font-size:0.78rem;font-weight:650;color:#e2e8f0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">` +
+        `<span class="sr-live-log-title-text">${titleHtml}</span>` +
+        `<span class="sr-live-log-spinner" aria-hidden="true" title="Planning…"></span>` +
+      `</div>` +
       `<ul class="sr-live-log-list" style="list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:5px;"></ul>` +
     `</div>`
   );
   const list = el && el.querySelector(".sr-live-log-list");
+  const spinner = el && el.querySelector(".sr-live-log-spinner");
   const scrollWrap = document.getElementById("setRouteChatScroll");
   let lastKey = "";
   const api = {
     el,
+    done() {
+      if (spinner) {
+        spinner.classList.add("is-done");
+        spinner.setAttribute("aria-hidden", "true");
+      }
+    },
     step(html, opts) {
       if (!list) return;
       const key = String(html);
@@ -14863,6 +14876,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const live = beginSetRouteLiveLog(
     `Planning <b>${(pOrig && pOrig.name) || "Origin"}</b> → <b>${(pDest && pDest.name) || "Destination"}</b>`
   );
+  try {
   live.step("Loading coast grid & corridor knowledge…");
   if (typeof loadSetrouteCoastGrid === "function") {
     try { await loadSetrouteCoastGrid(); } catch (e) {}
@@ -15007,6 +15021,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     }
     if (hardRefuse && (baseRoute.metadata && baseRoute.metadata.coreARefused)) {
       live.step("No sea corridor found for this OD pair.");
+      if (typeof live.done === "function") live.done();
       appendChatMessage("brain",
         `<strong>Core A could not build a sea corridor</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No graph path for <b>${pOrig.name}</b> → <b>${pDest.name}</b>. Try named major ports or a regional via (Malacca / Sunda / Cape / Suez / Panama).</div>`
       );
@@ -15136,6 +15151,9 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   if (window.SETROUTE_CHAT_HISTORY.length > 14) window.SETROUTE_CHAT_HISTORY.shift();
 
   if (scrollWrap) scrollWrap.scrollTop = scrollWrap.scrollHeight;
+  } finally {
+    if (typeof live.done === "function") live.done();
+  }
 }
 
 async function handleSetRouteUserMessage(rawText) {

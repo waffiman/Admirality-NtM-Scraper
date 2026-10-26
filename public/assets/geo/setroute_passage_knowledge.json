@@ -65,7 +65,7 @@
       "refs": ["opw_style_ocean_corridors", "imo_ships_routeing"],
       "originHints": ["tianjin", "xingang", "shanghai", "ningbo", "qingdao", "dalian", "busan", "tokyo", "hong kong", "kaohsiung", "taixing"],
       "destHints": ["houston", "galveston", "new orleans", "corpus"],
-      "nodeKeys": ["TIANJIN_APP", "BOHAI_STRAIT", "QINGDAO_APP", "EAST_CHINA_SEA", "OSUMI_STRAIT", "TOKYO_APP", "NPAC_GC_WEST", "NPAC_GC_MID", "NPAC_GC_EAST", "LONG_BEACH_APP", "MANZANILLO_APP", "PACIFIC_PANAMA_APP", "PANAMA_BALBOA", "PANAMA_COLON", "CARIBBEAN_MID", "YUCATAN_CH", "GULF_MEXICO_MID", "HOUSTON_APP"]
+      "nodeKeys": ["TIANJIN_APP", "BOHAI_STRAIT", "QINGDAO_APP", "EAST_CHINA_SEA", "OSUMI_STRAIT", "NPAC_GC_WEST", "NPAC_GC_MID", "NPAC_GC_EAST", "LONG_BEACH_APP", "MANZANILLO_APP", "PACIFIC_PANAMA_APP", "PANAMA_BALBOA", "PANAMA_COLON", "CARIBBEAN_MID", "YUCATAN_CH", "GULF_MEXICO_MID", "HOUSTON_APP"]
     },
     {
       "id": "fareast_uswc_npac",
