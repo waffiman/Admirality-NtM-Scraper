@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.113" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.114" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -4375,12 +4375,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
   align-items: center;
   justify-content: flex-end;
   padding: 0 0.5rem;
-  height: 38px;
+  height: 40px;
   flex-shrink: 0;
   gap: 0.65rem;
   user-select: none;
   z-index: 1000;
   position: relative;
+  overflow: visible;
 }
 
 /* Fixed-width cursor HUD (left) — never resizes when DMS / dashes change */
@@ -4395,20 +4396,24 @@ svg.leaflet-image-layer.leaflet-interactive path {
   width: 29ch;
   min-width: 29ch;
   max-width: 29ch;
-  overflow: hidden;
+  overflow: visible;
   text-overflow: clip;
   white-space: nowrap;
   pointer-events: none;
   font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Consolas, monospace;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
   color: #a4c4ff;
   background: rgba(6, 12, 28, 0.55);
   border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 0.2rem 0.55rem;
-  line-height: 1.2;
+  padding: 0.28rem 0.55rem;
+  line-height: 1.4;
+  height: auto;
+  min-height: 0;
+  display: inline-flex;
+  align-items: center;
   text-align: left;
 }
 
@@ -8788,12 +8793,7 @@ select option {
   transform: translateY(0) !important;
 }
 @media (max-width: 768px) {
-  .home-center-stage {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    flex: 0 0 auto !important;
-    z-index: 4;
-  }
+  /* Beat inline position:relative on #homeHudTop — keep HUD out of flex flow */
   .home-hud-top,
   #homeHudTop {
     position: absolute !important;
@@ -8809,10 +8809,22 @@ select option {
     right: 0 !important;
     bottom: 0.25rem !important;
     z-index: 5 !important;
+    margin-top: 0 !important;
   }
-  .home-center-stage {
-    padding-top: 2.6rem !important; /* clear absolute HUD */
-    padding-bottom: 2rem !important;
+  /* True geometric center of the hero viewport (ignore HUD / footer chrome).
+     Must beat #homeCenterStage { position:relative } from the v5.35 hero rules. */
+  .home-center-stage,
+  #homeCenterStage {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: calc(100% - 1.2rem) !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 0.2rem !important;
+    flex: none !important;
+    z-index: 4 !important;
   }
 }
 
@@ -8899,7 +8911,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.113" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.114" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -11966,7 +11978,7 @@ select option {
   }
 }
 
-/* ═══ Mobile polish pack (v5.113) — hero / dock / install / SetStar / SetRoute ═══ */
+/* ═══ Mobile polish pack (v5.114) — hero / dock / install / SetStar / SetRoute ═══ */
 .setstar-data-switch { display: none; }
 @media (max-width: 768px) {
   html, body, #tab-home, #tab-home.active, .home-hero-viewport, .app-content {
@@ -12012,7 +12024,7 @@ select option {
     grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
   }
 
-  /* SetStar: Almanac ↔ Logbook toggle */
+  /* SetStar: Star Locator ↔ Logbook toggle */
   .setstar-data-switch {
     display: flex !important;
     gap: 6px;
@@ -12064,26 +12076,37 @@ select option {
     font-size: 0.72rem !important;
   }
 
-  /* Logbook → 2-column cards on phone */
+  /* Logbook → full-width 2-column cards on phone (tbody must NOT be a 2-col grid) */
+  #tab-gyro .panel-logbook {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
   #tab-gyro .panel-logbook .scroll {
     overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   #tab-gyro table.log {
     width: 100% !important;
+    max-width: 100% !important;
     min-width: 0 !important;
     display: block !important;
+    box-sizing: border-box !important;
   }
   #tab-gyro table.log thead {
     display: none !important;
   }
-  #tab-gyro table.log tbody,
-  #tab-gyro table.log tr {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
+  #tab-gyro table.log tbody {
+    display: block !important;
     width: 100% !important;
   }
   #tab-gyro table.log tr {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
     margin: 0 0 0.75rem !important;
     padding: 0.55rem !important;
     border: 1px solid rgba(148, 163, 184, 0.2) !important;
@@ -12097,11 +12120,15 @@ select option {
     gap: 2px !important;
     width: auto !important;
     min-width: 0 !important;
+    max-width: 100% !important;
     padding: 0.35rem 0.4rem !important;
     border: none !important;
     background: rgba(15, 23, 42, 0.45) !important;
     border-radius: 7px !important;
     font-size: 0.72rem !important;
+    white-space: normal !important;
+    text-align: left !important;
+    overflow-wrap: anywhere !important;
   }
   #tab-gyro table.log td::before {
     content: attr(data-label);
@@ -12728,7 +12755,7 @@ select option {
           <!-- Foreground Container: 100% Locked Viewport, Scroll-Scrubbed Choreography -->
           <div class="home-hero-content">
             <!-- Top Bridge HUD Bar (3-Column Grid: Col 1 Left, Col 2 Center, Col 3 Right) -->
-            <div class="home-hud-top" id="homeHudTop" style="display:grid !important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) !important;align-items:center !important;width:100% !important;position:relative !important;">
+            <div class="home-hud-top" id="homeHudTop" style="display:grid !important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) !important;align-items:center !important;width:100% !important;">
               <!-- Column 1 (Left): "SETSAIL ●" on Slide 1; UTC Clock glides into this slot on Slide 2..4 -->
               <div class="home-hud-pill home-hud-left" id="homeHudLeftSlot" style="grid-column:1 !important;justify-self:start !important;position:relative !important;min-width:0 !important;">
                 <div class="hud-left-brand-wrap" id="homeHudLeftBrand">
@@ -13015,7 +13042,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.113" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.113';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.114" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.114';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13091,7 +13118,7 @@ select option {
 
 
 
-      <div id="tab-gyro" class="tab-pane setstar-panel-almanac">
+      <div id="tab-gyro" class="tab-pane setstar-panel-logbook">
 
 
 
@@ -13366,13 +13393,13 @@ select option {
 
 
 
-    <!-- Mobile: Almanac ↔ Logbook switch (desktop keeps side-by-side) -->
+    <!-- Mobile: Star Locator ↔ Logbook switch (desktop keeps side-by-side) -->
     <div class="setstar-data-switch no-print" id="setstarDataSwitch" role="tablist" aria-label="SetStar data panels">
-      <button type="button" class="active" data-setstar-panel="almanac" role="tab" aria-selected="true">Star Almanac</button>
-      <button type="button" data-setstar-panel="logbook" role="tab" aria-selected="false">Logbook</button>
+      <button type="button" data-setstar-panel="almanac" role="tab" aria-selected="false">Star Locator</button>
+      <button type="button" class="active" data-setstar-panel="logbook" role="tab" aria-selected="true">Logbook</button>
     </div>
 
-    <!-- ── Star Almanac Sidebar ── -->
+    <!-- ── Star Locator Sidebar ── -->
 
 
 
@@ -13380,7 +13407,7 @@ select option {
 
 
 
-      <h2>Star Almanac</h2>
+      <h2>Star Locator</h2>
 
 
 
@@ -19678,27 +19705,33 @@ select.min-input,
 
     window.renderStarAlmanac = renderStarAlmanac;
 
-    // Mobile Almanac ↔ Logbook panel switch
+    // Mobile Star Locator ↔ Logbook panel switch (Logbook default on phone)
     (function initSetstarDataSwitch() {
       const tab = document.getElementById('tab-gyro');
       const sw = document.getElementById('setstarDataSwitch');
       if (!tab || !sw || sw._boundSetstar) return;
       sw._boundSetstar = true;
-      if (!tab.classList.contains('setstar-panel-almanac') && !tab.classList.contains('setstar-panel-logbook')) {
-        tab.classList.add('setstar-panel-almanac');
-      }
+      const mobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+      const panel = mobile || !tab.classList.contains('setstar-panel-almanac') ? 'logbook' : 'almanac';
+      tab.classList.toggle('setstar-panel-almanac', panel === 'almanac');
+      tab.classList.toggle('setstar-panel-logbook', panel === 'logbook');
+      sw.querySelectorAll('[data-setstar-panel]').forEach(function (b) {
+        const on = b.getAttribute('data-setstar-panel') === panel;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
       sw.addEventListener('click', function (e) {
         const btn = e.target.closest('[data-setstar-panel]');
         if (!btn) return;
-        const panel = btn.getAttribute('data-setstar-panel');
-        tab.classList.toggle('setstar-panel-almanac', panel === 'almanac');
-        tab.classList.toggle('setstar-panel-logbook', panel === 'logbook');
+        const next = btn.getAttribute('data-setstar-panel');
+        tab.classList.toggle('setstar-panel-almanac', next === 'almanac');
+        tab.classList.toggle('setstar-panel-logbook', next === 'logbook');
         sw.querySelectorAll('[data-setstar-panel]').forEach(function (b) {
           const on = b === btn;
           b.classList.toggle('active', on);
           b.setAttribute('aria-selected', on ? 'true' : 'false');
         });
-        if (panel === 'almanac' && typeof renderStarAlmanac === 'function') {
+        if (next === 'almanac' && typeof renderStarAlmanac === 'function') {
           try { renderStarAlmanac(); } catch (err) {}
         }
       });
@@ -20728,25 +20761,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.113"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.113" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.113"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.114"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.114" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.114"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.113",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.114",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.113"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.113"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.113"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.114"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.114"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.114"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.113"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.114"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20819,7 +20852,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.113"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.114"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21542,17 +21575,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.113', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.114', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.113 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.114 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.113') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.113.0'); }, 1200);
+              if (last && last.indexOf('v5.114') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.114.0'); }, 1200);
               }
             } catch (eTip) {}
           })
