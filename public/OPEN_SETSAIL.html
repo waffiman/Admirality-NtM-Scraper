@@ -34,8 +34,8 @@
     html.setsail-booting body > .app-container { visibility: hidden !important; }
     #setsailBoot {
       position: fixed; inset: 0; z-index: 2147483000;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0; padding: 16px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 18px; margin: 0; padding: 16px;
       background: radial-gradient(ellipse at center, #0b1a14 0%, #030712 62%, #020617 100%);
       transition: opacity 0.45s ease, visibility 0.45s ease;
     }
@@ -49,12 +49,6 @@
         radial-gradient(circle at center, rgba(16,185,129,0.14) 0 2px, transparent 3px),
         repeating-radial-gradient(circle at center, transparent 0 18%, rgba(34,197,94,0.12) 18% 18.5%);
       overflow: hidden;
-    }
-    #setsailBoot .ssb-cross {
-      position: absolute; inset: 0; pointer-events: none;
-      background:
-        linear-gradient(90deg, transparent 49.6%, rgba(34,197,94,0.22) 49.6% 50.4%, transparent 50.4%),
-        linear-gradient(0deg, transparent 49.6%, rgba(34,197,94,0.22) 49.6% 50.4%, transparent 50.4%);
     }
     #setsailBoot .ssb-sweep {
       position: absolute; inset: -5%; border-radius: 50%;
@@ -75,14 +69,33 @@
     }
     #setsailBoot .ssb-own-vec {
       position: absolute; left: 50%; top: 50%; width: 2px; height: 22px;
-      margin: -22px 0 0 -1px; background: linear-gradient(180deg, #38bdf8, rgba(56,189,248,0.15));
+      margin: -22px 0 0 -1px; background: linear-gradient(180deg, #ffffff, rgba(255,255,255,0.12));
       border-radius: 2px; transform-origin: bottom center;
-      box-shadow: 0 0 8px rgba(56,189,248,0.55);
+      box-shadow: 0 0 8px rgba(255,255,255,0.55);
     }
     #setsailBoot .ssb-own-vec::after {
       content: ""; position: absolute; left: 50%; top: -1px; width: 0; height: 0;
       margin-left: -4px; border-left: 4px solid transparent; border-right: 4px solid transparent;
-      border-bottom: 7px solid #38bdf8;
+      border-bottom: 7px solid #ffffff;
+    }
+    #setsailBoot .ssb-loading {
+      display: inline-flex; align-items: baseline; gap: 1px;
+      font: 600 0.78rem/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+      letter-spacing: 0.28em; text-transform: uppercase; color: #86efac;
+      text-shadow: 0 0 12px rgba(16,185,129,0.35);
+      user-select: none;
+    }
+    #setsailBoot .ssb-dots { display: inline-flex; width: 1.6em; margin-left: 2px; letter-spacing: 0.05em; }
+    #setsailBoot .ssb-dots span {
+      opacity: 0; animation: ssbDot 1.2s ease-in-out infinite;
+    }
+    #setsailBoot .ssb-dots span:nth-child(1) { animation-delay: 0s; }
+    #setsailBoot .ssb-dots span:nth-child(2) { animation-delay: 0.2s; }
+    #setsailBoot .ssb-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes ssbDot {
+      0%, 20% { opacity: 0; }
+      40%, 70% { opacity: 1; }
+      90%, 100% { opacity: 0; }
     }
     #setsailBoot .ssb-tgt {
       position: absolute; left: 50%; top: 50%; z-index: 6;
@@ -154,7 +167,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.118" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.119" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -9010,7 +9023,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.118" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.119" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12077,7 +12090,7 @@ select option {
   }
 }
 
-/* ═══ Mobile polish pack (v5.118) — hero / dock / install / SetStar / SetRoute ═══ */
+/* ═══ Mobile polish pack (v5.119) — hero / dock / install / SetStar / SetRoute ═══ */
 .setstar-data-switch { display: none; }
 @media (max-width: 768px) {
   html, body, #tab-home, #tab-home.active, .home-hero-viewport, .app-content {
@@ -12712,7 +12725,6 @@ select option {
   <div id="setsailBoot" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Loading SetSail">
     <div class="ssb-scope" aria-hidden="true">
       <div class="ssb-sweep"></div>
-      <div class="ssb-cross"></div>
       <div class="ssb-own">
         <div class="ssb-own-vec"></div>
         <div class="ssb-own-dot"></div>
@@ -12722,6 +12734,7 @@ select option {
         <div class="ssb-tgt-label">SETSAIL</div>
       </div>
     </div>
+    <div class="ssb-loading" aria-hidden="true">LOADING<span class="ssb-dots"><span>.</span><span>.</span><span>.</span></span></div>
   </div>
   <script>
   (function () {
@@ -13356,7 +13369,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.118" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.118';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.119" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.119';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -21075,25 +21088,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.118"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.118" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.118"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.119"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.119" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.119"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.118",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.119",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.118"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.118"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.118"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.119"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.119"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.119"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.118"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.119"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21166,7 +21179,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.118"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.119"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21889,17 +21902,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.118', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.119', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.118 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.119 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.118') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.118.0'); }, 1200);
+              if (last && last.indexOf('v5.119') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.119.0'); }, 1200);
               }
             } catch (eTip) {}
           })
