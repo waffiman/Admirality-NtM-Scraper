@@ -15190,7 +15190,10 @@ async function handleSetRouteUserMessage(rawText) {
   // 1. AI-First Intent Interpretation (Master Mariner LLM with Full Conversation Context)
   let aiActionPlan = null;
   let aiTextMessage = "";
-  const thinkingEl = appendChatMessage("brain", `<span style="color:#94a3b8;">🧭 SetRoute AI analyzing navigational intent &amp; passage context...</span>`);
+  const thinkingEl = appendChatMessage(
+    "brain",
+    `<span style="color:#94a3b8;">🧭 SetRoute AI analyzing navigational intent &amp; passage context<span class="sr-anim-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></span>`
+  );
 
   if (navigator.onLine && typeof setrouteCohereChat === "function") {
     try {
@@ -15609,12 +15612,25 @@ function initSetRouteV50() {
     });
   }
 
-  // Expanded routes panel collapses as soon as the pointer leaves the sidebar.
+  // Expanded routes panel collapses when pointer leaves the sidebar —
+  // but NOT while hovering the portaled Delete menu (it lives on <body>).
   if (navSidebar && !navSidebar._boundRoutesMouseLeave) {
     navSidebar._boundRoutesMouseLeave = true;
-    navSidebar.addEventListener("mouseleave", () => {
+    navSidebar.addEventListener("mouseleave", (e) => {
       if (!navSidebar.classList.contains("routes-tree-open")) return;
-      collapseNavRoutesTree();
+      const to = e.relatedTarget;
+      if (to && to.closest && (
+        to.closest(".nav-saved-route-menu") ||
+        to.closest(".nav-saved-route-menu-wrap")
+      )) return;
+      // relatedTarget is often null when crossing into a portaled fixed menu — defer check
+      window.setTimeout(() => {
+        if (!navSidebar.classList.contains("routes-tree-open")) return;
+        if (navSidebar.matches(":hover")) return;
+        const overMenu = document.querySelector(".nav-saved-route-menu.is-open:hover, .nav-saved-route-menu:not([hidden]):hover");
+        if (overMenu || window.__setrouteRouteMenuHover) return;
+        collapseNavRoutesTree();
+      }, 60);
     });
   }
 
@@ -15640,6 +15656,22 @@ function initSetRouteV50() {
       if (panel.parentElement !== document.body) {
         document.body.appendChild(panel);
       }
+      if (!panel._boundRouteMenuHoverKeep) {
+        panel._boundRouteMenuHoverKeep = true;
+        panel.addEventListener("mouseenter", () => {
+          window.__setrouteRouteMenuHover = true;
+          if (navSidebar) navSidebar.classList.add("routes-tree-open");
+          if (navSavedList) navSavedList.classList.add("open");
+        });
+        panel.addEventListener("mouseleave", () => {
+          window.__setrouteRouteMenuHover = false;
+          window.setTimeout(() => {
+            if (window.__setrouteRouteMenuHover) return;
+            if (navSidebar && navSidebar.matches(":hover")) return;
+            collapseNavRoutesTree();
+          }, 60);
+        });
+      }
       panel.hidden = false;
       panel.classList.add("is-open");
       const r = moreBtn.getBoundingClientRect();
@@ -15655,6 +15687,7 @@ function initSetRouteV50() {
       panel.style.right = "auto";
     };
     const closeAllRouteMenus = () => {
+      window.__setrouteRouteMenuHover = false;
       document.querySelectorAll(".nav-saved-route-menu").forEach((p) => {
         p.hidden = true;
         p.classList.remove("is-open");

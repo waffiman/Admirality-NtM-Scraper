@@ -15687,6 +15687,7 @@ function initSetRouteV50() {
       panel.style.right = "auto";
     };
     const closeAllRouteMenus = () => {
+      window.__setrouteRouteMenuHover = false;
       document.querySelectorAll(".nav-saved-route-menu").forEach((p) => {
         p.hidden = true;
         p.classList.remove("is-open");
