@@ -95,6 +95,7 @@
       background: #facc15;
       box-shadow: 0 0 0 2px rgba(250,204,21,0.4), 0 0 16px rgba(250,204,21,0.95);
       animation: ssbBlip 1.1s ease-in-out infinite;
+      transition: background 0.2s ease, box-shadow 0.2s ease;
     }
     @keyframes ssbBlip {
       0%, 100% { transform: scale(1); opacity: 1; }
@@ -105,14 +106,20 @@
       font: 700 11px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
       letter-spacing: 0.06em; color: #fde047;
       text-shadow: 0 0 8px rgba(0,0,0,0.9);
+      transition: color 0.2s ease;
     }
+    #setsailBoot .ssb-tgt.is-hot .ssb-tgt-blip {
+      background: #ef4444;
+      box-shadow: 0 0 0 2px rgba(239,68,68,0.45), 0 0 16px rgba(239,68,68,0.95);
+    }
+    #setsailBoot .ssb-tgt.is-hot .ssb-tgt-label { color: #fca5a5; }
     #setsailBoot.is-contact .ssb-tgt-blip {
-      animation: none; background: #fef08a;
-      box-shadow: 0 0 0 3px #eab308, 0 0 28px #facc15;
+      animation: none; background: #f8fafc;
+      box-shadow: 0 0 0 3px #ef4444, 0 0 28px #ef4444;
       transform: scale(1.85);
     }
     #setsailBoot.is-contact .ssb-scope {
-      box-shadow: 0 0 0 2px rgba(250,204,21,0.5), inset 0 0 60px rgba(250,204,21,0.16), 0 0 60px rgba(250,204,21,0.22);
+      box-shadow: 0 0 0 2px rgba(239,68,68,0.5), inset 0 0 60px rgba(239,68,68,0.16), 0 0 60px rgba(239,68,68,0.22);
     }
   </style>
   <script>
@@ -147,7 +154,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.117" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.118" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -9003,7 +9010,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.117" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.118" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12070,7 +12077,7 @@ select option {
   }
 }
 
-/* ═══ Mobile polish pack (v5.117) — hero / dock / install / SetStar / SetRoute ═══ */
+/* ═══ Mobile polish pack (v5.118) — hero / dock / install / SetStar / SetRoute ═══ */
 .setstar-data-switch { display: none; }
 @media (max-width: 768px) {
   html, body, #tab-home, #tab-home.active, .home-hero-viewport, .app-content {
@@ -12733,16 +12740,29 @@ select option {
     var t0 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     var BEARING_DEG = 42;
     var EDGE_R = 48; // % of scope — start at the rim
+    // Rings every ~18% of radius (see repeating-radial-gradient). 2nd from center ≈ 36% of R.
+    var RING2_R = EDGE_R * 0.36; // yellow → red when inside / crossing 2nd ring
 
     function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
     function now() {
       return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     }
 
+    function loadProg() {
+      return clamp01(score / TOTAL);
+    }
+
+    /** Follow load; never finish the approach before MIN_MS (fast caches still get a 3s story). */
+    function visualProg() {
+      var elapsed = now() - t0;
+      var timeCap = clamp01(elapsed / MIN_MS);
+      var lp = loadReady ? 1 : Math.min(0.985, loadProg());
+      return Math.min(lp, timeCap);
+    }
+
     function place(prog) {
       var p = clamp01(prog);
       boot.setAttribute('aria-valuenow', String(Math.round(p * 100)));
-      // left/top % are relative to the radar scope — start at rim, end at own ship
       var r = (1 - p) * EDGE_R;
       var rad = (BEARING_DEG - 90) * Math.PI / 180;
       var x = Math.cos(rad) * r;
@@ -12750,12 +12770,17 @@ select option {
       tgt.style.left = (50 + x) + '%';
       tgt.style.top = (50 + y) + '%';
       tgt.style.transform = 'none';
+      // Inside / past 2nd ring from center → red
+      if (r <= RING2_R) tgt.classList.add('is-hot');
+      else tgt.classList.remove('is-hot');
     }
 
     function tryComplete() {
       if (finished) return;
       var elapsed = now() - t0;
-      if (elapsed < MIN_MS || !loadReady) return;
+      var vp = visualProg();
+      // Stay up until FULL load + min story time + target at center
+      if (!loadReady || elapsed < MIN_MS || vp < 0.999) return;
       finished = true;
       place(1);
       boot.classList.add('is-contact');
@@ -12778,10 +12803,7 @@ select option {
 
     function tick() {
       if (finished) return;
-      var elapsed = now() - t0;
-      // Story always plays over ≥3s from rim → center (even if assets are cached)
-      var timeProg = clamp01(elapsed / MIN_MS);
-      place(timeProg);
+      place(visualProg());
       tryComplete();
       if (!finished) {
         if (typeof requestAnimationFrame === 'function') requestAnimationFrame(tick);
@@ -12873,29 +12895,34 @@ select option {
       if (v.readyState >= 2) doneV();
       else {
         v.addEventListener('loadeddata', doneV, { once: true });
+        v.addEventListener('canplay', doneV, { once: true });
         v.addEventListener('error', doneV, { once: true });
-        setTimeout(doneV, 12000);
+        setTimeout(doneV, 14000);
       }
     }
 
     window.addEventListener('load', function () {
       mark('load');
-      setTimeout(function () {
-        loadReady = true;
-        tryComplete();
-      }, 50);
+      // Do NOT force loadReady here — wait until all weighted assets report in
+      tryComplete();
     });
 
+    // Hard safety only
     setTimeout(function () {
       loadReady = true;
+      score = TOTAL;
       tryComplete();
-    }, 22000);
+    }, 24000);
 
     if (typeof requestAnimationFrame === 'function') requestAnimationFrame(tick);
     else setTimeout(tick, 32);
 
     window.__setsailBootMark = mark;
-    window.__setsailBootComplete = function () { loadReady = true; tryComplete(); };
+    window.__setsailBootComplete = function () {
+      score = TOTAL;
+      loadReady = true;
+      tryComplete();
+    };
   })();
   </script>
 
@@ -13329,7 +13356,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.117" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.117';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.118" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.118';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -21048,25 +21075,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.117"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.117" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.117"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.118"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.118" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.118"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.117",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.118",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.117"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.117"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.117"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.118"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.118"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.118"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.117"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.118"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21139,7 +21166,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.117"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.118"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21862,17 +21889,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.117', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.118', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.117 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.118 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.117') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.117.0'); }, 1200);
+              if (last && last.indexOf('v5.118') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.118.0'); }, 1200);
               }
             } catch (eTip) {}
           })

@@ -4234,32 +4234,44 @@
 }
 .ss-port-toolbar {
   display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
+  flex-wrap: nowrap !important;
+  flex-direction: row !important;
+  align-items: center !important;
   gap: 5px;
   margin-bottom: 5px;
   flex-shrink: 0;
-  min-height: 26px;
+  min-height: 28px;
+  height: 28px;
+  overflow: hidden;
 }
 .ss-port-dash {
   color: #64748b;
   font-size: 0.65rem;
   line-height: 1;
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
 }
 .ss-port-date {
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.25);
   color: #e2e8f0;
   border-radius: 5px;
-  padding: 2px 4px;
+  padding: 0 4px;
   font-size: 0.62rem;
-  height: 26px;
+  height: 28px !important;
+  max-height: 28px !important;
+  min-height: 28px !important;
+  line-height: 26px;
   box-sizing: border-box;
   min-width: 0;
   flex: 1 1 0;
   max-width: none;
   color-scheme: dark;
+  align-self: center;
+  margin: 0;
+  vertical-align: middle;
 }
 .ss-port-icon-btn {
   border: 1px solid rgba(148, 163, 184, 0.28);
@@ -4278,16 +4290,20 @@
 }
 .ss-port-icon-btn svg { display: block; }
 .ss-port-icon-btn:hover { color: #67e8f9; border-color: rgba(103, 232, 249, 0.5); }
-/* Print — visually distinct from date fields, same row height */
+/* Print — same row & height as date fields */
 .ss-port-print-btn {
   flex: 0 0 auto;
+  align-self: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  height: 26px;
-  min-width: 26px;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  min-width: 28px;
   padding: 0 8px;
+  margin: 0;
   border-radius: 6px;
   border: 1px solid rgba(34, 211, 238, 0.55);
   background: linear-gradient(180deg, rgba(34, 211, 238, 0.28), rgba(14, 165, 233, 0.18));
@@ -4298,6 +4314,8 @@
   cursor: pointer;
   box-shadow: 0 0 0 1px rgba(8, 47, 73, 0.35), 0 2px 6px rgba(14, 165, 233, 0.2);
   line-height: 1;
+  box-sizing: border-box;
+  vertical-align: middle;
 }
 .ss-port-print-btn svg {
   display: block;

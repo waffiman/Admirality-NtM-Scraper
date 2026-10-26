@@ -1535,13 +1535,42 @@
     const title = ((card.querySelector(".ss-port-name") || {}).textContent || "Port").trim();
     const k = kind || "tides";
 
+    function openPrintWindow(features) {
+      // Do NOT use noopener — it returns null / a sealed about:blank handle in Chromium,
+      // so document.write never reaches the tab and print preview never opens.
+      const w = global.open("about:blank", "_blank", features || "width=900,height=1100");
+      if (w) {
+        try { w.opener = null; } catch (eOp) {}
+      }
+      return w;
+    }
+
+    function writePrintDoc(w, html) {
+      if (!w || w.closed) return false;
+      try {
+        w.document.open();
+        w.document.write(html);
+        w.document.close();
+        return true;
+      } catch (e) {
+        console.warn("[SetSail] print document write failed", e);
+        return false;
+      }
+    }
+
     if (k !== "tides") {
       const panel = card.querySelector('.ss-port-panel[data-panel="' + k + '"] .ss-port-content');
       if (!panel) return;
-      const w = global.open("", "_blank", "noopener,noreferrer,width=720,height=900");
-      if (!w) return;
-      w.document.write(
-        "<!DOCTYPE html><html><head><title>" +
+      const w = openPrintWindow("width=720,height=900");
+      if (!w) {
+        if (typeof global.showSetSailToast === "function") {
+          global.showSetSailToast("Allow pop-ups to print.", "info");
+        }
+        return;
+      }
+      writePrintDoc(
+        w,
+        "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/><title>" +
           escHtml(title) +
           "</title>" +
           "<style>body{font:14px/1.45 system-ui,sans-serif;color:#0f172a;padding:24px}" +
@@ -1552,9 +1581,8 @@
           escHtml(title) +
           "</h1>" +
           panel.innerHTML +
-          "<script>window.onload=function(){window.print();}<\/script></body></html>"
+          "<script>window.onload=function(){setTimeout(function(){window.focus();window.print();},200);}<\/script></body></html>"
       );
-      w.document.close();
       return;
     }
 
@@ -1574,7 +1602,7 @@
       btn.classList.add("is-busy");
     }
 
-    const w = global.open("", "_blank", "noopener,noreferrer,width=900,height=1100");
+    const w = openPrintWindow("width=900,height=1100");
     if (!w) {
       if (btn) {
         btn.disabled = !!prevDisabled;
@@ -1585,16 +1613,17 @@
       }
       return;
     }
-    w.document.write(
-      "<!DOCTYPE html><html><head><title>Tide table</title></head>" +
+    writePrintDoc(
+      w,
+      "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/><title>Tide table</title></head>" +
         "<body style=\"font:14px system-ui;padding:32px;color:#334155\">Loading tide table…</body></html>"
     );
-    w.document.close();
 
     try {
       const start = portDayStartUtc(fromYmd, tzCtx);
       const end = new Date(portDayStartUtc(toYmd, tzCtx).getTime() + 86400000);
       const data = await fetchTideTimeline(lat, lon, start, end);
+      if (w.closed) return;
       const station = (data && data.station) || {};
       const stationName = station.name || title;
       const stLat = Number(station.latitude);
@@ -1629,18 +1658,15 @@
         credit: credit,
         pages: pages
       });
-      w.document.open();
-      w.document.write(html);
-      w.document.close();
+      writePrintDoc(w, html);
     } catch (err) {
       try {
-        w.document.open();
-        w.document.write(
-          "<!DOCTYPE html><html><body style=\"font:14px system-ui;padding:32px;color:#b91c1c\">" +
+        writePrintDoc(
+          w,
+          "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/></head><body style=\"font:14px system-ui;padding:32px;color:#b91c1c\">" +
             "Could not build tide table for this range. Try again or shorten the date range." +
             "</body></html>"
         );
-        w.document.close();
       } catch (e2) {}
       console.warn("[SetSail] tide print failed", err);
     } finally {
