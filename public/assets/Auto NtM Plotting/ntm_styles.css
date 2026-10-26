@@ -9551,7 +9551,7 @@
   /* Portaled to document.body when open (see setsail_core.js) — escapes
      sidebar backdrop-filter / list transform containing blocks */
   position: fixed;
-  z-index: 2147483000;
+  z-index: 13050;
   min-width: 132px;
   padding: 4px;
   border-radius: 8px;
@@ -9559,7 +9559,11 @@
   border: 1px solid rgba(148, 163, 184, 0.28);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
-.nav-saved-route-menu.is-open {
+/* Never let .is-open beat the hidden attribute (that was covering the app UI) */
+.nav-saved-route-menu[hidden] {
+  display: none !important;
+}
+.nav-saved-route-menu.is-open:not([hidden]) {
   display: block;
 }
 

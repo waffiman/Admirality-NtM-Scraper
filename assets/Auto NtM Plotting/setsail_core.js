@@ -15627,10 +15627,18 @@ function initSetRouteV50() {
       window.setTimeout(() => {
         if (!navSidebar.classList.contains("routes-tree-open")) return;
         if (navSidebar.matches(":hover")) return;
-        const overMenu = document.querySelector(".nav-saved-route-menu.is-open:hover, .nav-saved-route-menu:not([hidden]):hover");
-        if (overMenu || window.__setrouteRouteMenuHover) return;
+        if (window.__setrouteRouteMenuHover) return;
+        const openMenu = document.querySelector(".nav-saved-route-menu.is-open:not([hidden])");
+        if (openMenu && openMenu.matches(":hover")) return;
         collapseNavRoutesTree();
-      }, 60);
+        // Belt-and-suspenders: never leave a stray body menu covering the app
+        document.querySelectorAll("body > .nav-saved-route-menu").forEach((p) => {
+          if (!p.matches(":hover")) {
+            p.hidden = true;
+            p.classList.remove("is-open");
+          }
+        });
+      }, 80);
     });
   }
 
@@ -15659,9 +15667,8 @@ function initSetRouteV50() {
       if (!panel._boundRouteMenuHoverKeep) {
         panel._boundRouteMenuHoverKeep = true;
         panel.addEventListener("mouseenter", () => {
+          // Keep expanded tree while pointer is on Delete popup (do not force-open if closed)
           window.__setrouteRouteMenuHover = true;
-          if (navSidebar) navSidebar.classList.add("routes-tree-open");
-          if (navSavedList) navSavedList.classList.add("open");
         });
         panel.addEventListener("mouseleave", () => {
           window.__setrouteRouteMenuHover = false;
@@ -15669,7 +15676,7 @@ function initSetRouteV50() {
             if (window.__setrouteRouteMenuHover) return;
             if (navSidebar && navSidebar.matches(":hover")) return;
             collapseNavRoutesTree();
-          }, 60);
+          }, 80);
         });
       }
       panel.hidden = false;
