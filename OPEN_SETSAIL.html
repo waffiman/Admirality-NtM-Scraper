@@ -55,7 +55,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.109" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.110" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -4373,7 +4373,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   border-top: 1px solid var(--line);
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
   padding: 0 0.5rem;
   height: 38px;
   flex-shrink: 0;
@@ -4383,27 +4383,33 @@ svg.leaflet-image-layer.leaflet-interactive path {
   position: relative;
 }
 
-/* Cursor lat/lon lives in the dock row (left), tiles pack to the right */
+/* Fixed-width cursor HUD (left) — never resizes when DMS / dashes change */
 .excel-dock-coords {
-  position: static;
-  bottom: auto;
-  left: auto;
-  z-index: 1;
-  flex: 0 1 auto;
-  max-width: min(42vw, 280px);
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  box-sizing: border-box;
+  flex: none;
+  width: 29ch;
+  min-width: 29ch;
+  max-width: 29ch;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: clip;
   white-space: nowrap;
   pointer-events: none;
   font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Consolas, monospace;
   font-size: 0.7rem;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
   color: #a4c4ff;
   background: rgba(6, 12, 28, 0.55);
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 0.2rem 0.55rem;
   line-height: 1.2;
+  text-align: left;
 }
 
 .excel-tabs-scroll {
@@ -4416,9 +4422,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   height: 100%;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
+  width: auto;
+  max-width: calc(100% - 30ch - 1rem);
   min-width: 0;
   margin-left: auto;
+  margin-right: 0;
 }
 
 .excel-tabs-scroll::-webkit-scrollbar {
@@ -8869,7 +8878,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.109" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.110" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12816,7 +12825,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.109" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.109';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.110" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.110';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -14381,7 +14390,7 @@ select option {
 
 
             <div class="excel-overlay-dock" id="excelOverlayDock" role="toolbar" aria-label="ECDIS Chart Overlays">
-              <div class="ntm-coords-hud excel-dock-coords" id="ntmHudCoords" title="Cursor position on chart">—° ——.—′ —, ———° ——.—′ —</div>
+              <div class="ntm-coords-hud excel-dock-coords" id="ntmHudCoords" title="Cursor position on chart">--° --.--' -, ---° --.--' -</div>
               <div class="excel-tabs-scroll">
                 <button type="button" class="excel-tab" data-overlay="notices" id="tabOverlayNotices">
                   <span class="excel-tab-spinner" id="tabNoticesSpinner" aria-hidden="true"></span>
@@ -20497,25 +20506,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.109"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.109" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.109"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.110"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.110" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.110"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.109",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.110",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.109"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.109"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.109"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.110"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.110"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.110"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.109"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.110"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20588,7 +20597,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.109"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.110"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21310,17 +21319,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.109', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.110', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.109 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.110 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.109') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.109.0'); }, 1200);
+              if (last && last.indexOf('v5.110') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.110.0'); }, 1200);
               }
             } catch (eTip) {}
           })

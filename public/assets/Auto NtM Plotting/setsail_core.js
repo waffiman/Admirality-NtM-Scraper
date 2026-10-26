@@ -4201,10 +4201,10 @@ function initNtMMap() {
       inertiaDeceleration: lowEndMap ? 4000 : 2500,
       inertiaMaxSpeed: lowEndMap ? 1500 : 2800,
       easeLinearity: 0.22,
-      // True circular pan: tiles repeat (noWrap:false). Do NOT worldCopyJump /
-      // soft-wrap the center — that teleports the user to the “other” side of ±180°.
-      // Continents & overlays are drawn on lon / lon±360 world copies instead.
-      worldCopyJump: false
+      // Cyclic chart: tiles wrap (noWrap:false). worldCopyJump keeps the center
+      // on a single spinning world so pan never “runs out” of finite copies.
+      // ECDIS land uses a sliding ±1 world window around the current center.
+      worldCopyJump: true
     });
 
     // keepBuffer high enough for date-line neighbour tiles (seamless wrap).
@@ -4446,7 +4446,8 @@ function initNtMMap() {
     const setHudCoordsIdle = () => {
       const hud = document.getElementById("ntmHudCoords");
       if (!hud) return;
-      hud.textContent = "—° ——.—′ —, ———° ——.—′ —";
+      // Same glyph widths as formatLatLonDMS so the fixed 29ch box never jumps.
+      hud.textContent = "--° --.--' -, ---° --.--' -";
       hud.removeAttribute("data-live");
     };
     setHudCoordsIdle();
@@ -4663,9 +4664,19 @@ function wrapLongitudeDeg(lng) {
   return x;
 }
 
-/** Longitude offsets for seamless circular chart (primary + left/right copies). */
-function setsailWorldCopyLonOffsets() {
-  return [0, -360, 360];
+/**
+ * Sliding 3-world window around the map center (never a fixed 0/±360 only).
+ * Combined with worldCopyJump this is an infinite cyclic chart — as you pan,
+ * the window follows; Leaflet jumps the center so |lng| never drifts forever.
+ */
+function setsailWorldCopyLonOffsets(map) {
+  let lng = 0;
+  try {
+    const m = map || (typeof leafletMap !== "undefined" ? leafletMap : null) || window.leafletMap;
+    if (m && typeof m.getCenter === "function") lng = m.getCenter().lng;
+  } catch (e) {}
+  const w = Math.round(Number(lng) / 360) || 0;
+  return [(w - 1) * 360, w * 360, (w + 1) * 360];
 }
 
 /** Call fn([lat, lon+offset], offset) for each world copy. */
@@ -10121,30 +10132,22 @@ function createEcdisSimpleBaseLayer() {
     };
   }
 
-  /** World-copy lon offsets that intersect the current viewport (+1 world buffer). */
+  /** Sliding ±1 world around map center — cyclic with worldCopyJump, not 3 fixed clones. */
   function visibleWorldLonOffsets(map) {
-    try {
-      const b = map.getBounds();
-      const west = b.getWest() - 40;
-      const east = b.getEast() + 40;
-      const minIdx = Math.floor((west + 180) / 360) - 1;
-      const maxIdx = Math.floor((east + 180) / 360) + 1;
-      const offs = [];
-      for (let i = minIdx; i <= maxIdx; i++) offs.push(i * 360);
-      return offs.length ? offs : [0, -360, 360];
-    } catch (e) {
-      return [0, -360, 360];
-    }
+    return typeof setsailWorldCopyLonOffsets === "function"
+      ? setsailWorldCopyLonOffsets(map)
+      : [0, -360, 360];
   }
+
+  let cachedHitGeo = null;
+  let cachedHitLevel = "";
 
   function renderCoarseLand(mapRef) {
     landFill.clearLayers();
-    // Whole-ring shift only (never mix offsets inside one ring — that caused
-    // yellow antimeridian fill bands). Viewport-scoped copies so land continues
-    // past ±180° instead of ending on a hard vertical cut.
+    // Whole-ring shift only (never mix offsets inside one ring).
     const style = landStyle();
     const map = mapRef || boundMap || group._map;
-    const offs = map ? visibleWorldLonOffsets(map) : [0, -360, 360];
+    const offs = visibleWorldLonOffsets(map);
     for (let i = 0; i < coarsePolys.length; i++) {
       const ring = coarsePolys[i];
       if (!ring || ring.length < 3) continue;
@@ -10154,6 +10157,26 @@ function createEcdisSimpleBaseLayer() {
         L.polygon(shifted, style).addTo(landFill);
       }
     }
+  }
+
+  function stampLandGeo(hitGeo, map) {
+    const offs = visibleWorldLonOffsets(map);
+    landFill.clearLayers();
+    const style = landStyle();
+    for (let oi = 0; oi < offs.length; oi++) {
+      const off = offs[oi];
+      const renderer = L.canvas({ padding: 0.75, pane: "ecdisLandPane" });
+      L.geoJSON(hitGeo, {
+        pane: "ecdisLandPane",
+        renderer,
+        interactive: false,
+        coordsToLatLng: function (coords) {
+          return L.latLng(coords[1], coords[0] + off);
+        },
+        style: style
+      }).addTo(landFill);
+    }
+    return offs;
   }
 
   function landUrls(level) {
@@ -10228,9 +10251,10 @@ function createEcdisSimpleBaseLayer() {
     if (!map || !map.hasLayer(group)) return;
     const z = map.getZoom();
     // World overview: coarse fill only. Closer: Natural Earth land polygons (fill = edge).
-    // Low thresholds — 50m from ~z2, detailed 10m from ~z3 (was z5).
     if (z < 1.5) {
       setEcdisLandLoading(false);
+      cachedHitGeo = null;
+      cachedHitLevel = "";
       if (lastLandKey !== "coarse") {
         lastLandKey = "coarse";
         renderCoarseLand(map);
@@ -10247,54 +10271,44 @@ function createEcdisSimpleBaseLayer() {
       const pad = z >= 6 ? 0.05 : z >= 3 ? 0.15 : 0.4;
       const bounds = map.getBounds().pad(pad);
       const offs = visibleWorldLonOffsets(map);
-      const key =
+      const worldKey = offs.join(",");
+      const viewKey =
         level +
         "|" +
-        Math.round(bounds.getSouth() * 20) +
+        Math.round(bounds.getSouth() * 10) +
         "|" +
-        Math.round(bounds.getWest() * 20) +
+        Math.round(bounds.getWest() * 10) +
         "|" +
-        Math.round(bounds.getNorth() * 20) +
+        Math.round(bounds.getNorth() * 10) +
         "|" +
-        Math.round(bounds.getEast() * 20) +
-        "|w" +
-        offs.join(",");
+        Math.round(bounds.getEast() * 10);
+      const key = viewKey + "|w" + worldKey;
       if (key === lastLandKey) {
         setEcdisLandLoading(false);
         return;
       }
-      lastLandKey = key;
       ensureEcdisPanes(map);
 
-      // Filter once, then stamp the hit set onto each visible world copy.
-      // (Re-parsing full 10m NE ×3 on one shared canvas was dropping copies at ±180.)
-      const srcFeats = (geo && geo.features) || [];
-      const hitFeats =
-        level === "110m"
-          ? srcFeats
-          : srcFeats.filter(function (feat) {
-              return featureHitsBounds(feat, bounds);
-            });
-      const hitGeo = { type: "FeatureCollection", features: hitFeats };
-
-      landFill.clearLayers();
-      for (let oi = 0; oi < offs.length; oi++) {
-        const off = offs[oi];
-        // Separate canvas per world — shared renderer + huge NE sets failed past ±180.
-        const renderer = L.canvas({ padding: 1, pane: "ecdisLandPane" });
-        L.geoJSON(hitGeo, {
-          pane: "ecdisLandPane",
-          renderer,
-          interactive: false,
-          coordsToLatLng: function (coords) {
-            return L.latLng(coords[1], coords[0] + off);
-          },
-          style: landStyle
-        }).addTo(landFill);
+      // Only refilter when the geographic view/level changes; world-index pan
+      // just restamps the cached hit set onto the sliding ±1 window.
+      if (cachedHitLevel !== viewKey || !cachedHitGeo) {
+        const srcFeats = (geo && geo.features) || [];
+        const hitFeats =
+          level === "110m"
+            ? srcFeats
+            : srcFeats.filter(function (feat) {
+                return featureHitsBounds(feat, bounds);
+              });
+        cachedHitGeo = { type: "FeatureCollection", features: hitFeats };
+        cachedHitLevel = viewKey;
       }
+      stampLandGeo(cachedHitGeo, map);
+      lastLandKey = key;
     } catch (e) {
       console.warn("[SetSail ECDIS] land load failed — coarse fallback", e);
       lastLandKey = "coarse";
+      cachedHitGeo = null;
+      cachedHitLevel = "";
       renderCoarseLand(map);
     } finally {
       if (seq === landSeq) setEcdisLandLoading(false);
@@ -10312,31 +10326,34 @@ function createEcdisSimpleBaseLayer() {
     ensureEcdisPanes(boundMap);
     boundMap.getContainer().classList.add("ecdis-simple-base");
     lastLandKey = "";
+    cachedHitGeo = null;
+    cachedHitLevel = "";
     renderCoarseLand(boundMap);
     const bump = function () {
       refreshEcdisLand();
     };
-    // moveend is enough for most pans; also refresh during move near ±180 so
-    // world-copy land appears before the gesture ends (no empty-blue flash).
+    // During pan near a world seam, only restamp cached land onto the sliding
+    // window (cheap) — never re-parse Natural Earth on every move tick.
     let moveTick = 0;
-    const bumpNearDateline = function () {
-      try {
-        const c = boundMap.getCenter();
-        const wrapped = ((c.lng % 360) + 540) % 360 - 180;
-        if (Math.abs(wrapped) < 140 && Math.abs(c.lng) < 140) return;
-      } catch (eNear) {
-        return;
-      }
+    const bumpWorldWindow = function () {
+      if (!cachedHitGeo) return;
       const now = Date.now();
-      if (now - moveTick < 120) return;
+      if (now - moveTick < 80) return;
       moveTick = now;
-      lastLandKey = "";
-      refreshEcdisLand();
+      try {
+        const offs = visibleWorldLonOffsets(boundMap);
+        const wk = offs.join(",");
+        if (lastLandKey && lastLandKey.indexOf("|w" + wk) >= 0) return;
+        stampLandGeo(cachedHitGeo, boundMap);
+        const pipe = lastLandKey.lastIndexOf("|w");
+        if (pipe >= 0) lastLandKey = lastLandKey.slice(0, pipe) + "|w" + wk;
+        else lastLandKey = "live|w" + wk;
+      } catch (eMove) {}
     };
     boundMap.on("zoomend moveend", bump);
-    boundMap.on("move", bumpNearDateline);
+    boundMap.on("move", bumpWorldWindow);
     group._ecdisCoastBump = bump;
-    group._ecdisCoastMoveBump = bumpNearDateline;
+    group._ecdisCoastMoveBump = bumpWorldWindow;
     refreshEcdisLand();
   });
   group.on("remove", function () {
@@ -10350,6 +10367,8 @@ function createEcdisSimpleBaseLayer() {
     group._ecdisCoastMoveBump = null;
     boundMap = null;
     lastLandKey = "";
+    cachedHitGeo = null;
+    cachedHitLevel = "";
   });
 
   group.refreshEcdisCoast = refreshEcdisCoast;

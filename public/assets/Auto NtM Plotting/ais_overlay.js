@@ -40,25 +40,25 @@
     { minLat: 50, minLon: 0, maxLat: 62, maxLon: 22 }       // North Sea (Baltic gate — last)
   ];
 
-  /** Zoom LOD: fewer / coarser markers far out; denser as user zooms in. */
+  /** Zoom LOD: keep marker counts modest so pan/zoom stays interactive. */
   function aisLodForZoom(z) {
     const zoom = Number(z) || 2;
     if (zoom <= 2) {
-      return { maxMarkers: 320, cellDeg: 10, maxPerZone: 28, maxZones: 14, digi: false, triangles: false, radius: 2 };
+      return { maxMarkers: 160, cellDeg: 12, maxPerZone: 20, maxZones: 10, digi: false, triangles: false, radius: 2 };
     }
     if (zoom <= 3) {
-      return { maxMarkers: 520, cellDeg: 6, maxPerZone: 45, maxZones: 14, digi: false, triangles: false, radius: 2.2 };
+      return { maxMarkers: 260, cellDeg: 8, maxPerZone: 36, maxZones: 10, digi: false, triangles: false, radius: 2.2 };
     }
     if (zoom <= 5) {
-      return { maxMarkers: 1100, cellDeg: 3, maxPerZone: 120, maxZones: 12, digi: false, triangles: false, radius: 2.5 };
+      return { maxMarkers: 480, cellDeg: 4, maxPerZone: 80, maxZones: 10, digi: false, triangles: false, radius: 2.5 };
     }
     if (zoom <= 7) {
-      return { maxMarkers: 2200, cellDeg: 1.4, maxPerZone: 400, maxZones: 10, digi: true, triangles: false, radius: 2.8 };
+      return { maxMarkers: 780, cellDeg: 2, maxPerZone: 200, maxZones: 8, digi: true, triangles: false, radius: 2.8 };
     }
-    if (zoom <= 10) {
-      return { maxMarkers: 4500, cellDeg: 0.6, maxPerZone: 2000, maxZones: 8, digi: true, triangles: true, radius: 3 };
+    if (zoom <= 9) {
+      return { maxMarkers: 1100, cellDeg: 0.9, maxPerZone: 500, maxZones: 6, digi: true, triangles: false, radius: 3 };
     }
-    return { maxMarkers: ABS_MARKER_CAP, cellDeg: 0.25, maxPerZone: 8000, maxZones: 6, digi: true, triangles: true, radius: 3.2 };
+    return { maxMarkers: 1600, cellDeg: 0.4, maxPerZone: 1200, maxZones: 5, digi: true, triangles: true, radius: 3.2 };
   }
 
   /**
@@ -140,6 +140,9 @@
   let zonesManifest = null;
   let zoneCache = Object.create(null);
   let aisRefreshSeq = 0;
+  let aisMarkerByMmsi = Object.create(null);
+  let aisRefreshBusy = false;
+  let aisRenderQueued = false;
 
   /** Shared canvas renderer — NAVTOR-like overview density without thousands of DOM icons. */
   function getAisCanvasRenderer() {
@@ -210,75 +213,119 @@
     );
   }
 
+  function clearAisMarkerPool(layer) {
+    const host = layer || leafletAisLayer;
+    for (const mmsi in aisMarkerByMmsi) {
+      const entry = aisMarkerByMmsi[mmsi];
+      try {
+        if (host && entry && entry.marker) host.removeLayer(entry.marker);
+      } catch (eRm) {}
+    }
+    aisMarkerByMmsi = Object.create(null);
+  }
+
+  /**
+   * Incremental AIS paint — update/reuse markers by MMSI.
+   * Avoids clearLayers()+rebuild (that made targets flicker and froze the map).
+   */
   function renderAisTargets(targets, map) {
     const layer = ensureLayer(map);
-    layer.clearLayers();
-    if (!Array.isArray(targets) || !targets.length) return;
-
     const z = map && map.getZoom ? map.getZoom() : 3;
     const lod = aisLodForZoom(z);
-    let list = sampleEvenlyByGrid(targets, Math.min(lod.maxMarkers, ABS_MARKER_CAP), lod.cellDeg);
+    const list = Array.isArray(targets)
+      ? sampleEvenlyByGrid(targets, Math.min(lod.maxMarkers, 1600), lod.cellDeg)
+      : [];
 
-    // Overview: canvas circleMarkers (smooth pan). Close-in: heading triangles (DivIcon).
-    const useTriangles = !!lod.triangles;
-    const px = z <= 3 ? 9 : z <= 5 ? 11 : 14;
+    const useTriangles = !!lod.triangles && z >= 10;
+    const px = z <= 5 ? 11 : 14;
     const canvasR = getAisCanvasRenderer();
-    list.forEach((v) => {
+    const seen = Object.create(null);
+    const interactive = z >= 5;
+
+    for (let i = 0; i < list.length; i++) {
+      const v = list[i];
       const lat = Number(v.lat);
       const lonRaw = Number(v.lon);
-      if (!Number.isFinite(lat) || !Number.isFinite(lonRaw)) return;
-      if (Math.abs(lat) > 90 || Math.abs(lonRaw) > 180) return;
+      if (!Number.isFinite(lat) || !Number.isFinite(lonRaw)) continue;
+      if (Math.abs(lat) > 90 || Math.abs(lonRaw) > 180) continue;
+      const mmsi = String(v.mmsi || (lat.toFixed(3) + ":" + lonRaw.toFixed(3)));
+      seen[mmsi] = 1;
       const lon = lonOnVisibleCopy(lonRaw, map);
       const col = shipColor(v.navStat, v.sog);
-      let m;
-      if (!useTriangles) {
-        m = L.circleMarker([lat, lon], {
-          radius: lod.radius,
-          color: "#0f172a",
-          weight: 0.6,
-          fillColor: col,
-          fillOpacity: 0.92,
-          renderer: canvasR,
-          interactive: z >= 4,
-          keyboard: false
-        });
-      } else {
-        const heading = Number(v.heading);
-        const rot =
-          Number.isFinite(heading) && heading < 360
-            ? heading
-            : Number(v.cog) < 360
-              ? Number(v.cog)
-              : 0;
-        const icon = L.divIcon({
-          className: "ais-target-icon",
-          html:
-            '<div style="transform:rotate(' +
-            rot +
-            "deg);width:" +
-            px +
-            "px;height:" +
-            px +
-            'px;display:flex;align-items:center;justify-content:center;">' +
-            '<svg viewBox="0 0 24 24" width="' +
-            px +
-            '" height="' +
-            px +
-            '">' +
-            '<polygon points="12,2 20,20 12,16 4,20" fill="' +
-            col +
-            '" stroke="#0f172a" stroke-width="1.5"/>' +
-            "</svg></div>",
-          iconSize: [px, px],
-          iconAnchor: [px / 2, px / 2]
-        });
-        m = L.marker([lat, lon], { icon, keyboard: false });
-      }
-      if (z >= 4) m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
-      layer.addLayer(m);
-    });
+      const mode = useTriangles ? "tri" : "dot";
+      let entry = aisMarkerByMmsi[mmsi];
 
-    // No numeric badge on the AIS tile — clutter / false "Baltic monopoly" cue
+      if (entry && entry.mode !== mode) {
+        try { layer.removeLayer(entry.marker); } catch (eSw) {}
+        delete aisMarkerByMmsi[mmsi];
+        entry = null;
+      }
+
+      if (!entry) {
+        let m;
+        if (mode === "dot") {
+          m = L.circleMarker([lat, lon], {
+            radius: lod.radius,
+            color: "#0f172a",
+            weight: 0.6,
+            fillColor: col,
+            fillOpacity: 0.92,
+            renderer: canvasR,
+            interactive: interactive,
+            keyboard: false
+          });
+        } else {
+          const heading = Number(v.heading);
+          const rot =
+            Number.isFinite(heading) && heading < 360
+              ? heading
+              : Number(v.cog) < 360
+                ? Number(v.cog)
+                : 0;
+          const icon = L.divIcon({
+            className: "ais-target-icon",
+            html:
+              '<div style="transform:rotate(' +
+              rot +
+              "deg);width:" +
+              px +
+              "px;height:" +
+              px +
+              'px;display:flex;align-items:center;justify-content:center;">' +
+              '<svg viewBox="0 0 24 24" width="' +
+              px +
+              '" height="' +
+              px +
+              '">' +
+              '<polygon points="12,2 20,20 12,16 4,20" fill="' +
+              col +
+              '" stroke="#0f172a" stroke-width="1.5"/>' +
+              "</svg></div>",
+            iconSize: [px, px],
+            iconAnchor: [px / 2, px / 2]
+          });
+          m = L.marker([lat, lon], { icon, keyboard: false, interactive: interactive });
+        }
+        if (interactive) m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
+        layer.addLayer(m);
+        aisMarkerByMmsi[mmsi] = { marker: m, mode: mode, col: col };
+      } else {
+        try {
+          entry.marker.setLatLng([lat, lon]);
+          if (mode === "dot" && entry.col !== col && entry.marker.setStyle) {
+            entry.marker.setStyle({ fillColor: col });
+            entry.col = col;
+          }
+        } catch (eUp) {}
+      }
+    }
+
+    for (const mmsi in aisMarkerByMmsi) {
+      if (seen[mmsi]) continue;
+      try { layer.removeLayer(aisMarkerByMmsi[mmsi].marker); } catch (eDel) {}
+      delete aisMarkerByMmsi[mmsi];
+    }
+
     const badge = document.querySelector('.excel-tab[data-overlay="ais"] .excel-tab-badge');
     if (badge) {
       badge.textContent = "";
@@ -305,20 +352,27 @@
   }
 
   function scheduleAisStreamRender() {
+    if (aisRefreshBusy) return;
     if (aisStreamPendingRender) return;
     aisStreamPendingRender = true;
     clearTimeout(aisStreamRenderTimer);
     aisStreamRenderTimer = setTimeout(() => {
       aisStreamPendingRender = false;
+      if (aisRefreshBusy) return;
       const map = window.leafletMap;
       if (!map || !(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
+      // Skip stream repaint while the user is actively dragging/zooming.
+      try {
+        if (map.dragging && map.dragging._dragging) return;
+        if (map._animatingZoom) return;
+      } catch (eDrag) {}
       pruneStaleStreamTargets();
       const allInView = getCombinedAisTargets(map);
       renderAisTargets(allInView, map);
       if (aisLastPayload) {
         aisLastPayload.count = allInView.length;
       }
-    }, 1200);
+    }, 1800);
   }
 
   function getMapAisStreamBoxes(map) {
@@ -906,13 +960,25 @@
     });
   }
 
-  async function refreshAisOverlay() {
+  async function refreshAisOverlay(opts) {
     const map = window.leafletMap;
     if (!map) return;
     if (!(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
+    if (aisRefreshBusy && !(opts && opts.force)) {
+      aisRenderQueued = true;
+      return;
+    }
+    const showSpinner = !!(opts && opts.spinner);
     const seq = ++aisRefreshSeq;
-    if (typeof window.setOverlayTileLoading === "function") {
-      window.setOverlayTileLoading("ais", true);
+    aisRefreshBusy = true;
+    let spinnerTimer = null;
+    let spinnerShown = false;
+    if (showSpinner && typeof window.setOverlayTileLoading === "function") {
+      // Delay spinner so short fetches don't lock the UI feel.
+      spinnerTimer = setTimeout(function () {
+        spinnerShown = true;
+        window.setOverlayTileLoading("ais", true);
+      }, 500);
     }
 
     const plan = mapViewportBoxes(map);
@@ -933,7 +999,7 @@
         try {
           const bb = map.getBounds();
           const span = Math.abs(bb.getEast() - bb.getWest()) * Math.abs(bb.getNorth() - bb.getSouth());
-          if (span > 800) return false; // still a wide view — skip Digitraffic
+          if (span > 800) return false;
           const vp = {
             minLat: bb.getSouth(),
             maxLat: bb.getNorth(),
@@ -948,11 +1014,10 @@
       if (lod.digi && balticFocused && zNow >= MIN_ZOOM_DIGITRAFFIC) {
         try {
           digi = await loadLiveDigitraffic();
-          digi = sampleEvenlyByGrid(digi, Math.min(800, lod.maxMarkers), lod.cellDeg);
+          digi = sampleEvenlyByGrid(digi, Math.min(500, lod.maxMarkers), lod.cellDeg);
         } catch (e) {}
       }
       if (seq !== aisRefreshSeq) return;
-      // Cap Open Waters per overview box so one corridor cannot dominate
       if (live.length && (plan.mode === "overview" || plan.mode === "world")) {
         live = sampleEvenlyByGrid(live, lod.maxMarkers, lod.cellDeg);
       }
@@ -970,10 +1035,27 @@
 
       rest = sampleEvenlyByGrid(rest, lod.maxMarkers * 2, lod.cellDeg);
       lastRestTargets = rest;
+      // Paint stream+REST immediately if we already have something, then finish.
       targets = getCombinedAisTargets(map);
+      // Yield to the browser before the marker pass so zoom/pan stay responsive.
+      await new Promise(function (r) {
+        if (typeof requestAnimationFrame === "function") requestAnimationFrame(function () { r(); });
+        else setTimeout(r, 0);
+      });
+      if (seq !== aisRefreshSeq) return;
       renderAisTargets(targets, map);
     } catch (e) {
       console.warn("[SetSail AIS] refresh failed", e);
+    } finally {
+      if (spinnerTimer) clearTimeout(spinnerTimer);
+      if (spinnerShown && typeof window.setOverlayTileLoading === "function") {
+        window.setOverlayTileLoading("ais", false);
+      }
+      aisRefreshBusy = false;
+      if (aisRenderQueued) {
+        aisRenderQueued = false;
+        setTimeout(function () { refreshAisOverlay({ spinner: false }); }, 50);
+      }
     }
 
     aisLastPayload = {
@@ -983,39 +1065,41 @@
       area: plan.area,
       zoom: plan.zoom
     };
-    if (typeof window.setOverlayTileLoading === "function") {
-      window.setOverlayTileLoading("ais", false);
-    }
     return targets.length;
   }
 
   function startAisPolling() {
     stopAisPolling();
-    refreshAisOverlay();
+    refreshAisOverlay({ spinner: true, force: true });
     connectAisStream();
-    aisTimer = setInterval(() => refreshAisOverlay(), AIS_REFRESH_MS);
+    aisTimer = setInterval(() => refreshAisOverlay({ spinner: false }), AIS_REFRESH_MS);
     const map = window.leafletMap;
     if (map && !map._setsailAisMoveHooked) {
       map._setsailAisMoveHooked = true;
       map.on("moveend zoomend", () => {
         if (!(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
         clearTimeout(aisMoveTimer);
+        // Longer debounce — avoid hammering network + marker rebuild mid-gesture.
         aisMoveTimer = setTimeout(() => {
-          refreshAisOverlay();
+          refreshAisOverlay({ spinner: false });
           sendAisStreamSubscriptionAll();
-        }, 450);
+        }, 750);
       });
     }
   }
 
   function stopAisPolling() {
     aisRefreshSeq++;
+    aisRefreshBusy = false;
+    aisRenderQueued = false;
     if (aisTimer) {
       clearInterval(aisTimer);
       aisTimer = null;
     }
+    clearTimeout(aisMoveTimer);
     disconnectAisStream();
     if (leafletAisLayer) {
+      clearAisMarkerPool(leafletAisLayer);
       leafletAisLayer.clearLayers();
       const map = window.leafletMap;
       if (map && map.hasLayer(leafletAisLayer)) map.removeLayer(leafletAisLayer);

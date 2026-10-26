@@ -20083,7 +20083,9 @@ function setOverlayActive(overlayKey, isActive, map = null) {
   if (window.OVERLAY_STATES) {
     window.OVERLAY_STATES[overlayKey] = isActive;
   }
-  if (isActive && (overlayKey === "depths" || overlayKey === "weather" || overlayKey === "route" || overlayKey === "notices" || overlayKey === "ais")) {
+  // AIS manages its own delayed spinner inside refreshAisOverlay — forcing
+  // is-loading here made the map feel locked for the whole multi-feed fetch.
+  if (isActive && (overlayKey === "depths" || overlayKey === "weather" || overlayKey === "route" || overlayKey === "notices")) {
     setOverlayTileLoading(overlayKey, true);
   } else if (!isActive) {
     setOverlayTileLoading(overlayKey, false);
