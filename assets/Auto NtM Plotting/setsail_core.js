@@ -14203,6 +14203,8 @@ function renderNavSavedRoutesTree() {
   const listEl = document.getElementById("navSavedRoutesList");
   const badgeEl = document.getElementById("navRoutesCountBadge");
   if (!listEl) return;
+  // Drop any Delete menus previously portaled onto <body>
+  document.querySelectorAll("body > .nav-saved-route-menu").forEach((p) => p.remove());
 
   let lib = getSavedRoutesLibrary();
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
@@ -15606,11 +15608,23 @@ function initSetRouteV50() {
       panel.style.left = "";
       panel.style.top = "";
       panel.style.right = "";
+      // Return portal'd menu to its wrap so list re-render stays consistent
+      const wrap = panel._routeMenuHome;
+      if (wrap && panel.parentElement !== wrap) {
+        wrap.appendChild(panel);
+      }
     };
     const placeRouteMenu = (panel, moreBtn) => {
       if (!panel || !moreBtn) return;
+      // Portal to <body>: sidebar backdrop-filter / list transform create a fixed
+      // containing block and clip overflow — menu must escape those ancestors.
+      const wrap = moreBtn.closest(".nav-saved-route-menu-wrap") || panel.parentElement;
+      if (wrap) panel._routeMenuHome = wrap;
+      if (panel.parentElement !== document.body) {
+        document.body.appendChild(panel);
+      }
       panel.hidden = false;
-      // Measure after unhiding; open to the right of ⋯ so it can leave the sidebar strip
+      panel.classList.add("is-open");
       const r = moreBtn.getBoundingClientRect();
       const mw = Math.max(panel.offsetWidth || 0, 124);
       const mh = Math.max(panel.offsetHeight || 0, 40);
@@ -15624,25 +15638,29 @@ function initSetRouteV50() {
       panel.style.right = "auto";
     };
     const closeAllRouteMenus = () => {
-      navSavedList.querySelectorAll(".nav-saved-route-menu").forEach((p) => {
+      document.querySelectorAll(".nav-saved-route-menu").forEach((p) => {
         p.hidden = true;
+        p.classList.remove("is-open");
         resetRouteMenuPos(p);
       });
       navSavedList.querySelectorAll(".nav-saved-route-more[aria-expanded='true']").forEach((b) => {
         b.setAttribute("aria-expanded", "false");
       });
     };
+    const handleRouteDeleteClick = (delBtn) => {
+      const rtId = delBtn.getAttribute("data-route-delete");
+      closeAllRouteMenus();
+      if (!rtId) return;
+      const ok = window.confirm("Delete this route and its chat transcript?");
+      if (!ok) return;
+      deleteRouteFromLibrary(rtId);
+    };
     navSavedList.addEventListener("click", (e) => {
       const delBtn = e.target.closest("[data-route-delete]");
       if (delBtn) {
         e.preventDefault();
         e.stopPropagation();
-        const rtId = delBtn.getAttribute("data-route-delete");
-        closeAllRouteMenus();
-        if (!rtId) return;
-        const ok = window.confirm("Delete this route and its chat transcript?");
-        if (!ok) return;
-        deleteRouteFromLibrary(rtId);
+        handleRouteDeleteClick(delBtn);
         return;
       }
       const moreBtn = e.target.closest("[data-route-menu-toggle]");
@@ -15650,7 +15668,9 @@ function initSetRouteV50() {
         e.preventDefault();
         e.stopPropagation();
         const rtId = moreBtn.getAttribute("data-route-menu-toggle");
-        const panel = navSavedList.querySelector(`[data-route-menu-panel="${rtId}"]`);
+        const panel =
+          document.querySelector(`.nav-saved-route-menu[data-route-menu-panel="${rtId}"]`) ||
+          navSavedList.querySelector(`[data-route-menu-panel="${rtId}"]`);
         const wasOpen = panel && !panel.hidden;
         closeAllRouteMenus();
         if (panel && !wasOpen) {
@@ -15670,22 +15690,20 @@ function initSetRouteV50() {
     });
     if (!document._boundRouteMenuOutsideClose) {
       document._boundRouteMenuOutsideClose = true;
+      // Delete lives on body after portal — catch it here
       document.addEventListener("click", (ev) => {
+        const delBtn = ev.target.closest && ev.target.closest(".nav-saved-route-menu [data-route-delete]");
+        if (delBtn) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          handleRouteDeleteClick(delBtn);
+          return;
+        }
         if (ev.target.closest && (
           ev.target.closest(".nav-saved-route-menu-wrap") ||
           ev.target.closest(".nav-saved-route-menu")
         )) return;
-        const list = document.getElementById("navSavedRoutesList");
-        if (!list) return;
-        list.querySelectorAll(".nav-saved-route-menu").forEach((p) => {
-          p.hidden = true;
-          p.style.left = "";
-          p.style.top = "";
-          p.style.right = "";
-        });
-        list.querySelectorAll(".nav-saved-route-more[aria-expanded='true']").forEach((b) => {
-          b.setAttribute("aria-expanded", "false");
-        });
+        closeAllRouteMenus();
       });
       const repositionOpenRouteMenu = () => {
         const list = document.getElementById("navSavedRoutesList");
@@ -15693,19 +15711,11 @@ function initSetRouteV50() {
         const openBtn = list.querySelector(".nav-saved-route-more[aria-expanded='true']");
         if (!openBtn) return;
         const rtId = openBtn.getAttribute("data-route-menu-toggle");
-        const panel = list.querySelector(`[data-route-menu-panel="${rtId}"]`);
+        const panel =
+          document.querySelector(`.nav-saved-route-menu[data-route-menu-panel="${rtId}"]`) ||
+          list.querySelector(`[data-route-menu-panel="${rtId}"]`);
         if (!panel || panel.hidden) return;
-        const r = openBtn.getBoundingClientRect();
-        const mw = Math.max(panel.offsetWidth || 0, 124);
-        const mh = Math.max(panel.offsetHeight || 0, 40);
-        let left = r.right + 6;
-        let top = r.top;
-        if (left + mw > window.innerWidth - 8) left = Math.max(8, r.left - mw - 6);
-        if (top + mh > window.innerHeight - 8) top = Math.max(8, window.innerHeight - mh - 8);
-        if (top < 8) top = 8;
-        panel.style.left = `${Math.round(left)}px`;
-        panel.style.top = `${Math.round(top)}px`;
-        panel.style.right = "auto";
+        placeRouteMenu(panel, openBtn);
       };
       window.addEventListener("resize", repositionOpenRouteMenu, { passive: true });
       navSavedList.addEventListener("scroll", () => {
