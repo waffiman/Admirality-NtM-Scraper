@@ -15590,7 +15590,21 @@ function initSetRouteV50() {
   const btnBackToPlan = document.getElementById("btnMonitoringBackToPlanning");
 
   function collapseNavRoutesTree() {
-    if (navSavedList) navSavedList.classList.remove("open");
+    window.__setrouteRouteMenuHover = false;
+    document.querySelectorAll(".nav-saved-route-menu").forEach((p) => {
+      p.hidden = true;
+      p.classList.remove("is-open");
+      const home = p._routeMenuHome;
+      if (home && p.parentElement !== home) {
+        try { home.appendChild(p); } catch (e) {}
+      }
+    });
+    if (navSavedList) {
+      navSavedList.classList.remove("open");
+      navSavedList.querySelectorAll(".nav-saved-route-more[aria-expanded='true']").forEach((b) => {
+        b.setAttribute("aria-expanded", "false");
+      });
+    }
     if (navExpandArrow) {
       navExpandArrow.classList.remove("open");
       navExpandArrow.textContent = "▾";
