@@ -15021,7 +15021,6 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     }
     if (hardRefuse && (baseRoute.metadata && baseRoute.metadata.coreARefused)) {
       live.step("No sea corridor found for this OD pair.");
-      if (typeof live.done === "function") live.done();
       appendChatMessage("brain",
         `<strong>Core A could not build a sea corridor</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No graph path for <b>${pOrig.name}</b> → <b>${pDest.name}</b>. Try named major ports or a regional via (Malacca / Sunda / Cape / Suez / Panama).</div>`
       );
