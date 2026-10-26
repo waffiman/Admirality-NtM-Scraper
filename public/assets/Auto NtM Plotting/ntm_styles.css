@@ -9703,14 +9703,21 @@
   color: #94a3b8;
 }
 
-/* Brain Dual-Function Switcher: Route Planning vs Route Monitoring */
+/* Brain Dual-Function Switcher: Planning vs Monitoring (compact, single-line) */
 .setroute-mode-switcher {
   display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
   background: rgba(15, 23, 42, 0.85);
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 999px;
-  padding: 3px;
-  gap: 3px;
+  padding: 2px;
+  gap: 2px;
+  height: 26px;
+  min-height: 26px;
+  max-height: 26px;
+  box-sizing: border-box;
+  vertical-align: middle;
 }
 
 [data-theme="light"] .setroute-mode-switcher {
@@ -9719,24 +9726,38 @@
 }
 
 .setroute-mode-btn {
-  padding: 5px 13px;
+  padding: 0 10px;
+  height: 22px;
+  min-height: 22px;
+  max-height: 22px;
   border-radius: 999px;
   border: none;
   background: transparent;
   color: #94a3b8;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
+  line-height: 1;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
   transition: all 0.18s ease;
+  box-sizing: border-box;
 }
 
 .setroute-mode-btn.active {
   background: linear-gradient(135deg, #0284c7, #0ea5e9);
   color: #ffffff;
   box-shadow: 0 2px 10px rgba(14, 165, 233, 0.35);
+}
+
+.setroute-mode-btn .sr-soon-pill {
+  margin-left: 0;
+  padding: 0 4px;
+  line-height: 1.15;
+  font-size: 0.52rem;
 }
 
 .setroute-topbar-actions {

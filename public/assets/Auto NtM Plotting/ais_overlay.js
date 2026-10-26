@@ -40,25 +40,25 @@
     { minLat: 50, minLon: 0, maxLat: 62, maxLon: 22 }       // North Sea (Baltic gate — last)
   ];
 
-  /** Zoom LOD: keep marker counts modest so pan/zoom stays interactive. */
+  /** Zoom LOD: triangles at every zoom; keep counts modest for pan/zoom. */
   function aisLodForZoom(z) {
     const zoom = Number(z) || 2;
     if (zoom <= 2) {
-      return { maxMarkers: 160, cellDeg: 12, maxPerZone: 20, maxZones: 10, digi: false, triangles: false, radius: 2 };
+      return { maxMarkers: 180, cellDeg: 12, maxPerZone: 22, maxZones: 10, digi: false, triPx: 9 };
     }
     if (zoom <= 3) {
-      return { maxMarkers: 260, cellDeg: 8, maxPerZone: 36, maxZones: 10, digi: false, triangles: false, radius: 2.2 };
+      return { maxMarkers: 280, cellDeg: 8, maxPerZone: 40, maxZones: 10, digi: false, triPx: 10 };
     }
     if (zoom <= 5) {
-      return { maxMarkers: 480, cellDeg: 4, maxPerZone: 80, maxZones: 10, digi: false, triangles: false, radius: 2.5 };
+      return { maxMarkers: 520, cellDeg: 4, maxPerZone: 90, maxZones: 10, digi: false, triPx: 11 };
     }
     if (zoom <= 7) {
-      return { maxMarkers: 780, cellDeg: 2, maxPerZone: 200, maxZones: 8, digi: true, triangles: false, radius: 2.8 };
+      return { maxMarkers: 820, cellDeg: 2, maxPerZone: 220, maxZones: 8, digi: true, triPx: 12 };
     }
     if (zoom <= 9) {
-      return { maxMarkers: 1100, cellDeg: 0.9, maxPerZone: 500, maxZones: 6, digi: true, triangles: false, radius: 3 };
+      return { maxMarkers: 1200, cellDeg: 0.9, maxPerZone: 550, maxZones: 6, digi: true, triPx: 13 };
     }
-    return { maxMarkers: 1600, cellDeg: 0.4, maxPerZone: 1200, maxZones: 5, digi: true, triangles: true, radius: 3.2 };
+    return { maxMarkers: 1600, cellDeg: 0.4, maxPerZone: 1200, maxZones: 5, digi: true, triPx: 14 };
   }
 
   /**
@@ -224,9 +224,35 @@
     aisMarkerByMmsi = Object.create(null);
   }
 
+  function aisTriangleIcon(col, rot, px) {
+    return L.divIcon({
+      className: "ais-target-icon",
+      html:
+        '<div style="transform:rotate(' +
+        rot +
+        "deg);width:" +
+        px +
+        "px;height:" +
+        px +
+        'px;display:flex;align-items:center;justify-content:center;">' +
+        '<svg viewBox="0 0 24 24" width="' +
+        px +
+        '" height="' +
+        px +
+        '">' +
+        '<polygon points="12,2 20,20 12,16 4,20" fill="' +
+        col +
+        '" stroke="#0f172a" stroke-width="1.5"/>' +
+        "</svg></div>",
+      iconSize: [px, px],
+      iconAnchor: [px / 2, px / 2]
+    });
+  }
+
   /**
-   * Incremental AIS paint — update/reuse markers by MMSI.
-   * Avoids clearLayers()+rebuild (that made targets flicker and froze the map).
+   * Incremental AIS paint — triangles at every zoom, reuse by MMSI.
+   * Markers still inside a padded viewport are kept even if this sample skipped them
+   * (prevents the “vanish after pan/zoom reload” flicker).
    */
   function renderAisTargets(targets, map) {
     const layer = ensureLayer(map);
@@ -236,11 +262,13 @@
       ? sampleEvenlyByGrid(targets, Math.min(lod.maxMarkers, 1600), lod.cellDeg)
       : [];
 
-    const useTriangles = !!lod.triangles && z >= 10;
-    const px = z <= 5 ? 11 : 14;
-    const canvasR = getAisCanvasRenderer();
+    const px = lod.triPx || 12;
     const seen = Object.create(null);
-    const interactive = z >= 5;
+    const interactive = z >= 4;
+    let padBounds = null;
+    try {
+      padBounds = map && map.getBounds ? map.getBounds().pad(0.45) : null;
+    } catch (eB) {}
 
     for (let i = 0; i < list.length; i++) {
       const v = list[i];
@@ -252,69 +280,39 @@
       seen[mmsi] = 1;
       const lon = lonOnVisibleCopy(lonRaw, map);
       const col = shipColor(v.navStat, v.sog);
-      const mode = useTriangles ? "tri" : "dot";
+      const heading = Number(v.heading);
+      const rot =
+        Number.isFinite(heading) && heading < 360
+          ? heading
+          : Number(v.cog) < 360
+            ? Number(v.cog)
+            : 0;
       let entry = aisMarkerByMmsi[mmsi];
 
-      if (entry && entry.mode !== mode) {
+      // Migrate any leftover circleMarkers to triangles
+      if (entry && entry.mode !== "tri") {
         try { layer.removeLayer(entry.marker); } catch (eSw) {}
         delete aisMarkerByMmsi[mmsi];
         entry = null;
       }
 
       if (!entry) {
-        let m;
-        if (mode === "dot") {
-          m = L.circleMarker([lat, lon], {
-            radius: lod.radius,
-            color: "#0f172a",
-            weight: 0.6,
-            fillColor: col,
-            fillOpacity: 0.92,
-            renderer: canvasR,
-            interactive: interactive,
-            keyboard: false
-          });
-        } else {
-          const heading = Number(v.heading);
-          const rot =
-            Number.isFinite(heading) && heading < 360
-              ? heading
-              : Number(v.cog) < 360
-                ? Number(v.cog)
-                : 0;
-          const icon = L.divIcon({
-            className: "ais-target-icon",
-            html:
-              '<div style="transform:rotate(' +
-              rot +
-              "deg);width:" +
-              px +
-              "px;height:" +
-              px +
-              'px;display:flex;align-items:center;justify-content:center;">' +
-              '<svg viewBox="0 0 24 24" width="' +
-              px +
-              '" height="' +
-              px +
-              '">' +
-              '<polygon points="12,2 20,20 12,16 4,20" fill="' +
-              col +
-              '" stroke="#0f172a" stroke-width="1.5"/>' +
-              "</svg></div>",
-            iconSize: [px, px],
-            iconAnchor: [px / 2, px / 2]
-          });
-          m = L.marker([lat, lon], { icon, keyboard: false, interactive: interactive });
-        }
+        const m = L.marker([lat, lon], {
+          icon: aisTriangleIcon(col, rot, px),
+          keyboard: false,
+          interactive: interactive
+        });
         if (interactive) m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
         layer.addLayer(m);
-        aisMarkerByMmsi[mmsi] = { marker: m, mode: mode, col: col };
+        aisMarkerByMmsi[mmsi] = { marker: m, mode: "tri", col: col, rot: rot, px: px };
       } else {
         try {
           entry.marker.setLatLng([lat, lon]);
-          if (mode === "dot" && entry.col !== col && entry.marker.setStyle) {
-            entry.marker.setStyle({ fillColor: col });
+          if (entry.col !== col || entry.rot !== rot || entry.px !== px) {
+            entry.marker.setIcon(aisTriangleIcon(col, rot, px));
             entry.col = col;
+            entry.rot = rot;
+            entry.px = px;
           }
         } catch (eUp) {}
       }
@@ -322,7 +320,14 @@
 
     for (const mmsi in aisMarkerByMmsi) {
       if (seen[mmsi]) continue;
-      try { layer.removeLayer(aisMarkerByMmsi[mmsi].marker); } catch (eDel) {}
+      const entry = aisMarkerByMmsi[mmsi];
+      // Keep on-screen targets that the LOD sample skipped this frame
+      try {
+        if (padBounds && entry && entry.marker && padBounds.contains(entry.marker.getLatLng())) {
+          continue;
+        }
+      } catch (eKeep) {}
+      try { layer.removeLayer(entry.marker); } catch (eDel) {}
       delete aisMarkerByMmsi[mmsi];
     }
 
@@ -331,6 +336,15 @@
       badge.textContent = "";
       badge.style.display = "none";
     }
+  }
+
+  /** Instant re-paint from cached REST+stream so pan/zoom never blanks the layer. */
+  function paintAisFromCache(map) {
+    if (!map || !(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
+    try {
+      const cached = getCombinedAisTargets(map);
+      if (cached && cached.length) renderAisTargets(cached, map);
+    } catch (e) {}
   }
 
   function getCombinedAisTargets(map) {
@@ -990,7 +1004,10 @@
           live = await loadOpenWatersBoxes(plan.boxes);
         } catch (e) {}
       }
-      if (seq !== aisRefreshSeq) return;
+      if (seq !== aisRefreshSeq) {
+        paintAisFromCache(map);
+        return;
+      }
       let digi = [];
       const zNow = plan.zoom != null ? plan.zoom : map.getZoom();
       const lod = aisLodForZoom(zNow);
@@ -1017,7 +1034,10 @@
           digi = sampleEvenlyByGrid(digi, Math.min(500, lod.maxMarkers), lod.cellDeg);
         } catch (e) {}
       }
-      if (seq !== aisRefreshSeq) return;
+      if (seq !== aisRefreshSeq) {
+        paintAisFromCache(map);
+        return;
+      }
       if (live.length && (plan.mode === "overview" || plan.mode === "world")) {
         live = sampleEvenlyByGrid(live, lod.maxMarkers, lod.cellDeg);
       }
@@ -1028,33 +1048,50 @@
 
       if (!plan.skipZones) {
         const zoneAll = await loadZonesForMap(map, zNow);
-        if (seq !== aisRefreshSeq) return;
+        if (seq !== aisRefreshSeq) {
+          paintAisFromCache(map);
+          return;
+        }
         const zFiltered = plan.mode === "viewport" ? filterToViewport(zoneAll, map) : zoneAll;
         rest = mergeByMmsi([rest, zFiltered]);
       }
 
       rest = sampleEvenlyByGrid(rest, lod.maxMarkers * 2, lod.cellDeg);
-      lastRestTargets = rest;
-      // Paint stream+REST immediately if we already have something, then finish.
+      // Merge into cache — never wipe previous REST hits with an empty fetch
+      // (that was blanking triangles right after pan/zoom).
+      if (rest.length) {
+        lastRestTargets = mergeByMmsi([lastRestTargets, rest]);
+        // Soft-cap cache so memory stays bounded
+        if (lastRestTargets.length > lod.maxMarkers * 4) {
+          lastRestTargets = sampleEvenlyByGrid(lastRestTargets, lod.maxMarkers * 3, lod.cellDeg);
+        }
+      }
       targets = getCombinedAisTargets(map);
       // Yield to the browser before the marker pass so zoom/pan stay responsive.
       await new Promise(function (r) {
         if (typeof requestAnimationFrame === "function") requestAnimationFrame(function () { r(); });
         else setTimeout(r, 0);
       });
-      if (seq !== aisRefreshSeq) return;
+      if (seq !== aisRefreshSeq) {
+        paintAisFromCache(map);
+        return;
+      }
       renderAisTargets(targets, map);
     } catch (e) {
       console.warn("[SetSail AIS] refresh failed", e);
+      paintAisFromCache(map);
     } finally {
       if (spinnerTimer) clearTimeout(spinnerTimer);
       if (spinnerShown && typeof window.setOverlayTileLoading === "function") {
         window.setOverlayTileLoading("ais", false);
       }
-      aisRefreshBusy = false;
-      if (aisRenderQueued) {
-        aisRenderQueued = false;
-        setTimeout(function () { refreshAisOverlay({ spinner: false }); }, 50);
+      // Only the latest refresh may clear the busy flag
+      if (seq === aisRefreshSeq) {
+        aisRefreshBusy = false;
+        if (aisRenderQueued) {
+          aisRenderQueued = false;
+          setTimeout(function () { refreshAisOverlay({ spinner: false }); }, 50);
+        }
       }
     }
 
@@ -1078,13 +1115,26 @@
       map._setsailAisMoveHooked = true;
       map.on("moveend zoomend", () => {
         if (!(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
+        // Reposition from cache immediately — don't wait for REST or markers vanish.
+        paintAisFromCache(map);
         clearTimeout(aisMoveTimer);
-        // Longer debounce — avoid hammering network + marker rebuild mid-gesture.
         aisMoveTimer = setTimeout(() => {
           refreshAisOverlay({ spinner: false });
           sendAisStreamSubscriptionAll();
         }, 750);
       });
+      // During active pan/zoom keep triangles glued to the viewport from cache.
+      if (!map._setsailAisMovePaintHooked) {
+        map._setsailAisMovePaintHooked = true;
+        let movePaintTick = 0;
+        map.on("move", () => {
+          if (!(window.OVERLAY_STATES && window.OVERLAY_STATES.ais)) return;
+          const now = Date.now();
+          if (now - movePaintTick < 120) return;
+          movePaintTick = now;
+          paintAisFromCache(map);
+        });
+      }
     }
   }
 
