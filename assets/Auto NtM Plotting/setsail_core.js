@@ -108,6 +108,10 @@ let _aisNameIndexPromise = null;
 let _vesselSuggestTimer = null;
 
 function loadUserVesselFromStorage() {
+  // Guests never restore a persisted vessel profile from disk.
+  if (typeof isSetSailSignedIn === "function" && !isSetSailSignedIn()) {
+    return null;
+  }
   try {
     const raw2 = localStorage.getItem(VESSEL_STORAGE_KEY_V2);
     if (raw2) {
@@ -125,6 +129,8 @@ function loadUserVesselFromStorage() {
 }
 
 function persistUserVessel() {
+  // Guests: keep vessel in memory for this tab only — never write to localStorage.
+  if (typeof isSetSailSignedIn === "function" && !isSetSailSignedIn()) return;
   try {
     if (userVessel) {
       localStorage.setItem(VESSEL_STORAGE_KEY_V2, JSON.stringify(userVessel));
@@ -1776,6 +1782,39 @@ function initMobileViewSwitcher() {
 let leafletRouteLayer = null;
 let activeRouteData = null;
 const ROUTE_STORAGE_KEY = "setsail_active_route";
+/** Guest (signed-out) route library — memory only; cleared when the tab closes. */
+let __setsailGuestRoutesLib = [];
+
+/** True only when a Google account is signed in. Guests must not persist workspace data. */
+function isSetSailSignedIn() {
+  try {
+    const raw = localStorage.getItem("setsail_auth_user_v1");
+    if (!raw) return false;
+    const u = JSON.parse(raw);
+    return !!(u && (u.email || u.sub));
+  } catch (e) {
+    return false;
+  }
+}
+window.isSetSailSignedIn = isSetSailSignedIn;
+
+function persistActiveRouteToStorage(route) {
+  if (!isSetSailSignedIn()) return;
+  try {
+    if (route) localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(route));
+    else localStorage.removeItem(ROUTE_STORAGE_KEY);
+  } catch (e) {}
+}
+
+function readActiveRouteFromStorage() {
+  if (!isSetSailSignedIn()) return null;
+  try {
+    const raw = localStorage.getItem(ROUTE_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
 
 /**
  * Parse CIRM / IEC 61174 XML Route Plan (.rtz)
@@ -1943,7 +1982,7 @@ function renderRouteOnMap(route, shouldFly = true) {
   const catPillRoute = document.getElementById("catPillRoute");
   if (catPillRoute) catPillRoute.style.display = "inline-flex";
   try {
-    localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(route));
+    persistActiveRouteToStorage(route);
   } catch (e) {}
 
   // Build clean path with continuous longitude unrolling (Pacific / antimeridian safe)
@@ -2125,7 +2164,7 @@ function renderRouteOnMap(route, shouldFly = true) {
         }
 
         try {
-          localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(activeRouteData));
+          persistActiveRouteToStorage(activeRouteData);
         } catch (err) {}
 
         if (typeof saveRouteToLibrary === "function") {
@@ -2213,7 +2252,7 @@ function clearActiveRoute() {
   }
   activeRouteData = null;
   try {
-    localStorage.removeItem(ROUTE_STORAGE_KEY);
+    persistActiveRouteToStorage(null);
   } catch (e) {}
   try { restoreSetRouteChatTranscript([]); } catch (eChat) {}
   try { syncSetRouteTopbarActions(); } catch (eTop) {}
@@ -3209,9 +3248,8 @@ function initVesselTracking() {
 
   // Restore saved route info inside popover if present
   try {
-    const savedRouteStr = localStorage.getItem(ROUTE_STORAGE_KEY);
-    if (savedRouteStr) {
-      const savedRoute = JSON.parse(savedRouteStr);
+    const savedRoute = readActiveRouteFromStorage();
+    if (savedRoute) {
       const infoBox = document.getElementById("vesselRouteInfoBox");
       const nameEl = document.getElementById("vesselRouteName");
       const metaEl = document.getElementById("vesselRouteMeta");
@@ -4433,9 +4471,8 @@ function initNtMMap() {
     }
 
     try {
-      const savedRouteStr = localStorage.getItem(ROUTE_STORAGE_KEY);
-      if (savedRouteStr) {
-        const savedRoute = JSON.parse(savedRouteStr);
+      const savedRoute = readActiveRouteFromStorage();
+      if (savedRoute) {
         activeRouteData = savedRoute;
         if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.route) {
           renderRouteOnMap(savedRoute, false);
@@ -7963,7 +8000,7 @@ async function generateSetRoutePassage() {
   };
 
   try {
-    localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(activeRouteData));
+    persistActiveRouteToStorage(activeRouteData);
   } catch (e) {}
 
   // Update Results Card
@@ -8355,7 +8392,7 @@ function saveWaypointFromModal() {
   wp.rot = rot;
 
   try {
-    localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(activeRouteData));
+    persistActiveRouteToStorage(activeRouteData);
   } catch (e) {}
 
   if (typeof renderRouteOnMap === "function") {
@@ -11063,7 +11100,7 @@ function saveSetSailUserHistory() {
       email: user.email,
       name: user.name || "",
       updatedAt: new Date().toISOString(),
-      activeRoute: activeRouteData || JSON.parse(localStorage.getItem(ROUTE_STORAGE_KEY) || "null"),
+      activeRoute: activeRouteData || readActiveRouteFromStorage(),
       routeBufferNm: window.ROUTE_CORRIDOR_BUFFER_NM || 25,
       routeCorridorFilter: Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED),
       noticeOverrides: getNoticeOverridesMap(),
@@ -11217,7 +11254,7 @@ function renderAgentRoutesInProfile(routes) {
       } else if (typeof renderRouteOnMap === "function") {
         try {
           activeRouteData = route;
-          localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(route));
+          persistActiveRouteToStorage(route);
           if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
           renderRouteOnMap(route, false);
         } catch (e2) {}
@@ -11309,6 +11346,18 @@ function setSetSailAuthUser(userObj) {
       clearCachedAgentApiKey();
       window.__setsailAgentRoutesCache = [];
       window.__setsailPendingApiKeyModal = false;
+      // Drop into Guest Mode: wipe ephemeral UI so signed-in library is not shown
+      try {
+        __setsailGuestRoutesLib = [];
+        activeRouteData = null;
+        if (typeof clearActiveRoute === "function") clearActiveRoute();
+        if (typeof restoreSetRouteChatTranscript === "function") restoreSetRouteChatTranscript([]);
+        if (typeof renderNavSavedRoutesTree === "function") renderNavSavedRoutesTree();
+        if (typeof syncSetRouteTopbarActions === "function") syncSetRouteTopbarActions();
+        userVessel = null;
+        if (typeof fillVesselFormsFromState === "function") fillVesselFormsFromState();
+        if (typeof updateHomeVesselHudLabel === "function") updateHomeVesselHudLabel();
+      } catch (eGuest) {}
     }
   } catch (e) {}
   syncSetSailAuthUI();
@@ -14033,6 +14082,10 @@ function enrichRouteWithLegsTelemetry(route, opts = {}) {
 window.enrichRouteWithLegsTelemetry = enrichRouteWithLegsTelemetry;
 
 function getSavedRoutesLibrary() {
+  // Guests: ephemeral in-memory chats/routes only (gone when the tab closes).
+  if (!isSetSailSignedIn()) {
+    return Array.isArray(__setsailGuestRoutesLib) ? __setsailGuestRoutesLib.slice() : [];
+  }
   try {
     const raw = localStorage.getItem(SETSAIL_ROUTES_LIBRARY_KEY);
     const list = raw ? JSON.parse(raw) : [];
@@ -14040,6 +14093,17 @@ function getSavedRoutesLibrary() {
   } catch (e) {
     return [];
   }
+}
+
+function writeSavedRoutesLibrary(lib) {
+  const capped = Array.isArray(lib) ? lib.slice(0, 35) : [];
+  if (!isSetSailSignedIn()) {
+    __setsailGuestRoutesLib = capped;
+    return;
+  }
+  try {
+    localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(capped));
+  } catch (e) {}
 }
 
 function captureSetRouteChatTranscript() {
@@ -14105,9 +14169,7 @@ function saveRouteToLibrary(route) {
   } else {
     lib.unshift(route);
   }
-  try {
-    localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(lib.slice(0, 35)));
-  } catch (e) {}
+  writeSavedRoutesLibrary(lib);
   renderNavSavedRoutesTree();
   syncSetRouteTopbarActions();
 }
@@ -14116,16 +14178,14 @@ window.saveRouteToLibrary = saveRouteToLibrary;
 function deleteRouteFromLibrary(routeId) {
   const wasActive = !!(activeRouteData && (activeRouteData.id === routeId || activeRouteData.name === routeId));
   const lib = getSavedRoutesLibrary().filter((r) => r.id !== routeId);
-  try {
-    localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(lib));
-  } catch (e) {}
+  writeSavedRoutesLibrary(lib);
   if (wasActive || (activeRouteData && activeRouteData.id === routeId)) {
     if (lib.length > 0) {
       selectSavedRouteFromSidebar(lib[0].id, false);
     } else {
       try { if (typeof clearActiveRoute === "function") clearActiveRoute(); } catch (eClr) {}
       activeRouteData = null;
-      try { localStorage.removeItem(ROUTE_STORAGE_KEY); } catch (eLs) {}
+      try { persistActiveRouteToStorage(null); } catch (eLs) {}
       restoreSetRouteChatTranscript([]);
       const drawer = document.getElementById("setRouteRightDrawer");
       if (drawer) drawer.classList.remove("open");
@@ -14149,7 +14209,7 @@ function renderNavSavedRoutesTree() {
     if (!lib.some(r => r.name === activeRouteData.name)) {
       enrichRouteWithLegsTelemetry(activeRouteData);
       lib.unshift(activeRouteData);
-      try { localStorage.setItem(SETSAIL_ROUTES_LIBRARY_KEY, JSON.stringify(lib)); } catch (e) {}
+      writeSavedRoutesLibrary(lib);
     }
   }
 
@@ -14208,7 +14268,7 @@ function selectSavedRouteFromSidebar(routeId, openRightDrawer = true) {
   enrichRouteWithLegsTelemetry(found);
   activeRouteData = found;
   try {
-    localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(found));
+    persistActiveRouteToStorage(found);
   } catch (e) {}
 
   restoreSetRouteChatTranscript(found.chatTranscript || []);
@@ -15023,7 +15083,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
 
   activeRouteData = baseRoute;
   try {
-    localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(baseRoute));
+    persistActiveRouteToStorage(baseRoute);
   } catch (e) {}
 
   saveRouteToLibrary(baseRoute);
@@ -15710,7 +15770,7 @@ function initSetRouteV50() {
       } catch (eSaveChat) {}
       window.SETROUTE_PENDING_CONTEXT = null;
       activeRouteData = null;
-      try { localStorage.removeItem(ROUTE_STORAGE_KEY); } catch (e) {}
+      try { persistActiveRouteToStorage(null); } catch (e) {}
       if (chatMessages) chatMessages.innerHTML = "";
       if (emptyHero) emptyHero.style.display = "flex";
       refreshSetRouteEmptyHero();
