@@ -22,7 +22,7 @@
 
 
 
-  <meta name="theme-color" content="#030712" />
+  <meta name="theme-color" content="#080f24" />
 
 
 
@@ -30,21 +30,22 @@
 
   <!-- Instant radar boot splash (inline — paints before CSS/JS bundles) -->
   <style id="setsail-boot-css">
-    html.setsail-booting, html.setsail-booting body { background: #030712 !important; }
+    /* Compact radar spinner — dark navy page bg (SetSail shell) */
+    html.setsail-booting, html.setsail-booting body { background: #080f24 !important; }
     html.setsail-booting body > .app-container { visibility: hidden !important; }
     #setsailBoot {
       position: fixed; inset: 0; z-index: 2147483000;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 18px; margin: 0; padding: 16px;
-      background: radial-gradient(ellipse at center, #0b1a14 0%, #030712 62%, #020617 100%);
+      gap: 12px; margin: 0; padding: 16px;
+      background: #080f24;
       transition: opacity 0.45s ease, visibility 0.45s ease;
     }
     #setsailBoot.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
     #setsailBoot .ssb-scope {
-      position: relative; width: min(78vw, 380px); aspect-ratio: 1 / 1;
+      position: relative; width: min(42vw, 190px); aspect-ratio: 1 / 1;
       border-radius: 50%;
       border: 1.5px solid rgba(34, 197, 94, 0.45);
-      box-shadow: 0 0 0 1px rgba(34,197,94,0.12), inset 0 0 40px rgba(16,185,129,0.08), 0 0 48px rgba(0,0,0,0.55);
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.12), inset 0 0 22px rgba(16,185,129,0.08), 0 0 28px rgba(0,0,0,0.45);
       background:
         radial-gradient(circle at center, rgba(16,185,129,0.14) 0 2px, transparent 3px),
         repeating-radial-gradient(circle at center, transparent 0 18%, rgba(34,197,94,0.12) 18% 18.5%);
@@ -63,26 +64,26 @@
       transform: translate(-50%, -50%); z-index: 5;
     }
     #setsailBoot .ssb-own-dot {
-      position: absolute; left: 50%; top: 50%; width: 7px; height: 7px;
-      margin: -3.5px 0 0 -3.5px; border-radius: 50%;
-      background: #f8fafc; box-shadow: 0 0 0 2px #0f172a, 0 0 10px rgba(248,250,252,0.7);
+      position: absolute; left: 50%; top: 50%; width: 6px; height: 6px;
+      margin: -3px 0 0 -3px; border-radius: 50%;
+      background: #f8fafc; box-shadow: 0 0 0 2px #0f172a, 0 0 8px rgba(248,250,252,0.7);
     }
     #setsailBoot .ssb-own-vec {
-      position: absolute; left: 50%; top: 50%; width: 2px; height: 22px;
-      margin: -22px 0 0 -1px; background: linear-gradient(180deg, #ffffff, rgba(255,255,255,0.12));
+      position: absolute; left: 50%; top: 50%; width: 2px; height: 14px;
+      margin: -14px 0 0 -1px; background: linear-gradient(180deg, #ffffff, rgba(255,255,255,0.12));
       border-radius: 2px; transform-origin: bottom center;
-      box-shadow: 0 0 8px rgba(255,255,255,0.55);
+      box-shadow: 0 0 6px rgba(255,255,255,0.55);
     }
     #setsailBoot .ssb-own-vec::after {
       content: ""; position: absolute; left: 50%; top: -1px; width: 0; height: 0;
-      margin-left: -4px; border-left: 4px solid transparent; border-right: 4px solid transparent;
-      border-bottom: 7px solid #ffffff;
+      margin-left: -3px; border-left: 3px solid transparent; border-right: 3px solid transparent;
+      border-bottom: 5px solid #ffffff;
     }
     #setsailBoot .ssb-loading {
       display: inline-flex; align-items: baseline; gap: 1px;
-      font: 600 0.78rem/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
-      letter-spacing: 0.28em; text-transform: uppercase; color: #86efac;
-      text-shadow: 0 0 12px rgba(16,185,129,0.35);
+      font: 600 0.72rem/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+      letter-spacing: 0.22em; text-transform: uppercase; color: #86efac;
+      text-shadow: 0 0 10px rgba(16,185,129,0.35);
       user-select: none;
     }
     #setsailBoot .ssb-dots { display: inline-flex; width: 1.6em; margin-left: 2px; letter-spacing: 0.05em; }
@@ -103,10 +104,10 @@
       will-change: left, top;
     }
     #setsailBoot .ssb-tgt-blip {
-      position: absolute; left: 0; top: 0; width: 11px; height: 11px;
-      margin: -5.5px 0 0 -5.5px; border-radius: 50%;
+      position: absolute; left: 0; top: 0; width: 8px; height: 8px;
+      margin: -4px 0 0 -4px; border-radius: 50%;
       background: #facc15;
-      box-shadow: 0 0 0 2px rgba(250,204,21,0.4), 0 0 16px rgba(250,204,21,0.95);
+      box-shadow: 0 0 0 2px rgba(250,204,21,0.4), 0 0 12px rgba(250,204,21,0.95);
       animation: ssbBlip 1.1s ease-in-out infinite;
       transition: background 0.2s ease, box-shadow 0.2s ease;
     }
@@ -115,24 +116,24 @@
       50% { transform: scale(1.35); opacity: 0.88; }
     }
     #setsailBoot .ssb-tgt-label {
-      position: absolute; left: 10px; top: -11px; white-space: nowrap;
-      font: 700 11px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+      position: absolute; left: 8px; top: -9px; white-space: nowrap;
+      font: 700 10px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
       letter-spacing: 0.06em; color: #fde047;
       text-shadow: 0 0 8px rgba(0,0,0,0.9);
       transition: color 0.2s ease;
     }
     #setsailBoot .ssb-tgt.is-hot .ssb-tgt-blip {
       background: #ef4444;
-      box-shadow: 0 0 0 2px rgba(239,68,68,0.45), 0 0 16px rgba(239,68,68,0.95);
+      box-shadow: 0 0 0 2px rgba(239,68,68,0.45), 0 0 12px rgba(239,68,68,0.95);
     }
     #setsailBoot .ssb-tgt.is-hot .ssb-tgt-label { color: #fca5a5; }
     #setsailBoot.is-contact .ssb-tgt-blip {
       animation: none; background: #f8fafc;
-      box-shadow: 0 0 0 3px #ef4444, 0 0 28px #ef4444;
-      transform: scale(1.85);
+      box-shadow: 0 0 0 2px #ef4444, 0 0 18px #ef4444;
+      transform: scale(1.7);
     }
     #setsailBoot.is-contact .ssb-scope {
-      box-shadow: 0 0 0 2px rgba(239,68,68,0.5), inset 0 0 60px rgba(239,68,68,0.16), 0 0 60px rgba(239,68,68,0.22);
+      box-shadow: 0 0 0 2px rgba(239,68,68,0.5), inset 0 0 36px rgba(239,68,68,0.16), 0 0 36px rgba(239,68,68,0.22);
     }
   </style>
   <script>
@@ -167,7 +168,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.120" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.121" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -8852,7 +8853,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.120" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.121" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -11919,7 +11920,7 @@ select option {
   }
 }
 
-/* ═══ Mobile polish pack (v5.120) — hero / dock / install / SetStar / SetRoute ═══ */
+/* ═══ Mobile polish pack (v5.121) — hero / dock / install / SetStar / SetRoute ═══ */
 .setstar-data-switch { display: none; }
 @media (max-width: 768px) {
   html, body, #tab-home, #tab-home.active, .home-hero-viewport, .app-content {
@@ -13198,7 +13199,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.120" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.120';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.121" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.121';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -20895,25 +20896,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.120"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.120" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.120"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.121"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.121" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.121"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.120",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.121",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.120"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.120"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.120"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.121"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.121"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.121"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.120"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.121"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20986,7 +20987,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.120"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.121"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21699,17 +21700,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.120', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.121', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.120 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.121 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.120') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.120.0'); }, 1200);
+              if (last && last.indexOf('v5.121') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.121.0'); }, 1200);
               }
             } catch (eTip) {}
           })

@@ -9548,16 +9548,15 @@
 }
 
 .nav-saved-route-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 4px);
-  z-index: 40;
+  /* Anchored via JS (position:fixed) so Delete escapes list/sidebar overflow */
+  position: fixed;
+  z-index: 13050;
   min-width: 124px;
   padding: 4px;
   border-radius: 8px;
-  background: rgba(8, 15, 28, 0.96);
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  background: rgba(8, 15, 28, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
 
 .nav-saved-route-delete {
