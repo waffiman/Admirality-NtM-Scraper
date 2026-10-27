@@ -2604,9 +2604,14 @@ function renderWeatherOnMap(map = null) {
     const iconDim = curZoom <= 4 ? 22 : 26;
     const badgeBorder = isSevere ? "rgba(239,68,68,0.65)" : "rgba(245,158,11,0.65)";
     const badgeTextCol = isSevere ? "#fecaca" : "#fde68a";
+    // Coriolis: Northern Hemisphere cyclones spin CCW; Southern Hemisphere CW.
+    const stormLat = Number(storm.center && storm.center[0]);
+    const spinClass = (Number.isFinite(stormLat) && stormLat < 0)
+      ? "weather-cyclone-icon weather-cyclone-icon--cw"
+      : "weather-cyclone-icon weather-cyclone-icon--ccw";
     const cycloneHtml = `
       <div style="position:relative;width:${iconDim}px;height:${iconDim}px;pointer-events:auto;">
-        <svg viewBox="0 0 24 24" style="width:${iconDim}px;height:${iconDim}px;display:block;filter:drop-shadow(0 0 5px ${badgeBorder});" class="weather-cyclone-icon">
+        <svg viewBox="0 0 24 24" style="width:${iconDim}px;height:${iconDim}px;display:block;filter:drop-shadow(0 0 5px ${badgeBorder});" class="${spinClass}">
           <circle cx="12" cy="12" r="8.5" fill="${isSevere ? 'rgba(239,68,68,0.24)' : 'rgba(245,158,11,0.22)'}" stroke="${primaryColor}" stroke-width="1.8"/>
           <path d="M12 3.5a8.5 8.5 0 0 0-8.5 8.5c0 3.2 1.8 6 4.6 7.5" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
           <path d="M12 20.5a8.5 8.5 0 0 0 8.5-8.5c0-3.2-1.8-6-4.6-7.5" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
@@ -5901,7 +5906,8 @@ const MARITIME_SEA_EDGES = [
   ["CANARY_PASS", "CAPE_VERDE_PASS"],
   ["CAPE_VERDE_PASS", "GULF_OF_GUINEA"],
   ["GULF_OF_GUINEA", "CAPE_AGULHAS"],
-  ["CAPE_AGULHAS", "DONDRA_HEAD"],
+  // Never chord CAPE_AGULHAS→DONDRA_HEAD: lat/lon lerp cuts Madagascar interior.
+  // Indian Ocean Cape→FE must go DURBAN / MOZAMBIQUE_CH / MAURITIUS_PASS.
 
   // Transatlantic & Americas
   ["USHANT", "NEW_YORK_APP"],
@@ -5995,7 +6001,12 @@ const SETROUTE_LAND_BOXES = [
   { minLat: -42.5, maxLat: -36.5, minLon: 172.5, maxLon: 178.5 }, // NZ North Island
   { minLat: 55.5, maxLat: 59.0, minLon: -7.5, maxLon: -2.5 },  // Scotland Highlands
   { minLat: 36.0, maxLat: 40.0, minLon: -9.0, maxLon: -6.0 },  // Iberia W interior
-  { minLat: -34.5, maxLat: -30.0, minLon: 17.5, maxLon: 26.5 } // SA interior near Cape
+  { minLat: -34.5, maxLat: -30.0, minLon: 17.5, maxLon: 26.5 }, // SA interior near Cape
+  // Indian Ocean — Cape Town↔Singapore chords used to clip these masses
+  { minLat: -25.2, maxLat: -12.4, minLon: 43.4, maxLon: 50.2 }, // Madagascar interior
+  { minLat: 6.4, maxLat: 9.6, minLon: 79.6, maxLon: 81.6 },     // Sri Lanka interior (keep Dondra S out)
+  { minLat: -34.2, maxLat: -28.8, minLon: 26.5, maxLon: 31.2 }, // SA interior inland of Durban coast
+  { minLat: -17.5, maxLat: -11.5, minLon: 48.8, maxLon: 50.4 }  // E Madagascar / coast mass
 ];
 
 /**
@@ -6054,7 +6065,8 @@ function setrouteLegShoalPenalty(lat1, lon1, lat2, lon2) {
 const SETROUTE_OCEAN_HUBS = [
   "GIBRALTAR_MID", "SUEZ_CANAL_MID", "CAPE_AGULHAS", "PANAMA_COLON",
   "SINGAPORE_MAIN", "MALACCA_MID", "DOVER_STRAIT", "BAB_EL_MANDEB",
-  "UNIMAK_PASS", "NATL_GC_MID", "NPAC_GC_MID", "MED_SICILY", "DONDRA_HEAD"
+  "UNIMAK_PASS", "NATL_GC_MID", "NPAC_GC_MID", "MED_SICILY", "DONDRA_HEAD",
+  "MAURITIUS_PASS", "MOZAMBIQUE_CH", "SIX_DEGREE_CH", "ARABIAN_SEA_MID"
 ];
 
 let SETROUTE_COAST_GRID = null;
@@ -6467,13 +6479,16 @@ function setrouteBuildAdjacency() {
       const p = setrouteLerpLatLon(a[0], a[1], b[0], b[1], samples[si]);
       if (setroutePointInLandBox(p[0], p[1])) boxHits++;
     }
-    // Soft-penalize land/coast hits; only TSS is a hard drop. Curated sea-graph edges must
-    // stay connected — dropping land-box hits was isolating Far East ↔ US Gulf (Panama/Cape/Suez all refused).
+    // Land/coast: soft-penalize most hits so curated long corridors stay connected
+    // (hard-dropping all land-box hits isolated Far East ↔ US Gulf). Hard-drop only
+    // clear interior chords (2+ samples in a land box on medium/long legs).
     const coastHit = dist >= 90 && typeof setrouteLegCrossesCoastline === "function" &&
       setrouteLegCrossesCoastline(a[0], a[1], b[0], b[1]);
     // COLREG Rule 10 — never keep edges through a Traffic Separation Zone
     const tssBan = typeof setrouteTssHardBan === "function" && setrouteTssHardBan(a[0], a[1], b[0], b[1]);
     if (tssBan) continue;
+    const interiorChord = boxHits >= 2 && dist >= 400;
+    if (interiorChord) continue; // e.g. Cape→Dondra through Madagascar — remove from graph
     if ((boxHits >= (dist >= 1500 ? 2 : 1) && dist >= 160) || (coastHit && dist >= 180)) {
       hazard = 50000;
     } else {
@@ -7304,29 +7319,45 @@ function setroutePathHasCriticalLayerBlock(path) {
 function setrouteDensifyWaypoints(waypoints, maxLegNm) {
   const maxNm = Number(maxLegNm) || 350;
   if (!Array.isArray(waypoints) || waypoints.length < 2) return waypoints;
+  const mkOcean = (lat, lon, a) => ({
+    wptNo: "TMP",
+    name: "Ocean track",
+    lat: Number(Number(lat).toFixed(5)),
+    lon: Number(Number(lon).toFixed(5)),
+    speedKnots: a.speedKnots,
+    portsideXTD: a.portsideXTD,
+    starboardXTD: a.starboardXTD,
+    turnRadius: 0.8,
+    sail: a.sail || "GC",
+    rot: 8.0
+  });
   const out = [waypoints[0]];
   for (let i = 0; i < waypoints.length - 1; i++) {
     const a = waypoints[i];
     const b = waypoints[i + 1];
     const dist = calculateHaversineDistanceNM(a.lat, a.lon, b.lat, b.lon);
+    // If the straight chord clips land, insert a sea hub so the drawn track stays wet
+    if (dist >= 180 && setrouteLegLikelyCrossesLand(a.lat, a.lon, b.lat, b.lon)) {
+      const hubKey = SETROUTE_OCEAN_HUBS.find((h) => {
+        const n = MARITIME_SEA_NODES[h];
+        if (!n) return false;
+        if (Math.hypot(n[0] - a.lat, n[1] - a.lon) < 0.4) return false;
+        if (Math.hypot(n[0] - b.lat, n[1] - b.lon) < 0.4) return false;
+        return !setrouteLegLikelyCrossesLand(a.lat, a.lon, n[0], n[1]) &&
+          !setrouteLegLikelyCrossesLand(n[0], n[1], b.lat, b.lon);
+      });
+      if (hubKey && MARITIME_SEA_NODES[hubKey]) {
+        const n = MARITIME_SEA_NODES[hubKey];
+        out.push(mkOcean(n[0], n[1], a));
+      }
+    }
     if (dist > maxNm) {
       const n = Math.min(12, Math.max(1, Math.ceil(dist / maxNm) - 1));
       for (let s = 1; s <= n; s++) {
         const p = setrouteLerpLatLon(a.lat, a.lon, b.lat, b.lon, s / (n + 1));
         // Skip insert if densify sample is on land
         if (setroutePointInLandBox(p[0], p[1])) continue;
-        out.push({
-          wptNo: "TMP",
-          name: "Ocean track",
-          lat: Number(p[0].toFixed(5)),
-          lon: Number(p[1].toFixed(5)),
-          speedKnots: a.speedKnots,
-          portsideXTD: a.portsideXTD,
-          starboardXTD: a.starboardXTD,
-          turnRadius: 0.8,
-          sail: a.sail || "GC",
-          rot: 8.0
-        });
+        out.push(mkOcean(p[0], p[1], a));
       }
     }
     out.push(b);
@@ -13761,7 +13792,10 @@ window.SETROUTE_PENDING_CONTEXT = null;
     ["DONDRA_HEAD", "CHENNAI_APP"],
     ["CHENNAI_APP", "BAY_OF_BENGAL_S"],
     ["DURBAN_APP", "MAURITIUS_PASS"],
+    ["CAPE_AGULHAS", "MAURITIUS_PASS"],
+    ["MOZAMBIQUE_CH", "MAURITIUS_PASS"],
     ["MAURITIUS_PASS", "DONDRA_HEAD"],
+    ["MAURITIUS_PASS", "SIX_DEGREE_CH"],
     ["MAURITIUS_PASS", "SUNDA_STRAIT"],
     ["SUNDA_STRAIT", "JAKARTA_APP"],
     ["JAKARTA_APP", "SINGAPORE_E"],

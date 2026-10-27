@@ -3584,15 +3584,34 @@
   color: #ffffff !important;
 }
 
-/* Marine Weather Map Overlay Styles (SPOS & Windy Standard) */
+/* Marine Weather Map Overlay Styles (SPOS & Windy Standard)
+   Cyclone eye spin is CSS-only (composited transform) — negligible vs weather.json load.
+   NH cyclones → CCW; SH cyclones → CW (Coriolis). */
 .weather-cyclone-icon {
-  animation: weather-spin 12s linear infinite;
   transform-origin: center center;
+  will-change: transform;
+  animation: weather-spin-ccw 10s linear infinite;
 }
-
-@keyframes weather-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.weather-cyclone-icon--cw {
+  animation-name: weather-spin-cw;
+}
+.weather-cyclone-icon--ccw {
+  animation-name: weather-spin-ccw;
+}
+@keyframes weather-spin-ccw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes weather-spin-cw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .weather-cyclone-icon,
+  .weather-cyclone-icon--cw,
+  .weather-cyclone-icon--ccw {
+    animation: none !important;
+  }
 }
 
 .weather-storm-div-icon,
