@@ -4648,10 +4648,35 @@ function initNtMMap() {
       }
     }, 0);
 
-    const seamarkLayer = L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", Object.assign({}, overlayTilePerfOpts, {
-      maxZoom: 18,
-      attribution: "OpenSeaMap"
+    // Buoys / seamarks (OpenSeaMap) — dual LOD so marks don't vanish mid-zoom.
+    // Base: coarse marks from low Z, stretched past maxNativeZoom so already-loaded
+    // tiles stay painted while detail tiles fetch. Detail: finer marks from z12+.
+    const seamarkUrl = "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png";
+    const seamarkPersistOpts = {
+      keepBuffer: lowEndMap ? 4 : 10,
+      updateWhenIdle: false,
+      updateWhenZooming: false,
+      updateInterval: lowEndMap ? 250 : 120,
+      noWrap: false,
+      attribution: "OpenSeaMap",
+      className: "setsail-seamark-tiles",
+      crossOrigin: true
+    };
+    const buoysBaseLayer = L.tileLayer(seamarkUrl, Object.assign({}, seamarkPersistOpts, {
+      minZoom: 5,
+      maxNativeZoom: 12,
+      maxZoom: 19,
+      opacity: 0.95,
+      zIndex: 450
     }));
+    const buoysDetailLayer = L.tileLayer(seamarkUrl, Object.assign({}, seamarkPersistOpts, {
+      minZoom: 12,
+      maxNativeZoom: 18,
+      maxZoom: 19,
+      opacity: 1,
+      zIndex: 451
+    }));
+    const seamarkLayer = L.layerGroup([buoysBaseLayer, buoysDetailLayer]);
 
     // Desktop & Mobile ResizeObserver to guarantee non-zero canvas & immediate tile paint
     if (typeof ResizeObserver !== "undefined") {
@@ -4689,7 +4714,9 @@ function initNtMMap() {
         ocean: oceanLayer,
         street: osmLayer,
         sat: satLayer,
-        buoys: seamarkLayer
+        buoys: seamarkLayer,
+        buoysBase: buoysBaseLayer,
+        buoysDetail: buoysDetailLayer
       });
     }
 
@@ -7440,9 +7467,10 @@ function setrouteBuildAppraisalFactors(route, opts) {
       factors.push({
         id: "tss_colreg10",
         ok: true,
-        text: "COLREG Rule 10 module loaded (Core A " +
+        text: "COLREG Rule 10 / Core A " +
           ((SetRouteCoreA && SetRouteCoreA.MODULE_VERSION) || "?") +
-          "); no TSS near this corridor."
+          " — " + ((SetRouteCoreA.SETROUTE_TSS_SCHEMES || []).length) +
+          " TSS schemes loaded; none near this corridor."
       });
     }
   } catch (eTss) {}

@@ -8,21 +8,24 @@
  *
  * Skills currently in this module:
  *  - COLREG Rule 10: hard ban Traffic Separation Zones; prefer Traffic Lanes
- *  - Singapore Strait TSS (eastbound / westbound / separation) polygons
+ *  - World TSS from OpenSeaMap/OSM seamarks (assets/geo/setroute_tss_world.json)
+ *  - Seed schemes (Singapore / Dover / Gibraltar) until world JSON loads
  *  - Edge cost hooks used by the sea-graph Dijkstra in setsail_core.js
  * =============================================================================
  */
 (function (global) {
   "use strict";
 
-  const MODULE_VERSION = "5.83.0-core-a";
+  const MODULE_VERSION = "5.135.0-core-a";
+  const WORLD_TSS_URL = "assets/geo/setroute_tss_world.json";
 
   /**
-   * TSS schemes as closed rings [lat, lon][].
-   * Categories: separation_zone (HARD BAN), traffic_lane (prefer + direction), precautionary_area.
+   * Seed TSS schemes as closed rings [lat, lon][].
+   * Categories: separation_zone (HARD BAN), traffic_lane (prefer + direction),
+   * traffic_lane_centerline (prefer near directed arrow), precautionary_area.
    * directionDeg: preferred course through lane (null = either way / precautionary).
    */
-  const SETROUTE_TSS_SCHEMES = [
+  const SETROUTE_TSS_SEED = [
     {
       id: "singapore_strait",
       name: "Singapore Strait TSS",
@@ -30,7 +33,6 @@
       parts: [
         {
           category: "separation_zone",
-          // Central separator approx. between Main Strait lanes (Malacca/Singapore approaches)
           ring: [
             [1.12, 103.55], [1.18, 103.72], [1.22, 103.95], [1.24, 104.15],
             [1.22, 104.35], [1.16, 104.45], [1.10, 104.35], [1.08, 104.10],
@@ -134,6 +136,11 @@
     }
   ];
 
+  /** Live catalogue — starts as seeds; replaced/merged when world JSON loads. */
+  let SETROUTE_TSS_SCHEMES = SETROUTE_TSS_SEED.slice();
+  let _worldLoaded = false;
+  let _worldMeta = null;
+
   function pointInRing(lat, lon, ring) {
     if (!ring || ring.length < 3) return false;
     let inside = false;
@@ -172,6 +179,70 @@
     return out;
   }
 
+  /** Approximate NM distance from point to polyline (local equirectangular). */
+  function distPointToLineNm(lat, lon, line) {
+    if (!line || line.length < 2) return Infinity;
+    const cosLat = Math.cos(lat * Math.PI / 180);
+    let best = Infinity;
+    for (let i = 0; i < line.length - 1; i++) {
+      const a = line[i], b = line[i + 1];
+      const ax = (a[1] - lon) * cosLat * 60;
+      const ay = (a[0] - lat) * 60;
+      const bx = (b[1] - lon) * cosLat * 60;
+      const by = (b[0] - lat) * 60;
+      const dx = bx - ax, dy = by - ay;
+      const len2 = dx * dx + dy * dy;
+      let t = 0;
+      if (len2 > 1e-12) {
+        t = Math.max(0, Math.min(1, (-ax * dx + -ay * dy) / len2));
+      }
+      const px = ax + t * dx;
+      const py = ay + t * dy;
+      const d = Math.sqrt(px * px + py * py);
+      if (d < best) best = d;
+    }
+    return best;
+  }
+
+  function applyLaneDirection(legCourse, dir, frac, scheme, part, hits, preferLaneRef, penaltyRef, label) {
+    const diff = angleDiffDeg(legCourse, dir);
+    if (diff <= 55) {
+      preferLaneRef.v += 180 * frac;
+      penaltyRef.v -= 120 * frac;
+      hits.push({
+        scheme: scheme.id,
+        name: part.name || scheme.name,
+        category: "traffic_lane",
+        rule: "COLREG Rule 10(b) — proceed in general direction of traffic flow",
+        frac: Math.round(frac * 100),
+        courseDiffDeg: Math.round(diff),
+        via: label || "lane"
+      });
+    } else if (diff >= 110) {
+      penaltyRef.v += 4500 * frac;
+      hits.push({
+        scheme: scheme.id,
+        name: part.name || scheme.name,
+        category: "traffic_lane_wrong_way",
+        rule: "COLREG Rule 10(b) — against traffic flow (avoid)",
+        frac: Math.round(frac * 100),
+        courseDiffDeg: Math.round(diff),
+        via: label || "lane"
+      });
+    } else {
+      penaltyRef.v += 900 * frac;
+      hits.push({
+        scheme: scheme.id,
+        name: part.name || scheme.name,
+        category: "traffic_lane_oblique",
+        rule: "COLREG Rule 10(c) — cross on heading as nearly as practicable at right angles",
+        frac: Math.round(frac * 100),
+        courseDiffDeg: Math.round(diff),
+        via: label || "lane"
+      });
+    }
+  }
+
   /**
    * COLREG Rule 10 costing for a graph/route leg.
    * Returns { penalty, hardBan, hits, preferLane }.
@@ -180,26 +251,66 @@
   function setrouteTssLegAnalysis(lat1, lon1, lat2, lon2) {
     const samples = sampleLeg(lat1, lon1, lat2, lon2, 6);
     const legCourse = courseDeg(lat1, lon1, lat2, lon2);
-    let penalty = 0;
+    const penaltyRef = { v: 0 };
+    const preferLaneRef = { v: 0 };
     let hardBan = false;
-    let preferLane = 0;
     const hits = [];
+
+    // Attraction: if any TSS scheme is nearby, lightly prefer getting into its lanes
+    let nearbyScheme = false;
 
     for (let s = 0; s < SETROUTE_TSS_SCHEMES.length; s++) {
       const scheme = SETROUTE_TSS_SCHEMES[s];
       for (let p = 0; p < scheme.parts.length; p++) {
         const part = scheme.parts[p];
+
+        if (part.category === "traffic_lane_centerline" && part.line && part.line.length >= 2) {
+          const halfW = Number(part.halfWidthNm) > 0 ? Number(part.halfWidthNm) : 0.55;
+          let nearHits = 0;
+          let minDist = Infinity;
+          for (let i = 0; i < samples.length; i++) {
+            const d = distPointToLineNm(samples[i][0], samples[i][1], part.line);
+            if (d < minDist) minDist = d;
+            if (d <= halfW) nearHits++;
+          }
+          if (minDist < 40) nearbyScheme = true;
+          if (!nearHits) {
+            // Soft pull toward lane when within ~8 nm
+            if (minDist < 8) {
+              penaltyRef.v += 35 * (1 - minDist / 8);
+            }
+            continue;
+          }
+          const frac = nearHits / samples.length;
+          const dir = Number(part.directionDeg);
+          if (Number.isFinite(dir)) {
+            applyLaneDirection(legCourse, dir, frac, scheme, part, hits, preferLaneRef, penaltyRef, "centerline");
+          } else {
+            preferLaneRef.v += 80 * frac;
+            penaltyRef.v -= 60 * frac;
+          }
+          continue;
+        }
+
+        if (!part.ring || part.ring.length < 3) continue;
+
         let hitsPart = 0;
         for (let i = 0; i < samples.length; i++) {
           if (pointInRing(samples[i][0], samples[i][1], part.ring)) hitsPart++;
+        }
+        // Proximity for attraction (use first ring vertex as rough cue)
+        if (!hitsPart && part.ring[0]) {
+          const c = part.ring[0];
+          const dlat = (lat1 - c[0]) * 60;
+          const dlon = (lon1 - c[1]) * 60 * Math.cos(lat1 * Math.PI / 180);
+          if (Math.sqrt(dlat * dlat + dlon * dlon) < 40) nearbyScheme = true;
         }
         if (!hitsPart) continue;
         const frac = hitsPart / samples.length;
 
         if (part.category === "separation_zone") {
-          // Rule 10(e)/(f): vessels shall not normally enter separation zone / cross at acute angle misuse
           hardBan = true;
-          penalty += 1e6 * frac;
+          penaltyRef.v += 1e6 * frac;
           hits.push({
             scheme: scheme.id,
             name: scheme.name,
@@ -210,47 +321,14 @@
         } else if (part.category === "traffic_lane") {
           const dir = Number(part.directionDeg);
           if (Number.isFinite(dir)) {
-            const diff = angleDiffDeg(legCourse, dir);
-            if (diff <= 55) {
-              // With the lane — bonus (negative penalty)
-              preferLane += 180 * frac;
-              penalty -= 120 * frac;
-              hits.push({
-                scheme: scheme.id,
-                name: part.name || scheme.name,
-                category: "traffic_lane",
-                rule: "COLREG Rule 10(b) — proceed in general direction of traffic flow",
-                frac: Math.round(frac * 100),
-                courseDiffDeg: Math.round(diff)
-              });
-            } else if (diff >= 110) {
-              // Against the lane — strong penalty (wrong way)
-              penalty += 4500 * frac;
-              hits.push({
-                scheme: scheme.id,
-                name: part.name || scheme.name,
-                category: "traffic_lane_wrong_way",
-                rule: "COLREG Rule 10(b) — against traffic flow (avoid)",
-                frac: Math.round(frac * 100),
-                courseDiffDeg: Math.round(diff)
-              });
-            } else {
-              // Crossing / oblique
-              penalty += 900 * frac;
-              hits.push({
-                scheme: scheme.id,
-                name: part.name || scheme.name,
-                category: "traffic_lane_oblique",
-                rule: "COLREG Rule 10(c) — cross on heading as nearly as practicable at right angles",
-                frac: Math.round(frac * 100),
-                courseDiffDeg: Math.round(diff)
-              });
-            }
+            applyLaneDirection(legCourse, dir, frac, scheme, part, hits, preferLaneRef, penaltyRef, "polygon");
           } else {
-            penalty -= 40 * frac;
+            penaltyRef.v -= 40 * frac;
+            preferLaneRef.v += 40 * frac;
           }
         } else if (part.category === "precautionary_area") {
-          penalty += 120 * frac;
+          // Caution areas may interrupt lanes — allowed but careful (not hard ban)
+          penaltyRef.v += 120 * frac;
           hits.push({
             scheme: scheme.id,
             name: part.name || "Precautionary area",
@@ -262,7 +340,17 @@
       }
     }
 
-    return { penalty, hardBan, hits, preferLane };
+    // If TSS exists nearby but leg is not using a lane, nudge planner toward lanes
+    if (nearbyScheme && preferLaneRef.v < 1 && !hardBan) {
+      penaltyRef.v += 80;
+    }
+
+    return {
+      penalty: penaltyRef.v,
+      hardBan,
+      hits,
+      preferLane: preferLaneRef.v
+    };
   }
 
   function setrouteTssEdgePenalty(lat1, lon1, lat2, lon2) {
@@ -280,12 +368,15 @@
     SETROUTE_TSS_SCHEMES.forEach((scheme) => {
       let near = false;
       scheme.parts.forEach((part) => {
-        const c = part.ring[0];
+        if (part.line && part.line.length) {
+          if (distPointToLineNm(lat, lon, part.line) < R) near = true;
+        }
+        const c = (part.ring && part.ring[0]) || (part.line && part.line[0]);
         if (!c) return;
         const dlat = (lat - c[0]) * 60;
         const dlon = (lon - c[1]) * 60 * Math.cos(lat * Math.PI / 180);
         const d = Math.sqrt(dlat * dlat + dlon * dlon);
-        if (d < R || pointInRing(lat, lon, part.ring)) near = true;
+        if (d < R || (part.ring && pointInRing(lat, lon, part.ring))) near = true;
       });
       if (near) {
         found.push({
@@ -299,14 +390,73 @@
     return found;
   }
 
+  function mergeWorldSchemes(world) {
+    if (!world || !Array.isArray(world.schemes) || !world.schemes.length) return;
+    // Prefer OSM world coverage; keep seed schemes only where OSM has no cell overlap
+    const osm = world.schemes.filter((s) => s && Array.isArray(s.parts) && s.parts.length);
+    const seedKeep = SETROUTE_TSS_SEED.filter((seed) => {
+      // Drop seed if any OSM scheme shares a rough centroid cell
+      const seedPt = seed.parts && seed.parts[0] && (seed.parts[0].ring || seed.parts[0].line);
+      if (!seedPt || !seedPt[0]) return true;
+      const slat = seedPt[0][0], slon = seedPt[0][1];
+      for (let i = 0; i < osm.length; i++) {
+        const p0 = osm[i].parts[0];
+        const pt = (p0 && (p0.ring || p0.line) || [])[0];
+        if (!pt) continue;
+        if (Math.abs(pt[0] - slat) < 2.5 && Math.abs(pt[1] - slon) < 2.5) return false;
+      }
+      return true;
+    });
+    SETROUTE_TSS_SCHEMES = osm.concat(seedKeep);
+    _worldLoaded = true;
+    _worldMeta = {
+      generatedAt: world.generatedAt || null,
+      counts: world.counts || null,
+      schemes: SETROUTE_TSS_SCHEMES.length
+    };
+    if (typeof console !== "undefined" && console.info) {
+      console.info(
+        "[SetRoute Core A] world TSS loaded: " +
+          osm.length + " OSM schemes + " + seedKeep.length + " seed (" +
+          SETROUTE_TSS_SCHEMES.length + " total)"
+      );
+    }
+  }
+
+  function loadWorldTss() {
+    if (typeof fetch !== "function") return Promise.resolve(false);
+    return fetch(WORLD_TSS_URL, { cache: "force-cache" })
+      .then((r) => (r && r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) return false;
+        mergeWorldSchemes(data);
+        return true;
+      })
+      .catch(() => false);
+  }
+
+  // Kick off load immediately
+  try {
+    loadWorldTss();
+  } catch (e) {}
+
   const api = {
     MODULE_VERSION,
-    SETROUTE_TSS_SCHEMES,
+    get SETROUTE_TSS_SCHEMES() {
+      return SETROUTE_TSS_SCHEMES;
+    },
     setrouteTssLegAnalysis,
     setrouteTssEdgePenalty,
     setrouteTssHardBan,
     setrouteNearbyTssSummary,
-    pointInRing
+    pointInRing,
+    loadWorldTss,
+    isWorldTssLoaded: function () {
+      return _worldLoaded;
+    },
+    worldTssMeta: function () {
+      return _worldMeta;
+    }
   };
 
   global.SetRouteCoreA = api;
@@ -316,6 +466,9 @@
   global.setrouteNearbyTssSummary = setrouteNearbyTssSummary;
 
   if (typeof console !== "undefined" && console.info) {
-    console.info("[SetRoute Core A] module " + MODULE_VERSION + " ready (" + SETROUTE_TSS_SCHEMES.length + " TSS schemes)");
+    console.info(
+      "[SetRoute Core A] module " + MODULE_VERSION + " ready (" +
+        SETROUTE_TSS_SCHEMES.length + " TSS schemes, world pending)"
+    );
   }
 })(typeof window !== "undefined" ? window : globalThis);
