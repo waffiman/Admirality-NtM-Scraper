@@ -6471,25 +6471,26 @@ function setrouteBuildAdjacency() {
     const a = MARITIME_SEA_NODES[u];
     const b = MARITIME_SEA_NODES[v];
     const dist = calculateHaversineDistanceNM(a[0], a[1], b[0], b[1]);
-    // Graph topology: land-boxes only (not coast-grid)
+    // Land awareness: coast-grid (planet shorelines) is primary; land-boxes catch interiors.
+    // Short TSS/canal hops (<120 NM) may graze coast geometry — keep those soft.
     let hazard = 0;
-    const samples = dist > 800 ? [0.25, 0.5, 0.75] : [0.5];
+    const samples = dist > 800 ? [0.2, 0.4, 0.6, 0.8] : (dist > 200 ? [0.25, 0.5, 0.75] : [0.5]);
     let boxHits = 0;
     for (let si = 0; si < samples.length; si++) {
       const p = setrouteLerpLatLon(a[0], a[1], b[0], b[1], samples[si]);
       if (setroutePointInLandBox(p[0], p[1])) boxHits++;
     }
-    // Land/coast: soft-penalize most hits so curated long corridors stay connected
-    // (hard-dropping all land-box hits isolated Far East ↔ US Gulf). Hard-drop only
-    // clear interior chords (2+ samples in a land box on medium/long legs).
     const coastHit = dist >= 90 && typeof setrouteLegCrossesCoastline === "function" &&
       setrouteLegCrossesCoastline(a[0], a[1], b[0], b[1]);
     // COLREG Rule 10 — never keep edges through a Traffic Separation Zone
     const tssBan = typeof setrouteTssHardBan === "function" && setrouteTssHardBan(a[0], a[1], b[0], b[1]);
     if (tssBan) continue;
-    const interiorChord = boxHits >= 2 && dist >= 400;
-    if (interiorChord) continue; // e.g. Cape→Dondra through Madagascar — remove from graph
-    if ((boxHits >= (dist >= 1500 ? 2 : 1) && dist >= 160) || (coastHit && dist >= 180)) {
+    // Hard-drop clear land chords: interior boxes OR coast-crossing ocean legs.
+    // Curated short coastal edges stay; long land-cuts are removed from the graph.
+    const interiorChord = boxHits >= 2 && dist >= 350;
+    const landCut = coastHit && dist >= 140;
+    if (interiorChord || landCut) continue;
+    if ((boxHits >= 1 && dist >= 160) || (coastHit && dist >= 100)) {
       hazard = 50000;
     } else {
       hazard += setrouteStaticNonStormWeatherPenalty(a[0], a[1], b[0], b[1]);

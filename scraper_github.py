@@ -1173,6 +1173,21 @@ def build_global_navtex_notices() -> tuple:
     ns_warnings = scrape_nautoshark_mvt_warnings()
     nga_warnings = scrape_nga_msi_warnings()
 
+    # Official regional feeds (JCG NAVTEX/NAVAREA XI + Taiwan Navy NtM)
+    regional_official = []
+    try:
+        from scraper_regional_warnings import (
+            scrape_regional_official_warnings,
+            merge_navtex_deduped,
+            normalize_warning_key,
+        )
+        print("  [*] Scraping official JCG + Taiwan regional warnings...")
+        regional_official = scrape_regional_official_warnings()
+    except Exception as e:
+        print(f"  [!] Regional official warnings scrape: {e}")
+        merge_navtex_deduped = None
+        normalize_warning_key = None
+
     navtex_notices = {}
     all_cancelled_refs = set()
 
@@ -1373,18 +1388,32 @@ def build_global_navtex_notices() -> tuple:
                 wobj["cancelReason"] = "Cancelled by subsequent NAVAREA/NAVTEX broadcast"
                 reconciled_count += 1
 
-    by_area_bucket = {}
-    for w in navtex_notices.values():
-        ar = str(w.get("navarea") or "I")
-        by_area_bucket.setdefault(ar, []).append(w)
-    result_list = []
-    for ar, items in by_area_bucket.items():
-        items.sort(key=lambda x: (
-            0 if x.get("isCancelled") else 1,
-            0 if any(k in str(x.get("id","")).upper() for k in ["NAVAREA", "HYDROLANT", "HYDROPAC", "HYDROARC"]) else 1,
-            0 if (x.get("isPolygon") or x.get("isLine")) else 1
-        ))
-        result_list.extend(items[:75])
+    # Tag NS/NGA with dedupe keys for merge against official regional feeds
+    secondary = list(navtex_notices.values())
+    if normalize_warning_key:
+        for w in secondary:
+            w.setdefault("dedupeKey", normalize_warning_key(str(w.get("id") or "")))
+            w.setdefault("officialSource", False)
+
+    if merge_navtex_deduped and regional_official:
+        result_list = merge_navtex_deduped(regional_official, secondary, per_area_cap=120)
+        print(f"  [+] Merged official regional ({len(regional_official)}) over NS/NGA ({len(secondary)}) → {len(result_list)}")
+    else:
+        by_area_bucket = {}
+        for w in secondary:
+            ar = str(w.get("navarea") or "I")
+            by_area_bucket.setdefault(ar, []).append(w)
+        result_list = []
+        for ar, items in by_area_bucket.items():
+            items.sort(key=lambda x: (
+                0 if x.get("isCancelled") else 1,
+                0 if any(k in str(x.get("id","")).upper() for k in ["NAVAREA", "HYDROLANT", "HYDROPAC", "HYDROARC"]) else 1,
+                0 if (x.get("isPolygon") or x.get("isLine")) else 1
+            ))
+            result_list.extend(items[:120])
+        if regional_official:
+            result_list.extend(regional_official)
+
     active_cnt = sum(1 for w in result_list if not w.get("isCancelled"))
     cancelled_cnt = sum(1 for w in result_list if w.get("isCancelled"))
     print(f"  [+] Total Plottable NAVTEX/NAVAREA Warnings: {len(result_list)} ({active_cnt} Active, {cancelled_cnt} Cancelled/Expired, {reconciled_count} Auto-Reconciled)")
@@ -2101,6 +2130,28 @@ if __name__ == "__main__":
     print("\n[5/5] Scraping Global NAVTEX & NAVAREA Broadcast Warnings (6h Cycle)...")
     navtex_list, navtex_cancelled_refs = build_global_navtex_notices()
 
+    # Dedupe UKHO NtM by normalized id (keep richest body / polygon)
+    ukho_deduped = []
+    ukho_seen = {}
+    for n in existing_ukho_notices:
+        kid = re.sub(r"\s+", " ", str(n.get("id") or n.get("noticeNumber") or "").upper().strip())
+        if not kid:
+            ukho_deduped.append(n)
+            continue
+        prev_i = ukho_seen.get(kid)
+        if prev_i is None:
+            ukho_seen[kid] = len(ukho_deduped)
+            ukho_deduped.append(n)
+            continue
+        prev = ukho_deduped[prev_i]
+        prev_score = (2 if prev.get("isPolygon") else 0) + min(len(prev.get("body") or ""), 800)
+        new_score = (2 if n.get("isPolygon") else 0) + min(len(n.get("body") or ""), 800)
+        if new_score >= prev_score:
+            ukho_deduped[prev_i] = n
+    if len(ukho_deduped) != len(existing_ukho_notices):
+        print(f"  [+] UKHO NtM dedupe: {len(existing_ukho_notices)} → {len(ukho_deduped)}")
+    existing_ukho_notices = ukho_deduped
+
     combined_notices = existing_ukho_notices + navtex_list
     active_notices = [n for n in combined_notices if not n.get("isCancelled")]
     cancelled_notices = [n for n in combined_notices if n.get("isCancelled")]
@@ -2113,7 +2164,7 @@ if __name__ == "__main__":
         "metadata": {
             "generatedAt": datetime.datetime.now(timezone.utc).isoformat(),
             "scrapedAt": datetime.datetime.now(timezone.utc).isoformat(),
-            "source": "UKHO Admiralty Weekly NtM + Global NAVTEX / NAVAREA (NautoShark & US NGA MSI)",
+            "source": "UKHO Admiralty Weekly NtM + Global NAVTEX/NAVAREA (JCG JHOD, Taiwan Navy, NautoShark, US NGA MSI)",
             "weeklyBulletin": existing_meta.get("weeklyBulletin", f"{week_num}wknm{year_num}.pdf"),
             "weekNumber": week_num,
             "year": year_num,
