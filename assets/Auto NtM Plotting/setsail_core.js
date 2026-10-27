@@ -4155,7 +4155,21 @@ function classifyNoticeGeometryClient(notice) {
     }
   }
 
-  const segs = setrouteSplitCoordsByJumps(coords0, maxLeg);
+  let segs = null;
+  if (multiJoin && coords0.length >= 8) {
+    const quads = [];
+    let qi = 0;
+    while (qi + 3 < coords0.length) {
+      const quad = coords0.slice(qi, qi + 4);
+      if (spanOf(quad) <= 20) { quads.push(quad); qi += 4; }
+      else break;
+    }
+    if (quads.length >= 2) {
+      const rest = coords0.slice(qi);
+      segs = quads.concat(rest.length ? setrouteSplitCoordsByJumps(rest, 6) : []);
+    }
+  }
+  if (!segs) segs = setrouteSplitCoordsByJumps(coords0, maxLeg);
 
   if (discreteSubject) {
     const primary = segs[0] || coords0;
