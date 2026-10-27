@@ -4048,6 +4048,25 @@
   font-family: inherit !important;
 }
 
+/* AIS target popups — high-contrast light text on dark chrome */
+.ss-ais-popup .leaflet-popup-content-wrapper,
+.ss-ais-popup .leaflet-popup-tip {
+  background: #0b1224 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(251, 146, 60, 0.35) !important;
+}
+.ss-ais-popup .leaflet-popup-content {
+  color: #f1f5f9 !important;
+  margin: 10px 12px !important;
+}
+.ss-ais-popup .ss-ais-popup-body,
+.ss-ais-popup .ss-ais-popup-body * {
+  color: inherit;
+}
+.ss-ais-popup a.leaflet-popup-close-button {
+  color: #cbd5e1 !important;
+}
+
 .leaflet-container a.leaflet-popup-close-button {
   color: #94a3b8 !important;
   padding: 8px 8px 0 0 !important;

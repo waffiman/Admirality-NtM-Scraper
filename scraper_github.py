@@ -40,11 +40,17 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 # ── Regular Expressions ──
 
+# 3-part: "4848 CHINA - East Coast - Pilot boarding places."
+# 2-part: "4854 VIETNAM - Light."  (no region) — must match or next notice bleeds into body
 NTM_ALL_HEADER_REGEX = re.compile(
-    r'(?:^|\n)\s*(\d{1,5}(?:\s*\([TP]\))?(?:\s*/\s*\d{2,4})?)\s*(?:\n|\s{1,6})'
-    r'([A-Z\s\-\u00C0-\u024F\u2013\u2014\ufffd]{3,35}?)\s*[\-\u2013\u2014]\s*'
+    r'(?:^|\n)\s*(\d{1,5}(?:\s*\([TP]\))?(?:\s*/\s*\d{2,4})?)\s+'
+    r'([A-Z][A-Z\s\-\u00C0-\u024F\u2013\u2014\ufffd]{1,40}?)\s*[\-\u2013\u2014]\s*'
+    r'(?:'
     r'([A-Za-z0-9\s\-\(\)\.\u00C0-\u024F\u2013\u2014\ufffd]{2,45}?)\s*[\-\u2013\u2014]\s*'
-    r'([^\n\r]+)',
+    r'([^\n\r]+)'
+    r'|'
+    r'([^\n\r]{2,120})'
+    r')',
     re.MULTILINE
 )
 
@@ -345,37 +351,49 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
     headers = []
     for m in NTM_ALL_HEADER_REGEX.finditer(clean_text):
         raw_num = m.group(1).strip()
-        raw_subj = m.group(4).strip()
-        
+        country = (m.group(2) or "").strip()
+        # group 3+4 = 3-part header; group 5 = 2-part (country - subject only)
+        if m.group(4):
+            region = (m.group(3) or "").strip()
+            raw_subj = m.group(4).strip()
+        else:
+            region = ""
+            raw_subj = (m.group(5) or "").strip()
+
         if re.search(r'\(continued\)', raw_subj, re.I):
             continue
-        
+        # Skip false positives (page footers / section labels)
+        if not re.match(r'^\d{1,5}', raw_num):
+            continue
+        if len(raw_subj) < 2:
+            continue
+
         notice_type = "PERM"
         tm = re.search(r'\(([TP])\)', raw_num, re.I) or re.search(r'\(([TP])\)', raw_subj, re.I)
         if tm:
             notice_type = tm.group(1).upper()
-        
+
         num = raw_num
         nm = re.match(r'^\d+', raw_num)
         if nm:
             num = nm.group(0)
-        
+
         year = detected_year
         ym = re.search(r'/(\d{2,4})', raw_num)
         if ym:
             yval = ym.group(1)
             year = yval[-2:] if len(yval) == 4 else yval
-        
+
         full_id = f"{num}{'(' + notice_type + ')' if notice_type != 'PERM' else ''}/{year}"
-        
+
         headers.append({
             "index": m.start(),
             "fullId": full_id,
             "num": num,
             "type": notice_type,
             "year": year,
-            "country": m.group(2).strip(),
-            "region": m.group(3).strip(),
+            "country": country,
+            "region": region,
             "subject": raw_subj
         })
     

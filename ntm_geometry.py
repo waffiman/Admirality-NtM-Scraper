@@ -33,10 +33,21 @@ LINE_RE = re.compile(
 DISCRETE_RE = re.compile(
     r"\b(?:BUOYAGE|LIGHTS?|BEACONS?|ROCKS?|WRECKS?|OBSTRUCTIONS?|"
     r"SOUNDING|DEPTHS?|DRYING\s+HEIGHT|AIDS?\s+TO\s+NAVIGATION|"
-    r"NM\s+BLOCKS?|CHART\s+CORRECTION)\b|"
-    r"\b(?:Depth|Depths|Drying\s+height|Obstructions?|Wrecks?|Sounding)\s+Position\b",
+    r"NM\s+BLOCKS?|CHART\s+CORRECTION|INSERT\s+DEPTH|DELETE\s+DEPTH|"
+    r"MOVE\s+G[A-Z]|INSERT\s+G[A-Z]|VIRTUAL\s+AIDS?)\b|"
+    r"\b(?:Depth|Depths|Drying\s+height|Obstructions?|Wrecks?|Sounding)\s+Position\b|"
+    r"^\s*(?:DEPTHS?|BUOY|BUOYS|LIGHT|LIGHTS|ROCKS?)\s*\.?\s*$",
     re.I,
 )
+# Hard discrete: subject-level chart corrections must never become long lines/areas
+DISCRETE_SUBJECT_RE = re.compile(
+    r"^\s*(?:DEPTHS?|BUOY(?:AGE)?|LIGHTS?|ROCKS?|WRECKS?|OBSTRUCTIONS?|"
+    r"NM\s+BLOCKS?|LEGENDS?|NOTES?)\b",
+    re.I,
+)
+# Max consecutive vertex spacing before treating as separate features (bleed / multi-feature)
+MAX_CONNECT_NM_UKHO = 40.0
+MAX_CONNECT_NM_NAVTEX = 120.0
 CIRCLE_RE = re.compile(
     r"(?:WITHIN|RADIUS|IN\s+A\s+RADIUS\s+OF)\s+(\d+(?:\.\d+)?)\s*(?:NM|N\.?M\.?|NAUTICAL\s+MILES?|MILES?)",
     re.I,
@@ -170,6 +181,49 @@ def _cohere_classify(coords: list, text: str) -> str | None:
     return None
 
 
+def _split_coords_by_jumps(coords: list, max_leg_nm: float) -> list:
+    """Break one vertex list into geographically coherent segments (stops bleed / multi-feature glue)."""
+    if not coords:
+        return []
+    segs = [[coords[0]]]
+    for c in coords[1:]:
+        prev = segs[-1][-1]
+        if _haversine_nm(prev["lat"], prev["lon"], c["lat"], c["lon"]) > max_leg_nm:
+            segs.append([c])
+        else:
+            segs[-1].append(c)
+    return segs
+
+
+def _seg_to_sub(seg: list, name: str, prefer_poly: bool) -> dict | None:
+    if not seg:
+        return None
+    if len(seg) == 1:
+        return {
+            "name": name,
+            "category": "point",
+            "coords": seg,
+            "points": [[seg[0]["lat"], seg[0]["lon"]]],
+        }
+    if len(seg) >= 3 and (
+        prefer_poly or _ring_closed(seg) or _shoelace_deg2(seg) > 1e-6 or _span_nm(seg) < 25
+    ):
+        ring = _close_ring(seg)
+        return {
+            "name": name,
+            "category": "restricted_area",
+            "coords": ring,
+            "points": [[c["lat"], c["lon"]] for c in ring],
+        }
+    # line segment
+    return {
+        "name": name,
+        "category": "line",
+        "coords": seg,
+        "points": [[c["lat"], c["lon"]] for c in seg],
+    }
+
+
 def classify_notice_geometry(coords: list, text: str = "", *, prefer_area: bool = False) -> dict[str, Any]:
     """
     Returns:
@@ -177,13 +231,20 @@ def classify_notice_geometry(coords: list, text: str = "", *, prefer_area: bool 
         kind: 'polygon'|'line'|'points'|'circle',
         isPolygon, isLine,
         coords,          # possibly rewritten (closed ring / circle)
-        subPolygons,     # optional
+        subPolygons,     # optional — used when multiple discrete features / jump splits
         confidence: 0..1,
         reason: str,
       }
     """
     coords = [c for c in (coords or []) if isinstance(c, dict) and "lat" in c and "lon" in c]
     text = text or ""
+    # First non-empty line often is the subject (Depths. / Buoy. / …)
+    first_line = ""
+    for ln in text.splitlines():
+        s = ln.strip()
+        if s:
+            first_line = s
+            break
     n = len(coords)
     empty = {
         "kind": "points",
@@ -221,24 +282,113 @@ def classify_notice_geometry(coords: list, text: str = "", *, prefer_area: bool 
                 "reason": "circle_radius_keyword",
             }
 
-    discrete = bool(DISCRETE_RE.search(text))
+    # Subject-only discrete (Buoy. / Depths. / Light.) — do NOT scan full body:
+    # bled next-notice text often contains "Light." / "Buoy." and would false-trigger.
+    discrete_subject = bool(DISCRETE_SUBJECT_RE.search(first_line))
     poly_kw = bool(POLYGON_RE.search(text))
     line_kw = bool(LINE_RE.search(text))
     area_soft = bool(AREA_SOFT_RE.search(text))
-    span = _span_nm(coords)
-    sane_cluster = span <= 250  # NM — typical coastal warning footprint
-
-    if discrete and not poly_kw and not (line_kw and n >= 2 and "JOINING" in text.upper()):
-        # Buoyage / lights / discrete chart corrections stay as point clouds
+    # Depth / buoy / light chart corrections are ALWAYS points — "enclosed by contour"
+    # and accidental "joining" from a bled next notice must not create mega-lines.
+    if discrete_subject and not re.search(
+        r"\b(?:FIRING|EXCLUSION|RESTRICTED\s+AREA|PROHIBITED\s+AREA|MARITIME\s+LIMIT)\b",
+        first_line,
+        re.I,
+    ):
+        # Keep ONLY the first geographic cluster — later clusters are almost always bleed
+        segs = _split_coords_by_jumps(coords, MAX_CONNECT_NM_UKHO)
+        primary = segs[0] if segs else coords
+        pts = []
+        seen = set()
+        for c in primary:
+            key = (round(c["lat"], 4), round(c["lon"], 4))
+            if key in seen:
+                continue
+            seen.add(key)
+            pts.append(c)
         return {
             "kind": "points",
             "isPolygon": False,
             "isLine": False,
-            "coords": coords,
+            "coords": pts[:20],
             "subPolygons": None,
-            "confidence": 0.9,
+            "confidence": 0.93,
             "reason": "discrete_feature_table",
         }
+
+    # Multiple "joining:" blocks (UKHO pecked maritime limits): prefer 4-vertex quads,
+    # then fall back to a tight jump threshold so features never glue into a mega-line.
+    join_count = len(re.findall(r"\bjoining\b", text, re.I))
+    multi_join = join_count >= 2 or bool(re.search(r"maritime\s+limit|pecked\s+line", text, re.I))
+    segs = None
+    if multi_join and len(coords) >= 8:
+        quads = []
+        i = 0
+        while i + 3 < len(coords):
+            quad = coords[i : i + 4]
+            if _span_nm(quad) <= 20:
+                quads.append(quad)
+                i += 4
+            else:
+                break
+        if len(quads) >= 2:
+            rest = coords[i:]
+            segs = quads + (_split_coords_by_jumps(rest, 6.0) if rest else [])
+    if segs is None:
+        if multi_join:
+            max_leg = 6.0
+        elif prefer_area:
+            max_leg = MAX_CONNECT_NM_NAVTEX
+        else:
+            max_leg = MAX_CONNECT_NM_UKHO
+        segs = _split_coords_by_jumps(coords, max_leg)
+
+    # Multi-feature after jump-split → subPolygons (plotter draws each ring/line separately)
+    if len(segs) > 1:
+        subs = []
+        prefer_poly = poly_kw or area_soft or prefer_area
+        for i, seg in enumerate(segs):
+            # Drop tiny bleed crumbs that are a single stray point far away after a huge jump
+            if len(seg) == 1 and i > 0 and len(segs[i - 1]) >= 2:
+                # keep as point feature
+                pass
+            sub = _seg_to_sub(seg, f"Part {i + 1}", prefer_poly or (line_kw and len(seg) >= 4 and _ring_closed(seg)))
+            if sub:
+                # Closed 4-pt maritime limits with "joining" → polygon not line
+                if (
+                    line_kw
+                    and len(seg) >= 3
+                    and (_ring_closed(seg) or (len(seg) >= 4 and _span_nm(seg) < 30))
+                ):
+                    ring = _close_ring(seg)
+                    sub = {
+                        "name": f"Part {i + 1}",
+                        "category": "restricted_area",
+                        "coords": ring,
+                        "points": [[c["lat"], c["lon"]] for c in ring],
+                    }
+                subs.append(sub)
+        if not subs:
+            return empty
+        has_poly = any(len(s.get("points") or []) >= 3 and s.get("category") != "line" for s in subs)
+        has_line = any(s.get("category") == "line" or len(s.get("points") or []) == 2 for s in subs)
+        # Flat coords = first substantive segment (popup / centroid)
+        primary = max(segs, key=len)
+        return {
+            "kind": "polygon" if has_poly else ("line" if has_line else "points"),
+            "isPolygon": has_poly,
+            "isLine": (not has_poly) and has_line,
+            "coords": primary if not has_poly else _close_ring(primary) if len(primary) >= 3 else primary,
+            "subPolygons": subs,
+            "confidence": 0.9,
+            "reason": "jump_split_multi_feature",
+        }
+
+    # Single coherent segment
+    coords = segs[0] if segs else coords
+    n = len(coords)
+    span = _span_nm(coords)
+    sane_cluster = span <= 250
 
     if n == 1:
         return {
@@ -270,6 +420,26 @@ def classify_notice_geometry(coords: list, text: str = "", *, prefer_area: bool 
             "reason": "polygon_keyword",
         }
 
+    # "joining" maritime limits that form a small closed box → polygon, not one long line
+    if line_kw and n >= 3 and (_ring_closed(coords) or (n >= 4 and span < 30)):
+        ring = _close_ring(coords)
+        return {
+            "kind": "polygon",
+            "isPolygon": True,
+            "isLine": False,
+            "coords": ring,
+            "subPolygons": [
+                {
+                    "name": "Area",
+                    "category": "restricted_area",
+                    "coords": ring,
+                    "points": [[c["lat"], c["lon"]] for c in ring],
+                }
+            ],
+            "confidence": 0.9,
+            "reason": "closed_joining_limit",
+        }
+
     if line_kw and n >= 2 and not poly_kw:
         return {
             "kind": "line",
@@ -282,6 +452,22 @@ def classify_notice_geometry(coords: list, text: str = "", *, prefer_area: bool 
         }
 
     if n == 2:
+        # Two vertices hundreds of NM apart are almost never a real cable/track —
+        # usually two unrelated positions bled into one notice.
+        if span > 80 and not re.search(
+            r"ALONG\s+THE\s+FOLLOWING\s+LINE|TRACKLINE|SUBMARINE\s+(?:CABLE|PIPELINE)|CABLE\s+RECOVERY",
+            text,
+            re.I,
+        ):
+            return {
+                "kind": "points",
+                "isPolygon": False,
+                "isLine": False,
+                "coords": coords,
+                "subPolygons": None,
+                "confidence": 0.8,
+                "reason": "two_points_too_far",
+            }
         return {
             "kind": "line",
             "isPolygon": False,
@@ -399,7 +585,8 @@ def classify_notice_geometry(coords: list, text: str = "", *, prefer_area: bool 
 
 def apply_geometry_to_notice(notice: dict, *, prefer_area: bool = False) -> dict:
     """Mutate notice with classified geometry flags / coords / subPolygons."""
-    text = " ".join(
+    # Newlines keep subject as first_line for discrete detection (avoid body bleed)
+    text = "\n".join(
         str(notice.get(k) or "")
         for k in ("subject", "title", "body", "rawText", "category")
     )
@@ -427,14 +614,18 @@ def apply_geometry_to_notice(notice: dict, *, prefer_area: bool = False) -> dict
     notice["geometryConfidence"] = g["confidence"]
     notice["geometryReason"] = g["reason"]
     if g.get("subPolygons"):
-        # Keep existing multi-ring WFS subPolygons if richer
         existing = notice.get("subPolygons") or []
-        if len(existing) <= 1:
+        # Prefer classifier multi-part split over a single stale ring
+        if len(existing) <= 1 or len(g["subPolygons"]) > 1:
             name = str(notice.get("id") or "Area")
             subs = g["subPolygons"]
             for s in subs:
-                s["name"] = name if s.get("name") in ("Area", "Circle") or not s.get("name") else s["name"]
+                if s.get("name") in ("Area", "Circle", None, "") or str(s.get("name", "")).startswith("Part "):
+                    s["name"] = name if not str(s.get("name", "")).startswith("Part ") else f"{name} {s['name']}"
             notice["subPolygons"] = subs
+    elif g["kind"] in ("points", "line") or not g["isPolygon"]:
+        # Drop stale area rings when reclassified as points/line
+        notice.pop("subPolygons", None)
     elif g["isPolygon"] and not notice.get("subPolygons"):
         ring = g["coords"]
         notice["subPolygons"] = [

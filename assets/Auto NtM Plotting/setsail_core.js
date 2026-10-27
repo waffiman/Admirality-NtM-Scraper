@@ -4079,7 +4079,7 @@ if (!window._navtexExpireInterval) {
   window._navtexExpireInterval = setInterval(runNavtexAutoExpireSweep, 30000);
 }
 
-/** Client-side geometry classifier — mirrors ntm_geometry.py (no Cohere). */
+/** Client-side geometry classifier — mirrors ntm_geometry.py (jump-split + discrete priority). */
 function setrouteHaversineNm(lat1, lon1, lat2, lon2) {
   const R = 3440.065;
   const p1 = lat1 * Math.PI / 180, p2 = lat2 * Math.PI / 180;
@@ -4088,19 +4088,35 @@ function setrouteHaversineNm(lat1, lon1, lat2, lon2) {
   const a = Math.sin(dphi / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
 }
+function setrouteSplitCoordsByJumps(coords, maxNm) {
+  if (!coords || !coords.length) return [];
+  const segs = [[coords[0]]];
+  for (let i = 1; i < coords.length; i++) {
+    const prev = segs[segs.length - 1][segs[segs.length - 1].length - 1];
+    const c = coords[i];
+    if (setrouteHaversineNm(prev.lat, prev.lon, c.lat, c.lon) > maxNm) segs.push([c]);
+    else segs[segs.length - 1].push(c);
+  }
+  return segs;
+}
 function classifyNoticeGeometryClient(notice) {
   if (!notice || !Array.isArray(notice.coords) || !notice.coords.length) return notice;
-  if (notice.geometryKind && notice.geometryConfidence >= 0.7) return notice;
-  const coords = notice.coords.filter((c) => c && Number.isFinite(c.lat) && Number.isFinite(c.lon));
-  const text = `${notice.subject || ""} ${notice.title || ""} ${notice.body || ""} ${notice.rawText || ""} ${notice.category || ""}`;
-  const n = coords.length;
-  const discrete = /\b(?:BUOYAGE|LIGHTS?|BEACONS?|ROCKS?|WRECKS?|OBSTRUCTIONS?|SOUNDING|DEPTHS?|NM\s+BLOCKS?|RIG\s*LIST|MODU|DRILLING\s+UNITS?)\b/i.test(text);
+  // Always re-check jump-split / discrete — even if prior scrape set a kind
+  const coords0 = notice.coords.filter((c) => c && Number.isFinite(c.lat) && Number.isFinite(c.lon));
+  if (!coords0.length) return notice;
+  const text = `${notice.subject || ""}\n${notice.title || ""}\n${notice.body || ""}\n${notice.rawText || ""}\n${notice.category || ""}`;
+  const firstLine = (notice.subject || notice.title || text.split("\n").find((l) => l.trim()) || "").trim();
+  const discreteSubject = /^(?:DEPTHS?|BUOY(?:AGE)?|LIGHTS?|ROCKS?|WRECKS?|OBSTRUCTIONS?|NM\s+BLOCKS?|LEGENDS?|NOTES?)\b/i.test(firstLine) &&
+    !/\b(?:FIRING|EXCLUSION|RESTRICTED\s+AREA|MARITIME\s+LIMIT)\b/i.test(firstLine);
   const polyKw = /AREA\s+BOUNDED|BOUNDED\s+BY|WITHIN\s+(?:THE\s+)?AREA|RESTRICTED\s+AREA|PROHIBITED\s+AREA|EXCLUSION|FIRING\s+(?:AREA|EXERCISE)|JOINING\s+THE\s+FOLLOWING|THE\s+FOLLOWING\s+(?:POSITIONS|CO[- ]?ORDINATES)/i.test(text);
-  const lineKw = /\bJOINING\b|TRACKLINE|CENT(?:ER|RE)LINE|PIPELINE|CABLE\s+(?:LAY|ROUTE|RECOVERY)|ALONG\s+THE\s+FOLLOWING\s+LINE|CORRIDOR/i.test(text);
+  const lineKw = /\bJOINING\b|TRACKLINE|CENT(?:ER|RE)LINE|PIPELINE|CABLE\s+(?:LAY|ROUTE|RECOVERY)|ALONG\s+THE\s+FOLLOWING\s+LINE|PECKED\s+LINE|CORRIDOR/i.test(text);
   const circleM = text.match(/(?:WITHIN|RADIUS|IN\s+A\s+RADIUS\s+OF)\s+(\d+(?:\.\d+)?)\s*(?:NM|N\.?M\.?|MILES?)/i);
   const src = String(notice.source || "");
   const preferArea = String(notice.type || "").toUpperCase() === "NAVTEX" ||
     /NAVAREA|NAVTEX|JCG|TAIWAN|AMSA|BSH|MSA|KHOA/i.test(src);
+  const joinCount = (text.match(/\bjoining\b/gi) || []).length;
+  const multiJoin = joinCount >= 2 || /maritime\s+limit|pecked\s+line/i.test(text);
+  const maxLeg = multiJoin ? 6 : (preferArea ? 120 : 40);
 
   const closeRing = (arr) => {
     if (!arr.length) return arr;
@@ -4108,17 +4124,20 @@ function classifyNoticeGeometryClient(notice) {
     if (setrouteHaversineNm(a.lat, a.lon, b.lat, b.lon) > 1.5) return arr.concat([{ lat: a.lat, lon: a.lon, dms: a.dms || "" }]);
     return arr;
   };
-  let span = 0;
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      span = Math.max(span, setrouteHaversineNm(coords[i].lat, coords[i].lon, coords[j].lat, coords[j].lon));
+  const spanOf = (arr) => {
+    let s = 0;
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = i + 1; j < arr.length; j++) {
+        s = Math.max(s, setrouteHaversineNm(arr[i].lat, arr[i].lon, arr[j].lat, arr[j].lon));
+      }
     }
-  }
+    return s;
+  };
 
-  if (circleM && n === 1) {
+  if (circleM && coords0.length === 1) {
     const rad = parseFloat(circleM[1]);
     if (rad >= 0.1 && rad <= 120) {
-      const lat0 = coords[0].lat, lon0 = coords[0].lon;
+      const lat0 = coords0[0].lat, lon0 = coords0[0].lon;
       const dlat = rad / 60, dlon = (rad / 60) / Math.max(0.2, Math.abs(Math.cos(lat0 * Math.PI / 180)));
       const ring = [];
       for (let i = 0; i < 24; i++) {
@@ -4135,32 +4154,79 @@ function classifyNoticeGeometryClient(notice) {
       return notice;
     }
   }
-  if (discrete && !polyKw) {
+
+  const segs = setrouteSplitCoordsByJumps(coords0, maxLeg);
+
+  if (discreteSubject) {
+    const primary = segs[0] || coords0;
+    const pts = [];
+    const seen = {};
+    primary.forEach((c) => {
+      const k = c.lat.toFixed(4) + "," + c.lon.toFixed(4);
+      if (seen[k]) return;
+      seen[k] = 1;
+      pts.push(c);
+    });
+    notice.coords = pts.slice(0, 20);
     notice.isPolygon = false;
     notice.isLine = false;
     notice.geometryKind = "points";
+    notice.geometryConfidence = 0.93;
+    notice.geometryReason = "discrete_feature_table";
+    delete notice.subPolygons;
+    return notice;
+  }
+
+  if (segs.length > 1) {
+    const subs = segs.map((seg, i) => {
+      if (seg.length === 1) {
+        return { name: `Part ${i + 1}`, category: "point", coords: seg, points: [[seg[0].lat, seg[0].lon]] };
+      }
+      const closed = setrouteHaversineNm(seg[0].lat, seg[0].lon, seg[seg.length - 1].lat, seg[seg.length - 1].lon) <= 1.5;
+      if (seg.length >= 3 && (polyKw || closed || spanOf(seg) < 30)) {
+        const ring = closeRing(seg);
+        return { name: `Part ${i + 1}`, category: "restricted_area", coords: ring, points: ring.map((c) => [c.lat, c.lon]) };
+      }
+      return { name: `Part ${i + 1}`, category: "line", coords: seg, points: seg.map((c) => [c.lat, c.lon]) };
+    });
+    const hasPoly = subs.some((s) => s.category === "restricted_area");
+    const hasLine = subs.some((s) => s.category === "line");
+    const primary = segs.reduce((a, b) => (a.length >= b.length ? a : b));
+    notice.subPolygons = subs;
+    notice.coords = hasPoly && primary.length >= 3 ? closeRing(primary) : primary;
+    notice.isPolygon = hasPoly;
+    notice.isLine = !hasPoly && hasLine;
+    notice.geometryKind = hasPoly ? "polygon" : (hasLine ? "line" : "points");
     notice.geometryConfidence = 0.9;
+    notice.geometryReason = "jump_split_multi_feature";
     return notice;
   }
+
+  const coords = segs[0] || coords0;
+  const n = coords.length;
+  const span = spanOf(coords);
+
   if (n === 1) {
+    notice.coords = coords;
     notice.isPolygon = false;
     notice.isLine = false;
     notice.geometryKind = "points";
     return notice;
   }
-  if ((polyKw && n >= 3 && span <= 250) || (preferArea && n >= 3 && span < 80 && !discrete)) {
+  if ((polyKw && n >= 3 && span <= 250) || (lineKw && n >= 3 && span < 30) || (preferArea && n >= 3 && span < 80 && !discrete)) {
     const ring = closeRing(coords);
     notice.coords = ring;
     notice.isPolygon = true;
     notice.isLine = false;
     notice.geometryKind = "polygon";
-    notice.geometryConfidence = polyKw ? 0.95 : 0.7;
+    notice.geometryConfidence = 0.9;
     if (!notice.subPolygons || notice.subPolygons.length <= 1) {
       notice.subPolygons = [{ name: notice.id || "Area", category: "restricted_area", coords: ring, points: ring.map((c) => [c.lat, c.lon]) }];
     }
     return notice;
   }
   if ((lineKw && n >= 2) || n === 2) {
+    notice.coords = coords;
     notice.isPolygon = false;
     notice.isLine = true;
     notice.geometryKind = "line";
@@ -5472,7 +5538,6 @@ function renderNtMListAndMap() {
           ${(item.charts && item.charts.length > 0) ? `<div style="font-size:0.76em;color:#64748b;"><b>Charts:</b> ${item.charts.join(', ')}</div>` : ''}
           <div style="display:flex;align-items:center;gap:6px;margin-top:7px;padding-top:6px;border-top:1px solid #cbd5e1;">
             <button type="button" onclick="window.openNoticeDetailModal('${safeId}')" style="flex:1;padding:4px 7px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid #94a3b8;background:#0f172a;color:#f8fafc;cursor:pointer;">View</button>
-            <span style="font-size:10px;font-weight:700;color:#64748b;background:#f1f5f9;padding:3px 7px;border-radius:4px;border:1px solid #cbd5e1;">Read-only</span>
           </div>
         </div>
       `;
@@ -5488,8 +5553,10 @@ function renderNtMListAndMap() {
         item.subPolygons.forEach(sub => {
           const pts = sub.points || (sub.coords || []).map(c => [c.lat, c.lon]);
           if (!pts || pts.length === 0) return;
+          const cat = String(sub.category || "").toLowerCase();
+          const asLine = cat === "line" || cat === "cable" || cat === "pipeline" || (pts.length === 2);
 
-          if (pts.length >= 3) {
+          if (pts.length >= 3 && !asLine) {
             const pOpts = Object.assign({
               color: pal.stroke,
               weight: basePolyWeight,
@@ -5500,7 +5567,7 @@ function renderNtMListAndMap() {
             const polygon = L.polygon(pts, pOpts);
             polygon.bindPopup(buildPopupHtml(item, `<div style="font-size:0.78em;color:#475569;margin-bottom:3px;"><b>Area:</b> ${sub.name} (${pts.length} pts)</div>`));
             leafletMarkersLayer.addLayer(polygon);
-          } else if (pts.length === 2) {
+          } else if (pts.length >= 2 && asLine) {
             splitAntimeridianLatLngs(pts).forEach((seg) => {
               const lOpts = Object.assign({
                 color: pal.stroke,
@@ -5508,7 +5575,7 @@ function renderNtMListAndMap() {
                 dashArray: isItemCancelled ? "3, 6" : "5, 4"
               }, pathPaneOpts());
               const polyline = L.polyline(seg, lOpts);
-              polyline.bindPopup(buildPopupHtml(item));
+              polyline.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${pts.length} pts)</div>`));
               leafletMarkersLayer.addLayer(polyline);
             });
           } else if (pts.length === 1) {

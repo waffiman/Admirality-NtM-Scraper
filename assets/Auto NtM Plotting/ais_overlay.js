@@ -200,16 +200,28 @@
     const dest = v.destination || "—";
     const sog = v.sog != null ? Number(v.sog).toFixed(1) + " kn" : "—";
     const cog = v.cog != null && Number(v.cog) < 360 ? Math.round(Number(v.cog)) + "°" : "—";
-    const type = v.shipTypeName || v.shipType || v.type || "AIS vessel";
-    const src = v.source || "AIS";
+    const type = v.shipTypeName || v.shipType || v.type || "Vessel";
+    // Light text on dark leaflet popup chrome — no source line (minimal)
     return (
-      '<div style="min-width:210px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;color:#1e293b;">' +
-      '<div style="font-weight:800;color:#ea4c25;margin-bottom:4px;display:flex;align-items:center;gap:5px;">🚢 ' + name + "</div>" +
-      "<div><b>MMSI:</b> " + (v.mmsi || "—") + (v.callSign ? " · <b>Call:</b> " + v.callSign : "") + "</div>" +
-      "<div><b>Type:</b> " + type + "</div>" +
-      "<div><b>SOG / COG:</b> " + sog + " / " + cog + "</div>" +
-      "<div><b>Destination:</b> " + dest + "</div>" +
-      '<div style="margin-top:5px;padding-top:3px;border-top:1px solid #e2e8f0;font-size:10px;color:#64748b;">Source: ' + src + "</div></div>"
+      '<div class="ss-ais-popup-body" style="min-width:200px;max-width:260px;font-family:Segoe UI,sans-serif;font-size:12.5px;line-height:1.5;color:#f1f5f9;">' +
+      '<div style="font-weight:800;color:#fb923c;margin-bottom:6px;font-size:13.5px;">' +
+      String(name).replace(/</g, "&lt;") +
+      "</div>" +
+      '<div style="color:#e2e8f0;"><span style="color:#94a3b8;">MMSI</span> ' +
+      (v.mmsi || "—") +
+      (v.callSign ? ' &nbsp;·&nbsp; <span style="color:#94a3b8;">Call</span> ' + String(v.callSign).replace(/</g, "&lt;") : "") +
+      "</div>" +
+      '<div style="color:#e2e8f0;"><span style="color:#94a3b8;">Type</span> ' +
+      String(type).replace(/</g, "&lt;") +
+      "</div>" +
+      '<div style="color:#e2e8f0;"><span style="color:#94a3b8;">SOG / COG</span> ' +
+      sog +
+      " / " +
+      cog +
+      "</div>" +
+      '<div style="color:#e2e8f0;"><span style="color:#94a3b8;">Dest</span> ' +
+      String(dest).replace(/</g, "&lt;") +
+      "</div></div>"
     );
   }
 
@@ -302,7 +314,7 @@
           keyboard: false,
           interactive: interactive
         });
-        if (interactive) m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
+        if (interactive) m.bindPopup(() => formatAisPopup(v), { maxWidth: 280, className: "ss-ais-popup" });
         layer.addLayer(m);
         aisMarkerByMmsi[mmsi] = { marker: m, mode: "tri", col: col, rot: rot, px: px };
       } else {
