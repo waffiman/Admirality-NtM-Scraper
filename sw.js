@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.128.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.128.0';
+const CACHE_NAME = 'setsail-cache-v5.129.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.129.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -30,19 +30,19 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=5.128',
-  'assets/Auto NtM Plotting/port_depths.js?v=5.128',
-  'assets/Auto NtM Plotting/ntm_module.js?v=5.128',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.128',
-  'assets/about/founder.jpg?v=5.128',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=5.129',
+  'assets/Auto NtM Plotting/port_depths.js?v=5.129',
+  'assets/Auto NtM Plotting/ntm_module.js?v=5.129',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.129',
+  'assets/about/founder.jpg?v=5.129',
   'assets/home/install_bg_lng.jpg',
-  'assets/about/mykhailo_byshliaha.jpg?v=5.128',
+  'assets/about/mykhailo_byshliaha.jpg?v=5.129',
   'assets/geo/setroute_corridor_templates.json',
   'assets/geo/setroute_passage_knowledge.json',
   'assets/about/mykhailo_byshliaha.jpg',
-  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.128',
-  'assets/Auto NtM Plotting/ais_overlay.js?v=5.128',
-  'assets/Auto NtM Plotting/setroute_core_a.js?v=5.128',
+  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.129',
+  'assets/Auto NtM Plotting/ais_overlay.js?v=5.129',
+  'assets/Auto NtM Plotting/setroute_core_a.js?v=5.129',
   'assets/authority-logos/noaa.svg',
   'assets/authority-logos/nasa.svg',
   'assets/Auto NtM Plotting/xlsx.full.min.js',

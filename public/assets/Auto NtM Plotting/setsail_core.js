@@ -6066,7 +6066,7 @@ const SETROUTE_OCEAN_HUBS = [
   "GIBRALTAR_MID", "SUEZ_CANAL_MID", "CAPE_AGULHAS", "PANAMA_COLON",
   "SINGAPORE_MAIN", "MALACCA_MID", "DOVER_STRAIT", "BAB_EL_MANDEB",
   "UNIMAK_PASS", "NATL_GC_MID", "NPAC_GC_MID", "MED_SICILY", "DONDRA_HEAD",
-  "MAURITIUS_PASS", "MOZAMBIQUE_CH", "SIX_DEGREE_CH", "ARABIAN_SEA_MID"
+  "MAURITIUS_PASS", "MADAGASCAR_S", "MOZAMBIQUE_CH", "SIX_DEGREE_CH", "ARABIAN_SEA_MID"
 ];
 
 let SETROUTE_COAST_GRID = null;
@@ -13705,7 +13705,9 @@ window.SETROUTE_PENDING_CONTEXT = null;
     "SALALAH_APP": [16.88, 54.05, "Salalah Arabian Sea Approach"],
     "KARACHI_APP": [24.70, 66.90, "Karachi Arabian Sea Fairway"],
     "CHENNAI_APP": [13.10, 80.40, "Chennai Bay of Bengal Approach"],
-    "MAURITIUS_PASS": [-20.20, 57.30, "Mascarene / Mauritius Deepsea Corridor"],
+    // South of Madagascar tip (−25.6° / 45°E) — never place this on a chord through the island
+    "MADAGASCAR_S": [-28.20, 46.80, "South Madagascar Deepsea Clear"],
+    "MAURITIUS_PASS": [-26.80, 55.20, "Mascarene / South Madagascar Deepsea Corridor"],
     "SUNDA_STRAIT": [-6.05, 105.75, "Sunda Strait Deepwater Channel"],
     "JAKARTA_APP": [-6.00, 106.88, "Jakarta / Tanjung Priok Fairway"],
     "LOMBOK_STRAIT": [-8.55, 115.70, "Lombok Strait Archipelagic Sea Lane"],
@@ -13791,12 +13793,13 @@ window.SETROUTE_PENDING_CONTEXT = null;
     ["KARACHI_APP", "MUMBAI_APP"],
     ["DONDRA_HEAD", "CHENNAI_APP"],
     ["CHENNAI_APP", "BAY_OF_BENGAL_S"],
-    ["DURBAN_APP", "MAURITIUS_PASS"],
-    ["CAPE_AGULHAS", "MAURITIUS_PASS"],
-    ["MOZAMBIQUE_CH", "MAURITIUS_PASS"],
+    ["DURBAN_APP", "MADAGASCAR_S"],
+    ["CAPE_AGULHAS", "MADAGASCAR_S"],
+    ["MADAGASCAR_S", "MAURITIUS_PASS"],
     ["MAURITIUS_PASS", "DONDRA_HEAD"],
     ["MAURITIUS_PASS", "SIX_DEGREE_CH"],
     ["MAURITIUS_PASS", "SUNDA_STRAIT"],
+    // MOZ→Mauritius direct clips Madagascar; keep Moz for Red Sea / Arabia only
     ["SUNDA_STRAIT", "JAKARTA_APP"],
     ["JAKARTA_APP", "SINGAPORE_E"],
     ["SUNDA_STRAIT", "SCS_SOUTH"],
