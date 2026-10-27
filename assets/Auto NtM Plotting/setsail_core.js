@@ -6071,6 +6071,7 @@ const SETROUTE_OCEAN_HUBS = [
 
 let SETROUTE_COAST_GRID = null;
 let SETROUTE_COAST_LOAD_PROMISE = null;
+let SETROUTE_LAND_MASK = null;
 function setrouteOrient(ax, ay, bx, by, cx, cy) {
   const v = (by - ay) * (cx - bx) - (bx - ax) * (cy - by);
   if (Math.abs(v) < 1e-12) return 0;
@@ -6112,44 +6113,72 @@ function setrouteSegmentsIntersect(aLat, aLon, bLat, bLon, cLat, cLon, dLat, dLo
 function setrouteCoastCellKey(lat, lon, cellDeg) {
   return Math.floor(lat / cellDeg) + "_" + Math.floor(lon / cellDeg);
 }
-function setrouteLegCrossesCoastline(lat1, lon1, lat2, lon2) {
-  if (!SETROUTE_COAST_GRID || !SETROUTE_COAST_GRID.cells) return false;
-  const cellDeg = SETROUTE_COAST_GRID.cellDeg || 2.5;
+function setrouteTestCoastSegBuckets(lat1, lon1, lat2, lon2, buckets, cellDeg, testedRef, budget) {
+  if (!buckets || !cellDeg) return false;
   const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
-  // Short TSS hops may graze coastline geometry — keep threshold low but not zero
-  if (dist < 28) return false;
-  const keys = new Set();
   const steps = Math.min(36, Math.max(5, Math.ceil(dist / 55)));
+  const keys = new Set();
   for (let i = 0; i <= steps; i++) {
     const p = setrouteLerpLatLon(lat1, lon1, lat2, lon2, i / steps);
     keys.add(setrouteCoastCellKey(p[0], p[1], cellDeg));
   }
-  let tested = 0;
   for (const k of keys) {
-    const segs = SETROUTE_COAST_GRID.cells[k];
+    const segs = buckets[k];
     if (!segs) continue;
     for (let s = 0; s < segs.length; s++) {
       const seg = segs[s];
-      tested++;
-      if (tested > 400) return false;
+      testedRef.n++;
+      if (testedRef.n > budget) return false;
       if (setrouteSegmentsIntersect(lat1, lon1, lat2, lon2, seg[0], seg[1], seg[2], seg[3])) return true;
     }
   }
   return false;
 }
+function setrouteLegCrossesCoastline(lat1, lon1, lat2, lon2) {
+  if (!SETROUTE_COAST_GRID || !SETROUTE_COAST_GRID.cells) return false;
+  const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+  // Short TSS hops may graze coastline geometry — keep threshold low but not zero
+  if (dist < 28) return false;
+  const testedRef = { n: 0 };
+  const budget = 520;
+  if (setrouteTestCoastSegBuckets(
+    lat1, lon1, lat2, lon2,
+    SETROUTE_COAST_GRID.cells, SETROUTE_COAST_GRID.cellDeg || 2.5,
+    testedRef, budget
+  )) return true;
+  // Denser WORLD_LAND_POLYGONS shoreline overlay (1° cells) — catches thin isthmuses / large islands
+  if (SETROUTE_COAST_GRID.landPolyCells && SETROUTE_COAST_GRID.landPolyCellDeg) {
+    if (setrouteTestCoastSegBuckets(
+      lat1, lon1, lat2, lon2,
+      SETROUTE_COAST_GRID.landPolyCells, SETROUTE_COAST_GRID.landPolyCellDeg,
+      testedRef, budget
+    )) return true;
+  }
+  return false;
+}
 async function loadSetrouteCoastGrid(force) {
-  if (SETROUTE_COAST_GRID && !force) return SETROUTE_COAST_GRID;
+  if (SETROUTE_COAST_GRID && SETROUTE_LAND_MASK && !force) return SETROUTE_COAST_GRID;
   if (SETROUTE_COAST_LOAD_PROMISE && !force) return SETROUTE_COAST_LOAD_PROMISE;
   SETROUTE_COAST_LOAD_PROMISE = (async () => {
     try {
-      const resp = await fetch("assets/geo/setroute_coast_grid.json", { cache: "force-cache" });
-      if (!resp.ok) throw new Error("coast_grid_http_" + resp.status);
-      SETROUTE_COAST_GRID = await resp.json();
+      const [coastResp, maskResp] = await Promise.all([
+        fetch("assets/geo/setroute_coast_grid.json", { cache: "force-cache" }),
+        fetch("assets/geo/setroute_land_mask.json", { cache: "force-cache" })
+      ]);
+      if (!coastResp.ok) throw new Error("coast_grid_http_" + coastResp.status);
+      SETROUTE_COAST_GRID = await coastResp.json();
       window.SETROUTE_COAST_GRID = SETROUTE_COAST_GRID;
+      if (maskResp.ok) {
+        SETROUTE_LAND_MASK = await maskResp.json();
+        window.SETROUTE_LAND_MASK = SETROUTE_LAND_MASK;
+      } else {
+        SETROUTE_LAND_MASK = null;
+      }
       return SETROUTE_COAST_GRID;
     } catch (e) {
-      console.warn("[SetRoute] coast grid load failed", e);
+      console.warn("[SetRoute] coast grid / land mask load failed", e);
       SETROUTE_COAST_GRID = null;
+      SETROUTE_LAND_MASK = null;
       return null;
     }
   })();
@@ -6219,6 +6248,11 @@ function setrouteLerpLatLon(lat1, lon1, lat2, lon2, t) {
   return [lat1 + (lat2 - lat1) * t, lon];
 }
 
+function setroutePointInLandMask(lat, lon) {
+  if (!SETROUTE_LAND_MASK || !SETROUTE_LAND_MASK.cells) return false;
+  const cellDeg = SETROUTE_LAND_MASK.cellDeg || 0.5;
+  return !!SETROUTE_LAND_MASK.cells[setrouteCoastCellKey(lat, lon, cellDeg)];
+}
 function setroutePointInLandBox(lat, lon) {
   for (let i = 0; i < SETROUTE_LAND_BOXES.length; i++) {
     const b = SETROUTE_LAND_BOXES[i];
@@ -6226,8 +6260,11 @@ function setroutePointInLandBox(lat, lon) {
       return true;
     }
   }
+  // 0.5° occupancy raster from WORLD_LAND_POLYGONS — fills interiors boxes miss (Madagascar, etc.)
+  if (setroutePointInLandMask(lat, lon)) return true;
   return false;
 }
+window.setroutePointInLandMask = setroutePointInLandMask;
 
 /** True if a direct chord likely crosses continental / island interior. */
 function setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2) {
@@ -7224,7 +7261,9 @@ function setrouteBuildAppraisalFactors(route, opts) {
   factors.push({
     id: "coast_grid",
     ok: !!SETROUTE_COAST_GRID,
-    text: SETROUTE_COAST_GRID ? "Coast grid loaded for land-cross tests." : "Coast grid missing — ocean OD fail-closed when required."
+    text: SETROUTE_COAST_GRID
+      ? ("Coast grid + land mask (" + ((SETROUTE_LAND_MASK && SETROUTE_LAND_MASK.cellCount) || 0) + " cells) for land-cross tests.")
+      : "Coast grid missing — ocean OD fail-closed when required."
   });
   const draft = Number(opts.draftMeters || (route && route.metadata && route.metadata.draftMeters));
   const canalLim = window.SETROUTE_CANAL_LIMITS_M || {};
