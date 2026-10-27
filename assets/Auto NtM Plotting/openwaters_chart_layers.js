@@ -508,7 +508,8 @@
         if (err) reject(err);
         else resolve();
       };
-      const onLoad = () => finish(null);
+      // Style "load" alone is too early (DEM/contours still streaming) — wait for idle.
+      const onLoad = () => {};
       const onIdle = () => finish(null);
       const onErr = (e) => {
         const msg = (e && e.error && e.error.message) || (e && e.message) || "";
@@ -532,7 +533,7 @@
         }
       }, timeoutMs || 12000);
       try {
-        if (gl.isStyleLoaded && gl.isStyleLoaded()) {
+        if (gl.loaded && gl.loaded() && gl.areTilesLoaded && gl.areTilesLoaded()) {
           finish(null);
           return;
         }
@@ -540,6 +541,128 @@
       gl.on("load", onLoad);
       gl.on("idle", onIdle);
       gl.on("error", onErr);
+    });
+  }
+
+  /**
+   * Bathymetry ready = style + DEM/vector tiles + (when zoom allows) isobath numeral labels painted.
+   * Labels layer minzoom is 7 — below that we wait for contours/color-relief idle only.
+   */
+  function waitForBathymetryReady(layer, timeoutMs) {
+    return new Promise((resolve) => {
+      const gl = layer && layer.getMaplibreMap && layer.getMaplibreMap();
+      if (!gl) {
+        resolve();
+        return;
+      }
+      let settled = false;
+      let pollTimer = null;
+      let idleArmed = false;
+      const LABEL_LAYER = "ow-bathy-contour-labels";
+      const CONTOUR_LAYER = "ow-bathy-contours";
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(hardTimer);
+        if (pollTimer) clearInterval(pollTimer);
+        try {
+          gl.off("idle", onIdle);
+          gl.off("data", onData);
+          gl.off("error", onErr);
+        } catch (e) {}
+        resolve();
+      };
+      const labelsExpected = () => {
+        try {
+          return (typeof gl.getZoom === "function" ? gl.getZoom() : 0) >= 7;
+        } catch (e) {
+          return false;
+        }
+      };
+      const countLabelFeatures = () => {
+        try {
+          if (!gl.getLayer || !gl.getLayer(LABEL_LAYER)) return 0;
+          const feats = gl.queryRenderedFeatures
+            ? gl.queryRenderedFeatures({ layers: [LABEL_LAYER] })
+            : [];
+          return feats && feats.length ? feats.length : 0;
+        } catch (e) {
+          return 0;
+        }
+      };
+      const countContourFeatures = () => {
+        try {
+          if (!gl.getLayer || !gl.getLayer(CONTOUR_LAYER)) return 0;
+          const feats = gl.queryRenderedFeatures
+            ? gl.queryRenderedFeatures({ layers: [CONTOUR_LAYER] })
+            : [];
+          return feats && feats.length ? feats.length : 0;
+        } catch (e) {
+          return 0;
+        }
+      };
+      const tilesReady = () => {
+        try {
+          if (gl.isStyleLoaded && !gl.isStyleLoaded()) return false;
+          if (gl.areTilesLoaded && !gl.areTilesLoaded()) return false;
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      let emptyViewStreak = 0;
+      const isFullyReady = () => {
+        if (!tilesReady() || !idleArmed) return false;
+        const contours = countContourFeatures();
+        if (labelsExpected()) {
+          const labels = countLabelFeatures();
+          if (labels > 0) return true;
+          // Deep ocean / no contour geometry in view — nothing to label; don't spin forever
+          if (contours === 0) {
+            emptyViewStreak++;
+            return emptyViewStreak >= 6; // ~2.4s of empty idle polls
+          }
+          emptyViewStreak = 0;
+          return false;
+        }
+        // Below label minzoom (7): DEM + contour lines idle is the full layer for this zoom
+        return contours > 0 || (gl.loaded && gl.loaded());
+      };
+      const onIdle = () => {
+        idleArmed = true;
+        if (isFullyReady()) finish();
+      };
+      const onData = (e) => {
+        // Keep spinner until vector/DEM tiles for bathymetry settle
+        if (e && e.dataType === "source" && e.isSourceLoaded && tilesReady()) {
+          try {
+            gl.once("idle", onIdle);
+          } catch (err) {}
+        }
+      };
+      const onErr = (e) => {
+        const msg = (e && e.error && e.error.message) || (e && e.message) || "";
+        const s = String(msg);
+        if (/Unimplemented type|Unable to parse the tile|Failed to load tile/i.test(s)) {
+          console.warn("[SetSail] Bathymetry tile warning:", s);
+          return;
+        }
+      };
+      const hardTimer = setTimeout(() => finish(), timeoutMs || 45000);
+      pollTimer = setInterval(() => {
+        if (isFullyReady()) finish();
+      }, 400);
+      try {
+        gl.on("idle", onIdle);
+        gl.on("data", onData);
+        gl.on("error", onErr);
+        if (tilesReady()) {
+          idleArmed = true;
+          if (isFullyReady()) finish();
+        }
+      } catch (e) {
+        finish();
+      }
     });
   }
 
@@ -1768,6 +1891,7 @@
   global.createOpenWatersBathymetryLayer = createBathymetryLayer;
   global.wireOpenWatersGlLayerResize = wireGlLayerResize;
   global.waitForOpenWatersGlStyle = waitForGlStyle;
+  global.waitForOpenWatersBathymetryReady = waitForBathymetryReady;
   global.flashOpenWatersLayerStatus = flashOwStatus;
   global.buildPortOwHydroControlsHtml = buildPortHydroControlsHtml;
   global.buildPortCardHtml = buildPortCardHtml;

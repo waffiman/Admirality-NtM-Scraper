@@ -10610,10 +10610,16 @@ function initVisualChartLayerSelector(mapInstance, layers) {
     </button>
 
     <button type="button" class="ntm-layer-thumb-btn" data-overlay="bathymetry" title="Bathymetry — Open Waters depth tint + isobath labels (metres)">
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#e9f7ff 0%,#7fc7f8 35%,#1f86cb 70%,#0c4a6e 100%);">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
-          <path d="M3 7h18M5 12h14M7 17h10" stroke="#ecfeff" stroke-width="1.7" stroke-linecap="round" opacity="0.95"/>
-          <circle cx="12" cy="12" r="2.1" fill="#fef9c3" stroke="#fde68a" stroke-width="0.8"/>
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#e0f2fe 0%,#7dd3fc 40%,#0284c7 78%,#0c4a6e 100%);">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true">
+          <path d="M2.5 7.2c3.2 1.6 6.4-1.2 9.6 0.2s6.2 1.4 9.4-0.3" stroke="#f8fafc" stroke-width="1.35" stroke-linecap="round" opacity="0.95"/>
+          <path d="M2.5 12.1c3.1 1.5 6.3-1.1 9.5 0.15s6.3 1.35 9.5-0.25" stroke="#e0f2fe" stroke-width="1.25" stroke-linecap="round" opacity="0.92"/>
+          <path d="M2.8 16.8c3 1.35 6.1-1 9.2 0.1s6.2 1.2 9.2-0.2" stroke="#bae6fd" stroke-width="1.15" stroke-linecap="round" opacity="0.9"/>
+          <g font-family="Segoe UI,Arial,sans-serif" font-size="4.2" font-weight="700" fill="#082f49" stroke="#ffffff" stroke-width="0.55" paint-order="stroke" text-anchor="middle">
+            <text x="7.2" y="6.55">10</text>
+            <text x="12.2" y="11.35">20</text>
+            <text x="16.8" y="16.15">50</text>
+          </g>
         </svg>
       </div>
       <span class="ntm-layer-thumb-label">Bathymetry</span>
@@ -10666,7 +10672,8 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       setOn: (v) => {
         isBathymetryActive = v;
       },
-      waitMs: 16000
+      waitMs: 45000,
+      waitReady: "waitForOpenWatersBathymetryReady"
     }
   };
 
@@ -10717,7 +10724,11 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       if (typeof wireOpenWatersGlLayerResize === "function") {
         wireOpenWatersGlLayerResize(lyr, mapInstance);
       }
-      if (typeof waitForOpenWatersGlStyle === "function") {
+      const waitFnName = meta.waitReady || "waitForOpenWatersGlStyle";
+      const waitFn = typeof window !== "undefined" ? window[waitFnName] : null;
+      if (typeof waitFn === "function") {
+        await waitFn(lyr, meta.waitMs);
+      } else if (typeof waitForOpenWatersGlStyle === "function") {
         await waitForOpenWatersGlStyle(lyr, meta.waitMs);
       }
       meta.setOn(true);
