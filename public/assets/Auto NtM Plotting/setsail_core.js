@@ -3346,6 +3346,8 @@ function parseCoordinateString(str) {
 
 /** Zoom at/above which own-ship switches from position circle → hull outline. */
 const OWN_SHIP_HULL_ZOOM = 14;
+/** ECDIS-style time vector: length = SOG (kn) × minutes / 60 → NM on the chart (grows with zoom). */
+const OWN_SHIP_VECTOR_MINUTES = 6;
 
 /**
  * Generates Crosshair Target Marker (legacy / fallback)
@@ -3355,8 +3357,8 @@ function getEcdisCrosshairIcon() {
 }
 
 /**
- * Low/medium zoom: ECDIS position circle (bullseye) + short heading vector with tick marks.
- * Bow = up in local SVG, then rotated by true heading/COG.
+ * Low/medium zoom: ECDIS position circle (bullseye).
+ * Time vector is drawn geographically (see updateOwnShipTimeVector) so it lengthens on zoom-in.
  */
 function hasOwnShipHeadingDeg(headingDeg) {
   // Reject null/"" before Number() — Number(null)===0 would falsely show a 0° vector
@@ -3365,17 +3367,87 @@ function hasOwnShipHeadingDeg(headingDeg) {
   return Number.isFinite(h) && h >= 0 && h < 360;
 }
 
+function destinationPointNm(lat, lon, bearingDeg, distNm) {
+  const R = 3440.065;
+  const brng = (Number(bearingDeg) * Math.PI) / 180;
+  const φ1 = (Number(lat) * Math.PI) / 180;
+  const λ1 = (Number(lon) * Math.PI) / 180;
+  const δ = Number(distNm) / R;
+  const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(brng));
+  const λ2 = λ1 + Math.atan2(
+    Math.sin(brng) * Math.sin(δ) * Math.cos(φ1),
+    Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2)
+  );
+  let lon2 = (λ2 * 180) / Math.PI;
+  if (lon2 > 180) lon2 -= 360;
+  if (lon2 < -180) lon2 += 360;
+  return [φ2 * 180 / Math.PI, lon2];
+}
+
+function resolveOwnShipSogKn(v) {
+  if (!v) return null;
+  const sog = Number(v.sog);
+  if (Number.isFinite(sog) && sog >= 0) return sog;
+  return null;
+}
+
+/** Geographic heading/time vector (NM) — screen length scales with zoom. */
+function updateOwnShipTimeVector(lat, lon, headingDeg, sogKn) {
+  if (!leafletMap || !leafletVesselLayer) return;
+  leafletVesselLayer.eachLayer((ly) => {
+    if (ly && ly._setsailOwnShipVector) {
+      try { leafletVesselLayer.removeLayer(ly); } catch (e) {}
+    }
+  });
+  if (!hasOwnShipHeadingDeg(headingDeg)) return;
+  const sog = Number(sogKn);
+  // Need motion to define a time vector; still draw a short stub if SOG unknown but heading set
+  const kn = (Number.isFinite(sog) && sog > 0.05) ? sog : 0;
+  const distNm = kn * (OWN_SHIP_VECTOR_MINUTES / 60);
+  if (!(distNm >= 0.02)) return;
+  const tip = destinationPointNm(lat, lon, headingDeg, distNm);
+  const line = L.polyline([[lat, lon], tip], {
+    color: "#0f172a",
+    weight: 2.1,
+    opacity: 0.92,
+    dashArray: "5 4",
+    lineCap: "round",
+    interactive: false,
+    className: "own-ship-time-vector"
+  });
+  line._setsailOwnShipVector = true;
+  // Arrowhead near tip (small geographic offset back along track)
+  const back = destinationPointNm(tip[0], tip[1], (Number(headingDeg) + 180) % 360, Math.min(0.08, distNm * 0.12));
+  const leftBrg = (Number(headingDeg) + 150) % 360;
+  const rightBrg = (Number(headingDeg) + 210) % 360;
+  const wing = Math.min(0.06, distNm * 0.1);
+  const a1 = destinationPointNm(tip[0], tip[1], leftBrg, wing);
+  const a2 = destinationPointNm(tip[0], tip[1], rightBrg, wing);
+  const arrow = L.polyline([a1, tip, a2], {
+    color: "#0f172a",
+    weight: 2.1,
+    opacity: 0.92,
+    lineCap: "round",
+    lineJoin: "round",
+    interactive: false,
+    className: "own-ship-time-vector"
+  });
+  arrow._setsailOwnShipVector = true;
+  leafletVesselLayer.addLayer(line);
+  leafletVesselLayer.addLayer(arrow);
+  // Keep a tiny reference to mid-tick positions unused; geographic polyline is source of truth
+  void back;
+}
+
 function getOwnShipPositionIcon(headingDeg, showVector) {
   const has = hasOwnShipHeadingDeg(headingDeg);
   const rot = has ? ((Number(headingDeg) % 360) + 360) % 360 : 0;
+  // Tiny bow tick only — full time vector is geographic (updateOwnShipTimeVector)
   const vec = showVector !== false && has;
   const vectorSvg = vec
     ? `<g class="own-ship-vector" stroke="#0f172a" stroke-width="1.35" fill="none" stroke-linecap="round">
-         <line x1="24" y1="24" x2="24" y2="4" stroke-dasharray="2.2 2.2"/>
-         <line x1="20.5" y1="18" x2="27.5" y2="18"/>
-         <line x1="20.5" y1="12" x2="27.5" y2="12"/>
-         <line x1="20.5" y1="7" x2="27.5" y2="7"/>
-         <polyline points="20.5,5.5 24,2 27.5,5.5" stroke-width="1.5"/>
+         <line x1="24" y1="24" x2="24" y2="14"/>
+         <polyline points="21.5,16 24,12.5 26.5,16" stroke-width="1.4"/>
        </g>`
     : "";
   const html = `
@@ -3396,7 +3468,8 @@ function getOwnShipPositionIcon(headingDeg, showVector) {
 }
 
 /**
- * High zoom: ECDIS own-ship hull outline (rounded bow, flat stern) + heading vector.
+ * High zoom: ECDIS own-ship hull outline (rounded bow, flat stern).
+ * Time vector is geographic — only a short bow tick stays in the SVG.
  */
 function getOwnShipHullIcon(headingDeg, showVector) {
   const has = hasOwnShipHeadingDeg(headingDeg);
@@ -3404,7 +3477,7 @@ function getOwnShipHullIcon(headingDeg, showVector) {
   const vec = showVector !== false && has;
   // Local coords: bow toward -Y (up). Hull centered near (24, 34).
   const vectorSvg = vec
-    ? `<line x1="24" y1="22" x2="24" y2="2" stroke="#0f172a" stroke-width="1.25"/>`
+    ? `<line x1="24" y1="22" x2="24" y2="12" stroke="#0f172a" stroke-width="1.25"/>`
     : "";
   const html = `
     <div class="own-ship-wrap own-ship-wrap--hull" style="transform:rotate(${rot}deg);transform-origin:24px 34px;">
@@ -3472,6 +3545,7 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
     leafletVesselLayer.clearLayers();
 
     const hdg = resolveOwnShipHeading(userVessel);
+    const sog = resolveOwnShipSogKn(userVessel);
     const marker = L.marker([lat, lon], {
       icon: getOwnShipMapIcon(hdg),
       zIndexOffset: 1200
@@ -3486,11 +3560,14 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
         <div style="font-size:0.8rem;color:#333;margin-bottom:3px;"><b>Coordinates:</b> ${formatLatLonDMS(lat, lon)}</div>
         ${userVessel.callSign ? `<div style="font-size:0.75rem;color:#333;"><b>Call Sign:</b> ${String(userVessel.callSign).replace(/[<>]/g, "")}</div>` : ""}
         ${userVessel.mmsi ? `<div style="font-size:0.75rem;color:#333;"><b>MMSI:</b> ${String(userVessel.mmsi).replace(/[<>]/g, "")}</div>` : ""}
+        ${hdg != null ? `<div style="font-size:0.75rem;color:#333;"><b>HDG:</b> ${Math.round(hdg)}°</div>` : ""}
+        ${sog != null ? `<div style="font-size:0.75rem;color:#333;"><b>SOG:</b> ${Number(sog).toFixed(1)} kn · vector ${OWN_SHIP_VECTOR_MINUTES} min</div>` : ""}
         <div style="font-size:0.75rem;color:#666;"><b>Source:</b> ${source === "gps" ? "Browser GPS" : source === "ais" ? "AIS match" : "Manual Navigation Entry"}</div>
       </div>
     `);
 
     leafletVesselLayer.addLayer(marker);
+    updateOwnShipTimeVector(lat, lon, hdg, sog);
     if (!skipFly) {
       leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
     }
@@ -4457,11 +4534,16 @@ function initNtMMap() {
         }
       }
       // Swap own-ship symbol: position circle ↔ hull outline at OWN_SHIP_HULL_ZOOM
+      // and refresh geographic time vector so it lengthens visually when zooming in.
       const hullMode = z >= OWN_SHIP_HULL_ZOOM;
-      if (hullMode !== lastOwnShipHullMode) {
-        lastOwnShipHullMode = hullMode;
-        if (userVessel && Number.isFinite(userVessel.lat) && Number.isFinite(userVessel.lon)) {
+      if (userVessel && Number.isFinite(userVessel.lat) && Number.isFinite(userVessel.lon)) {
+        if (hullMode !== lastOwnShipHullMode) {
+          lastOwnShipHullMode = hullMode;
           plotUserVessel(userVessel.lat, userVessel.lon, userVessel.source || "manual", true);
+        } else {
+          const hdg = resolveOwnShipHeading(userVessel);
+          const sog = resolveOwnShipSogKn(userVessel);
+          updateOwnShipTimeVector(userVessel.lat, userVessel.lon, hdg, sog);
         }
       }
     });

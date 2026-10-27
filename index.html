@@ -168,7 +168,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.126" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.127" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -7600,23 +7600,22 @@ svg.leaflet-image-layer.leaflet-interactive path {
   position: relative;
   min-height: clamp(340px, 50vh, 460px);
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(200px, 0.95fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: end;
-  gap: clamp(0.75rem, 2vw, 1.5rem);
+  gap: 0;
   padding: clamp(1.5rem, 3.2vw, 2.4rem) clamp(1.4rem, 3vw, 2.2rem);
   background-color: #07111f;
   overflow: hidden;
 }
-/* LNG wake photo — real <img> so it always paints (CSS bg was buried under opaque overlays) */
+/* Full-bleed Install photo (LNG + devices already composited on the right) */
 .home-install-bg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Mirrored L↔R; position tuned so the LNG hull stays inside the tile */
-  object-position: 48% center;
-  transform: scaleX(-1);
+  object-position: 62% center;
+  transform: none;
   z-index: 0;
   pointer-events: none;
   user-select: none;
@@ -7627,10 +7626,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  /* Slightly darker veil so LNG photo sits behind UI without competing */
+  /* Darken left for copy; keep right devices readable */
   background:
-    linear-gradient(105deg, rgba(4, 12, 24, 0.68) 0%, rgba(4, 12, 24, 0.4) 38%, rgba(4, 12, 24, 0.28) 68%, rgba(4, 12, 24, 0.5) 100%),
-    linear-gradient(180deg, rgba(4, 12, 24, 0.2) 0%, transparent 42%, rgba(4, 12, 24, 0.42) 100%);
+    linear-gradient(95deg, rgba(4, 12, 24, 0.78) 0%, rgba(4, 12, 24, 0.52) 34%, rgba(4, 12, 24, 0.18) 58%, rgba(4, 12, 24, 0.12) 100%),
+    linear-gradient(180deg, rgba(4, 12, 24, 0.18) 0%, transparent 45%, rgba(4, 12, 24, 0.35) 100%);
 }
 .home-install-stage::after {
   content: none;
@@ -7638,7 +7637,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .home-install-copy {
   position: relative;
   z-index: 2;
-  max-width: 28rem;
+  max-width: min(28rem, 48%);
   padding-bottom: 0.25rem;
 }
 .home-install-kicker {
@@ -7696,49 +7695,27 @@ svg.leaflet-image-layer.leaflet-interactive path {
   color: rgba(186, 230, 253, 0.85);
   max-width: 24rem;
 }
-.home-install-devices {
-  position: relative;
-  z-index: 2;
-  justify-self: end;
-  align-self: end;
-  width: min(100%, 380px);
-  margin-bottom: 0;
-  filter: drop-shadow(0 18px 36px rgba(2, 8, 23, 0.55));
-}
-.home-install-devices-photo {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: clamp(200px, 42vh, 320px);
-  object-fit: contain;
-  object-position: center bottom;
-  pointer-events: none;
-  user-select: none;
-  /* Real alpha PNG — no black studio square */
-}
 @media (max-width: 720px) {
   .home-install-stage {
     grid-template-columns: 1fr;
-    min-height: auto;
+    min-height: clamp(300px, 52vh, 420px);
     padding-bottom: 1.5rem;
-    text-align: center;
-    background-position: 70% center;
+    text-align: left;
+  }
+  .home-install-bg {
+    object-position: 78% center;
   }
   .home-install-copy {
-    max-width: none;
+    max-width: min(22rem, 92%);
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
   }
   .home-install-lead { max-width: 22rem; }
-  .home-install-devices {
-    justify-self: center;
-    width: min(320px, 92%);
-    order: -1;
-    margin: 0 auto 0.35rem;
-  }
-  .home-install-devices-photo {
-    max-height: 210px;
+  .home-install-stage::before {
+    background:
+      linear-gradient(180deg, rgba(4, 12, 24, 0.55) 0%, rgba(4, 12, 24, 0.35) 42%, rgba(4, 12, 24, 0.72) 100%),
+      linear-gradient(90deg, rgba(4, 12, 24, 0.55) 0%, rgba(4, 12, 24, 0.2) 70%, transparent 100%);
   }
 }
 [data-theme="light"] .home-install-tile {
@@ -8852,7 +8829,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.126" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.127" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -11919,7 +11896,7 @@ select option {
   }
 }
 
-/* ═══ Mobile polish pack (v5.126) — hero / dock / install / SetStar / SetRoute ═══ */
+/* ═══ Mobile polish pack (v5.127) — hero / dock / install / SetStar / SetRoute ═══ */
 .setstar-data-switch { display: none; }
 @media (max-width: 768px) {
   html, body, #tab-home, #tab-home.active, .home-hero-viewport, .app-content {
@@ -11927,7 +11904,7 @@ select option {
   }
 
   .home-install-bg {
-    object-position: 72% center !important;
+    object-position: 78% center !important;
   }
 
   /* Chart dock: tiles only, swipeable; hide cursor HUD */
@@ -13198,7 +13175,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.126" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.126';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.127" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.127';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13220,7 +13197,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_bg_lng.jpg" alt="" width="1600" height="893" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.127" alt="" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <p class="home-install-kicker">SetSail on your bridge</p>
                     <h2 class="home-install-title">The chart stays open when the tab would not.</h2>
@@ -13231,9 +13208,6 @@ select option {
                       </button>
                     </div>
                     <p class="home-install-hint" id="homeInstallHint" hidden></p>
-                  </div>
-                  <div class="home-install-devices" aria-hidden="true">
-                    <img class="home-install-devices-photo" src="assets/home/setsail_devices_splash.png?v=5.126" alt="" width="1024" height="571" decoding="async" fetchpriority="low" />
                   </div>
                 </div>
               </div>
@@ -20895,25 +20869,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.126"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.126" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.126"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.127"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.127" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.127"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.126",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.127",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.126"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.126"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.126"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.127"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.127"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.127"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.126"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.127"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -20986,7 +20960,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.126"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.127"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21699,17 +21673,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.126', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.127', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.126 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.127 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.126') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.126.0'); }, 1200);
+              if (last && last.indexOf('v5.127') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.127.0'); }, 1200);
               }
             } catch (eTip) {}
           })
