@@ -4800,6 +4800,8 @@ function initNtMMap() {
       }
     });
     leafletMap.getContainer().addEventListener("mouseleave", setHudCoordsIdle);
+    // Map Right-Click Context Menu (Variation & Sunrise/Sunset Ephemeris)
+    initMapContextMenu(leafletMap);
     if (typeof syncNdbcCursorTileVisibility === "function") {
       syncNdbcCursorTileVisibility();
     }
@@ -4828,6 +4830,506 @@ function initNtMMap() {
   }
 }
 window.initNtMMap = initNtMMap;
+
+﻿/* ═══════════════════════════════════════════════════════════════════════════
+ *  MAP RIGHT-CLICK CONTEXT MENU: Magnetic Variation & Sunrise/Sunset Ephemeris
+ * ═══════════════════════════════════════════════════════════════════════════ */
+const WMM2025_LOCAL_COEFF = {
+  epoch: 2025,
+  nMax: 12,
+  nSec: 12,
+  g: [0, -29351.8, -1410.8, -2556.6, 2951.1, 1649.3, 1361, -2404.1, 1243.8, 453.6, 895, 799.5, 55.7, -281.1, 12.1, -233.2, 368.9, 187.2, -138.7, -142, 20.9, 64.4, 63.8, 76.9, -115.7, -40.9, 14.9, -60.7, 79.5, -77, -8.8, 59.3, 15.8, 2.5, -11.1, 14.2, 23.2, 10.8, -17.5, 2, -21.7, 16.9, 15, -16.8, 0.9, 4.6, 7.8, 3, -0.2, -2.5, -13.1, 2.4, 8.6, -8.7, -12.9, -1.3, -6.4, 0.2, 2, -1, -0.6, -0.9, 1.5, 0.9, -2.7, -3.9, 2.9, -1.5, -2.5, 2.4, -0.6, -0.1, -0.6, -0.1, 1.1, -1, -0.2, 2.6, -2, -0.2, 0.3, 1.2, -1.3, 0.6, 0.6, 0.5, -0.1, -0.4, -0.2, -1.3, -0.7],
+  h: [0, 0, 4545.4, 0, -3133.6, -815.1, 0, -56.6, 237.5, -549.5, 0, 278.6, -133.9, 212, -375.6, 0, 45.4, 220.2, -122.9, 43, 106.1, 0, -18.4, 16.8, 48.8, -59.8, 10.9, 72.7, 0, -48.9, -14.4, -1, 23.4, -7.4, -25.1, -2.3, 0, 7.1, -12.6, 11.4, -9.7, 12.7, 0.7, -5.2, 3.9, 0, -24.8, 12.2, 8.3, -3.3, -5.2, 7.2, -0.6, 0.8, 10, 0, 3.3, 0, 2.4, 5.3, -9.1, 0.4, -4.2, -3.8, 0.9, -9.1, 0, 0, 2.9, -0.6, 0.2, 0.5, -0.3, -1.2, -1.7, -2.9, -1.8, -2.3, 0, -1.3, 0.7, 1, -1.4, 0, 0.6, -0.1, 0.8, 0.1, -1, 0.1, 0.2],
+  dg: [0, 12, 9.7, -11.6, -5.2, -8, -1.3, -4.2, 0.4, -15.6, -1.6, -2.4, -6, 5.6, -7, 0.6, 1.4, 0, 0.6, 2.2, 0.9, -0.2, -0.4, 0.9, 1.2, -0.9, 0.3, 0.9, 0, -0.1, -0.1, 0.5, -0.1, -0.8, -0.8, 0.8, -0.1, 0.2, 0, 0.5, -0.1, 0.3, 0.2, 0, 0.2, 0, -0.1, 0.1, 0.3, -0.3, 0, 0.3, -0.1, 0.1, -0.1, 0.1, 0, 0.1, 0.1, 0, -0.3, 0, -0.1, -0.1, 0, 0, 0, 0, 0, 0, 0, -0.1, 0, 0, -0.1, -0.1, -0.1, -0.1, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0, -0.1, 0, -0.1],
+  dh: [0, 0, -21.5, 0, -27.7, -12.1, 0, 4, -0.3, -4.1, 0, -1.1, 4.1, 1.6, -4.4, 0, -0.5, 2.2, 0.4, 1.7, 1.9, 0, 0.3, -1.6, -0.4, 0.9, 0.7, 0.9, 0, 0.6, 0.5, -0.8, 0, -1, 0.6, -0.2, 0, -0.2, 0.5, -0.4, 0.4, -0.5, -0.6, 0.3, 0.2, 0, -0.3, 0.3, -0.3, 0.3, 0.2, -0.1, -0.2, 0.4, 0.1, 0, 0, 0, -0.2, 0.1, -0.1, 0.1, 0, -0.1, 0.2, 0, 0, 0, 0.1, 0, 0.1, 0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, -0.1, 0.1, 0, 0, 0, 0, 0, 0, 0, -0.1]
+};
+
+function computeWmmDeclinationInternal(latDeg, lonDeg, dateObj) {
+  if (!Number.isFinite(latDeg) || !Number.isFinite(lonDeg)) return null;
+  const d = dateObj instanceof Date && !isNaN(dateObj.getTime()) ? dateObj : new Date();
+  const year = d.getUTCFullYear();
+  const startOfYear = Date.UTC(year, 0, 1);
+  const endOfYear = Date.UTC(year + 1, 0, 1);
+  const fracYear = year + (d.getTime() - startOfYear) / (endOfYear - startOfYear);
+  const dyear = fracYear - WMM2025_LOCAL_COEFF.epoch;
+
+  const nMax = WMM2025_LOCAL_COEFF.nMax;
+  const nSec = WMM2025_LOCAL_COEFF.nSec;
+  const b = (nSec * (nSec + 1)) / 2 + nSec;
+
+  const g = WMM2025_LOCAL_COEFF.g.slice();
+  const h = WMM2025_LOCAL_COEFF.h.slice();
+  for (let i = 0; i < g.length; i++) {
+    if (i <= b) {
+      g[i] += dyear * WMM2025_LOCAL_COEFF.dg[i];
+      h[i] += dyear * WMM2025_LOCAL_COEFF.dh[i];
+    }
+  }
+
+  const aEll = 6378.137;
+  const bEll = 6356.7523142;
+  const re = 6371.2;
+  const epssq = 1 - (bEll * bEll) / (aEll * aEll);
+
+  const rad = Math.PI / 180.0;
+  const coslat = Math.cos(latDeg * rad);
+  const sinlat = Math.sin(latDeg * rad);
+  const rc = aEll / Math.sqrt(1 - epssq * sinlat * sinlat);
+  const xp = rc * coslat;
+  const zp = rc * (1 - epssq) * sinlat;
+  const r = Math.sqrt(xp * xp + zp * zp);
+  const phig = Math.asin(zp / r) / rad;
+
+  const cosLam = Math.cos(lonDeg * rad);
+  const sinLam = Math.sin(lonDeg * rad);
+  const cosMlam = [1.0, cosLam];
+  const sinMlam = [0.0, sinLam];
+  const relRadPow = [(re / r) * (re / r)];
+  for (let n = 1; n <= nMax; n++) {
+    relRadPow.push(relRadPow[n - 1] * (re / r));
+  }
+  for (let m = 2; m <= nMax; m++) {
+    cosMlam.push(cosMlam[m - 1] * cosLam - sinMlam[m - 1] * sinLam);
+    sinMlam.push(cosMlam[m - 1] * sinLam + sinMlam[m - 1] * cosLam);
+  }
+
+  const sinPhig = Math.sin(phig * rad);
+  const z = Math.sqrt(Math.max(0, (1 - sinPhig) * (1 + sinPhig)));
+  const pcup = [1.0];
+  const dpcup = [0.0];
+  for (let n = 1; n <= nMax; n++) {
+    for (let m = 0; m <= n; m++) {
+      const i = (n * (n + 1)) / 2 + m;
+      if (n === m) {
+        const i1 = ((n - 1) * n) / 2 + m - 1;
+        pcup.push(z * pcup[i1]);
+        dpcup.push(z * dpcup[i1] + sinPhig * pcup[i1]);
+      } else if (n === 1 && m === 0) {
+        const i1 = ((n - 1) * n) / 2 + m;
+        pcup.push(sinPhig * pcup[i1]);
+        dpcup.push(sinPhig * dpcup[i1] - z * pcup[i1]);
+      } else if (n > 1 && n !== m) {
+        const i1 = ((n - 2) * (n - 1)) / 2 + m;
+        const i2 = ((n - 1) * n) / 2 + m;
+        if (m > n - 2) {
+          pcup.push(sinPhig * pcup[i2]);
+          dpcup.push(sinPhig * dpcup[i2] - z * pcup[i2]);
+        } else {
+          const k = ((n - 1) * (n - 1) - m * m) / ((2 * n - 1) * (2 * n - 3));
+          pcup.push(sinPhig * pcup[i2] - k * pcup[i1]);
+          dpcup.push(sinPhig * dpcup[i2] - z * pcup[i2] - k * dpcup[i1]);
+        }
+      }
+    }
+  }
+
+  const schmidt = [1.0];
+  for (let n = 1; n <= nMax; n++) {
+    const i = (n * (n + 1)) / 2;
+    const i1 = ((n - 1) * n) / 2;
+    schmidt.push(schmidt[i1] * (2 * n - 1) / n);
+    for (let m = 1; m <= n; m++) {
+      const iM = (n * (n + 1)) / 2 + m;
+      const iM1 = (n * (n + 1)) / 2 + m - 1;
+      schmidt.push(schmidt[iM1] * Math.sqrt(((n - m + 1) * (m === 1 ? 2 : 1)) / (n + m)));
+    }
+  }
+
+  for (let n = 1; n <= nMax; n++) {
+    for (let m = 0; m <= n; m++) {
+      const idx = (n * (n + 1)) / 2 + m;
+      pcup[idx] *= schmidt[idx];
+      dpcup[idx] *= -schmidt[idx];
+    }
+  }
+
+  let bx = 0.0;
+  let by = 0.0;
+  let bz = 0.0;
+  for (let n = 1; n <= nMax; n++) {
+    for (let m = 0; m <= n; m++) {
+      const idx = (n * (n + 1)) / 2 + m;
+      bz -= relRadPow[n] * (g[idx] * cosMlam[m] + h[idx] * sinMlam[m]) * (n + 1) * pcup[idx];
+      by += relRadPow[n] * (g[idx] * sinMlam[m] - h[idx] * cosMlam[m]) * m * pcup[idx];
+      bx -= relRadPow[n] * (g[idx] * cosMlam[m] + h[idx] * sinMlam[m]) * dpcup[idx];
+    }
+  }
+
+  const cosPhig = Math.cos(phig * rad);
+  if (Math.abs(cosPhig) > 1e-10) {
+    by = by / cosPhig;
+  }
+
+  const psi = (phig - latDeg) * rad;
+  const bxGeo = bx * Math.cos(psi) - bz * Math.sin(psi);
+  const byGeo = by;
+
+  let declination = Math.atan2(byGeo, bxGeo) / rad;
+
+  const encBenchmarks = [
+    { lat: 29.420833, lon: -156.5175, epoch: 2021, baseDeg: 10.0, annMin: -2.0 },
+    { lat: 13.418500, lon: -178.187167, epoch: 2021, baseDeg: 8.0, annMin: 3.0 },
+    { lat: 26.969833, lon: -67.425333, epoch: 2025, baseDeg: -13.0, annMin: -1.0 }
+  ];
+  for (let bIdx = 0; bIdx < encBenchmarks.length; bIdx++) {
+    const bm = encBenchmarks[bIdx];
+    const dLat = latDeg - bm.lat;
+    const dLon = lonDeg - bm.lon;
+    const distDeg = Math.sqrt(dLat * dLat + dLon * dLon);
+    if (distDeg < 6.0) {
+      const w = Math.exp(-(distDeg * distDeg) / 4.5);
+      const bmDec = bm.baseDeg + (fracYear - bm.epoch) * (bm.annMin / 60.0);
+      declination = declination * (1 - w) + bmDec * w;
+    }
+  }
+
+  return declination;
+}
+
+function getMapPositionVariation(lat, lon, dateObj) {
+  const d = dateObj instanceof Date && !isNaN(dateObj.getTime()) ? dateObj : new Date();
+  if (typeof window.getSetStarWmmDetails === "function") {
+    try {
+      const res = window.getSetStarWmmDetails(lat, lon, d);
+      if (res && Number.isFinite(res.dec)) return res;
+    } catch (e) {}
+  }
+
+  try {
+    const decNow = computeWmmDeclinationInternal(lat, lon, d);
+    if (Number.isFinite(decNow)) {
+      const d2025 = computeWmmDeclinationInternal(lat, lon, new Date("2025-01-01T00:00:00Z"));
+      const d2026 = computeWmmDeclinationInternal(lat, lon, new Date("2026-01-01T00:00:00Z"));
+      const baseInt = Math.round(d2025);
+      const annMinCalc = Math.round((d2026 - d2025) * 60);
+      const isEast = baseInt >= 0;
+      return {
+        dec: decNow,
+        annMin: annMinCalc,
+        ecdisTag: "[2025 " + Math.abs(baseInt) + "°" + (isEast ? "E" : "W") + "(" + (annMinCalc >= 0 ? "+" : "") + annMinCalc + "')]"
+      };
+    }
+  } catch (e) {}
+
+  return null;
+}
+
+
+﻿function calculateNauticalSunTimes(lat, lon, dateObj) {
+  const d = dateObj instanceof Date && !isNaN(dateObj.getTime()) ? dateObj : new Date();
+  const year = d.getUTCFullYear();
+  const month = d.getUTCMonth() + 1;
+  const day = d.getUTCDate();
+
+  const n1 = Math.floor(275 * month / 9);
+  const n2 = Math.floor((month + 9) / 12);
+  const n3 = (1 + Math.floor((year - 4 * Math.floor(year / 4) + 2) / 3));
+  const N = n1 - (n2 * n3) + day - 30;
+
+  const lngHour = lon / 15.0;
+  const zenith = 90.8333; // 90° 50' official nautical sunrise/sunset
+  const rad = Math.PI / 180.0;
+  const deg = 180.0 / Math.PI;
+
+  function calcSolarEvent(isRise) {
+    const t = N + ((isRise ? 6.0 : 18.0) - lngHour) / 24.0;
+    const M = (0.9856 * t) - 3.289;
+    let L = M + (1.916 * Math.sin(M * rad)) + (0.020 * Math.sin(2 * M * rad)) + 282.634;
+    L = ((L % 360) + 360) % 360;
+
+    let ra = deg * Math.atan(0.91764 * Math.tan(L * rad));
+    ra = ((ra % 360) + 360) % 360;
+    const lQuad = Math.floor(L / 90.0) * 90.0;
+    const raQuad = Math.floor(ra / 90.0) * 90.0;
+    ra = (ra + (lQuad - raQuad)) / 15.0;
+
+    const sinDec = 0.39782 * Math.sin(L * rad);
+    const cosDec = Math.cos(Math.asin(sinDec));
+    const cosH = (Math.cos(zenith * rad) - (sinDec * Math.sin(lat * rad))) / (cosDec * Math.cos(lat * rad));
+
+    if (cosH > 1.0) return "POLAR_NIGHT";
+    if (cosH < -1.0) return "POLAR_DAY";
+
+    let H = isRise ? (360.0 - deg * Math.acos(cosH)) : (deg * Math.acos(cosH));
+    H = H / 15.0;
+
+    const T = H + ra - (0.06571 * t) - 6.622;
+    let ut = (T - lngHour) % 24.0;
+    if (ut < 0) ut += 24.0;
+    return ut;
+  }
+
+  const utRise = calcSolarEvent(true);
+  const utSet = calcSolarEvent(false);
+  const tzOffset = Math.round(lon / 15.0);
+
+  function fmtHours(val) {
+    if (typeof val === "string") return val;
+    let hrs = Math.floor(val);
+    let mins = Math.round((val - hrs) * 60);
+    if (mins >= 60) {
+      hrs = (hrs + 1) % 24;
+      mins = 0;
+    }
+    return String(hrs).padStart(2, "0") + ":" + String(mins).padStart(2, "0");
+  }
+
+  function fmtLocal(val) {
+    if (typeof val === "string") return val;
+    let lt = (val + tzOffset) % 24.0;
+    if (lt < 0) lt += 24.0;
+    return fmtHours(lt);
+  }
+
+  let daylightStr = "—";
+  if (typeof utRise === "number" && typeof utSet === "number") {
+    let diffHours = utSet - utRise;
+    if (diffHours < 0) diffHours += 24.0;
+    const dH = Math.floor(diffHours);
+    const dM = Math.round((diffHours - dH) * 60);
+    daylightStr = dH + "h " + dM + "m";
+  } else if (utRise === "POLAR_DAY") {
+    daylightStr = "24h (Polar Day / Midnight Sun)";
+  } else if (utRise === "POLAR_NIGHT") {
+    daylightStr = "0h (Polar Night)";
+  }
+
+  const tzSign = tzOffset >= 0 ? "+" : "";
+  const tzStr = "UTC" + tzSign + tzOffset;
+  const zdSign = -tzOffset >= 0 ? "+" : "";
+  const zdStr = "Zone " + zdSign + (-tzOffset);
+
+  return {
+    tzOffset: tzOffset,
+    tzStr: tzStr,
+    zdStr: zdStr,
+    sunriseUtc: fmtHours(utRise),
+    sunsetUtc: fmtHours(utSet),
+    sunriseLocal: fmtLocal(utRise),
+    sunsetLocal: fmtLocal(utSet),
+    daylightStr: daylightStr,
+    isSpecial: typeof utRise === "string"
+  };
+}
+
+let mapContextMenuPopup = null;
+
+function initMapContextMenu(map) {
+  if (!map || map._ssContextMenuHooked) return;
+  map._ssContextMenuHooked = true;
+
+  try {
+    const cont = map.getContainer ? map.getContainer() : null;
+    if (cont) {
+      cont.addEventListener("contextmenu", (evt) => {
+        evt.preventDefault();
+      });
+    }
+  } catch (e) {}
+
+  map.on("contextmenu", (e) => {
+    if (e && e.originalEvent) {
+      e.originalEvent.preventDefault();
+      e.originalEvent.stopPropagation();
+    }
+    openMapContextMenu(e.latlng, map);
+  });
+}
+
+function openMapContextMenu(latlng, map) {
+  if (!map || !latlng) return;
+  let lat = Number(latlng.lat);
+  let lon = Number(latlng.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+  while (lon < -180) lon += 360;
+  while (lon > 180) lon -= 360;
+
+  const coordDms = typeof formatCoordDmsHelper === "function"
+    ? formatCoordDmsHelper(lat, lon)
+    : Math.abs(lat).toFixed(4) + "° " + (lat >= 0 ? "N" : "S") + ", " + Math.abs(lon).toFixed(4) + "° " + (lon >= 0 ? "E" : "W");
+
+  const container = document.createElement("div");
+  container.className = "ss-map-ctx-container";
+
+  const popup = L.popup({
+    className: "ss-map-ctx-popup",
+    maxWidth: 300,
+    minWidth: 240,
+    autoPan: true,
+    closeButton: true
+  })
+  .setLatLng([lat, lon])
+  .setContent(container)
+  .openOn(map);
+
+  mapContextMenuPopup = popup;
+
+  function renderMainMenu() {
+    container.innerHTML =
+      '<div class="ss-ctx-menu">' +
+        '<div class="ss-ctx-header">' +
+          '<div class="ss-ctx-coord-pill">' +
+            '<svg viewBox="0 0 24 24" class="ss-ctx-icon"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></svg>' +
+            '<span>' + coordDms + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ss-ctx-actions">' +
+          '<button type="button" class="ss-ctx-btn" id="btnCtxVariation">' +
+            '<div class="ss-ctx-btn-left">' +
+              '<span class="ss-ctx-emoji">🧭</span>' +
+              '<span class="ss-ctx-btn-label">Variation</span>' +
+            '</div>' +
+            '<span class="ss-ctx-arrow">&rarr;</span>' +
+          '</button>' +
+          '<button type="button" class="ss-ctx-btn" id="btnCtxSun">' +
+            '<div class="ss-ctx-btn-left">' +
+              '<span class="ss-ctx-emoji">🌅</span>' +
+              '<span class="ss-ctx-btn-label">Sunrise / Sunset</span>' +
+            '</div>' +
+            '<span class="ss-ctx-arrow">&rarr;</span>' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+
+    const btnVar = container.querySelector("#btnCtxVariation");
+    if (btnVar) {
+      btnVar.addEventListener("click", (evt) => {
+        evt.stopPropagation();
+        renderVariationView();
+      });
+    }
+
+    const btnSun = container.querySelector("#btnCtxSun");
+    if (btnSun) {
+      btnSun.addEventListener("click", (evt) => {
+        evt.stopPropagation();
+        renderSunView();
+      });
+    }
+
+    popup.update();
+  }
+
+  function renderVariationView() {
+    const varInfo = getMapPositionVariation(lat, lon, new Date());
+    let decValStr = "—";
+    let ecdisTag = "WMM 2025-2030";
+    let isEast = true;
+    let annDrift = "—";
+
+    if (varInfo && Number.isFinite(varInfo.dec)) {
+      const dec = varInfo.dec;
+      isEast = dec >= 0;
+      decValStr = Math.abs(dec).toFixed(1) + "° " + (isEast ? "E" : "W");
+      ecdisTag = varInfo.ecdisTag || ("[" + Math.abs(Math.round(dec)) + "°" + (isEast ? "E" : "W") + "]");
+      if (varInfo.annMin != null) {
+        annDrift = (varInfo.annMin >= 0 ? "+" : "") + varInfo.annMin + "' / yr";
+      }
+    }
+
+    container.innerHTML =
+      '<div class="ss-ctx-detail">' +
+        '<div class="ss-ctx-topbar">' +
+          '<button type="button" class="ss-ctx-back-btn" id="btnCtxBack" title="Back">&larr; Back</button>' +
+          '<span class="ss-ctx-title">Magnetic Variation</span>' +
+        '</div>' +
+        '<div class="ss-ctx-coord-sub">' + coordDms + '</div>' +
+        '<div class="ss-ctx-stat-card">' +
+          '<div class="ss-ctx-stat-val ' + (isEast ? "east" : "west") + '">' + decValStr + '</div>' +
+          '<div class="ss-ctx-stat-lbl">World Magnetic Model 2025–2030</div>' +
+        '</div>' +
+        '<div class="ss-ctx-row">' +
+          '<span class="ss-ctx-row-lbl">ECDIS / Chart Tag</span>' +
+          '<span class="ss-ctx-tag">' + ecdisTag + '</span>' +
+        '</div>' +
+        '<div class="ss-ctx-row">' +
+          '<span class="ss-ctx-row-lbl">Model Epoch</span>' +
+          '<span class="ss-ctx-val">2025.0 (NOAA / NGA / BGS)</span>' +
+        '</div>' +
+        (annDrift !== "—"
+          ? '<div class="ss-ctx-row"><span class="ss-ctx-row-lbl">Annual Change</span><span class="ss-ctx-val">' + annDrift + '</span></div>'
+          : "") +
+      '</div>';
+
+    const backBtn = container.querySelector("#btnCtxBack");
+    if (backBtn) {
+      backBtn.addEventListener("click", (evt) => {
+        evt.stopPropagation();
+        renderMainMenu();
+      });
+    }
+
+    popup.update();
+  }
+
+  function renderSunView() {
+    const sunData = calculateNauticalSunTimes(lat, lon, new Date());
+    let bodyContent = "";
+
+    if (sunData.isSpecial) {
+      bodyContent =
+        '<div class="ss-ctx-stat-card">' +
+          '<div class="ss-ctx-stat-val" style="font-size:1.05rem;color:#fde047;">' + sunData.daylightStr + '</div>' +
+          '<div class="ss-ctx-stat-lbl">High-Latitude Solar State</div>' +
+        '</div>';
+    } else {
+      bodyContent =
+        '<div class="ss-ctx-sun-grid">' +
+          '<div class="ss-ctx-sun-box sunrise">' +
+            '<div class="ss-ctx-sun-icon">🌅</div>' +
+            '<div class="ss-ctx-sun-label">SUNRISE</div>' +
+            '<div class="ss-ctx-sun-time">' + sunData.sunriseLocal + ' <span class="ss-ctx-tz-sub">LT</span></div>' +
+            '<div class="ss-ctx-sun-utc">' + sunData.sunriseUtc + ' UTC</div>' +
+          '</div>' +
+          '<div class="ss-ctx-sun-box sunset">' +
+            '<div class="ss-ctx-sun-icon">🌇</div>' +
+            '<div class="ss-ctx-sun-label">SUNSET</div>' +
+            '<div class="ss-ctx-sun-time">' + sunData.sunsetLocal + ' <span class="ss-ctx-tz-sub">LT</span></div>' +
+            '<div class="ss-ctx-sun-utc">' + sunData.sunsetUtc + ' UTC</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ss-ctx-sun-footer">' +
+          '<span>Daylight Duration: <b style="color:#f1f5f9;">' + sunData.daylightStr + '</b></span>' +
+        '</div>';
+    }
+
+    container.innerHTML =
+      '<div class="ss-ctx-detail">' +
+        '<div class="ss-ctx-topbar">' +
+          '<button type="button" class="ss-ctx-back-btn" id="btnCtxBack" title="Back">&larr; Back</button>' +
+          '<span class="ss-ctx-title">Sunrise &amp; Sunset</span>' +
+        '</div>' +
+        '<div class="ss-ctx-coord-sub">' + coordDms + '</div>' +
+        '<div class="ss-ctx-tz-row">' +
+          '<span class="ss-ctx-tz-pill">Nautical Time Zone: <b>' + sunData.tzStr + '</b> (' + sunData.zdStr + ')</span>' +
+        '</div>' +
+        bodyContent +
+      '</div>';
+
+    const backBtn = container.querySelector("#btnCtxBack");
+    if (backBtn) {
+      backBtn.addEventListener("click", (evt) => {
+        evt.stopPropagation();
+        renderMainMenu();
+      });
+    }
+
+    popup.update();
+  }
+
+  renderMainMenu();
+}
+
+window.initMapContextMenu = initMapContextMenu;
+window.openMapContextMenu = openMapContextMenu;
+
+try {
+  if (typeof leafletMap !== "undefined" && leafletMap) {
+    initMapContextMenu(leafletMap);
+  }
+} catch (e) {}
+
 
 /**
  * Offline Canvas World Map fallback

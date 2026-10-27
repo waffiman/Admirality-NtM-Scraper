@@ -168,7 +168,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.136" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.137" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -20162,6 +20162,11 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       return null;
     }
 
+    
+    window.calculateWMMDeclination = calculateWMMDeclination;
+    window.getSetStarWmmDetails = getSetStarWmmDetails;
+    window.autoSyncSetStarMagneticVariation = autoSyncSetStarMagneticVariation;
+
     function onSetStarCoordInputsChange(evt) {
       // Whenever position or date changes, always unlock & recalculate WMM variation
       if (evt && evt.target && ["lat", "latNS", "lon", "lonEW"].indexOf(evt.target.id) !== -1) {
@@ -21008,7 +21013,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.136"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.137"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21671,7 +21676,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.136' && k !== 'setsail-tiles-cache-v5.136').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.137' && k !== 'setsail-tiles-cache-v5.136').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 function showSetSailHardRefreshTip(cacheLabel) {
@@ -21721,9 +21726,9 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.136', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.137', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.136 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.137 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
@@ -21731,7 +21736,7 @@ function showSetSailHardRefreshTip(cacheLabel) {
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
               if (last && last.indexOf('v5.136') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.136.0'); }, 1200);
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.137.0'); }, 1200);
               }
             } catch (eTip) {}
           })
