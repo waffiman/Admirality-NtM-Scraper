@@ -6572,6 +6572,9 @@ function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
   if (typeof setrouteTssEdgePenalty === "function") {
     pen += setrouteTssEdgePenalty(lat1, lon1, lat2, lon2);
   }
+  if (typeof setrouteIalaEdgePenalty === "function") {
+    pen += setrouteIalaEdgePenalty(lat1, lon1, lat2, lon2);
+  }
   // Land/coast: forbid only LONG chords. Short TSS/coastal graph hops must stay connected
   if (setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2)) {
     const distNm = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
@@ -6737,6 +6740,8 @@ function setrouteBuildAdjacency() {
     // COLREG Rule 10 — never keep edges through a Traffic Separation Zone
     const tssBan = typeof setrouteTssHardBan === "function" && setrouteTssHardBan(a[0], a[1], b[0], b[1]);
     if (tssBan) continue;
+    const ialaBan = typeof setrouteIalaHardBan === "function" && setrouteIalaHardBan(a[0], a[1], b[0], b[1]);
+    if (ialaBan) continue;
     // Hard-drop clear land chords: interior boxes OR coast-crossing ocean legs.
     // Curated short coastal edges stay; long land-cuts are removed from the graph.
     const interiorChord = boxHits >= 2 && dist >= 350;
@@ -6749,6 +6754,7 @@ function setrouteBuildAdjacency() {
       if (typeof setrouteAisPenalty === "function") hazard += setrouteAisPenalty(a[0], a[1], b[0], b[1]) * 0.5;
       if (typeof setrouteLegShoalPenalty === "function") hazard += setrouteLegShoalPenalty(a[0], a[1], b[0], b[1]) * 0.85;
       if (typeof setrouteTssEdgePenalty === "function") hazard += setrouteTssEdgePenalty(a[0], a[1], b[0], b[1]);
+      if (typeof setrouteIalaEdgePenalty === "function") hazard += setrouteIalaEdgePenalty(a[0], a[1], b[0], b[1]);
     }
     const cost = dist + hazard;
     adj[u].push({ node: v, dist, cost });
@@ -7474,6 +7480,34 @@ function setrouteBuildAppraisalFactors(route, opts) {
       });
     }
   } catch (eTss) {}
+  try {
+    if (typeof setrouteIalaRegion === "function" && wps.length) {
+      const mid = wps[Math.floor(wps.length / 2)];
+      const reg = setrouteIalaRegion(mid.lat, mid.lon);
+      let ialaHits = 0;
+      let ialaDanger = 0;
+      let ialaChannel = 0;
+      if (typeof setrouteIalaLegAnalysis === "function" && wps.length >= 2) {
+        for (let i = 0; i < wps.length - 1; i++) {
+          const an = setrouteIalaLegAnalysis(wps[i].lat, wps[i].lon, wps[i + 1].lat, wps[i + 1].lon);
+          if (an.hardBan) ialaDanger++;
+          if (an.preferChannel > 0) ialaChannel++;
+          ialaHits += (an.hits || []).length;
+        }
+      }
+      const meta = SetRouteCoreA && SetRouteCoreA.ialaMarksMeta && SetRouteCoreA.ialaMarksMeta();
+      factors.push({
+        id: "iala_buoyage",
+        ok: ialaDanger === 0,
+        text: "IALA Region " + reg.region +
+          " (" + (reg.region === "A" ? "port RED can / stbd GREEN cone" : "port GREEN can / stbd RED cone") + ")" +
+          (meta && meta.counts ? "; " + meta.counts.total + " chart marks loaded" : "") +
+          (ialaChannel ? "; buoyed-channel legs=" + ialaChannel : "") +
+          (ialaDanger ? "; cardinal danger legs=" + ialaDanger : "") +
+          (ialaHits && !ialaChannel && !ialaDanger ? "; marks near route=" + ialaHits : "") + "."
+      });
+    }
+  } catch (eIala) {}
   factors.push({
     id: "coast_grid",
     ok: !!SETROUTE_COAST_GRID,

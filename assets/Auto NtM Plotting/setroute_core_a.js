@@ -9,6 +9,8 @@
  * Skills currently in this module:
  *  - COLREG Rule 10: hard ban Traffic Separation Zones; prefer Traffic Lanes
  *  - World TSS from OpenSeaMap/OSM seamarks (assets/geo/setroute_tss_world.json)
+ *  - IALA A/B regions + Lateral/Cardinal buoy chart knowledge (OpenSeaMap symbology)
+ *  - World lateral/cardinal marks (assets/geo/setroute_iala_marks.json) for approaches
  *  - Seed schemes (Singapore / Dover / Gibraltar) until world JSON loads
  *  - Edge cost hooks used by the sea-graph Dijkstra in setsail_core.js
  * =============================================================================
@@ -16,8 +18,9 @@
 (function (global) {
   "use strict";
 
-  const MODULE_VERSION = "5.135.0-core-a";
+  const MODULE_VERSION = "5.136.0-core-a";
   const WORLD_TSS_URL = "assets/geo/setroute_tss_world.json";
+  const IALA_MARKS_URL = "assets/geo/setroute_iala_marks.json";
 
   /**
    * Seed TSS schemes as closed rings [lat, lon][].
@@ -435,9 +438,366 @@
       .catch(() => false);
   }
 
+  // ---------------------------------------------------------------------------
+  // IALA Maritime Buoyage — Region A / B + Lateral / Cardinal (SetChart look)
+  // Chart symbology matches OpenSeaMap / S-52 style used by SetSail Buoys layer.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * IALA Region B: Americas + Japan + Korea + Philippines.
+   * Everywhere else coastal = Region A (Europe, Africa, Australia, most Asia…).
+   * Returning from seaward: Port = left hand, Starboard = right hand.
+   */
+  const IALA_REGION_B_BOXES = [
+    // North America + Caribbean + Central America
+    { south: 5, west: -170, north: 75, east: -50, name: "N America / Caribbean" },
+    // South America
+    { south: -56, west: -82, north: 13, east: -34, name: "S America" },
+    // Japan
+    { south: 24, west: 122, north: 46, east: 146, name: "Japan" },
+    // Korea
+    { south: 33, west: 124, north: 43, east: 132, name: "Korea" },
+    // Philippines
+    { south: 4, west: 116, north: 21, east: 127, name: "Philippines" }
+  ];
+
+  /** Chart appearance as drawn on OpenSeaMap / SetChart Buoys overlay. */
+  const IALA_CHART_SYMBOLS = {
+    A: {
+      region: "A",
+      port: {
+        hand: "port",
+        colour: "red",
+        colourHex: "#e53935",
+        shape: "can",
+        topmark: "cylinder",
+        chartNote: "Red can / flat-top (port hand when entering from seaward)"
+      },
+      starboard: {
+        hand: "starboard",
+        colour: "green",
+        colourHex: "#43a047",
+        shape: "conical",
+        topmark: "cone_point_up",
+        chartNote: "Green cone / pointed (starboard hand when entering from seaward)"
+      }
+    },
+    B: {
+      region: "B",
+      port: {
+        hand: "port",
+        colour: "green",
+        colourHex: "#43a047",
+        shape: "can",
+        topmark: "cylinder",
+        chartNote: "Green can / flat-top (port hand — Region B)"
+      },
+      starboard: {
+        hand: "starboard",
+        colour: "red",
+        colourHex: "#e53935",
+        shape: "conical",
+        topmark: "cone_point_up",
+        chartNote: "Red cone / pointed (starboard hand — Region B)"
+      }
+    },
+    cardinal: {
+      N: {
+        bands: "black over yellow",
+        topmark: "two cones point up",
+        safeSectorDeg: [270, 90],
+        pass: "north",
+        dangerRelative: "south of mark",
+        chartNote: "Black/yellow; ▲▲ — keep mark to the south (pass north)"
+      },
+      E: {
+        bands: "black-yellow-black",
+        topmark: "two cones base to base",
+        safeSectorDeg: [0, 180],
+        pass: "east",
+        dangerRelative: "west of mark",
+        chartNote: "BYB; cones base-to-base — keep mark to the west (pass east)"
+      },
+      S: {
+        bands: "yellow over black",
+        topmark: "two cones point down",
+        safeSectorDeg: [90, 270],
+        pass: "south",
+        dangerRelative: "north of mark",
+        chartNote: "Yellow/black; ▼▼ — keep mark to the north (pass south)"
+      },
+      W: {
+        bands: "yellow-black-yellow",
+        topmark: "two cones point to point",
+        safeSectorDeg: [180, 360],
+        pass: "west",
+        dangerRelative: "east of mark",
+        chartNote: "YBY; cones tip-to-tip — keep mark to the east (pass west)"
+      }
+    }
+  };
+
+  function inBox(lat, lon, b) {
+    return lat >= b.south && lat <= b.north && lon >= b.west && lon <= b.east;
+  }
+
+  function setrouteIalaRegion(lat, lon) {
+    for (let i = 0; i < IALA_REGION_B_BOXES.length; i++) {
+      if (inBox(lat, lon, IALA_REGION_B_BOXES[i])) {
+        return {
+          region: "B",
+          name: "IALA Region B",
+          box: IALA_REGION_B_BOXES[i].name,
+          symbols: IALA_CHART_SYMBOLS.B,
+          difference:
+            "Region B: Port = GREEN can, Starboard = RED cone (opposite of Region A colours)."
+        };
+      }
+    }
+    return {
+      region: "A",
+      name: "IALA Region A",
+      box: "Europe / Africa / Australia / most Asia",
+      symbols: IALA_CHART_SYMBOLS.A,
+      difference:
+        "Region A: Port = RED can, Starboard = GREEN cone when entering from seaward."
+    };
+  }
+
+  function setrouteIalaLateralMeaning(lat, lon, roleOrColour) {
+    const reg = setrouteIalaRegion(lat, lon);
+    const key = String(roleOrColour || "").toLowerCase();
+    let hand = null;
+    if (key === "port" || key === "p") hand = "port";
+    else if (key === "starboard" || key === "s") hand = "starboard";
+    else if (key === "r" || key === "colour_red" || key === "red") {
+      hand = reg.region === "A" ? "port" : "starboard";
+    } else if (key === "g" || key === "colour_green" || key === "green") {
+      hand = reg.region === "A" ? "starboard" : "port";
+    }
+    if (!hand) return { region: reg.region, hand: null, symbol: null };
+    const symbol = reg.symbols[hand];
+    return { region: reg.region, hand: hand, symbol: symbol, chart: symbol.chartNote };
+  }
+
+  function setrouteIalaCardinalSafeBearing(cardinal, fromLat, fromLon, markLat, markLon) {
+    const c = String(cardinal || "").toUpperCase().charAt(0);
+    const sym = IALA_CHART_SYMBOLS.cardinal[c];
+    if (!sym) return null;
+    // Bearing from mark to sample point — should lie in safe half-plane
+    const brg = courseDeg(markLat, markLon, fromLat, fromLon);
+    let safe = false;
+    if (c === "N") safe = brg >= 270 || brg <= 90;
+    else if (c === "E") safe = brg >= 0 && brg <= 180;
+    else if (c === "S") safe = brg >= 90 && brg <= 270;
+    else if (c === "W") safe = brg >= 180 || brg === 0;
+    return {
+      cardinal: c,
+      bearingFromMarkDeg: Math.round(brg),
+      safe: safe,
+      pass: sym.pass,
+      chart: sym.chartNote,
+      bands: sym.bands,
+      topmark: sym.topmark
+    };
+  }
+
+  // Compact OSM marks: [lat, lon, kind0|1, role]
+  let _ialaMarks = [];
+  let _ialaGrid = null;
+  let _ialaMeta = null;
+
+  function ialaCellKey(lat, lon) {
+    return Math.floor(lat) + "_" + Math.floor(lon);
+  }
+
+  function buildIalaGrid(marks) {
+    const g = Object.create(null);
+    for (let i = 0; i < marks.length; i++) {
+      const m = marks[i];
+      const k = ialaCellKey(m[0], m[1]);
+      if (!g[k]) g[k] = [];
+      g[k].push(i);
+    }
+    return g;
+  }
+
+  function queryIalaMarksNear(lat, lon, radiusNm) {
+    const R = Number(radiusNm) || 8;
+    const dLat = R / 60;
+    const dLon = R / (60 * Math.max(0.2, Math.cos(lat * Math.PI / 180)));
+    const out = [];
+    if (!_ialaGrid) return out;
+    const i0 = Math.floor(lat - dLat);
+    const i1 = Math.floor(lat + dLat);
+    const j0 = Math.floor(lon - dLon);
+    const j1 = Math.floor(lon + dLon);
+    for (let i = i0; i <= i1; i++) {
+      for (let j = j0; j <= j1; j++) {
+        const bucket = _ialaGrid[i + "_" + j];
+        if (!bucket) continue;
+        for (let b = 0; b < bucket.length; b++) {
+          const m = _ialaMarks[bucket[b]];
+          const dlat = (lat - m[0]) * 60;
+          const dlon = (lon - m[1]) * 60 * Math.cos(lat * Math.PI / 180);
+          const d = Math.sqrt(dlat * dlat + dlon * dlon);
+          if (d <= R) out.push({ lat: m[0], lon: m[1], kind: m[2], role: m[3], distNm: d });
+        }
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Costing for a leg using nearby laterals (port approach channel) + cardinals (danger side).
+   * Returns { penalty, hardBan, hits, preferChannel }.
+   */
+  function setrouteIalaLegAnalysis(lat1, lon1, lat2, lon2) {
+    const midLat = (lat1 + lat2) * 0.5;
+    const midLon = (lon1 + lon2) * 0.5;
+    const legCourse = courseDeg(lat1, lon1, lat2, lon2);
+    const region = setrouteIalaRegion(midLat, midLon);
+    let penalty = 0;
+    let hardBan = false;
+    let preferChannel = 0;
+    const hits = [];
+    const near = queryIalaMarksNear(midLat, midLon, 6);
+    if (!near.length) {
+      return { penalty: 0, hardBan: false, hits: [], preferChannel: 0, region: region.region };
+    }
+
+    let portMarks = 0;
+    let stbdMarks = 0;
+    let channelAligned = 0;
+
+    for (let i = 0; i < near.length; i++) {
+      const m = near[i];
+      if (m.kind === 1) {
+        // Cardinal — danger on one side
+        const chk = setrouteIalaCardinalSafeBearing(m.role, midLat, midLon, m.lat, m.lon);
+        if (!chk) continue;
+        if (!chk.safe && m.distNm < 1.2) {
+          hardBan = true;
+          penalty += 8e5;
+          hits.push({
+            category: "cardinal_danger",
+            cardinal: m.role,
+            rule: "IALA cardinal — do not pass on danger side (" + chk.chart + ")",
+            distNm: Math.round(m.distNm * 10) / 10
+          });
+        } else if (!chk.safe && m.distNm < 3) {
+          penalty += 2200 * (1 - m.distNm / 3);
+          hits.push({
+            category: "cardinal_caution",
+            cardinal: m.role,
+            rule: "IALA cardinal — prefer " + chk.pass + " of mark",
+            distNm: Math.round(m.distNm * 10) / 10
+          });
+        } else if (chk.safe && m.distNm < 4) {
+          preferChannel += 40;
+          penalty -= 50;
+        }
+      } else {
+        // Lateral
+        const meaning = setrouteIalaLateralMeaning(m.lat, m.lon, m.role);
+        if (!meaning.hand) continue;
+        // Relative position of mark vs leg midpoint (port/stbd of track)
+        const brgToMark = courseDeg(midLat, midLon, m.lat, m.lon);
+        const rel = ((brgToMark - legCourse + 540) % 360) - 180; // -180..180, + = mark to starboard of track
+        const markOnStbdOfTrack = rel > 0;
+        if (meaning.hand === "port") {
+          portMarks++;
+          // Inbound channel: port-hand buoy should sit to port of vessel track (rel < 0)
+          if (rel < -5) {
+            channelAligned++;
+            preferChannel += 90;
+            penalty -= 70;
+          } else if (rel > 15 && m.distNm < 2) {
+            // Port buoy on starboard side of track → likely wrong side / outbound
+            penalty += 600;
+          }
+        } else if (meaning.hand === "starboard") {
+          stbdMarks++;
+          if (rel > 5) {
+            channelAligned++;
+            preferChannel += 90;
+            penalty -= 70;
+          } else if (rel < -15 && m.distNm < 2) {
+            penalty += 600;
+          }
+        }
+      }
+    }
+
+    if (portMarks + stbdMarks >= 2 && channelAligned >= 1) {
+      preferChannel += 120;
+      penalty -= 100;
+      hits.push({
+        category: "lateral_channel",
+        rule: "IALA " + region.region + " laterals — following buoyed port approach channel",
+        port: portMarks,
+        starboard: stbdMarks,
+        chart:
+          region.region === "A"
+            ? "A: port RED can / stbd GREEN cone"
+            : "B: port GREEN can / stbd RED cone"
+      });
+    } else if (portMarks + stbdMarks >= 1) {
+      hits.push({
+        category: "lateral_near",
+        rule: "IALA " + region.region + " lateral marks nearby (port approach aids)",
+        port: portMarks,
+        starboard: stbdMarks
+      });
+    }
+
+    return {
+      penalty: penalty,
+      hardBan: hardBan,
+      hits: hits,
+      preferChannel: preferChannel,
+      region: region.region
+    };
+  }
+
+  function setrouteIalaEdgePenalty(lat1, lon1, lat2, lon2) {
+    return setrouteIalaLegAnalysis(lat1, lon1, lat2, lon2).penalty;
+  }
+
+  function setrouteIalaHardBan(lat1, lon1, lat2, lon2) {
+    return setrouteIalaLegAnalysis(lat1, lon1, lat2, lon2).hardBan;
+  }
+
+  function mergeIalaMarks(data) {
+    if (!data || !Array.isArray(data.marks)) return;
+    _ialaMarks = data.marks;
+    _ialaGrid = buildIalaGrid(_ialaMarks);
+    _ialaMeta = { counts: data.counts || null, generatedAt: data.generatedAt || null };
+    if (typeof console !== "undefined" && console.info) {
+      console.info(
+        "[SetRoute Core A] IALA marks loaded: " +
+          _ialaMarks.length +
+          " (lateral+cardinal)"
+      );
+    }
+  }
+
+  function loadIalaMarks() {
+    if (typeof fetch !== "function") return Promise.resolve(false);
+    return fetch(IALA_MARKS_URL, { cache: "force-cache" })
+      .then((r) => (r && r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) return false;
+        mergeIalaMarks(data);
+        return true;
+      })
+      .catch(() => false);
+  }
+
   // Kick off load immediately
   try {
     loadWorldTss();
+    loadIalaMarks();
   } catch (e) {}
 
   const api = {
@@ -456,6 +816,18 @@
     },
     worldTssMeta: function () {
       return _worldMeta;
+    },
+    IALA_CHART_SYMBOLS,
+    setrouteIalaRegion,
+    setrouteIalaLateralMeaning,
+    setrouteIalaCardinalSafeBearing,
+    setrouteIalaLegAnalysis,
+    setrouteIalaEdgePenalty,
+    setrouteIalaHardBan,
+    queryIalaMarksNear,
+    loadIalaMarks,
+    ialaMarksMeta: function () {
+      return _ialaMeta;
     }
   };
 
@@ -464,11 +836,15 @@
   global.setrouteTssEdgePenalty = setrouteTssEdgePenalty;
   global.setrouteTssHardBan = setrouteTssHardBan;
   global.setrouteNearbyTssSummary = setrouteNearbyTssSummary;
+  global.setrouteIalaRegion = setrouteIalaRegion;
+  global.setrouteIalaLegAnalysis = setrouteIalaLegAnalysis;
+  global.setrouteIalaEdgePenalty = setrouteIalaEdgePenalty;
+  global.setrouteIalaHardBan = setrouteIalaHardBan;
 
   if (typeof console !== "undefined" && console.info) {
     console.info(
       "[SetRoute Core A] module " + MODULE_VERSION + " ready (" +
-        SETROUTE_TSS_SCHEMES.length + " TSS schemes, world pending)"
+        SETROUTE_TSS_SCHEMES.length + " TSS schemes, IALA+TSS world pending)"
     );
   }
 })(typeof window !== "undefined" ? window : globalThis);
