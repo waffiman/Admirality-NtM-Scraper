@@ -4,21 +4,27 @@ Regional NAVTEX / NAVAREA / national NtM scrapers for SetSail.
 Primary official sources (scheduled with scraper_github.py):
 
   * Japan Coast Guard JHOD — NAVTEX + NAVAREA XI via warnings.cgi XML
-  * Taiwan ROC Navy — Notices to Mariners list + detail pages
+    (+ optional WFS GeoJSON polygons, layers 213/212)
+  * Taiwan ROC Navy — Notices to Mariners list + PDF body
 
 Designed to merge into the global NAVTEX pipeline with stable IDs and
 no duplicates against NautoShark / NGA MSI feeds.
+
+Note: kaiho.mlit.go.jp robots.txt Disallow:/TUHO/ — we use polite UA + rate
+limits for navigational-safety MSI reuse; keep request volume low.
 
 Next official feeds to wire (same merge/dedupe pattern):
   * AMSA (Australia) — NAVAREA X / coastal NAVTEX
   * KHOA (Korea) — NAVAREA XI coastal
   * China MSA regional 航行警告 pages — Zhejiang/Guangdong MSA
   * SMA / BSH — Baltic / NAVAREA I coastal densification
+  * Taiwan MOTC MPB — secondary to Navy (UUID detail + PDF)
 """
 
 from __future__ import annotations
 
 import datetime
+import math
 import re
 import time
 import xml.etree.ElementTree as ET
@@ -37,11 +43,14 @@ USER_AGENT = (
 
 JCG_WARNINGS_CGI = "https://www1.kaiho.mlit.go.jp/TUHO/keiho/cgi/warnings.cgi"
 JCG_DISP_CGI = "https://www1.kaiho.mlit.go.jp/TUHO/keiho/cgi/disp_warnings.cgi"
+JCG_WFS_CGI = "https://www1.kaiho.mlit.go.jp/TUHO/vpage/cgi-bin/WFS.cgi/"
 TW_NAVY_LIST = "https://navy.mnd.gov.tw/en/AboutUs/Partner_List.aspx?ID=30294"
 TW_NAVY_INFO = "https://navy.mnd.gov.tw/en/AboutUs/Partner_Info.aspx"
 
 # Active JCG warnings can span prior years — page instructs checking every year.
 JCG_YEAR_LOOKBACK = 8
+# WFS layer ids (visualpage vtype)
+JCG_WFS_LAYER = {"NAVTEX": 213, "NAVAREA11": 212}
 
 
 def _session():
@@ -220,8 +229,100 @@ def _jcg_detail(session, warning_type: str, tana: str, lang: str = "EG") -> str:
     return text.strip()
 
 
+def _lonlat_to_merc(lon: float, lat: float) -> tuple:
+    x = lon * 20037508.34 / 180.0
+    y = math.log(math.tan((90.0 + lat) * math.pi / 360.0)) / (math.pi / 180.0)
+    y = y * 20037508.34 / 180.0
+    return x, y
+
+
+def _ring_from_geojson_coords(ring) -> list:
+    """GeoJSON ring [lon,lat]… → SetSail coords [{lat,lon,dms}]."""
+    out = []
+    for pt in ring or []:
+        if not isinstance(pt, (list, tuple)) or len(pt) < 2:
+            continue
+        lon, lat = float(pt[0]), float(pt[1])
+        if abs(lat) > 90 or abs(lon) > 180:
+            continue
+        out.append({"lat": round(lat, 5), "lon": round(lon, 5), "dms": _format_dms(lat, lon)})
+    return out
+
+
+def _jcg_wfs_index(session, layer: int) -> dict:
+    """
+    Index JCG WFS features by tana for NAVAREA XI / Japan waters.
+    bbox must be EPSG:900913; lowercase 'bbox' query key.
+    """
+    by_tana = {}
+    # Tile lon/lat boxes covering JP + NW Pacific (NAVAREA XI core)
+    tiles = [
+        (120, 0, 140, 25),
+        (120, 25, 140, 46),
+        (140, 0, 160, 25),
+        (140, 25, 160, 46),
+        (100, 0, 120, 25),
+        (100, 25, 120, 46),
+    ]
+    for min_lon, min_lat, max_lon, max_lat in tiles:
+        try:
+            x1, y1 = _lonlat_to_merc(min_lon, min_lat)
+            x2, y2 = _lonlat_to_merc(max_lon, max_lat)
+            bbox = f"{min(x1, x2)},{min(y1, y2)},{max(x1, x2)},{max(y1, y2)}"
+            time.sleep(0.35)
+            r = session.get(
+                JCG_WFS_CGI,
+                params={"lang": "en", "layer": str(layer), "bbox": bbox},
+                timeout=40,
+            )
+            if r.status_code != 200:
+                continue
+            data = r.json()
+            for feat in data.get("features") or []:
+                props = feat.get("properties") or {}
+                tana = str(props.get("tana") or "").strip()
+                if not tana:
+                    continue
+                geom = feat.get("geometry") or {}
+                rings = []
+                gtype = geom.get("type")
+                if gtype == "GeometryCollection":
+                    for g in geom.get("geometries") or []:
+                        if g.get("type") == "Polygon":
+                            coords = g.get("coordinates") or []
+                            if coords:
+                                rings.append(_ring_from_geojson_coords(coords[0]))
+                        elif g.get("type") == "LineString":
+                            rings.append(_ring_from_geojson_coords(g.get("coordinates") or []))
+                elif gtype == "Polygon":
+                    coords = geom.get("coordinates") or []
+                    if coords:
+                        rings.append(_ring_from_geojson_coords(coords[0]))
+                rings = [r for r in rings if len(r) >= 2]
+                if not rings:
+                    continue
+                body = str(props.get("msgBody") or props.get("msgTitle") or "")
+                prev = by_tana.get(tana)
+                # Prefer feature with more ring points
+                score = sum(len(r) for r in rings)
+                if prev and prev.get("_score", 0) >= score:
+                    continue
+                by_tana[tana] = {
+                    "rings": rings,
+                    "body": body,
+                    "title": str(props.get("msgTitle") or ""),
+                    "expires": str(props.get("eventEndDate") or ""),
+                    "published": str(props.get("eventStartDate") or ""),
+                    "_score": score,
+                }
+        except Exception as e:
+            print(f"  [!] JCG WFS layer={layer} tile failed: {e}")
+    print(f"  [+] JCG WFS layer {layer}: {len(by_tana)} features indexed")
+    return by_tana
+
+
 def scrape_jcg_warnings(years: Iterable[int] | None = None, fetch_details: bool = True) -> list:
-    """Scrape in-force JCG NAVTEX + NAVAREA XI warnings (English)."""
+    """Scrape in-force JCG NAVTEX + NAVAREA XI warnings (English + WFS polygons)."""
     if requests is None:
         print("  [!] JCG scrape skipped — requests missing")
         return []
@@ -230,12 +331,22 @@ def scrape_jcg_warnings(years: Iterable[int] | None = None, fetch_details: bool 
         y0 = now.year
         years = list(range(y0, y0 - JCG_YEAR_LOOKBACK, -1))
     session = _session()
+    # Prefetch WFS geometry indexes (one pass per layer)
+    wfs_by_type = {}
+    for wtype, layer in JCG_WFS_LAYER.items():
+        try:
+            wfs_by_type[wtype] = _jcg_wfs_index(session, layer)
+        except Exception as e:
+            print(f"  [!] JCG WFS {wtype}: {e}")
+            wfs_by_type[wtype] = {}
+
     notices = []
     seen_tana = set()
     for wtype, prefix, navarea in (
         ("NAVTEX", "NAVTEX", "XI"),
         ("NAVAREA11", "NAVAREA XI", "XI"),
     ):
+        wfs_idx = wfs_by_type.get(wtype) or {}
         for year in years:
             try:
                 members = _jcg_list_year(session, wtype, year, "EG")
@@ -249,21 +360,29 @@ def scrape_jcg_warnings(years: Iterable[int] | None = None, fetch_details: bool 
                     continue
                 seen_tana.add(tana)
                 body = mem["title"]
-                if fetch_details:
+                wfs = wfs_idx.get(tana) or {}
+                if wfs.get("body"):
+                    body = wfs["body"]
+                elif fetch_details:
                     try:
-                        time.sleep(0.15)
+                        time.sleep(0.2)
                         body = _jcg_detail(session, wtype, tana, "EG") or body
                     except Exception as e:
                         print(f"  [!] JCG detail {tana}: {e}")
                 num = re.sub(r"\D", "", mem["number"]) or "0"
                 yr2 = str(year)[-2:]
                 full_id = f"{prefix} {int(num)}/{yr2}"
-                coords = extract_coords_from_text(body)
+                rings = wfs.get("rings") or []
+                coords = []
+                if rings:
+                    coords = rings[0][:40]
                 if not coords:
-                    # Still keep with Japan default if title-only — skip plot orphans
+                    coords = extract_coords_from_text(body)
+                if not coords:
                     continue
-                is_poly = len(coords) >= 3 and any(
-                    k in body.upper() for k in ("BOUNDED", "AREA", "JOINING", "ENCLOSED")
+                is_poly = len(coords) >= 3 and (
+                    len(rings) > 0
+                    or any(k in body.upper() for k in ("BOUNDED", "AREA", "JOINING", "ENCLOSED"))
                 )
                 is_line = (not is_poly) and len(coords) >= 2 and any(
                     k in body.upper() for k in ("JOINING", "CABLE", "PIPELINE", "TRACK")
@@ -279,8 +398,8 @@ def scrape_jcg_warnings(years: Iterable[int] | None = None, fetch_details: bool 
                     "country": "Japan / NAVAREA XI",
                     "region": f"JCG {wtype} ({year})",
                     "category": mem["category"] or "Navigational Warning",
-                    "subject": f"[{mem['category'] or 'Warning'}] {mem['title'][:135]}",
-                    "title": mem["title"][:180],
+                    "subject": f"[{mem['category'] or 'Warning'}] {(wfs.get('title') or mem['title'])[:135]}",
+                    "title": (wfs.get("title") or mem["title"])[:180],
                     "charts": [],
                     "coords": coords[:40],
                     "lat": coords[0]["lat"],
@@ -289,8 +408,8 @@ def scrape_jcg_warnings(years: Iterable[int] | None = None, fetch_details: bool 
                     "isLine": is_line,
                     "body": body[:1400],
                     "rawText": body[:1400],
-                    "published": "",
-                    "expires": "",
+                    "published": wfs.get("published") or "",
+                    "expires": wfs.get("expires") or "",
                     "cancels": [],
                     "status": "ACTIVE",
                     "isCancelled": False,
@@ -298,18 +417,24 @@ def scrape_jcg_warnings(years: Iterable[int] | None = None, fetch_details: bool 
                     "dedupeKey": normalize_warning_key(full_id),
                     "officialSource": True,
                 }
-                # extract CANCEL refs
                 for cm in re.finditer(r"CANCEL\s+(?:THIS\s+MSG\s+)?(\d{1,4})\s*/\s*(\d{2,4})", body, re.I):
                     notice["cancels"].append(f"{int(cm.group(1))}/{cm.group(2)[-2:]}")
-                if is_poly:
-                    notice["subPolygons"] = [
-                        {
-                            "name": full_id,
-                            "category": "restricted_area",
-                            "coords": coords[:40],
-                            "points": [[c["lat"], c["lon"]] for c in coords[:40]],
-                        }
-                    ]
+                if is_poly or len(rings) > 1:
+                    notice["subPolygons"] = []
+                    use_rings = rings if rings else [coords]
+                    for ri, ring in enumerate(use_rings[:6]):
+                        if len(ring) < 3:
+                            continue
+                        notice["subPolygons"].append(
+                            {
+                                "name": f"{full_id} Area {ri + 1}" if len(use_rings) > 1 else full_id,
+                                "category": "restricted_area",
+                                "coords": ring[:40],
+                                "points": [[c["lat"], c["lon"]] for c in ring[:40]],
+                            }
+                        )
+                    if notice["subPolygons"]:
+                        notice["isPolygon"] = True
                 notices.append(notice)
     print(f"  [+] JCG total plottable: {len(notices)}")
     return notices
