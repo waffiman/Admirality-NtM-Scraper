@@ -25,6 +25,11 @@ try:
 except ImportError:
     pdfplumber = None
 
+try:
+    from ntm_geometry import apply_geometry_to_notice
+except ImportError:
+    apply_geometry_to_notice = None
+
 # Base URLs
 BASE_URL = "https://msi.admiralty.co.uk"
 WEEKLY_URL = f"{BASE_URL}/NoticesToMariners/Weekly"
@@ -440,27 +445,11 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
         item_cancels = list(extract_cancellations(block_text, default_year=detected_year))
         cancelled_ids.update(item_cancels)
         
-        # 5. Geometry classification
-        sane = True
-        if len(coords) >= 2:
-            lats = [c["lat"] for c in coords]
-            lons = [c["lon"] for c in coords]
-            if (max(lats) - min(lats)) > 8 or (max(lons) - min(lons)) > 12:
-                sane = False
-        
-        # Check if sounding / depth / light table (discrete points, not a polygon)
-        is_sounding_table = bool(re.search(r'\b(?:Depth|Depths|Drying\s+height|Obstructions?|Wrecks?|Sounding)\s+Position\b', block_text, re.I))
-        
-        is_poly = len(coords) >= 3 and bool(POLYGON_KEYWORDS.search(block_text)) and sane and not is_sounding_table
-        is_line = len(coords) >= 2 and not is_poly and sane and bool(LINE_KEYWORDS.search(block_text)) and not is_sounding_table
-        
-        # Extract subPolygons if TSS or multi-area notice
+        # Extract subPolygons if TSS or multi-area notice (geometry kind via ntm_geometry)
         sub_polys = []
-        if is_poly or "traffic separation" in block_text.lower() or "separation zone" in block_text.lower():
+        if "traffic separation" in block_text.lower() or "separation zone" in block_text.lower() or POLYGON_KEYWORDS.search(block_text):
             sub_polys = extract_subpolygons_from_text(cur["fullId"], cur["subject"], block_text)
-            if len(sub_polys) > 1:
-                is_poly = True
-        
+
         notice_obj = {
             "id": cur["fullId"],
             "num": cur["num"],
@@ -471,8 +460,8 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
             "subject": cur["subject"],
             "charts": charts,
             "coords": coords,
-            "isPolygon": is_poly,
-            "isLine": is_line,
+            "isPolygon": False,
+            "isLine": False,
             "body": block_text[:1500].strip(),
             "cancels": item_cancels,
             "isCancelled": False,
@@ -481,7 +470,22 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
         }
         if sub_polys and len(sub_polys) > 1:
             notice_obj["subPolygons"] = sub_polys
-            
+        if apply_geometry_to_notice:
+            notice_obj = apply_geometry_to_notice(notice_obj)
+        else:
+            sane = True
+            if len(coords) >= 2:
+                lats = [c["lat"] for c in coords]
+                lons = [c["lon"] for c in coords]
+                if (max(lats) - min(lats)) > 8 or (max(lons) - min(lons)) > 12:
+                    sane = False
+            is_sounding_table = bool(re.search(
+                r"\b(?:Depth|Depths|Drying\s+height|Obstructions?|Wrecks?|Sounding)\s+Position\b",
+                block_text, re.I,
+            ))
+            notice_obj["isPolygon"] = len(coords) >= 3 and bool(POLYGON_KEYWORDS.search(block_text)) and sane and not is_sounding_table
+            notice_obj["isLine"] = len(coords) >= 2 and not notice_obj["isPolygon"] and sane and bool(LINE_KEYWORDS.search(block_text)) and not is_sounding_table
+
         results.append(notice_obj)
     
     return {
@@ -1181,7 +1185,7 @@ def build_global_navtex_notices() -> tuple:
             merge_navtex_deduped,
             normalize_warning_key,
         )
-        print("  [*] Scraping official JCG + Taiwan regional warnings...")
+        print("  [*] Scraping official regional warnings (JCG/Taiwan/AMSA/BSH)...")
         regional_official = scrape_regional_official_warnings()
     except Exception as e:
         print(f"  [!] Regional official warnings scrape: {e}")
@@ -1247,9 +1251,6 @@ def build_global_navtex_notices() -> tuple:
             except Exception:
                 pass
 
-        is_poly = (gtype == 3 and len(coords) >= 3) or (len(coords) >= 3 and any(k in desc.upper() for k in ["AREA BOUNDED", "BOUNDED BY", "WITHIN AREA"]))
-        is_line = (gtype == 2 and len(coords) >= 2) or (not is_poly and len(coords) >= 2 and any(k in desc.upper() for k in ["TRACKLINE", "CABLE", "PIPELINE", "JOINING"]))
-
         first_line = ""
         for ln in desc.splitlines():
             ln_s = ln.strip()
@@ -1280,8 +1281,8 @@ def build_global_navtex_notices() -> tuple:
             "coords": coords,
             "lat": first_lat,
             "lon": first_lon,
-            "isPolygon": is_poly,
-            "isLine": is_line,
+            "isPolygon": (gtype == 3 and len(coords) >= 3),
+            "isLine": (gtype == 2 and len(coords) >= 2),
             "body": desc[:1400],
             "rawText": desc[:1400],
             "published": published,
@@ -1293,6 +1294,8 @@ def build_global_navtex_notices() -> tuple:
         }
         if sub_polygons:
             notice_obj["subPolygons"] = sub_polygons
+        if apply_geometry_to_notice:
+            notice_obj = apply_geometry_to_notice(notice_obj, prefer_area=True)
         navtex_notices[raw_title] = notice_obj
 
     for bw in nga_warnings:
@@ -1334,9 +1337,6 @@ def build_global_navtex_notices() -> tuple:
             except Exception:
                 pass
 
-        is_poly = len(coords) >= 3 and any(k in text_body.upper() for k in ["AREA BOUNDED", "BOUNDED BY", "WITHIN AREA"])
-        is_line = not is_poly and len(coords) >= 2 and any(k in text_body.upper() for k in ["TRACKLINE", "CABLE", "PIPELINE", "JOINING"])
-
         lines = [ln.strip() for ln in text_body.splitlines() if ln.strip()]
         subj_line = lines[1] if len(lines) > 1 else (lines[0] if lines else "Broadcast Warning")
 
@@ -1357,8 +1357,8 @@ def build_global_navtex_notices() -> tuple:
             "coords": coords,
             "lat": first_lat,
             "lon": first_lon,
-            "isPolygon": is_poly,
-            "isLine": is_line,
+            "isPolygon": False,
+            "isLine": False,
             "body": text_body[:1400],
             "rawText": text_body[:1400],
             "published": issue_date,
@@ -1368,13 +1368,8 @@ def build_global_navtex_notices() -> tuple:
             "isCancelled": is_expired,
             "checkedForExport": not is_expired
         }
-        if is_poly:
-            notice_obj["subPolygons"] = [{
-                "name": full_id,
-                "category": "restricted_area",
-                "coords": coords,
-                "points": [[c["lat"], c["lon"]] for c in coords]
-            }]
+        if apply_geometry_to_notice:
+            notice_obj = apply_geometry_to_notice(notice_obj, prefer_area=True)
         navtex_notices[full_id] = notice_obj
 
     reconciled_count = 0
@@ -1414,9 +1409,13 @@ def build_global_navtex_notices() -> tuple:
         if regional_official:
             result_list.extend(regional_official)
 
+    if apply_geometry_to_notice:
+        result_list = [apply_geometry_to_notice(w, prefer_area=True) for w in result_list]
     active_cnt = sum(1 for w in result_list if not w.get("isCancelled"))
     cancelled_cnt = sum(1 for w in result_list if w.get("isCancelled"))
-    print(f"  [+] Total Plottable NAVTEX/NAVAREA Warnings: {len(result_list)} ({active_cnt} Active, {cancelled_cnt} Cancelled/Expired, {reconciled_count} Auto-Reconciled)")
+    poly_cnt = sum(1 for w in result_list if w.get("isPolygon") and not w.get("isCancelled"))
+    line_cnt = sum(1 for w in result_list if w.get("isLine") and not w.get("isCancelled"))
+    print(f"  [+] Total Plottable NAVTEX/NAVAREA Warnings: {len(result_list)} ({active_cnt} Active, {cancelled_cnt} Cancelled/Expired, {reconciled_count} Auto-Reconciled, {poly_cnt} poly, {line_cnt} line)")
     return result_list, list(all_cancelled_refs)
 
 
@@ -2151,6 +2150,8 @@ if __name__ == "__main__":
     if len(ukho_deduped) != len(existing_ukho_notices):
         print(f"  [+] UKHO NtM dedupe: {len(existing_ukho_notices)} → {len(ukho_deduped)}")
     existing_ukho_notices = ukho_deduped
+    if apply_geometry_to_notice:
+        existing_ukho_notices = [apply_geometry_to_notice(n) for n in existing_ukho_notices]
 
     combined_notices = existing_ukho_notices + navtex_list
     active_notices = [n for n in combined_notices if not n.get("isCancelled")]
@@ -2164,7 +2165,7 @@ if __name__ == "__main__":
         "metadata": {
             "generatedAt": datetime.datetime.now(timezone.utc).isoformat(),
             "scrapedAt": datetime.datetime.now(timezone.utc).isoformat(),
-            "source": "UKHO Admiralty Weekly NtM + Global NAVTEX/NAVAREA (JCG JHOD, Taiwan Navy, NautoShark, US NGA MSI)",
+            "source": "UKHO Admiralty Weekly NtM + Global NAVTEX/NAVAREA (JCG JHOD, Taiwan Navy, AMSA, BSH, NautoShark, US NGA MSI)",
             "weeklyBulletin": existing_meta.get("weeklyBulletin", f"{week_num}wknm{year_num}.pdf"),
             "weekNumber": week_num,
             "year": year_num,

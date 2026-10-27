@@ -13,17 +13,23 @@ no duplicates against NautoShark / NGA MSI feeds.
 Note: kaiho.mlit.go.jp robots.txt Disallow:/TUHO/ — we use polite UA + rate
 limits for navigational-safety MSI reuse; keep request volume low.
 
-Next official feeds to wire (same merge/dedupe pattern):
-  * AMSA (Australia) — NAVAREA X / coastal NAVTEX
-  * KHOA (Korea) — NAVAREA XI coastal
-  * China MSA regional 航行警告 pages — Zhejiang/Guangdong MSA
-  * SMA / BSH — Baltic / NAVAREA I coastal densification
-  * Taiwan MOTC MPB — secondary to Navy (UUID detail + PDF)
+Live official feeds (merged with dedupe):
+  * AMSA — NAVAREA X + AUSCOAST (MSI publication HTML)
+  * BSH — German North Sea / Baltic NAVTEX PDFs (NWN-NORD / NWN-OST)
+  * JCG JHOD — NAVTEX + NAVAREA XI
+  * Taiwan ROC Navy — NtM PDF
+
+Backlog (blocked / needs key or stable machine feed):
+  * KHOA — list API works; getHang.do currently 500 without portal session quirks
+  * China MSA regional 航行警告 — JS portals, no stable open JSON yet
+  * SMA Sweden — public NAVWARN URLs 404/timeout at last probe
+  * Taiwan MOTC MPB — secondary to Navy
 """
 
 from __future__ import annotations
 
 import datetime
+import html as html_lib
 import math
 import re
 import time
@@ -36,6 +42,11 @@ try:
 except ImportError:
     requests = None
 
+try:
+    from ntm_geometry import apply_geometry_to_notice
+except ImportError:
+    apply_geometry_to_notice = None
+
 USER_AGENT = (
     "Mozilla/5.0 (compatible; SetSailBot/1.0; +https://setsail-ai.vercel.app; "
     "navigational-safety research)"
@@ -46,6 +57,11 @@ JCG_DISP_CGI = "https://www1.kaiho.mlit.go.jp/TUHO/keiho/cgi/disp_warnings.cgi"
 JCG_WFS_CGI = "https://www1.kaiho.mlit.go.jp/TUHO/vpage/cgi-bin/WFS.cgi/"
 TW_NAVY_LIST = "https://navy.mnd.gov.tw/en/AboutUs/Partner_List.aspx?ID=30294"
 TW_NAVY_INFO = "https://navy.mnd.gov.tw/en/AboutUs/Partner_Info.aspx"
+AMSA_MSI_HOME = "https://www.operations.amsa.gov.au/AMSA.Web.MSIPublication/Home"
+BSH_NWN_PDFS = (
+    ("NORD", "https://www2.bsh.de/aktdat/nwn/nwn-nord.pdf"),
+    ("OST", "https://www2.bsh.de/aktdat/nwn/nwn-ost.pdf"),
+)
 
 # Active JCG warnings can span prior years — page instructs checking every year.
 JCG_YEAR_LOOKBACK = 8
@@ -91,6 +107,17 @@ def normalize_warning_key(raw: str) -> str:
     if m:
         suf = f"({m.group(2).upper()})" if m.group(2) else ""
         return f"TAIWAN NTM {int(m.group(1))}{suf}"
+    m = re.search(r"NAVAREA\s+X\s+(\d{1,4})\s*/\s*(\d{2,4})", s, re.I)
+    if m:
+        return f"NAVAREA X {int(m.group(1))}/{m.group(2)[-2:]}"
+    m = re.search(r"AUSCOAST\s+(?:WARNING\s+)?(?:AREA\s+)?([A-H])?\s*(\d{1,4})\s*/\s*(\d{2,4})", s, re.I)
+    if m:
+        area = (m.group(1) or "").upper()
+        return f"AUSCOAST {area} {int(m.group(2))}/{m.group(3)[-2:]}".replace("  ", " ").strip()
+    m = re.search(r"(?:NAVIGATIONAL\s+WARNING|NWN)\s*(?:NO\.?\s*)?(\d{1,4})\b", s, re.I)
+    if m and ("BSH" in s or "NORD" in s or "OST" in s or "GERMAN" in s):
+        sea = "NORD" if "NORD" in s or "NORTH" in s else ("OST" if "OST" in s or "BALTIC" in s else "DE")
+        return f"BSH {sea} {int(m.group(1))}"
     return s
 
 
@@ -122,6 +149,18 @@ def extract_coords_from_text(text: str) -> list:
             r"北緯\s*(\d{1,2})\s*[°º]\s*(\d{1,2})\s*['′]\s*(\d{1,2}(?:\.\d+)?)\s*[\"″]?\s*"
             r"[，,]\s*東經\s*(\d{1,3})\s*[°º]\s*(\d{1,2})\s*['′]\s*(\d{1,2}(?:\.\d+)?)\s*[\"″]?",
         ),
+        # Classic NAVTEX / AMSA: 13-06.14S 161-11.58E  (deg-min.dec)
+        re.compile(
+            r"(\d{1,2})\s*[-–]\s*(\d{1,2}(?:[.,]\d+)?)\s*([NS])\s*[,;]?\s+"
+            r"(\d{1,3})\s*[-–]\s*(\d{1,2}(?:[.,]\d+)?)\s*([EW])",
+            re.I,
+        ),
+        # German / BSH style: 54-07,3N 006-33,0E
+        re.compile(
+            r"(\d{1,2})\s*[-–]\s*(\d{1,2}(?:[.,]\d+)?)\s*([NS])\s+"
+            r"(\d{1,3})\s*[-–]\s*(\d{1,2}(?:[.,]\d+)?)\s*([EW])",
+            re.I,
+        ),
         # 24-23-15N 130-47-52E  or 24-23.15N 130-47.52E
         re.compile(
             r"(\d{1,2})-(\d{1,2})(?:-(\d{1,2}(?:\.\d+)?))?([NS])\s+"
@@ -140,7 +179,7 @@ def extract_coords_from_text(text: str) -> list:
     for pat_i, pat in enumerate(patterns):
         for m in pat.finditer(text):
             try:
-                if pat_i in (0,):
+                if pat_i == 0:
                     lat = int(m.group(1)) + int(m.group(2)) / 60.0 + float(m.group(3)) / 3600.0
                     lat_h = m.group(4).upper()
                     lon = int(m.group(5)) + int(m.group(6)) / 60.0 + float(m.group(7)) / 3600.0
@@ -149,16 +188,22 @@ def extract_coords_from_text(text: str) -> list:
                     lat = int(m.group(1)) + int(m.group(2)) / 60.0 + float(m.group(3)) / 3600.0
                     lon = int(m.group(4)) + int(m.group(5)) / 60.0 + float(m.group(6)) / 3600.0
                     lat_h, lon_h = "N", "E"
-                elif pat_i == 2:
+                elif pat_i in (2, 3):
+                    lat = int(m.group(1)) + float(m.group(2).replace(",", ".")) / 60.0
+                    lat_h = m.group(3).upper()
+                    lon = int(m.group(4)) + float(m.group(5).replace(",", ".")) / 60.0
+                    lon_h = m.group(6).upper()
+                elif pat_i == 4:
                     lat_d, lat_m = int(m.group(1)), float(m.group(2))
                     lat_s = float(m.group(3)) if m.group(3) else 0.0
                     lat_h = m.group(4).upper()
                     lon_d, lon_m = int(m.group(5)), float(m.group(6))
                     lon_s = float(m.group(7)) if m.group(7) else 0.0
                     lon_h = m.group(8).upper()
-                    lat = lat_d + lat_m / 60.0 + (0 if lat_s >= 60 else lat_s / 3600.0)
-                    lon = lon_d + lon_m / 60.0 + (0 if lon_s >= 60 else lon_s / 3600.0)
-                elif pat_i == 3:
+                    # If third group looks like decimal minutes continuation already in group2, treat as seconds only if < 60
+                    lat = lat_d + lat_m / 60.0 + (lat_s / 3600.0 if lat_s < 60 else 0.0)
+                    lon = lon_d + lon_m / 60.0 + (lon_s / 3600.0 if lon_s < 60 else 0.0)
+                elif pat_i == 5:
                     lat = int(m.group(1)) + float(m.group(2)) / 60.0
                     lat_h = m.group(3).upper()
                     lon = int(m.group(4)) + float(m.group(5)) / 60.0
@@ -184,6 +229,12 @@ def extract_coords_from_text(text: str) -> list:
             except Exception:
                 continue
     return coords
+
+
+def _finalize_notice_geometry(notice: dict) -> dict:
+    if apply_geometry_to_notice:
+        return apply_geometry_to_notice(notice)
+    return notice
 
 
 def _jcg_list_year(session, warning_type: str, year: int, lang: str = "EG") -> list:
@@ -380,13 +431,6 @@ def scrape_jcg_warnings(years: Iterable[int] | None = None, fetch_details: bool 
                     coords = extract_coords_from_text(body)
                 if not coords:
                     continue
-                is_poly = len(coords) >= 3 and (
-                    len(rings) > 0
-                    or any(k in body.upper() for k in ("BOUNDED", "AREA", "JOINING", "ENCLOSED"))
-                )
-                is_line = (not is_poly) and len(coords) >= 2 and any(
-                    k in body.upper() for k in ("JOINING", "CABLE", "PIPELINE", "TRACK")
-                )
                 notice = {
                     "id": full_id,
                     "noticeNumber": full_id,
@@ -404,8 +448,8 @@ def scrape_jcg_warnings(years: Iterable[int] | None = None, fetch_details: bool 
                     "coords": coords[:40],
                     "lat": coords[0]["lat"],
                     "lon": coords[0]["lon"],
-                    "isPolygon": is_poly,
-                    "isLine": is_line,
+                    "isPolygon": False,
+                    "isLine": False,
                     "body": body[:1400],
                     "rawText": body[:1400],
                     "published": wfs.get("published") or "",
@@ -419,15 +463,14 @@ def scrape_jcg_warnings(years: Iterable[int] | None = None, fetch_details: bool 
                 }
                 for cm in re.finditer(r"CANCEL\s+(?:THIS\s+MSG\s+)?(\d{1,4})\s*/\s*(\d{2,4})", body, re.I):
                     notice["cancels"].append(f"{int(cm.group(1))}/{cm.group(2)[-2:]}")
-                if is_poly or len(rings) > 1:
+                if len(rings) > 1:
                     notice["subPolygons"] = []
-                    use_rings = rings if rings else [coords]
-                    for ri, ring in enumerate(use_rings[:6]):
+                    for ri, ring in enumerate(rings[:6]):
                         if len(ring) < 3:
                             continue
                         notice["subPolygons"].append(
                             {
-                                "name": f"{full_id} Area {ri + 1}" if len(use_rings) > 1 else full_id,
+                                "name": f"{full_id} Area {ri + 1}",
                                 "category": "restricted_area",
                                 "coords": ring[:40],
                                 "points": [[c["lat"], c["lon"]] for c in ring[:40]],
@@ -435,7 +478,7 @@ def scrape_jcg_warnings(years: Iterable[int] | None = None, fetch_details: bool 
                         )
                     if notice["subPolygons"]:
                         notice["isPolygon"] = True
-                notices.append(notice)
+                notices.append(_finalize_notice_geometry(notice))
     print(f"  [+] JCG total plottable: {len(notices)}")
     return notices
 
@@ -555,7 +598,6 @@ def scrape_taiwan_navy_ntm(max_items: int = 60, fetch_details: bool = True) -> l
 
         suf = f"({tflag})" if tflag in ("T", "P") else ""
         full_id = f"TAIWAN NTM {int(num)}{suf}/{yr2}"
-        is_poly = len(coords) >= 3
         notice = {
             "id": full_id,
             "noticeNumber": full_id,
@@ -575,7 +617,7 @@ def scrape_taiwan_navy_ntm(max_items: int = 60, fetch_details: bool = True) -> l
             "coords": coords[:40],
             "lat": coords[0]["lat"],
             "lon": coords[0]["lon"],
-            "isPolygon": is_poly,
+            "isPolygon": False,
             "isLine": False,
             "body": body[:1400],
             "rawText": body[:1400],
@@ -589,22 +631,185 @@ def scrape_taiwan_navy_ntm(max_items: int = 60, fetch_details: bool = True) -> l
             "officialSource": True,
             "pdfUrl": pdf_url or "",
         }
-        if is_poly:
-            notice["subPolygons"] = [
-                {
-                    "name": full_id,
-                    "category": "restricted_area",
-                    "coords": coords[:40],
-                    "points": [[c["lat"], c["lon"]] for c in coords[:40]],
-                }
-            ]
-        notices.append(notice)
+        notices.append(_finalize_notice_geometry(notice))
     print(f"  [+] Taiwan Navy plottable: {len(notices)}")
     return notices
 
 
+def scrape_amsa_msi_warnings() -> list:
+    """AMSA NAVAREA X + AUSCOAST warnings from live MSI publication HTML."""
+    if requests is None:
+        print("  [!] AMSA scrape skipped — requests missing")
+        return []
+    session = _session()
+    try:
+        r = session.get(AMSA_MSI_HOME, timeout=45)
+        r.raise_for_status()
+    except Exception as e:
+        print(f"  [!] AMSA MSI fetch failed: {e}")
+        return []
+
+    plain = html_lib.unescape(re.sub(r"<[^>]+>", "\n", r.text))
+    plain = re.sub(r"[ \t]+", " ", plain)
+    blocks = re.findall(r"(SECURITE[\s\S]*?)NNNN", plain, re.I)
+    notices = []
+    now = datetime.datetime.now(datetime.timezone.utc)
+    yr2 = str(now.year)[-2:]
+    for block in blocks:
+        body = block.strip()
+        # Skip "warnings in force" summary-only messages (no actionable geometry usually)
+        if re.search(r"WARNINGS\s+IN\s+FORCE\s+AT", body, re.I) and not re.search(
+            r"ALONG\s+THE\s+FOLLOWING|BOUNDED|POSITION\s+\d|WITHIN\s+\d", body, re.I
+        ):
+            # Still keep if it has coords (rare)
+            if len(extract_coords_from_text(body)) < 2:
+                continue
+        m_nav = re.search(r"NAVAREA\s+X\s+(\d{1,4})\s*/\s*(\d{2,4})", body, re.I)
+        m_aus = re.search(
+            r"AUSCOAST\s+WARNING\s+(\d{1,4})\s*/\s*(\d{2,4})", body, re.I
+        )
+        if m_nav:
+            full_id = f"NAVAREA X {int(m_nav.group(1))}/{m_nav.group(2)[-2:]}"
+            region = "AMSA NAVAREA X"
+            navarea = "X"
+        elif m_aus:
+            full_id = f"AUSCOAST {int(m_aus.group(1))}/{m_aus.group(2)[-2:]}"
+            region = "AMSA AUSCOAST"
+            navarea = "X"
+        else:
+            continue
+        coords = extract_coords_from_text(body)
+        if not coords:
+            continue
+        first_line = ""
+        for ln in body.splitlines():
+            ln_s = ln.strip()
+            if (
+                ln_s
+                and not ln_s.upper().startswith("SECURITE")
+                and not ln_s.upper().startswith("FM ")
+                and "NAVAREA X" not in ln_s.upper()
+                and "AUSCOAST WARNING" not in ln_s.upper()
+            ):
+                first_line = ln_s
+                break
+        notice = {
+            "id": full_id,
+            "noticeNumber": full_id,
+            "num": re.search(r"(\d{1,4})", full_id).group(1),
+            "type": "NAVTEX",
+            "source": "AMSA / NAVAREA X",
+            "year": yr2,
+            "navarea": navarea,
+            "country": "Australia / NAVAREA X",
+            "region": region,
+            "category": "Navigational Warning",
+            "subject": f"[AMSA] {first_line[:135] or full_id}",
+            "title": first_line[:180] or full_id,
+            "charts": [],
+            "coords": coords[:40],
+            "lat": coords[0]["lat"],
+            "lon": coords[0]["lon"],
+            "isPolygon": False,
+            "isLine": False,
+            "body": body[:1400],
+            "rawText": body[:1400],
+            "published": "",
+            "expires": "",
+            "cancels": [],
+            "status": "ACTIVE",
+            "isCancelled": False,
+            "checkedForExport": True,
+            "dedupeKey": normalize_warning_key(full_id),
+            "officialSource": True,
+        }
+        for cm in re.finditer(r"CANCEL\s+(?:THIS\s+MSG\s+)?(\d{1,4})\s*/\s*(\d{2,4})", body, re.I):
+            notice["cancels"].append(f"{int(cm.group(1))}/{cm.group(2)[-2:]}")
+        notices.append(_finalize_notice_geometry(notice))
+    print(f"  [+] AMSA plottable: {len(notices)}")
+    return notices
+
+
+def scrape_bsh_nwn_warnings() -> list:
+    """BSH German North Sea / Baltic NAVTEX PDFs."""
+    if requests is None:
+        print("  [!] BSH scrape skipped — requests missing")
+        return []
+    session = _session()
+    notices = []
+    now = datetime.datetime.now(datetime.timezone.utc)
+    yr2 = str(now.year)[-2:]
+    for sea, url in BSH_NWN_PDFS:
+        try:
+            time.sleep(0.3)
+            r = session.get(url, timeout=45)
+            if r.status_code != 200 or r.content[:4] != b"%PDF":
+                print(f"  [!] BSH {sea} PDF HTTP {r.status_code}")
+                continue
+            text = _extract_pdf_text(r.content)
+        except Exception as e:
+            print(f"  [!] BSH {sea} failed: {e}")
+            continue
+        if not text:
+            continue
+        parts = re.split(r"(?=NAVIGATIONAL\s+WARNING\s+NO\.?\s*\d+)", text, flags=re.I)
+        for part in parts:
+            m = re.search(r"NAVIGATIONAL\s+WARNING\s+NO\.?\s*(\d{1,4})", part, re.I)
+            if not m:
+                continue
+            num = int(m.group(1))
+            body = part.strip()
+            coords = extract_coords_from_text(body)
+            if not coords:
+                continue
+            # Skip pure "warnings in force" lists
+            if re.search(r"WARNINGS\s+IN\s+FORCE", body, re.I) and len(coords) < 2:
+                continue
+            full_id = f"BSH {sea} {num}/{yr2}"
+            first = ""
+            for ln in body.splitlines():
+                ln_s = ln.strip()
+                if ln_s and not re.match(r"NAVIGATIONAL\s+WARNING", ln_s, re.I):
+                    first = ln_s
+                    break
+            notice = {
+                "id": full_id,
+                "noticeNumber": full_id,
+                "num": str(num),
+                "type": "NAVTEX",
+                "source": "BSH / German NAVTEX",
+                "year": yr2,
+                "navarea": "I",
+                "country": "Germany / NAVAREA I",
+                "region": f"BSH {sea} ({'North Sea' if sea == 'NORD' else 'Baltic'})",
+                "category": "Navigational Warning",
+                "subject": f"[BSH {sea}] {first[:135] or full_id}",
+                "title": first[:180] or full_id,
+                "charts": [],
+                "coords": coords[:40],
+                "lat": coords[0]["lat"],
+                "lon": coords[0]["lon"],
+                "isPolygon": False,
+                "isLine": False,
+                "body": body[:1400],
+                "rawText": body[:1400],
+                "published": "",
+                "expires": "",
+                "cancels": [],
+                "status": "ACTIVE",
+                "isCancelled": False,
+                "checkedForExport": True,
+                "dedupeKey": normalize_warning_key(f"BSH {sea} {num}"),
+                "officialSource": True,
+            }
+            notices.append(_finalize_notice_geometry(notice))
+        print(f"  [+] BSH {sea} plottable so far: {len(notices)}")
+    print(f"  [+] BSH total plottable: {len(notices)}")
+    return notices
+
+
 def scrape_regional_official_warnings() -> list:
-    """Entry point: JCG + Taiwan official warnings."""
+    """Entry point: JCG + Taiwan + AMSA + BSH official warnings."""
     out = []
     try:
         out.extend(scrape_jcg_warnings())
@@ -614,6 +819,17 @@ def scrape_regional_official_warnings() -> list:
         out.extend(scrape_taiwan_navy_ntm())
     except Exception as e:
         print(f"  [!] Taiwan scrape failed: {e}")
+    try:
+        out.extend(scrape_amsa_msi_warnings())
+    except Exception as e:
+        print(f"  [!] AMSA scrape failed: {e}")
+    try:
+        out.extend(scrape_bsh_nwn_warnings())
+    except Exception as e:
+        print(f"  [!] BSH scrape failed: {e}")
+    # Geometry pass (idempotent) for anything that skipped finalize
+    if apply_geometry_to_notice:
+        out = [apply_geometry_to_notice(n) for n in out]
     return out
 
 

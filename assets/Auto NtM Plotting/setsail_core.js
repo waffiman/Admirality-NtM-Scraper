@@ -4079,6 +4079,113 @@ if (!window._navtexExpireInterval) {
   window._navtexExpireInterval = setInterval(runNavtexAutoExpireSweep, 30000);
 }
 
+/** Client-side geometry classifier — mirrors ntm_geometry.py (no Cohere). */
+function setrouteHaversineNm(lat1, lon1, lat2, lon2) {
+  const R = 3440.065;
+  const p1 = lat1 * Math.PI / 180, p2 = lat2 * Math.PI / 180;
+  const dphi = (lat2 - lat1) * Math.PI / 180;
+  const dl = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dphi / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+function classifyNoticeGeometryClient(notice) {
+  if (!notice || !Array.isArray(notice.coords) || !notice.coords.length) return notice;
+  if (notice.geometryKind && notice.geometryConfidence >= 0.7) return notice;
+  const coords = notice.coords.filter((c) => c && Number.isFinite(c.lat) && Number.isFinite(c.lon));
+  const text = `${notice.subject || ""} ${notice.title || ""} ${notice.body || ""} ${notice.rawText || ""} ${notice.category || ""}`;
+  const n = coords.length;
+  const discrete = /\b(?:BUOYAGE|LIGHTS?|BEACONS?|ROCKS?|WRECKS?|OBSTRUCTIONS?|SOUNDING|DEPTHS?|NM\s+BLOCKS?|RIG\s*LIST|MODU|DRILLING\s+UNITS?)\b/i.test(text);
+  const polyKw = /AREA\s+BOUNDED|BOUNDED\s+BY|WITHIN\s+(?:THE\s+)?AREA|RESTRICTED\s+AREA|PROHIBITED\s+AREA|EXCLUSION|FIRING\s+(?:AREA|EXERCISE)|JOINING\s+THE\s+FOLLOWING|THE\s+FOLLOWING\s+(?:POSITIONS|CO[- ]?ORDINATES)/i.test(text);
+  const lineKw = /\bJOINING\b|TRACKLINE|CENT(?:ER|RE)LINE|PIPELINE|CABLE\s+(?:LAY|ROUTE|RECOVERY)|ALONG\s+THE\s+FOLLOWING\s+LINE|CORRIDOR/i.test(text);
+  const circleM = text.match(/(?:WITHIN|RADIUS|IN\s+A\s+RADIUS\s+OF)\s+(\d+(?:\.\d+)?)\s*(?:NM|N\.?M\.?|MILES?)/i);
+  const src = String(notice.source || "");
+  const preferArea = String(notice.type || "").toUpperCase() === "NAVTEX" ||
+    /NAVAREA|NAVTEX|JCG|TAIWAN|AMSA|BSH|MSA|KHOA/i.test(src);
+
+  const closeRing = (arr) => {
+    if (!arr.length) return arr;
+    const a = arr[0], b = arr[arr.length - 1];
+    if (setrouteHaversineNm(a.lat, a.lon, b.lat, b.lon) > 1.5) return arr.concat([{ lat: a.lat, lon: a.lon, dms: a.dms || "" }]);
+    return arr;
+  };
+  let span = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      span = Math.max(span, setrouteHaversineNm(coords[i].lat, coords[i].lon, coords[j].lat, coords[j].lon));
+    }
+  }
+
+  if (circleM && n === 1) {
+    const rad = parseFloat(circleM[1]);
+    if (rad >= 0.1 && rad <= 120) {
+      const lat0 = coords[0].lat, lon0 = coords[0].lon;
+      const dlat = rad / 60, dlon = (rad / 60) / Math.max(0.2, Math.abs(Math.cos(lat0 * Math.PI / 180)));
+      const ring = [];
+      for (let i = 0; i < 24; i++) {
+        const ang = 2 * Math.PI * i / 24;
+        ring.push({ lat: +(lat0 + dlat * Math.sin(ang)).toFixed(5), lon: +(lon0 + dlon * Math.cos(ang)).toFixed(5) });
+      }
+      ring.push({ lat: ring[0].lat, lon: ring[0].lon });
+      notice.coords = ring;
+      notice.isPolygon = true;
+      notice.isLine = false;
+      notice.geometryKind = "circle";
+      notice.geometryConfidence = 0.95;
+      notice.subPolygons = [{ name: notice.id || "Circle", category: "radius_area", coords: ring, points: ring.map((c) => [c.lat, c.lon]), radiusNm: rad, center: [lat0, lon0] }];
+      return notice;
+    }
+  }
+  if (discrete && !polyKw) {
+    notice.isPolygon = false;
+    notice.isLine = false;
+    notice.geometryKind = "points";
+    notice.geometryConfidence = 0.9;
+    return notice;
+  }
+  if (n === 1) {
+    notice.isPolygon = false;
+    notice.isLine = false;
+    notice.geometryKind = "points";
+    return notice;
+  }
+  if ((polyKw && n >= 3 && span <= 250) || (preferArea && n >= 3 && span < 80 && !discrete)) {
+    const ring = closeRing(coords);
+    notice.coords = ring;
+    notice.isPolygon = true;
+    notice.isLine = false;
+    notice.geometryKind = "polygon";
+    notice.geometryConfidence = polyKw ? 0.95 : 0.7;
+    if (!notice.subPolygons || notice.subPolygons.length <= 1) {
+      notice.subPolygons = [{ name: notice.id || "Area", category: "restricted_area", coords: ring, points: ring.map((c) => [c.lat, c.lon]) }];
+    }
+    return notice;
+  }
+  if ((lineKw && n >= 2) || n === 2) {
+    notice.isPolygon = false;
+    notice.isLine = true;
+    notice.geometryKind = "line";
+    notice.geometryConfidence = 0.9;
+    return notice;
+  }
+  if (n >= 3 && span <= 250 && preferArea) {
+    const ring = closeRing(coords);
+    notice.coords = ring;
+    notice.isPolygon = true;
+    notice.isLine = false;
+    notice.geometryKind = "polygon";
+    notice.geometryConfidence = 0.72;
+    if (!notice.subPolygons || notice.subPolygons.length <= 1) {
+      notice.subPolygons = [{ name: notice.id || "Area", category: "restricted_area", coords: ring, points: ring.map((c) => [c.lat, c.lon]) }];
+    }
+  }
+  return notice;
+}
+function reclassifyNoticesGeometry(list) {
+  if (!Array.isArray(list)) return list;
+  return list.map((n) => classifyNoticeGeometryClient(n));
+}
+window.classifyNoticeGeometryClient = classifyNoticeGeometryClient;
+
 function addNoticesToStore(newNotices, cancelledIds = []) {
   const overrides = getNoticeOverridesMap();
   if (cancelledIds && cancelledIds.length > 0) {
@@ -4142,7 +4249,7 @@ function loadStoreFromStorage() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        NTM_STORE = parsed;
+        NTM_STORE = reclassifyNoticesGeometry(parsed);
         window.NTM_STORE = NTM_STORE;
         reconcileAndApplyNoticeOverrides();
         const activeCount = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
@@ -4200,7 +4307,7 @@ async function loadRemoteNoticesJson(showFeedback = false) {
     }
 
     if (data && Array.isArray(data.notices) && data.notices.length > 0) {
-      NTM_STORE = data.notices;
+      NTM_STORE = reclassifyNoticesGeometry(data.notices);
       window.NTM_STORE = NTM_STORE;
       reconcileAndApplyNoticeOverrides();
       saveStoreToStorage();
