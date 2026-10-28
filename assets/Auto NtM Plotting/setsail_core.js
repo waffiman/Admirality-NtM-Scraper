@@ -808,10 +808,56 @@ async function applyAisHitToVessel(t, toastMsg) {
 async function findAisTargetByMmsi(mmsiRaw) {
   const mmsi = String(mmsiRaw || "").replace(/\D/g, "");
   if (mmsi.length < 5) return null;
+
+  // 1) Check active live stream targets
+  if (typeof window !== "undefined" && window.aisStreamTargets && window.aisStreamTargets[mmsi]) {
+    const t = window.aisStreamTargets[mmsi];
+    if (t && Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon))) {
+      return {
+        name: t.name || ("MMSI " + mmsi),
+        mmsi: mmsi,
+        lat: Number(t.lat),
+        lon: Number(t.lon),
+        sog: t.sog != null ? Number(t.sog) : null,
+        cog: t.cog != null ? Number(t.cog) : null,
+        heading: t.heading != null ? Number(t.heading) : null,
+        shipType: t.shipType || t.type || "",
+        destination: t.destination || "",
+        callSign: t.callSign || "",
+        source: t.source || "AISStream"
+      };
+    }
+  }
+
+  // 2) Check live AIS snapshot
+  if (typeof window !== "undefined" && typeof window.getAisTargetsSnapshot === "function") {
+    try {
+      const snap = window.getAisTargetsSnapshot(2000) || [];
+      const st = snap.find((x) => String(x.mmsi) === mmsi && Number.isFinite(Number(x.lat)));
+      if (st) {
+        return {
+          name: st.name || ("MMSI " + mmsi),
+          mmsi: mmsi,
+          lat: Number(st.lat),
+          lon: Number(st.lon),
+          sog: st.sog != null ? Number(st.sog) : null,
+          cog: st.cog != null ? Number(st.cog) : null,
+          heading: st.heading != null ? Number(st.heading) : null,
+          shipType: st.shipType || "",
+          destination: st.destination || "",
+          callSign: st.callSign || "",
+          source: st.source || "AIS"
+        };
+      }
+    } catch (eSnap) {}
+  }
+
+  // 3) Check indexed names / zone cache (only if coordinates present)
   const idx = await ensureAisNameIndex();
-  let hit = (idx || []).find((t) => String(t.mmsi || "") === mmsi);
+  let hit = (idx || []).find((t) => String(t.mmsi || "") === mmsi && Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon)));
   if (hit) return hit;
-  // Deep scan zone files (in case index still loading / stale)
+
+  // Deep scan zone files
   try {
     const man = await fetch("ais/zones/index.json?t=" + Date.now(), { cache: "no-store" }).then((r) =>
       r.ok ? r.json() : null
@@ -822,13 +868,13 @@ async function findAisTargetByMmsi(mmsiRaw) {
         const geo = await fetch(z.file + "?t=" + Date.now(), { cache: "no-store" }).then((r) =>
           r.ok ? r.json() : null
         );
-        const t = ((geo && geo.targets) || []).find((x) => String(x.mmsi) === mmsi);
+        const t = ((geo && geo.targets) || []).find((x) => String(x.mmsi) === mmsi && Number.isFinite(Number(x.lat)));
         if (t) {
           return {
             name: t.name || ("MMSI " + mmsi),
             mmsi,
-            lat: t.lat,
-            lon: t.lon,
+            lat: Number(t.lat),
+            lon: Number(t.lon),
             sog: t.sog,
             cog: t.cog,
             heading: t.heading,
@@ -841,17 +887,21 @@ async function findAisTargetByMmsi(mmsiRaw) {
       } catch (e) { /* next zone */ }
     }
   } catch (e2) { /* ignore */ }
-  // Live refresh path (Open Waters / Digitraffic) using temporary vessel context
+
+  // Live refresh path (Open Waters / Digitraffic)
   const prev = userVessel;
   userVessel = Object.assign({}, prev || {}, { mmsi: mmsi });
   try {
     const live = await fetchOwnVesselAisUpdate();
-    if (live) return live;
+    if (live && Number.isFinite(Number(live.lat)) && Number.isFinite(Number(live.lon))) return live;
   } catch (e3) { /* ignore */ }
   finally {
     userVessel = prev;
   }
-  // Registry seed for own ship
+
+  // Fallback to static registry seed if no live coordinates found yet
+  let staticHit = (idx || []).find((t) => String(t.mmsi || "") === mmsi);
+  if (staticHit) return staticHit;
   if (mmsi === "636024827") {
     return {
       name: "IINO INEOS VESTA",
@@ -863,6 +913,43 @@ async function findAisTargetByMmsi(mmsiRaw) {
   }
   return null;
 }
+
+function syncMyVesselFromLiveAis(t) {
+  if (!t || !window.userVessel) return;
+  const lat = Number(t.lat != null ? t.lat : t.latitude);
+  const lon = Number(t.lon != null ? t.lon : t.longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+  const prev = window.userVessel || {};
+  const updated = Object.assign({}, prev, {
+    lat: lat,
+    lon: lon,
+    sog: t.sog != null ? Number(t.sog) : prev.sog,
+    cog: t.cog != null ? Number(t.cog) : prev.cog,
+    heading: t.heading != null && t.heading < 360 ? Number(t.heading) : prev.heading,
+    shipType: t.shipType || t.type || prev.shipType,
+    destination: t.destination || prev.destination,
+    callSign: t.callSign || prev.callSign,
+    name: t.name || prev.name,
+    source: "AIS",
+    aisRefreshedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+  window.userVessel = updated;
+  if (typeof persistUserVessel === "function") persistUserVessel();
+
+  if (window.leafletMap && window.leafletVesselLayer && typeof plotUserVessel === "function") {
+    plotUserVessel(lat, lon, "AIS", true);
+  }
+
+  if (typeof syncVesselFieldsFromProfile === "function") {
+    syncVesselFieldsFromProfile(updated);
+  }
+  if (typeof updateHomeVesselHudLabel === "function") {
+    updateHomeVesselHudLabel();
+  }
+}
+window.syncMyVesselFromLiveAis = syncMyVesselFromLiveAis;
 
 function bindVesselNameAutocomplete(which) {
   const m = vesselFormMap(which);
@@ -5280,8 +5367,8 @@ function initMapContextMenu(map) {
 
   const popup = L.popup({
     className: "ss-map-ctx-popup",
-    maxWidth: 320,
-    minWidth: 260,
+    maxWidth: 268,
+    minWidth: 210,
     autoPan: true,
     closeButton: true
   })
@@ -5294,26 +5381,20 @@ function initMapContextMenu(map) {
   function renderMainMenu() {
     container.innerHTML =
       '<div class="ss-ctx-menu">' +
-        '<div class="ss-ctx-header">' +
-          '<div class="ss-ctx-brand-title">' +
-            '<svg viewBox="0 0 24 24" class="ss-ctx-brand-icon"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></svg>' +
-            '<span>POSITION EPHEMERIS</span>' +
-          '</div>' +
-        '</div>' +
         '<div class="ss-ctx-actions">' +
           '<button type="button" class="ss-ctx-btn" id="btnCtxVariation">' +
             '<div class="ss-ctx-btn-left">' +
-              '<span class="ss-ctx-emoji">🧭</span>' +
+              '<span class="ss-ctx-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><polygon points="12 4.2 13.4 10.6 12 12 10.6 10.6" fill="currentColor"/><polygon points="12 19.8 10.6 13.4 12 12 13.4 13.4" fill="currentColor" opacity="0.45"/><circle cx="12" cy="12" r="1.5" fill="#f05a36"/></svg></span>' +
               '<span class="ss-ctx-btn-label">Variation</span>' +
             '</div>' +
-            '<span class="ss-ctx-arrow">&rarr;</span>' +
+            '<span class="ss-ctx-arrow">›</span>' +
           '</button>' +
           '<button type="button" class="ss-ctx-btn" id="btnCtxSun">' +
             '<div class="ss-ctx-btn-left">' +
-              '<span class="ss-ctx-emoji">🌅</span>' +
+              '<span class="ss-ctx-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 15.5c2.2-1.4 4.4-2.1 8-2.1s5.8.7 8 2.1" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"/><circle cx="12" cy="9.2" r="3.1" fill="none" stroke="currentColor" stroke-width="1.55"/><path d="M12 3.4v1.4M7.2 5.6l1 1M16.8 5.6l-1 1" stroke="#f05a36" stroke-width="1.45" stroke-linecap="round"/></svg></span>' +
               '<span class="ss-ctx-btn-label">Sunrise / Sunset</span>' +
             '</div>' +
-            '<span class="ss-ctx-arrow">&rarr;</span>' +
+            '<span class="ss-ctx-arrow">›</span>' +
           '</button>' +
         '</div>' +
       '</div>';
@@ -5338,21 +5419,16 @@ function initMapContextMenu(map) {
   }
 
   function renderVariationView() {
-    const varInfo = getMapPositionVariation(lat, lon, new Date());
-    let decValStr = "—";
-    let ecdisTag = "WMM 2025-2030";
-    let isEast = true;
-    let annDrift = "—";
-
-    if (varInfo && Number.isFinite(varInfo.dec)) {
-      const dec = varInfo.dec;
-      isEast = dec >= 0;
-      decValStr = Math.abs(dec).toFixed(1) + "° " + (isEast ? "E" : "W");
-      ecdisTag = varInfo.ecdisTag || ("[" + Math.abs(Math.round(dec)) + "°" + (isEast ? "E" : "W") + "]");
-      if (varInfo.annMin != null) {
-        annDrift = (varInfo.annMin >= 0 ? "+" : "") + varInfo.annMin + "' / yr";
-      }
-    }
+    const varInfo = computePositionVariation(lat, lon);
+    const decVal = varInfo ? varInfo.decDeg : 0;
+    const isEast = decVal >= 0;
+    const absDeg = Math.abs(decVal);
+    const dInt = Math.floor(absDeg);
+    const mFrac = ((absDeg - dInt) * 60).toFixed(1);
+    const decValStr = `${dInt}° ${mFrac}' ${isEast ? "E" : "W"}`;
+    const annualChangeStr = varInfo && varInfo.annualChangeMin != null
+      ? (varInfo.annualChangeMin >= 0 ? `+${varInfo.annualChangeMin.toFixed(1)}'/yr` : `${varInfo.annualChangeMin.toFixed(1)}'/yr`)
+      : "0.0'/yr";
 
     container.innerHTML =
       '<div class="ss-ctx-detail">' +
@@ -5363,18 +5439,8 @@ function initMapContextMenu(map) {
         '<div class="ss-ctx-stat-card">' +
           '<div class="ss-ctx-stat-val ' + (isEast ? "east" : "west") + '">' + decValStr + '</div>' +
           '<div class="ss-ctx-stat-lbl">World Magnetic Model 2025–2030</div>' +
+          '<div class="ss-ctx-stat-sub">Annual Change: <b>' + annualChangeStr + '</b></div>' +
         '</div>' +
-        '<div class="ss-ctx-row">' +
-          '<span class="ss-ctx-row-lbl">ECDIS / Chart Tag</span>' +
-          '<span class="ss-ctx-tag">' + ecdisTag + '</span>' +
-        '</div>' +
-        '<div class="ss-ctx-row">' +
-          '<span class="ss-ctx-row-lbl">Model Epoch</span>' +
-          '<span class="ss-ctx-val">2025.0 (NOAA / NGA / BGS)</span>' +
-        '</div>' +
-        (annDrift !== "—"
-          ? '<div class="ss-ctx-row"><span class="ss-ctx-row-lbl">Annual Change</span><span class="ss-ctx-val">' + annDrift + '</span></div>'
-          : "") +
       '</div>';
 
     const backBtn = container.querySelector("#btnCtxBack");
@@ -5389,7 +5455,7 @@ function initMapContextMenu(map) {
   }
 
   function renderSunView() {
-    const sunData = calculateNauticalSunTimes(lat, lon, new Date());
+    const sunData = computePositionSolarEphemeris(lat, lon, new Date());
     let bodyContent = "";
 
     if (sunData.isSpecial) {
@@ -5402,20 +5468,20 @@ function initMapContextMenu(map) {
       bodyContent =
         '<div class="ss-ctx-sun-grid">' +
           '<div class="ss-ctx-sun-box sunrise">' +
-            '<div class="ss-ctx-sun-icon">🌅</div>' +
+            '<div class="ss-ctx-sun-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 16c2.4-1.5 4.8-2.2 8-2.2s5.6.7 8 2.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 4.2v1.5M7.4 6.4l.9.9M16.6 6.4l-.9.9" stroke="#f05a36" stroke-width="1.4" stroke-linecap="round"/></svg></div>' +
             '<div class="ss-ctx-sun-label">SUNRISE</div>' +
             '<div class="ss-ctx-sun-time">' + sunData.sunriseLocal + ' <span class="ss-ctx-tz-sub">LT</span></div>' +
             '<div class="ss-ctx-sun-utc">' + sunData.sunriseUtc + ' UTC</div>' +
           '</div>' +
           '<div class="ss-ctx-sun-box sunset">' +
-            '<div class="ss-ctx-sun-icon">🌇</div>' +
+            '<div class="ss-ctx-sun-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14.5c2.4 1.2 4.8 1.8 8 1.8s5.6-.6 8-1.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="10.2" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 5v1.4M7.4 7.1l.9.9M16.6 7.1l-.9.9" stroke="#f05a36" stroke-width="1.4" stroke-linecap="round"/></svg></div>' +
             '<div class="ss-ctx-sun-label">SUNSET</div>' +
             '<div class="ss-ctx-sun-time">' + sunData.sunsetLocal + ' <span class="ss-ctx-tz-sub">LT</span></div>' +
             '<div class="ss-ctx-sun-utc">' + sunData.sunsetUtc + ' UTC</div>' +
           '</div>' +
         '</div>' +
         '<div class="ss-ctx-sun-footer">' +
-          '<span>Daylight Duration: <b style="color:#ffffff;font-weight:800;">' + sunData.daylightStr + '</b></span>' +
+          '<span>Daylight Duration: <b style="color:#0f172a;font-weight:800;">' + sunData.daylightStr + '</b></span>' +
         '</div>';
     }
 
@@ -6642,6 +6708,15 @@ const MARITIME_SEA_NODES = {
   "EAST_CHINA_SEA": [29.50, 123.50, "East China Sea Corridor"],
   "SHANGHAI_APP": [31.00, 122.50, "Yangtze / Shanghai Fairway"],
   "OSUMI_STRAIT": [30.90, 131.00, "Osumi Strait (South Japan)"],
+  "IZU_OSHIMA_S": [34.50, 139.40, "Izu Oshima South Fairway (Honshu Approaches)"],
+  "SHIONOMISAKI_OFF": [33.30, 135.80, "Shionomisaki Offshore (Kii Channel Approach)"],
+  "SUNDA_STRAIT": [-5.95, 105.85, "Sunda Strait Fairway (Sumatra / Java)"],
+  "GASPAR_STRAIT": [-2.50, 107.10, "Gaspar Strait Deepwater Passage"],
+  "LOMBOK_STRAIT": [-8.75, 115.75, "Lombok Strait Deepwater Passage"],
+  "CAPE_TOWN_APP": [-33.85, 18.35, "Cape Town Deepwater Approach"],
+  "DURBAN_APP": [-29.85, 31.05, "Durban Port Fairway Approach"],
+  "PORT_ELIZABETH_OFF": [-34.20, 26.00, "Port Elizabeth Offshore (Agulhas Fairway)"],
+  "SOUTH_ATLANTIC_MID": [-20.00, 5.00, "South Atlantic Ocean Deepwater Transit"],
   "TOKYO_APP": [34.80, 139.80, "Tokyo Bay / Uraga Suido Fairway"],
   "BUSAN_APP": [35.00, 129.20, "Busan Port Fairway Approach"],
 
@@ -6823,13 +6898,14 @@ const SETROUTE_LAND_BOXES = [
   { minLat: -3.2, maxLat: 1.3, minLon: 105.0, maxLon: 109.8 }, // Karimata / Gaspar approaches
   { minLat: 5, maxLat: 18, minLon: 118, maxLon: 126 },       // Philippines (central)
   // Honshu interior only — do NOT span Osumi→Tokyo Pacific approaches
-  { minLat: 34.2, maxLat: 40.5, minLon: 136.2, maxLon: 140.9 },
+  { minLat: 34.95, maxLat: 40.5, minLon: 136.2, maxLon: 140.9 },
   // Greater Antilles: use island-specific boxes below — a 18–26°N / 85–70°W belt
   // was sealing Caribbean_MID→Yucatan / Key West→GoM fairways (Far East→Houston OD).
   { minLat: 36, maxLat: 41.5, minLon: 20.5, maxLon: 28.5 },   // Greece / Aegean islands mass
   { minLat: 54, maxLat: 59, minLon: 10, maxLon: 20 },         // S Sweden / Baltic islands belt
   { minLat: -47, maxLat: -34, minLon: 166, maxLon: 179 },     // NZ South Island interior
-  { minLat: 10, maxLat: 18, minLon: 42, maxLon: 50 },         // Horn of Africa / Yemen highland
+  { minLat: 8.0, maxLat: 11.4, minLon: 42.0, maxLon: 51.0 },   // Somalia / Horn of Africa interior
+  { minLat: 13.8, maxLat: 18.0, minLon: 42.5, maxLon: 50.0 },  // Yemen interior (leave Gulf of Aden fairway open)
   // Smaller island / archipelago interiors (stop chords clipping land)
   { minLat: -4.2, maxLat: 1.2, minLon: 99.5, maxLon: 104.2 }, // Sumatra W spine
   { minLat: -8.8, maxLat: -5.8, minLon: 105.5, maxLon: 114.5 }, // Java interior
@@ -8179,6 +8255,11 @@ function setrouteMatchCorridorTemplate(origName, destName) {
     const oh = (t.originHints || []).some((h) => o.indexOf(String(h).toLowerCase()) >= 0);
     const dh = (t.destHints || []).some((h) => d.indexOf(String(h).toLowerCase()) >= 0);
     if (oh && dh) return t;
+    const ohRev = (t.destHints || []).some((h) => o.indexOf(String(h).toLowerCase()) >= 0);
+    const dhRev = (t.originHints || []).some((h) => d.indexOf(String(h).toLowerCase()) >= 0);
+    if (ohRev && dhRev) {
+      return { id: t.id + "_rev", refs: t.refs, nodeKeys: t.nodeKeys.slice().reverse() };
+    }
   }
   return null;
 }

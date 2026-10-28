@@ -136,7 +136,7 @@
       box-shadow: 0 0 0 2px rgba(239,68,68,0.5), inset 0 0 36px rgba(239,68,68,0.16), 0 0 36px rgba(239,68,68,0.22);
     }
   
-/* v5.141: Wi-Fi AIS motion brow + Install native downloads */
+/* v5.142: Wi-Fi AIS motion brow + Install native downloads */
 .ss-motion-brow {
   position: absolute; top: 0; left: 0; right: 0; z-index: 1200;
   pointer-events: none;
@@ -6118,7 +6118,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 .home-vessel-hud-btn:hover { opacity: 0.92; }
 
-/* v5.141: Home vessel HUD vertical center + AIS suggest + ECDIS cursor */
+/* v5.142: Home vessel HUD vertical center + AIS suggest + ECDIS cursor */
 .home-vessel-hud-btn {
   display: inline-flex !important;
   align-items: center !important;
@@ -6200,7 +6200,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .own-ship-wrap--hull { width: 48px; height: 64px; }
 .own-ship-svg { display: block; filter: drop-shadow(0 0 1.5px rgba(255,255,255,0.85)) drop-shadow(0 1px 2px rgba(15,23,42,0.35)); }
 
-/* v5.141b: lock Home vessel HUD vertical center in top bar */
+/* v5.142b: lock Home vessel HUD vertical center in top bar */
 #homeHudTop {
   align-items: center !important;
 }
@@ -11883,7 +11883,7 @@ select option {
   }
 }
 
-/* ═══ Mobile polish pack (v5.141) — hero / dock / install / SetStar / SetRoute ═══ */
+/* ═══ Mobile polish pack (v5.142) — hero / dock / install / SetStar / SetRoute ═══ */
 .setstar-data-switch { display: none; }
 @media (max-width: 768px) {
   html, body, #tab-home, #tab-home.active, .home-hero-viewport, .app-content {
@@ -21647,7 +21647,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.141' && k !== 'setsail-tiles-cache-v5.141').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.142' && k !== 'setsail-tiles-cache-v5.142').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 function showSetSailHardRefreshTip(cacheLabel) {
@@ -21699,15 +21699,15 @@ function showSetSailHardRefreshTip(cacheLabel) {
         });
         navigator.serviceWorker.register('sw.js?v=5.141', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.141 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.142 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.141') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.141.0'); }, 1200);
+              if (last && last.indexOf('v5.142') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.142.0'); }, 1200);
               }
             } catch (eTip) {}
           })
