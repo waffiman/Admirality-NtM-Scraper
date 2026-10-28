@@ -674,24 +674,135 @@ function renderVesselSuggest(which, hits) {
   });
 }
 
-function applyAisHitToVessel(t, toastMsg) {
+function setVesselFieldBusy(id, busy) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const wrap = el.closest(".form-group") || el.parentElement;
+  if (!wrap) return;
+  wrap.classList.toggle("is-ais-loading", !!busy);
+  if (busy) {
+    if (!wrap.querySelector(".vessel-field-spinner")) {
+      const sp = document.createElement("span");
+      sp.className = "vessel-field-spinner";
+      sp.setAttribute("aria-hidden", "true");
+      wrap.appendChild(sp);
+    }
+  } else {
+    const sp = wrap.querySelector(".vessel-field-spinner");
+    if (sp) sp.remove();
+  }
+}
+
+function setVesselAisSyncBanner(visible, text) {
+  ["home", "chart"].forEach((which) => {
+    const m = vesselFormMap(which);
+    const form = document.querySelector('[data-vessel-form="' + which + '"]');
+    if (!form) return;
+    let ban = form.querySelector(".vessel-ais-sync-banner");
+    if (!ban) {
+      ban = document.createElement("div");
+      ban.className = "vessel-ais-sync-banner";
+      ban.setAttribute("role", "status");
+      const nameGroup = form.querySelector(".vessel-primary-fields") || form.firstElementChild;
+      if (nameGroup && nameGroup.parentNode) {
+        nameGroup.parentNode.insertBefore(ban, nameGroup.nextSibling);
+      } else {
+        form.prepend(ban);
+      }
+    }
+    if (visible) {
+      ban.hidden = false;
+      ban.textContent = text || "Vessel details synced from AIS";
+    } else {
+      ban.hidden = true;
+      ban.textContent = "";
+    }
+  });
+}
+
+function vesselHasFullAisPayload(t) {
+  if (!t) return false;
+  const hasName = !!(t.name && String(t.name).trim());
+  const hasPos = Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon));
+  return hasName && hasPos;
+}
+
+async function applyAisHitToVessel(t, toastMsg) {
   if (!t) return;
-  applyVesselProfile(
-    {
-      name: t.name || "",
-      callSign: t.callSign || "",
-      mmsi: t.mmsi != null ? String(t.mmsi) : "",
-      shipType: t.shipType || "",
-      destination: t.destination || "",
-      sog: t.sog,
-      cog: t.cog,
-      heading: t.heading,
-      lat: t.lat,
-      lon: t.lon,
-      source: "ais"
-    },
-    { toast: toastMsg || "Vessel details filled from AIS" }
-  );
+  const partial = {
+    name: t.name || "",
+    callSign: t.callSign || "",
+    mmsi: t.mmsi != null ? String(t.mmsi) : "",
+    shipType: t.shipType || "",
+    destination: t.destination || "",
+    sog: t.sog,
+    cog: t.cog,
+    heading: t.heading,
+    lat: t.lat,
+    lon: t.lon,
+    source: "ais"
+  };
+
+  // Show name immediately; spin on fields still waiting for AIS enrichment
+  const needPos = !(Number.isFinite(Number(partial.lat)) && Number.isFinite(Number(partial.lon)));
+  const needMeta = !partial.callSign || !partial.shipType;
+  ["home", "chart"].forEach((which) => {
+    const m = vesselFormMap(which);
+    if (needPos) {
+      setVesselFieldBusy(m.lat, true);
+      setVesselFieldBusy(m.lon, true);
+    }
+    if (needMeta) {
+      setVesselFieldBusy(m.callSign, true);
+      setVesselFieldBusy(m.type, true);
+      setVesselFieldBusy(m.dest, true);
+      setVesselFieldBusy(m.sog, true);
+      setVesselFieldBusy(m.cog, true);
+      setVesselFieldBusy(m.heading, true);
+    }
+  });
+  setVesselAisSyncBanner(false);
+  applyVesselProfile(partial, { toast: null, skipAisSchedule: true });
+
+  let full = partial;
+  if (!vesselHasFullAisPayload(partial) && partial.mmsi) {
+    try {
+      const live = await findAisTargetByMmsi(partial.mmsi);
+      if (live) {
+        full = Object.assign({}, partial, {
+          name: live.name || partial.name,
+          callSign: live.callSign || partial.callSign,
+          shipType: live.shipType || partial.shipType,
+          destination: live.destination || partial.destination,
+          sog: live.sog != null ? live.sog : partial.sog,
+          cog: live.cog != null ? live.cog : partial.cog,
+          heading: live.heading != null ? live.heading : partial.heading,
+          lat: Number.isFinite(Number(live.lat)) ? live.lat : partial.lat,
+          lon: Number.isFinite(Number(live.lon)) ? live.lon : partial.lon,
+          source: "ais"
+        });
+      }
+    } catch (e) {
+      console.warn("[SetSail Vessel] AIS enrich failed", e);
+    }
+  }
+
+  ["home", "chart"].forEach((which) => {
+    const m = vesselFormMap(which);
+    [m.lat, m.lon, m.callSign, m.type, m.dest, m.sog, m.cog, m.heading].forEach((id) => {
+      setVesselFieldBusy(id, false);
+    });
+  });
+
+  applyVesselProfile(full, { toast: null, skipAisSchedule: false });
+  if (vesselHasFullAisPayload(full)) {
+    setVesselAisSyncBanner(true, toastMsg || "Vessel details synced from AIS");
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast(toastMsg || "Vessel details synced from AIS", "success");
+    }
+  } else if (typeof showSetSailToast === "function") {
+    showSetSailToast("AIS name linked — waiting for full position/details", "info");
+  }
 }
 
 async function findAisTargetByMmsi(mmsiRaw) {
@@ -761,7 +872,7 @@ function bindVesselNameAutocomplete(which) {
   input.addEventListener("input", () => {
     const q = input.value.trim().toLowerCase();
     clearTimeout(_vesselSuggestTimer);
-    if (q.length < 2) {
+    if (q.length < 1) {
       hideVesselSuggest(which);
       return;
     }
@@ -769,7 +880,7 @@ function bindVesselNameAutocomplete(which) {
     const box = document.getElementById(mbox.suggest);
     if (box) {
       box.hidden = false;
-      box.innerHTML = '<div class="vas-meta" style="padding:0.45rem 0.55rem;">Searching all AIS targets…</div>';
+      box.innerHTML = '<div class="vas-meta" style="padding:0.45rem 0.55rem;">Searching AIS targets…</div>';
     }
     _vesselSuggestTimer = setTimeout(async () => {
       try {
@@ -780,7 +891,7 @@ function bindVesselNameAutocomplete(which) {
           const n = String(idx[i].name || "").toLowerCase();
           if (!n) continue;
           if (n.startsWith(q)) starts.push(idx[i]);
-          else if (n.includes(q)) contains.push(idx[i]);
+          else if (q.length >= 2 && n.includes(q)) contains.push(idx[i]);
           if (starts.length >= 20) break;
         }
         const hits = starts.concat(contains).slice(0, 20);
@@ -789,7 +900,7 @@ function bindVesselNameAutocomplete(which) {
         console.warn("[SetSail Vessel] suggest error", err);
         hideVesselSuggest(which);
       }
-    }, 160);
+    }, 120);
   });
   input.addEventListener("blur", () => {
     setTimeout(() => hideVesselSuggest(which), 220);
@@ -4353,6 +4464,9 @@ function loadStoreFromStorage() {
  */
 async function loadRemoteNoticesJson(showFeedback = false) {
   try {
+    if (typeof window.setOverlayNoticesLoading === "function") {
+      window.setOverlayNoticesLoading(true);
+    }
     const bust = Date.now();
     const endpoints = [
       "notices.json?t=" + bust,
@@ -4465,11 +4579,27 @@ function ensureNoticesReadyForOverlay() {
       p.classList.toggle("active", (p.dataset.category || "ALL") === "ALL");
     });
   }
-  // If store hasn't loaded the full bulletin yet, sync immediately
-  if (!Array.isArray(NTM_STORE) || NTM_STORE.length <= 10) {
-    return loadRemoteNoticesJson(true);
-  }
-  return Promise.resolve(true);
+  // Yield so the tile spinner paints before the (often heavy) plot/fetch work
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      setTimeout(async () => {
+        try {
+          if (!Array.isArray(NTM_STORE) || NTM_STORE.length <= 10) {
+            await loadRemoteNoticesJson(true);
+          } else if (typeof renderNtMListAndMap === "function") {
+            // Store already warm — still re-plot every object onto the chart
+            renderNtMListAndMap();
+          }
+          resolve(true);
+        } catch (e) {
+          if (typeof window.setOverlayNoticesLoading === "function") {
+            window.setOverlayNoticesLoading(false);
+          }
+          resolve(false);
+        }
+      }, 40);
+    });
+  });
 }
 window.ensureNoticesReadyForOverlay = ensureNoticesReadyForOverlay;
 
@@ -5154,8 +5284,8 @@ function openMapContextMenu(latlng, map) {
 
   const popup = L.popup({
     className: "ss-map-ctx-popup",
-    maxWidth: 300,
-    minWidth: 240,
+    maxWidth: 268,
+    minWidth: 210,
     autoPan: true,
     closeButton: true
   })
@@ -5177,17 +5307,17 @@ function openMapContextMenu(latlng, map) {
         '<div class="ss-ctx-actions">' +
           '<button type="button" class="ss-ctx-btn" id="btnCtxVariation">' +
             '<div class="ss-ctx-btn-left">' +
-              '<span class="ss-ctx-emoji">🧭</span>' +
+              '<span class="ss-ctx-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><polygon points="12 4.2 13.4 10.6 12 12 10.6 10.6" fill="currentColor"/><polygon points="12 19.8 10.6 13.4 12 12 13.4 13.4" fill="currentColor" opacity="0.45"/><circle cx="12" cy="12" r="1.5" fill="#f05a36"/></svg></span>' +
               '<span class="ss-ctx-btn-label">Variation</span>' +
             '</div>' +
-            '<span class="ss-ctx-arrow">&rarr;</span>' +
+            '<span class="ss-ctx-arrow">›</span>' +
           '</button>' +
           '<button type="button" class="ss-ctx-btn" id="btnCtxSun">' +
             '<div class="ss-ctx-btn-left">' +
-              '<span class="ss-ctx-emoji">🌅</span>' +
+              '<span class="ss-ctx-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 15.5c2.2-1.4 4.4-2.1 8-2.1s5.8.7 8 2.1" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"/><circle cx="12" cy="9.2" r="3.1" fill="none" stroke="currentColor" stroke-width="1.55"/><path d="M12 3.4v1.4M7.2 5.6l1 1M16.8 5.6l-1 1" stroke="#f05a36" stroke-width="1.45" stroke-linecap="round"/></svg></span>' +
               '<span class="ss-ctx-btn-label">Sunrise / Sunset</span>' +
             '</div>' +
-            '<span class="ss-ctx-arrow">&rarr;</span>' +
+            '<span class="ss-ctx-arrow">›</span>' +
           '</button>' +
         '</div>' +
       '</div>';
@@ -5277,20 +5407,20 @@ function openMapContextMenu(latlng, map) {
       bodyContent =
         '<div class="ss-ctx-sun-grid">' +
           '<div class="ss-ctx-sun-box sunrise">' +
-            '<div class="ss-ctx-sun-icon">🌅</div>' +
+            '<div class="ss-ctx-sun-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 16c2.4-1.5 4.8-2.2 8-2.2s5.6.7 8 2.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 4.2v1.5M7.4 6.4l.9.9M16.6 6.4l-.9.9" stroke="#f05a36" stroke-width="1.4" stroke-linecap="round"/></svg></div>' +
             '<div class="ss-ctx-sun-label">SUNRISE</div>' +
             '<div class="ss-ctx-sun-time">' + sunData.sunriseLocal + ' <span class="ss-ctx-tz-sub">LT</span></div>' +
             '<div class="ss-ctx-sun-utc">' + sunData.sunriseUtc + ' UTC</div>' +
           '</div>' +
           '<div class="ss-ctx-sun-box sunset">' +
-            '<div class="ss-ctx-sun-icon">🌇</div>' +
+            '<div class="ss-ctx-sun-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14.5c2.4 1.2 4.8 1.8 8 1.8s5.6-.6 8-1.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="10.2" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 5v1.4M7.4 7.1l.9.9M16.6 7.1l-.9.9" stroke="#f05a36" stroke-width="1.4" stroke-linecap="round"/></svg></div>' +
             '<div class="ss-ctx-sun-label">SUNSET</div>' +
             '<div class="ss-ctx-sun-time">' + sunData.sunsetLocal + ' <span class="ss-ctx-tz-sub">LT</span></div>' +
             '<div class="ss-ctx-sun-utc">' + sunData.sunsetUtc + ' UTC</div>' +
           '</div>' +
         '</div>' +
         '<div class="ss-ctx-sun-footer">' +
-          '<span>Daylight Duration: <b style="color:#f1f5f9;">' + sunData.daylightStr + '</b></span>' +
+          '<span>Daylight Duration: <b>' + sunData.daylightStr + '</b></span>' +
         '</div>';
     }
 
@@ -6256,10 +6386,12 @@ function renderNtMListAndMap() {
     drawOfflineCanvasMap();
   }
 
-  // Clear loading spinner on NtM & NAVTEX dock tab now that all objects are plotted on the map
+  // Clear spinner only after markers are in the DOM and the browser has painted
   if (typeof window.setOverlayNoticesLoading === "function") {
     requestAnimationFrame(() => {
-      window.setOverlayNoticesLoading(false);
+      requestAnimationFrame(() => {
+        window.setOverlayNoticesLoading(false);
+      });
     });
   }
 }

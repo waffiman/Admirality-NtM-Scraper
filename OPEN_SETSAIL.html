@@ -168,7 +168,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.137" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.138" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -6052,7 +6052,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 .home-vessel-hud-btn:hover { opacity: 0.92; }
 
-/* v5.136: Home vessel HUD vertical center + AIS suggest + ECDIS cursor */
+/* v5.138: Home vessel HUD vertical center + AIS suggest + ECDIS cursor */
 .home-vessel-hud-btn {
   display: inline-flex !important;
   align-items: center !important;
@@ -6134,7 +6134,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .own-ship-wrap--hull { width: 48px; height: 64px; }
 .own-ship-svg { display: block; filter: drop-shadow(0 0 1.5px rgba(255,255,255,0.85)) drop-shadow(0 1px 2px rgba(15,23,42,0.35)); }
 
-/* v5.136b: lock Home vessel HUD vertical center in top bar */
+/* v5.138b: lock Home vessel HUD vertical center in top bar */
 #homeHudTop {
   align-items: center !important;
 }
@@ -6261,6 +6261,68 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 .vessel-ais-suggest button:hover { background: rgba(56, 189, 248, 0.12); }
 .vessel-ais-suggest .vas-meta { color: #94a3b8; font-size: 0.65rem; }
+.vessel-coords-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0.35rem;
+  align-items: flex-end;
+}
+.vessel-coords-row .vessel-gps-btn {
+  padding: 0.38rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.vessel-more-details {
+  margin: 0.35rem 0 0.15rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  padding: 0.2rem 0.55rem 0.45rem;
+  background: rgba(15, 23, 42, 0.18);
+}
+.vessel-more-details > summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  padding: 0.35rem 0;
+  user-select: none;
+}
+.vessel-more-details > summary::-webkit-details-marker { display: none; }
+.vessel-more-details > summary::before {
+  content: "▸ ";
+  color: #f05a36;
+}
+.vessel-more-details[open] > summary::before { content: "▾ "; }
+.vessel-ais-sync-banner {
+  margin: 0 0 0.45rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 7px;
+  font-size: 0.68rem;
+  font-weight: 650;
+  color: #bbf7d0;
+  background: rgba(22, 163, 74, 0.16);
+  border: 1px solid rgba(74, 222, 128, 0.28);
+}
+.vessel-ais-sync-banner[hidden] { display: none !important; }
+.form-group.is-ais-loading { position: relative; }
+.form-group.is-ais-loading .min-input {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.vessel-field-spinner {
+  position: absolute;
+  right: 8px;
+  top: calc(50% + 6px);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(240, 90, 54, 0.25);
+  border-top-color: #f05a36;
+  animation: excelTabSpinnerRotate 0.65s linear infinite;
+  pointer-events: none;
+}
 .ntm-vessel-popover { width: 300px !important; max-height: min(72vh, 520px); overflow: auto; }
 
 /* My Vessel Popover enhanced styling */
@@ -8867,7 +8929,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.136" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.138" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -11934,7 +11996,7 @@ select option {
   }
 }
 
-/* ═══ Mobile polish pack (v5.136) — hero / dock / install / SetStar / SetRoute ═══ */
+/* ═══ Mobile polish pack (v5.138) — hero / dock / install / SetStar / SetRoute ═══ */
 .setstar-data-switch { display: none; }
 @media (max-width: 768px) {
   html, body, #tab-home, #tab-home.active, .home-hero-viewport, .app-content {
@@ -12960,37 +13022,42 @@ select option {
                     <button type="button" class="ntm-popover-close" id="homeVesselPopClose">×</button>
                   </div>
                   <div class="ntm-popover-body">
-                    <div class="vessel-profile-fields" data-vessel-form="home">
-                      <div class="form-group" style="margin-bottom:0.45rem;position:relative;">
-                        <label for="homeVesselName" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Vessel Name</label>
-                        <input type="text" id="homeVesselName" class="min-input vessel-field-name" placeholder="Type to search AIS…" autocomplete="off" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
-                        <div class="vessel-ais-suggest" id="homeVesselAisSuggest" hidden></div>
-                      </div>
-                      <div class="form-group" style="margin-bottom:0.45rem;">
-                        <label for="homeVesselCallSign" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Call Sign</label>
-                        <input type="text" id="homeVesselCallSign" class="min-input vessel-field-callsign" placeholder="e.g. 3EAB9" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
-                      </div>
-                      <div class="ntm-popover-subtitle">Position</div>
-                      <div class="vessel-coords-row" style="display:flex;gap:8px;margin-bottom:0.35rem;align-items:flex-end;">
-                        <div class="form-group" style="flex:1;margin-bottom:0;">
-                          <label for="homeVesselLat" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Latitude</label>
-                          <input type="text" id="homeVesselLat" class="min-input vessel-field-lat" placeholder="58° 37.7' N" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                                        <div class="vessel-profile-fields" data-vessel-form="home">
+                      <div class="vessel-primary-fields">
+                        <div class="form-group vessel-name-group" style="margin-bottom:0.45rem;position:relative;">
+                          <label for="homeVesselName">Vessel Name</label>
+                          <input type="text" id="homeVesselName" class="min-input vessel-field-name" placeholder="Type to search AIS…" autocomplete="off" />
+                          <div class="vessel-ais-suggest" id="homeVesselAisSuggest" hidden></div>
                         </div>
-                        <div class="form-group" style="flex:1;margin-bottom:0;">
-                          <label for="homeVesselLon" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Longitude</label>
-                          <input type="text" id="homeVesselLon" class="min-input vessel-field-lon" placeholder="017° 46.3' E" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                        <div class="ntm-popover-subtitle">Position</div>
+                        <div class="vessel-coords-row">
+                          <div class="form-group" style="flex:1;margin-bottom:0;">
+                            <label for="homeVesselLat">Latitude</label>
+                            <input type="text" id="homeVesselLat" class="min-input vessel-field-lat" placeholder="58° 37.7' N" />
+                          </div>
+                          <div class="form-group" style="flex:1;margin-bottom:0;">
+                            <label for="homeVesselLon">Longitude</label>
+                            <input type="text" id="homeVesselLon" class="min-input vessel-field-lon" placeholder="017° 46.3' E" />
+                          </div>
+                          <button type="button" class="ntm-btn-glass vessel-gps-btn" id="homeVesselGpsBtn" title="Use browser GPS">GPS</button>
                         </div>
-                        <button type="button" class="ntm-btn-glass vessel-gps-btn" id="homeVesselGpsBtn" title="Use browser GPS (asks permission only when clicked)" style="padding:0.38rem 0.55rem;font-size:0.72rem;font-weight:700;flex-shrink:0;">GPS</button>
                       </div>
-                      <div class="ntm-popover-subtitle">AIS Details</div>
-                      <div class="vessel-ais-grid">
-                        <div class="form-group"><label for="homeVesselMmsi">MMSI <span style="opacity:.65;font-weight:500;">(Enter = lookup)</span></label><input type="text" id="homeVesselMmsi" class="min-input vessel-field-mmsi" placeholder="e.g. 636024827" title="Type MMSI and press Enter to search AIS" /></div>
-                        <div class="form-group"><label for="homeVesselType">Ship Type</label><input type="text" id="homeVesselType" class="min-input vessel-field-type" /></div>
-                        <div class="form-group vessel-span2"><label for="homeVesselDest">Destination</label><input type="text" id="homeVesselDest" class="min-input vessel-field-dest" /></div>
-                        <div class="form-group"><label for="homeVesselSog">SOG (kn)</label><input type="text" id="homeVesselSog" class="min-input vessel-field-sog" /></div>
-                        <div class="form-group"><label for="homeVesselCog">COG (°)</label><input type="text" id="homeVesselCog" class="min-input vessel-field-cog" /></div>
-                        <div class="form-group"><label for="homeVesselHeading">Heading (°)</label><input type="text" id="homeVesselHeading" class="min-input vessel-field-heading" /></div>
-                      </div>
+                      <details class="vessel-more-details">
+                        <summary>More vessel details</summary>
+                        <div class="form-group" style="margin-bottom:0.45rem;">
+                          <label for="homeVesselCallSign">Call Sign</label>
+                          <input type="text" id="homeVesselCallSign" class="min-input vessel-field-callsign" placeholder="e.g. 3EAB9" />
+                        </div>
+                        <div class="ntm-popover-subtitle">AIS Details</div>
+                        <div class="vessel-ais-grid">
+                          <div class="form-group"><label for="homeVesselMmsi">MMSI <span style="opacity:.65;font-weight:500;">(Enter = lookup)</span></label><input type="text" id="homeVesselMmsi" class="min-input vessel-field-mmsi" placeholder="e.g. 636024827" title="Type MMSI and press Enter to search AIS" /></div>
+                          <div class="form-group"><label for="homeVesselType">Ship Type</label><input type="text" id="homeVesselType" class="min-input vessel-field-type" /></div>
+                          <div class="form-group vessel-span2"><label for="homeVesselDest">Destination</label><input type="text" id="homeVesselDest" class="min-input vessel-field-dest" /></div>
+                          <div class="form-group"><label for="homeVesselSog">SOG (kn)</label><input type="text" id="homeVesselSog" class="min-input vessel-field-sog" /></div>
+                          <div class="form-group"><label for="homeVesselCog">COG (°)</label><input type="text" id="homeVesselCog" class="min-input vessel-field-cog" /></div>
+                          <div class="form-group"><label for="homeVesselHeading">Heading (°)</label><input type="text" id="homeVesselHeading" class="min-input vessel-field-heading" /></div>
+                        </div>
+                      </details>
                       <div style="display:flex;gap:0.4rem;justify-content:flex-end;margin-top:0.55rem;">
                         <button type="button" class="ntm-btn-glass" id="homeVesselClearBtn" style="color:var(--warn);margin-right:auto;font-size:0.72rem;padding:0.3rem 0.55rem;">Clear</button>
                         <button type="button" class="ntm-btn-primary" id="homeVesselApplyBtn" style="font-size:0.75rem;padding:0.35rem 0.7rem;">Save</button>
@@ -13223,7 +13290,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.136" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.136';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.138" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.138';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13245,7 +13312,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.136" alt="" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.138" alt="" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <p class="home-install-kicker">SetSail on your bridge</p>
                     <h2 class="home-install-title">The chart stays open when the tab would not.</h2>
@@ -13988,37 +14055,42 @@ select option {
 
 
 
-                                    <div class="vessel-profile-fields" data-vessel-form="chart">
-                      <div class="form-group" style="margin-bottom:0.45rem;position:relative;">
-                        <label for="vesselName" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Vessel Name</label>
-                        <input type="text" id="vesselName" class="min-input vessel-field-name" placeholder="Type to search AIS…" autocomplete="off" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
-                        <div class="vessel-ais-suggest" id="vesselAisSuggest" hidden></div>
-                      </div>
-                      <div class="form-group" style="margin-bottom:0.45rem;">
-                        <label for="vesselCallSign" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Call Sign</label>
-                        <input type="text" id="vesselCallSign" class="min-input vessel-field-callsign" placeholder="e.g. 3EAB9" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
-                      </div>
-                      <div class="ntm-popover-subtitle">Position</div>
-                      <div class="vessel-coords-row" style="display:flex;gap:8px;margin-bottom:0.35rem;align-items:flex-end;">
-                        <div class="form-group" style="flex:1;margin-bottom:0;">
-                          <label for="vesselLat" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Latitude</label>
-                          <input type="text" id="vesselLat" class="min-input vessel-field-lat" placeholder="e.g. 58° 37.7' N" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                                                                        <div class="vessel-profile-fields" data-vessel-form="chart">
+                      <div class="vessel-primary-fields">
+                        <div class="form-group vessel-name-group" style="margin-bottom:0.45rem;position:relative;">
+                          <label for="vesselName">Vessel Name</label>
+                          <input type="text" id="vesselName" class="min-input vessel-field-name" placeholder="Type to search AIS…" autocomplete="off" />
+                          <div class="vessel-ais-suggest" id="vesselAisSuggest" hidden></div>
                         </div>
-                        <div class="form-group" style="flex:1;margin-bottom:0;">
-                          <label for="vesselLon" style="font-size:0.68rem;color:var(--muted);display:block;margin-bottom:2px;font-weight:600;">Longitude</label>
-                          <input type="text" id="vesselLon" class="min-input vessel-field-lon" placeholder="e.g. 017° 46.3' E" style="font-size:0.75rem;padding:0.38rem 0.5rem;width:100%;box-sizing:border-box;" />
+                        <div class="ntm-popover-subtitle">Position</div>
+                        <div class="vessel-coords-row">
+                          <div class="form-group" style="flex:1;margin-bottom:0;">
+                            <label for="vesselLat">Latitude</label>
+                            <input type="text" id="vesselLat" class="min-input vessel-field-lat" placeholder="e.g. 58° 37.7' N" />
+                          </div>
+                          <div class="form-group" style="flex:1;margin-bottom:0;">
+                            <label for="vesselLon">Longitude</label>
+                            <input type="text" id="vesselLon" class="min-input vessel-field-lon" placeholder="e.g. 017° 46.3' E" />
+                          </div>
+                          <button type="button" class="ntm-btn-glass vessel-gps-btn" id="vesselFetchGpsBtn" title="Use browser GPS">GPS</button>
                         </div>
-                        <button type="button" class="ntm-btn-glass vessel-gps-btn" id="vesselFetchGpsBtn" title="Use browser GPS (asks permission only when clicked)" style="padding:0.38rem 0.55rem;font-size:0.72rem;font-weight:700;flex-shrink:0;">GPS</button>
                       </div>
-                      <div class="ntm-popover-subtitle">AIS Details</div>
-                      <div class="vessel-ais-grid">
-                        <div class="form-group"><label for="vesselMmsi">MMSI <span style="opacity:.65;font-weight:500;">(Enter = lookup)</span></label><input type="text" id="vesselMmsi" class="min-input vessel-field-mmsi" placeholder="e.g. 636024827" title="Type MMSI and press Enter to search AIS" /></div>
-                        <div class="form-group"><label for="vesselType">Ship Type</label><input type="text" id="vesselType" class="min-input vessel-field-type" /></div>
-                        <div class="form-group vessel-span2"><label for="vesselDest">Destination</label><input type="text" id="vesselDest" class="min-input vessel-field-dest" /></div>
-                        <div class="form-group"><label for="vesselSog">SOG (kn)</label><input type="text" id="vesselSog" class="min-input vessel-field-sog" /></div>
-                        <div class="form-group"><label for="vesselCog">COG (°)</label><input type="text" id="vesselCog" class="min-input vessel-field-cog" /></div>
-                        <div class="form-group"><label for="vesselHeading">Heading (°)</label><input type="text" id="vesselHeading" class="min-input vessel-field-heading" /></div>
-                      </div>
+                      <details class="vessel-more-details">
+                        <summary>More vessel details</summary>
+                        <div class="form-group" style="margin-bottom:0.45rem;">
+                          <label for="vesselCallSign">Call Sign</label>
+                          <input type="text" id="vesselCallSign" class="min-input vessel-field-callsign" placeholder="e.g. 3EAB9" />
+                        </div>
+                        <div class="ntm-popover-subtitle">AIS Details</div>
+                        <div class="vessel-ais-grid">
+                          <div class="form-group"><label for="vesselMmsi">MMSI <span style="opacity:.65;font-weight:500;">(Enter = lookup)</span></label><input type="text" id="vesselMmsi" class="min-input vessel-field-mmsi" placeholder="e.g. 636024827" title="Type MMSI and press Enter to search AIS" /></div>
+                          <div class="form-group"><label for="vesselType">Ship Type</label><input type="text" id="vesselType" class="min-input vessel-field-type" /></div>
+                          <div class="form-group vessel-span2"><label for="vesselDest">Destination</label><input type="text" id="vesselDest" class="min-input vessel-field-dest" /></div>
+                          <div class="form-group"><label for="vesselSog">SOG (kn)</label><input type="text" id="vesselSog" class="min-input vessel-field-sog" /></div>
+                          <div class="form-group"><label for="vesselCog">COG (°)</label><input type="text" id="vesselCog" class="min-input vessel-field-cog" /></div>
+                          <div class="form-group"><label for="vesselHeading">Heading (°)</label><input type="text" id="vesselHeading" class="min-input vessel-field-heading" /></div>
+                        </div>
+                      </details>
                       <div style="display:flex;gap:0.4rem;justify-content:flex-end;margin-top:0.55rem;">
                         <button type="button" class="ntm-btn-glass" id="vesselClearBtn" style="color:var(--warn);margin-right:auto;display:none;font-size:0.72rem;padding:0.3rem 0.55rem;">Clear</button>
                         <button type="button" class="ntm-btn-primary" id="vesselApplyBtn" style="font-size:0.75rem;padding:0.35rem 0.7rem;">Save &amp; Plot</button>
@@ -20922,25 +20994,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.136"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.136" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.136"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.138"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.138" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.138"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.136",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.138",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.136"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.136"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.136"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.138"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.138"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.138"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.136"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.138"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21013,7 +21085,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.137"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.138"></script>
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21676,7 +21748,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.137' && k !== 'setsail-tiles-cache-v5.136').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.138' && k !== 'setsail-tiles-cache-v5.138').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 function showSetSailHardRefreshTip(cacheLabel) {
@@ -21726,17 +21798,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.137', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.138', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.137 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.138 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.136') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.137.0'); }, 1200);
+              if (last && last.indexOf('v5.138') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.138.0'); }, 1200);
               }
             } catch (eTip) {}
           })
