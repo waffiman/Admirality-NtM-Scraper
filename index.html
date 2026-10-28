@@ -6226,205 +6226,26 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 
 
+/* Compact My Vessel form (Home + SetChart) — robust containment */
 .home-vessel-popover {
-  /* Fixed — Home hero ancestors use overflow:hidden and would clip an absolute popover */
   position: fixed !important;
   top: 52px;
   right: 10px;
   left: auto !important;
   z-index: 50000 !important;
   display: none;
-  width: 300px !important;
-  max-width: min(300px, 92vw) !important;
+  width: 360px !important;
+  max-width: calc(100vw - 20px) !important;
+  box-sizing: border-box !important;
 }
 .home-vessel-popover.open { display: block !important; }
 
-/* Compact My Vessel form (Home + SetChart) — denser grid, less vertical stack */
-.vessel-profile-fields {
-  display: grid;
-  grid-template-columns: 1.35fr 1fr;
-  gap: 0.28rem 0.4rem;
-  align-items: end;
-}
-.vessel-profile-fields > .form-group { margin: 0 !important; }
-.vessel-profile-fields > .ntm-popover-subtitle,
-.vessel-profile-fields > .vessel-coords-row,
-.vessel-profile-fields > .vessel-ais-grid,
-.vessel-profile-fields > div:last-child {
-  grid-column: 1 / -1;
-}
-.vessel-profile-fields .ntm-popover-subtitle {
-  margin: 0.15rem 0 0 !important;
-  padding: 0 !important;
-  font-size: 0.62rem !important;
-  letter-spacing: 0.06em;
-  opacity: 0.85;
-}
-.vessel-profile-fields label {
-  font-size: 0.6rem !important;
-  margin-bottom: 1px !important;
-  line-height: 1.15;
-}
-.vessel-profile-fields .min-input {
-  font-size: 0.68rem !important;
-  padding: 0.26rem 0.4rem !important;
-  line-height: 1.25;
-}
-.vessel-coords-row {
-  gap: 6px !important;
-  margin-bottom: 0 !important;
-}
-.vessel-ais-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0.22rem 0.35rem;
-}
-.vessel-ais-grid .form-group { margin: 0; }
-.vessel-ais-grid label {
-  font-size: 0.58rem;
-  color: var(--muted);
-  display: block;
-  margin-bottom: 1px;
-  font-weight: 600;
-}
-.vessel-ais-grid .min-input {
-  font-size: 0.68rem;
-  padding: 0.26rem 0.38rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-.vessel-ais-grid .vessel-span2 { grid-column: 1 / -1; }
-.vessel-ais-grid .form-group:nth-child(1),
-.vessel-ais-grid .form-group:nth-child(2) {
-  grid-column: span 1;
-}
-/* MMSI + Type share first row as 1.5 / 1.5 of 3-col → use span */
-.vessel-ais-grid > .form-group:nth-child(1) { grid-column: 1 / 3; }
-.vessel-ais-grid > .form-group:nth-child(2) { grid-column: 3 / 4; }
-.vessel-ais-suggest {
-  position: absolute;
-  left: 0; right: 0;
-  top: calc(100% + 2px);
-  z-index: 30;
-  max-height: 180px;
-  overflow: auto;
-  background: rgba(8, 16, 36, 0.98);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  border-radius: 8px;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
-}
-.vessel-ais-suggest button {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  border: none;
-  color: #e2e8f0;
-  padding: 0.42rem 0.55rem;
-  font-size: 0.72rem;
-  cursor: pointer;
-  border-bottom: 1px solid rgba(148,163,184,0.12);
-}
-.vessel-ais-suggest button:hover { background: rgba(56, 189, 248, 0.12); }
-.vessel-ais-suggest .vas-meta { color: #94a3b8; font-size: 0.65rem; }
-.vessel-coords-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 0.35rem;
-  align-items: flex-end;
-}
-.vessel-coords-row .vessel-gps-btn {
-  padding: 0.38rem 0.55rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-.vessel-more-details {
-  margin: 0.35rem 0 0.15rem;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 8px;
-  padding: 0.2rem 0.55rem 0.45rem;
-  background: rgba(15, 23, 42, 0.18);
-}
-.vessel-more-details > summary {
-  cursor: pointer;
-  list-style: none;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #94a3b8;
-  padding: 0.35rem 0;
-  user-select: none;
-}
-.vessel-more-details > summary::-webkit-details-marker { display: none; }
-.vessel-more-details > summary::before {
-  content: "▸ ";
-  color: #f05a36;
-}
-.vessel-more-details[open] > summary::before { content: "▾ "; }
-.vessel-ais-sync-banner {
-  margin: 0 0 0.45rem;
-  padding: 0.4rem 0.55rem;
-  border-radius: 7px;
-  font-size: 0.68rem;
-  font-weight: 650;
-  color: #bbf7d0;
-  background: rgba(22, 163, 74, 0.16);
-  border: 1px solid rgba(74, 222, 128, 0.28);
-}
-.vessel-ais-sync-banner[hidden] { display: none !important; }
-.form-group.is-ais-loading { position: relative; }
-.form-group.is-ais-loading .min-input {
-  opacity: 0.55;
-  pointer-events: none;
-}
-.vessel-field-spinner {
-  position: absolute;
-  right: 8px;
-  top: calc(50% + 6px);
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid rgba(240, 90, 54, 0.25);
-  border-top-color: #f05a36;
-  animation: excelTabSpinnerRotate 0.65s linear infinite;
-  pointer-events: none;
-}
-.ntm-vessel-popover { width: 300px !important; max-height: min(72vh, 520px); overflow: auto; }
-
-/* My Vessel Popover enhanced styling */
 .ntm-vessel-popover {
-  background: rgba(10, 20, 44, 0.94) !important;
-  backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(56, 189, 248, 0.3) !important;
-  border-radius: 10px !important;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 14px rgba(56, 189, 248, 0.1) !important;
-  width: 300px !important;
+  width: 360px !important;
+  max-width: calc(100vw - 20px) !important;
+  box-sizing: border-box !important;
 }
 
-.ntm-vessel-popover .ntm-popover-header {
-  border-bottom: 1px solid rgba(56, 189, 248, 0.2) !important;
-  padding: 0.45rem 0.65rem !important;
-  font-weight: 700 !important;
-  font-size: 0.82rem !important;
-  color: #38bdf8 !important;
-}
-
-.ntm-vessel-popover .ntm-popover-body {
-  padding: 0.5rem 0.65rem !important;
-}
-
-.vessel-coords-row .min-input {
-  background: rgba(4, 10, 24, 0.7) !important;
-  border: 1px solid rgba(56, 189, 248, 0.25) !important;
-  color: #ffffff !important;
-  border-radius: 6px !important;
-  transition: all 0.2s ease !important;
-}
-
-.vessel-coords-row .min-input:focus {
-  border-color: #38bdf8 !important;
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4) !important;
-}
 
 /* ==========================================================================
    COMPREHENSIVE DAYTIME LIGHT THEME (Bridge Navigation Light Deck)
