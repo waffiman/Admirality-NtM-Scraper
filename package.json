@@ -1,9 +1,12 @@
 {
   "name": "setsail",
-  "version": "2.8.1",
+  "version": "5.140.0",
   "description": "SetSail Marine Navigation Suite",
   "private": true,
   "scripts": {
-    "build": "echo 'Static PWA Build Complete'"
+    "build": "node native/scripts/sync-www.js && echo Native www synced",
+    "native:sync": "node native/scripts/sync-www.js",
+    "native:electron": "npm --prefix native/electron start",
+    "native:electron:pack": "npm --prefix native/electron run pack"
   }
 }

@@ -147,6 +147,72 @@
     #setsailBoot .ssb-turnstile-hint.is-err { color: #fca5a5; }
     #setsailBoot .ssb-turnstile-hint.is-ok { color: #86efac; }
     #setsailBoot #ssbTurnstile { min-height: 65px; }
+  
+/* v5.140: Wi-Fi AIS motion brow + Install native downloads */
+.ss-motion-brow {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 1200;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(8,15,36,0.92), rgba(8,15,36,0.72));
+  border-bottom: 1px solid rgba(240,90,54,0.35);
+  backdrop-filter: blur(8px);
+}
+.ss-motion-brow-inner {
+  display: flex; flex-wrap: wrap; gap: 0.55rem 0.85rem; align-items: baseline;
+  padding: 0.35rem 0.65rem; font: 600 0.68rem/1.2 ui-monospace, Consolas, monospace;
+  color: #e2e8f0; letter-spacing: 0.04em;
+}
+.ss-mb-src {
+  color: #f05a36; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.62rem;
+}
+.ss-mb-item abbr { color: #94a3b8; text-decoration: none; margin-right: 0.2rem; }
+.ss-mb-item b { color: #f8fafc; font-weight: 700; }
+.ss-mb-item small { color: #64748b; margin-left: 0.15rem; }
+.ss-mb-q { margin-left: auto; font-size: 0.62rem; padding: 0.12rem 0.4rem; border-radius: 4px;
+  background: rgba(148,163,184,0.15); color: #cbd5e1; }
+.ss-mb-q[data-q="ok"] { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+.ss-mb-q[data-q="stale"] { background: rgba(234,179,8,0.2); color: #fde68a; }
+.ss-mb-q[data-q="lost"] { background: rgba(239,68,68,0.22); color: #fca5a5; }
+.ss-cloud-pause-banner {
+  position: absolute; top: 2.05rem; left: 0; right: 0; z-index: 1199;
+  padding: 0.28rem 0.65rem; font: 600 0.62rem/1.3 ui-monospace, Consolas, monospace;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: #fde68a; background: rgba(120,53,15,0.88); border-bottom: 1px solid rgba(251,191,36,0.35);
+  pointer-events: none;
+}
+.ss-wifi-ais-modal { position: fixed; inset: 0; z-index: 2147483600; display: flex; align-items: center; justify-content: center; }
+.ss-wifi-ais-modal[hidden] { display: none !important; }
+.ss-wifi-ais-backdrop { position: absolute; inset: 0; background: rgba(2,8,23,0.62); }
+.ss-wifi-ais-panel {
+  position: relative; z-index: 1; width: min(420px, 92vw); max-height: 90vh; overflow: auto;
+  background: #0b1224; border: 1px solid rgba(240,90,54,0.35); border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45); padding: 1rem 1.1rem 1.15rem; color: #e2e8f0;
+}
+.ss-wifi-ais-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.ss-wifi-ais-head h3 { margin: 0; font-size: 1rem; color: #fff; }
+.ss-wifi-ais-x { border: 0; background: transparent; color: #94a3b8; font-size: 1.4rem; cursor: pointer; }
+.ss-wifi-ais-lead { font-size: 0.78rem; color: #94a3b8; line-height: 1.45; margin: 0.65rem 0 0.85rem; }
+.ss-wifi-ais-actions { display: flex; flex-direction: column; gap: 0.4rem; }
+.ss-wifi-ais-manual { margin-top: 0.75rem; font-size: 0.78rem; color: #cbd5e1; }
+.ss-wifi-ais-manual-grid { display: grid; gap: 0.45rem; margin-top: 0.5rem; }
+.ss-wifi-ais-manual-grid label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.72rem; color: #94a3b8; }
+.ss-wifi-ais-status {
+  margin-top: 0.75rem; font: 600 0.68rem/1.35 ui-monospace, Consolas, monospace;
+  color: #7dd3fc; min-height: 2.2em;
+}
+.ss-wifi-ais-disc { width: 100%; margin-top: 0.55rem; justify-content: center; color: #fca5a5 !important; }
+.ss-native-auth-gate {
+  position: fixed; inset: 0; z-index: 2147483700; display: flex; align-items: center; justify-content: center;
+  background: #080f24; color: #e2e8f0;
+}
+.ss-native-auth-card { max-width: 360px; text-align: center; padding: 1.5rem; }
+.ss-native-auth-card h2 { margin: 0 0 0.5rem; }
+.home-install-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; }
+.home-install-btn.secondary {
+  background: rgba(15,23,42,0.55); color: #e2e8f0; border: 1px solid rgba(125,211,252,0.35);
+}
+.home-install-native-note { margin: 0.55rem 0 0; font-size: 0.68rem; color: #94a3b8; max-width: 22rem; line-height: 1.4; }
+#tab-ntm #ntmMap, #tab-ntm .leaflet-container { position: relative; }
+
   </style>
   <script>
     /* Mark booting ASAP — no external deps */
@@ -181,7 +247,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.139" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.140" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -6065,7 +6131,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 .home-vessel-hud-btn:hover { opacity: 0.92; }
 
-/* v5.139: Home vessel HUD vertical center + AIS suggest + ECDIS cursor */
+/* v5.140: Home vessel HUD vertical center + AIS suggest + ECDIS cursor */
 .home-vessel-hud-btn {
   display: inline-flex !important;
   align-items: center !important;
@@ -6147,7 +6213,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .own-ship-wrap--hull { width: 48px; height: 64px; }
 .own-ship-svg { display: block; filter: drop-shadow(0 0 1.5px rgba(255,255,255,0.85)) drop-shadow(0 1px 2px rgba(15,23,42,0.35)); }
 
-/* v5.139b: lock Home vessel HUD vertical center in top bar */
+/* v5.140b: lock Home vessel HUD vertical center in top bar */
 #homeHudTop {
   align-items: center !important;
 }
@@ -8942,7 +9008,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.139" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.140" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12009,7 +12075,7 @@ select option {
   }
 }
 
-/* ═══ Mobile polish pack (v5.139) — hero / dock / install / SetStar / SetRoute ═══ */
+/* ═══ Mobile polish pack (v5.140) — hero / dock / install / SetStar / SetRoute ═══ */
 .setstar-data-switch { display: none; }
 @media (max-width: 768px) {
   html, body, #tab-home, #tab-home.active, .home-hero-viewport, .app-content {
@@ -12873,6 +12939,18 @@ select option {
         setHint('Verified — entering bridge', 'is-ok');
         tryComplete();
       }
+      /* Native Capacitor / Electron shells skip Turnstile (Google gate instead). */
+      try {
+        var ua = navigator.userAgent || '';
+        var isNative = /Electron/i.test(ua) || (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) || !!window.SetSailNativeLan;
+        if (isNative) {
+          if (host) host.style.display = 'none';
+          var wrap = document.getElementById('ssbTurnstileWrap');
+          if (wrap) wrap.style.display = 'none';
+          markOk();
+          return;
+        }
+      } catch (eN) {}
       try {
         if (sessionStorage.getItem('ss_cf_turnstile_ok') === '1') {
           markOk();
@@ -13404,7 +13482,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.139" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.139';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.140" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.140';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13426,16 +13504,23 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.139" alt="" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.140" alt="" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <p class="home-install-kicker">SetSail on your bridge</p>
                     <h2 class="home-install-title">The chart stays open when the tab would not.</h2>
-                    <p class="home-install-lead">Install once — offline tiles, NtM &amp; NAVTEX cache, and a standalone window for thin satellite links.</p>
+                    <p class="home-install-lead">Download Android or Windows for Wi‑Fi AIS on the bridge — or install the PWA for browser offline cache.</p>
                     <div class="home-install-actions">
-                      <button type="button" class="home-install-btn primary" id="btnInstallSetSailApp" title="Install SetSail as an app">
-                        Install SetSail
+                      <a class="home-install-btn primary" id="btnDownloadAndroidApp" href="downloads/SetSail-android.apk" download="SetSail-android.apk" title="Download SetSail for Android">
+                        Android APK
+                      </a>
+                      <a class="home-install-btn primary" id="btnDownloadWindowsApp" href="downloads/SetSail-Setup.exe" download="SetSail-Setup.exe" title="Download SetSail for Windows">
+                        Windows
+                      </a>
+                      <button type="button" class="home-install-btn secondary" id="btnInstallSetSailApp" title="Install as browser PWA">
+                        PWA / Home Screen
                       </button>
                     </div>
+                    <p class="home-install-native-note">Native apps unlock adaptive Wi‑Fi AIS (SafePilot and similar ship modules). PWA stays available for browsers.</p>
                     <p class="home-install-hint" id="homeInstallHint" hidden></p>
                   </div>
                 </div>
@@ -21108,25 +21193,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.139"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.139" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.139"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.140"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.140" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.140"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.139",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.140",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.139"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.139"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.139"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.140"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.140"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.140"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.139"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.140"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21199,7 +21284,11 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.139"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.140"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.140"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.140"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.140"></script>
+
 
 
       <script id="setsail-home-saas-scroll-engine">
@@ -21862,7 +21951,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.139' && k !== 'setsail-tiles-cache-v5.139').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.140' && k !== 'setsail-tiles-cache-v5.140').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 function showSetSailHardRefreshTip(cacheLabel) {
@@ -21912,17 +22001,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.139', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.140', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.139 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.140 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.139') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.139.0'); }, 1200);
+              if (last && last.indexOf('v5.140') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.140.0'); }, 1200);
               }
             } catch (eTip) {}
           })

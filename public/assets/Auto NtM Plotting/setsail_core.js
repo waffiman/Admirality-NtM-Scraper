@@ -17535,3 +17535,5 @@ function initSetSailLocalization() {
   applySetSailLanguage(saved);
 }
 window.initSetSailLocalization = initSetSailLocalization;
+
+try { window.applyVesselProfile = applyVesselProfile; window.plotUserVessel = plotUserVessel; window.loadUserVesselFromStorage = loadUserVesselFromStorage; } catch (e) {}
