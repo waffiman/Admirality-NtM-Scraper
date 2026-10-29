@@ -11561,36 +11561,39 @@
 
 
 
-﻿/* ── SetSail Map Context Menu Popup ── */
+﻿/* ── SetSail Map Context Menu Popup (Miniature & High Contrast) ── */
 .ss-map-ctx-popup .leaflet-popup-content-wrapper {
-  background: rgba(242, 244, 248, 0.98) !important;
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  border: 1px solid rgba(100, 116, 139, 0.45) !important;
-  border-radius: 10px;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.35) !important;
-  padding: 0;
+  background: rgba(8, 16, 36, 0.96) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.38) !important;
+  border-radius: 9px !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.75), 0 0 16px rgba(56, 189, 248, 0.15) !important;
+  padding: 0 !important;
 }
 .ss-map-ctx-popup .leaflet-popup-tip {
-  background: rgba(242, 244, 248, 0.98) !important;
-  border: 1px solid rgba(100, 116, 139, 0.45) !important;
+  background: rgba(8, 16, 36, 0.96) !important;
+  border: 1px solid rgba(56, 189, 248, 0.38) !important;
 }
 .ss-map-ctx-popup .leaflet-popup-close-button {
-  color: #475569 !important;
-  padding: 6px 8px 0 0 !important;
-  font-size: 16px !important;
+  color: #94a3b8 !important;
+  padding: 4px 6px 0 0 !important;
+  font-size: 15px !important;
+  transition: color 0.15s ease !important;
 }
 .ss-map-ctx-popup .leaflet-popup-close-button:hover {
-  color: #f05a36 !important;
+  color: #38bdf8 !important;
 }
 .ss-map-ctx-popup .leaflet-popup-content {
   margin: 0 !important;
-  line-height: 1.4;
-  color: #0f172a !important;
+  line-height: 1.35;
+  color: #ffffff !important;
 }
 .ss-ctx-menu {
-  padding: 8px 10px 10px;
-  min-width: 210px;
+  padding: 6px 7px 7px;
+  min-width: 165px;
+  max-width: 195px;
+  box-sizing: border-box;
 }
 .ss-ctx-actions {
   display: flex;
@@ -11602,188 +11605,208 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(56, 189, 248, 0.22);
   border-radius: 6px;
-  padding: 8px 10px;
-  color: #0f172a !important;
-  font-size: 0.85rem;
-  font-weight: 650;
+  padding: 6px 8px;
+  color: #ffffff !important;
+  font-size: 0.78rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
+  pointer-events: auto !important;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
 }
 .ss-ctx-btn:hover {
-  background: rgba(240, 90, 54, 0.12);
-  color: #0f172a !important;
+  background: rgba(56, 189, 248, 0.22);
+  border-color: #38bdf8;
+  color: #ffffff !important;
+  transform: translateX(1px);
 }
 .ss-ctx-btn-left {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
+  pointer-events: none;
 }
 .ss-ctx-glyph {
-  width: 18px;
-  height: 18px;
-  color: #f05a36;
+  width: 15px;
+  height: 15px;
+  color: #38bdf8;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-.ss-ctx-glyph svg { width: 18px; height: 18px; }
+.ss-ctx-glyph svg { width: 15px; height: 15px; }
 .ss-ctx-btn-label {
-  color: #0f172a !important;
-  font-weight: 650 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
 }
 .ss-ctx-arrow {
-  color: #64748b;
-  font-size: 1.1rem;
-  font-weight: 700;
+  color: #38bdf8;
+  font-size: 0.95rem;
+  font-weight: 800;
   line-height: 1;
+  pointer-events: none;
 }
 .ss-ctx-btn:hover .ss-ctx-arrow {
-  color: #f05a36;
+  color: #ffffff;
+  transform: translateX(2px);
 }
 
 /* Detail views */
 .ss-ctx-detail {
-  padding: 8px 10px 10px;
-  min-width: 220px;
+  padding: 6px 8px 8px;
+  min-width: 170px;
+  max-width: 200px;
+  box-sizing: border-box;
 }
 .ss-ctx-topbar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-bottom: 5px;
 }
 .ss-ctx-back-btn {
-  background: transparent;
-  border: none;
-  color: #475569;
-  border-radius: 5px;
-  padding: 3px 6px;
-  font-size: 0.74rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #38bdf8 !important;
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-size: 0.68rem;
   font-weight: 700;
   cursor: pointer;
+  pointer-events: auto !important;
+  transition: all 0.15s ease;
 }
 .ss-ctx-back-btn:hover {
-  background: rgba(240, 90, 54, 0.12);
-  color: #f05a36;
+  background: rgba(56, 189, 248, 0.25);
+  color: #ffffff !important;
 }
 .ss-ctx-title {
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 800;
-  color: #0f172a !important;
+  color: #ffffff !important;
+  letter-spacing: 0.02em;
 }
 .ss-ctx-stat-card {
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 8px;
-  padding: 10px 8px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: rgba(4, 12, 28, 0.75);
+  border-radius: 7px;
+  padding: 6px 6px;
   text-align: center;
+  box-sizing: border-box;
 }
 .ss-ctx-stat-val {
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 850;
-  color: #0f172a !important;
+  color: #ffffff !important;
   line-height: 1.15;
 }
-.ss-ctx-stat-val.east { color: #0284c7 !important; }
-.ss-ctx-stat-val.west { color: #d97706 !important; }
+.ss-ctx-stat-val.east { color: #38bdf8 !important; text-shadow: 0 0 8px rgba(56, 189, 248, 0.35); }
+.ss-ctx-stat-val.west { color: #fb923c !important; text-shadow: 0 0 8px rgba(251, 146, 60, 0.35); }
 .ss-ctx-stat-lbl {
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   font-weight: 700;
-  color: #475569 !important;
+  color: #94a3b8 !important;
   text-transform: uppercase;
-  margin-top: 4px;
+  margin-top: 2px;
+  letter-spacing: 0.04em;
 }
 .ss-ctx-stat-sub {
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #1e293b !important;
-  margin-top: 5px;
-  padding-top: 5px;
-  border-top: 1px dashed rgba(15, 23, 42, 0.12);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #cbd5e1 !important;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(56, 189, 248, 0.2);
+}
+.ss-ctx-stat-sub b {
+  color: #ffffff !important;
+  font-weight: 750;
 }
 .ss-ctx-tz-row {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   text-align: center;
 }
 .ss-ctx-tz-pill {
-  font-size: 0.7rem;
-  color: #1e293b !important;
-  background: rgba(15, 23, 42, 0.08);
-  padding: 3px 8px;
+  font-size: 0.64rem;
+  color: #cbd5e1 !important;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 2px 6px;
   border-radius: 999px;
   font-weight: 600;
   display: inline-block;
 }
 .ss-ctx-tz-pill b {
-  color: #0f172a !important;
+  color: #38bdf8 !important;
   font-weight: 800;
 }
 .ss-ctx-sun-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 4px;
+  margin-bottom: 4px;
 }
 .ss-ctx-sun-box {
-  border-radius: 8px;
-  padding: 8px 6px;
+  border-radius: 6px;
+  padding: 5px 4px;
   text-align: center;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: rgba(4, 12, 28, 0.75);
 }
 .ss-ctx-sun-box.sunrise {
-  border-color: rgba(245, 158, 11, 0.4);
-  background: rgba(254, 243, 199, 0.65);
+  border-color: rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.08);
 }
 .ss-ctx-sun-box.sunset {
-  border-color: rgba(240, 90, 54, 0.35);
-  background: rgba(255, 237, 213, 0.65);
+  border-color: rgba(249, 115, 22, 0.4);
+  background: rgba(249, 115, 22, 0.08);
 }
 .ss-ctx-sun-icon {
-  width: 22px;
-  height: 22px;
-  margin: 0 auto 3px;
-  color: #f05a36;
+  width: 16px;
+  height: 16px;
+  margin: 0 auto 2px;
 }
-.ss-ctx-sun-icon svg { width: 22px; height: 22px; }
+.ss-ctx-sun-icon svg { width: 16px; height: 16px; }
 .ss-ctx-sun-label {
-  font-size: 0.64rem;
+  font-size: 0.55rem;
   font-weight: 800;
   letter-spacing: 0.05em;
-  color: #475569 !important;
+  color: #38bdf8 !important;
 }
 .ss-ctx-sun-time {
-  font-size: 1.15rem;
+  font-size: 0.95rem;
   font-weight: 850;
-  color: #0f172a !important;
-  margin-top: 2px;
+  color: #ffffff !important;
+  margin-top: 1px;
 }
 .ss-ctx-tz-sub {
-  font-size: 0.68rem;
-  color: #f05a36;
+  font-size: 0.62rem;
+  color: #38bdf8;
   font-weight: 750;
 }
 .ss-ctx-sun-utc {
-  font-size: 0.68rem;
-  color: #475569 !important;
+  font-size: 0.62rem;
+  color: #94a3b8 !important;
   margin-top: 1px;
-  font-weight: 650;
+  font-weight: 600;
 }
 .ss-ctx-sun-footer {
-  font-size: 0.72rem;
-  color: #334155 !important;
+  font-size: 0.66rem;
+  color: #cbd5e1 !important;
   text-align: center;
-  padding-top: 6px;
-  border-top: 1px solid rgba(15, 23, 42, 0.1);
-  font-weight: 650;
+  padding-top: 4px;
+  border-top: 1px solid rgba(56, 189, 248, 0.2);
+  font-weight: 600;
 }
 .ss-ctx-sun-footer b {
-  color: #0f172a !important;
-  font-weight: 850;
+  color: #ffffff !important;
+  font-weight: 800;
 }
 
 /* ── My Vessel Settings Popover (Home & SetChart) ── */
@@ -11927,7 +11950,7 @@
   box-sizing: border-box !important;
 }
 
-/* Full-width accordion for more details */
+/* Full-width accordion for more details: full-width click surface */
 details.vessel-more-details {
   width: 100% !important;
   box-sizing: border-box !important;
@@ -11938,22 +11961,28 @@ details.vessel-more-details {
 
 details.vessel-more-details summary {
   cursor: pointer !important;
-  font-size: 0.74rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
   color: #38bdf8 !important;
-  padding: 0.3rem 0.4rem !important;
+  padding: 0.38rem 0.55rem !important;
   border-radius: 6px !important;
-  background: rgba(56, 189, 248, 0.08) !important;
+  background: rgba(56, 189, 248, 0.1) !important;
   user-select: none !important;
   outline: none !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 4px !important;
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
   transition: background 0.15s ease !important;
+  pointer-events: auto !important;
 }
 
 details.vessel-more-details summary:hover {
-  background: rgba(56, 189, 248, 0.16) !important;
+  background: rgba(56, 189, 248, 0.22) !important;
+}
+
+details.vessel-more-details summary * {
+  pointer-events: none !important;
 }
 
 /* Symmetrical 6-column grid inside AIS Details */
@@ -12015,4 +12044,71 @@ details.vessel-more-details summary:hover {
   border-radius: 8px !important;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6) !important;
   box-sizing: border-box !important;
+}
+
+.vessel-ais-suggest[hidden] {
+  display: none !important;
+}
+
+/* Install tile frosted glass card */
+.home-install-copy {
+  position: relative !important;
+  z-index: 2 !important;
+  max-width: min(34rem, 58%) !important;
+  padding: 1.5rem 1.65rem !important;
+  background: rgba(6, 14, 30, 0.78) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1.5px solid rgba(56, 189, 248, 0.28) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  box-sizing: border-box !important;
+}
+
+.home-install-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.55rem !important;
+  align-items: stretch !important;
+  margin-top: 0.85rem !important;
+}
+
+.home-install-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  text-decoration: none !important;
+  padding: 0.55rem 0.95rem !important;
+  border-radius: 10px !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
+}
+
+.home-install-btn.primary {
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%) !important;
+  color: #04101c !important;
+  border: 1px solid rgba(56, 189, 248, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35) !important;
+}
+
+.home-install-btn.primary:hover {
+  transform: translateY(-2px) !important;
+  filter: brightness(1.08) !important;
+  box-shadow: 0 8px 22px rgba(2, 132, 199, 0.5) !important;
+}
+
+.home-install-btn.secondary {
+  background: rgba(15, 23, 42, 0.75) !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+}
+
+.home-install-btn.secondary:hover {
+  background: rgba(56, 189, 248, 0.2) !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
 }

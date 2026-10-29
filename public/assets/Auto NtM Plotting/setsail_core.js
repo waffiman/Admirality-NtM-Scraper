@@ -5365,10 +5365,16 @@ function initMapContextMenu(map) {
   const container = document.createElement("div");
   container.className = "ss-map-ctx-container";
 
+  // Prevent Leaflet map from intercepting clicks or drags
+  if (typeof L !== "undefined" && L.DomEvent) {
+    L.DomEvent.disableClickPropagation(container);
+    L.DomEvent.disableScrollPropagation(container);
+  }
+
   const popup = L.popup({
     className: "ss-map-ctx-popup",
-    maxWidth: 268,
-    minWidth: 210,
+    maxWidth: 200,
+    minWidth: 165,
     autoPan: true,
     closeButton: true
   })
@@ -5384,7 +5390,7 @@ function initMapContextMenu(map) {
         '<div class="ss-ctx-actions">' +
           '<button type="button" class="ss-ctx-btn" id="btnCtxVariation">' +
             '<div class="ss-ctx-btn-left">' +
-              '<span class="ss-ctx-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><polygon points="12 4.2 13.4 10.6 12 12 10.6 10.6" fill="currentColor"/><polygon points="12 19.8 10.6 13.4 12 12 13.4 13.4" fill="currentColor" opacity="0.45"/><circle cx="12" cy="12" r="1.5" fill="#f05a36"/></svg></span>' +
+              '<span class="ss-ctx-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><polygon points="12 4.2 13.4 10.6 12 12 10.6 10.6" fill="currentColor"/><polygon points="12 19.8 10.6 13.4 12 12 13.4 13.4" fill="currentColor" opacity="0.45"/><circle cx="12" cy="12" r="1.5" fill="#38bdf8"/></svg></span>' +
               '<span class="ss-ctx-btn-label">Variation</span>' +
             '</div>' +
             '<span class="ss-ctx-arrow">›</span>' +
@@ -5399,21 +5405,20 @@ function initMapContextMenu(map) {
         '</div>' +
       '</div>';
 
-    const btnVar = container.querySelector("#btnCtxVariation");
-    if (btnVar) {
-      btnVar.addEventListener("click", (evt) => {
+    const bindAction = (id, handler) => {
+      const el = container.querySelector(id);
+      if (!el) return;
+      el.addEventListener("pointerdown", (e) => { e.stopPropagation(); });
+      el.addEventListener("mousedown", (e) => { e.stopPropagation(); });
+      el.addEventListener("click", (evt) => {
+        evt.preventDefault();
         evt.stopPropagation();
-        renderVariationView();
+        handler();
       });
-    }
+    };
 
-    const btnSun = container.querySelector("#btnCtxSun");
-    if (btnSun) {
-      btnSun.addEventListener("click", (evt) => {
-        evt.stopPropagation();
-        renderSunView();
-      });
-    }
+    bindAction("#btnCtxVariation", renderVariationView);
+    bindAction("#btnCtxSun", renderSunView);
 
     popup.update();
   }
@@ -5434,18 +5439,21 @@ function initMapContextMenu(map) {
       '<div class="ss-ctx-detail">' +
         '<div class="ss-ctx-topbar">' +
           '<button type="button" class="ss-ctx-back-btn" id="btnCtxBack" title="Back">&larr; Back</button>' +
-          '<span class="ss-ctx-title">Magnetic Variation</span>' +
+          '<span class="ss-ctx-title">Variation</span>' +
         '</div>' +
         '<div class="ss-ctx-stat-card">' +
           '<div class="ss-ctx-stat-val ' + (isEast ? "east" : "west") + '">' + decValStr + '</div>' +
-          '<div class="ss-ctx-stat-lbl">World Magnetic Model 2025–2030</div>' +
-          '<div class="ss-ctx-stat-sub">Annual Change: <b>' + annualChangeStr + '</b></div>' +
+          '<div class="ss-ctx-stat-lbl">WMM 2025–2030</div>' +
+          '<div class="ss-ctx-stat-sub">Annual: <b>' + annualChangeStr + '</b></div>' +
         '</div>' +
       '</div>';
 
     const backBtn = container.querySelector("#btnCtxBack");
     if (backBtn) {
+      backBtn.addEventListener("pointerdown", (e) => { e.stopPropagation(); });
+      backBtn.addEventListener("mousedown", (e) => { e.stopPropagation(); });
       backBtn.addEventListener("click", (evt) => {
+        evt.preventDefault();
         evt.stopPropagation();
         renderMainMenu();
       });
@@ -5461,27 +5469,27 @@ function initMapContextMenu(map) {
     if (sunData.isSpecial) {
       bodyContent =
         '<div class="ss-ctx-stat-card">' +
-          '<div class="ss-ctx-stat-val" style="font-size:1.15rem;color:#fde047;font-weight:800;">' + sunData.daylightStr + '</div>' +
-          '<div class="ss-ctx-stat-lbl">High-Latitude Solar State</div>' +
+          '<div class="ss-ctx-stat-val" style="font-size:1.0rem;color:#fde047;font-weight:800;">' + sunData.daylightStr + '</div>' +
+          '<div class="ss-ctx-stat-lbl">Polar Solar State</div>' +
         '</div>';
     } else {
       bodyContent =
         '<div class="ss-ctx-sun-grid">' +
           '<div class="ss-ctx-sun-box sunrise">' +
-            '<div class="ss-ctx-sun-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 16c2.4-1.5 4.8-2.2 8-2.2s5.6.7 8 2.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 4.2v1.5M7.4 6.4l.9.9M16.6 6.4l-.9.9" stroke="#f05a36" stroke-width="1.4" stroke-linecap="round"/></svg></div>' +
+            '<div class="ss-ctx-sun-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 16c2.4-1.5 4.8-2.2 8-2.2s5.6.7 8 2.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 4.2v1.5M7.4 6.4l.9.9M16.6 6.4l-.9.9" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/></svg></div>' +
             '<div class="ss-ctx-sun-label">SUNRISE</div>' +
             '<div class="ss-ctx-sun-time">' + sunData.sunriseLocal + ' <span class="ss-ctx-tz-sub">LT</span></div>' +
             '<div class="ss-ctx-sun-utc">' + sunData.sunriseUtc + ' UTC</div>' +
           '</div>' +
           '<div class="ss-ctx-sun-box sunset">' +
-            '<div class="ss-ctx-sun-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14.5c2.4 1.2 4.8 1.8 8 1.8s5.6-.6 8-1.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="10.2" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 5v1.4M7.4 7.1l.9.9M16.6 7.1l-.9.9" stroke="#f05a36" stroke-width="1.4" stroke-linecap="round"/></svg></div>' +
+            '<div class="ss-ctx-sun-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14.5c2.4 1.2 4.8 1.8 8 1.8s5.6-.6 8-1.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="10.2" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 5v1.4M7.4 7.1l.9.9M16.6 7.1l-.9.9" stroke="#f97316" stroke-width="1.4" stroke-linecap="round"/></svg></div>' +
             '<div class="ss-ctx-sun-label">SUNSET</div>' +
             '<div class="ss-ctx-sun-time">' + sunData.sunsetLocal + ' <span class="ss-ctx-tz-sub">LT</span></div>' +
             '<div class="ss-ctx-sun-utc">' + sunData.sunsetUtc + ' UTC</div>' +
           '</div>' +
         '</div>' +
         '<div class="ss-ctx-sun-footer">' +
-          '<span>Daylight Duration: <b style="color:#0f172a;font-weight:800;">' + sunData.daylightStr + '</b></span>' +
+          '<span>Daylight: <b style="color:#ffffff;font-weight:800;">' + sunData.daylightStr + '</b></span>' +
         '</div>';
     }
 
@@ -5489,17 +5497,20 @@ function initMapContextMenu(map) {
       '<div class="ss-ctx-detail">' +
         '<div class="ss-ctx-topbar">' +
           '<button type="button" class="ss-ctx-back-btn" id="btnCtxBack" title="Back">&larr; Back</button>' +
-          '<span class="ss-ctx-title">Sunrise &amp; Sunset</span>' +
+          '<span class="ss-ctx-title">Sun Times</span>' +
         '</div>' +
         '<div class="ss-ctx-tz-row">' +
-          '<span class="ss-ctx-tz-pill">Nautical Time Zone: <b>' + sunData.tzStr + '</b> (' + sunData.zdStr + ')</span>' +
+          '<span class="ss-ctx-tz-pill">TZ: <b>' + sunData.tzStr + '</b> (' + sunData.zdStr + ')</span>' +
         '</div>' +
         bodyContent +
       '</div>';
 
     const backBtn = container.querySelector("#btnCtxBack");
     if (backBtn) {
+      backBtn.addEventListener("pointerdown", (e) => { e.stopPropagation(); });
+      backBtn.addEventListener("mousedown", (e) => { e.stopPropagation(); });
       backBtn.addEventListener("click", (evt) => {
+        evt.preventDefault();
         evt.stopPropagation();
         renderMainMenu();
       });
@@ -17612,3 +17623,16 @@ function initSetSailLocalization() {
 window.initSetSailLocalization = initSetSailLocalization;
 
 try { window.applyVesselProfile = applyVesselProfile; window.plotUserVessel = plotUserVessel; window.loadUserVesselFromStorage = loadUserVesselFromStorage; } catch (e) {}
+
+// Global robust toggle for My Vessel "More vessel details" accordion across full element width
+try {
+  document.addEventListener('click', function(e) {
+    const sum = e.target && e.target.closest && e.target.closest('.vessel-more-details summary');
+    if (!sum) return;
+    const det = sum.closest('details');
+    if (!det) return;
+    e.preventDefault();
+    e.stopPropagation();
+    det.open = !det.open;
+  }, true);
+} catch (eDetToggle) {}
