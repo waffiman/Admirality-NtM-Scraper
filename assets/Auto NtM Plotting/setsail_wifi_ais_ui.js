@@ -168,7 +168,7 @@
     try {
       if (global.SetSailLanAis && global.SetSailLanAis.isNativeShell && global.SetSailLanAis.isNativeShell()) {
         document.documentElement.classList.add("setsail-native-shell");
-        maybeNativeAuthGate();
+        // maybeNativeAuthGate(); // disabled - optional sign-in only
       }
     } catch (e) {}
   }
