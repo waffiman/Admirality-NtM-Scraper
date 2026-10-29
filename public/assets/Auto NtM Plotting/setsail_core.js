@@ -1596,7 +1596,10 @@ function initFilterAndSortPopovers() {
       sortPop.classList.remove("open");
       if (sortBtn) sortBtn.classList.remove("active");
     }
-    if (vesselPop && !vesselPop.contains(e.target) && e.target !== myVesselBtn && !(myVesselBtn && myVesselBtn.contains(e.target))) {
+    if (vesselPop && vesselPop.classList.contains("open") && !e.defaultPrevented &&
+        !vesselPop.contains(e.target) && e.target !== myVesselBtn &&
+        !(myVesselBtn && myVesselBtn.contains(e.target)) &&
+        !(e.target && e.target.closest && e.target.closest(".vessel-more-details"))) {
       vesselPop.classList.remove("open");
       if (myVesselBtn) myVesselBtn.classList.remove("active");
     }
@@ -3363,6 +3366,9 @@ function initHomeHudVessel() {
 
   document.addEventListener("click", (e) => {
     if (!pop || !pop.classList.contains("open")) return;
+    if (e.defaultPrevented) return;
+    if (pop.contains(e.target)) return;
+    if (e.target && e.target.closest && e.target.closest(".vessel-more-details")) return;
     const wrap = document.getElementById("homeVesselHudPill");
     if (wrap && !wrap.contains(e.target)) closeHomePop();
   });
@@ -4673,12 +4679,18 @@ function ensureNoticesReadyForOverlay() {
         try {
           if (!Array.isArray(NTM_STORE) || NTM_STORE.length <= 10) {
             await loadRemoteNoticesJson(true);
-          } else if (typeof renderNtMListAndMap === "function") {
-            // Store already warm — still re-plot every object onto the chart
+          }
+          // Always re-plot after fetch (or when store was already warm)
+          if (typeof renderNtMListAndMap === "function") {
             renderNtMListAndMap();
+          } else if (typeof window.setOverlayNoticesLoading === "function") {
+            window.setOverlayNoticesLoading(false);
           }
           resolve(true);
         } catch (e) {
+          try {
+            if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
+          } catch (e2) {}
           if (typeof window.setOverlayNoticesLoading === "function") {
             window.setOverlayNoticesLoading(false);
           }
@@ -5231,8 +5243,23 @@ function getMapPositionVariation(lat, lon, dateObj) {
   return null;
 }
 
+/** Aliases used by the SetChart RMB context menu (must match renderVariationView / renderSunView). */
+function computePositionVariation(lat, lon, dateObj) {
+  const r = getMapPositionVariation(lat, lon, dateObj);
+  if (!r) return { decDeg: 0, annualChangeMin: 0, ecdisTag: "" };
+  return {
+    decDeg: Number(r.dec) || 0,
+    annualChangeMin: Number(r.annMin) || 0,
+    ecdisTag: r.ecdisTag || ""
+  };
+}
+function computePositionSolarEphemeris(lat, lon, dateObj) {
+  return calculateNauticalSunTimes(lat, lon, dateObj);
+}
+window.computePositionVariation = computePositionVariation;
+window.computePositionSolarEphemeris = computePositionSolarEphemeris;
 
-﻿function calculateNauticalSunTimes(lat, lon, dateObj) {
+function calculateNauticalSunTimes(lat, lon, dateObj) {
   const d = dateObj instanceof Date && !isNaN(dateObj.getTime()) ? dateObj : new Date();
   const year = d.getUTCFullYear();
   const month = d.getUTCMonth() + 1;
@@ -5408,13 +5435,27 @@ function initMapContextMenu(map) {
     const bindAction = (id, handler) => {
       const el = container.querySelector(id);
       if (!el) return;
-      el.addEventListener("pointerdown", (e) => { e.stopPropagation(); });
-      el.addEventListener("mousedown", (e) => { e.stopPropagation(); });
-      el.addEventListener("click", (evt) => {
-        evt.preventDefault();
-        evt.stopPropagation();
-        handler();
-      });
+      const run = (evt) => {
+        if (evt) {
+          if (typeof L !== "undefined" && L.DomEvent) L.DomEvent.stop(evt);
+          else {
+            evt.preventDefault();
+            evt.stopPropagation();
+          }
+        }
+        try { handler(); } catch (err) {
+          console.warn("[SetSail] context menu action failed", err);
+        }
+      };
+      if (typeof L !== "undefined" && L.DomEvent) {
+        L.DomEvent.disableClickPropagation(el);
+        L.DomEvent.on(el, "mousedown", L.DomEvent.stopPropagation);
+        L.DomEvent.on(el, "click", run);
+      } else {
+        el.addEventListener("pointerdown", (e) => { e.stopPropagation(); });
+        el.addEventListener("mousedown", (e) => { e.stopPropagation(); });
+        el.addEventListener("click", run);
+      }
     };
 
     bindAction("#btnCtxVariation", renderVariationView);
@@ -17624,13 +17665,18 @@ window.initSetSailLocalization = initSetSailLocalization;
 
 try { window.applyVesselProfile = applyVesselProfile; window.plotUserVessel = plotUserVessel; window.loadUserVesselFromStorage = loadUserVesselFromStorage; } catch (e) {}
 
-// Global robust toggle for My Vessel "More vessel details" accordion across full element width
+// Global robust toggle for My Vessel "More vessel details" — full summary / header width
 try {
   document.addEventListener('click', function(e) {
-    const sum = e.target && e.target.closest && e.target.closest('.vessel-more-details summary');
-    if (!sum) return;
-    const det = sum.closest('details');
+    if (!e.target || !e.target.closest) return;
+    const det = e.target.closest('.vessel-more-details');
     if (!det) return;
+    // Don't steal clicks from fields inside an open panel
+    if (e.target.closest('input, textarea, select, button, a, label')) return;
+    const sum = det.querySelector('summary');
+    const onSummary = !!(e.target.closest('summary') || e.target === sum);
+    const onClosedBody = !det.open && !onSummary;
+    if (!onSummary && !onClosedBody) return;
     e.preventDefault();
     e.stopPropagation();
     det.open = !det.open;

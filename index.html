@@ -136,7 +136,7 @@
       box-shadow: 0 0 0 2px rgba(239,68,68,0.5), inset 0 0 36px rgba(239,68,68,0.16), 0 0 36px rgba(239,68,68,0.22);
     }
   
-/* v5.143: Wi-Fi AIS motion brow + Install native downloads */
+/* v5.144: NtM spinner/plot, RMB Variation/Sun, Install EN, vessel details hit */
 .ss-motion-brow {
   position: absolute; top: 0; left: 0; right: 0; z-index: 1200;
   pointer-events: none;
@@ -234,7 +234,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.141" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.144" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -6247,6 +6247,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
   align-items: end;
 }
 .vessel-profile-fields > .form-group { margin: 0 !important; }
+.vessel-profile-fields > .vessel-primary-fields,
+.vessel-profile-fields > .vessel-more-details,
 .vessel-profile-fields > .ntm-popover-subtitle,
 .vessel-profile-fields > .vessel-coords-row,
 .vessel-profile-fields > .vessel-ais-grid,
@@ -6347,6 +6349,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
   background: rgba(15, 23, 42, 0.18);
 }
 .vessel-more-details > summary {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
   cursor: pointer;
   list-style: none;
   font-size: 0.72rem;
@@ -6354,6 +6359,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   color: #94a3b8;
   padding: 0.35rem 0;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .vessel-more-details > summary::-webkit-details-marker { display: none; }
 .vessel-more-details > summary::before {
@@ -8995,7 +9001,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.141" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.144" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -13357,7 +13363,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.141" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.141';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.144" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.144';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13379,7 +13385,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.143" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.144" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -13387,11 +13393,11 @@ select option {
                     <div class="home-install-actions">
                       <a class="home-install-btn primary" id="btnDownloadWindowsApp" href="https://github.com/waffiman/Admirality-NtM-Scraper/releases/download/v5.141-win/SetSail-Windows.zip" target="_blank" rel="noopener" title="Download SetSail for Windows (portable zip)">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.551H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.949-1.801"/></svg>
-                        <span>Windows ZIP <small style="display:block;font-size:0.65rem;opacity:0.85;font-weight:500;">распаковать → SetSail.exe</small></span>
+                        <span>Windows ZIP <small style="display:block;font-size:0.65rem;opacity:0.85;font-weight:500;">Unzip → SetSail.exe</small></span>
                       </a>
                       <a class="home-install-btn primary" id="btnDownloadAndroidApp" href="https://github.com/waffiman/Admirality-NtM-Scraper/releases/download/v5.141-win/SetSail-android.apk" target="_blank" rel="noopener" title="Download SetSail for Android (APK)">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4116 13.8533 8.1 12 8.1s-3.5902.3116-5.1367.8497L4.841 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/></svg>
-                        <span>Android APK <small style="display:block;font-size:0.65rem;opacity:0.85;font-weight:500;">установить APK</small></span>
+                        <span>Android APK <small style="display:block;font-size:0.65rem;opacity:0.85;font-weight:500;">Install the APK</small></span>
                       </a>
                       <button type="button" class="home-install-btn secondary" id="btnInstallSetSailApp" title="Install as browser PWA">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex-shrink:0;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -13401,7 +13407,7 @@ select option {
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem;">
                       <a href="https://github.com/waffiman/Admirality-NtM-Scraper/releases/tag/v5.141-win" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:0.72rem;color:#38bdf8;text-decoration:none;font-weight:700;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                        <span>Страница релиза v5.141 на GitHub &rarr;</span>
+                        <span>Release page v5.141 on GitHub &rarr;</span>
                       </a>
                     </div>
                     <p class="home-install-hint" id="homeInstallHint" hidden></p>
@@ -21076,25 +21082,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.141"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.141" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.141"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.144"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.144" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.144"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.141",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.144",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.141"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.141"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.141"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.144"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.144"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.144"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.141"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.144"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21167,10 +21173,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.141"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.141"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.141"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.141"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.144"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.144"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.144"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.144"></script>
 
 
 
@@ -21884,17 +21890,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.141', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.144', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.143 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.144 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.143') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.143.0'); }, 1200);
+              if (last && last.indexOf('v5.144') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.144.0'); }, 1200);
               }
             } catch (eTip) {}
           })

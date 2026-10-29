@@ -20141,7 +20141,12 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         else currentMap.removeLayer(leafletIsobathsLayer);
       }
     } else if (overlayKey === "notices") {
-      const mLayer = window.leafletMarkersLayer || (typeof leafletMarkersLayer !== "undefined" ? leafletMarkersLayer : null);
+      let mLayer = window.leafletMarkersLayer || (typeof leafletMarkersLayer !== "undefined" ? leafletMarkersLayer : null);
+      if (!mLayer && typeof L !== "undefined") {
+        mLayer = L.layerGroup();
+        window.leafletMarkersLayer = mLayer;
+        try { if (typeof leafletMarkersLayer !== "undefined") leafletMarkersLayer = mLayer; } catch (eMk) {}
+      }
       if (mLayer) {
         if (isActive) {
           if (!currentMap.hasLayer(mLayer)) {
@@ -20239,17 +20244,9 @@ function setOverlayActive(overlayKey, isActive, map = null) {
     window.syncFilterMasterCheckboxes();
   }
 
-  // Synchronize Left Multi-Column List & Map Markers immediately!
-  if (overlayKey === "notices" && isActive) {
-    // Yield to the event loop so the browser immediately paints the loading spinner before compiling objects
-    setTimeout(() => {
-      if (typeof window.renderNtMListAndMap === "function") {
-        window.renderNtMListAndMap();
-      } else if (typeof renderNtMListAndMap === "function") {
-        renderNtMListAndMap();
-      }
-    }, 35);
-  } else {
+  // Synchronize list & markers. Notices ON is owned by ensureNoticesReadyForOverlay
+  // (keeps the tile spinner until fetch+plot finish — do not race-clear it here).
+  if (!(overlayKey === "notices" && isActive)) {
     if (typeof window.renderNtMListAndMap === "function") {
       window.renderNtMListAndMap();
     } else if (typeof renderNtMListAndMap === "function") {
