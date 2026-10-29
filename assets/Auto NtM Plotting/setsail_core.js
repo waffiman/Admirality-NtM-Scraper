@@ -808,10 +808,56 @@ async function applyAisHitToVessel(t, toastMsg) {
 async function findAisTargetByMmsi(mmsiRaw) {
   const mmsi = String(mmsiRaw || "").replace(/\D/g, "");
   if (mmsi.length < 5) return null;
+
+  // 1) Check active live stream targets
+  if (typeof window !== "undefined" && window.aisStreamTargets && window.aisStreamTargets[mmsi]) {
+    const t = window.aisStreamTargets[mmsi];
+    if (t && Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon))) {
+      return {
+        name: t.name || ("MMSI " + mmsi),
+        mmsi: mmsi,
+        lat: Number(t.lat),
+        lon: Number(t.lon),
+        sog: t.sog != null ? Number(t.sog) : null,
+        cog: t.cog != null ? Number(t.cog) : null,
+        heading: t.heading != null ? Number(t.heading) : null,
+        shipType: t.shipType || t.type || "",
+        destination: t.destination || "",
+        callSign: t.callSign || "",
+        source: t.source || "AISStream"
+      };
+    }
+  }
+
+  // 2) Check live AIS snapshot
+  if (typeof window !== "undefined" && typeof window.getAisTargetsSnapshot === "function") {
+    try {
+      const snap = window.getAisTargetsSnapshot(2000) || [];
+      const st = snap.find((x) => String(x.mmsi) === mmsi && Number.isFinite(Number(x.lat)));
+      if (st) {
+        return {
+          name: st.name || ("MMSI " + mmsi),
+          mmsi: mmsi,
+          lat: Number(st.lat),
+          lon: Number(st.lon),
+          sog: st.sog != null ? Number(st.sog) : null,
+          cog: st.cog != null ? Number(st.cog) : null,
+          heading: st.heading != null ? Number(st.heading) : null,
+          shipType: st.shipType || "",
+          destination: st.destination || "",
+          callSign: st.callSign || "",
+          source: st.source || "AIS"
+        };
+      }
+    } catch (eSnap) {}
+  }
+
+  // 3) Check indexed names / zone cache (only if coordinates present)
   const idx = await ensureAisNameIndex();
-  let hit = (idx || []).find((t) => String(t.mmsi || "") === mmsi);
+  let hit = (idx || []).find((t) => String(t.mmsi || "") === mmsi && Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon)));
   if (hit) return hit;
-  // Deep scan zone files (in case index still loading / stale)
+
+  // Deep scan zone files
   try {
     const man = await fetch("ais/zones/index.json?t=" + Date.now(), { cache: "no-store" }).then((r) =>
       r.ok ? r.json() : null
@@ -822,13 +868,13 @@ async function findAisTargetByMmsi(mmsiRaw) {
         const geo = await fetch(z.file + "?t=" + Date.now(), { cache: "no-store" }).then((r) =>
           r.ok ? r.json() : null
         );
-        const t = ((geo && geo.targets) || []).find((x) => String(x.mmsi) === mmsi);
+        const t = ((geo && geo.targets) || []).find((x) => String(x.mmsi) === mmsi && Number.isFinite(Number(x.lat)));
         if (t) {
           return {
             name: t.name || ("MMSI " + mmsi),
             mmsi,
-            lat: t.lat,
-            lon: t.lon,
+            lat: Number(t.lat),
+            lon: Number(t.lon),
             sog: t.sog,
             cog: t.cog,
             heading: t.heading,
@@ -841,17 +887,21 @@ async function findAisTargetByMmsi(mmsiRaw) {
       } catch (e) { /* next zone */ }
     }
   } catch (e2) { /* ignore */ }
-  // Live refresh path (Open Waters / Digitraffic) using temporary vessel context
+
+  // Live refresh path (Open Waters / Digitraffic)
   const prev = userVessel;
   userVessel = Object.assign({}, prev || {}, { mmsi: mmsi });
   try {
     const live = await fetchOwnVesselAisUpdate();
-    if (live) return live;
+    if (live && Number.isFinite(Number(live.lat)) && Number.isFinite(Number(live.lon))) return live;
   } catch (e3) { /* ignore */ }
   finally {
     userVessel = prev;
   }
-  // Registry seed for own ship
+
+  // Fallback to static registry seed if no live coordinates found yet
+  let staticHit = (idx || []).find((t) => String(t.mmsi || "") === mmsi);
+  if (staticHit) return staticHit;
   if (mmsi === "636024827") {
     return {
       name: "IINO INEOS VESTA",
@@ -863,6 +913,43 @@ async function findAisTargetByMmsi(mmsiRaw) {
   }
   return null;
 }
+
+function syncMyVesselFromLiveAis(t) {
+  if (!t || !window.userVessel) return;
+  const lat = Number(t.lat != null ? t.lat : t.latitude);
+  const lon = Number(t.lon != null ? t.lon : t.longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+  const prev = window.userVessel || {};
+  const updated = Object.assign({}, prev, {
+    lat: lat,
+    lon: lon,
+    sog: t.sog != null ? Number(t.sog) : prev.sog,
+    cog: t.cog != null ? Number(t.cog) : prev.cog,
+    heading: t.heading != null && t.heading < 360 ? Number(t.heading) : prev.heading,
+    shipType: t.shipType || t.type || prev.shipType,
+    destination: t.destination || prev.destination,
+    callSign: t.callSign || prev.callSign,
+    name: t.name || prev.name,
+    source: "AIS",
+    aisRefreshedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+  window.userVessel = updated;
+  if (typeof persistUserVessel === "function") persistUserVessel();
+
+  if (window.leafletMap && window.leafletVesselLayer && typeof plotUserVessel === "function") {
+    plotUserVessel(lat, lon, "AIS", true);
+  }
+
+  if (typeof syncVesselFieldsFromProfile === "function") {
+    syncVesselFieldsFromProfile(updated);
+  }
+  if (typeof updateHomeVesselHudLabel === "function") {
+    updateHomeVesselHudLabel();
+  }
+}
+window.syncMyVesselFromLiveAis = syncMyVesselFromLiveAis;
 
 function bindVesselNameAutocomplete(which) {
   const m = vesselFormMap(which);
@@ -3221,7 +3308,7 @@ function initHomeHudVessel() {
     if (!pop || !pillBtn) return;
     const r = pillBtn.getBoundingClientRect();
     const gap = 8;
-    const width = Math.min(340, Math.max(260, window.innerWidth - 24));
+    const width = Math.min(360, Math.max(280, window.innerWidth - 24));
     let top = Math.round(r.bottom + gap);
     let right = Math.round(Math.max(8, window.innerWidth - r.right));
     // Keep panel on-screen if it would hang below the viewport.
@@ -5266,7 +5353,7 @@ function initMapContextMenu(map) {
   });
 }
 
-function openMapContextMenu(latlng, map) {
+﻿function openMapContextMenu(latlng, map) {
   if (!map || !latlng) return;
   let lat = Number(latlng.lat);
   let lon = Number(latlng.lng);
@@ -5274,10 +5361,6 @@ function openMapContextMenu(latlng, map) {
 
   while (lon < -180) lon += 360;
   while (lon > 180) lon -= 360;
-
-  const coordDms = typeof formatCoordDmsHelper === "function"
-    ? formatCoordDmsHelper(lat, lon)
-    : Math.abs(lat).toFixed(4) + "° " + (lat >= 0 ? "N" : "S") + ", " + Math.abs(lon).toFixed(4) + "° " + (lon >= 0 ? "E" : "W");
 
   const container = document.createElement("div");
   container.className = "ss-map-ctx-container";
@@ -5298,12 +5381,6 @@ function openMapContextMenu(latlng, map) {
   function renderMainMenu() {
     container.innerHTML =
       '<div class="ss-ctx-menu">' +
-        '<div class="ss-ctx-header">' +
-          '<div class="ss-ctx-coord-pill">' +
-            '<svg viewBox="0 0 24 24" class="ss-ctx-icon"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></svg>' +
-            '<span>' + coordDms + '</span>' +
-          '</div>' +
-        '</div>' +
         '<div class="ss-ctx-actions">' +
           '<button type="button" class="ss-ctx-btn" id="btnCtxVariation">' +
             '<div class="ss-ctx-btn-left">' +
@@ -5342,21 +5419,16 @@ function openMapContextMenu(latlng, map) {
   }
 
   function renderVariationView() {
-    const varInfo = getMapPositionVariation(lat, lon, new Date());
-    let decValStr = "—";
-    let ecdisTag = "WMM 2025-2030";
-    let isEast = true;
-    let annDrift = "—";
-
-    if (varInfo && Number.isFinite(varInfo.dec)) {
-      const dec = varInfo.dec;
-      isEast = dec >= 0;
-      decValStr = Math.abs(dec).toFixed(1) + "° " + (isEast ? "E" : "W");
-      ecdisTag = varInfo.ecdisTag || ("[" + Math.abs(Math.round(dec)) + "°" + (isEast ? "E" : "W") + "]");
-      if (varInfo.annMin != null) {
-        annDrift = (varInfo.annMin >= 0 ? "+" : "") + varInfo.annMin + "' / yr";
-      }
-    }
+    const varInfo = computePositionVariation(lat, lon);
+    const decVal = varInfo ? varInfo.decDeg : 0;
+    const isEast = decVal >= 0;
+    const absDeg = Math.abs(decVal);
+    const dInt = Math.floor(absDeg);
+    const mFrac = ((absDeg - dInt) * 60).toFixed(1);
+    const decValStr = `${dInt}° ${mFrac}' ${isEast ? "E" : "W"}`;
+    const annualChangeStr = varInfo && varInfo.annualChangeMin != null
+      ? (varInfo.annualChangeMin >= 0 ? `+${varInfo.annualChangeMin.toFixed(1)}'/yr` : `${varInfo.annualChangeMin.toFixed(1)}'/yr`)
+      : "0.0'/yr";
 
     container.innerHTML =
       '<div class="ss-ctx-detail">' +
@@ -5364,22 +5436,11 @@ function openMapContextMenu(latlng, map) {
           '<button type="button" class="ss-ctx-back-btn" id="btnCtxBack" title="Back">&larr; Back</button>' +
           '<span class="ss-ctx-title">Magnetic Variation</span>' +
         '</div>' +
-        '<div class="ss-ctx-coord-sub">' + coordDms + '</div>' +
         '<div class="ss-ctx-stat-card">' +
           '<div class="ss-ctx-stat-val ' + (isEast ? "east" : "west") + '">' + decValStr + '</div>' +
           '<div class="ss-ctx-stat-lbl">World Magnetic Model 2025–2030</div>' +
+          '<div class="ss-ctx-stat-sub">Annual Change: <b>' + annualChangeStr + '</b></div>' +
         '</div>' +
-        '<div class="ss-ctx-row">' +
-          '<span class="ss-ctx-row-lbl">ECDIS / Chart Tag</span>' +
-          '<span class="ss-ctx-tag">' + ecdisTag + '</span>' +
-        '</div>' +
-        '<div class="ss-ctx-row">' +
-          '<span class="ss-ctx-row-lbl">Model Epoch</span>' +
-          '<span class="ss-ctx-val">2025.0 (NOAA / NGA / BGS)</span>' +
-        '</div>' +
-        (annDrift !== "—"
-          ? '<div class="ss-ctx-row"><span class="ss-ctx-row-lbl">Annual Change</span><span class="ss-ctx-val">' + annDrift + '</span></div>'
-          : "") +
       '</div>';
 
     const backBtn = container.querySelector("#btnCtxBack");
@@ -5394,13 +5455,13 @@ function openMapContextMenu(latlng, map) {
   }
 
   function renderSunView() {
-    const sunData = calculateNauticalSunTimes(lat, lon, new Date());
+    const sunData = computePositionSolarEphemeris(lat, lon, new Date());
     let bodyContent = "";
 
     if (sunData.isSpecial) {
       bodyContent =
         '<div class="ss-ctx-stat-card">' +
-          '<div class="ss-ctx-stat-val" style="font-size:1.05rem;color:#fde047;">' + sunData.daylightStr + '</div>' +
+          '<div class="ss-ctx-stat-val" style="font-size:1.15rem;color:#fde047;font-weight:800;">' + sunData.daylightStr + '</div>' +
           '<div class="ss-ctx-stat-lbl">High-Latitude Solar State</div>' +
         '</div>';
     } else {
@@ -5420,7 +5481,7 @@ function openMapContextMenu(latlng, map) {
           '</div>' +
         '</div>' +
         '<div class="ss-ctx-sun-footer">' +
-          '<span>Daylight Duration: <b>' + sunData.daylightStr + '</b></span>' +
+          '<span>Daylight Duration: <b style="color:#0f172a;font-weight:800;">' + sunData.daylightStr + '</b></span>' +
         '</div>';
     }
 
@@ -5430,7 +5491,6 @@ function openMapContextMenu(latlng, map) {
           '<button type="button" class="ss-ctx-back-btn" id="btnCtxBack" title="Back">&larr; Back</button>' +
           '<span class="ss-ctx-title">Sunrise &amp; Sunset</span>' +
         '</div>' +
-        '<div class="ss-ctx-coord-sub">' + coordDms + '</div>' +
         '<div class="ss-ctx-tz-row">' +
           '<span class="ss-ctx-tz-pill">Nautical Time Zone: <b>' + sunData.tzStr + '</b> (' + sunData.zdStr + ')</span>' +
         '</div>' +
@@ -6648,6 +6708,15 @@ const MARITIME_SEA_NODES = {
   "EAST_CHINA_SEA": [29.50, 123.50, "East China Sea Corridor"],
   "SHANGHAI_APP": [31.00, 122.50, "Yangtze / Shanghai Fairway"],
   "OSUMI_STRAIT": [30.90, 131.00, "Osumi Strait (South Japan)"],
+  "IZU_OSHIMA_S": [34.50, 139.40, "Izu Oshima South Fairway (Honshu Approaches)"],
+  "SHIONOMISAKI_OFF": [33.30, 135.80, "Shionomisaki Offshore (Kii Channel Approach)"],
+  "SUNDA_STRAIT": [-5.95, 105.85, "Sunda Strait Fairway (Sumatra / Java)"],
+  "GASPAR_STRAIT": [-2.50, 107.10, "Gaspar Strait Deepwater Passage"],
+  "LOMBOK_STRAIT": [-8.75, 115.75, "Lombok Strait Deepwater Passage"],
+  "CAPE_TOWN_APP": [-33.85, 18.35, "Cape Town Deepwater Approach"],
+  "DURBAN_APP": [-29.85, 31.05, "Durban Port Fairway Approach"],
+  "PORT_ELIZABETH_OFF": [-34.20, 26.00, "Port Elizabeth Offshore (Agulhas Fairway)"],
+  "SOUTH_ATLANTIC_MID": [-20.00, 5.00, "South Atlantic Ocean Deepwater Transit"],
   "TOKYO_APP": [34.80, 139.80, "Tokyo Bay / Uraga Suido Fairway"],
   "BUSAN_APP": [35.00, 129.20, "Busan Port Fairway Approach"],
 
@@ -6829,13 +6898,14 @@ const SETROUTE_LAND_BOXES = [
   { minLat: -3.2, maxLat: 1.3, minLon: 105.0, maxLon: 109.8 }, // Karimata / Gaspar approaches
   { minLat: 5, maxLat: 18, minLon: 118, maxLon: 126 },       // Philippines (central)
   // Honshu interior only — do NOT span Osumi→Tokyo Pacific approaches
-  { minLat: 34.2, maxLat: 40.5, minLon: 136.2, maxLon: 140.9 },
+  { minLat: 34.95, maxLat: 40.5, minLon: 136.2, maxLon: 140.9 },
   // Greater Antilles: use island-specific boxes below — a 18–26°N / 85–70°W belt
   // was sealing Caribbean_MID→Yucatan / Key West→GoM fairways (Far East→Houston OD).
   { minLat: 36, maxLat: 41.5, minLon: 20.5, maxLon: 28.5 },   // Greece / Aegean islands mass
   { minLat: 54, maxLat: 59, minLon: 10, maxLon: 20 },         // S Sweden / Baltic islands belt
   { minLat: -47, maxLat: -34, minLon: 166, maxLon: 179 },     // NZ South Island interior
-  { minLat: 10, maxLat: 18, minLon: 42, maxLon: 50 },         // Horn of Africa / Yemen highland
+  { minLat: 8.0, maxLat: 11.4, minLon: 42.0, maxLon: 51.0 },   // Somalia / Horn of Africa interior
+  { minLat: 13.8, maxLat: 18.0, minLon: 42.5, maxLon: 50.0 },  // Yemen interior (leave Gulf of Aden fairway open)
   // Smaller island / archipelago interiors (stop chords clipping land)
   { minLat: -4.2, maxLat: 1.2, minLon: 99.5, maxLon: 104.2 }, // Sumatra W spine
   { minLat: -8.8, maxLat: -5.8, minLon: 105.5, maxLon: 114.5 }, // Java interior
@@ -8185,6 +8255,11 @@ function setrouteMatchCorridorTemplate(origName, destName) {
     const oh = (t.originHints || []).some((h) => o.indexOf(String(h).toLowerCase()) >= 0);
     const dh = (t.destHints || []).some((h) => d.indexOf(String(h).toLowerCase()) >= 0);
     if (oh && dh) return t;
+    const ohRev = (t.destHints || []).some((h) => o.indexOf(String(h).toLowerCase()) >= 0);
+    const dhRev = (t.originHints || []).some((h) => d.indexOf(String(h).toLowerCase()) >= 0);
+    if (ohRev && dhRev) {
+      return { id: t.id + "_rev", refs: t.refs, nodeKeys: t.nodeKeys.slice().reverse() };
+    }
   }
   return null;
 }

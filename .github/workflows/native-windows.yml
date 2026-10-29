@@ -1,0 +1,55 @@
+name: Build SetSail Windows
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*-win"
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Sync www + install Electron
+        shell: bash
+        run: |
+          node native/scripts/sync-www.js
+          cd native/electron
+          npm install --no-fund --no-audit
+
+      - name: Package Windows app
+        shell: bash
+        run: |
+          cd native/electron
+          npx electron-packager . SetSail --platform=win32 --arch=x64 --out=../../downloads/windows --overwrite --asar --prune=true
+
+      - name: Zip
+        shell: bash
+        run: |
+          mkdir -p downloads
+          powershell -Command "Compress-Archive -Path 'downloads/windows/SetSail-win32-x64' -DestinationPath 'downloads/SetSail-Windows.zip' -Force"
+          ls -la downloads/SetSail-Windows.zip
+
+      - name: Upload to release v5.141-win
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v5.141-win
+          name: v5.141 SetSail Windows + boot fix
+          draft: false
+          files: downloads/SetSail-Windows.zip
+          body: |
+            ## Downloads
+            - **SetSail-Windows.zip** — unzip and run `SetSail.exe` (Wi-Fi AIS).
+
+            ## Site
+            - Cloudflare Turnstile removed from radar boot splash.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
