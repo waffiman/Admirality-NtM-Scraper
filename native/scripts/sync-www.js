@@ -53,4 +53,9 @@ for (const rel of COPY_LIST) {
   copyRecursive(src, path.join(WWW, rel));
 }
 
+// Electron packages www from native/electron/www
+const ELECTRON_WWW = path.resolve(__dirname, "..", "electron", "www");
+rmDeep(ELECTRON_WWW);
+copyRecursive(WWW, ELECTRON_WWW);
 console.log("www ready →", WWW);
+console.log("electron www →", ELECTRON_WWW);

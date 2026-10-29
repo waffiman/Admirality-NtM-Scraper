@@ -1,37 +1,15 @@
 {
   "name": "setsail-electron",
-  "version": "5.140.0",
+  "version": "5.141.0",
   "private": true,
   "main": "main.js",
-  "description": "SetSail Windows desktop (Electron) — Wi-Fi AIS LAN bridge",
+  "description": "SetSail Windows desktop (Electron) - Wi-Fi AIS LAN bridge",
   "scripts": {
     "start": "electron .",
-    "pack": "electron-builder --win nsis --x64",
-    "dir": "electron-builder --win dir --x64"
-  },
-  "build": {
-    "appId": "ai.setsail.app",
-    "productName": "SetSail",
-    "directories": {
-      "output": "../../downloads/windows"
-    },
-    "files": [
-      "main.js",
-      "preload.js",
-      "../../www/**/*"
-    ],
-    "extraResources": [],
-    "win": {
-      "target": ["nsis"],
-      "artifactName": "SetSail-Setup-${version}.${ext}"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    }
+    "pack": "electron-packager . SetSail --platform=win32 --arch=x64 --out=../../downloads/windows --overwrite --asar --prune=true"
   },
   "devDependencies": {
-    "electron": "^33.2.0",
-    "electron-builder": "^25.1.8"
+    "@electron/packager": "^18.3.6",
+    "electron": "33.2.1"
   }
 }

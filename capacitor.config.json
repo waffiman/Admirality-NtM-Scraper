@@ -1,0 +1,11 @@
+{
+  "appId": "ai.setsail.app",
+  "appName": "SetSail",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

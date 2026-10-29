@@ -8,5 +8,10 @@
     "native:sync": "node native/scripts/sync-www.js",
     "native:electron": "npm --prefix native/electron start",
     "native:electron:pack": "npm --prefix native/electron run pack"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.3",
+    "@capacitor/cli": "^6.2.3",
+    "@capacitor/core": "^6.2.3"
   }
 }

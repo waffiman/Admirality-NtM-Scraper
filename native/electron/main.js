@@ -20,11 +20,21 @@ function createWindow() {
     title: "SetSail"
   });
 
-  const wwwIndex = path.join(__dirname, "..", "..", "www", "index.html");
-  const fallback = path.join(__dirname, "..", "..", "index.html");
   const fs = require("fs");
-  const target = fs.existsSync(wwwIndex) ? wwwIndex : fallback;
-  mainWindow.loadFile(target);
+  // Prefer online site (smaller installer); fall back to bundled www for offline bridge use.
+  const bundled = [
+    path.join(__dirname, "www", "index.html"),
+    path.join(__dirname, "..", "..", "www", "index.html"),
+    path.join(__dirname, "..", "..", "index.html")
+  ].find((p) => fs.existsSync(p));
+  const useRemote = process.env.SETSAIL_LOAD_REMOTE !== "0";
+  if (useRemote) {
+    mainWindow.loadURL(process.env.SETSAIL_URL || "https://setsail-ai.vercel.app/");
+  } else if (bundled) {
+    mainWindow.loadFile(bundled);
+  } else {
+    mainWindow.loadURL("https://setsail-ai.vercel.app/");
+  }
 }
 
 function getNetworkInfo() {
