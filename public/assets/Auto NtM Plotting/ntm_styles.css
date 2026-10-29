@@ -11950,21 +11950,23 @@
   box-sizing: border-box !important;
 }
 
-/* Full-width accordion for more details: full-width click surface */
-details.vessel-more-details {
+/* Full-width accordion for more details (button, not native <details>) */
+.vessel-more-details {
   width: 100% !important;
   box-sizing: border-box !important;
   border-top: 1px solid rgba(56, 189, 248, 0.18) !important;
   padding-top: 0.35rem !important;
   margin-top: 0.2rem !important;
+  position: relative !important;
+  z-index: 2 !important;
 }
 
-details.vessel-more-details summary {
+.vessel-more-toggle {
   cursor: pointer !important;
   font-size: 0.75rem !important;
   font-weight: 700 !important;
   color: #38bdf8 !important;
-  padding: 0.38rem 0.55rem !important;
+  padding: 0.45rem 0.55rem !important;
   border-radius: 6px !important;
   background: rgba(56, 189, 248, 0.1) !important;
   user-select: none !important;
@@ -11975,14 +11977,14 @@ details.vessel-more-details summary {
   text-align: left !important;
   transition: background 0.15s ease !important;
   pointer-events: auto !important;
+  border: 0 !important;
+  margin: 0 !important;
+  position: relative !important;
+  z-index: 5 !important;
 }
 
-details.vessel-more-details summary:hover {
+.vessel-more-toggle:hover {
   background: rgba(56, 189, 248, 0.22) !important;
-}
-
-details.vessel-more-details summary * {
-  pointer-events: none !important;
 }
 
 /* Symmetrical 6-column grid inside AIS Details */

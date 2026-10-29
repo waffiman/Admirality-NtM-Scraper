@@ -3335,6 +3335,10 @@ function initHomeHudVessel() {
     if (chartPop) chartPop.classList.remove("open");
     if (chartBtn) chartBtn.classList.remove("active");
     fillVesselFormsFromState();
+    // Escape Home hero overflow/transform clipping so the whole panel receives clicks
+    if (pop && pop.parentElement !== document.body) {
+      document.body.appendChild(pop);
+    }
     placeHomePop();
     if (pop) pop.classList.add("open");
     if (pillBtn) pillBtn.setAttribute("aria-expanded", "true");
@@ -3368,9 +3372,9 @@ function initHomeHudVessel() {
     if (!pop || !pop.classList.contains("open")) return;
     if (e.defaultPrevented) return;
     if (pop.contains(e.target)) return;
-    if (e.target && e.target.closest && e.target.closest(".vessel-more-details")) return;
-    const wrap = document.getElementById("homeVesselHudPill");
-    if (wrap && !wrap.contains(e.target)) closeHomePop();
+    if (pillBtn && (e.target === pillBtn || pillBtn.contains(e.target))) return;
+    if (e.target && e.target.closest && e.target.closest(".vessel-more-details, .vessel-more-toggle")) return;
+    closeHomePop();
   });
 
   // No automatic geolocation prompt on first visit
@@ -4657,6 +4661,12 @@ function ensureNoticesReadyForOverlay() {
   if (typeof window.setOverlayNoticesLoading === "function") {
     window.setOverlayNoticesLoading(true);
   }
+  // Force overlay flag on both bindings before any async work
+  try {
+    if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.notices = true;
+    if (window.OVERLAY_STATES) window.OVERLAY_STATES.notices = true;
+  } catch (eOv) {}
+
   // Ensure notice type filters are not accidentally all unchecked when user enables the NtM & NAVTEX tile
   if (!NTM_ACTIVE_TYPES || NTM_ACTIVE_TYPES.size === 0) {
     NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM", "NAVTEX"]);
@@ -4677,14 +4687,30 @@ function ensureNoticesReadyForOverlay() {
     requestAnimationFrame(() => {
       setTimeout(async () => {
         try {
-          if (!Array.isArray(NTM_STORE) || NTM_STORE.length <= 10) {
+          const storeLen = Array.isArray(NTM_STORE) ? NTM_STORE.length
+            : (Array.isArray(window.NTM_STORE) ? window.NTM_STORE.length : 0);
+          // Always refresh from network when store looks empty/thin
+          if (storeLen <= 10) {
             await loadRemoteNoticesJson(true);
           }
-          // Always re-plot after fetch (or when store was already warm)
+          if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
+              Array.isArray(window.NTM_STORE) && window.NTM_STORE.length) {
+            NTM_STORE = window.NTM_STORE;
+          }
           if (typeof renderNtMListAndMap === "function") {
             renderNtMListAndMap();
-          } else if (typeof window.setOverlayNoticesLoading === "function") {
-            window.setOverlayNoticesLoading(false);
+          }
+          const drawn = (window.leafletMarkersLayer && window.leafletMarkersLayer.getLayers)
+            ? window.leafletMarkersLayer.getLayers().length : 0;
+          const total = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
+          if (typeof showSetSailToast === "function") {
+            if (drawn > 0) {
+              showSetSailToast("NtM & NAVTEX on chart: " + drawn + " objects (" + total + " in store)", "info");
+            } else if (total > 0) {
+              showSetSailToast("NtM store has " + total + " notices but 0 drawn — check type/NAVAREA filters", "warning");
+            } else {
+              showSetSailToast("NtM & NAVTEX: no notices loaded yet", "warning");
+            }
           }
           resolve(true);
         } catch (e) {
@@ -4974,7 +5000,7 @@ function initNtMMap() {
       const tier = getZoomLodTier(z);
       if (tier !== lastLodTier) {
         lastLodTier = tier;
-        if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.notices !== false) {
+        if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES && OVERLAY_STATES.notices === true) {
           renderNtMListAndMap(true);
         }
         if (typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.weather !== false) {
@@ -5823,6 +5849,16 @@ function renderNtMListAndMap() {
   const countEl = document.getElementById("ntmListCount");
   const searchVal = ((document.getElementById("ntmSearchInput") ? document.getElementById("ntmSearchInput").value : "") || "").toLowerCase().trim();
 
+  // Keep local store in sync with window (other scripts may hydrate window.NTM_STORE)
+  try {
+    if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
+        Array.isArray(window.NTM_STORE) && window.NTM_STORE.length > 0) {
+      NTM_STORE = window.NTM_STORE;
+    } else if (Array.isArray(NTM_STORE) && NTM_STORE.length > 0) {
+      window.NTM_STORE = NTM_STORE;
+    }
+  } catch (eSyncStore) {}
+
   const _ovStates = (typeof window !== "undefined" && window.OVERLAY_STATES)
     ? window.OVERLAY_STATES
     : (typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES : null);
@@ -6139,30 +6175,47 @@ function renderNtMListAndMap() {
   }
 
   // Render Markers on Leaflet Map (Zoom-Adaptive ECDIS Palette & Decluttering)
-  if (leafletMap && leafletMarkersLayer) {
-    leafletMarkersLayer.clearLayers();
-    if (!isNoticesActive) {
-      if (leafletMap.hasLayer(leafletMarkersLayer)) {
-        leafletMap.removeLayer(leafletMarkersLayer);
-      }
-      return;
-    }
-    if (!leafletMap.hasLayer(leafletMarkersLayer)) {
-      leafletMap.addLayer(leafletMarkersLayer);
-    }
-    const curZoom = leafletMap.getZoom ? leafletMap.getZoom() : 3;
+  // Prefer window refs — port_depths.js may recreate the layer group
+  const mapRef = (typeof window !== "undefined" && window.leafletMap) ? window.leafletMap
+    : (typeof leafletMap !== "undefined" ? leafletMap : null);
+  if (mapRef && !leafletMap) leafletMap = mapRef;
+  let markersLayer = (typeof window !== "undefined" && window.leafletMarkersLayer)
+    ? window.leafletMarkersLayer
+    : leafletMarkersLayer;
+  if (!markersLayer && mapRef && typeof L !== "undefined") {
+    markersLayer = L.layerGroup();
+    leafletMarkersLayer = markersLayer;
+    window.leafletMarkersLayer = markersLayer;
+  } else if (markersLayer) {
+    leafletMarkersLayer = markersLayer;
+    window.leafletMarkersLayer = markersLayer;
+  }
 
-    // Keep NtM above ECDIS land and clickable (land pane z=350, ntm pane z=450)
-    if (!leafletMap.getPane("ecdisLandPane")) {
-      const lp = leafletMap.createPane("ecdisLandPane");
+  if (mapRef && markersLayer) {
+    markersLayer.clearLayers();
+    if (!isNoticesActive) {
+      if (mapRef.hasLayer(markersLayer)) {
+        mapRef.removeLayer(markersLayer);
+      }
+    } else {
+    if (!mapRef.hasLayer(markersLayer)) {
+      mapRef.addLayer(markersLayer);
+    }
+    const curZoom = mapRef.getZoom ? mapRef.getZoom() : 3;
+
+    // Keep NtM above ECDIS land AND port-depth pane (650) so objects stay visible
+    if (!mapRef.getPane("ecdisLandPane")) {
+      const lp = mapRef.createPane("ecdisLandPane");
       lp.style.zIndex = 350;
       lp.style.pointerEvents = "none";
     } else {
-      leafletMap.getPane("ecdisLandPane").style.pointerEvents = "none";
+      mapRef.getPane("ecdisLandPane").style.pointerEvents = "none";
     }
-    if (!leafletMap.getPane("ntmOverlayPane")) {
-      const np = leafletMap.createPane("ntmOverlayPane");
-      np.style.zIndex = 450;
+    if (!mapRef.getPane("ntmOverlayPane")) {
+      const np = mapRef.createPane("ntmOverlayPane");
+      np.style.zIndex = 720;
+    } else {
+      mapRef.getPane("ntmOverlayPane").style.zIndex = 720;
     }
     if (!window._setsailNtmCanvasRenderer) {
       window._setsailNtmCanvasRenderer = L.canvas({ pane: "ntmOverlayPane" });
@@ -6486,14 +6539,15 @@ function renderNtMListAndMap() {
             </div>`
           );
           m.on("click", () => {
-            leafletMap.setView(ll, targetZoom);
+            mapRef.setView(ll, targetZoom);
           });
-          leafletMarkersLayer.addLayer(m);
+          markersLayer.addLayer(m);
         });
       });
     } else {
       filtered.forEach(plotOneNotice);
     }
+    } // end isNoticesActive plot branch
   } else {
     drawOfflineCanvasMap();
   }
@@ -17665,20 +17719,40 @@ window.initSetSailLocalization = initSetSailLocalization;
 
 try { window.applyVesselProfile = applyVesselProfile; window.plotUserVessel = plotUserVessel; window.loadUserVesselFromStorage = loadUserVesselFromStorage; } catch (e) {}
 
-// Global robust toggle for My Vessel "More vessel details" — full summary / header width
+// My Vessel "More vessel details" — plain button (native <details> left/center clicks closed the popover)
 try {
-  document.addEventListener('click', function(e) {
-    if (!e.target || !e.target.closest) return;
-    const det = e.target.closest('.vessel-more-details');
-    if (!det) return;
-    // Don't steal clicks from fields inside an open panel
-    if (e.target.closest('input, textarea, select, button, a, label')) return;
-    const sum = det.querySelector('summary');
-    const onSummary = !!(e.target.closest('summary') || e.target === sum);
-    const onClosedBody = !det.open && !onSummary;
-    if (!onSummary && !onClosedBody) return;
+  function toggleVesselMorePanel(wrap, forceOpen) {
+    if (!wrap) return;
+    const btn = wrap.querySelector(".vessel-more-toggle");
+    const panel = wrap.querySelector(".vessel-more-panel");
+    if (!btn || !panel) return;
+    const open = typeof forceOpen === "boolean" ? forceOpen : panel.hasAttribute("hidden");
+    if (open) {
+      panel.removeAttribute("hidden");
+      wrap.classList.add("is-open");
+      btn.setAttribute("aria-expanded", "true");
+    } else {
+      panel.setAttribute("hidden", "");
+      wrap.classList.remove("is-open");
+      btn.setAttribute("aria-expanded", "false");
+    }
+  }
+  window.toggleVesselMorePanel = toggleVesselMorePanel;
+
+  document.addEventListener("click", function(e) {
+    const btn = e.target && e.target.closest && e.target.closest(".vessel-more-toggle");
+    if (!btn) return;
     e.preventDefault();
     e.stopPropagation();
-    det.open = !det.open;
+    toggleVesselMorePanel(btn.closest(".vessel-more-details"));
   }, true);
+
+  ["homeVesselPopover", "ntmVesselPopover"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Bubble only — capture stop would block inputs inside the panel
+    ["mousedown", "click", "pointerdown"].forEach((evtName) => {
+      el.addEventListener(evtName, (ev) => { ev.stopPropagation(); }, false);
+    });
+  });
 } catch (eDetToggle) {}

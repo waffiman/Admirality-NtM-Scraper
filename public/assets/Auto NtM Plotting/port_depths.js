@@ -20141,22 +20141,33 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         else currentMap.removeLayer(leafletIsobathsLayer);
       }
     } else if (overlayKey === "notices") {
-      let mLayer = window.leafletMarkersLayer || (typeof leafletMarkersLayer !== "undefined" ? leafletMarkersLayer : null);
+      OVERLAY_STATES.notices = !!isActive;
+      window.OVERLAY_STATES = OVERLAY_STATES;
+      let mLayer = window.leafletMarkersLayer || null;
+      try {
+        if (!mLayer && typeof leafletMarkersLayer !== "undefined" && leafletMarkersLayer) {
+          mLayer = leafletMarkersLayer;
+        }
+      } catch (eMk0) {}
       if (!mLayer && typeof L !== "undefined") {
         mLayer = L.layerGroup();
-        window.leafletMarkersLayer = mLayer;
-        try { if (typeof leafletMarkersLayer !== "undefined") leafletMarkersLayer = mLayer; } catch (eMk) {}
       }
       if (mLayer) {
+        window.leafletMarkersLayer = mLayer;
+        try { leafletMarkersLayer = mLayer; } catch (eMk) {}
         if (isActive) {
-          if (!currentMap.hasLayer(mLayer)) {
-            currentMap.addLayer(mLayer);
-          }
+          if (!currentMap.hasLayer(mLayer)) currentMap.addLayer(mLayer);
+          try {
+            if (!currentMap.getPane("ntmOverlayPane")) {
+              const np = currentMap.createPane("ntmOverlayPane");
+              np.style.zIndex = 720;
+            } else {
+              currentMap.getPane("ntmOverlayPane").style.zIndex = 720;
+            }
+          } catch (ePane) {}
         } else {
           mLayer.clearLayers();
-          if (currentMap.hasLayer(mLayer)) {
-            currentMap.removeLayer(mLayer);
-          }
+          if (currentMap.hasLayer(mLayer)) currentMap.removeLayer(mLayer);
         }
       }
       if (isActive) {
@@ -20164,7 +20175,13 @@ function setOverlayActive(overlayKey, isActive, map = null) {
           window.setOverlayNoticesLoading(true);
         }
         if (typeof window.ensureNoticesReadyForOverlay === "function") {
-          window.ensureNoticesReadyForOverlay();
+          Promise.resolve(window.ensureNoticesReadyForOverlay()).catch(() => {
+            if (typeof window.setOverlayNoticesLoading === "function") {
+              window.setOverlayNoticesLoading(false);
+            }
+          });
+        } else if (typeof window.renderNtMListAndMap === "function") {
+          window.renderNtMListAndMap();
         }
       } else {
         if (typeof window.setOverlayNoticesLoading === "function") {
