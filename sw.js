@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.146.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.146.0';
+const CACHE_NAME = 'setsail-cache-v5.147.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.147.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -31,19 +31,19 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=5.146',
-  'assets/Auto NtM Plotting/port_depths.js?v=5.146',
-  'assets/Auto NtM Plotting/ntm_module.js?v=5.146',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.146',
-  'assets/about/founder.jpg?v=5.146',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=5.147',
+  'assets/Auto NtM Plotting/port_depths.js?v=5.147',
+  'assets/Auto NtM Plotting/ntm_module.js?v=5.147',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.147',
+  'assets/about/founder.jpg?v=5.147',
   'assets/home/install_bg_lng.jpg',
-  'assets/about/mykhailo_byshliaha.jpg?v=5.146',
+  'assets/about/mykhailo_byshliaha.jpg?v=5.147',
   'assets/geo/setroute_corridor_templates.json',
   'assets/geo/setroute_passage_knowledge.json',
   'assets/about/mykhailo_byshliaha.jpg',
-  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.146',
-  'assets/Auto NtM Plotting/ais_overlay.js?v=5.146',
-  'assets/Auto NtM Plotting/setroute_core_a.js?v=5.146',
+  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.147',
+  'assets/Auto NtM Plotting/ais_overlay.js?v=5.147',
+  'assets/Auto NtM Plotting/setroute_core_a.js?v=5.147',
   'assets/authority-logos/noaa.svg',
   'assets/authority-logos/nasa.svg',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
@@ -277,18 +277,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. notices.json, weather.json & news.json (15s timeout for 1.8MB payload + Offline Cache fallback)
+  // 2. notices.json (~2MB), weather.json & news.json — long timeout (sat links);
+  //    old 15s cap caused all mirrors to fail → app fell back to 5 demo stubs.
   if (url.pathname.endsWith('notices.json') || url.pathname.endsWith('weather.json') || url.pathname.endsWith('news.json') || url.pathname.endsWith('ais.json')) {
     const jsonBaseName = url.pathname.split('/').pop();
+    const isNotices = jsonBaseName === 'notices.json';
+    const jsonTimeoutMs = isNotices ? 90000 : 45000;
     event.respondWith(
-      fetchWithTimeout(event.request, 15000)
+      fetchWithTimeout(event.request, jsonTimeoutMs)
         .then((netRes) => {
           if (netRes && netRes.ok) {
             const copy = netRes.clone();
             const canonicalCopy = netRes.clone();
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, copy);
-              if (jsonBaseName) cache.put(jsonBaseName, canonicalCopy);
+              // Only cache same-origin canonical name for local notices.json
+              if (jsonBaseName && url.origin === self.location.origin) {
+                cache.put(jsonBaseName, canonicalCopy);
+              }
             });
           }
           return netRes;
@@ -305,7 +311,21 @@ self.addEventListener('fetch', (event) => {
               headers: headers
             });
           }
-          return new Response(JSON.stringify({ offline: true }), {
+          // Same-origin basename fallback (e.g. GitHub mirror failed → use cached /notices.json)
+          if (jsonBaseName) {
+            const byName = await matchAssetInCache(new Request(self.registration.scope + jsonBaseName));
+            if (byName) {
+              const blob = await byName.blob();
+              const headers = new Headers(byName.headers);
+              headers.set('X-SetSail-Offline', 'true');
+              return new Response(blob, {
+                status: 200,
+                statusText: 'OK (Offline Cache)',
+                headers: headers
+              });
+            }
+          }
+          return new Response(JSON.stringify({ offline: true, notices: [] }), {
             status: 503,
             statusText: 'Service Unavailable (Offline)',
             headers: { 'Content-Type': 'application/json' }

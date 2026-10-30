@@ -1386,7 +1386,12 @@ function initNetworkStatusWatchdog() {
 
   window.addEventListener("online", () => {
     console.log("[SetSail] Online connection restored.");
-    loadRemoteNoticesJson();
+    loadRemoteNoticesJson().then((ok) => {
+      if (ok && window.OVERLAY_STATES && window.OVERLAY_STATES.notices === true &&
+          typeof renderNtMListAndMap === "function") {
+        renderNtMListAndMap();
+      }
+    });
   });
 
   window.addEventListener("offline", () => {
@@ -1921,12 +1926,15 @@ function initAutoNtmUI() {
     });
   }
 
-  // Instant 0ms Local Snapshot Hydration first (for weak/satellite internet), then async network refresh
+  // Instant 0ms Local Snapshot Hydration first (for weak/satellite internet), then async network refresh.
+  // Do NOT auto-inject the 5 demo stubs — they look like a "broken" live overlay (exactly 5 objects).
   const hydratedCached = loadStoreFromStorage();
   loadRemoteNoticesJson().then(loadedRemote => {
     if (!loadedRemote && !hydratedCached) {
-      loadSampleNtMData();
       updateNetworkStatusHUD(false);
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("NtM database not cached yet — open NtM tile once online to sync (~2MB)", "warning");
+      }
     }
   });
 
@@ -3935,7 +3943,8 @@ function initSettingsUI() {
       try { localStorage.removeItem(NTM_STORAGE_KEY); } catch (e) {}
       NTM_STORE = [];
       if (leafletMarkersLayer) leafletMarkersLayer.clearLayers();
-      loadRemoteNoticesJson(true).then(() => {
+      loadRemoteNoticesJson(true).then((ok) => {
+        if (ok && typeof renderNtMListAndMap === "function") renderNtMListAndMap();
         if (typeof showSetSailToast === "function") {
           showSetSailToast("Cache reset complete. Fresh notices & weather synced.", "success");
         }
@@ -4531,12 +4540,24 @@ function saveStoreToStorage() {
 /**
  * Load store from LocalStorage
  */
+const NTM_DEMO_STUB_IDS = ["57/26", "31/26", "52(T)/26", "5927(T)/24", "51(P)/26"];
+function isNtmDemoStubStore(store) {
+  if (!Array.isArray(store) || store.length === 0 || store.length > 12) return false;
+  const ids = NTM_DEMO_STUB_IDS;
+  return store.every((n) => ids.indexOf(String(n && n.id)) >= 0);
+}
+
 function loadStoreFromStorage() {
   try {
     const raw = localStorage.getItem(NTM_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
+        // Drop the old 5-notice demo corpus so it cannot paint as a "live" overlay
+        if (isNtmDemoStubStore(parsed) || parsed.length < 20) {
+          try { localStorage.removeItem(NTM_STORAGE_KEY); } catch (eRm) {}
+          return false;
+        }
         NTM_STORE = reclassifyNoticesGeometry(parsed);
         window.NTM_STORE = NTM_STORE;
         reconcileAndApplyNoticeOverrides();
@@ -4546,8 +4567,7 @@ function loadStoreFromStorage() {
           badge.textContent = activeCount;
           badge.style.display = "block";
         }
-        renderNtMListAndMap();
-        return parsed.length > 10;
+        return parsed.length > 50;
       }
     }
   } catch (e) {
@@ -4565,43 +4585,66 @@ async function loadRemoteNoticesJson(showFeedback = false) {
       window.setOverlayNoticesLoading(true);
     }
     const bust = Date.now();
+    const origin = (typeof location !== "undefined" && location.origin) ? location.origin : "";
     const endpoints = [
+      origin + "/notices.json?t=" + bust,
       "notices.json?t=" + bust,
       "https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/notices.json?t=" + bust,
       "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + bust
     ];
     let res = null;
     let data = null;
+    let lastErr = "";
+    // Live corpus is ~1000+ notices; reject tiny payloads (e.g. demo stubs / corrupt cache)
+    const MIN_ACCEPT = 50;
     for (const url of endpoints) {
       try {
         const candidate = await fetch(url, { cache: "no-store" });
-        if (candidate && candidate.ok) {
-          const parsed = await candidate.json();
-          if (parsed && Array.isArray(parsed.notices) && parsed.notices.length > 0) {
-            res = candidate;
-            data = parsed;
-            break;
-          }
+        if (!candidate || !candidate.ok) {
+          lastErr = url + " → HTTP " + (candidate ? candidate.status : "fail");
+          continue;
         }
-      } catch (e) {}
+        const parsed = await candidate.json();
+        const n = parsed && Array.isArray(parsed.notices) ? parsed.notices.length : 0;
+        if (n >= MIN_ACCEPT) {
+          res = candidate;
+          data = parsed;
+          break;
+        }
+        lastErr = url + " → only " + n + " notices (need ≥" + MIN_ACCEPT + ")";
+      } catch (e) {
+        lastErr = url + " → " + ((e && e.message) || "error");
+      }
     }
 
     if (!res || !data) {
+      // Keep whatever is already in memory/localStorage if it looks like a real corpus
+      const existing = Array.isArray(NTM_STORE) ? NTM_STORE.length
+        : (Array.isArray(window.NTM_STORE) ? window.NTM_STORE.length : 0);
       updateNetworkStatusHUD(false);
+      if (existing >= MIN_ACCEPT) {
+        if (showFeedback && typeof showSetSailToast === "function") {
+          showSetSailToast("Offline — using cached NtM corpus (" + existing + " notices)", "warn");
+        }
+        if (typeof window.setOverlayNoticesLoading === "function") {
+          window.setOverlayNoticesLoading(false);
+        }
+        return true;
+      }
       if (typeof window.setOverlayNoticesLoading === "function") {
         window.setOverlayNoticesLoading(false);
       }
       if (showFeedback && typeof showSetSailToast === "function") {
-        showSetSailToast("Offline — using cached NtM & NAVTEX database", "warn");
+        showSetSailToast("NtM fetch failed — " + (lastErr || "no endpoint"), "warning");
       }
       return false;
     }
 
-    if (data && Array.isArray(data.notices) && data.notices.length > 0) {
+    if (data && Array.isArray(data.notices) && data.notices.length >= MIN_ACCEPT) {
       NTM_STORE = reclassifyNoticesGeometry(data.notices);
       window.NTM_STORE = NTM_STORE;
       reconcileAndApplyNoticeOverrides();
-      saveStoreToStorage();
+      try { saveStoreToStorage(); } catch (eSave) {}
       const navCnt = NTM_STORE.filter(n => n.type === "NAVTEX" && !n.isCancelled && n.status !== "CANCELLED").length;
       const ukhoCnt = NTM_STORE.filter(n => n.type !== "NAVTEX" && !n.isCancelled && n.status !== "CANCELLED").length;
       const badge = document.getElementById("ntmBadge");
@@ -4610,12 +4653,12 @@ async function loadRemoteNoticesJson(showFeedback = false) {
         badge.style.display = (navCnt + ukhoCnt) > 0 ? "block" : "none";
       }
       if (showFeedback && typeof showSetSailToast === "function") {
-        showSetSailToast(`Synced ${navCnt} NAVTEX/NAVAREA warnings + ${ukhoCnt} UKHO NtMs`, "info");
+        showSetSailToast(`Synced ${navCnt} NAVTEX/NAVAREA + ${ukhoCnt} UKHO NtMs (${NTM_STORE.length} total)`, "info");
       }
       if (data.metadata) {
         try { localStorage.setItem(META_STORAGE_KEY, JSON.stringify(data.metadata)); } catch(e){}
       }
-      renderNtMListAndMap();
+      // Caller (ensureNoticesReady / boot) decides when to render — avoid double plot races
       const meta = data.metadata || {};
       const wk = meta.weekNumber ? `Wk ${meta.weekNumber}/${meta.year}` : (meta.weeklyBulletin || "Live");
       const isOfflineResp = (res.headers && res.headers.get && res.headers.get("X-SetSail-Offline") === "true") || !navigator.onLine;
@@ -6536,42 +6579,62 @@ function renderNtMListAndMap() {
           .join("<br>");
         const more = count > 8 ? `<div style="margin-top:4px;color:#64748b;">+${count - 8} more…</div>` : "";
         const targetZoom = Math.min(Math.max(curZoom + 1.5, 4), 8);
+        const badgePx = count >= 100 ? 28 : (count >= 20 ? 24 : 22);
         const icon = L.divIcon({
           className: "ntm-cluster-icon",
           html:
-            '<div style="width:20px;height:20px;border-radius:50%;background:#f97316;border:1.5px solid #0f172a;color:#fff;font:700 9px/20px Segoe UI,sans-serif;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.4);">' +
+            '<div style="width:' + badgePx + 'px;height:' + badgePx + 'px;border-radius:50%;background:#f97316;border:2px solid #0f172a;color:#fff;font:700 ' +
+            (count >= 100 ? "9" : "10") +
+            'px/' + badgePx + 'px Segoe UI,sans-serif;text-align:center;box-shadow:0 2px 5px rgba(0,0,0,.45);">' +
             count +
             "</div>",
-          iconSize: [20, 20],
-          iconAnchor: [10, 10]
+          iconSize: [badgePx, badgePx],
+          iconAnchor: [badgePx / 2, badgePx / 2]
         });
-        setsailEachWorldLatLng(cl.lat, cl.lon, (ll) => {
-          const m = L.marker(ll, {
-            icon,
-            keyboard: false,
-            zIndexOffset: 2500
-          });
-          m.bindPopup(
-            `<div style="font-family:Segoe UI,sans-serif;min-width:200px;color:#111;">
-              <b style="color:#c2410c;">${count} NtM / NAVTEX</b>
-              <div style="font-size:0.78em;color:#64748b;margin:3px 0 6px;">${typeSummary}</div>
-              <div style="font-size:0.78em;line-height:1.35;">${listPreview}${more}</div>
-              <div style="margin-top:7px;font-size:0.72em;color:#0369a1;">Zoom in to split into individual objects</div>
-            </div>`
-          );
-          m.on("click", () => {
-            mapRef.setView(ll, targetZoom);
-          });
-          markersLayer.addLayer(m);
+        // One badge per cluster (no ±360 world copies) — fast & matches historical "hundreds of objects" feel via count labels
+        const ll = [cl.lat, wrapLongitudeDeg(cl.lon)];
+        const m = L.marker(ll, {
+          icon,
+          keyboard: false,
+          zIndexOffset: 2500
         });
+        m.bindPopup(
+          `<div style="font-family:Segoe UI,sans-serif;min-width:200px;color:#111;">
+            <b style="color:#c2410c;">${count} NtM / NAVTEX</b>
+            <div style="font-size:0.78em;color:#64748b;margin:3px 0 6px;">${typeSummary}</div>
+            <div style="font-size:0.78em;line-height:1.35;">${listPreview}${more}</div>
+            <div style="margin-top:7px;font-size:0.72em;color:#0369a1;">Zoom in to split into individual objects</div>
+          </div>`
+        );
+        m.on("click", () => {
+          mapRef.setView(ll, targetZoom);
+        });
+        markersLayer.addLayer(m);
       });
     } else {
+      // High zoom: plot individuals, but cap geometry explosion (world copies only for points)
       filtered.forEach(plotOneNotice);
     }
 
-    // If clustering produced nothing but we have notices, force raw point plot
+    // If clustering produced nothing but we have notices, force compact point plot
     if (markersLayer.getLayers().length === 0 && filtered.length > 0) {
-      filtered.slice(0, 400).forEach(plotOneNotice);
+      filtered.forEach((item) => {
+        if (!item.coords || !item.coords.length) return;
+        const c = item.coords[0];
+        const lat = Number(c.lat);
+        const lon = Number(c.lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+        const pal = getNoticeColors(item, Boolean(item.isCancelled || item.status === "CANCELLED"));
+        const circle = L.circleMarker([lat, wrapLongitudeDeg(lon)], {
+          radius: 4,
+          fillColor: pal.fill,
+          color: "#0f172a",
+          weight: 1,
+          fillOpacity: 0.9
+        });
+        circle.bindPopup(buildPopupHtml(item));
+        markersLayer.addLayer(circle);
+      });
     }
 
     try {
@@ -6640,6 +6703,7 @@ function selectNtMNotice(noticeId) {
 /**
  * Initial sample notices
  */
+/** Offline demo stubs (5 notices). Not auto-loaded — was mistaken for a broken live overlay. */
 function loadSampleNtMData() {
   const sampleNotices = [
     {
