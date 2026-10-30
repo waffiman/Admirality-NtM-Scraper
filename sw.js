@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.147.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.147.0';
+const CACHE_NAME = 'setsail-cache-v5.148.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.148.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -31,19 +31,19 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=5.147',
-  'assets/Auto NtM Plotting/port_depths.js?v=5.147',
-  'assets/Auto NtM Plotting/ntm_module.js?v=5.147',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.147',
-  'assets/about/founder.jpg?v=5.147',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=5.148',
+  'assets/Auto NtM Plotting/port_depths.js?v=5.148',
+  'assets/Auto NtM Plotting/ntm_module.js?v=5.148',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.148',
+  'assets/about/founder.jpg?v=5.148',
   'assets/home/install_bg_lng.jpg',
-  'assets/about/mykhailo_byshliaha.jpg?v=5.147',
+  'assets/about/mykhailo_byshliaha.jpg?v=5.148',
   'assets/geo/setroute_corridor_templates.json',
   'assets/geo/setroute_passage_knowledge.json',
   'assets/about/mykhailo_byshliaha.jpg',
-  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.147',
-  'assets/Auto NtM Plotting/ais_overlay.js?v=5.147',
-  'assets/Auto NtM Plotting/setroute_core_a.js?v=5.147',
+  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.148',
+  'assets/Auto NtM Plotting/ais_overlay.js?v=5.148',
+  'assets/Auto NtM Plotting/setroute_core_a.js?v=5.148',
   'assets/authority-logos/noaa.svg',
   'assets/authority-logos/nasa.svg',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
@@ -277,61 +277,54 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. notices.json (~2MB), weather.json & news.json — long timeout (sat links);
-  //    old 15s cap caused all mirrors to fail → app fell back to 5 demo stubs.
+  // 2. notices.json (~2MB): CACHE-FIRST then background revalidate.
+  //    Network-first with long timeout made the NtM tile wait 30–90s every click
+  //    (and show nothing if the sat link hiccuped). Serve cached corpus instantly.
   if (url.pathname.endsWith('notices.json') || url.pathname.endsWith('weather.json') || url.pathname.endsWith('news.json') || url.pathname.endsWith('ais.json')) {
     const jsonBaseName = url.pathname.split('/').pop();
     const isNotices = jsonBaseName === 'notices.json';
     const jsonTimeoutMs = isNotices ? 90000 : 45000;
-    event.respondWith(
-      fetchWithTimeout(event.request, jsonTimeoutMs)
-        .then((netRes) => {
-          if (netRes && netRes.ok) {
-            const copy = netRes.clone();
-            const canonicalCopy = netRes.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, copy);
-              // Only cache same-origin canonical name for local notices.json
-              if (jsonBaseName && url.origin === self.location.origin) {
-                cache.put(jsonBaseName, canonicalCopy);
-              }
-            });
-          }
-          return netRes;
-        })
-        .catch(async () => {
-          const cached = await matchAssetInCache(event.request);
-          if (cached) {
-            const blob = await cached.blob();
-            const headers = new Headers(cached.headers);
-            headers.set('X-SetSail-Offline', 'true');
-            return new Response(blob, {
-              status: 200,
-              statusText: 'OK (Offline Cache)',
-              headers: headers
-            });
-          }
-          // Same-origin basename fallback (e.g. GitHub mirror failed → use cached /notices.json)
-          if (jsonBaseName) {
-            const byName = await matchAssetInCache(new Request(self.registration.scope + jsonBaseName));
-            if (byName) {
-              const blob = await byName.blob();
-              const headers = new Headers(byName.headers);
-              headers.set('X-SetSail-Offline', 'true');
-              return new Response(blob, {
-                status: 200,
-                statusText: 'OK (Offline Cache)',
-                headers: headers
-              });
+    event.respondWith((async () => {
+      const cached =
+        (await matchAssetInCache(event.request)) ||
+        (jsonBaseName
+          ? await matchAssetInCache(new Request(self.registration.scope + jsonBaseName))
+          : null);
+
+      const fetchAndCache = async () => {
+        const netRes = await fetchWithTimeout(event.request, jsonTimeoutMs);
+        if (netRes && netRes.ok) {
+          try {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(event.request, netRes.clone());
+            if (jsonBaseName && url.origin === self.location.origin) {
+              cache.put(jsonBaseName, netRes.clone());
             }
-          }
-          return new Response(JSON.stringify({ offline: true, notices: [] }), {
-            status: 503,
-            statusText: 'Service Unavailable (Offline)',
-            headers: { 'Content-Type': 'application/json' }
-          });
-        })
-    );
+          } catch (ePut) {}
+        }
+        return netRes;
+      };
+
+      if (cached) {
+        // Stale-while-revalidate — do not block the tile spinner on a 2MB download
+        fetchAndCache().catch(() => {});
+        const blob = await cached.blob();
+        const headers = new Headers(cached.headers);
+        headers.set('X-SetSail-From-Cache', '1');
+        return new Response(blob, { status: 200, statusText: 'OK (Cache)', headers });
+      }
+
+      try {
+        const netRes = await fetchAndCache();
+        if (netRes) return netRes;
+      } catch (eNet) {}
+
+      return new Response(JSON.stringify({ offline: true, notices: [] }), {
+        status: 503,
+        statusText: 'Service Unavailable (Offline)',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    })());
     return;
   }
 

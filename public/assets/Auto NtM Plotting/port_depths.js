@@ -20176,6 +20176,7 @@ function setOverlayActive(overlayKey, isActive, map = null) {
           window.renderNtMListAndMap();
         }
       } else {
+        window._ntmOverlayLoadBusy = false;
         if (typeof window.setOverlayNoticesLoading === "function") {
           window.setOverlayNoticesLoading(false);
         }

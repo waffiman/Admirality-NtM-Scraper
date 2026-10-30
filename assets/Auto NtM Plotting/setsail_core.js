@@ -1926,16 +1926,17 @@ function initAutoNtmUI() {
     });
   }
 
-  // Instant 0ms Local Snapshot Hydration first (for weak/satellite internet), then async network refresh.
+  // Instant local/IDB hydration first (localStorage often cannot hold the ~2MB corpus), then network refresh.
   // Do NOT auto-inject the 5 demo stubs — they look like a "broken" live overlay (exactly 5 objects).
-  const hydratedCached = loadStoreFromStorage();
-  loadRemoteNoticesJson().then(loadedRemote => {
-    if (!loadedRemote && !hydratedCached) {
-      updateNetworkStatusHUD(false);
-      if (typeof showSetSailToast === "function") {
-        showSetSailToast("NtM database not cached yet — open NtM tile once online to sync (~2MB)", "warning");
+  Promise.resolve(hydrateNtmStorePreferCache()).then((hydratedCached) => {
+    loadRemoteNoticesJson(false).then((loadedRemote) => {
+      if (!loadedRemote && !hydratedCached) {
+        updateNetworkStatusHUD(false);
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("NtM database not cached yet — open NtM tile once online to sync (~2MB)", "warning");
+        }
       }
-    }
+    });
   });
 
   // Automatically sync live tropical cyclones & synoptic marine weather (weather.json + Open-Meteo)
@@ -4527,14 +4528,75 @@ function addNoticesToStore(newNotices, cancelledIds = []) {
 }
 
 /**
- * Save store to LocalStorage
+ * Persist NtM corpus. localStorage often rejects ~2MB JSON — IndexedDB is the durable cache.
+ */
+const NTM_IDB_NAME = "setsail_ntm_db";
+const NTM_IDB_STORE = "corpus";
+const NTM_IDB_KEY = "notices_v1";
+let _ntmRemoteLoadPromise = null;
+window._ntmOverlayLoadBusy = false;
+
+function openNtmIdb() {
+  return new Promise((resolve, reject) => {
+    if (typeof indexedDB === "undefined") {
+      reject(new Error("no indexedDB"));
+      return;
+    }
+    const req = indexedDB.open(NTM_IDB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(NTM_IDB_STORE)) db.createObjectStore(NTM_IDB_STORE);
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error("idb open failed"));
+  });
+}
+
+function saveStoreToIdb(store) {
+  return openNtmIdb().then((db) => new Promise((resolve, reject) => {
+    try {
+      const tx = db.transaction(NTM_IDB_STORE, "readwrite");
+      tx.objectStore(NTM_IDB_STORE).put({ notices: store, savedAt: Date.now() }, NTM_IDB_KEY);
+      tx.oncomplete = () => { try { db.close(); } catch (e) {} resolve(true); };
+      tx.onerror = () => { try { db.close(); } catch (e) {} reject(tx.error); };
+    } catch (e) {
+      try { db.close(); } catch (e2) {}
+      reject(e);
+    }
+  })).catch(() => false);
+}
+
+function loadStoreFromIdb() {
+  return openNtmIdb().then((db) => new Promise((resolve) => {
+    try {
+      const tx = db.transaction(NTM_IDB_STORE, "readonly");
+      const req = tx.objectStore(NTM_IDB_STORE).get(NTM_IDB_KEY);
+      req.onsuccess = () => {
+        try { db.close(); } catch (e) {}
+        const row = req.result;
+        const list = row && Array.isArray(row.notices) ? row.notices : null;
+        resolve(list);
+      };
+      req.onerror = () => { try { db.close(); } catch (e) {} resolve(null); };
+    } catch (e) {
+      try { db.close(); } catch (e2) {}
+      resolve(null);
+    }
+  })).catch(() => null);
+}
+
+/**
+ * Save store to LocalStorage (+ IndexedDB fallback for the full ~2MB corpus)
  */
 function saveStoreToStorage() {
   try {
     localStorage.setItem(NTM_STORAGE_KEY, JSON.stringify(NTM_STORE));
   } catch (e) {
     console.warn("Storage full or unavailable:", e);
+    // Drop oversized localStorage blob so future boots prefer IndexedDB
+    try { localStorage.removeItem(NTM_STORAGE_KEY); } catch (eRm) {}
   }
+  try { saveStoreToIdb(NTM_STORE); } catch (eIdb) {}
 }
 
 /**
@@ -4545,6 +4607,20 @@ function isNtmDemoStubStore(store) {
   if (!Array.isArray(store) || store.length === 0 || store.length > 12) return false;
   const ids = NTM_DEMO_STUB_IDS;
   return store.every((n) => ids.indexOf(String(n && n.id)) >= 0);
+}
+
+function applyHydratedNtmStore(parsed) {
+  if (!Array.isArray(parsed) || parsed.length < 20 || isNtmDemoStubStore(parsed)) return false;
+  NTM_STORE = reclassifyNoticesGeometry(parsed);
+  window.NTM_STORE = NTM_STORE;
+  reconcileAndApplyNoticeOverrides();
+  const activeCount = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
+  const badge = document.getElementById("ntmBadge");
+  if (badge) {
+    badge.textContent = activeCount;
+    badge.style.display = "block";
+  }
+  return parsed.length > 50;
 }
 
 function loadStoreFromStorage() {
@@ -4558,16 +4634,7 @@ function loadStoreFromStorage() {
           try { localStorage.removeItem(NTM_STORAGE_KEY); } catch (eRm) {}
           return false;
         }
-        NTM_STORE = reclassifyNoticesGeometry(parsed);
-        window.NTM_STORE = NTM_STORE;
-        reconcileAndApplyNoticeOverrides();
-        const activeCount = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
-        const badge = document.getElementById("ntmBadge");
-        if (badge) {
-          badge.textContent = activeCount;
-          badge.style.display = "block";
-        }
-        return parsed.length > 50;
+        return applyHydratedNtmStore(parsed);
       }
     }
   } catch (e) {
@@ -4576,102 +4643,111 @@ function loadStoreFromStorage() {
   return false;
 }
 
+/** Async warm from IndexedDB when localStorage could not hold the corpus. */
+async function hydrateNtmStorePreferCache() {
+  if (Array.isArray(NTM_STORE) && NTM_STORE.length >= 50) return true;
+  if (loadStoreFromStorage()) return true;
+  const fromIdb = await loadStoreFromIdb();
+  if (fromIdb && applyHydratedNtmStore(fromIdb)) return true;
+  return Array.isArray(NTM_STORE) && NTM_STORE.length >= 50;
+}
+window.hydrateNtmStorePreferCache = hydrateNtmStorePreferCache;
+
 /**
- * Attempt to load auto-synced notices.json with multi-endpoint failover
+ * Attempt to load auto-synced notices.json with multi-endpoint failover.
+ * Single-flight: concurrent callers share one network download (~2MB).
+ * Spinner is owned by ensureNoticesReadyForOverlay — do not toggle it here.
  */
 async function loadRemoteNoticesJson(showFeedback = false) {
-  try {
-    if (typeof window.setOverlayNoticesLoading === "function") {
-      window.setOverlayNoticesLoading(true);
-    }
-    const bust = Date.now();
-    const origin = (typeof location !== "undefined" && location.origin) ? location.origin : "";
-    const endpoints = [
-      origin + "/notices.json?t=" + bust,
-      "notices.json?t=" + bust,
-      "https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/notices.json?t=" + bust,
-      "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + bust
-    ];
-    let res = null;
-    let data = null;
-    let lastErr = "";
-    // Live corpus is ~1000+ notices; reject tiny payloads (e.g. demo stubs / corrupt cache)
-    const MIN_ACCEPT = 50;
-    for (const url of endpoints) {
-      try {
-        const candidate = await fetch(url, { cache: "no-store" });
-        if (!candidate || !candidate.ok) {
-          lastErr = url + " → HTTP " + (candidate ? candidate.status : "fail");
-          continue;
+  if (_ntmRemoteLoadPromise) return _ntmRemoteLoadPromise;
+  _ntmRemoteLoadPromise = (async () => {
+    try {
+      const bust = Date.now();
+      const origin = (typeof location !== "undefined" && location.origin) ? location.origin : "";
+      // Prefer same-origin first (SW cache-first = instant). Bust only on fallbacks.
+      const endpoints = [
+        { url: origin + "/notices.json", cache: "default" },
+        { url: "notices.json", cache: "default" },
+        { url: origin + "/notices.json?t=" + bust, cache: "no-store" },
+        { url: "https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/notices.json?t=" + bust, cache: "no-store" },
+        { url: "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + bust, cache: "no-store" }
+      ];
+      let res = null;
+      let data = null;
+      let lastErr = "";
+      // Live corpus is ~1000+ notices; reject tiny payloads (e.g. demo stubs / corrupt cache)
+      const MIN_ACCEPT = 50;
+      for (const ep of endpoints) {
+        try {
+          const candidate = await fetch(ep.url, { cache: ep.cache || "default" });
+          if (!candidate || !candidate.ok) {
+            lastErr = ep.url + " → HTTP " + (candidate ? candidate.status : "fail");
+            continue;
+          }
+          const parsed = await candidate.json();
+          const n = parsed && Array.isArray(parsed.notices) ? parsed.notices.length : 0;
+          if (n >= MIN_ACCEPT) {
+            res = candidate;
+            data = parsed;
+            break;
+          }
+          lastErr = ep.url + " → only " + n + " notices (need ≥" + MIN_ACCEPT + ")";
+        } catch (e) {
+          lastErr = ep.url + " → " + ((e && e.message) || "error");
         }
-        const parsed = await candidate.json();
-        const n = parsed && Array.isArray(parsed.notices) ? parsed.notices.length : 0;
-        if (n >= MIN_ACCEPT) {
-          res = candidate;
-          data = parsed;
-          break;
-        }
-        lastErr = url + " → only " + n + " notices (need ≥" + MIN_ACCEPT + ")";
-      } catch (e) {
-        lastErr = url + " → " + ((e && e.message) || "error");
       }
-    }
 
-    if (!res || !data) {
-      // Keep whatever is already in memory/localStorage if it looks like a real corpus
-      const existing = Array.isArray(NTM_STORE) ? NTM_STORE.length
-        : (Array.isArray(window.NTM_STORE) ? window.NTM_STORE.length : 0);
-      updateNetworkStatusHUD(false);
-      if (existing >= MIN_ACCEPT) {
+      if (!res || !data) {
+        // Keep whatever is already in memory/localStorage if it looks like a real corpus
+        await hydrateNtmStorePreferCache();
+        const existing = Array.isArray(NTM_STORE) ? NTM_STORE.length
+          : (Array.isArray(window.NTM_STORE) ? window.NTM_STORE.length : 0);
+        updateNetworkStatusHUD(false);
+        if (existing >= MIN_ACCEPT) {
+          if (showFeedback && typeof showSetSailToast === "function") {
+            showSetSailToast("Offline — using cached NtM corpus (" + existing + " notices)", "warn");
+          }
+          return true;
+        }
         if (showFeedback && typeof showSetSailToast === "function") {
-          showSetSailToast("Offline — using cached NtM corpus (" + existing + " notices)", "warn");
+          showSetSailToast("NtM fetch failed — " + (lastErr || "no endpoint"), "warning");
         }
-        if (typeof window.setOverlayNoticesLoading === "function") {
-          window.setOverlayNoticesLoading(false);
+        return false;
+      }
+
+      if (data && Array.isArray(data.notices) && data.notices.length >= MIN_ACCEPT) {
+        NTM_STORE = reclassifyNoticesGeometry(data.notices);
+        window.NTM_STORE = NTM_STORE;
+        reconcileAndApplyNoticeOverrides();
+        try { saveStoreToStorage(); } catch (eSave) {}
+        const navCnt = NTM_STORE.filter(n => n.type === "NAVTEX" && !n.isCancelled && n.status !== "CANCELLED").length;
+        const ukhoCnt = NTM_STORE.filter(n => n.type !== "NAVTEX" && !n.isCancelled && n.status !== "CANCELLED").length;
+        const badge = document.getElementById("ntmBadge");
+        if (badge) {
+          badge.textContent = navCnt + ukhoCnt;
+          badge.style.display = (navCnt + ukhoCnt) > 0 ? "block" : "none";
         }
+        if (showFeedback && typeof showSetSailToast === "function") {
+          showSetSailToast(`Synced ${navCnt} NAVTEX/NAVAREA + ${ukhoCnt} UKHO NtMs (${NTM_STORE.length} total)`, "info");
+        }
+        if (data.metadata) {
+          try { localStorage.setItem(META_STORAGE_KEY, JSON.stringify(data.metadata)); } catch(e){}
+        }
+        // Caller (ensureNoticesReady / boot) decides when to render — avoid double plot races
+        const meta = data.metadata || {};
+        const wk = meta.weekNumber ? `Wk ${meta.weekNumber}/${meta.year}` : (meta.weeklyBulletin || "Live");
+        const isOfflineResp = (res.headers && res.headers.get && res.headers.get("X-SetSail-Offline") === "true") || !navigator.onLine;
+        updateNetworkStatusHUD(!isOfflineResp, wk);
         return true;
       }
-      if (typeof window.setOverlayNoticesLoading === "function") {
-        window.setOverlayNoticesLoading(false);
-      }
-      if (showFeedback && typeof showSetSailToast === "function") {
-        showSetSailToast("NtM fetch failed — " + (lastErr || "no endpoint"), "warning");
-      }
-      return false;
+    } catch (err) {
+      updateNetworkStatusHUD(false);
     }
-
-    if (data && Array.isArray(data.notices) && data.notices.length >= MIN_ACCEPT) {
-      NTM_STORE = reclassifyNoticesGeometry(data.notices);
-      window.NTM_STORE = NTM_STORE;
-      reconcileAndApplyNoticeOverrides();
-      try { saveStoreToStorage(); } catch (eSave) {}
-      const navCnt = NTM_STORE.filter(n => n.type === "NAVTEX" && !n.isCancelled && n.status !== "CANCELLED").length;
-      const ukhoCnt = NTM_STORE.filter(n => n.type !== "NAVTEX" && !n.isCancelled && n.status !== "CANCELLED").length;
-      const badge = document.getElementById("ntmBadge");
-      if (badge) {
-        badge.textContent = navCnt + ukhoCnt;
-        badge.style.display = (navCnt + ukhoCnt) > 0 ? "block" : "none";
-      }
-      if (showFeedback && typeof showSetSailToast === "function") {
-        showSetSailToast(`Synced ${navCnt} NAVTEX/NAVAREA + ${ukhoCnt} UKHO NtMs (${NTM_STORE.length} total)`, "info");
-      }
-      if (data.metadata) {
-        try { localStorage.setItem(META_STORAGE_KEY, JSON.stringify(data.metadata)); } catch(e){}
-      }
-      // Caller (ensureNoticesReady / boot) decides when to render — avoid double plot races
-      const meta = data.metadata || {};
-      const wk = meta.weekNumber ? `Wk ${meta.weekNumber}/${meta.year}` : (meta.weeklyBulletin || "Live");
-      const isOfflineResp = (res.headers && res.headers.get && res.headers.get("X-SetSail-Offline") === "true") || !navigator.onLine;
-      updateNetworkStatusHUD(!isOfflineResp, wk);
-      return true;
-    }
-  } catch (err) {
-    updateNetworkStatusHUD(false);
-    if (typeof window.setOverlayNoticesLoading === "function") {
-      window.setOverlayNoticesLoading(false);
-    }
-  }
-  return false;
+    return false;
+  })().finally(() => {
+    _ntmRemoteLoadPromise = null;
+  });
+  return _ntmRemoteLoadPromise;
 }
 window.loadRemoteNoticesJson = loadRemoteNoticesJson;
 
@@ -4701,6 +4777,7 @@ function setOverlayNoticesLoading(isLoading) {
 window.setOverlayNoticesLoading = setOverlayNoticesLoading;
 
 function ensureNoticesReadyForOverlay() {
+  window._ntmOverlayLoadBusy = true;
   if (typeof window.setOverlayNoticesLoading === "function") {
     window.setOverlayNoticesLoading(true);
   }
@@ -4733,46 +4810,88 @@ function ensureNoticesReadyForOverlay() {
       p.classList.toggle("active", (p.dataset.category || "ALL") === "ALL");
     });
   }
-  // Yield so the tile spinner paints before the (often heavy) plot/fetch work
+  // Yield so the tile spinner paints, then: INSTANT plot from warm store, refresh in background
   return new Promise((resolve) => {
     requestAnimationFrame(() => {
       setTimeout(async () => {
         try {
-          // Always pull fresh notices when enabling the tile (localStorage can be stale/empty-coords)
-          await loadRemoteNoticesJson(true);
+          // 0) Hydrate memory from localStorage / IndexedDB before any network wait
+          await hydrateNtmStorePreferCache();
           if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
               Array.isArray(window.NTM_STORE) && window.NTM_STORE.length) {
             NTM_STORE = window.NTM_STORE;
           }
-          // Re-assert flag after async fetch (other renders may have raced)
-          try {
-            if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.notices = true;
-            if (window.OVERLAY_STATES) window.OVERLAY_STATES.notices = true;
-          } catch (eOv2) {}
 
-          if (typeof renderNtMListAndMap === "function") {
-            renderNtMListAndMap();
+          const assertOn = () => {
+            try {
+              if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.notices = true;
+              if (window.OVERLAY_STATES) window.OVERLAY_STATES.notices = true;
+            } catch (eOv2) {}
+          };
+          assertOn();
+
+          // Ensure Leaflet map exists (tile click can happen before initNtMMap finishes)
+          if ((!leafletMap && !(window.leafletMap)) && typeof initNtMMap === "function") {
+            try { initNtMMap(); } catch (eMap) {}
           }
+
+          // 1) Instant paint if corpus already in memory / IDB (typical after first visit)
+          const warmCount = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
+          let paintedWarm = false;
+          if (warmCount >= 50 && typeof renderNtMListAndMap === "function") {
+            try { renderNtMListAndMap(); } catch (eWarm) {}
+            const drawnWarm = (window.leafletMarkersLayer && window.leafletMarkersLayer.getLayers)
+              ? window.leafletMarkersLayer.getLayers().length : 0;
+            if (drawnWarm > 0) {
+              paintedWarm = true;
+              if (typeof showSetSailToast === "function") {
+                showSetSailToast("NtM & NAVTEX: " + drawnWarm + " chart objects (" + warmCount + " in store)", "info");
+              }
+              // Keep spinner only if we still need a network fill; warm plot is enough UX
+              if (typeof window.setOverlayNoticesLoading === "function") {
+                window.setOverlayNoticesLoading(false);
+              }
+            }
+          }
+
+          // 2) Refresh corpus (SW cache-first ≈ instant; shares in-flight boot fetch)
+          const beforeLen = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
+          await loadRemoteNoticesJson(warmCount < 50);
+          assertOn();
+          if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
+              Array.isArray(window.NTM_STORE) && window.NTM_STORE.length) {
+            NTM_STORE = window.NTM_STORE;
+          }
+          const afterLen = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
+
+          if (typeof renderNtMListAndMap === "function" && (afterLen !== beforeLen || !paintedWarm)) {
+            try { renderNtMListAndMap(); } catch (ePlot) {}
+          }
+
           const drawn = (window.leafletMarkersLayer && window.leafletMarkersLayer.getLayers)
             ? window.leafletMarkersLayer.getLayers().length : 0;
           const total = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
           const filteredN = (typeof getFilteredNotices === "function") ? getFilteredNotices().length : 0;
           if (typeof showSetSailToast === "function") {
-            if (drawn > 0) {
-              showSetSailToast("NtM & NAVTEX on chart: " + drawn + " map objects · " + filteredN + " filtered / " + total + " store", "info");
-            } else if (total > 0) {
-              showSetSailToast("NtM: " + total + " in store, " + filteredN + " filtered, 0 on map — retrying plot…", "warning");
-              // One hard retry with raw points
+            if (drawn > 0 && !paintedWarm) {
+              showSetSailToast("NtM & NAVTEX on chart: " + drawn + " objects · " + filteredN + " filtered / " + total + " store", "info");
+            } else if (drawn === 0 && total > 0) {
+              showSetSailToast("NtM: " + total + " in store, " + filteredN + " filtered, 0 on map — retrying…", "warning");
               try { renderNtMListAndMap(); } catch (eR) {}
-            } else {
-              showSetSailToast("NtM & NAVTEX: no notices loaded yet", "warning");
+            } else if (drawn === 0 && total === 0) {
+              showSetSailToast("NtM database missing locally — hard-refresh once online (scrapers are fine on server)", "warning");
             }
+          }
+          window._ntmOverlayLoadBusy = false;
+          if (typeof window.setOverlayNoticesLoading === "function") {
+            window.setOverlayNoticesLoading(false);
           }
           resolve(true);
         } catch (e) {
           try {
             if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
           } catch (e2) {}
+          window._ntmOverlayLoadBusy = false;
           if (typeof window.setOverlayNoticesLoading === "function") {
             window.setOverlayNoticesLoading(false);
           }
@@ -6645,11 +6764,13 @@ function renderNtMListAndMap() {
     drawOfflineCanvasMap();
   }
 
-  // Clear spinner only after markers are in the DOM and the browser has painted
-  if (typeof window.setOverlayNoticesLoading === "function") {
+  // Clear spinner only after markers painted — never race-clear while ensure() owns the load
+  if (typeof window.setOverlayNoticesLoading === "function" && !window._ntmOverlayLoadBusy) {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        window.setOverlayNoticesLoading(false);
+        if (!window._ntmOverlayLoadBusy) {
+          window.setOverlayNoticesLoading(false);
+        }
       });
     });
   }
