@@ -2703,14 +2703,35 @@ function renderWeatherOnMap(map = null) {
     leafletWeatherLayer.addLayer(dangerCircle);
 
     if (storm.forecastTrack && storm.forecastTrack.length > 0) {
+      // Sort by tau — advisory points are usually ordered, but never assume
+      const fTrack = storm.forecastTrack.slice().sort((a, b) => (Number(a.tau) || 0) - (Number(b.tau) || 0));
       const trackPoints = [storm.center];
       const coneLeft = [];
       const coneRight = [];
 
-      storm.forecastTrack.forEach((fp, idx) => {
+      // Densify great-circle midpoints between advisory fixes (visual only — markers stay at true τ)
+      const densifyTrack = (pts) => {
+        if (!pts || pts.length < 2) return pts || [];
+        const out = [pts[0]];
+        for (let i = 1; i < pts.length; i++) {
+          const a = pts[i - 1];
+          const b = pts[i];
+          const dLat = Number(b[0]) - Number(a[0]);
+          const dLon = Number(b[1]) - Number(a[1]);
+          const steps = Math.min(4, Math.max(1, Math.round(Math.hypot(dLat, dLon) / 1.2)));
+          for (let s = 1; s < steps; s++) {
+            const t = s / steps;
+            out.push([Number(a[0]) + dLat * t, Number(a[1]) + dLon * t]);
+          }
+          out.push(b);
+        }
+        return out;
+      };
+
+      fTrack.forEach((fp, idx) => {
         trackPoints.push(fp.coords);
-        const prevPt = idx === 0 ? storm.center : storm.forecastTrack[idx - 1].coords;
-        const nextPt = idx + 1 < storm.forecastTrack.length ? storm.forecastTrack[idx + 1].coords : fp.coords;
+        const prevPt = idx === 0 ? storm.center : fTrack[idx - 1].coords;
+        const nextPt = idx + 1 < fTrack.length ? fTrack[idx + 1].coords : fp.coords;
         const refFrom = (Math.abs(fp.coords[0] - prevPt[0]) < 0.01 && Math.abs(fp.coords[1] - prevPt[1]) < 0.01) ? storm.center : prevPt;
         const refTo = (Math.abs(fp.coords[0] - refFrom[0]) < 0.01 && Math.abs(fp.coords[1] - refFrom[1]) < 0.01) ? nextPt : fp.coords;
 
@@ -2734,13 +2755,13 @@ function renderWeatherOnMap(map = null) {
         ]);
 
         const popupHtml = `
-          <div style="font-family:sans-serif;font-size:11px;min-width:180px;">
-            <div style="font-weight:700;color:#d97706;border-bottom:1px solid #cbd5e1;padding-bottom:3px;margin-bottom:4px;">
-              ${storm.name} • Forecast +${fp.tau}h
+          <div class="ss-wx-storm-popup" style="font-family:'Segoe UI',system-ui,sans-serif;font-size:12px;min-width:190px;color:#0f172a;">
+            <div style="font-weight:700;color:#b45309;margin-bottom:6px;">${storm.shortName || storm.name} · +${fp.tau}h</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:11px;line-height:1.35;">
+              <div><span style="color:#64748b;">Pos</span><br><b>${Math.abs(fp.coords[0]).toFixed(1)}°${fp.coords[0] >= 0 ? "N" : "S"} ${Math.abs(fp.coords[1]).toFixed(1)}°${fp.coords[1] >= 0 ? "E" : "W"}</b></div>
+              <div><span style="color:#64748b;">Wind</span><br><b style="color:#dc2626;">${fp.winds} kt</b></div>
+              <div style="grid-column:1/-1;"><span style="color:#64748b;">Uncertainty</span> · <b>${fp.radiusNm} NM</b></div>
             </div>
-            <div><strong>Position:</strong> ${Math.abs(fp.coords[0]).toFixed(1)}°${fp.coords[0] >= 0 ? "N" : "S"}, ${Math.abs(fp.coords[1]).toFixed(1)}°${fp.coords[1] >= 0 ? "E" : "W"}</div>
-            <div><strong>Max Wind:</strong> ${fp.winds} kts</div>
-            <div><strong>Uncertainty Radius:</strong> ${fp.radiusNm} NM</div>
           </div>
         `;
 
@@ -2755,17 +2776,17 @@ function renderWeatherOnMap(map = null) {
           if (canvasRenderer) dotOpts.renderer = canvasRenderer;
           const dot = L.circleMarker(fp.coords, dotOpts);
           dot.bindTooltip(`${storm.shortName || storm.name} +${fp.tau}h (${fp.winds}kn)`, { direction: "top" });
-          dot.bindPopup(popupHtml);
+          dot.bindPopup(popupHtml, { className: "ss-wx-storm-popup-wrap", maxWidth: 260 });
           leafletWeatherLayer.addLayer(dot);
         } else {
           const wptIcon = L.divIcon({
             className: "weather-cone-wpt-icon",
-            html: `<div style="position:relative;width:8px;height:8px;"><div style="width:8px;height:8px;border-radius:50%;background:#f59e0b;border:1.5px solid #0f172a;"></div><div style="position:absolute;left:11px;top:-4px;background:rgba(245,158,11,0.92);color:#0f172a;font-size:8.5px;font-weight:800;padding:1px 4px;border-radius:3px;border:1px solid rgba(255,255,255,0.8);white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.35);">+${fp.tau}h (${fp.winds}kn)</div></div>`,
+            html: `<div style="position:relative;width:8px;height:8px;"><div style="width:8px;height:8px;border-radius:50%;background:#f59e0b;border:1.5px solid #0f172a;"></div><div class="weather-track-wpt-label" style="position:absolute;left:11px;top:-4px;background:rgba(245,158,11,0.92);color:#0f172a;font-size:8.5px;font-weight:800;padding:1px 4px;border-radius:3px;border:1px solid rgba(255,255,255,0.8);white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.35);">+${fp.tau}h (${fp.winds}kn)</div></div>`,
             iconSize: [8, 8],
             iconAnchor: [4, 4]
           });
           const wptMarker = L.marker(fp.coords, { icon: wptIcon });
-          wptMarker.bindPopup(popupHtml);
+          wptMarker.bindPopup(popupHtml, { className: "ss-wx-storm-popup-wrap", maxWidth: 260 });
           leafletWeatherLayer.addLayer(wptMarker);
         }
       });
@@ -2805,7 +2826,7 @@ function renderWeatherOnMap(map = null) {
         }
         return rings.filter((r) => r.length >= 2);
       };
-      splitWxTrack(trackPoints).forEach((seg) => {
+      splitWxTrack(densifyTrack(trackPoints)).forEach((seg) => {
         leafletWeatherLayer.addLayer(L.polyline(seg, lineOpts));
       });
     }
@@ -2837,23 +2858,36 @@ function renderWeatherOnMap(map = null) {
       iconAnchor: [iconDim / 2, iconDim / 2]
     });
     const stormMarker = L.marker(storm.center, { icon: stormIcon });
+    const posStr = Math.abs(storm.center[0]).toFixed(1) + "°" + (storm.center[0] >= 0 ? "N" : "S") + "  " +
+      Math.abs(storm.center[1]).toFixed(1) + "°" + (storm.center[1] >= 0 ? "E" : "W");
+    const catShort = String(storm.category || "").replace(/\s*\(.*?\)\s*/g, "").trim() || "Cyclone";
     stormMarker.bindPopup(`
-      <div style="font-family:sans-serif;font-size:11px;min-width:235px;line-height:1.45;">
-        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #cbd5e1;padding-bottom:4px;margin-bottom:6px;gap:6px;">
-          <strong style="color:#dc2626;font-size:12px;">🌀 ${storm.name}</strong>
-          <span style="background:#fee2e2;color:#991b1b;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;">${storm.category}</span>
+      <div class="ss-wx-storm-popup" style="font-family:'Segoe UI',system-ui,sans-serif;min-width:250px;max-width:300px;color:#0f172a;line-height:1.4;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#0f172a;letter-spacing:0.01em;">${storm.name || shortLabel}</div>
+            <div style="font-size:10px;color:#64748b;margin-top:1px;">${MARINE_WEATHER_STORE.synopticCycle || "Live advisory"}</div>
+          </div>
+          <span style="flex-shrink:0;background:${isSevere ? "#fee2e2" : "#ffedd5"};color:${isSevere ? "#991b1b" : "#9a3412"};padding:3px 7px;border-radius:999px;font-size:9px;font-weight:800;">${catShort}</span>
         </div>
-        <div><strong>Synoptic Cycle:</strong> ${MARINE_WEATHER_STORE.synopticCycle || "Live Advisory"}</div>
-        <div><strong>Position:</strong> ${Math.abs(storm.center[0]).toFixed(1)}°${storm.center[0] >= 0 ? "N":"S"}, ${Math.abs(storm.center[1]).toFixed(1)}°${storm.center[1] >= 0 ? "E":"W"}</div>
-        <div><strong>Max Sustained Winds:</strong> <span style="color:#dc2626;font-weight:700;">${storm.maxWinds} kts</span> (Gusts: ${storm.gusts} kts)</div>
-        <div><strong>Central Pressure:</strong> ${storm.centralPressure} hPa</div>
-        <div><strong>Movement:</strong> ${storm.movement}</div>
-        <div style="margin-top:6px;padding:5px 8px;background:rgba(239,68,68,0.1);border-left:3px solid #dc2626;border-radius:3px;font-size:10px;color:#991b1b;">
-          <strong>SPOS / ECDIS Safe Passing Advice:</strong><br>
-          Maintain minimum safe distance (CPA) ≥ 200 NM on navigable semicircle, ≥ 250 NM on dangerous semicircle.
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:7px 8px;">
+            <div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;">Wind</div>
+            <div style="font-size:18px;font-weight:800;color:#dc2626;line-height:1.15;">${storm.maxWinds}<span style="font-size:11px;font-weight:700;"> kt</span></div>
+            <div style="font-size:10px;color:#64748b;">Gust ${storm.gusts != null ? storm.gusts + " kt" : "—"}</div>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:7px 8px;">
+            <div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;">Pressure</div>
+            <div style="font-size:18px;font-weight:800;color:#0f172a;line-height:1.15;">${storm.centralPressure}<span style="font-size:11px;font-weight:700;"> hPa</span></div>
+            <div style="font-size:10px;color:#64748b;">${posStr}</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#334155;margin-bottom:8px;"><span style="color:#64748b;">Movement</span> · ${storm.movement || "—"}</div>
+        <div style="padding:7px 9px;background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(249,115,22,0.08));border:1px solid rgba(239,68,68,0.25);border-radius:8px;font-size:10.5px;color:#7f1d1d;">
+          <b>Safe passing</b> — CPA ≥ 200 NM (navigable) / ≥ 250 NM (dangerous semicircle)
         </div>
       </div>
-    `);
+    `, { className: "ss-wx-storm-popup-wrap", maxWidth: 320 });
     leafletWeatherLayer.addLayer(stormMarker);
   });
 
@@ -3000,27 +3034,64 @@ function renderWeatherOnMap(map = null) {
     });
   }
 
-  // 8. Ocean currents
-  if (wxSub.currents !== false && curZoom >= 3) {
-    (MARINE_WEATHER_STORE.currents || []).forEach((c) => {
-      if (!c || c.speedKn == null) return;
-      if (c.speedKn < 0.15 && curZoom < 5) return;
-      const rot = (Number(c.dirDeg) || 0) % 360;
-      const icon = L.divIcon({
-        className: "weather-current-icon",
-        html: `<div style="width:14px;height:14px;transform:rotate(${rot}deg);transform-origin:center;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:#a78bfa;opacity:0.9;"><path d="M12 2L5 20l7-3 7 3z"/></svg></div>`,
-        iconSize: [14, 14],
-        iconAnchor: [7, 7]
-      });
-      const m = L.marker([c.lat, c.lon], { icon });
-      m.bindPopup(`<strong>Ocean current:</strong> ${c.speedKn} kn @ ${c.dirDeg}°<br><span style="font-size:9px;color:#64748b;">Open-Meteo Marine</span>`);
-      leafletWeatherLayer.addLayer(m);
-    });
-  }
+  // Ocean currents: no map arrows — sampled into the cursor weather tile instead
 }
 
 window.renderWeatherOnMap = renderWeatherOnMap;
 
+
+/** Inverse-distance sample of ocean current grid at chart cursor. */
+function sampleCurrentAtLatLon(lat, lon) {
+  const currents = (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.currents))
+    ? MARINE_WEATHER_STORE.currents : [];
+  if (!currents.length || !Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return { ok: false, message: "No current data" };
+  }
+  const scored = [];
+  for (let i = 0; i < currents.length; i++) {
+    const c = currents[i];
+    if (!c || !Number.isFinite(c.lat) || !Number.isFinite(c.lon)) continue;
+    const d = calculateHaversineDistanceNM(lat, lon, c.lat, c.lon);
+    if (!Number.isFinite(d)) continue;
+    scored.push({ c, d });
+  }
+  if (!scored.length) return { ok: false, message: "No current data" };
+  scored.sort((a, b) => a.d - b.d);
+  const MAX_NM = 350;
+  if (scored[0].d > MAX_NM) {
+    return { ok: false, nearestNm: Math.round(scored[0].d), message: "No current within " + MAX_NM + " NM" };
+  }
+  const use = scored.filter((s) => s.d <= 180).slice(0, 5);
+  const pool = use.length ? use : scored.slice(0, 3);
+  let uSum = 0;
+  let vSum = 0;
+  let wSum = 0;
+  pool.forEach(({ c, d }) => {
+    const spd = Number(c.speedKn);
+    const dir = Number(c.dirDeg);
+    if (!Number.isFinite(spd)) return;
+    const w = 1 / Math.max(d, 0.5);
+    const w2 = w * w;
+    const rad = ((Number.isFinite(dir) ? dir : 0) * Math.PI) / 180;
+    // Oceanographic: direction current TOWARD; decompose to u/v
+    uSum += spd * Math.sin(rad) * w2;
+    vSum += spd * Math.cos(rad) * w2;
+    wSum += w2;
+  });
+  if (wSum <= 0) return { ok: false, message: "No current data" };
+  const u = uSum / wSum;
+  const v = vSum / wSum;
+  const speedKn = Math.hypot(u, v);
+  let dirDeg = (Math.atan2(u, v) * 180) / Math.PI;
+  if (dirDeg < 0) dirDeg += 360;
+  return {
+    ok: true,
+    speedKn: Math.round(speedKn * 100) / 100,
+    dirDeg: Math.round(dirDeg),
+    nearestNm: Math.round(scored[0].d)
+  };
+}
+window.sampleCurrentAtLatLon = sampleCurrentAtLatLon;
 
 /** Inverse-distance sample of NDBC buoys at chart cursor (no map markers). */
 function sampleNdbcAtLatLon(lat, lon) {
@@ -3107,9 +3178,9 @@ function syncNdbcCursorTileVisibility() {
   const states = (typeof window !== "undefined" && window.OVERLAY_STATES)
     ? window.OVERLAY_STATES
     : (typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES : null);
+  // Show whenever Weather overlay is on — cursor meteo + current (not only NDBC buoy sublayer)
   const wxOn = !!(states && states.weather);
-  const buoyOn = !(window.WEATHER_SUBFILTERS && window.WEATHER_SUBFILTERS.buoys === false);
-  const show = wxOn && buoyOn;
+  const show = wxOn;
   if (show) {
     tile.hidden = false;
     tile.removeAttribute("hidden");
@@ -3124,12 +3195,13 @@ function syncNdbcCursorTileVisibility() {
   }
 }
 
-function renderNdbcCursorChips(wind, wave, pressure, airSst) {
+function renderNdbcCursorChips(wind, wave, pressure, airSst, current) {
   return (
     '<span class="wx-chip" title="Wind"><span class="wx-ico" aria-hidden="true">\uD83D\uDCA8</span><b>' + wind + "</b></span>" +
     '<span class="wx-chip" title="Waves Hs"><span class="wx-ico" aria-hidden="true">\uD83C\uDF0A</span><b>' + wave + "</b></span>" +
     '<span class="wx-chip" title="Pressure"><span class="wx-ico" aria-hidden="true">\u25CE</span><b>' + pressure + "</b></span>" +
-    '<span class="wx-chip" title="Air / SST"><span class="wx-ico" aria-hidden="true">\uD83C\uDF21</span><b>' + airSst + "</b></span>"
+    '<span class="wx-chip" title="Air / SST"><span class="wx-ico" aria-hidden="true">\uD83C\uDF21</span><b>' + airSst + "</b></span>" +
+    '<span class="wx-chip" title="Ocean current"><span class="wx-ico" aria-hidden="true">\u2197</span><b>' + current + "</b></span>"
   );
 }
 
@@ -3140,12 +3212,18 @@ function updateNdbcCursorTile(lat, lon) {
   const meta = document.getElementById("ntmWxCursorMeta");
   if (!body) return;
   const s = sampleNdbcAtLatLon(lat, lon);
-  // Always keep the same 4-chip skeleton so the tile footprint never jumps.
+  const cur = sampleCurrentAtLatLon(lat, lon);
+  const curTxt = (cur && cur.ok)
+    ? (fmtWxNum(cur.speedKn, 1) + " kn " + fmtWxNum(cur.dirDeg, 0) + "\u00b0")
+    : "\u2014";
+  // Always keep the same chip skeleton so the tile footprint never jumps.
   if (!s.ok) {
-    tile.classList.remove("is-live");
-    body.innerHTML = renderNdbcCursorChips("\u2014", "\u2014", "\u2014 mb", "\u2014\u00b0/\u2014\u00b0");
-    if (meta) meta.textContent = s.message || "Move cursor\u2026";
-    tile.removeAttribute("title");
+    tile.classList.toggle("is-live", !!(cur && cur.ok));
+    body.innerHTML = renderNdbcCursorChips("\u2014", "\u2014", "\u2014 mb", "\u2014\u00b0/\u2014\u00b0", curTxt);
+    if (meta) {
+      meta.textContent = (s.message || "Move cursor\u2026") + (cur && cur.ok ? " · current OK" : "");
+    }
+    tile.title = cur && cur.ok ? ("Current " + curTxt) : (s.message || "");
     return;
   }
   tile.classList.add("is-live");
@@ -3166,20 +3244,24 @@ function updateNdbcCursorTile(lat, lon) {
     wind,
     wave,
     fmtWxNum(s.pressureMb, 0) + " mb",
-    fmtWxNum(s.airC, 0) + "\u00b0/" + fmtWxNum(s.sstC, 0) + "\u00b0"
+    fmtWxNum(s.airC, 0) + "\u00b0/" + fmtWxNum(s.sstC, 0) + "\u00b0",
+    curTxt
   );
   const chips = body.querySelectorAll(".wx-chip");
   if (chips[0]) chips[0].title = windTitle;
   if (chips[1]) chips[1].title = waveTitle;
+  if (chips[4]) chips[4].title = cur && cur.ok ? ("Current " + curTxt) : "Ocean current";
   if (meta) {
     const nMatch = String(s.sourceNote || "").match(/(\d+)\s*buoy/i);
     const nm = s.nearestNm != null ? Math.round(s.nearestNm) : null;
-    meta.textContent = nMatch
+    const buoyBit = nMatch
       ? (nMatch[1] + " buoy" + (nm != null ? " · " + nm + " NM" : ""))
-      : (s.mode === "nearest" ? ("buoy" + (nm != null ? " · " + nm + " NM" : "")) : (nm != null ? nm + " NM" : "NDBC"));
-    meta.title = (s.sourceNote || "") + (s.mode === "interpolated" ? " · blended" : " · buoy");
+      : (s.mode === "nearest" ? ("buoy" + (nm != null ? " · " + nm + " NM" : "")) : (nm != null ? nm + " NM" : "WX"));
+    meta.textContent = buoyBit + (cur && cur.ok ? " · cur" : "");
+    meta.title = (s.sourceNote || "") + (s.mode === "interpolated" ? " · blended" : "") +
+      (cur && cur.ok ? (" · current " + curTxt) : "");
   }
-  tile.title = windTitle + " · " + waveTitle;
+  tile.title = windTitle + " · " + waveTitle + (cur && cur.ok ? (" · " + curTxt) : "");
 }
 
 window.sampleNdbcAtLatLon = sampleNdbcAtLatLon;
@@ -4658,43 +4740,78 @@ window.hydrateNtmStorePreferCache = hydrateNtmStorePreferCache;
  * Single-flight: concurrent callers share one network download (~2MB).
  * Spinner is owned by ensureNoticesReadyForOverlay — do not toggle it here.
  */
+async function purgeCachedNoticesJson() {
+  if (typeof caches === "undefined") return;
+  try {
+    const names = await caches.keys();
+    await Promise.all(names.map(async (name) => {
+      const cache = await caches.open(name);
+      const keys = await cache.keys();
+      await Promise.all(keys.map((k) => {
+        try {
+          const p = new URL(k.url).pathname;
+          return (p.endsWith("/notices.json") || p === "/notices.json" || String(k.url).indexOf("notices.json") >= 0)
+            ? cache.delete(k) : Promise.resolve(false);
+        } catch (e) { return Promise.resolve(false); }
+      }));
+    }));
+  } catch (ePurge) {}
+}
+
 async function loadRemoteNoticesJson(showFeedback = false) {
   if (_ntmRemoteLoadPromise) return _ntmRemoteLoadPromise;
   _ntmRemoteLoadPromise = (async () => {
     try {
       const bust = Date.now();
       const origin = (typeof location !== "undefined" && location.origin) ? location.origin : "";
-      // Prefer same-origin first (SW cache-first = instant). Bust only on fallbacks.
+      // Same-origin first (SW cache-first). CDN/GitHub after so a poisoned local cache cannot
+      // alias into remote URLs — and we purge+retry once if same-origin returns a stub corpus.
       const endpoints = [
-        { url: origin + "/notices.json", cache: "default" },
-        { url: "notices.json", cache: "default" },
-        { url: origin + "/notices.json?t=" + bust, cache: "no-store" },
-        { url: "https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/notices.json?t=" + bust, cache: "no-store" },
-        { url: "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + bust, cache: "no-store" }
+        { url: origin + "/notices.json", cache: "default", sameOrigin: true },
+        { url: "notices.json", cache: "default", sameOrigin: true },
+        { url: "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + bust, cache: "no-store" },
+        { url: "https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/notices.json?t=" + bust, cache: "no-store", mode: "cors" },
+        { url: origin + "/notices.json?t=" + bust, cache: "no-store", sameOrigin: true }
       ];
       let res = null;
       let data = null;
       let lastErr = "";
+      let sawTinySameOrigin = false;
       // Live corpus is ~1000+ notices; reject tiny payloads (e.g. demo stubs / corrupt cache)
       const MIN_ACCEPT = 50;
-      for (const ep of endpoints) {
-        try {
-          const candidate = await fetch(ep.url, { cache: ep.cache || "default" });
-          if (!candidate || !candidate.ok) {
-            lastErr = ep.url + " → HTTP " + (candidate ? candidate.status : "fail");
-            continue;
+      const tryEndpoints = async (list) => {
+        for (const ep of list) {
+          try {
+            const opts = { cache: ep.cache || "default" };
+            if (ep.mode) opts.mode = ep.mode;
+            const candidate = await fetch(ep.url, opts);
+            if (!candidate || !candidate.ok) {
+              lastErr = ep.url + " → HTTP " + (candidate ? candidate.status : "fail");
+              continue;
+            }
+            const parsed = await candidate.json();
+            const n = parsed && Array.isArray(parsed.notices) ? parsed.notices.length : 0;
+            if (n >= MIN_ACCEPT) {
+              res = candidate;
+              data = parsed;
+              return true;
+            }
+            lastErr = ep.url + " → only " + n + " notices (need ≥" + MIN_ACCEPT + ")";
+            if (ep.sameOrigin) sawTinySameOrigin = true;
+          } catch (e) {
+            lastErr = ep.url + " → " + ((e && e.message) || "error");
           }
-          const parsed = await candidate.json();
-          const n = parsed && Array.isArray(parsed.notices) ? parsed.notices.length : 0;
-          if (n >= MIN_ACCEPT) {
-            res = candidate;
-            data = parsed;
-            break;
-          }
-          lastErr = ep.url + " → only " + n + " notices (need ≥" + MIN_ACCEPT + ")";
-        } catch (e) {
-          lastErr = ep.url + " → " + ((e && e.message) || "error");
         }
+        return false;
+      };
+
+      await tryEndpoints(endpoints);
+      if ((!res || !data) && sawTinySameOrigin) {
+        await purgeCachedNoticesJson();
+        await tryEndpoints([
+          { url: origin + "/notices.json?t=" + Date.now(), cache: "no-store", sameOrigin: true },
+          { url: "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + Date.now(), cache: "no-store" }
+        ]);
       }
 
       if (!res || !data) {
@@ -4709,6 +4826,7 @@ async function loadRemoteNoticesJson(showFeedback = false) {
           }
           return true;
         }
+        window._ntmLastFetchErr = lastErr || "no endpoint";
         if (showFeedback && typeof showSetSailToast === "function") {
           showSetSailToast("NtM fetch failed — " + (lastErr || "no endpoint"), "warning");
         }
@@ -4716,7 +4834,12 @@ async function loadRemoteNoticesJson(showFeedback = false) {
       }
 
       if (data && Array.isArray(data.notices) && data.notices.length >= MIN_ACCEPT) {
-        NTM_STORE = reclassifyNoticesGeometry(data.notices);
+        try {
+          NTM_STORE = reclassifyNoticesGeometry(data.notices);
+        } catch (eRe) {
+          console.warn("[NtM] reclassify failed, using raw notices", eRe);
+          NTM_STORE = data.notices;
+        }
         window.NTM_STORE = NTM_STORE;
         reconcileAndApplyNoticeOverrides();
         try { saveStoreToStorage(); } catch (eSave) {}
@@ -4738,10 +4861,12 @@ async function loadRemoteNoticesJson(showFeedback = false) {
         const wk = meta.weekNumber ? `Wk ${meta.weekNumber}/${meta.year}` : (meta.weeklyBulletin || "Live");
         const isOfflineResp = (res.headers && res.headers.get && res.headers.get("X-SetSail-Offline") === "true") || !navigator.onLine;
         updateNetworkStatusHUD(!isOfflineResp, wk);
+        window._ntmLastFetchErr = "";
         return true;
       }
     } catch (err) {
       updateNetworkStatusHUD(false);
+      window._ntmLastFetchErr = (err && err.message) || "error";
     }
     return false;
   })().finally(() => {
@@ -4879,7 +5004,8 @@ function ensureNoticesReadyForOverlay() {
               showSetSailToast("NtM: " + total + " in store, " + filteredN + " filtered, 0 on map — retrying…", "warning");
               try { renderNtMListAndMap(); } catch (eR) {}
             } else if (drawn === 0 && total === 0) {
-              showSetSailToast("NtM database missing locally — hard-refresh once online (scrapers are fine on server)", "warning");
+              const why = window._ntmLastFetchErr ? (" · " + window._ntmLastFetchErr) : "";
+              showSetSailToast("NtM corpus not loaded yet — retry tile or hard-refresh once online" + why, "warning");
             }
           }
           window._ntmOverlayLoadBusy = false;
@@ -5215,7 +5341,7 @@ function initNtMMap() {
       const hud = document.getElementById("ntmHudCoords");
       if (!hud) return;
       // Same glyph widths as formatLatLonDMS so the fixed 29ch box never jumps.
-      hud.textContent = "--° --.--' -, ---° --.--' -";
+      hud.textContent = "--° --.---' -, ---° --.---' -";
       hud.removeAttribute("data-live");
     };
     setHudCoordsIdle();
@@ -5506,6 +5632,7 @@ function calculateNauticalSunTimes(lat, lon, dateObj) {
 
   const utRise = calcSolarEvent(true);
   const utSet = calcSolarEvent(false);
+  // Standard meridian zone from longitude (Bowditch) — civil TZ may differ by ±1h
   const tzOffset = Math.round(lon / 15.0);
 
   function fmtHours(val) {
@@ -5519,9 +5646,9 @@ function calculateNauticalSunTimes(lat, lon, dateObj) {
     return String(hrs).padStart(2, "0") + ":" + String(mins).padStart(2, "0");
   }
 
-  function fmtLocal(val) {
+  function fmtLocal(val, off) {
     if (typeof val === "string") return val;
-    let lt = (val + tzOffset) % 24.0;
+    let lt = (val + off) % 24.0;
     if (lt < 0) lt += 24.0;
     return fmtHours(lt);
   }
@@ -5541,21 +5668,73 @@ function calculateNauticalSunTimes(lat, lon, dateObj) {
 
   const tzSign = tzOffset >= 0 ? "+" : "";
   const tzStr = "UTC" + tzSign + tzOffset;
-  const zdSign = -tzOffset >= 0 ? "+" : "";
-  const zdStr = "Zone " + zdSign + (-tzOffset);
 
   return {
     tzOffset: tzOffset,
     tzStr: tzStr,
-    zdStr: zdStr,
+    zdStr: "",
+    source: "nautical",
     sunriseUtc: fmtHours(utRise),
     sunsetUtc: fmtHours(utSet),
-    sunriseLocal: fmtLocal(utRise),
-    sunsetLocal: fmtLocal(utSet),
+    sunriseLocal: fmtLocal(utRise, tzOffset),
+    sunsetLocal: fmtLocal(utSet, tzOffset),
     daylightStr: daylightStr,
     isSpecial: typeof utRise === "string"
   };
 }
+
+/** Civil sunrise/sunset via Open-Meteo (IANA timezone=auto) — fixes ±1h political-TZ errors. */
+async function fetchCivilSunTimes(lat, lon) {
+  const url = "https://api.open-meteo.com/v1/forecast?latitude=" +
+    encodeURIComponent(lat) + "&longitude=" + encodeURIComponent(lon) +
+    "&daily=sunrise,sunset&timezone=auto&forecast_days=1";
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res || !res.ok) throw new Error("sun API " + (res ? res.status : "fail"));
+  const data = await res.json();
+  const srIso = data && data.daily && data.daily.sunrise && data.daily.sunrise[0];
+  const ssIso = data && data.daily && data.daily.sunset && data.daily.sunset[0];
+  if (!srIso || !ssIso) throw new Error("sun API empty");
+  const offSec = Number(data.utc_offset_seconds) || 0;
+  const tzOffH = offSec / 3600;
+  const tzSign = tzOffH >= 0 ? "+" : "";
+  const tzLabel = (Number.isInteger(tzOffH) ? String(tzOffH) : tzOffH.toFixed(1));
+  const parseLocalHm = (iso) => {
+    // Open-Meteo returns local wall time without Z, e.g. 2026-10-30T06:46
+    const m = String(iso).match(/T(\d{2}):(\d{2})/);
+    return m ? (m[1] + ":" + m[2]) : "—";
+  };
+  const toUtcHm = (iso) => {
+    // Interpret ISO as local civil, convert to UTC using reported offset
+    const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+    if (!m) return "—";
+    const utcMs = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) - offSec * 1000;
+    const ud = new Date(utcMs);
+    return String(ud.getUTCHours()).padStart(2, "0") + ":" + String(ud.getUTCMinutes()).padStart(2, "0");
+  };
+  const riseL = parseLocalHm(srIso);
+  const setL = parseLocalHm(ssIso);
+  let daylightStr = "—";
+  try {
+    const [rh, rm] = riseL.split(":").map(Number);
+    const [sh, sm] = setL.split(":").map(Number);
+    let mins = (sh * 60 + sm) - (rh * 60 + rm);
+    if (mins < 0) mins += 24 * 60;
+    daylightStr = Math.floor(mins / 60) + "h " + (mins % 60) + "m";
+  } catch (eDl) {}
+  return {
+    tzOffset: tzOffH,
+    tzStr: "UTC" + tzSign + tzLabel,
+    zdStr: data.timezone || "",
+    source: "civil",
+    sunriseUtc: toUtcHm(srIso),
+    sunsetUtc: toUtcHm(ssIso),
+    sunriseLocal: riseL,
+    sunsetLocal: setL,
+    daylightStr: daylightStr,
+    isSpecial: false
+  };
+}
+window.fetchCivilSunTimes = fetchCivilSunTimes;
 
 let mapContextMenuPopup = null;
 
@@ -5604,7 +5783,7 @@ function initMapContextMenu(map) {
     maxWidth: 200,
     minWidth: 165,
     autoPan: true,
-    closeButton: true
+    closeButton: false
   })
   .setLatLng([lat, lon])
   .setContent(container)
@@ -5704,10 +5883,8 @@ function initMapContextMenu(map) {
     popup.update();
   }
 
-  function renderSunView() {
-    const sunData = computePositionSolarEphemeris(lat, lon, new Date());
+  function paintSunView(sunData) {
     let bodyContent = "";
-
     if (sunData.isSpecial) {
       bodyContent =
         '<div class="ss-ctx-stat-card">' +
@@ -5718,47 +5895,40 @@ function initMapContextMenu(map) {
       bodyContent =
         '<div class="ss-ctx-sun-grid">' +
           '<div class="ss-ctx-sun-box sunrise">' +
-            '<div class="ss-ctx-sun-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 16c2.4-1.5 4.8-2.2 8-2.2s5.6.7 8 2.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 4.2v1.5M7.4 6.4l.9.9M16.6 6.4l-.9.9" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/></svg></div>' +
             '<div class="ss-ctx-sun-label">SUNRISE</div>' +
-            '<div class="ss-ctx-sun-time">' + sunData.sunriseLocal + ' <span class="ss-ctx-tz-sub">LT</span></div>' +
+            '<div class="ss-ctx-sun-time">' + sunData.sunriseLocal + '</div>' +
             '<div class="ss-ctx-sun-utc">' + sunData.sunriseUtc + ' UTC</div>' +
           '</div>' +
           '<div class="ss-ctx-sun-box sunset">' +
-            '<div class="ss-ctx-sun-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14.5c2.4 1.2 4.8 1.8 8 1.8s5.6-.6 8-1.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="10.2" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 5v1.4M7.4 7.1l.9.9M16.6 7.1l-.9.9" stroke="#f97316" stroke-width="1.4" stroke-linecap="round"/></svg></div>' +
             '<div class="ss-ctx-sun-label">SUNSET</div>' +
-            '<div class="ss-ctx-sun-time">' + sunData.sunsetLocal + ' <span class="ss-ctx-tz-sub">LT</span></div>' +
+            '<div class="ss-ctx-sun-time">' + sunData.sunsetLocal + '</div>' +
             '<div class="ss-ctx-sun-utc">' + sunData.sunsetUtc + ' UTC</div>' +
           '</div>' +
         '</div>' +
         '<div class="ss-ctx-sun-footer">' +
-          '<span>Daylight: <b style="color:#ffffff;font-weight:800;">' + sunData.daylightStr + '</b></span>' +
+          '<span>Daylight <b style="color:#fff;font-weight:700;">' + sunData.daylightStr + '</b></span>' +
         '</div>';
     }
-
+    const tzHint = sunData.zdStr
+      ? ('<span class="ss-ctx-tz-pill">' + sunData.tzStr + ' · ' + sunData.zdStr + '</span>')
+      : ('<span class="ss-ctx-tz-pill">' + sunData.tzStr + ' · std zone</span>');
     container.innerHTML =
-      '<div class="ss-ctx-detail">' +
-        '<div class="ss-ctx-topbar">' +
-          '<button type="button" class="ss-ctx-back-btn" id="btnCtxBack" title="Back">&larr; Back</button>' +
-          '<span class="ss-ctx-title">Sun Times</span>' +
-        '</div>' +
-        '<div class="ss-ctx-tz-row">' +
-          '<span class="ss-ctx-tz-pill">TZ: <b>' + sunData.tzStr + '</b> (' + sunData.zdStr + ')</span>' +
-        '</div>' +
+      '<div class="ss-ctx-detail ss-ctx-sun-minimal">' +
+        '<div class="ss-ctx-title" style="text-align:center;margin:0 0 6px;">Sun Times</div>' +
+        '<div class="ss-ctx-tz-row" style="justify-content:center;margin-bottom:6px;">' + tzHint + '</div>' +
         bodyContent +
       '</div>';
-
-    const backBtn = container.querySelector("#btnCtxBack");
-    if (backBtn) {
-      backBtn.addEventListener("pointerdown", (e) => { e.stopPropagation(); });
-      backBtn.addEventListener("mousedown", (e) => { e.stopPropagation(); });
-      backBtn.addEventListener("click", (evt) => {
-        evt.preventDefault();
-        evt.stopPropagation();
-        renderMainMenu();
-      });
-    }
-
     popup.update();
+  }
+
+  function renderSunView() {
+    // Instant nautical estimate, then upgrade to civil IANA times when online
+    paintSunView(computePositionSolarEphemeris(lat, lon, new Date()));
+    if (typeof fetchCivilSunTimes === "function" && navigator.onLine !== false) {
+      fetchCivilSunTimes(lat, lon).then((civil) => {
+        if (mapContextMenuPopup === popup) paintSunView(civil);
+      }).catch(() => {});
+    }
   }
 
   renderMainMenu();
@@ -5927,15 +6097,15 @@ function getFilteredNotices() {
  */
 function formatLatLonDMS(lat, lon) {
   const latDeg = Math.floor(Math.abs(lat));
-  const latMin = ((Math.abs(lat) - latDeg) * 60).toFixed(2);
+  const latMin = ((Math.abs(lat) - latDeg) * 60).toFixed(3);
   const latDir = lat >= 0 ? "N" : "S";
 
   const lonNorm = ((lon + 180) % 360 + 360) % 360 - 180;
   const lonDeg = Math.floor(Math.abs(lonNorm));
-  const lonMin = ((Math.abs(lonNorm) - lonDeg) * 60).toFixed(2);
+  const lonMin = ((Math.abs(lonNorm) - lonDeg) * 60).toFixed(3);
   const lonDir = lonNorm >= 0 ? "E" : "W";
 
-  return `${latDeg}° ${latMin.padStart(5, '0')}' ${latDir}, ${String(lonDeg).padStart(3, '0')}° ${lonMin.padStart(5, '0')}' ${lonDir}`;
+  return `${latDeg}° ${latMin.padStart(6, "0")}' ${latDir}, ${String(lonDeg).padStart(3, "0")}° ${lonMin.padStart(6, "0")}' ${lonDir}`;
 }
 
 /** Wrap longitude into (-180, 180]. */

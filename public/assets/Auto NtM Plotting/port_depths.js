@@ -20206,9 +20206,7 @@ function setOverlayActive(overlayKey, isActive, map = null) {
               window.showSetSailToast("Weather on, but no objects for current filters/zoom", "warning");
             }
           }
-          if (mapNow && storms.length && storms[0].center && typeof mapNow.flyTo === "function") {
-            try { mapNow.flyTo(storms[0].center, Math.max(mapNow.getZoom() || 3, 4), { duration: 0.9 }); } catch (e) {}
-          }
+          // Do not auto-fly to any cyclone — keep the navigator's current chart view
           if (typeof window.syncNdbcCursorTileVisibility === "function") {
             window.syncNdbcCursorTileVisibility();
           }

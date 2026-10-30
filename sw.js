@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.148.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.148.0';
+const CACHE_NAME = 'setsail-cache-v5.149.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.149.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -31,19 +31,19 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=5.148',
-  'assets/Auto NtM Plotting/port_depths.js?v=5.148',
-  'assets/Auto NtM Plotting/ntm_module.js?v=5.148',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.148',
-  'assets/about/founder.jpg?v=5.148',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=5.149',
+  'assets/Auto NtM Plotting/port_depths.js?v=5.149',
+  'assets/Auto NtM Plotting/ntm_module.js?v=5.149',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.149',
+  'assets/about/founder.jpg?v=5.149',
   'assets/home/install_bg_lng.jpg',
-  'assets/about/mykhailo_byshliaha.jpg?v=5.148',
+  'assets/about/mykhailo_byshliaha.jpg?v=5.149',
   'assets/geo/setroute_corridor_templates.json',
   'assets/geo/setroute_passage_knowledge.json',
   'assets/about/mykhailo_byshliaha.jpg',
-  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.148',
-  'assets/Auto NtM Plotting/ais_overlay.js?v=5.148',
-  'assets/Auto NtM Plotting/setroute_core_a.js?v=5.148',
+  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.149',
+  'assets/Auto NtM Plotting/ais_overlay.js?v=5.149',
+  'assets/Auto NtM Plotting/setroute_core_a.js?v=5.149',
   'assets/authority-logos/noaa.svg',
   'assets/authority-logos/nasa.svg',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
@@ -122,8 +122,11 @@ async function matchAssetInCache(request) {
     const decodedPath = decodeURIComponent(reqUrl.pathname);
     const baseName = decodedPath.split('/').pop();
     const isSharedJson = (baseName === 'notices.json' || baseName === 'weather.json' || baseName === 'news.json');
-    if (reqUrl.origin !== self.location.origin && !isSharedJson) {
-      return null;
+    // Cross-origin: only exact URL match — never alias GitHub/CDN requests to same-origin notices.json
+    if (reqUrl.origin !== self.location.origin) {
+      if (!isSharedJson) return null;
+      const appCache = await caches.open(CACHE_NAME);
+      return (await appCache.match(request)) || (await appCache.match(request, { ignoreSearch: true }));
     }
     const appCache = await caches.open(CACHE_NAME);
     let hit = (await appCache.match(request)) || (await appCache.match(request, { ignoreSearch: true }));
@@ -133,6 +136,9 @@ async function matchAssetInCache(request) {
 
     const keys = await appCache.keys();
     for (const k of keys) {
+      try {
+        if (new URL(k.url).origin !== self.location.origin) continue;
+      } catch (eOrig) { continue; }
       const kDecoded = decodeURIComponent(new URL(k.url).pathname);
       if (kDecoded.endsWith('/' + baseName) || kDecoded === decodedPath) {
         const matched = await appCache.match(k);
@@ -305,11 +311,36 @@ self.addEventListener('fetch', (event) => {
         return netRes;
       };
 
-      if (cached) {
+      // Reject poisoned tiny notices.json caches (old demo stubs) — force network
+      let usableCached = cached;
+      if (usableCached && isNotices) {
+        try {
+          const probe = await usableCached.clone().json();
+          const n = probe && Array.isArray(probe.notices) ? probe.notices.length : 0;
+          if (n < 50) {
+            try {
+              const cache = await caches.open(CACHE_NAME);
+              const keys = await cache.keys();
+              await Promise.all(keys.map((k) => {
+                try {
+                  const p = new URL(k.url).pathname;
+                  return (p.endsWith('/notices.json') || p === '/notices.json' || k.url.endsWith('notices.json'))
+                    ? cache.delete(k) : Promise.resolve(false);
+                } catch (eDel) { return Promise.resolve(false); }
+              }));
+            } catch (ePurge) {}
+            usableCached = null;
+          }
+        } catch (eProbe) {
+          usableCached = null;
+        }
+      }
+
+      if (usableCached) {
         // Stale-while-revalidate — do not block the tile spinner on a 2MB download
         fetchAndCache().catch(() => {});
-        const blob = await cached.blob();
-        const headers = new Headers(cached.headers);
+        const blob = await usableCached.blob();
+        const headers = new Headers(usableCached.headers);
         headers.set('X-SetSail-From-Cache', '1');
         return new Response(blob, { status: 200, statusText: 'OK (Cache)', headers });
       }
