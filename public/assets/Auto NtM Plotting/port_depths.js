@@ -20157,14 +20157,6 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         try { leafletMarkersLayer = mLayer; } catch (eMk) {}
         if (isActive) {
           if (!currentMap.hasLayer(mLayer)) currentMap.addLayer(mLayer);
-          try {
-            if (!currentMap.getPane("ntmOverlayPane")) {
-              const np = currentMap.createPane("ntmOverlayPane");
-              np.style.zIndex = 720;
-            } else {
-              currentMap.getPane("ntmOverlayPane").style.zIndex = 720;
-            }
-          } catch (ePane) {}
         } else {
           mLayer.clearLayers();
           if (currentMap.hasLayer(mLayer)) currentMap.removeLayer(mLayer);

@@ -11392,6 +11392,19 @@
   margin-right: 4px;
 }
 
+/* NtM cluster badges — transparent leaflet divIcon chrome */
+.ntm-cluster-icon {
+  background: transparent !important;
+  border: none !important;
+}
+#ntmMap .leaflet-overlay-pane,
+#ntmMap .leaflet-marker-pane {
+  z-index: 650;
+}
+#ntmMap .leaflet-marker-pane {
+  z-index: 660;
+}
+
 /* ── SetSail Admin Panel ── */
 .setsail-admin-modal-box {
   max-width: min(92vw, 460px) !important;

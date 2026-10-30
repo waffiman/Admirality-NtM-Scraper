@@ -4667,14 +4667,22 @@ function ensureNoticesReadyForOverlay() {
     if (window.OVERLAY_STATES) window.OVERLAY_STATES.notices = true;
   } catch (eOv) {}
 
-  // Ensure notice type filters are not accidentally all unchecked when user enables the NtM & NAVTEX tile
-  if (!NTM_ACTIVE_TYPES || NTM_ACTIVE_TYPES.size === 0) {
-    NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM", "NAVTEX"]);
-    ["popChkAll", "popChkNavtex", "popChkT", "popChkP", "popChkPerm"].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.checked = true;
-    });
-  }
+  // Reset type filters to full set every enable — stale unchecked boxes = empty map
+  NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM", "NAVTEX"]);
+  NTM_FILTER_AREAS = false;
+  NTM_SHOW_CANCELLED = false;
+  NTM_ACTIVE_NAVAREA = "ALL";
+  ["popChkAll", "popChkNavtex", "popChkT", "popChkP", "popChkPerm"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = true;
+  });
+  const chkCan = document.getElementById("popChkCancelled");
+  if (chkCan) chkCan.checked = false;
+  const chkPoly = document.getElementById("popChkPoly");
+  if (chkPoly) chkPoly.checked = false;
+  const navSel = document.getElementById("popNavareaSelect") || document.getElementById("ntmNavareaFilter");
+  if (navSel) navSel.value = "ALL";
+
   // Ensure sidebar category pill is not hiding notices behind PORTS or ROUTE filter
   if (activeOverlayCategory === "PORTS" || activeOverlayCategory === "ROUTE") {
     activeOverlayCategory = "ALL";
@@ -4687,27 +4695,32 @@ function ensureNoticesReadyForOverlay() {
     requestAnimationFrame(() => {
       setTimeout(async () => {
         try {
-          const storeLen = Array.isArray(NTM_STORE) ? NTM_STORE.length
-            : (Array.isArray(window.NTM_STORE) ? window.NTM_STORE.length : 0);
-          // Always refresh from network when store looks empty/thin
-          if (storeLen <= 10) {
-            await loadRemoteNoticesJson(true);
-          }
+          // Always pull fresh notices when enabling the tile (localStorage can be stale/empty-coords)
+          await loadRemoteNoticesJson(true);
           if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
               Array.isArray(window.NTM_STORE) && window.NTM_STORE.length) {
             NTM_STORE = window.NTM_STORE;
           }
+          // Re-assert flag after async fetch (other renders may have raced)
+          try {
+            if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.notices = true;
+            if (window.OVERLAY_STATES) window.OVERLAY_STATES.notices = true;
+          } catch (eOv2) {}
+
           if (typeof renderNtMListAndMap === "function") {
             renderNtMListAndMap();
           }
           const drawn = (window.leafletMarkersLayer && window.leafletMarkersLayer.getLayers)
             ? window.leafletMarkersLayer.getLayers().length : 0;
           const total = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
+          const filteredN = (typeof getFilteredNotices === "function") ? getFilteredNotices().length : 0;
           if (typeof showSetSailToast === "function") {
             if (drawn > 0) {
-              showSetSailToast("NtM & NAVTEX on chart: " + drawn + " objects (" + total + " in store)", "info");
+              showSetSailToast("NtM & NAVTEX on chart: " + drawn + " map objects · " + filteredN + " filtered / " + total + " store", "info");
             } else if (total > 0) {
-              showSetSailToast("NtM store has " + total + " notices but 0 drawn — check type/NAVAREA filters", "warning");
+              showSetSailToast("NtM: " + total + " in store, " + filteredN + " filtered, 0 on map — retrying plot…", "warning");
+              // One hard retry with raw points
+              try { renderNtMListAndMap(); } catch (eR) {}
             } else {
               showSetSailToast("NtM & NAVTEX: no notices loaded yet", "warning");
             }
@@ -4722,7 +4735,7 @@ function ensureNoticesReadyForOverlay() {
           }
           resolve(false);
         }
-      }, 40);
+      }, 50);
     });
   });
 }
@@ -6192,18 +6205,28 @@ function renderNtMListAndMap() {
   }
 
   if (mapRef && markersLayer) {
-    markersLayer.clearLayers();
-    if (!isNoticesActive) {
+    // Always rebuild the layer group when turning notices ON — avoids stale
+    // Canvas-renderer / pane bindings that leave getLayers()>0 but nothing painted.
+    if (isNoticesActive) {
+      try {
+        if (mapRef.hasLayer(markersLayer)) mapRef.removeLayer(markersLayer);
+        markersLayer.clearLayers();
+      } catch (eClr) {}
+      markersLayer = L.layerGroup();
+      leafletMarkersLayer = markersLayer;
+      window.leafletMarkersLayer = markersLayer;
+      mapRef.addLayer(markersLayer);
+    } else {
+      markersLayer.clearLayers();
       if (mapRef.hasLayer(markersLayer)) {
         mapRef.removeLayer(markersLayer);
       }
-    } else {
-    if (!mapRef.hasLayer(markersLayer)) {
-      mapRef.addLayer(markersLayer);
     }
+    if (isNoticesActive) {
     const curZoom = mapRef.getZoom ? mapRef.getZoom() : 3;
 
-    // Keep NtM above ECDIS land AND port-depth pane (650) so objects stay visible
+    // Keep land below vectors; NtM uses DEFAULT overlay/marker panes (reliable).
+    // Custom ntmOverlayPane + shared L.canvas() was painting into a dead pane on some loads.
     if (!mapRef.getPane("ecdisLandPane")) {
       const lp = mapRef.createPane("ecdisLandPane");
       lp.style.zIndex = 350;
@@ -6211,16 +6234,14 @@ function renderNtMListAndMap() {
     } else {
       mapRef.getPane("ecdisLandPane").style.pointerEvents = "none";
     }
-    if (!mapRef.getPane("ntmOverlayPane")) {
-      const np = mapRef.createPane("ntmOverlayPane");
-      np.style.zIndex = 720;
-    } else {
-      mapRef.getPane("ntmOverlayPane").style.zIndex = 720;
-    }
-    if (!window._setsailNtmCanvasRenderer) {
-      window._setsailNtmCanvasRenderer = L.canvas({ pane: "ntmOverlayPane" });
-    }
-    const canvasRenderer = window._setsailNtmCanvasRenderer;
+    try {
+      const ov = mapRef.getPane("overlayPane");
+      const mk = mapRef.getPane("markerPane");
+      if (ov) ov.style.zIndex = 650;
+      if (mk) mk.style.zIndex = 660;
+    } catch (eZ) {}
+    // Drop any stale custom canvas renderer from prior versions
+    window._setsailNtmCanvasRenderer = null;
 
     // Split polylines that cross the antimeridian so Leaflet does not draw a world-wrapping chord
     const splitAntimeridianLatLngs = (latlngs) => {
@@ -6348,9 +6369,9 @@ function renderNtMListAndMap() {
     const basePolyFillOp = curZoom <= 3 ? 0.05 : (curZoom <= 5 ? 0.09 : (curZoom <= 7 ? 0.14 : 0.20));
     const baseLineWeight = curZoom <= 3 ? 1.3 : (curZoom <= 5 ? 1.8 : 2.5);
 
+    // Default map renderer/panes — SVG or map preferCanvas; always attached to live map
     const pathPaneOpts = () => ({
-      pane: "ntmOverlayPane",
-      renderer: canvasRenderer
+      interactive: true
     });
 
     const buildPopupHtml = (item, extraLine = "") => {
@@ -6527,8 +6548,8 @@ function renderNtMListAndMap() {
         setsailEachWorldLatLng(cl.lat, cl.lon, (ll) => {
           const m = L.marker(ll, {
             icon,
-            pane: "ntmOverlayPane",
-            keyboard: false
+            keyboard: false,
+            zIndexOffset: 2500
           });
           m.bindPopup(
             `<div style="font-family:Segoe UI,sans-serif;min-width:200px;color:#111;">
@@ -6547,6 +6568,15 @@ function renderNtMListAndMap() {
     } else {
       filtered.forEach(plotOneNotice);
     }
+
+    // If clustering produced nothing but we have notices, force raw point plot
+    if (markersLayer.getLayers().length === 0 && filtered.length > 0) {
+      filtered.slice(0, 400).forEach(plotOneNotice);
+    }
+
+    try {
+      if (typeof mapRef.invalidateSize === "function") mapRef.invalidateSize({ animate: false });
+    } catch (eInv) {}
     } // end isNoticesActive plot branch
   } else {
     drawOfflineCanvasMap();
@@ -11366,11 +11396,7 @@ function createEcdisSimpleBaseLayer() {
     } else {
       map.getPane("ecdisLandPane").style.pointerEvents = "none";
     }
-    if (!map.getPane("ntmOverlayPane")) {
-      const n = map.createPane("ntmOverlayPane");
-      // Above land (350), below markers/popups (600+)
-      n.style.zIndex = 450;
-    }
+    // NtM now plots on default overlay/marker panes — do not create a low z-index custom pane
   }
 
   function landStyle() {
