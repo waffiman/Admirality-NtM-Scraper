@@ -253,6 +253,9 @@
    */
   function setrouteTssLegAnalysis(lat1, lon1, lat2, lon2) {
     const samples = sampleLeg(lat1, lon1, lat2, lon2, 6);
+    // Interior samples only for hard bans — graph nodes often sit inside named TSS polygons;
+    // banning endpoints alone shredded Channel / Ushant / Dover connectivity.
+    const interior = samples.length > 2 ? samples.slice(1, -1) : samples;
     const legCourse = courseDeg(lat1, lon1, lat2, lon2);
     const penaltyRef = { v: 0 };
     const preferLaneRef = { v: 0 };
@@ -298,8 +301,12 @@
         if (!part.ring || part.ring.length < 3) continue;
 
         let hitsPart = 0;
+        let interiorHits = 0;
         for (let i = 0; i < samples.length; i++) {
           if (pointInRing(samples[i][0], samples[i][1], part.ring)) hitsPart++;
+        }
+        for (let i = 0; i < interior.length; i++) {
+          if (pointInRing(interior[i][0], interior[i][1], part.ring)) interiorHits++;
         }
         // Proximity for attraction (use first ring vertex as rough cue)
         if (!hitsPart && part.ring[0]) {
@@ -312,15 +319,27 @@
         const frac = hitsPart / samples.length;
 
         if (part.category === "separation_zone") {
-          hardBan = true;
-          penaltyRef.v += 1e6 * frac;
-          hits.push({
-            scheme: scheme.id,
-            name: scheme.name,
-            category: "separation_zone",
-            rule: "COLREG Rule 10 — separation zone (hard ban)",
-            frac: Math.round(frac * 100)
-          });
+          // Hard ban only when the chord crosses the zone interior (not just endpoints)
+          if (interiorHits >= Math.max(1, Math.ceil(interior.length * 0.4))) {
+            hardBan = true;
+            penaltyRef.v += 1e6 * frac;
+            hits.push({
+              scheme: scheme.id,
+              name: scheme.name,
+              category: "separation_zone",
+              rule: "COLREG Rule 10 — separation zone (hard ban)",
+              frac: Math.round(frac * 100)
+            });
+          } else {
+            penaltyRef.v += 2800 * frac;
+            hits.push({
+              scheme: scheme.id,
+              name: scheme.name,
+              category: "separation_zone_graze",
+              rule: "COLREG Rule 10 — near separation zone (penalty)",
+              frac: Math.round(frac * 100)
+            });
+          }
         } else if (part.category === "traffic_lane") {
           const dir = Number(part.directionDeg);
           if (Number.isFinite(dir)) {
@@ -677,8 +696,17 @@
         const chk = setrouteIalaCardinalSafeBearing(m.role, midLat, midLon, m.lat, m.lon);
         if (!chk) continue;
         if (!chk.safe && m.distNm < 1.2) {
-          hardBan = true;
-          penalty += 8e5;
+          // Keep graph connectivity: hard-ban only on short approach hops.
+          // Ocean edges near a cardinal get a heavy penalty instead of a drop.
+          const legNm = (typeof calculateHaversineDistanceNM === "function")
+            ? calculateHaversineDistanceNM(lat1, lon1, lat2, lon2)
+            : 999;
+          if (legNm < 25) {
+            hardBan = true;
+            penalty += 8e5;
+          } else {
+            penalty += 12000;
+          }
           hits.push({
             category: "cardinal_danger",
             cardinal: m.role,

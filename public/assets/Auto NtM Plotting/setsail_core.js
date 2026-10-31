@@ -3207,12 +3207,20 @@ function syncNdbcCursorTileVisibility() {
 }
 
 function renderNdbcCursorChips(wind, wave, pressure, airSst, current) {
+  // Clear SVG glyphs (not emoji) — readable at 12–14px in the WX tile
+  const ico = {
+    wind: '<svg class="wx-ico-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h9a3 3 0 1 0-3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 12h13a3.5 3.5 0 1 1-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 16h7a2.5 2.5 0 1 1-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    wave: '<svg class="wx-ico-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14c2.2-2.4 3.8-3.5 6-3.5S13.8 14 16 14s3.8-1.1 5-2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 18c2.2-2.4 3.8-3.5 6-3.5S13.8 18 16 18s3.8-1.1 5-2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/></svg>',
+    pressure: '<svg class="wx-ico-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 12l3.2-4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="1.35" fill="currentColor"/></svg>',
+    temp: '<svg class="wx-ico-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13.2V6.8a2 2 0 1 1 4 0v6.4a3.2 3.2 0 1 1-4 0z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 15.2v1.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    current: '<svg class="wx-ico-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M13 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 8c1.6 1.2 1.6 2.8 0 4 1.6 1.2 1.6 2.8 0 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/></svg>'
+  };
   return (
-    '<span class="wx-chip" title="Wind"><span class="wx-ico" aria-hidden="true">\uD83D\uDCA8</span><b>' + wind + "</b></span>" +
-    '<span class="wx-chip" title="Waves Hs"><span class="wx-ico" aria-hidden="true">\uD83C\uDF0A</span><b>' + wave + "</b></span>" +
-    '<span class="wx-chip" title="Pressure"><span class="wx-ico" aria-hidden="true">\u25CE</span><b>' + pressure + "</b></span>" +
-    '<span class="wx-chip" title="Air / SST"><span class="wx-ico" aria-hidden="true">\uD83C\uDF21</span><b>' + airSst + "</b></span>" +
-    '<span class="wx-chip" title="Ocean current"><span class="wx-ico" aria-hidden="true">\u2197</span><b>' + current + "</b></span>"
+    '<span class="wx-chip" title="Wind"><span class="wx-ico" aria-hidden="true">' + ico.wind + "</span><b>" + wind + "</b></span>" +
+    '<span class="wx-chip" title="Waves Hs"><span class="wx-ico" aria-hidden="true">' + ico.wave + "</span><b>" + wave + "</b></span>" +
+    '<span class="wx-chip" title="Pressure"><span class="wx-ico" aria-hidden="true">' + ico.pressure + "</span><b>" + pressure + "</b></span>" +
+    '<span class="wx-chip" title="Air / SST"><span class="wx-ico" aria-hidden="true">' + ico.temp + "</span><b>" + airSst + "</b></span>" +
+    '<span class="wx-chip" title="Ocean current"><span class="wx-ico" aria-hidden="true">' + ico.current + "</span><b>" + current + "</b></span>"
   );
 }
 
@@ -7153,7 +7161,7 @@ const MARITIME_SEA_NODES = {
   "DOVER_STRAIT": [51.25, 1.70, "Dover Strait TSS"],
   "ENGLISH_CHANNEL_MID": [50.10, -0.20, "English Channel Mid TSS"],
   "CASQUETS": [49.75, -2.50, "Casquets TSS"],
-  "USHANT": [48.60, -5.40, "Ouessant / Ushant TSS"],
+  "USHANT": [48.72, -5.95, "Ouessant / Ushant TSS west of separation zone"],
 
   // Atlantic Europe & Africa
   "BISCAY_MID": [45.50, -7.00, "Bay of Biscay Deepwater Lane"],
@@ -7601,6 +7609,12 @@ async function loadSetrouteCoastGrid(force) {
       if (maskResp.ok) {
         SETROUTE_LAND_MASK = await maskResp.json();
         window.SETROUTE_LAND_MASK = SETROUTE_LAND_MASK;
+        try {
+          _setrouteAdjCache = null;
+          _setrouteAdjCacheKey = "";
+          _setrouteSeaGateKeys = null;
+          if (_setrouteWetPathMemo) _setrouteWetPathMemo.clear();
+        } catch (eAdjInv) {}
       } else {
         SETROUTE_LAND_MASK = null;
       }
@@ -7933,16 +7947,170 @@ function setrouteStaticNonStormWeatherPenalty(lat1, lon1, lat2, lon2) {
   return pen;
 }
 
-function setrouteBuildAdjacency() {
+/**
+ * Wet-path repair on the 0.5° land-mask lattice.
+ * Opens sea gates around every MARITIME_SEA_NODES entry so straits/canals stay passable.
+ * Returns { via:[[lat,lon],…], distNm } or null.
+ */
+const _setrouteWetPathMemo = new Map();
+let _setrouteSeaGateKeys = null;
+
+function setrouteBuildSeaGateKeys() {
+  const cellDeg = (SETROUTE_LAND_MASK && SETROUTE_LAND_MASK.cellDeg) || 0.5;
+  const gates = new Set();
+  const r = 1; // ±1 cell around each node
+  Object.keys(MARITIME_SEA_NODES).forEach((k) => {
+    const n = MARITIME_SEA_NODES[k];
+    if (!n) return;
+    const i0 = Math.floor(n[0] / cellDeg);
+    const j0 = Math.floor(n[1] / cellDeg);
+    for (let di = -r; di <= r; di++) {
+      for (let dj = -r; dj <= r; dj++) {
+        gates.add((i0 + di) + "_" + (j0 + dj));
+      }
+    }
+  });
+  return gates;
+}
+
+function setrouteCellIsNavigable(key, gates) {
+  if (gates && gates.has(key)) return true;
+  if (!SETROUTE_LAND_MASK || !SETROUTE_LAND_MASK.cells) return true;
+  return !SETROUTE_LAND_MASK.cells[key];
+}
+
+function setrouteWetPathLattice(lat1, lon1, lat2, lon2) {
+  const cellDeg = (SETROUTE_LAND_MASK && SETROUTE_LAND_MASK.cellDeg) || 0.5;
+  if (!SETROUTE_LAND_MASK || !SETROUTE_LAND_MASK.cells) return null;
+  const memoKey = [
+    Math.round(lat1 * 100), Math.round(lon1 * 100),
+    Math.round(lat2 * 100), Math.round(lon2 * 100)
+  ].join("|");
+  if (_setrouteWetPathMemo.has(memoKey)) return _setrouteWetPathMemo.get(memoKey);
+
+  if (!_setrouteSeaGateKeys) _setrouteSeaGateKeys = setrouteBuildSeaGateKeys();
+  const gates = _setrouteSeaGateKeys;
+
+  const i1 = Math.floor(lat1 / cellDeg);
+  const j1 = Math.floor(lon1 / cellDeg);
+  const i2 = Math.floor(lat2 / cellDeg);
+  const j2 = Math.floor(lon2 / cellDeg);
+  const startKey = i1 + "_" + j1;
+  const endKey = i2 + "_" + j2;
+  if (!setrouteCellIsNavigable(startKey, gates) || !setrouteCellIsNavigable(endKey, gates)) {
+    _setrouteWetPathMemo.set(memoKey, null);
+    return null;
+  }
+  if (startKey === endKey) {
+    const trivial = { via: [], distNm: calculateHaversineDistanceNM(lat1, lon1, lat2, lon2) };
+    _setrouteWetPathMemo.set(memoKey, trivial);
+    return trivial;
+  }
+
+  const heuristic = (i, j) => {
+    const dLat = (i - i2) * cellDeg * 60;
+    const dLon = (j - j2) * cellDeg * 60 * Math.cos(((i + i2) * 0.5 * cellDeg * Math.PI) / 180);
+    return Math.sqrt(dLat * dLat + dLon * dLon);
+  };
+
+  const open = [{ i: i1, j: j1, g: 0, f: heuristic(i1, j1), key: startKey }];
+  const came = new Map();
+  const gScore = new Map([[startKey, 0]]);
+  const closed = new Set();
+  const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+  let found = false;
+  let guard = 0;
+  const GUARD_MAX = 18000;
+
+  while (open.length && guard++ < GUARD_MAX) {
+    open.sort((a, b) => a.f - b.f);
+    const cur = open.shift();
+    if (closed.has(cur.key)) continue;
+    closed.add(cur.key);
+    if (cur.key === endKey) {
+      found = true;
+      break;
+    }
+    for (let d = 0; d < dirs.length; d++) {
+      const ni = cur.i + dirs[d][0];
+      const nj = cur.j + dirs[d][1];
+      const nk = ni + "_" + nj;
+      if (closed.has(nk)) continue;
+      if (!setrouteCellIsNavigable(nk, gates)) continue;
+      const step = (dirs[d][0] !== 0 && dirs[d][1] !== 0) ? 1.414 : 1;
+      const tent = cur.g + step * cellDeg * 60;
+      if (tent >= (gScore.get(nk) || Infinity)) continue;
+      gScore.set(nk, tent);
+      came.set(nk, cur.key);
+      open.push({ i: ni, j: nj, g: tent, f: tent + heuristic(ni, nj), key: nk });
+    }
+  }
+
+  if (!found) {
+    _setrouteWetPathMemo.set(memoKey, null);
+    return null;
+  }
+
+  const keys = [];
+  let ck = endKey;
+  while (ck && ck !== startKey) {
+    keys.push(ck);
+    ck = came.get(ck);
+  }
+  keys.reverse();
+  // Keep every Nth cell as via (skip endpoints — graph nodes already cover them)
+  const via = [];
+  const stride = Math.max(1, Math.floor(keys.length / 8));
+  for (let k = stride; k < keys.length - 1; k += stride) {
+    const parts = keys[k].split("_");
+    const ci = Number(parts[0]);
+    const cj = Number(parts[1]);
+    via.push([
+      Math.round((ci + 0.5) * cellDeg * 1e4) / 1e4,
+      Math.round((cj + 0.5) * cellDeg * 1e4) / 1e4
+    ]);
+  }
+
+  let distNm = 0;
+  let prev = [lat1, lon1];
+  via.forEach((p) => {
+    distNm += calculateHaversineDistanceNM(prev[0], prev[1], p[0], p[1]);
+    prev = p;
+  });
+  distNm += calculateHaversineDistanceNM(prev[0], prev[1], lat2, lon2);
+  const chord = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+  if (!(distNm >= chord * 0.95)) distNm = chord;
+
+  const out = { via, distNm };
+  _setrouteWetPathMemo.set(memoKey, out);
+  return out;
+}
+window.setrouteWetPathLattice = setrouteWetPathLattice;
+
+let _setrouteAdjCache = null;
+let _setrouteAdjCacheKey = "";
+
+function setrouteBuildAdjacency(force) {
+  const cacheKey = [
+    SETROUTE_LAND_MASK ? "mask1" : "mask0",
+    SETROUTE_COAST_GRID ? "coast1" : "coast0",
+    (typeof SETROUTE_TSS_SCHEMES !== "undefined" && SETROUTE_TSS_SCHEMES) ? SETROUTE_TSS_SCHEMES.length : 0,
+    Object.keys(MARITIME_SEA_NODES).length,
+    MARITIME_SEA_EDGES.length
+  ].join("|");
+  if (!force && _setrouteAdjCache && _setrouteAdjCacheKey === cacheKey) return _setrouteAdjCache;
+
+  _setrouteSeaGateKeys = null;
+  _setrouteWetPathMemo.clear();
+
   const adj = {};
   Object.keys(MARITIME_SEA_NODES).forEach((k) => { adj[k] = []; });
   for (const [u, v] of MARITIME_SEA_EDGES) {
     if (!MARITIME_SEA_NODES[u] || !MARITIME_SEA_NODES[v]) continue;
     const a = MARITIME_SEA_NODES[u];
     const b = MARITIME_SEA_NODES[v];
-    const dist = calculateHaversineDistanceNM(a[0], a[1], b[0], b[1]);
-    // Land awareness: coast-grid (planet shorelines) is primary; land-boxes catch interiors.
-    // Short TSS/canal hops (<120 NM) may graze coast geometry — keep those soft.
+    let dist = calculateHaversineDistanceNM(a[0], a[1], b[0], b[1]);
+    let via = null;
     let hazard = 0;
     const samples = dist > 800 ? [0.2, 0.4, 0.6, 0.8] : (dist > 200 ? [0.25, 0.5, 0.75] : [0.5]);
     let boxHits = 0;
@@ -7952,18 +8120,30 @@ function setrouteBuildAdjacency() {
     }
     const coastHit = dist >= 90 && typeof setrouteLegCrossesCoastline === "function" &&
       setrouteLegCrossesCoastline(a[0], a[1], b[0], b[1]);
-    // COLREG Rule 10 — never keep edges through a Traffic Separation Zone
+    // COLREG Rule 10 — drop only true interior separation-zone crossings
     const tssBan = typeof setrouteTssHardBan === "function" && setrouteTssHardBan(a[0], a[1], b[0], b[1]);
     if (tssBan) continue;
     const ialaBan = typeof setrouteIalaHardBan === "function" && setrouteIalaHardBan(a[0], a[1], b[0], b[1]);
     if (ialaBan) continue;
-    // Hard-drop clear land chords: interior boxes OR coast-crossing ocean legs.
-    // Curated short coastal edges stay; long land-cuts are removed from the graph.
+
     const interiorChord = boxHits >= 2 && dist >= 350;
     const landCut = coastHit && dist >= 140;
-    if (interiorChord || landCut) continue;
-    if ((boxHits >= 1 && dist >= 160) || (coastHit && dist >= 100)) {
-      hazard = 50000;
+    if (interiorChord || landCut) {
+      // Repair with a wet lattice detour instead of deleting the curated edge
+      const wet = setrouteWetPathLattice(a[0], a[1], b[0], b[1]);
+      if (!wet) continue;
+      via = wet.via;
+      dist = wet.distNm;
+      hazard = 800; // prefer dry chords when available, but keep connectivity
+    } else if ((boxHits >= 1 && dist >= 160) || (coastHit && dist >= 100)) {
+      const wet = setrouteWetPathLattice(a[0], a[1], b[0], b[1]);
+      if (wet && wet.distNm < dist * 1.45) {
+        via = wet.via;
+        dist = wet.distNm;
+        hazard = 400;
+      } else {
+        hazard = 50000;
+      }
     } else {
       hazard += setrouteStaticNonStormWeatherPenalty(a[0], a[1], b[0], b[1]);
       if (typeof setrouteAisPenalty === "function") hazard += setrouteAisPenalty(a[0], a[1], b[0], b[1]) * 0.5;
@@ -7972,9 +8152,17 @@ function setrouteBuildAdjacency() {
       if (typeof setrouteIalaEdgePenalty === "function") hazard += setrouteIalaEdgePenalty(a[0], a[1], b[0], b[1]);
     }
     const cost = dist + hazard;
-    adj[u].push({ node: v, dist, cost });
-    adj[v].push({ node: u, dist, cost });
+    const eUv = { node: v, dist, cost };
+    const eVu = { node: u, dist, cost };
+    if (via && via.length) {
+      eUv.via = via;
+      eVu.via = via.slice().reverse();
+    }
+    adj[u].push(eUv);
+    adj[v].push(eVu);
   }
+  _setrouteAdjCache = adj;
+  _setrouteAdjCacheKey = cacheKey;
   return adj;
 }
 
@@ -9737,19 +9925,15 @@ async function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCo
 
   let wptCounter = 2;
   const chokepoints = [];
-  for (const nodeKey of corridor) {
-    const node = MARITIME_SEA_NODES[nodeKey];
-    if (!node) continue;
-    const distOrig = calculateHaversineDistanceNM(origCoords[0], origCoords[1], node[0], node[1]);
-    const distDest = calculateHaversineDistanceNM(destCoords[0], destCoords[1], node[0], node[1]);
-    if (distOrig < 15 || distDest < 15) continue;
-
-    chokepoints.push(node[2]);
+  // Expand wet-path via points stored on adjacency edges (land-safe detours)
+  let adjForVia = null;
+  try { adjForVia = setrouteBuildAdjacency(); } catch (eAdj) { adjForVia = null; }
+  const pushCorridorWpt = (lat, lon, name) => {
     waypoints.push({
-      wptNo: ('00' + wptCounter).slice(-3),
-      name: node[2],
-      lat: parseFloat(node[0].toFixed(5)),
-      lon: parseFloat(node[1].toFixed(5)),
+      wptNo: ("00" + wptCounter).slice(-3),
+      name: name,
+      lat: parseFloat(Number(lat).toFixed(5)),
+      lon: parseFloat(Number(lon).toFixed(5)),
       speedKnots: spd,
       portsideXTD: xtd,
       starboardXTD: xtd,
@@ -9758,6 +9942,30 @@ async function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCo
       rot: 8.0
     });
     wptCounter++;
+  };
+  for (let ci = 0; ci < corridor.length; ci++) {
+    const nodeKey = corridor[ci];
+    const node = MARITIME_SEA_NODES[nodeKey];
+    if (!node) continue;
+    const distOrig = calculateHaversineDistanceNM(origCoords[0], origCoords[1], node[0], node[1]);
+    const distDest = calculateHaversineDistanceNM(destCoords[0], destCoords[1], node[0], node[1]);
+    if (distOrig < 15 || distDest < 15) {
+      // Still emit via points before skipping a near-port graph node
+    } else {
+      chokepoints.push(node[2]);
+      pushCorridorWpt(node[0], node[1], node[2]);
+    }
+    if (ci < corridor.length - 1 && adjForVia) {
+      const nextKey = corridor[ci + 1];
+      const edges = adjForVia[nodeKey] || [];
+      const edge = edges.find((e) => e && e.node === nextKey);
+      if (edge && Array.isArray(edge.via) && edge.via.length) {
+        edge.via.forEach((pt, vi) => {
+          if (!pt || pt.length < 2) return;
+          pushCorridorWpt(pt[0], pt[1], "Sea corridor via " + (vi + 1));
+        });
+      }
+    }
   }
 
   waypoints.push({
@@ -15264,7 +15472,16 @@ window.SETROUTE_PENDING_CONTEXT = null;
     "NATL_GC_MID": [47.00, -30.00, "Mid-Atlantic Great Circle Vertex"],
     "NPAC_GC_WEST": [42.50, 160.00, "NW Pacific Great Circle Waypoint"],
     "NPAC_GC_MID": [46.50, 180.00, "International Date Line North Pacific Vertex"],
-    "NPAC_GC_EAST": [44.00, -145.00, "NE Pacific Great Circle Waypoint"]
+    "NPAC_GC_EAST": [44.00, -145.00, "NE Pacific Great Circle Waypoint"],
+    // Med / Adriatic / Iberia / Korea — closes snap gaps for Trieste, Valencia, Ulsan, Algeciras
+    "TRIESTE_APP": [45.55, 13.55, "Gulf of Trieste Fairway Approach"],
+    "ADRIATIC_MID": [42.80, 15.80, "Central Adriatic Deepwater Lane"],
+    "OTRANTO_STRAIT": [40.05, 18.80, "Strait of Otranto / Ionian Gate"],
+    "VALENCIA_APP": [39.35, -0.15, "Valencia / Gulf of Valencia Approach"],
+    "ALBORAN_MID": [36.20, -2.80, "Alboran Sea Transit"],
+    "ULSAN_APP": [35.35, 129.55, "Ulsan / Onsan Fairway Approach"],
+    "BREMERHAVEN_APP": [53.75, 8.20, "Weser / Bremerhaven Approach"],
+    "IONIAN_MID": [37.80, 18.50, "Central Ionian Sea Transit"]
   };
   Object.assign(MARITIME_SEA_NODES, extraNodes);
 
@@ -15383,9 +15600,35 @@ window.SETROUTE_PENDING_CONTEXT = null;
     ["SAN_FRANCISCO_APP", "PACIFIC_PANAMA_APP"],
     ["BOHAI_STRAIT", "EAST_CHINA_SEA"],
     ["TIANJIN_APP", "QINGDAO_APP"],
-    ["HOUSTON_APP", "YUCATAN_CH"]
+    ["HOUSTON_APP", "YUCATAN_CH"],
+    // Adriatic ↔ Western Med (Trieste / Piraeus / Algeciras / Valencia)
+    ["TRIESTE_APP", "ADRIATIC_MID"],
+    ["ADRIATIC_MID", "OTRANTO_STRAIT"],
+    ["OTRANTO_STRAIT", "IONIAN_MID"],
+    ["IONIAN_MID", "PIRAEUS_APP"],
+    ["IONIAN_MID", "MED_MALTA"],
+    ["OTRANTO_STRAIT", "MED_SICILY"],
+    ["GENOA_APP", "ADRIATIC_MID"],
+    ["BARCELONA_APP", "VALENCIA_APP"],
+    ["VALENCIA_APP", "ALBORAN_MID"],
+    ["ALBORAN_MID", "GIBRALTAR_E"],
+    ["GIBRALTAR_E", "VALENCIA_APP"],
+    ["BUSAN_APP", "ULSAN_APP"],
+    ["ULSAN_APP", "TOKYO_APP"],
+    ["ULSAN_APP", "EAST_CHINA_SEA"],
+    ["HAMBURG_APP", "BREMERHAVEN_APP"],
+    ["BREMERHAVEN_APP", "NORTH_SEA_MID"],
+    ["BREMERHAVEN_APP", "ROTTERDAM_APP"],
+    ["MED_WEST", "VALENCIA_APP"],
+    ["MED_WEST", "ALBORAN_MID"]
   ];
   extraEdges.forEach(e => MARITIME_SEA_EDGES.push(e));
+  try {
+    _setrouteAdjCache = null;
+    _setrouteAdjCacheKey = "";
+    _setrouteSeaGateKeys = null;
+    if (_setrouteWetPathMemo) _setrouteWetPathMemo.clear();
+  } catch (eInv) {}
 
   // Expand PORT_DEPTHS_DB with 60+ additional major world ports so any port pair works out-of-the-box
   if (typeof PORT_DEPTHS_DB !== "undefined" && Array.isArray(PORT_DEPTHS_DB)) {
