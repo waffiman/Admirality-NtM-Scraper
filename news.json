@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-31T11:52:39Z",
-  "generatedAt": "2026-10-31T11:52:39Z",
+  "updatedAt": "2026-10-31T17:02:04Z",
+  "generatedAt": "2026-10-31T17:02:04Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -42,6 +42,145 @@
         "Jamming and spoofing attacks are rising fast across busy waterways, putting crews, cargo and insurance claims at risk.",
         "Join maritime and satellite experts to discover how proven technology fights back.",
         "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-2E1656C038",
+      "title": "Sea-Intelligence: Unprecedented Capacity Levels in Oct/Nov",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/sea-intelligence-unprecedented-capacity-levels-in-oct-nov/",
+      "publishedAt": "2026-10-31T16:24:30Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb",
+        "Suez Canal & Eastern Med",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "red sea"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/daniel-miksha-4ZornyPnGlA-unsplash-300x169.jpg",
+      "summary": "The container shipping market is currently operating in an environment of unprecedented supply, with deployed capacity reaching historic highs across all major East‑West trade lanes. The charts show a monthly breakdown of the average weekly capacity deployed on Asia‑Europe. Instead of following the traditional...",
+      "body": "The container shipping market is currently operating in an environment of unprecedented supply, with deployed capacity reaching historic highs across all major East‑West trade lanes. The charts show a monthly breakdown of the average weekly capacity deployed on Asia‑Europe. Instead of following the traditional late‑year taper following Golden Week, where supply typically contracts to meet softening Q4 demand, average weekly deployed capacity in October and November 2026 has accelerated dramatically, showing a complete detachment from historical trends observed in 2012‑2025. Source: Sea-Intelligence.com, Sunday Spotlight, issue 788 Deployed capacity on both Asia‑Europe trade lanes was elevated throughout the year, largely due to the Red Sea Crisis and the need for extra capacity to maintain weekly departure frequencies. However, the increases in October and November 2026 represent a drastic departure from even the elevated 2025 baseline. In these months, capacity pushed past 350,000 TEU on Asia‑North Europe and exceeded 260,000 TEU on Asia‑Mediterranean. The Transpacific also saw similarly elevated levels of capacity in October and November. On Asia‑North America West Coast, deployed capacity surged to nearly 393,000 TEU in October 2026 and is slated to reach an unprecedented 400,000 TEU weekly on average in November. Similarly, while Asia‑North America East Coast was largely in line with historical years up until August 2026, its October and November levels are the highest in any given year. This is a direct symptom of severe vessel bunching, caused by ongoing port congestion and schedule unreliability in Asia. Vessels originally scheduled to depart during Q3 were heavily delayed, cascading into the October and November, and ultimately artificially inflating deployed capacity.",
+      "takeaways": [
+        "The container shipping market is currently operating in an environment of unprecedented supply, with deployed capacity reaching historic highs across all major East‑West trade lanes.",
+        "The charts show a monthly breakdown of the average weekly capacity deployed on Asia‑Europe.",
+        "However, the increases in October and November 2026 represent a drastic departure from even the elevated 2025 baseline."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-0CDD30834D",
+      "title": "CMA CGM, Nike and Gemadept officially launch electric barge in Vietnam",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/cma-cgm-nike-and-gemadept-officially-launch-electric-barge-in-vietnam/",
+      "publishedAt": "2026-10-31T15:00:19Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/CMA-CGM-Electra_Launch-Ceremony-redim-300x145.jpg",
+      "summary": "CMA CGM, Nike and Vietnamese port operator Gemadept have officially launched a fully electric container barge solution in Vietnam, connecting inland cargo operations with the Gemalink deep-sea terminal in Cai Mep. The electric barge will operate on a 180-kilometre round trip between Nike’s inland drop-off location in...",
+      "body": "CMA CGM, Nike and Vietnamese port operator Gemadept have officially launched a fully electric container barge solution in Vietnam, connecting inland cargo operations with the Gemalink deep-sea terminal in Cai Mep. The electric barge will operate on a 180-kilometre round trip between Nike’s inland drop-off location in Ho Chi Minh City, formerly part of Binh Duong province, and the Gemalink terminal. According to CMA CGM, the vessel is designed to transport more than 50,000 TEUs annually. The service is expected to avoid approximately 778 tonnes of CO₂ emissions per year while producing no direct greenhouse gas emissions during operation. Electric barge connects inland transport with renewable energy The project combines battery-powered inland transportation with dedicated charging infrastructure and renewable electricity generated through a solar farm at the Gemalink terminal. Developed by CMA CGM’s New Build and Research and Development teams, the vessel uses battery technology supplied by CATL. It can be recharged in approximately four hours using certified renewable electricity. The integrated system is intended to provide an alternative to road transportation for container movements between inland logistics facilities and the deep-sea terminal. The official launch follows the previously announced collaboration between CMA CGM, Nike and Gemadept , which outlined plans for the electric barge and its supporting renewable energy infrastructure. Christine Cabau, Executive Vice President Assets and Operations at CMA CGM, said the project demonstrates how shipping companies, customers and terminal operators can work together to develop lower-carbon transportation solutions. Meanwhile, Do Cong Khanh, Deputy Chief Executive Officer of Gemadept Corporation and Chairman of Gemalink Deep-Sea Port, highlighted the integration of inland waterways, port infrastructure and renewable energy as a key element of the initiative. The partners also intend to explore opportunities to replicate the model in other markets and adapt it to additional customer supply chains. CMA CGM currently operates 29 weekly mainline services calling at seven ports across Vietnam, connecting the country with major international markets.",
+      "takeaways": [
+        "CMA CGM, Nike and Vietnamese port operator Gemadept have officially launched a fully electric container barge solution in Vietnam, connecting inland cargo operations with the Gemalink deep-sea terminal in Cai Mep.",
+        "The electric barge will operate on a 180-kilometre round trip between Nike’s inland drop-off location in Ho Chi Minh City, formerly part of Binh Duong province, and the Gemalink terminal.",
+        "According to CMA CGM, the vessel is designed to transport more than 50,000 TEUs annually."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-F58AAE1615",
+      "title": "ABB receives go-ahead for third Washington State Ferries hybrid vessel",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/abb-receives-go-ahead-for-third-washington-state-ferries-hybrid-vessel/",
+      "publishedAt": "2026-10-31T13:31:01Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/826b73f8-f651-41bc-b5d9-e11d253603f4-300x225.png",
+      "summary": "ABB has received a Notice to Proceed from Washington State Ferries (WSF) to supply and integrate the power and propulsion system for a third hybrid-electric newbuild ferry. The authorization extends ABB’s involvement in the fleet modernization programme from two vessels to three. It follows the company’s earlier...",
+      "body": "ABB has received a Notice to Proceed from Washington State Ferries (WSF) to supply and integrate the power and propulsion system for a third hybrid-electric newbuild ferry. The authorization extends ABB’s involvement in the fleet modernization programme from two vessels to three. It follows the company’s earlier selection as propulsion systems supplier, under an agreement covering two initial vessels and an option for a third. The third ferry will feature ABB’s Onboard DC Grid and Power and Energy Management System (PEMS). These technologies are designed to improve power distribution, integrate energy storage and manage available power sources according to operating conditions. In addition, ABB will integrate a 13.2-megawatt-hour battery energy storage system. The installation is designed to enable fully electric operations without direct emissions on short routes and while the vessel is in port. ABB’s scope of supply also includes marine automation, propulsion drives and motors, transformers, steering systems, propellers and remote diagnostics. The company will provide engineering and commissioning support. David Sowers, System Electrification Program Administrator at Washington State Ferries, said the authorization represents another step in the operator’s long-term fleet modernization programme. He also highlighted the importance of maintaining technical consistency across the new vessels. The latest development follows ABB’s earlier involvement in Washington State Ferries’ hybrid-electric newbuild programme , which initially covered two vessels with an option for a third. Washington State Ferries currently consumes approximately 19 million gallons of diesel annually. Its electrification programme targets a 76% reduction in carbon dioxide emissions and a 75% reduction in sulfur oxides by 2040. The operator plans to introduce up to 16 new hybrid-electric ferries by 2040, with a longer-term objective of achieving an emission-free fleet by 2050.",
+      "takeaways": [
+        "ABB has received a Notice to Proceed from Washington State Ferries (WSF) to supply and integrate the power and propulsion system for a third hybrid-electric newbuild ferry.",
+        "The authorization extends ABB’s involvement in the fleet modernization programme from two vessels to three.",
+        "It follows the company’s earlier selection as propulsion systems supplier, under an agreement covering two initial vessels and an option for a third."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-D7EF72AF24",
+      "title": "COSCO SHIPPING Ports revenue rises as overseas volumes accelerate",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/cosco-shipping-ports-revenue-rises-as-overseas-volumes-accelerate/",
+      "publishedAt": "2026-10-31T12:00:52Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb",
+        "Suez Canal & Eastern Med",
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "red sea",
+        "suez",
+        "china"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/GuangzhouNanshaOceangate_1_b-1-300x144.jpg",
+      "summary": "COSCO SHIPPING Ports reported higher revenue and container throughput during the third quarter of 2026, supported by strong growth across its overseas terminal portfolio. Revenue increased by 13% year on year to US$484.3 million. Gross profit rose by 19.3% to US$128.1 million, while operating profit reached US$81...",
+      "body": "COSCO SHIPPING Ports reported higher revenue and container throughput during the third quarter of 2026, supported by strong growth across its overseas terminal portfolio. Revenue increased by 13% year on year to US$484.3 million. Gross profit rose by 19.3% to US$128.1 million, while operating profit reached US$81 million. Profit attributable to shareholders remained broadly stable at US$82.6 million, compared with US$82.5 million in the same quarter last year. For the first nine months of 2026, revenue increased by 12.6% to US$1.39 billion. Profit attributable to shareholders rose by 19.7% to US$316.3 million. Overseas terminals lead throughput growth Total throughput across the company’s terminal portfolio increased by 8.4% to 42.27 million TEU during the quarter. Equity throughput rose by 8.1% to 12.88 million TEU. The quarterly filing includes terminals omitted from COSCO SHIPPING Ports’ regular monthly statistics. This explains the difference from the 32.6 million TEU third-quarter figure previously reported by Container News. Overseas terminals handled 11.32 million TEU, an increase of 19.4%. They accounted for 26.8% of the group’s total quarterly throughput. Piraeus Container Terminal recorded an 11.4% increase to 1.09 million TEU. Meanwhile, CSP Chancay Terminal handled 139,669 TEU, representing growth of 24.9%. Suez Canal Container Terminal processed 1.66 million TEU, up 8.4%, while Red Sea Gateway Terminal reported growth of 19.8% to 899,226 TEU. Antwerp Gateway increased its throughput by 16.3% to 684,232 TEU. However, CSP Abu Dhabi Terminal recorded a 76.4% decline to 97,734 TEU. Chinese terminals handle almost 31 million TEU COSCO SHIPPING Ports’ terminals in China handled 30.94 million TEU during the quarter, up 4.9%. They accounted for 73.2% of the company’s total throughput. Bohai Rim volumes increased by 4.3% to 14.12 million TEU. Pearl River Delta terminals handled 8.3 million TEU, representing growth of 7.6%. Throughput across the Southeast Coast region also rose by 7.6% to 1.51 million TEU, while Southwest Coast volumes increased by 7.3% to 2.67 million TEU. The Yangtze River Delta was the only Chinese region to report a decline. Its throughput fell by 0.3% to 4.34 million TEU. During the first nine months of 2026, COSCO SHIPPING Ports handled 122.42 million TEU across its complete terminal portfolio. This represents an increase of 8.1% compared with the corresponding period last year. The company said it will continue seeking controlling interests in strategic hub ports and equity stakes in key gateway facilities. It also plans to strengthen its terminal network along the Suez Canal route as traffic recovers.",
+      "takeaways": [
+        "COSCO SHIPPING Ports reported higher revenue and container throughput during the third quarter of 2026, supported by strong growth across its overseas terminal portfolio.",
+        "Revenue increased by 13% year on year to US$484.3 million.",
+        "Gross profit rose by 19.3% to US$128.1 million, while operating profit reached US$81 million."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -282,108 +421,6 @@
         "SEA-LNG and the Methane Abatement in Maritime Innovation Initiative (MAMII) have signed a four-year Memorandum of Understanding (MoU) to strengthen technical cooperation on methane emissions from LNG-fuelled vessels.",
         "The partnership will also see MAMII representatives participate in IMO technical working groups, correspondence groups and related discussions under SEA-LNG’s coordination.",
         "According to the initiative, these trials have produced promising preliminary results."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-D288F29ADF",
-      "title": "Port of Virginia orders 10 electric straddle carriers from Kalmar",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/port-of-virginia-orders-10-electric-straddle-carriers-from-kalmar/",
-      "publishedAt": "2026-10-31T03:00:16Z",
-      "category": "Weather & Cyclones",
-      "region": "US East Coast & New York",
-      "regions": [
-        "US East Coast & New York"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "safety"
-      ],
-      "coords": [
-        40.5,
-        -73.95
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/kalmar-has-secured-a-significant-order-for-10-kalmar-electric-straddle-carriers-from-the-port-of-virginia-300x164.webp",
-      "summary": "Kalmar has secured an order for 10 fully electric straddle carriers from the Port of Virginia in the United States. The equipment will be deployed at Norfolk International Terminals (NIT), the port’s largest container terminal. The order was recorded in Kalmar’s third-quarter 2026 order intake. Deliveries are...",
-      "body": "Kalmar has secured an order for 10 fully electric straddle carriers from the Port of Virginia in the United States. The equipment will be deployed at Norfolk International Terminals (NIT), the port’s largest container terminal. The order was recorded in Kalmar’s third-quarter 2026 order intake. Deliveries are scheduled to be completed during the third quarter of 2027. The new electric straddle carriers will support the port’s efforts to reduce emissions and improve operational safety. The Port of Virginia aims to achieve net-zero Scope 1 and 2 carbon emissions by 2040. Electric equipment for Norfolk International Terminals The straddle carriers will feature lithium-ion batteries designed for heavy-duty operations. According to Kalmar, the equipment can operate for up to 600 minutes. Each machine will also include the Kalmar Collision Warning System. The technology uses visual and audible alerts to warn operators about potential collision risks. “Integrating these fully electric Kalmar straddle carriers with the Collision Warning System into our operations is a vital step in our journey to create safer and more sustainable operations,” said Patrick Jefferson, Director of Operations at Norfolk International Terminals. NIT is undergoing an expansion that will increase its annual terminal capacity to 3.6 million TEUs. Following completion of the equipment delivery, the terminal is expected to have more than 90 semi-automated stacking cranes and 113 Kalmar hybrid straddle carriers, alongside the newly ordered electric equipment. The Port of Virginia also operates Virginia International Gateway (VIG), another semi-automated container terminal. Kalmar and the Port of Virginia have maintained a commercial relationship since 2007. The latest order extends their cooperation as the port continues investing in container-handling equipment and terminal operations. The financial value of the order was not disclosed.",
-      "takeaways": [
-        "Kalmar has secured an order for 10 fully electric straddle carriers from the Port of Virginia in the United States.",
-        "The equipment will be deployed at Norfolk International Terminals (NIT), the port’s largest container terminal.",
-        "The order was recorded in Kalmar’s third-quarter 2026 order intake."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-3EFF4BA3DC",
-      "title": "Tropical Shipping orders first hybrid straddle carrier from Kalmar",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/tropical-shipping-orders-first-hybrid-straddle-carrier-from-kalmar/",
-      "publishedAt": "2026-10-31T01:21:03Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/kalmar-has-secured-an-order-from-tropical-shipping-for-one-kalmar-hybrid-straddle-carrier-equipped-with-mykalmar-insight-as-well-as-one-kalmar-reachstacker.--225x300.png",
-      "summary": "Kalmar has received an order from Tropical Shipping for a hybrid straddle carrier and a reachstacker for its container terminal in Riviera Beach, Florida. The order was recorded in Kalmar’s third-quarter 2026 order intake, with delivery of both machines scheduled for the third quarter of 2027. The new straddle...",
-      "body": "Kalmar has received an order from Tropical Shipping for a hybrid straddle carrier and a reachstacker for its container terminal in Riviera Beach, Florida. The order was recorded in Kalmar’s third-quarter 2026 order intake, with delivery of both machines scheduled for the third quarter of 2027. The new straddle carrier will be the first hybrid model in Tropical Shipping’s fleet. The company selected the equipment as part of its efforts to manage fuel consumption, maintenance expenses and emissions. The hybrid straddle carrier will be equipped with MyKalmar INSIGHT, a digital fleet management solution that provides equipment performance and operational information. Expanding terminal equipment capacity Following the addition of the new machines, Tropical Shipping’s fleet will comprise 29 Kalmar straddle carriers and 25 reachstackers. The company said the investment would support operational efficiency at its Florida terminal, which serves its Caribbean shipping network. “Adding our first hybrid straddle carrier supports our goal of managing fuel and maintenance costs effectively over the machine’s lifetime while continuing to deliver reliable service across our terminal operations,” said Douglas Cowper, Vice President of Operations at Tropical Shipping. Cowper also highlighted the company’s existing relationship with Kalmar and the benefits of sourcing both equipment types from the same supplier. The order continues the cooperation between the two companies as Tropical Shipping expands its container-handling capabilities. Kalmar did not disclose the financial value of the contract.",
-      "takeaways": [
-        "Kalmar has received an order from Tropical Shipping for a hybrid straddle carrier and a reachstacker for its container terminal in Riviera Beach, Florida.",
-        "The order was recorded in Kalmar’s third-quarter 2026 order intake, with delivery of both machines scheduled for the third quarter of 2027.",
-        "The new straddle carrier will be the first hybrid model in Tropical Shipping’s fleet."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-ACA400D707",
-      "title": "Hellmann expands US logistics network with three new branches",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/hellmann-expands-us-logistics-network-with-three-new-branches/",
-      "publishedAt": "2026-10-30T23:30:14Z",
-      "category": "Weather & Cyclones",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "India & Indian Ocean",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/Miami-003-300x180.webp",
-      "summary": "Hellmann Worldwide Logistics has expanded its presence in the United States with three new branches in Indianapolis, the Columbus metropolitan area and the San Francisco Bay Area. The expansion brings the company’s US network to 12 branches and forms part of its Forward2030 growth strategy. Each location will focus...",
-      "body": "Hellmann Worldwide Logistics has expanded its presence in the United States with three new branches in Indianapolis, the Columbus metropolitan area and the San Francisco Bay Area. The expansion brings the company’s US network to 12 branches and forms part of its Forward2030 growth strategy. Each location will focus on specific industries while supporting customers through international and domestic logistics services. Hellmann, which established its US operations in 1988, is strengthening its coverage across sea freight, air freight and road transportation. New branches target key industries The Indianapolis branch is already operational and focuses on the automotive industry. It supports Tier 1 and Tier 2 suppliers with international ocean and air freight services, alongside domestic road transportation. Meanwhile, the new office in the Columbus metropolitan area of Ohio will serve customers in the fashion and retail sectors. The third location, near San Francisco International Airport, will focus on technology-related industries. These include semiconductors, electronics, cloud infrastructure and renewable energy. Together, the three branches will expand Hellmann’s ability to provide industry-specific logistics services across major US manufacturing and commercial markets. “The United States plays a pivotal role in our global growth strategy,” said Mario Stecher, Managing Director US at Hellmann Worldwide Logistics. Stecher added that the new locations would strengthen the company’s ability to serve customers in strategically important markets. The expansion also supports Hellmann’s US Accelerator Program, which aims to develop the company’s regional operations through targeted investment and industry expertise. Peter Hüwel, Regional CEO Americas at Hellmann Worldwide Logistics, said the program combines the company’s international network with local market knowledge to support further growth. The new branches extend Hellmann’s US footprint as the company continues to develop integrated logistics solutions for customers across its international network.",
-      "takeaways": [
-        "Hellmann Worldwide Logistics has expanded its presence in the United States with three new branches in Indianapolis, the Columbus metropolitan area and the San Francisco Bay Area.",
-        "The expansion brings the company’s US network to 12 branches and forms part of its Forward2030 growth strategy.",
-        "Each location will focus on specific industries while supporting customers through international and domestic logistics services."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -749,40 +786,6 @@
         "in Weekly Shipbrokers Reports 31/10/2026 VLCC rates continued to rise this week, with a busy start setting the tone.",
         "Although reported activity slowed later on, owners remained Source: Affinity Research LLP 31/10/2026 31/10/2026 31/10/2026 10/09/2026 23/01/2025 30/09/2024 16/07/2024 14/07/2024 27/06/2024 25/06/2024 26/05/2024",
         "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-D5DC0AE853",
-      "title": "Rhenus signs 10-year military logistics agreement with Dutch Defence Ministry",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/rhenus-signs-10-year-military-logistics-agreement-with-dutch-defence-ministry/",
-      "publishedAt": "2026-10-30T22:00:13Z",
-      "category": "Weather & Cyclones",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port",
-        "imo"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/Rhenus_and_the_Dutch_Ministry_of_Defence_enter_into_a_ten-year_partnership_to_strengthen_military_logistics-300x169.webp",
-      "summary": "Rhenus has signed a ten-year agreement with the Dutch Ministry of Defence to support military logistics operations in the Netherlands. The partnership focuses on the Soesterberg Logistics Centre (LCS), which supplies materials and equipment to the country’s armed forces. Under the agreement, Rhenus will support...",
-      "body": "Rhenus has signed a ten-year agreement with the Dutch Ministry of Defence to support military logistics operations in the Netherlands. The partnership focuses on the Soesterberg Logistics Centre (LCS), which supplies materials and equipment to the country’s armed forces. Under the agreement, Rhenus will support warehouse operations and help improve supply chain processes. The partnership aims to strengthen logistics reliability and support military training, exercises and deployments. The logistics centre forms part of the Materieellogistiek Commando. It is also part of the new Soesterberg Army Base, where four separate barracks are being combined into one facility. Rhenus to support warehouse operations Rhenus will contribute its experience in warehousing, supply chain management and logistics optimisation. Meanwhile, the Ministry of Defence will provide its knowledge of military operations and requirements. Both organisations will work together to improve efficiency and strengthen logistics support. In addition, they will share expertise and develop new approaches to warehouse management. The agreement follows a relational contracting model. This approach focuses on trust, shared responsibility and transparency. It also encourages continuous improvement throughout the partnership. “The armed forces can only operate effectively if the logistics behind the scenes function excellently,” said Markus Simons, Managing Director of Rhenus Warehousing Solutions Netherlands. According to Simons, combining military knowledge with Rhenus’s logistics experience will help improve operational readiness. The Dutch Ministry of Defence also highlighted the importance of reliable supply chains. “Our military personnel must be able to rely on a logistics organisation that delivers when it matters most,” said Mark Bours, Commander of Materieellogistiek Commando at the Royal Netherlands Army’s Land Command. The partnership will support the ongoing development of logistics operations at Soesterberg. It will also allow both organisations to exchange knowledge and improve existing processes over the next ten years. The companies did not disclose the financial value of the agreement.",
-      "takeaways": [
-        "Rhenus has signed a ten-year agreement with the Dutch Ministry of Defence to support military logistics operations in the Netherlands.",
-        "The partnership focuses on the Soesterberg Logistics Centre (LCS), which supplies materials and equipment to the country’s armed forces.",
-        "Under the agreement, Rhenus will support warehouse operations and help improve supply chain processes."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
