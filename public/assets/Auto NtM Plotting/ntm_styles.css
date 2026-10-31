@@ -4048,6 +4048,152 @@
   font-family: inherit !important;
 }
 
+/* Cyclone / forecast popups — high-contrast on dark Leaflet chrome */
+.ss-wx-storm-popup-wrap .leaflet-popup-content-wrapper,
+.ss-wx-storm-popup-wrap .leaflet-popup-tip {
+  background: #0b1224 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(251, 146, 60, 0.4) !important;
+}
+.ss-wx-storm-popup {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  min-width: 240px;
+  max-width: 300px;
+  color: #f1f5f9;
+  line-height: 1.4;
+}
+.ss-wx-storm-popup .ss-wx-storm-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #fdba74;
+  margin-bottom: 8px;
+}
+.ss-wx-storm-popup .ss-wx-storm-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.ss-wx-storm-popup .ss-wx-storm-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: 0.01em;
+}
+.ss-wx-storm-popup .ss-wx-storm-sub {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+.ss-wx-storm-popup .ss-wx-storm-badge {
+  flex-shrink: 0;
+  background: rgba(251, 146, 60, 0.18);
+  color: #fdba74;
+  border: 1px solid rgba(251, 146, 60, 0.4);
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  max-width: 9.5rem;
+  text-align: center;
+  line-height: 1.25;
+}
+.ss-wx-storm-popup .ss-wx-storm-badge.is-severe {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fecaca;
+  border-color: rgba(248, 113, 113, 0.45);
+}
+.ss-wx-storm-popup .ss-wx-storm-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.ss-wx-storm-popup .ss-wx-storm-card {
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 8px;
+  padding: 7px 8px;
+}
+.ss-wx-storm-popup .ss-wx-k {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+.ss-wx-storm-popup .ss-wx-storm-metric {
+  font-size: 18px;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.15;
+}
+.ss-wx-storm-popup .ss-wx-storm-metric span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+.ss-wx-storm-popup .ss-wx-hot {
+  color: #fb7185 !important;
+}
+.ss-wx-storm-popup .ss-wx-storm-note {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+.ss-wx-storm-popup .ss-wx-storm-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+  color: #e2e8f0;
+  margin-bottom: 5px;
+}
+.ss-wx-storm-popup .ss-wx-storm-row .ss-wx-k {
+  display: inline;
+  margin: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  font-weight: 600;
+}
+.ss-wx-storm-popup .ss-wx-storm-row b {
+  color: #f8fafc;
+  font-weight: 700;
+  text-align: right;
+}
+.ss-wx-storm-popup .ss-wx-storm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+  font-size: 11px;
+}
+.ss-wx-storm-popup .ss-wx-storm-grid b {
+  display: block;
+  color: #f8fafc;
+  font-weight: 700;
+  margin-top: 1px;
+}
+.ss-wx-storm-popup .ss-wx-span {
+  grid-column: 1 / -1;
+}
+.ss-wx-storm-popup .ss-wx-storm-advice {
+  margin-top: 6px;
+  padding: 7px 9px;
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 8px;
+  font-size: 10.5px;
+  color: #fecaca;
+}
+.ss-wx-storm-popup .ss-wx-storm-advice b {
+  color: #fff;
+}
+
 /* AIS target popups — high-contrast light text on dark chrome */
 .ss-ais-popup .leaflet-popup-content-wrapper,
 .ss-ais-popup .leaflet-popup-tip {

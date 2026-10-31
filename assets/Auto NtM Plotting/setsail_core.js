@@ -1273,6 +1273,9 @@ function switchToTab(targetTab, source) {
   if (activePane) {
     activePane.classList.add("active");
   }
+  try {
+    document.body.classList.toggle("ss-setchart", targetTab === "tab-ntm");
+  } catch (eBody) {}
 
   const appContent = document.querySelector(".app-content");
   const waffiFooter = document.querySelector(".waffi-credit-footer");
@@ -2755,12 +2758,12 @@ function renderWeatherOnMap(map = null) {
         ]);
 
         const popupHtml = `
-          <div class="ss-wx-storm-popup" style="font-family:'Segoe UI',system-ui,sans-serif;font-size:12px;min-width:190px;color:#0f172a;">
-            <div style="font-weight:700;color:#b45309;margin-bottom:6px;">${storm.shortName || storm.name} · +${fp.tau}h</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:11px;line-height:1.35;">
-              <div><span style="color:#64748b;">Pos</span><br><b>${Math.abs(fp.coords[0]).toFixed(1)}°${fp.coords[0] >= 0 ? "N" : "S"} ${Math.abs(fp.coords[1]).toFixed(1)}°${fp.coords[1] >= 0 ? "E" : "W"}</b></div>
-              <div><span style="color:#64748b;">Wind</span><br><b style="color:#dc2626;">${fp.winds} kt</b></div>
-              <div style="grid-column:1/-1;"><span style="color:#64748b;">Uncertainty</span> · <b>${fp.radiusNm} NM</b></div>
+          <div class="ss-wx-storm-popup">
+            <div class="ss-wx-storm-title">${storm.shortName || storm.name} · +${fp.tau}h</div>
+            <div class="ss-wx-storm-grid">
+              <div><span class="ss-wx-k">Pos</span><b>${Math.abs(fp.coords[0]).toFixed(1)}°${fp.coords[0] >= 0 ? "N" : "S"} ${Math.abs(fp.coords[1]).toFixed(1)}°${fp.coords[1] >= 0 ? "E" : "W"}</b></div>
+              <div><span class="ss-wx-k">Wind</span><b class="ss-wx-hot">${fp.winds} kt</b></div>
+              <div class="ss-wx-span"><span class="ss-wx-k">Uncertainty</span><b>${fp.radiusNm} NM</b></div>
             </div>
           </div>
         `;
@@ -2860,32 +2863,40 @@ function renderWeatherOnMap(map = null) {
     const stormMarker = L.marker(storm.center, { icon: stormIcon });
     const posStr = Math.abs(storm.center[0]).toFixed(1) + "°" + (storm.center[0] >= 0 ? "N" : "S") + "  " +
       Math.abs(storm.center[1]).toFixed(1) + "°" + (storm.center[1] >= 0 ? "E" : "W");
-    const catShort = String(storm.category || "").replace(/\s*\(.*?\)\s*/g, "").trim() || "Cyclone";
+    const catLabel = String(storm.category || "Cyclone").trim();
+    const fTrackSorted = (storm.forecastTrack || []).slice().sort((a, b) => (Number(a.tau) || 0) - (Number(b.tau) || 0));
+    const nextFp = fTrackSorted[0];
+    const nextLine = nextFp
+      ? ("+" + nextFp.tau + "h → " + Math.abs(nextFp.coords[0]).toFixed(1) + "°" + (nextFp.coords[0] >= 0 ? "N" : "S") +
+        " " + Math.abs(nextFp.coords[1]).toFixed(1) + "°" + (nextFp.coords[1] >= 0 ? "E" : "W") +
+        " · " + nextFp.winds + " kt")
+      : "";
     stormMarker.bindPopup(`
-      <div class="ss-wx-storm-popup" style="font-family:'Segoe UI',system-ui,sans-serif;min-width:250px;max-width:300px;color:#0f172a;line-height:1.4;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
+      <div class="ss-wx-storm-popup">
+        <div class="ss-wx-storm-head">
           <div>
-            <div style="font-size:13px;font-weight:800;color:#0f172a;letter-spacing:0.01em;">${storm.name || shortLabel}</div>
-            <div style="font-size:10px;color:#64748b;margin-top:1px;">${MARINE_WEATHER_STORE.synopticCycle || "Live advisory"}</div>
+            <div class="ss-wx-storm-name">${storm.name || shortLabel}</div>
+            <div class="ss-wx-storm-sub">${storm.id ? storm.id + " · " : ""}${MARINE_WEATHER_STORE.synopticCycle || "Live advisory"}</div>
           </div>
-          <span style="flex-shrink:0;background:${isSevere ? "#fee2e2" : "#ffedd5"};color:${isSevere ? "#991b1b" : "#9a3412"};padding:3px 7px;border-radius:999px;font-size:9px;font-weight:800;">${catShort}</span>
+          <span class="ss-wx-storm-badge ${isSevere ? "is-severe" : ""}">${catLabel}</span>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:7px 8px;">
-            <div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;">Wind</div>
-            <div style="font-size:18px;font-weight:800;color:#dc2626;line-height:1.15;">${storm.maxWinds}<span style="font-size:11px;font-weight:700;"> kt</span></div>
-            <div style="font-size:10px;color:#64748b;">Gust ${storm.gusts != null ? storm.gusts + " kt" : "—"}</div>
+        <div class="ss-wx-storm-cards">
+          <div class="ss-wx-storm-card">
+            <div class="ss-wx-k">Max wind</div>
+            <div class="ss-wx-storm-metric ss-wx-hot">${storm.maxWinds}<span> kt</span></div>
+            <div class="ss-wx-storm-note">Gust ${storm.gusts != null ? storm.gusts + " kt" : "—"}</div>
           </div>
-          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:7px 8px;">
-            <div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;">Pressure</div>
-            <div style="font-size:18px;font-weight:800;color:#0f172a;line-height:1.15;">${storm.centralPressure}<span style="font-size:11px;font-weight:700;"> hPa</span></div>
-            <div style="font-size:10px;color:#64748b;">${posStr}</div>
+          <div class="ss-wx-storm-card">
+            <div class="ss-wx-k">Pressure</div>
+            <div class="ss-wx-storm-metric">${storm.centralPressure != null ? storm.centralPressure : "—"}<span> hPa</span></div>
+            <div class="ss-wx-storm-note">${posStr}</div>
           </div>
         </div>
-        <div style="font-size:11px;color:#334155;margin-bottom:8px;"><span style="color:#64748b;">Movement</span> · ${storm.movement || "—"}</div>
-        <div style="padding:7px 9px;background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(249,115,22,0.08));border:1px solid rgba(239,68,68,0.25);border-radius:8px;font-size:10.5px;color:#7f1d1d;">
-          <b>Safe passing</b> — CPA ≥ 200 NM (navigable) / ≥ 250 NM (dangerous semicircle)
-        </div>
+        <div class="ss-wx-storm-row"><span class="ss-wx-k">Movement</span><b>${storm.movement || "—"}</b></div>
+        <div class="ss-wx-storm-row"><span class="ss-wx-k">Danger radius</span><b>${storm.dangerRadiusNm != null ? storm.dangerRadiusNm + " NM" : "—"}</b></div>
+        ${nextLine ? '<div class="ss-wx-storm-row"><span class="ss-wx-k">Next fix</span><b>' + nextLine + "</b></div>" : ""}
+        <div class="ss-wx-storm-row"><span class="ss-wx-k">Track points</span><b>${fTrackSorted.length}</b></div>
+        <div class="ss-wx-storm-advice"><b>Safe passing</b> — CPA ≥ 200 NM (navigable) / ≥ 250 NM (dangerous semicircle)</div>
       </div>
     `, { className: "ss-wx-storm-popup-wrap", maxWidth: 320 });
     leafletWeatherLayer.addLayer(stormMarker);
@@ -3695,7 +3706,7 @@ function resolveOwnShipSogKn(v) {
   return null;
 }
 
-/** Geographic heading/time vector (NM) — screen length scales with zoom. */
+/** Geographic heading/time vector — keep a readable screen length even at world zoom. */
 function updateOwnShipTimeVector(lat, lon, headingDeg, sogKn) {
   if (!leafletMap || !leafletVesselLayer) return;
   leafletVesselLayer.eachLayer((ly) => {
@@ -3705,10 +3716,23 @@ function updateOwnShipTimeVector(lat, lon, headingDeg, sogKn) {
   });
   if (!hasOwnShipHeadingDeg(headingDeg)) return;
   const sog = Number(sogKn);
-  // Need motion to define a time vector; still draw a short stub if SOG unknown but heading set
   const kn = (Number.isFinite(sog) && sog > 0.05) ? sog : 0;
-  const distNm = kn * (OWN_SHIP_VECTOR_MINUTES / 60);
+  let distNm = kn * (OWN_SHIP_VECTOR_MINUTES / 60);
+
+  // Floor/ceiling in screen pixels so the vector stays visible without zooming in
+  try {
+    const z = leafletMap.getZoom ? leafletMap.getZoom() : 3;
+    const metersPerPx = (40075016.686 * Math.cos((Number(lat) * Math.PI) / 180)) / Math.pow(2, z + 8);
+    const nmPerPx = Math.max(metersPerPx / 1852.0, 1e-9);
+    const minNm = 40 * nmPerPx;   // ~40 px stub at any zoom
+    const maxNm = 110 * nmPerPx;  // avoid huge spears when zoomed out + high SOG
+    if (!(distNm >= minNm)) distNm = minNm;
+    if (distNm > maxNm) distNm = maxNm;
+  } catch (ePx) {
+    if (!(distNm >= 0.15)) distNm = 0.15;
+  }
   if (!(distNm >= 0.02)) return;
+
   const tip = destinationPointNm(lat, lon, headingDeg, distNm);
   const line = L.polyline([[lat, lon], tip], {
     color: "#0f172a",
@@ -3720,11 +3744,9 @@ function updateOwnShipTimeVector(lat, lon, headingDeg, sogKn) {
     className: "own-ship-time-vector"
   });
   line._setsailOwnShipVector = true;
-  // Arrowhead near tip (small geographic offset back along track)
-  const back = destinationPointNm(tip[0], tip[1], (Number(headingDeg) + 180) % 360, Math.min(0.08, distNm * 0.12));
   const leftBrg = (Number(headingDeg) + 150) % 360;
   const rightBrg = (Number(headingDeg) + 210) % 360;
-  const wing = Math.min(0.06, distNm * 0.1);
+  const wing = Math.min(0.08, Math.max(0.03, distNm * 0.12));
   const a1 = destinationPointNm(tip[0], tip[1], leftBrg, wing);
   const a2 = destinationPointNm(tip[0], tip[1], rightBrg, wing);
   const arrow = L.polyline([a1, tip, a2], {
@@ -3739,8 +3761,6 @@ function updateOwnShipTimeVector(lat, lon, headingDeg, sogKn) {
   arrow._setsailOwnShipVector = true;
   leafletVesselLayer.addLayer(line);
   leafletVesselLayer.addLayer(arrow);
-  // Keep a tiny reference to mid-tick positions unused; geographic polyline is source of truth
-  void back;
 }
 
 function getOwnShipPositionIcon(headingDeg, showVector) {
