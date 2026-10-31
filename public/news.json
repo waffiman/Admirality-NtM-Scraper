@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-31T04:31:58Z",
-  "generatedAt": "2026-10-31T04:31:58Z",
+  "updatedAt": "2026-10-31T11:52:39Z",
+  "generatedAt": "2026-10-31T11:52:39Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -42,6 +42,211 @@
         "Jamming and spoofing attacks are rising fast across busy waterways, putting crews, cargo and insurance claims at risk.",
         "Join maritime and satellite experts to discover how proven technology fights back.",
         "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-C86A2A95ED",
+      "title": "NORDEN more than doubles Q3 profit to US$54 million",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/norden-more-than-doubles-q3-profit-to-us54-million/",
+      "publishedAt": "2026-10-31T10:30:34Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "tanker",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/tanker-1920-300x169.jpg",
+      "summary": "Danish shipping company NORDEN reported a net profit of US$54 million for the third quarter of 2026, more than double the US$26 million recorded in the corresponding period last year, supported by stronger market conditions across its Dry Cargo and Tankers businesses. The company’s quarterly net profit increased by...",
+      "body": "Danish shipping company NORDEN reported a net profit of US$54 million for the third quarter of 2026, more than double the US$26 million recorded in the corresponding period last year, supported by stronger market conditions across its Dry Cargo and Tankers businesses. The company’s quarterly net profit increased by approximately 108% year-on-year, while operating cash flow reached US$150 million, compared with US$96 million in the third quarter of 2025. Following the results, NORDEN raised its full-year net profit guidance to US$200–250 million, up from its previous forecast of US$180–230 million. The updated outlook includes US$79 million in vessel sales gains, unchanged from the previous quarter. During 2026, NORDEN continued adjusting its fleet portfolio in response to market developments, adding vessels to its core fleet in the Handysize and multipurpose (MPP) segments. The company also secured long-term charter agreements for MR tankers and Capesize vessels, aiming to strengthen future revenue visibility and reduce exposure to fluctuations in freight markets. Jan Rindbo, CEO of NORDEN, said the company had delivered a strong quarter across both its principal business segments, supported by the flexibility of its operating model and improved visibility for the remainder of the year. NORDEN reported a return on invested capital of 11.8%, while its estimated net asset value reached DKK 523 per share, representing an increase of 38% since the beginning of 2026. The company also announced a third-quarter shareholder distribution of US$24 million, comprising an interim dividend of DKK 2 per share and a new US$15 million share buyback programme. Despite raising its earnings outlook, NORDEN highlighted continued geopolitical uncertainty and cautioned that the timing of certain voyages could shift some earnings into 2027.",
+      "takeaways": [
+        "The company’s quarterly net profit increased by approximately 108% year-on-year, while operating cash flow reached US$150 million, compared with US$96 million in the third quarter of 2025.",
+        "Following the results, NORDEN raised its full-year net profit guidance to US$200–250 million, up from its previous forecast of US$180–230 million.",
+        "The updated outlook includes US$79 million in vessel sales gains, unchanged from the previous quarter."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A605B59200",
+      "title": "Eastern Car Liner arrives at port of Lázaro Cárdenas",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/eastern-car-liner-arrives-at-port-of-lazaro-cardenas/",
+      "publishedAt": "2026-10-31T09:00:35Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Japan & Korea",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "imo"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/αρχείο-λήψης-300x168.png",
+      "summary": "The Port of Lázaro Cárdenas has welcomed Eastern Car Liner, a Japanese shipping company specialising in the transport of automobiles, heavy vehicles, construction equipment and project cargo, with the MV Malaysia Brave making its inaugural call on October 24 at Multipurpose Terminal II, operated by LC Logistics. The...",
+      "body": "News Port News Top Right Eastern Car Liner arrives at port of Lázaro Cárdenas October 31, 2026 Facebook Twitter WhatsApp Linkedin Email The Port of Lázaro Cárdenas has welcomed Eastern Car Liner, a Japanese shipping company specialising in the transport of automobiles, heavy vehicles, construction equipment and project cargo, with the MV Malaysia Brave making its inaugural call on October 24 at Multipurpose Terminal II, operated by LC Logistics. The vessel, voyage 096, is represented by shipping agent Maritimex. During the inaugural call, 2,906 units were discharged, comprising 2,640 automobiles alongside 266 units of machinery, project cargo and buses. Unloading operations commenced with the machinery and equipment before continuing with the remaining units. Eastern Car Liner is recognised as a key niche player in the Pacific Rim for its flexibility in handling large tonnages and customised itineraries across specialised cargo segments. The port of Lázaro Cárdenas offers the infrastructure and operational expertise aligned with ECL’s service requirements, strengthening the port’s position as a strategic logistics hub on the Mexican Pacific coast for vehicle and specialised cargo handling while expanding service options for importers and the national supply chain. TAGS car liner Port of Lázaro Cárdenas Facebook Twitter WhatsApp Linkedin Email Previous article Behind Russia’s Arctic strategy Next article NORDEN more than doubles Q3 profit to US$54 million Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
+      "takeaways": [
+        "The vessel, voyage 096, is represented by shipping agent Maritimex.",
+        "During the inaugural call, 2,906 units were discharged, comprising 2,640 automobiles alongside 266 units of machinery, project cargo and buses.",
+        "Unloading operations commenced with the machinery and equipment before continuing with the remaining units."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-816409DCFC",
+      "title": "Impending strike threatens LA-LB ports container flow",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/ports-logistics/impending-strike-threatens-la-lb-ports-container-flow",
+      "publishedAt": "2026-10-31T07:34:32Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltacd483a4109c204d/6ae59b14c90ae71622bdf9bd/Port_of_Los_Angeles_ONE_HANOI_credit_POLA.jpg?width=720&quality=80&disable=upscale",
+      "summary": "Contract standoff with 250 security workers could freeze operations across key US West Coast gateway terminals following 4 November deadline extension",
+      "body": "Contract standoff with 250 security workers could freeze operations across key US West Coast gateway terminals following 4 November deadline extension",
+      "takeaways": [
+        "Contract standoff with 250 security workers could freeze operations across key US West Coast gateway terminals following 4 November deadline extension",
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-540343C139",
+      "title": "Behind Russia’s Arctic strategy",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/behind-russias-arctic-strategy/",
+      "publishedAt": "2026-10-31T07:30:15Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "suez",
+        "safety",
+        "imo"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/cleaned_Αρκτική-Νηοπομπή-στη-Θαλάσσια-Οδό-300x169.png",
+      "summary": "Moscow is not building a rival to Suez, but an export corridor no Western-controlled strait can touch, and selling it to Asia as safety.",
+      "body": "CN Premium Articles Top News Behind Russia’s Arctic strategy October 31, 2026 Facebook Twitter WhatsApp Linkedin Email Moscow is not building a rival to Suez, but an export corridor no Western-controlled strait can touch, and selling it to Asia as safety. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS Arctic route Northern Sea Route (NSR) Russia Facebook Twitter WhatsApp Linkedin Email Previous article Sidra Line launches Türkiye–St Petersburg service Next article Eastern Car Liner arrives at port of Lázaro Cárdenas Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
+      "takeaways": [
+        "This content is locked Select a CN Premium Subscription Package To Unlock The Content!",
+        "Operational Area: Suez Canal & Eastern Med, Baltic Sea & Northern Europe.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-0E2DE3AFFE",
+      "title": "Sidra Line launches Türkiye–St Petersburg service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/sidra-line-launches-turkiye-st-petersburg-service/",
+      "publishedAt": "2026-10-31T07:00:36Z",
+      "category": "Ports & Terminals",
+      "region": "Baltic Sea & Northern Europe",
+      "regions": [
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        57.5,
+        19.5
+      ],
+      "navarea": "I",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/pexels-julia-volk-8937118-1-300x200.jpg",
+      "summary": "Sidra Line will introduce a new container connection between Türkiye and St Petersburg. The carrier will operate the service under its Türkiye Russia Express (TRX) designation. Sidra Line previously used the same name for a service connecting Türkiye with Novorossiysk. The new TRX service will offer one sailing every...",
+      "body": "Services Top Right Sidra Line launches Türkiye–St Petersburg service October 31, 2026 Facebook Twitter WhatsApp Linkedin Email Sidra Line will introduce a new container connection between Türkiye and St Petersburg. The carrier will operate the service under its Türkiye Russia Express (TRX) designation. Sidra Line previously used the same name for a service connecting Türkiye with Novorossiysk. The new TRX service will offer one sailing every five weeks. Its rotation will be: Izmit (Safiport) – Istanbul (Ambarli) – Mersin – St Petersburg – Izmit The service will connect three Turkish ports with Russia’s Baltic region. TAGS Sidra Line Facebook Twitter WhatsApp Linkedin Email Previous article DNV confirms feasibility of ship-based CO₂ injection concept for Atlas project Next article Behind Russia’s Arctic strategy Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "Services Top Right Sidra Line launches Türkiye–St Petersburg service October 31, 2026 Facebook Twitter WhatsApp Linkedin Email Sidra Line will introduce a new container connection between Türkiye and St Petersburg.",
+        "The carrier will operate the service under its Türkiye Russia Express (TRX) designation.",
+        "Sidra Line previously used the same name for a service connecting Türkiye with Novorossiysk."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-80B86D1675",
+      "title": "DNV confirms feasibility of ship-based CO₂ injection concept for Atlas project",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/dnv-confirms-feasibility-of-ship-based-co%e2%82%82-injection-concept-for-atlas-project/",
+      "publishedAt": "2026-10-31T06:00:02Z",
+      "category": "Weather & Cyclones",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/ccs-facility-300x94.webp",
+      "summary": "DNV has issued a Statement of Feasibility for a ship-based CO₂ transport and offshore injection concept being developed by Aker BP and Höegh Evi for the Atlas carbon storage project on the Norwegian Continental Shelf. The concept involves transporting liquefied CO₂ aboard specialised shuttle carriers and injecting it...",
+      "body": "DNV has issued a Statement of Feasibility for a ship-based CO₂ transport and offshore injection concept being developed by Aker BP and Höegh Evi for the Atlas carbon storage project on the Norwegian Continental Shelf. The concept involves transporting liquefied CO₂ aboard specialised shuttle carriers and injecting it directly into subsea storage reservoirs, potentially eliminating the need for new onshore facilities, cross-border pipelines and permanent offshore structures. The Atlas project is designed to initially inject up to 6 million tonnes of CO₂ annually, with an estimated total storage capacity of 150 million tonnes. Aker BP is targeting the start of injection operations in 2031, subject to future investment decisions. DNV’s assessment focused on the offshore infrastructure required to transfer CO₂ from the vessels into subsea injection wells. The classification and assurance organisation identified technical challenges and uncertainties but concluded that these were manageable at the current development stage. The evaluation was conducted using DNV’s technology qualification methodology and follows earlier Approvals in Principle covering Höegh Evi’s liquefied CO₂ carrier and floating CO₂ reception and conditioning terminal concepts. Under the proposed transport system, captured CO₂ from European industrial facilities would be collected, processed and liquefied at a floating terminal before being transported to the offshore storage site. The terminal is designed to provide between 40,000 and 80,000 cubic metres of intermediate storage capacity, while individual shuttle carriers could transport up to 50,000 cubic metres of CO₂ per voyage. At the Atlas site, offshore transfer equipment and subsea pipelines would enable CO₂ to be injected directly into the reservoir. The project is being developed by Aker BP, which holds an 80% interest in the Atlas storage licence, alongside ORLEN with the remaining 20%. In October 2026, Aker BP and Höegh Evi were awarded €223 million in support from the EU Innovation Fund for the proposed cross-border CO₂ transport and storage network. The funding remains subject to a Final Investment Decision, currently targeted for 2028. The concept could also be considered for Aker BP’s Poseidon CO₂ storage licence on the Norwegian Continental Shelf, where a similar subsea development approach is under evaluation.",
+      "takeaways": [
+        "DNV has issued a Statement of Feasibility for a ship-based CO₂ transport and offshore injection concept being developed by Aker BP and Höegh Evi for the Atlas carbon storage project on the Norwegian Continental Shelf.",
+        "The Atlas project is designed to initially inject up to 6 million tonnes of CO₂ annually, with an estimated total storage capacity of 150 million tonnes.",
+        "Aker BP is targeting the start of injection operations in 2031, subject to future investment decisions."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -583,74 +788,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-048FD2BFC7",
-      "title": "FedEx revenue rises 12% as international freight business grows",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/fedex-revenue-rises-12-as-international-freight-business-grows/",
-      "publishedAt": "2026-10-30T21:00:12Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/download-1-300x200.webp",
-      "summary": "FedEx reported revenue of $22.9 billion for the third quarter of calendar 2026, up approximately 12% from $20.4 billion a year earlier. The company benefited from higher package yields, increased freight volumes and ongoing cost reductions. Operating income rose to $1.07 billion from $972 million in the same quarter...",
-      "body": "FedEx reported revenue of $22.9 billion for the third quarter of calendar 2026, up approximately 12% from $20.4 billion a year earlier. The company benefited from higher package yields, increased freight volumes and ongoing cost reductions. Operating income rose to $1.07 billion from $972 million in the same quarter of 2025. However, reported net income from continuing operations fell to $290 million from $645 million, partly reflecting a non-cash loss associated with its retained investment in FedEx Freight. Adjusted net income from continuing operations increased to $896 million from $693 million. Meanwhile, adjusted diluted earnings per share reached $3.74, compared with $2.93 a year earlier. International freight and network developments FedEx’s Express International segment generated revenue of $7.47 billion, an increase of 17% year over year. International freight revenue rose by 28% to $1.44 billion, supported by higher shipment weights and improved yields. Average daily international freight weight increased by 15%, while the segment’s operating income grew by 15% to $220 million. The company also recorded growth in its US domestic operations. Express US Domestic revenue increased by 10% to $14.71 billion, supported by higher package volumes and yields. FedEx continued to implement network optimisation and cost reduction initiatives during the quarter. However, higher transportation costs, wages and changes in global trade policies placed pressure on operating expenses. On 1 October 2026, FedEx completed the sale of FedEx Supply Chain to CMA CGM Group for approximately $1.4 billion. The transaction forms part of FedEx’s strategy to simplify its business portfolio and focus on its core transportation operations. The company had also completed the separation of FedEx Freight on 1 June 2026, retaining a 19.9% ownership interest in the newly independent business. “Our strong operating results and adjusted free cash flow demonstrate that FedEx is winning across high-value market segments while we optimize our network,” said Raj Subramaniam, President and CEO of FedEx. Following the quarterly performance, FedEx raised its calendar 2026 revenue growth forecast to approximately 12%, compared with its previous estimate of 11%. The company also increased its adjusted diluted earnings per share outlook to between $18.00 and $18.60, up from the previous range of $16.90 to $18.10. FedEx returned $2 billion to shareholders through share repurchases during the June–September period.",
-      "takeaways": [
-        "FedEx reported revenue of $22.9 billion for the third quarter of calendar 2026, up approximately 12% from $20.4 billion a year earlier.",
-        "The company benefited from higher package yields, increased freight volumes and ongoing cost reductions.",
-        "Operating income rose to $1.07 billion from $972 million in the same quarter of 2025."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-9A42D7D60A",
-      "title": "Panama Canal appoints Tommy Thomsen as Advisory Board chairman",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/panama-canal-appoints-tommy-thomsen-as-advisory-board-chairman/",
-      "publishedAt": "2026-10-30T20:00:39Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "US Gulf & Port of Houston",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port",
-        "panama"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/WhatsApp-Image-2026-10-26-Juntaasesora1-1024x683-1-300x200.jpeg",
-      "summary": "The Panama Canal has appointed Danish shipping executive Tommy Thomsen as chairman of its Advisory Board, succeeding Admiral William J. Flanagan. The leadership change took place during the Board’s 41st meeting, held from 26 to 28 October 2026. The meeting focused on global maritime trade challenges and the Canal’s...",
-      "body": "The Panama Canal has appointed Danish shipping executive Tommy Thomsen as chairman of its Advisory Board, succeeding Admiral William J. Flanagan. The leadership change took place during the Board’s 41st meeting, held from 26 to 28 October 2026. The meeting focused on global maritime trade challenges and the Canal’s strategic development plans. Board members also reviewed water management, revenue diversification and the waterway’s competitiveness. Thomsen brings more than 30 years of experience in the maritime and shipping industry. He currently leads Lauritzen Fonden, a Danish corporate foundation. The Advisory Board also welcomed two members: Oscar Hasbún Martínez, CEO of Compañía Sud Americana de Vapores (CSAV), and Jean Paul Rodrigue, a professor at Texas A&M University at Galveston. Hasbún also serves on the board of Hapag-Lloyd, in which CSAV is the largest shareholder. Meanwhile, Rodrigue specialises in maritime transport and logistics research. Strategic projects and water management During the meeting, members visited the Cocolí Locks and the Integrated Operations Control Center (CICO). They also toured areas associated with two planned projects: a gas pipeline and an extension of the logistics corridor. Panama Canal Administrator Ilya Espino de Marotta and Deputy Administrator Miguel Lorenzo presented progress on these initiatives. They also explained how the Canal coordinates vessel movements through its operations control centre. In addition, the discussions covered the Canal’s operational water management strategy in response to El Niño. Revenue diversification and long-term competitiveness were also on the agenda. “The Panama Canal faces an environment of profound change, yet it is uniquely positioned to remain a key connector of global trade,” said Tommy Thomsen, Chairman of the Panama Canal Advisory Board. José Ramón Icaza, Minister for Canal Affairs and Chairman of the Board of Directors, highlighted the importance of the Advisory Board’s recommendations for the Canal’s future. Established in December 1999, the Advisory Board provides strategic advice to the Panama Canal’s Board of Directors and administration. Its members represent sectors including shipping, international trade, finance, infrastructure and academia. The latest meeting brought together maritime industry representatives and Canal officials to review the waterway’s strategic priorities.",
-      "takeaways": [
-        "The Panama Canal has appointed Danish shipping executive Tommy Thomsen as chairman of its Advisory Board, succeeding Admiral William J.",
-        "The leadership change took place during the Board’s 41st meeting, held from 26 to 28 October 2026.",
-        "The meeting focused on global maritime trade challenges and the Canal’s strategic development plans."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-4088C5AB4A",
       "title": "Strike Threat at Los Angeles, Long Beach Ports Delayed as Union and Employers Extend Talks",
       "source": "gCaptain",
@@ -680,41 +817,6 @@
         "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
         "Join the leading maritime news network Containership berthed at the Port of Los Angeles.",
         "Photo courtesy Port of Los Angeles."
-      ],
-      "readingMinutes": 3,
-      "readMinutes": 3
-    },
-    {
-      "id": "SN-383C6CEBF9",
-      "title": "APSEZ raises full-year outlook after strong second quarter",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/apsez-raises-full-year-outlook-after-strong-second-quarter/",
-      "publishedAt": "2026-10-30T19:00:38Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "India & Indian Ocean",
-        "Australia & Pilbara"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/2-4-300x167.jpg",
-      "summary": "Adani Ports and Special Economic Zone (APSEZ) has raised its revenue, EBITDA and capital expenditure guidance following strong results for the second quarter of the 2027 financial year. The Indian port and logistics operator reported consolidated revenue of ₹11,340 crore for the quarter ended 30 September 2026. This...",
-      "body": "Adani Ports and Special Economic Zone (APSEZ) has raised its revenue, EBITDA and capital expenditure guidance following strong results for the second quarter of the 2027 financial year. The Indian port and logistics operator reported consolidated revenue of ₹11,340 crore for the quarter ended 30 September 2026. This represents an increase of 24% from ₹9,167 crore in the same period last year. EBITDA increased by 23% to ₹6,807 crore, while profit after tax rose by 18% to ₹3,682 crore. During the first half of FY27, APSEZ generated revenue of ₹22,161 crore, up 21% year on year. First-half EBITDA also increased by 21% to ₹13,347 crore, while profit after tax rose by 14% to ₹7,332 crore. International ports drive growth APSEZ’s domestic ports business generated quarterly revenue of ₹7,177 crore, an increase of 13%. EBITDA rose by 11% to ₹5,201 crore, with the segment maintaining a margin of 72.5%. Domestic cargo volume reached 118 million tonnes during the quarter. APSEZ held 27.3% of India’s overall cargo market and 44.4% of the country’s container market. The international ports division recorded revenue growth of 71% to ₹1,839 crore. EBITDA more than tripled to ₹878 crore, while its margin reached 47.7%. International cargo volumes increased from 10 million tonnes in the corresponding quarter last year to 24 million tonnes. APSEZ attributed the growth to the expansion of Colombo West International Terminal, stronger activity in Tanzania and the contribution from NQXT in Australia. Colombo West International Terminal handled two million TEU during its first 18 months of operation. The recently inaugurated second phase increased its capacity from 1.6 million to 3.2 million TEU. Tanzania operations handled a record 265,518 TEU during the quarter. This included a monthly record of 91,625 TEU in July 2026. Logistics and marine businesses expand Revenue from APSEZ’s logistics business increased by 21% to ₹1,273 crore. EBITDA rose by 8% to ₹237 crore. Container volumes handled by the logistics division reached 167,453 TEU. This represents a 15% increase from the first quarter of FY27, which was affected by disruption in West Asia. Marine revenue increased by 57% to ₹1,007 crore, while EBITDA rose by 32% to ₹447 crore. The company’s marine fleet expanded from 127 vessels to 138 vessels. The growth reflected fleet additions, stronger offshore services and APSEZ’s entry into subsea operations. APSEZ upgrades FY27 guidance APSEZ raised its full-year revenue guidance by ₹1,000 crore to a range of ₹44,000 crore to ₹46,000 crore. Its EBITDA guidance was also increased by ₹1,000 crore to between ₹26,000 crore and ₹27,000 crore. Meanwhile, planned capital expenditure was raised by ₹3,000 crore to a range of ₹15,000 crore to ₹17,000 crore. “Domestic ports continue to anchor our earnings, while international ports, logistics and marine are emerging as powerful growth engines,” said Ashwani Gupta, Whole-time Director and CEO of APSEZ. The company invested ₹10,521 crore during the first half of FY27. Its net debt-to-EBITDA ratio stood at 1.8 times, while its cash balance reached ₹12,502 crore at the end of September.",
-      "takeaways": [
-        "Adani Ports and Special Economic Zone (APSEZ) has raised its revenue, EBITDA and capital expenditure guidance following strong results for the second quarter of the 2027 financial year.",
-        "The Indian port and logistics operator reported consolidated revenue of ₹11,340 crore for the quarter ended 30 September 2026.",
-        "This represents an increase of 24% from ₹9,167 crore in the same period last year."
       ],
       "readingMinutes": 3,
       "readMinutes": 3
@@ -821,40 +923,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-ABBB555FE8",
-      "title": "Toyo Construction wins Sihanoukville container terminal contract",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/toyo-construction-wins-sihanoukville-container-terminal-contract/",
-      "publishedAt": "2026-10-30T18:00:37Z",
-      "category": "Ports & Terminals",
-      "region": "Japan & Korea",
-      "regions": [
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "dredging"
-      ],
-      "coords": [
-        35.1,
-        129.04
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/20261028-3-768x462-1-300x180.png",
-      "summary": "Toyo Construction has secured a ¥26.2 billion contract to build the second new container terminal at Sihanoukville Port in Cambodia. The Port Authority of Sihanoukville awarded the Japanese contractor Package 1, which covers the civil engineering works for the NCT2 expansion project. Construction is expected to take...",
-      "body": "Toyo Construction has secured a ¥26.2 billion contract to build the second new container terminal at Sihanoukville Port in Cambodia. The Port Authority of Sihanoukville awarded the Japanese contractor Package 1, which covers the civil engineering works for the NCT2 expansion project. Construction is expected to take 36 months. According to Toyo Construction, this will be its largest project undertaken in Cambodia. The development will be financed through a Japanese government yen loan provided by the Japan International Cooperation Agency. New terminal to add 450,000 TEU The project includes the construction of a 400-metre quay with a width of 35 metres and a water depth of 16.5 metres. Toyo Construction will also develop approximately 200,000 square metres of container terminal space. Other works include 3.9 million cubic metres of dredging, 350,000 cubic metres of land reclamation and 900 metres of revetment. The contractor will construct 12 buildings with a combined floor area of 9,389 square metres. The scope also covers yard development, electrical infrastructure and equipment-related works. A new terminal operating system will manage cargo handling, container storage, gate checks and transport services. Once completed, NCT2 is expected to increase Sihanoukville Port’s annual handling capacity by approximately 450,000 TEU. Expansion addresses rising cargo demand Sihanoukville is Cambodia’s only deep-water port and serves as the country’s main maritime gateway. Cargo volumes have increased alongside Cambodia’s economic growth, placing pressure on the existing terminal infrastructure. Three new container terminal projects are currently being developed at the port with support from the Japanese government and JICA. Toyo Construction’s latest contract covers the second terminal in this wider expansion programme. The Japanese contractor has operated in Cambodia since opening its Phnom Penh office in 1997. It previously participated in the Sihanoukville Port Multipurpose Terminal Development Project, which was completed in 2018.",
-      "takeaways": [
-        "Toyo Construction has secured a ¥26.2 billion contract to build the second new container terminal at Sihanoukville Port in Cambodia.",
-        "The Port Authority of Sihanoukville awarded the Japanese contractor Package 1, which covers the civil engineering works for the NCT2 expansion project.",
-        "Construction is expected to take 36 months."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-6C61362377",
       "title": "How MARAD Cut Years Off Deepwater Port Reviews Without Changing Environmental Standards",
       "source": "gCaptain",
@@ -889,40 +957,6 @@
       ],
       "readingMinutes": 6,
       "readMinutes": 6
-    },
-    {
-      "id": "SN-ABADE48421",
-      "title": "SFL acquires two 8,800 TEU container ships",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/sfl-acquires-two-8800-teu-container-ships/",
-      "publishedAt": "2026-10-30T17:00:40Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/Savannah-Express-300x225.jpg",
-      "summary": "SFL Corporation has agreed to acquire two 8,800 TEU container vessels scheduled for delivery in 2027. The company will also acquire a 93,000-cubic-metre dual-fuel Very Large Ammonia Carrier, which is due for delivery in 2028. The three vessels have an aggregate acquisition cost of approximately US$365 million. SFL...",
-      "body": "SFL Corporation has agreed to acquire two 8,800 TEU container vessels scheduled for delivery in 2027. The company will also acquire a 93,000-cubic-metre dual-fuel Very Large Ammonia Carrier, which is due for delivery in 2028. The three vessels have an aggregate acquisition cost of approximately US$365 million. SFL has secured minimum eight-year time charters for the two container ships with an unnamed leading liner company. The charters will begin when the vessels are delivered. The agreements include extension options covering up to four additional years. The charterer will also have options to purchase the vessels at the end of years eight, 10 and 12, subject to a profit-sharing arrangement with SFL. Charters add US$333 million to backlog The new ammonia carrier has been chartered to a global commodities company for a minimum period of five years from delivery. The agreement may be extended by up to two years. During the final two years of the firm charter period, the charterer will also have an option to arrange a sale of the vessel under a profit-sharing mechanism with SFL. Together, the new charter agreements will add at least US$333 million to SFL’s fixed-rate charter backlog. The total could increase if the charterers exercise their extension options. “We are pleased to continue building the asset portfolio, combining newbuilds with early delivery and charters to existing high-quality counterparties,” said Ole B. Hjertaker, CEO of SFL Management. “With the acquisitions and new charters announced so far this year, we have added more than US$1.6 billion to our fixed-rate charter backlog,” he added.",
-      "takeaways": [
-        "SFL Corporation has agreed to acquire two 8,800 TEU container vessels scheduled for delivery in 2027.",
-        "The company will also acquire a 93,000-cubic-metre dual-fuel Very Large Ammonia Carrier, which is due for delivery in 2028.",
-        "The three vessels have an aggregate acquisition cost of approximately US$365 million."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
     },
     {
       "id": "SN-06C18D6E76",
@@ -1581,7 +1615,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2026/10/Veritas-Tankers-Rainbow-order-300x180.jpg",
       "summary": "Swedish shipowner Veritas Tankers has placed an order for up to six 13,000 dwt stainless steel chemical tankers at China’s Nantong Rainbow Offshore & Engineering Equipment, in a deal potentially worth $248m. The yard’s Shenzhen-listed parent, Jiangsu Rainbow Heavy Industries, confirmed the contract with an unnamed...",
-      "body": "Europe Greater China Shipyards Tankers Swedish owner Veritas books up to six chemical tankers in China Adis Ajdin October 30, 2026 0 670 1 minute read Nantong Rainbow Offshore & Engineering Equipment Nantong Rainbow Offshore & Engineering Equipment Swedish shipowner Veritas Tankers has placed an order for up to six 13,000 dwt stainless steel chemical tankers at China’s Nantong Rainbow Offshore & Engineering Equipment, in a deal potentially worth $248m. The yard’s Shenzhen-listed parent, Jiangsu Rainbow Heavy Industries, confirmed the contract with an unnamed European owner in a stock exchange filing, putting the total value of the six-ship package, including options, at CNY1.5bn to CNY1.65bn ($225m to $248m). Shipbroking sources identify Sweden’s Rederi AB Veritas Tankers as the buyer, although the shipowner has not publicly confirmed its involvement. Rainbow has withheld the customer’s identity on commercial confidentiality grounds. The Chinese group has not specified how many vessels are firm and how many remain optional, but said deliveries are scheduled to begin 28 months after the contract is signed. The newbuildings are intended for parcel chemical trades, with designs suited to restricted waterways and operating conditions in northern Europe. For Rainbow, the deal adds another European customer to its chemical tanker business. The Nantong yard previously secured a contract from Germany’s John T. Essberger for two firm 13,000 dwt stainless steel chemical tankers and four options, with deliveries starting in 2027. That programme, covered by Splash in September 2024, forms part of Essberger’s fleet renewal drive and its investment in the E&S Tankers Pool operated with Stolt Tankers. Since 2022, Ove Johnsson has wholly owned and controlled Veritas Tankers. The company operates a fleet of five chemical tankers. Tags Sweden Adis Ajdin October 30, 2026 0 670 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Greater China Shipyards Tankers Swedish owner Veritas books up to six chemical tankers in China Adis Ajdin October 30, 2026 0 853 1 minute read Nantong Rainbow Offshore & Engineering Equipment Nantong Rainbow Offshore & Engineering Equipment Swedish shipowner Veritas Tankers has placed an order for up to six 13,000 dwt stainless steel chemical tankers at China’s Nantong Rainbow Offshore & Engineering Equipment, in a deal potentially worth $248m. The yard’s Shenzhen-listed parent, Jiangsu Rainbow Heavy Industries, confirmed the contract with an unnamed European owner in a stock exchange filing, putting the total value of the six-ship package, including options, at CNY1.5bn to CNY1.65bn ($225m to $248m). Shipbroking sources identify Sweden’s Rederi AB Veritas Tankers as the buyer, although the shipowner has not publicly confirmed its involvement. Rainbow has withheld the customer’s identity on commercial confidentiality grounds. The Chinese group has not specified how many vessels are firm and how many remain optional, but said deliveries are scheduled to begin 28 months after the contract is signed. The newbuildings are intended for parcel chemical trades, with designs suited to restricted waterways and operating conditions in northern Europe. For Rainbow, the deal adds another European customer to its chemical tanker business. The Nantong yard previously secured a contract from Germany’s John T. Essberger for two firm 13,000 dwt stainless steel chemical tankers and four options, with deliveries starting in 2027. That programme, covered by Splash in September 2024, forms part of Essberger’s fleet renewal drive and its investment in the E&S Tankers Pool operated with Stolt Tankers. Since 2022, Ove Johnsson has wholly owned and controlled Veritas Tankers. The company operates a fleet of five chemical tankers. Tags Sweden Adis Ajdin October 30, 2026 0 853 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Shipbroking sources identify Sweden’s Rederi AB Veritas Tankers as the buyer, although the shipowner has not publicly confirmed its involvement.",
         "Rainbow has withheld the customer’s identity on commercial confidentiality grounds.",
@@ -1651,7 +1685,7 @@
       "navarea": "III",
       "image": "https://splash247.com/wp-content/uploads/2017/12/dajin-heavy-e1782191774473-300x178.jpg",
       "summary": "Greek shipowner Evalend Shipping has been linked to the decision not to exercise an option for a fourth 211,000 dwt newcastlemax bulker at China’s Dajin Heavy Industry, removing a potential CNY525m ($78m) vessel from the yard’s order pipeline. Dajin disclosed that the option under a three-plus-one shipbuilding...",
-      "body": "Dry Cargo Europe Greater China Shipyards Evalend drops newcastlemax option at Dajin Heavy Adis Ajdin October 30, 2026 0 461 1 minute read Greek shipowner Evalend Shipping has been linked to the decision not to exercise an option for a fourth 211,000 dwt newcastlemax bulker at China’s Dajin Heavy Industry, removing a potential CNY525m ($78m) vessel from the yard’s order pipeline. Dajin disclosed that the option under a three-plus-one shipbuilding agreement signed in July had expired and that the Greek customer had elected not to proceed after discussions between the parties. The three firm ships, valued at a combined CNY1.575bn (about $235m), remain on order at subsidiary Tangshan Dajin, with completion scheduled across 2029 and 2030. The original deal carried a maximum value of CNY2.1bn ($313m) if the additional ship was declared. The yard said the decision does not constitute a contractual breach or trigger penalties. Dajin also expects no material impact on its production schedule or 2026 financial performance. The Chinese group did not identify the customer in its filing. However, Chinese shipbuilding market reports have linked the contract to Kriton Lendoudis-led Evalend Shipping. Splash covered the original agreement in July when Evalend emerged as the reported buyer of the three-plus-one series, marking the Greek owner’s entry into the newcastlemax sector. The group has since been linked to further tanker and bulk carrier investments in Asia, including a quartet of LR1 product tankers at Yangzijiang Shipbuilding. Other Greek owners have also turned to Dajin for newcastlemax tonnage. John Coustas-led Danaos Corporation has four 211,000 dwt vessels on order for delivery in 2028, while the Adrianopoulos family’s Cape Shipping has booked a pair of the same size for 2029 in a deal worth around $153m. The two programmes represent a combined investment of about $450m. Tags Greece Adis Ajdin October 30, 2026 0 461 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Dry Cargo Europe Greater China Shipyards Evalend drops newcastlemax option at Dajin Heavy Adis Ajdin October 30, 2026 0 583 1 minute read Greek shipowner Evalend Shipping has been linked to the decision not to exercise an option for a fourth 211,000 dwt newcastlemax bulker at China’s Dajin Heavy Industry, removing a potential CNY525m ($78m) vessel from the yard’s order pipeline. Dajin disclosed that the option under a three-plus-one shipbuilding agreement signed in July had expired and that the Greek customer had elected not to proceed after discussions between the parties. The three firm ships, valued at a combined CNY1.575bn (about $235m), remain on order at subsidiary Tangshan Dajin, with completion scheduled across 2029 and 2030. The original deal carried a maximum value of CNY2.1bn ($313m) if the additional ship was declared. The yard said the decision does not constitute a contractual breach or trigger penalties. Dajin also expects no material impact on its production schedule or 2026 financial performance. The Chinese group did not identify the customer in its filing. However, Chinese shipbuilding market reports have linked the contract to Kriton Lendoudis-led Evalend Shipping. Splash covered the original agreement in July when Evalend emerged as the reported buyer of the three-plus-one series, marking the Greek owner’s entry into the newcastlemax sector. The group has since been linked to further tanker and bulk carrier investments in Asia, including a quartet of LR1 product tankers at Yangzijiang Shipbuilding. Other Greek owners have also turned to Dajin for newcastlemax tonnage. John Coustas-led Danaos Corporation has four 211,000 dwt vessels on order for delivery in 2028, while the Adrianopoulos family’s Cape Shipping has booked a pair of the same size for 2029 in a deal worth around $153m. The two programmes represent a combined investment of about $450m. Tags Greece Adis Ajdin October 30, 2026 0 583 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Dajin disclosed that the option under a three-plus-one shipbuilding agreement signed in July had expired and that the Greek customer had elected not to proceed after discussions between the parties.",
         "The three firm ships, valued at a combined CNY1.575bn (about $235m), remain on order at subsidiary Tangshan Dajin, with completion scheduled across 2029 and 2030.",
@@ -1687,7 +1721,7 @@
       "navarea": "XI",
       "image": "https://splash247.com/wp-content/uploads/2017/07/yangtze-shipping-e1635767969840-300x171.jpg",
       "summary": "China Merchants-controlled Nanjing Tanker is planning to invest up to RMB191.72m ($28.7m) in ten 4,000 dwt crude oil barges as it moves to upgrade its fleet serving refineries along the Yangtze River. The Shanghai-listed owner has approved the investment through wholly owned subsidiary Nanjing Yangtze River Oil...",
-      "body": "Greater China Tankers China Merchants tanker arm targets Yangtze fleet renewal Adis Ajdin October 30, 2026 0 641 1 minute read China Merchants-controlled Nanjing Tanker is planning to invest up to RMB191.72m ($28.7m) in ten 4,000 dwt crude oil barges as it moves to upgrade its fleet serving refineries along the Yangtze River. The Shanghai-listed owner has approved the investment through wholly owned subsidiary Nanjing Yangtze River Oil Transport Logistics, with Hunan Jinhang Shipbuilding selected to construct the vessels. The barges will be fitted with cargo oil pumps to support self-unloading operations, responding to demand from petrochemical and refinery customers along the waterway. Construction is scheduled to proceed in batches through 2027, according to the company’s filing. The project received unanimous board approval but still requires shareholder consent before proceeding. Nanjing Tanker operates across domestic coastal, river and international oil transportation markets. The China Merchants Group-controlled company has a fleet of more than 70 vessels, including crude and product tankers. The proposed barges form a separate investment from the company’s recently disclosed LR2 tanker expansion at Dalian Shipbuilding Industry Corporation. That four-vessel, methanol-ready LR2 programme was previously reported by Splash. Adis Ajdin October 30, 2026 0 641 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Greater China Tankers China Merchants tanker arm targets Yangtze fleet renewal Adis Ajdin October 30, 2026 0 869 1 minute read China Merchants-controlled Nanjing Tanker is planning to invest up to RMB191.72m ($28.7m) in ten 4,000 dwt crude oil barges as it moves to upgrade its fleet serving refineries along the Yangtze River. The Shanghai-listed owner has approved the investment through wholly owned subsidiary Nanjing Yangtze River Oil Transport Logistics, with Hunan Jinhang Shipbuilding selected to construct the vessels. The barges will be fitted with cargo oil pumps to support self-unloading operations, responding to demand from petrochemical and refinery customers along the waterway. Construction is scheduled to proceed in batches through 2027, according to the company’s filing. The project received unanimous board approval but still requires shareholder consent before proceeding. Nanjing Tanker operates across domestic coastal, river and international oil transportation markets. The China Merchants Group-controlled company has a fleet of more than 70 vessels, including crude and product tankers. The proposed barges form a separate investment from the company’s recently disclosed LR2 tanker expansion at Dalian Shipbuilding Industry Corporation. That four-vessel, methanol-ready LR2 programme was previously reported by Splash. Adis Ajdin October 30, 2026 0 869 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The Shanghai-listed owner has approved the investment through wholly owned subsidiary Nanjing Yangtze River Oil Transport Logistics, with Hunan Jinhang Shipbuilding selected to construct the vessels.",
         "The barges will be fitted with cargo oil pumps to support self-unloading operations, responding to demand from petrochemical and refinery customers along the waterway.",
@@ -1821,7 +1855,7 @@
       "navarea": "III",
       "image": "https://splash247.com/wp-content/uploads/2026/10/CGT-300x180.jpg",
       "summary": "One of the largest coordinated port labour mobilisations in history is underway today, with more than 25 unions staging strikes and demonstrations at 113 ports across 22 countries and territories. The worldwide action, organised under the banner “Dockworkers do not work for war”, has expanded dramatically from a...",
-      "body": "Ports and Logistics Dockworkers unite across 113 ports in global anti-war protest Sam Chambers October 30, 2026 0 1,435 1 minute read CGT CGT One of the largest coordinated port labour mobilisations in history is underway today, with more than 25 unions staging strikes and demonstrations at 113 ports across 22 countries and territories. The worldwide action, organised under the banner “Dockworkers do not work for war”, has expanded dramatically from a smaller mobilisation involving 20 ports across seven countries in February. Major gateways involved include Hamburg, Le Havre, Marseille, Genoa, Gioia Tauro, Piraeus, Tangier Med, Mersin and India’s Nhava Sheva. France’s CGT has called a 24-hour walkout across approximately 24 ports, predicting that as much as 95% of national port activity could be halted. Italy has registered a nationwide 24-hour ports strike, coinciding with a general strike affecting other transport sectors. In Greece, seafarers’ unions have called 24-hour stoppages expected to disrupt ferry services at Piraeus, Rafina, Lavrio, Patras and Igoumenitsa. Organisers estimate that participating unions represent workers handling around 40% of Mediterranean container traffic, with up to 40,000 containers potentially delayed.< However, the actual disruption remains uncertain. Some ports are holding demonstrations rather than stopping cargo operations, while Genoa’s port authority anticipates relatively limited disruption. The campaign primarily opposes military cargo shipments through civilian ports, alongside demands for improved wages, working conditions and protections against automation. Although unprecedented in scale for this particular campaign, claims that it is the world’s largest port strike remain unverified. An international solidarity campaign for Liverpool dockworkers in January 1997 involved 105 ports and cities across 27 countries. No further worldwide coordinated strike date has been announced. Separately, a potential November 1 strike involving 250 port watchmen threatens operations at Los Angeles and Long Beach, although negotiations to avert the stoppage are continuing. Italy also faces another national general strike on November 20. Sam Chambers October 30, 2026 0 1,435 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Ports and Logistics Dockworkers unite across 113 ports in global anti-war protest Sam Chambers October 30, 2026 0 1,684 1 minute read CGT CGT One of the largest coordinated port labour mobilisations in history is underway today, with more than 25 unions staging strikes and demonstrations at 113 ports across 22 countries and territories. The worldwide action, organised under the banner “Dockworkers do not work for war”, has expanded dramatically from a smaller mobilisation involving 20 ports across seven countries in February. Major gateways involved include Hamburg, Le Havre, Marseille, Genoa, Gioia Tauro, Piraeus, Tangier Med, Mersin and India’s Nhava Sheva. France’s CGT has called a 24-hour walkout across approximately 24 ports, predicting that as much as 95% of national port activity could be halted. Italy has registered a nationwide 24-hour ports strike, coinciding with a general strike affecting other transport sectors. In Greece, seafarers’ unions have called 24-hour stoppages expected to disrupt ferry services at Piraeus, Rafina, Lavrio, Patras and Igoumenitsa. Organisers estimate that participating unions represent workers handling around 40% of Mediterranean container traffic, with up to 40,000 containers potentially delayed.< However, the actual disruption remains uncertain. Some ports are holding demonstrations rather than stopping cargo operations, while Genoa’s port authority anticipates relatively limited disruption. The campaign primarily opposes military cargo shipments through civilian ports, alongside demands for improved wages, working conditions and protections against automation. Although unprecedented in scale for this particular campaign, claims that it is the world’s largest port strike remain unverified. An international solidarity campaign for Liverpool dockworkers in January 1997 involved 105 ports and cities across 27 countries. No further worldwide coordinated strike date has been announced. Separately, a potential November 1 strike involving 250 port watchmen threatens operations at Los Angeles and Long Beach, although negotiations to avert the stoppage are continuing. Italy also faces another national general strike on November 20. Sam Chambers October 30, 2026 0 1,684 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The worldwide action, organised under the banner “Dockworkers do not work for war”, has expanded dramatically from a smaller mobilisation involving 20 ports across seven countries in February.",
         "Major gateways involved include Hamburg, Le Havre, Marseille, Genoa, Gioia Tauro, Piraeus, Tangier Med, Mersin and India’s Nhava Sheva.",
@@ -1892,7 +1926,7 @@
       "navarea": "IX",
       "image": "https://splash247.com/wp-content/uploads/2023/07/Shell-logo-300x180.jpg",
       "summary": "Soaring tanker freight rates are taking an increasingly heavy toll on the world’s oil majors, with the latest quarterly results revealing billions of dollars in additional shipping-related liabilities, squeezed refining margins and losses on trading positions. Shell has disclosed a $5.4bn non-cash increase in its...",
-      "body": "Europe Tankers Oil majors count the cost of runaway tanker rates Sam Chambers October 30, 2026 0 1,484 2 minutes read Shell Shell Soaring tanker freight rates are taking an increasingly heavy toll on the world’s oil majors, with the latest quarterly results revealing billions of dollars in additional shipping-related liabilities, squeezed refining margins and losses on trading positions. Shell has disclosed a $5.4bn non-cash increase in its shipping lease liabilities during the third quarter, reflecting the extraordinary rise in tanker rates since the outbreak of the Middle East conflict. The accounting adjustment relates to index-linked vessel charters, which must be revalued using prevailing spot rates. Shell’s shipping lease liabilities have increased by nearly $7.7bn since the beginning of the year, although the company stressed that the revaluations do not represent immediate cash expenditure. Oil majors: VLCC earnings this month were 14 times their ten-year average Shell chief financial officer Sinead Gorman said freight rates between the Middle East and China were now around ten times their levels a year ago. “You see that starting to come into margins,” she told analysts, adding that higher transportation costs were affecting refining, chemicals and crude trading. The British major nevertheless reported adjusted third-quarter earnings of $10.8bn, more than double the year-earlier figure, benefiting from exceptionally strong refining margins. At TotalEnergies, chief executive Patrick Pouyanné revealed that shipping costs, previously around $2 to $3 per barrel, had climbed to approximately $25 per barrel. Pouyanné attributed around $6 per barrel of pressure on the company’s liquids price realisations to additional freight costs. The French major has some protection through its chartering strategy, with fixed-rate medium- and long-term agreements covering approximately 40% of the equity crude it lifts. Pouyanné said having tankers available at agreed rates had also allowed the company’s traders to profit from moving Iraqi crude through the Strait of Hormuz. Italian energy giant Eni has similarly acknowledged that rising shipping costs are eating into its refining earnings The company reported third-quarter refining adjusted operating profit of €730m, supported by strong margins and increased refinery utilisation, but said the gains were partly offset by higher freight costs and unfavourable crude differentials. Eni executive Pino Ricci confirmed that the company’s refining margin calculations incorporated the sharp increase in transportation costs resulting from the Hormuz crisis. Norway’s Equinor has reported a more direct trading impact. Its crude, products and liquids business swung to an adjusted operating loss of $96m in the third quarter, compared with a $355m profit in the preceding three months. Equinor attributed the deterioration to losses on derivative positions in the exceptionally tight shipping market, which more than offset strong products trading. The Norwegian major also identified increased freight rates as an important contributor to higher operating expenses during the first nine months of 2026. Oil majors hoping for some freight rate reprieve would have been disappointed with the bullish mood at this week’s Maritime CEO Forum in Monaco where tanker owners appeared in no hurry to call the top of the market. Arrow researcher Burak Cetinok calculated that VLCC earnings this month were 14 times their ten-year average, with the weekly multiple approaching 20, but saw no immediate sell signal. DHT Holdings chief executive Svein Moxnes Harfjeld argued that fleet ageing would help underpin the market. By the end of 2029, almost half the VLCC fleet will be over 15 years old and a quarter over 20, creating substantial replacement requirements. Alberta Shipmanagement’s Alexia Inglessis pointed to recovering Middle Eastern oil flows, stronger Chinese demand, depleted inventories and sanctions-related inefficiencies. “I think we have a lot of things that point to a good market for the short to medium term,” she said. Tags France Italy Monaco Norway United Kingdom Sam Chambers October 30, 2026 0 1,484 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Tankers Oil majors count the cost of runaway tanker rates Sam Chambers October 30, 2026 0 1,803 2 minutes read Shell Shell Soaring tanker freight rates are taking an increasingly heavy toll on the world’s oil majors, with the latest quarterly results revealing billions of dollars in additional shipping-related liabilities, squeezed refining margins and losses on trading positions. Shell has disclosed a $5.4bn non-cash increase in its shipping lease liabilities during the third quarter, reflecting the extraordinary rise in tanker rates since the outbreak of the Middle East conflict. The accounting adjustment relates to index-linked vessel charters, which must be revalued using prevailing spot rates. Shell’s shipping lease liabilities have increased by nearly $7.7bn since the beginning of the year, although the company stressed that the revaluations do not represent immediate cash expenditure. Oil majors: VLCC earnings this month were 14 times their ten-year average Shell chief financial officer Sinead Gorman said freight rates between the Middle East and China were now around ten times their levels a year ago. “You see that starting to come into margins,” she told analysts, adding that higher transportation costs were affecting refining, chemicals and crude trading. The British major nevertheless reported adjusted third-quarter earnings of $10.8bn, more than double the year-earlier figure, benefiting from exceptionally strong refining margins. At TotalEnergies, chief executive Patrick Pouyanné revealed that shipping costs, previously around $2 to $3 per barrel, had climbed to approximately $25 per barrel. Pouyanné attributed around $6 per barrel of pressure on the company’s liquids price realisations to additional freight costs. The French major has some protection through its chartering strategy, with fixed-rate medium- and long-term agreements covering approximately 40% of the equity crude it lifts. Pouyanné said having tankers available at agreed rates had also allowed the company’s traders to profit from moving Iraqi crude through the Strait of Hormuz. Italian energy giant Eni has similarly acknowledged that rising shipping costs are eating into its refining earnings The company reported third-quarter refining adjusted operating profit of €730m, supported by strong margins and increased refinery utilisation, but said the gains were partly offset by higher freight costs and unfavourable crude differentials. Eni executive Pino Ricci confirmed that the company’s refining margin calculations incorporated the sharp increase in transportation costs resulting from the Hormuz crisis. Norway’s Equinor has reported a more direct trading impact. Its crude, products and liquids business swung to an adjusted operating loss of $96m in the third quarter, compared with a $355m profit in the preceding three months. Equinor attributed the deterioration to losses on derivative positions in the exceptionally tight shipping market, which more than offset strong products trading. The Norwegian major also identified increased freight rates as an important contributor to higher operating expenses during the first nine months of 2026. Oil majors hoping for some freight rate reprieve would have been disappointed with the bullish mood at this week’s Maritime CEO Forum in Monaco where tanker owners appeared in no hurry to call the top of the market. Arrow researcher Burak Cetinok calculated that VLCC earnings this month were 14 times their ten-year average, with the weekly multiple approaching 20, but saw no immediate sell signal. DHT Holdings chief executive Svein Moxnes Harfjeld argued that fleet ageing would help underpin the market. By the end of 2029, almost half the VLCC fleet will be over 15 years old and a quarter over 20, creating substantial replacement requirements. Alberta Shipmanagement’s Alexia Inglessis pointed to recovering Middle Eastern oil flows, stronger Chinese demand, depleted inventories and sanctions-related inefficiencies. “I think we have a lot of things that point to a good market for the short to medium term,” she said. Tags France Italy Monaco Norway United Kingdom Sam Chambers October 30, 2026 0 1,803 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Shell has disclosed a $5.4bn non-cash increase in its shipping lease liabilities during the third quarter, reflecting the extraordinary rise in tanker rates since the outbreak of the Middle East conflict.",
         "The accounting adjustment relates to index-linked vessel charters, which must be revalued using prevailing spot rates.",
@@ -1929,7 +1963,7 @@
       "navarea": "XI",
       "image": "https://splash247.com/wp-content/uploads/2026/10/Monaco-2026-3-300x191.jpg",
       "summary": "Shipping investors are enjoying extraordinary returns but face increasingly difficult decisions over when to cash out, with industry leaders warning that geopolitical disruption is masking underlying market risks and encouraging potentially dangerous investment decisions. Speaking at the Money and Ships session of...",
-      "body": "Europe Finance and Insurance Maritime CEO Maritime CEO Forum: When to leave the party Splash October 30, 2026 0 689 2 minutes read Splash Splash Shipping investors are enjoying extraordinary returns but face increasingly difficult decisions over when to cash out, with industry leaders warning that geopolitical disruption is masking underlying market risks and encouraging potentially dangerous investment decisions. Speaking at the Money and Ships session of this week’s Maritime CEO Forum at the Yacht Club de Monaco, Christoph Toepfer, chief executive of Borealis Maritime, warned that shipping was “living on borrowed time” as conflicts and trade disruptions continue to inflate tonne-mile demand. “I always enjoy staying late at the party,” Toepfer said, before suggesting that the resolution of geopolitical crises could rapidly unwind some of the demand supporting today’s markets. Andy Dacy, CEO and CIO of JP Morgan Asset Management’s Global Transportation Group, was more optimistic, suggesting shipping had another 12 to 18 months of strong earnings ahead. “We’re on a plateau of some sort for at least the foreseeable future,” he said. Dacy pointed to the enormous number of vessels delivered between 2004 and 2012 that will approach recycling age over the coming years, providing a potential counterweight to any reduction in geopolitical disruption. “We have at least another 12 to 18 months of good times ahead of us based on bad things, of course,” he observed. CTM chief executive Carlos Pena was less convinced about current tanker valuations, suggesting owners should consider selling VLCCs at today’s elevated prices while remaining invested in dry bulk, which has yet to enjoy comparable earnings. The discussion, moderated by TURTLE chief executive Isabelle Rickmers, also revealed sharply contrasting definitions of successful investment. Toepfer recalled turning a $10m investment in a containership into $37m before reinvesting the proceeds in two large anchor handlers, subsequently sold for $130m. Pena argued that sometimes the best investment decision was accepting substantial losses early. Closing expensive charter positions had allowed CTM to survive and develop its pool operations. “You need to have courage and lose money,” Pena said. Massimo Giovannini, managing partner of TST Group, agreed, recalling his decision not to buy six Korean-built handysizes at approximately $17m apiece in 2014, ahead of years of depressed dry bulk earnings. Despite expectations of another downturn, the panellists were divided over whether shipping would experience another genuine financial crisis. Toepfer argued that strong balance sheets, abundant cash and low leverage would prevent widespread distress, with investors ready to acquire vessels whenever prices weakened. “I don’t think we will see a proper distressed market in the next 10 years,” he said, suggesting listed shipping companies might offer greater discounts than privately owned vessels during the next downturn. Dacy was more cautious, predicting a downturn within five years while highlighting how shipping’s reduced borrowing requirements had insulated it from intensifying competition for capital. “AI is sucking up capital across the board,” he warned, although shipowners currently have sufficient cash to repay debt rather than seek additional financing. Pena stressed that financing remained available for attractive projects but advised newcomers to shipping to gain experience before committing capital at today’s prices. The panellists also identified protectionism, a possible Taiwan crisis and speculative newbuilding orders as major threats, particularly unfixed containerships and car carriers scheduled for delivery several years from now. This year’s Maritime CEO Forum was sponsored by: Tags Monaco Splash October 30, 2026 0 689 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Finance and Insurance Maritime CEO Maritime CEO Forum: When to leave the party Splash October 30, 2026 0 812 2 minutes read Splash Splash Shipping investors are enjoying extraordinary returns but face increasingly difficult decisions over when to cash out, with industry leaders warning that geopolitical disruption is masking underlying market risks and encouraging potentially dangerous investment decisions. Speaking at the Money and Ships session of this week’s Maritime CEO Forum at the Yacht Club de Monaco, Christoph Toepfer, chief executive of Borealis Maritime, warned that shipping was “living on borrowed time” as conflicts and trade disruptions continue to inflate tonne-mile demand. “I always enjoy staying late at the party,” Toepfer said, before suggesting that the resolution of geopolitical crises could rapidly unwind some of the demand supporting today’s markets. Andy Dacy, CEO and CIO of JP Morgan Asset Management’s Global Transportation Group, was more optimistic, suggesting shipping had another 12 to 18 months of strong earnings ahead. “We’re on a plateau of some sort for at least the foreseeable future,” he said. Dacy pointed to the enormous number of vessels delivered between 2004 and 2012 that will approach recycling age over the coming years, providing a potential counterweight to any reduction in geopolitical disruption. “We have at least another 12 to 18 months of good times ahead of us based on bad things, of course,” he observed. CTM chief executive Carlos Pena was less convinced about current tanker valuations, suggesting owners should consider selling VLCCs at today’s elevated prices while remaining invested in dry bulk, which has yet to enjoy comparable earnings. The discussion, moderated by TURTLE chief executive Isabelle Rickmers, also revealed sharply contrasting definitions of successful investment. Toepfer recalled turning a $10m investment in a containership into $37m before reinvesting the proceeds in two large anchor handlers, subsequently sold for $130m. Pena argued that sometimes the best investment decision was accepting substantial losses early. Closing expensive charter positions had allowed CTM to survive and develop its pool operations. “You need to have courage and lose money,” Pena said. Massimo Giovannini, managing partner of TST Group, agreed, recalling his decision not to buy six Korean-built handysizes at approximately $17m apiece in 2014, ahead of years of depressed dry bulk earnings. Despite expectations of another downturn, the panellists were divided over whether shipping would experience another genuine financial crisis. Toepfer argued that strong balance sheets, abundant cash and low leverage would prevent widespread distress, with investors ready to acquire vessels whenever prices weakened. “I don’t think we will see a proper distressed market in the next 10 years,” he said, suggesting listed shipping companies might offer greater discounts than privately owned vessels during the next downturn. Dacy was more cautious, predicting a downturn within five years while highlighting how shipping’s reduced borrowing requirements had insulated it from intensifying competition for capital. “AI is sucking up capital across the board,” he warned, although shipowners currently have sufficient cash to repay debt rather than seek additional financing. Pena stressed that financing remained available for attractive projects but advised newcomers to shipping to gain experience before committing capital at today’s prices. The panellists also identified protectionism, a possible Taiwan crisis and speculative newbuilding orders as major threats, particularly unfixed containerships and car carriers scheduled for delivery several years from now. This year’s Maritime CEO Forum was sponsored by: Tags Monaco Splash October 30, 2026 0 812 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "“I always enjoy staying late at the party,” Toepfer said, before suggesting that the resolution of geopolitical crises could rapidly unwind some of the demand supporting today’s markets.",
         "Andy Dacy, CEO and CIO of JP Morgan Asset Management’s Global Transportation Group, was more optimistic, suggesting shipping had another 12 to 18 months of strong earnings ahead.",
@@ -1937,39 +1971,6 @@
       ],
       "readingMinutes": 3,
       "readMinutes": 3
-    },
-    {
-      "id": "SN-E228E94286",
-      "title": "Four things to watch in shipping and energy if Middle East conflict resumes",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/security/four-things-to-watch-in-shipping-and-energy-if-middle-east-conflict-resumes",
-      "publishedAt": "2026-10-30T08:05:42Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "lng",
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltd19d0b0e82ace7ff/69a78d22381384f4a599cd69/DHT-VLCC-credit-DHT-Holdings.jpg?width=720&quality=80&disable=upscale",
-      "summary": "Crude oil flows have been recovering from the Middle East, however the story for LNG and product exports has been less positive",
-      "body": "Crude oil flows have been recovering from the Middle East, however the story for LNG and product exports has been less positive",
-      "takeaways": [
-        "Crude oil flows have been recovering from the Middle East, however the story for LNG and product exports has been less positive",
-        "Operational Area: Global Maritime.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
     }
   ]
 }
