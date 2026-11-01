@@ -3413,9 +3413,12 @@ function initHomeHudVessel() {
   fillVesselFormsFromState();
   if (typeof scheduleOwnVesselAisRefresh === "function") scheduleOwnVesselAisRefresh();
 
+  const pillHost = document.getElementById("homeVesselHudPill");
   const pillBtn = document.getElementById("homeVesselHudBtn");
   const pop = document.getElementById("homeVesselPopover");
   const closeBtn = document.getElementById("homeVesselPopClose");
+  if (pillBtn && pillBtn._homeVesselBound) return;
+  if (pillBtn) pillBtn._homeVesselBound = true;
 
   const placeHomePop = () => {
     if (!pop || !pillBtn) return;
@@ -3433,6 +3436,7 @@ function initHomeHudVessel() {
     pop.style.top = top + "px";
     pop.style.right = right + "px";
     pop.style.left = "auto";
+    pop.style.zIndex = "120000";
   };
   const closeHomePop = () => {
     if (pop) pop.classList.remove("open");
@@ -3455,6 +3459,8 @@ function initHomeHudVessel() {
     bindVesselNameAutocomplete("home");
     bindVesselMmsiLookup("home");
   };
+  window.openHomeVesselPopover = openHomePop;
+  window.closeHomeVesselPopover = closeHomePop;
   window.addEventListener("resize", () => {
     if (pop && pop.classList.contains("open")) placeHomePop();
   });
@@ -3462,14 +3468,35 @@ function initHomeHudVessel() {
     if (pop && pop.classList.contains("open")) placeHomePop();
   }, true);
 
+  const onVesselHudActivate = (e) => {
+    if (!e) return;
+    // Ignore clicks originating inside an already-open panel
+    if (pop && pop.contains(e.target)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+    if (pop && pop.classList.contains("open")) closeHomePop();
+    else openHomePop();
+  };
+  // Capture phase so hero/brand overlays cannot swallow the click first
   if (pillBtn) {
-    pillBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (pop && pop.classList.contains("open")) closeHomePop();
-      else openHomePop();
-    });
+    pillBtn.addEventListener("click", onVesselHudActivate, true);
   }
-  if (closeBtn) closeBtn.addEventListener("click", closeHomePop);
+  if (pillHost) {
+    pillHost.style.pointerEvents = "auto";
+    pillHost.style.zIndex = "81";
+    pillHost.addEventListener("click", (e) => {
+      // Only handle direct pill chrome clicks; button has its own listener
+      if (pillBtn && (e.target === pillBtn || pillBtn.contains(e.target))) return;
+      if (pop && pop.contains(e.target)) return;
+      onVesselHudActivate(e);
+    }, true);
+  }
+  if (closeBtn) closeBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeHomePop();
+  });
 
   const gpsBtn = document.getElementById("homeVesselGpsBtn");
   if (gpsBtn) gpsBtn.addEventListener("click", () => requestGpsIntoForm("home"));
@@ -3483,6 +3510,7 @@ function initHomeHudVessel() {
     if (e.defaultPrevented) return;
     if (pop.contains(e.target)) return;
     if (pillBtn && (e.target === pillBtn || pillBtn.contains(e.target))) return;
+    if (pillHost && (e.target === pillHost || pillHost.contains(e.target))) return;
     if (e.target && e.target.closest && e.target.closest(".vessel-more-details, .vessel-more-toggle")) return;
     closeHomePop();
   });
@@ -8344,6 +8372,50 @@ function setrouteDijkstraRun(startNode, endNode, adj, opts, asyncCfg) {
 
   // Fast path: no live storms → classic static Dijkstra on adj.cost
   if (!timedWx) {
+    const runStatic = async () => {
+      const dists = {};
+      const prev = {};
+      const visited = new Set();
+      Object.keys(MARITIME_SEA_NODES).forEach((k) => { dists[k] = Infinity; prev[k] = null; });
+      dists[startNode] = 0;
+      const keys = Object.keys(MARITIME_SEA_NODES);
+      for (let step = 0; step < keys.length; step++) {
+        if (opts.abortToken != null && setrouteIsAborted(opts.abortToken)) return null;
+        if (asyncCfg && step > 0 && step % 80 === 0) {
+          await new Promise((r) => setTimeout(r, 0));
+          if (opts.abortToken != null && setrouteIsAborted(opts.abortToken)) return null;
+        }
+        let u = null;
+        let uDist = Infinity;
+        for (const k of keys) {
+          if (!visited.has(k) && dists[k] < uDist) { uDist = dists[k]; u = k; }
+        }
+        if (u === null || uDist === Infinity) break;
+        if (u === endNode) break;
+        visited.add(u);
+        for (const edge of adj[u] || []) {
+          if (visited.has(edge.node)) continue;
+          const alt = dists[u] + edge.cost;
+          if (alt < dists[edge.node]) {
+            dists[edge.node] = alt;
+            prev[edge.node] = u;
+          }
+        }
+      }
+      if (dists[endNode] === Infinity) return null;
+      const path = [];
+      let curr = endNode;
+      while (curr) { path.unshift(curr); curr = prev[curr]; }
+      if (path[0] !== startNode) return null;
+      setrouteDijkstra._lastMeta = {
+        cost: dists[endNode],
+        arrivalH: t0 + setroutePathCostNM(path) / speed,
+        stormPenalty: 0
+      };
+      return path;
+    };
+    if (asyncCfg) return runStatic();
+    // sync (no yields) — still honor abort between steps without await
     const dists = {};
     const prev = {};
     const visited = new Set();
@@ -8351,6 +8423,7 @@ function setrouteDijkstraRun(startNode, endNode, adj, opts, asyncCfg) {
     dists[startNode] = 0;
     const keys = Object.keys(MARITIME_SEA_NODES);
     for (let step = 0; step < keys.length; step++) {
+      if (opts.abortToken != null && setrouteIsAborted(opts.abortToken)) return null;
       let u = null;
       let uDist = Infinity;
       for (const k of keys) {
@@ -8368,17 +8441,17 @@ function setrouteDijkstraRun(startNode, endNode, adj, opts, asyncCfg) {
         }
       }
     }
-    if (dists[endNode] === Infinity) return finishSyncOrAsync(null);
+    if (dists[endNode] === Infinity) return null;
     const path = [];
     let curr = endNode;
     while (curr) { path.unshift(curr); curr = prev[curr]; }
-    if (path[0] !== startNode) return finishSyncOrAsync(null);
+    if (path[0] !== startNode) return null;
     setrouteDijkstra._lastMeta = {
       cost: dists[endNode],
       arrivalH: t0 + setroutePathCostNM(path) / speed,
       stormPenalty: 0
     };
-    return finishSyncOrAsync(path);
+    return path;
   }
 
   const runTimed = async () => {
@@ -8500,10 +8573,12 @@ function setrouteDijkstraRun(startNode, endNode, adj, opts, asyncCfg) {
         };
       }
       if (yieldEvery && expansions % yieldEvery === 0) {
+        if (opts && opts.abortToken != null && setrouteIsAborted(opts.abortToken)) return null;
         await new Promise((r) => setTimeout(r, 0));
       }
     }
 
+    if (opts && opts.abortToken != null && setrouteIsAborted(opts.abortToken)) return null;
     const endLabs = (labels[endNode] || []).filter((l) => !l.dead);
     if (!endLabs.length) return null;
     endLabs.sort((a, b) => a.cost - b.cost || a.t - b.t);
@@ -9362,13 +9437,15 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
   };
 
   const searchOnceAsync = async (stormWeight) => {
+    if (options.abortToken != null && setrouteIsAborted(options.abortToken)) return { p: null };
     const dOpts = {
       speedKnots: speed,
       stormWeight: stormWeight,
       t0Hours: t0,
       maxLabels: 7,
       maxExpansions: 420000,
-      _asyncPlanning: wantAsync
+      _asyncPlanning: wantAsync,
+      abortToken: options.abortToken
     };
     if (typeof window !== "undefined") {
       window.SETROUTE_PLAN_PROGRESS = {
@@ -10142,8 +10219,18 @@ async function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCo
     speedKnots: spd,
     t0Hours: Number(routeOpts.t0Hours) || 0,
     asyncPlanning: asyncPlanning,
-    stormAvoidIters: Number(routeOpts.stormAvoidIters) || 5
+    stormAvoidIters: Number(routeOpts.stormAvoidIters) || 5,
+    abortToken: routeOpts.abortToken
   }));
+  if (routeOpts.abortToken != null && setrouteIsAborted(routeOpts.abortToken)) {
+    return {
+      name: "Stopped",
+      waypoints: [],
+      totalDistanceNM: 0,
+      steamingDays: 0,
+      metadata: { coreARefused: true, aborted: true }
+    };
+  }
   const waypoints = [];
 
   waypoints.push({
@@ -15646,6 +15733,47 @@ document.addEventListener("DOMContentLoaded", () => {
 const SETSAIL_ROUTES_LIBRARY_KEY = "setsail_routes_library_v1";
 window.SETROUTE_BRAIN_MODE = "planning";
 window.SETROUTE_PENDING_CONTEXT = null;
+window.SETROUTE_ABORT_GEN = 0;
+window.SETROUTE_BUSY = false;
+
+const SETROUTE_SEND_ICON_ARROW =
+  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>';
+const SETROUTE_SEND_ICON_STOP =
+  '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"/></svg>';
+
+function setrouteIsAborted(token) {
+  return Number(window.SETROUTE_ABORT_GEN) !== Number(token);
+}
+
+function setrouteBeginWork() {
+  const token = Number(window.SETROUTE_ABORT_GEN) || 0;
+  window.SETROUTE_BUSY = true;
+  setrouteSetComposerBusy(true);
+  return token;
+}
+
+function setrouteEndWork() {
+  window.SETROUTE_BUSY = false;
+  setrouteSetComposerBusy(false);
+}
+
+function setrouteAbortWork() {
+  window.SETROUTE_ABORT_GEN = (Number(window.SETROUTE_ABORT_GEN) || 0) + 1;
+  window.SETROUTE_BUSY = false;
+  setrouteSetComposerBusy(false);
+  try {
+    if (typeof showSetSailToast === "function") showSetSailToast("SetRoute response stopped.", "info");
+  } catch (eAb) {}
+}
+
+function setrouteSetComposerBusy(busy) {
+  const btn = document.getElementById("setRouteChatSendBtn");
+  if (!btn) return;
+  btn.classList.toggle("is-busy", !!busy);
+  btn.setAttribute("aria-label", busy ? "Stop" : "Send");
+  btn.title = busy ? "Stop response" : "Send";
+  btn.innerHTML = busy ? SETROUTE_SEND_ICON_STOP : SETROUTE_SEND_ICON_ARROW;
+}
 
 (function expandGlobalMaritimeGraph() {
   if (typeof MARITIME_SEA_NODES === "undefined" || typeof MARITIME_SEA_EDGES === "undefined") return;
@@ -17000,6 +17128,7 @@ function beginSetRouteLiveLog(titleHtml) {
 }
 
 async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
+  const workToken = setrouteBeginWork();
   const live = beginSetRouteLiveLog(
     `Planning <b>${(pOrig && pOrig.name) || "Origin"}</b> → <b>${(pDest && pDest.name) || "Destination"}</b>`
   );
@@ -17027,6 +17156,10 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
       </div>
     `);
     window.SETROUTE_PENDING_PLAN = { origin: pOrig, dest: pDest, options: Object.assign({}, options) };
+    return null;
+  }
+  if (setrouteIsAborted(workToken)) {
+    live.step("Stopped by user.");
     return null;
   }
   window.SETROUTE_MIN_DEPTH_M = depthPol.minDepthM;
@@ -17111,6 +17244,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
 
   live.step("Core A: starting land-safe corridor search…");
   const progressTimer = setInterval(() => {
+    if (setrouteIsAborted(workToken)) return;
     const p = (typeof window !== "undefined") ? window.SETROUTE_PLAN_PROGRESS : null;
     if (!p) return;
     live.updateLast(friendlySetRoutePlanPhase(p));
@@ -17127,11 +17261,16 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
         templatePath: tmpl && tmpl.nodeKeys,
         templateId: tmpl && tmpl.id,
         asyncPlanning: true,
-        stormAvoidIters: 5
+        stormAvoidIters: 5,
+        abortToken: workToken
       }
     );
   } finally {
     clearInterval(progressTimer);
+  }
+  if (setrouteIsAborted(workToken)) {
+    live.step("Stopped by user.");
+    return null;
   }
   live.step("Primary corridor candidate ready — auditing for land legs / refuse…");
   // Hard gate: only block when Core A produced no usable corridor. Land-leg warnings → prefer recovery, else still publish with audit.
@@ -17323,12 +17462,17 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   if (scrollWrap) scrollWrap.scrollTop = scrollWrap.scrollHeight;
   } finally {
     if (typeof live.done === "function") live.done();
+    setrouteEndWork();
   }
 }
 
 async function handleSetRouteUserMessage(rawText) {
   const text = (rawText || "").trim();
   if (!text) return;
+  if (window.SETROUTE_BUSY) {
+    // New typed message while busy → stop current run, then process the new intent
+    setrouteAbortWork();
+  }
 
   appendChatMessage("user", text);
   window.SETROUTE_CHAT_HISTORY.push({ role: "user", content: text });
@@ -17410,7 +17554,8 @@ Depth policy (mandatory for plan): draftMeters and optional ukcMeters (default U
 
 JSON actions only:
 1) plan: {"action":"plan","origin":"Port","destination":"Port","speedKnots":14.5,"draftMeters":null,"ukcMeters":null,"minDepthM":null,"viaCape":false,"viaSuez":false,"viaPanama":false}
-2) modify: {"action":"modify","speedKnots":16,"draftMeters":12.5,"ukcMeters":4,"minDepthM":null,"sailMode":"GC|RL","viaCape":true|false,"viaSuez":true|false,"viaPanama":true|false,"reverse":false}
+2) modify: {"action":"modify","origin":null,"destination":null,"speedKnots":16,"draftMeters":12.5,"ukcMeters":4,"minDepthM":null,"sailMode":"GC|RL","viaCape":true|false,"viaSuez":true|false,"viaPanama":true|false,"reverse":false}
+   Use modify when an active route exists and the user wants to edit ports, draft/UKC, canal preference, reverse, or speed — Core A will replan geometry when needed.
 3) audit: {"action":"audit"}
 4) resolve_exception: {"action":"resolve_exception","preferVia":"panama|cape|suez|none","avoidNodeKeys":[]}
 5) If the user only asks a seamanship question with no plan/modify intent: answer in <=3 sentences English and omit JSON.
@@ -17500,40 +17645,55 @@ When user says "make the route / сделай маршрут / use defaults" wit
 
   // 3. Execute AI Route Modification if recognized by LLM
   if (aiActionPlan && aiActionPlan.action === "modify" && activeRouteData && Array.isArray(activeRouteData.waypoints)) {
-    // Topology changes (Cape/Suez/reverse with ports) → full Core A replan
-    const needReplan = Boolean(aiActionPlan.viaCape) || Boolean(aiActionPlan.viaSuez) || Boolean(aiActionPlan.reverse);
     const last = window.SETROUTE_LAST_PORTS || {};
-    if (needReplan && last.origin && last.dest) {
-      let o = last.origin;
-      let d = last.dest;
+    const newOriginName = aiActionPlan.origin || aiActionPlan.from || null;
+    const newDestName = aiActionPlan.destination || aiActionPlan.to || null;
+    let o = last.origin;
+    let d = last.dest;
+    if (newOriginName || newDestName) {
+      const portsHit = await resolveUnknownPortsFromText(
+        [newOriginName, newDestName].filter(Boolean).join(" to "),
+        findPortsInUserMessage([newOriginName, newDestName].filter(Boolean).join(" to "))
+      );
+      if (newOriginName && portsHit[0]) o = portsHit[0];
+      if (newDestName) {
+        const destP = portsHit.find((p) => p && (!o || p.id !== o.id)) || portsHit[portsHit.length - 1];
+        if (destP) d = destP;
+      }
+    }
+    // Geometry-affecting edits → full Core A replan (ports / draft-UKC / canal / reverse / sail)
+    const needReplan = Boolean(aiActionPlan.viaCape) || Boolean(aiActionPlan.viaSuez) || Boolean(aiActionPlan.viaPanama) ||
+      Boolean(aiActionPlan.reverse) || Boolean(aiActionPlan.sailMode) ||
+      aiActionPlan.draftMeters != null || aiActionPlan.ukcMeters != null || aiActionPlan.minDepthM != null ||
+      Boolean(newOriginName) || Boolean(newDestName);
+    if (needReplan && o && d) {
       if (aiActionPlan.reverse) { const tmp = o; o = d; d = tmp; }
       await executeBrainLegByLegRoutePlan(o, d, {
         speedKnots: aiActionPlan.speedKnots || (activeRouteData.metadata && activeRouteData.metadata.speedKnots) || defaultOpts.speedKnots,
-        draftMeters: aiActionPlan.draftMeters || (activeRouteData.metadata && activeRouteData.metadata.draftMeters) || defaultOpts.draftMeters,
+        draftMeters: aiActionPlan.draftMeters != null ? aiActionPlan.draftMeters : ((activeRouteData.metadata && activeRouteData.metadata.draftMeters) || defaultOpts.draftMeters),
+        ukcMeters: aiActionPlan.ukcMeters != null ? aiActionPlan.ukcMeters : ((activeRouteData.metadata && activeRouteData.metadata.ukcMeters) || defaultOpts.ukcMeters),
+        minDepthM: aiActionPlan.minDepthM != null ? aiActionPlan.minDepthM : ((activeRouteData.metadata && activeRouteData.metadata.minDepthM) || defaultOpts.minDepthM),
+        userText: text,
         xtdNM: defaultOpts.xtdNM,
         sailMode: aiActionPlan.sailMode || defaultOpts.sailMode,
         viaCape: Boolean(aiActionPlan.viaCape),
-        viaSuez: Boolean(aiActionPlan.viaSuez) && !Boolean(aiActionPlan.viaCape)
+        viaSuez: Boolean(aiActionPlan.viaSuez) && !Boolean(aiActionPlan.viaCape),
+        viaPanama: Boolean(aiActionPlan.viaPanama)
       });
       return;
     }
-    if (aiActionPlan.reverse) {
-      activeRouteData.waypoints.reverse();
-      const parts = (activeRouteData.name || "").split(" to ");
-      if (parts.length === 2) activeRouteData.name = `${parts[1]} to ${parts[0]}`;
-    }
+    // Speed-only (or XTD) soft update — keep geometry, refresh ETE / audit
     activeRouteData.metadata = activeRouteData.metadata || {};
     if (aiActionPlan.speedKnots) activeRouteData.metadata.speedKnots = parseFloat(aiActionPlan.speedKnots);
-    if (aiActionPlan.draftMeters) activeRouteData.metadata.draftMeters = parseFloat(aiActionPlan.draftMeters);
-    if (aiActionPlan.sailMode) activeRouteData.metadata.sailMode = aiActionPlan.sailMode;
+    if (aiActionPlan.xtdNM) activeRouteData.metadata.xtdNM = parseFloat(aiActionPlan.xtdNM);
     enrichRouteWithLegsTelemetry(activeRouteData, activeRouteData.metadata);
     auditPassagePlan(activeRouteData);
     saveRouteToLibrary(activeRouteData);
     displaySetRouteResults(activeRouteData, true);
     if (leafletMap) renderRouteOnMap(activeRouteData, false);
     appendChatMessage("brain", `
-      ✓ <strong>Recalculated "${activeRouteData.name}" with updated parameters</strong><br>
-      Speed: <b>${activeRouteData.metadata.speedKnots || 14.5} kn</b> • Draft: <b>${activeRouteData.metadata.draftMeters || 11.5} m</b> • Total Distance: <b>${activeRouteData.totalDistanceNM} NM</b> (${activeRouteData.steamingDays} days).
+      ✓ <strong>Updated "${activeRouteData.name}" parameters</strong><br>
+      Speed: <b>${activeRouteData.metadata.speedKnots || 14.5} kn</b> • Draft: <b>${activeRouteData.metadata.draftMeters || "—"} m</b> • Total Distance: <b>${activeRouteData.totalDistanceNM} NM</b> (${activeRouteData.steamingDays} days).
       ${activeRouteData.safetyAudit ? `<div style="margin-top:4px;font-size:0.72rem;color:#94a3b8;">${activeRouteData.safetyAudit.summary}</div>` : ""}
     `);
     return;
@@ -17632,17 +17792,27 @@ When user says "make the route / сделай маршрут / use defaults" wit
 
   // 4d. Parameter modifications on active route
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2) {
-    if (parsedSpd || parsedDrf || parsedXtd || parsedSail || /reverse|invert|реверс/i.test(lower)) {
-      if (/reverse|invert|реверс/i.test(lower)) {
-        activeRouteData.waypoints.reverse();
-        const parts = (activeRouteData.name || "").split(" to ");
-        if (parts.length === 2) activeRouteData.name = `${parts[1]} to ${parts[0]}`;
+    if (parsedSpd || parsedDrf || parsedUkc || parsedMinDepth || parsedXtd || parsedSail || /reverse|invert|реверс/i.test(lower)) {
+      const last = window.SETROUTE_LAST_PORTS || {};
+      const wantReverse = /reverse|invert|реверс/i.test(lower);
+      // Draft / UKC / min depth / sail / reverse → full Core A replan (geometry may change)
+      if ((parsedDrf || parsedUkc || parsedMinDepth || parsedSail || wantReverse) && last.origin && last.dest) {
+        let o = last.origin;
+        let d = last.dest;
+        if (wantReverse) { const tmp = o; o = d; d = tmp; }
+        await executeBrainLegByLegRoutePlan(o, d, Object.assign({}, defaultOpts, {
+          speedKnots: parsedSpd || (activeRouteData.metadata && activeRouteData.metadata.speedKnots) || defaultOpts.speedKnots,
+          draftMeters: parsedDrf || (activeRouteData.metadata && activeRouteData.metadata.draftMeters) || defaultOpts.draftMeters,
+          ukcMeters: parsedUkc != null ? parsedUkc : ((activeRouteData.metadata && activeRouteData.metadata.ukcMeters) || defaultOpts.ukcMeters),
+          minDepthM: parsedMinDepth || (activeRouteData.metadata && activeRouteData.metadata.minDepthM) || defaultOpts.minDepthM,
+          sailMode: parsedSail || (activeRouteData.metadata && activeRouteData.metadata.sailMode) || defaultOpts.sailMode,
+          userText: text
+        }));
+        return;
       }
       activeRouteData.metadata = activeRouteData.metadata || {};
       if (parsedSpd) activeRouteData.metadata.speedKnots = parsedSpd;
-      if (parsedDrf) activeRouteData.metadata.draftMeters = parsedDrf;
       if (parsedXtd) activeRouteData.metadata.xtdNM = parsedXtd;
-      if (parsedSail) activeRouteData.metadata.sailMode = parsedSail;
 
       enrichRouteWithLegsTelemetry(activeRouteData, activeRouteData.metadata);
       saveRouteToLibrary(activeRouteData);
@@ -17650,8 +17820,8 @@ When user says "make the route / сделай маршрут / use defaults" wit
       if (leafletMap) renderRouteOnMap(activeRouteData, false);
 
       appendChatMessage("brain", `
-        <strong>✓ Recalculated "${activeRouteData.name}" across all ${activeRouteData.legs.length} legs</strong><br>
-        Speed: <b>${activeRouteData.metadata.speedKnots || 14.5} kn</b> • Draft: <b>${activeRouteData.metadata.draftMeters || 11.5} m</b> • ETE: <b>${activeRouteData.steamingDays} days</b>.
+        <strong>✓ Updated "${activeRouteData.name}" timing / corridor buffer</strong><br>
+        Speed: <b>${activeRouteData.metadata.speedKnots || 14.5} kn</b> • Draft: <b>${activeRouteData.metadata.draftMeters || "—"} m</b> • ETE: <b>${activeRouteData.steamingDays} days</b>.
       `);
       return;
     }
@@ -18062,10 +18232,28 @@ function initSetRouteV50() {
     });
   }
 
+  const sendBtn = document.getElementById("setRouteChatSendBtn");
+  if (sendBtn && !sendBtn._boundStopV152) {
+    sendBtn._boundStopV152 = true;
+    sendBtn.addEventListener("click", (e) => {
+      if (sendBtn.classList.contains("is-busy") || window.SETROUTE_BUSY) {
+        e.preventDefault();
+        e.stopPropagation();
+        setrouteAbortWork();
+        appendChatMessage("brain", "⏹ Response stopped. You can send a new request.");
+      }
+    }, true);
+  }
+
   if (chatForm && !chatForm._boundV50) {
     chatForm._boundV50 = true;
     chatForm.addEventListener("submit", (e) => {
       e.preventDefault();
+      if (window.SETROUTE_BUSY) {
+        setrouteAbortWork();
+        appendChatMessage("brain", "⏹ Response stopped. You can send a new request.");
+        return;
+      }
       if (!chatInput) return;
       const val = chatInput.value.trim();
       if (!val) return;
@@ -18079,6 +18267,11 @@ function initSetRouteV50() {
     chatInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
+        if (window.SETROUTE_BUSY) {
+          setrouteAbortWork();
+          appendChatMessage("brain", "⏹ Response stopped. You can send a new request.");
+          return;
+        }
         const val = chatInput.value.trim();
         if (!val) return;
         chatInput.value = "";

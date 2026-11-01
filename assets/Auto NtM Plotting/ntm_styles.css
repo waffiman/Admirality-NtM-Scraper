@@ -7266,7 +7266,16 @@
   min-height: 46px !important;
   padding: 0 1.15rem !important;
   box-sizing: border-box !important;
-  z-index: 40 !important;
+  /* Above .home-brand-block (z≈45) so My Vessel / Sign-In stay clickable */
+  z-index: 80 !important;
+  pointer-events: auto !important;
+}
+#homeVesselHudPill,
+#homeVesselHudBtn {
+  position: relative !important;
+  z-index: 81 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
 }
 
 .home-hud-left,
@@ -10441,6 +10450,15 @@
 .setroute-send-btn:disabled {
   opacity: 0.55;
   cursor: wait;
+}
+.setroute-send-btn.is-busy {
+  background: linear-gradient(135deg, #64748b, #475569);
+  box-shadow: 0 4px 14px rgba(71, 85, 105, 0.45);
+  border-radius: 10px;
+}
+.setroute-send-btn.is-busy:hover {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
 }
 
 /* 3. Right-Side Route Details Inspector Drawer (#setRouteRightDrawer)
