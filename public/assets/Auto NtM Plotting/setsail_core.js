@@ -13122,7 +13122,16 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         isBuoysActive = !isBuoysActive;
         btn.classList.toggle("active-overlay", isBuoysActive);
         if (isBuoysActive) {
+          if (mapInstance && !mapInstance.getPane("buoysPane")) {
+            const bp = mapInstance.createPane("buoysPane");
+            bp.style.zIndex = 455;
+            bp.style.pointerEvents = "none";
+          }
           layers.buoys.addTo(mapInstance);
+          try {
+            if (layers.buoysBase && layers.buoysBase.bringToFront) layers.buoysBase.bringToFront();
+            if (layers.buoysDetail && layers.buoysDetail.bringToFront) layers.buoysDetail.bringToFront();
+          } catch (eBf) {}
         } else if (mapInstance.hasLayer(layers.buoys)) {
           mapInstance.removeLayer(layers.buoys);
         }
