@@ -18,7 +18,7 @@
 (function (global) {
   "use strict";
 
-  const MODULE_VERSION = "5.136.0-core-a";
+  const MODULE_VERSION = "5.152.0-core-a";
   const WORLD_TSS_URL = "assets/geo/setroute_tss_world.json";
   const IALA_MARKS_URL = "assets/geo/setroute_iala_marks.json";
 
@@ -207,22 +207,43 @@
     return best;
   }
 
+  /**
+   * COLREG Rule 10 lane policy for a leg already sampling inside / near a lane:
+   *  - with flow (≲45°) → USE the traffic lane (strong prefer)
+   *  - ~90° to lane axis (crossErr ≲28°) → crossing OK; do NOT force lane follow
+   *  - against flow → heavy avoid
+   *  - any other oblique angle → must join / follow the lane (heavy penalty)
+   */
   function applyLaneDirection(legCourse, dir, frac, scheme, part, hits, preferLaneRef, penaltyRef, label) {
     const diff = angleDiffDeg(legCourse, dir);
-    if (diff <= 55) {
-      preferLaneRef.v += 180 * frac;
-      penaltyRef.v -= 120 * frac;
+    const crossErr = Math.abs(diff - 90);
+    if (diff <= 45) {
+      preferLaneRef.v += 320 * frac;
+      penaltyRef.v -= 220 * frac;
       hits.push({
         scheme: scheme.id,
         name: part.name || scheme.name,
         category: "traffic_lane",
-        rule: "COLREG Rule 10(b) — proceed in general direction of traffic flow",
+        rule: "COLREG Rule 10(b) — proceed in general direction of traffic flow (use lane)",
         frac: Math.round(frac * 100),
         courseDiffDeg: Math.round(diff),
         via: label || "lane"
       });
-    } else if (diff >= 110) {
-      penaltyRef.v += 4500 * frac;
+    } else if (crossErr <= 28) {
+      // Right-angle crossing — Rule 10(c); lane follow not required
+      preferLaneRef.v += 10 * frac;
+      penaltyRef.v += 25 * frac;
+      hits.push({
+        scheme: scheme.id,
+        name: part.name || scheme.name,
+        category: "traffic_lane_crossing",
+        rule: "COLREG Rule 10(c) — cross TSS as nearly as practicable at right angles",
+        frac: Math.round(frac * 100),
+        courseDiffDeg: Math.round(diff),
+        via: label || "lane"
+      });
+    } else if (diff >= 135) {
+      penaltyRef.v += 9000 * frac;
       hits.push({
         scheme: scheme.id,
         name: part.name || scheme.name,
@@ -233,12 +254,13 @@
         via: label || "lane"
       });
     } else {
-      penaltyRef.v += 900 * frac;
+      // Oblique clip — must use the appropriate traffic lane instead of cutting across
+      penaltyRef.v += 5200 * frac;
       hits.push({
         scheme: scheme.id,
         name: part.name || scheme.name,
         category: "traffic_lane_oblique",
-        rule: "COLREG Rule 10(c) — cross on heading as nearly as practicable at right angles",
+        rule: "COLREG Rule 10 — oblique TSS contact: join / follow traffic lane (do not cut)",
         frac: Math.round(frac * 100),
         courseDiffDeg: Math.round(diff),
         via: label || "lane"
@@ -362,9 +384,34 @@
       }
     }
 
-    // If TSS exists nearby but leg is not using a lane, nudge planner toward lanes
+    // Nearby TSS but leg not established in a lane:
+    // - if course is ~90° to a known lane axis → allow free crossing (no force-in)
+    // - otherwise pull hard into the traffic lane (oblique approach must join)
     if (nearbyScheme && preferLaneRef.v < 1 && !hardBan) {
-      penaltyRef.v += 80;
+      let crossingOk = false;
+      for (let s2 = 0; s2 < SETROUTE_TSS_SCHEMES.length && !crossingOk; s2++) {
+        const sch = SETROUTE_TSS_SCHEMES[s2];
+        for (let p2 = 0; p2 < sch.parts.length; p2++) {
+          const pr = sch.parts[p2];
+          const dir2 = Number(pr.directionDeg);
+          if (!Number.isFinite(dir2)) continue;
+          if (pr.category !== "traffic_lane" && pr.category !== "traffic_lane_centerline") continue;
+          if (Math.abs(angleDiffDeg(legCourse, dir2) - 90) <= 28) {
+            crossingOk = true;
+            break;
+          }
+        }
+      }
+      if (crossingOk) {
+        penaltyRef.v += 15;
+      } else {
+        penaltyRef.v += 720;
+        hits.push({
+          category: "tss_join_nudge",
+          rule: "COLREG Rule 10 — TSS nearby on oblique heading: join traffic lane",
+          frac: 0
+        });
+      }
     }
 
     return {

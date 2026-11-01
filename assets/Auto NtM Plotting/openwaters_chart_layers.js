@@ -137,10 +137,14 @@
         this._map = map;
         // Overlay on the map container (NOT a CSS-transformed tile pane) so we fully own alignment.
         // Continuous jumpTo on move/zoom keeps Bathymetry locked to the basemap.
+        // Depths / bathymetry must sit just above basemap tiles (200) and BELOW
+        // Buoys / seamarks / notices / markers — never cover navigational marks.
         if (!map.getPane("owBathyPane")) {
           const pane = map.createPane("owBathyPane");
-          pane.style.zIndex = 350;
+          pane.style.zIndex = 250;
           pane.style.pointerEvents = "none";
+        } else {
+          try { map.getPane("owBathyPane").style.zIndex = 250; } catch (eZ) {}
         }
         const root = (this._container = L.DomUtil.create("div", "setsail-ow-gl-root leaflet-zoom-hide"));
         root.style.cssText =

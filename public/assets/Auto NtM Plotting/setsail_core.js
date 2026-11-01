@@ -5233,8 +5233,15 @@ function initNtMMap() {
     }, 0);
 
     // Buoys / seamarks (OpenSeaMap) — dual LOD so marks don't vanish mid-zoom.
-    // Base: coarse marks from low Z, stretched past maxNativeZoom so already-loaded
-    // tiles stay painted while detail tiles fetch. Detail: finer marks from z12+.
+    // Dedicated pane ABOVE bathymetry (owBathyPane≈250) and BELOW port/NtM markers.
+    // Default TileLayer pane is tilePane(200), which Depths (250+) would cover.
+    if (!leafletMap.getPane("buoysPane")) {
+      const buoysPane = leafletMap.createPane("buoysPane");
+      buoysPane.style.zIndex = 455;
+      buoysPane.style.pointerEvents = "none";
+    } else {
+      try { leafletMap.getPane("buoysPane").style.zIndex = 455; } catch (eBp) {}
+    }
     const seamarkUrl = "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png";
     const seamarkPersistOpts = {
       keepBuffer: lowEndMap ? 4 : 10,
@@ -5244,7 +5251,8 @@ function initNtMMap() {
       noWrap: false,
       attribution: "OpenSeaMap",
       className: "setsail-seamark-tiles",
-      crossOrigin: true
+      crossOrigin: true,
+      pane: "buoysPane"
     };
     const buoysBaseLayer = L.tileLayer(seamarkUrl, Object.assign({}, seamarkPersistOpts, {
       minZoom: 5,
@@ -7448,30 +7456,36 @@ const SETROUTE_LAND_BOXES = [
 ];
 
 /**
- * Proxy for bathymetry / shoal risk: continental shelf & known banks where depth is often < ~20–50 m.
- * Soft edge cost so routes prefer deep water (stand-in until live DEM sampling is wired).
+ * Proxy for bathymetry / shoal risk: continental shelf & known banks.
+ * maxDepthM = conservative charted-depth ceiling used for HARD bans vs draft+UKC.
+ * Soft pen still prefers deep water when depth is adequate but shelf-y.
  */
 const SETROUTE_SHOAL_BOXES = [
-  { minLat: 51, maxLat: 56, minLon: 1, maxLon: 6, pen: 220 },
-  { minLat: 42, maxLat: 46.5, minLon: -68, maxLon: -55, pen: 260 },
-  { minLat: 24, maxLat: 30, minLon: -96, maxLon: -82, pen: 180 },
-  { minLat: 30, maxLat: 36, minLon: -78, maxLon: -74, pen: 160 },
-  { minLat: 50, maxLat: 52.5, minLon: -6, maxLon: 2, pen: 200 },
-  { minLat: 1.0, maxLat: 4.5, minLon: 102.5, maxLon: 105.5, pen: 240 },
-  { minLat: 21, maxLat: 26, minLon: 112, maxLon: 122, pen: 200 },
-  { minLat: 28, maxLat: 35, minLon: 120, maxLon: 127, pen: 180 },
-  { minLat: -12, maxLat: -4, minLon: 105, maxLon: 116, pen: 200 },
-  { minLat: 10, maxLat: 16, minLon: 99, maxLon: 110, pen: 180 },
-  { minLat: 53, maxLat: 60, minLon: -5, maxLon: 8, pen: 160 },
-  { minLat: 18, maxLat: 23, minLon: -87, maxLon: -80, pen: 170 },
-  { minLat: -6, maxLat: 2, minLon: 95, maxLon: 102, pen: 190 },   // W Sumatra shelf
-  { minLat: 4, maxLat: 10, minLon: 115, maxLon: 122, pen: 170 },  // Sulu / N Borneo shelf
-  { minLat: 22, maxLat: 26.5, minLon: -83, maxLon: -78, pen: 200 }, // Florida / Bahamas banks
-  { minLat: 10, maxLat: 16, minLon: 72, maxLon: 78, pen: 180 },    // SW India shelf
-  { minLat: -25, maxLat: -15, minLon: 145, maxLon: 155, pen: 160 }, // GBR approaches
-  { minLat: 48, maxLat: 52, minLon: -6, maxLon: 2, pen: 150 },     // Celtic / Channel W
-  { minLat: 33, maxLat: 37, minLon: -7, maxLon: -1, pen: 140 },    // Gulf of Cadiz shelf
-  { minLat: 40, maxLat: 45, minLon: 12, maxLon: 19, pen: 150 }     // Adriatic shelf
+  { minLat: 51, maxLat: 56, minLon: 1, maxLon: 6, pen: 220, maxDepthM: 35 },
+  { minLat: 42, maxLat: 46.5, minLon: -68, maxLon: -55, pen: 260, maxDepthM: 40 },
+  { minLat: 24, maxLat: 30, minLon: -96, maxLon: -82, pen: 180, maxDepthM: 25 },
+  { minLat: 30, maxLat: 36, minLon: -78, maxLon: -74, pen: 160, maxDepthM: 30 },
+  { minLat: 50, maxLat: 52.5, minLon: -6, maxLon: 2, pen: 200, maxDepthM: 40 },
+  { minLat: 1.0, maxLat: 4.5, minLon: 102.5, maxLon: 105.5, pen: 240, maxDepthM: 25 },
+  { minLat: 21, maxLat: 26, minLon: 112, maxLon: 122, pen: 200, maxDepthM: 30 },
+  { minLat: 28, maxLat: 35, minLon: 120, maxLon: 127, pen: 180, maxDepthM: 35 },
+  { minLat: -12, maxLat: -4, minLon: 105, maxLon: 116, pen: 200, maxDepthM: 30 },
+  { minLat: 10, maxLat: 16, minLon: 99, maxLon: 110, pen: 180, maxDepthM: 25 },
+  { minLat: 53, maxLat: 60, minLon: -5, maxLon: 8, pen: 160, maxDepthM: 35 },
+  { minLat: 18, maxLat: 23, minLon: -87, maxLon: -80, pen: 170, maxDepthM: 20 },
+  { minLat: -6, maxLat: 2, minLon: 95, maxLon: 102, pen: 190, maxDepthM: 35 },
+  { minLat: 4, maxLat: 10, minLon: 115, maxLon: 122, pen: 170, maxDepthM: 30 },
+  { minLat: 22, maxLat: 26.5, minLon: -83, maxLon: -78, pen: 200, maxDepthM: 15 },
+  { minLat: 10, maxLat: 16, minLon: 72, maxLon: 78, pen: 180, maxDepthM: 40 },
+  { minLat: -25, maxLat: -15, minLon: 145, maxLon: 155, pen: 160, maxDepthM: 25 },
+  { minLat: 48, maxLat: 52, minLon: -6, maxLon: 2, pen: 150, maxDepthM: 45 },
+  { minLat: 33, maxLat: 37, minLon: -7, maxLon: -1, pen: 140, maxDepthM: 50 },
+  { minLat: 40, maxLat: 45, minLon: 12, maxLon: 19, pen: 150, maxDepthM: 40 },
+  // Extra hard-shoal pockets (very shallow banks / reefs)
+  { minLat: 24.5, maxLat: 26.5, minLon: 53.5, maxLon: 55.5, pen: 400, maxDepthM: 12 },
+  { minLat: 11.5, maxLat: 13.2, minLon: 42.8, maxLon: 43.6, pen: 120, maxDepthM: 55 },
+  { minLat: 1.05, maxLat: 1.45, minLon: 103.4, maxLon: 104.2, pen: 200, maxDepthM: 18 },
+  { minLat: 54.8, maxLat: 55.6, minLon: 12.4, maxLon: 13.2, pen: 300, maxDepthM: 10 }
 ];
 
 function setrouteShoalPenalty(lat, lon) {
@@ -7485,6 +7499,120 @@ function setrouteShoalPenalty(lat, lon) {
   return pen;
 }
 
+/** Conservative depth estimate (m) for hard UKC bans — not a chart substitute. */
+function setrouteEstimateDepthM(lat, lon) {
+  let best = 2500;
+  for (let i = 0; i < SETROUTE_SHOAL_BOXES.length; i++) {
+    const b = SETROUTE_SHOAL_BOXES[i];
+    if (lat >= b.minLat && lat <= b.maxLat && lon >= b.minLon && lon <= b.maxLon) {
+      const d = Number(b.maxDepthM);
+      if (Number.isFinite(d) && d < best) best = d;
+    }
+  }
+  if (typeof setroutePointInLandBox === "function" && setroutePointInLandBox(lat, lon)) {
+    return 0;
+  }
+  // Near-coast heuristic when land-mask / coast grid available
+  try {
+    if (typeof SETROUTE_COAST_GRID !== "undefined" && SETROUTE_COAST_GRID && SETROUTE_COAST_GRID.cellDeg) {
+      const cell = SETROUTE_COAST_GRID.cellDeg || 0.5;
+      const key = Math.floor(lat / cell) + "_" + Math.floor(lon / cell);
+      const near = SETROUTE_COAST_GRID.buckets && SETROUTE_COAST_GRID.buckets[key];
+      if (near && near.length) best = Math.min(best, 28);
+    }
+  } catch (eD) {}
+  return best;
+}
+
+function setrouteGetMinRequiredDepthM() {
+  const v = Number(window.SETROUTE_MIN_DEPTH_M);
+  return Number.isFinite(v) && v > 0 ? v : 0;
+}
+
+/** Hard-ban like land when estimated depth < required (draft+UKC or absolute). */
+function setrouteLegTooShallow(lat1, lon1, lat2, lon2, minDepthM) {
+  const need = Number(minDepthM) > 0 ? Number(minDepthM) : setrouteGetMinRequiredDepthM();
+  if (!(need > 0)) return false;
+  const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+  const samples = dist > 500 ? [0.15, 0.35, 0.5, 0.65, 0.85] : (dist > 80 ? [0.25, 0.5, 0.75] : [0.5]);
+  for (let i = 0; i < samples.length; i++) {
+    const p = setrouteLerpLatLon(lat1, lon1, lat2, lon2, samples[i]);
+    if (setrouteEstimateDepthM(p[0], p[1]) + 0.05 < need) return true;
+  }
+  return false;
+}
+
+/**
+ * Resolve depth policy before planning.
+ * - minDepthM (user absolute) wins
+ * - else draft + (ukc || 4 m)
+ * - else need clarifying question
+ */
+function setrouteResolveDepthPolicy(options, userText) {
+  options = options || {};
+  const text = String(userText || options.userText || "");
+  const parseNum = (v) => {
+    const n = parseFloat(String(v == null ? "" : v).replace(",", "."));
+    return Number.isFinite(n) && n > 0 ? n : null;
+  };
+
+  let minDepth = parseNum(options.minDepthM);
+  let draft = parseNum(options.draftMeters);
+  let ukc = parseNum(options.ukcMeters);
+
+  const absDepthMatch = text.match(/(?:min(?:imum)?\s*(?:charted\s*)?depth|глубин[аыуе]?)\s*(?:to|=|:|of|≥|>=|>)?\s*(\d+(?:[.,]\d+)?)/i);
+  const ukcMatch = text.match(/(?:ukc|under[\s-]?keel|запаса?\s*глубин\w*)\s*(?:to|=|:|of)?\s*(\d+(?:[.,]\d+)?)/i);
+  const draftMatch = text.match(/(?:осадк[ауи]|draft|draught)\s*(?:to|=|:|of)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*m\s*(?:draft|draught|осадк)/i);
+
+  if (!minDepth && absDepthMatch) minDepth = parseNum(absDepthMatch[1]);
+  if (!ukc && ukcMatch) ukc = parseNum(ukcMatch[1]);
+  if (!draft && draftMatch) draft = parseNum(draftMatch[1] || draftMatch[2]);
+
+  // Prior confirmed session values
+  const last = window.SETROUTE_LAST_PORTS && window.SETROUTE_LAST_PORTS.opts;
+  if (!minDepth && !draft && last && last.depthConfirmed) {
+    minDepth = parseNum(last.minDepthM);
+    draft = parseNum(last.draftMeters);
+    ukc = parseNum(last.ukcMeters);
+  }
+
+  if (minDepth) {
+    return {
+      ok: true,
+      mode: "absolute",
+      minDepthM: minDepth,
+      draftMeters: draft,
+      ukcMeters: ukc,
+      message: "Min charted depth ≥ " + minDepth.toFixed(1) + " m"
+    };
+  }
+  if (draft) {
+    const ukcUse = ukc != null ? ukc : 4;
+    const need = draft + ukcUse;
+    return {
+      ok: true,
+      mode: "draft_ukc",
+      minDepthM: need,
+      draftMeters: draft,
+      ukcMeters: ukcUse,
+      message: "Draft " + draft.toFixed(1) + " m + UKC " + ukcUse.toFixed(1) + " m → min depth " + need.toFixed(1) + " m"
+    };
+  }
+  return {
+    ok: false,
+    needClarify: true,
+    mode: "ask",
+    minDepthM: null,
+    draftMeters: null,
+    ukcMeters: null,
+    message: "Depth policy not set — need draft (+ UKC) or a minimum depth before planning."
+  };
+}
+
+window.setrouteResolveDepthPolicy = setrouteResolveDepthPolicy;
+window.setrouteEstimateDepthM = setrouteEstimateDepthM;
+window.setrouteLegTooShallow = setrouteLegTooShallow;
+
 /** Soft “bathymetry gradient” proxy: prefer deep basins; penalize shelf chords. */
 function setrouteLegShoalPenalty(lat1, lon1, lat2, lon2) {
   const dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
@@ -7497,6 +7625,16 @@ function setrouteLegShoalPenalty(lat1, lon1, lat2, lon2) {
   }
   // Long shelf-hugging chords are especially undesirable
   if (pen > 0 && dist >= 250) pen *= 1.35;
+  // Extra cost (short of hard-ban) when near the UKC limit
+  const need = setrouteGetMinRequiredDepthM();
+  if (need > 0) {
+    for (let i = 0; i < samples.length; i++) {
+      const p = setrouteLerpLatLon(lat1, lon1, lat2, lon2, samples[i]);
+      const d = setrouteEstimateDepthM(p[0], p[1]);
+      if (d < need + 5) pen += 180;
+      if (d < need) pen += 5000;
+    }
+  }
   return pen;
 }
 
@@ -7797,6 +7935,9 @@ function setrouteEdgeHazardPenalty(lat1, lon1, lat2, lon2) {
   if (typeof setrouteLegShoalPenalty === "function") {
     pen += setrouteLegShoalPenalty(lat1, lon1, lat2, lon2);
   }
+  if (typeof setrouteLegTooShallow === "function" && setrouteLegTooShallow(lat1, lon1, lat2, lon2)) {
+    pen += 80000;
+  }
   // COLREG Rule 10 TSS (lanes prefer / wrong-way / separation hard via adjacency)
   if (typeof setrouteTssEdgePenalty === "function") {
     pen += setrouteTssEdgePenalty(lat1, lon1, lat2, lon2);
@@ -8091,12 +8232,14 @@ let _setrouteAdjCache = null;
 let _setrouteAdjCacheKey = "";
 
 function setrouteBuildAdjacency(force) {
+  const minDepthKey = setrouteGetMinRequiredDepthM() || 0;
   const cacheKey = [
     SETROUTE_LAND_MASK ? "mask1" : "mask0",
     SETROUTE_COAST_GRID ? "coast1" : "coast0",
     (typeof SETROUTE_TSS_SCHEMES !== "undefined" && SETROUTE_TSS_SCHEMES) ? SETROUTE_TSS_SCHEMES.length : 0,
     Object.keys(MARITIME_SEA_NODES).length,
-    MARITIME_SEA_EDGES.length
+    MARITIME_SEA_EDGES.length,
+    "d" + minDepthKey
   ].join("|");
   if (!force && _setrouteAdjCache && _setrouteAdjCacheKey === cacheKey) return _setrouteAdjCache;
 
@@ -8125,6 +8268,8 @@ function setrouteBuildAdjacency(force) {
     if (tssBan) continue;
     const ialaBan = typeof setrouteIalaHardBan === "function" && setrouteIalaHardBan(a[0], a[1], b[0], b[1]);
     if (ialaBan) continue;
+    // Depth / UKC — ban shallow chords like land
+    if (minDepthKey > 0 && setrouteLegTooShallow(a[0], a[1], b[0], b[1], minDepthKey)) continue;
 
     const interiorChord = boxHits >= 2 && dist >= 350;
     const landCut = coastHit && dist >= 140;
@@ -9064,6 +9209,97 @@ function setrouteDensifyWaypoints(waypoints, maxLegNm) {
   return out;
 }
 
+/** Destination point from lat/lon at course °T and distance NM. */
+function setrouteDestPoint(lat, lon, courseDeg, distNm) {
+  const R = 3440.065;
+  const δ = distNm / R;
+  const θ = (Number(courseDeg) || 0) * Math.PI / 180;
+  const φ1 = lat * Math.PI / 180;
+  const λ1 = lon * Math.PI / 180;
+  const sinφ1 = Math.sin(φ1), cosφ1 = Math.cos(φ1);
+  const sinδ = Math.sin(δ), cosδ = Math.cos(δ);
+  const sinφ2 = sinφ1 * cosδ + cosφ1 * sinδ * Math.cos(θ);
+  const φ2 = Math.asin(Math.min(1, Math.max(-1, sinφ2)));
+  const λ2 = λ1 + Math.atan2(Math.sin(θ) * sinδ * cosφ1, cosδ - sinφ1 * sinφ2);
+  let lon2 = (λ2 * 180 / Math.PI + 540) % 360 - 180;
+  return { lat: φ2 * 180 / Math.PI, lon: lon2 };
+}
+
+function setrouteCourseBetweenWp(a, b) {
+  const φ1 = a.lat * Math.PI / 180;
+  const φ2 = b.lat * Math.PI / 180;
+  const Δλ = (b.lon - a.lon) * Math.PI / 180;
+  const y = Math.sin(Δλ) * Math.cos(φ2);
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+function setrouteSignedTurnDeg(cIn, cOut) {
+  let d = ((Number(cOut) - Number(cIn) + 540) % 360) - 180;
+  return d;
+}
+
+/**
+ * Soft rule: if course change at a waypoint ≥ sharpDeg (70°), replace the apex
+ * with a fan of waypoints so each successive leg turn ≤ maxTurnDeg (20°).
+ */
+function setrouteSplitSharpTurns(waypoints, opts) {
+  opts = opts || {};
+  const sharpDeg = Number(opts.sharpDeg) > 0 ? Number(opts.sharpDeg) : 70;
+  const maxTurnDeg = Number(opts.maxTurnDeg) > 0 ? Number(opts.maxTurnDeg) : 20;
+  if (!Array.isArray(waypoints) || waypoints.length < 3) return waypoints;
+
+  const mk = (lat, lon, a, name) => ({
+    wptNo: "TMP",
+    name: name || "Turn ease",
+    lat: Number(Number(lat).toFixed(5)),
+    lon: Number(Number(lon).toFixed(5)),
+    speedKnots: a.speedKnots,
+    portsideXTD: a.portsideXTD,
+    starboardXTD: a.starboardXTD,
+    turnRadius: Math.max(0.6, Number(a.turnRadius) || 0.8),
+    sail: a.sail || "RL",
+    rot: 8.0
+  });
+
+  const out = [waypoints[0]];
+  for (let i = 1; i < waypoints.length - 1; i++) {
+    const A = out[out.length - 1];
+    const B = waypoints[i];
+    const C = waypoints[i + 1];
+    const cIn = setrouteCourseBetweenWp(A, B);
+    const cOut = setrouteCourseBetweenWp(B, C);
+    const signed = setrouteSignedTurnDeg(cIn, cOut);
+    const turn = Math.abs(signed);
+    if (!(turn >= sharpDeg)) {
+      out.push(B);
+      continue;
+    }
+    const nSeg = Math.max(2, Math.ceil(turn / maxTurnDeg));
+    const dIn = Math.min(14, Math.max(2.5, calculateHaversineDistanceNM(A.lat, A.lon, B.lat, B.lon) * 0.28));
+    const dOut = Math.min(14, Math.max(2.5, calculateHaversineDistanceNM(B.lat, B.lon, C.lat, C.lon) * 0.28));
+    for (let s = 1; s < nSeg; s++) {
+      const t = s / nSeg;
+      const pBack = setrouteDestPoint(B.lat, B.lon, (cIn + 180) % 360, dIn * (1 - t));
+      const pFwd = setrouteDestPoint(B.lat, B.lon, cOut, dOut * t);
+      const lat = pBack.lat * (1 - t) + pFwd.lat * t;
+      const lon = pBack.lon * (1 - t) + pFwd.lon * t;
+      if (typeof setroutePointInLandBox === "function" && setroutePointInLandBox(lat, lon)) continue;
+      out.push(mk(lat, lon, B, "Turn ease " + s + "/" + (nSeg - 1)));
+    }
+    // Keep a soft apex near B (slightly inside the turn) only if not land
+    const midBrg = (cIn + signed * 0.5 + 360) % 360;
+    const apex = setrouteDestPoint(B.lat, B.lon, midBrg, Math.min(dIn, dOut) * 0.15);
+    if (!(typeof setroutePointInLandBox === "function" && setroutePointInLandBox(apex.lat, apex.lon))) {
+      out.push(mk(apex.lat, apex.lon, B, B.name || "Turn pivot"));
+    }
+  }
+  out.push(waypoints[waypoints.length - 1]);
+  out.forEach((wp, idx) => { wp.wptNo = ("00" + (idx + 1)).slice(-3); wp.id = idx + 1; });
+  return out;
+}
+window.setrouteSplitSharpTurns = setrouteSplitSharpTurns;
+
 function setrouteAisPenalty(lat1, lon1, lat2, lon2) {
   if (typeof window.getAisTargetsSnapshot !== "function") return 0;
   let targets;
@@ -9985,6 +10221,9 @@ async function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCo
   let densified = waypoints;
   if (typeof setrouteDensifyWaypoints === "function") {
     densified = setrouteDensifyWaypoints(waypoints, 280);
+  }
+  if (typeof setrouteSplitSharpTurns === "function") {
+    densified = setrouteSplitSharpTurns(densified, { sharpDeg: 70, maxTurnDeg: 20 });
   }
   // Re-score densified track vs forecast (more accurate than graph nodes alone)
   if (typeof setrouteSimulateWaypointStormTrack === "function" && densified.length >= 2) {
@@ -16756,6 +16995,36 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     `Planning <b>${(pOrig && pOrig.name) || "Origin"}</b> → <b>${(pDest && pDest.name) || "Destination"}</b>`
   );
   try {
+  // Depth / draft / UKC is mandatory before any corridor search
+  const depthPol = typeof setrouteResolveDepthPolicy === "function"
+    ? setrouteResolveDepthPolicy(options, options.userText || "")
+    : { ok: true, minDepthM: 15.5, draftMeters: 11.5, ukcMeters: 4, mode: "draft_ukc", message: "fallback" };
+  if (!depthPol.ok) {
+    live.step("Waiting for draft / UKC / min depth…");
+    appendChatMessage("brain", `
+      <div>
+        <strong>Depth policy needed before planning</strong>
+        <div style="margin-top:6px;font-size:0.78rem;color:#94a3b8;line-height:1.45;">
+          Tell me your <b>draft</b> (I will add <b>4 m UKC</b> unless you set UKC), or a <b>minimum charted depth</b>.
+          Shallow water will be banned like land.
+        </div>
+        <div class="sr-quick-chips" style="margin-top:8px;">
+          <button type="button" class="sr-quick-chip" data-sr-prompt="draft 8.0m">Draft 8 m</button>
+          <button type="button" class="sr-quick-chip" data-sr-prompt="draft 10.0m">Draft 10 m</button>
+          <button type="button" class="sr-quick-chip" data-sr-prompt="draft 12.0m">Draft 12 m</button>
+          <button type="button" class="sr-quick-chip" data-sr-prompt="draft 14.0m UKC 3m">Draft 14 m · UKC 3</button>
+          <button type="button" class="sr-quick-chip" data-sr-prompt="minimum depth 20m">Min depth 20 m</button>
+        </div>
+      </div>
+    `);
+    window.SETROUTE_PENDING_PLAN = { origin: pOrig, dest: pDest, options: Object.assign({}, options) };
+    return null;
+  }
+  window.SETROUTE_MIN_DEPTH_M = depthPol.minDepthM;
+  // Bust adjacency cache so UKC hard-bans apply to this plan
+  _setrouteAdjCache = null;
+  _setrouteAdjCacheKey = "";
+
   live.step("Loading coast grid & corridor knowledge…");
   if (typeof loadSetrouteCoastGrid === "function") {
     try { await loadSetrouteCoastGrid(); } catch (e) {}
@@ -16772,12 +17041,14 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const nStorms = (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.storms))
     ? MARINE_WEATHER_STORE.storms.length : 0;
   live.step(
-    `Appraisal: SOG <b>${speed} kn</b>` +
+    `Appraisal: SOG <b>${speed} kn</b> · <b>${depthPol.message}</b>` +
     (nStorms ? ` · <b>${nStorms}</b> active cyclone track(s)` : " · no active cyclones in store") +
     ` · sea-graph + space-time search (may take 1–3 min)`
   );
   await new Promise((r) => setTimeout(r, 40));
-  const draft = parseFloat(options.draftMeters || (document.getElementById("setRouteDraftInput") && document.getElementById("setRouteDraftInput").value)) || 11.5;
+  const draft = Number(depthPol.draftMeters) > 0
+    ? Number(depthPol.draftMeters)
+    : (parseFloat(options.draftMeters) || (depthPol.minDepthM - (depthPol.ukcMeters || 4)) || 11.5);
   const xtd = parseFloat(options.xtdNM || (document.getElementById("setRouteXtdInput") && document.getElementById("setRouteXtdInput").value)) || 0.25;
   const sailMode = options.sailMode || (document.getElementById("setRouteSailSelect") && document.getElementById("setRouteSailSelect").value) || "HYBRID";
   const viaCape = Boolean(options.viaCape);
@@ -16787,7 +17058,16 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   window.SETROUTE_LAST_PORTS = {
     origin: pOrig,
     dest: pDest,
-    opts: { speedKnots: speed, draftMeters: draft, xtdNM: xtd, sailMode, viaCape }
+    opts: {
+      speedKnots: speed,
+      draftMeters: draft,
+      ukcMeters: depthPol.ukcMeters,
+      minDepthM: depthPol.minDepthM,
+      depthConfirmed: true,
+      xtdNM: xtd,
+      sailMode,
+      viaCape
+    }
   };
 
   const origSel = document.getElementById("setRouteOriginSelect");
@@ -16943,6 +17223,9 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     destination: pDest.name,
     speedKnots: speed,
     draftMeters: draft,
+    ukcMeters: depthPol.ukcMeters,
+    minDepthM: depthPol.minDepthM,
+    depthPolicy: depthPol.mode,
     xtdNM: xtd,
     sailMode: sailMode,
     generatedAt: new Date().toISOString(),
@@ -17045,11 +17328,16 @@ async function handleSetRouteUserMessage(rawText) {
   const lower = text.toLowerCase();
 
   const spdMatch = lower.match(/(?:скорост[ьию]|speed|spd)\s*(?:to|=|:|of)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:kn|kts|knots|узл)/i);
-  const drfMatch = lower.match(/(?:осадк[ауи]|draft|draught)\s*(?:to|=|:|of)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:m\b|meters|metres|м\b)/i);
+  const drfMatch = lower.match(/(?:осадк[ауи]|draft|draught)\s*(?:to|=|:|of)?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*m\s*(?:draft|draught|осадк)/i)
+    || lower.match(/(?:осадк[ауи]|draft|draught)\s*(?:to|=|:|of)?\s*(\d+(?:[.,]\d+)?)/i);
+  const ukcMatch = lower.match(/(?:ukc|under[\s-]?keel|запаса?\s*глубин\w*)\s*(?:to|=|:|of)?\s*(\d+(?:[.,]\d+)?)/i);
+  const minDepthMatch = lower.match(/(?:min(?:imum)?\s*(?:charted\s*)?depth|глубин[аыуе]?)\s*(?:to|=|:|of|≥|>=|>)?\s*(\d+(?:[.,]\d+)?)/i);
   const xtdMatch = lower.match(/(?:xtd|corridor|buffer)\s*(?:to|=|:|of)?\s*(\d+(?:[.,]\d+)?)/i);
 
   const parsedSpd = spdMatch ? parseFloat((spdMatch[1] || spdMatch[2]).replace(",", ".")) : null;
-  const parsedDrf = drfMatch ? parseFloat((drfMatch[1] || drfMatch[2]).replace(",", ".")) : null;
+  const parsedDrf = drfMatch ? parseFloat((drfMatch[1] || drfMatch[2] || "").replace(",", ".")) : null;
+  const parsedUkc = ukcMatch ? parseFloat(ukcMatch[1].replace(",", ".")) : null;
+  const parsedMinDepth = minDepthMatch ? parseFloat(minDepthMatch[1].replace(",", ".")) : null;
   const parsedXtd = xtdMatch ? parseFloat(xtdMatch[1].replace(",", ".")) : null;
   let parsedSail = null;
   if (/\bgc\b|great circle/i.test(lower)) parsedSail = "GC";
@@ -17057,14 +17345,33 @@ async function handleSetRouteUserMessage(rawText) {
   const chooseCape = /cape of good hope|via cape|around africa|agulhas/i.test(lower);
   const chooseSuez = /via suez|suez canal|through suez/i.test(lower);
 
+  const lastOpts = (window.SETROUTE_LAST_PORTS && window.SETROUTE_LAST_PORTS.opts) || {};
   const defaultOpts = {
-    speedKnots: parsedSpd || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.speedKnots) || parseFloat((document.getElementById("setRouteSpeedInput") || {}).value) || 14.5,
-    draftMeters: parsedDrf || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.draftMeters) || parseFloat((document.getElementById("setRouteDraftInput") || {}).value) || 11.5,
-    xtdNM: parsedXtd || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.xtdNM) || parseFloat((document.getElementById("setRouteXtdInput") || {}).value) || 0.25,
-    sailMode: parsedSail || (window.SETROUTE_LAST_PORTS.opts && window.SETROUTE_LAST_PORTS.opts.sailMode) || (document.getElementById("setRouteSailSelect") || {}).value || "HYBRID",
+    speedKnots: parsedSpd || lastOpts.speedKnots || parseFloat((document.getElementById("setRouteSpeedInput") || {}).value) || 14.5,
+    // Do NOT invent draft — only user / confirmed session / AI-stated values
+    draftMeters: parsedDrf || (lastOpts.depthConfirmed ? lastOpts.draftMeters : null),
+    ukcMeters: parsedUkc || (lastOpts.depthConfirmed ? lastOpts.ukcMeters : null),
+    minDepthM: parsedMinDepth || (lastOpts.depthConfirmed ? lastOpts.minDepthM : null),
+    userText: text,
+    xtdNM: parsedXtd || lastOpts.xtdNM || parseFloat((document.getElementById("setRouteXtdInput") || {}).value) || 0.25,
+    sailMode: parsedSail || lastOpts.sailMode || (document.getElementById("setRouteSailSelect") || {}).value || "HYBRID",
     viaCape: chooseCape,
     viaSuez: chooseSuez && !chooseCape
   };
+
+  // Resume plan waiting on depth/draft clarification
+  if (window.SETROUTE_PENDING_PLAN && (parsedDrf || parsedMinDepth || parsedUkc)) {
+    const pending = window.SETROUTE_PENDING_PLAN;
+    window.SETROUTE_PENDING_PLAN = null;
+    const merged = Object.assign({}, pending.options || {}, defaultOpts, {
+      draftMeters: parsedDrf || (pending.options && pending.options.draftMeters) || null,
+      ukcMeters: parsedUkc != null ? parsedUkc : (pending.options && pending.options.ukcMeters),
+      minDepthM: parsedMinDepth || (pending.options && pending.options.minDepthM) || null,
+      userText: text
+    });
+    await executeBrainLegByLegRoutePlan(pending.origin, pending.dest, merged);
+    return;
+  }
 
   // 1. AI-First Intent Interpretation (Master Mariner LLM with Full Conversation Context)
   let aiActionPlan = null;
@@ -17089,12 +17396,12 @@ async function handleSetRouteUserMessage(rawText) {
 ${curRouteDesc}
 Reply with a short acknowledgement, then ONE JSON object. No coordinates. No waypoint lists.
 Ports known: Tianjin (Xingang), Taixing, Ningbo, Shanghai, Houston, Los Angeles, Rotterdam, Singapore, Tokyo, Panama, Suez, Antwerp, Hamburg, Busan, Hong Kong, +60.
-Defaults: 14.5 kn, 11.5 m draft, XTD ±0.25 NM.
-Far East China → US Gulf should prefer viaPanama:true unless user asks Cape.
+Defaults: 14.5 kn, XTD ±0.25 NM. NEVER invent draft/UKC/minDepth — omit those keys unless the user stated them.
+Depth policy (mandatory for plan): draftMeters and optional ukcMeters (default UKC 4 m if only draft given), OR minDepthM absolute. If user gave neither, still emit plan JSON with draftMeters:null — Core A will ask.
 
 JSON actions only:
-1) plan: {"action":"plan","origin":"Port","destination":"Port","speedKnots":14.5,"draftMeters":11.5,"viaCape":false,"viaSuez":false,"viaPanama":false}
-2) modify: {"action":"modify","speedKnots":16,"draftMeters":12.5,"sailMode":"GC|RL","viaCape":true|false,"viaSuez":true|false,"viaPanama":true|false,"reverse":false}
+1) plan: {"action":"plan","origin":"Port","destination":"Port","speedKnots":14.5,"draftMeters":null,"ukcMeters":null,"minDepthM":null,"viaCape":false,"viaSuez":false,"viaPanama":false}
+2) modify: {"action":"modify","speedKnots":16,"draftMeters":12.5,"ukcMeters":4,"minDepthM":null,"sailMode":"GC|RL","viaCape":true|false,"viaSuez":true|false,"viaPanama":true|false,"reverse":false}
 3) audit: {"action":"audit"}
 4) resolve_exception: {"action":"resolve_exception","preferVia":"panama|cape|suez|none","avoidNodeKeys":[]}
 5) If the user only asks a seamanship question with no plan/modify intent: answer in <=3 sentences English and omit JSON.
@@ -17144,9 +17451,19 @@ When user says "make the route / сделай маршрут / use defaults" wit
     }
     if (extPorts.length >= 2) {
       window.SETROUTE_PENDING_CONTEXT = null;
+      const depthMentioned = /draft|draught|осадк|ukc|глубин|min(?:imum)?\s*(?:charted\s*)?depth/i.test(text);
       await executeBrainLegByLegRoutePlan(extPorts[0], extPorts[1], {
         speedKnots: aiActionPlan.speedKnots || defaultOpts.speedKnots,
-        draftMeters: aiActionPlan.draftMeters || defaultOpts.draftMeters,
+        draftMeters: parsedDrf != null
+          ? parsedDrf
+          : (depthMentioned && aiActionPlan.draftMeters != null ? aiActionPlan.draftMeters : defaultOpts.draftMeters),
+        ukcMeters: parsedUkc != null
+          ? parsedUkc
+          : (depthMentioned && aiActionPlan.ukcMeters != null ? aiActionPlan.ukcMeters : defaultOpts.ukcMeters),
+        minDepthM: parsedMinDepth != null
+          ? parsedMinDepth
+          : (depthMentioned && aiActionPlan.minDepthM != null ? aiActionPlan.minDepthM : defaultOpts.minDepthM),
+        userText: text,
         xtdNM: defaultOpts.xtdNM,
         sailMode: defaultOpts.sailMode,
         viaCape: Boolean(aiActionPlan.viaCape || defaultOpts.viaCape),
