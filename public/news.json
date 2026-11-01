@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-01T12:53:02Z",
-  "generatedAt": "2026-11-01T12:53:02Z",
+  "updatedAt": "2026-11-01T21:50:33Z",
+  "generatedAt": "2026-11-01T21:50:33Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -42,6 +42,249 @@
         "Jamming and spoofing attacks are rising fast across busy waterways, putting crews, cargo and insurance claims at risk.",
         "Join maritime and satellite experts to discover how proven technology fights back.",
         "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-90965DAD88",
+      "title": "Arken Intermodal Terminal achieves near-doubled yard capacity",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/arken-intermodal-terminal-achieves-near-doubled-yard-capacity/",
+      "publishedAt": "2026-11-01T20:00:04Z",
+      "category": "Ports & Terminals",
+      "region": "Baltic Sea & Northern Europe",
+      "regions": [
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        57.5,
+        19.5
+      ],
+      "navarea": "I",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/Arken-300x169.webp",
+      "summary": "The Port of Gothenburg has significantly increased yard capacity at Arken Intermodal Terminal through a reconfiguration of the railway track layout, freeing up approximately 4,000 square metres of additional yard space for trailers and other units. The result is an increase of almost double the previous yard capacity...",
+      "body": "The Port of Gothenburg has significantly increased yard capacity at Arken Intermodal Terminal through a reconfiguration of the railway track layout, freeing up approximately 4,000 square metres of additional yard space for trailers and other units. The result is an increase of almost double the previous yard capacity from a five percent expansion in available space. Arken Intermodal Terminal is one of Sweden’s largest intermodal terminals and a key hub for transfers between rail, road and sea. Growing cargo volumes over time had pushed capacity in certain flows close to its limit, with yard space identified as the primary constraint. The capacity improvement was achieved by rebuilding one of the through tracks at the terminal to release the additional yard area, demonstrating that smarter use of existing infrastructure can deliver substantial gains without the need for large-scale construction. Carl Johan Andersson, Senior Logistics Developer at the Port of Gothenburg, described the result as an example of capacity development through intelligent use of existing land rather than simply building bigger, noting that a five percent increase in space has delivered close to a doubling of yard capacity. Emma Meltin, Bridge Manager Intermodal at Gothenburg RoRo Terminal, highlighted the operational benefits of greater yard flexibility, enabling better flow planning, more effective peak management and reduced unnecessary cargo movements, ultimately delivering more efficient and reliable service to customers.",
+      "takeaways": [
+        "The result is an increase of almost double the previous yard capacity from a five percent expansion in available space.",
+        "Arken Intermodal Terminal is one of Sweden’s largest intermodal terminals and a key hub for transfers between rail, road and sea.",
+        "Growing cargo volumes over time had pushed capacity in certain flows close to its limit, with yard space identified as the primary constraint."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-C509ADB95B",
+      "title": "Emirates Shipping restructures India–Red Sea network",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/emirates-shipping-restructures-india-red-sea-network/",
+      "publishedAt": "2026-11-01T18:00:02Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb",
+        "India & Indian Ocean"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "red sea"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2019/07/Emirates-Shipping-Line-300x166.jpg",
+      "summary": "Emirates Shipping Line will reorganise its services between India and the Red Sea, according to DynaLiners. The carrier’s South Red Sea Service (SRS) will become a dedicated shuttle between Nhava Sheva and Jeddah. Two vessels ranging from 1,800 to 2,600 TEU will operate the service every nine days. The SRS rotation...",
+      "body": "Services Top Right Emirates Shipping restructures India–Red Sea network November 1, 2026 Facebook Twitter WhatsApp Linkedin Email Photo: Emirates Shipping Line Emirates Shipping Line will reorganise its services between India and the Red Sea, according to DynaLiners. The carrier’s South Red Sea Service (SRS) will become a dedicated shuttle between Nhava Sheva and Jeddah. Two vessels ranging from 1,800 to 2,600 TEU will operate the service every nine days. The SRS rotation will be: Nhava Sheva – Jeddah – Nhava Sheva Meanwhile, the North Red Sea Service (NRS) will cover the remaining ports. Two vessels ranging from 1,700 to 2,500 TEU will provide sailings at approximately fortnightly intervals. The NRS rotation will be: Nhava Sheva – Djibouti – Aqaba – Sokhna – Sohar – Nhava Sheva TAGS Emirates Facebook Twitter WhatsApp Linkedin Email Previous article Cefetra signs agreement with ABP at port of Immingham Next article Arken Intermodal Terminal achieves near-doubled yard capacity Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The carrier’s South Red Sea Service (SRS) will become a dedicated shuttle between Nhava Sheva and Jeddah.",
+        "Two vessels ranging from 1,800 to 2,600 TEU will operate the service every nine days.",
+        "The SRS rotation will be: Nhava Sheva – Jeddah – Nhava Sheva Meanwhile, the North Red Sea Service (NRS) will cover the remaining ports."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-E03A7520D3",
+      "title": "EU Retreats From Arctic Oil Ban Language In Strategy Draft",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/eu-retreats-from-arctic-oil-ban-language-in-strategy-draft/",
+      "publishedAt": "2026-11-01T16:15:09Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Rotterdam & North Sea",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "port",
+        "hormuz",
+        "safety"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "summary": "By Heidi Taksdal Skjeseth and Alberto Nardelli Oct 19, 2026 (Bloomberg) –The European Union looks to be relaxing its opposition to oil and gas production in polar areas, while still calling...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network The Arleigh Burke-class guided missile destroyer USS Bainbridge (DDG 96), left, Royal Norwegian replenishment oiler HNoMS Maud (A-530), center, and Royal Norwegian Navy Fridtjof Nansen-class frigate HNoMS Thor Heyerdahl (F-314), transit the North Cape fjord in the Barents Sea above the Arctic Circle, Aug. 29, 2025. (U.S. Navy Photo by Mass Communication Specialist 2nd Class Alice Husted) By Heidi Taksdal Skjeseth and Alberto Nardelli Oct 19, 2026 (Bloomberg) –The European Union looks to be relaxing its opposition to oil and gas production in polar areas, while still calling for all fossil fuels to be kept in the ground in its forthcoming Arctic strategy. A draft of the strategy, seen by Bloomberg, contains no references to a moratorium on new oil and gas drilling in the Arctic, marking a shift in wording from the EU’s 2021 stance . The wording has been a topic of intense discussions between the trade bloc and Norway, which has lobbied hard for the EU to abandon its climate-based opposition to oil and gas exploration in the high north. The Nordic nation awarded five oil and gas exploration licenses in the Barents Sea , which is part of the Arctic, in last year’s licensing round and opened up 38 blocks in 2026 for applications. Norway supplied almost a third of EU’s gas imports last year, including a small part from those fields. The petroleum industry’s fear was that the EU would pledge not to buy oil and gas from Norway’s new Arctic fields. Instead, the draft says the union will “prioritize” renewable energy sources and hydrocarbons produced outside the Arctic. The European Commission also says it will work toward an international commitment to prevent further development of Arctic oil and gas resources, or purchases from them, when such activity “poses a threat to the Arctic ecosystem.” In 2021, the EU had said that “building on the partial moratoriums on hydrocarbons exploration in the Arctic” in parts of the US, Canada and Greenland, “the EU is committed to ensuring that oil, coal and gas stay in the ground, including in Arctic regions” and that it would work toward “a multilateral legal obligation not to allow any further hydrocarbon reserve development in the Arctic or contiguous regions, nor to purchase such hydrocarbons if they were to be produced.” The latest draft also reiterates the EU’s broader commitment to work toward keeping coal, oil and gas in the ground, including in the Arctic, in line with its climate targets. The bloc has set a legally binding goal of cutting net greenhouse gas emissions by 90% by 2040 from the 1990 level. Related Article; Shadow Fleet Traffic on Northern Sea Route Surges as Arctic Safety Concerns Grow A spokesperson for Equinor ASA, which already produces oil and gas and is exploring more fields in the Barents Sea — referred questions to the Energy Department, and a spokesperson for the ministry declined to comment ahead of the strategy’s release. Environmental groups said the changes don’t amount to a significant retreat by Brussels. Paal Frisvold, who heads the Alliance to Preserve the Moratorium on Oil Drilling in the Arctic, told Bloomberg that he believes that the omission of the word moratorium makes the key message on climate stronger, adding “EU is determined to keep fossil fuels in the ground.” The draft text also maintains the EU’s opposition to deep-sea mining until scientific knowledge gaps have been “satisfactorily filled.” Norway in 2024 approved seabed mining , although no such works have yet started. © 2026 Bloomberg L.P. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! European natural gas prices hit a fresh three-year high as traders race to fill fuel storage facilities ahead of winter, while awaiting details of an Iran-Oman deal on shipping through the Strait of Hormuz. European Union governments should prepare for a \"prolonged disruption\" to energy markets as a result of the Iran war, the bloc's energy chief has told countries' ministers ahead of an emergency meeting on Tuesday. The European Union is planning measures to accelerate the bloc’s phaseout of Russian liquefied natural gas, just days after US President Donald Trump called on the EU to do more to curb Moscow’s energy trade. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "A draft of the strategy, seen by Bloomberg, contains no references to a moratorium on new oil and gas drilling in the Arctic, marking a shift in wording from the EU’s 2021 stance .",
+        "The wording has been a topic of intense discussions between the trade bloc and Norway, which has lobbied hard for the EU to abandon its climate-based opposition to oil and gas exploration in the high north."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-C5E5948DA9",
+      "title": "Cefetra signs agreement with ABP at port of Immingham",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/cefetra-signs-agreement-with-abp-at-port-of-immingham/",
+      "publishedAt": "2026-11-01T16:00:59Z",
+      "category": "Ports & Terminals",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/dlp0557-abp-david-lee-photography-ltd-300x200.jpg",
+      "summary": "Cefetra has signed a ten-year agreement with Associated British Ports at the Port of Immingham, securing substantial storage space at the UK’s largest port by tonnage volume and reinforcing a partnership that spans nearly three decades. Cefetra is one of the UK and Ireland’s major traders of grains and animal feed...",
+      "body": "Cefetra has signed a ten-year agreement with Associated British Ports at the Port of Immingham, securing substantial storage space at the UK’s largest port by tonnage volume and reinforcing a partnership that spans nearly three decades. Cefetra is one of the UK and Ireland’s major traders of grains and animal feed raw materials, handling approximately five million tonnes of raw material annually with a turnover exceeding GBP 1 billion, supplying customers across the animal nutrition, food and drink industries including dairy, beef, poultry, pork and bakery sectors. The long-term contract provides Cefetra with a stable foundation for future planning and continued efficient movement of raw materials to the businesses that depend on them, while confirming Immingham’s strategic importance within the company’s UK supply network. Cefetra is part of Cefetra Group, which has more than 120 years of experience in agriculture and international trade. Paul Litten, Head of Commercial for ABP in the Humber, described the ten-year agreement as an important endorsement of the strategic role the Humber plays in UK supply chains, highlighting the combination of extensive storage capacity, efficient cargo handling and direct market access available at Immingham. James Neilson of Cefetra Ltd described the agreement as reflecting the company’s commitment to reliable customer service and expressed appreciation for the strong working relationship built with ABP and the Immingham team over the years. ABP’s four Humber ports of Immingham, Grimsby, Goole and Hull collectively form the UK’s leading trade gateway by volume, handling more than 50 million tonnes of cargo annually worth over GBP 60 billion.",
+      "takeaways": [
+        "Cefetra is part of Cefetra Group, which has more than 120 years of experience in agriculture and international trade.",
+        "ABP’s four Humber ports of Immingham, Grimsby, Goole and Hull collectively form the UK’s leading trade gateway by volume, handling more than 50 million tonnes of cargo annually worth over GBP 60 billion.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-B453476D89",
+      "title": "Venture Global Begins Supplying Plaquemines Customers Under Long-Term LNG Contracts",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/venture-global-begins-supplying-plaquemines-customers-under-long-term-lng-contracts/",
+      "publishedAt": "2026-11-01T15:27:41Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Red Sea & Bab el-Mandeb",
+        "US Gulf & Port of Houston"
+      ],
+      "tags": [
+        "tanker",
+        "lng",
+        "port",
+        "hormuz",
+        "red sea"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "summary": "By Curtis Williams HOUSTON, Nov 1 (Reuters) – Energy major Shell SHEL.L was the first customer to receive LNG under a long-term sales contract from Venture Global’s VG.N Plaquemines export plant in Louisiana, after it completed Phase 1 commissioning...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo: Shutterstock/Alvaro Ardisana By Curtis Williams HOUSTON, Nov 1 (Reuters) – Energy major Shell SHEL.L was the first customer to receive LNG under a long-term sales contract from Venture Global’s VG.N Plaquemines export plant in Louisiana, after it completed Phase 1 commissioning and moved to commercial operations, the LNG exporter said on Sunday. Plaquemines finished Phase 1 commissioning on Saturday, 22 months after the facility produced its first liquefied natural gas, Venture Global said in a statement. The Malaga Knutsen LNG tanker loaded the first commercial cargo for Shell from Plaquemines and departed at 3:26 a.m. (0926 GMT) on Sunday. “Achieving commercial operations at the first phase of our second LNG project in 53 months is a testament to our team’s relentless dedication and hard work,” said Venture Global CEO Mike Sabel. Phase 1 customers including Shell, Orlen PKN.WA, Sinopec, CNOOC Gas & Power and EDF are expected to receive LNG under long-term contracts. Pricing of those contracts will be significantly discounted from near 46-month highs of around $34 per mmBtu at the Dutch Title Transfer Facility TRNLTTFMc1 benchmark in Europe and $32 at the Japan-Korea Marker JKMc1 benchmark in Asia. Venture Global has benefited from extensive commissioning periods at its plants. It has previously been able to sell Plaquemines cargoes on the spot market, which has seen prices spike due to the ongoing conflict in the Middle East. Related Article: U.S. Boosts LNG Exports From Plaquemines as Hormuz Crisis Threatens Global Gas Supply Just a startup five years ago, Venture Global is now the country’s second-largest LNG producer, helping the US lead the world in LNG exports. (Reporting by Curtis Williams in Houston; Editing by Nathan Crooks and Joe Bavier) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! QatarEnergy agreed to purchase US liquefied natural gas from Woodside Energy Group Ltd. for two decades, saying it’s now the top buyer of the American fuel as it diversifies from the Middle East. A carrier loaded with Qatari liquefied natural gas is sailing north through the Red Sea, potentially speeding up delivery to European customers with a rare transit through waters vulnerable to renewed attacks from Houthi rebels. President Donald Trump said Taiwan had agreed to buy 30% of the liquefied natural gas from a planned project in Alaska for 20 years, even as Taipei indicated that no binding commitments have been finalized. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Plaquemines finished Phase 1 commissioning on Saturday, 22 months after the facility produced its first liquefied natural gas, Venture Global said in a statement.",
+        "The Malaga Knutsen LNG tanker loaded the first commercial cargo for Shell from Plaquemines and departed at 3:26 a.m."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-1989EB2011",
+      "title": "Messina Line drops second Misurata call from West Med service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/messina-line-drops-second-misurata-call-from-west-med-service/",
+      "publishedAt": "2026-11-01T15:00:32Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://container-news.com/wp-content/uploads/2024/07/Ignazio-Messina-vessel-caption-768x404-1-300x158.webp",
+      "summary": "Messina Line will remove the second Misurata call from its West Med Line, according to DynaLiners. The service currently calls at the Libyan port twice during each rotation. Following the change, Misurata will retain one call before Tripoli. Messina Line deploys two 700 TEU vessels on the service. The revised...",
+      "body": "Services Top Right Messina Line drops second Misurata call from West Med service November 1, 2026 Facebook Twitter WhatsApp Linkedin Email Messina Line will remove the second Misurata call from its West Med Line, according to DynaLiners. The service currently calls at the Libyan port twice during each rotation. Following the change, Misurata will retain one call before Tripoli. Messina Line deploys two 700 TEU vessels on the service. The revised rotation will be: Castellón – Barcelona – Marseilles – Genoa – Misurata – Tripoli – Algiers – Castellón The West Med Line connects ports in Spain, France and Italy with Libya and Algeria. TAGS Messina Line Facebook Twitter WhatsApp Linkedin Email Previous article KMTC places first overseas newbuilding order Next article Cefetra signs agreement with ABP at port of Immingham Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The service currently calls at the Libyan port twice during each rotation.",
+        "Following the change, Misurata will retain one call before Tripoli.",
+        "Messina Line deploys two 700 TEU vessels on the service."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-7268CF8180",
+      "title": "KMTC places first overseas newbuilding order",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/kmtc-places-first-overseas-newbuilding-order/",
+      "publishedAt": "2026-11-01T14:00:47Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "China & East Asia",
+        "Japan & Korea"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "china"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2020/11/KMTC-Penang-Credit-Joseph-Lim-300x106.jpg",
+      "summary": "Korea Marine Transport Company (KMTC) has signed a contract for six 3,100 TEU container ships at CSSC Huangpu Wenchong Shipbuilding in China, according to DynaLiners. The agreement represents the South Korean carrier’s first containership newbuilding order placed outside its home country. Neither the contract value...",
+      "body": "News Sticky News KMTC places first overseas newbuilding order November 1, 2026 Facebook Twitter WhatsApp Linkedin Email Korea Marine Transport Company (KMTC) has signed a contract for six 3,100 TEU container ships at CSSC Huangpu Wenchong Shipbuilding in China, according to DynaLiners. The agreement represents the South Korean carrier’s first containership newbuilding order placed outside its home country. Neither the contract value nor the delivery schedule has been disclosed. The six vessels will add a combined nominal capacity of 18,600 TEU to KMTC’s fleet when delivered. TAGS KMTC Facebook Twitter WhatsApp Linkedin Email Previous article Kongsberg Maritime reports record order backlog amid strong newbuild demand Next article Messina Line drops second Misurata call from West Med service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The agreement represents the South Korean carrier’s first containership newbuilding order placed outside its home country.",
+        "Neither the contract value nor the delivery schedule has been disclosed.",
+        "The six vessels will add a combined nominal capacity of 18,600 TEU to KMTC’s fleet when delivered."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -218,112 +461,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-61B5639F08",
-      "title": "CMA CGM temporarily cuts transatlantic leg from PAD service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/cma-cgm-temporarily-cuts-transatlantic-leg-from-pad-service/",
-      "publishedAt": "2026-11-01T06:00:14Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "US East Coast & New York",
-        "Australia & Pilbara"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "panama"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2026/07/media-300x111.webp",
-      "summary": "CMA CGM will temporarily suspend the transatlantic leg of its Panama Direct (PAD) service following the end of the kiwifruit season. According to DynaLiners, the suspension will last 18 weeks, from mid-November 2026 until late March 2027. The shortened service will continue to provide weekly sailings between...",
-      "body": "Services Top Right CMA CGM temporarily cuts transatlantic leg from PAD service November 1, 2026 Facebook Twitter WhatsApp Linkedin Email CMA CGM will temporarily suspend the transatlantic leg of its Panama Direct (PAD) service following the end of the kiwifruit season. According to DynaLiners, the suspension will last 18 weeks, from mid-November 2026 until late March 2027. The shortened service will continue to provide weekly sailings between Australasia and the US East Coast. However, North European ports will be removed during this period. The adjustment will allow CMA CGM to remove four ships from the service. The revised fleet will comprise 11 vessels of around 2,500 TEU each. The temporary PAD rotation will be: New York – Savannah – Kingston – Papeete – Noumea – Brisbane – Sydney – Melbourne – Tauranga – Cartagena – Savannah – Philadelphia – New York TAGS CMA CGM Facebook Twitter WhatsApp Linkedin Email Previous article GT Lines changes partners on KCX1 service Next article ONE ends slot charter on Maersk’s Qilin service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "According to DynaLiners, the suspension will last 18 weeks, from mid-November 2026 until late March 2027.",
-        "The shortened service will continue to provide weekly sailings between Australasia and the US East Coast.",
-        "However, North European ports will be removed during this period."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-E86B3F12D5",
-      "title": "GT Lines changes partners on KCX1 service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/gt-lines-changes-partners-on-kcx1-service/",
-      "publishedAt": "2026-11-01T05:00:16Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "china"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/pexels-robertkso-11823155-1-300x200.jpg",
-      "summary": "GT Lines will launch a revised Khor Fakkan–China Express (KCX1) service with Ningbo Ocean, Sea Legend and Zhonggu Shipping, according to DynaLiners. The carrier is reusing the KCX1 name for the joint service. Its previous KCX1 operation was provided in partnership with CU Lines. The four partners will deploy five...",
-      "body": "Services Top Right GT Lines changes partners on KCX1 service November 1, 2026 Facebook Twitter WhatsApp Linkedin Email GT Lines will launch a revised Khor Fakkan–China Express (KCX1) service with Ningbo Ocean, Sea Legend and Zhonggu Shipping, according to DynaLiners. The carrier is reusing the KCX1 name for the joint service. Its previous KCX1 operation was provided in partnership with CU Lines. The four partners will deploy five vessels on the revised service. GT Lines will contribute two of the ships. The service will operate every ten days with the following rotation: Qingdao – Shanghai – Ningbo – Nansha – Khor Fakkan – Qingdao The revised setup will maintain direct connectivity between major Chinese ports and Khor Fakkan in the United Arab Emirates. TAGS GT Lines Facebook Twitter WhatsApp Linkedin Email Previous article Port of Los Angeles completes interchange project Next article CMA CGM temporarily cuts transatlantic leg from PAD service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The carrier is reusing the KCX1 name for the joint service.",
-        "Its previous KCX1 operation was provided in partnership with CU Lines.",
-        "The four partners will deploy five vessels on the revised service."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-6329218F86",
-      "title": "Port of Los Angeles completes interchange project",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/port-of-los-angeles-completes-interchange-project/",
-      "publishedAt": "2026-11-01T04:00:00Z",
-      "category": "Navigation & Safety",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "safety"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/SR47-Ribbon-Cutting-300x200.jpg",
-      "summary": "The Port of Los Angeles has celebrated the completion of the US$ 139 million SR 47 Interchange Project, reconfiguring key connections between the Vincent Thomas Bridge, I-110, Harbor Boulevard and Front Street to reduce traffic congestion, improve roadway safety and enhance access to surrounding residential...",
-      "body": "The Port of Los Angeles has celebrated the completion of the US$ 139 million SR 47 Interchange Project, reconfiguring key connections between the Vincent Thomas Bridge, I-110, Harbor Boulevard and Front Street to reduce traffic congestion, improve roadway safety and enhance access to surrounding residential communities and the LA Waterfront. The ribbon-cutting ceremony also marked the completion of more than US$ 18 million in nearby community beautification projects. The interchange reconfiguration separates truck traffic from passenger vehicles, improves cargo and motorist movement through one of the port’s busiest transportation corridors, and relocates the southbound SR 47 off-ramp to Harbor Boulevard from the south to the north side of the Vincent Thomas Bridge, improving traffic connections to San Pedro and the surrounding waterfront. Additional improvements include reconfigured freeway ramps, new turning and through lanes at Harbor Boulevard and a dedicated lane providing direct access to the West Basin Container Terminal. The Port secured more than US$ 73 million in grant funding for the project from LA Metro, Caltrans, the South Bay Cities Council of Governments and the US Department of Transportation. While the interchange improvements are complete, the new Harbor Boulevard on-ramp will remain closed in coordination with Caltrans’ upcoming Vincent Thomas Bridge Deck Replacement Project, which will close the bridge from November 7. Three community beautification projects totalling more than USD 18 million were also completed alongside the interchange. The US$ 10.5 million Front Street Beautification Project includes a 22-foot-wide landscaped area and multi-use path along the north side of Front Street adjacent to the West Basin Container Terminal. The approximately US$ 1 million Front Street West Project beautified the west side of Front Street at Pacific Avenue. The US$ 7 million North Gaffey Street Beautification Phase II Project adds new landscaping and a multi-use path along the east side of Gaffey Street between Gatun and Channel Streets alongside improvements to the Caltrans Park and Ride site.",
-      "takeaways": [
-        "The ribbon-cutting ceremony also marked the completion of more than US$ 18 million in nearby community beautification projects.",
-        "Additional improvements include reconfigured freeway ramps, new turning and through lanes at Harbor Boulevard and a dedicated lane providing direct access to the West Basin Container Terminal.",
-        "The Port secured more than US$ 73 million in grant funding for the project from LA Metro, Caltrans, the South Bay Cities Council of Governments and the US Department of Transportation."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-F2069AD5D7",
       "title": "Shipping Strikes In Hormuz Leave Both Sides With Economic Pain",
       "source": "gCaptain",
@@ -394,40 +531,6 @@
       "readMinutes": 3
     },
     {
-      "id": "SN-01E1520D73",
-      "title": "Rhenus expands China logistics operations with new Fuzhou office",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/rhenus-expands-china-logistics-operations-with-new-fuzhou-office/",
-      "publishedAt": "2026-11-01T01:40:35Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia"
-      ],
-      "tags": [
-        "port",
-        "china"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/Fuzhou_team-300x169.webp",
-      "summary": "Rhenus Group has expanded its logistics operations in China with a new office in Fuzhou, focusing on renewable energy equipment and e-commerce supply chains. The facility is the company’s first office in Greater China to establish dedicated business activities in both sectors. It will support Chinese exporters...",
-      "body": "Rhenus Group has expanded its logistics operations in China with a new office in Fuzhou, focusing on renewable energy equipment and e-commerce supply chains. The facility is the company’s first office in Greater China to establish dedicated business activities in both sectors. It will support Chinese exporters through international freight transportation, warehousing, customs clearance and distribution services. Located in Fujian province, the office will serve as a hub for developing new-energy logistics projects across China. In particular, Rhenus will focus on battery energy storage systems (BESS), with Europe as its primary target market and South America as a secondary destination. The nearby Port of Xiamen will play an important role in supporting outbound BESS shipments. Rhenus strengthens energy and e-commerce logistics The Fuzhou office currently employs 18 people, with additional recruitment planned until the end of the first quarter of 2027. According to Rhenus, the team will develop logistics solutions for new-energy customers across Greater China. These services will cover transportation, storage, customs procedures and final-mile delivery. Carol He, General Manager of Rhenus Logistics Southern China, said Fujian’s expanding new-energy manufacturing industry and its position in international supply chains supported the company’s decision to strengthen its regional presence. Meanwhile, the office will also develop e-commerce logistics services for Chinese companies entering European markets. Rhenus plans to use its European warehousing network in Germany, France, Switzerland and Spain to support these operations. The services will include customs clearance, bonded storage, documentation and final-mile distribution. In addition, the company will draw on its Contargo network to provide combined barge-and-truck and rail-and-truck transportation services across Europe. The Fuzhou office will also offer regulatory compliance support, covering European packaging requirements, VAT procedures, extended producer responsibility and battery-related documentation. Cliff Xu, Regional Director of Greater China at Rhenus Air & Ocean, said the expansion reflects the company’s efforts to respond to changing supply chain requirements. The opening brings Rhenus’ network in Greater China to 16 offices.",
-      "takeaways": [
-        "Rhenus Group has expanded its logistics operations in China with a new office in Fuzhou, focusing on renewable energy equipment and e-commerce supply chains.",
-        "The facility is the company’s first office in Greater China to establish dedicated business activities in both sectors.",
-        "It will support Chinese exporters through international freight transportation, warehousing, customs clearance and distribution services."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-A0E70B0A14",
       "title": "Russia Extends Ban On Most Diesel Exports Through January",
       "source": "gCaptain",
@@ -462,42 +565,6 @@
       ],
       "readingMinutes": 3,
       "readMinutes": 3
-    },
-    {
-      "id": "SN-345E374CA5",
-      "title": "CMA CGM adds seasonal Iskenderun call to MEDEX service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/cma-cgm-adds-seasonal-iskenderun-call-to-medex-service/",
-      "publishedAt": "2026-10-31T23:40:44Z",
-      "category": "Ports & Terminals",
-      "region": "Red Sea & Bab el-Mandeb",
-      "regions": [
-        "Red Sea & Bab el-Mandeb",
-        "Suez Canal & Eastern Med",
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "china"
-      ],
-      "coords": [
-        13.5,
-        42.8
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/cma-cgm-and-dsv-press-release-october2026-300x225.webp",
-      "summary": "CMA CGM has added a seasonal call at Iskenderun, Türkiye, to its Indian Subcontinent–Mediterranean MEDEX service. The call is expected to remain part of the service rotation until the end of December 2026. The addition provides a direct connection between southern Türkiye, the Mediterranean, the Middle East and the...",
-      "body": "Services Top Right CMA CGM adds seasonal Iskenderun call to MEDEX service November 1, 2026 Facebook Twitter WhatsApp Linkedin Email CMA CGM has added a seasonal call at Iskenderun, Türkiye, to its Indian Subcontinent–Mediterranean MEDEX service. The call is expected to remain part of the service rotation until the end of December 2026. The addition provides a direct connection between southern Türkiye, the Mediterranean, the Middle East and the Indian Subcontinent. It is also expected to support seasonal reefer exports from Türkiye, including citrus and apples. The revised MEDEX rotation is: Port Said – Malta – Genoa – Marseille – Valencia – Piraeus – Iskenderun – Beirut – Jeddah – Djibouti – Duqm – Mundra – Nhava Sheva – Colombo – Djibouti – Jeddah – Port Said TAGS CMA CGM Facebook Twitter WhatsApp Linkedin Email Previous article MacGregor secures retrofit contract for 35 Wallenius Wilhelmsen vessels Next article Rhenus expands China logistics operations with new Fuzhou office Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The call is expected to remain part of the service rotation until the end of December 2026.",
-        "The addition provides a direct connection between southern Türkiye, the Mediterranean, the Middle East and the Indian Subcontinent.",
-        "It is also expected to support seasonal reefer exports from Türkiye, including citrus and apples."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
     },
     {
       "id": "SN-81C585BDE5",
@@ -1210,79 +1277,6 @@
       ],
       "readingMinutes": 2,
       "readMinutes": 2
-    },
-    {
-      "id": "SN-CB2DEFECF8",
-      "title": "Anti-War Protests Spread Across Global Ports as Dockworkers Target Arms Trade",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/anti-war-protests-spread-across-global-ports-as-dockworkers-target-arms-trade/",
-      "publishedAt": "2026-10-30T16:02:58Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Suez Canal & Eastern Med",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "hormuz",
-        "safety"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
-      "summary": "Dockworkers across 113 ports in 22 countries staged coordinated strikes and protests Friday, disrupting cargo operations and ferry services as part of a global campaign opposing arms shipments to Israel...",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network A view of the container terminal of the Piraeus port, in Perama suburb of Piraeus, Greece January 28, 2025. REUTERS/Louisa Gouliamaki/File Photo Dockworkers across 113 ports in 22 countries staged coordinated strikes and protests Friday, disrupting cargo operations and ferry services as part of a global campaign opposing arms shipments to Israel and the use of commercial ports for military logistics. The October 30 action, organized under the banner “Dockworkers Don’t Work for War,” involves more than 25 unions across five continents, with 24-hour strikes, shorter work stoppages and demonstrations at ports throughout Europe, the Mediterranean and beyond. Organizers describe the mobilization as the largest coordinated port action of its kind, estimating that approximately 52,000 containers carrying $2.8 billion worth of cargo could be delayed. The group puts the direct economic cost at $57 million, although those figures have not been independently verified. The largest disruptions are concentrated in France, Italy, Greece and Türkiye, where unions called 24-hour strikes. Additional work stoppages and demonstrations are taking place in Morocco, Cyprus and other countries, while Italy is also holding a general strike. In Greece, approximately 3,000 workers joined a walkout at the Port of Piraeus, disrupting cargo operations and ferry services, according to Reuters. The movement has also expanded beyond its traditional European and Mediterranean base, with actions in India, Australia, Brazil, Mexico, Uruguay and the United States. On the U.S. West Coast, International Longshore and Warehouse Union (ILWU) Local 10 is participating in actions in Oakland and San Francisco. Other participating unions include Germany’s ver.di, Sweden’s Svenska Hamnarbetarförbundet, Denmark’s 3F and the Maritime Union of Australia. Organizers have published an interactive map and list of participating ports , including major shipping hubs such as Valencia, Algeciras, Barcelona, Hamburg, Piraeus, Genoa and Tangier Med. Participation varies by location, ranging from full-day strikes to brief stoppages and solidarity demonstrations outside port gates. Not all participating ports are experiencing cargo disruptions. The campaign follows an earlier international day of action on February 6 involving 20 ports in seven countries, marking a significant expansion of coordinated labor opposition to the movement of military cargo through commercial shipping networks. The International Transport Workers’ Federation (ITF) has thrown its support behind the campaign, calling on governments and employers to respect workers’ rights to refuse military cargo without retaliation. “Governments must stop the flow of arms used to violate international humanitarian law,” said ITF General Secretary Stephen Cotton. “Governments and employers must respect the voice and rights of these workers.” The ITF said the protests are intended to challenge the movement of military equipment through civilian ports while also drawing attention to workers’ demands for better wages, improved working conditions and protections against increasing automation. ITF President Paddy Crumlin criticized governments for increasing military spending while workers face growing economic pressure. “Governments find billions for weapons while telling working people to accept insecure jobs, squeezed wages and increasing automation – dockers have every right to challenge this anti-worker agenda,” Crumlin said. The federation’s support builds on resolutions adopted at its 2024 Congress in Marrakech, where affiliated unions committed to calling for a permanent ceasefire in Gaza and measures to stop arms transfers contributing to violations of international humanitarian law. The campaign’s demands were further formalized in the Istanbul Declaration in May 2026, when unions representing more than 35 ports agreed to oppose the movement of weapons, ammunition, military equipment and troops through civilian port facilities. The protests are being supported by No Harbour for Genocide, an activist research organization that tracks military supply chains moving through commercial ports. According to the group, its research identified 315 shipments of components for Israeli defense manufacturer Elbit Systems passing through 56 commercial ports in 29 countries between August 2025 and September 2026. The organization also says it tracked approximately 3,400 shipments supplying U.S. military bases through 67 ports in 42 countries between December 2025 and September 2026. Organizers argue that coordinated action across multiple ports makes it more difficult for shipping companies to avoid disruptions by rerouting military cargo through alternative terminals. Previous dockworker actions have targeted individual shipments in Greece, France, Italy and Morocco, including efforts to block weapons and military components destined for Israel. The latest campaign seeks to expand those actions into a broader international movement opposing what participating unions describe as the militarization of civilian port infrastructure. The protests also come amid growing concerns about the safety of commercial seafarers operating in conflict zones. At Piraeus, Greek maritime unions linked the action to mounting casualties among merchant mariners in the Persian Gulf and Black Sea, where commercial vessels have faced missile, drone and other attacks. “We will not work for their wars, and we will not become food for their cannons,” Apostolos Kypraios, head of the Greek union of merchant marine engineers, told Reuters during Friday’s demonstration. Greek unions cited 28 attacks on vessels in the Gulf during the first 21 days of October and 570 confirmed attacks in the Black Sea this year, which they said have killed 40 seafarers. Indian union representatives also raised concerns about casualties during the Iran war, saying approximately 15 Indian seafarers have died and others remain stranded by disruptions to maritime trade. Participating workers are demanding stronger safety protections, including access to medical personnel aboard vessels transiting war zones. The labor action comes as the shipping industry continues to grapple with attacks on vessels around the Strait of Hormuz, growing insecurity in the Black Sea and wider geopolitical disruptions affecting major trade routes. Despite the scale of the mobilization, the actual impact on global shipping remains difficult to assess. Organizers say the participating ports collectively handle approximately 13.5% of global shipping activity and 63% of Mediterranean container activity. Those figures, however, reflect the ports’ overall share of trade rather than the volume of cargo directly affected by Friday’s actions. The estimated $2.8 billion in delayed cargo also represents goods potentially held up by the stoppages, rather than cargo lost or permanently removed from trade. For the participating unions, the objective extends beyond Friday’s operational disruptions. Organizers say further coordinated actions are planned as the international dockworkers’ movement continues to expand. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! By Lori Ann LaRocco – The Port of Los Angeles reported strong results in April, but the port’s head warns that high energy prices are hitting the trucking community hard.... The Port of Long Beach emerged as the busiest seaport in the United States through the first quarter of 2026, even as cargo volumes eased from last year’s record pace and global... Multiple sources of trade data are showing the significant impact of the U.S.-Israel war on Iran and how it is going to continue to get worse before it gets better. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
-      "takeaways": [
-        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
-        "Join the leading maritime news network A view of the container terminal of the Piraeus port, in Perama suburb of Piraeus, Greece January 28, 2025.",
-        "Organizers describe the mobilization as the largest coordinated port action of its kind, estimating that approximately 52,000 containers carrying $2.8 billion worth of cargo could be delayed."
-      ],
-      "readingMinutes": 7,
-      "readMinutes": 7
-    },
-    {
-      "id": "SN-8A0E3436B1",
-      "title": "Tanker Hit by Limpet Mines in Strait of Hormuz as New Threat to Shipping Emerges",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/tanker-hit-by-limpet-mines-in-strait-of-hormuz-as-new-threat-to-shipping-emerges/",
-      "publishedAt": "2026-10-30T15:16:54Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Red Sea & Bab el-Mandeb",
-        "Baltic Sea & Northern Europe"
-      ],
-      "tags": [
-        "tanker",
-        "port",
-        "hormuz"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
-      "summary": "A tanker transiting the Strait of Hormuz was attacked by a small boat that attached two explosive devices to its hull, triggering an engine room fire and temporarily disabling the...",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Vessels in the Strait of Hormuz, as seen from Musandam, Oman, July 31, 2026. REUTERS/Stringer A tanker transiting the Strait of Hormuz was attacked by a small boat that attached two explosive devices to its hull, triggering an engine room fire and temporarily disabling the vessel, according to a verified report from the United Kingdom Maritime Trade Operations (UKMTO). The October 29 attack marks a significant escalation in the conflict, introducing a new threat to commercial shipping already facing repeated missile and drone strikes in and around the strategic waterway. According to UKMTO Warning 187-26, the incident occurred approximately 25 nautical miles northeast of Khasab, Oman, as the tanker was transiting outbound from the strait. A small boat approached the tanker’s port side and attached two explosive devices above the waterline. The resulting explosions sparked a fire in the engine room and temporarily disabled the ship. UKMTO confirmed Friday that the crew was safe, the fire had been extinguished and there was no environmental impact. The tanker has since resumed its voyage. Maritime security sources identified the weapons as limpet mines, explosives attached directly to a vessel’s hull. The attack represents the first reported successful use of the tactic against merchant shipping in the waterway since the war began in February. Martin Kelly, Head of Advisory at EOS Risk Group, identified the vessel as the LOUISE 1 and said the attack marked another step in Iran’s evolving campaign against commercial shipping. He said the last time Iran used limpet mines against merchant shipping was in May 2019 when they attacked four vessels anchored off Fujairah and subsequent attacks on the tankers KOKUKA COURAGEOUS and FRONT ALTAIR in the Gulf of Oman the following month. The return of limpet mines adds another layer to the threat facing ships navigating the strait. Kelly warned that the implications could be particularly serious for vessels waiting at anchor, where explosives could potentially be placed below the waterline without being detected by the crew. “A limpet mine below the waterline will cause significant damage and water ingress,” he said. Multiple Attacks Reported as Iran Claims Three Tankers Hit The limpet-mine attack was one of several maritime security incidents reported in the Strait of Hormuz on Thursday. In a separate UKMTO warning, a company security officer reported that another tanker had been struck by an unidentified projectile while completing an outbound transit of the strait at approximately 1600 UTC. No crew injuries or environmental impact were reported. Earlier Thursday, UKMTO also reported a vessel on fire approximately nine nautical miles north of Khasab. Regional authorities subsequently identified the vessel as a dhow that had been involved in a maritime security incident. The dhow caught fire, listed and sank. Its crew was safely evacuated, according to UKMTO. The incident follows an earlier U.S. military operation in which American forces reportedly destroyed a dhow suspected of providing intelligence to Iran. However, no connection between that operation and Thursday’s sinking has been established. Meanwhile, Iran’s Islamic Revolutionary Guard Corps Navy claimed Friday that three oil tankers had caught fire and exploded while attempting to transit routes it described as unauthorized. According to Iranian state media cited by Reuters, the IRGC claimed one tanker carrying approximately 2 million barrels of crude oil had struck a mine. Reuters said it could not independently verify the claims. Iran has repeatedly described attacks against ships using routes outside its control as mine strikes, but independent evidence supporting its broader claims of sea mines has remained limited. Attacks Concentrated Along Southern Transit Route The latest incidents come as the United States continues coordinating commercial vessel movements through the Strait of Hormuz, including a southern route intended to keep shipping moving despite Iranian threats. The route has increasingly become a focus of attacks. According to UKMTO’s October 30 weekly maritime security overview, 59 of 81 reported projectile strikes since July 6 occurred along the southern route. The report also highlighted the difficulty of establishing a complete picture of attacks across the region. “UKMTO reports only incidents verified through primary sources; additional incidents are known but cannot be independently verified,” the agency said. Since the conflict began on February 28, UKMTO has recorded 145 Iran-U.S. conflict-related incidents across its reporting area, including 88 incidents involving vessels in the Strait of Hormuz through October 28. Despite the continuing threat, commercial traffic has been recovering gradually. UKMTO reported 122 outbound and 155 inbound transits over its latest seven-day reporting period, up from 114 outbound and 127 inbound the previous week. However, combined traffic remains approximately 70% below pre-conflict levels. UKMTO also noted that around 80% of transits reported by U.S. Naval Cooperation and Guidance for Shipping involve energy carriers. The latest attacks underscore the challenges facing efforts to restore normal shipping through the waterway. While military operations have focused heavily on missiles, drones and the threat of naval mines, the use of explosives placed directly onto a merchant vessel’s hull introduces another risk for operators. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! By Gerry Doyle Oct 31, 2026 (Bloomberg) –As US President Donald Trump threatens renewed attacks against Iran, Tehran’s intermittent strikes on commercial vessels have left the two sides locked in a painful... The Baltic Exchange has received two whistleblowing claims of attempted manipulation of the world’s benchmark tanker rate since the beginning of the war in Iran, according to documents made public as part of a major legal battle with trading house Mercuria Energy Group. QatarEnergy is buying long-term supplies of liquefied natural gas from the US and other producers as part of a trading strategy designed to generate revenue if exports through the Strait of Hormuz are disrupted in the future, CEO Saad Sherida Al-Kaabi told Reuters on Thursday. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
-      "takeaways": [
-        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
-        "Join the leading maritime news network Vessels in the Strait of Hormuz, as seen from Musandam, Oman, July 31, 2026.",
-        "The October 29 attack marks a significant escalation in the conflict, introducing a new threat to commercial shipping already facing repeated missile and drone strikes in and around the strategic waterway."
-      ],
-      "readingMinutes": 6,
-      "readMinutes": 6
     },
     {
       "id": "SN-94548536E8",
