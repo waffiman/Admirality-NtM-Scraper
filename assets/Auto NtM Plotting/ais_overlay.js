@@ -178,6 +178,27 @@
     }
   }
 
+  /**
+   * SAFETY: AIS overlay markers are feed-only (AISStream / OpenSeaFeed / Open Waters / Digitraffic…).
+   * Never project foreign (or own) targets along a user’s private Current route / DR rails.
+   * Own-ship route DR lives only in setsail_core My Vessel layer — invisible to other clients.
+   */
+  function scrubNonFeedAisFields(t) {
+    if (!t || typeof t !== "object") return t;
+    if (t.deadReckoned || /ais-dr/i.test(String(t.source || ""))) {
+      const copy = Object.assign({}, t);
+      delete copy.deadReckoned;
+      delete copy.aisDrAt;
+      delete copy.aisDrNm;
+      delete copy.aisDrMode;
+      if (/ais-dr/i.test(String(copy.source || ""))) {
+        copy.source = "AIS";
+      }
+      return copy;
+    }
+    return t;
+  }
+
   function parseAisSeenMs(v) {
     if (v == null || v === "") return 0;
     if (typeof v === "number" && Number.isFinite(v)) {
@@ -250,7 +271,13 @@
     const useTriangles = !!lod.triangles;
     const px = z <= 3 ? 9 : z <= 5 ? 11 : 14;
     const canvasR = getAisCanvasRenderer();
-    list.forEach((v) => {
+    const ownMmsi = getOwnVesselMmsi();
+    list.forEach((raw) => {
+      // Feed coordinates only — never substitute local My Vessel DR position into AIS layer
+      const v = scrubNonFeedAisFields(raw);
+      if (ownMmsi && String(v.mmsi) === ownMmsi && window.userVessel && window.userVessel.deadReckoned) {
+        // Keep AIS triangle at last feed fix; My Vessel layer shows local DR separately
+      }
       const lat = Number(v.lat);
       const lonRaw = Number(v.lon);
       if (!Number.isFinite(lat) || !Number.isFinite(lonRaw)) return;

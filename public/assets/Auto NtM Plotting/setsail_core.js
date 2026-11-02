@@ -128,17 +128,45 @@ function loadUserVesselFromStorage() {
   return null;
 }
 
+/**
+ * Durable / cloud vessel snapshot.
+ * SAFETY: route-based Dead Reckoning is LOCAL DISPLAY ONLY for My Vessel.
+ * Never persist DR lat/lon as “truth” — other SetSail users must only ever see
+ * this MMSI via public AIS feeds (last real fix), never along a private route.
+ */
+function vesselStateForDurableStore(v) {
+  if (!v || typeof v !== "object") return v;
+  const out = Object.assign({}, v);
+  const isDr = !!(v.deadReckoned || /ais-dr/i.test(String(v.source || "")));
+  const fixLat = Number(v.aisFixLat);
+  const fixLon = Number(v.aisFixLon);
+  if (isDr && Number.isFinite(fixLat) && Number.isFinite(fixLon)) {
+    out.lat = fixLat;
+    out.lon = fixLon;
+    out.source = "ais";
+    out.deadReckoned = false;
+  }
+  delete out.aisDrAt;
+  delete out.aisDrNm;
+  delete out.aisDrMode;
+  delete out.displayDrLat;
+  delete out.displayDrLon;
+  return out;
+}
+window.vesselStateForDurableStore = vesselStateForDurableStore;
+
 function persistUserVessel() {
   // Guests: keep vessel in memory for this tab only — never write to localStorage.
   if (typeof isSetSailSignedIn === "function" && !isSetSailSignedIn()) return;
   try {
     if (userVessel) {
-      localStorage.setItem(VESSEL_STORAGE_KEY_V2, JSON.stringify(userVessel));
+      const durable = vesselStateForDurableStore(userVessel);
+      localStorage.setItem(VESSEL_STORAGE_KEY_V2, JSON.stringify(durable));
       localStorage.setItem(VESSEL_STORAGE_KEY, JSON.stringify({
-        lat: userVessel.lat,
-        lon: userVessel.lon,
-        source: userVessel.source || "manual",
-        updatedAt: userVessel.updatedAt
+        lat: durable.lat,
+        lon: durable.lon,
+        source: durable.source || "manual",
+        updatedAt: durable.updatedAt
       }));
     } else {
       localStorage.removeItem(VESSEL_STORAGE_KEY_V2);
@@ -839,11 +867,19 @@ function setroutePointAlongRoute(wps, alongNm) {
 /**
  * Extrapolate My Vessel when coastal AIS has gone dark.
  * Prefer DR along the coral-toggled “rails” route at last SOG; else COG/heading rhumb.
+ *
+ * SAFETY (multi-user):
+ * - Mutates ONLY the local My Vessel icon / in-memory userVessel.
+ * - MUST NEVER write into aisStreamTargets / AIS overlay / any shared feed.
+ * - Other SetSail clients see this MMSI solely from integrated AIS sources.
+ * - Private Current-route geometry must not influence anyone else’s chart.
  */
 function applyOwnVesselDeadReckoning(opts) {
   opts = opts || {};
   const v = userVessel;
   if (!v || !v.mmsi) return;
+  // Hard fence: DR is own-ship local display only
+  if (opts && opts.forAisTarget) return;
   const fixIso = v.aisLastFixAt || v.aisRefreshedAt;
   if (!fixIso) return;
   const fixMs = Date.parse(fixIso);

@@ -26,6 +26,34 @@
     }
   }
 
+  function sanitizeVesselForCloud(vessel) {
+    // Never upload route-DR coordinates — cloud profile is not a traffic source for others,
+    // but durable vessel truth must stay last real AIS/GPS, not a private-route guess.
+    if (!vessel || typeof vessel !== "object") return vessel;
+    try {
+      if (typeof global.vesselStateForDurableStore === "function") {
+        return global.vesselStateForDurableStore(vessel);
+      }
+    } catch (e) {}
+    var out = {};
+    Object.keys(vessel).forEach(function (k) {
+      out[k] = vessel[k];
+    });
+    var isDr = !!(out.deadReckoned || /ais-dr/i.test(String(out.source || "")));
+    var fixLat = Number(out.aisFixLat);
+    var fixLon = Number(out.aisFixLon);
+    if (isDr && isFinite(fixLat) && isFinite(fixLon)) {
+      out.lat = fixLat;
+      out.lon = fixLon;
+      out.source = "ais";
+      out.deadReckoned = false;
+    }
+    delete out.aisDrAt;
+    delete out.aisDrNm;
+    delete out.aisDrMode;
+    return out;
+  }
+
   function collectLocal() {
     var vessel = null;
     var route = null;
@@ -43,7 +71,13 @@
     try {
       ntmOverrides = JSON.parse(localStorage.getItem("setsail_ntm_overrides_v1") || "null");
     } catch (e4) {}
-    return { vessel: vessel, route: route, wifiAis: wifi, ntmOverrides: ntmOverrides, updatedAt: Date.now() };
+    return {
+      vessel: sanitizeVesselForCloud(vessel),
+      route: route,
+      wifiAis: wifi,
+      ntmOverrides: ntmOverrides,
+      updatedAt: Date.now()
+    };
   }
 
   function applyRemote(profile) {

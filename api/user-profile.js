@@ -89,7 +89,30 @@ async function loadProfile(sub) {
   return null;
 }
 
+/** Strip route-DR coords before durable store — never treat private-route guess as AIS truth. */
+function sanitizeProfileVessel(profile) {
+  if (!profile || typeof profile !== "object" || !profile.vessel || typeof profile.vessel !== "object") {
+    return profile;
+  }
+  const v = Object.assign({}, profile.vessel);
+  const isDr = !!(v.deadReckoned || /ais-dr/i.test(String(v.source || "")));
+  const fixLat = Number(v.aisFixLat);
+  const fixLon = Number(v.aisFixLon);
+  if (isDr && Number.isFinite(fixLat) && Number.isFinite(fixLon)) {
+    v.lat = fixLat;
+    v.lon = fixLon;
+    v.source = "ais";
+    v.deadReckoned = false;
+  }
+  delete v.aisDrAt;
+  delete v.aisDrNm;
+  delete v.aisDrMode;
+  profile.vessel = v;
+  return profile;
+}
+
 async function saveProfile(sub, profile) {
+  sanitizeProfileVessel(profile);
   mem.set(sub, profile);
   try {
     if (process.env.BLOB_READ_WRITE_TOKEN) {
