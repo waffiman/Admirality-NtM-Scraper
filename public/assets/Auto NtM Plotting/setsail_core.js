@@ -288,10 +288,16 @@ function applyVesselProfile(data, opts) {
 }
 
 /** Live refresh of the AIS target linked as My Vessel (MMSI). */
-const OWN_AIS_REFRESH_MS = 3 * 60 * 1000; // 3 min — open-ocean gaps still need frequent MMSI polls
-const OWN_AIS_STALE_DR_MS = 45 * 60 * 1000; // after 45 min without a new fix → dead-reckon
+/** Network AIS poll — NOT 5s (too heavy); adaptive below. Visual motion is separate. */
+const OWN_AIS_REFRESH_MS = 60 * 1000; // base 60s network poll
+const OWN_AIS_REFRESH_NEAR_MS = 20 * 1000; // 20s when map is zoomed near own ship
+const OWN_AIS_VISUAL_DR_MS = 12 * 1000; // coast along COG/rails after 12s without a new fix
+const OWN_AIS_STALE_DR_MS = 45 * 60 * 1000; // after 45 min → out-of-coverage messaging
+const OWN_SHIP_VISUAL_TICK_MS = 2000; // local icon advance every 2s (no network)
 let _ownAisRefreshTimer = null;
 let _ownAisDrTimer = null;
+let _ownShipMarker = null;
+let _ownShipMotionBusy = false;
 
 async function fetchOwnVesselAisUpdate() {
   const v = userVessel;
@@ -843,13 +849,17 @@ function applyOwnVesselDeadReckoning(opts) {
   const fixMs = Date.parse(fixIso);
   if (!Number.isFinite(fixMs)) return;
   const ageMs = Date.now() - fixMs;
-  if (!opts.force && ageMs < OWN_AIS_STALE_DR_MS) return;
+  // Visual coasting starts after OWN_AIS_VISUAL_DR_MS; force/opts.visual may override
+  const drGate = opts.visual ? OWN_AIS_VISUAL_DR_MS : OWN_AIS_VISUAL_DR_MS;
+  if (!opts.force && ageMs < drGate) return;
   // Wi-Fi / LAN AIS is truth — never DR over it
   if (String(v.source || "").toLowerCase().indexOf("wifi") >= 0) return;
   const sog = Number(v.sog);
-  if (!(sog >= 1)) return;
+  if (!(sog >= 0.3)) return;
   const distNm = sog * (ageMs / 3600000);
-  if (!(distNm > 0.5) || distNm > 3500) return;
+  // Visual ticks need small steps (e.g. 14 kn × 12 s ≈ 0.05 NM); toast/stale path keeps 0.5 NM floor
+  const minNm = opts.visual ? 0.015 : 0.5;
+  if (!(distNm > minNm) || distNm > 3500) return;
 
   // Last known AIS fix coordinates (not previous DR) — rails & rhumb both start here
   const fixLat = Number(v.aisFixLat != null ? v.aisFixLat : v.lat);
@@ -956,6 +966,26 @@ function applyOwnVesselDeadReckoning(opts) {
 }
 window.applyOwnVesselDeadReckoning = applyOwnVesselDeadReckoning;
 
+function isMapWatchingOwnShip() {
+  try {
+    if (!leafletMap || !userVessel) return false;
+    const lat = Number(userVessel.lat);
+    const lon = Number(userVessel.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+    const z = leafletMap.getZoom();
+    if (!(z >= 7)) return false;
+    const b = leafletMap.getBounds();
+    if (!b || !b.contains([lat, lon])) return false;
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function ownShipNetworkPollMs() {
+  return isMapWatchingOwnShip() ? OWN_AIS_REFRESH_NEAR_MS : OWN_AIS_REFRESH_MS;
+}
+
 function scheduleOwnVesselAisRefresh() {
   if (_ownAisRefreshTimer) {
     clearInterval(_ownAisRefreshTimer);
@@ -966,21 +996,44 @@ function scheduleOwnVesselAisRefresh() {
     _ownAisDrTimer = null;
   }
   if (!userVessel || !userVessel.mmsi) return;
-  _ownAisRefreshTimer = setInterval(() => {
-    refreshOwnVesselFromAis({ toast: false });
-  }, OWN_AIS_REFRESH_MS);
+
+  // Adaptive network poll: 20s near own ship, 60s otherwise — never 5s (map lag / API burn)
+  const armNetwork = () => {
+    if (_ownAisRefreshTimer) clearInterval(_ownAisRefreshTimer);
+    _ownAisRefreshTimer = setInterval(() => {
+      refreshOwnVesselFromAis({ toast: false });
+      // Re-arm interval if watch mode changed
+      const want = ownShipNetworkPollMs();
+      if (_ownAisRefreshTimer && _ownAisRefreshTimer._setsailMs !== want) {
+        armNetwork();
+      }
+    }, ownShipNetworkPollMs());
+    _ownAisRefreshTimer._setsailMs = ownShipNetworkPollMs();
+  };
+  armNetwork();
+
+  // Local visual motion every 2s — no network, no full layer rebuild
   _ownAisDrTimer = setInterval(() => {
-    applyOwnVesselDeadReckoning({ toast: false });
-  }, 60 * 1000);
+    if (_ownShipMotionBusy) return;
+    _ownShipMotionBusy = true;
+    try {
+      applyOwnVesselDeadReckoning({ toast: false, visual: true });
+    } catch (eDr) {
+    } finally {
+      _ownShipMotionBusy = false;
+    }
+  }, OWN_SHIP_VISUAL_TICK_MS);
+
   const stale =
     !userVessel.aisRefreshedAt ||
     Date.now() - new Date(userVessel.aisRefreshedAt).getTime() > 3 * 3600 * 1000;
-  const delay = stale ? 2500 : 5000;
+  const delay = stale ? 2500 : 4000;
   setTimeout(() => refreshOwnVesselFromAis({ toast: stale }), delay);
-  setTimeout(() => applyOwnVesselDeadReckoning({ toast: stale }), delay + 1500);
+  setTimeout(() => applyOwnVesselDeadReckoning({ toast: stale, visual: true }), delay + 800);
 }
 window.refreshOwnVesselFromAis = refreshOwnVesselFromAis;
 window.scheduleOwnVesselAisRefresh = scheduleOwnVesselAisRefresh;
+window.isMapWatchingOwnShip = isMapWatchingOwnShip;
 window.findAisTargetByMmsi = findAisTargetByMmsi;
 window.bindVesselMmsiLookup = bindVesselMmsiLookup;
 
@@ -1586,7 +1639,10 @@ function saveVesselForm(which, closeFn) {
 function clearVesselProfile(closeFn) {
   userVessel = null;
   persistUserVessel();
+  _ownShipMarker = null;
   if (leafletVesselLayer) leafletVesselLayer.clearLayers();
+  if (_ownAisRefreshTimer) { clearInterval(_ownAisRefreshTimer); _ownAisRefreshTimer = null; }
+  if (_ownAisDrTimer) { clearInterval(_ownAisDrTimer); _ownAisDrTimer = null; }
   const hud = document.getElementById("ntmVesselHud");
   if (hud) hud.style.display = "none";
   fillVesselFormsFromState();
@@ -2728,39 +2784,44 @@ function renderRouteOnMap(route, shouldFly = true) {
   }
   // Keep a copy for buffer corridor (same unrolled geometry)
   window._setsailRouteUnrolled = unrolledCoords.slice();
+  invalidateRouteCorridorDistanceCache();
 
-  const rtSub = window.ROUTE_SUBFILTERS || { waypoints: true, line: true };
+  // Default: always show waypoint circles unless user explicitly unchecked
+  if (!window.ROUTE_SUBFILTERS) window.ROUTE_SUBFILTERS = { waypoints: true, line: true };
+  if (window.ROUTE_SUBFILTERS.waypoints == null) window.ROUTE_SUBFILTERS.waypoints = true;
+  const rtSub = window.ROUTE_SUBFILTERS;
   let trackLine = null;
   let trackGlow = null;
   let trackOutline = null;
   let trackCore = null;
   if (rtSub.line !== false && unrolledCoords.length >= 2) {
-    // High-visibility route: dark outline + bright cyan core + outer glow
-    trackOutline = L.polyline(unrolledCoords, {
+    // Simplify display polylines for pan/zoom; full unrolled kept for WPT markers + DR
+    const lineCoords = simplifyRoutePtsForBuffer(unrolledCoords, 180);
+    trackOutline = L.polyline(lineCoords, {
       color: "#0b1e33",
-      weight: 10,
-      opacity: 0.85,
+      weight: 8,
+      opacity: 0.8,
       interactive: false,
       lineCap: "round",
       lineJoin: "round"
     });
-    trackGlow = L.polyline(unrolledCoords, {
+    trackGlow = L.polyline(lineCoords, {
       color: "#00e5ff",
-      weight: 14,
-      opacity: 0.35,
+      weight: 11,
+      opacity: 0.28,
       interactive: false,
       lineCap: "round",
       lineJoin: "round"
     });
-    trackLine = L.polyline(unrolledCoords, {
+    trackLine = L.polyline(lineCoords, {
       color: "#ff3b1f",
-      weight: 4.5,
+      weight: 4,
       opacity: 1,
       interactive: true,
       lineCap: "round",
       lineJoin: "round"
     });
-    trackCore = L.polyline(unrolledCoords, {
+    trackCore = L.polyline(lineCoords, {
       color: "#ffe566",
       weight: 2,
       opacity: 0.95,
@@ -2774,36 +2835,40 @@ function renderRouteOnMap(route, shouldFly = true) {
     leafletRouteLayer.addLayer(trackCore);
   }
 
-  if (typeof window.renderRouteBufferCorridorOnMap === "function") {
-    window.renderRouteBufferCorridorOnMap(); // v5.10 after unroll
-  }
+  // Buffer once at end (avoid double SVG rebuild during load)
 
-  // Add Waypoints
-  (rtSub.waypoints !== false ? cleanWps : []).forEach((wp, idx) => {
+  // Add Waypoints — always draw circles for every leg junction (subfilter may hide)
+  const showWpts = rtSub.waypoints !== false;
+  (showWpts ? cleanWps : []).forEach((wp, idx) => {
     const isStart = idx === 0;
     const isEnd = idx === cleanWps.length - 1;
     const wptCoords = unrolledCoords[idx];
     
     const color = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#38bdf8");
-    const fillColor = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#ffffff");
-    const radius = isStart || isEnd ? 6 : 4;
+    const fillColor = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#f8fafc");
+    // Large enough to read on ocean zoom — previous 8px dots vanished under the glow line
+    const radius = isStart || isEnd ? 12 : 9;
+    const box = radius * 2;
+    const numHtml = (!isStart && !isEnd && cleanWps.length <= 80)
+      ? `<span class="route-wpt-num">${idx + 1}</span>` : "";
     
     const marker = L.marker(wptCoords, {
       draggable: true,
       autoPan: true,
+      keyboard: false,
       icon: L.divIcon({
-        className: 'route-wpt-div-icon',
-        html: `<div style="width:${radius*2}px;height:${radius*2}px;border-radius:50%;background:${fillColor};border:2px solid ${color};box-shadow:0 0 8px rgba(0,0,0,0.5);cursor:grab;transition:transform 0.15s ease;" title="Drag to reposition WPT #${idx+1}"></div>`,
-        iconSize: [radius*2, radius*2],
+        className: "route-wpt-div-icon",
+        html: `<div class="route-wpt-dot" style="position:relative;width:${box}px;height:${box}px;background:${fillColor};border:3px solid ${color};" title="Drag WPT #${idx + 1}">${numHtml}</div>`,
+        iconSize: [box, box],
         iconAnchor: [radius, radius]
       }),
-      zIndexOffset: 1000
+      zIndexOffset: 2000 + idx
     });
 
     marker.on('dragstart', function(e) {
       const el = e.target.getElement();
       if (el) {
-        const dot = el.querySelector('div');
+        const dot = el.querySelector('.route-wpt-dot');
         if (dot) dot.style.cursor = 'grabbing';
       }
     });
@@ -2820,7 +2885,7 @@ function renderRouteOnMap(route, shouldFly = true) {
     marker.on('dragend', function(e) {
       const el = e.target.getElement();
       if (el) {
-        const dot = el.querySelector('div');
+        const dot = el.querySelector('.route-wpt-dot');
         if (dot) dot.style.cursor = 'grab';
       }
       const latlng = e.target.getLatLng();
@@ -2830,9 +2895,11 @@ function renderRouteOnMap(route, shouldFly = true) {
       wp.lat = parseFloat(normLat.toFixed(5));
       wp.lon = parseFloat(normLon.toFixed(5));
 
-      if (activeRouteData && activeRouteData.waypoints && activeRouteData.waypoints[idx]) {
-        activeRouteData.waypoints[idx].lat = wp.lat;
-        activeRouteData.waypoints[idx].lon = wp.lon;
+      // Prefer the original waypoint object (_src) — cleanWps index may diverge after dedupe
+      const targetWp = wp._src || (activeRouteData && activeRouteData.waypoints && activeRouteData.waypoints[idx]) || null;
+      if (activeRouteData && targetWp) {
+        targetWp.lat = wp.lat;
+        targetWp.lon = wp.lon;
 
         // Re-unroll coordinates cleanly across the entire route to maintain continuous geometry
         if (cleanWps.length > 0) {
@@ -2888,8 +2955,9 @@ function renderRouteOnMap(route, shouldFly = true) {
           displaySetRouteResults(activeRouteData, false);
         }
 
-        if (typeof renderNtMListAndMap === "function") {
-          renderNtMListAndMap();
+        // Debounced — full NtM/weather corridor refilter on every drag was freezing the map
+        if (typeof scheduleRouteCorridorLayersRefresh === "function") {
+          scheduleRouteCorridorLayersRefresh(220);
         }
 
         marker.setPopupContent(`
@@ -2951,6 +3019,12 @@ function renderRouteOnMap(route, shouldFly = true) {
   }
   if (typeof window.renderRouteBufferCorridorOnMap === "function") {
     window.renderRouteBufferCorridorOnMap();
+  }
+  // Defer heavy overlay refilter so pan/zoom stays responsive right after route load
+  if (typeof scheduleRouteCorridorLayersRefresh === "function") {
+    scheduleRouteCorridorLayersRefresh(280);
+  } else if (window.ROUTE_CORRIDOR_FILTER_ENABLED && typeof renderNtMListAndMap === "function") {
+    setTimeout(() => { try { renderNtMListAndMap(); } catch (e) {} }, 280);
   }
   if (typeof window.saveSetSailUserHistory === "function") {
     window.saveSetSailUserHistory();
@@ -4407,20 +4481,37 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
     source,
     updatedAt: new Date().toISOString()
   });
-  persistUserVessel();
+  // Avoid writing localStorage on every 2s visual tick — only persist on real fixes / slower cadence
+  const isVisualSrc = /dr|ais-dr/i.test(String(source || ""));
+  if (!isVisualSrc || !window._setsailOwnShipPersistAt || (Date.now() - window._setsailOwnShipPersistAt > 15000)) {
+    persistUserVessel();
+    window._setsailOwnShipPersistAt = Date.now();
+  }
 
   if (leafletMap && leafletVesselLayer) {
-    leafletVesselLayer.clearLayers();
-
     const hdg = resolveOwnShipHeading(userVessel);
     const sog = resolveOwnShipSogKn(userVessel);
-    const marker = L.marker([lat, lon], {
-      icon: getOwnShipMapIcon(hdg),
-      zIndexOffset: 1200
-    });
+    const ll = L.latLng(lat, lon);
+
+    // Reuse marker — clearLayers every tick was a major pan/zoom hitch
+    if (_ownShipMarker && leafletVesselLayer.hasLayer(_ownShipMarker)) {
+      _ownShipMarker.setLatLng(ll);
+      try {
+        const nextIcon = getOwnShipMapIcon(hdg);
+        if (nextIcon) _ownShipMarker.setIcon(nextIcon);
+      } catch (eIcon) {}
+    } else {
+      leafletVesselLayer.clearLayers();
+      _ownShipMarker = L.marker(ll, {
+        icon: getOwnShipMapIcon(hdg),
+        zIndexOffset: 1200,
+        interactive: true
+      });
+      leafletVesselLayer.addLayer(_ownShipMarker);
+    }
 
     const title = (userVessel.name && String(userVessel.name).trim()) || "Vessel Position";
-    marker.bindPopup(`
+    _ownShipMarker.bindPopup(`
       <div style="font-family:'Segoe UI',sans-serif;color:#111;min-width:180px;">
         <div style="font-weight:700;color:#0a3888;font-size:1rem;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:5px;">
           ${title.replace(/[<>]/g, "")}
@@ -4430,12 +4521,15 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
         ${userVessel.mmsi ? `<div style="font-size:0.75rem;color:#333;"><b>MMSI:</b> ${String(userVessel.mmsi).replace(/[<>]/g, "")}</div>` : ""}
         ${hdg != null ? `<div style="font-size:0.75rem;color:#333;"><b>HDG:</b> ${Math.round(hdg)}°</div>` : ""}
         ${sog != null ? `<div style="font-size:0.75rem;color:#333;"><b>SOG:</b> ${Number(sog).toFixed(1)} kn · vector ${OWN_SHIP_VECTOR_MINUTES} min</div>` : ""}
-        <div style="font-size:0.75rem;color:#666;"><b>Source:</b> ${source === "gps" ? "Browser GPS" : source === "ais" ? "AIS match" : "Manual Navigation Entry"}</div>
+        <div style="font-size:0.75rem;color:#666;"><b>Source:</b> ${source === "gps" ? "Browser GPS" : (String(source).indexOf("ais") >= 0 ? "AIS / DR" : "Manual Navigation Entry")}</div>
       </div>
     `);
 
-    leafletVesselLayer.addLayer(marker);
-    updateOwnShipTimeVector(lat, lon, hdg, sog);
+    // Throttle vector redraw (cheap but still SVG)
+    if (!window._setsailOwnShipVectorAt || (Date.now() - window._setsailOwnShipVectorAt > 4000)) {
+      updateOwnShipTimeVector(lat, lon, hdg, sog);
+      window._setsailOwnShipVectorAt = Date.now();
+    }
     if (!skipFly) {
       leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
     }
@@ -4443,7 +4537,6 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
   const hud = document.getElementById("ntmVesselHud");
   if (hud) {
-    // Keep bottom-left for cursor coordinates only (ECDIS-style)
     hud.style.display = "none";
   }
 
@@ -15175,8 +15268,60 @@ try {
    MINI DRAGGABLE ROUTE SNAPSHOT & CORRIDOR BUFFER FILTER ENGINE
    ========================================================================== */
 window.ROUTE_CORRIDOR_FILTER_ENABLED = false;
-window.ROUTE_CORRIDOR_BUFFER_NM = parseInt(localStorage.getItem("setsail_route_buffer_nm") || "25", 10) || 25;
+(function initRouteBufferNm() {
+  let n = parseInt(localStorage.getItem("setsail_route_buffer_nm") || "25", 10);
+  if (!Number.isFinite(n)) n = 25;
+  window.ROUTE_CORRIDOR_BUFFER_NM = Math.max(1, Math.min(250, n));
+})();
 let leafletRouteBufferLayer = null;
+let _routeCorridorRefreshTimer = null;
+let _routeCorridorBBox = null;
+
+/** Decimate polyline for buffer SVG (keeps ends). */
+function simplifyRoutePtsForBuffer(pts, maxPts) {
+  if (!pts || pts.length <= 2) return pts || [];
+  const cap = Math.max(8, Number(maxPts) || 96);
+  if (pts.length <= cap) return pts;
+  const out = [pts[0]];
+  const step = (pts.length - 1) / (cap - 1);
+  for (let i = 1; i < cap - 1; i++) {
+    out.push(pts[Math.round(i * step)]);
+  }
+  out.push(pts[pts.length - 1]);
+  return out;
+}
+
+function invalidateRouteCorridorDistanceCache() {
+  _routeCorridorBBox = null;
+  window._setsailRouteDistCacheGen = (window._setsailRouteDistCacheGen || 0) + 1;
+}
+
+function getActiveRouteBBoxPad(padDeg) {
+  if (_routeCorridorBBox && _routeCorridorBBox.gen === window._setsailRouteDistCacheGen) {
+    return _routeCorridorBBox;
+  }
+  if (!activeRouteData || !Array.isArray(activeRouteData.waypoints)) return null;
+  let minLat = 90, maxLat = -90, minLon = 180, maxLon = -180;
+  const wpts = activeRouteData.waypoints;
+  for (let i = 0; i < wpts.length; i++) {
+    const la = Number(wpts[i].lat);
+    const lo = Number(wpts[i].lon);
+    if (!Number.isFinite(la) || !Number.isFinite(lo)) continue;
+    if (la < minLat) minLat = la;
+    if (la > maxLat) maxLat = la;
+    if (lo < minLon) minLon = lo;
+    if (lo > maxLon) maxLon = lo;
+  }
+  const pad = Number(padDeg) || 1;
+  _routeCorridorBBox = {
+    gen: window._setsailRouteDistCacheGen || 0,
+    minLat: minLat - pad,
+    maxLat: maxLat + pad,
+    minLon: minLon - pad,
+    maxLon: maxLon + pad
+  };
+  return _routeCorridorBBox;
+}
 
 function getMinDistanceToActiveRouteNM(lat, lon) {
   if (!activeRouteData || !Array.isArray(activeRouteData.waypoints) || activeRouteData.waypoints.length === 0) {
@@ -15186,16 +15331,60 @@ function getMinDistanceToActiveRouteNM(lat, lon) {
   if (wpts.length === 1) {
     return calculateHaversineDistanceNM(lat, lon, wpts[0].lat, wpts[0].lon);
   }
+  // Fast reject far from route bbox (major win when corridor filter scans global NtM/ports)
+  const bufNm = Number(window.ROUTE_CORRIDOR_BUFFER_NM) || 25;
+  const padDeg = Math.max(0.5, (bufNm / 60) * 1.4 + 0.35);
+  const bb = getActiveRouteBBoxPad(padDeg);
+  if (bb && (lat < bb.minLat || lat > bb.maxLat || lon < bb.minLon || lon > bb.maxLon)) {
+    return Infinity;
+  }
   let minNm = Infinity;
-  for (let i = 0; i < wpts.length - 1; i++) {
+  // Stride long densified tracks; refine near hits
+  const n = wpts.length - 1;
+  const stride = n > 160 ? 3 : (n > 80 ? 2 : 1);
+  for (let i = 0; i < n; i += stride) {
     const A = wpts[i];
-    const B = wpts[i + 1];
+    const B = wpts[Math.min(n, i + stride)];
     const dSeg = pointToSegmentDistanceNM(lat, lon, A.lat, A.lon, B.lat, B.lon);
     if (dSeg < minNm) minNm = dSeg;
+    if (minNm <= 0.05) break;
+  }
+  if (stride > 1 && minNm < bufNm * 1.5) {
+    // Refine around approximate nearest
+    for (let i = 0; i < n; i++) {
+      const A = wpts[i];
+      const B = wpts[i + 1];
+      const dSeg = pointToSegmentDistanceNM(lat, lon, A.lat, A.lon, B.lat, B.lon);
+      if (dSeg < minNm) minNm = dSeg;
+      if (minNm <= 0.05) break;
+    }
   }
   return minNm;
 }
 window.getMinDistanceToActiveRouteNM = getMinDistanceToActiveRouteNM;
+
+function scheduleRouteCorridorLayersRefresh(delayMs) {
+  if (_routeCorridorRefreshTimer) clearTimeout(_routeCorridorRefreshTimer);
+  _routeCorridorRefreshTimer = setTimeout(() => {
+    _routeCorridorRefreshTimer = null;
+    try {
+      invalidateRouteCorridorDistanceCache();
+      if (typeof updateRouteMiniWindowUI === "function") updateRouteMiniWindowUI();
+      if (typeof renderRouteBufferCorridorOnMap === "function") renderRouteBufferCorridorOnMap();
+      if (!window.ROUTE_CORRIDOR_FILTER_ENABLED) return;
+      if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
+      if (typeof renderPortDepthsOnMap === "function" && leafletMap && OVERLAY_STATES && OVERLAY_STATES.depths) {
+        renderPortDepthsOnMap(leafletMap);
+      }
+      if (typeof renderWeatherOnMap === "function" && leafletMap && OVERLAY_STATES && OVERLAY_STATES.weather) {
+        renderWeatherOnMap(leafletMap);
+      }
+    } catch (eRef) {
+      console.warn("[SetSail] corridor refresh", eRef);
+    }
+  }, Math.max(50, Number(delayMs) || 200));
+}
+window.scheduleRouteCorridorLayersRefresh = scheduleRouteCorridorLayersRefresh;
 
 function pointToSegmentDistanceNM(pLat, pLon, aLat, aLon, bLat, bLon) {
   const midLatRad = ((aLat + bLat) * 0.5) * Math.PI / 180;
@@ -15257,7 +15446,7 @@ function renderRouteBufferCorridorOnMap() {
   const isRouteVisible = typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.route !== false;
   if (!hasRoute || !isRouteVisible) return;
 
-  const bufNm = Number(window.ROUTE_CORRIDOR_BUFFER_NM) || 25;
+  const bufNm = Math.max(1, Number(window.ROUTE_CORRIDOR_BUFFER_NM) || 25);
   // Prefer the same unrolled geometry used for the track line (Pacific / dateline safe)
   let pts = Array.isArray(window._setsailRouteUnrolled) && window._setsailRouteUnrolled.length >= 2
     ? window._setsailRouteUnrolled
@@ -15280,6 +15469,9 @@ function renderRouteBufferCorridorOnMap() {
       pts.push([lat, lon]);
     }
   }
+  // Decimate corridor polygon — full densified track as SVG was freezing pan/zoom
+  pts = simplifyRoutePtsForBuffer(pts, 96);
+  invalidateRouteCorridorDistanceCache();
   const isFilterOn = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
   const drId = getDrActiveRouteId();
   const isDrRails = !!(drId && activeRouteData && (activeRouteData.id === drId || activeRouteData.name === drId));
@@ -15466,11 +15658,7 @@ function initRouteMiniWindow() {
   }
 
   const refreshCorridorFilteredLayers = () => {
-    updateRouteMiniWindowUI();
-    renderRouteBufferCorridorOnMap();
-    if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
-    if (typeof renderPortDepthsOnMap === "function" && leafletMap && OVERLAY_STATES.depths) renderPortDepthsOnMap(leafletMap);
-    if (typeof renderWeatherOnMap === "function" && leafletMap && OVERLAY_STATES.weather) renderWeatherOnMap(leafletMap);
+    scheduleRouteCorridorLayersRefresh(40);
     if (typeof saveSetSailUserHistory === "function") saveSetSailUserHistory();
   };
 
@@ -15490,12 +15678,17 @@ function initRouteMiniWindow() {
   }
 
   if (rngBuffer) {
+    rngBuffer.min = "1";
+    rngBuffer.step = "1";
     rngBuffer.addEventListener("input", () => {
-      const val = parseInt(rngBuffer.value, 10) || 25;
+      const val = Math.max(1, Math.min(250, parseInt(rngBuffer.value, 10) || 25));
       window.ROUTE_CORRIDOR_BUFFER_NM = val;
       try { localStorage.setItem("setsail_route_buffer_nm", String(val)); } catch (e) {}
       if (lblBuffer) lblBuffer.textContent = `±${val} NM`;
-      refreshCorridorFilteredLayers();
+      // Buffer outline updates fast; full NtM/weather refilter is debounced
+      if (typeof renderRouteBufferCorridorOnMap === "function") renderRouteBufferCorridorOnMap();
+      if (lblBuffer) { /* label already set */ }
+      scheduleRouteCorridorLayersRefresh(180);
     });
   }
 
@@ -17291,13 +17484,15 @@ const _origRenderRouteOnMapV49 = window.renderRouteOnMap || renderRouteOnMap;
 renderRouteOnMap = function(route, shouldFly = true) {
   if (route && Array.isArray(route.waypoints) && route.waypoints.length > 0) {
     enrichRouteWithLegsTelemetry(route);
-    saveRouteToLibrary(route);
+    // Avoid rewriting library + drawer DOM on every cosmetic re-render (lag after load)
+    const sig = String(route.id || route.name || "") + ":" + route.waypoints.length + ":" + (route.totalDistanceNM || "");
+    if (window._setsailLastRouteRenderSig !== sig) {
+      window._setsailLastRouteRenderSig = sig;
+      saveRouteToLibrary(route);
+      displaySetRouteResults(route, false);
+    }
   }
-  const res = _origRenderRouteOnMapV49(route, shouldFly);
-  if (route) {
-    displaySetRouteResults(route, false);
-  }
-  return res;
+  return _origRenderRouteOnMapV49(route, shouldFly);
 };
 window.renderRouteOnMap = renderRouteOnMap;
 
