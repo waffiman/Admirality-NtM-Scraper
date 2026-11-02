@@ -37,21 +37,24 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 1.35rem; margin: 0; padding: 24px;
       background: #080f24;
-      transition: background 0.55s ease, opacity 0.4s ease, visibility 0.4s ease;
+      transition: background 0.95s ease, visibility 0.4s ease;
     }
     #setsailBoot.is-handoff {
       background: transparent;
       pointer-events: none;
     }
-    #setsailBoot.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
+    #setsailBoot.is-done { visibility: hidden; pointer-events: none; }
     #setsailBoot .ssb-logo-wrap {
       width: min(396px, 78vw);
       line-height: 0;
-      will-change: transform;
+      opacity: 1;
+      transition: opacity 0.5s ease;
     }
+    #setsailBoot.is-logo-out .ssb-logo-wrap { opacity: 0; }
     #setsailBoot .ssb-logo {
       display: block; width: 100%; height: auto;
-      filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 32px rgba(240, 90, 54, 0.24));
+      /* No coral glow — clean mark while Hero arrives around it */
+      filter: none;
       user-select: none; pointer-events: none;
     }
     #setsailBoot .ssb-bar-track {
@@ -60,7 +63,7 @@
       border-radius: 999px;
       background: rgba(148, 163, 184, 0.22);
       overflow: hidden;
-      transition: opacity 0.35s ease;
+      transition: opacity 0.45s ease;
     }
     #setsailBoot.is-handoff .ssb-bar-track { opacity: 0; }
     #setsailBoot .ssb-bar-fill {
@@ -70,8 +73,18 @@
       box-shadow: 0 0 10px rgba(240, 90, 54, 0.55);
       transition: width 0.12s linear;
     }
-    /* During handoff: Hero chrome fades in around the shared logo */
-    html.setsail-handoff #homeHeroLogoWrap { opacity: 0 !important; }
+    /*
+      Handoff model: boot logo stays put as the fixed reference.
+      Hero page arrives INTO the boot frame (fade/reveal around the logo).
+    */
+    html.setsail-handoff #homeHeroLogoWrap {
+      opacity: 0 !important;
+      transition: none !important;
+    }
+    html.setsail-handoff.setsail-logo-reveal #homeHeroLogoWrap {
+      opacity: 1 !important;
+      transition: opacity 0.5s ease !important;
+    }
     html.setsail-handoff .nav-sidebar,
     html.setsail-handoff #homeHudTop,
     html.setsail-handoff #homeBrandSub,
@@ -81,12 +94,23 @@
     html.setsail-handoff .home-hero-video,
     html.setsail-handoff .home-vignette-overlay,
     html.setsail-handoff .home-gradient-overlay,
+    html.setsail-handoff .home-static-saas-bg,
     html.setsail-handoff .site-footer {
-      animation: ssbHeroReveal 0.85s ease both;
+      animation: ssbHeroArrive 1s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
-    @keyframes ssbHeroReveal {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    html.setsail-handoff .home-hero-video { animation-delay: 0.02s; }
+    html.setsail-handoff .home-vignette-overlay,
+    html.setsail-handoff .home-gradient-overlay { animation-delay: 0.08s; }
+    html.setsail-handoff .nav-sidebar { animation-delay: 0.14s; }
+    html.setsail-handoff #homeHudTop { animation-delay: 0.18s; }
+    html.setsail-handoff #homeBrandSub { animation-delay: 0.22s; }
+    html.setsail-handoff #homeToolGrid { animation-delay: 0.28s; }
+    html.setsail-handoff .home-scroll-hint,
+    html.setsail-handoff .home-slide-dots,
+    html.setsail-handoff .site-footer { animation-delay: 0.34s; }
+    @keyframes ssbHeroArrive {
+      from { opacity: 0; filter: blur(6px); }
+      to { opacity: 1; filter: blur(0); }
     }
   </style>
 
@@ -122,7 +146,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.166" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.167" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -9079,7 +9103,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.166" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.167" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12827,43 +12851,28 @@ select option {
     function handoffToHero() {
       finished = true;
       paint(1);
-      var hero = document.getElementById('homeHeroLogoWrap');
-      var fromEl = logoWrap || boot;
+      // Logo stays fixed. Hero arrives into the boot frame around it.
       try { document.documentElement.classList.add('setsail-handoff'); } catch (e0) {}
       try { document.documentElement.classList.remove('setsail-booting'); } catch (e1) {}
 
       requestAnimationFrame(function () {
-        var from = fromEl.getBoundingClientRect();
-        var to = hero ? hero.getBoundingClientRect() : from;
-        if (!to.width || !to.height) to = from;
+        boot.classList.add('is-handoff'); // navy veil + bar dissolve; logo unmoved
 
-        boot.classList.add('is-handoff');
-
-        fromEl.style.position = 'fixed';
-        fromEl.style.left = from.left + 'px';
-        fromEl.style.top = from.top + 'px';
-        fromEl.style.width = from.width + 'px';
-        fromEl.style.margin = '0';
-        fromEl.style.zIndex = '2147483001';
-        fromEl.style.transformOrigin = 'top left';
-        fromEl.style.transition = 'transform 0.78s cubic-bezier(0.22, 1, 0.36, 1)';
-
-        var sx = to.width / Math.max(from.width, 1);
-        var sy = to.height / Math.max(from.height, 1);
-        var dx = to.left - from.left;
-        var dy = to.top - from.top;
-
-        requestAnimationFrame(function () {
-          fromEl.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
-        });
-
+        // After Hero chrome has arrived, soft-swap boot logo → Hero logo in place
         setTimeout(function () {
-          boot.classList.add('is-done');
-          try { document.documentElement.classList.remove('setsail-handoff'); } catch (e2) {}
+          try { document.documentElement.classList.add('setsail-logo-reveal'); } catch (e2) {}
+          boot.classList.add('is-logo-out');
           setTimeout(function () {
-            try { boot.remove(); } catch (e3) {}
-          }, 420);
-        }, 800);
+            boot.classList.add('is-done');
+            try {
+              document.documentElement.classList.remove('setsail-handoff');
+              document.documentElement.classList.remove('setsail-logo-reveal');
+            } catch (e3) {}
+            setTimeout(function () {
+              try { boot.remove(); } catch (e4) {}
+            }, 80);
+          }, 520);
+        }, 980);
       });
     }
 
@@ -13451,7 +13460,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.166" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.166';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.167" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.167';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13473,7 +13482,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.166" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.167" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -21163,25 +21172,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.166"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.166" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.166"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.167"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.167" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.167"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.166",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.167",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.166"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.166"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.166"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.167"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.167"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.167"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.166"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.167"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21254,10 +21263,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.166"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.166"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.166"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.166"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.167"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.167"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.167"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.167"></script>
 
 
 
@@ -21971,17 +21980,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.166', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.167', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.166 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.167 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.166') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.166.0'); }, 1200);
+              if (last && last.indexOf('v5.167') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.167.0'); }, 1200);
               }
             } catch (eTip) {}
           })
