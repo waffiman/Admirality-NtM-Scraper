@@ -240,21 +240,45 @@
     return "#f05a36";
   }
 
+  function escAis(s) {
+    return String(s == null ? "" : s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+  }
+
   function formatAisPopup(v) {
-    const name = v.name || v.shipName || ("MMSI " + v.mmsi);
-    const dest = v.destination || "—";
+    const name = escAis(v.name || v.shipName || ("MMSI " + (v.mmsi || "—")));
+    const dest = escAis(v.destination || "—");
     const sog = v.sog != null ? Number(v.sog).toFixed(1) + " kn" : "—";
     const cog = v.cog != null && Number(v.cog) < 360 ? Math.round(Number(v.cog)) + "°" : "—";
-    const type = v.shipTypeName || v.shipType || v.type || "AIS vessel";
-    const src = v.source || "AIS";
+    const hdg = v.heading != null && Number(v.heading) < 360 ? Math.round(Number(v.heading)) + "°" : null;
+    const type = escAis(v.shipTypeName || v.shipType || v.type || "AIS");
+    const src = escAis(v.source || "AIS");
+    const ownMmsi = getOwnVesselMmsi();
+    const isOwn = !!(ownMmsi && String(v.mmsi) === ownMmsi);
+    let modeBadge = "";
+    if (isOwn) {
+      const uv = window.userVessel || {};
+      const srcUv = String(uv.source || "").toLowerCase();
+      const isDr = !!(uv.deadReckoned || /ais-dr|dr-rails|dead.?reck/i.test(srcUv));
+      modeBadge = '<span class="ss-ais-mode ' + (isDr ? "is-dr" : "is-ais") + '">' + (isDr ? "DR" : "AIS") + "</span>";
+    }
+    const rows = [
+      ["MMSI", escAis(v.mmsi || "—") + (v.callSign ? " · " + escAis(v.callSign) : "")],
+      ["Type", type],
+      ["SOG/COG", sog + " / " + cog + (hdg ? " · HDG " + hdg : "")],
+      ["Dest", dest]
+    ];
+    const body = rows.map((r) =>
+      '<div class="ss-ais-row"><span class="ss-ais-k">' + r[0] + '</span><span class="ss-ais-v">' + r[1] + "</span></div>"
+    ).join("");
     return (
-      '<div style="min-width:210px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;color:#1e293b;">' +
-      '<div style="font-weight:800;color:#ea4c25;margin-bottom:4px;display:flex;align-items:center;gap:5px;">🚢 ' + name + "</div>" +
-      "<div><b>MMSI:</b> " + (v.mmsi || "—") + (v.callSign ? " · <b>Call:</b> " + v.callSign : "") + "</div>" +
-      "<div><b>Type:</b> " + type + "</div>" +
-      "<div><b>SOG / COG:</b> " + sog + " / " + cog + "</div>" +
-      "<div><b>Destination:</b> " + dest + "</div>" +
-      '<div style="margin-top:5px;padding-top:3px;border-top:1px solid #e2e8f0;font-size:10px;color:#64748b;">Source: ' + src + "</div></div>"
+      '<div class="ss-ais-popup-body">' +
+        '<div class="ss-ais-head">' +
+          '<span class="ss-ais-name">' + name + "</span>" +
+          modeBadge +
+        "</div>" +
+        body +
+        '<div class="ss-ais-foot">' + src + "</div>" +
+      "</div>"
     );
   }
 
@@ -328,7 +352,12 @@
         });
         m = L.marker([lat, lon], { icon, keyboard: false });
       }
-      if (z >= 4) m.bindPopup(() => formatAisPopup(v), { maxWidth: 280 });
+      if (z >= 4) {
+        m.bindPopup(() => formatAisPopup(v), {
+          maxWidth: 210,
+          className: "ss-ais-popup"
+        });
+      }
       layer.addLayer(m);
     });
 

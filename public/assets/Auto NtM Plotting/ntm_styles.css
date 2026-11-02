@@ -4194,23 +4194,104 @@
   color: #fff;
 }
 
-/* AIS target popups — high-contrast light text on dark chrome */
+/* AIS / own-ship target popups — compact, high-contrast light text on dark chrome */
 .ss-ais-popup .leaflet-popup-content-wrapper,
 .ss-ais-popup .leaflet-popup-tip {
   background: #0b1224 !important;
   color: #f8fafc !important;
-  border: 1px solid rgba(251, 146, 60, 0.35) !important;
+  border: 1px solid rgba(251, 146, 60, 0.4) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45) !important;
 }
 .ss-ais-popup .leaflet-popup-content {
   color: #f1f5f9 !important;
-  margin: 10px 12px !important;
+  margin: 7px 9px !important;
+  min-width: 0 !important;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+}
+.ss-ais-popup .ss-ais-popup-body {
+  color: #f1f5f9 !important;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  min-width: 148px;
+  max-width: 196px;
 }
 .ss-ais-popup .ss-ais-popup-body,
 .ss-ais-popup .ss-ais-popup-body * {
-  color: inherit;
+  color: #f1f5f9 !important;
+}
+.ss-ais-popup .ss-ais-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.28);
+}
+.ss-ais-popup .ss-ais-name {
+  font-weight: 750;
+  font-size: 12px;
+  color: #fdba74 !important;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ss-ais-popup .ss-ais-mode {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+.ss-ais-popup .ss-ais-mode.is-ais {
+  color: #052e1a !important;
+  background: #34d399;
+  border-color: #6ee7b7;
+}
+.ss-ais-popup .ss-ais-mode.is-dr {
+  color: #1c1917 !important;
+  background: #fbbf24;
+  border-color: #fcd34d;
+}
+.ss-ais-popup .ss-ais-mode.is-other {
+  color: #0c4a6e !important;
+  background: #7dd3fc;
+  border-color: #bae6fd;
+}
+.ss-ais-popup .ss-ais-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 4px 6px;
+  align-items: baseline;
+  margin: 2px 0;
+}
+.ss-ais-popup .ss-ais-k {
+  color: #cbd5e1 !important;
+  font-size: 9.5px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.ss-ais-popup .ss-ais-v {
+  color: #f8fafc !important;
+  font-size: 11px;
+  font-weight: 550;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ss-ais-popup .ss-ais-foot {
+  margin-top: 5px;
+  padding-top: 3px;
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+  font-size: 9.5px;
+  color: #cbd5e1 !important;
 }
 .ss-ais-popup a.leaflet-popup-close-button {
-  color: #cbd5e1 !important;
+  color: #e2e8f0 !important;
 }
 
 .leaflet-container a.leaflet-popup-close-button {

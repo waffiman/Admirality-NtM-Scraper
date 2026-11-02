@@ -4398,8 +4398,14 @@ function parseCoordinateString(str) {
 
 /** Zoom at/above which own-ship switches from position circle → hull outline. */
 const OWN_SHIP_HULL_ZOOM = 14;
-/** ECDIS-style time vector: length = SOG (kn) × minutes / 60 → NM on the chart (grows with zoom). */
-const OWN_SHIP_VECTOR_MINUTES = 6;
+/** ECDIS-style time vector: length = SOG (kn) × minutes / 60 → NM on the chart. */
+const OWN_SHIP_VECTOR_MINUTES = 30;
+/** Screen-pixel caps for the geographic vector (ECDIS readability). */
+const OWN_SHIP_VECTOR_MAX_PX = 100;
+/** Below this screen length, hide the shaft — arrow sits on the position circle. */
+const OWN_SHIP_VECTOR_ARROW_ONLY_PX = 22;
+/** Position-circle outer ring ≈ 9px in the 48px icon. */
+const OWN_SHIP_VECTOR_RIM_PX = 11;
 
 /**
  * Generates Crosshair Target Marker (legacy / fallback)
@@ -4443,81 +4449,99 @@ function resolveOwnShipSogKn(v) {
   return null;
 }
 
-/** Geographic heading/time vector — keep a readable screen length even at world zoom. */
-function updateOwnShipTimeVector(lat, lon, headingDeg, sogKn) {
-  if (!leafletMap || !leafletVesselLayer) return;
+function nmPerPixelAt(lat, zoom) {
+  const z = Number(zoom);
+  const metersPerPx = (40075016.686 * Math.cos((Number(lat) * Math.PI) / 180)) / Math.pow(2, z + 8);
+  return Math.max(metersPerPx / 1852.0, 1e-9);
+}
+
+function clearOwnShipTimeVectorLayers() {
+  if (!leafletVesselLayer) return;
   leafletVesselLayer.eachLayer((ly) => {
     if (ly && ly._setsailOwnShipVector) {
       try { leafletVesselLayer.removeLayer(ly); } catch (e) {}
     }
   });
+}
+
+/**
+ * ECDIS 30-min vector:
+ * - Geographic length = SOG × 30 min (grows on zoom-in).
+ * - Cap screen length so it never spears across the chart when close-in.
+ * - When zoomed far out (true length < ~circle), hide shaft; keep arrow flush on the circle + beam in icon.
+ */
+function updateOwnShipTimeVector(lat, lon, headingDeg, sogKn) {
+  if (!leafletMap || !leafletVesselLayer) return;
+  clearOwnShipTimeVectorLayers();
   if (!hasOwnShipHeadingDeg(headingDeg)) return;
+
   const sog = Number(sogKn);
   const kn = (Number.isFinite(sog) && sog > 0.05) ? sog : 0;
-  let distNm = kn * (OWN_SHIP_VECTOR_MINUTES / 60);
+  const trueNm = kn > 0 ? kn * (OWN_SHIP_VECTOR_MINUTES / 60) : 0;
 
-  // Floor/ceiling in screen pixels so the vector stays visible without zooming in
+  let npp = 0.01;
   try {
     const z = leafletMap.getZoom ? leafletMap.getZoom() : 3;
-    const metersPerPx = (40075016.686 * Math.cos((Number(lat) * Math.PI) / 180)) / Math.pow(2, z + 8);
-    const nmPerPx = Math.max(metersPerPx / 1852.0, 1e-9);
-    const minNm = 40 * nmPerPx;   // ~40 px stub at any zoom
-    const maxNm = 110 * nmPerPx;  // avoid huge spears when zoomed out + high SOG
-    if (!(distNm >= minNm)) distNm = minNm;
-    if (distNm > maxNm) distNm = maxNm;
+    npp = nmPerPixelAt(lat, z);
   } catch (ePx) {
-    if (!(distNm >= 0.15)) distNm = 0.15;
+    npp = 0.01;
   }
-  if (!(distNm >= 0.02)) return;
 
-  const tip = destinationPointNm(lat, lon, headingDeg, distNm);
-  const line = L.polyline([[lat, lon], tip], {
-    color: "#0f172a",
-    weight: 2.1,
-    opacity: 0.92,
-    dashArray: "5 4",
-    lineCap: "round",
-    interactive: false,
-    className: "own-ship-time-vector"
-  });
-  line._setsailOwnShipVector = true;
+  const rimNm = OWN_SHIP_VECTOR_RIM_PX * npp;
+  const maxNm = OWN_SHIP_VECTOR_MAX_PX * npp;
+  const arrowOnlyNm = OWN_SHIP_VECTOR_ARROW_ONLY_PX * npp;
+
+  // True 30-min length, capped in screen pixels when zoomed in
+  let tipNm = trueNm > 0 ? Math.min(trueNm, maxNm) : rimNm;
+  // Far zoom / tiny SOG: collapse to rim so arrow sits on the circle
+  const arrowOnly = !(trueNm > arrowOnlyNm) || tipNm <= rimNm * 1.15;
+  if (arrowOnly) tipNm = rimNm;
+
+  const tip = destinationPointNm(lat, lon, headingDeg, tipNm);
+  const wingNm = Math.max(5 * npp, Math.min(9 * npp, tipNm * 0.22));
   const leftBrg = (Number(headingDeg) + 150) % 360;
   const rightBrg = (Number(headingDeg) + 210) % 360;
-  const wing = Math.min(0.08, Math.max(0.03, distNm * 0.12));
-  const a1 = destinationPointNm(tip[0], tip[1], leftBrg, wing);
-  const a2 = destinationPointNm(tip[0], tip[1], rightBrg, wing);
+  const a1 = destinationPointNm(tip[0], tip[1], leftBrg, wingNm);
+  const a2 = destinationPointNm(tip[0], tip[1], rightBrg, wingNm);
+
+  if (!arrowOnly) {
+    // Shaft starts at the circle rim so it does not paint under the icon
+    const start = destinationPointNm(lat, lon, headingDeg, rimNm);
+    const line = L.polyline([start, tip], {
+      color: "#0f172a",
+      weight: 2.05,
+      opacity: 0.94,
+      lineCap: "round",
+      interactive: false,
+      className: "own-ship-time-vector"
+    });
+    line._setsailOwnShipVector = true;
+    leafletVesselLayer.addLayer(line);
+  }
+
   const arrow = L.polyline([a1, tip, a2], {
     color: "#0f172a",
-    weight: 2.1,
-    opacity: 0.92,
+    weight: 2.15,
+    opacity: 0.96,
     lineCap: "round",
     lineJoin: "round",
     interactive: false,
     className: "own-ship-time-vector"
   });
   arrow._setsailOwnShipVector = true;
-  leafletVesselLayer.addLayer(line);
   leafletVesselLayer.addLayer(arrow);
 }
+window.updateOwnShipTimeVector = updateOwnShipTimeVector;
 
 function getOwnShipPositionIcon(headingDeg, showVector) {
   const has = hasOwnShipHeadingDeg(headingDeg);
   const rot = has ? ((Number(headingDeg) % 360) + 360) % 360 : 0;
-  // Tiny bow tick only — full time vector is geographic (updateOwnShipTimeVector)
-  const vec = showVector !== false && has;
-  // Beam line: perpendicular to heading (local +X), through circle center, past outer ring (r=9)
+  // Beam only in SVG — geographic layer draws the 30-min vector / flush arrow
   const beamSvg = `<line class="own-ship-beam" x1="11" y1="24" x2="37" y2="24" stroke="#0f172a" stroke-width="1.45" stroke-linecap="round"/>`;
-  const vectorSvg = vec
-    ? `<g class="own-ship-vector" stroke="#0f172a" stroke-width="1.35" fill="none" stroke-linecap="round">
-         <line x1="24" y1="24" x2="24" y2="14"/>
-         <polyline points="21.5,16 24,12.5 26.5,16" stroke-width="1.4"/>
-       </g>`
-    : "";
   const html = `
     <div class="own-ship-wrap own-ship-wrap--pos" style="transform:rotate(${rot}deg);transform-origin:center center;">
       <svg class="own-ship-svg" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
         ${beamSvg}
-        ${vectorSvg}
         <circle cx="24" cy="24" r="9" fill="none" stroke="#0f172a" stroke-width="1.5"/>
         <circle cx="24" cy="24" r="5.2" fill="none" stroke="#0f172a" stroke-width="1.35"/>
         <circle cx="24" cy="24" r="2.1" fill="#0f172a"/>
@@ -4533,22 +4557,17 @@ function getOwnShipPositionIcon(headingDeg, showVector) {
 
 /**
  * High zoom: ECDIS own-ship hull outline (rounded bow, flat stern).
- * Time vector is geographic — only a short bow tick stays in the SVG.
+ * Time vector is geographic — beam stays in SVG.
  */
 function getOwnShipHullIcon(headingDeg, showVector) {
   const has = hasOwnShipHeadingDeg(headingDeg);
   const rot = has ? ((Number(headingDeg) % 360) + 360) % 360 : 0;
-  const vec = showVector !== false && has;
   // Local coords: bow toward -Y (up). Hull centered near (24, 34); beam athwartships through that center.
   const beamSvg = `<line class="own-ship-beam" x1="8" y1="34" x2="40" y2="34" stroke="#0f172a" stroke-width="1.55" stroke-linecap="round"/>`;
-  const vectorSvg = vec
-    ? `<line x1="24" y1="22" x2="24" y2="12" stroke="#0f172a" stroke-width="1.25"/>`
-    : "";
   const html = `
     <div class="own-ship-wrap own-ship-wrap--hull" style="transform:rotate(${rot}deg);transform-origin:24px 34px;">
       <svg class="own-ship-svg" width="48" height="64" viewBox="0 0 48 64" aria-hidden="true">
         ${beamSvg}
-        ${vectorSvg}
         <path d="M24 14
           C28.5 14 31.5 18 31.5 24
           L31.5 46
@@ -4594,6 +4613,48 @@ function resolveOwnShipHeading(v) {
   return ((Number(v.heading) % 360) + 360) % 360;
 }
 
+/** AIS vs DR (vs GPS/Manual) for own-ship popup badge. */
+function resolveOwnShipNavMode(v, source) {
+  const src = String(source != null ? source : (v && v.source) || "").toLowerCase();
+  if ((v && v.deadReckoned) || /ais-dr|dr-rails|dead.?reck/i.test(src)) return "DR";
+  if (/wifi/.test(src)) return "AIS"; // LAN/Wi-Fi AIS is still live AIS truth
+  if (/^ais\b|\bais\b/.test(src) || src === "ais") return "AIS";
+  if (src === "gps") return "GPS";
+  return "Manual";
+}
+
+function escapePopupText(s) {
+  return String(s == null ? "" : s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+}
+
+/** Compact dark own-ship AIS-style card. */
+function formatOwnShipPopupHtml(lat, lon, hdg, sog, source) {
+  const v = userVessel || {};
+  const title = escapePopupText((v.name && String(v.name).trim()) || "My Vessel");
+  const mode = resolveOwnShipNavMode(v, source);
+  const modeCls = mode === "DR" ? "is-dr" : (mode === "AIS" ? "is-ais" : "is-other");
+  const coords = typeof formatLatLonDMS === "function" ? formatLatLonDMS(lat, lon) : (lat + ", " + lon);
+  const rows = [];
+  if (v.mmsi) rows.push(["MMSI", escapePopupText(v.mmsi)]);
+  if (v.callSign) rows.push(["Call", escapePopupText(v.callSign)]);
+  rows.push(["Pos", escapePopupText(coords)]);
+  if (hdg != null) rows.push(["HDG", Math.round(hdg) + "°"]);
+  if (sog != null) rows.push(["SOG", Number(sog).toFixed(1) + " kn"]);
+  const body = rows.map((r) =>
+    '<div class="ss-ais-row"><span class="ss-ais-k">' + r[0] + "</span><span class=\"ss-ais-v\">" + r[1] + "</span></div>"
+  ).join("");
+  return (
+    '<div class="ss-ais-popup-body ss-own-ship-popup">' +
+      '<div class="ss-ais-head">' +
+        '<span class="ss-ais-name">' + title + "</span>" +
+        '<span class="ss-ais-mode ' + modeCls + '">' + mode + "</span>" +
+      "</div>" +
+      body +
+      '<div class="ss-ais-foot">Vector ' + OWN_SHIP_VECTOR_MINUTES + " min</div>" +
+    "</div>"
+  );
+}
+
 /**
  * Plot user vessel crosshair on map
  */
@@ -4625,7 +4686,10 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
         if (nextIcon) _ownShipMarker.setIcon(nextIcon);
       } catch (eIcon) {}
     } else {
-      leafletVesselLayer.clearLayers();
+      clearOwnShipTimeVectorLayers();
+      if (_ownShipMarker) {
+        try { leafletVesselLayer.removeLayer(_ownShipMarker); } catch (eRm) {}
+      }
       _ownShipMarker = L.marker(ll, {
         icon: getOwnShipMapIcon(hdg),
         zIndexOffset: 1200,
@@ -4634,26 +4698,13 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
       leafletVesselLayer.addLayer(_ownShipMarker);
     }
 
-    const title = (userVessel.name && String(userVessel.name).trim()) || "Vessel Position";
-    _ownShipMarker.bindPopup(`
-      <div style="font-family:'Segoe UI',sans-serif;color:#111;min-width:180px;">
-        <div style="font-weight:700;color:#0a3888;font-size:1rem;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:5px;">
-          ${title.replace(/[<>]/g, "")}
-        </div>
-        <div style="font-size:0.8rem;color:#333;margin-bottom:3px;"><b>Coordinates:</b> ${formatLatLonDMS(lat, lon)}</div>
-        ${userVessel.callSign ? `<div style="font-size:0.75rem;color:#333;"><b>Call Sign:</b> ${String(userVessel.callSign).replace(/[<>]/g, "")}</div>` : ""}
-        ${userVessel.mmsi ? `<div style="font-size:0.75rem;color:#333;"><b>MMSI:</b> ${String(userVessel.mmsi).replace(/[<>]/g, "")}</div>` : ""}
-        ${hdg != null ? `<div style="font-size:0.75rem;color:#333;"><b>HDG:</b> ${Math.round(hdg)}°</div>` : ""}
-        ${sog != null ? `<div style="font-size:0.75rem;color:#333;"><b>SOG:</b> ${Number(sog).toFixed(1)} kn · vector ${OWN_SHIP_VECTOR_MINUTES} min</div>` : ""}
-        <div style="font-size:0.75rem;color:#666;"><b>Source:</b> ${source === "gps" ? "Browser GPS" : (String(source).indexOf("ais") >= 0 ? "AIS / DR" : "Manual Navigation Entry")}</div>
-      </div>
-    `);
+    _ownShipMarker.bindPopup(
+      () => formatOwnShipPopupHtml(Number(userVessel.lat), Number(userVessel.lon), resolveOwnShipHeading(userVessel), resolveOwnShipSogKn(userVessel), userVessel.source),
+      { maxWidth: 210, className: "ss-ais-popup ss-own-ship-popup-wrap" }
+    );
 
-    // Throttle vector redraw (cheap but still SVG)
-    if (!window._setsailOwnShipVectorAt || (Date.now() - window._setsailOwnShipVectorAt > 4000)) {
-      updateOwnShipTimeVector(lat, lon, hdg, sog);
-      window._setsailOwnShipVectorAt = Date.now();
-    }
+    // Always refresh geographic vector (cheap); zoomend also calls this
+    updateOwnShipTimeVector(lat, lon, hdg, sog);
     if (!skipFly) {
       leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
     }
