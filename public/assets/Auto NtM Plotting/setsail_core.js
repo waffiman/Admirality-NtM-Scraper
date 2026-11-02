@@ -498,6 +498,8 @@ async function refreshOwnVesselFromAis(opts) {
       Object.assign({}, prev, hit, {
         source: isLive ? "ais" : "ais-stale",
         aisLastFixAt: hit.aisSeenAt || new Date(hitMs).toISOString(),
+        aisFixLat: Number(hit.lat),
+        aisFixLon: Number(hit.lon),
         aisRefreshedAt: new Date().toISOString(),
         deadReckoned: false
       }),
@@ -522,7 +524,156 @@ async function refreshOwnVesselFromAis(opts) {
   }
 }
 
-/** Extrapolate My Vessel from last SOG/COG when coastal AIS has gone dark (open ocean). */
+/** Persisted id of the My Vessel “DR rails” route (coral toggle). Off by default. */
+const SETSAIL_DR_ROUTE_KEY = "setsail_dr_active_route_id_v1";
+
+function getDrActiveRouteId() {
+  try {
+    return String(localStorage.getItem(SETSAIL_DR_ROUTE_KEY) || "").trim() || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setDrActiveRouteId(routeId) {
+  const id = routeId ? String(routeId).trim() : "";
+  try {
+    if (id) localStorage.setItem(SETSAIL_DR_ROUTE_KEY, id);
+    else localStorage.removeItem(SETSAIL_DR_ROUTE_KEY);
+  } catch (e) {}
+  if (id && typeof getSavedRoutesLibrary === "function") {
+    const found = getSavedRoutesLibrary().find((r) => r && (r.id === id || r.name === id));
+    if (found && typeof selectSavedRouteFromSidebar === "function") {
+      try { selectSavedRouteFromSidebar(found.id, false); } catch (eSel) {
+        try {
+          if (typeof renderRouteOnMap === "function") renderRouteOnMap(found, false);
+        } catch (eMap) {}
+      }
+    } else if (found && typeof renderRouteOnMap === "function") {
+      try { renderRouteOnMap(found, false); } catch (e2) {}
+    }
+  }
+  if (typeof window.renderRouteBufferCorridorOnMap === "function") {
+    window.renderRouteBufferCorridorOnMap();
+  }
+  if (typeof renderVesselRouteLibraryList === "function") {
+    renderVesselRouteLibraryList();
+  }
+  // Recompute DR when rails toggle changes (only if AIS is already stale)
+  try { applyOwnVesselDeadReckoning({ toast: false }); } catch (eDr) {}
+}
+window.getDrActiveRouteId = getDrActiveRouteId;
+window.setDrActiveRouteId = setDrActiveRouteId;
+
+function getDrActiveRoute() {
+  const id = getDrActiveRouteId();
+  if (!id) return null;
+  if (activeRouteData && (activeRouteData.id === id || activeRouteData.name === id)) {
+    return activeRouteData;
+  }
+  if (typeof getSavedRoutesLibrary !== "function") return null;
+  return getSavedRoutesLibrary().find((r) => r && (r.id === id || r.name === id)) || null;
+}
+window.getDrActiveRoute = getDrActiveRoute;
+
+/** Build cumulative NM lengths along a waypoint list. */
+function setrouteRouteLegLengths(wps) {
+  const legs = [];
+  let total = 0;
+  for (let i = 0; i < wps.length - 1; i++) {
+    const d = calculateHaversineDistanceNM(wps[i].lat, wps[i].lon, wps[i + 1].lat, wps[i + 1].lon);
+    legs.push(d);
+    total += d;
+  }
+  return { legs, total };
+}
+
+/** Closest point on route polyline → distance-along from start (NM). */
+function setrouteProjectOntoRoute(lat, lon, wps) {
+  if (!wps || wps.length < 2) return null;
+  let best = null;
+  let alongBefore = 0;
+  for (let i = 0; i < wps.length - 1; i++) {
+    const a = wps[i];
+    const b = wps[i + 1];
+    const legNm = calculateHaversineDistanceNM(a.lat, a.lon, b.lat, b.lon) || 1e-9;
+    // Project in local NM plane
+    const cosLat = Math.max(0.2, Math.cos(((a.lat + b.lat) * 0.5 * Math.PI) / 180));
+    const ax = 0;
+    const ay = 0;
+    const bx = (b.lon - a.lon) * 60 * cosLat;
+    const by = (b.lat - a.lat) * 60;
+    const px = (lon - a.lon) * 60 * cosLat;
+    const py = (lat - a.lat) * 60;
+    const ab2 = bx * bx + by * by || 1e-9;
+    let t = ((px - ax) * bx + (py - ay) * by) / ab2;
+    t = Math.max(0, Math.min(1, t));
+    const qx = ax + t * bx;
+    const qy = ay + t * by;
+    const qLat = a.lat + qy / 60;
+    const qLon = a.lon + qx / (60 * cosLat);
+    const dist = Math.hypot(px - qx, py - qy); // NM
+    const along = alongBefore + t * legNm;
+    if (!best || dist < best.distNm) {
+      const course = (typeof setrouteCourseBetweenWp === "function")
+        ? setrouteCourseBetweenWp(a, b)
+        : (Math.atan2(bx, by) * 180) / Math.PI;
+      best = {
+        lat: qLat,
+        lon: qLon,
+        distNm: dist,
+        alongNm: along,
+        segIdx: i,
+        t: t,
+        course: ((Number(course) % 360) + 360) % 360
+      };
+    }
+    alongBefore += legNm;
+  }
+  return best;
+}
+
+/** Point at distance-along route from start (NM). Clamps to ends. */
+function setroutePointAlongRoute(wps, alongNm) {
+  if (!wps || wps.length < 2) return null;
+  const { legs, total } = setrouteRouteLegLengths(wps);
+  let d = Math.max(0, Math.min(total, Number(alongNm) || 0));
+  if (d >= total - 1e-6) {
+    const a = wps[wps.length - 2];
+    const b = wps[wps.length - 1];
+    const course = (typeof setrouteCourseBetweenWp === "function")
+      ? setrouteCourseBetweenWp(a, b)
+      : 0;
+    return { lat: b.lat, lon: b.lon, course: ((Number(course) % 360) + 360) % 360, alongNm: total, atEnd: true };
+  }
+  for (let i = 0; i < legs.length; i++) {
+    if (d <= legs[i] + 1e-9) {
+      const a = wps[i];
+      const b = wps[i + 1];
+      const t = legs[i] > 0 ? d / legs[i] : 0;
+      const lat = a.lat + (b.lat - a.lat) * t;
+      const lon = a.lon + (b.lon - a.lon) * t;
+      const course = (typeof setrouteCourseBetweenWp === "function")
+        ? setrouteCourseBetweenWp(a, b)
+        : 0;
+      return {
+        lat: lat,
+        lon: lon,
+        course: ((Number(course) % 360) + 360) % 360,
+        alongNm: (alongNm || 0),
+        atEnd: false
+      };
+    }
+    d -= legs[i];
+  }
+  const last = wps[wps.length - 1];
+  return { lat: last.lat, lon: last.lon, course: 0, alongNm: total, atEnd: true };
+}
+
+/**
+ * Extrapolate My Vessel when coastal AIS has gone dark.
+ * Prefer DR along the coral-toggled “rails” route at last SOG; else COG/heading rhumb.
+ */
 function applyOwnVesselDeadReckoning(opts) {
   opts = opts || {};
   const v = userVessel;
@@ -532,56 +683,89 @@ function applyOwnVesselDeadReckoning(opts) {
   const fixMs = Date.parse(fixIso);
   if (!Number.isFinite(fixMs)) return;
   const ageMs = Date.now() - fixMs;
-  if (ageMs < OWN_AIS_STALE_DR_MS) return;
+  if (!opts.force && ageMs < OWN_AIS_STALE_DR_MS) return;
   // Wi-Fi / LAN AIS is truth — never DR over it
   if (String(v.source || "").toLowerCase().indexOf("wifi") >= 0) return;
   const sog = Number(v.sog);
-  const cog = Number(v.cog != null ? v.cog : v.heading);
-  const lat0 = Number(v.lat);
-  const lon0 = Number(v.lon);
-  if (!(sog >= 1) || !Number.isFinite(cog) || cog >= 360) return;
-  if (!Number.isFinite(lat0) || !Number.isFinite(lon0)) return;
-  if (typeof setrouteDestPoint !== "function" && typeof calculateDestination == "undefined") {
-    // Inline DR (nm along rhumb approx)
-  }
+  if (!(sog >= 1)) return;
   const distNm = sog * (ageMs / 3600000);
   if (!(distNm > 0.5) || distNm > 3500) return;
+
+  // Last known AIS fix coordinates (not previous DR) — rails & rhumb both start here
+  const fixLat = Number(v.aisFixLat != null ? v.aisFixLat : v.lat);
+  const fixLon = Number(v.aisFixLon != null ? v.aisFixLon : v.lon);
+  if (!Number.isFinite(fixLat) || !Number.isFinite(fixLon)) return;
+
   let lat1;
   let lon1;
-  if (typeof setrouteDestPoint === "function") {
-    const p = setrouteDestPoint(lat0, lon0, cog, distNm);
-    lat1 = p.lat;
-    lon1 = p.lon;
-  } else {
-    const R = 3440.065;
-    const δ = distNm / R;
-    const θ = (cog * Math.PI) / 180;
-    const φ1 = (lat0 * Math.PI) / 180;
-    const λ1 = (lon0 * Math.PI) / 180;
-    const sinφ2 = Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(θ);
-    const φ2 = Math.asin(Math.min(1, Math.max(-1, sinφ2)));
-    const λ2 = λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * sinφ2);
-    lat1 = (φ2 * 180) / Math.PI;
-    lon1 = (((λ2 * 180) / Math.PI + 540) % 360) - 180;
+  let courseOut = Number(v.cog != null ? v.cog : v.heading);
+  let mode = "cog";
+  const rails = getDrActiveRoute();
+  const wps = rails && Array.isArray(rails.waypoints) ? rails.waypoints.filter((w) =>
+    w && Number.isFinite(Number(w.lat)) && Number.isFinite(Number(w.lon))
+  ).map((w) => ({ lat: Number(w.lat), lon: Number(w.lon) })) : null;
+
+  if (wps && wps.length >= 2) {
+    const proj = setrouteProjectOntoRoute(fixLat, fixLon, wps);
+    if (proj) {
+      const target = setroutePointAlongRoute(wps, proj.alongNm + distNm);
+      if (target) {
+        lat1 = target.lat;
+        lon1 = target.lon;
+        courseOut = target.course;
+        mode = "rails";
+      }
+    }
   }
+
+  if (lat1 == null) {
+    const cog = Number(v.cog != null ? v.cog : v.heading);
+    if (!Number.isFinite(cog) || cog >= 360) return;
+    courseOut = cog;
+    if (typeof setrouteDestPoint === "function") {
+      const p = setrouteDestPoint(fixLat, fixLon, cog, distNm);
+      lat1 = p.lat;
+      lon1 = p.lon;
+    } else {
+      const R = 3440.065;
+      const δ = distNm / R;
+      const θ = (cog * Math.PI) / 180;
+      const φ1 = (fixLat * Math.PI) / 180;
+      const λ1 = (fixLon * Math.PI) / 180;
+      const sinφ2 = Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(θ);
+      const φ2 = Math.asin(Math.min(1, Math.max(-1, sinφ2)));
+      const λ2 = λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * sinφ2);
+      lat1 = (φ2 * 180) / Math.PI;
+      lon1 = (((λ2 * 180) / Math.PI + 540) % 360) - 180;
+    }
+  }
+
   if (!Number.isFinite(lat1) || !Number.isFinite(lon1)) return;
   const updated = Object.assign({}, v, {
     lat: lat1,
     lon: lon1,
-    source: "ais-dr",
+    cog: Number.isFinite(courseOut) ? courseOut : v.cog,
+    heading: Number.isFinite(courseOut) ? courseOut : v.heading,
+    source: mode === "rails" ? "ais-dr-rails" : "ais-dr",
     deadReckoned: true,
     aisDrAt: new Date().toISOString(),
-    aisDrNm: Math.round(distNm * 10) / 10
+    aisDrNm: Math.round(distNm * 10) / 10,
+    aisDrMode: mode
   });
+  // Preserve the raw AIS fix used as DR origin
+  if (v.aisFixLat == null) updated.aisFixLat = fixLat;
+  if (v.aisFixLon == null) updated.aisFixLon = fixLon;
   window.userVessel = updated;
   userVessel = updated;
   if (typeof persistUserVessel === "function") persistUserVessel();
   if (window.leafletMap && typeof plotUserVessel === "function") {
-    plotUserVessel(lat1, lon1, "AIS-DR", true);
+    plotUserVessel(lat1, lon1, mode === "rails" ? "AIS-DR-RAILS" : "AIS-DR", true);
   }
   if (opts.toast && typeof showSetSailToast === "function") {
     showSetSailToast(
-      "Own vessel dead-reckoned +" + Math.round(distNm) + " NM from last AIS (out of coastal coverage)",
+      mode === "rails"
+        ? "Own vessel DR along active route +" + Math.round(distNm) + " NM @ " + sog.toFixed(1) + " kn"
+        : "Own vessel dead-reckoned +" + Math.round(distNm) + " NM from last AIS (out of coastal coverage)",
       "info"
     );
   }
@@ -1061,6 +1245,8 @@ function syncMyVesselFromLiveAis(t) {
     source: "AIS",
     deadReckoned: false,
     aisLastFixAt: new Date(incomingTs).toISOString(),
+    aisFixLat: lat,
+    aisFixLon: lon,
     aisRefreshedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   });
@@ -2552,20 +2738,19 @@ function renderRouteOnMap(route, shouldFly = true) {
     leafletRouteLayer.addLayer(marker);
   });
 
-  // Update UI in My Vessel Popover
+  // Update UI in My Vessel Popover (multi-route list + DR toggle)
   const infoBox = document.getElementById("vesselRouteInfoBox");
-  const nameEl = document.getElementById("vesselRouteName");
-  const metaEl = document.getElementById("vesselRouteMeta");
   const clearBtn = document.getElementById("vesselClearRouteBtn");
   const fitBtn = document.getElementById("vesselFitRouteBtn");
 
   if (infoBox) infoBox.style.display = "block";
-  if (nameEl) nameEl.innerHTML = `${SetSailIcons.svg("route")} ${route.name}`;
-  if (metaEl) metaEl.textContent = `${route.waypoints.length} WPTs • Format: ${route.format}`;
   if (clearBtn) clearBtn.style.display = "inline-block";
   if (fitBtn) fitBtn.style.display = "inline-block";
+  if (typeof renderVesselRouteLibraryList === "function") {
+    renderVesselRouteLibraryList();
+  }
 
-  if (shouldFly && trackLine.getBounds().isValid()) {
+  if (shouldFly && trackLine && trackLine.getBounds && trackLine.getBounds().isValid()) {
     leafletMap.fitBounds(trackLine.getBounds().pad(0.08));
   }
   if (typeof window.updateRouteMiniWindowUI === "function") {
@@ -2626,6 +2811,9 @@ function clearActiveRoute() {
   }
   if (typeof window.saveSetSailUserHistory === "function") {
     window.saveSetSailUserHistory();
+  }
+  if (typeof renderVesselRouteLibraryList === "function") {
+    renderVesselRouteLibraryList();
   }
 }
 
@@ -3732,11 +3920,8 @@ function initVesselTracking() {
     const savedRoute = readActiveRouteFromStorage();
     if (savedRoute) {
       const infoBox = document.getElementById("vesselRouteInfoBox");
-      const nameEl = document.getElementById("vesselRouteName");
-      const metaEl = document.getElementById("vesselRouteMeta");
       if (infoBox) infoBox.style.display = "block";
-      if (nameEl) nameEl.innerHTML = `${SetSailIcons.svg("route")} ${savedRoute.name}`;
-      if (metaEl) metaEl.textContent = `${savedRoute.waypoints.length} WPTs • Format: ${savedRoute.format}`;
+      if (typeof renderVesselRouteLibraryList === "function") renderVesselRouteLibraryList();
       if (clearRouteBtn) clearRouteBtn.style.display = "inline-block";
       if (fitRouteBtn) fitRouteBtn.style.display = "inline-block";
     }
@@ -14903,10 +15088,14 @@ function renderRouteBufferCorridorOnMap() {
     }
   }
   const isFilterOn = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
+  const drId = getDrActiveRouteId();
+  const isDrRails = !!(drId && activeRouteData && (activeRouteData.id === drId || activeRouteData.name === drId));
 
   if (pts.length >= 2) {
-    const leftSide = [];
-    const rightSide = [];
+    // Port = left of track (looking start→end); Stbd = right.
+    // Direction (east, north)=(dx,dy); port = rotate 90° CCW → (-dy, dx).
+    const portSide = [];
+    const stbdSide = [];
     for (let i = 0; i < pts.length; i++) {
       const curLat = pts[i][0];
       const curLon = pts[i][1];
@@ -14914,27 +15103,61 @@ function renderRouteBufferCorridorOnMap() {
       const next = i < pts.length - 1 ? pts[i + 1] : pts[i];
       const latRad = curLat * Math.PI / 180;
       const cosLat = Math.max(0.2, Math.cos(latRad));
-      let dx = (next[1] - prev[1]) * cosLat;
-      let dy = next[0] - prev[0];
+      let dx = (next[1] - prev[1]) * cosLat; // east
+      let dy = next[0] - prev[0]; // north
       const len = Math.hypot(dx, dy) || 1;
       dx /= len;
       dy /= len;
-      // Perpendicular offset in NM → degrees (unrolled lon space)
-      const degLatOffset = (-dx) * (bufNm / 60);
-      const degLonOffset = (dy * (bufNm / 60)) / cosLat;
-      leftSide.push([curLat + degLatOffset, curLon + degLonOffset]);
-      rightSide.unshift([curLat - degLatOffset, curLon - degLonOffset]);
+      const nm = bufNm / 60;
+      // port (left): east=-dy, north=dx
+      const portLat = curLat + dx * nm;
+      const portLon = curLon + (-dy) * nm / cosLat;
+      // stbd (right): opposite
+      const stbdLat = curLat - dx * nm;
+      const stbdLon = curLon - (-dy) * nm / cosLat;
+      portSide.push([portLat, portLon]);
+      stbdSide.push([stbdLat, stbdLon]);
     }
-    const polyCoords = leftSide.concat(rightSide);
-    const corridorPoly = L.polygon(polyCoords, {
-      color: isFilterOn ? "#00e5ff" : "#f59e0b",
-      weight: isFilterOn ? 2.2 : 1.6,
-      dashArray: "6, 4",
-      fillColor: isFilterOn ? "#0ea5e9" : "#f59e0b",
-      fillOpacity: isFilterOn ? 0.14 : 0.10,
-      interactive: false
-    });
-    leafletRouteBufferLayer.addLayer(corridorPoly);
+    const polyCoords = portSide.concat(stbdSide.slice().reverse());
+    if (isDrRails) {
+      // Fill muted; edges: PORT red / STBD green (IALA A seafarer cue along track)
+      const corridorPoly = L.polygon(polyCoords, {
+        color: "transparent",
+        weight: 0,
+        fillColor: isFilterOn ? "#0ea5e9" : "#f05a36",
+        fillOpacity: isFilterOn ? 0.10 : 0.07,
+        interactive: false
+      });
+      leafletRouteBufferLayer.addLayer(corridorPoly);
+      leafletRouteBufferLayer.addLayer(L.polyline(portSide, {
+        color: "#ef4444",
+        weight: 3.2,
+        opacity: 0.95,
+        interactive: false,
+        lineCap: "round",
+        lineJoin: "round",
+        className: "setsail-route-port-edge"
+      }));
+      leafletRouteBufferLayer.addLayer(L.polyline(stbdSide, {
+        color: "#22c55e",
+        weight: 3.2,
+        opacity: 0.95,
+        interactive: false,
+        lineCap: "round",
+        lineJoin: "round",
+        className: "setsail-route-stbd-edge"
+      }));
+    } else {
+      const corridorPoly = L.polygon(polyCoords, {
+        color: isFilterOn ? "#00e5ff" : "#f59e0b",
+        weight: isFilterOn ? 2.2 : 1.6,
+        dashArray: "6, 4",
+        fillColor: isFilterOn ? "#0ea5e9" : "#f59e0b",
+        fillOpacity: isFilterOn ? 0.14 : 0.10,
+        interactive: false
+      });
+      leafletRouteBufferLayer.addLayer(corridorPoly);
+    }
   }
 }
 window.renderRouteBufferCorridorOnMap = renderRouteBufferCorridorOnMap;
@@ -16634,13 +16857,16 @@ function saveRouteToLibrary(route) {
   writeSavedRoutesLibrary(lib);
   renderNavSavedRoutesTree();
   syncSetRouteTopbarActions();
+  if (typeof renderVesselRouteLibraryList === "function") renderVesselRouteLibraryList();
 }
 window.saveRouteToLibrary = saveRouteToLibrary;
 
 function deleteRouteFromLibrary(routeId) {
   const wasActive = !!(activeRouteData && (activeRouteData.id === routeId || activeRouteData.name === routeId));
+  const wasDr = getDrActiveRouteId() === routeId;
   const lib = getSavedRoutesLibrary().filter((r) => r.id !== routeId);
   writeSavedRoutesLibrary(lib);
+  if (wasDr) setDrActiveRouteId(null);
   if (wasActive || (activeRouteData && activeRouteData.id === routeId)) {
     if (lib.length > 0) {
       selectSavedRouteFromSidebar(lib[0].id, false);
@@ -16655,11 +16881,99 @@ function deleteRouteFromLibrary(routeId) {
     }
   }
   renderNavSavedRoutesTree();
+  if (typeof renderVesselRouteLibraryList === "function") renderVesselRouteLibraryList();
   if (typeof showSetSailToast === "function") {
     showSetSailToast("Route and chat deleted", "info");
   }
 }
 window.deleteRouteFromLibrary = deleteRouteFromLibrary;
+
+/** My Vessel popover: list loaded routes with coral DR-rails toggles (one active max). */
+function renderVesselRouteLibraryList() {
+  const listEl = document.getElementById("vesselRouteLibraryList");
+  const infoBox = document.getElementById("vesselRouteInfoBox");
+  const clearBtn = document.getElementById("vesselClearRouteBtn");
+  const fitBtn = document.getElementById("vesselFitRouteBtn");
+  if (!listEl) return;
+
+  let lib = [];
+  try { lib = getSavedRoutesLibrary() || []; } catch (e) { lib = []; }
+  if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length) {
+    if (!lib.some((r) => r && (r.id === activeRouteData.id || r.name === activeRouteData.name))) {
+      lib = [activeRouteData].concat(lib);
+    }
+  }
+
+  if (!lib.length) {
+    listEl.innerHTML = "";
+    if (infoBox) infoBox.style.display = "none";
+    if (clearBtn) clearBtn.style.display = "none";
+    if (fitBtn) fitBtn.style.display = "none";
+    return;
+  }
+
+  if (infoBox) infoBox.style.display = "block";
+  if (clearBtn) clearBtn.style.display = "inline-block";
+  if (fitBtn) fitBtn.style.display = "inline-block";
+
+  const drId = getDrActiveRouteId();
+  // If stored DR id no longer exists, clear it (do not auto-enable the only remaining route)
+  if (drId && !lib.some((r) => r && (r.id === drId || r.name === drId))) {
+    try { localStorage.removeItem(SETSAIL_DR_ROUTE_KEY); } catch (e) {}
+  }
+  const drNow = getDrActiveRouteId();
+
+  listEl.innerHTML = lib.map((rt) => {
+    const rid = String(rt.id || "").replace(/"/g, "&quot;");
+    const safeName = String(rt.name || "Passage Route").replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+    const n = (rt.waypoints || []).length;
+    const dist = rt.totalDistanceNM || 0;
+    const fmt = rt.format || "ROUTE";
+    const isDr = !!(drNow && (rt.id === drNow || rt.name === drNow));
+    const isShown = !!(activeRouteData && (activeRouteData.id === rt.id || activeRouteData.name === rt.name));
+    return (
+      '<div class="vessel-route-lib-row' + (isShown ? " is-shown" : "") + '" data-route-id="' + rid + '">' +
+        '<div class="vessel-route-lib-info" data-route-show="' + rid + '" title="Show on chart">' +
+          '<div class="vessel-route-lib-name">' + safeName + (isDr ? ' · DR' : "") + "</div>" +
+          '<div class="vessel-route-lib-meta">' + n + " WPTs · " + dist + " NM · " + fmt + "</div>" +
+        "</div>" +
+        '<button type="button" class="vessel-route-dr-toggle' + (isDr ? " is-on" : "") +
+          '" data-route-dr-toggle="' + rid + '" role="switch" aria-checked="' + (isDr ? "true" : "false") +
+          '" title="Mark as DR rails route (coral = active; only one)"></button>' +
+      "</div>"
+    );
+  }).join("");
+
+  listEl.querySelectorAll("[data-route-show]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const id = el.getAttribute("data-route-show");
+      if (id && typeof selectSavedRouteFromSidebar === "function") {
+        selectSavedRouteFromSidebar(id, false);
+      }
+      renderVesselRouteLibraryList();
+    });
+  });
+  listEl.querySelectorAll("[data-route-dr-toggle]").forEach((btn) => {
+    btn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const id = btn.getAttribute("data-route-dr-toggle");
+      const cur = getDrActiveRouteId();
+      if (cur && (cur === id)) {
+        setDrActiveRouteId(null);
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("DR rails cleared — dead reckoning uses COG/heading", "info");
+        }
+      } else {
+        setDrActiveRouteId(id);
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("DR rails ON — vessel follows this track at last AIS speed", "success");
+        }
+      }
+    });
+  });
+}
+window.renderVesselRouteLibraryList = renderVesselRouteLibraryList;
 
 function renderNavSavedRoutesTree() {
   const listEl = document.getElementById("navSavedRoutesList");
@@ -16743,6 +17057,7 @@ function selectSavedRouteFromSidebar(routeId, openRightDrawer = true) {
   displaySetRouteResults(found, openRightDrawer);
   renderNavSavedRoutesTree();
   syncSetRouteTopbarActions();
+  if (typeof renderVesselRouteLibraryList === "function") renderVesselRouteLibraryList();
 }
 window.selectSavedRouteFromSidebar = selectSavedRouteFromSidebar;
 
