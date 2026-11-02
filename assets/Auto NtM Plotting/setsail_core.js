@@ -287,9 +287,11 @@ function applyVesselProfile(data, opts) {
   }
 }
 
-/** Hourly live refresh of the AIS target linked as My Vessel (MMSI). */
-const OWN_AIS_REFRESH_MS = 15 * 60 * 1000; // 15 min — hourly was leaving stale Japan fixes for days
+/** Live refresh of the AIS target linked as My Vessel (MMSI). */
+const OWN_AIS_REFRESH_MS = 3 * 60 * 1000; // 3 min — open-ocean gaps still need frequent MMSI polls
+const OWN_AIS_STALE_DR_MS = 45 * 60 * 1000; // after 45 min without a new fix → dead-reckon
 let _ownAisRefreshTimer = null;
+let _ownAisDrTimer = null;
 
 async function fetchOwnVesselAisUpdate() {
   const v = userVessel;
@@ -307,12 +309,14 @@ async function fetchOwnVesselAisUpdate() {
   if (lastFresh && Number.isFinite(lat0) && Number.isFinite(lon0)) {
     boxes.push([lat0 - 1.2, lon0 - 1.2, lat0 + 1.2, lon0 + 1.2]);
     boxes.push([lat0 - 4, lon0 - 4, lat0 + 4, lon0 + 4]);
+    boxes.push([lat0 - 12, lon0 - 12, lat0 + 12, lon0 + 12]);
   }
   // Always add global sample corridors so a ship that left the last bbox is still found
+  // (incl. Malacca exit → Indian Ocean toward Africa / Cape / Suez).
   [
-    [30, -80, 45, -55], [0, 95, 20, 120], [20, 115, 42, 145],
-    [35, -20, 55, 10], [-40, 10, -20, 40], [5, 40, 25, 70],
-    [30, -150, 50, -120], [-35, 145, -15, 175]
+    [30, -80, 45, -55], [0, 95, 20, 120], [-5, 90, 10, 110], [20, 115, 42, 145],
+    [35, -20, 55, 10], [-40, 10, -20, 40], [-15, 35, 20, 80], [5, 40, 25, 70],
+    [-25, 30, 5, 75], [30, -150, 50, -120], [-35, 145, -15, 175]
   ].forEach((b) => boxes.push(b));
 
   async function fromOpenWaters() {
@@ -320,23 +324,33 @@ async function fetchOwnVesselAisUpdate() {
       if (!f) return null;
       const p = f.properties || {};
       const c = (f.geometry && f.geometry.coordinates) || [];
+      const seenRaw = p.seen || p.time || p.updated || p.last_seen;
+      let seenMs = 0;
+      if (typeof seenRaw === "number" && Number.isFinite(seenRaw)) {
+        seenMs = seenRaw < 1e12 ? Math.round(seenRaw * 1000) : Math.round(seenRaw);
+      } else if (seenRaw) {
+        const t = Date.parse(String(seenRaw));
+        if (Number.isFinite(t)) seenMs = t;
+      }
       return {
         mmsi,
         lat: c[1],
         lon: c[0],
-        sog: p.sog,
-        cog: p.cog,
+        sog: p.sog != null ? p.sog : p.speed,
+        cog: p.cog != null ? p.cog : p.course,
         heading: p.heading,
         name: p.name || v.name || "",
         destination: p.destination || v.destination || "",
         shipType: p.type || p.shipType || v.shipType || "",
-        callSign: p.callSign || v.callSign || "",
+        callSign: p.callSign || p.call_sign || v.callSign || "",
         navStat: p.nav_status != null ? p.nav_status : p.navStat,
-        source: "ais"
+        source: "ais",
+        updatedAt: seenMs || Date.now(),
+        aisSeenAt: seenMs ? new Date(seenMs).toISOString() : null
       };
     }
 
-    // Direct MMSI lookup (most reliable on Open Waters).
+    // Direct MMSI lookup (most reliable on Open Waters) — returns last known even if old.
     try {
       const geo = await fetch("https://ais.openwaters.io/v1/vessels?mmsi=" + encodeURIComponent(mmsi), {
         headers: {
@@ -464,38 +478,138 @@ async function refreshOwnVesselFromAis(opts) {
   if (!userVessel || !userVessel.mmsi) return;
   try {
     const hit = await fetchOwnVesselAisUpdate();
-    if (!hit) return;
+    if (!hit) {
+      applyOwnVesselDeadReckoning({ toast: false });
+      return;
+    }
+    const prev = userVessel || {};
+    const prevFixMs = prev.aisLastFixAt
+      ? Date.parse(prev.aisLastFixAt)
+      : (prev.aisRefreshedAt ? Date.parse(prev.aisRefreshedAt) : 0);
+    const hitMs = Number(hit.updatedAt) || (hit.aisSeenAt ? Date.parse(hit.aisSeenAt) : Date.now());
+    // Never rewind My Vessel to an older AIS fix (stale Malacca while ship is in IO).
+    if (Number.isFinite(prevFixMs) && prevFixMs > 0 && hitMs + 5000 < prevFixMs) {
+      applyOwnVesselDeadReckoning({ toast: false });
+      return;
+    }
+    const ageMs = Date.now() - hitMs;
+    const isLive = ageMs <= OWN_AIS_STALE_DR_MS;
     applyVesselProfile(
-      Object.assign({}, userVessel, hit, {
-        source: "ais",
-        aisRefreshedAt: new Date().toISOString()
+      Object.assign({}, prev, hit, {
+        source: isLive ? "ais" : "ais-stale",
+        aisLastFixAt: hit.aisSeenAt || new Date(hitMs).toISOString(),
+        aisRefreshedAt: new Date().toISOString(),
+        deadReckoned: false
       }),
       {
         toast: opts.toast
-          ? "Own vessel AIS updated (" + (hit.name || hit.mmsi) + ")"
+          ? (isLive
+            ? "Own vessel AIS updated (" + (hit.name || hit.mmsi) + ")"
+            : "Last AIS fix is " + Math.round(ageMs / 3600000 * 10) / 10 + "h old — open ocean / out of coastal coverage")
           : null,
         skipAisSchedule: true
       }
     );
+    if (!isLive) applyOwnVesselDeadReckoning({ toast: false });
+    // Nudge live WS subscriptions so Open Waters keeps following this MMSI
+    try {
+      if (typeof window.sendAisStreamSubscriptionAll === "function") {
+        window.sendAisStreamSubscriptionAll();
+      }
+    } catch (eSub) {}
   } catch (e) {
-    console.warn("[SetSail Vessel] own AIS hourly refresh failed", e);
+    console.warn("[SetSail Vessel] own AIS refresh failed", e);
   }
 }
+
+/** Extrapolate My Vessel from last SOG/COG when coastal AIS has gone dark (open ocean). */
+function applyOwnVesselDeadReckoning(opts) {
+  opts = opts || {};
+  const v = userVessel;
+  if (!v || !v.mmsi) return;
+  const fixIso = v.aisLastFixAt || v.aisRefreshedAt;
+  if (!fixIso) return;
+  const fixMs = Date.parse(fixIso);
+  if (!Number.isFinite(fixMs)) return;
+  const ageMs = Date.now() - fixMs;
+  if (ageMs < OWN_AIS_STALE_DR_MS) return;
+  // Wi-Fi / LAN AIS is truth — never DR over it
+  if (String(v.source || "").toLowerCase().indexOf("wifi") >= 0) return;
+  const sog = Number(v.sog);
+  const cog = Number(v.cog != null ? v.cog : v.heading);
+  const lat0 = Number(v.lat);
+  const lon0 = Number(v.lon);
+  if (!(sog >= 1) || !Number.isFinite(cog) || cog >= 360) return;
+  if (!Number.isFinite(lat0) || !Number.isFinite(lon0)) return;
+  if (typeof setrouteDestPoint !== "function" && typeof calculateDestination == "undefined") {
+    // Inline DR (nm along rhumb approx)
+  }
+  const distNm = sog * (ageMs / 3600000);
+  if (!(distNm > 0.5) || distNm > 3500) return;
+  let lat1;
+  let lon1;
+  if (typeof setrouteDestPoint === "function") {
+    const p = setrouteDestPoint(lat0, lon0, cog, distNm);
+    lat1 = p.lat;
+    lon1 = p.lon;
+  } else {
+    const R = 3440.065;
+    const δ = distNm / R;
+    const θ = (cog * Math.PI) / 180;
+    const φ1 = (lat0 * Math.PI) / 180;
+    const λ1 = (lon0 * Math.PI) / 180;
+    const sinφ2 = Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(θ);
+    const φ2 = Math.asin(Math.min(1, Math.max(-1, sinφ2)));
+    const λ2 = λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * sinφ2);
+    lat1 = (φ2 * 180) / Math.PI;
+    lon1 = (((λ2 * 180) / Math.PI + 540) % 360) - 180;
+  }
+  if (!Number.isFinite(lat1) || !Number.isFinite(lon1)) return;
+  const updated = Object.assign({}, v, {
+    lat: lat1,
+    lon: lon1,
+    source: "ais-dr",
+    deadReckoned: true,
+    aisDrAt: new Date().toISOString(),
+    aisDrNm: Math.round(distNm * 10) / 10
+  });
+  window.userVessel = updated;
+  userVessel = updated;
+  if (typeof persistUserVessel === "function") persistUserVessel();
+  if (window.leafletMap && typeof plotUserVessel === "function") {
+    plotUserVessel(lat1, lon1, "AIS-DR", true);
+  }
+  if (opts.toast && typeof showSetSailToast === "function") {
+    showSetSailToast(
+      "Own vessel dead-reckoned +" + Math.round(distNm) + " NM from last AIS (out of coastal coverage)",
+      "info"
+    );
+  }
+}
+window.applyOwnVesselDeadReckoning = applyOwnVesselDeadReckoning;
 
 function scheduleOwnVesselAisRefresh() {
   if (_ownAisRefreshTimer) {
     clearInterval(_ownAisRefreshTimer);
     _ownAisRefreshTimer = null;
   }
+  if (_ownAisDrTimer) {
+    clearInterval(_ownAisDrTimer);
+    _ownAisDrTimer = null;
+  }
   if (!userVessel || !userVessel.mmsi) return;
   _ownAisRefreshTimer = setInterval(() => {
     refreshOwnVesselFromAis({ toast: false });
   }, OWN_AIS_REFRESH_MS);
+  _ownAisDrTimer = setInterval(() => {
+    applyOwnVesselDeadReckoning({ toast: false });
+  }, 60 * 1000);
   const stale =
     !userVessel.aisRefreshedAt ||
     Date.now() - new Date(userVessel.aisRefreshedAt).getTime() > 3 * 3600 * 1000;
-  const delay = stale ? 2500 : 8000;
+  const delay = stale ? 2500 : 5000;
   setTimeout(() => refreshOwnVesselFromAis({ toast: stale }), delay);
+  setTimeout(() => applyOwnVesselDeadReckoning({ toast: stale }), delay + 1500);
 }
 window.refreshOwnVesselFromAis = refreshOwnVesselFromAis;
 window.scheduleOwnVesselAisRefresh = scheduleOwnVesselAisRefresh;
@@ -921,24 +1035,40 @@ function syncMyVesselFromLiveAis(t) {
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
 
   const prev = window.userVessel || {};
+  // Prefer bridge Wi-Fi AIS over cloud when both are present
+  if (String(prev.source || "").toLowerCase().indexOf("wifi") >= 0) {
+    const wifiAge = prev.updatedAt ? Date.now() - Date.parse(prev.updatedAt) : 0;
+    if (Number.isFinite(wifiAge) && wifiAge < 120000) return;
+  }
+  const incomingTs = Number(t.updatedAt) || Date.now();
+  const prevFixMs = prev.aisLastFixAt
+    ? Date.parse(prev.aisLastFixAt)
+    : (prev.aisRefreshedAt ? Date.parse(prev.aisRefreshedAt) : 0);
+  if (Number.isFinite(prevFixMs) && prevFixMs > 0 && incomingTs + 8000 < prevFixMs) {
+    return; // older feed — ignore
+  }
+
   const updated = Object.assign({}, prev, {
     lat: lat,
     lon: lon,
     sog: t.sog != null ? Number(t.sog) : prev.sog,
     cog: t.cog != null ? Number(t.cog) : prev.cog,
-    heading: t.heading != null && t.heading < 360 ? Number(t.heading) : prev.heading,
+    heading: t.heading != null && Number(t.heading) < 360 ? Number(t.heading) : prev.heading,
     shipType: t.shipType || t.type || prev.shipType,
     destination: t.destination || prev.destination,
     callSign: t.callSign || prev.callSign,
     name: t.name || prev.name,
     source: "AIS",
+    deadReckoned: false,
+    aisLastFixAt: new Date(incomingTs).toISOString(),
     aisRefreshedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   });
   window.userVessel = updated;
+  userVessel = updated;
   if (typeof persistUserVessel === "function") persistUserVessel();
 
-  if (window.leafletMap && window.leafletVesselLayer && typeof plotUserVessel === "function") {
+  if (window.leafletMap && typeof plotUserVessel === "function") {
     plotUserVessel(lat, lon, "AIS", true);
   }
 

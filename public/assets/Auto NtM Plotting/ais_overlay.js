@@ -1,11 +1,13 @@
 /**
- * SetSail AIS Overlay — multi-feed AIS (deduped by MMSI)
- * Feeds: AISStream.io WS + OpenSeaFeed WS + Open Waters REST + Digitraffic (Baltic) + zone snapshots
+ * SetSail AIS Overlay — multi-feed AIS (deduped by MMSI, freshest wins)
+ * Feeds: AISStream.io WS + OpenSeaFeed WS + Open Waters WS/REST + Digitraffic (Baltic) + zone snapshots
+ * No MarineTraffic / VesselFinder scraping (ToS). Own-ship always MMSI-subscribed.
  */
 (function () {
-  const AIS_REFRESH_MS = 60 * 1000;
+  const AIS_REFRESH_MS = 45 * 1000;
   const ZONES_INDEX = "ais/zones/index.json";
   const OPENWATERS_VESSELS = "https://ais.openwaters.io/v1/vessels";
+  const OPENWATERS_WS_URL = "wss://ais.openwaters.io/v1/stream";
   const DIGITRAFFIC_LOC = "https://meri.digitraffic.fi/api/ais/v1/locations";
   const DIGITRAFFIC_VES = "https://meri.digitraffic.fi/api/ais/v1/vessels";
   const AISSTREAM_WS_URL = "wss://stream.aisstream.io/v0/stream";
@@ -18,8 +20,9 @@
   // Wide viewport still loads live AIS — targets appear as soon as the AIS tile is on.
   // OW_AREA_CAP is spanLon*spanLat (deg²). Above this we still show zone snapshots + stream.
   const OW_AREA_CAP = 4200;
-  const OW_MAX_TILES = 28;
-  const ABS_MARKER_CAP = 8000;
+  const OW_MAX_TILES = 48;
+  const OW_DENSE_TILE_DEG = 0.55; // OW REST truncates wide boxes (~500) — tile straits densely
+  const ABS_MARKER_CAP = 12000;
   const MIN_ZOOM_ZONES = 1;
   const MIN_ZOOM_DENSE_ZONES = 4;
   // Digitraffic = dense Baltic-only feed — never at world overview (it crowds the map).
@@ -149,16 +152,40 @@
     return aisCanvasRenderer || undefined;
   }
 
-  // Live WebSocket feeds (AISStream + OpenSeaFeed) → one MMSI map (no duplicate markers)
+  // Live WebSocket feeds (AISStream + OpenSeaFeed + Open Waters) → one MMSI map
   let aisStreamWs = null;
   let openSeaFeedWs = null;
+  let openWatersWs = null;
   let aisStreamTargets = Object.create(null);
   let aisStreamReconnectTimer = null;
   let openSeaFeedReconnectTimer = null;
+  let openWatersReconnectTimer = null;
   let aisStreamRenderTimer = null;
   let aisStreamPendingRender = false;
   let lastRestTargets = [];
-  let liveFeedStatus = { aisstream: "DISCONNECTED", openseafeed: "DISCONNECTED" };
+  let liveFeedStatus = {
+    aisstream: "DISCONNECTED",
+    openseafeed: "DISCONNECTED",
+    openwaters: "DISCONNECTED"
+  };
+
+  function getOwnVesselMmsi() {
+    try {
+      const m = window.userVessel && String(window.userVessel.mmsi || "").trim();
+      return /^\d{5,9}$/.test(m) ? m : "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function parseAisSeenMs(v) {
+    if (v == null || v === "") return 0;
+    if (typeof v === "number" && Number.isFinite(v)) {
+      return v < 1e12 ? Math.round(v * 1000) : Math.round(v);
+    }
+    const t = Date.parse(String(v));
+    return Number.isFinite(t) ? t : 0;
+  }
 
   function getPersonalAisStreamApiKey() {
     return "";
@@ -292,6 +319,15 @@
     if (map) combined = filterToViewport(combined, map);
     const z = map && map.getZoom ? map.getZoom() : 3;
     const lod = aisLodForZoom(z);
+    // Zoomed-in chart: keep every target in the viewport (Singapore / Malacca density).
+    // Even-grid sampling was dropping most ships in dense cells so the strait looked empty.
+    if (z >= 7) {
+      if (combined.length <= ABS_MARKER_CAP) return combined;
+      // Prefer underway when hard-capping extreme density
+      const moving = combined.filter((t) => Number(t.sog) >= 0.3);
+      const rest = combined.filter((t) => Number(t.sog) < 0.3);
+      return moving.concat(rest).slice(0, ABS_MARKER_CAP);
+    }
     return sampleEvenlyByGrid(combined, lod.maxMarkers, lod.cellDeg);
   }
 
@@ -357,6 +393,7 @@
     }
     connectAisStreamFeed();
     connectOpenSeaFeed();
+    connectOpenWatersFeed();
   }
 
   function openCompatibleAisWs(url, feedId, onOpen) {
@@ -439,6 +476,9 @@
       BoundingBoxes: boxes,
       FilterMessageTypes: ["PositionReport", "StandardClassBPositionReport", "ShipStaticData"]
     };
+    // Do NOT set FiltersShipMMSI here — on AISStream/OpenSeaFeed it means "only these
+    // MMSIs" and would wipe viewport traffic. Own-ship is pinned via Open Waters
+    // subscribe { mmsi: [...] } which ORs with bbox.
     if (apiKey) sub.APIKey = apiKey;
     return sub;
   }
@@ -466,14 +506,130 @@
     }
   }
 
+  function connectOpenWatersFeed() {
+    if (openWatersWs && (openWatersWs.readyState === WebSocket.OPEN || openWatersWs.readyState === WebSocket.CONNECTING)) {
+      sendOpenWatersSubscription();
+      return;
+    }
+    openWatersWs = openCompatibleAisWs(OPENWATERS_WS_URL, "openwaters", function () {
+      console.log("[SetSail AIS] Connected to Open Waters stream");
+      sendOpenWatersSubscription();
+    });
+    if (!openWatersWs) return;
+    // Native OW frames are not aisstream-shaped — parse in onmessage override after openCompatible
+    openWatersWs.onmessage = function (event) {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg && msg.type === "event") {
+          handleOpenWatersNativeEvent(msg);
+          return;
+        }
+        // aisstream-shaped frames if the gateway ever emits them
+        handleAisStreamMessage(msg, "openwaters");
+      } catch (e) {}
+    };
+    openWatersWs.onclose = function () {
+      liveFeedStatus.openwaters = "DISCONNECTED";
+      updateAisStreamStatusUI();
+      openWatersWs = null;
+      if (window.OVERLAY_STATES && window.OVERLAY_STATES.ais) {
+        clearTimeout(openWatersReconnectTimer);
+        openWatersReconnectTimer = setTimeout(connectOpenWatersFeed, 7000);
+      }
+    };
+  }
+
+  function sendOpenWatersSubscription() {
+    if (!openWatersWs || openWatersWs.readyState !== WebSocket.OPEN) return;
+    const map = window.leafletMap;
+    const boxes = getMapAisStreamBoxes(map) || [];
+    // OW native: bbox as [minLat,minLon,maxLat,maxLon][]; plus always follow My Vessel MMSI
+    const bbox = boxes.map((pair) => {
+      const a = pair[0];
+      const b = pair[1];
+      return [
+        Math.min(a[0], b[0]),
+        Math.min(a[1], b[1]),
+        Math.max(a[0], b[0]),
+        Math.max(a[1], b[1])
+      ];
+    });
+    const sub = { type: "subscribe", bbox: bbox, snapshot: true };
+    const own = getOwnVesselMmsi();
+    if (own) sub.mmsi = [Number(own) || own];
+    try {
+      openWatersWs.send(JSON.stringify(sub));
+    } catch (e) {
+      console.warn("[SetSail AIS] Open Waters subscribe error:", e);
+    }
+  }
+
+  function handleOpenWatersNativeEvent(ev) {
+    if (!ev || ev.mmsi == null) return;
+    const mmsiKey = String(ev.mmsi);
+    const prev = aisStreamTargets[mmsiKey] || {};
+    let lat = Number(ev.lat);
+    let lon = Number(ev.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      const msg = ev.message || {};
+      lat = Number(msg.Latitude != null ? msg.Latitude : msg.lat);
+      lon = Number(msg.Longitude != null ? msg.Longitude : msg.lon);
+    }
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      if (prev.lat != null && prev.lon != null) {
+        lat = prev.lat;
+        lon = prev.lon;
+      } else {
+        return;
+      }
+    }
+    const msg = ev.message || {};
+    const seenMs = parseAisSeenMs(ev.time || ev.seen || ev.received) || Date.now();
+    const next = {
+      mmsi: ev.mmsi,
+      lat: lat,
+      lon: lon,
+      name: (ev.name || msg.Name || msg.ShipName || prev.name || ("MMSI " + mmsiKey)).toString().trim(),
+      callSign: (ev.call_sign || msg.CallSign || prev.callSign || "").toString().trim(),
+      sog: ev.sog != null ? ev.sog : (msg.Sog != null ? msg.Sog : prev.sog),
+      cog: ev.cog != null ? ev.cog : (msg.Cog != null ? msg.Cog : prev.cog),
+      heading: ev.heading != null ? ev.heading : (msg.TrueHeading != null ? msg.TrueHeading : prev.heading),
+      navStat: ev.nav_status != null ? ev.nav_status : (msg.NavigationalStatus != null ? msg.NavigationalStatus : prev.navStat),
+      destination: (ev.destination || msg.Destination || prev.destination || "").toString().trim(),
+      shipType: ev.ship_type != null ? ev.ship_type : (msg.Type != null ? msg.Type : prev.shipType),
+      source: "Open Waters (live)",
+      updatedAt: Math.max(Number(prev.updatedAt) || 0, seenMs)
+    };
+    // Fresher-only overwrite for position
+    if ((Number(prev.updatedAt) || 0) > seenMs + 2000 && prev.lat != null) {
+      next.lat = prev.lat;
+      next.lon = prev.lon;
+      next.sog = prev.sog;
+      next.cog = prev.cog;
+      next.heading = prev.heading;
+      next.updatedAt = prev.updatedAt;
+      next.source = prev.source || next.source;
+    }
+    aisStreamTargets[mmsiKey] = next;
+    try {
+      const myMmsi = getOwnVesselMmsi();
+      if (myMmsi && mmsiKey === myMmsi && typeof window.syncMyVesselFromLiveAis === "function") {
+        window.syncMyVesselFromLiveAis(next);
+      }
+    } catch (eSync) {}
+    scheduleAisStreamRender();
+  }
+
   function sendAisStreamSubscriptionAll() {
     sendAisStreamSubscription();
     sendOpenSeaFeedSubscription();
+    sendOpenWatersSubscription();
   }
 
   function disconnectAisStream() {
     clearTimeout(aisStreamReconnectTimer);
     clearTimeout(openSeaFeedReconnectTimer);
+    clearTimeout(openWatersReconnectTimer);
     clearTimeout(aisStreamRenderTimer);
     if (aisStreamWs) {
       try {
@@ -489,8 +645,16 @@
       } catch (e) {}
       openSeaFeedWs = null;
     }
+    if (openWatersWs) {
+      try {
+        openWatersWs.onclose = null;
+        openWatersWs.close();
+      } catch (e) {}
+      openWatersWs = null;
+    }
     liveFeedStatus.aisstream = "DISCONNECTED";
     liveFeedStatus.openseafeed = "DISCONNECTED";
+    liveFeedStatus.openwaters = "DISCONNECTED";
     updateAisStreamStatusUI();
   }
 
@@ -532,24 +696,32 @@
     const destination = (staticMsg.Destination || prev.destination || "").trim();
     const shipType = staticMsg.Type != null ? staticMsg.Type : prev.shipType;
 
-    // One marker per MMSI — later frames overwrite position; static fields fill gaps
+    const nowTs = Date.now();
+    const prevTs = Number(prev.updatedAt) || 0;
+    // Fresher-only position overwrite across feeds (never let an older WS frame rewind a ship)
+    const keepPrevPos = prevTs > nowTs - 500 && Number.isFinite(Number(prev.lat)) && feedId !== (prev._feedId || "");
+    // Always accept brand-new frames from any live feed; only skip if clearly older stamp
+    const incomingTs = nowTs;
+    const useIncomingPos = !prevTs || incomingTs >= prevTs - 1500 || !Number.isFinite(Number(prev.lat));
     const next = {
       mmsi: mmsi,
-      lat: lat,
-      lon: lon,
+      lat: useIncomingPos ? lat : prev.lat,
+      lon: useIncomingPos ? lon : prev.lon,
       name: shipName || prev.name,
       callSign: callSign || prev.callSign,
-      sog: sog,
-      cog: cog,
-      heading: heading,
-      navStat: navStat,
+      sog: useIncomingPos && sog != null ? sog : (prev.sog != null ? prev.sog : sog),
+      cog: useIncomingPos && cog != null ? cog : (prev.cog != null ? prev.cog : cog),
+      heading: useIncomingPos && heading != null ? heading : (prev.heading != null ? prev.heading : heading),
+      navStat: navStat != null ? navStat : prev.navStat,
       destination: destination || prev.destination,
       shipType: shipType != null ? shipType : prev.shipType,
       source: prev.source && prev.source !== sourceLabel
         ? (String(prev.source).indexOf(sourceLabel) >= 0 ? prev.source : prev.source + " + " + sourceLabel)
         : sourceLabel,
-      updatedAt: Date.now()
+      updatedAt: useIncomingPos ? Math.max(prevTs, incomingTs) : prevTs,
+      _feedId: useIncomingPos ? feedId : (prev._feedId || feedId)
     };
+    void keepPrevPos;
     aisStreamTargets[mmsiKey] = next;
 
     // Live hook: if incoming AIS target matches My Vessel, update position & telemetry instantly
@@ -571,20 +743,22 @@
     if (!badge) return;
     const a = liveFeedStatus.aisstream === "CONNECTED";
     const o = liveFeedStatus.openseafeed === "CONNECTED";
-    if (a || o) {
-      badge.textContent = a && o ? "CONNECTED (2 LIVE FEEDS)" : "CONNECTED (LIVE STREAM)";
+    const w = liveFeedStatus.openwaters === "CONNECTED";
+    const n = (a ? 1 : 0) + (o ? 1 : 0) + (w ? 1 : 0);
+    if (n > 0) {
+      badge.textContent = n >= 2 ? ("CONNECTED (" + n + " LIVE FEEDS)") : "CONNECTED (LIVE STREAM)";
       badge.style.background = "#10b981";
       if (label) {
-        label.textContent = a && o
-          ? "AISStream.io + OpenSeaFeed"
-          : a
-            ? "Live Global AISStream.io"
-            : "OpenSeaFeed (community)";
+        const parts = [];
+        if (a) parts.push("AISStream.io");
+        if (o) parts.push("OpenSeaFeed");
+        if (w) parts.push("Open Waters");
+        label.textContent = parts.join(" + ");
       }
     } else if (getAisStreamApiKey()) {
       badge.textContent = "RECONNECTING";
       badge.style.background = "#0284c7";
-      if (label) label.textContent = "AISStream.io + OpenSeaFeed";
+      if (label) label.textContent = "AISStream.io + OpenSeaFeed + Open Waters";
     } else {
       badge.textContent = "COMMUNITY FALLBACK";
       badge.style.background = "#eab308";
@@ -612,25 +786,35 @@
           map[key] = Object.assign({}, t);
           continue;
         }
-        // Same MMSI from multiple feeds → keep one target; prefer fresher position, fill blanks
+        // Same MMSI from multiple feeds → one marker; freshest position wins (zones without
+        // updatedAt rank as 0 so live WS/REST always beat stale snapshots).
         const prevTs = Number(prev.updatedAt) || 0;
         const nextTs = Number(t.updatedAt) || 0;
-        const preferNewPos = nextTs >= prevTs;
+        const preferNewPos = nextTs > prevTs || (nextTs === prevTs && nextTs > 0);
+        const preferNewWhenEqualUnknown = nextTs === 0 && prevTs === 0;
+        const takePos = preferNewPos || (preferNewWhenEqualUnknown && true) || prev.lat == null;
         const merged = Object.assign({}, prev);
         Object.keys(t).forEach((k) => {
           const v = t[k];
           if (v == null || v === "") return;
           if (k === "lat" || k === "lon" || k === "sog" || k === "cog" || k === "heading" || k === "navStat") {
-            if (preferNewPos || prev[k] == null || prev[k] === "") merged[k] = v;
+            if ((preferNewPos || (nextTs === prevTs && nextTs > 0)) || prev[k] == null || prev[k] === "") {
+              if (takePos || prev[k] == null || prev[k] === "") merged[k] = v;
+            }
           } else if (k === "source") {
             const a = String(prev.source || "");
             const b = String(v);
-            if (a && b && a !== b && a.indexOf(b) < 0) merged.source = a + " + " + b;
+            if (preferNewPos) merged.source = b;
+            else if (a && b && a !== b && a.indexOf(b) < 0) merged.source = a + " + " + b;
             else if (!a) merged.source = b;
           } else if (k === "updatedAt") {
             merged.updatedAt = Math.max(prevTs, nextTs) || nextTs || prevTs;
-          } else if (prev[k] == null || prev[k] === "") {
-            merged[k] = v;
+          } else if (prev[k] == null || prev[k] === "" || preferNewPos) {
+            if (k === "name" || k === "callSign" || k === "destination" || k === "shipType" || k === "shipTypeName") {
+              if (preferNewPos || prev[k] == null || prev[k] === "") merged[k] = v;
+            } else if (prev[k] == null || prev[k] === "") {
+              merged[k] = v;
+            }
           }
         });
         map[key] = merged;
@@ -643,6 +827,7 @@
     const g = f.geometry || {};
     const c = g.coordinates || [];
     const p = f.properties || {};
+    const seenMs = parseAisSeenMs(p.seen || p.time || p.updated || p.last_seen);
     return {
       mmsi: p.mmsi != null ? p.mmsi : p.mmsi_string,
       name: p.name || p.vessel_name || "",
@@ -654,8 +839,29 @@
       heading: p.heading,
       navStat: p.navigational_status != null ? p.navigational_status : p.status,
       destination: p.destination || "",
-      source: "Open Waters"
+      source: "Open Waters",
+      updatedAt: seenMs || Date.now()
     };
+  }
+
+  /** Split a viewport box into ≤OW_DENSE_TILE_DEG tiles so OW REST does not truncate at ~500. */
+  function tileBboxDense(box, tileDeg) {
+    const deg = Math.max(0.25, Number(tileDeg) || OW_DENSE_TILE_DEG);
+    const out = [];
+    const minLat = Number(box.minLat);
+    const maxLat = Number(box.maxLat);
+    const minLon = Number(box.minLon);
+    const maxLon = Number(box.maxLon);
+    if (![minLat, maxLat, minLon, maxLon].every(Number.isFinite)) return [box];
+    for (let la = minLat; la < maxLat - 1e-9; la += deg) {
+      const la2 = Math.min(maxLat, la + deg);
+      for (let lo = minLon; lo < maxLon - 1e-9; lo += deg) {
+        const lo2 = Math.min(maxLon, lo + deg);
+        out.push({ minLat: la, minLon: lo, maxLat: la2, maxLon: lo2 });
+        if (out.length >= OW_MAX_TILES) return out;
+      }
+    }
+    return out.length ? out : [box];
   }
 
   function digitrafficFeatureToTarget(f) {
@@ -744,12 +950,25 @@
       }
       curW = nextW;
     }
+    // Dense coastal / strait zoom: tile the viewport so Open Waters returns full traffic
+    // (a single Malacca/Singapore bbox is truncated ~500 moving vessels).
+    let outBoxes = boxes;
+    if (zoom >= 7 && boxes.length) {
+      outBoxes = [];
+      for (let i = 0; i < boxes.length && outBoxes.length < OW_MAX_TILES; i++) {
+        const tiled = tileBboxDense(boxes[i], zoom >= 10 ? 0.35 : OW_DENSE_TILE_DEG);
+        for (let j = 0; j < tiled.length && outBoxes.length < OW_MAX_TILES; j++) {
+          outBoxes.push(tiled[j]);
+        }
+      }
+    }
     return {
       mode: "viewport",
       zoom: zoom,
       skipLive: false,
       skipZones: zoom < MIN_ZOOM_ZONES,
-      boxes: boxes.slice(0, OW_MAX_TILES)
+      boxes: outBoxes.slice(0, OW_MAX_TILES),
+      denseTiles: zoom >= 7
     };
   }
 
@@ -834,8 +1053,13 @@
     return sampleEvenlyByGrid(loaded.flat(), lod.maxMarkers, lod.cellDeg);
   }
 
-  async function loadOpenWatersBoxes(boxes) {
+  async function loadOpenWatersBoxes(boxes, opts) {
+    opts = opts || {};
     // Open Waters expects bbox=minLat,minLon,maxLat,maxLon (min_latitude=… params no longer work).
+    // max_age_moving keeps underway traffic; stationary can be older (berth).
+    const ageQ = opts.dense
+      ? "&max_age_moving=45m&max_age=36h"
+      : "&max_age_moving=30m&max_age=7d";
     const fetches = boxes.map(async (box) => {
       const bbox =
         Number(box.minLat).toFixed(4) +
@@ -846,7 +1070,7 @@
         "," +
         Number(box.maxLon).toFixed(4);
       try {
-        const gj = await fetchJson(OPENWATERS_VESSELS + "?bbox=" + bbox, {
+        const gj = await fetchJson(OPENWATERS_VESSELS + "?bbox=" + bbox + ageQ, {
           Accept: "application/json"
         });
         const feats = gj.features || [];
@@ -931,7 +1155,7 @@
       let live = [];
       if (!plan.skipLive && plan.boxes && plan.boxes.length) {
         try {
-          live = await loadOpenWatersBoxes(plan.boxes);
+          live = await loadOpenWatersBoxes(plan.boxes, { dense: !!plan.denseTiles || plan.mode === "viewport" });
         } catch (e) {}
       }
       if (seq !== aisRefreshSeq) return;
@@ -975,10 +1199,18 @@
         const zoneAll = await loadZonesForMap(map, zNow);
         if (seq !== aisRefreshSeq) return;
         const zFiltered = plan.mode === "viewport" ? filterToViewport(zoneAll, map) : zoneAll;
+        // Zones fill name gaps / sparse oceans — live timestamps already win in mergeByMmsi
         rest = mergeByMmsi([rest, zFiltered]);
       }
 
-      rest = sampleEvenlyByGrid(rest, lod.maxMarkers * 2, lod.cellDeg);
+      // Do not thin a dense zoomed viewport (Malacca / Singapore need every live target)
+      if (plan.mode !== "viewport" || zNow < 7) {
+        rest = sampleEvenlyByGrid(rest, lod.maxMarkers * 2, lod.cellDeg);
+      } else if (rest.length > ABS_MARKER_CAP) {
+        const moving = rest.filter((t) => Number(t.sog) >= 0.3);
+        const parked = rest.filter((t) => Number(t.sog) < 0.3);
+        rest = moving.concat(parked).slice(0, ABS_MARKER_CAP);
+      }
       lastRestTargets = rest;
       targets = getCombinedAisTargets(map);
       renderAisTargets(targets, map);
@@ -1049,7 +1281,7 @@
       const n = aisLastPayload && aisLastPayload.count;
       if (typeof showSetSailToast === "function") {
         showSetSailToast(
-          "AIS live feeds: AISStream.io + OpenSeaFeed (MMSI-deduped)." + (n != null ? " Targets: " + n : ""),
+          "AIS live feeds: AISStream.io + OpenSeaFeed + Open Waters (MMSI-deduped, freshest wins)." + (n != null ? " Targets: " + n : ""),
           "info"
         );
       }
@@ -1116,6 +1348,7 @@
   window.startAisPolling = startAisPolling;
   window.stopAisPolling = stopAisPolling;
   window.showAisInfoModal = showAisInfoModal;
+  window.sendAisStreamSubscriptionAll = sendAisStreamSubscriptionAll;
   window.AIS_REFRESH_MS = AIS_REFRESH_MS;
   /** Snapshot of live AIS targets for SetRoute Core A hazard costing (not UI). */
   window.getAisTargetsSnapshot = function getAisTargetsSnapshot(limit) {
