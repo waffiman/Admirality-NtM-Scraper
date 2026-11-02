@@ -4108,27 +4108,29 @@ function initHomeHudVessel() {
   const pop = document.getElementById("homeVesselPopover");
   const closeBtn = document.getElementById("homeVesselPopClose");
   const hudTop = document.getElementById("homeHudTop");
-  // Keep HUD above center-stage / logo choreography layers
   if (hudTop) {
-    hudTop.style.zIndex = "500";
+    hudTop.style.zIndex = "600";
     hudTop.style.pointerEvents = "auto";
     hudTop.style.position = "relative";
   }
   if (pillHost) {
     pillHost.style.pointerEvents = "auto";
-    pillHost.style.zIndex = "501";
+    pillHost.style.zIndex = "601";
     pillHost.style.position = "relative";
   }
   if (pillBtn) {
     pillBtn.style.pointerEvents = "auto";
     pillBtn.style.cursor = "pointer";
     pillBtn.style.position = "relative";
-    pillBtn.style.zIndex = "502";
+    pillBtn.style.zIndex = "602";
   }
 
+  // Beat .ntm-popover { top:calc(100%+6px)!important; position:absolute!important }
   const placeHomePop = () => {
-    if (!pop || !pillBtn) return;
-    const r = pillBtn.getBoundingClientRect();
+    const p = document.getElementById("homeVesselPopover");
+    const btn = document.getElementById("homeVesselHudBtn");
+    if (!p) return;
+    const r = btn ? btn.getBoundingClientRect() : { bottom: 64, top: 40, right: window.innerWidth - 12 };
     const gap = 8;
     const width = Math.min(360, Math.max(280, window.innerWidth - 24));
     let top = Math.round(r.bottom + gap);
@@ -4137,45 +4139,65 @@ function initHomeHudVessel() {
     if (top + approxH > window.innerHeight - 8) {
       top = Math.max(8, Math.round(r.top - gap - approxH));
     }
-    pop.style.position = "fixed";
-    pop.style.width = width + "px";
-    pop.style.top = top + "px";
-    pop.style.right = right + "px";
-    pop.style.left = "auto";
-    pop.style.zIndex = "2147483000";
+    p.style.setProperty("position", "fixed", "important");
+    p.style.setProperty("width", width + "px", "important");
+    p.style.setProperty("top", top + "px", "important");
+    p.style.setProperty("right", right + "px", "important");
+    p.style.setProperty("left", "auto", "important");
+    p.style.setProperty("bottom", "auto", "important");
+    p.style.setProperty("z-index", "2147483000", "important");
   };
   const closeHomePop = () => {
-    if (!pop) return;
-    pop.classList.remove("open");
-    pop.style.display = "none";
-    if (pillBtn) pillBtn.setAttribute("aria-expanded", "false");
+    const p = document.getElementById("homeVesselPopover");
+    const btn = document.getElementById("homeVesselHudBtn");
+    if (!p) return;
+    p.classList.remove("open");
+    p.style.setProperty("display", "none", "important");
+    p.style.setProperty("visibility", "hidden", "important");
+    p.style.setProperty("opacity", "0", "important");
+    p.style.setProperty("pointer-events", "none", "important");
+    if (btn) btn.setAttribute("aria-expanded", "false");
   };
   const openHomePop = () => {
+    const p = document.getElementById("homeVesselPopover");
+    const btn = document.getElementById("homeVesselHudBtn");
     const chartPop = document.getElementById("ntmVesselPopover");
     const chartBtn = document.getElementById("ntmMyVesselBtn");
     if (chartPop) chartPop.classList.remove("open");
     if (chartBtn) chartBtn.classList.remove("active");
     try { fillVesselFormsFromState(); } catch (e2) {}
-    if (pop && pop.parentElement !== document.body) {
-      document.body.appendChild(pop);
+    if (p && p.parentElement !== document.body) {
+      document.body.appendChild(p);
     }
     placeHomePop();
-    if (pop) {
-      pop.classList.add("open");
-      pop.style.display = "flex";
-      pop.style.flexDirection = "column";
+    if (p) {
+      p.classList.add("open");
+      p.style.setProperty("display", "flex", "important");
+      p.style.setProperty("flex-direction", "column", "important");
+      p.style.setProperty("visibility", "visible", "important");
+      p.style.setProperty("opacity", "1", "important");
+      p.style.setProperty("pointer-events", "auto", "important");
     }
     window._setsailHomeVesselOpenedAt = Date.now();
-    if (pillBtn) pillBtn.setAttribute("aria-expanded", "true");
+    if (btn) btn.setAttribute("aria-expanded", "true");
     try { bindVesselNameAutocomplete("home"); } catch (e3) {}
     try { bindVesselMmsiLookup("home"); } catch (e4) {}
   };
   window.openHomeVesselPopover = openHomePop;
   window.closeHomeVesselPopover = closeHomePop;
+  window.__ssOpenHomeVessel = function (ev) {
+    if (ev) {
+      try { ev.preventDefault(); } catch (_) {}
+      try { ev.stopPropagation(); } catch (_) {}
+    }
+    const p = document.getElementById("homeVesselPopover");
+    if (p && p.classList.contains("open") && window._setsailHomeVesselOpenedAt &&
+        (Date.now() - window._setsailHomeVesselOpenedAt) < 280) return;
+    if (p && p.classList.contains("open")) closeHomePop();
+    else openHomePop();
+  };
 
-  if (window._setsailHomeVesselDocBound) {
-    // Already have permanent document delegate — just refresh form wiring once
-  } else {
+  if (!window._setsailHomeVesselDocBound) {
     window._setsailHomeVesselDocBound = true;
     window.addEventListener("resize", () => {
       const p = document.getElementById("homeVesselPopover");
@@ -4186,45 +4208,22 @@ function initHomeHudVessel() {
       if (p && p.classList.contains("open")) placeHomePop();
     }, true);
 
-    // Permanent capture-phase delegate — survives re-inits and overlay races
-    document.addEventListener("pointerup", (e) => {
-      if (!e || !e.target || !e.target.closest) return;
-      const hit = e.target.closest("#homeVesselHudBtn, #homeVesselHudPill");
-      if (!hit) return;
-      const p = document.getElementById("homeVesselPopover");
-      if (p && p.contains(e.target)) return;
-      e.preventDefault();
-      e.stopPropagation();
-      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-      window._setsailHomeVesselPtrHandled = true;
-      setTimeout(() => { window._setsailHomeVesselPtrHandled = false; }, 50);
-      if (p && p.classList.contains("open")) closeHomePop();
-      else openHomePop();
-    }, true);
-
+    // Click only (not pointerup) — avoids open-then-immediate-close races with document listeners
     document.addEventListener("click", (e) => {
+      if (!e || !e.target || !e.target.closest) return;
       const p = document.getElementById("homeVesselPopover");
+      const hitBtn = e.target.closest("#homeVesselHudBtn, #homeVesselHudPill");
+      if (hitBtn && !(p && p.contains(e.target))) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof window.__ssOpenHomeVessel === "function") window.__ssOpenHomeVessel(e);
+        return;
+      }
       if (!p || !p.classList.contains("open")) return;
-      // Ignore the same gesture that just opened the panel
-      if (window._setsailHomeVesselOpenedAt && (Date.now() - window._setsailHomeVesselOpenedAt) < 280) return;
+      if (window._setsailHomeVesselOpenedAt && (Date.now() - window._setsailHomeVesselOpenedAt) < 320) return;
       if (p.contains(e.target)) return;
-      if (e.target.closest && e.target.closest("#homeVesselHudBtn, #homeVesselHudPill")) return;
-      if (e.target.closest && e.target.closest(".vessel-more-details, .vessel-more-toggle, .vessel-ais-suggest")) return;
+      if (e.target.closest(".vessel-more-details, .vessel-more-toggle, .vessel-ais-suggest")) return;
       closeHomePop();
-    });
-  }
-
-  if (pillBtn && !pillBtn._homeVesselBound) {
-    pillBtn._homeVesselBound = true;
-    // Fallback click only if pointerup did not already toggle
-    pillBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (window._setsailHomeVesselPtrHandled) return;
-      if (pop && pop.classList.contains("open") && window._setsailHomeVesselOpenedAt &&
-          (Date.now() - window._setsailHomeVesselOpenedAt) < 280) return;
-      if (pop && pop.classList.contains("open")) closeHomePop();
-      else openHomePop();
     }, true);
   }
 

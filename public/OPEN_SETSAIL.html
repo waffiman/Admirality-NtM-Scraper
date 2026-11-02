@@ -131,7 +131,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.168" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.169" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -6241,18 +6241,33 @@ body.ss-setchart .setsail-toast {
 }
 
 
-.home-vessel-popover {
-  /* Fixed — Home hero ancestors use overflow:hidden and would clip an absolute popover */
+/* Must beat .ntm-popover { position:absolute; top:calc(100%+6px)!important; left:0 } —
+   once portaled to body that rule parks the panel below the viewport. */
+#homeVesselPopover.home-vessel-popover,
+#homeVesselPopover.ntm-popover,
+#homeVesselPopover {
   position: fixed !important;
-  top: 52px;
-  right: 10px;
+  top: 72px !important;
+  right: 12px !important;
   left: auto !important;
-  z-index: 50000 !important;
-  display: none;
+  bottom: auto !important;
+  z-index: 2147483000 !important;
+  display: none !important;
   width: 300px !important;
   max-width: min(300px, 92vw) !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
-.home-vessel-popover.open { display: flex !important; flex-direction: column !important; }
+#homeVesselPopover.home-vessel-popover.open,
+#homeVesselPopover.ntm-popover.open,
+#homeVesselPopover.open {
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
 
 /* Compact My Vessel form (Home + SetChart) — denser grid, less vertical stack */
 .vessel-profile-fields {
@@ -7214,17 +7229,28 @@ body.ss-setchart .setsail-toast {
 }
 
 
-/* v5.166: Home My Vessel HUD must stay clickable above hero center stage */
+/*
+  v5.169: Hero HUD clickability.
+  .home-slide-dots sit at z-index:38 as a SIBLING of .home-hero-content (z-index:2),
+  so they stole clicks on the right side of the bar. Raise the whole content plane
+  above the dots, and keep the vessel control on top.
+*/
+.home-hero-content {
+  z-index: 50 !important;
+  pointer-events: auto !important;
+}
+.home-slide-dots {
+  z-index: 28 !important;
+}
 #tab-home #homeHudTop {
   position: relative !important;
-  z-index: 500 !important;
+  z-index: 600 !important;
   pointer-events: auto !important;
-  isolation: isolate;
 }
 #tab-home #homeVesselHudPill,
 #tab-home #homeVesselHudBtn {
   position: relative !important;
-  z-index: 501 !important;
+  z-index: 601 !important;
   pointer-events: auto !important;
   cursor: pointer !important;
 }
@@ -7236,6 +7262,15 @@ body.ss-setchart .setsail-toast {
 #tab-home #homeCenterStage #homeHeroLogoWrap,
 #tab-home #homeCenterStage #homeBrandSub {
   pointer-events: auto !important;
+}
+#homeVesselPopover.home-vessel-popover.open,
+#homeVesselPopover.open {
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 2147483000 !important;
 }
 
 /* v5.35 hero logo — HUD must stay ABOVE center stage or My Vessel clicks die */
@@ -9088,7 +9123,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.168" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.169" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -13177,7 +13212,8 @@ select option {
 
               <!-- Column 3 (Right): My Vessel profile (no auto GPS prompt) -->
               <div class="home-hud-pill home-hud-vessel home-hud-right" id="homeVesselHudPill" style="grid-column:3 !important;justify-self:end !important;margin-left:auto !important;position:relative !important;min-width:0 !important;" title="My Vessel — name, position &amp; AIS details">
-                <button type="button" class="home-vessel-hud-btn" id="homeVesselHudBtn" aria-haspopup="dialog" aria-expanded="false">
+                <button type="button" class="home-vessel-hud-btn" id="homeVesselHudBtn" aria-haspopup="dialog" aria-expanded="false"
+                  onclick="if(window.__ssOpenHomeVessel){window.__ssOpenHomeVessel(event);}else{var p=document.getElementById('homeVesselPopover');if(p){if(p.parentElement!==document.body)document.body.appendChild(p);p.classList.add('open');p.style.cssText='display:flex!important;flex-direction:column;visibility:visible;opacity:1;pointer-events:auto;position:fixed;top:72px;right:16px;z-index:2147483000;';}this.setAttribute('aria-expanded','true');}return false;">
                   <span class="home-hud-icon"><svg class="setsail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.4 14.2 H15.6 L21.2 16.6 L19.6 19.2 H4.2 Z" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/><path d="M12.4 14.2 V9.2 H18 V14.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><rect x="14.2" y="5.4" width="2.4" height="3.8" rx="0.35" fill="#f05a36"/><path d="M3.4 16.85 H19.2" stroke="#f05a36" stroke-width="1.35" stroke-linecap="round"/><circle cx="7.2" cy="16.2" r="0.55" fill="currentColor" opacity="0.55"/><circle cx="10.2" cy="16.2" r="0.55" fill="currentColor" opacity="0.55"/></svg></span>
                   <span class="home-hud-text" id="homeVesselHudCoords">NOT SET</span>
                 </button>
@@ -13234,6 +13270,67 @@ select option {
                 </div>
               </div>
             </div>
+            <script>
+            /* v5.169: self-contained Home My Vessel open — works even before setsail_core.js */
+            (function () {
+              function place(p, btn) {
+                var r = btn ? btn.getBoundingClientRect() : { bottom: 64, top: 40, right: window.innerWidth - 12 };
+                var gap = 8;
+                var width = Math.min(360, Math.max(280, window.innerWidth - 24));
+                var top = Math.round(r.bottom + gap);
+                var right = Math.round(Math.max(8, window.innerWidth - r.right));
+                var approxH = Math.min(560, window.innerHeight * 0.7);
+                if (top + approxH > window.innerHeight - 8) top = Math.max(8, Math.round(r.top - gap - approxH));
+                p.style.setProperty('position', 'fixed', 'important');
+                p.style.setProperty('width', width + 'px', 'important');
+                p.style.setProperty('top', top + 'px', 'important');
+                p.style.setProperty('right', right + 'px', 'important');
+                p.style.setProperty('left', 'auto', 'important');
+                p.style.setProperty('bottom', 'auto', 'important');
+                p.style.setProperty('z-index', '2147483000', 'important');
+              }
+              function openPop() {
+                var p = document.getElementById('homeVesselPopover');
+                var btn = document.getElementById('homeVesselHudBtn');
+                if (!p) return;
+                if (p.parentElement !== document.body) document.body.appendChild(p);
+                place(p, btn);
+                p.classList.add('open');
+                p.style.setProperty('display', 'flex', 'important');
+                p.style.setProperty('flex-direction', 'column', 'important');
+                p.style.setProperty('visibility', 'visible', 'important');
+                p.style.setProperty('opacity', '1', 'important');
+                p.style.setProperty('pointer-events', 'auto', 'important');
+                window._setsailHomeVesselOpenedAt = Date.now();
+                if (btn) btn.setAttribute('aria-expanded', 'true');
+                if (typeof window.openHomeVesselPopover === 'function' && window.openHomeVesselPopover !== openPop) {
+                  /* core may enrich (fill form / autocomplete) — call if already bound */
+                  try { if (window.__ssCoreVesselFill) window.__ssCoreVesselFill(); } catch (e) {}
+                }
+              }
+              function closePop() {
+                var p = document.getElementById('homeVesselPopover');
+                var btn = document.getElementById('homeVesselHudBtn');
+                if (!p) return;
+                p.classList.remove('open');
+                p.style.setProperty('display', 'none', 'important');
+                p.style.setProperty('visibility', 'hidden', 'important');
+                p.style.setProperty('opacity', '0', 'important');
+                p.style.setProperty('pointer-events', 'none', 'important');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+              }
+              window.__ssOpenHomeVessel = function (ev) {
+                if (ev) { try { ev.preventDefault(); } catch (e1) {} try { ev.stopPropagation(); } catch (e2) {} }
+                var p = document.getElementById('homeVesselPopover');
+                if (p && p.classList.contains('open') && window._setsailHomeVesselOpenedAt &&
+                    (Date.now() - window._setsailHomeVesselOpenedAt) < 280) return;
+                if (p && p.classList.contains('open')) closePop();
+                else openPop();
+              };
+              if (!window.openHomeVesselPopover) window.openHomeVesselPopover = openPop;
+              if (!window.closeHomeVesselPopover) window.closeHomeVesselPopover = closePop;
+            })();
+            </script>
 
             <!-- Slide 2 Section Header (Appears as the 3 Hero tiles disperse across the page) -->
             <div class="home-slide2-header" id="homeSlide2Header">
@@ -13457,7 +13554,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.168" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.168';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.169" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.169';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13479,7 +13576,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.168" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.169" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -21169,25 +21266,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.168"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.168" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.168"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.169"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.169" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.169"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.168",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.169",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.168"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.168"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.168"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.169"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.169"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.169"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.168"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.169"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21260,10 +21357,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.168"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.168"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.168"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.168"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.169"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.169"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.169"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.169"></script>
 
 
 
@@ -21977,17 +22074,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.168', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.169', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.168 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.169 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.168') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.168.0'); }, 1200);
+              if (last && last.indexOf('v5.169') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.169.0'); }, 1200);
               }
             } catch (eTip) {}
           })
