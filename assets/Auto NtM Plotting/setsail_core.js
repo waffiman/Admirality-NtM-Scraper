@@ -15339,25 +15339,25 @@ function getMinDistanceToActiveRouteNM(lat, lon) {
     return Infinity;
   }
   let minNm = Infinity;
-  // Stride long densified tracks; refine near hits
   const n = wpts.length - 1;
-  const stride = n > 160 ? 3 : (n > 80 ? 2 : 1);
-  for (let i = 0; i < n; i += stride) {
+  const stride = n > 160 ? 4 : (n > 80 ? 2 : 1);
+  if (stride > 1) {
+    // Coarse reject only (chord can under-estimate — never accept from coarse alone)
+    for (let i = 0; i < n; i += stride) {
+      const A = wpts[i];
+      const B = wpts[Math.min(n, i + stride)];
+      const dSeg = pointToSegmentDistanceNM(lat, lon, A.lat, A.lon, B.lat, B.lon);
+      if (dSeg < minNm) minNm = dSeg;
+    }
+    if (minNm > bufNm * 2.8) return minNm;
+  }
+  minNm = Infinity;
+  for (let i = 0; i < n; i++) {
     const A = wpts[i];
-    const B = wpts[Math.min(n, i + stride)];
+    const B = wpts[i + 1];
     const dSeg = pointToSegmentDistanceNM(lat, lon, A.lat, A.lon, B.lat, B.lon);
     if (dSeg < minNm) minNm = dSeg;
     if (minNm <= 0.05) break;
-  }
-  if (stride > 1 && minNm < bufNm * 1.5) {
-    // Refine around approximate nearest
-    for (let i = 0; i < n; i++) {
-      const A = wpts[i];
-      const B = wpts[i + 1];
-      const dSeg = pointToSegmentDistanceNM(lat, lon, A.lat, A.lon, B.lat, B.lon);
-      if (dSeg < minNm) minNm = dSeg;
-      if (minNm <= 0.05) break;
-    }
   }
   return minNm;
 }
