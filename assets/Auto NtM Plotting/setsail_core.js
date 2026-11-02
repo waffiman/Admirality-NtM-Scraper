@@ -526,6 +526,10 @@ async function refreshOwnVesselFromAis(opts) {
 
 /** Persisted id of the My Vessel “DR rails” route (coral toggle). Off by default. */
 const SETSAIL_DR_ROUTE_KEY = "setsail_dr_active_route_id_v1";
+const SETSAIL_DR_HANDOFF_KEY = "setsail_dr_route_handoff_v1";
+const SETSAIL_DR_LAST_RAILS_KEY = "setsail_dr_last_rails_wps_v1";
+/** Ship must come within this many NM of the new Current track to leave the previous rails. */
+const SETSAIL_DR_HANDOFF_NM = 2.5;
 
 function getDrActiveRouteId() {
   try {
@@ -535,8 +539,160 @@ function getDrActiveRouteId() {
   }
 }
 
-function setDrActiveRouteId(routeId) {
+function setrouteNormalizeRouteWps(route) {
+  if (!route || !Array.isArray(route.waypoints)) return [];
+  return route.waypoints
+    .filter((w) => w && Number.isFinite(Number(w.lat)) && Number.isFinite(Number(w.lon)))
+    .map((w) => ({ lat: Number(w.lat), lon: Number(w.lon) }));
+}
+
+function persistDrLastRailsWps(wps) {
+  const clean = Array.isArray(wps)
+    ? wps.filter((w) => w && Number.isFinite(Number(w.lat)) && Number.isFinite(Number(w.lon)))
+        .map((w) => ({ lat: Number(w.lat), lon: Number(w.lon) }))
+    : [];
+  window._setsailDrLastRailsWps = clean.length >= 2 ? clean : null;
+  try {
+    if (clean.length >= 2) localStorage.setItem(SETSAIL_DR_LAST_RAILS_KEY, JSON.stringify(clean));
+    else localStorage.removeItem(SETSAIL_DR_LAST_RAILS_KEY);
+  } catch (e) {}
+  return window._setsailDrLastRailsWps;
+}
+
+function loadDrLastRailsWps() {
+  if (window._setsailDrLastRailsWps && window._setsailDrLastRailsWps.length >= 2) {
+    return window._setsailDrLastRailsWps;
+  }
+  try {
+    const raw = localStorage.getItem(SETSAIL_DR_LAST_RAILS_KEY);
+    if (!raw) return null;
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr) || arr.length < 2) return null;
+    window._setsailDrLastRailsWps = arr
+      .filter((w) => w && Number.isFinite(Number(w.lat)) && Number.isFinite(Number(w.lon)))
+      .map((w) => ({ lat: Number(w.lat), lon: Number(w.lon) }));
+    return window._setsailDrLastRailsWps.length >= 2 ? window._setsailDrLastRailsWps : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function getDrHandoffState() {
+  try {
+    const mem = window._setsailDrHandoff;
+    if (mem && mem.nextRouteId && Array.isArray(mem.prevWps)) return mem;
+    const raw = localStorage.getItem(SETSAIL_DR_HANDOFF_KEY);
+    if (!raw) return null;
+    const o = JSON.parse(raw);
+    // prevWps may be empty after delete→upload gap; still a valid armed handoff
+    if (!o || !o.nextRouteId || !Array.isArray(o.prevWps)) return null;
+    window._setsailDrHandoff = o;
+    return o;
+  } catch (e) {
+    return null;
+  }
+}
+
+function clearDrHandoffState() {
+  try { localStorage.removeItem(SETSAIL_DR_HANDOFF_KEY); } catch (e) {}
+  window._setsailDrHandoff = null;
+}
+
+function armDrRouteHandoff(prevRouteOrWps, nextRouteId) {
+  const nextId = nextRouteId ? String(nextRouteId).trim() : "";
+  if (!nextId) {
+    clearDrHandoffState();
+    return null;
+  }
+  let prevWps = [];
+  if (Array.isArray(prevRouteOrWps)) {
+    prevWps = prevRouteOrWps
+      .filter((w) => w && Number.isFinite(Number(w.lat)) && Number.isFinite(Number(w.lon)))
+      .map((w) => ({ lat: Number(w.lat), lon: Number(w.lon) }));
+  } else if (prevRouteOrWps) {
+    prevWps = setrouteNormalizeRouteWps(prevRouteOrWps);
+  }
+  const state = {
+    prevWps: prevWps,
+    prevRouteId: (prevRouteOrWps && !Array.isArray(prevRouteOrWps) && prevRouteOrWps.id) || null,
+    nextRouteId: nextId,
+    handoffNm: SETSAIL_DR_HANDOFF_NM,
+    armedAt: new Date().toISOString()
+  };
+  try { localStorage.setItem(SETSAIL_DR_HANDOFF_KEY, JSON.stringify(state)); } catch (e) {}
+  window._setsailDrHandoff = state;
+  return state;
+}
+
+/**
+ * Resolve which polyline DR should ride right now.
+ * - Live Current route (with waypoint edits) when no handoff
+ * - During change-over: previous rails until ship is within handoffNm of the new Current
+ * - After delete of Current: orphan last-rails snap until a new Current is coral-toggled
+ */
+function resolveDrRailsForShip(lat, lon) {
+  const handoff = getDrHandoffState();
+  const nextRoute = typeof getDrActiveRoute === "function" ? getDrActiveRoute() : null;
+  const nextWps = nextRoute ? setrouteNormalizeRouteWps(nextRoute) : [];
+  const thresh = (handoff && Number(handoff.handoffNm)) || SETSAIL_DR_HANDOFF_NM;
+  const refLat = Number.isFinite(Number(lat)) ? Number(lat) : null;
+  const refLon = Number.isFinite(Number(lon)) ? Number(lon) : null;
+
+  if (handoff && handoff.nextRouteId) {
+    const activeId = getDrActiveRouteId();
+    if (activeId && activeId === handoff.nextRouteId && nextWps.length >= 2 &&
+        refLat != null && refLon != null) {
+      const near = setrouteProjectOntoRoute(refLat, refLon, nextWps);
+      if (near && near.distNm <= thresh) {
+        clearDrHandoffState();
+        persistDrLastRailsWps(nextWps);
+        return { wps: nextWps, phase: "rails", handoffDone: true };
+      }
+    }
+    if (handoff.prevWps && handoff.prevWps.length >= 2) {
+      return { wps: handoff.prevWps, phase: "handoff-prev" };
+    }
+    // Armed with empty prev (gap / first Current far away): COG until near new
+    return { wps: null, phase: "handoff-gap" };
+  }
+
+  if (nextWps.length >= 2) {
+    persistDrLastRailsWps(nextWps);
+    return { wps: nextWps, phase: "rails" };
+  }
+
+  // No Current — keep riding deleted route geometry so the icon never “falls off” rails mid-ocean
+  const orphan = loadDrLastRailsWps();
+  if (orphan && orphan.length >= 2) {
+    return { wps: orphan, phase: "orphan" };
+  }
+  return { wps: null, phase: "cog" };
+}
+window.resolveDrRailsForShip = resolveDrRailsForShip;
+
+function setDrActiveRouteId(routeId, opts) {
+  opts = opts || {};
   const id = routeId ? String(routeId).trim() : "";
+  const prevId = getDrActiveRouteId();
+  const prevRoute = typeof getDrActiveRoute === "function" ? getDrActiveRoute() : null;
+  const prevSnap = (prevRoute && setrouteNormalizeRouteWps(prevRoute)) || loadDrLastRailsWps() || null;
+
+  if (id && prevId && id !== prevId) {
+    // Preferred change-over: keep riding previous geometry until ship meets the new track
+    if (prevSnap && prevSnap.length >= 2) persistDrLastRailsWps(prevSnap);
+    armDrRouteHandoff(prevSnap || [], id);
+  } else if (id && !prevId) {
+    // After delete gap, or first Current — hand off from orphan snap when present
+    const snap = loadDrLastRailsWps();
+    if (snap && snap.length >= 2) armDrRouteHandoff(snap, id);
+    else clearDrHandoffState(); // first Current with no prior rails → adopt immediately
+  } else if (!id) {
+    // Clearing Current: keep last rails snap for orphan DR (unless caller wiped it)
+    if (!opts.wipeOrphan && prevSnap && prevSnap.length >= 2) persistDrLastRailsWps(prevSnap);
+    if (opts.wipeOrphan) persistDrLastRailsWps(null);
+    clearDrHandoffState();
+  }
+
   try {
     if (id) localStorage.setItem(SETSAIL_DR_ROUTE_KEY, id);
     else localStorage.removeItem(SETSAIL_DR_ROUTE_KEY);
@@ -559,15 +715,19 @@ function setDrActiveRouteId(routeId) {
   if (typeof renderVesselRouteLibraryList === "function") {
     renderVesselRouteLibraryList();
   }
-  // Recompute DR when rails toggle changes (only if AIS is already stale)
   try { applyOwnVesselDeadReckoning({ toast: false }); } catch (eDr) {}
 }
 window.getDrActiveRouteId = getDrActiveRouteId;
 window.setDrActiveRouteId = setDrActiveRouteId;
+window.getDrHandoffState = getDrHandoffState;
+window.clearDrHandoffState = clearDrHandoffState;
+window.persistDrLastRailsWps = persistDrLastRailsWps;
+window.loadDrLastRailsWps = loadDrLastRailsWps;
 
 function getDrActiveRoute() {
   const id = getDrActiveRouteId();
   if (!id) return null;
+  // Prefer live chart copy so waypoint edits / drag apply to DR immediately
   if (activeRouteData && (activeRouteData.id === id || activeRouteData.name === id)) {
     return activeRouteData;
   }
@@ -700,12 +860,19 @@ function applyOwnVesselDeadReckoning(opts) {
   let lon1;
   let courseOut = Number(v.cog != null ? v.cog : v.heading);
   let mode = "cog";
-  const rails = getDrActiveRoute();
-  const wps = rails && Array.isArray(rails.waypoints) ? rails.waypoints.filter((w) =>
-    w && Number.isFinite(Number(w.lat)) && Number.isFinite(Number(w.lon))
-  ).map((w) => ({ lat: Number(w.lat), lon: Number(w.lon) })) : null;
+  // Prefer current plotted position for handoff proximity (closer to where icon is now)
+  const shipLat = Number(v.lat);
+  const shipLon = Number(v.lon);
+  const resolved = typeof resolveDrRailsForShip === "function"
+    ? resolveDrRailsForShip(
+      Number.isFinite(shipLat) ? shipLat : fixLat,
+      Number.isFinite(shipLon) ? shipLon : fixLon
+    )
+    : { wps: null, phase: "cog" };
+  const wps = resolved && resolved.wps && resolved.wps.length >= 2 ? resolved.wps : null;
+  const phase = (resolved && resolved.phase) || "cog";
 
-  if (wps && wps.length >= 2) {
+  if (wps) {
     const proj = setrouteProjectOntoRoute(fixLat, fixLon, wps);
     if (proj) {
       const target = setroutePointAlongRoute(wps, proj.alongNm + distNm);
@@ -713,7 +880,20 @@ function applyOwnVesselDeadReckoning(opts) {
         lat1 = target.lat;
         lon1 = target.lon;
         courseOut = target.course;
-        mode = "rails";
+        mode = (phase === "handoff-prev" || phase === "orphan") ? phase : "rails";
+        // After advancing along prev rails, re-check if we crossed onto the new Current
+        if (phase === "handoff-prev" && typeof resolveDrRailsForShip === "function") {
+          const again = resolveDrRailsForShip(lat1, lon1);
+          if (again && again.handoffDone && again.wps && again.wps.length >= 2) {
+            const proj2 = setrouteProjectOntoRoute(lat1, lon1, again.wps);
+            if (proj2) {
+              lat1 = proj2.lat;
+              lon1 = proj2.lon;
+              courseOut = proj2.course;
+              mode = "rails";
+            }
+          }
+        }
       }
     }
   }
@@ -722,6 +902,7 @@ function applyOwnVesselDeadReckoning(opts) {
     const cog = Number(v.cog != null ? v.cog : v.heading);
     if (!Number.isFinite(cog) || cog >= 360) return;
     courseOut = cog;
+    mode = "cog";
     if (typeof setrouteDestPoint === "function") {
       const p = setrouteDestPoint(fixLat, fixLon, cog, distNm);
       lat1 = p.lat;
@@ -741,12 +922,13 @@ function applyOwnVesselDeadReckoning(opts) {
   }
 
   if (!Number.isFinite(lat1) || !Number.isFinite(lon1)) return;
+  const onRails = mode === "rails" || mode === "handoff-prev" || mode === "orphan";
   const updated = Object.assign({}, v, {
     lat: lat1,
     lon: lon1,
     cog: Number.isFinite(courseOut) ? courseOut : v.cog,
     heading: Number.isFinite(courseOut) ? courseOut : v.heading,
-    source: mode === "rails" ? "ais-dr-rails" : "ais-dr",
+    source: onRails ? "ais-dr-rails" : "ais-dr",
     deadReckoned: true,
     aisDrAt: new Date().toISOString(),
     aisDrNm: Math.round(distNm * 10) / 10,
@@ -759,15 +941,17 @@ function applyOwnVesselDeadReckoning(opts) {
   userVessel = updated;
   if (typeof persistUserVessel === "function") persistUserVessel();
   if (window.leafletMap && typeof plotUserVessel === "function") {
-    plotUserVessel(lat1, lon1, mode === "rails" ? "AIS-DR-RAILS" : "AIS-DR", true);
+    plotUserVessel(lat1, lon1, onRails ? "AIS-DR-RAILS" : "AIS-DR", true);
   }
   if (opts.toast && typeof showSetSailToast === "function") {
-    showSetSailToast(
-      mode === "rails"
-        ? "Own vessel DR along active route +" + Math.round(distNm) + " NM @ " + sog.toFixed(1) + " kn"
-        : "Own vessel dead-reckoned +" + Math.round(distNm) + " NM from last AIS (out of coastal coverage)",
-      "info"
-    );
+    const msg = mode === "rails"
+      ? "Own vessel DR along Current route +" + Math.round(distNm) + " NM @ " + sog.toFixed(1) + " kn"
+      : mode === "handoff-prev"
+        ? "DR change-over — still on previous rails until near new Current"
+        : mode === "orphan"
+          ? "DR on last route snap (no Current) — coral-toggle a new track to hand off"
+          : "Own vessel dead-reckoned +" + Math.round(distNm) + " NM from last AIS (out of coastal coverage)";
+    showSetSailToast(msg, "info");
   }
 }
 window.applyOwnVesselDeadReckoning = applyOwnVesselDeadReckoning;
@@ -2722,6 +2906,15 @@ function renderRouteOnMap(route, shouldFly = true) {
         if (typeof showSetSailToast === "function") {
           showSetSailToast(`WPT #${idx + 1} moved to ${formatLatLonDMS(wp.lat, wp.lon)}`, "info");
         }
+
+        // Live DR: Current-route waypoint edits apply on the next rails tick
+        try {
+          const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+          if (drId && activeRouteData && (activeRouteData.id === drId || activeRouteData.name === drId)) {
+            persistDrLastRailsWps(setrouteNormalizeRouteWps(activeRouteData));
+            applyOwnVesselDeadReckoning({ toast: false });
+          }
+        } catch (eDrLive) {}
       }
     });
 
@@ -16858,15 +17051,33 @@ function saveRouteToLibrary(route) {
   renderNavSavedRoutesTree();
   syncSetRouteTopbarActions();
   if (typeof renderVesselRouteLibraryList === "function") renderVesselRouteLibraryList();
+  // Live DR: library edits to the Current route reshape rails immediately
+  try {
+    const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+    if (drId && route && (route.id === drId || route.name === drId)) {
+      persistDrLastRailsWps(setrouteNormalizeRouteWps(route));
+      applyOwnVesselDeadReckoning({ toast: false });
+    }
+  } catch (eDrSave) {}
 }
 window.saveRouteToLibrary = saveRouteToLibrary;
 
 function deleteRouteFromLibrary(routeId) {
   const wasActive = !!(activeRouteData && (activeRouteData.id === routeId || activeRouteData.name === routeId));
   const wasDr = getDrActiveRouteId() === routeId;
+  // Snapshot rails before wipe so DR can orphan-ride through a delete→upload gap
+  if (wasDr) {
+    let doomed = null;
+    try {
+      doomed = getSavedRoutesLibrary().find((r) => r && r.id === routeId) ||
+        (activeRouteData && (activeRouteData.id === routeId || activeRouteData.name === routeId) ? activeRouteData : null);
+    } catch (eFind) { doomed = null; }
+    const snap = doomed ? setrouteNormalizeRouteWps(doomed) : loadDrLastRailsWps();
+    if (snap && snap.length >= 2) persistDrLastRailsWps(snap);
+  }
   const lib = getSavedRoutesLibrary().filter((r) => r.id !== routeId);
   writeSavedRoutesLibrary(lib);
-  if (wasDr) setDrActiveRouteId(null);
+  if (wasDr) setDrActiveRouteId(null); // keeps orphan snap; DR continues on last geometry
   if (wasActive || (activeRouteData && activeRouteData.id === routeId)) {
     if (lib.length > 0) {
       selectSavedRouteFromSidebar(lib[0].id, false);
@@ -16916,12 +17127,13 @@ function renderVesselRouteLibraryList() {
   if (clearBtn) clearBtn.style.display = "inline-block";
   if (fitBtn) fitBtn.style.display = "inline-block";
 
-  const drId = getDrActiveRouteId();
-  // If stored DR id no longer exists, clear it (do not auto-enable the only remaining route)
-  if (drId && !lib.some((r) => r && (r.id === drId || r.name === drId))) {
+  let drNow = getDrActiveRouteId();
+  // If stored DR id no longer exists, drop Current id only (orphan rails snap stays for change-over)
+  if (drNow && !lib.some((r) => r && (r.id === drNow || r.name === drNow))) {
     try { localStorage.removeItem(SETSAIL_DR_ROUTE_KEY); } catch (e) {}
+    clearDrHandoffState();
+    drNow = null;
   }
-  const drNow = getDrActiveRouteId();
 
   listEl.innerHTML = lib.map((rt) => {
     const rid = String(rt.id || "").replace(/"/g, "&quot;");
@@ -16960,14 +17172,28 @@ function renderVesselRouteLibraryList() {
       const id = btn.getAttribute("data-route-dr-toggle");
       const cur = getDrActiveRouteId();
       if (cur && (cur === id)) {
-        setDrActiveRouteId(null);
+        setDrActiveRouteId(null, { wipeOrphan: true });
         if (typeof showSetSailToast === "function") {
           showSetSailToast("DR rails cleared — dead reckoning uses COG/heading", "info");
         }
       } else {
+        const prev = cur;
         setDrActiveRouteId(id);
         if (typeof showSetSailToast === "function") {
-          showSetSailToast("DR rails ON — vessel follows this track at last AIS speed", "success");
+          if (prev && prev !== id) {
+            showSetSailToast(
+              "Route change-over armed — DR stays on previous rails until the ship meets the new Current (~" +
+                SETSAIL_DR_HANDOFF_NM + " NM)",
+              "success"
+            );
+          } else if (!prev && loadDrLastRailsWps()) {
+            showSetSailToast(
+              "New Current set — DR will hand off from the previous track when the ship meets it",
+              "success"
+            );
+          } else {
+            showSetSailToast("DR rails ON — vessel follows this Current route at last AIS speed", "success");
+          }
         }
       }
     });
