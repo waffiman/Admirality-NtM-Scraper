@@ -4422,6 +4422,8 @@ function getOwnShipPositionIcon(headingDeg, showVector) {
   const rot = has ? ((Number(headingDeg) % 360) + 360) % 360 : 0;
   // Tiny bow tick only — full time vector is geographic (updateOwnShipTimeVector)
   const vec = showVector !== false && has;
+  // Beam line: perpendicular to heading (local +X), through circle center, past outer ring (r=9)
+  const beamSvg = `<line class="own-ship-beam" x1="11" y1="24" x2="37" y2="24" stroke="#0f172a" stroke-width="1.45" stroke-linecap="round"/>`;
   const vectorSvg = vec
     ? `<g class="own-ship-vector" stroke="#0f172a" stroke-width="1.35" fill="none" stroke-linecap="round">
          <line x1="24" y1="24" x2="24" y2="14"/>
@@ -4431,6 +4433,7 @@ function getOwnShipPositionIcon(headingDeg, showVector) {
   const html = `
     <div class="own-ship-wrap own-ship-wrap--pos" style="transform:rotate(${rot}deg);transform-origin:center center;">
       <svg class="own-ship-svg" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+        ${beamSvg}
         ${vectorSvg}
         <circle cx="24" cy="24" r="9" fill="none" stroke="#0f172a" stroke-width="1.5"/>
         <circle cx="24" cy="24" r="5.2" fill="none" stroke="#0f172a" stroke-width="1.35"/>
@@ -4453,13 +4456,15 @@ function getOwnShipHullIcon(headingDeg, showVector) {
   const has = hasOwnShipHeadingDeg(headingDeg);
   const rot = has ? ((Number(headingDeg) % 360) + 360) % 360 : 0;
   const vec = showVector !== false && has;
-  // Local coords: bow toward -Y (up). Hull centered near (24, 34).
+  // Local coords: bow toward -Y (up). Hull centered near (24, 34); beam athwartships through that center.
+  const beamSvg = `<line class="own-ship-beam" x1="8" y1="34" x2="40" y2="34" stroke="#0f172a" stroke-width="1.55" stroke-linecap="round"/>`;
   const vectorSvg = vec
     ? `<line x1="24" y1="22" x2="24" y2="12" stroke="#0f172a" stroke-width="1.25"/>`
     : "";
   const html = `
     <div class="own-ship-wrap own-ship-wrap--hull" style="transform:rotate(${rot}deg);transform-origin:24px 34px;">
       <svg class="own-ship-svg" width="48" height="64" viewBox="0 0 48 64" aria-hidden="true">
+        ${beamSvg}
         ${vectorSvg}
         <path d="M24 14
           C28.5 14 31.5 18 31.5 24
