@@ -5278,10 +5278,12 @@ function initNtMMap() {
       className: "setsail-seamark-tiles",
       pane: "overlayPane"
     };
+    // LOD hand-off: base paints z5–11 only; detail takes over at z12+.
+    // If base maxZoom stays 19 it keeps scaling the z12 atlas → pixel clones under detail.
     const buoysBaseLayer = L.tileLayer(seamarkUrl, Object.assign({}, seamarkPersistOpts, {
       minZoom: 5,
       maxNativeZoom: 12,
-      maxZoom: 19,
+      maxZoom: 11,
       opacity: 1,
       zIndex: 450
     }));
@@ -7537,15 +7539,9 @@ function setrouteEstimateDepthM(lat, lon) {
   if (typeof setroutePointInLandBox === "function" && setroutePointInLandBox(lat, lon)) {
     return 0;
   }
-  // Near-coast heuristic when land-mask / coast grid available
-  try {
-    if (typeof SETROUTE_COAST_GRID !== "undefined" && SETROUTE_COAST_GRID && SETROUTE_COAST_GRID.cellDeg) {
-      const cell = SETROUTE_COAST_GRID.cellDeg || 0.5;
-      const key = Math.floor(lat / cell) + "_" + Math.floor(lon / cell);
-      const near = SETROUTE_COAST_GRID.buckets && SETROUTE_COAST_GRID.buckets[key];
-      if (near && near.length) best = Math.min(best, 28);
-    }
-  } catch (eD) {}
+  // Hard bans use explicit shoal maxDepthM only. A blanket "near coast → 28 m"
+  // floor falsely banned deep Red Sea / Bab approaches when draft+UKC > 28.
+  // Soft shelf preference stays in setrouteLegShoalPenalty / SETROUTE_SHOAL_BOXES.
   return best;
 }
 
@@ -7903,6 +7899,14 @@ function setrouteIsAsiaGulfPort(lat, lon) {
 /** Arabian / Persian Gulf ports (Jebel Ali, Ras Tanura, …) — not Singapore. */
 function setrouteIsPersianGulfPort(lat, lon) {
   return lat >= 22 && lat <= 31 && lon >= 47 && lon <= 61;
+}
+/** Red Sea incl. Jeddah / Bab approaches (not Med, not PG). */
+function setrouteIsRedSeaPort(lat, lon) {
+  return lat >= 12 && lat <= 30 && lon >= 32 && lon <= 44;
+}
+/** Arabian Sea / W India / Gulf of Aden gate (JNPA, Salalah, …). */
+function setrouteIsArabianSeaPort(lat, lon) {
+  return lat >= 5 && lat <= 28 && lon >= 44 && lon <= 78;
 }
 /** Malacca / Singapore / W Indonesia approaches. */
 function setrouteIsSeAsiaMalaccaPort(lat, lon) {
@@ -8293,19 +8297,51 @@ function setrouteBuildAdjacency(force) {
     if (tssBan) continue;
     const ialaBan = typeof setrouteIalaHardBan === "function" && setrouteIalaHardBan(a[0], a[1], b[0], b[1]);
     if (ialaBan) continue;
-    // Depth / UKC — ban shallow chords like land
-    if (minDepthKey > 0 && setrouteLegTooShallow(a[0], a[1], b[0], b[1], minDepthKey)) continue;
+
+    // Depth / UKC — ban shallow chords like land, but try a deep wet detour first
+    // (do not delete the only basin gate when a wet lattice can stay ≥ minDepth).
+    let depthBlocked = minDepthKey > 0 && setrouteLegTooShallow(a[0], a[1], b[0], b[1], minDepthKey);
+    if (depthBlocked) {
+      const wetDeep = setrouteWetPathLattice(a[0], a[1], b[0], b[1]);
+      let deepOk = false;
+      if (wetDeep && Array.isArray(wetDeep.via)) {
+        deepOk = true;
+        let prev = [a[0], a[1]];
+        const chain = wetDeep.via.concat([[b[0], b[1]]]);
+        for (let wi = 0; wi < chain.length; wi++) {
+          const pt = chain[wi];
+          if (setrouteLegTooShallow(prev[0], prev[1], pt[0], pt[1], minDepthKey)) {
+            deepOk = false;
+            break;
+          }
+          prev = pt;
+        }
+      }
+      if (deepOk && wetDeep) {
+        via = wetDeep.via;
+        dist = wetDeep.distNm;
+        hazard = 1200;
+        depthBlocked = false;
+      } else {
+        continue;
+      }
+    }
 
     const interiorChord = boxHits >= 2 && dist >= 350;
     const landCut = coastHit && dist >= 140;
-    if (interiorChord || landCut) {
+    if (!via && (interiorChord || landCut)) {
       // Repair with a wet lattice detour instead of deleting the curated edge
       const wet = setrouteWetPathLattice(a[0], a[1], b[0], b[1]);
-      if (!wet) continue;
-      via = wet.via;
-      dist = wet.distNm;
-      hazard = 800; // prefer dry chords when available, but keep connectivity
-    } else if ((boxHits >= 1 && dist >= 160) || (coastHit && dist >= 100)) {
+      if (wet) {
+        via = wet.via;
+        dist = wet.distNm;
+        hazard = 800; // prefer dry chords when available, but keep connectivity
+      } else {
+        // Wet failed (mask gaps / guard) — keep curated ocean gate with heavy hazard.
+        // Deleting Bab / Red Sea chords here was disconnecting JNPA→Jeddah.
+        hazard = 50000;
+      }
+    } else if (!via && ((boxHits >= 1 && dist >= 160) || (coastHit && dist >= 100))) {
       const wet = setrouteWetPathLattice(a[0], a[1], b[0], b[1]);
       if (wet && wet.distNm < dist * 1.45) {
         via = wet.via;
@@ -8314,7 +8350,7 @@ function setrouteBuildAdjacency(force) {
       } else {
         hazard = 50000;
       }
-    } else {
+    } else if (!via) {
       hazard += setrouteStaticNonStormWeatherPenalty(a[0], a[1], b[0], b[1]);
       if (typeof setrouteAisPenalty === "function") hazard += setrouteAisPenalty(a[0], a[1], b[0], b[1]) * 0.5;
       if (typeof setrouteLegShoalPenalty === "function") hazard += setrouteLegShoalPenalty(a[0], a[1], b[0], b[1]) * 0.85;
@@ -8362,7 +8398,7 @@ function setrouteDijkstraRun(startNode, endNode, adj, opts, asyncCfg) {
   const stormW = Math.max(0, Number(opts.stormWeight) || 1);
   const t0 = Number(opts.t0Hours) || 0;
   const maxLabels = Math.max(3, Math.min(10, Number(opts.maxLabels) || 7));
-  const timedWx = stormW > 0 && typeof MARINE_WEATHER_STORE !== "undefined" &&
+  const timedWx = !opts._forceStatic && stormW > 0 && typeof MARINE_WEATHER_STORE !== "undefined" &&
     Array.isArray(MARINE_WEATHER_STORE.storms) && MARINE_WEATHER_STORE.storms.length > 0;
 
   const finishSyncOrAsync = (val) => (asyncCfg ? Promise.resolve(val) : val);
@@ -8577,7 +8613,23 @@ function setrouteDijkstraRun(startNode, endNode, adj, opts, asyncCfg) {
 
     if (opts && opts.abortToken != null && setrouteIsAborted(opts.abortToken)) return null;
     const endLabs = (labels[endNode] || []).filter((l) => !l.dead);
-    if (!endLabs.length) return null;
+    if (!endLabs.length) {
+      // Timed multi-label incomplete (label cap / expansion budget) — same adjacency
+      // still has a static corridor. Fall back instead of false "no_safe_corridor".
+      const staticFb = setrouteDijkstra(startNode, endNode, adj, Object.assign({}, opts, {
+        stormWeight: 0,
+        _forceStatic: true
+      }));
+      if (staticFb && staticFb.length >= 2) {
+        setrouteDijkstra._lastMeta = Object.assign({}, setrouteDijkstra._lastMeta || {}, {
+          timed: false,
+          timedFallbackStatic: true,
+          expansions
+        });
+        return staticFb;
+      }
+      return null;
+    }
     endLabs.sort((a, b) => a.cost - b.cost || a.t - b.t);
     const best = endLabs[0];
     const path = [];
@@ -8717,7 +8769,21 @@ function setrouteDijkstraRun(startNode, endNode, adj, opts, asyncCfg) {
     }
   }
   const endLabs = (labels[endNode] || []).filter((l) => !l.dead);
-  if (!endLabs.length) return null;
+  if (!endLabs.length) {
+    const staticFb = setrouteDijkstra(startNode, endNode, adj, Object.assign({}, opts, {
+      stormWeight: 0,
+      _forceStatic: true
+    }));
+    if (staticFb && staticFb.length >= 2) {
+      setrouteDijkstra._lastMeta = Object.assign({}, setrouteDijkstra._lastMeta || {}, {
+        timed: false,
+        timedFallbackStatic: true,
+        expansions
+      });
+      return staticFb;
+    }
+    return null;
+  }
   endLabs.sort((a, b) => a.cost - b.cost || a.t - b.t);
   const best = endLabs[0];
   const path = [];
@@ -8970,15 +9036,25 @@ function setrouteAltCorridorRetries(origCoords, destCoords) {
     (setrouteIsPersianGulfPort(dLat, dLon) && (setrouteIsSeAsiaMalaccaPort(oLat, oLon) || setrouteIsFarEastPort(oLat, oLon)));
   if (pgSe) {
     return [
-      { viaMalacca: true, viaSunda: false, viaCape: false, viaPanama: false, viaSuez: false, label: "Malacca" },
-      { viaSunda: true, viaMalacca: false, viaCape: false, viaPanama: false, viaSuez: false, label: "Sunda" },
-      { viaCape: true, viaMalacca: false, viaSunda: false, viaPanama: false, viaSuez: false, label: "Cape" }
+      { viaMalacca: true, viaSunda: false, viaCape: false, viaPanama: false, viaSuez: false, viaBab: false, label: "Malacca" },
+      { viaSunda: true, viaMalacca: false, viaCape: false, viaPanama: false, viaSuez: false, viaBab: false, label: "Sunda" },
+      { viaCape: true, viaMalacca: false, viaSunda: false, viaPanama: false, viaSuez: false, viaBab: false, label: "Cape" }
+    ];
+  }
+  const arabRed =
+    (setrouteIsArabianSeaPort(oLat, oLon) && setrouteIsRedSeaPort(dLat, dLon)) ||
+    (setrouteIsRedSeaPort(oLat, oLon) && setrouteIsArabianSeaPort(dLat, dLon));
+  if (arabRed) {
+    return [
+      { viaBab: true, viaCape: false, viaPanama: false, viaSuez: false, viaMalacca: false, viaSunda: false, label: "Bab el Mandeb" },
+      { viaSuez: true, viaBab: false, viaCape: false, viaPanama: false, viaMalacca: false, viaSunda: false, label: "Suez" },
+      { viaCape: true, viaBab: false, viaPanama: false, viaSuez: false, viaMalacca: false, viaSunda: false, label: "Cape" }
     ];
   }
   return [
-    { viaPanama: true, viaCape: false, viaSuez: false, viaMalacca: false, viaSunda: false, label: "Panama" },
-    { viaCape: true, viaPanama: false, viaSuez: false, viaMalacca: false, viaSunda: false, label: "Cape" },
-    { viaSuez: true, viaCape: false, viaPanama: false, viaMalacca: false, viaSunda: false, label: "Suez" }
+    { viaPanama: true, viaCape: false, viaSuez: false, viaMalacca: false, viaSunda: false, viaBab: false, label: "Panama" },
+    { viaCape: true, viaPanama: false, viaSuez: false, viaMalacca: false, viaSunda: false, viaBab: false, label: "Cape" },
+    { viaSuez: true, viaCape: false, viaPanama: false, viaMalacca: false, viaSunda: false, viaBab: false, label: "Suez" }
   ];
 }
 
@@ -9485,6 +9561,11 @@ function findMaritimeSeaCorridor(origCoords, destCoords, options) {
       path = (await via(startNode, endNode, "PANAMA_COLON"))
         || (await via(startNode, endNode, "PANAMA_BALBOA"));
       routeMode = "via_panama";
+    } else if (options.viaBab) {
+      path = (await via(startNode, endNode, "BAB_EL_MANDEB"))
+        || (await via(startNode, endNode, "GULF_OF_ADEN"))
+        || (await via(startNode, endNode, "RED_SEA_SOUTH"));
+      routeMode = "via_bab_el_mandeb";
     } else if (options.viaSuez) {
       path = await via(startNode, endNode, "SUEZ_CANAL_MID");
       routeMode = "via_suez";
@@ -15794,7 +15875,8 @@ function setrouteSetComposerBusy(busy) {
     "DURBAN_APP": [-29.88, 31.12, "Durban Fairway Approach"],
     "MOZAMBIQUE_CH": [-18.00, 41.50, "Mozambique Channel Deepsea Lane"],
     "MOMBASA_APP": [-4.08, 39.75, "Mombasa East Africa Fairway"],
-    "JEDDAH_APP": [21.45, 39.05, "Jeddah Islamic Port Red Sea Approach"],
+    // Offshore fairway (west of Jeddah) — 39.05°E sat inside land-mask cell 42_78
+    "JEDDAH_APP": [21.45, 38.70, "Jeddah Islamic Port Red Sea Approach"],
     "SALALAH_APP": [16.88, 54.05, "Salalah Arabian Sea Approach"],
     "KARACHI_APP": [24.70, 66.90, "Karachi Arabian Sea Fairway"],
     "CHENNAI_APP": [13.10, 80.40, "Chennai Bay of Bengal Approach"],
