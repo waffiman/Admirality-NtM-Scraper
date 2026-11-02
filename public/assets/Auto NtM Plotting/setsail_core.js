@@ -4399,7 +4399,7 @@ function parseCoordinateString(str) {
 /** Zoom at/above which own-ship switches from position circle → hull outline. */
 const OWN_SHIP_HULL_ZOOM = 14;
 /** ECDIS-style time vector: length = SOG (kn) × minutes / 60 → NM on the chart. */
-const OWN_SHIP_VECTOR_MINUTES = 30;
+const OWN_SHIP_VECTOR_MINUTES = 60;
 /** Screen-pixel caps for the geographic vector (ECDIS readability). */
 const OWN_SHIP_VECTOR_MAX_PX = 100;
 /** Below this screen length, hide the shaft — arrow sits on the position circle. */
@@ -15777,23 +15777,26 @@ function updateRouteMiniWindowUI() {
     activeRouteData.totalDistanceNM = totalDist;
   }
 
-  // NEVER scan full NtM/Ports DB here — that was freezing the whole app to a dark-blue blank
-  const hitsEl = document.getElementById("routeMiniHits");
-  if (hitsEl && !hitsEl.dataset.deferred) {
-    hitsEl.textContent = window.ROUTE_CORRIDOR_FILTER_ENABLED ? "Corridor filter ON" : "—";
-  }
-
   const titleEl = document.getElementById("routeMiniTitle");
   const wptsEl = document.getElementById("routeMiniWpts");
   const distEl = document.getElementById("routeMiniDist");
+  const metaUnit = document.querySelector("#routeMiniMeta .ntm-route-mini-meta-unit");
   const chkEl = document.getElementById("chkRouteCorridorOnly");
+  const btnFilter = document.getElementById("btnRouteMiniFilter");
   const rngEl = document.getElementById("rngRouteBufferNm");
   const valEl = document.getElementById("lblRouteBufferNm");
+  const filterOn = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
 
-  if (titleEl) titleEl.textContent = activeRouteData.name || activeRouteData.routeName || "Active Passage Plan";
+  if (titleEl) titleEl.textContent = activeRouteData.name || activeRouteData.routeName || "Route";
   if (wptsEl) wptsEl.textContent = String(wpts.length);
+  if (metaUnit) metaUnit.textContent = wpts.length === 1 ? " wpt" : " wpts";
   if (distEl) distEl.textContent = `${totalDist.toLocaleString()} NM`;
-  if (chkEl) chkEl.checked = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
+  if (chkEl) chkEl.checked = filterOn;
+  if (btnFilter) {
+    btnFilter.classList.toggle("is-on", filterOn);
+    btnFilter.setAttribute("aria-pressed", filterOn ? "true" : "false");
+    btnFilter.title = filterOn ? "Corridor filter ON" : "Filter objects along corridor";
+  }
   if (rngEl) rngEl.value = String(window.ROUTE_CORRIDOR_BUFFER_NM || 25);
   if (valEl) valEl.textContent = `±${window.ROUTE_CORRIDOR_BUFFER_NM || 25} NM`;
 }
@@ -15807,9 +15810,14 @@ function initRouteMiniWindow() {
   const header = document.getElementById("ntmRouteMiniDragHandle");
   const btnMin = document.getElementById("btnRouteMiniMinimize");
   const btnFit = document.getElementById("btnRouteMiniFit");
+  const btnFilter = document.getElementById("btnRouteMiniFilter");
+  const btnDelete = document.getElementById("btnRouteMiniDelete");
   const chkCorridor = document.getElementById("chkRouteCorridorOnly");
   const rngBuffer = document.getElementById("rngRouteBufferNm");
   const lblBuffer = document.getElementById("lblRouteBufferNm");
+
+  const MIN_SVG = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 12h12"/></svg>';
+  const EXP_SVG = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 12h12M12 6v12"/></svg>';
 
   if (header) {
     let dragging = false;
@@ -15852,7 +15860,10 @@ function initRouteMiniWindow() {
     btnMin.addEventListener("click", (e) => {
       e.stopPropagation();
       win.classList.toggle("minimized");
-      btnMin.textContent = win.classList.contains("minimized") ? "+" : "—";
+      const mini = win.classList.contains("minimized");
+      btnMin.innerHTML = mini ? EXP_SVG : MIN_SVG;
+      btnMin.title = mini ? "Expand" : "Minimize";
+      btnMin.setAttribute("aria-label", mini ? "Expand" : "Minimize");
     });
   }
 
@@ -15868,18 +15879,54 @@ function initRouteMiniWindow() {
     if (typeof saveSetSailUserHistory === "function") saveSetSailUserHistory();
   };
 
+  const applyCorridorFilter = (on) => {
+    window.ROUTE_CORRIDOR_FILTER_ENABLED = !!on;
+    if (chkCorridor) chkCorridor.checked = !!on;
+    if (btnFilter) {
+      btnFilter.classList.toggle("is-on", !!on);
+      btnFilter.setAttribute("aria-pressed", on ? "true" : "false");
+      btnFilter.title = on ? "Corridor filter ON" : "Filter objects along corridor";
+    }
+    refreshCorridorFilteredLayers();
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast(
+        on
+          ? `Corridor filter ON (±${window.ROUTE_CORRIDOR_BUFFER_NM || 25} NM)`
+          : "Corridor filter OFF",
+        "info"
+      );
+    }
+  };
+
+  if (btnFilter) {
+    btnFilter.addEventListener("click", (e) => {
+      e.stopPropagation();
+      applyCorridorFilter(!window.ROUTE_CORRIDOR_FILTER_ENABLED);
+    });
+  }
+
   if (chkCorridor) {
     chkCorridor.addEventListener("change", () => {
-      window.ROUTE_CORRIDOR_FILTER_ENABLED = chkCorridor.checked;
-      refreshCorridorFilteredLayers();
-      if (typeof showSetSailToast === "function") {
-        showSetSailToast(
-          chkCorridor.checked
-            ? `Corridor filter ON (±${window.ROUTE_CORRIDOR_BUFFER_NM} NM along route)`
-            : "Corridor filter OFF (Showing all global chart objects)",
-          "info"
-        );
+      applyCorridorFilter(chkCorridor.checked);
+    });
+  }
+
+  if (btnDelete) {
+    btnDelete.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const rt = activeRouteData;
+      const name = (rt && (rt.name || rt.routeName)) || "this route";
+      if (!window.confirm("Delete route?\n" + name)) return;
+      try {
+        if (rt && rt.id && typeof deleteRouteFromLibrary === "function") {
+          deleteRouteFromLibrary(rt.id);
+        }
+      } catch (eDel) {}
+      if (typeof clearActiveRoute === "function") clearActiveRoute();
+      if (typeof renderNavSavedRoutesTree === "function") {
+        try { renderNavSavedRoutesTree(); } catch (eTree) {}
       }
+      if (typeof showSetSailToast === "function") showSetSailToast("Route deleted", "info");
     });
   }
 
@@ -15891,9 +15938,7 @@ function initRouteMiniWindow() {
       window.ROUTE_CORRIDOR_BUFFER_NM = val;
       try { localStorage.setItem("setsail_route_buffer_nm", String(val)); } catch (e) {}
       if (lblBuffer) lblBuffer.textContent = `±${val} NM`;
-      // Buffer outline updates fast; full NtM/weather refilter is debounced
       if (typeof renderRouteBufferCorridorOnMap === "function") renderRouteBufferCorridorOnMap();
-      if (lblBuffer) { /* label already set */ }
       scheduleRouteCorridorLayersRefresh(180);
     });
   }
