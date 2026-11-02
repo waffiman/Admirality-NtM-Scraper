@@ -31,29 +31,44 @@
     <!-- Instant logo boot splash (inline — paints before CSS/JS bundles) -->
   <style id="setsail-boot-css">
     html.setsail-booting, html.setsail-booting body { background: #080f24 !important; }
-    html.setsail-booting body > .app-container { visibility: hidden !important; }
+    /*
+      Keep Hero paintable under the boot veil (opacity, NOT visibility:hidden).
+      Sudden visibility flips were the main source of network-related jank.
+    */
+    html.setsail-booting body > .app-container {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
     #setsailBoot {
       position: fixed; inset: 0; z-index: 2147483000;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 1.35rem; margin: 0; padding: 24px;
-      background: #080f24;
-      transition: background 0.95s ease, visibility 0.4s ease;
-    }
-    #setsailBoot.is-handoff {
+      display: flex; align-items: center; justify-content: center;
+      margin: 0; padding: 24px;
       background: transparent;
       pointer-events: none;
     }
-    #setsailBoot.is-done { visibility: hidden; pointer-events: none; }
+    #setsailBoot .ssb-veil {
+      position: absolute; inset: 0;
+      background: #080f24;
+      opacity: 1;
+      transition: opacity 1.35s cubic-bezier(0.33, 0, 0.2, 1);
+      z-index: 0;
+    }
+    #setsailBoot.is-handoff .ssb-veil { opacity: 0; }
+    #setsailBoot.is-done { visibility: hidden; }
+    #setsailBoot .ssb-stage {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 1.35rem;
+    }
     #setsailBoot .ssb-logo-wrap {
       width: min(396px, 78vw);
       line-height: 0;
       opacity: 1;
-      transition: opacity 0.5s ease;
+      transition: opacity 0.55s ease;
     }
     #setsailBoot.is-logo-out .ssb-logo-wrap { opacity: 0; }
     #setsailBoot .ssb-logo {
       display: block; width: 100%; height: auto;
-      /* No coral glow — clean mark while Hero arrives around it */
       filter: none;
       user-select: none; pointer-events: none;
     }
@@ -63,7 +78,7 @@
       border-radius: 999px;
       background: rgba(148, 163, 184, 0.22);
       overflow: hidden;
-      transition: opacity 0.45s ease;
+      transition: opacity 0.4s ease;
     }
     #setsailBoot.is-handoff .ssb-bar-track { opacity: 0; }
     #setsailBoot .ssb-bar-fill {
@@ -73,44 +88,14 @@
       box-shadow: 0 0 10px rgba(240, 90, 54, 0.55);
       transition: width 0.12s linear;
     }
-    /*
-      Handoff model: boot logo stays put as the fixed reference.
-      Hero page arrives INTO the boot frame (fade/reveal around the logo).
-    */
+    /* Boot logo covers Hero logo until the soft swap — no motion on the mark */
     html.setsail-handoff #homeHeroLogoWrap {
       opacity: 0 !important;
       transition: none !important;
     }
     html.setsail-handoff.setsail-logo-reveal #homeHeroLogoWrap {
       opacity: 1 !important;
-      transition: opacity 0.5s ease !important;
-    }
-    html.setsail-handoff .nav-sidebar,
-    html.setsail-handoff #homeHudTop,
-    html.setsail-handoff #homeBrandSub,
-    html.setsail-handoff #homeToolGrid,
-    html.setsail-handoff .home-scroll-hint,
-    html.setsail-handoff .home-slide-dots,
-    html.setsail-handoff .home-hero-video,
-    html.setsail-handoff .home-vignette-overlay,
-    html.setsail-handoff .home-gradient-overlay,
-    html.setsail-handoff .home-static-saas-bg,
-    html.setsail-handoff .site-footer {
-      animation: ssbHeroArrive 1s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-    html.setsail-handoff .home-hero-video { animation-delay: 0.02s; }
-    html.setsail-handoff .home-vignette-overlay,
-    html.setsail-handoff .home-gradient-overlay { animation-delay: 0.08s; }
-    html.setsail-handoff .nav-sidebar { animation-delay: 0.14s; }
-    html.setsail-handoff #homeHudTop { animation-delay: 0.18s; }
-    html.setsail-handoff #homeBrandSub { animation-delay: 0.22s; }
-    html.setsail-handoff #homeToolGrid { animation-delay: 0.28s; }
-    html.setsail-handoff .home-scroll-hint,
-    html.setsail-handoff .home-slide-dots,
-    html.setsail-handoff .site-footer { animation-delay: 0.34s; }
-    @keyframes ssbHeroArrive {
-      from { opacity: 0; filter: blur(6px); }
-      to { opacity: 1; filter: blur(0); }
+      transition: opacity 0.55s ease !important;
     }
   </style>
 
@@ -146,7 +131,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.167" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.168" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -9103,7 +9088,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.167" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.168" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12804,21 +12789,23 @@ select option {
 <body>
 
     <div id="setsailBoot" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Loading SetSail">
-    <div class="ssb-logo-wrap" id="setsailBootLogoWrap">
-      <picture>
-        <source srcset="assets/SetSail LOGOS/setsail_logo_horizontal.webp" type="image/webp" />
-        <img class="ssb-logo" id="setsailBootLogo" src="assets/SetSail LOGOS/setsail_logo_horizontal.png" alt="SetSail" width="862" height="321" decoding="sync" fetchpriority="high" />
-      </picture>
-    </div>
-    <div class="ssb-bar-track" aria-hidden="true">
-      <div class="ssb-bar-fill" id="setsailBootBar"></div>
+    <div class="ssb-veil" id="setsailBootVeil" aria-hidden="true"></div>
+    <div class="ssb-stage">
+      <div class="ssb-logo-wrap" id="setsailBootLogoWrap">
+        <picture>
+          <source srcset="assets/SetSail LOGOS/setsail_logo_horizontal.webp" type="image/webp" />
+          <img class="ssb-logo" id="setsailBootLogo" src="assets/SetSail LOGOS/setsail_logo_horizontal.png" alt="SetSail" width="862" height="321" decoding="sync" fetchpriority="high" />
+        </picture>
+      </div>
+      <div class="ssb-bar-track" aria-hidden="true">
+        <div class="ssb-bar-fill" id="setsailBootBar"></div>
+      </div>
     </div>
   </div>
   <script>
   (function () {
     var boot = document.getElementById('setsailBoot');
     var bar = document.getElementById('setsailBootBar');
-    var logoWrap = document.getElementById('setsailBootLogoWrap');
     if (!boot) return;
 
     var WEIGHTS = { dom: 12, css: 12, leaflet: 10, core: 22, poster: 10, logo: 8, video: 18, load: 8 };
@@ -12828,7 +12815,7 @@ select option {
     var score = 0;
     var loadReady = false;
     var finished = false;
-    var MIN_MS = 1600;
+    var MIN_MS = 1800;
     var t0 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
 
     function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
@@ -12848,17 +12835,27 @@ select option {
       if (bar) bar.style.width = (p * 100).toFixed(2) + '%';
     }
 
+    function afterPaintSettle(cb) {
+      // Double-rAF + short settle so Hero can composite under the still-opaque veil
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          setTimeout(cb, 180);
+        });
+      });
+    }
+
     function handoffToHero() {
       finished = true;
       paint(1);
-      // Logo stays fixed. Hero arrives into the boot frame around it.
+      // 1) Uncover app opacity while navy veil stays fully opaque — Hero paints underneath, no flash
       try { document.documentElement.classList.add('setsail-handoff'); } catch (e0) {}
       try { document.documentElement.classList.remove('setsail-booting'); } catch (e1) {}
 
-      requestAnimationFrame(function () {
-        boot.classList.add('is-handoff'); // navy veil + bar dissolve; logo unmoved
+      afterPaintSettle(function () {
+        // 2) Only dissolve the veil — single opacity transition (network-stable)
+        boot.classList.add('is-handoff');
 
-        // After Hero chrome has arrived, soft-swap boot logo → Hero logo in place
+        // 3) Near end of veil fade, soft-swap logos in place (no motion)
         setTimeout(function () {
           try { document.documentElement.classList.add('setsail-logo-reveal'); } catch (e2) {}
           boot.classList.add('is-logo-out');
@@ -12870,9 +12867,9 @@ select option {
             } catch (e3) {}
             setTimeout(function () {
               try { boot.remove(); } catch (e4) {}
-            }, 80);
-          }, 520);
-        }, 980);
+            }, 40);
+          }, 580);
+        }, 1180);
       });
     }
 
@@ -13460,7 +13457,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.167" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.167';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.168" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.168';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13482,7 +13479,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.167" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.168" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -21172,25 +21169,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.167"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.167" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.167"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.168"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.168" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.168"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.167",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.168",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.167"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.167"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.167"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.168"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.168"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.168"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.167"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.168"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21263,10 +21260,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.167"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.167"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.167"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.167"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.168"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.168"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.168"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.168"></script>
 
 
 
@@ -21980,17 +21977,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.167', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.168', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.167 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.168 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.167') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.167.0'); }, 1200);
+              if (last && last.indexOf('v5.168') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.168.0'); }, 1200);
               }
             } catch (eTip) {}
           })
