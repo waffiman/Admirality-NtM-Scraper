@@ -28,180 +28,68 @@
 
   <title>SetSail — Your AI-Powered Bridge</title>
 
-  <!-- Instant radar boot splash (inline — paints before CSS/JS bundles) -->
+    <!-- Instant logo boot splash (inline — paints before CSS/JS bundles) -->
   <style id="setsail-boot-css">
-    /* Compact radar spinner — dark navy page bg (SetSail shell) */
     html.setsail-booting, html.setsail-booting body { background: #080f24 !important; }
     html.setsail-booting body > .app-container { visibility: hidden !important; }
     #setsailBoot {
       position: fixed; inset: 0; z-index: 2147483000;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 12px; margin: 0; padding: 16px;
+      gap: 1.35rem; margin: 0; padding: 24px;
       background: #080f24;
-      transition: opacity 0.45s ease, visibility 0.45s ease;
+      transition: background 0.55s ease, opacity 0.4s ease, visibility 0.4s ease;
     }
-    #setsailBoot.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
-    #setsailBoot .ssb-scope {
-      position: relative; width: min(42vw, 190px); aspect-ratio: 1 / 1;
-      border-radius: 50%;
-      border: 1.5px solid rgba(34, 197, 94, 0.45);
-      box-shadow: 0 0 0 1px rgba(34,197,94,0.12), inset 0 0 22px rgba(16,185,129,0.08), 0 0 28px rgba(0,0,0,0.45);
-      background:
-        radial-gradient(circle at center, rgba(16,185,129,0.14) 0 2px, transparent 3px),
-        repeating-radial-gradient(circle at center, transparent 0 18%, rgba(34,197,94,0.12) 18% 18.5%);
-      overflow: hidden;
-    }
-    #setsailBoot .ssb-sweep {
-      position: absolute; inset: -5%; border-radius: 50%;
-      background: conic-gradient(from 0deg, rgba(16,185,129,0.0) 0deg, rgba(16,185,129,0.0) 300deg, rgba(52,211,153,0.28) 330deg, rgba(167,243,208,0.55) 360deg);
-      animation: ssbSweep 2.4s linear infinite;
-      mix-blend-mode: screen;
+    #setsailBoot.is-handoff {
+      background: transparent;
       pointer-events: none;
     }
-    @keyframes ssbSweep { to { transform: rotate(360deg); } }
-    #setsailBoot .ssb-own {
-      position: absolute; left: 50%; top: 50%; width: 0; height: 0;
-      transform: translate(-50%, -50%); z-index: 5;
+    #setsailBoot.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
+    #setsailBoot .ssb-logo-wrap {
+      width: min(396px, 78vw);
+      line-height: 0;
+      will-change: transform;
     }
-    #setsailBoot .ssb-own-dot {
-      position: absolute; left: 50%; top: 50%; width: 6px; height: 6px;
-      margin: -3px 0 0 -3px; border-radius: 50%;
-      background: #f8fafc; box-shadow: 0 0 0 2px #0f172a, 0 0 8px rgba(248,250,252,0.7);
+    #setsailBoot .ssb-logo {
+      display: block; width: 100%; height: auto;
+      filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 32px rgba(240, 90, 54, 0.24));
+      user-select: none; pointer-events: none;
     }
-    #setsailBoot .ssb-own-vec {
-      position: absolute; left: 50%; top: 50%; width: 2px; height: 14px;
-      margin: -14px 0 0 -1px; background: linear-gradient(180deg, #ffffff, rgba(255,255,255,0.12));
-      border-radius: 2px; transform-origin: bottom center;
-      box-shadow: 0 0 6px rgba(255,255,255,0.55);
+    #setsailBoot .ssb-bar-track {
+      width: min(220px, 52vw);
+      height: 2px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.22);
+      overflow: hidden;
+      transition: opacity 0.35s ease;
     }
-    #setsailBoot .ssb-own-vec::after {
-      content: ""; position: absolute; left: 50%; top: -1px; width: 0; height: 0;
-      margin-left: -3px; border-left: 3px solid transparent; border-right: 3px solid transparent;
-      border-bottom: 5px solid #ffffff;
+    #setsailBoot.is-handoff .ssb-bar-track { opacity: 0; }
+    #setsailBoot .ssb-bar-fill {
+      height: 100%; width: 0%;
+      border-radius: inherit;
+      background: #f05a36;
+      box-shadow: 0 0 10px rgba(240, 90, 54, 0.55);
+      transition: width 0.12s linear;
     }
-    #setsailBoot .ssb-loading {
-      display: inline-flex; align-items: baseline; gap: 1px;
-      font: 600 0.72rem/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
-      letter-spacing: 0.22em; text-transform: uppercase; color: #86efac;
-      text-shadow: 0 0 10px rgba(16,185,129,0.35);
-      user-select: none;
+    /* During handoff: Hero chrome fades in around the shared logo */
+    html.setsail-handoff #homeHeroLogoWrap { opacity: 0 !important; }
+    html.setsail-handoff .nav-sidebar,
+    html.setsail-handoff #homeHudTop,
+    html.setsail-handoff #homeBrandSub,
+    html.setsail-handoff #homeToolGrid,
+    html.setsail-handoff .home-scroll-hint,
+    html.setsail-handoff .home-slide-dots,
+    html.setsail-handoff .home-hero-video,
+    html.setsail-handoff .home-vignette-overlay,
+    html.setsail-handoff .home-gradient-overlay,
+    html.setsail-handoff .site-footer {
+      animation: ssbHeroReveal 0.85s ease both;
     }
-    #setsailBoot .ssb-dots { display: inline-flex; width: 1.55em; margin-left: 2px; letter-spacing: 0.04em; }
-    #setsailBoot .ssb-dots span {
-      opacity: 0.15; animation: ssbDot 1.15s ease-in-out infinite;
+    @keyframes ssbHeroReveal {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
-    #setsailBoot .ssb-dots span:nth-child(1) { animation-delay: 0s; }
-    #setsailBoot .ssb-dots span:nth-child(2) { animation-delay: 0.18s; }
-    #setsailBoot .ssb-dots span:nth-child(3) { animation-delay: 0.36s; }
-    @keyframes ssbDot {
-      0%, 20% { opacity: 0.15; }
-      40%, 65% { opacity: 1; }
-      85%, 100% { opacity: 0.15; }
-    }
-    #setsailBoot .ssb-tgt {
-      position: absolute; left: 50%; top: 50%; z-index: 6;
-      width: 0; height: 0;
-      will-change: left, top;
-    }
-    #setsailBoot .ssb-tgt-blip {
-      position: absolute; left: 0; top: 0; width: 8px; height: 8px;
-      margin: -4px 0 0 -4px; border-radius: 50%;
-      background: #facc15;
-      box-shadow: 0 0 0 2px rgba(250,204,21,0.4), 0 0 12px rgba(250,204,21,0.95);
-      animation: ssbBlip 1.1s ease-in-out infinite;
-      transition: background 0.2s ease, box-shadow 0.2s ease;
-    }
-    @keyframes ssbBlip {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.35); opacity: 0.88; }
-    }
-    #setsailBoot .ssb-tgt-label {
-      position: absolute; left: 8px; top: -9px; white-space: nowrap;
-      font: 700 10px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
-      letter-spacing: 0.06em; color: #fde047;
-      text-shadow: 0 0 8px rgba(0,0,0,0.9);
-      transition: color 0.2s ease;
-    }
-    #setsailBoot .ssb-tgt.is-hot .ssb-tgt-blip {
-      background: #ef4444;
-      box-shadow: 0 0 0 2px rgba(239,68,68,0.45), 0 0 12px rgba(239,68,68,0.95);
-    }
-    #setsailBoot .ssb-tgt.is-hot .ssb-tgt-label { color: #fca5a5; }
-    #setsailBoot.is-contact .ssb-tgt-blip {
-      animation: none; background: #f8fafc;
-      box-shadow: 0 0 0 2px #ef4444, 0 0 18px #ef4444;
-      transform: scale(1.7);
-    }
-    #setsailBoot.is-contact .ssb-scope {
-      box-shadow: 0 0 0 2px rgba(239,68,68,0.5), inset 0 0 36px rgba(239,68,68,0.16), 0 0 36px rgba(239,68,68,0.22);
-    }
-  
-/* v5.152: Depths under Buoys; SetRoute TSS Rule10 + draft/UKC hard depth + turn ease */
-.ss-motion-brow {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 1200;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(8,15,36,0.92), rgba(8,15,36,0.72));
-  border-bottom: 1px solid rgba(240,90,54,0.35);
-  backdrop-filter: blur(8px);
-}
-.ss-motion-brow-inner {
-  display: flex; flex-wrap: wrap; gap: 0.55rem 0.85rem; align-items: baseline;
-  padding: 0.35rem 0.65rem; font: 600 0.68rem/1.2 ui-monospace, Consolas, monospace;
-  color: #e2e8f0; letter-spacing: 0.04em;
-}
-.ss-mb-src {
-  color: #f05a36; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.62rem;
-}
-.ss-mb-item abbr { color: #94a3b8; text-decoration: none; margin-right: 0.2rem; }
-.ss-mb-item b { color: #f8fafc; font-weight: 700; }
-.ss-mb-item small { color: #64748b; margin-left: 0.15rem; }
-.ss-mb-q { margin-left: auto; font-size: 0.62rem; padding: 0.12rem 0.4rem; border-radius: 4px;
-  background: rgba(148,163,184,0.15); color: #cbd5e1; }
-.ss-mb-q[data-q="ok"] { background: rgba(16,185,129,0.2); color: #6ee7b7; }
-.ss-mb-q[data-q="stale"] { background: rgba(234,179,8,0.2); color: #fde68a; }
-.ss-mb-q[data-q="lost"] { background: rgba(239,68,68,0.22); color: #fca5a5; }
-.ss-cloud-pause-banner {
-  position: absolute; top: 2.05rem; left: 0; right: 0; z-index: 1199;
-  padding: 0.28rem 0.65rem; font: 600 0.62rem/1.3 ui-monospace, Consolas, monospace;
-  letter-spacing: 0.06em; text-transform: uppercase;
-  color: #fde68a; background: rgba(120,53,15,0.88); border-bottom: 1px solid rgba(251,191,36,0.35);
-  pointer-events: none;
-}
-.ss-wifi-ais-modal { position: fixed; inset: 0; z-index: 2147483600; display: flex; align-items: center; justify-content: center; }
-.ss-wifi-ais-modal[hidden] { display: none !important; }
-.ss-wifi-ais-backdrop { position: absolute; inset: 0; background: rgba(2,8,23,0.62); }
-.ss-wifi-ais-panel {
-  position: relative; z-index: 1; width: min(420px, 92vw); max-height: 90vh; overflow: auto;
-  background: #0b1224; border: 1px solid rgba(240,90,54,0.35); border-radius: 14px;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.45); padding: 1rem 1.1rem 1.15rem; color: #e2e8f0;
-}
-.ss-wifi-ais-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
-.ss-wifi-ais-head h3 { margin: 0; font-size: 1rem; color: #fff; }
-.ss-wifi-ais-x { border: 0; background: transparent; color: #94a3b8; font-size: 1.4rem; cursor: pointer; }
-.ss-wifi-ais-lead { font-size: 0.78rem; color: #94a3b8; line-height: 1.45; margin: 0.65rem 0 0.85rem; }
-.ss-wifi-ais-actions { display: flex; flex-direction: column; gap: 0.4rem; }
-.ss-wifi-ais-manual { margin-top: 0.75rem; font-size: 0.78rem; color: #cbd5e1; }
-.ss-wifi-ais-manual-grid { display: grid; gap: 0.45rem; margin-top: 0.5rem; }
-.ss-wifi-ais-manual-grid label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.72rem; color: #94a3b8; }
-.ss-wifi-ais-status {
-  margin-top: 0.75rem; font: 600 0.68rem/1.35 ui-monospace, Consolas, monospace;
-  color: #7dd3fc; min-height: 2.2em;
-}
-.ss-wifi-ais-disc { width: 100%; margin-top: 0.55rem; justify-content: center; color: #fca5a5 !important; }
-.ss-native-auth-gate {
-  position: fixed; inset: 0; z-index: 2147483700; display: flex; align-items: center; justify-content: center;
-  background: #080f24; color: #e2e8f0;
-}
-.ss-native-auth-card { max-width: 360px; text-align: center; padding: 1.5rem; }
-.ss-native-auth-card h2 { margin: 0 0 0.5rem; }
-.home-install-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; }
-.home-install-btn.secondary {
-  background: rgba(15,23,42,0.55); color: #e2e8f0; border: 1px solid rgba(125,211,252,0.35);
-}
-.home-install-native-note { margin: 0.55rem 0 0; font-size: 0.68rem; color: #94a3b8; max-width: 22rem; line-height: 1.4; }
-#tab-ntm #ntmMap, #tab-ntm .leaflet-container { position: relative; }
-
   </style>
+
   <script>
     /* Mark booting ASAP — no external deps */
     try { document.documentElement.classList.add('setsail-booting'); } catch (e) {}
@@ -234,7 +122,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.165" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.166" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -451,7 +339,7 @@ svg.leaflet-zoom-animated {
 
 /* ECDIS simple basemap — solid water under vector land */
 .leaflet-container.ecdis-simple-base {
-  background: #9DC9E8 !important;
+  background: #4FA8D8 !important;
 }
 
 /* Keep basemap visible while zooming — no fade-to-blank */
@@ -7316,6 +7204,31 @@ body.ss-setchart .setsail-toast {
   min-height: 72px !important;
 }
 
+
+/* v5.166: Home My Vessel HUD must stay clickable above hero center stage */
+#tab-home #homeHudTop {
+  position: relative !important;
+  z-index: 500 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+}
+#tab-home #homeVesselHudPill,
+#tab-home #homeVesselHudBtn {
+  position: relative !important;
+  z-index: 501 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+#tab-home #homeCenterStage {
+  z-index: 20 !important;
+  pointer-events: none !important;
+}
+#tab-home #homeCenterStage .home-tool-tile,
+#tab-home #homeCenterStage #homeHeroLogoWrap,
+#tab-home #homeCenterStage #homeBrandSub {
+  pointer-events: auto !important;
+}
+
 /* v5.35 hero logo — HUD must stay ABOVE center stage or My Vessel clicks die */
 #homeCenterStage {
   position: relative !important;
@@ -9166,7 +9079,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.165" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.166" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12866,25 +12779,23 @@ select option {
 
 <body>
 
-  <div id="setsailBoot" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Loading SetSail">
-    <div class="ssb-scope" aria-hidden="true">
-      <div class="ssb-sweep"></div>
-      <div class="ssb-own">
-        <div class="ssb-own-vec"></div>
-        <div class="ssb-own-dot"></div>
-      </div>
-      <div class="ssb-tgt" id="setsailBootTgt">
-        <div class="ssb-tgt-blip"></div>
-        <div class="ssb-tgt-label">SETSAIL</div>
-      </div>
+    <div id="setsailBoot" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Loading SetSail">
+    <div class="ssb-logo-wrap" id="setsailBootLogoWrap">
+      <picture>
+        <source srcset="assets/SetSail LOGOS/setsail_logo_horizontal.webp" type="image/webp" />
+        <img class="ssb-logo" id="setsailBootLogo" src="assets/SetSail LOGOS/setsail_logo_horizontal.png" alt="SetSail" width="862" height="321" decoding="sync" fetchpriority="high" />
+      </picture>
     </div>
-    <div class="ssb-loading" aria-hidden="true">LOADING<span class="ssb-dots"><span>.</span><span>.</span><span>.</span></span></div>
+    <div class="ssb-bar-track" aria-hidden="true">
+      <div class="ssb-bar-fill" id="setsailBootBar"></div>
+    </div>
   </div>
   <script>
   (function () {
     var boot = document.getElementById('setsailBoot');
-    var tgt = document.getElementById('setsailBootTgt');
-    if (!boot || !tgt) return;
+    var bar = document.getElementById('setsailBootBar');
+    var logoWrap = document.getElementById('setsailBootLogoWrap');
+    if (!boot) return;
 
     var WEIGHTS = { dom: 12, css: 12, leaflet: 10, core: 22, poster: 10, logo: 8, video: 18, load: 8 };
     var TOTAL = 0;
@@ -12893,63 +12804,75 @@ select option {
     var score = 0;
     var loadReady = false;
     var finished = false;
-    var MIN_MS = 3000;
+    var MIN_MS = 1600;
     var t0 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-    // Random approach bearing each boot (same lightweight CSS/JS — only the angle changes)
-    var BEARING_CHOICES = [18, 42, 68, 105, 148, 195, 235, 278, 318, 348];
-    var BEARING_DEG = BEARING_CHOICES[Math.floor(Math.random() * BEARING_CHOICES.length)] || 42;
-    var EDGE_R = 48; // % of scope — start at the rim
-    // Rings every ~18% of radius (see repeating-radial-gradient). 2nd from center ≈ 36% of R.
-    var RING2_R = EDGE_R * 0.36; // yellow → red when inside / crossing 2nd ring
 
     function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
     function now() {
       return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     }
-
-    function loadProg() {
-      return clamp01(score / TOTAL);
-    }
-
-    /** Follow load; never finish the approach before MIN_MS (fast caches still get a 3s story). */
+    function loadProg() { return clamp01(score / TOTAL); }
     function visualProg() {
       var elapsed = now() - t0;
       var timeCap = clamp01(elapsed / MIN_MS);
       var lp = loadReady ? 1 : Math.min(0.985, loadProg());
       return Math.min(lp, timeCap);
     }
-
-    function place(prog) {
+    function paint(prog) {
       var p = clamp01(prog);
       boot.setAttribute('aria-valuenow', String(Math.round(p * 100)));
-      var r = (1 - p) * EDGE_R;
-      var rad = (BEARING_DEG - 90) * Math.PI / 180;
-      var x = Math.cos(rad) * r;
-      var y = Math.sin(rad) * r;
-      tgt.style.left = (50 + x) + '%';
-      tgt.style.top = (50 + y) + '%';
-      tgt.style.transform = 'none';
-      // Inside / past 2nd ring from center → red
-      if (r <= RING2_R) tgt.classList.add('is-hot');
-      else tgt.classList.remove('is-hot');
+      if (bar) bar.style.width = (p * 100).toFixed(2) + '%';
+    }
+
+    function handoffToHero() {
+      finished = true;
+      paint(1);
+      var hero = document.getElementById('homeHeroLogoWrap');
+      var fromEl = logoWrap || boot;
+      try { document.documentElement.classList.add('setsail-handoff'); } catch (e0) {}
+      try { document.documentElement.classList.remove('setsail-booting'); } catch (e1) {}
+
+      requestAnimationFrame(function () {
+        var from = fromEl.getBoundingClientRect();
+        var to = hero ? hero.getBoundingClientRect() : from;
+        if (!to.width || !to.height) to = from;
+
+        boot.classList.add('is-handoff');
+
+        fromEl.style.position = 'fixed';
+        fromEl.style.left = from.left + 'px';
+        fromEl.style.top = from.top + 'px';
+        fromEl.style.width = from.width + 'px';
+        fromEl.style.margin = '0';
+        fromEl.style.zIndex = '2147483001';
+        fromEl.style.transformOrigin = 'top left';
+        fromEl.style.transition = 'transform 0.78s cubic-bezier(0.22, 1, 0.36, 1)';
+
+        var sx = to.width / Math.max(from.width, 1);
+        var sy = to.height / Math.max(from.height, 1);
+        var dx = to.left - from.left;
+        var dy = to.top - from.top;
+
+        requestAnimationFrame(function () {
+          fromEl.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
+        });
+
+        setTimeout(function () {
+          boot.classList.add('is-done');
+          try { document.documentElement.classList.remove('setsail-handoff'); } catch (e2) {}
+          setTimeout(function () {
+            try { boot.remove(); } catch (e3) {}
+          }, 420);
+        }, 800);
+      });
     }
 
     function tryComplete() {
       if (finished) return;
       var elapsed = now() - t0;
       var vp = visualProg();
-      // Stay up until FULL load + min story time + target at center
       if (!loadReady || elapsed < MIN_MS || vp < 0.999) return;
-      finished = true;
-      place(1);
-      boot.classList.add('is-contact');
-      setTimeout(function () {
-        boot.classList.add('is-done');
-        try { document.documentElement.classList.remove('setsail-booting'); } catch (e) {}
-        setTimeout(function () {
-          try { boot.remove(); } catch (e2) {}
-        }, 480);
-      }, 380);
+      handoffToHero();
     }
 
     function mark(key) {
@@ -12962,7 +12885,7 @@ select option {
 
     function tick() {
       if (finished) return;
-      place(visualProg());
+      paint(visualProg());
       tryComplete();
       if (!finished) {
         if (typeof requestAnimationFrame === 'function') requestAnimationFrame(tick);
@@ -13032,7 +12955,7 @@ select option {
       mark(key);
     }
 
-    place(0);
+    paint(0);
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function () { mark('dom'); hookVideo(); });
@@ -13062,11 +12985,9 @@ select option {
 
     window.addEventListener('load', function () {
       mark('load');
-      // Do NOT force loadReady here — wait until all weighted assets report in
       tryComplete();
     });
 
-    // Hard safety only
     setTimeout(function () {
       loadReady = true;
       score = TOTAL;
@@ -13075,7 +12996,6 @@ select option {
 
     if (typeof requestAnimationFrame === 'function') requestAnimationFrame(tick);
     else setTimeout(tick, 32);
-
 
     window.__setsailBootMark = mark;
     window.__setsailBootComplete = function () {
@@ -13531,7 +13451,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.165" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.165';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.166" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.166';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13553,7 +13473,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.165" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.166" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -21243,25 +21163,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.165"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.165" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.165"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.166"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.166" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.166"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.165",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.166",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.165"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.165"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.165"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.166"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.166"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.166"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.165"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.166"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21334,10 +21254,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.165"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.165"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.165"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.165"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.166"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.166"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.166"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.166"></script>
 
 
 
@@ -22051,17 +21971,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.165', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.166', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.165 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.166 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.165') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.165.0'); }, 1200);
+              if (last && last.indexOf('v5.166') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.166.0'); }, 1200);
               }
             } catch (eTip) {}
           })

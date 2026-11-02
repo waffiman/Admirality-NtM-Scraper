@@ -4100,7 +4100,7 @@ window.refreshMarineWeather = refreshMarineWeather;
 function initHomeHudVessel() {
   loadUserVesselFromStorage();
   updateHomeVesselHudLabel();
-  fillVesselFormsFromState();
+  try { fillVesselFormsFromState(); } catch (eFill) {}
   if (typeof scheduleOwnVesselAisRefresh === "function") scheduleOwnVesselAisRefresh();
 
   const pillHost = document.getElementById("homeVesselHudPill");
@@ -4108,14 +4108,23 @@ function initHomeHudVessel() {
   const pop = document.getElementById("homeVesselPopover");
   const closeBtn = document.getElementById("homeVesselPopClose");
   const hudTop = document.getElementById("homeHudTop");
-  // Hero center-stage sits at z-index 80 and was swallowing HUD clicks — keep bar above it
+  // Keep HUD above center-stage / logo choreography layers
   if (hudTop) {
-    hudTop.style.zIndex = "120";
+    hudTop.style.zIndex = "500";
     hudTop.style.pointerEvents = "auto";
-    hudTop.style.position = hudTop.style.position || "relative";
+    hudTop.style.position = "relative";
   }
-  if (pillBtn && pillBtn._homeVesselBound) return;
-  if (pillBtn) pillBtn._homeVesselBound = true;
+  if (pillHost) {
+    pillHost.style.pointerEvents = "auto";
+    pillHost.style.zIndex = "501";
+    pillHost.style.position = "relative";
+  }
+  if (pillBtn) {
+    pillBtn.style.pointerEvents = "auto";
+    pillBtn.style.cursor = "pointer";
+    pillBtn.style.position = "relative";
+    pillBtn.style.zIndex = "502";
+  }
 
   const placeHomePop = () => {
     if (!pop || !pillBtn) return;
@@ -4124,102 +4133,125 @@ function initHomeHudVessel() {
     const width = Math.min(360, Math.max(280, window.innerWidth - 24));
     let top = Math.round(r.bottom + gap);
     let right = Math.round(Math.max(8, window.innerWidth - r.right));
-    // Keep panel on-screen if it would hang below the viewport.
     const approxH = Math.min(560, window.innerHeight * 0.7);
     if (top + approxH > window.innerHeight - 8) {
       top = Math.max(8, Math.round(r.top - gap - approxH));
     }
+    pop.style.position = "fixed";
     pop.style.width = width + "px";
     pop.style.top = top + "px";
     pop.style.right = right + "px";
     pop.style.left = "auto";
-    pop.style.zIndex = "120000";
+    pop.style.zIndex = "2147483000";
   };
   const closeHomePop = () => {
-    if (pop) pop.classList.remove("open");
+    if (!pop) return;
+    pop.classList.remove("open");
+    pop.style.display = "none";
     if (pillBtn) pillBtn.setAttribute("aria-expanded", "false");
   };
   const openHomePop = () => {
-    // close chart vessel popover if open
     const chartPop = document.getElementById("ntmVesselPopover");
     const chartBtn = document.getElementById("ntmMyVesselBtn");
     if (chartPop) chartPop.classList.remove("open");
     if (chartBtn) chartBtn.classList.remove("active");
-    fillVesselFormsFromState();
-    // Escape Home hero overflow/transform clipping so the whole panel receives clicks
+    try { fillVesselFormsFromState(); } catch (e2) {}
     if (pop && pop.parentElement !== document.body) {
       document.body.appendChild(pop);
     }
     placeHomePop();
-    if (pop) pop.classList.add("open");
+    if (pop) {
+      pop.classList.add("open");
+      pop.style.display = "flex";
+      pop.style.flexDirection = "column";
+    }
+    window._setsailHomeVesselOpenedAt = Date.now();
     if (pillBtn) pillBtn.setAttribute("aria-expanded", "true");
-    bindVesselNameAutocomplete("home");
-    bindVesselMmsiLookup("home");
+    try { bindVesselNameAutocomplete("home"); } catch (e3) {}
+    try { bindVesselMmsiLookup("home"); } catch (e4) {}
   };
   window.openHomeVesselPopover = openHomePop;
   window.closeHomeVesselPopover = closeHomePop;
-  window.addEventListener("resize", () => {
-    if (pop && pop.classList.contains("open")) placeHomePop();
-  });
-  window.addEventListener("scroll", () => {
-    if (pop && pop.classList.contains("open")) placeHomePop();
-  }, true);
 
-  const onVesselHudActivate = (e) => {
-    if (!e) return;
-    // Ignore clicks originating inside an already-open panel
-    if (pop && pop.contains(e.target)) return;
-    e.preventDefault();
-    e.stopPropagation();
-    if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-    if (pop && pop.classList.contains("open")) closeHomePop();
-    else openHomePop();
-  };
-  // Capture phase so hero/brand overlays cannot swallow the click first
-  if (pillBtn) {
-    pillBtn.addEventListener("click", onVesselHudActivate, true);
+  if (window._setsailHomeVesselDocBound) {
+    // Already have permanent document delegate — just refresh form wiring once
+  } else {
+    window._setsailHomeVesselDocBound = true;
+    window.addEventListener("resize", () => {
+      const p = document.getElementById("homeVesselPopover");
+      if (p && p.classList.contains("open")) placeHomePop();
+    });
+    window.addEventListener("scroll", () => {
+      const p = document.getElementById("homeVesselPopover");
+      if (p && p.classList.contains("open")) placeHomePop();
+    }, true);
+
+    // Permanent capture-phase delegate — survives re-inits and overlay races
+    document.addEventListener("pointerup", (e) => {
+      if (!e || !e.target || !e.target.closest) return;
+      const hit = e.target.closest("#homeVesselHudBtn, #homeVesselHudPill");
+      if (!hit) return;
+      const p = document.getElementById("homeVesselPopover");
+      if (p && p.contains(e.target)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+      window._setsailHomeVesselPtrHandled = true;
+      setTimeout(() => { window._setsailHomeVesselPtrHandled = false; }, 50);
+      if (p && p.classList.contains("open")) closeHomePop();
+      else openHomePop();
+    }, true);
+
+    document.addEventListener("click", (e) => {
+      const p = document.getElementById("homeVesselPopover");
+      if (!p || !p.classList.contains("open")) return;
+      // Ignore the same gesture that just opened the panel
+      if (window._setsailHomeVesselOpenedAt && (Date.now() - window._setsailHomeVesselOpenedAt) < 280) return;
+      if (p.contains(e.target)) return;
+      if (e.target.closest && e.target.closest("#homeVesselHudBtn, #homeVesselHudPill")) return;
+      if (e.target.closest && e.target.closest(".vessel-more-details, .vessel-more-toggle, .vessel-ais-suggest")) return;
+      closeHomePop();
+    });
   }
-  if (pillHost) {
-    pillHost.style.pointerEvents = "auto";
-    pillHost.style.zIndex = "130";
-    pillHost.style.position = "relative";
-    pillHost.addEventListener("click", (e) => {
-      // Only handle direct pill chrome clicks; button has its own listener
-      if (pillBtn && (e.target === pillBtn || pillBtn.contains(e.target))) return;
-      if (pop && pop.contains(e.target)) return;
-      onVesselHudActivate(e);
+
+  if (pillBtn && !pillBtn._homeVesselBound) {
+    pillBtn._homeVesselBound = true;
+    // Fallback click only if pointerup did not already toggle
+    pillBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (window._setsailHomeVesselPtrHandled) return;
+      if (pop && pop.classList.contains("open") && window._setsailHomeVesselOpenedAt &&
+          (Date.now() - window._setsailHomeVesselOpenedAt) < 280) return;
+      if (pop && pop.classList.contains("open")) closeHomePop();
+      else openHomePop();
     }, true);
   }
-  if (pillBtn) {
-    pillBtn.style.pointerEvents = "auto";
-    pillBtn.style.cursor = "pointer";
-    pillBtn.style.position = "relative";
-    pillBtn.style.zIndex = "131";
+
+  if (closeBtn && !closeBtn._homeVesselBound) {
+    closeBtn._homeVesselBound = true;
+    closeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeHomePop();
+    });
   }
-  if (closeBtn) closeBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    closeHomePop();
-  });
 
   const gpsBtn = document.getElementById("homeVesselGpsBtn");
-  if (gpsBtn) gpsBtn.addEventListener("click", () => requestGpsIntoForm("home"));
+  if (gpsBtn && !gpsBtn._homeVesselBound) {
+    gpsBtn._homeVesselBound = true;
+    gpsBtn.addEventListener("click", () => requestGpsIntoForm("home"));
+  }
   const applyBtn = document.getElementById("homeVesselApplyBtn");
-  if (applyBtn) applyBtn.addEventListener("click", () => saveVesselForm("home", closeHomePop));
+  if (applyBtn && !applyBtn._homeVesselBound) {
+    applyBtn._homeVesselBound = true;
+    applyBtn.addEventListener("click", () => saveVesselForm("home", closeHomePop));
+  }
   const clearBtn = document.getElementById("homeVesselClearBtn");
-  if (clearBtn) clearBtn.addEventListener("click", () => clearVesselProfile(closeHomePop));
-
-  document.addEventListener("click", (e) => {
-    if (!pop || !pop.classList.contains("open")) return;
-    if (e.defaultPrevented) return;
-    if (pop.contains(e.target)) return;
-    if (pillBtn && (e.target === pillBtn || pillBtn.contains(e.target))) return;
-    if (pillHost && (e.target === pillHost || pillHost.contains(e.target))) return;
-    if (e.target && e.target.closest && e.target.closest(".vessel-more-details, .vessel-more-toggle")) return;
-    closeHomePop();
-  });
-
-  // No automatic geolocation prompt on first visit
+  if (clearBtn && !clearBtn._homeVesselBound) {
+    clearBtn._homeVesselBound = true;
+    clearBtn.addEventListener("click", () => clearVesselProfile(closeHomePop));
+  }
 }
 
 function initVesselTracking() {
@@ -13147,8 +13179,9 @@ window.WORLD_LAND_POLYGONS = WORLD_LAND_POLYGONS;
 
 /** ECDIS: blue water + yellow land. Land fill from Natural Earth polygons (no separate gray coast stroke). */
 function createEcdisSimpleBaseLayer() {
-  const WATER = "#9DC9E8";
-  const LAND = "#F0E2A0";
+  // Slightly more saturated ECDIS palette (water blue / land yellow)
+  const WATER = "#4FA8D8";
+  const LAND = "#E6C93A";
   const WaterGrid = L.GridLayer.extend({
     createTile: function () {
       const t = document.createElement("div");
@@ -13483,8 +13516,8 @@ function initVisualChartLayerSelector(mapInstance, layers) {
   selector.className = "ntm-chart-layer-selector collapsed";
   selector.innerHTML = `
     <button type="button" class="ntm-layer-thumb-btn active-base" data-base="ecdis" title="ECDIS — blue water, yellow land, detailed coastline">
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#9DC9E8 0%,#9DC9E8 52%,#F0E2A0 52%,#F0E2A0 100%);">
-        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M4 22 L10 14 L16 18 L22 10 L32 22 Z" fill="#F0E2A0" stroke="#1a2744" stroke-width="1.4"/><rect x="2" y="22" width="32" height="10" fill="#9DC9E8"/></svg>
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#4FA8D8 0%,#4FA8D8 52%,#E6C93A 52%,#E6C93A 100%);">
+        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M4 22 L10 14 L16 18 L22 10 L32 22 Z" fill="#E6C93A" stroke="#1a2744" stroke-width="1.4"/><rect x="2" y="22" width="32" height="10" fill="#4FA8D8"/></svg>
       </div>
       <span class="ntm-layer-thumb-label">ECDIS</span>
     </button>
