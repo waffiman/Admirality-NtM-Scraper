@@ -319,13 +319,101 @@ function applyVesselProfile(data, opts) {
 /** Network AIS poll — NOT 5s (too heavy); adaptive below. Visual motion is separate. */
 const OWN_AIS_REFRESH_MS = 60 * 1000; // base 60s network poll
 const OWN_AIS_REFRESH_NEAR_MS = 20 * 1000; // 20s when map is zoomed near own ship
-const OWN_AIS_VISUAL_DR_MS = 12 * 1000; // coast along COG/rails after 12s without a new fix
-const OWN_AIS_STALE_DR_MS = 45 * 60 * 1000; // after 45 min → out-of-coverage messaging
-const OWN_SHIP_VISUAL_TICK_MS = 2000; // local icon advance every 2s (no network)
+/** Route-DR may start after this age past last AIS fix (still requires Current rails). */
+const OWN_AIS_VISUAL_DR_MS = 12 * 1000;
+const OWN_AIS_STALE_DR_MS = 45 * 60 * 1000; // messaging only — never COG-drift AIS targets
+const OWN_SHIP_VISUAL_TICK_MS = 2000; // local icon advance every 2s along Current rails only
 let _ownAisRefreshTimer = null;
 let _ownAisDrTimer = null;
 let _ownShipMarker = null;
 let _ownShipMotionBusy = false;
+/** Device clock correction: serverUtc − Date.now() (ms). */
+let _setsailUtcOffsetMs = 0;
+let _setsailUtcSyncedAt = 0;
+
+/**
+ * Trusted UTC now (ms). Syncs against /api/utc so device local time cannot skew DR age.
+ */
+function getSetSailUtcNowMs() {
+  return Date.now() + (_setsailUtcOffsetMs || 0);
+}
+
+function getSetSailUtcNowIso() {
+  return new Date(getSetSailUtcNowMs()).toISOString();
+}
+
+async function syncSetSailUtcClock(force) {
+  if (!force && _setsailUtcSyncedAt && Date.now() - _setsailUtcSyncedAt < 10 * 60 * 1000) {
+    return _setsailUtcOffsetMs;
+  }
+  const urls = ["/api/utc", "api/utc", "https://setsail-ai.vercel.app/api/utc"];
+  for (let i = 0; i < urls.length; i++) {
+    try {
+      const t0 = Date.now();
+      const r = await fetch(urls[i], { cache: "no-store", method: "GET" });
+      const t1 = Date.now();
+      if (!r.ok) continue;
+      let serverMs = NaN;
+      try {
+        const j = await r.json();
+        serverMs = Number(j && (j.utcMs != null ? j.utcMs : Date.parse(j.utc)));
+      } catch (eJson) {
+        serverMs = Date.parse(r.headers.get("date") || "");
+      }
+      if (!Number.isFinite(serverMs)) continue;
+      const mid = (t0 + t1) / 2;
+      _setsailUtcOffsetMs = serverMs - mid;
+      _setsailUtcSyncedAt = Date.now();
+      return _setsailUtcOffsetMs;
+    } catch (eFetch) {}
+  }
+  // Fallback: HTTP Date on any same-origin asset
+  try {
+    const t0 = Date.now();
+    const r = await fetch("sw.js?utc=" + t0, { cache: "no-store", method: "HEAD" });
+    const t1 = Date.now();
+    const serverMs = Date.parse(r.headers.get("date") || "");
+    if (Number.isFinite(serverMs)) {
+      _setsailUtcOffsetMs = serverMs - (t0 + t1) / 2;
+      _setsailUtcSyncedAt = Date.now();
+    }
+  } catch (e2) {}
+  return _setsailUtcOffsetMs;
+}
+window.getSetSailUtcNowMs = getSetSailUtcNowMs;
+window.getSetSailUtcNowIso = getSetSailUtcNowIso;
+window.syncSetSailUtcClock = syncSetSailUtcClock;
+
+/** Snap My Vessel icon back to last official AIS fix (no COG inventing). */
+function snapOwnShipToLastAisFix(opts) {
+  opts = opts || {};
+  const v = userVessel;
+  if (!v) return false;
+  const fixLat = Number(v.aisFixLat != null ? v.aisFixLat : v.lat);
+  const fixLon = Number(v.aisFixLon != null ? v.aisFixLon : v.lon);
+  if (!Number.isFinite(fixLat) || !Number.isFinite(fixLon)) return false;
+  const updated = Object.assign({}, v, {
+    lat: fixLat,
+    lon: fixLon,
+    source: v.aisLastFixAt ? "ais" : (v.source || "ais"),
+    deadReckoned: false,
+    aisDrAt: null,
+    aisDrNm: null,
+    aisDrMode: null,
+    aisDrActivatedAt: null
+  });
+  window.userVessel = updated;
+  userVessel = updated;
+  if (typeof persistUserVessel === "function") persistUserVessel();
+  if (window.leafletMap && typeof plotUserVessel === "function") {
+    plotUserVessel(fixLat, fixLon, updated.source || "AIS", true);
+  }
+  if (opts.toast && typeof showSetSailToast === "function") {
+    showSetSailToast("DR off — showing last official AIS fix only", "info");
+  }
+  return true;
+}
+window.snapOwnShipToLastAisFix = snapOwnShipToLastAisFix;
 
 async function fetchOwnVesselAisUpdate() {
   const v = userVessel;
@@ -511,22 +599,24 @@ async function refreshOwnVesselFromAis(opts) {
   opts = opts || {};
   if (!userVessel || !userVessel.mmsi) return;
   try {
+    try { await syncSetSailUtcClock(false); } catch (eUtc) {}
     const hit = await fetchOwnVesselAisUpdate();
     if (!hit) {
-      applyOwnVesselDeadReckoning({ toast: false });
+      // No new AIS — only coast if Current rails are ON (never COG invent)
+      if (getDrActiveRouteId()) applyOwnVesselDeadReckoning({ toast: false, visual: true });
       return;
     }
     const prev = userVessel || {};
     const prevFixMs = prev.aisLastFixAt
       ? Date.parse(prev.aisLastFixAt)
       : (prev.aisRefreshedAt ? Date.parse(prev.aisRefreshedAt) : 0);
-    const hitMs = Number(hit.updatedAt) || (hit.aisSeenAt ? Date.parse(hit.aisSeenAt) : Date.now());
+    const hitMs = Number(hit.updatedAt) || (hit.aisSeenAt ? Date.parse(hit.aisSeenAt) : getSetSailUtcNowMs());
     // Never rewind My Vessel to an older AIS fix (stale Malacca while ship is in IO).
     if (Number.isFinite(prevFixMs) && prevFixMs > 0 && hitMs + 5000 < prevFixMs) {
-      applyOwnVesselDeadReckoning({ toast: false });
+      if (getDrActiveRouteId()) applyOwnVesselDeadReckoning({ toast: false, visual: true });
       return;
     }
-    const ageMs = Date.now() - hitMs;
+    const ageMs = getSetSailUtcNowMs() - hitMs;
     const isLive = ageMs <= OWN_AIS_STALE_DR_MS;
     applyVesselProfile(
       Object.assign({}, prev, hit, {
@@ -534,20 +624,20 @@ async function refreshOwnVesselFromAis(opts) {
         aisLastFixAt: hit.aisSeenAt || new Date(hitMs).toISOString(),
         aisFixLat: Number(hit.lat),
         aisFixLon: Number(hit.lon),
-        aisRefreshedAt: new Date().toISOString(),
+        aisRefreshedAt: getSetSailUtcNowIso(),
         deadReckoned: false
       }),
       {
         toast: opts.toast
           ? (isLive
             ? "Own vessel AIS updated (" + (hit.name || hit.mmsi) + ")"
-            : "Last AIS fix is " + Math.round(ageMs / 3600000 * 10) / 10 + "h old — open ocean / out of coastal coverage")
+            : "Last AIS fix is " + Math.round(ageMs / 3600000 * 10) / 10 + "h old UTC — chart AIS stays at that fix; enable Current route for local DR")
           : null,
         skipAisSchedule: true
       }
     );
-    if (!isLive) applyOwnVesselDeadReckoning({ toast: false });
-    // Nudge live WS subscriptions so Open Waters keeps following this MMSI
+    // Re-project onto Current rails only when coral Current is active
+    if (getDrActiveRouteId()) applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true });
     try {
       if (typeof window.sendAisStreamSubscriptionAll === "function") {
         window.sendAisStreamSubscriptionAll();
@@ -660,11 +750,14 @@ function armDrRouteHandoff(prevRouteOrWps, nextRouteId) {
 
 /**
  * Resolve which polyline DR should ride right now.
- * - Live Current route (with waypoint edits) when no handoff
- * - During change-over: previous rails until ship is within handoffNm of the new Current
- * - After delete of Current: orphan last-rails snap until a new Current is coral-toggled
+ * SAFETY: only while a Current (coral) route id is set — never invent COG/orphan drift
+ * for chart AIS targets or for own-ship without Current rails.
  */
 function resolveDrRailsForShip(lat, lon) {
+  const activeId = getDrActiveRouteId();
+  if (!activeId) {
+    return { wps: null, phase: "off" };
+  }
   const handoff = getDrHandoffState();
   const nextRoute = typeof getDrActiveRoute === "function" ? getDrActiveRoute() : null;
   const nextWps = nextRoute ? setrouteNormalizeRouteWps(nextRoute) : [];
@@ -672,10 +765,8 @@ function resolveDrRailsForShip(lat, lon) {
   const refLat = Number.isFinite(Number(lat)) ? Number(lat) : null;
   const refLon = Number.isFinite(Number(lon)) ? Number(lon) : null;
 
-  if (handoff && handoff.nextRouteId) {
-    const activeId = getDrActiveRouteId();
-    if (activeId && activeId === handoff.nextRouteId && nextWps.length >= 2 &&
-        refLat != null && refLon != null) {
+  if (handoff && handoff.nextRouteId && handoff.nextRouteId === activeId) {
+    if (nextWps.length >= 2 && refLat != null && refLon != null) {
       const near = setrouteProjectOntoRoute(refLat, refLon, nextWps);
       if (near && near.distNm <= thresh) {
         clearDrHandoffState();
@@ -686,21 +777,15 @@ function resolveDrRailsForShip(lat, lon) {
     if (handoff.prevWps && handoff.prevWps.length >= 2) {
       return { wps: handoff.prevWps, phase: "handoff-prev" };
     }
-    // Armed with empty prev (gap / first Current far away): COG until near new
-    return { wps: null, phase: "handoff-gap" };
+    // No previous geometry — wait until near new Current (stay on last AIS until then)
+    return { wps: null, phase: "handoff-wait" };
   }
 
   if (nextWps.length >= 2) {
     persistDrLastRailsWps(nextWps);
     return { wps: nextWps, phase: "rails" };
   }
-
-  // No Current — keep riding deleted route geometry so the icon never “falls off” rails mid-ocean
-  const orphan = loadDrLastRailsWps();
-  if (orphan && orphan.length >= 2) {
-    return { wps: orphan, phase: "orphan" };
-  }
-  return { wps: null, phase: "cog" };
+  return { wps: null, phase: "off" };
 }
 window.resolveDrRailsForShip = resolveDrRailsForShip;
 
@@ -721,9 +806,8 @@ function setDrActiveRouteId(routeId, opts) {
     if (snap && snap.length >= 2) armDrRouteHandoff(snap, id);
     else clearDrHandoffState(); // first Current with no prior rails → adopt immediately
   } else if (!id) {
-    // Clearing Current: keep last rails snap for orphan DR (unless caller wiped it)
-    if (!opts.wipeOrphan && prevSnap && prevSnap.length >= 2) persistDrLastRailsWps(prevSnap);
     if (opts.wipeOrphan) persistDrLastRailsWps(null);
+    else if (prevSnap && prevSnap.length >= 2) persistDrLastRailsWps(prevSnap);
     clearDrHandoffState();
   }
 
@@ -749,7 +833,21 @@ function setDrActiveRouteId(routeId, opts) {
   if (typeof renderVesselRouteLibraryList === "function") {
     renderVesselRouteLibraryList();
   }
-  try { applyOwnVesselDeadReckoning({ toast: false }); } catch (eDr) {}
+  if (id) {
+    // Activating Current: sync UTC then project own ship onto rails from last AIS fix age
+    Promise.resolve(syncSetSailUtcClock(false)).finally(() => {
+      try {
+        if (userVessel) {
+          userVessel.aisDrActivatedAt = getSetSailUtcNowIso();
+          window.userVessel = userVessel;
+        }
+        applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true });
+      } catch (eDrOn) {}
+    });
+  } else {
+    // DR off → last official AIS only (never leave a COG-drifted ghost)
+    try { snapOwnShipToLastAisFix({ toast: false }); } catch (eOff) {}
+  }
 }
 window.getDrActiveRouteId = getDrActiveRouteId;
 window.setDrActiveRouteId = setDrActiveRouteId;
@@ -865,48 +963,42 @@ function setroutePointAlongRoute(wps, alongNm) {
 }
 
 /**
- * Extrapolate My Vessel when coastal AIS has gone dark.
- * Prefer DR along the coral-toggled “rails” route at last SOG; else COG/heading rhumb.
+ * Own-ship Dead Reckoning — ONLY along coral Current route rails (local display).
  *
- * SAFETY (multi-user):
- * - Mutates ONLY the local My Vessel icon / in-memory userVessel.
- * - MUST NEVER write into aisStreamTargets / AIS overlay / any shared feed.
- * - Other SetSail clients see this MMSI solely from integrated AIS sources.
- * - Private Current-route geometry must not influence anyone else’s chart.
+ * SAFETY:
+ * - Never COG/rhumb drift (that invented false open-ocean tracks for everyone who
+ *   linked the MMSI as My Vessel).
+ * - Never writes into aisStreamTargets / AIS overlay — other users always see last AIS.
+ * - Age = trusted UTC now − AIS fix UTC (device clock must not skew the coasting distance).
  */
 function applyOwnVesselDeadReckoning(opts) {
   opts = opts || {};
   const v = userVessel;
   if (!v || !v.mmsi) return;
-  // Hard fence: DR is own-ship local display only
   if (opts && opts.forAisTarget) return;
+  // No Current rails → no DR at all (icon stays on last official AIS)
+  if (!getDrActiveRouteId()) return;
+  // Wi-Fi / LAN AIS is truth — never DR over it
+  if (String(v.source || "").toLowerCase().indexOf("wifi") >= 0) return;
+
   const fixIso = v.aisLastFixAt || v.aisRefreshedAt;
   if (!fixIso) return;
   const fixMs = Date.parse(fixIso);
   if (!Number.isFinite(fixMs)) return;
-  const ageMs = Date.now() - fixMs;
-  // Visual coasting starts after OWN_AIS_VISUAL_DR_MS; force/opts.visual may override
-  const drGate = opts.visual ? OWN_AIS_VISUAL_DR_MS : OWN_AIS_VISUAL_DR_MS;
-  if (!opts.force && ageMs < drGate) return;
-  // Wi-Fi / LAN AIS is truth — never DR over it
-  if (String(v.source || "").toLowerCase().indexOf("wifi") >= 0) return;
+  const nowMs = getSetSailUtcNowMs();
+  const ageMs = Math.max(0, nowMs - fixMs);
+  if (!opts.force && ageMs < OWN_AIS_VISUAL_DR_MS) return;
+
   const sog = Number(v.sog);
   if (!(sog >= 0.3)) return;
   const distNm = sog * (ageMs / 3600000);
-  // Visual ticks need small steps (e.g. 14 kn × 12 s ≈ 0.05 NM); toast/stale path keeps 0.5 NM floor
-  const minNm = opts.visual ? 0.015 : 0.5;
+  const minNm = opts.force || opts.visual ? 0.015 : 0.5;
   if (!(distNm > minNm) || distNm > 3500) return;
 
-  // Last known AIS fix coordinates (not previous DR) — rails & rhumb both start here
   const fixLat = Number(v.aisFixLat != null ? v.aisFixLat : v.lat);
   const fixLon = Number(v.aisFixLon != null ? v.aisFixLon : v.lon);
   if (!Number.isFinite(fixLat) || !Number.isFinite(fixLon)) return;
 
-  let lat1;
-  let lon1;
-  let courseOut = Number(v.cog != null ? v.cog : v.heading);
-  let mode = "cog";
-  // Prefer current plotted position for handoff proximity (closer to where icon is now)
   const shipLat = Number(v.lat);
   const shipLon = Number(v.lon);
   const resolved = typeof resolveDrRailsForShip === "function"
@@ -914,89 +1006,60 @@ function applyOwnVesselDeadReckoning(opts) {
       Number.isFinite(shipLat) ? shipLat : fixLat,
       Number.isFinite(shipLon) ? shipLon : fixLon
     )
-    : { wps: null, phase: "cog" };
+    : { wps: null, phase: "off" };
   const wps = resolved && resolved.wps && resolved.wps.length >= 2 ? resolved.wps : null;
-  const phase = (resolved && resolved.phase) || "cog";
+  const phase = (resolved && resolved.phase) || "off";
+  if (!wps) return; // handoff-wait / off — keep last AIS, never invent a rhumb
 
-  if (wps) {
-    const proj = setrouteProjectOntoRoute(fixLat, fixLon, wps);
-    if (proj) {
-      const target = setroutePointAlongRoute(wps, proj.alongNm + distNm);
-      if (target) {
-        lat1 = target.lat;
-        lon1 = target.lon;
-        courseOut = target.course;
-        mode = (phase === "handoff-prev" || phase === "orphan") ? phase : "rails";
-        // After advancing along prev rails, re-check if we crossed onto the new Current
-        if (phase === "handoff-prev" && typeof resolveDrRailsForShip === "function") {
-          const again = resolveDrRailsForShip(lat1, lon1);
-          if (again && again.handoffDone && again.wps && again.wps.length >= 2) {
-            const proj2 = setrouteProjectOntoRoute(lat1, lon1, again.wps);
-            if (proj2) {
-              lat1 = proj2.lat;
-              lon1 = proj2.lon;
-              courseOut = proj2.course;
-              mode = "rails";
-            }
-          }
-        }
+  const proj = setrouteProjectOntoRoute(fixLat, fixLon, wps);
+  if (!proj) return;
+  const target = setroutePointAlongRoute(wps, proj.alongNm + distNm);
+  if (!target) return;
+
+  let lat1 = target.lat;
+  let lon1 = target.lon;
+  let courseOut = target.course;
+  let mode = phase === "handoff-prev" ? "handoff-prev" : "rails";
+
+  if (phase === "handoff-prev" && typeof resolveDrRailsForShip === "function") {
+    const again = resolveDrRailsForShip(lat1, lon1);
+    if (again && again.handoffDone && again.wps && again.wps.length >= 2) {
+      const proj2 = setrouteProjectOntoRoute(lat1, lon1, again.wps);
+      if (proj2) {
+        lat1 = proj2.lat;
+        lon1 = proj2.lon;
+        courseOut = proj2.course;
+        mode = "rails";
       }
     }
   }
 
-  if (lat1 == null) {
-    const cog = Number(v.cog != null ? v.cog : v.heading);
-    if (!Number.isFinite(cog) || cog >= 360) return;
-    courseOut = cog;
-    mode = "cog";
-    if (typeof setrouteDestPoint === "function") {
-      const p = setrouteDestPoint(fixLat, fixLon, cog, distNm);
-      lat1 = p.lat;
-      lon1 = p.lon;
-    } else {
-      const R = 3440.065;
-      const δ = distNm / R;
-      const θ = (cog * Math.PI) / 180;
-      const φ1 = (fixLat * Math.PI) / 180;
-      const λ1 = (fixLon * Math.PI) / 180;
-      const sinφ2 = Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(θ);
-      const φ2 = Math.asin(Math.min(1, Math.max(-1, sinφ2)));
-      const λ2 = λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * sinφ2);
-      lat1 = (φ2 * 180) / Math.PI;
-      lon1 = (((λ2 * 180) / Math.PI + 540) % 360) - 180;
-    }
-  }
-
   if (!Number.isFinite(lat1) || !Number.isFinite(lon1)) return;
-  const onRails = mode === "rails" || mode === "handoff-prev" || mode === "orphan";
   const updated = Object.assign({}, v, {
     lat: lat1,
     lon: lon1,
     cog: Number.isFinite(courseOut) ? courseOut : v.cog,
     heading: Number.isFinite(courseOut) ? courseOut : v.heading,
-    source: onRails ? "ais-dr-rails" : "ais-dr",
+    source: "ais-dr-rails",
     deadReckoned: true,
-    aisDrAt: new Date().toISOString(),
+    aisDrAt: getSetSailUtcNowIso(),
     aisDrNm: Math.round(distNm * 10) / 10,
-    aisDrMode: mode
+    aisDrMode: mode,
+    aisDrActivatedAt: v.aisDrActivatedAt || getSetSailUtcNowIso(),
+    aisFixLat: Number.isFinite(Number(v.aisFixLat)) ? Number(v.aisFixLat) : fixLat,
+    aisFixLon: Number.isFinite(Number(v.aisFixLon)) ? Number(v.aisFixLon) : fixLon
   });
-  // Preserve the raw AIS fix used as DR origin
-  if (v.aisFixLat == null) updated.aisFixLat = fixLat;
-  if (v.aisFixLon == null) updated.aisFixLon = fixLon;
   window.userVessel = updated;
   userVessel = updated;
   if (typeof persistUserVessel === "function") persistUserVessel();
   if (window.leafletMap && typeof plotUserVessel === "function") {
-    plotUserVessel(lat1, lon1, onRails ? "AIS-DR-RAILS" : "AIS-DR", true);
+    plotUserVessel(lat1, lon1, "AIS-DR-RAILS", true);
   }
   if (opts.toast && typeof showSetSailToast === "function") {
-    const msg = mode === "rails"
-      ? "Own vessel DR along Current route +" + Math.round(distNm) + " NM @ " + sog.toFixed(1) + " kn"
-      : mode === "handoff-prev"
-        ? "DR change-over — still on previous rails until near new Current"
-        : mode === "orphan"
-          ? "DR on last route snap (no Current) — coral-toggle a new track to hand off"
-          : "Own vessel dead-reckoned +" + Math.round(distNm) + " NM from last AIS (out of coastal coverage)";
+    const ageH = Math.round((ageMs / 3600000) * 10) / 10;
+    const msg = mode === "handoff-prev"
+      ? "DR change-over — previous rails until near new Current"
+      : "DR on Current route +" + Math.round(distNm) + " NM from last AIS (" + ageH + " h UTC @ " + sog.toFixed(1) + " kn)";
     showSetSailToast(msg, "info");
   }
 }
@@ -1033,6 +1096,11 @@ function scheduleOwnVesselAisRefresh() {
   }
   if (!userVessel || !userVessel.mmsi) return;
 
+  // Purge any legacy COG-DR ghost if Current rails are not active
+  if (userVessel.deadReckoned && !getDrActiveRouteId()) {
+    try { snapOwnShipToLastAisFix({ toast: false }); } catch (eSnap) {}
+  }
+
   // Adaptive network poll: 20s near own ship, 60s otherwise — never 5s (map lag / API burn)
   const armNetwork = () => {
     if (_ownAisRefreshTimer) clearInterval(_ownAisRefreshTimer);
@@ -1048,8 +1116,9 @@ function scheduleOwnVesselAisRefresh() {
   };
   armNetwork();
 
-  // Local visual motion every 2s — no network, no full layer rebuild
+  // Local rails motion every 2s — only while Current route is coral-ON (never COG)
   _ownAisDrTimer = setInterval(() => {
+    if (!getDrActiveRouteId()) return;
     if (_ownShipMotionBusy) return;
     _ownShipMotionBusy = true;
     try {
@@ -1062,10 +1131,13 @@ function scheduleOwnVesselAisRefresh() {
 
   const stale =
     !userVessel.aisRefreshedAt ||
-    Date.now() - new Date(userVessel.aisRefreshedAt).getTime() > 3 * 3600 * 1000;
+    getSetSailUtcNowMs() - new Date(userVessel.aisRefreshedAt).getTime() > 3 * 3600 * 1000;
   const delay = stale ? 2500 : 4000;
+  try { syncSetSailUtcClock(false); } catch (eBootUtc) {}
   setTimeout(() => refreshOwnVesselFromAis({ toast: stale }), delay);
-  setTimeout(() => applyOwnVesselDeadReckoning({ toast: stale, visual: true }), delay + 800);
+  setTimeout(() => {
+    if (getDrActiveRouteId()) applyOwnVesselDeadReckoning({ toast: false, visual: true });
+  }, delay + 800);
 }
 window.refreshOwnVesselFromAis = refreshOwnVesselFromAis;
 window.scheduleOwnVesselAisRefresh = scheduleOwnVesselAisRefresh;
@@ -1731,6 +1803,7 @@ function initApp() {
   safe("settings", initSettingsUI);
   safe("mobileSwitcher", initMobileViewSwitcher);
   safe("network", initNetworkStatusWatchdog);
+  safe("utcClock", () => { try { syncSetSailUtcClock(true); } catch (eUtc) {} });
 }
 
 if (document.readyState === "loading") {
@@ -17408,7 +17481,7 @@ function renderVesselRouteLibraryList() {
       if (cur && (cur === id)) {
         setDrActiveRouteId(null, { wipeOrphan: true });
         if (typeof showSetSailToast === "function") {
-          showSetSailToast("DR rails cleared — dead reckoning uses COG/heading", "info");
+          showSetSailToast("Current route cleared — My Vessel shows last official AIS fix only (no COG drift)", "info");
         }
       } else {
         const prev = cur;
@@ -17416,17 +17489,15 @@ function renderVesselRouteLibraryList() {
         if (typeof showSetSailToast === "function") {
           if (prev && prev !== id) {
             showSetSailToast(
-              "Route change-over armed — DR stays on previous rails until the ship meets the new Current (~" +
+              "Route change-over — stay on previous rails until near new Current (~" +
                 SETSAIL_DR_HANDOFF_NM + " NM)",
               "success"
             );
-          } else if (!prev && loadDrLastRailsWps()) {
+          } else {
             showSetSailToast(
-              "New Current set — DR will hand off from the previous track when the ship meets it",
+              "Current route ON — local DR projects My Vessel from last AIS UTC fix along this track (AIS layer stays feed-only)",
               "success"
             );
-          } else {
-            showSetSailToast("DR rails ON — vessel follows this Current route at last AIS speed", "success");
           }
         }
       }
