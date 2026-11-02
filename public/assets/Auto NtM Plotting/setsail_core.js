@@ -5261,15 +5261,12 @@ function initNtMMap() {
     }, 0);
 
     // Buoys / seamarks (OpenSeaMap) — dual LOD so marks don't vanish mid-zoom.
-    // Dedicated pane ABOVE bathymetry (owBathyPane≈250) and BELOW port/NtM markers.
-    // Default TileLayer pane is tilePane(200), which Depths (250+) would cover.
-    if (!leafletMap.getPane("buoysPane")) {
-      const buoysPane = leafletMap.createPane("buoysPane");
-      buoysPane.style.zIndex = 455;
-      buoysPane.style.pointerEvents = "none";
-    } else {
-      try { leafletMap.getPane("buoysPane").style.zIndex = 455; } catch (eBp) {}
-    }
+    // Use Leaflet overlayPane (z≈400), ABOVE bathymetry owBathyPane (250).
+    // Custom buoysPane broke tile paint (blank overlay); overlayPane is reliable.
+    try {
+      const ovPane = leafletMap.getPane("overlayPane");
+      if (ovPane && Number(ovPane.style.zIndex || 0) < 400) ovPane.style.zIndex = 400;
+    } catch (eOv) {}
     const seamarkUrl = "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png";
     const seamarkPersistOpts = {
       keepBuffer: lowEndMap ? 4 : 10,
@@ -5279,14 +5276,13 @@ function initNtMMap() {
       noWrap: false,
       attribution: "OpenSeaMap",
       className: "setsail-seamark-tiles",
-      crossOrigin: true,
-      pane: "buoysPane"
+      pane: "overlayPane"
     };
     const buoysBaseLayer = L.tileLayer(seamarkUrl, Object.assign({}, seamarkPersistOpts, {
       minZoom: 5,
       maxNativeZoom: 12,
       maxZoom: 19,
-      opacity: 0.95,
+      opacity: 1,
       zIndex: 450
     }));
     const buoysDetailLayer = L.tileLayer(seamarkUrl, Object.assign({}, seamarkPersistOpts, {
@@ -5297,6 +5293,7 @@ function initNtMMap() {
       zIndex: 451
     }));
     const seamarkLayer = L.layerGroup([buoysBaseLayer, buoysDetailLayer]);
+    try { window.seamarkLayer = seamarkLayer; } catch (eSm) {}
 
     // Desktop & Mobile ResizeObserver to guarantee non-zero canvas & immediate tile paint
     if (typeof ResizeObserver !== "undefined") {
@@ -13209,16 +13206,11 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         isBuoysActive = !isBuoysActive;
         btn.classList.toggle("active-overlay", isBuoysActive);
         if (isBuoysActive) {
-          if (mapInstance && !mapInstance.getPane("buoysPane")) {
-            const bp = mapInstance.createPane("buoysPane");
-            bp.style.zIndex = 455;
-            bp.style.pointerEvents = "none";
-          }
           layers.buoys.addTo(mapInstance);
           try {
-            if (layers.buoysBase && layers.buoysBase.bringToFront) layers.buoysBase.bringToFront();
-            if (layers.buoysDetail && layers.buoysDetail.bringToFront) layers.buoysDetail.bringToFront();
-          } catch (eBf) {}
+            if (layers.buoysBase && layers.buoysBase.redraw) layers.buoysBase.redraw();
+            if (layers.buoysDetail && layers.buoysDetail.redraw) layers.buoysDetail.redraw();
+          } catch (eRd) {}
         } else if (mapInstance.hasLayer(layers.buoys)) {
           mapInstance.removeLayer(layers.buoys);
         }
