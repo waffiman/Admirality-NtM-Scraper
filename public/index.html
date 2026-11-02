@@ -234,7 +234,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.162" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.163" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -4216,16 +4216,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .vessel-route-lib-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  max-height: 160px;
-  overflow-y: auto;
+  gap: 2px;
+  max-height: none;
+  overflow: visible;
 }
 .vessel-route-lib-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 2px;
+  padding: 3px 2px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  min-height: 26px;
 }
 .vessel-route-lib-row:last-child { border-bottom: none; }
 .vessel-route-lib-info {
@@ -4240,10 +4241,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.25;
 }
 .vessel-route-lib-meta {
-  font-size: 0.62rem;
-  color: #94a3b8;
+  display: none !important; /* compact: FROM→TO only */
 }
 .vessel-route-dr-toggle {
   --dr-w: 34px;
@@ -6277,14 +6278,30 @@ body.ss-setchart .setsail-toast {
   display: block;
 }
 .vessel-ais-suggest[hidden] { display: none !important; }
+/* Scrollable My Vessel popovers — overflow:visible was clipping routes past fixed height */
 .ntm-vessel-popover,
 .home-vessel-popover {
-  overflow: visible !important;
+  overflow: hidden !important;
+  max-height: min(78vh, 580px) !important;
+  display: none;
+  flex-direction: column;
+}
+.ntm-vessel-popover.open,
+.home-vessel-popover.open {
+  display: flex !important;
+}
+.ntm-vessel-popover .ntm-popover-header,
+.home-vessel-popover .ntm-popover-header {
+  flex: 0 0 auto;
 }
 .ntm-vessel-popover .ntm-popover-body,
 .home-vessel-popover .ntm-popover-body {
-  overflow: auto !important;
-  max-height: min(62vh, 420px);
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  max-height: none !important;
+  flex: 1 1 auto;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
 }
 /* ECDIS broken-crosshair cursor — black + white halo (readable on blue water & yellow land) */
 .ecdis-cursor-map,
@@ -6338,7 +6355,7 @@ body.ss-setchart .setsail-toast {
   width: 300px !important;
   max-width: min(300px, 92vw) !important;
 }
-.home-vessel-popover.open { display: block !important; }
+.home-vessel-popover.open { display: flex !important; flex-direction: column !important; }
 
 /* Compact My Vessel form (Home + SetChart) — denser grid, less vertical stack */
 .vessel-profile-fields {
@@ -6508,7 +6525,7 @@ body.ss-setchart .setsail-toast {
   animation: excelTabSpinnerRotate 0.65s linear infinite;
   pointer-events: none;
 }
-.ntm-vessel-popover { width: 300px !important; max-height: min(72vh, 520px); overflow: auto; }
+.ntm-vessel-popover { width: 300px !important; max-height: min(78vh, 580px) !important; }
 
 /* My Vessel Popover enhanced styling */
 .ntm-vessel-popover {
@@ -7084,15 +7101,22 @@ body.ss-setchart .setsail-toast {
   border-color: rgba(126, 182, 255, 0.25);
 }
 
-/* Draggable Waypoint Markers */
-.route-wpt-div-icon {
+/* Draggable Waypoint Markers — must stay visible above route glow/corridor */
+.leaflet-pane.leaflet-routeWptPane-pane,
+.leaflet-routeWptPane-pane {
+  z-index: 780 !important;
+}
+.route-wpt-div-icon,
+.leaflet-div-icon.route-wpt-div-icon {
   background: transparent !important;
   border: none !important;
   margin: 0 !important;
+  width: auto !important;
+  height: auto !important;
 }
 .route-wpt-div-icon .route-wpt-dot {
   box-sizing: border-box;
-  border-radius: 50%;
+  border-radius: 50% !important;
   cursor: grab;
   pointer-events: auto;
   box-shadow: 0 0 0 2px rgba(15,23,42,0.55), 0 0 10px rgba(0,0,0,0.45);
@@ -7206,8 +7230,9 @@ body.ss-setchart .setsail-toast {
 /* Top HUD Bar Choreography */
 .home-hud-top {
   position: relative !important;
-  z-index: 40 !important;
+  z-index: 120 !important;
   min-height: 44px !important;
+  pointer-events: auto !important;
 }
 
 .home-hud-left {
@@ -7291,23 +7316,30 @@ body.ss-setchart .setsail-toast {
   min-height: 72px !important;
 }
 
-/* v5.35 hero logo above HUD */
+/* v5.35 hero logo — HUD must stay ABOVE center stage or My Vessel clicks die */
 #homeCenterStage {
   position: relative !important;
-  z-index: 80 !important;
+  z-index: 20 !important;
 }
 #homeBrandBlock,
 .home-brand-block {
   position: relative !important;
-  z-index: 90 !important;
+  z-index: 22 !important;
 }
 #homeHeroLogoWrap {
   position: relative !important;
-  z-index: 95 !important;
+  z-index: 23 !important;
 }
 .home-hud-top,
 #homeHudTop {
-  z-index: 40 !important;
+  z-index: 120 !important;
+  pointer-events: auto !important;
+}
+#homeVesselHudPill,
+#homeVesselHudBtn {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 121 !important;
 }
 
 /* Slide 1 Bottom Animated Scroll Hint Arrow */
@@ -8235,7 +8267,8 @@ body.ss-setchart .setsail-toast {
   min-height: 46px !important;
   padding: 0 1.15rem !important;
   box-sizing: border-box !important;
-  z-index: 40 !important;
+  z-index: 120 !important;
+  pointer-events: auto !important;
 }
 
 .home-hud-left {
@@ -8415,7 +8448,8 @@ body.ss-setchart .setsail-toast {
   min-height: 46px !important;
   padding: 0 1.15rem !important;
   box-sizing: border-box !important;
-  z-index: 40 !important;
+  z-index: 120 !important;
+  pointer-events: auto !important;
 }
 
 .home-hud-left,
@@ -9132,7 +9166,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.162" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.163" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -11683,7 +11717,8 @@ select option {
   min-height: 46px !important;
   padding: 0 1.15rem !important;
   box-sizing: border-box !important;
-  z-index: 40 !important;
+  z-index: 120 !important;
+  pointer-events: auto !important;
 }
 
 .home-hud-left,
@@ -13496,7 +13531,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.162" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.162';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.163" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.163';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13518,7 +13553,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.162" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.163" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -14344,7 +14379,6 @@ select option {
                     <div id="vesselRouteName" style="color:var(--accent);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:none;"></div>
                     <div id="vesselRouteMeta" style="color:var(--muted);font-size:0.7rem;margin-top:2px;display:none;"></div>
                     <div id="vesselRouteLibraryList" class="vessel-route-lib-list" aria-label="Loaded passage plans"></div>
-                    <div class="vessel-route-dr-hint" style="font-size:0.62rem;color:#94a3b8;margin-top:6px;line-height:1.35;">Coral = Current route for local My Vessel DR only (off by default). Chart AIS targets always stay at last official AIS fix — never COG-drift. With Current ON, DR projects your ship from the AIS fix UTC timestamp along this track using a trusted UTC clock. Edits to the Current track apply live.</div>
                   </div>
 
 
@@ -21211,25 +21245,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.162"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.162" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.162"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.163"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.163" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.163"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.162",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.163",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.162"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.162"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.162"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.163"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.163"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.163"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.162"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.163"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21302,10 +21336,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.162"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.162"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.162"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.162"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.163"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.163"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.163"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.163"></script>
 
 
 
@@ -22019,17 +22053,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.162', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.163', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.162 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.163 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.162') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.162.0'); }, 1200);
+              if (last && last.indexOf('v5.163') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.163.0'); }, 1200);
               }
             } catch (eTip) {}
           })

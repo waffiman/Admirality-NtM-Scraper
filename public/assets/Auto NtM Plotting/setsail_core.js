@@ -2830,6 +2830,40 @@ function parseRtmRoute(arrayBuffer, fallbackName) {
 /**
  * Render Route Polyline and Waypoint Markers on Leaflet Chart
  */
+function ensureRouteWptPane() {
+  if (!leafletMap || !leafletMap.createPane) return "markerPane";
+  try {
+    let pane = leafletMap.getPane("routeWptPane");
+    if (!pane) {
+      pane = leafletMap.createPane("routeWptPane");
+    }
+    // Above overlay/glow polylines (often raised to z≈650) so WPT circles stay visible
+    pane.style.zIndex = 780;
+    pane.style.pointerEvents = "auto";
+    const mk = leafletMap.getPane("markerPane");
+    if (mk && Number(mk.style.zIndex || 0) < 700) mk.style.zIndex = 700;
+    return "routeWptPane";
+  } catch (e) {
+    return "markerPane";
+  }
+}
+
+/** Indices of WPTs to draw as circles — always start/end; sample densified tracks. */
+function pickRouteWptMarkerIndices(count) {
+  if (count <= 0) return [];
+  if (count <= 120) {
+    const all = [];
+    for (let i = 0; i < count; i++) all.push(i);
+    return all;
+  }
+  const maxMid = 100;
+  const step = Math.ceil((count - 2) / maxMid);
+  const idxs = [0];
+  for (let i = step; i < count - 1; i += step) idxs.push(i);
+  if (idxs[idxs.length - 1] !== count - 1) idxs.push(count - 1);
+  return idxs;
+}
+
 function renderRouteOnMap(route, shouldFly = true) {
   if (!leafletMap) return;
   if (window._setsailRenderingRoute) return;
@@ -2900,117 +2934,97 @@ function renderRouteOnMap(route, shouldFly = true) {
   if (window.ROUTE_SUBFILTERS.waypoints == null) window.ROUTE_SUBFILTERS.waypoints = true;
   const rtSub = window.ROUTE_SUBFILTERS;
   let trackLine = null;
-  let trackGlow = null;
   let trackOutline = null;
-  let trackCore = null;
   if (rtSub.line !== false && unrolledCoords.length >= 2) {
-    // Simplify display polylines for pan/zoom; full unrolled kept for WPT markers + DR
-    const lineCoords = simplifyRoutePtsForBuffer(unrolledCoords, 180);
+    // Two polylines only — 4 stacked SVG lines froze pan/zoom to a dark-blue blank
+    const lineCoords = simplifyRoutePtsForBuffer(unrolledCoords, 160);
     trackOutline = L.polyline(lineCoords, {
       color: "#0b1e33",
-      weight: 8,
-      opacity: 0.8,
-      interactive: false,
-      lineCap: "round",
-      lineJoin: "round"
-    });
-    trackGlow = L.polyline(lineCoords, {
-      color: "#00e5ff",
-      weight: 11,
-      opacity: 0.28,
+      weight: 7,
+      opacity: 0.75,
       interactive: false,
       lineCap: "round",
       lineJoin: "round"
     });
     trackLine = L.polyline(lineCoords, {
       color: "#ff3b1f",
-      weight: 4,
+      weight: 3.5,
       opacity: 1,
       interactive: true,
       lineCap: "round",
       lineJoin: "round"
     });
-    trackCore = L.polyline(lineCoords, {
-      color: "#ffe566",
-      weight: 2,
-      opacity: 0.95,
-      interactive: false,
-      lineCap: "round",
-      lineJoin: "round"
-    });
-    leafletRouteLayer.addLayer(trackGlow);
     leafletRouteLayer.addLayer(trackOutline);
     leafletRouteLayer.addLayer(trackLine);
-    leafletRouteLayer.addLayer(trackCore);
   }
 
-  // Buffer once at end (avoid double SVG rebuild during load)
-
-  // Add Waypoints — always draw circles for every leg junction (subfilter may hide)
+  // Waypoint circles on dedicated high pane (always, unless subfilter off)
   const showWpts = rtSub.waypoints !== false;
-  (showWpts ? cleanWps : []).forEach((wp, idx) => {
+  const wptPane = ensureRouteWptPane();
+  const wptIdxs = showWpts ? pickRouteWptMarkerIndices(cleanWps.length) : [];
+  wptIdxs.forEach((idx) => {
+    const wp = cleanWps[idx];
+    if (!wp) return;
     const isStart = idx === 0;
     const isEnd = idx === cleanWps.length - 1;
     const wptCoords = unrolledCoords[idx];
-    
+    if (!wptCoords) return;
+
     const color = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#38bdf8");
     const fillColor = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#f8fafc");
-    // Large enough to read on ocean zoom — previous 8px dots vanished under the glow line
-    const radius = isStart || isEnd ? 12 : 9;
+    const radius = isStart || isEnd ? 11 : 8;
     const box = radius * 2;
     const numHtml = (!isStart && !isEnd && cleanWps.length <= 80)
       ? `<span class="route-wpt-num">${idx + 1}</span>` : "";
-    
+
     const marker = L.marker(wptCoords, {
+      pane: wptPane,
       draggable: true,
       autoPan: true,
       keyboard: false,
       icon: L.divIcon({
-        className: "route-wpt-div-icon",
-        html: `<div class="route-wpt-dot" style="position:relative;width:${box}px;height:${box}px;background:${fillColor};border:3px solid ${color};" title="Drag WPT #${idx + 1}">${numHtml}</div>`,
+        className: "leaflet-div-icon route-wpt-div-icon",
+        html: `<div class="route-wpt-dot" style="position:relative;width:${box}px;height:${box}px;background:${fillColor};border:3px solid ${color};border-radius:50%;" title="Drag WPT #${idx + 1}">${numHtml}</div>`,
         iconSize: [box, box],
         iconAnchor: [radius, radius]
       }),
-      zIndexOffset: 2000 + idx
+      zIndexOffset: 2500 + idx
     });
 
-    marker.on('dragstart', function(e) {
+    marker.on("dragstart", function (e) {
       const el = e.target.getElement();
       if (el) {
-        const dot = el.querySelector('.route-wpt-dot');
-        if (dot) dot.style.cursor = 'grabbing';
+        const dot = el.querySelector(".route-wpt-dot");
+        if (dot) dot.style.cursor = "grabbing";
       }
     });
 
-    marker.on('drag', function(e) {
+    marker.on("drag", function (e) {
       const latlng = e.target.getLatLng();
       unrolledCoords[idx] = [latlng.lat, latlng.lng];
-      if (trackGlow) trackGlow.setLatLngs(unrolledCoords);
-      if (trackOutline) trackOutline.setLatLngs(unrolledCoords);
-      if (trackLine) trackLine.setLatLngs(unrolledCoords);
-      if (trackCore) trackCore.setLatLngs(unrolledCoords);
+      const linePts = simplifyRoutePtsForBuffer(unrolledCoords, 160);
+      if (trackOutline) trackOutline.setLatLngs(linePts);
+      if (trackLine) trackLine.setLatLngs(linePts);
     });
 
-    marker.on('dragend', function(e) {
+    marker.on("dragend", function (e) {
       const el = e.target.getElement();
       if (el) {
-        const dot = el.querySelector('.route-wpt-dot');
-        if (dot) dot.style.cursor = 'grab';
+        const dot = el.querySelector(".route-wpt-dot");
+        if (dot) dot.style.cursor = "grab";
       }
       const latlng = e.target.getLatLng();
       let normLon = ((latlng.lng + 180) % 360 + 360) % 360 - 180;
       let normLat = Math.max(-85, Math.min(85, latlng.lat));
-      
+
       wp.lat = parseFloat(normLat.toFixed(5));
       wp.lon = parseFloat(normLon.toFixed(5));
 
-      // Prefer the original waypoint object (_src) — cleanWps index may diverge after dedupe
       const targetWp = wp._src || (activeRouteData && activeRouteData.waypoints && activeRouteData.waypoints[idx]) || null;
       if (activeRouteData && targetWp) {
         targetWp.lat = wp.lat;
         targetWp.lon = wp.lon;
 
-        // Re-unroll coordinates cleanly across the entire route to maintain continuous geometry
         if (cleanWps.length > 0) {
           cleanWps[idx].lat = wp.lat;
           cleanWps[idx].lon = wp.lon;
@@ -3028,28 +3042,12 @@ function renderRouteOnMap(route, shouldFly = true) {
         }
 
         window._setsailRouteUnrolled = unrolledCoords.slice();
-        if (trackGlow) trackGlow.setLatLngs(unrolledCoords);
-        if (trackOutline) trackOutline.setLatLngs(unrolledCoords);
-        if (trackLine) trackLine.setLatLngs(unrolledCoords);
-        if (trackCore) trackCore.setLatLngs(unrolledCoords);
-
-        if (typeof window.renderRouteBufferCorridorOnMap === "function") {
-          window.renderRouteBufferCorridorOnMap();
-        }
+        const linePts = simplifyRoutePtsForBuffer(unrolledCoords, 160);
+        if (trackOutline) trackOutline.setLatLngs(linePts);
+        if (trackLine) trackLine.setLatLngs(linePts);
 
         if (typeof enrichRouteWithLegsTelemetry === "function") {
           enrichRouteWithLegsTelemetry(activeRouteData);
-        } else {
-          let totalDist = 0;
-          for (let k = 0; k < activeRouteData.waypoints.length - 1; k++) {
-            totalDist += calculateHaversineDistanceNM(
-              activeRouteData.waypoints[k].lat, activeRouteData.waypoints[k].lon,
-              activeRouteData.waypoints[k+1].lat, activeRouteData.waypoints[k+1].lon
-            );
-          }
-          activeRouteData.totalDistanceNM = Math.round(totalDist);
-          const spd = ((activeRouteData.metadata && activeRouteData.metadata.speedKnots) || 14.5) || 14.5;
-          activeRouteData.steamingDays = (totalDist / (spd * 24)).toFixed(1);
         }
 
         try {
@@ -3064,7 +3062,6 @@ function renderRouteOnMap(route, shouldFly = true) {
           displaySetRouteResults(activeRouteData, false);
         }
 
-        // Debounced — full NtM/weather corridor refilter on every drag was freezing the map
         if (typeof scheduleRouteCorridorLayersRefresh === "function") {
           scheduleRouteCorridorLayersRefresh(220);
         }
@@ -3076,7 +3073,6 @@ function renderRouteOnMap(route, shouldFly = true) {
             </div>
             <div style="font-size:0.78rem;color:#475569;margin-bottom:2px;"><b>Coordinates:</b> ${formatLatLonDMS(wp.lat, wp.lon)}</div>
             <div style="font-size:0.72rem;color:#64748b;"><b>Route:</b> ${route.name} (WPT ${idx + 1} of ${route.waypoints.length})</div>
-            <div style="font-size:0.70rem;color:#10b981;font-weight:600;margin-top:4px;">✨ Repositioned on Chart</div>
           </div>
         `);
 
@@ -3084,7 +3080,6 @@ function renderRouteOnMap(route, shouldFly = true) {
           showSetSailToast(`WPT #${idx + 1} moved to ${formatLatLonDMS(wp.lat, wp.lon)}`, "info");
         }
 
-        // Live DR: Current-route waypoint edits apply on the next rails tick
         try {
           const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
           if (drId && activeRouteData && (activeRouteData.id === drId || activeRouteData.name === drId)) {
@@ -3104,11 +3099,11 @@ function renderRouteOnMap(route, shouldFly = true) {
         <div style="font-size:0.72rem;color:#64748b;"><b>Route:</b> ${route.name} (WPT ${idx + 1} of ${route.waypoints.length})</div>
       </div>
     `);
-    
+
     leafletRouteLayer.addLayer(marker);
   });
 
-  // Update UI in My Vessel Popover (multi-route list + DR toggle)
+  // Update UI in My Vessel Popover (multi-route list + Current toggle)
   const infoBox = document.getElementById("vesselRouteInfoBox");
   const clearBtn = document.getElementById("vesselClearRouteBtn");
   const fitBtn = document.getElementById("vesselFitRouteBtn");
@@ -3126,17 +3121,18 @@ function renderRouteOnMap(route, shouldFly = true) {
   if (typeof window.updateRouteMiniWindowUI === "function") {
     window.updateRouteMiniWindowUI();
   }
-  if (typeof window.renderRouteBufferCorridorOnMap === "function") {
-    window.renderRouteBufferCorridorOnMap();
-  }
-  // Defer heavy overlay refilter so pan/zoom stays responsive right after route load
+  // Defer corridor + history — sync SVG polygon + localStorage on every render froze the UI
   if (typeof scheduleRouteCorridorLayersRefresh === "function") {
-    scheduleRouteCorridorLayersRefresh(280);
+    scheduleRouteCorridorLayersRefresh(320);
   } else if (window.ROUTE_CORRIDOR_FILTER_ENABLED && typeof renderNtMListAndMap === "function") {
-    setTimeout(() => { try { renderNtMListAndMap(); } catch (e) {} }, 280);
+    setTimeout(() => { try { renderNtMListAndMap(); } catch (e) {} }, 320);
   }
   if (typeof window.saveSetSailUserHistory === "function") {
-    window.saveSetSailUserHistory();
+    if (window._setsailRouteHistTimer) clearTimeout(window._setsailRouteHistTimer);
+    window._setsailRouteHistTimer = setTimeout(() => {
+      window._setsailRouteHistTimer = null;
+      try { window.saveSetSailUserHistory(); } catch (eH) {}
+    }, 1200);
   }
   } finally {
     window._setsailRenderingRoute = false;
@@ -4111,6 +4107,13 @@ function initHomeHudVessel() {
   const pillBtn = document.getElementById("homeVesselHudBtn");
   const pop = document.getElementById("homeVesselPopover");
   const closeBtn = document.getElementById("homeVesselPopClose");
+  const hudTop = document.getElementById("homeHudTop");
+  // Hero center-stage sits at z-index 80 and was swallowing HUD clicks — keep bar above it
+  if (hudTop) {
+    hudTop.style.zIndex = "120";
+    hudTop.style.pointerEvents = "auto";
+    hudTop.style.position = hudTop.style.position || "relative";
+  }
   if (pillBtn && pillBtn._homeVesselBound) return;
   if (pillBtn) pillBtn._homeVesselBound = true;
 
@@ -4178,13 +4181,20 @@ function initHomeHudVessel() {
   }
   if (pillHost) {
     pillHost.style.pointerEvents = "auto";
-    pillHost.style.zIndex = "81";
+    pillHost.style.zIndex = "130";
+    pillHost.style.position = "relative";
     pillHost.addEventListener("click", (e) => {
       // Only handle direct pill chrome clicks; button has its own listener
       if (pillBtn && (e.target === pillBtn || pillBtn.contains(e.target))) return;
       if (pop && pop.contains(e.target)) return;
       onVesselHudActivate(e);
     }, true);
+  }
+  if (pillBtn) {
+    pillBtn.style.pointerEvents = "auto";
+    pillBtn.style.cursor = "pointer";
+    pillBtn.style.position = "relative";
+    pillBtn.style.zIndex = "131";
   }
   if (closeBtn) closeBtn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -4655,7 +4665,31 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
   }
 
   updateHomeVesselHudLabel();
+  // Live lat/lon in open My Vessel popovers (skip if user is typing in those fields)
+  try {
+    syncOpenVesselPopoverLiveCoords();
+  } catch (eSync) {}
 }
+
+/** Push live vessel coords into open Home/Chart My Vessel forms without fighting focused inputs. */
+function syncOpenVesselPopoverLiveCoords() {
+  const chartPop = document.getElementById("ntmVesselPopover");
+  const homePop = document.getElementById("homeVesselPopover");
+  const chartOpen = !!(chartPop && chartPop.classList.contains("open"));
+  const homeOpen = !!(homePop && homePop.classList.contains("open"));
+  if (!chartOpen && !homeOpen) return;
+
+  const active = document.activeElement;
+  const activeId = active && active.id ? String(active.id) : "";
+  const editingCoords = /^(vesselLat|vesselLon|homeVesselLat|homeVesselLon|vesselName|homeVesselName|vesselMmsi|homeVesselMmsi)$/.test(activeId);
+  if (editingCoords) return;
+
+  const now = Date.now();
+  if (window._setsailVesselFormSyncAt && (now - window._setsailVesselFormSyncAt) < 900) return;
+  window._setsailVesselFormSyncAt = now;
+  if (typeof fillVesselFormsFromState === "function") fillVesselFormsFromState();
+}
+window.syncOpenVesselPopoverLiveCoords = syncOpenVesselPopoverLiveCoords;
 
 /**
  * Minimalist Settings UI
@@ -7348,7 +7382,13 @@ function renderNtMListAndMap() {
       const ov = mapRef.getPane("overlayPane");
       const mk = mapRef.getPane("markerPane");
       if (ov) ov.style.zIndex = 650;
-      if (mk) mk.style.zIndex = 660;
+      if (mk) mk.style.zIndex = 700;
+      let rw = mapRef.getPane("routeWptPane");
+      if (!rw) rw = mapRef.createPane("routeWptPane");
+      if (rw) {
+        rw.style.zIndex = 780;
+        rw.style.pointerEvents = "auto";
+      }
     } catch (eZ) {}
     // Drop any stale custom canvas renderer from prior versions
     window._setsailNtmCanvasRenderer = null;
@@ -15676,23 +15716,25 @@ function updateRouteMiniWindowUI() {
   const wpts = activeRouteData.waypoints;
   let totalDist = Number(activeRouteData.totalDistanceNM) || 0;
   if (!totalDist && wpts.length >= 2) {
-    for (let i = 0; i < wpts.length - 1; i++) {
-      totalDist += calculateHaversineDistanceNM(wpts[i].lat, wpts[i].lon, wpts[i + 1].lat, wpts[i + 1].lon);
+    // Sample legs — full O(n) haversine on densified tracks freezes the UI
+    const step = wpts.length > 80 ? Math.ceil((wpts.length - 1) / 60) : 1;
+    for (let i = 0; i < wpts.length - 1; i += step) {
+      const j = Math.min(wpts.length - 1, i + step);
+      totalDist += calculateHaversineDistanceNM(wpts[i].lat, wpts[i].lon, wpts[j].lat, wpts[j].lon);
     }
     totalDist = Math.round(totalDist);
     activeRouteData.totalDistanceNM = totalDist;
   }
 
-  const ntmHits = (typeof NTM_STORE !== "undefined" ? NTM_STORE : []).filter(n => !n.isCancelled && n.status !== "CANCELLED" && doesNoticeIntersectRouteCorridor(n)).length;
-  const portHits = (typeof PORT_DEPTHS_DB !== "undefined" ? PORT_DEPTHS_DB : []).filter(p => {
-    const c = p.approachCoords || p.coords;
-    return c && isPointInActiveRouteCorridor(c[0], c[1]);
-  }).length;
+  // NEVER scan full NtM/Ports DB here — that was freezing the whole app to a dark-blue blank
+  const hitsEl = document.getElementById("routeMiniHits");
+  if (hitsEl && !hitsEl.dataset.deferred) {
+    hitsEl.textContent = window.ROUTE_CORRIDOR_FILTER_ENABLED ? "Corridor filter ON" : "—";
+  }
 
   const titleEl = document.getElementById("routeMiniTitle");
   const wptsEl = document.getElementById("routeMiniWpts");
   const distEl = document.getElementById("routeMiniDist");
-  const hitsEl = document.getElementById("routeMiniHits");
   const chkEl = document.getElementById("chkRouteCorridorOnly");
   const rngEl = document.getElementById("rngRouteBufferNm");
   const valEl = document.getElementById("lblRouteBufferNm");
@@ -15700,7 +15742,6 @@ function updateRouteMiniWindowUI() {
   if (titleEl) titleEl.textContent = activeRouteData.name || activeRouteData.routeName || "Active Passage Plan";
   if (wptsEl) wptsEl.textContent = String(wpts.length);
   if (distEl) distEl.textContent = `${totalDist.toLocaleString()} NM`;
-  if (hitsEl) hitsEl.textContent = `${ntmHits} NtM • ${portHits} Ports`;
   if (chkEl) chkEl.checked = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
   if (rngEl) rngEl.value = String(window.ROUTE_CORRIDOR_BUFFER_NM || 25);
   if (valEl) valEl.textContent = `±${window.ROUTE_CORRIDOR_BUFFER_NM || 25} NM`;
@@ -17406,7 +17447,28 @@ function deleteRouteFromLibrary(routeId) {
 }
 window.deleteRouteFromLibrary = deleteRouteFromLibrary;
 
-/** My Vessel popover: list loaded routes with coral DR-rails toggles (one active max). */
+/** Compact FROM → TO label for My Vessel route tiles (no long meta). */
+function formatVesselRouteOdLabel(rt) {
+  if (!rt) return "Route";
+  const wps = Array.isArray(rt.waypoints) ? rt.waypoints : [];
+  const esc = (s) => String(s || "").replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c])).trim();
+  const strip = (s) => String(s || "").replace(/\s+/g, " ").trim();
+  let from = strip(rt.origin || rt.from || rt.fromName || "");
+  let to = strip(rt.destination || rt.to || rt.toName || "");
+  if (!from && wps[0]) from = strip(wps[0].name || wps[0].id || "");
+  if (!to && wps.length) {
+    const last = wps[wps.length - 1];
+    to = strip(last.name || last.id || "");
+  }
+  if (!from) from = "Start";
+  if (!to) to = "End";
+  // Keep tiles short
+  if (from.length > 22) from = from.slice(0, 20) + "…";
+  if (to.length > 22) to = to.slice(0, 20) + "…";
+  return esc(from) + " → " + esc(to);
+}
+
+/** My Vessel popover: list loaded routes with coral Current toggles (one active max). */
 function renderVesselRouteLibraryList() {
   const listEl = document.getElementById("vesselRouteLibraryList");
   const infoBox = document.getElementById("vesselRouteInfoBox");
@@ -17444,21 +17506,17 @@ function renderVesselRouteLibraryList() {
 
   listEl.innerHTML = lib.map((rt) => {
     const rid = String(rt.id || "").replace(/"/g, "&quot;");
-    const safeName = String(rt.name || "Passage Route").replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
-    const n = (rt.waypoints || []).length;
-    const dist = rt.totalDistanceNM || 0;
-    const fmt = rt.format || "ROUTE";
+    const od = formatVesselRouteOdLabel(rt);
     const isDr = !!(drNow && (rt.id === drNow || rt.name === drNow));
     const isShown = !!(activeRouteData && (activeRouteData.id === rt.id || activeRouteData.name === rt.name));
     return (
-      '<div class="vessel-route-lib-row' + (isShown ? " is-shown" : "") + '" data-route-id="' + rid + '">' +
+      '<div class="vessel-route-lib-row' + (isShown ? " is-shown" : "") + (isDr ? " is-current" : "") + '" data-route-id="' + rid + '">' +
         '<div class="vessel-route-lib-info" data-route-show="' + rid + '" title="Show on chart">' +
-          '<div class="vessel-route-lib-name">' + safeName + (isDr ? ' · DR' : "") + "</div>" +
-          '<div class="vessel-route-lib-meta">' + n + " WPTs · " + dist + " NM · " + fmt + "</div>" +
+          '<div class="vessel-route-lib-name">' + od + "</div>" +
         "</div>" +
         '<button type="button" class="vessel-route-dr-toggle' + (isDr ? " is-on" : "") +
           '" data-route-dr-toggle="' + rid + '" role="switch" aria-checked="' + (isDr ? "true" : "false") +
-          '" title="Mark as DR rails route (coral = active; only one)"></button>' +
+          '" title="Current route (coral = ON)" aria-label="Current"></button>' +
       "</div>"
     );
   }).join("");
@@ -17481,23 +17539,16 @@ function renderVesselRouteLibraryList() {
       if (cur && (cur === id)) {
         setDrActiveRouteId(null, { wipeOrphan: true });
         if (typeof showSetSailToast === "function") {
-          showSetSailToast("Current route cleared — My Vessel shows last official AIS fix only (no COG drift)", "info");
+          showSetSailToast("Current cleared — last official AIS fix only", "info");
         }
       } else {
         const prev = cur;
         setDrActiveRouteId(id);
         if (typeof showSetSailToast === "function") {
           if (prev && prev !== id) {
-            showSetSailToast(
-              "Route change-over — stay on previous rails until near new Current (~" +
-                SETSAIL_DR_HANDOFF_NM + " NM)",
-              "success"
-            );
+            showSetSailToast("Change-over — previous rails until near new Current", "success");
           } else {
-            showSetSailToast(
-              "Current route ON — local DR projects My Vessel from last AIS UTC fix along this track (AIS layer stays feed-only)",
-              "success"
-            );
+            showSetSailToast("Current ON — local DR along this track", "success");
           }
         }
       }
@@ -17595,11 +17646,13 @@ window.selectSavedRouteFromSidebar = selectSavedRouteFromSidebar;
 const _origRenderRouteOnMapV49 = window.renderRouteOnMap || renderRouteOnMap;
 renderRouteOnMap = function(route, shouldFly = true) {
   if (route && Array.isArray(route.waypoints) && route.waypoints.length > 0) {
-    enrichRouteWithLegsTelemetry(route);
     // Avoid rewriting library + drawer DOM on every cosmetic re-render (lag after load)
-    const sig = String(route.id || route.name || "") + ":" + route.waypoints.length + ":" + (route.totalDistanceNM || "");
+    const sig = String(route.id || route.name || "") + ":" + route.waypoints.length + ":" +
+      (route.waypoints[0] && route.waypoints[0].lat) + "," + (route.waypoints[0] && route.waypoints[0].lon);
     if (window._setsailLastRouteRenderSig !== sig) {
       window._setsailLastRouteRenderSig = sig;
+      // Full leg telemetry only when route identity changes — O(n) on densified tracks freezes UI
+      if (typeof enrichRouteWithLegsTelemetry === "function") enrichRouteWithLegsTelemetry(route);
       saveRouteToLibrary(route);
       displaySetRouteResults(route, false);
     }
