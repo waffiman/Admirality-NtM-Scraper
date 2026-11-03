@@ -28,14 +28,19 @@
   // Digitraffic = dense Baltic-only feed — never at world overview (it crowds the map).
   const MIN_ZOOM_DIGITRAFFIC = 6;
   // Even world corridors for Open Waters (Baltic intentionally last / not privileged).
+  // Extra IO / Andaman / BoB boxes catch ocean-passage traffic after Malacca T-AIS dropout.
   const OVERVIEW_SAMPLE_BOXES = [
     { minLat: 25, minLon: -80, maxLat: 42, maxLon: -55 },   // NW Atlantic / US East
     { minLat: 5, minLon: -95, maxLat: 28, maxLon: -60 },    // Gulf / Caribbean
     { minLat: -40, minLon: -60, maxLat: -20, maxLon: -30 }, // SW Atlantic
     { minLat: 35, minLon: -25, maxLat: 52, maxLon: 5 },     // NE Atlantic / Europe W
     { minLat: 30, minLon: -20, maxLat: 45, maxLon: 10 },    // Med W approaches
+    { minLat: 10, minLon: 40, maxLat: 30, maxLon: 60 },     // Red Sea / Gulf of Aden
     { minLat: -38, minLon: 10, maxLat: -20, maxLon: 40 },   // Cape of Good Hope
+    { minLat: -25, minLon: 40, maxLat: 5, maxLon: 75 },     // W / central Indian Ocean
     { minLat: 5, minLon: 40, maxLat: 25, maxLon: 70 },      // Arabian Sea
+    { minLat: 5, minLon: 80, maxLat: 22, maxLon: 95 },      // Bay of Bengal
+    { minLat: 0, minLon: 90, maxLat: 12, maxLon: 100 },     // Andaman / Malacca exit
     { minLat: -10, minLon: 90, maxLat: 15, maxLon: 120 },   // Malacca / Singapore
     { minLat: 20, minLon: 115, maxLat: 42, maxLon: 145 },   // East China / Japan
     { minLat: 30, minLon: -150, maxLat: 48, maxLon: -120 }, // NE Pacific
@@ -823,7 +828,9 @@
   }
 
   async function fetchJson(url, headers) {
-    const res = await fetch(url, { headers: headers || {} });
+    const h = Object.assign({ "Accept-Encoding": "gzip" }, headers || {});
+    // Digitraffic returns 406 without gzip; browsers negotiate automatically, but be explicit.
+    const res = await fetch(url, { headers: h });
     if (!res.ok) throw new Error("HTTP " + res.status + " " + url);
     return res.json();
   }
@@ -1143,6 +1150,7 @@
     try {
       const arr = await fetchJson(DIGITRAFFIC_VES, {
         Accept: "application/json",
+        "Accept-Encoding": "gzip",
         "Digitraffic-User": "SetSailMarineSuite/AIS"
       });
       if (Array.isArray(arr)) {
@@ -1162,6 +1170,7 @@
   async function loadLiveDigitraffic() {
     const geo = await fetchJson(DIGITRAFFIC_LOC, {
       Accept: "application/json",
+      "Accept-Encoding": "gzip",
       "Digitraffic-User": "SetSailMarineSuite/AIS"
     });
     if (!Object.keys(aisMetaByMmsi).length) await loadDigitrafficMeta();

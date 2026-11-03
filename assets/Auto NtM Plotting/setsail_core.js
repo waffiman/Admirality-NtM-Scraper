@@ -522,11 +522,12 @@ async function fetchOwnVesselAisUpdate() {
     boxes.push([lat0 - 12, lon0 - 12, lat0 + 12, lon0 + 12]);
   }
   // Always add global sample corridors so a ship that left the last bbox is still found
-  // (incl. Malacca exit → Indian Ocean toward Africa / Cape / Suez).
+  // (Malacca exit → Andaman / BoB / Arabian / Cape / Suez / Atlantic).
   [
-    [30, -80, 45, -55], [0, 95, 20, 120], [-5, 90, 10, 110], [20, 115, 42, 145],
-    [35, -20, 55, 10], [-40, 10, -20, 40], [-15, 35, 20, 80], [5, 40, 25, 70],
-    [-25, 30, 5, 75], [30, -150, 50, -120], [-35, 145, -15, 175]
+    [30, -80, 45, -55], [0, 95, 20, 120], [-5, 90, 10, 110], [0, 90, 12, 100],
+    [5, 80, 22, 95], [20, 115, 42, 145], [35, -20, 55, 10], [-40, 10, -20, 40],
+    [-15, 35, 20, 80], [5, 40, 25, 70], [10, 40, 30, 60], [-25, 30, 5, 75],
+    [-25, 40, 5, 75], [30, -150, 50, -120], [-35, 145, -15, 175]
   ].forEach((b) => boxes.push(b));
 
   async function fromOpenWaters() {
@@ -613,6 +614,7 @@ async function fetchOwnVesselAisUpdate() {
       const geo = await fetch("https://meri.digitraffic.fi/api/ais/v1/locations", {
         headers: {
           Accept: "application/json",
+          "Accept-Encoding": "gzip",
           "Digitraffic-User": "SetSailMarineSuite/AIS"
         },
         cache: "no-store"
@@ -625,6 +627,7 @@ async function fetchOwnVesselAisUpdate() {
         const vessels = await fetch("https://meri.digitraffic.fi/api/ais/v1/vessels", {
           headers: {
             Accept: "application/json",
+            "Accept-Encoding": "gzip",
             "Digitraffic-User": "SetSailMarineSuite/AIS"
           },
           cache: "no-store"
