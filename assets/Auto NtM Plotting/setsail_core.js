@@ -812,19 +812,47 @@ function setDrActiveRouteId(routeId, opts) {
   const prevRoute = typeof getDrActiveRoute === "function" ? getDrActiveRoute() : null;
   const prevSnap = (prevRoute && setrouteNormalizeRouteWps(prevRoute)) || loadDrLastRailsWps() || null;
 
-  if (id && prevId && id !== prevId) {
-    // Preferred change-over: keep riding previous geometry until ship meets the new track
-    if (prevSnap && prevSnap.length >= 2) persistDrLastRailsWps(prevSnap);
-    armDrRouteHandoff(prevSnap || [], id);
-  } else if (id && !prevId) {
-    // After delete gap, or first Current — hand off from orphan snap when present
-    const snap = loadDrLastRailsWps();
-    if (snap && snap.length >= 2) armDrRouteHandoff(snap, id);
-    else clearDrHandoffState(); // first Current with no prior rails → adopt immediately
-  } else if (!id) {
+  // Is own-ship already near the route we are about to make Current?
+  const shipNearRoute = (routeObj) => {
+    try {
+      const wps = routeObj ? setrouteNormalizeRouteWps(routeObj) : [];
+      if (wps.length < 2 || !userVessel) return false;
+      const la = Number(userVessel.lat);
+      const lo = Number(userVessel.lon);
+      if (!Number.isFinite(la) || !Number.isFinite(lo)) return false;
+      const p = setrouteProjectOntoRoute(la, lo, wps);
+      return !!(p && p.distNm <= Math.max(SETSAIL_DR_HANDOFF_NM, 8));
+    } catch (eN) {
+      return false;
+    }
+  };
+
+  if (!id) {
     if (opts.wipeOrphan) persistDrLastRailsWps(null);
     else if (prevSnap && prevSnap.length >= 2) persistDrLastRailsWps(prevSnap);
     clearDrHandoffState();
+  } else {
+    let foundEarly = null;
+    if (typeof getSavedRoutesLibrary === "function") {
+      foundEarly = getSavedRoutesLibrary().find((r) => r && (r.id === id || r.name === id)) || null;
+    }
+    if (!foundEarly && activeRouteData && (activeRouteData.id === id || activeRouteData.name === id)) {
+      foundEarly = activeRouteData;
+    }
+    const nearNew = shipNearRoute(foundEarly);
+    if (prevId && id !== prevId && !nearNew) {
+      // Change-over only when ship is NOT yet near the new track
+      if (prevSnap && prevSnap.length >= 2) persistDrLastRailsWps(prevSnap);
+      armDrRouteHandoff(prevSnap || [], id);
+    } else {
+      // First Current, or already on the new track → adopt rails immediately
+      // (stale orphan snaps used to leave DR in handoff-wait forever)
+      clearDrHandoffState();
+      if (foundEarly) {
+        const wps = setrouteNormalizeRouteWps(foundEarly);
+        if (wps.length >= 2) persistDrLastRailsWps(wps);
+      }
+    }
   }
 
   try {
@@ -854,10 +882,21 @@ function setDrActiveRouteId(routeId, opts) {
     Promise.resolve(syncSetSailUtcClock(false)).finally(() => {
       try {
         if (userVessel) {
+          // Ensure DR has a usable fix timestamp + freeze point
+          if (!userVessel.aisLastFixAt) {
+            userVessel.aisLastFixAt = userVessel.aisRefreshedAt || userVessel.updatedAt || getSetSailUtcNowIso();
+          }
+          if (!Number.isFinite(Number(userVessel.aisFixLat))) {
+            userVessel.aisFixLat = Number(userVessel.lat);
+          }
+          if (!Number.isFinite(Number(userVessel.aisFixLon))) {
+            userVessel.aisFixLon = Number(userVessel.lon);
+          }
           userVessel.aisDrActivatedAt = getSetSailUtcNowIso();
           window.userVessel = userVessel;
+          try { if (typeof persistUserVessel === "function") persistUserVessel(); } catch (eP) {}
         }
-        applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true });
+        applyOwnVesselDeadReckoning({ toast: true, force: true, visual: true });
       } catch (eDrOn) {}
     });
   } else {
@@ -1027,23 +1066,30 @@ function applyOwnVesselDeadReckoning(opts) {
   // Wi-Fi / LAN AIS is truth — never DR over it
   if (String(v.source || "").toLowerCase().indexOf("wifi") >= 0) return;
 
-  // Age ONLY from the AIS position-fix timestamp — never from local refresh time
-  // (aisRefreshedAt would invent hours of coast and overshoot GPS).
-  const fixIso = v.aisLastFixAt;
-  if (!fixIso) return;
-  const fixMs = Date.parse(fixIso);
-  if (!Number.isFinite(fixMs)) return;
+  // Prefer AIS position-fix time; fall back only when missing so Current can still snap.
+  // Cap fall-back age so a local refresh stamp cannot invent multi-hour overshoot.
+  const fixIsoPrimary = v.aisLastFixAt;
+  const fixIsoFallback = v.aisRefreshedAt || v.updatedAt || null;
+  const fixIso = fixIsoPrimary || fixIsoFallback;
+  if (!fixIso) {
+    // Still allow force-snap onto rails using "now" as freeze time
+    if (!(opts.force || opts.visual)) return;
+  }
+  const fixMsRaw = Date.parse(fixIso || getSetSailUtcNowIso());
+  if (!Number.isFinite(fixMsRaw)) return;
   const nowMs = getSetSailUtcNowMs();
-  let ageMs = Math.max(0, nowMs - fixMs);
+  let ageMs = Math.max(0, nowMs - fixMsRaw);
+  // If we only have a local refresh stamp (not a true AIS fix time), don't coast far
+  if (!fixIsoPrimary && ageMs > 20 * 60 * 1000) ageMs = 20 * 60 * 1000;
   // Guard device/server clock weirdness — never coast more than 18 h on one fix
   if (ageMs > 18 * 3600000) ageMs = 18 * 3600000;
   if (!opts.force && ageMs < OWN_AIS_VISUAL_DR_MS) return;
 
   let sog = Number(v.sog);
-  if (!(sog >= 0.3)) return;
+  if (!(sog >= 0.3)) sog = 0; // allow snap-to-rails even without SOG
   // Temper optimistic SOG on stale satellite AIS (common ocean overshoot vs live GPS)
   const ageH = ageMs / 3600000;
-  if (ageH > 0.75) {
+  if (sog >= 0.3 && ageH > 0.75) {
     const temper = Math.max(0.88, 1 - (ageH - 0.75) * 0.035);
     sog = sog * temper;
   }
@@ -1051,7 +1097,9 @@ function applyOwnVesselDeadReckoning(opts) {
   const prevAlong = Number(v.aisDrPrevAlongNm);
   const prevFixMs = Number(v.aisDrPrevFixMs);
   const curFixAlongHint = Number(v.aisDrFixAlongNm);
+  const fixMs = fixMsRaw;
   if (
+    sog >= 0.3 &&
     Number.isFinite(prevAlong) && Number.isFinite(prevFixMs) && Number.isFinite(curFixAlongHint) &&
     fixMs > prevFixMs && (fixMs - prevFixMs) > 60000
   ) {
@@ -1060,9 +1108,10 @@ function applyOwnVesselDeadReckoning(opts) {
       sog = sog * 0.35 + obsKn * 0.65;
     }
   }
-  const distNm = sog * (ageMs / 3600000);
-  const minNm = opts.force || opts.visual ? 0.015 : 0.5;
-  if (!(distNm > minNm) || distNm > 3500) return;
+  const distNm = sog >= 0.3 ? sog * (ageMs / 3600000) : 0;
+  if (distNm > 3500) return;
+  // Non-force network tick still needs meaningful coast; force/visual may snap with 0 NM
+  if (!(opts.force || opts.visual) && !(distNm > 0.5)) return;
 
   const fixLat = Number(v.aisFixLat != null ? v.aisFixLat : v.lat);
   const fixLon = Number(v.aisFixLon != null ? v.aisFixLon : v.lon);
@@ -1070,12 +1119,34 @@ function applyOwnVesselDeadReckoning(opts) {
 
   const shipLat = Number(v.lat);
   const shipLon = Number(v.lon);
-  const resolved = typeof resolveDrRailsForShip === "function"
+  let resolved = typeof resolveDrRailsForShip === "function"
     ? resolveDrRailsForShip(
       Number.isFinite(shipLat) ? shipLat : fixLat,
       Number.isFinite(shipLon) ? shipLon : fixLon
     )
     : { wps: null, phase: "off" };
+  // If stuck in handoff-wait but ship is already near Current rails — adopt now
+  if ((!resolved || !resolved.wps) && (opts.force || opts.visual)) {
+    const active = typeof getDrActiveRoute === "function" ? getDrActiveRoute() : null;
+    const aw = active ? setrouteNormalizeRouteWps(active) : [];
+    if (aw.length >= 2) {
+      const near = setrouteProjectOntoRoute(
+        Number.isFinite(shipLat) ? shipLat : fixLat,
+        Number.isFinite(shipLon) ? shipLon : fixLon,
+        aw
+      );
+      if (near && near.distNm <= Math.max(SETSAIL_DR_HANDOFF_NM, 12)) {
+        try { clearDrHandoffState(); } catch (eClr) {}
+        persistDrLastRailsWps(aw);
+        resolved = { wps: aw, phase: "rails", handoffDone: true };
+      } else if (opts.force) {
+        // Force Current: still ride the new rails (project AIS onto them)
+        try { clearDrHandoffState(); } catch (eClr2) {}
+        persistDrLastRailsWps(aw);
+        resolved = { wps: aw, phase: "rails" };
+      }
+    }
+  }
   const wps = resolved && resolved.wps && resolved.wps.length >= 2 ? resolved.wps : null;
   const phase = (resolved && resolved.phase) || "off";
   if (!wps) return; // handoff-wait / off — keep last AIS, never invent a rhumb
@@ -1114,6 +1185,10 @@ function applyOwnVesselDeadReckoning(opts) {
   }
 
   if (!Number.isFinite(lat1) || !Number.isFinite(lon1)) return;
+  // Skip no-op redraws (icon already there)
+  const dMove = calculateHaversineDistanceNM(Number(v.lat) || fixLat, Number(v.lon) || fixLon, lat1, lon1);
+  if (!(opts.force) && Number.isFinite(dMove) && dMove < 0.01 && v.deadReckoned) return;
+
   const updated = Object.assign({}, v, {
     lat: lat1,
     lon: lon1,
@@ -1126,6 +1201,7 @@ function applyOwnVesselDeadReckoning(opts) {
     aisDrMode: mode,
     aisDrActivatedAt: v.aisDrActivatedAt || getSetSailUtcNowIso(),
     aisDrFixAlongNm: proj.alongNm,
+    aisLastFixAt: v.aisLastFixAt || fixIso || getSetSailUtcNowIso(),
     aisFixLat: Number.isFinite(Number(v.aisFixLat)) ? Number(v.aisFixLat) : fixLat,
     aisFixLon: Number.isFinite(Number(v.aisFixLon)) ? Number(v.aisFixLon) : fixLon
   });
@@ -1136,10 +1212,12 @@ function applyOwnVesselDeadReckoning(opts) {
     plotUserVessel(lat1, lon1, "AIS-DR-RAILS", true);
   }
   if (opts.toast && typeof showSetSailToast === "function") {
-    const ageH = Math.round((ageMs / 3600000) * 10) / 10;
+    const ageHr = Math.round((ageMs / 3600000) * 10) / 10;
     const msg = mode === "handoff-prev"
       ? "DR change-over — previous rails until near new Current"
-      : "DR on Current route +" + Math.round(distNm) + " NM from last AIS (" + ageH + " h UTC @ " + sog.toFixed(1) + " kn)";
+      : (distNm >= 0.5
+        ? ("DR on Current +" + Math.round(distNm) + " NM from last AIS (" + ageHr + " h @ " + (sog || 0).toFixed(1) + " kn)")
+        : "DR on Current — snapped to route rails");
     showSetSailToast(msg, "info");
   }
 }
@@ -3052,20 +3130,21 @@ function renderRouteOnMap(route, shouldFly = true) {
   let trackOutline = null;
   const linePane = ensureRouteLinePane();
   if (rtSub.line !== false && unrolledCoords.length >= 2) {
-    // Two polylines on dedicated pane ABOVE corridor fill
+    // Black centerline on dedicated pane ABOVE corridor fill (halo for contrast)
     const lineCoords = simplifyRoutePtsForBuffer(unrolledCoords, 160);
+    const sw = getRouteStrokeWeights(leafletMap.getZoom ? leafletMap.getZoom() : 5);
     trackOutline = L.polyline(lineCoords, {
-      color: "#0b1e33",
-      weight: 7,
-      opacity: 0.8,
+      color: "#ffffff",
+      weight: sw.centerHalo,
+      opacity: 0.55,
       interactive: false,
       lineCap: "round",
       lineJoin: "round",
       pane: linePane
     });
     trackLine = L.polyline(lineCoords, {
-      color: "#ff3b1f",
-      weight: 3.5,
+      color: "#0a0a0a",
+      weight: sw.center,
       opacity: 1,
       interactive: true,
       lineCap: "round",
@@ -3075,6 +3154,10 @@ function renderRouteOnMap(route, shouldFly = true) {
     });
     leafletRouteLayer.addLayer(trackOutline);
     leafletRouteLayer.addLayer(trackLine);
+    window._setsailRouteStrokeRefs = Object.assign({}, window._setsailRouteStrokeRefs || {}, {
+      centerHalo: trackOutline,
+      center: trackLine
+    });
   }
 
   // Waypoint circles on dedicated high pane (always, unless subfilter off)
@@ -6368,6 +6451,9 @@ function initNtMMap() {
     leafletMap.on("zoomend", () => {
       const z = leafletMap.getZoom();
       const tier = getZoomLodTier(z);
+      if (typeof applyRouteStrokeWeightsForZoom === "function") {
+        try { applyRouteStrokeWeightsForZoom(); } catch (eSw) {}
+      }
       if (tier !== lastLodTier) {
         lastLodTier = tier;
         if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES && OVERLAY_STATES.notices === true) {
@@ -15721,6 +15807,40 @@ function simplifyRoutePtsForBuffer(pts, maxPts) {
   return out;
 }
 
+/** Zoom-scaled stroke weights — thin when fully zoomed out, full near coastal scales. */
+function getRouteStrokeWeights(zoom) {
+  const z = Number.isFinite(zoom) ? zoom : (leafletMap && leafletMap.getZoom ? leafletMap.getZoom() : 5);
+  // z≤2 → thinnest; z≥8 → full weight
+  const t = Math.max(0, Math.min(1, (z - 2) / 6));
+  const lerp = (a, b) => a + (b - a) * t;
+  return {
+    center: lerp(1.05, 3.0),
+    centerHalo: lerp(2.2, 5.5),
+    edge: lerp(1.0, 3.2),
+    corridor: lerp(0.7, 2.2)
+  };
+}
+window.getRouteStrokeWeights = getRouteStrokeWeights;
+
+/** Live-update route/corridor stroke weights without full rebuild. */
+function applyRouteStrokeWeightsForZoom() {
+  const w = getRouteStrokeWeights();
+  const pack = window._setsailRouteStrokeRefs || {};
+  try {
+    if (pack.centerHalo && pack.centerHalo.setStyle) pack.centerHalo.setStyle({ weight: w.centerHalo });
+    if (pack.center && pack.center.setStyle) pack.center.setStyle({ weight: w.center, color: "#0a0a0a" });
+    if (pack.centerHaloBuf && pack.centerHaloBuf.setStyle) pack.centerHaloBuf.setStyle({ weight: w.centerHalo });
+    if (pack.centerBuf && pack.centerBuf.setStyle) pack.centerBuf.setStyle({ weight: w.center, color: "#0a0a0a" });
+    if (pack.portEdge && pack.portEdge.setStyle) pack.portEdge.setStyle({ weight: w.edge });
+    if (pack.stbdEdge && pack.stbdEdge.setStyle) pack.stbdEdge.setStyle({ weight: w.edge });
+    if (pack.corridorPoly && pack.corridorPoly.setStyle) {
+      const prev = pack.corridorPoly.options || {};
+      if (prev.weight && prev.weight > 0) pack.corridorPoly.setStyle({ weight: w.corridor });
+    }
+  } catch (eW) {}
+}
+window.applyRouteStrokeWeightsForZoom = applyRouteStrokeWeightsForZoom;
+
 function invalidateRouteCorridorDistanceCache() {
   _routeCorridorBBox = null;
   window._setsailRouteDistCacheGen = (window._setsailRouteDistCacheGen || 0) + 1;
@@ -15929,6 +16049,8 @@ function renderRouteBufferCorridorOnMap() {
       stbdSide.push([stbdLat, stbdLon]);
     }
     const polyCoords = portSide.concat(stbdSide.slice().reverse());
+    const sw = getRouteStrokeWeights(leafletMap.getZoom ? leafletMap.getZoom() : 5);
+    const strokeRefs = Object.assign({}, window._setsailRouteStrokeRefs || {});
     if (isDrRails) {
       // Fill muted; edges: PORT red / STBD green (IALA A seafarer cue along track)
       const corridorPoly = L.polygon(polyCoords, {
@@ -15939,58 +16061,68 @@ function renderRouteBufferCorridorOnMap() {
         interactive: false
       });
       leafletRouteBufferLayer.addLayer(corridorPoly);
-      leafletRouteBufferLayer.addLayer(L.polyline(portSide, {
+      const portEdge = L.polyline(portSide, {
         color: "#ef4444",
-        weight: 3.2,
+        weight: sw.edge,
         opacity: 0.95,
         interactive: false,
         lineCap: "round",
         lineJoin: "round",
         className: "setsail-route-port-edge"
-      }));
-      leafletRouteBufferLayer.addLayer(L.polyline(stbdSide, {
+      });
+      const stbdEdge = L.polyline(stbdSide, {
         color: "#22c55e",
-        weight: 3.2,
+        weight: sw.edge,
         opacity: 0.95,
         interactive: false,
         lineCap: "round",
         lineJoin: "round",
         className: "setsail-route-stbd-edge"
-      }));
+      });
+      leafletRouteBufferLayer.addLayer(portEdge);
+      leafletRouteBufferLayer.addLayer(stbdEdge);
+      strokeRefs.corridorPoly = corridorPoly;
+      strokeRefs.portEdge = portEdge;
+      strokeRefs.stbdEdge = stbdEdge;
     } else {
       const corridorPoly = L.polygon(polyCoords, {
         color: isFilterOn ? "#00e5ff" : "#f59e0b",
-        weight: isFilterOn ? 2.2 : 1.6,
+        weight: isFilterOn ? sw.corridor : Math.max(0.8, sw.corridor * 0.85),
         dashArray: "6, 4",
         fillColor: isFilterOn ? "#0ea5e9" : "#f59e0b",
         fillOpacity: isFilterOn ? 0.14 : 0.10,
         interactive: false
       });
       leafletRouteBufferLayer.addLayer(corridorPoly);
+      strokeRefs.corridorPoly = corridorPoly;
     }
 
-    // Always paint the track centerline in the middle of the buffer (even if
-    // leafletRouteLayer was cleared / re-entry-skipped / buried under fill).
+    // Black track centerline in the middle of the buffer (always visible)
     const midPane = (typeof ensureRouteLinePane === "function") ? ensureRouteLinePane() : "overlayPane";
-    leafletRouteBufferLayer.addLayer(L.polyline(pts, {
-      color: "#0b1e33",
-      weight: 6,
-      opacity: 0.72,
+    const centerHaloBuf = L.polyline(pts, {
+      color: "#ffffff",
+      weight: sw.centerHalo,
+      opacity: 0.5,
       interactive: false,
       lineCap: "round",
       lineJoin: "round",
       pane: midPane
-    }));
-    leafletRouteBufferLayer.addLayer(L.polyline(pts, {
-      color: "#ff3b1f",
-      weight: 3.2,
+    });
+    const centerBuf = L.polyline(pts, {
+      color: "#0a0a0a",
+      weight: sw.center,
       opacity: 1,
       interactive: false,
       lineCap: "round",
       lineJoin: "round",
       pane: midPane,
       className: "setsail-route-centerline"
-    }));
+    });
+    leafletRouteBufferLayer.addLayer(centerHaloBuf);
+    leafletRouteBufferLayer.addLayer(centerBuf);
+    strokeRefs.centerHaloBuf = centerHaloBuf;
+    strokeRefs.centerBuf = centerBuf;
+    window._setsailRouteStrokeRefs = strokeRefs;
   }
 
   // Keep WPT pane above everything after corridor rebuild
