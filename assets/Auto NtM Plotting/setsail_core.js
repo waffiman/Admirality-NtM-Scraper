@@ -618,6 +618,19 @@ async function refreshOwnVesselFromAis(opts) {
     }
     const ageMs = getSetSailUtcNowMs() - hitMs;
     const isLive = ageMs <= OWN_AIS_STALE_DR_MS;
+    // Remember previous fix along-track so DR can calibrate SOG from successive AIS hits
+    let prevAlongKeep = Number(prev.aisDrFixAlongNm);
+    let prevFixKeep = prev.aisLastFixAt ? Date.parse(prev.aisLastFixAt) : NaN;
+    let newAlong = null;
+    try {
+      if (getDrActiveRouteId() && typeof resolveDrRailsForShip === "function" && typeof setrouteProjectOntoRoute === "function") {
+        const rails = resolveDrRailsForShip(Number(hit.lat), Number(hit.lon));
+        if (rails && rails.wps && rails.wps.length >= 2) {
+          const pNew = setrouteProjectOntoRoute(Number(hit.lat), Number(hit.lon), rails.wps);
+          if (pNew) newAlong = pNew.alongNm;
+        }
+      }
+    } catch (eAlong) {}
     applyVesselProfile(
       Object.assign({}, prev, hit, {
         source: isLive ? "ais" : "ais-stale",
@@ -625,7 +638,10 @@ async function refreshOwnVesselFromAis(opts) {
         aisFixLat: Number(hit.lat),
         aisFixLon: Number(hit.lon),
         aisRefreshedAt: getSetSailUtcNowIso(),
-        deadReckoned: false
+        deadReckoned: false,
+        aisDrPrevAlongNm: Number.isFinite(prevAlongKeep) ? prevAlongKeep : prev.aisDrPrevAlongNm,
+        aisDrPrevFixMs: Number.isFinite(prevFixKeep) ? prevFixKeep : prev.aisDrPrevFixMs,
+        aisDrFixAlongNm: Number.isFinite(newAlong) ? newAlong : prev.aisDrFixAlongNm
       }),
       {
         toast: opts.toast
@@ -880,7 +896,7 @@ function setrouteRouteLegLengths(wps) {
   return { legs, total };
 }
 
-/** Closest point on route polyline → distance-along from start (NM). */
+/** Closest point on route polyline → distance-along from start (NM) + signed XTD. */
 function setrouteProjectOntoRoute(lat, lon, wps) {
   if (!wps || wps.length < 2) return null;
   let best = null;
@@ -889,31 +905,44 @@ function setrouteProjectOntoRoute(lat, lon, wps) {
     const a = wps[i];
     const b = wps[i + 1];
     const legNm = calculateHaversineDistanceNM(a.lat, a.lon, b.lat, b.lon) || 1e-9;
-    // Project in local NM plane
+    // Project in local NM plane (equirectangular around leg mid-lat)
     const cosLat = Math.max(0.2, Math.cos(((a.lat + b.lat) * 0.5 * Math.PI) / 180));
-    const ax = 0;
-    const ay = 0;
     const bx = (b.lon - a.lon) * 60 * cosLat;
     const by = (b.lat - a.lat) * 60;
     const px = (lon - a.lon) * 60 * cosLat;
     const py = (lat - a.lat) * 60;
     const ab2 = bx * bx + by * by || 1e-9;
-    let t = ((px - ax) * bx + (py - ay) * by) / ab2;
+    let t = (px * bx + py * by) / ab2;
     t = Math.max(0, Math.min(1, t));
-    const qx = ax + t * bx;
-    const qy = ay + t * by;
-    const qLat = a.lat + qy / 60;
-    const qLon = a.lon + qx / (60 * cosLat);
-    const dist = Math.hypot(px - qx, py - qy); // NM
+    // Prefer great-circle point along the leg when we have dest helper
+    let qLat;
+    let qLon;
+    const course = (typeof setrouteCourseBetweenWp === "function")
+      ? setrouteCourseBetweenWp(a, b)
+      : (Math.atan2(bx, by) * 180) / Math.PI;
+    if (typeof setrouteDestPoint === "function" && legNm > 1e-6) {
+      const alongLeg = t * legNm;
+      const gc = setrouteDestPoint(a.lat, a.lon, course, alongLeg);
+      qLat = gc.lat;
+      qLon = gc.lon;
+    } else {
+      qLat = a.lat + (t * by) / 60;
+      qLon = a.lon + (t * bx) / (60 * cosLat);
+    }
+    const cosQ = Math.max(0.2, Math.cos((qLat * Math.PI) / 180));
+    const ox = (lon - qLon) * 60 * cosQ;
+    const oy = (lat - qLat) * 60;
+    const dist = Math.hypot(ox, oy); // NM
+    // Signed XTD: + = starboard of track (right-hand from A→B), − = port
+    const trackLen = Math.hypot(bx, by) || 1e-9;
+    const xtdSigned = (bx * oy - by * ox) / trackLen;
     const along = alongBefore + t * legNm;
     if (!best || dist < best.distNm) {
-      const course = (typeof setrouteCourseBetweenWp === "function")
-        ? setrouteCourseBetweenWp(a, b)
-        : (Math.atan2(bx, by) * 180) / Math.PI;
       best = {
         lat: qLat,
         lon: qLon,
         distNm: dist,
+        xtdNm: xtdSigned,
         alongNm: along,
         segIdx: i,
         t: t,
@@ -925,7 +954,7 @@ function setrouteProjectOntoRoute(lat, lon, wps) {
   return best;
 }
 
-/** Point at distance-along route from start (NM). Clamps to ends. */
+/** Point at distance-along route from start (NM). Uses great-circle along each leg. */
 function setroutePointAlongRoute(wps, alongNm) {
   if (!wps || wps.length < 2) return null;
   const { legs, total } = setrouteRouteLegLengths(wps);
@@ -942,12 +971,20 @@ function setroutePointAlongRoute(wps, alongNm) {
     if (d <= legs[i] + 1e-9) {
       const a = wps[i];
       const b = wps[i + 1];
-      const t = legs[i] > 0 ? d / legs[i] : 0;
-      const lat = a.lat + (b.lat - a.lat) * t;
-      const lon = a.lon + (b.lon - a.lon) * t;
       const course = (typeof setrouteCourseBetweenWp === "function")
         ? setrouteCourseBetweenWp(a, b)
         : 0;
+      let lat;
+      let lon;
+      if (typeof setrouteDestPoint === "function" && legs[i] > 1e-6) {
+        const gc = setrouteDestPoint(a.lat, a.lon, course, d);
+        lat = gc.lat;
+        lon = gc.lon;
+      } else {
+        const t = legs[i] > 0 ? d / legs[i] : 0;
+        lat = a.lat + (b.lat - a.lat) * t;
+        lon = a.lon + (b.lon - a.lon) * t;
+      }
       return {
         lat: lat,
         lon: lon,
@@ -960,6 +997,15 @@ function setroutePointAlongRoute(wps, alongNm) {
   }
   const last = wps[wps.length - 1];
   return { lat: last.lat, lon: last.lon, course: 0, alongNm: total, atEnd: true };
+}
+
+/** Offset a point by signed XTD (NM): + starboard / − port relative to course °T. */
+function setrouteOffsetByXtd(lat, lon, courseDeg, xtdNm) {
+  if (!Number.isFinite(xtdNm) || Math.abs(xtdNm) < 1e-4) return { lat: lat, lon: lon };
+  if (typeof setrouteDestPoint !== "function") return { lat: lat, lon: lon };
+  // Starboard = course + 90°
+  const brg = (((Number(courseDeg) || 0) + (xtdNm >= 0 ? 90 : -90)) % 360 + 360) % 360;
+  return setrouteDestPoint(lat, lon, brg, Math.abs(xtdNm));
 }
 
 /**
@@ -981,16 +1027,39 @@ function applyOwnVesselDeadReckoning(opts) {
   // Wi-Fi / LAN AIS is truth — never DR over it
   if (String(v.source || "").toLowerCase().indexOf("wifi") >= 0) return;
 
-  const fixIso = v.aisLastFixAt || v.aisRefreshedAt;
+  // Age ONLY from the AIS position-fix timestamp — never from local refresh time
+  // (aisRefreshedAt would invent hours of coast and overshoot GPS).
+  const fixIso = v.aisLastFixAt;
   if (!fixIso) return;
   const fixMs = Date.parse(fixIso);
   if (!Number.isFinite(fixMs)) return;
   const nowMs = getSetSailUtcNowMs();
-  const ageMs = Math.max(0, nowMs - fixMs);
+  let ageMs = Math.max(0, nowMs - fixMs);
+  // Guard device/server clock weirdness — never coast more than 18 h on one fix
+  if (ageMs > 18 * 3600000) ageMs = 18 * 3600000;
   if (!opts.force && ageMs < OWN_AIS_VISUAL_DR_MS) return;
 
-  const sog = Number(v.sog);
+  let sog = Number(v.sog);
   if (!(sog >= 0.3)) return;
+  // Temper optimistic SOG on stale satellite AIS (common ocean overshoot vs live GPS)
+  const ageH = ageMs / 3600000;
+  if (ageH > 0.75) {
+    const temper = Math.max(0.88, 1 - (ageH - 0.75) * 0.035);
+    sog = sog * temper;
+  }
+  // Prefer observed along-track speed from last two AIS fixes when available
+  const prevAlong = Number(v.aisDrPrevAlongNm);
+  const prevFixMs = Number(v.aisDrPrevFixMs);
+  const curFixAlongHint = Number(v.aisDrFixAlongNm);
+  if (
+    Number.isFinite(prevAlong) && Number.isFinite(prevFixMs) && Number.isFinite(curFixAlongHint) &&
+    fixMs > prevFixMs && (fixMs - prevFixMs) > 60000
+  ) {
+    const obsKn = ((curFixAlongHint - prevAlong) / ((fixMs - prevFixMs) / 3600000));
+    if (Number.isFinite(obsKn) && obsKn >= 0.5 && obsKn <= 35) {
+      sog = sog * 0.35 + obsKn * 0.65;
+    }
+  }
   const distNm = sog * (ageMs / 3600000);
   const minNm = opts.force || opts.visual ? 0.015 : 0.5;
   if (!(distNm > minNm) || distNm > 3500) return;
@@ -1013,12 +1082,22 @@ function applyOwnVesselDeadReckoning(opts) {
 
   const proj = setrouteProjectOntoRoute(fixLat, fixLon, wps);
   if (!proj) return;
+  // Cap residual XTD — keep small offsets, ignore huge outliers (bad fix / wrong route)
+  let xtdKeep = Number(proj.xtdNm) || 0;
+  if (Math.abs(xtdKeep) > 8) xtdKeep = 0;
+  else if (Math.abs(xtdKeep) > 3) xtdKeep *= 0.5;
+
   const target = setroutePointAlongRoute(wps, proj.alongNm + distNm);
   if (!target) return;
 
   let lat1 = target.lat;
   let lon1 = target.lon;
   let courseOut = target.course;
+  if (typeof setrouteOffsetByXtd === "function" && Math.abs(xtdKeep) >= 0.02) {
+    const off = setrouteOffsetByXtd(lat1, lon1, courseOut, xtdKeep);
+    lat1 = off.lat;
+    lon1 = off.lon;
+  }
   let mode = phase === "handoff-prev" ? "handoff-prev" : "rails";
 
   if (phase === "handoff-prev" && typeof resolveDrRailsForShip === "function") {
@@ -1046,6 +1125,7 @@ function applyOwnVesselDeadReckoning(opts) {
     aisDrNm: Math.round(distNm * 10) / 10,
     aisDrMode: mode,
     aisDrActivatedAt: v.aisDrActivatedAt || getSetSailUtcNowIso(),
+    aisDrFixAlongNm: proj.alongNm,
     aisFixLat: Number.isFinite(Number(v.aisFixLat)) ? Number(v.aisFixLat) : fixLat,
     aisFixLon: Number.isFinite(Number(v.aisFixLon)) ? Number(v.aisFixLon) : fixLon
   });
@@ -1577,6 +1657,19 @@ function syncMyVesselFromLiveAis(t) {
     return; // older feed — ignore
   }
 
+  let newAlong = null;
+  try {
+    if (typeof getDrActiveRouteId === "function" && getDrActiveRouteId() &&
+        typeof resolveDrRailsForShip === "function" && typeof setrouteProjectOntoRoute === "function") {
+      const rails = resolveDrRailsForShip(lat, lon);
+      if (rails && rails.wps && rails.wps.length >= 2) {
+        const pNew = setrouteProjectOntoRoute(lat, lon, rails.wps);
+        if (pNew) newAlong = pNew.alongNm;
+      }
+    }
+  } catch (eAl) {}
+  const prevAlongKeep = Number(prev.aisDrFixAlongNm);
+  const prevFixKeep = prev.aisLastFixAt ? Date.parse(prev.aisLastFixAt) : NaN;
   const updated = Object.assign({}, prev, {
     lat: lat,
     lon: lon,
@@ -1593,7 +1686,10 @@ function syncMyVesselFromLiveAis(t) {
     aisFixLat: lat,
     aisFixLon: lon,
     aisRefreshedAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    aisDrPrevAlongNm: Number.isFinite(prevAlongKeep) ? prevAlongKeep : prev.aisDrPrevAlongNm,
+    aisDrPrevFixMs: Number.isFinite(prevFixKeep) ? prevFixKeep : prev.aisDrPrevFixMs,
+    aisDrFixAlongNm: Number.isFinite(newAlong) ? newAlong : prev.aisDrFixAlongNm
   });
   window.userVessel = updated;
   userVessel = updated;
@@ -1601,6 +1697,10 @@ function syncMyVesselFromLiveAis(t) {
 
   if (window.leafletMap && typeof plotUserVessel === "function") {
     plotUserVessel(lat, lon, "AIS", true);
+  }
+  if (typeof getDrActiveRouteId === "function" && getDrActiveRouteId() &&
+      typeof applyOwnVesselDeadReckoning === "function") {
+    try { applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true }); } catch (eDr) {}
   }
 
   if (typeof syncVesselFieldsFromProfile === "function") {
@@ -2830,6 +2930,20 @@ function parseRtmRoute(arrayBuffer, fallbackName) {
 /**
  * Render Route Polyline and Waypoint Markers on Leaflet Chart
  */
+function ensureRouteLinePane() {
+  if (!leafletMap || !leafletMap.createPane) return "overlayPane";
+  try {
+    let pane = leafletMap.getPane("routeLinePane");
+    if (!pane) pane = leafletMap.createPane("routeLinePane");
+    // Above corridor buffer (overlay ~400–650) so centerline never hides under fill
+    pane.style.zIndex = 670;
+    pane.style.pointerEvents = "none";
+    return "routeLinePane";
+  } catch (e) {
+    return "overlayPane";
+  }
+}
+
 function ensureRouteWptPane() {
   if (!leafletMap || !leafletMap.createPane) return "markerPane";
   try {
@@ -2929,22 +3043,25 @@ function renderRouteOnMap(route, shouldFly = true) {
   window._setsailRouteUnrolled = unrolledCoords.slice();
   invalidateRouteCorridorDistanceCache();
 
-  // Default: always show waypoint circles unless user explicitly unchecked
+  // Default: always show waypoint circles + centerline unless user explicitly unchecked
   if (!window.ROUTE_SUBFILTERS) window.ROUTE_SUBFILTERS = { waypoints: true, line: true };
   if (window.ROUTE_SUBFILTERS.waypoints == null) window.ROUTE_SUBFILTERS.waypoints = true;
+  if (window.ROUTE_SUBFILTERS.line == null) window.ROUTE_SUBFILTERS.line = true;
   const rtSub = window.ROUTE_SUBFILTERS;
   let trackLine = null;
   let trackOutline = null;
+  const linePane = ensureRouteLinePane();
   if (rtSub.line !== false && unrolledCoords.length >= 2) {
-    // Two polylines only — 4 stacked SVG lines froze pan/zoom to a dark-blue blank
+    // Two polylines on dedicated pane ABOVE corridor fill
     const lineCoords = simplifyRoutePtsForBuffer(unrolledCoords, 160);
     trackOutline = L.polyline(lineCoords, {
       color: "#0b1e33",
       weight: 7,
-      opacity: 0.75,
+      opacity: 0.8,
       interactive: false,
       lineCap: "round",
-      lineJoin: "round"
+      lineJoin: "round",
+      pane: linePane
     });
     trackLine = L.polyline(lineCoords, {
       color: "#ff3b1f",
@@ -2952,7 +3069,9 @@ function renderRouteOnMap(route, shouldFly = true) {
       opacity: 1,
       interactive: true,
       lineCap: "round",
-      lineJoin: "round"
+      lineJoin: "round",
+      pane: linePane,
+      className: "setsail-route-centerline"
     });
     leafletRouteLayer.addLayer(trackOutline);
     leafletRouteLayer.addLayer(trackLine);
@@ -3720,21 +3839,7 @@ function renderWeatherOnMap(map = null) {
   }
 
   // 6. NDBC buoys — cursor probe + toolbar tile (no map markers)
-  // 7. Pressure MSL grid labels
-  if (wxSub.pressure !== false && curZoom >= 3.5) {
-    (MARINE_WEATHER_STORE.pressureGrid || []).forEach((p) => {
-      if (!p || p.mslhPa == null) return;
-      if (curZoom < 5 && Math.abs(p.lat % 24) > 0.1 && Math.abs(p.lon % 24) > 0.1) return;
-      const icon = L.divIcon({
-        className: "weather-msl-label",
-        html: `<div style="font-size:8px;font-weight:700;color:#cbd5e1;background:rgba(15,23,42,0.55);padding:0 3px;border-radius:2px;">${Math.round(p.mslhPa)}</div>`,
-        iconSize: [28, 12],
-        iconAnchor: [14, 6]
-      });
-      leafletWeatherLayer.addLayer(L.marker([p.lat, p.lon], { icon, interactive: false }));
-    });
-  }
-
+  // 7. Pressure MSL — NOT painted as a map grid (laggy + clutter). Sampled into WX tile at cursor.
   // Ocean currents: no map arrows — sampled into the cursor weather tile instead
 }
 
@@ -3794,12 +3899,58 @@ function sampleCurrentAtLatLon(lat, lon) {
 }
 window.sampleCurrentAtLatLon = sampleCurrentAtLatLon;
 
+/** Inverse-distance sample of model MSL pressure grid at chart cursor. */
+function samplePressureGridAtLatLon(lat, lon) {
+  const grid = (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.pressureGrid))
+    ? MARINE_WEATHER_STORE.pressureGrid : [];
+  if (!grid.length || !Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return { ok: false };
+  }
+  const scored = [];
+  for (let i = 0; i < grid.length; i++) {
+    const p = grid[i];
+    if (!p || !Number.isFinite(p.lat) || !Number.isFinite(p.lon)) continue;
+    const mb = p.mslhPa != null ? Number(p.mslhPa) : (p.pressureMb != null ? Number(p.pressureMb) : NaN);
+    if (!Number.isFinite(mb)) continue;
+    const d = calculateHaversineDistanceNM(lat, lon, p.lat, p.lon);
+    if (!Number.isFinite(d)) continue;
+    scored.push({ mb, d, lat: p.lat, lon: p.lon });
+  }
+  if (!scored.length) return { ok: false };
+  scored.sort((a, b) => a.d - b.d);
+  // Exact-ish hit
+  if (scored[0].d < 35) {
+    return { ok: true, pressureMb: scored[0].mb, nearestNm: scored[0].d, mode: "nearest" };
+  }
+  const MAX_NM = 900;
+  if (scored[0].d > MAX_NM) return { ok: false, nearestNm: scored[0].d };
+  const pool = scored.filter((s) => s.d <= Math.max(180, scored[0].d * 1.8)).slice(0, 6);
+  const use = pool.length >= 2 ? pool : scored.slice(0, Math.min(4, scored.length));
+  let sum = 0;
+  let wsum = 0;
+  use.forEach(({ mb, d }) => {
+    const w = 1 / Math.max(d, 1);
+    const w2 = w * w;
+    sum += mb * w2;
+    wsum += w2;
+  });
+  if (wsum <= 0) return { ok: false };
+  return {
+    ok: true,
+    pressureMb: sum / wsum,
+    nearestNm: scored[0].d,
+    mode: "interpolated",
+    blendCount: use.length
+  };
+}
+window.samplePressureGridAtLatLon = samplePressureGridAtLatLon;
+
 /** Inverse-distance sample of NDBC buoys at chart cursor (no map markers). */
 function sampleNdbcAtLatLon(lat, lon) {
   const buoys = (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.buoys))
     ? MARINE_WEATHER_STORE.buoys : [];
   if (!buoys.length || !Number.isFinite(lat) || !Number.isFinite(lon)) {
-    return { ok: false, mode: "none", message: "No NDBC data loaded" };
+    return { ok: false, mode: "none", message: "" };
   }
   const scored = [];
   for (let i = 0; i < buoys.length; i++) {
@@ -3809,7 +3960,7 @@ function sampleNdbcAtLatLon(lat, lon) {
     if (!Number.isFinite(d)) continue;
     scored.push({ b, d });
   }
-  if (!scored.length) return { ok: false, mode: "none", message: "No NDBC buoys" };
+  if (!scored.length) return { ok: false, mode: "none", message: "" };
   scored.sort((a, c) => a.d - c.d);
   const nearest = scored[0];
   const NEAR_NM = 60;
@@ -3817,7 +3968,8 @@ function sampleNdbcAtLatLon(lat, lon) {
   const MAX_NM = 450;
 
   if (nearest.d > MAX_NM) {
-    return { ok: false, mode: "far", nearestNm: Math.round(nearest.d), message: "No buoys within " + MAX_NM + " NM" };
+    // Quiet fail — pressure comes from model grid instead; never nag about buoys
+    return { ok: false, mode: "far", nearestNm: Math.round(nearest.d), message: "" };
   }
 
   const fields = ["windKt", "gustKt", "windDir", "waveHs", "wavePeriod", "waveDir", "pressureMb", "airC", "sstC"];
@@ -3922,17 +4074,38 @@ function updateNdbcCursorTile(lat, lon) {
   if (!body) return;
   const s = sampleNdbcAtLatLon(lat, lon);
   const cur = sampleCurrentAtLatLon(lat, lon);
+  const pModel = (typeof samplePressureGridAtLatLon === "function")
+    ? samplePressureGridAtLatLon(lat, lon)
+    : { ok: false };
   const curTxt = (cur && cur.ok)
     ? (fmtWxNum(cur.speedKn, 1) + " kn " + fmtWxNum(cur.dirDeg, 0) + "\u00b0")
     : "\u2014";
+  // Prefer buoy pressure when near a station; otherwise interpolate model MSL grid
+  let pressureMb = (s && s.ok && s.pressureMb != null) ? s.pressureMb : null;
+  let pressureSrc = (pressureMb != null) ? "buoy" : "";
+  if (pressureMb == null && pModel && pModel.ok) {
+    pressureMb = pModel.pressureMb;
+    pressureSrc = pModel.mode === "nearest" ? "MSL" : "MSL·IDW";
+  }
+  const pressureTxt = pressureMb != null ? (fmtWxNum(pressureMb, 0) + " mb") : "\u2014 mb";
+  const hasAny = !!(s && s.ok) || !!(cur && cur.ok) || !!(pModel && pModel.ok);
+
   // Always keep the same chip skeleton so the tile footprint never jumps.
   if (!s.ok) {
-    tile.classList.toggle("is-live", !!(cur && cur.ok));
-    body.innerHTML = renderNdbcCursorChips("\u2014", "\u2014", "\u2014 mb", "\u2014\u00b0/\u2014\u00b0", curTxt);
+    tile.classList.toggle("is-live", hasAny);
+    body.innerHTML = renderNdbcCursorChips("\u2014", "\u2014", pressureTxt, "\u2014\u00b0/\u2014\u00b0", curTxt);
     if (meta) {
-      meta.textContent = (s.message || "Move cursor\u2026") + (cur && cur.ok ? " · current OK" : "");
+      const bits = [];
+      if (pressureSrc) bits.push(pressureSrc);
+      if (cur && cur.ok) bits.push("cur");
+      meta.textContent = bits.length ? bits.join(" · ") : "Move cursor\u2026";
+      meta.title = pressureSrc
+        ? ("Pressure " + pressureTxt + " (" + pressureSrc + ")")
+        : "";
     }
-    tile.title = cur && cur.ok ? ("Current " + curTxt) : (s.message || "");
+    tile.title = pressureMb != null
+      ? ("Pressure " + pressureTxt + (cur && cur.ok ? " · " + curTxt : ""))
+      : (cur && cur.ok ? ("Current " + curTxt) : "");
     return;
   }
   tile.classList.add("is-live");
@@ -3952,25 +4125,27 @@ function updateNdbcCursorTile(lat, lon) {
   body.innerHTML = renderNdbcCursorChips(
     wind,
     wave,
-    fmtWxNum(s.pressureMb, 0) + " mb",
+    pressureTxt,
     fmtWxNum(s.airC, 0) + "\u00b0/" + fmtWxNum(s.sstC, 0) + "\u00b0",
     curTxt
   );
   const chips = body.querySelectorAll(".wx-chip");
   if (chips[0]) chips[0].title = windTitle;
   if (chips[1]) chips[1].title = waveTitle;
+  if (chips[2]) chips[2].title = "Pressure " + pressureTxt + (pressureSrc ? " · " + pressureSrc : "");
   if (chips[4]) chips[4].title = cur && cur.ok ? ("Current " + curTxt) : "Ocean current";
   if (meta) {
-    const nMatch = String(s.sourceNote || "").match(/(\d+)\s*buoy/i);
     const nm = s.nearestNm != null ? Math.round(s.nearestNm) : null;
-    const buoyBit = nMatch
-      ? (nMatch[1] + " buoy" + (nm != null ? " · " + nm + " NM" : ""))
-      : (s.mode === "nearest" ? ("buoy" + (nm != null ? " · " + nm + " NM" : "")) : (nm != null ? nm + " NM" : "WX"));
-    meta.textContent = buoyBit + (cur && cur.ok ? " · cur" : "");
-    meta.title = (s.sourceNote || "") + (s.mode === "interpolated" ? " · blended" : "") +
+    const bits = [];
+    if (s.mode === "nearest") bits.push("buoy" + (nm != null ? " " + nm + " NM" : ""));
+    else if (s.mode === "interpolated") bits.push("buoys" + (nm != null ? " " + nm + " NM" : ""));
+    if (pressureSrc && pressureSrc.indexOf("MSL") === 0) bits.push(pressureSrc);
+    if (cur && cur.ok) bits.push("cur");
+    meta.textContent = bits.length ? bits.join(" · ") : "WX";
+    meta.title = (s.sourceNote || "") + (pressureSrc ? " · P " + pressureSrc : "") +
       (cur && cur.ok ? (" · current " + curTxt) : "");
   }
-  tile.title = windTitle + " · " + waveTitle + (cur && cur.ok ? (" · " + curTxt) : "");
+  tile.title = windTitle + " · " + waveTitle + " · " + pressureTxt + (cur && cur.ok ? (" · " + curTxt) : "");
 }
 
 window.sampleNdbcAtLatLon = sampleNdbcAtLatLon;
@@ -6239,14 +6414,32 @@ function initNtMMap() {
       hud.removeAttribute("data-live");
     };
     setHudCoordsIdle();
+    let _wxCursorRaf = 0;
+    let _wxCursorLat = null;
+    let _wxCursorLon = null;
+    let _wxCursorLastMs = 0;
     leafletMap.on("mousemove", (e) => {
       const hud = document.getElementById("ntmHudCoords");
       if (hud) {
         hud.textContent = formatLatLonDMS(e.latlng.lat, e.latlng.lng);
         hud.setAttribute("data-live", "1");
       }
-      if (typeof updateNdbcCursorTile === "function") {
-        updateNdbcCursorTile(e.latlng.lat, e.latlng.lng);
+      if (typeof updateNdbcCursorTile !== "function") return;
+      _wxCursorLat = e.latlng.lat;
+      _wxCursorLon = e.latlng.lng;
+      const now = Date.now();
+      if (_wxCursorRaf) return;
+      const wait = Math.max(0, 120 - (now - _wxCursorLastMs));
+      const run = () => {
+        _wxCursorRaf = 0;
+        _wxCursorLastMs = Date.now();
+        if (_wxCursorLat == null) return;
+        try { updateNdbcCursorTile(_wxCursorLat, _wxCursorLon); } catch (eWx) {}
+      };
+      if (wait <= 0 && typeof requestAnimationFrame === "function") {
+        _wxCursorRaf = requestAnimationFrame(run);
+      } else {
+        _wxCursorRaf = setTimeout(run, wait || 16);
       }
     });
     leafletMap.getContainer().addEventListener("mouseleave", setHudCoordsIdle);
@@ -15609,13 +15802,8 @@ function scheduleRouteCorridorLayersRefresh(delayMs) {
       if (typeof updateRouteMiniWindowUI === "function") updateRouteMiniWindowUI();
       if (typeof renderRouteBufferCorridorOnMap === "function") renderRouteBufferCorridorOnMap();
       if (!window.ROUTE_CORRIDOR_FILTER_ENABLED) return;
+      // Only NtM list/map — re-painting weather/port depths here caused route+bathy lag
       if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
-      if (typeof renderPortDepthsOnMap === "function" && leafletMap && OVERLAY_STATES && OVERLAY_STATES.depths) {
-        renderPortDepthsOnMap(leafletMap);
-      }
-      if (typeof renderWeatherOnMap === "function" && leafletMap && OVERLAY_STATES && OVERLAY_STATES.weather) {
-        renderWeatherOnMap(leafletMap);
-      }
     } catch (eRef) {
       console.warn("[SetSail] corridor refresh", eRef);
     }
@@ -15780,6 +15968,35 @@ function renderRouteBufferCorridorOnMap() {
       });
       leafletRouteBufferLayer.addLayer(corridorPoly);
     }
+
+    // Always paint the track centerline in the middle of the buffer (even if
+    // leafletRouteLayer was cleared / re-entry-skipped / buried under fill).
+    const midPane = (typeof ensureRouteLinePane === "function") ? ensureRouteLinePane() : "overlayPane";
+    leafletRouteBufferLayer.addLayer(L.polyline(pts, {
+      color: "#0b1e33",
+      weight: 6,
+      opacity: 0.72,
+      interactive: false,
+      lineCap: "round",
+      lineJoin: "round",
+      pane: midPane
+    }));
+    leafletRouteBufferLayer.addLayer(L.polyline(pts, {
+      color: "#ff3b1f",
+      weight: 3.2,
+      opacity: 1,
+      interactive: false,
+      lineCap: "round",
+      lineJoin: "round",
+      pane: midPane,
+      className: "setsail-route-centerline"
+    }));
+  }
+
+  // Keep WPT pane above everything after corridor rebuild
+  try { ensureRouteWptPane(); } catch (eW) {}
+  if (leafletRouteLayer && leafletMap && leafletMap.hasLayer(leafletRouteLayer)) {
+    try { leafletRouteLayer.eachLayer((ly) => { if (ly && ly.bringToFront) ly.bringToFront(); }); } catch (eF) {}
   }
 }
 window.renderRouteBufferCorridorOnMap = renderRouteBufferCorridorOnMap;

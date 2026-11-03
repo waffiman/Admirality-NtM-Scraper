@@ -177,16 +177,19 @@
         });
 
         this._syncRaf = 0;
+        this._detailRaf = 0;
         this._lastSyncKey = "";
         this._boundSchedule = this._scheduleSync.bind(this);
+        this._boundScheduleIdle = this._scheduleSyncIdle.bind(this);
         this._boundResize = this._resizeGl.bind(this);
         this._boundZoomAnim = this._handleZoomAnim.bind(this);
 
-        // Continuous sync — prevents bathymetry "swim" during pan/zoom
+        // Continuous sync during pan — but progressive detail only after settle
+        // (contours/labels on every move frame + route SVG = major hitch)
         map.on("move", this._boundSchedule);
-        map.on("moveend", this._boundSchedule);
         map.on("zoom", this._boundSchedule);
-        map.on("zoomend", this._boundSchedule);
+        map.on("moveend", this._boundScheduleIdle);
+        map.on("zoomend", this._boundScheduleIdle);
         map.on("zoomanim", this._boundZoomAnim);
         map.on("resize", this._boundResize);
         map.on("viewreset", this._boundSchedule);
@@ -211,15 +214,19 @@
 
       onRemove: function (map) {
         map.off("move", this._boundSchedule);
-        map.off("moveend", this._boundSchedule);
         map.off("zoom", this._boundSchedule);
-        map.off("zoomend", this._boundSchedule);
+        map.off("moveend", this._boundScheduleIdle);
+        map.off("zoomend", this._boundScheduleIdle);
         map.off("zoomanim", this._boundZoomAnim);
         map.off("resize", this._boundResize);
         map.off("viewreset", this._boundSchedule);
         if (this._syncRaf) {
           try { cancelAnimationFrame(this._syncRaf); } catch (e) {}
           this._syncRaf = 0;
+        }
+        if (this._detailRaf) {
+          try { cancelAnimationFrame(this._detailRaf); } catch (e2) {}
+          this._detailRaf = 0;
         }
         if (map.attributionControl && this.options.attribution) {
           map.attributionControl.removeAttribution(this.options.attribution);
@@ -251,6 +258,14 @@
         this._syncRaf = requestAnimationFrame(() => {
           this._syncRaf = 0;
           this._syncView(false);
+        });
+      },
+
+      _scheduleSyncIdle: function () {
+        this._scheduleSync();
+        if (this._detailRaf) return;
+        this._detailRaf = requestAnimationFrame(() => {
+          this._detailRaf = 0;
           if (this._map) this._applyProgressiveDetail(this._map.getZoom());
         });
       },
