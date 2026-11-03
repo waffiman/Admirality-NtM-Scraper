@@ -138,13 +138,15 @@ function vesselStateForDurableStore(v) {
   if (!v || typeof v !== "object") return v;
   const out = Object.assign({}, v);
   const isDr = !!(v.deadReckoned || /ais-dr/i.test(String(v.source || "")));
-  const fixLat = Number(v.aisFixLat);
-  const fixLon = Number(v.aisFixLon);
-  if (isDr && Number.isFinite(fixLat) && Number.isFinite(fixLon)) {
-    out.lat = fixLat;
-    out.lon = fixLon;
+  if (isDr && isValidVesselLatLon(v.aisFixLat, v.aisFixLon)) {
+    out.lat = Number(v.aisFixLat);
+    out.lon = Number(v.aisFixLon);
     out.source = "ais";
     out.deadReckoned = false;
+  }
+  if (!isValidVesselLatLon(out.lat, out.lon)) {
+    out.lat = null;
+    out.lon = null;
   }
   delete out.aisDrAt;
   delete out.aisDrNm;
@@ -179,7 +181,7 @@ function getHomeVesselHudLabel() {
   if (!userVessel) return "NOT SET";
   const name = (userVessel.name || "").trim();
   if (name) return name;
-  if (Number.isFinite(Number(userVessel.lat)) && Number.isFinite(Number(userVessel.lon))) {
+  if (typeof isValidVesselLatLon === "function" && isValidVesselLatLon(userVessel.lat, userVessel.lon)) {
     return formatLatLonDMS(Number(userVessel.lat), Number(userVessel.lon));
   }
   return "NOT SET";
@@ -231,18 +233,27 @@ function getInputVal(id) {
   return el ? String(el.value || "").trim() : "";
 }
 
+/** True lat/lon only — Number(null)===0 must NEVER count as a fix (null-island zeros). */
+function isValidVesselLatLon(lat, lon) {
+  if (lat === null || lat === undefined || lon === null || lon === undefined) return false;
+  if (lat === "" || lon === "") return false;
+  const la = typeof lat === "number" ? lat : Number(lat);
+  const lo = typeof lon === "number" ? lon : Number(lon);
+  if (!Number.isFinite(la) || !Number.isFinite(lo)) return false;
+  if (Math.abs(la) > 90 || Math.abs(lo) > 180) return false;
+  if (la === 0 && lo === 0) return false;
+  return true;
+}
+window.isValidVesselLatLon = isValidVesselLatLon;
+
 function fillVesselFormsFromState() {
   const v = userVessel || {};
   ["home", "chart"].forEach((which) => {
     const m = vesselFormMap(which);
     setInputVal(m.name, v.name || "");
     setInputVal(m.callSign, v.callSign || "");
-    if (Number.isFinite(Number(v.lat)) && Number.isFinite(Number(v.lon))) {
-      setInputVal(m.lat, formatLatLonDMS(Number(v.lat), Number(v.lon)).split(/\s{2,}| (?=[0-9]+\°)/)[0] || formatLatLonDMS(Number(v.lat), Number(v.lon)));
-      // Prefer separate DMS strings if formatLatLonDMS returns combined
+    if (isValidVesselLatLon(v.lat, v.lon)) {
       const dms = formatLatLonDMS(Number(v.lat), Number(v.lon));
-      const parts = dms.split(/\s+/);
-      // format is typically "DD° MM.MM' N  DDD° MM.MM' E" — split at hemisphere of lat
       const mlat = dms.match(/([0-9]+°[^NSEW]*[NS])/i);
       const mlon = dms.match(/([0-9]+°[^NSEW]*[EW])/i);
       setInputVal(m.lat, mlat ? mlat[1].trim() : String(v.lat));
@@ -260,7 +271,7 @@ function fillVesselFormsFromState() {
   });
   const clearBtn = document.getElementById("vesselClearBtn");
   const homeClear = document.getElementById("homeVesselClearBtn");
-  const has = !!(userVessel && (userVessel.name || (Number.isFinite(Number(userVessel.lat)) && Number.isFinite(Number(userVessel.lon)))));
+  const has = !!(userVessel && (userVessel.name || isValidVesselLatLon(userVessel.lat, userVessel.lon)));
   if (clearBtn) clearBtn.style.display = has ? "inline-block" : "none";
   if (homeClear) homeClear.style.display = has ? "inline-block" : "none";
   updateHomeVesselHudLabel();
@@ -291,19 +302,37 @@ function readVesselForm(which) {
 function applyVesselProfile(data, opts) {
   opts = opts || {};
   const prev = userVessel || {};
-  userVessel = Object.assign({}, prev, data, {
+  const incoming = data && typeof data === "object" ? Object.assign({}, data) : {};
+  // Never let null/undefined lat coerce to 0 via Number(null)
+  if (!isValidVesselLatLon(incoming.lat, incoming.lon)) {
+    delete incoming.lat;
+    delete incoming.lon;
+  }
+  userVessel = Object.assign({}, prev, incoming, {
     updatedAt: new Date().toISOString()
   });
-  if (!Number.isFinite(Number(userVessel.lat)) || !Number.isFinite(Number(userVessel.lon))) {
-    // Keep name/details without position
-    userVessel.lat = Number.isFinite(Number(data.lat)) ? Number(data.lat) : prev.lat;
-    userVessel.lon = Number.isFinite(Number(data.lon)) ? Number(data.lon) : prev.lon;
+  if (!isValidVesselLatLon(userVessel.lat, userVessel.lon)) {
+    if (isValidVesselLatLon(prev.lat, prev.lon) && opts.keepPrevCoords !== false) {
+      userVessel.lat = prev.lat;
+      userVessel.lon = prev.lon;
+    } else {
+      userVessel.lat = null;
+      userVessel.lon = null;
+    }
   }
   persistUserVessel();
   fillVesselFormsFromState();
 
-  if (Number.isFinite(Number(userVessel.lat)) && Number.isFinite(Number(userVessel.lon))) {
+  if (isValidVesselLatLon(userVessel.lat, userVessel.lon)) {
     plotUserVessel(Number(userVessel.lat), Number(userVessel.lon), userVessel.source || "manual", true);
+    if (window._setsailAwaitingOwnShipFix) {
+      window._setsailAwaitingOwnShipFix = false;
+      ["home", "chart"].forEach((which) => {
+        const m = vesselFormMap(which);
+        setVesselFieldBusy(m.lat, false);
+        setVesselFieldBusy(m.lon, false);
+      });
+    }
   } else {
     updateHomeVesselHudLabel();
   }
@@ -438,7 +467,7 @@ async function fetchOpenWatersVesselByMmsi(mmsiRaw, opts) {
     const c = (f.geometry && f.geometry.coordinates) || [];
     const lat = Number(c[1]);
     const lon = Number(c[0]);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    if (!isValidVesselLatLon(lat, lon)) return null;
     const seenRaw = p.seen || p.time || p.updated || p.last_seen;
     let seenMs = 0;
     if (typeof seenRaw === "number" && Number.isFinite(seenRaw)) {
@@ -457,7 +486,7 @@ async function fetchOpenWatersVesselByMmsi(mmsiRaw, opts) {
       name: p.name || "",
       destination: p.destination || "",
       shipType: p.type || p.shipType || "",
-      callSign: p.callSign || p.call_sign || "",
+      callSign: p.callSign || p.call_sign || p.callsign || "",
       navStat: p.nav_status != null ? p.nav_status : p.navStat,
       source: "openwaters",
       updatedAt: seenMs || Date.now(),
@@ -522,17 +551,20 @@ async function fetchOwnVesselAisUpdate() {
         const t = Date.parse(String(seenRaw));
         if (Number.isFinite(t)) seenMs = t;
       }
+      const la = Number(c[1]);
+      const lo = Number(c[0]);
+      if (!isValidVesselLatLon(la, lo)) return null;
       return {
         mmsi,
-        lat: c[1],
-        lon: c[0],
+        lat: la,
+        lon: lo,
         sog: p.sog != null ? p.sog : p.speed,
         cog: p.cog != null ? p.cog : p.course,
         heading: p.heading,
         name: p.name || v.name || "",
         destination: p.destination || v.destination || "",
         shipType: p.type || p.shipType || v.shipType || "",
-        callSign: p.callSign || p.call_sign || v.callSign || "",
+        callSign: p.callSign || p.call_sign || p.callsign || v.callSign || "",
         navStat: p.nav_status != null ? p.nav_status : p.navStat,
         source: "ais",
         updatedAt: seenMs || Date.now(),
@@ -607,10 +639,13 @@ async function fetchOwnVesselAisUpdate() {
       } catch (e2) { /* meta optional */ }
       const p = f.properties || {};
       const c = (f.geometry && f.geometry.coordinates) || [];
+      const la = Number(c[1]);
+      const lo = Number(c[0]);
+      if (!isValidVesselLatLon(la, lo)) return null;
       return {
         mmsi,
-        lat: c[1],
-        lon: c[0],
+        lat: la,
+        lon: lo,
         sog: p.sog,
         cog: p.cog,
         heading: p.heading,
@@ -634,8 +669,13 @@ async function fetchOwnVesselAisUpdate() {
     if (!hit && typeof window.getAisTargetsSnapshot === "function") {
       const snap = window.getAisTargetsSnapshot(4000) || [];
       const row = snap.find((t) => String(t.mmsi) === mmsi);
-      if (row && Number.isFinite(Number(row.lat)) && Number.isFinite(Number(row.lon))) {
-        hit = Object.assign({}, row, { mmsi, source: row.source || "ais-stream" });
+      if (row && isValidVesselLatLon(row.lat, row.lon)) {
+        hit = Object.assign({}, row, {
+          mmsi,
+          lat: Number(row.lat),
+          lon: Number(row.lon),
+          source: row.source || "ais-stream"
+        });
       }
     }
   } catch (eSnap) {}
@@ -660,7 +700,7 @@ async function refreshOwnVesselFromAis(opts) {
   try {
     try { await syncSetSailUtcClock(false); } catch (eUtc) {}
     const hit = await fetchOwnVesselAisUpdate();
-    if (!hit) {
+    if (!hit || !isValidVesselLatLon(hit.lat, hit.lon)) {
       // No new AIS — only coast if Current rails are ON (never COG invent)
       if (getDrActiveRouteId()) applyOwnVesselDeadReckoning({ toast: false, visual: true });
       return;
@@ -1524,7 +1564,7 @@ function renderVesselSuggest(which, hits) {
   box.innerHTML = hits
     .map((t, i) => {
       const pos =
-        Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon))
+        isValidVesselLatLon(t.lat, t.lon)
           ? Number(t.lat).toFixed(3) + ", " + Number(t.lon).toFixed(3)
           : "";
       const meta = [t.mmsi ? "MMSI " + t.mmsi : "", t.callSign || "", pos].filter(Boolean).join(" · ");
@@ -1600,26 +1640,19 @@ function setVesselAisSyncBanner(visible, text) {
 function vesselHasFullAisPayload(t) {
   if (!t) return false;
   const hasName = !!(t.name && String(t.name).trim());
-  const hasPos = Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon));
-  return hasName && hasPos;
+  return hasName && isValidVesselLatLon(t.lat, t.lon);
 }
 
 async function applyAisHitToVessel(t, toastMsg) {
   if (!t) return;
   const mmsi = t.mmsi != null ? String(t.mmsi).replace(/\D/g, "") : "";
-  // Name/meta from suggest immediately — NEVER trust zone-cache lat/lon as "latest AIS"
-  // (that painted VESTA at old Malacca-entrance while Open Waters had Malacca-exit).
+  // Name/meta only — omit lat/lon keys so Number(null) never paints 0°/0°
   const partial = {
     name: t.name || "",
     callSign: t.callSign || "",
     mmsi: mmsi || (t.mmsi != null ? String(t.mmsi) : ""),
     shipType: t.shipType || "",
     destination: t.destination || "",
-    sog: null,
-    cog: null,
-    heading: null,
-    lat: null,
-    lon: null,
     source: "ais"
   };
 
@@ -1635,30 +1668,48 @@ async function applyAisHitToVessel(t, toastMsg) {
     setVesselFieldBusy(m.heading, true);
   });
   setVesselAisSyncBanner(false);
-  applyVesselProfile(partial, { toast: null, skipAisSchedule: true });
+  applyVesselProfile(partial, { toast: null, skipAisSchedule: true, keepPrevCoords: false });
+  // Explicitly clear any previous coords until live fix arrives
+  if (userVessel) {
+    userVessel.lat = null;
+    userVessel.lon = null;
+    userVessel.aisFixLat = null;
+    userVessel.aisFixLon = null;
+  }
+  fillVesselFormsFromState();
 
-  let full = partial;
+  let full = Object.assign({}, partial);
   if (partial.mmsi) {
     try {
-      // Live Open Waters first (seconds), then stream/snapshot — never zone deep-scan
-      let live = await fetchOpenWatersVesselByMmsi(partial.mmsi, { timeoutMs: 4500 });
+      let live = await fetchOpenWatersVesselByMmsi(partial.mmsi, { timeoutMs: 10000 });
+      if (!live) {
+        await new Promise((r) => setTimeout(r, 600));
+        live = await fetchOpenWatersVesselByMmsi(partial.mmsi, { timeoutMs: 10000 });
+      }
       if (!live) live = await findAisTargetByMmsi(partial.mmsi);
-      if (live) {
+      if (live && isValidVesselLatLon(live.lat, live.lon)) {
         full = Object.assign({}, partial, {
           name: live.name || partial.name,
           callSign: live.callSign || partial.callSign,
           shipType: live.shipType || partial.shipType,
           destination: live.destination || partial.destination,
-          sog: live.sog != null ? live.sog : partial.sog,
-          cog: live.cog != null ? live.cog : partial.cog,
-          heading: live.heading != null ? live.heading : partial.heading,
-          lat: Number.isFinite(Number(live.lat)) ? Number(live.lat) : partial.lat,
-          lon: Number.isFinite(Number(live.lon)) ? Number(live.lon) : partial.lon,
+          sog: live.sog != null ? live.sog : null,
+          cog: live.cog != null ? live.cog : null,
+          heading: live.heading != null ? live.heading : null,
+          lat: Number(live.lat),
+          lon: Number(live.lon),
           source: "ais",
           aisLastFixAt: live.aisSeenAt || null,
-          aisFixLat: Number.isFinite(Number(live.lat)) ? Number(live.lat) : null,
-          aisFixLon: Number.isFinite(Number(live.lon)) ? Number(live.lon) : null,
+          aisFixLat: Number(live.lat),
+          aisFixLon: Number(live.lon),
           aisRefreshedAt: getSetSailUtcNowIso ? getSetSailUtcNowIso() : new Date().toISOString()
+        });
+      } else if (live) {
+        full = Object.assign({}, partial, {
+          name: live.name || partial.name,
+          callSign: live.callSign || partial.callSign,
+          shipType: live.shipType || partial.shipType,
+          destination: live.destination || partial.destination
         });
       }
     } catch (e) {
@@ -1666,14 +1717,20 @@ async function applyAisHitToVessel(t, toastMsg) {
     }
   }
 
+  const hasFix = isValidVesselLatLon(full.lat, full.lon);
   ["home", "chart"].forEach((which) => {
     const m = vesselFormMap(which);
-    [m.lat, m.lon, m.callSign, m.type, m.dest, m.sog, m.cog, m.heading].forEach((id) => {
+    [m.callSign, m.type, m.dest, m.sog, m.cog, m.heading].forEach((id) => {
       setVesselFieldBusy(id, false);
     });
+    // Keep LAT/LON spinning until a real fix arrives (never paint 0°/0°)
+    if (hasFix) {
+      setVesselFieldBusy(m.lat, false);
+      setVesselFieldBusy(m.lon, false);
+    }
   });
 
-  applyVesselProfile(full, { toast: null, skipAisSchedule: false });
+  applyVesselProfile(full, { toast: null, skipAisSchedule: false, keepPrevCoords: false });
   if (vesselHasFullAisPayload(full)) {
     const ageNote = full.aisLastFixAt
       ? (" · AIS " + full.aisLastFixAt.replace("T", " ").replace(/\.\d+Z$/, "Z"))
@@ -1682,8 +1739,24 @@ async function applyAisHitToVessel(t, toastMsg) {
     if (typeof showSetSailToast === "function") {
       showSetSailToast(toastMsg || "Vessel details synced from AIS", "success");
     }
-  } else if (typeof showSetSailToast === "function") {
-    showSetSailToast("AIS name linked — waiting for full position/details", "info");
+  } else {
+    // Leave LAT/LON spinners on; background AIS refresh will clear them on first real fix
+    window._setsailAwaitingOwnShipFix = true;
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("AIS name linked — waiting for position…", "info");
+    }
+    if (typeof scheduleOwnVesselAisRefresh === "function") scheduleOwnVesselAisRefresh();
+    // Hard stop spinner after 90s so the form never spins forever
+    setTimeout(() => {
+      if (!window._setsailAwaitingOwnShipFix) return;
+      if (userVessel && isValidVesselLatLon(userVessel.lat, userVessel.lon)) return;
+      window._setsailAwaitingOwnShipFix = false;
+      ["home", "chart"].forEach((which) => {
+        const m = vesselFormMap(which);
+        setVesselFieldBusy(m.lat, false);
+        setVesselFieldBusy(m.lon, false);
+      });
+    }, 90000);
   }
 }
 
@@ -1693,14 +1766,14 @@ async function findAisTargetByMmsi(mmsiRaw) {
 
   // 1) Live Open Waters MMSI — authoritative last-known (skip stale zone caches)
   try {
-    const ow = await fetchOpenWatersVesselByMmsi(mmsi, { timeoutMs: 4500 });
-    if (ow && Number.isFinite(Number(ow.lat)) && Number.isFinite(Number(ow.lon))) return ow;
+    const ow = await fetchOpenWatersVesselByMmsi(mmsi, { timeoutMs: 8000 });
+    if (ow && isValidVesselLatLon(ow.lat, ow.lon)) return ow;
   } catch (eOw) {}
 
   // 2) Active live stream targets
   if (typeof window !== "undefined" && window.aisStreamTargets && window.aisStreamTargets[mmsi]) {
     const t = window.aisStreamTargets[mmsi];
-    if (t && Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon))) {
+    if (t && isValidVesselLatLon(t.lat, t.lon)) {
       return {
         name: t.name || ("MMSI " + mmsi),
         mmsi: mmsi,
@@ -1723,7 +1796,7 @@ async function findAisTargetByMmsi(mmsiRaw) {
   if (typeof window !== "undefined" && typeof window.getAisTargetsSnapshot === "function") {
     try {
       const snap = window.getAisTargetsSnapshot(2000) || [];
-      const st = snap.find((x) => String(x.mmsi) === mmsi && Number.isFinite(Number(x.lat)));
+      const st = snap.find((x) => String(x.mmsi) === mmsi && isValidVesselLatLon(x.lat, x.lon));
       if (st) {
         return {
           name: st.name || ("MMSI " + mmsi),
@@ -1780,7 +1853,7 @@ function syncMyVesselFromLiveAis(t) {
   if (!t || !window.userVessel) return;
   const lat = Number(t.lat != null ? t.lat : t.latitude);
   const lon = Number(t.lon != null ? t.lon : t.longitude);
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+  if (!isValidVesselLatLon(lat, lon)) return;
 
   const prev = window.userVessel || {};
   // Prefer bridge Wi-Fi AIS over cloud when both are present
@@ -4584,9 +4657,36 @@ function initVesselTracking() {
       routeFileInput.click();
     });
 
+    const finishRouteUpload = (parsed) => {
+      if (!parsed || !parsed.waypoints || parsed.waypoints.length === 0) return;
+      if (!parsed.id) {
+        parsed.id = "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+      }
+      try {
+        if (typeof enrichRouteWithLegsTelemetry === "function") enrichRouteWithLegsTelemetry(parsed);
+      } catch (eEn) {}
+      try {
+        if (typeof saveRouteToLibrary === "function") saveRouteToLibrary(parsed);
+      } catch (eLib) {}
+      renderRouteOnMap(parsed, true);
+      const asCurrent = !!window._setsailRouteUploadAsCurrent;
+      window._setsailRouteUploadAsCurrent = false;
+      if (asCurrent && typeof setDrActiveRouteId === "function") {
+        try {
+          setDrActiveRouteId(parsed.id || parsed.name);
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast("Route loaded as Current — DR rails active", "success");
+          }
+        } catch (eDr) {}
+      }
+    };
+
     routeFileInput.addEventListener("change", (e) => {
       const file = (e.target.files && e.target.files[0]);
-      if (!file) return;
+      if (!file) {
+        window._setsailRouteUploadAsCurrent = false;
+        return;
+      }
       const ext = file.name.split(".").pop().toLowerCase();
 
       if (ext === "rtm") {
@@ -4596,11 +4696,13 @@ function initVesselTracking() {
             const parsed = parseRtmRoute(evt.target.result, file.name);
             if (!parsed.waypoints || parsed.waypoints.length === 0) {
               alert("No valid waypoints found in .rtm route file.");
+              window._setsailRouteUploadAsCurrent = false;
               return;
             }
-            renderRouteOnMap(parsed, true);
+            finishRouteUpload(parsed);
           } catch (err) {
             console.error("RTM error:", err);
+            window._setsailRouteUploadAsCurrent = false;
             alert("Error parsing .rtm file: " + err.message);
           }
         };
@@ -4612,11 +4714,13 @@ function initVesselTracking() {
             const parsed = parseRtzRoute(evt.target.result, file.name);
             if (!parsed.waypoints || parsed.waypoints.length === 0) {
               alert("No valid waypoints found in .rtz route file.");
+              window._setsailRouteUploadAsCurrent = false;
               return;
             }
-            renderRouteOnMap(parsed, true);
+            finishRouteUpload(parsed);
           } catch (err) {
             console.error("RTZ error:", err);
+            window._setsailRouteUploadAsCurrent = false;
             alert("Error parsing .rtz file: " + err.message);
           }
         };
@@ -4628,16 +4732,19 @@ function initVesselTracking() {
             const parsed = parseCsvRoute(evt.target.result, file.name);
             if (!parsed.waypoints || parsed.waypoints.length === 0) {
               alert("No valid waypoints found in .csv route file.");
+              window._setsailRouteUploadAsCurrent = false;
               return;
             }
-            renderRouteOnMap(parsed, true);
+            finishRouteUpload(parsed);
           } catch (err) {
             console.error("CSV error:", err);
+            window._setsailRouteUploadAsCurrent = false;
             alert("Error parsing .csv file: " + err.message);
           }
         };
         reader.readAsText(file);
       } else {
+        window._setsailRouteUploadAsCurrent = false;
         alert("Unsupported format. Please select .rtz, .csv, or .rtm file.");
       }
       routeFileInput.value = "";
@@ -4968,6 +5075,7 @@ function resolveOwnShipNavMode(v, source) {
   const src = String(source != null ? source : (v && v.source) || "").toLowerCase();
   if ((v && v.deadReckoned) || /ais-dr|dr-rails|dead.?reck/i.test(src)) return "DR";
   if (/wifi/.test(src)) return "AIS"; // LAN/Wi-Fi AIS is still live AIS truth
+  if (/stale/.test(src)) return "STALE";
   if (/^ais\b|\bais\b/.test(src) || src === "ais") return "AIS";
   if (src === "gps") return "GPS";
   return "Manual";
@@ -4977,22 +5085,83 @@ function escapePopupText(s) {
   return String(s == null ? "" : s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
 }
 
-/** Compact dark own-ship AIS-style card. */
+/** Age of last AIS position-fix (ms), or null if unknown. */
+function getOwnShipAisAgeMs(v) {
+  if (!v) return null;
+  const fixIso = v.aisLastFixAt || v.aisSeenAt || null;
+  if (!fixIso) return null;
+  const ms = Date.parse(fixIso);
+  if (!Number.isFinite(ms)) return null;
+  const nowMs = typeof getSetSailUtcNowMs === "function" ? getSetSailUtcNowMs() : Date.now();
+  return Math.max(0, nowMs - ms);
+}
+
+function formatAisAgeHoursLabel(ageMs) {
+  if (!Number.isFinite(ageMs) || ageMs < 0) return "?";
+  const h = ageMs / 3600000;
+  if (h < 10) return (Math.round(h * 10) / 10).toFixed(1);
+  return String(Math.round(h));
+}
+
+/** Upload route from own-ship CCRP stale banner and auto-enable Current DR. */
+function uploadRouteAsCurrentFromOwnShipPopup() {
+  window._setsailRouteUploadAsCurrent = true;
+  const input = document.getElementById("vesselRouteFile");
+  if (!input) {
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Open My Vessel → upload a route (.rtz / .csv / .rtm)", "info");
+    }
+    return;
+  }
+  try { input.click(); } catch (e) {}
+}
+window.uploadRouteAsCurrentFromOwnShipPopup = uploadRouteAsCurrentFromOwnShipPopup;
+
+/** Compact dark own-ship AIS-style card (+ miniature stale / DR CTA when needed). */
 function formatOwnShipPopupHtml(lat, lon, hdg, sog, source) {
   const v = userVessel || {};
   const title = escapePopupText((v.name && String(v.name).trim()) || "My Vessel");
-  const mode = resolveOwnShipNavMode(v, source);
-  const modeCls = mode === "DR" ? "is-dr" : (mode === "AIS" ? "is-ais" : "is-other");
-  const coords = typeof formatLatLonDMS === "function" ? formatLatLonDMS(lat, lon) : (lat + ", " + lon);
+  let mode = resolveOwnShipNavMode(v, source);
+  const ageMs = getOwnShipAisAgeMs(v);
+  const STALE_BANNER_MS = 4 * 3600000;
+  const hasCurrent = typeof getDrActiveRouteId === "function" && !!getDrActiveRouteId();
+  const isDr = mode === "DR" || !!(v && v.deadReckoned);
+  const showStaleBanner =
+    !!v.mmsi &&
+    !isDr &&
+    !hasCurrent &&
+    (ageMs == null || ageMs >= STALE_BANNER_MS);
+  if (showStaleBanner && mode === "AIS") mode = "STALE";
+  const modeCls = mode === "DR" ? "is-dr" : (mode === "STALE" ? "is-other" : (mode === "AIS" ? "is-ais" : "is-other"));
+  const hasPos = isValidVesselLatLon(lat, lon);
+  const coords = hasPos
+    ? (typeof formatLatLonDMS === "function" ? formatLatLonDMS(lat, lon) : (lat + ", " + lon))
+    : "awaiting AIS";
   const rows = [];
   if (v.mmsi) rows.push(["MMSI", escapePopupText(v.mmsi)]);
   if (v.callSign) rows.push(["Call", escapePopupText(v.callSign)]);
   rows.push(["Pos", escapePopupText(coords)]);
-  if (hdg != null) rows.push(["HDG", Math.round(hdg) + "°"]);
-  if (sog != null) rows.push(["SOG", Number(sog).toFixed(1) + " kn"]);
+  if (hdg != null && Number.isFinite(Number(hdg))) rows.push(["HDG", Math.round(hdg) + "°"]);
+  if (sog != null && Number.isFinite(Number(sog))) rows.push(["SOG", Number(sog).toFixed(1) + " kn"]);
   const body = rows.map((r) =>
     '<div class="ss-ais-row"><span class="ss-ais-k">' + r[0] + "</span><span class=\"ss-ais-v\">" + r[1] + "</span></div>"
   ).join("");
+  let staleHtml = "";
+  if (showStaleBanner) {
+    const ageLbl = ageMs == null ? "?" : formatAisAgeHoursLabel(ageMs);
+    staleHtml =
+      '<div class="ss-own-ship-stale" role="status">' +
+        '<svg class="ss-own-ship-stale-ico" viewBox="0 0 24 24" aria-hidden="true">' +
+          '<path d="M12 3.2L22 20.5H2L12 3.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>' +
+          '<path d="M12 9.2v5.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
+          '<circle cx="12" cy="17.2" r="1.15" fill="currentColor"/>' +
+        "</svg>" +
+        '<div class="ss-own-ship-stale-body">' +
+          "Position stale by " + ageLbl + " h since last AIS. Upload your current track to start DR." +
+          '<br/><button type="button" class="ss-own-ship-stale-btn" onclick="window.uploadRouteAsCurrentFromOwnShipPopup&&window.uploadRouteAsCurrentFromOwnShipPopup()">Upload route → Current</button>' +
+        "</div>" +
+      "</div>";
+  }
   return (
     '<div class="ss-ais-popup-body ss-own-ship-popup">' +
       '<div class="ss-ais-head">' +
@@ -5000,6 +5169,7 @@ function formatOwnShipPopupHtml(lat, lon, hdg, sog, source) {
         '<span class="ss-ais-mode ' + modeCls + '">' + mode + "</span>" +
       "</div>" +
       body +
+      staleHtml +
       '<div class="ss-ais-foot">Vector ' + OWN_SHIP_VECTOR_MINUTES + " min</div>" +
     "</div>"
   );
@@ -5049,8 +5219,14 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
     }
 
     _ownShipMarker.bindPopup(
-      () => formatOwnShipPopupHtml(Number(userVessel.lat), Number(userVessel.lon), resolveOwnShipHeading(userVessel), resolveOwnShipSogKn(userVessel), userVessel.source),
-      { maxWidth: 210, className: "ss-ais-popup ss-own-ship-popup-wrap" }
+      () => formatOwnShipPopupHtml(
+        userVessel.lat,
+        userVessel.lon,
+        resolveOwnShipHeading(userVessel),
+        resolveOwnShipSogKn(userVessel),
+        userVessel.source
+      ),
+      { maxWidth: 260, minWidth: 168, className: "ss-ais-popup ss-own-ship-popup-wrap", autoPanPaddingTopLeft: [16, 48], autoPanPaddingBottomRight: [16, 36] }
     );
 
     // Always refresh geographic vector (cheap); zoomend also calls this
@@ -6410,42 +6586,34 @@ function initNtMMap() {
       }
     }, 0);
 
-    // Buoys / seamarks (OpenSeaMap) — dual LOD so marks don't vanish mid-zoom.
-    // Use Leaflet overlayPane (z≈400), ABOVE bathymetry owBathyPane (250).
-    // Custom buoysPane broke tile paint (blank overlay); overlayPane is reliable.
+    // Buoys / seamarks (OpenSeaMap) — single tile layer (dual LOD flashed on zoom).
+    // overlayPane above bathymetry; updateWhenIdle avoids mid-zoom appear/disappear.
     try {
       const ovPane = leafletMap.getPane("overlayPane");
       if (ovPane && Number(ovPane.style.zIndex || 0) < 400) ovPane.style.zIndex = 400;
     } catch (eOv) {}
     const seamarkUrl = "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png";
-    const seamarkPersistOpts = {
-      keepBuffer: lowEndMap ? 4 : 10,
-      updateWhenIdle: false,
+    const buoysTileLayer = L.tileLayer(seamarkUrl, {
+      minZoom: 3,
+      maxNativeZoom: 18,
+      maxZoom: 19,
+      keepBuffer: lowEndMap ? 6 : 14,
+      updateWhenIdle: true,
       updateWhenZooming: false,
-      updateInterval: lowEndMap ? 250 : 120,
+      updateInterval: lowEndMap ? 280 : 160,
       noWrap: false,
+      opacity: 1,
+      zIndex: 450,
       attribution: "OpenSeaMap",
       className: "setsail-seamark-tiles",
       pane: "overlayPane"
-    };
-    // LOD hand-off: base paints z5–11 only; detail takes over at z12+.
-    // If base maxZoom stays 19 it keeps scaling the z12 atlas → pixel clones under detail.
-    const buoysBaseLayer = L.tileLayer(seamarkUrl, Object.assign({}, seamarkPersistOpts, {
-      minZoom: 5,
-      maxNativeZoom: 12,
-      maxZoom: 11,
-      opacity: 1,
-      zIndex: 450
-    }));
-    const buoysDetailLayer = L.tileLayer(seamarkUrl, Object.assign({}, seamarkPersistOpts, {
-      minZoom: 12,
-      maxNativeZoom: 18,
-      maxZoom: 19,
-      opacity: 1,
-      zIndex: 451
-    }));
-    const seamarkLayer = L.layerGroup([buoysBaseLayer, buoysDetailLayer]);
-    try { window.seamarkLayer = seamarkLayer; } catch (eSm) {}
+    });
+    // Keep layerGroup API for toggles / Leaflet control (single child)
+    const seamarkLayer = L.layerGroup([buoysTileLayer]);
+    try {
+      window.seamarkLayer = seamarkLayer;
+      window.buoysTileLayer = buoysTileLayer;
+    } catch (eSm) {}
 
     // Desktop & Mobile ResizeObserver to guarantee non-zero canvas & immediate tile paint
     if (typeof ResizeObserver !== "undefined") {
@@ -6484,8 +6652,9 @@ function initNtMMap() {
         street: osmLayer,
         sat: satLayer,
         buoys: seamarkLayer,
-        buoysBase: buoysBaseLayer,
-        buoysDetail: buoysDetailLayer
+        buoysTile: buoysTileLayer,
+        buoysBase: buoysTileLayer,
+        buoysDetail: buoysTileLayer
       });
     }
 
@@ -7327,14 +7496,22 @@ function getFilteredNotices() {
 }
 
 /**
- * Format coordinates to nautical DMS
+ * Format coordinates to nautical DMS.
+ * Never formats null/undefined as 0°00.000' (Number(null)===0 trap).
  */
 function formatLatLonDMS(lat, lon) {
-  const latDeg = Math.floor(Math.abs(lat));
-  const latMin = ((Math.abs(lat) - latDeg) * 60).toFixed(3);
-  const latDir = lat >= 0 ? "N" : "S";
+  const la = typeof lat === "number" ? lat : Number(lat);
+  const lo = typeof lon === "number" ? lon : Number(lon);
+  if (lat === null || lat === undefined || lon === null || lon === undefined) return "—";
+  if (lat === "" || lon === "") return "—";
+  if (!Number.isFinite(la) || !Number.isFinite(lo)) return "—";
+  if (la === 0 && lo === 0) return "—";
 
-  const lonNorm = ((lon + 180) % 360 + 360) % 360 - 180;
+  const latDeg = Math.floor(Math.abs(la));
+  const latMin = ((Math.abs(la) - latDeg) * 60).toFixed(3);
+  const latDir = la >= 0 ? "N" : "S";
+
+  const lonNorm = ((lo + 180) % 360 + 360) % 360 - 180;
   const lonDeg = Math.floor(Math.abs(lonNorm));
   const lonMin = ((Math.abs(lonNorm) - lonDeg) * 60).toFixed(3);
   const lonDir = lonNorm >= 0 ? "E" : "W";
@@ -13855,8 +14032,8 @@ function initVisualChartLayerSelector(mapInstance, layers) {
   selector.className = "ntm-chart-layer-selector collapsed";
   selector.innerHTML = `
     <button type="button" class="ntm-layer-thumb-btn active-base" data-base="ecdis" title="ECDIS — blue water, yellow land, detailed coastline">
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#4FA8D8 0%,#4FA8D8 52%,#E6C93A 52%,#E6C93A 100%);">
-        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M4 22 L10 14 L16 18 L22 10 L32 22 Z" fill="#E6C93A" stroke="#1a2744" stroke-width="1.4"/><rect x="2" y="22" width="32" height="10" fill="#4FA8D8"/></svg>
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#B5C4C5 0%,#B5C4C5 52%,#EFB562 52%,#EFB562 100%);">
+        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M4 22 L10 14 L16 18 L22 10 L32 22 Z" fill="#EFB562" stroke="#5A3D28" stroke-width="1.4"/><rect x="2" y="22" width="32" height="10" fill="#B5C4C5"/></svg>
       </div>
       <span class="ntm-layer-thumb-label">ECDIS</span>
     </button>
@@ -14464,14 +14641,47 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       } else if (overlayKey === "buoys" && layers.buoys) {
         isBuoysActive = !isBuoysActive;
         btn.classList.toggle("active-overlay", isBuoysActive);
+        if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.buoys = isBuoysActive;
         if (isBuoysActive) {
+          const idleTitle = btn.getAttribute("title") || "Buoys — OpenSeaMap seamarks";
+          setOverlayBusy(btn, true, idleTitle);
+          if (mapInstance.hasLayer(layers.buoys)) {
+            try { mapInstance.removeLayer(layers.buoys); } catch (eRmB) {}
+          }
           layers.buoys.addTo(mapInstance);
+          const tile = layers.buoysTile || layers.buoysBase || null;
+          let settled = false;
+          const finishBuoys = () => {
+            if (settled) return;
+            settled = true;
+            setOverlayBusy(btn, false, idleTitle);
+            try {
+              if (tile) {
+                tile.off("load", finishBuoys);
+                tile.off("tileerror", finishBuoys);
+              }
+            } catch (eOff) {}
+          };
           try {
-            if (layers.buoysBase && layers.buoysBase.redraw) layers.buoysBase.redraw();
-            if (layers.buoysDetail && layers.buoysDetail.redraw) layers.buoysDetail.redraw();
+            if (tile) {
+              tile.once("load", finishBuoys);
+              tile.once("tileerror", finishBuoys);
+              if (tile.redraw) tile.redraw();
+            }
           } catch (eRd) {}
-        } else if (mapInstance.hasLayer(layers.buoys)) {
-          mapInstance.removeLayer(layers.buoys);
+          // Fallback — OpenSeaMap can be slow; never leave spinner forever
+          setTimeout(finishBuoys, 12000);
+          // Cached tiles may already be idle
+          setTimeout(() => {
+            try {
+              if (tile && tile._loading === false) finishBuoys();
+            } catch (eC) {}
+          }, 350);
+        } else {
+          setOverlayBusy(btn, false, btn.getAttribute("data-idle-title") || "Buoys — OpenSeaMap seamarks");
+          if (mapInstance.hasLayer(layers.buoys)) {
+            mapInstance.removeLayer(layers.buoys);
+          }
         }
       } else if (overlayKey === "bathymetry") {
         if (layerPanelLeaveTimer) {
