@@ -13789,7 +13789,8 @@ function createEcdisSimpleBaseLayer() {
   const water = new WaterGrid({
     noWrap: false,
     maxZoom: 19,
-    keepBuffer: 2,
+    keepBuffer: 1,
+    updateWhenIdle: true,
     updateWhenZooming: false,
     attribution: "ECDIS land/water · Natural Earth"
   });
