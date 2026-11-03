@@ -351,6 +351,9 @@ const OWN_AIS_REFRESH_NEAR_MS = 20 * 1000; // 20s when map is zoomed near own sh
 /** Route-DR may start after this age past last AIS fix (still requires Current rails). */
 const OWN_AIS_VISUAL_DR_MS = 12 * 1000;
 const OWN_AIS_STALE_DR_MS = 45 * 60 * 1000; // messaging only — never COG-drift AIS targets
+/** Max coast along Current rails from one AIS fix (ocean passages leave T-AIS for days). */
+const OWN_AIS_DR_MAX_AGE_MS = 14 * 24 * 3600000; // 14 days
+const OWN_AIS_DR_MAX_DIST_NM = 8000;
 const OWN_SHIP_VISUAL_TICK_MS = 2000; // local icon advance every 2s along Current rails only
 let _ownAisRefreshTimer = null;
 let _ownAisDrTimer = null;
@@ -1180,19 +1183,16 @@ function applyOwnVesselDeadReckoning(opts) {
   let ageMs = Math.max(0, nowMs - fixMsRaw);
   // If we only have a local refresh stamp (not a true AIS fix time), don't coast far
   if (!fixIsoPrimary && ageMs > 20 * 60 * 1000) ageMs = 20 * 60 * 1000;
-  // Guard device/server clock weirdness — never coast more than 18 h on one fix
-  if (ageMs > 18 * 3600000) ageMs = 18 * 3600000;
+  // Along Current rails we may coast for many days after T-AIS outage (Malacca → ocean).
+  // Hard cap only guards absurd clock skew — NOT the old 18 h ocean-passage trap.
+  if (ageMs > OWN_AIS_DR_MAX_AGE_MS) ageMs = OWN_AIS_DR_MAX_AGE_MS;
   if (!opts.force && ageMs < OWN_AIS_VISUAL_DR_MS) return;
 
   let sog = Number(v.sog);
   if (!(sog >= 0.3)) sog = 0; // allow snap-to-rails even without SOG
-  // Temper optimistic SOG on stale satellite AIS (common ocean overshoot vs live GPS)
-  const ageH = ageMs / 3600000;
-  if (sog >= 0.3 && ageH > 0.75) {
-    const temper = Math.max(0.88, 1 - (ageH - 0.75) * 0.035);
-    sog = sog * temper;
-  }
   // Prefer observed along-track speed from last two AIS fixes when available
+  // (only blend when the sample window is recent — never let an old slow Malacca
+  // leg permanently drag ocean-passage SOG down).
   const prevAlong = Number(v.aisDrPrevAlongNm);
   const prevFixMs = Number(v.aisDrPrevFixMs);
   const curFixAlongHint = Number(v.aisDrFixAlongNm);
@@ -1200,15 +1200,21 @@ function applyOwnVesselDeadReckoning(opts) {
   if (
     sog >= 0.3 &&
     Number.isFinite(prevAlong) && Number.isFinite(prevFixMs) && Number.isFinite(curFixAlongHint) &&
-    fixMs > prevFixMs && (fixMs - prevFixMs) > 60000
+    fixMs > prevFixMs && (fixMs - prevFixMs) > 60000 && (fixMs - prevFixMs) < 6 * 3600000
   ) {
     const obsKn = ((curFixAlongHint - prevAlong) / ((fixMs - prevFixMs) / 3600000));
     if (Number.isFinite(obsKn) && obsKn >= 0.5 && obsKn <= 35) {
-      sog = sog * 0.35 + obsKn * 0.65;
+      sog = sog * 0.45 + obsKn * 0.55;
     }
   }
+  // Mild temper only — Current rails + last AIS SOG are the ocean-passage truth.
+  // The old aggressive temper (down to 0.88 over hours) parked ships at Malacca exit.
+  const ageH = ageMs / 3600000;
+  if (sog >= 0.3 && ageH > 48) {
+    sog = sog * Math.max(0.92, 1 - (ageH - 48) * 0.002);
+  }
   const distNm = sog >= 0.3 ? sog * (ageMs / 3600000) : 0;
-  if (distNm > 3500) return;
+  if (distNm > OWN_AIS_DR_MAX_DIST_NM) return;
   // Non-force network tick still needs meaningful coast; force/visual may snap with 0 NM
   if (!(opts.force || opts.visual) && !(distNm > 0.5)) return;
 
@@ -5140,7 +5146,19 @@ function formatOwnShipPopupHtml(lat, lon, hdg, sog, source) {
   const rows = [];
   if (v.mmsi) rows.push(["MMSI", escapePopupText(v.mmsi)]);
   if (v.callSign) rows.push(["Call", escapePopupText(v.callSign)]);
-  rows.push(["Pos", escapePopupText(coords)]);
+  rows.push([isDr ? "DR" : "Pos", escapePopupText(coords)]);
+  // Always expose last official AIS fix (so DR never hides the true last T-AIS)
+  if (isValidVesselLatLon(v.aisFixLat, v.aisFixLon)) {
+    const aisCoords = typeof formatLatLonDMS === "function"
+      ? formatLatLonDMS(Number(v.aisFixLat), Number(v.aisFixLon))
+      : (v.aisFixLat + ", " + v.aisFixLon);
+    rows.push(["AIS", escapePopupText(aisCoords)]);
+  }
+  if (v.aisLastFixAt) {
+    const aisT = String(v.aisLastFixAt).replace("T", " ").replace(/\.\d+Z$/, "Z");
+    const ageLbl = ageMs != null ? (" · " + formatAisAgeHoursLabel(ageMs) + " h ago") : "";
+    rows.push(["Fix", escapePopupText(aisT + ageLbl)]);
+  }
   if (hdg != null && Number.isFinite(Number(hdg))) rows.push(["HDG", Math.round(hdg) + "°"]);
   if (sog != null && Number.isFinite(Number(sog))) rows.push(["SOG", Number(sog).toFixed(1) + " kn"]);
   const body = rows.map((r) =>
