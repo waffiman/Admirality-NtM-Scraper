@@ -744,6 +744,10 @@ async function refreshOwnVesselFromAis(opts) {
         aisFixLon: Number(hit.lon),
         aisRefreshedAt: getSetSailUtcNowIso(),
         deadReckoned: false,
+        // Fresh AIS becomes the new DR origin once coverage is lost again
+        aisDrActivatedAt: null,
+        aisDrNm: null,
+        aisDrMode: null,
         aisDrPrevAlongNm: Number.isFinite(prevAlongKeep) ? prevAlongKeep : prev.aisDrPrevAlongNm,
         aisDrPrevFixMs: Number.isFinite(prevFixKeep) ? prevFixKeep : prev.aisDrPrevFixMs,
         aisDrFixAlongNm: Number.isFinite(newAlong) ? newAlong : prev.aisDrFixAlongNm
@@ -757,8 +761,11 @@ async function refreshOwnVesselFromAis(opts) {
         skipAisSchedule: true
       }
     );
-    // Re-project onto Current rails only when coral Current is active
-    if (getDrActiveRouteId()) applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true });
+    // Live AIS in coverage: stay on the fix (do not immediately coast over it).
+    // When the fix ages out, the DR tick will coast from aisFixLat/Lon + aisLastFixAt.
+    if (getDrActiveRouteId() && !isLive) {
+      applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true });
+    }
     try {
       if (typeof window.sendAisStreamSubscriptionAll === "function") {
         window.sendAisStreamSubscriptionAll();
@@ -1189,6 +1196,25 @@ function applyOwnVesselDeadReckoning(opts) {
   // Along Current rails we may coast for many days after T-AIS outage (Malacca → ocean).
   // Hard cap only guards absurd clock skew — NOT the old 18 h ocean-passage trap.
   if (ageMs > OWN_AIS_DR_MAX_AGE_MS) ageMs = OWN_AIS_DR_MAX_AGE_MS;
+  // While AIS is still "live" (recent report), keep the icon on the fix — do not coast over it.
+  // DR starts only after OWN_AIS_STALE_DR_MS so re-entry into coverage snaps back to AIS.
+  if (!opts.force && ageMs < OWN_AIS_STALE_DR_MS) {
+    if (v.deadReckoned && isValidVesselLatLon(v.aisFixLat, v.aisFixLon)) {
+      // Snap back from DR to the official fix when a fresh report arrived
+      const updatedLive = Object.assign({}, v, {
+        lat: Number(v.aisFixLat),
+        lon: Number(v.aisFixLon),
+        deadReckoned: false,
+        source: "ais"
+      });
+      window.userVessel = updatedLive;
+      userVessel = updatedLive;
+      if (window.leafletMap && typeof plotUserVessel === "function") {
+        plotUserVessel(updatedLive.lat, updatedLive.lon, "AIS", true);
+      }
+    }
+    return;
+  }
   if (!opts.force && ageMs < OWN_AIS_VISUAL_DR_MS) return;
 
   let sog = Number(v.sog);
@@ -1919,10 +1945,8 @@ function syncMyVesselFromLiveAis(t) {
   if (window.leafletMap && typeof plotUserVessel === "function") {
     plotUserVessel(lat, lon, "AIS", true);
   }
-  if (typeof getDrActiveRouteId === "function" && getDrActiveRouteId() &&
-      typeof applyOwnVesselDeadReckoning === "function") {
-    try { applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true }); } catch (eDr) {}
-  }
+  // Live stream hit = in coverage — park on AIS. DR resumes from this fix when it ages out.
+  // (Do not force-coast over a fresh live report.)
 
   if (typeof syncVesselFieldsFromProfile === "function") {
     syncVesselFieldsFromProfile(updated);
@@ -3040,7 +3064,7 @@ function parseRtzRoute(xmlStr, fallbackName) {
       name: wpName.trim()
     });
   });
-  return { name: routeName, waypoints, format: "RTZ" };
+  return { name: routeName, waypoints: sanitizeRouteWaypoints(waypoints), format: "RTZ" };
 }
 
 /**
@@ -3104,7 +3128,7 @@ function parseCsvRoute(csvStr, fallbackName) {
       }
     }
   }
-  return { name: routeName, waypoints, format: "CSV" };
+  return { name: routeName, waypoints: sanitizeRouteWaypoints(waypoints), format: "CSV" };
 }
 
 /**
@@ -3145,8 +3169,35 @@ function parseRtmRoute(arrayBuffer, fallbackName) {
       break;
     }
   }
-  return { name: routeName, waypoints, format: "RTM" };
+  return { name: routeName, waypoints: sanitizeRouteWaypoints(waypoints), format: "RTM" };
 }
+
+/** Drop null-island / exact-zero padding and keep equator crossings intact. */
+function sanitizeRouteWaypoints(waypoints) {
+  if (!Array.isArray(waypoints)) return [];
+  const out = [];
+  for (let i = 0; i < waypoints.length; i++) {
+    const wp = waypoints[i];
+    if (!wp) continue;
+    const lat = Number(wp.lat);
+    const lon = Number(wp.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 180) continue;
+    if (lat === 0 && lon === 0) continue;
+    // Exact 0° longitude padding (RTM) between two non-zero legs — skip
+    if (lon === 0 && Math.abs(lat) > 1e-6) {
+      const prev = out.length ? out[out.length - 1] : null;
+      const next = waypoints[i + 1];
+      const nextLon = next != null ? Number(next.lon) : NaN;
+      if (prev && Number(prev.lon) !== 0 && Number.isFinite(nextLon) && nextLon !== 0) {
+        continue;
+      }
+    }
+    out.push(Object.assign({}, wp, { lat, lon, id: out.length + 1 }));
+  }
+  return out;
+}
+window.sanitizeRouteWaypoints = sanitizeRouteWaypoints;
 
 /**
  * Render Route Polyline and Waypoint Markers on Leaflet Chart
@@ -3303,25 +3354,22 @@ function renderRouteOnMap(route, shouldFly = true) {
     });
   }
 
-  // Waypoint circles on dedicated high pane (always, unless subfilter off)
+  // Waypoints: hollow black rings centered on leg joints (always, unless subfilter off)
   const showWpts = rtSub.waypoints !== false;
   const wptPane = ensureRouteWptPane();
   const wptIdxs = showWpts ? pickRouteWptMarkerIndices(cleanWps.length) : [];
+  const WPT_BOX = 14;
+  const WPT_R = 7;
   wptIdxs.forEach((idx) => {
     const wp = cleanWps[idx];
     if (!wp) return;
     const isStart = idx === 0;
     const isEnd = idx === cleanWps.length - 1;
     const wptCoords = unrolledCoords[idx];
-    if (!wptCoords) return;
+    if (!wptCoords || !Number.isFinite(wptCoords[0]) || !Number.isFinite(wptCoords[1])) return;
 
-    const color = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#38bdf8");
-    const fillColor = isStart ? "#10b981" : (isEnd ? "#ea4c25" : "#f8fafc");
-    const radius = isStart || isEnd ? 11 : 8;
-    const box = radius * 2;
-    const numHtml = (!isStart && !isEnd && cleanWps.length <= 80)
-      ? `<span class="route-wpt-num">${idx + 1}</span>` : "";
-
+    const stroke = "#0a0a0a";
+    const titleBit = isStart ? "Departure" : (isEnd ? "Destination" : ("WPT #" + (idx + 1)));
     const marker = L.marker(wptCoords, {
       pane: wptPane,
       draggable: true,
@@ -3329,9 +3377,14 @@ function renderRouteOnMap(route, shouldFly = true) {
       keyboard: false,
       icon: L.divIcon({
         className: "leaflet-div-icon route-wpt-div-icon",
-        html: `<div class="route-wpt-dot" style="position:relative;width:${box}px;height:${box}px;background:${fillColor};border:3px solid ${color};border-radius:50%;" title="Drag WPT #${idx + 1}">${numHtml}</div>`,
-        iconSize: [box, box],
-        iconAnchor: [radius, radius]
+        html:
+          '<div class="route-wpt-dot" title="Drag ' + titleBit + '" style="' +
+          "width:" + WPT_BOX + "px;height:" + WPT_BOX + "px;" +
+          "box-sizing:border-box;border-radius:50%;background:transparent;" +
+          "border:2px solid " + stroke + ";pointer-events:auto;cursor:grab;" +
+          '"></div>',
+        iconSize: [WPT_BOX, WPT_BOX],
+        iconAnchor: [WPT_R, WPT_R]
       }),
       zIndexOffset: 2500 + idx
     });
@@ -3413,7 +3466,7 @@ function renderRouteOnMap(route, shouldFly = true) {
 
         marker.setPopupContent(`
           <div style="font-family:'Segoe UI',sans-serif;min-width:180px;color:#1e293b;">
-            <div style="font-weight:700;font-size:0.92rem;color:${color};border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:5px;">
+            <div style="font-weight:700;font-size:0.92rem;color:#0a0a0a;border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:5px;">
               ${isStart ? "Departure: " : (isEnd ? "Destination: " : "Waypoint: ")}${wp.name || wp.id}
             </div>
             <div style="font-size:0.78rem;color:#475569;margin-bottom:2px;"><b>Coordinates:</b> ${formatLatLonDMS(wp.lat, wp.lon)}</div>
@@ -3437,7 +3490,7 @@ function renderRouteOnMap(route, shouldFly = true) {
 
     marker.bindPopup(`
       <div style="font-family:'Segoe UI',sans-serif;min-width:180px;color:#1e293b;">
-        <div style="font-weight:700;font-size:0.92rem;color:${color};border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:5px;">
+        <div style="font-weight:700;font-size:0.92rem;color:#0a0a0a;border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:5px;">
           ${isStart ? "Departure: " : (isEnd ? "Destination: " : "Waypoint: ")}${wp.name || wp.id}
         </div>
         <div style="font-size:0.78rem;color:#475569;margin-bottom:2px;"><b>Coordinates:</b> ${formatLatLonDMS(wp.lat, wp.lon)}</div>
@@ -3447,6 +3500,12 @@ function renderRouteOnMap(route, shouldFly = true) {
 
     leafletRouteLayer.addLayer(marker);
   });
+  // Ensure route layer (line + WPTs) is on the map whenever we render
+  try {
+    if (leafletMap && leafletRouteLayer && !leafletMap.hasLayer(leafletRouteLayer)) {
+      leafletRouteLayer.addTo(leafletMap);
+    }
+  } catch (eAddR) {}
 
   // Update UI in My Vessel Popover (multi-route list + Current toggle)
   const infoBox = document.getElementById("vesselRouteInfoBox");
@@ -6475,10 +6534,10 @@ function initNtMMap() {
 
     // keepBuffer high enough for date-line neighbour tiles (seamless wrap).
     const tilePerfOpts = {
-      keepBuffer: lowEndMap ? 4 : 8,
-      updateWhenIdle: false,
+      keepBuffer: lowEndMap ? 2 : 4,
+      updateWhenIdle: true,
       updateWhenZooming: false,
-      updateInterval: lowEndMap ? 200 : 100,
+      updateInterval: lowEndMap ? 280 : 160,
       noWrap: false
     };
     const overlayTilePerfOpts = Object.assign({}, tilePerfOpts, {
@@ -13806,13 +13865,26 @@ function createEcdisSimpleBaseLayer() {
     }
   }
 
+  // Reuse one canvas renderer — creating a new L.canvas() per pan leaked GPU/DOM and made ECDIS lag grow over time
+  let sharedLandRenderer = null;
+  function getLandRenderer() {
+    if (!sharedLandRenderer) {
+      sharedLandRenderer = L.canvas({ padding: 0.4, pane: "ecdisLandPane" });
+    }
+    return sharedLandRenderer;
+  }
+
   function stampLandGeo(hitGeo, map) {
     const offs = visibleWorldLonOffsets(map);
-    landFill.clearLayers();
+    try { landFill.clearLayers(); } catch (eClr) {}
     const style = landStyle();
-    for (let oi = 0; oi < offs.length; oi++) {
-      const off = offs[oi];
-      const renderer = L.canvas({ padding: 0.75, pane: "ecdisLandPane" });
+    const renderer = getLandRenderer();
+    // Prefer a single world copy when zoomed in (cheap); ±1 only near dateline / overview
+    const z = map && map.getZoom ? map.getZoom() : 3;
+    const mid = offs[Math.floor(offs.length / 2)];
+    const useOffs = z >= 5 ? [mid != null ? mid : 0] : offs;
+    for (let oi = 0; oi < useOffs.length; oi++) {
+      const off = useOffs[oi];
       L.geoJSON(hitGeo, {
         pane: "ecdisLandPane",
         renderer,
@@ -13908,7 +13980,8 @@ function createEcdisSimpleBaseLayer() {
       }
       return;
     }
-    const level = z >= 3 ? "10m" : z >= 2 ? "50m" : "110m";
+    // Defer 10m detail until closer zoom — 10m×3 worlds is the main ECDIS lag source
+    const level = z >= 5 ? "10m" : z >= 3 ? "50m" : "110m";
     const seq = ++landSeq;
     const needsFetch = !landCache[level];
     if (needsFetch) setEcdisLandLoading(true);
@@ -13919,16 +13992,18 @@ function createEcdisSimpleBaseLayer() {
       const bounds = map.getBounds().pad(pad);
       const offs = visibleWorldLonOffsets(map);
       const worldKey = offs.join(",");
+      // Coarser viewKey grid → fewer redraws while panning
+      const q = z >= 6 ? 20 : 8;
       const viewKey =
         level +
         "|" +
-        Math.round(bounds.getSouth() * 10) +
+        Math.round(bounds.getSouth() * q) +
         "|" +
-        Math.round(bounds.getWest() * 10) +
+        Math.round(bounds.getWest() * q) +
         "|" +
-        Math.round(bounds.getNorth() * 10) +
+        Math.round(bounds.getNorth() * q) +
         "|" +
-        Math.round(bounds.getEast() * 10);
+        Math.round(bounds.getEast() * q);
       const key = viewKey + "|w" + worldKey;
       if (key === lastLandKey) {
         setEcdisLandLoading(false);
@@ -13997,9 +14072,19 @@ function createEcdisSimpleBaseLayer() {
         else lastLandKey = "live|w" + wk;
       } catch (eMove) {}
     };
-    boundMap.on("zoomend moveend", bump);
-    boundMap.on("move", bumpWorldWindow);
-    group._ecdisCoastBump = bump;
+    // Only refresh land on zoomend/moveend — mid-pan restamps were the growing lag
+    let bumpTimer = 0;
+    const bumpDebounced = function () {
+      if (bumpTimer) clearTimeout(bumpTimer);
+      bumpTimer = setTimeout(function () {
+        bumpTimer = 0;
+        bump();
+      }, window._setsailLowEndMap ? 180 : 90);
+    };
+    boundMap.on("zoomend moveend", bumpDebounced);
+    // World-window restamp only on moveend near dateline (not every move tick)
+    boundMap.on("moveend", bumpWorldWindow);
+    group._ecdisCoastBump = bumpDebounced;
     group._ecdisCoastMoveBump = bumpWorldWindow;
     refreshEcdisLand();
   });
@@ -14008,10 +14093,11 @@ function createEcdisSimpleBaseLayer() {
       boundMap.off("zoomend moveend", group._ecdisCoastBump);
     }
     if (boundMap && group._ecdisCoastMoveBump) {
-      boundMap.off("move", group._ecdisCoastMoveBump);
+      boundMap.off("moveend", group._ecdisCoastMoveBump);
     }
     group._ecdisCoastBump = null;
     group._ecdisCoastMoveBump = null;
+    sharedLandRenderer = null;
     boundMap = null;
     lastLandKey = "";
     cachedHitGeo = null;
@@ -16417,11 +16503,8 @@ function renderRouteBufferCorridorOnMap() {
     window._setsailRouteStrokeRefs = strokeRefs;
   }
 
-  // Keep WPT pane above everything after corridor rebuild
+  // Keep WPT pane above corridor — do NOT bringToFront every marker (shifts DivIcon anchors)
   try { ensureRouteWptPane(); } catch (eW) {}
-  if (leafletRouteLayer && leafletMap && leafletMap.hasLayer(leafletRouteLayer)) {
-    try { leafletRouteLayer.eachLayer((ly) => { if (ly && ly.bringToFront) ly.bringToFront(); }); } catch (eF) {}
-  }
 }
 window.renderRouteBufferCorridorOnMap = renderRouteBufferCorridorOnMap;
 
