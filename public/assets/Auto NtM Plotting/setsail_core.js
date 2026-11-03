@@ -415,6 +415,62 @@ function snapOwnShipToLastAisFix(opts) {
 }
 window.snapOwnShipToLastAisFix = snapOwnShipToLastAisFix;
 
+/** Fast Open Waters MMSI lookup — last known position (even if hours/days old). */
+async function fetchOpenWatersVesselByMmsi(mmsiRaw, opts) {
+  opts = opts || {};
+  const mmsi = String(mmsiRaw || "").replace(/\D/g, "");
+  if (!/^\d{5,9}$/.test(mmsi)) return null;
+  const timeoutMs = Math.max(1500, Number(opts.timeoutMs) || 4500);
+  const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timer = setTimeout(() => { try { if (ctrl) ctrl.abort(); } catch (eA) {} }, timeoutMs);
+  try {
+    const geo = await fetch("https://ais.openwaters.io/v1/vessels?mmsi=" + encodeURIComponent(mmsi), {
+      headers: {
+        Accept: "application/geo+json, application/json",
+        "User-Agent": "SetSailMarineSuite/AIS"
+      },
+      cache: "no-store",
+      signal: ctrl ? ctrl.signal : undefined
+    }).then((r) => (r.ok ? r.json() : null));
+    const f = geo && (geo.features || [])[0];
+    if (!f) return null;
+    const p = f.properties || {};
+    const c = (f.geometry && f.geometry.coordinates) || [];
+    const lat = Number(c[1]);
+    const lon = Number(c[0]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    const seenRaw = p.seen || p.time || p.updated || p.last_seen;
+    let seenMs = 0;
+    if (typeof seenRaw === "number" && Number.isFinite(seenRaw)) {
+      seenMs = seenRaw < 1e12 ? Math.round(seenRaw * 1000) : Math.round(seenRaw);
+    } else if (seenRaw) {
+      const t = Date.parse(String(seenRaw));
+      if (Number.isFinite(t)) seenMs = t;
+    }
+    return {
+      mmsi,
+      lat,
+      lon,
+      sog: p.sog != null ? p.sog : p.speed,
+      cog: p.cog != null ? p.cog : p.course,
+      heading: p.heading,
+      name: p.name || "",
+      destination: p.destination || "",
+      shipType: p.type || p.shipType || "",
+      callSign: p.callSign || p.call_sign || "",
+      navStat: p.nav_status != null ? p.nav_status : p.navStat,
+      source: "openwaters",
+      updatedAt: seenMs || Date.now(),
+      aisSeenAt: seenMs ? new Date(seenMs).toISOString() : null
+    };
+  } catch (e) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+window.fetchOpenWatersVesselByMmsi = fetchOpenWatersVesselByMmsi;
+
 async function fetchOwnVesselAisUpdate() {
   const v = userVessel;
   if (!v || !v.mmsi) return null;
@@ -442,6 +498,18 @@ async function fetchOwnVesselAisUpdate() {
   ].forEach((b) => boxes.push(b));
 
   async function fromOpenWaters() {
+    // Direct MMSI lookup first (fast, last-known) — do NOT fall through to zone caches.
+    const direct = await fetchOpenWatersVesselByMmsi(mmsi, { timeoutMs: 5000 });
+    if (direct) {
+      return Object.assign({}, direct, {
+        name: direct.name || v.name || "",
+        destination: direct.destination || v.destination || "",
+        shipType: direct.shipType || v.shipType || "",
+        callSign: direct.callSign || v.callSign || "",
+        source: "ais"
+      });
+    }
+
     function hitFromFeature(f) {
       if (!f) return null;
       const p = f.properties || {};
@@ -472,33 +540,24 @@ async function fetchOwnVesselAisUpdate() {
       };
     }
 
-    // Direct MMSI lookup (most reliable on Open Waters) — returns last known even if old.
-    try {
-      const geo = await fetch("https://ais.openwaters.io/v1/vessels?mmsi=" + encodeURIComponent(mmsi), {
-        headers: {
-          Accept: "application/geo+json, application/json",
-          "User-Agent": "SetSailMarineSuite/AIS"
-        },
-        cache: "no-store"
-      }).then((r) => (r.ok ? r.json() : null));
-      const f = geo && (geo.features || [])[0];
-      const hit = hitFromFeature(f);
-      if (hit && Number.isFinite(hit.lat) && Number.isFinite(hit.lon)) return hit;
-    } catch (e) { /* fall through to bbox */ }
-
-    for (let i = 0; i < boxes.length; i++) {
+    // Cap bbox chase — previously walked every corridor and felt like 30–40s
+    const maxBoxes = Math.min(boxes.length, 4);
+    for (let i = 0; i < maxBoxes; i++) {
       const box = boxes[i];
       const url =
         "https://ais.openwaters.io/v1/vessels?bbox=" +
         box.map((n) => Number(n).toFixed(4)).join(",");
       try {
+        const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+        const tOut = setTimeout(() => { try { if (ctrl) ctrl.abort(); } catch (eB) {} }, 2500);
         const geo = await fetch(url, {
           headers: {
             Accept: "application/geo+json, application/json",
             "User-Agent": "SetSailMarineSuite/AIS"
           },
-          cache: "no-store"
-        }).then((r) => (r.ok ? r.json() : null));
+          cache: "no-store",
+          signal: ctrl ? ctrl.signal : undefined
+        }).then((r) => (r.ok ? r.json() : null)).finally(() => clearTimeout(tOut));
         if (!geo) continue;
         const feats = geo.features || [];
         for (let j = 0; j < feats.length; j++) {
@@ -1360,7 +1419,7 @@ async function ensureAisNameIndex() {
       source: "registry"
     });
 
-    // 1) Compact names catalog
+    // 1) Compact names catalog — enough for autocomplete in <1s
     try {
       const data = await fetch("ais/zones/names.json?t=" + Date.now(), { cache: "no-store" }).then((r) => {
         if (!r.ok) throw new Error("names.json HTTP " + r.status);
@@ -1372,51 +1431,68 @@ async function ensureAisNameIndex() {
       console.warn("[SetSail Vessel] names.json miss", e);
     }
 
-    // 2) Merge EVERY zone snapshot we track (full AIS catalog, not a sample)
-    try {
-      const man = await fetch("ais/zones/index.json?t=" + Date.now(), { cache: "no-store" }).then((r) => {
-        if (!r.ok) throw new Error("index.json HTTP " + r.status);
-        return r.json();
-      });
-      const zones = man.zones || [];
-      await Promise.all(
-        zones.map(async (z) => {
-          if (!z || !z.file) return;
-          try {
-            const geo = await fetch(z.file + "?t=" + Date.now(), { cache: "no-store" }).then((r) =>
-              r.ok ? r.json() : null
-            );
-            (geo && geo.targets ? geo.targets : []).forEach(pushRow);
-          } catch (ez) {
-            console.warn("[SetSail Vessel] zone index merge fail", z.id, ez);
-          }
-        })
-      );
-      console.info("[SetSail Vessel] AIS name index ready (all zones):", out.length);
-    } catch (e2) {
-      console.warn("[SetSail Vessel] zone merge failed — Digitraffic fallback", e2);
-      try {
-        const vessels = await fetch("https://meri.digitraffic.fi/api/ais/v1/vessels", {
-          headers: { Accept: "application/json", "Digitraffic-User": "SetSailMarineSuite/AIS" },
-          cache: "no-store"
-        }).then((r) => r.json());
-        const arr = Array.isArray(vessels) ? vessels : vessels.vessels || [];
-        arr.forEach((v) => {
-          pushRow({
-            name: v.name || v.shipName,
-            mmsi: v.mmsi || v.MMSI,
-            callSign: v.callSign || "",
-            shipType: v.shipType || v.shipTypeName || "",
-            destination: v.destination || "",
-            source: "Digitraffic"
-          });
-        });
-      } catch (e3) {
-        console.warn("[SetSail Vessel] Digitraffic name fallback failed", e3);
-      }
-    }
+    // Publish early so autocomplete / MMSI name resolve don't wait on zone merges
+    _aisNameIndex = out.slice();
 
-    _aisNameIndex = out;
+    // 2) Background-merge zone snapshots for richer name catalog (coords ignored for My Vessel)
+    (async () => {
+      try {
+        const man = await fetch("ais/zones/index.json?t=" + Date.now(), { cache: "no-store" }).then((r) => {
+          if (!r.ok) throw new Error("index.json HTTP " + r.status);
+          return r.json();
+        });
+        const zones = man.zones || [];
+        await Promise.all(
+          zones.map(async (z) => {
+            if (!z || !z.file) return;
+            try {
+              const geo = await fetch(z.file + "?t=" + Date.now(), { cache: "no-store" }).then((r) =>
+                r.ok ? r.json() : null
+              );
+              // Name/meta only — strip lat/lon so we never paint weeks-old zone fixes
+              (geo && geo.targets ? geo.targets : []).forEach((row) => {
+                if (!row) return;
+                pushRow({
+                  name: row.name,
+                  mmsi: row.mmsi,
+                  callSign: row.callSign || row.callsign,
+                  shipType: row.shipType || row.type,
+                  destination: row.destination,
+                  source: row.source || "AIS"
+                });
+              });
+            } catch (ez) {
+              console.warn("[SetSail Vessel] zone index merge fail", z.id, ez);
+            }
+          })
+        );
+        _aisNameIndex = out;
+        console.info("[SetSail Vessel] AIS name index ready (all zones):", out.length);
+      } catch (e2) {
+        console.warn("[SetSail Vessel] zone merge failed — Digitraffic fallback", e2);
+        try {
+          const vessels = await fetch("https://meri.digitraffic.fi/api/ais/v1/vessels", {
+            headers: { Accept: "application/json", "Digitraffic-User": "SetSailMarineSuite/AIS" },
+            cache: "no-store"
+          }).then((r) => r.json());
+          const arr = Array.isArray(vessels) ? vessels : vessels.vessels || [];
+          arr.forEach((v) => {
+            pushRow({
+              name: v.name || v.shipName,
+              mmsi: v.mmsi || v.MMSI,
+              callSign: v.callSign || "",
+              shipType: v.shipType || v.shipTypeName || "",
+              destination: v.destination || "",
+              source: "Digitraffic"
+            });
+          });
+          _aisNameIndex = out;
+        } catch (e3) {
+          console.warn("[SetSail Vessel] Digitraffic name fallback failed", e3);
+        }
+      }
+    })();
+
     return out;
   })();
   try {
@@ -1530,45 +1606,43 @@ function vesselHasFullAisPayload(t) {
 
 async function applyAisHitToVessel(t, toastMsg) {
   if (!t) return;
+  const mmsi = t.mmsi != null ? String(t.mmsi).replace(/\D/g, "") : "";
+  // Name/meta from suggest immediately — NEVER trust zone-cache lat/lon as "latest AIS"
+  // (that painted VESTA at old Malacca-entrance while Open Waters had Malacca-exit).
   const partial = {
     name: t.name || "",
     callSign: t.callSign || "",
-    mmsi: t.mmsi != null ? String(t.mmsi) : "",
+    mmsi: mmsi || (t.mmsi != null ? String(t.mmsi) : ""),
     shipType: t.shipType || "",
     destination: t.destination || "",
-    sog: t.sog,
-    cog: t.cog,
-    heading: t.heading,
-    lat: t.lat,
-    lon: t.lon,
+    sog: null,
+    cog: null,
+    heading: null,
+    lat: null,
+    lon: null,
     source: "ais"
   };
 
-  // Show name immediately; spin on fields still waiting for AIS enrichment
-  const needPos = !(Number.isFinite(Number(partial.lat)) && Number.isFinite(Number(partial.lon)));
-  const needMeta = !partial.callSign || !partial.shipType;
   ["home", "chart"].forEach((which) => {
     const m = vesselFormMap(which);
-    if (needPos) {
-      setVesselFieldBusy(m.lat, true);
-      setVesselFieldBusy(m.lon, true);
-    }
-    if (needMeta) {
-      setVesselFieldBusy(m.callSign, true);
-      setVesselFieldBusy(m.type, true);
-      setVesselFieldBusy(m.dest, true);
-      setVesselFieldBusy(m.sog, true);
-      setVesselFieldBusy(m.cog, true);
-      setVesselFieldBusy(m.heading, true);
-    }
+    setVesselFieldBusy(m.lat, true);
+    setVesselFieldBusy(m.lon, true);
+    setVesselFieldBusy(m.callSign, true);
+    setVesselFieldBusy(m.type, true);
+    setVesselFieldBusy(m.dest, true);
+    setVesselFieldBusy(m.sog, true);
+    setVesselFieldBusy(m.cog, true);
+    setVesselFieldBusy(m.heading, true);
   });
   setVesselAisSyncBanner(false);
   applyVesselProfile(partial, { toast: null, skipAisSchedule: true });
 
   let full = partial;
-  if (!vesselHasFullAisPayload(partial) && partial.mmsi) {
+  if (partial.mmsi) {
     try {
-      const live = await findAisTargetByMmsi(partial.mmsi);
+      // Live Open Waters first (seconds), then stream/snapshot — never zone deep-scan
+      let live = await fetchOpenWatersVesselByMmsi(partial.mmsi, { timeoutMs: 4500 });
+      if (!live) live = await findAisTargetByMmsi(partial.mmsi);
       if (live) {
         full = Object.assign({}, partial, {
           name: live.name || partial.name,
@@ -1578,9 +1652,13 @@ async function applyAisHitToVessel(t, toastMsg) {
           sog: live.sog != null ? live.sog : partial.sog,
           cog: live.cog != null ? live.cog : partial.cog,
           heading: live.heading != null ? live.heading : partial.heading,
-          lat: Number.isFinite(Number(live.lat)) ? live.lat : partial.lat,
-          lon: Number.isFinite(Number(live.lon)) ? live.lon : partial.lon,
-          source: "ais"
+          lat: Number.isFinite(Number(live.lat)) ? Number(live.lat) : partial.lat,
+          lon: Number.isFinite(Number(live.lon)) ? Number(live.lon) : partial.lon,
+          source: "ais",
+          aisLastFixAt: live.aisSeenAt || null,
+          aisFixLat: Number.isFinite(Number(live.lat)) ? Number(live.lat) : null,
+          aisFixLon: Number.isFinite(Number(live.lon)) ? Number(live.lon) : null,
+          aisRefreshedAt: getSetSailUtcNowIso ? getSetSailUtcNowIso() : new Date().toISOString()
         });
       }
     } catch (e) {
@@ -1597,7 +1675,10 @@ async function applyAisHitToVessel(t, toastMsg) {
 
   applyVesselProfile(full, { toast: null, skipAisSchedule: false });
   if (vesselHasFullAisPayload(full)) {
-    setVesselAisSyncBanner(true, toastMsg || "Vessel details synced from AIS");
+    const ageNote = full.aisLastFixAt
+      ? (" · AIS " + full.aisLastFixAt.replace("T", " ").replace(/\.\d+Z$/, "Z"))
+      : "";
+    setVesselAisSyncBanner(true, (toastMsg || "Vessel details synced from AIS") + ageNote);
     if (typeof showSetSailToast === "function") {
       showSetSailToast(toastMsg || "Vessel details synced from AIS", "success");
     }
@@ -1610,7 +1691,13 @@ async function findAisTargetByMmsi(mmsiRaw) {
   const mmsi = String(mmsiRaw || "").replace(/\D/g, "");
   if (mmsi.length < 5) return null;
 
-  // 1) Check active live stream targets
+  // 1) Live Open Waters MMSI — authoritative last-known (skip stale zone caches)
+  try {
+    const ow = await fetchOpenWatersVesselByMmsi(mmsi, { timeoutMs: 4500 });
+    if (ow && Number.isFinite(Number(ow.lat)) && Number.isFinite(Number(ow.lon))) return ow;
+  } catch (eOw) {}
+
+  // 2) Active live stream targets
   if (typeof window !== "undefined" && window.aisStreamTargets && window.aisStreamTargets[mmsi]) {
     const t = window.aisStreamTargets[mmsi];
     if (t && Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon))) {
@@ -1625,12 +1712,14 @@ async function findAisTargetByMmsi(mmsiRaw) {
         shipType: t.shipType || t.type || "",
         destination: t.destination || "",
         callSign: t.callSign || "",
-        source: t.source || "AISStream"
+        source: t.source || "AISStream",
+        aisSeenAt: t.aisSeenAt || t.updatedAt || null,
+        updatedAt: t.updatedAt || Date.now()
       };
     }
   }
 
-  // 2) Check live AIS snapshot
+  // 3) Live AIS snapshot (in-memory chart overlay)
   if (typeof window !== "undefined" && typeof window.getAisTargetsSnapshot === "function") {
     try {
       const snap = window.getAisTargetsSnapshot(2000) || [];
@@ -1647,69 +1736,41 @@ async function findAisTargetByMmsi(mmsiRaw) {
           shipType: st.shipType || "",
           destination: st.destination || "",
           callSign: st.callSign || "",
-          source: st.source || "AIS"
+          source: st.source || "AIS",
+          aisSeenAt: st.aisSeenAt || null,
+          updatedAt: st.updatedAt || Date.now()
         };
       }
     } catch (eSnap) {}
   }
 
-  // 3) Check indexed names / zone cache (only if coordinates present)
-  const idx = await ensureAisNameIndex();
-  let hit = (idx || []).find((t) => String(t.mmsi || "") === mmsi && Number.isFinite(Number(t.lat)) && Number.isFinite(Number(t.lon)));
-  if (hit) return hit;
-
-  // Deep scan zone files
+  // 4) Name/meta only from index — NEVER return zone lat/lon (weeks-old Malacca/Japan traps)
   try {
-    const man = await fetch("ais/zones/index.json?t=" + Date.now(), { cache: "no-store" }).then((r) =>
-      r.ok ? r.json() : null
-    );
-    for (const z of (man && man.zones) || []) {
-      if (!z || !z.file) continue;
-      try {
-        const geo = await fetch(z.file + "?t=" + Date.now(), { cache: "no-store" }).then((r) =>
-          r.ok ? r.json() : null
-        );
-        const t = ((geo && geo.targets) || []).find((x) => String(x.mmsi) === mmsi && Number.isFinite(Number(x.lat)));
-        if (t) {
-          return {
-            name: t.name || ("MMSI " + mmsi),
-            mmsi,
-            lat: Number(t.lat),
-            lon: Number(t.lon),
-            sog: t.sog,
-            cog: t.cog,
-            heading: t.heading,
-            shipType: t.shipType || t.type || "",
-            destination: t.destination || "",
-            callSign: t.callSign || "",
-            source: t.source || "AIS"
-          };
-        }
-      } catch (e) { /* next zone */ }
+    const idx = await ensureAisNameIndex();
+    const meta = (idx || []).find((t) => String(t.mmsi || "") === mmsi);
+    if (meta) {
+      return {
+        name: meta.name || ("MMSI " + mmsi),
+        mmsi: mmsi,
+        callSign: meta.callSign || "",
+        shipType: meta.shipType || "",
+        destination: meta.destination || "",
+        source: "registry",
+        lat: null,
+        lon: null
+      };
     }
-  } catch (e2) { /* ignore */ }
+  } catch (eIdx) {}
 
-  // Live refresh path (Open Waters / Digitraffic)
-  const prev = userVessel;
-  userVessel = Object.assign({}, prev || {}, { mmsi: mmsi });
-  try {
-    const live = await fetchOwnVesselAisUpdate();
-    if (live && Number.isFinite(Number(live.lat)) && Number.isFinite(Number(live.lon))) return live;
-  } catch (e3) { /* ignore */ }
-  finally {
-    userVessel = prev;
-  }
-
-  // Fallback to static registry seed if no live coordinates found yet
-  let staticHit = (idx || []).find((t) => String(t.mmsi || "") === mmsi);
-  if (staticHit) return staticHit;
   if (mmsi === "636024827") {
     return {
       name: "IINO INEOS VESTA",
       mmsi: "636024827",
       callSign: "5LUM3",
       shipType: "LPG Tanker",
-      source: "registry"
+      source: "registry",
+      lat: null,
+      lon: null
     };
   }
   return null;
@@ -13455,11 +13516,12 @@ const WORLD_LAND_POLYGONS = [[[-80.04,-59.57],[-80.55,-59.87],[-81.0,-60.16],[-8
 window.WORLD_LAND_POLYGONS = WORLD_LAND_POLYGONS;
 
 
-/** ECDIS: blue water + yellow land. Land fill from Natural Earth polygons (no separate gray coast stroke). */
+/** ECDIS: NAVTOR-style dusty teal water + golden-tan land (sampled from NAVTOR Ecdis Style). */
 function createEcdisSimpleBaseLayer() {
-  // Slightly more saturated ECDIS palette (water blue / land yellow)
-  const WATER = "#4FA8D8";
-  const LAND = "#E6C93A";
+  // NAVTOR reference: water ~#B5C4C5, land ~#EFB562, thin dark-brown coast
+  const WATER = "#B5C4C5";
+  const LAND = "#EFB562";
+  const COAST = "#5A3D28";
   const WaterGrid = L.GridLayer.extend({
     createTile: function () {
       const t = document.createElement("div");
@@ -13504,13 +13566,12 @@ function createEcdisSimpleBaseLayer() {
   }
 
   function landStyle() {
-    // Same yellow for fill and edge — no gray coastline halo, no source mismatch.
     return {
       pane: "ecdisLandPane",
       stroke: true,
-      color: LAND,
-      weight: 0.6,
-      opacity: 1,
+      color: COAST,
+      weight: 0.85,
+      opacity: 0.95,
       fillColor: LAND,
       fillOpacity: 1,
       interactive: false,

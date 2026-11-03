@@ -13855,8 +13855,8 @@ function initVisualChartLayerSelector(mapInstance, layers) {
   selector.className = "ntm-chart-layer-selector collapsed";
   selector.innerHTML = `
     <button type="button" class="ntm-layer-thumb-btn active-base" data-base="ecdis" title="ECDIS — blue water, yellow land, detailed coastline">
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#4FA8D8 0%,#4FA8D8 52%,#E6C93A 52%,#E6C93A 100%);">
-        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M4 22 L10 14 L16 18 L22 10 L32 22 Z" fill="#E6C93A" stroke="#1a2744" stroke-width="1.4"/><rect x="2" y="22" width="32" height="10" fill="#4FA8D8"/></svg>
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#B5C4C5 0%,#B5C4C5 52%,#EFB562 52%,#EFB562 100%);">
+        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M4 22 L10 14 L16 18 L22 10 L32 22 Z" fill="#EFB562" stroke="#5A3D28" stroke-width="1.4"/><rect x="2" y="22" width="32" height="10" fill="#B5C4C5"/></svg>
       </div>
       <span class="ntm-layer-thumb-label">ECDIS</span>
     </button>
