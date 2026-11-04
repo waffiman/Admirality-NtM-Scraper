@@ -2178,9 +2178,59 @@ function bindVesselMmsiLookup(which) {
 
 /** Browser GPS → My Vessel. Ignores device compass; SOG/COG only from ≥50 m ground moves. */
 const GPS_MOTION_MIN_M = 50;
+const GPS_TRACK_MAX_LEGS = 8; // more legs → stabler COG/SOG for the time vector
 let _gpsWatchId = null;
 let _gpsMotionAnchor = null; // { lat, lon, tMs } — last point used for SOG/COG
+let _gpsTrackLegs = []; // [{ lat, lon, tMs, sog, cog }] calibrated ≥50 m samples
 let _gpsUiBtns = [];
+
+function _gpsSmoothAngleDeg(prev, next, alpha) {
+  if (!Number.isFinite(next)) return prev;
+  if (!Number.isFinite(prev)) return next;
+  let d = ((next - prev + 540) % 360) - 180;
+  return ((prev + alpha * d) % 360 + 360) % 360;
+}
+
+function _gpsRecomputeSmoothMotion() {
+  if (!_gpsTrackLegs.length) return null;
+  // Prefer multi-leg average (stabilizes GPS vector as more fixes arrive)
+  let sogSum = 0;
+  let sogN = 0;
+  let cog = null;
+  for (let i = 0; i < _gpsTrackLegs.length; i++) {
+    const leg = _gpsTrackLegs[i];
+    if (Number.isFinite(leg.sog) && leg.sog >= 0) {
+      sogSum += leg.sog;
+      sogN += 1;
+    }
+    if (Number.isFinite(leg.cog)) {
+      cog = cog == null ? leg.cog : _gpsSmoothAngleDeg(cog, leg.cog, 0.45);
+    }
+  }
+  // Also use first→last chord for longer baseline when ≥2 anchors exist
+  if (_gpsTrackLegs.length >= 2) {
+    const a = _gpsTrackLegs[0];
+    const b = _gpsTrackLegs[_gpsTrackLegs.length - 1];
+    const dM = _gpsDistM(a.lat, a.lon, b.lat, b.lon);
+    const dtMs = b.tMs - a.tMs;
+    if (dM >= GPS_MOTION_MIN_M && dtMs >= 4000) {
+      const chordSog = (dM / 1852) / (dtMs / 3600000);
+      const chordCog = _gpsBearingDeg(a.lat, a.lon, b.lat, b.lon);
+      if (Number.isFinite(chordSog) && chordSog >= 0 && chordSog <= 60) {
+        sogSum += chordSog * 1.4;
+        sogN += 1.4;
+      }
+      if (Number.isFinite(chordCog)) {
+        cog = cog == null ? chordCog : _gpsSmoothAngleDeg(cog, chordCog, 0.55);
+      }
+    }
+  }
+  const sog = sogN > 0 ? sogSum / sogN : null;
+  return {
+    sog: Number.isFinite(sog) ? Math.round(sog * 10) / 10 : null,
+    cog: Number.isFinite(cog) ? Math.round(cog * 10) / 10 : null
+  };
+}
 
 const GPS_BTN_DISCONNECT_HTML =
   '<span class="ss-gps-btn-label">DISCONNECT</span>' +
@@ -2224,6 +2274,7 @@ function stopVesselGpsWatch() {
   window._setsailGpsWatchActive = false;
   window._setsailGpsConnecting = false;
   _gpsMotionAnchor = null;
+  _gpsTrackLegs = [];
   _gpsUiBtns.forEach((btn) => renderGpsButtonIdle(btn));
 }
 window.stopVesselGpsWatch = stopVesselGpsWatch;
@@ -2294,11 +2345,29 @@ function applyGpsFixToVessel(pos, opts) {
       const dtH = dtMs / 3600000;
       const sog = dtH > 0 ? (dM / 1852) / dtH : null;
       const cog = _gpsBearingDeg(_gpsMotionAnchor.lat, _gpsMotionAnchor.lon, lat, lon);
-      if (Number.isFinite(sog) && sog >= 0 && sog <= 60) patch.sog = Math.round(sog * 10) / 10;
-      if (Number.isFinite(cog)) {
-        patch.cog = Math.round(cog * 10) / 10;
-        // Heading follows COG from track — never phone yaw
-        patch.heading = patch.cog;
+      const leg = {
+        lat, lon, tMs,
+        sog: (Number.isFinite(sog) && sog >= 0 && sog <= 60) ? Math.round(sog * 10) / 10 : null,
+        cog: Number.isFinite(cog) ? Math.round(cog * 10) / 10 : null
+      };
+      _gpsTrackLegs.push(leg);
+      if (_gpsTrackLegs.length > GPS_TRACK_MAX_LEGS) _gpsTrackLegs.shift();
+      const smooth = _gpsRecomputeSmoothMotion();
+      if (smooth && smooth.sog != null) {
+        patch.sog = smooth.sog;
+        patch.gpsSogSmooth = smooth.sog;
+      } else if (leg.sog != null) {
+        patch.sog = leg.sog;
+        patch.gpsSogSmooth = leg.sog;
+      }
+      if (smooth && smooth.cog != null) {
+        patch.cog = smooth.cog;
+        patch.gpsCogSmooth = smooth.cog;
+        patch.heading = smooth.cog; // track COG — never phone yaw
+      } else if (leg.cog != null) {
+        patch.cog = leg.cog;
+        patch.gpsCogSmooth = leg.cog;
+        patch.heading = leg.cog;
       }
       _gpsMotionAnchor = { lat, lon, tMs };
     }
@@ -5313,14 +5382,71 @@ function parseCoordinateString(str) {
 
 /** Zoom at/above which own-ship switches from position circle → hull outline. */
 const OWN_SHIP_HULL_ZOOM = 14;
-/** ECDIS-style time vector: length = SOG (kn) × minutes / 60 → NM on the chart. */
-const OWN_SHIP_VECTOR_MINUTES = 60;
+/** Default ECDIS time-vector look-ahead (min). Length NM = SOG(kn) × minutes/60. */
+const OWN_SHIP_VECTOR_MINUTES_DEFAULT = 60;
+const OWN_SHIP_VECTOR_MINUTES_KEY = "setsail_own_ship_vector_min_v1";
 /** Screen-pixel caps for the geographic vector (ECDIS readability). */
 const OWN_SHIP_VECTOR_MAX_PX = 100;
 /** Below this screen length, hide the shaft — arrow sits on the position circle. */
 const OWN_SHIP_VECTOR_ARROW_ONLY_PX = 22;
 /** Position-circle outer ring ≈ 9px in the 48px icon. */
 const OWN_SHIP_VECTOR_RIM_PX = 11;
+
+/** @deprecated use getOwnShipVectorMinutes() — kept for older call sites */
+let OWN_SHIP_VECTOR_MINUTES = OWN_SHIP_VECTOR_MINUTES_DEFAULT;
+
+function getOwnShipVectorMinutes() {
+  let n = OWN_SHIP_VECTOR_MINUTES_DEFAULT;
+  try {
+    const raw = localStorage.getItem(OWN_SHIP_VECTOR_MINUTES_KEY);
+    if (raw != null && raw !== "") n = parseInt(raw, 10);
+  } catch (e) {}
+  if (!Number.isFinite(n)) n = OWN_SHIP_VECTOR_MINUTES_DEFAULT;
+  n = Math.max(1, Math.min(180, Math.round(n)));
+  OWN_SHIP_VECTOR_MINUTES = n;
+  return n;
+}
+
+function setOwnShipVectorMinutes(mins, opts) {
+  opts = opts || {};
+  let n = parseInt(mins, 10);
+  if (!Number.isFinite(n)) n = OWN_SHIP_VECTOR_MINUTES_DEFAULT;
+  n = Math.max(1, Math.min(180, Math.round(n)));
+  OWN_SHIP_VECTOR_MINUTES = n;
+  try { localStorage.setItem(OWN_SHIP_VECTOR_MINUTES_KEY, String(n)); } catch (e) {}
+  // Live-refresh geographic vector + open CCRP footer
+  try {
+    if (userVessel && isValidVesselLatLon(userVessel.lat, userVessel.lon)) {
+      const cog = resolveOwnShipCogDeg(userVessel);
+      const sog = resolveOwnShipSogKn(userVessel);
+      updateOwnShipTimeVector(userVessel.lat, userVessel.lon, cog, sog);
+    }
+  } catch (eV) {}
+  try {
+    const inp = document.getElementById("ssOwnShipVecMins");
+    if (inp && document.activeElement !== inp) inp.value = String(n);
+    const lab = document.getElementById("ssOwnShipVecMinsLabel");
+    if (lab) lab.textContent = String(n);
+  } catch (eUi) {}
+  try {
+    if (!opts.skipPopup && _ownShipMarker && _ownShipMarker.isPopupOpen && _ownShipMarker.isPopupOpen() && userVessel) {
+      _ownShipMarker.setPopupContent(formatOwnShipPopupHtml(
+        userVessel.lat, userVessel.lon,
+        resolveOwnShipCogDeg(userVessel),
+        resolveOwnShipSogKn(userVessel),
+        userVessel.source
+      ));
+    }
+  } catch (ePop) {}
+  if (opts.toast && typeof showSetSailToast === "function") {
+    showSetSailToast("Own-ship vector: " + n + " min", "info");
+  }
+  return n;
+}
+window.getOwnShipVectorMinutes = getOwnShipVectorMinutes;
+window.setOwnShipVectorMinutes = setOwnShipVectorMinutes;
+
+try { getOwnShipVectorMinutes(); } catch (eBootVec) {}
 
 /**
  * Generates Crosshair Target Marker (legacy / fallback)
@@ -5359,10 +5485,35 @@ function destinationPointNm(lat, lon, bearingDeg, distNm) {
 
 function resolveOwnShipSogKn(v) {
   if (!v) return null;
+  // Prefer GPS-smoothed SOG when GPS is the active feed
+  try {
+    if (typeof resolveOwnShipActiveFeed === "function" && resolveOwnShipActiveFeed(v) === "gps") {
+      const g = Number(v.gpsSogSmooth != null ? v.gpsSogSmooth : v.sog);
+      if (Number.isFinite(g) && g >= 0) return g;
+    }
+  } catch (e) {}
   const sog = Number(v.sog);
   if (Number.isFinite(sog) && sog >= 0) return sog;
   return null;
 }
+
+/** Vector direction = COG (ground track), never device/compass yaw. */
+function resolveOwnShipCogDeg(v) {
+  if (!v) return null;
+  try {
+    if (typeof resolveOwnShipActiveFeed === "function" && resolveOwnShipActiveFeed(v) === "gps") {
+      const g = Number(v.gpsCogSmooth != null ? v.gpsCogSmooth : v.cog);
+      if (hasOwnShipHeadingDeg(g)) return ((g % 360) + 360) % 360;
+    }
+  } catch (e) {}
+  if (hasOwnShipHeadingDeg(v.cog)) return ((Number(v.cog) % 360) + 360) % 360;
+  // DR / AIS sometimes only publish course as heading when COG missing
+  if ((v.deadReckoned || /ais-dr/i.test(String(v.source || ""))) && hasOwnShipHeadingDeg(v.heading)) {
+    return ((Number(v.heading) % 360) + 360) % 360;
+  }
+  return null;
+}
+window.resolveOwnShipCogDeg = resolveOwnShipCogDeg;
 
 function nmPerPixelAt(lat, zoom) {
   const z = Number(zoom);
@@ -5370,7 +5521,18 @@ function nmPerPixelAt(lat, zoom) {
   return Math.max(metersPerPx / 1852.0, 1e-9);
 }
 
+let _ownShipVecShaft = null;
+let _ownShipVecArrow = null;
+
 function clearOwnShipTimeVectorLayers() {
+  if (_ownShipVecShaft) {
+    try { if (leafletVesselLayer) leafletVesselLayer.removeLayer(_ownShipVecShaft); } catch (e) {}
+    _ownShipVecShaft = null;
+  }
+  if (_ownShipVecArrow) {
+    try { if (leafletVesselLayer) leafletVesselLayer.removeLayer(_ownShipVecArrow); } catch (e) {}
+    _ownShipVecArrow = null;
+  }
   if (!leafletVesselLayer) return;
   leafletVesselLayer.eachLayer((ly) => {
     if (ly && ly._setsailOwnShipVector) {
@@ -5380,19 +5542,28 @@ function clearOwnShipTimeVectorLayers() {
 }
 
 /**
- * ECDIS 30-min vector:
- * - Geographic length = SOG × 30 min (grows on zoom-in).
- * - Cap screen length so it never spears across the chart when close-in.
- * - When zoomed far out (true length < ~circle), hide shaft; keep arrow flush on the circle + beam in icon.
+ * ECDIS time vector (dynamic):
+ * - Direction = COG (°T)
+ * - Length NM = SOG(kn) × (vectorMinutes/60) — grows/shrinks live with SOG
+ * - Cap screen length so it never spears across the chart when close-in
+ * - Mutates existing polylines so the vector moves with the ship without reload
  */
-function updateOwnShipTimeVector(lat, lon, headingDeg, sogKn) {
+function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
   if (!leafletMap || !leafletVesselLayer) return;
-  clearOwnShipTimeVectorLayers();
-  if (!hasOwnShipHeadingDeg(headingDeg)) return;
+  if (!isValidVesselLatLon(lat, lon)) {
+    clearOwnShipTimeVectorLayers();
+    return;
+  }
+  if (!hasOwnShipHeadingDeg(cogDeg)) {
+    clearOwnShipTimeVectorLayers();
+    return;
+  }
 
+  const bearing = ((Number(cogDeg) % 360) + 360) % 360;
   const sog = Number(sogKn);
   const kn = (Number.isFinite(sog) && sog > 0.05) ? sog : 0;
-  const trueNm = kn > 0 ? kn * (OWN_SHIP_VECTOR_MINUTES / 60) : 0;
+  const mins = getOwnShipVectorMinutes();
+  const trueNm = kn > 0 ? kn * (mins / 60) : 0;
 
   let npp = 0.01;
   try {
@@ -5406,35 +5577,26 @@ function updateOwnShipTimeVector(lat, lon, headingDeg, sogKn) {
   const maxNm = OWN_SHIP_VECTOR_MAX_PX * npp;
   const arrowOnlyNm = OWN_SHIP_VECTOR_ARROW_ONLY_PX * npp;
 
-  // True 30-min length, capped in screen pixels when zoomed in
   let tipNm = trueNm > 0 ? Math.min(trueNm, maxNm) : rimNm;
-  // Far zoom / tiny SOG: collapse to rim so arrow sits on the circle
   const arrowOnly = !(trueNm > arrowOnlyNm) || tipNm <= rimNm * 1.15;
   if (arrowOnly) tipNm = rimNm;
 
-  const tip = destinationPointNm(lat, lon, headingDeg, tipNm);
+  const tip = destinationPointNm(lat, lon, bearing, tipNm);
   const wingNm = Math.max(5 * npp, Math.min(9 * npp, tipNm * 0.22));
-  const leftBrg = (Number(headingDeg) + 150) % 360;
-  const rightBrg = (Number(headingDeg) + 210) % 360;
+  const leftBrg = (bearing + 150) % 360;
+  const rightBrg = (bearing + 210) % 360;
   const a1 = destinationPointNm(tip[0], tip[1], leftBrg, wingNm);
   const a2 = destinationPointNm(tip[0], tip[1], rightBrg, wingNm);
 
-  if (!arrowOnly) {
-    // Shaft starts at the circle rim so it does not paint under the icon
-    const start = destinationPointNm(lat, lon, headingDeg, rimNm);
-    const line = L.polyline([start, tip], {
-      color: "#0f172a",
-      weight: 2.05,
-      opacity: 0.94,
-      lineCap: "round",
-      interactive: false,
-      className: "own-ship-time-vector"
-    });
-    line._setsailOwnShipVector = true;
-    leafletVesselLayer.addLayer(line);
-  }
-
-  const arrow = L.polyline([a1, tip, a2], {
+  const shaftStyle = {
+    color: "#0f172a",
+    weight: 2.05,
+    opacity: 0.94,
+    lineCap: "round",
+    interactive: false,
+    className: "own-ship-time-vector"
+  };
+  const arrowStyle = {
     color: "#0f172a",
     weight: 2.15,
     opacity: 0.96,
@@ -5442,9 +5604,35 @@ function updateOwnShipTimeVector(lat, lon, headingDeg, sogKn) {
     lineJoin: "round",
     interactive: false,
     className: "own-ship-time-vector"
-  });
-  arrow._setsailOwnShipVector = true;
-  leafletVesselLayer.addLayer(arrow);
+  };
+
+  if (!arrowOnly) {
+    const start = destinationPointNm(lat, lon, bearing, rimNm);
+    if (_ownShipVecShaft && leafletVesselLayer.hasLayer(_ownShipVecShaft)) {
+      _ownShipVecShaft.setLatLngs([start, tip]);
+    } else {
+      if (_ownShipVecShaft) {
+        try { leafletVesselLayer.removeLayer(_ownShipVecShaft); } catch (e) {}
+      }
+      _ownShipVecShaft = L.polyline([start, tip], shaftStyle);
+      _ownShipVecShaft._setsailOwnShipVector = true;
+      leafletVesselLayer.addLayer(_ownShipVecShaft);
+    }
+  } else if (_ownShipVecShaft) {
+    try { leafletVesselLayer.removeLayer(_ownShipVecShaft); } catch (e) {}
+    _ownShipVecShaft = null;
+  }
+
+  if (_ownShipVecArrow && leafletVesselLayer.hasLayer(_ownShipVecArrow)) {
+    _ownShipVecArrow.setLatLngs([a1, tip, a2]);
+  } else {
+    if (_ownShipVecArrow) {
+      try { leafletVesselLayer.removeLayer(_ownShipVecArrow); } catch (e) {}
+    }
+    _ownShipVecArrow = L.polyline([a1, tip, a2], arrowStyle);
+    _ownShipVecArrow._setsailOwnShipVector = true;
+    leafletVesselLayer.addLayer(_ownShipVecArrow);
+  }
 }
 window.updateOwnShipTimeVector = updateOwnShipTimeVector;
 
@@ -5523,9 +5711,10 @@ function getOwnShipSilhouetteIcon(headingDeg) {
 
 function resolveOwnShipHeading(v) {
   if (!v) return null;
-  // Heading vector follows My Vessel heading only — never invent from COG.
-  if (!hasOwnShipHeadingDeg(v.heading)) return null;
-  return ((Number(v.heading) % 360) + 360) % 360;
+  // Icon orientation: true heading when known, else COG so the hull still points along track
+  if (hasOwnShipHeadingDeg(v.heading)) return ((Number(v.heading) % 360) + 360) % 360;
+  const cog = resolveOwnShipCogDeg(v);
+  return cog;
 }
 
 /** AIS vs DR (vs GPS/Manual) for own-ship popup badge. */
@@ -5576,7 +5765,7 @@ function uploadRouteAsCurrentFromOwnShipPopup() {
 window.uploadRouteAsCurrentFromOwnShipPopup = uploadRouteAsCurrentFromOwnShipPopup;
 
 /** Compact dark own-ship AIS-style card (+ miniature stale / DR CTA when needed). */
-function formatOwnShipPopupHtml(lat, lon, hdg, sog, source) {
+function formatOwnShipPopupHtml(lat, lon, cogOrHdg, sog, source) {
   const v = userVessel || {};
   const title = escapePopupText((v.name && String(v.name).trim()) || "My Vessel");
   let mode = resolveOwnShipNavMode(v, source);
@@ -5598,6 +5787,11 @@ function formatOwnShipPopupHtml(lat, lon, hdg, sog, source) {
   const coords = hasPos
     ? (typeof formatLatLonDMS === "function" ? formatLatLonDMS(lat, lon) : (lat + ", " + lon))
     : "awaiting AIS";
+  const cog = resolveOwnShipCogDeg(v);
+  const hdgTrue = hasOwnShipHeadingDeg(v.heading) ? ((Number(v.heading) % 360) + 360) % 360 : null;
+  const sogKn = sog != null && Number.isFinite(Number(sog)) ? Number(sog) : resolveOwnShipSogKn(v);
+  const vecMins = getOwnShipVectorMinutes();
+  const vecNm = (sogKn != null && sogKn > 0) ? (sogKn * (vecMins / 60)) : null;
   const rows = [];
   if (v.mmsi) rows.push(["MMSI", escapePopupText(v.mmsi)]);
   if (v.callSign) rows.push(["Call", escapePopupText(v.callSign)]);
@@ -5614,8 +5808,14 @@ function formatOwnShipPopupHtml(lat, lon, hdg, sog, source) {
     const ageLbl = ageMs != null ? (" · " + formatAisAgeHoursLabel(ageMs) + " h ago") : "";
     rows.push(["Fix", escapePopupText(aisT + ageLbl)]);
   }
-  if (hdg != null && Number.isFinite(Number(hdg))) rows.push(["HDG", Math.round(hdg) + "°"]);
-  if (sog != null && Number.isFinite(Number(sog))) rows.push(["SOG", Number(sog).toFixed(1) + " kn"]);
+  if (cog != null) rows.push(["COG", Math.round(cog) + "°"]);
+  if (hdgTrue != null && (cog == null || Math.abs(hdgTrue - cog) > 1.5)) {
+    rows.push(["HDG", Math.round(hdgTrue) + "°"]);
+  }
+  if (sogKn != null && Number.isFinite(sogKn)) rows.push(["SOG", Number(sogKn).toFixed(1) + " kn"]);
+  if (vecNm != null && Number.isFinite(vecNm)) {
+    rows.push(["Vec", vecNm >= 10 ? (Math.round(vecNm) + " NM / " + vecMins + "′") : (vecNm.toFixed(1) + " NM / " + vecMins + "′")]);
+  }
   const body = rows.map((r) =>
     '<div class="ss-ais-row"><span class="ss-ais-k">' + r[0] + "</span><span class=\"ss-ais-v\">" + r[1] + "</span></div>"
   ).join("");
@@ -5646,6 +5846,16 @@ function formatOwnShipPopupHtml(lat, lon, hdg, sog, source) {
         "</div>" +
       "</div>";
   }
+  const vecCtrl =
+    '<div class="ss-ais-foot ss-own-ship-vec-ctrl" title="Time vector = SOG × minutes → length on chart; direction = COG">' +
+      '<span class="ss-own-ship-vec-label">Vector</span>' +
+      '<button type="button" class="ss-own-ship-vec-btn" onclick="window.nudgeOwnShipVectorMinutes&&window.nudgeOwnShipVectorMinutes(-5)" aria-label="Shorter vector">−</button>' +
+      '<input type="number" id="ssOwnShipVecMins" class="ss-own-ship-vec-input" min="1" max="180" step="1" value="' + vecMins + '"' +
+        ' onchange="window.setOwnShipVectorMinutes&&window.setOwnShipVectorMinutes(this.value)"' +
+        ' onkeydown="if(event.key===\'Enter\'){event.preventDefault();this.blur();}"/>' +
+      '<button type="button" class="ss-own-ship-vec-btn" onclick="window.nudgeOwnShipVectorMinutes&&window.nudgeOwnShipVectorMinutes(5)" aria-label="Longer vector">+</button>' +
+      '<span class="ss-own-ship-vec-unit">min</span>' +
+    "</div>";
   return (
     '<div class="ss-ais-popup-body ss-own-ship-popup">' +
       '<div class="ss-ais-head">' +
@@ -5654,10 +5864,26 @@ function formatOwnShipPopupHtml(lat, lon, hdg, sog, source) {
       "</div>" +
       body +
       staleHtml +
-      '<div class="ss-ais-foot">Vector ' + OWN_SHIP_VECTOR_MINUTES + " min</div>" +
+      vecCtrl +
     "</div>"
   );
 }
+
+function nudgeOwnShipVectorMinutes(delta) {
+  const cur = getOwnShipVectorMinutes();
+  setOwnShipVectorMinutes(cur + Number(delta || 0));
+  try {
+    if (_ownShipMarker && _ownShipMarker.isPopupOpen && _ownShipMarker.isPopupOpen()) {
+      _ownShipMarker.setPopupContent(formatOwnShipPopupHtml(
+        userVessel.lat, userVessel.lon,
+        resolveOwnShipCogDeg(userVessel),
+        resolveOwnShipSogKn(userVessel),
+        userVessel.source
+      ));
+    }
+  } catch (e) {}
+}
+window.nudgeOwnShipVectorMinutes = nudgeOwnShipVectorMinutes;
 
 /**
  * Plot user vessel crosshair on map
@@ -5679,6 +5905,7 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
   if (leafletMap && leafletVesselLayer) {
     const hdg = resolveOwnShipHeading(userVessel);
+    const cog = resolveOwnShipCogDeg(userVessel);
     const sog = resolveOwnShipSogKn(userVessel);
     const ll = L.latLng(lat, lon);
 
@@ -5706,15 +5933,15 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
       () => formatOwnShipPopupHtml(
         userVessel.lat,
         userVessel.lon,
-        resolveOwnShipHeading(userVessel),
+        resolveOwnShipCogDeg(userVessel),
         resolveOwnShipSogKn(userVessel),
         userVessel.source
       ),
-      { maxWidth: 260, minWidth: 168, className: "ss-ais-popup ss-own-ship-popup-wrap", autoPanPaddingTopLeft: [16, 48], autoPanPaddingBottomRight: [16, 36] }
+      { maxWidth: 280, minWidth: 176, className: "ss-ais-popup ss-own-ship-popup-wrap", autoPanPaddingTopLeft: [16, 48], autoPanPaddingBottomRight: [16, 36] }
     );
 
-    // Always refresh geographic vector (cheap); zoomend also calls this
-    updateOwnShipTimeVector(lat, lon, hdg, sog);
+    // Dynamic COG time-vector — length = SOG × minutes/60, direction = COG
+    updateOwnShipTimeVector(lat, lon, cog, sog);
     if (!skipFly) {
       leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
     }
@@ -7185,9 +7412,9 @@ function initNtMMap() {
           lastOwnShipHullMode = hullMode;
           plotUserVessel(userVessel.lat, userVessel.lon, userVessel.source || "manual", true);
         } else {
-          const hdg = resolveOwnShipHeading(userVessel);
+          const cog = resolveOwnShipCogDeg(userVessel);
           const sog = resolveOwnShipSogKn(userVessel);
-          updateOwnShipTimeVector(userVessel.lat, userVessel.lon, hdg, sog);
+          updateOwnShipTimeVector(userVessel.lat, userVessel.lon, cog, sog);
         }
       }
     });
