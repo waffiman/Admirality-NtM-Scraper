@@ -2,9 +2,8 @@
 
 /**
  * Google-keyed cloud profile (vessel / route / wifi AIS).
- * Durable store: SETSAIL_PROFILE_DIR is not available on Vercel —
- * uses globalThis memory + optional Vercel Blob if BLOB_READ_WRITE_TOKEN set.
- * For production durability set KV later; contract is stable.
+ * Accepts Google ID token (JWT) OR OAuth access_token (verified via userinfo).
+ * Durable store: in-memory + Vercel Blob when BLOB_READ_WRITE_TOKEN is set.
  */
 
 function cors(res) {
@@ -49,44 +48,70 @@ function b64urlToJson(part) {
   }
 }
 
-function decodeBearer(req) {
+async function verifyGoogleAccessToken(token) {
+  try {
+    const resp = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { Authorization: "Bearer " + token }
+    });
+    if (!resp.ok) return null;
+    const j = await resp.json();
+    if (!j || !j.sub) return null;
+    return { sub: String(j.sub), email: j.email || null, token: token, kind: "access_token" };
+  } catch (e) {
+    return null;
+  }
+}
+
+async function decodeBearer(req) {
   const h = req.headers.authorization || req.headers.Authorization || "";
   const m = String(h).match(/^Bearer\s+(.+)$/i);
   if (!m) return null;
   const token = m[1].trim();
+  if (!token) return null;
+
+  // Prefer JWT id_token (GIS One Tap / credential response)
   const bits = token.split(".");
-  if (bits.length < 2) return null;
-  const payload = b64urlToJson(bits[1]);
-  if (!payload || !payload.sub) return null;
-  if (payload.exp && Number(payload.exp) * 1000 < Date.now() - 60000) return null;
-  return { sub: String(payload.sub), email: payload.email || null, token: token };
+  if (bits.length >= 2) {
+    const payload = b64urlToJson(bits[1]);
+    if (payload && payload.sub) {
+      if (payload.exp && Number(payload.exp) * 1000 < Date.now() - 60000) {
+        // expired JWT — still try as access token below
+      } else {
+        return { sub: String(payload.sub), email: payload.email || null, token: token, kind: "id_token" };
+      }
+    }
+  }
+
+  // OAuth popup path stores opaque / non-profile access_token
+  return verifyGoogleAccessToken(token);
 }
 
 const mem = globalThis.__setsailProfiles || (globalThis.__setsailProfiles = new Map());
 
+function blobPath(sub) {
+  return "setsail-profiles/" + encodeURIComponent(String(sub)) + ".json";
+}
+
 async function loadProfile(sub) {
   if (mem.has(sub)) return mem.get(sub);
-  // Optional Blob path (lazy require)
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) return null;
   try {
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
-      const { head, get } = require("@vercel/blob");
-      // list not always available — try known pathname
-      const pathname = `setsail-profiles/${sub}.json`;
-      try {
-        const res = await fetch(`https://blob.vercel-storage.com/${pathname}`, {
-          headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` }
-        });
-        if (res.ok) {
-          const j = await res.json();
-          mem.set(sub, j);
-          return j;
-        }
-      } catch (e) {}
-      void head;
-      void get;
-    }
-  } catch (e2) {}
-  return null;
+    const { list } = require("@vercel/blob");
+    const pathname = blobPath(sub);
+    const listed = await list({ prefix: "setsail-profiles/" + encodeURIComponent(String(sub)), token: token, limit: 8 });
+    const hit = (listed && listed.blobs || []).find((b) => b && (b.pathname === pathname || String(b.pathname || "").endsWith(sub + ".json")));
+    const url = hit && hit.url;
+    if (!url) return null;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return null;
+    const j = await res.json();
+    mem.set(sub, j);
+    return j;
+  } catch (e) {
+    console.warn("[SetSail profile] blob load skipped", e && e.message);
+    return null;
+  }
 }
 
 /**
@@ -98,7 +123,6 @@ function sanitizeProfileVessel(profile) {
     return profile;
   }
   const v = Object.assign({}, profile.vessel);
-  // Keep lat/lon/sog/cog/heading/stw/source for cross-device sync
   if (v.lat != null) v.lat = Number(v.lat);
   if (v.lon != null) v.lon = Number(v.lon);
   profile.vessel = v;
@@ -108,16 +132,18 @@ function sanitizeProfileVessel(profile) {
 async function saveProfile(sub, profile) {
   sanitizeProfileVessel(profile);
   mem.set(sub, profile);
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) return profile;
   try {
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
-      const { put } = require("@vercel/blob");
-      await put(`setsail-profiles/${sub}.json`, JSON.stringify(profile), {
-        access: "public",
-        token: process.env.BLOB_READ_WRITE_TOKEN,
-        addRandomSuffix: false,
-        allowOverwrite: true
-      });
-    }
+    const { put } = require("@vercel/blob");
+    await put(blobPath(sub), JSON.stringify(profile), {
+      access: "public",
+      token: token,
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType: "application/json",
+      cacheControlMaxAge: 0
+    });
   } catch (e) {
     console.warn("[SetSail profile] blob save skipped", e && e.message);
   }
@@ -131,7 +157,7 @@ module.exports = async function handler(req, res) {
     return res.end();
   }
 
-  const auth = decodeBearer(req);
+  const auth = await decodeBearer(req);
   if (!auth) {
     res.statusCode = 401;
     return res.json({ ok: false, error: "unauthorized" });
@@ -140,7 +166,13 @@ module.exports = async function handler(req, res) {
   if (req.method === "GET") {
     const profile = await loadProfile(auth.sub);
     res.statusCode = 200;
-    return res.json({ ok: true, sub: auth.sub, profile: profile || null, durable: !!process.env.BLOB_READ_WRITE_TOKEN });
+    return res.json({
+      ok: true,
+      sub: auth.sub,
+      email: auth.email || null,
+      profile: profile || null,
+      durable: !!process.env.BLOB_READ_WRITE_TOKEN
+    });
   }
 
   if (req.method === "PUT") {
@@ -152,9 +184,10 @@ module.exports = async function handler(req, res) {
     }
     profile.updatedAt = Date.now();
     profile.sub = auth.sub;
+    if (auth.email) profile.email = auth.email;
     await saveProfile(auth.sub, profile);
     res.statusCode = 200;
-    return res.json({ ok: true, profile: profile });
+    return res.json({ ok: true, profile: profile, durable: !!process.env.BLOB_READ_WRITE_TOKEN });
   }
 
   res.statusCode = 405;

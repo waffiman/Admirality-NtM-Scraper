@@ -204,7 +204,11 @@
       });
     }
     window.addEventListener("setsail-auth-changed", function () {
-      pull();
+      pull().then(function (r) {
+        // After login on a second device: pull cloud, then push local so empty cloud gets seed
+        if (r && r.ok) schedulePush();
+        else schedulePush();
+      });
     });
 
     // Phone GPS live → push often; other devices → pull often for motion mirror

@@ -893,6 +893,18 @@ function getDrActiveRouteId() {
 }
 
 function setrouteNormalizeRouteWps(route) {
+  // Prefer the same unrolled chart axis the centerline polyline uses (dateline-safe)
+  if (
+    route &&
+    activeRouteData &&
+    route === activeRouteData &&
+    Array.isArray(window._setsailRouteUnrolled) &&
+    window._setsailRouteUnrolled.length >= 2
+  ) {
+    return window._setsailRouteUnrolled
+      .filter((p) => p && Number.isFinite(Number(p[0])) && Number.isFinite(Number(p[1])))
+      .map((p) => ({ lat: Number(p[0]), lon: Number(p[1]) }));
+  }
   if (!route || !Array.isArray(route.waypoints)) return [];
   return route.waypoints
     .filter((w) => w && Number.isFinite(Number(w.lat)) && Number.isFinite(Number(w.lon)))
@@ -1148,7 +1160,11 @@ function setrouteRouteLegLengths(wps) {
   return { legs, total };
 }
 
-/** Closest point on route polyline → distance-along from start (NM) + signed XTD. */
+/**
+ * Closest point on route polyline → distance-along from start (NM) + signed XTD.
+ * IMPORTANT: foot-of-perpendicular uses the same lat/lon CHORD as the drawn Leaflet
+ * centerline — never great-circle along the leg (that created an invisible parallel axis).
+ */
 function setrouteProjectOntoRoute(lat, lon, wps) {
   if (!wps || wps.length < 2) return null;
   let best = null;
@@ -1166,21 +1182,12 @@ function setrouteProjectOntoRoute(lat, lon, wps) {
     const ab2 = bx * bx + by * by || 1e-9;
     let t = (px * bx + py * by) / ab2;
     t = Math.max(0, Math.min(1, t));
-    // Prefer great-circle point along the leg when we have dest helper
-    let qLat;
-    let qLon;
+    // Chord point = exact position on the chart polyline segment
+    const qLat = a.lat + t * (b.lat - a.lat);
+    const qLon = a.lon + t * (b.lon - a.lon);
     const course = (typeof setrouteCourseBetweenWp === "function")
       ? setrouteCourseBetweenWp(a, b)
       : (Math.atan2(bx, by) * 180) / Math.PI;
-    if (typeof setrouteDestPoint === "function" && legNm > 1e-6) {
-      const alongLeg = t * legNm;
-      const gc = setrouteDestPoint(a.lat, a.lon, course, alongLeg);
-      qLat = gc.lat;
-      qLon = gc.lon;
-    } else {
-      qLat = a.lat + (t * by) / 60;
-      qLon = a.lon + (t * bx) / (60 * cosLat);
-    }
     const cosQ = Math.max(0.2, Math.cos((qLat * Math.PI) / 180));
     const ox = (lon - qLon) * 60 * cosQ;
     const oy = (lat - qLat) * 60;
@@ -1206,7 +1213,10 @@ function setrouteProjectOntoRoute(lat, lon, wps) {
   return best;
 }
 
-/** Point at distance-along route from start (NM). Uses great-circle along each leg. */
+/**
+ * Point at distance-along route from start (NM).
+ * Uses chord lerp (same as Leaflet centerline) so DR rides the visible axis.
+ */
 function setroutePointAlongRoute(wps, alongNm) {
   if (!wps || wps.length < 2) return null;
   const { legs, total } = setrouteRouteLegLengths(wps);
@@ -1226,17 +1236,9 @@ function setroutePointAlongRoute(wps, alongNm) {
       const course = (typeof setrouteCourseBetweenWp === "function")
         ? setrouteCourseBetweenWp(a, b)
         : 0;
-      let lat;
-      let lon;
-      if (typeof setrouteDestPoint === "function" && legs[i] > 1e-6) {
-        const gc = setrouteDestPoint(a.lat, a.lon, course, d);
-        lat = gc.lat;
-        lon = gc.lon;
-      } else {
-        const t = legs[i] > 0 ? d / legs[i] : 0;
-        lat = a.lat + (b.lat - a.lat) * t;
-        lon = a.lon + (b.lon - a.lon) * t;
-      }
+      const t = legs[i] > 0 ? d / legs[i] : 0;
+      const lat = a.lat + (b.lat - a.lat) * t;
+      const lon = a.lon + (b.lon - a.lon) * t;
       return {
         lat: lat,
         lon: lon,
@@ -1401,50 +1403,15 @@ function applyOwnVesselDeadReckoning(opts) {
 
   const proj = setrouteProjectOntoRoute(fixLat, fixLon, wps);
   if (!proj) return;
-  // Once the ship has touched / crossed Current (or already rides the axis), DR stays
-  // on the centerline — never coast parallel at residual AIS XTD.
-  const DR_CONTACT_NM = 0.35;
-  const xtdAbs = Math.abs(Number(proj.xtdNm) || 0);
-  let onCenter = !!v.aisDrOnCenterline || xtdAbs <= DR_CONTACT_NM;
-  // Current icon already on/near rails counts as contact (crossed since last AIS)
-  if (!onCenter && Number.isFinite(shipLat) && Number.isFinite(shipLon)) {
-    try {
-      const pShip = setrouteProjectOntoRoute(shipLat, shipLon, wps);
-      if (pShip && Math.abs(Number(pShip.xtdNm) || 0) <= DR_CONTACT_NM) onCenter = true;
-    } catch (eShip) {}
-  }
-  // Already DR'ing on rails → locked to axis (no parallel XTD coast)
-  if (v.deadReckoned && (v.aisDrMode === "rails" || v.aisDrMode === "handoff-prev")) onCenter = true;
 
   const target = setroutePointAlongRoute(wps, proj.alongNm + distNm);
   if (!target) return;
 
+  // Always ride the drawn centerline chord — never parallel XTD / GC offset
   let lat1 = target.lat;
   let lon1 = target.lon;
   let courseOut = target.course;
-  // Before first contact only: tempered approach XTD so the icon converges onto the track.
-  // After contact → exclusive centerline (lat1/lon1 stay on axis).
-  if (!onCenter && typeof setrouteOffsetByXtd === "function") {
-    let xtdKeep = Number(proj.xtdNm) || 0;
-    if (Math.abs(xtdKeep) > 8) xtdKeep = 0;
-    else if (Math.abs(xtdKeep) > 3) xtdKeep *= 0.25;
-    else xtdKeep *= 0.4;
-    if (Math.abs(xtdKeep) >= 0.02) {
-      const off = setrouteOffsetByXtd(lat1, lon1, courseOut, xtdKeep);
-      lat1 = off.lat;
-      lon1 = off.lon;
-      try {
-        const p2 = setrouteProjectOntoRoute(lat1, lon1, wps);
-        if (p2 && Math.abs(Number(p2.xtdNm) || 0) <= DR_CONTACT_NM) {
-          onCenter = true;
-          lat1 = target.lat;
-          lon1 = target.lon;
-        }
-      } catch (eC) {}
-    } else {
-      onCenter = true;
-    }
-  }
+  const onCenter = true;
   let mode = phase === "handoff-prev" ? "handoff-prev" : "rails";
 
   if (phase === "handoff-prev" && typeof resolveDrRailsForShip === "function") {
@@ -2641,7 +2608,7 @@ function clearVesselProfile(closeFn) {
   if (typeof closeFn === "function") closeFn();
 }
 
-let mobileCurrentView = "list"; // "list" | "map"
+let mobileCurrentView = "map"; // default Chart on every SetChart visit
 
 // Safe and immediate initialization
 function initApp() {
@@ -2870,6 +2837,8 @@ function switchToTab(targetTab, source) {
   }
 
   if (targetTab === "tab-ntm") {
+    // Every SetChart visit defaults to Chart (not List) on mobile
+    try { applyMobileSetChartView("map"); } catch (eMob) {}
     if (!leafletMap) {
       initNtMMap();
     }
@@ -3499,6 +3468,25 @@ function initAutoNtmUI() {
 /**
  * Mobile List vs Map Switcher
  */
+function applyMobileSetChartView(mode) {
+  const listBtn = document.getElementById("ntmViewListBtn");
+  const mapBtn = document.getElementById("ntmViewMapBtn");
+  const workspace = document.getElementById("ntmWorkspace");
+  if (!workspace) return;
+  const wantMap = mode !== "list";
+  mobileCurrentView = wantMap ? "map" : "list";
+  workspace.classList.toggle("mobile-view-map", wantMap);
+  workspace.classList.toggle("mobile-view-list", !wantMap);
+  if (listBtn) listBtn.classList.toggle("active", !wantMap);
+  if (mapBtn) mapBtn.classList.toggle("active", wantMap);
+  if (wantMap) {
+    setTimeout(() => {
+      try { if (leafletMap) leafletMap.invalidateSize(); } catch (e) {}
+    }, 150);
+  }
+}
+window.applyMobileSetChartView = applyMobileSetChartView;
+
 function initMobileViewSwitcher() {
   const listBtn = document.getElementById("ntmViewListBtn");
   const mapBtn = document.getElementById("ntmViewMapBtn");
@@ -3506,27 +3494,11 @@ function initMobileViewSwitcher() {
 
   if (!listBtn || !mapBtn || !workspace) return;
 
-  workspace.classList.add("mobile-view-list");
+  // Default: Chart (map) every time SetChart opens
+  applyMobileSetChartView("map");
 
-  listBtn.addEventListener("click", () => {
-    mobileCurrentView = "list";
-    listBtn.classList.add("active");
-    mapBtn.classList.remove("active");
-    workspace.classList.remove("mobile-view-map");
-    workspace.classList.add("mobile-view-list");
-  });
-
-  mapBtn.addEventListener("click", () => {
-    mobileCurrentView = "map";
-    mapBtn.classList.add("active");
-    listBtn.classList.remove("active");
-    workspace.classList.remove("mobile-view-list");
-    workspace.classList.add("mobile-view-map");
-
-    setTimeout(() => {
-      if (leafletMap) leafletMap.invalidateSize();
-    }, 150);
-  });
+  listBtn.addEventListener("click", () => applyMobileSetChartView("list"));
+  mapBtn.addEventListener("click", () => applyMobileSetChartView("map"));
 }
 
 /**
@@ -3862,22 +3834,23 @@ function renderRouteOnMap(route, shouldFly = true) {
   let trackOutline = null;
   const linePane = ensureRouteLinePane();
   if (rtSub.line !== false && unrolledCoords.length >= 2) {
-    // Full vertex list for the black axis so WPTs sit exactly on joints (no simplify drift)
+    // Full vertex list for the axis so WPTs sit exactly on joints (no simplify drift)
     const lineCoords = unrolledCoords;
     const sw = getRouteStrokeWeights(leafletMap.getZoom ? leafletMap.getZoom() : 5);
     trackOutline = L.polyline(lineCoords, {
-      color: "#ffffff",
+      color: "#fecaca",
       weight: sw.centerHalo,
-      opacity: 0.55,
+      opacity: 0.35,
       interactive: false,
       lineCap: "round",
       lineJoin: "round",
       pane: linePane
     });
     trackLine = L.polyline(lineCoords, {
-      color: "#0a0a0a",
+      color: "#dc2626",
       weight: sw.center,
-      opacity: 1,
+      opacity: 0.98,
+      dashArray: "10, 7",
       interactive: true,
       lineCap: "round",
       lineJoin: "round",
@@ -3892,12 +3865,11 @@ function renderRouteOnMap(route, shouldFly = true) {
     });
   }
 
-  // Waypoints: hollow black rings centered on leg joints (always, unless subfilter off)
+  // Waypoints: blue double-circles on leg joints (scale with zoom)
   const showWpts = rtSub.waypoints !== false;
   const wptPane = ensureRouteWptPane();
   const wptIdxs = showWpts ? pickRouteWptMarkerIndices(cleanWps.length) : [];
-  const WPT_BOX = 14;
-  const WPT_R = 7;
+  const mapZoom = leafletMap.getZoom ? leafletMap.getZoom() : 5;
   wptIdxs.forEach((idx) => {
     const wp = cleanWps[idx];
     if (!wp) return;
@@ -3906,26 +3878,17 @@ function renderRouteOnMap(route, shouldFly = true) {
     const wptCoords = unrolledCoords[idx];
     if (!wptCoords || !Number.isFinite(wptCoords[0]) || !Number.isFinite(wptCoords[1])) return;
 
-    const stroke = "#0a0a0a";
     const titleBit = isStart ? "Departure" : (isEnd ? "Destination" : ("WPT #" + (idx + 1)));
     const marker = L.marker(wptCoords, {
       pane: wptPane,
       draggable: true,
       autoPan: true,
       keyboard: false,
-      icon: L.divIcon({
-        className: "leaflet-div-icon route-wpt-div-icon",
-        html:
-          '<div class="route-wpt-dot" title="Drag ' + titleBit + '" style="' +
-          "width:" + WPT_BOX + "px;height:" + WPT_BOX + "px;" +
-          "box-sizing:border-box;border-radius:50%;background:transparent;" +
-          "border:2px solid " + stroke + ";pointer-events:auto;cursor:grab;" +
-          '"></div>',
-        iconSize: [WPT_BOX, WPT_BOX],
-        iconAnchor: [WPT_R, WPT_R]
-      }),
+      icon: buildRouteWptDivIcon(titleBit, mapZoom),
       zIndexOffset: 2500 + idx
     });
+    marker._setsailRouteWptIdx = idx;
+    marker._setsailRouteWptTitle = titleBit;
 
     marker.on("dragstart", function (e) {
       const el = e.target.getElement();
@@ -16084,6 +16047,16 @@ function setSetSailAuthUser(userObj) {
       try {
         maybeOpenPendingAgentApiKeyModal();
       } catch (eKey) {}
+      try {
+        window.dispatchEvent(new CustomEvent("setsail-auth-changed", { detail: { user: userObj } }));
+      } catch (eEv) {}
+      try {
+        if (window.SetSailProfileSync && typeof window.SetSailProfileSync.pull === "function") {
+          window.SetSailProfileSync.pull().then(function () {
+            if (window.SetSailProfileSync.schedulePush) window.SetSailProfileSync.schedulePush();
+          });
+        }
+      } catch (eSync) {}
     } else {
       saveSetSailUserHistory();
       localStorage.removeItem(SETSAIL_AUTH_KEY);
@@ -16108,6 +16081,9 @@ function setSetSailAuthUser(userObj) {
         if (typeof fillVesselFormsFromState === "function") fillVesselFormsFromState();
         if (typeof updateHomeVesselHudLabel === "function") updateHomeVesselHudLabel();
       } catch (eGuest) {}
+      try {
+        window.dispatchEvent(new CustomEvent("setsail-auth-changed", { detail: { user: null } }));
+      } catch (eEv2) {}
     }
   } catch (e) {}
   syncSetSailAuthUI();
@@ -16748,11 +16724,36 @@ function initGoogleAuthClients() {
 }
 
 async function fetchGoogleUserInfo(accessToken) {
-  const resp = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-    headers: { Authorization: "Bearer " + accessToken }
-  });
-  if (!resp.ok) throw new Error("userinfo " + resp.status);
-  return resp.json();
+  const tryUserInfo = async (url) => {
+    const resp = await fetch(url, {
+      headers: { Authorization: "Bearer " + accessToken },
+      cache: "no-store"
+    });
+    if (!resp.ok) throw new Error("userinfo " + resp.status);
+    return resp.json();
+  };
+  try {
+    return await tryUserInfo("https://www.googleapis.com/oauth2/v3/userinfo");
+  } catch (e1) {
+    try {
+      return await tryUserInfo("https://openidconnect.googleapis.com/v1/userinfo");
+    } catch (e2) {
+      // Last resort: tokeninfo (may lack picture / name)
+      const ti = await fetch(
+        "https://oauth2.googleapis.com/tokeninfo?access_token=" + encodeURIComponent(accessToken),
+        { cache: "no-store" }
+      );
+      if (!ti.ok) throw e1;
+      const j = await ti.json();
+      if (!j || !(j.email || j.sub)) throw e1;
+      return {
+        email: j.email || "",
+        name: j.name || (j.email ? String(j.email).split("@")[0] : "Google user"),
+        picture: j.picture || "",
+        sub: j.sub || j.user_id || ""
+      };
+    }
+  }
 }
 
 /**
@@ -17191,30 +17192,81 @@ function simplifyRoutePtsForBuffer(pts, maxPts) {
   return out;
 }
 
-/** Zoom-scaled stroke weights — thin when fully zoomed out, full near coastal scales. */
+/** Zoom-scaled stroke weights — axis thicker than buffer borders; thin when zoomed out. */
 function getRouteStrokeWeights(zoom) {
   const z = Number.isFinite(zoom) ? zoom : (leafletMap && leafletMap.getZoom ? leafletMap.getZoom() : 5);
   // z≤2 → thinnest; z≥8 → full weight
   const t = Math.max(0, Math.min(1, (z - 2) / 6));
   const lerp = (a, b) => a + (b - a) * t;
   return {
-    center: lerp(1.05, 3.0),
-    centerHalo: lerp(2.2, 5.5),
-    edge: lerp(1.0, 3.2),
-    corridor: lerp(0.7, 2.2)
+    // Center axis ≈ former buffer-edge thickness; edges thinner than axis
+    center: lerp(1.15, 3.2),
+    centerHalo: lerp(2.0, 4.6),
+    edge: lerp(0.55, 1.45),
+    corridor: lerp(0.45, 1.2),
+    wpt: lerp(7, 14)
   };
 }
 window.getRouteStrokeWeights = getRouteStrokeWeights;
+
+function getRouteWptPixelSize(zoom) {
+  const w = getRouteStrokeWeights(zoom);
+  const px = Math.round(Number(w.wpt) || 12);
+  return Math.max(7, Math.min(16, px));
+}
+window.getRouteWptPixelSize = getRouteWptPixelSize;
+
+function buildRouteWptDivIcon(titleBit, zoom) {
+  const box = getRouteWptPixelSize(zoom);
+  const outer = box;
+  const inner = Math.max(3, Math.round(box * 0.42));
+  const html =
+    '<div class="route-wpt-dot" title="Drag ' + titleBit + '" style="' +
+    "width:" + outer + "px;height:" + outer + "px;" +
+    "box-sizing:border-box;border-radius:50%;" +
+    "background:transparent;border:2px solid #2563eb;" +
+    "display:flex;align-items:center;justify-content:center;" +
+    "pointer-events:auto;cursor:grab;" +
+    '">' +
+      '<span style="width:' + inner + "px;height:" + inner + "px;border-radius:50%;" +
+      'box-sizing:border-box;border:1.5px solid #2563eb;background:rgba(37,99,235,0.15);display:block;"></span>' +
+    "</div>";
+  return L.divIcon({
+    className: "leaflet-div-icon route-wpt-div-icon",
+    html: html,
+    iconSize: [outer, outer],
+    iconAnchor: [outer / 2, outer / 2]
+  });
+}
+window.buildRouteWptDivIcon = buildRouteWptDivIcon;
 
 /** Live-update route/corridor stroke weights without full rebuild. */
 function applyRouteStrokeWeightsForZoom() {
   const w = getRouteStrokeWeights();
   const pack = window._setsailRouteStrokeRefs || {};
   try {
-    if (pack.centerHalo && pack.centerHalo.setStyle) pack.centerHalo.setStyle({ weight: w.centerHalo });
-    if (pack.center && pack.center.setStyle) pack.center.setStyle({ weight: w.center, color: "#0a0a0a" });
-    if (pack.centerHaloBuf && pack.centerHaloBuf.setStyle) pack.centerHaloBuf.setStyle({ weight: w.centerHalo });
-    if (pack.centerBuf && pack.centerBuf.setStyle) pack.centerBuf.setStyle({ weight: w.center, color: "#0a0a0a" });
+    if (pack.centerHalo && pack.centerHalo.setStyle) {
+      pack.centerHalo.setStyle({ weight: w.centerHalo, color: "#fecaca", opacity: 0.35 });
+    }
+    if (pack.center && pack.center.setStyle) {
+      pack.center.setStyle({
+        weight: w.center,
+        color: "#dc2626",
+        dashArray: "10, 7",
+        opacity: 0.98
+      });
+    }
+    if (pack.centerHaloBuf && pack.centerHaloBuf.setStyle) {
+      pack.centerHaloBuf.setStyle({ weight: w.centerHalo, color: "#fecaca", opacity: 0.35 });
+    }
+    if (pack.centerBuf && pack.centerBuf.setStyle) {
+      pack.centerBuf.setStyle({
+        weight: w.center,
+        color: "#dc2626",
+        dashArray: "10, 7",
+        opacity: 0.98
+      });
+    }
     if (pack.portEdge && pack.portEdge.setStyle) pack.portEdge.setStyle({ weight: w.edge });
     if (pack.stbdEdge && pack.stbdEdge.setStyle) pack.stbdEdge.setStyle({ weight: w.edge });
     if (pack.corridorPoly && pack.corridorPoly.setStyle) {
@@ -17222,6 +17274,18 @@ function applyRouteStrokeWeightsForZoom() {
       if (prev.weight && prev.weight > 0) pack.corridorPoly.setStyle({ weight: w.corridor });
     }
   } catch (eW) {}
+  // Scale WPT double-circles with zoom
+  try {
+    const z = leafletMap && leafletMap.getZoom ? leafletMap.getZoom() : 5;
+    if (leafletRouteLayer && leafletRouteLayer.eachLayer) {
+      leafletRouteLayer.eachLayer((ly) => {
+        if (!ly || !ly._setsailRouteWptIdx && ly._setsailRouteWptIdx !== 0) return;
+        if (!ly.setIcon) return;
+        const titleBit = ly._setsailRouteWptTitle || ("WPT #" + (ly._setsailRouteWptIdx + 1));
+        ly.setIcon(buildRouteWptDivIcon(titleBit, z));
+      });
+    }
+  } catch (eWpt) {}
 }
 window.applyRouteStrokeWeightsForZoom = applyRouteStrokeWeightsForZoom;
 
@@ -17488,18 +17552,19 @@ function renderRouteBufferCorridorOnMap() {
     if (!hasMainCenterline && fullAxisPts.length >= 2) {
       const midPane = (typeof ensureRouteLinePane === "function") ? ensureRouteLinePane() : "overlayPane";
       const centerHaloBuf = L.polyline(fullAxisPts, {
-        color: "#ffffff",
+        color: "#fecaca",
         weight: sw.centerHalo,
-        opacity: 0.5,
+        opacity: 0.35,
         interactive: false,
         lineCap: "round",
         lineJoin: "round",
         pane: midPane
       });
       const centerBuf = L.polyline(fullAxisPts, {
-        color: "#0a0a0a",
+        color: "#dc2626",
         weight: sw.center,
-        opacity: 1,
+        opacity: 0.98,
+        dashArray: "10, 7",
         interactive: false,
         lineCap: "round",
         lineJoin: "round",
