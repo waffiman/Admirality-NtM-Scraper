@@ -2385,6 +2385,8 @@ function applyGpsFixToVessel(pos, opts) {
     _gpsMotionAnchor = { lat, lon, tMs };
   }
 
+  // Prefetch global wind/current model for this fix (fills HDG/STW on next tick)
+  try { prefetchOpenMeteoPointWx(lat, lon); } catch (eOmGps) {}
   // HDG/STW from GPS SOG/COG − current − light wind leeway (never phone compass)
   try {
     const sogUse = patch.sog != null ? patch.sog : Number(prev.sog);
@@ -4630,58 +4632,215 @@ function renderWeatherOnMap(map = null) {
 window.renderWeatherOnMap = renderWeatherOnMap;
 
 
-/** Inverse-distance sample of ocean current grid at chart cursor. */
+/**
+ * Global Open-Meteo point cache (wind + ocean current + waves/SST).
+ * Fills the many ocean gaps where NDBC / sparse weather.json have no stations.
+ */
+const _omPointWxCache = new Map(); // key -> { at, wind, current, marine }
+const _omPointWxInflight = new Map();
+const OM_POINT_WX_TTL_MS = 20 * 60 * 1000;
+const OM_POINT_WX_ROUND = 0.25; // ~15 NM grid cell
+
+function omPointWxKey(lat, lon) {
+  const r = OM_POINT_WX_ROUND;
+  const la = Math.round(Number(lat) / r) * r;
+  const lo = Math.round(Number(lon) / r) * r;
+  return la.toFixed(2) + "," + lo.toFixed(2);
+}
+
+function getCachedOpenMeteoPointWx(lat, lon) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  const key = omPointWxKey(lat, lon);
+  const hit = _omPointWxCache.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.at > OM_POINT_WX_TTL_MS) return null;
+  return hit;
+}
+
+async function prefetchOpenMeteoPointWx(lat, lon, opts) {
+  opts = opts || {};
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
+  const key = omPointWxKey(lat, lon);
+  const cached = getCachedOpenMeteoPointWx(lat, lon);
+  if (cached && !opts.force) return cached;
+  if (_omPointWxInflight.has(key)) return _omPointWxInflight.get(key);
+
+  const job = (async () => {
+    const la = Number(key.split(",")[0]);
+    const lo = Number(key.split(",")[1]);
+    let wind = null;
+    let current = null;
+    let marine = null;
+    try {
+      const windUrl =
+        "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(la) +
+        "&longitude=" + encodeURIComponent(lo) +
+        "&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,temperature_2m" +
+        "&wind_speed_unit=kn&timezone=GMT";
+      const wr = await fetch(windUrl, { cache: "no-store" });
+      if (wr.ok) {
+        const j = await wr.json();
+        const c = j && j.current;
+        if (c) {
+          wind = {
+            windKt: Number.isFinite(Number(c.wind_speed_10m)) ? Number(c.wind_speed_10m) : null,
+            gustKt: Number.isFinite(Number(c.wind_gusts_10m)) ? Number(c.wind_gusts_10m) : null,
+            windDir: Number.isFinite(Number(c.wind_direction_10m)) ? Number(c.wind_direction_10m) : null,
+            pressureMb: Number.isFinite(Number(c.pressure_msl)) ? Number(c.pressure_msl) : null,
+            airC: Number.isFinite(Number(c.temperature_2m)) ? Number(c.temperature_2m) : null,
+            source: "open-meteo"
+          };
+        }
+      }
+    } catch (eW) {}
+    try {
+      const marineUrl =
+        "https://marine-api.open-meteo.com/v1/marine?latitude=" + encodeURIComponent(la) +
+        "&longitude=" + encodeURIComponent(lo) +
+        "&current=ocean_current_velocity,ocean_current_direction,wave_height,wave_direction,wave_period,sea_surface_temperature" +
+        "&timezone=GMT";
+      const mr = await fetch(marineUrl, { cache: "no-store" });
+      if (mr.ok) {
+        const j = await mr.json();
+        const c = j && j.current;
+        if (c) {
+          // Velocity is km/h by default → knots
+          let spdKn = Number(c.ocean_current_velocity);
+          if (Number.isFinite(spdKn)) spdKn = spdKn / 1.852;
+          const dir = Number(c.ocean_current_direction);
+          if (Number.isFinite(spdKn) && Number.isFinite(dir)) {
+            current = {
+              ok: true,
+              speedKn: Math.round(spdKn * 100) / 100,
+              dirDeg: Math.round(((dir % 360) + 360) % 360),
+              nearestNm: 0,
+              source: "open-meteo"
+            };
+          }
+          marine = {
+            waveHs: Number.isFinite(Number(c.wave_height)) ? Number(c.wave_height) : null,
+            waveDir: Number.isFinite(Number(c.wave_direction)) ? Number(c.wave_direction) : null,
+            wavePeriod: Number.isFinite(Number(c.wave_period)) ? Number(c.wave_period) : null,
+            sstC: Number.isFinite(Number(c.sea_surface_temperature)) ? Number(c.sea_surface_temperature) : null,
+            source: "open-meteo"
+          };
+        }
+      }
+    } catch (eM) {}
+    const pack = { at: Date.now(), key, lat: la, lon: lo, wind, current, marine };
+    _omPointWxCache.set(key, pack);
+    // Cap cache size
+    if (_omPointWxCache.size > 120) {
+      const first = _omPointWxCache.keys().next().value;
+      _omPointWxCache.delete(first);
+    }
+    return pack;
+  })();
+
+  _omPointWxInflight.set(key, job);
+  try {
+    return await job;
+  } finally {
+    _omPointWxInflight.delete(key);
+  }
+}
+window.prefetchOpenMeteoPointWx = prefetchOpenMeteoPointWx;
+window.getCachedOpenMeteoPointWx = getCachedOpenMeteoPointWx;
+
+/** Inverse-distance sample of ocean current grid at chart cursor (+ Open-Meteo fallback). */
 function sampleCurrentAtLatLon(lat, lon) {
   const currents = (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.currents))
     ? MARINE_WEATHER_STORE.currents : [];
-  if (!currents.length || !Number.isFinite(lat) || !Number.isFinite(lon)) {
-    return { ok: false, message: "No current data" };
+  if (Number.isFinite(lat) && Number.isFinite(lon) && currents.length) {
+    const scored = [];
+    for (let i = 0; i < currents.length; i++) {
+      const c = currents[i];
+      if (!c || !Number.isFinite(c.lat) || !Number.isFinite(c.lon)) continue;
+      const d = calculateHaversineDistanceNM(lat, lon, c.lat, c.lon);
+      if (!Number.isFinite(d)) continue;
+      scored.push({ c, d });
+    }
+    if (scored.length) {
+      scored.sort((a, b) => a.d - b.d);
+      const MAX_NM = 220; // prefer local grid only when reasonably near
+      if (scored[0].d <= MAX_NM) {
+        const use = scored.filter((s) => s.d <= 180).slice(0, 5);
+        const pool = use.length ? use : scored.slice(0, 3);
+        let uSum = 0;
+        let vSum = 0;
+        let wSum = 0;
+        pool.forEach(({ c, d }) => {
+          const spd = Number(c.speedKn);
+          const dir = Number(c.dirDeg);
+          if (!Number.isFinite(spd)) return;
+          const w = 1 / Math.max(d, 0.5);
+          const w2 = w * w;
+          const rad = ((Number.isFinite(dir) ? dir : 0) * Math.PI) / 180;
+          uSum += spd * Math.sin(rad) * w2;
+          vSum += spd * Math.cos(rad) * w2;
+          wSum += w2;
+        });
+        if (wSum > 0) {
+          const u = uSum / wSum;
+          const v = vSum / wSum;
+          const speedKn = Math.hypot(u, v);
+          let dirDeg = (Math.atan2(u, v) * 180) / Math.PI;
+          if (dirDeg < 0) dirDeg += 360;
+          return {
+            ok: true,
+            speedKn: Math.round(speedKn * 100) / 100,
+            dirDeg: Math.round(dirDeg),
+            nearestNm: Math.round(scored[0].d),
+            source: "grid"
+          };
+        }
+      }
+    }
   }
-  const scored = [];
-  for (let i = 0; i < currents.length; i++) {
-    const c = currents[i];
-    if (!c || !Number.isFinite(c.lat) || !Number.isFinite(c.lon)) continue;
-    const d = calculateHaversineDistanceNM(lat, lon, c.lat, c.lon);
-    if (!Number.isFinite(d)) continue;
-    scored.push({ c, d });
-  }
-  if (!scored.length) return { ok: false, message: "No current data" };
-  scored.sort((a, b) => a.d - b.d);
-  const MAX_NM = 350;
-  if (scored[0].d > MAX_NM) {
-    return { ok: false, nearestNm: Math.round(scored[0].d), message: "No current within " + MAX_NM + " NM" };
-  }
-  const use = scored.filter((s) => s.d <= 180).slice(0, 5);
-  const pool = use.length ? use : scored.slice(0, 3);
-  let uSum = 0;
-  let vSum = 0;
-  let wSum = 0;
-  pool.forEach(({ c, d }) => {
-    const spd = Number(c.speedKn);
-    const dir = Number(c.dirDeg);
-    if (!Number.isFinite(spd)) return;
-    const w = 1 / Math.max(d, 0.5);
-    const w2 = w * w;
-    const rad = ((Number.isFinite(dir) ? dir : 0) * Math.PI) / 180;
-    // Oceanographic: direction current TOWARD; decompose to u/v
-    uSum += spd * Math.sin(rad) * w2;
-    vSum += spd * Math.cos(rad) * w2;
-    wSum += w2;
-  });
-  if (wSum <= 0) return { ok: false, message: "No current data" };
-  const u = uSum / wSum;
-  const v = vSum / wSum;
-  const speedKn = Math.hypot(u, v);
-  let dirDeg = (Math.atan2(u, v) * 180) / Math.PI;
-  if (dirDeg < 0) dirDeg += 360;
-  return {
-    ok: true,
-    speedKn: Math.round(speedKn * 100) / 100,
-    dirDeg: Math.round(dirDeg),
-    nearestNm: Math.round(scored[0].d)
-  };
+  // Global model fallback (sync read of cache; caller should prefetch)
+  try {
+    const om = getCachedOpenMeteoPointWx(lat, lon);
+    if (om && om.current && om.current.ok) return Object.assign({}, om.current);
+  } catch (eOm) {}
+  // Kick async fill for next sample / cursor refresh
+  try { prefetchOpenMeteoPointWx(lat, lon); } catch (eP) {}
+  return { ok: false, message: "No current data" };
 }
 window.sampleCurrentAtLatLon = sampleCurrentAtLatLon;
+
+/** Wind at lat/lon: NDBC when near, else Open-Meteo global model. */
+function sampleWindAtLatLon(lat, lon) {
+  try {
+    const ndbc = typeof sampleNdbcAtLatLon === "function" ? sampleNdbcAtLatLon(lat, lon) : null;
+    if (ndbc && ndbc.ok && ndbc.windKt != null && Number.isFinite(Number(ndbc.windKt))) {
+      return {
+        ok: true,
+        windKt: Number(ndbc.windKt),
+        windDir: ndbc.windDir != null ? Number(ndbc.windDir) : null,
+        gustKt: ndbc.gustKt != null ? Number(ndbc.gustKt) : null,
+        source: "ndbc",
+        nearestNm: ndbc.nearestNm
+      };
+    }
+  } catch (eN) {}
+  try {
+    const om = getCachedOpenMeteoPointWx(lat, lon);
+    if (om && om.wind && om.wind.windKt != null && Number.isFinite(Number(om.wind.windKt))) {
+      return {
+        ok: true,
+        windKt: Number(om.wind.windKt),
+        windDir: om.wind.windDir != null ? Number(om.wind.windDir) : null,
+        gustKt: om.wind.gustKt != null ? Number(om.wind.gustKt) : null,
+        source: "open-meteo",
+        nearestNm: 0
+      };
+    }
+  } catch (eOm) {}
+  try { prefetchOpenMeteoPointWx(lat, lon); } catch (eP) {}
+  return { ok: false };
+}
+window.sampleWindAtLatLon = sampleWindAtLatLon;
 
 /** Polar (kn, ° toward) → east/north components. */
 function knTowardToUV(speedKn, dirTowardDeg) {
@@ -4728,7 +4887,7 @@ function deriveOwnShipHdgStw(lat, lon, sogKn, cogDeg) {
   let windKt = null;
   let leewayKn = null;
   try {
-    const wx = typeof sampleNdbcAtLatLon === "function" ? sampleNdbcAtLatLon(lat, lon) : null;
+    const wx = typeof sampleWindAtLatLon === "function" ? sampleWindAtLatLon(lat, lon) : null;
     if (wx && wx.ok && wx.windKt != null && Number.isFinite(Number(wx.windKt))) {
       windKt = Number(wx.windKt);
       const windFrom = Number(wx.windDir);
@@ -4740,6 +4899,9 @@ function deriveOwnShipHdgStw(lat, lon, sogKn, cogDeg) {
         lu = l.u;
         lv = l.v;
       }
+    } else {
+      // Ensure next DR/GPS tick has model wind/current
+      try { prefetchOpenMeteoPointWx(lat, lon); } catch (ePf) {}
     }
   } catch (eW) {}
   const water = uvToKnToward(g.u - cu - lu, g.v - cv - lv);
@@ -4943,39 +5105,87 @@ function updateNdbcCursorTile(lat, lon) {
   const meta = document.getElementById("ntmWxCursorMeta");
   if (!body) return;
   const s = sampleNdbcAtLatLon(lat, lon);
-  const cur = sampleCurrentAtLatLon(lat, lon);
+  let cur = sampleCurrentAtLatLon(lat, lon);
+  const windOm = typeof sampleWindAtLatLon === "function" ? sampleWindAtLatLon(lat, lon) : null;
+  let omPack = typeof getCachedOpenMeteoPointWx === "function" ? getCachedOpenMeteoPointWx(lat, lon) : null;
+  // Cache miss → fetch global model once, then re-paint this point
+  if (!omPack) {
+    try {
+      const p = prefetchOpenMeteoPointWx(lat, lon);
+      if (p && typeof p.then === "function") {
+        p.then(() => {
+          try { updateNdbcCursorTile(lat, lon); } catch (eR) {}
+          try {
+            if (userVessel && isValidVesselLatLon(userVessel.lat, userVessel.lon)) {
+              const dNm = calculateHaversineDistanceNM(
+                Number(userVessel.lat), Number(userVessel.lon), lat, lon
+              );
+              if (Number.isFinite(dNm) && dNm < 40) {
+                // Re-derive HDG/STW with fresh current/wind and refresh CCRP
+                const sog = resolveOwnShipSogKn(userVessel);
+                const cog = resolveOwnShipCogDeg(userVessel);
+                if (sog != null && cog != null) {
+                  const der = deriveOwnShipHdgStw(Number(userVessel.lat), Number(userVessel.lon), sog, cog);
+                  if (der && (der.hdg != null || der.stw != null)) {
+                    userVessel.heading = der.hdg != null ? der.hdg : userVessel.heading;
+                    userVessel.stw = der.stw != null ? der.stw : userVessel.stw;
+                  }
+                }
+                refreshOwnShipCcrpPopup();
+              }
+            }
+          } catch (eShip) {}
+        });
+      }
+    } catch (ePf) {}
+  }
+  cur = sampleCurrentAtLatLon(lat, lon);
+  omPack = typeof getCachedOpenMeteoPointWx === "function" ? getCachedOpenMeteoPointWx(lat, lon) : omPack;
   const pModel = (typeof samplePressureGridAtLatLon === "function")
     ? samplePressureGridAtLatLon(lat, lon)
     : { ok: false };
   const curTxt = (cur && cur.ok)
     ? (fmtWxNum(cur.speedKn, 1) + " kn " + fmtWxNum(cur.dirDeg, 0) + "\u00b0")
     : "\u2014";
-  // Prefer buoy pressure when near a station; otherwise interpolate model MSL grid
+  // Prefer buoy pressure when near a station; otherwise model MSL / Open-Meteo
   let pressureMb = (s && s.ok && s.pressureMb != null) ? s.pressureMb : null;
   let pressureSrc = (pressureMb != null) ? "buoy" : "";
   if (pressureMb == null && pModel && pModel.ok) {
     pressureMb = pModel.pressureMb;
     pressureSrc = pModel.mode === "nearest" ? "MSL" : "MSL·IDW";
   }
+  if (pressureMb == null && omPack && omPack.wind && omPack.wind.pressureMb != null) {
+    pressureMb = omPack.wind.pressureMb;
+    pressureSrc = "OM";
+  }
   const pressureTxt = pressureMb != null ? (fmtWxNum(pressureMb, 0) + " mb") : "\u2014 mb";
-  const hasAny = !!(s && s.ok) || !!(cur && cur.ok) || !!(pModel && pModel.ok);
 
-  // Always keep the same chip skeleton so the tile footprint never jumps.
+  // Open-Meteo fill when no nearby buoy
   if (!s.ok) {
+    const wKt = windOm && windOm.ok ? windOm.windKt : null;
+    const wDir = windOm && windOm.ok ? windOm.windDir : null;
+    const windTxt = (wKt != null)
+      ? (fmtWxNum(wKt, 0) + " kn" + (wDir != null ? (" " + fmtWxNum(wDir, 0) + "\u00b0") : ""))
+      : "\u2014";
+    const waveHs = omPack && omPack.marine ? omPack.marine.waveHs : null;
+    const waveTxt = waveHs != null ? (fmtWxNum(waveHs, 1) + " m") : "\u2014";
+    const airC = omPack && omPack.wind ? omPack.wind.airC : null;
+    const sstC = omPack && omPack.marine ? omPack.marine.sstC : null;
+    const airSstTxt = (airC != null || sstC != null)
+      ? (fmtWxNum(airC, 0) + "\u00b0/" + fmtWxNum(sstC, 0) + "\u00b0")
+      : "\u2014\u00b0/\u2014\u00b0";
+    const hasAny = !!(wKt != null) || !!(cur && cur.ok) || !!(pressureMb != null) || waveHs != null;
     tile.classList.toggle("is-live", hasAny);
-    body.innerHTML = renderNdbcCursorChips("\u2014", "\u2014", pressureTxt, "\u2014\u00b0/\u2014\u00b0", curTxt);
+    body.innerHTML = renderNdbcCursorChips(windTxt, waveTxt, pressureTxt, airSstTxt, curTxt);
     if (meta) {
       const bits = [];
+      if (wKt != null) bits.push(windOm && windOm.source === "open-meteo" ? "OM wind" : "wind");
       if (pressureSrc) bits.push(pressureSrc);
-      if (cur && cur.ok) bits.push("cur");
+      if (cur && cur.ok) bits.push(cur.source === "open-meteo" ? "OM cur" : "cur");
       meta.textContent = bits.length ? bits.join(" · ") : "Move cursor\u2026";
-      meta.title = pressureSrc
-        ? ("Pressure " + pressureTxt + " (" + pressureSrc + ")")
-        : "";
+      meta.title = bits.join(" · ");
     }
-    tile.title = pressureMb != null
-      ? ("Pressure " + pressureTxt + (cur && cur.ok ? " · " + curTxt : ""))
-      : (cur && cur.ok ? ("Current " + curTxt) : "");
+    tile.title = hasAny ? ("Model / sparse · " + windTxt + " · " + curTxt) : "";
     return;
   }
   tile.classList.add("is-live");
@@ -6277,6 +6487,23 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
     try {
       updateOwnShipHdgLine(lat, lon, resolveOwnShipTrueHdgDeg(userVessel));
     } catch (eHdgLn) {}
+    // Global wind/current model for HDG/STW (Open-Meteo fills ocean gaps)
+    try {
+      prefetchOpenMeteoPointWx(lat, lon).then(() => {
+        try {
+          if (!userVessel || !isValidVesselLatLon(userVessel.lat, userVessel.lon)) return;
+          const sog2 = resolveOwnShipSogKn(userVessel);
+          const cog2 = resolveOwnShipCogDeg(userVessel);
+          if (sog2 == null || cog2 == null) return;
+          const der = deriveOwnShipHdgStw(Number(userVessel.lat), Number(userVessel.lon), sog2, cog2);
+          if (der) {
+            if (der.hdg != null) userVessel.heading = der.hdg;
+            if (der.stw != null) userVessel.stw = der.stw;
+          }
+          refreshOwnShipCcrpPopup();
+        } catch (eOmShip) {}
+      });
+    } catch (eOmPref) {}
     if (!skipFly) {
       leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
     }
