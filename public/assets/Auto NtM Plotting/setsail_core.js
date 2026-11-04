@@ -2180,6 +2180,7 @@ function bindVesselMmsiLookup(which) {
 const GPS_MOTION_MIN_M = 50;
 const GPS_TRACK_MAX_LEGS = 8; // more legs → stabler COG/SOG for the time vector
 let _gpsWatchId = null;
+let _gpsConnectTimer = null;
 let _gpsMotionAnchor = null; // { lat, lon, tMs } — last point used for SOG/COG
 let _gpsTrackLegs = []; // [{ lat, lon, tMs, sog, cog }] calibrated ≥50 m samples
 let _gpsUiBtns = [];
@@ -2271,8 +2272,13 @@ function stopVesselGpsWatch() {
     try { navigator.geolocation.clearWatch(_gpsWatchId); } catch (e) {}
   }
   _gpsWatchId = null;
+  if (_gpsConnectTimer) {
+    try { clearTimeout(_gpsConnectTimer); } catch (eT) {}
+    _gpsConnectTimer = null;
+  }
   window._setsailGpsWatchActive = false;
   window._setsailGpsConnecting = false;
+  window._setsailGpsGotFix = false;
   _gpsMotionAnchor = null;
   _gpsTrackLegs = [];
   _gpsUiBtns.forEach((btn) => renderGpsButtonIdle(btn));
@@ -2452,62 +2458,79 @@ function startVesselGpsWatch(opts) {
   stopVesselGpsWatch();
   window._setsailGpsWatchActive = true;
   window._setsailGpsConnecting = true;
+  window._setsailGpsGotFix = false;
   setGpsButtonsConnecting();
   if (typeof showSetSailToast === "function") {
     showSetSailToast("Requesting GPS… allow location when prompted", "info");
   }
 
-  const geoOpts = {
-    enableHighAccuracy: true,
-    maximumAge: 5000,
-    timeout: 60000
-  };
   const failHard = (msg) => {
+    if (window._setsailGpsGotFix) return; // already live — ignore late errors
     stopVesselGpsWatch();
     if (typeof showSetSailToast === "function") showSetSailToast("GPS: " + msg, "error");
     else alert("GPS Error: " + msg);
   };
 
   const onOk = (pos, toast) => {
+    if (!pos || !pos.coords) return;
+    const first = !window._setsailGpsGotFix;
+    window._setsailGpsGotFix = true;
+    if (_gpsConnectTimer) {
+      clearTimeout(_gpsConnectTimer);
+      _gpsConnectTimer = null;
+    }
     applyGpsFixToVessel(pos, {
-      toast: toast || null,
+      toast: toast || (first ? "GPS position linked — tracking motion ≥50 m for SOG/COG" : null),
       fromStaleBanner: !!opts.fromStaleBanner
     });
   };
 
-  const onFirstErr = (err) => {
-    const msg = (err && err.message) ? err.message : "GPS unavailable";
-    // Fallback: one-shot without high accuracy (fixes common desktop/browser timeouts)
-    if (!window._setsailGpsTriedFallback) {
-      window._setsailGpsTriedFallback = true;
-      navigator.geolocation.getCurrentPosition(
-        (pos) => onOk(pos, "GPS position linked"),
-        () => failHard(msg),
-        { enableHighAccuracy: false, maximumAge: 60000, timeout: 45000 }
-      );
-      return;
-    }
-    failHard(msg);
-  };
+  // Mobile browsers often hang 60s on enableHighAccuracy getCurrentPosition while the
+  // GPS icon is already on. Strategy: instant coarse fix + parallel high-accuracy watch.
+  // Never kill the session on transient TIMEOUT while watch is still acquiring.
+  try {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => onOk(pos, null),
+      function () { /* coarse miss is OK — watch may still succeed */ },
+      { enableHighAccuracy: false, maximumAge: 120000, timeout: 12000 }
+    );
+  } catch (eCoarse) {}
 
-  // Transient watch timeouts must not kill an already-linked session
+  try {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => onOk(pos, null),
+      function () { /* high-accuracy one-shot miss is OK */ },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 25000 }
+    );
+  } catch (eHi) {}
+
   const onWatchErr = (err) => {
-    if (window._setsailGpsWatchActive && _gpsMotionAnchor) return;
-    onFirstErr(err);
+    // TIMEOUT / POSITION_UNAVAILABLE while still connecting: keep waiting for watch
+    if (window._setsailGpsGotFix || _gpsMotionAnchor) return;
+    const code = err && err.code;
+    if (code === 3 /* TIMEOUT */ || code === 2 /* POSITION_UNAVAILABLE */) return;
+    if (code === 1 /* PERMISSION_DENIED */) failHard("permission denied");
   };
-
-  window._setsailGpsTriedFallback = false;
-  navigator.geolocation.getCurrentPosition(
-    (pos) => onOk(pos, "GPS position linked — tracking motion ≥50 m for SOG/COG"),
-    onFirstErr,
-    geoOpts
-  );
 
   _gpsWatchId = navigator.geolocation.watchPosition(
     (pos) => onOk(pos, null),
     onWatchErr,
-    { enableHighAccuracy: true, maximumAge: 10000, timeout: 90000 }
+    {
+      enableHighAccuracy: true,
+      maximumAge: 5000,
+      // Long acquisition window — do not use 60s (that was the mobile timeout banner)
+      timeout: 180000
+    }
   );
+
+  // Only fail if nothing arrived at all after a generous wait
+  if (_gpsConnectTimer) clearTimeout(_gpsConnectTimer);
+  _gpsConnectTimer = setTimeout(() => {
+    _gpsConnectTimer = null;
+    if (!window._setsailGpsGotFix) {
+      failHard("timeout — no position yet. Keep GPS on and try again outdoors / with precise location enabled");
+    }
+  }, 45000);
 }
 window.startVesselGpsWatch = startVesselGpsWatch;
 window.toggleVesselGpsWatch = startVesselGpsWatch;
@@ -5385,10 +5408,14 @@ const OWN_SHIP_HULL_ZOOM = 14;
 /** Default ECDIS time-vector look-ahead (min). Length NM = SOG(kn) × minutes/60. */
 const OWN_SHIP_VECTOR_MINUTES_DEFAULT = 60;
 const OWN_SHIP_VECTOR_MINUTES_KEY = "setsail_own_ship_vector_min_v1";
-/** Screen-pixel caps for the geographic vector (ECDIS readability). */
-const OWN_SHIP_VECTOR_MAX_PX = 100;
-/** Below this screen length, hide the shaft — arrow sits on the position circle. */
-const OWN_SHIP_VECTOR_ARROW_ONLY_PX = 22;
+/** Max on-screen shaft length when zoomed in (px) — geographic NM is capped to this. */
+const OWN_SHIP_VECTOR_MAX_PX = 120;
+/** Below this true length on screen, hide shaft and show COG triangle through circle centre. */
+const OWN_SHIP_VECTOR_SHAFT_MIN_PX = 18;
+/** Always-visible COG beak size at far zoom (px from centre to tip). */
+const OWN_SHIP_VECTOR_BEAK_PX = 16;
+/** Half-base of far-zoom COG triangle (px). */
+const OWN_SHIP_VECTOR_BEAK_HALF_PX = 7;
 /** Position-circle outer ring ≈ 9px in the 48px icon. */
 const OWN_SHIP_VECTOR_RIM_PX = 11;
 
@@ -5523,16 +5550,16 @@ function nmPerPixelAt(lat, zoom) {
 
 let _ownShipVecShaft = null;
 let _ownShipVecArrow = null;
+let _ownShipVecBeak = null;
 
 function clearOwnShipTimeVectorLayers() {
-  if (_ownShipVecShaft) {
-    try { if (leafletVesselLayer) leafletVesselLayer.removeLayer(_ownShipVecShaft); } catch (e) {}
-    _ownShipVecShaft = null;
-  }
-  if (_ownShipVecArrow) {
-    try { if (leafletVesselLayer) leafletVesselLayer.removeLayer(_ownShipVecArrow); } catch (e) {}
-    _ownShipVecArrow = null;
-  }
+  [_ownShipVecShaft, _ownShipVecArrow, _ownShipVecBeak].forEach((ly) => {
+    if (!ly) return;
+    try { if (leafletVesselLayer) leafletVesselLayer.removeLayer(ly); } catch (e) {}
+  });
+  _ownShipVecShaft = null;
+  _ownShipVecArrow = null;
+  _ownShipVecBeak = null;
   if (!leafletVesselLayer) return;
   leafletVesselLayer.eachLayer((ly) => {
     if (ly && ly._setsailOwnShipVector) {
@@ -5541,12 +5568,46 @@ function clearOwnShipTimeVectorLayers() {
   });
 }
 
+function _setOwnShipVecLayer(kind, latlngs, factory) {
+  let ref = kind === "shaft" ? _ownShipVecShaft : (kind === "arrow" ? _ownShipVecArrow : _ownShipVecBeak);
+  if (ref && leafletVesselLayer && leafletVesselLayer.hasLayer(ref)) {
+    if (ref.setLatLngs) ref.setLatLngs(latlngs);
+    else if (ref.setLatLngs === undefined && ref.setStyle) {
+      try { leafletVesselLayer.removeLayer(ref); } catch (e) {}
+      ref = factory(latlngs);
+      ref._setsailOwnShipVector = true;
+      leafletVesselLayer.addLayer(ref);
+    }
+  } else {
+    if (ref) {
+      try { if (leafletVesselLayer) leafletVesselLayer.removeLayer(ref); } catch (e) {}
+    }
+    ref = factory(latlngs);
+    ref._setsailOwnShipVector = true;
+    if (leafletVesselLayer) leafletVesselLayer.addLayer(ref);
+  }
+  if (kind === "shaft") _ownShipVecShaft = ref;
+  else if (kind === "arrow") _ownShipVecArrow = ref;
+  else _ownShipVecBeak = ref;
+  return ref;
+}
+
+function _clearOwnShipVecKind(kind) {
+  const ref = kind === "shaft" ? _ownShipVecShaft : (kind === "arrow" ? _ownShipVecArrow : _ownShipVecBeak);
+  if (ref) {
+    try { if (leafletVesselLayer) leafletVesselLayer.removeLayer(ref); } catch (e) {}
+  }
+  if (kind === "shaft") _ownShipVecShaft = null;
+  else if (kind === "arrow") _ownShipVecArrow = null;
+  else _ownShipVecBeak = null;
+}
+
 /**
- * ECDIS time vector (dynamic):
- * - Direction = COG (°T)
- * - Length NM = SOG(kn) × (vectorMinutes/60) — grows/shrinks live with SOG
- * - Cap screen length so it never spears across the chart when close-in
- * - Mutates existing polylines so the vector moves with the ship without reload
+ * ECDIS time vector (scale-correct):
+ * - True length NM = SOG(kn) × (minutes/60)  → screen px = NM / nmPerPixel(zoom)
+ *   so zoom-in lengthens the vector on screen, zoom-out shortens it (map scale).
+ * - Cap max screen length when close-in; at far zoom hide shaft and show a COG
+ *   triangle whose base passes through the position-circle centre (always-visible beak).
  */
 function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
   if (!leafletMap || !leafletVesselLayer) return;
@@ -5563,6 +5624,7 @@ function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
   const sog = Number(sogKn);
   const kn = (Number.isFinite(sog) && sog > 0.05) ? sog : 0;
   const mins = getOwnShipVectorMinutes();
+  // Geographic truth: distance the ship covers in `mins` at current SOG
   const trueNm = kn > 0 ? kn * (mins / 60) : 0;
 
   let npp = 0.01;
@@ -5573,20 +5635,11 @@ function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
     npp = 0.01;
   }
 
+  // Screen projection of the true time-vector (this IS the zoom proportionality)
+  const truePx = trueNm > 0 ? trueNm / npp : 0;
+  const maxPx = OWN_SHIP_VECTOR_MAX_PX;
+  const drawPx = truePx > 0 ? Math.min(truePx, maxPx) : 0;
   const rimNm = OWN_SHIP_VECTOR_RIM_PX * npp;
-  const maxNm = OWN_SHIP_VECTOR_MAX_PX * npp;
-  const arrowOnlyNm = OWN_SHIP_VECTOR_ARROW_ONLY_PX * npp;
-
-  let tipNm = trueNm > 0 ? Math.min(trueNm, maxNm) : rimNm;
-  const arrowOnly = !(trueNm > arrowOnlyNm) || tipNm <= rimNm * 1.15;
-  if (arrowOnly) tipNm = rimNm;
-
-  const tip = destinationPointNm(lat, lon, bearing, tipNm);
-  const wingNm = Math.max(5 * npp, Math.min(9 * npp, tipNm * 0.22));
-  const leftBrg = (bearing + 150) % 360;
-  const rightBrg = (bearing + 210) % 360;
-  const a1 = destinationPointNm(tip[0], tip[1], leftBrg, wingNm);
-  const a2 = destinationPointNm(tip[0], tip[1], rightBrg, wingNm);
 
   const shaftStyle = {
     color: "#0f172a",
@@ -5598,41 +5651,50 @@ function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
   };
   const arrowStyle = {
     color: "#0f172a",
-    weight: 2.15,
+    weight: 2.2,
     opacity: 0.96,
     lineCap: "round",
     lineJoin: "round",
     interactive: false,
     className: "own-ship-time-vector"
   };
+  const beakStyle = {
+    color: "#0f172a",
+    weight: 1.6,
+    opacity: 0.98,
+    fillColor: "#0f172a",
+    fillOpacity: 0.92,
+    interactive: false,
+    className: "own-ship-time-vector own-ship-cog-beak",
+    lineJoin: "round"
+  };
 
-  if (!arrowOnly) {
-    const start = destinationPointNm(lat, lon, bearing, rimNm);
-    if (_ownShipVecShaft && leafletVesselLayer.hasLayer(_ownShipVecShaft)) {
-      _ownShipVecShaft.setLatLngs([start, tip]);
-    } else {
-      if (_ownShipVecShaft) {
-        try { leafletVesselLayer.removeLayer(_ownShipVecShaft); } catch (e) {}
-      }
-      _ownShipVecShaft = L.polyline([start, tip], shaftStyle);
-      _ownShipVecShaft._setsailOwnShipVector = true;
-      leafletVesselLayer.addLayer(_ownShipVecShaft);
-    }
-  } else if (_ownShipVecShaft) {
-    try { leafletVesselLayer.removeLayer(_ownShipVecShaft); } catch (e) {}
-    _ownShipVecShaft = null;
+  // Far zoom / tiny SOG: shaft vanishes; COG triangle through circle centre stays visible
+  const showBeakOnly = !(drawPx >= OWN_SHIP_VECTOR_SHAFT_MIN_PX);
+
+  if (showBeakOnly) {
+    _clearOwnShipVecKind("shaft");
+    _clearOwnShipVecKind("arrow");
+    const tipNm = OWN_SHIP_VECTOR_BEAK_PX * npp;
+    const halfNm = OWN_SHIP_VECTOR_BEAK_HALF_PX * npp;
+    const tip = destinationPointNm(lat, lon, bearing, tipNm);
+    // Base through circle centre, perpendicular to COG → isosceles COG triangle
+    const a1 = destinationPointNm(lat, lon, (bearing + 90) % 360, halfNm);
+    const a2 = destinationPointNm(lat, lon, (bearing + 270) % 360, halfNm);
+    _setOwnShipVecLayer("beak", [a1, tip, a2], (ll) => L.polygon(ll, beakStyle));
+    return;
   }
 
-  if (_ownShipVecArrow && leafletVesselLayer.hasLayer(_ownShipVecArrow)) {
-    _ownShipVecArrow.setLatLngs([a1, tip, a2]);
-  } else {
-    if (_ownShipVecArrow) {
-      try { leafletVesselLayer.removeLayer(_ownShipVecArrow); } catch (e) {}
-    }
-    _ownShipVecArrow = L.polyline([a1, tip, a2], arrowStyle);
-    _ownShipVecArrow._setsailOwnShipVector = true;
-    leafletVesselLayer.addLayer(_ownShipVecArrow);
-  }
+  _clearOwnShipVecKind("beak");
+  const tipNm = drawPx * npp; // = min(trueNm, maxPx*npp)
+  const tip = destinationPointNm(lat, lon, bearing, tipNm);
+  const start = destinationPointNm(lat, lon, bearing, rimNm);
+  const wingNm = Math.max(5 * npp, Math.min(10 * npp, tipNm * 0.2));
+  const a1 = destinationPointNm(tip[0], tip[1], (bearing + 150) % 360, wingNm);
+  const a2 = destinationPointNm(tip[0], tip[1], (bearing + 210) % 360, wingNm);
+
+  _setOwnShipVecLayer("shaft", [start, tip], (ll) => L.polyline(ll, shaftStyle));
+  _setOwnShipVecLayer("arrow", [a1, tip, a2], (ll) => L.polyline(ll, arrowStyle));
 }
 window.updateOwnShipTimeVector = updateOwnShipTimeVector;
 
