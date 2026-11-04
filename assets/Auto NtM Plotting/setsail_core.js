@@ -170,6 +170,12 @@ function persistUserVessel() {
         source: durable.source || "manual",
         updatedAt: durable.updatedAt
       }));
+      // Signed-in: push snapshot to cloud so other devices can pull My Vessel position
+      try {
+        if (window.SetSailProfileSync && typeof window.SetSailProfileSync.schedulePush === "function") {
+          window.SetSailProfileSync.schedulePush();
+        }
+      } catch (ePush) {}
     } else {
       localStorage.removeItem(VESSEL_STORAGE_KEY_V2);
       localStorage.removeItem(VESSEL_STORAGE_KEY);
@@ -2253,8 +2259,11 @@ function renderGpsButtonConnecting(btn) {
   if (!btn) return;
   btn.classList.add("is-gps-connecting");
   btn.classList.remove("is-gps-live", "is-gps-disconnect");
-  btn.innerHTML = GPS_BTN_SPIN_HTML;
-  btn.title = "Waiting for GPS fix…";
+  btn.innerHTML =
+    '<span class="ss-gps-spin" aria-hidden="true"></span>' +
+    '<span class="ss-gps-btn-label">Connecting…</span>' +
+    '<span class="ss-gps-btn-cancel">Cancel</span>';
+  btn.title = "Waiting for GPS satellite fix — tap Cancel to stop";
   btn.setAttribute("aria-busy", "true");
 }
 
@@ -2273,7 +2282,8 @@ function stopVesselGpsWatch() {
   }
   _gpsWatchId = null;
   if (_gpsConnectTimer) {
-    try { clearTimeout(_gpsConnectTimer); } catch (eT) {}
+    try { clearInterval(_gpsConnectTimer); } catch (eT) {}
+    try { clearTimeout(_gpsConnectTimer); } catch (eT2) {}
     _gpsConnectTimer = null;
   }
   window._setsailGpsWatchActive = false;
@@ -2444,9 +2454,12 @@ function startVesselGpsWatch(opts) {
     }
     return;
   }
-  if (window._setsailGpsWatchActive && _gpsWatchId != null && !window._setsailGpsConnecting) {
+  // Live or still connecting → tap = disconnect / cancel (no hard timeout kill)
+  if (window._setsailGpsWatchActive && (_gpsWatchId != null || window._setsailGpsConnecting)) {
     stopVesselGpsWatch();
-    if (typeof showSetSailToast === "function") showSetSailToast("GPS disconnected", "info");
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast(window._setsailGpsGotFix ? "GPS disconnected" : "GPS cancelled", "info");
+    }
     return;
   }
 
@@ -2455,82 +2468,93 @@ function startVesselGpsWatch(opts) {
     try { persistUserVessel(); } catch (eP) {}
   }
 
+  if (!window.isSecureContext && typeof showSetSailToast === "function") {
+    showSetSailToast("GPS needs HTTPS (open https://setsail-ai.vercel.app)", "error");
+    return;
+  }
+
   stopVesselGpsWatch();
   window._setsailGpsWatchActive = true;
   window._setsailGpsConnecting = true;
   window._setsailGpsGotFix = false;
   setGpsButtonsConnecting();
   if (typeof showSetSailToast === "function") {
-    showSetSailToast("Requesting GPS… allow location when prompted", "info");
+    showSetSailToast("Acquiring GPS… at sea this can take 1–3 min (satellites). Tap Cancel anytime.", "info");
   }
 
   const failHard = (msg) => {
-    if (window._setsailGpsGotFix) return; // already live — ignore late errors
+    if (window._setsailGpsGotFix) return;
     stopVesselGpsWatch();
     if (typeof showSetSailToast === "function") showSetSailToast("GPS: " + msg, "error");
     else alert("GPS Error: " + msg);
   };
 
-  const onOk = (pos, toast) => {
+  const onOk = (pos) => {
     if (!pos || !pos.coords) return;
+    const lat = Number(pos.coords.latitude);
+    const lon = Number(pos.coords.longitude);
+    // Accept any finite lat/lon from the device — even if accuracy is coarse
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+      return;
+    }
     const first = !window._setsailGpsGotFix;
     window._setsailGpsGotFix = true;
     if (_gpsConnectTimer) {
-      clearTimeout(_gpsConnectTimer);
+      clearInterval(_gpsConnectTimer);
       _gpsConnectTimer = null;
     }
+    // Bypass 0,0 rejection only if both are exactly 0 (null-island); ocean fixes are fine
+    if (lat === 0 && lon === 0) return;
     applyGpsFixToVessel(pos, {
-      toast: toast || (first ? "GPS position linked — tracking motion ≥50 m for SOG/COG" : null),
+      toast: first ? "GPS linked — SOG/COG calibrate after ≥50 m movement" : null,
       fromStaleBanner: !!opts.fromStaleBanner
     });
+    try {
+      if (window.SetSailProfileSync && typeof window.SetSailProfileSync.schedulePush === "function") {
+        window.SetSailProfileSync.schedulePush();
+      }
+    } catch (eSync) {}
   };
-
-  // Mobile browsers often hang 60s on enableHighAccuracy getCurrentPosition while the
-  // GPS icon is already on. Strategy: instant coarse fix + parallel high-accuracy watch.
-  // Never kill the session on transient TIMEOUT while watch is still acquiring.
-  try {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => onOk(pos, null),
-      function () { /* coarse miss is OK — watch may still succeed */ },
-      { enableHighAccuracy: false, maximumAge: 120000, timeout: 12000 }
-    );
-  } catch (eCoarse) {}
-
-  try {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => onOk(pos, null),
-      function () { /* high-accuracy one-shot miss is OK */ },
-      { enableHighAccuracy: true, maximumAge: 10000, timeout: 25000 }
-    );
-  } catch (eHi) {}
 
   const onWatchErr = (err) => {
-    // TIMEOUT / POSITION_UNAVAILABLE while still connecting: keep waiting for watch
     if (window._setsailGpsGotFix || _gpsMotionAnchor) return;
     const code = err && err.code;
+    // At sea without internet: network/coarse location fails — keep waiting for GNSS
     if (code === 3 /* TIMEOUT */ || code === 2 /* POSITION_UNAVAILABLE */) return;
-    if (code === 1 /* PERMISSION_DENIED */) failHard("permission denied");
+    if (code === 1 /* PERMISSION_DENIED */) failHard("permission denied — allow Location for this site in browser settings");
   };
 
-  _gpsWatchId = navigator.geolocation.watchPosition(
-    (pos) => onOk(pos, null),
-    onWatchErr,
-    {
+  // Single high-accuracy watch only (parallel getCurrentPosition races hurt cold GNSS TTFF).
+  // No short timeout: Google Maps apps wait for satellites; browser must too.
+  // maximumAge accepts a recent OS fix (e.g. from Maps) if the chip already has one.
+  try {
+    _gpsWatchId = navigator.geolocation.watchPosition(onOk, onWatchErr, {
       enableHighAccuracy: true,
-      maximumAge: 5000,
-      // Long acquisition window — do not use 60s (that was the mobile timeout banner)
-      timeout: 180000
-    }
-  );
+      maximumAge: 300000,
+      timeout: 600000
+    });
+  } catch (eWatch) {
+    failHard("geolocation failed to start");
+    return;
+  }
 
-  // Only fail if nothing arrived at all after a generous wait
-  if (_gpsConnectTimer) clearTimeout(_gpsConnectTimer);
-  _gpsConnectTimer = setTimeout(() => {
-    _gpsConnectTimer = null;
-    if (!window._setsailGpsGotFix) {
-      failHard("timeout — no position yet. Keep GPS on and try again outdoors / with precise location enabled");
+  // Soft reminders only — NEVER auto-fail (ship Wi‑Fi often has no Google MLS internet)
+  let remindN = 0;
+  if (_gpsConnectTimer) clearInterval(_gpsConnectTimer);
+  _gpsConnectTimer = setInterval(() => {
+    if (window._setsailGpsGotFix || !window._setsailGpsWatchActive) {
+      clearInterval(_gpsConnectTimer);
+      _gpsConnectTimer = null;
+      return;
     }
-  }, 45000);
+    remindN += 1;
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast(
+        "Still acquiring GPS… " + (remindN * 20) + "s — keep SetSail open, sky view helps. Tap Cancel to stop.",
+        "info"
+      );
+    }
+  }, 20000);
 }
 window.startVesselGpsWatch = startVesselGpsWatch;
 window.toggleVesselGpsWatch = startVesselGpsWatch;

@@ -163,9 +163,19 @@
       pull();
     });
     // opportunistic push while online
+    // Desktop pull cadence — picks up phone GPS snapshots while signed in
     setInterval(function () {
-      if (navigator.onLine && getAuthUser() && getToken()) push();
-    }, 120000);
+      if (!getAuthUser() || !getToken()) return;
+      if (navigator.onLine) {
+        // Phone (GPS live): push. Desktop / idle: pull then light push.
+        if (global._setsailGpsWatchActive) push();
+        else {
+          pull().then(function () {
+            /* keep local edits from being wiped only — pull already applied */
+          });
+        }
+      }
+    }, 45000);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
