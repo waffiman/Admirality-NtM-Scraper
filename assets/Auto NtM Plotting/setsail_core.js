@@ -129,10 +129,8 @@ function loadUserVesselFromStorage() {
 }
 
 /**
- * Durable / cloud vessel snapshot.
- * SAFETY: route-based Dead Reckoning is LOCAL DISPLAY ONLY for My Vessel.
- * Never persist DR lat/lon as “truth” — other SetSail users must only ever see
- * this MMSI via public AIS feeds (last real fix), never along a private route.
+ * Public / shared durable snapshot (never publish private-route DR as AIS truth).
+ * Same-account cloud sync uses vesselStateForAccountSync instead.
  */
 function vesselStateForDurableStore(v) {
   if (!v || typeof v !== "object") return v;
@@ -156,6 +154,24 @@ function vesselStateForDurableStore(v) {
   return out;
 }
 window.vesselStateForDurableStore = vesselStateForDurableStore;
+
+/**
+ * Same Google-account sync snapshot — keeps live GPS/DR display so phone → PC
+ * can mirror position + motion (SOG/COG/HDG/STW) dynamically.
+ */
+function vesselStateForAccountSync(v) {
+  if (!v || typeof v !== "object") return v;
+  const out = Object.assign({}, v);
+  if (!isValidVesselLatLon(out.lat, out.lon)) {
+    out.lat = null;
+    out.lon = null;
+  }
+  out.syncedAt = (typeof getSetSailUtcNowIso === "function")
+    ? getSetSailUtcNowIso()
+    : new Date().toISOString();
+  return out;
+}
+window.vesselStateForAccountSync = vesselStateForAccountSync;
 
 function persistUserVessel() {
   // Guests: keep vessel in memory for this tab only — never write to localStorage.
@@ -1449,11 +1465,23 @@ function applyOwnVesselDeadReckoning(opts) {
   const dMove = calculateHaversineDistanceNM(Number(v.lat) || fixLat, Number(v.lon) || fixLon, lat1, lon1);
   if (!(opts.force) && Number.isFinite(dMove) && dMove < 0.01 && v.deadReckoned) return;
 
+  // DR SOG = last GPS or AIS speed; COG = along-track leg course
+  const sogKeep = Number.isFinite(Number(v.sog)) && Number(v.sog) >= 0 ? Number(v.sog) : sog;
+  const cogLeg = Number.isFinite(courseOut) ? courseOut : v.cog;
+  let hdgDr = Number.isFinite(courseOut) ? courseOut : v.heading;
+  let stwDr = sogKeep;
+  try {
+    const der = deriveOwnShipHdgStw(lat1, lon1, sogKeep, cogLeg);
+    if (der && der.hdg != null) hdgDr = der.hdg;
+    if (der && der.stw != null) stwDr = der.stw;
+  } catch (eDer) {}
   const updated = Object.assign({}, v, {
     lat: lat1,
     lon: lon1,
-    cog: Number.isFinite(courseOut) ? courseOut : v.cog,
-    heading: Number.isFinite(courseOut) ? courseOut : v.heading,
+    sog: sogKeep,
+    cog: cogLeg,
+    heading: hdgDr,
+    stw: stwDr,
     source: "ais-dr-rails",
     deadReckoned: true,
     aisDrAt: getSetSailUtcNowIso(),
@@ -1472,6 +1500,7 @@ function applyOwnVesselDeadReckoning(opts) {
   if (window.leafletMap && typeof plotUserVessel === "function") {
     plotUserVessel(lat1, lon1, "AIS-DR-RAILS", true);
   }
+  try { refreshOwnShipCcrpPopup(); } catch (ePop) {}
   if (opts.toast && typeof showSetSailToast === "function") {
     const ageHr = Math.round((ageMs / 3600000) * 10) / 10;
     const msg = mode === "handoff-prev"
@@ -2379,17 +2408,26 @@ function applyGpsFixToVessel(pos, opts) {
       if (smooth && smooth.cog != null) {
         patch.cog = smooth.cog;
         patch.gpsCogSmooth = smooth.cog;
-        patch.heading = smooth.cog; // track COG — never phone yaw
       } else if (leg.cog != null) {
         patch.cog = leg.cog;
         patch.gpsCogSmooth = leg.cog;
-        patch.heading = leg.cog;
       }
       _gpsMotionAnchor = { lat, lon, tMs };
     }
   } else {
     _gpsMotionAnchor = { lat, lon, tMs };
   }
+
+  // HDG/STW from GPS SOG/COG − current − light wind leeway (never phone compass)
+  try {
+    const sogUse = patch.sog != null ? patch.sog : Number(prev.sog);
+    const cogUse = patch.cog != null ? patch.cog : Number(prev.cog);
+    if (Number.isFinite(sogUse) && Number.isFinite(cogUse)) {
+      const der = deriveOwnShipHdgStw(lat, lon, sogUse, cogUse);
+      if (der && der.hdg != null) patch.heading = der.hdg;
+      if (der && der.stw != null) patch.stw = der.stw;
+    }
+  } catch (eDer) {}
 
   applyVesselProfile(patch, {
     toast: opts.toast || null,
@@ -2417,16 +2455,7 @@ function applyGpsFixToVessel(pos, opts) {
       if (patch.heading != null) setInputVal(m.heading, patch.heading);
     } catch (eF) {}
   });
-  try {
-    if (_ownShipMarker && _ownShipMarker.isPopupOpen && _ownShipMarker.isPopupOpen()) {
-      _ownShipMarker.setPopupContent(formatOwnShipPopupHtml(
-        userVessel.lat, userVessel.lon,
-        resolveOwnShipHeading(userVessel),
-        resolveOwnShipSogKn(userVessel),
-        userVessel.source
-      ));
-    }
-  } catch (ePop) {}
+  try { refreshOwnShipCcrpPopup(); } catch (ePop) {}
 }
 
 function markGpsConnectedUi() {
@@ -4691,6 +4720,92 @@ function sampleCurrentAtLatLon(lat, lon) {
 }
 window.sampleCurrentAtLatLon = sampleCurrentAtLatLon;
 
+/** Polar (kn, ° toward) → east/north components. */
+function knTowardToUV(speedKn, dirTowardDeg) {
+  const spd = Number(speedKn) || 0;
+  const rad = ((Number(dirTowardDeg) || 0) * Math.PI) / 180;
+  return { u: spd * Math.sin(rad), v: spd * Math.cos(rad) };
+}
+function uvToKnToward(u, v) {
+  const speedKn = Math.hypot(u, v);
+  let dirDeg = (Math.atan2(u, v) * 180) / Math.PI;
+  if (dirDeg < 0) dirDeg += 360;
+  return { speedKn, dirDeg };
+}
+
+/**
+ * Derive HDG + STW from ground track (SOG/COG) by removing ocean current
+ * and a light wind-leeway term (no windage area → ~3% of wind speed downwind).
+ * V_water ≈ V_ground − V_current − V_leeway
+ */
+function deriveOwnShipHdgStw(lat, lon, sogKn, cogDeg) {
+  const sog = Number(sogKn);
+  const cog = Number(cogDeg);
+  if (!Number.isFinite(sog) || sog < 0 || !Number.isFinite(cog)) {
+    return { hdg: null, stw: null, current: null, windKt: null, leewayKn: null };
+  }
+  const g = knTowardToUV(sog, cog);
+  let cu = 0;
+  let cv = 0;
+  let current = null;
+  try {
+    current = typeof sampleCurrentAtLatLon === "function" ? sampleCurrentAtLatLon(lat, lon) : null;
+    if (current && current.ok && Number.isFinite(current.speedKn)) {
+      const c = knTowardToUV(current.speedKn, current.dirDeg);
+      cu = c.u;
+      cv = c.v;
+    } else {
+      current = null;
+    }
+  } catch (eC) {
+    current = null;
+  }
+  let lu = 0;
+  let lv = 0;
+  let windKt = null;
+  let leewayKn = null;
+  try {
+    const wx = typeof sampleNdbcAtLatLon === "function" ? sampleNdbcAtLatLon(lat, lon) : null;
+    if (wx && wx.ok && wx.windKt != null && Number.isFinite(Number(wx.windKt))) {
+      windKt = Number(wx.windKt);
+      const windFrom = Number(wx.windDir);
+      if (Number.isFinite(windFrom)) {
+        // Meteorological wind FROM → leeway TOWARD = from + 180
+        const toward = (windFrom + 180) % 360;
+        leewayKn = Math.max(0, windKt * 0.03); // approximate, no windage area
+        const l = knTowardToUV(leewayKn, toward);
+        lu = l.u;
+        lv = l.v;
+      }
+    }
+  } catch (eW) {}
+  const water = uvToKnToward(g.u - cu - lu, g.v - cv - lv);
+  return {
+    hdg: Number.isFinite(water.dirDeg) ? Math.round(water.dirDeg * 10) / 10 : null,
+    stw: Number.isFinite(water.speedKn) ? Math.round(Math.max(0, water.speedKn) * 10) / 10 : null,
+    current,
+    windKt,
+    leewayKn
+  };
+}
+window.deriveOwnShipHdgStw = deriveOwnShipHdgStw;
+
+/** Refresh open own-ship CCRP popup with latest digits (GPS/AIS/DR). */
+function refreshOwnShipCcrpPopup() {
+  try {
+    if (!_ownShipMarker || !_ownShipMarker.isPopupOpen || !_ownShipMarker.isPopupOpen()) return;
+    if (!userVessel) return;
+    _ownShipMarker.setPopupContent(formatOwnShipPopupHtml(
+      userVessel.lat,
+      userVessel.lon,
+      resolveOwnShipCogDeg(userVessel),
+      resolveOwnShipSogKn(userVessel),
+      userVessel.source
+    ));
+  } catch (e) {}
+}
+window.refreshOwnShipCcrpPopup = refreshOwnShipCcrpPopup;
+
 /** Inverse-distance sample of model MSL pressure grid at chart cursor. */
 function samplePressureGridAtLatLon(lat, lon) {
   const grid = (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.pressureGrid))
@@ -5850,7 +5965,11 @@ function uploadRouteAsCurrentFromOwnShipPopup() {
 }
 window.uploadRouteAsCurrentFromOwnShipPopup = uploadRouteAsCurrentFromOwnShipPopup;
 
-/** Compact dark own-ship AIS-style card (+ miniature stale / DR CTA when needed). */
+/**
+ * Own-ship CCRP popup — same AIS card layout for every feed.
+ * Identity/static fields always from last AIS; motion digits follow active feed:
+ *  AIS → AIS SOG/COG/HDG; GPS → GPS SOG/COG + derived HDG/STW; DR → leg COG + last SOG + derived HDG/STW.
+ */
 function formatOwnShipPopupHtml(lat, lon, cogOrHdg, sog, source) {
   const v = userVessel || {};
   const title = escapePopupText((v.name && String(v.name).trim()) || "My Vessel");
@@ -5860,30 +5979,55 @@ function formatOwnShipPopupHtml(lat, lon, cogOrHdg, sog, source) {
   const gpsUsed = !!(v.staleBannerGpsUsed || window._setsailGpsWatchActive || getOwnShipPreferredNav(v) === "gps");
   const isDr = mode === "DR" || !!(v && v.deadReckoned);
   const pref = getOwnShipPreferredNav(v);
-  // Banner: AIS-linked ship, fix older than 1 h, and at least one recovery action still available
+  const feed = typeof resolveOwnShipActiveFeed === "function" ? resolveOwnShipActiveFeed(v) : "ais";
   const aisStaleEnough = !!v.mmsi && (ageMs == null || ageMs >= OWN_AIS_STALE_BANNER_MS);
   const needGpsBtn = aisStaleEnough && !gpsUsed;
   const needRouteBtn = aisStaleEnough && !hasCurrent;
   const showStaleBanner = aisStaleEnough && (needGpsBtn || needRouteBtn);
   const bannerAmber = showStaleBanner && (gpsUsed || hasCurrent);
   if (showStaleBanner && mode === "AIS") mode = "STALE";
-  if (pref === "gps" && mode !== "DR") mode = "GPS";
+  if (feed === "gps" && mode !== "DR") mode = "GPS";
+  if (feed === "dr") mode = "DR";
   const modeCls = mode === "DR" ? "is-dr" : (mode === "STALE" ? "is-other" : (mode === "AIS" ? "is-ais" : "is-other"));
+
   const hasPos = isValidVesselLatLon(lat, lon);
   const coords = hasPos
     ? (typeof formatLatLonDMS === "function" ? formatLatLonDMS(lat, lon) : (lat + ", " + lon))
-    : "awaiting AIS";
-  const cog = resolveOwnShipCogDeg(v);
-  const hdgTrue = hasOwnShipHeadingDeg(v.heading) ? ((Number(v.heading) % 360) + 360) % 360 : null;
-  const sogKn = sog != null && Number.isFinite(Number(sog)) ? Number(sog) : resolveOwnShipSogKn(v);
+    : "awaiting fix";
+
+  let cog = resolveOwnShipCogDeg(v);
+  let sogKn = sog != null && Number.isFinite(Number(sog)) ? Number(sog) : resolveOwnShipSogKn(v);
+  let hdg = hasOwnShipHeadingDeg(v.heading) ? ((Number(v.heading) % 360) + 360) % 360 : null;
+  let stw = Number.isFinite(Number(v.stw)) ? Number(v.stw) : null;
+
+  // Recompute derived HDG/STW for GPS/DR when we have ground track
+  if ((feed === "gps" || feed === "dr") && sogKn != null && cog != null && hasPos) {
+    try {
+      const der = deriveOwnShipHdgStw(Number(lat), Number(lon), sogKn, cog);
+      if (der) {
+        if (der.hdg != null) hdg = der.hdg;
+        if (der.stw != null) stw = der.stw;
+      }
+    } catch (eD) {}
+  }
+
+  const typeStr = escapePopupText(v.shipType || v.shipTypeName || v.type || "—");
+  const destStr = escapePopupText(v.destination || "—");
+  const sogStr = sogKn != null && Number.isFinite(sogKn) ? Number(sogKn).toFixed(1) + " kn" : "—";
+  const cogStr = cog != null ? Math.round(cog) + "°" : "—";
+  const hdgStr = hdg != null ? Math.round(hdg) + "°" : "—";
+  const stwStr = stw != null && Number.isFinite(stw) ? Number(stw).toFixed(1) + " kn" : "—";
   const vecMins = getOwnShipVectorMinutes();
   const vecNm = (sogKn != null && sogKn > 0) ? (sogKn * (vecMins / 60)) : null;
+
   const rows = [];
-  if (v.mmsi) rows.push(["MMSI", escapePopupText(v.mmsi)]);
-  if (v.callSign) rows.push(["Call", escapePopupText(v.callSign)]);
+  rows.push(["MMSI", escapePopupText(v.mmsi || "—") + (v.callSign ? " · " + escapePopupText(v.callSign) : "")]);
+  rows.push(["Type", typeStr]);
   rows.push([isDr ? "DR" : "Pos", escapePopupText(coords)]);
-  // Always expose last official AIS fix (so DR never hides the true last T-AIS)
-  if (isValidVesselLatLon(v.aisFixLat, v.aisFixLon)) {
+  rows.push(["SOG/COG", sogStr + " / " + cogStr]);
+  rows.push(["HDG/STW", hdgStr + " / " + stwStr]);
+  rows.push(["Dest", destStr]);
+  if (isValidVesselLatLon(v.aisFixLat, v.aisFixLon) && (feed === "gps" || feed === "dr")) {
     const aisCoords = typeof formatLatLonDMS === "function"
       ? formatLatLonDMS(Number(v.aisFixLat), Number(v.aisFixLon))
       : (v.aisFixLat + ", " + v.aisFixLon);
@@ -5894,17 +6038,14 @@ function formatOwnShipPopupHtml(lat, lon, cogOrHdg, sog, source) {
     const ageLbl = ageMs != null ? (" · " + formatAisAgeHoursLabel(ageMs) + " h ago") : "";
     rows.push(["Fix", escapePopupText(aisT + ageLbl)]);
   }
-  if (cog != null) rows.push(["COG", Math.round(cog) + "°"]);
-  if (hdgTrue != null && (cog == null || Math.abs(hdgTrue - cog) > 1.5)) {
-    rows.push(["HDG", Math.round(hdgTrue) + "°"]);
-  }
-  if (sogKn != null && Number.isFinite(sogKn)) rows.push(["SOG", Number(sogKn).toFixed(1) + " kn"]);
   if (vecNm != null && Number.isFinite(vecNm)) {
     rows.push(["Vec", vecNm >= 10 ? (Math.round(vecNm) + " NM / " + vecMins + "′") : (vecNm.toFixed(1) + " NM / " + vecMins + "′")]);
   }
+
   const body = rows.map((r) =>
-    '<div class="ss-ais-row"><span class="ss-ais-k">' + r[0] + "</span><span class=\"ss-ais-v\">" + r[1] + "</span></div>"
+    '<div class="ss-ais-row"><span class="ss-ais-k">' + r[0] + '</span><span class="ss-ais-v">' + r[1] + "</span></div>"
   ).join("");
+
   let staleHtml = "";
   if (showStaleBanner) {
     const ageLbl = ageMs == null ? "?" : formatAisAgeHoursLabel(ageMs);
@@ -5942,6 +6083,7 @@ function formatOwnShipPopupHtml(lat, lon, cogOrHdg, sog, source) {
       '<button type="button" class="ss-own-ship-vec-btn" onclick="window.nudgeOwnShipVectorMinutes&&window.nudgeOwnShipVectorMinutes(5)" aria-label="Longer vector">+</button>' +
       '<span class="ss-own-ship-vec-unit">min</span>' +
     "</div>";
+  const feedNote = feed === "gps" ? "GPS motion · AIS identity" : (feed === "dr" ? "DR rails · last SOG" : "AIS");
   return (
     '<div class="ss-ais-popup-body ss-own-ship-popup">' +
       '<div class="ss-ais-head">' +
@@ -5951,6 +6093,7 @@ function formatOwnShipPopupHtml(lat, lon, cogOrHdg, sog, source) {
       body +
       staleHtml +
       vecCtrl +
+      '<div class="ss-ais-foot">' + escapePopupText(feedNote) + "</div>" +
     "</div>"
   );
 }
@@ -6031,6 +6174,8 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
     if (!skipFly) {
       leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
     }
+    // Live CCRP digits (position / SOG / COG / HDG / STW) while popup is open
+    try { refreshOwnShipCcrpPopup(); } catch (ePop) {}
   }
 
   const hud = document.getElementById("ntmVesselHud");

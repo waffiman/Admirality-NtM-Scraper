@@ -89,24 +89,18 @@ async function loadProfile(sub) {
   return null;
 }
 
-/** Strip route-DR coords before durable store — never treat private-route guess as AIS truth. */
+/**
+ * Same-account cloud profile may keep live GPS/DR display coords so devices
+ * mirror My Vessel motion. This is NOT a public AIS feed.
+ */
 function sanitizeProfileVessel(profile) {
   if (!profile || typeof profile !== "object" || !profile.vessel || typeof profile.vessel !== "object") {
     return profile;
   }
   const v = Object.assign({}, profile.vessel);
-  const isDr = !!(v.deadReckoned || /ais-dr/i.test(String(v.source || "")));
-  const fixLat = Number(v.aisFixLat);
-  const fixLon = Number(v.aisFixLon);
-  if (isDr && Number.isFinite(fixLat) && Number.isFinite(fixLon)) {
-    v.lat = fixLat;
-    v.lon = fixLon;
-    v.source = "ais";
-    v.deadReckoned = false;
-  }
-  delete v.aisDrAt;
-  delete v.aisDrNm;
-  delete v.aisDrMode;
+  // Keep lat/lon/sog/cog/heading/stw/source for cross-device sync
+  if (v.lat != null) v.lat = Number(v.lat);
+  if (v.lon != null) v.lon = Number(v.lon);
   profile.vessel = v;
   return profile;
 }
