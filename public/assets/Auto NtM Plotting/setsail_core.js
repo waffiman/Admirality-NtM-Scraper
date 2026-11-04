@@ -5614,6 +5614,118 @@ window.setOwnShipVectorMinutes = setOwnShipVectorMinutes;
 
 try { getOwnShipVectorMinutes(); } catch (eBootVec) {}
 
+/** HDG line from CCRP: fixed 100 NM black shaft (no arrow), thinner than COG vector. */
+const OWN_SHIP_HDG_LINE_NM = 100;
+const OWN_SHIP_HDG_LINE_KEY = "setsail_own_ship_hdg_line_v1";
+let _ownShipHdgLine = null;
+
+function isOwnShipHdgLineEnabled() {
+  try {
+    return localStorage.getItem(OWN_SHIP_HDG_LINE_KEY) === "1";
+  } catch (e) {
+    return false;
+  }
+}
+
+function setOwnShipHdgLineEnabled(on, opts) {
+  opts = opts || {};
+  const enabled = !!on;
+  try { localStorage.setItem(OWN_SHIP_HDG_LINE_KEY, enabled ? "1" : "0"); } catch (e) {}
+  try {
+    if (userVessel && isValidVesselLatLon(userVessel.lat, userVessel.lon)) {
+      updateOwnShipHdgLine(
+        userVessel.lat,
+        userVessel.lon,
+        resolveOwnShipTrueHdgDeg(userVessel)
+      );
+    } else {
+      clearOwnShipHdgLine();
+    }
+  } catch (eH) {}
+  try {
+    if (!opts.skipPopup && _ownShipMarker && _ownShipMarker.isPopupOpen && _ownShipMarker.isPopupOpen() && userVessel) {
+      _ownShipMarker.setPopupContent(formatOwnShipPopupHtml(
+        userVessel.lat, userVessel.lon,
+        resolveOwnShipCogDeg(userVessel),
+        resolveOwnShipSogKn(userVessel),
+        userVessel.source
+      ));
+    }
+  } catch (ePop) {}
+  return enabled;
+}
+window.isOwnShipHdgLineEnabled = isOwnShipHdgLineEnabled;
+window.setOwnShipHdgLineEnabled = setOwnShipHdgLineEnabled;
+
+function clearOwnShipHdgLine() {
+  if (_ownShipHdgLine) {
+    try { if (leafletVesselLayer) leafletVesselLayer.removeLayer(_ownShipHdgLine); } catch (e) {}
+    _ownShipHdgLine = null;
+  }
+  if (!leafletVesselLayer) return;
+  leafletVesselLayer.eachLayer((ly) => {
+    if (ly && ly._setsailOwnShipHdgLine) {
+      try { leafletVesselLayer.removeLayer(ly); } catch (e) {}
+    }
+  });
+}
+
+/**
+ * True heading for HDG line / popup digits — never falls back to COG.
+ * AIS: reported heading; GPS/DR: derived from ground track − current − leeway.
+ */
+function resolveOwnShipTrueHdgDeg(v) {
+  if (!v) return null;
+  const feed = typeof resolveOwnShipActiveFeed === "function" ? resolveOwnShipActiveFeed(v) : "ais";
+  let hdg = hasOwnShipHeadingDeg(v.heading) ? ((Number(v.heading) % 360) + 360) % 360 : null;
+  if ((feed === "gps" || feed === "dr") && isValidVesselLatLon(v.lat, v.lon)) {
+    const sogKn = resolveOwnShipSogKn(v);
+    const cog = resolveOwnShipCogDeg(v);
+    if (sogKn != null && cog != null) {
+      try {
+        const der = deriveOwnShipHdgStw(Number(v.lat), Number(v.lon), sogKn, cog);
+        if (der && der.hdg != null) hdg = der.hdg;
+      } catch (eD) {}
+    }
+  }
+  return hdg;
+}
+window.resolveOwnShipTrueHdgDeg = resolveOwnShipTrueHdgDeg;
+
+function updateOwnShipHdgLine(lat, lon, hdgDeg) {
+  if (!leafletMap || !leafletVesselLayer) return;
+  if (!isOwnShipHdgLineEnabled()) {
+    clearOwnShipHdgLine();
+    return;
+  }
+  if (!isValidVesselLatLon(lat, lon) || !hasOwnShipHeadingDeg(hdgDeg)) {
+    clearOwnShipHdgLine();
+    return;
+  }
+  const bearing = ((Number(hdgDeg) % 360) + 360) % 360;
+  const tip = destinationPointNm(lat, lon, bearing, OWN_SHIP_HDG_LINE_NM);
+  const latlngs = [[Number(lat), Number(lon)], tip];
+  const style = {
+    color: "#0a0a0a",
+    weight: 1.15,
+    opacity: 0.92,
+    lineCap: "butt",
+    interactive: false,
+    className: "own-ship-hdg-line"
+  };
+  if (_ownShipHdgLine && leafletVesselLayer.hasLayer(_ownShipHdgLine) && _ownShipHdgLine.setLatLngs) {
+    _ownShipHdgLine.setLatLngs(latlngs);
+    try { _ownShipHdgLine.setStyle(style); } catch (eSt) {}
+  } else {
+    if (_ownShipHdgLine) {
+      try { leafletVesselLayer.removeLayer(_ownShipHdgLine); } catch (eRm) {}
+    }
+    _ownShipHdgLine = L.polyline(latlngs, style);
+    _ownShipHdgLine._setsailOwnShipHdgLine = true;
+    leafletVesselLayer.addLayer(_ownShipHdgLine);
+  }
+}
+
 /**
  * Generates Crosshair Target Marker (legacy / fallback)
  */
@@ -5969,26 +6081,31 @@ window.uploadRouteAsCurrentFromOwnShipPopup = uploadRouteAsCurrentFromOwnShipPop
  * Own-ship CCRP popup — same AIS card layout for every feed.
  * Identity/static fields always from last AIS; motion digits follow active feed:
  *  AIS → AIS SOG/COG/HDG; GPS → GPS SOG/COG + derived HDG/STW; DR → leg COG + last SOG + derived HDG/STW.
+ * Top-right badge always mirrors active feed (AIS / GPS / DR) — not STALE.
  */
 function formatOwnShipPopupHtml(lat, lon, cogOrHdg, sog, source) {
   const v = userVessel || {};
   const title = escapePopupText((v.name && String(v.name).trim()) || "My Vessel");
-  let mode = resolveOwnShipNavMode(v, source);
   const ageMs = getOwnShipAisAgeMs(v);
   const hasCurrent = typeof getDrActiveRouteId === "function" && !!getDrActiveRouteId();
   const gpsUsed = !!(v.staleBannerGpsUsed || window._setsailGpsWatchActive || getOwnShipPreferredNav(v) === "gps");
-  const isDr = mode === "DR" || !!(v && v.deadReckoned);
-  const pref = getOwnShipPreferredNav(v);
   const feed = typeof resolveOwnShipActiveFeed === "function" ? resolveOwnShipActiveFeed(v) : "ais";
+  // Badge = live feed only (never STALE / Manual override when GPS/DR active)
+  let mode = "AIS";
+  if (feed === "gps") mode = "GPS";
+  else if (feed === "dr") mode = "DR";
+  else if (feed === "ais") mode = "AIS";
+  else {
+    const fallback = resolveOwnShipNavMode(v, source);
+    mode = (fallback === "GPS" || fallback === "DR" || fallback === "AIS") ? fallback : "AIS";
+  }
+  const isDr = mode === "DR" || !!(v && v.deadReckoned);
+  const modeCls = mode === "DR" ? "is-dr" : (mode === "AIS" ? "is-ais" : (mode === "GPS" ? "is-gps" : "is-other"));
   const aisStaleEnough = !!v.mmsi && (ageMs == null || ageMs >= OWN_AIS_STALE_BANNER_MS);
   const needGpsBtn = aisStaleEnough && !gpsUsed;
   const needRouteBtn = aisStaleEnough && !hasCurrent;
   const showStaleBanner = aisStaleEnough && (needGpsBtn || needRouteBtn);
   const bannerAmber = showStaleBanner && (gpsUsed || hasCurrent);
-  if (showStaleBanner && mode === "AIS") mode = "STALE";
-  if (feed === "gps" && mode !== "DR") mode = "GPS";
-  if (feed === "dr") mode = "DR";
-  const modeCls = mode === "DR" ? "is-dr" : (mode === "STALE" ? "is-other" : (mode === "AIS" ? "is-ais" : "is-other"));
 
   const hasPos = isValidVesselLatLon(lat, lon);
   const coords = hasPos
@@ -6019,13 +6136,27 @@ function formatOwnShipPopupHtml(lat, lon, cogOrHdg, sog, source) {
   const stwStr = stw != null && Number.isFinite(stw) ? Number(stw).toFixed(1) + " kn" : "—";
   const vecMins = getOwnShipVectorMinutes();
   const vecNm = (sogKn != null && sogKn > 0) ? (sogKn * (vecMins / 60)) : null;
+  const hdgLineOn = isOwnShipHdgLineEnabled();
+  const hdgCell =
+    '<span class="ss-own-ship-hdg-cell">' +
+      '<span class="ss-own-ship-hdg-val">' + hdgStr + "</span>" +
+      '<label class="ss-own-ship-hdg-line-lbl" title="Show 100 NM HDG line from CCRP"' +
+        ' onmousedown="event.stopPropagation()" onclick="event.stopPropagation()">' +
+        '<input type="checkbox" class="ss-own-ship-hdg-line-cb"' +
+          (hdgLineOn ? " checked" : "") +
+          (hdg == null ? " disabled" : "") +
+          ' onchange="event.stopPropagation();window.setOwnShipHdgLineEnabled&&window.setOwnShipHdgLineEnabled(this.checked,{skipPopup:true})"/>' +
+      "</label>" +
+      '<span class="ss-own-ship-hdg-sep"> / </span>' +
+      '<span class="ss-own-ship-stw-val">' + stwStr + "</span>" +
+    "</span>";
 
   const rows = [];
   rows.push(["MMSI", escapePopupText(v.mmsi || "—") + (v.callSign ? " · " + escapePopupText(v.callSign) : "")]);
   rows.push(["Type", typeStr]);
   rows.push([isDr ? "DR" : "Pos", escapePopupText(coords)]);
   rows.push(["SOG/COG", sogStr + " / " + cogStr]);
-  rows.push(["HDG/STW", hdgStr + " / " + stwStr]);
+  rows.push(["HDG/STW", hdgCell]);
   rows.push(["Dest", destStr]);
   if (isValidVesselLatLon(v.aisFixLat, v.aisFixLon) && (feed === "gps" || feed === "dr")) {
     const aisCoords = typeof formatLatLonDMS === "function"
@@ -6147,6 +6278,7 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
       } catch (eIcon) {}
     } else {
       clearOwnShipTimeVectorLayers();
+      clearOwnShipHdgLine();
       if (_ownShipMarker) {
         try { leafletVesselLayer.removeLayer(_ownShipMarker); } catch (eRm) {}
       }
@@ -6166,11 +6298,22 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
         resolveOwnShipSogKn(userVessel),
         userVessel.source
       ),
-      { maxWidth: 280, minWidth: 176, className: "ss-ais-popup ss-own-ship-popup-wrap", autoPanPaddingTopLeft: [16, 48], autoPanPaddingBottomRight: [16, 36] }
+      {
+        maxWidth: 280,
+        minWidth: 176,
+        closeButton: false,
+        className: "ss-ais-popup ss-own-ship-popup-wrap",
+        autoPanPaddingTopLeft: [16, 48],
+        autoPanPaddingBottomRight: [16, 36]
+      }
     );
 
     // Dynamic COG time-vector — length = SOG × minutes/60, direction = COG
     updateOwnShipTimeVector(lat, lon, cog, sog);
+    // Optional 100 NM HDG line from CCRP (checkbox in popup)
+    try {
+      updateOwnShipHdgLine(lat, lon, resolveOwnShipTrueHdgDeg(userVessel));
+    } catch (eHdgLn) {}
     if (!skipFly) {
       leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
     }

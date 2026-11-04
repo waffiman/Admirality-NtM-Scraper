@@ -4256,10 +4256,14 @@
   background: #fbbf24;
   border-color: #fcd34d;
 }
-.ss-ais-popup .ss-ais-mode.is-other {
+.ss-ais-popup .ss-ais-mode.is-other,
+.ss-ais-popup .ss-ais-mode.is-gps {
   color: #0c4a6e !important;
   background: #7dd3fc;
   border-color: #bae6fd;
+}
+.ss-ais-popup.ss-own-ship-popup-wrap .leaflet-popup-close-button {
+  display: none !important;
 }
 .ss-ais-popup .ss-ais-row {
   display: grid;
