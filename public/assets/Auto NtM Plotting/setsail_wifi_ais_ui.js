@@ -141,22 +141,51 @@
     }
   }
 
+  function isNativeShell() {
+    try {
+      return !!(global.SetSailLanAis && global.SetSailLanAis.isNativeShell && global.SetSailLanAis.isNativeShell());
+    } catch (e) {
+      return false;
+    }
+  }
+
   function wireVesselButtons() {
     ensureModal();
     document.querySelectorAll("[data-vessel-form]").forEach(function (form) {
-      if (form.querySelector(".ss-wifi-ais-launch")) return;
+      if (form.querySelector(".ss-wifi-ais-launch") || form.querySelector(".ss-vessel-gps-launch")) return;
       var row = form.querySelector(".vessel-primary-fields") || form;
+      var after = row.querySelector(".vessel-coords-row");
       var btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "ntm-btn-glass ss-wifi-ais-launch";
-      btn.textContent = "Connect Wi‑Fi AIS";
-      btn.title = "Adaptive link to shipboard Wi‑Fi AIS / PPU (SafePilot and similar)";
-      btn.style.cssText = "width:100%;margin-top:0.45rem;justify-content:center;font-weight:600;font-size:0.75rem;";
-      btn.addEventListener("click", function (ev) {
-        ev.preventDefault();
-        open();
-      });
-      var after = row.querySelector(".vessel-coords-row");
+      btn.style.cssText =
+        "width:100%;margin-top:0.45rem;justify-content:center;font-weight:600;font-size:0.75rem;";
+
+      if (isNativeShell()) {
+        // Native apps keep Wi‑Fi AIS (SafePilot / pilot plug)
+        btn.className = "ntm-btn-glass ss-wifi-ais-launch";
+        btn.textContent = "Connect Wi‑Fi AIS";
+        btn.title = "Adaptive link to shipboard Wi‑Fi AIS / PPU (SafePilot and similar)";
+        btn.addEventListener("click", function (ev) {
+          ev.preventDefault();
+          open();
+        });
+      } else {
+        // Website: GPS replaces Wi‑Fi AIS (browser has no LAN socket to the bridge)
+        btn.className = "ntm-btn-glass ss-vessel-gps-launch";
+        btn.id = form.getAttribute("data-vessel-form") === "home" ? "homeVesselGpsBtn" : "vesselFetchGpsBtn";
+        btn.textContent = "GPS";
+        btn.title = "Connect device GPS — position now; SOG/COG from ground moves ≥50 m (ignores phone turns)";
+        btn.setAttribute("data-idle-label", "GPS");
+        if (typeof global.registerVesselGpsButton === "function") {
+          global.registerVesselGpsButton(btn);
+        } else {
+          btn.addEventListener("click", function (ev) {
+            ev.preventDefault();
+            if (typeof global.startVesselGpsWatch === "function") global.startVesselGpsWatch();
+          });
+        }
+      }
+
       if (after && after.parentNode) after.parentNode.insertBefore(btn, after.nextSibling);
       else row.appendChild(btn);
     });

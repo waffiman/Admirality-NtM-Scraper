@@ -703,6 +703,8 @@ async function fetchOwnVesselAisUpdate() {
 async function refreshOwnVesselFromAis(opts) {
   opts = opts || {};
   if (!userVessel || !userVessel.mmsi) return;
+  // Live browser GPS owns the icon — do not let AIS/DR overwrite it while watch is on
+  if (window._setsailGpsWatchActive) return;
   try {
     try { await syncSetSailUtcClock(false); } catch (eUtc) {}
     const hit = await fetchOwnVesselAisUpdate();
@@ -748,6 +750,7 @@ async function refreshOwnVesselFromAis(opts) {
         aisDrActivatedAt: null,
         aisDrNm: null,
         aisDrMode: null,
+        aisDrOnCenterline: false,
         aisDrPrevAlongNm: Number.isFinite(prevAlongKeep) ? prevAlongKeep : prev.aisDrPrevAlongNm,
         aisDrPrevFixMs: Number.isFinite(prevFixKeep) ? prevFixKeep : prev.aisDrPrevFixMs,
         aisDrFixAlongNm: Number.isFinite(newAlong) ? newAlong : prev.aisDrFixAlongNm
@@ -1175,8 +1178,10 @@ function applyOwnVesselDeadReckoning(opts) {
   if (opts && opts.forAisTarget) return;
   // No Current rails → no DR at all (icon stays on last official AIS)
   if (!getDrActiveRouteId()) return;
-  // Wi-Fi / LAN AIS is truth — never DR over it
-  if (String(v.source || "").toLowerCase().indexOf("wifi") >= 0) return;
+  // Wi-Fi / LAN AIS and live browser GPS are truth — never DR over them
+  const srcLow = String(v.source || "").toLowerCase();
+  if (srcLow.indexOf("wifi") >= 0) return;
+  if (srcLow === "gps" || window._setsailGpsWatchActive) return;
 
   // Prefer AIS position-fix time; fall back only when missing so Current can still snap.
   // Cap fall-back age so a local refresh stamp cannot invent multi-hour overshoot.
@@ -1287,10 +1292,20 @@ function applyOwnVesselDeadReckoning(opts) {
 
   const proj = setrouteProjectOntoRoute(fixLat, fixLon, wps);
   if (!proj) return;
-  // Cap residual XTD — keep small offsets, ignore huge outliers (bad fix / wrong route)
-  let xtdKeep = Number(proj.xtdNm) || 0;
-  if (Math.abs(xtdKeep) > 8) xtdKeep = 0;
-  else if (Math.abs(xtdKeep) > 3) xtdKeep *= 0.5;
+  // Once the ship has touched / crossed Current (or already rides the axis), DR stays
+  // on the centerline — never coast parallel at residual AIS XTD.
+  const DR_CONTACT_NM = 0.35;
+  const xtdAbs = Math.abs(Number(proj.xtdNm) || 0);
+  let onCenter = !!v.aisDrOnCenterline || xtdAbs <= DR_CONTACT_NM;
+  // Current icon already on/near rails counts as contact (crossed since last AIS)
+  if (!onCenter && Number.isFinite(shipLat) && Number.isFinite(shipLon)) {
+    try {
+      const pShip = setrouteProjectOntoRoute(shipLat, shipLon, wps);
+      if (pShip && Math.abs(Number(pShip.xtdNm) || 0) <= DR_CONTACT_NM) onCenter = true;
+    } catch (eShip) {}
+  }
+  // Already DR'ing on rails → locked to axis (no parallel XTD coast)
+  if (v.deadReckoned && (v.aisDrMode === "rails" || v.aisDrMode === "handoff-prev")) onCenter = true;
 
   const target = setroutePointAlongRoute(wps, proj.alongNm + distNm);
   if (!target) return;
@@ -1298,10 +1313,28 @@ function applyOwnVesselDeadReckoning(opts) {
   let lat1 = target.lat;
   let lon1 = target.lon;
   let courseOut = target.course;
-  if (typeof setrouteOffsetByXtd === "function" && Math.abs(xtdKeep) >= 0.02) {
-    const off = setrouteOffsetByXtd(lat1, lon1, courseOut, xtdKeep);
-    lat1 = off.lat;
-    lon1 = off.lon;
+  // Before first contact only: tempered approach XTD so the icon converges onto the track.
+  // After contact → exclusive centerline (lat1/lon1 stay on axis).
+  if (!onCenter && typeof setrouteOffsetByXtd === "function") {
+    let xtdKeep = Number(proj.xtdNm) || 0;
+    if (Math.abs(xtdKeep) > 8) xtdKeep = 0;
+    else if (Math.abs(xtdKeep) > 3) xtdKeep *= 0.25;
+    else xtdKeep *= 0.4;
+    if (Math.abs(xtdKeep) >= 0.02) {
+      const off = setrouteOffsetByXtd(lat1, lon1, courseOut, xtdKeep);
+      lat1 = off.lat;
+      lon1 = off.lon;
+      try {
+        const p2 = setrouteProjectOntoRoute(lat1, lon1, wps);
+        if (p2 && Math.abs(Number(p2.xtdNm) || 0) <= DR_CONTACT_NM) {
+          onCenter = true;
+          lat1 = target.lat;
+          lon1 = target.lon;
+        }
+      } catch (eC) {}
+    } else {
+      onCenter = true;
+    }
   }
   let mode = phase === "handoff-prev" ? "handoff-prev" : "rails";
 
@@ -1333,6 +1366,7 @@ function applyOwnVesselDeadReckoning(opts) {
     aisDrAt: getSetSailUtcNowIso(),
     aisDrNm: Math.round(distNm * 10) / 10,
     aisDrMode: mode,
+    aisDrOnCenterline: onCenter || mode === "rails",
     aisDrActivatedAt: v.aisDrActivatedAt || getSetSailUtcNowIso(),
     aisDrFixAlongNm: proj.alongNm,
     aisLastFixAt: v.aisLastFixAt || fixIso || getSetSailUtcNowIso(),
@@ -2041,35 +2075,219 @@ function bindVesselMmsiLookup(which) {
   });
 }
 
-function requestGpsIntoForm(which) {
+/** Browser GPS → My Vessel. Ignores device compass; SOG/COG only from ≥50 m ground moves. */
+const GPS_MOTION_MIN_M = 50;
+let _gpsWatchId = null;
+let _gpsMotionAnchor = null; // { lat, lon, tMs } — last point used for SOG/COG
+let _gpsUiBtns = [];
+
+function stopVesselGpsWatch() {
+  if (_gpsWatchId != null && navigator.geolocation) {
+    try { navigator.geolocation.clearWatch(_gpsWatchId); } catch (e) {}
+  }
+  _gpsWatchId = null;
+  window._setsailGpsWatchActive = false;
+  _gpsMotionAnchor = null;
+  _gpsUiBtns.forEach((btn) => {
+    if (!btn) return;
+    btn.classList.remove("is-gps-live");
+    btn.textContent = btn.getAttribute("data-idle-label") || "GPS";
+    btn.title = "Connect device GPS — position + SOG/COG from ground motion (≥50 m)";
+  });
+}
+window.stopVesselGpsWatch = stopVesselGpsWatch;
+
+function _gpsBearingDeg(lat1, lon1, lat2, lon2) {
+  const r1 = (lat1 * Math.PI) / 180;
+  const r2 = (lat2 * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const y = Math.sin(dLon) * Math.cos(r2);
+  const x = Math.cos(r1) * Math.sin(r2) - Math.sin(r1) * Math.cos(r2) * Math.cos(dLon);
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+}
+
+function _gpsDistM(lat1, lon1, lat2, lon2) {
+  if (typeof calculateHaversineDistanceNM === "function") {
+    return calculateHaversineDistanceNM(lat1, lon1, lat2, lon2) * 1852;
+  }
+  const R = 6371000;
+  const p1 = (lat1 * Math.PI) / 180;
+  const p2 = (lat2 * Math.PI) / 180;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+function applyGpsFixToVessel(pos, opts) {
+  opts = opts || {};
+  if (!pos || !pos.coords) return;
+  const lat = Number(pos.coords.latitude);
+  const lon = Number(pos.coords.longitude);
+  if (!isValidVesselLatLon(lat, lon)) return;
+  const tMs = Number(pos.timestamp) || Date.now();
+  window._homeGeoLon = lon;
+
+  const patch = {
+    lat,
+    lon,
+    source: "gps",
+    deadReckoned: false,
+    aisDrOnCenterline: false,
+    updatedAt: new Date(tMs).toISOString()
+  };
+
+  // SOG / COG ONLY from ground track ≥ 50 m — never use coords.heading / device orientation
+  if (_gpsMotionAnchor && Number.isFinite(_gpsMotionAnchor.lat)) {
+    const dM = _gpsDistM(_gpsMotionAnchor.lat, _gpsMotionAnchor.lon, lat, lon);
+    const dtMs = tMs - Number(_gpsMotionAnchor.tMs || 0);
+    if (dM >= GPS_MOTION_MIN_M && dtMs >= 2000) {
+      const dtH = dtMs / 3600000;
+      const sog = dtH > 0 ? (dM / 1852) / dtH : null;
+      const cog = _gpsBearingDeg(_gpsMotionAnchor.lat, _gpsMotionAnchor.lon, lat, lon);
+      if (Number.isFinite(sog) && sog >= 0 && sog <= 60) patch.sog = Math.round(sog * 10) / 10;
+      if (Number.isFinite(cog)) {
+        patch.cog = Math.round(cog * 10) / 10;
+        // Heading follows COG from track — never phone yaw
+        patch.heading = patch.cog;
+      }
+      _gpsMotionAnchor = { lat, lon, tMs };
+    }
+  } else {
+    _gpsMotionAnchor = { lat, lon, tMs };
+  }
+
+  applyVesselProfile(patch, {
+    toast: opts.toast || null,
+    skipAisSchedule: true,
+    keepPrevCoords: false
+  });
+  ["home", "chart"].forEach((which) => {
+    try {
+      const m = vesselFormMap(which);
+      if (typeof isValidVesselLatLon === "function" && isValidVesselLatLon(lat, lon) && typeof formatLatLonDMS === "function") {
+        const dms = formatLatLonDMS(lat, lon);
+        const mlat = dms.match(/([0-9]+°[^NSEW]*[NS])/i);
+        const mlon = dms.match(/([0-9]+°[^NSEW]*[EW])/i);
+        setInputVal(m.lat, mlat ? mlat[1].trim() : String(lat));
+        setInputVal(m.lon, mlon ? mlon[1].trim() : String(lon));
+      } else {
+        setInputVal(m.lat, lat.toFixed(5));
+        setInputVal(m.lon, lon.toFixed(5));
+      }
+      if (patch.sog != null) setInputVal(m.sog, patch.sog);
+      if (patch.cog != null) setInputVal(m.cog, patch.cog);
+      if (patch.heading != null) setInputVal(m.heading, patch.heading);
+    } catch (eF) {}
+  });
+}
+
+function setGpsButtonsLive(on) {
+  _gpsUiBtns.forEach((btn) => {
+    if (!btn) return;
+    btn.classList.toggle("is-gps-live", !!on);
+    if (on) {
+      btn.textContent = "GPS · LIVE";
+      btn.title = "GPS live — tap to disconnect";
+    } else {
+      btn.textContent = btn.getAttribute("data-idle-label") || "GPS";
+      btn.title = "Connect device GPS — position + SOG/COG from ground motion (≥50 m)";
+    }
+  });
+}
+
+function startVesselGpsWatch(opts) {
+  opts = opts || {};
   if (!navigator.geolocation) {
-    alert("Geolocation is not supported by your browser. Please enter coordinates manually.");
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Geolocation is not supported in this browser", "error");
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
     return;
   }
-  const btn = document.getElementById(which === "home" ? "homeVesselGpsBtn" : "vesselFetchGpsBtn");
-  const prev = btn ? btn.textContent : "GPS";
-  if (btn) btn.textContent = "…";
+  if (window._setsailGpsWatchActive && _gpsWatchId != null) {
+    stopVesselGpsWatch();
+    if (typeof showSetSailToast === "function") showSetSailToast("GPS disconnected", "info");
+    return;
+  }
+
+  stopVesselGpsWatch();
+  window._setsailGpsWatchActive = true;
+  setGpsButtonsLive(true);
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast("Requesting GPS… allow location when prompted", "info");
+  }
+
+  const geoOpts = {
+    enableHighAccuracy: true,
+    maximumAge: 5000,
+    timeout: 60000
+  };
+  const failHard = (msg) => {
+    stopVesselGpsWatch();
+    if (typeof showSetSailToast === "function") showSetSailToast("GPS: " + msg, "error");
+    else alert("GPS Error: " + msg);
+  };
+
+  const onFirstErr = (err) => {
+    const msg = (err && err.message) ? err.message : "GPS unavailable";
+    // Fallback: one-shot without high accuracy (fixes common desktop/browser timeouts)
+    if (!window._setsailGpsTriedFallback) {
+      window._setsailGpsTriedFallback = true;
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          applyGpsFixToVessel(pos, { toast: "GPS position linked" });
+        },
+        () => failHard(msg),
+        { enableHighAccuracy: false, maximumAge: 60000, timeout: 45000 }
+      );
+      return;
+    }
+    failHard(msg);
+  };
+
+  // Transient watch timeouts must not kill an already-linked session
+  const onWatchErr = (err) => {
+    if (window._setsailGpsWatchActive && _gpsMotionAnchor) return;
+    onFirstErr(err);
+  };
+
+  window._setsailGpsTriedFallback = false;
   navigator.geolocation.getCurrentPosition(
     (pos) => {
-      if (btn) btn.textContent = prev;
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
-      window._homeGeoLon = lon;
-      const m = vesselFormMap(which);
-      setInputVal(m.lat, lat.toFixed(5));
-      setInputVal(m.lon, lon.toFixed(5));
-      const data = readVesselForm(which);
-      data.lat = lat;
-      data.lon = lon;
-      data.source = "gps";
-      applyVesselProfile(data, { toast: "Position updated from GPS" });
+      applyGpsFixToVessel(pos, { toast: "GPS position linked — tracking motion ≥50 m for SOG/COG" });
     },
-    (err) => {
-      if (btn) btn.textContent = prev;
-      alert("GPS Error: " + err.message + ". Enter coordinates manually if needed.");
-    },
-    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    onFirstErr,
+    geoOpts
   );
+
+  _gpsWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      applyGpsFixToVessel(pos, { toast: null });
+    },
+    onWatchErr,
+    { enableHighAccuracy: true, maximumAge: 10000, timeout: 90000 }
+  );
+}
+window.startVesselGpsWatch = startVesselGpsWatch;
+window.toggleVesselGpsWatch = startVesselGpsWatch;
+
+function registerVesselGpsButton(btn) {
+  if (!btn || btn._gpsBound) return;
+  btn._gpsBound = true;
+  btn.setAttribute("data-idle-label", btn.textContent || "GPS");
+  _gpsUiBtns.push(btn);
+  btn.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    startVesselGpsWatch();
+  });
+}
+window.registerVesselGpsButton = registerVesselGpsButton;
+
+/** @deprecated — use startVesselGpsWatch */
+function requestGpsIntoForm(which) {
+  startVesselGpsWatch({ which: which });
 }
 
 function saveVesselForm(which, closeFn) {
@@ -3324,8 +3542,8 @@ function renderRouteOnMap(route, shouldFly = true) {
   let trackOutline = null;
   const linePane = ensureRouteLinePane();
   if (rtSub.line !== false && unrolledCoords.length >= 2) {
-    // Black centerline on dedicated pane ABOVE corridor fill (halo for contrast)
-    const lineCoords = simplifyRoutePtsForBuffer(unrolledCoords, 160);
+    // Full vertex list for the black axis so WPTs sit exactly on joints (no simplify drift)
+    const lineCoords = unrolledCoords;
     const sw = getRouteStrokeWeights(leafletMap.getZoom ? leafletMap.getZoom() : 5);
     trackOutline = L.polyline(lineCoords, {
       color: "#ffffff",
@@ -3400,9 +3618,8 @@ function renderRouteOnMap(route, shouldFly = true) {
     marker.on("drag", function (e) {
       const latlng = e.target.getLatLng();
       unrolledCoords[idx] = [latlng.lat, latlng.lng];
-      const linePts = simplifyRoutePtsForBuffer(unrolledCoords, 160);
-      if (trackOutline) trackOutline.setLatLngs(linePts);
-      if (trackLine) trackLine.setLatLngs(linePts);
+      if (trackOutline) trackOutline.setLatLngs(unrolledCoords);
+      if (trackLine) trackLine.setLatLngs(unrolledCoords);
     });
 
     marker.on("dragend", function (e) {
@@ -3440,9 +3657,8 @@ function renderRouteOnMap(route, shouldFly = true) {
         }
 
         window._setsailRouteUnrolled = unrolledCoords.slice();
-        const linePts = simplifyRoutePtsForBuffer(unrolledCoords, 160);
-        if (trackOutline) trackOutline.setLatLngs(linePts);
-        if (trackLine) trackLine.setLatLngs(linePts);
+        if (trackOutline) trackOutline.setLatLngs(unrolledCoords);
+        if (trackLine) trackLine.setLatLngs(unrolledCoords);
 
         if (typeof enrichRouteWithLegsTelemetry === "function") {
           enrichRouteWithLegsTelemetry(activeRouteData);
@@ -4697,9 +4913,8 @@ function initHomeHudVessel() {
   }
 
   const gpsBtn = document.getElementById("homeVesselGpsBtn");
-  if (gpsBtn && !gpsBtn._homeVesselBound) {
-    gpsBtn._homeVesselBound = true;
-    gpsBtn.addEventListener("click", () => requestGpsIntoForm("home"));
+  if (gpsBtn && typeof registerVesselGpsButton === "function") {
+    registerVesselGpsButton(gpsBtn);
   }
   const applyBtn = document.getElementById("homeVesselApplyBtn");
   if (applyBtn && !applyBtn._homeVesselBound) {
@@ -4887,8 +5102,8 @@ function initVesselTracking() {
   }
   if (closeBtn) closeBtn.addEventListener("click", closePopover);
 
-  if (fetchGpsBtn) {
-    fetchGpsBtn.addEventListener("click", () => requestGpsIntoForm("chart"));
+  if (fetchGpsBtn && typeof registerVesselGpsButton === "function") {
+    registerVesselGpsButton(fetchGpsBtn);
   }
 
   if (applyBtn) {
@@ -16393,23 +16608,25 @@ function renderRouteBufferCorridorOnMap() {
       pts.push([lat, lon]);
     }
   }
-  // Decimate corridor polygon — full densified track as SVG was freezing pan/zoom
-  pts = simplifyRoutePtsForBuffer(pts, 96);
+  // Full axis for the black centerline; decimate only the corridor edges (SVG perf)
+  const fullAxisPts = pts.slice();
+  const edgePts = simplifyRoutePtsForBuffer(pts, 96);
   invalidateRouteCorridorDistanceCache();
   const isFilterOn = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
   const drId = getDrActiveRouteId();
   const isDrRails = !!(drId && activeRouteData && (activeRouteData.id === drId || activeRouteData.name === drId));
+  const hasMainCenterline = !!(window._setsailRouteStrokeRefs && window._setsailRouteStrokeRefs.center);
 
-  if (pts.length >= 2) {
+  if (edgePts.length >= 2) {
     // Port = left of track (looking start→end); Stbd = right.
     // Direction (east, north)=(dx,dy); port = rotate 90° CCW → (-dy, dx).
     const portSide = [];
     const stbdSide = [];
-    for (let i = 0; i < pts.length; i++) {
-      const curLat = pts[i][0];
-      const curLon = pts[i][1];
-      const prev = i > 0 ? pts[i - 1] : pts[i];
-      const next = i < pts.length - 1 ? pts[i + 1] : pts[i];
+    for (let i = 0; i < edgePts.length; i++) {
+      const curLat = edgePts[i][0];
+      const curLon = edgePts[i][1];
+      const prev = i > 0 ? edgePts[i - 1] : edgePts[i];
+      const next = i < edgePts.length - 1 ? edgePts[i + 1] : edgePts[i];
       const latRad = curLat * Math.PI / 180;
       const cosLat = Math.max(0.2, Math.cos(latRad));
       let dx = (next[1] - prev[1]) * cosLat; // east
@@ -16476,31 +16693,37 @@ function renderRouteBufferCorridorOnMap() {
       strokeRefs.corridorPoly = corridorPoly;
     }
 
-    // Black track centerline in the middle of the buffer (always visible)
-    const midPane = (typeof ensureRouteLinePane === "function") ? ensureRouteLinePane() : "overlayPane";
-    const centerHaloBuf = L.polyline(pts, {
-      color: "#ffffff",
-      weight: sw.centerHalo,
-      opacity: 0.5,
-      interactive: false,
-      lineCap: "round",
-      lineJoin: "round",
-      pane: midPane
-    });
-    const centerBuf = L.polyline(pts, {
-      color: "#0a0a0a",
-      weight: sw.center,
-      opacity: 1,
-      interactive: false,
-      lineCap: "round",
-      lineJoin: "round",
-      pane: midPane,
-      className: "setsail-route-centerline"
-    });
-    leafletRouteBufferLayer.addLayer(centerHaloBuf);
-    leafletRouteBufferLayer.addLayer(centerBuf);
-    strokeRefs.centerHaloBuf = centerHaloBuf;
-    strokeRefs.centerBuf = centerBuf;
+    // Only draw a buffer centerline when the main route layer has none.
+    // Always use FULL axis verts (same as WPTs) — never the decimated edge polyline.
+    if (!hasMainCenterline && fullAxisPts.length >= 2) {
+      const midPane = (typeof ensureRouteLinePane === "function") ? ensureRouteLinePane() : "overlayPane";
+      const centerHaloBuf = L.polyline(fullAxisPts, {
+        color: "#ffffff",
+        weight: sw.centerHalo,
+        opacity: 0.5,
+        interactive: false,
+        lineCap: "round",
+        lineJoin: "round",
+        pane: midPane
+      });
+      const centerBuf = L.polyline(fullAxisPts, {
+        color: "#0a0a0a",
+        weight: sw.center,
+        opacity: 1,
+        interactive: false,
+        lineCap: "round",
+        lineJoin: "round",
+        pane: midPane,
+        className: "setsail-route-centerline"
+      });
+      leafletRouteBufferLayer.addLayer(centerHaloBuf);
+      leafletRouteBufferLayer.addLayer(centerBuf);
+      strokeRefs.centerHaloBuf = centerHaloBuf;
+      strokeRefs.centerBuf = centerBuf;
+    } else {
+      strokeRefs.centerHaloBuf = null;
+      strokeRefs.centerBuf = null;
+    }
     window._setsailRouteStrokeRefs = strokeRefs;
   }
 
