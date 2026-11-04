@@ -148,7 +148,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.178" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.179" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -6272,11 +6272,18 @@ body.ss-setchart .setsail-toast {
   gap: 6px;
   align-items: flex-start;
 }
+.ss-ais-popup .ss-own-ship-stale.is-amber {
+  background: rgba(120, 53, 15, 0.58);
+  border-color: rgba(251, 191, 36, 0.55);
+}
 .ss-ais-popup .ss-own-ship-stale-ico {
   flex: 0 0 auto;
   width: 14px;
   height: 14px;
   margin-top: 1px;
+  color: #f87171;
+}
+.ss-ais-popup .ss-own-ship-stale.is-amber .ss-own-ship-stale-ico {
   color: #fbbf24;
 }
 .ss-ais-popup .ss-own-ship-stale-body {
@@ -6287,9 +6294,18 @@ body.ss-setchart .setsail-toast {
   color: #fecaca;
   font-weight: 500;
 }
+.ss-ais-popup .ss-own-ship-stale.is-amber .ss-own-ship-stale-body {
+  color: #fde68a;
+}
+.ss-ais-popup .ss-own-ship-stale-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
 .ss-ais-popup .ss-own-ship-stale-btn {
   display: inline-block;
-  margin-top: 4px;
+  margin-top: 0;
   padding: 2px 7px;
   border-radius: 4px;
   border: 1px solid rgba(252, 165, 165, 0.55);
@@ -6299,6 +6315,10 @@ body.ss-setchart .setsail-toast {
   font-weight: 700;
   cursor: pointer !important;
   line-height: 1.3;
+}
+.ss-ais-popup .ss-own-ship-stale.is-amber .ss-own-ship-stale-btn {
+  border-color: rgba(251, 191, 36, 0.55);
+  color: #fef3c7;
 }
 .ss-ais-popup .ss-own-ship-stale-btn:hover {
   background: rgba(239, 68, 68, 0.35);
@@ -7152,10 +7172,65 @@ body.ss-setchart .setsail-toast {
   cursor: grab;
   pointer-events: auto;
 }
+.ss-vessel-gps-launch,
+.ntm-btn-glass.ss-vessel-gps-launch {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.45rem !important;
+}
+.ss-vessel-gps-launch.is-gps-connecting,
+.ntm-btn-glass.is-gps-connecting {
+  opacity: 0.92;
+  pointer-events: none;
+  cursor: wait !important;
+}
+.ss-gps-spin {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(148, 163, 184, 0.35);
+  border-top-color: #38bdf8;
+  animation: ss-gps-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes ss-gps-spin {
+  to { transform: rotate(360deg); }
+}
 .ss-vessel-gps-launch.is-gps-live,
-.ntm-btn-glass.is-gps-live {
-  border-color: #22c55e !important;
-  color: #166534 !important;
+.ss-vessel-gps-launch.is-gps-disconnect,
+.ntm-btn-glass.is-gps-live,
+.ntm-btn-glass.is-gps-disconnect {
+  border-color: rgba(239, 68, 68, 0.75) !important;
+  color: #fecaca !important;
+  background: rgba(127, 29, 29, 0.45) !important;
+  font-weight: 700 !important;
+}
+.ss-vessel-gps-launch.is-gps-live:hover,
+.ntm-btn-glass.is-gps-disconnect:hover {
+  background: rgba(185, 28, 28, 0.55) !important;
+  color: #fff !important;
+}
+.ss-gps-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  animation: ss-gps-live-pulse 1.2s ease-out infinite;
+  flex-shrink: 0;
+  margin-left: 0.15rem;
+}
+@keyframes ss-gps-live-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.65); }
+  70% { box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+[data-theme="light"] .ss-vessel-gps-launch.is-gps-live,
+[data-theme="light"] .ntm-btn-glass.is-gps-disconnect {
+  color: #991b1b !important;
+  background: rgba(254, 226, 226, 0.95) !important;
+  border-color: rgba(239, 68, 68, 0.55) !important;
 }
 .route-wpt-div-icon .route-wpt-dot:hover {
   transform: none;
@@ -8577,8 +8652,21 @@ body.ss-setchart .setsail-toast {
 
 #homeVesselHudCoords {
   white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-width: none !important;
+}
+#homeVesselHudPill.is-coords-label,
+#homeVesselHudPill.is-coords-label #homeVesselHudBtn {
+  max-width: none !important;
+}
+#homeVesselHudPill.is-coords-label #homeVesselHudCoords {
+  font-size: 0.62rem !important;
+  letter-spacing: 0.01em;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+  max-width: none !important;
 }
 
 /* Stacked Bottom Dock: #homeScrollHint sits strictly ABOVE .site-footer in normal flex flow */
@@ -8719,6 +8807,9 @@ body.ss-setchart .setsail-toast {
     max-width: 126px !important;
     border-radius: 14px !important;
   }
+  #homeVesselHudPill.is-coords-label {
+    max-width: min(72vw, 220px) !important;
+  }
 
   #homeVesselHudCoords {
     font-size: 0.58rem !important;
@@ -8726,6 +8817,12 @@ body.ss-setchart .setsail-toast {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
+  }
+  #homeVesselHudPill.is-coords-label #homeVesselHudCoords {
+    font-size: 0.52rem !important;
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
   }
 
   /* Center Stage & Brand Logo on Phone */
@@ -9027,9 +9124,16 @@ body.ss-setchart .setsail-toast {
     max-width: 105px !important;
     padding: 2px 5px !important;
   }
+  #homeVesselHudPill.is-coords-label {
+    max-width: min(78vw, 200px) !important;
+  }
   #homeVesselHudCoords {
     max-width: 80px !important;
     font-size: 0.54rem !important;
+  }
+  #homeVesselHudPill.is-coords-label #homeVesselHudCoords {
+    max-width: none !important;
+    font-size: 0.48rem !important;
   }
   .home-tool-desc {
     display: none !important;
@@ -9237,7 +9341,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.178" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.179" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -11846,8 +11950,21 @@ select option {
 
 #homeVesselHudCoords {
   white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-width: none !important;
+}
+#homeVesselHudPill.is-coords-label,
+#homeVesselHudPill.is-coords-label #homeVesselHudBtn {
+  max-width: none !important;
+}
+#homeVesselHudPill.is-coords-label #homeVesselHudCoords {
+  font-size: 0.62rem !important;
+  letter-spacing: 0.01em;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+  max-width: none !important;
 }
 
 /* Stacked Bottom Dock: #homeScrollHint sits strictly ABOVE .site-footer in normal flex flow */
@@ -11988,6 +12105,9 @@ select option {
     max-width: 126px !important;
     border-radius: 14px !important;
   }
+  #homeVesselHudPill.is-coords-label {
+    max-width: min(72vw, 220px) !important;
+  }
 
   #homeVesselHudCoords {
     font-size: 0.58rem !important;
@@ -11995,6 +12115,12 @@ select option {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
+  }
+  #homeVesselHudPill.is-coords-label #homeVesselHudCoords {
+    font-size: 0.52rem !important;
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
   }
 
   /* Center Stage & Brand Logo on Phone */
@@ -12296,9 +12422,16 @@ select option {
     max-width: 105px !important;
     padding: 2px 5px !important;
   }
+  #homeVesselHudPill.is-coords-label {
+    max-width: min(78vw, 200px) !important;
+  }
   #homeVesselHudCoords {
     max-width: 80px !important;
     font-size: 0.54rem !important;
+  }
+  #homeVesselHudPill.is-coords-label #homeVesselHudCoords {
+    max-width: none !important;
+    font-size: 0.48rem !important;
   }
   .home-tool-desc {
     display: none !important;
@@ -13716,7 +13849,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.178" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.178';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.179" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.179';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -13738,7 +13871,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.178" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.179" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -21427,25 +21560,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.178"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.178" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.178"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.179"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.179" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.179"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.178",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.179",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.178"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.178"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.178"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.179"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.179"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.179"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.178"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.179"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21518,10 +21651,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.178"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.178"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.178"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.178"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.179"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.179"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.179"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.179"></script>
 
 
 
@@ -22235,17 +22368,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.178', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.179', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.178 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.179 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.178') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.178.0'); }, 1200);
+              if (last && last.indexOf('v5.179') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.179.0'); }, 1200);
               }
             } catch (eTip) {}
           })
