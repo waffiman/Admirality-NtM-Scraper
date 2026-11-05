@@ -148,7 +148,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.187" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.188" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -9530,7 +9530,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.187" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.188" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -13094,6 +13094,22 @@ select option {
       gap: 0 !important;
       background: rgba(7, 13, 25, 0.9) !important;
     }
+    @media (max-width: 768px) {
+      .ntm-chart-layer-selector {
+        flex-direction: column !important;
+        align-items: flex-end !important;
+      }
+      .ntm-chart-layer-selector .ntm-layer-trigger-btn {
+        order: -1 !important;
+      }
+      .ntm-chart-layer-selector:not(.collapsed) .ntm-layer-trigger-btn {
+        display: flex !important;
+      }
+      .ntm-chart-layer-selector:not(.collapsed) {
+        max-height: min(72vh, 460px) !important;
+        overflow-y: auto !important;
+      }
+    }
     /* 2. Filter Popover Window (#ntmFilterPopover): never clip or hide behind map */
     #ntmSidebar,
     .ntm-sidebar-list {
@@ -14038,7 +14054,7 @@ select option {
                     It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.187" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.187';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.188" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.188';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -14060,7 +14076,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.187" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.188" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -21748,25 +21764,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.187"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.187" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.187"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.188"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.188" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.188"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.187",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.188",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.187"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.187"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.187"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.188"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.188"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.188"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.187"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.188"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21839,10 +21855,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.187"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.187"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.187"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.187"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.188"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.188"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.188"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.188"></script>
 
 
 
@@ -22556,17 +22572,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.187', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.188', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.187 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.188 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.187') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.187.0'); }, 1200);
+              if (last && last.indexOf('v5.188') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.188.0'); }, 1200);
               }
             } catch (eTip) {}
           })

@@ -7922,7 +7922,6 @@ function initNtMMap() {
     const baseMaps = {
       "ECDIS Chart": ecdisLayer,
       "Ocean Chart (Esri)": oceanLayer,
-      "OpenStreetMap": osmLayer,
       "Satellite Imagery": satLayer
     };
 
@@ -7942,7 +7941,6 @@ function initNtMMap() {
       initVisualChartLayerSelector(leafletMap, {
         ecdis: ecdisLayer,
         ocean: oceanLayer,
-        street: osmLayer,
         sat: satLayer,
         buoys: seamarkLayer,
         buoysTile: buoysTileLayer,
@@ -15324,6 +15322,272 @@ function createEcdisSimpleBaseLayer() {
 }
 window.createEcdisSimpleBaseLayer = createEcdisSimpleBaseLayer;
 
+/* ==========================================================================
+   Time Zone overlay — colored UTC offset bands + bottom-of-viewport live labels
+   ========================================================================== */
+let _tzBandsLayer = null;
+let _tzLabelHost = null;
+let _tzClockTimer = null;
+let _tzMapRef = null;
+let _tzMoveHandler = null;
+
+/* Reference palette (nautical TZ atlas): orange → green → grey → blue → pink */
+const TZ_BAND_PALETTE = [
+  { fill: "rgba(232, 154, 72, 0.30)", solid: "#c97828", stroke: "rgba(20, 24, 32, 0.72)" },
+  { fill: "rgba(118, 168, 98, 0.30)", solid: "#4f7d3d", stroke: "rgba(20, 24, 32, 0.72)" },
+  { fill: "rgba(156, 164, 176, 0.30)", solid: "#6b7380", stroke: "rgba(20, 24, 32, 0.72)" },
+  { fill: "rgba(96, 150, 205, 0.30)", solid: "#3a6f9a", stroke: "rgba(20, 24, 32, 0.72)" },
+  { fill: "rgba(214, 148, 168, 0.30)", solid: "#b56a82", stroke: "rgba(20, 24, 32, 0.72)" }
+];
+
+function tzOffsetColor(offsetH) {
+  const o = Number(offsetH) || 0;
+  return TZ_BAND_PALETTE[((o % 5) + 5) % 5];
+}
+
+function formatTzOffsetLabel(offsetH) {
+  const o = Number(offsetH) || 0;
+  if (o === 0) return "UTC±0";
+  return "UTC" + (o > 0 ? "+" : "") + o;
+}
+
+function formatTimeAtUtcOffset(offsetH) {
+  const o = Number(offsetH) || 0;
+  const now = new Date();
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  const local = new Date(utcMs + o * 3600000);
+  const hh = String(local.getHours()).padStart(2, "0");
+  const mm = String(local.getMinutes()).padStart(2, "0");
+  return hh + ":" + mm;
+}
+
+function tzNormLon(lon) {
+  let x = lon;
+  while (x < -180) x += 360;
+  while (x > 180) x -= 360;
+  return x;
+}
+
+function tzBandLonRanges(offsetH) {
+  const o = Number(offsetH) || 0;
+  const west = o * 15 - 7.5;
+  const east = o * 15 + 7.5;
+  const w = tzNormLon(west);
+  const e = tzNormLon(east);
+  if (w <= e) return [[w, e]];
+  // Antimeridian wrap
+  return [[w, 180], [-180, e]];
+}
+
+function buildTimezoneBandsGeoJson() {
+  // Classic nautical chart style: 15° longitude bands for UTC−12 … UTC+14
+  const features = [];
+  for (let o = -12; o <= 14; o++) {
+    const colors = tzOffsetColor(o);
+    const ranges = tzBandLonRanges(o);
+    ranges.forEach((rng) => {
+      const west = rng[0];
+      const east = rng[1];
+      if (east - west < 0.05) return;
+      features.push({
+        type: "Feature",
+        properties: {
+          offset: o,
+          label: formatTzOffsetLabel(o),
+          fill: colors.fill,
+          stroke: colors.stroke,
+          solid: colors.solid
+        },
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [west, -85],
+            [east, -85],
+            [east, 85],
+            [west, 85],
+            [west, -85]
+          ]]
+        }
+      });
+    });
+  }
+  return { type: "FeatureCollection", features: features };
+}
+
+function ensureTimezonePane(map) {
+  if (!map || !map.createPane) return "overlayPane";
+  try {
+    let pane = map.getPane("timezonePane");
+    if (!pane) pane = map.createPane("timezonePane");
+    pane.style.zIndex = 350;
+    pane.style.pointerEvents = "none";
+    return "timezonePane";
+  } catch (e) {
+    return "overlayPane";
+  }
+}
+
+function ensureTimezoneLabelHost(map) {
+  const container = map && map.getContainer && map.getContainer();
+  if (!container) return null;
+  let host = container.querySelector(".ss-tz-label-host");
+  if (!host) {
+    host = document.createElement("div");
+    host.className = "ss-tz-label-host";
+    host.setAttribute("aria-hidden", "true");
+    container.appendChild(host);
+  }
+  _tzLabelHost = host;
+  return host;
+}
+
+function refreshTimezoneViewportLabels() {
+  if (!_tzMapRef) return;
+  const map = _tzMapRef;
+  const host = ensureTimezoneLabelHost(map);
+  if (!host) return;
+  const size = map.getSize();
+  if (!size || size.x < 40 || size.y < 40) {
+    host.innerHTML = "";
+    return;
+  }
+  const bounds = map.getBounds();
+  if (!bounds) {
+    host.innerHTML = "";
+    return;
+  }
+  const west = bounds.getWest();
+  const east = bounds.getEast();
+  const midLat = (bounds.getSouth() + bounds.getNorth()) / 2;
+  const minLabelGapPx = 52;
+  const chipHalf = 32;
+
+  const visible = [];
+  for (let o = -12; o <= 14; o++) {
+    const ranges = tzBandLonRanges(o);
+    ranges.forEach((rng) => {
+      // Expand by ±360 copies so wrapped world views still hit bands
+      for (let k = -1; k <= 1; k++) {
+        const bandW = rng[0] + k * 360;
+        const bandE = rng[1] + k * 360;
+        const iW = Math.max(west, bandW);
+        const iE = Math.min(east, bandE);
+        if (iE - iW < 0.12) continue;
+        const leftPx = map.latLngToContainerPoint([midLat, iW]).x;
+        const rightPx = map.latLngToContainerPoint([midLat, iE]).x;
+        const widthPx = Math.abs(rightPx - leftPx);
+        if (widthPx < 30) continue;
+        visible.push({
+          offset: o,
+          midPx: (leftPx + rightPx) / 2,
+          widthPx: widthPx,
+          colors: tzOffsetColor(o)
+        });
+      }
+    });
+  }
+
+  visible.sort((a, b) => b.widthPx - a.widthPx);
+  const placed = [];
+  visible.forEach((z) => {
+    if (z.midPx < chipHalf - 8 || z.midPx > size.x - chipHalf + 8) return;
+    if (placed.some((p) => Math.abs(p.midPx - z.midPx) < minLabelGapPx)) return;
+    placed.push(z);
+  });
+  placed.sort((a, b) => a.midPx - b.midPx);
+
+  let html = "";
+  placed.forEach((z) => {
+    const timeStr = formatTimeAtUtcOffset(z.offset);
+    const zoneStr = formatTzOffsetLabel(z.offset);
+    const left = Math.round(z.midPx - chipHalf);
+    html +=
+      '<div class="ss-tz-chip" data-tz-offset="' + z.offset + '" style="left:' + left + 'px">' +
+        '<div class="ss-tz-chip-time">' + timeStr + "</div>" +
+        '<div class="ss-tz-chip-zone" style="background:' + z.colors.solid + '">' + zoneStr + "</div>" +
+      "</div>";
+  });
+  host.innerHTML = html;
+}
+
+function tickTimezoneLabelClocks() {
+  if (!_tzLabelHost) return;
+  try {
+    _tzLabelHost.querySelectorAll(".ss-tz-chip[data-tz-offset]").forEach((chip) => {
+      const o = Number(chip.getAttribute("data-tz-offset"));
+      const timeEl = chip.querySelector(".ss-tz-chip-time");
+      if (timeEl) timeEl.textContent = formatTimeAtUtcOffset(o);
+    });
+  } catch (e) {}
+}
+
+function setTimezoneOverlayActive(map, on) {
+  if (!map) return false;
+  _tzMapRef = map;
+  if (!on) {
+    try {
+      if (_tzClockTimer) {
+        clearInterval(_tzClockTimer);
+        _tzClockTimer = null;
+      }
+      if (_tzMoveHandler) {
+        map.off("move", _tzMoveHandler);
+        map.off("zoom", _tzMoveHandler);
+        map.off("moveend", _tzMoveHandler);
+        map.off("zoomend", _tzMoveHandler);
+        map.off("resize", _tzMoveHandler);
+        _tzMoveHandler = null;
+      }
+      if (_tzBandsLayer && map.hasLayer(_tzBandsLayer)) map.removeLayer(_tzBandsLayer);
+      if (_tzLabelHost && _tzLabelHost.parentNode) _tzLabelHost.parentNode.removeChild(_tzLabelHost);
+      _tzLabelHost = null;
+    } catch (e) {}
+    return false;
+  }
+
+  const bandPane = ensureTimezonePane(map);
+  if (!_tzBandsLayer) {
+    const geo = buildTimezoneBandsGeoJson();
+    _tzBandsLayer = L.geoJSON(geo, {
+      pane: bandPane,
+      interactive: false,
+      style: (feat) => {
+        const p = (feat && feat.properties) || {};
+        return {
+          fillColor: p.fill || "rgba(56,189,248,0.2)",
+          color: p.stroke || "rgba(20,24,32,0.72)",
+          weight: 1.15,
+          opacity: 0.85,
+          fillOpacity: 1,
+          lineJoin: "miter"
+        };
+      }
+    });
+  }
+  if (!map.hasLayer(_tzBandsLayer)) _tzBandsLayer.addTo(map);
+  ensureTimezoneLabelHost(map);
+
+  if (!_tzMoveHandler) {
+    let raf = 0;
+    _tzMoveHandler = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        refreshTimezoneViewportLabels();
+      });
+    };
+    map.on("move", _tzMoveHandler);
+    map.on("zoom", _tzMoveHandler);
+    map.on("moveend", _tzMoveHandler);
+    map.on("zoomend", _tzMoveHandler);
+    map.on("resize", _tzMoveHandler);
+  }
+  refreshTimezoneViewportLabels();
+  if (_tzClockTimer) clearInterval(_tzClockTimer);
+  _tzClockTimer = setInterval(tickTimezoneLabelClocks, 1000);
+  return true;
+}
+window.setTimezoneOverlayActive = setTimezoneOverlayActive;
 
 function initVisualChartLayerSelector(mapInstance, layers) {
   const mapContainer = document.getElementById("ntmMapContainer");
@@ -15364,13 +15628,6 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         <svg viewBox="0 0 36 36" width="28" height="28"><path d="M4 24c5-4 10-4 14 0s9 4 14 0" fill="none" stroke="#e0f2fe" stroke-width="2.2" stroke-linecap="round"/><path d="M6 16c4-3 8-3 12 0s8 3 12 0" fill="none" stroke="#7dd3fc" stroke-width="1.8" stroke-linecap="round"/></svg>
       </div>
       <span class="ntm-layer-thumb-label">Ocean</span>
-    </button>
-
-    <button type="button" class="ntm-layer-thumb-btn" data-base="street" title="OpenStreetMap">
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#f1faee 0%,#e9edc9 50%,#a8dadc 100%);">
-        <svg viewBox="0 0 36 36" width="26" height="26"><path d="M6 12h24M6 24h24M14 6v24M24 6v24" stroke="#457b9d" stroke-width="2.2"/></svg>
-      </div>
-      <span class="ntm-layer-thumb-label">Street</span>
     </button>
 
     <button type="button" class="ntm-layer-thumb-btn" data-base="sat" title="World Satellite Imagery">
@@ -15419,7 +15676,19 @@ function initVisualChartLayerSelector(mapInstance, layers) {
       <span class="ntm-layer-thumb-label">Bathymetry</span>
     </button>
 
-    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Layers — ECDIS / Ocean / Buoys / Bathymetry" aria-label="Chart layers including Bathymetry">
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="timezones" title="Time Zones — UTC offset bands with live local time">
+      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(90deg,#c97828 0%,#4f7d3d 20%,#6b7380 40%,#3a6f9a 60%,#b56a82 80%,#c97828 100%);">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true">
+          <rect x="2.5" y="3.5" width="19" height="17" rx="2.2" fill="rgba(15,23,42,0.35)" stroke="#f8fafc" stroke-width="1.2"/>
+          <path d="M7.2 3.5v17M12 3.5v17M16.8 3.5v17" stroke="rgba(15,23,42,0.55)" stroke-width="1.1"/>
+          <circle cx="12" cy="12" r="4.4" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.1"/>
+          <path d="M12 9.4v2.7l1.85 1.15" stroke="#0f172a" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="ntm-layer-thumb-label">Time Zone</span>
+    </button>
+
+    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Layers — ECDIS / Ocean / Buoys / Bathymetry / Time Zone" aria-label="Chart layers">
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#94a3b8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
       </div>
@@ -15431,7 +15700,16 @@ function initVisualChartLayerSelector(mapInstance, layers) {
   mapContainer.appendChild(selector);
 
   let layerPanelLeaveTimer = null;
+  let layerPanelOpenedAt = 0;
+  const isCoarsePointer = () => {
+    try {
+      return window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    } catch (e) {
+      return false;
+    }
+  };
   selector.addEventListener("mouseenter", () => {
+    if (isCoarsePointer()) return; // touch: open only via trigger tap
     if (layerPanelLeaveTimer) {
       clearTimeout(layerPanelLeaveTimer);
       layerPanelLeaveTimer = null;
@@ -15439,6 +15717,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
     selector.classList.remove("collapsed");
   });
   selector.addEventListener("mouseleave", () => {
+    if (isCoarsePointer()) return;
     if (layerPanelLeaveTimer) clearTimeout(layerPanelLeaveTimer);
     layerPanelLeaveTimer = setTimeout(() => {
       selector.classList.add("collapsed");
@@ -15449,6 +15728,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
   let activeBaseKey = "ocean";
   let isBuoysActive = false;
   let isBathymetryActive = false;
+  let isTimezonesActive = false;
   let bathymetryLayerRef = layers.bathymetry || null;
   let owOverlayBusy = false;
 
@@ -15865,13 +16145,34 @@ function initVisualChartLayerSelector(mapInstance, layers) {
   }
 
   // Handle Layer Selector Clicks
+  // Mobile: block the synthetic click that fires after the opening tap (same screen coords → Bathymetry)
+  const blockGhostOpenTap = (e) => {
+    if (Date.now() - layerPanelOpenedAt >= 520) return;
+    const t = e.target && e.target.closest ? e.target.closest(".ntm-layer-thumb-btn") : null;
+    if (t && t.getAttribute("data-trigger") === "1") return; // never block Layers open/close
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+  };
+  selector.addEventListener("click", blockGhostOpenTap, true);
+  selector.addEventListener("pointerup", blockGhostOpenTap, true);
+  selector.addEventListener("touchend", blockGhostOpenTap, true);
+
   selector.querySelectorAll(".ntm-layer-thumb-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      if (selector.classList.contains("collapsed") || btn.getAttribute("data-trigger") === "1") {
+      const isTrigger = btn.getAttribute("data-trigger") === "1";
+      // Collapsed: only the trigger is tappable — open/close the panel
+      if (selector.classList.contains("collapsed") || isTrigger) {
+        const wasCollapsed = selector.classList.contains("collapsed");
         selector.classList.toggle("collapsed");
+        if (wasCollapsed) layerPanelOpenedAt = Date.now();
         return;
       }
+      // Swallow ghost taps that land on Bathymetry/Buoys right after opening (same finger position)
+      if (Date.now() - layerPanelOpenedAt < 520) return;
+
       const baseKey = btn.getAttribute("data-base");
       const overlayKey = btn.getAttribute("data-overlay");
 
@@ -15884,7 +16185,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           if (triggerBtn) {
             triggerBtn.classList.toggle("is-loading", !!on);
             triggerBtn.setAttribute("aria-busy", on ? "true" : "false");
-            triggerBtn.title = on ? "Loading chart layer…" : "Layers — ECDIS / Ocean / Buoys / Bathymetry";
+            triggerBtn.title = on ? "Loading chart layer…" : "Layers — ECDIS / Ocean / Buoys / Bathymetry / Time Zone";
           }
           btn.classList.toggle("is-loading", !!on);
         };
@@ -15929,7 +16230,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
             globeWrap.classList.remove("active");
             mapInstance.setView([globeState.rotLat, globeState.rotLon], mapInstance.getZoom());
           }
-          ["ecdis", "ocean", "street", "sat"].forEach((k) => {
+          ["ecdis", "ocean", "sat"].forEach((k) => {
             if (layers[k] && mapInstance.hasLayer(layers[k])) {
               mapInstance.removeLayer(layers[k]);
             }
@@ -15958,7 +16259,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
             }
           }
         }
-        selector.classList.add("collapsed");
+        if (!isCoarsePointer()) selector.classList.add("collapsed");
       } else if (overlayKey === "buoys" && layers.buoys) {
         isBuoysActive = !isBuoysActive;
         btn.classList.toggle("active-overlay", isBuoysActive);
@@ -16009,8 +16310,18 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           clearTimeout(layerPanelLeaveTimer);
           layerPanelLeaveTimer = null;
         }
-        selector.classList.remove("collapsed");
+        if (!isCoarsePointer()) selector.classList.remove("collapsed");
         toggleOwMapLibreOverlay(overlayKey, btn);
+      } else if (overlayKey === "timezones") {
+        isTimezonesActive = !isTimezonesActive;
+        btn.classList.toggle("active-overlay", isTimezonesActive);
+        try {
+          setTimezoneOverlayActive(mapInstance, isTimezonesActive);
+        } catch (eTz) {
+          console.warn("[SetSail] Time Zone overlay failed", eTz);
+          isTimezonesActive = false;
+          btn.classList.remove("active-overlay");
+        }
       }
     });
   });

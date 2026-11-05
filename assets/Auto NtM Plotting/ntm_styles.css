@@ -8455,6 +8455,83 @@
   display: none !important;
 }
 
+/* Time Zone labels — pinned to bottom of map viewport (follow pan/zoom via JS left%) */
+.ss-tz-label-host {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  height: 40px;
+  z-index: 650;
+  pointer-events: none;
+  overflow: visible;
+}
+.ss-tz-chip {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 64px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.42);
+  pointer-events: none;
+  line-height: 1;
+  font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  border: 1px solid rgba(15, 23, 42, 0.35);
+}
+.ss-tz-chip-time {
+  background: #c5ccd6;
+  color: #111827;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-align: center;
+  padding: 4px 2px 3px;
+  font-variant-numeric: tabular-nums;
+}
+.ss-tz-chip-zone {
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-align: center;
+  padding: 4px 2px 5px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+/* Mobile: open layer panel vertically downward; keep trigger visible at top */
+@media (max-width: 768px) {
+  .ntm-chart-layer-selector {
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    max-width: min(46vw, 168px) !important;
+    gap: 4px !important;
+  }
+  .ntm-chart-layer-selector:not(.collapsed) {
+    max-width: min(46vw, 168px) !important;
+    max-height: min(72vh, 460px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    justify-content: flex-start !important;
+    padding: 6px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Keep trigger pinned at the top so thumbs don't appear under the finger */
+  .ntm-chart-layer-selector .ntm-layer-trigger-btn {
+    order: -1 !important;
+  }
+  .ntm-chart-layer-selector:not(.collapsed) .ntm-layer-trigger-btn {
+    display: flex !important;
+  }
+  .ntm-layer-divider {
+    width: 36px !important;
+    height: 1px !important;
+    margin: 2px 0 !important;
+  }
+}
+
 /* 2. Filter Popover & Sidebar Stacking Fix — never clip or hide behind map */
 .ntm-sidebar-list,
 #ntmSidebar {
