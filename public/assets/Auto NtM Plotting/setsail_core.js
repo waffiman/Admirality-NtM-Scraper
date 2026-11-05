@@ -199,6 +199,14 @@ function persistUserVessel() {
   } catch (e) {}
 }
 
+function isProfileSyncInFlight() {
+  try {
+    if (window.SetSailProfileSync && window.SetSailProfileSync.isSyncing) return true;
+  } catch (e) {}
+  return !!window.__setsailProfileSyncing;
+}
+window.isProfileSyncInFlight = isProfileSyncInFlight;
+
 function getHomeVesselHudLabel() {
   if (!userVessel) return "NOT SET";
   const name = (userVessel.name || "").trim();
@@ -213,17 +221,38 @@ function getHomeVesselHudLabel() {
 function updateHomeVesselHudLabel() {
   const el = document.getElementById("homeVesselHudCoords");
   const pill = document.getElementById("homeVesselHudPill");
+  if (!el) return;
+  const syncing = isProfileSyncInFlight();
+  const hasAuth = !!(typeof getSetSailAuthUser === "function" && getSetSailAuthUser());
   const label = getHomeVesselHudLabel();
-  if (el) {
-    el.textContent = label;
-    el.title = label !== "NOT SET" ? label : "My Vessel — not set";
+  // While cloud profile is pulling on a signed-in device, never flash NOT SET
+  if (syncing && hasAuth && label === "NOT SET") {
+    el.innerHTML =
+      '<span class="home-hud-sync-wrap" aria-live="polite">' +
+        '<span class="home-hud-sync-spinner" aria-hidden="true"></span>' +
+        '<span class="home-hud-sync-text">Syncing…</span>' +
+      "</span>";
+    el.title = "Syncing vessel profile from your account…";
+    if (pill) {
+      pill.classList.add("is-syncing");
+      pill.classList.remove("is-coords-label");
+    }
+    return;
   }
+  el.textContent = label;
+  el.title = label !== "NOT SET" ? label : "My Vessel — not set";
   if (pill) {
+    pill.classList.remove("is-syncing");
     const isCoords = !!(userVessel && !(userVessel.name || "").trim() &&
       typeof isValidVesselLatLon === "function" && isValidVesselLatLon(userVessel.lat, userVessel.lon));
     pill.classList.toggle("is-coords-label", isCoords);
   }
 }
+try {
+  window.addEventListener("setsail-profile-sync", function () {
+    try { updateHomeVesselHudLabel(); } catch (e) {}
+  });
+} catch (eSyncHud) {}
 
 function vesselFormMap(which) {
   if (which === "home") {
@@ -3764,7 +3793,8 @@ function ensureOwnShipPane() {
   try {
     let pane = leafletMap.getPane("ownShipPane");
     if (!pane) pane = leafletMap.createPane("ownShipPane");
-    pane.style.zIndex = 860;
+    // Above routeLine (670) + WPT (780) + notice markers; keep vectors with the ship
+    pane.style.zIndex = 920;
     pane.style.pointerEvents = "auto";
     return "ownShipPane";
   } catch (e) {
@@ -5888,12 +5918,14 @@ function updateOwnShipHdgLine(lat, lon, hdgDeg) {
   const bearing = ((Number(hdgDeg) % 360) + 360) % 360;
   const tip = destinationPointNm(lat, lon, bearing, OWN_SHIP_HDG_LINE_NM);
   const latlngs = [[Number(lat), Number(lon)], tip];
+  const ownPane = typeof ensureOwnShipPane === "function" ? ensureOwnShipPane() : "ownShipPane";
   const style = {
     color: "#0a0a0a",
     weight: 1.15,
     opacity: 0.92,
     lineCap: "butt",
     interactive: false,
+    pane: ownPane,
     className: "own-ship-hdg-line"
   };
   if (_ownShipHdgLine && leafletVesselLayer.hasLayer(_ownShipHdgLine) && _ownShipHdgLine.setLatLngs) {
@@ -6075,12 +6107,14 @@ function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
   const drawPx = truePx > 0 ? Math.min(truePx, maxPx) : 0;
   const rimNm = OWN_SHIP_VECTOR_RIM_PX * npp;
 
+  const ownPane = typeof ensureOwnShipPane === "function" ? ensureOwnShipPane() : "ownShipPane";
   const shaftStyle = {
     color: "#0f172a",
     weight: 2.05,
     opacity: 0.94,
     lineCap: "round",
     interactive: false,
+    pane: ownPane,
     className: "own-ship-time-vector"
   };
   const arrowStyle = {
@@ -6090,6 +6124,7 @@ function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
     lineCap: "round",
     lineJoin: "round",
     interactive: false,
+    pane: ownPane,
     className: "own-ship-time-vector"
   };
   const beakStyle = {
@@ -6099,6 +6134,7 @@ function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
     fillColor: "#0f172a",
     fillOpacity: 0.92,
     interactive: false,
+    pane: ownPane,
     className: "own-ship-time-vector own-ship-cog-beak",
     lineJoin: "round"
   };
@@ -6137,9 +6173,11 @@ function getOwnShipPositionIcon(headingDeg, showVector) {
   const rot = has ? ((Number(headingDeg) % 360) + 360) % 360 : 0;
   // Beam only in SVG — geographic layer draws the 30-min vector / flush arrow
   const beamSvg = `<line class="own-ship-beam" x1="11" y1="24" x2="37" y2="24" stroke="#0f172a" stroke-width="1.45" stroke-linecap="round"/>`;
+  // Opaque ECDIS-cream disc under rings so the red route axis cannot show through CCRP
   const html = `
     <div class="own-ship-wrap own-ship-wrap--pos" style="transform:rotate(${rot}deg);transform-origin:center center;">
       <svg class="own-ship-svg" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="10.2" fill="#f4efe3" fill-opacity="0.96" stroke="none"/>
         ${beamSvg}
         <circle cx="24" cy="24" r="9" fill="none" stroke="#0f172a" stroke-width="1.5"/>
         <circle cx="24" cy="24" r="5.2" fill="none" stroke="#0f172a" stroke-width="1.35"/>
@@ -6174,7 +6212,7 @@ function getOwnShipHullIcon(headingDeg, showVector) {
           C19 51.5 16.5 49.5 16.5 46
           L16.5 24
           C16.5 18 19.5 14 24 14 Z"
-          fill="none" stroke="#0f172a" stroke-width="2.1" stroke-linejoin="round"/>
+          fill="#f4efe3" fill-opacity="0.94" stroke="#0f172a" stroke-width="2.1" stroke-linejoin="round"/>
         <line x1="17.2" y1="44" x2="30.8" y2="44" stroke="#64748b" stroke-width="1.15"/>
         <line x1="24" y1="16" x2="24" y2="50" stroke="#94a3b8" stroke-width="1"/>
       </svg>
@@ -8052,6 +8090,12 @@ function initNtMMap() {
     leafletMap.getContainer().addEventListener("mouseleave", setHudCoordsIdle);
     // Map Right-Click Context Menu (Variation & Sunrise/Sunset Ephemeris)
     initMapContextMenu(leafletMap);
+    // Prefetch IANA timezone polygons for Sun popup + Time Zone layer
+    setTimeout(function () {
+      try {
+        if (typeof loadTimezoneIanaGeoJson === "function") loadTimezoneIanaGeoJson();
+      } catch (eTzPrefetch) {}
+    }, 1800);
     if (typeof syncNdbcCursorTileVisibility === "function") {
       syncNdbcCursorTileVisibility();
     }
@@ -8327,7 +8371,24 @@ function calculateNauticalSunTimes(lat, lon, dateObj) {
   const utRise = calcSolarEvent(true);
   const utSet = calcSolarEvent(false);
   // Standard meridian zone from longitude (Bowditch) — civil TZ may differ by ±1h
-  const tzOffset = Math.round(lon / 15.0);
+  // Prefer IANA offset from loaded timezone polygons when available (political TZ).
+  // Fall back to Bowditch standard meridian only offline / before geo loads.
+  let tzOffset = Math.round(lon / 15.0);
+  let zdStr = "";
+  try {
+    const feats = _tzGeoCache && _tzGeoCache.features;
+    if (feats && feats.length) {
+      for (let i = 0; i < feats.length; i++) {
+        const f = feats[i];
+        if (tzPointInFeature(lon, lat, f)) {
+          const p = f.properties || {};
+          if (Number.isFinite(Number(p.offset))) tzOffset = Number(p.offset);
+          if (p.tzid) zdStr = String(p.tzid);
+          break;
+        }
+      }
+    }
+  } catch (eTzHit) {}
 
   function fmtHours(val) {
     if (typeof val === "string") return val;
@@ -8360,14 +8421,13 @@ function calculateNauticalSunTimes(lat, lon, dateObj) {
     daylightStr = "0h (Polar Night)";
   }
 
-  const tzSign = tzOffset >= 0 ? "+" : "";
-  const tzStr = "UTC" + tzSign + tzOffset;
+  const tzStr = formatTzOffsetLabel(tzOffset);
 
   return {
     tzOffset: tzOffset,
     tzStr: tzStr,
-    zdStr: "",
-    source: "nautical",
+    zdStr: zdStr,
+    source: zdStr ? "iana-poly" : "nautical",
     sunriseUtc: fmtHours(utRise),
     sunsetUtc: fmtHours(utSet),
     sunriseLocal: fmtLocal(utRise, tzOffset),
@@ -8616,12 +8676,32 @@ function initMapContextMenu(map) {
   }
 
   function renderSunView() {
-    // Instant nautical estimate, then upgrade to civil IANA times when online
-    paintSunView(computePositionSolarEphemeris(lat, lon, new Date()));
+    // Prefer civil IANA (Open-Meteo timezone=auto) — political TZ, not 15° meridians.
+    // Show a light "loading" card first; fall back to nautical only if offline/API fails.
+    container.innerHTML =
+      '<div class="ss-ctx-detail ss-ctx-sun-minimal">' +
+        '<div class="ss-ctx-title" style="text-align:center;margin:0 0 6px;">Sun Times</div>' +
+        '<div class="ss-ctx-tz-row" style="justify-content:center;margin-bottom:6px;">' +
+          '<span class="ss-ctx-tz-pill">Resolving IANA zone…</span>' +
+        "</div>" +
+        '<div class="ss-ctx-stat-card" style="text-align:center;padding:10px;">' +
+          '<div class="ss-ctx-stat-lbl">Fetching civil sunrise / sunset</div>' +
+        "</div>" +
+      "</div>";
+    popup.update();
+    const applyNauticalFallback = () => {
+      const n = computePositionSolarEphemeris(lat, lon, new Date());
+      n.zdStr = n.zdStr || "std meridian (offline)";
+      paintSunView(n);
+    };
     if (typeof fetchCivilSunTimes === "function" && navigator.onLine !== false) {
       fetchCivilSunTimes(lat, lon).then((civil) => {
         if (mapContextMenuPopup === popup) paintSunView(civil);
-      }).catch(() => {});
+      }).catch(() => {
+        if (mapContextMenuPopup === popup) applyNauticalFallback();
+      });
+    } else {
+      applyNauticalFallback();
     }
   }
 
@@ -8636,6 +8716,14 @@ try {
     initMapContextMenu(leafletMap);
   }
 } catch (e) {}
+// Warm IANA TZ polygons in background so Sun popup uses political offsets even before the layer is toggled
+try {
+  if (typeof loadTimezoneIanaGeoJson === "function") {
+    setTimeout(function () {
+      try { loadTimezoneIanaGeoJson(); } catch (eWarm) {}
+    }, 2500);
+  }
+} catch (eWarmOuter) {}
 
 
 /**
@@ -15323,32 +15411,44 @@ function createEcdisSimpleBaseLayer() {
 window.createEcdisSimpleBaseLayer = createEcdisSimpleBaseLayer;
 
 /* ==========================================================================
-   Time Zone overlay — colored UTC offset bands + bottom-of-viewport live labels
+   Time Zone overlay — IANA political polygons + bottom-of-viewport live labels
+   Data: assets/data/timezones_iana.geojson (timezone-boundary-builder, simplified)
    ========================================================================== */
 let _tzBandsLayer = null;
 let _tzLabelHost = null;
 let _tzClockTimer = null;
 let _tzMapRef = null;
 let _tzMoveHandler = null;
+let _tzGeoCache = null;
+let _tzGeoPromise = null;
+let _tzWantedOn = false;
+const TZ_GEO_URL = "assets/data/timezones_iana.geojson";
 
 /* Reference palette (nautical TZ atlas): orange → green → grey → blue → pink */
 const TZ_BAND_PALETTE = [
-  { fill: "rgba(232, 154, 72, 0.30)", solid: "#c97828", stroke: "rgba(20, 24, 32, 0.72)" },
-  { fill: "rgba(118, 168, 98, 0.30)", solid: "#4f7d3d", stroke: "rgba(20, 24, 32, 0.72)" },
-  { fill: "rgba(156, 164, 176, 0.30)", solid: "#6b7380", stroke: "rgba(20, 24, 32, 0.72)" },
-  { fill: "rgba(96, 150, 205, 0.30)", solid: "#3a6f9a", stroke: "rgba(20, 24, 32, 0.72)" },
-  { fill: "rgba(214, 148, 168, 0.30)", solid: "#b56a82", stroke: "rgba(20, 24, 32, 0.72)" }
+  { fill: "rgba(232, 154, 72, 0.32)", solid: "#c97828", stroke: "rgba(20, 24, 32, 0.65)" },
+  { fill: "rgba(118, 168, 98, 0.32)", solid: "#4f7d3d", stroke: "rgba(20, 24, 32, 0.65)" },
+  { fill: "rgba(156, 164, 176, 0.32)", solid: "#6b7380", stroke: "rgba(20, 24, 32, 0.65)" },
+  { fill: "rgba(96, 150, 205, 0.32)", solid: "#3a6f9a", stroke: "rgba(20, 24, 32, 0.65)" },
+  { fill: "rgba(214, 148, 168, 0.32)", solid: "#b56a82", stroke: "rgba(20, 24, 32, 0.65)" }
 ];
 
 function tzOffsetColor(offsetH) {
   const o = Number(offsetH) || 0;
-  return TZ_BAND_PALETTE[((o % 5) + 5) % 5];
+  // Stable index across half-hour zones (India +5.5, Nepal +5.75, …)
+  const idx = ((Math.round(o * 4) % 5) + 5) % 5;
+  return TZ_BAND_PALETTE[idx];
 }
 
 function formatTzOffsetLabel(offsetH) {
   const o = Number(offsetH) || 0;
-  if (o === 0) return "UTC±0";
-  return "UTC" + (o > 0 ? "+" : "") + o;
+  if (Math.abs(o) < 1e-9) return "UTC±0";
+  const sign = o > 0 ? "+" : "-";
+  const a = Math.abs(o);
+  const h = Math.floor(a + 1e-9);
+  const m = Math.round((a - h) * 60);
+  if (m) return "UTC" + sign + h + ":" + String(m).padStart(2, "0");
+  return "UTC" + sign + h;
 }
 
 function formatTimeAtUtcOffset(offsetH) {
@@ -15361,57 +15461,59 @@ function formatTimeAtUtcOffset(offsetH) {
   return hh + ":" + mm;
 }
 
-function tzNormLon(lon) {
-  let x = lon;
-  while (x < -180) x += 360;
-  while (x > 180) x -= 360;
-  return x;
-}
-
-function tzBandLonRanges(offsetH) {
-  const o = Number(offsetH) || 0;
-  const west = o * 15 - 7.5;
-  const east = o * 15 + 7.5;
-  const w = tzNormLon(west);
-  const e = tzNormLon(east);
-  if (w <= e) return [[w, e]];
-  // Antimeridian wrap
-  return [[w, 180], [-180, e]];
-}
-
-function buildTimezoneBandsGeoJson() {
-  // Classic nautical chart style: 15° longitude bands for UTC−12 … UTC+14
-  const features = [];
-  for (let o = -12; o <= 14; o++) {
-    const colors = tzOffsetColor(o);
-    const ranges = tzBandLonRanges(o);
-    ranges.forEach((rng) => {
-      const west = rng[0];
-      const east = rng[1];
-      if (east - west < 0.05) return;
-      features.push({
-        type: "Feature",
-        properties: {
-          offset: o,
-          label: formatTzOffsetLabel(o),
-          fill: colors.fill,
-          stroke: colors.stroke,
-          solid: colors.solid
-        },
-        geometry: {
-          type: "Polygon",
-          coordinates: [[
-            [west, -85],
-            [east, -85],
-            [east, 85],
-            [west, 85],
-            [west, -85]
-          ]]
-        }
-      });
-    });
+/** Ray-cast point-in-ring (lon/lat), ring = [[lon,lat],…] */
+function tzPointInRing(lon, lat, ring) {
+  if (!ring || ring.length < 3) return false;
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0];
+    const yi = ring[i][1];
+    const xj = ring[j][0];
+    const yj = ring[j][1];
+    const intersect = ((yi > lat) !== (yj > lat)) &&
+      (lon < (xj - xi) * (lat - yi) / ((yj - yi) || 1e-12) + xi);
+    if (intersect) inside = !inside;
   }
-  return { type: "FeatureCollection", features: features };
+  return inside;
+}
+
+function tzPointInFeature(lon, lat, feat) {
+  const g = feat && feat.geometry;
+  if (!g) return false;
+  const hitPoly = (rings) => {
+    if (!rings || !rings.length) return false;
+    if (!tzPointInRing(lon, lat, rings[0])) return false;
+    for (let h = 1; h < rings.length; h++) {
+      if (tzPointInRing(lon, lat, rings[h])) return false;
+    }
+    return true;
+  };
+  if (g.type === "Polygon") return hitPoly(g.coordinates);
+  if (g.type === "MultiPolygon") {
+    for (let i = 0; i < (g.coordinates || []).length; i++) {
+      if (hitPoly(g.coordinates[i])) return true;
+    }
+  }
+  return false;
+}
+
+function loadTimezoneIanaGeoJson() {
+  if (_tzGeoCache) return Promise.resolve(_tzGeoCache);
+  if (_tzGeoPromise) return _tzGeoPromise;
+  _tzGeoPromise = fetch(TZ_GEO_URL + "?v=5.189", { cache: "force-cache" })
+    .then((r) => {
+      if (!r.ok) throw new Error("TZ geo " + r.status);
+      return r.json();
+    })
+    .then((geo) => {
+      _tzGeoCache = geo;
+      return geo;
+    })
+    .catch((err) => {
+      _tzGeoPromise = null;
+      throw err;
+    });
+  return _tzGeoPromise;
 }
 
 function ensureTimezonePane(map) {
@@ -15442,7 +15544,7 @@ function ensureTimezoneLabelHost(map) {
 }
 
 function refreshTimezoneViewportLabels() {
-  if (!_tzMapRef) return;
+  if (!_tzMapRef || !_tzGeoCache) return;
   const map = _tzMapRef;
   const host = ensureTimezoneLabelHost(map);
   if (!host) return;
@@ -15456,40 +15558,53 @@ function refreshTimezoneViewportLabels() {
     host.innerHTML = "";
     return;
   }
-  const west = bounds.getWest();
-  const east = bounds.getEast();
-  const midLat = (bounds.getSouth() + bounds.getNorth()) / 2;
-  const minLabelGapPx = 52;
-  const chipHalf = 32;
-
-  const visible = [];
-  for (let o = -12; o <= 14; o++) {
-    const ranges = tzBandLonRanges(o);
-    ranges.forEach((rng) => {
-      // Expand by ±360 copies so wrapped world views still hit bands
-      for (let k = -1; k <= 1; k++) {
-        const bandW = rng[0] + k * 360;
-        const bandE = rng[1] + k * 360;
-        const iW = Math.max(west, bandW);
-        const iE = Math.min(east, bandE);
-        if (iE - iW < 0.12) continue;
-        const leftPx = map.latLngToContainerPoint([midLat, iW]).x;
-        const rightPx = map.latLngToContainerPoint([midLat, iE]).x;
-        const widthPx = Math.abs(rightPx - leftPx);
-        if (widthPx < 30) continue;
-        visible.push({
-          offset: o,
-          midPx: (leftPx + rightPx) / 2,
-          widthPx: widthPx,
-          colors: tzOffsetColor(o)
-        });
+  // Sample along the bottom edge of the viewport — labels stay glued to map bottom
+  const bottomY = size.y - 8;
+  const step = Math.max(18, Math.floor(size.x / 48));
+  const spans = new Map(); // key = offset|tzid → {offset,tzid,minPx,maxPx,count}
+  const feats = _tzGeoCache.features || [];
+  for (let x = 4; x < size.x - 4; x += step) {
+    const ll = map.containerPointToLatLng([x, bottomY]);
+    if (!ll) continue;
+    let hit = null;
+    for (let i = 0; i < feats.length; i++) {
+      const f = feats[i];
+      if (tzPointInFeature(ll.lng, ll.lat, f)) {
+        hit = f;
+        break;
       }
-    });
+    }
+    if (!hit) continue;
+    const p = hit.properties || {};
+    const off = Number(p.offset);
+    if (!Number.isFinite(off)) continue;
+    const key = String(off) + "|" + String(p.tzid || "");
+    let s = spans.get(key);
+    if (!s) {
+      s = { offset: off, tzid: p.tzid || "", minPx: x, maxPx: x, count: 0 };
+      spans.set(key, s);
+    } else {
+      s.minPx = Math.min(s.minPx, x);
+      s.maxPx = Math.max(s.maxPx, x);
+    }
+    s.count += 1;
   }
 
-  visible.sort((a, b) => b.widthPx - a.widthPx);
+  const chipHalf = 32;
+  const minLabelGapPx = 54;
+  const candidates = Array.from(spans.values())
+    .filter((s) => (s.maxPx - s.minPx) >= 20 || s.count >= 2)
+    .map((s) => ({
+      offset: s.offset,
+      tzid: s.tzid,
+      midPx: (s.minPx + s.maxPx) / 2,
+      widthPx: Math.max(24, s.maxPx - s.minPx),
+      colors: tzOffsetColor(s.offset)
+    }))
+    .sort((a, b) => b.widthPx - a.widthPx);
+
   const placed = [];
-  visible.forEach((z) => {
+  candidates.forEach((z) => {
     if (z.midPx < chipHalf - 8 || z.midPx > size.x - chipHalf + 8) return;
     if (placed.some((p) => Math.abs(p.midPx - z.midPx) < minLabelGapPx)) return;
     placed.push(z);
@@ -15501,8 +15616,9 @@ function refreshTimezoneViewportLabels() {
     const timeStr = formatTimeAtUtcOffset(z.offset);
     const zoneStr = formatTzOffsetLabel(z.offset);
     const left = Math.round(z.midPx - chipHalf);
+    const title = (z.tzid ? z.tzid + " · " : "") + zoneStr;
     html +=
-      '<div class="ss-tz-chip" data-tz-offset="' + z.offset + '" style="left:' + left + 'px">' +
+      '<div class="ss-tz-chip" data-tz-offset="' + z.offset + '" title="' + title.replace(/"/g, "") + '" style="left:' + left + 'px">' +
         '<div class="ss-tz-chip-time">' + timeStr + "</div>" +
         '<div class="ss-tz-chip-zone" style="background:' + z.colors.solid + '">' + zoneStr + "</div>" +
       "</div>";
@@ -15521,73 +15637,92 @@ function tickTimezoneLabelClocks() {
   } catch (e) {}
 }
 
+function _tzDetachHandlers(map) {
+  if (_tzClockTimer) {
+    clearInterval(_tzClockTimer);
+    _tzClockTimer = null;
+  }
+  if (_tzMoveHandler && map) {
+    map.off("move", _tzMoveHandler);
+    map.off("zoom", _tzMoveHandler);
+    map.off("moveend", _tzMoveHandler);
+    map.off("zoomend", _tzMoveHandler);
+    map.off("resize", _tzMoveHandler);
+    _tzMoveHandler = null;
+  }
+  if (_tzBandsLayer && map && map.hasLayer(_tzBandsLayer)) map.removeLayer(_tzBandsLayer);
+  if (_tzLabelHost && _tzLabelHost.parentNode) _tzLabelHost.parentNode.removeChild(_tzLabelHost);
+  _tzLabelHost = null;
+}
+
 function setTimezoneOverlayActive(map, on) {
   if (!map) return false;
   _tzMapRef = map;
+  _tzWantedOn = !!on;
   if (!on) {
-    try {
-      if (_tzClockTimer) {
-        clearInterval(_tzClockTimer);
-        _tzClockTimer = null;
-      }
-      if (_tzMoveHandler) {
-        map.off("move", _tzMoveHandler);
-        map.off("zoom", _tzMoveHandler);
-        map.off("moveend", _tzMoveHandler);
-        map.off("zoomend", _tzMoveHandler);
-        map.off("resize", _tzMoveHandler);
-        _tzMoveHandler = null;
-      }
-      if (_tzBandsLayer && map.hasLayer(_tzBandsLayer)) map.removeLayer(_tzBandsLayer);
-      if (_tzLabelHost && _tzLabelHost.parentNode) _tzLabelHost.parentNode.removeChild(_tzLabelHost);
-      _tzLabelHost = null;
-    } catch (e) {}
+    try { _tzDetachHandlers(map); } catch (e) {}
     return false;
   }
 
   const bandPane = ensureTimezonePane(map);
-  if (!_tzBandsLayer) {
-    const geo = buildTimezoneBandsGeoJson();
+  const mountLayer = (geo) => {
+    if (!_tzWantedOn || _tzMapRef !== map) return;
+    if (_tzBandsLayer) {
+      try { if (map.hasLayer(_tzBandsLayer)) map.removeLayer(_tzBandsLayer); } catch (eRm) {}
+      _tzBandsLayer = null;
+    }
     _tzBandsLayer = L.geoJSON(geo, {
       pane: bandPane,
       interactive: false,
       style: (feat) => {
         const p = (feat && feat.properties) || {};
+        const c = tzOffsetColor(p.offset);
         return {
-          fillColor: p.fill || "rgba(56,189,248,0.2)",
-          color: p.stroke || "rgba(20,24,32,0.72)",
-          weight: 1.15,
-          opacity: 0.85,
+          fillColor: c.fill,
+          color: c.stroke,
+          weight: 1.05,
+          opacity: 0.8,
           fillOpacity: 1,
-          lineJoin: "miter"
+          lineJoin: "round"
         };
       }
     });
-  }
-  if (!map.hasLayer(_tzBandsLayer)) _tzBandsLayer.addTo(map);
-  ensureTimezoneLabelHost(map);
+    _tzBandsLayer.addTo(map);
+    ensureTimezoneLabelHost(map);
+    if (!_tzMoveHandler) {
+      let raf = 0;
+      _tzMoveHandler = () => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          refreshTimezoneViewportLabels();
+        });
+      };
+      map.on("move", _tzMoveHandler);
+      map.on("zoom", _tzMoveHandler);
+      map.on("moveend", _tzMoveHandler);
+      map.on("zoomend", _tzMoveHandler);
+      map.on("resize", _tzMoveHandler);
+    }
+    refreshTimezoneViewportLabels();
+    if (_tzClockTimer) clearInterval(_tzClockTimer);
+    _tzClockTimer = setInterval(tickTimezoneLabelClocks, 1000);
+  };
 
-  if (!_tzMoveHandler) {
-    let raf = 0;
-    _tzMoveHandler = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        refreshTimezoneViewportLabels();
-      });
-    };
-    map.on("move", _tzMoveHandler);
-    map.on("zoom", _tzMoveHandler);
-    map.on("moveend", _tzMoveHandler);
-    map.on("zoomend", _tzMoveHandler);
-    map.on("resize", _tzMoveHandler);
+  if (_tzGeoCache) {
+    mountLayer(_tzGeoCache);
+    return true;
   }
-  refreshTimezoneViewportLabels();
-  if (_tzClockTimer) clearInterval(_tzClockTimer);
-  _tzClockTimer = setInterval(tickTimezoneLabelClocks, 1000);
+  loadTimezoneIanaGeoJson()
+    .then((geo) => mountLayer(geo))
+    .catch((err) => {
+      console.warn("[SetSail] IANA timezone polygons failed to load", err);
+      _tzWantedOn = false;
+    });
   return true;
 }
 window.setTimezoneOverlayActive = setTimezoneOverlayActive;
+window.loadTimezoneIanaGeoJson = loadTimezoneIanaGeoJson;
 
 function initVisualChartLayerSelector(mapInstance, layers) {
   const mapContainer = document.getElementById("ntmMapContainer");
@@ -17767,8 +17902,11 @@ window.getRouteStrokeWeights = getRouteStrokeWeights;
 
 function getRouteWptPixelSize(zoom) {
   const w = getRouteStrokeWeights(zoom);
-  const px = Math.round(Number(w.wpt) || 12);
-  return Math.max(7, Math.min(16, px));
+  let px = Math.round(Number(w.wpt) || 12);
+  px = Math.max(8, Math.min(16, px));
+  // Even size → integer iconAnchor (odd boxes cause 0.5px left bias in Leaflet DivIcon)
+  if (px % 2) px += 1;
+  return px;
 }
 window.getRouteWptPixelSize = getRouteWptPixelSize;
 
@@ -17780,17 +17918,18 @@ function buildRouteWptDivIcon(titleBit, zoom) {
   const rIn = Math.max(2, box * 0.22);
   const html =
     '<div class="route-wpt-dot" title="Drag ' + String(titleBit || "WPT").replace(/"/g, "") +
-    '" style="width:' + box + "px;height:" + box + "px;margin:0;padding:0;line-height:0;cursor:grab;\">" +
+    '" style="width:' + box + "px;height:" + box + "px;margin:0;padding:0;line-height:0;cursor:grab;box-sizing:border-box;\">" +
       '<svg width="' + box + '" height="' + box + '" viewBox="0 0 ' + box + " " + box +
-      '" style="display:block;overflow:visible" aria-hidden="true">' +
+      '" style="display:block;overflow:visible;margin:0;padding:0" aria-hidden="true">' +
         '<circle cx="' + cx + '" cy="' + cx + '" r="' + rOut +
-        '" fill="rgba(37,99,235,0.08)" stroke="#2563eb" stroke-width="2"/>' +
+        '" fill="rgba(37,99,235,0.14)" stroke="#2563eb" stroke-width="2" vector-effect="non-scaling-stroke"/>' +
         '<circle cx="' + cx + '" cy="' + cx + '" r="' + rIn +
-        '" fill="none" stroke="#2563eb" stroke-width="1.6"/>' +
+        '" fill="#2563eb" stroke="none"/>' +
       "</svg>" +
     "</div>";
   return L.divIcon({
-    className: "leaflet-div-icon route-wpt-div-icon",
+    // Do NOT include default "leaflet-div-icon" — its 1px border shifts the visual centre left
+    className: "route-wpt-div-icon",
     html: html,
     iconSize: [box, box],
     iconAnchor: [cx, cx],

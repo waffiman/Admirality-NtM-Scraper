@@ -191,10 +191,27 @@
     } catch (e2) {}
   }
 
+  var syncInFlight = 0;
+  function setSyncing(on) {
+    if (on) syncInFlight += 1;
+    else syncInFlight = Math.max(0, syncInFlight - 1);
+    try {
+      window.dispatchEvent(
+        new CustomEvent("setsail-profile-sync", {
+          detail: { syncing: syncInFlight > 0, phase: on ? "start" : "done" }
+        })
+      );
+    } catch (eEv) {}
+    try {
+      if (typeof global.updateHomeVesselHudLabel === "function") global.updateHomeVesselHudLabel();
+    } catch (eHud) {}
+  }
+
   async function pull() {
     var token = getToken();
     var user = getAuthUser();
     if (!token || !user) return { ok: false, reason: "no_auth" };
+    setSyncing(true);
     try {
       var r = await fetch(API, {
         method: "GET",
@@ -215,6 +232,8 @@
       return { ok: false, status: r.status, j: j };
     } catch (e) {
       return { ok: false, error: String(e && e.message) };
+    } finally {
+      setSyncing(false);
     }
   }
 
@@ -278,10 +297,21 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
 
+  Object.defineProperty(global, "__setsailProfileSyncing", {
+    configurable: true,
+    get: function () {
+      return syncInFlight > 0;
+    },
+    set: function () {}
+  });
+
   global.SetSailProfileSync = {
     pull: pull,
     push: push,
     schedulePush: schedulePush,
-    collectLocal: collectLocal
+    collectLocal: collectLocal,
+    get isSyncing() {
+      return syncInFlight > 0;
+    }
   };
 })(typeof window !== "undefined" ? window : globalThis);
