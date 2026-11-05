@@ -3536,8 +3536,20 @@ window.isSetSailSignedIn = isSetSailSignedIn;
 function persistActiveRouteToStorage(route) {
   if (!isSetSailSignedIn()) return;
   try {
-    if (route) localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(route));
-    else localStorage.removeItem(ROUTE_STORAGE_KEY);
+    if (route) {
+      if (!route.syncedAt) route.syncedAt = new Date().toISOString();
+      route.updatedAt = Date.now();
+      localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(route));
+      try { localStorage.setItem("setsail_route_v1", JSON.stringify(route)); } catch (e2) {}
+      try {
+        if (window.SetSailProfileSync && typeof window.SetSailProfileSync.schedulePush === "function") {
+          window.SetSailProfileSync.schedulePush();
+        }
+      } catch (ePush) {}
+    } else {
+      localStorage.removeItem(ROUTE_STORAGE_KEY);
+      try { localStorage.removeItem("setsail_route_v1"); } catch (e3) {}
+    }
   } catch (e) {}
 }
 
@@ -3745,6 +3757,21 @@ function ensureRouteWptPane() {
     return "markerPane";
   }
 }
+
+/** Own-ship CCRP above route axis + WPTs so DR icon is never covered by the track. */
+function ensureOwnShipPane() {
+  if (!leafletMap || !leafletMap.createPane) return "markerPane";
+  try {
+    let pane = leafletMap.getPane("ownShipPane");
+    if (!pane) pane = leafletMap.createPane("ownShipPane");
+    pane.style.zIndex = 860;
+    pane.style.pointerEvents = "auto";
+    return "ownShipPane";
+  } catch (e) {
+    return "markerPane";
+  }
+}
+window.ensureOwnShipPane = ensureOwnShipPane;
 
 /** Indices of WPTs to draw as circles — always start/end; sample densified tracks. */
 function pickRouteWptMarkerIndices(count) {
@@ -5177,15 +5204,8 @@ function updateNdbcCursorTile(lat, lon) {
     const hasAny = !!(wKt != null) || !!(cur && cur.ok) || !!(pressureMb != null) || waveHs != null;
     tile.classList.toggle("is-live", hasAny);
     body.innerHTML = renderNdbcCursorChips(windTxt, waveTxt, pressureTxt, airSstTxt, curTxt);
-    if (meta) {
-      const bits = [];
-      if (wKt != null) bits.push(windOm && windOm.source === "open-meteo" ? "OM wind" : "wind");
-      if (pressureSrc) bits.push(pressureSrc);
-      if (cur && cur.ok) bits.push(cur.source === "open-meteo" ? "OM cur" : "cur");
-      meta.textContent = bits.length ? bits.join(" · ") : "Move cursor\u2026";
-      meta.title = bits.join(" · ");
-    }
-    tile.title = hasAny ? ("Model / sparse · " + windTxt + " · " + curTxt) : "";
+    if (meta) { meta.textContent = ""; meta.title = ""; }
+    tile.title = "";
     return;
   }
   tile.classList.add("is-live");
@@ -5214,18 +5234,8 @@ function updateNdbcCursorTile(lat, lon) {
   if (chips[1]) chips[1].title = waveTitle;
   if (chips[2]) chips[2].title = "Pressure " + pressureTxt + (pressureSrc ? " · " + pressureSrc : "");
   if (chips[4]) chips[4].title = cur && cur.ok ? ("Current " + curTxt) : "Ocean current";
-  if (meta) {
-    const nm = s.nearestNm != null ? Math.round(s.nearestNm) : null;
-    const bits = [];
-    if (s.mode === "nearest") bits.push("buoy" + (nm != null ? " " + nm + " NM" : ""));
-    else if (s.mode === "interpolated") bits.push("buoys" + (nm != null ? " " + nm + " NM" : ""));
-    if (pressureSrc && pressureSrc.indexOf("MSL") === 0) bits.push(pressureSrc);
-    if (cur && cur.ok) bits.push("cur");
-    meta.textContent = bits.length ? bits.join(" · ") : "WX";
-    meta.title = (s.sourceNote || "") + (pressureSrc ? " · P " + pressureSrc : "") +
-      (cur && cur.ok ? (" · current " + curTxt) : "");
-  }
-  tile.title = windTitle + " · " + waveTitle + " · " + pressureTxt + (cur && cur.ok ? (" · " + curTxt) : "");
+  if (meta) { meta.textContent = ""; meta.title = ""; }
+  tile.title = "";
 }
 
 window.sampleNdbcAtLatLon = sampleNdbcAtLatLon;
@@ -6443,7 +6453,13 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
     const ll = L.latLng(lat, lon);
 
     // Reuse marker — clearLayers every tick was a major pan/zoom hitch
-    if (_ownShipMarker && leafletVesselLayer.hasLayer(_ownShipMarker)) {
+    const needNewMarker = !(
+      _ownShipMarker &&
+      leafletVesselLayer.hasLayer(_ownShipMarker) &&
+      _ownShipMarker.options &&
+      _ownShipMarker.options.pane === "ownShipPane"
+    );
+    if (!needNewMarker) {
       _ownShipMarker.setLatLng(ll);
       try {
         const nextIcon = getOwnShipMapIcon(hdg);
@@ -6455,9 +6471,11 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
       if (_ownShipMarker) {
         try { leafletVesselLayer.removeLayer(_ownShipMarker); } catch (eRm) {}
       }
+      ensureOwnShipPane();
       _ownShipMarker = L.marker(ll, {
         icon: getOwnShipMapIcon(hdg),
-        zIndexOffset: 1200,
+        pane: "ownShipPane",
+        zIndexOffset: 5000,
         interactive: true
       });
       leafletVesselLayer.addLayer(_ownShipMarker);
@@ -17444,25 +17462,28 @@ function getRouteWptPixelSize(zoom) {
 window.getRouteWptPixelSize = getRouteWptPixelSize;
 
 function buildRouteWptDivIcon(titleBit, zoom) {
+  // SVG double-circle — geometric centre = iconAnchor (avoids CSS border-box left offset)
   const box = getRouteWptPixelSize(zoom);
-  const outer = box;
-  const inner = Math.max(3, Math.round(box * 0.42));
+  const cx = box / 2;
+  const rOut = Math.max(3.5, box / 2 - 1.25);
+  const rIn = Math.max(2, box * 0.22);
   const html =
-    '<div class="route-wpt-dot" title="Drag ' + titleBit + '" style="' +
-    "width:" + outer + "px;height:" + outer + "px;" +
-    "box-sizing:border-box;border-radius:50%;" +
-    "background:transparent;border:2px solid #2563eb;" +
-    "display:flex;align-items:center;justify-content:center;" +
-    "pointer-events:auto;cursor:grab;" +
-    '">' +
-      '<span style="width:' + inner + "px;height:" + inner + "px;border-radius:50%;" +
-      'box-sizing:border-box;border:1.5px solid #2563eb;background:rgba(37,99,235,0.15);display:block;"></span>' +
+    '<div class="route-wpt-dot" title="Drag ' + String(titleBit || "WPT").replace(/"/g, "") +
+    '" style="width:' + box + "px;height:" + box + "px;margin:0;padding:0;line-height:0;cursor:grab;\">" +
+      '<svg width="' + box + '" height="' + box + '" viewBox="0 0 ' + box + " " + box +
+      '" style="display:block;overflow:visible" aria-hidden="true">' +
+        '<circle cx="' + cx + '" cy="' + cx + '" r="' + rOut +
+        '" fill="rgba(37,99,235,0.08)" stroke="#2563eb" stroke-width="2"/>' +
+        '<circle cx="' + cx + '" cy="' + cx + '" r="' + rIn +
+        '" fill="none" stroke="#2563eb" stroke-width="1.6"/>' +
+      "</svg>" +
     "</div>";
   return L.divIcon({
     className: "leaflet-div-icon route-wpt-div-icon",
     html: html,
-    iconSize: [outer, outer],
-    iconAnchor: [outer / 2, outer / 2]
+    iconSize: [box, box],
+    iconAnchor: [cx, cx],
+    popupAnchor: [0, -cx]
   });
 }
 window.buildRouteWptDivIcon = buildRouteWptDivIcon;

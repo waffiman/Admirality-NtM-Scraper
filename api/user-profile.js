@@ -2,9 +2,10 @@
 
 /**
  * Google-keyed cloud profile (vessel / route / wifi AIS).
- * Accepts Google ID token (JWT) OR OAuth access_token (verified via userinfo).
- * Durable store: in-memory + Vercel Blob when BLOB_READ_WRITE_TOKEN is set.
+ * Durable: GitHub Contents (SETSAIL_ANALYTICS_GITHUB_TOKEN) and/or Vercel Blob.
  */
+
+const store = require("../lib/userProfileStore");
 
 function cors(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -26,7 +27,7 @@ function readBody(req) {
     let raw = "";
     req.on("data", (c) => {
       raw += c;
-      if (raw.length > 512000) resolve({});
+      if (raw.length > 900000) resolve({});
     });
     req.on("end", () => {
       try {
@@ -69,55 +70,23 @@ async function decodeBearer(req) {
   const token = m[1].trim();
   if (!token) return null;
 
-  // Prefer JWT id_token (GIS One Tap / credential response)
   const bits = token.split(".");
   if (bits.length >= 2) {
     const payload = b64urlToJson(bits[1]);
     if (payload && payload.sub) {
-      if (payload.exp && Number(payload.exp) * 1000 < Date.now() - 60000) {
-        // expired JWT — still try as access token below
-      } else {
-        return { sub: String(payload.sub), email: payload.email || null, token: token, kind: "id_token" };
+      if (!(payload.exp && Number(payload.exp) * 1000 < Date.now() - 60000)) {
+        return {
+          sub: String(payload.sub),
+          email: payload.email || null,
+          token: token,
+          kind: "id_token"
+        };
       }
     }
   }
-
-  // OAuth popup path stores opaque / non-profile access_token
   return verifyGoogleAccessToken(token);
 }
 
-const mem = globalThis.__setsailProfiles || (globalThis.__setsailProfiles = new Map());
-
-function blobPath(sub) {
-  return "setsail-profiles/" + encodeURIComponent(String(sub)) + ".json";
-}
-
-async function loadProfile(sub) {
-  if (mem.has(sub)) return mem.get(sub);
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) return null;
-  try {
-    const { list } = require("@vercel/blob");
-    const pathname = blobPath(sub);
-    const listed = await list({ prefix: "setsail-profiles/" + encodeURIComponent(String(sub)), token: token, limit: 8 });
-    const hit = (listed && listed.blobs || []).find((b) => b && (b.pathname === pathname || String(b.pathname || "").endsWith(sub + ".json")));
-    const url = hit && hit.url;
-    if (!url) return null;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) return null;
-    const j = await res.json();
-    mem.set(sub, j);
-    return j;
-  } catch (e) {
-    console.warn("[SetSail profile] blob load skipped", e && e.message);
-    return null;
-  }
-}
-
-/**
- * Same-account cloud profile may keep live GPS/DR display coords so devices
- * mirror My Vessel motion. This is NOT a public AIS feed.
- */
 function sanitizeProfileVessel(profile) {
   if (!profile || typeof profile !== "object" || !profile.vessel || typeof profile.vessel !== "object") {
     return profile;
@@ -126,27 +95,6 @@ function sanitizeProfileVessel(profile) {
   if (v.lat != null) v.lat = Number(v.lat);
   if (v.lon != null) v.lon = Number(v.lon);
   profile.vessel = v;
-  return profile;
-}
-
-async function saveProfile(sub, profile) {
-  sanitizeProfileVessel(profile);
-  mem.set(sub, profile);
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) return profile;
-  try {
-    const { put } = require("@vercel/blob");
-    await put(blobPath(sub), JSON.stringify(profile), {
-      access: "public",
-      token: token,
-      addRandomSuffix: false,
-      allowOverwrite: true,
-      contentType: "application/json",
-      cacheControlMaxAge: 0
-    });
-  } catch (e) {
-    console.warn("[SetSail profile] blob save skipped", e && e.message);
-  }
   return profile;
 }
 
@@ -164,15 +112,21 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.method === "GET") {
-    const profile = await loadProfile(auth.sub);
-    res.statusCode = 200;
-    return res.json({
-      ok: true,
-      sub: auth.sub,
-      email: auth.email || null,
-      profile: profile || null,
-      durable: !!process.env.BLOB_READ_WRITE_TOKEN
-    });
+    try {
+      const profile = await store.loadProfile(auth);
+      res.statusCode = 200;
+      return res.json({
+        ok: true,
+        sub: auth.sub,
+        email: auth.email || null,
+        profileKey: store.profileKey(auth),
+        profile: profile || null,
+        durable: store.hasDurableBackend()
+      });
+    } catch (e) {
+      res.statusCode = 500;
+      return res.json({ ok: false, error: "load_failed", message: e && e.message });
+    }
   }
 
   if (req.method === "PUT") {
@@ -182,12 +136,20 @@ module.exports = async function handler(req, res) {
       res.statusCode = 400;
       return res.json({ ok: false, error: "missing_profile" });
     }
-    profile.updatedAt = Date.now();
-    profile.sub = auth.sub;
-    if (auth.email) profile.email = auth.email;
-    await saveProfile(auth.sub, profile);
-    res.statusCode = 200;
-    return res.json({ ok: true, profile: profile, durable: !!process.env.BLOB_READ_WRITE_TOKEN });
+    sanitizeProfileVessel(profile);
+    try {
+      const saved = await store.saveProfile(auth, profile);
+      res.statusCode = 200;
+      return res.json({
+        ok: true,
+        profile: saved.profile,
+        durable: saved.durable,
+        backend: saved.backend
+      });
+    } catch (e) {
+      res.statusCode = 500;
+      return res.json({ ok: false, error: "save_failed", message: e && e.message });
+    }
   }
 
   res.statusCode = 405;

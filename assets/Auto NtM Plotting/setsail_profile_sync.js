@@ -1,14 +1,15 @@
 /**
- * Pull/push vessel + route + Wi‑Fi AIS profile keyed by Google account.
- * Live GPS/DR motion on phone is mirrored to other signed-in devices.
+ * Pull/push vessel + route profile keyed by Google account.
+ * Live GPS on phone mirrors to other signed-in devices; routes merge without wiping.
  */
 (function (global) {
   "use strict";
 
   var API = "/api/user-profile";
-  var PUSH_DEBOUNCE_MS = 1500;
-  var GPS_PUSH_MS = 8000;
+  var PUSH_DEBOUNCE_MS = 1600;
+  var GPS_PUSH_MS = 12000;
   var PULL_MS = 10000;
+  var ROUTE_KEYS = ["setsail_active_route", "setsail_route_v1", "setsail_active_route_v1"];
 
   function getToken() {
     try {
@@ -31,7 +32,6 @@
   }
 
   function sanitizeVesselForCloud(vessel) {
-    // Same-account sync: keep live GPS/DR display + full motion fields
     if (!vessel || typeof vessel !== "object") return vessel;
     try {
       if (typeof global.vesselStateForAccountSync === "function") {
@@ -46,25 +46,45 @@
     return vessel;
   }
 
+  function readLocalRoute() {
+    // Prefer live chart route
+    try {
+      if (global.activeRouteData && Array.isArray(global.activeRouteData.waypoints) &&
+          global.activeRouteData.waypoints.length > 0) {
+        var live = global.activeRouteData;
+        if (!live.syncedAt) live.syncedAt = new Date().toISOString();
+        return live;
+      }
+    } catch (e0) {}
+    for (var i = 0; i < ROUTE_KEYS.length; i++) {
+      try {
+        var raw = localStorage.getItem(ROUTE_KEYS[i]);
+        if (!raw) continue;
+        var r = JSON.parse(raw);
+        if (r && Array.isArray(r.waypoints) && r.waypoints.length > 0) {
+          if (!r.syncedAt) r.syncedAt = r.updatedAt || new Date().toISOString();
+          return r;
+        }
+      } catch (e1) {}
+    }
+    return null;
+  }
+
   function collectLocal() {
     var vessel = null;
-    var route = null;
     var wifi = null;
     var ntmOverrides = null;
     try {
-      // Prefer in-memory live vessel (GPS ticks) over possibly stale localStorage
       if (global.userVessel) vessel = global.userVessel;
       else vessel = JSON.parse(localStorage.getItem("setsail_vessel_state_v2") || "null");
     } catch (e) {}
-    try {
-      route = JSON.parse(localStorage.getItem("setsail_route_v1") || localStorage.getItem("setsail_active_route_v1") || "null");
-    } catch (e2) {}
     try {
       wifi = JSON.parse(localStorage.getItem("setsail_wifi_ais_profile_v1") || "null");
     } catch (e3) {}
     try {
       ntmOverrides = JSON.parse(localStorage.getItem("setsail_ntm_overrides_v1") || "null");
     } catch (e4) {}
+    var route = readLocalRoute();
     return {
       vessel: sanitizeVesselForCloud(vessel),
       route: route,
@@ -74,29 +94,59 @@
     };
   }
 
-  function remoteIsNewer(remoteVessel, localVessel) {
-    if (!remoteVessel) return false;
-    if (!localVessel) return true;
-    var rMs = Date.parse(remoteVessel.syncedAt || remoteVessel.gpsLastFixAt || remoteVessel.updatedAt || 0);
-    var lMs = Date.parse(localVessel.syncedAt || localVessel.gpsLastFixAt || localVessel.updatedAt || 0);
-    if (!isFinite(rMs)) return false;
-    if (!isFinite(lMs)) return true;
-    return rMs > lMs + 500;
+  function vesselStampMs(v) {
+    if (!v) return 0;
+    var n = Date.parse(v.syncedAt || v.gpsLastFixAt || v.aisLastFixAt || v.updatedAt || 0);
+    return isFinite(n) ? n : 0;
+  }
+
+  function remoteVesselIsNewer(remote, local) {
+    if (!remote) return false;
+    if (!local) return true;
+    return vesselStampMs(remote) > vesselStampMs(local) + 400;
+  }
+
+  function applyRemoteRoute(route) {
+    if (!route || !Array.isArray(route.waypoints) || route.waypoints.length < 2) return;
+    try {
+      localStorage.setItem("setsail_active_route", JSON.stringify(route));
+      localStorage.setItem("setsail_route_v1", JSON.stringify(route));
+    } catch (e) {}
+    try {
+      global.activeRouteData = route;
+      if (typeof global.renderRouteOnMap === "function" && global.leafletMap) {
+        // Avoid flyTo on every pull
+        global.renderRouteOnMap(route, false);
+      } else if (typeof global.persistActiveRouteToStorage === "function") {
+        global.persistActiveRouteToStorage(route);
+      }
+      if (typeof global.saveRouteToLibrary === "function") {
+        try { global.saveRouteToLibrary(route); } catch (eLib) {}
+      }
+      if (typeof global.updateRouteMiniWindowUI === "function") {
+        try { global.updateRouteMiniWindowUI(); } catch (eUi) {}
+      }
+    } catch (e2) {}
   }
 
   function applyRemote(profile) {
     if (!profile || typeof profile !== "object") return;
+
     try {
-      if (profile.route) localStorage.setItem("setsail_route_v1", JSON.stringify(profile.route));
       if (profile.wifiAis) localStorage.setItem("setsail_wifi_ais_profile_v1", JSON.stringify(profile.wifiAis));
       if (profile.ntmOverrides) localStorage.setItem("setsail_ntm_overrides_v1", JSON.stringify(profile.ntmOverrides));
     } catch (e) {}
+
+    // Route always merges (even while local GPS watch is active)
+    try {
+      if (profile.route) applyRemoteRoute(profile.route);
+    } catch (eR) {}
 
     if (!profile.vessel) return;
     var remote = profile.vessel;
     var local = global.userVessel || null;
 
-    // Local GPS watch owns motion — only merge AIS identity / static fields from cloud
+    // Local GPS watch owns motion — only merge AIS identity / static fields
     if (global._setsailGpsWatchActive) {
       try {
         var idOnly = {
@@ -116,7 +166,7 @@
       return;
     }
 
-    if (!remoteIsNewer(remote, local)) return;
+    if (!remoteVesselIsNewer(remote, local)) return;
 
     try {
       localStorage.setItem("setsail_vessel_state_v2", JSON.stringify(remote));
@@ -156,7 +206,11 @@
       });
       if (r.ok && j && j.profile) {
         applyRemote(j.profile);
-        return { ok: true, profile: j.profile };
+        return { ok: true, profile: j.profile, durable: j.durable, backend: j.backend };
+      }
+      // Empty cloud profile is still ok — seed via push
+      if (r.ok && j && j.ok && !j.profile) {
+        return { ok: true, profile: null, empty: true, durable: j.durable };
       }
       return { ok: false, status: r.status, j: j };
     } catch (e) {
@@ -182,7 +236,7 @@
       var j = await r.json().catch(function () {
         return {};
       });
-      return { ok: r.ok, status: r.status, j: j };
+      return { ok: r.ok, status: r.status, j: j, durable: j && j.durable, backend: j && j.backend };
     } catch (e) {
       return { ok: false, error: String(e && e.message) };
     }
@@ -204,14 +258,11 @@
       });
     }
     window.addEventListener("setsail-auth-changed", function () {
-      pull().then(function (r) {
-        // After login on a second device: pull cloud, then push local so empty cloud gets seed
-        if (r && r.ok) schedulePush();
-        else schedulePush();
+      pull().then(function () {
+        schedulePush();
       });
     });
 
-    // Phone GPS live → push often; other devices → pull often for motion mirror
     setInterval(function () {
       if (!getAuthUser() || !getToken() || !navigator.onLine) return;
       if (global._setsailGpsWatchActive) push();
