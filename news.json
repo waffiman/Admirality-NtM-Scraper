@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-05T23:26:21Z",
-  "generatedAt": "2026-11-05T23:26:21Z",
+  "updatedAt": "2026-11-06T05:33:32Z",
+  "generatedAt": "2026-11-06T05:33:32Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -11,8 +11,219 @@
     "Hellenic Shipping News",
     "Container News"
   ],
-  "totalArticles": 60,
+  "totalArticles": 70,
   "articles": [
+    {
+      "id": "SN-32DEF5D14D",
+      "title": "Sea-Intelligence: Increased Service Instability",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/sea-intelligence-increased-service-instability/",
+      "publishedAt": "2026-11-06T03:00:18Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Singapore & Malacca Strait",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "summary": "Since the pandemic, we have seen a severe escalation in liner service instability across major deep‑sea trades, caused by increases in blank sailings, services phasing in/out, vessels delayed into the following week, and ad‑hoc extra‑loaders. We measure the instability as the standard deviation of the number of...",
+      "body": "Since the pandemic, we have seen a severe escalation in liner service instability across major deep‑sea trades, caused by increases in blank sailings, services phasing in/out, vessels delayed into the following week, and ad‑hoc extra‑loaders. We measure the instability as the standard deviation of the number of weekly offered services, but express it as the percentage of the average number of services, to account for the change in number of offered services. Figure 1 shows the relative standard deviation of the post‑pandemic period (2020‑2026) in excess of the pre‑pandemic (2013‑2019) baseline. Source: Sea-Intelligence.com, Sunday Spotlight, issue 789 The most profound operational disruptions are currently concentrated on the Asia‑Europe trade lane, with Asia‑North Europe seeing an massive 78% increase in weekly service instability, while Asia‑Mediterranean recorded a 71% increase. The Transpacific network has also reached higher baseline of service instability, although it has absorbed the turbulence slightly better than Asia‑Europe. Service instability on the Asia‑North America East Coast trade lane recorded the smallest comparative growth, increasing by 26%, while Asia‑North America West Coast saw a 48% increase. This increased destabilization of liner networks causes cascading negative consequences for both cargo owners and maritime infrastructure. For shippers, this constant weekly shifting in available capacity makes it incredibly hard to plan their supply chains. More importantly, these unexpected changes create major bottlenecks at the arrival ports. When the number of arriving vessels and containers constantly goes up and down, it greatly increases the risk of sudden port congestion. This congestion can then lead to longer waiting times for vessels, in turn worsening schedule reliability and lengthening transit times. Alan Murphy, CEO, Sea-Intelligence",
+      "takeaways": [
+        "We measure the instability as the standard deviation of the number of weekly offered services, but express it as the percentage of the average number of services, to account for the change in number of offered services.",
+        "Figure 1 shows the relative standard deviation of the post‑pandemic period (2020‑2026) in excess of the pre‑pandemic (2013‑2019) baseline.",
+        "The Transpacific network has also reached higher baseline of service instability, although it has absorbed the turbulence slightly better than Asia‑Europe."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-02726C69E7",
+      "title": "Second term for Arsenio Dominguez backed by IMO Council",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/regulations/second-term-for-arsenio-dominguez-backed-by-imo-council",
+      "publishedAt": "2026-11-06T02:09:16Z",
+      "category": "Shipping & Tankers",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "imo"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt01feb7c8e0218b40/66f65742ad437d46e0cccb93/Mr._Arsenio_Dominguez_-_IMO_Secretary-General_square.jpg?width=720&quality=80&disable=upscale",
+      "summary": "The second term is subject to approval by the IMO Assembly next year",
+      "body": "The second term is subject to approval by the IMO Assembly next year",
+      "takeaways": [
+        "The second term is subject to approval by the IMO Assembly next year",
+        "Operational Area: Global Maritime.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-1FCAB3C3B1",
+      "title": "What the Transpacific boom means for operations",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/what-the-transpacific-boom-means-for-operations/",
+      "publishedAt": "2026-11-06T01:00:39Z",
+      "category": "Ports & Terminals",
+      "region": "US West Coast & Pacific",
+      "regions": [
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "imo"
+      ],
+      "coords": [
+        33.73,
+        -118.26
+      ],
+      "navarea": "XII",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/hillebrand-gori-ggp-base-1592x896.web_.796.448-300x169.jpg",
+      "summary": "The route’s record earnings reflect scarce usable capacity more than strong demand, and that changes the risks facing carriers, ports and shippers. The transpacific has become the most lucrative major container trade in the world.",
+      "body": "CN Premium Articles Top News What the Transpacific boom means for operations November 6, 2026 Facebook Twitter WhatsApp Linkedin Email The route’s record earnings reflect scarce usable capacity more than strong demand, and that changes the risks facing carriers, ports and shippers. The transpacific has become the most lucrative major container trade in the world. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS containerized trade shipping operations Transpacific Facebook Twitter WhatsApp Linkedin Email Previous article Hapag-Lloyd announces export gate-in restrictions at APMT Valencia Next article Sea-Intelligence: Increased Service Instability Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
+      "takeaways": [
+        "The transpacific has become the most lucrative major container trade in the world.",
+        "This content is locked Select a CN Premium Subscription Package To Unlock The Content!",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-6D98F6B62B",
+      "title": "Hapag-Lloyd announces export gate-in restrictions at APMT Valencia",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/hapag-lloyd-announces-export-gate-in-restrictions-at-apmt-valencia/",
+      "publishedAt": "2026-11-05T23:30:38Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "US West Coast & Pacific",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "suez"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2026/09/hapag-lloyd-containers-white-300x150.jpg",
+      "summary": "Hapag-Lloyd has announced temporary restrictions on export container deliveries at APM Terminals Valencia due to ongoing congestion at the Spanish terminal. Effective immediately, the export container acceptance window has been reduced from 14 days to nine days before a vessel’s estimated time of arrival. The...",
+      "body": "Port News Top Right Hapag-Lloyd announces export gate-in restrictions at APMT Valencia November 6, 2026 Facebook Twitter WhatsApp Linkedin Email Hapag-Lloyd has announced temporary restrictions on export container deliveries at APM Terminals Valencia due to ongoing congestion at the Spanish terminal. Effective immediately, the export container acceptance window has been reduced from 14 days to nine days before a vessel’s estimated time of arrival. The restriction will remain in place until further notice. Under the temporary arrangement, APMT Valencia will only accept export containers during the nine-day window. Containers delivered earlier may be rejected, potentially leading to delays and additional transport or storage costs. Hapag-Lloyd has advised customers and hauliers to check the relevant vessel gate opening dates before arranging deliveries to the terminal. The carrier added that exceptions will not be available during the restriction period. Changes to vessel calls will also not be permitted solely to accommodate containers delivered outside the authorised gate-in window. TAGS APM TERMINALS VALENCIA export containers gate-in restrictions Hapag Lloyd port congestion PORT OF VALENCIA Spain Facebook Twitter WhatsApp Linkedin Email Previous article Why Evergreen’s Suez return matters for container supply Next article What the Transpacific boom means for operations Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "Effective immediately, the export container acceptance window has been reduced from 14 days to nine days before a vessel’s estimated time of arrival.",
+        "The restriction will remain in place until further notice.",
+        "Under the temporary arrangement, APMT Valencia will only accept export containers during the nine-day window."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-941444A87C",
+      "title": "Ammonia-Powered Bulk Carrier Takes on Green Fuel in Australian First",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/ammonia-powered-bulk-carrier-takes-on-green-fuel-in-australian-first/",
+      "publishedAt": "2026-11-05T22:49:48Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "China & East Asia",
+        "Australia & Pilbara"
+      ],
+      "tags": [
+        "lng",
+        "container",
+        "port",
+        "singapore",
+        "china"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=900&q=80",
+      "summary": "Australia has completed its first green ammonia bunkering operation involving an ammonia-powered bulk carrier, marking another step toward bringing alternative fuels into commercial shipping. The operation took place earlier this...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network The ammonia-powered bulk carrier Mineral Europa receives green ammonia during a ship-to-ship bunkering operation at the Port of Port Hedland, Australia. Photo: Fortescue Australia has completed its first green ammonia bunkering operation involving an ammonia-powered bulk carrier, marking another step toward bringing alternative fuels into commercial shipping. The operation took place earlier this week at the Port of Port Hedland in Western Australia, where the 300-meter Mineral Europa received certified green ammonia from a bunker vessel before entering port to load iron ore bound for China. The vessel, described as the world’s first ammonia-powered dry bulk carrier, is operated by CMB.TECH and chartered to Australian mining giant Fortescue. According to a joint announcement from Fortescue, Pilbara Ports and CMB.TECH , the ship-to-ship transfer took approximately two hours and was completed successfully at 8:42 a.m. local time. The operation required extensive planning, including vessel compatibility assessments, ammonia dispersion modeling, emergency response procedures, and additional marine support. Port authorities said the trial proceeded only after all safety and operational requirements had been met. The successful bunkering is particularly significant for the iron ore trade, which relies heavily on large bulk carriers transporting Australian exports to Asian steelmakers. Fortescue is seeking to reduce emissions from those voyages by introducing ammonia-powered vessels and developing a reliable supply of green marine fuel. Unlike conventional marine fuels, ammonia contains no carbon and produces no carbon dioxide when used as fuel. Its overall emissions benefits, however, depend on how it is produced and on controlling other emissions, including nitrous oxide. Ammonia’s toxicity also presents additional challenges for ship operators, ports and bunker suppliers. Fortescue Metals CEO Dino Otranto said the operation demonstrated that ammonia bunkering is moving beyond small-scale testing toward practical use in major commercial ports. “Industry has moved ahead of regulation to prove the technology,” Otranto said. He added that policy certainty and long-term fuel purchasing commitments would be needed to support further investment in green ammonia production and bunkering infrastructure. Fortescue has been an early supporter of ammonia as a marine fuel. In 2024, its Fortescue Green Pioneer completed ammonia-fueled propulsion trials in Singapore , demonstrating the technology aboard a converted offshore support vessel. The company has since expanded its commercial shipping ambitions through a partnership with CMB.TECH. In addition to Mineral Europa , Fortescue charters nine other vessels from the shipping group that can be converted to operate on ammonia in the future. The companies also announced an agreement earlier this year covering up to 12 ammonia-capable bulk carriers. The Port Hedland operation builds on an earlier ship-to-ship ammonia transfer trial at nearby Dampier in September 2024 , which helped establish procedures for handling ammonia between vessels. Pilbara Ports is now studying the development of a clean fuel bunkering hub in the region, with the latest trial expected to inform future operations. While ammonia-powered shipping still faces substantial hurdles involving fuel cost, availability, safety and regulatory standards, the Port Hedland operation demonstrates how the fuel could be supplied to large commercial vessels at one of the world’s busiest bulk export ports. The companies did not disclose the quantity of green ammonia transferred during the operation. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! The Australian Maritime Safety Authority (AMSA) has banned a Marshall Islands-flagged bulk carrier from Australian ports for 90 days after inspectors discovered that crew work and rest records had been... The global shipping industry is ordering alternative-fuel vessels faster than ports can develop the infrastructure needed to fuel them, according to a new report from Lloyd’s Register (LR), highlighting a... Orders for alternative-fueled ships are running 57% ahead of last year, with LNG-powered containerships and car carriers driving much of the growth, according to new figures from classification society DNV.... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Join the leading maritime news network The ammonia-powered bulk carrier Mineral Europa receives green ammonia during a ship-to-ship bunkering operation at the Port of Port Hedland, Australia.",
+        "Photo: Fortescue Australia has completed its first green ammonia bunkering operation involving an ammonia-powered bulk carrier, marking another step toward bringing alternative fuels into commercial shipping."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
+    {
+      "id": "SN-12351CC1F4",
+      "title": "Finnish Court Jails Cargo Ship Captain, Crew Member for Baltic Sea Cable Sabotage",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/finnish-court-jails-cargo-ship-captain-crew-member-for-baltic-sea-cable-sabotage/",
+      "publishedAt": "2026-11-05T22:44:20Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Rotterdam & North Sea",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "lng",
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "summary": "A Finnish court on Thursday jailed the Russian captain and an Azerbaijani crew member of the cargo ship Fitburg for aggravated sabotage over damage to two subsea telecommunications cables in the Gulf of Finland last year.",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network A Border Guard helicopter and a Coast Guard patrol ship Turva seize the Fitburg vessel suspected of a subsea cable breach in the Gulf of Finland on 31 December 2025, in this handout picture obtained on January 1, 2026. Finnish Police/Handout via REUTERS HELSINKI, Nov 5 (Reuters) – A Finnish court on Thursday jailed the Russian captain and an Azerbaijani crew member of the cargo ship Fitburg for aggravated sabotage over damage to two subsea telecommunications cables in the Gulf of Finland last year. Finland on December 31 seized the vessel in the Gulf of Finland while it was en route from Russia to Israel, on suspicion that it had damaged cables running from Helsinki to Estonia. The Helsinki District Court sentenced the captain to 3 years and 6 months in prison and the crew member to 2 years and 10 months. It said in a statement the two acted intentionally when the ship dragged an anchor chain and anchor shank along the seabed for around 130 km (81 miles). Finland has intensified efforts to protect its undersea infrastructure following a string of incidents affecting cables and pipelines in the Baltic Sea since 2022, including a vessel-boarding drill it conducted in September. The captain will appeal the verdict, while the crew member has not yet decided whether to do so, their respective lawyers said. The court also ordered the two defendants to jointly pay around €1.9 million ($2.1 million) in damages, and ordered the captain to pay about €85,000 more, the verdict showed. The seized vessel, sailing under Saint Vincent and the Grenadines’ flag, was en route from the Russian port of St Petersburg to Israel at the time of the incident. The ship has since been released. The defendants, who have remained in Finland subject to travel bans, have denied any wrongdoing and have challenged Finland’s jurisdiction in the case. The 14 crew members of the vessel were nationals of Russia, Georgia, Kazakhstan and Azerbaijan, investigators have said. ($1 = 0.8880 euros) (Reporting by Essi Lehto and Elviira Luoma, editing by Terje Solsvik, Anna Ringstrom and Xevi Fontdegloria) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Norway has detained a Chinese-owned heavy-lift vessel sanctioned for its role in delivering equipment to Russia’s Arctic LNG 2 project, in what appears to be the first known detention in the Arctic of a Chinese vessel linked to Russia’s shadow fleet. A Greek container ship has sunk after being hit by naval drones off Bulgaria on Wednesday, the Bulgarian government said, in the latest of a series of strikes in the western Black Sea this month that have raised concerns about the widening scope of Russia's war in Ukraine. Russia expects to begin regular year-round eastbound shipping along the Northern Sea Route in early 2027, as additional nuclear icebreaker capacity, newer ice-class LNG carriers and pressure to redirect energy exports toward Asia bring the long-delayed ambition closer to reality. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Finland on December 31 seized the vessel in the Gulf of Finland while it was en route from Russia to Israel, on suspicion that it had damaged cables running from Helsinki to Estonia.",
+        "The Helsinki District Court sentenced the captain to 3 years and 6 months in prison and the crew member to 2 years and 10 months."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
     {
       "id": "SN-FBBAC0C2A6",
       "title": "Seven Shadow Fleet Tankers Spoof AIS to Hide Novorossiysk Voyages",
@@ -404,11 +615,45 @@
       "navarea": "IX",
       "image": "https://container-news.com/wp-content/uploads/2026/09/evergreenline_lg-300x86.jpg",
       "summary": "Evergreen’s first transits add little tonnage. Their importance lies in what they bring closer: the release of millions of TEU into a market already bracing for a wave of new ships.",
-      "body": "CN Premium Articles Top News Why Evergreen’s Suez return matters for container supply November 6, 2026 Facebook Twitter WhatsApp Linkedin Email Evergreen’s first transits add little tonnage. Their importance lies in what they bring closer: the release of millions of TEU into a market already bracing for a wave of new ships. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS EVERGREEN Red Sea SUEZ Facebook Twitter WhatsApp Linkedin Email Previous article SFL reports higher quarterly profit as charter backlog reaches US$5 billion Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
+      "body": "CN Premium Articles Top News Why Evergreen’s Suez return matters for container supply November 6, 2026 Facebook Twitter WhatsApp Linkedin Email Evergreen’s first transits add little tonnage. Their importance lies in what they bring closer: the release of millions of TEU into a market already bracing for a wave of new ships. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS EVERGREEN Red Sea SUEZ Facebook Twitter WhatsApp Linkedin Email Previous article SFL reports higher quarterly profit as charter backlog reaches US$5 billion Next article Hapag-Lloyd announces export gate-in restrictions at APMT Valencia Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
       "takeaways": [
         "CN Premium Articles Top News Why Evergreen’s Suez return matters for container supply November 6, 2026 Facebook Twitter WhatsApp Linkedin Email Evergreen’s first transits add little tonnage.",
         "Their importance lies in what they bring closer: the release of millions of TEU into a market already bracing for a wave of new ships.",
         "This content is locked Select a CN Premium Subscription Package To Unlock The Content!"
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-10D115719E",
+      "title": "Arc Begins Battery-Electric Conversion of Long Beach Harbor Tug",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/arc-begins-batteryelectric-conversion-544186",
+      "publishedAt": "2026-11-05T21:31:11Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "port",
+        "shipyard"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://images.marinelink.com/images/maritime/w150/pmg-174875.jpg",
+      "summary": "Arc, a marine technology company, has begun engineering the battery-electric conversion of Harbor Sentinel, a 50-foot harbor tug owned and operated by Pacific Maritime Group (PMG). Supported by funding from the Port of Long Beach through its Technology Advancement Program (TAP) and SWIFT Program…",
+      "body": "Arc Begins Battery-Electric Conversion of Long Beach Harbor Tug Maritime Activity Reports, Inc. November 5, 2026 © PMG Arc, a marine technology company, has begun engineering the battery-electric conversion of Harbor Sentinel, a 50-foot harbor tug owned and operated by Pacific Maritime Group (PMG). Supported by funding from the Port of Long Beach through its Technology Advancement Program (TAP) and SWIFT Program, along with a Volkswagen Environmental Mitigation Trust grant administered by the Bay Area Air Quality Management District, the project will replace the tug’s twin diesel engines with an Arc electric powertrain. Naval architecture firm Glosten is leading vessel engineering. Following commissioning, Harbor Sentinel will return to work from PMG’s Long Beach terminal for a 12-month demonstration. The Harbor Sentinel joined PMG’s harbor fleet in 2023. The tug currently runs on two Cummins KT19 diesel engines producing 950 horsepower and carries 8,900 gallons of fuel. Its work includes moving barges and supporting construction and shipyard operations. In converting to electric power, the tug joins other efforts by the California Air Resources Board (CARB) to improve the air quality in California. Glosten completed a feasibility study and hull scan before engineering began. The firm is now adapting the vessel and designing onboard systems to meet applicable U.S. Coast Guard Subchapter M requirements. PMG will remove both diesel engines and install an integrated electric powertrain tailored to the existing vessel. The system includes a battery bank targeting 2 MWh of usable energy, electric motors and drivetrain, power electronics for the vessel’s existing AC equipment, updated helm controls and captain displays, and onboard charging with a DC fast-charge inlet. Telematics will support 24/7 remote monitoring. To accommodate the system, PMG in-house will widen the Sentinel 3.5’ and build a new deck, midbody, and pilothouse. Arc will integrate, commission and test the system, then support PMG’s crew on site and remotely after the tug returns to service. Arc will also prepare the technical documentation required for Coast Guard review of its systems and components. The Port of Long Beach’s Technology Advancement Program supports demonstrations of emerging technologies on working port equipment as part of the San Pedro Bay Ports Clean Air Action Plan. During the 12-month demonstration, Arc will collect data on performance, operations and charging, report results to the Port quarterly, and deliver a final report evaluating the technology and its potential for broader commercial adoption. This project compliments other conversion projects in the Port of Los Angeles. Through the Harbor Sentinel conversion, Arc and Pacific Maritime Group aim to demonstrate the technical and economic feasibility of repowering existing commercial vessels with electric propulsion systems.",
+      "takeaways": [
+        "Arc Begins Battery-Electric Conversion of Long Beach Harbor Tug Maritime Activity Reports, Inc.",
+        "November 5, 2026 © PMG Arc, a marine technology company, has begun engineering the battery-electric conversion of Harbor Sentinel, a 50-foot harbor tug owned and operated by Pacific Maritime Group (PMG).",
+        "Naval architecture firm Glosten is leading vessel engineering."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -486,39 +731,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-7DDF838CA8",
-      "title": "Brazilian builds boat from rubbish to collect more rubbish",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/brazilian-builds-boat-from-rubbish-to-collect-more-rubbish/",
-      "publishedAt": "2026-11-05T20:17:00Z",
-      "category": "Weather & Cyclones",
-      "region": "Brazil & South Atlantic",
-      "regions": [
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        -23.96,
-        -46.33
-      ],
-      "navarea": "V",
-      "image": "https://splash247.com/wp-content/uploads/2026/11/FridayRubbishBoat-300x178.jpg",
-      "summary": "A former Brazilian ocean canoeing champion has taken recycling to a floating extreme, constructing a boat from 230 discarded plastic containers so he can collect even more rubbish from the sea. Marcos Arnhold spent two months building the unusual craft in Guaratuba, southern Brazil, using 125 two-litre plastic...",
-      "body": "Americas Environment Brazilian builds boat from rubbish to collect more rubbish Sam Chambers November 6, 2026 0 3 1 minute read A former Brazilian ocean canoeing champion has taken recycling to a floating extreme, constructing a boat from 230 discarded plastic containers so he can collect even more rubbish from the sea. Marcos Arnhold spent two months building the unusual craft in Guaratuba, southern Brazil, using 125 two-litre plastic bottles, 105 five-litre disinfectant containers and a metal roof rack salvaged from an old Volkswagen Kombi. The homemade vessel is destined for Guaratuba Bay and its surrounding mangroves, where Arnhold plans to collect discarded rubbish for delivery to a municipal recycling centre. The former athlete, who won Brazil’s national ocean canoeing championship in 2002, told local newspaper JB Litoral that initial flotation and stability tests have exceeded expectations. The vessel currently has a 6.5 hp petrol engine, although Arnhold hopes eventually to add a sail and switch to electric propulsion. Friends donated bottles, while local sponsors helped finance the engine and trailer. Applauding the initiative, Graeme Somerville-Ryan, the founder of Eyesea, told Splash: “Never underestimate the endeavor, endurance, and effort of good people wanting to change the world. He should be celebrated and supported. But we know ocean and coastal pollution is an industrial-sized problem, and we need industrial solutions. This is where shipping and maritime people can, and are, making a difference.” Eyesea is a maritime environmental non-profit that uses crowdsourced photographs, geolocation data and satellite technology to map marine pollution and help coordinate targeted clean-up efforts worldwide. Tags Brazil Sam Chambers November 6, 2026 0 3 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "The homemade vessel is destined for Guaratuba Bay and its surrounding mangroves, where Arnhold plans to collect discarded rubbish for delivery to a municipal recycling centre.",
-        "The former athlete, who won Brazil’s national ocean canoeing championship in 2002, told local newspaper JB Litoral that initial flotation and stability tests have exceeded expectations.",
-        "The vessel currently has a 6.5 hp petrol engine, although Arnhold hopes eventually to add a sail and switch to electric propulsion."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-4996D2BEB1",
       "title": "Explainer: How Africa’s ports are diverging",
       "source": "Container News",
@@ -587,6 +799,71 @@
       "readMinutes": 5
     },
     {
+      "id": "SN-CBE3C0BE6E",
+      "title": "General Dynamics Mission Systems Awarded $15m MEDUSA Contract Modification",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/general-dynamics-mission-systems-awarded-544189",
+      "publishedAt": "2026-11-05T19:19:14Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://images.marinelink.com/images/maritime/w150/general-dynamics-mission-systems-174874.jpg",
+      "summary": "General Dynamics Mission Systems announced it was awarded a $15 million contract modification to exercise options under a previously awarded contract for the Mining Expendable Delivery Unmanned Submarine Asset (MEDUSA).Building on the prototype…",
+      "body": "General Dynamics Mission Systems Awarded $15m MEDUSA Contract Modification Maritime Activity Reports, Inc. November 5, 2026 © General Dynamics Mission Systems General Dynamics Mission Systems announced it was awarded a $15 million contract modification to exercise options under a previously awarded contract for the Mining Expendable Delivery Unmanned Submarine Asset (MEDUSA). Building on the prototype, software and engineering work advanced under the July contract modification, this follow-on award continues MEDUSA's maturation and expands the program’s support infrastructure. MEDUSA is a submarine-launched delivery system that uses an expendable unmanned underwater vehicle (UUV) to deploy diverse payloads with precision. Purpose-built to meet the U.S. Navy's requirements for long-range offensive mining capability, the system offers flexibility to host additional payloads across a range of maritime missions. Work began in September 2026 and will continue through February 2028 at General Dynamics facilities in Quincy and Taunton, Massachusetts. The Naval Sea Systems Command, Washington Navy Yard, District of Columbia, is the contracting activity. General Dynamics has invested in its facilities and staff to support the growth of its UUV centers of excellence and advance undersea programs. These include the Center of Excellence for Research and Development, Prototyping, and Offshore Test in Quincy and the UUV Manufacturing and Assembly Center of Excellence in Taunton. Together, these sites provide an integrated path from concept through production. The Quincy facility supports rapid prototyping and in-water testing, while the Taunton facility provides the advanced manufacturing capacity to transition mature designs toward full-rate production. Alongside these investments, General Dynamics is working with suppliers to strengthen the industrial base and expand production capacity to meet the U.S. Navy’s future demands.",
+      "takeaways": [
+        "General Dynamics Mission Systems Awarded $15m MEDUSA Contract Modification Maritime Activity Reports, Inc.",
+        "Building on the prototype, software and engineering work advanced under the July contract modification, this follow-on award continues MEDUSA's maturation and expands the program’s support infrastructure.",
+        "MEDUSA is a submarine-launched delivery system that uses an expendable unmanned underwater vehicle (UUV) to deploy diverse payloads with precision."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A35095B803",
+      "title": "Katsa Expands Capacity With New Assembly Plant",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/katsa-expands-capacity-new-assembly-plant-544188",
+      "publishedAt": "2026-11-05T19:14:58Z",
+      "category": "Ports & Terminals",
+      "region": "Baltic Sea & Northern Europe",
+      "regions": [
+        "Baltic Sea & Northern Europe",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        57.5,
+        19.5
+      ],
+      "navarea": "I",
+      "image": "https://images.marinelink.com/images/maritime/w150/overhead-view-of-katsas-new-174873.jpeg",
+      "summary": "Twin Disc, Inc. subsidiary Katsa announced that it is expanding its capacity with a 54,000-square-foot gearbox assembly facility and warehouse in Pirkkala, Finland, in response to a double-digit percentage year-over-year increase in demand.The new plant…",
+      "body": "Katsa Expands Capacity With New Assembly Plant Maritime Activity Reports, Inc. November 5, 2026 Overhead view of Katsa's new 54,000-square-foot gearbox assembly facility and warehouse that's currently under construction in Pirkkala, Finland. © Katsa Twin Disc, Inc. subsidiary Katsa announced that it is expanding its capacity with a 54,000-square-foot gearbox assembly facility and warehouse in Pirkkala, Finland, in response to a double-digit percentage year-over-year increase in demand. The new plant, expected to be fully operational by May 2027, brings together gearbox assembly, testing and painting under one roof. The unified design will streamline operations by reducing material handling steps and maximizing production flow. In addition, a dedicated warehouse will support efficient inbound and outbound logistics for components from suppliers and from Katsa’s nearby Tampere manufacturing plant and provide on-site storage. Katsas growth is driven by demand from multiple industries, including defense, industrial power generation and heavy equipment. While Katsa does not supply gearboxes directly to data centers, it provides components to major engine manufacturers who design and install backup power systems for these facilities. The company is currently adding 40 employees at its manufacturing operations and its two existing assembly locations in Tampere and will transition 25 experienced workers to the new facility in Pirkkala. By June 2027, Katsa expects to have a total workforce of approximately 250 employees. The site will feature a new 20-ton overhead crane-doubling the lifting capacity of Katsa's current assembly operation-and will enable the company to assemble and test larger industrial gearboxes. The facility will also include a renewable energy heating and cooling system. Ten geothermal wells, each about 1,150 feet deep, will provide approximately 98% of the building's heating and cooling needs. Construction recently reached a major milestone with the completion of the building's roof. To celebrate, Katsa hosted a traditional Finnish harjakaiset (topping off) ceremony.",
+      "takeaways": [
+        "Katsa Expands Capacity With New Assembly Plant Maritime Activity Reports, Inc.",
+        "November 5, 2026 Overhead view of Katsa's new 54,000-square-foot gearbox assembly facility and warehouse that's currently under construction in Pirkkala, Finland.",
+        "The new plant, expected to be fully operational by May 2027, brings together gearbox assembly, testing and painting under one roof."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
       "id": "SN-752C08EC29",
       "title": "US-sanctioned ships dropped from Iran's PGSA blacklist",
       "source": "Seatrade Maritime",
@@ -618,6 +895,40 @@
         "LPG carriers removed from PGSA non-compliance list as UKMTO reports Hormuz tanker strike.",
         "Operational Area: Strait of Hormuz & Persian Gulf, Red Sea & Bab el-Mandeb.",
         "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-4AC572240A",
+      "title": "CM Energy Contributes to ASSO Cable Lay Project",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/cm-energy-contributes-asso-cable-lay-544187",
+      "publishedAt": "2026-11-05T19:04:17Z",
+      "category": "Ports & Terminals",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "China & East Asia"
+      ],
+      "tags": [
+        "port",
+        "china"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://images.marinelink.com/images/maritime/w150/cm-energy-174872.png",
+      "summary": "CM Energy is strengthening its engagement in the European offshore wind market through an ongoing integrated cable-lay installation for ASSO Subsea, an international subsea contractor that specializes in submarine cable installation, protection…",
+      "body": "CM Energy Contributes to ASSO Cable Lay Project Maritime Activity Reports, Inc. November 5, 2026 © CM Energy CM Energy is strengthening its engagement in the European offshore wind market through an ongoing integrated cable-lay installation for ASSO Subsea, an international subsea contractor that specializes in submarine cable installation, protection and repair. The contract comprises an integrated package of cable-handling and associated marine equipment for a new vessel. Engineering and manufacturing activities are progressing within CM Energy's own facilities across China, with elements of the project engaging the European supply chain. In September 2026, CM Energy opened an office in Delft, the Netherlands, as its European business hub, further reinforcing its commitment to supporting the European offshore market through closer customer relationships and local industry engagement. As investment in Europe's fixed-bottom offshore wind infrastructure continues, CM Energy intends to build on its current project activity and develop long-term relationships with vessel owners, offshore contractors and specialist suppliers across the region.",
+      "takeaways": [
+        "CM Energy Contributes to ASSO Cable Lay Project Maritime Activity Reports, Inc.",
+        "The contract comprises an integrated package of cable-handling and associated marine equipment for a new vessel.",
+        "Engineering and manufacturing activities are progressing within CM Energy's own facilities across China, with elements of the project engaging the European supply chain."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -691,6 +1002,44 @@
       "readMinutes": 8
     },
     {
+      "id": "SN-C5E247FF68",
+      "title": "Dominguez gets nod for second term at IMO helm",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/dominguez-gets-nod-for-second-term-at-imo-helm/",
+      "publishedAt": "2026-11-05T18:17:58Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Red Sea & Bab el-Mandeb",
+        "Suez Canal & Eastern Med"
+      ],
+      "tags": [
+        "hormuz",
+        "red sea",
+        "panama",
+        "safety",
+        "imo"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://splash247.com/wp-content/uploads/2026/11/Arsenio-Dominguez-IMO-300x180.jpg",
+      "summary": "Arsenio Dominguez is set to remain at the helm of the International Maritime Organization (IMO) until the end of 2031 after the UN shipping agency’s Council backed his appointment for another four-year term. The 40-member Council endorsed the Panamanian’s extension during its 138th session in London, with the...",
+      "body": "Operations Regulatory Dominguez gets nod for second term at IMO helm Adis Ajdin November 6, 2026 0 378 1 minute read IMO IMO Arsenio Dominguez is set to remain at the helm of the International Maritime Organization (IMO) until the end of 2031 after the UN shipping agency’s Council backed his appointment for another four-year term. The 40-member Council endorsed the Panamanian’s extension during its 138th session in London, with the decision still requiring formal approval from the IMO Assembly when it meets in late 2027. If approved, Dominguez will serve a second term from January 1, 2028, to December 31, 2031, extending his leadership of the world’s maritime regulator during a period of mounting challenges over shipping decarbonisation and maritime security. Dominguez, who took office in January 2024, has spent much of his first term navigating increasingly divided positions among member states over the IMO’s Net-Zero Framework, which aims to introduce a global marine fuel standard and emissions pricing mechanism. The framework, agreed in principle in April 2025, suffered a major setback last October when governments voted to delay its adoption by a year following strong opposition led by the United States and Saudi Arabia. Efforts to revive the agreement have continued throughout 2026, with negotiations set to culminate in another critical round of talks later this month. The Marine Environment Protection Committee meets from November 30 to December 3, followed by a planned extraordinary session on December 4 to revisit the framework’s adoption. The IMO has also faced mounting pressure over the safety of commercial shipping amid continuing attacks and disruptions in the Strait of Hormuz, Red Sea and Black Sea, issues that feature on the agenda of this week’s Council meeting. Dominguez, the IMO’s tenth secretary-general, previously served as director of its Marine Environment Division, administrative director and chief of staff. He also represented Panama at the organisation and chaired its Marine Environment Protection Committee. He succeeded South Korea’s Kitack Lim in January 2024 after securing the Council’s backing in July 2023 and subsequent Assembly approval. Adis Ajdin November 6, 2026 0 378 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The 40-member Council endorsed the Panamanian’s extension during its 138th session in London, with the decision still requiring formal approval from the IMO Assembly when it meets in late 2027.",
+        "The framework, agreed in principle in April 2025, suffered a major setback last October when governments voted to delay its adoption by a year following strong opposition led by the United States and Saudi Arabia.",
+        "Efforts to revive the agreement have continued throughout 2026, with negotiations set to culminate in another critical round of talks later this month."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
       "id": "SN-E54EA7DE5D",
       "title": "India joins ISF Verify initiative for digital seafarer certification",
       "source": "Container News",
@@ -721,6 +1070,212 @@
         "India has joined the ISF Verify initiative, marking a significant step towards the wider adoption of digital seafarer certification across the global shipping industry.",
         "The agreement brings together India’s Directorate General of Maritime Administration (DGMA), the International Chamber of Shipping (ICS) and Lloyd’s Register OneOcean (LROO).",
         "India supplies approximately 312,000 seafarers, making it the world’s second-largest seafarer supply country, according to the ICS/BIMCO Seafarer Workforce Report 2026."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-542DBDD277",
+      "title": "Singapore, Norway Launch Call for Green Shipping Research Grants",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/singapore-norway-launch-call-green-544177",
+      "publishedAt": "2026-11-05T17:52:32Z",
+      "category": "Weather & Cyclones",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port",
+        "singapore",
+        "safety",
+        "bunker",
+        "autonomous"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://images.marinelink.com/images/maritime/w150/adobe-stocktravel-man-174871.jpg",
+      "summary": "The Maritime and Port Authority of Singapore (MPA), the Research Council of Norway (RCN) and the Singapore Maritime Institute (SMI) have launched a joint research grant call to develop solutions to support the decarbonization of international…",
+      "body": "Singapore, Norway Launch Call for Green Shipping Research Grants Maritime Activity Reports, Inc. November 5, 2026 © Adobe Stock/Travel man The Maritime and Port Authority of Singapore (MPA), the Research Council of Norway (RCN) and the Singapore Maritime Institute (SMI) have launched a joint research grant call to develop solutions to support the decarbonization of international shipping. The joint grant call brings together the research, technology and industry capabilities of Singapore’s and Norway’s maritime innovation ecosystems to address shared technological and operational challenges and develop solutions applicable across international shipping. The grant call builds on the MPA-RCN Memorandum of Understanding signed in April 2024 on maritime research, development, education and training. The grant call will focus on three areas: Alternative fuels and energy infrastructure: Improving the safety and handling of alternative marine fuels, developing bunkering and fuel storage technologies, and advancing charging infrastructure for electric vessels. Vessel energy efficiency and emissions reduction: Developing technologies to improve vessel performance, optimize onboard energy consumption and reduce fuel use. Digitalization and greener shipping operations: Advancing voyage optimization, just-in-time arrivals, autonomous operations and ship-port data exchange to improve operational efficiency and reduce emissions. SMI will provide up to USD$2.1 million (S$2.7 million) for Singapore research partners, while RCN will make available up to USD$2.15 million (NOK 20 million) for Norwegian research partners. Each proposal must involve research institutions and industry partners from both countries to ensure that the research addresses practical industry needs. Selected projects may receive funding for up to four years. This is the third Singapore–Norway joint research grant call, following earlier calls in 2015 and 2018 which supported four research projects in maritime energy efficiency, emissions reduction and emerging technologies. Applications open on December 2, 2026 and close on January 20, 2027. Further information, including application requirements and the submission process, is available here .",
+      "takeaways": [
+        "Singapore, Norway Launch Call for Green Shipping Research Grants Maritime Activity Reports, Inc.",
+        "The grant call builds on the MPA-RCN Memorandum of Understanding signed in April 2024 on maritime research, development, education and training.",
+        "Vessel energy efficiency and emissions reduction: Developing technologies to improve vessel performance, optimize onboard energy consumption and reduce fuel use."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-91BD8FD79B",
+      "title": "Ukraine Renews Attacks on Russian Oil Refineries",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/ukraine-renews-attacks-russian-oil-544183",
+      "publishedAt": "2026-11-05T17:42:24Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "US East Coast & New York",
+      "regions": [
+        "US East Coast & New York",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "tanker",
+        "port"
+      ],
+      "coords": [
+        40.5,
+        -73.95
+      ],
+      "navarea": "IV",
+      "image": "https://images.marinelink.com/images/maritime/w150/adobe-stockgoaerials-174868.jpeg",
+      "summary": "Ukraine's renewed attacks on Russian oil refineries add to Moscow's difficulty in addressing domestic fuel shortages while it ships diesel to international markets under an export deal with US President Donald Trump.The Ryazan oil refinery, one of Russia's largest…",
+      "body": "Ukraine Renews Attacks on Russian Oil Refineries Maritime Activity Reports, Inc. November 5, 2026 © Adobe Stock/GoAerials Ukraine's renewed attacks on Russian oil refineries add to Moscow's difficulty in addressing domestic fuel shortages while it ships diesel to international markets under an export deal with US President Donald Trump. The Ryazan oil refinery, one of Russia's largest, appeared to have come under attack as part of a large drone strike overnight on industrial sites in the city, southeast of Moscow, according to a Reuters video analysis. If confirmed, it would be the second refinery to be hit this week following an attack on the Yaroslavl plant, northeast of Moscow, overnight on Monday, marking the breakdown of a pause in strikes. Ukraine's strikes on oil refineries this year forced large amounts of processing capacity in western Russia offline, causing fuel shortages that meant Moscow had to enforce fuel export bans from April onwards. A ban on diesel exports has been lifted in part and the US struck the deal in October with the Kremlin to resume diesel exports to international markets when Trump was seeking to calm diesel prices ahead of the midterm elections on November 3, which Trump's Republican Party lost. The city of Ryazan had restored power supply earlier on Thursday as fires at the unnamed industrial sites were either contained or put out, the local governor said on social media. US-RUSSIA DIESEL CARGOES ARE IN FOCUS At least six Russian diesel cargoes have broadcast that they plan transatlantic voyages, shipping data from Kpler and LSEG show, while two cargoes appeared to have changed course after being previously bound for the US Atlantic coast. No Russian diesel cargo has arrived in the US since the deal, the data show. The first observed US-bound Russian shipment is expected to arrive in New York this weekend, but regulatory, legislative and sanctions concerns mean that its discharge is not guaranteed, Kpler analyst Matt Smith said. \"These are commercial loadings, so naturally the details cannot be made public. All the diesel will find its buyers,\" Kremlin spokesman Dmitry Peskov told reporters on a daily conference call. Tankers often broadcast messages known as signals, such as \"ATLANTIC COAST FOR ORDERS,\" indicating they are heading for the US Atlantic coast but have no confirmed discharge port, so the crew is awaiting instructions. Kremlin envoy Kirill Dmitriev said Russian diesel cargoes destined for the US are continuing on course, in a post on X. There is no connection between diesel tankers changing course and the result of the US midterm elections, Peskov added. (Reuters)",
+      "takeaways": [
+        "Ukraine Renews Attacks on Russian Oil Refineries Maritime Activity Reports, Inc.",
+        "The Ryazan oil refinery, one of Russia's largest, appeared to have come under attack as part of a large drone strike overnight on industrial sites in the city, southeast of Moscow, according to a Reuters video analysis.",
+        "If confirmed, it would be the second refinery to be hit this week following an attack on the Yaroslavl plant, northeast of Moscow, overnight on Monday, marking the breakdown of a pause in strikes."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-C912525BBB",
+      "title": "Turkey Unveils 2040 Energy Policy Powered by Electrification",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/turkey-unveils-energy-policy-powered-544182",
+      "publishedAt": "2026-11-05T17:34:32Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.marinelink.com/images/maritime/w150/adobe-stockmertframe-174867.jpeg",
+      "summary": "Turkey's Energy Minister Alparslan Bayraktar unveiled the country's 2040 national energy policy on Thursday, which requires $500 billion in energy investments by 2040, including more than $330 billion for electrification goals.Policy built on supply security…",
+      "body": "Turkey Unveils 2040 Energy Policy Powered by Electrification Maritime Activity Reports, Inc. November 5, 2026 © Adobe Stock/Mertframe Turkey's Energy Minister Alparslan Bayraktar unveiled the country's 2040 national energy policy on Thursday, which requires $500 billion in energy investments by 2040, including more than $330 billion for electrification goals. Policy built on supply security, emissions reduction. Wind and solar power installed capacity target set at 175 GW by 2040. Plan projects installed power capacity will rise to 281 GW from current 123 GW, with renewables' share climbing to 77% from 63%. Offshore wind capacity target of 6 GW by 2040, with the first tender planned for April next year. The plan forecasts lower growth for total energy demand, down to 199 million tons from 230 million tons of oil equivalent in 2040 as electrification picks up to 36% of total energy demand, saving $240 billion. Total electricity consumption forecast at 680 terawatt hours (TWh) versus business as usual forecast of 551 TWh by 2040, from 365 TWh last year. Electric vehicles, data centres, electrolysers and heat pumps seen as drivers of electricity demand. Turkey's annual energy import bill has averaged $65 billion to $70 billion in recent years; the new policies aim to reduce that while maintaining supply security. Nuclear capacity target for 2040 is 10 gigawatts, adding 5 gigawatts beyond the Akkuyu plant already under construction, with nuclear expected to meet 11% of electricity demand by 2040. Decisions on two additional nuclear plants, at Sinop and Thrace, are planned for 2027, with the aim of bringing them online by 2040. Combined electricity generation, grid and storage investment projects announced by the minister add up to more than $330 billion, by Reuters calculations. Total energy investments, including on oil and gas production and infrastructure, seen at $500 billion by 2040. State enterprises to provide to $210 billion of total. Annual natural gas consumption seen at 57 bcm versus business as usual forecast of 77 bcm by 2040, from 59 bcm last year. Crude oil consumption seen at 718,000 bpd versus business as usual forecast of 1.2 million bpd by 2040, from 993,000 bpd last year Annual per capita electricity consumption expected to double to 7,500 kWh by 2040, total emissions seen down 40% (Reuters)",
+      "takeaways": [
+        "Turkey Unveils 2040 Energy Policy Powered by Electrification Maritime Activity Reports, Inc.",
+        "Policy built on supply security, emissions reduction.",
+        "Wind and solar power installed capacity target set at 175 GW by 2040."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-9A555C3C2F",
+      "title": "French Maritime Patrol Plane Extends Stay After Black Sea Cargo Vessel Attacks",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/french-maritime-patrol-plane-extends-stay-544180",
+      "publishedAt": "2026-11-05T17:28:04Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "safety"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.marinelink.com/images/maritime/w150/adobe-stockpeter-hermes-furian-174865.jpeg",
+      "summary": "A French maritime patrol aircraft deployed to Romania to bolster surveillance after a series of deadly strikes on merchant ships in the Black Sea on the edge of NATO's eastern flank will extend its stay by several weeks, its commander said on…",
+      "body": "French Maritime Patrol Plane Extends Stay After Black Sea Cargo Vessel Attacks Maritime Activity Reports, Inc. November 5, 2026 © Adobe Stock/Peter Hermes Furian A French maritime patrol aircraft deployed to Romania to bolster surveillance after a series of deadly strikes on merchant ships in the Black Sea on the edge of NATO's eastern flank will extend its stay by several weeks, its commander said on Thursday. The attacks have shown how the escalating maritime war between Russia and Ukraine is expanding into a major challenge for NATO in the Black Sea that has left member states such as Romania and Bulgaria exposed. The Black Sea is crucial for shipments of grain, oil and oil products and is shared by Bulgaria, Romania, Georgia and Turkey, as well as Ukraine and Russia. Russia has denied targeting Ukraine's neighbours. France temporarily relocated the Atlantique 2 aircraft — designed to detect submarines, warships and small threats including sea drones and mines — to the Romanian Mihail Kogalniceanu air base on October 18 after NATO members Romania and Bulgaria asked NATO for reinforcements. \"The Atlantique 2 presence will be maintained for a few weeks from now on. We are here to ensure the safety of navigation of the commercial traffic in the Black Sea,\" said the aircraft's commander, whose identity was not given by the French naval forces for security purposes. It had initially been deployed to Romania until November 6. At least nine cargo ships were hit near the coast of Romania and Bulgaria in October, with some 34 sailors reported dead or missing. The plane was able to detect the three sea drones which ultimately struck and sank the Greek-owned container vessel Contship Jet in Bulgaria's exclusive economic zone on October 28. The commander said they notified Bulgarian authorities and the vessel an hour before the sea drones struck, enabling the crew in that instance to come away unscathed. \"We are a surveillance aircraft,\" the plane's commander said. \"We are able to detect. We are not able to neutralise and intercept these kind of drones.\" NATO said this week the alliance had committed to investing more than $40 billion in counter-drone capabilities in the next five years. It said its commitment to defending all its members, including those on the Black Sea, was \"ironclad\". (Reuters)",
+      "takeaways": [
+        "French Maritime Patrol Plane Extends Stay After Black Sea Cargo Vessel Attacks Maritime Activity Reports, Inc.",
+        "The attacks have shown how the escalating maritime war between Russia and Ukraine is expanding into a major challenge for NATO in the Black Sea that has left member states such as Romania and Bulgaria exposed.",
+        "The Black Sea is crucial for shipments of grain, oil and oil products and is shared by Bulgaria, Romania, Georgia and Turkey, as well as Ukraine and Russia."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-42E176FB9B",
+      "title": "Iran Maintains Pressure as Three Tankers Hit in Hormuz",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/iran-maintains-pressure-three-tankers-hit-544179",
+      "publishedAt": "2026-11-05T17:25:02Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Red Sea & Bab el-Mandeb",
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "tanker",
+        "port",
+        "hormuz"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.marinelink.com/images/maritime/w150/adobe-stockfaraways-174864.jpeg",
+      "summary": "Iran reported three more tankers had been damaged in the Strait of Hormuz on Thursday, making clear that shipping would remain in peril as long as the war in the Gulf is unresolved, now that US voters have punished President Donald Trump for…",
+      "body": "Iran Maintains Pressure as Three Tankers Hit in Hormuz Maritime Activity Reports, Inc. November 5, 2026 © Adobe Stock/Faraways Iran reported three more tankers had been damaged in the Strait of Hormuz on Thursday, making clear that shipping would remain in peril as long as the war in the Gulf is unresolved, now that US voters have punished President Donald Trump for waging it. The electoral rout that cost Trump's Republicans control of Congress has prompted a stark reassessment of the conflict's political cost in Washington, led by Vice President JD Vance, who said in a long social media post on Wednesday that the war was to blame for his party's defeat. In a mocking reply on Thursday, Iran's Parliament Speaker Mohammad Baqer Qalibaf, Vance's opposite number at previous peace talks, accused Vance of letting Trump double down like a \"losing gambler\" by planning more US strikes. If Vance believed the war was a mistake he should persuade Trump to call it off, Qalibaf said: \"Skip the TED talk. Why not say this to your boss?\" Oil prices have plunged in recent days as traders wagered that Trump, chastened by voters, may be less likely to restart the strikes he launched alongside Israel as \"Operation Epic Fury\" in February. Prices bounced back slightly on Thursday but are down more than $20 a barrel from last week. Iranian officials have been meeting with Qatari mediators since last week to discuss proposals to end the hostilities. But neither side has announced any breakthroughs on the major issues that have prevented any peace agreement so far. ATTACKS ON TANKERS AT RECORD PACE Meanwhile, attacks on tankers in the Gulf are still running close to a record pace. At least five vessels have reported incidents since Sunday, according to UK maritime security agency UKMTO, around the same rate as in October when the agency said 35 vessels were hit, the most of any month of the war. The UKMTO reported that a vessel had been struck by two unidentified projectiles late on Wednesday. Iran's Revolutionary Guards, who do not typically acknowledge firing on merchant ships but say the transit route is unsafe without Tehran's consent, said two tankers had struck naval mines and another had caught fire on Thursday. On Wednesday Iranian Supreme Leader Ayatollah Mojtaba Khamenei said there should not be \"even the slightest inclination towards submission\" to the United States, which he said would remain hostile towards Iran no matter which party was in power. 'HE IS PLANNING TO BOMB IRAN' When asked about Vance's comments on the war on Wednesday, Trump defended the decision to launch it, saying it was important to prevent Iran from getting a nuclear weapon, a justification he has repeatedly cited. A White House adviser told Reuters that some officials and staff inside the White House viewed Vance's post as a foreign policy break from the president and a public recognition of the war's economic consequences. But two sources told Reuters they believed Trump was still likely to order resumed hostilities. \"He is planning to bomb Iran. Don’t listen to what he’s saying. He held off because of the midterms. We asked him to hold off until the midterms,\" said one of the sources. The other said Trump did not have anything to lose politically now ⁠that the midterms were over. Peacemaking efforts have revolved around the future status of the strait, a US blockade on Iranian ports, sanctions on the Islamic Republic and a resumption of negotiations over Tehran's nuclear programme. A senior Iranian official said this week that the two sides remain far apart. Qatar said on Tuesday that the United States and Iran were committed to mediation efforts and were reviewing proposals aimed at bridging their differences, adding that there had been developments in talks with both sides. (Reuters)",
+      "takeaways": [
+        "Iran Maintains Pressure as Three Tankers Hit in Hormuz Maritime Activity Reports, Inc.",
+        "If Vance believed the war was a mistake he should persuade Trump to call it off, Qalibaf said: \"Skip the TED talk.",
+        "Prices bounced back slightly on Thursday but are down more than $20 a barrel from last week."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-7DDF838CA8",
+      "title": "Brazilian builds boat from rubbish to collect more rubbish",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/brazilian-builds-boat-from-rubbish-to-collect-more-rubbish/",
+      "publishedAt": "2026-11-05T17:17:00Z",
+      "category": "Weather & Cyclones",
+      "region": "Brazil & South Atlantic",
+      "regions": [
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        -23.96,
+        -46.33
+      ],
+      "navarea": "V",
+      "image": "https://splash247.com/wp-content/uploads/2026/11/FridayRubbishBoat-300x178.jpg",
+      "summary": "A former Brazilian ocean canoeing champion has taken recycling to a floating extreme, constructing a boat from 230 discarded plastic containers so he can collect even more rubbish from the sea. Marcos Arnhold spent two months building the unusual craft in Guaratuba, southern Brazil, using 125 two-litre plastic...",
+      "body": "Americas Environment Brazilian builds boat from rubbish to collect more rubbish Sam Chambers November 6, 2026 0 4,905 1 minute read A former Brazilian ocean canoeing champion has taken recycling to a floating extreme, constructing a boat from 230 discarded plastic containers so he can collect even more rubbish from the sea. Marcos Arnhold spent two months building the unusual craft in Guaratuba, southern Brazil, using 125 two-litre plastic bottles, 105 five-litre disinfectant containers and a metal roof rack salvaged from an old Volkswagen Kombi. The homemade vessel is destined for Guaratuba Bay and its surrounding mangroves, where Arnhold plans to collect discarded rubbish for delivery to a municipal recycling centre. The former athlete, who won Brazil’s national ocean canoeing championship in 2002, told local newspaper JB Litoral that initial flotation and stability tests have exceeded expectations. The vessel currently has a 6.5 hp petrol engine, although Arnhold hopes eventually to add a sail and switch to electric propulsion. Friends donated bottles, while local sponsors helped finance the engine and trailer. Applauding the initiative, Graeme Somerville-Ryan, the founder of Eyesea, told Splash: “Never underestimate the endeavor, endurance, and effort of good people wanting to change the world. He should be celebrated and supported. But we know ocean and coastal pollution is an industrial-sized problem, and we need industrial solutions. This is where shipping and maritime people can, and are, making a difference.” Eyesea is a maritime environmental non-profit that uses crowdsourced photographs, geolocation data and satellite technology to map marine pollution and help coordinate targeted clean-up efforts worldwide. Tags Brazil Sam Chambers November 6, 2026 0 4,905 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The homemade vessel is destined for Guaratuba Bay and its surrounding mangroves, where Arnhold plans to collect discarded rubbish for delivery to a municipal recycling centre.",
+        "The former athlete, who won Brazil’s national ocean canoeing championship in 2002, told local newspaper JB Litoral that initial flotation and stability tests have exceeded expectations.",
+        "The vessel currently has a 6.5 hp petrol engine, although Arnhold hopes eventually to add a sail and switch to electric propulsion."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -830,6 +1385,41 @@
       ],
       "readingMinutes": 2,
       "readMinutes": 2
+    },
+    {
+      "id": "SN-458E209A79",
+      "title": "Tender-Assist Rigs: Southeast Asia’s Quiet Workhorses Head for Full Utilization",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/tenderassist-rigs-southeast-asias-quiet-544178",
+      "publishedAt": "2026-11-05T16:28:24Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Panama Canal & Caribbean",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port",
+        "china"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.marinelink.com/images/maritime/w150/about-the-author-paul-ezekiel-174863.jpg",
+      "summary": "Often overshadowed by the towering jackup and ultra-deepwater floating rig fleets that dominate offshore headlines, tender-assist rigs are enjoying a resurgence in Southeast Asia. While they represent a relatively small niche of the global offshore drilling market…",
+      "body": "Tender-Assist Rigs: Southeast Asia’s Quiet Workhorses Head for Full Utilization Maritime Activity Reports, Inc. By Paul Ezekiel, Senior Offshore Rig Analyst, Westwood Global Energy Group November 5, 2026 EDrill-2 tender-assist drilling rig © Energy Drilling About the Author: Paul Ezekiel joined Westwood Global Energy Group in August 2018 as an Offshore Rig Analyst. He has more than 28 years in the offshore industry focused on Marketing, Contracts and Business Development. He has served as Chartering Manager at Seacor Marine and Commercial Manager at Tidewater International. Ezekiel holds a Master Mariner Class I Licence from the Australian Maritime College and an MBA from the University of Hull. He has also spent time as a Senior Lecturer at the Si Often overshadowed by the towering jackup and ultra-deepwater floating rig fleets that dominate offshore headlines, tender-assist rigs are enjoying a resurgence in Southeast Asia. While they represent a relatively small niche of the global offshore drilling market, these versatile units have become indispensable to operators across Thailand, Malaysia and Brunei, where their efficiency and cost competitiveness continue to drive demand. Tender-assist rigs are designed for fast, efficient platform drilling. Conventional units use a barge-like monohull and are best suited to shallow, calm waters, while larger semi-tenders can operate in deeper and more challenging environments such as offshore East Malaysia and the Andaman Sea. The key attraction is speed. Compared with jackups, tender-assist rigs require less time to mobilize, rig up and move between locations. In some cases, drilling equipment can be installed in as few as three lifts, reducing non-productive time and improving well economics. A Market Concentrated in Southeast Asia According to Westwood's RigLogix, the global fleet comprises of just 29 tender-assist and semi tender-assist rigs (collectively referred to here as TARs). Of these, 16 are currently active, six are warm stacked, six are cold stacked and one remains under construction. Yet despite their modest numbers, the market is tightening rapidly, with Southeast Asia standing as the only region where the sector is truly thriving. Figure 1: Average Age of Global Tender-Assist Rig Fleet © Westwood RigLogix Not only are rigs actively drilling throughout the Asia Pacific region, but there has also been recent reactivation activity, new construction and visible demand for upcoming well programs. Outside this region, the picture is markedly different. Idle units are scattered across locations including China, Greece, Venezuela, Romania and Spain, with many having been inactive for years. In contrast, operators across Malaysia and Thailand continue to rely heavily on TARs to support development drilling campaigns on established offshore platforms. A Market Dominated by Two Players The Southeast Asian TAR market remains highly concentrated. The primary fleet owners are Vantris Energy, formerly part of Sapura Energy, and Energy Drilling, which together control most of the operational units available in the region. Elsewhere, PetroVietnam Drilling manages a single semi-tender currently working for Shell Brunei on a long-term contract, while Keppel's Raiqa TAR remains under construction. The limited availability of rigs means contracts are frequently awarded through direct negotiations or restricted tenders rather than fully competitive bidding rounds. PTTEP Leads Demand Thailand's national oil company PTTEP is currently the world's largest user of TARs. The company has eight tender-assist units and two semi-tenders under contract, with one of the latter operating in Myanmar. PTTEP's extensive platform infrastructure in the Gulf of Thailand is ideally suited to these units. The region's shallow water depths and relatively calm sea conditions make TARs a natural fit, although recent tenders indicate the operator is increasingly willing to consider either TARs or jackups depending on program requirements. Further demand comes from Carigali-PTTEP Operating Company (CPOC), which currently has a semi-tender working in the Malaysia-Thailand Joint Development Area. Malaysia remains another cornerstone of regional demand. PETRONAS Carigali currently has three TARs under contract, while operators including EnQuest, Vestigo, Shell, JX Nippon, ConocoPhillips and PTTEP Sabah continue to utilise these units across the country's offshore fields. Historically, ExxonMobil was a major user of TARs in the Palas and Dulang fields before operatorship transferred to PETRONAS Carigali. This broad operator base has helped support a consistently healthy domestic market and provided stability for fleet owners, even during broader offshore industry downturns. A Tightening Market Fleet utilization has already reached approximately 96%, and the market appears poised to tighten further. Excluding the cold-stacked T-9 and the newbuild Raiqa, effective utilisation is expected to reach 100% before the end of the fourth quarter. Looking ahead, 2027 promises to be particularly active for semi-tenders in Malaysia. Major drilling campaigns are scheduled to begin from March onwards, including Shell's Malikai Phase 3 programme, PTTEP's Kikeh Phase 3 development and ConocoPhillips' Kebabangan Cluster campaign. Activity is also expected to expand beyond Malaysia. Offshore Vietnam, the Bien Dong project is anticipated to generate additional demand beginning in the first quarter of 2028. Rates Rising Alongside Demand Historically, TARs have commanded dayrates slightly below those of jackups, reflecting their specialist role and more limited geographic market. Over the past 12 months, however, that gap has narrowed as utilization has tightened across Southeast Asia. Today, four TARs are securing rates above US$120,000 per day, underlining the strength of demand and the scarcity of available units. Asia Pacific Tender & Jackup Average Leading-Edge Dayrates 2021-2026 © Westwood RigLogix Contract durations vary across the fleet, ranging from short-term campaigns to multi-year agreements. PTTEP remains a notable exception, typically favoring long-term contracts to support its substantial production commitments in the Gulf of Thailand. For companies considering a newbuild TAR, historical benchmarks provide a useful starting point, although today's reality would likely involve longer delivery schedules and significantly higher construction costs. Historically, a unit could be built in around 24 months from order to delivery. Figure 3: Historical Tender-Assist Rig Newbuild Construction © Source Westwood RigLogix. Whether a newbuild is commercially viable depends on balancing the cost of investment against the relatively small size of the global TAR market. However, with utilization nearing full capacity, dayrates strengthening and limited newbuild activity in recent years, the sector appears increasingly exposed to a future supply shortage. Should demand continue to grow across Southeast Asia, contractors may find that fleet expansion becomes not only attractive but necessary to meet operator requirements.",
+      "takeaways": [
+        "Tender-Assist Rigs: Southeast Asia’s Quiet Workhorses Head for Full Utilization Maritime Activity Reports, Inc.",
+        "He has more than 28 years in the offshore industry focused on Marketing, Contracts and Business Development.",
+        "He has served as Chartering Manager at Seacor Marine and Commercial Manager at Tidewater International."
+      ],
+      "readingMinutes": 5,
+      "readMinutes": 5
     },
     {
       "id": "SN-2AACFB99F3",
@@ -973,39 +1563,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-5F1C11786A",
-      "title": "DHL Global Forwarding revenue jumps as ocean freight volumes rise",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/dhl-global-forwarding-revenue-jumps-as-ocean-freight-volumes-rise/",
-      "publishedAt": "2026-11-05T15:00:40Z",
-      "category": "Weather & Cyclones",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/posttower-dhlgroup-1592x896.web_.796.448-300x169.jpg",
-      "summary": "DHL Group reported higher revenue and operating profit in the third quarter of 2026, supported by growth in international freight forwarding, express deliveries and contract logistics. Group revenue increased by 12.6% to €22.7 billion, compared with €20.1 billion in the same period last year. Operating profit (EBIT)...",
-      "body": "DHL Group reported higher revenue and operating profit in the third quarter of 2026, supported by growth in international freight forwarding, express deliveries and contract logistics. Group revenue increased by 12.6% to €22.7 billion, compared with €20.1 billion in the same period last year. Operating profit (EBIT) rose by 16.2% to €1.7 billion, while the EBIT margin improved to 7.6% from 7.3%. Net profit attributable to shareholders reached €907 million, up from €840 million a year earlier. The results reflected stronger freight activity across several markets, particularly on trade lanes originating in Asia. DHL Global Forwarding records strong growth DHL Global Forwarding reported a 23.4% increase in third-quarter revenue to €5.64 billion, compared with €4.57 billion in 2025. The division’s EBIT increased by 32.7% to €259 million, while its operating margin improved to 4.6% from 4.3%. Ocean freight volumes increased by 4.8% year on year, with growth mainly driven by shipments originating in Asia and Europe. Meanwhile, ocean freight revenue rose by 26.8%. Air freight volumes also increased by 12%, supported by stronger demand on routes originating in Asia. According to DHL, changing trade flows continued to influence customer transport requirements. The company used its international forwarding network to support alternative routes and maintain supply chain continuity. The stronger performance in Global Forwarding contributed to the group’s overall earnings growth during the quarter. Express and Supply Chain support earnings DHL Express recorded revenue of approximately €7 billion, an increase of 19.2% year on year. Operating profit rose by 50% to €1.04 billion, supported by higher shipment weights and improved network utilisation. The division also benefited from temporary capacity constraints in the international air freight market. These contributed approximately €100 million to quarterly earnings. Meanwhile, DHL Supply Chain increased revenue by 12% to €4.94 billion. EBIT rose by 8.1% to €301 million, although the operating margin declined slightly to 6.1%. Growth was recorded across all regions, with the Americas making a particularly strong contribution. The division also secured new contracts in retail, e-commerce fulfilment and technology. However, DHL eCommerce reported a decline in revenue to €1.59 billion, while EBIT fell to €51 million. The year-on-year comparison was affected by portfolio changes and positive one-off effects recorded in 2025. DHL maintains upgraded full-year outlook Following an earlier guidance increase announced on 16 October, DHL Group continues to expect full-year 2026 operating profit of more than €7 billion. The company also forecasts free cash flow, excluding mergers and acquisitions, of more than €3.2 billion. For the first nine months of 2026, free cash flow excluding M&A reached €2.7 billion, compared with €2.3 billion in the corresponding period last year. DHL plans capital expenditure of approximately €3.6 billion for the full year, reflecting investments in logistics capacity, automation and digitalisation. The company is also expanding its capabilities in data centre logistics, life sciences, healthcare and other sectors where it expects continued demand growth. Despite geopolitical uncertainty and shifting trade patterns, DHL’s latest results indicate continued growth in international logistics activity, particularly in ocean and air freight forwarding.",
-      "takeaways": [
-        "DHL Group reported higher revenue and operating profit in the third quarter of 2026, supported by growth in international freight forwarding, express deliveries and contract logistics.",
-        "Group revenue increased by 12.6% to €22.7 billion, compared with €20.1 billion in the same period last year.",
-        "Operating profit (EBIT) rose by 16.2% to €1.7 billion, while the EBIT margin improved to 7.6% from 7.3%."
-      ],
-      "readingMinutes": 3,
-      "readMinutes": 3
-    },
-    {
       "id": "SN-9BBEC8A165",
       "title": "Velesto’s 2010-built rig finds drilling job with Petronas",
       "source": "Offshore Energy",
@@ -1108,44 +1665,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-C5E247FF68",
-      "title": "Dominguez gets nod for second term at IMO helm",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/dominguez-gets-nod-for-second-term-at-imo-helm/",
-      "publishedAt": "2026-11-05T14:17:58Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Red Sea & Bab el-Mandeb",
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "hormuz",
-        "red sea",
-        "panama",
-        "safety",
-        "imo"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://splash247.com/wp-content/uploads/2026/11/Arsenio-Dominguez-IMO-300x180.jpg",
-      "summary": "Arsenio Dominguez is set to remain at the helm of the International Maritime Organization (IMO) until the end of 2031 after the UN shipping agency’s Council backed his appointment for another four-year term. The 40-member Council endorsed the Panamanian’s extension during its 138th session in London, with the...",
-      "body": "Operations Regulatory Dominguez gets nod for second term at IMO helm Adis Ajdin November 5, 2026 0 225 1 minute read IMO IMO Arsenio Dominguez is set to remain at the helm of the International Maritime Organization (IMO) until the end of 2031 after the UN shipping agency’s Council backed his appointment for another four-year term. The 40-member Council endorsed the Panamanian’s extension during its 138th session in London, with the decision still requiring formal approval from the IMO Assembly when it meets in late 2027. If approved, Dominguez will serve a second term from January 1, 2028, to December 31, 2031, extending his leadership of the world’s maritime regulator during a period of mounting challenges over shipping decarbonisation and maritime security. Dominguez, who took office in January 2024, has spent much of his first term navigating increasingly divided positions among member states over the IMO’s Net-Zero Framework, which aims to introduce a global marine fuel standard and emissions pricing mechanism. The framework, agreed in principle in April 2025, suffered a major setback last October when governments voted to delay its adoption by a year following strong opposition led by the United States and Saudi Arabia. Efforts to revive the agreement have continued throughout 2026, with negotiations set to culminate in another critical round of talks later this month. The Marine Environment Protection Committee meets from November 30 to December 3, followed by a planned extraordinary session on December 4 to revisit the framework’s adoption. The IMO has also faced mounting pressure over the safety of commercial shipping amid continuing attacks and disruptions in the Strait of Hormuz, Red Sea and Black Sea, issues that feature on the agenda of this week’s Council meeting. Dominguez, the IMO’s tenth secretary-general, previously served as director of its Marine Environment Division, administrative director and chief of staff. He also represented Panama at the organisation and chaired its Marine Environment Protection Committee. He succeeded South Korea’s Kitack Lim in January 2024 after securing the Council’s backing in July 2023 and subsequent Assembly approval. Adis Ajdin November 5, 2026 0 225 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "The 40-member Council endorsed the Panamanian’s extension during its 138th session in London, with the decision still requiring formal approval from the IMO Assembly when it meets in late 2027.",
-        "The framework, agreed in principle in April 2025, suffered a major setback last October when governments voted to delay its adoption by a year following strong opposition led by the United States and Saudi Arabia.",
-        "Efforts to revive the agreement have continued throughout 2026, with negotiations set to culminate in another critical round of talks later this month."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-7EAC16F4D2",
       "title": "France Extends Maritime Patrol Plane’s Stay in Black Sea After Cargo Ship Attacks",
       "source": "gCaptain",
@@ -1182,38 +1701,6 @@
       "readMinutes": 4
     },
     {
-      "id": "SN-49A1C9524E",
-      "title": "ID Logistics and Terra Robotics plan humanoid robot pilot in Germany",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/id-logistics-and-terra-robotics-plan-humanoid-robot-pilot-in-germany/",
-      "publishedAt": "2026-11-05T14:00:36Z",
-      "category": "Weather & Cyclones",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/ID_Logistics_Terra_Robotics_Humanoid_Robot_Cover-268x300.jpg",
-      "summary": "ID Logistics has partnered with Terra Robotics to explore the use of humanoid robots in warehouse operations, with plans to launch its first pilot under real operating conditions in Germany within six months. The strategic partnership, which took effect on 1 November 2026, follows initial tests involving two humanoid...",
-      "body": "ID Logistics has partnered with Terra Robotics to explore the use of humanoid robots in warehouse operations, with plans to launch its first pilot under real operating conditions in Germany within six months. The strategic partnership, which took effect on 1 November 2026, follows initial tests involving two humanoid robots at facilities in Griesheim and Löhne. The companies aim to identify tasks where humanoid robots could support warehouse operations. Their focus includes sorting, order picking, packing and other repetitive logistics activities. The agreement also marks a further step in ID Logistics’ efforts to assess new automation technologies across its contract logistics operations. Two humanoid robots complete initial sorting tests ID Logistics and Terra Robotics began working together approximately one year ago. Each company invested in a Unitree G1 EDU6 humanoid robot to develop and test an initial sorting process. The robot named IDA is based at ID Logistics’ facility in Griesheim. Meanwhile, a second robot, named Heinz, is located at Terra Robotics in Löhne. Both robots were programmed to perform the same sorting task. They can now distinguish cardboard boxes from mailer bags and place them into shipping boxes. The robots use five-fingered hands equipped with tactile sensors to handle the different types of packaging. Robin Otto, CEO of ID Logistics Germany, said the logistics sector offers considerable potential for humanoid robotics because many warehouse processes involve repetitive tasks. The company intends to identify suitable applications and assess their performance in real operating environments before considering wider deployment. First operational pilot planned within six months The next phase will focus on selecting a suitable application for testing at an ID Logistics facility in Germany. Over the coming weeks, the partners will evaluate four or five potential use cases and define their technical and operational requirements. They will then select the most suitable task and robot model for the pilot. Terra Robotics’ portfolio includes humanoid robots from manufacturers such as Unitree and UBTECH. However, the companies have not yet confirmed which model will be used. The first pilot is scheduled to take place within six months of the announcement. It will assess the technology’s capabilities and limitations under real warehouse operating conditions. The results will help determine whether humanoid robots could support more complex logistics processes in the future. ID Logistics operates approximately 450 logistics facilities worldwide, including 17 in Germany. Its activities cover retail, e-commerce, consumer goods and other sectors. For now, the partnership remains focused on testing and evaluating the technology rather than deploying humanoid robots across the company’s wider logistics network.",
-      "takeaways": [
-        "ID Logistics has partnered with Terra Robotics to explore the use of humanoid robots in warehouse operations, with plans to launch its first pilot under real operating conditions in Germany within six months.",
-        "The strategic partnership, which took effect on 1 November 2026, follows initial tests involving two humanoid robots at facilities in Griesheim and Löhne.",
-        "The companies aim to identify tasks where humanoid robots could support warehouse operations."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-C9DC7AF2BE",
       "title": "RINA to mobilize up to 83 experts for €11 million contract with Petrobras",
       "source": "Offshore Energy",
@@ -1247,43 +1734,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-477590B600",
-      "title": "Hapag-Lloyd unveils standalone AMX and ASX services linking Asia and Latin America",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/hapag-lloyd-unveils-standalone-amx-and-asx-services-linking-asia-and-latin-america/",
-      "publishedAt": "2026-11-05T13:00:55Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "singapore",
-        "china"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/Hamburg-Express-KH-051124-06_Orange.jpg-300x150.webp",
-      "summary": "Hapag-Lloyd has announced two standalone container shipping services connecting Asia with Latin America, as the German carrier prepares to expand its network in 2027. The new AMX and ASX services will provide connections to Mexico and the East Coast of South America, respectively. Both will operate independently...",
-      "body": "Hapag-Lloyd has announced two standalone container shipping services connecting Asia with Latin America, as the German carrier prepares to expand its network in 2027. The new AMX and ASX services will provide connections to Mexico and the East Coast of South America, respectively. Both will operate independently under Hapag-Lloyd’s network. According to the carrier, the changes aim to improve regional connectivity and provide customers with additional routing options. The AMX service is scheduled to begin in January 2027, while ASX will follow in April. AMX to connect Asia and Mexico from January The new AMX service will offer weekly sailings between Asia and Mexico, with direct calls in China, South Korea and three Mexican ports. The planned port rotation is: Ningbo – Qingdao – Busan – Ensenada – Manzanillo – Lázaro Cárdenas. Through transshipment connections in Mexico, customers will also gain access to additional destinations along the West Coast of Latin America. Hapag-Lloyd said the standalone structure will provide greater operational control over the service. Meanwhile, regular weekly departures will support cargo planning across the trade corridor. Detailed vessel schedules are expected to become available closer to the launch. ASX to strengthen Asia–South America connections The second service, ASX, will connect Asia with the East Coast of South America from April 2027. Its planned rotation includes direct calls at major Asian and Brazilian ports: Qingdao – Ningbo – Shekou – Tanjung Pelepas – Santos – Itajaí – Rio Grande – Paranaguá – Santos – Singapore – Qingdao. In addition, feeder services via Rio Grande will provide connections to Montevideo in Uruguay and Buenos Aires in Argentina. Both AMX and ASX will include direct calls at Qingdao, strengthening the carrier’s connections between northern China and Latin American markets. The ASX announcement comes as Hapag-Lloyd prepares to leave its existing vessel-sharing arrangement with MSC and Ocean Network Express (ONE) on the Asia–East Coast South America trade. MSC and ONE previously announced plans to continue their Ipanema/SX1 service without Hapag-Lloyd from April 2027. However, Hapag-Lloyd has not explicitly described ASX as a replacement for its existing AS2 service. The company has also not disclosed the number of vessels, deployed capacity or first sailing dates for the new standalone services. Further operational details are expected as Hapag-Lloyd prepares for their introduction in 2027.",
-      "takeaways": [
-        "Hapag-Lloyd has announced two standalone container shipping services connecting Asia with Latin America, as the German carrier prepares to expand its network in 2027.",
-        "The new AMX and ASX services will provide connections to Mexico and the East Coast of South America, respectively.",
-        "Both will operate independently under Hapag-Lloyd’s network."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-A8F2464862",
       "title": "Woodside to cut more than 500 jobs in $400m savings drive",
       "source": "Splash247",
@@ -1309,7 +1759,7 @@
       "navarea": "IV",
       "image": "https://splash247.com/wp-content/uploads/2024/02/Woodside-building-300x191.jpg",
       "summary": "Australian energy giant Woodside is planning to cut more than 500 jobs worldwide as part of a restructuring programme aimed at delivering $400m in annual cost savings from 2028. The workforce reduction, equivalent to more than 10% of the company’s employees at the end of 2025, forms part of a broader effort to...",
-      "body": "Offshore Woodside to cut more than 500 jobs in $400m savings drive Bojan Lepic November 5, 2026 0 272 1 minute read Woodside Woodside Australian energy giant Woodside is planning to cut more than 500 jobs worldwide as part of a restructuring programme aimed at delivering $400m in annual cost savings from 2028. The workforce reduction, equivalent to more than 10% of the company’s employees at the end of 2025, forms part of a broader effort to streamline operations, reduce external spending and reshape its oil and gas portfolio. Woodside chief executive Liz Westcott outlined the measures during the company’s Capital Markets Day in Sydney on Thursday. The latest savings target represents a $50m increase from the $350m previously announced and will be measured against the company’s 2025 cost base. Woodside expects the workforce reductions to take place over time but has not disclosed which operations or countries will be affected. According to its latest annual workforce figures, the company employed 4,693 people at the end of 2025, including 3,717 in Australia. Besides reducing employee numbers, Woodside intends to simplify internal processes, improve supply chain management and expand the use of artificial intelligence and digital technologies. The restructuring follows portfolio changes involving its Calypso, Sunrise and Bonaparte carbon capture and storage interests. Westcott said the company was concentrating investment on its most profitable assets while improving operating efficiency and capital discipline. The measures come as Woodside prepares to bring several major developments online. Its Scarborough LNG project offshore Western Australia is 99% complete, with the first LNG cargo expected before the end of 2026. The deepwater Trion oil development offshore Mexico is targeting first production in 2028, followed by the Louisiana LNG project in 2029. Woodside expects these developments to support sales growth of more than 30% to approximately 280m barrels of oil equivalent in 2032. The company has also introduced a new shareholder distribution policy targeting payouts of 20% to 40% of adjusted operating cash flow through dividends and potential share buybacks. Bojan Lepic November 5, 2026 0 272 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Offshore Woodside to cut more than 500 jobs in $400m savings drive Bojan Lepic November 5, 2026 1 467 1 minute read Woodside Woodside Australian energy giant Woodside is planning to cut more than 500 jobs worldwide as part of a restructuring programme aimed at delivering $400m in annual cost savings from 2028. The workforce reduction, equivalent to more than 10% of the company’s employees at the end of 2025, forms part of a broader effort to streamline operations, reduce external spending and reshape its oil and gas portfolio. Woodside chief executive Liz Westcott outlined the measures during the company’s Capital Markets Day in Sydney on Thursday. The latest savings target represents a $50m increase from the $350m previously announced and will be measured against the company’s 2025 cost base. Woodside expects the workforce reductions to take place over time but has not disclosed which operations or countries will be affected. According to its latest annual workforce figures, the company employed 4,693 people at the end of 2025, including 3,717 in Australia. Besides reducing employee numbers, Woodside intends to simplify internal processes, improve supply chain management and expand the use of artificial intelligence and digital technologies. The restructuring follows portfolio changes involving its Calypso, Sunrise and Bonaparte carbon capture and storage interests. Westcott said the company was concentrating investment on its most profitable assets while improving operating efficiency and capital discipline. The measures come as Woodside prepares to bring several major developments online. Its Scarborough LNG project offshore Western Australia is 99% complete, with the first LNG cargo expected before the end of 2026. The deepwater Trion oil development offshore Mexico is targeting first production in 2028, followed by the Louisiana LNG project in 2029. Woodside expects these developments to support sales growth of more than 30% to approximately 280m barrels of oil equivalent in 2032. The company has also introduced a new shareholder distribution policy targeting payouts of 20% to 40% of adjusted operating cash flow through dividends and potential share buybacks. Bojan Lepic November 5, 2026 1 467 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The workforce reduction, equivalent to more than 10% of the company’s employees at the end of 2025, forms part of a broader effort to streamline operations, reduce external spending and reshape its oil and gas portfolio.",
         "Woodside chief executive Liz Westcott outlined the measures during the company’s Capital Markets Day in Sydney on Thursday.",
@@ -1342,7 +1792,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2025/11/Alpha-Ventus-offshore-wind-300x180.jpg",
       "summary": "German offshore wind services specialist Deutsche Windtechnik has secured a comprehensive maintenance contract from Ocean Breeze Energy covering all 12 turbines at the Alpha Ventus offshore wind farm in the North Sea. The contract will begin in January 2027 and covers turbine servicing, maintenance, troubleshooting...",
-      "body": "Europe Offshore Renewables Deutsche Windtechnik lands maintenance deal at Germany’s first offshore wind farm Bojan Lepic November 5, 2026 0 214 1 minute read Alpha Ventus Alpha Ventus German offshore wind services specialist Deutsche Windtechnik has secured a comprehensive maintenance contract from Ocean Breeze Energy covering all 12 turbines at the Alpha Ventus offshore wind farm in the North Sea. The contract will begin in January 2027 and covers turbine servicing, maintenance, troubleshooting and associated technical support. From September 2027, the scope will expand to include remote monitoring, offshore coordination centre services, grid management and around-the-clock alarm handling. The agreement follows Ocean Breeze Energy’s acquisition of Alpha Ventus from EWE, RWE, and Vattenfall in October, with the new owner confirming plans to extend operations at the pioneering German offshore wind development. Commissioned in 2010, Alpha Ventus was Germany’s first offshore wind farm and served as an important testing ground for technologies and maintenance practices subsequently adopted across the country’s offshore wind industry. Located approximately 45 km north of Borkum, the 60 MW development comprises six Senvion 5M turbines and six AREVA Multibrid M5000 units. Deutsche Windtechnik previously provided maintenance services at the project, beginning with the Senvion turbines in 2017 and expanding to the AREVA units in 2020. Both contracts expired at the end of 2024. The new agreement will see the company return to the development under its new ownership structure. Ocean Breeze Energy will retain responsibility for higher-level technical design management. The contract also strengthens Deutsche Windtechnik’s offshore operations around Borkum, where it already provides services at the Riffgat and Trianel Windpark Borkum I projects. Tags Germany Offshore Wind Bojan Lepic November 5, 2026 0 214 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Deutsche Windtechnik lands maintenance deal at Germany’s first offshore wind farm Bojan Lepic November 5, 2026 0 338 1 minute read Alpha Ventus Alpha Ventus German offshore wind services specialist Deutsche Windtechnik has secured a comprehensive maintenance contract from Ocean Breeze Energy covering all 12 turbines at the Alpha Ventus offshore wind farm in the North Sea. The contract will begin in January 2027 and covers turbine servicing, maintenance, troubleshooting and associated technical support. From September 2027, the scope will expand to include remote monitoring, offshore coordination centre services, grid management and around-the-clock alarm handling. The agreement follows Ocean Breeze Energy’s acquisition of Alpha Ventus from EWE, RWE, and Vattenfall in October, with the new owner confirming plans to extend operations at the pioneering German offshore wind development. Commissioned in 2010, Alpha Ventus was Germany’s first offshore wind farm and served as an important testing ground for technologies and maintenance practices subsequently adopted across the country’s offshore wind industry. Located approximately 45 km north of Borkum, the 60 MW development comprises six Senvion 5M turbines and six AREVA Multibrid M5000 units. Deutsche Windtechnik previously provided maintenance services at the project, beginning with the Senvion turbines in 2017 and expanding to the AREVA units in 2020. Both contracts expired at the end of 2024. The new agreement will see the company return to the development under its new ownership structure. Ocean Breeze Energy will retain responsibility for higher-level technical design management. The contract also strengthens Deutsche Windtechnik’s offshore operations around Borkum, where it already provides services at the Riffgat and Trianel Windpark Borkum I projects. Tags Germany Offshore Wind Bojan Lepic November 5, 2026 0 338 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The contract will begin in January 2027 and covers turbine servicing, maintenance, troubleshooting and associated technical support.",
         "From September 2027, the scope will expand to include remote monitoring, offshore coordination centre services, grid management and around-the-clock alarm handling.",
@@ -1376,7 +1826,7 @@
       "navarea": "IX",
       "image": "https://splash247.com/wp-content/uploads/2026/07/Aker-Solutions-worker-300x189.jpg",
       "summary": "Norwegian offshore engineering group Aker Solutions has received a letter of award from Vietnam’s PTSC Mechanical & Construction for work on QatarEnergy’s Maydan Mahzam oilfield redevelopment project. The contract covers detailed engineering for three major topsides, four jackets and modifications required to connect...",
-      "body": "Asia Europe Middle East Offshore Aker Solutions bags engineering deal for Qatar oilfield redevelopment Bojan Lepic November 5, 2026 0 600 1 minute read Aker Solutions Aker Solutions Norwegian offshore engineering group Aker Solutions has received a letter of award from Vietnam’s PTSC Mechanical & Construction for work on QatarEnergy’s Maydan Mahzam oilfield redevelopment project. The contract covers detailed engineering for three major topsides, four jackets and modifications required to connect new facilities with existing offshore infrastructure. Aker Solutions describes the award as sizeable, valuing it between NOK500m and NOK1.5bn ($54m to $162m). The company will carry out engineering work from its offices in Kuala Lumpur, Malaysia, and Mumbai, India. The award remains subject to a final contract, with Aker Solutions expecting to register the order in its Renewables and Field Development segment during the fourth quarter of 2026. The Maydan Mahzam field lies around 100 km northeast of Qatar’s coastline, in water depths of approximately 40 metres. Discovered in the 1960s, the field began producing in 1965. QatarEnergy is undertaking a major redevelopment to modernise ageing offshore facilities, improve production efficiency and extend the field’s operating life. PTSC M&C secured the project’s first major offshore construction package in September and signed the main contract with QatarEnergy on October 22. The Vietnamese contractor’s responsibilities include engineering, procurement, fabrication, transportation, installation and commissioning of eight offshore structures weighing more than 100,000 tonnes combined. The programme is scheduled to run from the fourth quarter of 2026 until the end of 2031 and is designed to help sustain Maydan Mahzam production at approximately 25,000 barrels per day. Tags Norway Qatar Vietnam Bojan Lepic November 5, 2026 0 600 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Asia Europe Middle East Offshore Aker Solutions bags engineering deal for Qatar oilfield redevelopment Bojan Lepic November 5, 2026 0 884 1 minute read Aker Solutions Aker Solutions Norwegian offshore engineering group Aker Solutions has received a letter of award from Vietnam’s PTSC Mechanical & Construction for work on QatarEnergy’s Maydan Mahzam oilfield redevelopment project. The contract covers detailed engineering for three major topsides, four jackets and modifications required to connect new facilities with existing offshore infrastructure. Aker Solutions describes the award as sizeable, valuing it between NOK500m and NOK1.5bn ($54m to $162m). The company will carry out engineering work from its offices in Kuala Lumpur, Malaysia, and Mumbai, India. The award remains subject to a final contract, with Aker Solutions expecting to register the order in its Renewables and Field Development segment during the fourth quarter of 2026. The Maydan Mahzam field lies around 100 km northeast of Qatar’s coastline, in water depths of approximately 40 metres. Discovered in the 1960s, the field began producing in 1965. QatarEnergy is undertaking a major redevelopment to modernise ageing offshore facilities, improve production efficiency and extend the field’s operating life. PTSC M&C secured the project’s first major offshore construction package in September and signed the main contract with QatarEnergy on October 22. The Vietnamese contractor’s responsibilities include engineering, procurement, fabrication, transportation, installation and commissioning of eight offshore structures weighing more than 100,000 tonnes combined. The programme is scheduled to run from the fourth quarter of 2026 until the end of 2031 and is designed to help sustain Maydan Mahzam production at approximately 25,000 barrels per day. Tags Norway Qatar Vietnam Bojan Lepic November 5, 2026 0 884 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The contract covers detailed engineering for three major topsides, four jackets and modifications required to connect new facilities with existing offshore infrastructure.",
         "Aker Solutions describes the award as sizeable, valuing it between NOK500m and NOK1.5bn ($54m to $162m).",
@@ -1444,7 +1894,7 @@
       "navarea": "IX",
       "image": "https://splash247.com/wp-content/uploads/2026/11/Seaway-Eagle-Seaway7-300x180.jpg",
       "summary": "Abu Dhabi-based HEA Energy has struck a deal to acquire Subsea7’s heavy transportation business, adding a six-vessel operation to its growing offshore fleet. The transaction will see Subsea7’s offshore renewables arm Seaway7 divest a business comprising five owned and one chartered open-deck semi-submersible heavy...",
-      "body": "Europe Middle East Offshore Renewables HEA Energy snaps up Subsea7’s six-ship heavy transport business Adis Ajdin November 5, 2026 0 1,012 1 minute read Seaway7 Seaway7 Abu Dhabi-based HEA Energy has struck a deal to acquire Subsea7’s heavy transportation business, adding a six-vessel operation to its growing offshore fleet. The transaction will see Subsea7’s offshore renewables arm Seaway7 divest a business comprising five owned and one chartered open-deck semi-submersible heavy transport vessels. The fleet includes Seaway Eagle, Seaway Falcon, Seaway Hawk, Seaway Osprey, Seaway Albatross and the chartered Seaway Swan . The vessels are used to transport offshore wind foundations, substations, jackup rigs, offshore modules and other oversized cargo, with lifting and transportation capabilities covering loads of up to 55,000 tonnes. Financial terms have not been disclosed, with Subsea7 saying the transaction remains subject to customary closing conditions, including regulatory approvals. Completion is expected in the first half of 2027. The sale forms part of the permitted divestments under Subsea7’s merger agreement with Italian offshore contractor Saipem and will trigger a €105m special dividend to Subsea7 shareholders. For HEA Energy, the acquisition marks another major expansion of its offshore vessel business, which has been growing rapidly across the Middle East and Europe. The company was established in 2022 by Hassan Elali, the founder and former executive chairman of Zakher Marine International (ZMI), which was acquired by ADNOC Logistics & Services. HEA has been building up its offshore support and wind maintenance fleet through newbuildings and acquisitions. By September this year, the company had 19 vessels delivered and another 12 under construction, with deliveries scheduled through 2027. Its expansion has also included offshore wind maintenance work in Europe, where the company has secured contracts involving its jackup vessels, including HEA Hercules , which was mobilised for a North Sea campaign earlier this year. The divestment comes as Subsea7 and Saipem work towards their proposed merger to create Saipem7. Brazil’s competition watchdog gave conditional clearance to the combination on November 4, requiring the separate sale of the Seven Borealis pipelay and heavylift vessel to address competition concerns. The proposed merger, which would create an offshore engineering group with combined revenues of about €21bn ($23.6bn), still faces regulatory scrutiny in Europe and Australia. Tags Norway United Arab Emirates Adis Ajdin November 5, 2026 0 1,012 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Middle East Offshore Renewables HEA Energy snaps up Subsea7’s six-ship heavy transport business Adis Ajdin November 5, 2026 0 1,386 1 minute read Seaway7 Seaway7 Abu Dhabi-based HEA Energy has struck a deal to acquire Subsea7’s heavy transportation business, adding a six-vessel operation to its growing offshore fleet. The transaction will see Subsea7’s offshore renewables arm Seaway7 divest a business comprising five owned and one chartered open-deck semi-submersible heavy transport vessels. The fleet includes Seaway Eagle, Seaway Falcon, Seaway Hawk, Seaway Osprey, Seaway Albatross and the chartered Seaway Swan . The vessels are used to transport offshore wind foundations, substations, jackup rigs, offshore modules and other oversized cargo, with lifting and transportation capabilities covering loads of up to 55,000 tonnes. Financial terms have not been disclosed, with Subsea7 saying the transaction remains subject to customary closing conditions, including regulatory approvals. Completion is expected in the first half of 2027. The sale forms part of the permitted divestments under Subsea7’s merger agreement with Italian offshore contractor Saipem and will trigger a €105m special dividend to Subsea7 shareholders. For HEA Energy, the acquisition marks another major expansion of its offshore vessel business, which has been growing rapidly across the Middle East and Europe. The company was established in 2022 by Hassan Elali, the founder and former executive chairman of Zakher Marine International (ZMI), which was acquired by ADNOC Logistics & Services. HEA has been building up its offshore support and wind maintenance fleet through newbuildings and acquisitions. By September this year, the company had 19 vessels delivered and another 12 under construction, with deliveries scheduled through 2027. Its expansion has also included offshore wind maintenance work in Europe, where the company has secured contracts involving its jackup vessels, including HEA Hercules , which was mobilised for a North Sea campaign earlier this year. The divestment comes as Subsea7 and Saipem work towards their proposed merger to create Saipem7. Brazil’s competition watchdog gave conditional clearance to the combination on November 4, requiring the separate sale of the Seven Borealis pipelay and heavylift vessel to address competition concerns. The proposed merger, which would create an offshore engineering group with combined revenues of about €21bn ($23.6bn), still faces regulatory scrutiny in Europe and Australia. Tags Norway United Arab Emirates Adis Ajdin November 5, 2026 0 1,386 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The transaction will see Subsea7’s offshore renewables arm Seaway7 divest a business comprising five owned and one chartered open-deck semi-submersible heavy transport vessels.",
         "The fleet includes Seaway Eagle, Seaway Falcon, Seaway Hawk, Seaway Osprey, Seaway Albatross and the chartered Seaway Swan .",
@@ -1476,7 +1926,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2026/11/Fitburg-Finnish-Border-Guard-300x180.jpg",
       "summary": "A Finnish court has sentenced the captain and a crew member of the general cargo ship Fitburg to prison for deliberately damaging two subsea telecommunications cables in the Gulf of Finland on New Year’s Eve last year. Helsinki District Court handed Russian captain Andrei Maksimenko a three-and-a-half-year prison...",
-      "body": "Europe Operations Regulatory Finland jails captain and crew member over Baltic cable sabotage Adis Ajdin November 5, 2026 0 10,574 2 minutes read Finnish Border Guard Finnish Border Guard A Finnish court has sentenced the captain and a crew member of the general cargo ship Fitburg to prison for deliberately damaging two subsea telecommunications cables in the Gulf of Finland on New Year’s Eve last year. Helsinki District Court handed Russian captain Andrei Maksimenko a three-and-a-half-year prison sentence, while Azerbaijani bosun Vusal Majidov received two years and 10 months after both were convicted of aggravated criminal damage. The court ordered the two men, who had been subject to travel bans during proceedings, to be taken into custody immediately. They were also ordered to pay compensation for the damage caused to subsea infrastructure. The case centres on the St Vincent and the Grenadines-flagged Fitburg , which was intercepted by Finnish authorities on December 31, 2025, while sailing from St Petersburg to Israel carrying steel products. Investigators established that the vessel had dragged its damaged anchor and chain along the seabed for around 130 km, damaging two telecommunications cables belonging to Elisa and Arelion Finland. The anchor also crossed seven other telecommunications and power cables and a gas pipeline, creating a risk of further damage to critical infrastructure. The court found that the anchor had been lowered after the ship departed St Petersburg but before it left Russian territorial waters. Although prosecutors did not claim that the captain had personally ordered the anchor lowered, the court ruled that both men must have known it was dragging while the vessel continued its voyage. It also found that the bosun had actively contributed to the ship continuing for around two hours after Finnish authorities first contacted the vessel. Both defendants denied wrongdoing and challenged Finland’s jurisdiction, arguing that the damage occurred outside its territorial waters. The court rejected that argument, ruling that Finnish courts could hear the case because the offences were intentional and their consequences were felt in Finland. The decision comes after a separate case involving the Cook Islands-flagged tanker Eagle S , whose crew faced charges over damage to five undersea cables in December 2024. Helsinki District Court initially dismissed that case on jurisdictional grounds in October 2025, but an appeals court overturned the decision in August this year and ordered the case to be reconsidered. The Fitburg defendants were also charged with aggravated interference with telecommunications, but the court dismissed that separate count because it was covered by the aggravated criminal damage conviction. The ruling is not final. The captain’s lawyer has indicated that he intends to appeal, while the bosun is also considering challenging the verdict. Tags Finland Adis Ajdin November 5, 2026 0 10,574 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Operations Regulatory Finland jails captain and crew member over Baltic cable sabotage Adis Ajdin November 5, 2026 0 20,783 2 minutes read Finnish Border Guard Finnish Border Guard A Finnish court has sentenced the captain and a crew member of the general cargo ship Fitburg to prison for deliberately damaging two subsea telecommunications cables in the Gulf of Finland on New Year’s Eve last year. Helsinki District Court handed Russian captain Andrei Maksimenko a three-and-a-half-year prison sentence, while Azerbaijani bosun Vusal Majidov received two years and 10 months after both were convicted of aggravated criminal damage. The court ordered the two men, who had been subject to travel bans during proceedings, to be taken into custody immediately. They were also ordered to pay compensation for the damage caused to subsea infrastructure. The case centres on the St Vincent and the Grenadines-flagged Fitburg , which was intercepted by Finnish authorities on December 31, 2025, while sailing from St Petersburg to Israel carrying steel products. Investigators established that the vessel had dragged its damaged anchor and chain along the seabed for around 130 km, damaging two telecommunications cables belonging to Elisa and Arelion Finland. The anchor also crossed seven other telecommunications and power cables and a gas pipeline, creating a risk of further damage to critical infrastructure. The court found that the anchor had been lowered after the ship departed St Petersburg but before it left Russian territorial waters. Although prosecutors did not claim that the captain had personally ordered the anchor lowered, the court ruled that both men must have known it was dragging while the vessel continued its voyage. It also found that the bosun had actively contributed to the ship continuing for around two hours after Finnish authorities first contacted the vessel. Both defendants denied wrongdoing and challenged Finland’s jurisdiction, arguing that the damage occurred outside its territorial waters. The court rejected that argument, ruling that Finnish courts could hear the case because the offences were intentional and their consequences were felt in Finland. The decision comes after a separate case involving the Cook Islands-flagged tanker Eagle S , whose crew faced charges over damage to five undersea cables in December 2024. Helsinki District Court initially dismissed that case on jurisdictional grounds in October 2025, but an appeals court overturned the decision in August this year and ordered the case to be reconsidered. The Fitburg defendants were also charged with aggravated interference with telecommunications, but the court dismissed that separate count because it was covered by the aggravated criminal damage conviction. The ruling is not final. The captain’s lawyer has indicated that he intends to appeal, while the bosun is also considering challenging the verdict. Tags Finland Adis Ajdin November 5, 2026 0 20,783 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The court ordered the two men, who had been subject to travel bans during proceedings, to be taken into custody immediately.",
         "They were also ordered to pay compensation for the damage caused to subsea infrastructure.",
@@ -1513,451 +1963,11 @@
       "navarea": "XI",
       "image": "https://splash247.com/wp-content/uploads/2026/06/Seacon-300x180.jpg",
       "summary": "Hong Kong-listed Seacon Shipping has struck a $19.6m deal for a newly built oil and chemical tanker, adding to its fleet amid reports of a four-vessel MR tanker disposal. The Qingdao-based owner’s Singapore subsidiary has agreed to acquire the 4,981 gt Jia Yue Ming Zhu, which was built in October this year and will...",
-      "body": "Asia Greater China Tankers Seacon snaps up fresh tanker in $19.6m deal Adis Ajdin November 5, 2026 0 299 1 minute read Seacon Seacon Hong Kong-listed Seacon Shipping has struck a $19.6m deal for a newly built oil and chemical tanker, adding to its fleet amid reports of a four-vessel MR tanker disposal. The Qingdao-based owner’s Singapore subsidiary has agreed to acquire the 4,981 gt Jia Yue Ming Zhu , which was built in October this year and will be renamed Golden Canna. The vessel is being purchased from Marshall Islands-incorporated Sanhe Jiaye, according to a filing with the Hong Kong Stock Exchange. Seacon will pay a $2.94m deposit upon delivery, with the remaining $16.66m due within 120 days. The acquisition will be funded through internal resources and external financing. The latest purchase follows shipbroking reports linking Seacon to the sale of four MR product tankers in an en bloc deal involving two recently completed vessels and another two still under construction. The company has not publicly confirmed the reported transaction. Seacon has been actively reshaping its tanker portfolio, combining investments in newer chemical and product carriers with vessel sales and refinancing deals. In June, the company agreed to acquire two chemical and oil tankers, Golden Gerbera and Golden Osmanthus , from Oriental Prime Shipping for $39.2m, or $19.6m apiece. The owner also carried out a $103.4m refinancing of four 18,500 dwt chemical tankers in August, replacing earlier sale-and-leaseback arrangements with new 10-year facilities at lower financing margins. Seacon’s push into larger product tankers dates back to 2024, when it contracted four 50,000 dwt MR vessels at Chengxi Shipyard for around $45m each. The group was subsequently linked to another four MR newbuildings through a joint venture with Huanghai Shipbuilding. At the end of June, Seacon controlled 38 vessels and held investments in another 15 through joint ventures, with its diversified portfolio including 18 oil and chemical tankers. Tags Singapore Adis Ajdin November 5, 2026 0 299 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Asia Greater China Tankers Seacon snaps up fresh tanker in $19.6m deal Adis Ajdin November 5, 2026 0 463 1 minute read Seacon Seacon Hong Kong-listed Seacon Shipping has struck a $19.6m deal for a newly built oil and chemical tanker, adding to its fleet amid reports of a four-vessel MR tanker disposal. The Qingdao-based owner’s Singapore subsidiary has agreed to acquire the 4,981 gt Jia Yue Ming Zhu , which was built in October this year and will be renamed Golden Canna. The vessel is being purchased from Marshall Islands-incorporated Sanhe Jiaye, according to a filing with the Hong Kong Stock Exchange. Seacon will pay a $2.94m deposit upon delivery, with the remaining $16.66m due within 120 days. The acquisition will be funded through internal resources and external financing. The latest purchase follows shipbroking reports linking Seacon to the sale of four MR product tankers in an en bloc deal involving two recently completed vessels and another two still under construction. The company has not publicly confirmed the reported transaction. Seacon has been actively reshaping its tanker portfolio, combining investments in newer chemical and product carriers with vessel sales and refinancing deals. In June, the company agreed to acquire two chemical and oil tankers, Golden Gerbera and Golden Osmanthus , from Oriental Prime Shipping for $39.2m, or $19.6m apiece. The owner also carried out a $103.4m refinancing of four 18,500 dwt chemical tankers in August, replacing earlier sale-and-leaseback arrangements with new 10-year facilities at lower financing margins. Seacon’s push into larger product tankers dates back to 2024, when it contracted four 50,000 dwt MR vessels at Chengxi Shipyard for around $45m each. The group was subsequently linked to another four MR newbuildings through a joint venture with Huanghai Shipbuilding. At the end of June, Seacon controlled 38 vessels and held investments in another 15 through joint ventures, with its diversified portfolio including 18 oil and chemical tankers. Tags Singapore Adis Ajdin November 5, 2026 0 463 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The Qingdao-based owner’s Singapore subsidiary has agreed to acquire the 4,981 gt Jia Yue Ming Zhu , which was built in October this year and will be renamed Golden Canna.",
         "The vessel is being purchased from Marshall Islands-incorporated Sanhe Jiaye, according to a filing with the Hong Kong Stock Exchange.",
         "Seacon will pay a $2.94m deposit upon delivery, with the remaining $16.66m due within 120 days."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-F3C1CB742D",
-      "title": "Vattenfall signs final agreements for 1.8GW Danish offshore wind projects",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/vattenfall-signs-final-agreements-for-1-8gw-danish-offshore-wind-projects/",
-      "publishedAt": "2026-11-05T11:00:00Z",
-      "category": "Shipping & Tankers",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Baltic Sea & Northern Europe",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "shipping",
-        "rotterdam"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://splash247.com/wp-content/uploads/2023/07/Vattenfall-300x180.jpg",
-      "summary": "Swedish energy group Vattenfall has signed final agreements with the Danish Energy Agency for two offshore wind developments with a combined capacity of at least 1.8GW. The agreements cover the 800 MW Hesselø project in the Kattegat and the 1 GW Holmsland development in the North Sea, both expected to become...",
-      "body": "Europe Offshore Renewables Vattenfall signs final agreements for 1.8GW Danish offshore wind projects Bojan Lepic November 5, 2026 0 264 1 minute read Vattenfall Vattenfall Swedish energy group Vattenfall has signed final agreements with the Danish Energy Agency for two offshore wind developments with a combined capacity of at least 1.8GW. The agreements cover the 800 MW Hesselø project in the Kattegat and the 1 GW Holmsland development in the North Sea, both expected to become operational in 2032. Holmsland was previously known as North Sea I Mid, with the name changed to reflect its location off the Danish coast near Hvide Sande. The signing follows Vattenfall’s successful bids for both projects in Denmark’s offshore wind tender in August. The company secured the North Sea project with a bid of DKK504 ($78) per MWh, while its winning offer for Hesselø was DKK542 ($84) per MWh. The agreed prices are guaranteed for 20 years after the developments are completed. Hesselø is located approximately 30 km from the Danish coast, while Holmsland is planned around 20 km offshore. Together, the projects are expected to significantly expand the country’s offshore renewable energy capacity. The company stressed that construction of both wind farms remains subject to final investment decisions and the necessary regulatory approvals. Vattenfall currently operates five offshore wind farms in Denmark, generating about 6.5TWh of electricity annually. The company is also developing major offshore wind projects elsewhere in Europe, including Nordlicht in Germany and Zeevonk in the Netherlands. Tags Denmark Offshore Wind Sweden Bojan Lepic November 5, 2026 0 264 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "The agreements cover the 800 MW Hesselø project in the Kattegat and the 1 GW Holmsland development in the North Sea, both expected to become operational in 2032.",
-        "Holmsland was previously known as North Sea I Mid, with the name changed to reflect its location off the Danish coast near Hvide Sande.",
-        "The signing follows Vattenfall’s successful bids for both projects in Denmark’s offshore wind tender in August."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-4A0A2E528B",
-      "title": "BP raises over $1bn from Aker BP stake sale",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/bp-raises-over-1bn-from-aker-bp-stake-sale/",
-      "publishedAt": "2026-11-05T10:45:00Z",
-      "category": "Ports & Terminals",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://splash247.com/wp-content/uploads/2024/12/BP-logo-BP-300x181.jpg",
-      "summary": "British energy major BP has raised about $1.06bn by selling part of its stake in Norwegian oil and gas producer Aker BP as it continues efforts to strengthen its balance sheet. The company sold 31.6m shares, representing around 5% of Aker BP’s total issued share capital, for NOK311 per share. The transaction...",
-      "body": "Europe Offshore BP raises over $1bn from Aker BP stake sale Bojan Lepic November 5, 2026 0 271 1 minute read BP BP British energy major BP has raised about $1.06bn by selling part of its stake in Norwegian oil and gas producer Aker BP as it continues efforts to strengthen its balance sheet. The company sold 31.6m shares, representing around 5% of Aker BP’s total issued share capital, for NOK311 per share. The transaction generated gross proceeds of NOK9.83bn ($1.06bn). The sale price represents a discount of approximately 12% to Aker BP’s closing share price of NOK354 on Wednesday. Following the transaction, BP’s ownership in Aker BP has fallen from 15.9% to approximately 10.9%, leaving it with 68.7m shares. The company has agreed not to sell its remaining holding for 90 days, subject to customary exemptions. BP said it would use the proceeds to strengthen its financial position. The disposal has also prompted the company to raise its expected divestment and other proceeds for 2026 to approximately $9bn, up from its previous guidance of $8bn. BP chief executive Meg O’Neill said the Norwegian producer’s performance and favourable market conditions created an opportunity to realise some of the investment’s value. Aker BP was established in 2016 by combining BP’s Norwegian upstream business with Det norske oljeselskap. The company has since become one of Norway’s largest independent oil and gas producers, with a portfolio of producing assets and developments across the Norwegian continental shelf. Aker BP reported production of 374,000 barrels of oil equivalent per day in the third quarter, while its major Yggdrasil and Valhall PWP-Fenris developments remain on track for first production in mid-2027. Tags Norway United Kingdom Bojan Lepic November 5, 2026 0 271 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "The company sold 31.6m shares, representing around 5% of Aker BP’s total issued share capital, for NOK311 per share.",
-        "The transaction generated gross proceeds of NOK9.83bn ($1.06bn).",
-        "The sale price represents a discount of approximately 12% to Aker BP’s closing share price of NOK354 on Wednesday."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-DFEF6C6453",
-      "title": "Energy security to keep running the show into 2027 amid market shifts, IEA Chief warns",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/05/energy-security-to-keep-running-the-show-into-2027-amid-market-shifts-iea-chief-warns",
-      "publishedAt": "2026-11-05T10:00:00Z",
-      "category": "Weather & Cyclones",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Suez Canal & Eastern Med",
-        "Panama Canal & Caribbean"
-      ],
-      "tags": [
-        "lng",
-        "port",
-        "hormuz",
-        "china"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://www.offshore-energy.biz/api/media/file/oil2012%20IEA-800x400.png?prefix=media",
-      "summary": "$3.4 trillion global energy spend: Clean tech outpaces fossil fuels nearly 2-to-1 in 2026. IEA Chief says energy markets will not normalize in 2027.",
-      "body": "Market Outlooks November 5, 2026 · 2 hours ago Energy security to keep running the show into 2027 amid market shifts, IEA Chief warns $3.4 trillion global energy spend: Clean tech outpaces fossil fuels nearly 2-to-1 in 2026. IEA Chief says energy markets will not normalize in 2027. MC Melisa Cavcic Senior Editor 5 minutes read LinkedIn X Email Illustration Source: IEA As the energy transition reshapes capital allocation, global energy spending is barreling toward a record $3.4 trillion, according to the International Energy Agency (IEA). However, IEA’s Executive Director has warned that markets will not return to normal in 2027, as energy security continues to shake up global markets. With the Middle East conflict exposing severe supply vulnerabilities as shipping transit through the Strait of Hormuz ground to a halt, the crisis has highlighted the critical need to diversify supplies and find new delivery routes. While low-emissions technologies, nuclear, storage, and grid expansions pull in $2.2 trillion, leaving traditional oil, gas, and coal trailing behind, fossil fuel extraction is continuing to command a $1.2 trillion slice of the market. Driven by persistent geopolitical energy shocks, global investments are fuelling a nuclear comeback and a surge in clean infrastructure deployment looking toward 2027. As reported by Reuters , Fatih Birol , IEA’s Executive Director, recently warned that markets would not revert to pre-war conditions in 2027. Highlighting persistent supply security risks, high fuel pressures, and a rush toward clean tech and nuclear resilience, the ongoing supply vulnerabilities and diesel and gas constraints across Europe appear to be bringing in a permanent shift in how nations approach energy security and infrastructure investment. The IEA has underlined a four-decade high in nuclear power construction alongside the broader $3.4 trillion investment wave, accelerating the race toward grids, efficiency, and storage. Birol is convinced the Hormuz crisis is leading governments to rethink energy priorities and to seek to diversify partners, trade routes, fuels, and technologies. Given that the global energy crisis will continue to cast a long shadow into 2027, based on IEA leadership’s take on the situation, lingering supply bottlenecks and fractured trade routes are locking in a high-alert era for global energy security. Back in May 2026, the IEA’s ‘ World Energy Investment’ report outlined that the conflict in the Middle East was expected to make energy security a top priority among decision-makers, as its effects were being felt most directly in the Middle East and Asia, which had been the destination for 80-90% of energy exports from Gulf producers. The International Energy Agency said at the time that the conflict was fortifying a shift towards security, trust, and diversity as key considerations when choosing energy projects and partners, alongside costs, prices, and environmental performance. As a result, the IEA anticipated wide-ranging implications for the fuels and technologies that countries prioritize, where they get them from, and how they look to achieve other strategic energy objectives. \" Changing perceptions of risk and reliability are expected to spur renewed interest in a range of domestically available energy resources: for key fuel importers, this creates upside for renewables, nuclear and potentially also for coal. Renewable energy resources are widely distributed around the world, and preliminary signs indicate that deployment is picking up in some markets heavily affected by the energy crisis. Moreover, if it prompts a faster pace of electrification, the conflict will bring the Age of Electricity even more clearly into view: electricity-related spending already makes up nearly 60% of all global energy investment. \" — The International Energy Agency Related Articles Fossil Energy IEA: Oil & gas decline rates sound the alarm over global energy security risks 5 min read The Paris-based agency’s projections indicated that capital flows to the energy sector were expected to grow to $3.4 trillion in 2026, a 5% rise from 2025, mainly from China, the U.S., and the EU, with the clean energy investment set to grow to $2.2 trillion, almost double that of fossil fuels, as investment in clean energy increases year-on-year by 7% in advanced economies and in China, and 4% in other emerging markets, reflecting regional differences with a shared focus on energy security. The IEA has noted that geopolitical tensions, supply restrictions, and market shocks are impacting the outlook looking into 2027, stressing persistent risks to energy security and fuel supplies, alongside surging costs and heightened demand for power infrastructure resilience, energy storage, and nuclear build-outs, which have hit multi-decade highs with roughly 90 GW under construction. The total energy spending in the U.S. is set to rise by 6%, reaching almost $610 billion, with a nearly fourfold uptick in LNG spending in 2026, and battery storage, geothermal, and nuclear power emerging as investment drivers. The United States is expected to represent nearly half of global LNG export capacity by 2030. The investment in the Latin American region is anticipated to increase to $190 billion in 2026, with fossil fuel supply spending continuing to rise, led by deepwater oil developments in Brazil and Guyana and continued activity in Argentina, Mexico, and Venezuela, and grids remaining a focus sector. Advertisement Energy investments in the European Union are projected to rise to $440 billion in response to energy security and affordability concerns, supported by diversification and accelerated electrification, with natural gas investment remaining important for security of supply, especially through LNG, with infrastructure investments reaching $17 billion in 2025. Africa’s energy spending is forecast to reach $110 billion in 2026, dominated by fossil fuel spending, with growing interest in power generation, critical minerals, and transport, while upstream investment hit $37 billion in 2025, down from $68 billion in 2016, an 11% drop. Investment remains highly concentrated in Algeria, Angola, Egypt, Nigeria, and Libya, which together account for 70% of investment, even though investment in these countries has fallen from $50 billion in 2016 to $25 billion in 2025. On the other hand, capital allocated to emerging producers such as Mozambique, Namibia, Senegal, and Uganda has grown since 2016. The Middle East is continuing to attract energy investment, with natural gas and low-emissions technologies driving investment trends, but upstream oil and gas spending is projected to decline by around 1% in 2026. Eurasia continues to keep fossil fuels as the primary energy source in the region, while investment in renewables, grids, and electrification is projected to reach $43 billion. While total energy spending remains dominated by oil and gas, at $77 billion, regional fossil fuel investment has fallen markedly from past highs. There is a growing focus on power system reliability, grid expansion, and export resilience in countries such as Kazakhstan, Uzbekistan and Azerbaijan, which includes major public and foreign-backed projects in solar, wind, storage, hydropower and transmission infrastructure. China’s energy investment priorities are shifting from capacity expansion toward broader system strategy, with grid expansion and green finance underpinning energy transition, based on the IEA’s report. The country’s spending is forecast to hit $945 billion in 2026, with grid investment expected to rise sharply to $140 billion, playing a central role in integrating recent renewable additions, supporting electrification, and strengthening energy security. India’s energy investment is projected to climb to $170 billion, driven by a surge in investment in solar PV and oil refining, as for every dollar invested in fossil-based generation, the country invests three in renewables and nuclear power. Japan and Korea’s investment in dispatchable generation is becoming increasingly important for electricity security, while the region is expanding critical mineral investments to reduce supply chain risks by combining transition-related spending with a strong focus on energy security, with total investment projected to reach $122 billion. Southeast Asia’s energy investment continues to grow, with spending on renewables, grids, and end-use sectors anticipated to jump to $57 billion in 2026, as the region’s electricity demand is increasing 1.5 times faster than the global average, with the momentum building for cross-border electricity trade through the ASEAN Power Grid (APG), with $27 billion needed for cross-border interconnections by 2040. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Market Outlooks Business Developments & Projects Business & Finance Energy Transition Fossil Energy Oil & Gas Low-Carbon Transition News Long Reads",
-      "takeaways": [
-        "IEA Chief says energy markets will not normalize in 2027.",
-        "However, IEA’s Executive Director has warned that markets will not return to normal in 2027, as energy security continues to shake up global markets.",
-        "Driven by persistent geopolitical energy shocks, global investments are fuelling a nuclear comeback and a surge in clean infrastructure deployment looking toward 2027."
-      ],
-      "readingMinutes": 7,
-      "readMinutes": 7
-    },
-    {
-      "id": "SN-F4576646BC",
-      "title": "Panama teams up with Pole Star Global for registry sanctions compliance",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/regulations/panama-teams-up-with-pole-star-global-for-registry-sanctions-compliance",
-      "publishedAt": "2026-11-05T09:58:15Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean"
-      ],
-      "tags": [
-        "panama"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt9c2c89919f750c3c/6aec54f22c8d98e1b1815e7f/DirkMacre.jpg?width=720&quality=80&disable=upscale",
-      "summary": "Pole Star Global is working with the Panama Maritime Authority to improve sanctions compliance by the Panama Ship Registry",
-      "body": "Pole Star Global is working with the Panama Maritime Authority to improve sanctions compliance by the Panama Ship Registry",
-      "takeaways": [
-        "Pole Star Global is working with the Panama Maritime Authority to improve sanctions compliance by the Panama Ship Registry",
-        "Operational Area: Panama Canal & Caribbean.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-C86920D1A5",
-      "title": "Chevron contract takes EnerMech offshore Equatorial Guinea",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/05/chevron-contract-takes-enermech-offshore-equatorial-guinea",
-      "publishedAt": "2026-11-05T09:44:50Z",
-      "category": "Ports & Terminals",
-      "region": "US Gulf & Port of Houston",
-      "regions": [
-        "US Gulf & Port of Houston",
-        "Singapore & Malacca Strait",
-        "Australia & Pilbara"
-      ],
-      "tags": [
-        "port",
-        "houston"
-      ],
-      "coords": [
-        29.35,
-        -94.78
-      ],
-      "navarea": "IV",
-      "image": "https://www.offshore-energy.biz/api/media/file/Chevron%20contract%20takes%20EnerMech%20offshore%20Equatorial%20Guinea-800x449.jpg?prefix=media",
-      "summary": "Aberdeen-headquartered integrated solutions specialist EnerMech has won a contract with U.S.-headquartered energy giant Chevron for specialist...",
-      "body": "Pipes November 5, 2026 · 1 minute ago Chevron contract takes EnerMech offshore Equatorial Guinea NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email EnerMech Aberdeen-headquartered integrated solutions specialist EnerMech has won a contract with U.S.-headquartered energy giant Chevron for specialist pipeline pre-commissioning services at a gas development offshore Equatorial Guinea. EnerMech will support the preparation of approximately 19 kilometers of rigid production flowline connecting the Aseng gas field to existing offshore infrastructure, with the scope including pre-operational engineering and project management, and specialist pipeline pre-commissioning services. \"Pre-commissioning activities are a critical stage in preparing pipeline infrastructure for operation, requiring detailed planning, technical expertise and precise execution,\" said Nuno de Sousa , SVP, Energy Solutions, Infrastructure & Industrial Solutions and Western Hemisphere at EnerMech. \"Drawing on extensive experience delivering similar scopes around the world, our team will work closely with Chevron to ensure the pipeline system is prepared for the next phase of the project safely, efficiently and in line with operational requirements.\" The company will manage the project from its Houston base. “While we have supported Chevron on projects in other parts of our business for many years, this award expands that relationship into Pipelines & Subsea and reinforces the value our specialist teams can bring across the asset lifecycle,\" said Charles “Chuck” Davison, Jr. , CEO of EnerMech. Chevron announced the final investment decision (FID) for the Aseng gas monetization project in April, revealing that Subsea7 had been tasked with the subsea installation scope. Related Articles Subsea EnerMech stays with Chevron in Australia until end of 2031 1 min read Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Pipes Subsea Production & Processing Fossil Energy Oil & Gas Contracts & Tenders Business Developments & Projects Business & Finance",
-      "takeaways": [
-        "Chevron announced the final investment decision (FID) for the Aseng gas monetization project in April, revealing that Subsea7 had been tasked with the subsea installation scope.",
-        "Related Articles Subsea EnerMech stays with Chevron in Australia until end of 2031 1 min read Reach the Offshore Energy industry in one go!",
-        "Offshore Energy is read by thousands of professionals every day."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-668B1F06AD",
-      "title": "Nautical Institute UAE Branch puts seafarer welfare centre stage at Marine Ball 2026",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/event-news/uaes-nautical-institute-gala-dinner-celebrates-maritime-industry-boosts-seafarer-welfare-awareness",
-      "publishedAt": "2026-11-05T09:22:34Z",
-      "category": "Ports & Terminals",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltf9e3335ff7f4e74c/6aec576d8fa0d17b55eddd20/Untitled_-_November_05_2026_at_10.13.58.png?width=720&quality=80&disable=upscale",
-      "summary": "Capt Zarir Irani discusses how the UAE Nautical Institute's annual charity gala blends networking with an enduring commitment to seafarer mental health support.",
-      "body": "Capt Zarir Irani discusses how the UAE Nautical Institute's annual charity gala blends networking with an enduring commitment to seafarer mental health support.",
-      "takeaways": [
-        "Capt Zarir Irani discusses how the UAE Nautical Institute's annual charity gala blends networking with an enduring commitment to seafarer mental health support.",
-        "Operational Area: Strait of Hormuz & Persian Gulf.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-A10A2D9905",
-      "title": "Maersk Slides as Upgraded Guidance Is Lower Than Anticipated",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/maersk-slides-as-upgraded-guidance-is-lower-than-anticipated/",
-      "publishedAt": "2026-11-05T09:21:38Z",
-      "category": "Weather & Cyclones",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Red Sea & Bab el-Mandeb",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "hormuz",
-        "red sea",
-        "typhoon"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=900&q=80",
-      "summary": "AP Moller-Maersk A/S shares slumped after a guidance upgrade and third-quarter earnings from the world’s second-largest shipping line fell short of analyst estimates.",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Maersk container vessels are worked at Bremerhaven’s North Sea Terminal, where APM Terminals and Eurogate are planning a €1 billion modernization aimed at fully electrified, zero-emission operations. Photo courtesy Maersk/APM Terminals By Christian Wienberg and Sanne Wass Nov 5, 2026 (Bloomberg) –AP Moller-Maersk A/S shares slumped after a guidance upgrade and third-quarter earnings from the world’s second-largest shipping line fell short of analyst estimates. Maersk stock dropped as much as 11.6%, the most since April 2025, at 9:33 a.m. in Copenhagen. Shares are falling for the sixth day in a row, but are still up about 36% this year. Maersk now expects 2026 underlying earnings before interest and tax to be in a range of $8 billion to $8.5 billion, according to a statement on Thursday. The full range is below the average analyst estimate of $8.66 billion compiled by Bloomberg. Third-quarter Ebit, while up 155% from a year earlier at $3.27 billion, missed the $3.61 billion estimate. Revenue and Ebitda also came below estimates. “Maersk delivered third-quarter earnings that came in below expectations,” Mikkel Emil Jensen, an analyst at AL Sydbank, said in a note. “The main explanation lies in the Ocean business, where volume growth was slightly weaker than expected while costs came in higher than anticipated.” He listed lower activity in the Middle East and challenging weather conditions as some of the reasons for lower volumes. Still, Maersk’s new guidance compares with the Copenhagen-based company’s previous forecast range of $4.5 billion to $6.5 billion and is the second upgrade in just three months as a global rollout of artificial intelligence infrastructure boosts the demand and rates for shipping services. Chief Executive Officer Vincent Clerc told reporters in Copenhagen that “some analysts need to look into the spreadsheets.” Haider Anjum, a senior analyst at Jyske Bank, called the earnings strong but “not strong enough.” He said earnings continue to be driven by capacity disruptions around Hormuz, typhoons and port congestion, raising questions about how long those tailwinds can last. Repeated disruptions to global supply chains have boosted freight rates in recent years. They include the Covid-19 pandemic, Houthi attacks that forced carriers to avoid the Red Sea and most recently the US war against Iran that throttled traffic in the Strait of Hormuz. “The guidance also implies that fourth-quarter earnings will be slightly lower than in the third quarter, which is broadly in line with our expectations,” Jensen of AL Sydbank said. © 2026 Bloomberg L.P. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Vice President JD Vance on Wednesday blamed Republicans’ midterm election losses on the Trump administration’s eight-month war with Iran, which has driven up global energy prices and left commercial shipping... The Iran war was a key driver of the Republican Party's shellacking in the US midterms on Tuesday, but the bruising defeat may make it more challenging for President Donald Trump to end the conflict. Contacts between Iran and the United States to end their eight-month war are continuing, Tehran said on Monday, after days of Iranian talks with Qatari mediators ended with altered proposals but no breakthrough. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
-      "takeaways": [
-        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
-        "Maersk stock dropped as much as 11.6%, the most since April 2025, at 9:33 a.m.",
-        "Shares are falling for the sixth day in a row, but are still up about 36% this year."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
-      "id": "SN-7743C53B97",
-      "title": "When safety becomes culture: Inside the Tristar Safety at Sea Conference",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/crewing/when-safety-becomes-culture-inside-the-tristar-safety-at-sea-conference",
-      "publishedAt": "2026-11-05T09:12:04Z",
-      "category": "Navigation & Safety",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "safety"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt98daf17bd7b1fdab/6aec49b7f7db7fa649ad4670/Untitled_-_07_May_2026_at_11.31.50.png?width=720&quality=80&disable=upscale",
-      "summary": "A look at how the Tristar Safety at Sea Conference puts seafarer welfare at its heart",
-      "body": "A look at how the Tristar Safety at Sea Conference puts seafarer welfare at its heart",
-      "takeaways": [
-        "A look at how the Tristar Safety at Sea Conference puts seafarer welfare at its heart",
-        "Operational Area: Global Maritime.",
-        "Watchkeepers transiting affected waters should cross-check active NAVAREA & UKMTO advisories on SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-C5BE1A6B77",
-      "title": "CIMC and Oman Investment Authority establish cooperation",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/ports-logistics/cimc-and-oman-investment-authority-establish-cooperation",
-      "publishedAt": "2026-11-05T08:44:49Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt37b70ea7d4f9a2e1/6aec42c490e4194a77b84b36/CIMC-OIA.jpg?width=720&quality=80&disable=upscale",
-      "summary": "Partnership targets port logistics, green energy and localised industrial development",
-      "body": "Partnership targets port logistics, green energy and localised industrial development",
-      "takeaways": [
-        "Partnership targets port logistics, green energy and localised industrial development",
-        "Operational Area: Global Maritime.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-0098DE690C",
-      "title": "Aker Solutions scores multimillion-dollar job on oil field redevelopment offshore Qatar",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/05/aker-solutions-scores-multimillion-dollar-job-on-oil-field-redevelopment-offshore-qatar",
-      "publishedAt": "2026-11-05T08:39:47Z",
-      "category": "Ports & Terminals",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "lng",
-        "port"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://www.offshore-energy.biz/api/media/file/offshore_maintenance_modifications_Aker%20Solutions-800x450.png?prefix=media",
-      "summary": "Aker Solutions has been booked to undertake an assignment to extend the life of a field that has been producing oil since the mid-1960s.",
-      "body": "Contracts & Tenders November 5, 2026 · 8 minutes ago Aker Solutions scores multimillion-dollar job on oil field redevelopment offshore Qatar Aker Solutions has been booked to undertake an assignment to extend the life of a field that has been producing oil since the mid-1960s. MC Melisa Cavcic Senior Editor 2 minutes read LinkedIn X Email Illustration Source: Aker Solutions Norway-based energy services provider Aker Solutions has landed a sizeable deal with PTSC Mechanical and Construction Limited Company (PTSC M&C) to help bring to life the multimillion-dollar modernization of an oil field off the coast of Qatar, with its engineering hubs in Kuala Lumpur and Mumbai spearheading detail design for three topsides, four jackets, and crucial brownfield tie-ins as the Persian Gulf state’s QatarEnergy works to prolong the operational life of the 1960s-era field. Aker Solutions has received a letter of award (LOA) from PTSC M&C for a contract worth between NOK 0.5 billion and NOK 1.5 billion (approximately $54 million to $162 million) for detail design work related to the redevelopment of the Maydan Mahzam oil field offshore Qatar. According to the European player, the work will be executed by its engineering teams in Kuala Lumpur, Malaysia, and Mumbai, India. Aker Solutions will provide detail design services for several offshore installations under PTSC M&C's project scope, including three major topsides, four jackets, and a brownfield tie-in. The LOA is subject to the signing of the final contract. QatarEnergy, as the operator of the field, is planning a major redevelopment project to upgrade and extend the operational life of the asset, with PTSC M&C selected for a key package in the redevelopment program. This is part of the Qatari player’s energy security playbook, alongside its recent liquefied natural gas (LNG) deals in the United States. Related Articles Business & Finance Cheniere to fuel QatarEnergy with US Gulf Coast LNG through 2054 3 min read Located about 100 kilometers northeast of the Qatari coastline and 28 kilometers southeast of Halul Island, in water depths of about 40 meters, the Maydan Mahzam oil field, along with the nearby Bul Hanine field, was discovered in the 1960s and has been in production since 1965. \" This award reflects the strength of our engineering organization and our long track record of delivering complex offshore projects. Our team in Kuala Lumpur brings extensive offshore oil and gas experience, complemented by the capabilities of our office in Mumbai and the wider Aker Solutions organization. Together, we look forward to supporting the successful execution of the Maydan Mahzam project. \" — Guro Rausand Executive Vice President of New Build at Aker Solutions Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Contracts & Tenders Project & Tenders Business & Finance Business Developments & Projects Fossil Energy Oil & Gas News",
-      "takeaways": [
-        "According to the European player, the work will be executed by its engineering teams in Kuala Lumpur, Malaysia, and Mumbai, India.",
-        "Aker Solutions will provide detail design services for several offshore installations under PTSC M&C's project scope, including three major topsides, four jackets, and a brownfield tie-in.",
-        "The LOA is subject to the signing of the final contract."
-      ],
-      "readingMinutes": 3,
-      "readMinutes": 3
-    },
-    {
-      "id": "SN-7A1E470AAC",
-      "title": "PLSV owned by DOF and TechnipFMC to work longer for Petrobras",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/05/plsv-owned-by-dof-and-technipfmc-to-work-longer-for-petrobras",
-      "publishedAt": "2026-11-05T08:16:04Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://www.offshore-energy.biz/api/media/file/PLSV%20owned%20by%20DOF%20and%20TechnipFMC%20to%20work%20longer%20for%20Petrobras-760x444.jpg?prefix=media",
-      "summary": "A pipe-laying support vessel (PLSV) owned by a joint venture between DOF Group and TechnipFMC has secured a new long-term contract extension with...",
-      "body": "Vessels & Vehicles November 5, 2026 · 1 minute ago PLSV owned by DOF and TechnipFMC to work longer for Petrobras NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email Skandi Olinda. Source: DOF A pipe-laying support vessel (PLSV) owned by a joint venture between DOF Group and TechnipFMC has secured a new long-term contract extension with Brazil's oil & gas firm Petrobras. The long-term contract for Skandi Olinda was previously scheduled to terminate in April 2027, and has now been extended through January 2028, covering 304 additional work days. The PLSV joins Skandi Buzios and Skandi Recife, which had their contracts extended in July . Built in 2019, Skandi Olinda is 140 meters long and can accommodate 120 people. The vessel is owned by a joint venture between DOF (50%) and TechnipFMC (50%). Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Vessels & Vehicles Pipes Subsea Vessels Fossil Energy Oil & Gas Contracts & Tenders",
-      "takeaways": [
-        "Vessels & Vehicles November 5, 2026 · 1 minute ago PLSV owned by DOF and TechnipFMC to work longer for Petrobras NS Nadja Skopljak Managing Editor 1 minutes read LinkedIn X Email Skandi Olinda.",
-        "Source: DOF A pipe-laying support vessel (PLSV) owned by a joint venture between DOF Group and TechnipFMC has secured a new long-term contract extension with Brazil's oil & gas firm Petrobras.",
-        "The long-term contract for Skandi Olinda was previously scheduled to terminate in April 2027, and has now been extended through January 2028, covering 304 additional work days."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-E27A3489AA",
-      "title": "Maersk ups full year forecast as ocean drives Q3 profits",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/containers/maersk-ups-full-year-forecast-as-ocean-drives-q3-profits",
-      "publishedAt": "2026-11-05T07:48:03Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "container"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt109af6f65599c472/66cdd46385c58d832accfabe/maersk-flag.jpg?width=720&quality=80&disable=upscale",
-      "summary": "AP Moller Maersk has added up to $4bn to its full year earnings driven by container shipping",
-      "body": "AP Moller Maersk has added up to $4bn to its full year earnings driven by container shipping",
-      "takeaways": [
-        "AP Moller Maersk has added up to $4bn to its full year earnings driven by container shipping",
-        "Operational Area: Global Maritime.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-0CEBAE7FB7",
-      "title": "Saipem7 closing in on its debut as Brazil clears Saipem-Subsea7 merger",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/05/saipem7-closing-in-on-its-debut-as-brazil-clears-saipem-subsea7-merger",
-      "publishedAt": "2026-11-05T07:39:59Z",
-      "category": "Shipping & Tankers",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "shipping",
-        "singapore"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://www.offshore-energy.biz/api/media/file/Saipem-800x534.jpg?prefix=media",
-      "summary": "The multibillion-dollar merger between Saipem and Subsea7 has secured Brazil’s blessing, pending divestment of a vessel.",
-      "body": "Business & Finance November 5, 2026 · 19 minutes ago Saipem7 closing in on its debut as Brazil clears Saipem-Subsea7 merger The multibillion-dollar merger between Saipem and Subsea7 has secured Brazil’s blessing, pending divestment of a vessel. MC Melisa Cavcic Senior Editor 2 minutes read LinkedIn X Email Illustration Source: Saipem Italy’s engineering, drilling, and construction services giant Saipem and the Luxembourg-domiciled Subsea7 have made inroads in bringing their proposed business combination closer to completion, with the green light from Brazil’s antitrust watchdog, the Conselho Administrativo de Defesa Econômica (CADE), clearing a major regulatory hurdle while conditioning the approval on the sale of a pipelaying vessel to preserve market competition. Saipem and Subsea7 have received the approval from Brazil’s CADE for their proposed combination to create Saipem7, subject to compliance with the commitments set out in a merger control agreement. The duo has committed to divest the Seven Borealis vessel to address the competition concerns raised by CADE’s tribunal during its review. This commitment includes specific provisions to ensure continuity in the execution of the existing project backlog. Both companies have emphasized that the divestiture is not expected to materially affect the strategic rationale of the proposed combination. As a result, they have confirmed the synergies previously announced. The European players underlined: “Subsea7 and Saipem remain firmly committed to the proposed combination and will continue to work constructively with the relevant authorities to secure prompt satisfaction (or, where applicable, waiver) of the remaining conditions set out in the common merger plan approved by the shareholders of both companies.” This go-ahead in Brazil comes after Saipem and Subsea7 announced the end of the U.S. antitrust review period, giving them the all-clear to close the transaction in America. The duo’s merger is not out of the woods yet, as the conclusion of the European Commission’s in-depth investigation to assess the proposed merger is still ongoing. Related Articles Fossil Energy Saipem-Subsea7 merger under the microscope as EU flags competition concerns 3 min read Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Business & Finance Authorities & Government Business Developments & Projects Fossil Energy Oil & Gas Subsea",
-      "takeaways": [
-        "Saipem and Subsea7 have received the approval from Brazil’s CADE for their proposed combination to create Saipem7, subject to compliance with the commitments set out in a merger control agreement.",
-        "The duo has committed to divest the Seven Borealis vessel to address the competition concerns raised by CADE’s tribunal during its review.",
-        "This commitment includes specific provisions to ensure continuity in the execution of the existing project backlog."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
