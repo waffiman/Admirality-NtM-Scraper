@@ -4644,7 +4644,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   overflow: visible;
 }
 
-/* Fixed-width cursor HUD (left) — never resizes when DMS / dashes change */
+/* Cursor HUD (left) — coordinates + nav details dropdown toggle */
 .excel-dock-coords {
   position: absolute;
   left: 0.5rem;
@@ -4653,13 +4653,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
   z-index: 2;
   box-sizing: border-box;
   flex: none;
-  width: 33ch;
-  min-width: 33ch;
-  max-width: 33ch;
+  width: auto;
+  min-width: fit-content;
+  max-width: none;
   overflow: visible;
   text-overflow: clip;
   white-space: nowrap;
-  pointer-events: none;
+  pointer-events: auto;
   font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Consolas, monospace;
   font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
@@ -4668,12 +4668,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
   background: rgba(6, 12, 28, 0.55);
   border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 0.28rem 0.55rem;
+  padding: 0.22rem 0.5rem 0.22rem 0.65rem;
   line-height: 1.4;
   height: auto;
   min-height: 0;
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   text-align: left;
 }
 

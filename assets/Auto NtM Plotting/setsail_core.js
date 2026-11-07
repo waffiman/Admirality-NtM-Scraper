@@ -7592,7 +7592,10 @@ function ensureOwnShipPane() {
 
     pane.style.zIndex = 920;
 
-    pane.style.pointerEvents = "auto";
+    // v5.192: pane holds a full-viewport vector canvas (HDG/COG lines, interactive:false).
+    // pointer-events:auto made that canvas swallow clicks on popups / chart objects below.
+    // The own-ship marker icon stays clickable via .leaflet-marker-icon.leaflet-interactive.
+    pane.style.pointerEvents = "none";
 
     return "ownShipPane";
 
@@ -17044,6 +17047,18 @@ function initMapContextMenu(map) {
 
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
 
+  // Unwrapped position (keeps tools on the world copy the user clicked)
+  const rawLatLng = L.latLng(lat, lon);
+
+  // Popup pane must sit above route / WPT / own-ship panes or its buttons die
+  try {
+
+    const pp = map.getPane && map.getPane("popupPane");
+
+    if (pp) { pp.style.zIndex = 1000; pp.style.pointerEvents = "auto"; }
+
+  } catch (ePp) {}
+
 
 
   while (lon < -180) lon += 360;
@@ -17132,6 +17147,20 @@ function initMapContextMenu(map) {
 
           '</button>' +
 
+          '<button type="button" class="ss-ctx-btn" id="btnCtxVrmEbl">' +
+
+            '<div class="ss-ctx-btn-left">' +
+
+              '<span class="ss-ctx-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10" cy="14" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 14L21 3" fill="none" stroke="#f97316" stroke-width="1.6" stroke-dasharray="3 2" stroke-linecap="round"/><circle cx="10" cy="14" r="1.6" fill="#f97316"/></svg></span>' +
+
+              '<span class="ss-ctx-btn-label">VRM / EBL</span>' +
+
+            '</div>' +
+
+            '<span class="ss-ctx-arrow">+</span>' +
+
+          '</button>' +
+
         '</div>' +
 
       '</div>';
@@ -17144,9 +17173,13 @@ function initMapContextMenu(map) {
 
       if (!el) return;
 
+      let lastFire = 0;
+
       const run = (evt) => {
 
         if (evt) {
+
+          if (evt.type === "pointerup" && evt.button != null && evt.button !== 0) return;
 
           if (typeof L !== "undefined" && L.DomEvent) L.DomEvent.stop(evt);
 
@@ -17160,6 +17193,13 @@ function initMapContextMenu(map) {
 
         }
 
+        // pointerup + click both arrive for one press — fire once
+        const now = Date.now();
+
+        if (now - lastFire < 450) return;
+
+        lastFire = now;
+
         try { handler(); } catch (err) {
 
           console.warn("[SetSail] context menu action failed", err);
@@ -17168,23 +17208,17 @@ function initMapContextMenu(map) {
 
       };
 
-      if (typeof L !== "undefined" && L.DomEvent) {
+      const stopOnly = (e) => { e.stopPropagation(); };
 
-        L.DomEvent.disableClickPropagation(el);
+      el.addEventListener("pointerdown", stopOnly);
 
-        L.DomEvent.on(el, "mousedown", L.DomEvent.stopPropagation);
+      el.addEventListener("mousedown", stopOnly);
 
-        L.DomEvent.on(el, "click", run);
+      el.addEventListener("touchstart", stopOnly, { passive: true });
 
-      } else {
+      el.addEventListener("pointerup", run);
 
-        el.addEventListener("pointerdown", (e) => { e.stopPropagation(); });
-
-        el.addEventListener("mousedown", (e) => { e.stopPropagation(); });
-
-        el.addEventListener("click", run);
-
-      }
+      el.addEventListener("click", run);
 
     };
 
@@ -17193,6 +17227,18 @@ function initMapContextMenu(map) {
     bindAction("#btnCtxVariation", renderVariationView);
 
     bindAction("#btnCtxSun", renderSunView);
+
+    bindAction("#btnCtxVrmEbl", () => {
+
+      try { map.closePopup(popup); } catch (eCl) {}
+
+      if (typeof window.addVrmEblTool === "function") {
+
+        window.addVrmEblTool(map, rawLatLng);
+
+      }
+
+    });
 
 
 
@@ -17425,6 +17471,356 @@ function initMapContextMenu(map) {
 window.initMapContextMenu = initMapContextMenu;
 
 window.openMapContextMenu = openMapContextMenu;
+
+
+
+/* ==========================================================================
+   v5.192 VRM / EBL tool (right-click menu → "VRM / EBL")
+   - Centre handle: drag = move whole tool; click = info + Delete; dbl-click = delete
+   - VRM handle (square on the ring): drag = change range
+   - EBL handle (diamond on the line): drag = change bearing
+   EBL is drawn in screen space so it always runs straight to the chart edge
+   (Mercator is conformal → screen angle == true bearing).
+   ========================================================================== */
+
+const _ssVrmEblList = [];
+
+window._ssVrmEblList = _ssVrmEblList;
+
+
+
+function ensureVrmEblPane(map) {
+
+  let pane = map.getPane("vrmEblPane");
+
+  if (!pane) pane = map.createPane("vrmEblPane");
+
+  pane.style.zIndex = 880;          // above route / WPT, below own-ship (920) & popups (950+)
+
+  pane.style.pointerEvents = "none"; // only the handles are interactive
+
+  return "vrmEblPane";
+
+}
+
+
+
+function _vrmDestination(lat, lon, distM, brgDeg) {
+
+  const R = 6371008.8;
+
+  const d = distM / R;
+
+  const b = brgDeg * Math.PI / 180;
+
+  const p1 = lat * Math.PI / 180;
+
+  const l1 = lon * Math.PI / 180;
+
+  const p2 = Math.asin(Math.sin(p1) * Math.cos(d) + Math.cos(p1) * Math.sin(d) * Math.cos(b));
+
+  const l2 = l1 + Math.atan2(Math.sin(b) * Math.sin(d) * Math.cos(p1), Math.cos(d) - Math.sin(p1) * Math.sin(p2));
+
+  return L.latLng(p2 * 180 / Math.PI, l2 * 180 / Math.PI);
+
+}
+
+
+
+function _vrmScreenBearing(map, fromLL, toLL) {
+
+  const a = map.latLngToLayerPoint(fromLL);
+
+  const b = map.latLngToLayerPoint(toLL);
+
+  let deg = Math.atan2(b.x - a.x, -(b.y - a.y)) * 180 / Math.PI;
+
+  if (deg < 0) deg += 360;
+
+  return deg;
+
+}
+
+
+
+function addVrmEblTool(map, centerLL) {
+
+  if (!map || typeof L === "undefined") return null;
+
+  const paneName = ensureVrmEblPane(map);
+
+  let hp = map.getPane("vrmHandlePane");
+
+  if (!hp) hp = map.createPane("vrmHandlePane");
+
+  hp.style.zIndex = 905;
+
+  const handlePane = "vrmHandlePane";
+
+  const renderer = L.svg({ pane: paneName, padding: 0.5 });
+
+  const COLOR = "#f97316";
+
+  let center = L.latLng(centerLL || map.getCenter());
+
+  // Default range ≈ 1/6 of the visible chart width, rounded to 0.1 NM
+  let rangeM = (() => {
+
+    try {
+
+      const b = map.getBounds();
+
+      const w = map.distance(L.latLng(center.lat, b.getWest()), L.latLng(center.lat, b.getEast()));
+
+      const nm = Math.max(0.1, Math.round((w / 6 / 1852) * 10) / 10);
+
+      return nm * 1852;
+
+    } catch (e) { return 3 * 1852; }
+
+  })();
+
+  let eblBrg = 45;
+
+  let vrmHandleBrg = 135;          // where the VRM handle sits on the ring
+
+  const group = L.layerGroup().addTo(map);
+
+  const ring = L.circle(center, {
+
+    radius: rangeM, pane: paneName, renderer, color: COLOR, weight: 2,
+
+    opacity: 0.95, fill: false, interactive: false, className: "ss-vrm-ring"
+
+  }).addTo(group);
+
+  const ebl = L.polyline([center, center], {
+
+    pane: paneName, renderer, color: COLOR, weight: 1.8, opacity: 0.95,
+
+    dashArray: "10 6", interactive: false, className: "ss-ebl-line"
+
+  }).addTo(group);
+
+  const mkIcon = (cls, size) => L.divIcon({
+
+    className: "ss-vrm-handle " + cls,
+
+    html: "<span></span>",
+
+    iconSize: [size, size],
+
+    iconAnchor: [size / 2, size / 2]
+
+  });
+
+  const centerMk = L.marker(center, {
+
+    icon: mkIcon("ss-vrm-handle--center", 18), draggable: true, keyboard: false,
+
+    pane: handlePane, zIndexOffset: 9000, autoPan: false
+
+  }).addTo(group);
+
+  const vrmMk = L.marker(center, {
+
+    icon: mkIcon("ss-vrm-handle--vrm", 14), draggable: true, keyboard: false,
+
+    pane: handlePane, zIndexOffset: 9001, autoPan: false
+
+  }).addTo(group);
+
+  const eblMk = L.marker(center, {
+
+    icon: mkIcon("ss-vrm-handle--ebl", 14), draggable: true, keyboard: false,
+
+    pane: handlePane, zIndexOffset: 9002, autoPan: false
+
+  }).addTo(group);
+
+  vrmMk.bindTooltip("", { permanent: true, direction: "right", offset: [10, 0], className: "ss-vrm-label" });
+
+  eblMk.bindTooltip("", { permanent: true, direction: "right", offset: [10, 0], className: "ss-vrm-label ss-ebl-label" });
+
+  const fmtNm = (m) => {
+
+    const nm = m / 1852;
+
+    return (nm < 10 ? nm.toFixed(2) : nm.toFixed(1)) + " NM";
+
+  };
+
+  const fmtBrg = (d) => ("00" + (Math.round(d * 10) / 10).toFixed(1)).slice(-5) + "°T";
+
+  function eblEdgePoint() {
+
+    const p0 = map.latLngToLayerPoint(center);
+
+    const size = map.getSize();
+
+    const len = Math.sqrt(size.x * size.x + size.y * size.y) * 2 + 200;
+
+    const r = eblBrg * Math.PI / 180;
+
+    return map.layerPointToLatLng(L.point(p0.x + Math.sin(r) * len, p0.y - Math.cos(r) * len));
+
+  }
+
+  function eblHandlePos() {
+
+    // Sit on the EBL just outside the ring (min 70 px from centre)
+    const p0 = map.latLngToLayerPoint(center);
+
+    const pr = map.latLngToLayerPoint(_vrmDestination(center.lat, center.lng, rangeM, 90));
+
+    const ringPx = Math.abs(pr.x - p0.x);
+
+    const dist = Math.max(70, ringPx + 46);
+
+    const r = eblBrg * Math.PI / 180;
+
+    return map.layerPointToLatLng(L.point(p0.x + Math.sin(r) * dist, p0.y - Math.cos(r) * dist));
+
+  }
+
+  function redraw(skip) {
+
+    ring.setLatLng(center);
+
+    ring.setRadius(rangeM);
+
+    ebl.setLatLngs([center, eblEdgePoint()]);
+
+    if (skip !== "center") centerMk.setLatLng(center);
+
+    if (skip !== "vrm") vrmMk.setLatLng(_vrmDestination(center.lat, center.lng, rangeM, vrmHandleBrg));
+
+    if (skip !== "ebl") eblMk.setLatLng(eblHandlePos());
+
+    vrmMk.setTooltipContent("VRM " + fmtNm(rangeM));
+
+    eblMk.setTooltipContent("EBL " + fmtBrg(eblBrg));
+
+  }
+
+  // Centre drag → move whole tool
+  centerMk.on("drag", (e) => { center = e.target.getLatLng(); redraw("center"); });
+
+  centerMk.on("dragend", () => redraw());
+
+  // VRM drag → range (and remember the angle the user left the handle at)
+  vrmMk.on("drag", (e) => {
+
+    const ll = e.target.getLatLng();
+
+    rangeM = Math.max(18.52, map.distance(center, ll));
+
+    vrmHandleBrg = _vrmScreenBearing(map, center, ll);
+
+    redraw("vrm");
+
+  });
+
+  vrmMk.on("dragend", () => redraw());
+
+  // EBL drag → bearing
+  eblMk.on("drag", (e) => {
+
+    eblBrg = _vrmScreenBearing(map, center, e.target.getLatLng());
+
+    redraw("ebl");
+
+  });
+
+  eblMk.on("dragend", () => redraw());
+
+  const tool = { group, remove: null };
+
+  function removeTool() {
+
+    try { map.off("zoomend moveend viewreset resize", onView); } catch (e) {}
+
+    try { map.closePopup(); } catch (e) {}
+
+    try { map.removeLayer(group); } catch (e) {}
+
+    const i = _ssVrmEblList.indexOf(tool);
+
+    if (i >= 0) _ssVrmEblList.splice(i, 1);
+
+  }
+
+  tool.remove = removeTool;
+
+  // Click centre → info + Delete;  double-click centre → delete immediately
+  centerMk.on("click", (e) => {
+
+    if (e && e.originalEvent) L.DomEvent.stop(e.originalEvent);
+
+    const box = document.createElement("div");
+
+    box.className = "ss-vrm-popup";
+
+    const lat = center.lat, lon = ((center.lng + 540) % 360) - 180;
+
+    const pos = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : (lat.toFixed(4) + ", " + lon.toFixed(4));
+
+    box.innerHTML =
+
+      '<div class="ss-vrm-popup-title">VRM / EBL</div>' +
+
+      '<div class="ss-vrm-popup-row"><span>Origin</span><b>' + pos + "</b></div>" +
+
+      '<div class="ss-vrm-popup-row"><span>VRM</span><b>' + fmtNm(rangeM) + "</b></div>" +
+
+      '<div class="ss-vrm-popup-row"><span>EBL</span><b>' + fmtBrg(eblBrg) + "</b></div>" +
+
+      '<button type="button" class="ss-vrm-del-btn">Delete VRM / EBL</button>';
+
+    L.DomEvent.disableClickPropagation(box);
+
+    const del = box.querySelector(".ss-vrm-del-btn");
+
+    const doDel = (ev) => { if (ev) { ev.preventDefault(); ev.stopPropagation(); } removeTool(); };
+
+    del.addEventListener("click", doDel);
+
+    del.addEventListener("pointerup", doDel);
+
+    L.popup({ className: "ss-map-ctx-popup ss-vrm-popup-wrap", closeButton: true, autoPan: true, offset: [0, -6] })
+
+      .setLatLng(center).setContent(box).openOn(map);
+
+  });
+
+  centerMk.on("dblclick", (e) => {
+
+    if (e && e.originalEvent) L.DomEvent.stop(e.originalEvent);
+
+    removeTool();
+
+  });
+
+  // EBL must be re-extended to the edge whenever the view changes
+  function onView() { redraw(); }
+
+  map.on("zoomend moveend viewreset resize", onView);
+
+  redraw();
+
+  _ssVrmEblList.push(tool);
+
+  return tool;
+
+}
+
+window.addVrmEblTool = addVrmEblTool;
+
+window.clearVrmEblTools = function () {
+
+  _ssVrmEblList.slice().forEach((t) => { try { t.remove(); } catch (e) {} });
+
+};
 
 
 
