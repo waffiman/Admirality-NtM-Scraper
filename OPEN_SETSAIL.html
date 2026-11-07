@@ -7328,10 +7328,9 @@ body.ss-setchart .setsail-toast {
 .leaflet-div-icon.route-wpt-div-icon {
   background: transparent !important;
   border: none !important;
-  margin: 0 !important;
   padding: 0 !important;
-  transform-origin: center center;
   line-height: 0 !important;
+  transform-origin: center center;
 }
 .route-wpt-div-icon .route-wpt-dot {
   margin: 0 !important;
@@ -7347,6 +7346,20 @@ body.ss-setchart .setsail-toast {
   display: block !important;
   margin: 0 !important;
   padding: 0 !important;
+}
+.leaflet-pane.leaflet-ntmMarkerPane-pane,
+.leaflet-ntmMarkerPane-pane {
+  z-index: 660 !important;
+  pointer-events: auto !important;
+}
+.leaflet-popup-pane,
+#ntmMap .leaflet-popup-pane {
+  z-index: 950 !important;
+  pointer-events: auto !important;
+}
+.leaflet-popup,
+.leaflet-popup-content-wrapper {
+  pointer-events: auto !important;
 }
 .leaflet-ownShipPane-pane,
 .leaflet-pane.leaflet-ownShipPane-pane {

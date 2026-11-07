@@ -12700,13 +12700,35 @@
 
   border: none !important;
 
-  margin-left: 0 !important;
+  padding: 0 !important;
 
-  margin-top: 0 !important;
+}
 
-  width: auto !important;
+.leaflet-pane.leaflet-ntmMarkerPane-pane,
 
-  height: auto !important;
+.leaflet-ntmMarkerPane-pane {
+
+  z-index: 660 !important;
+
+  pointer-events: auto !important;
+
+}
+
+.leaflet-popup-pane,
+
+#ntmMap .leaflet-popup-pane {
+
+  z-index: 950 !important;
+
+  pointer-events: auto !important;
+
+}
+
+.leaflet-popup,
+
+.leaflet-popup-content-wrapper {
+
+  pointer-events: auto !important;
 
 }
 

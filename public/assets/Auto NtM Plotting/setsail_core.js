@@ -18728,6 +18728,18 @@ function renderNtMListAndMap() {
 
       if (mk) mk.style.zIndex = 700;
 
+      let ntmPane = mapRef.getPane("ntmMarkerPane");
+
+      if (!ntmPane) ntmPane = mapRef.createPane("ntmMarkerPane");
+
+      if (ntmPane) {
+
+        ntmPane.style.zIndex = 660;
+
+        ntmPane.style.pointerEvents = "auto";
+
+      }
+
       let rw = mapRef.getPane("routeWptPane");
 
       if (!rw) rw = mapRef.createPane("routeWptPane");
@@ -18739,6 +18751,10 @@ function renderNtMListAndMap() {
         rw.style.pointerEvents = "auto";
 
       }
+
+      const pp = mapRef.getPane("popupPane");
+
+      if (pp) pp.style.zIndex = 950;
 
     } catch (eZ) {}
 
@@ -18986,7 +19002,7 @@ function renderNtMListAndMap() {
 
     // Zoom-adaptive sizes & opacities so world view is crisp and never cluttered
 
-    const ptRadius = curZoom <= 3 ? 2.7 : (curZoom <= 5 ? 3.6 : (curZoom <= 7 ? 4.6 : 5.8));
+    const ptRadius = Math.max(5.5, curZoom <= 3 ? 4.0 : (curZoom <= 5 ? 5.0 : (curZoom <= 7 ? 6.0 : 7.0)));
 
     const ptRimColor = curZoom <= 6 ? "rgba(15, 23, 42, 0.88)" : "#ffffff";
 
@@ -19000,11 +19016,23 @@ function renderNtMListAndMap() {
 
 
 
-    // Default map renderer/panes — SVG or map preferCanvas; always attached to live map
+    // Dedicated canvas renderer with generous click tolerance (16px) for crisp responsive clicks
+
+    const ntmRenderer = (typeof L !== "undefined" && L.canvas)
+
+      ? L.canvas({ pane: "ntmMarkerPane", tolerance: 16 })
+
+      : null;
+
+
 
     const pathPaneOpts = () => ({
 
-      interactive: true
+      interactive: true,
+
+      pane: "ntmMarkerPane",
+
+      renderer: ntmRenderer
 
     });
 
@@ -19362,9 +19390,27 @@ function renderNtMListAndMap() {
 
         const ll = [cl.lat, wrapLongitudeDeg(cl.lon)];
 
+        const clusterItemsHtml = cl.items.slice(0, 10).map((it) => {
+
+          const safeItemId = String(it.id || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0;border-bottom:1px solid #edf2f7;font-size:11px;">` +
+
+            `<a href="javascript:void(0)" onclick="window.openNoticeDetailModal('${safeItemId}')" style="color:#0284c7;font-weight:600;text-decoration:none;">${String(it.id || "")}</a>` +
+
+            `<span style="color:#64748b;font-size:10px;">${it.type || ""}</span>` +
+
+          `</div>`;
+
+        }).join("");
+
+
+
         const m = L.marker(ll, {
 
           icon,
+
+          pane: "ntmMarkerPane",
 
           keyboard: false,
 
@@ -19374,25 +19420,31 @@ function renderNtMListAndMap() {
 
         m.bindPopup(
 
-          `<div style="font-family:Segoe UI,sans-serif;min-width:200px;color:#111;">
+          `<div style="font-family:'Segoe UI',sans-serif;min-width:220px;max-width:300px;color:#111;">
 
-            <b style="color:#c2410c;">${count} NtM / NAVTEX</b>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:3px;">
 
-            <div style="font-size:0.78em;color:#64748b;margin:3px 0 6px;">${typeSummary}</div>
+              <b style="color:#c2410c;font-size:1.02em;">${count} NtM / NAVTEX</b>
 
-            <div style="font-size:0.78em;line-height:1.35;">${listPreview}${more}</div>
+              <span style="font-size:0.7em;color:#64748b;font-weight:600;">Cluster</span>
 
-            <div style="margin-top:7px;font-size:0.72em;color:#0369a1;">Zoom in to split into individual objects</div>
+            </div>
 
-          </div>`
+            <div style="font-size:0.76em;color:#64748b;margin:2px 0 6px;">${typeSummary}</div>
+
+            <div style="max-height:115px;overflow-y:auto;background:#f8fafc;padding:4px 6px;border-radius:4px;border:1px solid #e2e8f0;margin-bottom:6px;">
+
+              ${clusterItemsHtml}${count > 10 ? `<div style="margin-top:3px;color:#64748b;font-size:10px;">+${count - 10} more…</div>` : ""}
+
+            </div>
+
+            <button type="button" onclick="if(window.leafletMap)window.leafletMap.setView([${cl.lat}, ${wrapLongitudeDeg(cl.lon)}], ${targetZoom})" style="width:100%;padding:5px 8px;font-size:11px;font-weight:600;border-radius:4px;border:1px solid #ea580c;background:#f97316;color:#fff;cursor:pointer;">Zoom in to separate (${count} objects)</button>
+
+          </div>`,
+
+          { maxWidth: 320, minWidth: 220, autoPan: true }
 
         );
-
-        m.on("click", () => {
-
-          mapRef.setView(ll, targetZoom);
-
-        });
 
         markersLayer.addLayer(m);
 
@@ -19400,9 +19452,27 @@ function renderNtMListAndMap() {
 
     } else {
 
-      // High zoom: plot individuals, but cap geometry explosion (world copies only for points)
+      // High zoom: plot individuals — sort polygons first so circles/lines stay on top and clickable
 
-      filtered.forEach(plotOneNotice);
+      const sortedFiltered = filtered.slice().sort((a, b) => {
+
+        const isPolyA = Boolean((a.subPolygons && a.subPolygons.length) || a.isPolygon);
+
+        const isPolyB = Boolean((b.subPolygons && b.subPolygons.length) || b.isPolygon);
+
+        if (isPolyA !== isPolyB) return isPolyA ? -1 : 1;
+
+        const isLineA = Boolean(a.isLine);
+
+        const isLineB = Boolean(b.isLine);
+
+        if (isLineA !== isLineB) return isLineA ? -1 : 1;
+
+        return 0;
+
+      });
+
+      sortedFiltered.forEach(plotOneNotice);
 
     }
 
@@ -27052,11 +27122,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function openNoticeDetailModal(noticeOrId) {
 
+  const store = (Array.isArray(NTM_STORE) && NTM_STORE.length)
+
+    ? NTM_STORE
+
+    : (Array.isArray(window.NTM_STORE) && window.NTM_STORE.length ? window.NTM_STORE : []);
+
   const item = (typeof noticeOrId === "object" && noticeOrId !== null)
 
     ? noticeOrId
 
-    : NTM_STORE.find(n => n.id === noticeOrId);
+    : store.find(n => n.id === noticeOrId);
 
   if (!item) return;
 
@@ -30452,7 +30528,75 @@ function createEcdisSimpleBaseLayer() {
 
     }
 
+    // Graceful hierarchy fallback: 10m -> 50m -> 110m (avoids dropping land on network fail)
+
+    if (level === "10m") {
+
+      try { return await loadLandGeo("50m"); } catch (e50) {}
+
+      try { return await loadLandGeo("110m"); } catch (e110) {}
+
+    } else if (level === "50m") {
+
+      try { return await loadLandGeo("110m"); } catch (e110) {}
+
+    }
+
     throw lastErr || new Error("land load failed");
+
+  }
+
+
+
+  function getFeatureBBox(feat) {
+
+    if (feat && feat._bbox) return feat._bbox;
+
+    let minLat = Infinity, maxLat = -Infinity;
+
+    let minLon = Infinity, maxLon = -Infinity;
+
+    const walk = (c) => {
+
+      if (!c || !c.length) return;
+
+      if (typeof c[0] === "number") {
+
+        const lon = c[0], lat = c[1];
+
+        if (lat < minLat) minLat = lat;
+
+        if (lat > maxLat) maxLat = lat;
+
+        if (lon < minLon) minLon = lon;
+
+        if (lon > maxLon) maxLon = lon;
+
+        return;
+
+      }
+
+      for (let i = 0; i < c.length; i++) walk(c[i]);
+
+    };
+
+    const g = feat && feat.geometry;
+
+    if (g && g.coordinates) walk(g.coordinates);
+
+    if (!Number.isFinite(minLat)) {
+
+      if (feat) feat._bbox = null;
+
+      return null;
+
+    }
+
+    const bbox = [minLat, minLon, maxLat, maxLon];
+
+    if (feat) feat._bbox = bbox;
+
+    return bbox;
 
   }
 
@@ -30462,45 +30606,53 @@ function createEcdisSimpleBaseLayer() {
 
     try {
 
-      const g = feat && feat.geometry;
+      const bbox = getFeatureBBox(feat);
 
-      if (!g) return false;
+      if (!bbox) return true;
 
-      const coords = g.coordinates;
+      const bSouth = bounds.getSouth();
 
-      // Test primary + ±360 so Alaska/Chukotka stay selectable when the view is
+      const bNorth = bounds.getNorth();
 
-      // on a wrapped world copy past ±180°.
+      const bWest = bounds.getWest();
 
-      const checkPair = (lon, lat) =>
+      const bEast = bounds.getEast();
 
-        bounds.contains([lat, lon]) ||
 
-        bounds.contains([lat, lon + 360]) ||
 
-        bounds.contains([lat, lon - 360]) ||
+      // Check primary bbox + ±360 world copies
 
-        bounds.contains([lat, lon + 720]) ||
+      const worldOffsets = [0, -360, 360, -720, 720];
 
-        bounds.contains([lat, lon - 720]);
+      for (let i = 0; i < worldOffsets.length; i++) {
 
-      const walk = (c) => {
+        const off = worldOffsets[i];
 
-        if (!c || !c.length) return false;
+        const fMinLon = bbox[1] + off;
 
-        if (typeof c[0] === "number") return checkPair(c[0], c[1]);
+        const fMaxLon = bbox[3] + off;
 
-        for (let i = 0; i < c.length; i++) {
+        const fMinLat = bbox[0];
 
-          if (walk(c[i])) return true;
+        const fMaxLat = bbox[2];
+
+
+
+        // Disjoint check: if completely outside, continue to next copy
+
+        if (bNorth < fMinLat || bSouth > fMaxLat || bEast < fMinLon || bWest > fMaxLon) {
+
+          continue;
 
         }
 
-        return false;
+        // Bounding boxes overlap: keep the feature on close zoom (never drop land to water)
 
-      };
+        return true;
 
-      return walk(coords);
+      }
+
+      return false;
 
     } catch (e) {
 
