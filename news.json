@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-07T12:40:31Z",
-  "generatedAt": "2026-11-07T12:40:31Z",
+  "updatedAt": "2026-11-07T21:36:11Z",
+  "generatedAt": "2026-11-07T21:36:11Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -13,6 +13,183 @@
   ],
   "totalArticles": 70,
   "articles": [
+    {
+      "id": "SN-742791DEB2",
+      "title": "MSC extends Shikra service to Khor Fakkan and Sohar",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/msc-extends-shikra-service-to-khor-fakkan-and-sohar/",
+      "publishedAt": "2026-11-07T20:13:32Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Singapore & Malacca Strait",
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "singapore"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2026/07/MSC-Nela-at-Port-of-Long-Beach-300x200.jpg",
+      "summary": "MSC has extended its Far East–India Shikra service to the Middle East by adding calls at Khor Fakkan in the United Arab Emirates and Sohar in Oman. The revised service will provide direct connections between major Chinese ports, Singapore, India and the Gulf. MSC will increase the Shikra deployment to 15...",
+      "body": "Services Top Right MSC extends Shikra service to Khor Fakkan and Sohar November 7, 2026 Facebook Twitter WhatsApp Linkedin Email MSC has extended its Far East–India Shikra service to the Middle East by adding calls at Khor Fakkan in the United Arab Emirates and Sohar in Oman. The revised service will provide direct connections between major Chinese ports, Singapore, India and the Gulf. MSC will increase the Shikra deployment to 15 containerships with capacities ranging from approximately 14,000 to 24,300 TEU. The revised rotation will be: Dalian – Tianjin – Qingdao – Shanghai – Ningbo – Nansha – Singapore – Nhava Sheva – Mundra – Khor Fakkan – Sohar – Dalian The addition of Khor Fakkan and Sohar expands Shikra beyond its previous Far East–India coverage, adding direct access to two major Middle Eastern container gateways. TAGS Mediterranean Shipping Co. (MSC) Facebook Twitter WhatsApp Linkedin Email Previous article FESCO reinstates Wenzhou and boosts Korea–Russia service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The revised service will provide direct connections between major Chinese ports, Singapore, India and the Gulf.",
+        "MSC will increase the Shikra deployment to 15 containerships with capacities ranging from approximately 14,000 to 24,300 TEU.",
+        "(MSC) Facebook Twitter WhatsApp Linkedin Email Previous article FESCO reinstates Wenzhou and boosts Korea–Russia service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail"
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-D793B4E1A4",
+      "title": "FESCO reinstates Wenzhou and boosts Korea–Russia service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/fesco-reinstates-wenzhou-and-boosts-korea-russia-service/",
+      "publishedAt": "2026-11-07T18:00:27Z",
+      "category": "Ports & Terminals",
+      "region": "Baltic Sea & Northern Europe",
+      "regions": [
+        "Baltic Sea & Northern Europe",
+        "China & East Asia",
+        "Japan & Korea"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        57.5,
+        19.5
+      ],
+      "navarea": "I",
+      "image": "https://container-news.com/wp-content/uploads/2021/11/FESCO-containers-300x200.jpg",
+      "summary": "FESCO will reinstate Wenzhou on its FCDL3 service following the launch of the separate FCDL5 connection between Shanghai and Vladivostok, according to DynaLiners. The revised FCDL3 rotation will be: Vladivostok – Shantou – Xiamen – Wenzhou – Ningbo – Vladivostok The Russian carrier has also added a second vessel to...",
+      "body": "Services Top Right FESCO reinstates Wenzhou and boosts Korea–Russia service November 7, 2026 Facebook Twitter WhatsApp Linkedin Email FESCO will reinstate Wenzhou on its FCDL3 service following the launch of the separate FCDL5 connection between Shanghai and Vladivostok, according to DynaLiners. The revised FCDL3 rotation will be: Vladivostok – Shantou – Xiamen – Wenzhou – Ningbo – Vladivostok The Russian carrier has also added a second vessel to its Korea Soviet Direct Line (KSDL). The additional deployment increases the service frequency to one sailing every four days. Two container ships with capacities ranging from 700 to 900 TEUs now operate the shuttle between Busan and Vladivostok. TAGS FESCO Facebook Twitter WhatsApp Linkedin Email Previous article Renovation and consolidation the Pola and Tripoli quays at Vibo Marina port Next article MSC extends Shikra service to Khor Fakkan and Sohar Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The revised FCDL3 rotation will be: Vladivostok – Shantou – Xiamen – Wenzhou – Ningbo – Vladivostok The Russian carrier has also added a second vessel to its Korea Soviet Direct Line (KSDL).",
+        "The additional deployment increases the service frequency to one sailing every four days.",
+        "Two container ships with capacities ranging from 700 to 900 TEUs now operate the shuttle between Busan and Vladivostok."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-8F5D12D63E",
+      "title": "Renovation and consolidation the Pola and Tripoli quays at Vibo Marina port",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/renovation-and-consolidation-the-pola-and-tripoli-quays-at-vibo-marina-port/",
+      "publishedAt": "2026-11-07T16:00:20Z",
+      "category": "Navigation & Safety",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "port",
+        "safety"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/avvio-lavori-banchina-vibo-300x225.png",
+      "summary": "The renovation and consolidation works for the Pola and Tripoli quays at the Port of Vibo Marina have been handed over to the contractor Franco Giuseppe Srl. The project is financed with EUR 6.5 million from the Fund for Development and Cohesion, channelled through the Calabria Region’s Development and Cohesion Plan....",
+      "body": "The renovation and consolidation works for the Pola and Tripoli quays at the Port of Vibo Marina have been handed over to the contractor Franco Giuseppe Srl. The project is financed with EUR 6.5 million from the Fund for Development and Cohesion, channelled through the Calabria Region’s Development and Cohesion Plan. At the same time, Port Authority President Paolo Piacenza signed the ordinance for clearing the affected areas, completing the procedures needed to make the spaces available so that the construction site can actually begin. The 18-month project aims to restore both quays to full operational capacity and improve safety for navigation and port operations. It involves extending the quay frontage over a total length of about 175 metres, with widths varying between 4 and 8 metres, and creating a new uniform alignment. The works will provide a working depth of 9 metres while preparing the infrastructure for a possible later deepening to 10 metres. The facilities and service systems will also be renewed, including water and electrical networks, a rainwater collection system and port equipment. Piacenza described the handover as a significant achievement and a concrete sign of the Authority’s commitment to revitalising Vibo Marina. He said the aim is to restore full efficiency to the infrastructure, improve safety and make port spaces more functional for operators, building a modern and competitive port able to attract new businesses, support existing ones and benefit the local economy. He framed port investment as part of a wider regional strategy that strengthens the relationship between port and city and contributes to the development of the Vibo Valentia area and Calabria. The project belongs to a broader investment programme to strengthen the functionality and competitiveness of the system’s five ports, Gioia Tauro, Crotone, Corigliano Calabro, Vibo Valentia and Palmi, through infrastructure restoration, redevelopment of state-owned spaces and improved services.",
+      "takeaways": [
+        "The renovation and consolidation works for the Pola and Tripoli quays at the Port of Vibo Marina have been handed over to the contractor Franco Giuseppe Srl.",
+        "The project is financed with EUR 6.5 million from the Fund for Development and Cohesion, channelled through the Calabria Region’s Development and Cohesion Plan.",
+        "The 18-month project aims to restore both quays to full operational capacity and improve safety for navigation and port operations."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-EA492EEAA4",
+      "title": "LA Port Strike Threat Deferred Again As Labor Talks Drag On",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/la-port-strike-threat-deferred-again-as-labor-talks-drag-on/",
+      "publishedAt": "2026-11-07T13:57:29Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "US West Coast & Pacific",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "lng",
+        "container",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "summary": "By Laura Curtis Nov 7, 2026 (Bloomberg) –The union representing about 250 security workers at the US’s busiest ports agreed to continue negotiations on a new labor contract for two more...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Shipping containers sit on a Maersk vessel docked at the port of Los Angeles in Long Beach, California, U.S., March 10, 2026. REUTERS/Caroline Brehman By Laura Curtis Nov 7, 2026 (Bloomberg) –The union representing about 250 security workers at the US’s busiest ports agreed to continue negotiations on a new labor contract for two more weeks, their employers said. The latest extension goes through Nov. 20, with additional talks scheduled with the International Longshore and Warehouse Union Local 26 scheduled during that period, the Pacific Maritime Association said in a statement. The two sides had already extended a couple of times, initially from Nov. 1 to Nov. 4 , and then to midnight Friday. “PMA remains committed to reaching a fair agreement at the bargaining table that avoids disruption at the nation’s two busiest ports,” it said. The Friday deadline had coincided with the very moment that the Vincent Thomas Bridge — which connects the ports to a major highway — is set to close for repairs for more than a year. Disruptions at the affected terminals could impact roughly 85% of the cargo that moves through the Port of Long Beach and a third of the cargo at the Port of Los Angeles, according to the PMA. The adjacent ports reported record cargo volumes last month and together handle about a third of they country’s seaborne containerized goods. The previous labor contract expired in July 2025, though the PMA, which represents port terminals and ocean carriers, and ILWU Local 26 have been meeting regularly to negotiate with the assistance of the Federal Mediation and Conciliation Service. The situation escalated recently ago after the union authorized a strike. Local 26 members provide security at six container terminals at the Southern California ports. The PMA warned on Oct. 27 that ILWU dockworkers and marine clerks — who have separate labor contracts and are not party to this dispute — were expected to stand with the Local 26 watchmen in the event of a strike. Read more: Southern California Ports Shatter Cargo Records as Imports Surge Port of Long Beach CEO Noel Hacegaba said he expected the elevated container volumes to continue through at least the beginning of next year. “We expect to be busy at least through the first month of the new year and possibly through the first quarter,” Hacegaba told Bloomberg earlier this week, adding that cargo needed to supply the AI boom is among the growth drivers. © 2026 Bloomberg L.P. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! A potential strike threatening operations at some of the busiest container terminals in the United States has been pushed back after the Pacific Maritime Association (PMA) and the International Longshore... The ports of Los Angeles and Long Beach have identified liquefied natural gas (LNG) and methanol as the most viable alternative marine fuels for the near and medium term, with... UPDATE: Port employers warn that a walkout by 250 watchmen could halt operations at terminals handling more than half of the nation’s busiest container port complex. A potential November 1... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Join the leading maritime news network Shipping containers sit on a Maersk vessel docked at the port of Los Angeles in Long Beach, California, U.S., March 10, 2026.",
+        "The latest extension goes through Nov."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-181344012B",
+      "title": "Soaring Freight Rates Give US Refiners Edge As Crude Discounts Widen",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/soaring-freight-rates-give-us-refiners-edge-as-crude-discounts-widen/",
+      "publishedAt": "2026-11-07T13:36:17Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Panama Canal & Caribbean",
+        "US Gulf & Port of Houston"
+      ],
+      "tags": [
+        "tanker",
+        "port",
+        "hormuz",
+        "houston"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "summary": "By Vallari Srivastava and Sumit Saha Nov 6 (Reuters) – The Iran conflict has sent tanker rates soaring, forcing sellers to deepen discounts on heavy crude grades and giving US Gulf Coast...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network The Houston Ship Channel and adjacent refineries, part of the Port of Houston, are seen in Houston, Texas, U.S., May 5, 2019. REUTERS/Loren Elliott By Vallari Srivastava and Sumit Saha Nov 6 (Reuters) – The Iran conflict has sent tanker rates soaring, forcing sellers to deepen discounts on heavy crude grades and giving US Gulf Coast refiners a cost advantage over Asian rivals, executives said after reporting bumper third-quarter profits. Security threats around the Strait of Hormuz, a key maritime chokepoint through which about one-fifth of global oil and liquefied natural gas supplies passed before the war started, have disrupted tanker traffic, while higher war-risk insurance premiums and longer voyages have driven upshipping costs. The disruption particularly benefited US Gulf Coast refiners, which could buy discounted heavy crude produced closer to home, including from Canada and Venezuela, while Asian rivals faced sharply higher freight and insurance costs to import similar grades through longer and riskiershipping routes. US refining margins more than doubled in the third quarter. Rising freight costs have widened discounts on Canadian heavy crude, including Western Canadian Select (WCS), which typically trades below US benchmark West Texas Intermediate (WTI), creating a windfall for Gulf Coast refiners, as more than 70% of their facilities are configured to process heavier crude. “The main story right now in the market is freight rates,” Randy Hawkins, vice president of Crude And Feedstocks Supply And Trading at Valero Energy VLO.N, said on a post-earnings conference call. Freight costs for shipping crude from the US Gulf Coast to Asia have jumped to $30-$35 a barrel from about $5 a year earlier, Hawkins said. “Higher freight rates actually give us an advantage into the typical export markets into Latin America,” said Gary Simmons, chief operating officer of Valero, adding that it mainly competes with European barrels in that market. Ample heavy crude supplies from Canada and Venezuela , combined with elevated freight rates, have widened the WTI-WCS differential, lowering feedstock costs, US refining executives said. For Phillips 66 PSX.N, every $1 widening in the WCS-WTI differential is worth about $140 million in gains, Brian Mandell, executive vice president of marketing and commercial, said. Higher shipping costs have also been more than offset by stronger fuel margins, said Delia He, an oil and tanker market analyst at Arrow Shipping. “For every extra dollar of freight, the diesel margin has grown by at least eight,” He said. POSITIONED FOR A STRONG 2027 US refiners have also been shielded from the impacts of higher spot tanker rates following the war due to their advance shipping arrangements. Phillips 66 said it had secured more than 40 time-charter vessels before the Iran conflict , covering about 40% of its asset-based shipping needs. Valero, PBF, Marathon and Canada’s Suncor SU.TO also secured chartered fleets before the war began, insulating them from the surge in prices. Wider differentials are expected to continue to lend strength next year as well, some industry executives said. Top US refiner Marathon Petroleum MPC.N expects record Canadian heavy crude processing in the fourth quarter, while CEO Maryann Mannen has said that margins are expected to remain elevated through at least mid-2027. “In the near term we will take advantage of it,” HF Sinclair DINO.N said of the wider discounts, adding, “we do see the differentials stay wider than they have throughout the near term, at least through 2027.” (Reporting by Vallari Srivastava and Sumit Saha in Bengaluru; Editing by Liz Hampton and Shinjini Ganguli) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! The United States on Wednesday sanctioned a network of individuals and companies accused of operating fraudulent ship registries that helped Iran’s shadow fleet evade sanctions, while issuing a new warning... Vice President JD Vance on Wednesday blamed Republicans’ midterm election losses on the Trump administration’s eight-month war with Iran, which has driven up global energy prices and left commercial shipping... Democrats’ takeover of both chambers of Congress in Tuesday’s midterm elections has raised new questions about the future of U.S. maritime policy, with implications for tariffs, shipbuilding, the Jones Act,... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Join the leading maritime news network The Houston Ship Channel and adjacent refineries, part of the Port of Houston, are seen in Houston, Texas, U.S., May 5, 2019.",
+        "US refining margins more than doubled in the third quarter."
+      ],
+      "readingMinutes": 4,
+      "readMinutes": 4
+    },
     {
       "id": "SN-7588B62BC6",
       "title": "Two new quay cranes strengthen port Botany’s capability",
@@ -256,42 +433,6 @@
         "The wider scope covers the West Mediterranean, East Mediterranean, Adriatic, North Africa and Black Sea regions.",
         "It applies to cargo moving from Asia.",
         "MSC previously introduced the surcharges for selected East Mediterranean and Black Sea ports in September."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-9773AB6EA6",
-      "title": "Maersk confirms Rotterdam rail constraints through June 2027",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/maersk-confirms-rotterdam-rail-constraints-through-june-2027/",
-      "publishedAt": "2026-11-06T22:30:52Z",
-      "category": "Ports & Terminals",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Suez Canal & Eastern Med",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "suez"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/08/blue-maersk-containers-being-transported-by-rail_1024x576-300x169.webp",
-      "summary": "Maersk has confirmed that reduced rail capacity at APM Terminals Maasvlakte II in Rotterdam will continue until the end of June 2027. The constraints are linked to the terminal’s ongoing expansion works. Maersk had previously advised customers that reduced rail availability would continue until January 2027....",
-      "body": "Out of the Box Top Right Maersk confirms Rotterdam rail constraints through June 2027 November 7, 2026 Facebook Twitter WhatsApp Linkedin Email Maersk has confirmed that reduced rail capacity at APM Terminals Maasvlakte II in Rotterdam will continue until the end of June 2027. The constraints are linked to the terminal’s ongoing expansion works. Maersk had previously advised customers that reduced rail availability would continue until January 2027. Customers should expect limited rail capacity throughout the extended period. Maersk said it is working with affected shippers to identify suitable transport arrangements for individual cargo flows. Alternative transport options Depending on operational availability and shipment requirements, customers may use: Barge services to inland terminals Truck transport Alternative rail connections where feasible Maersk will continue monitoring the expansion works and provide further updates if the timeline or operational conditions change. TAGS APM TERMINALS barge transport inland transport Maasvlakte II MAERSK Port of Rotterdam Rail Freight ROTTERDAM Facebook Twitter WhatsApp Linkedin Email Previous article Hapag-Lloyd extends Pakistan reefer PSS across Arabian Gulf Next article MSC extends piracy and Suez surcharges across Mediterranean Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The constraints are linked to the terminal’s ongoing expansion works.",
-        "Maersk had previously advised customers that reduced rail availability would continue until January 2027.",
-        "Customers should expect limited rail capacity throughout the extended period."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -657,40 +798,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-C3F5A0C886",
-      "title": "Hapag-Lloyd extends Pakistan reefer PSS across Arabian Gulf",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/hapag-lloyd-extends-pakistan-reefer-pss-across-arabian-gulf/",
-      "publishedAt": "2026-11-06T21:00:27Z",
-      "category": "Ports & Terminals",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/07/HAPAG-HLAG_AlNefud_HH_1280x800_rgb-1-300x188.jpg",
-      "summary": "Hapag-Lloyd will apply a Peak Season Surcharge to refrigerated containers moving from Pakistan to selected destinations across the Arabian Gulf. The surcharge will cover sailings from Karachi and Port Qasim between 16 and 30 November 2026. PSS levels 20-foot reefer: US$500 per container 40-foot high-cube reefer:...",
-      "body": "Rates & Surcharges Top Right Hapag-Lloyd extends Pakistan reefer PSS across Arabian Gulf November 6, 2026 Facebook Twitter WhatsApp Linkedin Email Hapag-Lloyd will apply a Peak Season Surcharge to refrigerated containers moving from Pakistan to selected destinations across the Arabian Gulf. The surcharge will cover sailings from Karachi and Port Qasim between 16 and 30 November 2026. PSS levels 20-foot reefer: US$500 per container 40-foot high-cube reefer: US$500 per container The destination scope covers the United Arab Emirates, Bahrain, Oman, Iraq, Kuwait and Qatar. The announcement follows Hapag-Lloyd’s earlier PSS on reefer shipments from Pakistan to selected UAE ports, which applies from 1 to 15 November. TAGS Hapag Lloyd Facebook Twitter WhatsApp Linkedin Email Previous article Maersk reportedly nears order for up to 24 megamax ships Next article Maersk confirms Rotterdam rail constraints through June 2027 Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The surcharge will cover sailings from Karachi and Port Qasim between 16 and 30 November 2026.",
-        "PSS levels 20-foot reefer: US$500 per container 40-foot high-cube reefer: US$500 per container The destination scope covers the United Arab Emirates, Bahrain, Oman, Iraq, Kuwait and Qatar.",
-        "The announcement follows Hapag-Lloyd’s earlier PSS on reefer shipments from Pakistan to selected UAE ports, which applies from 1 to 15 November."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-CA195B2A91",
       "title": "Meyer Werft Establishes Organizational, Legal Framework for Offshore Converter Business",
       "source": "MarineLink",
@@ -720,42 +827,6 @@
         "Meyer Werft Establishes Organizational, Legal Framework for Offshore Converter Business Maritime Activity Reports, Inc.",
         "November 6, 2026 © MEYER WERFT MEYER WERFT is establishing the organizational and legal framework for the successful development of its offshore converter business.",
         "To this end, all activities in this new business segment of the Group will be consolidated in the coming weeks into a separate company, NEPTUN Offshore GmbH & Co."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-FEDAE1B1F7",
-      "title": "Maersk reportedly nears order for up to 24 megamax ships",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/maersk-reportedly-nears-order-for-up-to-24-megamax-ships/",
-      "publishedAt": "2026-11-06T20:00:11Z",
-      "category": "Ports & Terminals",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "china",
-        "shipyard"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/09/tangier-maersk-at-the-port-of-mobile_1024x576-300x169.webp",
-      "summary": "Maersk is reportedly moving closer to ordering twelve container ships of 24,000 TEUs, with options for another twelve vessels, according to DynaLiners. If all options are exercised, the potential contract would cover 24 ultra-large container vessels with a combined capacity of approximately 576,000 TEUs. The reported...",
-      "body": "News Sticky News Maersk reportedly nears order for up to 24 megamax ships November 6, 2026 Facebook Twitter WhatsApp Linkedin Email Tangier Maersk at the Port of Mobile. Photo credit: Alabama Port Authority. Maersk is reportedly moving closer to ordering twelve container ships of 24,000 TEUs, with options for another twelve vessels, according to DynaLiners. If all options are exercised, the potential contract would cover 24 ultra-large container vessels with a combined capacity of approximately 576,000 TEUs. The reported deal would follow Maersk’s substantial order for 18,600 TEU ships, confirmed in September. China’s Hudong-Zhonghua Shipbuilding, Hengli Heavy Industry and Yangzijiang Shipbuilding are understood to be among the leading contenders. However, no shipyard selection, contract value or delivery schedule has been confirmed. TAGS A.P. Moeller-Maersk Facebook Twitter WhatsApp Linkedin Email Previous article Alfa Laval agrees to acquire NAVTOR for US$700 million Next article Hapag-Lloyd extends Pakistan reefer PSS across Arabian Gulf Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "News Sticky News Maersk reportedly nears order for up to 24 megamax ships November 6, 2026 Facebook Twitter WhatsApp Linkedin Email Tangier Maersk at the Port of Mobile.",
-        "Photo credit: Alabama Port Authority.",
-        "Maersk is reportedly moving closer to ordering twelve container ships of 24,000 TEUs, with options for another twelve vessels, according to DynaLiners."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1516,11 +1587,10 @@
       "navarea": "GLOBAL",
       "image": "https://images.marinelink.com/images/maritime/w150/credit-seaway7-174884.jpg",
       "summary": "Subsea7 has agreed to sell its Seaway7 heavy transportation business, comprising six semi-submersible vessels, to HEA Energy in a transaction linked to its proposed merger with Saipem.The sale covers six open-deck semi-submersible heavy transportation vessels…",
-      "body": "Subsea7 Strikes Deal to Sell Seaway7 Heavy Transport Unit to HEA Energy Maritime Activity Reports, Inc. November 6, 2026 (Credit: Seaway7) Subsea7 has agreed to sell its Seaway7 heavy transportation business, comprising six semi-submersible vessels, to HEA Energy in a transaction linked to its proposed merger with Saipem. The sale covers six open-deck semi-submersible heavy transportation vessels, five of which are owned and one chartered from a third party. According to the Seaway7’s fleet information, the six heavy transportation vessels include Seaway Albatross Seaway Eagle, Seaway Falcon, Seaway Hawk, Seaway Osprey, and Seaway Swan. The transaction remains subject to closing conditions, including applicable regulatory approvals, with completion expected in the first half of 2027. Subsea7 said the commercial terms of the agreement, including the cash consideration, would remain confidential. The divestment constitutes the permitted business sale referenced in Subsea7's merger agreement with Saipem and will trigger a special dividend of $ €105 million, previously approved at an extraordinary general meeting on September 25, 2025. The dividend will be paid at the earlier of the transaction's completion or the date immediately preceding the effective date of the proposed merger with Saipem. Subsea7 said processing and distributing the dividend funds could take up to two weeks.",
+      "body": "Subsea7 has agreed to sell its Seaway7 heavy transportation business, comprising six semi-submersible vessels, to HEA Energy in a transaction linked to its proposed merger with Saipem.The sale covers six open-deck semi-submersible heavy transportation vessels…",
       "takeaways": [
-        "Subsea7 Strikes Deal to Sell Seaway7 Heavy Transport Unit to HEA Energy Maritime Activity Reports, Inc.",
-        "November 6, 2026 (Credit: Seaway7) Subsea7 has agreed to sell its Seaway7 heavy transportation business, comprising six semi-submersible vessels, to HEA Energy in a transaction linked to its proposed merger with Saipem.",
-        "The sale covers six open-deck semi-submersible heavy transportation vessels, five of which are owned and one chartered from a third party."
+        "Operational Area: Global Maritime.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1903,80 +1973,6 @@
       ],
       "readingMinutes": 2,
       "readMinutes": 2
-    },
-    {
-      "id": "SN-6701FD2732",
-      "title": "Shipbuilding boom heads for 2028 delivery crunch",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/shipbuilding-boom-heads-for-2028-delivery-crunch/",
-      "publishedAt": "2026-11-06T08:30:33Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "China & East Asia",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "suez",
-        "china",
-        "shipyard"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://splash247.com/wp-content/uploads/2026/05/Hengli-LR2-300x180.jpg",
-      "summary": "The global shipbuilding orderbook has expanded three and a half times since 2020, while yard capacity has grown by just 30%, setting the stage for an extraordinary delivery squeeze over the next two years. The latest Shipping Market Review from Danish Ship Finance reveals that shipbuilding order cover has jumped from...",
-      "body": "Shipyards Shipbuilding boom heads for 2028 delivery crunch Sam Chambers November 6, 2026 0 4,136 2 minutes read Hengli Heavy Industries Hengli Heavy Industries The global shipbuilding orderbook has expanded three and a half times since 2020, while yard capacity has grown by just 30%, setting the stage for an extraordinary delivery squeeze over the next two years. The latest Shipping Market Review from Danish Ship Finance reveals that shipbuilding order cover has jumped from 1.4 years in 2020 to 3.7 years today, with the orderbook now equivalent to 19% of the existing world fleet, up from just 7% six years ago. The figures add another dimension to the remarkable shipbuilding boom documented by Splash on Monday, when Clarksons Research revealed that the global orderbook had reached a record 226.1m compensated gross tonnes (cgt), surpassing the previous peak of 225.5m cgt set in September 2008. Worth approximately $700bn, the backlog is heavily concentrated in China, whose yards control 68% of outstanding orders. Danish Ship Finance notes that shipyards have contracted more tonnage than they have delivered every year since 2021, despite output from active yards increasing 69% over the period. Production is now running at 86% of capacity. The problem is that the delivery pipeline is becoming increasingly unrealistic. The highest-performing yards are booked at 164% of their available capacity for 2028, making substantial delays almost inevitable. Danish Ship Finance’s analysis of five years of individual vessel schedules shows that approximately 78% of contracted tonnage arrives in its scheduled year. Roughly one-sixth slips into subsequent years, while around 5% is cancelled. Even allowing for historical delivery performance, scheduled production in 2027 and 2028 would occupy between 84% and 89% of global yard capacity before delayed vessels from previous years are considered. The Danish financier estimates that 10m to 11m cgt of scheduled deliveries could slip annually from 2027 and 2028. If delayed 2027 deliveries roll into 2028, the latter year’s workload could climb to around 60m cgt, equivalent to 107% of available capacity. The implications extend well beyond shipyard scheduling. Danish Ship Finance warns that in the VLCC, suezmax, capesize and large gas carrier segments, even scrapping every vessel older than 20 years would not offset the incoming orderbook. That raises the prospect of significant pressure on older vessel values as new tonnage arrives. Meanwhile, Clarksons is tracking approximately 225 shipyard expansion projects worldwide, more than three-quarters of them in China. The ballooning shipyard capacity scene in Asia garnered much discussion at the Splash-organised Maritime CEO Forum in Monaco last week. “We have been seeing a lot of new yards popping up, left, right, and centre, and the zombie shipyards being revived,” Milena Pappas from Star Bulk told delegates attending the exclusive shipowner gathering. On concerns about the capabilities of some new yards, Pappas revealed that prospective builders had asked owners to arrange the supply of engines themselves. Cesare d’Amico, who heads up Italian shipowner d’Amico Società di Navigazione warned on the potential for overcapacity. “The number of ships that can be added every day, every week is really a lot,” he said, a point of view shared by John Michael Radziwill, the chairman of Monaco owner CTM. “It will get oversupplied. You’re not going to have a shortage of dry cargo ships for very long,” Radziwill said. Sam Chambers November 6, 2026 0 4,136 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "Worth approximately $700bn, the backlog is heavily concentrated in China, whose yards control 68% of outstanding orders.",
-        "Danish Ship Finance notes that shipyards have contracted more tonnage than they have delivered every year since 2021, despite output from active yards increasing 69% over the period.",
-        "Production is now running at 86% of capacity."
-      ],
-      "readingMinutes": 3,
-      "readMinutes": 3
-    },
-    {
-      "id": "SN-CAAB2AC8A7",
-      "title": "Seafarer missing in Gulf tanker strike as Iran redraws Hormuz blacklist",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/seafarer-missing-in-gulf-tanker-strike-as-iran-redraws-hormuz-blacklist/",
-      "publishedAt": "2026-11-06T08:15:00Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Red Sea & Bab el-Mandeb",
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "tanker",
-        "lpg",
-        "port",
-        "hormuz",
-        "panama"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://splash247.com/wp-content/uploads/2026/03/US-Navy-Epic-Fury-Iran-300x180.jpeg",
-      "summary": "A seafarer is missing following a missile-suspected attack on a Greek-operated tanker deep inside the Arabian Gulf, while Iran has reshuffled its growing Strait of Hormuz blacklist and fresh security warnings point to continuing threats to commercial shipping. The Marshall Islands-flagged Velos Sapphire, a 74,998 dwt...",
-      "body": "Middle East Operations Tankers Seafarer missing in Gulf tanker strike as Iran redraws Hormuz blacklist Adis Ajdin November 6, 2026 0 986 3 minutes read U.S. Central Command U.S. Central Command A seafarer is missing following a missile-suspected attack on a Greek-operated tanker deep inside the Arabian Gulf, while Iran has reshuffled its growing Strait of Hormuz blacklist and fresh security warnings point to continuing threats to commercial shipping. The Marshall Islands-flagged Velos Sapphire , a 74,998 dwt product tanker built in 2007 and managed by Athens-based Velos Tankers, was struck around 50 nautical miles north of Qatar’s Madinat ash Shamal. UK Maritime Trade Operations (UKMTO) initially reported two unidentified projectiles hitting an unnamed tanker at 23:20 UTC. The ship’s operator subsequently reported an explosion on the aft port side, believed to have been caused by an unidentified missile. The International Maritime Organization (IMO) has since identified the vessel, recording damage, no pollution and one seafarer missing. Maritime security sources have reported that the crew member was killed, although the IMO has not confirmed a fatality.A fire reportedly broke out following the strike but was extinguished. The tanker had departed Fujairah on November 3 bound for Sitra, Bahrain. AIS analysis showed its speed falling to 2.4 knots shortly before the attack and to around 1.1 knots afterwards. It subsequently regained speed and continued towards Bahrain, suggesting it retained propulsion despite the damage. The strike adds to growing concerns that attacks on merchant shipping are spreading well beyond the Hormuz chokepoint. The vessel does not appear on Iran’s blacklist of ships accused of breaching its transit requirements. Another tanker in the same Greek-managed fleet, Velos Amber, is listed, although there is no established connection between the blacklist and the latest attack. Iran’s Persian Gulf Strait Authority (PGSA) has meanwhile removed two LPG carriers sanctioned by Washington from its non-compliance list. The 2003-built Gas Marakua and 2001-built SOGL , both designated by the US Treasury in October over their links to Iranian petroleum shipping networks, disappeared from the latest list published on November 5. The authority has instead added the 2018-built, Panama-flagged chemical and products tanker Mercan , which is owned and operated from Turkey. The changes leave 239 vessels on Tehran’s blacklist, down from 240 earlier in the week but sharply higher than the 77 recorded in September. PGSA has provided no explanation for the changes. The authority has threatened blacklisted vessels with fines, detention or confiscation during future passages, while also warning that ships cooperating with designated vessels through ship-to-ship transfers could face restrictions. The overlapping sanctions regimes have created further difficulties for operators. Washington has designated PGSA itself and warned that obtaining services or safe-passage guarantees from the Iranian authority can expose shipping companies to sanctions risks. Mine threats have also returned to the forefront. The US has called on Iran to identify mine locations in the Strait of Hormuz during discussions at the IMO, while Iranian forces have separately claimed several tanker mine strikes without identifying the vessels involved. Tehran has claimed incidents involving five tankers and a tugboat, including fires and mine damage, but the reports remain independently unverified. It is also unclear whether some of the claims overlap with previously reported attacks. A maritime security assessment issued on Thursday by the Joint Maritime Information Centre (JMIC) recorded four attacks in the strait during its latest 96-hour reporting period, all concentrated within 52 hours off Oman’s Musandam peninsula between November 1 and 3. Two further attacks were recorded inside the Arabian Gulf. JMIC continues to classify the threat around Hormuz as severe, warning of further deliberate strikes and highlighting drone overflights, targeted surveillance and radio harassment of merchant vessels. Shipping traffic remains severely depressed. AIS-based monitoring recorded just nine commercial crossings on Thursday, with the seven-day average running at around nine ships a day, barely a tenth of the pre-conflict level of approximately 85. South Korea is also preparing to expand its Cheonghae naval unit’s operational area towards southern Oman and reinforce it with a P-8A maritime patrol aircraft and mine-countermeasure capabilities. The proposal, which requires parliamentary approval, would not place the unit inside Hormuz but could support future mine-clearance operations. Diplomatic efforts continue in parallel, with the foreign ministers of Oman and Iran discussing practical and technical arrangements for restoring unhindered navigation through the strait on Thursday. No reopening agreement has been announced. The IMO’s latest figures put the number of confirmed maritime incidents across the region at 129, with 24 seafarer fatalities recorded since the conflict began. Tags Hormuz Crisis Iran Qatar Adis Ajdin November 6, 2026 0 986 3 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "Middle East Operations Tankers Seafarer missing in Gulf tanker strike as Iran redraws Hormuz blacklist Adis Ajdin November 6, 2026 0 986 3 minutes read U.S.",
-        "The Marshall Islands-flagged Velos Sapphire , a 74,998 dwt product tanker built in 2007 and managed by Athens-based Velos Tankers, was struck around 50 nautical miles north of Qatar’s Madinat ash Shamal.",
-        "UK Maritime Trade Operations (UKMTO) initially reported two unidentified projectiles hitting an unnamed tanker at 23:20 UTC."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
     }
   ]
 }
