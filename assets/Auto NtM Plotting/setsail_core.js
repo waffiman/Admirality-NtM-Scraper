@@ -15789,12 +15789,234 @@ function initNtMMap() {
 
     const seamarkLayer = L.layerGroup([buoysTileLayer]);
 
+    // Interactive Buoys Layer Engine (Rich AIS-Style Popups on LMB)
+    let _buoyMarksData = [];
+    let _buoyTssData = [];
+    let _buoysVectorGroup = L.layerGroup();
+    seamarkLayer.addLayer(_buoysVectorGroup);
+
+    async function loadBuoyDatasets() {
+      if (_buoyMarksData.length > 0) return;
+      try {
+        const rMarks = await fetch("assets/geo/setroute_iala_marks.json");
+        if (rMarks.ok) _buoyMarksData = await rMarks.json();
+      } catch (eMarks) {}
+      try {
+        const rTss = await fetch("assets/geo/setroute_tss_world.json");
+        if (rTss.ok) _buoyTssData = await rTss.json();
+      } catch (eTss) {}
+    }
+
+    function pointInTssPolygon(lat, lon, ring) {
+      if (!ring || ring.length < 3) return false;
+      let inside = false;
+      const n = ring.length;
+      let p1lat = ring[0][0], p1lon = ring[0][1];
+      for (let i = 1; i <= n; i++) {
+        const p2lat = ring[i % n][0], p2lon = ring[i % n][1];
+        if (lon > Math.min(p1lon, p2lon) && lon <= Math.max(p1lon, p2lon)) {
+          if (lat <= Math.max(p1lat, p2lat)) {
+            let xinters = p1lat;
+            if (p1lon !== p2lon) {
+              xinters = (lon - p1lon) * (p2lat - p1lat) / (p2lon - p1lon) + p1lat;
+            }
+            if (p1lat === p2lat || lat <= xinters) {
+              inside = !inside;
+            }
+          }
+        }
+        p1lat = p2lat; p1lon = p2lon;
+      }
+      return inside;
+    }
+
+    function formatBuoyPopup(mark) {
+      const icon = mark.icon || (mark.hand === "port" ? "🟥" : mark.hand === "starboard" ? "🟩" : (mark.type && mark.type.includes("cardinal")) ? "▲" : "⚓");
+      const headerColor = mark.headerColor || (mark.hand === "port" ? "#ef4444" : mark.hand === "starboard" ? "#22c55e" : (mark.type && mark.type.includes("cardinal")) ? "#eab308" : "#38bdf8");
+      const name = mark.name || mark.id || "Navigational Seamark";
+      const typeStr = mark.typeLabel || mark.type || "Seamark";
+      const lightStr = mark.light || "Unlit / Fixed Daymark";
+      const colour = mark.colour || "Standard S-52";
+      const shape = mark.shape || "Pillar / Buoy";
+      const topmark = mark.topmark || "—";
+      const ialaReg = mark.ialaRegion || (typeof setrouteIalaRegion === "function" ? setrouteIalaRegion(mark.lat, mark.lon).name : "IALA Region A");
+      const posDms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(mark.lat, mark.lon) : `${mark.lat.toFixed(4)}°, ${mark.lon.toFixed(4)}°`;
+      const desc = mark.description || "";
+
+      return (
+        '<div class="ss-buoy-popup-content" style="min-width:230px;max-width:320px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;color:#1e293b;">' +
+          '<div style="font-weight:800;color:' + headerColor + ';margin-bottom:5px;display:flex;align-items:center;gap:6px;font-size:13px;">' +
+            '<span>' + icon + '</span> <span>' + name + '</span>' +
+          '</div>' +
+          '<div><b>Type:</b> ' + typeStr + '</div>' +
+          '<div><b>Light:</b> <span style="font-family:monospace;font-weight:700;color:#0284c7;">' + lightStr + '</span></div>' +
+          '<div><b>Colour / Shape:</b> ' + colour + ' · ' + shape + '</div>' +
+          '<div><b>Topmark:</b> ' + topmark + '</div>' +
+          '<div><b>IALA Region:</b> ' + ialaReg + '</div>' +
+          '<div><b>Position:</b> <span style="font-family:monospace;font-size:11px;color:#334155;">' + posDms + '</span></div>' +
+          (desc ? '<div style="margin-top:5px;padding:3px 6px;background:#f8fafc;border-left:3px solid ' + headerColor + ';border-radius:3px;font-size:11px;color:#475569;">' + desc + '</div>' : '') +
+          '<div style="margin-top:6px;padding-top:4px;border-top:1px solid #e2e8f0;font-size:10px;color:#64748b;display:flex;justify-content:space-between;">' +
+            '<span>OpenSeaMap / IALA S-52</span>' +
+            '<span>Active Seamark</span>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function formatTssPopup(tss, lat, lon) {
+      const name = tss.name || "Traffic Separation Scheme";
+      const cat = tss.category === "separation_zone" ? "Separation Zone (HARD BAN)" :
+                  tss.category === "traffic_lane" ? "Traffic Lane (One-Way Flow)" :
+                  tss.category === "precautionary_area" ? "Precautionary Area" : "TSS Area";
+      const headerColor = tss.category === "separation_zone" ? "#dc2626" :
+                          tss.category === "traffic_lane" ? "#2563eb" : "#7c3aed";
+      const dir = tss.directionDeg != null ? `${tss.directionDeg}° True` : "Variable / Precautionary";
+      const colreg = "COLREG Rule 10 (Traffic Separation Schemes)";
+      const posDms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
+      const ruleNote = tss.category === "separation_zone"
+        ? "Rule 10(h): A vessel not using a TSS shall avoid it by as wide a margin as is practicable."
+        : tss.category === "traffic_lane"
+        ? "Rule 10(b): Proceed in the appropriate traffic lane in the general direction of traffic flow."
+        : "Rule 10: Navigate with particular caution in precautionary areas.";
+
+      return (
+        '<div class="ss-buoy-popup-content ss-tss-popup-content" style="min-width:240px;max-width:330px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;color:#1e293b;">' +
+          '<div style="font-weight:800;color:' + headerColor + ';margin-bottom:5px;display:flex;align-items:center;gap:6px;font-size:13px;">' +
+            '<span>🧭</span> <span>' + name + '</span>' +
+          '</div>' +
+          '<div><b>Category:</b> ' + cat + '</div>' +
+          (tss.directionDeg != null ? '<div><b>Traffic Course:</b> <span style="font-family:monospace;font-weight:700;color:#2563eb;">' + dir + '</span></div>' : '') +
+          '<div><b>Regulation:</b> ' + colreg + '</div>' +
+          '<div><b>Position:</b> <span style="font-family:monospace;font-size:11px;color:#334155;">' + posDms + '</span></div>' +
+          '<div style="margin-top:5px;padding:3px 6px;background:#f8fafc;border-left:3px solid ' + headerColor + ';border-radius:3px;font-size:11px;color:#475569;">' + ruleNote + '</div>' +
+          '<div style="margin-top:6px;padding-top:4px;border-top:1px solid #e2e8f0;font-size:10px;color:#64748b;display:flex;justify-content:space-between;">' +
+            '<span>IMO / OpenSeaMap TSS</span>' +
+            '<span>Rule 10 Enforced</span>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function initBuoysInteractiveLayer(map, seamarkLyr) {
+      if (!map || !seamarkLyr) return;
+      loadBuoyDatasets();
+
+      // Click on chart when Buoys layer is active -> hit-test buoys & TSS
+      map.on("click", (e) => {
+        if (!map.hasLayer(seamarkLyr)) return;
+        if (e.originalEvent && (e.originalEvent._stopped || e.originalEvent.defaultPrevented)) return;
+
+        const clickPt = e.latlng;
+        const lat = clickPt.lat;
+        const lon = ((clickPt.lng + 540) % 360) - 180;
+        const z = map.getZoom();
+
+        // 1. Check nearest known buoy (pixel distance <= 45px or within 1.5 NM)
+        let bestMark = null;
+        let minPx = 45;
+        const clickPx = map.latLngToLayerPoint(clickPt);
+
+        for (let i = 0; i < _buoyMarksData.length; i++) {
+          const m = _buoyMarksData[i];
+          const mPx = map.latLngToLayerPoint([m.lat, m.lon]);
+          const d = clickPx.distanceTo(mPx);
+          if (d < minPx) {
+            minPx = d;
+            bestMark = m;
+          }
+        }
+
+        if (bestMark) {
+          L.popup({ className: "ss-map-ctx-popup ss-buoy-popup", autoPan: true, offset: [0, -4] })
+            .setLatLng([bestMark.lat, bestMark.lon])
+            .setContent(formatBuoyPopup(bestMark))
+            .openOn(map);
+          return;
+        }
+
+        // 2. Check TSS scheme hit
+        for (let s = 0; s < _buoyTssData.length; s++) {
+          const scheme = _buoyTssData[s];
+          for (let p = 0; p < scheme.parts.length; p++) {
+            const part = scheme.parts[p];
+            if (pointInTssPolygon(lat, lon, part.ring)) {
+              const tssObj = Object.assign({}, part, { schemeName: scheme.name });
+              L.popup({ className: "ss-map-ctx-popup ss-buoy-popup", autoPan: true, offset: [0, -4] })
+                .setLatLng(clickPt)
+                .setContent(formatTssPopup(tssObj, lat, lon))
+                .openOn(map);
+              return;
+            }
+          }
+        }
+
+        // 3. Fallback: If clicked at zoom >= 10 in coastal waters, show IALA navigation context
+        if (z >= 10 && typeof setrouteIalaRegion === "function") {
+          const reg = setrouteIalaRegion(lat, lon);
+          const posDms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
+          const fallbackContent =
+            '<div class="ss-buoy-popup-content" style="min-width:220px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;color:#1e293b;">' +
+              '<div style="font-weight:800;color:#0284c7;margin-bottom:4px;display:flex;align-items:center;gap:6px;">' +
+                '<span>⚓</span> <span>OpenSeaMap Seamark Inspection</span>' +
+              '</div>' +
+              '<div><b>IALA Jurisdiction:</b> ' + reg.name + '</div>' +
+              '<div><b>Lateral Rule:</b> ' + reg.difference + '</div>' +
+              '<div><b>Position:</b> <span style="font-family:monospace;font-size:11px;color:#334155;">' + posDms + '</span></div>' +
+              '<div style="margin-top:5px;padding-top:3px;border-top:1px solid #e2e8f0;font-size:10px;color:#64748b;">Source: OpenSeaMap / IALA S-52</div>' +
+            '</div>';
+
+          L.popup({ className: "ss-map-ctx-popup ss-buoy-popup", autoPan: true, offset: [0, -4] })
+            .setLatLng(clickPt)
+            .setContent(fallbackContent)
+            .openOn(map);
+        }
+      });
+
+      function updateVectorBuoyMarkers() {
+        if (!map.hasLayer(seamarkLyr)) {
+          _buoysVectorGroup.clearLayers();
+          return;
+        }
+        const z = map.getZoom();
+        _buoysVectorGroup.clearLayers();
+        if (z < 7) return;
+
+        const bounds = map.getBounds();
+        _buoyMarksData.forEach((m) => {
+          if (!bounds.contains([m.lat, m.lon])) return;
+          const col = m.headerColor || (m.hand === "port" ? "#ef4444" : m.hand === "starboard" ? "#22c55e" : "#eab308");
+          const dot = L.circleMarker([m.lat, m.lon], {
+            radius: z >= 12 ? 6.5 : 4.5,
+            color: "#ffffff",
+            weight: 1.2,
+            fillColor: col,
+            fillOpacity: 0.95,
+            pane: "overlayPane",
+            className: "ss-buoy-target-marker"
+          });
+          dot.bindTooltip(`<b>${m.name}</b><br><span style="font-family:monospace;color:#0284c7;">${m.light || ""}</span>`, {
+            direction: "top", offset: [0, -6], className: "ss-vrm-label"
+          });
+          dot.on("click", (ev) => {
+            if (ev.originalEvent) ev.originalEvent._stopped = true;
+            L.popup({ className: "ss-map-ctx-popup ss-buoy-popup", autoPan: true, offset: [0, -4] })
+              .setLatLng([m.lat, m.lon])
+              .setContent(formatBuoyPopup(m))
+              .openOn(map);
+          });
+          _buoysVectorGroup.addLayer(dot);
+        });
+      }
+
+      map.on("zoomend moveend", updateVectorBuoyMarkers);
+      seamarkLyr.on("add", updateVectorBuoyMarkers);
+      seamarkLyr.on("remove", () => { _buoysVectorGroup.clearLayers(); });
+    }
+
     try {
-
       window.seamarkLayer = seamarkLayer;
-
       window.buoysTileLayer = buoysTileLayer;
-
+      initBuoysInteractiveLayer(leafletMap, seamarkLayer);
     } catch (eSm) {}
 
 
@@ -17453,7 +17675,27 @@ function addVrmEblTool(map, centerLL) {
 
   const renderer = L.svg({ pane: paneName, padding: 0.5 });
 
-  const COLOR = "#f97316";
+  const VRM_EBL_PALETTE = [
+    "#f97316", // 1. Nautical Orange (classic primary)
+    "#06b6d4", // 2. Electric Cyan
+    "#ec4899", // 3. Vivid Magenta
+    "#eab308", // 4. Golden Yellow
+    "#8b5cf6", // 5. Radiant Purple
+    "#10b981", // 6. Emerald Green
+    "#3b82f6", // 7. Marine Blue
+    "#f43f5e", // 8. Rose Red
+    "#14b8a6", // 9. Teal
+    "#a855f7"  // 10. Violet
+  ];
+
+  // Pick an unused color from palette among currently active tools
+  const usedColors = new Set(
+    (_ssVrmEblList || []).map((t) => t && t.color).filter(Boolean)
+  );
+  let COLOR = VRM_EBL_PALETTE.find((c) => !usedColors.has(c));
+  if (!COLOR) {
+    COLOR = VRM_EBL_PALETTE[(_ssVrmEblList || []).length % VRM_EBL_PALETTE.length];
+  }
 
   let center = L.latLng(centerLL || map.getCenter());
 
@@ -17490,11 +17732,11 @@ function addVrmEblTool(map, centerLL) {
     dashArray: "8 5", interactive: true, className: "ss-ebl-line"
   }).addTo(group);
 
-  const mkIcon = (cls, size) => L.divIcon({
+  const mkIcon = (cls, size, col) => L.divIcon({
 
     className: "ss-vrm-handle " + cls,
 
-    html: "<span></span>",
+    html: `<span style="background:${col}; border-color:#ffffff; box-shadow: 0 0 0 2px ${col}, 0 2px 8px rgba(0,0,0,0.7); --vrm-col:${col};"></span>`,
 
     iconSize: [size, size],
 
@@ -17504,7 +17746,7 @@ function addVrmEblTool(map, centerLL) {
 
   const centerMk = L.marker(center, {
 
-    icon: mkIcon("ss-vrm-handle--center", 18), draggable: true, keyboard: false,
+    icon: mkIcon("ss-vrm-handle--center", 18, COLOR), draggable: true, keyboard: false,
 
     pane: handlePane, zIndexOffset: 9000, autoPan: false
 
@@ -17512,7 +17754,7 @@ function addVrmEblTool(map, centerLL) {
 
   const vrmMk = L.marker(center, {
 
-    icon: mkIcon("ss-vrm-handle--vrm", 14), draggable: true, keyboard: false,
+    icon: mkIcon("ss-vrm-handle--vrm", 14, COLOR), draggable: true, keyboard: false,
 
     pane: handlePane, zIndexOffset: 9001, autoPan: false
 
@@ -17520,7 +17762,7 @@ function addVrmEblTool(map, centerLL) {
 
   const eblMk = L.marker(center, {
 
-    icon: mkIcon("ss-vrm-handle--ebl", 14), draggable: true, keyboard: false,
+    icon: mkIcon("ss-vrm-handle--ebl", 14, COLOR), draggable: true, keyboard: false,
 
     pane: handlePane, zIndexOffset: 9002, autoPan: false
 
@@ -17622,7 +17864,7 @@ function addVrmEblTool(map, centerLL) {
 
   eblMk.on("dragend", () => redraw());
 
-  const tool = { group, remove: null };
+  const tool = { group, remove: null, color: COLOR };
 
   function removeTool() {
 
@@ -17647,10 +17889,13 @@ function addVrmEblTool(map, centerLL) {
     const lat = center.lat, lon = ((center.lng + 540) % 360) - 180;
     const pos = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : (lat.toFixed(4) + ", " + lon.toFixed(4));
     box.innerHTML =
-      '<div class="ss-vrm-popup-title" style="margin-bottom:4px;font-weight:700;">VRM / EBL</div>' +
+      '<div class="ss-vrm-popup-title" style="margin-bottom:6px;font-weight:700;color:' + COLOR + ';display:flex;align-items:center;gap:6px;">' +
+        '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + COLOR + ';box-shadow:0 0 6px ' + COLOR + ';"></span>' +
+        'VRM / EBL Tool' +
+      '</div>' +
       '<div class="ss-vrm-popup-row"><span>Origin</span><b>' + pos + '</b></div>' +
-      '<div class="ss-vrm-popup-row"><span>VRM</span><b>' + fmtNm(rangeM) + '</b></div>' +
-      '<div class="ss-vrm-popup-row"><span>EBL</span><b>' + fmtBrg(eblBrg) + '</b></div>' +
+      '<div class="ss-vrm-popup-row"><span>VRM</span><b style="color:' + COLOR + ';">' + fmtNm(rangeM) + '</b></div>' +
+      '<div class="ss-vrm-popup-row"><span>EBL</span><b style="color:' + COLOR + ';">' + fmtBrg(eblBrg) + '</b></div>' +
       '<button type="button" class="ss-vrm-del-btn" style="margin-top:6px;width:100%;padding:6px 12px;background:#ef4444;color:#fff;border:none;border-radius:6px;font-weight:600;font-size:0.82rem;cursor:pointer;">Delete VRM / EBL</button>';
     L.DomEvent.disableClickPropagation(box);
     const del = box.querySelector(".ss-vrm-del-btn");
