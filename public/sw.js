@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.196.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.196.0';
+const CACHE_NAME = 'setsail-cache-v5.197.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.197.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -18,6 +18,12 @@ const OFFLINE_CORE_ASSETS = [
   'ais/zones/index.json',
   'ais/zones/names.json',
   'assets/geo/ne_50m_coastline.geojson',
+  'assets/geo/ne_110m_land.geojson',
+  'assets/geo/ne_50m_land.geojson',
+  'assets/geo/ne_110m_lakes.geojson',
+  'assets/geo/ne_110m_rivers.geojson',
+  'assets/geo/ne_50m_lakes.geojson',
+  'assets/geo/ne_50m_rivers.geojson',
   'assets/geo/setroute_coast_grid.json',
   'assets/geo/setroute_land_mask.json',
   'assets/home_bg.mp4',

@@ -30759,109 +30759,77 @@ window.WORLD_LAND_POLYGONS = WORLD_LAND_POLYGONS;
 /** ECDIS: NAVTOR-style dusty teal water + golden-tan land (sampled from NAVTOR Ecdis Style). */
 
 function createEcdisSimpleBaseLayer() {
-
-  // NAVTOR reference: water ~#B5C4C5, land ~#EFB562, thin dark-brown coast
-
+  // NAVTOR reference: water ~#B5C4C5, land ~#EFB562, thin dark-brown coast ~#5A3D28
   const WATER = "#B5C4C5";
-
   const LAND = "#EFB562";
-
   const COAST = "#5A3D28";
 
   const WaterGrid = L.GridLayer.extend({
-
     createTile: function () {
-
       const t = document.createElement("div");
-
       t.style.cssText = "width:256px;height:256px;background:" + WATER + ";";
-
       return t;
-
     }
-
   });
-
   const water = new WaterGrid({
-
     noWrap: false,
-
     maxZoom: 19,
-
     keepBuffer: 1,
-
     updateWhenIdle: true,
-
     updateWhenZooming: false,
-
     attribution: "ECDIS land/water · Natural Earth"
-
   });
 
-
-
-  const detailedHydro = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
-    minZoom: 6,
-    maxZoom: 19,
-    pane: "tilePane",
-    className: "ecdis-detailed-hydro-tile",
-    attribution: "ECDIS Inland Waters &bull; Esri / Natural Earth",
-    updateWhenIdle: true
-  });
+  // Country & State/Province boundaries + City & Country labels (pure black lines & text, 0 terrain)
+  const boundariesLabels = L.tileLayer(
+    "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+    {
+      minZoom: 2,
+      maxZoom: 19,
+      pane: "ecdisLabelsPane",
+      className: "ecdis-boundaries-labels-tile",
+      attribution: "Boundaries & Places · Esri",
+      keepBuffer: 2,
+      updateWhenIdle: true
+    }
+  );
 
   const landFill = L.layerGroup();
-  const group = L.layerGroup([water, detailedHydro, landFill]);
+  const group = L.layerGroup([water, landFill, boundariesLabels]);
   group._setsailEcdis = true;
   group._setsailEcdisWater = water;
-  group._setsailEcdisHydro = detailedHydro;
-
-
+  group._setsailEcdisLabels = boundariesLabels;
 
   const landCache = Object.create(null);
-
+  const hydroCache = Object.create(null);
   let landSeq = 0;
-
   let boundMap = null;
-
   let lastLandKey = "";
 
-
-
   const coarsePolys =
-
     typeof WORLD_LAND_POLYGONS !== "undefined" && Array.isArray(WORLD_LAND_POLYGONS)
-
       ? WORLD_LAND_POLYGONS
-
       : window.WORLD_LAND_POLYGONS || [];
 
-
-
   function ensureEcdisPanes(map) {
-
     if (!map || !map.createPane) return;
-
     if (!map.getPane("ecdisLandPane")) {
-
       const p = map.createPane("ecdisLandPane");
-
-      // Below NtM/AIS overlay pane so land never covers clickable warnings
-
       p.style.zIndex = 350;
-
       p.style.pointerEvents = "none";
-
     } else {
-
       map.getPane("ecdisLandPane").style.pointerEvents = "none";
-
+      try { map.getPane("ecdisLandPane").style.zIndex = 350; } catch (eZ) {}
     }
-
-    // NtM now plots on default overlay/marker panes — do not create a low z-index custom pane
-
+    if (!map.getPane("ecdisLabelsPane")) {
+      const lp = map.createPane("ecdisLabelsPane");
+      lp.style.zIndex = 370;
+      lp.style.pointerEvents = "none";
+    } else {
+      map.getPane("ecdisLabelsPane").style.pointerEvents = "none";
+      try { map.getPane("ecdisLabelsPane").style.zIndex = 370; } catch (eZ) {}
+    }
   }
-
-
 
   function landStyle(zoom) {
     const map = boundMap || group._map || (typeof leafletMap !== "undefined" ? leafletMap : null);
@@ -30874,7 +30842,7 @@ function createEcdisSimpleBaseLayer() {
       weight: isClose ? 1.0 : 0.85,
       opacity: 0.95,
       fillColor: LAND,
-      fillOpacity: isClose ? 0 : 1,
+      fillOpacity: 1, // UNCONDITIONALLY 1 at all zoom levels (no transparent bleed-through)
       interactive: false,
       smoothFactor: 1.2,
       lineCap: "round",
@@ -30882,408 +30850,308 @@ function createEcdisSimpleBaseLayer() {
     };
   }
 
+  function lakeStyle(zoom) {
+    const map = boundMap || group._map || (typeof leafletMap !== "undefined" ? leafletMap : null);
+    const z = zoom != null ? zoom : (map && map.getZoom ? map.getZoom() : 3);
+    return {
+      pane: "ecdisLandPane",
+      stroke: true,
+      color: COAST,
+      weight: z >= 6 ? 0.9 : 0.6,
+      opacity: 0.9,
+      fillColor: WATER,
+      fillOpacity: 1,
+      interactive: false,
+      smoothFactor: 1.2
+    };
+  }
 
+  function riverStyle(zoom) {
+    const map = boundMap || group._map || (typeof leafletMap !== "undefined" ? leafletMap : null);
+    const z = zoom != null ? zoom : (map && map.getZoom ? map.getZoom() : 3);
+    const w = z >= 8 ? 2.5 : z >= 5 ? 1.6 : 1.0;
+    return {
+      pane: "ecdisLandPane",
+      stroke: true,
+      color: WATER,
+      weight: w,
+      opacity: 0.95,
+      fill: false,
+      interactive: false,
+      lineCap: "round",
+      lineJoin: "round"
+    };
+  }
 
   /** Sliding ±1 world around map center — cyclic with worldCopyJump, not 3 fixed clones. */
-
   function visibleWorldLonOffsets(map) {
-
     return typeof setsailWorldCopyLonOffsets === "function"
-
       ? setsailWorldCopyLonOffsets(map)
-
       : [0, -360, 360];
-
   }
-
-
 
   let cachedHitGeo = null;
-
+  let cachedHitLakes = null;
+  let cachedHitRivers = null;
   let cachedHitLevel = "";
 
-
-
   function renderCoarseLand(mapRef) {
-
     landFill.clearLayers();
-
-    // Whole-ring shift only (never mix offsets inside one ring).
-
     const style = landStyle();
-
     const map = mapRef || boundMap || group._map;
-
     const offs = visibleWorldLonOffsets(map);
-
     for (let i = 0; i < coarsePolys.length; i++) {
-
       const ring = coarsePolys[i];
-
       if (!ring || ring.length < 3) continue;
-
       for (let oi = 0; oi < offs.length; oi++) {
-
         const off = offs[oi];
-
         const shifted = off === 0 ? ring : ring.map((ll) => [ll[0], ll[1] + off]);
-
         L.polygon(shifted, style).addTo(landFill);
-
       }
-
     }
-
   }
-
-
-
-  // Reuse one canvas renderer — creating a new L.canvas() per pan leaked GPU/DOM and made ECDIS lag grow over time
 
   let sharedLandRenderer = null;
-
   function getLandRenderer() {
-
     if (!sharedLandRenderer) {
-
       sharedLandRenderer = L.canvas({ padding: 0.4, pane: "ecdisLandPane" });
-
     }
-
     return sharedLandRenderer;
-
   }
 
-
-
-  function stampLandGeo(hitGeo, map) {
+  function stampLandGeo(hitGeo, map, hitLakes, hitRivers) {
     const offs = visibleWorldLonOffsets(map);
     try { landFill.clearLayers(); } catch (eClr) {}
     const z = map && map.getZoom ? map.getZoom() : 3;
     const style = landStyle(z);
+    const lStyle = lakeStyle(z);
+    const rStyle = riverStyle(z);
     const renderer = getLandRenderer();
-    // Prefer a single world copy when zoomed in (cheap); ±1 only near dateline / overview
-
     const mid = offs[Math.floor(offs.length / 2)];
-
     const useOffs = z >= 5 ? [mid != null ? mid : 0] : offs;
 
-    for (let oi = 0; oi < useOffs.length; oi++) {
+    // 1. Stamp Land Polygons (Dark Yellow #EFB562)
+    if (hitGeo && hitGeo.features && hitGeo.features.length) {
+      for (let oi = 0; oi < useOffs.length; oi++) {
+        const off = useOffs[oi];
+        L.geoJSON(hitGeo, {
+          pane: "ecdisLandPane",
+          renderer,
+          interactive: false,
+          coordsToLatLng: function (coords) {
+            return L.latLng(coords[1], coords[0] + off);
+          },
+          style: style
+        }).addTo(landFill);
+      }
+    }
 
-      const off = useOffs[oi];
+    // 2. Stamp Inland Lakes (Water Blue #B5C4C5 with coast outline)
+    if (hitLakes && hitLakes.features && hitLakes.features.length) {
+      for (let oi = 0; oi < useOffs.length; oi++) {
+        const off = useOffs[oi];
+        L.geoJSON(hitLakes, {
+          pane: "ecdisLandPane",
+          renderer,
+          interactive: false,
+          coordsToLatLng: function (coords) {
+            return L.latLng(coords[1], coords[0] + off);
+          },
+          style: lStyle
+        }).addTo(landFill);
+      }
+    }
 
-      L.geoJSON(hitGeo, {
-
-        pane: "ecdisLandPane",
-
-        renderer,
-
-        interactive: false,
-
-        coordsToLatLng: function (coords) {
-
-          return L.latLng(coords[1], coords[0] + off);
-
-        },
-
-        style: style
-
-      }).addTo(landFill);
-
+    // 3. Stamp Inland Rivers (Water Blue #B5C4C5 stroked channels)
+    if (hitRivers && hitRivers.features && hitRivers.features.length) {
+      for (let oi = 0; oi < useOffs.length; oi++) {
+        const off = useOffs[oi];
+        L.geoJSON(hitRivers, {
+          pane: "ecdisLandPane",
+          renderer,
+          interactive: false,
+          coordsToLatLng: function (coords) {
+            return L.latLng(coords[1], coords[0] + off);
+          },
+          style: rStyle
+        }).addTo(landFill);
+      }
     }
 
     return offs;
-
   }
-
-
 
   function landUrls(level) {
-
     const local = "assets/geo/ne_" + level + "_land.geojson";
-
     const cdn =
-
       "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_" +
-
       level +
-
       "_land.geojson";
-
-    return [local + "?v=5.32", cdn];
-
+    return [local + "?v=5.197", cdn];
   }
-
-
 
   async function loadLandGeo(level) {
-
     if (landCache[level]) return landCache[level];
-
     const urls = landUrls(level);
-
     let lastErr = null;
-
     for (let i = 0; i < urls.length; i++) {
-
       try {
-
         const geo = await fetch(urls[i], { cache: "force-cache" }).then((r) => {
-
           if (!r.ok) throw new Error("HTTP " + r.status);
-
           return r.json();
-
         });
-
         landCache[level] = geo;
-
         return geo;
-
       } catch (e) {
-
         lastErr = e;
-
       }
-
     }
-
-    // Graceful hierarchy fallback: 10m -> 50m -> 110m (avoids dropping land on network fail)
-
     if (level === "10m") {
-
       try { return await loadLandGeo("50m"); } catch (e50) {}
-
       try { return await loadLandGeo("110m"); } catch (e110) {}
-
     } else if (level === "50m") {
-
       try { return await loadLandGeo("110m"); } catch (e110) {}
-
     }
-
     throw lastErr || new Error("land load failed");
-
   }
 
-
+  async function loadHydroGeo(kind, level) {
+    const key = kind + "_" + level;
+    if (hydroCache[key]) return hydroCache[key];
+    const local = "assets/geo/ne_" + level + "_" + kind + ".geojson";
+    const cdn =
+      "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_" +
+      level +
+      "_" +
+      kind +
+      ".geojson";
+    const urls = [local + "?v=5.197", cdn];
+    for (let i = 0; i < urls.length; i++) {
+      try {
+        const geo = await fetch(urls[i], { cache: "force-cache" }).then((r) => {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        });
+        hydroCache[key] = geo;
+        return geo;
+      } catch (e) {}
+    }
+    if (level === "50m") {
+      try {
+        return await loadHydroGeo(kind, "110m");
+      } catch (eFallback) {}
+    }
+    return { type: "FeatureCollection", features: [] };
+  }
 
   function getFeatureBBox(feat) {
-
     if (feat && feat._bbox) return feat._bbox;
-
     let minLat = Infinity, maxLat = -Infinity;
-
     let minLon = Infinity, maxLon = -Infinity;
-
     const walk = (c) => {
-
       if (!c || !c.length) return;
-
       if (typeof c[0] === "number") {
-
         const lon = c[0], lat = c[1];
-
         if (lat < minLat) minLat = lat;
-
         if (lat > maxLat) maxLat = lat;
-
         if (lon < minLon) minLon = lon;
-
         if (lon > maxLon) maxLon = lon;
-
         return;
-
       }
-
       for (let i = 0; i < c.length; i++) walk(c[i]);
-
     };
-
     const g = feat && feat.geometry;
-
     if (g && g.coordinates) walk(g.coordinates);
-
     if (!Number.isFinite(minLat)) {
-
       if (feat) feat._bbox = null;
-
       return null;
-
     }
-
     const bbox = [minLat, minLon, maxLat, maxLon];
-
     if (feat) feat._bbox = bbox;
-
     return bbox;
-
   }
-
-
 
   function featureHitsBounds(feat, bounds) {
-
     try {
-
       const bbox = getFeatureBBox(feat);
-
       if (!bbox) return true;
-
       const bSouth = bounds.getSouth();
-
       const bNorth = bounds.getNorth();
-
       const bWest = bounds.getWest();
-
       const bEast = bounds.getEast();
-
-
-
-      // Check primary bbox + ±360 world copies
-
       const worldOffsets = [0, -360, 360, -720, 720];
-
       for (let i = 0; i < worldOffsets.length; i++) {
-
         const off = worldOffsets[i];
-
         const fMinLon = bbox[1] + off;
-
         const fMaxLon = bbox[3] + off;
-
         const fMinLat = bbox[0];
-
         const fMaxLat = bbox[2];
-
-
-
-        // Disjoint check: if completely outside, continue to next copy
-
         if (bNorth < fMinLat || bSouth > fMaxLat || bEast < fMinLon || bWest > fMaxLon) {
-
           continue;
-
         }
-
-        // Bounding boxes overlap: keep the feature on close zoom (never drop land to water)
-
         return true;
-
       }
-
       return false;
-
     } catch (e) {
-
       return true;
-
     }
-
   }
-
-
 
   function setEcdisLandLoading(on) {
-
     const sel = document.getElementById("ntmChartLayerSelector");
-
     if (!sel) return;
-
     const trig = sel.querySelector(".ntm-layer-trigger-btn");
-
     sel.classList.toggle("is-loading-base", !!on);
-
     if (trig) {
-
       trig.classList.toggle("is-loading", !!on);
-
       trig.setAttribute("aria-busy", on ? "true" : "false");
-
       trig.title = on ? "Loading ECDIS land detail…" : "Select Chart Layer";
-
     }
-
   }
 
-
-
   async function refreshEcdisLand() {
-
     const map = boundMap || group._map;
-
     if (!map || !map.hasLayer(group)) return;
-
     const z = map.getZoom();
 
-    // World overview: coarse fill only. Closer: Natural Earth land polygons (fill = edge).
-
     if (z < 1.5) {
-
       setEcdisLandLoading(false);
-
       cachedHitGeo = null;
-
+      cachedHitLakes = null;
+      cachedHitRivers = null;
       cachedHitLevel = "";
-
       if (lastLandKey !== "coarse") {
-
         lastLandKey = "coarse";
-
         renderCoarseLand(map);
-
       }
-
       return;
-
     }
 
-    // Defer 10m detail until closer zoom — 10m×3 worlds is the main ECDIS lag source
-
     const level = z >= 5 ? "10m" : z >= 3 ? "50m" : "110m";
-
+    const hydroLevel = z >= 3 ? "50m" : "110m";
     const seq = ++landSeq;
-
-    const needsFetch = !landCache[level];
-
+    const needsFetch = !landCache[level] || !hydroCache["lakes_" + hydroLevel] || !hydroCache["rivers_" + hydroLevel];
     if (needsFetch) setEcdisLandLoading(true);
 
     try {
-
-      const geo = await loadLandGeo(level);
-
+      const [geo, lakes, rivers] = await Promise.all([
+        loadLandGeo(level),
+        loadHydroGeo("lakes", hydroLevel),
+        loadHydroGeo("rivers", hydroLevel)
+      ]);
       if (seq !== landSeq) return;
 
       const pad = z >= 6 ? 0.05 : z >= 3 ? 0.15 : 0.4;
-
       const bounds = map.getBounds().pad(pad);
-
       const offs = visibleWorldLonOffsets(map);
-
       const worldKey = offs.join(",");
 
-      // Coarser viewKey grid → fewer redraws while panning
-
       const q = z >= 6 ? 20 : 8;
-
       const viewKey =
-
-        level +
-
-        "|" +
-
-        Math.round(bounds.getSouth() * q) +
-
-        "|" +
-
-        Math.round(bounds.getWest() * q) +
-
-        "|" +
-
-        Math.round(bounds.getNorth() * q) +
-
-        "|" +
-
+        level + "|" + hydroLevel + "|" +
+        Math.round(bounds.getSouth() * q) + "|" +
+        Math.round(bounds.getWest() * q) + "|" +
+        Math.round(bounds.getNorth() * q) + "|" +
         Math.round(bounds.getEast() * q);
 
       const modeKey = z >= 6 ? "|close" : "|far";
@@ -31294,8 +31162,6 @@ function createEcdisSimpleBaseLayer() {
       }
       ensureEcdisPanes(map);
 
-      // Only refilter when the geographic view/level changes; world-index pan
-      // just restamps the cached hit set onto the sliding ±1 window.
       if (cachedHitLevel !== (viewKey + modeKey) || !cachedHitGeo) {
         const srcFeats = (geo && geo.features) || [];
         const hitFeats =
@@ -31305,135 +31171,93 @@ function createEcdisSimpleBaseLayer() {
                 return featureHitsBounds(feat, bounds);
               });
         cachedHitGeo = { type: "FeatureCollection", features: hitFeats };
+
+        const lFeats = (lakes && lakes.features) || [];
+        const hitLakes = lFeats.filter(function (feat) {
+          return featureHitsBounds(feat, bounds);
+        });
+        cachedHitLakes = { type: "FeatureCollection", features: hitLakes };
+
+        const rFeats = (rivers && rivers.features) || [];
+        const hitRivers = rFeats.filter(function (feat) {
+          return featureHitsBounds(feat, bounds);
+        });
+        cachedHitRivers = { type: "FeatureCollection", features: hitRivers };
+
         cachedHitLevel = viewKey + modeKey;
       }
 
-      stampLandGeo(cachedHitGeo, map);
-
+      stampLandGeo(cachedHitGeo, map, cachedHitLakes, cachedHitRivers);
       lastLandKey = key;
-
     } catch (e) {
-
       console.warn("[SetSail ECDIS] land load failed — coarse fallback", e);
-
       lastLandKey = "coarse";
-
       cachedHitGeo = null;
-
+      cachedHitLakes = null;
+      cachedHitRivers = null;
       cachedHitLevel = "";
-
       renderCoarseLand(map);
-
     } finally {
-
       if (seq === landSeq) setEcdisLandLoading(false);
-
     }
-
   }
-
-
-
-  // Back-compat alias for any callers expecting the old name.
 
   function refreshEcdisCoast() {
-
     return refreshEcdisLand();
-
   }
 
-
-
   group.on("add", function () {
-
     boundMap = group._map;
-
     if (!boundMap) return;
-
     ensureEcdisPanes(boundMap);
-
     boundMap.getContainer().classList.add("ecdis-simple-base");
-
+    try {
+      const p = boundMap.getPane("ecdisLandPane");
+      if (p) p.style.display = "";
+      const lp = boundMap.getPane("ecdisLabelsPane");
+      if (lp) lp.style.display = "";
+    } catch (eP) {}
     lastLandKey = "";
-
     cachedHitGeo = null;
-
+    cachedHitLakes = null;
+    cachedHitRivers = null;
     cachedHitLevel = "";
-
     renderCoarseLand(boundMap);
-
     const bump = function () {
-
       refreshEcdisLand();
-
     };
-
-    // During pan near a world seam, only restamp cached land onto the sliding
-
-    // window (cheap) — never re-parse Natural Earth on every move tick.
 
     let moveTick = 0;
-
     const bumpWorldWindow = function () {
-
       if (!cachedHitGeo) return;
-
       const now = Date.now();
-
       if (now - moveTick < 80) return;
-
       moveTick = now;
-
       try {
-
         const offs = visibleWorldLonOffsets(boundMap);
-
         const wk = offs.join(",");
-
         if (lastLandKey && lastLandKey.indexOf("|w" + wk) >= 0) return;
-
-        stampLandGeo(cachedHitGeo, boundMap);
-
+        stampLandGeo(cachedHitGeo, boundMap, cachedHitLakes, cachedHitRivers);
         const pipe = lastLandKey.lastIndexOf("|w");
-
         if (pipe >= 0) lastLandKey = lastLandKey.slice(0, pipe) + "|w" + wk;
-
         else lastLandKey = "live|w" + wk;
-
       } catch (eMove) {}
-
     };
 
-    // Only refresh land on zoomend/moveend — mid-pan restamps were the growing lag
-
     let bumpTimer = 0;
-
     const bumpDebounced = function () {
-
       if (bumpTimer) clearTimeout(bumpTimer);
-
       bumpTimer = setTimeout(function () {
-
         bumpTimer = 0;
-
         bump();
-
       }, window._setsailLowEndMap ? 180 : 90);
-
     };
 
     boundMap.on("zoomend moveend", bumpDebounced);
-
-    // World-window restamp only on moveend near dateline (not every move tick)
-
     boundMap.on("moveend", bumpWorldWindow);
-
     group._ecdisCoastBump = bumpDebounced;
-
     group._ecdisCoastMoveBump = bumpWorldWindow;
-
     refreshEcdisLand();
-
   });
 
   group.on("remove", function () {
@@ -31445,6 +31269,11 @@ function createEcdisSimpleBaseLayer() {
         if (p) {
           p.style.display = "none";
           p.innerHTML = "";
+        }
+        const lp = curMap.getPane("ecdisLabelsPane");
+        if (lp) {
+          lp.style.display = "none";
+          lp.innerHTML = "";
         }
         const c = curMap.getContainer ? curMap.getContainer() : null;
         if (c) c.classList.remove("ecdis-simple-base");
@@ -31462,17 +31291,14 @@ function createEcdisSimpleBaseLayer() {
     boundMap = null;
     lastLandKey = "";
     cachedHitGeo = null;
+    cachedHitLakes = null;
+    cachedHitRivers = null;
     cachedHitLevel = "";
   });
 
-
-
   group.refreshEcdisCoast = refreshEcdisCoast;
-
   group.refreshEcdisLand = refreshEcdisLand;
-
   return group;
-
 }
 
 window.createEcdisSimpleBaseLayer = createEcdisSimpleBaseLayer;
