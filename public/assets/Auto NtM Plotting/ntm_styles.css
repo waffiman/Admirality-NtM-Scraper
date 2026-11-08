@@ -25288,12 +25288,17 @@
 
 /* 4. VRM / EBL Nautical Chart Tool Styles */
 .ss-vrm-ring {
-  pointer-events: none !important;
-  filter: drop-shadow(0 0 3px rgba(249, 115, 22, 0.45));
+  pointer-events: stroke !important;
+  cursor: pointer !important;
+  filter: drop-shadow(0 0 1.5px rgba(249, 115, 22, 0.45));
 }
 .ss-ebl-line {
-  pointer-events: none !important;
-  filter: drop-shadow(0 0 3px rgba(249, 115, 22, 0.45));
+  pointer-events: stroke !important;
+  cursor: pointer !important;
+  filter: drop-shadow(0 0 1.5px rgba(249, 115, 22, 0.45));
+}
+.ecdis-detailed-hydro-tile img {
+  filter: sepia(0.25) hue-rotate(-10deg) saturate(1.15) contrast(1.02);
 }
 .ss-vrm-handle {
   pointer-events: auto !important;

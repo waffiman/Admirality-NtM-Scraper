@@ -15531,11 +15531,8 @@ function initNtMMap() {
         errEvent.tile.src = `https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/${c.z}/${c.y}/${c.x}`;
 
       } else if (step === 1) {
-
         errEvent.tile.dataset.fallbackStep = "2";
-
-        errEvent.tile.src = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${c.z}/${c.x}/${c.y}.png`;
-
+        errEvent.tile.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/${c.z}/${c.y}/${c.x}`;
       } else if (step === 2) {
 
         errEvent.tile.dataset.fallbackStep = "3";
@@ -17484,19 +17481,13 @@ function addVrmEblTool(map, centerLL) {
   const group = L.layerGroup().addTo(map);
 
   const ring = L.circle(center, {
-
-    radius: rangeM, pane: paneName, renderer, color: COLOR, weight: 2,
-
-    opacity: 0.95, fill: false, interactive: false, className: "ss-vrm-ring"
-
+    radius: rangeM, pane: paneName, renderer, color: COLOR, weight: 1.1,
+    opacity: 0.95, fill: false, interactive: true, className: "ss-vrm-ring"
   }).addTo(group);
 
   const ebl = L.polyline([center, center], {
-
-    pane: paneName, renderer, color: COLOR, weight: 1.8, opacity: 0.95,
-
-    dashArray: "10 6", interactive: false, className: "ss-ebl-line"
-
+    pane: paneName, renderer, color: COLOR, weight: 1.1, opacity: 0.95,
+    dashArray: "8 5", interactive: true, className: "ss-ebl-line"
   }).addTo(group);
 
   const mkIcon = (cls, size) => L.divIcon({
@@ -17649,53 +17640,45 @@ function addVrmEblTool(map, centerLL) {
 
   tool.remove = removeTool;
 
-  // Click centre → info + Delete;  double-click centre → delete immediately
-  centerMk.on("click", (e) => {
-
-    if (e && e.originalEvent) L.DomEvent.stop(e.originalEvent);
-
+  // Right-click (ПКМ) anywhere on VRM circle, EBL line, or handles opens delete popup
+  function showDeletePopup(atLatLng) {
     const box = document.createElement("div");
-
     box.className = "ss-vrm-popup";
-
     const lat = center.lat, lon = ((center.lng + 540) % 360) - 180;
-
     const pos = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : (lat.toFixed(4) + ", " + lon.toFixed(4));
-
     box.innerHTML =
-
-      '<div class="ss-vrm-popup-title">VRM / EBL</div>' +
-
-      '<div class="ss-vrm-popup-row"><span>Origin</span><b>' + pos + "</b></div>" +
-
-      '<div class="ss-vrm-popup-row"><span>VRM</span><b>' + fmtNm(rangeM) + "</b></div>" +
-
-      '<div class="ss-vrm-popup-row"><span>EBL</span><b>' + fmtBrg(eblBrg) + "</b></div>" +
-
-      '<button type="button" class="ss-vrm-del-btn">Delete VRM / EBL</button>';
-
+      '<div class="ss-vrm-popup-title" style="margin-bottom:4px;font-weight:700;">VRM / EBL</div>' +
+      '<div class="ss-vrm-popup-row"><span>Origin</span><b>' + pos + '</b></div>' +
+      '<div class="ss-vrm-popup-row"><span>VRM</span><b>' + fmtNm(rangeM) + '</b></div>' +
+      '<div class="ss-vrm-popup-row"><span>EBL</span><b>' + fmtBrg(eblBrg) + '</b></div>' +
+      '<button type="button" class="ss-vrm-del-btn" style="margin-top:6px;width:100%;padding:6px 12px;background:#ef4444;color:#fff;border:none;border-radius:6px;font-weight:600;font-size:0.82rem;cursor:pointer;">Delete VRM / EBL</button>';
     L.DomEvent.disableClickPropagation(box);
-
     const del = box.querySelector(".ss-vrm-del-btn");
-
     const doDel = (ev) => { if (ev) { ev.preventDefault(); ev.stopPropagation(); } removeTool(); };
-
     del.addEventListener("click", doDel);
-
     del.addEventListener("pointerup", doDel);
-
     L.popup({ className: "ss-map-ctx-popup ss-vrm-popup-wrap", closeButton: true, autoPan: true, offset: [0, -6] })
+      .setLatLng(atLatLng || center).setContent(box).openOn(map);
+  }
 
-      .setLatLng(center).setContent(box).openOn(map);
+  const handleToolContextMenu = (e) => {
+    if (e && e.originalEvent) {
+      L.DomEvent.stop(e.originalEvent);
+      try { e.originalEvent.preventDefault(); } catch (ePrv) {}
+      try { e.originalEvent.stopPropagation(); } catch (eStp) {}
+    }
+    showDeletePopup((e && e.latlng) ? e.latlng : center);
+  };
 
-  });
+  ring.on("contextmenu", handleToolContextMenu);
+  ebl.on("contextmenu", handleToolContextMenu);
+  centerMk.on("contextmenu", handleToolContextMenu);
+  vrmMk.on("contextmenu", handleToolContextMenu);
+  eblMk.on("contextmenu", handleToolContextMenu);
 
   centerMk.on("dblclick", (e) => {
-
     if (e && e.originalEvent) L.DomEvent.stop(e.originalEvent);
-
     removeTool();
-
   });
 
   // EBL must be re-extended to the edge whenever the view changes
@@ -30563,13 +30546,20 @@ function createEcdisSimpleBaseLayer() {
 
 
 
+  const detailedHydro = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
+    minZoom: 6,
+    maxZoom: 19,
+    pane: "tilePane",
+    className: "ecdis-detailed-hydro-tile",
+    attribution: "ECDIS Inland Waters &bull; Esri / Natural Earth",
+    updateWhenIdle: true
+  });
+
   const landFill = L.layerGroup();
-
-  const group = L.layerGroup([water, landFill]);
-
+  const group = L.layerGroup([water, detailedHydro, landFill]);
   group._setsailEcdis = true;
-
   group._setsailEcdisWater = water;
+  group._setsailEcdisHydro = detailedHydro;
 
 
 
@@ -30619,34 +30609,23 @@ function createEcdisSimpleBaseLayer() {
 
 
 
-  function landStyle() {
-
+  function landStyle(zoom) {
+    const map = boundMap || group._map || (typeof leafletMap !== "undefined" ? leafletMap : null);
+    const z = zoom != null ? zoom : (map && map.getZoom ? map.getZoom() : 3);
+    const isClose = z >= 6;
     return {
-
       pane: "ecdisLandPane",
-
       stroke: true,
-
       color: COAST,
-
-      weight: 0.85,
-
+      weight: isClose ? 1.0 : 0.85,
       opacity: 0.95,
-
       fillColor: LAND,
-
-      fillOpacity: 1,
-
+      fillOpacity: isClose ? 0 : 1,
       interactive: false,
-
       smoothFactor: 1.2,
-
       lineCap: "round",
-
       lineJoin: "round"
-
     };
-
   }
 
 
@@ -30724,18 +30703,12 @@ function createEcdisSimpleBaseLayer() {
 
 
   function stampLandGeo(hitGeo, map) {
-
     const offs = visibleWorldLonOffsets(map);
-
     try { landFill.clearLayers(); } catch (eClr) {}
-
-    const style = landStyle();
-
-    const renderer = getLandRenderer();
-
-    // Prefer a single world copy when zoomed in (cheap); ±1 only near dateline / overview
-
     const z = map && map.getZoom ? map.getZoom() : 3;
+    const style = landStyle(z);
+    const renderer = getLandRenderer();
+    // Prefer a single world copy when zoomed in (cheap); ±1 only near dateline / overview
 
     const mid = offs[Math.floor(offs.length / 2)];
 
@@ -31059,44 +31032,26 @@ function createEcdisSimpleBaseLayer() {
 
         Math.round(bounds.getEast() * q);
 
-      const key = viewKey + "|w" + worldKey;
-
+      const modeKey = z >= 6 ? "|close" : "|far";
+      const key = viewKey + modeKey + "|w" + worldKey;
       if (key === lastLandKey) {
-
         setEcdisLandLoading(false);
-
         return;
-
       }
-
       ensureEcdisPanes(map);
 
-
-
       // Only refilter when the geographic view/level changes; world-index pan
-
       // just restamps the cached hit set onto the sliding ±1 window.
-
-      if (cachedHitLevel !== viewKey || !cachedHitGeo) {
-
+      if (cachedHitLevel !== (viewKey + modeKey) || !cachedHitGeo) {
         const srcFeats = (geo && geo.features) || [];
-
         const hitFeats =
-
           level === "110m"
-
             ? srcFeats
-
             : srcFeats.filter(function (feat) {
-
                 return featureHitsBounds(feat, bounds);
-
               });
-
         cachedHitGeo = { type: "FeatureCollection", features: hitFeats };
-
-        cachedHitLevel = viewKey;
-
+        cachedHitLevel = viewKey + modeKey;
       }
 
       stampLandGeo(cachedHitGeo, map);
@@ -31228,33 +31183,32 @@ function createEcdisSimpleBaseLayer() {
   });
 
   group.on("remove", function () {
-
+    try { landFill.clearLayers(); } catch (eClr) {}
+    try {
+      const curMap = boundMap || group._map || (typeof leafletMap !== "undefined" ? leafletMap : null);
+      if (curMap && curMap.getPane) {
+        const p = curMap.getPane("ecdisLandPane");
+        if (p) {
+          p.style.display = "none";
+          p.innerHTML = "";
+        }
+        const c = curMap.getContainer ? curMap.getContainer() : null;
+        if (c) c.classList.remove("ecdis-simple-base");
+      }
+    } catch (eP) {}
     if (boundMap && group._ecdisCoastBump) {
-
       boundMap.off("zoomend moveend", group._ecdisCoastBump);
-
     }
-
     if (boundMap && group._ecdisCoastMoveBump) {
-
       boundMap.off("moveend", group._ecdisCoastMoveBump);
-
     }
-
     group._ecdisCoastBump = null;
-
     group._ecdisCoastMoveBump = null;
-
     sharedLandRenderer = null;
-
     boundMap = null;
-
     lastLandKey = "";
-
     cachedHitGeo = null;
-
     cachedHitLevel = "";
-
   });
 
 
@@ -33010,60 +32964,20 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
 
   // Handle Layer Selector Clicks
-
-  // Mobile: block the synthetic click that fires after the opening tap (same screen coords → Bathymetry)
-
-  const blockGhostOpenTap = (e) => {
-
-    if (Date.now() - layerPanelOpenedAt >= 520) return;
-
-    const t = e.target && e.target.closest ? e.target.closest(".ntm-layer-thumb-btn") : null;
-
-    if (t && t.getAttribute("data-trigger") === "1") return; // never block Layers open/close
-
-    e.preventDefault();
-
-    e.stopPropagation();
-
-    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-
-  };
-
-  selector.addEventListener("click", blockGhostOpenTap, true);
-
-  selector.addEventListener("pointerup", blockGhostOpenTap, true);
-
-  selector.addEventListener("touchend", blockGhostOpenTap, true);
-
-
-
   selector.querySelectorAll(".ntm-layer-thumb-btn").forEach((btn) => {
-
     btn.addEventListener("click", (e) => {
-
       e.preventDefault();
-
       e.stopPropagation();
 
       const isTrigger = btn.getAttribute("data-trigger") === "1";
-
-      // Collapsed: only the trigger is tappable — open/close the panel
-
-      if (selector.classList.contains("collapsed") || isTrigger) {
-
-        const wasCollapsed = selector.classList.contains("collapsed");
-
+      if (isTrigger) {
         selector.classList.toggle("collapsed");
-
-        if (wasCollapsed) layerPanelOpenedAt = Date.now();
-
         return;
-
       }
 
-      // Swallow ghost taps that land on Bathymetry/Buoys right after opening (same finger position)
-
-      if (Date.now() - layerPanelOpenedAt < 520) return;
+      if (selector.classList.contains("collapsed")) {
+        selector.classList.remove("collapsed");
+      }
 
 
 
@@ -33100,96 +33014,57 @@ function initVisualChartLayerSelector(mapInstance, layers) {
         };
 
         // Track full tile settle: Leaflet fires "loading" when tiles start, "load" when ALL visible tiles done
-
         const waitLayerFullyLoaded = (lyr, done) => {
-
           let settled = false;
-
           const finish = () => {
-
             if (settled) return;
-
             settled = true;
-
             lyr.off("loading", onLoading);
-
             lyr.off("load", onLoad);
-
             lyr.off("tileerror", onTileErr);
-
             done();
-
           };
-
           const onLoading = () => setBaseLoading(true);
-
           const onLoad = () => finish();
-
           const onTileErr = () => { /* keep waiting for remaining tiles; load still fires */ };
-
           lyr.on("loading", onLoading);
-
           lyr.on("load", onLoad);
-
           lyr.on("tileerror", onTileErr);
-
           // Safety: never spin forever
-
-          setTimeout(finish, 12000);
-
+          setTimeout(finish, 2500);
         };
 
-
-
         if (baseKey === "globe3d") {
-
           const mapElG = mapInstance.getContainer();
-
           if (mapElG) mapElG.classList.remove("ecdis-simple-base");
-
           setBaseLoading(true);
-
           const c = mapInstance.getCenter();
-
           globeState.rotLat = c.lat;
-
           globeState.rotLon = c.lng;
-
           globeState.active = true;
-
           globeWrap.classList.add("active");
-
           requestAnimationFrame(() => {
-
             renderGlobe3D();
-
             // Globe is canvas — wait one paint + short settle
-
             requestAnimationFrame(() => setTimeout(() => setBaseLoading(false), 180));
-
           });
-
         } else {
-
           if (globeState.active) {
-
             globeState.active = false;
-
             globeWrap.classList.remove("active");
-
             mapInstance.setView([globeState.rotLat, globeState.rotLon], mapInstance.getZoom());
-
           }
-
           ["ecdis", "ocean", "sat"].forEach((k) => {
-
             if (layers[k] && mapInstance.hasLayer(layers[k])) {
-
               mapInstance.removeLayer(layers[k]);
-
             }
-
           });
+          const ecdisPane = mapInstance.getPane("ecdisLandPane");
+          if (baseKey === "ecdis") {
+            if (ecdisPane) ecdisPane.style.display = "";
+          } else {
+            if (ecdisPane) ecdisPane.style.display = "none";
+          }
 
           if (layers[baseKey]) {
 
@@ -36771,76 +36646,76 @@ function renderRouteBufferCorridorOnMap() {
 
   }
 
-  // Full axis for the black centerline; decimate only the corridor edges (SVG perf)
-
+  // Full axis vertices used for both centerline and corridor borders (exact symmetry, no corner drift)
   const fullAxisPts = pts.slice();
-
-  const edgePts = simplifyRoutePtsForBuffer(pts, 96);
-
+  const edgePts = pts.slice();
   invalidateRouteCorridorDistanceCache();
-
   const isFilterOn = Boolean(window.ROUTE_CORRIDOR_FILTER_ENABLED);
-
   const drId = getDrActiveRouteId();
-
   const isDrRails = !!(drId && activeRouteData && (activeRouteData.id === drId || activeRouteData.name === drId));
-
   const hasMainCenterline = !!(window._setsailRouteStrokeRefs && window._setsailRouteStrokeRefs.center);
 
-
-
   if (edgePts.length >= 2) {
+    const nm = bufNm / 60;
+    const n = edgePts.length;
 
-    // Port = left of track (looking start→end); Stbd = right.
-
-    // Direction (east, north)=(dx,dy); port = rotate 90° CCW → (-dy, dx).
+    // 1. Calculate unit normal vector for each leg in local metric
+    const legNormals = [];
+    for (let i = 0; i < n - 1; i++) {
+      const p1 = edgePts[i];
+      const p2 = edgePts[i + 1];
+      const latMid = (p1[0] + p2[0]) * 0.5 * Math.PI / 180;
+      const cosLat = Math.max(0.2, Math.cos(latMid));
+      let dx = (p2[1] - p1[1]) * cosLat;
+      let dy = p2[0] - p1[0];
+      const len = Math.hypot(dx, dy) || 1;
+      dx /= len;
+      dy /= len;
+      // Port normal (CCW 90° of track vector [dx, dy] where x=east, y=north): [-dy, dx]
+      legNormals.push({ nx: -dy, ny: dx, cosLat: cosLat });
+    }
 
     const portSide = [];
-
     const stbdSide = [];
 
-    for (let i = 0; i < edgePts.length; i++) {
-
+    // 2. Compute exact symmetric miter bisector normal at every waypoint
+    for (let i = 0; i < n; i++) {
       const curLat = edgePts[i][0];
-
       const curLon = edgePts[i][1];
-
-      const prev = i > 0 ? edgePts[i - 1] : edgePts[i];
-
-      const next = i < edgePts.length - 1 ? edgePts[i + 1] : edgePts[i];
-
       const latRad = curLat * Math.PI / 180;
-
       const cosLat = Math.max(0.2, Math.cos(latRad));
 
-      let dx = (next[1] - prev[1]) * cosLat; // east
+      let nx, ny, scale = 1.0;
+      if (i === 0) {
+        nx = legNormals[0].nx;
+        ny = legNormals[0].ny;
+      } else if (i === n - 1) {
+        nx = legNormals[n - 2].nx;
+        ny = legNormals[n - 2].ny;
+      } else {
+        const ln1 = legNormals[i - 1];
+        const ln2 = legNormals[i];
+        const bx = (ln1.nx + ln2.nx) * 0.5;
+        const by = (ln1.ny + ln2.ny) * 0.5;
+        const bLen = Math.hypot(bx, by);
+        if (bLen < 1e-4) {
+          nx = ln1.nx;
+          ny = ln1.ny;
+        } else {
+          const unx = bx / bLen;
+          const uny = by / bLen;
+          const dot = unx * ln1.nx + uny * ln1.ny;
+          scale = 1.0 / Math.max(0.35, dot);
+          nx = unx;
+          ny = uny;
+        }
+      }
 
-      let dy = next[0] - prev[0]; // north
+      const dLat = ny * nm * scale;
+      const dLon = (nx * nm * scale) / cosLat;
 
-      const len = Math.hypot(dx, dy) || 1;
-
-      dx /= len;
-
-      dy /= len;
-
-      const nm = bufNm / 60;
-
-      // port (left): east=-dy, north=dx
-
-      const portLat = curLat + dx * nm;
-
-      const portLon = curLon + (-dy) * nm / cosLat;
-
-      // stbd (right): opposite
-
-      const stbdLat = curLat - dx * nm;
-
-      const stbdLon = curLon - (-dy) * nm / cosLat;
-
-      portSide.push([portLat, portLon]);
-
-      stbdSide.push([stbdLat, stbdLon]);
-
+      portSide.push([curLat + dLat, curLon + dLon]);
+      stbdSide.push([curLat - dLat, curLon - dLon]);
     }
 
     const polyCoords = portSide.concat(stbdSide.slice().reverse());
