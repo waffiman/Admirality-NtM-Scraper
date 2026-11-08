@@ -15794,12 +15794,16 @@ function initNtMMap() {
     let _buoyTssData = [];
     let _buoysVectorGroup = L.layerGroup();
     seamarkLayer.addLayer(_buoysVectorGroup);
+    let _renderBuoysHitboxes = null;
 
     async function loadBuoyDatasets() {
       if (_buoyMarksData.length > 0) return;
       try {
         const rMarks = await fetch("assets/geo/setroute_iala_marks.json");
-        if (rMarks.ok) _buoyMarksData = await rMarks.json();
+        if (rMarks.ok) {
+          _buoyMarksData = await rMarks.json();
+          if (typeof _renderBuoysHitboxes === "function") _renderBuoysHitboxes();
+        }
       } catch (eMarks) {}
       try {
         const rTss = await fetch("assets/geo/setroute_tss_world.json");
@@ -15831,9 +15835,10 @@ function initNtMMap() {
     }
 
     function formatBuoyPopup(mark) {
-      const icon = mark.icon || (mark.hand === "port" ? "🟥" : mark.hand === "starboard" ? "🟩" : (mark.type && mark.type.includes("cardinal")) ? "▲" : "⚓");
-      const headerColor = mark.headerColor || (mark.hand === "port" ? "#ef4444" : mark.hand === "starboard" ? "#22c55e" : (mark.type && mark.type.includes("cardinal")) ? "#eab308" : "#38bdf8");
       const name = mark.name || mark.id || "Navigational Seamark";
+      const icon = mark.icon || (mark.hand === "port" ? "🟥" : mark.hand === "starboard" ? "🟩" : (mark.type && mark.type.includes("cardinal")) ? "▲" : "⚓");
+      const modeCls = mark.hand === "port" ? "is-port" : mark.hand === "starboard" ? "is-starboard" : (mark.type && mark.type.includes("cardinal")) ? "is-cardinal" : "is-ais";
+      const badgeText = mark.categoryBadge || (mark.hand === "port" ? "PORT" : mark.hand === "starboard" ? "STBD" : (mark.type && mark.type.includes("cardinal")) ? "CARDINAL" : (mark.typeLabel ? mark.typeLabel.split(" ")[0].toUpperCase() : "SEAMARK"));
       const typeStr = mark.typeLabel || mark.type || "Seamark";
       const lightStr = mark.light || "Unlit / Fixed Daymark";
       const colour = mark.colour || "Standard S-52";
@@ -15844,62 +15849,64 @@ function initNtMMap() {
       const desc = mark.description || "";
 
       return (
-        '<div class="ss-buoy-popup-content" style="min-width:230px;max-width:320px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;color:#1e293b;">' +
-          '<div style="font-weight:800;color:' + headerColor + ';margin-bottom:5px;display:flex;align-items:center;gap:6px;font-size:13px;">' +
-            '<span>' + icon + '</span> <span>' + name + '</span>' +
+        '<div class="ss-ais-popup-body ss-buoy-popup-body">' +
+          '<div class="ss-ais-head">' +
+            '<span class="ss-ais-name" title="' + name + '">' + icon + ' ' + name + '</span>' +
+            '<span class="ss-ais-mode ' + modeCls + '">' + badgeText + '</span>' +
           '</div>' +
-          '<div><b>Type:</b> ' + typeStr + '</div>' +
-          '<div><b>Light:</b> <span style="font-family:monospace;font-weight:700;color:#0284c7;">' + lightStr + '</span></div>' +
-          '<div><b>Colour / Shape:</b> ' + colour + ' · ' + shape + '</div>' +
-          '<div><b>Topmark:</b> ' + topmark + '</div>' +
-          '<div><b>IALA Region:</b> ' + ialaReg + '</div>' +
-          '<div><b>Position:</b> <span style="font-family:monospace;font-size:11px;color:#334155;">' + posDms + '</span></div>' +
-          (desc ? '<div style="margin-top:5px;padding:3px 6px;background:#f8fafc;border-left:3px solid ' + headerColor + ';border-radius:3px;font-size:11px;color:#475569;">' + desc + '</div>' : '') +
-          '<div style="margin-top:6px;padding-top:4px;border-top:1px solid #e2e8f0;font-size:10px;color:#64748b;display:flex;justify-content:space-between;">' +
-            '<span>OpenSeaMap / IALA S-52</span>' +
-            '<span>Active Seamark</span>' +
-          '</div>' +
+          '<div class="ss-ais-row"><span class="ss-ais-k">TYPE</span><span class="ss-ais-v">' + typeStr + '</span></div>' +
+          '<div class="ss-ais-row"><span class="ss-ais-k">LIGHT</span><span class="ss-ais-v" style="color:#38bdf8;font-family:monospace;font-weight:700;">' + lightStr + '</span></div>' +
+          '<div class="ss-ais-row"><span class="ss-ais-k">COLOUR</span><span class="ss-ais-v">' + colour + '</span></div>' +
+          '<div class="ss-ais-row"><span class="ss-ais-k">SHAPE</span><span class="ss-ais-v">' + shape + '</span></div>' +
+          '<div class="ss-ais-row"><span class="ss-ais-k">TOPMARK</span><span class="ss-ais-v">' + topmark + '</span></div>' +
+          '<div class="ss-ais-row"><span class="ss-ais-k">REGION</span><span class="ss-ais-v">' + ialaReg + '</span></div>' +
+          '<div class="ss-ais-row"><span class="ss-ais-k">POS</span><span class="ss-ais-v" style="font-family:monospace;font-size:10px;">' + posDms + '</span></div>' +
+          (desc ? '<div class="ss-ais-foot" style="margin-top:4px;padding:3px 5px;background:rgba(255,255,255,0.06);border-left:2px solid #38bdf8;border-radius:2px;font-size:10px;color:#94a3b8;line-height:1.35;">' + desc + '</div>' : '') +
+          '<div class="ss-ais-foot">OpenSeaMap · S-52 / S-57 Seamark</div>' +
         '</div>'
       );
     }
 
     function formatTssPopup(tss, lat, lon) {
-      const name = tss.name || "Traffic Separation Scheme";
+      const name = tss.name || tss.schemeName || "Traffic Separation Scheme";
       const cat = tss.category === "separation_zone" ? "Separation Zone (HARD BAN)" :
                   tss.category === "traffic_lane" ? "Traffic Lane (One-Way Flow)" :
                   tss.category === "precautionary_area" ? "Precautionary Area" : "TSS Area";
-      const headerColor = tss.category === "separation_zone" ? "#dc2626" :
-                          tss.category === "traffic_lane" ? "#2563eb" : "#7c3aed";
+      const badgeText = tss.category === "separation_zone" ? "SEP ZONE" :
+                        tss.category === "traffic_lane" ? "LANE" : "TSS";
+      const modeCls = tss.category === "separation_zone" ? "is-sep-zone" :
+                      tss.category === "traffic_lane" ? "is-lane" : "is-ais";
       const dir = tss.directionDeg != null ? `${tss.directionDeg}° True` : "Variable / Precautionary";
-      const colreg = "COLREG Rule 10 (Traffic Separation Schemes)";
+      const colreg = "COLREG Rule 10 (TSS)";
       const posDms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
       const ruleNote = tss.category === "separation_zone"
-        ? "Rule 10(h): A vessel not using a TSS shall avoid it by as wide a margin as is practicable."
+        ? "Rule 10(h): A vessel not using a TSS shall avoid it by as wide a margin as practicable."
         : tss.category === "traffic_lane"
         ? "Rule 10(b): Proceed in the appropriate traffic lane in the general direction of traffic flow."
         : "Rule 10: Navigate with particular caution in precautionary areas.";
 
       return (
-        '<div class="ss-buoy-popup-content ss-tss-popup-content" style="min-width:240px;max-width:330px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;color:#1e293b;">' +
-          '<div style="font-weight:800;color:' + headerColor + ';margin-bottom:5px;display:flex;align-items:center;gap:6px;font-size:13px;">' +
-            '<span>🧭</span> <span>' + name + '</span>' +
+        '<div class="ss-ais-popup-body ss-buoy-popup-body">' +
+          '<div class="ss-ais-head">' +
+            '<span class="ss-ais-name" title="' + name + '">🧭 ' + name + '</span>' +
+            '<span class="ss-ais-mode ' + modeCls + '">' + badgeText + '</span>' +
           '</div>' +
-          '<div><b>Category:</b> ' + cat + '</div>' +
-          (tss.directionDeg != null ? '<div><b>Traffic Course:</b> <span style="font-family:monospace;font-weight:700;color:#2563eb;">' + dir + '</span></div>' : '') +
-          '<div><b>Regulation:</b> ' + colreg + '</div>' +
-          '<div><b>Position:</b> <span style="font-family:monospace;font-size:11px;color:#334155;">' + posDms + '</span></div>' +
-          '<div style="margin-top:5px;padding:3px 6px;background:#f8fafc;border-left:3px solid ' + headerColor + ';border-radius:3px;font-size:11px;color:#475569;">' + ruleNote + '</div>' +
-          '<div style="margin-top:6px;padding-top:4px;border-top:1px solid #e2e8f0;font-size:10px;color:#64748b;display:flex;justify-content:space-between;">' +
-            '<span>IMO / OpenSeaMap TSS</span>' +
-            '<span>Rule 10 Enforced</span>' +
-          '</div>' +
+          '<div class="ss-ais-row"><span class="ss-ais-k">ZONE</span><span class="ss-ais-v">' + cat + '</span></div>' +
+          (tss.directionDeg != null ? '<div class="ss-ais-row"><span class="ss-ais-k">COURSE</span><span class="ss-ais-v" style="color:#60a5fa;font-family:monospace;font-weight:700;">' + dir + '</span></div>' : '') +
+          '<div class="ss-ais-row"><span class="ss-ais-k">RULE</span><span class="ss-ais-v">' + colreg + '</span></div>' +
+          '<div class="ss-ais-row"><span class="ss-ais-k">POS</span><span class="ss-ais-v" style="font-family:monospace;font-size:10px;">' + posDms + '</span></div>' +
+          '<div class="ss-ais-foot" style="margin-top:4px;padding:3px 5px;background:rgba(255,255,255,0.06);border-left:2px solid #ef4444;border-radius:2px;font-size:10px;color:#cbd5e1;line-height:1.35;">' + ruleNote + '</div>' +
+          '<div class="ss-ais-foot">IMO / OpenSeaMap TSS · Rule 10</div>' +
         '</div>'
       );
     }
 
     function initBuoysInteractiveLayer(map, seamarkLyr) {
       if (!map || !seamarkLyr) return;
-      loadBuoyDatasets();
+      _renderBuoysHitboxes = updateVectorBuoyMarkers;
+      loadBuoyDatasets().then(() => {
+        try { updateVectorBuoyMarkers(); } catch (e) {}
+      });
 
       // Click on chart when Buoys layer is active -> hit-test buoys & TSS
       map.on("click", (e) => {
@@ -15911,7 +15918,7 @@ function initNtMMap() {
         const lon = ((clickPt.lng + 540) % 360) - 180;
         const z = map.getZoom();
 
-        // 1. Check nearest known buoy (pixel distance <= 45px or within 1.5 NM)
+        // 1. Check nearest known buoy (pixel distance <= 45px)
         let bestMark = null;
         let minPx = 45;
         const clickPx = map.latLngToLayerPoint(clickPt);
@@ -15927,7 +15934,7 @@ function initNtMMap() {
         }
 
         if (bestMark) {
-          L.popup({ className: "ss-map-ctx-popup ss-buoy-popup", autoPan: true, offset: [0, -4] })
+          L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 270, minWidth: 190, closeButton: true })
             .setLatLng([bestMark.lat, bestMark.lon])
             .setContent(formatBuoyPopup(bestMark))
             .openOn(map);
@@ -15941,7 +15948,7 @@ function initNtMMap() {
             const part = scheme.parts[p];
             if (pointInTssPolygon(lat, lon, part.ring)) {
               const tssObj = Object.assign({}, part, { schemeName: scheme.name });
-              L.popup({ className: "ss-map-ctx-popup ss-buoy-popup", autoPan: true, offset: [0, -4] })
+              L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 270, minWidth: 190, closeButton: true })
                 .setLatLng(clickPt)
                 .setContent(formatTssPopup(tssObj, lat, lon))
                 .openOn(map);
@@ -15955,17 +15962,19 @@ function initNtMMap() {
           const reg = setrouteIalaRegion(lat, lon);
           const posDms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
           const fallbackContent =
-            '<div class="ss-buoy-popup-content" style="min-width:220px;font-family:Segoe UI,sans-serif;font-size:12px;line-height:1.45;color:#1e293b;">' +
-              '<div style="font-weight:800;color:#0284c7;margin-bottom:4px;display:flex;align-items:center;gap:6px;">' +
-                '<span>⚓</span> <span>OpenSeaMap Seamark Inspection</span>' +
+            '<div class="ss-ais-popup-body ss-buoy-popup-body">' +
+              '<div class="ss-ais-head">' +
+                '<span class="ss-ais-name">⚓ OpenSeaMap Seamark</span>' +
+                '<span class="ss-ais-mode is-ais">' + (reg.code || "IALA") + '</span>' +
               '</div>' +
-              '<div><b>IALA Jurisdiction:</b> ' + reg.name + '</div>' +
-              '<div><b>Lateral Rule:</b> ' + reg.difference + '</div>' +
-              '<div><b>Position:</b> <span style="font-family:monospace;font-size:11px;color:#334155;">' + posDms + '</span></div>' +
-              '<div style="margin-top:5px;padding-top:3px;border-top:1px solid #e2e8f0;font-size:10px;color:#64748b;">Source: OpenSeaMap / IALA S-52</div>' +
+              '<div class="ss-ais-row"><span class="ss-ais-k">SYSTEM</span><span class="ss-ais-v">' + reg.name + '</span></div>' +
+              '<div class="ss-ais-row"><span class="ss-ais-k">LATERAL</span><span class="ss-ais-v">' + reg.difference + '</span></div>' +
+              '<div class="ss-ais-row"><span class="ss-ais-k">POS</span><span class="ss-ais-v" style="font-family:monospace;font-size:10px;">' + posDms + '</span></div>' +
+              '<div class="ss-ais-row"><span class="ss-ais-k">CHART</span><span class="ss-ais-v">OpenSeaMap S-52 / S-57</span></div>' +
+              '<div class="ss-ais-foot">OpenSeaMap · S-52 Seamark Layer</div>' +
             '</div>';
 
-          L.popup({ className: "ss-map-ctx-popup ss-buoy-popup", autoPan: true, offset: [0, -4] })
+          L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 260, minWidth: 190, closeButton: true })
             .setLatLng(clickPt)
             .setContent(fallbackContent)
             .openOn(map);
@@ -15981,30 +15990,29 @@ function initNtMMap() {
         _buoysVectorGroup.clearLayers();
         if (z < 7) return;
 
-        const bounds = map.getBounds();
+        const bounds = (typeof map.getBounds === "function" && map.getBounds().pad) ? map.getBounds().pad(0.4) : map.getBounds();
         _buoyMarksData.forEach((m) => {
           if (!bounds.contains([m.lat, m.lon])) return;
-          const col = m.headerColor || (m.hand === "port" ? "#ef4444" : m.hand === "starboard" ? "#22c55e" : "#eab308");
-          const dot = L.circleMarker([m.lat, m.lon], {
-            radius: z >= 12 ? 6.5 : 4.5,
-            color: "#ffffff",
-            weight: 1.2,
-            fillColor: col,
-            fillOpacity: 0.95,
+          // 100% invisible interactive hitbox: NO visible dots, NO borders, NO tooltips!
+          // Preserves original OpenSeaMap PNG rendering strictly untouched while enabling direct LMB clicks on buoys.
+          const hitbox = L.circleMarker([m.lat, m.lon], {
+            radius: z >= 12 ? 22 : 16,
+            stroke: false,
+            fill: true,
+            fillOpacity: 0,
+            opacity: 0,
             pane: "overlayPane",
-            className: "ss-buoy-target-marker"
+            className: "ss-buoy-hitbox",
+            interactive: true
           });
-          dot.bindTooltip(`<b>${m.name}</b><br><span style="font-family:monospace;color:#0284c7;">${m.light || ""}</span>`, {
-            direction: "top", offset: [0, -6], className: "ss-vrm-label"
-          });
-          dot.on("click", (ev) => {
+          hitbox.on("click", (ev) => {
             if (ev.originalEvent) ev.originalEvent._stopped = true;
-            L.popup({ className: "ss-map-ctx-popup ss-buoy-popup", autoPan: true, offset: [0, -4] })
+            L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 270, minWidth: 190, closeButton: true })
               .setLatLng([m.lat, m.lon])
               .setContent(formatBuoyPopup(m))
               .openOn(map);
           });
-          _buoysVectorGroup.addLayer(dot);
+          _buoysVectorGroup.addLayer(hitbox);
         });
       }
 
@@ -16016,6 +16024,7 @@ function initNtMMap() {
     try {
       window.seamarkLayer = seamarkLayer;
       window.buoysTileLayer = buoysTileLayer;
+      window._buoysVectorGroup = _buoysVectorGroup;
       initBuoysInteractiveLayer(leafletMap, seamarkLayer);
     } catch (eSm) {}
 
