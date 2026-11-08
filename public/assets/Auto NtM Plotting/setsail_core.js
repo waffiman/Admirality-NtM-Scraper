@@ -15264,233 +15264,130 @@ function ensureNoticesReadyForOverlay() {
 
 
   // Reset type filters to full set every enable — stale unchecked boxes = empty map
-
   NTM_ACTIVE_TYPES = new Set(["T", "P", "PERM", "NAVTEX"]);
-
   NTM_FILTER_AREAS = false;
-
   NTM_SHOW_CANCELLED = false;
-
   NTM_ACTIVE_NAVAREA = "ALL";
+  window.ROUTE_CORRIDOR_FILTER_ENABLED = false; // Never let route corridor hide all notices on initial toggle
 
   ["popChkAll", "popChkNavtex", "popChkT", "popChkP", "popChkPerm"].forEach(id => {
-
     const el = document.getElementById(id);
-
     if (el) el.checked = true;
-
   });
 
   const chkCan = document.getElementById("popChkCancelled");
-
   if (chkCan) chkCan.checked = false;
 
   const chkPoly = document.getElementById("popChkPoly");
-
   if (chkPoly) chkPoly.checked = false;
 
   const navSel = document.getElementById("popNavareaSelect") || document.getElementById("ntmNavareaFilter");
-
   if (navSel) navSel.value = "ALL";
 
-
-
   // Ensure sidebar category pill is not hiding notices behind PORTS or ROUTE filter
-
   if (activeOverlayCategory === "PORTS" || activeOverlayCategory === "ROUTE") {
-
     activeOverlayCategory = "ALL";
-
     document.querySelectorAll(".ntm-category-pill").forEach(p => {
-
       p.classList.toggle("active", (p.dataset.category || "ALL") === "ALL");
-
     });
-
   }
 
-  // Yield so the tile spinner paints, then: INSTANT plot from warm store, refresh in background
+  // Clear search input if it was left populated from a previous search
+  const searchInput = document.getElementById("ntmSearchInput");
+  if (searchInput && searchInput.value) {
+    searchInput.value = "";
+  }
 
+  // Yield to the event loop so the tile spinner immediately paints, then plot notices
   return new Promise((resolve) => {
-
-    requestAnimationFrame(() => {
-
-      setTimeout(async () => {
-
-        try {
-
-          // 0) Hydrate memory from localStorage / IndexedDB before any network wait
-
-          await hydrateNtmStorePreferCache();
-
-          if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
-
-              Array.isArray(window.NTM_STORE) && window.NTM_STORE.length) {
-
-            NTM_STORE = window.NTM_STORE;
-
-          }
-
-
-
-          const assertOn = () => {
-
-            try {
-
-              if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.notices = true;
-
-              if (window.OVERLAY_STATES) window.OVERLAY_STATES.notices = true;
-
-            } catch (eOv2) {}
-
-          };
-
-          assertOn();
-
-
-
-          // Ensure Leaflet map exists (tile click can happen before initNtMMap finishes)
-
-          if ((!leafletMap && !(window.leafletMap)) && typeof initNtMMap === "function") {
-
-            try { initNtMMap(); } catch (eMap) {}
-
-          }
-
-
-
-          // 1) Instant paint if corpus already in memory / IDB (typical after first visit)
-
-          const warmCount = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
-
-          let paintedWarm = false;
-
-          if (warmCount >= 50 && typeof renderNtMListAndMap === "function") {
-
-            try { renderNtMListAndMap(); } catch (eWarm) {}
-
-            const drawnWarm = (window.leafletMarkersLayer && window.leafletMarkersLayer.getLayers)
-
-              ? window.leafletMarkersLayer.getLayers().length : 0;
-
-            if (drawnWarm > 0) {
-
-              paintedWarm = true;
-
-              if (typeof showSetSailToast === "function") {
-
-                showSetSailToast("NtM & NAVTEX: " + drawnWarm + " chart objects (" + warmCount + " in store)", "info");
-
-              }
-
-              // Keep spinner only if we still need a network fill; warm plot is enough UX
-
-              if (typeof window.setOverlayNoticesLoading === "function") {
-
-                window.setOverlayNoticesLoading(false);
-
-              }
-
-            }
-
-          }
-
-
-
-          // 2) Refresh corpus (SW cache-first ≈ instant; shares in-flight boot fetch)
-
-          const beforeLen = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
-
-          await loadRemoteNoticesJson(warmCount < 50);
-
-          assertOn();
-
-          if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
-
-              Array.isArray(window.NTM_STORE) && window.NTM_STORE.length) {
-
-            NTM_STORE = window.NTM_STORE;
-
-          }
-
-          const afterLen = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
-
-
-
-          if (typeof renderNtMListAndMap === "function" && (afterLen !== beforeLen || !paintedWarm)) {
-
-            try { renderNtMListAndMap(); } catch (ePlot) {}
-
-          }
-
-
-
-          const drawn = (window.leafletMarkersLayer && window.leafletMarkersLayer.getLayers)
-
-            ? window.leafletMarkersLayer.getLayers().length : 0;
-
-          const total = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
-
-          const filteredN = (typeof getFilteredNotices === "function") ? getFilteredNotices().length : 0;
-
-          if (typeof showSetSailToast === "function") {
-
-            if (drawn > 0 && !paintedWarm) {
-
-              showSetSailToast("NtM & NAVTEX on chart: " + drawn + " objects · " + filteredN + " filtered / " + total + " store", "info");
-
-            } else if (drawn === 0 && total > 0) {
-
-              showSetSailToast("NtM: " + total + " in store, " + filteredN + " filtered, 0 on map — retrying…", "warning");
-
-              try { renderNtMListAndMap(); } catch (eR) {}
-
-            } else if (drawn === 0 && total === 0) {
-
-              const why = window._ntmLastFetchErr ? (" · " + window._ntmLastFetchErr) : "";
-
-              showSetSailToast("NtM corpus not loaded yet — retry tile or hard-refresh once online" + why, "warning");
-
-            }
-
-          }
-
-          window._ntmOverlayLoadBusy = false;
-
-          if (typeof window.setOverlayNoticesLoading === "function") {
-
-            window.setOverlayNoticesLoading(false);
-
-          }
-
-          resolve(true);
-
-        } catch (e) {
-
-          try {
-
-            if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
-
-          } catch (e2) {}
-
-          window._ntmOverlayLoadBusy = false;
-
-          if (typeof window.setOverlayNoticesLoading === "function") {
-
-            window.setOverlayNoticesLoading(false);
-
-          }
-
-          resolve(false);
-
+    setTimeout(async () => {
+      try {
+        // 0) Hydrate memory from localStorage / IndexedDB before any network wait
+        await hydrateNtmStorePreferCache();
+        if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
+            Array.isArray(window.NTM_STORE) && window.NTM_STORE.length) {
+          NTM_STORE = window.NTM_STORE;
         }
 
-      }, 50);
+        const assertOn = () => {
+          try {
+            if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.notices = true;
+            if (window.OVERLAY_STATES) window.OVERLAY_STATES.notices = true;
+          } catch (eOv2) {}
+        };
+        assertOn();
 
-    });
+        // Ensure Leaflet map exists (tile click can happen before initNtMMap finishes)
+        if ((!leafletMap && !(window.leafletMap)) && typeof initNtMMap === "function") {
+          try { initNtMMap(); } catch (eMap) {}
+        }
 
+        // 1) Instant paint if corpus already in memory / IDB
+        const warmCount = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
+        let paintedWarm = false;
+        if (warmCount >= 50 && typeof renderNtMListAndMap === "function") {
+          try { renderNtMListAndMap(); } catch (eWarm) {}
+          const drawnWarm = (window.leafletMarkersLayer && window.leafletMarkersLayer.getLayers)
+            ? window.leafletMarkersLayer.getLayers().length : 0;
+          if (drawnWarm > 0) {
+            paintedWarm = true;
+            if (typeof showSetSailToast === "function") {
+              showSetSailToast("NtM & NAVTEX: " + drawnWarm + " chart objects (" + warmCount + " in store)", "info");
+            }
+          }
+        }
+
+        // 2) Refresh corpus from network / cache
+        await loadRemoteNoticesJson(warmCount < 50);
+        assertOn();
+        if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
+            Array.isArray(window.NTM_STORE) && window.NTM_STORE.length) {
+          NTM_STORE = window.NTM_STORE;
+        }
+
+        // Unconditionally render to ensure full synchronization with latest data & filters
+        if (typeof renderNtMListAndMap === "function") {
+          try { renderNtMListAndMap(); } catch (ePlot) {}
+        }
+
+        const drawn = (window.leafletMarkersLayer && window.leafletMarkersLayer.getLayers)
+          ? window.leafletMarkersLayer.getLayers().length : 0;
+        const total = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
+        const filteredN = (typeof getFilteredNotices === "function") ? getFilteredNotices().length : 0;
+        if (typeof showSetSailToast === "function") {
+          if (drawn > 0 && !paintedWarm) {
+            showSetSailToast("NtM & NAVTEX on chart: " + drawn + " objects · " + filteredN + " filtered / " + total + " store", "info");
+          } else if (drawn === 0 && total > 0) {
+            showSetSailToast("NtM: " + total + " in store, " + filteredN + " filtered, 0 on map — retrying…", "warning");
+            try { renderNtMListAndMap(); } catch (eR) {}
+          } else if (drawn === 0 && total === 0) {
+            const why = window._ntmLastFetchErr ? (" · " + window._ntmLastFetchErr) : "";
+            showSetSailToast("NtM corpus not loaded yet — retry tile or hard-refresh once online" + why, "warning");
+          }
+        }
+
+        window._ntmOverlayLoadBusy = false;
+        // Keep spinner visible for at least a brief moment so user perceives responsiveness
+        setTimeout(() => {
+          if (typeof window.setOverlayNoticesLoading === "function") {
+            window.setOverlayNoticesLoading(false);
+          }
+        }, 250);
+        resolve(true);
+      } catch (e) {
+        try {
+          if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
+        } catch (e2) {}
+        window._ntmOverlayLoadBusy = false;
+        setTimeout(() => {
+          if (typeof window.setOverlayNoticesLoading === "function") {
+            window.setOverlayNoticesLoading(false);
+          }
+        }, 200);
+        resolve(false);
+      }
+    }, 40);
   });
-
 }
 
 window.ensureNoticesReadyForOverlay = ensureNoticesReadyForOverlay;

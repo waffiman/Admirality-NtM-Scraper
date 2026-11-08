@@ -19687,7 +19687,6 @@ var PORT_DEPTHS_DB = window.PORT_DEPTHS_DB || [
     ]
   }
 ];
-window.PORT_DEPTHS_DB = PORT_DEPTHS_DB;
 
 /**
  * Initialize Port Depths and Isobaths Layers on Leaflet Map
@@ -19828,10 +19827,9 @@ function renderPortDepthsOnMap(map) {
       autoPanPadding: [18, 18],
       closeButton: true
     });
-    marker.on("popupopen", (ev) => {
+    marker.on("popupopen", () => {
       try {
-        const popup = marker.getPopup();
-        const node = popup && popup.getElement();
+        const node = marker.getPopup() && marker.getPopup().getElement();
         const card = node && node.querySelector(".ss-port-card");
         if (card && typeof window.wirePortCardInteractions === "function") {
           window.wirePortCardInteractions(card);
@@ -19839,46 +19837,11 @@ function renderPortDepthsOnMap(map) {
         if (card && typeof window.ssPortCardLoad === "function") {
           window.ssPortCardLoad(card, "tides");
         }
-        if (popup && map) enableDraggablePortPopup(map, popup);
       } catch (e) {}
     });
     leafletPortDepthsLayer.addLayer(marker);
   });
 }
-
-/** Drag port popup by its header so it can be moved anywhere on the chart. */
-function enableDraggablePortPopup(map, popup) {
-  if (!map || !popup || typeof L === "undefined" || !L.Draggable) return;
-  const el = popup.getElement && popup.getElement();
-  if (!el || el._ssPortDragBound) return;
-  const handle = el.querySelector(".ss-port-head") || el.querySelector(".leaflet-popup-content-wrapper");
-  if (!handle) return;
-  el._ssPortDragBound = true;
-  try {
-    // Anchor Leaflet's absolute position so L.Draggable can take over transform.
-    const startLatLng = popup.getLatLng();
-    if (startLatLng) {
-      const layerPt = map.latLngToLayerPoint(startLatLng);
-      L.DomUtil.setPosition(el, layerPt);
-    }
-    const draggable = new L.Draggable(el, handle);
-    el._ssPortDraggable = draggable;
-    draggable.enable();
-    L.DomEvent.disableClickPropagation(handle);
-    L.DomEvent.on(handle, "dblclick", L.DomEvent.stopPropagation);
-    draggable.on("dragend", () => {
-      try {
-        const pos = L.DomUtil.getPosition(el);
-        if (!pos) return;
-        const ll = map.layerPointToLatLng(pos);
-        popup.setLatLng(ll);
-      } catch (eDrag) {}
-    });
-  } catch (e) {
-    el._ssPortDragBound = false;
-  }
-}
-window.enableDraggablePortPopup = enableDraggablePortPopup;
 
 /**
  * Toggle loading spinner on NtM & NAVTEX Dock Tab
@@ -20083,9 +20046,7 @@ function setOverlayActive(overlayKey, isActive, map = null) {
   if (window.OVERLAY_STATES) {
     window.OVERLAY_STATES[overlayKey] = isActive;
   }
-  // AIS manages its own delayed spinner inside refreshAisOverlay — forcing
-  // is-loading here made the map feel locked for the whole multi-feed fetch.
-  if (isActive && (overlayKey === "depths" || overlayKey === "weather" || overlayKey === "route" || overlayKey === "notices")) {
+  if (isActive && (overlayKey === "depths" || overlayKey === "weather" || overlayKey === "route" || overlayKey === "notices" || overlayKey === "ais")) {
     setOverlayTileLoading(overlayKey, true);
   } else if (!isActive) {
     setOverlayTileLoading(overlayKey, false);
@@ -20154,7 +20115,7 @@ function setOverlayActive(overlayKey, isActive, map = null) {
       }
       if (mLayer) {
         window.leafletMarkersLayer = mLayer;
-        try { leafletMarkersLayer = mLayer; } catch (eMk) {}
+        try { leafletMarkersLayer = mLayer; } catch (eMk0) {}
         if (isActive) {
           if (!currentMap.hasLayer(mLayer)) currentMap.addLayer(mLayer);
         } else {
@@ -20187,34 +20148,15 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         else currentMap.removeLayer(seamarkLayer);
       }
     } else if (overlayKey === "weather") {
-      if (typeof window.syncNdbcCursorTileVisibility === "function") {
-        try { window.syncNdbcCursorTileVisibility(); } catch (e) {}
-      }
       if (isActive && typeof window.refreshMarineWeather === "function") {
         Promise.resolve(window.refreshMarineWeather(true)).finally(() => {
-          const mapNow = window.leafletMap || currentMap;
           if (typeof window.renderWeatherOnMap === "function") {
-            window.renderWeatherOnMap(mapNow);
-          }
-          const n = (window.leafletWeatherLayer && window.leafletWeatherLayer.getLayers)
-            ? window.leafletWeatherLayer.getLayers().length : 0;
-          const storms = (window.MARINE_WEATHER_STORE && window.MARINE_WEATHER_STORE.storms) || [];
-          if (typeof window.showSetSailToast === "function") {
-            if (n > 0) {
-              window.showSetSailToast("Weather on: " + n + " objects" + (storms.length ? " (" + storms.length + " cyclones)" : "") + " — zoom oceans to see", "info");
-            } else {
-              window.showSetSailToast("Weather on, but no objects for current filters/zoom", "warning");
-            }
-          }
-          // Do not auto-fly to any cyclone — keep the navigator's current chart view
-          if (typeof window.syncNdbcCursorTileVisibility === "function") {
-            window.syncNdbcCursorTileVisibility();
+            window.renderWeatherOnMap(currentMap);
           }
           setOverlayTileLoading("weather", false);
         });
       } else if (typeof window.renderWeatherOnMap === "function") {
-        window.renderWeatherOnMap(window.leafletMap || currentMap);
-        if (typeof window.syncNdbcCursorTileVisibility === "function") window.syncNdbcCursorTileVisibility();
+        window.renderWeatherOnMap(currentMap);
         setTimeout(() => setOverlayTileLoading("weather", false), 350);
       } else {
         setTimeout(() => setOverlayTileLoading("weather", false), 350);

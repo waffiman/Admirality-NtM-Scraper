@@ -21827,7 +21827,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
     } catch (e) {}
   </script>
   <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.189"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.189"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.193"></script>
   <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.189"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
   <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.189"></script>
@@ -21903,7 +21903,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.189"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.193"></script>
 <script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.189"></script>
 <script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.189"></script>
 <script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.189"></script>
@@ -22620,7 +22620,7 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.189', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.193', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.189 registered, scope:', reg.scope);
             if (navigator.onLine) {
