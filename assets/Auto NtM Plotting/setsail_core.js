@@ -201,6 +201,13 @@ let leafletVesselLayer = null;
 let leafletWeatherLayer = null;
 
 let userVessel = null; // { lat, lon, source: "gps" | "manual" }
+try {
+  Object.defineProperty(window, "userVessel", {
+    configurable: true,
+    get: function () { return userVessel; },
+    set: function (v) { userVessel = v; }
+  });
+} catch (eWinVessel) {}
 
 
 
@@ -334,11 +341,7 @@ function vesselStateForAccountSync(v) {
 
   }
 
-  out.syncedAt = (typeof getSetSailUtcNowIso === "function")
-
-    ? getSetSailUtcNowIso()
-
-    : new Date().toISOString();
+  out.syncedAt = v.updatedAt || v.gpsLastFixAt || v.aisLastFixAt || null;
 
   return out;
 
@@ -348,7 +351,9 @@ window.vesselStateForAccountSync = vesselStateForAccountSync;
 
 
 
-function persistUserVessel() {
+function persistUserVessel(opts) {
+
+  opts = opts || {};
 
   // Guests: keep vessel in memory for this tab only — never write to localStorage.
 
@@ -376,15 +381,27 @@ function persistUserVessel() {
 
       // Signed-in: push snapshot to cloud so other devices can pull My Vessel position
 
-      try {
+      if (!opts.fromCloudSync) {
 
-        if (window.SetSailProfileSync && typeof window.SetSailProfileSync.schedulePush === "function") {
+        try {
 
-          window.SetSailProfileSync.schedulePush();
+          if (window.SetSailProfileSync) {
 
-        }
+            if (typeof window.SetSailProfileSync.touchDomain === "function") {
 
-      } catch (ePush) {}
+              window.SetSailProfileSync.touchDomain("vessel");
+
+            } else if (typeof window.SetSailProfileSync.schedulePush === "function") {
+
+              window.SetSailProfileSync.schedulePush();
+
+            }
+
+          }
+
+        } catch (ePush) {}
+
+      }
 
     } else {
 
@@ -446,13 +463,13 @@ function updateHomeVesselHudLabel() {
 
   if (!el) return;
 
-  const syncing = isProfileSyncInFlight();
+  const syncing = isProfileSyncInFlight() && (!window.SetSailProfileSync || !window.SetSailProfileSync.initialPullDone);
 
   const hasAuth = !!(typeof getSetSailAuthUser === "function" && getSetSailAuthUser());
 
   const label = getHomeVesselHudLabel();
 
-  // While cloud profile is pulling on a signed-in device, never flash NOT SET
+  // While cloud profile is pulling on initial boot of a signed-in device, never flash NOT SET
 
   if (syncing && hasAuth && label === "NOT SET") {
 
@@ -742,9 +759,15 @@ function applyVesselProfile(data, opts) {
 
   }
 
+  const nextUpdatedAt = opts.fromCloudSync
+
+    ? (incoming.updatedAt || incoming.syncedAt || prev.updatedAt || new Date().toISOString())
+
+    : (incoming.updatedAt || new Date().toISOString());
+
   userVessel = Object.assign({}, prev, incoming, {
 
-    updatedAt: new Date().toISOString()
+    updatedAt: nextUpdatedAt
 
   });
 
@@ -766,7 +789,7 @@ function applyVesselProfile(data, opts) {
 
   }
 
-  persistUserVessel();
+  persistUserVessel({ fromCloudSync: !!opts.fromCloudSync });
 
   fillVesselFormsFromState();
 
@@ -1028,6 +1051,29 @@ window.snapOwnShipToLastAisFix = snapOwnShipToLastAisFix;
 
 
 
+function aisShipTypeCodeToText(code) {
+  if (code == null || code === "") return "";
+  if (typeof code === "string" && /[A-Za-z]/.test(code)) return code.trim();
+  const n = Number(code);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  if (n === 30) return "Fishing";
+  if (n === 31 || n === 32 || n === 52) return "Tug";
+  if (n === 33) return "Dredger";
+  if (n === 35) return "Military";
+  if (n === 36) return "Sailing";
+  if (n === 37) return "Pleasure Craft";
+  if (n >= 40 && n <= 49) return "High Speed Craft";
+  if (n === 50) return "Pilot Vessel";
+  if (n === 51) return "Search & Rescue";
+  if (n === 53) return "Port Tender";
+  if (n === 55) return "Law Enforcement";
+  if (n >= 60 && n <= 69) return "Passenger";
+  if (n >= 70 && n <= 79) return "Cargo";
+  if (n >= 80 && n <= 89) return "Tanker";
+  if (n >= 90 && n <= 99) return "Special / Research Vessel";
+  return "Type " + n;
+}
+
 /** Fast Open Waters MMSI lookup — last known position (even if hours/days old). */
 
 async function fetchOpenWatersVesselByMmsi(mmsiRaw, opts) {
@@ -1110,7 +1156,7 @@ async function fetchOpenWatersVesselByMmsi(mmsiRaw, opts) {
 
       destination: p.destination || "",
 
-      shipType: p.type || p.shipType || "",
+      shipType: p.ship_type || p.type_name || aisShipTypeCodeToText(p.type || p.shipType) || "",
 
       callSign: p.callSign || p.call_sign || p.callsign || "",
 
@@ -1120,7 +1166,9 @@ async function fetchOpenWatersVesselByMmsi(mmsiRaw, opts) {
 
       updatedAt: seenMs || Date.now(),
 
-      aisSeenAt: seenMs ? new Date(seenMs).toISOString() : null
+      aisSeenAt: seenMs ? new Date(seenMs).toISOString() : null,
+
+      liveCoords: true
 
     };
 
@@ -2225,6 +2273,12 @@ function setDrActiveRouteId(routeId, opts) {
     if (id) localStorage.setItem(SETSAIL_DR_ROUTE_KEY, id);
 
     else localStorage.removeItem(SETSAIL_DR_ROUTE_KEY);
+
+    if (!opts.fromCloudSync && window.SetSailProfileSync && typeof window.SetSailProfileSync.touchDomain === "function") {
+
+      window.SetSailProfileSync.touchDomain("dr");
+
+    }
 
   } catch (e) {}
 
@@ -3338,494 +3392,286 @@ async function ensureAisNameIndex() {
 
 
 
-    // 2) Background-merge zone snapshots for richer name catalog (coords ignored for My Vessel)
-
+    // 2) Background-merge zone snapshots + global ais.json for richer name catalog
     (async () => {
-
       try {
-
         const man = await fetch("ais/zones/index.json?t=" + Date.now(), { cache: "no-store" }).then((r) => {
-
           if (!r.ok) throw new Error("index.json HTTP " + r.status);
-
           return r.json();
-
         });
-
         const zones = man.zones || [];
-
         await Promise.all(
-
           zones.map(async (z) => {
-
             if (!z || !z.file) return;
-
             try {
-
-              const geo = await fetch(z.file + "?t=" + Date.now(), { cache: "no-store" }).then((r) =>
-
+              const zUrl = String(z.file).startsWith("ais/") ? z.file : ("ais/zones/" + z.file);
+              const geo = await fetch(zUrl + "?t=" + Date.now(), { cache: "no-store" }).then((r) =>
                 r.ok ? r.json() : null
-
               );
-
+              const list = Array.isArray(geo) ? geo : ((geo && (geo.vessels || geo.targets)) || []);
               // Name/meta only — strip lat/lon so we never paint weeks-old zone fixes
-
-              (geo && geo.targets ? geo.targets : []).forEach((row) => {
-
+              list.forEach((row) => {
                 if (!row) return;
-
                 pushRow({
-
                   name: row.name,
-
                   mmsi: row.mmsi,
-
                   callSign: row.callSign || row.callsign,
-
-                  shipType: row.shipType || row.type,
-
+                  shipType: aisShipTypeCodeToText(row.shipType || row.type),
                   destination: row.destination,
-
                   source: row.source || "AIS"
-
                 });
-
               });
-
             } catch (ez) {
-
               console.warn("[SetSail Vessel] zone index merge fail", z.id, ez);
-
             }
-
           })
-
         );
-
-        _aisNameIndex = out;
-
-        console.info("[SetSail Vessel] AIS name index ready (all zones):", out.length);
-
-      } catch (e2) {
-
-        console.warn("[SetSail Vessel] zone merge failed — Digitraffic fallback", e2);
-
         try {
-
-          const vessels = await fetch("https://meri.digitraffic.fi/api/ais/v1/vessels", {
-
-            headers: { Accept: "application/json", "Digitraffic-User": "SetSailMarineSuite/AIS" },
-
-            cache: "no-store"
-
-          }).then((r) => r.json());
-
-          const arr = Array.isArray(vessels) ? vessels : vessels.vessels || [];
-
-          arr.forEach((v) => {
-
+          const snapGlobal = await fetch("ais.json?t=" + Date.now(), { cache: "no-store" }).then((r) =>
+            r.ok ? r.json() : null
+          );
+          const snapList = Array.isArray(snapGlobal)
+            ? snapGlobal
+            : ((snapGlobal && (snapGlobal.targets || snapGlobal.vessels)) || []);
+          snapList.forEach((row) => {
+            if (!row || !row.name) return;
             pushRow({
-
-              name: v.name || v.shipName,
-
-              mmsi: v.mmsi || v.MMSI,
-
-              callSign: v.callSign || "",
-
-              shipType: v.shipType || v.shipTypeName || "",
-
-              destination: v.destination || "",
-
-              source: "Digitraffic"
-
+              name: row.name,
+              mmsi: row.mmsi,
+              callSign: row.callSign || row.callsign || "",
+              shipType: aisShipTypeCodeToText(row.shipType || row.type),
+              destination: row.destination || "",
+              source: row.source || "AIS"
             });
-
           });
-
+        } catch (eSnapG) {}
+        _aisNameIndex = out;
+        console.info("[SetSail Vessel] AIS name index ready (all zones + global):", out.length);
+      } catch (e2) {
+        console.warn("[SetSail Vessel] zone merge failed — Digitraffic fallback", e2);
+        try {
+          const vessels = await fetch("https://meri.digitraffic.fi/api/ais/v1/vessels", {
+            headers: { Accept: "application/json", "Digitraffic-User": "SetSailMarineSuite/AIS" },
+            cache: "no-store"
+          }).then((r) => r.json());
+          const arr = Array.isArray(vessels) ? vessels : vessels.vessels || [];
+          arr.forEach((v) => {
+            pushRow({
+              name: v.name || v.shipName,
+              mmsi: v.mmsi || v.MMSI,
+              callSign: v.callSign || "",
+              shipType: aisShipTypeCodeToText(v.shipType || v.shipTypeName),
+              destination: v.destination || "",
+              source: "Digitraffic"
+            });
+          });
           _aisNameIndex = out;
-
         } catch (e3) {
-
           console.warn("[SetSail Vessel] Digitraffic name fallback failed", e3);
-
         }
-
       }
-
     })();
 
-
-
     return out;
-
   })();
 
   try {
-
     return await _aisNameIndexPromise;
-
   } finally {
-
     if (_aisNameIndex && !_aisNameIndex.length) {
-
       _aisNameIndexPromise = null;
-
     }
-
   }
-
 }
-
-
 
 function hideVesselSuggest(which) {
-
   const m = vesselFormMap(which);
-
   const box = document.getElementById(m.suggest);
-
   if (box) {
-
     box.hidden = true;
-
     box.innerHTML = "";
-
   }
-
 }
-
-
 
 function renderVesselSuggest(which, hits) {
-
   const m = vesselFormMap(which);
-
   const box = document.getElementById(m.suggest);
-
   if (!box) return;
-
   if (!hits.length) {
-
     hideVesselSuggest(which);
-
     return;
-
   }
-
   box.innerHTML = hits
-
     .map((t, i) => {
-
       const pos =
-
         isValidVesselLatLon(t.lat, t.lon)
-
           ? Number(t.lat).toFixed(3) + ", " + Number(t.lon).toFixed(3)
-
           : "";
-
       const meta = [t.mmsi ? "MMSI " + t.mmsi : "", t.callSign || "", pos].filter(Boolean).join(" · ");
-
       return (
-
         '<button type="button" data-ais-hit="' +
-
         i +
-
         '"><div style="font-weight:700;color:#7dd3fc;">' +
-
         String(t.name).replace(/[<>&]/g, "") +
-
         '</div><div class="vas-meta">' +
-
         meta.replace(/[<>&]/g, "") +
-
         "</div></button>"
-
       );
-
     })
-
     .join("");
-
   box.hidden = false;
-
   box.querySelectorAll("button[data-ais-hit]").forEach((btn) => {
-
     btn.addEventListener("mousedown", (ev) => {
-
       ev.preventDefault();
-
       const t = hits[Number(btn.getAttribute("data-ais-hit"))];
-
       if (!t) return;
-
       applyAisHitToVessel(t, "Vessel details filled from AIS");
-
       hideVesselSuggest(which);
-
     });
-
   });
-
 }
-
-
 
 function setVesselFieldBusy(id, busy) {
-
   const el = document.getElementById(id);
-
   if (!el) return;
-
   const wrap = el.closest(".form-group") || el.parentElement;
-
   if (!wrap) return;
-
   wrap.classList.toggle("is-ais-loading", !!busy);
-
   if (busy) {
-
     if (!wrap.querySelector(".vessel-field-spinner")) {
-
       const sp = document.createElement("span");
-
       sp.className = "vessel-field-spinner";
-
       sp.setAttribute("aria-hidden", "true");
-
       wrap.appendChild(sp);
-
     }
-
   } else {
-
     const sp = wrap.querySelector(".vessel-field-spinner");
-
     if (sp) sp.remove();
-
   }
-
 }
-
-
 
 function setVesselAisSyncBanner(visible, text) {
-
   ["home", "chart"].forEach((which) => {
-
     const m = vesselFormMap(which);
-
     const form = document.querySelector('[data-vessel-form="' + which + '"]');
-
     if (!form) return;
-
     let ban = form.querySelector(".vessel-ais-sync-banner");
-
     if (!ban) {
-
       ban = document.createElement("div");
-
       ban.className = "vessel-ais-sync-banner";
-
       ban.setAttribute("role", "status");
-
       const nameGroup = form.querySelector(".vessel-primary-fields") || form.firstElementChild;
-
       if (nameGroup && nameGroup.parentNode) {
-
         nameGroup.parentNode.insertBefore(ban, nameGroup.nextSibling);
-
       } else {
-
         form.prepend(ban);
-
       }
-
     }
-
     if (visible) {
-
       ban.hidden = false;
-
       ban.textContent = text || "Vessel details synced from AIS";
-
     } else {
-
       ban.hidden = true;
-
       ban.textContent = "";
-
     }
-
   });
-
 }
-
-
 
 function vesselHasFullAisPayload(t) {
-
   if (!t) return false;
-
   const hasName = !!(t.name && String(t.name).trim());
-
   return hasName && isValidVesselLatLon(t.lat, t.lon);
-
 }
 
-
-
 async function applyAisHitToVessel(t, toastMsg) {
-
   if (!t) return;
-
   const mmsi = t.mmsi != null ? String(t.mmsi).replace(/\D/g, "") : "";
-
-  // Name/meta only — omit lat/lon keys so Number(null) never paints 0°/0°
-
+  const hasLiveHitCoords = !!(t.liveCoords && isValidVesselLatLon(t.lat, t.lon));
+  // Name/meta only unless the selected hit came directly from a live AIS feed/search
   const partial = {
-
     name: t.name || "",
-
     callSign: t.callSign || "",
-
     mmsi: mmsi || (t.mmsi != null ? String(t.mmsi) : ""),
-
-    shipType: t.shipType || "",
-
+    shipType: aisShipTypeCodeToText(t.shipType || t.shipTypeName) || "",
     destination: t.destination || "",
-
-    source: "ais"
-
+    source: "ais",
+    preferredNav: "ais"
   };
-
-
-
-  ["home", "chart"].forEach((which) => {
-
-    const m = vesselFormMap(which);
-
-    setVesselFieldBusy(m.lat, true);
-
-    setVesselFieldBusy(m.lon, true);
-
-    setVesselFieldBusy(m.callSign, true);
-
-    setVesselFieldBusy(m.type, true);
-
-    setVesselFieldBusy(m.dest, true);
-
-    setVesselFieldBusy(m.sog, true);
-
-    setVesselFieldBusy(m.cog, true);
-
-    setVesselFieldBusy(m.heading, true);
-
-  });
-
-  setVesselAisSyncBanner(false);
-
-  applyVesselProfile(partial, { toast: null, skipAisSchedule: true, keepPrevCoords: false });
-
-  // Explicitly clear any previous coords until live fix arrives
-
-  if (userVessel) {
-
-    userVessel.lat = null;
-
-    userVessel.lon = null;
-
-    userVessel.aisFixLat = null;
-
-    userVessel.aisFixLon = null;
-
+  if (hasLiveHitCoords) {
+    partial.lat = Number(t.lat);
+    partial.lon = Number(t.lon);
+    partial.aisFixLat = Number(t.lat);
+    partial.aisFixLon = Number(t.lon);
+    partial.aisLastFixAt = t.aisSeenAt || new Date().toISOString();
+    if (t.sog != null) partial.sog = Number(t.sog);
+    if (t.cog != null) partial.cog = Number(t.cog);
+    if (t.heading != null && Number(t.heading) < 360) partial.heading = Number(t.heading);
   }
 
+  ["home", "chart"].forEach((which) => {
+    const m = vesselFormMap(which);
+    setVesselFieldBusy(m.lat, !hasLiveHitCoords);
+    setVesselFieldBusy(m.lon, !hasLiveHitCoords);
+    setVesselFieldBusy(m.callSign, !partial.callSign);
+    setVesselFieldBusy(m.type, !partial.shipType);
+    setVesselFieldBusy(m.dest, !partial.destination);
+    setVesselFieldBusy(m.sog, partial.sog == null);
+    setVesselFieldBusy(m.cog, partial.cog == null);
+    setVesselFieldBusy(m.heading, partial.heading == null);
+  });
+  setVesselAisSyncBanner(false);
+  applyVesselProfile(partial, { toast: null, skipAisSchedule: true, keepPrevCoords: false });
+  if (!hasLiveHitCoords && userVessel) {
+    userVessel.lat = null;
+    userVessel.lon = null;
+    userVessel.aisFixLat = null;
+    userVessel.aisFixLon = null;
+  }
   fillVesselFormsFromState();
 
-
-
   let full = Object.assign({}, partial);
-
   if (partial.mmsi) {
-
     try {
-
-      let live = await fetchOpenWatersVesselByMmsi(partial.mmsi, { timeoutMs: 10000 });
-
-      if (!live) {
-
+      let live = await fetchOpenWatersVesselByMmsi(partial.mmsi, { timeoutMs: hasLiveHitCoords ? 4500 : 10000 });
+      if (!live && !hasLiveHitCoords) {
         await new Promise((r) => setTimeout(r, 600));
-
         live = await fetchOpenWatersVesselByMmsi(partial.mmsi, { timeoutMs: 10000 });
-
       }
-
       if (!live) live = await findAisTargetByMmsi(partial.mmsi);
-
-      if (live && isValidVesselLatLon(live.lat, live.lon)) {
-
-        full = Object.assign({}, partial, {
-
-          name: live.name || partial.name,
-
-          callSign: live.callSign || partial.callSign,
-
-          shipType: live.shipType || partial.shipType,
-
-          destination: live.destination || partial.destination,
-
-          sog: live.sog != null ? live.sog : null,
-
-          cog: live.cog != null ? live.cog : null,
-
-          heading: live.heading != null ? live.heading : null,
-
-          lat: Number(live.lat),
-
-          lon: Number(live.lon),
-
-          source: "ais",
-
-          preferredNav: "ais",
-
-          staleBannerGpsUsed: false,
-
-          aisLastFixAt: live.aisSeenAt || null,
-
-          aisFixLat: Number(live.lat),
-
-          aisFixLon: Number(live.lon),
-
-          aisRefreshedAt: getSetSailUtcNowIso ? getSetSailUtcNowIso() : new Date().toISOString()
-
-        });
-
-      } else if (live) {
-
-        full = Object.assign({}, partial, {
-
-          name: live.name || partial.name,
-
-          callSign: live.callSign || partial.callSign,
-
-          shipType: live.shipType || partial.shipType,
-
-          destination: live.destination || partial.destination,
-
-          preferredNav: "ais"
-
-        });
-
+      if ((!live || !isValidVesselLatLon(live.lat, live.lon)) && hasLiveHitCoords) {
+        live = t;
       }
-
+      if (live && isValidVesselLatLon(live.lat, live.lon)) {
+        full = Object.assign({}, partial, {
+          name: live.name || partial.name,
+          callSign: live.callSign || partial.callSign,
+          shipType: aisShipTypeCodeToText(live.shipType || live.shipTypeName) || partial.shipType,
+          destination: live.destination || partial.destination,
+          sog: live.sog != null ? live.sog : (partial.sog != null ? partial.sog : null),
+          cog: live.cog != null ? live.cog : (partial.cog != null ? partial.cog : null),
+          heading: live.heading != null ? live.heading : (partial.heading != null ? partial.heading : null),
+          lat: Number(live.lat),
+          lon: Number(live.lon),
+          source: "ais",
+          preferredNav: "ais",
+          staleBannerGpsUsed: false,
+          aisLastFixAt: live.aisSeenAt || partial.aisLastFixAt || null,
+          aisFixLat: Number(live.lat),
+          aisFixLon: Number(live.lon),
+          aisRefreshedAt: getSetSailUtcNowIso ? getSetSailUtcNowIso() : new Date().toISOString()
+        });
+      } else if (live) {
+        full = Object.assign({}, partial, {
+          name: live.name || partial.name,
+          callSign: live.callSign || partial.callSign,
+          shipType: aisShipTypeCodeToText(live.shipType || live.shipTypeName) || partial.shipType,
+          destination: live.destination || partial.destination,
+          preferredNav: "ais"
+        });
+      }
     } catch (e) {
-
       console.warn("[SetSail Vessel] AIS enrich failed", e);
-
     }
-
   }
 
 
@@ -4248,88 +4094,133 @@ window.syncMyVesselFromLiveAis = syncMyVesselFromLiveAis;
 
 
 
-function bindVesselNameAutocomplete(which) {
+let _vesselSuggestReqSeq = 0;
 
-  const m = vesselFormMap(which);
+function mergeVesselAutocompleteHits(q, sources) {
+  const byKey = Object.create(null);
+  const starts = [];
+  const contains = [];
+  const addCandidate = (item) => {
+    if (!item) return;
+    const name = String(item.name || item.shipName || "").trim();
+    const mmsi = item.mmsi != null && item.mmsi !== "" ? String(item.mmsi).trim() : "";
+    const callSign = String(item.callSign || item.callsign || "").trim();
+    if (!name && !mmsi) return;
+    const nLow = name.toLowerCase();
+    const cLow = callSign.toLowerCase();
+    const isStart = nLow.startsWith(q) || (mmsi && mmsi.startsWith(q)) || (cLow && cLow.startsWith(q));
+    const isCont = !isStart && q.length >= 2 && (nLow.includes(q) || (mmsi && mmsi.includes(q)) || (cLow && cLow.includes(q)));
+    if (!isStart && !isCont) return;
 
-  const input = document.getElementById(m.name);
-
-  if (!input || input._aisBound) return;
-
-  input._aisBound = true;
-
-  input.addEventListener("input", () => {
-
-    const q = input.value.trim().toLowerCase();
-
-    clearTimeout(_vesselSuggestTimer);
-
-    if (q.length < 1) {
-
-      hideVesselSuggest(which);
-
-      return;
-
-    }
-
-    const mbox = vesselFormMap(which);
-
-    const box = document.getElementById(mbox.suggest);
-
-    if (box) {
-
-      box.hidden = false;
-
-      box.innerHTML = '<div class="vas-meta" style="padding:0.45rem 0.55rem;">Searching AIS targets…</div>';
-
-    }
-
-    _vesselSuggestTimer = setTimeout(async () => {
-
-      try {
-
-        const idx = await ensureAisNameIndex();
-
-        const starts = [];
-
-        const contains = [];
-
-        for (let i = 0; i < idx.length; i++) {
-
-          const n = String(idx[i].name || "").toLowerCase();
-
-          if (!n) continue;
-
-          if (n.startsWith(q)) starts.push(idx[i]);
-
-          else if (q.length >= 2 && n.includes(q)) contains.push(idx[i]);
-
-          if (starts.length >= 20) break;
-
-        }
-
-        const hits = starts.concat(contains).slice(0, 20);
-
-        renderVesselSuggest(which, hits);
-
-      } catch (err) {
-
-        console.warn("[SetSail Vessel] suggest error", err);
-
-        hideVesselSuggest(which);
-
+    const key = mmsi || ("N:" + name.toUpperCase());
+    const hasPos = isValidVesselLatLon(item.lat, item.lon);
+    const existing = byKey[key];
+    if (existing) {
+      if (name && (!existing.name || /^MMSI\s+/i.test(existing.name))) existing.name = name;
+      if (callSign && !existing.callSign) existing.callSign = callSign;
+      if (item.shipType && !existing.shipType) existing.shipType = aisShipTypeCodeToText(item.shipType);
+      if (item.destination && !existing.destination) existing.destination = item.destination;
+      if (hasPos && (item.liveCoords || !isValidVesselLatLon(existing.lat, existing.lon))) {
+        existing.lat = Number(item.lat);
+        existing.lon = Number(item.lon);
+        if (item.sog != null) existing.sog = Number(item.sog);
+        if (item.cog != null) existing.cog = Number(item.cog);
+        if (item.heading != null) existing.heading = Number(item.heading);
+        if (item.aisSeenAt) existing.aisSeenAt = item.aisSeenAt;
+        if (item.liveCoords) existing.liveCoords = true;
       }
+      return;
+    }
 
+    const row = {
+      name: name || ("MMSI " + mmsi),
+      mmsi: mmsi || null,
+      callSign: callSign,
+      shipType: aisShipTypeCodeToText(item.shipType || item.shipTypeName) || "",
+      destination: item.destination || "",
+      lat: hasPos ? Number(item.lat) : null,
+      lon: hasPos ? Number(item.lon) : null,
+      sog: item.sog != null ? Number(item.sog) : null,
+      cog: item.cog != null ? Number(item.cog) : null,
+      heading: item.heading != null ? Number(item.heading) : null,
+      source: item.source || "AIS",
+      aisSeenAt: item.aisSeenAt || null,
+      liveCoords: !!(item.liveCoords && hasPos)
+    };
+    byKey[key] = row;
+    if (isStart) starts.push(row);
+    else contains.push(row);
+  };
+
+  for (let s = 0; s < sources.length; s++) {
+    const arr = sources[s];
+    if (!Array.isArray(arr)) continue;
+    for (let i = 0; i < arr.length; i++) {
+      addCandidate(arr[i]);
+    }
+  }
+  // Prefer vessels that have live coordinates at the top of each group
+  const sortLiveFirst = (a, b) => (b.liveCoords ? 1 : 0) - (a.liveCoords ? 1 : 0);
+  starts.sort(sortLiveFirst);
+  contains.sort(sortLiveFirst);
+  return starts.concat(contains).slice(0, 20);
+}
+
+function bindVesselNameAutocomplete(which) {
+  const m = vesselFormMap(which);
+  const input = document.getElementById(m.name);
+  if (!input || input._aisBound) return;
+  input._aisBound = true;
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    clearTimeout(_vesselSuggestTimer);
+    const reqId = ++_vesselSuggestReqSeq;
+    if (q.length < 1) {
+      hideVesselSuggest(which);
+      return;
+    }
+    const mbox = vesselFormMap(which);
+    const box = document.getElementById(mbox.suggest);
+    if (box) {
+      box.hidden = false;
+      box.innerHTML = '<div class="vas-meta" style="padding:0.45rem 0.55rem;">Searching AIS targets…</div>';
+    }
+    _vesselSuggestTimer = setTimeout(async () => {
+      try {
+        const idx = await ensureAisNameIndex();
+        if (reqId !== _vesselSuggestReqSeq) return;
+        const liveSnap = typeof window.getAisTargetsSnapshot === "function"
+          ? window.getAisTargetsSnapshot(20000)
+          : [];
+        let hits = mergeVesselAutocompleteHits(q, [liveSnap, idx]);
+        if (hits.length > 0) {
+          renderVesselSuggest(which, hits);
+        }
+        if (q.length >= 2 && typeof window.searchLiveAisVesselsByName === "function") {
+          const remoteLive = await window.searchLiveAisVesselsByName(q);
+          if (reqId !== _vesselSuggestReqSeq) return;
+          if (Array.isArray(remoteLive) && remoteLive.length > 0) {
+            // Also add newly discovered vessels to _aisNameIndex for instant future lookups
+            remoteLive.forEach((rv) => {
+              if (rv && rv.name && Array.isArray(_aisNameIndex)) {
+                const exists = _aisNameIndex.some((x) => (rv.mmsi && String(x.mmsi) === String(rv.mmsi)) || String(x.name).toUpperCase() === String(rv.name).toUpperCase());
+                if (!exists) _aisNameIndex.unshift(rv);
+              }
+            });
+            hits = mergeVesselAutocompleteHits(q, [remoteLive, liveSnap, idx]);
+          }
+        }
+        if (reqId !== _vesselSuggestReqSeq) return;
+        renderVesselSuggest(which, hits);
+      } catch (err) {
+        console.warn("[SetSail Vessel] suggest error", err);
+        hideVesselSuggest(which);
+      }
     }, 120);
-
   });
-
   input.addEventListener("blur", () => {
-
     setTimeout(() => hideVesselSuggest(which), 220);
-
   });
-
 }
 
 
@@ -4606,6 +4497,8 @@ function renderGpsButtonLive(btn) {
 
 function stopVesselGpsWatch() {
 
+  const wasActive = !!window._setsailGpsWatchActive;
+
   if (_gpsWatchId != null && navigator.geolocation) {
 
     try { navigator.geolocation.clearWatch(_gpsWatchId); } catch (e) {}
@@ -4635,6 +4528,20 @@ function stopVesselGpsWatch() {
   _gpsTrackLegs = [];
 
   _gpsUiBtns.forEach((btn) => renderGpsButtonIdle(btn));
+
+  if (wasActive && userVessel) {
+
+    if (userVessel.mmsi) {
+
+      userVessel.preferredNav = "ais";
+
+    }
+
+    userVessel.updatedAt = new Date().toISOString();
+
+    try { persistUserVessel(); } catch (eP) {}
+
+  }
 
 }
 
@@ -4708,9 +4615,8 @@ function applyGpsFixToVessel(pos, opts) {
 
   const pref = getOwnShipPreferredNav(prev);
 
-  // AIS-primary with a fresh AIS fix: keep AIS on the icon; still record GPS health
-
-  if (pref === "ais" && typeof isOwnShipAisFresh === "function" && isOwnShipAisFresh(prev)) {
+  // If user explicitly turned on GPS watch on this device, GPS is authoritative and broadcasts live position to cloud
+  if (!window._setsailGpsWatchActive && pref === "ais" && typeof isOwnShipAisFresh === "function" && isOwnShipAisFresh(prev)) {
 
     if (userVessel) {
 
@@ -4726,9 +4632,8 @@ function applyGpsFixToVessel(pos, opts) {
 
 
 
-  // First successful GPS: if user was not on AIS-primary, GPS becomes preferred
-
-  let nextPreferred = pref;
+  // Active GPS watch or non-AIS preference makes GPS preferred
+  let nextPreferred = window._setsailGpsWatchActive ? "gps" : pref;
 
   if (pref !== "ais") nextPreferred = "gps";
 
@@ -5252,11 +5157,27 @@ function saveVesselForm(which, closeFn) {
 
 
 
-function clearVesselProfile(closeFn) {
+function clearVesselProfile(closeFn, opts) {
+
+  opts = opts || {};
 
   userVessel = null;
 
-  persistUserVessel();
+  persistUserVessel({ fromCloudSync: !!opts.fromCloudSync });
+
+  if (!opts.fromCloudSync) {
+
+    try {
+
+      if (window.SetSailProfileSync && typeof window.SetSailProfileSync.touchDomain === "function") {
+
+        window.SetSailProfileSync.touchDomain("vessel_clear");
+
+      }
+
+    } catch (eSyncClr) {}
+
+  }
 
   _ownShipMarker = null;
 
@@ -5277,6 +5198,8 @@ function clearVesselProfile(closeFn) {
   if (typeof closeFn === "function") closeFn();
 
 }
+
+window.clearVesselProfile = clearVesselProfile;
 
 
 
@@ -8214,7 +8137,9 @@ function renderRouteOnMap(route, shouldFly = true) {
 
 
 
-function clearActiveRoute() {
+function clearActiveRoute(opts) {
+
+  opts = opts || {};
 
   const catPillRoute = document.getElementById("catPillRoute");
 
@@ -8241,6 +8166,12 @@ function clearActiveRoute() {
   try {
 
     persistActiveRouteToStorage(null);
+
+    if (!opts.fromCloudSync && window.SetSailProfileSync && typeof window.SetSailProfileSync.touchDomain === "function") {
+
+      window.SetSailProfileSync.touchDomain("route_clear");
+
+    }
 
   } catch (e) {}
 
@@ -14241,6 +14172,8 @@ function classifyNoticeGeometryClient(notice) {
 
   if (!notice || !Array.isArray(notice.coords) || !notice.coords.length) return notice;
 
+  if (notice.geometrySource === "nautoshark_mvt") return notice;
+
   // Always re-check jump-split / discrete — even if prior scrape set a kind
 
   const coords0 = notice.coords.filter((c) => c && Number.isFinite(c.lat) && Number.isFinite(c.lon));
@@ -14493,7 +14426,7 @@ function classifyNoticeGeometryClient(notice) {
 
   }
 
-  if ((polyKw && n >= 3 && span <= 250) || (lineKw && n >= 3 && span < 30) || (preferArea && n >= 3 && span < 80 && !discrete)) {
+  if ((polyKw && n >= 3 && span <= 250) || (lineKw && n >= 3 && span < 30) || (preferArea && n >= 3 && span < 80 && !discreteSubject)) {
 
     const ring = closeRing(coords);
 
@@ -14667,7 +14600,7 @@ const NTM_IDB_NAME = "setsail_ntm_db";
 
 const NTM_IDB_STORE = "corpus";
 
-const NTM_IDB_KEY = "notices_v1";
+const NTM_IDB_KEY = "notices_v2";
 
 let _ntmRemoteLoadPromise = null;
 
@@ -14973,9 +14906,9 @@ async function loadRemoteNoticesJson(showFeedback = false) {
 
       const endpoints = [
 
-        { url: origin + "/notices.json", cache: "default", sameOrigin: true },
+        { url: origin + "/notices.json?v=5.201", cache: "default", sameOrigin: true },
 
-        { url: "notices.json", cache: "default", sameOrigin: true },
+        { url: "notices.json?v=5.201", cache: "default", sameOrigin: true },
 
         { url: "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + bust, cache: "no-store" },
 
@@ -15151,7 +15084,11 @@ async function loadRemoteNoticesJson(showFeedback = false) {
 
         }
 
-        // Caller (ensureNoticesReady / boot) decides when to render — avoid double plot races
+        if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES && OVERLAY_STATES.notices) {
+
+          try { renderNtMListAndMap(); } catch (eR) {}
+
+        }
 
         const meta = data.metadata || {};
 
@@ -15207,7 +15144,7 @@ function setOverlayNoticesLoading(isLoading) {
 
     tab.classList.add("is-loading");
 
-    tab.setAttribute("title", "Loading NtM & NAVTEX objects onto chart...");
+    tab.setAttribute("title", "Loading Warnings onto chart...");
 
     if (!tab.querySelector(".excel-tab-spinner")) {
 
@@ -15231,7 +15168,7 @@ function setOverlayNoticesLoading(isLoading) {
 
     tab.classList.remove("is-loading");
 
-    tab.setAttribute("title", "Toggle Admiralty NtM & NAVTEX Warnings Overlay");
+    tab.setAttribute("title", "Toggle Warnings Overlay (NtM & NAVTEX)");
 
   }
 
@@ -16126,26 +16063,90 @@ function initNtMMap() {
           if (window.leafletMarkersLayer && typeof window.leafletMarkersLayer.eachLayer === "function") {
             window.leafletMarkersLayer.eachLayer((layer) => {
               if (!layer) return;
-              let ll = null;
-              if (typeof layer.getLatLng === "function") ll = layer.getLatLng();
-              else if (typeof layer.getBounds === "function") ll = layer.getBounds().getCenter();
-              if (!ll || !isInside(ll.lat, ll.lng)) return;
-              const d = distNm(ll.lat, ll.lng);
-              const n = layer._noticeData || (layer.options && layer.options._noticeData) || {};
-              const title = n.title || layer.options.title || ("Notice " + (n.noticeNumber || "NtM"));
+              const n = layer._noticeData || (layer.options && layer.options._noticeData) || null;
+              if (!n) return;
+              let matched = false;
+              let d = 999;
+              let hitLat = lat;
+              let hitLon = lon;
+
+              if (typeof layer.getLatLng === "function") {
+                const ll = layer.getLatLng();
+                if (ll && isInside(ll.lat, ll.lng)) {
+                  matched = true;
+                  d = distNm(ll.lat, ll.lng);
+                  hitLat = ll.lat;
+                  hitLon = ll.lng;
+                }
+              } else if (typeof L !== "undefined" && layer instanceof L.Polygon && typeof layer.getLatLngs === "function") {
+                const rawLL = layer.getLatLngs();
+                const ringLL = Array.isArray(rawLL[0]) ? (Array.isArray(rawLL[0][0]) ? rawLL[0][0] : rawLL[0]) : rawLL;
+                if (Array.isArray(ringLL) && ringLL.length >= 3) {
+                  const ringPairs = ringLL.map(p => [p.lat, ((p.lng + 540) % 360) - 180]);
+                  if (typeof pointInTssPolygon === "function" && pointInTssPolygon(lat, lon, ringPairs)) {
+                    matched = true;
+                    d = 0.05;
+                  } else {
+                    for (let i = 0; i < ringPairs.length; i++) {
+                      const a = ringPairs[i];
+                      const b = ringPairs[(i + 1) % ringPairs.length];
+                      if (isInside(a[0], a[1])) {
+                        matched = true;
+                        d = Math.min(d, distNm(a[0], a[1]));
+                      } else if (typeof pointToSegmentDistanceNM === "function") {
+                        const segD = pointToSegmentDistanceNM(lat, lon, a[0], a[1], b[0], b[1]);
+                        if (segD <= 0.71) {
+                          matched = true;
+                          d = Math.min(d, segD);
+                        }
+                      }
+                    }
+                  }
+                }
+              } else if (typeof L !== "undefined" && layer instanceof L.Polyline && typeof layer.getLatLngs === "function") {
+                const rawLL = layer.getLatLngs();
+                const lineLL = Array.isArray(rawLL[0]) ? rawLL[0] : rawLL;
+                if (Array.isArray(lineLL) && lineLL.length >= 2) {
+                  for (let i = 0; i < lineLL.length - 1; i++) {
+                    const aLat = lineLL[i].lat, aLon = ((lineLL[i].lng + 540) % 360) - 180;
+                    const bLat = lineLL[i + 1].lat, bLon = ((lineLL[i + 1].lng + 540) % 360) - 180;
+                    if (isInside(aLat, aLon) || isInside(bLat, bLon)) {
+                      matched = true;
+                      d = Math.min(d, distNm(aLat, aLon), distNm(bLat, bLon));
+                    } else if (typeof pointToSegmentDistanceNM === "function") {
+                      const segD = pointToSegmentDistanceNM(lat, lon, aLat, aLon, bLat, bLon);
+                      if (segD <= 0.71) {
+                        matched = true;
+                        d = Math.min(d, segD);
+                      }
+                    }
+                  }
+                }
+              }
+
+              if (!matched) return;
+              const title = n.id || n.noticeNumber || n.title || "NtM / NAVTEX";
+              const typeBadge = n.type === "NAVTEX" ? "NAVTEX" : ("NtM " + (n.type || ""));
               addCandidate({
-                id: "ntm_" + (n.id || n.noticeNumber || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
-                category: "NtM",
-                catBadge: "NtM",
-                badgeColor: "#f59e0b",
+                id: "ntm_" + (n.id || n.noticeNumber || (hitLat.toFixed(4) + "_" + hitLon.toFixed(4))),
+                category: typeBadge.trim(),
+                catBadge: typeBadge.trim(),
+                badgeColor: n.type === "NAVTEX" ? "#f97316" : "#d946ef",
                 icon: "⚠️",
                 name: title,
-                subtitle: `${n.chart || n.area || "Admiralty"} · ${d.toFixed(2)} NM`,
+                subtitle: `${n.country || ("NAVAREA " + (n.navarea || ""))} · ${(n.category || n.subject || "Warning").slice(0, 42)} · ${d.toFixed(2)} NM`,
                 distNm: d,
-                lat: ll.lat,
-                lon: ll.lng,
+                lat: hitLat,
+                lon: hitLon,
                 open: function() {
-                  if (typeof layer.openPopup === "function") layer.openPopup();
+                  if (layer._popupHtml) {
+                    L.popup({ maxWidth: 325, minWidth: 240, autoPan: true, closeButton: true })
+                      .setLatLng(clickPt)
+                      .setContent(layer._popupHtml)
+                      .openOn(targetMap);
+                  } else if (typeof layer.openPopup === "function") {
+                    layer.openPopup(clickPt);
+                  }
                 }
               });
             });
@@ -19499,7 +19500,7 @@ function renderNtMListAndMap() {
 
             <div class="ntm-empty-hint-grid">
 
-              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--notices" data-overlay-hint="notices" title="Notices to Mariners &amp; NAVTEX"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>NtM / NAVTEX</span></button>
+              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--notices" data-overlay-hint="notices" title="Warnings (Notices to Mariners &amp; NAVTEX)"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Warnings</span></button>
 
               <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--depths" data-overlay-hint="depths" title="Ports &amp; UKC"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V10l7-4 7 4v11"/><path d="M9 21v-6h6v6"/></svg><span>Ports</span></button>
 
@@ -19749,145 +19750,7 @@ function renderNtMListAndMap() {
 
     // World / low zoom: aggressively merge nearby notices; split only after a clear zoom-in
 
-    const clusterNoticesForZoom = (notices, zoom) => {
-
-      if (zoom > 4.5) return null;
-
-      // Larger cells = fewer numbered markers on a cluttered world view
-
-      const cellDeg = zoom <= 2 ? 36 : zoom <= 2.5 ? 26 : zoom <= 3 ? 18 : zoom <= 3.5 ? 12 : 7;
-
-      const buckets = Object.create(null);
-
-      notices.forEach((item) => {
-
-        if (!item.coords || !item.coords.length) return;
-
-        const c = noticeCentroid(item);
-
-        if (!c) return;
-
-        const key =
-
-          Math.round(c[0] / cellDeg) + "|" + Math.round(c[1] / cellDeg);
-
-        if (!buckets[key]) buckets[key] = { items: [], latSum: 0, lonSum: 0 };
-
-        buckets[key].items.push(item);
-
-        buckets[key].latSum += c[0];
-
-        buckets[key].lonSum += c[1];
-
-      });
-
-      let clusters = Object.keys(buckets).map((k) => {
-
-        const b = buckets[k];
-
-        const n = b.items.length;
-
-        return { items: b.items, lat: b.latSum / n, lon: b.lonSum / n };
-
-      });
-
-      // Absorb leftover singles into the nearest multi-cluster (or each other) so world view stays sparse
-
-      if (zoom <= 3.5 && clusters.length > 1) {
-
-        const absorbR = cellDeg * 1.6;
-
-        const absorbR2 = absorbR * absorbR;
-
-        let changed = true;
-
-        while (changed) {
-
-          changed = false;
-
-          const multi = [];
-
-          const singles = [];
-
-          clusters.forEach((c) => (c.items.length > 1 ? multi : singles).push(c));
-
-          if (!singles.length) break;
-
-          const nextSingles = [];
-
-          singles.forEach((s) => {
-
-            let best = null;
-
-            let bestD = Infinity;
-
-            const pool = multi.length ? multi : nextSingles;
-
-            pool.forEach((m) => {
-
-              const dLat = s.lat - m.lat;
-
-              const dLon = s.lon - m.lon;
-
-              const d2 = dLat * dLat + dLon * dLon;
-
-              if (d2 < bestD) {
-
-                bestD = d2;
-
-                best = m;
-
-              }
-
-            });
-
-            if (best && bestD <= absorbR2) {
-
-              best.items.push.apply(best.items, s.items);
-
-              const n = best.items.length;
-
-              let lat = 0;
-
-              let lon = 0;
-
-              best.items.forEach((it) => {
-
-                const c = noticeCentroid(it);
-
-                if (!c) return;
-
-                lat += c[0];
-
-                lon += c[1];
-
-              });
-
-              best.lat = lat / n;
-
-              best.lon = lon / n;
-
-              if (multi.indexOf(best) < 0) multi.push(best);
-
-              changed = true;
-
-            } else {
-
-              nextSingles.push(s);
-
-            }
-
-          });
-
-          clusters = multi.concat(nextSingles);
-
-        }
-
-      }
-
-      return clusters;
-
-    };
+    const clusterNoticesForZoom = (_notices, _zoom) => null;
 
 
 
@@ -19903,43 +19766,45 @@ function renderNtMListAndMap() {
 
     const getNoticeColors = (item, isCancelled) => {
 
-      if (isCancelled) return { stroke: "#94a3b8", fill: "#f87171", badge: "#ef4444" };
+      if (isCancelled) return { stroke: "#64748b", fill: "#f87171", badge: "#ef4444" };
 
-      if (item.type === "NAVTEX") return { stroke: "#fb923c", fill: "#f97316", badge: "#ea580c" };
+      if (item.type === "NAVTEX") return { stroke: "#b91c1c", fill: "#f97316", badge: "#ea580c" };
 
-      if (item.type === "T")      return { stroke: "#fde047", fill: "#eab308", badge: "#ca8a04" };
+      if (item.type === "T")      return { stroke: "#a16207", fill: "#eab308", badge: "#ca8a04" };
 
-      if (item.type === "P")      return { stroke: "#c4b5fd", fill: "#8b5cf6", badge: "#7c3aed" };
+      if (item.type === "P")      return { stroke: "#6d28d9", fill: "#8b5cf6", badge: "#7c3aed" };
 
-      return { stroke: "#e879f9", fill: "#d946ef", badge: "#c026d3" }; // Admiralty Magenta for PERM
+      return { stroke: "#a21caf", fill: "#d946ef", badge: "#c026d3" }; // Admiralty Magenta for PERM
 
     };
 
 
 
-    // Zoom-adaptive sizes & opacities so world view is crisp and never cluttered
+    // Zoom-adaptive sizes & opacities so world and regional views match NautoShark density
 
-    const ptRadius = Math.max(5.5, curZoom <= 3 ? 4.0 : (curZoom <= 5 ? 5.0 : (curZoom <= 7 ? 6.0 : 7.0)));
+    const ptRadius = curZoom <= 2 ? 2.8 : (curZoom <= 3 ? 3.4 : (curZoom <= 4 ? 4.0 : (curZoom <= 5 ? 4.8 : (curZoom <= 7 ? 5.6 : 6.6))));
 
-    const ptRimColor = curZoom <= 6 ? "rgba(15, 23, 42, 0.88)" : "#ffffff";
+    const ptRimColor = curZoom <= 6 ? "rgba(15, 23, 42, 0.9)" : "#ffffff";
 
-    const ptRimWeight = curZoom <= 4 ? 0.8 : (curZoom <= 6 ? 1.0 : 1.4);
+    const ptRimWeight = curZoom <= 4 ? 0.9 : (curZoom <= 6 ? 1.1 : 1.4);
 
-    const basePolyWeight = curZoom <= 3 ? 0.9 : (curZoom <= 5 ? 1.2 : (curZoom <= 7 ? 1.6 : 2.0));
+    const basePolyWeight = curZoom <= 3 ? 1.15 : (curZoom <= 5 ? 1.45 : (curZoom <= 7 ? 1.8 : 2.1));
 
-    const basePolyFillOp = curZoom <= 3 ? 0.05 : (curZoom <= 5 ? 0.09 : (curZoom <= 7 ? 0.14 : 0.20));
+    const basePolyFillOp = curZoom <= 3 ? 0.14 : (curZoom <= 5 ? 0.20 : (curZoom <= 7 ? 0.24 : 0.28));
 
-    const baseLineWeight = curZoom <= 3 ? 1.3 : (curZoom <= 5 ? 1.8 : 2.5);
+    const baseLineWeight = curZoom <= 3 ? 1.6 : (curZoom <= 5 ? 2.1 : 2.6);
 
 
 
-    // Dedicated canvas renderer with generous click tolerance (16px) for crisp responsive clicks
+    // Reuse a single canvas renderer on ntmMarkerPane with generous click tolerance (16px)
 
-    const ntmRenderer = (typeof L !== "undefined" && L.canvas)
+    if (!mapRef._setsailNtmCanvasRenderer && typeof L !== "undefined" && L.canvas) {
 
-      ? L.canvas({ pane: "ntmMarkerPane", tolerance: 16 })
+      mapRef._setsailNtmCanvasRenderer = L.canvas({ pane: "ntmMarkerPane", tolerance: 16 });
 
-      : null;
+    }
+
+    const ntmRenderer = mapRef._setsailNtmCanvasRenderer || null;
 
 
 
@@ -20011,6 +19876,38 @@ function renderNtMListAndMap() {
 
 
 
+    const attachNoticeLayer = (lyr, item, popHtml) => {
+
+      lyr._noticeData = item;
+
+      lyr._popupHtml = popHtml;
+
+      lyr.bindPopup(popHtml);
+
+      lyr.on("click", (ev) => {
+
+        if (typeof handleEcdisObjectPick === "function" && ev && ev.latlng) {
+
+          if (ev.originalEvent) {
+
+            try { L.DomEvent.stopPropagation(ev.originalEvent); } catch (eS) {}
+
+          }
+
+          try { mapRef.closePopup(); } catch (eC) {}
+
+          handleEcdisObjectPick(ev.latlng, mapRef);
+
+        }
+
+      });
+
+      leafletMarkersLayer.addLayer(lyr);
+
+    };
+
+
+
     const plotOneNotice = (item) => {
 
       if (!item.coords || item.coords.length === 0) return;
@@ -20039,6 +19936,8 @@ function renderNtMListAndMap() {
 
           if (pts.length >= 3 && !asLine) {
 
+            const polyPoints = pts.map(p => [p[0], wrapLongitudeDeg(p[1])]);
+
             const pOpts = Object.assign({
 
               color: pal.stroke,
@@ -20053,15 +19952,25 @@ function renderNtMListAndMap() {
 
             }, pathPaneOpts());
 
-            const polygon = L.polygon(pts, pOpts);
+            const popHtml = buildPopupHtml(item, `<div style="font-size:0.78em;color:#475569;margin-bottom:3px;"><b>Area:</b> ${sub.name || item.id} (${pts.length} pts)</div>`);
 
-            polygon.bindPopup(buildPopupHtml(item, `<div style="font-size:0.78em;color:#475569;margin-bottom:3px;"><b>Area:</b> ${sub.name} (${pts.length} pts)</div>`));
+            setsailWorldCopyLonOffsets().forEach((off) => {
 
-            leafletMarkersLayer.addLayer(polygon);
+              const ring = off === 0 ? polyPoints : polyPoints.map((p) => [p[0], p[1] + off]);
+
+              const polygon = L.polygon(ring, pOpts);
+
+              attachNoticeLayer(polygon, item, popHtml);
+
+            });
 
           } else if (pts.length >= 2 && asLine) {
 
-            splitAntimeridianLatLngs(pts).forEach((seg) => {
+            const linePoints = pts.map(p => [p[0], wrapLongitudeDeg(p[1])]);
+
+            const popHtml = buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${pts.length} pts)</div>`);
+
+            splitAntimeridianLatLngs(linePoints).forEach((seg) => {
 
               const lOpts = Object.assign({
 
@@ -20073,11 +19982,15 @@ function renderNtMListAndMap() {
 
               }, pathPaneOpts());
 
-              const polyline = L.polyline(seg, lOpts);
+              setsailWorldCopyLonOffsets().forEach((off) => {
 
-              polyline.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${pts.length} pts)</div>`));
+                const shifted = off === 0 ? seg : seg.map((p) => [p[0], p[1] + off]);
 
-              leafletMarkersLayer.addLayer(polyline);
+                const polyline = L.polyline(shifted, lOpts);
+
+                attachNoticeLayer(polyline, item, popHtml);
+
+              });
 
             });
 
@@ -20097,13 +20010,15 @@ function renderNtMListAndMap() {
 
             }, pathPaneOpts());
 
+            const dmsStr = formatCoordDmsHelper(pts[0][0], pts[0][1]);
+
+            const popHtml = buildPopupHtml(item, `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`);
+
             setsailEachWorldLatLng(pts[0][0], pts[0][1], (ll) => {
 
               const circle = L.circleMarker(ll, cOpts);
 
-              circle.bindPopup(buildPopupHtml(item));
-
-              leafletMarkersLayer.addLayer(circle);
+              attachNoticeLayer(circle, item, popHtml);
 
             });
 
@@ -20135,15 +20050,17 @@ function renderNtMListAndMap() {
 
           color: pal.stroke,
 
-          weight: isLargeRegionalArea && curZoom <= 5 ? 0.8 : basePolyWeight,
+          weight: isLargeRegionalArea && curZoom <= 5 ? 0.9 : basePolyWeight,
 
           fillColor: pal.fill,
 
-          fillOpacity: isItemCancelled ? 0.04 : (isLargeRegionalArea && curZoom <= 5 ? 0.025 : basePolyFillOp),
+          fillOpacity: isItemCancelled ? 0.04 : (isLargeRegionalArea && curZoom <= 5 ? 0.05 : basePolyFillOp),
 
           dashArray: isItemCancelled ? "3, 6" : (item.type === "NAVTEX" || item.type === "T" ? "4, 4" : null)
 
         }, pathPaneOpts());
+
+        const popHtml = buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Polygon (${item.coords.length} vertices)</div>`);
 
         setsailWorldCopyLonOffsets().forEach((off) => {
 
@@ -20151,9 +20068,7 @@ function renderNtMListAndMap() {
 
           const polygon = L.polygon(ring, pOpts);
 
-          polygon.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Polygon (${item.coords.length} vertices)</div>`));
-
-          leafletMarkersLayer.addLayer(polygon);
+          attachNoticeLayer(polygon, item, popHtml);
 
         });
 
@@ -20162,6 +20077,8 @@ function renderNtMListAndMap() {
         const linePoints = item.coords.map(c => [c.lat, wrapLongitudeDeg(c.lon)]);
 
         const segments = splitAntimeridianLatLngs(linePoints);
+
+        const popHtml = buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points${segments.length > 1 ? " · date-line split" : ""})</div>`);
 
         segments.forEach((seg) => {
 
@@ -20181,9 +20098,7 @@ function renderNtMListAndMap() {
 
             const polyline = L.polyline(shifted, lOpts);
 
-            polyline.bindPopup(buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points${segments.length > 1 ? " · date-line split" : ""})</div>`));
-
-            leafletMarkersLayer.addLayer(polyline);
+            attachNoticeLayer(polyline, item, popHtml);
 
           });
 
@@ -20191,9 +20106,7 @@ function renderNtMListAndMap() {
 
       } else {
 
-        // At global zoom <= 4, if a single notice has multiple points, plot only its primary point
-
-        const coordsToPlot = (curZoom <= 4 && item.coords.length > 2) ? [item.coords[0]] : item.coords;
+        const coordsToPlot = item.coords;
 
         coordsToPlot.forEach(coord => {
 
@@ -20215,13 +20128,13 @@ function renderNtMListAndMap() {
 
           const dmsStr = coord.dms || formatCoordDmsHelper(coord.lat, coord.lon);
 
+          const popHtml = buildPopupHtml(item, `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`);
+
           setsailEachWorldLatLng(coord.lat, coord.lon, (ll) => {
 
             const circle = L.circleMarker(ll, cOpts);
 
-            circle.bindPopup(buildPopupHtml(item, `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`));
-
-            leafletMarkersLayer.addLayer(circle);
+            attachNoticeLayer(circle, item, popHtml);
 
           });
 
@@ -33828,6 +33741,16 @@ function saveSetSailUserHistory() {
 
     updateUserHistorySummaryUI(snapshot);
 
+    try {
+
+      if (window.SetSailProfileSync && typeof window.SetSailProfileSync.schedulePush === "function") {
+
+        window.SetSailProfileSync.schedulePush();
+
+      }
+
+    } catch (eCloudHist) {}
+
     return snapshot;
 
   } catch (e) {
@@ -40846,7 +40769,21 @@ function saveRouteToLibrary(route) {
 
   }
 
+  route.updatedAt = new Date().toISOString();
+
   writeSavedRoutesLibrary(lib);
+
+  try {
+
+    if (window.SetSailProfileSync && typeof window.SetSailProfileSync.touchDomain === "function") {
+
+      window.SetSailProfileSync.touchDomain("routes_library");
+
+      window.SetSailProfileSync.touchDomain("route");
+
+    }
+
+  } catch (eSyncLib) {}
 
   renderNavSavedRoutesTree();
 
@@ -40905,6 +40842,16 @@ function deleteRouteFromLibrary(routeId) {
   const lib = getSavedRoutesLibrary().filter((r) => r.id !== routeId);
 
   writeSavedRoutesLibrary(lib);
+
+  try {
+
+    if (window.SetSailProfileSync && typeof window.SetSailProfileSync.touchDomain === "function") {
+
+      window.SetSailProfileSync.touchDomain("routes_library", { deletedId: routeId });
+
+    }
+
+  } catch (eSyncDel) {}
 
   if (wasDr) setDrActiveRouteId(null); // keeps orphan snap; DR continues on last geometry
 

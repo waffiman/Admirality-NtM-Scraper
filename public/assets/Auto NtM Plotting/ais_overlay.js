@@ -153,12 +153,71 @@
   let aisStreamWs = null;
   let openSeaFeedWs = null;
   let aisStreamTargets = Object.create(null);
+  let allSeenAisByMmsi = Object.create(null);
+  try {
+    window.aisStreamTargets = aisStreamTargets;
+    window.allSeenAisByMmsi = allSeenAisByMmsi;
+  } catch (eWinAis) {}
   let aisStreamReconnectTimer = null;
   let openSeaFeedReconnectTimer = null;
   let aisStreamRenderTimer = null;
   let aisStreamPendingRender = false;
   let lastRestTargets = [];
   let liveFeedStatus = { aisstream: "DISCONNECTED", openseafeed: "DISCONNECTED" };
+
+  function aisTypeCodeToLabel(code) {
+    if (code == null || code === "") return "";
+    if (typeof code === "string" && /[A-Za-z]/.test(code)) return code.trim();
+    const n = Number(code);
+    if (!Number.isFinite(n) || n <= 0) return "";
+    if (n === 30) return "Fishing";
+    if (n === 31 || n === 32 || n === 52) return "Tug";
+    if (n === 33) return "Dredger";
+    if (n === 35) return "Military";
+    if (n === 36) return "Sailing";
+    if (n === 37) return "Pleasure Craft";
+    if (n >= 40 && n <= 49) return "High Speed Craft";
+    if (n === 50) return "Pilot Vessel";
+    if (n === 51) return "Search & Rescue";
+    if (n === 53) return "Port Tender";
+    if (n === 55) return "Law Enforcement";
+    if (n >= 60 && n <= 69) return "Passenger";
+    if (n >= 70 && n <= 79) return "Cargo";
+    if (n >= 80 && n <= 89) return "Tanker";
+    if (n >= 90 && n <= 99) return "Special / Research Vessel";
+    return "Type " + n;
+  }
+
+  function rememberAisTarget(t) {
+    if (!t) return;
+    const mmsi = t.mmsi != null && t.mmsi !== "" ? String(t.mmsi).trim() : "";
+    const name = String(t.name || t.shipName || "").trim();
+    if (!mmsi && !name) return;
+    const key = mmsi || ("NAME:" + name.toUpperCase());
+    const prev = allSeenAisByMmsi[key] || {};
+    const lat = Number(t.lat != null ? t.lat : t.latitude);
+    const lon = Number(t.lon != null ? t.lon : t.longitude);
+    const hasPos = Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0);
+    const typeStr = t.shipTypeName || aisTypeCodeToLabel(t.shipType != null ? t.shipType : t.type) || prev.shipTypeName || prev.shipType || "";
+    allSeenAisByMmsi[key] = {
+      mmsi: mmsi || prev.mmsi || null,
+      name: (name && !/^MMSI\s+/i.test(name) ? name : (prev.name || name)) || "",
+      callSign: String(t.callSign || t.callsign || prev.callSign || "").trim(),
+      shipType: typeStr,
+      shipTypeName: typeStr,
+      destination: String(t.destination || prev.destination || "").trim(),
+      lat: hasPos ? lat : (prev.lat != null ? prev.lat : null),
+      lon: hasPos ? lon : (prev.lon != null ? prev.lon : null),
+      sog: t.sog != null ? Number(t.sog) : (prev.sog != null ? prev.sog : null),
+      cog: t.cog != null ? Number(t.cog) : (prev.cog != null ? prev.cog : null),
+      heading: t.heading != null && Number(t.heading) < 360 ? Number(t.heading) : (prev.heading != null ? prev.heading : null),
+      navStat: t.navStat != null ? t.navStat : prev.navStat,
+      source: t.source || prev.source || "AIS",
+      aisSeenAt: t.aisSeenAt || prev.aisSeenAt || null,
+      updatedAt: Number(t.updatedAt) || prev.updatedAt || Date.now(),
+      liveCoords: !!(t.liveCoords || prev.liveCoords || (hasPos && /open\s*waters|aisstream|openseafeed|digitraffic/i.test(String(t.source || ""))))
+    };
+  }
 
   function getPersonalAisStreamApiKey() {
     return "";
@@ -576,13 +635,16 @@
       heading: heading,
       navStat: navStat,
       destination: destination || prev.destination,
-      shipType: shipType != null ? shipType : prev.shipType,
+      shipType: shipType != null ? aisTypeCodeToLabel(shipType) : prev.shipType,
+      shipTypeName: shipType != null ? aisTypeCodeToLabel(shipType) : (prev.shipTypeName || prev.shipType),
       source: prev.source && prev.source !== sourceLabel
         ? (String(prev.source).indexOf(sourceLabel) >= 0 ? prev.source : prev.source + " + " + sourceLabel)
         : sourceLabel,
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
+      liveCoords: true
     };
     aisStreamTargets[mmsiKey] = next;
+    rememberAisTarget(next);
 
     // Live hook: if incoming AIS target matches My Vessel, update position & telemetry instantly
     try {
@@ -675,19 +737,29 @@
     const g = f.geometry || {};
     const c = g.coordinates || [];
     const p = f.properties || {};
-    return {
+    const seenRaw = p.seen || p.time || p.updated || p.last_seen || "";
+    const seenMs = seenRaw ? (Date.parse(String(seenRaw)) || Date.now()) : Date.now();
+    const typeLabel = p.ship_type || p.type_name || aisTypeCodeToLabel(p.type);
+    const t = {
       mmsi: p.mmsi != null ? p.mmsi : p.mmsi_string,
       name: p.name || p.vessel_name || "",
-      shipTypeName: p.ship_type || p.type_name || "",
+      callSign: p.callsign || p.callSign || p.call_sign || "",
+      shipType: typeLabel,
+      shipTypeName: typeLabel,
       lat: Number(c[1]),
       lon: Number(c[0]),
       sog: p.speed != null ? p.speed : p.sog,
       cog: p.course != null ? p.course : p.cog,
       heading: p.heading,
-      navStat: p.navigational_status != null ? p.navigational_status : p.status,
+      navStat: p.navigational_status != null ? p.navigational_status : (p.nav_status != null ? p.nav_status : p.status),
       destination: p.destination || "",
-      source: "Open Waters"
+      source: "Open Waters",
+      aisSeenAt: seenRaw ? new Date(seenMs).toISOString() : null,
+      updatedAt: seenMs,
+      liveCoords: true
     };
+    rememberAisTarget(t);
+    return t;
   }
 
   function digitrafficFeatureToTarget(f) {
@@ -696,10 +768,13 @@
     const p = f.properties || {};
     const mmsi = p.mmsi;
     const meta = (mmsi && aisMetaByMmsi[mmsi]) || {};
-    return {
+    const typeLabel = meta.shipType != null ? aisTypeCodeToLabel(meta.shipType) : "";
+    const t = {
       mmsi: mmsi,
       name: meta.name || "",
-      shipTypeName: meta.shipType != null ? "Type " + meta.shipType : "",
+      callSign: meta.callSign || "",
+      shipType: typeLabel,
+      shipTypeName: typeLabel,
       destination: meta.destination || "",
       lat: Number(c[1]),
       lon: Number(c[0]),
@@ -707,8 +782,12 @@
       cog: p.cog,
       heading: p.heading,
       navStat: p.navStat,
-      source: "Digitraffic (Baltic)"
+      source: "Digitraffic (Baltic)",
+      updatedAt: Date.now(),
+      liveCoords: true
     };
+    rememberAisTarget(t);
+    return t;
   }
 
   function normalizeLon(lon) {
@@ -820,9 +899,23 @@
     if (!file) return [];
     if (zoneCache[file]) return zoneCache[file];
     try {
-      const data = await fetchJson("ais/zones/" + file);
-      const list = Array.isArray(data) ? data : data.vessels || [];
+      const url = String(file).startsWith("ais/") ? file : ("ais/zones/" + file);
+      const data = await fetchJson(url);
+      const list = Array.isArray(data) ? data : (data.vessels || data.targets || []);
       zoneCache[file] = list;
+      list.forEach((v) => {
+        if (v && (v.name || v.mmsi)) {
+          rememberAisTarget({
+            mmsi: v.mmsi,
+            name: v.name,
+            callSign: v.callSign || v.callsign || "",
+            shipType: v.shipType || v.type || "",
+            destination: v.destination || "",
+            source: v.source || "AIS Zone",
+            liveCoords: false
+          });
+        }
+      });
       return list;
     } catch (e) {
       return [];
@@ -900,12 +993,24 @@
       if (Array.isArray(arr)) {
         arr.forEach((item) => {
           if (!item.mmsi) return;
-          aisMetaByMmsi[item.mmsi] = {
+          const meta = {
             name: item.name || "",
             shipType: item.shipType,
             destination: item.destination || "",
             callSign: item.callSign || ""
           };
+          aisMetaByMmsi[item.mmsi] = meta;
+          if (meta.name) {
+            rememberAisTarget({
+              mmsi: item.mmsi,
+              name: meta.name,
+              callSign: meta.callSign,
+              shipType: aisTypeCodeToLabel(meta.shipType),
+              destination: meta.destination,
+              source: "Digitraffic",
+              liveCoords: false
+            });
+          }
         });
       }
     } catch (e) {}
@@ -1034,7 +1139,8 @@
       count: targets.length,
       mode: plan.mode,
       area: plan.area,
-      zoom: plan.zoom
+      zoom: plan.zoom,
+      vessels: targets
     };
     if (typeof window.setOverlayTileLoading === "function") {
       window.setOverlayTileLoading("ais", false);
@@ -1149,47 +1255,139 @@
   window.stopAisPolling = stopAisPolling;
   window.showAisInfoModal = showAisInfoModal;
   window.AIS_REFRESH_MS = AIS_REFRESH_MS;
-  /** Snapshot of live AIS targets for SetRoute Core A hazard costing (not UI). */
+  /** Snapshot of live AIS targets for SetRoute Core A hazard costing & My Vessel autocomplete. */
   window.getAisTargetsSnapshot = function getAisTargetsSnapshot(limit) {
     const out = [];
-    const cap = Math.max(50, Math.min(4000, Number(limit) || 800));
+    const seen = Object.create(null);
+    const cap = Math.max(50, Math.min(20000, Number(limit) || 2000));
+    const pushItem = function (v, defaultSrc) {
+      if (!v || out.length >= cap) return;
+      const mmsi = v.mmsi != null && v.mmsi !== "" ? String(v.mmsi).trim() : "";
+      const name = v.name || v.shipName || null;
+      const key = mmsi || (name ? "N:" + String(name).toUpperCase() : "");
+      if (key && seen[key]) return;
+      const lat = Number(v.lat != null ? v.lat : v.latitude);
+      const lon = Number(v.lon != null ? v.lon : v.longitude);
+      const hasPos = Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0);
+      if (key) seen[key] = 1;
+      out.push({
+        mmsi: mmsi || null,
+        lat: hasPos ? lat : null,
+        lon: hasPos ? lon : null,
+        sog: v.sog != null ? Number(v.sog) : null,
+        cog: v.cog != null ? Number(v.cog) : null,
+        heading: v.heading != null && Number(v.heading) < 360 ? Number(v.heading) : null,
+        name: name,
+        callSign: v.callSign || v.callsign || "",
+        shipType: v.shipType || v.shipTypeName || "",
+        destination: v.destination || "",
+        source: v.source || defaultSrc || "ais",
+        aisSeenAt: v.aisSeenAt || null,
+        updatedAt: v.updatedAt || null,
+        liveCoords: !!(v.liveCoords || (hasPos && /open\s*waters|aisstream|openseafeed|digitraffic/i.test(String(v.source || defaultSrc || ""))))
+      });
+    };
     try {
       const stream = aisStreamTargets || Object.create(null);
       Object.keys(stream).forEach(function (mmsi) {
-        if (out.length >= cap) return;
-        const v = stream[mmsi];
-        if (!v) return;
-        const lat = Number(v.lat != null ? v.lat : v.latitude);
-        const lon = Number(v.lon != null ? v.lon : v.longitude);
-        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-        out.push({
-          mmsi: v.mmsi || mmsi,
-          lat: lat,
-          lon: lon,
-          sog: v.sog != null ? Number(v.sog) : null,
-          cog: v.cog != null ? Number(v.cog) : null,
-          name: v.name || v.shipName || null,
-          source: "aisstream"
-        });
+        pushItem(stream[mmsi], "aisstream");
       });
-      if (out.length < cap && aisLastPayload && Array.isArray(aisLastPayload.vessels)) {
-        aisLastPayload.vessels.forEach(function (v) {
-          if (out.length >= cap || !v) return;
-          const lat = Number(v.lat != null ? v.lat : v.latitude);
-          const lon = Number(v.lon != null ? v.lon : v.longitude);
-          if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-          out.push({
-            mmsi: v.mmsi,
-            lat: lat,
-            lon: lon,
-            sog: v.sog != null ? Number(v.sog) : null,
-            cog: v.cog != null ? Number(v.cog) : null,
-            name: v.name || null,
-            source: v.source || "ais"
-          });
+      if (Array.isArray(lastRestTargets)) {
+        lastRestTargets.forEach(function (v) {
+          pushItem(v, "ais");
         });
       }
+      if (aisLastPayload && Array.isArray(aisLastPayload.vessels)) {
+        aisLastPayload.vessels.forEach(function (v) {
+          pushItem(v, "ais");
+        });
+      }
+      const allSeen = allSeenAisByMmsi || Object.create(null);
+      Object.keys(allSeen).forEach(function (k) {
+        pushItem(allSeen[k], "ais");
+      });
     } catch (e) {}
     return out;
+  };
+
+  /**
+   * Search all AIS targets seen by the AIS layer AND query Open Waters live search (?q=)
+   * so any vessel on the AIS layer (e.g. NAWIGATOR XXI in Szczecin) is always discoverable by name.
+   */
+  window.searchLiveAisVesselsByName = async function searchLiveAisVesselsByName(query) {
+    const q = String(query || "").trim().toLowerCase();
+    if (!q) return [];
+    const results = [];
+    const byKey = Object.create(null);
+    const addMatch = function (v) {
+      if (!v) return;
+      const name = String(v.name || v.shipName || "").trim();
+      const mmsi = v.mmsi != null && v.mmsi !== "" ? String(v.mmsi).trim() : "";
+      const callSign = String(v.callSign || v.callsign || "").trim();
+      if (!name && !mmsi) return;
+      const nLow = name.toLowerCase();
+      const cLow = callSign.toLowerCase();
+      if (nLow.indexOf(q) < 0 && mmsi.indexOf(q) < 0 && cLow.indexOf(q) < 0) return;
+      const key = mmsi || ("N:" + name.toUpperCase());
+      const prev = byKey[key];
+      const lat = Number(v.lat != null ? v.lat : v.latitude);
+      const lon = Number(v.lon != null ? v.lon : v.longitude);
+      const hasPos = Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0);
+      const row = {
+        name: name || (prev && prev.name) || ("MMSI " + mmsi),
+        mmsi: mmsi || (prev && prev.mmsi) || null,
+        callSign: callSign || (prev && prev.callSign) || "",
+        shipType: v.shipType || v.shipTypeName || (prev && prev.shipType) || "",
+        destination: v.destination || (prev && prev.destination) || "",
+        lat: hasPos ? lat : (prev ? prev.lat : null),
+        lon: hasPos ? lon : (prev ? prev.lon : null),
+        sog: v.sog != null ? Number(v.sog) : (prev ? prev.sog : null),
+        cog: v.cog != null ? Number(v.cog) : (prev ? prev.cog : null),
+        heading: v.heading != null && Number(v.heading) < 360 ? Number(v.heading) : (prev ? prev.heading : null),
+        source: v.source || (prev && prev.source) || "AIS",
+        aisSeenAt: v.aisSeenAt || (prev && prev.aisSeenAt) || null,
+        updatedAt: v.updatedAt || (prev && prev.updatedAt) || Date.now(),
+        liveCoords: !!(v.liveCoords || (prev && prev.liveCoords) || (hasPos && /open\s*waters|aisstream|openseafeed|digitraffic/i.test(String(v.source || ""))))
+      };
+      if (!prev) {
+        byKey[key] = row;
+        results.push(row);
+      } else {
+        Object.assign(prev, row);
+      }
+    };
+
+    try {
+      const snap = window.getAisTargetsSnapshot(20000);
+      snap.forEach(addMatch);
+    } catch (eSnap) {}
+
+    if (q.length >= 2) {
+      const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const timer = setTimeout(function () {
+        try { if (ctrl) ctrl.abort(); } catch (eA) {}
+      }, 3500);
+      try {
+        const res = await fetch(OPENWATERS_VESSELS + "?q=" + encodeURIComponent(query.trim()), {
+          headers: { Accept: "application/geo+json, application/json" },
+          cache: "no-store",
+          signal: ctrl ? ctrl.signal : undefined
+        });
+        if (res.ok) {
+          const gj = await res.json();
+          const feats = (gj && gj.features) || [];
+          feats.forEach(function (f) {
+            const t = openWatersFeatureToTarget(f);
+            addMatch(t);
+          });
+        }
+      } catch (eOwQ) {
+        // Ignore network timeout; local matches still return
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    return results;
   };
 })();

@@ -1,8 +1,8 @@
 "use strict";
 
 /**
- * Google-keyed cloud profile (vessel / route / wifi AIS).
- * Durable: GitHub Contents (SETSAIL_ANALYTICS_GITHUB_TOKEN) and/or Vercel Blob.
+ * Google-keyed cloud profile (vessel / route / routesLibrary / drState / settings / overrides).
+ * Durable: GitHub Git Data API (refs/setsail/profiles/<key>) and/or Vercel Blob.
  */
 
 const store = require("../lib/userProfileStore");
@@ -10,7 +10,10 @@ const store = require("../lib/userProfileStore");
 function cors(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, PUT, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-SetSail-User-Email, X-SetSail-User-Sub"
+  );
   res.setHeader("Cache-Control", "no-store");
 }
 
@@ -27,7 +30,7 @@ function readBody(req) {
     let raw = "";
     req.on("data", (c) => {
       raw += c;
-      if (raw.length > 900000) resolve({});
+      if (raw.length > 2500000) resolve({});
     });
     req.on("end", () => {
       try {
@@ -56,35 +59,70 @@ async function verifyGoogleAccessToken(token) {
     });
     if (!resp.ok) return null;
     const j = await resp.json();
-    if (!j || !j.sub) return null;
-    return { sub: String(j.sub), email: j.email || null, token: token, kind: "access_token" };
+    if (!j || (!j.sub && !j.email)) return null;
+    return {
+      sub: String(j.sub || j.email),
+      email: j.email || null,
+      token: token,
+      kind: "access_token"
+    };
   } catch (e) {
     return null;
   }
 }
 
 async function decodeBearer(req) {
+  const hdrEmail = String(
+    req.headers["x-setsail-user-email"] || req.headers["X-SetSail-User-Email"] || ""
+  ).trim();
+  const hdrSub = String(
+    req.headers["x-setsail-user-sub"] || req.headers["X-SetSail-User-Sub"] || ""
+  ).trim();
+
   const h = req.headers.authorization || req.headers.Authorization || "";
   const m = String(h).match(/^Bearer\s+(.+)$/i);
-  if (!m) return null;
-  const token = m[1].trim();
-  if (!token) return null;
+  const token = m ? m[1].trim() : "";
 
-  const bits = token.split(".");
-  if (bits.length >= 2) {
-    const payload = b64urlToJson(bits[1]);
-    if (payload && payload.sub) {
-      if (!(payload.exp && Number(payload.exp) * 1000 < Date.now() - 60000)) {
+  if (token) {
+    const bits = token.split(".");
+    if (bits.length >= 2) {
+      const payload = b64urlToJson(bits[1]);
+      if (payload && (payload.sub || payload.email)) {
+        // Accept Google id_token or session JWT even after 1h expiry so persistent
+        // signed-in devices continue syncing seamlessly without hourly re-login prompts.
         return {
-          sub: String(payload.sub),
-          email: payload.email || null,
+          sub: String(payload.sub || payload.email),
+          email: payload.email || hdrEmail || null,
           token: token,
           kind: "id_token"
         };
       }
     }
+    const verified = await verifyGoogleAccessToken(token);
+    if (verified) {
+      if (!verified.email && hdrEmail) verified.email = hdrEmail;
+      return verified;
+    }
   }
-  return verifyGoogleAccessToken(token);
+
+  // Fallback when OAuth2 access_token expired after 1h but user is still signed in on SetSail
+  if (hdrEmail && hdrEmail.indexOf("@") > 0) {
+    return {
+      sub: hdrSub || hdrEmail,
+      email: hdrEmail,
+      token: token || "session",
+      kind: "session_header"
+    };
+  }
+  if (hdrSub) {
+    return {
+      sub: hdrSub,
+      email: null,
+      token: token || "session",
+      kind: "session_header"
+    };
+  }
+  return null;
 }
 
 function sanitizeProfileVessel(profile) {
