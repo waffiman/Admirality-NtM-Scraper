@@ -13003,32 +13003,39 @@ select option {
     window._homeClockMode = 'UTC'; // 'UTC' or 'LMT'
     window._homeGeoLon = null;
 
-    // Passive check if geolocation is already granted
-    if (navigator.geolocation && navigator.permissions && navigator.permissions.query) {
-      navigator.permissions.query({ name: 'geolocation' }).then(function(res) {
-        if (res.state === 'granted') {
-          navigator.geolocation.getCurrentPosition(function(pos) {
-            if (pos && pos.coords && Number.isFinite(pos.coords.longitude)) {
-              window._homeGeoLon = pos.coords.longitude;
-            }
-          }, function() {}, { timeout: 6000, maximumAge: 60000 });
-        }
-      }).catch(function() {});
-    }
+    // Vessel position telemetry (no browser GPS prompt)
+    window._homeGeoLon = getActiveGeoLongitude();
 
     function getActiveGeoLongitude() {
-      if (Number.isFinite(window._homeGeoLon)) return window._homeGeoLon;
+      // 1. In-memory userVessel object from SetSail core
+      if (window.userVessel && Number.isFinite(window.userVessel.lon)) {
+        return window.userVessel.lon;
+      }
+      // 2. Storage vessel states (setsail_vessel_state_v2 or v1)
       try {
-        const raw = localStorage.getItem('setsail_vessel_pos_v2');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && parsed.source === 'GPS' && Number.isFinite(parsed.lon)) {
-            window._homeGeoLon = parsed.lon;
-            return parsed.lon;
-          }
+        const raw2 = localStorage.getItem('setsail_vessel_state_v2') || localStorage.getItem('setsail_vessel_state_v1');
+        if (raw2) {
+          const v = JSON.parse(raw2);
+          if (v && Number.isFinite(v.lon)) return v.lon;
         }
       } catch (e) {}
-      return null;
+      // 3. Own ship map marker position
+      try {
+        if (window._ownShipMarker && typeof window._ownShipMarker.getLatLng === 'function') {
+          const ll = window._ownShipMarker.getLatLng();
+          if (ll && Number.isFinite(ll.lng)) return ll.lng;
+        }
+      } catch (e) {}
+      // 4. Input in Home My Vessel modal (#homeVesselLon)
+      try {
+        const lonEl = document.getElementById('homeVesselLon');
+        if (lonEl && lonEl.value) {
+          const val = typeof parseCoordDms === 'function' ? parseCoordDms(lonEl.value, false) : parseFloat(lonEl.value);
+          if (Number.isFinite(val)) return val;
+        }
+      } catch (e) {}
+      // 5. Default reference longitude (IINO INEOS VESTA English Channel / Dover strait: +1.25 E)
+      return 1.25;
     }
 
     function updateHomeTelemetry() {
@@ -13088,42 +13095,9 @@ select option {
         return;
       }
 
-      // User wants to switch from UTC -> LMT: verify or request Browser Geolocation
-      const existingLon = getActiveGeoLongitude();
-      if (Number.isFinite(existingLon)) {
-        window._homeClockMode = 'LMT';
-        updateHomeTelemetry();
-        return;
-      }
-
-      if (!navigator.geolocation) {
-        btn.dataset.tempMsg = '1';
-        btn.textContent = 'NO GPS';
-        setTimeout(() => { delete btn.dataset.tempMsg; updateHomeTelemetry(); }, 1600);
-        return;
-      }
-
-      btn.dataset.tempMsg = '1';
-      btn.textContent = 'LOC...';
-      navigator.geolocation.getCurrentPosition(
-        function(pos) {
-          delete btn.dataset.tempMsg;
-          if (pos && pos.coords && Number.isFinite(pos.coords.longitude)) {
-            window._homeGeoLon = pos.coords.longitude;
-            window._homeClockMode = 'LMT';
-            updateHomeTelemetry();
-          }
-        },
-        function() {
-          btn.textContent = 'NO GPS';
-          setTimeout(() => {
-            delete btn.dataset.tempMsg;
-            window._homeClockMode = 'UTC';
-            updateHomeTelemetry();
-          }, 1600);
-        },
-        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
-      );
+      // Switch UTC -> LMT using current vessel longitude (zero browser GPS prompt)
+      window._homeClockMode = 'LMT';
+      updateHomeTelemetry();
     });
 
     if (document.readyState === 'loading') {
@@ -14098,12 +14072,12 @@ select option {
                 </div>
                 <div class="about-copy" id="homeAboutCopy">
                   <p class="about-kicker">About SetSail</p>
-                  <h2 class="about-headline">Navigation tools that ship.</h2>
+                  <h2 class="about-headline">Built from the Bridge. Grounded in Maritime Science.</h2>
                   <p class="about-body">
-                    SetSail is a live chart workspace for passage work — notices, depths, weather, and routing in one place, built to stay clear when the watch is busy and the link is slow.
+                    SetSail was conceived as the founder's maritime degree thesis project dedicated to <strong>"The Use of ECDIS for Collision Avoidance"</strong>. Rather than treating navigational safety as abstract theory, the founder chose to deeply investigate, master, and unlock the subject from first principles — by engineering a complete, live online ECDIS suite from the ground up.
                   </p>
                   <p class="about-body about-body-gap">
-                    It sits between two crafts most products never join: seamanship and shipping working software. A pure programmer rarely feels the bridge; a pure mariner rarely ships a live app. SetSail lives in between — and will keep gaining new functions while sharpening what already works.
+                    SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
                     <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.189" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.189';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />

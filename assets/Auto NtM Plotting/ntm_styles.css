@@ -25528,3 +25528,173 @@
   pointer-events: none !important;
   opacity: 0.88;
 }
+
+
+/* ==========================================================================
+   ECDIS MULTI-OBJECT PICK REPORT POPUP (1x1 NM Query Reticle & List)
+   ========================================================================== */
+.ss-ecdis-pick-popup .leaflet-popup-content-wrapper {
+  background: rgba(8, 16, 36, 0.96) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(56, 189, 248, 0.45) !important;
+  border-radius: 9px !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 15px rgba(56, 189, 248, 0.15) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.ss-ecdis-pick-popup .leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.35 !important;
+  color: #ffffff !important;
+}
+
+.ss-ecdis-pick-popup .leaflet-popup-tip {
+  background: rgba(8, 16, 36, 0.96) !important;
+  border: 1px solid rgba(56, 189, 248, 0.45) !important;
+}
+
+.ss-ecdis-pick-container {
+  min-width: 260px;
+  max-width: 310px;
+  box-sizing: border-box;
+}
+
+.ss-ecdis-pick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(15, 23, 42, 0.75);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.ss-ecdis-pick-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ss-ecdis-pick-reticle-ico {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ss-ecdis-pick-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #f1f5f9;
+}
+
+.ss-ecdis-pick-pos {
+  font-family: ui-monospace, "Cascadia Mono", monospace;
+  font-size: 9.5px;
+  color: #94a3b8;
+}
+
+.ss-ecdis-pick-count-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  white-space: nowrap;
+}
+
+.ss-ecdis-pick-list {
+  max-height: 220px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+}
+
+.ss-ecdis-pick-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  color: inherit;
+  font-family: inherit;
+}
+
+.ss-ecdis-pick-row:hover {
+  background: rgba(56, 189, 248, 0.12);
+  border-left-color: #38bdf8;
+}
+
+.ss-ecdis-pick-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.ss-ecdis-pick-badge {
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ss-ecdis-pick-row-info {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.ss-ecdis-pick-row-name {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ss-ecdis-pick-row-sub {
+  font-size: 9.5px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.ss-ecdis-pick-row-arrow {
+  font-size: 14px;
+  color: #64748b;
+  flex-shrink: 0;
+  margin-left: 6px;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.ss-ecdis-pick-row:hover .ss-ecdis-pick-row-arrow {
+  color: #38bdf8;
+  transform: translateX(2px);
+}
+
+.ss-ecdis-pick-foot {
+  padding: 5px 10px;
+  background: rgba(15, 23, 42, 0.55);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 9.5px;
+  color: #64748b;
+  text-align: center;
+}

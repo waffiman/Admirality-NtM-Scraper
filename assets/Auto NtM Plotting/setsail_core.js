@@ -15802,12 +15802,13 @@ function initNtMMap() {
         const rMarks = await fetch("assets/geo/setroute_iala_marks.json");
         if (rMarks.ok) {
           _buoyMarksData = await rMarks.json();
+          window._buoyMarksData = _buoyMarksData;
           if (typeof _renderBuoysHitboxes === "function") _renderBuoysHitboxes();
         }
       } catch (eMarks) {}
       try {
         const rTss = await fetch("assets/geo/setroute_tss_world.json");
-        if (rTss.ok) _buoyTssData = await rTss.json();
+        if (rTss.ok) { _buoyTssData = await rTss.json(); window._buoyTssData = _buoyTssData; }
       } catch (eTss) {}
     }
 
@@ -15908,57 +15909,323 @@ function initNtMMap() {
         try { updateVectorBuoyMarkers(); } catch (e) {}
       });
 
-      // Click on chart when Buoys layer is active -> hit-test buoys & TSS
-      map.on("click", (e) => {
-        if (!map.hasLayer(seamarkLyr)) return;
-        if (e.originalEvent && (e.originalEvent._stopped || e.originalEvent.defaultPrevented)) return;
+    // =========================================================================
+    // UNIFIED ECDIS OBJECT PICK ENGINE (1x1 NM Query with Red Reticle Corners)
+    // =========================================================================
+    let _ecdisPickReticleLayer = null;
 
-        const clickPt = e.latlng;
-        const lat = clickPt.lat;
-        const lon = ((clickPt.lng + 540) % 360) - 180;
-        const z = map.getZoom();
+    function clearEcdisPickReticle(targetMap) {
+      const m = targetMap || map || (typeof leafletMap !== "undefined" ? leafletMap : null);
+      if (_ecdisPickReticleLayer && m && m.hasLayer(_ecdisPickReticleLayer)) {
+        try { m.removeLayer(_ecdisPickReticleLayer); } catch (e) {}
+      }
+    }
 
-        // 1. Check nearest known buoy (pixel distance <= 45px)
-        let bestMark = null;
-        let minPx = 45;
-        const clickPx = map.latLngToLayerPoint(clickPt);
+    function drawEcdisPickReticle(clickPt, targetMap, dLat, dLon) {
+      clearEcdisPickReticle(targetMap);
+      if (!targetMap) return;
+      if (!_ecdisPickReticleLayer) {
+        _ecdisPickReticleLayer = L.layerGroup();
+      } else {
+        _ecdisPickReticleLayer.clearLayers();
+      }
 
-        for (let i = 0; i < _buoyMarksData.length; i++) {
-          const m = _buoyMarksData[i];
-          const mPx = map.latLngToLayerPoint([m.lat, m.lon]);
-          const d = clickPx.distanceTo(mPx);
-          if (d < minPx) {
-            minPx = d;
-            bestMark = m;
-          }
+      const north = clickPt.lat + dLat;
+      const south = clickPt.lat - dLat;
+      const east = clickPt.lng + dLon;
+      const west = clickPt.lng - dLon;
+
+      const k = 0.28; // corner bracket arm length (28% of box side)
+      const armLat = dLat * 2 * k;
+      const armLon = dLon * 2 * k;
+
+      const cornerStyle = {
+        color: "#ef4444",
+        weight: 3.0,
+        opacity: 0.95,
+        interactive: false,
+        lineCap: "square",
+        lineJoin: "miter"
+      };
+
+      // 4 Red Target Reticle Corners (Frame the 1x1 NM square)
+      L.polyline([[north - armLat, west], [north, west], [north, west + armLon]], cornerStyle).addTo(_ecdisPickReticleLayer);
+      L.polyline([[north, east - armLon], [north, east], [north - armLat, east]], cornerStyle).addTo(_ecdisPickReticleLayer);
+      L.polyline([[south + armLat, west], [south, west], [south, west + armLon]], cornerStyle).addTo(_ecdisPickReticleLayer);
+      L.polyline([[south, east - armLon], [south, east], [south + armLat, east]], cornerStyle).addTo(_ecdisPickReticleLayer);
+
+      // Subtle dashed inner boundary box
+      L.rectangle([[south, west], [north, east]], {
+        color: "#ef4444",
+        weight: 1,
+        opacity: 0.35,
+        dashArray: "3, 5",
+        fill: true,
+        fillColor: "#ef4444",
+        fillOpacity: 0.04,
+        interactive: false
+      }).addTo(_ecdisPickReticleLayer);
+
+      _ecdisPickReticleLayer.addTo(targetMap);
+      window._ecdisPickReticleLayer = _ecdisPickReticleLayer;
+    }
+
+    function handleEcdisObjectPick(clickPt, targetMap, originatingObject) {
+      if (!targetMap || !clickPt) return;
+      const lat = clickPt.lat;
+      const lon = ((clickPt.lng + 540) % 360) - 180;
+      const z = targetMap.getZoom ? targetMap.getZoom() : 10;
+
+      // 1x1 NM Query Box: 0.5 NM half-height and half-width
+      const dLat = 0.5 / 60; // 0.008333 deg
+      const dLon = 0.5 / (60 * Math.cos(Math.max(-85, Math.min(85, lat)) * Math.PI / 180));
+
+      function isInside(tLat, tLon) {
+        if (!Number.isFinite(tLat) || !Number.isFinite(tLon)) return false;
+        if (tLat < lat - dLat || tLat > lat + dLat) return false;
+        const lonDiff = Math.abs(((tLon - lon + 540) % 360) - 180);
+        return lonDiff <= dLon;
+      }
+
+      function distNm(tLat, tLon) {
+        if (!Number.isFinite(tLat) || !Number.isFinite(tLon)) return 999;
+        try {
+          return targetMap.distance([lat, lon], [tLat, tLon]) / 1852;
+        } catch (e) {
+          return 999;
         }
+      }
 
-        if (bestMark) {
-          L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 270, minWidth: 190, closeButton: true })
-            .setLatLng([bestMark.lat, bestMark.lon])
-            .setContent(formatBuoyPopup(bestMark))
-            .openOn(map);
-          return;
+      function isLayerOn(name) {
+        if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES && OVERLAY_STATES[name] != null) {
+          return Boolean(OVERLAY_STATES[name]);
         }
+        const tab = document.querySelector(`.excel-tab[data-overlay="${name}"]`);
+        return tab ? tab.classList.contains("active") : false;
+      }
 
-        // 2. Check TSS scheme hit
-        for (let s = 0; s < _buoyTssData.length; s++) {
-          const scheme = _buoyTssData[s];
-          for (let p = 0; p < scheme.parts.length; p++) {
-            const part = scheme.parts[p];
-            if (pointInTssPolygon(lat, lon, part.ring)) {
-              const tssObj = Object.assign({}, part, { schemeName: scheme.name });
-              L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 270, minWidth: 190, closeButton: true })
-                .setLatLng(clickPt)
-                .setContent(formatTssPopup(tssObj, lat, lon))
-                .openOn(map);
-              return;
+      const candidates = [];
+      const seen = new Set();
+
+      function addCandidate(c) {
+        if (!c || !c.id || seen.has(c.id)) return;
+        seen.add(c.id);
+        candidates.push(c);
+      }
+
+      if (originatingObject) {
+        addCandidate(originatingObject);
+      }
+
+      // 1. BUOYS & SEAMARKS (if Buoys layer enabled on map)
+      if (targetMap.hasLayer(seamarkLyr)) {
+        const _marksArr = (Array.isArray(_buoyMarksData) && _buoyMarksData.length) ? _buoyMarksData : (Array.isArray(window._buoyMarksData) ? window._buoyMarksData : []);
+        if (_marksArr.length) {
+          for (let i = 0; i < _marksArr.length; i++) {
+            const m = _marksArr[i];
+            if (isInside(m.lat, m.lon)) {
+              const d = distNm(m.lat, m.lon);
+              addCandidate({
+                id: "buoy_" + (m.name || (m.lat.toFixed(4) + "_" + m.lon.toFixed(4))),
+                category: "BUOY",
+                catBadge: "BUOY",
+                badgeColor: "#38bdf8",
+                icon: "⚓",
+                name: m.name || m.type || "Seamark Buoy",
+                subtitle: `${m.light ? m.light + " · " : ""}${m.colour || m.shape || "IALA"} · ${d.toFixed(2)} NM`,
+                distNm: d,
+                lat: m.lat,
+                lon: m.lon,
+                open: function() {
+                  L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 280, minWidth: 200, closeButton: true })
+                    .setLatLng([m.lat, m.lon])
+                    .setContent(formatBuoyPopup(m))
+                    .openOn(targetMap);
+                }
+              });
             }
           }
         }
 
-        // 3. Fallback: If clicked at zoom >= 10 in coastal waters, show IALA navigation context
-        if (z >= 10 && typeof setrouteIalaRegion === "function") {
+        // TSS Schemes
+        const _tssArr = (Array.isArray(_buoyTssData) && _buoyTssData.length) ? _buoyTssData : (Array.isArray(window._buoyTssData) ? window._buoyTssData : []);
+        if (_tssArr.length) {
+          for (let s = 0; s < _tssArr.length; s++) {
+            const scheme = _tssArr[s];
+            if (!scheme || !Array.isArray(scheme.parts)) continue;
+            for (let p = 0; p < scheme.parts.length; p++) {
+              const part = scheme.parts[p];
+              if (pointInTssPolygon(lat, lon, part.ring)) {
+                const tssObj = Object.assign({}, part, { schemeName: scheme.name });
+                addCandidate({
+                  id: "tss_" + scheme.name + "_" + (part.category || p),
+                  category: "TSS",
+                  catBadge: "TSS",
+                  badgeColor: part.category === "separation_zone" ? "#ef4444" : "#60a5fa",
+                  icon: "🧭",
+                  name: scheme.name,
+                  subtitle: `${part.category === "separation_zone" ? "Separation Zone (Hard Ban)" : "Traffic Lane"} · COLREG Rule 10`,
+                  distNm: 0,
+                  lat: clickPt.lat,
+                  lon: clickPt.lng,
+                  open: function() {
+                    L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 280, minWidth: 200, closeButton: true })
+                      .setLatLng(clickPt)
+                      .setContent(formatTssPopup(tssObj, lat, lon))
+                      .openOn(targetMap);
+                  }
+                });
+              }
+            }
+          }
+        }
+      }
+
+      // 2. AIS TARGETS (if AIS overlay active)
+      if (isLayerOn("ais") || (window.leafletAisLayer && targetMap.hasLayer(window.leafletAisLayer))) {
+        try {
+          if (window.leafletAisLayer && typeof window.leafletAisLayer.eachLayer === "function") {
+            window.leafletAisLayer.eachLayer((marker) => {
+              if (!marker || typeof marker.getLatLng !== "function") return;
+              const ll = marker.getLatLng();
+              if (isInside(ll.lat, ll.lng)) {
+                const d = distNm(ll.lat, ll.lng);
+                const v = marker._aisData || (marker.options && marker.options._aisData) || {};
+                const name = v.name || v.shipName || marker.options.title || ("MMSI " + (v.mmsi || "Target"));
+                addCandidate({
+                  id: "ais_" + (v.mmsi || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
+                  category: "AIS",
+                  catBadge: "AIS",
+                  badgeColor: "#10b981",
+                  icon: "🚢",
+                  name: name,
+                  subtitle: `${v.shipTypeName || v.shipType || "Vessel"} · SOG ${v.sog != null ? Number(v.sog).toFixed(1) : "—"} kn · ${d.toFixed(2)} NM`,
+                  distNm: d,
+                  lat: ll.lat,
+                  lon: ll.lng,
+                  open: function() {
+                    if (typeof marker.openPopup === "function") {
+                      marker.openPopup();
+                    } else if (typeof window.formatAisPopup === "function") {
+                      L.popup({ className: "ss-ais-popup", autoPan: true, offset: [0, -6], maxWidth: 280, closeButton: true })
+                        .setLatLng(ll)
+                        .setContent(window.formatAisPopup(v))
+                        .openOn(targetMap);
+                    }
+                  }
+                });
+              }
+            });
+          }
+        } catch (eAis) {}
+      }
+
+      // 3. ADMIRALTY NtM & NAVTEX WARNINGS (if Notices active)
+      if (isLayerOn("notices") || (window.leafletMarkersLayer && targetMap.hasLayer(window.leafletMarkersLayer))) {
+        try {
+          if (window.leafletMarkersLayer && typeof window.leafletMarkersLayer.eachLayer === "function") {
+            window.leafletMarkersLayer.eachLayer((layer) => {
+              if (!layer) return;
+              let ll = null;
+              if (typeof layer.getLatLng === "function") ll = layer.getLatLng();
+              else if (typeof layer.getBounds === "function") ll = layer.getBounds().getCenter();
+              if (!ll || !isInside(ll.lat, ll.lng)) return;
+              const d = distNm(ll.lat, ll.lng);
+              const n = layer._noticeData || (layer.options && layer.options._noticeData) || {};
+              const title = n.title || layer.options.title || ("Notice " + (n.noticeNumber || "NtM"));
+              addCandidate({
+                id: "ntm_" + (n.id || n.noticeNumber || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
+                category: "NtM",
+                catBadge: "NtM",
+                badgeColor: "#f59e0b",
+                icon: "⚠️",
+                name: title,
+                subtitle: `${n.chart || n.area || "Admiralty"} · ${d.toFixed(2)} NM`,
+                distNm: d,
+                lat: ll.lat,
+                lon: ll.lng,
+                open: function() {
+                  if (typeof layer.openPopup === "function") layer.openPopup();
+                }
+              });
+            });
+          }
+        } catch (eNtm) {}
+      }
+
+      // 4. PORT DEPTHS & SOUNDINGS (if Depths active)
+      if (isLayerOn("depths") || (window.leafletPortDepthsLayer && targetMap.hasLayer(window.leafletPortDepthsLayer))) {
+        try {
+          if (window.leafletPortDepthsLayer && typeof window.leafletPortDepthsLayer.eachLayer === "function") {
+            window.leafletPortDepthsLayer.eachLayer((layer) => {
+              if (!layer || typeof layer.getLatLng !== "function") return;
+              const ll = layer.getLatLng();
+              if (isInside(ll.lat, ll.lng)) {
+                const d = distNm(ll.lat, ll.lng);
+                const p = layer._portData || (layer.options && layer.options._portData) || {};
+                const name = p.name || layer.options.title || "Harbour / Port";
+                addCandidate({
+                  id: "port_" + (p.unlocode || p.name || ll.lat.toFixed(4)),
+                  category: "PORT",
+                  catBadge: "PORT",
+                  badgeColor: "#3b82f6",
+                  icon: "⚓",
+                  name: name,
+                  subtitle: `${p.unlocode || "Harbour"} · Depths & Tides · ${d.toFixed(2)} NM`,
+                  distNm: d,
+                  lat: ll.lat,
+                  lon: ll.lng,
+                  open: function() {
+                    if (typeof layer.openPopup === "function") layer.openPopup();
+                  }
+                });
+              }
+            });
+          }
+        } catch (ePorts) {}
+      }
+
+      // 5. ROUTE WAYPOINTS (if Route active)
+      if (isLayerOn("route") || (window.leafletRouteLayer && targetMap.hasLayer(window.leafletRouteLayer))) {
+        try {
+          if (window.leafletRouteLayer && typeof window.leafletRouteLayer.eachLayer === "function") {
+            window.leafletRouteLayer.eachLayer((layer) => {
+              if (!layer || typeof layer.getLatLng !== "function") return;
+              const ll = layer.getLatLng();
+              if (isInside(ll.lat, ll.lng)) {
+                const d = distNm(ll.lat, ll.lng);
+                const wpt = layer._wptData || (layer.options && layer.options._wptData) || {};
+                const name = wpt.name || layer.options.title || ("WPT " + (wpt.index != null ? wpt.index : ""));
+                addCandidate({
+                  id: "wpt_" + (wpt.name || wpt.index || ll.lat.toFixed(4)),
+                  category: "WPT",
+                  catBadge: "WPT",
+                  badgeColor: "#f05a36",
+                  icon: "📍",
+                  name: name,
+                  subtitle: `Route Waypoint · Course ${wpt.course || "—"}° · ${d.toFixed(2)} NM`,
+                  distNm: d,
+                  lat: ll.lat,
+                  lon: ll.lng,
+                  open: function() {
+                    if (typeof layer.openPopup === "function") layer.openPopup();
+                  }
+                });
+              }
+            });
+          }
+        } catch (eRoute) {}
+      }
+
+      // Sort candidates ascending by distance
+      candidates.sort((a, b) => a.distNm - b.distNm);
+
+      // =======================================================================
+      // EVALUATE CANDIDATE COUNT
+      // =======================================================================
+      if (candidates.length === 0) {
+        if (targetMap.hasLayer(seamarkLyr) && z >= 10 && typeof setrouteIalaRegion === "function") {
+          drawEcdisPickReticle(clickPt, targetMap, dLat, dLon);
           const reg = setrouteIalaRegion(lat, lon);
           const posDms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
           const fallbackContent =
@@ -15970,16 +16237,120 @@ function initNtMMap() {
               '<div class="ss-ais-row"><span class="ss-ais-k">SYSTEM</span><span class="ss-ais-v">' + reg.name + '</span></div>' +
               '<div class="ss-ais-row"><span class="ss-ais-k">LATERAL</span><span class="ss-ais-v">' + reg.difference + '</span></div>' +
               '<div class="ss-ais-row"><span class="ss-ais-k">POS</span><span class="ss-ais-v" style="font-family:monospace;font-size:10px;">' + posDms + '</span></div>' +
-              '<div class="ss-ais-row"><span class="ss-ais-k">CHART</span><span class="ss-ais-v">OpenSeaMap S-52 / S-57</span></div>' +
               '<div class="ss-ais-foot">OpenSeaMap · S-52 Seamark Layer</div>' +
             '</div>';
 
-          L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 260, minWidth: 190, closeButton: true })
+          const pop = L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 260, minWidth: 190, closeButton: true })
             .setLatLng(clickPt)
             .setContent(fallbackContent)
-            .openOn(map);
+            .openOn(targetMap);
+          pop.on("remove", () => clearEcdisPickReticle(targetMap));
+        } else {
+          clearEcdisPickReticle(targetMap);
         }
+        return;
+      }
+
+      // CASE 1: Exactly 1 object in the 1x1 NM square -> Open its details immediately!
+      if (candidates.length === 1) {
+        drawEcdisPickReticle(clickPt, targetMap, dLat, dLon);
+        const single = candidates[0];
+        if (typeof single.open === "function") {
+          single.open();
+        }
+        targetMap.once("popupclose", () => {
+          setTimeout(() => {
+            if (!targetMap._popup || !targetMap.hasLayer(targetMap._popup)) {
+              clearEcdisPickReticle(targetMap);
+            }
+          }, 80);
+        });
+        return;
+      }
+
+      // CASE 2: 2 or more objects in the 1x1 NM square -> Show ECDIS Pick Report scroll list!
+      drawEcdisPickReticle(clickPt, targetMap, dLat, dLon);
+      const count = candidates.length;
+      const dms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
+
+      const listHtml = `
+        <div class="ss-ecdis-pick-container">
+          <div class="ss-ecdis-pick-head">
+            <div class="ss-ecdis-pick-title-wrap">
+              <span class="ss-ecdis-pick-reticle-ico">🎯</span>
+              <div>
+                <div class="ss-ecdis-pick-title">CHART QUERY · 1×1 NM</div>
+                <div class="ss-ecdis-pick-pos">${dms}</div>
+              </div>
+            </div>
+            <span class="ss-ecdis-pick-count-badge">${count} OBJECTS</span>
+          </div>
+          <div class="ss-ecdis-pick-list">
+            ${candidates.map((c, idx) => `
+              <button type="button" class="ss-ecdis-pick-row" data-idx="${idx}">
+                <div class="ss-ecdis-pick-row-left">
+                  <span class="ss-ecdis-pick-badge" style="background:${c.badgeColor}22;color:${c.badgeColor};border:1px solid ${c.badgeColor}66;">${c.catBadge}</span>
+                  <div class="ss-ecdis-pick-row-info">
+                    <div class="ss-ecdis-pick-row-name">${c.name}</div>
+                    <div class="ss-ecdis-pick-row-sub">${c.subtitle}</div>
+                  </div>
+                </div>
+                <span class="ss-ecdis-pick-row-arrow">›</span>
+              </button>
+            `).join("")}
+          </div>
+          <div class="ss-ecdis-pick-foot">Click an object to inspect full details</div>
+        </div>
+      `;
+
+      const pickPopup = L.popup({
+        className: "ss-ecdis-pick-popup",
+        autoPan: true,
+        offset: [0, -6],
+        maxWidth: 320,
+        minWidth: 260,
+        closeButton: true
+      })
+      .setLatLng(clickPt)
+      .setContent(listHtml)
+      .openOn(targetMap);
+
+      pickPopup.on("remove", () => {
+        setTimeout(() => {
+          if (!targetMap._popup || !targetMap.hasLayer(targetMap._popup)) {
+            clearEcdisPickReticle(targetMap);
+          }
+        }, 80);
       });
+
+      setTimeout(() => {
+        const el = pickPopup.getElement ? pickPopup.getElement() : null;
+        if (!el) return;
+        el.querySelectorAll(".ss-ecdis-pick-row").forEach((btn) => {
+          btn.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            const idx = parseInt(btn.getAttribute("data-idx"), 10);
+            const chosen = candidates[idx];
+            targetMap.closePopup(pickPopup);
+            if (chosen && typeof chosen.open === "function") {
+              chosen.open();
+            }
+          });
+        });
+      }, 50);
+    }
+
+    window.handleEcdisObjectPick = handleEcdisObjectPick;
+    window.clearEcdisPickReticle = clearEcdisPickReticle;
+    window.drawEcdisPickReticle = drawEcdisPickReticle;
+
+    // Unified chart click handler (all layers equal)
+    map.on("click", (e) => {
+      if (e.originalEvent && (e.originalEvent._stopped || e.originalEvent.defaultPrevented)) return;
+      handleEcdisObjectPick(e.latlng, map);
+    });
+
 
       function updateVectorBuoyMarkers() {
         if (!map.hasLayer(seamarkLyr)) {
@@ -16007,10 +16378,26 @@ function initNtMMap() {
           });
           hitbox.on("click", (ev) => {
             if (ev.originalEvent) ev.originalEvent._stopped = true;
-            L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 270, minWidth: 190, closeButton: true })
-              .setLatLng([m.lat, m.lon])
-              .setContent(formatBuoyPopup(m))
-              .openOn(map);
+            const pt = ev.latlng || L.latLng(m.lat, m.lon);
+            const buoyCandidate = {
+              id: "buoy_" + (m.name || (m.lat.toFixed(4) + "_" + m.lon.toFixed(4))),
+              category: "BUOY",
+              catBadge: "BUOY",
+              badgeColor: "#38bdf8",
+              icon: "⚓",
+              name: m.name || m.type || "Seamark Buoy",
+              subtitle: `${m.light ? m.light + " · " : ""}${m.colour || m.shape || "IALA"} · 0.00 NM`,
+              distNm: 0,
+              lat: m.lat,
+              lon: m.lon,
+              open: function() {
+                L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 280, minWidth: 200, closeButton: true })
+                  .setLatLng([m.lat, m.lon])
+                  .setContent(formatBuoyPopup(m))
+                  .openOn(map);
+              }
+            };
+            handleEcdisObjectPick(pt, map, buoyCandidate);
           });
           _buoysVectorGroup.addLayer(hitbox);
         });
@@ -30797,6 +31184,11 @@ function createEcdisSimpleBaseLayer() {
   const landFill = L.layerGroup();
   const group = L.layerGroup([water, landFill, boundariesLabels]);
   group._setsailEcdis = true;
+  const _origGroupOnAdd = group.onAdd;
+  group.onAdd = function (map) {
+    ensureEcdisPanes(map);
+    return _origGroupOnAdd.call(this, map);
+  };
   group._setsailEcdisWater = water;
   group._setsailEcdisLabels = boundariesLabels;
 
