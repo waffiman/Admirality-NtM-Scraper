@@ -1,8 +1,8 @@
-name: Scrape Admiralty NtM & NAVTEX (Every 6 Hours)
+name: Scrape Admiralty NtM, NAVTEX, AIS & Weather (Hourly)
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 permissions:

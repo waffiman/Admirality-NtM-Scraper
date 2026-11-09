@@ -269,6 +269,67 @@
     );
   }
 
+  const OWN_VESSEL_PRIORITY_RADIUS_NM = 100;
+
+  function haversineNm(lat1, lon1, lat2, lon2) {
+    const la1 = Number(lat1), lo1 = Number(lon1), la2 = Number(lat2), lo2 = Number(lon2);
+    if (!Number.isFinite(la1) || !Number.isFinite(lo1) || !Number.isFinite(la2) || !Number.isFinite(lo2)) return Infinity;
+    const toRad = Math.PI / 180;
+    const dLat = (la2 - la1) * toRad;
+    const dLon = (lo2 - lo1) * toRad;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(la1 * toRad) * Math.cos(la2 * toRad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a)));
+    return 3440.065 * c;
+  }
+
+  function getOwnVesselLatLon() {
+    try {
+      const v = (typeof window !== "undefined" && window.userVessel) ? window.userVessel : null;
+      if (v) {
+        const lat = Number(v.lat);
+        const lon = Number(v.lon);
+        if (Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && !(lat === 0 && lon === 0)) {
+          return { lat, lon, mmsi: v.mmsi ? String(v.mmsi).trim() : "" };
+        }
+      }
+      const raw = localStorage.getItem("setsail_vessel_state_v2") || localStorage.getItem("setsail_user_vessel_v1");
+      if (raw) {
+        const p = JSON.parse(raw);
+        const lat = Number(p && p.lat);
+        const lon = Number(p && p.lon);
+        if (Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && !(lat === 0 && lon === 0)) {
+          return { lat, lon, mmsi: p && p.mmsi ? String(p.mmsi).trim() : "" };
+        }
+      }
+    } catch (eOwn) {}
+    return null;
+  }
+
+  function samplePreservingOwnRadius(targets, maxCount, cellDeg) {
+    if (!Array.isArray(targets) || !targets.length) return [];
+    const own = getOwnVesselLatLon();
+    if (!own) return sampleEvenlyByGrid(targets, maxCount, cellDeg);
+    const nearOwn = [];
+    const others = [];
+    for (let i = 0; i < targets.length; i++) {
+      const t = targets[i];
+      if (!t) continue;
+      const dNm = haversineNm(own.lat, own.lon, t.lat, t.lon);
+      if (dNm <= OWN_VESSEL_PRIORITY_RADIUS_NM) {
+        t.nearOwnShip100Nm = true;
+        t.distFromOwnNm = Math.round(dNm * 10) / 10;
+        nearOwn.push(t);
+      } else {
+        others.push(t);
+      }
+    }
+    const remCap = Math.max(100, maxCount - nearOwn.length);
+    const sampledOthers = sampleEvenlyByGrid(others, remCap, cellDeg);
+    return nearOwn.concat(sampledOthers);
+  }
+
   function renderAisTargets(targets, map) {
     const layer = ensureLayer(map);
     layer.clearLayers();
@@ -276,7 +337,7 @@
 
     const z = map && map.getZoom ? map.getZoom() : 3;
     const lod = aisLodForZoom(z);
-    let list = sampleEvenlyByGrid(targets, Math.min(lod.maxMarkers, ABS_MARKER_CAP), lod.cellDeg);
+    let list = samplePreservingOwnRadius(targets, Math.min(lod.maxMarkers, ABS_MARKER_CAP), lod.cellDeg);
 
     // Overview: canvas circleMarkers (smooth pan). Close-in: heading triangles (DivIcon).
     const useTriangles = !!lod.triangles;
@@ -298,7 +359,7 @@
           fillColor: col,
           fillOpacity: 0.92,
           renderer: canvasR,
-          interactive: z >= 4,
+          interactive: z >= 4 || !!v.nearOwnShip100Nm,
           keyboard: false
         });
       } else {
@@ -334,7 +395,7 @@
         m = L.marker([lat, lon], { icon, keyboard: false });
       }
       m._aisData = v;
-      if (z >= 4) {
+      if (z >= 4 || !!v.nearOwnShip100Nm) {
         m.on("click", (ev) => {
           if (ev.originalEvent) ev.originalEvent._stopped = true;
           const pt = ev.latlng || L.latLng(lat, lon);
@@ -383,7 +444,7 @@
     if (map) combined = filterToViewport(combined, map);
     const z = map && map.getZoom ? map.getZoom() : 3;
     const lod = aisLodForZoom(z);
-    return sampleEvenlyByGrid(combined, lod.maxMarkers, lod.cellDeg);
+    return samplePreservingOwnRadius(combined, lod.maxMarkers, lod.cellDeg);
   }
 
   function pruneStaleStreamTargets() {
@@ -1053,6 +1114,95 @@
     });
   }
 
+  async function refreshAisTargetsNearOwnVessel(latRaw, lonRaw, radiusNm) {
+    const own = (Number.isFinite(Number(latRaw)) && Number.isFinite(Number(lonRaw)))
+      ? { lat: Number(latRaw), lon: Number(lonRaw), mmsi: (window.userVessel && window.userVessel.mmsi) ? String(window.userVessel.mmsi).trim() : "" }
+      : getOwnVesselLatLon();
+    if (!own) return 0;
+
+    const rNm = Math.max(10, Number(radiusNm) || OWN_VESSEL_PRIORITY_RADIUS_NM);
+    const dLat = rNm / 60;
+    const dLon = rNm / (60 * Math.max(0.2, Math.cos((own.lat * Math.PI) / 180)));
+    const ownBox = {
+      minLat: Math.max(-89.9, own.lat - dLat),
+      maxLat: Math.min(89.9, own.lat + dLat),
+      minLon: Math.max(-180, own.lon - dLon),
+      maxLon: Math.min(180, own.lon + dLon)
+    };
+
+    try {
+      let liveBoxTargets = [];
+      try {
+        liveBoxTargets = await loadOpenWatersBoxes([ownBox]);
+      } catch (eOw) {}
+
+      let digiNear = [];
+      if (bboxOverlaps(ownBox, { minLat: 53.0, maxLat: 66.5, minLon: 9.0, maxLon: 30.5 })) {
+        try {
+          digiNear = await loadLiveDigitraffic();
+        } catch (eDg) {}
+      }
+
+      const rawCombined = mergeByMmsi([liveBoxTargets, digiNear]);
+      const nowMs = Date.now();
+      const freshNear = [];
+      for (let i = 0; i < rawCombined.length; i++) {
+        const t = rawCombined[i];
+        if (!t) continue;
+        const dist = haversineNm(own.lat, own.lon, t.lat, t.lon);
+        if (dist <= rNm) {
+          t.nearOwnShip100Nm = true;
+          t.distFromOwnNm = Math.round(dist * 10) / 10;
+          t.updatedAt = t.updatedAt || nowMs;
+          t.liveCoords = true;
+          freshNear.push(t);
+          if (t.mmsi) {
+            const mKey = String(t.mmsi);
+            if (aisStreamTargets[mKey]) {
+              aisStreamTargets[mKey] = Object.assign({}, aisStreamTargets[mKey], t, { updatedAt: nowMs });
+            }
+            allSeenAisByMmsi[mKey] = Object.assign({}, allSeenAisByMmsi[mKey] || {}, t, { updatedAt: nowMs });
+          }
+        }
+      }
+
+      if (freshNear.length > 0) {
+        // Replace older versions of these MMSIs in lastRestTargets with fresh 100 NM positions
+        lastRestTargets = mergeByMmsi([freshNear, lastRestTargets]);
+
+        // Also sync own vessel if found among fresh live targets
+        if (own.mmsi && typeof window.syncMyVesselFromLiveAis === "function") {
+          const selfHit = freshNear.find((x) => String(x.mmsi) === own.mmsi);
+          if (selfHit) {
+            try { window.syncMyVesselFromLiveAis(selfHit); } catch (eSelf) {}
+          }
+        }
+
+        // Dynamically re-render on SetChart without page reload if AIS overlay is active
+        const map = window.leafletMap;
+        if (map && window.OVERLAY_STATES && window.OVERLAY_STATES.ais) {
+          const allInView = getCombinedAisTargets(map);
+          renderAisTargets(allInView, map);
+          if (aisLastPayload) {
+            aisLastPayload.at = new Date().toISOString();
+            aisLastPayload.count = allInView.length;
+            aisLastPayload.vessels = allInView;
+          }
+        }
+      }
+      window._lastOwnRadiusAisSync = {
+        at: new Date().toISOString(),
+        lat: own.lat,
+        lon: own.lon,
+        radiusNm: rNm,
+        updatedCount: freshNear.length
+      };
+      return freshNear.length;
+    } catch (eNear) {
+      return 0;
+    }
+  }
+
   async function refreshAisOverlay() {
     const map = window.leafletMap;
     if (!map) return;
@@ -1063,12 +1213,24 @@
     }
 
     const plan = mapViewportBoxes(map);
+    const own = getOwnVesselLatLon();
     let targets = [];
     try {
       let live = [];
-      if (!plan.skipLive && plan.boxes && plan.boxes.length) {
+      const boxesToLoad = (plan.boxes && plan.boxes.length) ? plan.boxes.slice() : [];
+      if (own) {
+        const dLat = OWN_VESSEL_PRIORITY_RADIUS_NM / 60;
+        const dLon = OWN_VESSEL_PRIORITY_RADIUS_NM / (60 * Math.max(0.2, Math.cos((own.lat * Math.PI) / 180)));
+        boxesToLoad.unshift({
+          minLat: Math.max(-89.9, own.lat - dLat),
+          maxLat: Math.min(89.9, own.lat + dLat),
+          minLon: Math.max(-180, own.lon - dLon),
+          maxLon: Math.min(180, own.lon + dLon)
+        });
+      }
+      if ((!plan.skipLive || own) && boxesToLoad.length) {
         try {
-          live = await loadOpenWatersBoxes(plan.boxes);
+          live = await loadOpenWatersBoxes(boxesToLoad);
         } catch (e) {}
       }
       if (seq !== aisRefreshSeq) return;
@@ -1078,6 +1240,12 @@
       // Digitraffic only when zoomed into / near Baltic — never flood world overview
       const balticFocused = (() => {
         try {
+          if (own && bboxOverlaps(
+            { minLat: own.lat - 1.7, maxLat: own.lat + 1.7, minLon: own.lon - 3.0, maxLon: own.lon + 3.0 },
+            { minLat: 53.0, maxLat: 66.5, minLon: 9.0, maxLon: 30.5 }
+          )) {
+            return true;
+          }
           const bb = map.getBounds();
           const span = Math.abs(bb.getEast() - bb.getWest()) * Math.abs(bb.getNorth() - bb.getSouth());
           if (span > 800) return false; // still a wide view — skip Digitraffic
@@ -1092,16 +1260,16 @@
           return false;
         }
       })();
-      if (lod.digi && balticFocused && zNow >= MIN_ZOOM_DIGITRAFFIC) {
+      if ((lod.digi && balticFocused && zNow >= MIN_ZOOM_DIGITRAFFIC) || (own && balticFocused)) {
         try {
           digi = await loadLiveDigitraffic();
-          digi = sampleEvenlyByGrid(digi, Math.min(800, lod.maxMarkers), lod.cellDeg);
+          digi = samplePreservingOwnRadius(digi, Math.min(800, lod.maxMarkers), lod.cellDeg);
         } catch (e) {}
       }
       if (seq !== aisRefreshSeq) return;
-      // Cap Open Waters per overview box so one corridor cannot dominate
+      // Cap Open Waters per overview box so one corridor cannot dominate, while preserving 100 NM around own ship
       if (live.length && (plan.mode === "overview" || plan.mode === "world")) {
-        live = sampleEvenlyByGrid(live, lod.maxMarkers, lod.cellDeg);
+        live = samplePreservingOwnRadius(live, lod.maxMarkers, lod.cellDeg);
       }
       let rest = mergeByMmsi([live, digi]);
       if (plan.mode === "viewport") {
@@ -1115,7 +1283,7 @@
         rest = mergeByMmsi([rest, zFiltered]);
       }
 
-      rest = sampleEvenlyByGrid(rest, lod.maxMarkers * 2, lod.cellDeg);
+      rest = samplePreservingOwnRadius(rest, lod.maxMarkers * 2, lod.cellDeg);
       lastRestTargets = rest;
       targets = getCombinedAisTargets(map);
       renderAisTargets(targets, map);
@@ -1251,6 +1419,7 @@
   }
 
   window.refreshAisOverlay = refreshAisOverlay;
+  window.refreshAisTargetsNearOwnVessel = refreshAisTargetsNearOwnVessel;
   window.startAisPolling = startAisPolling;
   window.stopAisPolling = stopAisPolling;
   window.showAisInfoModal = showAisInfoModal;

@@ -20014,6 +20014,10 @@ function initExcelOverlayDock(map) {
     }
   });
 
+  if (typeof window.syncNdbcCursorTileVisibility === "function") {
+    try { window.syncNdbcCursorTileVisibility(); } catch (eSync) {}
+  }
+
   // Restore or run weekly depth check on startup
   runWeeklyDepthAudit(false);
 }
@@ -20137,6 +20141,8 @@ function setOverlayActive(overlayKey, isActive, map = null) {
           window.renderNtMListAndMap();
         }
       } else {
+        window._ntmPlotRenderSeq = (window._ntmPlotRenderSeq || 0) + 1;
+        window._ntmOverlayPlottingActive = false;
         window._ntmOverlayLoadBusy = false;
         if (typeof window.setOverlayNoticesLoading === "function") {
           window.setOverlayNoticesLoading(false);
@@ -20148,17 +20154,29 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         else currentMap.removeLayer(seamarkLayer);
       }
     } else if (overlayKey === "weather") {
+      if (typeof window.syncNdbcCursorTileVisibility === "function") {
+        window.syncNdbcCursorTileVisibility();
+      }
       if (isActive && typeof window.refreshMarineWeather === "function") {
         Promise.resolve(window.refreshMarineWeather(true)).finally(() => {
           if (typeof window.renderWeatherOnMap === "function") {
             window.renderWeatherOnMap(currentMap);
           }
+          if (typeof window.syncNdbcCursorTileVisibility === "function") {
+            window.syncNdbcCursorTileVisibility();
+          }
           setOverlayTileLoading("weather", false);
         });
       } else if (typeof window.renderWeatherOnMap === "function") {
         window.renderWeatherOnMap(currentMap);
+        if (typeof window.syncNdbcCursorTileVisibility === "function") {
+          window.syncNdbcCursorTileVisibility();
+        }
         setTimeout(() => setOverlayTileLoading("weather", false), 350);
       } else {
+        if (typeof window.syncNdbcCursorTileVisibility === "function") {
+          window.syncNdbcCursorTileVisibility();
+        }
         setTimeout(() => setOverlayTileLoading("weather", false), 350);
       }
     } else if (overlayKey === "ais") {

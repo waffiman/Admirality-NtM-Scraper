@@ -25,11 +25,6 @@ try:
 except ImportError:
     pdfplumber = None
 
-try:
-    from ntm_geometry import apply_geometry_to_notice
-except ImportError:
-    apply_geometry_to_notice = None
-
 # Base URLs
 BASE_URL = "https://msi.admiralty.co.uk"
 WEEKLY_URL = f"{BASE_URL}/NoticesToMariners/Weekly"
@@ -40,17 +35,11 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 # ── Regular Expressions ──
 
-# 3-part: "4848 CHINA - East Coast - Pilot boarding places."
-# 2-part: "4854 VIETNAM - Light."  (no region) — must match or next notice bleeds into body
 NTM_ALL_HEADER_REGEX = re.compile(
-    r'(?:^|\n)\s*(\d{1,5}(?:\s*\([TP]\))?(?:\s*/\s*\d{2,4})?)\s+'
-    r'([A-Z][A-Z\s\-\u00C0-\u024F\u2013\u2014\ufffd]{1,40}?)\s*[\-\u2013\u2014]\s*'
-    r'(?:'
+    r'(?:^|\n)\s*(\d{1,5}(?:\s*\([TP]\))?(?:\s*/\s*\d{2,4})?)\s*(?:\n|\s{1,6})'
+    r'([A-Z\s\-\u00C0-\u024F\u2013\u2014\ufffd]{3,35}?)\s*[\-\u2013\u2014]\s*'
     r'([A-Za-z0-9\s\-\(\)\.\u00C0-\u024F\u2013\u2014\ufffd]{2,45}?)\s*[\-\u2013\u2014]\s*'
-    r'([^\n\r]+)'
-    r'|'
-    r'([^\n\r]{2,120})'
-    r')',
+    r'([^\n\r]+)',
     re.MULTILINE
 )
 
@@ -351,49 +340,37 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
     headers = []
     for m in NTM_ALL_HEADER_REGEX.finditer(clean_text):
         raw_num = m.group(1).strip()
-        country = (m.group(2) or "").strip()
-        # group 3+4 = 3-part header; group 5 = 2-part (country - subject only)
-        if m.group(4):
-            region = (m.group(3) or "").strip()
-            raw_subj = m.group(4).strip()
-        else:
-            region = ""
-            raw_subj = (m.group(5) or "").strip()
-
+        raw_subj = m.group(4).strip()
+        
         if re.search(r'\(continued\)', raw_subj, re.I):
             continue
-        # Skip false positives (page footers / section labels)
-        if not re.match(r'^\d{1,5}', raw_num):
-            continue
-        if len(raw_subj) < 2:
-            continue
-
+        
         notice_type = "PERM"
         tm = re.search(r'\(([TP])\)', raw_num, re.I) or re.search(r'\(([TP])\)', raw_subj, re.I)
         if tm:
             notice_type = tm.group(1).upper()
-
+        
         num = raw_num
         nm = re.match(r'^\d+', raw_num)
         if nm:
             num = nm.group(0)
-
+        
         year = detected_year
         ym = re.search(r'/(\d{2,4})', raw_num)
         if ym:
             yval = ym.group(1)
             year = yval[-2:] if len(yval) == 4 else yval
-
+        
         full_id = f"{num}{'(' + notice_type + ')' if notice_type != 'PERM' else ''}/{year}"
-
+        
         headers.append({
             "index": m.start(),
             "fullId": full_id,
             "num": num,
             "type": notice_type,
             "year": year,
-            "country": country,
-            "region": region,
+            "country": m.group(2).strip(),
+            "region": m.group(3).strip(),
             "subject": raw_subj
         })
     
@@ -463,11 +440,27 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
         item_cancels = list(extract_cancellations(block_text, default_year=detected_year))
         cancelled_ids.update(item_cancels)
         
-        # Extract subPolygons if TSS or multi-area notice (geometry kind via ntm_geometry)
+        # 5. Geometry classification
+        sane = True
+        if len(coords) >= 2:
+            lats = [c["lat"] for c in coords]
+            lons = [c["lon"] for c in coords]
+            if (max(lats) - min(lats)) > 8 or (max(lons) - min(lons)) > 12:
+                sane = False
+        
+        # Check if sounding / depth / light table (discrete points, not a polygon)
+        is_sounding_table = bool(re.search(r'\b(?:Depth|Depths|Drying\s+height|Obstructions?|Wrecks?|Sounding)\s+Position\b', block_text, re.I))
+        
+        is_poly = len(coords) >= 3 and bool(POLYGON_KEYWORDS.search(block_text)) and sane and not is_sounding_table
+        is_line = len(coords) >= 2 and not is_poly and sane and bool(LINE_KEYWORDS.search(block_text)) and not is_sounding_table
+        
+        # Extract subPolygons if TSS or multi-area notice
         sub_polys = []
-        if "traffic separation" in block_text.lower() or "separation zone" in block_text.lower() or POLYGON_KEYWORDS.search(block_text):
+        if is_poly or "traffic separation" in block_text.lower() or "separation zone" in block_text.lower():
             sub_polys = extract_subpolygons_from_text(cur["fullId"], cur["subject"], block_text)
-
+            if len(sub_polys) > 1:
+                is_poly = True
+        
         notice_obj = {
             "id": cur["fullId"],
             "num": cur["num"],
@@ -478,8 +471,8 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
             "subject": cur["subject"],
             "charts": charts,
             "coords": coords,
-            "isPolygon": False,
-            "isLine": False,
+            "isPolygon": is_poly,
+            "isLine": is_line,
             "body": block_text[:1500].strip(),
             "cancels": item_cancels,
             "isCancelled": False,
@@ -488,22 +481,7 @@ def parse_admiralty_ntm_text(full_text, default_year="26"):
         }
         if sub_polys and len(sub_polys) > 1:
             notice_obj["subPolygons"] = sub_polys
-        if apply_geometry_to_notice:
-            notice_obj = apply_geometry_to_notice(notice_obj)
-        else:
-            sane = True
-            if len(coords) >= 2:
-                lats = [c["lat"] for c in coords]
-                lons = [c["lon"] for c in coords]
-                if (max(lats) - min(lats)) > 8 or (max(lons) - min(lons)) > 12:
-                    sane = False
-            is_sounding_table = bool(re.search(
-                r"\b(?:Depth|Depths|Drying\s+height|Obstructions?|Wrecks?|Sounding)\s+Position\b",
-                block_text, re.I,
-            ))
-            notice_obj["isPolygon"] = len(coords) >= 3 and bool(POLYGON_KEYWORDS.search(block_text)) and sane and not is_sounding_table
-            notice_obj["isLine"] = len(coords) >= 2 and not notice_obj["isPolygon"] and sane and bool(LINE_KEYWORDS.search(block_text)) and not is_sounding_table
-
+            
         results.append(notice_obj)
     
     return {
@@ -761,6 +739,7 @@ def main():
 # ==============================================================================
 
 import math
+import time
 import requests
 from datetime import timezone
 # keep module `datetime` (imported at top) — do not shadow
@@ -1035,14 +1014,44 @@ def decode_mvt_tile(raw_bytes: bytes, z: int, x: int, y: int) -> list:
     return features_out
 
 NAVTEX_COORD_PATTERNS = [
-    re.compile(r"(\d{1,2})\s*[-??\s]\s*(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\'?]\s*)?(?:(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\"?]\s*)?)?([NS])\s*[,/\s]+\s*(\d{1,3})\s*[-??\s]\s*(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\'?]\s*)?(?:(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\"?]\s*)?)?([EW])", re.IGNORECASE),
+    re.compile(r"(\d{1,2})\s*[-°\s]\s*(\d{1,2}(?:[\.,]\d+)?)\s*(?:['′]\s*)?(?:(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\"″]\s*)?)?([NS])\s*[,/\s]+\s*(\d{1,3})\s*[-°\s]\s*(\d{1,2}(?:[\.,]\d+)?)\s*(?:['′]\s*)?(?:(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\"″]\s*)?)?([EW])", re.IGNORECASE),
     re.compile(r"\b(\d{2})(\d{2}(?:\.\d+)?)([NS])\s+(\d{3})(\d{2}(?:\.\d+)?)([EW])\b", re.IGNORECASE),
 ]
+
+AREA_BETWEEN_PATTERN = re.compile(
+    r"AREA\s+BETWEEN\s+"
+    r"(\d{1,2})[-°\s](\d{1,2}(?:[\.,]\d+)?)(?:[-'\s](\d{1,2}(?:[\.,]\d+)?))?\s*([NS])\s+(?:AND\s+|TO\s+)?"
+    r"(\d{1,2})[-°\s](\d{1,2}(?:[\.,]\d+)?)(?:[-'\s](\d{1,2}(?:[\.,]\d+)?))?\s*([NS])\s+AND\s+"
+    r"(\d{1,3})[-°\s](\d{1,2}(?:[\.,]\d+)?)(?:[-'\s](\d{1,2}(?:[\.,]\d+)?))?\s*([EW])\s+(?:AND\s+|TO\s+)?"
+    r"(\d{1,3})[-°\s](\d{1,2}(?:[\.,]\d+)?)(?:[-'\s](\d{1,2}(?:[\.,]\d+)?))?\s*([EW])",
+    re.IGNORECASE
+)
+
+def _dms_parts_to_dec(d_s, m_s, s_s, hem_s):
+    d = int(d_s)
+    m = float(str(m_s).replace(",", "."))
+    s = float(str(s_s).replace(",", ".")) if s_s else 0.0
+    val = d + m / 60.0 + s / 3600.0
+    if str(hem_s).upper() in ("S", "W"):
+        val = -val
+    return round(val, 5)
 
 def extract_coords_from_navtex_text(text: str) -> list:
     coords = []
     seen = set()
     if not text: return coords
+    m_ab = AREA_BETWEEN_PATTERN.search(text)
+    if m_ab:
+        try:
+            lat1 = _dms_parts_to_dec(m_ab.group(1), m_ab.group(2), m_ab.group(3), m_ab.group(4))
+            lat2 = _dms_parts_to_dec(m_ab.group(5), m_ab.group(6), m_ab.group(7), m_ab.group(8))
+            lon1 = _dms_parts_to_dec(m_ab.group(9), m_ab.group(10), m_ab.group(11), m_ab.group(12))
+            lon2 = _dms_parts_to_dec(m_ab.group(13), m_ab.group(14), m_ab.group(15), m_ab.group(16))
+            for la, lo in [(lat1, lon1), (lat2, lon1), (lat2, lon2), (lat1, lon2), (lat1, lon1)]:
+                coords.append({"lat": la, "lon": lo, "dms": format_dms(la, lo)})
+            return coords
+        except Exception:
+            pass
     for m in NAVTEX_COORD_PATTERNS[0].finditer(text):
         try:
             lat_d = int(m.group(1))
@@ -1122,61 +1131,136 @@ def extract_cancellations_and_expiry(text: str, ref_year: int = 2026) -> tuple:
             pass
     return cancelled_refs, self_expiry_iso
 
+def _parse_iso_utc(iso_str: str):
+    if not iso_str:
+        return None
+    s = str(iso_str).strip()
+    try:
+        if len(s) >= 19 and s[4] == "-" and s[7] == "-" and s[10] in ("T", " "):
+            return datetime.datetime.strptime(s[:19].replace(" ", "T"), "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+    except Exception:
+        pass
+    try:
+        dt = datetime.datetime.fromisoformat(s.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
+    except Exception:
+        return None
+
 def scrape_nautoshark_mvt_warnings() -> dict:
     live_token = get_nautoshark_token()
-    tiles_to_fetch = [(0, 0, 0)]
-    for x in range(4):
-        for y in range(4):
-            tiles_to_fetch.append((2, x, y))
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Referer": "https://www.nautoshark.com/",
+        "Origin": "https://www.nautoshark.com"
+    })
+
+    failed_tiles = []
 
     def _fetch_one(zxy):
         z, x, y = zxy
         url = f"https://api.mapbox.com/v4/{NAUTOSHARK_TILESET}/{z}/{x}/{y}.vector.pbf?access_token={live_token}"
-        try:
-            r = requests.get(url, timeout=15, headers={'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.nautoshark.com/', 'Origin': 'https://www.nautoshark.com'})
-            raw = r.content if r.status_code == 200 else b''
-            if raw and len(raw) > 0:
-                return z, decode_mvt_tile(raw, z, x, y)
-        except Exception:
-            pass
-        return z, []
+        # Retry throttled / transient failures (HTTP 429 / 5xx / timeouts) — GitHub runners share IPs
+        # and Mapbox may throttle bursts; a silently-empty tile used to drop thousands of warnings.
+        for attempt in range(4):
+            try:
+                r = session.get(url, timeout=20)
+                if r.status_code == 200:
+                    raw = r.content or b""
+                    return zxy, (decode_mvt_tile(raw, z, x, y) if raw else [])
+                if r.status_code in (204, 404):
+                    return zxy, []  # genuinely empty tile
+            except Exception:
+                pass
+            time.sleep(1.5 * (attempt + 1))
+        failed_tiles.append(zxy)
+        return zxy, []
 
-    z0_features = []
-    z2_features = []
+    base_tiles = [(0, 0, 0)]
+    for x in range(4):
+        for y in range(4):
+            base_tiles.append((2, x, y))
+    for x in range(8):
+        for y in range(8):
+            base_tiles.append((3, x, y))
+
+    all_tile_results = []
     with ThreadPoolExecutor(max_workers=8) as pool:
-        futures = [pool.submit(_fetch_one, t) for t in tiles_to_fetch]
-        for fut in as_completed(futures):
-            z, feats = fut.result()
-            if z == 0:
-                z0_features.extend(feats)
-            else:
-                z2_features.extend(feats)
+        res_base = list(pool.map(_fetch_one, base_tiles))
+        all_tile_results.extend(res_base)
+
+        # Subdivide z=3 tiles that have >=15 features into z=4 to prevent Mapbox low-zoom feature dropping
+        t4_tiles = []
+        for (z, x, y), feats in res_base:
+            if z == 3 and len(feats) >= 15:
+                for dx in (0, 1):
+                    for dy in (0, 1):
+                        t4_tiles.append((4, x * 2 + dx, y * 2 + dy))
+        if t4_tiles:
+            res_t4 = list(pool.map(_fetch_one, t4_tiles))
+            all_tile_results.extend(res_t4)
+
+            # Subdivide dense z=4 tiles (>=150 features) into z=5
+            t5_tiles = []
+            for (z, x, y), feats in res_t4:
+                if len(feats) >= 150:
+                    for dx in (0, 1):
+                        for dy in (0, 1):
+                            t5_tiles.append((5, x * 2 + dx, y * 2 + dy))
+            if t5_tiles:
+                res_t5 = list(pool.map(_fetch_one, t5_tiles))
+                all_tile_results.extend(res_t5)
+
+    # Group by (warningId, featureId) -> {zoom: [feat, ...]}
+    by_wid_fid_z = {}
+    wid_props = {}
+    for (z, _x, _y), feats in all_tile_results:
+        for f in feats:
+            props = f["props"]
+            wid = props.get("warningId") or props.get("id")
+            if not wid:
+                continue
+            fid = str(props.get("id") or f"{f['geom_type']}_{len(f['rings'])}")
+            if wid not in wid_props or (props.get("description") and not wid_props[wid].get("description")):
+                wid_props[wid] = props
+            by_wid_fid_z.setdefault(wid, {}).setdefault(fid, {}).setdefault(z, []).append(f)
 
     warnings_by_id = {}
-    for z_level, feat_list in [(0, z0_features), (2, z2_features)]:
-        for f in feat_list:
-            props = f["props"]
-            raw_title = str(props.get("title") or props.get("id") or "").strip()
-            if not raw_title: continue
-            pub_str = str(props.get("published") or "")
-            area_str = str(props.get("area") or "")
-            is_recent = (z_level == 0) or ("2026" in pub_str or "/26" in raw_title or "-26" in raw_title or "NAVAREA" in area_str.upper())
-            if not is_recent:
-                continue
-            rings = f["rings"]
-            gtype = f["geom_type"]
-            flat_pts = [pt for r in rings for pt in r]
-            if not flat_pts: continue
-            prev = warnings_by_id.get(raw_title)
-            if prev is None or len(flat_pts) > prev["_pt_count"]:
-                warnings_by_id[raw_title] = {
-                    "props": props,
-                    "geom_type": gtype,
-                    "rings": rings,
-                    "_pt_count": len(flat_pts)
-                }
+    for wid, fid_map in by_wid_fid_z.items():
+        props = wid_props[wid]
+        sub_geoms = []
+        seen_sigs = set()
 
-    print(f"  [+] Decoded {len(warnings_by_id)} active global NAVTEX/NAVAREA warnings from NautoShark MVT")
+        for fid, z_map in fid_map.items():
+            # Prefer highest zoom where this sub-feature fit inside a single tile (unclipped & max precision)
+            single_tile_zs = [z for z, flist in z_map.items() if len(flist) == 1]
+            best_z = max(single_tile_zs) if single_tile_zs else max(z_map.keys())
+            best_feat = max(z_map[best_z], key=lambda item: sum(len(r) for r in item["rings"]))
+            gtype = best_feat["geom_type"]
+            for ring in best_feat["rings"]:
+                if not ring:
+                    continue
+                if gtype == 3 and len(ring) < 3:
+                    continue
+                if gtype == 2 and len(ring) < 2:
+                    continue
+                sig = (gtype, len(ring), tuple((round(pt[0], 3), round(pt[1], 3)) for pt in ring[:12]))
+                if sig in seen_sigs:
+                    continue
+                seen_sigs.add(sig)
+                sub_geoms.append((gtype, ring))
+
+        if not sub_geoms:
+            continue
+        warnings_by_id[wid] = {
+            "props": props,
+            "sub_geoms": sub_geoms
+        }
+
+    print(f"  [+] Decoded {len(warnings_by_id)} active global NAVTEX/NAVAREA warnings from NautoShark MVT (z=0..5)"
+          f" · tiles fetched {len(all_tile_results)} · failed after retries {len(failed_tiles)}")
     return warnings_by_id
 
 def scrape_nga_msi_warnings() -> list:
@@ -1195,126 +1279,194 @@ def build_global_navtex_notices() -> tuple:
     ns_warnings = scrape_nautoshark_mvt_warnings()
     nga_warnings = scrape_nga_msi_warnings()
 
-    # Official regional feeds (JCG NAVTEX/NAVAREA XI + Taiwan Navy NtM)
-    regional_official = []
-    try:
-        from scraper_regional_warnings import (
-            scrape_regional_official_warnings,
-            merge_navtex_deduped,
-            normalize_warning_key,
-        )
-        print("  [*] Scraping official regional warnings (JCG/Taiwan/AMSA/BSH)...")
-        regional_official = scrape_regional_official_warnings()
-    except Exception as e:
-        print(f"  [!] Regional official warnings scrape: {e}")
-        merge_navtex_deduped = None
-        normalize_warning_key = None
-
     navtex_notices = {}
     all_cancelled_refs = set()
+    cancelled_by_scope = {}
+    seen_main_navarea_keys = set()
 
-    for raw_title, item in ns_warnings.items():
+    for wid, item in ns_warnings.items():
         props = item["props"]
-        gtype = item["geom_type"]
-        rings = item["rings"]
+        sub_geoms = item["sub_geoms"]
+
         desc = str(props.get("description") or "").strip()
-        area_name = str(props.get("area") or "NAVAREA").strip()
-        category = str(props.get("category") or "Navigational Warning").strip()
-        published = str(props.get("published") or "").strip()
+        raw_title = str(props.get("title") or "").strip()
+        root_nav = str(props.get("rootNavareaName") or "").strip()
+        sub_nav = str(props.get("navareaName") or "").strip()
+        prefix = str(props.get("prefix") or "").strip()
+        num_val = props.get("number")
+        yr_val = props.get("year")
+        type_gen = str(props.get("typeGeneral") or "Navigational Warning").strip()
+        type_det = str(props.get("typeDetails") or "").strip()
+        published = str(props.get("dateTimeGroup") or props.get("published") or "").strip()
         expires = str(props.get("expires") or "").strip()
+
+        yr_int = now_utc.year
+        if yr_val is not None and str(yr_val).strip().isdigit():
+            yr_int = int(str(yr_val).strip())
+            if yr_int < 100:
+                yr_int += 2000
+        yr_full = str(yr_int)
+        yr_short = yr_full[-2:]
+
+        # Skip pre-2026 USCG inland/local buoy Light List discrepancies to keep notices.json lean (~2600 old river buoys)
+        if "USCG" in sub_nav and yr_int < 2026 and type_gen == "Aids to Navigation Changes":
+            continue
+
+        num_str = str(num_val).strip() if (num_val is not None and str(num_val).strip() != "") else "0"
+
+        category = f"{type_gen} — {type_det}" if type_det else type_gen
+        is_restr_cat = any(k in category.lower() for k in ["hazard", "gunnery", "firing", "rocket", "military", "prohibited", "restricted", "special", "bombing"])
 
         coords = []
         sub_polygons = []
-        if gtype == 3 and rings:
-            for r_idx, ring in enumerate(rings):
-                if len(ring) >= 3:
-                    ring_coords = [{"lat": pt[0], "lon": pt[1], "dms": format_dms(pt[0], pt[1])} for pt in ring[:40]]
-                    if not coords:
-                        coords = ring_coords
-                    sub_polygons.append({
-                        "name": f"{raw_title} Area {r_idx + 1}" if len(rings) > 1 else raw_title,
-                        "category": "restricted_area" if any(k in category.lower() for k in ["hazard", "gunnery", "rocket", "military", "prohibited", "restricted"]) else "precautionary_area",
-                        "coords": ring_coords,
-                        "points": [[pt[0], pt[1]] for pt in ring[:40]]
-                    })
-        elif gtype == 2 and rings:
-            main_ring = max(rings, key=len)
-            coords = [{"lat": pt[0], "lon": pt[1], "dms": format_dms(pt[0], pt[1])} for pt in main_ring[:40]]
-        else:
-            for ring in rings:
-                for pt in ring[:20]:
-                    coords.append({"lat": pt[0], "lon": pt[1], "dms": format_dms(pt[0], pt[1])})
+        has_poly = False
+        has_line = False
 
-        text_coords = extract_coords_from_navtex_text(desc)
-        if len(coords) <= 1 and len(text_coords) > len(coords):
-            coords = text_coords[:30]
+        for g_idx, (gtype, ring) in enumerate(sub_geoms):
+            if gtype == 3 and len(ring) >= 3:
+                has_poly = True
+                ring_pts = [[round(pt[0], 5), round(pt[1], 5)] for pt in ring[:50]]
+                if ring_pts[0] != ring_pts[-1]:
+                    ring_pts.append(ring_pts[0])
+                if not coords:
+                    coords = [{"lat": p[0], "lon": p[1]} for p in ring_pts]
+                    coords[0]["dms"] = format_dms(coords[0]["lat"], coords[0]["lon"])
+                sub_polygons.append({
+                    "name": f"Area {g_idx + 1}" if len(sub_geoms) > 1 else (raw_title[:45] or "Area"),
+                    "category": "restricted_area" if is_restr_cat else "precautionary_area",
+                    "points": ring_pts
+                })
+            elif gtype == 2 and len(ring) >= 2:
+                has_line = True
+                line_pts = [[round(pt[0], 5), round(pt[1], 5)] for pt in ring[:50]]
+                if not coords:
+                    coords = [{"lat": p[0], "lon": p[1]} for p in line_pts]
+                    coords[0]["dms"] = format_dms(coords[0]["lat"], coords[0]["lon"])
+                sub_polygons.append({
+                    "name": f"Line {g_idx + 1}" if len(sub_geoms) > 1 else (raw_title[:45] or "Line"),
+                    "category": "line",
+                    "points": line_pts
+                })
+            else:
+                for pt in ring[:25]:
+                    la, lo = round(pt[0], 5), round(pt[1], 5)
+                    c_entry = {"lat": la, "lon": lo}
+                    if not coords:
+                        c_entry["dms"] = format_dms(la, lo)
+                    coords.append(c_entry)
+                    sub_polygons.append({
+                        "name": f"Pt {len(sub_polygons) + 1}",
+                        "category": "point",
+                        "points": [[la, lo]]
+                    })
+
+        if len(coords) <= 1 and not has_poly and not has_line:
+            text_coords = extract_coords_from_navtex_text(desc)
+            if len(text_coords) > len(coords):
+                coords = text_coords[:30]
+                if len(coords) == 5 and coords[0]["lat"] == coords[-1]["lat"] and coords[0]["lon"] == coords[-1]["lon"]:
+                    has_poly = True
+                    sub_polygons = [{
+                        "name": raw_title[:45] or "Area",
+                        "category": "restricted_area",
+                        "points": [[c["lat"], c["lon"]] for c in coords]
+                    }]
+
         if not coords:
             continue
 
         first_lat = coords[0]["lat"]
         first_lon = coords[0]["lon"]
-        navarea_roman = infer_navarea_from_coords(first_lat, first_lon, f"{area_name} {raw_title} {desc[:120]}")
 
-        cancels_list, self_exp_iso = extract_cancellations_and_expiry(desc, now_utc.year)
+        m_nav = re.search(r"\bNAVAREA\s+([IVX]+)\b", f"{root_nav} {sub_nav}", re.IGNORECASE)
+        if m_nav:
+            navarea_roman = m_nav.group(1).upper()
+        else:
+            navarea_roman = infer_navarea_from_coords(first_lat, first_lon, f"{root_nav} {sub_nav} {raw_title} {desc[:120]}")
+
+        is_main_navarea = sub_nav.upper().startswith("NAVAREA ") or (not sub_nav and root_nav.upper().startswith("NAVAREA "))
+        if is_main_navarea:
+            num_part = f"{prefix} {num_str}/{yr_short}".strip() if num_str != "0" else (raw_title[:40] or f"#{wid}")
+            display_id = f"NAVAREA {navarea_roman} {num_part}".strip()
+            if num_str.isdigit():
+                seen_main_navarea_keys.add((navarea_roman, int(num_str), yr_short))
+        else:
+            if sub_nav.upper() in ("NAVTEX", "COASTAL", "LOCAL", "EAST COASTAL", "SOUTH COASTAL", "WEST COASTAL", "NORTH COASTAL", "ARCTIC COASTAL", "INLAND WATERS COASTAL"):
+                agency_lbl = f"NAVAREA {navarea_roman} {sub_nav}"
+            else:
+                agency_lbl = sub_nav or f"NAVAREA {navarea_roman}"
+            num_part = f"{prefix} {num_str}/{yr_full}".strip() if num_str != "0" else (raw_title[:40] or f"#{wid}")
+            display_id = f"{agency_lbl} {num_part}".strip()
+
+        if display_id in navtex_notices:
+            display_id = f"{display_id} ({wid})"
+
+        scope_key = (navarea_roman, (sub_nav or root_nav or "NAVAREA").upper())
+        cancels_list, self_exp_iso = extract_cancellations_and_expiry(desc, yr_int)
         for c_ref in cancels_list:
-            all_cancelled_refs.add(c_ref)
+            all_cancelled_refs.add(f"{scope_key[1]} {c_ref}")
+            cancelled_by_scope.setdefault(scope_key, set()).add(c_ref)
+            if "/" in c_ref:
+                c_n, c_y = c_ref.split("/", 1)
+                cancelled_by_scope[scope_key].add(f"{int(c_n) if c_n.isdigit() else c_n}/{c_y[-2:]}")
 
         effective_expiry = expires or self_exp_iso
         is_expired = False
         if effective_expiry:
-            try:
-                exp_dt = datetime.fromisoformat(effective_expiry.replace("Z", "+00:00"))
-                if exp_dt < now_utc:
-                    is_expired = True
-            except Exception:
-                pass
+            exp_dt = _parse_iso_utc(effective_expiry)
+            if exp_dt and exp_dt < now_utc:
+                is_expired = True
 
-        first_line = ""
-        for ln in desc.splitlines():
-            ln_s = ln.strip()
-            if ln_s and not ln_s.upper().startswith("NAVAREA") and ln_s != raw_title:
-                first_line = ln_s
-                break
-        subject_str = f"[{category}] {first_line[:135]}" if first_line else f"{category} ? {area_name}"
+        # Do not keep expired warnings on the map
+        if is_expired:
+            continue
 
-        ym = re.search(r"\/(\d{2,4})\b", raw_title)
-        yr_short = ym.group(1)[-2:] if ym else str(now_utc.year)[-2:]
-        nm = re.search(r"(\d{1,5})", raw_title)
-        num_str = nm.group(1) if nm else "0"
+        is_poly = has_poly or (len(coords) >= 3 and any(k in desc.upper() for k in ["AREA BOUNDED", "BOUNDED BY", "WITHIN AREA", "AREA BETWEEN"]))
+        is_line = (not is_poly) and (has_line or (len(coords) >= 2 and any(k in desc.upper() for k in ["TRACKLINE", "CABLE", "PIPELINE", "JOINING"])))
+
+        first_line = raw_title
+        if not first_line:
+            for ln in desc.splitlines():
+                ln_s = ln.strip()
+                if ln_s and not ln_s.upper().startswith("NAVAREA"):
+                    first_line = ln_s
+                    break
+        subject_str = f"[{category}] {first_line[:135]}" if first_line else f"[{category}] {display_id}"
+
+        country_lbl = f"NAVAREA {navarea_roman} — {sub_nav}" if (sub_nav and not is_main_navarea) else f"NAVAREA {navarea_roman}"
+        region_lbl = f"{category} ({NAVAREA_REGION_NAMES.get(navarea_roman, 'Global Maritime')})"
 
         notice_obj = {
-            "id": raw_title,
-            "noticeNumber": raw_title,
+            "id": display_id,
+            "noticeNumber": f"{num_str}/{yr_full}" if num_str != "0" else display_id,
             "num": num_str,
             "type": "NAVTEX",
             "source": "NAVTEX / NAVAREA",
+            "geometrySource": "nautoshark_mvt",
             "year": yr_short,
             "navarea": navarea_roman,
-            "country": f"NAVAREA {navarea_roman}",
-            "region": f"{area_name} ({NAVAREA_REGION_NAMES.get(navarea_roman, 'Global Maritime')})",
+            "country": country_lbl,
+            "region": region_lbl,
             "category": category,
             "subject": subject_str,
-            "title": subject_str,
             "charts": [],
-            "coords": coords,
+            "coords": coords[:50],
             "lat": first_lat,
             "lon": first_lon,
-            "isPolygon": (gtype == 3 and len(coords) >= 3),
-            "isLine": (gtype == 2 and len(coords) >= 2),
-            "body": desc[:1400],
-            "rawText": desc[:1400],
+            "isPolygon": is_poly,
+            "isLine": is_line,
+            "body": desc[:1000],
             "published": published,
-            "expires": effective_expiry or "",
+            "expires": effective_expiry[:19] + "Z" if (effective_expiry and len(effective_expiry) >= 19) else (effective_expiry or ""),
             "cancels": cancels_list,
-            "status": "CANCELLED" if is_expired else "ACTIVE",
-            "isCancelled": is_expired,
-            "checkedForExport": not is_expired
+            "status": "ACTIVE",
+            "isCancelled": False,
+            "checkedForExport": True,
+            "_scopeKey": scope_key
         }
-        if sub_polygons:
+        if len(sub_polygons) > 1 or (has_poly and len(sub_polygons) == 1):
             notice_obj["subPolygons"] = sub_polygons
-        if apply_geometry_to_notice:
-            notice_obj = apply_geometry_to_notice(notice_obj, prefer_area=True)
-        navtex_notices[raw_title] = notice_obj
+        navtex_notices[display_id] = notice_obj
 
     for bw in nga_warnings:
         msg_year = str(bw.get("msgYear") or now_utc.year)[-2:]
@@ -1329,16 +1481,26 @@ def build_global_navtex_notices() -> tuple:
         area_label_map = {"IV": "NAVAREA IV", "XII": "NAVAREA XII", "A": "HYDROLANT", "P": "HYDROPAC", "C": "HYDROARC"}
         prefix = area_label_map.get(nav_area_code, f"NAVAREA {nav_area_code}")
         full_id = f"{prefix} {msg_num}/{msg_year}"
+        scope_key = (nav_area_code if nav_area_code in ("IV", "XII") else prefix, prefix)
 
         cancels_list, self_exp_iso = extract_cancellations_and_expiry(text_body, now_utc.year)
         for c_ref in cancels_list:
-            all_cancelled_refs.add(c_ref)
             all_cancelled_refs.add(f"{prefix} {c_ref}")
+            cancelled_by_scope.setdefault(scope_key, set()).add(c_ref)
+            if "/" in c_ref:
+                c_n, c_y = c_ref.split("/", 1)
+                cancelled_by_scope[scope_key].add(f"{int(c_n) if c_n.isdigit() else c_n}/{c_y[-2:]}")
 
-        if full_id in navtex_notices:
-            if cancels_list:
-                existing_c = set(navtex_notices[full_id].get("cancels", []))
-                navtex_notices[full_id]["cancels"] = list(existing_c.union(cancels_list))
+        # Skip if already captured from NautoShark MVT
+        if full_id in navtex_notices or (msg_num.isdigit() and (nav_area_code, int(msg_num), msg_year) in seen_main_navarea_keys):
+            continue
+
+        is_expired = (status_code != "A")
+        if self_exp_iso:
+            exp_dt = _parse_iso_utc(self_exp_iso)
+            if exp_dt and exp_dt < now_utc:
+                is_expired = True
+        if is_expired:
             continue
 
         coords = extract_coords_from_navtex_text(text_body)[:30]
@@ -1347,13 +1509,8 @@ def build_global_navtex_notices() -> tuple:
         first_lon = coords[0]["lon"]
         navarea_roman = infer_navarea_from_coords(first_lat, first_lon, f"{prefix} {text_body[:120]}")
 
-        is_expired = (status_code != "A")
-        if self_exp_iso:
-            try:
-                if datetime.fromisoformat(self_exp_iso.replace("Z", "+00:00")) < now_utc:
-                    is_expired = True
-            except Exception:
-                pass
+        is_poly = len(coords) >= 3 and any(k in text_body.upper() for k in ["AREA BOUNDED", "BOUNDED BY", "WITHIN AREA", "AREA BETWEEN"])
+        is_line = not is_poly and len(coords) >= 2 and any(k in text_body.upper() for k in ["TRACKLINE", "CABLE", "PIPELINE", "JOINING"])
 
         lines = [ln.strip() for ln in text_body.splitlines() if ln.strip()]
         subj_line = lines[1] if len(lines) > 1 else (lines[0] if lines else "Broadcast Warning")
@@ -1370,71 +1527,50 @@ def build_global_navtex_notices() -> tuple:
             "region": f"{prefix} (Subregion {subregion})" if subregion else f"{prefix} ({NAVAREA_REGION_NAMES.get(navarea_roman, 'Global')})",
             "category": "Broadcast Warning",
             "subject": f"[Broadcast Warning] {subj_line[:135]}",
-            "title": f"[Broadcast Warning] {subj_line[:135]}",
             "charts": [],
             "coords": coords,
             "lat": first_lat,
             "lon": first_lon,
-            "isPolygon": False,
-            "isLine": False,
-            "body": text_body[:1400],
-            "rawText": text_body[:1400],
+            "isPolygon": is_poly,
+            "isLine": is_line,
+            "body": text_body[:1000],
             "published": issue_date,
             "expires": self_exp_iso or "",
             "cancels": cancels_list,
-            "status": "CANCELLED" if is_expired else "ACTIVE",
-            "isCancelled": is_expired,
-            "checkedForExport": not is_expired
+            "status": "ACTIVE",
+            "isCancelled": False,
+            "checkedForExport": True,
+            "_scopeKey": scope_key
         }
-        if apply_geometry_to_notice:
-            notice_obj = apply_geometry_to_notice(notice_obj, prefer_area=True)
+        if is_poly:
+            notice_obj["subPolygons"] = [{
+                "name": full_id,
+                "category": "restricted_area",
+                "points": [[c["lat"], c["lon"]] for c in coords]
+            }]
         navtex_notices[full_id] = notice_obj
 
     reconciled_count = 0
+    final_notices = []
     for wid, wobj in navtex_notices.items():
-        num_yr = f"{wobj['num']}/{wobj['year']}"
-        if wid in all_cancelled_refs or num_yr in all_cancelled_refs:
-            if not wobj.get("isCancelled"):
-                wobj["isCancelled"] = True
-                wobj["status"] = "CANCELLED"
-                wobj["checkedForExport"] = False
-                wobj["cancelReason"] = "Cancelled by subsequent NAVAREA/NAVTEX broadcast"
-                reconciled_count += 1
+        scope_key = wobj.pop("_scopeKey", None)
+        scoped_cancels = cancelled_by_scope.get(scope_key, set()) if scope_key else set()
+        num_str = str(wobj.get("num") or "")
+        yr_str = str(wobj.get("year") or "")
+        num_yr_2 = f"{int(num_str) if num_str.isdigit() else num_str}/{yr_str[-2:]}"
+        num_yr_4 = f"{num_str}/20{yr_str[-2:]}"
+        if num_yr_2 in scoped_cancels or num_yr_4 in scoped_cancels or f"{num_str}/{yr_str}" in scoped_cancels:
+            reconciled_count += 1
+            continue
+        final_notices.append(wobj)
 
-    # Tag NS/NGA with dedupe keys for merge against official regional feeds
-    secondary = list(navtex_notices.values())
-    if normalize_warning_key:
-        for w in secondary:
-            w.setdefault("dedupeKey", normalize_warning_key(str(w.get("id") or "")))
-            w.setdefault("officialSource", False)
-
-    if merge_navtex_deduped and regional_official:
-        result_list = merge_navtex_deduped(regional_official, secondary, per_area_cap=120)
-        print(f"  [+] Merged official regional ({len(regional_official)}) over NS/NGA ({len(secondary)}) → {len(result_list)}")
-    else:
-        by_area_bucket = {}
-        for w in secondary:
-            ar = str(w.get("navarea") or "I")
-            by_area_bucket.setdefault(ar, []).append(w)
-        result_list = []
-        for ar, items in by_area_bucket.items():
-            items.sort(key=lambda x: (
-                0 if x.get("isCancelled") else 1,
-                0 if any(k in str(x.get("id","")).upper() for k in ["NAVAREA", "HYDROLANT", "HYDROPAC", "HYDROARC"]) else 1,
-                0 if (x.get("isPolygon") or x.get("isLine")) else 1
-            ))
-            result_list.extend(items[:120])
-        if regional_official:
-            result_list.extend(regional_official)
-
-    if apply_geometry_to_notice:
-        result_list = [apply_geometry_to_notice(w, prefer_area=True) for w in result_list]
-    active_cnt = sum(1 for w in result_list if not w.get("isCancelled"))
-    cancelled_cnt = sum(1 for w in result_list if w.get("isCancelled"))
-    poly_cnt = sum(1 for w in result_list if w.get("isPolygon") and not w.get("isCancelled"))
-    line_cnt = sum(1 for w in result_list if w.get("isLine") and not w.get("isCancelled"))
-    print(f"  [+] Total Plottable NAVTEX/NAVAREA Warnings: {len(result_list)} ({active_cnt} Active, {cancelled_cnt} Cancelled/Expired, {reconciled_count} Auto-Reconciled, {poly_cnt} poly, {line_cnt} line)")
-    return result_list, list(all_cancelled_refs)
+    final_notices.sort(key=lambda x: (
+        str(x.get("navarea") or "I"),
+        0 if (x.get("isPolygon") or x.get("isLine")) else 1,
+        -(int(x["num"]) if str(x.get("num", "")).isdigit() else 0)
+    ))
+    print(f"  [+] Total Active Plottable NAVTEX/NAVAREA Warnings: {len(final_notices)} (Excluded {reconciled_count} Cancelled/Expired)")
+    return final_notices, list(all_cancelled_refs)
 
 
 
@@ -2068,40 +2204,14 @@ def scrape_live_marine_weather() -> dict:
         pass
 
     print(f"  [+] Scraped {len(storms_list)} live active tropical systems: {[s['shortName'] for s in storms_list]}")
-
-    # F. OPC High Seas / NDBC buoys / MSL pressure grid / ocean currents
-    opc_warnings = []
-    ndbc_buoys = []
-    pressure_grid = []
-    ocean_currents = []
-    try:
-        from _weather_layers_scrape import (
-            scrape_opc_warnings,
-            scrape_ndbc_buoys,
-            scrape_pressure_grid,
-            scrape_ocean_currents,
-        )
-        sess = requests.Session() if requests else None
-        if sess is not None:
-            opc_warnings = scrape_opc_warnings(sess, ua)
-            ndbc_buoys = scrape_ndbc_buoys(sess, ua)
-            pressure_grid = scrape_pressure_grid(sess, ua)
-            ocean_currents = scrape_ocean_currents(sess, ua)
-    except Exception as e:
-        print(f"  [!] Extended weather layers scrape warning: {e}")
-
     return {
         "synopticCycle": now_dt.strftime("%H00 UTC"),
         "lastSyncUtc": now_iso,
-        "provider": "NOAA NHC + JTWC + JMA RSMC + NOAA OPC High Seas + NDBC + Open-Meteo ECMWF IFS / Marine",
+        "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
         "storms": storms_list,
         "waves": waves_list,
         "pressureCenters": pressure_centers,
-        "windVectors": wind_vectors,
-        "opcWarnings": opc_warnings,
-        "buoys": ndbc_buoys,
-        "pressureGrid": pressure_grid,
-        "currents": ocean_currents,
+        "windVectors": wind_vectors
     }
 
 if __name__ == "__main__":
@@ -2147,29 +2257,17 @@ if __name__ == "__main__":
     print("\n[5/5] Scraping Global NAVTEX & NAVAREA Broadcast Warnings (6h Cycle)...")
     navtex_list, navtex_cancelled_refs = build_global_navtex_notices()
 
-    # Dedupe UKHO NtM by normalized id (keep richest body / polygon)
-    ukho_deduped = []
-    ukho_seen = {}
-    for n in existing_ukho_notices:
-        kid = re.sub(r"\s+", " ", str(n.get("id") or n.get("noticeNumber") or "").upper().strip())
-        if not kid:
-            ukho_deduped.append(n)
-            continue
-        prev_i = ukho_seen.get(kid)
-        if prev_i is None:
-            ukho_seen[kid] = len(ukho_deduped)
-            ukho_deduped.append(n)
-            continue
-        prev = ukho_deduped[prev_i]
-        prev_score = (2 if prev.get("isPolygon") else 0) + min(len(prev.get("body") or ""), 800)
-        new_score = (2 if n.get("isPolygon") else 0) + min(len(n.get("body") or ""), 800)
-        if new_score >= prev_score:
-            ukho_deduped[prev_i] = n
-    if len(ukho_deduped) != len(existing_ukho_notices):
-        print(f"  [+] UKHO NtM dedupe: {len(existing_ukho_notices)} → {len(ukho_deduped)}")
-    existing_ukho_notices = ukho_deduped
-    if apply_geometry_to_notice:
-        existing_ukho_notices = [apply_geometry_to_notice(n) for n in existing_ukho_notices]
+    # Safety guard: never overwrite a full 7,000+ NAVTEX corpus with a degraded/throttled stub
+    if len(navtex_list) < 5000 and "old_data" in locals() and isinstance(old_data, dict):
+        existing_navtex = [
+            n for n in old_data.get("notices", [])
+            if n.get("type") == "NAVTEX" or n.get("source") in ("NAVTEX / NAVAREA", "NGA MSI / NAVAREA")
+        ]
+        if len(existing_navtex) > len(navtex_list):
+            print(f"[WARN] Fresh NAVTEX scrape returned only {len(navtex_list)} notices (expected >=5000). "
+                  f"Preserving {len(existing_navtex)} existing NAVTEX notices to prevent data loss!")
+            navtex_list = existing_navtex
+            navtex_cancelled_refs = list(set(navtex_cancelled_refs + existing_cancelled))
 
     combined_notices = existing_ukho_notices + navtex_list
     active_notices = [n for n in combined_notices if not n.get("isCancelled")]
@@ -2183,7 +2281,7 @@ if __name__ == "__main__":
         "metadata": {
             "generatedAt": datetime.datetime.now(timezone.utc).isoformat(),
             "scrapedAt": datetime.datetime.now(timezone.utc).isoformat(),
-            "source": "UKHO Admiralty Weekly NtM + Global NAVTEX/NAVAREA (JCG JHOD, Taiwan Navy, AMSA, BSH, NautoShark, US NGA MSI)",
+            "source": "UKHO Admiralty Weekly NtM + Global NAVTEX / NAVAREA (NautoShark & US NGA MSI)",
             "weeklyBulletin": existing_meta.get("weeklyBulletin", f"{week_num}wknm{year_num}.pdf"),
             "weekNumber": week_num,
             "year": year_num,

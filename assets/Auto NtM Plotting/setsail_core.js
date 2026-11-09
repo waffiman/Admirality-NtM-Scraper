@@ -1852,6 +1852,16 @@ async function refreshOwnVesselFromAis(opts) {
 
     } catch (eSub) {}
 
+    try {
+
+      if (userVessel && isValidVesselLatLon(userVessel.lat, userVessel.lon) && typeof window.refreshAisTargetsNearOwnVessel === "function") {
+
+        window.refreshAisTargetsNearOwnVessel(Number(userVessel.lat), Number(userVessel.lon), 100);
+
+      }
+
+    } catch (eNear100) {}
+
   } catch (e) {
 
     console.warn("[SetSail Vessel] own AIS refresh failed", e);
@@ -3180,54 +3190,42 @@ function scheduleOwnVesselAisRefresh() {
 
 
 
-  // Adaptive network poll only when MMSI linked
-
-  if (userVessel.mmsi) {
-
+  // Adaptive network poll whenever vessel has MMSI or valid position
+  const hasValidPos = isValidVesselLatLon(userVessel.lat, userVessel.lon);
+  if (userVessel.mmsi || hasValidPos) {
     const armNetwork = () => {
-
       if (_ownAisRefreshTimer) clearInterval(_ownAisRefreshTimer);
-
       _ownAisRefreshTimer = setInterval(() => {
-
-        refreshOwnVesselFromAis({ toast: false });
-
-        const want = ownShipNetworkPollMs();
-
-        if (_ownAisRefreshTimer && _ownAisRefreshTimer._setsailMs !== want) {
-
-          armNetwork();
-
+        if (userVessel.mmsi) {
+          refreshOwnVesselFromAis({ toast: false });
         }
-
+        if (userVessel && isValidVesselLatLon(userVessel.lat, userVessel.lon) && typeof window.refreshAisTargetsNearOwnVessel === "function") {
+          window.refreshAisTargetsNearOwnVessel(Number(userVessel.lat), Number(userVessel.lon), 100);
+        }
+        const want = ownShipNetworkPollMs();
+        if (_ownAisRefreshTimer && _ownAisRefreshTimer._setsailMs !== want) {
+          armNetwork();
+        }
       }, ownShipNetworkPollMs());
-
       _ownAisRefreshTimer._setsailMs = ownShipNetworkPollMs();
-
     };
-
     armNetwork();
 
-
-
     const stale =
-
       !userVessel.aisRefreshedAt ||
-
       getSetSailUtcNowMs() - new Date(userVessel.aisRefreshedAt).getTime() > 3 * 3600 * 1000;
-
     const delay = stale ? 2500 : 4000;
-
     try { syncSetSailUtcClock(false); } catch (eBootUtc) {}
-
-    setTimeout(() => refreshOwnVesselFromAis({ toast: stale }), delay);
-
     setTimeout(() => {
-
+      if (userVessel && userVessel.mmsi) {
+        refreshOwnVesselFromAis({ toast: stale });
+      } else if (userVessel && isValidVesselLatLon(userVessel.lat, userVessel.lon) && typeof window.refreshAisTargetsNearOwnVessel === "function") {
+        window.refreshAisTargetsNearOwnVessel(Number(userVessel.lat), Number(userVessel.lon), 100);
+      }
+    }, delay);
+    setTimeout(() => {
       if (getDrActiveRouteId()) applyOwnVesselDeadReckoning({ toast: false, visual: true });
-
     }, delay + 800);
-
   }
 
 
@@ -6906,13 +6904,18 @@ function initAutoNtmUI() {
 
 
   // Automatically sync live tropical cyclones & synoptic marine weather (weather.json + Open-Meteo)
-
   if (typeof refreshMarineWeather === "function") {
-
     refreshMarineWeather(false);
-
   }
-
+  const SETSAIL_WEATHER_AUTO_REFRESH_MS = 60 * 60 * 1000; // 1-hour dynamic background refresh
+  if (window._setsailWeatherRefreshTimer) {
+    clearInterval(window._setsailWeatherRefreshTimer);
+  }
+  window._setsailWeatherRefreshTimer = setInterval(() => {
+    if (typeof refreshMarineWeather === "function") {
+      refreshMarineWeather(false);
+    }
+  }, SETSAIL_WEATHER_AUTO_REFRESH_MS);
 }
 
 
@@ -8571,7 +8574,11 @@ function renderWeatherOnMap(map = null) {
 
   if (!currentMap) return;
 
+  if (typeof syncNdbcCursorTileVisibility === "function") {
 
+    syncNdbcCursorTileVisibility();
+
+  }
 
   if (!leafletWeatherLayer) {
 
@@ -8590,6 +8597,12 @@ function renderWeatherOnMap(map = null) {
     }
 
     leafletWeatherLayer.clearLayers();
+
+    if (typeof syncNdbcCursorTileVisibility === "function") {
+
+      syncNdbcCursorTileVisibility();
+
+    }
 
     return;
 
@@ -10172,47 +10185,37 @@ function fmtWxNum(v, digits) {
 
 
 function syncNdbcCursorTileVisibility() {
-
   const tile = document.getElementById("ntmWxCursorTile");
-
   if (!tile) return;
-
   const states = (typeof window !== "undefined" && window.OVERLAY_STATES)
-
     ? window.OVERLAY_STATES
-
     : (typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES : null);
-
   // Show whenever Weather overlay is on — cursor meteo + current (not only NDBC buoy sublayer)
-
   const wxOn = !!(states && states.weather);
-
   const show = wxOn;
-
   if (show) {
-
     tile.hidden = false;
-
     tile.removeAttribute("hidden");
-
-    tile.style.display = "flex";
-
+    tile.style.setProperty("display", "flex", "important");
+    tile.style.visibility = "visible";
     tile.setAttribute("aria-hidden", "false");
-
+    try {
+      const v = (typeof window !== "undefined" && window.userVessel) ? window.userVessel : null;
+      const seedLat = (typeof _wxCursorLat === "number" && Number.isFinite(_wxCursorLat))
+        ? _wxCursorLat
+        : (v && isValidVesselLatLon(v.lat, v.lon) ? Number(v.lat) : (window.leafletMap && window.leafletMap.getCenter ? window.leafletMap.getCenter().lat : 26.0));
+      const seedLon = (typeof _wxCursorLon === "number" && Number.isFinite(_wxCursorLon))
+        ? _wxCursorLon
+        : (v && isValidVesselLatLon(v.lat, v.lon) ? Number(v.lon) : (window.leafletMap && window.leafletMap.getCenter ? window.leafletMap.getCenter().lng : 12.0));
+      updateNdbcCursorTile(seedLat, seedLon);
+    } catch (eSeed) {}
   } else {
-
     tile.hidden = true;
-
     tile.setAttribute("hidden", "");
-
-    tile.style.display = "none";
-
+    tile.style.setProperty("display", "none", "important");
     tile.setAttribute("aria-hidden", "true");
-
     tile.classList.remove("is-live");
-
   }
-
 }
 
 
@@ -10514,7 +10517,11 @@ function weatherPayloadHasData(data) {
 
 
 async function refreshMarineWeather(force = false) {
-
+  try {
+    if (typeof _omPointWxCache !== "undefined" && _omPointWxCache && typeof _omPointWxCache.clear === "function") {
+      _omPointWxCache.clear();
+    }
+  } catch (eClr) {}
   try {
 
     const bust = Date.now();
@@ -10716,6 +10723,12 @@ async function refreshMarineWeather(force = false) {
   if (typeof syncWeatherModalLayerChecks === "function") {
 
     syncWeatherModalLayerChecks();
+
+  }
+
+  if (typeof syncNdbcCursorTileVisibility === "function") {
+
+    syncNdbcCursorTileVisibility();
 
   }
 
@@ -14742,6 +14755,8 @@ function saveStoreToStorage() {
 
 const NTM_DEMO_STUB_IDS = ["57/26", "31/26", "52(T)/26", "5927(T)/24", "51(P)/26"];
 
+const NTM_MIN_FULL_CORPUS = 5000;
+
 function isNtmDemoStubStore(store) {
 
   if (!Array.isArray(store) || store.length === 0 || store.length > 12) return false;
@@ -14756,7 +14771,7 @@ function isNtmDemoStubStore(store) {
 
 function applyHydratedNtmStore(parsed) {
 
-  if (!Array.isArray(parsed) || parsed.length < 20 || isNtmDemoStubStore(parsed)) return false;
+  if (!Array.isArray(parsed) || parsed.length < NTM_MIN_FULL_CORPUS || isNtmDemoStubStore(parsed)) return false;
 
   NTM_STORE = reclassifyNoticesGeometry(parsed);
 
@@ -14776,7 +14791,7 @@ function applyHydratedNtmStore(parsed) {
 
   }
 
-  return parsed.length > 50;
+  return parsed.length >= NTM_MIN_FULL_CORPUS;
 
 }
 
@@ -14794,9 +14809,9 @@ function loadStoreFromStorage() {
 
       if (Array.isArray(parsed) && parsed.length > 0) {
 
-        // Drop the old 5-notice demo corpus so it cannot paint as a "live" overlay
+        // Drop stale partial corpus (<5000 notices) so it cannot block loading the full 8,112-notice corpus
 
-        if (isNtmDemoStubStore(parsed) || parsed.length < 20) {
+        if (isNtmDemoStubStore(parsed) || parsed.length < NTM_MIN_FULL_CORPUS) {
 
           try { localStorage.removeItem(NTM_STORAGE_KEY); } catch (eRm) {}
 
@@ -14826,7 +14841,7 @@ function loadStoreFromStorage() {
 
 async function hydrateNtmStorePreferCache() {
 
-  if (Array.isArray(NTM_STORE) && NTM_STORE.length >= 50) return true;
+  if (Array.isArray(NTM_STORE) && NTM_STORE.length >= NTM_MIN_FULL_CORPUS) return true;
 
   if (loadStoreFromStorage()) return true;
 
@@ -14834,7 +14849,7 @@ async function hydrateNtmStorePreferCache() {
 
   if (fromIdb && applyHydratedNtmStore(fromIdb)) return true;
 
-  return Array.isArray(NTM_STORE) && NTM_STORE.length >= 50;
+  return Array.isArray(NTM_STORE) && NTM_STORE.length >= NTM_MIN_FULL_CORPUS;
 
 }
 
@@ -14906,9 +14921,9 @@ async function loadRemoteNoticesJson(showFeedback = false) {
 
       const endpoints = [
 
-        { url: origin + "/notices.json?v=5.201", cache: "default", sameOrigin: true },
+        { url: origin + "/notices.json?v=5.202", cache: "default", sameOrigin: true },
 
-        { url: "notices.json?v=5.201", cache: "default", sameOrigin: true },
+        { url: "notices.json?v=5.202", cache: "default", sameOrigin: true },
 
         { url: "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + bust, cache: "no-store" },
 
@@ -14926,9 +14941,9 @@ async function loadRemoteNoticesJson(showFeedback = false) {
 
       let sawTinySameOrigin = false;
 
-      // Live corpus is ~1000+ notices; reject tiny payloads (e.g. demo stubs / corrupt cache)
+      // Full live corpus is ~8,000+ notices (UKHO + NautoShark NAVAREA); reject partial stubs (<5,000)
 
-      const MIN_ACCEPT = 50;
+      const MIN_ACCEPT = NTM_MIN_FULL_CORPUS;
 
       const tryEndpoints = async (list) => {
 
@@ -15128,7 +15143,7 @@ window.loadRemoteNoticesJson = loadRemoteNoticesJson;
 
 
 
-function setOverlayNoticesLoading(isLoading) {
+function setOverlayNoticesLoading(isLoading, currentPlotted, totalPlotted) {
 
   const tab = document.getElementById("tabOverlayNotices");
 
@@ -15144,7 +15159,13 @@ function setOverlayNoticesLoading(isLoading) {
 
     tab.classList.add("is-loading");
 
-    tab.setAttribute("title", "Loading Warnings onto chart...");
+    const progressTxt = (Number.isFinite(currentPlotted) && Number.isFinite(totalPlotted) && totalPlotted > 0)
+
+      ? `Loading Warnings onto chart (${currentPlotted} / ${totalPlotted})...`
+
+      : "Loading Warnings onto chart...";
+
+    tab.setAttribute("title", progressTxt);
 
     if (!tab.querySelector(".excel-tab-spinner")) {
 
@@ -15262,7 +15283,7 @@ function ensureNoticesReadyForOverlay() {
         // 1) Instant paint if corpus already in memory / IDB
         const warmCount = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
         let paintedWarm = false;
-        if (warmCount >= 50 && typeof renderNtMListAndMap === "function") {
+        if (warmCount >= NTM_MIN_FULL_CORPUS && typeof renderNtMListAndMap === "function") {
           try { renderNtMListAndMap(); } catch (eWarm) {}
           const drawnWarm = (window.leafletMarkersLayer && window.leafletMarkersLayer.getLayers)
             ? window.leafletMarkersLayer.getLayers().length : 0;
@@ -15275,7 +15296,7 @@ function ensureNoticesReadyForOverlay() {
         }
 
         // 2) Refresh corpus from network / cache
-        await loadRemoteNoticesJson(warmCount < 50);
+        await loadRemoteNoticesJson(warmCount < NTM_MIN_FULL_CORPUS);
         assertOn();
         if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
             Array.isArray(window.NTM_STORE) && window.NTM_STORE.length) {
@@ -15304,23 +15325,27 @@ function ensureNoticesReadyForOverlay() {
         }
 
         window._ntmOverlayLoadBusy = false;
-        // Keep spinner visible for at least a brief moment so user perceives responsiveness
-        setTimeout(() => {
-          if (typeof window.setOverlayNoticesLoading === "function") {
-            window.setOverlayNoticesLoading(false);
-          }
-        }, 250);
+        // Keep spinner visible until chunked plotting finishes
+        if (!window._ntmOverlayPlottingActive && typeof window.setOverlayNoticesLoading === "function") {
+          setTimeout(() => {
+            if (!window._ntmOverlayPlottingActive && typeof window.setOverlayNoticesLoading === "function") {
+              window.setOverlayNoticesLoading(false);
+            }
+          }, 250);
+        }
         resolve(true);
       } catch (e) {
         try {
           if (typeof renderNtMListAndMap === "function") renderNtMListAndMap();
         } catch (e2) {}
         window._ntmOverlayLoadBusy = false;
-        setTimeout(() => {
-          if (typeof window.setOverlayNoticesLoading === "function") {
-            window.setOverlayNoticesLoading(false);
-          }
-        }, 200);
+        if (!window._ntmOverlayPlottingActive && typeof window.setOverlayNoticesLoading === "function") {
+          setTimeout(() => {
+            if (!window._ntmOverlayPlottingActive && typeof window.setOverlayNoticesLoading === "function") {
+              window.setOverlayNoticesLoading(false);
+            }
+          }, 200);
+        }
         resolve(false);
       }
     }, 40);
@@ -19396,7 +19421,10 @@ function renderNtMListAndMap() {
 
 
 
-      filteredNotices.forEach(item => {
+      const renderLimit = Math.max(100, Number(window._ntmSidebarRenderLimit) || 250);
+      const itemsToRender = filteredNotices.slice(0, renderLimit);
+
+      itemsToRender.forEach(item => {
 
         const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
 
@@ -19477,6 +19505,17 @@ function renderNtMListAndMap() {
         `;
 
       });
+
+      if (filteredNotices.length > renderLimit) {
+        const remaining = filteredNotices.length - renderLimit;
+        html += `
+          <div style="padding:0.6rem 0.4rem;text-align:center;">
+            <button type="button" class="ntm-btn-glass" onclick="window._ntmSidebarRenderLimit = (window._ntmSidebarRenderLimit || 250) + 500; renderNtMListAndMap();" style="width:100%;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;border-radius:6px;border:1px solid #0284c7;color:#0284c7;background:rgba(2,132,199,0.06);">
+              Show more warnings (+${remaining.toLocaleString()} remaining)
+            </button>
+          </div>
+        `;
+      }
 
     }
 
@@ -19876,272 +19915,151 @@ function renderNtMListAndMap() {
 
 
 
-    const attachNoticeLayer = (lyr, item, popHtml) => {
-
+    const attachNoticeLayer = (lyr, item, extraLine) => {
       lyr._noticeData = item;
-
-      lyr._popupHtml = popHtml;
-
-      lyr.bindPopup(popHtml);
-
-      lyr.on("click", (ev) => {
-
-        if (typeof handleEcdisObjectPick === "function" && ev && ev.latlng) {
-
-          if (ev.originalEvent) {
-
-            try { L.DomEvent.stopPropagation(ev.originalEvent); } catch (eS) {}
-
+      lyr._extraLine = extraLine || "";
+      Object.defineProperty(lyr, "_popupHtml", {
+        get: function() {
+          if (!this.__cachedPopHtml) {
+            this.__cachedPopHtml = buildPopupHtml(item, this._extraLine || "");
           }
-
-          try { mapRef.closePopup(); } catch (eC) {}
-
-          handleEcdisObjectPick(ev.latlng, mapRef);
-
-        }
-
+          return this.__cachedPopHtml;
+        },
+        set: function(v) {
+          this.__cachedPopHtml = v;
+        },
+        configurable: true
       });
-
+      lyr.bindPopup(() => lyr._popupHtml, { maxWidth: 325, minWidth: 240, autoPan: true });
+      lyr.on("click", (ev) => {
+        if (typeof handleEcdisObjectPick === "function" && ev && ev.latlng) {
+          if (ev.originalEvent) {
+            try { L.DomEvent.stopPropagation(ev.originalEvent); } catch (eS) {}
+          }
+          try { mapRef.closePopup(); } catch (eC) {}
+          handleEcdisObjectPick(ev.latlng, mapRef);
+        }
+      });
       leafletMarkersLayer.addLayer(lyr);
-
     };
 
-
-
     const plotOneNotice = (item) => {
-
       if (!item.coords || item.coords.length === 0) return;
 
-
-
       const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
-
       const pal = getNoticeColors(item, isItemCancelled);
 
-
-
       if (item.subPolygons && item.subPolygons.length > 0) {
-
         item.subPolygons.forEach(sub => {
-
           const pts = sub.points || (sub.coords || []).map(c => [c.lat, c.lon]);
-
           if (!pts || pts.length === 0) return;
-
           const cat = String(sub.category || "").toLowerCase();
-
           const asLine = cat === "line" || cat === "cable" || cat === "pipeline" || (pts.length === 2);
 
-
-
           if (pts.length >= 3 && !asLine) {
-
             const polyPoints = pts.map(p => [p[0], wrapLongitudeDeg(p[1])]);
-
             const pOpts = Object.assign({
-
               color: pal.stroke,
-
               weight: basePolyWeight,
-
               fillColor: pal.fill,
-
               fillOpacity: isItemCancelled ? 0.04 : basePolyFillOp,
-
               dashArray: isItemCancelled ? "4, 6" : null
-
             }, pathPaneOpts());
-
-            const popHtml = buildPopupHtml(item, `<div style="font-size:0.78em;color:#475569;margin-bottom:3px;"><b>Area:</b> ${sub.name || item.id} (${pts.length} pts)</div>`);
-
+            const extra = `<div style="font-size:0.78em;color:#475569;margin-bottom:3px;"><b>Area:</b> ${sub.name || item.id} (${pts.length} pts)</div>`;
             setsailWorldCopyLonOffsets().forEach((off) => {
-
               const ring = off === 0 ? polyPoints : polyPoints.map((p) => [p[0], p[1] + off]);
-
               const polygon = L.polygon(ring, pOpts);
-
-              attachNoticeLayer(polygon, item, popHtml);
-
+              attachNoticeLayer(polygon, item, extra);
             });
-
           } else if (pts.length >= 2 && asLine) {
-
             const linePoints = pts.map(p => [p[0], wrapLongitudeDeg(p[1])]);
-
-            const popHtml = buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${pts.length} pts)</div>`);
-
+            const extra = `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${pts.length} pts)</div>`;
             splitAntimeridianLatLngs(linePoints).forEach((seg) => {
-
               const lOpts = Object.assign({
-
                 color: pal.stroke,
-
                 weight: baseLineWeight,
-
                 dashArray: isItemCancelled ? "3, 6" : "5, 4"
-
               }, pathPaneOpts());
-
               setsailWorldCopyLonOffsets().forEach((off) => {
-
                 const shifted = off === 0 ? seg : seg.map((p) => [p[0], p[1] + off]);
-
                 const polyline = L.polyline(shifted, lOpts);
-
-                attachNoticeLayer(polyline, item, popHtml);
-
+                attachNoticeLayer(polyline, item, extra);
               });
-
             });
-
           } else if (pts.length === 1) {
-
             const cOpts = Object.assign({
-
               radius: ptRadius,
-
               fillColor: pal.fill,
-
               color: ptRimColor,
-
               weight: ptRimWeight,
-
               fillOpacity: isItemCancelled ? 0.45 : 0.86
-
             }, pathPaneOpts());
-
             const dmsStr = formatCoordDmsHelper(pts[0][0], pts[0][1]);
-
-            const popHtml = buildPopupHtml(item, `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`);
-
+            const extra = `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`;
             setsailEachWorldLatLng(pts[0][0], pts[0][1], (ll) => {
-
               const circle = L.circleMarker(ll, cOpts);
-
-              attachNoticeLayer(circle, item, popHtml);
-
+              attachNoticeLayer(circle, item, extra);
             });
-
           }
-
         });
-
       } else if (item.isPolygon && item.coords.length >= 3) {
-
         const polyPoints = item.coords.map(c => [c.lat, wrapLongitudeDeg(c.lon)]);
-
         let latSpan = 0, lonSpan = 0;
-
         if (polyPoints.length >= 3) {
-
           const lats = polyPoints.map(p => p[0]);
-
           const lons = polyPoints.map(p => p[1]);
-
           latSpan = Math.max(...lats) - Math.min(...lats);
-
           lonSpan = Math.max(...lons) - Math.min(...lons);
-
         }
-
         const isLargeRegionalArea = (latSpan > 3.5 || lonSpan > 3.5);
-
         const pOpts = Object.assign({
-
           color: pal.stroke,
-
           weight: isLargeRegionalArea && curZoom <= 5 ? 0.9 : basePolyWeight,
-
           fillColor: pal.fill,
-
           fillOpacity: isItemCancelled ? 0.04 : (isLargeRegionalArea && curZoom <= 5 ? 0.05 : basePolyFillOp),
-
           dashArray: isItemCancelled ? "3, 6" : (item.type === "NAVTEX" || item.type === "T" ? "4, 4" : null)
-
         }, pathPaneOpts());
-
-        const popHtml = buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Polygon (${item.coords.length} vertices)</div>`);
-
+        const extra = `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Polygon (${item.coords.length} vertices)</div>`;
         setsailWorldCopyLonOffsets().forEach((off) => {
-
           const ring = off === 0 ? polyPoints : polyPoints.map((p) => [p[0], p[1] + off]);
-
           const polygon = L.polygon(ring, pOpts);
-
-          attachNoticeLayer(polygon, item, popHtml);
-
+          attachNoticeLayer(polygon, item, extra);
         });
-
       } else if (item.isLine && item.coords.length >= 2) {
-
         const linePoints = item.coords.map(c => [c.lat, wrapLongitudeDeg(c.lon)]);
-
         const segments = splitAntimeridianLatLngs(linePoints);
-
-        const popHtml = buildPopupHtml(item, `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points${segments.length > 1 ? " · date-line split" : ""})</div>`);
-
+        const extra = `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points${segments.length > 1 ? " · date-line split" : ""})</div>`;
         segments.forEach((seg) => {
-
           const lOpts = Object.assign({
-
             color: pal.stroke,
-
             weight: baseLineWeight,
-
             dashArray: isItemCancelled ? "3, 6" : (item.type === "T" ? "5, 4" : null)
-
           }, pathPaneOpts());
-
           setsailWorldCopyLonOffsets().forEach((off) => {
-
             const shifted = off === 0 ? seg : seg.map((p) => [p[0], p[1] + off]);
-
             const polyline = L.polyline(shifted, lOpts);
-
-            attachNoticeLayer(polyline, item, popHtml);
-
+            attachNoticeLayer(polyline, item, extra);
           });
-
         });
-
       } else {
-
         const coordsToPlot = item.coords;
-
         coordsToPlot.forEach(coord => {
-
           const cOpts = Object.assign({
-
             radius: ptRadius,
-
             fillColor: pal.fill,
-
             color: ptRimColor,
-
             weight: ptRimWeight,
-
             opacity: 0.92,
-
             fillOpacity: isItemCancelled ? 0.4 : 0.85
-
           }, pathPaneOpts());
-
           const dmsStr = coord.dms || formatCoordDmsHelper(coord.lat, coord.lon);
-
-          const popHtml = buildPopupHtml(item, `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`);
-
+          const extra = `<div style="font-size:0.78em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">${dmsStr}</div>`;
           setsailEachWorldLatLng(coord.lat, coord.lon, (ll) => {
-
             const circle = L.circleMarker(ll, cOpts);
-
-            attachNoticeLayer(circle, item, popHtml);
-
+            attachNoticeLayer(circle, item, extra);
           });
-
         });
-
       }
-
     };
 
 
@@ -20302,7 +20220,42 @@ function renderNtMListAndMap() {
 
       });
 
-      sortedFiltered.forEach(plotOneNotice);
+      const totalNotices = sortedFiltered.length;
+      const CHUNK_SIZE = 1200;
+      let currentIndex = 0;
+      const currentPlotSeq = ++window._ntmPlotRenderSeq;
+      window._ntmOverlayPlottingActive = true;
+      if (typeof window.setOverlayNoticesLoading === "function") {
+        window.setOverlayNoticesLoading(true, 0, totalNotices);
+      }
+
+      function plotNextChunk() {
+        if (currentPlotSeq !== window._ntmPlotRenderSeq) return;
+        const end = Math.min(currentIndex + CHUNK_SIZE, totalNotices);
+        for (; currentIndex < end; currentIndex++) {
+          plotOneNotice(sortedFiltered[currentIndex]);
+        }
+        if (typeof window.setOverlayNoticesLoading === "function") {
+          window.setOverlayNoticesLoading(true, currentIndex, totalNotices);
+        }
+        if (currentIndex < totalNotices) {
+          if (typeof requestAnimationFrame !== "undefined") {
+            requestAnimationFrame(plotNextChunk);
+          } else {
+            setTimeout(plotNextChunk, 0);
+          }
+        } else {
+          window._ntmOverlayPlottingActive = false;
+          window._ntmOverlayLoadBusy = false;
+          if (typeof window.setOverlayNoticesLoading === "function") {
+            window.setOverlayNoticesLoading(false);
+          }
+          try {
+            if (typeof mapRef.invalidateSize === "function") mapRef.invalidateSize({ animate: false });
+          } catch (eInv) {}
+        }
+      }
+      plotNextChunk();
 
     }
 
@@ -20310,7 +20263,7 @@ function renderNtMListAndMap() {
 
     // If clustering produced nothing but we have notices, force compact point plot
 
-    if (markersLayer.getLayers().length === 0 && filtered.length > 0) {
+    if (markersLayer.getLayers().length === 0 && filtered.length > 0 && !window._ntmOverlayPlottingActive) {
 
       filtered.forEach((item) => {
 
@@ -20340,7 +20293,7 @@ function renderNtMListAndMap() {
 
         });
 
-        circle.bindPopup(buildPopupHtml(item));
+        circle.bindPopup(() => buildPopupHtml(item));
 
         markersLayer.addLayer(circle);
 
@@ -20366,15 +20319,15 @@ function renderNtMListAndMap() {
 
 
 
-  // Clear spinner only after markers painted — never race-clear while ensure() owns the load
+  // Clear spinner only after markers painted — never race-clear while ensure() or chunk plotting is active
 
-  if (typeof window.setOverlayNoticesLoading === "function" && !window._ntmOverlayLoadBusy) {
+  if (typeof window.setOverlayNoticesLoading === "function" && !window._ntmOverlayLoadBusy && !window._ntmOverlayPlottingActive) {
 
     requestAnimationFrame(() => {
 
       requestAnimationFrame(() => {
 
-        if (!window._ntmOverlayLoadBusy) {
+        if (!window._ntmOverlayLoadBusy && !window._ntmOverlayPlottingActive) {
 
           window.setOverlayNoticesLoading(false);
 
