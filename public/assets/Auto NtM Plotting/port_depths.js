@@ -19818,6 +19818,7 @@ function renderPortDepthsOnMap(map) {
 
     const popupHtml = `<div class="ss-port-popup-shell">${cardHtml}</div>`;
 
+    marker._portData = port;
     marker.bindPopup(popupHtml, {
       className: "ntm-dark-popup ss-port-popup",
       maxWidth: 300,
@@ -19826,6 +19827,29 @@ function renderPortDepthsOnMap(map) {
       keepInView: true,
       autoPanPadding: [18, 18],
       closeButton: true
+    });
+    marker.on("click", (ev) => {
+      if (ev && ev.originalEvent) ev.originalEvent._ecdisPickHandled = true;
+      const targetMap = currentMap || (typeof window !== "undefined" ? window.leafletMap : null);
+      if (typeof window.handleEcdisObjectPick === "function" && targetMap) {
+        const pt = (ev && ev.latlng) || L.latLng(markerLatLng[0], markerLatLng[1]);
+        const portCandidate = {
+          id: "port_" + (port.unlocode || port.name || markerLatLng[0].toFixed(4) + "_" + markerLatLng[1].toFixed(4)),
+          category: "PORT",
+          catBadge: "PORT",
+          badgeColor: "#3b82f6",
+          icon: "⚓",
+          name: port.name || tipName || "Harbour / Port",
+          subtitle: `${port.unlocode || "Harbour"} · Depths & Tides · 0.00 NM`,
+          distNm: 0,
+          lat: markerLatLng[0],
+          lon: markerLatLng[1],
+          open: function() {
+            marker.openPopup();
+          }
+        };
+        window.handleEcdisObjectPick(pt, targetMap, portCandidate);
+      }
     });
     marker.on("popupopen", () => {
       try {

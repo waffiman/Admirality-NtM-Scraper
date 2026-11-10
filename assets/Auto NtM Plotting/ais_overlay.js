@@ -397,7 +397,10 @@
       m._aisData = v;
       if (z >= 4 || !!v.nearOwnShip100Nm) {
         m.on("click", (ev) => {
-          if (ev.originalEvent) ev.originalEvent._stopped = true;
+          if (ev.originalEvent) {
+            ev.originalEvent._stopped = true;
+            ev.originalEvent._ecdisPickHandled = true;
+          }
           const pt = ev.latlng || L.latLng(lat, lon);
           if (typeof window.handleEcdisObjectPick === "function") {
             const aisCandidate = {
