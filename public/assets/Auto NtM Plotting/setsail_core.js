@@ -15189,9 +15189,9 @@ async function loadRemoteNoticesJson(showFeedback = false) {
         }
 
         if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES && OVERLAY_STATES.notices) {
-
-          try { renderNtMListAndMap(); } catch (eR) {}
-
+          if (!window._ntmOverlayPlottingActive) {
+            try { renderNtMListAndMap(); } catch (eR) {}
+          }
         }
 
         const meta = data.metadata || {};
@@ -15371,45 +15371,49 @@ function ensureNoticesReadyForOverlay() {
 
         // 1) Instant paint if corpus already in memory / IDB
         const warmCount = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
-        let paintedWarm = false;
-        if (warmCount >= NTM_MIN_FULL_CORPUS && typeof renderNtMListAndMap === "function") {
-          try { renderNtMListAndMap(); } catch (eWarm) {}
-          const drawnWarm = (window.leafletMarkersLayer && window.leafletMarkersLayer.getLayers)
-            ? window.leafletMarkersLayer.getLayers().length : 0;
-          if (drawnWarm > 0) {
-            paintedWarm = true;
-            if (typeof showSetSailToast === "function") {
-              showSetSailToast("NtM & NAVTEX: " + drawnWarm + " chart objects (" + warmCount + " in store)", "info");
-            }
+        const hasFullWarmCorpus = warmCount >= NTM_MIN_FULL_CORPUS;
+
+        if (hasFullWarmCorpus) {
+          // Fast path: We already have a complete, verified corpus (>=5000 notices).
+          // Render it to the map immediately without blocking on network download!
+          if (typeof renderNtMListAndMap === "function") {
+            try { renderNtMListAndMap(); } catch (eWarm) {}
           }
-        }
-
-        // 2) Refresh corpus from network / cache
-        await loadRemoteNoticesJson(warmCount < NTM_MIN_FULL_CORPUS);
-        assertOn();
-        if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
-            Array.isArray(window.NTM_STORE) && window.NTM_STORE.length) {
-          NTM_STORE = window.NTM_STORE;
-        }
-
-        // Unconditionally render to ensure full synchronization with latest data & filters
-        if (typeof renderNtMListAndMap === "function") {
-          try { renderNtMListAndMap(); } catch (ePlot) {}
-        }
-
-        const drawn = (window.leafletMarkersLayer && window.leafletMarkersLayer.getLayers)
-          ? window.leafletMarkersLayer.getLayers().length : 0;
-        const total = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
-        const filteredN = (typeof getFilteredNotices === "function") ? getFilteredNotices().length : 0;
-        if (typeof showSetSailToast === "function") {
-          if (drawn > 0 && !paintedWarm) {
-            showSetSailToast("NtM & NAVTEX on chart: " + drawn + " objects · " + filteredN + " filtered / " + total + " store", "info");
-          } else if (drawn === 0 && total > 0) {
-            showSetSailToast("NtM: " + total + " in store, " + filteredN + " filtered, 0 on map — retrying…", "warning");
-            try { renderNtMListAndMap(); } catch (eR) {}
-          } else if (drawn === 0 && total === 0) {
-            const why = window._ntmLastFetchErr ? (" · " + window._ntmLastFetchErr) : "";
-            showSetSailToast("NtM corpus not loaded yet — retry tile or hard-refresh once online" + why, "warning");
+          const filteredN = (typeof getFilteredNotices === "function") ? getFilteredNotices().length : warmCount;
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast("NtM & NAVTEX: " + filteredN + " notices active on chart", "info");
+          }
+          // Kick off background refresh without blocking user interaction or tile spinner
+          Promise.resolve().then(() => {
+            loadRemoteNoticesJson(false).then((updated) => {
+              if (updated && typeof renderNtMListAndMap === "function") {
+                const curBusy = window._ntmOverlayLoadBusy || window._ntmOverlayPlottingActive;
+                if (!curBusy) {
+                  try { renderNtMListAndMap(); } catch (eBg) {}
+                }
+              }
+            }).catch(() => {});
+          });
+        } else {
+          // Cold path: No corpus in memory/IDB yet — fetch from network
+          await loadRemoteNoticesJson(true);
+          assertOn();
+          if ((!Array.isArray(NTM_STORE) || NTM_STORE.length === 0) &&
+              Array.isArray(window.NTM_STORE) && window.NTM_STORE.length) {
+            NTM_STORE = window.NTM_STORE;
+          }
+          if (typeof renderNtMListAndMap === "function") {
+            try { renderNtMListAndMap(); } catch (ePlot) {}
+          }
+          const total = Array.isArray(NTM_STORE) ? NTM_STORE.length : 0;
+          const filteredN = (typeof getFilteredNotices === "function") ? getFilteredNotices().length : total;
+          if (typeof showSetSailToast === "function") {
+            if (total > 0) {
+              showSetSailToast("NtM & NAVTEX: " + filteredN + " notices loaded on chart", "info");
+            } else {
+              const why = window._ntmLastFetchErr ? (" · " + window._ntmLastFetchErr) : "";
+              showSetSailToast("NtM corpus not loaded yet — retry tile or hard-refresh once online" + why, "warning");
+            }
           }
         }
 
@@ -20547,7 +20551,9 @@ function renderNtMListAndMap() {
         if (currentPlotSeq !== window._ntmPlotRenderSeq) return;
         const end = Math.min(currentIndex + CHUNK_SIZE, totalNotices);
         for (; currentIndex < end; currentIndex++) {
-          plotOneNotice(sortedFiltered[currentIndex]);
+          try {
+            plotOneNotice(sortedFiltered[currentIndex]);
+          } catch (ePlotOne) {}
         }
         if (typeof window.setOverlayNoticesLoading === "function") {
           window.setOverlayNoticesLoading(true, currentIndex, totalNotices);
