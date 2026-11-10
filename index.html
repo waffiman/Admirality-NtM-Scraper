@@ -148,7 +148,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.205" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.206" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -9636,7 +9636,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.205" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.206" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -13066,24 +13066,24 @@ select option {
     // Vessel position telemetry (no browser GPS prompt)
     window._homeGeoLon = getActiveGeoLongitude();
 
-    function getActiveGeoLongitude() {
+    function getActiveGeoLongitude(allowDefault) {
       // 1. In-memory userVessel object from SetSail core
       if (window.userVessel && Number.isFinite(window.userVessel.lon)) {
-        return window.userVessel.lon;
+        return Number(window.userVessel.lon);
       }
       // 2. Storage vessel states (setsail_vessel_state_v2 or v1)
       try {
         const raw2 = localStorage.getItem('setsail_vessel_state_v2') || localStorage.getItem('setsail_vessel_state_v1');
         if (raw2) {
           const v = JSON.parse(raw2);
-          if (v && Number.isFinite(v.lon)) return v.lon;
+          if (v && Number.isFinite(v.lon)) return Number(v.lon);
         }
       } catch (e) {}
       // 3. Own ship map marker position
       try {
         if (window._ownShipMarker && typeof window._ownShipMarker.getLatLng === 'function') {
           const ll = window._ownShipMarker.getLatLng();
-          if (ll && Number.isFinite(ll.lng)) return ll.lng;
+          if (ll && Number.isFinite(ll.lng)) return Number(ll.lng);
         }
       } catch (e) {}
       // 4. Input in Home My Vessel modal (#homeVesselLon)
@@ -13094,8 +13094,9 @@ select option {
           if (Number.isFinite(val)) return val;
         }
       } catch (e) {}
-      // 5. Default reference longitude (IINO INEOS VESTA English Channel / Dover strait: +1.25 E)
-      return 1.25;
+      // 5. Default reference longitude when fallback is explicitly allowed
+      if (allowDefault) return 1.25;
+      return null;
     }
 
     function updateHomeTelemetry() {
@@ -13116,20 +13117,26 @@ select option {
 
       const now = new Date();
       let targetDate = now;
-      const geoLon = getActiveGeoLongitude();
+      const geoLon = getActiveGeoLongitude(true);
 
       if (window._homeClockMode === 'LMT' && Number.isFinite(geoLon)) {
-        // True Nautical Local Mean Time (LMT): UTC + (Longitude_deg * 4 minutes) = UTC + (Longitude_deg * 240,000 ms)
-        targetDate = new Date(now.getTime() + geoLon * 240000);
+        // Nautical Zone Time (Ship's Time / LMT): integer hour offset from UTC = round(Longitude / 15°)
+        // Each nautical zone is exactly 15° of longitude (1 hour).
+        // Minutes and seconds are exactly identical to UTC.
+        const zoneOffsetHours = Math.round(geoLon / 15);
+        targetDate = new Date(now.getTime() + zoneOffsetHours * 3600000);
         if (modeBtn && !modeBtn.dataset.tempMsg) {
           modeBtn.textContent = 'LMT';
           modeBtn.classList.add('mode-lmt');
+          const sign = zoneOffsetHours >= 0 ? '+' : '';
+          modeBtn.title = 'Local Nautical Time (UTC' + sign + zoneOffsetHours + ') at lon ' + Math.abs(geoLon).toFixed(1) + '°' + (geoLon >= 0 ? 'E' : 'W') + ' — click to switch to UTC';
         }
       } else {
         window._homeClockMode = 'UTC';
         if (modeBtn && !modeBtn.dataset.tempMsg) {
           modeBtn.textContent = 'UTC';
           modeBtn.classList.remove('mode-lmt');
+          modeBtn.title = 'UTC (Universal Time Coordinated) — click to switch to LMT';
         }
       }
 
@@ -13155,7 +13162,33 @@ select option {
         return;
       }
 
-      // Switch UTC -> LMT using current vessel longitude (zero browser GPS prompt)
+      // Check if ship position is already known; if not, request GPS
+      const knownLon = getActiveGeoLongitude(false);
+      if (knownLon == null && navigator.geolocation) {
+        btn.dataset.tempMsg = 'GPS';
+        btn.textContent = 'GPS…';
+        navigator.geolocation.getCurrentPosition(
+          function(pos) {
+            delete btn.dataset.tempMsg;
+            const la = pos.coords.latitude;
+            const lo = pos.coords.longitude;
+            if (typeof plotUserVessel === 'function') {
+              plotUserVessel(la, lo, 'gps', true);
+            }
+            window._homeClockMode = 'LMT';
+            updateHomeTelemetry();
+          },
+          function(err) {
+            delete btn.dataset.tempMsg;
+            window._homeClockMode = 'LMT';
+            updateHomeTelemetry();
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
+        );
+        return;
+      }
+
+      // Switch UTC -> LMT using current vessel longitude
       window._homeClockMode = 'LMT';
       updateHomeTelemetry();
     });
@@ -14140,7 +14173,7 @@ select option {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.205" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.205';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.206" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.206';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -14162,7 +14195,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.205" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.206" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -21933,25 +21966,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.205"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.205" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.205"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.206"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.206" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.206"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.205",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.206",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.205"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.205"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.205"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.206"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.206"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.206"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.205"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.206"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -22024,10 +22057,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.205"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.205"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.205"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.205"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.206"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.206"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.206"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.206"></script>
 
 
 
@@ -22741,17 +22774,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.205', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.206', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.205 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.206 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.205') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.205.0'); }, 1200);
+              if (last && last.indexOf('v5.206') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.206.0'); }, 1200);
               }
             } catch (eTip) {}
           })
