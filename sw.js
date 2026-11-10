@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.209.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.209.0';
+const CACHE_NAME = 'setsail-cache-v5.210.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.210.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -127,12 +127,23 @@ async function matchAssetInCache(request) {
     const reqUrl = new URL(request.url);
     const decodedPath = decodeURIComponent(reqUrl.pathname);
     const baseName = decodedPath.split('/').pop();
-    const isSharedJson = (baseName === 'notices.json' || baseName === 'weather.json' || baseName === 'news.json');
-    // Cross-origin: only exact URL match — never alias GitHub/CDN requests to same-origin notices.json
+    const isSharedJson = (baseName === 'notices.json' || baseName === 'weather.json' || baseName === 'news.json' || baseName === 'ais.json');
+    // Cross-origin: check CACHE_NAME or any other cache for shared JSON
     if (reqUrl.origin !== self.location.origin) {
       if (!isSharedJson) return null;
       const appCache = await caches.open(CACHE_NAME);
-      return (await appCache.match(request)) || (await appCache.match(request, { ignoreSearch: true }));
+      const crossHit = (await appCache.match(request)) || (await appCache.match(request, { ignoreSearch: true }));
+      if (crossHit) return crossHit;
+      const allNames = await caches.keys();
+      for (const name of allNames) {
+        if (name === CACHE_NAME) continue;
+        try {
+          const c = await caches.open(name);
+          const h = (await c.match(request)) || (await c.match(request, { ignoreSearch: true })) || (await c.match(baseName));
+          if (h) return h;
+        } catch (eC) {}
+      }
+      return null;
     }
     const appCache = await caches.open(CACHE_NAME);
     let hit = (await appCache.match(request)) || (await appCache.match(request, { ignoreSearch: true }));
@@ -149,6 +160,21 @@ async function matchAssetInCache(request) {
       if (kDecoded.endsWith('/' + baseName) || kDecoded === decodedPath) {
         const matched = await appCache.match(k);
         if (matched) return matched;
+      }
+    }
+
+    if (isSharedJson) {
+      const allNames = await caches.keys();
+      for (const name of allNames) {
+        if (name === CACHE_NAME) continue;
+        try {
+          const c = await caches.open(name);
+          const h = (await c.match(request)) || (await c.match(request, { ignoreSearch: true })) || (await c.match(baseName)) || (await c.match('./' + baseName));
+          if (h) {
+            try { await appCache.put(request, h.clone()); } catch (ePut) {}
+            return h;
+          }
+        } catch (eC) {}
       }
     }
   } catch (e) {}
@@ -194,6 +220,26 @@ self.addEventListener('activate', (event) => {
     (async () => {
       const keys = await caches.keys();
       const oldCaches = keys.filter((key) => key !== CACHE_NAME && key !== TILE_CACHE_NAME);
+
+      // Migrate large shared JSON data from old caches before deletion
+      try {
+        const newAppCache = await caches.open(CACHE_NAME);
+        for (const oKey of oldCaches) {
+          try {
+            const oldC = await caches.open(oKey);
+            for (const assetName of ['notices.json', 'weather.json', 'news.json', 'ais.json']) {
+              const alreadyHas = await newAppCache.match(assetName);
+              if (!alreadyHas) {
+                const oldHit = await oldC.match(assetName);
+                if (oldHit && oldHit.ok) {
+                  await newAppCache.put(assetName, oldHit.clone());
+                }
+              }
+            }
+          } catch (eMig) {}
+        }
+      } catch (eMigrate) {}
+
       if (oldCaches.length > 0) {
         await Promise.all(oldCaches.map((key) => caches.delete(key)));
       }
@@ -295,7 +341,7 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.endsWith('notices.json') || url.pathname.endsWith('weather.json') || url.pathname.endsWith('news.json') || url.pathname.endsWith('ais.json')) {
     const jsonBaseName = url.pathname.split('/').pop();
     const isNotices = jsonBaseName === 'notices.json';
-    const jsonTimeoutMs = isNotices ? 90000 : 45000;
+    const jsonTimeoutMs = isNotices ? 12000 : 15000;
     event.respondWith((async () => {
       const cached =
         (await matchAssetInCache(event.request)) ||
