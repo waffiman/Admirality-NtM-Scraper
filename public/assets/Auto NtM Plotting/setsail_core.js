@@ -15982,9 +15982,118 @@ function initNtMMap() {
 
     });
 
-    // Keep layerGroup API for toggles / Leaflet control (single child)
+    // Subsea Infrastructure Layer (Submarine Cables & Pipelines)
+    // Custom map pane strictly below buoysTileLayer (450) and vector markers (480)
+    let _subseaInfraData = null;
+    let _subseaInfraLayer = L.layerGroup();
 
-    const seamarkLayer = L.layerGroup([buoysTileLayer]);
+    function ensureSubseaPane() {
+      if (leafletMap && !leafletMap.getPane("subseaInfrastructurePane")) {
+        const p = leafletMap.createPane("subseaInfrastructurePane");
+        p.style.zIndex = "410";
+        p.style.pointerEvents = "auto";
+      }
+    }
+
+    function formatSubseaInfraPopup(props) {
+      const isCable = props.t === "CBL";
+      const icon = isCable ? "⚡" : "🛢️";
+      const badgeText = isCable ? "SUBMARINE CABLE" : "SUBSEA PIPELINE";
+      const badgeColor = isCable ? "#d946ef" : "#818cf8";
+      const name = props.name || (isCable ? "Submarine Cable" : "Marine Pipeline");
+      const medium = props.sub || (isCable ? "Fiber-Optic Telecom" : "Hydrocarbons");
+      const operator = props.op || "—";
+      const status = props.st || "Active";
+      const year = props.yr ? `Built / In Service: ${props.yr}` : "";
+      const length = props.km ? `Length: ${props.km.toLocaleString()} km` : "";
+      const extraInfo = [year, length].filter(Boolean).join(" · ");
+
+      return `
+        <div class="ss-ais-popup-inner ss-subsea-popup" style="font-family:system-ui,-apple-system,sans-serif;color:#f8fafc;padding:2px;">
+          <div class="ss-ais-popup-hdr" style="border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:6px;margin-bottom:8px;display:flex;align-items:flex-start;gap:6px;">
+            <span style="font-size:1.15rem;line-height:1.2;">${icon}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:0.92rem;color:#f8fafc;line-height:1.25;word-break:break-word;">${name}</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+                <span style="font-size:0.68rem;font-weight:700;padding:1px 6px;border-radius:3px;background:${badgeColor}22;color:${badgeColor};border:1px solid ${badgeColor}66;">${badgeText}</span>
+                <span style="font-size:0.72rem;color:#94a3b8;">${status}</span>
+              </div>
+            </div>
+          </div>
+          <div class="ss-ais-popup-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:0.75rem;margin-bottom:8px;">
+            <div><span style="color:#94a3b8;">Medium:</span> <b style="color:#e2e8f0;">${medium}</b></div>
+            <div><span style="color:#94a3b8;">Operator:</span> <b style="color:#e2e8f0;">${operator}</b></div>
+            ${extraInfo ? `<div style="grid-column:1/-1;color:#94a3b8;font-size:0.72rem;margin-top:2px;">${extraInfo}</div>` : ""}
+          </div>
+          <div style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:4px;padding:5px 7px;font-size:0.68rem;color:#fca5a5;line-height:1.35;display:flex;align-items:flex-start;gap:6px;">
+            <span style="font-size:0.9rem;line-height:1;">⚓</span>
+            <span><b>NAV WARNING:</b> Anchoring, trawling and underwater operations prohibited in vicinity (UNCLOS / S-52).</span>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadSubseaInfraDataset() {
+      if (_subseaInfraData) return;
+      ensureSubseaPane();
+      try {
+        const resp = await fetch("assets/geo/setroute_subsea_cables_pipelines.json");
+        if (!resp.ok) return;
+        _subseaInfraData = await resp.json();
+        window._subseaInfraData = _subseaInfraData;
+        renderSubseaInfra();
+      } catch (eSubsea) {
+        console.warn("[SetSail] Subsea cables & pipelines failed to load", eSubsea);
+      }
+    }
+
+    function renderSubseaInfra() {
+      if (!_subseaInfraData || !Array.isArray(_subseaInfraData.features)) return;
+      ensureSubseaPane();
+      _subseaInfraLayer.clearLayers();
+
+      const geoJsonLayer = L.geoJSON(_subseaInfraData, {
+        pane: "subseaInfrastructurePane",
+        style: function(feat) {
+          const isCable = feat.properties && feat.properties.t === "CBL";
+          return {
+            color: isCable ? "#d946ef" : "#818cf8",
+            weight: isCable ? 1.7 : 2.2,
+            opacity: isCable ? 0.82 : 0.85,
+            dashArray: isCable ? "6, 4" : "8, 3, 2, 3",
+            lineCap: "round",
+            pane: "subseaInfrastructurePane"
+          };
+        },
+        onEachFeature: function(feat, lyr) {
+          const p = feat.properties || {};
+          const isCable = p.t === "CBL";
+          lyr.on("mouseover", function() {
+            lyr.setStyle({
+              weight: isCable ? 3.2 : 3.8,
+              color: isCable ? "#f472b6" : "#a5b4fc",
+              opacity: 1
+            });
+          });
+          lyr.on("mouseout", function() {
+            geoJsonLayer.resetStyle(lyr);
+          });
+          lyr.bindPopup(formatSubseaInfraPopup(p), {
+            className: "ss-ais-popup ss-buoy-popup-wrap",
+            maxWidth: 300,
+            minWidth: 220,
+            autoPan: true,
+            offset: [0, -4]
+          });
+        }
+      });
+
+      _subseaInfraLayer.addLayer(geoJsonLayer);
+    }
+
+    // Keep layerGroup API for toggles / Leaflet control
+    // Add _subseaInfraLayer FIRST so it resides below buoysTileLayer and hitboxes
+    const seamarkLayer = L.layerGroup([_subseaInfraLayer, buoysTileLayer]);
 
     // Interactive Buoys Layer Engine (Rich AIS-Style Popups on LMB)
     let _buoyMarksData = [];
@@ -15994,6 +16103,8 @@ function initNtMMap() {
     let _renderBuoysHitboxes = null;
 
     async function loadBuoyDatasets() {
+      if (_buoyMarksData.length > 0 && _subseaInfraData) return;
+      loadSubseaInfraDataset();
       if (_buoyMarksData.length > 0) return;
       try {
         const rMarks = await fetch("assets/geo/setroute_iala_marks.json");
@@ -16823,7 +16934,11 @@ function initNtMMap() {
       }
 
       map.on("zoomend moveend", updateVectorBuoyMarkers);
-      seamarkLyr.on("add", updateVectorBuoyMarkers);
+      seamarkLyr.on("add", () => {
+        ensureSubseaPane();
+        loadSubseaInfraDataset();
+        updateVectorBuoyMarkers();
+      });
       seamarkLyr.on("remove", () => { _buoysVectorGroup.clearLayers(); });
     }
 
@@ -16886,7 +17001,7 @@ function initNtMMap() {
 
     const overlayMaps = {
 
-      "OpenSeaMap Buoys": seamarkLayer
+      "Marks (Buoys, Beacons & Subsea Cables)": seamarkLayer
 
     };
 
@@ -32763,29 +32878,31 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
 
 
-    <button type="button" class="ntm-layer-thumb-btn" data-overlay="buoys" title="Buoys — OpenSeaMap PNG seamarks (buoys, lights, beacons)">
+    <button type="button" class="ntm-layer-thumb-btn" data-overlay="buoys" title="Marks — Seamarks, Buoys, Beacons, Subsea Cables & Pipelines">
 
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
 
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
 
-          <ellipse cx="12" cy="20.2" rx="5.2" ry="1.35" fill="#0ea5e9" opacity="0.35"/>
+          <path d="M1 21.5h22" stroke="#d946ef" stroke-width="1.4" stroke-dasharray="3,2" opacity="0.9"/>
 
-          <path d="M8.2 17.2h7.6l-1.1-8.4H9.3z" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.1" stroke-linejoin="round"/>
+          <ellipse cx="12" cy="18.5" rx="5.2" ry="1.35" fill="#0ea5e9" opacity="0.35"/>
 
-          <path d="M9.4 12.4h5.2" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M8.2 15.5h7.6l-1.1-7.4H9.3z" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.1" stroke-linejoin="round"/>
 
-          <path d="M9.4 14.8h5.2" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M9.4 11h5.2" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
 
-          <rect x="11.15" y="5.2" width="1.7" height="3.7" rx="0.4" fill="#e2e8f0"/>
+          <path d="M9.4 13.2h5.2" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
 
-          <path d="M12 2.4l2.35 2.6H9.65z" fill="#fbbf24" stroke="#f59e0b" stroke-width="0.8" stroke-linejoin="round"/>
+          <rect x="11.15" y="4.5" width="1.7" height="3.6" rx="0.4" fill="#e2e8f0"/>
+
+          <path d="M12 2l2.35 2.5H9.65z" fill="#fbbf24" stroke="#f59e0b" stroke-width="0.8" stroke-linejoin="round"/>
 
         </svg>
 
       </div>
 
-      <span class="ntm-layer-thumb-label">Buoys</span>
+      <span class="ntm-layer-thumb-label">Marks</span>
 
     </button>
 
@@ -33922,7 +34039,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
         if (isBuoysActive) {
 
-          const idleTitle = btn.getAttribute("title") || "Buoys — OpenSeaMap seamarks";
+          const idleTitle = btn.getAttribute("title") || "Marks — Seamarks, Buoys & Subsea Cables";
 
           setOverlayBusy(btn, true, idleTitle);
 
