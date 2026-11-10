@@ -5687,6 +5687,12 @@ function switchToTab(targetTab, source) {
 
       }
 
+      try {
+        if (typeof ensureCurrentRouteRenderedOnChart === "function") {
+          ensureCurrentRouteRenderedOnChart();
+        }
+      } catch (eRt) {}
+
     }, 60);
 
     setTimeout(() => {
@@ -5696,6 +5702,12 @@ function switchToTab(targetTab, source) {
         leafletMap.invalidateSize();
 
       }
+
+      try {
+        if (typeof ensureCurrentRouteRenderedOnChart === "function") {
+          ensureCurrentRouteRenderedOnChart();
+        }
+      } catch (eRt) {}
 
     }, 200);
 
@@ -7589,7 +7601,13 @@ function renderRouteOnMap(route, shouldFly = true) {
 
     leafletRouteLayer = L.layerGroup().addTo(leafletMap);
 
+  } else if (!leafletMap.hasLayer(leafletRouteLayer)) {
+
+    leafletRouteLayer.addTo(leafletMap);
+
   }
+
+  window.leafletRouteLayer = leafletRouteLayer;
 
   leafletRouteLayer.clearLayers();
 
@@ -8173,6 +8191,115 @@ function renderRouteOnMap(route, shouldFly = true) {
   }
 
 }
+
+
+
+/**
+ * Automatically restores and projects the vessel's Current (DR) route or active route onto SetChart.
+ * Ensures layer is attached, drawn, corridor computed, passed-waypoints styled, and dock UI synced.
+ */
+function ensureCurrentRouteRenderedOnChart(opts) {
+  opts = opts || {};
+  const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+  if (!map) return;
+
+  const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+  let targetRoute = null;
+
+  if (drId) {
+    if (typeof getDrActiveRoute === "function") {
+      try { targetRoute = getDrActiveRoute(); } catch (eDr) {}
+    }
+    if (!targetRoute && typeof getSavedRoutesLibrary === "function") {
+      try {
+        const lib = getSavedRoutesLibrary();
+        if (Array.isArray(lib)) {
+          targetRoute = lib.find(r => r && (r.id === drId || r.name === drId)) || null;
+        }
+      } catch (eLib) {}
+    }
+    if (!targetRoute) {
+      try {
+        const rawLib = localStorage.getItem(SETSAIL_ROUTES_LIBRARY_KEY);
+        if (rawLib) {
+          const parsed = JSON.parse(rawLib);
+          if (Array.isArray(parsed)) {
+            targetRoute = parsed.find(r => r && (r.id === drId || r.name === drId)) || null;
+          }
+        }
+      } catch (eRawLib) {}
+    }
+  }
+
+  if (!targetRoute && activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
+    targetRoute = activeRouteData;
+  }
+  if (!targetRoute && typeof readActiveRouteFromStorage === "function") {
+    try { targetRoute = readActiveRouteFromStorage(); } catch (eAct) {}
+  }
+  if (!targetRoute) {
+    try {
+      const rawAct = localStorage.getItem(ROUTE_STORAGE_KEY);
+      if (rawAct) targetRoute = JSON.parse(rawAct);
+    } catch (eActStorage) {}
+  }
+
+  if (!targetRoute || !Array.isArray(targetRoute.waypoints) || targetRoute.waypoints.length === 0) {
+    return;
+  }
+
+  const isCurrent = Boolean(drId && (targetRoute.id === drId || targetRoute.name === drId));
+
+  if (isCurrent) {
+    if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
+    if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+  } else if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.route === false && !opts.force) {
+    return;
+  }
+
+  activeRouteData = targetRoute;
+
+  let rLayer = window.leafletRouteLayer || (typeof leafletRouteLayer !== "undefined" ? leafletRouteLayer : null);
+  if (!rLayer && typeof L !== "undefined") {
+    rLayer = L.layerGroup();
+    window.leafletRouteLayer = rLayer;
+    leafletRouteLayer = rLayer;
+  }
+  if (rLayer && !map.hasLayer(rLayer)) {
+    map.addLayer(rLayer);
+  }
+
+  const hasPainted = rLayer && typeof rLayer.getLayers === "function" && rLayer.getLayers().length > 0;
+  if (!hasPainted || opts.force || window._setsailRouteNeedsRepaint) {
+    window._setsailRouteNeedsRepaint = false;
+    if (typeof renderRouteOnMap === "function") {
+      renderRouteOnMap(targetRoute, false);
+    }
+  }
+
+  if (typeof window.renderRouteBufferCorridorOnMap === "function") {
+    try { window.renderRouteBufferCorridorOnMap(); } catch (eCor) {}
+  }
+  if (typeof updateCurrentRouteWaypointsPassedStatus === "function") {
+    try { updateCurrentRouteWaypointsPassedStatus(); } catch (ePass) {}
+  }
+
+  const routeTab = document.querySelector('.excel-tab[data-overlay="route"]');
+  if (routeTab) {
+    routeTab.classList.add("active");
+    const chk = routeTab.querySelector(".excel-tab-check");
+    if (chk) chk.textContent = "✓";
+  }
+  const catPillRoute = document.getElementById("catPillRoute");
+  if (catPillRoute) catPillRoute.style.display = "inline-flex";
+
+  try {
+    if (typeof displaySetRouteResults === "function") {
+      displaySetRouteResults(targetRoute, false);
+    }
+  } catch (eDisp) {}
+}
+window.ensureCurrentRouteRenderedOnChart = ensureCurrentRouteRenderedOnChart;
 
 
 
@@ -16886,17 +17013,9 @@ function initNtMMap() {
 
     try {
 
-      const savedRoute = readActiveRouteFromStorage();
+      if (typeof ensureCurrentRouteRenderedOnChart === "function") {
 
-      if (savedRoute) {
-
-        activeRouteData = savedRoute;
-
-        if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.route) {
-
-          renderRouteOnMap(savedRoute, false);
-
-        }
+        ensureCurrentRouteRenderedOnChart({ force: true });
 
       }
 
@@ -17049,6 +17168,12 @@ function initNtMMap() {
       initExcelOverlayDock(leafletMap);
 
       if (typeof initSetRoute === "function") initSetRoute();
+
+      try {
+        if (typeof ensureCurrentRouteRenderedOnChart === "function") {
+          ensureCurrentRouteRenderedOnChart();
+        }
+      } catch (eRtDock) {}
 
     }
 

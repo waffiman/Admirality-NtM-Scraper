@@ -7,15 +7,24 @@
 
 // Global Overlay State — must be `var` + window so setsail_core.js can read the same object
 // (script-scoped `const` is invisible to other classic scripts → empty-hint / dock desync).
+var hasSavedDrCurrentRoute = false;
+try {
+  const drId = String(localStorage.getItem("setsail_dr_active_route_id_v1") || "").trim();
+  if (drId) hasSavedDrCurrentRoute = true;
+} catch (e) {}
+
 var OVERLAY_STATES = window.OVERLAY_STATES || {
   depths: false,
   isobaths: false,
   notices: false,
   buoys: false,
   weather: false,
-  route: false,
+  route: hasSavedDrCurrentRoute,
   ais: false
 };
+if (hasSavedDrCurrentRoute) {
+  OVERLAY_STATES.route = true;
+}
 window.OVERLAY_STATES = OVERLAY_STATES;
 
 let leafletPortDepthsLayer = null;
@@ -20027,6 +20036,11 @@ function initExcelOverlayDock(map) {
     });
   }
 
+  if (hasSavedDrCurrentRoute) {
+    OVERLAY_STATES.route = true;
+    if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+  }
+
   // Sync initial dock tab visual states with OVERLAY_STATES (all OFF by default for fast map load)
   ["notices", "depths", "weather", "ais", "route"].forEach((key) => {
     const isAct = Boolean(OVERLAY_STATES[key]);
@@ -20040,6 +20054,10 @@ function initExcelOverlayDock(map) {
 
   if (typeof window.syncNdbcCursorTileVisibility === "function") {
     try { window.syncNdbcCursorTileVisibility(); } catch (eSync) {}
+  }
+
+  if (hasSavedDrCurrentRoute && typeof window.ensureCurrentRouteRenderedOnChart === "function") {
+    try { window.ensureCurrentRouteRenderedOnChart(); } catch (eCurRt) {}
   }
 
   // Restore or run weekly depth check on startup
@@ -20215,8 +20233,12 @@ function setOverlayActive(overlayKey, isActive, map = null) {
       const rLayer = (typeof window.leafletRouteLayer !== "undefined" && window.leafletRouteLayer)
         ? window.leafletRouteLayer
         : (typeof leafletRouteLayer !== "undefined" ? leafletRouteLayer : null);
-      if (isActive && typeof activeRouteData !== "undefined" && activeRouteData && typeof window.renderRouteOnMap === "function" && !window._setsailRenderingRoute) {
-        window.renderRouteOnMap(activeRouteData, false);
+      if (isActive) {
+        if (typeof window.ensureCurrentRouteRenderedOnChart === "function") {
+          window.ensureCurrentRouteRenderedOnChart({ force: true });
+        } else if (typeof activeRouteData !== "undefined" && activeRouteData && typeof window.renderRouteOnMap === "function" && !window._setsailRenderingRoute) {
+          window.renderRouteOnMap(activeRouteData, false);
+        }
       }
       if (rLayer) {
         if (isActive) {
