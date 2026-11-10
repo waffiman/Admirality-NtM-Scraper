@@ -148,7 +148,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.203" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.204" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -1085,6 +1085,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .ntm-wx-cursor-badge {
   flex: 0 0 auto;
   width: 2.1rem;
+  min-width: 2.1rem;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-size: 0.56rem;
   font-weight: 800;
@@ -1095,6 +1100,31 @@ svg.leaflet-image-layer.leaflet-interactive path {
   border: 1px solid rgba(250, 204, 21, 0.35);
   border-radius: 4px;
   padding: 0.16rem 0.15rem;
+  box-sizing: border-box;
+}
+.ntm-wx-cursor-badge .wx-badge-text {
+  display: inline-block;
+  line-height: 1;
+}
+.ntm-wx-cursor-badge .wx-badge-spinner {
+  display: none;
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(250, 204, 21, 0.25);
+  border-top-color: #facc15;
+  border-right-color: #f97316;
+  border-radius: 50%;
+  animation: ntmWxBadgeSpin 0.65s linear infinite;
+  box-sizing: border-box;
+}
+@keyframes ntmWxBadgeSpin {
+  to { transform: rotate(360deg); }
+}
+.ntm-wx-cursor-tile.is-loading-data .ntm-wx-cursor-badge .wx-badge-text {
+  display: none !important;
+}
+.ntm-wx-cursor-tile.is-loading-data .ntm-wx-cursor-badge .wx-badge-spinner {
+  display: inline-block !important;
 }
 .ntm-wx-cursor-body {
   display: flex;
@@ -1161,6 +1191,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
 [data-theme="light"] .ntm-wx-cursor-tile {
   background: rgba(224, 242, 254, 0.95);
   border-color: rgba(2, 132, 199, 0.35);
+}
+[data-theme="light"] .ntm-wx-cursor-badge {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.12);
+  border-color: rgba(2, 132, 199, 0.35);
+}
+[data-theme="light"] .ntm-wx-cursor-badge .wx-badge-spinner {
+  border-color: rgba(2, 132, 199, 0.25);
+  border-top-color: #0284c7;
+  border-right-color: #0369a1;
 }
 [data-theme="light"] .ntm-wx-cursor-tile .wx-chip {
   background: rgba(255, 255, 255, 0.85);
@@ -9589,7 +9629,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.203" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.204" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -14087,7 +14127,7 @@ select option {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.203" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.203';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.204" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.204';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -14109,7 +14149,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.203" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.204" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -14809,7 +14849,7 @@ select option {
 
           <div class="ntm-toolbar-right">
             <div class="ntm-wx-cursor-tile" id="ntmWxCursorTile" hidden title="Weather at cursor — wind, waves, pressure, SST and ocean current">
-              <span class="ntm-wx-cursor-badge">WX</span>
+              <span class="ntm-wx-cursor-badge" id="ntmWxCursorBadge"><span class="wx-badge-text">WX</span><span class="wx-badge-spinner" aria-hidden="true"></span></span>
               <div class="ntm-wx-cursor-body" id="ntmWxCursorBody">
                 <span class="wx-chip" title="Wind"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><path d="M4 8h9a3 3 0 1 0-3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 12h13a3.5 3.5 0 1 1-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 16h7a2.5 2.5 0 1 1-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>—</b></span>
                 <span class="wx-chip" title="Waves Hs"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><path d="M3 14c2.2-2.4 3.8-3.5 6-3.5S13.8 14 16 14s3.8-1.1 5-2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 18c2.2-2.4 3.8-3.5 6-3.5S13.8 18 16 18s3.8-1.1 5-2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/></svg></span><b>—</b></span>
@@ -21811,25 +21851,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.203"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.203" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.203"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.204"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.204" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.204"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.203",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.204",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.203"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.203"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.203"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.204"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.204"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.204"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.203"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.204"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21902,10 +21942,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.203"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.203"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.203"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.203"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.204"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.204"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.204"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.204"></script>
 
 
 
@@ -22619,17 +22659,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.203', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.204', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.203 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.204 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.203') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.203.0'); }, 1200);
+              if (last && last.indexOf('v5.204') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.204.0'); }, 1200);
               }
             } catch (eTip) {}
           })

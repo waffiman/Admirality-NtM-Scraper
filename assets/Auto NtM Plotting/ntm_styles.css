@@ -25698,3 +25698,60 @@
   color: #64748b;
   text-align: center;
 }
+
+/* WX Cursor Badge & Loading Spinner */
+.ntm-wx-cursor-badge {
+  flex: 0 0 auto;
+  width: 2.1rem;
+  min-width: 2.1rem;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #facc15;
+  background: rgba(250, 204, 21, 0.12);
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  border-radius: 4px;
+  padding: 0.16rem 0.15rem;
+  box-sizing: border-box;
+}
+.ntm-wx-cursor-badge .wx-badge-text {
+  display: inline-block;
+  line-height: 1;
+}
+.ntm-wx-cursor-badge .wx-badge-spinner {
+  display: none;
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(250, 204, 21, 0.25);
+  border-top-color: #facc15;
+  border-right-color: #f97316;
+  border-radius: 50%;
+  animation: ntmWxBadgeSpin 0.65s linear infinite;
+  box-sizing: border-box;
+}
+@keyframes ntmWxBadgeSpin {
+  to { transform: rotate(360deg); }
+}
+.ntm-wx-cursor-tile.is-loading-data .ntm-wx-cursor-badge .wx-badge-text {
+  display: none !important;
+}
+.ntm-wx-cursor-tile.is-loading-data .ntm-wx-cursor-badge .wx-badge-spinner {
+  display: inline-block !important;
+}
+[data-theme="light"] .ntm-wx-cursor-badge {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.12);
+  border-color: rgba(2, 132, 199, 0.35);
+}
+[data-theme="light"] .ntm-wx-cursor-badge .wx-badge-spinner {
+  border-color: rgba(2, 132, 199, 0.25);
+  border-top-color: #0284c7;
+  border-right-color: #0369a1;
+}
+

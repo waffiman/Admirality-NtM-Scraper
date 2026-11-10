@@ -10201,11 +10201,11 @@ function syncNdbcCursorTileVisibility() {
     tile.setAttribute("aria-hidden", "false");
     try {
       const v = (typeof window !== "undefined" && window.userVessel) ? window.userVessel : null;
-      const seedLat = (typeof _wxCursorLat === "number" && Number.isFinite(_wxCursorLat))
-        ? _wxCursorLat
+      const seedLat = (typeof window !== "undefined" && typeof window._wxCursorLat === "number" && Number.isFinite(window._wxCursorLat))
+        ? window._wxCursorLat
         : (v && isValidVesselLatLon(v.lat, v.lon) ? Number(v.lat) : (window.leafletMap && window.leafletMap.getCenter ? window.leafletMap.getCenter().lat : 26.0));
-      const seedLon = (typeof _wxCursorLon === "number" && Number.isFinite(_wxCursorLon))
-        ? _wxCursorLon
+      const seedLon = (typeof window !== "undefined" && typeof window._wxCursorLon === "number" && Number.isFinite(window._wxCursorLon))
+        ? window._wxCursorLon
         : (v && isValidVesselLatLon(v.lat, v.lon) ? Number(v.lon) : (window.leafletMap && window.leafletMap.getCenter ? window.leafletMap.getCenter().lng : 12.0));
       updateNdbcCursorTile(seedLat, seedLon);
     } catch (eSeed) {}
@@ -10215,6 +10215,7 @@ function syncNdbcCursorTileVisibility() {
     tile.style.setProperty("display", "none", "important");
     tile.setAttribute("aria-hidden", "true");
     tile.classList.remove("is-live");
+    tile.classList.remove("is-loading-data");
   }
 }
 
@@ -10288,7 +10289,27 @@ function updateNdbcCursorTile(lat, lon) {
 
         p.then(() => {
 
-          try { updateNdbcCursorTile(lat, lon); } catch (eR) {}
+          try {
+
+            const curLat = (typeof window !== "undefined" && window._wxCursorLat != null) ? window._wxCursorLat : null;
+
+            const curLon = (typeof window !== "undefined" && window._wxCursorLon != null) ? window._wxCursorLon : null;
+
+            if (curLat != null && curLon != null) {
+
+              if (Math.abs(curLat - lat) < 0.25 && Math.abs(curLon - lon) < 0.25) {
+
+                updateNdbcCursorTile(curLat, curLon);
+
+              }
+
+            } else {
+
+              updateNdbcCursorTile(lat, lon);
+
+            }
+
+          } catch (eR) {}
 
           try {
 
@@ -10418,6 +10439,16 @@ function updateNdbcCursorTile(lat, lon) {
 
     tile.title = "";
 
+    const ptKey = typeof omPointWxKey === "function" ? omPointWxKey(lat, lon) : (Math.round(lat * 20) / 20 + "," + Math.round(lon * 20) / 20);
+
+    const isInFlight = typeof _omPointWxInflight !== "undefined" && _omPointWxInflight && _omPointWxInflight.has(ptKey);
+
+    const hasDashes = [windTxt, waveTxt, pressureTxt, airSstTxt, curTxt].some(t => typeof t === "string" && (t.indexOf("\u2014") !== -1 || t.indexOf("—") !== -1));
+
+    const isLoading = (isInFlight || !omPack) && hasDashes;
+
+    tile.classList.toggle("is-loading-data", !!isLoading);
+
     return;
 
   }
@@ -10477,6 +10508,16 @@ function updateNdbcCursorTile(lat, lon) {
   if (meta) { meta.textContent = ""; meta.title = ""; }
 
   tile.title = "";
+
+  const ptKey = typeof omPointWxKey === "function" ? omPointWxKey(lat, lon) : (Math.round(lat * 20) / 20 + "," + Math.round(lon * 20) / 20);
+
+  const isInFlight = typeof _omPointWxInflight !== "undefined" && _omPointWxInflight && _omPointWxInflight.has(ptKey);
+
+  const hasDashes = [wind, wave, pressureTxt, fmtWxNum(s.airC, 0) + "\u00b0/" + fmtWxNum(s.sstC, 0) + "\u00b0", curTxt].some(t => typeof t === "string" && (t.indexOf("\u2014") !== -1 || t.indexOf("—") !== -1));
+
+  const isLoading = (isInFlight || !omPack) && hasDashes;
+
+  tile.classList.toggle("is-loading-data", !!isLoading);
 
 }
 
@@ -16660,6 +16701,8 @@ function initNtMMap() {
       if (valEl) valEl.textContent = idleStr;
       else if (hud) hud.textContent = idleStr;
       if (hud) hud.removeAttribute("data-live");
+      const curTile = document.getElementById("ntmWxCursorTile");
+      if (curTile) curTile.classList.remove("is-loading-data");
       try { updateCursorNavData(null, null); } catch (eCur) {}
     };
 
@@ -16690,6 +16733,24 @@ function initNtMMap() {
       _wxCursorLat = e.latlng.lat;
 
       _wxCursorLon = e.latlng.lng;
+
+      window._wxCursorLat = e.latlng.lat;
+
+      window._wxCursorLon = e.latlng.lng;
+
+      const curTile = document.getElementById("ntmWxCursorTile");
+
+      if (curTile && !curTile.hidden && typeof getCachedOpenMeteoPointWx === "function") {
+
+        const cached = getCachedOpenMeteoPointWx(e.latlng.lat, e.latlng.lng);
+
+        if (!cached) {
+
+          curTile.classList.add("is-loading-data");
+
+        }
+
+      }
 
       const now = Date.now();
 
