@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "0000 UTC",
-  "lastSyncUtc": "2026-11-10T00:34:19.257927+00:00",
+  "synopticCycle": "0800 UTC",
+  "lastSyncUtc": "2026-11-10T08:02:22.652588+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,20 +9,20 @@
       "shortName": "Pena",
       "category": "Tropical Storm (NOAA NHC)",
       "center": [
-        11.5,
-        -161.4
+        11.7,
+        -162.7
       ],
       "centralPressure": 1004,
       "maxWinds": 35,
       "gusts": 43,
-      "movement": "W at 12 kts",
+      "movement": "W at 14 kts",
       "dangerRadiusNm": 70,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            11.5,
-            -161.4
+            11.7,
+            -162.7
           ],
           "winds": 35,
           "radiusNm": 56
@@ -30,8 +30,8 @@
         {
           "tau": 24,
           "coords": [
-            11.5,
-            -163.0
+            11.7,
+            -164.4
           ],
           "winds": 35,
           "radiusNm": 73
@@ -39,8 +39,8 @@
         {
           "tau": 36,
           "coords": [
-            11.5,
-            -163.0
+            11.7,
+            -164.4
           ],
           "winds": 35,
           "radiusNm": 90
@@ -48,8 +48,8 @@
         {
           "tau": 48,
           "coords": [
-            11.2,
-            -165.3
+            11.4,
+            -166.5
           ],
           "winds": 35,
           "radiusNm": 107
@@ -57,8 +57,8 @@
         {
           "tau": 60,
           "coords": [
-            11.2,
-            -165.3
+            11.4,
+            -166.5
           ],
           "winds": 35,
           "radiusNm": 124
@@ -66,8 +66,8 @@
         {
           "tau": 72,
           "coords": [
-            11.1,
-            -167.4
+            11.3,
+            -168.9
           ],
           "winds": 35,
           "radiusNm": 140
@@ -75,8 +75,8 @@
         {
           "tau": 84,
           "coords": [
-            11.1,
-            -167.4
+            11.3,
+            -168.9
           ],
           "winds": 35,
           "radiusNm": 157
@@ -89,38 +89,38 @@
       "shortName": "Cempaka",
       "category": "Typhoon (JTWC/JMA)",
       "center": [
-        24.6,
-        136.6
+        25.4,
+        139.9
       ],
-      "centralPressure": 970,
+      "centralPressure": 955,
       "maxWinds": 95,
       "gusts": 119,
-      "movement": "ENE at 15 kts",
+      "movement": "ENE at 9 kts",
       "dangerRadiusNm": 114,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            25.5,
-            139.7
+            26.1,
+            141.8
           ],
-          "winds": 95,
+          "winds": 90,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            26.6,
-            143.7
+            27.5,
+            146.2
           ],
-          "winds": 85,
+          "winds": 80,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            28.0,
-            148.5
+            28.8,
+            151.3
           ],
           "winds": 70,
           "radiusNm": 90
@@ -128,8 +128,8 @@
         {
           "tau": 48,
           "coords": [
-            29.0,
-            153.4
+            29.9,
+            156.8
           ],
           "winds": 55,
           "radiusNm": 107
@@ -137,8 +137,8 @@
         {
           "tau": 60,
           "coords": [
-            29.2,
-            157.5
+            31.0,
+            161.9
           ],
           "winds": 45,
           "radiusNm": 124
@@ -155,7 +155,7 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 4.3,
+      "waveHeight": 4.6,
       "swellPeriod": 9,
       "swellDir": "E"
     },
@@ -167,33 +167,33 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 2.5,
+      "waveHeight": 3.0,
       "swellPeriod": 7,
-      "swellDir": "WNW"
+      "swellDir": "NW"
     },
     {
       "id": "WS1",
       "name": "Pena Cyclonic Wave Field",
       "center": [
-        11.5,
-        -161.4
+        11.7,
+        -162.7
       ],
       "radiusNm": 150,
-      "waveHeight": 3.4,
+      "waveHeight": 3.3,
       "swellPeriod": 9,
-      "swellDir": "NE"
+      "swellDir": "ENE"
     },
     {
       "id": "WS2",
       "name": "Cempaka Cyclonic Wave Field",
       "center": [
-        24.6,
-        136.6
+        25.4,
+        139.9
       ],
       "radiusNm": 228,
-      "waveHeight": 4.0,
-      "swellPeriod": 8,
-      "swellDir": "NNW"
+      "waveHeight": 6.5,
+      "swellPeriod": 10,
+      "swellDir": "SSW"
     }
   ],
   "pressureCenters": [
@@ -202,17 +202,17 @@
       "value": 1004,
       "name": "Tropical Storm PENA Core Low",
       "coords": [
-        11.5,
-        -161.4
+        11.7,
+        -162.7
       ]
     },
     {
       "type": "L",
-      "value": 970,
+      "value": 955,
       "name": "Typhoon CEMPAKA Core Low",
       "coords": [
-        24.6,
-        136.6
+        25.4,
+        139.9
       ]
     },
     {
@@ -246,8 +246,8 @@
   "windVectors": [
     {
       "coords": [
-        11.8,
-        -161.1
+        12.0,
+        -162.4
       ],
       "dir": 160,
       "speed": 35,
@@ -255,8 +255,8 @@
     },
     {
       "coords": [
-        24.9,
-        136.9
+        25.7,
+        140.2
       ],
       "dir": 200,
       "speed": 95,
