@@ -12230,49 +12230,39 @@ function clearOwnShipTimeVectorLayers() {
 
 
 function _setOwnShipVecLayer(kind, latlngs, factory) {
-
   let ref = kind === "shaft" ? _ownShipVecShaft : (kind === "arrow" ? _ownShipVecArrow : _ownShipVecBeak);
 
-  if (ref && leafletVesselLayer && leafletVesselLayer.hasLayer(ref)) {
-
-    if (ref.setLatLngs) ref.setLatLngs(latlngs);
-
-    else if (ref.setLatLngs === undefined && ref.setStyle) {
-
-      try { leafletVesselLayer.removeLayer(ref); } catch (e) {}
-
-      ref = factory(latlngs);
-
-      ref._setsailOwnShipVector = true;
-
-      leafletVesselLayer.addLayer(ref);
-
-    }
-
-  } else {
-
-    if (ref) {
-
+  // If arrow structure changed between single and multi-polyline, cleanly recreate
+  if (kind === "arrow" && ref) {
+    const cur = ref.getLatLngs ? ref.getLatLngs() : null;
+    if (!cur || !Array.isArray(cur[0])) {
       try { if (leafletVesselLayer) leafletVesselLayer.removeLayer(ref); } catch (e) {}
-
+      ref = null;
     }
+  }
 
+  if (ref && leafletVesselLayer && leafletVesselLayer.hasLayer(ref)) {
+    if (ref.setLatLngs) ref.setLatLngs(latlngs);
+    else if (ref.setLatLngs === undefined && ref.setStyle) {
+      try { leafletVesselLayer.removeLayer(ref); } catch (e) {}
+      ref = factory(latlngs);
+      ref._setsailOwnShipVector = true;
+      leafletVesselLayer.addLayer(ref);
+    }
+  } else {
+    if (ref) {
+      try { if (leafletVesselLayer) leafletVesselLayer.removeLayer(ref); } catch (e) {}
+    }
     ref = factory(latlngs);
-
     ref._setsailOwnShipVector = true;
-
     if (leafletVesselLayer) leafletVesselLayer.addLayer(ref);
-
   }
 
   if (kind === "shaft") _ownShipVecShaft = ref;
-
   else if (kind === "arrow") _ownShipVecArrow = ref;
-
   else _ownShipVecBeak = ref;
 
   return ref;
-
 }
 
 
@@ -12481,15 +12471,20 @@ function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
 
   const wingNm = Math.max(5 * npp, Math.min(10 * npp, tipNm * 0.2));
 
+  // Double arrow for Ground-Stabilized COG vector (ECDIS IEC 62288 standard)
+  // 1. Primary (leading) arrowhead at the tip of the vector
   const a1 = destinationPointNm(tip[0], tip[1], (bearing + 150) % 360, wingNm);
-
   const a2 = destinationPointNm(tip[0], tip[1], (bearing + 210) % 360, wingNm);
 
-
+  // 2. Secondary (trailing) arrowhead placed slightly behind along the shaft
+  const offsetNm = Math.max(4.5 * npp, wingNm * 0.75);
+  const tip2 = destinationPointNm(tip[0], tip[1], (bearing + 180) % 360, offsetNm);
+  const b1 = destinationPointNm(tip2[0], tip2[1], (bearing + 150) % 360, wingNm);
+  const b2 = destinationPointNm(tip2[0], tip2[1], (bearing + 210) % 360, wingNm);
 
   _setOwnShipVecLayer("shaft", [start, tip], (ll) => L.polyline(ll, shaftStyle));
 
-  _setOwnShipVecLayer("arrow", [a1, tip, a2], (ll) => L.polyline(ll, arrowStyle));
+  _setOwnShipVecLayer("arrow", [[a1, tip, a2], [b1, tip2, b2]], (ll) => L.polyline(ll, arrowStyle));
 
 }
 
