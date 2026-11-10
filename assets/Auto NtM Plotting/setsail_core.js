@@ -2322,6 +2322,12 @@ function setDrActiveRouteId(routeId, opts) {
 
   }
 
+  try {
+    if (typeof updateCurrentRouteWaypointsPassedStatus === "function") {
+      updateCurrentRouteWaypointsPassedStatus();
+    }
+  } catch (eDrWp) {}
+
   if (typeof renderVesselRouteLibraryList === "function") {
 
     renderVesselRouteLibraryList();
@@ -7827,6 +7833,8 @@ function renderRouteOnMap(route, shouldFly = true) {
 
     marker._setsailRouteWptTitle = titleBit;
 
+    marker._setsailRouteWptPassed = false;
+
 
 
     marker.on("dragstart", function (e) {
@@ -8103,6 +8111,12 @@ function renderRouteOnMap(route, shouldFly = true) {
     window.updateRouteMiniWindowUI();
 
   }
+
+  try {
+    if (typeof updateCurrentRouteWaypointsPassedStatus === "function") {
+      updateCurrentRouteWaypointsPassedStatus();
+    }
+  } catch (eUpWp) {}
 
   // Defer corridor + history — sync SVG polygon + localStorage on every render froze the UI
 
@@ -13131,6 +13145,18 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
   }
 
 
+
+  try {
+    if (typeof updateCurrentRouteWaypointsPassedStatus === "function") {
+      updateCurrentRouteWaypointsPassedStatus(lat, lon);
+    }
+  } catch (eWpPass) {}
+
+  try {
+    if (typeof window.syncSetStarHemispheresFromOwnShip === "function") {
+      window.syncSetStarHemispheresFromOwnShip();
+    }
+  } catch (eHemi) {}
 
   const hud = document.getElementById("ntmVesselHud");
 
@@ -36555,7 +36581,7 @@ window.getRouteWptPixelSize = getRouteWptPixelSize;
 
 
 
-function buildRouteWptDivIcon(titleBit, zoom) {
+function buildRouteWptDivIcon(titleBit, zoom, isPassed = false) {
 
   // SVG double-circle — geometric centre = iconAnchor (avoids CSS border-box left offset)
 
@@ -36567,9 +36593,17 @@ function buildRouteWptDivIcon(titleBit, zoom) {
 
   const rIn = Math.max(2, box * 0.22);
 
+  const strokeColor = isPassed ? "#dc2626" : "#2563eb";
+
+  const fillColor = isPassed ? "#dc2626" : "#2563eb";
+
+  const haloColor = isPassed ? "rgba(220,38,38,0.22)" : "rgba(37,99,235,0.14)";
+
+  const passedCls = isPassed ? " is-passed" : "";
+
   const html =
 
-    '<div class="route-wpt-dot" title="Drag ' + String(titleBit || "WPT").replace(/"/g, "") +
+    '<div class="route-wpt-dot' + passedCls + '" title="' + (isPassed ? '[Passed] ' : '') + 'Drag ' + String(titleBit || "WPT").replace(/"/g, "") +
 
     '" style="width:' + box + "px;height:" + box + "px;margin:0;padding:0;line-height:0;cursor:grab;box-sizing:border-box;\">" +
 
@@ -36579,11 +36613,11 @@ function buildRouteWptDivIcon(titleBit, zoom) {
 
         '<circle cx="' + cx + '" cy="' + cx + '" r="' + rOut +
 
-        '" fill="rgba(37,99,235,0.14)" stroke="#2563eb" stroke-width="2" vector-effect="non-scaling-stroke"/>' +
+        '" fill="' + haloColor + '" stroke="' + strokeColor + '" stroke-width="2.2" vector-effect="non-scaling-stroke"/>' +
 
         '<circle cx="' + cx + '" cy="' + cx + '" r="' + rIn +
 
-        '" fill="#2563eb" stroke="none"/>' +
+        '" fill="' + fillColor + '" stroke="none"/>' +
 
       "</svg>" +
 
@@ -36593,7 +36627,7 @@ function buildRouteWptDivIcon(titleBit, zoom) {
 
     // Do NOT include default "leaflet-div-icon" — its 1px border shifts the visual centre left
 
-    className: "route-wpt-div-icon",
+    className: "route-wpt-div-icon" + passedCls,
 
     html: html,
 
@@ -36606,6 +36640,118 @@ function buildRouteWptDivIcon(titleBit, zoom) {
   });
 
 }
+
+window.buildRouteWptDivIcon = buildRouteWptDivIcon;
+
+function isRouteCurrentRoute(route) {
+  if (!route) return false;
+  const curId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+  if (!curId) return false;
+  return (
+    (route.id && String(route.id) === String(curId)) ||
+    (route.name && String(route.name) === String(curId)) ||
+    !!route.isCurrent ||
+    !!route.isDr
+  );
+}
+window.isRouteCurrentRoute = isRouteCurrentRoute;
+
+function updateCurrentRouteWaypointsPassedStatus(shipLat, shipLon) {
+  if (!leafletRouteLayer || !activeRouteData) return;
+  const isCurrent = isRouteCurrentRoute(activeRouteData);
+  const zoom = leafletMap && leafletMap.getZoom ? leafletMap.getZoom() : 5;
+
+  if (!isCurrent) {
+    if (leafletRouteLayer.eachLayer) {
+      leafletRouteLayer.eachLayer((ly) => {
+        if (!ly || (!ly._setsailRouteWptIdx && ly._setsailRouteWptIdx !== 0)) return;
+        if (ly._setsailRouteWptPassed) {
+          ly._setsailRouteWptPassed = false;
+          if (ly.setIcon) {
+            const titleBit = ly._setsailRouteWptTitle || ("WPT #" + (ly._setsailRouteWptIdx + 1));
+            ly.setIcon(buildRouteWptDivIcon(titleBit, zoom, false));
+          }
+        }
+      });
+    }
+    return;
+  }
+
+  if (!Number.isFinite(shipLat) || !Number.isFinite(shipLon)) {
+    const v = (typeof userVessel !== "undefined" && userVessel) ? userVessel : ((typeof window !== "undefined" && window.userVessel) ? window.userVessel : null);
+    if (v && Number.isFinite(v.lat) && Number.isFinite(v.lon)) {
+      shipLat = Number(v.lat);
+      shipLon = Number(v.lon);
+    } else {
+      return;
+    }
+  }
+
+  const wps = activeRouteData.waypoints;
+  if (!wps || wps.length === 0) return;
+
+  const routeKey = String(activeRouteData.id || activeRouteData.name || "current");
+  if (window._setsailCurrentRouteId !== routeKey) {
+    window._setsailCurrentRouteId = routeKey;
+    window._setsailCurrentRoutePassedWpts = new Set();
+  }
+  const passedSet = window._setsailCurrentRoutePassedWpts;
+
+  const unrolled = window._setsailRouteUnrolled || wps.map((w) => [Number(w.lat), Number(w.lon)]);
+  const normWps = unrolled.map((p) => ({ lat: p[0], lon: p[1] }));
+  const proj = (typeof setrouteProjectOntoRoute === "function") ? setrouteProjectOntoRoute(shipLat, shipLon, normWps) : null;
+
+  if (proj && proj.distNm <= 5.0) {
+    for (let k = 0; k < proj.segIdx; k++) {
+      passedSet.add(k);
+    }
+    if (proj.t >= 0.05 || proj.alongNm > 0.1) {
+      passedSet.add(proj.segIdx);
+    }
+    if (proj.t >= 0.95 && (proj.segIdx + 1 < normWps.length)) {
+      passedSet.add(proj.segIdx + 1);
+    }
+  }
+
+  for (let i = 0; i < normWps.length; i++) {
+    if (passedSet.has(i)) continue;
+    const wp = normWps[i];
+    const dNm = (typeof calculateHaversineDistanceNM === "function")
+      ? calculateHaversineDistanceNM(shipLat, shipLon, wp.lat, wp.lon)
+      : 999;
+
+    let distPx = Infinity;
+    try {
+      if (leafletMap && typeof leafletMap.latLngToLayerPoint === "function") {
+        const pShip = leafletMap.latLngToLayerPoint([shipLat, shipLon]);
+        const pWp = leafletMap.latLngToLayerPoint([wp.lat, wp.lon]);
+        distPx = pShip.distanceTo(pWp);
+      }
+    } catch (ePx) {}
+
+    if (dNm <= 1.0 || distPx <= 28) {
+      passedSet.add(i);
+      for (let k = 0; k < i; k++) {
+        passedSet.add(k);
+      }
+    }
+  }
+
+  if (leafletRouteLayer.eachLayer) {
+    leafletRouteLayer.eachLayer((ly) => {
+      if (!ly || (!ly._setsailRouteWptIdx && ly._setsailRouteWptIdx !== 0)) return;
+      if (!ly.setIcon) return;
+      const idx = ly._setsailRouteWptIdx;
+      const isPassed = passedSet.has(idx);
+      if (ly._setsailRouteWptPassed !== isPassed) {
+        ly._setsailRouteWptPassed = isPassed;
+        const titleBit = ly._setsailRouteWptTitle || ("WPT #" + (idx + 1));
+        ly.setIcon(buildRouteWptDivIcon(titleBit, zoom, isPassed));
+      }
+    });
+  }
+}
+window.updateCurrentRouteWaypointsPassedStatus = updateCurrentRouteWaypointsPassedStatus;
 
 window.buildRouteWptDivIcon = buildRouteWptDivIcon;
 
@@ -36695,7 +36841,7 @@ function applyRouteStrokeWeightsForZoom() {
 
         const titleBit = ly._setsailRouteWptTitle || ("WPT #" + (ly._setsailRouteWptIdx + 1));
 
-        ly.setIcon(buildRouteWptDivIcon(titleBit, z));
+        ly.setIcon(buildRouteWptDivIcon(titleBit, z, !!ly._setsailRouteWptPassed));
 
       });
 

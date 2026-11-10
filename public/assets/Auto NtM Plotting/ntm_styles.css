@@ -25755,3 +25755,12 @@
   border-right-color: #0369a1;
 }
 
+
+/* Passed waypoint on Current Route (red matching centerline) */
+.route-wpt-div-icon.is-passed .route-wpt-dot svg circle:first-child {
+  stroke: #dc2626 !important;
+  fill: rgba(220, 38, 38, 0.22) !important;
+}
+.route-wpt-div-icon.is-passed .route-wpt-dot svg circle:last-child {
+  fill: #dc2626 !important;
+}

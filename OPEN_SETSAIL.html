@@ -148,7 +148,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.204" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.205" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -7398,6 +7398,13 @@ body.ss-setchart .setsail-toast {
   line-height: 0 !important;
   transform-origin: center center;
 }
+.route-wpt-div-icon.is-passed .route-wpt-dot svg circle:first-child {
+  stroke: #dc2626 !important;
+  fill: rgba(220, 38, 38, 0.22) !important;
+}
+.route-wpt-div-icon.is-passed .route-wpt-dot svg circle:last-child {
+  fill: #dc2626 !important;
+}
 .route-wpt-div-icon .route-wpt-dot {
   margin: 0 !important;
   padding: 0 !important;
@@ -9629,7 +9636,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.204" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.205" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12978,11 +12985,17 @@ select option {
             appContent.style.maxHeight = '100vh';
           }
           if (waffiFooter) waffiFooter.style.display = 'none';
+          if (typeof window.syncSetStarHemispheresFromOwnShip === 'function') {
+            window.syncSetStarHemispheresFromOwnShip();
+          }
           setTimeout(() => {
             if (window.leafletMap) window.leafletMap.invalidateSize();
             else if (typeof window.initNtMMap === 'function') window.initNtMMap();
           }, 120);
         } else if (targetTab === 'tab-gyro') {
+          if (typeof window.syncSetStarHemispheresFromOwnShip === 'function') {
+            window.syncSetStarHemispheresFromOwnShip();
+          }
           setTimeout(() => {
             if (typeof window.renderDevTableView === 'function') window.renderDevTableView();
             if (typeof window.drawDevChart === 'function') window.drawDevChart();
@@ -14127,7 +14140,7 @@ select option {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.204" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.204';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.205" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.205';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -14149,7 +14162,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.204" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.205" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -21154,12 +21167,81 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       }
     }
 
+    // SetStar Hemisphere Live Sync with Own Ship Position
+    window.isSetStarHemisphereManuallyEdited = false;
+
+    function getKnownOwnShipPosition() {
+      if (window.userVessel && Number.isFinite(window.userVessel.lat) && Number.isFinite(window.userVessel.lon)) {
+        return { lat: Number(window.userVessel.lat), lon: Number(window.userVessel.lon) };
+      }
+      try {
+        const raw = localStorage.getItem('setsail_vessel_state_v2') || localStorage.getItem('setsail_vessel_state_v1');
+        if (raw) {
+          const v = JSON.parse(raw);
+          if (v && Number.isFinite(v.lat) && Number.isFinite(v.lon)) {
+            return { lat: Number(v.lat), lon: Number(v.lon) };
+          }
+        }
+      } catch (e) {}
+      try {
+        if (window._ownShipMarker && typeof window._ownShipMarker.getLatLng === 'function') {
+          const ll = window._ownShipMarker.getLatLng();
+          if (ll && Number.isFinite(ll.lat) && Number.isFinite(ll.lng)) {
+            return { lat: Number(ll.lat), lon: Number(ll.lng) };
+          }
+        }
+      } catch (e2) {}
+      return null;
+    }
+    window.getKnownOwnShipPosition = getKnownOwnShipPosition;
+
+    function syncSetStarHemispheresFromOwnShip() {
+      if (window.isSetStarHemisphereManuallyEdited) return;
+      var pos = getKnownOwnShipPosition();
+      if (!pos) return;
+      var latNSEl = document.getElementById("latNS");
+      var lonEWEl = document.getElementById("lonEW");
+      var changed = false;
+      if (latNSEl && Number.isFinite(pos.lat)) {
+        var targetNS = pos.lat >= 0 ? "N" : "S";
+        if (latNSEl.value !== targetNS) {
+          latNSEl.value = targetNS;
+          changed = true;
+        }
+      }
+      if (lonEWEl && Number.isFinite(pos.lon)) {
+        var targetEW = pos.lon >= 0 ? "E" : "W";
+        if (lonEWEl.value !== targetEW) {
+          lonEWEl.value = targetEW;
+          changed = true;
+        }
+      }
+      if (changed && typeof onSetStarCoordInputsChange === "function") {
+        onSetStarCoordInputsChange();
+      }
+    }
+    window.syncSetStarHemispheresFromOwnShip = syncSetStarHemispheresFromOwnShip;
+
+    // Track manual user override on hemisphere selects so auto-sync doesn't overwrite manual input
+    (function initSetStarHemisphereManualListener() {
+      var latNSEl = document.getElementById("latNS");
+      var lonEWEl = document.getElementById("lonEW");
+      if (latNSEl) {
+        latNSEl.addEventListener("change", function() { window.isSetStarHemisphereManuallyEdited = true; });
+      }
+      if (lonEWEl) {
+        lonEWEl.addEventListener("change", function() { window.isSetStarHemisphereManuallyEdited = true; });
+      }
+    })();
+
     // SetStar UI Streamlining & Live Sync Engine
     function initSetStarCurrentData() {
+      syncSetStarHemispheresFromOwnShip();
       var btn = document.getElementById("btnUseCurrentData");
       if (!btn) return;
       btn.addEventListener("click", function() {
         window.isSetStarVarManuallyEdited = false;
+        window.isSetStarHemisphereManuallyEdited = false;
         var now = new Date();
         var yyyy = now.getFullYear();
         var mm = String(now.getMonth() + 1).padStart(2, "0");
@@ -21851,25 +21933,25 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.204"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.204" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.204"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.205"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.205" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.205"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.204",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.205",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.204"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.204"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.204"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.205"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.205"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.205"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.204"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.205"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -21942,10 +22024,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.204"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.204"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.204"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.204"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.205"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.205"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.205"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.205"></script>
 
 
 
@@ -22659,17 +22741,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.204', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.205', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.204 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.205 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.204') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.204.0'); }, 1200);
+              if (last && last.indexOf('v5.205') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.205.0'); }, 1200);
               }
             } catch (eTip) {}
           })
