@@ -791,13 +791,15 @@ function applyVesselProfile(data, opts) {
 
   persistUserVessel({ fromCloudSync: !!opts.fromCloudSync });
 
-  fillVesselFormsFromState();
-
-
+  if (!opts.skipPlot) {
+    fillVesselFormsFromState();
+  }
 
   if (isValidVesselLatLon(userVessel.lat, userVessel.lon)) {
 
-    plotUserVessel(Number(userVessel.lat), Number(userVessel.lon), userVessel.source || "manual", true);
+    if (!opts.skipPlot) {
+      plotUserVessel(Number(userVessel.lat), Number(userVessel.lon), userVessel.source || "manual", true);
+    }
 
     if (window._setsailAwaitingOwnShipFix) {
 
@@ -1738,7 +1740,7 @@ async function refreshOwnVesselFromAis(opts) {
 
     const ageMs = getSetSailUtcNowMs() - hitMs;
 
-    const isLive = ageMs <= OWN_AIS_STALE_DR_MS;
+    const isLive = ageMs <= OWN_AIS_VISUAL_DR_MS;
 
     // Remember previous fix along-track so DR can calibrate SOG from successive AIS hits
 
@@ -1772,74 +1774,49 @@ async function refreshOwnVesselFromAis(opts) {
 
     const shouldPlotAis = isLive || feedNow === "ais" || feedNow === "dr";
 
+    const isDrOnRails = !isLive && !!getDrActiveRouteId();
+    const keepLat = (isDrOnRails && isValidVesselLatLon(prev.lat, prev.lon))
+      ? prev.lat
+      : ((feedNow === "gps" && !isLive && isValidVesselLatLon(prev.lat, prev.lon)) ? prev.lat : Number(hit.lat));
+    const keepLon = (isDrOnRails && isValidVesselLatLon(prev.lat, prev.lon))
+      ? prev.lon
+      : ((feedNow === "gps" && !isLive && isValidVesselLatLon(prev.lat, prev.lon)) ? prev.lon : Number(hit.lon));
+
     applyVesselProfile(
-
       Object.assign({}, prev, hit, {
-
-        // Keep GPS lat/lon on the icon if GPS is the temporary active feed
-
-        lat: (feedNow === "gps" && !isLive && isValidVesselLatLon(prev.lat, prev.lon)) ? prev.lat : Number(hit.lat),
-
-        lon: (feedNow === "gps" && !isLive && isValidVesselLatLon(prev.lat, prev.lon)) ? prev.lon : Number(hit.lon),
-
-        source: isLive ? "ais" : (feedNow === "gps" ? "gps" : "ais-stale"),
-
+        lat: keepLat,
+        lon: keepLon,
+        source: isLive ? "ais" : (feedNow === "gps" ? "gps" : (isDrOnRails ? (prev.source || "ais-dr-rails") : "ais-stale")),
         preferredNav: prev.preferredNav === "gps" ? "gps" : "ais",
-
         aisLastFixAt: hit.aisSeenAt || new Date(hitMs).toISOString(),
-
         aisFixLat: Number(hit.lat),
-
         aisFixLon: Number(hit.lon),
-
         aisRefreshedAt: getSetSailUtcNowIso(),
-
-        deadReckoned: false,
-
+        deadReckoned: isDrOnRails,
         // Fresh AIS becomes the new DR origin once coverage is lost again
-
-        aisDrActivatedAt: null,
-
-        aisDrNm: null,
-
-        aisDrMode: null,
-
-        aisDrOnCenterline: false,
-
+        aisDrActivatedAt: isDrOnRails ? (prev.aisDrActivatedAt || getSetSailUtcNowIso()) : null,
+        aisDrNm: isDrOnRails ? prev.aisDrNm : null,
+        aisDrMode: isDrOnRails ? prev.aisDrMode : null,
+        aisDrOnCenterline: isDrOnRails ? prev.aisDrOnCenterline : false,
         aisDrPrevAlongNm: Number.isFinite(prevAlongKeep) ? prevAlongKeep : prev.aisDrPrevAlongNm,
-
         aisDrPrevFixMs: Number.isFinite(prevFixKeep) ? prevFixKeep : prev.aisDrPrevFixMs,
-
         aisDrFixAlongNm: Number.isFinite(newAlong) ? newAlong : prev.aisDrFixAlongNm
-
       }),
-
       {
-
         toast: opts.toast
-
           ? (isLive
-
             ? "Own vessel AIS updated (" + (hit.name || hit.mmsi) + ")"
-
             : "Last AIS fix is " + Math.round(ageMs / 3600000 * 10) / 10 + "h old UTC — chart AIS stays at that fix; enable Current route for local DR")
-
           : null,
-
-        skipAisSchedule: true
-
+        skipAisSchedule: true,
+        skipPlot: isDrOnRails
       }
-
     );
 
     // Live AIS in coverage: stay on the fix (do not immediately coast over it).
-
     // When the fix ages out, DR/GPS fallbacks take over.
-
-    if (getDrActiveRouteId() && !isLive && shouldPlotAis && feedNow !== "gps") {
-
+    if (isDrOnRails && shouldPlotAis && feedNow !== "gps") {
       applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true });
-
     }
 
     try {
@@ -2754,45 +2731,25 @@ function applyOwnVesselDeadReckoning(opts) {
 
   if (ageMs > OWN_AIS_DR_MAX_AGE_MS) ageMs = OWN_AIS_DR_MAX_AGE_MS;
 
-  // While AIS is still "live" (recent report), keep the icon on the fix — do not coast over it.
-
-  // DR starts only after OWN_AIS_STALE_DR_MS so re-entry into coverage snaps back to AIS.
-
-  if (!opts.force && ageMs < OWN_AIS_STALE_DR_MS) {
-
+  // While AIS is truly live (<12s), keep the icon on the fix — do not coast over it.
+  // When fix ages past OWN_AIS_VISUAL_DR_MS, DR projection along route rails takes over smoothly.
+  if (!opts.force && ageMs < OWN_AIS_VISUAL_DR_MS) {
     if (v.deadReckoned && isValidVesselLatLon(v.aisFixLat, v.aisFixLon)) {
-
-      // Snap back from DR to the official fix when a fresh report arrived
-
+      // Snap back from DR to the official fix only when a fresh live report arrives
       const updatedLive = Object.assign({}, v, {
-
         lat: Number(v.aisFixLat),
-
         lon: Number(v.aisFixLon),
-
         deadReckoned: false,
-
         source: "ais"
-
       });
-
       window.userVessel = updatedLive;
-
       userVessel = updatedLive;
-
       if (window.leafletMap && typeof plotUserVessel === "function") {
-
         plotUserVessel(updatedLive.lat, updatedLive.lon, "AIS", true);
-
       }
-
     }
-
     return;
-
   }
-
-  if (!opts.force && ageMs < OWN_AIS_VISUAL_DR_MS) return;
 
 
 
@@ -2990,7 +2947,8 @@ function applyOwnVesselDeadReckoning(opts) {
 
   const dMove = calculateHaversineDistanceNM(Number(v.lat) || fixLat, Number(v.lon) || fixLon, lat1, lon1);
 
-  if (!(opts.force) && Number.isFinite(dMove) && dMove < 0.01 && v.deadReckoned) return;
+  const minMove = (opts.visual || opts.force) ? 0.0001 : 0.01;
+  if (!(opts.force) && Number.isFinite(dMove) && dMove < minMove && v.deadReckoned) return;
 
 
 
@@ -3065,6 +3023,7 @@ function applyOwnVesselDeadReckoning(opts) {
   }
 
   try { refreshOwnShipCcrpPopup(); } catch (ePop) {}
+  try { syncOpenVesselPopoverLiveCoords(); } catch (eSyncPop) {}
 
   if (opts.toast && typeof showSetSailToast === "function") {
 
@@ -4014,11 +3973,17 @@ function syncMyVesselFromLiveAis(t) {
 
   const prevFixKeep = prev.aisLastFixAt ? Date.parse(prev.aisLastFixAt) : NaN;
 
+  const ageMs = Math.max(0, (typeof getSetSailUtcNowMs === "function" ? getSetSailUtcNowMs() : Date.now()) - incomingTs);
+  const isLive = ageMs <= OWN_AIS_VISUAL_DR_MS;
+  const isDrOnRails = !isLive && typeof getDrActiveRouteId === "function" && !!getDrActiveRouteId();
+  const keepLat = (isDrOnRails && isValidVesselLatLon(prev.lat, prev.lon)) ? prev.lat : lat;
+  const keepLon = (isDrOnRails && isValidVesselLatLon(prev.lat, prev.lon)) ? prev.lon : lon;
+
   const updated = Object.assign({}, prev, {
 
-    lat: lat,
+    lat: keepLat,
 
-    lon: lon,
+    lon: keepLon,
 
     sog: t.sog != null ? Number(t.sog) : prev.sog,
 
@@ -4034,11 +3999,11 @@ function syncMyVesselFromLiveAis(t) {
 
     name: t.name || prev.name,
 
-    source: "AIS",
+    source: isLive ? "AIS" : (isDrOnRails ? (prev.source || "ais-dr-rails") : "ais-stale"),
 
     preferredNav: prev.preferredNav === "gps" ? "gps" : "ais",
 
-    deadReckoned: false,
+    deadReckoned: isDrOnRails,
 
     aisLastFixAt: new Date(incomingTs).toISOString(),
 
@@ -4049,6 +4014,14 @@ function syncMyVesselFromLiveAis(t) {
     aisRefreshedAt: new Date().toISOString(),
 
     updatedAt: new Date().toISOString(),
+
+    aisDrActivatedAt: isDrOnRails ? (prev.aisDrActivatedAt || (typeof getSetSailUtcNowIso === "function" ? getSetSailUtcNowIso() : new Date().toISOString())) : null,
+
+    aisDrNm: isDrOnRails ? prev.aisDrNm : null,
+
+    aisDrMode: isDrOnRails ? prev.aisDrMode : null,
+
+    aisDrOnCenterline: isDrOnRails ? prev.aisDrOnCenterline : false,
 
     aisDrPrevAlongNm: Number.isFinite(prevAlongKeep) ? prevAlongKeep : prev.aisDrPrevAlongNm,
 
@@ -4068,7 +4041,11 @@ function syncMyVesselFromLiveAis(t) {
 
   // AIS-primary with live GPS temp: only reclaim icon when AIS is the preferred feed
 
-  if (getOwnShipPreferredNav(updated) === "ais" && window.leafletMap && typeof plotUserVessel === "function") {
+  if (isDrOnRails) {
+    if (typeof applyOwnVesselDeadReckoning === "function") {
+      applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true });
+    }
+  } else if (getOwnShipPreferredNav(updated) === "ais" && window.leafletMap && typeof plotUserVessel === "function") {
 
     plotUserVessel(lat, lon, "AIS", true);
 
@@ -6256,6 +6233,8 @@ function initFilterAndSortPopovers() {
       vesselPop.classList.remove("open");
 
       if (myVesselBtn) myVesselBtn.classList.remove("active");
+
+      try { if (typeof stopVesselPopoverLiveSync === "function") stopVesselPopoverLiveSync(); } catch (eSync) {}
 
     }
 
@@ -11064,6 +11043,8 @@ function initHomeHudVessel() {
 
     if (btn) btn.setAttribute("aria-expanded", "false");
 
+    try { stopVesselPopoverLiveSync(); } catch (eSync) {}
+
   };
 
   const openHomePop = () => {
@@ -11113,6 +11094,8 @@ function initHomeHudVessel() {
     try { bindVesselNameAutocomplete("home"); } catch (e3) {}
 
     try { bindVesselMmsiLookup("home"); } catch (e4) {}
+
+    try { startVesselPopoverLiveSync(); } catch (eSync) {}
 
   };
 
@@ -11560,6 +11543,8 @@ function initVesselTracking() {
 
       if (myVesselBtn) myVesselBtn.classList.remove("active");
 
+      try { stopVesselPopoverLiveSync(); } catch (eSync) {}
+
     } else {
 
       vesselPop.classList.add("open");
@@ -11569,6 +11554,8 @@ function initVesselTracking() {
       fillVesselFormsFromState();
 
       bindVesselNameAutocomplete("chart");
+
+      try { startVesselPopoverLiveSync(); } catch (eSync) {}
 
     }
 
@@ -11581,6 +11568,8 @@ function initVesselTracking() {
     if (vesselPop) vesselPop.classList.remove("open");
 
     if (myVesselBtn) myVesselBtn.classList.remove("active");
+
+    try { stopVesselPopoverLiveSync(); } catch (eSync) {}
 
   };
 
@@ -13327,42 +13316,78 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
 
 /** Push live vessel coords into open Home/Chart My Vessel forms without fighting focused inputs. */
+let _vesselPopoverLiveTimer = null;
 
 function syncOpenVesselPopoverLiveCoords() {
-
   const chartPop = document.getElementById("ntmVesselPopover");
-
   const homePop = document.getElementById("homeVesselPopover");
-
   const chartOpen = !!(chartPop && chartPop.classList.contains("open"));
-
   const homeOpen = !!(homePop && homePop.classList.contains("open"));
-
   if (!chartOpen && !homeOpen) return;
 
-
+  const v = window.userVessel || userVessel;
+  if (!v) return;
 
   const active = document.activeElement;
-
   const activeId = active && active.id ? String(active.id) : "";
 
-  const editingCoords = /^(vesselLat|vesselLon|homeVesselLat|homeVesselLon|vesselName|homeVesselName|vesselMmsi|homeVesselMmsi)$/.test(activeId);
+  ["home", "chart"].forEach((which) => {
+    if (which === "home" && !homeOpen) return;
+    if (which === "chart" && !chartOpen) return;
+    const m = typeof vesselFormMap === "function" ? vesselFormMap(which) : null;
+    if (!m) return;
 
-  if (editingCoords) return;
+    if (isValidVesselLatLon(v.lat, v.lon)) {
+      const dms = formatLatLonDMS(Number(v.lat), Number(v.lon));
+      const mlat = dms.match(/([0-9]+°[^NSEW]*[NS])/i);
+      const mlon = dms.match(/([0-9]+°[^NSEW]*[EW])/i);
+      const latVal = mlat ? mlat[1].trim() : String(v.lat);
+      const lonVal = mlon ? mlon[1].trim() : String(v.lon);
+      if (activeId !== m.lat) setInputVal(m.lat, latVal);
+      if (activeId !== m.lon) setInputVal(m.lon, lonVal);
+    }
 
+    if (activeId !== m.sog && v.sog != null) setInputVal(m.sog, v.sog);
+    if (activeId !== m.cog && v.cog != null) setInputVal(m.cog, v.cog);
+    if (activeId !== m.heading && v.heading != null) setInputVal(m.heading, v.heading);
+  });
 
+  try {
+    if (typeof updateHomeVesselHudLabel === "function") updateHomeVesselHudLabel();
+  } catch (eHud) {}
+}
 
-  const now = Date.now();
+function startVesselPopoverLiveSync() {
+  syncOpenVesselPopoverLiveCoords();
+  if (_vesselPopoverLiveTimer) return;
+  _vesselPopoverLiveTimer = setInterval(() => {
+    const chartPop = document.getElementById("ntmVesselPopover");
+    const homePop = document.getElementById("homeVesselPopover");
+    const chartOpen = !!(chartPop && chartPop.classList.contains("open"));
+    const homeOpen = !!(homePop && homePop.classList.contains("open"));
+    if (!chartOpen && !homeOpen) {
+      stopVesselPopoverLiveSync();
+      return;
+    }
+    if (typeof getDrActiveRouteId === "function" && getDrActiveRouteId()) {
+      if (typeof applyOwnVesselDeadReckoning === "function") {
+        applyOwnVesselDeadReckoning({ toast: false, visual: true });
+      }
+    }
+    syncOpenVesselPopoverLiveCoords();
+  }, 1000);
+}
 
-  if (window._setsailVesselFormSyncAt && (now - window._setsailVesselFormSyncAt) < 900) return;
-
-  window._setsailVesselFormSyncAt = now;
-
-  if (typeof fillVesselFormsFromState === "function") fillVesselFormsFromState();
-
+function stopVesselPopoverLiveSync() {
+  if (_vesselPopoverLiveTimer) {
+    clearInterval(_vesselPopoverLiveTimer);
+    _vesselPopoverLiveTimer = null;
+  }
 }
 
 window.syncOpenVesselPopoverLiveCoords = syncOpenVesselPopoverLiveCoords;
+window.startVesselPopoverLiveSync = startVesselPopoverLiveSync;
+window.stopVesselPopoverLiveSync = stopVesselPopoverLiveSync;
 
 
 
