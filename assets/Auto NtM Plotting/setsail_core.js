@@ -15985,9 +15985,19 @@ function initNtMMap() {
     function ensureSubseaPane() {
       if (leafletMap && !leafletMap.getPane("subseaInfrastructurePane")) {
         const p = leafletMap.createPane("subseaInfrastructurePane");
-        p.style.zIndex = "410";
+        p.style.zIndex = "340";
         p.style.pointerEvents = "auto";
       }
+    }
+
+    function getSubseaStrokeWeights(zoom) {
+      const z = Number.isFinite(zoom) ? zoom : (leafletMap && leafletMap.getZoom ? leafletMap.getZoom() : 7);
+      const w = (typeof getRouteStrokeWeights === "function") ? getRouteStrokeWeights(z) : { corridor: 1.1 };
+      const corridorW = Math.max(0.85, Math.min(1.25, Number(w.corridor) || 1.1));
+      return {
+        pipeline: corridorW,
+        cable: Math.max(0.75, corridorW - 0.15)
+      };
     }
 
     function formatSubseaInfraPopup(props) {
@@ -16029,23 +16039,54 @@ function initNtMMap() {
     }
 
     async function loadSubseaInfraDataset() {
-      if (_subseaInfraData) return;
+      if (_subseaInfraData) {
+        updateSubseaInfraLayer();
+        return;
+      }
       ensureSubseaPane();
       try {
         const resp = await fetch("assets/geo/setroute_subsea_cables_pipelines.json");
         if (!resp.ok) return;
         _subseaInfraData = await resp.json();
         window._subseaInfraData = _subseaInfraData;
-        renderSubseaInfra();
+        updateSubseaInfraLayer();
       } catch (eSubsea) {
         console.warn("[SetSail] Subsea cables & pipelines failed to load", eSubsea);
       }
     }
 
+    function updateSubseaInfraLayer() {
+      if (!leafletMap) return;
+      const hasMarks = leafletMap.hasLayer(seamarkLayer);
+      if (!hasMarks) {
+        _subseaInfraLayer.clearLayers();
+        return;
+      }
+      const z = leafletMap.getZoom ? leafletMap.getZoom() : 5;
+      if (z < 7) {
+        if (_subseaInfraLayer.getLayers().length > 0) {
+          _subseaInfraLayer.clearLayers();
+        }
+        return;
+      }
+      if (!_subseaInfraData) {
+        loadSubseaInfraDataset();
+      } else {
+        renderSubseaInfra();
+      }
+    }
+
     function renderSubseaInfra() {
-      if (!_subseaInfraData || !Array.isArray(_subseaInfraData.features)) return;
+      if (!_subseaInfraData || !Array.isArray(_subseaInfraData.features) || !leafletMap) return;
+      const z = leafletMap.getZoom ? leafletMap.getZoom() : 7;
+      if (z < 7) {
+        _subseaInfraLayer.clearLayers();
+        return;
+      }
       ensureSubseaPane();
       _subseaInfraLayer.clearLayers();
+
+      const weights = getSubseaStrokeWeights(z);
 
       const geoJsonLayer = L.geoJSON(_subseaInfraData, {
         pane: "subseaInfrastructurePane",
@@ -16053,9 +16094,9 @@ function initNtMMap() {
           const isCable = feat.properties && feat.properties.t === "CBL";
           return {
             color: isCable ? "#d946ef" : "#818cf8",
-            weight: isCable ? 1.7 : 2.2,
-            opacity: isCable ? 0.82 : 0.85,
-            dashArray: isCable ? "6, 4" : "8, 3, 2, 3",
+            weight: isCable ? weights.cable : weights.pipeline,
+            opacity: isCable ? 0.68 : 0.72,
+            dashArray: isCable ? "5, 4" : "6, 3, 2, 3",
             lineCap: "round",
             pane: "subseaInfrastructurePane"
           };
@@ -16065,9 +16106,9 @@ function initNtMMap() {
           const isCable = p.t === "CBL";
           lyr.on("mouseover", function() {
             lyr.setStyle({
-              weight: isCable ? 3.2 : 3.8,
+              weight: isCable ? 2.0 : 2.2,
               color: isCable ? "#f472b6" : "#a5b4fc",
-              opacity: 1
+              opacity: 0.95
             });
           });
           lyr.on("mouseout", function() {
@@ -16929,12 +16970,16 @@ function initNtMMap() {
       }
 
       map.on("zoomend moveend", updateVectorBuoyMarkers);
+      map.on("zoomend", updateSubseaInfraLayer);
       seamarkLyr.on("add", () => {
         ensureSubseaPane();
-        loadSubseaInfraDataset();
+        updateSubseaInfraLayer();
         updateVectorBuoyMarkers();
       });
-      seamarkLyr.on("remove", () => { _buoysVectorGroup.clearLayers(); });
+      seamarkLyr.on("remove", () => {
+        _buoysVectorGroup.clearLayers();
+        _subseaInfraLayer.clearLayers();
+      });
     }
 
     try {

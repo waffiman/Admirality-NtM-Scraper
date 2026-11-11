@@ -829,5 +829,93 @@
         ]
       }
     ]
+  },
+  {
+    "id": "cape_town_table_bay",
+    "name": "Approaches to Table Bay (Cape Town) TSS",
+    "colreg": "Rule 10",
+    "region": "IALA A",
+    "parts": [
+      {
+        "category": "separation_zone",
+        "name": "Table Bay Central Separation Zone",
+        "ring": [
+          [
+            -33.82,
+            18.34
+          ],
+          [
+            -33.82,
+            18.37
+          ],
+          [
+            -33.91,
+            18.42
+          ],
+          [
+            -33.91,
+            18.39
+          ],
+          [
+            -33.82,
+            18.34
+          ]
+        ]
+      },
+      {
+        "category": "traffic_lane",
+        "name": "Table Bay Inbound Lane",
+        "directionDeg": 150,
+        "ring": [
+          [
+            -33.81,
+            18.37
+          ],
+          [
+            -33.8,
+            18.43
+          ],
+          [
+            -33.9,
+            18.47
+          ],
+          [
+            -33.91,
+            18.42
+          ],
+          [
+            -33.81,
+            18.37
+          ]
+        ]
+      },
+      {
+        "category": "traffic_lane",
+        "name": "Table Bay Outbound Lane",
+        "directionDeg": 330,
+        "ring": [
+          [
+            -33.83,
+            18.28
+          ],
+          [
+            -33.82,
+            18.34
+          ],
+          [
+            -33.91,
+            18.39
+          ],
+          [
+            -33.92,
+            18.33
+          ],
+          [
+            -33.83,
+            18.28
+          ]
+        ]
+      }
+    ]
   }
 ]
