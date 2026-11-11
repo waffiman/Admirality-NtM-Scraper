@@ -893,7 +893,11 @@ let _setsailUtcSyncedAt = 0;
 
 function getSetSailUtcNowMs() {
 
-  return Date.now() + (_setsailUtcOffsetMs || 0);
+  const off = Number.isFinite(_setsailUtcOffsetMs)
+    ? _setsailUtcOffsetMs
+    : (Number(localStorage.getItem('setsail_trusted_utc_offset_ms')) || 0);
+
+  return Date.now() + off;
 
 }
 
@@ -947,9 +951,11 @@ async function syncSetSailUtcClock(force) {
 
       const mid = (t0 + t1) / 2;
 
-      _setsailUtcOffsetMs = serverMs - mid;
+      _setsailUtcOffsetMs = Math.round(serverMs - mid);
 
       _setsailUtcSyncedAt = Date.now();
+
+      try { localStorage.setItem('setsail_trusted_utc_offset_ms', String(_setsailUtcOffsetMs)); } catch (eStore) {}
 
       return _setsailUtcOffsetMs;
 
@@ -971,9 +977,11 @@ async function syncSetSailUtcClock(force) {
 
     if (Number.isFinite(serverMs)) {
 
-      _setsailUtcOffsetMs = serverMs - (t0 + t1) / 2;
+      _setsailUtcOffsetMs = Math.round(serverMs - (t0 + t1) / 2);
 
       _setsailUtcSyncedAt = Date.now();
+
+      try { localStorage.setItem('setsail_trusted_utc_offset_ms', String(_setsailUtcOffsetMs)); } catch (eStore) {}
 
     }
 
