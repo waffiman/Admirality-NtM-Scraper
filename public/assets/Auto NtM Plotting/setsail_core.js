@@ -16014,6 +16014,8 @@ function initNtMMap() {
     // Custom map pane strictly below buoysTileLayer (450) and vector markers (480)
     let _subseaInfraData = null;
     let _subseaInfraLayer = L.layerGroup();
+    let _subseaGeoJsonLayer = null;
+    let _subseaRenderer = null;
 
     function ensureSubseaPane() {
       if (leafletMap && !leafletMap.getPane("subseaInfrastructurePane")) {
@@ -16023,21 +16025,261 @@ function initNtMMap() {
       }
     }
 
-    function getSubseaStrokeWeights(zoom) {
-      const z = Number.isFinite(zoom) ? zoom : (leafletMap && leafletMap.getZoom ? leafletMap.getZoom() : 7);
-      const w = (typeof getRouteStrokeWeights === "function") ? getRouteStrokeWeights(z) : { corridor: 1.1 };
-      const corridorW = Math.max(0.85, Math.min(1.25, Number(w.corridor) || 1.1));
-      return {
-        pipeline: corridorW,
-        cable: Math.max(0.75, corridorW - 0.15)
-      };
+    function isSubseaOilGasPipeline(medium) {
+      if (!medium) return true;
+      const m = String(medium).toLowerCase();
+      if (m.includes("water") || m.includes("sewage") || m.includes("fluid") || m.includes("geothermal")) {
+        if (m.includes("gas") || m.includes("oil") || m.includes("hydrocarbon")) return true;
+        return false;
+      }
+      return true;
     }
+
+    function _getPolylineDistanceWalker(pts) {
+      const segLens = [];
+      const cumDists = [0.0];
+      let totalLen = 0.0;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const dx = pts[i + 1].x - pts[i].x;
+        const dy = pts[i + 1].y - pts[i].y;
+        const d = Math.hypot(dx, dy);
+        segLens.push(d);
+        totalLen += d;
+        cumDists.push(totalLen);
+      }
+
+      function getPos(s, h) {
+        if (h === undefined) h = 0.0;
+        if (totalLen < 1e-6) return { x: pts[0].x, y: pts[0].y };
+        if (s <= 0) {
+          const segLen = segLens[0];
+          if (segLen < 1e-6) return { x: pts[0].x, y: pts[0].y };
+          const ux = (pts[1].x - pts[0].x) / segLen;
+          const uy = (pts[1].y - pts[0].y) / segLen;
+          return { x: pts[0].x + s * ux - h * uy, y: pts[0].y + s * uy + h * ux };
+        }
+        if (s >= totalLen) {
+          const lastIdx = pts.length - 2;
+          const segLen = segLens[lastIdx];
+          if (segLen < 1e-6) return { x: pts[pts.length - 1].x, y: pts[pts.length - 1].y };
+          const ux = (pts[lastIdx + 1].x - pts[lastIdx].x) / segLen;
+          const uy = (pts[lastIdx + 1].y - pts[lastIdx].y) / segLen;
+          const extra = s - totalLen;
+          return {
+            x: pts[pts.length - 1].x + extra * ux - h * uy,
+            y: pts[pts.length - 1].y + extra * uy + h * ux
+          };
+        }
+        let low = 0, high = cumDists.length - 1, idx = 0;
+        while (low <= high) {
+          const mid = (low + high) >> 1;
+          if (cumDists[mid] <= s) {
+            idx = mid;
+            low = mid + 1;
+          } else {
+            high = mid - 1;
+          }
+        }
+        if (idx >= pts.length - 1) idx = pts.length - 2;
+        const segLen = segLens[idx];
+        if (segLen < 1e-6) return { x: pts[idx].x, y: pts[idx].y };
+        const ux = (pts[idx + 1].x - pts[idx].x) / segLen;
+        const uy = (pts[idx + 1].y - pts[idx].y) / segLen;
+        const t = s - cumDists[idx];
+        return {
+          x: pts[idx].x + t * ux - h * uy,
+          y: pts[idx].y + t * uy + h * ux
+        };
+      }
+
+      return { getPos, totalLen };
+    }
+
+    function _drawEcdisPipeline(ctx, pts) {
+      const walker = _getPolylineDistanceWalker(pts);
+      const totalLen = walker.totalLen;
+      if (totalLen < 3) return;
+      const getPos = walker.getPos;
+
+      const cycle = 56.0;
+      const dashLen = 15.0;
+      const rCirc = 3.3;
+      let s = 4.0;
+
+      while (s < totalLen) {
+        const sDashEnd = Math.min(s + dashLen, totalLen);
+        if (s < sDashEnd) {
+          ctx.beginPath();
+          const pStart = getPos(s, 0);
+          ctx.moveTo(pStart.x, pStart.y);
+          let ds = 3.0;
+          while (s + ds < sDashEnd) {
+            const pMid = getPos(s + ds, 0);
+            ctx.lineTo(pMid.x, pMid.y);
+            ds += 3.0;
+          }
+          const pEnd = getPos(sDashEnd, 0);
+          ctx.lineTo(pEnd.x, pEnd.y);
+          ctx.stroke();
+        }
+
+        const sCircCenter = s + dashLen + rCirc;
+        if (sCircCenter <= totalLen + rCirc) {
+          const cp = getPos(sCircCenter, 0);
+          ctx.beginPath();
+          ctx.arc(cp.x, cp.y, rCirc, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        s += cycle;
+      }
+    }
+
+    function _drawEcdisCable(ctx, pts) {
+      const walker = _getPolylineDistanceWalker(pts);
+      const totalLen = walker.totalLen;
+      if (totalLen < 3) return;
+      const getPos = walker.getPos;
+
+      const cycle = 73.0;
+      let s = 4.0;
+
+      while (s < totalLen) {
+        // 1. Straight dash: s to s + 14
+        const sDashEnd = Math.min(s + 14.0, totalLen);
+        if (s < sDashEnd) {
+          ctx.beginPath();
+          const pStart = getPos(s, 0);
+          ctx.moveTo(pStart.x, pStart.y);
+          let ds = 3.0;
+          while (s + ds < sDashEnd) {
+            const pMid = getPos(s + ds, 0);
+            ctx.lineTo(pMid.x, pMid.y);
+            ds += 3.0;
+          }
+          const pEnd = getPos(sDashEnd, 0);
+          ctx.lineTo(pEnd.x, pEnd.y);
+          ctx.stroke();
+        }
+
+        // 2. Wave 1: s + 18 to s + 30 (length 12)
+        const w1Start = s + 18.0;
+        const w1End = Math.min(s + 30.0, totalLen);
+        const w1Span = w1End - w1Start;
+        if (w1Span > 2) {
+          ctx.beginPath();
+          const p0 = getPos(w1Start, 0);
+          ctx.moveTo(p0.x, p0.y);
+          const steps = 8;
+          for (let k = 1; k <= steps; k++) {
+            const u = k / steps;
+            const ws = w1Start + u * w1Span;
+            const wh = -Math.sin(u * 2 * Math.PI) * 3.8;
+            const p = getPos(ws, wh);
+            ctx.lineTo(p.x, p.y);
+          }
+          ctx.stroke();
+        }
+
+        // 3. Lightning bolt: centered at s + 38
+        if (s + 38.0 <= totalLen + 5) {
+          const sb = s + 38.0;
+          const p1 = getPos(sb + 4.0, -9.0);
+          const p2 = getPos(sb - 2.0, 0.0);
+          const p3 = getPos(sb + 5.0, 3.0);
+          const p4 = getPos(sb - 1.0, 10.0);
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.lineTo(p3.x, p3.y);
+          ctx.lineTo(p4.x, p4.y);
+          ctx.stroke();
+        }
+
+        // 4. Wave 2: s + 46 to s + 58 (length 12)
+        const w2Start = s + 46.0;
+        const w2End = Math.min(s + 58.0, totalLen);
+        const w2Span = w2End - w2Start;
+        if (w2Span > 2) {
+          ctx.beginPath();
+          const p0 = getPos(w2Start, 0);
+          ctx.moveTo(p0.x, p0.y);
+          const steps = 8;
+          for (let k = 1; k <= steps; k++) {
+            const u = k / steps;
+            const ws = w2Start + u * w2Span;
+            const wh = -Math.sin(u * 2 * Math.PI) * 3.8;
+            const p = getPos(ws, wh);
+            ctx.lineTo(p.x, p.y);
+          }
+          ctx.stroke();
+        }
+
+        s += cycle;
+      }
+    }
+
+    const EcdisSubseaRenderer = L.Canvas.extend({
+      _updatePoly: function(layer, closed) {
+        if (!this._drawing) return;
+        const subseaType = layer.options && layer.options.subseaType;
+        if (!subseaType) {
+          return L.Canvas.prototype._updatePoly.call(this, layer, closed);
+        }
+        const parts = layer._parts;
+        if (!parts || !parts.length) return;
+        const ctx = this._ctx;
+        const isCable = subseaType === "CBL";
+        const isOil = layer.options.isOil !== false;
+        const isHovered = !!layer.options._isHovered;
+
+        ctx.save();
+
+        if (isHovered) {
+          ctx.lineWidth = isCable ? 5.5 : 6.0;
+          ctx.strokeStyle = isCable ? "rgba(244, 114, 182, 0.45)" : (isOil ? "rgba(244, 114, 182, 0.45)" : "rgba(148, 163, 184, 0.45)");
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.beginPath();
+          for (let i = 0; i < parts.length; i++) {
+            const p = parts[i];
+            for (let j = 0; j < p.length; j++) {
+              ctx[j === 0 ? "moveTo" : "lineTo"](p[j].x, p[j].y);
+            }
+          }
+          ctx.stroke();
+        }
+
+        const strokeColor = isCable
+          ? (isHovered ? "#f472b6" : "#b52895")
+          : (isOil ? (isHovered ? "#f472b6" : "#b52895") : (isHovered ? "#94a3b8" : "#5b636c"));
+
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 1.4;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        for (let pIdx = 0; pIdx < parts.length; pIdx++) {
+          const pts = parts[pIdx];
+          if (!pts || pts.length < 2) continue;
+
+          if (isCable) {
+            _drawEcdisCable(ctx, pts);
+          } else {
+            _drawEcdisPipeline(ctx, pts);
+          }
+        }
+
+        ctx.restore();
+      }
+    });
 
     function formatSubseaInfraPopup(props) {
       const isCable = props.t === "CBL";
-      const icon = isCable ? "⚡" : "🛢️";
-      const badgeText = isCable ? "SUBMARINE CABLE" : "SUBSEA PIPELINE";
-      const badgeColor = isCable ? "#d946ef" : "#818cf8";
+      const isOil = !isCable && isSubseaOilGasPipeline(props.sub);
+      const icon = isCable ? "⚡" : (isOil ? "🛢️" : "💧");
+      const badgeText = isCable ? "SUBMARINE CABLE" : (isOil ? "OIL / GAS PIPELINE" : "WATER / SEWAGE PIPELINE");
+      const badgeColor = isCable ? "#d946ef" : (isOil ? "#d946ef" : "#94a3b8");
       const name = props.name || (isCable ? "Submarine Cable" : "Marine Pipeline");
       const medium = props.sub || (isCable ? "Fiber-Optic Telecom" : "Hydrocarbons");
       const operator = props.op || "—";
@@ -16117,47 +16359,58 @@ function initNtMMap() {
         return;
       }
       ensureSubseaPane();
-      _subseaInfraLayer.clearLayers();
 
-      const weights = getSubseaStrokeWeights(z);
+      if (!_subseaRenderer) {
+        _subseaRenderer = new EcdisSubseaRenderer({
+          pane: "subseaInfrastructurePane",
+          padding: 0.25,
+          tolerance: 6
+        });
+      }
 
-      const geoJsonLayer = L.geoJSON(_subseaInfraData, {
-        pane: "subseaInfrastructurePane",
-        style: function(feat) {
-          const isCable = feat.properties && feat.properties.t === "CBL";
-          return {
-            color: isCable ? "#d946ef" : "#818cf8",
-            weight: isCable ? weights.cable : weights.pipeline,
-            opacity: isCable ? 0.68 : 0.72,
-            dashArray: isCable ? "5, 4" : "6, 3, 2, 3",
-            lineCap: "round",
-            pane: "subseaInfrastructurePane"
-          };
-        },
-        onEachFeature: function(feat, lyr) {
-          const p = feat.properties || {};
-          const isCable = p.t === "CBL";
-          lyr.on("mouseover", function() {
-            lyr.setStyle({
-              weight: isCable ? 2.0 : 2.2,
-              color: isCable ? "#f472b6" : "#a5b4fc",
-              opacity: 0.95
+      if (!_subseaGeoJsonLayer) {
+        _subseaGeoJsonLayer = L.geoJSON(_subseaInfraData, {
+          pane: "subseaInfrastructurePane",
+          renderer: _subseaRenderer,
+          style: function(feat) {
+            const p = feat.properties || {};
+            const isCable = p.t === "CBL";
+            const isOil = !isCable && isSubseaOilGasPipeline(p.sub);
+            return {
+              pane: "subseaInfrastructurePane",
+              renderer: _subseaRenderer,
+              subseaType: isCable ? "CBL" : "PIP",
+              isOil: isOil,
+              stroke: true,
+              weight: 10,
+              opacity: 0,
+              lineCap: "round"
+            };
+          },
+          onEachFeature: function(feat, lyr) {
+            const p = feat.properties || {};
+            lyr.on("mouseover", function() {
+              lyr.options._isHovered = true;
+              lyr.redraw();
             });
-          });
-          lyr.on("mouseout", function() {
-            geoJsonLayer.resetStyle(lyr);
-          });
-          lyr.bindPopup(formatSubseaInfraPopup(p), {
-            className: "ss-ais-popup ss-buoy-popup-wrap",
-            maxWidth: 300,
-            minWidth: 220,
-            autoPan: true,
-            offset: [0, -4]
-          });
-        }
-      });
+            lyr.on("mouseout", function() {
+              lyr.options._isHovered = false;
+              lyr.redraw();
+            });
+            lyr.bindPopup(formatSubseaInfraPopup(p), {
+              className: "ss-ais-popup ss-buoy-popup-wrap",
+              maxWidth: 300,
+              minWidth: 220,
+              autoPan: true,
+              offset: [0, -4]
+            });
+          }
+        });
+      }
 
-      _subseaInfraLayer.addLayer(geoJsonLayer);
+      if (!_subseaInfraLayer.hasLayer(_subseaGeoJsonLayer)) {
+        _subseaInfraLayer.addLayer(_subseaGeoJsonLayer);
+      }
     }
 
     // Keep layerGroup API for toggles / Leaflet control
