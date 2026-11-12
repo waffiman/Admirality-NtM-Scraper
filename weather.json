@@ -1,58 +1,49 @@
 {
-  "synopticCycle": "0100 UTC",
-  "lastSyncUtc": "2026-11-12T01:21:06.881327+00:00",
+  "synopticCycle": "0900 UTC",
+  "lastSyncUtc": "2026-11-12T09:22:35.880614+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
       "id": "CP042026",
-      "name": "Tropical Storm PENA",
+      "name": "Tropical Depression PENA",
       "shortName": "Pena",
-      "category": "Tropical Storm (NOAA NHC)",
+      "category": "Tropical Depression (NOAA NHC)",
       "center": [
-        9.9,
-        -169.4
+        9.8,
+        -172.0
       ],
-      "centralPressure": 1002,
-      "maxWinds": 40,
-      "gusts": 49,
+      "centralPressure": 1009,
+      "maxWinds": 30,
+      "gusts": 37,
       "movement": "W at 16 kts",
       "dangerRadiusNm": 70,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            10.0,
-            -171.5
+            9.9,
+            -174.3
           ],
-          "winds": 40,
+          "winds": 30,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            10.2,
-            -174.5
+            10.0,
+            -177.4
           ],
-          "winds": 35,
+          "winds": 30,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            10.5,
-            -177.5
+            10.2,
+            180.0
           ],
           "winds": 30,
           "radiusNm": 90
-        },
-        {
-          "tau": 48,
-          "coords": [
-            10.6,
-            179.6
-          ],
-          "winds": 30,
-          "radiusNm": 107
         }
       ]
     },
@@ -101,9 +92,9 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 3.3,
-      "swellPeriod": 8,
-      "swellDir": "ENE"
+      "waveHeight": 3.0,
+      "swellPeriod": 9,
+      "swellDir": "E"
     },
     {
       "id": "W2",
@@ -113,19 +104,19 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.1,
-      "swellPeriod": 8,
-      "swellDir": "W"
+      "waveHeight": 2.9,
+      "swellPeriod": 9,
+      "swellDir": "WSW"
     },
     {
       "id": "WS1",
       "name": "Pena Cyclonic Wave Field",
       "center": [
-        9.9,
-        -169.4
+        9.8,
+        -172.0
       ],
       "radiusNm": 150,
-      "waveHeight": 3.4,
+      "waveHeight": 3.5,
       "swellPeriod": 10,
       "swellDir": "NE"
     },
@@ -137,19 +128,19 @@
         154.1
       ],
       "radiusNm": 156,
-      "waveHeight": 4.4,
+      "waveHeight": 3.5,
       "swellPeriod": 9,
-      "swellDir": "N"
+      "swellDir": "NNE"
     }
   ],
   "pressureCenters": [
     {
       "type": "L",
-      "value": 1002,
-      "name": "Tropical Storm PENA Core Low",
+      "value": 1009,
+      "name": "Tropical Depression PENA Core Low",
       "coords": [
-        9.9,
-        -169.4
+        9.8,
+        -172.0
       ]
     },
     {
@@ -192,12 +183,12 @@
   "windVectors": [
     {
       "coords": [
-        10.2,
-        -169.1
+        10.1,
+        -171.7
       ],
       "dir": 160,
-      "speed": 40,
-      "label": "40 kts (Pena)"
+      "speed": 30,
+      "label": "30 kts (Pena)"
     },
     {
       "coords": [
