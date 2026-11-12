@@ -5319,17 +5319,16 @@ document.addEventListener("click", (e) => {
   }
 
   const tabBtn = e.target.closest(".nav-sidebar .nav-item");
-
   if (tabBtn) {
-
     e.preventDefault();
-
     const target = tabBtn.getAttribute("data-tab");
-
+    const activePane = document.querySelector(".tab-pane.active");
+    if (target === "tab-ntm" && activePane && activePane.id === "tab-ntm" && typeof window.toggleNtmSidebar === "function") {
+      window.toggleNtmSidebar();
+      return;
+    }
     if (target) switchToTab(target, "user");
-
     return;
-
   }
 
 });
@@ -6735,51 +6734,80 @@ function initAutoNtmUI() {
 
 
   // Sidebar Collapse / Expand Toggle
+  function toggleNtmSidebar(forceOpen) {
+    const workspaceEl = document.getElementById("ntmWorkspace");
+    const ntmTab = document.getElementById("tab-ntm");
+    const expandBtn = document.getElementById("ntmExpandSidebarBtn");
+    const sidebar = document.getElementById("ntmSidebar");
+    if (!workspaceEl) return;
+
+    const isCurrentlyCollapsed = workspaceEl.classList.contains("sidebar-collapsed");
+    const shouldOpen = (typeof forceOpen === "boolean") ? forceOpen : isCurrentlyCollapsed;
+
+    if (shouldOpen) {
+      workspaceEl.classList.remove("sidebar-collapsed");
+      if (ntmTab) ntmTab.classList.remove("sidebar-collapsed");
+      if (sidebar) {
+        sidebar.style.display = "";
+        sidebar.style.opacity = "";
+        sidebar.style.pointerEvents = "";
+      }
+      if (expandBtn) expandBtn.style.display = "none";
+    } else {
+      workspaceEl.classList.add("sidebar-collapsed");
+      if (ntmTab) ntmTab.classList.add("sidebar-collapsed");
+      if (sidebar) {
+        sidebar.style.display = "none";
+        sidebar.style.opacity = "0";
+        sidebar.style.pointerEvents = "none";
+      }
+      if (expandBtn) expandBtn.style.display = "block";
+    }
+
+    setTimeout(() => {
+      try {
+        const m = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+        if (m && typeof m.invalidateSize === "function") m.invalidateSize();
+      } catch (_) {}
+    }, 150);
+  }
+  window.toggleNtmSidebar = toggleNtmSidebar;
 
   const collapseBtn = document.getElementById("ntmCollapseSidebarBtn");
-
   const expandBtn = document.getElementById("ntmExpandSidebarBtn");
 
-  const workspaceEl = document.getElementById("ntmWorkspace");
-
-
-
-  if (collapseBtn && workspaceEl) {
-
-    collapseBtn.addEventListener("click", () => {
-
-      workspaceEl.classList.add("sidebar-collapsed");
-
-      const ntmTab = document.getElementById("tab-ntm");
-
-      if (ntmTab) ntmTab.classList.add("sidebar-collapsed");
-
-      if (expandBtn) expandBtn.style.display = "block";
-
-      setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 250);
-
+  if (collapseBtn) {
+    collapseBtn.addEventListener("click", (e) => {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      toggleNtmSidebar(false);
     });
-
   }
 
-
-
-  if (expandBtn && workspaceEl) {
-
-    expandBtn.addEventListener("click", () => {
-
-      workspaceEl.classList.remove("sidebar-collapsed");
-
-      const ntmTab = document.getElementById("tab-ntm");
-
-      if (ntmTab) ntmTab.classList.remove("sidebar-collapsed");
-
-      expandBtn.style.display = "none";
-
-      setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 250);
-
+  if (expandBtn) {
+    expandBtn.addEventListener("click", (e) => {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      toggleNtmSidebar(true);
     });
+  }
 
+  if (!window._setsailBoundSidebarToggleDelegation) {
+    window._setsailBoundSidebarToggleDelegation = true;
+    document.addEventListener("click", (e) => {
+      const cBtn = e.target && e.target.closest && e.target.closest("#ntmCollapseSidebarBtn, .ntm-sidebar-collapse-btn");
+      if (cBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleNtmSidebar(false);
+        return;
+      }
+      const xBtn = e.target && e.target.closest && e.target.closest("#ntmExpandSidebarBtn, .ntm-map-expand-btn");
+      if (xBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleNtmSidebar(true);
+        return;
+      }
+    }, true);
   }
 
 
@@ -10051,31 +10079,91 @@ window.deriveOwnShipHdgStw = deriveOwnShipHdgStw;
 
 
 /** Refresh open own-ship CCRP popup with latest digits (GPS/AIS/DR). */
-
 function refreshOwnShipCcrpPopup() {
-
   try {
-
     if (!_ownShipMarker || !_ownShipMarker.isPopupOpen || !_ownShipMarker.isPopupOpen()) return;
-
     if (!userVessel) return;
 
+    const lat = userVessel.lat;
+    const lon = userVessel.lon;
+    const cog = resolveOwnShipCogDeg(userVessel);
+    const sog = resolveOwnShipSogKn(userVessel);
+    const source = userVessel.source;
+
+    const popup = _ownShipMarker.getPopup();
+    const popupEl = popup && popup.getElement();
+    if (popupEl) {
+      // 1. Position row update (real-time DMS ticking)
+      const posRow = popupEl.querySelector('.ss-ais-row[data-field="pos"]');
+      if (posRow) {
+        const kEl = posRow.querySelector('.ss-ais-k');
+        const vEl = posRow.querySelector('.ss-ais-v');
+        const feed = typeof resolveOwnShipActiveFeed === "function" ? resolveOwnShipActiveFeed(userVessel) : "ais";
+        const isDr = feed === "dr" || !!userVessel.deadReckoned;
+        if (kEl) kEl.textContent = isDr ? "DR" : "Pos";
+        if (vEl) {
+          const coords = isValidVesselLatLon(lat, lon)
+            ? (typeof formatLatLonDMS === "function" ? formatLatLonDMS(lat, lon) : (lat + ", " + lon))
+            : "awaiting fix";
+          vEl.textContent = coords;
+        }
+      }
+
+      // 2. SOG/COG row update
+      const sogCogRow = popupEl.querySelector('.ss-ais-row[data-field="sogcog"] .ss-ais-v');
+      if (sogCogRow) {
+        const sogStr = sog != null && Number.isFinite(sog) ? Number(sog).toFixed(1) + " kn" : "—";
+        const cogStr = cog != null ? Math.round(cog) + "°" : "—";
+        sogCogRow.textContent = sogStr + " / " + cogStr;
+      }
+
+      // 3. HDG/STW update
+      let hdg = hasOwnShipHeadingDeg(userVessel.heading) ? ((Number(userVessel.heading) % 360) + 360) % 360 : null;
+      let stw = Number.isFinite(Number(userVessel.stw)) ? Number(userVessel.stw) : null;
+      const hdgValEl = popupEl.querySelector(".ss-own-ship-hdg-val");
+      const stwValEl = popupEl.querySelector(".ss-own-ship-stw-val");
+      if (hdgValEl && hdg != null) hdgValEl.textContent = Math.round(hdg) + "°";
+      if (stwValEl && stw != null) stwValEl.textContent = Number(stw).toFixed(1) + " kn";
+
+      // 4. Vector distance update
+      const vecRow = popupEl.querySelector('.ss-ais-row[data-field="vec"] .ss-ais-v');
+      if (vecRow) {
+        const vecMins = getOwnShipVectorMinutes();
+        const vecNm = (sog != null && sog > 0) ? (sog * (vecMins / 60)) : null;
+        if (vecNm != null) {
+          vecRow.textContent = vecNm >= 10 ? (Math.round(vecNm) + " NM / " + vecMins + "′") : (vecNm.toFixed(1) + " NM / " + vecMins + "′");
+        }
+      }
+
+      // 5. Update stale banner age label if present
+      const staleBody = popupEl.querySelector(".ss-own-ship-stale-body");
+      if (staleBody) {
+        const ageMs = getOwnShipAisAgeMs(userVessel);
+        const ageLbl = ageMs == null ? "?" : formatAisAgeHoursLabel(ageMs);
+        const firstText = staleBody.firstChild;
+        if (firstText && firstText.nodeType === 3) {
+          firstText.nodeValue = "AIS stale · " + ageLbl + " h ";
+        }
+      }
+
+      // 6. Keep popup anchored to moving marker position
+      if (isValidVesselLatLon(lat, lon) && popup.setLatLng) {
+        popup.setLatLng([Number(lat), Number(lon)]);
+      }
+
+      // If user is actively typing in the vector input, avoid full innerHTML replacement
+      const vecInput = document.getElementById("ssOwnShipVecMins");
+      if (vecInput && document.activeElement === vecInput) return;
+    }
+
     _ownShipMarker.setPopupContent(formatOwnShipPopupHtml(
-
-      userVessel.lat,
-
-      userVessel.lon,
-
-      resolveOwnShipCogDeg(userVessel),
-
-      resolveOwnShipSogKn(userVessel),
-
-      userVessel.source
-
+      lat,
+      lon,
+      cog,
+      sog,
+      source
     ));
-
   } catch (e) {}
-
 }
 
 window.refreshOwnShipCcrpPopup = refreshOwnShipCcrpPopup;
@@ -12898,54 +12986,31 @@ function formatOwnShipPopupHtml(lat, lon, cogOrHdg, sog, source) {
 
 
   const rows = [];
-
   rows.push(["MMSI", escapePopupText(v.mmsi || "—") + (v.callSign ? " · " + escapePopupText(v.callSign) : "")]);
-
   rows.push(["Type", typeStr]);
-
-  rows.push([isDr ? "DR" : "Pos", escapePopupText(coords)]);
-
-  rows.push(["SOG/COG", sogStr + " / " + cogStr]);
-
-  rows.push(["HDG/STW", hdgCell]);
-
+  rows.push([isDr ? "DR" : "Pos", escapePopupText(coords), "pos"]);
+  rows.push(["SOG/COG", sogStr + " / " + cogStr, "sogcog"]);
+  rows.push(["HDG/STW", hdgCell, "hdgstw"]);
   rows.push(["Dest", destStr]);
-
   if (isValidVesselLatLon(v.aisFixLat, v.aisFixLon) && (feed === "gps" || feed === "dr")) {
-
     const aisCoords = typeof formatLatLonDMS === "function"
-
       ? formatLatLonDMS(Number(v.aisFixLat), Number(v.aisFixLon))
-
       : (v.aisFixLat + ", " + v.aisFixLon);
-
-    rows.push(["AIS", escapePopupText(aisCoords)]);
-
+    rows.push(["AIS", escapePopupText(aisCoords), "ais"]);
   }
-
   if (v.aisLastFixAt) {
-
     const aisT = String(v.aisLastFixAt).replace("T", " ").replace(/\.\d+Z$/, "Z");
-
     const ageLbl = ageMs != null ? (" · " + formatAisAgeHoursLabel(ageMs) + " h ago") : "";
-
-    rows.push(["Fix", escapePopupText(aisT + ageLbl)]);
-
+    rows.push(["Fix", escapePopupText(aisT + ageLbl), "fix"]);
   }
-
   if (vecNm != null && Number.isFinite(vecNm)) {
-
-    rows.push(["Vec", vecNm >= 10 ? (Math.round(vecNm) + " NM / " + vecMins + "′") : (vecNm.toFixed(1) + " NM / " + vecMins + "′")]);
-
+    rows.push(["Vec", vecNm >= 10 ? (Math.round(vecNm) + " NM / " + vecMins + "′") : (vecNm.toFixed(1) + " NM / " + vecMins + "′"), "vec"]);
   }
 
-
-
-  const body = rows.map((r) =>
-
-    '<div class="ss-ais-row"><span class="ss-ais-k">' + r[0] + '</span><span class="ss-ais-v">' + r[1] + "</span></div>"
-
-  ).join("");
+  const body = rows.map((r) => {
+    const fAttr = r[2] ? (' data-field="' + r[2] + '"') : "";
+    return '<div class="ss-ais-row"' + fAttr + '><span class="ss-ais-k">' + r[0] + '</span><span class="ss-ais-v">' + r[1] + "</span></div>";
+  }).join("");
 
 
 
@@ -13192,38 +13257,32 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
 
     _ownShipMarker.bindPopup(
-
       () => formatOwnShipPopupHtml(
-
         userVessel.lat,
-
         userVessel.lon,
-
         resolveOwnShipCogDeg(userVessel),
-
         resolveOwnShipSogKn(userVessel),
-
         userVessel.source
-
       ),
-
       {
-
         maxWidth: 280,
-
         minWidth: 176,
-
         closeButton: false,
-
         className: "ss-ais-popup ss-own-ship-popup-wrap",
-
         autoPanPaddingTopLeft: [16, 48],
-
         autoPanPaddingBottomRight: [16, 36]
-
       }
-
     );
+
+    if (!_ownShipMarker._popupLiveSyncBound) {
+      _ownShipMarker._popupLiveSyncBound = true;
+      _ownShipMarker.on("popupopen", () => {
+        if (typeof startVesselPopoverLiveSync === "function") startVesselPopoverLiveSync();
+      });
+      _ownShipMarker.on("popupclose", () => {
+        if (typeof stopVesselPopoverLiveSync === "function") stopVesselPopoverLiveSync();
+      });
+    }
 
 
 
@@ -13367,14 +13426,20 @@ function syncOpenVesselPopoverLiveCoords() {
 
 function startVesselPopoverLiveSync() {
   syncOpenVesselPopoverLiveCoords();
+  try { if (typeof refreshOwnShipCcrpPopup === "function") refreshOwnShipCcrpPopup(); } catch (ePop0) {}
   if (_vesselPopoverLiveTimer) return;
   _vesselPopoverLiveTimer = setInterval(() => {
     const chartPop = document.getElementById("ntmVesselPopover");
     const homePop = document.getElementById("homeVesselPopover");
     const chartOpen = !!(chartPop && chartPop.classList.contains("open"));
     const homeOpen = !!(homePop && homePop.classList.contains("open"));
-    if (!chartOpen && !homeOpen) {
-      stopVesselPopoverLiveSync();
+    const ownShipPopupOpen = !!(typeof _ownShipMarker !== "undefined" && _ownShipMarker && _ownShipMarker.isPopupOpen && _ownShipMarker.isPopupOpen());
+
+    if (!chartOpen && !homeOpen && !ownShipPopupOpen) {
+      if (_vesselPopoverLiveTimer) {
+        clearInterval(_vesselPopoverLiveTimer);
+        _vesselPopoverLiveTimer = null;
+      }
       return;
     }
     if (typeof getDrActiveRouteId === "function" && getDrActiveRouteId()) {
@@ -13382,11 +13447,25 @@ function startVesselPopoverLiveSync() {
         applyOwnVesselDeadReckoning({ toast: false, visual: true });
       }
     }
-    syncOpenVesselPopoverLiveCoords();
+    if (chartOpen || homeOpen) {
+      syncOpenVesselPopoverLiveCoords();
+    }
+    if (ownShipPopupOpen && typeof refreshOwnShipCcrpPopup === "function") {
+      refreshOwnShipCcrpPopup();
+    }
   }, 1000);
 }
 
 function stopVesselPopoverLiveSync() {
+  const chartPop = document.getElementById("ntmVesselPopover");
+  const homePop = document.getElementById("homeVesselPopover");
+  const chartOpen = !!(chartPop && chartPop.classList.contains("open"));
+  const homeOpen = !!(homePop && homePop.classList.contains("open"));
+  const ownShipPopupOpen = !!(typeof _ownShipMarker !== "undefined" && _ownShipMarker && _ownShipMarker.isPopupOpen && _ownShipMarker.isPopupOpen());
+
+  // Do not kill timer if either modal or own-ship map popup remains open
+  if (chartOpen || homeOpen || ownShipPopupOpen) return;
+
   if (_vesselPopoverLiveTimer) {
     clearInterval(_vesselPopoverLiveTimer);
     _vesselPopoverLiveTimer = null;
@@ -15200,10 +15279,10 @@ async function loadRemoteNoticesJson(showFeedback = false) {
 
       // Local/Same-origin first (SW cache-first). CDN/GitHub fallback.
       const endpoints = [
-        { url: localNoticesUrl + "?v=5.210", cache: "default", sameOrigin: true, timeout: 6000 },
-        { url: "notices.json?v=5.210", cache: "default", sameOrigin: true, timeout: 6000 },
-        { url: "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + bust, cache: "no-store", timeout: 8000 },
-        { url: "https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/notices.json?t=" + bust, cache: "no-store", mode: "cors", timeout: 8000 }
+        { url: localNoticesUrl + "?v=5.218.0", cache: "default", sameOrigin: true, timeout: 30000 },
+        { url: "notices.json?v=5.218.0", cache: "default", sameOrigin: true, timeout: 30000 },
+        { url: "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + bust, cache: "no-store", timeout: 30000 },
+        { url: "https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/notices.json?t=" + bust, cache: "no-store", mode: "cors", timeout: 30000 }
       ];
 
       let res = null;
@@ -15348,7 +15427,7 @@ async function loadRemoteNoticesJson(showFeedback = false) {
         }
 
         if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES && OVERLAY_STATES.notices) {
-          if (!window._ntmOverlayPlottingActive) {
+          if (!window._ntmOverlayPlottingActive && !window._ntmOverlayLoadBusy) {
             try { renderNtMListAndMap(); } catch (eR) {}
           }
         }
@@ -15497,13 +15576,13 @@ function ensureNoticesReadyForOverlay() {
   // Yield to the event loop so the tile spinner immediately paints, then plot notices
   return new Promise((resolve) => {
     setTimeout(async () => {
-      // Safety watchdog: NEVER leave spinner spinning or _ntmOverlayLoadBusy=true for more than 8 seconds
+      // Safety watchdog: NEVER leave spinner spinning or _ntmOverlayLoadBusy=true for more than 35 seconds
       const watchdog = setTimeout(() => {
         window._ntmOverlayLoadBusy = false;
         if (!window._ntmOverlayPlottingActive && typeof window.setOverlayNoticesLoading === "function") {
           window.setOverlayNoticesLoading(false);
         }
-      }, 8000);
+      }, 35000);
 
       try {
         // 0) Hydrate memory from localStorage / IndexedDB / CacheStorage before any network wait
@@ -15564,7 +15643,10 @@ function ensureNoticesReadyForOverlay() {
           return;
         }
 
-        // Cold path: No corpus in memory/IDB/caches yet — fetch from network with timeout protection
+        // Cold path: No corpus in memory/IDB/caches yet — notify user and fetch from network
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("Downloading Admiralty NtM database (~9 MB)...", "info");
+        }
         await loadRemoteNoticesJson(true);
         clearTimeout(watchdog);
         assertOn();
@@ -16103,7 +16185,7 @@ function initNtMMap() {
 
       const cycle = 56.0;
       const dashLen = 15.0;
-      const rCirc = 3.3;
+      const rCirc = 2.2;
       let s = 4.0;
 
       while (s < totalLen) {
@@ -16174,20 +16256,20 @@ function initNtMMap() {
           for (let k = 1; k <= steps; k++) {
             const u = k / steps;
             const ws = w1Start + u * w1Span;
-            const wh = -Math.sin(u * 2 * Math.PI) * 3.8;
+            const wh = -Math.sin(u * 2 * Math.PI) * 2.5;
             const p = getPos(ws, wh);
             ctx.lineTo(p.x, p.y);
           }
           ctx.stroke();
         }
 
-        // 3. Lightning bolt: centered at s + 38
+        // 3. Lightning bolt: centered at s + 38 (scaled 1.5x thinner)
         if (s + 38.0 <= totalLen + 5) {
           const sb = s + 38.0;
-          const p1 = getPos(sb + 4.0, -9.0);
-          const p2 = getPos(sb - 2.0, 0.0);
-          const p3 = getPos(sb + 5.0, 3.0);
-          const p4 = getPos(sb - 1.0, 10.0);
+          const p1 = getPos(sb + 2.7, -6.0);
+          const p2 = getPos(sb - 1.3, 0.0);
+          const p3 = getPos(sb + 3.3, 2.0);
+          const p4 = getPos(sb - 0.7, 6.7);
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p2.x, p2.y);
@@ -16208,7 +16290,7 @@ function initNtMMap() {
           for (let k = 1; k <= steps; k++) {
             const u = k / steps;
             const ws = w2Start + u * w2Span;
-            const wh = -Math.sin(u * 2 * Math.PI) * 3.8;
+            const wh = -Math.sin(u * 2 * Math.PI) * 2.5;
             const p = getPos(ws, wh);
             ctx.lineTo(p.x, p.y);
           }
@@ -16236,7 +16318,7 @@ function initNtMMap() {
         ctx.save();
 
         if (isHovered) {
-          ctx.lineWidth = isCable ? 5.5 : 6.0;
+          ctx.lineWidth = isCable ? 3.7 : 4.0;
           ctx.strokeStyle = isCable ? "rgba(244, 114, 182, 0.45)" : (isOil ? "rgba(244, 114, 182, 0.45)" : "rgba(148, 163, 184, 0.45)");
           ctx.lineCap = "round";
           ctx.lineJoin = "round";
@@ -16255,7 +16337,7 @@ function initNtMMap() {
           : (isOil ? (isHovered ? "#f472b6" : "#b52895") : (isHovered ? "#94a3b8" : "#5b636c"));
 
         ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = 1.4;
+        ctx.lineWidth = 0.93;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
 
