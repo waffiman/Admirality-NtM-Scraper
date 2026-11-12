@@ -6739,6 +6739,7 @@ function initAutoNtmUI() {
     const ntmTab = document.getElementById("tab-ntm");
     const expandBtn = document.getElementById("ntmExpandSidebarBtn");
     const sidebar = document.getElementById("ntmSidebar");
+    const mapContainer = document.getElementById("ntmMapContainer");
     if (!workspaceEl) return;
 
     const isCurrentlyCollapsed = workspaceEl.classList.contains("sidebar-collapsed");
@@ -6751,6 +6752,12 @@ function initAutoNtmUI() {
         sidebar.style.display = "";
         sidebar.style.opacity = "";
         sidebar.style.pointerEvents = "";
+        sidebar.style.width = "";
+        sidebar.style.maxWidth = "";
+      }
+      if (mapContainer) {
+        mapContainer.style.width = "";
+        mapContainer.style.gridColumn = "";
       }
       if (expandBtn) expandBtn.style.display = "none";
     } else {
@@ -6760,16 +6767,24 @@ function initAutoNtmUI() {
         sidebar.style.display = "none";
         sidebar.style.opacity = "0";
         sidebar.style.pointerEvents = "none";
+        sidebar.style.width = "0px";
+        sidebar.style.maxWidth = "0px";
+      }
+      if (mapContainer) {
+        mapContainer.style.width = "100%";
+        mapContainer.style.gridColumn = "1 / -1";
       }
       if (expandBtn) expandBtn.style.display = "block";
     }
 
-    setTimeout(() => {
-      try {
-        const m = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
-        if (m && typeof m.invalidateSize === "function") m.invalidateSize();
-      } catch (_) {}
-    }, 150);
+    [50, 150, 300].forEach(delay => {
+      setTimeout(() => {
+        try {
+          const m = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+          if (m && typeof m.invalidateSize === "function") m.invalidateSize({ animate: false });
+        } catch (_) {}
+      }, delay);
+    });
   }
   window.toggleNtmSidebar = toggleNtmSidebar;
 

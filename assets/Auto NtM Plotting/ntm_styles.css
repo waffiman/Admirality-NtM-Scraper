@@ -913,9 +913,8 @@
 
 
 .ntm-workspace.sidebar-collapsed {
-
-  grid-template-columns: 0px 1fr;
-
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
 }
 
 
@@ -17130,8 +17129,20 @@
 
 .ntm-workspace.sidebar-collapsed,
 #tab-ntm.sidebar-collapsed .ntm-workspace {
-  grid-template-columns: 0px 1fr !important;
+  grid-template-columns: 1fr !important;
   gap: 0 !important;
+}
+
+.ntm-workspace.sidebar-collapsed #ntmMapContainer,
+.ntm-workspace.sidebar-collapsed .ntm-map-container,
+#tab-ntm.sidebar-collapsed #ntmMapContainer,
+#tab-ntm.sidebar-collapsed .ntm-map-container {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex: 1 1 auto !important;
 }
 
 .ntm-items-scroll,
