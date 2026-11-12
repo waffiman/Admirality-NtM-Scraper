@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "1800 UTC",
-  "lastSyncUtc": "2026-11-11T18:25:12.712946+00:00",
+  "synopticCycle": "0100 UTC",
+  "lastSyncUtc": "2026-11-12T01:21:06.881327+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -10,19 +10,19 @@
       "category": "Tropical Storm (NOAA NHC)",
       "center": [
         9.9,
-        -167.7
+        -169.4
       ],
       "centralPressure": 1002,
       "maxWinds": 40,
       "gusts": 49,
-      "movement": "WSW at 9 kts",
+      "movement": "W at 16 kts",
       "dangerRadiusNm": 70,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            9.9,
-            -167.7
+            10.0,
+            -171.5
           ],
           "winds": 40,
           "radiusNm": 56
@@ -30,56 +30,29 @@
         {
           "tau": 24,
           "coords": [
-            10.0,
-            -169.6
+            10.2,
+            -174.5
           ],
-          "winds": 40,
+          "winds": 35,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            10.0,
-            -169.6
+            10.5,
+            -177.5
           ],
-          "winds": 40,
+          "winds": 30,
           "radiusNm": 90
         },
         {
           "tau": 48,
           "coords": [
-            10.2,
-            -172.6
+            10.6,
+            179.6
           ],
-          "winds": 40,
+          "winds": 30,
           "radiusNm": 107
-        },
-        {
-          "tau": 60,
-          "coords": [
-            10.2,
-            -172.6
-          ],
-          "winds": 40,
-          "radiusNm": 124
-        },
-        {
-          "tau": 72,
-          "coords": [
-            10.5,
-            -175.7
-          ],
-          "winds": 35,
-          "radiusNm": 140
-        },
-        {
-          "tau": 84,
-          "coords": [
-            10.5,
-            -175.7
-          ],
-          "winds": 35,
-          "radiusNm": 157
         }
       ]
     },
@@ -128,8 +101,8 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 3.5,
-      "swellPeriod": 9,
+      "waveHeight": 3.3,
+      "swellPeriod": 8,
       "swellDir": "ENE"
     },
     {
@@ -140,7 +113,7 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.2,
+      "waveHeight": 3.1,
       "swellPeriod": 8,
       "swellDir": "W"
     },
@@ -149,11 +122,11 @@
       "name": "Pena Cyclonic Wave Field",
       "center": [
         9.9,
-        -167.7
+        -169.4
       ],
       "radiusNm": 150,
-      "waveHeight": 3.2,
-      "swellPeriod": 9,
+      "waveHeight": 3.4,
+      "swellPeriod": 10,
       "swellDir": "NE"
     },
     {
@@ -164,9 +137,9 @@
         154.1
       ],
       "radiusNm": 156,
-      "waveHeight": 6.7,
-      "swellPeriod": 10,
-      "swellDir": "NNE"
+      "waveHeight": 4.4,
+      "swellPeriod": 9,
+      "swellDir": "N"
     }
   ],
   "pressureCenters": [
@@ -176,7 +149,7 @@
       "name": "Tropical Storm PENA Core Low",
       "coords": [
         9.9,
-        -167.7
+        -169.4
       ]
     },
     {
@@ -220,7 +193,7 @@
     {
       "coords": [
         10.2,
-        -167.4
+        -169.1
       ],
       "dir": 160,
       "speed": 40,
