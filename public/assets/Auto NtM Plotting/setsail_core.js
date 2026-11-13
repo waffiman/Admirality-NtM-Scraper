@@ -16523,24 +16523,82 @@ function initNtMMap() {
     let _buoyTssData = [];
     let _buoysVectorGroup = L.layerGroup();
     seamarkLayer.addLayer(_buoysVectorGroup);
+    // Light sector wedges (0.3 NM) — OSM light_* only; IALA lateral/cardinal have no sectors
+    let _lightSectorsData = null;
+    let _lightSectorsRadiusNm = 0.3;
+    let _lightSectorsGroup = L.layerGroup();
+    seamarkLayer.addLayer(_lightSectorsGroup);
     let _renderBuoysHitboxes = null;
+    let _renderLightSectors = null;
+
+    const LIGHT_SECTOR_COLOURS = {
+      w: { fill: "#f1f5f9", stroke: "#cbd5e1" },
+      r: { fill: "#ef4444", stroke: "#dc2626" },
+      g: { fill: "#22c55e", stroke: "#16a34a" },
+      y: { fill: "#eab308", stroke: "#ca8a04" },
+      o: { fill: "#f97316", stroke: "#ea580c" },
+      b: { fill: "#3b82f6", stroke: "#2563eb" },
+      v: { fill: "#a855f7", stroke: "#9333ea" },
+      m: { fill: "#d946ef", stroke: "#c026d3" }
+    };
+
+    function ensureLightSectorsPane(mapRef) {
+      if (!mapRef || typeof mapRef.getPane !== "function") return;
+      if (!mapRef.getPane("lightSectorsPane")) {
+        const p = mapRef.createPane("lightSectorsPane");
+        p.style.zIndex = "440";
+        p.style.pointerEvents = "none";
+      }
+    }
+
+    function buildLightSectorRing(lat, lon, startDeg, endDeg, radiusNm) {
+      const a0 = ((Number(startDeg) % 360) + 360) % 360;
+      const b0 = ((Number(endDeg) % 360) + 360) % 360;
+      let sweep = (b0 - a0 + 360) % 360;
+      if (sweep < 0.05) sweep = 360;
+      const step = sweep >= 180 ? 4 : 5;
+      const n = Math.max(12, Math.ceil(sweep / step));
+      const ring = [[lat, lon]];
+      for (let i = 0; i <= n; i++) {
+        const brg = (a0 + (sweep * i) / n) % 360;
+        const p = destinationPointNm(lat, lon, brg, radiusNm);
+        ring.push([p[0], p[1]]);
+      }
+      ring.push([lat, lon]);
+      return ring;
+    }
 
     async function loadBuoyDatasets() {
-      if (_buoyMarksData.length > 0 && _subseaInfraData) return;
+      if (_buoyMarksData.length > 0 && _subseaInfraData && _lightSectorsData) return;
       loadSubseaInfraDataset();
-      if (_buoyMarksData.length > 0) return;
-      try {
-        const rMarks = await fetch("assets/geo/setroute_iala_marks.json");
-        if (rMarks.ok) {
-          _buoyMarksData = await rMarks.json();
-          window._buoyMarksData = _buoyMarksData;
-          if (typeof _renderBuoysHitboxes === "function") _renderBuoysHitboxes();
-        }
-      } catch (eMarks) {}
-      try {
-        const rTss = await fetch("assets/geo/setroute_tss_world.json");
-        if (rTss.ok) { _buoyTssData = await rTss.json(); window._buoyTssData = _buoyTssData; }
-      } catch (eTss) {}
+      if (!(_buoyMarksData.length > 0)) {
+        try {
+          const rMarks = await fetch("assets/geo/setroute_iala_marks.json");
+          if (rMarks.ok) {
+            _buoyMarksData = await rMarks.json();
+            window._buoyMarksData = _buoyMarksData;
+            if (typeof _renderBuoysHitboxes === "function") _renderBuoysHitboxes();
+          }
+        } catch (eMarks) {}
+      }
+      if (!_lightSectorsData) {
+        try {
+          const rSec = await fetch("assets/geo/setroute_light_sectors.json");
+          if (rSec.ok) {
+            const raw = await rSec.json();
+            _lightSectorsRadiusNm = Number(raw.radiusNm) > 0 ? Number(raw.radiusNm) : 0.3;
+            _lightSectorsData = Array.isArray(raw.L) ? raw.L : [];
+            window._lightSectorsData = _lightSectorsData;
+            if (typeof _renderLightSectors === "function") _renderLightSectors();
+          }
+        } catch (eSec) {}
+      }
+      if (!(_buoyTssData.length > 0)) {
+        try {
+          const rTss = await fetch("assets/geo/setroute_tss_world.json");
+          if (rTss.ok) { _buoyTssData = await rTss.json(); window._buoyTssData = _buoyTssData; }
+        } catch (eTss) {}
+      }
     }
 
     function pointInTssPolygon(lat, lon, ring) {
@@ -16636,8 +16694,11 @@ function initNtMMap() {
     function initBuoysInteractiveLayer(map, seamarkLyr) {
       if (!map || !seamarkLyr) return;
       _renderBuoysHitboxes = updateVectorBuoyMarkers;
+      _renderLightSectors = updateLightSectors;
+      ensureLightSectorsPane(map);
       loadBuoyDatasets().then(() => {
         try { updateVectorBuoyMarkers(); } catch (e) {}
+        try { updateLightSectors(); } catch (e2) {}
       });
 
     // =========================================================================
@@ -17289,6 +17350,67 @@ function initNtMMap() {
     });
 
 
+      function updateLightSectors() {
+        if (!_lightSectorsGroup) return;
+        _lightSectorsGroup.clearLayers();
+        if (!map.hasLayer(seamarkLyr)) return;
+        const z = map.getZoom();
+        // 0.3 NM wedges only readable at chart scale (IALA marks intentionally excluded)
+        if (z < 12) return;
+        const list = Array.isArray(_lightSectorsData) ? _lightSectorsData : [];
+        if (!list.length) return;
+        ensureLightSectorsPane(map);
+        const bounds = (typeof map.getBounds === "function" && map.getBounds().pad)
+          ? map.getBounds().pad(0.15)
+          : map.getBounds();
+        const rNm = _lightSectorsRadiusNm || 0.3;
+        const rM = rNm * 1852;
+        const maxDraw = z >= 14 ? 900 : z >= 13 ? 550 : 320;
+        let drawn = 0;
+        for (let i = 0; i < list.length; i++) {
+          if (drawn >= maxDraw) break;
+          const row = list[i];
+          if (!row || row.length < 3) continue;
+          const lat = row[0], lon = row[1], sectors = row[2];
+          if (!bounds.contains([lat, lon])) continue;
+          if (!Array.isArray(sectors) || !sectors.length) continue;
+          for (let s = 0; s < sectors.length; s++) {
+            if (drawn >= maxDraw) break;
+            const sec = sectors[s];
+            if (!sec || sec.length < 3) continue;
+            const code = String(sec[0] || "w").toLowerCase();
+            const cols = LIGHT_SECTOR_COLOURS[code] || LIGHT_SECTOR_COLOURS.w;
+            const a = Number(sec[1]);
+            const b = Number(sec[2]);
+            if (!Number.isFinite(a) || !Number.isFinite(b)) continue;
+            const isFull = (a === 0 && b === 360) || Math.abs(((b - a + 360) % 360)) < 0.05;
+            // Full-circle all-round: slightly tighter zoom to avoid low-z clutter
+            if (isFull && z < 13) continue;
+            const style = {
+              pane: "lightSectorsPane",
+              interactive: false,
+              stroke: true,
+              color: cols.stroke,
+              weight: 1,
+              opacity: 0.75,
+              fill: true,
+              fillColor: cols.fill,
+              fillOpacity: isFull ? 0.18 : 0.32,
+              className: "ss-light-sector"
+            };
+            try {
+              if (isFull) {
+                _lightSectorsGroup.addLayer(L.circle([lat, lon], Object.assign({ radius: rM }, style)));
+              } else {
+                const ring = buildLightSectorRing(lat, lon, a, b, rNm);
+                _lightSectorsGroup.addLayer(L.polygon(ring, style));
+              }
+              drawn++;
+            } catch (eSecDraw) {}
+          }
+        }
+      }
+
       function updateVectorBuoyMarkers() {
         if (!map.hasLayer(seamarkLyr)) {
           _buoysVectorGroup.clearLayers();
@@ -17343,15 +17465,21 @@ function initNtMMap() {
         });
       }
 
-      map.on("zoomend moveend", updateVectorBuoyMarkers);
+      map.on("zoomend moveend", () => {
+        updateVectorBuoyMarkers();
+        updateLightSectors();
+      });
       map.on("zoomend", updateSubseaInfraLayer);
       seamarkLyr.on("add", () => {
         ensureSubseaPane();
+        ensureLightSectorsPane(map);
         updateSubseaInfraLayer();
         updateVectorBuoyMarkers();
+        updateLightSectors();
       });
       seamarkLyr.on("remove", () => {
         _buoysVectorGroup.clearLayers();
+        _lightSectorsGroup.clearLayers();
         _subseaInfraLayer.clearLayers();
       });
     }
