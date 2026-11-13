@@ -14483,25 +14483,18 @@ function setrouteHaversineNm(lat1, lon1, lat2, lon2) {
 }
 
 function setrouteSplitCoordsByJumps(coords, maxNm) {
-
   if (!coords || !coords.length) return [];
-
   const segs = [[coords[0]]];
-
+  const maxLonJump = 25; // degrees — separate basins / dateline-ish jumps
   for (let i = 1; i < coords.length; i++) {
-
     const prev = segs[segs.length - 1][segs[segs.length - 1].length - 1];
-
     const c = coords[i];
-
-    if (setrouteHaversineNm(prev.lat, prev.lon, c.lat, c.lon) > maxNm) segs.push([c]);
-
+    const dNm = setrouteHaversineNm(prev.lat, prev.lon, c.lat, c.lon);
+    const dLon = Math.abs(((Number(c.lon) - Number(prev.lon) + 540) % 360) - 180);
+    if (dNm > maxNm || dLon > maxLonJump) segs.push([c]);
     else segs[segs.length - 1].push(c);
-
   }
-
   return segs;
-
 }
 
 function classifyNoticeGeometryClient(notice) {
@@ -14540,7 +14533,7 @@ function classifyNoticeGeometryClient(notice) {
 
   const multiJoin = joinCount >= 2 || /maritime\s+limit|pecked\s+line/i.test(text);
 
-  const maxLeg = multiJoin ? 6 : (preferArea ? 120 : 40);
+  const maxLeg = multiJoin ? 6 : (preferArea ? 35 : 40);
 
 
 
@@ -14787,19 +14780,33 @@ function classifyNoticeGeometryClient(notice) {
   }
 
   if ((lineKw && n >= 2) || n === 2) {
-
+    // Two positions far apart are discrete points — never draw a chord across land
+    if (n === 2 && span > 40 && !lineKw) {
+      notice.coords = coords;
+      notice.isPolygon = false;
+      notice.isLine = false;
+      notice.geometryKind = "points";
+      notice.geometryConfidence = 0.88;
+      notice.geometryReason = "two_points_far_apart";
+      delete notice.subPolygons;
+      return notice;
+    }
+    if (span > 250 && !lineKw) {
+      notice.coords = coords;
+      notice.isPolygon = false;
+      notice.isLine = false;
+      notice.geometryKind = "points";
+      notice.geometryConfidence = 0.85;
+      notice.geometryReason = "span_too_large_for_line";
+      delete notice.subPolygons;
+      return notice;
+    }
     notice.coords = coords;
-
     notice.isPolygon = false;
-
     notice.isLine = true;
-
     notice.geometryKind = "line";
-
     notice.geometryConfidence = 0.9;
-
     return notice;
-
   }
 
   if (n >= 3 && span <= 250 && preferArea) {
@@ -15169,53 +15176,64 @@ async function hydrateNtmStorePreferCache() {
     return true;
   }
 
-  // 1. LocalStorage
-  if (loadStoreFromStorage()) return true;
+  // Single-flight — boot + tile click must not race dual CacheStorage scans
+  if (window._ntmHydratePromise) return window._ntmHydratePromise;
 
-  // 2. IndexedDB (~20-50ms async disk access)
-  try {
-    const fromIdb = await loadStoreFromIdb();
-    if (fromIdb && applyHydratedNtmStore(fromIdb)) return true;
-  } catch (eIdb) {}
+  window._ntmHydratePromise = (async () => {
+    // 1. LocalStorage
+    if (loadStoreFromStorage()) return true;
 
-  // 3. CacheStorage (window.caches) — instant local disk read (~30-60ms)
-  // Ensures precached notices.json from Service Worker is loaded instantly without network wait
-  try {
-    if (typeof caches !== "undefined") {
-      const cacheNames = await caches.keys();
-      for (const cName of cacheNames) {
-        try {
-          const cache = await caches.open(cName);
-          let match = await cache.match("notices.json") || await cache.match("./notices.json");
-          if (!match) {
-            const keys = await cache.keys();
-            for (const k of keys) {
-              const u = String((k && k.url) || "");
-              if (u.endsWith("/notices.json") || u.indexOf("notices.json") >= 0) {
-                match = await cache.match(k);
-                if (match) break;
-              }
+    // 2. IndexedDB (~20-50ms async disk access)
+    try {
+      const fromIdb = await loadStoreFromIdb();
+      if (fromIdb && applyHydratedNtmStore(fromIdb)) return true;
+    } catch (eIdb) {}
+
+    // 3. CacheStorage — ONLY match known notices.json URLs (never cache.keys():
+    //    tile caches can have 10k+ entries and freeze the first Warnings click)
+    try {
+      if (typeof caches !== "undefined") {
+        const candidates = [];
+        try { candidates.push(new URL("notices.json", window.location.href).href); } catch (eU) {}
+        candidates.push("notices.json", "./notices.json", "/notices.json");
+        const cacheNames = await caches.keys();
+        for (const cName of cacheNames) {
+          try {
+            const cache = await caches.open(cName);
+            let match = null;
+            for (const url of candidates) {
+              match = await cache.match(url);
+              if (match) break;
             }
-          }
-          if (match) {
-            const parsed = await match.json();
-            const list = parsed && Array.isArray(parsed.notices) ? parsed.notices : (Array.isArray(parsed) ? parsed : null);
-            if (list && list.length >= NTM_MIN_FULL_CORPUS) {
-              if (applyHydratedNtmStore(list)) {
-                try { saveStoreToIdb(list); } catch (eSave) {}
-                if (parsed.metadata) {
-                  try { localStorage.setItem(META_STORAGE_KEY, JSON.stringify(parsed.metadata)); } catch(e){}
+            if (!match) {
+              // One targeted relative match — still no full key scan
+              match = await cache.match(new Request("notices.json"));
+            }
+            if (match) {
+              const parsed = await match.json();
+              const list = parsed && Array.isArray(parsed.notices) ? parsed.notices
+                : (Array.isArray(parsed) ? parsed : null);
+              if (list && list.length >= NTM_MIN_FULL_CORPUS) {
+                if (applyHydratedNtmStore(list)) {
+                  try { saveStoreToIdb(list); } catch (eSave) {}
+                  if (parsed.metadata) {
+                    try { localStorage.setItem(META_STORAGE_KEY, JSON.stringify(parsed.metadata)); } catch (e) {}
+                  }
+                  return true;
                 }
-                return true;
               }
             }
-          }
-        } catch (eC) {}
+          } catch (eC) {}
+        }
       }
-    }
-  } catch (eCaches) {}
+    } catch (eCaches) {}
 
-  return Array.isArray(NTM_STORE) && NTM_STORE.length >= NTM_MIN_FULL_CORPUS;
+    return Array.isArray(NTM_STORE) && NTM_STORE.length >= NTM_MIN_FULL_CORPUS;
+  })().finally(() => {
+    window._ntmHydratePromise = null;
+  });
+
+  return window._ntmHydratePromise;
 }
 
 window.hydrateNtmStorePreferCache = hydrateNtmStorePreferCache;
@@ -15280,7 +15298,7 @@ async function loadRemoteNoticesJson(showFeedback = false) {
       // Local/Same-origin first (SW cache-first). CDN/GitHub fallback.
       const endpoints = [
         { url: localNoticesUrl + "?v=5.218.0", cache: "default", sameOrigin: true, timeout: 30000 },
-        { url: "notices.json?v=5.218.0", cache: "default", sameOrigin: true, timeout: 30000 },
+        { url: "notices.json?v=5.221.0", cache: "default", sameOrigin: true, timeout: 30000 },
         { url: "https://cdn.jsdelivr.net/gh/waffiman/Admirality-NtM-Scraper@main/notices.json?t=" + bust, cache: "no-store", timeout: 30000 },
         { url: "https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/notices.json?t=" + bust, cache: "no-store", mode: "cors", timeout: 30000 }
       ];
@@ -15579,7 +15597,8 @@ function ensureNoticesReadyForOverlay() {
       // Safety watchdog: NEVER leave spinner spinning or _ntmOverlayLoadBusy=true for more than 35 seconds
       const watchdog = setTimeout(() => {
         window._ntmOverlayLoadBusy = false;
-        if (!window._ntmOverlayPlottingActive && typeof window.setOverlayNoticesLoading === "function") {
+        window._ntmOverlayPlottingActive = false; // force — never leave spinner forever
+        if (typeof window.setOverlayNoticesLoading === "function") {
           window.setOverlayNoticesLoading(false);
         }
       }, 35000);
@@ -20657,6 +20676,26 @@ function renderNtMListAndMap() {
 
     // Split polylines that cross the antimeridian so Leaflet does not draw a world-wrapping chord
 
+    const splitLongLegsLatLngs = (latlngs, maxNm) => {
+      const limit = Number(maxNm) > 0 ? Number(maxNm) : 80;
+      const rings = [[]];
+      for (let i = 0; i < latlngs.length; i++) {
+        const cur = latlngs[i];
+        const ring = rings[rings.length - 1];
+        if (ring.length) {
+          const prev = ring[ring.length - 1];
+          const dNm = setrouteHaversineNm(prev[0], prev[1], cur[0], cur[1]);
+          const dLon = Math.abs(((Number(cur[1]) - Number(prev[1]) + 540) % 360) - 180);
+          if (dNm > limit || dLon > 25) {
+            rings.push([cur]);
+            continue;
+          }
+        }
+        ring.push(cur);
+      }
+      return rings.filter((r) => r.length >= 2);
+    };
+
     const splitAntimeridianLatLngs = (latlngs) => {
 
       const rings = [[]];
@@ -20933,7 +20972,7 @@ function renderNtMListAndMap() {
           } else if (pts.length >= 2 && asLine) {
             const linePoints = pts.map(p => [p[0], wrapLongitudeDeg(p[1])]);
             const extra = `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${pts.length} pts)</div>`;
-            splitAntimeridianLatLngs(linePoints).forEach((seg) => {
+            splitAntimeridianLatLngs(linePoints).flatMap((seg) => splitLongLegsLatLngs(seg, 80)).forEach((seg) => {
               const lOpts = Object.assign({
                 color: pal.stroke,
                 weight: baseLineWeight,
@@ -20986,7 +21025,8 @@ function renderNtMListAndMap() {
         });
       } else if (item.isLine && item.coords.length >= 2) {
         const linePoints = item.coords.map(c => [c.lat, wrapLongitudeDeg(c.lon)]);
-        const segments = splitAntimeridianLatLngs(linePoints);
+        const segments = splitAntimeridianLatLngs(linePoints)
+          .flatMap((seg) => splitLongLegsLatLngs(seg, 80));
         const extra = `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points${segments.length > 1 ? " · date-line split" : ""})</div>`;
         segments.forEach((seg) => {
           const lOpts = Object.assign({
@@ -21208,6 +21248,13 @@ function renderNtMListAndMap() {
       window._ntmOverlayPlottingActive = true;
       if (typeof window.setOverlayNoticesLoading === "function") {
         window.setOverlayNoticesLoading(true, 0, totalNotices);
+      }
+      if (totalNotices === 0) {
+        window._ntmOverlayPlottingActive = false;
+        window._ntmOverlayLoadBusy = false;
+        if (typeof window.setOverlayNoticesLoading === "function") {
+          window.setOverlayNoticesLoading(false);
+        }
       }
 
       function plotNextChunk() {
