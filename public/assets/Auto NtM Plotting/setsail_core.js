@@ -17149,35 +17149,9 @@ function initNtMMap() {
       // =======================================================================
       // EVALUATE CANDIDATE COUNT
       // =======================================================================
+      // Empty 1×1 NM frame → no popup (never show IALA Region A/B stub)
       if (candidates.length === 0) {
-        if (isBuoysActive && z >= 10 && typeof setrouteIalaRegion === "function") {
-          drawEcdisPickReticle(clickPt, targetMap, dLat, dLon);
-          const reg = setrouteIalaRegion(lat, lon);
-          const posDms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
-          const fallbackContent =
-            '<div class="ss-ais-popup-body ss-buoy-popup-body">' +
-              '<div class="ss-ais-head">' +
-                '<span class="ss-ais-name">⚓ OpenSeaMap Seamark</span>' +
-                '<span class="ss-ais-mode is-ais">' + (reg.code || "IALA") + '</span>' +
-              '</div>' +
-              '<div class="ss-ais-row"><span class="ss-ais-k">SYSTEM</span><span class="ss-ais-v">' + reg.name + '</span></div>' +
-              '<div class="ss-ais-row"><span class="ss-ais-k">LATERAL</span><span class="ss-ais-v">' + reg.difference + '</span></div>' +
-              '<div class="ss-ais-row"><span class="ss-ais-k">POS</span><span class="ss-ais-v" style="font-family:monospace;font-size:10px;">' + posDms + '</span></div>' +
-              '<div class="ss-ais-foot">OpenSeaMap · S-52 Seamark Layer</div>' +
-            '</div>';
-
-          const pop = L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 260, minWidth: 190, closeButton: true })
-            .setLatLng(clickPt)
-            .setContent(fallbackContent)
-            .openOn(targetMap);
-          pop.on("remove", () => {
-            setTimeout(() => {
-              if (_ecdisPickSessionId === currentSession) clearEcdisPickReticle(targetMap);
-            }, 80);
-          });
-        } else {
-          clearEcdisPickReticle(targetMap);
-        }
+        clearEcdisPickReticle(targetMap);
         return;
       }
 
@@ -17295,9 +17269,22 @@ function initNtMMap() {
     window.clearEcdisPickReticle = clearEcdisPickReticle;
     window.drawEcdisPickReticle = drawEcdisPickReticle;
 
-    // Unified chart click handler (all layers equal)
+    // Unified chart click handler (all layers equal).
+    // preclick: if a popup is already open, this LMB only closes it — do not open a new pick.
+    map.on("preclick", () => {
+      try {
+        map._ssEcdisPickClosingOnly = !!(map._popup && map.hasLayer(map._popup));
+      } catch (ePre) {
+        map._ssEcdisPickClosingOnly = false;
+      }
+    });
     map.on("click", (e) => {
       if (e.originalEvent && e.originalEvent._ecdisPickHandled) return;
+      if (map._ssEcdisPickClosingOnly) {
+        map._ssEcdisPickClosingOnly = false;
+        try { clearEcdisPickReticle(map); } catch (eClr) {}
+        return;
+      }
       handleEcdisObjectPick(e.latlng, map);
     });
 
