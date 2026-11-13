@@ -1,8 +1,71 @@
 {
-  "synopticCycle": "1400 UTC",
-  "lastSyncUtc": "2026-11-13T14:00:19.132579+00:00",
+  "synopticCycle": "2000 UTC",
+  "lastSyncUtc": "2026-11-13T20:51:34.663730+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
-  "storms": [],
+  "storms": [
+    {
+      "id": "SH952026",
+      "name": "Invest 95S",
+      "shortName": "95S",
+      "category": "Tropical Disturbance (Active Invest)",
+      "center": [
+        -9.5,
+        85.9
+      ],
+      "centralPressure": 1006,
+      "maxWinds": 25,
+      "gusts": 32,
+      "movement": "W at 1203 kts",
+      "dangerRadiusNm": 65,
+      "forecastTrack": [
+        {
+          "tau": 12,
+          "coords": [
+            -9.2,
+            -158.0
+          ],
+          "winds": 30,
+          "radiusNm": 45
+        },
+        {
+          "tau": 24,
+          "coords": [
+            -8.5,
+            -158.0
+          ],
+          "winds": 35,
+          "radiusNm": 60
+        },
+        {
+          "tau": 36,
+          "coords": [
+            -8.2,
+            -157.5
+          ],
+          "winds": 40,
+          "radiusNm": 75
+        },
+        {
+          "tau": 48,
+          "coords": [
+            -8.6,
+            -157.5
+          ],
+          "winds": 45,
+          "radiusNm": 90
+        },
+        {
+          "tau": 60,
+          "coords": [
+            -8.9,
+            -157.9
+          ],
+          "winds": 50,
+          "radiusNm": 105
+        }
+      ]
+    }
+  ],
   "waves": [
     {
       "id": "W1",
@@ -12,9 +75,9 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 2.5,
+      "waveHeight": 2.8,
       "swellPeriod": 8,
-      "swellDir": "ESE"
+      "swellDir": "SSW"
     },
     {
       "id": "W2",
@@ -24,12 +87,21 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.7,
-      "swellPeriod": 8,
-      "swellDir": "W"
+      "waveHeight": 5.1,
+      "swellPeriod": 10,
+      "swellDir": "WSW"
     }
   ],
   "pressureCenters": [
+    {
+      "type": "L",
+      "value": 1006,
+      "name": "Invest 95S Core Low",
+      "coords": [
+        -9.5,
+        85.9
+      ]
+    },
     {
       "type": "H",
       "value": 1026,
@@ -58,5 +130,15 @@
       ]
     }
   ],
-  "windVectors": []
+  "windVectors": [
+    {
+      "coords": [
+        -9.2,
+        86.2
+      ],
+      "dir": 200,
+      "speed": 25,
+      "label": "25 kts (95S)"
+    }
+  ]
 }
