@@ -1,44 +1,8 @@
 {
-  "synopticCycle": "2300 UTC",
-  "lastSyncUtc": "2026-11-12T23:22:57.909341+00:00",
+  "synopticCycle": "0500 UTC",
+  "lastSyncUtc": "2026-11-13T05:22:08.528589+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
-  "storms": [
-    {
-      "id": "CP042026",
-      "name": "Post-Tropical Cyclone PENA",
-      "shortName": "Pena",
-      "category": "Post-Tropical Cyclone (NOAA NHC)",
-      "center": [
-        9.8,
-        -173.4
-      ],
-      "centralPressure": 1006,
-      "maxWinds": 30,
-      "gusts": 37,
-      "movement": "W at 18 kts",
-      "dangerRadiusNm": 70,
-      "forecastTrack": [
-        {
-          "tau": 12,
-          "coords": [
-            9.8,
-            -173.4
-          ],
-          "winds": 30,
-          "radiusNm": 56
-        },
-        {
-          "tau": 24,
-          "coords": [
-            9.9,
-            -174.1
-          ],
-          "winds": 30,
-          "radiusNm": 73
-        }
-      ]
-    }
-  ],
+  "storms": [],
   "waves": [
     {
       "id": "W1",
@@ -48,7 +12,7 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 2.6,
+      "waveHeight": 2.5,
       "swellPeriod": 8,
       "swellDir": "E"
     },
@@ -60,33 +24,12 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 2.8,
-      "swellPeriod": 9,
-      "swellDir": "W"
-    },
-    {
-      "id": "WS1",
-      "name": "Pena Cyclonic Wave Field",
-      "center": [
-        9.8,
-        -173.4
-      ],
-      "radiusNm": 150,
-      "waveHeight": 3.0,
-      "swellPeriod": 10,
-      "swellDir": "NE"
+      "waveHeight": 3.2,
+      "swellPeriod": 8,
+      "swellDir": "WNW"
     }
   ],
   "pressureCenters": [
-    {
-      "type": "L",
-      "value": 1006,
-      "name": "Post-Tropical Cyclone PENA Core Low",
-      "coords": [
-        9.8,
-        -173.4
-      ]
-    },
     {
       "type": "H",
       "value": 1026,
@@ -115,15 +58,5 @@
       ]
     }
   ],
-  "windVectors": [
-    {
-      "coords": [
-        10.1,
-        -173.1
-      ],
-      "dir": 160,
-      "speed": 30,
-      "label": "30 kts (Pena)"
-    }
-  ]
+  "windVectors": []
 }
