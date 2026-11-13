@@ -7070,99 +7070,7 @@
 
 
 
-/* Distinct Highlighting & Right Alignment for My Route Tab */
-
-.excel-tab-route {
-
-  margin-left: auto !important;
-
-  border-color: rgba(56, 189, 248, 0.55) !important;
-
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(14, 165, 233, 0.06)) !important;
-
-  color: #38bdf8 !important;
-
-  font-weight: 700 !important;
-
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
-
-}
-
-
-
-.excel-tab-route:hover {
-
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.24), rgba(14, 165, 233, 0.12)) !important;
-
-  color: #ffffff !important;
-
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
-
-}
-
-
-
-.excel-tab-route.active {
-
-  background: linear-gradient(135deg, rgba(2, 132, 199, 0.35), rgba(56, 189, 248, 0.22)) !important;
-
-  border-color: #38bdf8 !important;
-
-  color: #ffffff !important;
-
-  box-shadow: 0 -2px 10px rgba(56, 189, 248, 0.35), 0 0 14px rgba(56, 189, 248, 0.25);
-
-}
-
-
-
-.excel-tab-route .excel-tab-check {
-
-  border-color: #38bdf8;
-
-  color: #38bdf8;
-
-}
-
-
-
-.excel-tab-route.active .excel-tab-check {
-
-  background: #0284c7;
-
-  color: #ffffff;
-
-}
-
-
-
-[data-theme="light"] .excel-tab-route {
-
-  margin-left: auto !important;
-
-  border-color: rgba(2, 132, 199, 0.45) !important;
-
-  background: linear-gradient(135deg, #e0f2fe, #bae6fd) !important;
-
-  color: #0369a1 !important;
-
-  font-weight: 700 !important;
-
-  box-shadow: 0 0 8px rgba(2, 132, 199, 0.15);
-
-}
-
-
-
-[data-theme="light"] .excel-tab-route.active {
-
-  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
-
-  border-color: #0284c7 !important;
-
-  color: #ffffff !important;
-
-}
+/* .excel-tab-route kept for JS hooks — same visuals as .excel-tab */
 
 
 
@@ -16498,33 +16406,7 @@
 
 
 
-/* Dock tile name colors — same palette as empty-hint buttons */
-
-.excel-tab[data-overlay="notices"] .excel-tab-name { color: #fbbf24; }
-
-.excel-tab[data-overlay="depths"] .excel-tab-name { color: #34d399; }
-
-.excel-tab[data-overlay="weather"] .excel-tab-name { color: #38bdf8; }
-
-.excel-tab[data-overlay="ais"] .excel-tab-name { color: #2dd4bf; }
-
-.excel-tab[data-overlay="route"] .excel-tab-name,
-
-.excel-tab-route .excel-tab-name { color: #38bdf8; }
-
-.excel-tab.active[data-overlay="notices"] .excel-tab-name,
-
-.excel-tab.active[data-overlay="depths"] .excel-tab-name,
-
-.excel-tab.active[data-overlay="weather"] .excel-tab-name,
-
-.excel-tab.active[data-overlay="ais"] .excel-tab-name,
-
-.excel-tab.active[data-overlay="route"] .excel-tab-name {
-
-  color: #ffffff;
-
-}
+/* Dock tile names inherit unified .excel-tab color across all overlays and themes */
 
 
 
