@@ -139,18 +139,24 @@
         // Continuous jumpTo on move/zoom keeps Bathymetry locked to the basemap.
         // Depths / bathymetry must sit just above basemap tiles (200) and BELOW
         // Buoys / seamarks / notices / markers — never cover navigational marks.
-        if (!map.getPane("owBathyPane")) {
-          const pane = map.createPane("owBathyPane");
-          pane.style.zIndex = 250;
+        // Elevation contours use ecdisElevPane (above ECDIS land fill, below place labels).
+        const paneName = this.options.pane || "owBathyPane";
+        const paneZ = this.options.paneZIndex != null ? this.options.paneZIndex : 250;
+        if (!map.getPane(paneName)) {
+          const pane = map.createPane(paneName);
+          pane.style.zIndex = paneZ;
           pane.style.pointerEvents = "none";
         } else {
-          try { map.getPane("owBathyPane").style.zIndex = 250; } catch (eZ) {}
+          try {
+            map.getPane(paneName).style.zIndex = paneZ;
+            map.getPane(paneName).style.pointerEvents = "none";
+          } catch (eZ) {}
         }
         const root = (this._container = L.DomUtil.create("div", "setsail-ow-gl-root leaflet-zoom-hide"));
         root.style.cssText =
           "position:absolute;left:0;top:0;width:100%;height:100%;" +
           "pointer-events:none;overflow:hidden;background:transparent;transform-origin:0 0;";
-        map.getPane("owBathyPane").appendChild(root);
+        map.getPane(paneName).appendChild(root);
 
         const center = map.getCenter();
         const glZoom = Math.max(0, map.getZoom() - GL_ZOOM_OFFSET);
@@ -701,17 +707,203 @@
     setTimeout(kick, 280);
   }
 
-  function createMapLibreLayer(style, attribution) {
+  function createMapLibreLayer(style, attribution, extraOpts) {
     const Cls = ensureOwGlLayerClass();
-    return new Cls({
+    return new Cls(Object.assign({
       style: style,
       attribution: attribution || "Open Waters"
-    });
+    }, extraOpts || {}));
   }
 
   async function createBathymetryLayer() {
     await ensureMapLibreReady();
     return createMapLibreLayer(buildBathymetryOverlayStyle(), "Open Waters Bathymetry");
+  }
+
+  /* ── ECDIS land elevation contours (lines + m labels only; no land recolor) ── */
+  const ML_CONTOUR_SRC = "assets/Auto%20NtM%20Plotting/maplibre-contour.min.js?v=5.223";
+  const ECDIS_ELEV_MIN_ZOOM = 9; // Leaflet zoom — keep light at overview
+  let _mlContourReady = null;
+  let _elevDemSource = null;
+  let _ecdisElevLayer = null;
+  let _ecdisElevWanted = false;
+  let _ecdisElevBusy = null;
+
+  function ensureMaplibreContour() {
+    if (global.mlcontour) return Promise.resolve();
+    if (_mlContourReady) return _mlContourReady;
+    _mlContourReady = loadScript(ML_CONTOUR_SRC, 20000).then(() => {
+      if (!global.mlcontour) throw new Error("mlcontour global missing");
+    }).catch((err) => {
+      _mlContourReady = null;
+      throw err;
+    });
+    return _mlContourReady;
+  }
+
+  function buildEcdisElevationContourStyle(demSource) {
+    // Contours generated client-side from Terrarium DEM (AWS Tilezen / Joerd).
+    // Land fill stays ECDIS #EFB562 — we only draw brown isolines + metre labels.
+    const contourTiles = demSource.contourProtocolUrl({
+      multiplier: 1,
+      thresholds: {
+        // MapLibre zoom (≈ Leaflet − 1): minor / major intervals in metres
+        8: [200, 1000],
+        9: [100, 500],
+        10: [50, 200],
+        11: [50, 200],
+        12: [20, 100],
+        13: [20, 100],
+        14: [10, 50],
+        15: [10, 50]
+      },
+      elevationKey: "ele",
+      levelKey: "level",
+      contourLayer: "contours"
+    });
+    return {
+      version: 8,
+      name: "SetSail ECDIS land elevation contours",
+      glyphs: "https://tiles.openwaters.io/fonts/{fontstack}/{range}.pbf",
+      sources: {
+        "ecdis-elev-contours": {
+          type: "vector",
+          tiles: [contourTiles],
+          maxzoom: 15
+        }
+      },
+      layers: [
+        {
+          id: "ow-transparent-bg",
+          type: "background",
+          paint: { "background-color": "rgba(0,0,0,0)" }
+        },
+        {
+          id: "ecdis-elev-lines",
+          type: "line",
+          source: "ecdis-elev-contours",
+          "source-layer": "contours",
+          // Skip sea-level / underwater — land elevations only
+          filter: [">", ["get", "ele"], 0],
+          minzoom: 8,
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: {
+            "line-color": [
+              "match",
+              ["get", "level"],
+              1, "rgba(90, 61, 40, 0.55)",
+              "rgba(90, 61, 40, 0.32)"
+            ],
+            "line-width": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              8, ["match", ["get", "level"], 1, 0.7, 0.35],
+              12, ["match", ["get", "level"], 1, 1.15, 0.55],
+              15, ["match", ["get", "level"], 1, 1.35, 0.7]
+            ]
+          }
+        },
+        {
+          id: "ecdis-elev-labels",
+          type: "symbol",
+          source: "ecdis-elev-contours",
+          "source-layer": "contours",
+          filter: ["all", [">", ["get", "ele"], 0], [">", ["get", "level"], 0]],
+          minzoom: 9,
+          layout: {
+            "symbol-placement": "line",
+            "symbol-spacing": 260,
+            "text-field": ["concat", ["to-string", ["get", "ele"]], " m"],
+            "text-size": ["interpolate", ["linear"], ["zoom"], 9, 10, 13, 12, 15, 13],
+            "text-font": ["Noto Sans Regular"],
+            "text-letter-spacing": 0.02,
+            "text-max-angle": 30,
+            "text-padding": 14,
+            "text-allow-overlap": false,
+            "text-optional": true,
+            "text-rotation-alignment": "map",
+            "text-pitch-alignment": "viewport"
+          },
+          paint: {
+            "text-color": "#5A3D28",
+            "text-halo-color": "rgba(239, 181, 98, 0.92)",
+            "text-halo-width": 1.6,
+            "text-halo-blur": 0.1
+          }
+        }
+      ]
+    };
+  }
+
+  async function createEcdisElevationContourLayer() {
+    await ensureMapLibreReady();
+    await ensureMaplibreContour();
+    if (!_elevDemSource) {
+      _elevDemSource = new global.mlcontour.DemSource({
+        // Global Terrarium DEM (land elevation). Oceans ≈ 0 → filtered out in style.
+        url: "https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png",
+        encoding: "terrarium",
+        maxzoom: 13,
+        worker: true,
+        cacheSize: 72,
+        timeoutMs: 10000
+      });
+      _elevDemSource.setupMaplibre(global.maplibregl);
+    }
+    return createMapLibreLayer(
+      buildEcdisElevationContourStyle(_elevDemSource),
+      "Land elevation contours · AWS Terrarium",
+      { pane: "ecdisElevPane", paneZIndex: 360 }
+    );
+  }
+
+  /**
+   * Auto-managed with ECDIS basemap: show contour lines only when zoomed in (z ≥ 9).
+   * Does not alter ECDIS land/water colors — isolines + metre labels only.
+   */
+  async function syncEcdisLandElevationContours(map, ecdisOn) {
+    _ecdisElevWanted = !!ecdisOn;
+    if (!map) return false;
+    const z = map.getZoom ? map.getZoom() : 0;
+    const shouldShow = _ecdisElevWanted && z >= ECDIS_ELEV_MIN_ZOOM;
+
+    if (!shouldShow) {
+      try {
+        if (_ecdisElevLayer && map.hasLayer(_ecdisElevLayer)) map.removeLayer(_ecdisElevLayer);
+      } catch (eRm) {}
+      return false;
+    }
+
+    if (_ecdisElevBusy) return _ecdisElevBusy;
+    _ecdisElevBusy = (async () => {
+      try {
+        if (!_ecdisElevLayer) {
+          _ecdisElevLayer = await createEcdisElevationContourLayer();
+        }
+        if (!_ecdisElevWanted) return false;
+        const z2 = map.getZoom ? map.getZoom() : 0;
+        if (z2 < ECDIS_ELEV_MIN_ZOOM) return false;
+        if (!map.hasLayer(_ecdisElevLayer)) {
+          _ecdisElevLayer.addTo(map);
+          wireGlLayerResize(_ecdisElevLayer, map);
+        } else {
+          try {
+            if (typeof _ecdisElevLayer._applyProgressiveDetail === "function") {
+              _ecdisElevLayer._applyProgressiveDetail(z2);
+            }
+            if (typeof _ecdisElevLayer._resizeGl === "function") _ecdisElevLayer._resizeGl();
+          } catch (eSync) {}
+        }
+        return true;
+      } catch (err) {
+        console.warn("[SetSail] ECDIS elevation contours failed:", err);
+        return false;
+      } finally {
+        _ecdisElevBusy = null;
+      }
+    })();
+    return _ecdisElevBusy;
   }
 
   const TIDES_STATIONS = "https://api.openwaters.io/tides/stations";
@@ -1912,6 +2104,9 @@
 
   global.ensureOpenWatersMapLibre = ensureMapLibreReady;
   global.createOpenWatersBathymetryLayer = createBathymetryLayer;
+  global.createEcdisElevationContourLayer = createEcdisElevationContourLayer;
+  global.syncEcdisLandElevationContours = syncEcdisLandElevationContours;
+  global.ECDIS_ELEV_MIN_ZOOM = ECDIS_ELEV_MIN_ZOOM;
   global.wireOpenWatersGlLayerResize = wireGlLayerResize;
   global.waitForOpenWatersGlStyle = waitForGlStyle;
   global.waitForOpenWatersBathymetryReady = waitForBathymetryReady;

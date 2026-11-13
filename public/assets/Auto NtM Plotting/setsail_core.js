@@ -32079,9 +32079,41 @@ function createEcdisSimpleBaseLayer() {
   const group = L.layerGroup([water, landFill, boundariesLabels]);
   group._setsailEcdis = true;
   const _origGroupOnAdd = group.onAdd;
+  const _origGroupOnRemove = group.onRemove;
   group.onAdd = function (map) {
     ensureEcdisPanes(map);
-    return _origGroupOnAdd.call(this, map);
+    const ret = _origGroupOnAdd.call(this, map);
+    // Land elevation isolines (brown lines + m labels) only when zoomed in — never recolors ECDIS land
+    try {
+      if (!map._ssEcdisElevZoomHook) {
+        map._ssEcdisElevZoomHook = function () {
+          try {
+            if (typeof window.syncEcdisLandElevationContours === "function") {
+              window.syncEcdisLandElevationContours(map, true);
+            }
+          } catch (eZ) {}
+        };
+        map.on("zoomend", map._ssEcdisElevZoomHook);
+        map.on("moveend", map._ssEcdisElevZoomHook);
+      }
+      if (typeof window.syncEcdisLandElevationContours === "function") {
+        window.syncEcdisLandElevationContours(map, true);
+      }
+    } catch (eElev) {}
+    return ret;
+  };
+  group.onRemove = function (map) {
+    try {
+      if (map && map._ssEcdisElevZoomHook) {
+        map.off("zoomend", map._ssEcdisElevZoomHook);
+        map.off("moveend", map._ssEcdisElevZoomHook);
+        map._ssEcdisElevZoomHook = null;
+      }
+      if (typeof window.syncEcdisLandElevationContours === "function") {
+        window.syncEcdisLandElevationContours(map, false);
+      }
+    } catch (eElevOff) {}
+    return _origGroupOnRemove ? _origGroupOnRemove.call(this, map) : this;
   };
   group._setsailEcdisWater = water;
   group._setsailEcdisLabels = boundariesLabels;
