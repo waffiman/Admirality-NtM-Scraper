@@ -470,11 +470,25 @@
 
       if (!remoteVessel) return;
 
-      // Local GPS watch on THIS device owns motion — only merge static identity fields
+      var hasLocalVessel = !!(
+        localVessel &&
+        ((localVessel.name && String(localVessel.name).trim()) ||
+          (typeof global.isValidVesselLatLon === "function" &&
+            global.isValidVesselLatLon(localVessel.lat, localVessel.lon)))
+      );
+
+      // Local GPS watch on THIS device owns motion — only merge static identity fields when remote is newer or different
       if (global._setsailGpsWatchActive) {
+        if (hasLocalVessel && remoteVStamp <= localVStamp) {
+          return;
+        }
         try {
+          var nextName = (localVessel && localVessel.nameCustomized && localVessel.name)
+            ? localVessel.name
+            : (remoteVessel.name || (localVessel && localVessel.name));
           var idOnly = {
-            name: remoteVessel.name || (localVessel && localVessel.name),
+            name: nextName,
+            nameCustomized: !!(remoteVessel.nameCustomized || (localVessel && localVessel.nameCustomized)),
             callSign: remoteVessel.callSign || (localVessel && localVessel.callSign),
             mmsi: remoteVessel.mmsi || (localVessel && localVessel.mmsi),
             shipType: remoteVessel.shipType || (localVessel && localVessel.shipType),
@@ -483,24 +497,30 @@
             aisFixLon: remoteVessel.aisFixLon != null ? remoteVessel.aisFixLon : (localVessel && localVessel.aisFixLon),
             aisLastFixAt: remoteVessel.aisLastFixAt || (localVessel && localVessel.aisLastFixAt)
           };
+          var changed = !localVessel ||
+            String(idOnly.name || "") !== String(localVessel.name || "") ||
+            String(idOnly.callSign || "") !== String(localVessel.callSign || "") ||
+            String(idOnly.mmsi || "") !== String(localVessel.mmsi || "") ||
+            String(idOnly.shipType || "") !== String(localVessel.shipType || "") ||
+            String(idOnly.destination || "") !== String(localVessel.destination || "") ||
+            String(idOnly.aisLastFixAt || "") !== String(localVessel.aisLastFixAt || "");
+          if (!changed) {
+            if (remoteVStamp > localVStamp) setLocalStamp("setsail_vessel_updated_at_v1", remoteVStamp);
+            return;
+          }
+          setLocalStamp("setsail_vessel_updated_at_v1", remoteVStamp || Date.now());
           if (typeof global.applyVesselProfile === "function") {
             global.applyVesselProfile(idOnly, {
               skipAisSchedule: true,
               toast: null,
               keepPrevCoords: true,
-              fromCloudSync: true
+              fromCloudSync: true,
+              preserveOpenForm: true
             });
           }
         } catch (eId) {}
         return;
       }
-
-      var hasLocalVessel = !!(
-        localVessel &&
-        ((localVessel.name && String(localVessel.name).trim()) ||
-          (typeof global.isValidVesselLatLon === "function" &&
-            global.isValidVesselLatLon(localVessel.lat, localVessel.lon)))
-      );
 
       // Accept remote vessel if we don't have one locally OR remote is newer OR remote has live GPS coords that changed
       var coordsChanged =
@@ -521,11 +541,16 @@
 
       try {
         if (typeof global.applyVesselProfile === "function") {
-          global.applyVesselProfile(remoteVessel, {
+          var syncedVessel = remoteVessel;
+          if (localVessel && localVessel.nameCustomized && localVessel.name && remoteVStamp <= localVStamp) {
+            syncedVessel = Object.assign({}, remoteVessel, { name: localVessel.name, nameCustomized: true });
+          }
+          global.applyVesselProfile(syncedVessel, {
             skipAisSchedule: remoteVessel.source === "gps" || remoteVessel.preferredNav === "gps",
             toast: null,
             keepPrevCoords: false,
-            fromCloudSync: true
+            fromCloudSync: true,
+            preserveOpenForm: true
           });
         } else if (typeof global.loadUserVesselFromStorage === "function") {
           global.loadUserVesselFromStorage();

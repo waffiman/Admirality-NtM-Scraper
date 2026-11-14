@@ -221,6 +221,10 @@ let _aisNameIndexPromise = null;
 
 let _vesselSuggestTimer = null;
 
+let _ownAisFetchSeq = 0;
+
+let _vesselPickSeq = 0;
+
 
 
 function loadUserVesselFromStorage() {
@@ -635,17 +639,121 @@ window.isValidVesselLatLon = isValidVesselLatLon;
 
 
 
-function fillVesselFormsFromState() {
+const _VESSEL_FORM_KEYS = ["name", "callSign", "lat", "lon", "mmsi", "type", "dest", "sog", "cog", "heading"];
+
+const _VESSEL_IDENTITY_KEYS = { name: true, callSign: true, mmsi: true, type: true, dest: true };
+
+function isVesselPopoverOpen(which) {
+
+  const id = which === "home" ? "homeVesselPopover" : "ntmVesselPopover";
+
+  const el = document.getElementById(id);
+
+  return !!(el && el.classList.contains("open"));
+
+}
+
+function bindVesselFormEditTracking(which) {
+
+  const forms = which ? [which] : ["home", "chart"];
+
+  forms.forEach((w) => {
+
+    const m = vesselFormMap(w);
+
+    _VESSEL_FORM_KEYS.forEach((k) => {
+
+      const el = document.getElementById(m[k]);
+
+      if (!el || el._vesselEditTracked) return;
+
+      el._vesselEditTracked = true;
+
+      const mark = () => {
+
+        if (el.dataset) el.dataset.userEdited = "1";
+
+      };
+
+      el.addEventListener("input", mark);
+
+      el.addEventListener("change", mark);
+
+    });
+
+  });
+
+}
+
+function resetVesselFormEditFlags(which) {
+
+  const forms = which ? [which] : ["home", "chart"];
+
+  forms.forEach((w) => {
+
+    const m = vesselFormMap(w);
+
+    _VESSEL_FORM_KEYS.forEach((k) => {
+
+      const el = document.getElementById(m[k]);
+
+      if (el && el.dataset) delete el.dataset.userEdited;
+
+    });
+
+  });
+
+}
+
+function shouldSkipVesselFieldOverwrite(el, which, opts, key) {
+
+  if (!el) return true;
+
+  opts = opts || {};
+
+  if (opts.force) return false;
+
+  if (document.activeElement === el) return true;
+
+  if (el.dataset && el.dataset.userEdited === "1") return true;
+
+  if (isVesselPopoverOpen(which) && (opts.preserveOpenForm || _VESSEL_IDENTITY_KEYS[key])) return true;
+
+  return false;
+
+}
+
+function fillVesselFormsFromState(opts) {
+
+  opts = opts || {};
+
+  bindVesselFormEditTracking();
 
   const v = userVessel || {};
 
-  ["home", "chart"].forEach((which) => {
+  const forms = opts.which ? [opts.which] : ["home", "chart"];
+
+  const setIfAllowed = (which, key, val) => {
 
     const m = vesselFormMap(which);
 
-    setInputVal(m.name, v.name || "");
+    const id = m && m[key];
 
-    setInputVal(m.callSign, v.callSign || "");
+    if (!id) return;
+
+    const el = document.getElementById(id);
+
+    if (!el || shouldSkipVesselFieldOverwrite(el, which, opts, key)) return;
+
+    setInputVal(id, val);
+
+  };
+
+  forms.forEach((which) => {
+
+    setIfAllowed(which, "name", v.name || "");
+
+    setIfAllowed(which, "callSign", v.callSign || "");
 
     if (isValidVesselLatLon(v.lat, v.lon)) {
 
@@ -655,29 +763,29 @@ function fillVesselFormsFromState() {
 
       const mlon = dms.match(/([0-9]+°[^NSEW]*[EW])/i);
 
-      setInputVal(m.lat, mlat ? mlat[1].trim() : String(v.lat));
+      setIfAllowed(which, "lat", mlat ? mlat[1].trim() : String(v.lat));
 
-      setInputVal(m.lon, mlon ? mlon[1].trim() : String(v.lon));
+      setIfAllowed(which, "lon", mlon ? mlon[1].trim() : String(v.lon));
 
     } else {
 
-      setInputVal(m.lat, "");
+      setIfAllowed(which, "lat", "");
 
-      setInputVal(m.lon, "");
+      setIfAllowed(which, "lon", "");
 
     }
 
-    setInputVal(m.mmsi, v.mmsi || "");
+    setIfAllowed(which, "mmsi", v.mmsi || "");
 
-    setInputVal(m.type, v.shipType || "");
+    setIfAllowed(which, "type", v.shipType || "");
 
-    setInputVal(m.dest, v.destination || "");
+    setIfAllowed(which, "dest", v.destination || "");
 
-    setInputVal(m.sog, v.sog != null ? v.sog : "");
+    setIfAllowed(which, "sog", v.sog != null ? v.sog : "");
 
-    setInputVal(m.cog, v.cog != null ? v.cog : "");
+    setIfAllowed(which, "cog", v.cog != null ? v.cog : "");
 
-    setInputVal(m.heading, v.heading != null ? v.heading : "");
+    setIfAllowed(which, "heading", v.heading != null ? v.heading : "");
 
   });
 
@@ -792,7 +900,11 @@ function applyVesselProfile(data, opts) {
   persistUserVessel({ fromCloudSync: !!opts.fromCloudSync });
 
   if (!opts.skipPlot) {
-    fillVesselFormsFromState();
+    fillVesselFormsFromState({
+      force: !!opts.forceForm,
+      preserveOpenForm: !!(opts.preserveOpenForm || opts.fromCloudSync || !opts.forceForm),
+      which: opts.fillWhich || null
+    });
   }
 
   if (isValidVesselLatLon(userVessel.lat, userVessel.lon)) {
@@ -1710,11 +1822,19 @@ async function refreshOwnVesselFromAis(opts) {
 
   if (getOwnShipPreferredNav(userVessel) === "gps") return;
 
+  const fetchSeq = ++_ownAisFetchSeq;
+
+  const reqMmsi = String(userVessel.mmsi || "").replace(/\D/g, "");
+
   try {
 
     try { await syncSetSailUtcClock(false); } catch (eUtc) {}
 
+    if (fetchSeq !== _ownAisFetchSeq || !userVessel || String(userVessel.mmsi || "").replace(/\D/g, "") !== reqMmsi) return;
+
     const hit = await fetchOwnVesselAisUpdate();
+
+    if (fetchSeq !== _ownAisFetchSeq || !userVessel || String(userVessel.mmsi || "").replace(/\D/g, "") !== reqMmsi) return;
 
     if (!hit || !isValidVesselLatLon(hit.lat, hit.lon)) {
 
@@ -1790,8 +1910,12 @@ async function refreshOwnVesselFromAis(opts) {
       ? prev.lon
       : ((feedNow === "gps" && !isLive && isValidVesselLatLon(prev.lat, prev.lon)) ? prev.lon : Number(hit.lon));
 
+    const resolvedName = (prev.nameCustomized && prev.name) ? prev.name : (hit.name || prev.name);
+
     applyVesselProfile(
       Object.assign({}, prev, hit, {
+        name: resolvedName,
+        nameCustomized: !!prev.nameCustomized,
         lat: keepLat,
         lon: keepLon,
         source: isLive ? "ais" : (feedNow === "gps" ? "gps" : (isDrOnRails ? (prev.source || "ais-dr-rails") : "ais-stale")),
@@ -1817,7 +1941,8 @@ async function refreshOwnVesselFromAis(opts) {
             : "Last AIS fix is " + Math.round(ageMs / 3600000 * 10) / 10 + "h old UTC — chart AIS stays at that fix; enable Current route for local DR")
           : null,
         skipAisSchedule: true,
-        skipPlot: isDrOnRails
+        skipPlot: isDrOnRails,
+        preserveOpenForm: true
       }
     );
 
@@ -3556,11 +3681,14 @@ function vesselHasFullAisPayload(t) {
 
 async function applyAisHitToVessel(t, toastMsg) {
   if (!t) return;
+  const pickSeq = ++_vesselPickSeq;
+  ++_ownAisFetchSeq;
   const mmsi = t.mmsi != null ? String(t.mmsi).replace(/\D/g, "") : "";
   const hasLiveHitCoords = !!(t.liveCoords && isValidVesselLatLon(t.lat, t.lon));
   // Name/meta only unless the selected hit came directly from a live AIS feed/search
   const partial = {
     name: t.name || "",
+    nameCustomized: false,
     callSign: t.callSign || "",
     mmsi: mmsi || (t.mmsi != null ? String(t.mmsi) : ""),
     shipType: aisShipTypeCodeToText(t.shipType || t.shipTypeName) || "",
@@ -3591,14 +3719,15 @@ async function applyAisHitToVessel(t, toastMsg) {
     setVesselFieldBusy(m.heading, partial.heading == null);
   });
   setVesselAisSyncBanner(false);
-  applyVesselProfile(partial, { toast: null, skipAisSchedule: true, keepPrevCoords: false });
+  resetVesselFormEditFlags();
+  applyVesselProfile(partial, { toast: null, skipAisSchedule: true, keepPrevCoords: false, forceForm: true });
   if (!hasLiveHitCoords && userVessel) {
     userVessel.lat = null;
     userVessel.lon = null;
     userVessel.aisFixLat = null;
     userVessel.aisFixLon = null;
   }
-  fillVesselFormsFromState();
+  fillVesselFormsFromState({ force: true });
 
   let full = Object.assign({}, partial);
   if (partial.mmsi) {
@@ -3647,6 +3776,22 @@ async function applyAisHitToVessel(t, toastMsg) {
 
 
 
+  const userRenamedWhileFetching = ["home", "chart"].some((w) => {
+    if (!isVesselPopoverOpen(w)) return false;
+    const el = document.getElementById(vesselFormMap(w).name);
+    return !!(el && (document.activeElement === el || (el.dataset && el.dataset.userEdited === "1")));
+  });
+
+  if (pickSeq !== _vesselPickSeq || userRenamedWhileFetching) {
+    ["home", "chart"].forEach((which) => {
+      const m = vesselFormMap(which);
+      [m.lat, m.lon, m.callSign, m.type, m.dest, m.sog, m.cog, m.heading].forEach((id) => {
+        setVesselFieldBusy(id, false);
+      });
+    });
+    return;
+  }
+
   const hasFix = isValidVesselLatLon(full.lat, full.lon);
 
   ["home", "chart"].forEach((which) => {
@@ -3671,9 +3816,15 @@ async function applyAisHitToVessel(t, toastMsg) {
 
   });
 
+  const anyFieldEditedDuringFetch = ["home", "chart"].some((w) => {
+    const m = vesselFormMap(w);
+    return _VESSEL_FORM_KEYS.some((k) => {
+      const el = document.getElementById(m[k]);
+      return !!(el && (document.activeElement === el || (el.dataset && el.dataset.userEdited === "1")));
+    });
+  });
 
-
-  applyVesselProfile(full, { toast: null, skipAisSchedule: false, keepPrevCoords: false });
+  applyVesselProfile(full, { toast: null, skipAisSchedule: false, keepPrevCoords: false, forceForm: !anyFieldEditedDuringFetch, preserveOpenForm: true });
 
   if (vesselHasFullAisPayload(full)) {
 
@@ -4005,7 +4156,9 @@ function syncMyVesselFromLiveAis(t) {
 
     callSign: t.callSign || prev.callSign,
 
-    name: t.name || prev.name,
+    name: (prev.nameCustomized && prev.name) ? prev.name : (t.name || prev.name),
+
+    nameCustomized: !!prev.nameCustomized,
 
     source: isLive ? "AIS" : (isDrOnRails ? (prev.source || "ais-dr-rails") : "ais-stale"),
 
@@ -4156,6 +4309,7 @@ function mergeVesselAutocompleteHits(q, sources) {
 }
 
 function bindVesselNameAutocomplete(which) {
+  bindVesselFormEditTracking(which);
   const m = vesselFormMap(which);
   const input = document.getElementById(m.name);
   if (!input || input._aisBound) return;
@@ -4756,7 +4910,9 @@ function applyGpsFixToVessel(pos, opts) {
 
     skipAisSchedule: true,
 
-    keepPrevCoords: false
+    keepPrevCoords: false,
+
+    preserveOpenForm: true
 
   });
 
@@ -4765,6 +4921,12 @@ function applyGpsFixToVessel(pos, opts) {
   // GPS-only vessels still need DR motion ticks when Current is on
 
   if (typeof scheduleOwnVesselDrMotion === "function") scheduleOwnVesselDrMotion();
+
+  const setGpsFieldIfIdle = (id, val) => {
+    const el = id ? document.getElementById(id) : null;
+    if (!el || document.activeElement === el || (el.dataset && el.dataset.userEdited === "1")) return;
+    setInputVal(id, val);
+  };
 
   ["home", "chart"].forEach((which) => {
 
@@ -4780,23 +4942,23 @@ function applyGpsFixToVessel(pos, opts) {
 
         const mlon = dms.match(/([0-9]+°[^NSEW]*[EW])/i);
 
-        setInputVal(m.lat, mlat ? mlat[1].trim() : String(lat));
+        setGpsFieldIfIdle(m.lat, mlat ? mlat[1].trim() : String(lat));
 
-        setInputVal(m.lon, mlon ? mlon[1].trim() : String(lon));
+        setGpsFieldIfIdle(m.lon, mlon ? mlon[1].trim() : String(lon));
 
       } else {
 
-        setInputVal(m.lat, lat.toFixed(5));
+        setGpsFieldIfIdle(m.lat, lat.toFixed(5));
 
-        setInputVal(m.lon, lon.toFixed(5));
+        setGpsFieldIfIdle(m.lon, lon.toFixed(5));
 
       }
 
-      if (patch.sog != null) setInputVal(m.sog, patch.sog);
+      if (patch.sog != null) setGpsFieldIfIdle(m.sog, patch.sog);
 
-      if (patch.cog != null) setInputVal(m.cog, patch.cog);
+      if (patch.cog != null) setGpsFieldIfIdle(m.cog, patch.cog);
 
-      if (patch.heading != null) setInputVal(m.heading, patch.heading);
+      if (patch.heading != null) setGpsFieldIfIdle(m.heading, patch.heading);
 
     } catch (eF) {}
 
@@ -5118,6 +5280,58 @@ function saveVesselForm(which, closeFn) {
 
   const hasPos = Number.isFinite(data.lat) && Number.isFinite(data.lon);
 
+  const prev = userVessel || null;
+
+  const m = vesselFormMap(which);
+
+  const morePanel = document.getElementById(which === "home" ? "homeVesselMorePanel" : "vesselMorePanel");
+
+  const moreHidden = !!(morePanel && morePanel.hasAttribute("hidden"));
+
+  const mmsiEl = m && m.mmsi ? document.getElementById(m.mmsi) : null;
+
+  const mmsiEdited = !!(mmsiEl && mmsiEl.dataset && mmsiEl.dataset.userEdited === "1");
+
+  const prevNameUpper = prev && prev.name ? String(prev.name).trim().toUpperCase() : "";
+
+  const nextNameUpper = data.name ? String(data.name).trim().toUpperCase() : "";
+
+  const renamedAway = !!(prevNameUpper && nextNameUpper !== prevNameUpper);
+
+  const detachHiddenAis = !!(renamedAway && moreHidden && !mmsiEdited && prev && prev.mmsi && String(data.mmsi || "").trim() === String(prev.mmsi || "").trim());
+
+  if (detachHiddenAis) {
+
+    // Hidden MMSI belonged to the previous vessel; clear stale AIS identity metadata on manual rename
+
+    data.mmsi = "";
+
+    data.callSign = "";
+
+    data.shipType = "";
+
+    data.destination = "";
+
+    data.aisLastFixAt = null;
+
+    data.aisRefreshedAt = null;
+
+    data.aisFixLat = null;
+
+    data.aisFixLon = null;
+
+    data.deadReckoned = false;
+
+    data.nameCustomized = false;
+
+    data.source = (prev && prev.source === "gps") ? "gps" : "manual";
+
+  } else {
+
+    data.nameCustomized = renamedAway ? !!(nextNameUpper && String(data.mmsi || "").trim()) : !!(prev && prev.nameCustomized);
+
+  }
+
   const hasName = !!(data.name && data.name.trim());
 
   if (!hasPos && !hasName && !data.callSign && !data.mmsi) {
@@ -5128,7 +5342,7 @@ function saveVesselForm(which, closeFn) {
 
   }
 
-  if ((getInputVal(vesselFormMap(which).lat) || getInputVal(vesselFormMap(which).lon)) && !hasPos) {
+  if ((getInputVal(m.lat) || getInputVal(m.lon)) && !hasPos) {
 
     alert("Please enter valid coordinates (e.g., 58° 37.70' N / 017° 46.3' E) or leave both blank.");
 
@@ -5136,9 +5350,27 @@ function saveVesselForm(which, closeFn) {
 
   }
 
-  data.source = data.source === "gps" ? "gps" : (hasPos ? (userVessel && userVessel.source === "gps" ? "gps" : "manual") : (userVessel && userVessel.source) || "manual");
+  if (!detachHiddenAis) {
 
-  applyVesselProfile(data, { toast: "Vessel profile saved" });
+    data.source = data.source === "gps" ? "gps" : (hasPos ? (userVessel && userVessel.source === "gps" ? "gps" : "manual") : (userVessel && userVessel.source) || "manual");
+
+  }
+
+  _ownAisFetchSeq++;
+
+  _vesselPickSeq++;
+
+  if (!String(data.mmsi || "").trim() && _ownAisRefreshTimer) {
+
+    clearInterval(_ownAisRefreshTimer);
+
+    _ownAisRefreshTimer = null;
+
+  }
+
+  resetVesselFormEditFlags();
+
+  applyVesselProfile(data, { toast: "Vessel profile saved", forceForm: true });
 
   if (typeof closeFn === "function") closeFn();
 
@@ -5149,6 +5381,10 @@ function saveVesselForm(which, closeFn) {
 function clearVesselProfile(closeFn, opts) {
 
   opts = opts || {};
+
+  _ownAisFetchSeq++;
+
+  _vesselPickSeq++;
 
   userVessel = null;
 
@@ -5180,7 +5416,9 @@ function clearVesselProfile(closeFn, opts) {
 
   if (hud) hud.style.display = "none";
 
-  fillVesselFormsFromState();
+  if (!opts.fromCloudSync && typeof resetVesselFormEditFlags === "function") resetVesselFormEditFlags();
+
+  fillVesselFormsFromState(opts.fromCloudSync ? { preserveOpenForm: true } : { force: true });
 
   updateHomeVesselHudLabel();
 
@@ -11027,6 +11265,8 @@ function initHomeHudVessel() {
 
   try { fillVesselFormsFromState(); } catch (eFill) {}
 
+  try { bindVesselFormEditTracking("home"); } catch (eTrack) {}
+
   if (typeof scheduleOwnVesselAisRefresh === "function") scheduleOwnVesselAisRefresh();
 
 
@@ -11149,6 +11389,8 @@ function initHomeHudVessel() {
 
     const btn = document.getElementById("homeVesselHudBtn");
 
+    const wasOpen = !!(p && p.classList.contains("open"));
+
     const chartPop = document.getElementById("ntmVesselPopover");
 
     const chartBtn = document.getElementById("ntmMyVesselBtn");
@@ -11157,7 +11399,13 @@ function initHomeHudVessel() {
 
     if (chartBtn) chartBtn.classList.remove("active");
 
-    try { fillVesselFormsFromState(); } catch (e2) {}
+    if (!wasOpen) {
+
+      try { resetVesselFormEditFlags("home"); } catch (eRst) {}
+
+      try { fillVesselFormsFromState({ force: true, which: "home" }); } catch (e2) {}
+
+    }
 
     if (p && p.parentElement !== document.body) {
 
@@ -11603,6 +11851,8 @@ function initVesselTracking() {
 
   fillVesselFormsFromState();
 
+  bindVesselFormEditTracking("chart");
+
   bindVesselNameAutocomplete("chart");
 
   bindVesselMmsiLookup("chart");
@@ -11647,7 +11897,9 @@ function initVesselTracking() {
 
       if (myVesselBtn) myVesselBtn.classList.add("active");
 
-      fillVesselFormsFromState();
+      resetVesselFormEditFlags("chart");
+
+      fillVesselFormsFromState({ force: true, which: "chart" });
 
       bindVesselNameAutocomplete("chart");
 
@@ -13397,6 +13649,11 @@ function syncOpenVesselPopoverLiveCoords() {
 
   const active = document.activeElement;
   const activeId = active && active.id ? String(active.id) : "";
+  const canLiveTelemetry = (id) => {
+    if (!id || activeId === id) return false;
+    const el = document.getElementById(id);
+    return !!(el && !(el.dataset && el.dataset.userEdited === "1"));
+  };
 
   ["home", "chart"].forEach((which) => {
     if (which === "home" && !homeOpen) return;
@@ -13410,13 +13667,13 @@ function syncOpenVesselPopoverLiveCoords() {
       const mlon = dms.match(/([0-9]+°[^NSEW]*[EW])/i);
       const latVal = mlat ? mlat[1].trim() : String(v.lat);
       const lonVal = mlon ? mlon[1].trim() : String(v.lon);
-      if (activeId !== m.lat) setInputVal(m.lat, latVal);
-      if (activeId !== m.lon) setInputVal(m.lon, lonVal);
+      if (canLiveTelemetry(m.lat)) setInputVal(m.lat, latVal);
+      if (canLiveTelemetry(m.lon)) setInputVal(m.lon, lonVal);
     }
 
-    if (activeId !== m.sog && v.sog != null) setInputVal(m.sog, v.sog);
-    if (activeId !== m.cog && v.cog != null) setInputVal(m.cog, v.cog);
-    if (activeId !== m.heading && v.heading != null) setInputVal(m.heading, v.heading);
+    if (canLiveTelemetry(m.sog) && v.sog != null) setInputVal(m.sog, v.sog);
+    if (canLiveTelemetry(m.cog) && v.cog != null) setInputVal(m.cog, v.cog);
+    if (canLiveTelemetry(m.heading) && v.heading != null) setInputVal(m.heading, v.heading);
   });
 
   try {
@@ -35387,9 +35644,15 @@ function setSetSailAuthUser(userObj) {
 
         if (typeof syncSetRouteTopbarActions === "function") syncSetRouteTopbarActions();
 
+        _ownAisFetchSeq++;
+
+        _vesselPickSeq++;
+
         userVessel = null;
 
-        if (typeof fillVesselFormsFromState === "function") fillVesselFormsFromState();
+        if (typeof resetVesselFormEditFlags === "function") resetVesselFormEditFlags();
+
+        if (typeof fillVesselFormsFromState === "function") fillVesselFormsFromState({ force: true });
 
         if (typeof updateHomeVesselHudLabel === "function") updateHomeVesselHudLabel();
 

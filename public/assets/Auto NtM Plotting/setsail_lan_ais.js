@@ -125,20 +125,25 @@
   function pushOwnToVessel() {
     var o = state.own;
     if (o.lat == null || o.lon == null) return;
+    var prev = global.userVessel || null;
     var data = {
       lat: o.lat,
       lon: o.lon,
       source: "wifi-ais",
-      sog: o.sog,
-      cog: o.cog,
-      heading: o.hdg,
-      rot: o.rot,
-      mmsi: o.mmsi,
       updatedAt: new Date().toISOString()
     };
+    if (o.sog != null) data.sog = o.sog;
+    if (o.cog != null) data.cog = o.cog;
+    if (o.hdg != null) data.heading = o.hdg;
+    if (o.rot != null) data.rot = o.rot;
+    if (o.mmsi != null && o.mmsi !== "") data.mmsi = o.mmsi;
+    if (prev && prev.nameCustomized && prev.name) {
+      data.name = prev.name;
+      data.nameCustomized = true;
+    }
     try {
       if (typeof global.applyVesselProfile === "function") {
-        global.applyVesselProfile(data);
+        global.applyVesselProfile(data, { preserveOpenForm: true });
       } else if (typeof global.plotUserVessel === "function") {
         global.plotUserVessel(o.lat, o.lon, "wifi-ais", true);
       }
