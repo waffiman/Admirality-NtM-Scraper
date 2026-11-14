@@ -1742,15 +1742,21 @@ function isOwnShipGpsFresh(v) {
 
   const vv = v || userVessel || {};
 
-  if (!window._setsailGpsWatchActive) return false;
+  if (window._setsailGpsWatchActive) return true;
 
-  const iso = vv.gpsLastFixAt || (String(vv.source || "").toLowerCase() === "gps" ? vv.updatedAt : null);
+  const src = String(vv.source || "").toLowerCase();
 
-  if (!iso) return !!window._setsailGpsWatchActive;
+  const pref = String(vv.preferredNav || "").toLowerCase();
+
+  if ((pref === "gps" || src === "gps") && isValidVesselLatLon(vv.lat, vv.lon)) return true;
+
+  const iso = vv.gpsLastFixAt || (src === "gps" ? vv.updatedAt : null);
+
+  if (!iso) return false;
 
   const ms = Date.parse(iso);
 
-  if (!Number.isFinite(ms)) return !!window._setsailGpsWatchActive;
+  if (!Number.isFinite(ms)) return false;
 
   const nowMs = typeof getSetSailUtcNowMs === "function" ? getSetSailUtcNowMs() : Date.now();
 
@@ -1766,7 +1772,7 @@ function isOwnShipGpsFresh(v) {
 
  *  - preferred AIS → AIS, else GPS (temp), else DR (temp)
 
- *  - preferred GPS → GPS, else DR (temp); AIS never overrides
+ *  - preferred GPS → GPS (always stays on GPS track; never hijacked by AIS/DR)
 
  */
 
@@ -1776,13 +1782,9 @@ function resolveOwnShipActiveFeed(v) {
 
   const pref = getOwnShipPreferredNav(vv);
 
-  if (pref === "gps") {
+  if (pref === "gps" || window._setsailGpsWatchActive || String(vv.source || "").toLowerCase() === "gps") {
 
-    if (isOwnShipGpsFresh(vv)) return "gps";
-
-    if (typeof getDrActiveRouteId === "function" && getDrActiveRouteId()) return "dr";
-
-    return "gps"; // last GPS / waiting
+    return "gps";
 
   }
 
@@ -2812,7 +2814,9 @@ function applyOwnVesselDeadReckoning(opts) {
 
   if (srcLow.indexOf("wifi") >= 0) return;
 
-  // Fresh GPS watch still owns the icon
+  // GPS mode / watch always owns the icon ? never jump away to AIS-DR rails on weak GPS signal
+
+  if (window._setsailGpsWatchActive || getOwnShipPreferredNav(v) === "gps" || srcLow === "gps") return;
 
   if (typeof isOwnShipGpsFresh === "function" && isOwnShipGpsFresh(v)) return;
 
@@ -4526,7 +4530,7 @@ function _gpsRecomputeSmoothMotion() {
 
     const dtMs = b.tMs - a.tMs;
 
-    if (dM >= GPS_MOTION_MIN_M && dtMs >= 4000) {
+    if (dM >= 15 && dtMs >= 3000) {
 
       const chordSog = (dM / 1852) / (dtMs / 3600000);
 
@@ -4748,7 +4752,23 @@ function applyGpsFixToVessel(pos, opts) {
 
   if (!isValidVesselLatLon(lat, lon)) return;
 
-  const tMs = Number(pos.timestamp) || Date.now();
+  const nowMs = typeof getSetSailUtcNowMs === "function" ? getSetSailUtcNowMs() : Date.now();
+
+  const rawTs = Number(pos.timestamp);
+
+  // Weak/cached OS fixes can carry a timestamp minutes in the past; keep monotonic sample time for SOG/COG
+
+  // while stamping gpsLastFixAt / updatedAt with current clock so DR / cloud sync never treat active GPS as stale.
+
+  const tMs = (Number.isFinite(rawTs) && rawTs > 0 && Math.abs(nowMs - rawTs) < 60000) ? rawTs : nowMs;
+
+  const accM = Number(pos.coords && pos.coords.accuracy);
+
+  const minTrackM = (Number.isFinite(accM) && accM > 0)
+
+    ? Math.max(15, Math.min(GPS_MOTION_MIN_M, accM * 0.35))
+
+    : 25;
 
   window._homeGeoLon = lon;
 
@@ -4763,7 +4783,7 @@ function applyGpsFixToVessel(pos, opts) {
 
     if (userVessel) {
 
-      userVessel.gpsLastFixAt = new Date(tMs).toISOString();
+      userVessel.gpsLastFixAt = new Date(nowMs).toISOString();
 
     }
 
@@ -4782,6 +4802,8 @@ function applyGpsFixToVessel(pos, opts) {
 
 
 
+  const nowIso = new Date(nowMs).toISOString();
+
   const patch = {
 
     lat,
@@ -4796,9 +4818,9 @@ function applyGpsFixToVessel(pos, opts) {
 
     aisDrOnCenterline: false,
 
-    gpsLastFixAt: new Date(tMs).toISOString(),
+    gpsLastFixAt: nowIso,
 
-    updatedAt: new Date(tMs).toISOString()
+    updatedAt: nowIso
 
   };
 
@@ -4806,15 +4828,21 @@ function applyGpsFixToVessel(pos, opts) {
 
 
 
-  // SOG / COG ONLY from ground track ≥ 50 m — never use coords.heading / device orientation
+  // Ground track over-ground line: rate adapts to GPS accuracy (15..50 m), never device compass
 
   if (_gpsMotionAnchor && Number.isFinite(_gpsMotionAnchor.lat)) {
 
     const dM = _gpsDistM(_gpsMotionAnchor.lat, _gpsMotionAnchor.lon, lat, lon);
 
-    const dtMs = tMs - Number(_gpsMotionAnchor.tMs || 0);
+    let dtMs = tMs - Number(_gpsMotionAnchor.tMs || 0);
 
-    if (dM >= GPS_MOTION_MIN_M && dtMs >= 2000) {
+    if (!(dtMs >= 1000) && Number.isFinite(_gpsMotionAnchor.recvMs)) {
+
+      dtMs = nowMs - _gpsMotionAnchor.recvMs;
+
+    }
+
+    if (dM >= minTrackM && dtMs >= 1500) {
 
       const dtH = dtMs / 3600000;
 
@@ -4824,7 +4852,7 @@ function applyGpsFixToVessel(pos, opts) {
 
       const leg = {
 
-        lat, lon, tMs,
+        lat, lon, tMs: Math.max(tMs, nowMs),
 
         sog: (Number.isFinite(sog) && sog >= 0 && sog <= 60) ? Math.round(sog * 10) / 10 : null,
 
@@ -4866,13 +4894,33 @@ function applyGpsFixToVessel(pos, opts) {
 
       }
 
-      _gpsMotionAnchor = { lat, lon, tMs };
+      _gpsMotionAnchor = { lat, lon, tMs: Math.max(tMs, nowMs), recvMs: nowMs };
+
+    } else if (_gpsTrackLegs.length > 0) {
+
+      const smooth = _gpsRecomputeSmoothMotion();
+
+      if (smooth && smooth.sog != null) {
+
+        patch.sog = smooth.sog;
+
+        patch.gpsSogSmooth = smooth.sog;
+
+      }
+
+      if (smooth && smooth.cog != null) {
+
+        patch.cog = smooth.cog;
+
+        patch.gpsCogSmooth = smooth.cog;
+
+      }
 
     }
 
   } else {
 
-    _gpsMotionAnchor = { lat, lon, tMs };
+    _gpsMotionAnchor = { lat, lon, tMs: Math.max(tMs, nowMs), recvMs: nowMs };
 
   }
 
@@ -13450,65 +13498,55 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
 
 
-    // Reuse marker — clearLayers every tick was a major pan/zoom hitch
+    const zNow = (typeof leafletMap !== "undefined" && leafletMap && leafletMap.getZoom)
+      ? leafletMap.getZoom()
+      : 8;
+    const wantHull = zNow >= OWN_SHIP_HULL_ZOOM;
+    const hasHdg = hasOwnShipHeadingDeg(hdg);
+    const rotDeg = hasHdg ? ((Number(hdg) % 360) + 360) % 360 : 0;
 
+    // Reuse marker and update rotation in-place ? setIcon() destroys/recreates DOM and causes flicker on GPS ticks
     const needNewMarker = !(
-
       _ownShipMarker &&
-
       leafletVesselLayer.hasLayer(_ownShipMarker) &&
-
       _ownShipMarker.options &&
-
       _ownShipMarker.options.pane === "ownShipPane"
-
     );
 
     if (!needNewMarker) {
-
       _ownShipMarker.setLatLng(ll);
-
-      try {
-
-        const nextIcon = getOwnShipMapIcon(hdg);
-
-        if (nextIcon) _ownShipMarker.setIcon(nextIcon);
-
-      } catch (eIcon) {}
-
-    } else {
-
-      clearOwnShipTimeVectorLayers();
-
-      clearOwnShipHdgLine();
-
-      if (_ownShipMarker) {
-
-        try { leafletVesselLayer.removeLayer(_ownShipMarker); } catch (eRm) {}
-
+      const wrapEl = _ownShipMarker._icon && _ownShipMarker._icon.querySelector
+        ? _ownShipMarker._icon.querySelector(".own-ship-wrap")
+        : null;
+      if (_ownShipMarker._ssHullMode !== wantHull || !wrapEl) {
+        try {
+          const nextIcon = getOwnShipMapIcon(hdg);
+          if (nextIcon) {
+            _ownShipMarker.setIcon(nextIcon);
+            _ownShipMarker._ssHullMode = wantHull;
+          }
+        } catch (eIcon) {}
+      } else {
+        wrapEl.style.transform = `rotate(${rotDeg}deg)`;
       }
-
+    } else {
+      clearOwnShipTimeVectorLayers();
+      clearOwnShipHdgLine();
+      if (_ownShipMarker) {
+        try { leafletVesselLayer.removeLayer(_ownShipMarker); } catch (eRm) {}
+      }
       ensureOwnShipPane();
-
       _ownShipMarker = L.marker(ll, {
-
         icon: getOwnShipMapIcon(hdg),
-
         pane: "ownShipPane",
-
         zIndexOffset: 6000,
-
         interactive: true
-
       });
-
+      _ownShipMarker._ssHullMode = wantHull;
       leafletVesselLayer.addLayer(_ownShipMarker);
-
     }
 
-
-
-    _ownShipMarker.bindPopup(
+    if (!_ownShipMarker.getPopup()) _ownShipMarker.bindPopup(
       () => formatOwnShipPopupHtml(
         userVessel.lat,
         userVessel.lon,
