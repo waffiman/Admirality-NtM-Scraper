@@ -7721,7 +7721,7 @@ function sanitizeRouteWaypoints(waypoints) {
 
     if (lat === 0 && lon === 0) continue;
 
-    // Exact 0° longitude padding (RTM) between two non-zero legs — skip
+    // Exact 0° longitude padding (RTM) only when both neighbors are far in the same hemisphere (keep real Prime Meridian crossings)
 
     if (lon === 0 && Math.abs(lat) > 1e-6) {
 
@@ -7729,9 +7729,17 @@ function sanitizeRouteWaypoints(waypoints) {
 
       const next = waypoints[i + 1];
 
+      const prevLon = prev != null ? Number(prev.lon) : NaN;
+
       const nextLon = next != null ? Number(next.lon) : NaN;
 
-      if (prev && Number(prev.lon) !== 0 && Number.isFinite(nextLon) && nextLon !== 0) {
+      if (
+        Number.isFinite(prevLon) &&
+        Number.isFinite(nextLon) &&
+        Math.abs(prevLon) > 45 &&
+        Math.abs(nextLon) > 45 &&
+        prevLon * nextLon > 0
+      ) {
 
         continue;
 
@@ -7862,27 +7870,11 @@ function pickRouteWptMarkerIndices(count) {
 
   if (count <= 0) return [];
 
-  if (count <= 120) {
+  const all = [];
 
-    const all = [];
+  for (let i = 0; i < count; i++) all.push(i);
 
-    for (let i = 0; i < count; i++) all.push(i);
-
-    return all;
-
-  }
-
-  const maxMid = 100;
-
-  const step = Math.ceil((count - 2) / maxMid);
-
-  const idxs = [0];
-
-  for (let i = step; i < count - 1; i += step) idxs.push(i);
-
-  if (idxs[idxs.length - 1] !== count - 1) idxs.push(count - 1);
-
-  return idxs;
+  return all;
 
 }
 
@@ -8058,6 +8050,8 @@ function renderRouteOnMap(route, shouldFly = true) {
 
       interactive: false,
 
+      smoothFactor: 0,
+
       lineCap: "round",
 
       lineJoin: "round",
@@ -8077,6 +8071,8 @@ function renderRouteOnMap(route, shouldFly = true) {
       dashArray: "10, 7",
 
       interactive: true,
+
+      smoothFactor: 0,
 
       lineCap: "round",
 
