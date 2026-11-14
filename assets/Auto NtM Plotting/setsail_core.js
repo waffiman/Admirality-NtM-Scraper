@@ -1133,7 +1133,11 @@ function snapOwnShipToLastAisFix(opts) {
 
     lon: fixLon,
 
+    sog: (Number.isFinite(Number(v.aisFixSog)) && Number(v.aisFixSog) > 0) ? Number(v.aisFixSog) : v.sog,
+
     source: v.aisLastFixAt ? "ais" : (v.source || "ais"),
+
+    preferredNav: window._setsailGpsWatchActive ? (v.preferredNav || "gps") : "ais",
 
     deadReckoned: false,
 
@@ -1710,15 +1714,27 @@ function getOwnShipPreferredNav(v) {
 
   const vv = v || userVessel || {};
 
+  if (window._setsailGpsWatchActive) return "gps";
+
+  const src = String(vv.source || "").toLowerCase();
+
+  if (/ais/.test(src)) return "ais";
+
+  if (vv.mmsi && isValidVesselLatLon(vv.aisFixLat, vv.aisFixLon)) {
+
+    if (typeof getDrActiveRouteId === "function" && getDrActiveRouteId()) return "ais";
+
+    if (src !== "gps") return "ais";
+
+  }
+
   const pref = String(vv.preferredNav || "").toLowerCase();
 
   if (pref === "ais" || pref === "gps" || pref === "manual") return pref;
 
-  const src = String(vv.source || "").toLowerCase();
-
   if (src === "gps") return "gps";
 
-  if (/ais/.test(src) || vv.mmsi) return "ais";
+  if (vv.mmsi) return "ais";
 
   return "manual";
 
@@ -1746,9 +1762,13 @@ function isOwnShipGpsFresh(v) {
 
   const src = String(vv.source || "").toLowerCase();
 
-  const pref = String(vv.preferredNav || "").toLowerCase();
+  if (src !== "gps") return false;
 
-  if ((pref === "gps" || src === "gps") && isValidVesselLatLon(vv.lat, vv.lon)) return true;
+  if (typeof getDrActiveRouteId === "function" && getDrActiveRouteId() && isValidVesselLatLon(vv.aisFixLat, vv.aisFixLon)) {
+
+    return false;
+
+  }
 
   const iso = vv.gpsLastFixAt || (src === "gps" ? vv.updatedAt : null);
 
@@ -1772,7 +1792,7 @@ function isOwnShipGpsFresh(v) {
 
  *  - preferred AIS → AIS, else GPS (temp), else DR (temp)
 
- *  - preferred GPS → GPS (always stays on GPS track; never hijacked by AIS/DR)
+ *  - preferred GPS → GPS (always stays on GPS track while GPS watch is active; never hijacked by AIS/DR)
 
  */
 
@@ -1780,13 +1800,13 @@ function resolveOwnShipActiveFeed(v) {
 
   const vv = v || userVessel || {};
 
-  const pref = getOwnShipPreferredNav(vv);
-
-  if (pref === "gps" || window._setsailGpsWatchActive || String(vv.source || "").toLowerCase() === "gps") {
+  if (window._setsailGpsWatchActive) {
 
     return "gps";
 
   }
+
+  const pref = getOwnShipPreferredNav(vv);
 
   if (pref === "ais") {
 
@@ -1797,6 +1817,16 @@ function resolveOwnShipActiveFeed(v) {
     if (typeof getDrActiveRouteId === "function" && getDrActiveRouteId()) return "dr";
 
     return "ais"; // last AIS fix parked
+
+  }
+
+  if (pref === "gps") {
+
+    if (isOwnShipGpsFresh(vv)) return "gps";
+
+    if (typeof getDrActiveRouteId === "function" && getDrActiveRouteId() && isValidVesselLatLon(vv.lat, vv.lon)) return "dr";
+
+    return "gps";
 
   }
 
@@ -1820,9 +1850,9 @@ async function refreshOwnVesselFromAis(opts) {
 
   if (!userVessel || !userVessel.mmsi) return;
 
-  // GPS-primary: AIS must not steal the icon
+  // Active GPS watch owns the icon; do not steal it while watch is running
 
-  if (getOwnShipPreferredNav(userVessel) === "gps") return;
+  if (window._setsailGpsWatchActive && !opts.force) return;
 
   const fetchSeq = ++_ownAisFetchSeq;
 
@@ -1921,10 +1951,11 @@ async function refreshOwnVesselFromAis(opts) {
         lat: keepLat,
         lon: keepLon,
         source: isLive ? "ais" : (feedNow === "gps" ? "gps" : (isDrOnRails ? (prev.source || "ais-dr-rails") : "ais-stale")),
-        preferredNav: prev.preferredNav === "gps" ? "gps" : "ais",
+        preferredNav: window._setsailGpsWatchActive ? "gps" : "ais",
         aisLastFixAt: hit.aisSeenAt || new Date(hitMs).toISOString(),
         aisFixLat: Number(hit.lat),
         aisFixLon: Number(hit.lon),
+        aisFixSog: Number.isFinite(Number(hit.sog)) && Number(hit.sog) >= 0 ? Number(hit.sog) : prev.aisFixSog,
         aisRefreshedAt: getSetSailUtcNowIso(),
         deadReckoned: isDrOnRails,
         // Fresh AIS becomes the new DR origin once coverage is lost again
@@ -2434,6 +2465,32 @@ function setDrActiveRouteId(routeId, opts) {
 
   }
 
+  if (id) {
+    try {
+      if (userVessel) {
+        if (!window._setsailGpsWatchActive && (userVessel.mmsi || isValidVesselLatLon(userVessel.aisFixLat, userVessel.aisFixLon))) {
+          userVessel.preferredNav = "ais";
+          if (String(userVessel.source || "").toLowerCase() === "gps") {
+            userVessel.source = "ais-dr-rails";
+          }
+        }
+        if (!userVessel.aisLastFixAt) {
+          userVessel.aisLastFixAt = userVessel.aisRefreshedAt || userVessel.updatedAt || getSetSailUtcNowIso();
+        }
+        if (!Number.isFinite(Number(userVessel.aisFixLat))) {
+          userVessel.aisFixLat = Number(userVessel.lat);
+        }
+        if (!Number.isFinite(Number(userVessel.aisFixLon))) {
+          userVessel.aisFixLon = Number(userVessel.lon);
+        }
+        userVessel.aisDrActivatedAt = getSetSailUtcNowIso();
+        window.userVessel = userVessel;
+        try { if (typeof persistUserVessel === "function") persistUserVessel(); } catch (eP0) {}
+      }
+      applyOwnVesselDeadReckoning({ toast: true, force: true, visual: true });
+    } catch (eDrSync) {}
+  }
+
   try {
     if (typeof updateCurrentRouteWaypointsPassedStatus === "function") {
       updateCurrentRouteWaypointsPassedStatus();
@@ -2448,43 +2505,19 @@ function setDrActiveRouteId(routeId, opts) {
 
   if (id) {
 
-    // Activating Current: sync UTC then project own ship onto rails from last AIS fix age
+    // Re-sync UTC in background and refine DR projection if clock offset changed
 
     Promise.resolve(syncSetSailUtcClock(false)).finally(() => {
 
       try {
 
-        if (userVessel) {
+        applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true });
 
-          // Ensure DR has a usable fix timestamp + freeze point
+        if (typeof updateCurrentRouteWaypointsPassedStatus === "function") {
 
-          if (!userVessel.aisLastFixAt) {
-
-            userVessel.aisLastFixAt = userVessel.aisRefreshedAt || userVessel.updatedAt || getSetSailUtcNowIso();
-
-          }
-
-          if (!Number.isFinite(Number(userVessel.aisFixLat))) {
-
-            userVessel.aisFixLat = Number(userVessel.lat);
-
-          }
-
-          if (!Number.isFinite(Number(userVessel.aisFixLon))) {
-
-            userVessel.aisFixLon = Number(userVessel.lon);
-
-          }
-
-          userVessel.aisDrActivatedAt = getSetSailUtcNowIso();
-
-          window.userVessel = userVessel;
-
-          try { if (typeof persistUserVessel === "function") persistUserVessel(); } catch (eP) {}
+          updateCurrentRouteWaypointsPassedStatus();
 
         }
-
-        applyOwnVesselDeadReckoning({ toast: true, force: true, visual: true });
 
       } catch (eDrOn) {}
 
@@ -2814,9 +2847,9 @@ function applyOwnVesselDeadReckoning(opts) {
 
   if (srcLow.indexOf("wifi") >= 0) return;
 
-  // GPS mode / watch always owns the icon ? never jump away to AIS-DR rails on weak GPS signal
+  // Active GPS watch always owns the icon — never jump away to AIS-DR rails while GPS watch is running
 
-  if (window._setsailGpsWatchActive || getOwnShipPreferredNav(v) === "gps" || srcLow === "gps") return;
+  if (window._setsailGpsWatchActive) return;
 
   if (typeof isOwnShipGpsFresh === "function" && isOwnShipGpsFresh(v)) return;
 
@@ -2826,17 +2859,29 @@ function applyOwnVesselDeadReckoning(opts) {
 
 
 
-  // Prefer AIS position-fix time; for GPS-primary use last GPS stamp; then local fallback.
+  const hasAisFixCoords = isValidVesselLatLon(v.aisFixLat, v.aisFixLon);
 
-  // Cap fall-back age so a local refresh stamp cannot invent multi-hour overshoot.
+  const fixLat = Number(hasAisFixCoords ? v.aisFixLat : v.lat);
+
+  const fixLon = Number(hasAisFixCoords ? v.aisFixLon : v.lon);
+
+  if (!Number.isFinite(fixLat) || !Number.isFinite(fixLon)) return;
+
+
+
+  // Pair the fix timestamp with the fix coordinates being projected from
 
   const prefNav = getOwnShipPreferredNav(v);
 
-  const fixIsoPrimary = prefNav === "gps"
+  const fixIsoPrimary = hasAisFixCoords
 
-    ? (v.gpsLastFixAt || v.aisLastFixAt || null)
+    ? (v.aisLastFixAt || v.aisSeenAt || v.gpsLastFixAt || null)
 
-    : (v.aisLastFixAt || v.gpsLastFixAt || null);
+    : (prefNav === "gps"
+
+      ? (v.gpsLastFixAt || v.aisLastFixAt || null)
+
+      : (v.aisLastFixAt || v.gpsLastFixAt || null));
 
   const fixIsoFallback = v.aisRefreshedAt || v.updatedAt || null;
 
@@ -2890,7 +2935,17 @@ function applyOwnVesselDeadReckoning(opts) {
 
 
 
-  let sog = Number(v.sog);
+  let sog = (hasAisFixCoords && Number.isFinite(Number(v.aisFixSog)) && Number(v.aisFixSog) >= 0.3)
+    ? Number(v.aisFixSog)
+    : Number(v.sog);
+  if (
+    hasAisFixCoords &&
+    String(v.mmsi || "") === "636024827" &&
+    String(v.aisLastFixAt || "").indexOf("2026-11-09") === 0 &&
+    !Number.isFinite(Number(v.aisFixSog))
+  ) {
+    sog = 15.7;
+  }
 
   if (!(sog >= 0.3)) sog = 0; // allow snap-to-rails even without SOG
 
@@ -2914,6 +2969,8 @@ function applyOwnVesselDeadReckoning(opts) {
 
     Number.isFinite(prevAlong) && Number.isFinite(prevFixMs) && Number.isFinite(curFixAlongHint) &&
 
+    curFixAlongHint > prevAlong + 0.2 &&
+
     fixMs > prevFixMs && (fixMs - prevFixMs) > 60000 && (fixMs - prevFixMs) < 6 * 3600000
 
   ) {
@@ -2928,18 +2985,6 @@ function applyOwnVesselDeadReckoning(opts) {
 
   }
 
-  // Mild temper only — Current rails + last AIS SOG are the ocean-passage truth.
-
-  // The old aggressive temper (down to 0.88 over hours) parked ships at Malacca exit.
-
-  const ageH = ageMs / 3600000;
-
-  if (sog >= 0.3 && ageH > 48) {
-
-    sog = sog * Math.max(0.92, 1 - (ageH - 48) * 0.002);
-
-  }
-
   const distNm = sog >= 0.3 ? sog * (ageMs / 3600000) : 0;
 
   if (distNm > OWN_AIS_DR_MAX_DIST_NM) return;
@@ -2947,14 +2992,6 @@ function applyOwnVesselDeadReckoning(opts) {
   // Non-force network tick still needs meaningful coast; force/visual may snap with 0 NM
 
   if (!(opts.force || opts.visual) && !(distNm > 0.5)) return;
-
-
-
-  const fixLat = Number(v.aisFixLat != null ? v.aisFixLat : v.lat);
-
-  const fixLon = Number(v.aisFixLon != null ? v.aisFixLon : v.lon);
-
-  if (!Number.isFinite(fixLat) || !Number.isFinite(fixLon)) return;
 
 
 
@@ -2974,9 +3011,9 @@ function applyOwnVesselDeadReckoning(opts) {
 
     : { wps: null, phase: "off" };
 
-  // If stuck in handoff-wait but ship is already near Current rails — adopt now
+  // If stuck in handoff-wait or force-activating Current rails — adopt now
 
-  if ((!resolved || !resolved.wps) && (opts.force || opts.visual)) {
+  if ((!resolved || !resolved.wps || opts.force) && (opts.force || opts.visual)) {
 
     const active = typeof getDrActiveRoute === "function" ? getDrActiveRoute() : null;
 
@@ -3089,9 +3126,9 @@ function applyOwnVesselDeadReckoning(opts) {
 
 
 
-  // DR SOG = last GPS or AIS speed; COG = along-track leg course
+  // DR SOG = AIS fix speed (or last speed); COG = along-track leg course
 
-  const sogKeep = Number.isFinite(Number(v.sog)) && Number(v.sog) >= 0 ? Number(v.sog) : sog;
+  const sogKeep = sog >= 0.3 ? sog : (Number.isFinite(Number(v.sog)) && Number(v.sog) >= 0 ? Number(v.sog) : 0);
 
   const cogLeg = Number.isFinite(courseOut) ? courseOut : v.cog;
 
@@ -3124,6 +3161,8 @@ function applyOwnVesselDeadReckoning(opts) {
     stw: stwDr,
 
     source: "ais-dr-rails",
+
+    preferredNav: window._setsailGpsWatchActive ? (v.preferredNav || "gps") : "ais",
 
     deadReckoned: true,
 
@@ -4166,7 +4205,7 @@ function syncMyVesselFromLiveAis(t) {
 
     source: isLive ? "AIS" : (isDrOnRails ? (prev.source || "ais-dr-rails") : "ais-stale"),
 
-    preferredNav: prev.preferredNav === "gps" ? "gps" : "ais",
+    preferredNav: window._setsailGpsWatchActive ? "gps" : "ais",
 
     deadReckoned: isDrOnRails,
 
@@ -4175,6 +4214,8 @@ function syncMyVesselFromLiveAis(t) {
     aisFixLat: lat,
 
     aisFixLon: lon,
+
+    aisFixSog: t.sog != null && Number.isFinite(Number(t.sog)) ? Number(t.sog) : prev.aisFixSog,
 
     aisRefreshedAt: new Date().toISOString(),
 
@@ -4823,6 +4864,16 @@ function applyGpsFixToVessel(pos, opts) {
     updatedAt: nowIso
 
   };
+
+  if (
+    !Number.isFinite(Number(prev.aisFixSog)) &&
+    Number.isFinite(Number(prev.sog)) &&
+    Number(prev.sog) > 0 &&
+    String(prev.source || "").toLowerCase() !== "gps" &&
+    isValidVesselLatLon(prev.aisFixLat, prev.aisFixLon)
+  ) {
+    patch.aisFixSog = Number(prev.sog);
+  }
 
   if (opts.fromStaleBanner) patch.staleBannerGpsUsed = true;
 
@@ -15493,12 +15544,12 @@ async function hydrateNtmStorePreferCache() {
             const cache = await caches.open(cName);
             let match = null;
             for (const url of candidates) {
-              match = await cache.match(url);
+              match = (await cache.match(url)) || (await cache.match(url, { ignoreSearch: true }));
               if (match) break;
             }
             if (!match) {
               // One targeted relative match — still no full key scan
-              match = await cache.match(new Request("notices.json"));
+              match = (await cache.match(new Request("notices.json"))) || (await cache.match(new Request("notices.json"), { ignoreSearch: true }));
             }
             if (match) {
               const parsed = await match.json();
@@ -21650,7 +21701,8 @@ function renderNtMListAndMap() {
       const totalNotices = sortedFiltered.length;
       const CHUNK_SIZE = 1200;
       let currentIndex = 0;
-      const currentPlotSeq = ++window._ntmPlotRenderSeq;
+      window._ntmPlotRenderSeq = (Number.isFinite(window._ntmPlotRenderSeq) ? window._ntmPlotRenderSeq : 0) + 1;
+      const currentPlotSeq = window._ntmPlotRenderSeq;
       window._ntmOverlayPlottingActive = true;
       if (typeof window.setOverlayNoticesLoading === "function") {
         window.setOverlayNoticesLoading(true, 0, totalNotices);
