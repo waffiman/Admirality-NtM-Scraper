@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "1500 UTC",
-  "lastSyncUtc": "2026-11-14T15:36:42.317232+00:00",
+  "synopticCycle": "2000 UTC",
+  "lastSyncUtc": "2026-11-14T20:28:17.259465+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -15,14 +15,14 @@
       "centralPressure": 1006,
       "maxWinds": 25,
       "gusts": 32,
-      "movement": "W at 1270 kts",
+      "movement": "W at 1240 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -7.8,
-            -171.1
+            -11.6,
+            -166.4
           ],
           "winds": 30,
           "radiusNm": 45
@@ -30,8 +30,8 @@
         {
           "tau": 24,
           "coords": [
-            -7.6,
-            -171.5
+            -11.8,
+            -166.7
           ],
           "winds": 35,
           "radiusNm": 60
@@ -39,8 +39,8 @@
         {
           "tau": 36,
           "coords": [
-            -7.5,
-            -171.9
+            -11.9,
+            -167.0
           ],
           "winds": 40,
           "radiusNm": 75
@@ -48,8 +48,8 @@
         {
           "tau": 48,
           "coords": [
-            -7.3,
-            -172.4
+            -12.1,
+            -167.4
           ],
           "winds": 45,
           "radiusNm": 90
@@ -57,8 +57,8 @@
         {
           "tau": 60,
           "coords": [
-            -7.3,
-            -172.9
+            -12.3,
+            -167.8
           ],
           "winds": 50,
           "radiusNm": 105
@@ -76,7 +76,7 @@
       ],
       "radiusNm": 240,
       "waveHeight": 2.5,
-      "swellPeriod": 8,
+      "swellPeriod": 9,
       "swellDir": "WSW"
     },
     {
@@ -87,7 +87,7 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 5.6,
+      "waveHeight": 5.0,
       "swellPeriod": 11,
       "swellDir": "SW"
     }
