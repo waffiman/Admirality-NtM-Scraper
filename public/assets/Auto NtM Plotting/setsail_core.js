@@ -14839,11 +14839,76 @@ function setrouteSplitCoordsByJumps(coords, maxNm) {
   return segs;
 }
 
+function parseAreaBoundedBodyCoordsClient(rawText) {
+  if (!rawText) return [];
+  const m = String(rawText).match(/(?:IN\s+AREA\s+BOUND(?:ED)?\s+BY|AREA\s+BOUND(?:ED)?\s+BY)\s*:?\s*([\s\S]+?)(?:CANCEL\s+THIS|\n\s*\d+\.\s+[A-Z]|$)/i);
+  if (!m) return [];
+  const block = m[1];
+  const rx = /(\d{1,2})[\s\-](\d{2}(?:\.\d+)?)\s*([NS])\s*,?\s*(\d{2,3})[\s\-](\d{2}(?:\.\d+)?)\s*([EW])/gi;
+  const pts = [];
+  let match;
+  while ((match = rx.exec(block)) !== null) {
+    let lat = parseInt(match[1], 10) + parseFloat(match[2]) / 60;
+    if (match[3].toUpperCase() === "S") lat = -lat;
+    let lon = parseInt(match[4], 10) + parseFloat(match[5]) / 60;
+    if (match[6].toUpperCase() === "W") lon = -lon;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) continue;
+    pts.push({
+      lat: +lat.toFixed(5),
+      lon: +lon.toFixed(5),
+      dms: match[0].trim()
+    });
+  }
+  return pts;
+}
+
 function classifyNoticeGeometryClient(notice) {
 
   if (!notice || !Array.isArray(notice.coords) || !notice.coords.length) return notice;
 
-  if (notice.geometrySource === "nautoshark_mvt") return notice;
+  if (notice.geometrySource === "nautoshark_mvt") {
+    let hasTileSeam = false;
+    const checkLon = (lonVal) => {
+      const a = Math.abs(Number(lonVal));
+      if (Math.abs(a - 180) < 0.02 || Math.abs(a - 157.39014) < 0.02) hasTileSeam = true;
+    };
+    (notice.coords || []).forEach((c) => { if (c) checkLon(c.lon); });
+    if (Array.isArray(notice.subPolygons)) {
+      notice.subPolygons.forEach((s) => {
+        const pts = s && (s.points || s.coords);
+        if (Array.isArray(pts)) {
+          pts.forEach((p) => checkLon(Array.isArray(p) ? p[1] : (p && p.lon)));
+        }
+      });
+    }
+    if (hasTileSeam) {
+      const bodyRing = parseAreaBoundedBodyCoordsClient((notice.body || "") + "\n" + (notice.rawText || ""));
+      if (bodyRing.length >= 4) {
+        let maxStepNm = 0;
+        for (let i = 1; i < bodyRing.length; i++) {
+          const d = setrouteHaversineNm(bodyRing[i - 1].lat, bodyRing[i - 1].lon, bodyRing[i].lat, bodyRing[i].lon);
+          if (d > maxStepNm) maxStepNm = d;
+        }
+        if (maxStepNm <= 1200) {
+          const a = bodyRing[0], b = bodyRing[bodyRing.length - 1];
+          const closedRing = setrouteHaversineNm(a.lat, a.lon, b.lat, b.lon) > 1.5
+            ? bodyRing.concat([{ lat: a.lat, lon: a.lon, dms: a.dms || "" }])
+            : bodyRing;
+          notice.coords = closedRing;
+          notice.isPolygon = true;
+          notice.isLine = false;
+          notice.geometryKind = "polygon";
+          notice.subPolygons = [{
+            name: notice.id || "Area 1",
+            category: "restricted_area",
+            coords: closedRing,
+            points: closedRing.map((c) => [c.lat, c.lon])
+          }];
+        }
+      }
+    }
+    return notice;
+  }
 
   // Always re-check jump-split / discrete — even if prior scrape set a kind
 
@@ -14875,7 +14940,8 @@ function classifyNoticeGeometryClient(notice) {
 
   const multiJoin = joinCount >= 2 || /maritime\s+limit|pecked\s+line/i.test(text);
 
-  const maxLeg = multiJoin ? 6 : (preferArea ? 35 : 40);
+  const isSpaceOrLargeHazard = polyKw && /SPACE\s+(?:DEBRIS|ELEMENTS)|HAZARDOUS\s+OPERATIONS|ROCKET|MISSILE/i.test(text);
+  const maxLeg = isSpaceOrLargeHazard ? 1200 : (multiJoin ? 6 : (preferArea ? 35 : 40));
 
 
 
@@ -15097,7 +15163,7 @@ function classifyNoticeGeometryClient(notice) {
 
   }
 
-  if ((polyKw && n >= 3 && span <= 250) || (lineKw && n >= 3 && span < 30) || (preferArea && n >= 3 && span < 80 && !discreteSubject)) {
+  if ((polyKw && n >= 3 && span <= (isSpaceOrLargeHazard ? 4500 : 250)) || (lineKw && n >= 3 && span < 30) || (preferArea && n >= 3 && span < 80 && !discreteSubject)) {
 
     const ring = closeRing(coords);
 
@@ -20171,6 +20237,48 @@ function wrapLongitudeDeg(lng) {
 
 }
 
+/**
+ * Unroll consecutive polygon/polyline vertices across the antimeridian (+/-180 deg)
+ * so consecutive longitudes never jump by >180 deg (preventing world-spanning bands
+ * when a ring touches -180.0 or crosses the International Date Line).
+ */
+function unrollNoticeRingLatLngs(pts) {
+  if (!Array.isArray(pts) || !pts.length) return [];
+  const valid = [];
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    const lat = Number(Array.isArray(p) ? p[0] : (p && p.lat));
+    const lon = Number(Array.isArray(p) ? p[1] : (p && p.lon));
+    if (Number.isFinite(lat) && Number.isFinite(lon)) valid.push([lat, lon]);
+  }
+  if (!valid.length) return [];
+  let lon0 = valid[0][1];
+  while (lon0 > 180) lon0 -= 360;
+  while (lon0 < -180) lon0 += 360;
+  if (Math.abs(Math.abs(lon0) - 180) < 1e-5) {
+    for (let k = 1; k < valid.length; k++) {
+      let lk = valid[k][1];
+      while (lk > 180) lk -= 360;
+      while (lk < -180) lk += 360;
+      if (Math.abs(Math.abs(lk) - 180) > 1e-4) {
+        lon0 = lk < 0 ? -180 : 180;
+        break;
+      }
+    }
+  }
+  const out = [[valid[0][0], lon0]];
+  for (let i = 1; i < valid.length; i++) {
+    let lon = valid[i][1];
+    while (lon > 180) lon -= 360;
+    while (lon < -180) lon += 360;
+    const prevLon = out[out.length - 1][1];
+    while (lon - prevLon > 180) lon -= 360;
+    while (lon - prevLon < -180) lon += 360;
+    out.push([valid[i][0], lon]);
+  }
+  return out;
+}
+
 
 
 /**
@@ -21188,31 +21296,14 @@ function renderNtMListAndMap() {
 
 
     const noticeCentroid = (item) => {
-
-      const coords = item.coords || [];
-
-      let lat = 0;
-
-      let lon = 0;
-
-      let n = 0;
-
-      for (let i = 0; i < coords.length; i++) {
-
-        const c = coords[i];
-
-        if (!c || !Number.isFinite(Number(c.lat)) || !Number.isFinite(Number(c.lon))) continue;
-
-        lat += Number(c.lat);
-
-        lon += Number(c.lon);
-
-        n++;
-
+      const unrolled = unrollNoticeRingLatLngs(item && item.coords ? item.coords : []);
+      if (!unrolled.length) return null;
+      let lat = 0, lon = 0;
+      for (let i = 0; i < unrolled.length; i++) {
+        lat += unrolled[i][0];
+        lon += unrolled[i][1];
       }
-
-      return n ? [lat / n, lon / n] : null;
-
+      return [lat / unrolled.length, wrapLongitudeDeg(lon / unrolled.length)];
     };
 
 
@@ -21399,10 +21490,15 @@ function renderNtMListAndMap() {
     };
 
     const plotOneNotice = (item) => {
-      if (!item.coords || item.coords.length === 0) return;
+      if (!item || !item.coords || item.coords.length === 0) return;
+      if (!item._setsailGeomChecked) {
+        try { classifyNoticeGeometryClient(item); } catch (eG) {}
+        item._setsailGeomChecked = true;
+      }
 
       const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
       const pal = getNoticeColors(item, isItemCancelled);
+      const maxLineLegNm = item.geometrySource === "nautoshark_mvt" ? 650 : 250;
 
       if (item.subPolygons && item.subPolygons.length > 0) {
         item.subPolygons.forEach(sub => {
@@ -21412,24 +21508,31 @@ function renderNtMListAndMap() {
           const asLine = cat === "line" || cat === "cable" || cat === "pipeline" || (pts.length === 2);
 
           if (pts.length >= 3 && !asLine) {
-            const polyPoints = pts.map(p => [p[0], wrapLongitudeDeg(p[1])]);
+            const polyPoints = unrollNoticeRingLatLngs(pts);
+            if (polyPoints.length < 3) return;
+            let latSpan = 0, lonSpan = 0;
+            const lats = polyPoints.map(p => p[0]);
+            const lons = polyPoints.map(p => p[1]);
+            latSpan = Math.max(...lats) - Math.min(...lats);
+            lonSpan = Math.max(...lons) - Math.min(...lons);
+            const isLargeRegionalArea = (latSpan > 3.5 || lonSpan > 3.5);
             const pOpts = Object.assign({
               color: pal.stroke,
-              weight: basePolyWeight,
+              weight: isLargeRegionalArea && curZoom <= 5 ? 0.9 : basePolyWeight,
               fillColor: pal.fill,
-              fillOpacity: isItemCancelled ? 0.04 : basePolyFillOp,
-              dashArray: isItemCancelled ? "4, 6" : null
+              fillOpacity: isItemCancelled ? 0.04 : (isLargeRegionalArea && curZoom <= 5 ? 0.05 : basePolyFillOp),
+              dashArray: isItemCancelled ? "4, 6" : (isLargeRegionalArea && (item.type === "NAVTEX" || item.type === "T") ? "4, 4" : null)
             }, pathPaneOpts());
-            const extra = `<div style="font-size:0.78em;color:#475569;margin-bottom:3px;"><b>Area:</b> ${sub.name || item.id} (${pts.length} pts)</div>`;
+            const extra = `<div style="font-size:0.78em;color:#475569;margin-bottom:3px;"><b>Area:</b> ${sub.name || item.id} (${polyPoints.length} pts)</div>`;
             setsailWorldCopyLonOffsets().forEach((off) => {
               const ring = off === 0 ? polyPoints : polyPoints.map((p) => [p[0], p[1] + off]);
               const polygon = L.polygon(ring, pOpts);
               attachNoticeLayer(polygon, item, extra);
             });
           } else if (pts.length >= 2 && asLine) {
-            const linePoints = pts.map(p => [p[0], wrapLongitudeDeg(p[1])]);
-            const extra = `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${pts.length} pts)</div>`;
-            splitAntimeridianLatLngs(linePoints).flatMap((seg) => splitLongLegsLatLngs(seg, 80)).forEach((seg) => {
+            const linePoints = unrollNoticeRingLatLngs(pts);
+            const extra = `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${linePoints.length} pts)</div>`;
+            splitAntimeridianLatLngs(linePoints).flatMap((seg) => splitLongLegsLatLngs(seg, maxLineLegNm)).forEach((seg) => {
               const lOpts = Object.assign({
                 color: pal.stroke,
                 weight: baseLineWeight,
@@ -21458,7 +21561,8 @@ function renderNtMListAndMap() {
           }
         });
       } else if (item.isPolygon && item.coords.length >= 3) {
-        const polyPoints = item.coords.map(c => [c.lat, wrapLongitudeDeg(c.lon)]);
+        const polyPoints = unrollNoticeRingLatLngs(item.coords);
+        if (polyPoints.length < 3) return;
         let latSpan = 0, lonSpan = 0;
         if (polyPoints.length >= 3) {
           const lats = polyPoints.map(p => p[0]);
@@ -21474,16 +21578,16 @@ function renderNtMListAndMap() {
           fillOpacity: isItemCancelled ? 0.04 : (isLargeRegionalArea && curZoom <= 5 ? 0.05 : basePolyFillOp),
           dashArray: isItemCancelled ? "3, 6" : (item.type === "NAVTEX" || item.type === "T" ? "4, 4" : null)
         }, pathPaneOpts());
-        const extra = `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Polygon (${item.coords.length} vertices)</div>`;
+        const extra = `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Polygon (${polyPoints.length} vertices)</div>`;
         setsailWorldCopyLonOffsets().forEach((off) => {
           const ring = off === 0 ? polyPoints : polyPoints.map((p) => [p[0], p[1] + off]);
           const polygon = L.polygon(ring, pOpts);
           attachNoticeLayer(polygon, item, extra);
         });
       } else if (item.isLine && item.coords.length >= 2) {
-        const linePoints = item.coords.map(c => [c.lat, wrapLongitudeDeg(c.lon)]);
+        const linePoints = unrollNoticeRingLatLngs(item.coords);
         const segments = splitAntimeridianLatLngs(linePoints)
-          .flatMap((seg) => splitLongLegsLatLngs(seg, 80));
+          .flatMap((seg) => splitLongLegsLatLngs(seg, maxLineLegNm));
         const extra = `<div style="font-size:0.76em;color:#2e7d32;font-family:monospace;margin-bottom:3px;">Line (${item.coords.length} points${segments.length > 1 ? " · date-line split" : ""})</div>`;
         segments.forEach((seg) => {
           const lOpts = Object.assign({
@@ -21887,7 +21991,7 @@ function selectNtMNotice(noticeId) {
 
     if (item.coords.length > 1) {
 
-      const bounds = L.latLngBounds(item.coords.map(c => [c.lat, c.lon]));
+      const bounds = L.latLngBounds(unrollNoticeRingLatLngs(item.coords));
 
       leafletMap.fitBounds(bounds.pad(0.18), { maxZoom: 12, duration: 1.2 });
 
@@ -29185,11 +29289,11 @@ function fillNtmOverlayInfoModalCounts() {
 
       if (Array.isArray(parsed) && parsed.length) {
 
-        store = parsed;
+        store = typeof reclassifyNoticesGeometry === "function" ? reclassifyNoticesGeometry(parsed) : parsed;
 
-        NTM_STORE = parsed;
+        NTM_STORE = store;
 
-        window.NTM_STORE = parsed;
+        window.NTM_STORE = store;
 
       }
 
@@ -30187,11 +30291,13 @@ function executeDirectMapExport() {
 
         item.subPolygons.forEach((sub, sIdx) => {
 
-          const pts = sub.points || (sub.coords || []).map(c => [c.lon, c.lat]);
+          const pts = (sub.coords && sub.coords.length)
+            ? sub.coords.map(c => [c.lon, c.lat])
+            : (sub.points || []).map(p => Array.isArray(p) ? [p[1], p[0]] : [p.lon, p.lat]);
 
           if (pts && pts.length >= 3) {
 
-            const ring = pts.map(p => Array.isArray(p) ? (p[0] > 90 ? [p[1], p[0]] : p) : [p.lon, p.lat]);
+            const ring = pts.slice();
 
             if (ring.length > 0 && (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])) {
 
@@ -30759,11 +30865,13 @@ function exportUserChartGeoJson() {
 
       n.subPolygons.forEach((sub, sIdx) => {
 
-        const pts = sub.points || (sub.coords || []).map(c => [c.lon, c.lat]);
+        const pts = (sub.coords && sub.coords.length)
+          ? sub.coords.map(c => [c.lon, c.lat])
+          : (sub.points || []).map(p => Array.isArray(p) ? [p[1], p[0]] : [p.lon, p.lat]);
 
         if (pts && pts.length >= 3) {
 
-          const ring = pts.map(p => Array.isArray(p) ? (p[0] > 90 ? [p[1], p[0]] : p) : [p.lon, p.lat]);
+          const ring = pts.slice();
 
           if (ring.length > 0 && (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])) {
 
