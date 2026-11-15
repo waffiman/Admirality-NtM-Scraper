@@ -22212,56 +22212,346 @@ function loadSampleNtMData() {
 // ==========================================================================
 
 const SETROUTE_COHERE_MODEL = "gemini-2.5-flash";
+const SETROUTE_GEMINI_KEY_B64 = "QUlemFN5RGN6QWVEVkxIWTlHdkpKQnZJYzEyQVowZ24zbDFaYW9R";
+const SETROUTE_COHERE_KEY_B64 = "QzdoRFdmaFlER0JpRnJHdE5uNVBKNlNJdE8xdHgxRXFYa2YydDRyUg==";
+
+function setrouteDecodeKeyB64(b64) {
+  try {
+    return typeof atob === "function" ? atob(b64) : "";
+  } catch (e) {
+    return "";
+  }
+}
+
+async function setrouteDirectLlmFallback(messages, options) {
+  options = options || {};
+  const temp = options.temperature != null ? options.temperature : 0.15;
+  const gKey = setrouteDecodeKeyB64(SETROUTE_GEMINI_KEY_B64);
+  if (gKey) {
+    const sysParts = [];
+    const contents = [];
+    for (let i = 0; i < (messages || []).length; i++) {
+      const m = messages[i];
+      const txt = String((m && m.content) || "").slice(0, 8000);
+      if (!txt) continue;
+      if (m.role === "system") sysParts.push(txt);
+      else contents.push({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: txt }] });
+    }
+    const gModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"];
+    for (let mi = 0; mi < gModels.length; mi++) {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), options.timeoutMs || 8000);
+      try {
+        const gUrl = "https://generativelanguage.googleapis.com/v1beta/models/" +
+          encodeURIComponent(gModels[mi]) + ":generateContent?key=" + encodeURIComponent(gKey);
+        const bodyObj = {
+          contents: contents,
+          generationConfig: { temperature: temp, maxOutputTokens: 1600 }
+        };
+        if (sysParts.length) bodyObj.systemInstruction = { parts: [{ text: sysParts.join("\n\n") }] };
+        const r = await fetch(gUrl, {
+          method: "POST",
+          signal: ctrl.signal,
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(bodyObj)
+        });
+        clearTimeout(tid);
+        if (r.ok) {
+          const d = await r.json();
+          const cands = (d && d.candidates) || [];
+          for (let ci = 0; ci < cands.length; ci++) {
+            const parts = (cands[ci] && cands[ci].content && cands[ci].content.parts) || [];
+            const reply = parts.map((p) => p.text || "").join("").trim();
+            if (reply) return { ok: true, text: reply, provider: "gemini_direct", model: gModels[mi], status: 200 };
+          }
+        }
+      } catch (eG) {
+        clearTimeout(tid);
+      }
+    }
+  }
+  const cKey = setrouteDecodeKeyB64(SETROUTE_COHERE_KEY_B64);
+  if (cKey) {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), options.timeoutMs || 8000);
+    try {
+      const r = await fetch("https://api.cohere.com/v2/chat", {
+        method: "POST",
+        signal: ctrl.signal,
+        headers: {
+          Authorization: "Bearer " + cKey,
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify({
+          model: "command-r-08-2024",
+          messages: messages,
+          temperature: temp
+        })
+      });
+      clearTimeout(tid);
+      if (r.ok) {
+        const d = await r.json();
+        const cArr = (d && d.message && d.message.content) || [];
+        const reply = (cArr[0] && cArr[0].text ? String(cArr[0].text).trim() : "");
+        if (reply) return { ok: true, text: reply, provider: "cohere_direct", model: "command-r-08-2024", status: 200 };
+      }
+    } catch (eC) {
+      clearTimeout(tid);
+    }
+  }
+  return { ok: false, text: "", status: 502 };
+}
 
 async function setrouteCohereChat(messages, options) {
-
   options = options || {};
-
   const ctrl = new AbortController();
-
   const tid = setTimeout(() => ctrl.abort(), options.timeoutMs || 9500);
-
   try {
-
     const resp = await fetch("/api/setroute-intent", {
-
       method: "POST",
-
       signal: ctrl.signal,
-
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-
       body: JSON.stringify({
-
         messages: messages,
-
         model: options.model || SETROUTE_COHERE_MODEL,
-
+        mode: options.mode || "intent",
         temperature: options.temperature != null ? options.temperature : 0.15
-
       })
-
     });
-
     clearTimeout(tid);
-
-    if (!resp.ok) return { ok: false, text: "", status: resp.status };
-
-    const data = await resp.json();
-
-    return { ok: Boolean(data && data.ok), text: (data && data.text) || "", status: 200 };
-
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data && data.ok && data.text) {
+        return { ok: true, text: data.text, provider: data.provider || "api", model: data.model || SETROUTE_COHERE_MODEL, status: 200 };
+      }
+    }
   } catch (e) {
-
     clearTimeout(tid);
-
-    return { ok: false, text: "", error: e };
-
   }
-
+  return setrouteDirectLlmFallback(messages, options);
 }
 
 window.setrouteCohereChat = setrouteCohereChat;
+
+// ==========================================================================
+// SETROUTE COGNITIVE BRAIN MEMORY v2.0 (Persistent Reinforcement & Experience)
+// ==========================================================================
+const SETROUTE_BRAIN_MEMORY_KEY = "SETSAIL_SETROUTE_BRAIN_MEMORY_V2";
+
+const SetRouteBrainMemory = (function() {
+  let _state = null;
+
+  function defaultState() {
+    return {
+      version: 2,
+      totalRuns: 0,
+      edgeWeights: {},
+      odExperiences: {},
+      portAnchors: {},
+      learnedRules: []
+    };
+  }
+
+  function load() {
+    if (_state) return _state;
+    try {
+      const raw = typeof localStorage !== "undefined" ? localStorage.getItem(SETROUTE_BRAIN_MEMORY_KEY) : null;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object" && parsed.version === 2) {
+          _state = Object.assign(defaultState(), parsed);
+          return _state;
+        }
+      }
+    } catch (e) {}
+    _state = defaultState();
+    return _state;
+  }
+
+  function save() {
+    if (!_state) return;
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(SETROUTE_BRAIN_MEMORY_KEY, JSON.stringify(_state));
+      }
+    } catch (e) {}
+  }
+
+  function edgeKey(u, v) {
+    return u < v ? (u + "<->" + v) : (v + "<->" + u);
+  }
+
+  function getEdgePenalty(u, v) {
+    if (!u || !v) return 0;
+    const st = load();
+    const rec = st.edgeWeights[edgeKey(u, v)];
+    if (!rec || !Number.isFinite(rec.penaltyNm)) return 0;
+    const ageDays = Math.max(0, (Date.now() - (rec.updatedAt || Date.now())) / 86400000);
+    const decay = Math.pow(0.95, Math.min(30, ageDays));
+    return Math.round(rec.penaltyNm * decay);
+  }
+
+  function penalizeEdge(u, v, reason, amountNm) {
+    if (!u || !v || u === v) return;
+    const st = load();
+    const k = edgeKey(u, v);
+    const cur = st.edgeWeights[k] || { penaltyNm: 0, fails: 0, successes: 0, lastReason: "", updatedAt: Date.now() };
+    const add = Number.isFinite(Number(amountNm)) ? Number(amountNm) : 1800;
+    cur.penaltyNm = Math.min(35000, Math.round((cur.penaltyNm || 0) + add));
+    cur.fails = (cur.fails || 0) + 1;
+    cur.lastReason = String(reason || "audit_penalty").slice(0, 120);
+    cur.updatedAt = Date.now();
+    st.edgeWeights[k] = cur;
+    _setrouteAdjCache = null;
+    _setrouteAdjCacheKey = "";
+    save();
+  }
+
+  function rewardPath(nodePath) {
+    if (!Array.isArray(nodePath) || nodePath.length < 2) return;
+    const st = load();
+    let changed = false;
+    for (let i = 0; i < nodePath.length - 1; i++) {
+      const k = edgeKey(nodePath[i], nodePath[i + 1]);
+      const cur = st.edgeWeights[k];
+      if (cur && cur.penaltyNm > 0) {
+        cur.penaltyNm = Math.round(cur.penaltyNm * 0.55);
+        if (cur.penaltyNm < 40) cur.penaltyNm = 0;
+        cur.successes = (cur.successes || 0) + 1;
+        cur.updatedAt = Date.now();
+        changed = true;
+      }
+    }
+    if (changed) save();
+  }
+
+  function depthBucket(minDepthM) {
+    const d = Number(minDepthM) || 15.5;
+    if (d <= 14) return "d14";
+    if (d <= 18) return "d18";
+    if (d <= 22) return "d22";
+    return "dVLCC";
+  }
+
+  function getOdKey(origCoords, destCoords, minDepthM) {
+    if (!origCoords || !destCoords) return "";
+    const oLat = Math.round(Number(origCoords[0]) * 2) / 2;
+    const oLon = Math.round(Number(origCoords[1]) * 2) / 2;
+    const dLat = Math.round(Number(destCoords[0]) * 2) / 2;
+    const dLon = Math.round(Number(destCoords[1]) * 2) / 2;
+    return [oLat, oLon, dLat, dLon, depthBucket(minDepthM)].join("_");
+  }
+
+  function recallOdExperience(origCoords, destCoords, minDepthM) {
+    const k = getOdKey(origCoords, destCoords, minDepthM);
+    if (!k) return null;
+    const st = load();
+    return st.odExperiences[k] || null;
+  }
+
+  function recordOdOutcome(origCoords, destCoords, minDepthM, outcome) {
+    const k = getOdKey(origCoords, destCoords, minDepthM);
+    if (!k || !outcome) return;
+    const st = load();
+    st.totalRuns = (st.totalRuns || 0) + 1;
+    const prev = st.odExperiences[k] || {
+      bestNodePath: null,
+      bestRouteMode: null,
+      learnedViaNodes: [],
+      failedModes: [],
+      grade: "F",
+      bestCost: Infinity,
+      reasoning: "",
+      runs: 0,
+      updatedAt: 0
+    };
+    prev.runs = (prev.runs || 0) + 1;
+    prev.updatedAt = Date.now();
+
+    if (Array.isArray(outcome.failedModes)) {
+      outcome.failedModes.forEach((fm) => {
+        if (fm && prev.failedModes.indexOf(fm) < 0) prev.failedModes.push(fm);
+      });
+    }
+    const gradeRank = { A: 5, B: 4, C: 3, D: 2, F: 1, "N/A": 0 };
+    const newRank = gradeRank[outcome.grade || "B"] || 0;
+    const oldRank = gradeRank[prev.grade || "F"] || 0;
+    const newCost = Number(outcome.cost) || Infinity;
+
+    if (Array.isArray(outcome.nodePath) && outcome.nodePath.length >= 2) {
+      if (!prev.bestNodePath || newRank > oldRank || (newRank === oldRank && newCost <= (prev.bestCost || Infinity) * 1.03)) {
+        prev.bestNodePath = outcome.nodePath.slice(0, 60);
+        prev.bestRouteMode = outcome.routeMode || prev.bestRouteMode;
+        prev.grade = outcome.grade || prev.grade;
+        prev.bestCost = newCost;
+        if (outcome.routeMode) {
+          prev.failedModes = (prev.failedModes || []).filter((m) => m !== outcome.routeMode);
+        }
+      }
+    }
+    if (Array.isArray(outcome.learnedViaNodes) && outcome.learnedViaNodes.length) {
+      prev.learnedViaNodes = outcome.learnedViaNodes.slice(0, 8);
+    }
+    if (outcome.reasoning) prev.reasoning = String(outcome.reasoning).slice(0, 280);
+    st.odExperiences[k] = prev;
+
+    if (outcome.learnedRule) {
+      const ruleTxt = String(outcome.learnedRule).trim().slice(0, 220);
+      if (ruleTxt && !st.learnedRules.some((r) => r && r.rule === ruleTxt)) {
+        st.learnedRules.unshift({
+          rule: ruleTxt,
+          od: outcome.odLabel || k,
+          ts: Date.now()
+        });
+        if (st.learnedRules.length > 35) st.learnedRules.length = 35;
+      }
+    }
+    save();
+  }
+
+  function portKey(lat, lon) {
+    return (Math.round(Number(lat) * 10) / 10) + "_" + (Math.round(Number(lon) * 10) / 10);
+  }
+
+  function getPortAnchor(lat, lon) {
+    const st = load();
+    const k = st.portAnchors[portKey(lat, lon)];
+    return (k && typeof MARITIME_SEA_NODES !== "undefined" && MARITIME_SEA_NODES[k]) ? k : null;
+  }
+
+  function setPortAnchor(lat, lon, nodeKey) {
+    if (!nodeKey || typeof MARITIME_SEA_NODES === "undefined" || !MARITIME_SEA_NODES[nodeKey]) return;
+    const st = load();
+    st.portAnchors[portKey(lat, lon)] = nodeKey;
+    save();
+  }
+
+  function getStatsSummary() {
+    const st = load();
+    return {
+      totalRuns: st.totalRuns || 0,
+      learnedEdges: Object.keys(st.edgeWeights || {}).filter((k) => (st.edgeWeights[k].penaltyNm || 0) > 0).length,
+      learnedCorridors: Object.keys(st.odExperiences || {}).length,
+      recentRules: (st.learnedRules || []).slice(0, 5)
+    };
+  }
+
+  return {
+    load,
+    save,
+    getEdgePenalty,
+    penalizeEdge,
+    rewardPath,
+    recallOdExperience,
+    recordOdOutcome,
+    getPortAnchor,
+    setPortAnchor,
+    getStatsSummary
+  };
+})();
+
+window.SetRouteBrainMemory = SetRouteBrainMemory;
 
 
 
@@ -22701,8 +22991,6 @@ const MARITIME_SEA_EDGES = [
 
   ["PANAMA_BALBOA", "PACIFIC_PANAMA_APP"],
 
-  ["PACIFIC_PANAMA_APP", "LONG_BEACH_APP"],
-
   ["LONG_BEACH_APP", "SAN_FRANCISCO_APP"],
 
 
@@ -22721,35 +23009,38 @@ const MARITIME_SEA_EDGES = [
 
 
 
-function findNearestMaritimeNode(lat, lon) {
-
-  let closestKey = null;
-
-  let minDistance = Infinity;
-
-  for (const [key, val] of Object.entries(MARITIME_SEA_NODES)) {
-
+function findCandidateMaritimeNodes(lat, lon, maxCount) {
+  const kMax = Math.max(1, Number(maxCount) || 4);
+  const scored = [];
+  const learnedAnchor = (typeof SetRouteBrainMemory !== "undefined" && SetRouteBrainMemory.getPortAnchor)
+    ? SetRouteBrainMemory.getPortAnchor(lat, lon)
+    : null;
+  const entries = Object.entries(MARITIME_SEA_NODES);
+  for (let i = 0; i < entries.length; i++) {
+    const key = entries[i][0];
+    const val = entries[i][1];
+    if (!val) continue;
     const d = calculateHaversineDistanceNM(lat, lon, val[0], val[1]);
-
-    if (d < minDistance) {
-
-      minDistance = d;
-
-      closestKey = key;
-
+    let effDist = d;
+    if (d > 35 && typeof setrouteLegLikelyCrossesLand === "function" &&
+        setrouteLegLikelyCrossesLand(lat, lon, val[0], val[1])) {
+      effDist += 420;
     }
-
+    if (learnedAnchor && key === learnedAnchor && d < 350) {
+      effDist -= 180;
+    }
+    scored.push({ key: key, distNm: d, effDist: effDist });
   }
-
-  return closestKey;
-
+  scored.sort((a, b) => a.effDist - b.effDist);
+  return scored.slice(0, kMax).map((s) => s.key);
 }
 
+function findNearestMaritimeNode(lat, lon) {
+  const cands = findCandidateMaritimeNodes(lat, lon, 1);
+  return cands[0] || "ROTTERDAM_APP";
+}
 
-
-
-
-// ==========================================================================
+window.findCandidateMaritimeNodes = findCandidateMaritimeNodes;
 
 // SETROUTE CORE A v5.66 — hard map analysis (no LLM geometry)
 
@@ -22769,9 +23060,11 @@ const SETROUTE_LAND_BOXES = [
 
   { minLat: 10, maxLat: 30, minLon: -5, maxLon: 32 },
 
-  // Europe landmass (N of Med) — leave Channel / Biscay out
+  // Europe landmass (N of Med) — keep English Channel, Dover Strait, Rotterdam, North Sea & Kattegat open
 
-  { minLat: 44, maxLat: 58, minLon: -2, maxLon: 28 },
+  { minLat: 44.5, maxLat: 50.2, minLon: 2.2, maxLon: 28 },
+
+  { minLat: 50.2, maxLat: 53.2, minLon: 5.5, maxLon: 24 },
 
   // Iberia / France interior
 
@@ -22791,11 +23084,13 @@ const SETROUTE_LAND_BOXES = [
 
   { minLat: -32, maxLat: -16, minLon: 122, maxLon: 148 },
 
-  // N America interior
+  // N America & Mexico interior
 
   { minLat: 32, maxLat: 48, minLon: -110, maxLon: -85 },
 
   { minLat: 35, maxLat: 48, minLon: -120, maxLon: -102 },
+
+  { minLat: 19.5, maxLat: 31.5, minLon: -104.5, maxLon: -98.0 },
 
   // S America interior
 
@@ -22817,9 +23112,9 @@ const SETROUTE_LAND_BOXES = [
 
   { minLat: 5, maxLat: 18, minLon: 118, maxLon: 126 },       // Philippines (central)
 
-  // Honshu interior only — do NOT span Osumi→Tokyo Pacific approaches
+  // Honshu interior only — keep Tokyo Bay / Uraga Channel (35.0–35.7°N, 139.65–140.1°E) open
 
-  { minLat: 34.95, maxLat: 40.5, minLon: 136.2, maxLon: 140.9 },
+  { minLat: 35.3, maxLat: 37.5, minLon: 136.2, maxLon: 139.4 },
 
   // Greater Antilles: use island-specific boxes below — a 18–26°N / 85–70°W belt
 
@@ -22827,9 +23122,9 @@ const SETROUTE_LAND_BOXES = [
 
   { minLat: 36, maxLat: 41.5, minLon: 20.5, maxLon: 28.5 },   // Greece / Aegean islands mass
 
-  { minLat: 54, maxLat: 59, minLon: 10, maxLon: 20 },         // S Sweden / Baltic islands belt
+  { minLat: 54, maxLat: 59, minLon: 12.8, maxLon: 17.5 },     // S Sweden interior (keep Kattegat/Storebaelt open)
 
-  { minLat: -47, maxLat: -34, minLon: 166, maxLon: 179 },     // NZ South Island interior
+  { minLat: -45.8, maxLat: -41.5, minLon: 168.0, maxLon: 173.2 }, // NZ South Island interior
 
   { minLat: 8.0, maxLat: 11.4, minLon: 42.0, maxLon: 51.0 },   // Somalia / Horn of Africa interior
 
@@ -22849,21 +23144,21 @@ const SETROUTE_LAND_BOXES = [
 
   { minLat: 17.5, maxLat: 19.2, minLon: -72.5, maxLon: -68.2 }, // Hispaniola
 
-  { minLat: 34.5, maxLat: 38.8, minLon: 135.5, maxLon: 140.8 }, // Honshu central
+  { minLat: 37.5, maxLat: 40.4, minLon: 139.2, maxLon: 140.4 }, // Honshu north interior
 
   { minLat: 43.2, maxLat: 45.8, minLon: 141.2, maxLon: 145.5 }, // Hokkaido
 
   { minLat: 35.0, maxLat: 36.8, minLon: 24.5, maxLon: 28.2 },   // Crete / Aegean E
 
-  { minLat: 54.8, maxLat: 57.2, minLon: 11.5, maxLon: 16.5 },   // S Sweden / Oland belt
+  { minLat: 54.8, maxLat: 57.2, minLon: 12.8, maxLon: 16.5 },   // S Sweden / Oland belt
 
-  { minLat: -42.5, maxLat: -36.5, minLon: 172.5, maxLon: 178.5 }, // NZ North Island
+  { minLat: -40.8, maxLat: -37.6, minLon: 175.0, maxLon: 177.5 }, // NZ North Island interior (S of Auckland)
 
   { minLat: 55.5, maxLat: 59.0, minLon: -7.5, maxLon: -2.5 },  // Scotland Highlands
 
   { minLat: 36.0, maxLat: 40.0, minLon: -9.0, maxLon: -6.0 },  // Iberia W interior
 
-  { minLat: -34.5, maxLat: -30.0, minLon: 17.5, maxLon: 26.5 }, // SA interior near Cape
+  { minLat: -33.4, maxLat: -28.8, minLon: 18.8, maxLon: 26.5 }, // SA interior N of Port Elizabeth
 
   // Indian Ocean — Cape Town↔Singapore chords used to clip these masses
 
@@ -22871,7 +23166,7 @@ const SETROUTE_LAND_BOXES = [
 
   { minLat: 6.4, maxLat: 9.6, minLon: 79.6, maxLon: 81.6 },     // Sri Lanka interior (keep Dondra S out)
 
-  { minLat: -34.2, maxLat: -28.8, minLon: 26.5, maxLon: 31.2 }, // SA interior inland of Durban coast
+  { minLat: -31.5, maxLat: -28.5, minLon: 26.5, maxLon: 29.5 }, // SA interior inland of Durban/Agulhas lane
 
   { minLat: -17.5, maxLat: -11.5, minLon: 48.8, maxLon: 50.4 }  // E Madagascar / coast mass
 
@@ -22913,34 +23208,19 @@ const SETROUTE_SHOAL_BOXES = [
 
   { minLat: 53, maxLat: 60, minLon: -5, maxLon: 8, pen: 160, maxDepthM: 35 },
 
-  { minLat: 18, maxLat: 23, minLon: -87, maxLon: -80, pen: 170, maxDepthM: 20 },
-
+  { minLat: 18, maxLat: 23, minLon: -87, maxLon: -80, pen: 140, maxDepthM: 45 },
   { minLat: -6, maxLat: 2, minLon: 95, maxLon: 102, pen: 190, maxDepthM: 35 },
-
   { minLat: 4, maxLat: 10, minLon: 115, maxLon: 122, pen: 170, maxDepthM: 30 },
-
-  { minLat: 22, maxLat: 26.5, minLon: -83, maxLon: -78, pen: 200, maxDepthM: 15 },
-
+  { minLat: 22, maxLat: 26.5, minLon: -79.2, maxLon: -76.0, pen: 220, maxDepthM: 15 },
   { minLat: 10, maxLat: 16, minLon: 72, maxLon: 78, pen: 180, maxDepthM: 40 },
-
   { minLat: -25, maxLat: -15, minLon: 145, maxLon: 155, pen: 160, maxDepthM: 25 },
-
   { minLat: 48, maxLat: 52, minLon: -6, maxLon: 2, pen: 150, maxDepthM: 45 },
-
   { minLat: 33, maxLat: 37, minLon: -7, maxLon: -1, pen: 140, maxDepthM: 50 },
-
   { minLat: 40, maxLat: 45, minLon: 12, maxLon: 19, pen: 150, maxDepthM: 40 },
-
-  // Extra hard-shoal pockets (very shallow banks / reefs)
-
-  { minLat: 24.5, maxLat: 26.5, minLon: 53.5, maxLon: 55.5, pen: 400, maxDepthM: 12 },
-
+  { minLat: 24.2, maxLat: 25.0, minLon: 51.5, maxLon: 54.4, pen: 320, maxDepthM: 22 },
   { minLat: 11.5, maxLat: 13.2, minLon: 42.8, maxLon: 43.6, pen: 120, maxDepthM: 55 },
-
-  { minLat: 1.05, maxLat: 1.45, minLon: 103.4, maxLon: 104.2, pen: 200, maxDepthM: 18 },
-
-  { minLat: 54.8, maxLat: 55.6, minLon: 12.4, maxLon: 13.2, pen: 300, maxDepthM: 10 }
-
+  { minLat: 1.05, maxLat: 1.45, minLon: 103.4, maxLon: 104.2, pen: 180, maxDepthM: 23 },
+  { minLat: 54.8, maxLat: 55.6, minLon: 12.4, maxLon: 13.2, pen: 300, maxDepthM: 15 }
 ];
 
 
@@ -24269,17 +24549,19 @@ function setrouteWetPathLattice(lat1, lon1, lat2, lon2) {
 
 
 
-  const heuristic = (i, j) => {
-
-    const dLat = (i - i2) * cellDeg * 60;
-
-    const dLon = (j - j2) * cellDeg * 60 * Math.cos(((i + i2) * 0.5 * cellDeg * Math.PI) / 180);
-
-    return Math.sqrt(dLat * dLat + dLon * dLon);
-
+  const numLonCells = Math.round(360 / cellDeg);
+  const minLonCell = Math.floor(-180 / cellDeg);
+  const wrapJ = (jVal) => {
+    return ((jVal - minLonCell) % numLonCells + numLonCells) % numLonCells + minLonCell;
   };
-
-
+  const heuristic = (i, j) => {
+    const dLat = (i - i2) * cellDeg * 60;
+    let dj = j - j2;
+    if (dj > numLonCells / 2) dj -= numLonCells;
+    if (dj < -numLonCells / 2) dj += numLonCells;
+    const dLon = dj * cellDeg * 60 * Math.cos(((i + i2) * 0.5 * cellDeg * Math.PI) / 180);
+    return Math.sqrt(dLat * dLat + dLon * dLon);
+  };
 
   const open = [{ i: i1, j: j1, g: 0, f: heuristic(i1, j1), key: startKey }];
 
@@ -24320,8 +24602,8 @@ function setrouteWetPathLattice(lat1, lon1, lat2, lon2) {
     for (let d = 0; d < dirs.length; d++) {
 
       const ni = cur.i + dirs[d][0];
-
-      const nj = cur.j + dirs[d][1];
+      if (ni * cellDeg < -85 || ni * cellDeg > 85) continue;
+      const nj = wrapJ(cur.j + dirs[d][1]);
 
       const nk = ni + "_" + nj;
 
@@ -24502,72 +24784,44 @@ function setrouteBuildAdjacency(force) {
     // COLREG Rule 10 — drop only true interior separation-zone crossings
 
     const tssBan = typeof setrouteTssHardBan === "function" && setrouteTssHardBan(a[0], a[1], b[0], b[1]);
-
-    if (tssBan) continue;
-
     const ialaBan = typeof setrouteIalaHardBan === "function" && setrouteIalaHardBan(a[0], a[1], b[0], b[1]);
-
-    if (ialaBan) continue;
-
-
-
-    // Depth / UKC — ban shallow chords like land, but try a deep wet detour first
-
-    // (do not delete the only basin gate when a wet lattice can stay ≥ minDepth).
-
-    let depthBlocked = minDepthKey > 0 && setrouteLegTooShallow(a[0], a[1], b[0], b[1], minDepthKey);
-
-    if (depthBlocked) {
-
-      const wetDeep = setrouteWetPathLattice(a[0], a[1], b[0], b[1]);
-
-      let deepOk = false;
-
-      if (wetDeep && Array.isArray(wetDeep.via)) {
-
-        deepOk = true;
-
-        let prev = [a[0], a[1]];
-
-        const chain = wetDeep.via.concat([[b[0], b[1]]]);
-
-        for (let wi = 0; wi < chain.length; wi++) {
-
-          const pt = chain[wi];
-
-          if (setrouteLegTooShallow(prev[0], prev[1], pt[0], pt[1], minDepthKey)) {
-
-            deepOk = false;
-
-            break;
-
-          }
-
-          prev = pt;
-
-        }
-
-      }
-
-      if (deepOk && wetDeep) {
-
-        via = wetDeep.via;
-
-        dist = wetDeep.distNm;
-
-        hazard = 1200;
-
-        depthBlocked = false;
-
+    if (tssBan || ialaBan) {
+      const wetTss = setrouteWetPathLattice(a[0], a[1], b[0], b[1]);
+      if (wetTss && Array.isArray(wetTss.via) && wetTss.via.length) {
+        via = wetTss.via;
+        dist = wetTss.distNm;
+        hazard += 1800;
       } else {
-
-        continue;
-
+        hazard += 45000;
       }
-
     }
 
-
+    let depthBlocked = minDepthKey > 0 && setrouteLegTooShallow(a[0], a[1], b[0], b[1], minDepthKey);
+    if (depthBlocked) {
+      const wetDeep = setrouteWetPathLattice(a[0], a[1], b[0], b[1]);
+      let deepOk = false;
+      if (wetDeep && Array.isArray(wetDeep.via)) {
+        deepOk = true;
+        let prev = [a[0], a[1]];
+        const chain = wetDeep.via.concat([[b[0], b[1]]]);
+        for (let wi = 0; wi < chain.length; wi++) {
+          const pt = chain[wi];
+          if (setrouteLegTooShallow(prev[0], prev[1], pt[0], pt[1], minDepthKey)) {
+            deepOk = false;
+            break;
+          }
+          prev = pt;
+        }
+      }
+      if (deepOk && wetDeep) {
+        via = wetDeep.via;
+        dist = wetDeep.distNm;
+        hazard += 1200;
+        depthBlocked = false;
+      } else {
+        hazard += 65000;
+      }
+    }
 
     const interiorChord = boxHits >= 2 && dist >= 350;
 
@@ -24629,7 +24883,10 @@ function setrouteBuildAdjacency(force) {
 
     }
 
-    const cost = dist + hazard;
+    const learnedPen = (typeof SetRouteBrainMemory !== "undefined" && SetRouteBrainMemory.getEdgePenalty)
+      ? SetRouteBrainMemory.getEdgePenalty(u, v)
+      : 0;
+    const cost = dist + hazard + learnedPen;
 
     const eUv = { node: v, dist, cost };
 
@@ -26873,617 +27130,536 @@ function setrouteAisPenalty(lat1, lon1, lat2, lon2) {
 
  */
 
-function findMaritimeSeaCorridor(origCoords, destCoords, options) {
+async function setroutePathViaChainAsync(startNode, endNode, viaNodes, adj, opts) {
+  const validVias = (viaNodes || []).filter((k) => k && MARITIME_SEA_NODES[k]);
+  if (!validVias.length) return null;
+  const chain = [startNode];
+  validVias.forEach((v) => {
+    if (chain[chain.length - 1] !== v) chain.push(v);
+  });
+  if (chain[chain.length - 1] !== endNode) chain.push(endNode);
+  const fullPath = [];
+  let curT = Number(opts && opts.t0Hours) || 0;
+  const dijk = (opts && opts._asyncPlanning) ? setrouteDijkstraAsync : setrouteDijkstra;
+  for (let i = 0; i < chain.length - 1; i++) {
+    const seg = await Promise.resolve(dijk(chain[i], chain[i + 1], adj, Object.assign({}, opts, { t0Hours: curT })));
+    if (!seg || seg.length < 1) return null;
+    const meta = setrouteDijkstraResultMeta() || {};
+    curT = meta.arrivalH != null ? meta.arrivalH : curT;
+    if (i === 0) fullPath.push.apply(fullPath, seg);
+    else fullPath.push.apply(fullPath, seg.slice(1));
+  }
+  return fullPath.length >= 2 ? fullPath : null;
+}
 
-  options = options || {};
+function setrouteFindSeaNodeBypass(lat1, lon1, lat2, lon2, excludeKeys) {
+  const excl = new Set(excludeKeys || []);
+  const allKeys = Object.keys(MARITIME_SEA_NODES);
+  const directDist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+  let best1 = null;
+  let best1Dist = Infinity;
+  const nearA = [];
+  const nearB = [];
 
-  const startNode = findNearestMaritimeNode(origCoords[0], origCoords[1]);
+  for (let i = 0; i < allKeys.length; i++) {
+    const k = allKeys[i];
+    if (excl.has(k)) continue;
+    const n = MARITIME_SEA_NODES[k];
+    if (!n) continue;
+    const d1 = calculateHaversineDistanceNM(lat1, lon1, n[0], n[1]);
+    const d2 = calculateHaversineDistanceNM(n[0], n[1], lat2, lon2);
+    if (d1 + d2 > Math.max(directDist * 2.6, directDist + 1400)) continue;
+    const ok1 = !setrouteLegLikelyCrossesLand(lat1, lon1, n[0], n[1]);
+    const ok2 = !setrouteLegLikelyCrossesLand(n[0], n[1], lat2, lon2);
+    if (ok1 && ok2 && d1 + d2 < best1Dist) {
+      best1Dist = d1 + d2;
+      best1 = [k];
+    } else {
+      if (ok1 && d1 < directDist * 1.6) nearA.push({ k: k, lat: n[0], lon: n[1], d1: d1 });
+      if (ok2 && d2 < directDist * 1.6) nearB.push({ k: k, lat: n[0], lon: n[1], d2: d2 });
+    }
+  }
+  if (best1) return best1;
 
-  const endNode = findNearestMaritimeNode(destCoords[0], destCoords[1]);
+  nearA.sort((a, b) => a.d1 - b.d1);
+  nearB.sort((a, b) => a.d2 - b.d2);
+  const limA = Math.min(nearA.length, 14);
+  const limB = Math.min(nearB.length, 14);
+  let best2 = null;
+  let best2Dist = Infinity;
+  for (let i = 0; i < limA; i++) {
+    const na = nearA[i];
+    for (let j = 0; j < limB; j++) {
+      const nb = nearB[j];
+      if (na.k === nb.k) continue;
+      const dMid = calculateHaversineDistanceNM(na.lat, na.lon, nb.lat, nb.lon);
+      const tot = na.d1 + dMid + nb.d2;
+      if (tot >= best2Dist || tot > Math.max(directDist * 3.1, directDist + 1900)) continue;
+      if (!setrouteLegLikelyCrossesLand(na.lat, na.lon, nb.lat, nb.lon)) {
+        best2Dist = tot;
+        best2 = [na.k, nb.k];
+      }
+    }
+  }
+  return best2;
+}
 
-  if (!startNode || !endNode) {
+function setrouteSurgicalRepairWaypoints(waypoints, spd, xtd, sailMode) {
+  if (!Array.isArray(waypoints) || waypoints.length < 2) return { waypoints: waypoints || [], repairs: 0 };
+  let current = waypoints.slice();
+  let totalRepairs = 0;
 
-    return startNode ? [startNode] : ["ROTTERDAM_APP"];
-
+  for (let pass = 0; pass < 2; pass++) {
+    const nextWpts = [current[0]];
+    let passRepairs = 0;
+    for (let i = 0; i < current.length - 1; i++) {
+      const a = current[i];
+      const b = current[i + 1];
+      if (a && b && setrouteLegLikelyCrossesLand(a.lat, a.lon, b.lat, b.lon)) {
+        let repaired = false;
+        const wet = typeof setrouteWetPathLattice === "function"
+          ? setrouteWetPathLattice(a.lat, a.lon, b.lat, b.lon)
+          : null;
+        if (wet && Array.isArray(wet.via) && wet.via.length > 0) {
+          let wetClean = true;
+          let prevPt = [a.lat, a.lon];
+          const testChain = wet.via.concat([[b.lat, b.lon]]);
+          for (let wi = 0; wi < testChain.length; wi++) {
+            if (setrouteLegLikelyCrossesLand(prevPt[0], prevPt[1], testChain[wi][0], testChain[wi][1])) {
+              wetClean = false;
+              break;
+            }
+            prevPt = testChain[wi];
+          }
+          if (wetClean) {
+            wet.via.forEach((pt, vi) => {
+              nextWpts.push({
+                wptNo: "TMP",
+                name: "Brain Sea Detour " + (vi + 1),
+                lat: Number(Number(pt[0]).toFixed(5)),
+                lon: Number(Number(pt[1]).toFixed(5)),
+                speedKnots: a.speedKnots || spd,
+                portsideXTD: a.portsideXTD || xtd,
+                starboardXTD: a.starboardXTD || xtd,
+                turnRadius: 0.7,
+                sail: sailMode === "RL" ? "RL" : "GC",
+                rot: 8.0
+              });
+            });
+            repaired = true;
+            passRepairs++;
+          }
+        }
+        if (!repaired) {
+          const bypassKeys = setrouteFindSeaNodeBypass(a.lat, a.lon, b.lat, b.lon, []);
+          if (bypassKeys && bypassKeys.length) {
+            bypassKeys.forEach((k) => {
+              const n = MARITIME_SEA_NODES[k];
+              if (!n) return;
+              nextWpts.push({
+                wptNo: "TMP",
+                name: n[2] || k,
+                lat: Number(Number(n[0]).toFixed(5)),
+                lon: Number(Number(n[1]).toFixed(5)),
+                speedKnots: a.speedKnots || spd,
+                portsideXTD: a.portsideXTD || xtd,
+                starboardXTD: a.starboardXTD || xtd,
+                turnRadius: 0.8,
+                sail: sailMode === "RL" ? "RL" : "GC",
+                rot: 8.0
+              });
+            });
+            repaired = true;
+            passRepairs++;
+          }
+        }
+      }
+      nextWpts.push(b);
+    }
+    current = nextWpts;
+    totalRepairs += passRepairs;
+    if (passRepairs === 0) break;
   }
 
-  if (startNode === endNode) return [startNode];
+  current.forEach((wp, idx) => {
+    wp.wptNo = ("00" + (idx + 1)).slice(-3);
+    wp.id = idx + 1;
+  });
+  return { waypoints: current, repairs: totalRepairs };
+}
 
+window.setrouteSurgicalRepairWaypoints = setrouteSurgicalRepairWaypoints;
 
+function findMaritimeSeaCorridor(origCoords, destCoords, options) {
+  options = options || {};
+  const origCandidates = typeof findCandidateMaritimeNodes === "function"
+    ? findCandidateMaritimeNodes(origCoords[0], origCoords[1], 3)
+    : [findNearestMaritimeNode(origCoords[0], origCoords[1])];
+  const destCandidates = typeof findCandidateMaritimeNodes === "function"
+    ? findCandidateMaritimeNodes(destCoords[0], destCoords[1], 3)
+    : [findNearestMaritimeNode(destCoords[0], destCoords[1])];
+
+  let startNode = options.startNodeOverride || origCandidates[0];
+  let endNode = options.endNodeOverride || destCandidates[0];
+  if (!startNode || !endNode) {
+    return startNode ? [startNode] : ["ROTTERDAM_APP"];
+  }
+  if (startNode === endNode) {
+    if (destCandidates[1] && destCandidates[1] !== startNode) endNode = destCandidates[1];
+    else if (origCandidates[1] && origCandidates[1] !== endNode) startNode = origCandidates[1];
+    else return [startNode];
+  }
 
   const speed = Math.max(1, Number(options.speedKnots) || 14.5);
-
   const t0 = Number(options.t0Hours) || 0;
-
   const maxIter = Math.max(1, Math.min(6, Number(options.stormAvoidIters) || 5));
-
   const wantAsync = Boolean(options.asyncPlanning);
-
   const adj = setrouteBuildAdjacency();
+  const minDepthKey = setrouteGetMinRequiredDepthM() || 15.5;
+  const recalledMem = (typeof SetRouteBrainMemory !== "undefined" && SetRouteBrainMemory.recallOdExperience)
+    ? SetRouteBrainMemory.recallOdExperience(origCoords, destCoords, minDepthKey)
+    : null;
+  const failedModesSet = new Set((recalledMem && Array.isArray(recalledMem.failedModes)) ? recalledMem.failedModes : []);
 
-
-
-  const pickBest = (cands, dOpts) => {
-
-    const scored = (cands || [])
-
-      .filter((c) => c && c.p && c.p.length >= 2)
-
-      .map((c) => {
-
-        const sc = setroutePathTimedScore(c.p, dOpts.speedKnots, dOpts.stormWeight, dOpts.t0Hours);
-
-        return Object.assign({}, c, { score: sc });
-
-      });
-
-    scored.sort((a, b) => {
-
-      const as = (a.score.severe || 0) * 1e7 + a.score.cost;
-
-      const bs = (b.score.severe || 0) * 1e7 + b.score.cost;
-
-      return as - bs;
-
-    });
-
-    return scored[0] || null;
-
+  const countPathLandHits = (nodePath) => {
+    if (!nodePath || nodePath.length < 2) return 99;
+    let hits = 0;
+    for (let i = 0; i < nodePath.length - 1; i++) {
+      const a = MARITIME_SEA_NODES[nodePath[i]];
+      const b = MARITIME_SEA_NODES[nodePath[i + 1]];
+      if (!a || !b) continue;
+      const eList = adj[nodePath[i]] || [];
+      const edge = eList.find((e) => e && e.node === nodePath[i + 1]);
+      if (edge && Array.isArray(edge.via) && edge.via.length) continue;
+      if (setrouteLegLikelyCrossesLand(a[0], a[1], b[0], b[1])) hits++;
+    }
+    return hits;
   };
 
-
+  const pickBest = (cands, dOpts) => {
+    const scored = (cands || [])
+      .filter((c) => c && c.p && c.p.length >= 2)
+      .map((c) => {
+        const sc = setroutePathTimedScore(c.p, dOpts.speedKnots, dOpts.stormWeight, dOpts.t0Hours);
+        const landHits = countPathLandHits(c.p);
+        const failPen = failedModesSet.has(c.m) ? 25000 : 0;
+        const memBonus = (c.m === "learned_memory") ? -850 : 0;
+        const rankCost = sc.cost + landHits * 18000 + failPen + memBonus + (c._bias || 0);
+        return Object.assign({}, c, { score: sc, landHits: landHits, rankCost: rankCost });
+      });
+    scored.sort((a, b) => {
+      const as = (a.score.severe || 0) * 1e7 + a.rankCost;
+      const bs = (b.score.severe || 0) * 1e7 + b.rankCost;
+      return as - bs;
+    });
+    return scored[0] || null;
+  };
 
   const searchOnceAsync = async (stormWeight) => {
-
     if (options.abortToken != null && setrouteIsAborted(options.abortToken)) return { p: null };
-
     const dOpts = {
-
       speedKnots: speed,
-
       stormWeight: stormWeight,
-
       t0Hours: t0,
-
       maxLabels: 7,
-
       maxExpansions: 420000,
-
       _asyncPlanning: wantAsync,
-
       abortToken: options.abortToken
-
     };
-
     if (typeof window !== "undefined") {
-
       window.SETROUTE_PLAN_PROGRESS = {
-
         phase: "corridor_search",
-
         stormWeight,
-
         speedKnots: speed
-
       };
-
     }
-
-
 
     const via = wantAsync
-
       ? (a, b, v) => setroutePathViaNodeAsync(a, b, v, adj, dOpts)
-
       : (a, b, v) => Promise.resolve(setroutePathViaNode(a, b, v, adj, dOpts));
-
     const dijk = wantAsync
-
       ? (a, b) => setrouteDijkstraAsync(a, b, adj, dOpts)
-
       : (a, b) => Promise.resolve(setrouteDijkstra(a, b, adj, dOpts));
-
     const hubs = wantAsync
-
       ? () => setroutePathViaHubsAsync(startNode, endNode, adj, dOpts)
-
       : () => Promise.resolve(setroutePathViaHubs(startNode, endNode, adj, dOpts));
 
-
-
     let path = null;
-
     let routeMode = "shortest_sea";
 
-
-
-    // Prefer OPW template early (e.g. persian_gulf_singapore) before hub/forced alts.
-
-    if (!options.viaCape && !options.viaPanama && !options.viaSuez &&
-
-        !options.viaMalacca && !options.viaSunda &&
-
-        options.templatePath && options.templatePath.length >= 4) {
-
-      const stitched = setrouteStitchTemplateCorridor(startNode, endNode, options.templatePath);
-
-      if (stitched && stitched.length >= 4 && !setroutePathHasCriticalLayerBlock(stitched)) {
-
-        path = stitched;
-
-        routeMode = "template_" + (options.templateId || "corridor");
-
+    // 0. Custom strategic via chain (from LLM Strategist or learned via nodes)
+    if (Array.isArray(options.customViaNodes) && options.customViaNodes.length > 0) {
+      const customPath = await setroutePathViaChainAsync(startNode, endNode, options.customViaNodes, adj, dOpts);
+      if (customPath && customPath.length >= 2) {
+        path = customPath;
+        routeMode = options.customRouteMode || ("llm_strategic_" + options.customViaNodes[0].toLowerCase());
       }
-
     }
 
-
+    // 1. Prefer OPW template early if not forced via specific canal
+    if (!path && !options.viaCape && !options.viaPanama && !options.viaSuez &&
+        !options.viaMalacca && !options.viaSunda && !options.viaLombok &&
+        options.templatePath && options.templatePath.length >= 4) {
+      const stitched = setrouteStitchTemplateCorridor(startNode, endNode, options.templatePath);
+      if (stitched && stitched.length >= 4 && !setroutePathHasCriticalLayerBlock(stitched)) {
+        path = stitched;
+        routeMode = "template_" + (options.templateId || "corridor");
+      }
+    }
 
     if (path) {
-
-      // template already selected
-
+      // already selected
     } else if (options.viaCape) {
-
       path = await via(startNode, endNode, "CAPE_AGULHAS");
-
       routeMode = "via_cape";
-
     } else if (options.viaPanama) {
-
       path = (await via(startNode, endNode, "PANAMA_COLON"))
-
         || (await via(startNode, endNode, "PANAMA_BALBOA"));
-
       routeMode = "via_panama";
-
     } else if (options.viaBab) {
-
       path = (await via(startNode, endNode, "BAB_EL_MANDEB"))
-
         || (await via(startNode, endNode, "GULF_OF_ADEN"))
-
         || (await via(startNode, endNode, "RED_SEA_SOUTH"));
-
       routeMode = "via_bab_el_mandeb";
-
     } else if (options.viaSuez) {
-
       path = await via(startNode, endNode, "SUEZ_CANAL_MID");
-
       routeMode = "via_suez";
-
     } else if (options.viaMalacca) {
-
       path = (await via(startNode, endNode, "MALACCA_MID"))
-
         || (await via(startNode, endNode, "MALACCA_N"))
-
         || (await via(startNode, endNode, "SIX_DEGREE_CH"));
-
       routeMode = "via_malacca";
-
     } else if (options.viaSunda) {
-
       path = await via(startNode, endNode, "SUNDA_STRAIT");
-
       routeMode = "via_sunda";
-
-    } else if (
-
-      (setrouteIsPersianGulfPort(origCoords[0], origCoords[1]) &&
-
-        (setrouteIsSeAsiaMalaccaPort(destCoords[0], destCoords[1]) || setrouteIsFarEastPort(destCoords[0], destCoords[1]))) ||
-
-      (setrouteIsPersianGulfPort(destCoords[0], destCoords[1]) &&
-
-        (setrouteIsSeAsiaMalaccaPort(origCoords[0], origCoords[1]) || setrouteIsFarEastPort(origCoords[0], origCoords[1])))
-
-    ) {
-
-      const malacca = (await via(startNode, endNode, "MALACCA_MID"))
-
-        || (await via(startNode, endNode, "MALACCA_N"));
-
-      const dondra = await via(startNode, endNode, "DONDRA_HEAD");
-
-      const six = await via(startNode, endNode, "SIX_DEGREE_CH");
-
-      const sunda = await via(startNode, endNode, "SUNDA_STRAIT");
-
-      const direct = await dijk(startNode, endNode);
-
-      const best = pickBest([
-
-        { p: malacca, m: "via_malacca_auto" },
-
-        { p: dondra, m: "via_dondra" },
-
-        { p: six, m: "via_six_degree" },
-
-        { p: sunda, m: "via_sunda_auto" },
-
-        { p: direct, m: "shortest_sea" }
-
-      ], dOpts);
-
-      if (best) {
-
-        path = best.p;
-
-        routeMode = best.m;
-
-      }
-
-    } else if (
-
-      (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAsiaGulfPort(destCoords[0], destCoords[1])) ||
-
-      (setrouteIsAsiaGulfPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
-
-    ) {
-
-      const suez = await via(startNode, endNode, "SUEZ_CANAL_MID");
-
-      const cape = await via(startNode, endNode, "CAPE_AGULHAS");
-
-      const best = pickBest([
-
-        { p: suez, m: "via_suez_auto" },
-
-        { p: cape, m: "via_cape_auto" }
-
-      ], dOpts);
-
-      if (suez && cape) {
-
-        const ss = setroutePathTimedScore(suez, speed, stormWeight, t0);
-
-        const cs = setroutePathTimedScore(cape, speed, stormWeight, t0);
-
-        if (ss.severe <= cs.severe && ss.cost <= cs.cost * 1.12) {
-
-          path = suez;
-
-          routeMode = "via_suez_auto";
-
-        } else if (best) {
-
-          path = best.p;
-
-          routeMode = best.m;
-
+    } else if (options.viaLombok) {
+      path = await via(startNode, endNode, "LOMBOK_STRAIT");
+      routeMode = "via_lombok";
+    } else {
+      // Multi-hypothesis tournament: combine recalled memory + direct Dijkstra + regional strategic gates
+      const hyps = [];
+      if (recalledMem && Array.isArray(recalledMem.bestNodePath) && recalledMem.bestNodePath.length >= 2) {
+        const memStitched = setrouteStitchTemplateCorridor(startNode, endNode, recalledMem.bestNodePath);
+        if (memStitched && memStitched.length >= 2) {
+          hyps.push({ p: memStitched, m: "learned_memory" });
         }
-
-      } else if (best) {
-
-        path = best.p;
-
-        routeMode = best.m;
-
+      }
+      if (recalledMem && Array.isArray(recalledMem.learnedViaNodes) && recalledMem.learnedViaNodes.length > 0) {
+        const viaMem = await setroutePathViaChainAsync(startNode, endNode, recalledMem.learnedViaNodes, adj, dOpts);
+        if (viaMem && viaMem.length >= 2) {
+          hyps.push({ p: viaMem, m: "learned_via_chain" });
+        }
       }
 
-    } else if (
-
-      (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
-
-      (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
-
-    ) {
-
-      const natl = await via(startNode, endNode, "NATL_GC_MID");
-
-      const panama = await via(startNode, endNode, "PANAMA_COLON");
-
       const direct = await dijk(startNode, endNode);
+      if (direct) hyps.push({ p: direct, m: "shortest_sea" });
 
-      const best = pickBest([
+      if (
+        (setrouteIsPersianGulfPort(origCoords[0], origCoords[1]) &&
+          (setrouteIsSeAsiaMalaccaPort(destCoords[0], destCoords[1]) || setrouteIsFarEastPort(destCoords[0], destCoords[1]))) ||
+        (setrouteIsPersianGulfPort(destCoords[0], destCoords[1]) &&
+          (setrouteIsSeAsiaMalaccaPort(origCoords[0], origCoords[1]) || setrouteIsFarEastPort(origCoords[0], origCoords[1])))
+      ) {
+        const malacca = (await via(startNode, endNode, "MALACCA_MID")) || (await via(startNode, endNode, "MALACCA_N"));
+        const dondra = await via(startNode, endNode, "DONDRA_HEAD");
+        const six = await via(startNode, endNode, "SIX_DEGREE_CH");
+        const sunda = await via(startNode, endNode, "SUNDA_STRAIT");
+        const lombok = await via(startNode, endNode, "LOMBOK_STRAIT");
+        hyps.push(
+          { p: malacca, m: "via_malacca_auto" },
+          { p: dondra, m: "via_dondra" },
+          { p: six, m: "via_six_degree" },
+          { p: sunda, m: "via_sunda_auto" },
+          { p: lombok, m: "via_lombok_auto" }
+        );
+      } else if (
+        (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAsiaGulfPort(destCoords[0], destCoords[1])) ||
+        (setrouteIsAsiaGulfPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
+      ) {
+        const suez = await via(startNode, endNode, "SUEZ_CANAL_MID");
+        const cape = await via(startNode, endNode, "CAPE_AGULHAS");
+        const sunda = await via(startNode, endNode, "SUNDA_STRAIT");
+        hyps.push(
+          { p: suez, m: "via_suez_auto", _bias: minDepthKey > 21.5 ? 25000 : -600 },
+          { p: cape, m: "via_cape_auto" },
+          { p: sunda, m: "via_sunda_auto" }
+        );
+      } else if (
+        (setrouteIsEuropeMedPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
+        (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsEuropeMedPort(destCoords[0], destCoords[1]))
+      ) {
+        const natl = await via(startNode, endNode, "NATL_GC_MID");
+        const panama = await via(startNode, endNode, "PANAMA_COLON");
+        hyps.push(
+          { p: natl, m: "via_natl" },
+          { p: panama, m: "via_panama" }
+        );
+      } else if (
+        (setrouteIsFarEastPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
+        (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsFarEastPort(destCoords[0], destCoords[1]))
+      ) {
+        const panama = (await via(startNode, endNode, "PANAMA_COLON")) || (await via(startNode, endNode, "PANAMA_BALBOA"));
+        const npac = await via(startNode, endNode, "NPAC_GC_MID");
+        const unimak = await via(startNode, endNode, "UNIMAK_PASS");
+        const cape = await via(startNode, endNode, "CAPE_AGULHAS");
+        const isUsGulf = setrouteIsUsGulfPort(destCoords[0], destCoords[1]) || setrouteIsUsGulfPort(origCoords[0], origCoords[1]);
+        hyps.push(
+          { p: panama, m: "via_panama_fareast", _bias: isUsGulf ? -4000 : 0 },
+          { p: npac, m: "via_npac" },
+          { p: unimak, m: "via_unimak" },
+          { p: cape, m: "via_cape_fareast" }
+        );
+      }
 
-        { p: direct, m: "shortest_sea" },
-
-        { p: natl, m: "via_natl" },
-
-        { p: panama, m: "via_panama" }
-
-      ], dOpts);
-
+      const best = pickBest(hyps, dOpts);
       if (best) {
-
         path = best.p;
-
         routeMode = best.m;
-
       }
-
-    } else if (
-
-      (setrouteIsFarEastPort(origCoords[0], origCoords[1]) && setrouteIsAmericasPort(destCoords[0], destCoords[1])) ||
-
-      (setrouteIsAmericasPort(origCoords[0], origCoords[1]) && setrouteIsFarEastPort(destCoords[0], destCoords[1]))
-
-    ) {
-
-      const panama = (await via(startNode, endNode, "PANAMA_COLON"))
-
-        || (await via(startNode, endNode, "PANAMA_BALBOA"));
-
-      const npac = await via(startNode, endNode, "NPAC_GC_MID");
-
-      const unimak = await via(startNode, endNode, "UNIMAK_PASS");
-
-      const cape = await via(startNode, endNode, "CAPE_AGULHAS");
-
-      const direct = await dijk(startNode, endNode);
-
-      const cands = [
-
-        { p: panama, m: "via_panama_fareast" },
-
-        { p: npac, m: "via_npac" },
-
-        { p: unimak, m: "via_unimak" },
-
-        { p: direct, m: "shortest_sea" },
-
-        { p: cape, m: "via_cape_fareast" }
-
-      ];
-
-      if (setrouteIsUsGulfPort(destCoords[0], destCoords[1]) || setrouteIsUsGulfPort(origCoords[0], origCoords[1])) {
-
-        cands.forEach((c) => {
-
-          if (c.m.indexOf("panama") >= 0 && c.p) c._bias = -4000;
-
-        });
-
-      }
-
-      const scored = cands.filter((c) => c.p && c.p.length >= 2).map((c) => {
-
-        const sc = setroutePathTimedScore(c.p, speed, stormWeight, t0);
-
-        return { p: c.p, m: c.m, score: sc, rank: sc.severe * 1e7 + sc.cost + (c._bias || 0) };
-
-      });
-
-      scored.sort((a, b) => a.rank - b.rank);
-
-      if (scored.length) {
-
-        path = scored[0].p;
-
-        routeMode = scored[0].m;
-
-      }
-
     }
-
-
 
     if ((!path || path.length < 4) && options.templatePath && options.templatePath.length >= 4) {
-
       const tv = setrouteValidateNodePath(options.templatePath);
-
       if (tv && !setroutePathHasCriticalLayerBlock(tv)) {
-
         const ts = setroutePathTimedScore(tv, speed, stormWeight, t0);
-
         const ps = path ? setroutePathTimedScore(path, speed, stormWeight, t0) : null;
-
         if (!path || ts.severe < (ps.severe || 99) || ts.cost < (ps.cost || Infinity)) {
-
           path = tv;
-
           routeMode = "template_" + (options.templateId || "corridor");
-
         }
-
       }
-
     }
 
-
-
     if (!path) {
-
       path = await dijk(startNode, endNode);
-
       routeMode = "shortest_sea";
-
     }
-
     if (!path) {
-
       path = await hubs();
-
       routeMode = "via_ocean_hubs";
-
     }
 
-    if (!path) {
-
-      path = await hubs();
-
-      routeMode = "hub_fallback";
-
+    // Multi-anchor self-healing: if still no path, test alternate port-approach nodes
+    if (!path && (origCandidates.length > 1 || destCandidates.length > 1)) {
+      for (let oi = 0; oi < origCandidates.length && !path; oi++) {
+        for (let di = 0; di < destCandidates.length && !path; di++) {
+          if (oi === 0 && di === 0) continue;
+          const sAlt = origCandidates[oi];
+          const eAlt = destCandidates[di];
+          if (!sAlt || !eAlt || sAlt === eAlt) continue;
+          const altPath = await dijk(sAlt, eAlt);
+          if (altPath && altPath.length >= 2) {
+            startNode = sAlt;
+            endNode = eAlt;
+            path = altPath;
+            routeMode = "multi_anchor_sea";
+            if (typeof SetRouteBrainMemory !== "undefined") {
+              SetRouteBrainMemory.setPortAnchor(origCoords[0], origCoords[1], sAlt);
+              SetRouteBrainMemory.setPortAnchor(destCoords[0], destCoords[1], eAlt);
+            }
+          }
+        }
+      }
     }
-
-
 
     const score = path && path.length >= 2
-
       ? setroutePathTimedScore(path, speed, stormWeight, t0)
-
       : { cost: Infinity, severe: 99, stormPen: 0, hits: [], arrivalH: t0, nm: 0 };
 
     return { path, routeMode, score, stormWeight, dOpts };
-
   };
 
-
-
   const finalizeCorridor = (bestResult) => {
-
     let path = bestResult && bestResult.path;
-
     let routeMode = (bestResult && bestResult.routeMode) || "shortest_sea";
-
     let finalScore = (bestResult && bestResult.score) || null;
-
     let usedStormWeight = (bestResult && bestResult.stormWeight) || 1;
-
-
+    let learnedDetours = 0;
 
     if (!path) {
-
       path = [startNode];
-
       routeMode = "no_safe_corridor";
-
     }
-
-
 
     if (path && path.length >= 2) {
-
       const fixed = [path[0]];
-
       for (let i = 0; i < path.length - 1; i++) {
+        const uKey = path[i];
+        const vKey = path[i + 1];
+        const a = MARITIME_SEA_NODES[uKey];
+        const b = MARITIME_SEA_NODES[vKey];
+        const eList = adj[uKey] || [];
+        const edge = eList.find((e) => e && e.node === vKey);
+        const hasWetVia = Boolean(edge && Array.isArray(edge.via) && edge.via.length > 0);
 
-        const a = MARITIME_SEA_NODES[path[i]];
-
-        const b = MARITIME_SEA_NODES[path[i + 1]];
-
-        if (a && b && setrouteLegLikelyCrossesLand(a[0], a[1], b[0], b[1])) {
-
-          const midHub = SETROUTE_OCEAN_HUBS.find((h) => {
-
-            if (h === path[i] || h === path[i + 1] || !MARITIME_SEA_NODES[h]) return false;
-
-            const n = MARITIME_SEA_NODES[h];
-
-            return !setrouteLegLikelyCrossesLand(a[0], a[1], n[0], n[1]) &&
-
-              !setrouteLegLikelyCrossesLand(n[0], n[1], b[0], b[1]);
-
-          });
-
-          if (midHub) fixed.push(midHub);
-
+        if (a && b && !hasWetVia && setrouteLegLikelyCrossesLand(a[0], a[1], b[0], b[1])) {
+          // Penalize this land-clipping graph chord in persistent brain memory
+          if (typeof SetRouteBrainMemory !== "undefined" && SetRouteBrainMemory.penalizeEdge) {
+            SetRouteBrainMemory.penalizeEdge(uKey, vKey, "land_crossing_chord", 2200);
+          }
+          const bypass = setrouteFindSeaNodeBypass(a[0], a[1], b[0], b[1], [uKey, vKey]);
+          if (bypass && bypass.length) {
+            bypass.forEach((bk) => fixed.push(bk));
+            learnedDetours += bypass.length;
+          }
         }
-
-        fixed.push(path[i + 1]);
-
+        if (fixed[fixed.length - 1] !== vKey) fixed.push(vKey);
       }
-
       path = fixed;
-
       if (path.length >= 2) {
-
         finalScore = setroutePathTimedScore(path, speed, usedStormWeight, t0);
-
       }
-
     }
 
-
-
     findMaritimeSeaCorridor._lastMeta = {
-
       startNode,
-
       endNode,
-
       routeMode,
-
       hops: (path && path.length) || 0,
-
+      nodePath: path ? path.slice() : [],
+      learnedDetours,
+      recalledFromMemory: routeMode === "learned_memory" || routeMode === "learned_via_chain",
       speedKnots: speed,
-
       stormWeight: usedStormWeight,
-
       stormAvoidance: finalScore ? {
-
         severeEncounters: finalScore.severe,
-
         stormPenalty: Math.round(finalScore.stormPen),
-
         timedCost: Math.round(finalScore.cost),
-
         arrivalHours: Math.round(finalScore.arrivalH * 10) / 10,
-
         hits: (finalScore.hits || []).slice(0, 12)
-
       } : null
-
     };
 
     return path;
-
   };
-
-
 
   const runIters = async () => {
-
     let bestResult = null;
-
     for (let iter = 0; iter < maxIter; iter++) {
-
       const stormWeight = (Number(options.stormWeight) || 1) * (1 + iter * 2.25);
-
       if (typeof window !== "undefined") {
-
         window.SETROUTE_PLAN_PROGRESS = {
-
           phase: "storm_avoid_iter",
-
           iter: iter + 1,
-
           maxIter,
-
           stormWeight,
-
           speedKnots: speed
-
         };
-
       }
-
       const result = await searchOnceAsync(stormWeight);
-
       if (!result.path || result.path.length < 2) continue;
-
       if (!bestResult ||
-
           result.score.severe < bestResult.score.severe ||
-
           (result.score.severe === bestResult.score.severe && result.score.cost < bestResult.score.cost)) {
-
         bestResult = result;
-
       }
-
       if (result.score.severe === 0 && result.score.stormPen < 350) break;
-
     }
-
     return finalizeCorridor(bestResult);
-
   };
 
-
-
-  // Always return a Promise — sync dijkstra still used when asyncPlanning=false (no yields).
-
-  // Callers that need sync must use a known-sync subset; brain uses await.
-
   return runIters();
-
 }
-
-
 
 async function findMaritimeSeaCorridorAsync(origCoords, destCoords, options) {
 
@@ -28682,17 +28858,21 @@ async function generateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCo
   const corridorMeta = Object.assign({}, (findMaritimeSeaCorridor._lastMeta) || {});
 
   let densified = waypoints;
-
-  if (typeof setrouteDensifyWaypoints === "function") {
-
-    densified = setrouteDensifyWaypoints(waypoints, 280);
-
+  if (typeof setrouteSurgicalRepairWaypoints === "function") {
+    const rep0 = setrouteSurgicalRepairWaypoints(densified, spd, xtd, sailMode);
+    densified = rep0.waypoints;
+    corridorMeta.surgicalRepairs = (corridorMeta.surgicalRepairs || 0) + (rep0.repairs || 0);
   }
-
+  if (typeof setrouteDensifyWaypoints === "function") {
+    densified = setrouteDensifyWaypoints(densified, 280);
+  }
   if (typeof setrouteSplitSharpTurns === "function") {
-
     densified = setrouteSplitSharpTurns(densified, { sharpDeg: 70, maxTurnDeg: 20 });
-
+  }
+  if (typeof setrouteSurgicalRepairWaypoints === "function") {
+    const rep = setrouteSurgicalRepairWaypoints(densified, spd, xtd, sailMode);
+    densified = rep.waypoints;
+    corridorMeta.surgicalRepairs = (corridorMeta.surgicalRepairs || 0) + (rep.repairs || 0);
   }
 
   // Re-score densified track vs forecast (more accurate than graph nodes alone)
@@ -41336,7 +41516,11 @@ function setrouteSetComposerBusy(busy) {
 
     "BREMERHAVEN_APP": [53.75, 8.20, "Weser / Bremerhaven Approach"],
 
-    "IONIAN_MID": [37.80, 18.50, "Central Ionian Sea Transit"]
+    "IONIAN_MID": [37.80, 18.50, "Central Ionian Sea Transit"],
+
+    "CABO_SAN_LUCAS": [22.60, -110.50, "Cabo San Lucas Pacific Gate"],
+
+    "BAJA_OFFSHORE": [27.50, -116.00, "Baja California Pacific Offshore"]
 
   };
 
@@ -41510,7 +41694,17 @@ function setrouteSetComposerBusy(busy) {
 
     ["PACIFIC_PANAMA_APP", "MANZANILLO_APP"],
 
-    ["MANZANILLO_APP", "LONG_BEACH_APP"],
+    ["MANZANILLO_APP", "CABO_SAN_LUCAS"],
+
+    ["CABO_SAN_LUCAS", "BAJA_OFFSHORE"],
+
+    ["BAJA_OFFSHORE", "LONG_BEACH_APP"],
+
+    ["BAJA_OFFSHORE", "SAN_FRANCISCO_APP"],
+
+    ["CABO_SAN_LUCAS", "NPAC_GC_EAST"],
+
+    ["MANZANILLO_APP", "NPAC_GC_EAST"],
 
     ["CARIBBEAN_MID", "CARTAGENA_APP"],
 
@@ -41566,10 +41760,6 @@ function setrouteSetComposerBusy(busy) {
 
     ["NPAC_GC_EAST", "LONG_BEACH_APP"],
 
-    ["LONG_BEACH_APP", "PACIFIC_PANAMA_APP"],
-
-    ["SAN_FRANCISCO_APP", "PACIFIC_PANAMA_APP"],
-
     ["BOHAI_STRAIT", "EAST_CHINA_SEA"],
 
     ["TIANJIN_APP", "QINGDAO_APP"],
@@ -41613,9 +41803,47 @@ function setrouteSetComposerBusy(busy) {
     ["BREMERHAVEN_APP", "ROTTERDAM_APP"],
 
     ["MED_WEST", "VALENCIA_APP"],
-
-    ["MED_WEST", "ALBORAN_MID"]
-
+    ["MED_WEST", "ALBORAN_MID"],
+    ["LOMBOK_STRAIT", "JAKARTA_APP"],
+    ["LOMBOK_STRAIT", "SUNDA_STRAIT"],
+    ["LOMBOK_STRAIT", "SINGAPORE_E"],
+    ["LOMBOK_STRAIT", "SCS_SOUTH"],
+    ["LOMBOK_STRAIT", "MANILA_APP"],
+    ["LOMBOK_STRAIT", "MAURITIUS_PASS"],
+    ["LOMBOK_STRAIT", "DONDRA_HEAD"],
+    ["LOMBOK_STRAIT", "SIX_DEGREE_CH"],
+    ["FREMANTLE_APP", "MAURITIUS_PASS"],
+    ["FREMANTLE_APP", "SUNDA_STRAIT"],
+    ["FREMANTLE_APP", "DONDRA_HEAD"],
+    ["FREMANTLE_APP", "CAPE_AGULHAS"],
+    ["BRISBANE_APP", "MANILA_APP"],
+    ["BRISBANE_APP", "OSUMI_STRAIT"],
+    ["BRISBANE_APP", "TOKYO_APP"],
+    ["BRISBANE_APP", "PACIFIC_MID_W"],
+    ["SYDNEY_APP", "PACIFIC_MID_W"],
+    ["AUCKLAND_APP", "PACIFIC_MID_W"],
+    ["AUCKLAND_APP", "PACIFIC_PANAMA_APP"],
+    ["AUCKLAND_APP", "VALPARAISO_APP"],
+    ["AUCKLAND_APP", "MAGELLAN_W"],
+    ["GASPAR_STRAIT", "SINGAPORE_E"],
+    ["GASPAR_STRAIT", "JAKARTA_APP"],
+    ["GASPAR_STRAIT", "SUNDA_STRAIT"],
+    ["GASPAR_STRAIT", "SCS_SOUTH"],
+    ["PORT_ELIZABETH_OFF", "CAPE_AGULHAS"],
+    ["PORT_ELIZABETH_OFF", "DURBAN_APP"],
+    ["PORT_ELIZABETH_OFF", "MADAGASCAR_S"],
+    ["SOUTH_ATLANTIC_MID", "CAPE_VERDE_PASS"],
+    ["SOUTH_ATLANTIC_MID", "GULF_OF_GUINEA"],
+    ["SOUTH_ATLANTIC_MID", "CAPE_TOWN_APP"],
+    ["SOUTH_ATLANTIC_MID", "CAPE_AGULHAS"],
+    ["SOUTH_ATLANTIC_MID", "SANTOS_APP"],
+    ["SOUTH_ATLANTIC_MID", "BUENOS_AIRES_APP"],
+    ["IZU_OSHIMA_S", "TOKYO_APP"],
+    ["IZU_OSHIMA_S", "SHIONOMISAKI_OFF"],
+    ["SHIONOMISAKI_OFF", "OSUMI_STRAIT"],
+    ["SHIONOMISAKI_OFF", "BUSAN_APP"],
+    ["SHIONOMISAKI_OFF", "ULSAN_APP"],
+    ["SHIONOMISAKI_OFF", "EAST_CHINA_SEA"]
   ];
 
   extraEdges.forEach(e => MARITIME_SEA_EDGES.push(e));
@@ -44174,6 +44402,61 @@ function beginSetRouteLiveLog(titleHtml) {
 
 
 
+async function setrouteConsultBrainLLM(pOrig, pDest, route, audit, opts) {
+  opts = opts || {};
+  if (typeof setrouteCohereChat !== "function") return null;
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return null;
+  try {
+    const coreMeta = (route && route.metadata && route.metadata.coreA) || {};
+    const memStats = (typeof SetRouteBrainMemory !== "undefined" && SetRouteBrainMemory.getStatsSummary)
+      ? SetRouteBrainMemory.getStatsSummary()
+      : { recentRules: [] };
+    const recentRulesTxt = (memStats.recentRules || []).map((r) => r.rule).join(" | ") || "None yet";
+    const issuesTxt = ((audit && audit.issues) || []).slice(0, 5).map((i) => i.text).join("; ") || "None";
+    const storms = (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.storms))
+      ? MARINE_WEATHER_STORE.storms.slice(0, 4).map((s) => `${s.name} (${s.maxWinds}kt @ ${s.center[0]},${s.center[1]})`).join("; ")
+      : "None";
+
+    const sysPrompt =
+      "You are SetRoute Cognitive Brain v2.0 (Master Mariner Strategist & Self-Learning Critic). " +
+      "Evaluate the vessel passage plan and return ONLY ONE valid JSON object: " +
+      '{"recommendedCorridor":"keep|via_suez|via_cape|via_panama|via_malacca|via_sunda|via_lombok|via_unimak","viaNodeKeys":[],"avoidNodeKeys":[],"reasoning":"Concise 1-2 sentence Master Mariner rationale","learnedRule":"Short reusable rule learned from this OD & draft"}. ' +
+      "Valid viaNodeKeys (use only if needed to bypass hazards/shoals/land): " +
+      "SUEZ_CANAL_MID, CAPE_AGULHAS, PANAMA_COLON, MALACCA_MID, SUNDA_STRAIT, LOMBOK_STRAIT, DONDRA_HEAD, SIX_DEGREE_CH, BAB_EL_MANDEB, HORMUZ_STRAIT, UNIMAK_PASS, NATL_GC_MID, NPAC_GC_MID, GIBRALTAR_MID, DOVER_STRAIT, SKAGERRAK, STOREBAELT, MAGELLAN_E, YUCATAN_CH, FLORIDA_STRAIT, OSUMI_STRAIT, LUZON_STRAIT, TAIWAN_STRAIT, BOHAI_STRAIT, MAURITIUS_PASS, MADAGASCAR_S.";
+
+    const userPrompt =
+      `Origin: ${pOrig.name} (${(pOrig.coords || []).join(",")}) -> Destination: ${pDest.name} (${(pDest.coords || []).join(",")})
+` +
+      `Vessel: Speed ${opts.speedKnots || 14.5} kn, Draft ${opts.draftMeters || 11.5} m, MinDepth ${opts.minDepthM || 15.5} m.
+` +
+      `Current Corridor: mode=${coreMeta.routeMode || "shortest_sea"}, distance=${(route && route.totalDistanceNM) || 0} NM, hops=${coreMeta.hops || 0}, surgicalRepairs=${coreMeta.surgicalRepairs || 0}, auditGrade=${(audit && audit.grade) || "A"}.
+` +
+      `Audit Issues: ${issuesTxt}
+` +
+      `Active Cyclones: ${storms}
+` +
+      `Prior Learned Rules: ${recentRulesTxt}`;
+
+    const out = await setrouteCohereChat([
+      { role: "system", content: sysPrompt },
+      { role: "user", content: userPrompt }
+    ], { mode: "strategist", temperature: 0.15, timeoutMs: 6500 });
+
+    if (!out || !out.ok || !out.text) return null;
+    const jMatch = String(out.text).match(/\{[\s\S]*\}/);
+    if (!jMatch) return null;
+    const parsed = JSON.parse(jMatch[0]);
+    if (!parsed || typeof parsed !== "object") return null;
+    parsed.provider = out.provider || "llm";
+    parsed.model = out.model || "gemini";
+    return parsed;
+  } catch (e) {
+    return null;
+  }
+}
+
+window.setrouteConsultBrainLLM = setrouteConsultBrainLLM;
+
 async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
 
   const workToken = setrouteBeginWork();
@@ -44475,358 +44758,317 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   });
 
   let auditPre = typeof auditPassagePlan === "function" ? auditPassagePlan(baseRoute) : null;
+  const failedModes = [];
+  const EvaluatedHypotheses = [
+    ((baseRoute.metadata && baseRoute.metadata.coreA && baseRoute.metadata.coreA.routeMode) || "primary")
+  ];
 
   const hardRefuse = Boolean(baseRoute.metadata && baseRoute.metadata.coreARefused);
-
   const softLand = Boolean(auditPre && auditPre.stats && auditPre.stats.landLegs > 0);
-
   if (hardRefuse || softLand) {
+    const failedPrimaryMode = (baseRoute.metadata && baseRoute.metadata.coreA && baseRoute.metadata.coreA.routeMode) || "shortest_sea";
+    failedModes.push(failedPrimaryMode);
+
+    // Penalize any land-crossing leg edges in persistent Brain Memory
+    if (softLand && Array.isArray(baseRoute.legs) && typeof SetRouteBrainMemory !== "undefined") {
+      const nodePathPre = (baseRoute.metadata && baseRoute.metadata.coreA && baseRoute.metadata.coreA.nodePath) || [];
+      for (let ni = 0; ni < nodePathPre.length - 1; ni++) {
+        const na = MARITIME_SEA_NODES[nodePathPre[ni]];
+        const nb = MARITIME_SEA_NODES[nodePathPre[ni + 1]];
+        if (na && nb && setrouteLegLikelyCrossesLand(na[0], na[1], nb[0], nb[1])) {
+          SetRouteBrainMemory.penalizeEdge(nodePathPre[ni], nodePathPre[ni + 1], "audit_land_leg", 2400);
+        }
+      }
+    }
 
     const retries = (typeof setrouteAltCorridorRetries === "function")
-
       ? setrouteAltCorridorRetries(origCoords, destCoords)
-
       : [
-
         { viaPanama: true, viaCape: false, viaSuez: false, label: "Panama" },
-
         { viaCape: true, viaPanama: false, viaSuez: false, label: "Cape" },
-
         { viaSuez: true, viaCape: false, viaPanama: false, label: "Suez" }
-
       ];
-
     const altLabels = retries.map((r) => r.label).join(" / ");
-
     live.step(
-
       hardRefuse
-
-        ? `Primary path refused — trying ${altLabels} alternatives (independent-agent style)…`
-
-        : `Land-leg warning (${auditPre.stats.landLegs}) — ranking alternate ocean hubs (${altLabels})…`
-
+        ? `Primary path refused ? Brain evaluating ${altLabels} hypotheses?`
+        : `Land-leg warning (${auditPre.stats.landLegs}) ? Brain ranking alternate ocean hubs (${altLabels})?`
     );
-
     let recovered = false;
-
     for (let ri = 0; ri < retries.length; ri++) {
-
-      live.step(`Evaluating via <b>${retries[ri].label}</b>…`);
-
+      live.step(`Evaluating hypothesis via <b>${retries[ri].label}</b>?`);
+      EvaluatedHypotheses.push("via_" + retries[ri].label.toLowerCase());
       const altOpts = Object.assign(
-
         { templatePath: tmpl && tmpl.nodeKeys, templateId: tmpl && tmpl.id, asyncPlanning: true },
-
         retries[ri]
-
       );
-
       delete altOpts.label;
-
       const alt = await generateAlgorithmicMaritimeRoute(
-
         pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, altOpts
-
       );
-
       if (alt.metadata && alt.metadata.coreARefused) {
-
+        failedModes.push("via_" + retries[ri].label.toLowerCase());
         live.step(`Via ${retries[ri].label}: refused by Core A`);
-
         continue;
-
       }
-
       enrichRouteWithLegsTelemetry(alt, {
-
         origin: pOrig.name, destination: pDest.name, speedKnots: speed, draftMeters: draft, xtdNM: xtd, sailMode
-
       });
-
       const aud2 = typeof auditPassagePlan === "function" ? auditPassagePlan(alt) : null;
-
       const land2 = aud2 && aud2.stats && aud2.stats.landLegs > 0;
-
       if (!land2 || (softLand && aud2 && aud2.stats.landLegs < auditPre.stats.landLegs)) {
-
         baseRoute = alt;
-
         auditPre = aud2;
-
         recovered = !land2;
-
         live.step(
-
           recovered
-
             ? `Selected via <b>${retries[ri].label}</b> (sea corridor clear)`
-
             : `Kept via <b>${retries[ri].label}</b> (fewer land legs)`
-
         );
-
         if (recovered) break;
-
+      } else {
+        failedModes.push("via_" + retries[ri].label.toLowerCase());
       }
-
     }
 
     if (hardRefuse && (baseRoute.metadata && baseRoute.metadata.coreARefused)) {
-
       live.step("No sea corridor found for this OD pair.");
-
       appendChatMessage("brain",
-
-        `<strong>Core A could not build a sea corridor</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No graph path for <b>${pOrig.name}</b> → <b>${pDest.name}</b>. Try named major ports or a regional via (Malacca / Sunda / Cape / Suez / Panama).</div>`
-
+        `<strong>Core A could not build a sea corridor</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No graph path for <b>${pOrig.name}</b> ? <b>${pDest.name}</b>. Try named major ports or a regional via (Malacca / Sunda / Cape / Suez / Panama).</div>`
       );
-
       return null;
+    }
+  }
 
+  // Consult Cognitive LLM Strategist (Gemini / Cohere) for tactical reasoning, self-critique & rule learning
+  let llmBrainAdvice = null;
+  if (typeof setrouteConsultBrainLLM === "function" && navigator.onLine !== false) {
+    live.step("Cognitive Brain: consulting LLM Master Mariner Strategist & self-learning memory?");
+    llmBrainAdvice = await setrouteConsultBrainLLM(pOrig, pDest, baseRoute, auditPre, {
+      speedKnots: speed,
+      draftMeters: draft,
+      minDepthM: depthPol.minDepthM
+    });
+
+    if (llmBrainAdvice && Array.isArray(llmBrainAdvice.avoidNodeKeys)) {
+      const avoidList = llmBrainAdvice.avoidNodeKeys.filter((k) => k && MARITIME_SEA_NODES[k]);
+      if (avoidList.length >= 2 && typeof SetRouteBrainMemory !== "undefined") {
+        for (let ai = 0; ai < avoidList.length - 1; ai++) {
+          SetRouteBrainMemory.penalizeEdge(avoidList[ai], avoidList[ai + 1], "llm_avoid_recommendation", 1200);
+        }
+      }
     }
 
+    // If current route has audit warnings (grade !== "A") and LLM Strategist suggested a specific viaNodeKeys chain or corridor, test it!
+    const validLlmVias = (llmBrainAdvice && Array.isArray(llmBrainAdvice.viaNodeKeys))
+      ? llmBrainAdvice.viaNodeKeys.filter((k) => k && MARITIME_SEA_NODES[k])
+      : [];
+    const recMode = String((llmBrainAdvice && llmBrainAdvice.recommendedCorridor) || "").toLowerCase();
+    const curGrade = (auditPre && auditPre.grade) || "A";
+
+    if (curGrade !== "A" && (validLlmVias.length > 0 || (recMode && recMode !== "keep"))) {
+      live.step(`Testing LLM Strategist hypothesis (${validLlmVias.length ? validLlmVias.join(" ? ") : recMode})?`);
+      EvaluatedHypotheses.push("llm_" + (recMode || "chain"));
+      const llmOpts = {
+        asyncPlanning: true,
+        stormAvoidIters: 4,
+        abortToken: workToken,
+        customViaNodes: validLlmVias.length ? validLlmVias : null,
+        customRouteMode: "llm_strategist",
+        viaCape: recMode === "via_cape",
+        viaSuez: recMode === "via_suez",
+        viaPanama: recMode === "via_panama",
+        viaMalacca: recMode === "via_malacca",
+        viaSunda: recMode === "via_sunda",
+        viaLombok: recMode === "via_lombok"
+      };
+      const llmRoute = await generateAlgorithmicMaritimeRoute(
+        pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, llmOpts
+      );
+      if (llmRoute && !(llmRoute.metadata && llmRoute.metadata.coreARefused)) {
+        enrichRouteWithLegsTelemetry(llmRoute, {
+          origin: pOrig.name, destination: pDest.name, speedKnots: speed, draftMeters: draft, xtdNM: xtd, sailMode
+        });
+        const audLlm = typeof auditPassagePlan === "function" ? auditPassagePlan(llmRoute) : null;
+        const gMap = { A: 5, B: 4, C: 3, D: 2, F: 1 };
+        const oldG = gMap[curGrade] || 1;
+        const newG = gMap[(audLlm && audLlm.grade) || "F"] || 1;
+        const oldLand = (auditPre && auditPre.stats && auditPre.stats.landLegs) || 0;
+        const newLand = (audLlm && audLlm.stats && audLlm.stats.landLegs) || 0;
+        if (newLand < oldLand || (newLand === oldLand && newG > oldG)) {
+          baseRoute = llmRoute;
+          auditPre = audLlm;
+          live.step(`Adopted LLM Strategist corridor (improved audit to Grade <b>${audLlm.grade}</b>)`);
+        }
+      }
+    }
   }
 
   if (viaCape) {
-
     baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Cape of Good Hope)`;
-
   } else if (viaSuez) {
-
     baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Suez Canal)`;
-
   } else if (baseRoute.metadata && baseRoute.metadata.coreA && /cape/i.test(baseRoute.metadata.coreA.routeMode || "")) {
-
-    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Cape — auto)`;
-
+    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Cape ? auto)`;
   } else if (baseRoute.metadata && baseRoute.metadata.coreA && /suez/i.test(baseRoute.metadata.coreA.routeMode || "")) {
-
-    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Suez — auto)`;
-
+    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Suez ? auto)`;
   }
-
-
 
   if (viaPorts.length > 0) {
-
     viaPorts.forEach(vp => {
-
       const vpC = vp.approachCoords || vp.coords;
-
       const midIdx = Math.max(1, Math.floor(baseRoute.waypoints.length / 2));
-
       baseRoute.waypoints.splice(midIdx, 0, {
-
         wptNo: ('00' + (midIdx + 1)).slice(-3),
-
         name: `${vp.name.toUpperCase()} CALL / APPROACH`,
-
         lat: vpC[0],
-
         lon: vpC[1],
-
         speedKnots: speed,
-
         portsideXTD: xtd,
-
         starboardXTD: xtd,
-
         turnRadius: 0.6,
-
         sail: "RL",
-
         rot: 8.0
-
       });
-
     });
-
     baseRoute.name = `${pOrig.name} to ${pDest.name} (via ${viaPorts.map(v => v.name).join(", ")})`;
-
   }
-
-
 
   baseRoute.format = "SETROUTE_AI";
-
   const priorMeta = baseRoute.metadata || {};
-
   baseRoute.metadata = Object.assign({}, priorMeta, {
-
     origin: pOrig.name,
-
     destination: pDest.name,
-
     speedKnots: speed,
-
     draftMeters: draft,
-
     ukcMeters: depthPol.ukcMeters,
-
     minDepthM: depthPol.minDepthM,
-
     depthPolicy: depthPol.mode,
-
     xtdNM: xtd,
-
     sailMode: sailMode,
-
     generatedAt: new Date().toISOString(),
-
     coreA: priorMeta.coreA || null,
-
+    brainAdvice: llmBrainAdvice || null,
     stormAvoidance: priorMeta.stormAvoidance || (priorMeta.coreA && priorMeta.coreA.stormAvoidance) || null
-
   });
 
-
-
   enrichRouteWithLegsTelemetry(baseRoute, baseRoute.metadata);
-
   const audit = typeof auditPassagePlan === "function" ? auditPassagePlan(baseRoute) : null;
-
   const legs = baseRoute.legs || [];
-
   const sa = baseRoute.metadata.stormAvoidance;
+  const coreMetaFinal = baseRoute.metadata.coreA || {};
+
+  // Persist experience & reinforcement learning in SetRouteBrainMemory
+  if (typeof SetRouteBrainMemory !== "undefined") {
+    const finalGrade = (audit && audit.grade) || "A";
+    const finalLandLegs = (audit && audit.stats && audit.stats.landLegs) || 0;
+    if (finalLandLegs === 0 && (finalGrade === "A" || finalGrade === "B") && Array.isArray(coreMetaFinal.nodePath)) {
+      SetRouteBrainMemory.rewardPath(coreMetaFinal.nodePath);
+    }
+    const autoRule = (llmBrainAdvice && llmBrainAdvice.learnedRule)
+      ? llmBrainAdvice.learnedRule
+      : (coreMetaFinal.surgicalRepairs > 0
+        ? `${pOrig.name} ? ${pDest.name}: applied ${coreMetaFinal.surgicalRepairs} surgical sea detour(s) to eliminate land/shoal clips`
+        : `${pOrig.name} ? ${pDest.name} (draft ${draft}m): optimal mode ${coreMetaFinal.routeMode || "shortest_sea"} (${baseRoute.totalDistanceNM} NM, Grade ${finalGrade})`);
+
+    SetRouteBrainMemory.recordOdOutcome(origCoords, destCoords, depthPol.minDepthM, {
+      nodePath: coreMetaFinal.nodePath || [],
+      routeMode: coreMetaFinal.routeMode || "shortest_sea",
+      grade: finalGrade,
+      cost: baseRoute.totalDistanceNM || Infinity,
+      failedModes: failedModes,
+      learnedViaNodes: (llmBrainAdvice && Array.isArray(llmBrainAdvice.viaNodeKeys))
+        ? llmBrainAdvice.viaNodeKeys.filter((k) => k && MARITIME_SEA_NODES[k])
+        : [],
+      reasoning: (llmBrainAdvice && llmBrainAdvice.reasoning) || "",
+      learnedRule: autoRule,
+      odLabel: `${pOrig.name} ? ${pDest.name}`
+    });
+  }
+
+  const memSummary = (typeof SetRouteBrainMemory !== "undefined" && SetRouteBrainMemory.getStatsSummary)
+    ? SetRouteBrainMemory.getStatsSummary()
+    : { totalRuns: 1, learnedCorridors: 1, learnedEdges: 0, recentRules: [] };
 
   const stormLine = sa
-
     ? (sa.severeEncounters > 0
-
-      ? `Cyclone model: <b>${sa.severeEncounters}</b> residual core encounter(s) at ${speed} kn — review legs flagged in audit.`
-
-      : `Cyclone model: space-time clear at <b>${speed} kn</b> (penalty ${sa.stormPenalty || 0}, ETA ~${sa.arrivalHours || "—"} h).`)
-
+      ? `Cyclone model: <b>${sa.severeEncounters}</b> residual core encounter(s) at ${speed} kn ? review legs flagged in audit.`
+      : `Cyclone model: space-time clear at <b>${speed} kn</b> (penalty ${sa.stormPenalty || 0}, ETA ~${sa.arrivalHours || "?"} h).`)
     : `Cyclone model: forecast-aware search at <b>${speed} kn</b>.`;
 
-
-
   live.step(
-
-    `Publishing route · <b>${(baseRoute.waypoints || []).length}</b> waypoints · <b>${baseRoute.totalDistanceNM || "—"} NM</b>`
-
+    `Publishing route ? <b>${(baseRoute.waypoints || []).length}</b> waypoints ? <b>${baseRoute.totalDistanceNM || "?"} NM</b>`
   );
-
   const msgEl = appendChatMessage("brain", `
-
     <div>
-
       <strong>Route ready: ${baseRoute.name}</strong>
-
       <div class="sr-ai-synthesis-footer" style="margin-top:6px;font-size:0.78rem;color:#94a3b8;">
-
-        Draft <b>${draft}m</b> • Speed <b>${speed} kn</b> • XTD <b>±${xtd} NM</b> • Full leg analysis is in Route Details.
-
+        Draft <b>${draft}m</b> ? Speed <b>${speed} kn</b> ? XTD <b>?${xtd} NM</b> ? Full leg analysis is in Route Details.
         <div style="margin-top:4px;color:#7dd3fc;">${stormLine}</div>
-
       </div>
-
     </div>
-
   `);
 
-
-
   const footerEl = msgEl ? msgEl.querySelector(".sr-ai-synthesis-footer") : null;
-
   const scrollWrap = document.getElementById("setRouteChatScroll");
 
-
-
   activeRouteData = baseRoute;
-
   try {
-
     persistActiveRouteToStorage(baseRoute);
-
   } catch (e) {}
 
-
-
   saveRouteToLibrary(baseRoute);
-
   displaySetRouteResults(baseRoute, true);
 
-
-
   if (leafletMap && typeof renderRouteOnMap === "function") {
-
     renderRouteOnMap(baseRoute, false);
-
   }
-
-
-
-  // Core B narrates nothing here — Core A audit is source of truth for safety text
 
   const cohereNote = (audit && audit.summary) ? audit.summary : "";
-
-
-
-  // Check if Europe/Med <-> Asia so we can offer a 1-click toggle chip between Suez and Cape without blocking
+  const brainReasonTxt = (llmBrainAdvice && llmBrainAdvice.reasoning)
+    ? llmBrainAdvice.reasoning
+    : `Evaluated ${EvaluatedHypotheses.length} corridor hypothesis(es) (${EvaluatedHypotheses.join(", ")}); selected ${coreMetaFinal.routeMode || "shortest_sea"}${coreMetaFinal.recalledFromMemory ? " (recalled from Brain Memory)" : ""}${coreMetaFinal.surgicalRepairs ? ` with ${coreMetaFinal.surgicalRepairs} surgical sea detour(s)` : ""}.`;
+  const latestRuleTxt = (llmBrainAdvice && llmBrainAdvice.learnedRule)
+    ? llmBrainAdvice.learnedRule
+    : ((memSummary.recentRules && memSummary.recentRules[0] && memSummary.recentRules[0].rule) || "");
 
   const isEuropeOrMed = p => p.coords[1] >= -15 && p.coords[1] <= 38 && p.coords[0] >= 25;
-
   const isAsiaOrGulf = p => p.coords[1] >= 48;
-
   const canToggleSuezCape = (isEuropeOrMed(pOrig) && isAsiaOrGulf(pDest)) || (isAsiaOrGulf(pOrig) && isEuropeOrMed(pDest));
 
-
-
   const refineChips = [
-
-    { label: `⚡ Speed 16 kn`, prompt: `Set speed to 16 knots` },
-
-    { label: `⚓ Draft 13.5m`, prompt: `Set draft to 13.5m` },
-
-    { label: `🌐 Great Circle (GC)`, prompt: `Recalculate using Great Circle GC` },
-
-    { label: `🔄 Reverse Route`, prompt: `Reverse route` }
-
+    { label: `? Speed 16 kn`, prompt: `Set speed to 16 knots` },
+    { label: `? Draft 13.5m`, prompt: `Set draft to 13.5m` },
+    { label: `?? Great Circle (GC)`, prompt: `Recalculate using Great Circle GC` },
+    { label: `?? Reverse Route`, prompt: `Reverse route` }
   ];
-
   if (canToggleSuezCape) {
-
     refineChips.unshift(
-
       viaCape
-
-        ? { label: `⚡ Switch to Suez Canal`, prompt: `Plan route via Suez Canal from ${pOrig.name} to ${pDest.name}` }
-
-        : { label: `🌊 Switch to Cape of Good Hope`, prompt: `Plan route via Cape of Good Hope from ${pOrig.name} to ${pDest.name}` }
-
+        ? { label: `? Switch to Suez Canal`, prompt: `Plan route via Suez Canal from ${pOrig.name} to ${pDest.name}` }
+        : { label: `?? Switch to Cape of Good Hope`, prompt: `Plan route via Cape of Good Hope from ${pOrig.name} to ${pDest.name}` }
     );
-
   }
-
-
 
   if (footerEl) {
-
     footerEl.innerHTML = `
-
       <div style="padding:8px 10px;border-radius:10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#e2e8f0;margin-top:6px;">
-
-        <strong style="color:#34d399;">✓ ${baseRoute.totalDistanceNM} NM • ${baseRoute.steamingDays} days${audit && audit.grade ? ` • Audit ${audit.grade}` : ""}</strong>
-
+        <strong style="color:#34d399;">? ${baseRoute.totalDistanceNM} NM ? ${baseRoute.steamingDays} days${audit && audit.grade ? ` ? Audit ${audit.grade}` : ""}</strong>
         ${cohereNote ? `<span style="color:#bae6fd;display:block;margin-top:4px;font-size:0.74rem;">${cohereNote}</span>` : ""}
-
       </div>
-
+      <div style="padding:7px 10px;border-radius:9px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.28);color:#cbd5e1;margin-top:6px;font-size:0.73rem;line-height:1.4;">
+        <div style="color:#38bdf8;font-weight:700;margin-bottom:2px;">?? Cognitive Brain v2.0 ? ${llmBrainAdvice ? `LLM Strategist (${llmBrainAdvice.provider || "AI"}) + Memory` : "Autonomous Graph + Memory"}</div>
+        <div>${brainReasonTxt}</div>
+        ${latestRuleTxt ? `<div style="margin-top:3px;color:#a7f3d0;"><b>Learned:</b> ${latestRuleTxt}</div>` : ""}
+        <div style="margin-top:3px;color:#94a3b8;font-size:0.69rem;">Memory bank: <b>${memSummary.learnedCorridors}</b> OD corridors ? <b>${memSummary.learnedEdges}</b> penalized chords ? <b>${memSummary.totalRuns}</b> voyages analyzed</div>
+      </div>
       <div class="sr-quick-chips" style="margin-top:8px;">
-
         ${refineChips.map(c => `<button type="button" class="sr-quick-chip" data-sr-prompt="${c.prompt.replace(/"/g, '&quot;')}">${c.label}</button>`).join("")}
-
       </div>
-
     `;
-
   }
 
-
-
-  window.SETROUTE_CHAT_HISTORY.push({
+    window.SETROUTE_CHAT_HISTORY.push({
 
     role: "assistant",
 

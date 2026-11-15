@@ -190,14 +190,24 @@ module.exports = async function handler(req, res) {
       content: String(m.content || "").slice(0, 8000)
     }));
 
-    // Server-side maritime guard: never let a bare chat model invent tourist itineraries
-    const MARITIME_GUARD =
-      "You are SetRoute Core B for merchant-ship PASSAGE PLANNING only. " +
-      "Never describe flights, trains, hotels, sightseeing, or city tourism. " +
-      "Reply with a short acknowledgement, then EXACTLY one flat JSON object (no nesting like action_plan). " +
-      'Required shape example: {"action":"plan","origin":"Tianjin","destination":"Houston","viaPanama":true,"speedKnots":14.5,"draftMeters":11.5}. ' +
-      "action must be plan|modify|audit|resolve_exception. " +
-      "No coordinates and no waypoint lists. Ports are seaports only.";
+    const mode = typeof body.mode === "string" ? body.mode.toLowerCase() : "intent";
+
+    // Server-side maritime guard: intent parser mode vs cognitive strategist/critic mode
+    const MARITIME_GUARD = mode === "strategist"
+      ? (
+        "You are SetRoute Cognitive Brain (Master Mariner Strategist & Self-Learning Critic). " +
+        "Analyze the origin, destination, vessel draft/UKC, weather/cyclone hazards, candidate sea corridors, and past learned memory rules. " +
+        "Reply ONLY with ONE valid JSON object of the form: " +
+        '{"recommendedCorridor":"<id_or_mode>","viaNodeKeys":["NODE_KEY"],"avoidNodeKeys":["NODE_KEY"],"reasoning":"<1-2 concise sentences explaining the tactical decision>","learnedRule":"<short rule to remember for future voyages>"}'
+      )
+      : (
+        "You are SetRoute Core B for merchant-ship PASSAGE PLANNING only. " +
+        "Never describe flights, trains, hotels, sightseeing, or city tourism. " +
+        "Reply with a short acknowledgement, then EXACTLY one flat JSON object (no nesting like action_plan). " +
+        'Required shape example: {"action":"plan","origin":"Tianjin","destination":"Houston","viaPanama":true,"speedKnots":14.5,"draftMeters":11.5}. ' +
+        "action must be plan|modify|audit|resolve_exception. " +
+        "No coordinates and no waypoint lists. Ports are seaports only."
+      );
     if (!safeMessages.some((m) => m.role === "system")) {
       safeMessages.unshift({ role: "system", content: MARITIME_GUARD });
     } else {
