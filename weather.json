@@ -1,67 +1,85 @@
 {
-  "synopticCycle": "0700 UTC",
-  "lastSyncUtc": "2026-11-15T07:36:50.114684+00:00",
+  "synopticCycle": "1500 UTC",
+  "lastSyncUtc": "2026-11-15T15:25:07.476947+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
-      "id": "SH952026",
-      "name": "Invest 95S",
-      "shortName": "95S",
-      "category": "Tropical Disturbance (Active Invest)",
+      "id": "SH-04",
+      "name": "Tropical Storm FOUR",
+      "shortName": "Four",
+      "category": "Tropical Storm (JTWC)",
       "center": [
-        -9.5,
-        85.9
+        -8.1,
+        49.9
       ],
-      "centralPressure": 1006,
-      "maxWinds": 25,
-      "gusts": 32,
-      "movement": "W at 1231 kts",
+      "centralPressure": 1003,
+      "maxWinds": 35,
+      "gusts": 44,
+      "movement": "W at 1039 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -10.9,
-            -164.2
+            -8.5,
+            -160.1
           ],
-          "winds": 30,
-          "radiusNm": 45
+          "winds": 50,
+          "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            -11.2,
-            -164.5
+            -8.8,
+            -161.3
           ],
-          "winds": 35,
-          "radiusNm": 60
+          "winds": 60,
+          "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            -11.6,
-            -164.8
+            -9.1,
+            -162.5
           ],
-          "winds": 40,
-          "radiusNm": 75
+          "winds": 75,
+          "radiusNm": 90
         },
         {
           "tau": 48,
           "coords": [
-            -11.8,
-            -165.2
+            -9.4,
+            -163.5
           ],
-          "winds": 45,
-          "radiusNm": 90
+          "winds": 80,
+          "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            -12.0,
-            -165.5
+            -9.7,
+            -164.3
           ],
-          "winds": 50,
-          "radiusNm": 105
+          "winds": 80,
+          "radiusNm": 124
+        },
+        {
+          "tau": 72,
+          "coords": [
+            -10.0,
+            -164.6
+          ],
+          "winds": 75,
+          "radiusNm": 140
+        },
+        {
+          "tau": 84,
+          "coords": [
+            -10.3,
+            -164.7
+          ],
+          "winds": 65,
+          "radiusNm": 157
         }
       ]
     }
@@ -75,9 +93,9 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 2.6,
+      "waveHeight": 2.5,
       "swellPeriod": 8,
-      "swellDir": "NNW"
+      "swellDir": "N"
     },
     {
       "id": "W2",
@@ -87,19 +105,31 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.8,
-      "swellPeriod": 11,
-      "swellDir": "SW"
+      "waveHeight": 3.1,
+      "swellPeriod": 10,
+      "swellDir": "WSW"
+    },
+    {
+      "id": "WS1",
+      "name": "Four Cyclonic Wave Field",
+      "center": [
+        -8.1,
+        49.9
+      ],
+      "radiusNm": 150,
+      "waveHeight": 2.5,
+      "swellPeriod": 8,
+      "swellDir": "SE"
     }
   ],
   "pressureCenters": [
     {
       "type": "L",
-      "value": 1006,
-      "name": "Invest 95S Core Low",
+      "value": 1003,
+      "name": "Tropical Storm FOUR Core Low",
       "coords": [
-        -9.5,
-        85.9
+        -8.1,
+        49.9
       ]
     },
     {
@@ -133,12 +163,12 @@
   "windVectors": [
     {
       "coords": [
-        -9.2,
-        86.2
+        -7.8,
+        50.2
       ],
       "dir": 200,
-      "speed": 25,
-      "label": "25 kts (95S)"
+      "speed": 35,
+      "label": "35 kts (Four)"
     }
   ]
 }

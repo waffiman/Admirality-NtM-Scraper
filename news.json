@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-15T07:36:51Z",
-  "generatedAt": "2026-11-15T07:36:51Z",
+  "updatedAt": "2026-11-15T15:25:09Z",
+  "generatedAt": "2026-11-15T15:25:09Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -13,6 +13,178 @@
   ],
   "totalArticles": 70,
   "articles": [
+    {
+      "id": "SN-018FFCC4B0",
+      "title": "CMA CGM announces new peak season surcharges on Africa and Americas trades",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/cma-cgm-announces-new-peak-season-surcharges-on-africa-and-americas-trades/",
+      "publishedAt": "2026-11-15T14:38:09Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Panama Canal & Caribbean",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/cma-cgm-and-dsv-press-release-october2026-300x225.webp",
+      "summary": "CMA CGM has announced new Peak Season Surcharges (PSS) covering shipments from the Far East to South Africa and from Europe and the Mediterranean to Latin America and the Caribbean, with implementation dates in November and December 2026. The French container shipping company will introduce a surcharge of US$650 per...",
+      "body": "CMA CGM has announced new Peak Season Surcharges (PSS) covering shipments from the Far East to South Africa and from Europe and the Mediterranean to Latin America and the Caribbean, with implementation dates in November and December 2026. The French container shipping company will introduce a surcharge of US$650 per TEU on shipments from the Far East to South Africa, effective from 15 November 2026. The measure applies to all cargo types and will remain in place until further notice. The surcharge will be determined by the loading date and covers cargo originating from Far East ports and destined for South Africa. New surcharges from Europe and Mediterranean to the Americas In a separate announcement, CMA CGM confirmed additional Peak Season Surcharges (PSS 02) on shipments from Northern Europe, the Mediterranean, North Africa and the Black Sea to destinations across Latin America and the Caribbean. The new charges will take effect on 7 December 2026, based on the loading date, and will remain applicable until further notice. All three measures apply exclusively to short-term contracts and cover all cargo types. For shipments originating in Northern Europe, excluding Portugal, and destined for the west coast of South America, the carrier will apply a surcharge of €200 per unit. A surcharge of €200 per unit will also apply to shipments originating from Mediterranean ports in Spain, Italy and France, as well as the Adriatic and Portugal. The measure covers destinations on the west coast of South America, the west coasts of Central America and Mexico, the east coast of Central America and the Caribbean, excluding the French West Indies. It also covers the Leeward Islands, excluding Gustavia and Philipsburg, and the Windward Islands. For shipments originating from the Eastern Mediterranean, Adriatic, North Africa and Black Sea, CMA CGM has announced a surcharge of US$200 per unit. This measure applies to the same destination regions, including the west coast of South America, the west coasts of Central America and Mexico, the east coast of Central America and the Caribbean, subject to the stated exclusions for the French West Indies, Gustavia and Philipsburg. The December surcharges will apply in addition to the carrier’s existing freight charges under the relevant contract terms. CMA CGM has not specified an expiry date for either announcement, with both measures remaining in effect until further notice.",
+      "takeaways": [
+        "The French container shipping company will introduce a surcharge of US$650 per TEU on shipments from the Far East to South Africa, effective from 15 November 2026.",
+        "The measure applies to all cargo types and will remain in place until further notice.",
+        "The surcharge will be determined by the loading date and covers cargo originating from Far East ports and destined for South Africa."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-EE8D87C485",
+      "title": "Yang Ming expands Egypt coverage through DP World slot-sharing deal",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/yang-ming-expands-egypt-coverage-through-dp-world-slot-sharing-deal/",
+      "publishedAt": "2026-11-15T13:00:07Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2025/05/Yang-Ming-vessel-300x169.jpg",
+      "summary": "Yang Ming Marine Transport will expand its shipping connections within Egypt through a slot-sharing arrangement with DP World Shipping Solutions, covering three services linking the country’s main Mediterranean ports. Under the arrangement, the Taiwanese container carrier will take slots on two intra-Egypt services...",
+      "body": "Yang Ming Marine Transport will expand its shipping connections within Egypt through a slot-sharing arrangement with DP World Shipping Solutions, covering three services linking the country’s main Mediterranean ports. Under the arrangement, the Taiwanese container carrier will take slots on two intra-Egypt services operated by DP World Shipping Solutions, as well as on the Egyptian section of the operator’s Egypt–Syria–Lebanon service. Yang Ming will market the three connections under the EG1, EG2 and EG3 service brands, providing links between Port Said, Damietta and Alexandria. Three services connecting Egyptian ports The EG1 service will operate weekly, following the rotation: Port Said – Damietta – Alexandria (Old Port) – Port Said. The EG2 service will run fortnightly, connecting: Damietta – Alexandria (El Dekheila) – Port Said. Meanwhile, the EG3 service will provide a weekly connection with the following rotation: Port Said – Alexandria (El Dekheila) – Damietta – Port Said. The arrangement will give Yang Ming access to both Alexandria’s Old Port and El Dekheila facilities, alongside the container gateways of Port Said and Damietta. Through the slot-sharing agreement, Yang Ming will be able to market additional container transport connections within Egypt without directly operating the vessels assigned to the services.",
+      "takeaways": [
+        "Yang Ming Marine Transport will expand its shipping connections within Egypt through a slot-sharing arrangement with DP World Shipping Solutions, covering three services linking the country’s main Mediterranean ports.",
+        "Yang Ming will market the three connections under the EG1, EG2 and EG3 service brands, providing links between Port Said, Damietta and Alexandria.",
+        "Three services connecting Egyptian ports The EG1 service will operate weekly, following the rotation: Port Said – Damietta – Alexandria (Old Port) – Port Said."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-8482340D4E",
+      "title": "MSC restructures Baltic Loop 07 into Klaipeda–Kotka shuttle",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/msc-restructures-baltic-loop-07-into-klaipeda-kotka-shuttle/",
+      "publishedAt": "2026-11-15T11:38:07Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Rotterdam & North Sea",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2026/10/MSC-Meline-300x225.jpg",
+      "summary": "MSC has revised its Baltic Loop 07 service, replacing the previous multi-port rotation with a dedicated shuttle connection between Klaipeda in Lithuania and Kotka in Finland. Under the revised arrangement, the service will operate exclusively between the two Baltic ports, removing calls at Gdynia in Poland, Antwerp...",
+      "body": "Services Top Right MSC restructures Baltic Loop 07 into Klaipeda–Kotka shuttle November 15, 2026 Facebook Twitter WhatsApp Linkedin Email MSC Meline; Source: VesselFinder MSC has revised its Baltic Loop 07 service, replacing the previous multi-port rotation with a dedicated shuttle connection between Klaipeda in Lithuania and Kotka in Finland. Under the revised arrangement, the service will operate exclusively between the two Baltic ports, removing calls at Gdynia in Poland, Antwerp in Belgium and Aarhus in Denmark. The new rotation will be: Klaipeda – Kotka – Klaipeda. The restructured service will be operated by a single container vessel with a capacity of approximately 1,400 TEU. The adjustment represents a substantial reduction in the geographical coverage of Baltic Loop 07, concentrating the service on the direct connection between Lithuania and Finland rather than its previous network of Baltic and Northern European ports. The removal of Gdynia, Antwerp and Aarhus applies specifically to Baltic Loop 07 and does not necessarily indicate the withdrawal of MSC services from those ports. The revised arrangement also changes the service’s operating structure, with one vessel assigned to the shorter two-port rotation. Details regarding the vessel’s identity and the effective date of the revised deployment have not been specified. TAGS Mediterranean Shipping Co. (MSC) Facebook Twitter WhatsApp Linkedin Email Previous article Sea-Intelligence: Is 2026 TP Peak Season Driven by AI? Next article Yang Ming expands Egypt coverage through DP World slot-sharing deal Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "Under the revised arrangement, the service will operate exclusively between the two Baltic ports, removing calls at Gdynia in Poland, Antwerp in Belgium and Aarhus in Denmark.",
+        "The new rotation will be: Klaipeda – Kotka – Klaipeda.",
+        "The restructured service will be operated by a single container vessel with a capacity of approximately 1,400 TEU."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-54C033CF6D",
+      "title": "Sea-Intelligence: Is 2026 TP Peak Season Driven by AI?",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/sea-intelligence-is-2026-tp-peak-season-driven-by-ai/",
+      "publishedAt": "2026-11-15T09:55:03Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/zach-m-23PFamjvVLw-unsplash-300x169.jpg",
+      "summary": "According to data from the US Census Bureau, the still-ongoing 2026 Transpacific container shipping peak season is not being driven by the boom in investments in artificial intelligence (AI) and is instead being actively fuelled by traditional consumer goods. Figure 1 shows the monthly Asia to US containerized...",
+      "body": "According to data from the US Census Bureau, the still-ongoing 2026 Transpacific container shipping peak season is not being driven by the boom in investments in artificial intelligence (AI) and is instead being actively fuelled by traditional consumer goods. Figure 1 shows the monthly Asia to US containerized imports in Metric Tons for January 2022 to September 2026, broken down into seven major categories. We mapped all HS8 codes in the data to five traditional container goods classification groups (A‑E) and created two new groups (F‑G). We do not claim that all goods transported under the F-G classifications are being used to build AI data centres, but that they could conceivably be contributing to it. Source: Sea-Intelligence.com, Sunday Spotlight, issue 790 The data shows that high‑value AI computer chips and IT equipment does not travel by ocean freight and is almost exclusively shipped by airfreight. Furthermore, when looking at the physical materials needed to build these massive data centres, the numbers show no significant impact on Asia-US volumes. The data shows that the import weight for data centre construction materials and infrastructure has remained almost completely flat. If the AI boom were truly driving Transpacific container volumes, we would expect to see an increase here. So, what is driving Transpacific volumes then? The 2026 peak season boom is being driven almost entirely by traditional container goods and raw manufacturing materials. We are seeing strong growth in the import of everyday consumer items like apparel, toys, games, sporting goods, and bicycles. Additionally, there are major increases in raw materials and intermediate goods like plastics, paper, packaging, and everyday hardware.",
+      "takeaways": [
+        "Figure 1 shows the monthly Asia to US containerized imports in Metric Tons for January 2022 to September 2026, broken down into seven major categories.",
+        "We mapped all HS8 codes in the data to five traditional container goods classification groups (A‑E) and created two new groups (F‑G).",
+        "We do not claim that all goods transported under the F-G classifications are being used to build AI data centres, but that they could conceivably be contributing to it."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-365B918948",
+      "title": "Liquefied biogas storage tank installed at the port of Gothenburg",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/liquefied-biogas-storage-tank-installed-at-the-port-of-gothenburg/",
+      "publishedAt": "2026-11-15T08:00:59Z",
+      "category": "Ports & Terminals",
+      "region": "Baltic Sea & Northern Europe",
+      "regions": [
+        "Baltic Sea & Northern Europe",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port",
+        "bunker"
+      ],
+      "coords": [
+        57.5,
+        19.5
+      ],
+      "navarea": "I",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/Nordionliquifying-300x219.webp",
+      "summary": "Construction of the biogas liquefaction plant at the Port of Gothenburg has reached an important milestone with the installation of the facility’s liquefied biogas storage tank. The plant is scheduled for completion in the second quarter of 2027 and is expected to make Swedish biogas more accessible to more sectors,...",
+      "body": "Construction of the biogas liquefaction plant at the Port of Gothenburg has reached an important milestone with the installation of the facility’s liquefied biogas storage tank. The plant is scheduled for completion in the second quarter of 2027 and is expected to make Swedish biogas more accessible to more sectors, not least shipping. LBG is a renewable, low-climate-impact fuel that can replace fossil alternatives, and interest in it is growing rapidly in the shipping sector. Groundworks, including foundations and base slabs, are complete, and the tank is the first of the plant’s key components to be installed. It arrived at the port by vessel, has a volume of 500 cubic metres, weighs close to 140 tonnes and will be able to store up to 200 tonnes of LBG once the facility is operational. Once finished, the plant will be able to deliver 250 gigawatt-hours of LBG a year, equivalent to the consumption of 500 trucks or the bunkering of 50 vessels. It will be the first liquefaction plant in Sweden connected directly to the west Swedish gas grid, creating a new market for Swedish biogas producers that are, or want to become, connected to the grid. Producers and users are already present at the port: ST1 Biokraft has signed an agreement securing part of the plant’s capacity, and several shipping companies that call regularly already use LBG to power their vessels. Therese Jällbrink, Head of Renewable Energy at the Port of Gothenburg, said shipping’s transition requires a collaborative value chain, that the facility strengthens the port’s position in renewable bunker fuels and allows LBG to be offered to shipping on a larger scale, and that the growing number of vessels on order for LBG operation points to strong potential for increased bunkering. Carolina Wistén, Head of Customer and Market, Gas Grid, at Nordion Energi, said the facility is starting to take shape and brings the goal of delivering LBG from the gas grid to shipping, heavy transport and industry closer.",
+      "takeaways": [
+        "Construction of the biogas liquefaction plant at the Port of Gothenburg has reached an important milestone with the installation of the facility’s liquefied biogas storage tank.",
+        "The plant is scheduled for completion in the second quarter of 2027 and is expected to make Swedish biogas more accessible to more sectors, not least shipping.",
+        "LBG is a renewable, low-climate-impact fuel that can replace fossil alternatives, and interest in it is growing rapidly in the shipping sector."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
     {
       "id": "SN-8F77493F60",
       "title": "Hapag-Lloyd raises Far East–Europe freight rates from December",
@@ -244,7 +416,7 @@
       "navarea": "IV",
       "image": "https://splash247.com/wp-content/uploads/2026/11/American-Heritage-300x180.jpeg",
       "summary": "A US federal court has authorised the arrest of the tanker Atlantic Asphalt after the Port of New Orleans launched legal action seeking more than $1m in damages following the collision that sank American Cruise Lines’ American Heritage. The Board of Commissioners of the Port of New Orleans filed the lawsuit in the...",
-      "body": "Americas Operations Tankers US court orders arrest of tanker after New Orleans cruise ship collision Grant Rowles November 15, 2026 0 5,650 1 minute read US Coast Guard Heartland US Coast Guard Heartland A US federal court has authorised the arrest of the tanker Atlantic Asphalt after the Port of New Orleans launched legal action seeking more than $1m in damages following the collision that sank American Cruise Lines’ American Heritage. The Board of Commissioners of the Port of New Orleans filed the lawsuit in the Eastern District of Louisiana, naming the tanker, its owner Nave Shipping SA and OSM Thome’s Singapore-based Thome Ship Management as defendants. The port alleges that the collision caused extensive damage to its Thalia Street Terminal, where American Heritage was berthed. Physical damage is currently estimated to exceed $1m, with additional claims expected for cleanup, surveys, repairs and salvage. A federal judge subsequently authorised the arrest of Atlantic Asphalt , issuing a warrant directing US marshals to take possession of the vessel and hold it subject to further court orders. The port has also sought the vessel’s sale to recover damages. The 17,764 dwt asphalt tanker struck American Heritage on November 13 , causing the river cruise ship to capsize and partially sink. Thirty-two people were taken to hospital following the incident, with no fatalities reported. The lawsuit alleges negligence by the tanker interests, although the cause of the collision remains under investigation. OSM Thome confirmed that it manages Atlantic Asphalt and said the vessel was stable at anchor following the incident. The company said it had activated its emergency response team and was cooperating fully with local authorities. For dedicated cruise shipping news coverage visit splashcruise.com . Tags Cruise United States Grant Rowles November 15, 2026 0 5,650 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Americas Operations Tankers US court orders arrest of tanker after New Orleans cruise ship collision Grant Rowles November 15, 2026 1 30,513 1 minute read US Coast Guard Heartland US Coast Guard Heartland A US federal court has authorised the arrest of the tanker Atlantic Asphalt after the Port of New Orleans launched legal action seeking more than $1m in damages following the collision that sank American Cruise Lines’ American Heritage. The Board of Commissioners of the Port of New Orleans filed the lawsuit in the Eastern District of Louisiana, naming the tanker, its owner Nave Shipping SA and OSM Thome’s Singapore-based Thome Ship Management as defendants. The port alleges that the collision caused extensive damage to its Thalia Street Terminal, where American Heritage was berthed. Physical damage is currently estimated to exceed $1m, with additional claims expected for cleanup, surveys, repairs and salvage. A federal judge subsequently authorised the arrest of Atlantic Asphalt , issuing a warrant directing US marshals to take possession of the vessel and hold it subject to further court orders. The port has also sought the vessel’s sale to recover damages. The 17,764 dwt asphalt tanker struck American Heritage on November 13 , causing the river cruise ship to capsize and partially sink. Thirty-two people were taken to hospital following the incident, with no fatalities reported. The lawsuit alleges negligence by the tanker interests, although the cause of the collision remains under investigation. OSM Thome confirmed that it manages Atlantic Asphalt and said the vessel was stable at anchor following the incident. The company said it had activated its emergency response team and was cooperating fully with local authorities. For dedicated cruise shipping news coverage visit splashcruise.com . Tags Cruise United States Grant Rowles November 15, 2026 1 30,513 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The port alleges that the collision caused extensive damage to its Thalia Street Terminal, where American Heritage was berthed.",
         "Physical damage is currently estimated to exceed $1m, with additional claims expected for cleanup, surveys, repairs and salvage.",
@@ -364,77 +536,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-3AD892EAD7",
-      "title": "Tailwind replaces Colombo with Xiamen on Tiger Express service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/tailwind-replaces-colombo-with-xiamen-on-tiger-express-service/",
-      "publishedAt": "2026-11-14T20:00:18Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia",
-        "India & Indian Ocean"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "china"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2023/02/Screenshot-2023-02-20-at-11.20.49-300x162.png",
-      "summary": "Tailwind Shipping Lines will revise the rotation of its Tiger Express (TEX) service in December 2026, replacing the Sri Lankan port of Colombo with Xiamen in China. The adjustment will introduce a Chinese port call to the carrier’s fortnightly service connecting Bangladesh, Malaysia and Vietnam, while removing...",
-      "body": "Tailwind Shipping Lines will revise the rotation of its Tiger Express (TEX) service in December 2026, replacing the Sri Lankan port of Colombo with Xiamen in China. The adjustment will introduce a Chinese port call to the carrier’s fortnightly service connecting Bangladesh, Malaysia and Vietnam, while removing Colombo from the existing itinerary. Under the revised arrangement, the TEX service will follow the rotation: Port Kelang – Xiamen – Ho Chi Minh City – Port Kelang – Chattogram (Chittagong) – Port Kelang. The service will continue operating every two weeks, using two container vessels with capacities of approximately 1,900 TEU. The addition of Xiamen will extend the service’s geographical coverage to China, providing a new connection between the Chinese port and the existing Southeast Asian and Bangladeshi destinations. Tailwind previously expanded the Tiger Express service in June 2025, introducing calls at Ho Chi Minh City and Port Kelang alongside its existing Colombo and Chattogram connections. The latest adjustment will retain the service’s fortnightly frequency and its existing calls in Malaysia, Vietnam and Bangladesh, while replacing the Sri Lankan connection with Xiamen. A specific first sailing date for the revised rotation has not been provided.",
-      "takeaways": [
-        "Tailwind Shipping Lines will revise the rotation of its Tiger Express (TEX) service in December 2026, replacing the Sri Lankan port of Colombo with Xiamen in China.",
-        "The adjustment will introduce a Chinese port call to the carrier’s fortnightly service connecting Bangladesh, Malaysia and Vietnam, while removing Colombo from the existing itinerary.",
-        "Under the revised arrangement, the TEX service will follow the rotation: Port Kelang – Xiamen – Ho Chi Minh City – Port Kelang – Chattogram (Chittagong) – Port Kelang."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-CD86CF04B9",
-      "title": "Hapag-Lloyd and ZIM add Imbituba to Asia–South America service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/hapag-lloyd-and-zim-add-imbituba-to-asia-south-america-service/",
-      "publishedAt": "2026-11-14T18:15:17Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia",
-        "India & Indian Ocean"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2024/08/1-17-300x170.jpeg",
-      "summary": "Hapag-Lloyd and ZIM have added a call at the Brazilian port of Imbituba to their jointly operated Asia–East Coast South America service, expanding the route’s coverage along Brazil’s southern coastline, as reported by DynaLiners. The service, marketed as AS3 by Hapag-Lloyd and ZIM Falcon Service (ZFS) by ZIM, was...",
-      "body": "Services Sticky News Hapag-Lloyd and ZIM add Imbituba to Asia–South America service November 14, 2026 Facebook Twitter WhatsApp Linkedin Email Hapag-Lloyd and ZIM have added a call at the Brazilian port of Imbituba to their jointly operated Asia–East Coast South America service, expanding the route’s coverage along Brazil’s southern coastline, as reported by DynaLiners. The service, marketed as AS3 by Hapag-Lloyd and ZIM Falcon Service (ZFS) by ZIM, was introduced in September 2026 to provide weekly connections between major Asian ports and Brazil. Under the revised arrangement, Imbituba will be positioned between Rio Grande and Itajaí, while the sequence of calls at Itajaí and Paranaguá will also change compared with the original rotation. The updated port rotation will be: Shanghai – Ningbo – Xiamen – Hong Kong – Shenzhen (Yantian) – Rio Grande – Imbituba – Itajaí – Paranaguá – Santos – Rio de Janeiro – Shanghai. The addition of Imbituba expands the service’s direct port coverage in southern Brazil, providing another connection for containerised cargo moving between Asia and the East Coast of South America. The revised rotation retains the existing Asian calls and the Brazilian ports of Rio Grande, Itajaí, Paranaguá, Santos and Rio de Janeiro, with Imbituba becoming the sixth Brazilian destination served by the route. TAGS Hapag-Lloyd AG Zim Integrated Shipping Services Facebook Twitter WhatsApp Linkedin Email Previous article Port of Long Beach records lowest emissions per container Next article Tailwind replaces Colombo with Xiamen on Tiger Express service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The service, marketed as AS3 by Hapag-Lloyd and ZIM Falcon Service (ZFS) by ZIM, was introduced in September 2026 to provide weekly connections between major Asian ports and Brazil.",
-        "Under the revised arrangement, Imbituba will be positioned between Rio Grande and Itajaí, while the sequence of calls at Itajaí and Paranaguá will also change compared with the original rotation.",
-        "The updated port rotation will be: Shanghai – Ningbo – Xiamen – Hong Kong – Shenzhen (Yantian) – Rio Grande – Imbituba – Itajaí – Paranaguá – Santos – Rio de Janeiro – Shanghai."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-725D1147A7",
       "title": "MSC Nears Deal To Buy Majority Stake In German Shipyard Meyer Werft",
       "source": "gCaptain",
@@ -470,78 +571,6 @@
       "readMinutes": 3
     },
     {
-      "id": "SN-116757DD97",
-      "title": "Port of Long Beach records lowest emissions per container",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/port-of-long-beach-records-lowest-emissions-per-container/",
-      "publishedAt": "2026-11-14T16:21:14Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "US West Coast & Pacific",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2024/08/Port-of-Long-Beach-POLB-300x200.jpg",
-      "summary": "The Port of Long Beach’s 2025 emissions inventory shows emissions per container at an all-time low, even as terminals handled a record of nearly 9.9 million TEUs. The reductions are attributed to strategic investment in zero-emissions equipment, greater use of shore power and more frequent calls by cleaner ships....",
-      "body": "The Port of Long Beach’s 2025 emissions inventory shows emissions per container at an all-time low, even as terminals handled a record of nearly 9.9 million TEUs. The reductions are attributed to strategic investment in zero-emissions equipment, greater use of shore power and more frequent calls by cleaner ships. Compared with the prior year, diesel particulate matter fell 7%, nitrogen oxides 9%, sulfur oxides 9% and greenhouse gases 6%. Since the 2017 update of the Clean Air Action Plan, adopted with the Port of Los Angeles, diesel particulates are down 13%, nitrogen oxides 34% and sulfur oxides 29%. Greenhouse gases rose 9% over the period, against a 31% increase in container throughput. Since 2005, the 20th anniversary year of the Clean Air Action Plan, diesel soot has fallen 91%, nitrogen oxides 70 percent, sulfur oxides 98% and greenhouse gases 9%, while throughput grew 47%. Last year also marked 20 years since the port adopted its Green Port Policy. Other highlights of the inventory: Trucks of model year 2014 or newer reached a record 95% of the fleet, and 2% of the drayage fleet were zero-emissions models. Use of shore power and emissions-control barges for ships at berth rose 11%. Tier III engines, the cleanest available, were fitted on 21% of vessel calls. Zero-emissions models made up 21% of cargo-handling equipment. To accelerate the move toward a carbon-free future, the port will launch new initiatives over the next year: a truck utilisation incentive programme to increase use of zero-emissions trucks, an enhanced zero-emissions truck voucher programme, an update to the Green Ship Incentive Program to attract cleaner vessels, and continued work on a zero-emissions infrastructure plan to boost deployment of zero-emissions cargo-handling equipment, harbour craft and locomotives. Harbor Commission President Steven Neal said the findings confirm that the port can be a strong jobs engine while protecting the environment. CEO Dr Noel Hacegaba said the port is focused on building the Port of the Future, a safe, resilient and zero-emissions port, and that the inventory shows it is on the right track, though more remains to be done.",
-      "takeaways": [
-        "The Port of Long Beach’s 2025 emissions inventory shows emissions per container at an all-time low, even as terminals handled a record of nearly 9.9 million TEUs.",
-        "The reductions are attributed to strategic investment in zero-emissions equipment, greater use of shore power and more frequent calls by cleaner ships.",
-        "Compared with the prior year, diesel particulate matter fell 7%, nitrogen oxides 9%, sulfur oxides 9% and greenhouse gases 6%."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-D18E4915A1",
-      "title": "Why Maersk’s latest hack matters more than it looks",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/why-maersks-latest-hack-matters-more-than-it-looks/",
-      "publishedAt": "2026-11-14T14:43:11Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Japan & Korea",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "hormuz",
-        "imo"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/cleaned_Ψηφιακή-Ροή-στο-Νυχτερινό-Λιμάνι-300x169.png",
-      "summary": "A contained intrusion into a legacy system shows how consolidation, logistics data and the Hormuz war’s digital front are reshaping shipping’s risk map On Wednesday, Maersk confirmed that hackers had broken into an older IT system and taken data from it.",
-      "body": "CN Premium Articles Top News Why Maersk’s latest hack matters more than it looks November 14, 2026 Facebook Twitter WhatsApp Linkedin Email A contained intrusion into a legacy system shows how consolidation, logistics data and the Hormuz war’s digital front are reshaping shipping’s risk map On Wednesday, Maersk confirmed that hackers had broken into an older IT system and taken data from it. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS A.P. Moeller-Maersk Cyberattacks digital geopolitical risks Facebook Twitter WhatsApp Linkedin Email Previous article KMTC to launch own South Korea–Vietnam container service in December Next article Port of Long Beach records lowest emissions per container Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
-      "takeaways": [
-        "This content is locked Select a CN Premium Subscription Package To Unlock The Content!",
-        "Operational Area: Strait of Hormuz & Persian Gulf, Japan & Korea, US West Coast & Pacific.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-9CE5320F00",
       "title": "Oil Tanker On Fire After Hitting Mine In Hormuz",
       "source": "gCaptain",
@@ -572,41 +601,6 @@
         "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
         "REUTERS/Amr Alfiky Nov 14 (Reuters) – Iran’s navy said an oil tanker caught fire on Saturday morning after hitting a naval mine in the eastern Strait of Hormuz, Iranian state media reported.",
         "Reuters could not immediately verify the report."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-B4393015CC",
-      "title": "KMTC to launch own South Korea–Vietnam container service in December",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/kmtc-to-launch-own-south-korea-vietnam-container-service-in-december/",
-      "publishedAt": "2026-11-14T13:00:57Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "china"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2021/03/KMTC-vessel-300x142.png",
-      "summary": "KMTC is preparing to launch a new container shipping service connecting South Korea, Vietnam and China in December 2026, introducing its own vessel-operated connection on a trade currently served through a slot-chartering arrangement. The new service, marketed as IPH, will deploy two container vessels with capacities...",
-      "body": "Services Top Right KMTC to launch own South Korea–Vietnam container service in December November 14, 2026 Facebook Twitter WhatsApp Linkedin Email KMTC is preparing to launch a new container shipping service connecting South Korea, Vietnam and China in December 2026, introducing its own vessel-operated connection on a trade currently served through a slot-chartering arrangement. The new service, marketed as IPH, will deploy two container vessels with capacities of approximately 1,000 TEU each. The planned port rotation will be: Incheon – Busan – Hai Phong – Xiamen – Incheon. KMTC currently serves the same trade through slots on CK Line’s HPX service, which it markets as HPX1. While CK Line’s service also includes calls at Gunsan in South Korea and Qinzhou in China, these ports are not included in KMTC’s existing HPX1 offering. The introduction of IPH will give KMTC a directly operated service linking Incheon and Busan with Hai Phong and Xiamen, maintaining the four-port coverage available through its current slot-chartering arrangement. The new deployment represents a change in the carrier’s operating arrangements on the South Korea–Vietnam trade, with KMTC assigning two vessels to the connection. The exact commencement date, vessel identities and sailing frequency have not been specified. TAGS KMTC Facebook Twitter WhatsApp Linkedin Email Previous article Hai An takes delivery of Green View Next article Why Maersk’s latest hack matters more than it looks Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The new service, marketed as IPH, will deploy two container vessels with capacities of approximately 1,000 TEU each.",
-        "The planned port rotation will be: Incheon – Busan – Hai Phong – Xiamen – Incheon.",
-        "KMTC currently serves the same trade through slots on CK Line’s HPX service, which it markets as HPX1."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -673,7 +667,7 @@
       "navarea": "IV",
       "image": "https://splash247.com/wp-content/uploads/2026/11/Retired-District-Chief-Chris-Mickal-New-Orleans-Fire-Department-300x180.jpeg",
       "summary": "The 17,764 dwt bitumen tanker Atlantic Asphalt has struck and partially sunk a river cruise ship on the Mississippi River in New Orleans, leaving 32 people hospitalised and prompting a major emergency response. The collision occurred at approximately 12.30 pm local time on November 13, when the 2017-built tanker...",
-      "body": "Americas Operations Tankers Tanker sinks river cruise ship in New Orleans collision Grant Rowles November 14, 2026 0 1,557 1 minute read New Orleans Fire Department / Chris Mickal New Orleans Fire Department / Chris Mickal The 17,764 dwt bitumen tanker Atlantic Asphalt has struck and partially sunk a river cruise ship on the Mississippi River in New Orleans, leaving 32 people hospitalised and prompting a major emergency response. The collision occurred at approximately 12.30 pm local time on November 13, when the 2017-built tanker struck American Cruise Lines’ American Heritage , which was docked at the Port of New Orleans and disembarking passengers. The impact caused the riverboat to take on water and capsize, with emergency services launching a rescue operation involving the US Coast Guard, port authorities and nearby vessels. New Orleans mayor Helena Moreno confirmed that all 180 passengers and crew had been accounted for. Thirty-two people were taken to hospital, with no critical injuries reported. According to VesselsValue, the Atlantic Asphalt is owned by single-ship company Nave Shipping and operated by Swiss company Asphaltos Trade. The US Coast Guard closed a section of the Mississippi River between mile markers 93 and 96 while emergency operations continued, temporarily affecting commercial vessel traffic through the busy shipping corridor. The National Transportation Safety Board is investigating the collision alongside the Coast Guard. American Cruise Lines confirmed that its passengers and crew had been evacuated and said it was cooperating with the authorities. The extent of damage to the tanker has not been disclosed. For dedicated cruise shipping news coverage visit splashcruise.com . Tags Cruise United States Grant Rowles November 14, 2026 0 1,557 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Americas Operations Tankers Tanker sinks river cruise ship in New Orleans collision Grant Rowles November 14, 2026 0 1,624 1 minute read New Orleans Fire Department / Chris Mickal New Orleans Fire Department / Chris Mickal The 17,764 dwt bitumen tanker Atlantic Asphalt has struck and partially sunk a river cruise ship on the Mississippi River in New Orleans, leaving 32 people hospitalised and prompting a major emergency response. The collision occurred at approximately 12.30 pm local time on November 13, when the 2017-built tanker struck American Cruise Lines’ American Heritage , which was docked at the Port of New Orleans and disembarking passengers. The impact caused the riverboat to take on water and capsize, with emergency services launching a rescue operation involving the US Coast Guard, port authorities and nearby vessels. New Orleans mayor Helena Moreno confirmed that all 180 passengers and crew had been accounted for. Thirty-two people were taken to hospital, with no critical injuries reported. According to VesselsValue, the Atlantic Asphalt is owned by single-ship company Nave Shipping and operated by Swiss company Asphaltos Trade. The US Coast Guard closed a section of the Mississippi River between mile markers 93 and 96 while emergency operations continued, temporarily affecting commercial vessel traffic through the busy shipping corridor. The National Transportation Safety Board is investigating the collision alongside the Coast Guard. American Cruise Lines confirmed that its passengers and crew had been evacuated and said it was cooperating with the authorities. The extent of damage to the tanker has not been disclosed. For dedicated cruise shipping news coverage visit splashcruise.com . Tags Cruise United States Grant Rowles November 14, 2026 0 1,624 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The impact caused the riverboat to take on water and capsize, with emergency services launching a rescue operation involving the US Coast Guard, port authorities and nearby vessels.",
         "New Orleans mayor Helena Moreno confirmed that all 180 passengers and crew had been accounted for.",
@@ -1193,30 +1187,35 @@
       "sourceRegion": "USA / Maritime Tech",
       "url": "https://www.marinelink.com/news/cma-cgm-demonstrates-relative-resilience-544352",
       "publishedAt": "2026-11-13T17:46:08Z",
-      "category": "Shipping & Tankers",
-      "region": "Singapore & Malacca Strait",
+      "category": "Weather & Cyclones",
+      "region": "Red Sea & Bab el-Mandeb",
       "regions": [
+        "Red Sea & Bab el-Mandeb",
+        "Rotterdam & North Sea",
         "Singapore & Malacca Strait"
       ],
       "tags": [
-        "shipping",
-        "singapore"
+        "lng",
+        "container",
+        "port",
+        "red sea",
+        "china"
       ],
       "coords": [
-        1.26,
-        103.82
+        13.5,
+        42.8
       ],
-      "navarea": "XI",
+      "navarea": "IX",
       "image": "https://images.marinelink.com/images/maritime/w150/michael-derrer-fuchs-stockadobecom-175052.jpeg",
       "summary": "The third quarter of 2026 took place in a volatile economic environment, with persistent tensions in the Middle East impacting international trade and global supply chains. In this context, both shipping and logistics activities were affected…",
-      "body": "The third quarter of 2026 took place in a volatile economic environment, with persistent tensions in the Middle East impacting international trade and global supply chains. In this context, both shipping and logistics activities were affected…",
+      "body": "CMA CGM Demonstrates Relative Resilience in a Volatile Q3 Maritime Activity Reports, Inc. November 13, 2026 © Michael Derrer Fuchs - stock.adobe.com The third quarter of 2026 took place in a volatile economic environment, with persistent tensions in the Middle East impacting international trade and global supply chains. In this context, both shipping and logistics activities were affected by adjustments made to trade routes and transport networks. Nevertheless, the global economy demonstrated relative resilience given the scale of the shock to energy prices, while international trade remained dynamic. The Group’s transported volumes increased by 5.5% compared with the third quarter of 2025, outperforming the market. This represents one of the strongest growth rates recorded in recent years. This growth was underpinned by three key drivers: Restocking , as companies sought to build up inventories amid ongoing economic and geopolitical uncertainty; Increased investment in AI-related infrastructure and data centres; Strong momentum in clean technologies and electric vehicles , particularly in China, amid higher hydrocarbon prices. The CMA CGM Group leveraged the complementary strengths of its shipping, logistics and terminal operations to offer customers integrated solutions across the entire supply chain. This strategy is underpinned by investments in port infrastructure, which are essential to expanding the Group’s capacity and strengthening its global network. The Group also accelerated its transformation through innovation and artificial intelligence across all its businesses. MAIA, its agentic AI platform co-developed with Mistral AI, is being progressively rolled out to employees across its shipping, logistics and media businesses. In France, the CMA CGM Group confirms its long-term commitment and contribution to the country's economic, maritime and logistics development. The Group supports 96,500 jobs, including 19,100 direct jobs and 77,400 jobs across the wider economy. The Group has welcomed the first vessels in its new series of 24,000-TEU containerships, including the CMA CGM NOTRE DAME, CMA CGM PANTHEON and CMA CGM ORSAY, which are deployed on its flagship FAL service connecting Asia and Europe. These are the world's largest LNG-powered containerships operating under the French flag. CMA CGM also accelerated the energy transition in shipping through several major alternative fuel bunkering operations: bioethanol in Brazil, bio-LNG in Rotterdam and a world-record biomethanol bunkering operation in Shanghai. CEVA Logistics expanded its international footprint through the acquisition of FedEx Supply Chain and initiated a simplification of its organizational structure under the leadership of Patrick Moebel, aimed at improving its efficiency and strengthening customer proximity CMA CGM further developed its global terminal network, notably through Terminal 4 at the Port of Jeddah in partnership with Red Sea Gateway Terminal, and CMA Terminals' acquisition of a 49% stake in Nador Container Terminal in Morocco. CMA CGM AIR CARGO strengthened its operations during the quarter, with a fleet of eight aircraft now operating under the CMA CGM AIR CARGO and Air Belgium brands, supported by hubs in France, Belgium and the United States. CMA Media launched CMA Sport, while BFMTV maintained its position as France's leading news channel throughout the quarter. Outlook Demand for maritime transport benefited from a strong increase in volumes carried, a trend that is expected to continue over the coming months. Freight rates, which have been rising since the second quarter of 2026, are also supporting the growth of the business. However, the outlook for the coming months remains uncertain. Tensions in the Middle East continue to disrupt shipping routes and weigh on operating costs, while changes in trade policies will continue to influence international trade flows. Against this backdrop, the CMA CGM Group maintains a prudent and responsive approach to management. Its presence across the entire logistics chain, the flexibility of its network and the strength of its balance sheet are major assets in order to cope with changes in its operating environment and provide long-term support to its customers.",
       "takeaways": [
-        "The third quarter of 2026 took place in a volatile economic environment, with persistent tensions in the Middle East impacting international trade and global supply chains.",
-        "In this context, both shipping and logistics activities were affected…",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+        "CMA CGM Demonstrates Relative Resilience in a Volatile Q3 Maritime Activity Reports, Inc.",
+        "In this context, both shipping and logistics activities were affected by adjustments made to trade routes and transport networks.",
+        "Nevertheless, the global economy demonstrated relative resilience given the scale of the shock to energy prices, while international trade remained dynamic."
       ],
-      "readingMinutes": 2,
-      "readMinutes": 2
+      "readingMinutes": 3,
+      "readMinutes": 3
     },
     {
       "id": "SN-E9EA9B8996",
@@ -1627,7 +1626,7 @@
       "navarea": "IX",
       "image": "https://splash247.com/wp-content/uploads/2026/11/SS-United-States-780x470-1-300x181.jpeg",
       "summary": "Dr Raymon Krishnan, president of Singapore’s Logistics & Supply Chain Management Society, writes for Splash today, reflecting on one of this week’s most talked about stories in the mainstream press. On Wednesday, the 990-foot ocean liner SS United States was deliberately sunk off Destin, Florida, to become what is...",
-      "body": "Containers Contributions From ocean liner to artificial reef: A warning for container shipping Splash November 13, 2026 0 12,748 3 minutes read Dr Raymon Krishnan, president of Singapore’s Logistics & Supply Chain Management Society, writes for Splash today, reflecting on one of this week’s most talked about stories in the mainstream press. On Wednesday, the 990-foot ocean liner SS United States was deliberately sunk off Destin, Florida , to become what is expected to be the world’s largest artificial reef. Initial underwater inspections found the vessel upright, approximately 180 feet below the surface. The sinking of the SS United States reminds us that ships can outlive their commercial purpose. Launched in 1951 and entering service in 1952, the SS United States was the pinnacle of post-war American maritime engineering. It held the record as the world’s fastest passenger ship but was withdrawn in 1969 as commercial aviation transformed the economics of transatlantic travel. It was not poor engineering that made the ship obsolete, it was a market that had moved on. After decades moored in Philadelphia, the vessel was acquired by Okaloosa County in a project valued at approximately $13m. Its new role will support tourism, marine conservation and research. Its retirement offers a useful perspective on container shipping as it now faces another turning point. A substantial wave of new capacity The container shipping industry is preparing for a significant increase in fleet capacity. According to Drewry’s third-quarter 2026 Container Forecaster the global containership orderbook stood at approximately 13.9m teu on 1 September 2026, equivalent to 40.9% of the active fleet. Drewry forecasts fleet growth of 8.4% in 2027, rising to 12.1% in 2028 before moderating to 9.4% in 2029. The concern is the market into which these ships will be delivered. During the pandemic, congestion, equipment shortages and route disruption absorbed vessel capacity. Diversions around the Cape of Good Hope lengthened voyages and tied up ships. Carriers responded by ordering larger, more fuel-efficient vessels anticipating continued trade growth, but shipbuilding schedules are long and in the era of the never normal, market conditions change quickly. If Red Sea and Suez Canal routings return progressively to normal, shorter voyages could release significant effective capacity without a single additional ship entering service. Combined with newbuildings, this could widen the gap between supply and demand. Vessel capacity could potentially reach as much as 10% above demand under such circumstances. The consequences could include lower freight rates, tougher competition for cargo, blank sailings, slower steaming, vessel idling and accelerated recycling of older tonnage. The industry faces a major capacity-management challenge. The cost of getting the timing wrong Aviation permanently changed the market for passenger liners, while container shipping remains essential to trade. New vessels will not automatically become redundant. Nevertheless, ships are long-term capital investments, ordered years before delivery and expected to earn returns over operating lives spanning decades. A vessel ordered when freight rates are high and capacity constrained may enter service when demand is weaker, transit times are shorter and competing tonnage is plentiful. Efficiency alone cannot guarantee a satisfactory return. Carriers will have to decide which vessels to deploy, which trades to prioritise and when to redeploy or retire older ships. Smaller vessels displaced from mainline routes may move into regional trades, adding competitive pressure whilst others may be laid up, sold or recycled. Ports and terminals may see service patterns, berth requirements and transhipment flows change. Shippers may welcome lower rates but carriers protecting utilisation may consolidate services, withdraw sailings or alter port rotations. Lower prices could therefore come with less predictable frequency and transit times. The costs of poor capacity planning will ultimately ripple through businesses to end users and consumers. A different future for ageing vessels The SS United States project raises the question of what happens when ships lose their original commercial purpose. Conversion into an artificial reef offers a potential tourism and conservation role but it is neither a universal nor necessarily economical solution for commercial vessels. For surplus container ships, recycling will remain the principal end-of-life option when redeployment is no longer viable. Some older vessels may serve feeder networks or specialised trades, provided their economics remain competitive. Fleet renewal should consider the economic, environmental and operational consequences of retiring existing tonnage and not just the efficiency gains promised by newbuildings. The SS United States was a remarkable engineering achievement but it could not escape changing transportation economics. Its story reminds us that a ship’s commercial lifespan is determined not simply by how well it is built but by whether the market still needs what it does. As the industry approaches 2027, the question is whether carriers have ordered more capacity than the market can sustainably absorb and how prepared they are to manage the consequences. The challenge is not simply to build the next generation of vessels. It is to ensure there is a commercially sustainable reason to put them to work. It’s not something we as an industry have a good track doing. Tags Singapore Splash November 13, 2026 0 12,748 3 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Containers Contributions From ocean liner to artificial reef: A warning for container shipping Splash November 13, 2026 0 13,292 3 minutes read Dr Raymon Krishnan, president of Singapore’s Logistics & Supply Chain Management Society, writes for Splash today, reflecting on one of this week’s most talked about stories in the mainstream press. On Wednesday, the 990-foot ocean liner SS United States was deliberately sunk off Destin, Florida , to become what is expected to be the world’s largest artificial reef. Initial underwater inspections found the vessel upright, approximately 180 feet below the surface. The sinking of the SS United States reminds us that ships can outlive their commercial purpose. Launched in 1951 and entering service in 1952, the SS United States was the pinnacle of post-war American maritime engineering. It held the record as the world’s fastest passenger ship but was withdrawn in 1969 as commercial aviation transformed the economics of transatlantic travel. It was not poor engineering that made the ship obsolete, it was a market that had moved on. After decades moored in Philadelphia, the vessel was acquired by Okaloosa County in a project valued at approximately $13m. Its new role will support tourism, marine conservation and research. Its retirement offers a useful perspective on container shipping as it now faces another turning point. A substantial wave of new capacity The container shipping industry is preparing for a significant increase in fleet capacity. According to Drewry’s third-quarter 2026 Container Forecaster the global containership orderbook stood at approximately 13.9m teu on 1 September 2026, equivalent to 40.9% of the active fleet. Drewry forecasts fleet growth of 8.4% in 2027, rising to 12.1% in 2028 before moderating to 9.4% in 2029. The concern is the market into which these ships will be delivered. During the pandemic, congestion, equipment shortages and route disruption absorbed vessel capacity. Diversions around the Cape of Good Hope lengthened voyages and tied up ships. Carriers responded by ordering larger, more fuel-efficient vessels anticipating continued trade growth, but shipbuilding schedules are long and in the era of the never normal, market conditions change quickly. If Red Sea and Suez Canal routings return progressively to normal, shorter voyages could release significant effective capacity without a single additional ship entering service. Combined with newbuildings, this could widen the gap between supply and demand. Vessel capacity could potentially reach as much as 10% above demand under such circumstances. The consequences could include lower freight rates, tougher competition for cargo, blank sailings, slower steaming, vessel idling and accelerated recycling of older tonnage. The industry faces a major capacity-management challenge. The cost of getting the timing wrong Aviation permanently changed the market for passenger liners, while container shipping remains essential to trade. New vessels will not automatically become redundant. Nevertheless, ships are long-term capital investments, ordered years before delivery and expected to earn returns over operating lives spanning decades. A vessel ordered when freight rates are high and capacity constrained may enter service when demand is weaker, transit times are shorter and competing tonnage is plentiful. Efficiency alone cannot guarantee a satisfactory return. Carriers will have to decide which vessels to deploy, which trades to prioritise and when to redeploy or retire older ships. Smaller vessels displaced from mainline routes may move into regional trades, adding competitive pressure whilst others may be laid up, sold or recycled. Ports and terminals may see service patterns, berth requirements and transhipment flows change. Shippers may welcome lower rates but carriers protecting utilisation may consolidate services, withdraw sailings or alter port rotations. Lower prices could therefore come with less predictable frequency and transit times. The costs of poor capacity planning will ultimately ripple through businesses to end users and consumers. A different future for ageing vessels The SS United States project raises the question of what happens when ships lose their original commercial purpose. Conversion into an artificial reef offers a potential tourism and conservation role but it is neither a universal nor necessarily economical solution for commercial vessels. For surplus container ships, recycling will remain the principal end-of-life option when redeployment is no longer viable. Some older vessels may serve feeder networks or specialised trades, provided their economics remain competitive. Fleet renewal should consider the economic, environmental and operational consequences of retiring existing tonnage and not just the efficiency gains promised by newbuildings. The SS United States was a remarkable engineering achievement but it could not escape changing transportation economics. Its story reminds us that a ship’s commercial lifespan is determined not simply by how well it is built but by whether the market still needs what it does. As the industry approaches 2027, the question is whether carriers have ordered more capacity than the market can sustainably absorb and how prepared they are to manage the consequences. The challenge is not simply to build the next generation of vessels. It is to ensure there is a commercially sustainable reason to put them to work. It’s not something we as an industry have a good track doing. Tags Singapore Splash November 13, 2026 0 13,292 3 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "On Wednesday, the 990-foot ocean liner SS United States was deliberately sunk off Destin, Florida , to become what is expected to be the world’s largest artificial reef.",
         "Initial underwater inspections found the vessel upright, approximately 180 feet below the surface.",
@@ -1665,7 +1664,7 @@
       "navarea": "IV",
       "image": "https://splash247.com/wp-content/uploads/2026/11/BW-Mistral-Geir-Vinnes-Marine-Traffic-300x180.jpg",
       "summary": "BW LPG has struck another lucrative vessel sale, offloading a VLGC acquired in John Fredriksen’s Avance Gas fleet deal less than two years ago for well over $100m. The New York- and Oslo-listed gas carrier giant has agreed to sell the 2015-built, 83,134 cu m BW Mistral, with the transaction expected to generate a net …",
-      "body": "Asia Gas BW LPG scores another lucrative Avance VLGC flip Adis Ajdin November 13, 2026 0 1,029 1 minute read Geir Vinnes / Marine Traffic Geir Vinnes / Marine Traffic BW LPG has struck another lucrative vessel sale, offloading a VLGC acquired in John Fredriksen’s Avance Gas fleet deal less than two years ago for well over $100m. The New York- and Oslo-listed gas carrier giant has agreed to sell the 2015-built, 83,134 cu m BW Mistral , with the transaction expected to generate a net book gain of around $37m and net cash proceeds of approximately $104m. The buyer has not been disclosed. Built at China’s Jiangnan shipyard, the scrubber-fitted vessel is currently trading in the spot market and will continue earning revenue for BW LPG until its scheduled handover by mid-January 2027. Chief executive Kristian Sørensen said the ship had contributed significantly to earnings since joining the fleet in 2024, with the company now taking advantage of strong secondhand values to realise a sizeable return. The disposal marks another profitable exit from the 12-ship Avance Gas fleet acquired in August 2024 for $1.05bn in cash, shares and assumed debt. In July, BW LPG agreed to sell the 2015-built, 83,000 cu m BW Levant , another vessel from the Avance transaction, with expected net cash proceeds of $38m and a book gain of around $17m. The two deals are set to generate combined book gains of approximately $54m and net cash proceeds of $142m. The latest sale comes amid a broader fleet renewal drive at BW LPG. Its 52%-owned Indian subsidiary has also been selling older VLGCs, most recently agreeing to dispose of the 2008-built BW Loyalty for a price in the low-$80m range, with an expected gain of $52m. At the other end of the fleet, BW LPG has committed around $940m to eight 90,000 cu m panamax VLGC newbuildings at HD Hyundai Heavy Industries in South Korea, scheduled for delivery between 2029 and 2030. Tags Singapore Adis Ajdin November 13, 2026 0 1,029 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Asia Gas BW LPG scores another lucrative Avance VLGC flip Adis Ajdin November 13, 2026 0 1,054 1 minute read Geir Vinnes / Marine Traffic Geir Vinnes / Marine Traffic BW LPG has struck another lucrative vessel sale, offloading a VLGC acquired in John Fredriksen’s Avance Gas fleet deal less than two years ago for well over $100m. The New York- and Oslo-listed gas carrier giant has agreed to sell the 2015-built, 83,134 cu m BW Mistral , with the transaction expected to generate a net book gain of around $37m and net cash proceeds of approximately $104m. The buyer has not been disclosed. Built at China’s Jiangnan shipyard, the scrubber-fitted vessel is currently trading in the spot market and will continue earning revenue for BW LPG until its scheduled handover by mid-January 2027. Chief executive Kristian Sørensen said the ship had contributed significantly to earnings since joining the fleet in 2024, with the company now taking advantage of strong secondhand values to realise a sizeable return. The disposal marks another profitable exit from the 12-ship Avance Gas fleet acquired in August 2024 for $1.05bn in cash, shares and assumed debt. In July, BW LPG agreed to sell the 2015-built, 83,000 cu m BW Levant , another vessel from the Avance transaction, with expected net cash proceeds of $38m and a book gain of around $17m. The two deals are set to generate combined book gains of approximately $54m and net cash proceeds of $142m. The latest sale comes amid a broader fleet renewal drive at BW LPG. Its 52%-owned Indian subsidiary has also been selling older VLGCs, most recently agreeing to dispose of the 2008-built BW Loyalty for a price in the low-$80m range, with an expected gain of $52m. At the other end of the fleet, BW LPG has committed around $940m to eight 90,000 cu m panamax VLGC newbuildings at HD Hyundai Heavy Industries in South Korea, scheduled for delivery between 2029 and 2030. Tags Singapore Adis Ajdin November 13, 2026 0 1,054 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Built at China’s Jiangnan shipyard, the scrubber-fitted vessel is currently trading in the spot market and will continue earning revenue for BW LPG until its scheduled handover by mid-January 2027.",
         "Chief executive Kristian Sørensen said the ship had contributed significantly to earnings since joining the fleet in 2024, with the company now taking advantage of strong secondhand values to realise a sizeable return.",
@@ -1737,7 +1736,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2026/08/Cetus-Humpback-Cetus-Maritime-300x180.jpg",
       "summary": "Hong Kong-based dry bulk owner Cetus Maritime has successfully placed a NOK1.89bn ($200m) share offering, including an over-allotment, clearing a major hurdle ahead of its planned Oslo stock market debut next week. The Mark Young-led company said it had conditionally allocated 108.5m shares at NOK17.44 ($1.83)...",
-      "body": "Dry Cargo Europe Finance and Insurance Greater China Cetus seals $200m share placement ahead of Oslo debut Adis Ajdin November 13, 2026 0 672 1 minute read Cetus Maritime Cetus Maritime Hong Kong-based dry bulk owner Cetus Maritime has successfully placed a NOK1.89bn ($200m) share offering, including an over-allotment, clearing a major hurdle ahead of its planned Oslo stock market debut next week. The Mark Young-led company said it had conditionally allocated 108.5m shares at NOK17.44 ($1.83) apiece, taking up the full $25m over-allotment on top of its original $175m fundraising target. The transaction comprises 95m new shares raising approximately $174m for Cetus, alongside 13.5m existing shares borrowed from major shareholder Pacific Transportation Asia (PTA) to cover the over-allotment. A 30-day greenshoe option could bring in further capital through the issuance of additional new shares. The placement follows strong initial interest from some of shipping’s biggest investment names, including an affiliate of Idan Ofer’s Eastern Pacific Shipping, Arne Blystad’s Songa Capital and the Albemarle Shipping Fund, co-founded by Magnus Halvorsen. Together with DNB Asset Management, the four investors had indicated interest in subscribing for a combined $106.5m. Cetus has not disclosed their final individual allocations. The proceeds should help fund Cetus’s acquisition of 13 handysize and ultramax bulkers from Hong Kong-listed Seacon Shipping Group, along with Syngrace, which holds contracts for three additional handysize newbuildings. The transaction involves approximately $72.5m in cash and the issuance of 37.3m Cetus shares to Seacon. The fresh capital will also support newbuilding payments, fleet deleveraging and working capital requirements. Following completion of the fleet acquisition and a planned vessel sale, Cetus said it expects to operate 42 ships, comprising 34 vessels on the water and eight newbuildings scheduled for delivery in 2027 and 2028. The company is targeting November 18 for its first day of trading on Euronext Growth Oslo, subject to regulatory approvals and completion of the Seacon transaction. Cetus has also left the door open for a move to the main Oslo Børs list within 12 months of its debut. Following the listing and assuming full exercise of the greenshoe option, PTA would retain approximately 40.6% of the company, while Seacon would hold around 14.3%. Tags Hong Kong Norway Adis Ajdin November 13, 2026 0 672 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Dry Cargo Europe Finance and Insurance Greater China Cetus seals $200m share placement ahead of Oslo debut Adis Ajdin November 13, 2026 0 692 1 minute read Cetus Maritime Cetus Maritime Hong Kong-based dry bulk owner Cetus Maritime has successfully placed a NOK1.89bn ($200m) share offering, including an over-allotment, clearing a major hurdle ahead of its planned Oslo stock market debut next week. The Mark Young-led company said it had conditionally allocated 108.5m shares at NOK17.44 ($1.83) apiece, taking up the full $25m over-allotment on top of its original $175m fundraising target. The transaction comprises 95m new shares raising approximately $174m for Cetus, alongside 13.5m existing shares borrowed from major shareholder Pacific Transportation Asia (PTA) to cover the over-allotment. A 30-day greenshoe option could bring in further capital through the issuance of additional new shares. The placement follows strong initial interest from some of shipping’s biggest investment names, including an affiliate of Idan Ofer’s Eastern Pacific Shipping, Arne Blystad’s Songa Capital and the Albemarle Shipping Fund, co-founded by Magnus Halvorsen. Together with DNB Asset Management, the four investors had indicated interest in subscribing for a combined $106.5m. Cetus has not disclosed their final individual allocations. The proceeds should help fund Cetus’s acquisition of 13 handysize and ultramax bulkers from Hong Kong-listed Seacon Shipping Group, along with Syngrace, which holds contracts for three additional handysize newbuildings. The transaction involves approximately $72.5m in cash and the issuance of 37.3m Cetus shares to Seacon. The fresh capital will also support newbuilding payments, fleet deleveraging and working capital requirements. Following completion of the fleet acquisition and a planned vessel sale, Cetus said it expects to operate 42 ships, comprising 34 vessels on the water and eight newbuildings scheduled for delivery in 2027 and 2028. The company is targeting November 18 for its first day of trading on Euronext Growth Oslo, subject to regulatory approvals and completion of the Seacon transaction. Cetus has also left the door open for a move to the main Oslo Børs list within 12 months of its debut. Following the listing and assuming full exercise of the greenshoe option, PTA would retain approximately 40.6% of the company, while Seacon would hold around 14.3%. Tags Hong Kong Norway Adis Ajdin November 13, 2026 0 692 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The Mark Young-led company said it had conditionally allocated 108.5m shares at NOK17.44 ($1.83) apiece, taking up the full $25m over-allotment on top of its original $175m fundraising target.",
         "The transaction comprises 95m new shares raising approximately $174m for Cetus, alongside 13.5m existing shares borrowed from major shareholder Pacific Transportation Asia (PTA) to cover the over-allotment.",
@@ -1774,7 +1773,7 @@
       "navarea": "IX",
       "image": "https://splash247.com/wp-content/uploads/2026/11/Melicertes-LNG-carrier-Afrelino-Christian-Mantiri-Marine-Traffic-300x180.jpg",
       "summary": "Britain has slapped fresh sanctions on 11 ships linked to Russian energy exports, targeting five LNG carriers, five oil tankers and a floating storage unit in its latest effort to disrupt Moscow’s seaborne oil and gas trade. The measures also cover nine companies, including Russian oil producer Slavneft, Rosneft’s...",
-      "body": "Europe Gas Operations Regulatory Tankers UK blacklists 11 ships in fresh Russia sanctions sweep Adis Ajdin November 13, 2026 1 1,138 1 minute read Afrelino Christian Mantiri / Marine Traffic Afrelino Christian Mantiri / Marine Traffic Britain has slapped fresh sanctions on 11 ships linked to Russian energy exports, targeting five LNG carriers, five oil tankers and a floating storage unit in its latest effort to disrupt Moscow’s seaborne oil and gas trade. The measures also cover nine companies, including Russian oil producer Slavneft, Rosneft’s Vostok Oil project and several energy trading businesses based in Dubai. The latest vessel additions include LNG carriers Melicertes, Neleus, Perle, Aeolus and Oneiroi , alongside the Novatek-linked Koryak FSU . On the oil side, London has blacklisted Apeks, Sara Sky, Balu 6, Yvika and Alma . The vessels operate under a mix of Russian, Panamanian, Sierra Leonean and Djiboutian flags, according to the official sanctions notice. The restrictions prohibit the specified ships from accessing British ports and impose controls on chartering and operating them. They also restrict the provision of services including ship finance, broking, technical assistance and crewing, subject to applicable exceptions and licensing arrangements. The corporate additions extend the crackdown beyond individual ships. Dubai-based Forteza Trading, Patera and Novus Energy have been designated, with British authorities specifically linking Novus Energy to dealings involving vessels already subject to UK restrictions. Russian petrochemical producer Sibur and coal groups SUEK and Kuzbassrazrezugol also feature in the latest package. The move brings all ten of Russia’s largest oil producers under British sanctions following the inclusion of Slavneft. The government announced the measures during the European Political Community summit in Dublin, where pressure on Russian energy revenues formed part of discussions on Ukraine. Britain has been steadily expanding its maritime restrictions this year, including sanctions against six ships in August and an earlier package targeting Russia’s developing LNG shadow fleet. Tags Russia United Kingdom Adis Ajdin November 13, 2026 1 1,138 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Gas Operations Regulatory Tankers UK blacklists 11 ships in fresh Russia sanctions sweep Adis Ajdin November 13, 2026 1 1,179 1 minute read Afrelino Christian Mantiri / Marine Traffic Afrelino Christian Mantiri / Marine Traffic Britain has slapped fresh sanctions on 11 ships linked to Russian energy exports, targeting five LNG carriers, five oil tankers and a floating storage unit in its latest effort to disrupt Moscow’s seaborne oil and gas trade. The measures also cover nine companies, including Russian oil producer Slavneft, Rosneft’s Vostok Oil project and several energy trading businesses based in Dubai. The latest vessel additions include LNG carriers Melicertes, Neleus, Perle, Aeolus and Oneiroi , alongside the Novatek-linked Koryak FSU . On the oil side, London has blacklisted Apeks, Sara Sky, Balu 6, Yvika and Alma . The vessels operate under a mix of Russian, Panamanian, Sierra Leonean and Djiboutian flags, according to the official sanctions notice. The restrictions prohibit the specified ships from accessing British ports and impose controls on chartering and operating them. They also restrict the provision of services including ship finance, broking, technical assistance and crewing, subject to applicable exceptions and licensing arrangements. The corporate additions extend the crackdown beyond individual ships. Dubai-based Forteza Trading, Patera and Novus Energy have been designated, with British authorities specifically linking Novus Energy to dealings involving vessels already subject to UK restrictions. Russian petrochemical producer Sibur and coal groups SUEK and Kuzbassrazrezugol also feature in the latest package. The move brings all ten of Russia’s largest oil producers under British sanctions following the inclusion of Slavneft. The government announced the measures during the European Political Community summit in Dublin, where pressure on Russian energy revenues formed part of discussions on Ukraine. Britain has been steadily expanding its maritime restrictions this year, including sanctions against six ships in August and an earlier package targeting Russia’s developing LNG shadow fleet. Tags Russia United Kingdom Adis Ajdin November 13, 2026 1 1,179 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The measures also cover nine companies, including Russian oil producer Slavneft, Rosneft’s Vostok Oil project and several energy trading businesses based in Dubai.",
         "The latest vessel additions include LNG carriers Melicertes, Neleus, Perle, Aeolus and Oneiroi , alongside the Novatek-linked Koryak FSU .",
@@ -1807,7 +1806,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2023/08/UK-Government-offshore-wind-300x172.jpg",
       "summary": "German offshore wind services specialist Deutsche Windtechnik has secured a five-year operations and maintenance contract covering two offshore wind farms in the UK. The agreement, awarded by asset manager XceCo, covers the Lynn and Inner Dowsing wind farms off Lincolnshire, which have a combined installed capacity...",
-      "body": "Europe Offshore Renewables Deutsche Windtechnik picked for UK offshore wind maintenance job Bojan Lepic November 13, 2026 0 633 1 minute read UK Government UK Government German offshore wind services specialist Deutsche Windtechnik has secured a five-year operations and maintenance contract covering two offshore wind farms in the UK. The agreement, awarded by asset manager XceCo, covers the Lynn and Inner Dowsing wind farms off Lincolnshire, which have a combined installed capacity of 194.4MW. The contract will begin on April 1, 2027, and covers all 54 turbines across the two projects. According to Deutsche Windtechnik, the agreement represents the first full-scope UK offshore wind service contract awarded to an independent provider. The two adjacent wind farms, located approximately 5 km off Skegness, entered operation in 2009 and comprise 27 turbines each. The assets are wholly owned by funds managed by Macquarie Asset Management, which increased its ownership from 60.75% to 100% in 2024. The projects have historically operated under a self-perform maintenance model overseen by XceCo. Under the new arrangement, Deutsche Windtechnik will assume responsibility for integrated maintenance services, while XceCo retains its asset management role. Preparations for the transition are already underway, including technical and operational handover, workforce integration and the transfer of operating processes and systems. The contract adds to Deutsche Windtechnik’s growing offshore wind maintenance portfolio. Earlier this month, the company secured a separate service agreement from Ocean Breeze Energy covering all 12 turbines at Germany’s 60MW Alpha Ventus offshore wind farm. That contract begins in January 2027 and includes turbine maintenance, troubleshooting, and technical support. Tags Germany Offshore Wind United Kingdom Bojan Lepic November 13, 2026 0 633 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Deutsche Windtechnik picked for UK offshore wind maintenance job Bojan Lepic November 13, 2026 0 656 1 minute read UK Government UK Government German offshore wind services specialist Deutsche Windtechnik has secured a five-year operations and maintenance contract covering two offshore wind farms in the UK. The agreement, awarded by asset manager XceCo, covers the Lynn and Inner Dowsing wind farms off Lincolnshire, which have a combined installed capacity of 194.4MW. The contract will begin on April 1, 2027, and covers all 54 turbines across the two projects. According to Deutsche Windtechnik, the agreement represents the first full-scope UK offshore wind service contract awarded to an independent provider. The two adjacent wind farms, located approximately 5 km off Skegness, entered operation in 2009 and comprise 27 turbines each. The assets are wholly owned by funds managed by Macquarie Asset Management, which increased its ownership from 60.75% to 100% in 2024. The projects have historically operated under a self-perform maintenance model overseen by XceCo. Under the new arrangement, Deutsche Windtechnik will assume responsibility for integrated maintenance services, while XceCo retains its asset management role. Preparations for the transition are already underway, including technical and operational handover, workforce integration and the transfer of operating processes and systems. The contract adds to Deutsche Windtechnik’s growing offshore wind maintenance portfolio. Earlier this month, the company secured a separate service agreement from Ocean Breeze Energy covering all 12 turbines at Germany’s 60MW Alpha Ventus offshore wind farm. That contract begins in January 2027 and includes turbine maintenance, troubleshooting, and technical support. Tags Germany Offshore Wind United Kingdom Bojan Lepic November 13, 2026 0 656 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The agreement, awarded by asset manager XceCo, covers the Lynn and Inner Dowsing wind farms off Lincolnshire, which have a combined installed capacity of 194.4MW.",
         "The contract will begin on April 1, 2027, and covers all 54 turbines across the two projects.",
@@ -1841,7 +1840,7 @@
       "navarea": "III",
       "image": "https://splash247.com/wp-content/uploads/2023/02/Karteria-MR2-300x180.jpg",
       "summary": "Greek shipowner Pyxis Tankers has agreed to sell its oldest product tanker for $37m, cashing in on firm asset values and cutting its MR fleet from three vessels to two. The Nasdaq-listed company, led by Eddie Valentis, has struck a deal with an undisclosed third-party buyer for the 2013-built, 46,652 dwt Pyxis...",
-      "body": "Europe Tankers Pyxis cashes in on ageing MR tanker in $37m deal Adis Ajdin November 13, 2026 0 1,227 1 minute read Pyxis Tankers Pyxis Tankers Greek shipowner Pyxis Tankers has agreed to sell its oldest product tanker for $37m, cashing in on firm asset values and cutting its MR fleet from three vessels to two. The Nasdaq-listed company, led by Eddie Valentis, has struck a deal with an undisclosed third-party buyer for the 2013-built, 46,652 dwt Pyxis Karteria , constructed at South Korea’s Hyundai Mipo yard. Pyxis expects to book a gain of about $21m from the sale, with net cash proceeds estimated at $25.9m after repayment of around $10.7m in vessel-related debt and transaction costs. The vessel was acquired in July 2021 for $20m. The latest agreement puts its resale price $17m above the original purchase cost, before taking into account financing and operating cash flows. Completion is expected between November 20 and December 20. The deal will leave Pyxis with five vessels, including two MR product tankers and interests in three bulkers. The company has been reshaping its fleet across both sectors. In October, Pyxis agreed to buy out the remaining 40% interest in the ultramax Konkar Ormi from a company linked to Valentis for approximately $6.83m. It also secured a two-year charter with CITGO Petroleum for the 2017-built MR tanker Pyxis Lamda at $31,000 per day, locking in approximately $21.8m of expected net revenue. The latest sale gives Pyxis additional firepower for further fleet renewal, with management targeting younger ships where purchase prices offer more attractive returns. Tags Greece Adis Ajdin November 13, 2026 0 1,227 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Tankers Pyxis cashes in on ageing MR tanker in $37m deal Adis Ajdin November 13, 2026 0 1,252 1 minute read Pyxis Tankers Pyxis Tankers Greek shipowner Pyxis Tankers has agreed to sell its oldest product tanker for $37m, cashing in on firm asset values and cutting its MR fleet from three vessels to two. The Nasdaq-listed company, led by Eddie Valentis, has struck a deal with an undisclosed third-party buyer for the 2013-built, 46,652 dwt Pyxis Karteria , constructed at South Korea’s Hyundai Mipo yard. Pyxis expects to book a gain of about $21m from the sale, with net cash proceeds estimated at $25.9m after repayment of around $10.7m in vessel-related debt and transaction costs. The vessel was acquired in July 2021 for $20m. The latest agreement puts its resale price $17m above the original purchase cost, before taking into account financing and operating cash flows. Completion is expected between November 20 and December 20. The deal will leave Pyxis with five vessels, including two MR product tankers and interests in three bulkers. The company has been reshaping its fleet across both sectors. In October, Pyxis agreed to buy out the remaining 40% interest in the ultramax Konkar Ormi from a company linked to Valentis for approximately $6.83m. It also secured a two-year charter with CITGO Petroleum for the 2017-built MR tanker Pyxis Lamda at $31,000 per day, locking in approximately $21.8m of expected net revenue. The latest sale gives Pyxis additional firepower for further fleet renewal, with management targeting younger ships where purchase prices offer more attractive returns. Tags Greece Adis Ajdin November 13, 2026 0 1,252 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The Nasdaq-listed company, led by Eddie Valentis, has struck a deal with an undisclosed third-party buyer for the 2013-built, 46,652 dwt Pyxis Karteria , constructed at South Korea’s Hyundai Mipo yard.",
         "Pyxis expects to book a gain of about $21m from the sale, with net cash proceeds estimated at $25.9m after repayment of around $10.7m in vessel-related debt and transaction costs.",
@@ -1944,7 +1943,7 @@
       "navarea": "IX",
       "image": "https://splash247.com/wp-content/uploads/2026/11/CENTCOM-copy-300x177.jpg",
       "summary": "Greenpeace has identified 540 possible oil spills across the Gulf, Strait of Hormuz and Arabian Sea since the US-Iran war began on February 28 (see map below), with satellite imagery showing a cumulative slick footprint of approximately 20,000 sq km. Not all detections have been conclusively linked to attacks on...",
-      "body": "Environment Middle East Tankers Gulf war leaves toxic legacy that could last decades Sam Chambers November 13, 2026 0 1,146 2 minutes read CENTCOM CENTCOM Greenpeace has identified 540 possible oil spills across the Gulf, Strait of Hormuz and Arabian Sea since the US-Iran war began on February 28 (see map below), with satellite imagery showing a cumulative slick footprint of approximately 20,000 sq km. Not all detections have been conclusively linked to attacks on shipping. The environmental consequences could last for decades. A 2022 study published in the Journal of Marine Science and Engineering found extensive oil deposits along more than 25 km of Saudi Arabia’s Abu Ali Island coastline, almost 40 years after the 1983–85 Nowruz oil spills during the Iran-Iraq war. Researchers found oil contamination in 76% of 1,434 test pits, demonstrating how petroleum residues can persist long after surface slicks disappear. The spills continue daily with many more strikes on ships being reported every week. Iran has claimed that four oil tankers struck naval mines in the Strait of Hormuz over the past two days, while a separately confirmed attack on a Sinokor-operated tanker off the United Arab Emirates forced the evacuation of 22 seafarers. Iran’s Revolutionary Guards Navy claimed yesterday that two supertankers carrying more than 4m barrels of oil between them had been disabled by explosions on Wednesday after ignoring warnings against using what Tehran described as an unauthorised route through the strait. Iranian state media attributed the explosions to naval mines and broadcast footage purporting to show the incidents. The Iranian army subsequently claimed that another two tankers struck mines in the eastern part of the strait on Thursday afternoon after ignoring navigation warnings and switching off their radar systems. None of the four vessels has been identified, and the claims have not been independently verified. Separately, UK Maritime Trade Operations (UKMTO) confirmed that a tanker was struck by an unidentified projectile 14 nautical miles northwest of Ras Al Khaimah, UAE, at 1800 GMT on Wednesday. The projectile hit the vessel’s engine room, starting a fire and forcing the evacuation of its crew. India’s shipping minister Sarbananda Sonowal subsequently identified the vessel as the Liberia-flagged Dominica Prosperity, reporting that all 22 crew members, including 19 Indian nationals, had been safely evacuated. The tanker was drifting off Mina Saqr when the attack occurred. The International Maritime Organization’s latest tally of Hormuz strikes, covering incidents confirmed through November 11, stands at 134, with 25 seafarers killed since the conflict began in late February. Sam Chambers November 13, 2026 0 1,146 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Environment Middle East Tankers Gulf war leaves toxic legacy that could last decades Sam Chambers November 13, 2026 0 1,182 2 minutes read CENTCOM CENTCOM Greenpeace has identified 540 possible oil spills across the Gulf, Strait of Hormuz and Arabian Sea since the US-Iran war began on February 28 (see map below), with satellite imagery showing a cumulative slick footprint of approximately 20,000 sq km. Not all detections have been conclusively linked to attacks on shipping. The environmental consequences could last for decades. A 2022 study published in the Journal of Marine Science and Engineering found extensive oil deposits along more than 25 km of Saudi Arabia’s Abu Ali Island coastline, almost 40 years after the 1983–85 Nowruz oil spills during the Iran-Iraq war. Researchers found oil contamination in 76% of 1,434 test pits, demonstrating how petroleum residues can persist long after surface slicks disappear. The spills continue daily with many more strikes on ships being reported every week. Iran has claimed that four oil tankers struck naval mines in the Strait of Hormuz over the past two days, while a separately confirmed attack on a Sinokor-operated tanker off the United Arab Emirates forced the evacuation of 22 seafarers. Iran’s Revolutionary Guards Navy claimed yesterday that two supertankers carrying more than 4m barrels of oil between them had been disabled by explosions on Wednesday after ignoring warnings against using what Tehran described as an unauthorised route through the strait. Iranian state media attributed the explosions to naval mines and broadcast footage purporting to show the incidents. The Iranian army subsequently claimed that another two tankers struck mines in the eastern part of the strait on Thursday afternoon after ignoring navigation warnings and switching off their radar systems. None of the four vessels has been identified, and the claims have not been independently verified. Separately, UK Maritime Trade Operations (UKMTO) confirmed that a tanker was struck by an unidentified projectile 14 nautical miles northwest of Ras Al Khaimah, UAE, at 1800 GMT on Wednesday. The projectile hit the vessel’s engine room, starting a fire and forcing the evacuation of its crew. India’s shipping minister Sarbananda Sonowal subsequently identified the vessel as the Liberia-flagged Dominica Prosperity, reporting that all 22 crew members, including 19 Indian nationals, had been safely evacuated. The tanker was drifting off Mina Saqr when the attack occurred. The International Maritime Organization’s latest tally of Hormuz strikes, covering incidents confirmed through November 11, stands at 134, with 25 seafarers killed since the conflict began in late February. Sam Chambers November 13, 2026 0 1,182 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Not all detections have been conclusively linked to attacks on shipping.",
         "The environmental consequences could last for decades.",
