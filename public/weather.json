@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "1500 UTC",
-  "lastSyncUtc": "2026-11-15T15:25:07.476947+00:00",
+  "synopticCycle": "1700 UTC",
+  "lastSyncUtc": "2026-11-15T17:39:52.142800+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,13 +9,13 @@
       "shortName": "Four",
       "category": "Tropical Storm (JTWC)",
       "center": [
-        -8.1,
-        49.9
+        -8.4,
+        -158.9
       ],
-      "centralPressure": 1003,
+      "centralPressure": 1001,
       "maxWinds": 35,
       "gusts": 44,
-      "movement": "W at 1039 kts",
+      "movement": "W at 6 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
@@ -95,7 +95,7 @@
       "radiusNm": 240,
       "waveHeight": 2.5,
       "swellPeriod": 8,
-      "swellDir": "N"
+      "swellDir": "NE"
     },
     {
       "id": "W2",
@@ -105,7 +105,7 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.1,
+      "waveHeight": 2.9,
       "swellPeriod": 10,
       "swellDir": "WSW"
     },
@@ -113,23 +113,23 @@
       "id": "WS1",
       "name": "Four Cyclonic Wave Field",
       "center": [
-        -8.1,
-        49.9
+        -8.4,
+        -158.9
       ],
       "radiusNm": 150,
-      "waveHeight": 2.5,
-      "swellPeriod": 8,
-      "swellDir": "SE"
+      "waveHeight": 4.1,
+      "swellPeriod": 9,
+      "swellDir": "NE"
     }
   ],
   "pressureCenters": [
     {
       "type": "L",
-      "value": 1003,
+      "value": 1001,
       "name": "Tropical Storm FOUR Core Low",
       "coords": [
-        -8.1,
-        49.9
+        -8.4,
+        -158.9
       ]
     },
     {
@@ -163,10 +163,10 @@
   "windVectors": [
     {
       "coords": [
-        -7.8,
-        50.2
+        -8.1,
+        -158.6
       ],
-      "dir": 200,
+      "dir": 160,
       "speed": 35,
       "label": "35 kts (Four)"
     }

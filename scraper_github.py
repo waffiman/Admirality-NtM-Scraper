@@ -1582,15 +1582,78 @@ def deg_to_compass(deg):
     except Exception:
         return "NW"
 
-def _parse_atcf_best_line(basin: str, num: str, year: int, ua: dict) -> dict:
-    """Fetch latest BEST track record from NHC or UCAR open ATCF b-deck."""
+def _storm_gcd_nm(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Great-circle distance in nautical miles (wraps antimeridian crossings)."""
+    import math
+    rlat1, rlat2 = math.radians(lat1), math.radians(lat2)
+    dlat = rlat2 - rlat1
+    dlon = math.radians(((lon2 - lon1 + 180.0) % 360.0) - 180.0)
+    a = math.sin(dlat * 0.5) ** 2 + math.cos(rlat1) * math.cos(rlat2) * (math.sin(dlon * 0.5) ** 2)
+    c = 2.0 * math.atan2(math.sqrt(max(0.0, a)), math.sqrt(max(0.0, 1.0 - a)))
+    return 3440.065 * c
+
+
+def _sanitize_cyclone_forecast(center: list, forecast_track: list, max_kts: float = 48.0) -> list:
+    """Drop physically impossible jump points (e.g., cross-season basin mismatches) from a cyclone track."""
+    if not center or len(center) < 2 or not forecast_track:
+        return []
+    try:
+        prev_lat, prev_lon = float(center[0]), float(center[1])
+    except Exception:
+        return []
+    prev_tau = 0.0
+    clean = []
+    ordered = sorted(
+        forecast_track,
+        key=lambda x: float(x.get("tau") or 0) if isinstance(x, dict) else 0.0,
+    )
+    for fp in ordered:
+        if not isinstance(fp, dict):
+            continue
+        coords = fp.get("coords") or []
+        if len(coords) < 2:
+            continue
+        try:
+            lat = float(coords[0])
+            lon = float(coords[1])
+            tau = float(fp.get("tau") or (prev_tau + 12.0))
+        except Exception:
+            continue
+        if not (-85.0 <= lat <= 85.0 and -180.0 <= lon <= 360.0):
+            continue
+        lon = ((lon + 180.0) % 360.0) - 180.0
+        dtau = max(6.0, tau - prev_tau)
+        jump_nm = _storm_gcd_nm(prev_lat, prev_lon, lat, lon)
+        # First step allows modest uncertainty between B-deck analysis and model init; later steps <= 48 kt
+        max_step_nm = max(320.0 if not clean else 240.0, dtau * max_kts)
+        if jump_nm > max_step_nm:
+            # Stop or skip corrupted branch (never connect e.g. Indian Ocean center to South Pacific model)
+            if not clean:
+                break
+            continue
+        fp_copy = dict(fp)
+        fp_copy["coords"] = [round(lat, 2), round(lon, 2)]
+        clean.append(fp_copy)
+        prev_lat, prev_lon, prev_tau = lat, lon, tau
+    return clean
+
+
+def _parse_atcf_best_line(basin: str, num: str, year: int, ua: dict, max_age_days: int = 14) -> dict:
+    """Fetch freshest non-stale BEST track record from NHC or UCAR open ATCF b-deck across candidate season years."""
+    from datetime import datetime, timezone
     b_low = basin.lower()
     n_pad = str(num).zfill(2)
+    now_utc = datetime.now(timezone.utc)
+    # SH season July-Dec uses year+1 in ATCF b-deck filenames (e.g. 2026-11 -> bsh952027.dat)
+    cand_years = [year + 1, year] if (b_low == "sh" and now_utc.month >= 7) else [year, year + 1]
     urls = []
-    if b_low in ("al", "ep", "cp"):
-        urls.append(f"https://ftp.nhc.noaa.gov/atcf/btk/b{b_low}{n_pad}{year}.dat")
-    urls.append(f"https://hurricanes.ral.ucar.edu/repository/data/bdecks_open/{year}/b{b_low}{n_pad}{year}.dat")
+    for y in cand_years:
+        if b_low in ("al", "ep", "cp"):
+            urls.append(f"https://ftp.nhc.noaa.gov/atcf/btk/b{b_low}{n_pad}{y}.dat")
+        urls.append(f"https://hurricanes.ral.ucar.edu/repository/data/bdecks_open/{y}/b{b_low}{n_pad}{y}.dat")
 
+    best = None
+    best_dt = None
     for u in urls:
         try:
             r = requests.get(u, timeout=10, headers=ua)
@@ -1601,6 +1664,13 @@ def _parse_atcf_best_line(basin: str, num: str, year: int, ua: dict) -> dict:
                 parts = [p.strip() for p in lines[-1].split(",")]
                 if len(parts) >= 10:
                     ymdh = parts[2]
+                    try:
+                        rec_dt = datetime.strptime(ymdh[:10], "%Y%m%d%H").replace(tzinfo=timezone.utc)
+                    except Exception:
+                        continue
+                    age_sec = (now_utc - rec_dt).total_seconds()
+                    if age_sec > max_age_days * 86400 or age_sec < -2 * 86400:
+                        continue
                     lat_s = parts[6]
                     lon_s = parts[7]
                     kt_s = parts[8]
@@ -1612,7 +1682,7 @@ def _parse_atcf_best_line(basin: str, num: str, year: int, ua: dict) -> dict:
                     press = int(float(mb_s or 1008))
                     if press <= 800 or press > 1030:
                         press = max(920, 1012 - int(winds * 0.65))
-                    return {
+                    cand = {
                         "ymdh": ymdh,
                         "lat": round(lat_v, 2),
                         "lon": round(lon_v, 2),
@@ -1620,16 +1690,20 @@ def _parse_atcf_best_line(basin: str, num: str, year: int, ua: dict) -> dict:
                         "pressure": press,
                         "type": ty_s
                     }
+                    if best_dt is None or rec_dt > best_dt:
+                        best = cand
+                        best_dt = rec_dt
         except Exception:
             pass
-    return {}
+    return best or {}
 
 
 def _calc_track_movement(lat1: float, lon1: float, lat2: float, lon2: float, hours: float = 12.0) -> str:
     """Compute compass direction and speed in knots between two track points."""
     import math
     dlat = lat2 - lat1
-    dlon = (lon2 - lon1) * math.cos(math.radians((lat1 + lat2) * 0.5))
+    dlon_deg = ((lon2 - lon1 + 180.0) % 360.0) - 180.0
+    dlon = dlon_deg * math.cos(math.radians((lat1 + lat2) * 0.5))
     if abs(dlat) < 0.02 and abs(dlon) < 0.02:
         return "Stationary"
     brg = (math.degrees(math.atan2(dlon, dlat)) + 360.0) % 360.0
@@ -2089,10 +2163,26 @@ def scrape_live_marine_weather() -> dict:
             continue
 
         atcf_info = _parse_atcf_best_line(basin, num, cur_year, ua)
-        lat = atcf_info.get("lat") if atcf_info.get("lat") is not None else chosen_coords[0][0]
-        lon = atcf_info.get("lon") if atcf_info.get("lon") is not None else chosen_coords[0][1]
-        winds = atcf_info.get("winds") or 25
-        press = atcf_info.get("pressure") or 1008
+        atcf_lat = atcf_info.get("lat")
+        atcf_lon = atcf_info.get("lon")
+        if atcf_lat is not None and atcf_lon is not None:
+            if _storm_gcd_nm(atcf_lat, atcf_lon, chosen_coords[0][0], chosen_coords[0][1]) > 250.0:
+                matched_coords = None
+                for k_m, v_m in mdict.items():
+                    c_m = v_m.get("coords") or []
+                    if k_m != "CARQ" and len(c_m) >= 2 and _storm_gcd_nm(atcf_lat, atcf_lon, c_m[0][0], c_m[0][1]) <= 250.0:
+                        matched_coords = c_m
+                        break
+                if matched_coords:
+                    chosen_coords = matched_coords
+                else:
+                    # Do not combine an unaligned ATCF position with a distant model track
+                    atcf_lat = None
+                    atcf_lon = None
+        lat = atcf_lat if atcf_lat is not None else chosen_coords[0][0]
+        lon = atcf_lon if atcf_lon is not None else chosen_coords[0][1]
+        winds = (atcf_info.get("winds") if atcf_lat is not None else None) or 25
+        press = (atcf_info.get("pressure") if atcf_lat is not None else None) or 1008
 
         # Dedup consecutive identical model coordinates and build 12h forecast steps
         dedup_pts = []
@@ -2113,7 +2203,8 @@ def scrape_live_marine_weather() -> dict:
                 "radiusNm": 45 + idx_pt * 15
             })
 
-        movement_str = _calc_track_movement(lat, lon, track_out[0]["coords"][0], track_out[0]["coords"][1], 12.0) if track_out else "WNW at 10 kts"
+        track_out = _sanitize_cyclone_forecast([lat, lon], track_out)
+        movement_str = _calc_track_movement(lat, lon, track_out[0]["coords"][0], track_out[0]["coords"][1], max(6.0, float(track_out[0].get("tau") or 12.0))) if track_out else "Stationary"
 
         # Match formation chance from formationAreas if nearby
         chance_str = "Active Invest"
@@ -2144,6 +2235,21 @@ def scrape_live_marine_weather() -> dict:
         }
 
     storms_list = list(storms_by_name.values())
+    for st in storms_list:
+        c = st.get("center") or []
+        if len(c) >= 2:
+            raw_ft = st.get("forecastTrack") or []
+            clean_ft = _sanitize_cyclone_forecast(c, raw_ft)
+            if len(clean_ft) != len(raw_ft):
+                st["forecastTrack"] = clean_ft
+                if clean_ft:
+                    st["movement"] = _calc_track_movement(
+                        float(c[0]), float(c[1]),
+                        float(clean_ft[0]["coords"][0]), float(clean_ft[0]["coords"][1]),
+                        max(6.0, float(clean_ft[0].get("tau") or 12.0))
+                    )
+                else:
+                    st["movement"] = "Stationary"
 
     # E. Dynamically build Wave Basins, Pressure Centers & Wind Vectors from live storm coordinates
     waves_list = [

@@ -355,6 +355,8 @@ window.vesselStateForAccountSync = vesselStateForAccountSync;
 
 
 
+let _lastVisualDrPersistMs = 0;
+
 function persistUserVessel(opts) {
 
   opts = opts || {};
@@ -366,6 +368,16 @@ function persistUserVessel(opts) {
   try {
 
     if (userVessel) {
+
+      if (opts.visualDr) {
+
+        const nowMs = Date.now();
+
+        if (nowMs - _lastVisualDrPersistMs < 15000) return;
+
+        _lastVisualDrPersistMs = nowMs;
+
+      }
 
       const durable = vesselStateForDurableStore(userVessel);
 
@@ -383,9 +395,9 @@ function persistUserVessel(opts) {
 
       }));
 
-      // Signed-in: push snapshot to cloud so other devices can pull My Vessel position
+      // Signed-in: push snapshot to cloud on real fix/profile changes (never on periodic visual DR ticks)
 
-      if (!opts.fromCloudSync) {
+      if (!opts.fromCloudSync && !opts.visualDr && !opts.skipCloudSync) {
 
         try {
 
@@ -941,7 +953,16 @@ function applyVesselProfile(data, opts) {
 
   }
 
-  if (!opts.skipAisSchedule && userVessel && userVessel.mmsi) {
+  const sameMmsiRunning = !!(
+    opts.fromCloudSync &&
+    typeof _ownAisRefreshTimer !== "undefined" &&
+    _ownAisRefreshTimer &&
+    prev &&
+    userVessel &&
+    String(prev.mmsi || "") === String(userVessel.mmsi || "")
+  );
+
+  if (!opts.skipAisSchedule && !sameMmsiRunning && userVessel && userVessel.mmsi) {
 
     scheduleOwnVesselAisRefresh();
 
@@ -3190,7 +3211,7 @@ function applyOwnVesselDeadReckoning(opts) {
 
   userVessel = updated;
 
-  if (typeof persistUserVessel === "function") persistUserVessel();
+  if (typeof persistUserVessel === "function") persistUserVessel({ visualDr: !!opts.visual });
 
   if (window.leafletMap && typeof plotUserVessel === "function") {
 
@@ -4133,7 +4154,35 @@ function syncMyVesselFromLiveAis(t) {
 
   }
 
-  const incomingTs = Number(t.updatedAt) || Date.now();
+  const rawTs = t.updatedAt != null ? t.updatedAt : (t.seen != null ? t.seen : (t.timestamp != null ? t.timestamp : t.ts));
+
+  let incomingTs = NaN;
+
+  if (typeof rawTs === "number" && Number.isFinite(rawTs)) {
+
+    incomingTs = rawTs < 1e12 ? rawTs * 1000 : rawTs;
+
+  } else if (typeof rawTs === "string" && rawTs.trim()) {
+
+    const parsed = Date.parse(rawTs);
+
+    if (Number.isFinite(parsed)) {
+
+      incomingTs = parsed;
+
+    } else if (Number.isFinite(Number(rawTs))) {
+
+      const numTs = Number(rawTs);
+
+      incomingTs = numTs < 1e12 ? numTs * 1000 : numTs;
+
+    }
+
+  }
+
+  const hasExplicitTs = Number.isFinite(incomingTs) && incomingTs > 0;
+
+  if (!hasExplicitTs) incomingTs = Date.now();
 
   const prevFixMs = prev.aisLastFixAt
 
@@ -4141,9 +4190,27 @@ function syncMyVesselFromLiveAis(t) {
 
     : (prev.aisRefreshedAt ? Date.parse(prev.aisRefreshedAt) : 0);
 
-  if (Number.isFinite(prevFixMs) && prevFixMs > 0 && incomingTs + 8000 < prevFixMs) {
+  if (Number.isFinite(prevFixMs) && prevFixMs > 0) {
 
-    return; // older feed — ignore
+    if (incomingTs + 8000 < prevFixMs) {
+
+      return; // older feed — ignore
+
+    }
+
+    const sameAnchor =
+
+      isValidVesselLatLon(prev.aisFixLat, prev.aisFixLon) &&
+
+      Math.abs(lat - Number(prev.aisFixLat)) < 1e-4 &&
+
+      Math.abs(lon - Number(prev.aisFixLon)) < 1e-4;
+
+    if (sameAnchor && (!hasExplicitTs || incomingTs <= prevFixMs + 2000)) {
+
+      return; // duplicate AIS record without a genuinely newer fix — keep DR smooth
+
+    }
 
   }
 
@@ -9183,9 +9250,75 @@ function renderWeatherOnMap(map = null) {
 
     if (storm.forecastTrack && storm.forecastTrack.length > 0) {
 
-      // Sort by tau — advisory points are usually ordered, but never assume
+      // Sort by tau, sanitize impossible jumps (e.g. basin/season mismatches), and unroll antimeridian crossings continuously
 
-      const fTrack = storm.forecastTrack.slice().sort((a, b) => (Number(a.tau) || 0) - (Number(b.tau) || 0));
+      const stormGcdNm = (lat1, lon1, lat2, lon2) => {
+
+        const r = Math.PI / 180;
+
+        const rLat1 = lat1 * r, rLat2 = lat2 * r;
+
+        const dLat = rLat2 - rLat1;
+
+        const dLon = (((((lon2 - lon1) % 360) + 540) % 360) - 180) * r;
+
+        const s = Math.sin(dLat * 0.5) ** 2 + Math.cos(rLat1) * Math.cos(rLat2) * (Math.sin(dLon * 0.5) ** 2);
+
+        return 3440.065 * 2 * Math.atan2(Math.sqrt(Math.max(0, s)), Math.sqrt(Math.max(0, 1 - s)));
+
+      };
+
+      const rawSortedTrack = storm.forecastTrack.slice().sort((a, b) => (Number(a.tau) || 0) - (Number(b.tau) || 0));
+
+      const fTrack = [];
+
+      let prevLat = Number(storm.center[0]);
+
+      let prevLon = Number(storm.center[1]);
+
+      let prevTau = 0;
+
+      for (let i = 0; i < rawSortedTrack.length; i++) {
+
+        const fp = rawSortedTrack[i];
+
+        if (!fp || !Array.isArray(fp.coords) || fp.coords.length < 2) continue;
+
+        const lat = Number(fp.coords[0]);
+
+        const rawLon = Number(fp.coords[1]);
+
+        if (!Number.isFinite(lat) || !Number.isFinite(rawLon) || Math.abs(lat) > 85) continue;
+
+        const stepDlon = ((((rawLon - prevLon) % 360) + 540) % 360) - 180;
+
+        const uLon = prevLon + stepDlon;
+
+        const tau = Number(fp.tau) || (prevTau + 12);
+
+        const dtHr = Math.max(6, tau - prevTau);
+
+        const jumpNm = stormGcdNm(prevLat, prevLon, lat, uLon);
+
+        const maxJumpNm = Math.max(fTrack.length === 0 ? 450 : 300, dtHr * 48);
+
+        if (jumpNm > maxJumpNm) {
+
+          if (fTrack.length === 0) break;
+
+          continue;
+
+        }
+
+        fTrack.push(Object.assign({}, fp, { coords: [lat, uLon] }));
+
+        prevLat = lat;
+
+        prevLon = uLon;
+
+        prevTau = tau;
+
+      }
 
       const trackPoints = [storm.center];
 
@@ -9359,81 +9492,85 @@ function renderWeatherOnMap(map = null) {
 
 
 
-      const coneCoords = [storm.center, ...coneLeft, ...coneRight.reverse(), storm.center];
+      if (fTrack.length > 0 && coneLeft.length > 0) {
 
-      const coneOpts = {
+        const coneCoords = [storm.center, ...coneLeft, ...coneRight.reverse(), storm.center];
 
-        color: "#f59e0b",
+        const coneOpts = {
 
-        weight: 0.9,
+          color: "#f59e0b",
 
-        dashArray: "3, 4",
+          weight: 0.9,
 
-        fillColor: "#f59e0b",
+          dashArray: "3, 4",
 
-        fillOpacity: curZoom <= 4 ? 0.14 : 0.20
+          fillColor: "#f59e0b",
 
-      };
+          fillOpacity: curZoom <= 4 ? 0.14 : 0.20
 
-      if (canvasRenderer) coneOpts.renderer = canvasRenderer;
+        };
 
-      leafletWeatherLayer.addLayer(L.polygon(coneCoords, coneOpts));
+        if (canvasRenderer) coneOpts.renderer = canvasRenderer;
+
+        leafletWeatherLayer.addLayer(L.polygon(coneCoords, coneOpts));
 
 
 
-      const lineOpts = {
+        const lineOpts = {
 
-        color: "#fbbf24",
+          color: "#fbbf24",
 
-        weight: curZoom <= 4 ? 1.5 : 2.2,
+          weight: curZoom <= 4 ? 1.5 : 2.2,
 
-        dashArray: "5, 5",
+          dashArray: "5, 5",
 
-        opacity: 0.85
+          opacity: 0.85
 
-      };
+        };
 
-      if (canvasRenderer) lineOpts.renderer = canvasRenderer;
+        if (canvasRenderer) lineOpts.renderer = canvasRenderer;
 
-      // Split antimeridian chords (same guard as NtM) so storm tracks never draw across the whole map
+        // Split antimeridian chords (same guard as NtM) so storm tracks never draw across the whole map
 
-      const splitWxTrack = (latlngs) => {
+        const splitWxTrack = (latlngs) => {
 
-        const rings = [[]];
+          const rings = [[]];
 
-        for (let i = 0; i < latlngs.length; i++) {
+          for (let i = 0; i < latlngs.length; i++) {
 
-          const cur = latlngs[i];
+            const cur = latlngs[i];
 
-          const ring = rings[rings.length - 1];
+            const ring = rings[rings.length - 1];
 
-          if (ring.length) {
+            if (ring.length) {
 
-            const prev = ring[ring.length - 1];
+              const prev = ring[ring.length - 1];
 
-            if (Math.abs(Number(cur[1]) - Number(prev[1])) > 180) {
+              if (Math.abs(Number(cur[1]) - Number(prev[1])) > 180) {
 
-              rings.push([cur]);
+                rings.push([cur]);
 
-              continue;
+                continue;
+
+              }
 
             }
 
+            ring.push(cur);
+
           }
 
-          ring.push(cur);
+          return rings.filter((r) => r.length >= 2);
 
-        }
+        };
 
-        return rings.filter((r) => r.length >= 2);
+        splitWxTrack(densifyTrack(trackPoints)).forEach((seg) => {
 
-      };
+          leafletWeatherLayer.addLayer(L.polyline(seg, lineOpts));
 
-      splitWxTrack(densifyTrack(trackPoints)).forEach((seg) => {
+        });
 
-        leafletWeatherLayer.addLayer(L.polyline(seg, lineOpts));
-
-      });
+      }
 
     }
 

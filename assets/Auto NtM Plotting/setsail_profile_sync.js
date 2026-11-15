@@ -453,7 +453,7 @@
       try {
         localVessel = global.userVessel || JSON.parse(localStorage.getItem("setsail_vessel_state_v2") || "null");
       } catch (eLv) {}
-      var localVStamp = vesselStampMs(localVessel);
+      var localVStamp = Math.max(getLocalStamp("setsail_vessel_updated_at_v1"), vesselStampMs(localVessel));
       var localCleared = getLocalStamp("setsail_vessel_cleared_at_v1");
 
       // Check if vessel was explicitly cleared on another device
@@ -522,15 +522,35 @@
         return;
       }
 
-      // Accept remote vessel if we don't have one locally OR remote is newer OR remote has live GPS coords that changed
-      var coordsChanged =
-        typeof global.isValidVesselLatLon === "function" &&
-        global.isValidVesselLatLon(remoteVessel.lat, remoteVessel.lon) &&
-        (!localVessel ||
-          Math.abs(Number(remoteVessel.lat) - Number(localVessel.lat || 0)) > 1e-6 ||
-          Math.abs(Number(remoteVessel.lon) - Number(localVessel.lon || 0)) > 1e-6);
+      // Never let stale/equal remote vessel overwrite local vessel (even if local DR/GPS moved coordinates)
+      if (hasLocalVessel && remoteVStamp <= localVStamp) {
+        return;
+      }
 
-      if (hasLocalVessel && remoteVStamp <= localVStamp && !coordsChanged) {
+      // If local is actively running Current-route DR on the same (or newer) AIS fix,
+      // never snap backwards to another device's delayed DR or static AIS snapshot.
+      var drRouteId = typeof global.getDrActiveRouteId === "function" ? global.getDrActiveRouteId() : null;
+      var localIsDr = !!(localVessel && (localVessel.deadReckoned || /ais-dr/i.test(String(localVessel.source || ""))));
+      var remoteSrc = String(remoteVessel.source || "").toLowerCase();
+      var localFixMs = localVessel && localVessel.aisLastFixAt ? Date.parse(localVessel.aisLastFixAt) : NaN;
+      var remoteFixMs = remoteVessel && remoteVessel.aisLastFixAt ? Date.parse(remoteVessel.aisLastFixAt) : NaN;
+      var remoteGpsMs = remoteVessel && remoteVessel.gpsLastFixAt ? Date.parse(remoteVessel.gpsLastFixAt) : NaN;
+      var remoteIsLiveOther =
+        (remoteSrc === "gps" && Number.isFinite(remoteGpsMs) && (!Number.isFinite(localFixMs) || remoteGpsMs > localFixMs)) ||
+        remoteSrc === "manual" ||
+        remoteSrc === "wifi-ais";
+      var sameOrOlderAnchor =
+        !Number.isFinite(remoteFixMs) ||
+        !Number.isFinite(localFixMs) ||
+        remoteFixMs <= localFixMs + 2000;
+      if (
+        hasLocalVessel &&
+        localIsDr &&
+        drRouteId &&
+        !remoteIsLiveOther &&
+        sameOrOlderAnchor &&
+        (remoteSrc === "ais" || remoteSrc === "ais-stale" || remoteSrc.indexOf("ais-dr") >= 0)
+      ) {
         return;
       }
 
@@ -540,6 +560,13 @@
       } catch (eLs) {}
 
       try {
+        var useRailsDr = !!(
+          drRouteId &&
+          !remoteIsLiveOther &&
+          (remoteSrc === "ais-stale" ||
+            remoteSrc.indexOf("ais-dr") >= 0 ||
+            (remoteSrc === "ais" && Number.isFinite(remoteFixMs) && Date.now() - remoteFixMs > 12000))
+        );
         if (typeof global.applyVesselProfile === "function") {
           var syncedVessel = remoteVessel;
           if (localVessel && localVessel.nameCustomized && localVessel.name && remoteVStamp <= localVStamp) {
@@ -547,28 +574,34 @@
           }
           global.applyVesselProfile(syncedVessel, {
             skipAisSchedule: remoteVessel.source === "gps" || remoteVessel.preferredNav === "gps",
+            skipPlot: useRailsDr,
             toast: null,
             keepPrevCoords: false,
             fromCloudSync: true,
             preserveOpenForm: true
           });
-        } else if (typeof global.loadUserVesselFromStorage === "function") {
-          global.loadUserVesselFromStorage();
+          if (useRailsDr && typeof global.applyOwnVesselDeadReckoning === "function") {
+            global.applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true });
+          }
+        } else {
+          if (typeof global.loadUserVesselFromStorage === "function") {
+            global.loadUserVesselFromStorage();
+          }
+          if (
+            typeof global.plotUserVessel === "function" &&
+            typeof global.isValidVesselLatLon === "function" &&
+            global.isValidVesselLatLon(remoteVessel.lat, remoteVessel.lon)
+          ) {
+            global.plotUserVessel(
+              Number(remoteVessel.lat),
+              Number(remoteVessel.lon),
+              remoteVessel.source || "gps",
+              true
+            );
+          }
         }
         if (typeof global.refreshOwnShipCcrpPopup === "function") {
           global.refreshOwnShipCcrpPopup();
-        }
-        if (
-          typeof global.plotUserVessel === "function" &&
-          typeof global.isValidVesselLatLon === "function" &&
-          global.isValidVesselLatLon(remoteVessel.lat, remoteVessel.lon)
-        ) {
-          global.plotUserVessel(
-            Number(remoteVessel.lat),
-            Number(remoteVessel.lon),
-            remoteVessel.source || "gps",
-            true
-          );
         }
         if (typeof global.updateHomeVesselHudLabel === "function") {
           global.updateHomeVesselHudLabel();
@@ -634,11 +667,14 @@
     }
   }
 
+  var _pushSeq = 0;
   async function push() {
     if (applyingRemote) return { ok: false, reason: "applying_remote" };
     var user = getAuthUser();
     var token = getToken();
     if (!user || !token) return { ok: false, reason: "no_auth" };
+    var pushSeq = ++_pushSeq;
+    var startVStamp = getLocalStamp("setsail_vessel_updated_at_v1");
     var body = { profile: collectLocal() };
     try {
       var r = await fetch(API, {
@@ -650,8 +686,14 @@
       var j = await r.json().catch(function () {
         return {};
       });
-      if (r.ok && j && j.profile) {
-        // Apply merged profile back in case another device pushed concurrently
+      if (
+        r.ok &&
+        j &&
+        j.profile &&
+        pushSeq === _pushSeq &&
+        getLocalStamp("setsail_vessel_updated_at_v1") <= startVStamp
+      ) {
+        // Apply merged profile back only if no newer local change/push superseded this request
         applyRemote(j.profile);
       }
       return { ok: r.ok, status: r.status, j: j, durable: j && j.durable, backend: j && j.backend };
