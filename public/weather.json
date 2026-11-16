@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "0700 UTC",
-  "lastSyncUtc": "2026-11-16T07:42:14.705151+00:00",
+  "synopticCycle": "1800 UTC",
+  "lastSyncUtc": "2026-11-16T18:00:28.036294+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,76 +9,76 @@
       "shortName": "Xavier",
       "category": "Tropical Storm (JTWC)",
       "center": [
-        -8.4,
-        -160.6
+        -8.8,
+        -161.8
       ],
-      "centralPressure": 995,
-      "maxWinds": 45,
-      "gusts": 56,
-      "movement": "W at 3 kts",
-      "dangerRadiusNm": 65,
+      "centralPressure": 989,
+      "maxWinds": 60,
+      "gusts": 75,
+      "movement": "W at 1 kts",
+      "dangerRadiusNm": 72,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -8.4,
-            -161.2
+            -8.8,
+            -162.0
           ],
-          "winds": 50,
+          "winds": 70,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            -8.7,
-            -162.5
+            -9.1,
+            -162.7
           ],
-          "winds": 70,
+          "winds": 85,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            -9.0,
-            -163.4
+            -9.5,
+            -163.1
           ],
-          "winds": 85,
+          "winds": 95,
           "radiusNm": 90
         },
         {
           "tau": 48,
           "coords": [
-            -9.5,
-            -163.9
+            -10.0,
+            -163.3
           ],
-          "winds": 90,
+          "winds": 95,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            -9.9,
-            -164.1
+            -10.4,
+            -163.2
           ],
-          "winds": 90,
+          "winds": 85,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
-            -10.3,
-            -164.1
+            -10.6,
+            -163.0
           ],
-          "winds": 80,
+          "winds": 75,
           "radiusNm": 140
         },
         {
           "tau": 84,
           "coords": [
-            -10.5,
-            -163.9
+            -10.8,
+            -163.1
           ],
-          "winds": 65,
+          "winds": 60,
           "radiusNm": 157
         }
       ]
@@ -89,20 +89,20 @@
       "shortName": "92I",
       "category": "Tropical Disturbance (Active Invest)",
       "center": [
-        11.0,
-        86.1
+        11.6,
+        85.9
       ],
-      "centralPressure": 1005,
+      "centralPressure": 1003,
       "maxWinds": 30,
       "gusts": 39,
-      "movement": "WNW at 8 kts",
+      "movement": "WSW at 2 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            11.8,
-            84.6
+            11.5,
+            85.6
           ],
           "winds": 35,
           "radiusNm": 45
@@ -110,8 +110,8 @@
         {
           "tau": 24,
           "coords": [
-            11.8,
-            85.7
+            11.3,
+            86.4
           ],
           "winds": 40,
           "radiusNm": 60
@@ -119,8 +119,8 @@
         {
           "tau": 36,
           "coords": [
-            12.1,
-            86.2
+            11.9,
+            87.0
           ],
           "winds": 45,
           "radiusNm": 75
@@ -128,8 +128,8 @@
         {
           "tau": 48,
           "coords": [
-            12.0,
-            86.4
+            12.2,
+            86.8
           ],
           "winds": 50,
           "radiusNm": 90
@@ -137,8 +137,70 @@
         {
           "tau": 60,
           "coords": [
-            12.1,
-            85.8
+            12.3,
+            86.6
+          ],
+          "winds": 55,
+          "radiusNm": 105
+        }
+      ]
+    },
+    {
+      "id": "SH962026",
+      "name": "Invest 96S",
+      "shortName": "96S",
+      "category": "Tropical Disturbance (Active Invest)",
+      "center": [
+        -1.2,
+        91.4
+      ],
+      "centralPressure": 1007,
+      "maxWinds": 30,
+      "gusts": 39,
+      "movement": "SSW at 8 kts",
+      "dangerRadiusNm": 65,
+      "forecastTrack": [
+        {
+          "tau": 12,
+          "coords": [
+            -2.8,
+            91.0
+          ],
+          "winds": 35,
+          "radiusNm": 45
+        },
+        {
+          "tau": 24,
+          "coords": [
+            -3.5,
+            90.1
+          ],
+          "winds": 40,
+          "radiusNm": 60
+        },
+        {
+          "tau": 36,
+          "coords": [
+            -3.8,
+            89.8
+          ],
+          "winds": 45,
+          "radiusNm": 75
+        },
+        {
+          "tau": 48,
+          "coords": [
+            -4.6,
+            89.8
+          ],
+          "winds": 50,
+          "radiusNm": 90
+        },
+        {
+          "tau": 60,
+          "coords": [
+            -5.7,
+            89.3
           ],
           "winds": 55,
           "radiusNm": 105
@@ -155,9 +217,9 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 3.8,
+      "waveHeight": 4.5,
       "swellPeriod": 9,
-      "swellDir": "S"
+      "swellDir": "SW"
     },
     {
       "id": "W2",
@@ -175,44 +237,65 @@
       "id": "WS1",
       "name": "Xavier Cyclonic Wave Field",
       "center": [
-        -8.4,
-        -160.6
+        -8.8,
+        -161.8
       ],
       "radiusNm": 150,
-      "waveHeight": 3.8,
-      "swellPeriod": 9,
-      "swellDir": "ENE"
+      "waveHeight": 3.7,
+      "swellPeriod": 10,
+      "swellDir": "SSE"
     },
     {
       "id": "WS2",
       "name": "92I Cyclonic Wave Field",
       "center": [
-        11.0,
-        86.1
+        11.6,
+        85.9
       ],
       "radiusNm": 150,
       "waveHeight": 2.5,
       "swellPeriod": 9,
-      "swellDir": "S"
+      "swellDir": "WSW"
+    },
+    {
+      "id": "WS3",
+      "name": "96S Cyclonic Wave Field",
+      "center": [
+        -1.2,
+        91.4
+      ],
+      "radiusNm": 150,
+      "waveHeight": 2.7,
+      "swellPeriod": 8,
+      "swellDir": "WSW"
     }
   ],
   "pressureCenters": [
     {
       "type": "L",
-      "value": 995,
+      "value": 989,
       "name": "Tropical Storm XAVIER Core Low",
       "coords": [
-        -8.4,
-        -160.6
+        -8.8,
+        -161.8
       ]
     },
     {
       "type": "L",
-      "value": 1005,
+      "value": 1003,
       "name": "Invest 92I Core Low",
       "coords": [
-        11.0,
-        86.1
+        11.6,
+        85.9
+      ]
+    },
+    {
+      "type": "L",
+      "value": 1007,
+      "name": "Invest 96S Core Low",
+      "coords": [
+        -1.2,
+        91.4
       ]
     },
     {
@@ -246,21 +329,30 @@
   "windVectors": [
     {
       "coords": [
-        -8.1,
-        -160.3
+        -8.5,
+        -161.5
       ],
       "dir": 160,
-      "speed": 45,
-      "label": "45 kts (Xavier)"
+      "speed": 60,
+      "label": "60 kts (Xavier)"
     },
     {
       "coords": [
-        11.3,
-        86.4
+        11.9,
+        86.2
       ],
       "dir": 200,
       "speed": 30,
       "label": "30 kts (92I)"
+    },
+    {
+      "coords": [
+        -0.9,
+        91.7
+      ],
+      "dir": 200,
+      "speed": 30,
+      "label": "30 kts (96S)"
     }
   ]
 }
