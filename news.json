@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-16T00:48:12Z",
-  "generatedAt": "2026-11-16T00:48:12Z",
+  "updatedAt": "2026-11-16T04:57:51Z",
+  "generatedAt": "2026-11-16T04:57:51Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -11,8 +11,73 @@
     "Hellenic Shipping News",
     "Container News"
   ],
-  "totalArticles": 60,
+  "totalArticles": 70,
   "articles": [
+    {
+      "id": "SN-EE8BE218FA",
+      "title": "Tanker confirmed struck in the Gulf, Iran claims VLCC sinking",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/security/tanker-confirmed-struck-in-the-gulf-iran-claims-vlcc-sinking",
+      "publishedAt": "2026-11-16T03:32:56Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf"
+      ],
+      "tags": [
+        "tanker",
+        "hormuz"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltd44f600b3049a408/6afa7a27d5e6cfa3da8443cc/irgc-tanker-sinking-claim.jpg?width=720&quality=80&disable=upscale",
+      "summary": "Iran continues to target commercial shipping in and around the Strait of Hormuz as it claims two tankers hit mines",
+      "body": "Iran continues to target commercial shipping in and around the Strait of Hormuz as it claims two tankers hit mines",
+      "takeaways": [
+        "Iran continues to target commercial shipping in and around the Strait of Hormuz as it claims two tankers hit mines",
+        "Operational Area: Strait of Hormuz & Persian Gulf.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-FCAC423A59",
+      "title": "DP World extends port concessions in Chile and the Philippines",
+      "source": "Seatrade Maritime",
+      "sourceIcon": "🚢",
+      "sourceRegion": "UK / Global",
+      "url": "https://www.seatrade-maritime.com/ports-logistics/dp-world-extends-port-concessions-in-chile-and-the-philippines",
+      "publishedAt": "2026-11-16T02:16:45Z",
+      "category": "Ports & Terminals",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltd582f0b0b3c2c5ba/6afa6852c45044c1996af594/A_view_of_Manila_South_Harbour_operated_by_DP_World%E2%80%99s_strategic_partner_Asian_Terminals_Inc.jpg?width=720&quality=80&disable=upscale",
+      "summary": "Dubai-headquartered terminal operator renews concessions in Manila and San Antonio, Chile well ahead of expiration of existing contracts",
+      "body": "Dubai-headquartered terminal operator renews concessions in Manila and San Antonio, Chile well ahead of expiration of existing contracts",
+      "takeaways": [
+        "Dubai-headquartered terminal operator renews concessions in Manila and San Antonio, Chile well ahead of expiration of existing contracts",
+        "Operational Area: Strait of Hormuz & Persian Gulf.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
     {
       "id": "SN-C6754D0686",
       "title": "Steering Problem On Tanker Caused Collision In New Orleans",
@@ -188,7 +253,7 @@
       "navarea": "III",
       "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
       "summary": "Capesize The Capesize market maintained a positive trajectory throughout the week, with the Pacific emerging as the clear driver of overall gains. Despite some midweek volatility, improving miner demand and increasingly competitive fixing levels saw C5 recover strongly, climbing from $13.80 on Monday to $15.20 by...",
-      "body": "Dry Bulk Shipping: Capesizes Retain Positive Momentum in Dry Bulk Market , International Shipping News 16/11/2026 Capesize The Capesize market maintained a positive trajectory throughout the week, with the Pacific emerging as the clear driver of overall gains. Despite some midweek volatility, improving miner demand and increasingly competitive fixing levels saw C5 recover strongly, climbing from $13.80 on Monday to $15.20 by Thursday, before easing back to $14.50–$14.60 towards the end of the week. Activity picked up considerably, particularly from Wednesday onwards, with both Port Hedland and Dampier miners covering multiple cargoes and operators increasingly willing to pay into the low-mid $15s. The Atlantic presented a more mixed picture. North Atlantic sentiment remained positive, supported by improving demand on the Transatlantic and Fronthaul routes, while the South Brazil and West Africa to China markets struggled to establish similar momentum. C3 levels softened as the week progressed, with fixtures slipping from around $36 to $35, reflecting limited index-date demand and a widening gap between bids and offers. Overall, the BCI 182 5TC built on its $40,000 level, reaching a high of $43,860 before closing the week at $42,798. Pacific strength and North Atlantic resilience ultimately outweighed continued pressure in the South Atlantic. Panamax-Kamsarmax The market delivered contrasting performances this week, with the Atlantic maintaining a firm tone while the Pacific struggled to gain momentum. Strong transatlantic demand and limited prompt tonnage supported rates, with an 82,000-dwt fixing around $18,000 for a US East Coast round trip and another at $22,250 basis South Africa for an East Coast South America transatlantic trip. Increasing North Continent tonnage availability offered charterers greater flexibility, while an 82,000-dwt secured $27,350 for a US Gulf fronthaul to China. East Coast South America remained supported by tighter early December tonnage, with an 83,000-dwt fixing at $18,750 plus $875,000 ballast bonus to the Far East and an 81,000-dwt at $18,500 basis retroactive East Coast India delivery. Meanwhile, growing Pacific tonnage availability outweighed Australian mineral demand, with an 82,000-dwt fixing at $22,500 early in the week compared with a 77,000-dwt at $19,000 towards the close. North Pacific and Indonesian activity remained subdued, with an 82,000-dwt fixing at $19,500 and a 76,000-dwt at $17,000 respectively. Period activity included an 83,000-dwt fixing five to seven months at $17,000 and an 81,000-dwt for one year at $18,000, both basis Pacific delivery. Ultramax/Supramax After declining for two weeks, the 11TC average showed positive returns in the second half of the week due to an improving Atlantic market. The North American market saw extremely limited tonnage for November dates, with transatlantic rates flying to new highs as a 63,000-dwt fixed for grains US Gulf to Continent/Mediterranean at $39,000 and a 64,000-dwt fixed for similar business at $40,000. A 61,000-dwt fixed petcoke to the East Mediterranean at $42,000, and a 64,000-dwt was said to have fixed on voyage on the same route in the mid $40,000s. There were modest gains in the South Atlantic, whilst the Continent and Mediterranean markets remained steady in light trading. Rates slowly softened in Asia as NoPac grains slowed, with a 64,000-dwt fixed for a round voyage at $21,000 and a 63,000-dwt concluded at $27,000 basis North China via NoPac to Bangladesh, whilst backhaul demand remained strong. Further south, the market was affected by a weak Indian Ocean market with ballasting tonnage competing for Indonesian stems, with larger units switching attention to Australian cargoes for better returns. With a falling spot market in the East, there was limited period activity, however a modern 63,000-dwt still managed to fix a strong $24,500 for 6 to 8 months basis delivery CJK. Handysize The week completed on a steady-to-firmer note, with sentiment largely positional across both basins. Across the Continent and Mediterranean, activity remained limited, although rates began to show signs of firmness towards the end of the week. The 37,000-dwt open Italy fixed for a trip to South Africa with charterers’ option WC India at low $20,000. The US Gulf and South Atlantic showed healthier momentum, supported by fresh demand and a balanced cargo-to-tonnage position, with a number of fixtures reported, particularly from the US Gulf. A 39,000-dwt open Mobile fixed for a trip to UK with pellets at $23,000, while a 37,000-dwt open Santos fixed via Brazil to Singapore–Japan range with parcels at $24,000. Across Asia, sentiment remained positive, with activity gaining pace and several fixtures concluded above previous levels, supported by a generally healthy balance between tonnage availability and cargo demand. A 40,000-dwt open Tomakomai 14-16 Nov fixed via Japan to Taiwan with slag at $19,500. Source: Baltic Exchange Tops 2026-11-16 hellenicshippingnews... tweet Share",
+      "body": "Dry Bulk Shipping: Capesizes Retain Positive Momentum in Dry Bulk Market , International Shipping News 16/11/2026 C apesize The Capesize market maintained a positive trajectory throughout the week, with the Pacific emerging as the clear driver of overall gains. Despite some midweek volatility, improving miner demand and increasingly competitive fixing levels saw C5 recover strongly, climbing from $13.80 on Monday to $15.20 by Thursday, before easing back to $14.50–$14.60 towards the end of the week. Activity picked up considerably, particularly from Wednesday onwards, with both Port Hedland and Dampier miners covering multiple cargoes and operators increasingly willing to pay into the low-mid $15s. The Atlantic presented a more mixed picture. North Atlantic sentiment remained positive, supported by improving demand on the Transatlantic and Fronthaul routes, while the South Brazil and West Africa to China markets struggled to establish similar momentum. C3 levels softened as the week progressed, with fixtures slipping from around $36 to $35, reflecting limited index-date demand and a widening gap between bids and offers. Overall, the BCI 182 5TC built on its $40,000 level, reaching a high of $43,860 before closing the week at $42,798. Pacific strength and North Atlantic resilience ultimately outweighed continued pressure in the South Atlantic. Panamax-Kamsarmax The market delivered contrasting performances this week, with the Atlantic maintaining a firm tone while the Pacific struggled to gain momentum. Strong transatlantic demand and limited prompt tonnage supported rates, with an 82,000-dwt fixing around $18,000 for a US East Coast round trip and another at $22,250 basis South Africa for an East Coast South America transatlantic trip. Increasing North Continent tonnage availability offered charterers greater flexibility, while an 82,000-dwt secured $27,350 for a US Gulf fronthaul to China. East Coast South America remained supported by tighter early December tonnage, with an 83,000-dwt fixing at $18,750 plus $875,000 ballast bonus to the Far East and an 81,000-dwt at $18,500 basis retroactive East Coast India delivery. Meanwhile, growing Pacific tonnage availability outweighed Australian mineral demand, with an 82,000-dwt fixing at $22,500 early in the week compared with a 77,000-dwt at $19,000 towards the close. North Pacific and Indonesian activity remained subdued, with an 82,000-dwt fixing at $19,500 and a 76,000-dwt at $17,000 respectively. Period activity included an 83,000-dwt fixing five to seven months at $17,000 and an 81,000-dwt for one year at $18,000, both basis Pacific delivery. Ultramax/Supramax After declining for two weeks, the 11TC average showed positive returns in the second half of the week due to an improving Atlantic market. The North American market saw extremely limited tonnage for November dates, with transatlantic rates flying to new highs as a 63,000-dwt fixed for grains US Gulf to Continent/Mediterranean at $39,000 and a 64,000-dwt fixed for similar business at $40,000. A 61,000-dwt fixed petcoke to the East Mediterranean at $42,000, and a 64,000-dwt was said to have fixed on voyage on the same route in the mid $40,000s. There were modest gains in the South Atlantic, whilst the Continent and Mediterranean markets remained steady in light trading. Rates slowly softened in Asia as NoPac grains slowed, with a 64,000-dwt fixed for a round voyage at $21,000 and a 63,000-dwt concluded at $27,000 basis North China via NoPac to Bangladesh, whilst backhaul demand remained strong. Further south, the market was affected by a weak Indian Ocean market with ballasting tonnage competing for Indonesian stems, with larger units switching attention to Australian cargoes for better returns. With a falling spot market in the East, there was limited period activity, however a modern 63,000-dwt still managed to fix a strong $24,500 for 6 to 8 months basis delivery CJK. Handysize The week completed on a steady-to-firmer note, with sentiment largely positional across both basins. Across the Continent and Mediterranean, activity remained limited, although rates began to show signs of firmness towards the end of the week. The 37,000-dwt open Italy fixed for a trip to South Africa with charterers’ option WC India at low $20,000. The US Gulf and South Atlantic showed healthier momentum, supported by fresh demand and a balanced cargo-to-tonnage position, with a number of fixtures reported, particularly from the US Gulf. A 39,000-dwt open Mobile fixed for a trip to UK with pellets at $23,000, while a 37,000-dwt open Santos fixed via Brazil to Singapore–Japan range with parcels at $24,000. Across Asia, sentiment remained positive, with activity gaining pace and several fixtures concluded above previous levels, supported by a generally healthy balance between tonnage availability and cargo demand. A 40,000-dwt open Tomakomai 14-16 Nov fixed via Japan to Taiwan with slag at $19,500. Source: Baltic Exchange Tops 2026-11-16 hellenicshippingnews... tweet Share",
       "takeaways": [
         "Activity picked up considerably, particularly from Wednesday onwards, with both Port Hedland and Dampier miners covering multiple cargoes and operators increasingly willing to pay into the low-mid $15s.",
         "The Atlantic presented a more mixed picture.",
@@ -224,9 +289,9 @@
       "navarea": "IX",
       "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
       "summary": "VLCC supply is starting to arrive. After a sharp rise in ordering, the first of the new tonnage is reaching the water, with deliveries already well ahead of last year. Using VesselsValue data, we look at what is on order, who is building it, and why owners keep ordering at near-record prices. VLCC deliveries have ...",
-      "body": "VLCC Deliveries Rise Fivefold as the Orderbook Builds in International Shipping News 16/11/2026 VLCC supply is starting to arrive. After a sharp rise in ordering, the first of the new tonnage is reaching the water, with deliveries already well ahead of last year. Using VesselsValue data, we look at what is on order, who is building it, and why owners keep ordering at near-record prices. VLCC deliveries have moved significantly higher. There were just seven VLCCs delivered across the whole of 2025, while 35 have already delivered this year, five times the 2025 total. The pipeline behind them is substantial, with 349 VLCCs on order or launched, and the delivery schedule is heavily weighted to the next few years, with 125 due in 2028 and 113 in 2029. Overall, 27.3% of the VLCC fleet is on order. China sits at the centre of VLCC deliveries China holds 268 of the VLCCs on order, c.77% of the orderbook, and builds 106 of the 125 units, due in 2028. South Korea accounts for 59 and Japan for 15, so the build programme is firmly concentrated in one country. Our recent market chat on new and established yards entering the Tanker market looks at how this capacity is being added. Notable recent orders include three 320,000 DWT VLCCs ordered by Bahri, set to be built at International Maritime Industries (IMI) and set for delivery in 2029, contracted at USD 150.3 mil each en bloc, VV Value USD 127.69 mil. IMI is Saudi Arabia’s first large-scale shipbuilding project, and these are the only VLCCs on order at a Saudi yard. 219 VLCCs have been ordered this year to date, compared to just 85 in 2025, and newbuilding values have risen with it. Prices are up 15% year-on-year, from USD 125.59 mil to USD 144.51 mil, close to the all-time high of USD 154 mil in Oct 2008. Why demand is holding up despite high prices and a large orderbook Replacement alone does not explain it, as the 349 VLCCs on order or launched compares with 183 vessels aged 20 years and above. Tankers have been in short supply in recent years because of sanctions and geopolitics, and the situation in the Strait of Hormuz has tightened availability further. Earnings have reached levels that were previously unthinkable, which strengthens the case for newbuilding even at current prices. Middle Eastern producers are also a factor. With shipowners reluctant to transit the Strait of Hormuz since the disruption began, some producers have looked to buy or build their own VLCCs so that they have vessels available to move their crude whatever the conditions. This moves them from relying on the open market for tonnage to owning the capacity they need to get barrels out, and it adds a further source of newbuilding demand alongside strong earnings. The age profile shows where supply could be removed if conditions change. Of the 932 VLCCs in the fleet, 45.8% are 15 years or older, including 183 vessels aged 20 years and above. That leaves a sizeable pool of tonnage that could be considered for demolition should the market weaken. VLCC deliveries continue to build Taken together, the data points to a VLCC fleet that is about to grow at a pace not seen in recent years, with the build programme concentrated in China and delivery volumes weighted to 2028 and 2029. Demand for newbuildings has held up so far because earnings, tight tonnage availability, and energy security concerns have outweighed the cost of ordering at near-record prices. Should conditions change, the ageing fleet offers a sizeable pool of tonnage that could leave the market, so the balance between deliveries and demolition will be one to watch. Source: Veson Tops 2026-11-16 hellenicshippingnews... tweet Share",
+      "body": "VLCC Deliveries Rise Fivefold as the Orderbook Builds in International Shipping News 16/11/2026 V LCC supply is starting to arrive. After a sharp rise in ordering, the first of the new tonnage is reaching the water, with deliveries already well ahead of last year. Using VesselsValue data, we look at what is on order, who is building it, and why owners keep ordering at near-record prices. VLCC deliveries have moved significantly higher. There were just seven VLCCs delivered across the whole of 2025, while 35 have already delivered this year, five times the 2025 total. The pipeline behind them is substantial, with 349 VLCCs on order or launched, and the delivery schedule is heavily weighted to the next few years, with 125 due in 2028 and 113 in 2029. Overall, 27.3% of the VLCC fleet is on order. China sits at the centre of VLCC deliveries China holds 268 of the VLCCs on order, c.77% of the orderbook, and builds 106 of the 125 units, due in 2028. South Korea accounts for 59 and Japan for 15, so the build programme is firmly concentrated in one country. Our recent market chat on new and established yards entering the Tanker market looks at how this capacity is being added. Notable recent orders include three 320,000 DWT VLCCs ordered by Bahri, set to be built at International Maritime Industries (IMI) and set for delivery in 2029, contracted at USD 150.3 mil each en bloc, VV Value USD 127.69 mil. IMI is Saudi Arabia’s first large-scale shipbuilding project, and these are the only VLCCs on order at a Saudi yard. 219 VLCCs have been ordered this year to date, compared to just 85 in 2025, and newbuilding values have risen with it. Prices are up 15% year-on-year, from USD 125.59 mil to USD 144.51 mil, close to the all-time high of USD 154 mil in Oct 2008. Why demand is holding up despite high prices and a large orderbook Replacement alone does not explain it, as the 349 VLCCs on order or launched compares with 183 vessels aged 20 years and above. Tankers have been in short supply in recent years because of sanctions and geopolitics, and the situation in the Strait of Hormuz has tightened availability further. Earnings have reached levels that were previously unthinkable, which strengthens the case for newbuilding even at current prices. Middle Eastern producers are also a factor. With shipowners reluctant to transit the Strait of Hormuz since the disruption began, some producers have looked to buy or build their own VLCCs so that they have vessels available to move their crude whatever the conditions. This moves them from relying on the open market for tonnage to owning the capacity they need to get barrels out, and it adds a further source of newbuilding demand alongside strong earnings. The age profile shows where supply could be removed if conditions change. Of the 932 VLCCs in the fleet, 45.8% are 15 years or older, including 183 vessels aged 20 years and above. That leaves a sizeable pool of tonnage that could be considered for demolition should the market weaken. VLCC deliveries continue to build Taken together, the data points to a VLCC fleet that is about to grow at a pace not seen in recent years, with the build programme concentrated in China and delivery volumes weighted to 2028 and 2029. Demand for newbuildings has held up so far because earnings, tight tonnage availability, and energy security concerns have outweighed the cost of ordering at near-record prices. Should conditions change, the ageing fleet offers a sizeable pool of tonnage that could leave the market, so the balance between deliveries and demolition will be one to watch. Source: Veson Tops 2026-11-16 hellenicshippingnews... tweet Share",
       "takeaways": [
-        "VLCC Deliveries Rise Fivefold as the Orderbook Builds in International Shipping News 16/11/2026 VLCC supply is starting to arrive.",
+        "VLCC Deliveries Rise Fivefold as the Orderbook Builds in International Shipping News 16/11/2026 V LCC supply is starting to arrive.",
         "After a sharp rise in ordering, the first of the new tonnage is reaching the water, with deliveries already well ahead of last year.",
         "Using VesselsValue data, we look at what is on order, who is building it, and why owners keep ordering at near-record prices."
       ],
@@ -1141,7 +1206,7 @@
       "navarea": "IV",
       "image": "https://splash247.com/wp-content/uploads/2026/11/American-Heritage-300x180.jpeg",
       "summary": "A US federal court has authorised the arrest of the tanker Atlantic Asphalt after the Port of New Orleans launched legal action seeking more than $1m in damages following the collision that sank American Cruise Lines’ American Heritage. The Board of Commissioners of the Port of New Orleans filed the lawsuit in the...",
-      "body": "Americas Operations Tankers US court orders arrest of tanker after New Orleans cruise ship collision Grant Rowles November 15, 2026 5 70,947 1 minute read US Coast Guard Heartland US Coast Guard Heartland A US federal court has authorised the arrest of the tanker Atlantic Asphalt after the Port of New Orleans launched legal action seeking more than $1m in damages following the collision that sank American Cruise Lines’ American Heritage. The Board of Commissioners of the Port of New Orleans filed the lawsuit in the Eastern District of Louisiana, naming the tanker, its owner Nave Shipping SA and OSM Thome’s Singapore-based Thome Ship Management as defendants. The port alleges that the collision caused extensive damage to its Thalia Street Terminal, where American Heritage was berthed. Physical damage is currently estimated to exceed $1m, with additional claims expected for cleanup, surveys, repairs and salvage. A federal judge subsequently authorised the arrest of Atlantic Asphalt , issuing a warrant directing US marshals to take possession of the vessel and hold it subject to further court orders. The port has also sought the vessel’s sale to recover damages. The 17,764 dwt asphalt tanker struck American Heritage on November 13 , causing the river cruise ship to capsize and partially sink. Thirty-two people were taken to hospital following the incident, with no fatalities reported. The lawsuit alleges negligence by the tanker interests, although the cause of the collision remains under investigation. OSM Thome confirmed that it manages Atlantic Asphalt and said the vessel was stable at anchor following the incident. The company said it had activated its emergency response team and was cooperating fully with local authorities. For dedicated cruise shipping news coverage visit splashcruise.com . Tags Cruise United States Grant Rowles November 15, 2026 5 70,947 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Americas Operations Tankers US court orders arrest of tanker after New Orleans cruise ship collision Grant Rowles November 15, 2026 6 76,442 1 minute read US Coast Guard Heartland US Coast Guard Heartland A US federal court has authorised the arrest of the tanker Atlantic Asphalt after the Port of New Orleans launched legal action seeking more than $1m in damages following the collision that sank American Cruise Lines’ American Heritage. The Board of Commissioners of the Port of New Orleans filed the lawsuit in the Eastern District of Louisiana, naming the tanker, its owner Nave Shipping SA and OSM Thome’s Singapore-based Thome Ship Management as defendants. The port alleges that the collision caused extensive damage to its Thalia Street Terminal, where American Heritage was berthed. Physical damage is currently estimated to exceed $1m, with additional claims expected for cleanup, surveys, repairs and salvage. A federal judge subsequently authorised the arrest of Atlantic Asphalt , issuing a warrant directing US marshals to take possession of the vessel and hold it subject to further court orders. The port has also sought the vessel’s sale to recover damages. The 17,764 dwt asphalt tanker struck American Heritage on November 13 , causing the river cruise ship to capsize and partially sink. Thirty-two people were taken to hospital following the incident, with no fatalities reported. The lawsuit alleges negligence by the tanker interests, although the cause of the collision remains under investigation. OSM Thome confirmed that it manages Atlantic Asphalt and said the vessel was stable at anchor following the incident. The company said it had activated its emergency response team and was cooperating fully with local authorities. For dedicated cruise shipping news coverage visit splashcruise.com . Tags Cruise United States Grant Rowles November 15, 2026 6 76,442 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The port alleges that the collision caused extensive damage to its Thalia Street Terminal, where American Heritage was berthed.",
         "Physical damage is currently estimated to exceed $1m, with additional claims expected for cleanup, surveys, repairs and salvage.",
@@ -1328,6 +1393,40 @@
       "readMinutes": 2
     },
     {
+      "id": "SN-2185CBF33E",
+      "title": "Tanker, Passenger Vessel Collide in New Orleans",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/tanker-passenger-vessel-collide-new-544358",
+      "publishedAt": "2026-11-14T00:21:39Z",
+      "category": "Navigation & Safety",
+      "region": "US Gulf & Port of Houston",
+      "regions": [
+        "US Gulf & Port of Houston",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "tanker",
+        "port"
+      ],
+      "coords": [
+        29.35,
+        -94.78
+      ],
+      "navarea": "IV",
+      "image": "https://images.marinelink.com/images/maritime/w150/american-heritage-image-courtesy-american-175058.jpg",
+      "summary": "A tanker ship collided on Friday, November 13, 2026 with an American Cruise Lines passenger ship that was docked in New Orleans on the Mississippi River, where rescue efforts were under way for multiple passengers in the water.US Department…",
+      "body": "Tanker, Passenger Vessel Collide in New Orleans Maritime Activity Reports, Inc. By Brad Brooks November 13, 2026 American Heritage. Image courtesy American Cruise Line A tanker ship collided on Friday, November 13, 2026 with an American Cruise Lines passenger ship that was docked in New Orleans on the Mississippi River, where rescue efforts were under way for multiple passengers in the water. US Department of Homeland Security Secretary Markwayne Mullin wrote on social media that \"we are throwing every asset we have to helping rescue missing passengers\" and that his department was coordinating closely with state officials. The department did not immediately respond to a request for comment on details of the missing passengers. The New Orleans mayor's office stated on social media that \"multiple individuals have been rescued, and search-and-rescue operations remain ongoing.\" The US Coast Guard said in an emailed statement that it had responded to the collision and that all river traffic was closed in the vicinity. It provided no other details. Local TV showed videos of the cruise ship listing on its side, while CBS News reported that at least 14 people had been rescued from the water. The cruise ship has a capacity for 150 people and was built in 2015, American Cruise Lines said on its website. The Advocate newspaper, citing unnamed Port of New Orleans officials, reported that 129 passengers were aboard the American Heritage cruise ship when it was hit by the Atlantic Asphalt, a tanker, at approximately 12:30 p.m. local time (1830 GMT). There was no immediate word on any deaths or injuries. The Port of New Orleans did not immediately respond to requests for comment. American Cruise Lines said in an emailed statement that it was coordinating with the US Coast Guard and local authorities. \"Guests and crew were evacuated, and we are deeply concerned for everyone involved,\" the company said. (Reporting by Ismail Shakil, Brad Brooks, Christian Martinez and Ryan Jones; Editing by Edmund Klamann)",
+      "takeaways": [
+        "Tanker, Passenger Vessel Collide in New Orleans Maritime Activity Reports, Inc.",
+        "By Brad Brooks November 13, 2026 American Heritage.",
+        "The department did not immediately respond to a request for comment on details of the missing passengers."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
       "id": "SN-63FEE37054",
       "title": "Tanker Strikes Docked Paddlewheeler on Mississippi River, Causing It to Capsize",
       "source": "gCaptain",
@@ -1353,7 +1452,7 @@
       "navarea": "IV",
       "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80",
       "summary": "Update: ‘Miracle on the Mississippi’: All Accounted For After Tanker Capsizes Cruise Ship in New Orleans A Marshall Islands-flagged asphalt tanker struck the docked American Cruise Lines riverboat American Heritage on the...",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo credit: Tow Boaters Facebook group Update: ‘Miracle on the Mississippi’: All Accounted For After Tanker Capsizes Cruise Ship in New Orleans A Marshall Islands-flagged asphalt tanker struck the docked American Cruise Lines riverboat American Heritage on the Mississippi River in New Orleans on Friday, sending people into the water and leaving the cruise ship capsized at the dock. The 160-meter tanker Atlantic Asphalt collided with the U.S.-flagged American Heritage at about 12:30 p.m. local time below the Crescent City Connection bridge, according to the Port of New Orleans. Video of the incident shows the tanker striking the port side of the docked river cruise ship. In the aftermath, the American Heritage took on water, rolled over and subsequently capsized alongside the dock. Other video circulating online showed people in the water wearing life jackets as rescuers responded. Port NOLA said about 129 passengers, in addition to crew members, were aboard the American Heritage at the time of the collision. The mayor’s office said multiple people had been rescued and search-and-rescue operations were ongoing. American Cruise Lines confirmed that the American Heritage was involved in a collision while it was docked in New Orleans. “We are in close coordination with the U.S. Coast Guard and local authorities. Guests and crew were evacuated, and we are deeply concerned for everyone involved. We will share more information as it becomes available,” the company said. The collision triggered a major emergency response involving the U.S. Coast Guard, New Orleans Fire Department, police, EMS and Port NOLA Harbor Police. The Coast Guard has closed the river to all vessel traffic between mile marker 93 and 96 while responders assess the situation and conduct response operations. The NTSB is launching a “go team” to investigate the collision. The team expects to arrive tomorrow morning. According to vessel-tracking data from MarineTraffic, the 81-meter American Heritage had arrived from Natchez, Mississippi and docked in New Orleans earlier on Friday. MarineTraffic recorded a “proximity event” involving the Atlantic Asphalt at 18:29 UTC, or 12:29 p.m. local time, corresponding with the reported time of the collision. AIS data shows the Atlantic Asphalt called at Amuay, Venezuela, in mid-October before arriving in Paulsboro, New Jersey, on October 24. The tanker departed Paulsboro on October 26 and arrived in New Orleans on November 11, two days before the collision. The Atlantic Asphalt was not operating under the current Jones Act waiver, as it was continuing an international voyage after discharging part of its foreign-loaded cargo in New Jersey rather than transporting cargo loaded at Paulsboro to New Orleans. The Trump administration’s emergency Jones Act waiver, which was extended Friday, allows certain foreign-flagged vessels to transport domestic cargo between U.S. ports. American Cruise Lines said guests and crew had been evacuated and that it was coordinating with the Coast Guard and local authorities. Passengers were being taken to the Port of New Orleans Administration Building for assistance and medical evaluation. The cause of the collision remains under investigation. Authorities have not said whether the tanker experienced a mechanical or propulsion failure before the impact. Louisiana Governor Jeff Landry said he had been briefed on the incident and was in contact with local officials as the emergency response continued. The American Heritage, built in 2015, is a 150-passenger paddlewheel river cruise ship operated by American Cruise Lines. The vessel features multiple passenger decks, private balcony accommodations and a traditional stern paddlewheel design. It operates cruises along the Mississippi River and other U.S. inland waterways. This is a developing story and will be updated. WATCH: New video shows moment the Atlantic Asphalt tanker collides with American Cruise Lines’ American Heritage while the cruise ship is docked on the Mississippi River. pic.twitter.com/SS2mCQGCY5 UPDATE: New video from the New Orleans riverfront shows passengers CROWDED on the deck of the tilted American Heritage, trying to get off as first responders run to the ship > The paddlewheeler had docked about two hours earlier to let passengers off when the tanker Atlantic… pic.twitter.com/VtQts0yTED INSANE: Footage shows aftermath of the Atlantic Asphalt tanker crash into the American Heritage river cruiser on the Mississippi River in New Orleans. 129 passengers were on board at the time of the crash. This is horrifying. Pray ?? pic.twitter.com/WiLXHessaj Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! All passengers and crew aboard an American Cruise Lines riverboat survived after a Marshall Islands-flagged asphalt tanker struck the docked paddle-wheeler on the Mississippi River in New Orleans on Friday,... A new federal watchdog report says gaps in training, coordination and emergency planning continue to complicate the response to ship fires at U.S. ports, three years after two firefighters were... Fatal accident comes despite increasing efforts aimed at preventing enclosed-space deaths Two crewmembers are dead and two others hospitalized following a confined space incident aboard a freight barge near Ketchikan,... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo credit: Tow Boaters Facebook group Update: ‘Miracle on the Mississippi’: All Accounted For After Tanker Capsizes Cruise Ship in New Orleans A Marshall Islands-flagged asphalt tanker struck the docked American Cruise Lines riverboat American Heritage on the Mississippi River in New Orleans on Friday, sending people into the water and leaving the cruise ship capsized at the dock. The 160-meter tanker Atlantic Asphalt collided with the U.S.-flagged American Heritage at about 12:30 p.m. local time below the Crescent City Connection bridge, according to the Port of New Orleans. Video of the incident shows the tanker striking the port side of the docked river cruise ship. In the aftermath, the American Heritage took on water, rolled over and subsequently capsized alongside the dock. Other video circulating online showed people in the water wearing life jackets as rescuers responded. Port NOLA said about 129 passengers, in addition to crew members, were aboard the American Heritage at the time of the collision. The mayor’s office said multiple people had been rescued and search-and-rescue operations were ongoing. American Cruise Lines confirmed that the American Heritage was involved in a collision while it was docked in New Orleans. “We are in close coordination with the U.S. Coast Guard and local authorities. Guests and crew were evacuated, and we are deeply concerned for everyone involved. We will share more information as it becomes available,” the company said. The collision triggered a major emergency response involving the U.S. Coast Guard, New Orleans Fire Department, police, EMS and Port NOLA Harbor Police. The Coast Guard has closed the river to all vessel traffic between mile marker 93 and 96 while responders assess the situation and conduct response operations. The NTSB is launching a “go team” to investigate the collision. The team expects to arrive tomorrow morning. According to vessel-tracking data from MarineTraffic, the 81-meter American Heritage had arrived from Natchez, Mississippi and docked in New Orleans earlier on Friday. MarineTraffic recorded a “proximity event” involving the Atlantic Asphalt at 18:29 UTC, or 12:29 p.m. local time, corresponding with the reported time of the collision. AIS data shows the Atlantic Asphalt called at Amuay, Venezuela, in mid-October before arriving in Paulsboro, New Jersey, on October 24. The tanker departed Paulsboro on October 26 and arrived in New Orleans on November 11, two days before the collision. The Atlantic Asphalt was not operating under the current Jones Act waiver, as it was continuing an international voyage after discharging part of its foreign-loaded cargo in New Jersey rather than transporting cargo loaded at Paulsboro to New Orleans. The Trump administration’s emergency Jones Act waiver, which was extended Friday, allows certain foreign-flagged vessels to transport domestic cargo between U.S. ports. American Cruise Lines said guests and crew had been evacuated and that it was coordinating with the Coast Guard and local authorities. Passengers were being taken to the Port of New Orleans Administration Building for assistance and medical evaluation. The cause of the collision remains under investigation. Authorities have not said whether the tanker experienced a mechanical or propulsion failure before the impact. Louisiana Governor Jeff Landry said he had been briefed on the incident and was in contact with local officials as the emergency response continued. The American Heritage, built in 2015, is a 150-passenger paddlewheel river cruise ship operated by American Cruise Lines. The vessel features multiple passenger decks, private balcony accommodations and a traditional stern paddlewheel design. It operates cruises along the Mississippi River and other U.S. inland waterways. This is a developing story and will be updated. WATCH: New video shows moment the Atlantic Asphalt tanker collides with American Cruise Lines’ American Heritage while the cruise ship is docked on the Mississippi River. pic.twitter.com/SS2mCQGCY5 UPDATE: New video from the New Orleans riverfront shows passengers CROWDED on the deck of the tilted American Heritage, trying to get off as first responders run to the ship > The paddlewheeler had docked about two hours earlier to let passengers off when the tanker Atlantic… pic.twitter.com/VtQts0yTED INSANE: Footage shows aftermath of the Atlantic Asphalt tanker crash into the American Heritage river cruiser on the Mississippi River in New Orleans. 129 passengers were on board at the time of the crash. This is horrifying. Pray ?? pic.twitter.com/WiLXHessaj Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! By Siddharth Cavale Nov 15 (Reuters) – The asphalt tanker vessel that struck a docked paddlewheel cruise boat in the Mississippi River at New Orleans last week experienced a steering problem in which its... All passengers and crew aboard an American Cruise Lines riverboat survived after a Marshall Islands-flagged asphalt tanker struck the docked paddle-wheeler on the Mississippi River in New Orleans on Friday,... A new federal watchdog report says gaps in training, coordination and emergency planning continue to complicate the response to ship fires at U.S. ports, three years after two firefighters were... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
         "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
         "The 160-meter tanker Atlantic Asphalt collided with the U.S.-flagged American Heritage at about 12:30 p.m.",
@@ -1361,6 +1460,144 @@
       ],
       "readingMinutes": 5,
       "readMinutes": 5
+    },
+    {
+      "id": "SN-A668E3D4A1",
+      "title": "Nikkiso Delivers Dry Dock Overhaul for LNG Tanker",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/nikkiso-delivers-dry-dock-overhaul-lng-544354",
+      "publishedAt": "2026-11-13T19:38:58Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "tanker",
+        "lng",
+        "port",
+        "shipyard"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://images.marinelink.com/images/maritime/w150/nikkiso-ceig-175054.jpeg",
+      "summary": "Nikkiso Clean Energy & Industrial Gases Group (Nikkiso CE&IG) has successfully completed a dry-dock maintenance project for the LNG tanker Ekaputra 1, carrying out the overhaul of seven cryogenic pumps in only 10 days. The work was performed…",
+      "body": "Nikkiso Delivers Dry Dock Overhaul for LNG Tanker Maritime Activity Reports, Inc. November 13, 2026 © Nikkiso CE&IG Nikkiso Clean Energy & Industrial Gases Group (Nikkiso CE&IG) has successfully completed a dry-dock maintenance project for the LNG tanker Ekaputra 1, carrying out the overhaul of seven cryogenic pumps in only 10 days. The work was performed for vessel owner Humolco by Nikkiso CE&IG’s Cryogenic Services Business Unit during the tanker’s scheduled dry dock window at PaxOcean shipyard in Batam, Indonesia. The scope included the overhaul of five large cargo pumps and two spray pumps, which all form part of the vessel’s LNG cargo handling operations. Completing seven pump overhauls within a 10-day dry-dock window required careful planning and coordination among Nikkiso CE&IG’s Cryogenic Services team, specialized subcontractors and the shipyard. Nikkiso coordinated personnel, parts and other resources in advance to keep the project on schedule, with all seven pumps overhauled, reinstalled, and recommissioned.",
+      "takeaways": [
+        "Nikkiso Delivers Dry Dock Overhaul for LNG Tanker Maritime Activity Reports, Inc.",
+        "The work was performed for vessel owner Humolco by Nikkiso CE&IG’s Cryogenic Services Business Unit during the tanker’s scheduled dry dock window at PaxOcean shipyard in Batam, Indonesia.",
+        "The scope included the overhaul of five large cargo pumps and two spray pumps, which all form part of the vessel’s LNG cargo handling operations."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-64F45802C6",
+      "title": "CMA CGM Demonstrates Relative Resilience in a Volatile Q3",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/cma-cgm-demonstrates-relative-resilience-544352",
+      "publishedAt": "2026-11-13T17:46:08Z",
+      "category": "Weather & Cyclones",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb",
+        "Rotterdam & North Sea",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "lng",
+        "container",
+        "port",
+        "red sea",
+        "china"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://images.marinelink.com/images/maritime/w150/michael-derrer-fuchs-stockadobecom-175052.jpeg",
+      "summary": "The third quarter of 2026 took place in a volatile economic environment, with persistent tensions in the Middle East impacting international trade and global supply chains. In this context, both shipping and logistics activities were affected…",
+      "body": "CMA CGM Demonstrates Relative Resilience in a Volatile Q3 Maritime Activity Reports, Inc. November 13, 2026 © Michael Derrer Fuchs - stock.adobe.com The third quarter of 2026 took place in a volatile economic environment, with persistent tensions in the Middle East impacting international trade and global supply chains. In this context, both shipping and logistics activities were affected by adjustments made to trade routes and transport networks. Nevertheless, the global economy demonstrated relative resilience given the scale of the shock to energy prices, while international trade remained dynamic. The Group’s transported volumes increased by 5.5% compared with the third quarter of 2025, outperforming the market. This represents one of the strongest growth rates recorded in recent years. This growth was underpinned by three key drivers: Restocking , as companies sought to build up inventories amid ongoing economic and geopolitical uncertainty; Increased investment in AI-related infrastructure and data centres; Strong momentum in clean technologies and electric vehicles , particularly in China, amid higher hydrocarbon prices. The CMA CGM Group leveraged the complementary strengths of its shipping, logistics and terminal operations to offer customers integrated solutions across the entire supply chain. This strategy is underpinned by investments in port infrastructure, which are essential to expanding the Group’s capacity and strengthening its global network. The Group also accelerated its transformation through innovation and artificial intelligence across all its businesses. MAIA, its agentic AI platform co-developed with Mistral AI, is being progressively rolled out to employees across its shipping, logistics and media businesses. In France, the CMA CGM Group confirms its long-term commitment and contribution to the country's economic, maritime and logistics development. The Group supports 96,500 jobs, including 19,100 direct jobs and 77,400 jobs across the wider economy. The Group has welcomed the first vessels in its new series of 24,000-TEU containerships, including the CMA CGM NOTRE DAME, CMA CGM PANTHEON and CMA CGM ORSAY, which are deployed on its flagship FAL service connecting Asia and Europe. These are the world's largest LNG-powered containerships operating under the French flag. CMA CGM also accelerated the energy transition in shipping through several major alternative fuel bunkering operations: bioethanol in Brazil, bio-LNG in Rotterdam and a world-record biomethanol bunkering operation in Shanghai. CEVA Logistics expanded its international footprint through the acquisition of FedEx Supply Chain and initiated a simplification of its organizational structure under the leadership of Patrick Moebel, aimed at improving its efficiency and strengthening customer proximity CMA CGM further developed its global terminal network, notably through Terminal 4 at the Port of Jeddah in partnership with Red Sea Gateway Terminal, and CMA Terminals' acquisition of a 49% stake in Nador Container Terminal in Morocco. CMA CGM AIR CARGO strengthened its operations during the quarter, with a fleet of eight aircraft now operating under the CMA CGM AIR CARGO and Air Belgium brands, supported by hubs in France, Belgium and the United States. CMA Media launched CMA Sport, while BFMTV maintained its position as France's leading news channel throughout the quarter. Outlook Demand for maritime transport benefited from a strong increase in volumes carried, a trend that is expected to continue over the coming months. Freight rates, which have been rising since the second quarter of 2026, are also supporting the growth of the business. However, the outlook for the coming months remains uncertain. Tensions in the Middle East continue to disrupt shipping routes and weigh on operating costs, while changes in trade policies will continue to influence international trade flows. Against this backdrop, the CMA CGM Group maintains a prudent and responsive approach to management. Its presence across the entire logistics chain, the flexibility of its network and the strength of its balance sheet are major assets in order to cope with changes in its operating environment and provide long-term support to its customers.",
+      "takeaways": [
+        "CMA CGM Demonstrates Relative Resilience in a Volatile Q3 Maritime Activity Reports, Inc.",
+        "In this context, both shipping and logistics activities were affected by adjustments made to trade routes and transport networks.",
+        "Nevertheless, the global economy demonstrated relative resilience given the scale of the shock to energy prices, while international trade remained dynamic."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-572B9B2BE0",
+      "title": "Singapore Maintains Role Leading Maritime City in 2026",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/singapore-maintains-role-leading-maritime-544350",
+      "publishedAt": "2026-11-13T14:22:01Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port",
+        "singapore"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://images.marinelink.com/images/maritime/w150/adobe-stocklena-ermakova-175048.jpeg",
+      "summary": "Singapore has retained its position as the world’s leading maritime city in the 2026 Leading Maritime Cities (LMC) report by DNV and Menon Economics for the seventh consecutive edition. Singapore also maintained its leading position in three of the five pillars* assessed in the report — Shipping…",
+      "body": "Singapore has retained its position as the world’s leading maritime city in the 2026 Leading Maritime Cities (LMC) report by DNV and Menon Economics for the seventh consecutive edition. Singapore also maintained its leading position in three of the five pillars* assessed in the report — Shipping…",
+      "takeaways": [
+        "Singapore has retained its position as the world’s leading maritime city in the 2026 Leading Maritime Cities (LMC) report by DNV and Menon Economics for the seventh consecutive edition.",
+        "Singapore also maintained its leading position in three of the five pillars* assessed in the report — Shipping…",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-3677F0EC28",
+      "title": "San Pedro Bay Ports Commemorate 20th Anniversary of the Clean Air Action Plan",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/san-pedro-bay-ports-commemorate-th-544349",
+      "publishedAt": "2026-11-13T14:17:24Z",
+      "category": "Weather & Cyclones",
+      "region": "US West Coast & Pacific",
+      "regions": [
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        33.73,
+        -118.26
+      ],
+      "navarea": "XII",
+      "image": "https://images.marinelink.com/images/maritime/w150/port-of-los-angelesport-of-175047.jpg",
+      "summary": "The Port of Los Angeles and Port of Long Beach will commemorate the 20th anniversary of the landmark Clean Air Action Plan (CAAP) with a special stakeholder meeting and harbor tour of the entire San Pedro Bay port complex aboard El Escudo, Harbor Breeze’s new zero-emission excursion vessel…",
+      "body": "San Pedro Bay Ports Commemorate 20th Anniversary of the Clean Air Action Plan Maritime Activity Reports, Inc. November 13, 2026 © Port Of Los Angeles/Port Of Long Beach The Port of Los Angeles and Port of Long Beach will commemorate the 20th anniversary of the landmark Clean Air Action Plan (CAAP) with a special stakeholder meeting and harbor tour of the entire San Pedro Bay port complex aboard El Escudo , Harbor Breeze’s new zero-emission excursion vessel, on Wednesday Dec. 2 from 9:30 a.m. to noon, weather permitting. First adopted in 2006 and last updated in 2017, the CAAP is a comprehensive strategy for accelerating progress toward a zero-emissions future, while protecting and strengthening the ports’ competitive position in the global economy. Since 2005, port-related air pollution emissions in San Pedro Bay have dropped 90% for diesel particulate matter, 71% for nitrogen oxides, and 98% for sulfur oxides. Targets for reducing greenhouse gases (GHG) from port-related sources were introduced as part of the 2017 CAAP. The document calls for the Ports to reduce GHG 40% below 1990 levels by 2030 and 80% below 1990 levels by 2050. Boat tour attendees will meet at Banning’s Landing Community Center, 100 E. Water St., Wilmington, CA 90744 no later than 9:15 a.m. Due to limited capacity, interested parties must register here. Vessel loading and unloading is not wheelchair accessible at Banning’s Landing and will require participants to use a small set of stairs get on and off of the boat. If you will be unable to board the vessel at this location due to a physical ailment, indicate this via the registration form at least one week before the event to arrange alternate accommodations. Limited free parking is available at the Wilmington Waterfront Promenade parking lot next to Banning’s Landing Community Center. Street parking will also be available.",
+      "takeaways": [
+        "San Pedro Bay Ports Commemorate 20th Anniversary of the Clean Air Action Plan Maritime Activity Reports, Inc.",
+        "Since 2005, port-related air pollution emissions in San Pedro Bay have dropped 90% for diesel particulate matter, 71% for nitrogen oxides, and 98% for sulfur oxides.",
+        "Targets for reducing greenhouse gases (GHG) from port-related sources were introduced as part of the 2017 CAAP."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
     },
     {
       "id": "SN-0EFB3789FC",
@@ -1397,6 +1634,40 @@
       "readMinutes": 2
     },
     {
+      "id": "SN-435AC1890E",
+      "title": "Singapore-Registered Bulk Carrier Strikes US Bridge, Disrupts Traffic",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/singaporeregistered-bulk-carrier-strikes-544348",
+      "publishedAt": "2026-11-13T12:36:29Z",
+      "category": "Navigation & Safety",
+      "region": "US East Coast & New York",
+      "regions": [
+        "US East Coast & New York",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port",
+        "singapore"
+      ],
+      "coords": [
+        40.5,
+        -73.95
+      ],
+      "navarea": "IV",
+      "image": "https://images.marinelink.com/images/maritime/w150/the-taconypalmyra-bridge-spanning-the-175046.jpg",
+      "summary": "The Singapore-registered bulk carrier STRATEGIC ALLIANCE has struck the Tacony-Palmyra Bridge over the Delaware River between Pennsylvania and New Jersey, forcing a temporary closure before vehicle traffic was partially restored.The incident occurred shortly after 1 p.m.",
+      "body": "Singapore-Registered Bulk Carrier Strikes US Bridge, Disrupts Traffic Maritime Activity Reports, Inc. November 13, 2026 The Tacony-Palmyra Bridge spanning the Delaware River between Philadelphia, Pennsylvania, and Palmyra, New Jersey, pictured in June 2010 (Credit: Jag9889 / Wikimedia Commons / CC BY-SA 4.0) The Singapore-registered bulk carrier STRATEGIC ALLIANCE has struck the Tacony-Palmyra Bridge over the Delaware River between Pennsylvania and New Jersey, forcing a temporary closure before vehicle traffic was partially restored. The incident occurred shortly after 1 p.m. local time on November 12 during a bridge opening for marine traffic, according to the Burlington County Bridge Commission. Representative Ed Neilson reported that the bridge was initially unable to close following the collision, causing significant traffic congestion on the Philadelphia side. The bridge was closed to motorists and pedestrians while officials investigated potential structural damage. Subsequent inspections indicated that the bridge was safe and that the damage appeared minor, the commission said. By 8:40 p.m., two lanes had reopened to motor vehicles, one in each direction, although another lane remained closed for repairs to the pedestrian sidewalk. Pedestrian access to the bridge remained prohibited. Singapore's Maritime and Port Authority (MPA) confirmed that STRATEGIC ALLIANCE was involved in the incident, reporting no injuries to civilians or crew members, no major damage to the vessel and no marine pollution. The bulk carrier is safely moored at the Kinder Morgan terminal in Pennsylvania, according to MPA. The Singaporean authority said it was in contact with the vessel's management company and relevant US authorities to establish the circumstances of the incident and would conduct an investigation. Repairs and inspections of the bridge are continuing.",
+      "takeaways": [
+        "Singapore-Registered Bulk Carrier Strikes US Bridge, Disrupts Traffic Maritime Activity Reports, Inc.",
+        "The incident occurred shortly after 1 p.m.",
+        "local time on November 12 during a bridge opening for marine traffic, according to the Burlington County Bridge Commission."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
       "id": "SN-2CCB729A4B",
       "title": "Orkney Islands’ first link to UK mainland nears offshore installation",
       "source": "Offshore Energy",
@@ -1425,6 +1696,39 @@
         "According to the company, the completion of the FAT testing represents the culmination of more than a year of manufacturing activities at its facility in Halden, Norway.",
         "\"With this important manufacturing milestone achieved, project activities continue to progress on several fronts.",
         "Nexans' teams are currently advancing onshore cable installation and jointing works in Orkney, while preparations continue for the offshore installation campaign scheduled for 2027,\" Nexans said."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A24E3E80F8",
+      "title": "Seaway7 Starts Cable Installation at Ørsted’s Hornsea 3 Wind Farm",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/seaway-starts-cable-installation-rsteds-544346",
+      "publishedAt": "2026-11-13T11:17:28Z",
+      "category": "Ports & Terminals",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://images.marinelink.com/images/maritime/w150/credit-seaway7-175044.jpg",
+      "summary": "Seaway7 has installed the first inter-array cable at Ørsted's 2.9 GW Hornsea 3 offshore wind farm in the UK North Sea, marking the start of a major cable installation campaign.The company will transport and install more than 536 kilometers of 66kV inter-array cables…",
+      "body": "Seaway7 Starts Cable Installation at Ørsted’s Hornsea 3 Wind Farm Maritime Activity Reports, Inc. November 13, 2026 (Credit: Seaway7) Seaway7 has installed the first inter-array cable at Ørsted's 2.9 GW Hornsea 3 offshore wind farm in the UK North Sea, marking the start of a major cable installation campaign. The company will transport and install more than 536 kilometers of 66kV inter-array cables, connecting the wind turbines to offshore converter stations, Seaway7 announced on November 12. The scope covers 197 inter-array cables at Hornsea 3, which Seaway7 expects to become the world's largest offshore wind farm when completed. The project is the third in Ørsted's Hornsea offshore wind zone for which Seaway7 has secured an inter-array cable installation contract. The company previously transported and installed 89 cables totaling approximately 170 kilometers at Hornsea 1, followed by 165 cables spanning around 382 kilometers at Hornsea 2. Once the latest campaign is completed, Seaway7 will have installed more than 1,000 kilometers of inter-array cables across the three developments. The Hornsea projects are located approximately 90 - 160 kilometers off the east coast of England, in water depths ranging from around 25 to 75 meters. Delivery of the current installation program is being led from Seaway7's Aberdeen office.",
+      "takeaways": [
+        "Seaway7 Starts Cable Installation at Ørsted’s Hornsea 3 Wind Farm Maritime Activity Reports, Inc.",
+        "November 13, 2026 (Credit: Seaway7) Seaway7 has installed the first inter-array cable at Ørsted's 2.9 GW Hornsea 3 offshore wind farm in the UK North Sea, marking the start of a major cable installation campaign.",
+        "The company will transport and install more than 536 kilometers of 66kV inter-array cables, connecting the wind turbines to offshore converter stations, Seaway7 announced on November 12."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1572,6 +1876,43 @@
       "readMinutes": 2
     },
     {
+      "id": "SN-1ECC36FE75",
+      "title": "Oil Heads for Weekly Decline Despite Middle East Supply Threats",
+      "source": "MarineLink",
+      "sourceIcon": "🧭",
+      "sourceRegion": "USA / Maritime Tech",
+      "url": "https://www.marinelink.com/news/oil-heads-weekly-decline-despite-middle-544343",
+      "publishedAt": "2026-11-13T09:43:15Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Red Sea & Bab el-Mandeb",
+        "US Gulf & Port of Houston"
+      ],
+      "tags": [
+        "tanker",
+        "port",
+        "hormuz",
+        "red sea"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.marinelink.com/images/maritime/w150/miha-creative-adobe-stock-175041.jpeg",
+      "summary": "Oil prices edged up on Friday but were headed for a second weekly decline as the continued US focus on its blockade and economic pressure on Iran eased fears of renewed fighting in the Middle East, though shipping attacks remained a supply risk.Brent futures LCOc1 were up 53 cents…",
+      "body": "Oil Heads for Weekly Decline Despite Middle East Supply Threats Maritime Activity Reports, Inc. November 13, 2026 © Miha Creative / Adobe Stock Oil prices edged up on Friday but were headed for a second weekly decline as the continued US focus on its blockade and economic pressure on Iran eased fears of renewed fighting in the Middle East, though shipping attacks remained a supply risk. Brent futures LCOc1 were up 53 cents, or 0.55%, to $96.35 a barrel at 0900 GMT. US West Texas Intermediate (WTI) futures CLc1 added 20 cents, or 0.23%, to $88.94 a barrel. For the week, Brent and WTI were both on track for a 2% drop. The benchmarks plunged 16% and 13%, respectively, last week. \"The market is range bound post midterms. The ability for more hostilities (in Iran) is restricted but a deal is equally elusive,\" said Jeff Currie, founder of Real Macro and former global head of commodities research at Goldman Sachs. \"That means the market is roughly balanced, with the ability to trade up limited and the ability to trade down limited,\" he said. Oil has had a volatile trading week, with earlier hopes for a rapprochement in the US-Israeli war on Iran, now in its ninth month, offset by strikes on Saudi Arabian infrastructure by Yemen’s Iran-backed Houthis and attacks on tankers shipping crude out of the Gulf. US President Donald Trump said on Truth Social a deal with Iran was not necessary to end the war. \"Trump's indications that further military escalation against Iran may not be necessary have raised expectations that Washington could increasingly rely on economic sanctions and restrictions on oil shipments rather than intensifying military operations,\" said Sugandha Sachdeva, founder of SS WealthStreet, a New Delhi-based research firm. The weakness in oil prices is also largely driven by signs of softening US demand, as rising crude oil and fuel inventories indicate a relatively subdued consumption outlook, Sachdeva said. US crude and fuel inventories rose last week, driven by softer refined products demand and a jump in oil imports, the Energy Information Administration said on Thursday. Despite the easing prices, risks remain for oil shipments out of the Strait of Hormuz, the key waterway for crude exports from the main Middle East producers. On Thursday, Iran's military said four oil tankers were hit by explosions in the Strait of Hormuz after ignoring warnings. Reuters could not immediately verify the Iranian accounts. That same day, Yemen's Iran-aligned Houthis said they had attacked a pumping station on the Saudi East-West oil pipeline, an oil facility in the Saudi Red Sea city of Yanbu, and an Aramco building in the capital Riyadh. \"Geopolitical risks remain elevated, and any fresh disruption to oil supplies could quickly reignite upward pressure on prices,\" Sachdeva of SS WealthStreet said. (Reuters - Reporting by Anna Hirtenstein in London. Additional reporting by Helen Clark and Sethuraman N R; Editing by Christian Schmollinger, Sonali Paul, Thomas Derpinghaus and Tomasz Janowski)",
+      "takeaways": [
+        "Oil Heads for Weekly Decline Despite Middle East Supply Threats Maritime Activity Reports, Inc.",
+        "Brent futures LCOc1 were up 53 cents, or 0.55%, to $96.35 a barrel at 0900 GMT.",
+        "US West Texas Intermediate (WTI) futures CLc1 added 20 cents, or 0.23%, to $88.94 a barrel."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
       "id": "SN-81B0A8CFEE",
       "title": "Cetus seals $200m share placement ahead of Oslo debut",
       "source": "Splash247",
@@ -1639,339 +1980,6 @@
         "The measures also cover nine companies, including Russian oil producer Slavneft, Rosneft’s Vostok Oil project and several energy trading businesses based in Dubai.",
         "The latest vessel additions include LNG carriers Melicertes, Neleus, Perle, Aeolus and Oneiroi , alongside the Novatek-linked Koryak FSU .",
         "On the oil side, London has blacklisted Apeks, Sara Sky, Balu 6, Yvika and Alma ."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-5B86A4767E",
-      "title": "Marine license granted for one of UK’s largest power projects",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/13/marine-license-granted-for-one-of-uks-largest-power-projects",
-      "publishedAt": "2026-11-13T08:41:56Z",
-      "category": "Shipping & Tankers",
-      "region": "US East Coast & New York",
-      "regions": [
-        "US East Coast & New York",
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "shipping",
-        "us"
-      ],
-      "coords": [
-        40.5,
-        -73.95
-      ],
-      "navarea": "IV",
-      "image": "https://www.offshore-energy.biz/api/media/file/Marine%20license%20granted%20for%20one%20of%20UK%E2%80%99s%20largest%20power%20projects-800x435.jpg?prefix=media",
-      "summary": "SSEN Transmission has secured the marine license for subsea cable infrastructure in Scottish waters for the 2 GW Eastern Green Link 3 (EGL3)...",
-      "body": "Project & Tenders November 13, 2026 · 1 minute ago Marine license granted for one of UK’s largest power projects NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email SSEN Transmission SSEN Transmission has secured the marine license for subsea cable infrastructure in Scottish waters for the 2 GW Eastern Green Link 3 (EGL3) high-voltage subsea electricity link between Scotland and England. EGL3, a joint venture between SSEN Transmission and National Grid Electricity Transmission (NGET), will run between Longside in Aberdeenshire and Walpole in Norfolk. Related Articles Cabling Marine license application filed for one of UK’s largest power projects 2 min read The marine license, awarded on November 11, covers the installation and operation of the project’s subsea cable infrastructure in Scottish waters, including nearshore work where the cable will meet land near Peterhead in Aberdeenshire. This follows several years of project development, marine surveys and ecological and environmental assessment work to understand the habitats and species present along the proposed cable route. “We’re absolutely delighted to have been granted the marine licence for the Scottish waters section of the subsea cable route on EGL3. This marks a really significant moment for the project and reflects many years of design development and marine survey activities which have underpinned this successful outcome today,\" said James Johnson , Joint Venture Program Director at SSEN Transmission. “Developing infrastructure of this scale in the marine environment requires careful planning and collaboration. Throughout the development, we have worked closely with local communities, marine stakeholders and other offshore developers and asset owners, whose feedback has helped shape our plans and minimise potential impacts wherever possible.\" Construction of EGL3 is proposed to start in 2029, with the aim of the link being fully operational by 2033. Under a contract worth over €2.2 billion , NKT will deliver a turnkey scope to design, manufacture, and install a 525 kV HVDC power cable system with a route length of around 680 kilometers, including onshore and offshore cable sections, for the project. Hitachi Energy will deliver HVDC converter stations in Scotland and England. Related Articles Cabling NKT wins its largest single project award ever with €2.2B contract for UK subsea link 2 min read Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Project & Tenders Business Developments & Projects Outlook & Strategy Infrastructure Interconnectors Cabling Subsea",
-      "takeaways": [
-        "EGL3, a joint venture between SSEN Transmission and National Grid Electricity Transmission (NGET), will run between Longside in Aberdeenshire and Walpole in Norfolk.",
-        "This follows several years of project development, marine surveys and ecological and environmental assessment work to understand the habitats and species present along the proposed cable route.",
-        "“We’re absolutely delighted to have been granted the marine licence for the Scottish waters section of the subsea cable route on EGL3."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-4BF6E88D0E",
-      "title": "LA port 2nd highest monthly volume as Transpac peak season extends",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/containers/la-port-2nd-highest-monthly-volume-as-transpac-peak-season-extends",
-      "publishedAt": "2026-11-13T08:25:09Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt7b8bc59f2c1c39d6/66cdd4975405f1b17c068a20/los-angeles-containerized-cargo.jpg?width=720&quality=80&disable=upscale",
-      "summary": "Talk of front loading earlier in the year proved wrong and traditional goods driving volumes not AI data centre construction",
-      "body": "Talk of front loading earlier in the year proved wrong and traditional goods driving volumes not AI data centre construction",
-      "takeaways": [
-        "Talk of front loading earlier in the year proved wrong and traditional goods driving volumes not AI data centre construction",
-        "Operational Area: Global Maritime.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-9DF654BE45",
-      "title": "ExxonMobil reaches FID on eighth project offshore Guyana",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/13/exxonmobil-reaches-fid-on-eighth-project-offshore-guyana",
-      "publishedAt": "2026-11-13T08:06:59Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://www.offshore-energy.biz/api/media/file/exxon-800x449.jpg?prefix=media",
-      "summary": "U.S.-headquartered oil & gas company ExxonMobil has made the final investment decision (FID) for its Longtail development offshore Guyana after...",
-      "body": "Project & Tenders November 13, 2026 · 1 minute ago ExxonMobil reaches FID on eighth project offshore Guyana NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Illustration; Source: ExxonMobil U.S.-headquartered oil & gas company ExxonMobil has made the final investment decision (FID) for its Longtail development offshore Guyana after having secured required government and regulatory approvals, with project start-up expected in 2030. Longtail, the eighth development located in the southeastern portion of the Stabroek block, is expected to include approximately 45 subsea production and injection wells. Subject to future investment decisions, market demand and the development of necessary infrastructure, gas from the project could be transported to shore by pipeline. The project will utilize a floating production storage and offloading (FPSO) vessel designed to process 1.2 billion standard cubic feet per day of gas and produce up to 250,000 barrels of condensate per day (bpd). ExxonMobil Guyana Limited is the operator with a 45% interest in the Stabroek block, while Hess Guyana Exploration Ltd. holds a 30% interest, and CNOOC Petroleum Guyana Limited a 25% interest. “Guyana is home to one of the world’s most prolific energy developments, and Longtail represents the next phase in realizing the full potential of its resources,” said ExxonMobil Upstream Company President Dan Ammann . “By developing these gas and condensate resources, we’re unlocking new value for Guyana while delivering advantaged energy to meet growing global demand.” ExxonMobil is producing approximately 900,000 bpd from four projects in the Stabroek block. With the expected startup of the fifth project, Uaru, in the fourth quarter, production is expected to exceed 1 million bpd. Construction is also progressing on Whiptail and Hammerhead, the sixth and seventh approved projects. Whiptail is anticipated to begin production in 2027, with Hammerhead expected to follow in 2029. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Project & Tenders Business & Finance Oil & Gas Fossil Energy Exploration & Production",
-      "takeaways": [
-        "Longtail, the eighth development located in the southeastern portion of the Stabroek block, is expected to include approximately 45 subsea production and injection wells.",
-        "Subject to future investment decisions, market demand and the development of necessary infrastructure, gas from the project could be transported to shore by pipeline.",
-        "The project will utilize a floating production storage and offloading (FPSO) vessel designed to process 1.2 billion standard cubic feet per day of gas and produce up to 250,000 barrels of condensate per day (bpd)."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-69B509BF2E",
-      "title": "Chinese yards building capacity to meet container ship orders",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/shipyards/chinese-yards-building-capacity-to-meet-container-ship-orders",
-      "publishedAt": "2026-11-13T06:52:24Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "china",
-        "shipyard"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blta4e8fed4ca7dd0e6/66cdd414d7618dc38902ec5c/Yangzijiang_20yard_1.jpg?width=720&quality=80&disable=upscale",
-      "summary": "China’s shipyards are expanding fast to meet the demand for new container vessels, with Dalian’s Hengli yard a surprise beneficiary of the boom",
-      "body": "China’s shipyards are expanding fast to meet the demand for new container vessels, with Dalian’s Hengli yard a surprise beneficiary of the boom",
-      "takeaways": [
-        "China’s shipyards are expanding fast to meet the demand for new container vessels, with Dalian’s Hengli yard a surprise beneficiary of the boom",
-        "Operational Area: China & East Asia.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-E40C4D9781",
-      "title": "Cosco Shipping Development books 16 VLCC newbuilds",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/tankers/cosco-shipping-development-books-16-vlcc-newbuilds",
-      "publishedAt": "2026-11-13T06:43:11Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt640ad2532e8ffa74/67346bea8133d52a69f1a012/cosco-shipping-vlcc-Credit-COSCO-Shipping.jpg?width=720&quality=80&disable=upscale",
-      "summary": "The crude carriers are for bareboat charter to Cosco Shipping Energy Transportation which has now lined up 40 VLCC newbuildings",
-      "body": "The crude carriers are for bareboat charter to Cosco Shipping Energy Transportation which has now lined up 40 VLCC newbuildings",
-      "takeaways": [
-        "The crude carriers are for bareboat charter to Cosco Shipping Energy Transportation which has now lined up 40 VLCC newbuildings",
-        "Operational Area: China & East Asia.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-F50AD3DFD8",
-      "title": "Monjasa adds five tankers from Bernhard Schulte in fleet renewal",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/bunkering/monjasa-adds-five-tankers-from-bernhard-schulte-in-fleet-renewal",
-      "publishedAt": "2026-11-13T04:25:34Z",
-      "category": "Shipping & Tankers",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "tanker",
-        "bunker"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltbb306aa30a78e469/6af6922912fabd5e313f8614/Monjasa_Tracer_in_the_Port_of_Rotterdam_Courtesy_of_Monjasa_(1).jpg?width=720&quality=80&disable=upscale",
-      "summary": "The acquisition of five sister vessels is the largest in the bunker supplier's history",
-      "body": "The acquisition of five sister vessels is the largest in the bunker supplier's history",
-      "takeaways": [
-        "The acquisition of five sister vessels is the largest in the bunker supplier's history",
-        "Operational Area: Global Maritime.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-ADBB48DD53",
-      "title": "New ultra-deep oil & gas discovery marks ‘major breakthrough’ in Bohai Sea",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/12/new-ultra-deep-oil-and-gas-discovery-marks-major-breakthrough-in-bohai-sea",
-      "publishedAt": "2026-11-12T15:51:13Z",
-      "category": "Weather & Cyclones",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia"
-      ],
-      "tags": [
-        "china"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://www.offshore-energy.biz/api/media/file/CNOOC-1-800x190.png?prefix=media",
-      "summary": "CNOOC has revealed an ultra-deep natural gas find in the central Bohai Sea, with a high-yield volcanic well testing at 800,000 cubic meters per day.",
-      "body": "Exploration & Production November 12, 2026 · 1 minute ago New ultra-deep oil & gas discovery marks ‘major breakthrough’ in Bohai Sea CNOOC has revealed an ultra-deep natural gas find in the central Bohai Sea, with a high-yield volcanic well testing at 800,000 cubic meters per day. MC Melisa Cavcic Senior Editor 2 minutes read LinkedIn X Email Offshore platform (for illustration purposes) Source: CNOOC Chinese state-owned oil and gas giant China National Offshore Oil Corporation (CNOOC) has made a high-yield natural gas discovery in volcanic rock more than 5,700 meters beneath the central Bohai Sea, opening doors to a new frontier for ultra-deep exploration in the region and bringing the company one step closer to building a trillion-cubic-meter gas province off the coast of China. CNOOC has drilled a high-yield volcanic oil and gas well in ultra-deep formations over 5,000 meters deep in Bohai, said to represent a major breakthrough in ultra-deep natural gas exploration offshore China. The well, which is adjacent to the Bozhong Sag , the largest hydrocarbon-rich sag in Bohai, encountered a cumulative total of over 120 meters of gas pay zone in volcanic formations and was completed at a depth of 5,770 meters. The well was tested to produce approximately 800,000 cubic meters (around 28 million cubic feet) per day of natural gas, uncovering promising exploration prospects in the offshore ultra-deep volcanic rocks and promoting the natural gas exploration process in the Bozhong Sag. \" In recent years, CNOOC Limited has continued to strengthen theoretical innovation in deep and ultra-deep oil and gas enrichment in basins with high heat flow and strong activity, and to intensify research on key technologies. Exploration in China’s offshore areas has achieved a major leap from shallow to deep and ultra-deep formations. The success of this well has opened up a new play for offshore ultra-deep natural gas exploration and expanded the scope of deep oil and gas exploration in Bohai. It is of positive significance for accelerating the ultra-deep exploration process in Bohai and for building a major gas province of one trillion cubic meters in Bohai. \" — Xu Changgui Chief Scientist and Chief Geologist of China National Offshore Oil Corporation (CNOOC) Related Articles Business & Finance CNOOC’s 2026 run powered by 9 start-ups, 5 new oil & gas discoveries, and 23 appraisals 2 min read While the ultra-deep formations in Bohai are geologically complex, making reservoir prediction difficult, CNOOC has continued to make what it describes as breakthroughs in its theoretical understanding of offshore ultra-deep oil and gas exploration. The company independently developed key offshore deep multi-source broadband three-dimensional (3D) seismic exploration technologies and innovative methods for predicting high-quality reservoirs in ultra-deep buried hills. The Chinese player points out that its efforts enabled it to identify the favorable ultra-deep volcanic natural gas enrichment zones in the Bozhong Sag, discovering a high-yield oil and gas well, and marking significant progress in ultra-deep volcanic natural gas exploration in Bohai. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Exploration & Production Business Developments & Projects Business & Finance Fossil Energy Oil & Gas Rigs News",
-      "takeaways": [
-        "CNOOC has drilled a high-yield volcanic oil and gas well in ultra-deep formations over 5,000 meters deep in Bohai, said to represent a major breakthrough in ultra-deep natural gas exploration offshore China.",
-        "Exploration in China’s offshore areas has achieved a major leap from shallow to deep and ultra-deep formations.",
-        "The success of this well has opened up a new play for offshore ultra-deep natural gas exploration and expanded the scope of deep oil and gas exploration in Bohai."
-      ],
-      "readingMinutes": 3,
-      "readMinutes": 3
-    },
-    {
-      "id": "SN-A559F21A19",
-      "title": "Maersk hit by ransomware cyber-attack",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/containers/maersk-hit-by-ransomware-cyber-attack",
-      "publishedAt": "2026-11-12T14:24:55Z",
-      "category": "Shipping & Tankers",
-      "region": "Japan & Korea",
-      "regions": [
-        "Japan & Korea"
-      ],
-      "tags": [
-        "shipping",
-        "japan"
-      ],
-      "coords": [
-        35.1,
-        129.04
-      ],
-      "navarea": "XI",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blte47af563785c106f/68aec69671851eed612006c5/anonymous-cybersecurity-Credit-Pete-Linforth-via-Pixabay.jpg?width=720&quality=80&disable=upscale",
-      "summary": "Danish carrier Maersk Line has confirmed that a breach of its security system has taken place via the legacy platform when the carrier acquired LF Logistics in 2022",
-      "body": "Danish carrier Maersk Line has confirmed that a breach of its security system has taken place via the legacy platform when the carrier acquired LF Logistics in 2022",
-      "takeaways": [
-        "Danish carrier Maersk Line has confirmed that a breach of its security system has taken place via the legacy platform when the carrier acquired LF Logistics in 2022",
-        "Operational Area: Japan & Korea.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-7EDB7318F6",
-      "title": "SLB on multi-year integrated drilling quest with European oil & gas operator",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/12/slb-on-multi-year-integrated-drilling-quest-with-european-oil-and-gas-operator",
-      "publishedAt": "2026-11-12T14:22:03Z",
-      "category": "Weather & Cyclones",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://www.offshore-energy.biz/api/media/file/Deepsea%20Bergen%20Source%20SLB-800x644.png?prefix=media",
-      "summary": "SLB’s new assignment with Vår Energi aims to drive efficiency and performance across two rigs owned by Transocean and Odfjell Drilling.",
-      "body": "Contracts & Tenders November 12, 2026 · 7 minutes ago SLB on multi-year integrated drilling quest with European oil & gas operator SLB’s new assignment with Vår Energi aims to drive efficiency and performance across two rigs owned by Transocean and Odfjell Drilling. MC Melisa Cavcic Senior Editor 2 minutes read LinkedIn X Email Deepsea Bergen rig Source: Odfjell Drilling U.S.-headquartered energy technology giant SLB has landed a long-term integrated drilling job with Norway’s oil and gas company Vår Energi to provide services for two harsh-environment semi-submersible rigs in Norwegian waters, with extension options that could keep the company occupied through 2034. SLB has been selected by Vår Energi as its main integrated drilling services supplier for the Transocean Barents and Deepsea Bergen rigs on the Norwegian Continental Shelf (NCS), covering an initial four-year period, with four additional one-year extension options that could extend the scope through 2034. The two harsh-environment semi-submersibles will continuously drill exploration and development wells during this period. The U.S. giant explains that the integrated delivery model brings together technical expertise, digital workflows, and operational execution across the well delivery process. Torger Rød , Chief Operating Officer of Vår Energi, commented: “Creating greater value on the Norwegian Continental Shelf requires us to challenge traditional ways of working. By connecting planning and execution and bringing together expertise, technology and data, we can work across traditional boundaries to deliver wells faster, more predictably and with greater value.” SLB, which will be working closely with Vår Energi and other selected service and technology providers, will connect planning and execution, simplify interfaces, and use data to support faster decisions and more consistent well performance. This assignment expands the U.S. giant’s role in the Norwegian operator’s offshore operations, adding integrated drilling services to an established relationship spanning digital well and field development planning and subsea production systems through the OneSubsea joint venture. ND Maduemezia , President of Europe and Africa at SLB, noted: “We value the trust Vår Energi has placed in us. Our focus now is on differentiated execution, combining technology, technical expertise, operating discipline and digital capabilities to deliver consistently high performance at scale.” This comes shortly after SLB secured a 15-year deal with TotalEnergies for the deployment of coherent well planning and engineering solutions across the globe. Related Articles Fossil Energy SLB and TotalEnergies enter into 15-year digital drilling agreement 1 min read Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Contracts & Tenders Project & Tenders Business Developments & Projects Business & Finance Exploration & Production Fossil Energy Oil & Gas Rigs News",
-      "takeaways": [
-        "The two harsh-environment semi-submersibles will continuously drill exploration and development wells during this period.",
-        "giant explains that the integrated delivery model brings together technical expertise, digital workflows, and operational execution across the well delivery process.",
-        "Torger Rød , Chief Operating Officer of Vår Energi, commented: “Creating greater value on the Norwegian Continental Shelf requires us to challenge traditional ways of working."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-D726B4CCB1",
-      "title": "Singapore retains maritime city crown as Shanghai rises to second",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/ports-logistics/singapore-retains-maritime-city-crown-as-shanghai-rises-to-second",
-      "publishedAt": "2026-11-12T14:05:25Z",
-      "category": "Shipping & Tankers",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait",
-        "China & East Asia"
-      ],
-      "tags": [
-        "singapore"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blt2861a44206a9c10e/66daacb60fd4f52c369ce748/singapore-port-credit-marcus-hand.jpg?width=720&quality=80&disable=upscale",
-      "summary": "Shanghai overtakes Rotterdam in DNV and Menon Economics' global maritime city rankings, while Abu Dhabi and Athens make gains.",
-      "body": "Shanghai overtakes Rotterdam in DNV and Menon Economics' global maritime city rankings, while Abu Dhabi and Athens make gains.",
-      "takeaways": [
-        "Shanghai overtakes Rotterdam in DNV and Menon Economics' global maritime city rankings, while Abu Dhabi and Athens make gains.",
-        "Operational Area: Rotterdam & North Sea, Singapore & Malacca Strait, China & East Asia.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
