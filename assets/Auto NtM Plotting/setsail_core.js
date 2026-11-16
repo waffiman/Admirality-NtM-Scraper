@@ -12548,40 +12548,58 @@ function updateOwnShipHdgLine(lat, lon, hdgDeg) {
     return;
   }
 
-  const vLat = Number(lat);
+  const vLat = Math.max(-85.05, Math.min(85.05, Number(lat)));
   const vLon = resolveMapPlotLon(vLat, normLon);
   const bearing = ((Number(hdgDeg) % 360) + 360) % 360;
 
-  // Draw HDG line across the entire nautical chart to the map boundary ("до конца карты")
-  let tipLat = null;
-  let tipLon = null;
+  // Draw HDG line as a conformal constant-bearing ray in unrounded Web Mercator pixels
+  // so zooming or reaching chart boundaries never alters its bearing angle.
+  let tipLat = vLat;
+  let tipLon = vLon;
   try {
+    const z = Number.isFinite(Number(leafletMap.getZoom && leafletMap.getZoom())) ? Number(leafletMap.getZoom()) : 8;
+    const worldPx = (leafletMap.options && leafletMap.options.crs && typeof leafletMap.options.crs.scale === "function")
+      ? leafletMap.options.crs.scale(z)
+      : (256 * Math.pow(2, z));
+    const p0 = leafletMap.project([vLat, vLon], z);
     const size = leafletMap.getSize ? leafletMap.getSize() : { x: 1920, y: 1080 };
-    const diagPx = Math.max(2500, Math.hypot(size.x || 1920, size.y || 1080) * 2.5);
-    const originPx = leafletMap.latLngToContainerPoint([vLat, vLon]);
+    const w = Number(size.x) || 1920;
+    const h = Number(size.y) || 1080;
+    const center = leafletMap.getCenter ? leafletMap.getCenter() : L.latLng(vLat, vLon);
+    const pCenter = leafletMap.project(center, z);
+    const offsetPx = Math.hypot(p0.x - pCenter.x, p0.y - pCenter.y);
+    let t = Math.max(2500, offsetPx + Math.hypot(w, h) * 1.5);
+
     const rad = (bearing * Math.PI) / 180;
     const dx = Math.sin(rad);
     const dy = -Math.cos(rad);
-    const tipPx = L.point(originPx.x + dx * diagPx, originPx.y + dy * diagPx);
-    const tipLatLng = leafletMap.containerPointToLatLng(tipPx);
-    if (tipLatLng && Number.isFinite(tipLatLng.lat) && Number.isFinite(tipLatLng.lng)) {
-      tipLat = Math.max(-85.05, Math.min(85.05, tipLatLng.lat));
-      tipLon = tipLatLng.lng;
-    }
-  } catch (eTip) {}
 
-  if (tipLat == null || tipLon == null) {
-    const fallbackTip = destinationPointRhumbNm(vLat, vLon, bearing, 5000);
-    tipLat = fallbackTip[0];
-    tipLon = fallbackTip[1];
+    // Clip proportionally along the ray at the Web Mercator latitude limits (never clamp lat independently)
+    const yMargin = 1e-3;
+    if (dy < -1e-12) {
+      t = Math.min(t, Math.max(0, (yMargin - p0.y) / dy));
+    } else if (dy > 1e-12) {
+      t = Math.min(t, Math.max(0, (worldPx - yMargin - p0.y) / dy));
+    }
+
+    const pTip = L.point(p0.x + dx * t, p0.y + dy * t);
+    const llTip = leafletMap.unproject(pTip, z);
+    if (llTip && Number.isFinite(llTip.lat)) {
+      tipLat = llTip.lat;
+      // Preserve exact linear Web Mercator longitude continuity without ±180° backward wrap
+      tipLon = vLon + ((pTip.x - p0.x) / worldPx) * 360;
+    } else {
+      const fb = destinationPointRhumbNm(vLat, vLon, bearing, 3000);
+      tipLat = fb[0];
+      tipLon = fb[1];
+    }
+  } catch (eTip) {
+    const fb = destinationPointRhumbNm(vLat, vLon, bearing, 3000);
+    tipLat = fb[0];
+    tipLon = fb[1];
   }
 
-  // Continuous unrolling so line doesn't snap across antimeridian
-  let runLon = vLon;
-  while (tipLon - runLon > 180) tipLon -= 360;
-  while (tipLon - runLon < -180) tipLon += 360;
-
-  const latlngs = [[vLat, runLon], [tipLat, tipLon]];
+  const latlngs = [[vLat, vLon], [tipLat, tipLon]];
   const ownPane = typeof ensureOwnShipPane === "function" ? ensureOwnShipPane() : "ownShipPane";
   const style = {
     color: "#0a0a0a",
@@ -12605,10 +12623,10 @@ function updateOwnShipHdgLine(lat, lon, hdgDeg) {
     leafletVesselLayer.addLayer(_ownShipHdgLine);
   }
 
-  // Hook map movement so line dynamically tracks screen edge on pan/zoom
+  // Hook map move/zoom/resize so line length tracks the chart edge cleanly at constant bearing
   if (!window._setsailHdgLineMapBound && leafletMap && leafletMap.on) {
     window._setsailHdgLineMapBound = true;
-    leafletMap.on("move", () => {
+    leafletMap.on("move zoom zoomend viewreset resize", () => {
       if (isOwnShipHdgLineEnabled() && userVessel && isValidVesselLatLon(userVessel.lat, userVessel.lon)) {
         updateOwnShipHdgLine(userVessel.lat, userVessel.lon, resolveOwnShipTrueHdgDeg(userVessel));
       }
