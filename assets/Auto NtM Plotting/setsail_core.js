@@ -188,6 +188,8 @@ let NTM_SHOW_CANCELLED = false; // Strictly isolated from map by default!
 
 let NTM_ACTIVE_NAVAREA = "ALL";
 
+let NTM_ACTIVE_AUTHORITY = "ALL";
+
 let NTM_ACTIVE_SORT = "NUM_DESC";
 
 
@@ -6269,6 +6271,17 @@ function updateNetworkStatusHUD(isOnline, customWk = null) {
 
  */
 
+function getNoticeAuthority(notice) {
+  if (!notice) return "UKHO";
+  const auth = String(notice.authority || "").trim().toUpperCase();
+  if (auth) return auth;
+  const src = String(notice.source || "").trim().toUpperCase();
+  if (src === "SANHO") return "SANHO";
+  if (notice.type === "NAVTEX" || src.includes("NAVTEX") || src.includes("NGA MSI")) return "NAVTEX";
+  return "UKHO";
+}
+window.getNoticeAuthority = getNoticeAuthority;
+
 function getNoticeNavarea(notice) {
 
   if (!notice) return "NAVAREA I";
@@ -6626,6 +6639,7 @@ function initFilterAndSortPopovers() {
   const chkCan = document.getElementById("popChkCancelled");
 
   const selectNavarea = document.getElementById("popSelectNavarea");
+  const selectAuthority = document.getElementById("popSelectAuthority");
 
 
 
@@ -6643,6 +6657,8 @@ function initFilterAndSortPopovers() {
 
         NTM_ACTIVE_NAVAREA = "ALL";
 
+        NTM_ACTIVE_AUTHORITY = "ALL";
+
         if (chkNavtex) chkNavtex.checked = true;
 
         if (chkT) chkT.checked = true;
@@ -6656,6 +6672,8 @@ function initFilterAndSortPopovers() {
         if (chkCan) chkCan.checked = false;
 
         if (selectNavarea) selectNavarea.value = "ALL";
+
+        if (selectAuthority) selectAuthority.value = "ALL";
 
       }
 
@@ -6683,7 +6701,7 @@ function initFilterAndSortPopovers() {
 
 
 
-    const allTypesChecked = NTM_ACTIVE_TYPES.size === 4 && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED && NTM_ACTIVE_NAVAREA === "ALL";
+    const allTypesChecked = NTM_ACTIVE_TYPES.size === 4 && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED && NTM_ACTIVE_NAVAREA === "ALL" && NTM_ACTIVE_AUTHORITY === "ALL";
 
     if (chkAll) chkAll.checked = allTypesChecked;
 
@@ -6759,6 +6777,22 @@ function initFilterAndSortPopovers() {
 
   }
 
+  if (selectAuthority) {
+
+    selectAuthority.addEventListener("change", (e) => {
+
+      NTM_ACTIVE_AUTHORITY = e.target.value || "ALL";
+
+      if (chkAll && NTM_ACTIVE_AUTHORITY !== "ALL") chkAll.checked = false;
+
+      syncFilterIndicators();
+
+      renderNtMListAndMap();
+
+    });
+
+  }
+
 
 
   // Sort Radio Listeners
@@ -6797,7 +6831,7 @@ function syncFilterIndicators() {
 
   const label = document.getElementById("ntmActiveFiltersLabel");
 
-  const isDefault = NTM_ACTIVE_TYPES.has("NAVTEX") && NTM_ACTIVE_TYPES.has("T") && NTM_ACTIVE_TYPES.has("P") && NTM_ACTIVE_TYPES.has("PERM") && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED && NTM_ACTIVE_NAVAREA === "ALL";
+  const isDefault = NTM_ACTIVE_TYPES.has("NAVTEX") && NTM_ACTIVE_TYPES.has("T") && NTM_ACTIVE_TYPES.has("P") && NTM_ACTIVE_TYPES.has("PERM") && !NTM_FILTER_AREAS && !NTM_SHOW_CANCELLED && NTM_ACTIVE_NAVAREA === "ALL" && NTM_ACTIVE_AUTHORITY === "ALL";
 
 
 
@@ -6810,6 +6844,10 @@ function syncFilterIndicators() {
     if (NTM_SHOW_CANCELLED) {
 
       label.innerHTML = SetSailIcons.svg("cancelled") + " Cancelled";
+
+    } else if (NTM_ACTIVE_AUTHORITY !== "ALL") {
+
+      label.textContent = NTM_ACTIVE_AUTHORITY === "SANHO" ? "SANHO (SA)" : NTM_ACTIVE_AUTHORITY;
 
     } else if (NTM_ACTIVE_NAVAREA !== "ALL") {
 
@@ -16152,6 +16190,7 @@ function ensureNoticesReadyForOverlay() {
   NTM_FILTER_AREAS = false;
   NTM_SHOW_CANCELLED = false;
   NTM_ACTIVE_NAVAREA = "ALL";
+  NTM_ACTIVE_AUTHORITY = "ALL";
   window.ROUTE_CORRIDOR_FILTER_ENABLED = false; // Never let route corridor hide all notices on initial toggle
 
   ["popChkAll", "popChkNavtex", "popChkT", "popChkP", "popChkPerm"].forEach(id => {
@@ -16165,8 +16204,10 @@ function ensureNoticesReadyForOverlay() {
   const chkPoly = document.getElementById("popChkPoly");
   if (chkPoly) chkPoly.checked = false;
 
-  const navSel = document.getElementById("popNavareaSelect") || document.getElementById("ntmNavareaFilter");
+  const navSel = document.getElementById("popSelectNavarea") || document.getElementById("popNavareaSelect") || document.getElementById("ntmNavareaFilter");
   if (navSel) navSel.value = "ALL";
+  const authSel = document.getElementById("popSelectAuthority");
+  if (authSel) authSel.value = "ALL";
 
   // Ensure sidebar category pill is not hiding notices behind PORTS or ROUTE filter
   if (activeOverlayCategory === "PORTS" || activeOverlayCategory === "ROUTE") {
@@ -20252,11 +20293,17 @@ function getFilteredNotices() {
 
     }
 
+    if (NTM_ACTIVE_AUTHORITY !== "ALL") {
+
+      if (getNoticeAuthority(item) !== String(NTM_ACTIVE_AUTHORITY).toUpperCase()) return false;
+
+    }
+
 
 
     if (searchVal) {
 
-      const searchStr = `${item.id} ${item.country || ""} ${item.region || ""} ${item.subject || ""} ${item.body || item.rawText || ""} ${item.coordinator || ""} ${(item.charts || []).join(" ")} ${item.cancels ? item.cancels.join(" ") : ""}`.toLowerCase();
+      const searchStr = `${item.id} ${item.noticeNumber || ""} ${item.authority || ""} ${item.source || ""} ${item.country || ""} ${item.region || ""} ${item.subject || ""} ${item.body || item.rawText || ""} ${item.coordinator || ""} ${(item.charts || []).join(" ")} ${item.cancels ? item.cancels.join(" ") : ""}`.toLowerCase();
 
       if (!searchStr.includes(searchVal)) return false;
 
@@ -29992,13 +30039,19 @@ function openNoticeDetailModal(noticeOrId) {
 
   if (roBanner) {
 
+    const auth = getNoticeAuthority(item);
+
     roBanner.style.display = "block";
 
     roBanner.textContent = isNavtex
 
       ? "Official NAVTEX / NAVAREA broadcast — read-only."
 
-      : "Official UKHO NtM — read-only (no user add / edit / delete).";
+      : (auth === "SANHO"
+
+        ? "Official SANHO (South Africa) NtM — read-only (no user add / edit / delete)."
+
+        : "Official UKHO NtM — read-only (no user add / edit / delete).");
 
   }
 

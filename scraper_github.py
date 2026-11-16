@@ -2336,6 +2336,7 @@ if __name__ == "__main__":
             print(f"[warn] UKHO scrape warning: {e}")
 
     existing_ukho_notices = []
+    existing_sanho_notices = []
     existing_meta = {}
     existing_cancelled = []
     target_read = notices_json_path if os.path.exists(notices_json_path) else root_notices_path
@@ -2345,10 +2346,13 @@ if __name__ == "__main__":
                 old_data = json.load(f)
                 existing_meta = old_data.get("metadata", {})
                 existing_cancelled = old_data.get("cancelledIds", [])
-                existing_ukho_notices = [
-                    n for n in old_data.get("notices", [])
-                    if n.get("type") != "NAVTEX" and n.get("source") not in ("NAVTEX / NAVAREA", "NGA MSI / NAVAREA")
-                ]
+                for n in old_data.get("notices", []):
+                    if n.get("type") == "NAVTEX" or n.get("source") in ("NAVTEX / NAVAREA", "NGA MSI / NAVAREA"):
+                        continue
+                    if n.get("authority") == "SANHO" or n.get("source") == "SANHO":
+                        existing_sanho_notices.append(n)
+                    else:
+                        existing_ukho_notices.append(n)
         except Exception as e:
             print(f"[warn] Reading existing notices.json: {e}")
 
@@ -2359,6 +2363,27 @@ if __name__ == "__main__":
         if n.get("coords") and ("lat" not in n or "lon" not in n):
             n["lat"] = n["coords"][0]["lat"]
             n["lon"] = n["coords"][0]["lon"]
+
+    # Isolated SANHO provider: network/PDF failures never break UKHO or NAVTEX sync
+    sanho_notices = []
+    sanho_cancelled_refs = []
+    sanho_latest_edition = None
+    try:
+        from sanho_scraper import scrape_sanho_notices
+        sanho_cache_dir = os.path.join(script_dir, "cache", "sanho")
+        sanho_res = scrape_sanho_notices(cache_dir=sanho_cache_dir)
+        if sanho_res.get("error"):
+            print(f"[!] SANHO scrape warning: {sanho_res['error']}")
+        sanho_notices = sanho_res.get("notices") or []
+        sanho_cancelled_refs = sanho_res.get("cancelledIds") or []
+        sanho_latest_edition = sanho_res.get("latestEdition")
+        print(f"[+] SANHO provider extracted {len(sanho_notices)} notices ({len(sanho_cancelled_refs)} cancelled refs)")
+    except Exception as sanho_err:
+        print(f"[!] SANHO provider isolated failure (UKHO/NAVTEX unaffected): {sanho_err}")
+
+    if not sanho_notices and existing_sanho_notices:
+        print(f"[WARN] Reusing {len(existing_sanho_notices)} previously cached SANHO notices.")
+        sanho_notices = existing_sanho_notices
 
     print("\n[5/5] Scraping Global NAVTEX & NAVAREA Broadcast Warnings (6h Cycle)...")
     navtex_list, navtex_cancelled_refs = build_global_navtex_notices()
@@ -2375,7 +2400,7 @@ if __name__ == "__main__":
             navtex_list = existing_navtex
             navtex_cancelled_refs = list(set(navtex_cancelled_refs + existing_cancelled))
 
-    combined_notices = existing_ukho_notices + navtex_list
+    combined_notices = existing_ukho_notices + sanho_notices + navtex_list
     active_notices = [n for n in combined_notices if not n.get("isCancelled")]
     cancelled_notices = [n for n in combined_notices if n.get("isCancelled")]
     active_navtex = [n for n in navtex_list if not n.get("isCancelled")]
@@ -2387,7 +2412,7 @@ if __name__ == "__main__":
         "metadata": {
             "generatedAt": datetime.datetime.now(timezone.utc).isoformat(),
             "scrapedAt": datetime.datetime.now(timezone.utc).isoformat(),
-            "source": "UKHO Admiralty Weekly NtM + Global NAVTEX / NAVAREA (NautoShark & US NGA MSI)",
+            "source": "UKHO Admiralty Weekly NtM + SANHO (South Africa) + Global NAVTEX / NAVAREA (NautoShark & US NGA MSI)",
             "weeklyBulletin": existing_meta.get("weeklyBulletin", f"{week_num}wknm{year_num}.pdf"),
             "weekNumber": week_num,
             "year": year_num,
@@ -2396,6 +2421,8 @@ if __name__ == "__main__":
             "activeNotices": len(active_notices),
             "cancelledNotices": len(cancelled_notices),
             "ukhoNoticesCount": len(existing_ukho_notices),
+            "sanhoNoticesCount": len(sanho_notices),
+            "sanhoEdition": sanho_latest_edition or existing_meta.get("sanhoEdition"),
             "navtexWarningsCount": len(navtex_list),
             "activeNavtexCount": len(active_navtex),
             "countT": len([n for n in active_notices if n.get("type") == "T"]),
@@ -2405,7 +2432,7 @@ if __name__ == "__main__":
             "countPoly": len([n for n in active_notices if n.get("isPolygon")]),
             "countLine": len([n for n in active_notices if n.get("isLine")])
         },
-        "cancelledIds": sorted(list(set(existing_cancelled + navtex_cancelled_refs)))[:600],
+        "cancelledIds": sorted(list(set(existing_cancelled + sanho_cancelled_refs + navtex_cancelled_refs)))[:750],
         "notices": combined_notices
     }
 
@@ -2414,7 +2441,7 @@ if __name__ == "__main__":
     with open(root_notices_path, "w", encoding="utf-8") as f:
         json.dump(final_payload, f, separators=(",", ":"), ensure_ascii=False)
 
-    print(f"[+] Saved {len(combined_notices)} total notices ({len(existing_ukho_notices)} UKHO NtM + {len(navtex_list)} NAVTEX/NAVAREA) to notices.json")
+    print(f"[+] Saved {len(combined_notices)} total notices ({len(existing_ukho_notices)} UKHO NtM + {len(sanho_notices)} SANHO NtM + {len(navtex_list)} NAVTEX/NAVAREA) to notices.json")
 
     print("\n[6/6] Scraping Live Global Tropical Cyclones & Synoptic Marine Weather...")
     wx_payload = scrape_live_marine_weather()
