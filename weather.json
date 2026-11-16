@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "2000 UTC",
-  "lastSyncUtc": "2026-11-15T20:51:27.167817+00:00",
+  "synopticCycle": "0000 UTC",
+  "lastSyncUtc": "2026-11-16T00:48:10.638799+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -95,14 +95,14 @@
       "centralPressure": 1006,
       "maxWinds": 30,
       "gusts": 39,
-      "movement": "N at 5 kts",
+      "movement": "WNW at 3 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            11.4,
-            86.4
+            10.6,
+            85.8
           ],
           "winds": 35,
           "radiusNm": 45
@@ -110,8 +110,8 @@
         {
           "tau": 24,
           "coords": [
-            11.2,
-            86.7
+            10.8,
+            85.5
           ],
           "winds": 40,
           "radiusNm": 60
@@ -119,8 +119,8 @@
         {
           "tau": 36,
           "coords": [
-            11.1,
-            87.2
+            11.3,
+            86.2
           ],
           "winds": 45,
           "radiusNm": 75
@@ -128,8 +128,8 @@
         {
           "tau": 48,
           "coords": [
-            11.4,
-            87.0
+            11.6,
+            86.2
           ],
           "winds": 50,
           "radiusNm": 90
@@ -137,8 +137,8 @@
         {
           "tau": 60,
           "coords": [
-            11.2,
-            86.5
+            10.9,
+            85.9
           ],
           "winds": 55,
           "radiusNm": 105
@@ -155,9 +155,9 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 3.0,
+      "waveHeight": 3.5,
       "swellPeriod": 8,
-      "swellDir": "ESE"
+      "swellDir": "SE"
     },
     {
       "id": "W2",
@@ -167,7 +167,7 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 2.7,
+      "waveHeight": 2.5,
       "swellPeriod": 10,
       "swellDir": "WSW"
     },
@@ -179,9 +179,9 @@
         -160.1
       ],
       "radiusNm": 150,
-      "waveHeight": 3.7,
+      "waveHeight": 3.6,
       "swellPeriod": 9,
-      "swellDir": "S"
+      "swellDir": "SE"
     },
     {
       "id": "WS2",
@@ -191,9 +191,9 @@
         86.3
       ],
       "radiusNm": 150,
-      "waveHeight": 2.9,
+      "waveHeight": 2.5,
       "swellPeriod": 9,
-      "swellDir": "S"
+      "swellDir": "SSW"
     }
   ],
   "pressureCenters": [
