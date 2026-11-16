@@ -1221,6 +1221,20 @@ function aisShipTypeCodeToText(code) {
   return "Type " + n;
 }
 
+/** Parse numeric epoch (s/ms) or ISO AIS timestamp into epoch ms, or 0 if absent/invalid. */
+function parseOwnAisTimestampMs(raw) {
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    return raw > 0 ? (raw < 1e12 ? Math.round(raw * 1000) : Math.round(raw)) : 0;
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    const parsed = Date.parse(raw);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    const num = Number(raw);
+    if (Number.isFinite(num) && num > 0) return num < 1e12 ? Math.round(num * 1000) : Math.round(num);
+  }
+  return 0;
+}
+
 /** Fast Open Waters MMSI lookup — last known position (even if hours/days old). */
 
 async function fetchOpenWatersVesselByMmsi(mmsiRaw, opts) {
@@ -1269,21 +1283,7 @@ async function fetchOpenWatersVesselByMmsi(mmsiRaw, opts) {
 
     if (!isValidVesselLatLon(lat, lon)) return null;
 
-    const seenRaw = p.seen || p.time || p.updated || p.last_seen;
-
-    let seenMs = 0;
-
-    if (typeof seenRaw === "number" && Number.isFinite(seenRaw)) {
-
-      seenMs = seenRaw < 1e12 ? Math.round(seenRaw * 1000) : Math.round(seenRaw);
-
-    } else if (seenRaw) {
-
-      const t = Date.parse(String(seenRaw));
-
-      if (Number.isFinite(t)) seenMs = t;
-
-    }
+    const seenMs = parseOwnAisTimestampMs(p.seen != null ? p.seen : (p.time != null ? p.time : (p.updated != null ? p.updated : p.last_seen)));
 
     return {
 
@@ -1311,9 +1311,11 @@ async function fetchOpenWatersVesselByMmsi(mmsiRaw, opts) {
 
       source: "openwaters",
 
-      updatedAt: seenMs || Date.now(),
+      updatedAt: seenMs || null,
 
       aisSeenAt: seenMs ? new Date(seenMs).toISOString() : null,
+
+      hasExplicitSeen: seenMs > 0,
 
       liveCoords: true
 
@@ -1423,21 +1425,7 @@ async function fetchOwnVesselAisUpdate() {
 
       const c = (f.geometry && f.geometry.coordinates) || [];
 
-      const seenRaw = p.seen || p.time || p.updated || p.last_seen;
-
-      let seenMs = 0;
-
-      if (typeof seenRaw === "number" && Number.isFinite(seenRaw)) {
-
-        seenMs = seenRaw < 1e12 ? Math.round(seenRaw * 1000) : Math.round(seenRaw);
-
-      } else if (seenRaw) {
-
-        const t = Date.parse(String(seenRaw));
-
-        if (Number.isFinite(t)) seenMs = t;
-
-      }
+      const seenMs = parseOwnAisTimestampMs(p.seen != null ? p.seen : (p.time != null ? p.time : (p.updated != null ? p.updated : p.last_seen)));
 
       const la = Number(c[1]);
 
@@ -1471,9 +1459,11 @@ async function fetchOwnVesselAisUpdate() {
 
         source: "ais",
 
-        updatedAt: seenMs || Date.now(),
+        updatedAt: seenMs || null,
 
-        aisSeenAt: seenMs ? new Date(seenMs).toISOString() : null
+        aisSeenAt: seenMs ? new Date(seenMs).toISOString() : null,
+
+        hasExplicitSeen: seenMs > 0
 
       };
 
@@ -1625,6 +1615,8 @@ async function fetchOwnVesselAisUpdate() {
 
       if (!isValidVesselLatLon(la, lo)) return null;
 
+      const seenMs = parseOwnAisTimestampMs(p.timestampExternal != null ? p.timestampExternal : (p.seen != null ? p.seen : (p.time != null ? p.time : p.updated)));
+
       return {
 
         mmsi,
@@ -1649,7 +1641,13 @@ async function fetchOwnVesselAisUpdate() {
 
         navStat: p.navStat,
 
-        source: "ais"
+        source: "ais",
+
+        updatedAt: seenMs || null,
+
+        aisSeenAt: seenMs ? new Date(seenMs).toISOString() : null,
+
+        hasExplicitSeen: seenMs > 0
 
       };
 
@@ -1907,7 +1905,13 @@ async function refreshOwnVesselFromAis(opts) {
 
       : (prev.aisRefreshedAt ? Date.parse(prev.aisRefreshedAt) : 0);
 
-    const hitMs = Number(hit.updatedAt) || (hit.aisSeenAt ? Date.parse(hit.aisSeenAt) : getSetSailUtcNowMs());
+    const parsedHitMs = parseOwnAisTimestampMs(
+      hit.aisSeenAt != null ? hit.aisSeenAt
+        : (hit.updatedAt != null ? hit.updatedAt
+          : (hit.seen != null ? hit.seen : (hit.timestamp != null ? hit.timestamp : hit.ts)))
+    );
+    const hasExplicitTs = parsedHitMs > 0;
+    const hitMs = hasExplicitTs ? parsedHitMs : getSetSailUtcNowMs();
 
     // Never rewind My Vessel to an older AIS fix (stale Malacca while ship is in IO).
 
@@ -1919,9 +1923,29 @@ async function refreshOwnVesselFromAis(opts) {
 
     }
 
-    const ageMs = getSetSailUtcNowMs() - hitMs;
-
-    const isLive = ageMs <= OWN_AIS_VISUAL_DR_MS;
+    const anchorLat = isValidVesselLatLon(prev.aisFixLat, prev.aisFixLon)
+      ? Number(prev.aisFixLat)
+      : Number(prev.aisLastFixLat);
+    const anchorLon = isValidVesselLatLon(prev.aisFixLat, prev.aisFixLon)
+      ? Number(prev.aisFixLon)
+      : Number(prev.aisLastFixLon);
+    const hasAnchor = isValidVesselLatLon(anchorLat, anchorLon);
+    const ageMs = Math.max(0, getSetSailUtcNowMs() - hitMs);
+    const isLive = ageMs < OWN_AIS_STALE_DR_MS;
+    const sameAnchor =
+      hasAnchor &&
+      Math.abs(Number(hit.lat) - anchorLat) < 1e-4 &&
+      Math.abs(Number(hit.lon) - anchorLon) < 1e-4;
+    if (
+      Number.isFinite(prevFixMs) &&
+      prevFixMs > 0 &&
+      hasAnchor &&
+      ((sameAnchor && (!hasExplicitTs || hitMs <= prevFixMs + 2000)) ||
+        (!isLive && hasExplicitTs && hitMs <= prevFixMs))
+    ) {
+      if (getDrActiveRouteId()) applyOwnVesselDeadReckoning({ toast: false, visual: true });
+      return;
+    }
 
     // Remember previous fix along-track so DR can calibrate SOG from successive AIS hits
 
@@ -1964,6 +1988,9 @@ async function refreshOwnVesselFromAis(opts) {
       : ((feedNow === "gps" && !isLive && isValidVesselLatLon(prev.lat, prev.lon)) ? prev.lon : Number(hit.lon));
 
     const resolvedName = (prev.nameCustomized && prev.name) ? prev.name : (hit.name || prev.name);
+    const keepCog = isDrOnRails ? prev.cog : (hit.cog != null && Number.isFinite(Number(hit.cog)) ? Number(hit.cog) : prev.cog);
+    const keepHdg = isDrOnRails ? prev.heading : (hit.heading != null && Number.isFinite(Number(hit.heading)) ? Number(hit.heading) : prev.heading);
+    const keepSog = isDrOnRails ? prev.sog : (hit.sog != null && Number.isFinite(Number(hit.sog)) ? Number(hit.sog) : prev.sog);
 
     applyVesselProfile(
       Object.assign({}, prev, hit, {
@@ -1971,11 +1998,15 @@ async function refreshOwnVesselFromAis(opts) {
         nameCustomized: !!prev.nameCustomized,
         lat: keepLat,
         lon: keepLon,
+        cog: keepCog,
+        heading: keepHdg,
+        sog: keepSog,
         source: isLive ? "ais" : (feedNow === "gps" ? "gps" : (isDrOnRails ? (prev.source || "ais-dr-rails") : "ais-stale")),
         preferredNav: window._setsailGpsWatchActive ? "gps" : "ais",
         aisLastFixAt: hit.aisSeenAt || new Date(hitMs).toISOString(),
         aisFixLat: Number(hit.lat),
         aisFixLon: Number(hit.lon),
+        aisFixCog: hit.cog != null && Number.isFinite(Number(hit.cog)) ? Number(hit.cog) : prev.aisFixCog,
         aisFixSog: Number.isFinite(Number(hit.sog)) && Number(hit.sog) >= 0 ? Number(hit.sog) : prev.aisFixSog,
         aisRefreshedAt: getSetSailUtcNowIso(),
         deadReckoned: isDrOnRails,
@@ -1984,6 +2015,8 @@ async function refreshOwnVesselFromAis(opts) {
         aisDrNm: isDrOnRails ? prev.aisDrNm : null,
         aisDrMode: isDrOnRails ? prev.aisDrMode : null,
         aisDrOnCenterline: isDrOnRails ? prev.aisDrOnCenterline : false,
+        aisDrLegCourse: isDrOnRails ? prev.aisDrLegCourse : null,
+        aisDrSegIdx: isDrOnRails ? prev.aisDrSegIdx : null,
         aisDrPrevAlongNm: Number.isFinite(prevAlongKeep) ? prevAlongKeep : prev.aisDrPrevAlongNm,
         aisDrPrevFixMs: Number.isFinite(prevFixKeep) ? prevFixKeep : prev.aisDrPrevFixMs,
         aisDrFixAlongNm: Number.isFinite(newAlong) ? newAlong : prev.aisDrFixAlongNm
@@ -2068,37 +2101,55 @@ function getDrActiveRouteId() {
 
 function setrouteNormalizeRouteWps(route) {
 
-  // Prefer the same unrolled chart axis the centerline polyline uses (dateline-safe)
+  if (!route || !Array.isArray(route.waypoints)) return [];
 
-  if (
+  const clean = [];
 
-    route &&
+  for (let i = 0; i < route.waypoints.length; i++) {
 
-    activeRouteData &&
+    const w = route.waypoints[i];
 
-    route === activeRouteData &&
+    if (!w) continue;
 
-    Array.isArray(window._setsailRouteUnrolled) &&
+    const lat = Number(w.lat);
 
-    window._setsailRouteUnrolled.length >= 2
+    let lon = Number(w.lon);
 
-  ) {
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
 
-    return window._setsailRouteUnrolled
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 360) continue;
 
-      .filter((p) => p && Number.isFinite(Number(p[0])) && Number.isFinite(Number(p[1])))
+    lon = ((lon + 180) % 360 + 360) % 360 - 180;
 
-      .map((p) => ({ lat: Number(p[0]), lon: Number(p[1]) }));
+    const prev = clean.length ? clean[clean.length - 1] : null;
+
+    if (prev && Math.abs(prev.lat - lat) < 1e-7 && Math.abs(prev._normLon - lon) < 1e-7) continue;
+
+    clean.push({ lat, _normLon: lon });
 
   }
 
-  if (!route || !Array.isArray(route.waypoints)) return [];
+  if (clean.length === 0) return [];
 
-  return route.waypoints
+  const out = [{ lat: clean[0].lat, lon: clean[0]._normLon }];
 
-    .filter((w) => w && Number.isFinite(Number(w.lat)) && Number.isFinite(Number(w.lon)))
+  let runLon = clean[0]._normLon;
 
-    .map((w) => ({ lat: Number(w.lat), lon: Number(w.lon) }));
+  for (let i = 1; i < clean.length; i++) {
+
+    let lon = clean[i]._normLon;
+
+    while (lon - runLon > 180) lon -= 360;
+
+    while (lon - runLon < -180) lon += 360;
+
+    runLon = lon;
+
+    out.push({ lat: clean[i].lat, lon });
+
+  }
+
+  return out;
 
 }
 
@@ -2280,57 +2331,25 @@ function resolveDrRailsForShip(lat, lon) {
 
   }
 
-  const handoff = getDrHandoffState();
-
   const nextRoute = typeof getDrActiveRoute === "function" ? getDrActiveRoute() : null;
 
   const nextWps = nextRoute ? setrouteNormalizeRouteWps(nextRoute) : [];
 
-  const thresh = (handoff && Number(handoff.handoffNm)) || SETSAIL_DR_HANDOFF_NM;
-
-  const refLat = Number.isFinite(Number(lat)) ? Number(lat) : null;
-
-  const refLon = Number.isFinite(Number(lon)) ? Number(lon) : null;
-
-
-
-  if (handoff && handoff.nextRouteId && handoff.nextRouteId === activeId) {
-
-    if (nextWps.length >= 2 && refLat != null && refLon != null) {
-
-      const near = setrouteProjectOntoRoute(refLat, refLon, nextWps);
-
-      if (near && near.distNm <= thresh) {
-
-        clearDrHandoffState();
-
-        persistDrLastRailsWps(nextWps);
-
-        return { wps: nextWps, phase: "rails", handoffDone: true };
-
-      }
-
-    }
-
-    if (handoff.prevWps && handoff.prevWps.length >= 2) {
-
-      return { wps: handoff.prevWps, phase: "handoff-prev" };
-
-    }
-
-    // No previous geometry — wait until near new Current (stay on last AIS until then)
-
-    return { wps: null, phase: "handoff-wait" };
-
-  }
-
-
-
   if (nextWps.length >= 2) {
+
+    try { clearDrHandoffState(); } catch (eClrH) {}
 
     persistDrLastRailsWps(nextWps);
 
     return { wps: nextWps, phase: "rails" };
+
+  }
+
+  const snap = typeof loadDrLastRailsWps === "function" ? loadDrLastRailsWps() : null;
+
+  if (snap && snap.length >= 2) {
+
+    return { wps: snap, phase: "rails" };
 
   }
 
@@ -2348,41 +2367,9 @@ function setDrActiveRouteId(routeId, opts) {
 
   const id = routeId ? String(routeId).trim() : "";
 
-  const prevId = getDrActiveRouteId();
-
   const prevRoute = typeof getDrActiveRoute === "function" ? getDrActiveRoute() : null;
 
   const prevSnap = (prevRoute && setrouteNormalizeRouteWps(prevRoute)) || loadDrLastRailsWps() || null;
-
-
-
-  // Is own-ship already near the route we are about to make Current?
-
-  const shipNearRoute = (routeObj) => {
-
-    try {
-
-      const wps = routeObj ? setrouteNormalizeRouteWps(routeObj) : [];
-
-      if (wps.length < 2 || !userVessel) return false;
-
-      const la = Number(userVessel.lat);
-
-      const lo = Number(userVessel.lon);
-
-      if (!Number.isFinite(la) || !Number.isFinite(lo)) return false;
-
-      const p = setrouteProjectOntoRoute(la, lo, wps);
-
-      return !!(p && p.distNm <= Math.max(SETSAIL_DR_HANDOFF_NM, 8));
-
-    } catch (eN) {
-
-      return false;
-
-    }
-
-  };
 
 
 
@@ -2410,31 +2397,13 @@ function setDrActiveRouteId(routeId, opts) {
 
     }
 
-    const nearNew = shipNearRoute(foundEarly);
+    clearDrHandoffState();
 
-    if (prevId && id !== prevId && !nearNew) {
+    if (foundEarly) {
 
-      // Change-over only when ship is NOT yet near the new track
+      const wps = setrouteNormalizeRouteWps(foundEarly);
 
-      if (prevSnap && prevSnap.length >= 2) persistDrLastRailsWps(prevSnap);
-
-      armDrRouteHandoff(prevSnap || [], id);
-
-    } else {
-
-      // First Current, or already on the new track → adopt rails immediately
-
-      // (stale orphan snaps used to leave DR in handoff-wait forever)
-
-      clearDrHandoffState();
-
-      if (foundEarly) {
-
-        const wps = setrouteNormalizeRouteWps(foundEarly);
-
-        if (wps.length >= 2) persistDrLastRailsWps(wps);
-
-      }
+      if (wps.length >= 2) persistDrLastRailsWps(wps);
 
     }
 
@@ -2592,212 +2561,224 @@ window.getDrActiveRoute = getDrActiveRoute;
 
 
 
-/** Build cumulative NM lengths along a waypoint list. */
-
-function setrouteRouteLegLengths(wps) {
-
-  const legs = [];
-
-  let total = 0;
-
-  for (let i = 0; i < wps.length - 1; i++) {
-
-    const d = calculateHaversineDistanceNM(wps[i].lat, wps[i].lon, wps[i + 1].lat, wps[i + 1].lon);
-
-    legs.push(d);
-
-    total += d;
-
-  }
-
-  return { legs, total };
-
+/** Wrap longitude into canonical [-180, 180) range. */
+function setrouteWrapLon180(lon) {
+  const x = Number(lon);
+  if (!Number.isFinite(x)) return 0;
+  return ((x + 180) % 360 + 360) % 360 - 180;
 }
 
+/** Web Mercator northing in longitude-equivalent degrees (EPSG:3857 conformal y). */
+function setrouteMercYDeg(lat) {
+  const la = Math.max(-85.05112878, Math.min(85.05112878, Number(lat) || 0));
+  const rad = (la * Math.PI) / 180;
+  return (Math.log(Math.tan(Math.PI / 4 + rad / 2)) * 180) / Math.PI;
+}
 
+/** Inverse Web Mercator northing (degrees) -> latitude (degrees). */
+function setrouteInvMercYDeg(yDeg) {
+  const yRad = ((Number(yDeg) || 0) * Math.PI) / 180;
+  const latRad = 2 * Math.atan(Math.exp(yRad)) - Math.PI / 2;
+  return Math.max(-85.05112878, Math.min(85.05112878, (latRad * 180) / Math.PI));
+}
+
+/** Rhumb (Mercator straight-segment) bearing deg, NM length, and unwrapped segment deltas from a -> b. */
+function setrouteRhumbCourseDist(a, b) {
+  const lat1 = Number(a.lat);
+  const lon1 = Number(a.lon);
+  const lat2 = Number(b.lat);
+  const dLonDeg = setrouteWrapLon180(Number(b.lon) - lon1);
+  const bLon = lon1 + dLonDeg;
+  const phi1 = (lat1 * Math.PI) / 180;
+  const phi2 = (lat2 * Math.PI) / 180;
+  const dPhi = phi2 - phi1;
+  const psi1 = Math.log(Math.tan(Math.PI / 4 + phi1 / 2));
+  const psi2 = Math.log(Math.tan(Math.PI / 4 + phi2 / 2));
+  const dPsi = psi2 - psi1;
+  const dLam = (dLonDeg * Math.PI) / 180;
+  const q = Math.abs(dPsi) > 1e-12 ? dPhi / dPsi : Math.cos(phi1);
+  const distNm = 3440.065 * Math.hypot(dPhi, q * dLam);
+  const course = (dLam === 0 && dPsi === 0) ? 0 : (((Math.atan2(dLam, dPsi) * 180) / Math.PI + 360) % 360);
+  const y1 = (psi1 * 180) / Math.PI;
+  const y2 = (psi2 * 180) / Math.PI;
+  return {
+    course,
+    distNm,
+    dLonDeg,
+    bLon,
+    dPhiDeg: lat2 - lat1,
+    y1,
+    y2,
+    dYDeg: y2 - y1
+  };
+}
+
+/** Build cumulative Rhumb NM lengths along a waypoint list (matching drawn chart polylines). */
+function setrouteRouteLegLengths(wps) {
+  const legs = [];
+  let total = 0;
+  for (let i = 0; i < wps.length - 1; i++) {
+    const d = setrouteRhumbCourseDist(wps[i], wps[i + 1]).distNm;
+    legs.push(d);
+    total += d;
+  }
+  return { legs, total };
+}
 
 /**
-
- * Closest point on route polyline → distance-along from start (NM) + signed XTD.
-
- * IMPORTANT: foot-of-perpendicular uses the same lat/lon CHORD as the drawn Leaflet
-
- * centerline — never great-circle along the leg (that created an invisible parallel axis).
-
+ * Closest point on route polyline -> distance-along from start (NM) + signed XTD.
+ * Uses Web Mercator (EPSG:3857) conformal segment projection and per-segment antimeridian
+ * unwrapping so projected point & leg course match Leaflet L.polyline identically.
  */
-
 function setrouteProjectOntoRoute(lat, lon, wps) {
-
   if (!wps || wps.length < 2) return null;
-
   let best = null;
-
   let alongBefore = 0;
-
+  const pLat = Number(lat);
+  const pY = setrouteMercYDeg(pLat);
   for (let i = 0; i < wps.length - 1; i++) {
-
     const a = wps[i];
-
     const b = wps[i + 1];
+    const aLon = Number(a.lon);
+    const rh = setrouteRhumbCourseDist(a, b);
+    const bLon = rh.bLon;
+    const legNm = rh.distNm || 1e-9;
 
-    const legNm = calculateHaversineDistanceNM(a.lat, a.lon, b.lat, b.lon) || 1e-9;
+    const midLon = (aLon + bLon) * 0.5;
+    const pLon = midLon + setrouteWrapLon180(Number(lon) - midLon);
 
-    // Project in local NM plane (equirectangular around leg mid-lat)
+    const bx = bLon - aLon;
+    const by = rh.dYDeg;
+    const px = pLon - aLon;
+    const py = pY - rh.y1;
+    const ab2 = bx * bx + by * by || 1e-12;
+    let s = (px * bx + py * by) / ab2;
+    s = Math.max(0, Math.min(1, s));
 
-    const cosLat = Math.max(0.2, Math.cos(((a.lat + b.lat) * 0.5 * Math.PI) / 180));
-
-    const bx = (b.lon - a.lon) * 60 * cosLat;
-
-    const by = (b.lat - a.lat) * 60;
-
-    const px = (lon - a.lon) * 60 * cosLat;
-
-    const py = (lat - a.lat) * 60;
-
-    const ab2 = bx * bx + by * by || 1e-9;
-
-    let t = (px * bx + py * by) / ab2;
-
-    t = Math.max(0, Math.min(1, t));
-
-    // Chord point = exact position on the chart polyline segment
-
-    const qLat = a.lat + t * (b.lat - a.lat);
-
-    const qLon = a.lon + t * (b.lon - a.lon);
-
-    const course = (typeof setrouteCourseBetweenWp === "function")
-
-      ? setrouteCourseBetweenWp(a, b)
-
-      : (Math.atan2(bx, by) * 180) / Math.PI;
+    const qLonUnrolled = aLon + s * bx;
+    const qY = rh.y1 + s * by;
+    const qLat = Math.abs(rh.dPhiDeg) <= 1e-7 ? Number(a.lat) : setrouteInvMercYDeg(qY);
+    const qLon = setrouteWrapLon180(qLonUnrolled);
 
     const cosQ = Math.max(0.2, Math.cos((qLat * Math.PI) / 180));
+    const ox = (pLon - qLonUnrolled) * 60 * cosQ;
+    const oy = (pLat - qLat) * 60;
+    const dist = Math.hypot(ox, oy);
 
-    const ox = (lon - qLon) * 60 * cosQ;
-
-    const oy = (lat - qLat) * 60;
-
-    const dist = Math.hypot(ox, oy); // NM
-
-    // Signed XTD: + = starboard of track (right-hand from A→B), − = port
-
+    // Signed XTD: + = starboard of track (right-hand from A->B), - = port
     const trackLen = Math.hypot(bx, by) || 1e-9;
+    const xtdSigned = (by * ox - bx * oy) / trackLen;
 
-    const xtdSigned = (bx * oy - by * ox) / trackLen;
-
-    const along = alongBefore + t * legNm;
+    const fracAlong = Math.abs(rh.dPhiDeg) > 1e-5
+      ? Math.max(0, Math.min(1, (qLat - Number(a.lat)) / rh.dPhiDeg))
+      : s;
+    const along = alongBefore + fracAlong * legNm;
 
     if (!best || dist < best.distNm) {
-
       best = {
-
         lat: qLat,
-
         lon: qLon,
-
+        unrolledLon: qLonUnrolled,
         distNm: dist,
-
         xtdNm: xtdSigned,
-
         alongNm: along,
-
         segIdx: i,
-
-        t: t,
-
-        course: ((Number(course) % 360) + 360) % 360
-
+        t: fracAlong,
+        course: rh.course
       };
-
     }
-
     alongBefore += legNm;
-
   }
-
   return best;
-
 }
 
-
-
 /**
-
  * Point at distance-along route from start (NM).
-
- * Uses chord lerp (same as Leaflet centerline) so DR rides the visible axis.
-
+ * Uses constant-bearing Rhumb progression paired with Web Mercator longitude interpolation
+ * so DR moves at exact ground speed strictly along the visible Leaflet centerline.
  */
-
 function setroutePointAlongRoute(wps, alongNm) {
-
   if (!wps || wps.length < 2) return null;
-
   const { legs, total } = setrouteRouteLegLengths(wps);
-
   let d = Math.max(0, Math.min(total, Number(alongNm) || 0));
-
   if (d >= total - 1e-6) {
-
     const a = wps[wps.length - 2];
-
     const b = wps[wps.length - 1];
-
-    const course = (typeof setrouteCourseBetweenWp === "function")
-
-      ? setrouteCourseBetweenWp(a, b)
-
-      : 0;
-
-    return { lat: b.lat, lon: b.lon, course: ((Number(course) % 360) + 360) % 360, alongNm: total, atEnd: true };
-
+    const rh = setrouteRhumbCourseDist(a, b);
+    return {
+      lat: Number(b.lat),
+      lon: setrouteWrapLon180(rh.bLon),
+      unrolledLon: rh.bLon,
+      course: rh.course,
+      segIdx: wps.length - 2,
+      t: 1,
+      alongNm: total,
+      atEnd: true
+    };
   }
-
   for (let i = 0; i < legs.length; i++) {
-
     if (d <= legs[i] + 1e-9) {
-
       const a = wps[i];
-
       const b = wps[i + 1];
-
-      const course = (typeof setrouteCourseBetweenWp === "function")
-
-        ? setrouteCourseBetweenWp(a, b)
-
-        : 0;
-
-      const t = legs[i] > 0 ? d / legs[i] : 0;
-
-      const lat = a.lat + (b.lat - a.lat) * t;
-
-      const lon = a.lon + (b.lon - a.lon) * t;
-
+      const rh = setrouteRhumbCourseDist(a, b);
+      const t = legs[i] > 0 ? Math.max(0, Math.min(1, d / legs[i])) : 0;
+      const lat = Number(a.lat) + rh.dPhiDeg * t;
+      let lonUnrolled;
+      if (Math.abs(rh.dPhiDeg) > 1e-5 && Math.abs(rh.dYDeg) > 1e-7) {
+        const fracY = (setrouteMercYDeg(lat) - rh.y1) / rh.dYDeg;
+        lonUnrolled = Number(a.lon) + rh.dLonDeg * fracY;
+      } else {
+        lonUnrolled = Number(a.lon) + rh.dLonDeg * t;
+      }
       return {
-
         lat: lat,
-
-        lon: lon,
-
-        course: ((Number(course) % 360) + 360) % 360,
-
-        alongNm: (alongNm || 0),
-
+        lon: setrouteWrapLon180(lonUnrolled),
+        unrolledLon: lonUnrolled,
+        course: rh.course,
+        segIdx: i,
+        t: t,
+        alongNm: Number(alongNm) || 0,
         atEnd: false
-
       };
-
     }
-
     d -= legs[i];
-
   }
-
+  const aLast = wps[wps.length - 2];
   const last = wps[wps.length - 1];
+  const rhLast = setrouteRhumbCourseDist(aLast, last);
+  return {
+    lat: Number(last.lat),
+    lon: setrouteWrapLon180(rhLast.bLon),
+    unrolledLon: rhLast.bLon,
+    course: rhLast.course,
+    segIdx: wps.length - 2,
+    t: 1,
+    alongNm: total,
+    atEnd: true
+  };
+}
 
-  return { lat: last.lat, lon: last.lon, course: 0, alongNm: total, atEnd: true };
-
+/** Resolve exact Rhumb course of the active leg for a vessel in DR on Current rails. */
+function resolveDrCurrentLegCourseDeg(v) {
+  try {
+    if (!v || typeof getDrActiveRoute !== "function") return null;
+    const route = getDrActiveRoute();
+    const wps = route ? setrouteNormalizeRouteWps(route) : [];
+    if (wps.length >= 2) {
+      const la = Number(v.lat);
+      const lo = Number(v.lon);
+      const segIdx = Number(v.aisDrSegIdx);
+      if (Number.isInteger(segIdx) && segIdx >= 0 && segIdx < wps.length - 1 && Number.isFinite(la) && Number.isFinite(lo)) {
+        const legProj = setrouteProjectOntoRoute(la, lo, [wps[segIdx], wps[segIdx + 1]]);
+        if (legProj && legProj.distNm <= 0.15) return legProj.course;
+      }
+      if (Number.isFinite(la) && Number.isFinite(lo)) {
+        const proj = setrouteProjectOntoRoute(la, lo, wps);
+        if (proj && Number.isFinite(proj.course)) return proj.course;
+      }
+    }
+  } catch (eLeg) {}
+  return Number.isFinite(Number(v && v.aisDrLegCourse)) ? ((Number(v.aisDrLegCourse) % 360) + 360) % 360 : null;
 }
 
 
@@ -2858,11 +2839,34 @@ function applyOwnVesselDeadReckoning(opts) {
 
   if (!hasFixOrigin) return;
 
-  // Higher-priority live feeds suppress DR
+  // Higher-priority live feeds suppress DR (AIS must be lost > 1h for DR)
 
   const feed = typeof resolveOwnShipActiveFeed === "function" ? resolveOwnShipActiveFeed(v) : null;
 
-  if (feed === "ais" || feed === "gps") return;
+  if (feed === "gps") return;
+
+  const isFreshAis = feed === "ais" || (getOwnShipPreferredNav(v) === "ais" && typeof isOwnShipAisFresh === "function" && isOwnShipAisFresh(v));
+
+  if (isFreshAis) {
+    if (v.deadReckoned && isValidVesselLatLon(v.aisFixLat, v.aisFixLon)) {
+      const liveCog = Number.isFinite(Number(v.aisFixCog)) ? Number(v.aisFixCog) : v.cog;
+      const updatedLive = Object.assign({}, v, {
+        lat: Number(v.aisFixLat),
+        lon: Number(v.aisFixLon),
+        cog: liveCog,
+        deadReckoned: false,
+        aisDrOnCenterline: false,
+        source: "ais"
+      });
+      window.userVessel = updatedLive;
+      userVessel = updatedLive;
+      if (typeof persistUserVessel === "function") persistUserVessel({ visualDr: true });
+      if (window.leafletMap && typeof plotUserVessel === "function") {
+        plotUserVessel(updatedLive.lat, updatedLive.lon, "AIS", true);
+      }
+    }
+    return;
+  }
 
   const srcLow = String(v.source || "").toLowerCase();
 
@@ -2873,10 +2877,6 @@ function applyOwnVesselDeadReckoning(opts) {
   if (window._setsailGpsWatchActive) return;
 
   if (typeof isOwnShipGpsFresh === "function" && isOwnShipGpsFresh(v)) return;
-
-  // Fresh AIS (preferred) owns the icon
-
-  if (getOwnShipPreferredNav(v) === "ais" && typeof isOwnShipAisFresh === "function" && isOwnShipAisFresh(v)) return;
 
 
 
@@ -2934,15 +2934,18 @@ function applyOwnVesselDeadReckoning(opts) {
 
   if (ageMs > OWN_AIS_DR_MAX_AGE_MS) ageMs = OWN_AIS_DR_MAX_AGE_MS;
 
-  // While AIS is truly live (<12s), keep the icon on the fix — do not coast over it.
-  // When fix ages past OWN_AIS_VISUAL_DR_MS, DR projection along route rails takes over smoothly.
-  if (!opts.force && ageMs < OWN_AIS_VISUAL_DR_MS) {
+  const isAisOrigin = !!(hasAisFixCoords || v.aisLastFixAt || v.aisSeenAt);
+  const staleThreshMs = isAisOrigin ? OWN_AIS_STALE_DR_MS : OWN_AIS_VISUAL_DR_MS;
+  if ((!opts.force && ageMs < staleThreshMs) || (isAisOrigin && (v.aisLastFixAt || v.aisSeenAt) && ageMs < OWN_AIS_STALE_DR_MS)) {
     if (v.deadReckoned && isValidVesselLatLon(v.aisFixLat, v.aisFixLon)) {
-      // Snap back from DR to the official fix only when a fresh live report arrives
       const updatedLive = Object.assign({}, v, {
         lat: Number(v.aisFixLat),
         lon: Number(v.aisFixLon),
+        cog: Number.isFinite(Number(v.aisFixCog)) ? Number(v.aisFixCog) : v.cog,
         deadReckoned: false,
+        aisDrOnCenterline: false,
+        aisDrLegCourse: null,
+        aisDrSegIdx: null,
         source: "ais"
       });
       window.userVessel = updatedLive;
@@ -3032,9 +3035,7 @@ function applyOwnVesselDeadReckoning(opts) {
 
     : { wps: null, phase: "off" };
 
-  // If stuck in handoff-wait or force-activating Current rails — adopt now
-
-  if ((!resolved || !resolved.wps || opts.force) && (opts.force || opts.visual)) {
+  if ((!resolved || !resolved.wps || resolved.wps.length < 2) && (opts.force || opts.visual)) {
 
     const active = typeof getDrActiveRoute === "function" ? getDrActiveRoute() : null;
 
@@ -3042,35 +3043,11 @@ function applyOwnVesselDeadReckoning(opts) {
 
     if (aw.length >= 2) {
 
-      const near = setrouteProjectOntoRoute(
+      try { clearDrHandoffState(); } catch (eClr) {}
 
-        Number.isFinite(shipLat) ? shipLat : fixLat,
+      persistDrLastRailsWps(aw);
 
-        Number.isFinite(shipLon) ? shipLon : fixLon,
-
-        aw
-
-      );
-
-      if (near && near.distNm <= Math.max(SETSAIL_DR_HANDOFF_NM, 12)) {
-
-        try { clearDrHandoffState(); } catch (eClr) {}
-
-        persistDrLastRailsWps(aw);
-
-        resolved = { wps: aw, phase: "rails", handoffDone: true };
-
-      } else if (opts.force) {
-
-        // Force Current: still ride the new rails (project AIS onto them)
-
-        try { clearDrHandoffState(); } catch (eClr2) {}
-
-        persistDrLastRailsWps(aw);
-
-        resolved = { wps: aw, phase: "rails" };
-
-      }
+      resolved = { wps: aw, phase: "rails" };
 
     }
 
@@ -3078,9 +3055,7 @@ function applyOwnVesselDeadReckoning(opts) {
 
   const wps = resolved && resolved.wps && resolved.wps.length >= 2 ? resolved.wps : null;
 
-  const phase = (resolved && resolved.phase) || "off";
-
-  if (!wps) return; // handoff-wait / off — keep last AIS, never invent a rhumb
+  if (!wps) return; // off — keep last AIS, never invent a rhumb
 
 
 
@@ -3096,58 +3071,45 @@ function applyOwnVesselDeadReckoning(opts) {
 
 
 
-  // Always ride the drawn centerline chord — never parallel XTD / GC offset
+  // Always ride the drawn Web Mercator centerline — never parallel XTD / GC offset
 
-  let lat1 = target.lat;
+  const lat1 = target.lat;
 
-  let lon1 = target.lon;
+  const lon1 = target.lon;
 
-  let courseOut = target.course;
+  const courseOut = target.course;
 
   const onCenter = true;
 
-  let mode = phase === "handoff-prev" ? "handoff-prev" : "rails";
-
-
-
-  if (phase === "handoff-prev" && typeof resolveDrRailsForShip === "function") {
-
-    const again = resolveDrRailsForShip(lat1, lon1);
-
-    if (again && again.handoffDone && again.wps && again.wps.length >= 2) {
-
-      const proj2 = setrouteProjectOntoRoute(lat1, lon1, again.wps);
-
-      if (proj2) {
-
-        lat1 = proj2.lat;
-
-        lon1 = proj2.lon;
-
-        courseOut = proj2.course;
-
-        mode = "rails";
-
-      }
-
-    }
-
-  }
+  const mode = "rails";
 
 
 
   if (!Number.isFinite(lat1) || !Number.isFinite(lon1)) return;
 
-  // Skip no-op redraws (icon already there)
+  // Skip no-op redraws only if position, leg course, and active segment already match
 
   const dMove = calculateHaversineDistanceNM(Number(v.lat) || fixLat, Number(v.lon) || fixLon, lat1, lon1);
 
   const minMove = (opts.visual || opts.force) ? 0.0001 : 0.01;
-  if (!(opts.force) && Number.isFinite(dMove) && dMove < minMove && v.deadReckoned) return;
+  const prevCog = Number(v.cog);
+  const cogDiff = (Number.isFinite(prevCog) && Number.isFinite(courseOut))
+    ? Math.abs(((prevCog - courseOut + 540) % 360) - 180)
+    : 999;
+  const needUpdate = !(
+    v.deadReckoned &&
+    v.aisDrOnCenterline &&
+    String(v.source || "").toLowerCase() === "ais-dr-rails" &&
+    Number.isFinite(dMove) &&
+    dMove < minMove &&
+    cogDiff < 0.05 &&
+    Number(v.aisDrSegIdx) === Number(target.segIdx)
+  );
+  if (!opts.force && !needUpdate) return;
 
 
 
-  // DR SOG = AIS fix speed (or last speed); COG = along-track leg course
+  // DR SOG = AIS fix speed (or last speed); COG = along-track leg Rhumb course
 
   const sogKeep = sog >= 0.3 ? sog : (Number.isFinite(Number(v.sog)) && Number(v.sog) >= 0 ? Number(v.sog) : 0);
 
@@ -3176,6 +3138,10 @@ function applyOwnVesselDeadReckoning(opts) {
     sog: sogKeep,
 
     cog: cogLeg,
+
+    aisDrLegCourse: cogLeg,
+
+    aisDrSegIdx: target.segIdx,
 
     heading: hdgDr,
 
@@ -3226,15 +3192,9 @@ function applyOwnVesselDeadReckoning(opts) {
 
     const ageHr = Math.round((ageMs / 3600000) * 10) / 10;
 
-    const msg = mode === "handoff-prev"
-
-      ? "DR change-over — previous rails until near new Current"
-
-      : (distNm >= 0.5
-
-        ? ("DR on Current +" + Math.round(distNm) + " NM from last AIS (" + ageHr + " h @ " + (sog || 0).toFixed(1) + " kn)")
-
-        : "DR on Current — snapped to route rails");
+    const msg = distNm >= 0.5
+      ? ("DR on Current +" + Math.round(distNm) + " NM from last AIS (" + ageHr + " h @ " + (sog || 0).toFixed(1) + " kn)")
+      : "DR on Current — snapped to route rails";
 
     showSetSailToast(msg, "info");
 
@@ -4156,39 +4116,27 @@ function syncMyVesselFromLiveAis(t) {
 
   const rawTs = t.updatedAt != null ? t.updatedAt : (t.seen != null ? t.seen : (t.timestamp != null ? t.timestamp : t.ts));
 
-  let incomingTs = NaN;
+  const parsedTs = parseOwnAisTimestampMs(rawTs);
 
-  if (typeof rawTs === "number" && Number.isFinite(rawTs)) {
+  const hasExplicitTs = parsedTs > 0;
 
-    incomingTs = rawTs < 1e12 ? rawTs * 1000 : rawTs;
-
-  } else if (typeof rawTs === "string" && rawTs.trim()) {
-
-    const parsed = Date.parse(rawTs);
-
-    if (Number.isFinite(parsed)) {
-
-      incomingTs = parsed;
-
-    } else if (Number.isFinite(Number(rawTs))) {
-
-      const numTs = Number(rawTs);
-
-      incomingTs = numTs < 1e12 ? numTs * 1000 : numTs;
-
-    }
-
-  }
-
-  const hasExplicitTs = Number.isFinite(incomingTs) && incomingTs > 0;
-
-  if (!hasExplicitTs) incomingTs = Date.now();
+  const incomingTs = hasExplicitTs ? parsedTs : Date.now();
 
   const prevFixMs = prev.aisLastFixAt
 
     ? Date.parse(prev.aisLastFixAt)
 
     : (prev.aisRefreshedAt ? Date.parse(prev.aisRefreshedAt) : 0);
+
+  const ageMs = Math.max(0, (typeof getSetSailUtcNowMs === "function" ? getSetSailUtcNowMs() : Date.now()) - incomingTs);
+  const isLive = ageMs < OWN_AIS_STALE_DR_MS;
+  const anchorLat = isValidVesselLatLon(prev.aisFixLat, prev.aisFixLon)
+    ? Number(prev.aisFixLat)
+    : Number(prev.aisLastFixLat);
+  const anchorLon = isValidVesselLatLon(prev.aisFixLat, prev.aisFixLon)
+    ? Number(prev.aisFixLon)
+    : Number(prev.aisLastFixLon);
+  const hasAnchor = isValidVesselLatLon(anchorLat, anchorLon);
 
   if (Number.isFinite(prevFixMs) && prevFixMs > 0) {
 
@@ -4199,14 +4147,15 @@ function syncMyVesselFromLiveAis(t) {
     }
 
     const sameAnchor =
+      hasAnchor &&
+      Math.abs(lat - anchorLat) < 1e-4 &&
+      Math.abs(lon - anchorLon) < 1e-4;
 
-      isValidVesselLatLon(prev.aisFixLat, prev.aisFixLon) &&
-
-      Math.abs(lat - Number(prev.aisFixLat)) < 1e-4 &&
-
-      Math.abs(lon - Number(prev.aisFixLon)) < 1e-4;
-
-    if (sameAnchor && (!hasExplicitTs || incomingTs <= prevFixMs + 2000)) {
+    if (
+      hasAnchor &&
+      ((sameAnchor && (!hasExplicitTs || incomingTs <= prevFixMs + 2000)) ||
+        (!isLive && hasExplicitTs && incomingTs <= prevFixMs))
+    ) {
 
       return; // duplicate AIS record without a genuinely newer fix — keep DR smooth
 
@@ -4242,11 +4191,12 @@ function syncMyVesselFromLiveAis(t) {
 
   const prevFixKeep = prev.aisLastFixAt ? Date.parse(prev.aisLastFixAt) : NaN;
 
-  const ageMs = Math.max(0, (typeof getSetSailUtcNowMs === "function" ? getSetSailUtcNowMs() : Date.now()) - incomingTs);
-  const isLive = ageMs <= OWN_AIS_VISUAL_DR_MS;
   const isDrOnRails = !isLive && typeof getDrActiveRouteId === "function" && !!getDrActiveRouteId();
   const keepLat = (isDrOnRails && isValidVesselLatLon(prev.lat, prev.lon)) ? prev.lat : lat;
   const keepLon = (isDrOnRails && isValidVesselLatLon(prev.lat, prev.lon)) ? prev.lon : lon;
+  const keepCog = isDrOnRails ? prev.cog : (t.cog != null && Number.isFinite(Number(t.cog)) ? Number(t.cog) : prev.cog);
+  const keepHdg = isDrOnRails ? prev.heading : (t.heading != null && Number(t.heading) < 360 ? Number(t.heading) : prev.heading);
+  const keepSog = isDrOnRails ? prev.sog : (t.sog != null && Number.isFinite(Number(t.sog)) ? Number(t.sog) : prev.sog);
 
   const updated = Object.assign({}, prev, {
 
@@ -4254,11 +4204,11 @@ function syncMyVesselFromLiveAis(t) {
 
     lon: keepLon,
 
-    sog: t.sog != null ? Number(t.sog) : prev.sog,
+    sog: keepSog,
 
-    cog: t.cog != null ? Number(t.cog) : prev.cog,
+    cog: keepCog,
 
-    heading: t.heading != null && Number(t.heading) < 360 ? Number(t.heading) : prev.heading,
+    heading: keepHdg,
 
     shipType: t.shipType || t.type || prev.shipType,
 
@@ -4282,6 +4232,8 @@ function syncMyVesselFromLiveAis(t) {
 
     aisFixLon: lon,
 
+    aisFixCog: t.cog != null && Number.isFinite(Number(t.cog)) ? Number(t.cog) : prev.aisFixCog,
+
     aisFixSog: t.sog != null && Number.isFinite(Number(t.sog)) ? Number(t.sog) : prev.aisFixSog,
 
     aisRefreshedAt: new Date().toISOString(),
@@ -4295,6 +4247,10 @@ function syncMyVesselFromLiveAis(t) {
     aisDrMode: isDrOnRails ? prev.aisDrMode : null,
 
     aisDrOnCenterline: isDrOnRails ? prev.aisDrOnCenterline : false,
+
+    aisDrLegCourse: isDrOnRails ? prev.aisDrLegCourse : null,
+
+    aisDrSegIdx: isDrOnRails ? prev.aisDrSegIdx : null,
 
     aisDrPrevAlongNm: Number.isFinite(prevAlongKeep) ? prevAlongKeep : prev.aisDrPrevAlongNm,
 
@@ -8452,7 +8408,7 @@ function renderRouteOnMap(route, shouldFly = true) {
 
             persistDrLastRailsWps(setrouteNormalizeRouteWps(activeRouteData));
 
-            applyOwnVesselDeadReckoning({ toast: false });
+            applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true });
 
           }
 
@@ -8694,6 +8650,9 @@ function ensureCurrentRouteRenderedOnChart(opts) {
 
   if (typeof window.renderRouteBufferCorridorOnMap === "function") {
     try { window.renderRouteBufferCorridorOnMap(); } catch (eCor) {}
+  }
+  if (isCurrent && typeof applyOwnVesselDeadReckoning === "function") {
+    try { applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true }); } catch (eDrBoot) {}
   }
   if (typeof updateCurrentRouteWaypointsPassedStatus === "function") {
     try { updateCurrentRouteWaypointsPassedStatus(); } catch (ePass) {}
@@ -12545,13 +12504,14 @@ function updateOwnShipHdgLine(lat, lon, hdgDeg) {
     clearOwnShipHdgLine();
     return;
   }
-  if (!isValidVesselLatLon(lat, lon) || !hasOwnShipHeadingDeg(hdgDeg)) {
+  const normLon = setrouteWrapLon180(lon);
+  if (!isValidVesselLatLon(lat, normLon) || !hasOwnShipHeadingDeg(hdgDeg)) {
     clearOwnShipHdgLine();
     return;
   }
 
   const vLat = Number(lat);
-  const vLon = Number(lon);
+  const vLon = resolveMapPlotLon(vLat, normLon);
   const bearing = ((Number(hdgDeg) % 360) + 360) % 360;
 
   // Draw HDG line across the entire nautical chart to the map boundary ("до конца карты")
@@ -12573,7 +12533,7 @@ function updateOwnShipHdgLine(lat, lon, hdgDeg) {
   } catch (eTip) {}
 
   if (tipLat == null || tipLon == null) {
-    const fallbackTip = destinationPointNm(vLat, vLon, bearing, 5000);
+    const fallbackTip = destinationPointRhumbNm(vLat, vLon, bearing, 5000);
     tipLat = fallbackTip[0];
     tipLon = fallbackTip[1];
   }
@@ -12680,6 +12640,73 @@ function destinationPointNm(lat, lon, bearingDeg, distNm) {
 
 }
 
+/** Constant-bearing Rhumb destination in Web Mercator (preserves continuous unrolled longitude). */
+function destinationPointRhumbNm(lat, lon, bearingDeg, distNm) {
+  const R = 3440.065;
+  const theta = (Number(bearingDeg) * Math.PI) / 180;
+  const delta = Number(distNm) / R;
+  const phi1 = (Number(lat) * Math.PI) / 180;
+  let phi2 = phi1 + delta * Math.cos(theta);
+  const maxPhi = (85.05112878 * Math.PI) / 180;
+  if (phi2 > maxPhi) phi2 = maxPhi;
+  if (phi2 < -maxPhi) phi2 = -maxPhi;
+  const dPhi = phi2 - phi1;
+  const psi1 = Math.log(Math.tan(Math.PI / 4 + phi1 / 2));
+  const psi2 = Math.log(Math.tan(Math.PI / 4 + phi2 / 2));
+  const dPsi = psi2 - psi1;
+  const q = Math.abs(dPsi) > 1e-12 ? dPhi / dPsi : Math.cos(phi1);
+  const dLam = Math.abs(q) > 1e-9 ? (delta * Math.sin(theta)) / q : 0;
+  const lon2 = Number(lon) + (dLam * 180) / Math.PI;
+  return [(phi2 * 180) / Math.PI, lon2];
+}
+
+/** Pick 360-deg world copy matching the visible unrolled route (antimeridian continuity) or map center. */
+function resolveMapPlotLon(lat, lon) {
+  const la = Number(lat);
+  const loRaw = Number(lon);
+  if (!Number.isFinite(la) || !Number.isFinite(loRaw)) return lon;
+  const base = setrouteWrapLon180(loRaw);
+  const cosLa = Math.max(0.2, Math.cos((la * Math.PI) / 180));
+  try {
+    const unrolled = window._setsailRouteUnrolled;
+    const isRouteVisible = typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.route !== false;
+    if (isRouteVisible && Array.isArray(unrolled) && unrolled.length >= 2) {
+      let bestCand = base;
+      let bestD2 = Infinity;
+      for (let k = -2; k <= 2; k++) {
+        const cand = base + k * 360;
+        for (let i = 0; i < unrolled.length - 1; i++) {
+          const a = unrolled[i];
+          const b = unrolled[i + 1];
+          if (!a || !b) continue;
+          const dx = (b[1] - a[1]) * cosLa;
+          const dy = b[0] - a[0];
+          const ab2 = dx * dx + dy * dy;
+          let s = ab2 > 1e-12 ? (((cand - a[1]) * cosLa * dx + (la - a[0]) * dy) / ab2) : 0;
+          s = Math.max(0, Math.min(1, s));
+          const px = a[1] + s * (b[1] - a[1]);
+          const py = a[0] + s * (b[0] - a[0]);
+          const d2 = ((cand - px) * cosLa) ** 2 + (la - py) ** 2;
+          if (d2 < bestD2) {
+            bestD2 = d2;
+            bestCand = cand;
+          }
+        }
+      }
+      if (bestD2 < 25) return bestCand;
+    }
+  } catch (eUnr) {}
+  try {
+    if (leafletMap && leafletMap.getCenter) {
+      const cLng = Number(leafletMap.getCenter().lng);
+      if (Number.isFinite(cLng)) {
+        return base + Math.round((cLng - base) / 360) * 360;
+      }
+    }
+  } catch (eCen) {}
+  return base;
+}
+
 
 
 function resolveOwnShipSogKn(v) {
@@ -12718,7 +12745,9 @@ function resolveOwnShipCogDeg(v) {
 
   try {
 
-    if (typeof resolveOwnShipActiveFeed === "function" && resolveOwnShipActiveFeed(v) === "gps") {
+    const feed = typeof resolveOwnShipActiveFeed === "function" ? resolveOwnShipActiveFeed(v) : null;
+
+    if (feed === "gps") {
 
       const g = Number(v.gpsCogSmooth != null ? v.gpsCogSmooth : v.cog);
 
@@ -12726,11 +12755,22 @@ function resolveOwnShipCogDeg(v) {
 
     }
 
+    const hasDrRoute = typeof getDrActiveRouteId === "function" && !!getDrActiveRouteId();
+    const isDrNow = hasDrRoute && (feed === "dr" || !!v.deadReckoned || /ais-dr/i.test(String(v.source || "")));
+    if (isDrNow && feed !== "ais" && typeof resolveDrCurrentLegCourseDeg === "function") {
+      const legCog = resolveDrCurrentLegCourseDeg(v);
+      if (hasOwnShipHeadingDeg(legCog)) return ((Number(legCog) % 360) + 360) % 360;
+    }
+
   } catch (e) {}
 
   if (hasOwnShipHeadingDeg(v.cog)) return ((Number(v.cog) % 360) + 360) % 360;
 
-  // DR / AIS sometimes only publish course as heading when COG missing
+  if (/ais-dr/i.test(String(v.source || "")) && hasOwnShipHeadingDeg(v.aisDrLegCourse)) {
+    return ((Number(v.aisDrLegCourse) % 360) + 360) % 360;
+  }
+
+  // AIS sometimes only publish course as heading when COG missing
 
   if ((v.deadReckoned || /ais-dr/i.test(String(v.source || ""))) && hasOwnShipHeadingDeg(v.heading)) {
 
@@ -12874,7 +12914,9 @@ function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
 
   if (!leafletMap || !leafletVesselLayer) return;
 
-  if (!isValidVesselLatLon(lat, lon)) {
+  const normLon = setrouteWrapLon180(lon);
+
+  if (!isValidVesselLatLon(lat, normLon)) {
 
     clearOwnShipTimeVectorLayers();
 
@@ -12890,7 +12932,7 @@ function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
 
   }
 
-
+  const plotLon = resolveMapPlotLon(lat, normLon);
 
   const bearing = ((Number(cogDeg) % 360) + 360) % 360;
 
@@ -13014,13 +13056,13 @@ function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
 
     const halfNm = OWN_SHIP_VECTOR_BEAK_HALF_PX * npp;
 
-    const tip = destinationPointNm(lat, lon, bearing, tipNm);
+    const tip = destinationPointRhumbNm(lat, plotLon, bearing, tipNm);
 
-    // Base through circle centre, perpendicular to COG → isosceles COG triangle
+    // Base through circle centre, perpendicular to COG -> isosceles COG triangle
 
-    const a1 = destinationPointNm(lat, lon, (bearing + 90) % 360, halfNm);
+    const a1 = destinationPointRhumbNm(lat, plotLon, (bearing + 90) % 360, halfNm);
 
-    const a2 = destinationPointNm(lat, lon, (bearing + 270) % 360, halfNm);
+    const a2 = destinationPointRhumbNm(lat, plotLon, (bearing + 270) % 360, halfNm);
 
     _setOwnShipVecLayer("beak", [a1, tip, a2], (ll) => L.polygon(ll, beakStyle));
 
@@ -13034,22 +13076,22 @@ function updateOwnShipTimeVector(lat, lon, cogDeg, sogKn) {
 
   const tipNm = drawPx * npp; // = min(trueNm, maxPx*npp)
 
-  const tip = destinationPointNm(lat, lon, bearing, tipNm);
+  const tip = destinationPointRhumbNm(lat, plotLon, bearing, tipNm);
 
-  const start = destinationPointNm(lat, lon, bearing, rimNm);
+  const start = destinationPointRhumbNm(lat, plotLon, bearing, rimNm);
 
   const wingNm = Math.max(5 * npp, Math.min(10 * npp, tipNm * 0.2));
 
   // Double arrow for Ground-Stabilized COG vector (ECDIS IEC 62288 standard)
   // 1. Primary (leading) arrowhead at the tip of the vector
-  const a1 = destinationPointNm(tip[0], tip[1], (bearing + 150) % 360, wingNm);
-  const a2 = destinationPointNm(tip[0], tip[1], (bearing + 210) % 360, wingNm);
+  const a1 = destinationPointRhumbNm(tip[0], tip[1], (bearing + 150) % 360, wingNm);
+  const a2 = destinationPointRhumbNm(tip[0], tip[1], (bearing + 210) % 360, wingNm);
 
   // 2. Secondary (trailing) arrowhead placed slightly behind along the shaft
   const offsetNm = Math.max(4.5 * npp, wingNm * 0.75);
-  const tip2 = destinationPointNm(tip[0], tip[1], (bearing + 180) % 360, offsetNm);
-  const b1 = destinationPointNm(tip2[0], tip2[1], (bearing + 150) % 360, wingNm);
-  const b2 = destinationPointNm(tip2[0], tip2[1], (bearing + 210) % 360, wingNm);
+  const tip2 = destinationPointRhumbNm(tip[0], tip[1], (bearing + 180) % 360, offsetNm);
+  const b1 = destinationPointRhumbNm(tip2[0], tip2[1], (bearing + 150) % 360, wingNm);
+  const b2 = destinationPointRhumbNm(tip2[0], tip2[1], (bearing + 210) % 360, wingNm);
 
   _setOwnShipVecLayer("shaft", [start, tip], (ll) => L.polyline(ll, shaftStyle));
 
@@ -13644,11 +13686,13 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
   const prev = userVessel || {};
 
+  const normLon = setrouteWrapLon180(lon);
+
   userVessel = Object.assign({}, prev, {
 
     lat,
 
-    lon,
+    lon: normLon,
 
     source,
 
@@ -13662,7 +13706,7 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
   if (!isVisualSrc || !window._setsailOwnShipPersistAt || (Date.now() - window._setsailOwnShipPersistAt > 15000)) {
 
-    persistUserVessel();
+    persistUserVessel({ visualDr: isVisualSrc });
 
     window._setsailOwnShipPersistAt = Date.now();
 
@@ -13678,7 +13722,9 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
     const sog = resolveOwnShipSogKn(userVessel);
 
-    const ll = L.latLng(lat, lon);
+    const plotLon = resolveMapPlotLon(lat, normLon);
+
+    const ll = L.latLng(lat, plotLon);
 
 
 
@@ -13762,13 +13808,13 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
     // Dynamic COG time-vector — length = SOG × minutes/60, direction = COG
 
-    updateOwnShipTimeVector(lat, lon, cog, sog);
+    updateOwnShipTimeVector(lat, normLon, cog, sog);
 
     // Optional 100 NM HDG line from CCRP (checkbox in popup)
 
     try {
 
-      updateOwnShipHdgLine(lat, lon, resolveOwnShipTrueHdgDeg(userVessel));
+      updateOwnShipHdgLine(lat, normLon, resolveOwnShipTrueHdgDeg(userVessel));
 
     } catch (eHdgLn) {}
 
@@ -13776,7 +13822,7 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
     try {
 
-      prefetchOpenMeteoPointWx(lat, lon).then(() => {
+      prefetchOpenMeteoPointWx(lat, normLon).then(() => {
 
         try {
 
@@ -13808,7 +13854,7 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
     if (!skipFly) {
 
-      leafletMap.flyTo([lat, lon], Math.max(leafletMap.getZoom(), 8));
+      leafletMap.flyTo([lat, plotLon], Math.max(leafletMap.getZoom(), 8));
 
     }
 
@@ -42873,7 +42919,7 @@ function saveRouteToLibrary(route) {
 
       persistDrLastRailsWps(setrouteNormalizeRouteWps(route));
 
-      applyOwnVesselDeadReckoning({ toast: false });
+      applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true });
 
     }
 

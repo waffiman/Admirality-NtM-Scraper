@@ -560,12 +560,13 @@
       } catch (eLs) {}
 
       try {
+        var staleMs = typeof global.OWN_AIS_STALE_DR_MS === "number" ? global.OWN_AIS_STALE_DR_MS : 3600000;
         var useRailsDr = !!(
           drRouteId &&
           !remoteIsLiveOther &&
           (remoteSrc === "ais-stale" ||
             remoteSrc.indexOf("ais-dr") >= 0 ||
-            (remoteSrc === "ais" && Number.isFinite(remoteFixMs) && Date.now() - remoteFixMs > 12000))
+            (remoteSrc === "ais" && Number.isFinite(remoteFixMs) && Date.now() - remoteFixMs >= staleMs))
         );
         if (typeof global.applyVesselProfile === "function") {
           var syncedVessel = remoteVessel;
