@@ -11834,15 +11834,35 @@ function initVesselTracking() {
 
 
 
-    const finishRouteUpload = (parsed) => {
+    const finishRouteUpload = (parsed, uploadedFileName) => {
 
       if (!parsed || !parsed.waypoints || parsed.waypoints.length === 0) return;
 
-      if (!parsed.id) {
+      const cleanFileName = String(uploadedFileName || "")
 
-        parsed.id = "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+        .replace(/^.*[/\\]/, "")
+
+        .replace(/\.(rtz|csv|rtm)$/i, "")
+
+        .trim();
+
+      if (cleanFileName) {
+
+        if (parsed.name && parsed.name !== cleanFileName) {
+
+          parsed.internalName = parsed.name;
+
+        }
+
+        parsed.name = cleanFileName;
+
+        parsed.fileName = String(uploadedFileName || "").replace(/^.*[/\\]/, "").trim();
 
       }
+
+      parsed.id = "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+
+      parsed._isFreshFileUpload = true;
 
       try {
 
@@ -11918,7 +11938,7 @@ function initVesselTracking() {
 
             }
 
-            finishRouteUpload(parsed);
+            finishRouteUpload(parsed, file.name);
 
           } catch (err) {
 
@@ -11954,7 +11974,7 @@ function initVesselTracking() {
 
             }
 
-            finishRouteUpload(parsed);
+            finishRouteUpload(parsed, file.name);
 
           } catch (err) {
 
@@ -11990,7 +12010,7 @@ function initVesselTracking() {
 
             }
 
-            finishRouteUpload(parsed);
+            finishRouteUpload(parsed, file.name);
 
           } catch (err) {
 
@@ -17182,14 +17202,14 @@ function initNtMMap() {
     let _renderLightSectors = null;
 
     const LIGHT_SECTOR_COLOURS = {
-      w: { fill: "#f1f5f9", stroke: "#cbd5e1" },
-      r: { fill: "#ef4444", stroke: "#dc2626" },
-      g: { fill: "#22c55e", stroke: "#16a34a" },
-      y: { fill: "#eab308", stroke: "#ca8a04" },
-      o: { fill: "#f97316", stroke: "#ea580c" },
-      b: { fill: "#3b82f6", stroke: "#2563eb" },
-      v: { fill: "#a855f7", stroke: "#9333ea" },
-      m: { fill: "#d946ef", stroke: "#c026d3" }
+      w: { arc: "#fde047", fill: "#fde047", stroke: "#0f172a" },
+      r: { arc: "#ef4444", fill: "#ef4444", stroke: "#0f172a" },
+      g: { arc: "#22c55e", fill: "#22c55e", stroke: "#0f172a" },
+      y: { arc: "#facc15", fill: "#facc15", stroke: "#0f172a" },
+      o: { arc: "#fb923c", fill: "#fb923c", stroke: "#0f172a" },
+      b: { arc: "#3b82f6", fill: "#3b82f6", stroke: "#0f172a" },
+      v: { arc: "#c084fc", fill: "#c084fc", stroke: "#0f172a" },
+      m: { arc: "#e879f9", fill: "#e879f9", stroke: "#0f172a" }
     };
 
     function ensureLightSectorsPane(mapRef) {
@@ -17201,21 +17221,20 @@ function initNtMMap() {
       }
     }
 
-    function buildLightSectorRing(lat, lon, startDeg, endDeg, radiusNm) {
+    function buildLightSectorArc(lat, lon, startDeg, endDeg, radiusNm) {
       const a0 = ((Number(startDeg) % 360) + 360) % 360;
       const b0 = ((Number(endDeg) % 360) + 360) % 360;
       let sweep = (b0 - a0 + 360) % 360;
       if (sweep < 0.05) sweep = 360;
-      const step = sweep >= 180 ? 4 : 5;
+      const step = sweep >= 180 ? 3 : 4;
       const n = Math.max(12, Math.ceil(sweep / step));
-      const ring = [[lat, lon]];
+      const arc = [];
       for (let i = 0; i <= n; i++) {
         const brg = (a0 + (sweep * i) / n) % 360;
-        const p = destinationPointNm(lat, lon, brg, radiusNm);
-        ring.push([p[0], p[1]]);
+        const p = destinationPointRhumbNm(lat, lon, brg, radiusNm);
+        arc.push([p[0], setrouteWrapLon180(p[1])]);
       }
-      ring.push([lat, lon]);
-      return ring;
+      return arc;
     }
 
     async function loadBuoyDatasets() {
@@ -18005,17 +18024,20 @@ function initNtMMap() {
         _lightSectorsGroup.clearLayers();
         if (!map.hasLayer(seamarkLyr)) return;
         const z = map.getZoom();
-        // 0.3 NM wedges only readable at chart scale (IALA marks intentionally excluded)
-        if (z < 12) return;
+        if (z < 8) return;
         const list = Array.isArray(_lightSectorsData) ? _lightSectorsData : [];
         if (!list.length) return;
         ensureLightSectorsPane(map);
         const bounds = (typeof map.getBounds === "function" && map.getBounds().pad)
           ? map.getBounds().pad(0.15)
           : map.getBounds();
-        const rNm = _lightSectorsRadiusNm || 0.3;
-        const rM = rNm * 1852;
-        const maxDraw = z >= 14 ? 900 : z >= 13 ? 550 : 320;
+        const center = typeof map.getCenter === "function" ? map.getCenter() : { lat: 0 };
+        const latRad = (Number(center && center.lat || 0) * Math.PI) / 180;
+        const mPerPx = (40075016.686 * Math.max(0.15, Math.cos(latRad))) / (256 * Math.pow(2, z));
+        const targetPx = z >= 14 ? 54 : z >= 12 ? 42 : z >= 10 ? 30 : 22;
+        const effNm = Math.max(0.18, Math.min(3.5, (targetPx * mPerPx) / 1852));
+        const arcW = z >= 12 ? 4.5 : z >= 10 ? 3.5 : 2.8;
+        const maxDraw = z >= 14 ? 900 : z >= 12 ? 600 : z >= 10 ? 400 : 280;
         let drawn = 0;
         for (let i = 0; i < list.length; i++) {
           if (drawn >= maxDraw) break;
@@ -18024,6 +18046,8 @@ function initNtMMap() {
           const lat = row[0], lon = row[1], sectors = row[2];
           if (!bounds.contains([lat, lon])) continue;
           if (!Array.isArray(sectors) || !sectors.length) continue;
+          const centerPt = [lat, setrouteWrapLon180(lon)];
+          const drawnLegAngles = new Set();
           for (let s = 0; s < sectors.length; s++) {
             if (drawn >= maxDraw) break;
             const sec = sectors[s];
@@ -18034,27 +18058,63 @@ function initNtMMap() {
             const b = Number(sec[2]);
             if (!Number.isFinite(a) || !Number.isFinite(b)) continue;
             const isFull = (a === 0 && b === 360) || Math.abs(((b - a + 360) % 360)) < 0.05;
-            // Full-circle all-round: slightly tighter zoom to avoid low-z clutter
-            if (isFull && z < 13) continue;
-            const style = {
-              pane: "lightSectorsPane",
-              interactive: false,
-              stroke: true,
-              color: cols.stroke,
-              weight: 1,
-              opacity: 0.75,
-              fill: true,
-              fillColor: cols.fill,
-              fillOpacity: isFull ? 0.18 : 0.32,
-              className: "ss-light-sector"
-            };
+            // Only draw directional ECDIS sectors; omit 360-deg all-round clutter
+            if (isFull) continue;
             try {
-              if (isFull) {
-                _lightSectorsGroup.addLayer(L.circle([lat, lon], Object.assign({ radius: rM }, style)));
-              } else {
-                const ring = buildLightSectorRing(lat, lon, a, b, rNm);
-                _lightSectorsGroup.addLayer(L.polygon(ring, style));
+              const arc = buildLightSectorArc(lat, lon, a, b, effNm);
+              if (!arc || arc.length < 2) continue;
+              const startKey = Math.round((((a % 360) + 360) % 360) * 100);
+              const endKey = Math.round((((b % 360) + 360) % 360) * 100);
+              if (!drawnLegAngles.has(startKey)) {
+                drawnLegAngles.add(startKey);
+                _lightSectorsGroup.addLayer(L.polyline([centerPt, arc[0]], {
+                  pane: "lightSectorsPane",
+                  interactive: false,
+                  stroke: true,
+                  color: cols.stroke || "#0f172a",
+                  weight: 1.15,
+                  opacity: 0.9,
+                  dashArray: "4, 4",
+                  lineCap: "butt",
+                  className: "ss-light-sector ss-light-sector-leg"
+                }));
               }
+              if (!drawnLegAngles.has(endKey)) {
+                drawnLegAngles.add(endKey);
+                _lightSectorsGroup.addLayer(L.polyline([centerPt, arc[arc.length - 1]], {
+                  pane: "lightSectorsPane",
+                  interactive: false,
+                  stroke: true,
+                  color: cols.stroke || "#0f172a",
+                  weight: 1.15,
+                  opacity: 0.9,
+                  dashArray: "4, 4",
+                  lineCap: "butt",
+                  className: "ss-light-sector ss-light-sector-leg"
+                }));
+              }
+              _lightSectorsGroup.addLayer(L.polyline(arc, {
+                pane: "lightSectorsPane",
+                interactive: false,
+                stroke: true,
+                color: cols.stroke || "#0f172a",
+                weight: arcW + 2.2,
+                opacity: 0.9,
+                lineCap: "butt",
+                smoothFactor: 0.3,
+                className: "ss-light-sector ss-light-sector-casing"
+              }));
+              _lightSectorsGroup.addLayer(L.polyline(arc, {
+                pane: "lightSectorsPane",
+                interactive: false,
+                stroke: true,
+                color: cols.arc || cols.fill || "#fde047",
+                weight: arcW,
+                opacity: 0.95,
+                lineCap: "butt",
+                smoothFactor: 0.3,
+                className: "ss-light-sector ss-light-sector-arc"
+              }));
               drawn++;
             } catch (eSecDraw) {}
           }
@@ -39758,29 +39818,23 @@ function initRouteMiniWindow() {
 
       const rt = activeRouteData;
 
-      const name = (rt && (rt.name || rt.routeName)) || "this route";
+      if (rt && rt.id && typeof deleteRouteFromLibrary === "function") {
 
-      if (!window.confirm("Delete route?\n" + name)) return;
+        try { deleteRouteFromLibrary(rt.id); } catch (eDel) {}
 
-      try {
+      } else {
 
-        if (rt && rt.id && typeof deleteRouteFromLibrary === "function") {
+        if (typeof clearActiveRoute === "function") clearActiveRoute();
 
-          deleteRouteFromLibrary(rt.id);
+        if (typeof renderNavSavedRoutesTree === "function") {
+
+          try { renderNavSavedRoutesTree(); } catch (eTree) {}
 
         }
 
-      } catch (eDel) {}
-
-      if (typeof clearActiveRoute === "function") clearActiveRoute();
-
-      if (typeof renderNavSavedRoutesTree === "function") {
-
-        try { renderNavSavedRoutesTree(); } catch (eTree) {}
+        if (typeof showSetSailToast === "function") showSetSailToast("Route deleted", "info");
 
       }
-
-      if (typeof showSetSailToast === "function") showSetSailToast("Route deleted", "info");
 
     });
 
@@ -42938,7 +42992,25 @@ function saveRouteToLibrary(route) {
 
   const lib = getSavedRoutesLibrary();
 
-  const existingIdx = lib.findIndex(r => r.id === route.id || (r.name && r.name === route.name));
+  const isFreshUpload = !!(route && route._isFreshFileUpload);
+
+  if (isFreshUpload) {
+
+    try { delete route._isFreshFileUpload; } catch (eDelFlag) {}
+
+  }
+
+  if (!route.id) {
+
+    route.id = "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+
+  }
+
+  const existingIdx = isFreshUpload
+
+    ? lib.findIndex(r => r && r.id === route.id)
+
+    : lib.findIndex(r => r && (r.id === route.id || (!(r.id && route.id && r.id !== route.id) && r.name && r.name === route.name)));
 
   if (existingIdx >= 0) {
 
@@ -43028,7 +43100,13 @@ function deleteRouteFromLibrary(routeId) {
 
   }
 
-  const lib = getSavedRoutesLibrary().filter((r) => r.id !== routeId);
+  try {
+
+    document.querySelectorAll("body > .nav-saved-route-menu").forEach((p) => p.remove());
+
+  } catch (eMenus) {}
+
+  const lib = getSavedRoutesLibrary().filter((r) => r && r.id !== routeId);
 
   writeSavedRoutesLibrary(lib);
 
@@ -43044,19 +43122,33 @@ function deleteRouteFromLibrary(routeId) {
 
   if (wasDr) setDrActiveRouteId(null); // keeps orphan snap; DR continues on last geometry
 
-  if (wasActive || (activeRouteData && activeRouteData.id === routeId)) {
+  if (wasActive || (activeRouteData && (activeRouteData.id === routeId || activeRouteData.name === routeId))) {
 
-    if (lib.length > 0) {
+    activeRouteData = null;
 
-      selectSavedRouteFromSidebar(lib[0].id, false);
+    try { persistActiveRouteToStorage(null); } catch (eLs) {}
+
+    if (lib.length > 0 && typeof selectSavedRouteFromSidebar === "function") {
+
+      selectSavedRouteFromSidebar(lib[0].id, false, { skipSavePrev: true });
 
     } else {
 
       try { if (typeof clearActiveRoute === "function") clearActiveRoute(); } catch (eClr) {}
 
-      activeRouteData = null;
+      window._setsailRouteUnrolled = null;
 
-      try { persistActiveRouteToStorage(null); } catch (eLs) {}
+      if (typeof leafletRouteLayer !== "undefined" && leafletRouteLayer) {
+
+        try { leafletRouteLayer.clearLayers(); } catch (eRl) {}
+
+      }
+
+      if (typeof renderRouteBufferCorridorOnMap === "function") {
+
+        try { renderRouteBufferCorridorOnMap(); } catch (eCor) {}
+
+      }
 
       restoreSetRouteChatTranscript([]);
 
@@ -43076,7 +43168,7 @@ function deleteRouteFromLibrary(routeId) {
 
   if (typeof showSetSailToast === "function") {
 
-    showSetSailToast("Route and chat deleted", "info");
+    showSetSailToast("Route deleted", "info");
 
   }
 
@@ -43150,7 +43242,7 @@ function renderVesselRouteLibraryList() {
 
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length) {
 
-    if (!lib.some((r) => r && (r.id === activeRouteData.id || r.name === activeRouteData.name))) {
+    if (!lib.some((r) => r && ((activeRouteData.id && r.id === activeRouteData.id) || (!(r.id && activeRouteData.id && r.id !== activeRouteData.id) && r.name && r.name === activeRouteData.name)))) {
 
       lib = [activeRouteData].concat(lib);
 
@@ -43204,19 +43296,27 @@ function renderVesselRouteLibraryList() {
 
     const rid = String(rt.id || "").replace(/"/g, "&quot;");
 
+    const rawName = String((rt && (rt.name || rt.routeName)) || "").trim();
+
     const od = formatVesselRouteOdLabel(rt);
+
+    const escTitle = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+    const displayLabel = rawName ? escTitle(rawName) : od;
+
+    const tip = escTitle(rawName && od && rawName !== od ? (rawName + " (" + od + ") — Show on chart") : ((rawName || od) + " — Show on chart"));
 
     const isDr = !!(drNow && (rt.id === drNow || rt.name === drNow));
 
-    const isShown = !!(activeRouteData && (activeRouteData.id === rt.id || activeRouteData.name === rt.name));
+    const isShown = !!(activeRouteData && ((activeRouteData.id && activeRouteData.id === rt.id) || (!(activeRouteData.id && rt.id && activeRouteData.id !== rt.id) && activeRouteData.name === rt.name)));
 
     return (
 
       '<div class="vessel-route-lib-row' + (isShown ? " is-shown" : "") + (isDr ? " is-current" : "") + '" data-route-id="' + rid + '">' +
 
-        '<div class="vessel-route-lib-info" data-route-show="' + rid + '" title="Show on chart">' +
+        '<div class="vessel-route-lib-info" data-route-show="' + rid + '" title="' + tip + '">' +
 
-          '<div class="vessel-route-lib-name">' + od + "</div>" +
+          '<div class="vessel-route-lib-name">' + displayLabel + "</div>" +
 
         "</div>" +
 
@@ -43324,7 +43424,7 @@ function renderNavSavedRoutesTree() {
 
   if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
 
-    if (!lib.some(r => r.name === activeRouteData.name)) {
+    if (!lib.some(r => r && ((activeRouteData.id && r.id === activeRouteData.id) || (!(r.id && activeRouteData.id && r.id !== activeRouteData.id) && r.name && r.name === activeRouteData.name)))) {
 
       enrichRouteWithLegsTelemetry(activeRouteData);
 
@@ -43358,7 +43458,7 @@ function renderNavSavedRoutesTree() {
 
   listEl.innerHTML = lib.map((rt) => {
 
-    const isAct = activeRouteData && (activeRouteData.id === rt.id || activeRouteData.name === rt.name);
+    const isAct = !!(activeRouteData && ((activeRouteData.id && activeRouteData.id === rt.id) || (!(activeRouteData.id && rt.id && activeRouteData.id !== rt.id) && activeRouteData.name === rt.name)));
 
     const legsCnt = (rt.legs ? rt.legs.length : Math.max(0, (rt.waypoints || []).length - 1));
 
@@ -43416,7 +43516,7 @@ window.renderNavSavedRoutesTree = renderNavSavedRoutesTree;
 
 
 
-function selectSavedRouteFromSidebar(routeId, openRightDrawer = true) {
+function selectSavedRouteFromSidebar(routeId, openRightDrawer = true, opts = {}) {
 
   const lib = getSavedRoutesLibrary();
 
@@ -43430,7 +43530,7 @@ function selectSavedRouteFromSidebar(routeId, openRightDrawer = true) {
 
   try {
 
-    if (activeRouteData && activeRouteData.id && activeRouteData.id !== found.id) {
+    if (!(opts && opts.skipSavePrev) && activeRouteData && activeRouteData.id && activeRouteData.id !== found.id) {
 
       activeRouteData.chatTranscript = captureSetRouteChatTranscript();
 
@@ -46604,15 +46704,17 @@ function initSetRouteV50() {
 
     const handleRouteDeleteClick = (delBtn) => {
 
-      const rtId = delBtn.getAttribute("data-route-delete");
+      const rtId = delBtn && delBtn.getAttribute("data-route-delete");
 
-      closeAllRouteMenus();
+      try {
+
+        closeAllRouteMenus();
+
+        document.querySelectorAll("body > .nav-saved-route-menu").forEach((p) => p.remove());
+
+      } catch (eMenus) {}
 
       if (!rtId) return;
-
-      const ok = window.confirm("Delete this route and its chat transcript?");
-
-      if (!ok) return;
 
       deleteRouteFromLibrary(rtId);
 

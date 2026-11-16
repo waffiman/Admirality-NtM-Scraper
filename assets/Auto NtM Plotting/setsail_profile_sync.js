@@ -266,13 +266,18 @@
   function applyRemoteRoutesLibrary(profile) {
     if (!profile || !Array.isArray(profile.routesLibrary)) return;
     try {
+      var curDel = readDeletedRouteIds();
       if (profile.deletedRouteIds && typeof profile.deletedRouteIds === "object") {
-        var curDel = readDeletedRouteIds();
         Object.assign(curDel, profile.deletedRouteIds);
         localStorage.setItem("setsail_deleted_route_ids_v1", JSON.stringify(curDel));
       }
       var localLib = readLocalRoutesLibrary();
-      var remoteLib = profile.routesLibrary;
+      var remoteLib = profile.routesLibrary.filter(function (r) {
+        if (!r || !r.id) return Boolean(r);
+        var delTs = Number(curDel[String(r.id)]) || 0;
+        if (!delTs) return true;
+        return routeStampMs(r) > delTs + 5000;
+      });
       var localIds = localLib.map(function (r) { return (r && r.id) + ":" + routeStampMs(r); }).join("|");
       var remoteIds = remoteLib.map(function (r) { return (r && r.id) + ":" + routeStampMs(r); }).join("|");
       if (localIds === remoteIds && localLib.length === remoteLib.length) return;
@@ -317,6 +322,9 @@
 
     var route = profile.route;
     if (!route || !Array.isArray(route.waypoints) || route.waypoints.length < 2) return;
+    var delMap = readDeletedRouteIds();
+    var delRouteTs = route.id ? (Number(delMap[String(route.id)]) || 0) : 0;
+    if (delRouteTs && routeStampMs(route) <= delRouteTs + 5000) return;
     if (localRoute && localUpdated > remoteUpdated + 200) return;
 
     var sameRoute =
