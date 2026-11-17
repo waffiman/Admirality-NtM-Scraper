@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "1000 UTC",
-  "lastSyncUtc": "2026-11-17T10:17:23.855081+00:00",
+  "synopticCycle": "1900 UTC",
+  "lastSyncUtc": "2026-11-17T19:39:50.067063+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,20 +9,20 @@
       "shortName": "Akvan",
       "category": "Tropical Storm (JTWC)",
       "center": [
-        12.0,
+        12.2,
         87.3
       ],
       "centralPressure": 999,
       "maxWinds": 40,
       "gusts": 50,
-      "movement": "NW at 3 kts",
+      "movement": "NW at 4 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            12.5,
-            86.8
+            12.8,
+            86.7
           ],
           "winds": 40,
           "radiusNm": 56
@@ -30,7 +30,7 @@
         {
           "tau": 24,
           "coords": [
-            13.2,
+            13.7,
             86.0
           ],
           "winds": 45,
@@ -39,8 +39,8 @@
         {
           "tau": 36,
           "coords": [
-            14.1,
-            85.0
+            14.9,
+            85.1
           ],
           "winds": 45,
           "radiusNm": 90
@@ -48,8 +48,8 @@
         {
           "tau": 48,
           "coords": [
-            15.1,
-            84.0
+            16.2,
+            84.5
           ],
           "winds": 45,
           "radiusNm": 107
@@ -57,29 +57,20 @@
         {
           "tau": 60,
           "coords": [
-            16.2,
-            83.2
+            17.6,
+            84.0
           ],
-          "winds": 50,
+          "winds": 40,
           "radiusNm": 124
         },
         {
           "tau": 72,
           "coords": [
-            17.4,
-            82.7
+            19.2,
+            83.4
           ],
-          "winds": 40,
+          "winds": 30,
           "radiusNm": 140
-        },
-        {
-          "tau": 84,
-          "coords": [
-            19.9,
-            82.0
-          ],
-          "winds": 20,
-          "radiusNm": 157
         }
       ]
     },
@@ -89,13 +80,13 @@
       "shortName": "Xavier",
       "category": "Category 4 Hurricane (JTWC)",
       "center": [
-        -9.1,
-        -163.5
+        -9.3,
+        -163.8
       ],
       "centralPressure": 936,
       "maxWinds": 125,
       "gusts": 156,
-      "movement": "SW at 3 kts",
+      "movement": "SSW at 1 kts",
       "dangerRadiusNm": 150,
       "forecastTrack": [
         {
@@ -169,20 +160,20 @@
       "shortName": "96S",
       "category": "Tropical Disturbance (Active Invest)",
       "center": [
-        -4.6,
-        90.1
+        -5.3,
+        90.0
       ],
       "centralPressure": 1006,
       "maxWinds": 30,
       "gusts": 39,
-      "movement": "E at 4 kts",
+      "movement": "SSE at 5 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -4.7,
-            90.8
+            -6.2,
+            90.2
           ],
           "winds": 35,
           "radiusNm": 45
@@ -190,8 +181,8 @@
         {
           "tau": 24,
           "coords": [
-            -5.4,
-            90.6
+            -6.8,
+            89.6
           ],
           "winds": 40,
           "radiusNm": 60
@@ -199,8 +190,8 @@
         {
           "tau": 36,
           "coords": [
-            -6.0,
-            89.7
+            -8.3,
+            88.7
           ],
           "winds": 45,
           "radiusNm": 75
@@ -208,8 +199,8 @@
         {
           "tau": 48,
           "coords": [
-            -6.4,
-            88.2
+            -9.0,
+            88.3
           ],
           "winds": 50,
           "radiusNm": 90
@@ -217,8 +208,8 @@
         {
           "tau": 60,
           "coords": [
-            -6.8,
-            87.1
+            -8.3,
+            88.2
           ],
           "winds": 55,
           "radiusNm": 105
@@ -235,8 +226,8 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 8.2,
-      "swellPeriod": 13,
+      "waveHeight": 8.3,
+      "swellPeriod": 12,
       "swellDir": "WSW"
     },
     {
@@ -247,7 +238,7 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 2.5,
+      "waveHeight": 2.8,
       "swellPeriod": 11,
       "swellDir": "SW"
     },
@@ -255,37 +246,37 @@
       "id": "WS1",
       "name": "Akvan Cyclonic Wave Field",
       "center": [
-        12.0,
+        12.2,
         87.3
       ],
       "radiusNm": 150,
       "waveHeight": 2.5,
       "swellPeriod": 8,
-      "swellDir": "SSW"
+      "swellDir": "WSW"
     },
     {
       "id": "WS2",
       "name": "Xavier Cyclonic Wave Field",
       "center": [
-        -9.1,
-        -163.5
+        -9.3,
+        -163.8
       ],
       "radiusNm": 300,
-      "waveHeight": 6.4,
-      "swellPeriod": 11,
-      "swellDir": "SSE"
+      "waveHeight": 7.6,
+      "swellPeriod": 9,
+      "swellDir": "W"
     },
     {
       "id": "WS3",
       "name": "96S Cyclonic Wave Field",
       "center": [
-        -4.6,
-        90.1
+        -5.3,
+        90.0
       ],
       "radiusNm": 150,
-      "waveHeight": 2.9,
-      "swellPeriod": 7,
-      "swellDir": "N"
+      "waveHeight": 2.5,
+      "swellPeriod": 8,
+      "swellDir": "S"
     }
   ],
   "pressureCenters": [
@@ -294,7 +285,7 @@
       "value": 999,
       "name": "Tropical Storm AKVAN Core Low",
       "coords": [
-        12.0,
+        12.2,
         87.3
       ]
     },
@@ -303,8 +294,8 @@
       "value": 936,
       "name": "Hurricane XAVIER Core Low",
       "coords": [
-        -9.1,
-        -163.5
+        -9.3,
+        -163.8
       ]
     },
     {
@@ -312,8 +303,8 @@
       "value": 1006,
       "name": "Invest 96S Core Low",
       "coords": [
-        -4.6,
-        90.1
+        -5.3,
+        90.0
       ]
     },
     {
@@ -347,7 +338,7 @@
   "windVectors": [
     {
       "coords": [
-        12.3,
+        12.5,
         87.6
       ],
       "dir": 200,
@@ -356,8 +347,8 @@
     },
     {
       "coords": [
-        -8.8,
-        -163.2
+        -9.0,
+        -163.5
       ],
       "dir": 160,
       "speed": 125,
@@ -365,8 +356,8 @@
     },
     {
       "coords": [
-        -4.3,
-        90.4
+        -5.0,
+        90.3
       ],
       "dir": 200,
       "speed": 30,
