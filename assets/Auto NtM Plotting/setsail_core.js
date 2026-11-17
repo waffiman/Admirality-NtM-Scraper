@@ -6060,6 +6060,7 @@ function switchToTab(targetTab, source) {
   }
 
 }
+window.switchToTab = switchToTab;
 
 
 
@@ -8614,8 +8615,15 @@ function ensureCurrentRouteRenderedOnChart(opts) {
 
   const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
   let targetRoute = null;
+  const explicitOverride = window._setsailExplicitChartRoute;
+  const hasExplicitOverride = Boolean(
+    explicitOverride && Array.isArray(explicitOverride.waypoints) && explicitOverride.waypoints.length > 0
+  );
+  if (hasExplicitOverride) {
+    targetRoute = explicitOverride;
+  }
 
-  if (drId) {
+  if (!targetRoute && drId) {
     if (typeof getDrActiveRoute === "function") {
       try { targetRoute = getDrActiveRoute(); } catch (eDr) {}
     }
@@ -8659,7 +8667,7 @@ function ensureCurrentRouteRenderedOnChart(opts) {
 
   const isCurrent = Boolean(drId && (targetRoute.id === drId || targetRoute.name === drId));
 
-  if (isCurrent) {
+  if (isCurrent || hasExplicitOverride) {
     if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
     if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
   } else if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.route === false && !opts.force) {
@@ -8689,7 +8697,7 @@ function ensureCurrentRouteRenderedOnChart(opts) {
   if (typeof window.renderRouteBufferCorridorOnMap === "function") {
     try { window.renderRouteBufferCorridorOnMap(); } catch (eCor) {}
   }
-  if (isCurrent && typeof applyOwnVesselDeadReckoning === "function") {
+  if (isCurrent && !hasExplicitOverride && typeof applyOwnVesselDeadReckoning === "function") {
     try { applyOwnVesselDeadReckoning({ toast: false, force: true, visual: true }); } catch (eDrBoot) {}
   }
   if (typeof updateCurrentRouteWaypointsPassedStatus === "function") {
@@ -8712,6 +8720,59 @@ function ensureCurrentRouteRenderedOnChart(opts) {
   } catch (eDisp) {}
 }
 window.ensureCurrentRouteRenderedOnChart = ensureCurrentRouteRenderedOnChart;
+
+/** Open SetChart and immediately plot the active SetRoute plan without letting DR override it. */
+function openAndPlotRouteOnSetChart(routeOverride) {
+  const targetRoute = routeOverride || (typeof activeRouteData !== "undefined" ? activeRouteData : null) || window.activeRouteData;
+  const hasWpts = Boolean(targetRoute && Array.isArray(targetRoute.waypoints) && targetRoute.waypoints.length > 0);
+  if (hasWpts) {
+    activeRouteData = targetRoute;
+    window.activeRouteData = targetRoute;
+    window._setsailExplicitChartRoute = targetRoute;
+    window._setsailExplicitRouteToken = (window._setsailExplicitRouteToken || 0) + 1;
+    window._setsailRouteNeedsRepaint = true;
+    if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
+    if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+  }
+  const token = window._setsailExplicitRouteToken || 0;
+  if (typeof switchToTab === "function") switchToTab("tab-ntm", "user");
+
+  const runPlot = (attempt) => {
+    const map = (typeof leafletMap !== "undefined" ? leafletMap : null) || window.leafletMap;
+    if (!map && attempt < 25) {
+      setTimeout(() => runPlot(attempt + 1), 60);
+      return;
+    }
+    if (!map) return;
+    try { map.invalidateSize(); } catch (eInv) {}
+    if (hasWpts) {
+      if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
+      if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+      const routeTab = document.querySelector('.excel-tab[data-overlay="route"]');
+      if (routeTab) {
+        routeTab.classList.add("active");
+        const chk = routeTab.querySelector(".excel-tab-check");
+        if (chk) { chk.textContent = "✓"; chk.style.opacity = "1"; }
+      }
+      if (typeof renderRouteOnMap === "function") {
+        renderRouteOnMap(targetRoute, true);
+      }
+      if (typeof window.renderRouteBufferCorridorOnMap === "function") {
+        try { window.renderRouteBufferCorridorOnMap(); } catch (eCor) {}
+      }
+      setTimeout(() => {
+        try { if (leafletMap) leafletMap.invalidateSize(); } catch (eInv2) {}
+      }, 120);
+      setTimeout(() => {
+        if ((window._setsailExplicitRouteToken || 0) === token) {
+          window._setsailExplicitChartRoute = null;
+        }
+      }, 900);
+    }
+  };
+  setTimeout(() => runPlot(0), 30);
+}
+window.openAndPlotRouteOnSetChart = openAndPlotRouteOnSetChart;
 
 
 
@@ -9165,6 +9226,12 @@ function renderWeatherOnMap(map = null) {
 
   if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.weather === false) {
 
+    if (typeof syncWxSynopticLayer === "function") {
+
+      syncWxSynopticLayer(currentMap, false);
+
+    }
+
     if (currentMap.hasLayer(leafletWeatherLayer)) {
 
       currentMap.removeLayer(leafletWeatherLayer);
@@ -9190,6 +9257,12 @@ function renderWeatherOnMap(map = null) {
   }
 
   leafletWeatherLayer.clearLayers();
+
+  if (typeof syncWxSynopticLayer === "function") {
+
+    syncWxSynopticLayer(currentMap, true);
+
+  }
 
 
 
@@ -9974,6 +10047,1393 @@ function renderWeatherOnMap(map = null) {
 
 
 window.renderWeatherOnMap = renderWeatherOnMap;
+
+/* ============================================================================
+ * UNIFIED SYNOPTIC WEATHER CANVAS OVERLAY (SPOS-style 5-Channel Composite)
+ * Zero backend changes; uses client MARINE_WEATHER_STORE + Open-Meteo batches.
+ * Sits in wxSynopticPane (zIndex 385) strictly below overlayPane / markerPane.
+ * ========================================================================== */
+(function initUnifiedSynopticWxModule() {
+  const WX_PANE = "wxSynopticPane";
+  const WX_PANE_Z = 385;
+  const NODE_TTL_MS = 10 * 60 * 1000;
+  const MAX_CACHE_NODES = 800;
+  const _nodeCache = new Map();
+  const _lonSteps = [0.1, 0.25, 0.5, 1, 2, 4, 8, 12, 16, 20, 24, 30, 36, 45, 60, 72];
+  const _latSteps = [0.1, 0.25, 0.5, 1, 2, 4, 8, 12, 16, 20, 24, 28, 36, 45];
+  const WAVE_STOPS = [
+    [0.0, 11, 25, 44, 0.05],
+    [1.5, 11, 25, 44, 0.12],
+    [2.25, 0, 168, 204, 0.24],
+    [3.0, 0, 168, 204, 0.28],
+    [4.0, 254, 198, 23, 0.37],
+    [5.0, 254, 198, 23, 0.42],
+    [6.0, 255, 87, 34, 0.50],
+    [8.0, 220, 38, 38, 0.55]
+  ];
+
+  function wrapLon180(lon) {
+    return ((((lon + 180) % 360) + 360) % 360) - 180;
+  }
+
+  function clampNum(v, lo, hi) {
+    return v < lo ? lo : (v > hi ? hi : v);
+  }
+
+  function extractStormCenter(st) {
+    if (!st) return null;
+    if (Array.isArray(st.center) && st.center.length >= 2) {
+      const la = Number(st.center[0]);
+      const lo = Number(st.center[1]);
+      if (Number.isFinite(la) && Number.isFinite(lo)) return [la, lo];
+    }
+    if (st.center && typeof st.center === "object") {
+      const la = Number(st.center.lat);
+      const lo = Number(st.center.lng != null ? st.center.lng : st.center.lon);
+      if (Number.isFinite(la) && Number.isFinite(lo)) return [la, lo];
+    }
+    if (Number.isFinite(Number(st.lat)) && Number.isFinite(Number(st.lon))) {
+      return [Number(st.lat), Number(st.lon)];
+    }
+    return null;
+  }
+
+  function ensureWxSynopticPane(map) {
+    if (!map || !map.getPane || !map.createPane) return "overlayPane";
+    let pane = map.getPane(WX_PANE);
+    if (!pane) pane = map.createPane(WX_PANE);
+    if (pane) {
+      pane.style.zIndex = String(WX_PANE_Z);
+      pane.style.pointerEvents = "none";
+    }
+    return WX_PANE;
+  }
+
+  function nodeCacheKey(lat, lon) {
+    const wLon = wrapLon180(lon);
+    const latS = (Math.round(lat * 100) / 100).toFixed(2);
+    const lonS = (Math.round(wLon * 100) / 100).toFixed(2);
+    return latS + "," + lonS;
+  }
+
+  function pruneCacheIfNeeded() {
+    if (_nodeCache.size <= MAX_CACHE_NODES) return;
+    const dropCount = _nodeCache.size - MAX_CACHE_NODES;
+    let i = 0;
+    for (const k of _nodeCache.keys()) {
+      _nodeCache.delete(k);
+      i += 1;
+      if (i >= dropCount) break;
+    }
+  }
+
+  function getLiveCachedNode(lat, lon) {
+    const key = nodeCacheKey(lat, lon);
+    const hit = _nodeCache.get(key);
+    if (!hit) return null;
+    if ((Date.now() - hit.ts) > NODE_TTL_MS) return null;
+    return hit;
+  }
+
+  function synthesizeBaselineNode(lat, lon) {
+    const wLon = wrapLon180(lon);
+    const cachedOm = (typeof getCachedOpenMeteoPointWx === "function")
+      ? getCachedOpenMeteoPointWx(lat, wLon) : null;
+    if (cachedOm && cachedOm.ok) {
+      const wSpd = cachedOm.windKt != null ? Number(cachedOm.windKt) : (cachedOm.windSpeedKt != null ? Number(cachedOm.windSpeedKt) : 12);
+      const wDir = cachedOm.windDirDeg != null ? Number(cachedOm.windDirDeg) : 240;
+      const pMb = cachedOm.pressureMb != null ? Number(cachedOm.pressureMb) : 1013.2;
+      const tempC = cachedOm.tempC != null ? Number(cachedOm.tempC) : (25.5 - 0.34 * Math.abs(lat));
+      const waveM = cachedOm.waveM != null ? Number(cachedOm.waveM) : 1.1;
+      const curKt = cachedOm.currentKt != null ? Number(cachedOm.currentKt) : 0.3;
+      const curDir = cachedOm.currentDirDeg != null ? Number(cachedOm.currentDirDeg) : 90;
+      return {
+        isSea: cachedOm.waveM !== null,
+        wave: waveM,
+        pressure: pMb,
+        windKt: wSpd,
+        windDir: wDir,
+        windU: wSpd * Math.sin(wDir * Math.PI / 180),
+        windV: wSpd * Math.cos(wDir * Math.PI / 180),
+        currKt: curKt,
+        currDir: curDir,
+        currU: curKt * Math.sin(curDir * Math.PI / 180),
+        currV: curKt * Math.cos(curDir * Math.PI / 180),
+        tempC: tempC,
+        source: "om-point"
+      };
+    }
+
+    // Smooth global climatological gradient for instant first paint / offline fallback
+    let pressure = 1013.4
+      + 6.2 * Math.cos((lat - 28) * Math.PI / 88)
+      - 5.2 * Math.exp(-Math.pow((Math.abs(lat) - 56) / 15, 2))
+      + 2.4 * Math.sin((wLon + 25) * Math.PI / 65);
+    let windSpd = 10 + 6 * Math.exp(-Math.pow((Math.abs(lat) - 48) / 16, 2));
+    let windDir = lat >= 0 ? (Math.abs(lat) < 28 ? 65 : 255) : (Math.abs(lat) < 28 ? 115 : 275);
+    let windU = windSpd * Math.sin(windDir * Math.PI / 180);
+    let windV = windSpd * Math.cos(windDir * Math.PI / 180);
+    let wave = 0.7 + 0.65 * Math.exp(-Math.pow((Math.abs(lat) - 48) / 18, 2));
+    let currKt = 0.25;
+    let currDir = Math.abs(lat) < 25 ? 270 : 75;
+    let tempC = 26.5 - 0.36 * Math.abs(lat) + 1.2 * Math.cos(wLon * Math.PI / 90);
+
+    const store = (typeof MARINE_WEATHER_STORE !== "undefined" && MARINE_WEATHER_STORE) ? MARINE_WEATHER_STORE : {};
+    if (typeof samplePressureGridAtLatLon === "function") {
+      const pg = samplePressureGridAtLatLon(lat, wLon);
+      if (pg && pg.ok && Number.isFinite(pg.pressureMb)) {
+        pressure = pg.pressureMb;
+      }
+    }
+    const pCenters = Array.isArray(store.pressureCenters) ? store.pressureCenters : [];
+    for (let i = 0; i < pCenters.length; i++) {
+      const pc = pCenters[i];
+      if (!pc || !Number.isFinite(pc.lat) || !Number.isFinite(pc.lon)) continue;
+      const targetMb = Number(pc.pressureMb != null ? pc.pressureMb : (pc.pressure != null ? pc.pressure : (pc.type === "H" ? 1024 : 996)));
+      const dNm = typeof calculateHaversineDistanceNM === "function"
+        ? calculateHaversineDistanceNM(lat, wLon, pc.lat, pc.lon)
+        : Math.hypot((lat - pc.lat) * 60, (wLon - pc.lon) * 60 * Math.cos(lat * Math.PI / 180));
+      const g = Math.exp(-(dNm * dNm) / (2 * 520 * 520));
+      pressure += (targetMb - 1013.4) * g;
+    }
+
+    const waveAreas = Array.isArray(store.waves) ? store.waves : [];
+    let wvW = 0;
+    let wvS = 0;
+    for (let i = 0; i < waveAreas.length; i++) {
+      const wa = waveAreas[i];
+      const wLat = wa.lat != null ? wa.lat : (wa.center ? wa.center[0] : NaN);
+      const wLng = wa.lon != null ? wa.lon : (wa.center ? wa.center[1] : NaN);
+      const hM = Number(wa.significantWaveHeightM != null ? wa.significantWaveHeightM : (wa.heightM != null ? wa.heightM : wa.height));
+      if (!Number.isFinite(wLat) || !Number.isFinite(wLng) || !Number.isFinite(hM)) continue;
+      const dNm = typeof calculateHaversineDistanceNM === "function"
+        ? calculateHaversineDistanceNM(lat, wLon, wLat, wLng) : 9999;
+      if (dNm < 720) {
+        const w = Math.exp(-(dNm * dNm) / (2 * 300 * 300));
+        wvS += hM * w;
+        wvW += w;
+      }
+    }
+    if (wvW > 0.05) {
+      wave = wave * (1 - Math.min(0.9, wvW)) + (wvS / wvW) * Math.min(0.9, wvW);
+    }
+
+    if (typeof sampleWindAtLatLon === "function") {
+      const sw = sampleWindAtLatLon(lat, wLon);
+      if (sw && sw.ok && Number.isFinite(sw.speedKt) && Number.isFinite(sw.dirDeg) && (sw.nearestNm == null || sw.nearestNm < 520)) {
+        const weight = clampNum(1 - (sw.nearestNm || 0) / 520, 0.25, 1);
+        const su = sw.speedKt * Math.sin(sw.dirDeg * Math.PI / 180);
+        const sv = sw.speedKt * Math.cos(sw.dirDeg * Math.PI / 180);
+        windU = windU * (1 - weight) + su * weight;
+        windV = windV * (1 - weight) + sv * weight;
+      }
+    }
+
+    if (typeof sampleCurrentAtLatLon === "function") {
+      const sc = sampleCurrentAtLatLon(lat, wLon);
+      if (sc && sc.ok && Number.isFinite(sc.speedKt) && Number.isFinite(sc.dirDeg)) {
+        currKt = sc.speedKt;
+        currDir = sc.dirDeg;
+      }
+    }
+
+    const storms = Array.isArray(store.storms) ? store.storms : [];
+    for (let i = 0; i < storms.length; i++) {
+      const sc = extractStormCenter(storms[i]);
+      if (!sc) continue;
+      const sLat = sc[0];
+      const sLon = sc[1];
+      const dNm = typeof calculateHaversineDistanceNM === "function"
+        ? calculateHaversineDistanceNM(lat, wLon, sLat, sLon) : 9999;
+      if (dNm < 420) {
+        const g = Math.exp(-(dNm * dNm) / (2 * 130 * 130));
+        const coreMb = Number(storms[i].pressureMb || storms[i].centralPressureMb || 978);
+        pressure = pressure * (1 - g) + coreMb * g;
+        wave = Math.max(wave, 1.4 + 5.8 * g);
+        const maxKt = Number(storms[i].maxWindKt || storms[i].windKt || 68);
+        const bearingToPt = Math.atan2(
+          (wLon - sLon) * Math.cos(sLat * Math.PI / 180),
+          lat - sLat
+        );
+        const tangOffset = sLat >= 0 ? (-Math.PI / 2 - 0.3) : (Math.PI / 2 + 0.3);
+        const fromRad = bearingToPt + tangOffset + Math.PI;
+        const radialSpd = maxKt * Math.exp(-Math.pow((dNm - 28) / 115, 2));
+        windU += radialSpd * Math.sin(fromRad) * g;
+        windV += radialSpd * Math.cos(fromRad) * g;
+      }
+    }
+
+    windSpd = Math.hypot(windU, windV);
+    windDir = ((Math.atan2(windU, windV) * 180 / Math.PI) + 360) % 360;
+    const currU = currKt * Math.sin(currDir * Math.PI / 180);
+    const currV = currKt * Math.cos(currDir * Math.PI / 180);
+
+    return {
+      isSea: true,
+      wave: wave,
+      pressure: pressure,
+      windKt: windSpd,
+      windDir: windDir,
+      windU: windU,
+      windV: windV,
+      currKt: currKt,
+      currDir: currDir,
+      currU: currU,
+      currV: currV,
+      tempC: tempC,
+      source: "baseline"
+    };
+  }
+
+  function buildViewportGeoGrid(map) {
+    const sz = map.getSize();
+    const w = sz.x;
+    const h = sz.y;
+    if (w < 8 || h < 8) return null;
+
+    const nw = map.containerPointToLatLng([0, 0]);
+    const se = map.containerPointToLatLng([w, h]);
+    const rawMinLat = Math.min(nw.lat, se.lat);
+    const rawMaxLat = Math.max(nw.lat, se.lat);
+    const rawMinLon = Math.min(nw.lng, se.lng);
+    const rawMaxLon = Math.max(nw.lng, se.lng);
+
+    const latSpan = Math.max(0.15, rawMaxLat - rawMinLat);
+    const lonSpan = Math.min(360, Math.max(0.2, rawMaxLon - rawMinLon));
+    const minLat = clampNum(rawMinLat - latSpan * 0.22, -82, 82);
+    const maxLat = clampNum(rawMaxLat + latSpan * 0.22, -82, 82);
+    const minLon = rawMinLon - lonSpan * 0.22;
+    const maxLon = Math.min(rawMaxLon + lonSpan * 0.22, minLon + 360);
+    const latExt = Math.max(0.2, maxLat - minLat);
+    const lonExt = Math.max(0.2, maxLon - minLon);
+
+    let lonIdx = _lonSteps.length - 1;
+    for (let i = 0; i < _lonSteps.length; i++) {
+      if (Math.floor(lonExt / _lonSteps[i]) + 2 <= 8) {
+        lonIdx = i;
+        break;
+      }
+    }
+    let latIdx = _latSteps.length - 1;
+    for (let i = 0; i < _latSteps.length; i++) {
+      if (Math.floor(latExt / _latSteps[i]) + 2 <= 7) {
+        latIdx = i;
+        break;
+      }
+    }
+
+    const countCols = function (s) {
+      const sLo = Math.floor(minLon / s) * s;
+      const eLo = Math.min(sLo + 360, Math.ceil(maxLon / s) * s);
+      return Math.max(2, Math.floor((eLo - sLo) / s) + 1);
+    };
+    const countRows = function (s) {
+      const sLa = Math.max(-80, Math.floor(minLat / s) * s);
+      const eLa = Math.min(80, Math.ceil(maxLat / s) * s);
+      return Math.max(2, Math.floor((eLa - sLa) / s) + 1);
+    };
+
+    while (countCols(_lonSteps[lonIdx]) * countRows(_latSteps[latIdx]) > 48
+        && (lonIdx < _lonSteps.length - 1 || latIdx < _latSteps.length - 1)) {
+      const cols = countCols(_lonSteps[lonIdx]);
+      const rows = countRows(_latSteps[latIdx]);
+      if (cols >= rows && lonIdx < _lonSteps.length - 1) {
+        lonIdx += 1;
+      } else if (latIdx < _latSteps.length - 1) {
+        latIdx += 1;
+      } else {
+        lonIdx += 1;
+      }
+    }
+
+    const dLon = _lonSteps[lonIdx];
+    const dLat = _latSteps[latIdx];
+    const startLat = Math.max(-80, Math.floor(minLat / dLat) * dLat);
+    const endLat = Math.min(80, Math.ceil(maxLat / dLat) * dLat);
+    const startLon = Math.floor(minLon / dLon) * dLon;
+    const endLon = Math.min(startLon + 360, Math.ceil(maxLon / dLon) * dLon);
+
+    const lats = [];
+    for (let la = startLat; la <= endLat + 1e-6 && lats.length < 9; la += dLat) {
+      lats.push(Math.round(la * 1000) / 1000);
+    }
+    if (lats.length < 2) {
+      lats.push(Math.min(82, startLat + dLat));
+    }
+
+    const lons = [];
+    for (let lo = startLon; lo <= endLon + 1e-6 && lons.length < 10; lo += dLon) {
+      lons.push(Math.round(lo * 1000) / 1000);
+    }
+    if (lons.length < 2) {
+      lons.push(startLon + dLon);
+    }
+
+    const nRows = lats.length;
+    const nCols = lons.length;
+    const nodes = new Array(nRows * nCols);
+    const missing = [];
+    const seenMissing = new Set();
+
+    for (let r = 0; r < nRows; r++) {
+      const la = lats[r];
+      for (let c = 0; c < nCols; c++) {
+        const lo = lons[c];
+        const idx = r * nCols + c;
+        const live = getLiveCachedNode(la, lo);
+        if (live) {
+          nodes[idx] = live;
+        } else {
+          nodes[idx] = synthesizeBaselineNode(la, lo);
+          const k = nodeCacheKey(la, lo);
+          if (!seenMissing.has(k)) {
+            seenMissing.add(k);
+            missing.push({ lat: la, lon: wrapLon180(lo), key: k });
+          }
+        }
+      }
+    }
+
+    return {
+      lats: lats,
+      lons: lons,
+      nRows: nRows,
+      nCols: nCols,
+      dLat: dLat,
+      dLon: dLon,
+      nodes: nodes,
+      missing: missing
+    };
+  }
+
+  function sampleGridBilinear(grid, lat, rawLon) {
+    const nRows = grid.nRows;
+    const nCols = grid.nCols;
+    const lats = grid.lats;
+    const lons = grid.lons;
+
+    let lon = rawLon;
+    const span = lons[nCols - 1] - lons[0];
+    while (lon < lons[0]) lon += 360;
+    while (lon > lons[nCols - 1]) {
+      if (lon - 360 >= lons[0]) {
+        lon -= 360;
+      } else {
+        break;
+      }
+    }
+    if (lon > lons[nCols - 1] && span > 350) {
+      lon = lons[0] + ((lon - lons[0]) % 360);
+    }
+
+    const clLat = clampNum(lat, lats[0], lats[nRows - 1]);
+    const clLon = clampNum(lon, lons[0], lons[nCols - 1]);
+
+    const fRow = clampNum((clLat - lats[0]) / (grid.dLat || 1), 0, nRows - 1.0001);
+    const fCol = clampNum((clLon - lons[0]) / (grid.dLon || 1), 0, nCols - 1.0001);
+    const r0 = Math.floor(fRow);
+    const c0 = Math.floor(fCol);
+    const r1 = Math.min(nRows - 1, r0 + 1);
+    const c1 = Math.min(nCols - 1, c0 + 1);
+    const ty = fRow - r0;
+    const tx = fCol - c0;
+
+    const w00 = (1 - tx) * (1 - ty);
+    const w10 = tx * (1 - ty);
+    const w01 = (1 - tx) * ty;
+    const w11 = tx * ty;
+
+    const n00 = grid.nodes[r0 * nCols + c0];
+    const n10 = grid.nodes[r0 * nCols + c1];
+    const n01 = grid.nodes[r1 * nCols + c0];
+    const n11 = grid.nodes[r1 * nCols + c1];
+
+    const pressure = n00.pressure * w00 + n10.pressure * w10 + n01.pressure * w01 + n11.pressure * w11;
+    const windU = n00.windU * w00 + n10.windU * w10 + n01.windU * w01 + n11.windU * w11;
+    const windV = n00.windV * w00 + n10.windV * w10 + n01.windV * w01 + n11.windV * w11;
+    const tempC = n00.tempC * w00 + n10.tempC * w10 + n01.tempC * w01 + n11.tempC * w11;
+
+    let seaFrac = 0;
+    let waveSum = 0;
+    let cU = 0;
+    let cV = 0;
+    if (n00.isSea && n00.wave != null) { seaFrac += w00; waveSum += n00.wave * w00; cU += n00.currU * w00; cV += n00.currV * w00; }
+    if (n10.isSea && n10.wave != null) { seaFrac += w10; waveSum += n10.wave * w10; cU += n10.currU * w10; cV += n10.currV * w10; }
+    if (n01.isSea && n01.wave != null) { seaFrac += w01; waveSum += n01.wave * w01; cU += n01.currU * w01; cV += n01.currV * w01; }
+    if (n11.isSea && n11.wave != null) { seaFrac += w11; waveSum += n11.wave * w11; cU += n11.currU * w11; cV += n11.currV * w11; }
+
+    const isSea = seaFrac >= 0.22;
+    const wave = isSea ? (waveSum / seaFrac) : null;
+    const currU = isSea ? (cU / seaFrac) : 0;
+    const currV = isSea ? (cV / seaFrac) : 0;
+
+    return {
+      pressure: pressure,
+      windU: windU,
+      windV: windV,
+      windKt: Math.hypot(windU, windV),
+      windDir: ((Math.atan2(windU, windV) * 180 / Math.PI) + 360) % 360,
+      isSea: isSea,
+      seaFrac: seaFrac,
+      wave: wave,
+      currU: currU,
+      currV: currV,
+      currKt: Math.hypot(currU, currV),
+      currDir: ((Math.atan2(currU, currV) * 180 / Math.PI) + 360) % 360,
+      tempC: tempC
+    };
+  }
+
+  function waveColorRgba(waveM, seaFrac) {
+    const seaMult = seaFrac >= 0.65 ? 1 : clampNum((seaFrac - 0.20) / 0.45, 0, 1);
+    if (seaMult <= 0.01) return [0, 0, 0, 0];
+    const h = clampNum(waveM, 0, 12);
+    for (let i = 1; i < WAVE_STOPS.length; i++) {
+      const a = WAVE_STOPS[i - 1];
+      const b = WAVE_STOPS[i];
+      if (h <= b[0] || i === WAVE_STOPS.length - 1) {
+        const t = b[0] > a[0] ? clampNum((h - a[0]) / (b[0] - a[0]), 0, 1) : 1;
+        return [
+          Math.round(a[1] + (b[1] - a[1]) * t),
+          Math.round(a[2] + (b[2] - a[2]) * t),
+          Math.round(a[3] + (b[3] - a[3]) * t),
+          Math.round((a[4] + (b[4] - a[4]) * t) * seaMult * 255)
+        ];
+      }
+    }
+    return [220, 38, 38, Math.round(0.55 * seaMult * 255)];
+  }
+
+  function renderWaveHeatmap(ctx, map, grid, w, h) {
+    const lowEnd = typeof window !== "undefined" && window.SETSAIL_LOW_END;
+    const step = lowEnd ? 7 : 5;
+    const bw = Math.max(8, Math.ceil(w / step) + 1);
+    const bh = Math.max(8, Math.ceil(h / step) + 1);
+
+    if (!renderWaveHeatmap._offCanvas) {
+      renderWaveHeatmap._offCanvas = document.createElement("canvas");
+    }
+    const off = renderWaveHeatmap._offCanvas;
+    if (off.width !== bw || off.height !== bh) {
+      off.width = bw;
+      off.height = bh;
+    }
+    const oCtx = off.getContext("2d");
+    const img = oCtx.createImageData(bw, bh);
+    const data = img.data;
+
+    const rowLats = new Float64Array(bh);
+    for (let y = 0; y < bh; y++) {
+      rowLats[y] = map.containerPointToLatLng([0, Math.min(h, y * step)]).lat;
+    }
+    const colLons = new Float64Array(bw);
+    for (let x = 0; x < bw; x++) {
+      colLons[x] = map.containerPointToLatLng([Math.min(w, x * step), 0]).lng;
+    }
+
+    const nRows = grid.nRows;
+    const nCols = grid.nCols;
+    const lat0 = grid.lats[0];
+    const latN = grid.lats[nRows - 1];
+    const lon0 = grid.lons[0];
+    const lonN = grid.lons[nCols - 1];
+    const invDLat = 1 / (grid.dLat || 1);
+    const invDLon = 1 / (grid.dLon || 1);
+    const nodes = grid.nodes;
+
+    for (let y = 0; y < bh; y++) {
+      const clLat = clampNum(rowLats[y], lat0, latN);
+      const fRow = clampNum((clLat - lat0) * invDLat, 0, nRows - 1.0001);
+      const r0 = Math.floor(fRow);
+      const r1 = Math.min(nRows - 1, r0 + 1);
+      const ty = fRow - r0;
+      const ity = 1 - ty;
+      const rowOff0 = r0 * nCols;
+      const rowOff1 = r1 * nCols;
+
+      for (let x = 0; x < bw; x++) {
+        let lo = colLons[x];
+        while (lo < lon0) lo += 360;
+        while (lo > lonN && lo - 360 >= lon0) lo -= 360;
+        const clLon = clampNum(lo, lon0, lonN);
+        const fCol = clampNum((clLon - lon0) * invDLon, 0, nCols - 1.0001);
+        const c0 = Math.floor(fCol);
+        const c1 = Math.min(nCols - 1, c0 + 1);
+        const tx = fCol - c0;
+        const itx = 1 - tx;
+
+        const w00 = itx * ity;
+        const w10 = tx * ity;
+        const w01 = itx * ty;
+        const w11 = tx * ty;
+
+        const n00 = nodes[rowOff0 + c0];
+        const n10 = nodes[rowOff0 + c1];
+        const n01 = nodes[rowOff1 + c0];
+        const n11 = nodes[rowOff1 + c1];
+
+        let seaFrac = 0;
+        let wSum = 0;
+        if (n00.isSea && n00.wave != null) { seaFrac += w00; wSum += n00.wave * w00; }
+        if (n10.isSea && n10.wave != null) { seaFrac += w10; wSum += n10.wave * w10; }
+        if (n01.isSea && n01.wave != null) { seaFrac += w01; wSum += n01.wave * w01; }
+        if (n11.isSea && n11.wave != null) { seaFrac += w11; wSum += n11.wave * w11; }
+
+        const pIdx = (y * bw + x) * 4;
+        if (seaFrac < 0.20) {
+          data[pIdx] = 0;
+          data[pIdx + 1] = 0;
+          data[pIdx + 2] = 0;
+          data[pIdx + 3] = 0;
+        } else {
+          const rgba = waveColorRgba(wSum / seaFrac, seaFrac);
+          data[pIdx] = rgba[0];
+          data[pIdx + 1] = rgba[1];
+          data[pIdx + 2] = rgba[2];
+          data[pIdx + 3] = rgba[3];
+        }
+      }
+    }
+
+    oCtx.putImageData(img, 0, 0);
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(off, 0, 0, (bw - 1) * step, (bh - 1) * step);
+    ctx.restore();
+  }
+
+  function renderIsobarContours(ctx, map, grid, w, h, stormPts) {
+    const cell = 18;
+    const nx = Math.ceil(w / cell) + 2;
+    const ny = Math.ceil(h / cell) + 2;
+    const pField = new Float64Array(nx * ny);
+
+    const rowLats = new Float64Array(ny);
+    for (let y = 0; y < ny; y++) {
+      rowLats[y] = map.containerPointToLatLng([0, y * cell]).lat;
+    }
+    const colLons = new Float64Array(nx);
+    for (let x = 0; x < nx; x++) {
+      colLons[x] = map.containerPointToLatLng([x * cell, 0]).lng;
+    }
+
+    const nRows = grid.nRows;
+    const nCols = grid.nCols;
+    const lat0 = grid.lats[0];
+    const latN = grid.lats[nRows - 1];
+    const lon0 = grid.lons[0];
+    const lonN = grid.lons[nCols - 1];
+    const invDLat = 1 / (grid.dLat || 1);
+    const invDLon = 1 / (grid.dLon || 1);
+    const nodes = grid.nodes;
+
+    let minP = 1100;
+    let maxP = 800;
+    for (let y = 0; y < ny; y++) {
+      const fRow = clampNum((clampNum(rowLats[y], lat0, latN) - lat0) * invDLat, 0, nRows - 1.0001);
+      const r0 = Math.floor(fRow);
+      const r1 = Math.min(nRows - 1, r0 + 1);
+      const ty = fRow - r0;
+      const ity = 1 - ty;
+      for (let x = 0; x < nx; x++) {
+        let lo = colLons[x];
+        while (lo < lon0) lo += 360;
+        while (lo > lonN && lo - 360 >= lon0) lo -= 360;
+        const fCol = clampNum((clampNum(lo, lon0, lonN) - lon0) * invDLon, 0, nCols - 1.0001);
+        const c0 = Math.floor(fCol);
+        const c1 = Math.min(nCols - 1, c0 + 1);
+        const tx = fCol - c0;
+        const itx = 1 - tx;
+        const p = nodes[r0 * nCols + c0].pressure * itx * ity
+          + nodes[r0 * nCols + c1].pressure * tx * ity
+          + nodes[r1 * nCols + c0].pressure * itx * ty
+          + nodes[r1 * nCols + c1].pressure * tx * ty;
+        pField[y * nx + x] = p;
+        if (p < minP) minP = p;
+        if (p > maxP) maxP = p;
+      }
+    }
+
+    const firstLvl = Math.ceil(minP / 4) * 4;
+    const lastLvl = Math.floor(maxP / 4) * 4;
+    if (lastLvl < firstLvl) return 0;
+
+    const placedPills = [];
+    let levelCount = 0;
+
+    function interpCoord(va, vb, level, xa, ya, xb, yb) {
+      const denom = vb - va;
+      const t = Math.abs(denom) < 1e-6 ? 0.5 : clampNum((level - va) / denom, 0.001, 0.999);
+      return [xa + (xb - xa) * t, ya + (yb - ya) * t];
+    }
+
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.40)";
+    ctx.lineWidth = 1;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    for (let level = firstLvl; level <= lastLvl; level += 4) {
+      const segs = [];
+      const adj = new Map();
+
+      function pushSeg(kA, pA, kB, pB) {
+        const sIdx = segs.length;
+        segs.push({ kA: kA, pA: pA, kB: kB, pB: pB, used: false });
+        let arrA = adj.get(kA);
+        if (!arrA) { arrA = []; adj.set(kA, arrA); }
+        arrA.push(sIdx);
+        let arrB = adj.get(kB);
+        if (!arrB) { arrB = []; adj.set(kB, arrB); }
+        arrB.push(sIdx);
+      }
+
+      for (let iy = 0; iy < ny - 1; iy++) {
+        const yTop = iy * cell;
+        const yBot = (iy + 1) * cell;
+        const rowA = iy * nx;
+        const rowB = (iy + 1) * nx;
+        for (let ix = 0; ix < nx - 1; ix++) {
+          const v0 = pField[rowA + ix];
+          const v1 = pField[rowA + ix + 1];
+          const v2 = pField[rowB + ix + 1];
+          const v3 = pField[rowB + ix];
+          const mask = (v0 >= level ? 8 : 0) | (v1 >= level ? 4 : 0) | (v2 >= level ? 2 : 0) | (v3 >= level ? 1 : 0);
+          if (mask === 0 || mask === 15) continue;
+
+          const xL = ix * cell;
+          const xR = (ix + 1) * cell;
+          const kT = "H:" + ix + "," + iy;
+          const kR = "V:" + (ix + 1) + "," + iy;
+          const kB = "H:" + ix + "," + (iy + 1);
+          const kL = "V:" + ix + "," + iy;
+          const pt = function (edge) {
+            if (edge === 0) return [kT, interpCoord(v0, v1, level, xL, yTop, xR, yTop)];
+            if (edge === 1) return [kR, interpCoord(v1, v2, level, xR, yTop, xR, yBot)];
+            if (edge === 2) return [kB, interpCoord(v3, v2, level, xL, yBot, xR, yBot)];
+            return [kL, interpCoord(v0, v3, level, xL, yTop, xL, yBot)];
+          };
+
+          const avg = 0.25 * (v0 + v1 + v2 + v3);
+          let pairs;
+          if (mask === 1 || mask === 14) pairs = [[3, 2]];
+          else if (mask === 2 || mask === 13) pairs = [[2, 1]];
+          else if (mask === 3 || mask === 12) pairs = [[3, 1]];
+          else if (mask === 4 || mask === 11) pairs = [[0, 1]];
+          else if (mask === 5) pairs = avg >= level ? [[0, 3], [1, 2]] : [[0, 1], [3, 2]];
+          else if (mask === 6 || mask === 9) pairs = [[0, 2]];
+          else if (mask === 7 || mask === 8) pairs = [[0, 3]];
+          else pairs = avg >= level ? [[0, 1], [3, 2]] : [[0, 3], [1, 2]];
+
+          for (let q = 0; q < pairs.length; q++) {
+            const a = pt(pairs[q][0]);
+            const b = pt(pairs[q][1]);
+            pushSeg(a[0], a[1], b[0], b[1]);
+          }
+        }
+      }
+
+      if (!segs.length) continue;
+      levelCount += 1;
+
+      const polylines = [];
+      for (let i = 0; i < segs.length; i++) {
+        if (segs[i].used) continue;
+        segs[i].used = true;
+        const pts = [segs[i].pA, segs[i].pB];
+        let headKey = segs[i].kA;
+        let tailKey = segs[i].kB;
+
+        let guard = 0;
+        while (guard++ < 4000) {
+          const list = adj.get(tailKey);
+          let nextSeg = null;
+          if (list) {
+            for (let m = 0; m < list.length; m++) {
+              const cand = segs[list[m]];
+              if (!cand.used) { nextSeg = cand; break; }
+            }
+          }
+          if (!nextSeg) break;
+          nextSeg.used = true;
+          if (nextSeg.kA === tailKey) {
+            pts.push(nextSeg.pB);
+            tailKey = nextSeg.kB;
+          } else {
+            pts.push(nextSeg.pA);
+            tailKey = nextSeg.kA;
+          }
+        }
+
+        guard = 0;
+        while (guard++ < 4000) {
+          const list = adj.get(headKey);
+          let prevSeg = null;
+          if (list) {
+            for (let m = 0; m < list.length; m++) {
+              const cand = segs[list[m]];
+              if (!cand.used) { prevSeg = cand; break; }
+            }
+          }
+          if (!prevSeg) break;
+          prevSeg.used = true;
+          if (prevSeg.kA === headKey) {
+            pts.unshift(prevSeg.pB);
+            headKey = prevSeg.kB;
+          } else {
+            pts.unshift(prevSeg.pA);
+            headKey = prevSeg.kA;
+          }
+        }
+
+        if (pts.length >= 2) polylines.push(pts);
+      }
+
+      ctx.beginPath();
+      const labelSpots = [];
+      for (let pIdx = 0; pIdx < polylines.length; pIdx++) {
+        const pts = polylines[pIdx];
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        let arcLen = 0;
+        for (let k = 1; k < pts.length; k++) {
+          arcLen += Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]);
+        }
+        if (pts.length === 2) {
+          ctx.lineTo(pts[1][0], pts[1][1]);
+        } else {
+          for (let k = 1; k < pts.length - 1; k++) {
+            const mx = 0.5 * (pts[k][0] + pts[k + 1][0]);
+            const my = 0.5 * (pts[k][1] + pts[k + 1][1]);
+            ctx.quadraticCurveTo(pts[k][0], pts[k][1], mx, my);
+          }
+          const last = pts[pts.length - 1];
+          ctx.lineTo(last[0], last[1]);
+        }
+
+        if (arcLen >= 135) {
+          const targetFracs = arcLen > 420 ? [0.28, 0.72] : [0.5];
+          for (let f = 0; f < targetFracs.length; f++) {
+            const mp = pts[Math.min(pts.length - 1, Math.floor(pts.length * targetFracs[f]))];
+            const lx = mp[0];
+            const ly = mp[1];
+            if (lx < 42 || lx > w - 42 || ly < 30 || ly > h - 30) continue;
+            let nearStorm = false;
+            for (let s = 0; s < stormPts.length; s++) {
+              if (Math.hypot(lx - stormPts[s].x, ly - stormPts[s].y) < 56) {
+                nearStorm = true;
+                break;
+              }
+            }
+            if (nearStorm) continue;
+            let clash = false;
+            for (let q = 0; q < placedPills.length; q++) {
+              if (Math.hypot(lx - placedPills[q].x, ly - placedPills[q].y) < 110) {
+                clash = true;
+                break;
+              }
+            }
+            if (!clash) {
+              placedPills.push({ x: lx, y: ly, label: String(level) });
+              labelSpots.push({ x: lx, y: ly, label: String(level) });
+            }
+          }
+        }
+      }
+      ctx.stroke();
+
+      if (labelSpots.length) {
+        ctx.save();
+        ctx.font = "600 10px \"JetBrains Mono\", \"Consolas\", monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        for (let q = 0; q < labelSpots.length; q++) {
+          const sp = labelSpots[q];
+          const tw = ctx.measureText(sp.label).width;
+          const pw = tw + 10;
+          const ph = 15;
+          const rx = sp.x - pw / 2;
+          const ry = sp.y - ph / 2;
+          ctx.fillStyle = "rgba(8, 16, 30, 0.78)";
+          ctx.beginPath();
+          if (typeof ctx.roundRect === "function") {
+            ctx.roundRect(rx, ry, pw, ph, 4);
+          } else {
+            ctx.rect(rx, ry, pw, ph);
+          }
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+          ctx.lineWidth = 0.75;
+          ctx.stroke();
+          ctx.fillStyle = "rgba(241, 245, 249, 0.88)";
+          ctx.fillText(sp.label, sp.x, sp.y + 0.5);
+        }
+        ctx.restore();
+      }
+    }
+
+    ctx.restore();
+    return levelCount;
+  }
+
+  function windBarbColor(kt) {
+    if (kt >= 40) return "#FF5722";
+    if (kt >= 25) return "#FEC617";
+    return "#F8FAFC";
+  }
+
+  function drawWindBarb(ctx, x, y, spdKt, dirFromDeg, lat) {
+    const color = windBarbColor(spdKt);
+    const rounded = Math.round(spdKt / 5) * 5;
+    ctx.save();
+    ctx.translate(x, y);
+
+    if (rounded < 5) {
+      ctx.strokeStyle = "rgba(6, 12, 24, 0.65)";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, 3.2, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.25;
+      ctx.beginPath();
+      ctx.arc(0, 0, 3.2, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    const rad = dirFromDeg * Math.PI / 180;
+    const ux = Math.sin(rad);
+    const uy = -Math.cos(rad);
+    const hemi = lat < 0 ? -1 : 1;
+    const nx = hemi * (-uy);
+    const ny = hemi * ux;
+    const staffLen = 25;
+    const fullLen = 9.5;
+    const halfLen = 5.2;
+    const slant = 0.34;
+
+    let rem = rounded;
+    const shapes = [];
+    while (rem >= 50) { shapes.push("P"); rem -= 50; }
+    while (rem >= 10) { shapes.push("F"); rem -= 10; }
+    while (rem >= 5) { shapes.push("H"); rem -= 5; }
+
+    function traceShapes() {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(ux * staffLen, uy * staffLen);
+      let pos = staffLen;
+      if (shapes.length === 1 && shapes[0] === "H") {
+        pos = staffLen - 4.2;
+      }
+      for (let i = 0; i < shapes.length; i++) {
+        const s = shapes[i];
+        if (s === "P") {
+          const base = pos;
+          const base2 = Math.max(6, pos - 5.2);
+          const mid = (base + base2) * 0.5;
+          ctx.moveTo(ux * base, uy * base);
+          ctx.lineTo(ux * mid + nx * (fullLen + 0.5), uy * mid + ny * (fullLen + 0.5));
+          ctx.lineTo(ux * base2, uy * base2);
+          pos -= 6.5;
+        } else {
+          const flen = s === "F" ? fullLen : halfLen;
+          const bx = ux * pos;
+          const by = uy * pos;
+          const tx = bx + (nx + ux * slant) * flen;
+          const ty = by + (ny + uy * slant) * flen;
+          ctx.moveTo(bx, by);
+          ctx.lineTo(tx, ty);
+          pos -= 3.8;
+        }
+      }
+    }
+
+    traceShapes();
+    ctx.strokeStyle = "rgba(6, 12, 24, 0.70)";
+    ctx.lineWidth = 2.8;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.stroke();
+
+    traceShapes();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.45;
+    ctx.stroke();
+
+    let pos = staffLen;
+    for (let i = 0; i < shapes.length; i++) {
+      if (shapes[i] === "P") {
+        const base = pos;
+        const base2 = Math.max(6, pos - 5.2);
+        const mid = (base + base2) * 0.5;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(ux * base, uy * base);
+        ctx.lineTo(ux * mid + nx * (fullLen + 0.5), uy * mid + ny * (fullLen + 0.5));
+        ctx.lineTo(ux * base2, uy * base2);
+        ctx.closePath();
+        ctx.fill();
+        pos -= 6.5;
+      } else {
+        pos -= 3.8;
+      }
+    }
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(0, 0, 1.9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawCurrentVector(ctx, x, y, currKt, currDirDeg) {
+    if (!Number.isFinite(currKt) || currKt < 0.05) return;
+    const rad = currDirDeg * Math.PI / 180;
+    const dx = Math.sin(rad);
+    const dy = -Math.cos(rad);
+    const px = -dy;
+    const py = dx;
+    const len = clampNum(10 + currKt * 5.8, 10, 28);
+    const startX = x - dx * (len * 0.42);
+    const startY = y - dy * (len * 0.42);
+    const tipX = x + dx * (len * 0.58);
+    const tipY = y + dy * (len * 0.58);
+    const ctrlX = (startX + tipX) * 0.5 + px * 2.8;
+    const ctrlY = (startY + tipY) * 0.5 + py * 2.8;
+
+    ctx.save();
+    const headBaseX = tipX - dx * 5.2;
+    const headBaseY = tipY - dy * 5.2;
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.quadraticCurveTo(ctrlX + px * 1.4, ctrlY + py * 1.4, headBaseX + px * 1.8, headBaseY + py * 1.8);
+    ctx.lineTo(headBaseX + px * 3.8, headBaseY + py * 3.8);
+    ctx.lineTo(tipX, tipY);
+    ctx.lineTo(headBaseX - px * 3.8, headBaseY - py * 3.8);
+    ctx.lineTo(headBaseX - px * 1.8, headBaseY - py * 1.8);
+    ctx.quadraticCurveTo(ctrlX - px * 1.0, ctrlY - py * 1.0, startX, startY);
+    ctx.closePath();
+
+    ctx.strokeStyle = "rgba(6, 12, 24, 0.72)";
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+    ctx.fillStyle = "#38BDF8";
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawMicroBadge(ctx, x, y, waveM, tempC) {
+    if (!Number.isFinite(waveM)) return;
+    const tStr = Number.isFinite(tempC) ? (Math.round(tempC) + "\u00B0C") : "--";
+    const text = waveM.toFixed(1) + "m \u2022 " + tStr;
+    ctx.save();
+    ctx.font = "500 10px \"JetBrains Mono\", \"Consolas\", monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.shadowColor = "rgba(4, 9, 18, 0.94)";
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 1;
+    ctx.fillStyle = "rgba(226, 232, 240, 0.75)";
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  function getActiveStormScreenPoints(map) {
+    const out = [];
+    const storms = (typeof MARINE_WEATHER_STORE !== "undefined" && MARINE_WEATHER_STORE && Array.isArray(MARINE_WEATHER_STORE.storms))
+      ? MARINE_WEATHER_STORE.storms : [];
+    const ctrLng = map.getCenter ? map.getCenter().lng : 0;
+    for (let i = 0; i < storms.length; i++) {
+      const sc = extractStormCenter(storms[i]);
+      if (!sc) continue;
+      let sLon = sc[1];
+      while (sLon - ctrLng > 180) sLon -= 360;
+      while (sLon - ctrLng < -180) sLon += 360;
+      const pt = map.latLngToContainerPoint([sc[0], sLon]);
+      if (pt) out.push(pt);
+    }
+    return out;
+  }
+
+  const EcdisSynopticWeatherLayer = (typeof L !== "undefined" && L.Layer) ? L.Layer.extend({
+    onAdd: function (map) {
+      this._map = map;
+      this._paneName = ensureWxSynopticPane(map);
+      const pane = map.getPane(this._paneName) || map.getPanes().overlayPane;
+      this._canvas = document.createElement("canvas");
+      this._canvas.id = "wxSynopticCanvas";
+      this._canvas.className = "wx-synoptic-canvas";
+      this._canvas.style.position = "absolute";
+      this._canvas.style.top = "0";
+      this._canvas.style.left = "0";
+      this._canvas.style.pointerEvents = "none";
+      pane.appendChild(this._canvas);
+
+      this._rafId = null;
+      this._fetchTimer = null;
+      this._activeCtrls = new Set();
+      this._inFlightNodes = new Map();
+      this._lastStats = { zoom: map.getZoom(), nodes: 0, liveNodes: 0, barbs: 0, currents: 0, badges: 0, isobars: 0 };
+
+      map.on("move zoom moveend zoomend viewreset resize", this._onMapViewChanged, this);
+      this._drawImmediate();
+      this._scheduleViewportFetch(10);
+    },
+
+    onRemove: function (map) {
+      if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
+      if (this._fetchTimer) { clearTimeout(this._fetchTimer); this._fetchTimer = null; }
+      if (this._activeCtrls) {
+        this._activeCtrls.forEach(function (c) { try { c.abort(); } catch (eA) {} });
+        this._activeCtrls.clear();
+      }
+      map.off("move zoom moveend zoomend viewreset resize", this._onMapViewChanged, this);
+      if (this._canvas && this._canvas.parentNode) {
+        this._canvas.parentNode.removeChild(this._canvas);
+      }
+      this._canvas = null;
+      this._map = null;
+    },
+
+    refreshNow: function () {
+      if (!this._map) return;
+      this._scheduleDraw();
+      this._scheduleViewportFetch(20);
+    },
+
+    _onMapViewChanged: function (ev) {
+      this._scheduleDraw();
+      if (!ev || ev.type === "moveend" || ev.type === "zoomend" || ev.type === "resize") {
+        this._scheduleViewportFetch(180);
+      }
+    },
+
+    _scheduleDraw: function () {
+      if (this._rafId || !this._map) return;
+      const self = this;
+      this._rafId = requestAnimationFrame(function () {
+        self._rafId = null;
+        self._drawImmediate();
+      });
+    },
+
+    _scheduleViewportFetch: function (delayMs) {
+      if (this._fetchTimer) clearTimeout(this._fetchTimer);
+      const self = this;
+      this._fetchTimer = setTimeout(function () {
+        self._fetchTimer = null;
+        self._fetchMissingGridNodes();
+      }, delayMs == null ? 180 : delayMs);
+    },
+
+    _fetchMissingGridNodes: function () {
+      const map = this._map;
+      const self = this;
+      if (!map) return;
+      if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.weather === false) return;
+      const grid = buildViewportGeoGrid(map);
+      if (!grid || !grid.missing.length) return;
+
+      const now = Date.now();
+      const inFlight = this._inFlightNodes || (this._inFlightNodes = new Map());
+      inFlight.forEach(function (expTs, k) {
+        if (expTs <= now) inFlight.delete(k);
+      });
+
+      const pending = grid.missing.filter(function (pt) {
+        const exp = inFlight.get(pt.key);
+        return !(exp && exp > now);
+      });
+      if (!pending.length) return;
+
+      const batch = pending.slice(0, 48);
+      for (let i = 0; i < batch.length; i++) {
+        inFlight.set(batch[i].key, now + 16000);
+      }
+
+      const lats = batch.map(function (pt) { return pt.lat.toFixed(3); }).join(",");
+      const lons = batch.map(function (pt) { return pt.lon.toFixed(3); }).join(",");
+      const fcUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + lats + "&longitude=" + lons
+        + "&current=wind_speed_10m,wind_direction_10m,pressure_msl,temperature_2m&wind_speed_unit=kn&timezone=GMT";
+      const marUrl = "https://marine-api.open-meteo.com/v1/marine?latitude=" + lats + "&longitude=" + lons
+        + "&current=wave_height,ocean_current_velocity,ocean_current_direction,sea_surface_temperature&timezone=GMT";
+
+      function fetchWithEndpointTimeout(url) {
+        const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+        if (ctrl && self._activeCtrls) self._activeCtrls.add(ctrl);
+        const timer = setTimeout(function () {
+          if (ctrl) { try { ctrl.abort(); } catch (eT) {} }
+        }, 15000);
+        const opts = ctrl ? { signal: ctrl.signal } : {};
+        return fetch(url, opts)
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .catch(function () { return null; })
+          .finally(function () {
+            clearTimeout(timer);
+            if (ctrl && self._activeCtrls) self._activeCtrls.delete(ctrl);
+          });
+      }
+
+      // Apply Forecast (wind, MSL pressure, 2m air temp) immediately when ready
+      fetchWithEndpointTimeout(fcUrl).then(function (fcRaw) {
+        if (!self._map || !fcRaw) return;
+        const fcArr = Array.isArray(fcRaw) ? fcRaw : (fcRaw.current ? [fcRaw] : []);
+        const ts = Date.now();
+        let stored = 0;
+        for (let i = 0; i < batch.length; i++) {
+          const fcCur = fcArr[i] && fcArr[i].current ? fcArr[i].current : null;
+          if (!fcCur) continue;
+          const prev = _nodeCache.get(batch[i].key) || synthesizeBaselineNode(batch[i].lat, batch[i].lon);
+          const windKt = fcCur.wind_speed_10m != null ? Number(fcCur.wind_speed_10m) : prev.windKt;
+          const windDir = fcCur.wind_direction_10m != null ? Number(fcCur.wind_direction_10m) : prev.windDir;
+          const pressure = fcCur.pressure_msl != null ? Number(fcCur.pressure_msl) : prev.pressure;
+          const tempC = fcCur.temperature_2m != null ? Number(fcCur.temperature_2m) : prev.tempC;
+          const safeWindKt = Number.isFinite(windKt) ? windKt : prev.windKt;
+          const safeWindDir = Number.isFinite(windDir) ? windDir : prev.windDir;
+          _nodeCache.set(batch[i].key, {
+            ts: ts,
+            isSea: prev.isSea,
+            wave: prev.wave,
+            pressure: Number.isFinite(pressure) ? pressure : prev.pressure,
+            windKt: safeWindKt,
+            windDir: safeWindDir,
+            windU: safeWindKt * Math.sin(safeWindDir * Math.PI / 180),
+            windV: safeWindKt * Math.cos(safeWindDir * Math.PI / 180),
+            currKt: prev.currKt,
+            currDir: prev.currDir,
+            currU: prev.currU,
+            currV: prev.currV,
+            tempC: Number.isFinite(tempC) ? tempC : prev.tempC,
+            sst: prev.sst,
+            hasFc: true,
+            hasMar: Boolean(prev.hasMar),
+            source: "open-meteo"
+          });
+          stored += 1;
+        }
+        if (stored > 0) {
+          pruneCacheIfNeeded();
+          self._scheduleDraw();
+        }
+      });
+
+      // Apply Marine (wave height, ocean current, SST, exact land/sea mask) independently
+      fetchWithEndpointTimeout(marUrl).then(function (marRaw) {
+        if (!self._map || !marRaw) return;
+        const marArr = Array.isArray(marRaw) ? marRaw : (marRaw.current ? [marRaw] : []);
+        const ts = Date.now();
+        let stored = 0;
+        for (let i = 0; i < batch.length; i++) {
+          const marCur = marArr[i] && marArr[i].current ? marArr[i].current : null;
+          if (!marCur) continue;
+          const prev = _nodeCache.get(batch[i].key) || synthesizeBaselineNode(batch[i].lat, batch[i].lon);
+          const rawWave = marCur.wave_height != null ? Number(marCur.wave_height) : null;
+          const isSea = rawWave !== null && Number.isFinite(rawWave);
+          const wave = isSea ? rawWave : null;
+          const currKmH = (isSea && marCur.ocean_current_velocity != null) ? Number(marCur.ocean_current_velocity) : null;
+          const currKt = (currKmH !== null && Number.isFinite(currKmH)) ? (currKmH / 1.852) : (isSea ? prev.currKt : 0);
+          const currDir = (isSea && marCur.ocean_current_direction != null) ? Number(marCur.ocean_current_direction) : prev.currDir;
+          const safeCurrKt = Number.isFinite(currKt) ? currKt : 0;
+          const safeCurrDir = Number.isFinite(currDir) ? currDir : 0;
+          const sst = (isSea && marCur.sea_surface_temperature != null) ? Number(marCur.sea_surface_temperature) : prev.tempC;
+          _nodeCache.set(batch[i].key, {
+            ts: ts,
+            isSea: isSea,
+            wave: wave,
+            pressure: prev.pressure,
+            windKt: prev.windKt,
+            windDir: prev.windDir,
+            windU: prev.windU,
+            windV: prev.windV,
+            currKt: safeCurrKt,
+            currDir: safeCurrDir,
+            currU: safeCurrKt * Math.sin(safeCurrDir * Math.PI / 180),
+            currV: safeCurrKt * Math.cos(safeCurrDir * Math.PI / 180),
+            tempC: Number.isFinite(prev.tempC) && prev.hasFc ? prev.tempC : sst,
+            sst: sst,
+            hasFc: Boolean(prev.hasFc),
+            hasMar: true,
+            source: "open-meteo"
+          });
+          stored += 1;
+        }
+        if (stored > 0) {
+          pruneCacheIfNeeded();
+          self._scheduleDraw();
+        }
+      });
+    },
+
+    _drawImmediate: function () {
+      const map = this._map;
+      const canvas = this._canvas;
+      if (!map || !canvas) return;
+      ensureWxSynopticPane(map);
+
+      const sz = map.getSize();
+      const w = Math.max(0, Math.round(sz.x));
+      const h = Math.max(0, Math.round(sz.y));
+      if (w < 8 || h < 8) return;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const pw = Math.round(w * dpr);
+      const ph = Math.round(h * dpr);
+      if (canvas.width !== pw || canvas.height !== ph) {
+        canvas.width = pw;
+        canvas.height = ph;
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+      }
+
+      const topLeftLayer = map.containerPointToLayerPoint([0, 0]);
+      L.DomUtil.setPosition(canvas, topLeftLayer);
+
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.weather === false) {
+        return;
+      }
+
+      const grid = buildViewportGeoGrid(map);
+      if (!grid) return;
+
+      const zoom = map.getZoom();
+      const stormPts = getActiveStormScreenPoints(map);
+
+      // Channel 1: Wave Height Background Heatmap (SPOS Calm-Transparent Bilinear)
+      renderWaveHeatmap(ctx, map, grid, w, h);
+
+      // Channel 2: Atmospheric Pressure Isobar Contours (4 hPa step, no duplicate cyclone L)
+      const isobarCount = renderIsobarContours(ctx, map, grid, w, h, stormPts);
+
+      // World-pixel anchored cell grid so barbs/currents/badges pan smoothly without jitter
+      // Automatic LOD: z<=4 wider spacing (barbs only), z5-6 add currents (~104px), z7+ add micro-badges (~98px)
+      const cellPx = zoom <= 4 ? 138 : (zoom <= 6 ? 104 : 98);
+      const pb = map.getPixelBounds(map.getCenter(), zoom);
+      const minX = pb.min.x;
+      const minY = pb.min.y;
+      const ixStart = Math.floor((minX - 24) / cellPx);
+      const ixEnd = Math.ceil((minX + w + 24) / cellPx);
+      const iyStart = Math.floor((minY - 24) / cellPx);
+      const iyEnd = Math.ceil((minY + h + 24) / cellPx);
+
+      const showCurrents = zoom >= 5;
+      const showBadges = zoom >= 7;
+      let barbCount = 0;
+      let currCount = 0;
+      let badgeCount = 0;
+
+      for (let iy = iyStart; iy <= iyEnd; iy++) {
+        const wy = iy * cellPx;
+        const cy = wy - minY;
+        if (cy < -20 || cy > h + 20) continue;
+
+        for (let ix = ixStart; ix <= ixEnd; ix++) {
+          const wx = ix * cellPx;
+          const cx = wx - minX;
+          if (cx < -20 || cx > w + 20) continue;
+
+          let nearStorm = false;
+          for (let s = 0; s < stormPts.length; s++) {
+            if (Math.hypot(cx - stormPts[s].x, cy - stormPts[s].y) < 34) {
+              nearStorm = true;
+              break;
+            }
+          }
+          if (nearStorm) continue;
+
+          const ll = map.unproject(L.point(wx, wy), zoom);
+          const val = sampleGridBilinear(grid, ll.lat, ll.lng);
+
+          // Channel 3: Meteorological Wind Barb
+          drawWindBarb(ctx, cx, cy, val.windKt, val.windDir, ll.lat);
+          barbCount += 1;
+
+          // Channel 4: Offset Cyan Ocean Current Vector (Zoom >= 5, sea only)
+          if (showCurrents && val.isSea && val.currKt >= 0.05) {
+            drawCurrentVector(ctx, cx + 15, cy + 9, val.currKt, val.currDir);
+            currCount += 1;
+          }
+
+          // Channel 5: Temperature & Wave Micro-Badge (Zoom >= 7, sea only)
+          if (showBadges && val.isSea && val.wave != null && cx >= 26 && cx <= w - 26 && cy >= 0 && cy <= h - 24) {
+            drawMicroBadge(ctx, cx, cy + 16, val.wave, val.tempC);
+            badgeCount += 1;
+          }
+        }
+      }
+
+      let liveNodes = 0;
+      for (let i = 0; i < grid.nodes.length; i++) {
+        if (grid.nodes[i].source === "open-meteo") liveNodes += 1;
+      }
+      this._lastStats = {
+        zoom: zoom,
+        nodes: grid.nodes.length,
+        liveNodes: liveNodes,
+        barbs: barbCount,
+        currents: currCount,
+        badges: badgeCount,
+        isobars: isobarCount
+      };
+    }
+  }) : null;
+
+  function syncWxSynopticLayer(map, enabled) {
+    if (!map || !EcdisSynopticWeatherLayer) return;
+    if (!enabled) {
+      if (map._wxSynopticLayer) {
+        try { map.removeLayer(map._wxSynopticLayer); } catch (eR) {}
+      }
+      return;
+    }
+    ensureWxSynopticPane(map);
+    if (!map._wxSynopticLayer) {
+      map._wxSynopticLayer = new EcdisSynopticWeatherLayer();
+    }
+    if (!map.hasLayer(map._wxSynopticLayer)) {
+      map._wxSynopticLayer.addTo(map);
+    } else {
+      map._wxSynopticLayer.refreshNow();
+    }
+  }
+
+  window.ensureWxSynopticPane = ensureWxSynopticPane;
+  window.syncWxSynopticLayer = syncWxSynopticLayer;
+  window._wxSynopticDebug = {
+    getStats: function () {
+      const m = typeof leafletMap !== "undefined" ? leafletMap : null;
+      const layer = m && m._wxSynopticLayer ? m._wxSynopticLayer : null;
+      return {
+        hasLayer: Boolean(layer && m && m.hasLayer(layer)),
+        cacheSize: _nodeCache.size,
+        stats: layer ? layer._lastStats : null
+      };
+    }
+  };
+
+  if (typeof document !== "undefined" && !window._wxSynopticClickHookBound) {
+    window._wxSynopticClickHookBound = true;
+    document.addEventListener("click", function (ev) {
+      const t = ev && ev.target && ev.target.closest ? ev.target.closest("#tabOverlayWeather") : null;
+      if (!t) return;
+      setTimeout(function () {
+        const m = (typeof window !== "undefined" && window.leafletMap)
+          ? window.leafletMap : (typeof leafletMap !== "undefined" ? leafletMap : null);
+        if (!m) return;
+        const enabled = typeof OVERLAY_STATES === "undefined" ? true : OVERLAY_STATES.weather !== false;
+        syncWxSynopticLayer(m, enabled);
+      }, 0);
+    }, false);
+  }
+})();
 
 
 
@@ -16476,7 +17936,7 @@ function initNtMMap() {
 
     const tilePerfOpts = {
 
-      keepBuffer: lowEndMap ? 2 : 4,
+      keepBuffer: lowEndMap ? 1 : 2,
 
       updateWhenIdle: true,
 
@@ -16500,9 +17960,9 @@ function initNtMMap() {
 
 
 
-    // 1. Primary Nautical Chart (Esri Ocean Base + CARTO + China AutoNavi / Gaode Multi-Stage Failover)
+    // 1. Primary Nautical Chart (Esri Ocean Base + Server Mirror + Topo + China AutoNavi Failover)
 
-    const oceanLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", Object.assign({}, tilePerfOpts, {
+    const oceanLayer = L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", Object.assign({}, tilePerfOpts, {
 
       maxNativeZoom: 13,
 
@@ -16524,11 +17984,14 @@ function initNtMMap() {
 
         errEvent.tile.dataset.fallbackStep = "1";
 
-        errEvent.tile.src = `https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/${c.z}/${c.y}/${c.x}`;
+        errEvent.tile.src = `https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/${c.z}/${c.y}/${c.x}`;
 
       } else if (step === 1) {
+
         errEvent.tile.dataset.fallbackStep = "2";
-        errEvent.tile.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/${c.z}/${c.y}/${c.x}`;
+
+        errEvent.tile.src = `https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/${c.z}/${c.y}/${c.x}`;
+
       } else if (step === 2) {
 
         errEvent.tile.dataset.fallbackStep = "3";
@@ -16619,9 +18082,9 @@ function initNtMMap() {
 
 
 
-    // 4. Satellite Imagery (Esri World Imagery + Services Mirror + China AutoNavi Satellite Fallback)
+    // 4. Satellite Imagery (Esri World Imagery Services CDN + Server Mirror + China AutoNavi Satellite Fallback)
 
-    const satLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", Object.assign({}, tilePerfOpts, {
+    const satLayer = L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", Object.assign({}, tilePerfOpts, {
 
       maxNativeZoom: 18,
 
@@ -16643,7 +18106,7 @@ function initNtMMap() {
 
         errEvent.tile.dataset.fallbackStep = "1";
 
-        errEvent.tile.src = `https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${c.z}/${c.y}/${c.x}`;
+        errEvent.tile.src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${c.z}/${c.y}/${c.x}`;
 
       } else if (step === 1) {
 
@@ -16753,13 +18216,13 @@ function initNtMMap() {
 
     const buoysTileLayer = L.tileLayer(seamarkUrl, {
 
-      minZoom: 3,
+      minZoom: 9,
 
       maxNativeZoom: 18,
 
       maxZoom: 19,
 
-      keepBuffer: lowEndMap ? 6 : 14,
+      keepBuffer: lowEndMap ? 2 : 3,
 
       updateWhenIdle: true,
 
@@ -17188,9 +18651,86 @@ function initNtMMap() {
     // Add _subseaInfraLayer FIRST so it resides below buoysTileLayer and hitboxes
     const seamarkLayer = L.layerGroup([_subseaInfraLayer, buoysTileLayer]);
 
-    // Interactive Buoys Layer Engine (Rich AIS-Style Popups on LMB)
+    // Interactive Buoys & TSS Layer Engine (Rich AIS-Style Popups on LMB + Global/SANHO TSS Vectors)
     let _buoyMarksData = [];
     let _buoyTssData = [];
+    let _tssChartData = null;
+    let _tssGroup = L.layerGroup();
+    let _tssRenderer = null;
+    let _renderTssOverlay = null;
+    seamarkLayer.addLayer(_tssGroup);
+    window._tssGroup = _tssGroup;
+
+    function ensureTssPane(mapRef) {
+      if (!mapRef || typeof mapRef.getPane !== "function") return;
+      if (!mapRef.getPane("tssPane")) {
+        const p = mapRef.createPane("tssPane");
+        p.style.zIndex = "430";
+        p.style.pointerEvents = "none";
+      }
+    }
+
+    const EcdisTssRenderer = L.Canvas.extend({
+      _updatePoly: function(layer, closed) {
+        L.Canvas.prototype._updatePoly.call(this, layer, closed);
+        if (!this._drawing || !layer || !layer.options || !layer.options.tssArrows) return;
+        const parts = layer._parts;
+        if (!parts || !parts.length) return;
+        const ctx = this._ctx;
+        ctx.save();
+        ctx.strokeStyle = layer.options.color || "#c026d3";
+        ctx.lineWidth = Math.max(1.5, Number(layer.options.weight || 1.6));
+        ctx.globalAlpha = 0.92;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.setLineDash([]);
+        for (let pi = 0; pi < parts.length; pi++) {
+          const pts = parts[pi];
+          if (!pts || pts.length < 2) continue;
+          let totalLen = 0;
+          const segs = [];
+          for (let i = 0; i < pts.length - 1; i++) {
+            const dx = pts[i + 1].x - pts[i].x;
+            const dy = pts[i + 1].y - pts[i].y;
+            const d = Math.hypot(dx, dy);
+            if (d > 0.5) {
+              segs.push({ a: pts[i], b: pts[i + 1], dx, dy, d, start: totalLen, end: totalLen + d });
+              totalLen += d;
+            }
+          }
+          if (totalLen < 12) continue;
+          const spacing = 72;
+          let target = totalLen < spacing ? totalLen * 0.5 : 32;
+          let si = 0;
+          while (target <= totalLen - 6) {
+            while (si < segs.length - 1 && segs[si].end < target) si++;
+            const seg = segs[si];
+            const t = Math.max(0, Math.min(1, (target - seg.start) / seg.d));
+            const cx = seg.a.x + seg.dx * t;
+            const cy = seg.a.y + seg.dy * t;
+            const ux = seg.dx / seg.d;
+            const uy = seg.dy / seg.d;
+            const nx = -uy;
+            const ny = ux;
+            const tx = cx + ux * 7.5;
+            const ty = cy + uy * 7.5;
+            const bx = cx - ux * 7.5;
+            const by = cy - uy * 7.5;
+            ctx.beginPath();
+            ctx.moveTo(bx, by);
+            ctx.lineTo(tx, ty);
+            ctx.moveTo(tx - ux * 6.5 + nx * 4.8, ty - uy * 6.5 + ny * 4.8);
+            ctx.lineTo(tx, ty);
+            ctx.lineTo(tx - ux * 6.5 - nx * 4.8, ty - uy * 6.5 - ny * 4.8);
+            ctx.stroke();
+            if (totalLen < spacing) break;
+            target += spacing;
+          }
+        }
+        ctx.restore();
+      }
+    });
+
     let _buoysVectorGroup = L.layerGroup();
     seamarkLayer.addLayer(_buoysVectorGroup);
     // Light sector wedges (0.3 NM) — OSM light_* only; IALA lateral/cardinal have no sectors
@@ -17237,37 +18777,54 @@ function initNtMMap() {
       return arc;
     }
 
+    let _buoyDatasetsInflight = null;
+
     async function loadBuoyDatasets() {
-      if (_buoyMarksData.length > 0 && _subseaInfraData && _lightSectorsData) return;
+      if (_buoyMarksData.length > 0 && _subseaInfraData && _lightSectorsData && _tssChartData && _buoyTssData.length > 0) return;
       loadSubseaInfraDataset();
+      if (_buoyDatasetsInflight) return _buoyDatasetsInflight;
+      const tasks = [];
       if (!(_buoyMarksData.length > 0)) {
-        try {
-          const rMarks = await fetch("assets/geo/setroute_iala_marks.json");
-          if (rMarks.ok) {
-            _buoyMarksData = await rMarks.json();
+        tasks.push(fetch("assets/geo/setroute_iala_marks.json").then(r => r.ok ? r.json() : null).then(d => {
+          if (Array.isArray(d)) {
+            _buoyMarksData = d;
             window._buoyMarksData = _buoyMarksData;
             if (typeof _renderBuoysHitboxes === "function") _renderBuoysHitboxes();
           }
-        } catch (eMarks) {}
+        }).catch(() => {}));
       }
       if (!_lightSectorsData) {
-        try {
-          const rSec = await fetch("assets/geo/setroute_light_sectors.json");
-          if (rSec.ok) {
-            const raw = await rSec.json();
+        tasks.push(fetch("assets/geo/setroute_light_sectors.json").then(r => r.ok ? r.json() : null).then(raw => {
+          if (raw) {
             _lightSectorsRadiusNm = Number(raw.radiusNm) > 0 ? Number(raw.radiusNm) : 0.3;
             _lightSectorsData = Array.isArray(raw.L) ? raw.L : [];
             window._lightSectorsData = _lightSectorsData;
             if (typeof _renderLightSectors === "function") _renderLightSectors();
           }
-        } catch (eSec) {}
+        }).catch(() => {}));
       }
       if (!(_buoyTssData.length > 0)) {
-        try {
-          const rTss = await fetch("assets/geo/setroute_tss_world.json");
-          if (rTss.ok) { _buoyTssData = await rTss.json(); window._buoyTssData = _buoyTssData; }
-        } catch (eTss) {}
+        tasks.push(fetch("assets/geo/setroute_tss_world.json").then(r => r.ok ? r.json() : null).then(d => {
+          if (Array.isArray(d)) {
+            _buoyTssData = d;
+            window._buoyTssData = _buoyTssData;
+          }
+        }).catch(() => {}));
       }
+      if (!_tssChartData) {
+        tasks.push(fetch("assets/geo/setroute_tss_chart.json").then(r => r.ok ? r.json() : null).then(raw => {
+          if (raw) {
+            _tssChartData = Array.isArray(raw.items) ? raw.items : (Array.isArray(raw) ? raw : []);
+            window._tssChartData = _tssChartData;
+            if (typeof _renderTssOverlay === "function") _renderTssOverlay();
+          }
+        }).catch(() => {}));
+      }
+      if (!tasks.length) return;
+      _buoyDatasetsInflight = Promise.all(tasks).finally(() => {
+        _buoyDatasetsInflight = null;
+      });
+      await _buoyDatasetsInflight;
     }
 
     function pointInTssPolygon(lat, lon, ring) {
@@ -17364,10 +18921,13 @@ function initNtMMap() {
       if (!map || !seamarkLyr) return;
       _renderBuoysHitboxes = updateVectorBuoyMarkers;
       _renderLightSectors = updateLightSectors;
+      _renderTssOverlay = updateTssOverlay;
       ensureLightSectorsPane(map);
+      ensureTssPane(map);
       loadBuoyDatasets().then(() => {
         try { updateVectorBuoyMarkers(); } catch (e) {}
         try { updateLightSectors(); } catch (e2) {}
+        try { updateTssOverlay(); } catch (e3) {}
       });
 
     // =========================================================================
@@ -17515,8 +19075,9 @@ function initNtMMap() {
           }
         }
 
-        // TSS Schemes
+        // TSS Schemes (named routing polygons + global/SANHO vector TSS fallback)
         const _tssArr = (Array.isArray(_buoyTssData) && _buoyTssData.length) ? _buoyTssData : (Array.isArray(window._buoyTssData) ? window._buoyTssData : []);
+        let matchedNamedTss = false;
         if (_tssArr.length) {
           for (let s = 0; s < _tssArr.length; s++) {
             const scheme = _tssArr[s];
@@ -17524,6 +19085,7 @@ function initNtMMap() {
             for (let p = 0; p < scheme.parts.length; p++) {
               const part = scheme.parts[p];
               if (pointInTssPolygon(lat, lon, part.ring)) {
+                matchedNamedTss = true;
                 const tssObj = Object.assign({}, part, { schemeName: scheme.name });
                 addCandidate({
                   id: "tss_" + scheme.name + "_" + (part.category || p),
@@ -17544,6 +19106,58 @@ function initNtMMap() {
                   }
                 });
               }
+            }
+          }
+        }
+        const _tssChartArr = Array.isArray(_tssChartData) ? _tssChartData : (Array.isArray(window._tssChartData) ? window._tssChartData : []);
+        if (!matchedNamedTss && _tssChartArr.length) {
+          const padDeg = 0.04;
+          const catMap = { z: "separation_zone", r: "separation_zone", p: "precautionary_area", i: "inshore_traffic_zone", l: "traffic_lane", m: "traffic_lane", b: "separation_boundary", s: "separation_line", t: "two_way_route", d: "deep_water_route", c: "deep_water_route", x: "separation_crossing" };
+          for (let ci = 0; ci < _tssChartArr.length; ci++) {
+            const it = _tssChartArr[ci];
+            if (!it || it.length < 6) continue;
+            const bb = it[4];
+            if (!bb || lat < bb[0] - padDeg || lat > bb[2] + padDeg || lon < bb[1] - padDeg || lon > bb[3] + padDeg) continue;
+            const rings = Array.isArray(it[5][0]) && Array.isArray(it[5][0][0]) ? it[5] : [it[5]];
+            let hit = false;
+            if (it[1] === 1) {
+              hit = rings.some(rg => pointInTssPolygon(lat, lon, rg));
+            } else {
+              for (let ri = 0; ri < rings.length && !hit; ri++) {
+                const rg = rings[ri];
+                for (let pi = 0; pi < rg.length - 1 && !hit; pi++) {
+                  const aLat = rg[pi][0], aLon = rg[pi][1], bLat = rg[pi + 1][0], bLon = rg[pi + 1][1];
+                  const dx = (bLon - aLon) * 60 * cosLat, dy = (bLat - aLat) * 60;
+                  const px = (lon - aLon) * 60 * cosLat, py = (lat - aLat) * 60;
+                  const l2 = dx * dx + dy * dy;
+                  const u = l2 > 1e-8 ? Math.max(0, Math.min(1, (px * dx + py * dy) / l2)) : 0;
+                  if (Math.hypot(px - u * dx, py - u * dy) <= 1.2) hit = true;
+                }
+              }
+            }
+            if (hit) {
+              const cat = catMap[it[0]] || "traffic_lane";
+              const title = it[3] || (cat === "separation_zone" ? "Traffic Separation Zone" : cat === "precautionary_area" ? "TSS Precautionary Area" : "Traffic Separation Lane");
+              const tssObj = { category: cat, name: title, schemeName: title, directionDeg: it[2] != null ? it[2] : null };
+              addCandidate({
+                id: "tss_chart_" + ci,
+                category: "TSS",
+                catBadge: "TSS",
+                badgeColor: cat === "separation_zone" ? "#ef4444" : "#d946ef",
+                icon: "🧭",
+                name: title,
+                subtitle: `${cat.replace(/_/g, " ")} · COLREG Rule 10`,
+                distNm: 0,
+                lat: clickPt.lat,
+                lon: clickPt.lng,
+                open: function() {
+                  L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 280, minWidth: 200, closeButton: true })
+                    .setLatLng(clickPt)
+                    .setContent(formatTssPopup(tssObj, lat, lon))
+                    .openOn(targetMap);
+                }
+              });
+              break;
             }
           }
         }
@@ -18175,19 +19789,147 @@ function initNtMMap() {
         });
       }
 
+      function buildTssFeatureStyle(typeCode, isPoly, z) {
+        const base = {
+          pane: "tssPane",
+          renderer: _tssRenderer,
+          interactive: false,
+          opacity: 0.9,
+          weight: 1.5
+        };
+        if (typeCode === "z" || typeCode === "r") {
+          return Object.assign(base, {
+            color: "#c026d3",
+            fillColor: "#d946ef",
+            fillOpacity: isPoly ? (z >= 9 ? 0.22 : 0.28) : 0,
+            fill: !!isPoly
+          });
+        }
+        if (typeCode === "p" || typeCode === "i" || typeCode === "x") {
+          return Object.assign(base, {
+            color: "#c026d3",
+            weight: 1.4,
+            opacity: 0.85,
+            dashArray: "6, 4",
+            fillColor: "#d946ef",
+            fillOpacity: isPoly ? 0.08 : 0,
+            fill: !!isPoly
+          });
+        }
+        if (typeCode === "b") {
+          return Object.assign(base, {
+            color: "#c026d3",
+            weight: z >= 9 ? 1.6 : 1.4,
+            dashArray: "7, 4",
+            fill: false
+          });
+        }
+        if (typeCode === "s") {
+          return Object.assign(base, {
+            color: "#a21caf",
+            weight: 2.0,
+            opacity: 0.92,
+            fill: false
+          });
+        }
+        if (typeCode === "l" || typeCode === "m") {
+          return Object.assign(base, {
+            color: "#c026d3",
+            weight: z >= 9 ? 1.8 : 1.5,
+            tssArrows: true,
+            fillColor: "#d946ef",
+            fillOpacity: isPoly ? 0.06 : 0,
+            fill: !!isPoly
+          });
+        }
+        if (typeCode === "t" || typeCode === "d" || typeCode === "c") {
+          return Object.assign(base, {
+            color: "#a855f7",
+            weight: z >= 9 ? 1.6 : 1.3,
+            opacity: 0.85,
+            dashArray: "5, 4",
+            fillColor: "#a855f7",
+            fillOpacity: isPoly ? 0.06 : 0,
+            fill: !!isPoly
+          });
+        }
+        return Object.assign(base, {
+          color: "#c026d3",
+          weight: 1.4,
+          opacity: 0.8,
+          dashArray: "5, 4",
+          fillColor: "#d946ef",
+          fillOpacity: isPoly ? 0.08 : 0,
+          fill: !!isPoly
+        });
+      }
+
+      function updateTssOverlay() {
+        _tssGroup.clearLayers();
+        const z = map.getZoom();
+        if (!map.hasLayer(seamarkLyr) || z < 5 || !Array.isArray(_tssChartData)) return;
+
+        ensureTssPane(map);
+        if (!_tssRenderer) {
+          _tssRenderer = new EcdisTssRenderer({
+            pane: "tssPane",
+            padding: 0.25,
+            tolerance: 0
+          });
+        }
+
+        const bounds = map.getBounds().pad(0.25);
+        const minLat = bounds.getSouth();
+        const maxLat = bounds.getNorth();
+        const minLon = bounds.getWest();
+        const maxLon = bounds.getEast();
+        let renderedCount = 0;
+
+        for (let i = 0; i < _tssChartData.length && renderedCount < 1200; i++) {
+          const item = _tssChartData[i];
+          const typeCode = item[0];
+          const isPoly = item[1];
+          const bbox = item[4];
+          const geom = item[5];
+          if (!bbox || !Array.isArray(geom) || geom.length === 0) continue;
+          if (bbox[2] < minLat || bbox[0] > maxLat) continue;
+
+          const rings = Array.isArray(geom[0]) && Array.isArray(geom[0][0]) ? geom : [geom];
+          const style = buildTssFeatureStyle(typeCode, isPoly, z);
+
+          for (let sIdx = 0; sIdx < 3 && renderedCount < 1200; sIdx++) {
+            const shift = sIdx === 0 ? 0 : (sIdx === 1 ? -360 : 360);
+            if (bbox[3] + shift < minLon || bbox[1] + shift > maxLon) continue;
+
+            const shiftedRings = shift === 0
+              ? rings
+              : rings.map((ring) => ring.map((pt) => [pt[0], pt[1] + shift]));
+            const latlngs = shiftedRings.length === 1 ? shiftedRings[0] : shiftedRings;
+            const layer = isPoly ? L.polygon(latlngs, style) : L.polyline(latlngs, style);
+            _tssGroup.addLayer(layer);
+            renderedCount++;
+          }
+        }
+      }
+
       map.on("zoomend moveend", () => {
+        updateTssOverlay();
         updateVectorBuoyMarkers();
         updateLightSectors();
       });
       map.on("zoomend", updateSubseaInfraLayer);
       seamarkLyr.on("add", () => {
         ensureSubseaPane();
+        ensureTssPane(map);
         ensureLightSectorsPane(map);
+        loadBuoyDatasets();
         updateSubseaInfraLayer();
+        updateTssOverlay();
         updateVectorBuoyMarkers();
         updateLightSectors();
       });
       seamarkLyr.on("remove", () => {
+        _tssGroup.clearLayers();
         _buoysVectorGroup.clearLayers();
         _lightSectorsGroup.clearLayers();
         _subseaInfraLayer.clearLayers();
@@ -18197,6 +19939,7 @@ function initNtMMap() {
     try {
       window.seamarkLayer = seamarkLayer;
       window.buoysTileLayer = buoysTileLayer;
+      window._tssGroup = _tssGroup;
       window._buoysVectorGroup = _buoysVectorGroup;
       initBuoysInteractiveLayer(leafletMap, seamarkLayer);
     } catch (eSm) {}
@@ -27263,113 +29006,107 @@ function setrouteSignedTurnDeg(cIn, cOut) {
  */
 
 function setrouteSplitSharpTurns(waypoints, opts) {
-
   opts = opts || {};
-
   const sharpDeg = Number(opts.sharpDeg) > 0 ? Number(opts.sharpDeg) : 70;
-
   const maxTurnDeg = Number(opts.maxTurnDeg) > 0 ? Number(opts.maxTurnDeg) : 20;
-
   if (!Array.isArray(waypoints) || waypoints.length < 3) return waypoints;
 
-
-
   const mk = (lat, lon, a, name) => ({
-
     wptNo: "TMP",
-
     name: name || "Turn ease",
-
     lat: Number(Number(lat).toFixed(5)),
-
-    lon: Number(Number(lon).toFixed(5)),
-
+    lon: Number((((Number(lon) + 180) % 360 + 360) % 360 - 180).toFixed(5)),
     speedKnots: a.speedKnots,
-
     portsideXTD: a.portsideXTD,
-
     starboardXTD: a.starboardXTD,
-
     turnRadius: Math.max(0.6, Number(a.turnRadius) || 0.8),
-
     sail: a.sail || "RL",
-
     rot: 8.0
-
   });
 
-
+  const normLonRel = (lon, refLon) => {
+    let l = Number(lon);
+    while (l - refLon > 180) l -= 360;
+    while (l - refLon < -180) l += 360;
+    return l;
+  };
 
   const out = [waypoints[0]];
-
   for (let i = 1; i < waypoints.length - 1; i++) {
-
     const A = out[out.length - 1];
-
     const B = waypoints[i];
-
     const C = waypoints[i + 1];
-
+    const distAB = calculateHaversineDistanceNM(A.lat, A.lon, B.lat, B.lon);
+    const distBC = calculateHaversineDistanceNM(B.lat, B.lon, C.lat, C.lon);
     const cIn = setrouteCourseBetweenWp(A, B);
-
     const cOut = setrouteCourseBetweenWp(B, C);
-
     const signed = setrouteSignedTurnDeg(cIn, cOut);
-
     const turn = Math.abs(signed);
 
-    if (!(turn >= sharpDeg)) {
-
+    if (!(turn >= sharpDeg) || Math.min(distAB, distBC) < 1.5) {
       out.push(B);
-
       continue;
-
     }
 
-    const nSeg = Math.max(2, Math.ceil(turn / maxTurnDeg));
+    const nSeg = Math.max(2, Math.min(8, Math.ceil(turn / maxTurnDeg)));
+    const dIn = Math.min(14, distAB * 0.38);
+    const dOut = Math.min(14, distBC * 0.38);
+    const pIn = setrouteDestPoint(B.lat, B.lon, (cIn + 180) % 360, dIn);
+    const pOut = setrouteDestPoint(B.lat, B.lon, cOut, dOut);
+    const pInLon = normLonRel(pIn.lon, B.lon);
+    const pOutLon = normLonRel(pOut.lon, B.lon);
 
-    const dIn = Math.min(14, Math.max(2.5, calculateHaversineDistanceNM(A.lat, A.lon, B.lat, B.lon) * 0.28));
-
-    const dOut = Math.min(14, Math.max(2.5, calculateHaversineDistanceNM(B.lat, B.lon, C.lat, C.lon) * 0.28));
-
-    for (let s = 1; s < nSeg; s++) {
-
+    const arcPts = [];
+    for (let s = 0; s <= nSeg; s++) {
       const t = s / nSeg;
-
-      const pBack = setrouteDestPoint(B.lat, B.lon, (cIn + 180) % 360, dIn * (1 - t));
-
-      const pFwd = setrouteDestPoint(B.lat, B.lon, cOut, dOut * t);
-
-      const lat = pBack.lat * (1 - t) + pFwd.lat * t;
-
-      const lon = pBack.lon * (1 - t) + pFwd.lon * t;
-
-      if (typeof setroutePointInLandBox === "function" && setroutePointInLandBox(lat, lon)) continue;
-
-      out.push(mk(lat, lon, B, "Turn ease " + s + "/" + (nSeg - 1)));
-
+      const omt = 1 - t;
+      const w0 = omt * omt;
+      const w1 = 2 * omt * t;
+      const w2 = t * t;
+      const lat = w0 * pIn.lat + w1 * B.lat + w2 * pOut.lat;
+      const lon = w0 * pInLon + w1 * B.lon + w2 * pOutLon;
+      const wrappedLon = (((lon + 180) % 360) + 360) % 360 - 180;
+      const prevPt = arcPts.length ? arcPts[arcPts.length - 1] : A;
+      if (calculateHaversineDistanceNM(prevPt.lat, prevPt.lon, lat, wrappedLon) < 0.2) continue;
+      if (calculateHaversineDistanceNM(lat, wrappedLon, C.lat, C.lon) < 0.2) continue;
+      arcPts.push(mk(lat, wrappedLon, B, "Turn ease " + (arcPts.length + 1) + "/" + (nSeg + 1)));
     }
 
-    // Keep a soft apex near B (slightly inside the turn) only if not land
-
-    const midBrg = (cIn + signed * 0.5 + 360) % 360;
-
-    const apex = setrouteDestPoint(B.lat, B.lon, midBrg, Math.min(dIn, dOut) * 0.15);
-
-    if (!(typeof setroutePointInLandBox === "function" && setroutePointInLandBox(apex.lat, apex.lon))) {
-
-      out.push(mk(apex.lat, apex.lon, B, B.name || "Turn pivot"));
-
+    let validArc = arcPts.length >= 2;
+    if (validArc) {
+      const chain = [A].concat(arcPts, [C]);
+      for (let ci = 0; ci < chain.length - 1 && validArc; ci++) {
+        const p1 = chain[ci], p2 = chain[ci + 1];
+        if (ci < chain.length - 2 && typeof setroutePointInLandBox === "function" && setroutePointInLandBox(p2.lat, p2.lon)) {
+          validArc = false;
+        }
+        if (validArc && typeof setrouteLegLikelyCrossesLand === "function" && setrouteLegLikelyCrossesLand(p1.lat, p1.lon, p2.lat, p2.lon)) {
+          validArc = false;
+        }
+        if (validArc && ci > 0) {
+          const prevCrs = setrouteCourseBetweenWp(chain[ci - 1], p1);
+          const nextCrs = setrouteCourseBetweenWp(p1, p2);
+          const dStep = setrouteSignedTurnDeg(prevCrs, nextCrs);
+          if ((dStep * signed < -1e-6 && Math.abs(dStep) > 2) || Math.abs(dStep) > Math.max(maxTurnDeg + 12, turn * 0.7)) {
+            validArc = false;
+          }
+        }
+      }
     }
 
+    if (validArc) {
+      arcPts.forEach((pt, idx) => {
+        pt.name = "Turn ease " + (idx + 1) + "/" + arcPts.length;
+        out.push(pt);
+      });
+    } else {
+      out.push(B);
+    }
   }
 
   out.push(waypoints[waypoints.length - 1]);
-
   out.forEach((wp, idx) => { wp.wptNo = ("00" + (idx + 1)).slice(-3); wp.id = idx + 1; });
-
   return out;
-
 }
 
 window.setrouteSplitSharpTurns = setrouteSplitSharpTurns;
@@ -28347,16 +30084,16 @@ function initSetRoute() {
 
   if (viewChartBtn) {
 
-    viewChartBtn.addEventListener("click", () => {
-
-      switchToTab("tab-ntm");
-
-      if (activeRouteData) {
-
-        renderRouteOnMap(activeRouteData, true);
-
+    viewChartBtn.addEventListener("click", (ev) => {
+      if (ev) ev.preventDefault();
+      if (typeof openAndPlotRouteOnSetChart === "function") {
+        openAndPlotRouteOnSetChart(activeRouteData);
+      } else {
+        switchToTab("tab-ntm", "user");
+        if (activeRouteData) {
+          renderRouteOnMap(activeRouteData, true);
+        }
       }
-
     });
 
   }
@@ -35491,7 +37228,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
           lyr.on("load", onLoad);
           lyr.on("tileerror", onTileErr);
           // Safety: never spin forever
-          setTimeout(finish, 2500);
+          setTimeout(finish, 15000);
         };
 
         if (baseKey === "globe3d") {
@@ -45145,12 +46882,12 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     const altLabels = retries.map((r) => r.label).join(" / ");
     live.step(
       hardRefuse
-        ? `Primary path refused ? Brain evaluating ${altLabels} hypotheses?`
-        : `Land-leg warning (${auditPre.stats.landLegs}) ? Brain ranking alternate ocean hubs (${altLabels})?`
+        ? `Primary path refused — Brain evaluating ${altLabels} hypotheses…`
+        : `Land-leg warning (${auditPre.stats.landLegs}) — Brain ranking alternate ocean hubs (${altLabels})…`
     );
     let recovered = false;
     for (let ri = 0; ri < retries.length; ri++) {
-      live.step(`Evaluating hypothesis via <b>${retries[ri].label}</b>?`);
+      live.step(`Evaluating hypothesis via <b>${retries[ri].label}</b>…`);
       EvaluatedHypotheses.push("via_" + retries[ri].label.toLowerCase());
       const altOpts = Object.assign(
         { templatePath: tmpl && tmpl.nodeKeys, templateId: tmpl && tmpl.id, asyncPlanning: true },
@@ -45188,7 +46925,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     if (hardRefuse && (baseRoute.metadata && baseRoute.metadata.coreARefused)) {
       live.step("No sea corridor found for this OD pair.");
       appendChatMessage("brain",
-        `<strong>Core A could not build a sea corridor</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No graph path for <b>${pOrig.name}</b> ? <b>${pDest.name}</b>. Try named major ports or a regional via (Malacca / Sunda / Cape / Suez / Panama).</div>`
+        `<strong>Core A could not build a sea corridor</strong><div style="margin-top:4px;font-size:0.78rem;color:#fca5a5;">No graph path for <b>${pOrig.name}</b> → <b>${pDest.name}</b>. Try named major ports or a regional via (Malacca / Sunda / Cape / Suez / Panama).</div>`
       );
       return null;
     }
@@ -45197,7 +46934,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   // Consult Cognitive LLM Strategist (Gemini / Cohere) for tactical reasoning, self-critique & rule learning
   let llmBrainAdvice = null;
   if (typeof setrouteConsultBrainLLM === "function" && navigator.onLine !== false) {
-    live.step("Cognitive Brain: consulting LLM Master Mariner Strategist & self-learning memory?");
+    live.step("Cognitive Brain: consulting LLM Master Mariner Strategist & self-learning memory…");
     llmBrainAdvice = await setrouteConsultBrainLLM(pOrig, pDest, baseRoute, auditPre, {
       speedKnots: speed,
       draftMeters: draft,
@@ -45221,7 +46958,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     const curGrade = (auditPre && auditPre.grade) || "A";
 
     if (curGrade !== "A" && (validLlmVias.length > 0 || (recMode && recMode !== "keep"))) {
-      live.step(`Testing LLM Strategist hypothesis (${validLlmVias.length ? validLlmVias.join(" ? ") : recMode})?`);
+      live.step(`Testing LLM Strategist hypothesis (${validLlmVias.length ? validLlmVias.join(" → ") : recMode})…`);
       EvaluatedHypotheses.push("llm_" + (recMode || "chain"));
       const llmOpts = {
         asyncPlanning: true,
@@ -45263,9 +47000,9 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   } else if (viaSuez) {
     baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Suez Canal)`;
   } else if (baseRoute.metadata && baseRoute.metadata.coreA && /cape/i.test(baseRoute.metadata.coreA.routeMode || "")) {
-    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Cape ? auto)`;
+    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Cape — auto)`;
   } else if (baseRoute.metadata && baseRoute.metadata.coreA && /suez/i.test(baseRoute.metadata.coreA.routeMode || "")) {
-    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Suez ? auto)`;
+    baseRoute.name = `${pOrig.name} to ${pDest.name} (Via Suez — auto)`;
   }
 
   if (viaPorts.length > 0) {
@@ -45322,8 +47059,8 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
     const autoRule = (llmBrainAdvice && llmBrainAdvice.learnedRule)
       ? llmBrainAdvice.learnedRule
       : (coreMetaFinal.surgicalRepairs > 0
-        ? `${pOrig.name} ? ${pDest.name}: applied ${coreMetaFinal.surgicalRepairs} surgical sea detour(s) to eliminate land/shoal clips`
-        : `${pOrig.name} ? ${pDest.name} (draft ${draft}m): optimal mode ${coreMetaFinal.routeMode || "shortest_sea"} (${baseRoute.totalDistanceNM} NM, Grade ${finalGrade})`);
+        ? `${pOrig.name} → ${pDest.name}: applied ${coreMetaFinal.surgicalRepairs} surgical sea detour(s) to eliminate land/shoal clips`
+        : `${pOrig.name} → ${pDest.name} (draft ${draft}m): optimal mode ${coreMetaFinal.routeMode || "shortest_sea"} (${baseRoute.totalDistanceNM} NM, Grade ${finalGrade})`);
 
     SetRouteBrainMemory.recordOdOutcome(origCoords, destCoords, depthPol.minDepthM, {
       nodePath: coreMetaFinal.nodePath || [],
@@ -45336,7 +47073,7 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
         : [],
       reasoning: (llmBrainAdvice && llmBrainAdvice.reasoning) || "",
       learnedRule: autoRule,
-      odLabel: `${pOrig.name} ? ${pDest.name}`
+      odLabel: `${pOrig.name} → ${pDest.name}`
     });
   }
 
@@ -45346,18 +47083,18 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
 
   const stormLine = sa
     ? (sa.severeEncounters > 0
-      ? `Cyclone model: <b>${sa.severeEncounters}</b> residual core encounter(s) at ${speed} kn ? review legs flagged in audit.`
+      ? `Cyclone model: <b>${sa.severeEncounters}</b> residual core encounter(s) at ${speed} kn · review legs flagged in audit.`
       : `Cyclone model: space-time clear at <b>${speed} kn</b> (penalty ${sa.stormPenalty || 0}, ETA ~${sa.arrivalHours || "?"} h).`)
     : `Cyclone model: forecast-aware search at <b>${speed} kn</b>.`;
 
   live.step(
-    `Publishing route ? <b>${(baseRoute.waypoints || []).length}</b> waypoints ? <b>${baseRoute.totalDistanceNM || "?"} NM</b>`
+    `Publishing route · <b>${(baseRoute.waypoints || []).length}</b> waypoints · <b>${baseRoute.totalDistanceNM || "?"} NM</b>`
   );
   const msgEl = appendChatMessage("brain", `
     <div>
       <strong>Route ready: ${baseRoute.name}</strong>
       <div class="sr-ai-synthesis-footer" style="margin-top:6px;font-size:0.78rem;color:#94a3b8;">
-        Draft <b>${draft}m</b> ? Speed <b>${speed} kn</b> ? XTD <b>?${xtd} NM</b> ? Full leg analysis is in Route Details.
+        Draft <b>${draft}m</b> · Speed <b>${speed} kn</b> · XTD <b>±${xtd} NM</b> · Full leg analysis is in Route Details.
         <div style="margin-top:4px;color:#7dd3fc;">${stormLine}</div>
       </div>
     </div>
@@ -45391,30 +47128,30 @@ async function executeBrainLegByLegRoutePlan(pOrig, pDest, options = {}) {
   const canToggleSuezCape = (isEuropeOrMed(pOrig) && isAsiaOrGulf(pDest)) || (isAsiaOrGulf(pOrig) && isEuropeOrMed(pDest));
 
   const refineChips = [
-    { label: `? Speed 16 kn`, prompt: `Set speed to 16 knots` },
-    { label: `? Draft 13.5m`, prompt: `Set draft to 13.5m` },
-    { label: `?? Great Circle (GC)`, prompt: `Recalculate using Great Circle GC` },
-    { label: `?? Reverse Route`, prompt: `Reverse route` }
+    { label: `⚡ Speed 16 kn`, prompt: `Set speed to 16 knots` },
+    { label: `⚓ Draft 13.5m`, prompt: `Set draft to 13.5m` },
+    { label: `🌐 Great Circle (GC)`, prompt: `Recalculate using Great Circle GC` },
+    { label: `⇄ Reverse Route`, prompt: `Reverse route` }
   ];
   if (canToggleSuezCape) {
     refineChips.unshift(
       viaCape
-        ? { label: `? Switch to Suez Canal`, prompt: `Plan route via Suez Canal from ${pOrig.name} to ${pDest.name}` }
-        : { label: `?? Switch to Cape of Good Hope`, prompt: `Plan route via Cape of Good Hope from ${pOrig.name} to ${pDest.name}` }
+        ? { label: `🚢 Switch to Suez Canal`, prompt: `Plan route via Suez Canal from ${pOrig.name} to ${pDest.name}` }
+        : { label: `🌍 Switch to Cape of Good Hope`, prompt: `Plan route via Cape of Good Hope from ${pOrig.name} to ${pDest.name}` }
     );
   }
 
   if (footerEl) {
     footerEl.innerHTML = `
       <div style="padding:8px 10px;border-radius:10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#e2e8f0;margin-top:6px;">
-        <strong style="color:#34d399;">? ${baseRoute.totalDistanceNM} NM ? ${baseRoute.steamingDays} days${audit && audit.grade ? ` ? Audit ${audit.grade}` : ""}</strong>
+        <strong style="color:#34d399;">✅ ${baseRoute.totalDistanceNM} NM · ${baseRoute.steamingDays} days${audit && audit.grade ? ` · Audit ${audit.grade}` : ""}</strong>
         ${cohereNote ? `<span style="color:#bae6fd;display:block;margin-top:4px;font-size:0.74rem;">${cohereNote}</span>` : ""}
       </div>
       <div style="padding:7px 10px;border-radius:9px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.28);color:#cbd5e1;margin-top:6px;font-size:0.73rem;line-height:1.4;">
-        <div style="color:#38bdf8;font-weight:700;margin-bottom:2px;">?? Cognitive Brain v2.0 ? ${llmBrainAdvice ? `LLM Strategist (${llmBrainAdvice.provider || "AI"}) + Memory` : "Autonomous Graph + Memory"}</div>
+        <div style="color:#38bdf8;font-weight:700;margin-bottom:2px;">🧠 Cognitive Brain v2.0 · ${llmBrainAdvice ? `LLM Strategist (${llmBrainAdvice.provider || "AI"}) + Memory` : "Autonomous Graph + Memory"}</div>
         <div>${brainReasonTxt}</div>
         ${latestRuleTxt ? `<div style="margin-top:3px;color:#a7f3d0;"><b>Learned:</b> ${latestRuleTxt}</div>` : ""}
-        <div style="margin-top:3px;color:#94a3b8;font-size:0.69rem;">Memory bank: <b>${memSummary.learnedCorridors}</b> OD corridors ? <b>${memSummary.learnedEdges}</b> penalized chords ? <b>${memSummary.totalRuns}</b> voyages analyzed</div>
+        <div style="margin-top:3px;color:#94a3b8;font-size:0.69rem;">Memory bank: <b>${memSummary.learnedCorridors}</b> OD corridors · <b>${memSummary.learnedEdges}</b> penalized chords · <b>${memSummary.totalRuns}</b> voyages analyzed</div>
       </div>
       <div class="sr-quick-chips" style="margin-top:8px;">
         ${refineChips.map(c => `<button type="button" class="sr-quick-chip" data-sr-prompt="${c.prompt.replace(/"/g, '&quot;')}">${c.label}</button>`).join("")}
@@ -47210,28 +48947,22 @@ function initSetRouteV50() {
 
     drawerPlotBtn._boundV50 = true;
 
-    drawerPlotBtn.addEventListener("click", () => {
-
-      if (typeof switchToTab === "function") switchToTab("tab-ntm");
-
+    drawerPlotBtn.addEventListener("click", (ev) => {
+      if (ev) ev.preventDefault();
+      if (typeof openAndPlotRouteOnSetChart === "function") {
+        openAndPlotRouteOnSetChart(activeRouteData);
+        return;
+      }
+      if (typeof switchToTab === "function") switchToTab("tab-ntm", "user");
       setTimeout(() => {
-
         if (leafletMap && activeRouteData) {
-
           leafletMap.invalidateSize();
-
           if (typeof setOverlayActive === "function") {
-
             setOverlayActive("route", true, leafletMap);
-
           }
-
           renderRouteOnMap(activeRouteData, true);
-
         }
-
       }, 180);
-
     });
 
   }

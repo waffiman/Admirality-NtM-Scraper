@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.236.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.236.0';
+const CACHE_NAME = 'setsail-cache-v5.237.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.237.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -19,6 +19,7 @@ const OFFLINE_CORE_ASSETS = [
   'ais/zones/names.json',
   'assets/geo/setroute_subsea_cables_pipelines.json',
   'assets/geo/setroute_tss_world.json',
+  'assets/geo/setroute_tss_chart.json',
   'assets/geo/setroute_iala_marks.json',
   'assets/geo/setroute_light_sectors.json',
   'assets/geo/ne_50m_coastline.geojson',
@@ -41,19 +42,19 @@ const OFFLINE_CORE_ASSETS = [
   'assets/leaflet/images/marker-icon.png',
   'assets/leaflet/images/marker-icon-2x.png',
   'assets/leaflet/images/marker-shadow.png',
-  'assets/Auto NtM Plotting/ntm_styles.css?v=5.236',
-  'assets/Auto NtM Plotting/port_depths.js?v=5.236',
-  'assets/Auto NtM Plotting/ntm_module.js?v=5.236',
-  'assets/Auto NtM Plotting/setsail_core.js?v=5.236',
-  'assets/about/founder.jpg?v=5.236',
+  'assets/Auto NtM Plotting/ntm_styles.css?v=5.237',
+  'assets/Auto NtM Plotting/port_depths.js?v=5.237',
+  'assets/Auto NtM Plotting/ntm_module.js?v=5.237',
+  'assets/Auto NtM Plotting/setsail_core.js?v=5.237',
+  'assets/about/founder.jpg?v=5.237',
   'assets/home/install_bg_lng.jpg',
-  'assets/about/mykhailo_byshliaha.jpg?v=5.236',
+  'assets/about/mykhailo_byshliaha.jpg?v=5.237',
   'assets/geo/setroute_corridor_templates.json',
   'assets/geo/setroute_passage_knowledge.json',
   'assets/about/mykhailo_byshliaha.jpg',
-  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.236',
-  'assets/Auto NtM Plotting/ais_overlay.js?v=5.236',
-  'assets/Auto NtM Plotting/setroute_core_a.js?v=5.236',
+  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.237',
+  'assets/Auto NtM Plotting/ais_overlay.js?v=5.237',
+  'assets/Auto NtM Plotting/setroute_core_a.js?v=5.237',
   'assets/authority-logos/noaa.svg',
   'assets/authority-logos/nasa.svg',
   'assets/Auto NtM Plotting/xlsx.full.min.js',
@@ -112,9 +113,14 @@ for (let z = 1; z <= 2; z++) {
 }
 
 function fetchWithTimeout(request, timeoutMs) {
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('Network timeout')), timeoutMs);
-    fetch(request)
+    const timer = setTimeout(() => {
+      try { if (ctrl) ctrl.abort(); } catch (e) {}
+      reject(new Error('Network timeout'));
+    }, timeoutMs);
+    const opts = ctrl ? { signal: ctrl.signal } : undefined;
+    fetch(request, opts)
       .then((res) => {
         clearTimeout(timer);
         resolve(res);
@@ -474,22 +480,15 @@ self.addEventListener('fetch', (event) => {
         }
 
         try {
-          const networkTile = await fetchWithTimeout(event.request, 8000);
+          const networkTile = await fetchWithTimeout(event.request, 18000);
           if (networkTile && (networkTile.ok || networkTile.type === 'opaque')) {
             tileCache.put(event.request, networkTile.clone());
+            return networkTile;
           }
-          return networkTile;
+          return networkTile || new Response('', { status: 504, statusText: 'Tile Gateway Timeout' });
         } catch (fetchErr) {
-          // Raster-only fallback (never for .pbf — handled above)
-          return new Response(
-            new Uint8Array([
-              137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82,
-              0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0,
-              0, 0, 10, 73, 68, 65, 84, 120, 156, 99, 0, 1, 0, 0, 5, 0, 1,
-              13, 10, 45, 180, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130
-            ]),
-            { headers: { 'Content-Type': 'image/png' } }
-          );
+          // Return HTTP 504 (never HTTP 200 1x1 blank PNG) so Leaflet keeps tile hidden and triggers CDN failover
+          return new Response('', { status: 504, statusText: 'Tile Gateway Timeout' });
         }
       })
     );

@@ -917,5 +917,193 @@
         ]
       }
     ]
+  },
+  {
+    "id": "off_alphard_banks",
+    "name": "Off Alphard Banks TSS (IMO A.858(20))",
+    "colreg": "Rule 10",
+    "region": "IALA A",
+    "parts": [
+      {
+        "category": "separation_zone",
+        "name": "Alphard Banks Separation Zone",
+        "ring": [
+          [
+            -34.97983,
+            20.75
+          ],
+          [
+            -34.94133,
+            21.08333
+          ],
+          [
+            -35.135,
+            21.08333
+          ],
+          [
+            -35.159,
+            20.75
+          ],
+          [
+            -34.97983,
+            20.75
+          ]
+        ]
+      },
+      {
+        "category": "traffic_lane",
+        "name": "Off Alphard Banks Westbound Lane",
+        "directionDeg": 262,
+        "ring": [
+          [
+            -34.92933,
+            20.75
+          ],
+          [
+            -34.89083,
+            21.08333
+          ],
+          [
+            -34.94133,
+            21.08333
+          ],
+          [
+            -34.97983,
+            20.75
+          ],
+          [
+            -34.92933,
+            20.75
+          ]
+        ]
+      },
+      {
+        "category": "traffic_lane",
+        "name": "Off Alphard Banks Eastbound Lane",
+        "directionDeg": 85,
+        "ring": [
+          [
+            -35.159,
+            20.75
+          ],
+          [
+            -35.135,
+            21.08333
+          ],
+          [
+            -35.18517,
+            21.08333
+          ],
+          [
+            -35.20917,
+            20.75
+          ],
+          [
+            -35.159,
+            20.75
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "off_fa_platform",
+    "name": "Off FA Platform TSS (Mossel Bay, IMO A.858(20))",
+    "colreg": "Rule 10",
+    "region": "IALA A",
+    "parts": [
+      {
+        "category": "separation_zone",
+        "name": "FA Platform Central Separation Zone",
+        "ring": [
+          [
+            -34.83517,
+            22.0
+          ],
+          [
+            -34.78983,
+            22.33333
+          ],
+          [
+            -35.0295,
+            22.33333
+          ],
+          [
+            -35.05617,
+            22.181
+          ],
+          [
+            -35.06767,
+            22.0
+          ],
+          [
+            -34.83517,
+            22.0
+          ]
+        ]
+      },
+      {
+        "category": "traffic_lane",
+        "name": "Off FA Platform Westbound Lane",
+        "directionDeg": 262,
+        "ring": [
+          [
+            -34.7845,
+            22.0
+          ],
+          [
+            -34.74583,
+            22.33333
+          ],
+          [
+            -34.78983,
+            22.33333
+          ],
+          [
+            -34.83517,
+            22.0
+          ],
+          [
+            -34.7845,
+            22.0
+          ]
+        ]
+      },
+      {
+        "category": "traffic_lane",
+        "name": "Off FA Platform Eastbound Lane",
+        "directionDeg": 82,
+        "ring": [
+          [
+            -35.06767,
+            22.0
+          ],
+          [
+            -35.05617,
+            22.181
+          ],
+          [
+            -35.0295,
+            22.33333
+          ],
+          [
+            -35.08017,
+            22.33333
+          ],
+          [
+            -35.10583,
+            22.18633
+          ],
+          [
+            -35.11933,
+            22.0
+          ],
+          [
+            -35.06767,
+            22.0
+          ]
+        ]
+      }
+    ]
   }
 ]
