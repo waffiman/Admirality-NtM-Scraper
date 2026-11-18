@@ -3,6 +3,9 @@ name: Deploy SetSail to Cloudflare
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "analytics/**"
+      - "userdata/**"
   workflow_dispatch:
 
 permissions:
@@ -25,7 +28,7 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Deploy Worker + Assets (setsail-nav)
+      - name: Deploy Worker + Assets (admirality-ntm-scraper)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

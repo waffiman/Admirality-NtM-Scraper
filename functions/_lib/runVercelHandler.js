@@ -42,6 +42,7 @@ export async function runVercelHandler(handler, request, env) {
     headers,
     body,
     query: Object.fromEntries(url.searchParams.entries()),
+    _cfAssets: env && env.ASSETS && typeof env.ASSETS.fetch === "function" ? env.ASSETS : null,
     on() {}
   };
 

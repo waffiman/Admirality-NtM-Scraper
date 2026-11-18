@@ -96,7 +96,13 @@ function sanitizeWeather(data) {
   };
 }
 
-async function fetchJson(url) {
+async function fetchJson(url, req) {
+  if (req && req._cfAssets) {
+    try {
+      const ar = await req._cfAssets.fetch(new Request(url));
+      if (ar && ar.ok) return ar.json();
+    } catch (e) {}
+  }
   const r = await fetch(url, { cache: "no-store" });
   if (!r.ok) return null;
   return r.json();
@@ -129,8 +135,8 @@ module.exports = async function handler(req, res) {
       process.env.SETSAIL_PUBLIC_BASE ||
       (host ? `https://${host}` : "https://setsail-nav.com");
     const [weather, notices] = await Promise.all([
-      fetchJson(`${origin}/weather.json`),
-      fetchJson(`${origin}/notices.json`)
+      fetchJson(`${origin}/weather.json`, req),
+      fetchJson(`${origin}/notices.json`, req)
     ]);
 
     const noticeList = Array.isArray(notices)
