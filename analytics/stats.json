@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-18T20:07:00.598Z",
+  "updatedAt": "2026-11-18T20:09:05.718Z",
   "visitsByDay": {
     "2026-11-18": 3
   },
@@ -11,5 +11,11 @@
       "d30405e4-72bb-4efb-84f5-b1a20a77cee0"
     ]
   },
-  "profiles": {}
+  "profiles": {
+    "6d7ef714474d5d5b88bbdb9f989f0c52da37a4a9dee07ccb42bda73e5a6868fe": {
+      "firstSeen": "2026-11-18T20:09:05.718Z",
+      "lastSeen": "2026-11-18T20:09:05.718Z",
+      "lastDay": "2026-11-18"
+    }
+  }
 }
