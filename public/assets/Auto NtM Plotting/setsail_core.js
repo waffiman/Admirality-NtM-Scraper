@@ -1054,7 +1054,7 @@ async function syncSetSailUtcClock(force) {
 
   }
 
-  const urls = ["/api/utc", "api/utc", "https://setsail-ai.vercel.app/api/utc"];
+  const urls = ["/api/utc", "api/utc", "https://setsail-nav.com/api/utc", "https://setsail-ai.vercel.app/api/utc"];
 
   for (let i = 0; i < urls.length; i++) {
 
@@ -5174,7 +5174,7 @@ function startVesselGpsWatch(opts) {
 
   if (!window.isSecureContext && typeof showSetSailToast === "function") {
 
-    showSetSailToast("GPS needs HTTPS (open https://setsail-ai.vercel.app)", "error");
+    showSetSailToast("GPS needs HTTPS (open https://setsail-nav.com)", "error");
 
     return;
 
@@ -39814,9 +39814,15 @@ function isSetSailSiteHost() {
 
     if (h === "localhost" || h === "127.0.0.1") return true;
 
+    if (h === "setsail-nav.com" || h === "www.setsail-nav.com") return true;
+
     if (h === "setsail-ai.vercel.app") return true;
 
     if (h.endsWith(".vercel.app") && h.includes("setsail")) return true;
+
+    if (h.endsWith(".pages.dev") && h.includes("setsail")) return true;
+
+    if (h.endsWith(".pages.dev") && h.includes("admirality")) return true;
 
     return false;
 

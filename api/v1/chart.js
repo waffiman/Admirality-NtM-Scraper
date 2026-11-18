@@ -124,7 +124,10 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const origin = `https://${req.headers.host || "setsail-ai.vercel.app"}`;
+    const host = String(req.headers.host || "").trim();
+    const origin =
+      process.env.SETSAIL_PUBLIC_BASE ||
+      (host ? `https://${host}` : "https://setsail-nav.com");
     const [weather, notices] = await Promise.all([
       fetchJson(`${origin}/weather.json`),
       fetchJson(`${origin}/notices.json`)

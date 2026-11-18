@@ -1,6 +1,6 @@
 # SetSail — Agent Playbook
 
-**Source of truth:** https://github.com/waffiman/Admirality-NtM-Scraper (`main`) / https://setsail-ai.vercel.app
+**Source of truth:** https://github.com/waffiman/Admirality-NtM-Scraper (`main`) / https://setsail-nav.com (Cloudflare Pages; legacy: https://setsail-ai.vercel.app)
 
 **Local workspace (use this):** `E:\IINO INEOS VESTA\SetSail_App\`
 
@@ -16,7 +16,7 @@ Open Antigravity / Cursor / other agents **here**. Do **not** use the old `SetSa
 
 ## Open locally
 - Prefer: `OPEN_SETSAIL.html` or `index.html` in `SetSail_App\`
-- Or live: https://setsail-ai.vercel.app
+- Or live: https://setsail-nav.com
 
 ## Before any edit
 1. Pull latest `index.html`, `sw.js`, `assets/Auto NtM Plotting/*`, data JSON from GitHub or Vercel.
@@ -31,7 +31,9 @@ Open Antigravity / Cursor / other agents **here**. Do **not** use the old `SetSa
 
 ## Google Sign-In
 Authorized JavaScript origins must include:
-- `https://setsail-ai.vercel.app`
+- `https://setsail-nav.com`
+- `https://www.setsail-nav.com`
+- `https://setsail-ai.vercel.app` (legacy)
 - `http://localhost` (for local tests)
 
 ## SetRoute Core A (edit this for routing skills)

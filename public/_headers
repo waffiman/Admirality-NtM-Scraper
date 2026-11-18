@@ -1,4 +1,7 @@
 # SetSail Cloudflare Cache Headers (non-overlapping path rules)
+/*
+  Permissions-Policy: geolocation=(self)
+
 /assets/geo/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
