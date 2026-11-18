@@ -26,7 +26,7 @@
 
 
 
-  <title>SetSail — Your AI-Powered Bridge</title>
+  <title>SetSail – Your AI-Powered Bridge</title>
 
     <!-- Instant logo boot splash (inline — paints before CSS/JS bundles) -->
   <style id="setsail-boot-css">
@@ -148,7 +148,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.237" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.238" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -9652,7 +9652,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.237" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.238" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
 
@@ -12942,8 +12942,42 @@ select option {
        completely independent of external scripts, offline mode, or network state.
        ========================================================================= -->
   <script>
-    // 1. Programmatic Tab Switching Engine
+    // 1. Clean Hash Route Mapping & Programmatic Tab Switching Engine
+    const SETSAIL_TAB_TO_HASH = {
+      'tab-home': 'home',
+      'tab-ntm': 'setchart',
+      'tab-gyro': 'setstar',
+      'tab-route': 'setroute',
+      'tab-news': 'setnews',
+      'tab-settings': 'settings'
+    };
+    const SETSAIL_HASH_TO_TAB = {
+      'home': 'tab-home',
+      'setchart': 'tab-ntm',
+      'setstar': 'tab-gyro',
+      'setroute': 'tab-route',
+      'setnews': 'tab-news',
+      'settings': 'tab-settings',
+      'tab-home': 'tab-home',
+      'tab-ntm': 'tab-ntm',
+      'tab-gyro': 'tab-gyro',
+      'tab-route': 'tab-route',
+      'tab-news': 'tab-news',
+      'tab-settings': 'tab-settings'
+    };
+    function resolveSetSailTabId(raw) {
+      const clean = String(raw || '').replace(/^#/, '').trim().toLowerCase();
+      if (!clean) return '';
+      return SETSAIL_HASH_TO_TAB[clean] || clean;
+    }
+    function getSetSailTabHash(tabId) {
+      return SETSAIL_TAB_TO_HASH[tabId] || tabId;
+    }
+    window.resolveSetSailTabId = resolveSetSailTabId;
+    window.getSetSailTabHash = getSetSailTabHash;
+
     function switchToTab(targetTab, source) {
+      targetTab = resolveSetSailTabId(targetTab);
       if (!targetTab) return;
       if (!document.getElementById(targetTab)) {
         console.warn('[SetSail] switchToTab ignored unknown tab:', targetTab);
@@ -12963,7 +12997,7 @@ select option {
         sessionStorage.setItem('setsail_active_tab', targetTab);
         localStorage.setItem('setsail_active_tab', targetTab);
         if (window.history && window.history.replaceState) {
-          window.history.replaceState(null, '', '#' + targetTab);
+          window.history.replaceState(null, '', '#' + getSetSailTabHash(targetTab));
         }
       } catch (e) {}
       try {
@@ -13037,12 +13071,12 @@ select option {
     }
     window.switchToTab = switchToTab;
 
-    // Only restore when URL has an explicit hash (e.g. #tab-ntm). Bare "/" stays on Home.
+    // Only restore when URL has an explicit hash (e.g. #setchart). Bare "/" stays on Home.
     function restoreSetSailTab() {
       try {
-        const hash = (window.location.hash || '').replace('#', '').trim();
-        if (hash && document.getElementById(hash)) {
-          switchToTab(hash, 'restore');
+        const tabId = resolveSetSailTabId(window.location.hash || '');
+        if (tabId && document.getElementById(tabId)) {
+          switchToTab(tabId, 'restore');
         }
       } catch (e) {}
     }
@@ -13054,11 +13088,11 @@ select option {
     // Guard: if an unknown hash is cleared by the browser, do not bounce to Home
     window.addEventListener('hashchange', function () {
       try {
-        const h = (window.location.hash || '').replace('#', '').trim();
-        if (!h) return;
-        if (document.getElementById(h) && typeof switchToTab === 'function') {
+        const tabId = resolveSetSailTabId(window.location.hash || '');
+        if (!tabId) return;
+        if (document.getElementById(tabId) && typeof switchToTab === 'function') {
           const active = document.querySelector('.tab-pane.active');
-          if (!active || active.id !== h) switchToTab(h);
+          if (!active || active.id !== tabId) switchToTab(tabId, 'user');
         }
       } catch (e) {}
     });
@@ -14287,7 +14321,7 @@ select option {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.237" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.237';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.238" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.238';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -14309,7 +14343,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.237" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.238" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -22141,26 +22175,26 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.237"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.237" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.237"></script>
-  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.237"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.238"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.238" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.238"></script>
+  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.238"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.237",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.238",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.237"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.237"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.237"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.238"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.238"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.238"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.237"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.238"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -22233,10 +22267,10 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.237"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.237"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.237"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.237"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.238"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.238"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.238"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.238"></script>
 
 
 
@@ -22900,7 +22934,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.237.0' && k !== 'setsail-tiles-cache-v5.237.0').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.238.0' && k !== 'setsail-tiles-cache-v5.238.0').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 function showSetSailHardRefreshTip(cacheLabel) {
@@ -22950,17 +22984,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.237', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.238', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.237 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.238 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.237') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.237.0'); }, 1200);
+              if (last && last.indexOf('v5.238') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.238.0'); }, 1200);
               }
             } catch (eTip) {}
           })

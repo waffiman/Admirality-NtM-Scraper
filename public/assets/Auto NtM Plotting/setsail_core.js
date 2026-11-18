@@ -5586,7 +5586,18 @@ function initApp() {
 
       if (window.location.hash && window.location.hash.length > 1) {
 
-        hashTab = window.location.hash.replace("#", "").trim();
+        const rawH = window.location.hash.replace(/^#/, "").trim().toLowerCase();
+
+        const coreMap = {
+          "home": "tab-home", "setchart": "tab-ntm", "setstar": "tab-gyro",
+          "setroute": "tab-route", "setnews": "tab-news", "settings": "tab-settings",
+          "tab-home": "tab-home", "tab-ntm": "tab-ntm", "tab-gyro": "tab-gyro",
+          "tab-route": "tab-route", "tab-news": "tab-news", "tab-settings": "tab-settings"
+        };
+
+        hashTab = (typeof window.resolveSetSailTabId === "function")
+          ? window.resolveSetSailTabId(rawH)
+          : (coreMap[rawH] || rawH);
 
       }
 
@@ -5821,6 +5832,30 @@ function initNavigationTabs() {
 
 function switchToTab(targetTab, source) {
 
+  const coreHashMap = {
+    "home": "tab-home", "setchart": "tab-ntm", "setstar": "tab-gyro",
+    "setroute": "tab-route", "setnews": "tab-news", "settings": "tab-settings",
+    "tab-home": "tab-home", "tab-ntm": "tab-ntm", "tab-gyro": "tab-gyro",
+    "tab-route": "tab-route", "tab-news": "tab-news", "tab-settings": "tab-settings"
+  };
+
+  const coreTabToHash = {
+    "tab-home": "home", "tab-ntm": "setchart", "tab-gyro": "setstar",
+    "tab-route": "setroute", "tab-news": "setnews", "tab-settings": "settings"
+  };
+
+  if (typeof window.resolveSetSailTabId === "function") {
+
+    targetTab = window.resolveSetSailTabId(targetTab);
+
+  } else {
+
+    const cleanH = String(targetTab || "").replace(/^#/, "").trim().toLowerCase();
+
+    targetTab = coreHashMap[cleanH] || cleanH;
+
+  }
+
   if (!targetTab) return;
 
   if (!document.getElementById(targetTab)) {
@@ -5879,7 +5914,11 @@ function switchToTab(targetTab, source) {
 
     if (window.history && window.history.replaceState) {
 
-      window.history.replaceState(null, "", "#" + targetTab);
+      const outHash = (typeof window.getSetSailTabHash === "function")
+        ? window.getSetSailTabHash(targetTab)
+        : (coreTabToHash[targetTab] || targetTab);
+
+      window.history.replaceState(null, "", "#" + outHash);
 
     }
 
