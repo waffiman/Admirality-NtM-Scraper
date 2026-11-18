@@ -1,8 +1,11 @@
-# SetSail Cloudflare Pages Cache Headers
+# SetSail Cloudflare Cache Headers (non-overlapping path rules)
 /assets/geo/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
-/assets/*
+/assets/Auto%20NtM%20Plotting/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+
+/assets/Auto NtM Plotting/*
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 
 /sw.js
@@ -15,5 +18,17 @@
 /
   Cache-Control: public, max-age=0, must-revalidate
 
-/*.json
+/notices.json
   Cache-Control: public, max-age=60, must-revalidate
+
+/ais.json
+  Cache-Control: public, max-age=60, must-revalidate
+
+/weather.json
+  Cache-Control: public, max-age=60, must-revalidate
+
+/news.json
+  Cache-Control: public, max-age=60, must-revalidate
+
+/manifest.json
+  Cache-Control: public, max-age=300, must-revalidate
