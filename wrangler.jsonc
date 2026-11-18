@@ -1,18 +1,19 @@
 {
-  "name": "admirality-ntm-scraper",
+  "name": "setsail-nav",
+  "main": "worker.js",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
-  "pages_build_output_dir": "./public",
-  // Optional local/dev secrets: copy to .dev.vars (not committed)
-  // SETSAIL_ANALYTICS_GITHUB_TOKEN=
-  // SETSAIL_GOOGLE_CLIENT_ID=
-  // TURNSTILE_SITE_KEY=
-  // TURNSTILE_SECRET_KEY=
-  // GEMINI_API_KEY=
-  // COHERE_API_KEY=
-  // SETSAIL_API_SIGNING_SECRET=
-  // SETSAIL_PUBLIC_BASE=https://setsail-nav.com
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "none",
+    "html_handling": "auto-trailing-slash"
+  },
   "vars": {
     "SETSAIL_PUBLIC_BASE": "https://setsail-nav.com"
   }
+  // Secrets via Dashboard or `wrangler secret put`:
+  // SETSAIL_ANALYTICS_GITHUB_TOKEN, SETSAIL_GOOGLE_CLIENT_ID,
+  // TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY,
+  // GEMINI_API_KEY, COHERE_API_KEY, SETSAIL_API_SIGNING_SECRET
 }

@@ -1,24 +1,33 @@
 /**
  * Cloudflare Pages Functions catch-all for legacy Vercel /api/* handlers.
- * Maps /api/utc, /api/v1/keys, etc. onto the existing Node CJS modules in /api.
+ * Static imports so esbuild can bundle the existing CJS modules from /api.
  */
-import { createRequire } from "node:module";
 import { runVercelHandler } from "../_lib/runVercelHandler.js";
 
-const require = createRequire(import.meta.url);
+import utc from "../../api/utc.js";
+import track from "../../api/track.js";
+import stats from "../../api/stats.js";
+import userProfile from "../../api/user-profile.js";
+import setrouteIntent from "../../api/setroute-intent.js";
+import turnstileConfig from "../../api/turnstile-config.js";
+import turnstileVerify from "../../api/turnstile-verify.js";
+import v1Keys from "../../api/v1/keys.js";
+import v1Routes from "../../api/v1/routes.js";
+import v1Route from "../../api/v1/route.js";
+import v1Chart from "../../api/v1/chart.js";
 
 const HANDLERS = {
-  utc: () => require("../../api/utc.js"),
-  track: () => require("../../api/track.js"),
-  stats: () => require("../../api/stats.js"),
-  "user-profile": () => require("../../api/user-profile.js"),
-  "setroute-intent": () => require("../../api/setroute-intent.js"),
-  "turnstile-config": () => require("../../api/turnstile-config.js"),
-  "turnstile-verify": () => require("../../api/turnstile-verify.js"),
-  "v1/keys": () => require("../../api/v1/keys.js"),
-  "v1/routes": () => require("../../api/v1/routes.js"),
-  "v1/route": () => require("../../api/v1/route.js"),
-  "v1/chart": () => require("../../api/v1/chart.js")
+  utc,
+  track,
+  stats,
+  "user-profile": userProfile,
+  "setroute-intent": setrouteIntent,
+  "turnstile-config": turnstileConfig,
+  "turnstile-verify": turnstileVerify,
+  "v1/keys": v1Keys,
+  "v1/routes": v1Routes,
+  "v1/route": v1Route,
+  "v1/chart": v1Chart
 };
 
 function resolveKey(params) {
@@ -28,10 +37,7 @@ function resolveKey(params) {
   return "";
 }
 
-function loadHandler(key) {
-  const factory = HANDLERS[key];
-  if (!factory) return null;
-  const mod = factory();
+function asHandler(mod) {
   if (typeof mod === "function") return mod;
   if (mod && typeof mod.default === "function") return mod.default;
   if (mod && typeof mod.handler === "function") return mod.handler;
@@ -40,33 +46,10 @@ function loadHandler(key) {
 
 export async function onRequest(context) {
   const key = resolveKey(context.params);
-  if (!key || !HANDLERS[key]) {
+  const handler = asHandler(HANDLERS[key]);
+  if (!key || !handler) {
     return new Response(JSON.stringify({ error: "not_found", path: key || null }), {
       status: 404,
-      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
-    });
-  }
-
-  let handler;
-  try {
-    handler = loadHandler(key);
-  } catch (err) {
-    return new Response(
-      JSON.stringify({
-        error: "handler_load_failed",
-        path: key,
-        message: err && err.message ? err.message : "error"
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
-      }
-    );
-  }
-
-  if (!handler) {
-    return new Response(JSON.stringify({ error: "handler_invalid", path: key }), {
-      status: 500,
       headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
     });
   }
