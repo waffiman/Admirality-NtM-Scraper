@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-19T20:22:30.763Z",
+  "updatedAt": "2026-11-19T20:22:31.909Z",
   "visitsByDay": {
     "2026-11-18": 6,
     "2026-11-19": 31
@@ -51,7 +51,7 @@
   "profiles": {
     "6d7ef714474d5d5b88bbdb9f989f0c52da37a4a9dee07ccb42bda73e5a6868fe": {
       "firstSeen": "2026-11-18T20:09:05.718Z",
-      "lastSeen": "2026-11-19T19:30:36.268Z",
+      "lastSeen": "2026-11-19T20:22:31.909Z",
       "lastDay": "2026-11-19"
     }
   }
