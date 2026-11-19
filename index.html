@@ -22259,20 +22259,33 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
 
       <!-- Modal: Weather overlay info -->
       <div class="ntm-modal" id="weatherOverlayModal">
-        <div class="ntm-modal-box" style="max-width:320px;">
+        <div class="ntm-modal-box" style="max-width:340px;">
           <div class="ntm-modal-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:10px;">
             <h3 style="margin:0;font-size:0.9rem;color:#f1f5f9;">Weather layers</h3>
             <button type="button" class="ntm-modal-close" id="weatherOverlayModalClose" title="Close" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">&#10005;</button>
           </div>
           <div style="font-size:0.78rem;color:#cad8f4;line-height:1.45;">
-            <div id="weatherModalLayerChecks" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-bottom:12px;font-size:0.75rem;color:#e2e8f0;">
+            <div id="weatherModalLayerChecks" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-bottom:10px;font-size:0.75rem;color:#e2e8f0;">
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerCyclones" checked> Cyclones</label>
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerWaves" checked> Waves</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerWaves" checked> Waves (Hs)</label>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerOpc" checked> OPC Gale/Storm</label>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;" title="Buoy observations blended into the WX cursor tile"><input type="checkbox" id="wxLayerBuoys" checked> Buoy obs at cursor</label>
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerPressure" checked> Pressure MSL</label>
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerWinds" checked> Wind</label>
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;" title="Ocean current shown in the WX cursor tile (not as map arrows)"><input type="checkbox" id="wxLayerCurrents" checked> Current at cursor</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="wxLayerWinds" checked> Wind Barbs</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;" title="Ocean current vectors and cursor velocity"><input type="checkbox" id="wxLayerCurrents" checked> Ocean Currents</label>
+            </div>
+            <div style="background:rgba(8,15,32,0.72);border:1px solid rgba(148,163,184,0.18);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:0.68rem;color:#cbd5e1;">
+              <div style="font-weight:700;color:#e2e8f0;margin-bottom:4px;">Wave Height (Hs) Color Scale</div>
+              <div style="height:8px;border-radius:4px;background:linear-gradient(90deg,#0e4182 0%,#0698cc 18%,#10b99e 35%,#84cc16 50%,#facc15 64%,#f97316 78%,#ef4444 90%,#d91872 100%);margin-bottom:3px;"></div>
+              <div style="display:flex;justify-content:space-between;color:#94a3b8;font-size:0.63rem;margin-bottom:6px;">
+                <span>0.5m</span><span>1.5m</span><span>2.5m</span><span>4m</span><span>6m</span><span>8m</span><span>11m+</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;gap:6px;border-top:1px solid rgba(148,163,184,0.14);padding-top:5px;font-size:0.64rem;">
+                <span><b>Wind:</b> <span style="color:#f8fafc;">&lt;15</span> · <span style="color:#7dd3fc;">15+</span> · <span style="color:#facc15;">24+</span> · <span style="color:#fb923c;">34+</span> · <span style="color:#f87171;">48+</span> · <span style="color:#f43f5e;">64+ kt</span></span>
+              </div>
+              <div style="display:flex;justify-content:space-between;gap:6px;padding-top:2px;font-size:0.64rem;">
+                <span><b>Current:</b> <span style="color:#38bdf8;">&lt;0.5</span> · <span style="color:#2dd4bf;">0.5+</span> · <span style="color:#fbbf24;">1.2+</span> · <span style="color:#fb7185;">2.0+ kt</span></span>
+              </div>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <button type="button" class="ntm-btn-glass" id="btnRefreshWeatherModal" style="padding:4px 10px;font-size:0.72rem;">Refresh</button>
@@ -22529,6 +22542,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
 <script src="assets/Auto NtM Plotting/setsail_core.js?v=5.239"></script>
 <script>if (typeof window.__setsailToggleNtmSidebar === 'function') { window.toggleNtmSidebar = window.__setsailToggleNtmSidebar; }</script>
+<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.243"></script>
 <script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.241"></script>
 <script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.239"></script>
 <script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.239"></script>
@@ -23196,7 +23210,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.242.0' && k !== 'setsail-tiles-cache-v5.242.0').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.243.0' && k !== 'setsail-tiles-cache-v5.243.0').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 function showSetSailHardRefreshTip(cacheLabel) {
@@ -23246,17 +23260,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.242', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.243', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.242 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.243 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.242') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.242.0'); }, 1200);
+              if (last && last.indexOf('v5.243') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.243.0'); }, 1200);
               }
             } catch (eTip) {}
           })
