@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.239.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.239.0';
+const CACHE_NAME = 'setsail-cache-v5.240.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.240.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -52,7 +52,7 @@ const OFFLINE_CORE_ASSETS = [
   'assets/geo/setroute_corridor_templates.json',
   'assets/geo/setroute_passage_knowledge.json',
   'assets/about/mykhailo_byshliaha.jpg',
-  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.239',
+  'assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.240',
   'assets/Auto NtM Plotting/ais_overlay.js?v=5.239',
   'assets/Auto NtM Plotting/setroute_core_a.js?v=5.239',
   'assets/authority-logos/noaa.svg',
@@ -62,9 +62,8 @@ const OFFLINE_CORE_ASSETS = [
   'assets/Auto NtM Plotting/pdf.min.js',
   'assets/Auto NtM Plotting/pdf.worker.min.js',
   'assets/SetSail LOGOS/setsail_logo_square.webp',
-  'assets/SetSail LOGOS/setsail_logo_horizontal.webp',
+  'assets/SetSail LOGOS/setsail_logo_horizontal.svg',
   'assets/SetSail LOGOS/setsail_logo_square.png',
-  'assets/SetSail LOGOS/setsail_logo_horizontal.png',
   'assets/flags/ae.png',
   'assets/flags/au.png',
   'assets/flags/be.png',

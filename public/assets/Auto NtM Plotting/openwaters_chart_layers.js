@@ -1726,9 +1726,9 @@
 
   function setsailLogoUrl() {
     try {
-      return new URL("assets/SetSail%20LOGOS/setsail_logo_horizontal.png", global.location.href).href;
+      return new URL("assets/SetSail%20LOGOS/setsail_logo_horizontal.svg", global.location.href).href;
     } catch (e) {
-      return "assets/SetSail LOGOS/setsail_logo_horizontal.png";
+      return "assets/SetSail LOGOS/setsail_logo_horizontal.svg";
     }
   }
 
