@@ -17012,7 +17012,7 @@
 
 .ntm-workspace.sidebar-collapsed,
 #tab-ntm.sidebar-collapsed .ntm-workspace {
-  grid-template-columns: 0px 1fr !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   gap: 0 !important;
 }
 
@@ -17302,6 +17302,58 @@
 
     overflow: visible !important;
 
+  }
+
+  #tab-ntm.sidebar-collapsed .ntm-workspace,
+  #ntmWorkspace.sidebar-collapsed {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0 !important;
+  }
+
+  #tab-ntm.sidebar-collapsed #ntmMapContainer,
+  #tab-ntm.sidebar-collapsed .ntm-map-container,
+  #ntmWorkspace.sidebar-collapsed #ntmMapContainer,
+  #ntmWorkspace.sidebar-collapsed .ntm-map-container {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+
+  #tab-ntm.sidebar-collapsed .ntm-sidebar-list,
+  #tab-ntm.sidebar-collapsed #ntmSidebar,
+  #ntmWorkspace.sidebar-collapsed .ntm-sidebar-list,
+  #ntmWorkspace.sidebar-collapsed #ntmSidebar,
+  #ntmSidebar[data-collapsed="1"] {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .ntm-list-header {
+    position: relative !important;
+    z-index: 2600 !important;
+  }
+
+  #ntmCollapseSidebarBtn,
+  .ntm-sidebar-collapse-btn {
+    position: relative !important;
+    z-index: 2610 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+
+  #ntmExpandSidebarBtn,
+  .ntm-map-expand-btn {
+    position: absolute !important;
+    z-index: 2610 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
   }
 
 

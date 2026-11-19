@@ -73,6 +73,61 @@ export default {
       }
     }
 
+    if (url.pathname === "/robots.txt") {
+      const body = [
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /api/",
+        "",
+        "User-agent: Googlebot",
+        "Allow: /",
+        "Disallow: /api/",
+        "",
+        "User-agent: Bingbot",
+        "Allow: /",
+        "Disallow: /api/",
+        "",
+        "Host: https://setsail-nav.com",
+        "Sitemap: https://setsail-nav.com/sitemap.xml",
+        ""
+      ].join("\n");
+      return new Response(body, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "public, max-age=3600"
+        }
+      });
+    }
+
+    if (url.pathname === "/sitemap.xml") {
+      const xml = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"',
+        '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">',
+        "  <url>",
+        "    <loc>https://setsail-nav.com/</loc>",
+        "    <lastmod>2026-11-19</lastmod>",
+        "    <changefreq>daily</changefreq>",
+        "    <priority>1.0</priority>",
+        "    <image:image>",
+        "      <image:loc>https://setsail-nav.com/assets/SetSail%20LOGOS/setsail_og_preview.png</image:loc>",
+        "      <image:title>SetSail – Your AI-Powered Maritime Navigation Bridge</image:title>",
+        "      <image:caption>SetSail Maritime Navigation Platform: SetChart ECDIS Auto-NtM Plotting, SetRoute AI Passage Planning, SetStar Celestial Gyro Error Calculator, and Live Maritime Intelligence.</image:caption>",
+        "    </image:image>",
+        "  </url>",
+        "</urlset>",
+        ""
+      ].join("\n");
+      return new Response(xml, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/xml; charset=utf-8",
+          "Cache-Control": "public, max-age=3600"
+        }
+      });
+    }
+
     if (env && env.ASSETS && typeof env.ASSETS.fetch === "function") {
       return env.ASSETS.fetch(request);
     }

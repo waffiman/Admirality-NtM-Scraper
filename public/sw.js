@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.241.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.241.0';
+const CACHE_NAME = 'setsail-cache-v5.242.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.242.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -315,6 +315,38 @@ self.addEventListener('fetch', (event) => {
   // 1. Navigation (HTML pages) — network-first with longer timeout (ship sat links)
   // Stale cached index.html was trapping users on pre-v5.77 UI ("Manual") + land-chord Core A.
   if (event.request.mode === 'navigate') {
+    const isLegacyVercelHost =
+      self.location &&
+      typeof self.location.hostname === 'string' &&
+      self.location.hostname.toLowerCase().indexOf('vercel.app') !== -1;
+
+    const buildTransferOrOfflineHtml = (autoRedirect) =>
+      '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+      (autoRedirect ? '<meta http-equiv="refresh" content="0;url=https://setsail-nav.com/">' : '') +
+      '<title>SetSail — Moved to setsail-nav.com</title></head>' +
+      '<body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#080f24;color:#e2e8f0;font-family:Segoe UI,system-ui,sans-serif;padding:24px;text-align:center;box-sizing:border-box;">' +
+      '<div style="max-width:480px;background:rgba(15,23,42,0.92);border:1px solid rgba(56,189,248,0.35);border-radius:16px;padding:32px 28px;box-shadow:0 20px 50px rgba(0,0,0,0.6);">' +
+      '<div style="display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(56,189,248,0.14);border:1px solid rgba(56,189,248,0.4);color:#38bdf8;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;">Official Domain Transfer</div>' +
+      '<h2 style="margin:0 0 10px;font-size:24px;color:#f8fafc;">SetSail Has Moved to setsail-nav.com</h2>' +
+      '<p style="margin:0 0 22px;font-size:15px;line-height:1.55;color:#94a3b8;">The previous <strong style="color:#cbd5e1;">vercel.app</strong> address has been retired. SetSail is now permanently hosted on our new official maritime domain:</p>' +
+      '<a href="https://setsail-nav.com/" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:10px;background:linear-gradient(135deg,#0284c7,#38bdf8);color:#041022;font-weight:700;font-size:15px;text-decoration:none;box-shadow:0 8px 24px rgba(56,189,248,0.35);">Continue to setsail-nav.com &rarr;</a>' +
+      '<p style="margin:18px 0 0;font-size:12px;color:#64748b;">If you are offline at sea, please open <a href="https://setsail-nav.com/" style="color:#38bdf8;">https://setsail-nav.com</a> once with internet to enable full offline bridge caching.</p>' +
+      '</div>' +
+      (autoRedirect
+        ? '<script>try{window.location.replace("https://setsail-nav.com/"+(location.pathname||"").replace(/^\\/+/,"")+(location.search||"")+(location.hash||""));}catch(e){}</script>'
+        : '<script>try{if(location.hostname.indexOf("vercel.app")!==-1){window.location.replace("https://setsail-nav.com/"+(location.pathname||"").replace(/^\\/+/,"")+(location.search||"")+(location.hash||""));}}catch(e){}</script>') +
+      '</body></html>';
+
+    if (isLegacyVercelHost) {
+      event.respondWith(
+        new Response(buildTransferOrOfflineHtml(true), {
+          status: 200,
+          headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+        })
+      );
+      return;
+    }
+
     event.respondWith(
       (async () => {
         try {
@@ -337,7 +369,7 @@ self.addEventListener('fetch', (event) => {
         if (cached) return cached;
 
         return new Response(
-          '<!DOCTYPE html><html><head><title>SetSail Offline</title></head><body style="background:#080e20;color:#e2e8f0;font-family:sans-serif;padding:40px;text-align:center;"><h2>SetSail Offline Mode</h2><p>Please open SetSail once with internet to enable complete offline caching.</p></body></html>',
+          buildTransferOrOfflineHtml(false),
           { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
         );
       })()
