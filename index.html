@@ -22258,6 +22258,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
 <script src="assets/Auto NtM Plotting/setsail_core.js?v=5.239"></script>
+<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.241"></script>
 <script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.239"></script>
 <script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.239"></script>
 <script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.239"></script>
@@ -22924,7 +22925,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.240.0' && k !== 'setsail-tiles-cache-v5.240.0').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.241.0' && k !== 'setsail-tiles-cache-v5.241.0').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 function showSetSailHardRefreshTip(cacheLabel) {
@@ -22974,17 +22975,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.240', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.241', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.240 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.241 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.240') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.240.0'); }, 1200);
+              if (last && last.indexOf('v5.241') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.241.0'); }, 1200);
               }
             } catch (eTip) {}
           })

@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.240.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.240.0';
+const CACHE_NAME = 'setsail-cache-v5.241.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.241.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -46,6 +46,7 @@ const OFFLINE_CORE_ASSETS = [
   'assets/Auto NtM Plotting/port_depths.js?v=5.239',
   'assets/Auto NtM Plotting/ntm_module.js?v=5.239',
   'assets/Auto NtM Plotting/setsail_core.js?v=5.239',
+  'assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.241',
   'assets/about/founder.jpg?v=5.239',
   'assets/home/install_bg_lng.jpg',
   'assets/about/mykhailo_byshliaha.jpg?v=5.239',
