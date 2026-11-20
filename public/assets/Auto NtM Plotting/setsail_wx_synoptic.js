@@ -1,12 +1,12 @@
 /**
- * SetSail Unified Synoptic Weather Engine v5.243
+ * SetSail Unified Synoptic Weather Engine v5.245
  *
  * Fixes & Upgrades:
  * 1. Calibrated 10-stop Nautical Wave Height (Hs) Color Gradient (0.0m -> 13.0m+)
  *    with periodic [-180, +180] longitude wrapping & multi-batch Open-Meteo fetching
  *    so colors render across 100% of world oceans even at maximum zoom-out (z=2..4).
  * 2. High-density Bicubic/Hermite Pressure Field + analytical Holland (1980) cyclone
- *    vortex & synoptic High/Low pressureCenters superposition at every 16px contour cell
+ *    vortex & synoptic High/Low pressureCenters superposition at every contour cell
  *    for realistic curved isobars (4 hPa step).
  * 3. Full-range WMO Wind Barbs (5-150+ kt, non-overlapping 50-kt pennants, 6-tier Beaufort colors)
  *    & graduated Ocean Current Vectors (all zoom levels, 4-tier speed colors + chevron ticks),
@@ -14,6 +14,8 @@
  *    with the bottom-left Cursor Weather HUD (#ntmWxCursorTile).
  * 4. Physically consistent variation of ALL 5 weather parameters (Wind, Pressure, Wave Hs,
  *    Ocean Current, Air/SST Temperature) as distance approaches any active Cyclone / Hurricane.
+ * 5. Zero-lag hardware-composited panning (overscanned pane-anchored canvas + LUT/bbox/scalar
+ *    fast paths + shadowBlur elimination + adaptive low-end fallback for weak laptops).
  */
 (function initSetSailSynopticWxV5243() {
   "use strict";
@@ -23,6 +25,17 @@
   var NODE_TTL_MS = 10 * 60 * 1000;
   var MAX_CACHE_NODES = 1600;
   var _nodeCache = new Map();
+  var _autoLowEndUntil = 0;
+
+  function isWeakDeviceMode() {
+    if (typeof window !== "undefined") {
+      if (window.SETSAIL_LOW_END) return true;
+      var hc = typeof navigator !== "undefined" ? Number(navigator.hardwareConcurrency) : 0;
+      var dm = typeof navigator !== "undefined" ? Number(navigator.deviceMemory) : 0;
+      if ((hc > 0 && hc <= 4) || (dm > 0 && dm <= 4)) return true;
+    }
+    return Date.now() < _autoLowEndUntil;
+  }
 
   // Finer steps at global zoom so max zoom-out (z=2..4) has dense coverage (~20 deg instead of 72 deg)
   var _lonSteps = [0.1, 0.25, 0.5, 1, 2, 4, 6, 8, 12, 16, 20, 24, 30];
@@ -42,6 +55,38 @@
     [10.0, 217, 24, 114, 0.63],
     [13.0, 168, 85, 247, 0.68]
   ];
+
+  // Precomputed 281-entry RGBA lookup table (0.00 m -> 14.00 m at 0.05 m resolution) for O(1) pixel coloring
+  var WAVE_LUT_MAX = 14;
+  var WAVE_LUT_STEPS = 280;
+  var WAVE_LUT_R = new Uint8Array(WAVE_LUT_STEPS + 1);
+  var WAVE_LUT_G = new Uint8Array(WAVE_LUT_STEPS + 1);
+  var WAVE_LUT_B = new Uint8Array(WAVE_LUT_STEPS + 1);
+  var WAVE_LUT_A = new Float32Array(WAVE_LUT_STEPS + 1);
+  (function buildWaveLut() {
+    for (var idx = 0; idx <= WAVE_LUT_STEPS; idx++) {
+      var h = (idx / WAVE_LUT_STEPS) * WAVE_LUT_MAX;
+      var r = 168, g = 85, b = 247, a = 0.68;
+      for (var i = 1; i < WAVE_STOPS.length; i++) {
+        var sA = WAVE_STOPS[i - 1];
+        var sB = WAVE_STOPS[i];
+        if (h <= sB[0] || i === WAVE_STOPS.length - 1) {
+          var t = sB[0] > sA[0] ? (h - sA[0]) / (sB[0] - sA[0]) : 1;
+          if (t < 0) t = 0;
+          else if (t > 1) t = 1;
+          r = Math.round(sA[1] + (sB[1] - sA[1]) * t);
+          g = Math.round(sA[2] + (sB[2] - sA[2]) * t);
+          b = Math.round(sA[3] + (sB[3] - sA[3]) * t);
+          a = sA[4] + (sB[4] - sA[4]) * t;
+          break;
+        }
+      }
+      WAVE_LUT_R[idx] = r;
+      WAVE_LUT_G[idx] = g;
+      WAVE_LUT_B[idx] = b;
+      WAVE_LUT_A[idx] = a * 255;
+    }
+  })();
 
   function wrapLon180(lon) {
     return ((((Number(lon) + 180) % 360) + 360) % 360) - 180;
@@ -469,6 +514,148 @@
     };
   }
 
+  var DEG2RAD = Math.PI / 180;
+  var _DEG_STEP_NM = 60;
+
+  function fastSphereNm(lat1, wLon1, cosLat1, sinLat1, item) {
+    var dLat = lat1 - item.lat;
+    if (dLat > item.maxDLat || dLat < -item.maxDLat) return 99999;
+    var dLonDeg = wLon1 - item.lon;
+    if (dLonDeg > 180) dLonDeg -= 360;
+    else if (dLonDeg < -180) dLonDeg += 360;
+    if (dLonDeg > item.maxDLon || dLonDeg < -item.maxDLon) return 99999;
+    if (Math.abs(dLat) < 0.025 && Math.abs(dLonDeg) < 0.025) {
+      return _DEG_STEP_NM * Math.hypot(dLat, dLonDeg * cosLat1);
+    }
+    var cosD = sinLat1 * item.sinLat + cosLat1 * item.cosLat * Math.cos(dLonDeg * DEG2RAD);
+    if (cosD >= 1) return 0;
+    if (cosD <= -1) return 10808;
+    return Math.acos(cosD) * 3440.065;
+  }
+
+  function prepareFrameMesoscale() {
+    var store = (typeof window.MARINE_WEATHER_STORE !== "undefined" && window.MARINE_WEATHER_STORE)
+      ? window.MARINE_WEATHER_STORE
+      : ((typeof MARINE_WEATHER_STORE !== "undefined" && MARINE_WEATHER_STORE) ? MARINE_WEATHER_STORE : {});
+
+    var rawStorms = Array.isArray(store.storms) ? store.storms : [];
+    var storms = [];
+    for (var s = 0; s < rawStorms.length; s++) {
+      var st = rawStorms[s];
+      var sc = extractStormCenter(st);
+      if (!sc) continue;
+      var sLat = sc[0];
+      var sLon = wrapLon180(sc[1]);
+      var maxKt = Number(
+        st.maxWinds != null ? st.maxWinds :
+        (st.maxWindKt != null ? st.maxWindKt :
+        (st.windKt != null ? st.windKt : 65))
+      );
+      var coreMb = Number(
+        st.centralPressure != null ? st.centralPressure :
+        (st.pressureMb != null ? st.pressureMb :
+        (st.centralPressureMb != null ? st.centralPressureMb :
+        Math.round(1010 - maxKt * 0.55)))
+      );
+      var dangerNm = Math.max(55, Number(st.dangerRadiusNm) || 90);
+      var outerNm = Math.max(380, dangerNm * 3.6);
+      var rmw = clampNum(dangerNm * 0.26, 18, 30);
+      var cosS = Math.cos(sLat * DEG2RAD);
+      var degPad = outerNm / 58.0 + 1.5;
+      storms.push({
+        lat: sLat,
+        lon: sLon,
+        cosLat: cosS,
+        sinLat: Math.sin(sLat * DEG2RAD),
+        maxDLat: degPad,
+        maxDLon: Math.min(180, degPad / Math.max(0.18, Math.abs(cosS))),
+        maxKt: maxKt,
+        coreMb: coreMb,
+        dangerNm: dangerNm,
+        outerNm: outerNm,
+        invOuterNm: 1 / outerNm,
+        rmw: rmw,
+        hollandB: clampNum(1.15 + (maxKt - 35) * 0.004, 1.05, 1.65),
+        peakWaveM: Math.max(2.6, 0.8 + 0.072 * maxKt + 0.00034 * maxKt * maxKt),
+        wavePowScale: 1 / (dangerNm * 1.45)
+      });
+    }
+
+    var rawP = Array.isArray(store.pressureCenters) ? store.pressureCenters : [];
+    var pCenters = [];
+    for (var i = 0; i < rawP.length; i++) {
+      var pc = rawP[i];
+      var pcCoords = extractCoordsPair(pc);
+      if (!pcCoords) continue;
+      var pcLat = pcCoords[0];
+      var pcLon = wrapLon180(pcCoords[1]);
+      var dup = false;
+      if (pc.type === "L") {
+        for (var si = 0; si < storms.length; si++) {
+          if (Math.hypot(storms[si].lat - pcLat, wrapLon180(storms[si].lon - pcLon)) < 2.0) {
+            dup = true;
+            break;
+          }
+        }
+      }
+      if (dup) continue;
+      var targetMb = Number(
+        pc.value != null ? pc.value :
+        (pc.pressureMb != null ? pc.pressureMb :
+        (pc.pressure != null ? pc.pressure : (pc.type === "H" ? 1025 : 996)))
+      );
+      if (!Number.isFinite(targetMb)) continue;
+      var cosP = Math.cos(pcLat * DEG2RAD);
+      var pDegPad = 1400 / 58.0 + 1.5;
+      pCenters.push({
+        lat: pcLat,
+        lon: pcLon,
+        cosLat: cosP,
+        sinLat: Math.sin(pcLat * DEG2RAD),
+        maxDLat: pDegPad,
+        maxDLon: Math.min(180, pDegPad / Math.max(0.18, Math.abs(cosP))),
+        targetMb: targetMb,
+        deltaAmbientMb: targetMb - 1013.2,
+        invTwoSigSq: 1 / (2 * 540 * 540)
+      });
+    }
+
+    var rawW = Array.isArray(store.waves) ? store.waves : [];
+    var waveAreas = [];
+    for (var w = 0; w < rawW.length; w++) {
+      var wa = rawW[w];
+      var wCoords = extractCoordsPair(wa);
+      if (!wCoords) continue;
+      var hM = Number(
+        wa.waveHeight != null ? wa.waveHeight :
+        (wa.significantWaveHeightM != null ? wa.significantWaveHeightM :
+        (wa.heightM != null ? wa.heightM : wa.height))
+      );
+      if (!Number.isFinite(hM)) continue;
+      var radNm = Number(wa.radiusNm) || 220;
+      var cutoffNm = radNm * 2.8;
+      var cosW = Math.cos(wCoords[0] * DEG2RAD);
+      var wDegPad = cutoffNm / 58.0 + 1.5;
+      waveAreas.push({
+        lat: wCoords[0],
+        lon: wrapLon180(wCoords[1]),
+        cosLat: cosW,
+        sinLat: Math.sin(wCoords[0] * DEG2RAD),
+        maxDLat: wDegPad,
+        maxDLon: Math.min(180, wDegPad / Math.max(0.18, Math.abs(cosW))),
+        hM: hM,
+        cutoffNm: cutoffNm,
+        invTwoSigSq: 1 / (2 * (radNm * 0.95) * (radNm * 0.95))
+      });
+    }
+
+    return {
+      storms: storms,
+      pCenters: pCenters,
+      waveAreas: waveAreas
+    };
+  }
+
   function ensureWxSynopticPane(map) {
     if (!map || !map.getPane || !map.createPane) return "overlayPane";
     var pane = map.getPane(WX_PANE);
@@ -606,15 +793,16 @@
     };
   }
 
-  function buildViewportGeoGrid(map) {
+  function buildViewportGeoGrid(map, marginPx) {
     var sz = map.getSize();
     var w = sz.x;
     var h = sz.y;
     if (w < 8 || h < 8) return null;
 
+    var pad = marginPx > 0 ? marginPx : 0;
     var zoom = map.getZoom ? map.getZoom() : 3;
-    var nw = map.containerPointToLatLng([0, 0]);
-    var se = map.containerPointToLatLng([w, h]);
+    var nw = map.containerPointToLatLng([-pad, -pad]);
+    var se = map.containerPointToLatLng([w + pad, h + pad]);
     var rawMinLat = Math.min(nw.lat, se.lat);
     var rawMaxLat = Math.max(nw.lat, se.lat);
     var rawMinLon = Math.min(nw.lng, se.lng);
@@ -633,10 +821,10 @@
     } else {
       var latSpan = Math.max(0.15, rawMaxLat - rawMinLat);
       var lonSpan = Math.min(360, Math.max(0.2, rawMaxLon - rawMinLon));
-      minLat = clampNum(rawMinLat - latSpan * 0.24, -82, 82);
-      maxLat = clampNum(rawMaxLat + latSpan * 0.24, -82, 82);
-      var minLon = rawMinLon - lonSpan * 0.24;
-      var maxLon = Math.min(rawMaxLon + lonSpan * 0.24, minLon + 360);
+      minLat = clampNum(rawMinLat - latSpan * 0.20, -82, 82);
+      maxLat = clampNum(rawMaxLat + latSpan * 0.20, -82, 82);
+      var minLon = rawMinLon - lonSpan * 0.20;
+      var maxLon = Math.min(rawMaxLon + lonSpan * 0.20, minLon + 360);
       var latExt = Math.max(0.2, maxLat - minLat);
       var lonExt = Math.max(0.2, maxLon - minLon);
 
@@ -697,7 +885,11 @@
 
     var nRows = lats.length;
     var nCols = lons.length;
-    var nodes = new Array(nRows * nCols);
+    var len = nRows * nCols;
+    var nodes = new Array(len);
+    var pArr = new Float32Array(len);
+    var wArr = new Float32Array(len);
+    var sArr = new Uint8Array(len);
     var missing = [];
     var seenMissing = new Set();
 
@@ -706,17 +898,21 @@
       for (var c = 0; c < nCols; c++) {
         var cLon = lons[c];
         var idx = r * nCols + c;
-        var live = getLiveCachedNode(rLat, cLon);
-        if (live) {
-          nodes[idx] = live;
-        } else {
-          nodes[idx] = synthesizeBaselineNode(rLat, cLon);
+        var nd = getLiveCachedNode(rLat, cLon);
+        if (!nd) {
+          nd = synthesizeBaselineNode(rLat, cLon);
           var k = nodeCacheKey(rLat, cLon);
           if (!seenMissing.has(k)) {
             seenMissing.add(k);
             missing.push({ lat: rLat, lon: wrapLon180(cLon), key: k });
           }
         }
+        nodes[idx] = nd;
+        pArr[idx] = Number.isFinite(nd.pressure) ? nd.pressure : 1013.2;
+        wArr[idx] = (nd.wave != null && Number.isFinite(nd.wave))
+          ? nd.wave
+          : (nd.waveFallback != null ? nd.waveFallback : clampNum(0.45 + 0.062 * Math.pow(nd.windKt || 10, 1.12), 0.35, 10));
+        sArr[idx] = nd.isSea ? 1 : 0;
       }
     }
 
@@ -729,7 +925,82 @@
       dLon: dLon,
       isGlobal: isGlobalZoom,
       nodes: nodes,
+      _pressure: pArr,
+      _wave: wArr,
+      _sea: sArr,
       missing: missing
+    };
+  }
+
+  function buildGridAxisLookup(grid, map, cw, ch, step, countX, countY, originX, originY, zoom) {
+    var nRows = grid.nRows;
+    var nCols = grid.nCols;
+    var lats = grid.lats;
+    var lons = grid.lons;
+    var lat0 = lats[0];
+    var latMax = lats[nRows - 1];
+    var lon0 = lons[0];
+    var lonMax = lons[nCols - 1];
+    var span = lonMax - lon0;
+    var invDLat = 1 / (grid.dLat || 1);
+    var invDLon = 1 / (grid.dLon || 1);
+
+    var rowLat = new Float64Array(countY);
+    var rowCos = new Float64Array(countY);
+    var rowSin = new Float64Array(countY);
+    var rowR0 = new Uint16Array(countY);
+    var rowR1 = new Uint16Array(countY);
+    var rowTy = new Float32Array(countY);
+
+    for (var py = 0; py < countY; py++) {
+      var wy = originY + Math.min(ch, py * step);
+      var la = map.unproject(L.point(originX, wy), zoom).lat;
+      rowLat[py] = la;
+      rowCos[py] = Math.cos(la * DEG2RAD);
+      rowSin[py] = Math.sin(la * DEG2RAD);
+      var clLat = clampNum(la, lat0, latMax);
+      var fRow = clampNum((clLat - lat0) * invDLat, 0, nRows - 1.0001);
+      var r0 = Math.floor(fRow);
+      var r1 = r0 + 1 < nRows ? r0 + 1 : nRows - 1;
+      rowR0[py] = r0 * nCols;
+      rowR1[py] = r1 * nCols;
+      var ftY = fRow - r0;
+      rowTy[py] = ftY * ftY * (3 - 2 * ftY);
+    }
+
+    var colRawLon = new Float64Array(countX);
+    var colWLon = new Float64Array(countX);
+    var colC0 = new Uint16Array(countX);
+    var colC1 = new Uint16Array(countX);
+    var colTx = new Float32Array(countX);
+
+    for (var px = 0; px < countX; px++) {
+      var wx = originX + Math.min(cw, px * step);
+      var rawLo = map.unproject(L.point(wx, originY), zoom).lng;
+      colRawLon[px] = rawLo;
+      colWLon[px] = wrapLon180(rawLo);
+      var lo = grid.isGlobal ? colWLon[px] : rawLo;
+      while (lo < lon0) lo += 360;
+      while (lo > lonMax) {
+        if (lo - 360 >= lon0) lo -= 360;
+        else break;
+      }
+      if (lo > lonMax && span >= 336) {
+        lo = lon0 + ((((lo - lon0) % 360) + 360) % 360);
+      }
+      var clLon = clampNum(lo, lon0, lonMax);
+      var fCol = clampNum((clLon - lon0) * invDLon, 0, nCols - 1.0001);
+      var c0 = Math.floor(fCol);
+      var c1 = c0 + 1 < nCols ? c0 + 1 : nCols - 1;
+      colC0[px] = c0;
+      colC1[px] = c1;
+      var ftX = fCol - c0;
+      colTx[px] = ftX * ftX * (3 - 2 * ftX);
+    }
+
+    return {
+      rowLat: rowLat, rowCos: rowCos, rowSin: rowSin, rowR0: rowR0, rowR1: rowR1, rowTy: rowTy,
+      colRawLon: colRawLon, colWLon: colWLon, colC0: colC0, colC1: colC1, colTx: colTx
     };
   }
 
@@ -883,11 +1154,11 @@
     return [168, 85, 247, Math.round(0.68 * seaMult * 255)];
   }
 
-  function renderWaveHeatmap(ctx, map, grid, w, h) {
-    var lowEnd = typeof window !== "undefined" && window.SETSAIL_LOW_END;
-    var step = lowEnd ? 7 : 5;
-    var bw = Math.max(8, Math.ceil(w / step) + 1);
-    var bh = Math.max(8, Math.ceil(h / step) + 1);
+  function renderWaveHeatmap(ctx, map, grid, cw, ch, originX, originY, zoom, sys, fastDragMode) {
+    var lowEnd = isWeakDeviceMode() || Boolean(fastDragMode);
+    var step = fastDragMode ? 10 : (lowEnd ? 8 : 6);
+    var bw = Math.max(8, Math.ceil(cw / step) + 1);
+    var bh = Math.max(8, Math.ceil(ch / step) + 1);
 
     if (!renderWaveHeatmap._offCanvas) {
       renderWaveHeatmap._offCanvas = document.createElement("canvas");
@@ -896,37 +1167,127 @@
     if (off.width !== bw || off.height !== bh) {
       off.width = bw;
       off.height = bh;
+      renderWaveHeatmap._img = null;
     }
     var oCtx = off.getContext("2d");
-    var img = oCtx.createImageData(bw, bh);
+    var img = renderWaveHeatmap._img;
+    if (!img || img.width !== bw || img.height !== bh) {
+      img = oCtx.createImageData(bw, bh);
+      renderWaveHeatmap._img = img;
+    }
     var data = img.data;
 
-    var rowLats = new Float64Array(bh);
-    for (var y = 0; y < bh; y++) {
-      rowLats[y] = map.containerPointToLatLng([0, Math.min(h, y * step)]).lat;
-    }
-    var colLons = new Float64Array(bw);
-    for (var x = 0; x < bw; x++) {
-      colLons[x] = map.containerPointToLatLng([Math.min(w, x * step), 0]).lng;
-    }
+    var axis = buildGridAxisLookup(grid, map, cw, ch, step, bw, bh, originX, originY, zoom);
+    var rowLat = axis.rowLat;
+    var rowCos = axis.rowCos;
+    var rowSin = axis.rowSin;
+    var rowR0 = axis.rowR0;
+    var rowR1 = axis.rowR1;
+    var rowTy = axis.rowTy;
+    var colRawLon = axis.colRawLon;
+    var colWLon = axis.colWLon;
+    var colC0 = axis.colC0;
+    var colC1 = axis.colC1;
+    var colTx = axis.colTx;
+
+    var wArr = grid._wave;
+    var sArr = grid._sea;
+    var isGlobal = grid.dLon >= 8;
+    var storms = sys ? sys.storms : [];
+    var waveAreas = sys ? sys.waveAreas : [];
+    var nStorms = storms.length;
+    var nWaves = waveAreas.length;
 
     for (var py = 0; py < bh; py++) {
-      var lat = rowLats[py];
+      var la = rowLat[py];
+      var cosLa = rowCos[py];
+      var sinLa = rowSin[py];
+      var r0Base = rowR0[py];
+      var r1Base = rowR1[py];
+      var ty = rowTy[py];
+      var oneMinusTy = 1 - ty;
+      var rowPixBase = py * bw;
+
       for (var px = 0; px < bw; px++) {
-        var lon = colLons[px];
-        var val = sampleGridFieldAtLatLon(grid, lat, lon);
-        var pIdx = (py * bw + px) * 4;
-        if (!val.isSea || val.seaFrac < 0.16 || val.wave == null) {
+        var tx = colTx[px];
+        var oneMinusTx = 1 - tx;
+        var w00 = oneMinusTx * oneMinusTy;
+        var w10 = tx * oneMinusTy;
+        var w01 = oneMinusTx * ty;
+        var w11 = tx * ty;
+
+        var c0 = colC0[px];
+        var c1 = colC1[px];
+        var i00 = r0Base + c0;
+        var i10 = r0Base + c1;
+        var i01 = r1Base + c0;
+        var i11 = r1Base + c1;
+
+        var seaFrac = sArr[i00] * w00 + sArr[i10] * w10 + sArr[i01] * w01 + sArr[i11] * w11;
+        var rawLon = colRawLon[px];
+        if (isGlobal && seaFrac < 0.78 && !isDeepLandInterior(la, rawLon)) {
+          seaFrac = 0.78;
+        }
+        var isSea = seaFrac >= 0.18;
+        var pIdx = (rowPixBase + px) * 4;
+
+        if (!isSea && nStorms === 0) {
+          data[pIdx] = 0;
+          data[pIdx + 1] = 0;
+          data[pIdx + 2] = 0;
+          data[pIdx + 3] = 0;
+          continue;
+        }
+
+        var wave = wArr[i00] * w00 + wArr[i10] * w10 + wArr[i01] * w01 + wArr[i11] * w11;
+        var wLon = colWLon[px];
+
+        if (nWaves > 0) {
+          for (var wIdx = 0; wIdx < nWaves; wIdx++) {
+            var wa = waveAreas[wIdx];
+            var dWv = fastSphereNm(la, wLon, cosLa, sinLa, wa);
+            if (dWv < wa.cutoffNm) {
+              var gWv = Math.exp(-(dWv * dWv) * wa.invTwoSigSq);
+              var targetWave = wave * (1 - gWv) + wa.hM * gWv;
+              if (targetWave > wave) wave = targetWave;
+            }
+          }
+        }
+
+        if (nStorms > 0) {
+          for (var s = 0; s < nStorms; s++) {
+            var st = storms[s];
+            var dNm = fastSphereNm(la, wLon, cosLa, sinLa, st);
+            if (dNm < st.outerNm) {
+              isSea = true;
+              seaFrac = Math.max(seaFrac, 0.65);
+              var outerTapering = smoothstep01(1 - dNm * st.invOuterNm);
+              var waveProfile = dNm <= st.rmw
+                ? (1.0 + 0.02 * (1 - dNm / st.rmw))
+                : Math.exp(-Math.pow((dNm - st.rmw) * st.wavePowScale, 1.35));
+              var stormWaveM = (1.0 + (st.peakWaveM - 1.0) * waveProfile) * outerTapering + wave * (1 - outerTapering);
+              if (stormWaveM > wave) wave = stormWaveM;
+            }
+          }
+        }
+
+        if (!isSea || seaFrac < 0.16) {
           data[pIdx] = 0;
           data[pIdx + 1] = 0;
           data[pIdx + 2] = 0;
           data[pIdx + 3] = 0;
         } else {
-          var rgba = waveColorRgba(val.wave, val.seaFrac);
-          data[pIdx] = rgba[0];
-          data[pIdx + 1] = rgba[1];
-          data[pIdx + 2] = rgba[2];
-          data[pIdx + 3] = rgba[3];
+          var seaMult = seaFrac >= 0.55 ? 1 : clampNum((seaFrac - 0.15) / 0.40, 0, 1);
+          if (seaMult <= 0.01) {
+            data[pIdx + 3] = 0;
+          } else {
+            var hc = wave < 0 ? 0 : (wave > WAVE_LUT_MAX ? WAVE_LUT_MAX : wave);
+            var lutIdx = ((hc * (WAVE_LUT_STEPS / WAVE_LUT_MAX)) + 0.5) | 0;
+            data[pIdx] = WAVE_LUT_R[lutIdx];
+            data[pIdx + 1] = WAVE_LUT_G[lutIdx];
+            data[pIdx + 2] = WAVE_LUT_B[lutIdx];
+            data[pIdx + 3] = (WAVE_LUT_A[lutIdx] * seaMult + 0.5) | 0;
+          }
         }
       }
     }
@@ -934,36 +1295,105 @@
     oCtx.putImageData(img, 0, 0);
     ctx.save();
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+    ctx.imageSmoothingQuality = lowEnd ? "low" : "medium";
     ctx.drawImage(off, 0, 0, (bw - 1) * step, (bh - 1) * step);
     ctx.restore();
   }
 
-  function renderIsobarContours(ctx, map, grid, w, h, stormPts) {
-    var cell = 16;
-    var nx = Math.ceil(w / cell) + 2;
-    var ny = Math.ceil(h / cell) + 2;
-    var pField = new Float64Array(nx * ny);
+  function renderIsobarContours(ctx, map, grid, cw, ch, stormPts, originX, originY, zoom, sys, fastDragMode) {
+    var lowEnd = isWeakDeviceMode() || Boolean(fastDragMode);
+    var cell = fastDragMode ? 24 : (lowEnd ? 22 : 18);
+    var nx = Math.ceil(cw / cell) + 2;
+    var ny = Math.ceil(ch / cell) + 2;
+    var needSize = nx * ny;
+    if (!renderIsobarContours._pField || renderIsobarContours._pField.length < needSize) {
+      renderIsobarContours._pField = new Float32Array(needSize);
+    }
+    var pField = renderIsobarContours._pField;
 
-    var rowLats = new Float64Array(ny);
-    for (var y = 0; y < ny; y++) {
-      rowLats[y] = map.containerPointToLatLng([0, y * cell]).lat;
-    }
-    var colLons = new Float64Array(nx);
-    for (var x = 0; x < nx; x++) {
-      colLons[x] = map.containerPointToLatLng([x * cell, 0]).lng;
-    }
+    var axis = buildGridAxisLookup(grid, map, cw, ch, cell, nx, ny, originX, originY, zoom);
+    var rowLat = axis.rowLat;
+    var rowCos = axis.rowCos;
+    var rowSin = axis.rowSin;
+    var rowR0 = axis.rowR0;
+    var rowR1 = axis.rowR1;
+    var rowTy = axis.rowTy;
+    var colWLon = axis.colWLon;
+    var colC0 = axis.colC0;
+    var colC1 = axis.colC1;
+    var colTx = axis.colTx;
+
+    var pArr = grid._pressure;
+    var nodes = grid.nodes;
+    var storms = sys ? sys.storms : [];
+    var pCenters = sys ? sys.pCenters : [];
+    var nStorms = storms.length;
+    var nPC = pCenters.length;
 
     var minP = 1100;
     var maxP = 800;
     for (var py = 0; py < ny; py++) {
-      var la = rowLats[py];
+      var la = rowLat[py];
+      var cosLa = rowCos[py];
+      var sinLa = rowSin[py];
+      var r0Base = rowR0[py];
+      var r1Base = rowR1[py];
+      var ty = rowTy[py];
+      var oneMinusTy = 1 - ty;
+      var rowOut = py * nx;
+
       for (var px = 0; px < nx; px++) {
-        var lo = colLons[px];
-        var p = sampleGridFieldAtLatLon(grid, la, lo).pressure;
-        pField[py * nx + px] = p;
-        if (p < minP) minP = p;
-        if (p > maxP) maxP = p;
+        var tx = colTx[px];
+        var oneMinusTx = 1 - tx;
+        var w00 = oneMinusTx * oneMinusTy;
+        var w10 = tx * oneMinusTy;
+        var w01 = oneMinusTx * ty;
+        var w11 = tx * ty;
+
+        var c0 = colC0[px];
+        var c1 = colC1[px];
+        var i00 = r0Base + c0;
+        var pressure = pArr[i00] * w00
+          + pArr[r0Base + c1] * w10
+          + pArr[r1Base + c0] * w01
+          + pArr[r1Base + c1] * w11;
+
+        var wLon = colWLon[px];
+        if (nPC > 0) {
+          var isOm = nodes[i00].source === "open-meteo";
+          for (var i = 0; i < nPC; i++) {
+            var pc = pCenters[i];
+            var dPc = fastSphereNm(la, wLon, cosLa, sinLa, pc);
+            if (dPc < 1400) {
+              var gPc = Math.exp(-(dPc * dPc) * pc.invTwoSigSq);
+              if (isOm) {
+                pressure = pressure * (1 - 0.35 * gPc) + pc.targetMb * (0.35 * gPc);
+              } else {
+                pressure += pc.deltaAmbientMb * gPc;
+              }
+            }
+          }
+        }
+        if (nStorms > 0) {
+          for (var s = 0; s < nStorms; s++) {
+            var st = storms[s];
+            var dNm = fastSphereNm(la, wLon, cosLa, sinLa, st);
+            if (dNm < st.outerNm) {
+              var outerTapering = smoothstep01(1 - dNm * st.invOuterNm);
+              var envP = Math.max(pressure, st.coreMb + 8, 1009.5);
+              var effR = dNm > 2.5 ? dNm : 2.5;
+              var hollandFactor = Math.exp(-Math.pow(st.rmw / effR, st.hollandB));
+              var hollandP = st.coreMb + (envP - st.coreMb) * hollandFactor;
+              var pBlend = Math.pow(outerTapering, 0.75);
+              var stormP = hollandP * pBlend + pressure * (1 - pBlend);
+              if (stormP < pressure) pressure = stormP;
+            }
+          }
+        }
+
+        pField[rowOut + px] = pressure;
+        if (pressure < minP) minP = pressure;
+        if (pressure > maxP) maxP = pressure;
       }
     }
 
@@ -971,14 +1401,16 @@
     var lastLvl = Math.floor(maxP / 4) * 4;
     if (lastLvl < firstLvl) return 0;
 
+    var edgeTotal = needSize * 2;
+    if (!renderIsobarContours._eA || renderIsobarContours._eA.length < edgeTotal) {
+      renderIsobarContours._eA = new Int32Array(edgeTotal);
+      renderIsobarContours._eB = new Int32Array(edgeTotal);
+    }
+    var eA = renderIsobarContours._eA;
+    var eB = renderIsobarContours._eB;
+
     var placedPills = [];
     var levelCount = 0;
-
-    function interpCoord(va, vb, level, xa, ya, xb, yb) {
-      var denom = vb - va;
-      var t = Math.abs(denom) < 1e-6 ? 0.5 : clampNum((level - va) / denom, 0.001, 0.999);
-      return [xa + (xb - xa) * t, ya + (yb - ya) * t];
-    }
 
     ctx.save();
     ctx.lineCap = "round";
@@ -986,18 +1418,8 @@
 
     for (var level = firstLvl; level <= lastLvl; level += 4) {
       var segs = [];
-      var adj = new Map();
-
-      var pushSeg = function (kA, pA, kB, pB) {
-        var sIdx = segs.length;
-        segs.push({ kA: kA, pA: pA, kB: kB, pB: pB, used: false });
-        var arrA = adj.get(kA);
-        if (!arrA) { arrA = []; adj.set(kA, arrA); }
-        arrA.push(sIdx);
-        var arrB = adj.get(kB);
-        if (!arrB) { arrB = []; adj.set(kB, arrB); }
-        arrB.push(sIdx);
-      };
+      eA.fill(-1, 0, edgeTotal);
+      eB.fill(-1, 0, edgeTotal);
 
       for (var iy = 0; iy < ny - 1; iy++) {
         var yTop = iy * cell;
@@ -1014,32 +1436,42 @@
 
           var xL = ix * cell;
           var xR = (ix + 1) * cell;
-          var kT = "H:" + ix + "," + iy;
-          var kR = "V:" + (ix + 1) + "," + iy;
-          var kB = "H:" + ix + "," + (iy + 1);
-          var kL = "V:" + ix + "," + iy;
-          var pt = function (edge) {
-            if (edge === 0) return [kT, interpCoord(v0, v1, level, xL, yTop, xR, yTop)];
-            if (edge === 1) return [kR, interpCoord(v1, v2, level, xR, yTop, xR, yBot)];
-            if (edge === 2) return [kB, interpCoord(v3, v2, level, xL, yBot, xR, yBot)];
-            return [kL, interpCoord(v0, v3, level, xL, yTop, xL, yBot)];
-          };
+          var kT = (rowA + ix) * 2;
+          var kR = (rowA + ix + 1) * 2 + 1;
+          var kB = (rowB + ix) * 2;
+          var kL = (rowA + ix) * 2 + 1;
 
-          var avg = 0.25 * (v0 + v1 + v2 + v3);
           var pairs;
           if (mask === 1 || mask === 14) pairs = [[3, 2]];
           else if (mask === 2 || mask === 13) pairs = [[2, 1]];
           else if (mask === 3 || mask === 12) pairs = [[3, 1]];
           else if (mask === 4 || mask === 11) pairs = [[0, 1]];
-          else if (mask === 5) pairs = avg >= level ? [[0, 3], [1, 2]] : [[0, 1], [3, 2]];
+          else if (mask === 5) pairs = (0.25 * (v0 + v1 + v2 + v3)) >= level ? [[0, 3], [1, 2]] : [[0, 1], [3, 2]];
           else if (mask === 6 || mask === 9) pairs = [[0, 2]];
           else if (mask === 7 || mask === 8) pairs = [[0, 3]];
-          else pairs = avg >= level ? [[0, 1], [3, 2]] : [[0, 3], [1, 2]];
+          else pairs = (0.25 * (v0 + v1 + v2 + v3)) >= level ? [[0, 1], [3, 2]] : [[0, 3], [1, 2]];
 
           for (var q = 0; q < pairs.length; q++) {
-            var a = pt(pairs[q][0]);
-            var b = pt(pairs[q][1]);
-            pushSeg(a[0], a[1], b[0], b[1]);
+            var e1 = pairs[q][0];
+            var e2 = pairs[q][1];
+            var kA, ax, ay, kB2, bx, by, dm, t;
+
+            if (e1 === 0) { kA = kT; dm = v1 - v0; t = Math.abs(dm) < 1e-6 ? 0.5 : clampNum((level - v0) / dm, 0.001, 0.999); ax = xL + cell * t; ay = yTop; }
+            else if (e1 === 1) { kA = kR; dm = v2 - v1; t = Math.abs(dm) < 1e-6 ? 0.5 : clampNum((level - v1) / dm, 0.001, 0.999); ax = xR; ay = yTop + cell * t; }
+            else if (e1 === 2) { kA = kB; dm = v2 - v3; t = Math.abs(dm) < 1e-6 ? 0.5 : clampNum((level - v3) / dm, 0.001, 0.999); ax = xL + cell * t; ay = yBot; }
+            else { kA = kL; dm = v3 - v0; t = Math.abs(dm) < 1e-6 ? 0.5 : clampNum((level - v0) / dm, 0.001, 0.999); ax = xL; ay = yTop + cell * t; }
+
+            if (e2 === 0) { kB2 = kT; dm = v1 - v0; t = Math.abs(dm) < 1e-6 ? 0.5 : clampNum((level - v0) / dm, 0.001, 0.999); bx = xL + cell * t; by = yTop; }
+            else if (e2 === 1) { kB2 = kR; dm = v2 - v1; t = Math.abs(dm) < 1e-6 ? 0.5 : clampNum((level - v1) / dm, 0.001, 0.999); bx = xR; by = yTop + cell * t; }
+            else if (e2 === 2) { kB2 = kB; dm = v2 - v3; t = Math.abs(dm) < 1e-6 ? 0.5 : clampNum((level - v3) / dm, 0.001, 0.999); bx = xL + cell * t; by = yBot; }
+            else { kB2 = kL; dm = v3 - v0; t = Math.abs(dm) < 1e-6 ? 0.5 : clampNum((level - v0) / dm, 0.001, 0.999); bx = xL; by = yTop + cell * t; }
+
+            var sIdx = segs.length;
+            segs.push({ kA: kA, ax: ax, ay: ay, kB: kB2, bx: bx, by: by, used: false });
+            if (eA[kA] === -1) eA[kA] = sIdx;
+            else eB[kA] = sIdx;
+            if (eA[kB2] === -1) eA[kB2] = sIdx;
+            else eB[kB2] = sIdx;
           }
         }
       }
@@ -1048,59 +1480,78 @@
       levelCount += 1;
 
       var polylines = [];
-      for (var i = 0; i < segs.length; i++) {
-        if (segs[i].used) continue;
-        segs[i].used = true;
-        var pts = [segs[i].pA, segs[i].pB];
-        var headKey = segs[i].kA;
-        var tailKey = segs[i].kB;
+      for (var i2 = 0; i2 < segs.length; i2++) {
+        var sg = segs[i2];
+        if (sg.used) continue;
+        sg.used = true;
+        var tailX = [sg.ax, sg.bx];
+        var tailY = [sg.ay, sg.by];
+        var headKey = sg.kA;
+        var tailKey = sg.kB;
 
         var guard = 0;
         while (guard++ < 4000) {
-          var list = adj.get(tailKey);
-          var nextSeg = null;
-          if (list) {
-            for (var m = 0; m < list.length; m++) {
-              var cand = segs[list[m]];
-              if (!cand.used) { nextSeg = cand; break; }
-            }
+          var s1 = eA[tailKey];
+          var cSeg = (s1 >= 0 && !segs[s1].used) ? segs[s1] : null;
+          if (!cSeg) {
+            var s2 = eB[tailKey];
+            if (s2 >= 0 && !segs[s2].used) cSeg = segs[s2];
           }
-          if (!nextSeg) break;
-          nextSeg.used = true;
-          if (nextSeg.kA === tailKey) {
-            pts.push(nextSeg.pB);
-            tailKey = nextSeg.kB;
+          if (!cSeg) break;
+          cSeg.used = true;
+          if (cSeg.kA === tailKey) {
+            tailX.push(cSeg.bx);
+            tailY.push(cSeg.by);
+            tailKey = cSeg.kB;
           } else {
-            pts.push(nextSeg.pA);
-            tailKey = nextSeg.kA;
+            tailX.push(cSeg.ax);
+            tailY.push(cSeg.ay);
+            tailKey = cSeg.kA;
           }
         }
 
+        var headX = [];
+        var headY = [];
         guard = 0;
         while (guard++ < 4000) {
-          var list2 = adj.get(headKey);
-          var prevSeg = null;
-          if (list2) {
-            for (var m2 = 0; m2 < list2.length; m2++) {
-              var cand2 = segs[list2[m2]];
-              if (!cand2.used) { prevSeg = cand2; break; }
-            }
+          var p1 = eA[headKey];
+          var pSeg = (p1 >= 0 && !segs[p1].used) ? segs[p1] : null;
+          if (!pSeg) {
+            var p2 = eB[headKey];
+            if (p2 >= 0 && !segs[p2].used) pSeg = segs[p2];
           }
-          if (!prevSeg) break;
-          prevSeg.used = true;
-          if (prevSeg.kA === headKey) {
-            pts.unshift(prevSeg.pB);
-            headKey = prevSeg.kB;
+          if (!pSeg) break;
+          pSeg.used = true;
+          if (pSeg.kA === headKey) {
+            headX.push(pSeg.bx);
+            headY.push(pSeg.by);
+            headKey = pSeg.kB;
           } else {
-            pts.unshift(prevSeg.pA);
-            headKey = prevSeg.kA;
+            headX.push(pSeg.ax);
+            headY.push(pSeg.ay);
+            headKey = pSeg.kA;
           }
         }
 
-        if (pts.length >= 2) polylines.push(pts);
+        var totalPts = headX.length + tailX.length;
+        if (totalPts >= 2) {
+          var plX = new Array(totalPts);
+          var plY = new Array(totalPts);
+          var ptr = 0;
+          for (var hx = headX.length - 1; hx >= 0; hx--) {
+            plX[ptr] = headX[hx];
+            plY[ptr] = headY[hx];
+            ptr += 1;
+          }
+          for (var tx2 = 0; tx2 < tailX.length; tx2++) {
+            plX[ptr] = tailX[tx2];
+            plY[ptr] = tailY[tx2];
+            ptr += 1;
+          }
+          polylines.push({ x: plX, y: plY, n: totalPts });
+        }
       }
 
-      // Highlight deep low-pressure cyclone isobars (< 1000 hPa) vs standard synoptic isobars
       var isDeepLow = level <= 996;
       var isStandard1012 = level === 1012;
       ctx.strokeStyle = isDeepLow
@@ -1112,33 +1563,33 @@
       var labelSpots = [];
       for (var pIdx = 0; pIdx < polylines.length; pIdx++) {
         var pl = polylines[pIdx];
-        ctx.moveTo(pl[0][0], pl[0][1]);
+        var pxArr = pl.x;
+        var pyArr = pl.y;
+        var pn = pl.n;
+        ctx.moveTo(pxArr[0], pyArr[0]);
         var arcLen = 0;
-        for (var k = 1; k < pl.length; k++) {
-          arcLen += Math.hypot(pl[k][0] - pl[k - 1][0], pl[k][1] - pl[k - 1][1]);
+        for (var k = 1; k < pn; k++) {
+          arcLen += Math.hypot(pxArr[k] - pxArr[k - 1], pyArr[k] - pyArr[k - 1]);
         }
-        if (pl.length === 2) {
-          ctx.lineTo(pl[1][0], pl[1][1]);
+        if (pn === 2) {
+          ctx.lineTo(pxArr[1], pyArr[1]);
         } else {
-          for (var k2 = 1; k2 < pl.length - 1; k2++) {
-            var mx = 0.5 * (pl[k2][0] + pl[k2 + 1][0]);
-            var my = 0.5 * (pl[k2][1] + pl[k2 + 1][1]);
-            ctx.quadraticCurveTo(pl[k2][0], pl[k2][1], mx, my);
+          for (var k2 = 1; k2 < pn - 1; k2++) {
+            ctx.quadraticCurveTo(pxArr[k2], pyArr[k2], 0.5 * (pxArr[k2] + pxArr[k2 + 1]), 0.5 * (pyArr[k2] + pyArr[k2 + 1]));
           }
-          var last = pl[pl.length - 1];
-          ctx.lineTo(last[0], last[1]);
+          ctx.lineTo(pxArr[pn - 1], pyArr[pn - 1]);
         }
 
-        if (arcLen >= 115) {
+        if (!fastDragMode && arcLen >= 115) {
           var targetFracs = arcLen > 400 ? [0.28, 0.72] : [0.5];
           for (var f = 0; f < targetFracs.length; f++) {
-            var mp = pl[Math.min(pl.length - 1, Math.floor(pl.length * targetFracs[f]))];
-            var lx = mp[0];
-            var ly = mp[1];
-            if (lx < 40 || lx > w - 40 || ly < 28 || ly > h - 28) continue;
+            var mIdx = Math.min(pn - 1, Math.floor(pn * targetFracs[f]));
+            var lx = pxArr[mIdx];
+            var ly = pyArr[mIdx];
+            if (lx < 40 || lx > cw - 40 || ly < 28 || ly > ch - 28) continue;
             var nearStorm = false;
-            for (var s = 0; s < stormPts.length; s++) {
-              if (Math.hypot(lx - stormPts[s].x, ly - stormPts[s].y) < 44) {
+            for (var sIdx2 = 0; sIdx2 < stormPts.length; sIdx2++) {
+              if (Math.hypot(lx - stormPts[sIdx2].x, ly - stormPts[sIdx2].y) < 44) {
                 nearStorm = true;
                 break;
               }
@@ -1386,20 +1837,11 @@
     var tStr = Number.isFinite(tempC) ? (Math.round(tempC) + "\u00B0C") : "--";
     var cStr = (Number.isFinite(currKt) && currKt >= 0.05) ? (" \u2022 " + currKt.toFixed(1) + "kn") : "";
     var text = waveM.toFixed(1) + "m \u2022 " + tStr + cStr;
-    ctx.save();
-    ctx.font = "500 9.5px \"JetBrains Mono\", \"Consolas\", monospace";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
-    ctx.shadowColor = "rgba(4, 9, 18, 0.96)";
-    ctx.shadowBlur = 4;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 1;
-    ctx.fillStyle = "rgba(226, 232, 240, 0.82)";
+    ctx.strokeText(text, x, y);
     ctx.fillText(text, x, y);
-    ctx.restore();
   }
 
-  function getActiveStormScreenPoints(map) {
+  function getActiveStormScreenPoints(map, originX, originY, zoom) {
     var out = [];
     var store = (typeof window.MARINE_WEATHER_STORE !== "undefined" && window.MARINE_WEATHER_STORE)
       ? window.MARINE_WEATHER_STORE
@@ -1412,8 +1854,12 @@
       var sLon = sc[1];
       while (sLon - ctrLng > 180) sLon -= 360;
       while (sLon - ctrLng < -180) sLon += 360;
-      var pt = map.latLngToContainerPoint([sc[0], sLon]);
-      if (pt) out.push(pt);
+      var pt = (originX != null && map.project)
+        ? map.project([sc[0], sLon], zoom)
+        : map.latLngToContainerPoint([sc[0], sLon]);
+      if (pt) {
+        out.push(originX != null ? { x: pt.x - originX, y: pt.y - originY } : pt);
+      }
     }
     return out;
   }
@@ -1454,53 +1900,158 @@
       this._canvas.style.top = "0";
       this._canvas.style.left = "0";
       this._canvas.style.pointerEvents = "none";
+      this._canvas.style.willChange = "transform";
       pane.appendChild(this._canvas);
 
       this._rafId = null;
+      this._panThrottleTimer = null;
+      this._recenterTimer = null;
       this._fetchTimer = null;
       this._activeCtrls = new Set();
       this._inFlightNodes = new Map();
-      this._lastStats = { zoom: map.getZoom(), nodes: 0, liveNodes: 0, barbs: 0, currents: 0, badges: 0, isobars: 0 };
+      this._hasValidCache = false;
+      this._dirty = true;
+      this._isMoving = false;
+      this._lastPanDrawTs = 0;
+      this._renderedFast = false;
+      this._lastStats = { zoom: map.getZoom(), nodes: 0, liveNodes: 0, barbs: 0, currents: 0, badges: 0, isobars: 0, drawMs: 0 };
 
-      map.on("move zoom moveend zoomend viewreset resize", this._onMapViewChanged, this);
-      this._drawImmediate();
+      map.on("movestart dragstart", this._onMoveStart, this);
+      map.on("move", this._onMapMoving, this);
+      map.on("moveend dragend", this._onMoveEnd, this);
+      map.on("zoom zoomend viewreset resize", this._onMapZoomOrReset, this);
+
+      this._drawImmediate({ force: true });
       this._scheduleViewportFetch(10);
     },
 
     onRemove: function (map) {
       if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
+      if (this._panThrottleTimer) { clearTimeout(this._panThrottleTimer); this._panThrottleTimer = null; }
+      if (this._recenterTimer) { clearTimeout(this._recenterTimer); this._recenterTimer = null; }
       if (this._fetchTimer) { clearTimeout(this._fetchTimer); this._fetchTimer = null; }
       if (this._activeCtrls) {
         this._activeCtrls.forEach(function (c) { try { c.abort(); } catch (eA) {} });
         this._activeCtrls.clear();
       }
-      map.off("move zoom moveend zoomend viewreset resize", this._onMapViewChanged, this);
+      map._wxIsMoving = false;
+      map.off("movestart dragstart", this._onMoveStart, this);
+      map.off("move", this._onMapMoving, this);
+      map.off("moveend dragend", this._onMoveEnd, this);
+      map.off("zoom zoomend viewreset resize", this._onMapZoomOrReset, this);
       if (this._canvas && this._canvas.parentNode) {
         this._canvas.parentNode.removeChild(this._canvas);
       }
       this._canvas = null;
+      this._hasValidCache = false;
       this._map = null;
     },
 
     refreshNow: function () {
       if (!this._map) return;
-      this._scheduleDraw();
+      this._dirty = true;
+      this._hasValidCache = false;
+      this._scheduleDraw(false);
       this._scheduleViewportFetch(20);
     },
 
-    _onMapViewChanged: function (ev) {
-      this._scheduleDraw();
-      if (!ev || ev.type === "moveend" || ev.type === "zoomend" || ev.type === "resize") {
+    _isViewportCovered: function () {
+      var map = this._map;
+      if (!map || !this._hasValidCache || this._dirty) return false;
+      var sz = map.getSize();
+      var w = Math.max(0, Math.round(sz.x));
+      var h = Math.max(0, Math.round(sz.y));
+      var zoom = map.getZoom();
+      if (zoom !== this._renderedZoom || w !== this._renderedVpW || h !== this._renderedVpH) {
+        return false;
+      }
+      var vpLayer = map.containerPointToLayerPoint([0, 0]);
+      return (
+        vpLayer.x >= this._covMinX + 2 &&
+        vpLayer.y >= this._covMinY + 2 &&
+        (vpLayer.x + w) <= this._covMaxX - 2 &&
+        (vpLayer.y + h) <= this._covMaxY - 2
+      );
+    },
+
+    _onMoveStart: function () {
+      this._isMoving = true;
+      if (this._map) this._map._wxIsMoving = true;
+      if (this._recenterTimer) { clearTimeout(this._recenterTimer); this._recenterTimer = null; }
+    },
+
+    _onMapMoving: function () {
+      if (!this._map) return;
+      // Fast path: Leaflet's mapPane already shifts our overscanned canvas on GPU compositor in 0.00ms!
+      if (this._isViewportCovered()) {
+        return;
+      }
+      // If zoom changed or continuous drag exceeded +/-220px overscan margin, throttle fast pan redraw
+      if (this._map.getZoom() !== this._renderedZoom || !this._hasValidCache) {
+        this._scheduleDraw(false);
+        return;
+      }
+      var now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+      var since = now - (this._lastPanDrawTs || 0);
+      if (since >= 110) {
+        this._lastPanDrawTs = now;
+        this._drawImmediate({ force: true, fastDrag: true });
+      } else if (!this._panThrottleTimer) {
+        var self = this;
+        this._panThrottleTimer = setTimeout(function () {
+          self._panThrottleTimer = null;
+          if (!self._map) return;
+          self._lastPanDrawTs = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+          self._drawImmediate({ force: true, fastDrag: Boolean(self._isMoving) });
+        }, Math.max(16, 110 - since));
+      }
+    },
+
+    _onMoveEnd: function () {
+      this._isMoving = false;
+      if (this._map) this._map._wxIsMoving = false;
+      if (this._panThrottleTimer) { clearTimeout(this._panThrottleTimer); this._panThrottleTimer = null; }
+      if (!this._map) return;
+      this._scheduleViewportFetch(140);
+
+      if (!this._isViewportCovered() || this._renderedFast) {
+        this._dirty = true;
+        this._scheduleDraw(false);
+        return;
+      }
+
+      // If user panned more than 40% of overscan margin, quietly re-center overscan after settle
+      var vpLayer = this._map.containerPointToLayerPoint([0, 0]);
+      var dx = Math.abs(vpLayer.x - (this._covCenterVpX || 0));
+      var dy = Math.abs(vpLayer.y - (this._covCenterVpY || 0));
+      var lim = Math.max(60, (this._covMargin || 180) * 0.42);
+      if (dx > lim || dy > lim) {
+        var self = this;
+        if (this._recenterTimer) clearTimeout(this._recenterTimer);
+        this._recenterTimer = setTimeout(function () {
+          self._recenterTimer = null;
+          if (!self._map || self._isMoving) return;
+          self._dirty = true;
+          self._scheduleDraw(false);
+        }, 50);
+      }
+    },
+
+    _onMapZoomOrReset: function (ev) {
+      this._dirty = true;
+      this._hasValidCache = false;
+      this._scheduleDraw(false);
+      if (!ev || ev.type === "zoomend" || ev.type === "resize") {
         this._scheduleViewportFetch(140);
       }
     },
 
-    _scheduleDraw: function () {
+    _scheduleDraw: function (fastDrag) {
       if (this._rafId || !this._map) return;
       var self = this;
       this._rafId = requestAnimationFrame(function () {
         self._rafId = null;
-        self._drawImmediate();
+        self._drawImmediate({ force: true, fastDrag: Boolean(fastDrag) });
       });
     },
 
@@ -1518,7 +2069,7 @@
       var self = this;
       if (!map) return;
       if (typeof window.OVERLAY_STATES !== "undefined" && window.OVERLAY_STATES.weather === false) return;
-      var grid = buildViewportGeoGrid(map);
+      var grid = buildViewportGeoGrid(map, 0);
       if (!grid || !grid.missing.length) return;
 
       var now = Date.now();
@@ -1608,7 +2159,8 @@
             }
             if (stored > 0) {
               pruneCacheIfNeeded();
-              self._scheduleDraw();
+              self._dirty = true;
+              self._scheduleDraw(false);
             }
           });
 
@@ -1665,93 +2217,118 @@
             }
             if (stored > 0) {
               pruneCacheIfNeeded();
-              self._scheduleDraw();
+              self._dirty = true;
+              self._scheduleDraw(false);
             }
           });
         })(toFetch.slice(cStart, cStart + CHUNK_SIZE));
       }
     },
 
-    _drawImmediate: function () {
+    _drawImmediate: function (opts) {
       var map = this._map;
       var canvas = this._canvas;
       if (!map || !canvas) return;
       ensureWxSynopticPane(map);
+
+      var force = opts === true || Boolean(opts && opts.force);
+      var fastDragMode = Boolean(opts && opts.fastDrag);
+      if (!force && this._isViewportCovered()) {
+        return;
+      }
 
       var sz = map.getSize();
       var w = Math.max(0, Math.round(sz.x));
       var h = Math.max(0, Math.round(sz.y));
       if (w < 8 || h < 8) return;
 
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      var pw = Math.round(w * dpr);
-      var ph = Math.round(h * dpr);
+      if (typeof window.OVERLAY_STATES !== "undefined" && window.OVERLAY_STATES.weather === false) {
+        var ctxEmpty = canvas.getContext("2d");
+        ctxEmpty.setTransform(1, 0, 0, 1, 0, 0);
+        ctxEmpty.clearRect(0, 0, canvas.width, canvas.height);
+        this._hasValidCache = false;
+        return;
+      }
+
+      var tStart = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+      var lowEnd = isWeakDeviceMode() || fastDragMode;
+      var dpr = lowEnd ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
+      var margin = (w < 640 || lowEnd) ? 160 : 220;
+      var cw = w + margin * 2;
+      var ch = h + margin * 2;
+      var pw = Math.round(cw * dpr);
+      var ph = Math.round(ch * dpr);
       if (canvas.width !== pw || canvas.height !== ph) {
         canvas.width = pw;
         canvas.height = ph;
-        canvas.style.width = w + "px";
-        canvas.style.height = h + "px";
+        canvas.style.width = cw + "px";
+        canvas.style.height = ch + "px";
       }
 
-      var topLeftLayer = map.containerPointToLayerPoint([0, 0]);
-      L.DomUtil.setPosition(canvas, topLeftLayer);
+      var vpLayer0 = map.containerPointToLayerPoint([0, 0]);
+      var anchorLayer = L.point(Math.round(vpLayer0.x - margin), Math.round(vpLayer0.y - margin));
+      L.DomUtil.setPosition(canvas, anchorLayer);
+      var originWorld = map.getPixelOrigin().add(anchorLayer);
+      var originX = originWorld.x;
+      var originY = originWorld.y;
 
       var ctx = canvas.getContext("2d");
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
-
-      if (typeof window.OVERLAY_STATES !== "undefined" && window.OVERLAY_STATES.weather === false) {
-        return;
-      }
+      ctx.clearRect(0, 0, cw, ch);
 
       var wxSub = window.WEATHER_SUBFILTERS ||
         (typeof window.loadWeatherSubfilters === "function" ? window.loadWeatherSubfilters() : {});
 
-      var grid = buildViewportGeoGrid(map);
+      var grid = buildViewportGeoGrid(map, margin);
       if (!grid) return;
       _latestSynopticGrid = grid;
 
       var zoom = map.getZoom();
-      var stormPts = getActiveStormScreenPoints(map);
+      var sys = prepareFrameMesoscale();
+      var stormPts = getActiveStormScreenPoints(map, originX, originY, zoom);
 
       // Channel 1: Wave Height Background Heatmap (renders across all zoom levels including z=2..4 max zoom-out)
       if (wxSub.waves !== false) {
-        renderWaveHeatmap(ctx, map, grid, w, h);
+        renderWaveHeatmap(ctx, map, grid, cw, ch, originX, originY, zoom, sys, fastDragMode);
       }
 
       // Channel 2: Atmospheric Pressure Isobar Contours (4 hPa step + Holland cyclone contours)
       var isobarCount = 0;
       if (wxSub.pressure !== false) {
-        isobarCount = renderIsobarContours(ctx, map, grid, w, h, stormPts);
+        isobarCount = renderIsobarContours(ctx, map, grid, cw, ch, stormPts, originX, originY, zoom, sys, fastDragMode);
       }
 
-      // World-pixel anchored cell grid so barbs/currents/badges pan smoothly without jitter
+      // World-pixel anchored cell grid so barbs/currents/badges pan smoothly without jitter across overscan tiles
       var cellPx = zoom <= 3 ? 118 : (zoom <= 4 ? 110 : (zoom <= 6 ? 100 : 96));
-      var pb = map.getPixelBounds(map.getCenter(), zoom);
-      var minX = pb.min.x;
-      var minY = pb.min.y;
-      var ixStart = Math.floor((minX - 24) / cellPx);
-      var ixEnd = Math.ceil((minX + w + 24) / cellPx);
-      var iyStart = Math.floor((minY - 24) / cellPx);
-      var iyEnd = Math.ceil((minY + h + 24) / cellPx);
+      var ixStart = Math.floor((originX - 24) / cellPx);
+      var ixEnd = Math.ceil((originX + cw + 24) / cellPx);
+      var iyStart = Math.floor((originY - 24) / cellPx);
+      var iyEnd = Math.ceil((originY + ch + 24) / cellPx);
+      var numSymCols = Math.max(0, ixEnd - ixStart + 1);
+      var symLngs = new Float64Array(numSymCols);
+      for (var ic = 0; ic < numSymCols; ic++) {
+        symLngs[ic] = map.unproject(L.point((ixStart + ic) * cellPx, originY), zoom).lng;
+      }
 
       var showWinds = wxSub.winds !== false;
       var showCurrents = wxSub.currents !== false;
-      var showBadges = zoom >= 6;
+      var showBadges = zoom >= 6 && !fastDragMode;
       var currScale = zoom <= 3 ? 0.78 : (zoom <= 4 ? 0.88 : 1.0);
       var barbCount = 0;
       var currCount = 0;
-      var badgeCount = 0;
+      var badgeQueue = [];
 
       for (var iy = iyStart; iy <= iyEnd; iy++) {
         var wy = iy * cellPx;
-        var cy = wy - minY;
-        if (cy < -20 || cy > h + 20) continue;
+        var cy = wy - originY;
+        if (cy < -20 || cy > ch + 20) continue;
+        var rowSymLat = map.unproject(L.point(originX, wy), zoom).lat;
+        if (Math.abs(rowSymLat) > 82) continue;
 
-        for (var ix = ixStart; ix <= ixEnd; ix++) {
-          var wx = ix * cellPx;
-          var cx = wx - minX;
-          if (cx < -20 || cx > w + 20) continue;
+        for (var ic2 = 0; ic2 < numSymCols; ic2++) {
+          var wx = (ixStart + ic2) * cellPx;
+          var cx = wx - originX;
+          if (cx < -20 || cx > cw + 20) continue;
 
           var nearStorm = false;
           for (var s = 0; s < stormPts.length; s++) {
@@ -1762,13 +2339,12 @@
           }
           if (nearStorm) continue;
 
-          var ll = map.unproject(L.point(wx, wy), zoom);
-          if (Math.abs(ll.lat) > 82) continue;
-          var val = sampleGridFieldAtLatLon(grid, ll.lat, ll.lng);
+          var colSymLng = symLngs[ic2];
+          var val = sampleGridFieldAtLatLon(grid, rowSymLat, colSymLng);
 
           // Channel 3: Meteorological Wind Barb
           if (showWinds) {
-            drawWindBarb(ctx, cx, cy, val.windKt, val.windDir, ll.lat);
+            drawWindBarb(ctx, cx, cy, val.windKt, val.windDir, rowSymLat);
             barbCount += 1;
           }
 
@@ -1778,18 +2354,62 @@
             currCount += 1;
           }
 
-          // Channel 5: Wave + Temp + Current Micro-Badge (Zoom >= 6, sea only)
-          if (showBadges && val.isSea && val.wave != null && cx >= 32 && cx <= w - 32 && cy >= 0 && cy <= h - 24) {
-            drawMicroBadge(ctx, cx, cy + 16, val.wave, val.tempC, val.currKt);
-            badgeCount += 1;
+          // Channel 5: Wave + Temp + Current Micro-Badge (Zoom >= 6, sea only, batched without shadowBlur)
+          if (showBadges && val.isSea && val.wave != null && cx >= 32 && cx <= cw - 32 && cy >= 0 && cy <= ch - 24) {
+            badgeQueue.push(cx, cy + 16, val.wave, val.tempC, val.currKt);
           }
         }
+      }
+
+      var badgeCount = badgeQueue.length / 5;
+      if (badgeCount > 0) {
+        ctx.save();
+        ctx.font = "500 9.5px \"JetBrains Mono\", \"Consolas\", monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.lineJoin = "round";
+        ctx.lineWidth = 2.6;
+        ctx.strokeStyle = "rgba(4, 9, 18, 0.92)";
+        ctx.fillStyle = "rgba(226, 232, 240, 0.88)";
+        for (var bq = 0; bq < badgeQueue.length; bq += 5) {
+          drawMicroBadge(ctx, badgeQueue[bq], badgeQueue[bq + 1], badgeQueue[bq + 2], badgeQueue[bq + 3], badgeQueue[bq + 4]);
+        }
+        ctx.restore();
       }
 
       var liveNodes = 0;
       for (var nIdx = 0; nIdx < grid.nodes.length; nIdx++) {
         if (grid.nodes[nIdx].source === "open-meteo") liveNodes += 1;
       }
+
+      var tNow = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+      var drawMs = Math.max(0, tNow - tStart);
+      this._drawCount = (this._drawCount || 0) + 1;
+      if (!fastDragMode && this._drawCount > 2) {
+        if (drawMs > 28) {
+          this._slowFrameCount = (this._slowFrameCount || 0) + 1;
+          if (this._slowFrameCount >= 2) {
+            _autoLowEndUntil = Date.now() + 30000;
+          }
+        } else {
+          this._slowFrameCount = 0;
+        }
+      }
+
+      this._hasValidCache = true;
+      this._dirty = false;
+      this._renderedFast = fastDragMode;
+      this._renderedZoom = zoom;
+      this._renderedVpW = w;
+      this._renderedVpH = h;
+      this._covMinX = anchorLayer.x;
+      this._covMinY = anchorLayer.y;
+      this._covMaxX = anchorLayer.x + cw;
+      this._covMaxY = anchorLayer.y + ch;
+      this._covCenterVpX = vpLayer0.x;
+      this._covCenterVpY = vpLayer0.y;
+      this._covMargin = margin;
+
       this._lastStats = {
         zoom: zoom,
         nodes: grid.nodes.length,
@@ -1797,7 +2417,9 @@
         barbs: barbCount,
         currents: currCount,
         badges: badgeCount,
-        isobars: isobarCount
+        isobars: isobarCount,
+        drawMs: Math.round(drawMs * 10) / 10,
+        overscanMargin: margin
       };
     }
   }) : null;
@@ -1805,7 +2427,7 @@
   function syncWxSynopticLayerV5243(map, enabled) {
     if (!map || !EcdisSynopticWeatherLayerV5243) return;
     // Upgrade any pre-existing legacy _wxSynopticLayer instance
-    if (map._wxSynopticLayer && !map._wxSynopticLayer._isV5243) {
+    if (map._wxSynopticLayer && !map._wxSynopticLayer._isV5245) {
       try { map.removeLayer(map._wxSynopticLayer); } catch (eOld) {}
       map._wxSynopticLayer = null;
     }
@@ -1819,6 +2441,7 @@
     if (!map._wxSynopticLayer) {
       var inst = new EcdisSynopticWeatherLayerV5243();
       inst._isV5243 = true;
+      inst._isV5245 = true;
       map._wxSynopticLayer = inst;
     }
     if (!map.hasLayer(map._wxSynopticLayer)) {
@@ -1929,6 +2552,8 @@
   window.updateNdbcCursorTile = function (lat, lon) {
     var tile = document.getElementById("ntmWxCursorTile");
     if (!tile || tile.hidden) return;
+    var activeMap = (typeof window.leafletMap !== "undefined" && window.leafletMap) ? window.leafletMap : null;
+    if (activeMap && activeMap._wxIsMoving) return;
     var body = document.getElementById("ntmWxCursorBody");
     var meta = document.getElementById("ntmWxCursorMeta");
     if (!body) return;
@@ -2013,7 +2638,8 @@
       var m = (typeof window.leafletMap !== "undefined" && window.leafletMap) ? window.leafletMap : null;
       var layer = m && m._wxSynopticLayer ? m._wxSynopticLayer : null;
       return {
-        version: "v5.243",
+        version: "v5.245",
+        weakMode: isWeakDeviceMode(),
         hasLayer: Boolean(layer && m && m.hasLayer(layer)),
         cacheSize: _nodeCache.size,
         stats: layer ? layer._lastStats : null
@@ -2025,12 +2651,13 @@
   function attachToExistingMap() {
     var m = (typeof window.leafletMap !== "undefined" && window.leafletMap) ? window.leafletMap : null;
     if (!m) return;
-    if (!m._wxSynopticLayer || !m._wxSynopticLayer._isV5243) {
+    if (!m._wxSynopticLayer || !m._wxSynopticLayer._isV5245) {
       if (m._wxSynopticLayer) {
         try { m.removeLayer(m._wxSynopticLayer); } catch (e0) {}
       }
       var inst = new EcdisSynopticWeatherLayerV5243();
       inst._isV5243 = true;
+      inst._isV5245 = true;
       m._wxSynopticLayer = inst;
       var enabled = (typeof window.OVERLAY_STATES !== "undefined") ? Boolean(window.OVERLAY_STATES.weather) : false;
       if (enabled) {
