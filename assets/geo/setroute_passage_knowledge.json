@@ -151,7 +151,9 @@
       "nodeKeys": [
         "EAST_CHINA_SEA",
         "OSUMI_STRAIT",
-        "TOKYO_APP",
+        "SHIONOMISAKI_OFF",
+        "IZU_OSHIMA_S",
+        "NOJIMAZAKI_OFF",
         "NPAC_GC_WEST",
         "NPAC_GC_MID",
         "NPAC_GC_EAST",
@@ -186,15 +188,21 @@
         "MALACCA_MID",
         "SIX_DEGREE_CH",
         "DONDRA_HEAD",
+        "ARABIAN_SEA_MID",
         "SOCOTRA_N",
         "BAB_EL_MANDEB",
+        "RED_SEA_MID",
         "SUEZ_CANAL_MID",
         "PORT_SAID_APP",
+        "MED_CRETE",
         "MED_SICILY",
         "GIBRALTAR_MID",
+        "ST_VINCENT",
+        "FINISTERRE",
         "USHANT",
         "DOVER_STRAIT",
-        "ROTTERDAM_APP"
+        "GERMAN_BIGHT_TSS",
+        "BREMERHAVEN_APP"
       ]
     },
     {
@@ -506,6 +514,60 @@
         "SHIONOMISAKI_OFF",
         "IZU_OSHIMA_S",
         "TOKYO_APP"
+      ]
+    },
+    {
+      "id": "arabian_uswc_malacca_npac",
+      "refs": [
+        "opw_style_ocean_corridors",
+        "imo_ships_routeing"
+      ],
+      "originHints": [
+        "salalah",
+        "muscat",
+        "sohar",
+        "dubai",
+        "jebel ali",
+        "fujairah",
+        "dammam",
+        "ras tanura",
+        "kuwait",
+        "karachi",
+        "mumbai",
+        "nhava sheva",
+        "mundra",
+        "colombo"
+      ],
+      "destHints": [
+        "san francisco",
+        "oakland",
+        "los angeles",
+        "long beach",
+        "seattle",
+        "tacoma",
+        "vancouver"
+      ],
+      "nodeKeys": [
+        "ARABIAN_SEA_MID",
+        "DONDRA_HEAD",
+        "SIX_DEGREE_CH",
+        "MALACCA_N",
+        "MALACCA_MID",
+        "MALACCA_S",
+        "SINGAPORE_W",
+        "SINGAPORE_MAIN",
+        "SINGAPORE_E",
+        "NATUNA_CORRIDOR",
+        "SCS_SOUTH",
+        "SCS_MID",
+        "SCS_NORTH",
+        "LUZON_STRAIT",
+        "SHIONOMISAKI_OFF",
+        "IZU_OSHIMA_S",
+        "NOJIMAZAKI_OFF",
+        "NPAC_GC_WEST",
+        "NPAC_GC_MID",
+        "NPAC_GC_EAST"
       ]
     }
   ]

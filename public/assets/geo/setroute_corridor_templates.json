@@ -1,16 +1,14 @@
 {
-  "version": 1,
+  "version": 2,
   "templates": [
     {
       "id": "fareast_china_us_gulf_panama",
       "originHints": ["tianjin", "xingang", "shanghai", "ningbo", "qingdao", "dalian", "busan", "tokyo", "hong kong", "kaohsiung"],
       "destHints": ["houston", "galveston", "new orleans", "corpus"],
       "nodeKeys": [
-        "TIANJIN_APP",
-        "BOHAI_STRAIT",
-        "QINGDAO_APP",
         "EAST_CHINA_SEA",
         "OSUMI_STRAIT",
+        "TOKYO_APP",
         "NPAC_GC_WEST",
         "NPAC_GC_MID",
         "NPAC_GC_EAST",
@@ -28,30 +26,73 @@
     {
       "id": "fareast_uswc_npac",
       "originHints": ["tianjin", "shanghai", "ningbo", "busan", "tokyo", "osaka"],
-      "destHints": ["los angeles", "long beach", "san francisco", "seattle", "vancouver"],
+      "destHints": ["los angeles", "long beach", "san francisco", "oakland", "seattle", "vancouver"],
       "nodeKeys": [
         "EAST_CHINA_SEA",
         "OSUMI_STRAIT",
         "TOKYO_APP",
         "NPAC_GC_WEST",
         "NPAC_GC_MID",
-        "NPAC_GC_EAST",
-        "LONG_BEACH_APP"
+        "NPAC_GC_EAST"
       ]
     },
     {
       "id": "med_asia_suez",
-      "originHints": ["rotterdam", "hamburg", "antwerp", "gibraltar", "piraeus"],
-      "destHints": ["singapore", "shanghai", "hong kong", "busan", "tokyo"],
+      "originHints": ["rotterdam", "hamburg", "antwerp", "bremerhaven", "felixstowe", "southampton", "le havre", "gibraltar", "piraeus"],
+      "destHints": ["singapore", "shanghai", "ningbo", "qingdao", "tianjin", "hong kong", "shenzhen", "kaohsiung", "busan", "tokyo", "yokohama"],
       "nodeKeys": [
+        "GIBRALTAR_W",
         "GIBRALTAR_MID",
+        "GIBRALTAR_E",
+        "MED_WEST",
+        "MED_CENTRAL",
         "MED_SICILY",
+        "MED_EAST",
         "PORT_SAID_APP",
         "SUEZ_CANAL_MID",
+        "SUEZ_SOUTH",
+        "RED_SEA_JUBAL",
+        "RED_SEA_N",
+        "RED_SEA_MID",
+        "RED_SEA_S",
         "BAB_EL_MANDEB",
+        "GULF_OF_ADEN",
+        "SOCOTRA_N",
+        "ARABIAN_SEA_MID",
         "DONDRA_HEAD",
+        "SIX_DEGREE_CH",
+        "MALACCA_N",
         "MALACCA_MID",
-        "SINGAPORE_MAIN"
+        "MALACCA_S",
+        "SINGAPORE_W",
+        "SINGAPORE_MAIN",
+        "SINGAPORE_E"
+      ]
+    },
+    {
+      "id": "arabian_uswc_malacca_npac",
+      "originHints": ["salalah", "muscat", "sohar", "dubai", "jebel ali", "fujairah", "dammam", "ras tanura", "kuwait", "karachi", "mumbai", "nhava sheva", "mundra", "colombo"],
+      "destHints": ["san francisco", "oakland", "los angeles", "long beach", "seattle", "tacoma", "vancouver"],
+      "nodeKeys": [
+        "ARABIAN_SEA_MID",
+        "DONDRA_HEAD",
+        "SIX_DEGREE_CH",
+        "MALACCA_N",
+        "MALACCA_MID",
+        "MALACCA_S",
+        "SINGAPORE_W",
+        "SINGAPORE_MAIN",
+        "SINGAPORE_E",
+        "NATUNA_CORRIDOR",
+        "SCS_SOUTH",
+        "SCS_MID",
+        "TAIWAN_STRAIT",
+        "EAST_CHINA_SEA",
+        "OSUMI_STRAIT",
+        "TOKYO_APP",
+        "NPAC_GC_WEST",
+        "NPAC_GC_MID",
+        "NPAC_GC_EAST"
       ]
     }
   ]
