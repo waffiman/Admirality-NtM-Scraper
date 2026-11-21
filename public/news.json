@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-21T09:17:07Z",
-  "generatedAt": "2026-11-21T09:17:07Z",
+  "updatedAt": "2026-11-21T17:09:27Z",
+  "generatedAt": "2026-11-21T17:09:27Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -20,7 +20,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/cma-shipping",
-      "publishedAt": "2026-11-21T09:17:07Z",
+      "publishedAt": "2026-11-21T17:09:27Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -52,7 +52,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/crew-connect-global",
-      "publishedAt": "2026-11-21T09:17:07Z",
+      "publishedAt": "2026-11-21T17:09:27Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -73,6 +73,215 @@
       "takeaways": [
         "Operational Area: Global Maritime.",
         "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-8E3DCD1E26",
+      "title": "Russian Military-Linked Cargo Ship Burns After Suspected Drone Strike in Gulf of Finland",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/russian-military-linked-cargo-ship-burns-after-suspected-drone-strike-in-gulf-of-finland/",
+      "publishedAt": "2026-11-21T16:34:08Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Suez Canal & Eastern Med",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "tanker",
+        "container",
+        "port",
+        "hormuz",
+        "imo"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "summary": "A Russian cargo ship linked to Moscow’s military logistics network caught fire after a drone strike in the Gulf of Finland on Saturday, drifting into Finnish territorial waters and triggering...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Flames and thick smoke rise from the Russian-flagged cargo ship Sparta II in the Gulf of Finland on November 21, 2026, following a suspected drone attack. The vessel later drifted into Finnish territorial waters, prompting a response by Finnish authorities. A Russian cargo ship linked to Moscow’s military logistics network caught fire after a drone strike in the Gulf of Finland on Saturday, drifting into Finnish territorial waters and triggering an emergency maritime rescue operation. The Russian-flagged Sparta II , a sanctioned cargo vessel with a history of transporting military equipment, was struck in international waters west of Gogland Island, known in Finnish as Suursaari, according to Finland’s Ministry of Defence. Finnish military authorities detected the attack at approximately 8:40–8:50 a.m. local time, when the vessel was roughly 50 kilometers west of the island. The damaged ship subsequently lost maneuverability and drifted into Finnish territorial waters, where the Finnish Border Guard assumed responsibility for coordinating rescue operations. The incident took another turn shortly after midday when a Russian helicopter was suspected of entering Finnish airspace near Loviisa, reaching as far as 4.1 kilometers (2.5 miles) into Finnish territory. Finland’s Defence Minister Antti Häkkänen said the suspected airspace violation may have been connected to rescue or surveillance operations involving the damaged cargo ship. “The suspected airspace violation may be related to rescue or monitoring operations concerning the damaged cargo vessel in the Gulf of Finland,” Häkkänen said in a statement translated from Finnish. The Finnish Border Guard is investigating the incident, which occurred at approximately 12:34 p.m. local time. Fire Raises Fears of Explosions and Sinking The Sparta II remained ablaze Saturday afternoon, with Finnish authorities warning that the uncontrolled fire could lead to further explosions or even the loss of the vessel. The Finnish Border Guard said rescue vessels had reached the scene south of Loviisa, where authorities established a restricted area around the damaged ship. An official update issued at 2:58 p.m. local time said the crew had not been forced to abandon the vessel and that no environmental damage had been detected. Finnish authorities were preparing to assist with firefighting, evacuate personnel if necessary, and respond to any marine pollution. In a subsequent briefing reported by Yle, Finnish officials said the ship’s 16 crew members were evacuating into rescue craft. The vessel had anchored at approximately 3:45 p.m., and the anchor was holding. Russian rescue vessels were expected to arrive later Saturday. According to Finnish officials, Russia intended to tow Sparta II back into Russian waters once rescue operations were completed. The Finnish Border Guard emphasized that foreign vessels would require Finnish permission to participate in rescue operations within its area of responsibility. Sanctioned Vessel With Russian Military Connections The roll-on/roll-off Sparta II , IMO 9160994, is associated with Oboronlogistika, a Russian state-linked logistics company that provides maritime transportation services supporting the Russian Ministry of Defence. The vessel has previously been identified as part of Russia’s military logistics network, including operations involving the movement of military equipment between Russian ports and overseas locations. Sparta II was sanctioned by the United States in 2022 over its connections to Oboronlogistika and has been linked to shipments of military equipment from Syria to Russia. The ship has also operated cargo services connecting mainland Russia with its Baltic exclave of Kaliningrad, carrying vehicles, containers and other freight. Despite its military connections, Finnish authorities said they could not confirm whether the vessel was carrying weapons or military equipment when it was attacked. Finland Imposes Air and Maritime Restrictions The drone strike prompted Finland to reintroduce temporary restrictions on aviation and maritime activity in the eastern Gulf of Finland. The Ministry of Defence said the measures were intended to protect civilians and allow authorities to respond to any additional drone threats. Finland also notified its allies of the incident, underscoring the security implications of a military attack taking place near the territorial waters of a NATO member. Finnish authorities said they had received information about Ukrainian drone operations targeting Russia’s Leningrad region earlier Saturday and had taken precautions against drones potentially straying into Finnish territory. Although Finnish officials linked the attack on Sparta II to Ukrainian drones, there was no independently verified confirmation of responsibility from Kyiv in the official statements reviewed. Finland’s Defence Forces said the incident did not represent an immediate military threat to the country and that commercial shipping in the Baltic Sea had not been endangered. War Reaches Another Baltic Shipping Corridor The incident highlights the growing risks to commercial shipping as the war between Russia and Ukraine extends beyond the Black Sea. The Gulf of Finland is one of Russia’s most important maritime corridors, providing access to the Baltic Sea from St. Petersburg and the major oil and cargo terminals at Ust-Luga and Primorsk. It is also a heavily trafficked international shipping route bordered by NATO members Finland and Estonia. Unlike the Black Sea, where merchant vessels have repeatedly been caught up in military operations, the Gulf of Finland has remained a major commercial shipping corridor despite heightened tensions and security concerns since Russia’s full-scale invasion of Ukraine in 2022. The attack on Sparta II raises fresh questions about the vulnerability of Russian military-linked shipping in the Baltic and the potential consequences for neighboring countries when damaged vessels drift across maritime boundaries. It also illustrates the challenges facing coastal authorities when a military incident involving a sanctioned foreign vessel develops into a maritime rescue and potential pollution emergency. The Finnish Border Guard said the situation did not pose a danger to other maritime traffic, while rescue and firefighting operations continued in coordination with other authorities. The fate of Sparta II , including whether the damaged ship can be safely towed back to Russian waters, remains uncertain. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Another tanker was struck by a projectile and caught fire in the Strait of Hormuz on Friday, extending a wave of attacks on commercial shipping that has pushed maritime security... The European Union has imposed a new round of sanctions targeting the shipowners, vessel managers, insurers and financial networks supporting Russia’s shadow fleet, expanding its efforts to disrupt the maritime... A Somali-flagged cargo ship carrying nearly 3,000 metric tons of wheat capsized off Bulgaria on Monday after what crew members described as an attack by two sea drones, marking the... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Join the leading maritime news network Flames and thick smoke rise from the Russian-flagged cargo ship Sparta II in the Gulf of Finland on November 21, 2026, following a suspected drone attack.",
+        "The vessel later drifted into Finnish territorial waters, prompting a response by Finnish authorities."
+      ],
+      "readingMinutes": 6,
+      "readMinutes": 6
+    },
+    {
+      "id": "SN-4F5976B454",
+      "title": "MSC expands regional network with two new services",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/msc-expands-regional-network-with-two-new-services/",
+      "publishedAt": "2026-11-21T16:00:19Z",
+      "category": "Ports & Terminals",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Suez Canal & Eastern Med",
+        "India & Indian Ocean"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2026/07/MSC-Ruby-en-puerto-de-Bilbao-300x200.jpeg",
+      "summary": "MSC is expanding its regional network with two new services covering the Arabian Gulf and the Indian Subcontinent. The carrier will launch Fujairah Shuttle 2 in December 2026, while also introducing a dedicated connection between Ennore in India and Chittagong in Bangladesh. Fujairah Shuttle 2 Fujairah Shuttle 2 will...",
+      "body": "Services Sticky News MSC expands regional network with two new services November 21, 2026 Facebook Twitter WhatsApp Linkedin Email MSC Ruby en puerto de Bilbao MSC is expanding its regional network with two new services covering the Arabian Gulf and the Indian Subcontinent. The carrier will launch Fujairah Shuttle 2 in December 2026, while also introducing a dedicated connection between Ennore in India and Chittagong in Bangladesh. Fujairah Shuttle 2 Fujairah Shuttle 2 will connect Colombo with Khor Fakkan and Fujairah in the United Arab Emirates, as well as Sohar in Oman. MSC has scheduled vessels ranging from 1,700 to 9,400 TEU to operate on the service. The announced port sequence is: Colombo – Khor Fakkan – Fujairah – Sohar Ennore to Chittagong MSC has also introduced a service marketed as Ennore to Chittagong. A single 1,700 TEU container ship will operate the connection, offering one sailing every ten days between the two ports. The rotation is: Ennore – Chittagong – Ennore TAGS Mediterranean Shipping Co. (MSC) Facebook Twitter WhatsApp Linkedin Email Previous article Caerus Shipping launches direct Oman–India service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The carrier will launch Fujairah Shuttle 2 in December 2026, while also introducing a dedicated connection between Ennore in India and Chittagong in Bangladesh.",
+        "Fujairah Shuttle 2 Fujairah Shuttle 2 will connect Colombo with Khor Fakkan and Fujairah in the United Arab Emirates, as well as Sohar in Oman.",
+        "MSC has scheduled vessels ranging from 1,700 to 9,400 TEU to operate on the service."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-44662DF719",
+      "title": "Caerus Shipping launches direct Oman–India service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/caerus-shipping-launches-direct-oman-india-service/",
+      "publishedAt": "2026-11-21T14:12:18Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "India & Indian Ocean"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/images-20-300x200.jpg",
+      "summary": "Caerus Shipping has introduced its Arab Sea Express (AXS), providing direct connections between Sohar in Oman and the Indian ports of Nhava Sheva and Mundra. The service operates every 14 days. It is available to exporters, importers, freight forwarders and non-vessel-operating common carriers moving cargo between...",
+      "body": "Services Top Right Caerus Shipping launches direct Oman–India service November 21, 2026 Facebook Twitter WhatsApp Linkedin Email Caerus Shipping has introduced its Arab Sea Express (AXS), providing direct connections between Sohar in Oman and the Indian ports of Nhava Sheva and Mundra. The service operates every 14 days. It is available to exporters, importers, freight forwarders and non-vessel-operating common carriers moving cargo between Oman and India. The AXS rotation is: Sohar – Nhava Sheva – Mundra – Sohar Caerus Shipping also supports customers using their own containers. Bookings and vessel space remain subject to confirmation. Reefer cargo opportunities The carrier is exploring opportunities to develop refrigerated cargo volumes on the service, particularly fresh fruit and vegetable exports from India to Oman. Reefer bookings will depend on operational approval, equipment availability and the number of vessel plugs available. Local logistics support Caerus Shipping’s representatives in Oman provide assistance with port operations, documentation, container handling, customs clearance and inland transportation arrangements. Its teams in Mundra and Nhava Sheva also support bookings, cargo coordination and operational enquiries. TAGS Caerus Shipping Facebook Twitter WhatsApp Linkedin Email Previous article Maersk sets Cyprus truck fuel surcharge at 15% Next article MSC expands regional network with two new services Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The service operates every 14 days.",
+        "It is available to exporters, importers, freight forwarders and non-vessel-operating common carriers moving cargo between Oman and India.",
+        "The AXS rotation is: Sohar – Nhava Sheva – Mundra – Sohar Caerus Shipping also supports customers using their own containers."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-7AC1DFD0F1",
+      "title": "Southern California Port Employers, Watchmen Union Reach Tentative Deal",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/southern-california-port-employers-watchmen-union-reach-tentative-deal/",
+      "publishedAt": "2026-11-21T13:58:36Z",
+      "category": "Navigation & Safety",
+      "region": "US West Coast & Pacific",
+      "regions": [
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "safety"
+      ],
+      "coords": [
+        33.73,
+        -118.26
+      ],
+      "navarea": "XII",
+      "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80",
+      "summary": "Nov 21 (Reuters) – The Pacific Maritime Association (PMA) employers group at the Los Angeles and Long Beach ports said on Saturday it had reached a tentative agreement with the union for security...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Shipping containers sit on a Maersk vessel docked at the port of Los Angeles in Long Beach, California, U.S., March 10, 2026. REUTERS/Caroline Brehman Nov 21 (Reuters) – The Pacific Maritime Association (PMA) employers group at the Los Angeles and Long Beach ports said on Saturday it had reached a tentative agreement with the union for security guards, averting a strike that could have disrupted operations at the two busiest cargo shipping hubs in the US. The International Longshore and Warehouse Union (ILWU) Local 26 represents 250 security officers, or watchmen, who account for a small fraction of the ports’ workforce, but their work is critical because they control access at terminal gates, conduct security patrols and report safety issues. PMA, which represents terminal owners, said the agreement reached on Saturday was subject to ratification by Local 26 members, and the current contract will be extended pending ratification. The union did not immediately respond to a request for comment sent outside regular business hours. The two sides resumed federally mediated negotiations on Friday, two days after the parties broke off talks , with the employers group reporting “little-to-no movement from the union on PMA’s proposals.” The PMA said at the time that its offer included a one-time bonus of $3,200 for each union member and a wage proposal that would raise average annual earnings for full-time watchmen from more than $170,000 to $198,000. The offer also called for maintaining fully employer-paid healthcare for active workers and retirees, valued at more than $62,000 each year, and increased pension benefits up to $93,200 a year for workers with the longest tenure. Talks between the terminal owners and the union have stretched on for more than a year. (Reporting by Akanksha Khushi in Bengaluru, Steve Gorman and Lisa Baertlein in Los Angeles. Editing by Toby Chopra and Mark Potter) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! More than 110 U.S. trade associations are urging waterfront employers and union leaders to reach a labor agreement and avert a potentially crippling strike at the ports of Los Angeles... A potential strike at the nation’s busiest container port complex is back on the table after contract negotiations between waterfront employers and a union representing about 250 port security workers... By Laura Curtis Nov 15, 2026, (Bloomberg)–Import containers moving through the US’s busiest trade hub passed the one million mark for the second time in October, as some firms bring in... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Join the leading maritime news network Shipping containers sit on a Maersk vessel docked at the port of Los Angeles in Long Beach, California, U.S., March 10, 2026.",
+        "PMA, which represents terminal owners, said the agreement reached on Saturday was subject to ratification by Local 26 members, and the current contract will be extended pending ratification."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-621AB66DA0",
+      "title": "Maersk sets Cyprus truck fuel surcharge at 15%",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/maersk-sets-cyprus-truck-fuel-surcharge-at-15/",
+      "publishedAt": "2026-11-21T12:21:16Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "India & Indian Ocean",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2025/09/S-3037_MAERSK-NAMSOS250504-300x237.jpg",
+      "summary": "Maersk will apply a 15% fuel surcharge to truck transportation in Cyprus from 23 November 2026. The carrier attributed the temporary measure to higher fuel-related costs arising from the situation in the Middle East. The surcharge will appear on invoices as the Export Fuel Surcharge (EFS) or Import Fuel Surcharge...",
+      "body": "Rates & Surcharges Top Right Maersk sets Cyprus truck fuel surcharge at 15% November 21, 2026 Facebook Twitter WhatsApp Linkedin Email MAERSK NOTODDEN Maersk will apply a 15% fuel surcharge to truck transportation in Cyprus from 23 November 2026. The carrier attributed the temporary measure to higher fuel-related costs arising from the situation in the Middle East. The surcharge will appear on invoices as the Export Fuel Surcharge (EFS) or Import Fuel Surcharge (IFS), depending on the direction of the shipment. Maersk will continue reviewing the Cyprus rate weekly instead of monthly. No adjustment trigger will apply during this period, while the carrier will issue an update every Friday for the following week. For non-FMC shipments, the Price Calculation Date is based on the estimated departure of the first vessel shown in the latest booking confirmation issued at the customer’s request. For import shipments where inland transportation is arranged after the cargo departs from its origin, the surcharge will be calculated according to the import shipment creation date. TAGS A.P. Moeller-Maersk Facebook Twitter WhatsApp Linkedin Email Previous article Eimskip raises ISK 2.5 billion through new bond issue Next article Caerus Shipping launches direct Oman–India service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The carrier attributed the temporary measure to higher fuel-related costs arising from the situation in the Middle East.",
+        "The surcharge will appear on invoices as the Export Fuel Surcharge (EFS) or Import Fuel Surcharge (IFS), depending on the direction of the shipment.",
+        "Maersk will continue reviewing the Cyprus rate weekly instead of monthly."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-EB67016BBE",
+      "title": "Eimskip raises ISK 2.5 billion through new bond issue",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/eimskip-raises-isk-2-5-billion-through-new-bond-issue/",
+      "publishedAt": "2026-11-21T10:30:54Z",
+      "category": "Shipping & Tankers",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "shipping",
+        "singapore"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2020/12/lagarfoss-2014-47-Source-Eimskip-300x200.jpg",
+      "summary": "Icelandic shipping and logistics company Eimskip has completed the auction of its new EIM 261130 bond series, accepting bids worth ISK 2.5 billion at a yield of 8.50%. The auction attracted 17 bids with a combined value of ISK 2.7 billion. Submitted yields ranged from 8.20% to 8.75%, while the bonds will be issued at...",
+      "body": "Icelandic shipping and logistics company Eimskip has completed the auction of its new EIM 261130 bond series, accepting bids worth ISK 2.5 billion at a yield of 8.50%. The auction attracted 17 bids with a combined value of ISK 2.7 billion. Submitted yields ranged from 8.20% to 8.75%, while the bonds will be issued at par. The non-indexed bonds have a four-year maturity and will make quarterly interest payments. The first interest payment is scheduled for 26 February 2027, while the principal will be repaid in full when the series matures on 26 November 2030. Each bond has a denomination of ISK 20 million. Payment and settlement are scheduled for 26 November 2026. Eimskip also plans to apply for the admission of the bond series to trading on the Nasdaq Iceland Main Market. Under the terms of the issue, the bonds must be admitted to trading within six months of their issuance and no later than 26 May 2027. Landsbankinn Corporate Finance and Capital Markets managed the auction and will oversee the listing process. Eimskip will publish a prospectus on its investor website after receiving approval from the Financial Supervisory Authority of the Central Bank of Iceland and before trading begins.",
+      "takeaways": [
+        "Icelandic shipping and logistics company Eimskip has completed the auction of its new EIM 261130 bond series, accepting bids worth ISK 2.5 billion at a yield of 8.50%.",
+        "The auction attracted 17 bids with a combined value of ISK 2.7 billion.",
+        "Submitted yields ranged from 8.20% to 8.75%, while the bonds will be issued at par."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -103,7 +312,7 @@
       "navarea": "XI",
       "image": "https://container-news.com/wp-content/uploads/2026/11/images-24-300x207.jpg",
       "summary": "Interasia Lines and T.S. Lines are restoring two weekly container services connecting South China with Southeast Asia. The carriers will jointly operate the South China-Vietnam-Thailand service, branded SVT, with two ships of approximately 1,000 TEU. The SVT rotation will be: Nansha – Shekou – Ho Chi Minh City (Cat...",
-      "body": "Services Top Right Interasia and T.S. Lines restore two Southeast Asia services November 21, 2026 Facebook Twitter WhatsApp Linkedin Email Interasia Lines and T.S. Lines are restoring two weekly container services connecting South China with Southeast Asia. The carriers will jointly operate the South China-Vietnam-Thailand service, branded SVT, with two ships of approximately 1,000 TEU. The SVT rotation will be: Nansha – Shekou – Ho Chi Minh City (Cat Lai) – Bangkok – Laem Chabang – Nansha T.S. Lines will also restore its China-Port Kelang service under the NSP designation. Interasia will join the operation and market it as the China-Port Kelang Express (CPX). The joint CPX/NSP service will deploy two ships of approximately 1,800 TEU and operate weekly on the following rotation: Shenzhen (Shekou) – Nansha – Port Kelang – Shenzhen TAGS Interasia Lines T.S. Lines Facebook Twitter WhatsApp Linkedin Email Previous article Fincantieri secures order for two LNG-powered Carnival cruise ships Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "body": "Services Top Right Interasia and T.S. Lines restore two Southeast Asia services November 21, 2026 Facebook Twitter WhatsApp Linkedin Email Interasia Lines and T.S. Lines are restoring two weekly container services connecting South China with Southeast Asia. The carriers will jointly operate the South China-Vietnam-Thailand service, branded SVT, with two ships of approximately 1,000 TEU. The SVT rotation will be: Nansha – Shekou – Ho Chi Minh City (Cat Lai) – Bangkok – Laem Chabang – Nansha T.S. Lines will also restore its China-Port Kelang service under the NSP designation. Interasia will join the operation and market it as the China-Port Kelang Express (CPX). The joint CPX/NSP service will deploy two ships of approximately 1,800 TEU and operate weekly on the following rotation: Shenzhen (Shekou) – Nansha – Port Kelang – Shenzhen TAGS Interasia Lines T.S. Lines Facebook Twitter WhatsApp Linkedin Email Previous article Fincantieri secures order for two LNG-powered Carnival cruise ships Next article Eimskip raises ISK 2.5 billion through new bond issue Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
       "takeaways": [
         "Services Top Right Interasia and T.S.",
         "Lines restore two Southeast Asia services November 21, 2026 Facebook Twitter WhatsApp Linkedin Email Interasia Lines and T.S.",
@@ -285,42 +494,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-E2CAF86EA9",
-      "title": "Panda Express Line reorganises Russian Far East network",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/panda-express-line-reorganises-russian-far-east-network/",
-      "publishedAt": "2026-11-20T23:47:57Z",
-      "category": "Ports & Terminals",
-      "region": "Baltic Sea & Northern Europe",
-      "regions": [
-        "Baltic Sea & Northern Europe",
-        "China & East Asia",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "china"
-      ],
-      "coords": [
-        57.5,
-        19.5
-      ],
-      "navarea": "I",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/HAI-RUN-SHENG-DA-panta-300x169.jpeg",
-      "summary": "Panda Express Line has revised four services connecting the Russian Far East with ports in China and South Korea. The carrier has redistributed port coverage across its PEL2, PEL4, PEL5 and PEL6 loops. Under the changes, PEL2 will replace Tianjin with Ningbo and Busan. PEL4 will reinstate Tianjin and add Dalian,...",
-      "body": "Services Top Right Panda Express Line reorganises Russian Far East network November 21, 2026 Facebook Twitter WhatsApp Linkedin Email HAI RUN SHENG DA Panda Express Line has revised four services connecting the Russian Far East with ports in China and South Korea. The carrier has redistributed port coverage across its PEL2, PEL4, PEL5 and PEL6 loops. Under the changes, PEL2 will replace Tianjin with Ningbo and Busan. PEL4 will reinstate Tianjin and add Dalian, while PEL5 will introduce a call at Rizhao. Ningbo will meanwhile be removed from PEL6. The revised services are: PEL2: One 1,300 TEU vessel operating fortnightly between Nakhodka, Ningbo and Busan. PEL4: One 1,500 TEU vessel operating fortnightly between Vladivostok, Dalian, Tianjin and Ningbo. PEL5: One 1,300 TEU vessel operating fortnightly between Vladivostok, Rizhao and Shanghai. PEL6: Two vessels ranging from 1,500 to 2,200 TEU operating approximately weekly between Vladivostok, Nansha and Xiamen. TAGS Panda Express Facebook Twitter WhatsApp Linkedin Email Previous article FESCO removes two ports from FCDL1 service Next article Eimskip orders new Konecranes mobile harbor crane for Icelandic port Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The carrier has redistributed port coverage across its PEL2, PEL4, PEL5 and PEL6 loops.",
-        "Under the changes, PEL2 will replace Tianjin with Ningbo and Busan.",
-        "PEL4 will reinstate Tianjin and add Dalian, while PEL5 will introduce a call at Rizhao."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-350B312FA2",
       "title": "More Than 110 Trade Groups Urge Deal as LA-Long Beach Port Strike Deadline Nears",
       "source": "gCaptain",
@@ -345,51 +518,14 @@
       "navarea": "XI",
       "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
       "summary": "More than 110 U.S. trade associations are urging waterfront employers and union leaders to reach a labor agreement and avert a potentially crippling strike at the ports of Los Angeles...",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo courtesy Port of Long Beach More than 110 U.S. trade associations are urging waterfront employers and union leaders to reach a labor agreement and avert a potentially crippling strike at the ports of Los Angeles and Long Beach, with the latest contract extension set to expire just after midnight Saturday. The warning comes as the Pacific Maritime Association (PMA) and International Longshore and Warehouse Union (ILWU) Local 26 face a critical deadline following more than a year of negotiations over a contract covering approximately 250 port security workers. In a joint statement Friday, the associations called on both sides to remain at the bargaining table, negotiate in good faith and keep cargo moving through the nation’s busiest container port complex. “The Ports of Los Angeles and Long Beach already face congestion from near-record import volumes,” the groups warned, adding that a work stoppage would jeopardize holiday shipments, disrupt manufacturing supply chains and restrict U.S. exports. The statement was backed by major organizations including the National Retail Federation, U.S. Chamber of Commerce, National Association of Manufacturers, American Trucking Associations and more than 100 other groups representing retailers, manufacturers, agricultural producers and logistics providers. The associations warned that a prolonged disruption could quickly spread beyond the waterfront, affecting trucking companies, railroads, warehouses and distribution networks nationwide. Container backlogs could take weeks or months to clear even after operations resume, they said. A Small Union With an Outsized Impact Although Local 26 represents only about 2% of the ILWU workforce at the two ports, its members perform security duties at terminals handling a substantial share of Southern California’s container traffic. According to PMA, the six container terminals covered by the dispute account for approximately 85% of cargo at Long Beach and 33% at Los Angeles. The larger concern is that thousands of longshore workers, marine clerks and foremen covered by separate labor agreements could honor Local 26 picket lines, effectively shutting down cargo operations at affected terminals. PMA warned Wednesday that negotiations held November 17 ended with little progress, while the union had already authorized a strike and indicated it was unwilling to extend the current agreement beyond 12:01 a.m. Pacific time Saturday. The two sides were scheduled to return to the negotiating table Friday in a final effort to avert a work stoppage. The more than 110 trade associations urged both parties to pursue a resolution that protects workers, employers and consumers rather than risk a disruption with nationwide economic consequences. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! A potential strike at the nation’s busiest container port complex is back on the table after contract negotiations between waterfront employers and a union representing about 250 port security workers... By Laura Curtis Nov 15, 2026, (Bloomberg)–Import containers moving through the US’s busiest trade hub passed the one million mark for the second time in October, as some firms bring in... By Lori-Ann LaRocco The Port of Los Angeles handled a record 1,026,872 twenty-foot equivalent units (TEUs) in October, marking its second-busiest month ever and extending the strongest five-month cargo run... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo courtesy Port of Long Beach More than 110 U.S. trade associations are urging waterfront employers and union leaders to reach a labor agreement and avert a potentially crippling strike at the ports of Los Angeles and Long Beach, with the latest contract extension set to expire just after midnight Saturday. The warning comes as the Pacific Maritime Association (PMA) and International Longshore and Warehouse Union (ILWU) Local 26 face a critical deadline following more than a year of negotiations over a contract covering approximately 250 port security workers. In a joint statement Friday, the associations called on both sides to remain at the bargaining table, negotiate in good faith and keep cargo moving through the nation’s busiest container port complex. “The Ports of Los Angeles and Long Beach already face congestion from near-record import volumes,” the groups warned, adding that a work stoppage would jeopardize holiday shipments, disrupt manufacturing supply chains and restrict U.S. exports. The statement was backed by major organizations including the National Retail Federation, U.S. Chamber of Commerce, National Association of Manufacturers, American Trucking Associations and more than 100 other groups representing retailers, manufacturers, agricultural producers and logistics providers. The associations warned that a prolonged disruption could quickly spread beyond the waterfront, affecting trucking companies, railroads, warehouses and distribution networks nationwide. Container backlogs could take weeks or months to clear even after operations resume, they said. A Small Union With an Outsized Impact Although Local 26 represents only about 2% of the ILWU workforce at the two ports, its members perform security duties at terminals handling a substantial share of Southern California’s container traffic. According to PMA, the six container terminals covered by the dispute account for approximately 85% of cargo at Long Beach and 33% at Los Angeles. The larger concern is that thousands of longshore workers, marine clerks and foremen covered by separate labor agreements could honor Local 26 picket lines, effectively shutting down cargo operations at affected terminals. PMA warned Wednesday that negotiations held November 17 ended with little progress, while the union had already authorized a strike and indicated it was unwilling to extend the current agreement beyond 12:01 a.m. Pacific time Saturday. The two sides were scheduled to return to the negotiating table Friday in a final effort to avert a work stoppage. The more than 110 trade associations urged both parties to pursue a resolution that protects workers, employers and consumers rather than risk a disruption with nationwide economic consequences. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Nov 21 (Reuters) – The Pacific Maritime Association (PMA) employers group at the Los Angeles and Long Beach ports said on Saturday it had reached a tentative agreement with the union for security... A potential strike at the nation’s busiest container port complex is back on the table after contract negotiations between waterfront employers and a union representing about 250 port security workers... By Laura Curtis Nov 15, 2026, (Bloomberg)–Import containers moving through the US’s busiest trade hub passed the one million mark for the second time in October, as some firms bring in... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
         "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
         "Join the leading maritime news network Photo courtesy Port of Long Beach More than 110 U.S.",
         "In a joint statement Friday, the associations called on both sides to remain at the bargaining table, negotiate in good faith and keep cargo moving through the nation’s busiest container port complex."
       ],
-      "readingMinutes": 3,
-      "readMinutes": 3
-    },
-    {
-      "id": "SN-2084B1532C",
-      "title": "FESCO removes two ports from FCDL1 service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/fesco-removes-two-ports-from-fcdl1-service/",
-      "publishedAt": "2026-11-20T22:21:57Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "Baltic Sea & Northern Europe",
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "panama",
-        "china"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2021/11/FESCO-containers-300x200.jpg",
-      "summary": "FESCO has removed Da Nang and Shenzhen’s Yantian terminal from its FESCO China Direct Line 1 (FCDL1). According to DynaLiners, the service connects Vietnam and southern China with Vladivostok in the Russian Far East. Following the changes, FCDL1 retains two Vietnamese calls at Ho Chi Minh City and Hai Phong,...",
-      "body": "Services Sticky News FESCO removes two ports from FCDL1 service November 21, 2026 Facebook Twitter WhatsApp Linkedin Email FESCO has removed Da Nang and Shenzhen’s Yantian terminal from its FESCO China Direct Line 1 (FCDL1). According to DynaLiners, the service connects Vietnam and southern China with Vladivostok in the Russian Far East. Following the changes, FCDL1 retains two Vietnamese calls at Ho Chi Minh City and Hai Phong, alongside Nansha in China. FESCO operates the service with three container ships of approximately 1,700 TEU each. The revised rotation is: Ho Chi Minh City – Hai Phong – Nansha – Vladivostok – Ho Chi Minh City TAGS FESCO Facebook Twitter WhatsApp Linkedin Email Previous article How lawfare took over the Panama Canal’s ports Next article Panda Express Line reorganises Russian Far East network Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "According to DynaLiners, the service connects Vietnam and southern China with Vladivostok in the Russian Far East.",
-        "Following the changes, FCDL1 retains two Vietnamese calls at Ho Chi Minh City and Hai Phong, alongside Nansha in China.",
-        "FESCO operates the service with three container ships of approximately 1,700 TEU each."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
+      "readingMinutes": 4,
+      "readMinutes": 4
     },
     {
       "id": "SN-CB91D58D15",
@@ -754,77 +890,6 @@
       "readMinutes": 5
     },
     {
-      "id": "SN-91A7AB865C",
-      "title": "How lawfare took over the Panama Canal’s ports",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/how-lawfare-took-over-the-panama-canals-ports/",
-      "publishedAt": "2026-11-20T21:00:19Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "panama",
-        "imo"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2026/05/Neopanamax2-1140x759-1-1024x682-1-300x200.jpg",
-      "summary": "Hutchison litigates to set an exit price. Panama now answers with a criminal file. Neither side is seeking a verdict.",
-      "body": "CN Premium Articles Sticky News How lawfare took over the Panama Canal’s ports November 20, 2026 Facebook Twitter WhatsApp Linkedin Email Hutchison litigates to set an exit price. Panama now answers with a criminal file. Neither side is seeking a verdict. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS CK Hutchison Cristóbal lawfare Panama Canal Authority Port of Balboa Facebook Twitter WhatsApp Linkedin Email Previous article Great White Fleet cuts PTCO service frequency Next article FESCO removes two ports from FCDL1 service Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
-      "takeaways": [
-        "CN Premium Articles Sticky News How lawfare took over the Panama Canal’s ports November 20, 2026 Facebook Twitter WhatsApp Linkedin Email Hutchison litigates to set an exit price.",
-        "Panama now answers with a criminal file.",
-        "This content is locked Select a CN Premium Subscription Package To Unlock The Content!"
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-B2E3CB08E5",
-      "title": "Great White Fleet cuts PTCO service frequency",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/great-white-fleet-cuts-ptco-service-frequency/",
-      "publishedAt": "2026-11-20T20:00:17Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "panama",
-        "china"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/images-25-300x168.jpg",
-      "summary": "Chiquita’s Great White Fleet will reduce the frequency of its Hueneme service, branded PTCO, from weekly to fortnightly. The service connects the US West Coast with Mexico and Central America and will be maintained with a single container ship of approximately 2,100 TEU. The PTCO service will call at: Port Hueneme –...",
-      "body": "Services Top Right Great White Fleet cuts PTCO service frequency November 20, 2026 Facebook Twitter WhatsApp Linkedin Email Chiquita’s Great White Fleet will reduce the frequency of its Hueneme service, branded PTCO, from weekly to fortnightly. The service connects the US West Coast with Mexico and Central America and will be maintained with a single container ship of approximately 2,100 TEU. The PTCO service will call at: Port Hueneme – Manzanillo, Mexico – Puerto Madero – Puerto Quetzal TAGS Central America Chiquita Great White Fleet Manzanillo Port Hueneme PTCO Puerto Madero Puerto Quetzal Facebook Twitter WhatsApp Linkedin Email Previous article Maersk sets heavy-load surcharge for China–South America trade Next article How lawfare took over the Panama Canal’s ports Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The service connects the US West Coast with Mexico and Central America and will be maintained with a single container ship of approximately 2,100 TEU.",
-        "Operational Area: Panama Canal & Caribbean, China & East Asia.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-E640BBFBD0",
       "title": "Iran War Oil Premium Evaporates as Global Crude Supplies Surge",
       "source": "gCaptain",
@@ -909,12 +974,15 @@
       "region": "Strait of Hormuz & Persian Gulf",
       "regions": [
         "Strait of Hormuz & Persian Gulf",
-        "Red Sea & Bab el-Mandeb"
+        "Red Sea & Bab el-Mandeb",
+        "US Gulf & Port of Houston"
       ],
       "tags": [
         "tanker",
         "port",
-        "hormuz"
+        "hormuz",
+        "red sea",
+        "imo"
       ],
       "coords": [
         26.56,
@@ -923,13 +991,14 @@
       "navarea": "IX",
       "image": "https://images.marinelink.com/images/maritime/w150/adobe-stockzulfugar-karimov-175227.jpeg",
       "summary": "Oil prices fell on Friday and were set for a weekly decline on strong exports from the Middle East despite Houthi attacks on Saudi Arabia's capital Riyadh and reports of tanker disruptions in the Strait of Hormuz.Brent crude futures were down 67 cents, or 0.7%, at $91.31 a barrel at 1414 GMT.",
-      "body": "Oil prices fell on Friday and were set for a weekly decline on strong exports from the Middle East despite Houthi attacks on Saudi Arabia's capital Riyadh and reports of tanker disruptions in the Strait of Hormuz.Brent crude futures were down 67 cents, or 0.7%, at $91.31 a barrel at 1414 GMT.",
+      "body": "Oil Prices Drop for Third Week Straight Maritime Activity Reports, Inc. November 20, 2026 © Adobe Stock/Zulfugar Karimov Oil prices fell on Friday and were set for a weekly decline on strong exports from the Middle East despite Houthi attacks on Saudi Arabia's capital Riyadh and reports of tanker disruptions in the Strait of Hormuz. Brent crude futures were down 67 cents, or 0.7%, at $91.31 a barrel at 1414 GMT. US West Texas Intermediate futures for December were down 36 cents, or 0.4%, at $82.85 a barrel, while the more active January contract was down 19 cents, or 0.2%, at $82.85. Brent is on track for a near 5% decline for the week and the December WTI contract for a 6.5% weekly drop as expectations of a supply surplus grew because crude shipments through the Strait of Hormuz have returned to roughly pre-war levels. This would be the benchmarks' third straight week of decline. \"This week we keep having relatively strong export flows out of the Middle East. There is also a narrative ongoing that as long as people are talking, maybe there's a deal in the making,\" said Aldo Spanjer, commodity strategist at BNP Paribas. \"The prices are correct if you believe that this geopolitical risk doesn't come back. I'm not in that camp who thinks this is done ... I probably see a rebound,\" he said. On Friday, the Iran-aligned Houthi movement warned workers and people near Saudi Arabia's Red Sea ports to evacuate immediately and urged shipping companies to remove vessels, saying they would target Saudi ports in Jeddah and the Red Sea if a Saudi-led coalition strikes Yemen's Hodeidah port. The Houthis fired missiles at Riyadh on Thursday. Two oil tankers also hit naval mines in the Strait of Hormuz and \"are burning,\" Iran's Revolutionary Guards Navy said in a statement carried by state media on Thursday. Iran's intensifying attacks on tankers transiting the Strait of Hormuz, \"running at roughly one incident per day in November,\" still add a meaningful geopolitical risk premium to the market, according to UOB Group analysts in a client note. OPEC+ ministers will hold a series of meetings on November 29 to decide their 2027 output policy. The group comprises the Organization of the Petroleum Exporting Countries and allies such as Russia. The Middle East conflict has caused the biggest disruption ever to global oil and gas trade and could cut world oil demand by more than 4% by 2035 if governments accelerate electrification, efficiency and fuel-switching measures in response, the International Energy Agency said on Thursday. However, some analysts expect softness in the broader equities markets to weigh on oil prices, as Asian shares fell on Friday — heading for their worst week since 2020. \"Supply disruptions remain a risk, but near-term demand concerns tied to the AI trade unwind and broader risk-off sentiment are weighing on prices,\" said Saxo analysts in a note. In Russia, crude oil output could fall again as Ukrainian attacks on refineries and export infrastructure intensify, analysts and traders say. Ukrainian drone a ttacks have cut Russian oil refineries' combined crude processing volumes by 45% since late October, Reuters reported on Wednesday. (Reuters)",
       "takeaways": [
-        "Operational Area: Strait of Hormuz & Persian Gulf, Red Sea & Bab el-Mandeb.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+        "Oil Prices Drop for Third Week Straight Maritime Activity Reports, Inc.",
+        "Brent crude futures were down 67 cents, or 0.7%, at $91.31 a barrel at 1414 GMT.",
+        "US West Texas Intermediate futures for December were down 36 cents, or 0.4%, at $82.85 a barrel, while the more active January contract was down 19 cents, or 0.2%, at $82.85."
       ],
-      "readingMinutes": 2,
-      "readMinutes": 2
+      "readingMinutes": 3,
+      "readMinutes": 3
     },
     {
       "id": "SN-B9F790C032",
@@ -943,9 +1012,13 @@
       "region": "Strait of Hormuz & Persian Gulf",
       "regions": [
         "Strait of Hormuz & Persian Gulf",
-        "Singapore & Malacca Strait"
+        "Suez Canal & Eastern Med",
+        "Rotterdam & North Sea"
       ],
       "tags": [
+        "tanker",
+        "port",
+        "hormuz",
         "singapore"
       ],
       "coords": [
@@ -955,13 +1028,14 @@
       "navarea": "IX",
       "image": "https://images.marinelink.com/images/maritime/w150/adobe-stockchristianthielnet-175225.jpeg",
       "summary": "US Treasury Department officials met with government authorities in Singapore and Malaysia this week, including regulators and national security bodies, to warn of potential risks they could face if they do not comply with US sanctions on Iran.Washington is urging the countries…",
-      "body": "US Treasury Department officials met with government authorities in Singapore and Malaysia this week, including regulators and national security bodies, to warn of potential risks they could face if they do not comply with US sanctions on Iran.Washington is urging the countries…",
+      "body": "US Treasury Urges Singapore, Malaysia of Compliance With Iran Sanctions Maritime Activity Reports, Inc. November 20, 2026 © Adobe Stock/christianthiel.net US Treasury Department officials met with government authorities in Singapore and Malaysia this week, including regulators and national security bodies, to warn of potential risks they could face if they do not comply with US sanctions on Iran. Washington is urging the countries, as well as law firms and banks operating there, to stay alert for Iranian front companies, as it steps up efforts to enforce sanctions in Asia and bring about a speedy end to the conflict in the Middle East. The US is urging additional scrutiny on \"high-risk\" sectors such as maritime transport, aviation services and procurement networks, \"to make sure they're not fronting for Iran,\" said a Treasury Department official. \"We want it to be understood too, that we're going to target these lifelines, and it's not going to be a negotiation when we find a lifeline that needs to be targeted,\" the official said. Since the US and Israel commenced strikes on Iran in February, the US has intensified actions to throttle Tehran's business interests overseas. In August, President Donald Trump's administration launched Operation Economic Outcast, resulting in a barrage of sanctions against targets spanning Canadian digital currency platforms to a major Russian banking group. OIL ON WATER For years, tankers have regularly made stops in the waters around Malaysia, Singapore and Indonesia to make ship-to-ship transfers of Iranian oil that help obscure its origin. Last year, Malaysian authorities said they would more tightly enforce rules around these transfers and in February seized two tankers and their cargoes. Since April, the US Navy has imposed a blockade on shipping reaching Iran through the Strait of Hormuz, and this month has cracked down on movement over Iran's land borders and through the Caspian Sea. In July, the Treasury Department sanctioned dozens of individuals, vessels and companies based in Singapore, Hong Kong, the UAE, the Marshall Islands and St Kitts and Nevis linked to Iranian oil magnate Mohammad Hossein Shamkhani. These efforts were starting to disrupt Iran's source of revenue, the US official said, citing data showing that the country is currently undergoing the worst GDP contraction in four decades and the highest rate of inflation since World War II. IRANIAN AIRLINES However, the official said there was still work to be done. \"There's an Iranian airline that flies to Malaysia, or has, recently, so we raised this,\" the US official said, without naming the carrier. Using public flight records, Reuters identified a regularly scheduled flight between Tehran and Kuala Lumpur operated by Iran Airtour, which flew as recently as November 14. A scheduled flight on November 17 did not depart, the records also show. Iran Airtour did not respond to an emailed request for comment sent outside of business hours on Friday. Most Iranian airlines largely stopped flying to Malaysia in 2022 due to US sanctions on refuelling Iranian planes. However, Iran Airtour, a privately owned airline, resumed flights to Malaysia in November 2025, according to Iranian media. On September 8, the US imposed sanctions on dozens of companies in the UAE, Britain, Malaysia, Turkey and Kazakhstan it said were supporting Iran's aviation sector to move weapons, personnel and illicit cargo. The following day, Iran Air officials met with Malaysia's ambassador to Iran to discuss resuming direct flights between Iran and Kuala Lumpur. 'DOING OUR PART' Both Malaysia and Singapore implement UN Security Council sanctions on Iran. Singapore's government said in a statement it \"is firmly committed to doing our part\" and \"preventing bad actors from abusing our corporate vehicles,\" citing its efforts to strengthen vigilance in the maritime and financial industries this year. The Malaysian government did not respond to requests for comment. (Reuters)",
       "takeaways": [
-        "Operational Area: Strait of Hormuz & Persian Gulf, Singapore & Malacca Strait.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+        "US Treasury Urges Singapore, Malaysia of Compliance With Iran Sanctions Maritime Activity Reports, Inc.",
+        "The US is urging additional scrutiny on \"high-risk\" sectors such as maritime transport, aviation services and procurement networks, \"to make sure they're not fronting for Iran,\" said a Treasury Department official.",
+        "\"We want it to be understood too, that we're going to target these lifelines, and it's not going to be a negotiation when we find a lifeline that needs to be targeted,\" the official said."
       ],
-      "readingMinutes": 2,
-      "readMinutes": 2
+      "readingMinutes": 3,
+      "readMinutes": 3
     },
     {
       "id": "SN-D0D33C948C",
@@ -975,8 +1049,7 @@
       "region": "Strait of Hormuz & Persian Gulf",
       "regions": [
         "Strait of Hormuz & Persian Gulf",
-        "Red Sea & Bab el-Mandeb",
-        "Singapore & Malacca Strait"
+        "Red Sea & Bab el-Mandeb"
       ],
       "tags": [
         "port",
@@ -989,14 +1062,13 @@
       "navarea": "IX",
       "image": "https://images.marinelink.com/images/maritime/w150/au-usanakul-adobe-stock-175224.jpeg",
       "summary": "The Saudi-led coalition fighting Yemen's Iran-aligned Houthis said it had struck the Red Sea port of Hodeidah to destroy Houthi capabilities on Friday, as the militants warned airlines to avoid Saudi airspace, pledging new air strikes within hours.The developments…",
-      "body": "Saudi Forces Strike Hodeidah Port as Houthis Warn Airlines Away From Airspace Maritime Activity Reports, Inc. November 20, 2026 © AU USAnakul / Adobe Stock The Saudi-led coalition fighting Yemen's Iran-aligned Houthis said it had struck the Red Sea port of Hodeidah to destroy Houthi capabilities on Friday, as the militants warned airlines to avoid Saudi airspace, pledging new air strikes within hours. The developments, a day after the group struck the tallest skyscraper in Riyadh, signalled a worsening of a conflict that has brought a humanitarian crisis to Yemen and severe disruption to Saudi Arabia, in parallel with the US-led war against Iran. Hodeidah is the main port bringing food and other supplies into Houthi-controlled northern Yemen. The coalition had earlier warned civilians to evacuate the area. The Saudi-led coalition said it destroyed operational capabilities at the port that were used in smuggling operations and the transport of weapons and ballistic missiles. The port remains fully operational and the flow of goods will continue, according to Yemen’s Information Minister. HOUTHIS TELL SHIPPING COMPANIES TO EVACUATE FROM SAUDI PORTS There was no immediate comment from the Houthis, who had earlier said they would hit Red Sea ports if the Saudis carried out their own threat to strike the Yemeni port. \"We warn all employees, workers, and those in the vicinity of (Saudi Arabia's Red Sea) ports to evacuate them immediately and stay away. We also urge all shipping companies to immediately evacuate their ships from these ports,\" Houthi military spokesperson Yahya Saree said in a statement. Airlines should avoid Saudi airspace \"because it will be the scene of our operations in the coming hours,\" Saree said, making an exception for airspace near the Muslim holy cities of Mecca and Medina. He also said the group would target a power station at Shuqaiq in southern Saudi Arabia. The Saudi-led coalition also said it carried out an operation in Yemen's capital Sanaa targeting ballistic missile and drone capabilities and that operations in Saada and Taiz were ongoing. Since fighting resumed in Yemen in July in parallel with the wider Iran war, the Houthis have rapidly advanced in Yemen, seizing territory from Yemen's internationally recognised government and its allies, who are backed by Saudi Arabia. The Saudis have carried out air strikes on Yemen in support of their allies on the ground, while the Houthis have struck Saudi oil targets, airports and office towers. Deadly strikes on Riyadh's main airport last month led to the cancellation of most international flights, and Saudi Arabia has postponed or cancelled high-profile global events including soccer's AFC Asian Cup. Saudi Arabia, a close ally of the United States, has been backing Yemen's internationally recognised government for more than a decade in a war that was fought to a stalemate in 2022 but reignited in July this year. The Houthis have seized Yemen's Red Sea coast and forced the Saudi-backed forces aligned with the government to retreat over the weekend to defend their temporary capital in the southern port of Aden. (Reuters)",
+      "body": "The Saudi-led coalition fighting Yemen's Iran-aligned Houthis said it had struck the Red Sea port of Hodeidah to destroy Houthi capabilities on Friday, as the militants warned airlines to avoid Saudi airspace, pledging new air strikes within hours.The developments…",
       "takeaways": [
-        "Saudi Forces Strike Hodeidah Port as Houthis Warn Airlines Away From Airspace Maritime Activity Reports, Inc.",
-        "Hodeidah is the main port bringing food and other supplies into Houthi-controlled northern Yemen.",
-        "The coalition had earlier warned civilians to evacuate the area."
+        "Operational Area: Strait of Hormuz & Persian Gulf, Red Sea & Bab el-Mandeb.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
       ],
-      "readingMinutes": 3,
-      "readMinutes": 3
+      "readingMinutes": 2,
+      "readMinutes": 2
     },
     {
       "id": "SN-FD41A8CDE5",
@@ -1247,42 +1319,6 @@
       "readMinutes": 4
     },
     {
-      "id": "SN-9592BB48E3",
-      "title": "Crew Airlifted After Bulk Carrier Grounds on French Coast",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/crew-airlifted-after-bulk-carrier-grounds-on-french-coast/",
-      "publishedAt": "2026-11-20T15:56:25Z",
-      "category": "Weather & Cyclones",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Australia & Pilbara",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "tanker",
-        "port",
-        "hormuz"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=900&q=80",
-      "summary": "A Maltese-flagged bulk carrier ran aground on France’s Atlantic coast early Friday after being driven toward shore by strong winds and heavy seas, prompting the helicopter evacuation of 19 crew...",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network The Maltese-flagged bulk carrier MIRO G sits aground on a beach near Lit-et-Mixe in southwestern France on November 20, 2026, after being driven ashore by strong winds and heavy seas. A Maltese-flagged bulk carrier ran aground on France’s Atlantic coast early Friday after being driven toward shore by strong winds and heavy seas, prompting the helicopter evacuation of 19 crew members and a major maritime emergency response. The 169-meter MIRO G grounded near Lit-et-Mixe in southwestern France’s Landes region shortly after midnight on November 20, after its crew reported difficulty maneuvering in deteriorating weather. According to France’s Atlantic Maritime Prefecture, the vessel alerted the CROSS-A Étel rescue coordination center Thursday evening after encountering heavy swell and strong crosswinds. The crew attempted an emergency anchorage, but wind gusts reaching 48 knots caused the vessel to drag anchor and drift toward shore. Following the grounding, a French Air and Space Force search-and-rescue helicopter operating from Cazaux evacuated 19 of the vessel’s 22 crew members. The captain and two other mariners remained aboard to assist authorities with the ongoing response. French authorities have since shifted their attention to the possibility of refloating the vessel. A French Navy evaluation and intervention team was deployed by helicopter to assess the ship’s condition and determine whether it can be safely pulled free. Meanwhile, the emergency towing vessel Abeille Bretagne departed Brest in anticipation of a possible refloating operation. A French Navy Falcon 50 maritime surveillance aircraft has also been monitoring the grounded vessel. Authorities said its initial aerial assessment found no evidence of pollution. However, the operation faces significant challenges. According to AFP, the vessel is carrying more than 100 tonnes of diesel fuel, presenting a potential pollution risk. French maritime officials said options under consideration include pumping fuel from the vessel to reduce its weight before attempting to tow it into deeper water. The operation is complicated by rough weather, including waves reaching five to six meters, and difficult access to the beach. The MIRO G , a 2011-built Handysize bulk carrier with a deadweight capacity of approximately 28,200 tonnes, was sailing without cargo when the grounding occurred. The ship was reportedly bound for Rouen, France, where it was scheduled to load approximately 30,000 tonnes of wheat destined for Libya. The incident triggered the activation of Level 3 of France’s ORSEC maritime emergency response system, as well as the Franco-Spanish Biscaye Plan, a bilateral agreement coordinating maritime rescue and pollution response in the Bay of Biscay. The Spanish emergency towing vessel Sar Gavia was also mobilized under the agreement. French authorities have formally instructed the shipowner to take necessary measures to eliminate immediate and future dangers and minimize any potential environmental damage. As of Friday, no pollution had been detected, and the maritime prefecture said operations remained underway. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! France has started drafting a UN Security Council resolution in coordination with the United States on setting up ?an international mission to restore movement in the Strait of Hormuz, diplomats said on Tuesday. Australian authorities have launched an investigation after the 182,066-dwt bulk carrier Cape Falcon ran aground off the Port of Gladstone, Queensland, with efforts to refloat the vessel so far unsuccessful. The Liberian-flagged... PARIS, June 25 (Reuters) – France’s navy seized another tanker it said was linked to Russia’s “shadow fleet” on Thursday, underscoring the escalation this year in European efforts to enforce sanctions and... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
-      "takeaways": [
-        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
-        "The 169-meter MIRO G grounded near Lit-et-Mixe in southwestern France’s Landes region shortly after midnight on November 20, after its crew reported difficulty maneuvering in deteriorating weather.",
-        "According to France’s Atlantic Maritime Prefecture, the vessel alerted the CROSS-A Étel rescue coordination center Thursday evening after encountering heavy swell and strong crosswinds."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
-    },
-    {
       "id": "SN-41ACFDA350",
       "title": "Dongara Marine to Build 22-Meter Patrol Vessel",
       "source": "MarineLink",
@@ -1290,26 +1326,26 @@
       "sourceRegion": "USA / Maritime Tech",
       "url": "https://www.marinelink.com/news/dongara-marine-build-meter-patrol-vessel-544506",
       "publishedAt": "2026-11-20T15:01:26Z",
-      "category": "Shipping & Tankers",
-      "region": "Global Maritime",
+      "category": "Ports & Terminals",
+      "region": "Australia & Pilbara",
       "regions": [
-        "Global Maritime"
+        "Australia & Pilbara"
       ],
       "tags": [
-        "shipping",
-        "global"
+        "port"
       ],
       "coords": [
-        25.0,
-        -40.0
+        -20.31,
+        118.58
       ],
-      "navarea": "GLOBAL",
+      "navarea": "X",
       "image": "https://images.marinelink.com/images/maritime/w150/dongara-marine-175223.png",
       "summary": "The Cook Labor Government is investing $13.4 million in two new vessels to strengthen fisheries compliance and protect the Kimberley's valuable marine resources.A new nine-meter amphibious vessel is now operating out of Broome, undertaking patrols…",
-      "body": "The Cook Labor Government is investing $13.4 million in two new vessels to strengthen fisheries compliance and protect the Kimberley's valuable marine resources.A new nine-meter amphibious vessel is now operating out of Broome, undertaking patrols…",
+      "body": "Dongara Marine to Build 22-Meter Patrol Vessel Maritime Activity Reports, Inc. November 20, 2026 © Dongara Marine The Cook Labor Government is investing $13.4 million in two new vessels to strengthen fisheries compliance and protect the Kimberley's valuable marine resources. A new nine-meter amphibious vessel is now operating out of Broome, undertaking patrols across the Buccaneer Archipelago Marine Park. The vessel was built by global business Sealegs who specialize in manufacturing the versatile craft. The vessel's ability to travel on both land and water will allow Fisheries and Marine Officers to access remote locations where extreme tidal conditions and limited boat ramp infrastructure can make launching traditional vessels difficult. The vessel will support joint patrols with local Aboriginal ranger groups, strengthening partnerships and supporting the shared management of the culturally significant region. The larger 22-meter patrol vessel will also be based in Broome, supporting commercial and recreational fisheries compliance and marine park management across northern waters. Expected to be delivered in October 2028, the new vessel will be built by Dongara Marine, providing another boost to Western Australia's marine manufacturing industry. The Geraldton business also delivered the new PV Equinox earlier this year, replacing the ageing PV Walcott and strengthening the State's fisheries patrol capabilities across the Kimberley.",
       "takeaways": [
-        "Operational Area: Global Maritime.",
-        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+        "Dongara Marine to Build 22-Meter Patrol Vessel Maritime Activity Reports, Inc.",
+        "November 20, 2026 © Dongara Marine The Cook Labor Government is investing $13.4 million in two new vessels to strengthen fisheries compliance and protect the Kimberley's valuable marine resources.",
+        "A new nine-meter amphibious vessel is now operating out of Broome, undertaking patrols across the Buccaneer Archipelago Marine Park."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1484,43 +1520,6 @@
       ],
       "readingMinutes": 2,
       "readMinutes": 2
-    },
-    {
-      "id": "SN-FCE33821A1",
-      "title": "Iranian Oil Transferred Between Tankers as US Widens Blockade",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/iranian-oil-transferred-between-tankers-as-us-widens-blockade/",
-      "publishedAt": "2026-11-20T13:57:02Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "tanker",
-        "lpg",
-        "port",
-        "hormuz",
-        "suez"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
-      "summary": "A cargo of Iranian crude was transferred between two tankers in the Persian Gulf this week, as the US warned its navy could target vessels that carry out the practice while enforcing a maritime blockade.",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Oil tanker Al Shaffiah sails at the sea near the Omani coast, as seen from Musandam, Oman, June 26, 2026. REUTERS/Stringer By Weilun Soon Nov 20, 2026 (Bloomberg) –A cargo of Iranian crude was transferred between two tankers in the Persian Gulf this week, as the US warned its navy could target vessels that carry out the practice while enforcing a maritime blockade. A US-sanctioned Suezmax called Olym transferred oil to the medium-range Hao Fan on Tuesday, according to nonprofit group United Against Nuclear Iran and data analytics platform Kpler. UANI said Hao Fan, which is not blacklisted by Washington, is spoofing its location near Oman’s Shinas. The tankers turned off their transponders during the operation, which UANI said took place just south of Iran’s main oil export terminal on Kharg Island, deep in the Persian Gulf. It is the first observed transfer since the US reinstated its blockade of Iranian ports in mid-July, said Charlie Brown, an adviser to UANI. The group based its analysis on satellite images and ship-tracking data. The US military issued a notice on Wednesday that it was widening the scope of its blockade to target ships receiving cargoes at sea. The American operation has brought Iranian oil exports to a halt , forcing production curbs and cutting off a key source of revenue for the Islamic Republic. Read More: Iran’s Main Oil Terminals Remain Empty as US Blockade Bites Some small shipments of Iranian liquefied petroleum gas have left the Middle East since the blockade was reinstated, but Brown said it’s unlikely the crude loaded onto Hao Fan is destined for global markets. The vessel took about 200,000 barrels in the ship-to-ship transfer, too little to make an export voyage economic, he added. “Things have been consistent so far with regard to the blockade,” said Brown. The timing of the US notice and the transfer between Olym and Hao Fan was likely a “happy coincidence,” but the Iranians are expected to try “all kinds of ways to get things out,” he added. © 2026 Bloomberg L.P. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Another tanker was struck by a projectile and caught fire in the Strait of Hormuz on Friday, extending a wave of attacks on commercial shipping that has pushed maritime security... Iran’s attacks on oil tankers crossing the crucial Strait of Hormuz are getting more intense, just as prices have tumbled due to a flood of supply from the Middle East. The LPG tanker TARA GAS remained on fire and adrift in the Strait of Hormuz on Wednesday, according to a new navigational warning, as independently verified video showed the vessel... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
-      "takeaways": [
-        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
-        "Join the leading maritime news network Oil tanker Al Shaffiah sails at the sea near the Omani coast, as seen from Musandam, Oman, June 26, 2026.",
-        "A US-sanctioned Suezmax called Olym transferred oil to the medium-range Hao Fan on Tuesday, according to nonprofit group United Against Nuclear Iran and data analytics platform Kpler."
-      ],
-      "readingMinutes": 3,
-      "readMinutes": 3
     },
     {
       "id": "SN-38C6BABF60",
@@ -1718,7 +1717,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2015/07/Subsea-7-Seven-Borealis-300x200.jpeg",
       "summary": "Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis, which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally...",
-      "body": "Europe Offshore Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger Bojan Lepic November 20, 2026 0 1,761 1 minute read Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis , which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month. The regulator required the disposal of Seven Borealis to address competition concerns in Brazil’s offshore engineering, procurement, construction, and installation market, where both contractors have a substantial presence. Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure. Those commitments currently extend into 2028. The company has not identified a prospective buyer or disclosed an asking price for the vessel. The planned merger will create Saipem 7, combining two of the world’s largest offshore construction contractors. Subsea 7 said 13 of the 16 relevant competition authorities have approved the transaction. Reviews remain underway in Australia, the EU, and West Africa, with completion now expected in early 2027. The Seven Borealis disposal remains a condition of the Brazilian approval. Tags Italy Norway Bojan Lepic November 20, 2026 0 1,761 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger Bojan Lepic November 20, 2026 0 2,102 1 minute read Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis , which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month. The regulator required the disposal of Seven Borealis to address competition concerns in Brazil’s offshore engineering, procurement, construction, and installation market, where both contractors have a substantial presence. Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure. Those commitments currently extend into 2028. The company has not identified a prospective buyer or disclosed an asking price for the vessel. The planned merger will create Saipem 7, combining two of the world’s largest offshore construction contractors. Subsea 7 said 13 of the 16 relevant competition authorities have approved the transaction. Reviews remain underway in Australia, the EU, and West Africa, with completion now expected in early 2027. The Seven Borealis disposal remains a condition of the Brazilian approval. Tags Italy Norway Bojan Lepic November 20, 2026 0 2,102 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month.",
         "Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure.",
@@ -1752,7 +1751,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2026/10/Seaway-Phoenix-Seaway-7-300x180.jpg",
       "summary": "Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift, Seaway Strashnov, and Seaway Phoenix, with offshore work expected during 2029 and 2030....",
-      "body": "Europe Offshore Renewables Seaway 7 lines up vessel trio for Scottish offshore wind project Bojan Lepic November 20, 2026 0 636 1 minute read Seaway 7 Seaway 7 Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030. The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables. SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations. The project is located around 38 km off the Scottish Borders in the outer Firth of Forth, with average water depths of approximately 52 m. SSE expects Berwick Bank B to become the world’s deepest fixed-bottom offshore wind farm once completed. The development forms part of the wider Berwick Bank offshore wind complex, which has a proposed capacity of approximately 4.1GW. The Berwick Bank B agreement remains subject to final contract award and SSE’s final investment decision, expected in late 2027. Subject to approval, preparatory offshore construction could begin in 2028, with foundation and cable installation continuing into 2031. Seaway 7 previously worked with SSE on the Beatrice and Seagreen offshore wind farms. Tags Norway Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 636 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Seaway 7 lines up vessel trio for Scottish offshore wind project Bojan Lepic November 20, 2026 0 782 1 minute read Seaway 7 Seaway 7 Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030. The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables. SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations. The project is located around 38 km off the Scottish Borders in the outer Firth of Forth, with average water depths of approximately 52 m. SSE expects Berwick Bank B to become the world’s deepest fixed-bottom offshore wind farm once completed. The development forms part of the wider Berwick Bank offshore wind complex, which has a proposed capacity of approximately 4.1GW. The Berwick Bank B agreement remains subject to final contract award and SSE’s final investment decision, expected in late 2027. Subject to approval, preparatory offshore construction could begin in 2028, with foundation and cable installation continuing into 2031. Seaway 7 previously worked with SSE on the Beatrice and Seagreen offshore wind farms. Tags Norway Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 782 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030.",
         "The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables.",
@@ -1819,7 +1818,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2023/08/Ingka-floating-wind-300x185.jpg",
       "summary": "The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity...",
-      "body": "Europe Offshore Renewables Scotland greenlights 1 GW floating offshore wind project Bojan Lepic November 20, 2026 0 541 1 minute read Ingka Group Ingka Group The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes. The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure. Muir Mhòr was awarded seabed rights in Scotland’s ScotWind leasing round in 2022 and is among the country’s most advanced commercial-scale floating wind developments. Fred. Olsen Seawind took full ownership of the project earlier this year after acquiring Vattenfall’s 50% interest. The developer is targeting the start of electricity generation in the early 2030s, subject to further commercial and investment decisions. The project has already awarded £18.4m in development contracts, including £7.96m to Scottish suppliers. The latest approval comes with conditions requiring measures to address the wind farm’s potential impact on commercial fisheries and seabirds. The Scottish Fishermen’s Federation criticised the decision, arguing that questions remain about whether fishing vessels can operate safely around the project’s floating foundations, moorings, and subsea cables. Scotland currently has more than 11GW of consented offshore wind capacity, according to the government. The consent is a significant development milestone for Muir Mhòr, although the project has yet to reach a final investment decision. Tags Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 541 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Scotland greenlights 1 GW floating offshore wind project Bojan Lepic November 20, 2026 0 646 1 minute read Ingka Group Ingka Group The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes. The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure. Muir Mhòr was awarded seabed rights in Scotland’s ScotWind leasing round in 2022 and is among the country’s most advanced commercial-scale floating wind developments. Fred. Olsen Seawind took full ownership of the project earlier this year after acquiring Vattenfall’s 50% interest. The developer is targeting the start of electricity generation in the early 2030s, subject to further commercial and investment decisions. The project has already awarded £18.4m in development contracts, including £7.96m to Scottish suppliers. The latest approval comes with conditions requiring measures to address the wind farm’s potential impact on commercial fisheries and seabirds. The Scottish Fishermen’s Federation criticised the decision, arguing that questions remain about whether fishing vessels can operate safely around the project’s floating foundations, moorings, and subsea cables. Scotland currently has more than 11GW of consented offshore wind capacity, according to the government. The consent is a significant development milestone for Muir Mhòr, although the project has yet to reach a final investment decision. Tags Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 646 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Olsen Seawind off the Aberdeenshire coast.",
         "Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes.",
