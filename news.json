@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-21T01:07:40Z",
-  "generatedAt": "2026-11-21T01:07:40Z",
+  "updatedAt": "2026-11-21T09:17:07Z",
+  "generatedAt": "2026-11-21T09:17:07Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -20,7 +20,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/cma-shipping",
-      "publishedAt": "2026-11-21T01:07:40Z",
+      "publishedAt": "2026-11-21T09:17:07Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -52,7 +52,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/crew-connect-global",
-      "publishedAt": "2026-11-21T01:07:40Z",
+      "publishedAt": "2026-11-21T09:17:07Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -73,6 +73,213 @@
       "takeaways": [
         "Operational Area: Global Maritime.",
         "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-62E8C86112",
+      "title": "Interasia and T.S. Lines restore two Southeast Asia services",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/interasia-and-t-s-lines-restore-two-southeast-asia-services/",
+      "publishedAt": "2026-11-21T09:00:14Z",
+      "category": "Ports & Terminals",
+      "region": "China & East Asia",
+      "regions": [
+        "China & East Asia"
+      ],
+      "tags": [
+        "lng",
+        "container",
+        "port",
+        "china"
+      ],
+      "coords": [
+        30.6,
+        122.1
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/images-24-300x207.jpg",
+      "summary": "Interasia Lines and T.S. Lines are restoring two weekly container services connecting South China with Southeast Asia. The carriers will jointly operate the South China-Vietnam-Thailand service, branded SVT, with two ships of approximately 1,000 TEU. The SVT rotation will be: Nansha – Shekou – Ho Chi Minh City (Cat...",
+      "body": "Services Top Right Interasia and T.S. Lines restore two Southeast Asia services November 21, 2026 Facebook Twitter WhatsApp Linkedin Email Interasia Lines and T.S. Lines are restoring two weekly container services connecting South China with Southeast Asia. The carriers will jointly operate the South China-Vietnam-Thailand service, branded SVT, with two ships of approximately 1,000 TEU. The SVT rotation will be: Nansha – Shekou – Ho Chi Minh City (Cat Lai) – Bangkok – Laem Chabang – Nansha T.S. Lines will also restore its China-Port Kelang service under the NSP designation. Interasia will join the operation and market it as the China-Port Kelang Express (CPX). The joint CPX/NSP service will deploy two ships of approximately 1,800 TEU and operate weekly on the following rotation: Shenzhen (Shekou) – Nansha – Port Kelang – Shenzhen TAGS Interasia Lines T.S. Lines Facebook Twitter WhatsApp Linkedin Email Previous article Fincantieri secures order for two LNG-powered Carnival cruise ships Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "Services Top Right Interasia and T.S.",
+        "Lines restore two Southeast Asia services November 21, 2026 Facebook Twitter WhatsApp Linkedin Email Interasia Lines and T.S.",
+        "Lines are restoring two weekly container services connecting South China with Southeast Asia."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-7B991F0A2A",
+      "title": "Fincantieri secures order for two LNG-powered Carnival cruise ships",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/fincantieri-secures-order-for-two-lng-powered-carnival-cruise-ships/",
+      "publishedAt": "2026-11-21T07:47:12Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "lng",
+        "port",
+        "shipyard"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/Κρουαζιερόπλοιο-υπό-κατασκευή-στο-ναυπηγείο-cleaned-300x169.png",
+      "summary": "Fincantieri has signed a contract with Carnival Corporation to build two new dual-fuel cruise ships for Carnival Cruise Line. The vessels will be constructed at the Italian shipbuilder’s Marghera yard, with deliveries scheduled for 2033 and 2035. Each ship will have a gross tonnage of approximately 130,000 GT and...",
+      "body": "Fincantieri has signed a contract with Carnival Corporation to build two new dual-fuel cruise ships for Carnival Cruise Line. The vessels will be constructed at the Italian shipbuilder’s Marghera yard, with deliveries scheduled for 2033 and 2035. Each ship will have a gross tonnage of approximately 130,000 GT and around 1,650 guest cabins. The contract is subject to financing and other customary conditions. Fincantieri described its value as significant but did not disclose a financial figure. New vessels to feature LNG propulsion The two cruise ships will feature dual-fuel propulsion systems, with liquefied natural gas (LNG) as their primary fuel. According to Fincantieri, the vessels will combine advanced environmental and digital technologies with an energy-efficient design. The new design has also been developed as a platform that Carnival Corporation could use across several of its cruise brands in the future. The latest order expands a shipbuilding relationship spanning three decades. Fincantieri has delivered 76 vessels to Carnival Corporation’s various cruise brands, including 15 ships for Carnival Cruise Line. “With 12 new ships now on order for delivery through 2039 across Carnival Cruise Line, Princess and AIDA, we have a strong pipeline that supports our measured approach to growth,” said Josh Weinstein, CEO of Carnival Corporation. Weinstein also highlighted the importance of introducing new technologies and improving vessel efficiency as the company expands its fleet. Order adds to Carnival’s existing shipbuilding programme The two new vessels will join Carnival Cruise Line’s existing three-ship Ace-class programme at Fincantieri. Construction of the first Ace-class vessel, Carnival Destiny, began at the shipbuilder’s Monfalcone facility in July 2026. Unlike the newly ordered ships, the Ace-class vessels are being built to a larger design of approximately 230,000 GT. Pierroberto Folgiero, CEO and Managing Director of Fincantieri, said the new contract strengthens the company’s long-term relationship with Carnival Corporation. He also pointed to ongoing investments in shipyard infrastructure, digitalisation, automation and robotics under Fincantieri’s Shipyard of the Future strategy. The latest agreement extends the shipbuilder’s cruise vessel delivery schedule and supports future activity at its Italian facilities.",
+      "takeaways": [
+        "Fincantieri has signed a contract with Carnival Corporation to build two new dual-fuel cruise ships for Carnival Cruise Line.",
+        "The vessels will be constructed at the Italian shipbuilder’s Marghera yard, with deliveries scheduled for 2033 and 2035.",
+        "Each ship will have a gross tonnage of approximately 130,000 GT and around 1,650 guest cabins."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-B087B57A17",
+      "title": "Akkon Lines launches Türkiye–Levant service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/akkon-lines-launches-turkiye-levant-service/",
+      "publishedAt": "2026-11-21T06:00:08Z",
+      "category": "Ports & Terminals",
+      "region": "Global Maritime",
+      "regions": [
+        "Global Maritime"
+      ],
+      "tags": [
+        "lng",
+        "container",
+        "port"
+      ],
+      "coords": [
+        25.0,
+        -40.0
+      ],
+      "navarea": "GLOBAL",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/pexels-adempercem-35531300-300x199.jpg",
+      "summary": "Akkon Lines will launch a new container service connecting Türkiye with Syria and Lebanon in December 2026. The new Levant Bridge Service (LBS) will be operated by a single 340 TEU vessel, offering one sailing every ten days. The service will connect three Turkish ports with Latakia in Syria and Beirut in Lebanon....",
+      "body": "Services Top Right Akkon Lines launches Türkiye–Levant service November 21, 2026 Facebook Twitter WhatsApp Linkedin Email Akkon Lines will launch a new container service connecting Türkiye with Syria and Lebanon in December 2026. The new Levant Bridge Service (LBS) will be operated by a single 340 TEU vessel, offering one sailing every ten days. The service will connect three Turkish ports with Latakia in Syria and Beirut in Lebanon. Its rotation will be: Izmir – Mersin – Iskenderun – Latakia – Beirut – Izmir TAGS AKKON LINES Facebook Twitter WhatsApp Linkedin Email Previous article Seatrium reports S$12.2 billion order book as new contracts increase Next article Fincantieri secures order for two LNG-powered Carnival cruise ships Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The new Levant Bridge Service (LBS) will be operated by a single 340 TEU vessel, offering one sailing every ten days.",
+        "The service will connect three Turkish ports with Latakia in Syria and Beirut in Lebanon.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-295ADDBF6C",
+      "title": "Seatrium reports S$12.2 billion order book as new contracts increase",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/seatrium-reports-s12-2-billion-order-book-as-new-contracts-increase/",
+      "publishedAt": "2026-11-21T04:30:36Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "lng",
+        "port",
+        "singapore"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/Εντυπωσιακό-Ναυπηγείο-με-Υπεράκτιο-Πλοίο-cleaned-300x169.png",
+      "summary": "Seatrium reported a net order book of S$12.2 billion at the end of September 2026, supported by new contract wins across its offshore energy and marine engineering businesses. The Singapore-based group secured S$1.7 billion in new orders during the year to date. Its order book comprises 35 projects, with scheduled...",
+      "body": "Seatrium reported a net order book of S$12.2 billion at the end of September 2026, supported by new contract wins across its offshore energy and marine engineering businesses. The Singapore-based group secured S$1.7 billion in new orders during the year to date. Its order book comprises 35 projects, with scheduled deliveries extending through 2033. In its third-quarter business update, released on 19 November, Seatrium also reported improving gross margins and steady operational performance. The company expects its underlying net profit for 2026 to be materially higher than in 2025. New orders support offshore project portfolio Seatrium’s recent contracts include floating storage and regasification unit (FSRU) conversions for Karpowership and Excelerate Energy. The group has also secured floating production, storage and offloading (FPSO) integration projects for SBM Offshore and MODEC. Other awards include the conversion and integration of five next-generation Whale Class Powerships for Karpowership. Seatrium will also undertake completion work on four offshore rigs for RigCo. Meanwhile, the company is working towards finalising a third floating liquefied natural gas (FLNG) conversion contract with Golar by the end of 2026. The project remains at the letter-of-intent stage. During the third-quarter reporting period, Seatrium delivered the Revolution Wind offshore substations to Ørsted and the Sparta floating production unit to Shell. The company also achieved the sailaways of the P-80 and P-82 FPSOs, which are being developed for Petrobras. Seatrium expects stronger 2026 profitability Seatrium said its gross margins continued to improve compared with the first half of 2026. The improvement was supported by a more favourable mix of projects, tighter cost controls and savings from the disposal of non-core businesses. The group remains on track to achieve recurring annualised cost savings exceeding S$50 million from completed divestments. “We have continued to execute strongly and make consistent progress on progressive gross margin improvements, building a resilient and more profitable Seatrium,” said Chris Ong, Chief Executive Officer, Seatrium. “Order win momentum has picked up in recent weeks,” Ong added. Looking ahead, the company expects its stronger margin performance to continue through the remainder of 2026. Seatrium will focus on securing new projects while maintaining financial discipline and improving its cost structure. Its current order book provides visibility over planned project deliveries through 2033.",
+      "takeaways": [
+        "Seatrium reported a net order book of S$12.2 billion at the end of September 2026, supported by new contract wins across its offshore energy and marine engineering businesses.",
+        "The Singapore-based group secured S$1.7 billion in new orders during the year to date.",
+        "Its order book comprises 35 projects, with scheduled deliveries extending through 2033."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-236D475E6E",
+      "title": "CMA CGM adds Hazira to PIKEX2 service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/cma-cgm-adds-hazira-to-pikex2-service/",
+      "publishedAt": "2026-11-21T03:00:37Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "India & Indian Ocean"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "suez"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://container-news.com/wp-content/uploads/2026/08/CMA-CGM-Grand-Palais-300x200.jpeg",
+      "summary": "CMA CGM will add Hazira to its weekly Pakistan Khalifa Express 2 (PIKEX2), expanding the service’s coverage of India’s west coast. The regional loop connects Colombo with ports across India and Pakistan. CMA CGM operates the service with two container ships of 1,700 and 2,500 TEU. Following the addition of Hazira,...",
+      "body": "Services Top Right CMA CGM adds Hazira to PIKEX2 service November 21, 2026 Facebook Twitter WhatsApp Linkedin Email CMA CGM Grand Palais; Source:Suez Canal Authority CMA CGM will add Hazira to its weekly Pakistan Khalifa Express 2 (PIKEX2), expanding the service’s coverage of India’s west coast. The regional loop connects Colombo with ports across India and Pakistan. CMA CGM operates the service with two container ships of 1,700 and 2,500 TEU. Following the addition of Hazira, the weekly rotation will be: Colombo – Mangalore – Nhava Sheva – Hazira – Mundra – Karachi – Port Qasim – Colombo TAGS CMA CGM Facebook Twitter WhatsApp Linkedin Email Previous article Eimskip orders new Konecranes mobile harbor crane for Icelandic port Next article Seatrium reports S$12.2 billion order book as new contracts increase Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The regional loop connects Colombo with ports across India and Pakistan.",
+        "CMA CGM operates the service with two container ships of 1,700 and 2,500 TEU.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-3AE8F2FB8F",
+      "title": "Eimskip orders new Konecranes mobile harbor crane for Icelandic port",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/eimskip-orders-new-konecranes-mobile-harbor-crane-for-icelandic-port/",
+      "publishedAt": "2026-11-21T01:20:02Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/Konecranes-Gottwald-ESP.8_Eimskip_0-200x300.jpg",
+      "summary": "Icelandic shipping and logistics company Eimskip has ordered a new Konecranes Gottwald ESP.8 Mobile Harbor Crane for the port of Reyðarfjörður in Iceland. The order was booked in the fourth quarter of 2026, with delivery scheduled for the third quarter of 2027. The crane will mainly handle containers, alongside...",
+      "body": "Icelandic shipping and logistics company Eimskip has ordered a new Konecranes Gottwald ESP.8 Mobile Harbor Crane for the port of Reyðarfjörður in Iceland. The order was booked in the fourth quarter of 2026, with delivery scheduled for the third quarter of 2027. The crane will mainly handle containers, alongside general and project cargo. It will be the first ESP.8 model deployed at Reyðarfjörður. Eimskip already operates two cranes of the same model at Sundahöfn, Reykjavík’s main cargo port, where they have been in service since 2024. Electric drive supports port operations The new crane will combine an external electrical power connection with an onboard diesel generator. This will allow Eimskip to operate the equipment using electricity from the local grid while retaining a diesel-powered option when required. The Gottwald ESP.8 has a maximum lifting capacity of 125 tonnes and a working radius of up to 54 metres. It will also feature Konecranes’ TRUCONNECT remote monitoring system, which provides operational information to support equipment maintenance and availability. “We are very satisfied with our Konecranes Gottwald mobile harbor cranes and the ESP.8 models have brought a new level of performance to our fleet,” said Hilmar Pétur Valgarðsson, Executive Vice President and COO Operations, Eimskip. “By powering the cranes with electricity, we have been able to reduce both operating costs and emissions,” Valgarðsson added. Eimskip has used Konecranes Gottwald mobile harbor cranes for approximately 30 years. The latest order continues that relationship while expanding the company’s electrically powered cargo-handling equipment in Iceland. The financial value of the order was not disclosed.",
+      "takeaways": [
+        "Icelandic shipping and logistics company Eimskip has ordered a new Konecranes Gottwald ESP.8 Mobile Harbor Crane for the port of Reyðarfjörður in Iceland.",
+        "The order was booked in the fourth quarter of 2026, with delivery scheduled for the third quarter of 2027.",
+        "The crane will mainly handle containers, alongside general and project cargo."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -104,7 +311,7 @@
       "navarea": "I",
       "image": "https://container-news.com/wp-content/uploads/2026/11/HAI-RUN-SHENG-DA-panta-300x169.jpeg",
       "summary": "Panda Express Line has revised four services connecting the Russian Far East with ports in China and South Korea. The carrier has redistributed port coverage across its PEL2, PEL4, PEL5 and PEL6 loops. Under the changes, PEL2 will replace Tianjin with Ningbo and Busan. PEL4 will reinstate Tianjin and add Dalian,...",
-      "body": "Services Top Right Panda Express Line reorganises Russian Far East network November 21, 2026 Facebook Twitter WhatsApp Linkedin Email HAI RUN SHENG DA Panda Express Line has revised four services connecting the Russian Far East with ports in China and South Korea. The carrier has redistributed port coverage across its PEL2, PEL4, PEL5 and PEL6 loops. Under the changes, PEL2 will replace Tianjin with Ningbo and Busan. PEL4 will reinstate Tianjin and add Dalian, while PEL5 will introduce a call at Rizhao. Ningbo will meanwhile be removed from PEL6. The revised services are: PEL2: One 1,300 TEU vessel operating fortnightly between Nakhodka, Ningbo and Busan. PEL4: One 1,500 TEU vessel operating fortnightly between Vladivostok, Dalian, Tianjin and Ningbo. PEL5: One 1,300 TEU vessel operating fortnightly between Vladivostok, Rizhao and Shanghai. PEL6: Two vessels ranging from 1,500 to 2,200 TEU operating approximately weekly between Vladivostok, Nansha and Xiamen. TAGS Panda Express Facebook Twitter WhatsApp Linkedin Email Previous article FESCO removes two ports from FCDL1 service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "body": "Services Top Right Panda Express Line reorganises Russian Far East network November 21, 2026 Facebook Twitter WhatsApp Linkedin Email HAI RUN SHENG DA Panda Express Line has revised four services connecting the Russian Far East with ports in China and South Korea. The carrier has redistributed port coverage across its PEL2, PEL4, PEL5 and PEL6 loops. Under the changes, PEL2 will replace Tianjin with Ningbo and Busan. PEL4 will reinstate Tianjin and add Dalian, while PEL5 will introduce a call at Rizhao. Ningbo will meanwhile be removed from PEL6. The revised services are: PEL2: One 1,300 TEU vessel operating fortnightly between Nakhodka, Ningbo and Busan. PEL4: One 1,500 TEU vessel operating fortnightly between Vladivostok, Dalian, Tianjin and Ningbo. PEL5: One 1,300 TEU vessel operating fortnightly between Vladivostok, Rizhao and Shanghai. PEL6: Two vessels ranging from 1,500 to 2,200 TEU operating approximately weekly between Vladivostok, Nansha and Xiamen. TAGS Panda Express Facebook Twitter WhatsApp Linkedin Email Previous article FESCO removes two ports from FCDL1 service Next article Eimskip orders new Konecranes mobile harbor crane for Icelandic port Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
       "takeaways": [
         "The carrier has redistributed port coverage across its PEL2, PEL4, PEL5 and PEL6 loops.",
         "Under the changes, PEL2 will replace Tianjin with Ningbo and Busan.",
@@ -655,41 +862,6 @@
       "readMinutes": 5
     },
     {
-      "id": "SN-B798793FC7",
-      "title": "Maersk sets heavy-load surcharge for China–South America trade",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/maersk-sets-heavy-load-surcharge-for-china-south-america-trade/",
-      "publishedAt": "2026-11-20T19:00:15Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "china"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/09/7c8a240e-28e8-4ecb-b4b7-91ca54957fff-300x169.webp",
-      "summary": "Effective from the Price Calculation Date of 5 December 2026, a surcharge of US$200 per container will apply when the Verified Gross Mass exceeds 23 metric tonnes. The measure covers shipments originating from Shanghai, Qingdao, Xingang and Dalian. Destinations covered are Santos, Itapoa, Itajai and Paranagua in...",
-      "body": "Rates & Surcharges Top Right Maersk sets heavy-load surcharge for China–South America trade November 20, 2026 Facebook Twitter WhatsApp Linkedin Email CGI-generated image of a 8,700 TEU Maersk Lima class Effective from the Price Calculation Date of 5 December 2026, a surcharge of US$200 per container will apply when the Verified Gross Mass exceeds 23 metric tonnes. The measure covers shipments originating from Shanghai, Qingdao, Xingang and Dalian. Destinations covered are Santos, Itapoa, Itajai and Paranagua in Brazil, Montevideo in Uruguay and Buenos Aires in Argentina. Equipment VGM threshold Surcharge Effective date 40-foot non-operating reefer Above 23 metric tonnes US$200 per container 5 December 2026 Maersk’s consolidated tariff table also includes the existing US$200 surcharge for 20-foot dry equipment with a VGM exceeding 20 metric tonnes. That charge has applied since 17 July 2026. The surcharge applies across Maersk’s ocean products, including contract bookings, SPOT and Maersk Go. VGM includes the weight of the cargo, dunnage and securing materials, together with the container’s tare weight. TAGS A.P. Moeller-Maersk Facebook Twitter WhatsApp Linkedin Email Previous article DP World raises Mozambique port investment Next article Great White Fleet cuts PTCO service frequency Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The measure covers shipments originating from Shanghai, Qingdao, Xingang and Dalian.",
-        "Destinations covered are Santos, Itapoa, Itajai and Paranagua in Brazil, Montevideo in Uruguay and Buenos Aires in Argentina.",
-        "That charge has applied since 17 July 2026."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-48ED7FD492",
       "title": "Tanker On Fire After Struck By Projectile Near Strait of Hormuz",
       "source": "MarineLink",
@@ -825,42 +997,6 @@
       ],
       "readingMinutes": 3,
       "readMinutes": 3
-    },
-    {
-      "id": "SN-816A8CD233",
-      "title": "DP World raises Mozambique port investment",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/dp-world-raises-mozambique-port-investment/",
-      "publishedAt": "2026-11-20T18:00:36Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "china",
-        "imo"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/800_meetingchairmanandpresidentchapo5-300x203.jpeg",
-      "summary": "DP World has announced an expanded investment of US$ 200 million in the Port of Maputo, following a meeting between Group Executive Chairman H.E. Essa Kazim and Mozambique’s President, H.E. Daniel Chapo. The figure raises the company’s original commitment of USD 165 million and supports its ambition to strengthen...",
-      "body": "DP World has announced an expanded investment of US$ 200 million in the Port of Maputo, following a meeting between Group Executive Chairman H.E. Essa Kazim and Mozambique’s President, H.E. Daniel Chapo. The figure raises the company’s original commitment of USD 165 million and supports its ambition to strengthen Mozambique’s position as a strategic trade and logistics gateway for Southern Africa. The meeting focused on expanding operations, exploring further investment in trade infrastructure and improving transport and logistics links with neighbouring markets. The expanded project will nearly triple the container terminal’s annual handling capacity, from 225,000 TEU to 650,000 TEU by the second quarter of 2027, exceeding the original target of 530,000 TEU. It will let the terminal accommodate larger vessels, improve operational efficiency and reinforce Maputo’s role as a regional logistics hub. DP World operates the Maputo container terminal and is a shareholder in the Maputo Port Development Company, which holds the port concession until 2058. Beyond the port, Maputo is emerging as a multimodal gateway linking Southern Africa’s industrial and agricultural heartlands to global markets, and DP World is strengthening these connections through cross-border road and rail networks and its inland logistics hub at Komatipoort in South Africa. Its Shipping Solutions business is also due to launch a new weekly China-Africa Link later this month, connecting Shanghai, Ningbo, Nansha and other Chinese ports with Maputo and other regional gateways, which together will make the Maputo Corridor a more competitive route for regional trade. Essa Kazim said Mozambique has an opportunity to become one of Southern Africa’s most important trade gateways, and that the ambition is not simply to move more cargo through Maputo but to connect businesses across the region to global markets through better infrastructure, shipping services and inland logistics, helping Mozambique capture more of the value of regional trade.",
-      "takeaways": [
-        "DP World has announced an expanded investment of US$ 200 million in the Port of Maputo, following a meeting between Group Executive Chairman H.E.",
-        "Essa Kazim and Mozambique’s President, H.E.",
-        "The figure raises the company’s original commitment of USD 165 million and supports its ambition to strengthen Mozambique’s position as a strategic trade and logistics gateway for Southern Africa."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
     },
     {
       "id": "SN-FD41A8CDE5",
@@ -1010,40 +1146,6 @@
       "readMinutes": 5
     },
     {
-      "id": "SN-63951BDC68",
-      "title": "MSC extends Med Canadian Service to Greece and Türkiye",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/msc-extends-med-canadian-service-to-greece-and-turkiye/",
-      "publishedAt": "2026-11-20T17:00:32Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2026/10/MSC-Meline-300x225.jpg",
-      "summary": "MSC has extended its weekly Med Canadian Service to Greece and Türkiye, establishing a direct connection between the Eastern Mediterranean and Montreal. The revised service calls at the Turkish ports of Tekirdag, Gemlik and Aliaga, as well as Piraeus in Greece, before continuing through the Western Mediterranean to...",
-      "body": "Services Top Right MSC extends Med Canadian Service to Greece and Türkiye November 20, 2026 Facebook Twitter WhatsApp Linkedin Email MSC Meline; Source: VesselFinder MSC has extended its weekly Med Canadian Service to Greece and Türkiye, establishing a direct connection between the Eastern Mediterranean and Montreal. The revised service calls at the Turkish ports of Tekirdag, Gemlik and Aliaga, as well as Piraeus in Greece, before continuing through the Western Mediterranean to Canada. MSC has allocated seven container ships ranging from 4,000 to 5,000 TEU to the expanded loop. The revised port rotation is: Tekirdag – Gemlik – Aliaga – Piraeus – Gioia Tauro – Salerno – Livorno – Valencia – Nador – Montreal – Valencia – Barcelona – Gioia Tauro – Piraeus – Tekirdag TAGS Mediterranean Shipping Co. (MSC) Facebook Twitter WhatsApp Linkedin Email Previous article KMTC and Namsung suspend Korea–Japan service Next article DP World raises Mozambique port investment Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The revised service calls at the Turkish ports of Tekirdag, Gemlik and Aliaga, as well as Piraeus in Greece, before continuing through the Western Mediterranean to Canada.",
-        "MSC has allocated seven container ships ranging from 4,000 to 5,000 TEU to the expanded loop.",
-        "The revised port rotation is: Tekirdag – Gemlik – Aliaga – Piraeus – Gioia Tauro – Salerno – Livorno – Valencia – Nador – Montreal – Valencia – Barcelona – Gioia Tauro – Piraeus – Tekirdag TAGS Mediterranean Shipping Co."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-932639FEE4",
       "title": "Container shipping rate tactics draw competition criticism",
       "source": "Seatrade Maritime",
@@ -1145,40 +1247,6 @@
       "readMinutes": 4
     },
     {
-      "id": "SN-B59B522992",
-      "title": "KMTC and Namsung suspend Korea–Japan service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/kmtc-and-namsung-suspend-korea-japan-service/",
-      "publishedAt": "2026-11-20T16:00:10Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/images-21-300x222.jpg",
-      "summary": "KMTC and Namsung Shipping have suspended their jointly operated JPS1/BJS service connecting South Korea and Japan. The weekly service deployed two container ships of approximately 1,000 TEU, with each carrier contributing one vessel. The suspended port rotation was: Busan – Hakata – Kanazawa – Kushiro – Tomakomai –...",
-      "body": "Services Top Right KMTC and Namsung suspend Korea–Japan service November 20, 2026 Facebook Twitter WhatsApp Linkedin Email KMTC and Namsung Shipping have suspended their jointly operated JPS1/BJS service connecting South Korea and Japan. The weekly service deployed two container ships of approximately 1,000 TEU, with each carrier contributing one vessel. The suspended port rotation was: Busan – Hakata – Kanazawa – Kushiro – Tomakomai – Sapporo – Akita – Busan TAGS BJS Busan JAPAN JPS1 KMTC Namsung Shipping South Korea Facebook Twitter WhatsApp Linkedin Email Previous article DynaLiners Shares Index stabilises amid sector volatility Next article MSC extends Med Canadian Service to Greece and Türkiye Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The weekly service deployed two container ships of approximately 1,000 TEU, with each carrier contributing one vessel.",
-        "Operational Area: Suez Canal & Eastern Med, Japan & Korea.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-9592BB48E3",
       "title": "Crew Airlifted After Bulk Carrier Grounds on French Coast",
       "source": "gCaptain",
@@ -1242,40 +1310,6 @@
       "takeaways": [
         "Operational Area: Global Maritime.",
         "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-6A13CD76E0",
-      "title": "DynaLiners Shares Index stabilises amid sector volatility",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/dynaliners-shares-index-stabilises-amid-sector-volatility/",
-      "publishedAt": "2026-11-20T15:00:54Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/02/markus-winkler-IrRbSND5EUc-unsplash-1-300x200.jpg",
-      "summary": "The DynaLiners Shares Index was broadly unchanged during the latest trading week, marking a relative stabilisation after four weeks of sharper declines. However, the headline result masked considerable volatility among the four sector indices, with two advancing and two declining. All four recorded double-digit point...",
-      "body": "Rates & Surcharges Top Right DynaLiners Shares Index stabilises amid sector volatility November 20, 2026 Facebook Twitter WhatsApp Linkedin Email The DynaLiners Shares Index was broadly unchanged during the latest trading week, marking a relative stabilisation after four weeks of sharper declines. However, the headline result masked considerable volatility among the four sector indices, with two advancing and two declining. All four recorded double-digit point movements. DLSI Owners delivered the strongest performance, adding 49 points and rising 1.4%. By contrast, DLSI Ports and DLSI Boxes both declined by 1.6%. At company level, 53 stocks advanced and 67 declined, producing an average share-price decrease of 0.2%. Castor Maritime recorded the steepest fall among the companies tracked, declining 12%, while terminal operator International Container Terminal Services Inc. (ICTSI) fell 10%. On the positive side, LC Logistics gained 10%, while Mercantile Ports & Logistics led the weekly advances with a 19% increase. TAGS DynaLiners Shares Index Facebook Twitter WhatsApp Linkedin Email Previous article ONE plans four new intra-Asia services Next article KMTC and Namsung suspend Korea–Japan service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "However, the headline result masked considerable volatility among the four sector indices, with two advancing and two declining.",
-        "All four recorded double-digit point movements.",
-        "DLSI Owners delivered the strongest performance, adding 49 points and rising 1.4%."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1413,41 +1447,6 @@
         "Burdian appointed as DHS Joint Task Force-Maritime Director Maritime Activity Reports, Inc.",
         "Jo‑Ann Burdian was presidentially appointed as the director, Department of Homeland Security Joint Task Force–Maritime (JTF-M), effective Nov.",
         "DHS Secretary Markwayne Mullin nominated Burdian as director of JTF-M, in accordance with 6 U.S.C."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-1106286DD6",
-      "title": "ONE plans four new intra-Asia services",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/one-plans-four-new-intra-asia-services/",
-      "publishedAt": "2026-11-20T14:00:40Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "singapore"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/07/7rT67U4Y-300x200.jpeg",
-      "summary": "Ocean Network Express (ONE) is preparing to introduce four new intra-Asia services connecting Japan and Singapore with several Southeast Asian markets, according to DynaLiners. Three Japan-focused services are scheduled to begin in mid-December, covering Indonesia, Malaysia, Singapore, Vietnam, Thailand and the...",
-      "body": "Ocean Network Express (ONE) is preparing to introduce four new intra-Asia services connecting Japan and Singapore with several Southeast Asian markets, according to DynaLiners. Three Japan-focused services are scheduled to begin in mid-December, covering Indonesia, Malaysia, Singapore, Vietnam, Thailand and the Philippines. According to ONE’s published schedules, the new loops are expected to be branded Japan-Indonesia-Malaysia (JIM), Japan Singapore Shuttle (JSS) and Japan Thailand Vietnam (JTV). The three services are presumed to replace ONE’s existing JTI operation, although the carrier has not confirmed their vessel deployments. The planned rotations are: JIM: Kobe – Osaka – Nagoya – Yokohama – Tokyo – Nansha – Jakarta – Port Kelang – Singapore – Kobe JSS: Tokyo – Yokohama – Shimizu – Nagoya – Kobe – Singapore – Ho Chi Minh City (Cai Mep) – Tokyo JTV: Tokyo – Yokohama – Nagoya – Kobe – Busan – Ho Chi Minh City (Cai Mep) – Laem Chabang – Manila – Tokyo In January, ONE will also introduce the Singapore-Jakarta Shuttle (SJS), connecting its Singapore transhipment hub with Indonesia’s principal container port. The weekly shuttle will deploy one container ship of approximately 4,250 TEU between Singapore and Jakarta.",
-      "takeaways": [
-        "Ocean Network Express (ONE) is preparing to introduce four new intra-Asia services connecting Japan and Singapore with several Southeast Asian markets, according to DynaLiners.",
-        "Three Japan-focused services are scheduled to begin in mid-December, covering Indonesia, Malaysia, Singapore, Vietnam, Thailand and the Philippines.",
-        "According to ONE’s published schedules, the new loops are expected to be branded Japan-Indonesia-Malaysia (JIM), Japan Singapore Shuttle (JSS) and Japan Thailand Vietnam (JTV)."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1719,7 +1718,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2015/07/Subsea-7-Seven-Borealis-300x200.jpeg",
       "summary": "Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis, which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally...",
-      "body": "Europe Offshore Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger Bojan Lepic November 20, 2026 0 1,277 1 minute read Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis , which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month. The regulator required the disposal of Seven Borealis to address competition concerns in Brazil’s offshore engineering, procurement, construction, and installation market, where both contractors have a substantial presence. Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure. Those commitments currently extend into 2028. The company has not identified a prospective buyer or disclosed an asking price for the vessel. The planned merger will create Saipem 7, combining two of the world’s largest offshore construction contractors. Subsea 7 said 13 of the 16 relevant competition authorities have approved the transaction. Reviews remain underway in Australia, the EU, and West Africa, with completion now expected in early 2027. The Seven Borealis disposal remains a condition of the Brazilian approval. Tags Italy Norway Bojan Lepic November 20, 2026 0 1,277 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger Bojan Lepic November 20, 2026 0 1,761 1 minute read Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis , which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month. The regulator required the disposal of Seven Borealis to address competition concerns in Brazil’s offshore engineering, procurement, construction, and installation market, where both contractors have a substantial presence. Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure. Those commitments currently extend into 2028. The company has not identified a prospective buyer or disclosed an asking price for the vessel. The planned merger will create Saipem 7, combining two of the world’s largest offshore construction contractors. Subsea 7 said 13 of the 16 relevant competition authorities have approved the transaction. Reviews remain underway in Australia, the EU, and West Africa, with completion now expected in early 2027. The Seven Borealis disposal remains a condition of the Brazilian approval. Tags Italy Norway Bojan Lepic November 20, 2026 0 1,761 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month.",
         "Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure.",
@@ -1753,7 +1752,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2026/10/Seaway-Phoenix-Seaway-7-300x180.jpg",
       "summary": "Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift, Seaway Strashnov, and Seaway Phoenix, with offshore work expected during 2029 and 2030....",
-      "body": "Europe Offshore Renewables Seaway 7 lines up vessel trio for Scottish offshore wind project Bojan Lepic November 20, 2026 0 502 1 minute read Seaway 7 Seaway 7 Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030. The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables. SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations. The project is located around 38 km off the Scottish Borders in the outer Firth of Forth, with average water depths of approximately 52 m. SSE expects Berwick Bank B to become the world’s deepest fixed-bottom offshore wind farm once completed. The development forms part of the wider Berwick Bank offshore wind complex, which has a proposed capacity of approximately 4.1GW. The Berwick Bank B agreement remains subject to final contract award and SSE’s final investment decision, expected in late 2027. Subject to approval, preparatory offshore construction could begin in 2028, with foundation and cable installation continuing into 2031. Seaway 7 previously worked with SSE on the Beatrice and Seagreen offshore wind farms. Tags Norway Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 502 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Seaway 7 lines up vessel trio for Scottish offshore wind project Bojan Lepic November 20, 2026 0 636 1 minute read Seaway 7 Seaway 7 Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030. The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables. SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations. The project is located around 38 km off the Scottish Borders in the outer Firth of Forth, with average water depths of approximately 52 m. SSE expects Berwick Bank B to become the world’s deepest fixed-bottom offshore wind farm once completed. The development forms part of the wider Berwick Bank offshore wind complex, which has a proposed capacity of approximately 4.1GW. The Berwick Bank B agreement remains subject to final contract award and SSE’s final investment decision, expected in late 2027. Subject to approval, preparatory offshore construction could begin in 2028, with foundation and cable installation continuing into 2031. Seaway 7 previously worked with SSE on the Beatrice and Seagreen offshore wind farms. Tags Norway Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 636 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030.",
         "The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables.",
@@ -1820,7 +1819,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2023/08/Ingka-floating-wind-300x185.jpg",
       "summary": "The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity...",
-      "body": "Europe Offshore Renewables Scotland greenlights 1 GW floating offshore wind project Bojan Lepic November 20, 2026 0 426 1 minute read Ingka Group Ingka Group The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes. The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure. Muir Mhòr was awarded seabed rights in Scotland’s ScotWind leasing round in 2022 and is among the country’s most advanced commercial-scale floating wind developments. Fred. Olsen Seawind took full ownership of the project earlier this year after acquiring Vattenfall’s 50% interest. The developer is targeting the start of electricity generation in the early 2030s, subject to further commercial and investment decisions. The project has already awarded £18.4m in development contracts, including £7.96m to Scottish suppliers. The latest approval comes with conditions requiring measures to address the wind farm’s potential impact on commercial fisheries and seabirds. The Scottish Fishermen’s Federation criticised the decision, arguing that questions remain about whether fishing vessels can operate safely around the project’s floating foundations, moorings, and subsea cables. Scotland currently has more than 11GW of consented offshore wind capacity, according to the government. The consent is a significant development milestone for Muir Mhòr, although the project has yet to reach a final investment decision. Tags Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 426 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Scotland greenlights 1 GW floating offshore wind project Bojan Lepic November 20, 2026 0 541 1 minute read Ingka Group Ingka Group The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes. The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure. Muir Mhòr was awarded seabed rights in Scotland’s ScotWind leasing round in 2022 and is among the country’s most advanced commercial-scale floating wind developments. Fred. Olsen Seawind took full ownership of the project earlier this year after acquiring Vattenfall’s 50% interest. The developer is targeting the start of electricity generation in the early 2030s, subject to further commercial and investment decisions. The project has already awarded £18.4m in development contracts, including £7.96m to Scottish suppliers. The latest approval comes with conditions requiring measures to address the wind farm’s potential impact on commercial fisheries and seabirds. The Scottish Fishermen’s Federation criticised the decision, arguing that questions remain about whether fishing vessels can operate safely around the project’s floating foundations, moorings, and subsea cables. Scotland currently has more than 11GW of consented offshore wind capacity, according to the government. The consent is a significant development milestone for Muir Mhòr, although the project has yet to reach a final investment decision. Tags Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 541 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Olsen Seawind off the Aberdeenshire coast.",
         "Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes.",
