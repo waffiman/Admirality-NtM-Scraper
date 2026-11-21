@@ -7298,9 +7298,7 @@ function initAutoNtmUI() {
 
         tab.classList.add("active");
 
-        const chk = tab.querySelector(".excel-tab-check");
-
-        if (chk) chk.textContent = "✓";
+        tab.setAttribute("aria-pressed", "true");
 
       }
 
@@ -8084,9 +8082,7 @@ function renderRouteOnMap(route, shouldFly = true) {
 
       routeTab.classList.add("active");
 
-      const chk = routeTab.querySelector(".excel-tab-check");
-
-      if (chk) chk.style.opacity = "1";
+      routeTab.setAttribute("aria-pressed", "true");
 
     }
 
@@ -8746,8 +8742,7 @@ function ensureCurrentRouteRenderedOnChart(opts) {
   const routeTab = document.querySelector('.excel-tab[data-overlay="route"]');
   if (routeTab) {
     routeTab.classList.add("active");
-    const chk = routeTab.querySelector(".excel-tab-check");
-    if (chk) chk.textContent = "✓";
+    routeTab.setAttribute("aria-pressed", "true");
   }
   const catPillRoute = document.getElementById("catPillRoute");
   if (catPillRoute) catPillRoute.style.display = "inline-flex";
@@ -8790,8 +8785,7 @@ function openAndPlotRouteOnSetChart(routeOverride) {
       const routeTab = document.querySelector('.excel-tab[data-overlay="route"]');
       if (routeTab) {
         routeTab.classList.add("active");
-        const chk = routeTab.querySelector(".excel-tab-check");
-        if (chk) { chk.textContent = "✓"; chk.style.opacity = "1"; }
+        routeTab.setAttribute("aria-pressed", "true");
       }
       if (typeof renderRouteOnMap === "function") {
         renderRouteOnMap(targetRoute, true);
@@ -17688,9 +17682,9 @@ function setOverlayNoticesLoading(isLoading, currentPlotted, totalPlotted) {
 
       sp.setAttribute("aria-hidden", "true");
 
-      const chk = tab.querySelector(".excel-tab-check");
+      const icoWrap = tab.querySelector(".excel-tab-ico-wrap");
 
-      if (chk) tab.insertBefore(sp, chk);
+      if (icoWrap) icoWrap.prepend(sp);
 
       else tab.prepend(sp);
 
@@ -20033,15 +20027,7 @@ function initNtMMap() {
 
 
 
-    const overlayMaps = {
-
-      "Marks (Buoys, Beacons & Subsea Cables)": seamarkLayer
-
-    };
-
-
-
-    L.control.layers(baseMaps, overlayMaps, { position: "topright" }).addTo(leafletMap);
+    L.control.layers(baseMaps, {}, { position: "topright" }).addTo(leafletMap);
 
     if (typeof initVisualChartLayerSelector === "function") {
 
@@ -36197,97 +36183,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
 
 
-    <div class="ntm-layer-divider"></div>
-
-
-
-    <button type="button" class="ntm-layer-thumb-btn" data-overlay="buoys" title="Marks — Seamarks, Buoys, Beacons, Subsea Cables & Pipelines">
-
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
-
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-
-          <path d="M1 21.5h22" stroke="#d946ef" stroke-width="1.4" stroke-dasharray="3,2" opacity="0.9"/>
-
-          <ellipse cx="12" cy="18.5" rx="5.2" ry="1.35" fill="#0ea5e9" opacity="0.35"/>
-
-          <path d="M8.2 15.5h7.6l-1.1-7.4H9.3z" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.1" stroke-linejoin="round"/>
-
-          <path d="M9.4 11h5.2" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
-
-          <path d="M9.4 13.2h5.2" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
-
-          <rect x="11.15" y="4.5" width="1.7" height="3.6" rx="0.4" fill="#e2e8f0"/>
-
-          <path d="M12 2l2.35 2.5H9.65z" fill="#fbbf24" stroke="#f59e0b" stroke-width="0.8" stroke-linejoin="round"/>
-
-        </svg>
-
-      </div>
-
-      <span class="ntm-layer-thumb-label">Marks</span>
-
-    </button>
-
-
-
-    <button type="button" class="ntm-layer-thumb-btn" data-overlay="bathymetry" title="Bathymetry — Open Waters depth tint + isobath labels (metres)">
-
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#e0f2fe 0%,#7dd3fc 40%,#0284c7 78%,#0c4a6e 100%);">
-
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true">
-
-          <path d="M2.5 7.2c3.2 1.6 6.4-1.2 9.6 0.2s6.2 1.4 9.4-0.3" stroke="#f8fafc" stroke-width="1.35" stroke-linecap="round" opacity="0.95"/>
-
-          <path d="M2.5 12.1c3.1 1.5 6.3-1.1 9.5 0.15s6.3 1.35 9.5-0.25" stroke="#e0f2fe" stroke-width="1.25" stroke-linecap="round" opacity="0.92"/>
-
-          <path d="M2.8 16.8c3 1.35 6.1-1 9.2 0.1s6.2 1.2 9.2-0.2" stroke="#bae6fd" stroke-width="1.15" stroke-linecap="round" opacity="0.9"/>
-
-          <g font-family="Segoe UI,Arial,sans-serif" font-size="4.2" font-weight="700" fill="#082f49" stroke="#ffffff" stroke-width="0.55" paint-order="stroke" text-anchor="middle">
-
-            <text x="7.2" y="6.55">10</text>
-
-            <text x="12.2" y="11.35">20</text>
-
-            <text x="16.8" y="16.15">50</text>
-
-          </g>
-
-        </svg>
-
-      </div>
-
-      <span class="ntm-layer-thumb-label">Bathymetry</span>
-
-    </button>
-
-
-
-    <button type="button" class="ntm-layer-thumb-btn" data-overlay="timezones" title="Time Zones — UTC offset bands with live local time">
-
-      <div class="ntm-layer-thumb-preview" style="background:linear-gradient(90deg,#c97828 0%,#4f7d3d 20%,#6b7380 40%,#3a6f9a 60%,#b56a82 80%,#c97828 100%);">
-
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true">
-
-          <rect x="2.5" y="3.5" width="19" height="17" rx="2.2" fill="rgba(15,23,42,0.35)" stroke="#f8fafc" stroke-width="1.2"/>
-
-          <path d="M7.2 3.5v17M12 3.5v17M16.8 3.5v17" stroke="rgba(15,23,42,0.55)" stroke-width="1.1"/>
-
-          <circle cx="12" cy="12" r="4.4" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.1"/>
-
-          <path d="M12 9.4v2.7l1.85 1.15" stroke="#0f172a" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
-
-        </svg>
-
-      </div>
-
-      <span class="ntm-layer-thumb-label">Time Zone</span>
-
-    </button>
-
-
-
-    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Layers — ECDIS / Ocean / Buoys / Bathymetry / Time Zone" aria-label="Chart layers">
+    <button type="button" class="ntm-layer-thumb-btn ntm-layer-trigger-btn always-trigger" data-trigger="1" title="Map View — ECDIS / Ocean / Satellite / Globe 3D" aria-label="Map views">
 
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#1e293b 0%,#0f172a 100%);">
 
@@ -36413,9 +36309,37 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
 
 
+  const syncVisualOverlayTab = (overlayKey, btn, isOn) => {
+
+    try {
+
+      if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES[overlayKey] = !!isOn;
+
+      if (window.OVERLAY_STATES) window.OVERLAY_STATES[overlayKey] = !!isOn;
+
+    } catch (eOv) {}
+
+    const target = btn || document.querySelector('.excel-tab[data-overlay="' + overlayKey + '"]');
+
+    if (target) {
+
+      target.classList.toggle("active", !!isOn);
+
+      target.setAttribute("aria-pressed", isOn ? "true" : "false");
+
+    }
+
+  };
+
   const setOverlayBusy = (btn, on, titleIdle) => {
 
     if (!btn) return;
+
+    if (!btn.dataset.idleTitle && (titleIdle || btn.title)) {
+
+      btn.dataset.idleTitle = btn.title || titleIdle;
+
+    }
 
     btn.classList.toggle("is-loading", !!on);
 
@@ -36423,13 +36347,13 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
     if (on) btn.title = "Loading…";
 
-    else if (titleIdle) btn.title = titleIdle;
+    else btn.title = btn.dataset.idleTitle || titleIdle || btn.title;
 
   };
 
 
 
-  const toggleOwMapLibreOverlay = async (overlayKey, btn) => {
+  const toggleOwMapLibreOverlay = async (overlayKey, btn, desiredOn) => {
 
     if (owOverlayBusy) return;
 
@@ -36437,11 +36361,25 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
     if (!meta) return;
 
-    const turningOn = !meta.getOn();
+    const targetBtn = btn || document.querySelector('.excel-tab[data-overlay="' + overlayKey + '"]');
 
-    const idleTitle = meta.title;
+    const curOn = Boolean(meta.getOn());
+
+    const turningOn = typeof desiredOn === "boolean" ? desiredOn : !curOn;
+
+    const idleTitle = (targetBtn && targetBtn.dataset && targetBtn.dataset.idleTitle) || (targetBtn && targetBtn.title) || meta.title;
 
     const label = meta.label;
+
+    if (turningOn === curOn) {
+
+      syncVisualOverlayTab(overlayKey, targetBtn, curOn);
+
+      setOverlayBusy(targetBtn, false, idleTitle);
+
+      return;
+
+    }
 
 
 
@@ -36453,9 +36391,9 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
       meta.setOn(false);
 
-      btn.classList.remove("active-overlay");
+      syncVisualOverlayTab(overlayKey, targetBtn, false);
 
-      setOverlayBusy(btn, false, idleTitle);
+      setOverlayBusy(targetBtn, false, idleTitle);
 
       if (typeof flashOpenWatersLayerStatus === "function") {
 
@@ -36471,7 +36409,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
     owOverlayBusy = true;
 
-    setOverlayBusy(btn, true, idleTitle);
+    setOverlayBusy(targetBtn, true, idleTitle);
 
     if (typeof flashOpenWatersLayerStatus === "function") {
 
@@ -36523,9 +36461,9 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
       meta.setOn(true);
 
-      btn.classList.add("active-overlay");
+      syncVisualOverlayTab(overlayKey, targetBtn, true);
 
-      setOverlayBusy(btn, false, idleTitle);
+      setOverlayBusy(targetBtn, false, idleTitle);
 
       if (typeof flashOpenWatersLayerStatus === "function") {
 
@@ -36547,9 +36485,9 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
       } catch (e2) {}
 
-      btn.classList.remove("active-overlay");
+      syncVisualOverlayTab(overlayKey, targetBtn, false);
 
-      setOverlayBusy(btn, false, idleTitle + " (unavailable)");
+      setOverlayBusy(targetBtn, false, idleTitle + " (unavailable)");
 
       meta.setOn(false);
 
@@ -37241,7 +37179,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
             triggerBtn.setAttribute("aria-busy", on ? "true" : "false");
 
-            triggerBtn.title = on ? "Loading chart layer…" : "Layers — ECDIS / Ocean / Buoys / Bathymetry / Time Zone";
+            triggerBtn.title = on ? "Loading chart layer…" : "Map View — ECDIS / Ocean / Satellite / Globe 3D";
 
           }
 
@@ -37352,135 +37290,84 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
         if (!isCoarsePointer()) selector.classList.add("collapsed");
 
-      } else if (overlayKey === "buoys" && layers.buoys) {
-
-        isBuoysActive = !isBuoysActive;
-
-        btn.classList.toggle("active-overlay", isBuoysActive);
-
-        if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.buoys = isBuoysActive;
-
-        if (isBuoysActive) {
-
-          const idleTitle = btn.getAttribute("title") || "Marks — Seamarks, Buoys & Subsea Cables";
-
-          setOverlayBusy(btn, true, idleTitle);
-
-          if (mapInstance.hasLayer(layers.buoys)) {
-
-            try { mapInstance.removeLayer(layers.buoys); } catch (eRmB) {}
-
-          }
-
-          layers.buoys.addTo(mapInstance);
-
-          const tile = layers.buoysTile || layers.buoysBase || null;
-
-          let settled = false;
-
-          const finishBuoys = () => {
-
-            if (settled) return;
-
-            settled = true;
-
-            setOverlayBusy(btn, false, idleTitle);
-
-            try {
-
-              if (tile) {
-
-                tile.off("load", finishBuoys);
-
-                tile.off("tileerror", finishBuoys);
-
-              }
-
-            } catch (eOff) {}
-
-          };
-
-          try {
-
-            if (tile) {
-
-              tile.once("load", finishBuoys);
-
-              tile.once("tileerror", finishBuoys);
-
-              if (tile.redraw) tile.redraw();
-
-            }
-
-          } catch (eRd) {}
-
-          // Fallback — OpenSeaMap can be slow; never leave spinner forever
-
-          setTimeout(finishBuoys, 12000);
-
-          // Cached tiles may already be idle
-
-          setTimeout(() => {
-
-            try {
-
-              if (tile && tile._loading === false) finishBuoys();
-
-            } catch (eC) {}
-
-          }, 350);
-
-        } else {
-
-          setOverlayBusy(btn, false, btn.getAttribute("data-idle-title") || "Buoys — OpenSeaMap seamarks");
-
-          if (mapInstance.hasLayer(layers.buoys)) {
-
-            mapInstance.removeLayer(layers.buoys);
-
-          }
-
-        }
-
-      } else if (overlayKey === "bathymetry") {
-
-        if (layerPanelLeaveTimer) {
-
-          clearTimeout(layerPanelLeaveTimer);
-
-          layerPanelLeaveTimer = null;
-
-        }
-
-        if (!isCoarsePointer()) selector.classList.remove("collapsed");
-
-        toggleOwMapLibreOverlay(overlayKey, btn);
-
-      } else if (overlayKey === "timezones") {
-
-        isTimezonesActive = !isTimezonesActive;
-
-        btn.classList.toggle("active-overlay", isTimezonesActive);
-
-        try {
-
-          setTimezoneOverlayActive(mapInstance, isTimezonesActive);
-
-        } catch (eTz) {
-
-          console.warn("[SetSail] Time Zone overlay failed", eTz);
-
-          isTimezonesActive = false;
-
-          btn.classList.remove("active-overlay");
-
-        }
-
       }
 
     });
 
   });
+
+  /**
+   * Toggle visual map overlays (Marks, Bathymetry, Time Zones) from the bottom
+   * chart dock while synchronizing active UI state, spinners, and OVERLAY_STATES.
+   */
+  window.setSetChartVisualOverlay = function (overlayKey, desiredOn) {
+    const dockBtn = document.querySelector('.excel-tab[data-overlay="' + overlayKey + '"]');
+    if (overlayKey === "buoys" && layers.buoys) {
+      const nextOn = typeof desiredOn === "boolean" ? desiredOn : !isBuoysActive;
+      isBuoysActive = nextOn;
+      syncVisualOverlayTab("buoys", dockBtn, nextOn);
+      if (nextOn) {
+        const idleTitle = (dockBtn && (dockBtn.dataset.idleTitle || dockBtn.getAttribute("title"))) || "Marks — Seamarks, Buoys & Subsea Cables";
+        setOverlayBusy(dockBtn, true, idleTitle);
+        if (mapInstance.hasLayer(layers.buoys)) {
+          try { mapInstance.removeLayer(layers.buoys); } catch (eRmB) {}
+        }
+        layers.buoys.addTo(mapInstance);
+        const tile = layers.buoysTile || layers.buoysBase || null;
+        let settled = false;
+        const finishBuoys = () => {
+          if (settled) return;
+          settled = true;
+          setOverlayBusy(dockBtn, false, idleTitle);
+          try {
+            if (tile) {
+              tile.off("load", finishBuoys);
+              tile.off("tileerror", finishBuoys);
+            }
+          } catch (eOff) {}
+        };
+        try {
+          if (tile) {
+            tile.once("load", finishBuoys);
+            tile.once("tileerror", finishBuoys);
+            if (tile.redraw) tile.redraw();
+          }
+        } catch (eRd) {}
+        setTimeout(finishBuoys, 12000);
+        setTimeout(() => {
+          try {
+            if (tile && tile._loading === false) finishBuoys();
+          } catch (eC) {}
+        }, 350);
+      } else {
+        setOverlayBusy(dockBtn, false);
+        if (mapInstance.hasLayer(layers.buoys)) {
+          mapInstance.removeLayer(layers.buoys);
+        }
+      }
+      return isBuoysActive;
+    }
+
+    if (overlayKey === "bathymetry") {
+      toggleOwMapLibreOverlay("bathymetry", dockBtn, desiredOn);
+      return isBathymetryActive;
+    }
+
+    if (overlayKey === "timezones") {
+      const nextTz = typeof desiredOn === "boolean" ? desiredOn : !isTimezonesActive;
+      isTimezonesActive = nextTz;
+      syncVisualOverlayTab("timezones", dockBtn, nextTz);
+      try {
+        setTimezoneOverlayActive(mapInstance, nextTz);
+      } catch (eTz) {
+        console.warn("[SetSail] Time Zone overlay failed", eTz);
+        isTimezonesActive = false;
+        syncVisualOverlayTab("timezones", dockBtn, false);
+      }
+      return isTimezonesActive;
+    }
+    return false;
+  };
 
 }
 

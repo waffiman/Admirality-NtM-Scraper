@@ -6969,103 +6969,98 @@
 
 
 .excel-tabs-scroll {
-
   display: flex;
-
   align-items: flex-end;
-
-  flex: 1 1 auto;
-
+  justify-content: flex-start;
+  flex: 0 1 auto;
+  width: auto;
+  max-width: calc(100% - 245px);
   min-width: 0;
-
-  gap: 3px;
-
+  margin-left: auto;
+  margin-right: 0;
+  gap: 4px;
   overflow-x: auto;
-
   overflow-y: hidden;
-
   scrollbar-width: none;
-
   -webkit-overflow-scrolling: touch;
-
   height: 100%;
-
-  flex: 1;
-
-  min-width: 0;
-
 }
-
-
 
 .excel-tabs-scroll::-webkit-scrollbar {
-
   display: none;
-
 }
-
-
 
 .excel-tab {
-
+  --tab-accent: #38bdf8;
+  --tab-accent-rgb: 56, 189, 248;
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
-
   align-items: center;
-
+  align-self: flex-end;
   gap: 6px;
-
-  background: rgba(14, 22, 46, 0.65);
-
-  border: 1px solid var(--line);
-
+  background: rgba(13, 21, 42, 0.72);
+  border: 1px solid rgba(126, 182, 255, 0.16);
   border-bottom: none;
-
-  border-radius: 6px 6px 0 0;
-
-  padding: 0.35rem 0.65rem;
-
-  font-size: 0.73rem;
-
+  border-radius: 7px 7px 0 0;
+  padding: 0 0.56rem 0 0.42rem;
+  font-size: 0.72rem;
   font-weight: 600;
-
-  color: var(--muted);
-
+  color: #8fa2bc;
   cursor: pointer;
-
-  transition: all 0.15s ease;
-
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.2s ease, transform 0.14s ease;
   white-space: nowrap;
-
-  height: 30px;
-
+  height: 32px;
   margin: 0;
-
   outline: none;
-
 }
 
+.excel-tab::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 7px;
+  right: 7px;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: transparent;
+  transition: all 0.2s ease;
+}
 
+.excel-tab[data-overlay="notices"]    { --tab-accent: #fb923c; --tab-accent-rgb: 251, 146, 60; }
+.excel-tab[data-overlay="depths"]     { --tab-accent: #38bdf8; --tab-accent-rgb: 56, 189, 248; }
+.excel-tab[data-overlay="weather"]    { --tab-accent: #60a5fa; --tab-accent-rgb: 96, 165, 250; }
+.excel-tab[data-overlay="ais"]        { --tab-accent: #2dd4bf; --tab-accent-rgb: 45, 212, 191; }
+.excel-tab[data-overlay="buoys"]      { --tab-accent: #f87171; --tab-accent-rgb: 248, 113, 113; }
+.excel-tab[data-overlay="bathymetry"] { --tab-accent: #22d3ee; --tab-accent-rgb: 34, 211, 238; }
+.excel-tab[data-overlay="timezones"]  { --tab-accent: #a78bfa; --tab-accent-rgb: 167, 139, 250; }
+.excel-tab[data-overlay="route"]      { --tab-accent: #34d399; --tab-accent-rgb: 52, 211, 153; }
 
 .excel-tab:hover {
-
-  background: rgba(126, 182, 255, 0.12);
-
-  color: #fff;
-
+  background: rgba(126, 182, 255, 0.11);
+  border-color: rgba(var(--tab-accent-rgb), 0.36);
+  color: #e2e8f0;
 }
 
-
+.excel-tab:hover .excel-tab-ico-wrap {
+  border-color: rgba(var(--tab-accent-rgb), 0.38);
+  color: #cbd5e1;
+}
 
 .excel-tab.active {
+  background: linear-gradient(180deg, rgba(var(--tab-accent-rgb), 0.22) 0%, rgba(var(--tab-accent-rgb), 0.08) 100%);
+  border-color: rgba(var(--tab-accent-rgb), 0.58);
+  color: #f8fafc;
+  font-weight: 700;
+  box-shadow: 0 -2px 12px rgba(var(--tab-accent-rgb), 0.2);
+}
 
-  background: rgba(2, 132, 199, 0.22);
-
-  border-color: #38bdf8;
-
-  color: #ffffff;
-
-  box-shadow: 0 -2px 8px rgba(56, 189, 248, 0.2);
-
+.excel-tab.active::before {
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: var(--tab-accent);
+  box-shadow: 0 0 9px rgba(var(--tab-accent-rgb), 0.85);
 }
 
 
@@ -7148,108 +7143,111 @@
 
 
 
-.excel-tab-check {
-
+/* Layer Icon Socket & Illuminated Switch SVG */
+.excel-tab-ico-wrap {
+  position: relative;
   display: inline-flex;
-
   align-items: center;
-
   justify-content: center;
-
-  width: 13px;
-
-  height: 13px;
-
-  border-radius: 3px;
-
-  border: 1px solid rgba(140, 170, 255, 0.35);
-
-  background: rgba(255, 255, 255, 0.05);
-
-  font-size: 0.65rem;
-
-  font-weight: 800;
-
-  color: #38bdf8;
-
-  line-height: 1;
-
-}
-
-
-
-.excel-tab.active .excel-tab-check {
-
-  background: #0284c7;
-
-  border-color: #38bdf8;
-
-  color: #ffffff;
-
-}
-
-
-
-/* Excel Dock Tab Loading Spinner */
-
-.excel-tab-spinner {
-
-  display: none;
-
-  width: 13px;
-
-  height: 13px;
-
-  border: 2px solid rgba(56, 189, 248, 0.22);
-
-  border-top-color: #38bdf8;
-
-  border-right-color: #f97316;
-
-  border-radius: 50%;
-
-  animation: excelTabSpinnerRotate 0.65s linear infinite;
-
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  color: rgba(160, 178, 204, 0.74);
   flex-shrink: 0;
-
-  box-sizing: border-box;
-
-  margin: 0;
-
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.22s ease;
 }
 
+.excel-tab-svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), color 0.18s ease, opacity 0.16s ease, filter 0.2s ease;
+}
 
+.excel-tab-svg .ico-fill {
+  fill: var(--tab-accent);
+  fill-opacity: 0;
+  transition: fill-opacity 0.2s ease;
+}
+
+.excel-tab-svg .ico-spark {
+  opacity: 0.24;
+  transition: opacity 0.2s ease, stroke 0.2s ease;
+}
+
+.excel-tab-svg .ico-dot {
+  fill: currentColor;
+  stroke: none;
+  opacity: 0.55;
+  transition: opacity 0.2s ease, fill 0.2s ease;
+}
+
+.excel-tab.active .excel-tab-ico-wrap {
+  background: rgba(var(--tab-accent-rgb), 0.24);
+  border-color: rgba(var(--tab-accent-rgb), 0.72);
+  box-shadow: 0 0 10px rgba(var(--tab-accent-rgb), 0.42), inset 0 0 6px rgba(var(--tab-accent-rgb), 0.26);
+  color: var(--tab-accent);
+}
+
+.excel-tab.active .excel-tab-svg {
+  color: var(--tab-accent);
+  filter: drop-shadow(0 0 4px rgba(var(--tab-accent-rgb), 0.65));
+  transform: scale(1.06);
+}
+
+.excel-tab.active .excel-tab-svg .ico-fill {
+  fill-opacity: 0.32;
+}
+
+.excel-tab.active .excel-tab-svg .ico-spark {
+  opacity: 1;
+  stroke: var(--tab-accent);
+}
+
+.excel-tab.active .excel-tab-svg .ico-dot {
+  fill: var(--tab-accent);
+  opacity: 1;
+}
+
+/* Dock Tab Loading Spinner centered inside Icon Socket */
+.excel-tab-spinner {
+  display: none;
+  position: absolute;
+  inset: 3px;
+  width: 12px;
+  height: 12px;
+  margin: auto;
+  border: 2px solid rgba(var(--tab-accent-rgb), 0.22);
+  border-top-color: var(--tab-accent);
+  border-radius: 50%;
+  animation: setsailSpin 0.65s linear infinite;
+  box-sizing: border-box;
+  pointer-events: none;
+}
 
 @keyframes excelTabSpinnerRotate {
-
   0% { transform: rotate(0deg); }
-
   100% { transform: rotate(360deg); }
-
 }
-
-
 
 .excel-tab.is-loading .excel-tab-spinner {
-
-  display: inline-flex !important;
-
+  display: block !important;
 }
 
-
-
-.excel-tab.is-loading .excel-tab-check {
-
-  display: none !important;
-
+.excel-tab.is-loading .excel-tab-svg {
+  opacity: 0 !important;
+  transform: scale(0.72);
 }
-
-
 
 .excel-tab.is-loading {
-
   cursor: wait !important;
-
 }
 
 
@@ -7449,37 +7447,61 @@
 
 
 [data-theme="light"] .excel-tab {
-
-  background: #e2e8f0;
-
+  background: rgba(255, 255, 255, 0.72);
   border-color: #cbd5e1;
-
-  color: #475569;
-
+  color: #526071;
 }
 
+[data-theme="light"] .excel-tab[data-overlay="notices"]    { --tab-accent: #ea580c; --tab-accent-rgb: 234, 88, 12; }
+[data-theme="light"] .excel-tab[data-overlay="depths"]     { --tab-accent: #0284c7; --tab-accent-rgb: 2, 132, 199; }
+[data-theme="light"] .excel-tab[data-overlay="weather"]    { --tab-accent: #2563eb; --tab-accent-rgb: 37, 99, 235; }
+[data-theme="light"] .excel-tab[data-overlay="ais"]        { --tab-accent: #0d9488; --tab-accent-rgb: 13, 148, 136; }
+[data-theme="light"] .excel-tab[data-overlay="buoys"]      { --tab-accent: #dc2626; --tab-accent-rgb: 220, 38, 38; }
+[data-theme="light"] .excel-tab[data-overlay="bathymetry"] { --tab-accent: #0891b2; --tab-accent-rgb: 8, 145, 178; }
+[data-theme="light"] .excel-tab[data-overlay="timezones"]  { --tab-accent: #7c3aed; --tab-accent-rgb: 124, 58, 237; }
+[data-theme="light"] .excel-tab[data-overlay="route"]      { --tab-accent: #059669; --tab-accent-rgb: 5, 150, 105; }
 
+[data-theme="light"] .excel-tab-ico-wrap {
+  background: rgba(15, 23, 42, 0.05);
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #64748b;
+}
 
 [data-theme="light"] .excel-tab:hover {
-
-  background: #cbd5e1;
-
+  background: #ffffff;
+  border-color: rgba(var(--tab-accent-rgb), 0.45);
   color: #0f172a;
-
 }
 
-
+[data-theme="light"] .excel-tab:hover .excel-tab-ico-wrap {
+  border-color: rgba(var(--tab-accent-rgb), 0.45);
+  color: var(--tab-accent);
+}
 
 [data-theme="light"] .excel-tab.active {
+  background: linear-gradient(180deg, rgba(var(--tab-accent-rgb), 0.13) 0%, #ffffff 78%);
+  border-color: rgba(var(--tab-accent-rgb), 0.65);
+  color: #0f172a;
+  box-shadow: 0 -2px 8px rgba(var(--tab-accent-rgb), 0.14);
+}
 
-  background: #ffffff;
+[data-theme="light"] .excel-tab.active::before {
+  box-shadow: 0 0 6px rgba(var(--tab-accent-rgb), 0.45);
+}
 
-  border-color: #0284c7;
+[data-theme="light"] .excel-tab.active .excel-tab-ico-wrap {
+  background: rgba(var(--tab-accent-rgb), 0.16);
+  border-color: rgba(var(--tab-accent-rgb), 0.72);
+  box-shadow: 0 0 8px rgba(var(--tab-accent-rgb), 0.22), inset 0 0 4px rgba(var(--tab-accent-rgb), 0.14);
+  color: var(--tab-accent);
+}
 
-  color: #0369a1;
+[data-theme="light"] .excel-tab.active .excel-tab-svg {
+  filter: drop-shadow(0 0 2px rgba(var(--tab-accent-rgb), 0.35));
+}
 
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.06);
-
+[data-theme="light"] .excel-tab.active .excel-tab-svg .ico-fill {
+  fill-opacity: 0.24;
 }
 
 
@@ -23073,11 +23095,9 @@
   }
 
   .excel-tabs-scroll {
-
-    justify-content: space-evenly;
-
-    gap: 4px;
-
+    justify-content: flex-start;
+    max-width: 100%;
+    gap: 5px;
   }
 
 
@@ -23293,23 +23313,16 @@
 }
 
 .excel-tab.is-loading .excel-tab-spinner {
-
-  display: inline-block !important;
-
+  display: block !important;
+  position: absolute;
+  inset: 3px;
   width: 12px;
-
   height: 12px;
-
+  margin: auto;
   border-radius: 50%;
-
-  border: 2px solid rgba(56,189,248,0.25);
-
-  border-top-color: #38bdf8;
-
-  animation: setsailSpin 0.7s linear infinite;
-
-  margin-right: 4px;
-
+  border: 2px solid rgba(var(--tab-accent-rgb, 56, 189, 248), 0.25);
+  border-top-color: var(--tab-accent, #38bdf8);
+  animation: setsailSpin 0.65s linear infinite;
 }
 
 

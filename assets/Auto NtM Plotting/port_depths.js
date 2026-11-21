@@ -18,6 +18,8 @@ var OVERLAY_STATES = window.OVERLAY_STATES || {
   isobaths: false,
   notices: false,
   buoys: false,
+  bathymetry: false,
+  timezones: false,
   weather: false,
   route: hasSavedDrCurrentRoute,
   ais: false
@@ -19882,6 +19884,7 @@ function renderPortDepthsOnMap(map) {
 function setOverlayNoticesLoading(isLoading) {
   const tab = document.getElementById("tabOverlayNotices");
   if (!tab) return;
+  tab.setAttribute("aria-busy", isLoading ? "true" : "false");
   if (isLoading) {
     tab.classList.add("is-loading");
     tab.setAttribute("title", "Loading NtM & NAVTEX objects onto chart...");
@@ -19890,8 +19893,8 @@ function setOverlayNoticesLoading(isLoading) {
       sp.className = "excel-tab-spinner";
       sp.id = "tabNoticesSpinner";
       sp.setAttribute("aria-hidden", "true");
-      const chk = tab.querySelector(".excel-tab-check");
-      if (chk) tab.insertBefore(sp, chk);
+      const icoWrap = tab.querySelector(".excel-tab-ico-wrap");
+      if (icoWrap) icoWrap.prepend(sp);
       else tab.prepend(sp);
     }
   } else {
@@ -19902,7 +19905,7 @@ function setOverlayNoticesLoading(isLoading) {
 window.setOverlayNoticesLoading = setOverlayNoticesLoading;
 
 /**
- * Initialize Excel-Style Overlays Dock Bar
+ * Initialize Bottom Chart Overlays Dock Bar
  */
 function initExcelOverlayDock(map) {
   const dock = document.getElementById("excelOverlayDock");
@@ -19910,145 +19913,80 @@ function initExcelOverlayDock(map) {
   if (dock.dataset.initialized === "1") return;
   dock.dataset.initialized = "1";
 
-  // 1. Admiralty NtM Overlay Tab
-  const ntmTab = document.getElementById("tabOverlayNotices");
-  if (ntmTab) {
-    ntmTab.addEventListener("click", (e) => {
-      if (e.target && e.target.closest("#btnNtmOverlayInfo")) {
-        e.stopPropagation();
-        if (typeof window.openNtmOverlayInfoModal === "function") {
-          window.openNtmOverlayInfoModal();
+  const overlayTabSpecs = [
+    {
+      key: "notices",
+      tabId: "tabOverlayNotices",
+      infoId: "btnNtmOverlayInfo",
+      onInfo: () => { if (typeof window.openNtmOverlayInfoModal === "function") window.openNtmOverlayInfoModal(); },
+      beforeToggle: (isActive) => { setOverlayNoticesLoading(isActive); }
+    },
+    {
+      key: "depths",
+      tabId: "tabOverlayDepths",
+      infoId: "btnWeeklyDepthAudit",
+      onInfo: () => { runWeeklyDepthAudit(true); }
+    },
+    {
+      key: "weather",
+      tabId: "tabOverlayWeather",
+      infoId: "btnWeatherOverlayInfo",
+      onInfo: () => { if (typeof window.showWeatherInfoModal === "function") window.showWeatherInfoModal(); }
+    },
+    {
+      key: "ais",
+      tabId: "tabOverlayAis",
+      infoId: "btnAisOverlayInfo",
+      onInfo: () => { if (typeof window.showAisInfoModal === "function") window.showAisInfoModal(); }
+    },
+    { key: "buoys", tabId: "tabOverlayBuoys" },
+    { key: "bathymetry", tabId: "tabOverlayBathymetry" },
+    { key: "timezones", tabId: "tabOverlayTimezones" },
+    {
+      key: "route",
+      tabId: "tabOverlayRoute",
+      infoId: "btnRouteOverlayInfo",
+      onInfo: () => { if (typeof window.showRouteInfoSummary === "function") window.showRouteInfoSummary(); }
+    }
+  ];
+
+  overlayTabSpecs.forEach((spec) => {
+    const tab = document.getElementById(spec.tabId);
+    if (tab) {
+      tab.addEventListener("click", (e) => {
+        if (spec.infoId && e.target && e.target.closest("#" + spec.infoId)) {
+          e.stopPropagation();
+          spec.onInfo();
+          return;
         }
-        return;
+        const isActive = !tab.classList.contains("active");
+        if (spec.beforeToggle) spec.beforeToggle(isActive);
+        setOverlayActive(spec.key, isActive, window.leafletMap || map);
+      });
+    }
+    if (spec.infoId) {
+      const infoBtn = document.getElementById(spec.infoId);
+      if (infoBtn) {
+        infoBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          spec.onInfo();
+        });
       }
-      const isActive = !ntmTab.classList.contains("active");
-      if (isActive) {
-        setOverlayNoticesLoading(true);
-      } else {
-        setOverlayNoticesLoading(false);
-      }
-      setOverlayActive("notices", isActive, window.leafletMap || map);
-    });
-  }
-
-  const ntmInfoBtn = document.getElementById("btnNtmOverlayInfo");
-  if (ntmInfoBtn) {
-    ntmInfoBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (typeof window.openNtmOverlayInfoModal === "function") {
-        window.openNtmOverlayInfoModal();
-      }
-    });
-  }
-
-  // 2. Port Depths Overlay Tab
-  const depthTab = document.getElementById("tabOverlayDepths");
-  if (depthTab) {
-    depthTab.addEventListener("click", (e) => {
-      if (e.target && e.target.closest("#btnWeeklyDepthAudit")) {
-        e.stopPropagation();
-        runWeeklyDepthAudit(true);
-        return;
-      }
-      const isActive = !depthTab.classList.contains("active");
-      setOverlayActive("depths", isActive, window.leafletMap || map);
-    });
-  }
-
-  const auditBtn = document.getElementById("btnWeeklyDepthAudit");
-  if (auditBtn) {
-    auditBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      runWeeklyDepthAudit(true);
-    });
-  }
-
-  // 3. Marine Weather Overlay Tab
-  const weatherTab = document.getElementById("tabOverlayWeather");
-  if (weatherTab) {
-    weatherTab.addEventListener("click", (e) => {
-      if (e.target && e.target.closest("#btnWeatherOverlayInfo")) {
-        e.stopPropagation();
-        if (typeof window.showWeatherInfoModal === "function") {
-          window.showWeatherInfoModal();
-        }
-        return;
-      }
-      const isActive = !weatherTab.classList.contains("active");
-      setOverlayActive("weather", isActive, window.leafletMap || map);
-    });
-  }
-
-  const weatherInfoBtn = document.getElementById("btnWeatherOverlayInfo");
-  if (weatherInfoBtn) {
-    weatherInfoBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (typeof window.showWeatherInfoModal === "function") {
-        window.showWeatherInfoModal();
-      }
-    });
-  }
-
-  // 3b. AIS Overlay Tab (non-exportable)
-  const aisTab = document.getElementById("tabOverlayAis");
-  if (aisTab) {
-    aisTab.addEventListener("click", (e) => {
-      if (e.target && e.target.closest("#btnAisOverlayInfo")) {
-        e.stopPropagation();
-        if (typeof window.showAisInfoModal === "function") window.showAisInfoModal();
-        return;
-      }
-      const isActive = !aisTab.classList.contains("active");
-      setOverlayActive("ais", isActive, window.leafletMap || map);
-    });
-  }
-  const aisInfoBtn = document.getElementById("btnAisOverlayInfo");
-  if (aisInfoBtn) {
-    aisInfoBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (typeof window.showAisInfoModal === "function") window.showAisInfoModal();
-    });
-  }
-
-  // 4. Route Track Overlay Tab
-  const routeTab = document.getElementById("tabOverlayRoute");
-  if (routeTab) {
-    routeTab.addEventListener("click", (e) => {
-      if (e.target && e.target.closest("#btnRouteOverlayInfo")) {
-        e.stopPropagation();
-        if (typeof window.showRouteInfoSummary === "function") {
-          window.showRouteInfoSummary();
-        }
-        return;
-      }
-      const isActive = !routeTab.classList.contains("active");
-      setOverlayActive("route", isActive, window.leafletMap || map);
-    });
-  }
-
-  const routeInfoBtn = document.getElementById("btnRouteOverlayInfo");
-  if (routeInfoBtn) {
-    routeInfoBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (typeof window.showRouteInfoSummary === "function") {
-        window.showRouteInfoSummary();
-      }
-    });
-  }
+    }
+  });
 
   if (hasSavedDrCurrentRoute) {
     OVERLAY_STATES.route = true;
     if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
   }
 
-  // Sync initial dock tab visual states with OVERLAY_STATES (all OFF by default for fast map load)
-  ["notices", "depths", "weather", "ais", "route"].forEach((key) => {
+  // Sync initial dock tab visual states with OVERLAY_STATES
+  overlayTabSpecs.forEach(({ key }) => {
     const isAct = Boolean(OVERLAY_STATES[key]);
     const tabEl = document.querySelector(`.excel-tab[data-overlay="${key}"]`);
     if (tabEl) {
       tabEl.classList.toggle("active", isAct);
-      const chk = tabEl.querySelector(".excel-tab-check");
-      if (chk) chk.textContent = isAct ? "✓" : "";
+      tabEl.setAttribute("aria-pressed", isAct ? "true" : "false");
     }
   });
 
@@ -20065,20 +20003,20 @@ function initExcelOverlayDock(map) {
 }
 
 /**
- * Toggle an overlay on/off and sync Excel dock tab UI
+ * Toggle an overlay on/off and sync dock tile icon state
  */
-
 function setOverlayTileLoading(overlayKey, isLoading) {
   const tab = document.querySelector('.excel-tab[data-overlay="' + overlayKey + '"]');
   if (!tab) return;
+  tab.setAttribute("aria-busy", isLoading ? "true" : "false");
   if (isLoading) {
     tab.classList.add("is-loading");
     if (!tab.querySelector(".excel-tab-spinner")) {
       const sp = document.createElement("span");
       sp.className = "excel-tab-spinner";
       sp.setAttribute("aria-hidden", "true");
-      const chk = tab.querySelector(".excel-tab-check");
-      if (chk) tab.insertBefore(sp, chk);
+      const icoWrap = tab.querySelector(".excel-tab-ico-wrap");
+      if (icoWrap) icoWrap.prepend(sp);
       else tab.prepend(sp);
     }
   } else {
@@ -20088,6 +20026,18 @@ function setOverlayTileLoading(overlayKey, isLoading) {
 window.setOverlayTileLoading = setOverlayTileLoading;
 
 function setOverlayActive(overlayKey, isActive, map = null) {
+  // Visual map overlays (Marks, Bathymetry, Time Zones) manage their own
+  // async loading spinner and active state via setsail_core's controller.
+  if (overlayKey === "buoys" || overlayKey === "bathymetry" || overlayKey === "timezones") {
+    if (typeof window.setSetChartVisualOverlay === "function") {
+      window.setSetChartVisualOverlay(overlayKey, Boolean(isActive));
+      if (typeof window.syncFilterMasterCheckboxes === "function") {
+        window.syncFilterMasterCheckboxes();
+      }
+      return;
+    }
+  }
+
   OVERLAY_STATES[overlayKey] = isActive;
   if (window.OVERLAY_STATES) {
     window.OVERLAY_STATES[overlayKey] = isActive;
@@ -20108,14 +20058,11 @@ function setOverlayActive(overlayKey, isActive, map = null) {
 
   const currentMap = window.leafletMap || map || (typeof leafletMap !== "undefined" ? leafletMap : null);
 
-  // Update Excel Tab UI
+  // Update dock tile active & accessibility state
   const tab = document.querySelector(`.excel-tab[data-overlay="${overlayKey}"]`);
   if (tab) {
-    tab.classList.toggle("active", isActive);
-    const checkEl = tab.querySelector(".excel-tab-check");
-    if (checkEl) {
-      checkEl.textContent = isActive ? "✓" : "";
-    }
+    tab.classList.toggle("active", Boolean(isActive));
+    tab.setAttribute("aria-pressed", isActive ? "true" : "false");
   }
 
   if (currentMap) {
@@ -20194,6 +20141,10 @@ function setOverlayActive(overlayKey, isActive, map = null) {
       if (typeof seamarkLayer !== "undefined" && seamarkLayer) {
         if (isActive) currentMap.addLayer(seamarkLayer);
         else currentMap.removeLayer(seamarkLayer);
+      }
+    } else if (overlayKey === "timezones") {
+      if (typeof window.setTimezoneOverlayActive === "function") {
+        window.setTimezoneOverlayActive(currentMap, Boolean(isActive));
       }
     } else if (overlayKey === "weather") {
       if (typeof window.syncNdbcCursorTileVisibility === "function") {
