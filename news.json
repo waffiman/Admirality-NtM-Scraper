@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-20T19:03:09Z",
-  "generatedAt": "2026-11-20T19:03:09Z",
+  "updatedAt": "2026-11-21T01:07:40Z",
+  "generatedAt": "2026-11-21T01:07:40Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -20,7 +20,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/cma-shipping",
-      "publishedAt": "2026-11-20T19:03:09Z",
+      "publishedAt": "2026-11-21T01:07:40Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -52,7 +52,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/crew-connect-global",
-      "publishedAt": "2026-11-20T19:03:09Z",
+      "publishedAt": "2026-11-21T01:07:40Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -76,6 +76,583 @@
       ],
       "readingMinutes": 2,
       "readMinutes": 2
+    },
+    {
+      "id": "SN-E2CAF86EA9",
+      "title": "Panda Express Line reorganises Russian Far East network",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/panda-express-line-reorganises-russian-far-east-network/",
+      "publishedAt": "2026-11-20T23:47:57Z",
+      "category": "Ports & Terminals",
+      "region": "Baltic Sea & Northern Europe",
+      "regions": [
+        "Baltic Sea & Northern Europe",
+        "China & East Asia",
+        "Japan & Korea"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "china"
+      ],
+      "coords": [
+        57.5,
+        19.5
+      ],
+      "navarea": "I",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/HAI-RUN-SHENG-DA-panta-300x169.jpeg",
+      "summary": "Panda Express Line has revised four services connecting the Russian Far East with ports in China and South Korea. The carrier has redistributed port coverage across its PEL2, PEL4, PEL5 and PEL6 loops. Under the changes, PEL2 will replace Tianjin with Ningbo and Busan. PEL4 will reinstate Tianjin and add Dalian,...",
+      "body": "Services Top Right Panda Express Line reorganises Russian Far East network November 21, 2026 Facebook Twitter WhatsApp Linkedin Email HAI RUN SHENG DA Panda Express Line has revised four services connecting the Russian Far East with ports in China and South Korea. The carrier has redistributed port coverage across its PEL2, PEL4, PEL5 and PEL6 loops. Under the changes, PEL2 will replace Tianjin with Ningbo and Busan. PEL4 will reinstate Tianjin and add Dalian, while PEL5 will introduce a call at Rizhao. Ningbo will meanwhile be removed from PEL6. The revised services are: PEL2: One 1,300 TEU vessel operating fortnightly between Nakhodka, Ningbo and Busan. PEL4: One 1,500 TEU vessel operating fortnightly between Vladivostok, Dalian, Tianjin and Ningbo. PEL5: One 1,300 TEU vessel operating fortnightly between Vladivostok, Rizhao and Shanghai. PEL6: Two vessels ranging from 1,500 to 2,200 TEU operating approximately weekly between Vladivostok, Nansha and Xiamen. TAGS Panda Express Facebook Twitter WhatsApp Linkedin Email Previous article FESCO removes two ports from FCDL1 service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The carrier has redistributed port coverage across its PEL2, PEL4, PEL5 and PEL6 loops.",
+        "Under the changes, PEL2 will replace Tianjin with Ningbo and Busan.",
+        "PEL4 will reinstate Tianjin and add Dalian, while PEL5 will introduce a call at Rizhao."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-350B312FA2",
+      "title": "More Than 110 Trade Groups Urge Deal as LA-Long Beach Port Strike Deadline Nears",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/more-than-110-trade-groups-urge-deal-as-la-long-beach-port-strike-deadline-nears/",
+      "publishedAt": "2026-11-20T22:33:04Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "summary": "More than 110 U.S. trade associations are urging waterfront employers and union leaders to reach a labor agreement and avert a potentially crippling strike at the ports of Los Angeles...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo courtesy Port of Long Beach More than 110 U.S. trade associations are urging waterfront employers and union leaders to reach a labor agreement and avert a potentially crippling strike at the ports of Los Angeles and Long Beach, with the latest contract extension set to expire just after midnight Saturday. The warning comes as the Pacific Maritime Association (PMA) and International Longshore and Warehouse Union (ILWU) Local 26 face a critical deadline following more than a year of negotiations over a contract covering approximately 250 port security workers. In a joint statement Friday, the associations called on both sides to remain at the bargaining table, negotiate in good faith and keep cargo moving through the nation’s busiest container port complex. “The Ports of Los Angeles and Long Beach already face congestion from near-record import volumes,” the groups warned, adding that a work stoppage would jeopardize holiday shipments, disrupt manufacturing supply chains and restrict U.S. exports. The statement was backed by major organizations including the National Retail Federation, U.S. Chamber of Commerce, National Association of Manufacturers, American Trucking Associations and more than 100 other groups representing retailers, manufacturers, agricultural producers and logistics providers. The associations warned that a prolonged disruption could quickly spread beyond the waterfront, affecting trucking companies, railroads, warehouses and distribution networks nationwide. Container backlogs could take weeks or months to clear even after operations resume, they said. A Small Union With an Outsized Impact Although Local 26 represents only about 2% of the ILWU workforce at the two ports, its members perform security duties at terminals handling a substantial share of Southern California’s container traffic. According to PMA, the six container terminals covered by the dispute account for approximately 85% of cargo at Long Beach and 33% at Los Angeles. The larger concern is that thousands of longshore workers, marine clerks and foremen covered by separate labor agreements could honor Local 26 picket lines, effectively shutting down cargo operations at affected terminals. PMA warned Wednesday that negotiations held November 17 ended with little progress, while the union had already authorized a strike and indicated it was unwilling to extend the current agreement beyond 12:01 a.m. Pacific time Saturday. The two sides were scheduled to return to the negotiating table Friday in a final effort to avert a work stoppage. The more than 110 trade associations urged both parties to pursue a resolution that protects workers, employers and consumers rather than risk a disruption with nationwide economic consequences. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! A potential strike at the nation’s busiest container port complex is back on the table after contract negotiations between waterfront employers and a union representing about 250 port security workers... By Laura Curtis Nov 15, 2026, (Bloomberg)–Import containers moving through the US’s busiest trade hub passed the one million mark for the second time in October, as some firms bring in... By Lori-Ann LaRocco The Port of Los Angeles handled a record 1,026,872 twenty-foot equivalent units (TEUs) in October, marking its second-busiest month ever and extending the strongest five-month cargo run... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Join the leading maritime news network Photo courtesy Port of Long Beach More than 110 U.S.",
+        "In a joint statement Friday, the associations called on both sides to remain at the bargaining table, negotiate in good faith and keep cargo moving through the nation’s busiest container port complex."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-2084B1532C",
+      "title": "FESCO removes two ports from FCDL1 service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/fesco-removes-two-ports-from-fcdl1-service/",
+      "publishedAt": "2026-11-20T22:21:57Z",
+      "category": "Ports & Terminals",
+      "region": "Panama Canal & Caribbean",
+      "regions": [
+        "Panama Canal & Caribbean",
+        "Baltic Sea & Northern Europe",
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "panama",
+        "china"
+      ],
+      "coords": [
+        9.08,
+        -79.68
+      ],
+      "navarea": "IV",
+      "image": "https://container-news.com/wp-content/uploads/2021/11/FESCO-containers-300x200.jpg",
+      "summary": "FESCO has removed Da Nang and Shenzhen’s Yantian terminal from its FESCO China Direct Line 1 (FCDL1). According to DynaLiners, the service connects Vietnam and southern China with Vladivostok in the Russian Far East. Following the changes, FCDL1 retains two Vietnamese calls at Ho Chi Minh City and Hai Phong,...",
+      "body": "Services Sticky News FESCO removes two ports from FCDL1 service November 21, 2026 Facebook Twitter WhatsApp Linkedin Email FESCO has removed Da Nang and Shenzhen’s Yantian terminal from its FESCO China Direct Line 1 (FCDL1). According to DynaLiners, the service connects Vietnam and southern China with Vladivostok in the Russian Far East. Following the changes, FCDL1 retains two Vietnamese calls at Ho Chi Minh City and Hai Phong, alongside Nansha in China. FESCO operates the service with three container ships of approximately 1,700 TEU each. The revised rotation is: Ho Chi Minh City – Hai Phong – Nansha – Vladivostok – Ho Chi Minh City TAGS FESCO Facebook Twitter WhatsApp Linkedin Email Previous article How lawfare took over the Panama Canal’s ports Next article Panda Express Line reorganises Russian Far East network Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "According to DynaLiners, the service connects Vietnam and southern China with Vladivostok in the Russian Far East.",
+        "Following the changes, FCDL1 retains two Vietnamese calls at Ho Chi Minh City and Hai Phong, alongside Nansha in China.",
+        "FESCO operates the service with three container ships of approximately 1,700 TEU each."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-CB91D58D15",
+      "title": "Vassilis Kikilias at the EPP: “We Cannot Afford to Lose Any More Time – Joint European Action Is Needed on Competitiveness and Shipping”",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/vassilis-kikilias-at-the-epp-we-cannot-afford-to-lose-any-more-time-joint-european-action-is-needed-on-competitiveness-and-shipping/",
+      "publishedAt": "2026-11-20T22:00:59Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Suez Canal & Eastern Med",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "lng",
+        "port",
+        "hormuz",
+        "china",
+        "imo"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "summary": "The need for joint European action to strengthen competitiveness, through the effective implementation of the Draghi Report, was highlighted by Greece’s Minister of Maritime Affairs and Insular Policy, Vassilis Kikilias, in a speech following the conference of the European People’s Party (EPP) Group. The conference...",
+      "body": "Vassilis Kikilias at the EPP: “We Cannot Afford to Lose Any More Time – Joint European Action Is Needed on Competitiveness and Shipping” in Hellenic Shipping News 21/11/2026 The need for joint European action to strengthen competitiveness, through the effective implementation of the Draghi Report, was highlighted by Greece’s Minister of Maritime Affairs and Insular Policy, Vassilis Kikilias, in a speech following the conference of the European People’s Party (EPP) Group. The conference was held in Athens at the initiative of Eliza Vozemberg, Chair of the European Parliament’s Committee on Transport and Tourism. The Minister stressed that Europe’s strength lies in its elected representatives, who understand the needs of their respective societies, noting that European institutions and administrative bodies must listen to their positions and proposals and take them seriously. “This is the soul and the heart of European politics. Great European leaders in the past contributed to the creation of our European family and the building of the European idea, recognising that people, societies and states must be at the centre of our policies. And, of course, there must be an institutional and administrative framework that implements the policies of the elected representatives of European countries.” He added: “The Draghi Report, approximately two years ago, marked a turning point in addressing the issues we Europeans had been raising concerning competitiveness, the cost of goods and the prosperity of European families. We must be particularly careful and decisive in implementing policies that serve these objectives.” Referring to the strategic importance of shipping to the global economy, the Minister said: “Greece accounts for 61% of the European fleet and 20% of the global fleet, while 80% of world trade is transported by sea. This is an extremely important fact in understanding what is at stake today in Europe and around the world. “Unfortunately, there is a war at the heart of Europe and another in the Middle East. Traffic through the Strait of Hormuz has been disrupted, creating enormous problems for the global economy, as 20% of the world’s oil and 25% of its natural gas pass through it. We are also facing problems with fertiliser supplies. With the war in Ukraine now continuing into its fifth year, we are experiencing even greater difficulties in supply chains, energy and the prices of essential goods. “Therefore, the more we strengthen competitiveness, invest in our ports and shipping, develop our infrastructure and establish an appropriate regulatory framework, the more opportunities we create for growth in our countries, for exporting our products and for prosperity.” As he pointed out, the importance of shipping to national economies and to the everyday lives of European citizens explains Greece’s position on the Net-Zero Framework, both at the IMO and in Europe. “We support the green transition. However, today, liquefied natural gas (LNG) is the transitional fuel, and there is no other available solution, since the quantities of alternative fuels being produced account for just 0.5% of global demand. “We were about to impose an additional financial burden of hundreds of billions of euros on the shipping industry in order to accelerate the green transition using fuels that are not yet available. Had this happened, it would have further fuelled inflation and increased energy and product prices in Europe and across the world. This would have been disastrous for a Europe already under pressure from inflation and facing an energy crisis and a cost-of-living squeeze.” Mr Kikilias went on to discuss the decisive role of ports and their infrastructure in strengthening European competitiveness, stressing: “Our ports are of strategic importance. Why have the United States decided to reinvest in shipyards, shipping, the maritime transportation of energy and ports, and why are China and countries in the East already doing so? Because these sectors will play a decisive role in shaping global power balances and the decisions that will be taken over the next 25 years. “As Europeans, however, we already have this advantage. We have the fleet and we have the ports. This is something we must support. Therefore, when it comes to the Emissions Trading System (ETS), we must take the competitiveness of European ports into account and seek ways to strengthen it, rather than weaken them in comparison with other ports in the Mediterranean or elsewhere in the world.” Concluding his speech, the Minister announced his intention to give shipping a leading role during Greece’s upcoming Presidency of the Council of the European Union, with the participation of representatives of the industry from Greece and across Europe. “As we are due to assume the Presidency of the Council of the European Union in the coming months, I am particularly pleased to announce that we will organise an Informal Meeting of EU Ministers dedicated specifically to shipping. “We will invite the private sector, the President of the Union of Greek Shipowners, Ms Melina Travlou, as well as the leaders of the Greek and European shipping industries, to join you and us – the Members of the European Parliament, members of national parliaments and the Ministry – in meaningful discussions about the future of the sector. “We want to draw on their capabilities so that the many people we represent and support can prosper. This is the way forward, together.” Source: Greek Ministry of Maritime Affairs and Insular Policy 2026-11-21 hellenicshippingnews... tweet Share",
+      "takeaways": [
+        "The conference was held in Athens at the initiative of Eliza Vozemberg, Chair of the European Parliament’s Committee on Transport and Tourism.",
+        "“This is the soul and the heart of European politics.",
+        "Great European leaders in the past contributed to the creation of our European family and the building of the European idea, recognising that people, societies and states must be at the centre of our policies."
+      ],
+      "readingMinutes": 5,
+      "readMinutes": 5
+    },
+    {
+      "id": "SN-477B8197BD",
+      "title": "Tanker Market: Arabian Gulf Crude Oil Exports Down 27.6% This Year",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/tanker-market-arabian-gulf-crude-oil-exports-down-27-6-this-year/",
+      "publishedAt": "2026-11-20T22:00:59Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Suez Canal & Eastern Med",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "tanker",
+        "port",
+        "hormuz",
+        "suez",
+        "china"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "summary": "The war in Iran has dealt a significant blow to the Gulf oil export markets, with crude oil loading significantly lower over the 10-month period (Jan.-Oct.). In its latest weekly report, shipbroker Banchero Costa said that “in Jan-Dec 2025, global crude oil loadings went up by +1.8% y-o-y to 2,221.1 mln tonnes,...",
+      "body": "Tanker Market: Arabian Gulf Crude Oil Exports Down 27.6% This Year in Hellenic Shipping News 21/11/2026 T he war in Iran has dealt a significant blow to the Gulf oil export markets, with crude oil loading significantly lower over the 10-month period (Jan.-Oct.). In its latest weekly report, shipbroker Banchero Costa said that “in Jan-Dec 2025, global crude oil loadings went up by +1.8% y-o-y to 2,221.1 mln tonnes, excluding all cabotage trade, according to vessels tracking data from LSEG. This year started well, but the trend reversed from March onwards, and global crude oil loadings in Jan-Oct 2026 were down by -5.8% y-o-y to 1,738.8 mln tonnes. Exports from the Arabian Gulf were down by -27.6% y-o-y to 531.3 mln t in Jan-Oct 2026, accounting for 30.6% of seaborne crude trade, down from 39.8% in the same period of last year. From South America, exports increased by +32.5% y-o-y to 238.8 mln t, with a share of 13.7%. Exports from Russian ports (including oil of Kazakh origin) increased by +6.7% y-o-y in Jan-Oct 2026 to 207.8 mln tonnes, or 12.0% of global trade. From the USA, export volumes increased by +8.5% y-o-y to 166.4 mln t in Jan-Oct 2026, a 9.6% share. From South East Asia exports increased by +2.7% y-o-y to 92.8 mln t in Jan-Oct 2026 (but this inevitably also reflects changes in the re-export of Russian origin volumes)”. According to Banchero Costa, “in terms of demand, the top single country seaborne importer of crude oil in Jan-Oct 2026 was Mainland China, accounting for 18.9% of global trade, although the EU27 as a bloc was a larger buyer. Volumes into China declined by -20.1% y-o-y to 328.4 mln t in Jan-Oct 2026. Imports to the EU27 increased by +0.9% y-o-y to 387.8 mln t, accounting for 22.4% of global trade. To ASEAN, imports declined by -9.2% y-o-y to 219.4 mln t (again this includes Russian volumes later reexported elsewhere in Asia). To India, volumes increased +1.5% y-oy to 200.8 mln t in Jan-Oct 2026”. The shipbroker added that “the Arabian Gulf countries (including Saudi Arabia, the UAE, Qatar, Bahrain, Kuwait, Oman, Iraq and Iran) are the single largest seaborne exporter of crude oil in the world. In 2025 they accounted for 39.8% of global seaborne crude oil exports. In the 12 months of 2025, seaborne crude oil exports from AG countries increased by +1.7% to 883.1 mln tonnes, excluding cabotage, after declining by -0.8% y-o-y in 2024. In Jan-Oct 2026, however, Arabian Gulf crude exports collapsed by -27.6% y-o-y to 531.3 mln tonnes, from 734.1 mln t in the same period of 2025, and their share of global seaborne crude trade fell to 30.6%, from 39.8% a year earlier. About 85.8% of volumes loaded in the AG countries in Jan-Oct 2026 were carried in VLCCs, 11.0% were carried in Suezmaxes, and 3.1% in Aframaxes. These proportions increased in recent years in favour of the largest tankers, as Suezmaxes and Afras were diverted to carry more Russian cargoes”. Meanwhile, “the ranking of export terminals has been transformed by the war in the Gulf, with loadings shifting decisively to terminals that can be reached without transiting the Strait of Hormuz. The main crude oil export terminals in the AG are now: Fujairah (137.8 mln tonnes, or 25.9%, in Jan-Oct 2026), Yanbu (104.0 mln t, or 19.6%), Ras Tanura (59.2 mln t, or 11.1%), Basrah (52.6 mln t, or 9.9%), Sohar (49.8 mln t, or 9.4%), Mina al Fahal (36.7 mln t, or 6.9%), Mina al Ahmadi (14.3 mln t), Zirku Island (11.4 mln t), Das Island (6.1 mln t). Ras Tanura, the largest terminal in the world a year ago, has been overtaken by Fujairah and Yanbu, both of which lie outside the Strait”, Banchero Costa said. “In terms of destinations for crude oil shipments from the AG, the focus in recent years has clearly shifted to Asia. In Jan-Oct 2026, the top destination was South East Asia, accounting for 21.6% of the total AG crude exports, narrowly ahead of Mainland China with 21.5%, followed by India with 14.6%, South Korea with 11.0%, Japan with 7.4%. Direct shipments to the USA now account for just 1.8% of AG exports, and direct shipments to the European Union for just 2.2%. Another 6.1% of AG exports are shipped to the Ain Sukhna Terminal in Egypt to feed the Sumed pipeline, and will eventually mostly end up in Europe. In Jan-Oct 2026, the AG countries shipped 114.4 mln tonnes of crude to Mainland China, which represents a -39.4% y-o-y decline from 188.9 mln tonnesin Jan-Oct 2025. Shipments to South East Asia fell by -27.8% y-o-y to 114.9 mln t, from 159.0 mln t in Jan-Oct 2025. The AG also shipped 77.5 mln t this year to India, which represents a decline of -15.4% y-o-y from 91.6 mln t in the same period last year. Volumes to South Korea declined by -28.4% y-o-y in Jan-Oct 2026 to 58.5 mln t. Shipments from the AG to Japan more than halved, down -52.4% y-o-y in JanOct 2026 to 39.4 mln tonnes”, the shipbroker concluded. Nikos Roussanoglou, Hellenic Shipping News Worldwide Tops 2026-11-21 hellenicshippingnews... tweet Share",
+      "takeaways": [
+        "This year started well, but the trend reversed from March onwards, and global crude oil loadings in Jan-Oct 2026 were down by -5.8% y-o-y to 1,738.8 mln tonnes.",
+        "Exports from the Arabian Gulf were down by -27.6% y-o-y to 531.3 mln t in Jan-Oct 2026, accounting for 30.6% of seaborne crude trade, down from 39.8% in the same period of last year.",
+        "From South America, exports increased by +32.5% y-o-y to 238.8 mln t, with a share of 13.7%."
+      ],
+      "readingMinutes": 5,
+      "readMinutes": 5
+    },
+    {
+      "id": "SN-C0094BD08C",
+      "title": "MEPC 85 to confront net-zero divide",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/mepc-85-to-confront-net-zero-divide/",
+      "publishedAt": "2026-11-20T22:00:58Z",
+      "category": "Weather & Cyclones",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea",
+        "Baltic Sea & Northern Europe",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port",
+        "imo"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=900&q=80",
+      "summary": "The International Maritime Organization’s Marine Environment Protection Committee (MEPC 85) will convene in London from Nov 30-Dec 3 against a backdrop of intensifying pressure to deliver a landmark agreement on shipping decarbonisation, with delegates facing what many observers see as a defining moment for the...",
+      "body": "MEPC 85 to confront net-zero divide in International Shipping News , Shipping: Emission Possible 21/11/2026 T he International Maritime Organization’s Marine Environment Protection Committee (MEPC 85) will convene in London from Nov 30-Dec 3 against a backdrop of intensifying pressure to deliver a landmark agreement on shipping decarbonisation, with delegates facing what many observers see as a defining moment for the sector’s climate transition. The meeting follows a year of difficult negotiations over the organisation’s proposed mid-term greenhouse gas reduction measures. While the committee’s agenda spans a broad range of environmental issues – including ballast water management, amendments to MARPOL and the NOx Technical Code, marine plastic litter, underwater radiated noise and maritime digitalisation – climate policy is expected to dominate proceedings. Central to those discussions will be efforts to resolve outstanding differences over draft amendments to MARPOL Annex VI and the package of mid-term measures envisioned under the IMO’s 2023 greenhouse gas strategy. According to the IMO, delegates will consider the outcomes of recent intersessional negotiations and seek ways to address “remaining concerns” surrounding the proposed measures, which combine technical and economic elements intended to accelerate emissions reductions from international shipping. The committee is also expected to continue work on the IMO’s Life Cycle GHG Assessment framework. The significance of the discussions has been heightened by the unresolved fate of the IMO’s proposed Net-Zero Framework (NZF), which environmental organisations argue is the industry’s best opportunity to establish a global mechanism for driving down emissions. Adopt ‘as is’ The Clean Shipping Coalition (CSC), representing environmental non-governmental organisations engaged in IMO negotiations, has urged member states to finalise and adopt the framework before the end of the year. “In order to fulfil the goals of the IMO’s GHG Strategy and to protect our global climate, the IMO and all its member states must adopt the Net-Zero Framework ‘as is’, without further diversion,” said Lukas Leppert, president of the Clean Shipping Coalition. “The product of years of negotiations, the Net-Zero Framework reflects findings from the IMO’s Comprehensive Impact Assessment, is a long-negotiated compromise that brings together a multitude of interests and positions, and is supported by a broad majority.” The coalition argues that the framework, originally approved during MEPC 83 in April 2025, already provides a balanced pathway for implementing the IMO’s decarbonisation objectives. The proposed package combines a global fuel standard with an economic mechanism designed to incentivise lower-carbon fuels and technologies. Adoption was delayed after opposition from a group of member states prevented final approval in October 2025. Environmental groups contend that subsequent attempts to replace or significantly revise the framework have failed to attract broad support. “Since October 2025, when IMO member states voted to adjourn the adoption session for one year, various alternative proposals to the NZF were introduced and intensively discussed, but were neither able to demonstrate a comparable reduction in emissions nor gather sufficient support,” Leppert said. “These alternative proposals aimed at supplanting or distracting from the NZF have fallen away, proving the NZF as the best course ahead.” The CSC frames MEPC 85 as a test of the IMO’s ability to convert years of negotiation into binding regulation. “There is no longer time for going in circles; every IMO member state must get behind the Net-Zero Framework and adopt it before the year ends,” Leppert said. EU stance Shipping industry representatives have also taken a view on how member states should proceed. Ahead of the London meetings, Melina Travlos, president of the Union of Greek Shipowners (UGS), warned that political divisions risk undermining efforts to secure a workable global solution. In a statement, she criticised the European Union’s negotiating stance and argued that flexibility remains essential if consensus is to be achieved. “Two months after the inconclusive last round of negotiations at the IMO on reducing greenhouse gas emissions from international shipping, and with the next critical negotiating meetings approaching, there remains no evidence of positive tangible progress,” Travlos said. She argued that recent discussions at European level had demonstrated an unwillingness to compromise, adding that “the EU’s uncompromising position is steering the IMO process to a new dead end, effectively torpedoing the negotiations by depriving them of the flexibility necessary for any chance of success.” The Greek shipowners’ organisation has consistently advocated a global regulatory framework that recognises differing operational realities across shipping segments and trading patterns. Rather than focusing predominantly on alternative fuels, Travlos called for a broader approach incorporating operational and technical efficiency measures. “For a regulation to be effective it must be pragmatic, proportionate and implementable, while reflecting the commercial and operational realities and constraints of the industry,” she said. Travlos further argued that policymakers must align climate ambitions with technological readiness and fuel availability. “This means taking into account the availability, scalability and affordability of alternative fuels, technologies and supporting infrastructure, as well as competing demand from other sectors,” she said. “Such a regulatory framework must also recognise the diversity of solutions available to the shipping industry, rather than focusing exclusively on alternative fuels. It should support all effective pathways to emissions reduction, including technical and operational efficiency measures.” The contrasting positions highlight the challenge awaiting delegates in London. Environmental groups are pressing for rapid adoption of a framework they view as the culmination of years of climate negotiations, while shipowners and several member states are emphasising practicality, flexibility and the risks of imposing measures that outpace technology deployment and fuel availability. After more than a year of delays, MEPC 85 offers member states an opportunity either to bridge their differences and advance a global climate framework or risk prolonging uncertainty over the sector’s pathway to net zero. Source: Baltic Exchange Tops 2026-11-21 hellenicshippingnews... tweet Share",
+      "takeaways": [
+        "The meeting follows a year of difficult negotiations over the organisation’s proposed mid-term greenhouse gas reduction measures.",
+        "Central to those discussions will be efforts to resolve outstanding differences over draft amendments to MARPOL Annex VI and the package of mid-term measures envisioned under the IMO’s 2023 greenhouse gas strategy.",
+        "The committee is also expected to continue work on the IMO’s Life Cycle GHG Assessment framework."
+      ],
+      "readingMinutes": 5,
+      "readMinutes": 5
+    },
+    {
+      "id": "SN-0CB6DCE003",
+      "title": "Baltic Dry Index Eases For 2nd Day",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/baltic-dry-index-eases-for-2nd-day/",
+      "publishedAt": "2026-11-20T22:00:57Z",
+      "category": "Ports & Terminals",
+      "region": "Panama Canal & Caribbean",
+      "regions": [
+        "Panama Canal & Caribbean",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "port",
+        "panama"
+      ],
+      "coords": [
+        9.08,
+        -79.68
+      ],
+      "navarea": "IV",
+      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
+      "summary": "The Baltic Exchange’s dry bulk freight index, which tracks rates for ships carrying dry bulk commodities, was down for a second session on Friday, falling by 0.1% to 2,898 points. The capesize index, which typically transports 150,000-ton cargoes, including iron ore and coal, decreased by 0.3% to 4,502 points; and...",
+      "body": "Baltic Dry Index Eases For 2nd Day in Dry Bulk Market , International Shipping News 21/11/2026 The Baltic Exchange’s dry bulk freight index, which tracks rates for ships carrying dry bulk commodities, was down for a second session on Friday, falling by 0.1% to 2,898 points. The capesize index, which typically transports 150,000-ton cargoes, including iron ore and coal, decreased by 0.3% to 4,502 points; and the supramax index fell by 0.2% to 1,810 points. On the other hand, the panamax index, which usually carries 60,000 to 70,000 tons of coal or grain, advanced 8 points to its highest since October 22 at 2,140 points. The benchmark index posted a 2.8% weekly decline. Source: Trading Economics 2026-11-21 hellenicshippingnews... tweet Share",
+      "takeaways": [
+        "The capesize index, which typically transports 150,000-ton cargoes, including iron ore and coal, decreased by 0.3% to 4,502 points; and the supramax index fell by 0.2% to 1,810 points.",
+        "On the other hand, the panamax index, which usually carries 60,000 to 70,000 tons of coal or grain, advanced 8 points to its highest since October 22 at 2,140 points.",
+        "The benchmark index posted a 2.8% weekly decline."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-58D66764AA",
+      "title": "How SAL and DNV are strengthening heavy-lift shipping",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/how-sal-and-dnv-are-strengthening-heavy-lift-shipping/",
+      "publishedAt": "2026-11-20T22:00:57Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "China & East Asia",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "port",
+        "china",
+        "safety",
+        "imo",
+        "shipyard"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=900&q=80",
+      "summary": "From classification and newbuilding support to operational tools and advisory expertise, SAL and DNV have been collaborating for decades. The partnership supports both the development of SAL’s Orca Class vessels and day-to-day operations, including more efficient cargo planning using DNV’s Route-Specific Cargo...",
+      "body": "How SAL and DNV are strengthening heavy-lift shipping in International Shipping News 21/11/2026 F rom classification and newbuilding support to operational tools and advisory expertise, SAL and DNV have been collaborating for decades. The partnership supports both the development of SAL’s Orca Class vessels and day-to-day operations, including more efficient cargo planning using DNV’s Route-Specific Cargo Calculator. With a current fleet of 22 DNV-classed heavy-lift vessels, SAL Heavy Lift is a leader in the segment. The Harren Group company’s latest newbuilding programme has set a new benchmark for performance, operational flexibility, and efficiency. Three of a series of five 14,600 dwt Orca Class ships have been delivered so far. SAL is discussing additional newbuilds of the same type with Wuhu Shipyard in China. “Our long-standing collaboration with SAL and Harren Group has covered many different aspects of their fleet,” says Jost Bergmann, Business Director MPV & General Cargo Ships at DNV. Bergmann, who supports SAL’s newbuilding programme for DNV, recently attended the christening of MV Patricia, the third vessel in the series, in Rostock. “The Orca vessels stand out in several respects, both in their design and in how they are intended to support SAL’s operations.” Heavy-lift vessel design built on decades of operational experience The design of SAL’s Orca Class heavy-lift vessels draws on decades of experience in project cargo shipping with a focus on the most demanding cargoes. Developed by SAL’s in-house ship engineering team, the basic design combines the company’s shipbuilding expertise with lessons from operating heavy-lift vessels and transporting complex and oversized cargo. The optimized hull form supports good seakeeping and helps limit acceleration forces acting on the cargo, which can reduce lashing requirements. A forward deck house protects deck cargo from the elements while enabling long cargo, such as wind turbine blades, to extend beyond the stern. Flexible cargo handling for oversized project cargo Cargo flexibility was also a priority. The vessels’ high freeboard helps protect cargo from water, while DNV’s Hatchcoverless class notation allows oversized cargo to be transported in the open hold. A box-shaped single cargo hold and hatch covers designed for loads of up to 10 tonnes per square metre provide additional options for positioning heavy and oversized project cargo. SAL’s requirements for loading flexibility were considered during the design process. DNV’s class-independent Maritime Advisory experts carried out global structural analyses using the vessels’ three-dimensional finite element model to validate these requirements and develop recommendations for optimizing the design. This combination of vessel design and structural analysis supports the operational flexibility required for complex heavy-lift and project cargo. The Orca Class vessels also have a high ice class rating of 1A and Polar Code certification for operations requiring particular care in low ambient temperatures. Electric cranes and flexible propulsion for heavy-lift shipping The vessels combine their cargo capabilities with new crane, energy management, and propulsion technologies. Two fully electric Liebherr Maritime LS 800 E cranes, each with a lifting capacity of 800 tonnes, provide a combined lifting capacity of up to 1,600 tonnes in tandem operation. Using electric rather than hydraulic cranes also eliminates the risk of hydraulic oil escaping from the crane system. A hybrid energy management system combines gensets with lithium-titanium-oxide batteries to optimize energy use. Shore power capability allows the vessels to operate without on-board emissions when suitable infrastructure is available in port. Methanol-ready propulsion for greater fuel flexibility The Orca Class also features a dual-engine concept designed for different operating profiles. One engine supports normal cruising, while the second main engine can provide additional power through the gearbox when required, enabling speeds of up to 18.5 knots for time-critical cargo deliveries. The vessels are designed to be methanol-ready, except for the tanks, allowing conversion for operation with green methanol. Safety and accessibility are also integrated into the design, with stairs providing access to walkways, entrances, accommodation, work areas, and cargo areas. Operational excellence supported by DNV The cooperation between SAL’s parent company Harren Group and DNV extends beyond newbuilding projects. For vessels in operation, Harren Group draws on DNV’s digital class services, software, and class-independent Advisory expertise to support day-to-day fleet management and address technical challenges. My Services on Veracity, for example, gives superintendents and inspectors a central overview of their vessels, helping them monitor the fleet, plan upcoming activities, and arrange surveys easily. Integrated port state control guidance, including relevant checklists and authority focus areas, also helps crews prepare vessels for inspections and smoother port stays. Jan-Hendrik Dammann, Fleet Manager, Harren Shipping Services GmbH & Co. KG, confirms: “DNV’s digital solutions, especially My Services on Veracity, are the benchmark in the market and a real asset in our day-to-day work. For our ships in service, DNV is a partner we can rely on.” The cooperation also gives Harren Group access to DATE (Direct Access to Technical Experts), connecting the company directly with DNV experts when technical questions arise. “We’ve been partners with DNV for a long time, and what we value most is the quality of support and service we receive, online and in person,” highlights Dammann. “We can reach the right experts when needed, and our requests are handled quickly and competently. This close and straightforward cooperation means we usually find joint solutions that are practical and work for both sides.” DNV’s Route-Specific Cargo Calculator delivers solid monetary benefits Carrying extremely heavy or oversized project cargoes comes with stowage restrictions and sea-fastening challenges. Securing breakbulk cargo on board in compliance with the IMO Code of Safe Practice for Cargo Stowage and Securing (CSS Code) requires engineering expertise as well as costly sea-fastening equipment and often comes with considerable efforts for deck reinforcements. Intended to predict the acceleration forces acting on the cargo during transit, the CSS Code assumes the harsh conditions in the North Atlantic, and uses standardized ship contours. But for trips in much more benign sea areas, these rules are overly conservative. While calculating the more realistic accelerations along a given route takes expert knowledge, DNV’s Route-Specific Cargo Calculator tool on Veracity provides a convenient, user-friendly way for cargo planners to predict the acceleration forces during the relevant season without requiring engineering skills. Increased stowage flexibility and capacity utilization SAL is using the tool more and more, says Karsten Behrens, Managing Director at SAL Engineering. “It gives us greater stowage flexibility compared to the CSS Code, for example in matching the vessel with the cargo or placing cargo on the weather deck. It also reduces the lashing effort and expense. These effects can multiply when identical cargo is transported along the same route repeatedly.” In one case, the tool helped SAL make better use of the available space on board by calculating a reduced route- and season-specific maximum transverse acceleration of 3.95 m/s2, which is roughly 75 per cent of the assumed value according to the CSS Code of 5.23 m/s2. The resulting reduction of deck loads allowed 15 to 20 per cent more cargo to be transported on that voyage. “In some cases the DNV tool allows us to accept a particular shipping order; in other cases, it reduces the number of trips we must take,” says Behrens. “This is in the best interests of both the cargo owner and the ship operator.” Stored digital ship model reduces lashing time and effort The Route-Specific Cargo Calculator uses a digital model of the ship that has to be entered into DNV’s Veracity system only once. All the user has to enter for a specific trip are some loading condition parameters like draft, trim, and metacentric height (GM), the stowage positions of cargo items, plus the route and, optionally, the season. The tool uses its database of route-specific sea states to return realistic acceleration values. “While we could calculate these values ourselves at SAL Engineering,” remarks Behrens, “the DNV tool reduces the effort and speeds up the process, freeing up our resources for other purposes.” Another typical use case is transporting wind turbine components from the U.S. East Coast to Mexico. The CSS Code would require extensive lashing, but sailing this route during the summer season reduces the lashing requirement by about 50 per cent. RSCC unlocks operational potential and strengthens risk management “The DNV tool helps open up untapped potential,” explains Behrens. “What is more, even in the North Atlantic in winter, when we operate under the most severe conditions, the tool gives us reassurance that the sea-fastening and loading measures we take are on the safe side. For shipments with our newbuild MV Elise, we not only knew that we were on the safe side, but the tool even told us how far.” Source: DNV, https://www.dnv.com/expert-story/maritime-impact/how-sal-and-dnv-are-strengthening-heavy-lift-shipping/ Tops 2026-11-21 hellenicshippingnews... tweet Share",
+      "takeaways": [
+        "The partnership supports both the development of SAL’s Orca Class vessels and day-to-day operations, including more efficient cargo planning using DNV’s Route-Specific Cargo Calculator.",
+        "With a current fleet of 22 DNV-classed heavy-lift vessels, SAL Heavy Lift is a leader in the segment.",
+        "The Harren Group company’s latest newbuilding programme has set a new benchmark for performance, operational flexibility, and efficiency."
+      ],
+      "readingMinutes": 8,
+      "readMinutes": 8
+    },
+    {
+      "id": "SN-60B3F97220",
+      "title": "Xeneta Weekly Ocean Container Shipping Market Update: Mediterranean spot rates move in mysterious ways as Red Sea return stalls",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/xeneta-weekly-ocean-container-shipping-market-update-mediterranean-spot-rates-move-in-mysterious-ways-as-red-sea-return-stalls/",
+      "publishedAt": "2026-11-20T22:00:55Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb",
+        "Suez Canal & Eastern Med",
+        "US East Coast & New York"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "red sea"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "summary": "The Xeneta Weekly Ocean Container Shipping Market Update provides data and intelligence including the latest freight rate and capacity movements across global trades with supporting insight from Peter Sand, Xeneta Chief Analyst. Peter Sand, Xeneta Chief Analyst: “Offered capacity is increasing on all fronthauls out...",
+      "body": "Xeneta Weekly Ocean Container Shipping Market Update: Mediterranean spot rates move in mysterious ways as Red Sea return stalls in International Shipping News 21/11/2026 The Xeneta Weekly Ocean Container Shipping Market Update provides data and intelligence including the latest freight rate and capacity movements across global trades with supporting insight from Peter Sand, Xeneta Chief Analyst. Peter Sand, Xeneta Chief Analyst: “Offered capacity is increasing on all fronthauls out of the Far East to Europe and the US, with average spot rates unsurprisingly continuing to soften – with one exception. The trade from the Far East to the Mediterranean is moving in mysterious ways, with spot rates increasing 6.8% in the past week. “Average spot rates into the Mediterranean are now USD 1,551 per FEU higher than into North Europe. The fact that this widening spread is being driven by increases in the already-elevated rates into the Mediterranean adds to the mystery. “The reason the Mediterranean trade is behaving differently to other fronthauls may be found in the Red Sea, where the ramp-up in services transiting the Bab el-Mandeb Strait since August tailed off in November. “Container ship transits through the strait increased from 305 in August to 463 in October. That trend has now turned, with the seven-day average falling 28% from a peak of 16.6 transits per day on 25 October to 11.9 on 19 November. “Something has happened to cool the return of container shipping services to the Red Sea in November. Whatever the reason, disruption in the Red Sea is felt more acutely on trades between the Far East and the Mediterranean because they are the most operationally exposed to the region. “This is a timely reminder to shippers that the path to forecasted falling freight rates in 2027 will not be plain sailing. The general direction for rates will be downward, but the situation in the Red Sea remains fragile, so it is likely there will be unexpected spikes along the way.” Data highlights Market average spot rates – 19 November 2026: Far East to US West Coast: USD 8,203 per FEU (40ft container) Far East to US East Coast: USD 10,901 per FEU Far East to North Europe: USD 3,438 per FEU Far East to Mediterranean: USD 4,989 per FEU North Europe to US East Coast: USD 2,961 per FEU Change from a week ago (since 12 November 2026):: Far East to US West Coast: -1.7% Far East to US East Coast: -1.9% Far East to North Europe: -2.3% Far East to Mediterranean: +6.8% North Europe to US East Coast: -0.0% Change from a year ago (since 19 November 2025): Far East to US West Coast: +304.3% Far East to US East Coast: +297.8% Far East to North Europe: +44.7% Far East to Mediterranean: +68.7% North Europe to US East Coast: +86.8% Offered capacity change from a month ago (since 19 October 2026, TEU, four-week rolling average): Far East to US West Coast: +10.9% Far East to US East Coast: +11.4% Far East to North Europe: +0.2% Far East to Mediterranean: +2.2% North Europe to US East Coast: +38.7% Source: Xeneta 2026-11-21 hellenicshippingnews... tweet Share",
+      "takeaways": [
+        "Peter Sand, Xeneta Chief Analyst: “Offered capacity is increasing on all fronthauls out of the Far East to Europe and the US, with average spot rates unsurprisingly continuing to soften – with one exception.",
+        "The trade from the Far East to the Mediterranean is moving in mysterious ways, with spot rates increasing 6.8% in the past week.",
+        "“Average spot rates into the Mediterranean are now USD 1,551 per FEU higher than into North Europe."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-AFD4189E23",
+      "title": "GMS Week 47 – The Tide Of Second Thoughts",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/gms-week-47-the-tide-of-second-thoughts/",
+      "publishedAt": "2026-11-20T22:00:54Z",
+      "category": "Ports & Terminals",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Panama Canal & Caribbean",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "port",
+        "panama"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
+      "summary": "After several weeks of improving confidence, recycling buyers are beginning to have second thoughts about how aggressively to pursue fresh tonnage. Bangladesh’s recent optimism has been tempered by weaker steel, political unrest and sluggish domestic demand, prompting some buyers to reconsider their purchasing ideas...",
+      "body": "GMS Week 47 – The Tide Of Second Thoughts in Weekly Demolition Reports 21/11/2026 After several weeks of improving confidence, recycling buyers are beginning to have second thoughts about how aggressively to pursue fresh tonnage. Bangladesh’s recent optimism has been tempered by weaker steel, political unrest and sluggish domestic demand, prompting some buyers to reconsider their purchasing ideas or delay commitments. Elsewhere, sentiment remains selective rather than distressed. Recycling indications are unchanged across all four destinations, although the shortage of available candidates continues to restrict fresh business. Dry freight surrendered part of last week’s gains, with the Baltic Dry Index easing from 3,020 on November 12 to 2,901 on Thursday, November 19. Capesizes declined to 4,514 and Supramaxes slipped to 1,814, while Panamaxes edged higher to 2,132. Despite the correction, employment opportunities remain sufficiently attractive for many ageing vessels, limiting the incentive for owners to consider recycling. Crude oil continued its downward trajectory, with Brent trading around USD 90 per barrel on Friday and WTI near USD 82. Recovering Middle Eastern exports and expectations of greater supply have outweighed continuing regional security concerns. Lower energy costs may provide some relief to recyclers and steel producers, although uncertain Gulf trading conditions continue to influence vessel employment and disposal decisions. Regional steel markets offered mixed signals. Bangladesh plate retreated from last week’s improvement, while Indian steel recovered towards Friday and Pakistani prices strengthened marginally. Chinese quotations weakened further. These movements have provided little justification for stronger recycling bids, particularly where domestic finished-steel consumption remains disappointing. Bangladesh faces the week’s most challenging domestic developments, with political unrest, disruptions in the garment sector and weak local demand prompting greater buyer caution. India continues to pursue specialist opportunities and has sought Italian support for European approval of selected recycling facilities. Pakistan remains measured, while Turkey faces subdued steel demand and continuing production disruption at a major mill. Waterfront activity nevertheless continued. Alang and Chattogram recorded further arrivals and deliveries, while Gadani received another bulker. These movements primarily reflect previously secured tonnage rather than fresh transactions. No new recycling sales were reported during the week. The market therefore enters the final weeks of November with buyers reassessing their positions rather than abandoning them. Bangladesh’s earlier enthusiasm has given way to greater caution, while India, Pakistan and Turkey remain selective. Owners, meanwhile, still have sufficient trading alternatives to resist recycling. The price board has not moved, but the conviction behind it is being tested. For now, the market is not changing its prices. It is having second thoughts about paying them. For Week 47 of 2026, GMS Market Rankings / Vessel indications are as below. Download PDF Source: GMS,Inc. https://www.gmsinc.net/gms_new/index.php/web 2026-11-21 hellenicshippingnews... tweet Share",
+      "takeaways": [
+        "Bangladesh’s recent optimism has been tempered by weaker steel, political unrest and sluggish domestic demand, prompting some buyers to reconsider their purchasing ideas or delay commitments.",
+        "Elsewhere, sentiment remains selective rather than distressed.",
+        "Recycling indications are unchanged across all four destinations, although the shortage of available candidates continues to restrict fresh business."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-1BE41AE08D",
+      "title": "VHBS New ConTex Container Ship Time Charter Assessment Index Week 47",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/vhbs-new-contex-container-ship-time-charter-assessment-index-week-47-3/",
+      "publishedAt": "2026-11-20T22:00:54Z",
+      "category": "Ports & Terminals",
+      "region": "Rotterdam & North Sea",
+      "regions": [
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        51.95,
+        4.14
+      ],
+      "navarea": "I",
+      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
+      "summary": "The overall container market in Week 47 remained stable, with only limited week-on-week improvements. Source: Verband Hamburger und Bremer Schiffsmakler e.V",
+      "body": "VHBS New ConTex Container Ship Time Charter Assessment Index Week 47 in Weekly Container Reports Index 21/11/2026 The overall container market in Week 47 remained stable, with only limited week-on-week improvements. Download PDF Source: Verband Hamburger und Bremer Schiffsmakler e.V 2026-11-21 hellenicshippingnews... tweet Share",
+      "takeaways": [
+        "VHBS New ConTex Container Ship Time Charter Assessment Index Week 47 in Weekly Container Reports Index 21/11/2026 The overall container market in Week 47 remained stable, with only limited week-on-week improvements.",
+        "Download PDF Source: Verband Hamburger und Bremer Schiffsmakler e.V 2026-11-21 hellenicshippingnews...",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-665639A94B",
+      "title": "Drewry: World Container Index Down 3% Last Week",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/drewry-world-container-index-down-3-last-week-8/",
+      "publishedAt": "2026-11-20T22:00:53Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Suez Canal & Eastern Med",
+        "US East Coast & New York"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "hormuz",
+        "suez"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "summary": "For many years, World Container Index (WCI) has been the go-to, independent, global reference for index-linked contracts. If your organisation requires regional visibility/coverage beyond the eight trade lanes provided below, contact the team. Our detailed assessment for Thursday, 19 Nov 2026 • The Drewry World...",
+      "body": "Drewry: World Container Index Down 3% Last Week in International Shipping News 21/11/2026 For many years, World Container Index (WCI) has been the go-to, independent, global reference for index-linked contracts. If your organisation requires regional visibility/coverage beyond the eight trade lanes provided below, contact the team. Our detailed assessment for Thursday, 19 Nov 2026 • The Drewry World Container Index (WCI), the benchmark widely referenced by procurement teams, decreased 3% to $4,176 per 40ft container this week due to declining rates on the Transpacific trade route. Despite the decline, the WCI remains 126% higher YoY. • On the Transpacific trade route, rates continued their downwards trend for the seventh consecutive week. Rates from Shanghai to New York decreased 9% to $8,194 per 40ft container, the lowest in 15 weeks, and those from Shanghai to Los Angeles fell 5% to $7,026 per 40ft container, the lowest in 12 weeks. In response to the weak demand, carriers are reducing capacity through blank sailings. According to Drewry’s Container Capacity Insight, ten blank sailings have been announced for next week, compared with four this week. Despite these capacity reductions, Drewry expects freight rates to decrease further next week. • On the Asia-Europe/Med trade route, rates from Shanghai to Genoa increased 6% to $4,436 per 40ft container after remaining stable for three consecutive weeks, while Shanghai to Rotterdam rates remained unchanged at $3,496 per 40ft container. Carriers are managing capacity through blank sailings, and according to Drewry’s Container Capacity Insight, four blank sailings are announced for next week, lower than five this week. As demand is expected to strengthen in December ahead of the new contract season, many carriers have announced PSS, ranging from $1,000-1,600 per 40ft container on Asia-Europe/Med effective December. Hence, Drewry expects rates to increase in the coming weeks. • The East-West container shipping market remains under pressure, with different trends on Transpacific and Asia-Europe/Med trade routes. Asia–Europe demand is expected to strengthen in December ahead of the new contract season and Chinese New Year, prompting carriers to push rate increases through surcharges, whereas easing Transpacific demand is likely to drive rates lower. Meanwhile, worsening North Europe port congestion is delaying empty-container returns to Asia, raising concerns over future equipment shortages. Suez Canal transits improved to 57 vessels last week, while only four vessels crossed the Strait of Hormuz. With geopolitical uncertainty and potential labour disruptions at Los Angeles and Long Beach remain key risks, shippers should expect continued rate volatility. Ocean spot market freight rates against 6,700 global port pairs If you need spot market container freight rate information on other routes to those above, find out more about our Container Freight Rate Insight (CFRI) online service, which covers 6,700 global port pairs updated monthly (2,450 updated fortnightly). Source: Drewry 2026-11-21 hellenicshippingnews... tweet Share",
+      "takeaways": [
+        "Drewry: World Container Index Down 3% Last Week in International Shipping News 21/11/2026 For many years, World Container Index (WCI) has been the go-to, independent, global reference for index-linked contracts.",
+        "If your organisation requires regional visibility/coverage beyond the eight trade lanes provided below, contact the team.",
+        "Despite the decline, the WCI remains 126% higher YoY."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-9D3E936353",
+      "title": "The Week in Alt Fuels: The net-zero bargain",
+      "source": "Hellenic Shipping News",
+      "sourceIcon": "📊",
+      "sourceRegion": "Greece / Markets",
+      "url": "https://www.hellenicshippingnews.com/the-week-in-alt-fuels-the-net-zero-bargain/",
+      "publishedAt": "2026-11-20T22:00:51Z",
+      "category": "Weather & Cyclones",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Rotterdam & North Sea",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port",
+        "singapore",
+        "china",
+        "imo",
+        "bunker"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=900&q=80",
+      "summary": "The IMO faces a difficult choice next month. A softer version of the Net-Zero Framework could help break the negotiating deadlock. But weaker rules could undermine the very transition it is meant to support. The IMO’s Marine Environment Protection Committee (MEPC) will reconvene from 30 November to 3 December to...",
+      "body": "The Week in Alt Fuels: The net-zero bargain in International Shipping News 21/11/2026 The IMO faces a difficult choice next month. A softer version of the Net-Zero Framework could help break the negotiating deadlock. But weaker rules could undermine the very transition it is meant to support. The IMO’s Marine Environment Protection Committee (MEPC) will reconvene from 30 November to 3 December to consider proposals ranging from stronger economic measures to removing greenhouse gas (GHG) pricing altogether. Liberia, Tuvalu, Brazil and a four-country group comprising Australia, Canada, South Africa and the UK have submitted proposals for discussion at the IMO’s intersessional GHG working group meeting from 23 to 27 November. Japan has submitted a proposal calling for softer fuel intensity targets and direct contributions, but it was not circulated within the six-month period required under MARPOL for adoption at MEPC 85. The EU and Pacific Island states support adopting the text approved in April 2025. The US and several other countries, including major oil producers, want substantial changes to its technical and economic provisions. US President Donald Trump has openly opposed global emissions pricing. “There is no global government – and while I am President, there will be no global taxes,” he said. The question is no longer simply whether governments can agree on a global framework, but whether the compromises needed to secure that agreement could leave shipping with rules too weak to drive meaningful change. The case for compromise The Union of Greek Shipowners (UGS) has urged Brussels to show greater flexibility in negotiations. “The EU’s uncompromising position is steering the IMO process to a new dead end, effectively torpedoing the negotiations by depriving them of the flexibility necessary for any chance of success,” UGS president Melina Travlos said. Travlos said Greece and three other EU member states, collectively representing 70% of the EU-controlled fleet, had pressed for the EU to approach the IMO talks with a genuine willingness to negotiate. While she did not name the three countries supporting a compromise, Cyprus, Greece, Malta and Italy called for “realistic, globally applicable and cost effective” regulations during a ministerial meeting in Limassol in September. The four EU countries agreed to work towards the “widest possible consensus” on global measures that support shipping’s green fuel transition while keeping the sector competitive. All four countries supported the framework’s approval in April 2025. Nine shipping industry associations, including BIMCO, ICS, IBIA and WSC, have called for an “achievable, enforceable, and stable regulatory framework” that reflects fuel costs and availability. “The regulatory framework must support credible transition pathways for existing ships and technologies. Continued industry investment and effective implementation will depend on global regulatory certainty and the reliable production and cost-competitiveness of alternative fuels at scale,” the statement said. The associations also stressed the need to avoid overlapping regional and international requirements, including multiple charges on the same emissions. Travlos has made a similar argument, questioning whether the EU values its own regional measures, and the revenues they generate, more than a global agreement. Charles Whitfield, chairman of Australian ammonia developer NH3 Clean Energy, expects IMO member states to reach an agreement in December, although he expects it to be less stringent than the April 2025 version. “But I think that there will be a piece of paper or an agreement that does actually get ratified,” he told ENGINE. Whitfield believes a common international framework would be preferable to the different regulatory approaches emerging across the EU, China and Singapore. But at what cost? Critics of a softer framework argue that political compromise could come at the expense of meaningful emissions reductions. Weakening emissions targets or making compliance payments too cheap could undermine the IMO’s climate goals and slow the shift to cleaner marine fuels, according to a report by University College London’s Shipping and Oceans Research Group and the Rocky Mountain Institute. The Clean Shipping Coalition has urged governments to adopt the framework without further changes. It argues that the existing text already represents years of negotiations and that alternative proposals have yet to demonstrate comparable emissions reductions or attract sufficient support. The proposed IMO Net-Zero Fund is intended to support cleaner technologies, infrastructure and capacity-building, particularly in vulnerable countries. The availability of financial and technical support could help least developed and developing economies manage the transition. Em Fenton, senior director of climate diplomacy at Opportunity Green, has cautioned against reopening the existing compromise. “The Net-Zero Framework represents a hard-fought multilateral compromise. Any significant shift away from this text risks harming not only the level of emissions reductions that can be achieved from such a regulatory measure, but also the justice and equity of its implementation,” they told ENGINE. “Further delay or weakening of the text only serves fossil fuel interests and does nothing to support climate vulnerable countries during shipping’s transition,” Fenton added. A deal worth having? Important questions remain unresolved, from lifecycle emissions accounting and chain of custody to GHG pricing and the proposed net-zero fund. A weaker agreement could bring more governments on board and give shipping a common regulatory starting point. But if compliance becomes cheaper than switching fuels, that certainty may do little to encourage investment in cleaner alternatives. In other alt fuels news this week, South Korea’s Lotte Fine Chemical and Norwegian shipping company Höegh Autoliners plan to expand green ammonia bunkering operations across South Korean ports. Japanese shipping company NYK Line has unveiled a newbuild gas carrier equipped with an ammonia dual-fuel two-stroke main engine at Japan Marine United’s Ariake Shipyard in Kumamoto Prefecture. French energy firm TotalEnergies has shelved its planned $16 billion green hydrogen and ammonia production project in southern Chile, citing weak demand for green fuels and higher-than-expected production costs. Source: By Konica Bhatt, ENGINE, https://www.engine.online/news/ 2026-11-21 hellenicshippingnews... tweet Share",
+      "takeaways": [
+        "The Week in Alt Fuels: The net-zero bargain in International Shipping News 21/11/2026 The IMO faces a difficult choice next month.",
+        "A softer version of the Net-Zero Framework could help break the negotiating deadlock.",
+        "But weaker rules could undermine the very transition it is meant to support."
+      ],
+      "readingMinutes": 5,
+      "readMinutes": 5
+    },
+    {
+      "id": "SN-91A7AB865C",
+      "title": "How lawfare took over the Panama Canal’s ports",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/how-lawfare-took-over-the-panama-canals-ports/",
+      "publishedAt": "2026-11-20T21:00:19Z",
+      "category": "Ports & Terminals",
+      "region": "Panama Canal & Caribbean",
+      "regions": [
+        "Panama Canal & Caribbean"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "panama",
+        "imo"
+      ],
+      "coords": [
+        9.08,
+        -79.68
+      ],
+      "navarea": "IV",
+      "image": "https://container-news.com/wp-content/uploads/2026/05/Neopanamax2-1140x759-1-1024x682-1-300x200.jpg",
+      "summary": "Hutchison litigates to set an exit price. Panama now answers with a criminal file. Neither side is seeking a verdict.",
+      "body": "CN Premium Articles Sticky News How lawfare took over the Panama Canal’s ports November 20, 2026 Facebook Twitter WhatsApp Linkedin Email Hutchison litigates to set an exit price. Panama now answers with a criminal file. Neither side is seeking a verdict. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS CK Hutchison Cristóbal lawfare Panama Canal Authority Port of Balboa Facebook Twitter WhatsApp Linkedin Email Previous article Great White Fleet cuts PTCO service frequency Next article FESCO removes two ports from FCDL1 service Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
+      "takeaways": [
+        "CN Premium Articles Sticky News How lawfare took over the Panama Canal’s ports November 20, 2026 Facebook Twitter WhatsApp Linkedin Email Hutchison litigates to set an exit price.",
+        "Panama now answers with a criminal file.",
+        "This content is locked Select a CN Premium Subscription Package To Unlock The Content!"
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-B2E3CB08E5",
+      "title": "Great White Fleet cuts PTCO service frequency",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/great-white-fleet-cuts-ptco-service-frequency/",
+      "publishedAt": "2026-11-20T20:00:17Z",
+      "category": "Ports & Terminals",
+      "region": "Panama Canal & Caribbean",
+      "regions": [
+        "Panama Canal & Caribbean",
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "panama",
+        "china"
+      ],
+      "coords": [
+        9.08,
+        -79.68
+      ],
+      "navarea": "IV",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/images-25-300x168.jpg",
+      "summary": "Chiquita’s Great White Fleet will reduce the frequency of its Hueneme service, branded PTCO, from weekly to fortnightly. The service connects the US West Coast with Mexico and Central America and will be maintained with a single container ship of approximately 2,100 TEU. The PTCO service will call at: Port Hueneme –...",
+      "body": "Services Top Right Great White Fleet cuts PTCO service frequency November 20, 2026 Facebook Twitter WhatsApp Linkedin Email Chiquita’s Great White Fleet will reduce the frequency of its Hueneme service, branded PTCO, from weekly to fortnightly. The service connects the US West Coast with Mexico and Central America and will be maintained with a single container ship of approximately 2,100 TEU. The PTCO service will call at: Port Hueneme – Manzanillo, Mexico – Puerto Madero – Puerto Quetzal TAGS Central America Chiquita Great White Fleet Manzanillo Port Hueneme PTCO Puerto Madero Puerto Quetzal Facebook Twitter WhatsApp Linkedin Email Previous article Maersk sets heavy-load surcharge for China–South America trade Next article How lawfare took over the Panama Canal’s ports Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The service connects the US West Coast with Mexico and Central America and will be maintained with a single container ship of approximately 2,100 TEU.",
+        "Operational Area: Panama Canal & Caribbean, China & East Asia.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-E640BBFBD0",
+      "title": "Iran War Oil Premium Evaporates as Global Crude Supplies Surge",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/iran-war-oil-premium-evaporates-as-global-crude-supplies-surge/",
+      "publishedAt": "2026-11-20T19:35:22Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Panama Canal & Caribbean",
+        "US Gulf & Port of Houston"
+      ],
+      "tags": [
+        "tanker",
+        "lpg",
+        "port",
+        "hormuz"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "summary": "The price of US sour oil has plunged, as a surge in crude supply from Venezuela, Canada and the Middle East gives refiners ample barrels to choose from.",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Photo: Shutterstock/Sven Hansche By Nathan Risser and Yongchang Chin (Bloomberg) –The price of US sour oil has plunged, as a surge in crude supply from Venezuela, Canada and the Middle East gives refiners ample barrels to choose from. US medium sour export grade Mars traded at a record premium to benchmark West Texas Intermediate futures in the early days of the Iran war. Buyers turned to the Gulf of Mexico variety, which is similar in quality to Middle Eastern crude, as the closure of the Strait of Hormuz disrupted supplies. Now, as oil markets begin to settle after a volatile year, Mars has fallen to a deep discount, making it cheaper for US refiners built to process heavier crude. Mars has dropped from a $10 premium to a $4 discount to WTI futures in less than a month. That’s the steepest discount since late September. Mars rallied to record premium of $17.50 at the peak of supply disruptions in March and April. At the start of the year, before the US and Israel launched their war in Iran in late February, the grade largely traded at a discount. Rising production of heavy-sour crude in Venezuela and Canada has pushed global prices lower in recent weeks. US refiners, major buyers of heavier oil along the Gulf Coast and in the Midwest, have benefited from increased supplies from Canada and Latin America. At the same time, higher shipping costs are weighing on prices at the barrel’s origin by making overseas sales more expensive. Flows from the Persian Gulf have also increased. Higher Middle Eastern flows, however, have reduced the incentive for Asian refiners to take advantage of falling Mars prices, with the US grade still uneconomical to import, according to traders familiar with the matter, who asked not to be named because they aren’t authorized to speak to the media. On a delivered basis to Northeast Asia, Mars for February was priced at a premium of about $12 to $13 a barrel to the Dubai benchmark — around $10 more expensive than similar quality oil from Saudi Arabia, they said. At least one other seller of Middle Eastern crude has also slashed offer prices, they added. “Incremental supply looks to be dominated by heavier and more sour barrels, especially out of Canada, Venezuela, and the Middle East,” Valero’s head of crude supply Randy Hawkins said in an October earnings call. It’s a “race to the bottom” Phillips 66’s executive vice president of marketing and commercial Brian Mandell said on a call with analysts the same month. In Canada, the pipeline that takes oil sands crude from inland fields to export markets on the West Coast is operating at a record 960,000 barrels a day this month, 8% above its stated capacity. Oil will also be shipped on 34 vessels out of the Westridge terminal near Vancouver in November, up from 31 in October. While cheaper heavy crude is a boon to refiners who are already making record profits from the Iran war’s disruptions to global fuel markets, it is coming at a cost to heavy oil producers. “We’re basically going to have to be a price taker,” oil driller Sable Offshore Corp. chief executive office Jim Flores said earlier this month. Sable pumps heavy oil off the coast of California. For now, US crude exports of both heavy and light grades continue at historically elevated levels. US crude exports averaged 4 million barrels a day over the past four weeks, below the weekly record of more than 6 million set in April but well above the 3 million average since the US lifted its crude-export ban in 2015. © 2026 Bloomberg L.P. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Another tanker was struck by a projectile and caught fire in the Strait of Hormuz on Friday, extending a wave of attacks on commercial shipping that has pushed maritime security... The LPG tanker TARA GAS remained on fire and adrift in the Strait of Hormuz on Wednesday, according to a new navigational warning, as independently verified video showed the vessel... The number of empty tankers sailing to collect cargoes of Middle East crude is sliding, a trend that could jeopardize the recent revival in the region’s oil flows to global markets, according to Tankertrackers.com, a firm that monitors vessel movements. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "US medium sour export grade Mars traded at a record premium to benchmark West Texas Intermediate futures in the early days of the Iran war.",
+        "Buyers turned to the Gulf of Mexico variety, which is similar in quality to Middle Eastern crude, as the closure of the Strait of Hormuz disrupted supplies."
+      ],
+      "readingMinutes": 5,
+      "readMinutes": 5
     },
     {
       "id": "SN-B798793FC7",
@@ -103,7 +680,7 @@
       "navarea": "XI",
       "image": "https://container-news.com/wp-content/uploads/2026/09/7c8a240e-28e8-4ecb-b4b7-91ca54957fff-300x169.webp",
       "summary": "Effective from the Price Calculation Date of 5 December 2026, a surcharge of US$200 per container will apply when the Verified Gross Mass exceeds 23 metric tonnes. The measure covers shipments originating from Shanghai, Qingdao, Xingang and Dalian. Destinations covered are Santos, Itapoa, Itajai and Paranagua in...",
-      "body": "Rates & Surcharges Top Right Maersk sets heavy-load surcharge for China–South America trade November 20, 2026 Facebook Twitter WhatsApp Linkedin Email CGI-generated image of a 8,700 TEU Maersk Lima class Effective from the Price Calculation Date of 5 December 2026, a surcharge of US$200 per container will apply when the Verified Gross Mass exceeds 23 metric tonnes. The measure covers shipments originating from Shanghai, Qingdao, Xingang and Dalian. Destinations covered are Santos, Itapoa, Itajai and Paranagua in Brazil, Montevideo in Uruguay and Buenos Aires in Argentina. Equipment VGM threshold Surcharge Effective date 40-foot non-operating reefer Above 23 metric tonnes US$200 per container 5 December 2026 Maersk’s consolidated tariff table also includes the existing US$200 surcharge for 20-foot dry equipment with a VGM exceeding 20 metric tonnes. That charge has applied since 17 July 2026. The surcharge applies across Maersk’s ocean products, including contract bookings, SPOT and Maersk Go. VGM includes the weight of the cargo, dunnage and securing materials, together with the container’s tare weight. TAGS A.P. Moeller-Maersk Facebook Twitter WhatsApp Linkedin Email Previous article DP World raises Mozambique port investment Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "body": "Rates & Surcharges Top Right Maersk sets heavy-load surcharge for China–South America trade November 20, 2026 Facebook Twitter WhatsApp Linkedin Email CGI-generated image of a 8,700 TEU Maersk Lima class Effective from the Price Calculation Date of 5 December 2026, a surcharge of US$200 per container will apply when the Verified Gross Mass exceeds 23 metric tonnes. The measure covers shipments originating from Shanghai, Qingdao, Xingang and Dalian. Destinations covered are Santos, Itapoa, Itajai and Paranagua in Brazil, Montevideo in Uruguay and Buenos Aires in Argentina. Equipment VGM threshold Surcharge Effective date 40-foot non-operating reefer Above 23 metric tonnes US$200 per container 5 December 2026 Maersk’s consolidated tariff table also includes the existing US$200 surcharge for 20-foot dry equipment with a VGM exceeding 20 metric tonnes. That charge has applied since 17 July 2026. The surcharge applies across Maersk’s ocean products, including contract bookings, SPOT and Maersk Go. VGM includes the weight of the cargo, dunnage and securing materials, together with the container’s tare weight. TAGS A.P. Moeller-Maersk Facebook Twitter WhatsApp Linkedin Email Previous article DP World raises Mozambique port investment Next article Great White Fleet cuts PTCO service frequency Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
       "takeaways": [
         "The measure covers shipments originating from Shanghai, Qingdao, Xingang and Dalian.",
         "Destinations covered are Santos, Itapoa, Itajai and Paranagua in Brazil, Montevideo in Uruguay and Buenos Aires in Argentina.",
@@ -160,15 +737,12 @@
       "region": "Strait of Hormuz & Persian Gulf",
       "regions": [
         "Strait of Hormuz & Persian Gulf",
-        "Red Sea & Bab el-Mandeb",
-        "US Gulf & Port of Houston"
+        "Red Sea & Bab el-Mandeb"
       ],
       "tags": [
         "tanker",
         "port",
-        "hormuz",
-        "red sea",
-        "imo"
+        "hormuz"
       ],
       "coords": [
         26.56,
@@ -177,14 +751,13 @@
       "navarea": "IX",
       "image": "https://images.marinelink.com/images/maritime/w150/adobe-stockzulfugar-karimov-175227.jpeg",
       "summary": "Oil prices fell on Friday and were set for a weekly decline on strong exports from the Middle East despite Houthi attacks on Saudi Arabia's capital Riyadh and reports of tanker disruptions in the Strait of Hormuz.Brent crude futures were down 67 cents, or 0.7%, at $91.31 a barrel at 1414 GMT.",
-      "body": "Oil Prices Drop for Third Week Straight Maritime Activity Reports, Inc. November 20, 2026 © Adobe Stock/Zulfugar Karimov Oil prices fell on Friday and were set for a weekly decline on strong exports from the Middle East despite Houthi attacks on Saudi Arabia's capital Riyadh and reports of tanker disruptions in the Strait of Hormuz. Brent crude futures were down 67 cents, or 0.7%, at $91.31 a barrel at 1414 GMT. US West Texas Intermediate futures for December were down 36 cents, or 0.4%, at $82.85 a barrel, while the more active January contract was down 19 cents, or 0.2%, at $82.85. Brent is on track for a near 5% decline for the week and the December WTI contract for a 6.5% weekly drop as expectations of a supply surplus grew because crude shipments through the Strait of Hormuz have returned to roughly pre-war levels. This would be the benchmarks' third straight week of decline. \"This week we keep having relatively strong export flows out of the Middle East. There is also a narrative ongoing that as long as people are talking, maybe there's a deal in the making,\" said Aldo Spanjer, commodity strategist at BNP Paribas. \"The prices are correct if you believe that this geopolitical risk doesn't come back. I'm not in that camp who thinks this is done ... I probably see a rebound,\" he said. On Friday, the Iran-aligned Houthi movement warned workers and people near Saudi Arabia's Red Sea ports to evacuate immediately and urged shipping companies to remove vessels, saying they would target Saudi ports in Jeddah and the Red Sea if a Saudi-led coalition strikes Yemen's Hodeidah port. The Houthis fired missiles at Riyadh on Thursday. Two oil tankers also hit naval mines in the Strait of Hormuz and \"are burning,\" Iran's Revolutionary Guards Navy said in a statement carried by state media on Thursday. Iran's intensifying attacks on tankers transiting the Strait of Hormuz, \"running at roughly one incident per day in November,\" still add a meaningful geopolitical risk premium to the market, according to UOB Group analysts in a client note. OPEC+ ministers will hold a series of meetings on November 29 to decide their 2027 output policy. The group comprises the Organization of the Petroleum Exporting Countries and allies such as Russia. The Middle East conflict has caused the biggest disruption ever to global oil and gas trade and could cut world oil demand by more than 4% by 2035 if governments accelerate electrification, efficiency and fuel-switching measures in response, the International Energy Agency said on Thursday. However, some analysts expect softness in the broader equities markets to weigh on oil prices, as Asian shares fell on Friday — heading for their worst week since 2020. \"Supply disruptions remain a risk, but near-term demand concerns tied to the AI trade unwind and broader risk-off sentiment are weighing on prices,\" said Saxo analysts in a note. In Russia, crude oil output could fall again as Ukrainian attacks on refineries and export infrastructure intensify, analysts and traders say. Ukrainian drone a ttacks have cut Russian oil refineries' combined crude processing volumes by 45% since late October, Reuters reported on Wednesday. (Reuters)",
+      "body": "Oil prices fell on Friday and were set for a weekly decline on strong exports from the Middle East despite Houthi attacks on Saudi Arabia's capital Riyadh and reports of tanker disruptions in the Strait of Hormuz.Brent crude futures were down 67 cents, or 0.7%, at $91.31 a barrel at 1414 GMT.",
       "takeaways": [
-        "Oil Prices Drop for Third Week Straight Maritime Activity Reports, Inc.",
-        "Brent crude futures were down 67 cents, or 0.7%, at $91.31 a barrel at 1414 GMT.",
-        "US West Texas Intermediate futures for December were down 36 cents, or 0.4%, at $82.85 a barrel, while the more active January contract was down 19 cents, or 0.2%, at $82.85."
+        "Operational Area: Strait of Hormuz & Persian Gulf, Red Sea & Bab el-Mandeb.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
       ],
-      "readingMinutes": 3,
-      "readMinutes": 3
+      "readingMinutes": 2,
+      "readMinutes": 2
     },
     {
       "id": "SN-B9F790C032",
@@ -214,202 +787,6 @@
       "takeaways": [
         "Operational Area: Strait of Hormuz & Persian Gulf, Singapore & Malacca Strait.",
         "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-D620F6507C",
-      "title": "Cyprus Shipping Chamber Supports Joint Shipping Industry Statement ahead of IMO MEPC 85",
-      "source": "Hellenic Shipping News",
-      "sourceIcon": "📊",
-      "sourceRegion": "Greece / Markets",
-      "url": "https://www.hellenicshippingnews.com/cyprus-shipping-chamber-supports-joint-shipping-industry-statement-ahead-of-imo-mepc-85/",
-      "publishedAt": "2026-11-20T18:00:59Z",
-      "category": "Weather & Cyclones",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "port",
-        "imo"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=900&q=80",
-      "summary": "The Cyprus Shipping Chamber (CSC) expresses its support to the joint statement issued by BIMCO, CLIA, IBIA, ICS, INTERCARGO, INTERFERRY, INTERTANKO, IPTA and WSC, ahead of the International Maritime Organisation’s (IMO) 85th session of the Marine Environment Protection Committee (MEPC 85), taking place in London from...",
-      "body": "Cyprus Shipping Chamber Supports Joint Shipping Industry Statement ahead of IMO MEPC 85 in International Shipping News 20/11/2026 The Cyprus Shipping Chamber (CSC) expresses its support to the joint statement issued by BIMCO, CLIA, IBIA, ICS, INTERCARGO, INTERFERRY, INTERTANKO, IPTA and WSC, ahead of the International Maritime Organisation’s (IMO) 85th session of the Marine Environment Protection Committee (MEPC 85), taking place in London from 30 November to 4 December 2026. The statement highlights the importance of a global regulatory framework at the IMO for the decarbonisation of international shipping that is practical, effective and achievable, while taking into account market and technological readiness, availability of alternative fuels and infrastructure, and providing the necessary regulatory certainty for the industry. The Chamber urges the IMO Member States to achieve the necessary compromises, with a view to developing a viable and effective global approach that ensures a level playing field, avoids regulatory fragmentation and duplication of requirements, and supports a safe and sustainable energy transition. Read the full statement circulated by the abovementioned Associations here: https://www.ics-shipping.org/statement/shipping-industry-urges-governments-to-agree-on-global-ghg-regulations-to-provide-regulatory-certainty-and-incentivize-maritime-decarbonization/ Source: Cyprus Shipping Chamber (CSC) 2026-11-20 hellenicshippingnews... tweet Share",
-      "takeaways": [
-        "Operational Area: Suez Canal & Eastern Med, Rotterdam & North Sea.",
-        "Cross-check live NOAA NHC / JMA / JTWC tropical cyclone cones and ECMWF wave heights on SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-F65008AD06",
-      "title": "Baltic Exchange welcomes new Lord Mayor of the City of London",
-      "source": "Hellenic Shipping News",
-      "sourceIcon": "📊",
-      "sourceRegion": "Greece / Markets",
-      "url": "https://www.hellenicshippingnews.com/baltic-exchange-welcomes-new-lord-mayor-of-the-city-of-london/",
-      "publishedAt": "2026-11-20T18:00:57Z",
-      "category": "Ports & Terminals",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Baltic Sea & Northern Europe"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
-      "summary": "Baltic Exchange is delighted to welcome Alderman Bronek Masojada as the newly elected and 698th Lord Mayor of the City of London. He succeeded Lady Mayor Dame Susan Langley DBE on 13 November at the Silent Ceremony at Guildhall, which was followed by the annual Lord Mayor’s Show in the City of London the next ...",
-      "body": "Baltic Exchange welcomes new Lord Mayor of the City of London in International Shipping News 20/11/2026 Baltic Exchange is delighted to welcome Alderman Bronek Masojada as the newly elected and 698th Lord Mayor of the City of London. He succeeded Lady Mayor Dame Susan Langley DBE on 13 November at the Silent Ceremony at Guildhall, which was followed by the annual Lord Mayor’s Show in the City of London the next day. The Lord Mayor spent 28 years at insurance giant Hiscox, including 21 years as Group Chief Executive, helping transform it into a leading global specialist insurer. He has also held senior roles across the insurance market and is Chair of the East End Community Foundation, supporting work to improve life chances and employment prospects across East London. The Lord Mayor also sits on the London International Shipping Week Board of Advisors. As Lord Mayor, Bronek will act as an international ambassador for the UK’s financial and professional services sector, championing its contribution to prosperity at home and abroad, as well as the UK’s role as a trusted partner that connects markets, nations, and ideas. This includes promoting London’s rich maritime heritage and its pivotal role in global finance, as well as the Baltic Exchange’s own role in supporting international shipping markets from its historic foundations at the heart of London’s maritime community. The Baltic looks forward to hosting a lunch in honour of the new Lord Mayor in December. On behalf of the international shipping community, the Baltic Exchange is delighted to welcome the Lord Mayor to his new role and looks forward to working closely with him and fellow shipping leaders to champion London’s place at the centre of the international maritime sector. Source: Baltic Exchange 2026-11-20 hellenicshippingnews... tweet Share",
-      "takeaways": [
-        "He succeeded Lady Mayor Dame Susan Langley DBE on 13 November at the Silent Ceremony at Guildhall, which was followed by the annual Lord Mayor’s Show in the City of London the next day.",
-        "The Lord Mayor spent 28 years at insurance giant Hiscox, including 21 years as Group Chief Executive, helping transform it into a leading global specialist insurer.",
-        "He has also held senior roles across the insurance market and is Chair of the East End Community Foundation, supporting work to improve life chances and employment prospects across East London."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-8DE810FDB9",
-      "title": "Equinor: Cyber-attack stopped",
-      "source": "Hellenic Shipping News",
-      "sourceIcon": "📊",
-      "sourceRegion": "Greece / Markets",
-      "url": "https://www.hellenicshippingnews.com/equinor-cyber-attack-stopped/",
-      "publishedAt": "2026-11-20T18:00:55Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
-      "summary": "Update 20 November 2026, 08:55 CET: The cyber-attack against Equinor has now been stopped. Production is running as normal, and there is no indication that data has been stolen or altered. There is also no indication that the attack has had any negative consequences for employees, partners or suppliers. The incident...",
-      "body": "Equinor: Cyber-attack stopped in Oil & Companies News 20/11/2026 Update 20 November 2026, 08:55 CET: The cyber-attack against Equinor has now been stopped. Production is running as normal, and there is no indication that data has been stolen or altered. There is also no indication that the attack has had any negative consequences for employees, partners or suppliers. The incident has been reported to the police. The cyber-attack detected by Equinor is still ongoing, and work to stop the attack and restore full integrity to the affected systems continues. It is too early to say how long this work will take. Production is running as normal, and there are no indications that data has been stolen or altered. The attack does not appear to be specifically targeting Equinor. Equinor is in continuous contact with the relevant national security authorities and has reported the matter to the police. Equinor has gained a clearer understanding of how the attack was carried out and which systems have been affected. As this is not a virus attack, there is no risk of the attack spreading. At present, there is no indication that the attack has consequences for employees, partners or suppliers. Production remains unaffected. Work is ongoing to neutralise the attack and restore the full integrity to the affected systems. It is too early to determine how long this will take. Equinor continues this work in dialogue with national security authorities. Equinor has detected an ongoing cyber-attack against certain IT systems. Relevant resources have been mobilised to neutralise the attack and regain full integrity. There are no indications that data has been stolen. The attack has not affected Equinor’s operations and production. Relevant authorities are being informed. Equinor will provide updates when new information is available. Source: Equinor 2026-11-20 hellenicshippingnews... tweet Share",
-      "takeaways": [
-        "Equinor: Cyber-attack stopped in Oil & Companies News 20/11/2026 Update 20 November 2026, 08:55 CET: The cyber-attack against Equinor has now been stopped.",
-        "Production is running as normal, and there is no indication that data has been stolen or altered.",
-        "There is also no indication that the attack has had any negative consequences for employees, partners or suppliers."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-F196D0038E",
-      "title": "US Natgas Prices Rise on Friday",
-      "source": "Hellenic Shipping News",
-      "sourceIcon": "📊",
-      "sourceRegion": "Greece / Markets",
-      "url": "https://www.hellenicshippingnews.com/us-natgas-prices-rise-on-friday/",
-      "publishedAt": "2026-11-20T18:00:53Z",
-      "category": "Weather & Cyclones",
-      "region": "US Gulf & Port of Houston",
-      "regions": [
-        "US Gulf & Port of Houston"
-      ],
-      "tags": [
-        "lng",
-        "port"
-      ],
-      "coords": [
-        29.35,
-        -94.78
-      ],
-      "navarea": "IV",
-      "image": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=900&q=80",
-      "summary": "US natural gas prices rose to around $3.30 per million British thermal units on Friday and were heading for a weekly gain of more than 3%, marking a third consecutive week of advances. Prices were supported by forecasts of colder weather, which could lift heating demand towards the end of November and through...",
-      "body": "US Natgas Prices Rise on Friday in General Energy News 20/11/2026 US natural gas prices rose to around $3.30 per million British thermal units on Friday and were heading for a weekly gain of more than 3%, marking a third consecutive week of advances. Prices were supported by forecasts of colder weather, which could lift heating demand towards the end of November and through December and January. However, the upside remains limited by ample supply, as producers continue injecting gas into storage to meet current demand. The US Energy Information Administration reported a storage increase of 20 billion cubic feet for the week ended November 13, exceeding the five-year average build of 15 bcf. Meanwhile, the outlook for longer-term supply improved after federal regulators approved Cheniere Energy’s application to expand its Sabine Pass LNG export facility in Louisiana by 20 million tonnes per annum, potentially increasing US export capacity and access to international markets. Source: Trading Economics 2026-11-20 hellenicshippingnews... tweet Share",
-      "takeaways": [
-        "Prices were supported by forecasts of colder weather, which could lift heating demand towards the end of November and through December and January.",
-        "However, the upside remains limited by ample supply, as producers continue injecting gas into storage to meet current demand.",
-        "The US Energy Information Administration reported a storage increase of 20 billion cubic feet for the week ended November 13, exceeding the five-year average build of 15 bcf."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-B201BE5E10",
-      "title": "Consumer sentiment rises as Michigan index surpasses expectations",
-      "source": "Hellenic Shipping News",
-      "sourceIcon": "📊",
-      "sourceRegion": "Greece / Markets",
-      "url": "https://www.hellenicshippingnews.com/consumer-sentiment-rises-as-michigan-index-surpasses-expectations/",
-      "publishedAt": "2026-11-20T18:00:51Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
-      "summary": "The University of Michigan’s Consumer Sentiment Index, a key gauge of consumer confidence in the United States, has shown an unexpected uptick, reflecting a more optimistic outlook among consumers regarding current and future economic conditions. The latest reading of the index came in at 51.5, surpassing both the...",
-      "body": "Consumer sentiment rises as Michigan index surpasses expectations in World Economy News 20/11/2026 The University of Michigan’s Consumer Sentiment Index, a key gauge of consumer confidence in the United States, has shown an unexpected uptick, reflecting a more optimistic outlook among consumers regarding current and future economic conditions. The latest reading of the index came in at 51.5, surpassing both the forecasted value of 51.0 and the previous month’s figure of 48.0. This upward movement in consumer sentiment is noteworthy, as it suggests a growing confidence among consumers, which could have positive implications for the broader economy. The index, which is derived from a survey of approximately 500 consumers, is a critical indicator of consumer attitudes and expectations, playing a significant role in shaping economic forecasts and policy decisions. The actual reading of 51.5 not only exceeded the anticipated forecast of 51.0 but also marked a significant improvement from the previous month’s index of 48.0. This increase indicates that consumers are feeling more optimistic about their financial situations and the general economic outlook, which could translate into increased consumer spending, a crucial driver of economic growth. The Consumer Sentiment Index is closely monitored by economists and investors alike, as it provides valuable insights into consumer behavior and economic trends. A higher-than-expected reading is typically seen as bullish for the U.S. dollar, reflecting confidence in the economy’s growth prospects. While the index’s importance is rated with two stars, indicating moderate significance, its implications for economic policy and market dynamics should not be underestimated. The rise in consumer sentiment could influence monetary policy decisions, as well as impact financial markets, particularly if the trend continues in subsequent months. Overall, the latest data from the University of Michigan suggests a cautiously optimistic outlook for the U.S. economy, with consumers showing increased confidence in their economic prospects. This development will be closely watched by economists and policymakers as they assess the potential for sustained economic recovery. Source: Investing.com 2026-11-20 hellenicshippingnews... tweet Share",
-      "takeaways": [
-        "The latest reading of the index came in at 51.5, surpassing both the forecasted value of 51.0 and the previous month’s figure of 48.0.",
-        "This upward movement in consumer sentiment is noteworthy, as it suggests a growing confidence among consumers, which could have positive implications for the broader economy.",
-        "The index, which is derived from a survey of approximately 500 consumers, is a critical indicator of consumer attitudes and expectations, playing a significant role in shaping economic forecasts and policy decisions."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-A56DD82A17",
-      "title": "Greece Current Account Gap Widens in September",
-      "source": "Hellenic Shipping News",
-      "sourceIcon": "📊",
-      "sourceRegion": "Greece / Markets",
-      "url": "https://www.hellenicshippingnews.com/greece-current-account-gap-widens-in-september/",
-      "publishedAt": "2026-11-20T18:00:49Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80",
-      "summary": "Greece’s current account deficit widened to EUR 0.52 billion in September 2026, compared with EUR 0.42 billion in the corresponding month of the previous year. The goods deficit expanded to EUR 3.38 billion from EUR 2.74 billion, as the value of imports (EUR 8.04 billion) outpaced exports (EUR 4.67 billion). The...",
-      "body": "Greece Current Account Gap Widens in September in World Economy News 20/11/2026 Greece’s current account deficit widened to EUR 0.52 billion in September 2026, compared with EUR 0.42 billion in the corresponding month of the previous year. The goods deficit expanded to EUR 3.38 billion from EUR 2.74 billion, as the value of imports (EUR 8.04 billion) outpaced exports (EUR 4.67 billion). The secondary income deficit also increased to EUR 0.36 billion from EUR 0.24 billion. In contrast, the services account surplus expanded to EUR 3.45 billion from EUR 3.12 billion, supported largely by higher revenues from travel, transport, and other services. Moreover, the primary income deficit narrowed to EUR 0.24 billion from EUR 0.56 billion a year earlier. Source: Trading Economics 2026-11-20 hellenicshippingnews... tweet Share",
-      "takeaways": [
-        "The goods deficit expanded to EUR 3.38 billion from EUR 2.74 billion, as the value of imports (EUR 8.04 billion) outpaced exports (EUR 4.67 billion).",
-        "The secondary income deficit also increased to EUR 0.36 billion from EUR 0.24 billion.",
-        "In contrast, the services account surplus expanded to EUR 3.45 billion from EUR 3.12 billion, supported largely by higher revenues from travel, transport, and other services."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -448,37 +825,6 @@
       ],
       "readingMinutes": 3,
       "readMinutes": 3
-    },
-    {
-      "id": "SN-AD21304D0A",
-      "title": "Lion Shipbrokers Weekly Market Report, Week 47 2026",
-      "source": "Hellenic Shipping News",
-      "sourceIcon": "📊",
-      "sourceRegion": "Greece / Markets",
-      "url": "https://www.hellenicshippingnews.com/lion-shipbrokers-weekly-market-report-week-47-2026/",
-      "publishedAt": "2026-11-20T18:00:37Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80",
-      "summary": "Sale & Purchase: The second-hand market kept up its pace, with a further thirty vessels reported sold Source: Lion Shipbrokers Limited",
-      "body": "in Weekly Shipbrokers Reports 20/11/2026 Sale & Purchase: The second-hand market kept up its pace, with a further thirty vessels reported sold Source: Lion Shipbrokers Limited 20/11/2026 20/11/2026 20/11/2026 10/09/2026 23/01/2025 30/09/2024 16/07/2024 14/07/2024 27/06/2024 25/06/2024 26/05/2024",
-      "takeaways": [
-        "Operational Area: Global Maritime.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
     },
     {
       "id": "SN-816A8CD233",
@@ -545,7 +891,7 @@
       "navarea": "IX",
       "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
       "summary": "Another tanker was struck by a projectile and caught fire in the Strait of Hormuz on Friday, extending a wave of attacks on commercial shipping that has pushed maritime security...",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Vessels in the Strait of Hormuz, as seen from Musandam, Oman, August 3, 2026. REUTERS/Stringer Another tanker was struck by a projectile and caught fire in the Strait of Hormuz on Friday, extending a wave of attacks on commercial shipping that has pushed maritime security incidents to their highest weekly level since mid-October. The latest incident occurred at approximately 1500 UTC, eight nautical miles north of Khasab, Oman, according to UK Maritime Trade Operations (UKMTO) Warning 214-26 . The tanker was transiting outbound through the strategic waterway when an unknown projectile struck its port bow, sparking a fire onboard. The vessel’s company security officer reported no casualties or environmental impact. Authorities are investigating. The attack comes amid a sharp escalation in threats to merchant shipping across the Middle East and Black Sea. According to maritime security analyst Martin Kelly of Orbital Risk Intelligence, shipping experienced 15 attacks and piracy-related incidents over the past seven days, a 50% increase from the previous week and the highest weekly total since mid-October. In the Persian Gulf, Strait of Hormuz and Gulf of Oman, Kelly recorded seven strikes involving six vessels. Four tankers were hit within 13 nautical miles of Khasab over three days, including the LPG tanker TARA GAS , which was attacked twice. The violence has left two seafarers missing and 13 injured, according to Kelly’s assessment. Among the most serious incidents was the November 17 attack on the tanker NAVIG8 MESSI , which suffered a fire after being struck 13 nautical miles north of Khasab. ADNOC confirmed that one crew member was missing and 11 others were injured. The remaining crew were evacuated and the vessel was reported under tow. The TARA GAS , meanwhile, was disabled by a projectile strike on November 16 before being hit again the following day, resulting in another fire and the vessel being abandoned. The pattern points to an increasingly dangerous concentration of attacks along the southern shipping lanes off Oman’s Musandam Peninsula, particularly against tankers attempting to leave the Persian Gulf. The deteriorating security situation is taking a continued toll on commercial traffic. In its weekly maritime security overview published Friday , UKMTO reported 115 outbound and 148 inbound transits over the preceding seven days, down from 139 outbound and 169 inbound crossings the previous week. Combined traffic remains approximately 65% below pre-conflict levels. UKMTO recorded six verified attacks across the Strait of Hormuz and Persian Gulf during its latest reporting period, which covered incidents through November 18. Four occurred in the Strait itself and two in the wider Persian Gulf. Two vessels required assistance, while the outcomes of four others remained unknown. The agency cautioned that its figures do not capture every incident, as some reports cannot be independently verified. Since the U.S.-Iran ceasefire agreement expired on August 17, UKMTO has recorded six total vessel losses, while 22 vessels required assistance and 31 were confirmed to have continued their voyages. The Joint Maritime Information Center (JMIC) continues to assess the threat to commercial shipping in the Strait of Hormuz as SEVERE , warning that further deliberate attacks are highly likely. The surge in maritime violence extends well beyond the Middle East. Six commercial vessels were struck in the western Black Sea over the past week, according to Kelly, including two ships that sank in Bulgaria’s exclusive economic zone on consecutive days. The general cargo ship BETUL 8 sank on November 16, followed by the LPG tanker GAS HUSKY on November 17. All 31 seafarers aboard the two vessels were rescued. Maritime security firm Ambrey separately confirmed reports of six vessels struck since November 13, including four attacked near the Sulina anchorage in Romanian waters and two in Bulgarian waters. Ambrey assessed the attacks as part of an escalating Russian campaign involving unmanned aerial and surface vessels. The incidents have raised growing concerns about the safety of commercial shipping in waters adjacent to NATO member states Romania and Bulgaria. Piracy-related activity has also increased in the Gulf of Aden and western Indian Ocean. During the week, a tanker reported being approached by an armed skiff carrying a ladder approximately 430 nautical miles east of Socotra, Yemen. In another incident off Al Mukalla, armed guards aboard a cargo vessel fired a warning shot to repel an attempted boarding. A further incident was reported Friday, when six armed men aboard a skiff fired four shots at an eastbound bulk carrier approximately 95 nautical miles southwest of Al Mukalla. The ship’s security team returned warning shots, forcing the attackers to retreat. No injuries or damage were reported. The incidents underscore the growing range of threats facing merchant vessels, from projectile and drone attacks in active conflict zones to renewed piracy activity along established trading routes. With attacks concentrated around the Strait of Hormuz and the western Black Sea, maritime security analysts warn that the coming week could bring further strikes against commercial vessels. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! A cargo of Iranian crude was transferred between two tankers in the Persian Gulf this week, as the US warned its navy could target vessels that carry out the practice while enforcing a maritime blockade. Iran’s attacks on oil tankers crossing the crucial Strait of Hormuz are getting more intense, just as prices have tumbled due to a flood of supply from the Middle East. The LPG tanker TARA GAS remained on fire and adrift in the Strait of Hormuz on Wednesday, according to a new navigational warning, as independently verified video showed the vessel... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Vessels in the Strait of Hormuz, as seen from Musandam, Oman, August 3, 2026. REUTERS/Stringer Another tanker was struck by a projectile and caught fire in the Strait of Hormuz on Friday, extending a wave of attacks on commercial shipping that has pushed maritime security incidents to their highest weekly level since mid-October. The latest incident occurred at approximately 1500 UTC, eight nautical miles north of Khasab, Oman, according to UK Maritime Trade Operations (UKMTO) Warning 214-26 . The tanker was transiting outbound through the strategic waterway when an unknown projectile struck its port bow, sparking a fire onboard. The vessel’s company security officer reported no casualties or environmental impact. Authorities are investigating. The attack comes amid a sharp escalation in threats to merchant shipping across the Middle East and Black Sea. According to maritime security analyst Martin Kelly of Orbital Risk Intelligence, shipping experienced 15 attacks and piracy-related incidents over the past seven days, a 50% increase from the previous week and the highest weekly total since mid-October. In the Persian Gulf, Strait of Hormuz and Gulf of Oman, Kelly recorded seven strikes involving six vessels. Four tankers were hit within 13 nautical miles of Khasab over three days, including the LPG tanker TARA GAS , which was attacked twice. The violence has left two seafarers missing and 13 injured, according to Kelly’s assessment. Among the most serious incidents was the November 17 attack on the tanker NAVIG8 MESSI , which suffered a fire after being struck 13 nautical miles north of Khasab. ADNOC confirmed that one crew member was missing and 11 others were injured. The remaining crew were evacuated and the vessel was reported under tow. The TARA GAS , meanwhile, was disabled by a projectile strike on November 16 before being hit again the following day, resulting in another fire and the vessel being abandoned. The pattern points to an increasingly dangerous concentration of attacks along the southern shipping lanes off Oman’s Musandam Peninsula, particularly against tankers attempting to leave the Persian Gulf. The deteriorating security situation is taking a continued toll on commercial traffic. In its weekly maritime security overview published Friday , UKMTO reported 115 outbound and 148 inbound transits over the preceding seven days, down from 139 outbound and 169 inbound crossings the previous week. Combined traffic remains approximately 65% below pre-conflict levels. UKMTO recorded six verified attacks across the Strait of Hormuz and Persian Gulf during its latest reporting period, which covered incidents through November 18. Four occurred in the Strait itself and two in the wider Persian Gulf. Two vessels required assistance, while the outcomes of four others remained unknown. The agency cautioned that its figures do not capture every incident, as some reports cannot be independently verified. Since the U.S.-Iran ceasefire agreement expired on August 17, UKMTO has recorded six total vessel losses, while 22 vessels required assistance and 31 were confirmed to have continued their voyages. The Joint Maritime Information Center (JMIC) continues to assess the threat to commercial shipping in the Strait of Hormuz as SEVERE , warning that further deliberate attacks are highly likely. The surge in maritime violence extends well beyond the Middle East. Six commercial vessels were struck in the western Black Sea over the past week, according to Kelly, including two ships that sank in Bulgaria’s exclusive economic zone on consecutive days. The general cargo ship BETUL 8 sank on November 16, followed by the LPG tanker GAS HUSKY on November 17. All 31 seafarers aboard the two vessels were rescued. Maritime security firm Ambrey separately confirmed reports of six vessels struck since November 13, including four attacked near the Sulina anchorage in Romanian waters and two in Bulgarian waters. Ambrey assessed the attacks as part of an escalating Russian campaign involving unmanned aerial and surface vessels. The incidents have raised growing concerns about the safety of commercial shipping in waters adjacent to NATO member states Romania and Bulgaria. Piracy-related activity has also increased in the Gulf of Aden and western Indian Ocean. During the week, a tanker reported being approached by an armed skiff carrying a ladder approximately 430 nautical miles east of Socotra, Yemen. In another incident off Al Mukalla, armed guards aboard a cargo vessel fired a warning shot to repel an attempted boarding. A further incident was reported Friday, when six armed men aboard a skiff fired four shots at an eastbound bulk carrier approximately 95 nautical miles southwest of Al Mukalla. The ship’s security team returned warning shots, forcing the attackers to retreat. No injuries or damage were reported. The incidents underscore the growing range of threats facing merchant vessels, from projectile and drone attacks in active conflict zones to renewed piracy activity along established trading routes. With attacks concentrated around the Strait of Hormuz and the western Black Sea, maritime security analysts warn that the coming week could bring further strikes against commercial vessels. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! The price of US sour oil has plunged, as a surge in crude supply from Venezuela, Canada and the Middle East gives refiners ample barrels to choose from. A cargo of Iranian crude was transferred between two tankers in the Persian Gulf this week, as the US warned its navy could target vessels that carry out the practice while enforcing a maritime blockade. Iran’s attacks on oil tankers crossing the crucial Strait of Hormuz are getting more intense, just as prices have tumbled due to a flood of supply from the Middle East. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
       "takeaways": [
         "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
         "Join the leading maritime news network Vessels in the Strait of Hormuz, as seen from Musandam, Oman, August 3, 2026.",
@@ -876,26 +1222,26 @@
       "sourceRegion": "USA / Maritime Tech",
       "url": "https://www.marinelink.com/news/dongara-marine-build-meter-patrol-vessel-544506",
       "publishedAt": "2026-11-20T15:01:26Z",
-      "category": "Ports & Terminals",
-      "region": "Australia & Pilbara",
+      "category": "Shipping & Tankers",
+      "region": "Global Maritime",
       "regions": [
-        "Australia & Pilbara"
+        "Global Maritime"
       ],
       "tags": [
-        "port"
+        "shipping",
+        "global"
       ],
       "coords": [
-        -20.31,
-        118.58
+        25.0,
+        -40.0
       ],
-      "navarea": "X",
+      "navarea": "GLOBAL",
       "image": "https://images.marinelink.com/images/maritime/w150/dongara-marine-175223.png",
       "summary": "The Cook Labor Government is investing $13.4 million in two new vessels to strengthen fisheries compliance and protect the Kimberley's valuable marine resources.A new nine-meter amphibious vessel is now operating out of Broome, undertaking patrols…",
-      "body": "Dongara Marine to Build 22-Meter Patrol Vessel Maritime Activity Reports, Inc. November 20, 2026 © Dongara Marine The Cook Labor Government is investing $13.4 million in two new vessels to strengthen fisheries compliance and protect the Kimberley's valuable marine resources. A new nine-meter amphibious vessel is now operating out of Broome, undertaking patrols across the Buccaneer Archipelago Marine Park. The vessel was built by global business Sealegs who specialize in manufacturing the versatile craft. The vessel's ability to travel on both land and water will allow Fisheries and Marine Officers to access remote locations where extreme tidal conditions and limited boat ramp infrastructure can make launching traditional vessels difficult. The vessel will support joint patrols with local Aboriginal ranger groups, strengthening partnerships and supporting the shared management of the culturally significant region. The larger 22-meter patrol vessel will also be based in Broome, supporting commercial and recreational fisheries compliance and marine park management across northern waters. Expected to be delivered in October 2028, the new vessel will be built by Dongara Marine, providing another boost to Western Australia's marine manufacturing industry. The Geraldton business also delivered the new PV Equinox earlier this year, replacing the ageing PV Walcott and strengthening the State's fisheries patrol capabilities across the Kimberley.",
+      "body": "The Cook Labor Government is investing $13.4 million in two new vessels to strengthen fisheries compliance and protect the Kimberley's valuable marine resources.A new nine-meter amphibious vessel is now operating out of Broome, undertaking patrols…",
       "takeaways": [
-        "Dongara Marine to Build 22-Meter Patrol Vessel Maritime Activity Reports, Inc.",
-        "November 20, 2026 © Dongara Marine The Cook Labor Government is investing $13.4 million in two new vessels to strengthen fisheries compliance and protect the Kimberley's valuable marine resources.",
-        "A new nine-meter amphibious vessel is now operating out of Broome, undertaking patrols across the Buccaneer Archipelago Marine Park."
+        "Operational Area: Global Maritime.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1280,41 +1626,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-F7CD42E341",
-      "title": "MSC revises Chinook and reinstates Mustang service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/msc-revises-chinook-and-reinstates-mustang-service/",
-      "publishedAt": "2026-11-20T13:00:37Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "China & East Asia",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2026/02/download-_1_-300x169.png",
-      "summary": "MSC will revise its Chinook service and reinstate the Mustang service as part of changes to its Asia–Pacific Northwest network. From week 50, Conti Annapurna, voyage UK650A, will begin the revised eastbound Chinook rotation from South Vietnam. MSC said the streamlined service will feature fewer port calls and reduced...",
-      "body": "Services Sticky News MSC revises Chinook and reinstates Mustang service November 20, 2026 Facebook Twitter WhatsApp Linkedin Email MSC Etoile at Victoria International Container Terminal MSC will revise its Chinook service and reinstate the Mustang service as part of changes to its Asia–Pacific Northwest network. From week 50, Conti Annapurna, voyage UK650A, will begin the revised eastbound Chinook rotation from South Vietnam. MSC said the streamlined service will feature fewer port calls and reduced time in port. The revised Chinook rotation will be: Dong Nai – Xiamen – Shanghai – Qingdao – Busan – Vancouver – Seattle – Prince Rupert MSC will also reinstate the Mustang service, establishing a second dedicated Pacific Northwest loop alongside Chinook. Mustang will resume from Yantian on 13 December 2026 with GSL Dorothea, voyage UV651A. The service will restore direct connections from Yantian and Ningbo to Seattle and Vancouver. The Mustang rotation will be: Yantian – Ningbo – Busan – Seattle – Vancouver MSC said the two services will provide broader coverage and additional shipping options between Asia and the Pacific Northwest. TAGS Mediterranean Shipping Co. (MSC) Facebook Twitter WhatsApp Linkedin Email Previous article Lufthansa Cargo adds Rome–Tel Aviv freight capacity with Poste Air Cargo Next article ONE plans four new intra-Asia services Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "From week 50, Conti Annapurna, voyage UK650A, will begin the revised eastbound Chinook rotation from South Vietnam.",
-        "MSC said the streamlined service will feature fewer port calls and reduced time in port.",
-        "Mustang will resume from Yantian on 13 December 2026 with GSL Dorothea, voyage UV651A."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-4227DC544E",
       "title": "Nexans completes deep-water cable laying ops off Australia for Chevron",
       "source": "Offshore Energy",
@@ -1383,38 +1694,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-9D279095DA",
-      "title": "Lufthansa Cargo adds Rome–Tel Aviv freight capacity with Poste Air Cargo",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/lufthansa-cargo-adds-rome-tel-aviv-freight-capacity-with-poste-air-cargo/",
-      "publishedAt": "2026-11-20T12:00:13Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/Poste-Air-Cargo-3-300x169.webp",
-      "summary": "Lufthansa Cargo has expanded its air freight services between Rome and Tel Aviv through a new capacity agreement with Poste Air Cargo. The additional direct flights operate every Monday and Thursday from Rome-Fiumicino Airport. They are served by Boeing 737-800BCF freighters, each offering approximately 22 metric...",
-      "body": "Lufthansa Cargo has expanded its air freight services between Rome and Tel Aviv through a new capacity agreement with Poste Air Cargo. The additional direct flights operate every Monday and Thursday from Rome-Fiumicino Airport. They are served by Boeing 737-800BCF freighters, each offering approximately 22 metric tons of cargo capacity. Under the arrangement, Lufthansa Cargo uses capacity provided by Poste Air Cargo, the cargo airline of Italy’s Poste Italiane Group. The additional flights respond to continued demand for air freight capacity on the route. They also give customers in Italy more options for scheduling shipments to Tel Aviv. Rome hub gains additional freighter connections The new services complement Lufthansa Cargo’s existing cooperation with ITA Airways. Since June 2025, Lufthansa Cargo has gradually expanded its marketing of cargo capacity on ITA Airways flights, strengthening Rome’s role in its Southern European network. The agreement with Poste Air Cargo adds dedicated freighter capacity alongside the cargo space available on passenger aircraft. “With the additional cargo routes from Poste Air Cargo out of Rome, we are creating more capacity on a highly sought-after route and greater flexibility for shipment planning,” said Ashwin Bhat, CEO of Lufthansa Cargo. “At the same time, we are further developing Rome as a hub in Southern Europe: We are strategically supplementing ITA Airways’ cargo capacity with freighter services, thereby aligning our offerings even more closely with our customers’ needs,” Bhat added. Lufthansa Cargo expects the additional capacity to remain available for at least the rest of the winter flight schedule. Poste Air Cargo operates domestic and international cargo services, including scheduled flights, charters and ACMI operations. Its domestic network also supports mail and parcel transportation for the Poste Italiane Group.",
-      "takeaways": [
-        "Lufthansa Cargo has expanded its air freight services between Rome and Tel Aviv through a new capacity agreement with Poste Air Cargo.",
-        "The additional direct flights operate every Monday and Thursday from Rome-Fiumicino Airport.",
-        "They are served by Boeing 737-800BCF freighters, each offering approximately 22 metric tons of cargo capacity."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-10ADE30F79",
       "title": "Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger",
       "source": "Splash247",
@@ -1440,151 +1719,11 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2015/07/Subsea-7-Seven-Borealis-300x200.jpeg",
       "summary": "Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis, which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally...",
-      "body": "Europe Offshore Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger Bojan Lepic November 20, 2026 0 0 1 minute read Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis , which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month. The regulator required the disposal of Seven Borealis to address competition concerns in Brazil’s offshore engineering, procurement, construction, and installation market, where both contractors have a substantial presence. Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure. Those commitments currently extend into 2028. The company has not identified a prospective buyer or disclosed an asking price for the vessel. The planned merger will create Saipem 7, combining two of the world’s largest offshore construction contractors. Subsea 7 said 13 of the 16 relevant competition authorities have approved the transaction. Reviews remain underway in Australia, the EU, and West Africa, with completion now expected in early 2027. The Seven Borealis disposal remains a condition of the Brazilian approval. Tags Italy Norway Bojan Lepic November 20, 2026 0 0 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger Bojan Lepic November 20, 2026 0 1,277 1 minute read Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis , which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month. The regulator required the disposal of Seven Borealis to address competition concerns in Brazil’s offshore engineering, procurement, construction, and installation market, where both contractors have a substantial presence. Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure. Those commitments currently extend into 2028. The company has not identified a prospective buyer or disclosed an asking price for the vessel. The planned merger will create Saipem 7, combining two of the world’s largest offshore construction contractors. Subsea 7 said 13 of the 16 relevant competition authorities have approved the transaction. Reviews remain underway in Australia, the EU, and West Africa, with completion now expected in early 2027. The Seven Borealis disposal remains a condition of the Brazilian approval. Tags Italy Norway Bojan Lepic November 20, 2026 0 1,277 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month.",
         "Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure.",
         "Those commitments currently extend into 2028."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-A2B064B68D",
-      "title": "TEN, Ltd. Reports Record Profits for the Nine Months and Third Quarter of 2026",
-      "source": "Hellenic Shipping News",
-      "sourceIcon": "📊",
-      "sourceRegion": "Greece / Markets",
-      "url": "https://www.hellenicshippingnews.com/ten-ltd-reports-record-profits-for-the-nine-months-and-third-quarter-of-2026/",
-      "publishedAt": "2026-11-20T11:00:59Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "US East Coast & New York",
-      "regions": [
-        "US East Coast & New York",
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "tanker",
-        "lng",
-        "port",
-        "singapore"
-      ],
-      "coords": [
-        40.5,
-        -73.95
-      ],
-      "navarea": "IV",
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
-      "summary": "TEN, Ltd. reported results (unaudited) for the nine months and the third quarter ended September 30, 2026. NINE MONTHS 2026 SUMMARY RESULTS During the first nine months of 2026, TEN, with an average in-the-water fleet of 63 vessels, generated gross revenues of $851 million, a near $274 million increase from the nine...",
-      "body": "TEN, Ltd. Reports Record Profits for the Nine Months and Third Quarter of 2026 in Hellenic Shipping News 20/11/2026 TEN, Ltd. reported results (unaudited) for the nine months and the third quarter ended September 30, 2026. NINE MONTHS 2026 SUMMARY RESULTS During the first nine months of 2026, TEN, with an average in-the-water fleet of 63 vessels, generated gross revenues of $851 million, a near $274 million increase from the nine months of 2025. The resulting net income for the first nine-months of 2026 reached $403 million equivalent to $12.69 per share compared to $2.75 per share in the nine-month period of 2025, representing a gross increase of 355%. Operating income during the 2026 nine-month period and inclusive of a $94 million capital gain from the sale of four vessels, rose to $467 million from $171 million in the corresponding period of 2025, which also included capital gains of $12.5 million. Adjusted EBITDA for the first nine months of 2026 was at $510 million from $289 million in the first nine months of 2025. Despite having 12 vessels on scheduled dry dock, one vessel undergoing repairs and some on repositing voyages during the first nine months of 2026, fleet utilization remained high at 95.5%. The average Time Charter Equivalent (TCE) rate per vessel per day for the nine months of 2026 rose to $45,170, compared with $30,703 in the nine months of 2025, representing a 47% increase, reflecting the continued strength of the tanker markets. Total operating expenses per vessel per day remained at a still competitive $10,664 in the nine months ended September 30, 2026. Depreciation and amortization in the nine months ended September 30, 2026, totaled $135 million from $126 million in the corresponding 2025 period, attributable to the operation of a slightly larger fleet consisting of newer and larger class vessels. TEN’s cash balances at the end of September 2026, stood at a healthy $533.5 million, $269 million higher than the cash levels at the end of September 2025 Total bank debt as of September 30, 2026, was $2.0 billion from $1.8 billion at September 30, 2025, reflecting new loans associated with vessels entering the fleet. Interest and finance costs for the first nine months of 2026 amounted to $65.7 million, about $7.0 million lower than the level recorded in the first nine-months of 2025, as a result of decreased spreads attained from banks for new or refinanced loans and lower global interest rates. Interest income rose to f $10.4 million in the 2026 nine-month period compared to $7.7 million received in the 2025 nine-month period. Q3 2026 SUMMARY RESULTS With an average fleet of 63 vessels, TEN’s gross revenues during the third quarter of 2026 approximated $300 million, an increase of $113 million, or 61%, over the corresponding 2025 period. Net income in the third quarter of 2026 reached $174.5 million (inclusive of the capital gains mentioned above), equivalent to $5.57 per share, from $1.05 per share in the third quarter of 2025 which also recorded the aforementioned capital gains. A 431% increase. Operating income during the third quarter of 2026, inclusive of $56.2 million capital gain from the sale of three vessels in the summer of 2026, settled at $194.5 million from $60.5 million in the equivalent quarter of 2025, which included capital gains of $8.9 million obtained from the sale of three vessels Adjusted EBITDA for the third quarter of 2026 was at $185.4 million, 94% higher from the 2025 third quarter level. Average TCE rate per vessel per day in the third quarter of 2026 reached $48,615, 59% higher than the 2025 equivalent period, supported by high fleet utilization rates of nearly 94%. Operating expenses per vessel per day in the third quarter of 2026 were $11,394. Depreciation and amortization expenses during the third quarter of 2026 were in line with the increased number of vessels in the fleet at $44.8 million, just $2.3 million higher than the 2025 third quarter levels. Consistent with the first nine-months trend, interest and finance costs in the third quarter of 2026 decreased by $1.4 million from the corresponding 2025 period to $22.3 million, benefiting from lower borrowing spreads and lower global interest rates, while interest income totaled $4.8 million. SUBSEQUENT EVENTS & OTHERS On September 29, 2026, TEN exercised its right to repurchase the 2022-built LNG carrier Tenergy, currently under a five-year finance lease, at a significant discount to fair market value. The acquisition will be completed upon the expiration of the lease in January 2027 and will be financed in its entirety through funds obtained from an international banking institution on attractive terms. On October 26, 2026, TEN announced its authorization to commence an up to $150 million buyback program covering both common and preferred shares. The timing of any share purchases of any type, the prices and the exact number of shares to be purchased will depend on prevailing market conditions, cash balances and other uses of capital. TEN is evaluating the possibility of applying to list its common shares on the Main Board of the Singapore Exchange Securities Trading Limited (the “SGX-ST”). TEN’s common shares are currently listed and traded on the New York Stock Exchange (“NYSE”) and would continue to be primarily listed and traded on NYSE. No final decision or commitment has been made as to the timing, terms or conditions of any such listing on the SGX-ST. CORPORATE AFFAIRS On October 26, 2026, TEN announced a doubling of its first 2027 semi-annual common stock dividend to $1.00 per share, up from $0.50 per share in the 2026 comparable period. The dividend is scheduled for payment on January 20, 2027, to shareholders of record as of January 12, 2027. For the entire 2026, TEN paid common shareholders a total of $1.50 per share in dividends. Since the Company’s NYSE listing in 2002, TEN has consistently demonstrated its commitment to reward shareholders, and will have distributed, until the end of 2026 over $1.0 billion in aggregate common and preferred share dividends. The Company’s 9.25% Series E Preferred Shares become redeemable at the election of the Company on May 28, 2027, and the Company currently expects that it may elect to redeem, all or a portion of, such Series E Preferred Shares on the above stated date. This disclosure does not constitute a notice of redemption, and there can be no assurance as to the amount, if any, of the Series E Preferred Shares that will be redeemed. CORPORATE STRATEGY As tanker market fundamentals, in terms of supply and demand remain healthy and continue to be supported by trade dislocations stemming from geopolitics, TEN benefits from the very strong conditions evident both in the freight market and the firm asset values. Accordingly, TEN continues to capture the market upside through spot and profit-sharing contracts, while pursuing long-term charter coverage at today’s high levels. With cash balances well in excess of half a billion dollars, and $3.6 billion of future revenues, management remains committed to evaluating accretive growth opportunities across the various sectors in which TEN operates, while continuing to focus on the divestment of older assets where demand remains strong. “TEN is navigating through this unprecedented environment with a diversified and high-quality fleet, positioned to capture market upside by securing firm forward revenues and providing shareholders with attractive returns. In parallel, it is continuing its dynamic 20-vessel newbuilding program,” stated Mr. George Saroglou, COO and President of TEN. “The doubling of the 2027 first semi-annual dividend, the $150 million buyback program together with the divestment of older tonnage highlights management’s intention to use TEN’s healthy and growing cash balances for the long-term benefit of the Company, and its shareholders,” To this end, and having been pioneers in the capital markets with a first public listing back in 1993 on the Oslo Bors, and in 2002 on the NYSE, management currently evaluates a possible secondary listing on the Singapore Exchange (SGX), in order to position the Company in the growing Asian capital market going forward” Mr. Saroglou concluded. Full Report Source: TEN Ltd. 2026-11-20 hellenicshippingnews... tweet Share",
-      "takeaways": [
-        "Reports Record Profits for the Nine Months and Third Quarter of 2026 in Hellenic Shipping News 20/11/2026 TEN, Ltd.",
-        "reported results (unaudited) for the nine months and the third quarter ended September 30, 2026.",
-        "The resulting net income for the first nine-months of 2026 reached $403 million equivalent to $12.69 per share compared to $2.75 per share in the nine-month period of 2025, representing a gross increase of 355%."
-      ],
-      "readingMinutes": 7,
-      "readMinutes": 7
-    },
-    {
-      "id": "SN-092CBC44E5",
-      "title": "Decision time on carbon pricing for global shipping at the UN",
-      "source": "Hellenic Shipping News",
-      "sourceIcon": "📊",
-      "sourceRegion": "Greece / Markets",
-      "url": "https://www.hellenicshippingnews.com/decision-time-on-carbon-pricing-for-global-shipping-at-the-un/",
-      "publishedAt": "2026-11-20T11:00:57Z",
-      "category": "Weather & Cyclones",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "lng",
-        "port",
-        "imo"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=900&q=80",
-      "summary": "Governments are set to decide on the future of the Net-Zero Framework (NZF) for global shipping, a landmark climate agreement introducing the world’s first global carbon pricing on any industry. The negotiations are planned to take place at the International Maritime Organization (IMO) as a three-part summit:...",
-      "body": "Decision time on carbon pricing for global shipping at the UN in International Shipping News 20/11/2026 Governments are set to decide on the future of the Net-Zero Framework (NZF) for global shipping, a landmark climate agreement introducing the world’s first global carbon pricing on any industry. The negotiations are planned to take place at the International Maritime Organization (IMO) as a three-part summit: technical working group talks (ISWG-GHG-23) on 23-27 November, the 85th session of the Marine Environment Protection Committee (MEPC 85) on 30 November – 3 December, and potentially the Extraordinary Session (MEPC E.2) on 4 December. The talks will decide the fate of ~5% of global oil demand represented by global shipping, making the stakes for energy security and climate extremely high. The meeting is also a test whether global “middle powers” can unite despite the US and other petro states and deliver meaningful global climate action this year. Discussions in the first week (ISWG-GHG-23) will primarily focus on the NZF’s key elements, such as the agreed limits to phase-out fossil fuels, clean energy and carbon pricing revenues, and whether any possible changes can deliver a compromise that works for all countries, including climate champions as well as persistent opponents of climate action. Political discussions in the second week (MEPC85) are likely to culminate in a decision on the adoption of the Framework, either in its current form or with possible changes, on Friday 4 December. Latest evidence from UCL and RMI shows that the NZF in its current form is the best, most cost-effective way for the industry to achieve its climate commitments under the 2023 Revised Strategy. Experts warn further delaying the NZF adoption would accelerate the rise of national and regional rules, which are already emerging in Africa and Europe, resulting in a regulatory patchwork unable to provide the unanimity and predictability that global trade requires. The IMO discussions follow the COP 31 Climate Summit putting a spotlight on shipping action. Over 110 maritime companies and industry associations called on the IMO Member States to adopt the NZF this year. Over 30 maritime organizations committed to increasing electricity’s share of shipping’s energy use to at least 20% by 2035, stating that a strong global policy at the IMO is necessary to help achieve this goal. Em Fenton, Senior Director, Climate Diplomacy, Opportunity Green says: “We have seen real solidarity and progress at shipping’s climate negotiations over the past two years. Now it’s crunch time and we cannot allow those who shout the loudest to pull the rug out from under the table. Climate vulnerable countries have fought hard for a plan to decarbonise the shipping sector, and waited long enough to see this put into action. Now, Member States must adopt a Net-Zero Framework that cleans up the global shipping industry in a way that supports communities facing the worst impacts of the climate crisis and ensures that everyone pays a fair price for their shipping pollution.” Alex Springer, Deputy Director of Shipping, Transport & Environment, said: “The biggest danger at MEPC 85 is no longer delay, but a rushed deal designed to get Trump and his allies to the table. Carving out an indefinite transition to fossil LNG and crop biofuels is not progress; it would be a concession to US and Saudi business interests and will prolong shipping’s fossil fuel dependency at the expense of climate action. IMO member states, in the EU and elsewhere, must resist pressure to reach a deal at any cost that would simply swap the industry from one set of dirty fuels to another.” Delaine McCullough, Shipping Program Director, Ocean Conservancy, said: “Adopting the agreed upon Net-Zero Framework is the quickest and most effective way to protect communities, address climate change, and create certainty for the shipping industry for decades to come. As this year’s stunning weather disasters make clear, our ocean and the industry cannot afford to kick the hard decisions down the road again.” Lucas Leppert, President, the Clean Shipping Coalition, said: “In the more than 12 months delay in adoption of the NZF, the world has seen increased climate impacts: floods, droughts, heatwaves, and wildfires. There is no longer time for going in circles; every IMO member state must get behind the Net-Zero Framework and adopt it before the year ends.” Jesse Fahnestock, Director of Decarbonisation, Global Maritime Forum, said: “As we approach the critical meetings of the next two weeks, the space for agreement is narrowing. Further delay or weakening of agreed elements risks costly delays and abandonment of investments by first movers, and would likely drive further regulatory fragmentation to fill the ambition gap. Global shipping needs two things first and foremost: a credible, sufficient, and transparently-managed price signal, and a predictable, fixed trajectory for emissions reductions. Amongst the options discussed, the NZF is the one that delivers on that.” Davina Hurt, Climate Policy Director, Pacific Environment, said: “For generations, communities living near ports have carried the burden of shipping pollution — in their children’s lungs, in their homes and in their shortened lives. Meanwhile, islands and coastal communities that have done the least to cause the climate crisis, are watching the sea take their land. The Net-Zero Framework now on the table is our best chance in a generation to step toward cleaner fuels and move towards a more equitable solution. It’s time to finally put the costs where they belong: on polluters and the fossil fuel companies that continue to make billions in profits each year. Member states should ensure that a funding mechanism delivers for those communities who need it the most. Delegates can not afford to walk away from this responsibility again.” Adria Jover, President & Founder, International Electric Maritime Association (IEMA), says: “At COP31, we witnessed an unprecedented alignment of industry and NGO voices demanding the rapid electrification of the global fleet and ports worldwide. The responsibility to turn this pledge into action sits now in London. As the next round of IMO meetings begins, the adoption of the Net-Zero Framework is the first and most critical opportunity for IMO Member States to show that they are hearing these voices and send the definitive market signal the industry needs to electrify at scale.” Sandra Moguel, Legal Research & Coordination Lead, Equal Routes, said: “As negotiations resume at the IMO, Member States will decide how the Net-Zero Framework treats LNG and other methane-based fuels. LNG can look cleaner on paper than it is in practice, because methane that slips through engines or leaks along the supply chain is easy to miss. It should not receive rewards without fully accounting for that slip and leakage on a well-to-wake basis. This is the moment to give every delegation equal access to the information shaping these talks, so no decision rests on incomplete data or assumptions.” Emily Zhang, Analyst at InfluenceMap, said: “We’re seeing broad corporate support for the Net-Zero Framework across shipping and fuels, from major carriers to associations representing most of the world’s fleet. But that support doesn’t extend to every detail. Ahead of the framework’s approval, some of the same groups pushed for a lower carbon price and a weaker fuel standard, which would pull the framework away from the net-zero trajectory IMO members set in the 2023 GHG Strategy. Oil and gas groups have also lobbied for accounting rules that would make fossil fuels count as cleaner. As IMO member states reconvene, the test is whether they adopt the framework as agreed, or let it be weakened in the fine print.” Aurelia Leeuw, Director of EU Policy, SASHA Coalition, said: “Industry is united in asking for action – shipping companies, ports and maritime businesses need global regulatory clarity so they can direct investment away from fossil fuels. It’s time for IMO Member States to hear these calls and finally adopt a Net-Zero Framework that will support the most truly sustainable fuels and technologies of the future. Europe must continue to push for an outcome that creates predictable investment signals that are urgently needed for a sustainable future for international shipping.” The NZF combines gradually more strict carbon intensity targets with carbon pricing. The mechanism was agreed at the IMO in April 2025 by an overwhelming majority. The adoption was delayed a few months later, in a close vote (57 in favour and 49 against) in October 2025, due to strong pressure from the US, Saudi Arabia and other petro states. The IMO agreed to discuss adoption again at the end of 2026. Source: Pacific Environment, Opportunity Green, Clean Shipping Coalition, Global Maritime Forum, InfluenceMap, SASHA Coalition, International Electric Maritime Association (IEMA), Ocean Conservancy and Transport & Environment 2026-11-20 hellenicshippingnews... tweet Share",
-      "takeaways": [
-        "The talks will decide the fate of ~5% of global oil demand represented by global shipping, making the stakes for energy security and climate extremely high.",
-        "The meeting is also a test whether global “middle powers” can unite despite the US and other petro states and deliver meaningful global climate action this year.",
-        "Political discussions in the second week (MEPC85) are likely to culminate in a decision on the adoption of the Framework, either in its current form or with possible changes, on Friday 4 December."
-      ],
-      "readingMinutes": 8,
-      "readMinutes": 8
-    },
-    {
-      "id": "SN-97C99B728B",
-      "title": "LR approves new Rules for nuclear-powered ships and offshore units",
-      "source": "Hellenic Shipping News",
-      "sourceIcon": "📊",
-      "sourceRegion": "Greece / Markets",
-      "url": "https://www.hellenicshippingnews.com/lr-approves-new-rules-for-nuclear-powered-ships-and-offshore-units/",
-      "publishedAt": "2026-11-20T11:00:55Z",
-      "category": "Weather & Cyclones",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "port",
-        "bunker"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=900&q=80",
-      "summary": "Lloyd’s Register (LR) has approved Rules for the Classification of Ships and Offshore Units Integrated with Nuclear Power, providing a common classification framework to support the assessment of nuclear technologies for maritime use. They are believed to be the first Rules developed by a class society that are...",
-      "body": "LR approves new Rules for nuclear-powered ships and offshore units in International Shipping News , Shipping: Emission Possible 20/11/2026 Lloyd’s Register (LR) has approved Rules for the Classification of Ships and Offshore Units Integrated with Nuclear Power, providing a common classification framework to support the assessment of nuclear technologies for maritime use. They are believed to be the first Rules developed by a class society that are suitable for all types of ship and offshore units. The Rules have been approved by LR’s Ships and Offshore Technical Committees and will evolve as nuclear maritime technologies mature. Interest in nuclear power for maritime use is gathering momentum, with governments, regulators, shipowners and technology developers increasingly working together to address practical barriers to deployment. The new Rules respond to growing demand for guidance on the practical steps needed to bring nuclear power into maritime applications. Claudene Sharp-Patel, Global Technical Director, Lloyd’s Register Reactor agnostic, the Rules are underpinned by goals and functional requirements, an approach intended to accommodate different nuclear technologies and marine applications as designs and international regulation continue to evolve. They will form part of a wider suite of classification and Advisory tools to support the development of nuclear maritime projects, which will be announced separately. Claudene Sharp-Patel, Global Technical Director at LR, said: “The maritime industry needs a clear classification framework to assess how advanced nuclear technologies can be integrated into ships and offshore units. These Rules set out the goals to be achieved, the functions to be performed and the evidence needed to demonstrate that a design meets the requirements, without prescribing a particular reactor technology.” The framework draws on LR’s risk-based certification (RBC) process to help align maritime requirements with nuclear licensing, using the same goal-based approach in the nuclear Rules. Mark Tipping, Global Offshore Power-to-X Director at LR, said: “The opportunity for nuclear in maritime extends well beyond ship power. From nuclear-powered vessels to floating power units and reliable, low-carbon energy for ports and neighbouring industries, there is potential to reshape how the sector produces and uses energy. “These rules provide a common framework for those developing or bringing forward nuclear maritime projects.” Mark Tipping, Global Offshore Power-to-X Director, Lloyd’s Register Nuclear’s high energy density brings the potential for long intervals between refuelling and reliable power for propulsion and onboard services, reducing reliance on conventional bunker fuel supplies. Inherently safe, it supports greater flexibility in vessel deployment, while avoiding greenhouse gas emissions during operation. The Rules form part of LR’s wider work to support the safe deployment of advanced nuclear technology in maritime. This includes Advisory support on feasibility and integration risks, contributions to international regulatory development through the Nuclear Energy Maritime Organization (NEMO) and work with the British Ports Association on a practical readiness pathway for ports considering nuclear-powered ships and floating nuclear power units. LR’s expertise spans voyage, vessel and people, combining classification, Advisory and digital providing the Power of Three to assess nuclear technologies, understand integration risks and make informed decisions on maritime applications. Source: Lloyd’s Register 2026-11-20 hellenicshippingnews... tweet Share",
-      "takeaways": [
-        "They are believed to be the first Rules developed by a class society that are suitable for all types of ship and offshore units.",
-        "The Rules have been approved by LR’s Ships and Offshore Technical Committees and will evolve as nuclear maritime technologies mature.",
-        "Interest in nuclear power for maritime use is gathering momentum, with governments, regulators, shipowners and technology developers increasingly working together to address practical barriers to deployment."
-      ],
-      "readingMinutes": 3,
-      "readMinutes": 3
-    },
-    {
-      "id": "SN-9DC25F5366",
-      "title": "Lufthansa Cargo names new co-CEOs at LUG aircargo handling",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/lufthansa-cargo-names-new-co-ceos-at-lug-aircargo-handling/",
-      "publishedAt": "2026-11-20T11:00:19Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Japan & Korea",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/DSC01342-300x169.webp",
-      "summary": "LUG aircargo handling has introduced a joint leadership structure, with Uwe Glunz joining Patrik Tschirch as Co-CEO following the company’s acquisition by Lufthansa Cargo. The new management arrangement took effect on 1 November 2026. It follows Lufthansa Cargo’s move to take full ownership of the German air cargo...",
-      "body": "LUG aircargo handling has introduced a joint leadership structure, with Uwe Glunz joining Patrik Tschirch as Co-CEO following the company’s acquisition by Lufthansa Cargo. The new management arrangement took effect on 1 November 2026. It follows Lufthansa Cargo’s move to take full ownership of the German air cargo handling company earlier this month. Glunz brings extensive experience from senior positions at Lufthansa Cargo. His previous responsibilities included management roles in South Korea, the United States, Mexico and Central America. Since 2021, he has served as Managing Director of CB Customs Broker, where he focused on digital customs clearance and e-commerce activities. Meanwhile, Tschirch has led LUG aircargo handling since 2013. He began his career with American Airlines Cargo and Cathay Pacific Cargo before spending 12 years at Air Canada Cargo. He later joined LUG’s Key Account and Business Development division. New leadership follows Lufthansa Cargo acquisition The management changes come as Lufthansa Cargo strengthens its ground handling operations in Germany. The company signed an agreement to acquire LUG in September 2026 and completed the acquisition in early November. The transaction is intended to increase handling capacity and support the airline’s long-term growth plans. “With Patrik Tschirch and Uwe Glunz, we have a strong and experienced leadership team at the helm of LUG,” said Frank Bauer, Chief Operating Officer, Lufthansa Cargo. “Together, they will continue the company’s successful growth and further strengthen LUG’s position as the top choice in air cargo handling,” Bauer added. The new leadership team will oversee LUG’s operations as the company enters its next phase under Lufthansa Cargo’s ownership.",
-      "takeaways": [
-        "LUG aircargo handling has introduced a joint leadership structure, with Uwe Glunz joining Patrik Tschirch as Co-CEO following the company’s acquisition by Lufthansa Cargo.",
-        "The new management arrangement took effect on 1 November 2026.",
-        "It follows Lufthansa Cargo’s move to take full ownership of the German air cargo handling company earlier this month."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1614,7 +1753,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2026/10/Seaway-Phoenix-Seaway-7-300x180.jpg",
       "summary": "Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift, Seaway Strashnov, and Seaway Phoenix, with offshore work expected during 2029 and 2030....",
-      "body": "Europe Offshore Renewables Seaway 7 lines up vessel trio for Scottish offshore wind project Bojan Lepic November 20, 2026 0 100 1 minute read Seaway 7 Seaway 7 Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030. The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables. SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations. The project is located around 38 km off the Scottish Borders in the outer Firth of Forth, with average water depths of approximately 52 m. SSE expects Berwick Bank B to become the world’s deepest fixed-bottom offshore wind farm once completed. The development forms part of the wider Berwick Bank offshore wind complex, which has a proposed capacity of approximately 4.1GW. The Berwick Bank B agreement remains subject to final contract award and SSE’s final investment decision, expected in late 2027. Subject to approval, preparatory offshore construction could begin in 2028, with foundation and cable installation continuing into 2031. Seaway 7 previously worked with SSE on the Beatrice and Seagreen offshore wind farms. Tags Norway Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 100 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Seaway 7 lines up vessel trio for Scottish offshore wind project Bojan Lepic November 20, 2026 0 502 1 minute read Seaway 7 Seaway 7 Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030. The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables. SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations. The project is located around 38 km off the Scottish Borders in the outer Firth of Forth, with average water depths of approximately 52 m. SSE expects Berwick Bank B to become the world’s deepest fixed-bottom offshore wind farm once completed. The development forms part of the wider Berwick Bank offshore wind complex, which has a proposed capacity of approximately 4.1GW. The Berwick Bank B agreement remains subject to final contract award and SSE’s final investment decision, expected in late 2027. Subject to approval, preparatory offshore construction could begin in 2028, with foundation and cable installation continuing into 2031. Seaway 7 previously worked with SSE on the Beatrice and Seagreen offshore wind farms. Tags Norway Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 502 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030.",
         "The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables.",
@@ -1657,40 +1796,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-D26C4F943C",
-      "title": "GEODIS strengthens Asia Pacific healthcare logistics with GDP certification",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/geodis-strengthens-asia-pacific-healthcare-logistics-with-gdp-certification/",
-      "publishedAt": "2026-11-20T10:00:50Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Japan & Korea",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/5c759c8f-7a32-3555-e2a3-f072981d1ff8-300x225.jpg",
-      "summary": "GEODIS has announced regional Good Distribution Practices (GDP) certification for its operations across Asia Pacific, strengthening its capabilities in pharmaceutical and healthcare logistics. The certification is based on standards established by the World Health Organization (WHO). It covers certified activities...",
-      "body": "GEODIS has announced regional Good Distribution Practices (GDP) certification for its operations across Asia Pacific, strengthening its capabilities in pharmaceutical and healthcare logistics. The certification is based on standards established by the World Health Organization (WHO). It covers certified activities involving the handling, storage and distribution of pharmaceutical products, healthcare supplies and medical devices. The development supports GEODIS’ efforts to apply consistent quality procedures across its regional healthcare logistics network. Certification covers temperature-sensitive shipments The certification includes freight forwarding services and temperature-controlled storage, depending on the activities performed at each certified location. The storage requirements cover temperatures of 2–8°C and 15–25°C, supporting the handling of healthcare products with different temperature requirements. GDP standards address several important aspects of pharmaceutical logistics. These include temperature monitoring, documentation, product traceability, risk assessment and staff training. They also establish procedures to help maintain product integrity throughout transportation and storage. According to GEODIS, the regional certification confirms the implementation of quality management systems and controlled operating procedures across the activities covered. The announcement follows the company’s earlier GDP certification for freight forwarding operations in South Korea. By extending its certified capabilities across the region, GEODIS aims to support customers managing complex pharmaceutical supply chains and temperature-sensitive shipments. The company has not specified the number of facilities or countries included in the latest regional certification announcement.",
-      "takeaways": [
-        "GEODIS has announced regional Good Distribution Practices (GDP) certification for its operations across Asia Pacific, strengthening its capabilities in pharmaceutical and healthcare logistics.",
-        "The certification is based on standards established by the World Health Organization (WHO).",
-        "It covers certified activities involving the handling, storage and distribution of pharmaceutical products, healthcare supplies and medical devices."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-78E7FC277A",
       "title": "Scotland greenlights 1 GW floating offshore wind project",
       "source": "Splash247",
@@ -1715,7 +1820,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2023/08/Ingka-floating-wind-300x185.jpg",
       "summary": "The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity...",
-      "body": "Europe Offshore Renewables Scotland greenlights 1 GW floating offshore wind project Bojan Lepic November 20, 2026 0 147 1 minute read Ingka Group Ingka Group The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes. The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure. Muir Mhòr was awarded seabed rights in Scotland’s ScotWind leasing round in 2022 and is among the country’s most advanced commercial-scale floating wind developments. Fred. Olsen Seawind took full ownership of the project earlier this year after acquiring Vattenfall’s 50% interest. The developer is targeting the start of electricity generation in the early 2030s, subject to further commercial and investment decisions. The project has already awarded £18.4m in development contracts, including £7.96m to Scottish suppliers. The latest approval comes with conditions requiring measures to address the wind farm’s potential impact on commercial fisheries and seabirds. The Scottish Fishermen’s Federation criticised the decision, arguing that questions remain about whether fishing vessels can operate safely around the project’s floating foundations, moorings, and subsea cables. Scotland currently has more than 11GW of consented offshore wind capacity, according to the government. The consent is a significant development milestone for Muir Mhòr, although the project has yet to reach a final investment decision. Tags Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 147 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Scotland greenlights 1 GW floating offshore wind project Bojan Lepic November 20, 2026 0 426 1 minute read Ingka Group Ingka Group The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes. The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure. Muir Mhòr was awarded seabed rights in Scotland’s ScotWind leasing round in 2022 and is among the country’s most advanced commercial-scale floating wind developments. Fred. Olsen Seawind took full ownership of the project earlier this year after acquiring Vattenfall’s 50% interest. The developer is targeting the start of electricity generation in the early 2030s, subject to further commercial and investment decisions. The project has already awarded £18.4m in development contracts, including £7.96m to Scottish suppliers. The latest approval comes with conditions requiring measures to address the wind farm’s potential impact on commercial fisheries and seabirds. The Scottish Fishermen’s Federation criticised the decision, arguing that questions remain about whether fishing vessels can operate safely around the project’s floating foundations, moorings, and subsea cables. Scotland currently has more than 11GW of consented offshore wind capacity, according to the government. The consent is a significant development milestone for Muir Mhòr, although the project has yet to reach a final investment decision. Tags Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 426 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Olsen Seawind off the Aberdeenshire coast.",
         "Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes.",
@@ -1856,77 +1961,6 @@
       ],
       "readingMinutes": 11,
       "readMinutes": 11
-    },
-    {
-      "id": "SN-B0C21FA29B",
-      "title": "Hunter makes offshore move with Jacktel buyout offer",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/hunter-makes-offshore-move-with-jacktel-buyout-offer/",
-      "publishedAt": "2026-11-20T08:25:49Z",
-      "category": "Ports & Terminals",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "tanker",
-        "port"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://splash247.com/wp-content/uploads/2022/09/Jacktel-Haven-300x180.jpg",
-      "summary": "Oslo-listed Hunter Group has launched a NOK1.63bn ($168m) takeover bid for Norwegian offshore accommodation player Jacktel, looking to put its windfall from lucrative VLCC charter contracts into a longer-term business. The Erik Mathiesen-led investment company has offered NOK6.30 per share in cash through wholly...",
-      "body": "Europe Operations Tankers Hunter makes offshore move with Jacktel buyout offer Adis Ajdin November 20, 2026 0 231 2 minutes read Jacktel Jacktel Oslo-listed Hunter Group has launched a NOK1.63bn ($168m) takeover bid for Norwegian offshore accommodation player Jacktel, looking to put its windfall from lucrative VLCC charter contracts into a longer-term business. The Erik Mathiesen-led investment company has offered NOK6.30 per share in cash through wholly owned subsidiary HG Projectco 1, valuing Jacktel at an 8.6% premium to its November 18 closing share price. The bid has already secured commitments from six major Jacktel shareholders controlling around 73% of the company, including investment vehicles linked to chairman Harald Thorstein and Hunter board member Morten Astrup. Hunter needs acceptances representing more than 90% of Jacktel’s shares to complete the transaction. The offer was initially set to expire at 9 am Oslo time on November 20, with the option of extending the deadline to November 23. If successful, Hunter intends to buy out the remaining shareholders and delist Jacktel from Euronext Growth Oslo. The acquisition would be financed from available cash. Jacktel owns the four-legged, self-elevating accommodation rig Haven , which can house up to 444 offshore personnel and has been deployed on major North Sea oil and gas developments. The unit is currently working for Aker BP at the Valhall field, where its firm contract runs until February 2028, with options potentially extending employment through June that year. Jacktel reported 100% utilisation during the third quarter, generating $19m in revenue and $10.3m in EBITDA. Its firm contract backlog stood at $56m at the end of September, rising to $75m including options. The acquisition would mark another change of direction for Hunter, which has spent much of this year cashing in on historically strong VLCC rates through two back-to-back charter arrangements. The company chartered in the tankers at fixed rates averaging $51,750 per day before placing them on index-linked contracts, capturing substantial margins as tanker rates surged. Hunter’s latest results show a net time charter result of $114.2m in the third quarter, with its spot-linked charter rates averaging $673,342 per day against fixed charter-in costs of $51,750, leaving a margin of $621,592 per day. The company recorded a net profit of $111.4m for the quarter and reported $137.1m in cash and working capital at the end of September. The bumper earnings have continued into the fourth quarter, with Hunter fixing 53% of available vessel days at an average of approximately $1.35m per day. November rates have so far averaged around $1.25m per day. The VLCC arrangements are approaching expiry, leaving Hunter looking for a new source of longer-term earnings. Tags Norway Adis Ajdin November 20, 2026 0 231 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "The Erik Mathiesen-led investment company has offered NOK6.30 per share in cash through wholly owned subsidiary HG Projectco 1, valuing Jacktel at an 8.6% premium to its November 18 closing share price.",
-        "The bid has already secured commitments from six major Jacktel shareholders controlling around 73% of the company, including investment vehicles linked to chairman Harald Thorstein and Hunter board member Morten Astrup.",
-        "Hunter needs acceptances representing more than 90% of Jacktel’s shares to complete the transaction."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-D9B74BC742",
-      "title": "Yangzijiang revives $500m Chinese shipyard project",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/yangzijiang-revives-500m-chinese-shipyard-project/",
-      "publishedAt": "2026-11-20T08:15:05Z",
-      "category": "Weather & Cyclones",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "China & East Asia",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "port",
-        "singapore",
-        "china",
-        "shipyard"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://splash247.com/wp-content/uploads/2024/05/Yangzijiang-300x180.jpg",
-      "summary": "Chinese shipbuilding heavyweight Yangzijiang has brought a previously stalled shipyard expansion back onto the table, signing an investment agreement for a RMB3.38bn ($504m) construction project at Taicang in Jiangsu province. The Singapore-listed group’s wholly owned subsidiary, Jiangsu Yangzijiang Shipbuilding...",
-      "body": "Greater China Shipyards Yangzijiang revives $500m Chinese shipyard project Adis Ajdin November 20, 2026 0 622 1 minute read Yangzijiang Shipbuilding Yangzijiang Shipbuilding Chinese shipbuilding heavyweight Yangzijiang has brought a previously stalled shipyard expansion back onto the table, signing an investment agreement for a RMB3.38bn ($504m) construction project at Taicang in Jiangsu province. The Singapore-listed group’s wholly owned subsidiary, Jiangsu Yangzijiang Shipbuilding Group, signed the deal with the Taicang Port Economic and Technological Development Zone this week. The project, known as Yangzi Runze, will see the development of a manufacturing base geared towards clean-energy vessels. The planned investment will be financed entirely from the group’s internal resources. Yangzijiang established Jiangsu Yangzi Runze Shipbuilding in late 2024 and first announced plans for the facility in February 2025, but the development had remained on hold pending further negotiations and regulatory clearance. The latest agreement puts the project back in motion, although Yangzijiang has stressed that construction cannot proceed until the necessary approvals are obtained. No construction timetable or completion date has been announced. The new complex will sit alongside Jiangsu Yangzi-Mitsui Shipbuilding, the group’s joint venture with Japan’s Mitsui, giving the two facilities scope to share resources and supporting operations. Yangzijiang has been expanding its capacity to build alternative-fuel vessels amid a substantial orderbook stretching towards the end of the decade. The Taicang investment would add another production base to its Chinese shipbuilding network.The company said the agreement would not materially affect its earnings or net tangible assets for 2026. Adis Ajdin November 20, 2026 0 622 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "The Singapore-listed group’s wholly owned subsidiary, Jiangsu Yangzijiang Shipbuilding Group, signed the deal with the Taicang Port Economic and Technological Development Zone this week.",
-        "The project, known as Yangzi Runze, will see the development of a manufacturing base geared towards clean-energy vessels.",
-        "The planned investment will be financed entirely from the group’s internal resources."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
     }
   ]
 }
