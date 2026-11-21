@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "1700 UTC",
-  "lastSyncUtc": "2026-11-21T17:09:25.256730+00:00",
+  "synopticCycle": "2200 UTC",
+  "lastSyncUtc": "2026-11-21T22:49:56.313612+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,10 +9,10 @@
       "shortName": "Xavier",
       "category": "Tropical Storm (JTWC)",
       "center": [
-        -11.8,
-        -165.2
+        -11.9,
+        -165.6
       ],
-      "centralPressure": 996,
+      "centralPressure": 997,
       "maxWinds": 45,
       "gusts": 56,
       "movement": "WSW at 7 kts",
@@ -21,8 +21,8 @@
         {
           "tau": 12,
           "coords": [
-            -12.1,
-            -166.5
+            -12.2,
+            -166.9
           ],
           "winds": 45,
           "radiusNm": 56
@@ -30,8 +30,8 @@
         {
           "tau": 24,
           "coords": [
-            -12.5,
-            -167.9
+            -12.6,
+            -168.2
           ],
           "winds": 45,
           "radiusNm": 73
@@ -40,7 +40,7 @@
           "tau": 36,
           "coords": [
             -12.9,
-            -169.0
+            -169.1
           ],
           "winds": 40,
           "radiusNm": 90
@@ -48,8 +48,8 @@
         {
           "tau": 48,
           "coords": [
-            -13.1,
-            -169.8
+            -12.9,
+            -170.1
           ],
           "winds": 35,
           "radiusNm": 107
@@ -57,20 +57,11 @@
         {
           "tau": 60,
           "coords": [
-            -12.9,
-            -170.8
-          ],
-          "winds": 35,
-          "radiusNm": 124
-        },
-        {
-          "tau": 72,
-          "coords": [
-            -12.4,
-            -172.2
+            -12.6,
+            -171.3
           ],
           "winds": 30,
-          "radiusNm": 140
+          "radiusNm": 124
         }
       ]
     },
@@ -86,14 +77,14 @@
       "centralPressure": 1007,
       "maxWinds": 25,
       "gusts": 32,
-      "movement": "SW at 2 kts",
+      "movement": "W at 6 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -12.1,
-            90.8
+            -11.7,
+            89.8
           ],
           "winds": 30,
           "radiusNm": 45
@@ -101,8 +92,8 @@
         {
           "tau": 24,
           "coords": [
-            -12.3,
-            90.2
+            -12.0,
+            89.0
           ],
           "winds": 35,
           "radiusNm": 60
@@ -110,8 +101,8 @@
         {
           "tau": 36,
           "coords": [
-            -12.6,
-            89.5
+            -12.4,
+            88.2
           ],
           "winds": 40,
           "radiusNm": 75
@@ -119,8 +110,8 @@
         {
           "tau": 48,
           "coords": [
-            -13.1,
-            88.9
+            -12.8,
+            87.6
           ],
           "winds": 45,
           "radiusNm": 90
@@ -128,8 +119,8 @@
         {
           "tau": 60,
           "coords": [
-            -13.5,
-            88.2
+            -13.0,
+            86.7
           ],
           "winds": 50,
           "radiusNm": 105
@@ -146,7 +137,7 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 3.5,
+      "waveHeight": 3.3,
       "swellPeriod": 9,
       "swellDir": "WNW"
     },
@@ -158,31 +149,31 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 2.5,
+      "waveHeight": 2.6,
       "swellPeriod": 8,
-      "swellDir": "WNW"
+      "swellDir": "NW"
     },
     {
       "id": "WS1",
       "name": "Xavier Cyclonic Wave Field",
       "center": [
-        -11.8,
-        -165.2
+        -11.9,
+        -165.6
       ],
       "radiusNm": 150,
-      "waveHeight": 3.2,
-      "swellPeriod": 9,
-      "swellDir": "E"
+      "waveHeight": 3.3,
+      "swellPeriod": 8,
+      "swellDir": "ENE"
     }
   ],
   "pressureCenters": [
     {
       "type": "L",
-      "value": 996,
+      "value": 997,
       "name": "Tropical Storm XAVIER Core Low",
       "coords": [
-        -11.8,
-        -165.2
+        -11.9,
+        -165.6
       ]
     },
     {
@@ -225,8 +216,8 @@
   "windVectors": [
     {
       "coords": [
-        -11.5,
-        -164.9
+        -11.6,
+        -165.3
       ],
       "dir": 160,
       "speed": 45,
