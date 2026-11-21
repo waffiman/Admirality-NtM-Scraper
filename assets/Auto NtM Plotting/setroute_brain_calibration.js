@@ -1287,7 +1287,8 @@
       var b2 = calculateInitialBearingDeg(cur.lat, cur.lon, next.lat, next.lon);
       var turn = setrouteTurnAngleDeg(b1, b2);
 
-      if (turn > sharpThresh && dIn > 22 && dOut > 22) {
+      var isProtectedStraitHub = /TSS|STRAIT|HORMUZ|DOVER|GIBRALTAR|MANDEB|MALACCA|SINGAPORE|USHANT|CASQUETS/i.test(String(cur.name || ""));
+      if (!isProtectedStraitHub && turn > sharpThresh && dIn > 22 && dOut > 22) {
         var pA = setrouteLerpLatLon(prev.lat, prev.lon, cur.lat, cur.lon, 0.84);
         var pB = setrouteLerpLatLon(cur.lat, cur.lon, next.lat, next.lon, 0.16);
         if (!window.setroutePointInLandBox(pA[0], pA[1]) &&
@@ -1458,46 +1459,1243 @@
     return _origAltCorridorRetries ? _origAltCorridorRetries(origCoords, destCoords) : [];
   };
 
-  // Ensure generateAlgorithmicMaritimeRoute always runs final backtrack cleaner & accurate corridor metadata
+  // ---------------------------------------------------------------------------
+  // 6. GLOBAL TSS TRAFFIC-LANE CENTERLINE BRAIN (CHART + WORLD MEDIAL AXES)
+  // ---------------------------------------------------------------------------
+  var TSS_BRAIN = {
+    ready: false,
+    chartRaw: null,
+    worldRaw: null,
+    worldCount: -1,
+    sepZones: [],
+    sepLines: [],
+    chains: [],
+    sepZoneBuckets: {},
+    sepLineBuckets: {},
+    chainBuckets: {},
+    bucketDeg: 2.0
+  };
+  var _tssBrainPromise = null;
+
+  function tssDeltaLonDeg(lon1, lon2) {
+    var d = lon2 - lon1;
+    if (d > 180) d -= 360;
+    if (d < -180) d += 360;
+    return d;
+  }
+
+  function tssNormalizeLon(lon) {
+    var x = lon;
+    while (x > 180) x -= 360;
+    while (x < -180) x += 360;
+    return x;
+  }
+
+  function tssCosMid(lat1, lat2) {
+    var c = Math.cos(((lat1 + lat2) * 0.5) * Math.PI / 180);
+    return Math.abs(c) < 0.08 ? 0.08 : c;
+  }
+
+  function tssAngleDiff(a, b) {
+    var d = Math.abs(((a - b) % 360 + 360) % 360);
+    return d > 180 ? 360 - d : d;
+  }
+
+  function tssPointInRing(lat, lon, ring) {
+    if (!Array.isArray(ring) || ring.length < 3) return false;
+    var inside = false;
+    var j = ring.length - 1;
+    for (var i = 0; i < ring.length; i++) {
+      var yi = ring[i][0], xi = ring[i][1];
+      var yj = ring[j][0], xj = ring[j][1];
+      if (((yi > lat) !== (yj > lat)) &&
+          (lon < (xj - xi) * (lat - yi) / ((yj - yi) || 1e-12) + xi)) {
+        inside = !inside;
+      }
+      j = i;
+    }
+    return inside;
+  }
+
+  function tssPointInSepZoneObj(lat, lon, z) {
+    if (lat < z.minLat || lat > z.maxLat || lon < z.minLon || lon > z.maxLon) return false;
+    if (!tssPointInRing(lat, lon, z.outer)) return false;
+    for (var h = 0; h < z.holes.length; h++) {
+      if (tssPointInRing(lat, lon, z.holes[h])) return false;
+    }
+    return true;
+  }
+
+  function tssSegsIntersect(a1, a2, b1, b2) {
+    var ax = a1[1], ay = a1[0], bx = a2[1], by = a2[0];
+    var cx = b1[1], cy = b1[0], dx = b2[1], dy = b2[0];
+    if (Math.max(ay, by) < Math.min(cy, dy) || Math.max(cy, dy) < Math.min(ay, by)) return false;
+    if (Math.max(ax, bx) < Math.min(cx, dx) || Math.max(cx, dx) < Math.min(ax, bx)) return false;
+    function ccw(p1x, p1y, p2x, p2y, p3x, p3y) {
+      return (p3y - p1y) * (p2x - p1x) > (p2y - p1y) * (p3x - p1x);
+    }
+    return (ccw(ax, ay, cx, cy, dx, dy) !== ccw(bx, by, cx, cy, dx, dy)) &&
+           (ccw(ax, ay, bx, by, cx, cy) !== ccw(ax, ay, bx, by, dx, dy));
+  }
+
+  function tssDistPointToSegNm(lat, lon, p1, p2) {
+    var cosL = tssCosMid(p1[0], p2[0]);
+    var dlon12 = tssDeltaLonDeg(p1[1], p2[1]);
+    var dlon1p = tssDeltaLonDeg(p1[1], lon);
+    var bx = dlon12 * 60 * cosL, by = (p2[0] - p1[0]) * 60;
+    var px = dlon1p * 60 * cosL, py = (lat - p1[0]) * 60;
+    var len2 = bx * bx + by * by;
+    var t = len2 > 1e-9 ? Math.max(0, Math.min(1, (px * bx + py * by) / len2)) : 0;
+    return {
+      distNm: Math.hypot(px - t * bx, py - t * by),
+      t: t,
+      projLat: p1[0] + t * (p2[0] - p1[0]),
+      projLon: tssNormalizeLon(p1[1] + t * dlon12)
+    };
+  }
+
+  function tssBucketKeysForBbox(minLat, minLon, maxLat, maxLon, stepDeg) {
+    var a0 = Math.floor(minLat / stepDeg), a1 = Math.floor(maxLat / stepDeg);
+    var o0 = Math.floor(minLon / stepDeg), o1 = Math.floor(maxLon / stepDeg);
+    var out = [];
+    for (var a = a0; a <= a1; a++) {
+      for (var o = o0; o <= o1; o++) {
+        out.push(a + "," + o);
+      }
+    }
+    return out;
+  }
+
+  function tssIndexBucketItem(map, idx, minLat, minLon, maxLat, maxLon, stepDeg) {
+    var keys = tssBucketKeysForBbox(minLat, minLon, maxLat, maxLon, stepDeg);
+    for (var k = 0; k < keys.length; k++) {
+      var arr = map[keys[k]];
+      if (!arr) { arr = []; map[keys[k]] = arr; }
+      arr.push(idx);
+    }
+  }
+
+  function tssQueryBuckets(map, minLat, minLon, maxLat, maxLon, stepDeg) {
+    var keys = tssBucketKeysForBbox(minLat, minLon, maxLat, maxLon, stepDeg);
+    var seen = {}, out = [];
+    for (var k = 0; k < keys.length; k++) {
+      var arr = map[keys[k]];
+      if (!arr) continue;
+      for (var i = 0; i < arr.length; i++) {
+        if (!seen[arr[i]]) { seen[arr[i]] = true; out.push(arr[i]); }
+      }
+    }
+    return out;
+  }
+
+  function tssQuerySegBuckets(map, lat1, lon1, lat2, lon2, padDeg, stepDeg) {
+    var minLat = Math.min(lat1, lat2) - padDeg, maxLat = Math.max(lat1, lat2) + padDeg;
+    if (Math.abs(lon2 - lon1) <= 180) {
+      return tssQueryBuckets(map, minLat, Math.min(lon1, lon2) - padDeg, maxLat, Math.max(lon1, lon2) + padDeg, stepDeg);
+    }
+    var a = tssQueryBuckets(map, minLat, 180 - Math.max(padDeg, 1.5), maxLat, 180, stepDeg);
+    var b = tssQueryBuckets(map, minLat, -180, maxLat, -180 + Math.max(padDeg, 1.5), stepDeg);
+    var seen = {}, out = [];
+    for (var i = 0; i < a.length; i++) { if (!seen[a[i]]) { seen[a[i]] = true; out.push(a[i]); } }
+    for (var j = 0; j < b.length; j++) { if (!seen[b[j]]) { seen[b[j]] = true; out.push(b[j]); } }
+    return out;
+  }
+
+  function tssSegCrossesBbox(minLat, maxLat, lon1, lon2, padDeg, item) {
+    if (item.maxLat < minLat || item.minLat > maxLat) return false;
+    if (Math.abs(lon2 - lon1) <= 180) {
+      return !(item.maxLon < Math.min(lon1, lon2) - padDeg || item.minLon > Math.max(lon1, lon2) + padDeg);
+    }
+    return item.maxLon >= 180 - Math.max(padDeg, 1.5) || item.minLon <= -180 + Math.max(padDeg, 1.5);
+  }
+
+  /**
+   * Compute a 5-station geometric medial-axis centerline inside a traffic_lane polygon
+   * ordered strictly along its declared directionDeg (fallback where chart lacks 'l' vector).
+   */
+  function tssExtractMedialCenterline(ring, dirDeg) {
+    if (!Array.isArray(ring) || ring.length < 3 || dirDeg == null) return null;
+    var refLat = 0, refLon = 0;
+    for (var i = 0; i < ring.length; i++) { refLat += ring[i][0]; refLon += ring[i][1]; }
+    refLat /= ring.length; refLon /= ring.length;
+    var cosL = Math.cos(refLat * Math.PI / 180) || 0.1;
+    var rad = (dirDeg * Math.PI) / 180;
+    var ux = Math.sin(rad), uy = Math.cos(rad);
+    var vx = -uy, vy = ux;
+    var polyUV = [], uMin = Infinity, uMax = -Infinity;
+    for (var p = 0; p < ring.length; p++) {
+      var x = tssDeltaLonDeg(refLon, ring[p][1]) * 60 * cosL;
+      var y = (ring[p][0] - refLat) * 60;
+      var u = x * ux + y * uy, v = x * vx + y * vy;
+      if (u < uMin) uMin = u;
+      if (u > uMax) uMax = u;
+      polyUV.push([u, v]);
+    }
+    var span = uMax - uMin;
+    if (!(span > 0.5)) return null;
+    var stations = [0.06, 0.28, 0.50, 0.72, 0.94];
+    var pts = [];
+    for (var si = 0; si < stations.length; si++) {
+      var uT = uMin + stations[si] * span;
+      var vHits = [];
+      for (var e = 0; e < polyUV.length; e++) {
+        var a = polyUV[e], b = polyUV[(e + 1) % polyUV.length];
+        if ((a[0] <= uT && b[0] > uT) || (b[0] <= uT && a[0] > uT)) {
+          var t = (uT - a[0]) / (b[0] - a[0]);
+          vHits.push(a[1] + t * (b[1] - a[1]));
+        }
+      }
+      if (vHits.length >= 2) {
+        vHits.sort(function (a, b) { return a - b; });
+        var vMid = 0.5 * (vHits[0] + vHits[vHits.length - 1]);
+        pts.push([refLat + (uT * uy + vMid * vy) / 60, refLon + (uT * ux + vMid * vx) / (60 * cosL)]);
+      }
+    }
+    return pts.length >= 2 ? pts : null;
+  }
+
+  function tssMakePolyBbox(pts) {
+    var minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+    for (var i = 0; i < pts.length; i++) {
+      if (pts[i][0] < minLat) minLat = pts[i][0];
+      if (pts[i][0] > maxLat) maxLat = pts[i][0];
+      if (pts[i][1] < minLon) minLon = pts[i][1];
+      if (pts[i][1] > maxLon) maxLon = pts[i][1];
+    }
+    return [minLat, minLon, maxLat, maxLon];
+  }
+
+  function tssPointInAnySepZone(lat, lon) {
+    if (!TSS_BRAIN.ready || !TSS_BRAIN.sepZones.length) return false;
+    var zIds = tssQueryBuckets(TSS_BRAIN.sepZoneBuckets, lat - 0.02, lon - 0.02, lat + 0.02, lon + 0.02, TSS_BRAIN.bucketDeg);
+    for (var zi = 0; zi < zIds.length; zi++) {
+      if (tssPointInSepZoneObj(lat, lon, TSS_BRAIN.sepZones[zIds[zi]])) return true;
+    }
+    return false;
+  }
+
+  function tssSegmentCrossesBarrier(lat1, lon1, lat2, lon2) {
+    if (!TSS_BRAIN.ready) return false;
+    var pad = 0.03;
+    var isWrap = Math.abs(lon2 - lon1) > 180;
+    var minLat = Math.min(lat1, lat2) - pad, maxLat = Math.max(lat1, lat2) + pad;
+    var zIds = tssQuerySegBuckets(TSS_BRAIN.sepZoneBuckets, lat1, lon1, lat2, lon2, pad, TSS_BRAIN.bucketDeg);
+    var distNm = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+    var steps = Math.max(2, Math.min(20, Math.ceil(distNm / 1.2)));
+    var dLon = tssDeltaLonDeg(lon1, lon2);
+    var pA = [lat1, lon1], pB = [lat2, lon2];
+
+    for (var zi = 0; zi < zIds.length; zi++) {
+      var z = TSS_BRAIN.sepZones[zIds[zi]];
+      if (!z || !tssSegCrossesBbox(minLat, maxLat, lon1, lon2, pad, z)) continue;
+      for (var s = 0; s <= steps; s++) {
+        var frac = s / steps;
+        if (tssPointInSepZoneObj(lat1 + (lat2 - lat1) * frac, tssNormalizeLon(lon1 + dLon * frac), z)) {
+          return true;
+        }
+      }
+      if (!isWrap) {
+        for (var ei = 0; ei < z.outer.length; ei++) {
+          var nextEi = (ei + 1) % z.outer.length;
+          if (tssSegsIntersect(pA, pB, z.outer[ei], z.outer[nextEi])) return true;
+        }
+      }
+    }
+
+    if (!isWrap) {
+      var sIds = tssQuerySegBuckets(TSS_BRAIN.sepLineBuckets, lat1, lon1, lat2, lon2, pad, TSS_BRAIN.bucketDeg);
+      for (var si = 0; si < sIds.length; si++) {
+        var sl = TSS_BRAIN.sepLines[sIds[si]];
+        if (!sl || !tssSegCrossesBbox(minLat, maxLat, lon1, lon2, pad, sl)) continue;
+        for (var pi = 0; pi < sl.pts.length - 1; pi++) {
+          if (tssSegsIntersect(pA, pB, sl.pts[pi], sl.pts[pi + 1])) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function tssFinalizeChain(pts, name, source) {
+    var cum = [0], segBrg = [], total = 0;
+    for (var i = 0; i < pts.length - 1; i++) {
+      total += calculateHaversineDistanceNM(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]);
+      cum.push(total);
+      segBrg.push(calculateInitialBearingDeg(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]));
+    }
+    var bb = tssMakePolyBbox(pts);
+    return {
+      pts: pts, cumNm: cum, segBrg: segBrg, totalNm: total,
+      minLat: bb[0], minLon: bb[1], maxLat: bb[2], maxLon: bb[3],
+      meanBrg: calculateInitialBearingDeg(pts[0][0], pts[0][1], pts[pts.length - 1][0], pts[pts.length - 1][1]),
+      name: name || "", source: source || "chart"
+    };
+  }
+
+  function buildTssBrainIndex(chartItems) {
+    var worldSchemes = (TSS_BRAIN.worldRaw && TSS_BRAIN.worldRaw.length)
+      ? TSS_BRAIN.worldRaw
+      : ((window.SetRouteCoreA && window.SetRouteCoreA.SETROUTE_TSS_SCHEMES) || []);
+    TSS_BRAIN.chartRaw = chartItems;
+    TSS_BRAIN.worldCount = worldSchemes.length;
+    TSS_BRAIN.sepZones = [];
+    TSS_BRAIN.sepLines = [];
+    TSS_BRAIN.chains = [];
+    TSS_BRAIN.sepZoneBuckets = {};
+    TSS_BRAIN.sepLineBuckets = {};
+    TSS_BRAIN.chainBuckets = {};
+
+    var stepDeg = TSS_BRAIN.bucketDeg;
+    var rawSegs = [];
+
+    if (Array.isArray(chartItems)) {
+      for (var i = 0; i < chartItems.length; i++) {
+        var it = chartItems[i];
+        if (!it || it.length < 6) continue;
+        var tCode = it[0], isPoly = it[1], nm = it[3] || "", bb = it[4], geom = it[5];
+        if (!Array.isArray(geom) || geom.length === 0) continue;
+
+        if (tCode === "z" && isPoly === 1) {
+          var isMulti = Array.isArray(geom[0]) && Array.isArray(geom[0][0]);
+          var outer = isMulti ? geom[0] : geom;
+          var holes = isMulti ? geom.slice(1) : [];
+          if (!outer || outer.length < 3) continue;
+          var zbb = bb || tssMakePolyBbox(outer);
+          var zIdx = TSS_BRAIN.sepZones.length;
+          TSS_BRAIN.sepZones.push({
+            outer: outer, holes: holes, name: nm, source: "chart",
+            minLat: zbb[0], minLon: zbb[1], maxLat: zbb[2], maxLon: zbb[3]
+          });
+          tssIndexBucketItem(TSS_BRAIN.sepZoneBuckets, zIdx, zbb[0], zbb[1], zbb[2], zbb[3], stepDeg);
+        } else if (tCode === "s" && isPoly === 0 && geom.length >= 2) {
+          var sbb = bb || tssMakePolyBbox(geom);
+          var sIdx = TSS_BRAIN.sepLines.length;
+          TSS_BRAIN.sepLines.push({
+            pts: geom, name: nm, minLat: sbb[0], minLon: sbb[1], maxLat: sbb[2], maxLon: sbb[3]
+          });
+          tssIndexBucketItem(TSS_BRAIN.sepLineBuckets, sIdx, sbb[0], sbb[1], sbb[2], sbb[3], stepDeg);
+        } else if ((tCode === "l" || tCode === "m") && isPoly === 0 && geom.length >= 2) {
+          var totalLen = 0;
+          for (var p = 0; p < geom.length - 1; p++) {
+            totalLen += calculateHaversineDistanceNM(geom[p][0], geom[p][1], geom[p + 1][0], geom[p + 1][1]);
+          }
+          var chordLen = calculateHaversineDistanceNM(geom[0][0], geom[0][1], geom[geom.length - 1][0], geom[geom.length - 1][1]);
+          if (totalLen < 1.4 || chordLen < 0.42 * totalLen) continue;
+          rawSegs.push({
+            pts: geom, len: totalLen, name: nm, source: "chart",
+            b0: calculateInitialBearingDeg(geom[0][0], geom[0][1], geom[1][0], geom[1][1]),
+            b1: calculateInitialBearingDeg(geom[geom.length - 2][0], geom[geom.length - 2][1], geom[geom.length - 1][0], geom[geom.length - 1][1])
+          });
+        }
+      }
+    }
+
+    // Add world schemes only where chart lacks separation coverage (e.g. Eastern Hormuz)
+    for (var wi = 0; wi < worldSchemes.length; wi++) {
+      var ws = worldSchemes[wi];
+      if (!ws || !Array.isArray(ws.parts)) continue;
+      var schPts = [];
+      for (var pi = 0; pi < ws.parts.length; pi++) {
+        if (Array.isArray(ws.parts[pi].ring)) {
+          for (var rp = 0; rp < ws.parts[pi].ring.length; rp++) schPts.push(ws.parts[pi].ring[rp]);
+        }
+      }
+      if (!schPts.length) continue;
+      var sBB = tssMakePolyBbox(schPts);
+      var chartZCands = tssQueryBuckets(TSS_BRAIN.sepZoneBuckets, sBB[0], sBB[1], sBB[2], sBB[3], stepDeg);
+      var hasChartSep = false;
+      for (var ci = 0; ci < chartZCands.length; ci++) {
+        var cz = TSS_BRAIN.sepZones[chartZCands[ci]];
+        if (cz.maxLat >= sBB[0] && cz.minLat <= sBB[2] && cz.maxLon >= sBB[1] && cz.minLon <= sBB[3]) {
+          hasChartSep = true;
+          break;
+        }
+      }
+      if (hasChartSep) continue;
+
+      for (var k = 0; k < ws.parts.length; k++) {
+        var part = ws.parts[k];
+        if (!part || !Array.isArray(part.ring) || part.ring.length < 3) continue;
+        var pbb = tssMakePolyBbox(part.ring);
+        if (part.category === "separation_zone") {
+          var wzIdx = TSS_BRAIN.sepZones.length;
+          TSS_BRAIN.sepZones.push({
+            outer: part.ring, holes: [], name: part.name || ws.name || "", source: "world",
+            minLat: pbb[0], minLon: pbb[1], maxLat: pbb[2], maxLon: pbb[3]
+          });
+          tssIndexBucketItem(TSS_BRAIN.sepZoneBuckets, wzIdx, pbb[0], pbb[1], pbb[2], pbb[3], stepDeg);
+        } else if (part.category === "traffic_lane" && part.directionDeg != null) {
+          var covered = false;
+          for (var si2 = 0; si2 < rawSegs.length; si2++) {
+            var seg = rawSegs[si2];
+            var mid = seg.pts[Math.floor(seg.pts.length / 2)];
+            if (tssPointInRing(mid[0], mid[1], part.ring) &&
+                tssAngleDiff(calculateInitialBearingDeg(seg.pts[0][0], seg.pts[0][1], seg.pts[seg.pts.length - 1][0], seg.pts[seg.pts.length - 1][1]), part.directionDeg) <= 45) {
+              covered = true;
+              break;
+            }
+          }
+          if (!covered) {
+            var med = tssExtractMedialCenterline(part.ring, part.directionDeg);
+            if (med && med.length >= 2) {
+              rawSegs.push({
+                pts: med,
+                len: calculateHaversineDistanceNM(med[0][0], med[0][1], med[med.length - 1][0], med[med.length - 1][1]),
+                name: part.name || ws.name || "", source: "world",
+                b0: calculateInitialBearingDeg(med[0][0], med[0][1], med[1][0], med[1][1]),
+                b1: calculateInitialBearingDeg(med[med.length - 2][0], med[med.length - 2][1], med[med.length - 1][0], med[med.length - 1][1])
+              });
+            }
+          }
+        }
+      }
+    }
+
+    TSS_BRAIN.ready = true;
+
+    // Stitch collinear continuous segments (1-to-1 best match avoiding separation barriers)
+    var nextBest = {};
+    for (var aIdx = 0; aIdx < rawSegs.length; aIdx++) {
+      var segA = rawSegs[aIdx], aEnd = segA.pts[segA.pts.length - 1];
+      var bestB = -1, bestScore = Infinity;
+      for (var bIdx = 0; bIdx < rawSegs.length; bIdx++) {
+        if (aIdx === bIdx) continue;
+        var segB = rawSegs[bIdx], bStart = segB.pts[0];
+        if (Math.abs(aEnd[0] - bStart[0]) > 0.14 || Math.abs(tssDeltaLonDeg(aEnd[1], bStart[1])) > 0.20) continue;
+        var gapNm = calculateHaversineDistanceNM(aEnd[0], aEnd[1], bStart[0], bStart[1]);
+        if (gapNm > 5.2) continue;
+        var turnDeg = tssAngleDiff(segA.b1, segB.b0);
+        if (turnDeg > 38) continue;
+        if (gapNm > 0.3) {
+          var gapBrg = calculateInitialBearingDeg(aEnd[0], aEnd[1], bStart[0], bStart[1]);
+          if (tssAngleDiff(segA.b1, gapBrg) > 40 || tssAngleDiff(gapBrg, segB.b0) > 40) continue;
+          if (tssSegmentCrossesBarrier(aEnd[0], aEnd[1], bStart[0], bStart[1])) continue;
+        }
+        var sc = gapNm + 0.05 * turnDeg;
+        if (sc < bestScore) { bestScore = sc; bestB = bIdx; }
+      }
+      if (bestB >= 0) nextBest[aIdx] = { target: bestB, score: bestScore };
+    }
+
+    var prevBest = {};
+    var aKeys = Object.keys(nextBest);
+    for (var ak = 0; ak < aKeys.length; ak++) {
+      var ai = Number(aKeys[ak]), nb = nextBest[ai];
+      if (!prevBest[nb.target] || nb.score < prevBest[nb.target].score) {
+        prevBest[nb.target] = { source: ai, score: nb.score };
+      }
+    }
+    var cleanNext = {}, hasPrev = {};
+    var pKeys = Object.keys(prevBest);
+    for (var pk = 0; pk < pKeys.length; pk++) {
+      var bi = Number(pKeys[pk]), src = prevBest[bi].source;
+      cleanNext[src] = bi; hasPrev[bi] = true;
+    }
+
+    var usedSeg = {};
+    for (var sIdx2 = 0; sIdx2 < rawSegs.length; sIdx2++) {
+      if (hasPrev[sIdx2] || usedSeg[sIdx2]) continue;
+      var curIdx = sIdx2, chainPts = rawSegs[curIdx].pts.slice();
+      var chainName = rawSegs[curIdx].name, chainSrc = rawSegs[curIdx].source;
+      usedSeg[curIdx] = true;
+      while (cleanNext[curIdx] !== undefined && !usedSeg[cleanNext[curIdx]]) {
+        curIdx = cleanNext[curIdx]; usedSeg[curIdx] = true;
+        if (!chainName && rawSegs[curIdx].name) chainName = rawSegs[curIdx].name;
+        var addPts = rawSegs[curIdx].pts, lastP = chainPts[chainPts.length - 1];
+        var dJoin = calculateHaversineDistanceNM(lastP[0], lastP[1], addPts[0][0], addPts[0][1]);
+        for (var ap = (dJoin < 0.05 ? 1 : 0); ap < addPts.length; ap++) chainPts.push(addPts[ap]);
+      }
+      var chain = tssFinalizeChain(chainPts, chainName, chainSrc);
+      var cId = TSS_BRAIN.chains.length; chain.id = cId;
+      TSS_BRAIN.chains.push(chain);
+      tssIndexBucketItem(TSS_BRAIN.chainBuckets, cId, chain.minLat, chain.minLon, chain.maxLat, chain.maxLon, stepDeg);
+    }
+
+    for (var u = 0; u < rawSegs.length; u++) {
+      if (usedSeg[u]) continue;
+      var solo = tssFinalizeChain(rawSegs[u].pts.slice(), rawSegs[u].name, rawSegs[u].source);
+      var soloId = TSS_BRAIN.chains.length; solo.id = soloId;
+      TSS_BRAIN.chains.push(solo);
+      tssIndexBucketItem(TSS_BRAIN.chainBuckets, soloId, solo.minLat, solo.minLon, solo.maxLat, solo.maxLon, stepDeg);
+    }
+  }
+
+  function ensureTssBrainSync() {
+    var worldLen = (TSS_BRAIN.worldRaw && TSS_BRAIN.worldRaw.length) ||
+      ((window.SetRouteCoreA && window.SetRouteCoreA.SETROUTE_TSS_SCHEMES)
+        ? window.SetRouteCoreA.SETROUTE_TSS_SCHEMES.length : 0);
+    var chartArr = Array.isArray(window._tssChartData) ? window._tssChartData : null;
+    if (!TSS_BRAIN.ready || (chartArr && !TSS_BRAIN.chartRaw) || worldLen !== TSS_BRAIN.worldCount) {
+      buildTssBrainIndex(chartArr || TSS_BRAIN.chartRaw);
+    }
+    return TSS_BRAIN.ready;
+  }
+
+  function ensureTssBrainReady() {
+    if (TSS_BRAIN.ready && TSS_BRAIN.chartRaw && TSS_BRAIN.worldRaw) {
+      ensureTssBrainSync();
+      return Promise.resolve(TSS_BRAIN);
+    }
+    if (_tssBrainPromise) return _tssBrainPromise;
+    _tssBrainPromise = (async function () {
+      try {
+        if (window.SetRouteCoreA && typeof window.SetRouteCoreA.loadWorldTss === "function") {
+          await window.SetRouteCoreA.loadWorldTss();
+        }
+      } catch (eW) {}
+      if (!TSS_BRAIN.worldRaw && typeof fetch === "function") {
+        try {
+          var wResp = await fetch("assets/geo/setroute_tss_world.json");
+          if (wResp && wResp.ok) {
+            var wJson = await wResp.json();
+            var wList = Array.isArray(wJson) ? wJson : (wJson && (wJson.schemes || wJson.items) || []);
+            if (Array.isArray(wList) && wList.length) {
+              TSS_BRAIN.worldRaw = wList;
+              if (window.SetRouteCoreA && Array.isArray(window.SetRouteCoreA.SETROUTE_TSS_SCHEMES)) {
+                var have = {}, base = window.SetRouteCoreA.SETROUTE_TSS_SCHEMES;
+                for (var hi = 0; hi < base.length; hi++) if (base[hi] && base[hi].id) have[base[hi].id] = true;
+                for (var wi = 0; wi < wList.length; wi++) {
+                  if (wList[wi] && wList[wi].id && !have[wList[wi].id]) base.push(wList[wi]);
+                }
+              }
+            }
+          }
+        } catch (eWr) {}
+      }
+      var chartItems = Array.isArray(window._tssChartData) ? window._tssChartData : null;
+      if (!chartItems && typeof fetch === "function") {
+        try {
+          var resp = await fetch("assets/geo/setroute_tss_chart.json");
+          if (resp && resp.ok) {
+            var json = await resp.json();
+            chartItems = Array.isArray(json) ? json : (json && Array.isArray(json.items) ? json.items : []);
+            if (chartItems.length && !window._tssChartData) window._tssChartData = chartItems;
+          }
+        } catch (eC) {}
+      }
+      buildTssBrainIndex(chartItems);
+      if (typeof window.setrouteBuildAdjacency === "function") {
+        try { window.setrouteBuildAdjacency(true); } catch (eAdj) {}
+      }
+      return TSS_BRAIN;
+    })();
+    return _tssBrainPromise;
+  }
+
+  try { ensureTssBrainReady(); } catch (eBoot) {}
+
+  function tssProjectPointToChain(lat, lon, chain) {
+    var bestDist = Infinity, bestLat = chain.pts[0][0], bestLon = chain.pts[0][1];
+    var bestS = 0, bestSeg = 0;
+    for (var i = 0; i < chain.pts.length - 1; i++) {
+      var res = tssDistPointToSegNm(lat, lon, chain.pts[i], chain.pts[i + 1]);
+      if (res.distNm < bestDist) {
+        bestDist = res.distNm; bestLat = res.projLat; bestLon = res.projLon;
+        bestS = chain.cumNm[i] + res.t * (chain.cumNm[i + 1] - chain.cumNm[i]);
+        bestSeg = i;
+      }
+    }
+    return {
+      distNm: bestDist, projLat: bestLat, projLon: bestLon, sNm: bestS, segIdx: bestSeg,
+      tangentBrg: chain.segBrg[bestSeg] !== undefined ? chain.segBrg[bestSeg] : chain.meanBrg
+    };
+  }
+
+  function tssChainPointAtS(chain, sTarget) {
+    var s = Math.max(0, Math.min(chain.totalNm, sTarget));
+    for (var i = 0; i < chain.pts.length - 1; i++) {
+      var s0 = chain.cumNm[i], s1 = chain.cumNm[i + 1];
+      if (s <= s1 || i === chain.pts.length - 2) {
+        var span = s1 - s0;
+        var t = span > 1e-6 ? Math.max(0, Math.min(1, (s - s0) / span)) : 0;
+        var a = chain.pts[i], b = chain.pts[i + 1];
+        return {
+          lat: a[0] + t * (b[0] - a[0]),
+          lon: tssNormalizeLon(a[1] + t * tssDeltaLonDeg(a[1], b[1])),
+          brg: chain.segBrg[i] !== undefined ? chain.segBrg[i] : chain.meanBrg
+        };
+      }
+    }
+    var last = chain.pts[chain.pts.length - 1];
+    return { lat: last[0], lon: last[1], brg: chain.meanBrg };
+  }
+
+  function tssSimplifyPolylineNm(pts, tolNm) {
+    if (!Array.isArray(pts) || pts.length <= 2) return pts ? pts.slice() : [];
+    var keep = new Array(pts.length);
+    keep[0] = true; keep[pts.length - 1] = true;
+    var stack = [[0, pts.length - 1]];
+    while (stack.length > 0) {
+      var pair = stack.pop(), i0 = pair[0], i1 = pair[1];
+      if (i1 <= i0 + 1) continue;
+      var maxD = -1, maxIdx = -1;
+      for (var i = i0 + 1; i < i1; i++) {
+        var d = tssDistPointToSegNm(pts[i][0], pts[i][1], pts[i0], pts[i1]).distNm;
+        if (d > maxD) { maxD = d; maxIdx = i; }
+      }
+      if (maxD > tolNm && maxIdx > i0 && maxIdx < i1) {
+        keep[maxIdx] = true; stack.push([i0, maxIdx], [maxIdx, i1]);
+      }
+    }
+    var out = [];
+    for (var j = 0; j < pts.length; j++) if (keep[j]) out.push(pts[j]);
+    return out;
+  }
+
+  function tssSliceChain(chain, sStart, sEnd) {
+    var p0 = tssChainPointAtS(chain, sStart), p1 = tssChainPointAtS(chain, sEnd);
+    var raw = [[p0.lat, p0.lon]];
+    for (var i = 1; i < chain.pts.length - 1; i++) {
+      var si = chain.cumNm[i];
+      if (si > sStart + 0.3 && si < sEnd - 0.3) raw.push([chain.pts[i][0], chain.pts[i][1]]);
+    }
+    raw.push([p1.lat, p1.lon]);
+    return tssSimplifyPolylineNm(raw, 0.025);
+  }
+
+  function isSafeTssWaterPoint(lat, lon) {
+    if (getPointFairwayDepthM(lat, lon) > 0) return true;
+    return !(typeof window.setroutePointInLandBox === "function" && window.setroutePointInLandBox(lat, lon));
+  }
+
+  function isSafeTssLeg(lat1, lon1, lat2, lon2) {
+    if (typeof window.setrouteLegLikelyCrossesLand !== "function") return true;
+    return !window.setrouteLegLikelyCrossesLand(lat1, lon1, lat2, lon2);
+  }
+
+  var _origCoreATssAnalysis = window.SetRouteCoreA && window.SetRouteCoreA.setrouteTssLegAnalysis;
+
+  function calibratedTssLegAnalysis(lat1, lon1, lat2, lon2) {
+    ensureTssBrainSync();
+    if (!TSS_BRAIN.ready || (TSS_BRAIN.chains.length === 0 && TSS_BRAIN.sepZones.length === 0)) {
+      return _origCoreATssAnalysis
+        ? _origCoreATssAnalysis(lat1, lon1, lat2, lon2)
+        : { penalty: 0, inTss: false, hits: [], schemes: [], summary: "Open Sea / Non-TSS" };
+    }
+
+    var legDist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+    var legBrg = calculateInitialBearingDeg(lat1, lon1, lat2, lon2);
+    var pad = 0.25;
+    var zIds = tssQuerySegBuckets(TSS_BRAIN.sepZoneBuckets, lat1, lon1, lat2, lon2, pad, TSS_BRAIN.bucketDeg);
+    var sIds = tssQuerySegBuckets(TSS_BRAIN.sepLineBuckets, lat1, lon1, lat2, lon2, pad, TSS_BRAIN.bucketDeg);
+    var cIds = tssQuerySegBuckets(TSS_BRAIN.chainBuckets, lat1, lon1, lat2, lon2, pad, TSS_BRAIN.bucketDeg);
+
+    if (!zIds.length && !sIds.length && !cIds.length) {
+      return { penalty: 0, inTss: false, hits: [], schemes: [], summary: "Open Sea / Non-TSS" };
+    }
+
+    var nSamples = Math.max(5, Math.min(20, Math.ceil(legDist / 4) + 1));
+    var sepSamples = 0, alignedSamples = 0, wrongSamples = 0, alignedXtdSum = 0;
+    var schemeMap = {}, dLonTotal = tssDeltaLonDeg(lon1, lon2);
+
+    for (var s = 0; s < nSamples; s++) {
+      var frac = nSamples > 1 ? s / (nSamples - 1) : 0.5;
+      var sLat = lat1 + (lat2 - lat1) * frac;
+      var sLon = tssNormalizeLon(lon1 + dLonTotal * frac);
+      var inSep = false;
+
+      for (var zi = 0; zi < zIds.length; zi++) {
+        var z = TSS_BRAIN.sepZones[zIds[zi]];
+        if (tssPointInSepZoneObj(sLat, sLon, z)) {
+          inSep = true;
+          if (z.name) schemeMap[z.name] = true;
+          break;
+        }
+      }
+      if (inSep) { sepSamples++; continue; }
+
+      var bestAl = Infinity, bestOpp = Infinity, bestNm = "";
+      for (var ci = 0; ci < cIds.length; ci++) {
+        var ch = TSS_BRAIN.chains[cIds[ci]];
+        if (sLat < ch.minLat - 0.12 || sLat > ch.maxLat + 0.12 ||
+            sLon < ch.minLon - 0.14 || sLon > ch.maxLon + 0.14) continue;
+        var pr = tssProjectPointToChain(sLat, sLon, ch);
+        if (pr.distNm > 4.0) continue;
+        var dAng = tssAngleDiff(legBrg, pr.tangentBrg);
+        if (dAng <= 50 && pr.distNm < bestAl) {
+          bestAl = pr.distNm; bestNm = ch.name || bestNm;
+        } else if (dAng >= 130 && pr.distNm < bestOpp) {
+          bestOpp = pr.distNm; bestNm = ch.name || bestNm;
+        }
+      }
+      if (bestAl <= 2.8 && bestAl <= bestOpp + 0.4) {
+        alignedSamples++; alignedXtdSum += bestAl;
+        if (bestNm) schemeMap[bestNm] = true;
+      } else if (bestOpp <= 1.8 && bestOpp < bestAl - 0.3) {
+        wrongSamples++;
+        if (bestNm) schemeMap[bestNm] = true;
+      }
+    }
+
+    var crossesBarrier = legDist >= 7.5 && tssSegmentCrossesBarrier(lat1, lon1, lat2, lon2);
+    var hits = [], penalty = 0;
+    var sepFrac = sepSamples / nSamples, alFrac = alignedSamples / nSamples, wrFrac = wrongSamples / nSamples;
+
+    if (sepFrac > 0 || crossesBarrier) {
+      var effSep = Math.max(sepFrac, crossesBarrier ? 0.15 : 0);
+      penalty += 9000 * effSep;
+      hits.push({ category: "separation_zone", fraction: Number(effSep.toFixed(2)) });
+    }
+    if (wrFrac >= (legDist < 8.0 ? 0.35 : 0.18)) {
+      penalty += 3200 * wrFrac;
+      hits.push({ category: "traffic_lane_wrong_way", fraction: Number(wrFrac.toFixed(2)) });
+    }
+    if (alFrac > 0) {
+      var avgXtd = alignedXtdSum / alignedSamples;
+      var centerFactor = Math.max(0.1, 1.0 - avgXtd / 2.2);
+      penalty -= 260 * alFrac * centerFactor;
+      penalty += 85 * avgXtd * alFrac;
+      hits.push({ category: "traffic_lane", fraction: Number(alFrac.toFixed(2)), avgXtdNm: Number(avgXtd.toFixed(2)) });
+    }
+
+    var schemes = Object.keys(schemeMap);
+    return {
+      penalty: Math.round(penalty), inTss: hits.length > 0, hits: hits, schemes: schemes,
+      summary: hits.length ? ("TSS" + (schemes.length ? ": " + schemes.slice(0, 2).join(", ") : "")) : "Open Sea / Non-TSS"
+    };
+  }
+
+  function calibratedTssHardBan(lat1, lon1, lat2, lon2) {
+    var ta = calibratedTssLegAnalysis(lat1, lon1, lat2, lon2);
+    if (!ta || !Array.isArray(ta.hits)) return false;
+    var dist = calculateHaversineDistanceNM(lat1, lon1, lat2, lon2);
+    if (dist < 4.0) return false;
+    for (var i = 0; i < ta.hits.length; i++) {
+      if (ta.hits[i].category === "separation_zone" && (ta.hits[i].fraction || 0) >= 0.18) return true;
+    }
+    return false;
+  }
+
+  function calibratedTssEdgePenalty(lat1, lon1, lat2, lon2) {
+    return calibratedTssLegAnalysis(lat1, lon1, lat2, lon2).penalty;
+  }
+
+  window.setrouteTssLegAnalysis = calibratedTssLegAnalysis;
+  window.setrouteTssHardBan = calibratedTssHardBan;
+  window.setrouteTssEdgePenalty = calibratedTssEdgePenalty;
+  if (window.SetRouteCoreA) {
+    window.SetRouteCoreA.setrouteTssLegAnalysis = calibratedTssLegAnalysis;
+    window.SetRouteCoreA.setrouteTssHardBan = calibratedTssHardBan;
+    window.SetRouteCoreA.setrouteTssEdgePenalty = calibratedTssEdgePenalty;
+  }
+
+  function makeTssWaypoint(baseWpt, lat, lon, label, isTss) {
+    var cleanName = String(label || "TSS Centerline").replace(/[\/\\<>]/g, " - ");
+    return {
+      wptNo: "000",
+      name: cleanName,
+      lat: parseFloat(Number(lat).toFixed(5)),
+      lon: parseFloat(Number(lon).toFixed(5)),
+      speedKnots: (baseWpt && baseWpt.speedKnots) || 14.5,
+      portsideXTD: (baseWpt && baseWpt.portsideXTD) || 0.5,
+      starboardXTD: (baseWpt && baseWpt.starboardXTD) || 0.5,
+      turnRadius: 0.7,
+      sail: (baseWpt && baseWpt.sail) || "RL",
+      rot: 8.0,
+      _tssAligned: Boolean(isTss)
+    };
+  }
+
+  /**
+   * Recover near-port approach hubs (<15 NM from origin/destination) that setsail_core
+   * skipped when leaving/entering port causes a land crossing or TSS separation breach.
+   */
+  function recoverSkippedApproachHubs(waypoints, nodePath, speed, xtd, sailMode) {
+    if (!Array.isArray(waypoints) || waypoints.length < 2 || !Array.isArray(nodePath) || !nodePath.length) {
+      return waypoints;
+    }
+    if (typeof MARITIME_SEA_NODES !== "object" || !MARITIME_SEA_NODES) return waypoints;
+    var out = waypoints.slice();
+
+    var k0 = nodePath[0];
+    var n0 = MARITIME_SEA_NODES[k0];
+    if (n0 && out.length >= 2) {
+      var w0 = out[0], w1 = out[1];
+      var d0n = calculateHaversineDistanceNM(w0.lat, w0.lon, n0[0], n0[1]);
+      var d1n = calculateHaversineDistanceNM(w1.lat, w1.lon, n0[0], n0[1]);
+      var d01 = calculateHaversineDistanceNM(w0.lat, w0.lon, w1.lat, w1.lon);
+      if (d0n >= 3.0 && d0n < 18.0 && d1n >= 2.0 && (d0n + d1n <= d01 + 16)) {
+        var origLand = !isSafeTssLeg(w0.lat, w0.lon, w1.lat, w1.lon);
+        var subLand = !isSafeTssLeg(w0.lat, w0.lon, n0[0], n0[1]) || !isSafeTssLeg(n0[0], n0[1], w1.lat, w1.lon);
+        var origSep = tssSegmentCrossesBarrier(w0.lat, w0.lon, w1.lat, w1.lon);
+        var subSep = tssSegmentCrossesBarrier(w0.lat, w0.lon, n0[0], n0[1]) || tssSegmentCrossesBarrier(n0[0], n0[1], w1.lat, w1.lon);
+        if (!subLand && (origLand || (origSep && !subSep))) {
+          out.splice(1, 0, {
+            wptNo: "000", name: n0[2] || k0, lat: n0[0], lon: n0[1],
+            speedKnots: speed || w0.speedKnots || 14.5, portsideXTD: xtd || 0.5, starboardXTD: xtd || 0.5,
+            turnRadius: 0.8, sail: sailMode || w0.sail || "RL", rot: 8.0, seaNodeKey: k0
+          });
+        }
+      }
+    }
+
+    var kLast = nodePath[nodePath.length - 1];
+    var nL = MARITIME_SEA_NODES[kLast];
+    if (nL && out.length >= 2) {
+      var wPrev = out[out.length - 2], wDest = out[out.length - 1];
+      var dLn = calculateHaversineDistanceNM(wDest.lat, wDest.lon, nL[0], nL[1]);
+      var dPn = calculateHaversineDistanceNM(wPrev.lat, wPrev.lon, nL[0], nL[1]);
+      var dPD = calculateHaversineDistanceNM(wPrev.lat, wPrev.lon, wDest.lat, wDest.lon);
+      if (dLn >= 3.0 && dLn < 18.0 && dPn >= 2.0 && (dPn + dLn <= dPD + 16)) {
+        var dstLand = !isSafeTssLeg(wPrev.lat, wPrev.lon, wDest.lat, wDest.lon);
+        var dstSubLand = !isSafeTssLeg(wPrev.lat, wPrev.lon, nL[0], nL[1]) || !isSafeTssLeg(nL[0], nL[1], wDest.lat, wDest.lon);
+        var dstSep = tssSegmentCrossesBarrier(wPrev.lat, wPrev.lon, wDest.lat, wDest.lon);
+        var dstSubSep = tssSegmentCrossesBarrier(nL[0], nL[1], wDest.lat, wDest.lon);
+        if (!dstSubLand && (dstLand || (dstSep && !dstSubSep))) {
+          out.splice(out.length - 1, 0, {
+            wptNo: "000", name: nL[2] || kLast, lat: nL[0], lon: nL[1],
+            speedKnots: speed || wPrev.speedKnots || 14.5, portsideXTD: xtd || 0.5, starboardXTD: xtd || 0.5,
+            turnRadius: 0.8, sail: sailMode || wPrev.sail || "RL", rot: 8.0, seaNodeKey: kLast
+          });
+        }
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Align corridor waypoints onto exact directional TSS traffic-lane centerlines:
+   *  Pass 1: Relocate off-axis/wrong-side graph hubs onto the aligned directional lane.
+   *  Pass 2: Thread legs smoothly down matching lane chains (respecting Rule 10(c) crossings).
+   *  Pass 3: Remove residual non-aligned zigzags and merge micro-segments.
+   */
+  function alignWaypointsToTssLanes(waypoints, options) {
+    ensureTssBrainSync();
+    if (!TSS_BRAIN.ready || !TSS_BRAIN.chains.length || !Array.isArray(waypoints) || waypoints.length < 2) {
+      return waypoints;
+    }
+
+    var wpts = [];
+    for (var wi = 0; wi < waypoints.length; wi++) {
+      wpts.push(Object.assign({}, waypoints[wi], { _pinned: (wi === 0 || wi === waypoints.length - 1) }));
+    }
+
+    for (var pass = 0; pass < 3; pass++) {
+      for (var k = 1; k < wpts.length - 1; k++) {
+        if (wpts[k]._pinned) continue;
+        var prev = wpts[k - 1], cur = wpts[k], next = wpts[k + 1];
+        var dOrigSum = calculateHaversineDistanceNM(prev.lat, prev.lon, cur.lat, cur.lon) +
+                       calculateHaversineDistanceNM(cur.lat, cur.lon, next.lat, next.lon);
+        var bIn = calculateInitialBearingDeg(prev.lat, prev.lon, cur.lat, cur.lon);
+        var bOut = calculateInitialBearingDeg(cur.lat, cur.lon, next.lat, next.lon);
+        var bChord = calculateInitialBearingDeg(prev.lat, prev.lon, next.lat, next.lon);
+        var curInSep = tssPointInAnySepZone(cur.lat, cur.lon);
+        var origBarCount = (tssSegmentCrossesBarrier(prev.lat, prev.lon, cur.lat, cur.lon) ? 1 : 0) +
+                           (tssSegmentCrossesBarrier(cur.lat, cur.lon, next.lat, next.lon) ? 1 : 0);
+
+        var cIds = tssQueryBuckets(TSS_BRAIN.chainBuckets, cur.lat - 0.38, cur.lon - 0.48, cur.lat + 0.38, cur.lon + 0.48, TSS_BRAIN.bucketDeg);
+        var minAlDist = Infinity, minOppDist = Infinity;
+        for (var qci = 0; qci < cIds.length; qci++) {
+          var qch = TSS_BRAIN.chains[cIds[qci]];
+          if (cur.lat < qch.minLat - 0.38 || cur.lat > qch.maxLat + 0.38 ||
+              cur.lon < qch.minLon - 0.48 || cur.lon > qch.maxLon + 0.48) continue;
+          var qpr = tssProjectPointToChain(cur.lat, cur.lon, qch);
+          var qAng = tssAngleDiff(bChord, qpr.tangentBrg);
+          if (qAng <= 55 && qpr.distNm < minAlDist) minAlDist = qpr.distNm;
+          else if (qAng >= 125 && qpr.distNm < minOppDist) minOppDist = qpr.distNm;
+        }
+        var curInWrongLane = (minOppDist <= 4.5 && minOppDist + 0.35 < minAlDist);
+        var needEscape = curInSep || origBarCount > 0 || curInWrongLane;
+        var bestProj = null, bestSc = Infinity, alreadyCentered = false;
+
+        for (var ci = 0; ci < cIds.length; ci++) {
+          var ch = TSS_BRAIN.chains[cIds[ci]];
+          if (cur.lat < ch.minLat - 0.38 || cur.lat > ch.maxLat + 0.38 ||
+              cur.lon < ch.minLon - 0.48 || cur.lon > ch.maxLon + 0.48) continue;
+          var pr = tssProjectPointToChain(cur.lat, cur.lon, ch);
+          var dChord = tssAngleDiff(bChord, pr.tangentBrg);
+          var dIn = tssAngleDiff(bIn, pr.tangentBrg);
+          var dOut = tssAngleDiff(bOut, pr.tangentBrg);
+          if (pr.distNm <= 0.15 && dChord <= 46 && origBarCount === 0 && !curInSep && !curInWrongLane) {
+            alreadyCentered = true;
+            continue;
+          }
+          if (pr.distNm > 18) continue;
+          if (!curInSep && !curInWrongLane && (dChord > 48 || Math.max(dIn, dOut) > 58)) continue;
+          if ((curInSep || curInWrongLane) && Math.min(dIn, dOut) > 65 && dChord > 55) continue;
+
+          var candPts = [[pr.projLat, pr.projLon]];
+          if (needEscape) {
+            candPts.push(ch.pts[0], ch.pts[ch.pts.length - 1]);
+          }
+          for (var cpi = 0; cpi < candPts.length; cpi++) {
+            var cLat = candPts[cpi][0], cLon = candPts[cpi][1];
+            var dMove = calculateHaversineDistanceNM(cur.lat, cur.lon, cLat, cLon);
+            if (dMove > 22) continue;
+            if (!isSafeTssWaterPoint(cLat, cLon)) continue;
+            if (tssPointInAnySepZone(cLat, cLon)) continue;
+            if (!isSafeTssLeg(prev.lat, prev.lon, cLat, cLon)) continue;
+            if (!isSafeTssLeg(cLat, cLon, next.lat, next.lon)) continue;
+
+            var dNewSum = calculateHaversineDistanceNM(prev.lat, prev.lon, cLat, cLon) +
+                          calculateHaversineDistanceNM(cLat, cLon, next.lat, next.lon);
+            var detour = dNewSum - dOrigSum;
+            if (detour > Math.max(15, dOrigSum * 0.25)) continue;
+
+            var newBarCount = (tssSegmentCrossesBarrier(prev.lat, prev.lon, cLat, cLon) ? 1 : 0) +
+                              (tssSegmentCrossesBarrier(cLat, cLon, next.lat, next.lon) ? 1 : 0);
+            if (!needEscape && origBarCount === 0 && newBarCount > 0) continue;
+
+            var sc = dMove + Math.max(0, detour) * 0.8 + (curInWrongLane ? newBarCount * 40 : newBarCount * 240) + Math.min(dChord, Math.min(dIn, dOut)) * 0.15 - Math.min(20, ch.totalNm) * 0.12;
+            if (ch.totalNm < 4) sc += 3.0;
+            if (sc < bestSc) {
+              bestSc = sc;
+              bestProj = { lat: cLat, lon: cLon, chain: ch, newBar: newBarCount };
+            }
+          }
+        }
+
+        if (bestProj && !alreadyCentered) {
+          if (!needEscape && origBarCount === 0 && bestProj.newBar > 0) continue;
+          wpts[k].lat = parseFloat(bestProj.lat.toFixed(5));
+          wpts[k].lon = parseFloat(bestProj.lon.toFixed(5));
+          wpts[k]._tssAligned = true;
+          if (bestProj.chain.name && !/FAIRWAY|PILOT/i.test(wpts[k].name || "")) {
+            wpts[k].name = String(bestProj.chain.name + " Lane").replace(/[\/\\<>]/g, " - ");
+          }
+        } else if (alreadyCentered) {
+          wpts[k]._tssAligned = true;
+        }
+      }
+    }
+
+    var out = [wpts[0]];
+    for (var li = 0; li < wpts.length - 1; li++) {
+      var A = out[out.length - 1], B = wpts[li + 1];
+      var legLen = calculateHaversineDistanceNM(A.lat, A.lon, B.lat, B.lon);
+      if (legLen < 1.8 || Math.abs(B.lon - A.lon) > 180) {
+        out.push(B);
+        continue;
+      }
+      var legBrg = calculateInitialBearingDeg(A.lat, A.lon, B.lat, B.lon);
+      var origLandSafe = isSafeTssLeg(A.lat, A.lon, B.lat, B.lon);
+      var origCrossBarrier = tssSegmentCrossesBarrier(A.lat, A.lon, B.lat, B.lon);
+      var origLegTa = (origCrossBarrier || legLen < 180) ? calibratedTssLegAnalysis(A.lat, A.lon, B.lat, B.lon) : null;
+      var origLegPen = origLegTa ? origLegTa.penalty : 0;
+      var origWrongWay = Boolean(origLegTa && (origLegTa.hits || []).some(function (h) {
+        return h.category === "traffic_lane_wrong_way";
+      }));
+      var pad = 0.36;
+      var minLat = Math.min(A.lat, B.lat) - pad, maxLat = Math.max(A.lat, B.lat) + pad;
+      var cands = tssQuerySegBuckets(TSS_BRAIN.chainBuckets, A.lat, A.lon, B.lat, B.lon, pad, TSS_BRAIN.bucketDeg);
+      var matches = [];
+      var minChainLen = legLen < 25 ? 1.2 : 2.0;
+      var minAdvance = legLen < 25 ? 1.0 : 2.2;
+      var minSpan = legLen < 25 ? 1.0 : 2.0;
+
+      for (var mi = 0; mi < cands.length; mi++) {
+        var chain = TSS_BRAIN.chains[cands[mi]];
+        if (!tssSegCrossesBbox(minLat, maxLat, A.lon, B.lon, pad, chain)) continue;
+        if (chain.totalNm < minChainLen) continue;
+
+        var prA = tssProjectPointToChain(A.lat, A.lon, chain);
+        var prB = tssProjectPointToChain(B.lat, B.lon, chain);
+        var sA = prA.sNm, sB = prB.sNm;
+        if (sB - sA < minAdvance) continue;
+
+        var sEnter = sA, sExit = sB;
+        if (sA > 0.6 && prA.distNm > 0.45) {
+          sEnter = Math.min(sB - minSpan * 0.7, sA + Math.min(Math.max(5.5, prA.distNm * 1.45), (sB - sA) * 0.45));
+        }
+        if (sB < chain.totalNm - 0.6 && prB.distNm > 0.45) {
+          sExit = Math.max(sEnter + minSpan * 0.7, sB - Math.min(Math.max(5.5, prB.distNm * 1.45), (sB - sEnter) * 0.45));
+        }
+        if (sExit - sEnter < minSpan) continue;
+
+        var pEnter = tssChainPointAtS(chain, sEnter), pExit = tssChainPointAtS(chain, sExit);
+        var midPt = tssChainPointAtS(chain, 0.5 * (sEnter + sExit));
+        var sliceBrg = calculateInitialBearingDeg(pEnter.lat, pEnter.lon, pExit.lat, pExit.lon);
+        if (tssAngleDiff(legBrg, sliceBrg) > 52 || tssAngleDiff(legBrg, midPt.brg) > 54) continue;
+
+        var legProjMid = tssDistPointToSegNm(midPt.lat, midPt.lon, [A.lat, A.lon], [B.lat, B.lon]);
+        var legProjEnter = tssDistPointToSegNm(pEnter.lat, pEnter.lon, [A.lat, A.lon], [B.lat, B.lon]);
+        var legProjExit = tssDistPointToSegNm(pExit.lat, pExit.lon, [A.lat, A.lon], [B.lat, B.lon]);
+        var minOffset = Math.min(legProjMid.distNm, legProjEnter.distNm, legProjExit.distNm);
+        var avgOffset = (legProjMid.distNm + legProjEnter.distNm + legProjExit.distNm) / 3;
+        var captureCap = (origCrossBarrier || origWrongWay) ? 16.0 : 12.5;
+        if (minOffset > captureCap || avgOffset > captureCap + 2.0) continue;
+
+        var dApproach = calculateHaversineDistanceNM(A.lat, A.lon, pEnter.lat, pEnter.lon);
+        var dDepart = calculateHaversineDistanceNM(pExit.lat, pExit.lon, B.lat, B.lon);
+        if (dApproach > 1.2) {
+          var bApp = calculateInitialBearingDeg(A.lat, A.lon, pEnter.lat, pEnter.lon);
+          if (tssAngleDiff(bApp, pEnter.brg) > 65 || tssAngleDiff(legBrg, bApp) > 60) continue;
+        }
+        if (dDepart > 1.2) {
+          var bDep = calculateInitialBearingDeg(pExit.lat, pExit.lon, B.lat, B.lon);
+          if (tssAngleDiff(pExit.brg, bDep) > 65 || tssAngleDiff(legBrg, bDep) > 60) continue;
+        }
+
+        var spanNm = sExit - sEnter, newDist = dApproach + spanNm + dDepart;
+        if (newDist > Math.max(legLen * 1.30, legLen + 14)) continue;
+
+        var slice = tssSliceChain(chain, sEnter, sExit);
+        if (slice.length < 2) continue;
+
+        var testChain = [[A.lat, A.lon]].concat(slice).concat([[B.lat, B.lon]]);
+        var chainUnsafe = false, localBarHits = 0, sliceInteriorBarHits = 0;
+        for (var ti = 0; ti < testChain.length - 1; ti++) {
+          var t0 = testChain[ti], t1 = testChain[ti + 1];
+          if (origLandSafe && !isSafeTssLeg(t0[0], t0[1], t1[0], t1[1])) { chainUnsafe = true; break; }
+          var segLenTi = calculateHaversineDistanceNM(t0[0], t0[1], t1[0], t1[1]);
+          if (tssSegmentCrossesBarrier(t0[0], t0[1], t1[0], t1[1])) {
+            if (ti > 0 && ti < testChain.length - 2) sliceInteriorBarHits++;
+            else if (segLenTi < 40) localBarHits++;
+          }
+        }
+        if (chainUnsafe || sliceInteriorBarHits > 0) continue;
+        if (!origCrossBarrier && !origWrongWay && localBarHits > 0) continue;
+        if (localBarHits > 0) {
+          var appPen = dApproach > 0.5 ? calibratedTssLegAnalysis(A.lat, A.lon, pEnter.lat, pEnter.lon).penalty : 0;
+          var depPen = dDepart > 0.5 ? calibratedTssLegAnalysis(pExit.lat, pExit.lon, B.lat, B.lon).penalty : 0;
+          if (appPen + depPen > origLegPen + 300) continue;
+        }
+
+        var t0Frac = Math.min(legProjEnter.t, legProjExit.t), t1Frac = Math.max(legProjEnter.t, legProjExit.t);
+        var score = avgOffset * 3.0 + localBarHits * 120 + Math.max(0, newDist - legLen) * 0.55 - Math.min(45, spanNm) * 0.35;
+        matches.push({
+          tStart: t0Frac, tEnd: t1Frac, tMid: 0.5 * (t0Frac + t1Frac), score: score,
+          slice: slice, label: chain.name ? (chain.name + " Centerline") : "TSS Lane Centerline"
+        });
+      }
+
+      if (matches.length > 0) {
+        matches.sort(function (m1, m2) { return m1.tMid - m2.tMid; });
+        var chosen = [];
+        for (var ci2 = 0; ci2 < matches.length; ci2++) {
+          var cand = matches[ci2], overlaps = false;
+          for (var cj = 0; cj < chosen.length; cj++) {
+            var prevCh = chosen[cj];
+            var ov = Math.min(prevCh.tEnd, cand.tEnd) - Math.max(prevCh.tStart, cand.tStart);
+            var minSpanOv = Math.min(prevCh.tEnd - prevCh.tStart, cand.tEnd - cand.tStart);
+            if (ov > 0.15 * Math.max(0.05, minSpanOv)) {
+              overlaps = true;
+              if (cand.score < prevCh.score) chosen[cj] = cand;
+              break;
+            }
+          }
+          if (!overlaps) chosen.push(cand);
+        }
+        chosen.sort(function (m1, m2) { return m1.tStart - m2.tStart; });
+
+        for (var chIdx = 0; chIdx < chosen.length; chIdx++) {
+          var segList = chosen[chIdx].slice, chLabel = chosen[chIdx].label;
+          var curTail = out[out.length - 1];
+          var dJump = calculateHaversineDistanceNM(curTail.lat, curTail.lon, segList[0][0], segList[0][1]);
+          if (dJump > 1.5) {
+            var jBrg = calculateInitialBearingDeg(curTail.lat, curTail.lon, segList[0][0], segList[0][1]);
+            if (tssAngleDiff(legBrg, jBrg) > 55) continue;
+            if (dJump >= 6.0 && tssSegmentCrossesBarrier(curTail.lat, curTail.lon, segList[0][0], segList[0][1])) continue;
+          }
+          var lastPt = segList[segList.length - 1];
+          var dTail = calculateHaversineDistanceNM(lastPt[0], lastPt[1], B.lat, B.lon);
+          if (dTail > 1.5 && tssAngleDiff(legBrg, calculateInitialBearingDeg(lastPt[0], lastPt[1], B.lat, B.lon)) > 62) {
+            continue;
+          }
+          for (var sp = 0; sp < segList.length; sp++) {
+            var pt = segList[sp], tail = out[out.length - 1];
+            if (calculateHaversineDistanceNM(tail.lat, tail.lon, pt[0], pt[1]) < 0.45) {
+              if (!tail._pinned) {
+                tail.lat = parseFloat(Number(pt[0]).toFixed(5));
+                tail.lon = parseFloat(Number(pt[1]).toFixed(5));
+                tail._tssAligned = true;
+              }
+              continue;
+            }
+            if (calculateHaversineDistanceNM(pt[0], pt[1], B.lat, B.lon) < 0.45) continue;
+            out.push(makeTssWaypoint(A, pt[0], pt[1], chLabel, true));
+          }
+        }
+      }
+      out.push(B);
+    }
+
+    function tssDestOffset(lat, lon, brgDeg, distNm) {
+      var radB = (brgDeg * Math.PI) / 180;
+      var cosL = Math.max(0.15, Math.cos((lat * Math.PI) / 180));
+      return [
+        lat + (distNm * Math.cos(radB)) / 60,
+        tssNormalizeLon(lon + (distNm * Math.sin(radB)) / (60 * cosL))
+      ];
+    }
+
+    function tssEvalLegViolation(ta) {
+      var hits = (ta && ta.hits) || [];
+      var bad = 0;
+      for (var hi = 0; hi < hits.length; hi++) {
+        if (hits[hi].category === "separation_zone") bad += 10;
+        else if (hits[hi].category === "traffic_lane_wrong_way") bad += 6;
+      }
+      return bad;
+    }
+
+    for (var repPass = 0; repPass < 2; repPass++) {
+      var repOut = [out[0]], anyRep = false;
+      for (var ri = 0; ri < out.length - 1; ri++) {
+        var rA = repOut[repOut.length - 1], rB = out[ri + 1];
+        var rLen = calculateHaversineDistanceNM(rA.lat, rA.lon, rB.lat, rB.lon);
+        if (rLen < 1.2 || rLen > 120 || Math.abs(rB.lon - rA.lon) > 180) {
+          repOut.push(rB);
+          continue;
+        }
+        var ta0 = calibratedTssLegAnalysis(rA.lat, rA.lon, rB.lat, rB.lon);
+        var bad0 = tssEvalLegViolation(ta0);
+        if (bad0 === 0) {
+          repOut.push(rB);
+          continue;
+        }
+
+        var rBrg = calculateInitialBearingDeg(rA.lat, rA.lon, rB.lat, rB.lon);
+        var rcIds = tssQuerySegBuckets(TSS_BRAIN.chainBuckets, rA.lat, rA.lon, rB.lat, rB.lon, 0.35, TSS_BRAIN.bucketDeg);
+        var seqCands = [];
+
+        for (var rci = 0; rci < rcIds.length; rci++) {
+          var rch = TSS_BRAIN.chains[rcIds[rci]];
+          var rpA = tssProjectPointToChain(rA.lat, rA.lon, rch);
+          var rpB = tssProjectPointToChain(rB.lat, rB.lon, rch);
+          var diffA = tssAngleDiff(rBrg, rpA.tangentBrg);
+          var diffB = tssAngleDiff(rBrg, rpB.tangentBrg);
+          if (diffA <= 78 || diffB <= 78) {
+            var chLbl = rch.name ? (rch.name + " Centerline") : "TSS Lane Centerline";
+            var ptsTest = [
+              { pt: rch.pts[0], s: 0 },
+              { pt: [rpA.projLat, rpA.projLon], s: rpA.sNm },
+              { pt: [rpB.projLat, rpB.projLon], s: rpB.sNm },
+              { pt: rch.pts[rch.pts.length - 1], s: rch.totalNm }
+            ];
+            for (var pti = 0; pti < ptsTest.length; pti++) {
+              var candPt = ptsTest[pti].pt, candS = ptsTest[pti].s;
+              seqCands.push({ pts: [candPt], label: chLbl });
+              if (rpB.sNm > candS + 1.0 && rpB.distNm <= 8.0) {
+                var slEnd = rpB.distNm <= 0.65 ? rpB.sNm : Math.min(rch.totalNm, Math.max(candS + 1.5, rpB.sNm));
+                var slPts = tssSliceChain(rch, candS, slEnd);
+                if (slPts.length >= 2) seqCands.push({ pts: slPts, label: chLbl });
+              }
+            }
+          }
+          if (diffA >= 115 || diffB >= 115) {
+            var oppBrg = rpA.distNm <= rpB.distNm ? rpA.tangentBrg : rpB.tangentBrg;
+            var crossDists = [1.8, 3.4, 5.2];
+            var baseRoots = [
+              [rA.lat, rA.lon],
+              [0.5 * (rA.lat + rB.lat), tssNormalizeLon(rA.lon + 0.5 * tssDeltaLonDeg(rA.lon, rB.lon))]
+            ];
+            for (var bri = 0; bri < baseRoots.length; bri++) {
+              for (var cdi = 0; cdi < crossDists.length; cdi++) {
+                seqCands.push({ pts: [tssDestOffset(baseRoots[bri][0], baseRoots[bri][1], (oppBrg + 90) % 360, crossDists[cdi])], label: "TSS Rule 10 Crossing" });
+                seqCands.push({ pts: [tssDestOffset(baseRoots[bri][0], baseRoots[bri][1], (oppBrg + 270) % 360, crossDists[cdi])], label: "TSS Rule 10 Crossing" });
+              }
+            }
+          }
+        }
+
+        var bestSeq = null, bestSeqScore = Infinity;
+        for (var sci = 0; sci < seqCands.length; sci++) {
+          var candObj = seqCands[sci], cPts = candObj.pts;
+          var cleanPts = [];
+          for (var cpi = 0; cpi < cPts.length; cpi++) {
+            var cp = cPts[cpi];
+            if (!isSafeTssWaterPoint(cp[0], cp[1]) || tssPointInAnySepZone(cp[0], cp[1])) { cleanPts = null; break; }
+            if (calculateHaversineDistanceNM(rA.lat, rA.lon, cp[0], cp[1]) < 0.45) continue;
+            if (calculateHaversineDistanceNM(cp[0], cp[1], rB.lat, rB.lon) < 0.45) continue;
+            if (cleanPts.length && calculateHaversineDistanceNM(cleanPts[cleanPts.length - 1][0], cleanPts[cleanPts.length - 1][1], cp[0], cp[1]) < 0.45) continue;
+            cleanPts.push(cp);
+          }
+          if (!cleanPts || !cleanPts.length) continue;
+
+          var fullPath = [[rA.lat, rA.lon]].concat(cleanPts).concat([[rB.lat, rB.lon]]);
+          var sumD = 0, landBad = false, seqBad = 0, seqPen = 0;
+          for (var fi2 = 0; fi2 < fullPath.length - 1; fi2++) {
+            var fp0 = fullPath[fi2], fp1 = fullPath[fi2 + 1];
+            var fSegD = calculateHaversineDistanceNM(fp0[0], fp0[1], fp1[0], fp1[1]);
+            sumD += fSegD;
+            if (!isSafeTssLeg(fp0[0], fp0[1], fp1[0], fp1[1])) { landBad = true; break; }
+            var fTa = calibratedTssLegAnalysis(fp0[0], fp0[1], fp1[0], fp1[1]);
+            seqBad += tssEvalLegViolation(fTa);
+            seqPen += fTa.penalty;
+          }
+          if (landBad) continue;
+          if (sumD > Math.max(rLen * 1.85, rLen + 14)) continue;
+          if (seqBad >= bad0) continue;
+          if (seqBad > 0 && seqPen >= ta0.penalty - 250) continue;
+
+          var detourNm = Math.max(0, sumD - rLen);
+          var seqScore = seqBad * 5000 + seqPen + detourNm * 18;
+          if (seqScore < bestSeqScore) {
+            bestSeqScore = seqScore;
+            bestSeq = { pts: cleanPts, label: candObj.label };
+          }
+        }
+
+        if (bestSeq) {
+          anyRep = true;
+          for (var bsi = 0; bsi < bestSeq.pts.length; bsi++) {
+            repOut.push(makeTssWaypoint(rA, bestSeq.pts[bsi][0], bestSeq.pts[bsi][1], bestSeq.label, true));
+          }
+        }
+        repOut.push(rB);
+      }
+      out = repOut;
+      if (!anyRep) break;
+    }
+
+    for (var j = 1; j < out.length - 1; j++) {
+      var curW = out[j];
+      if (curW._pinned || curW._tssAligned) continue;
+      var pW = out[j - 1], nW = out[j + 1];
+      if (!pW._tssAligned && !nW._tssAligned) continue;
+      var dDirect = calculateHaversineDistanceNM(pW.lat, pW.lon, nW.lat, nW.lon);
+      if (dDirect > 45) continue;
+      var b1 = calculateInitialBearingDeg(pW.lat, pW.lon, curW.lat, curW.lon);
+      var b2 = calculateInitialBearingDeg(curW.lat, curW.lon, nW.lat, nW.lon);
+      if (setrouteTurnAngleDeg(b1, b2) > 28 &&
+          isSafeTssLeg(pW.lat, pW.lon, nW.lat, nW.lon) &&
+          !tssSegmentCrossesBarrier(pW.lat, pW.lon, nW.lat, nW.lon)) {
+        out.splice(j, 1); j--;
+      }
+    }
+
+    for (var fi = 0; fi < out.length; fi++) {
+      delete out[fi]._pinned;
+      delete out[fi]._tssAligned;
+      out[fi].wptNo = ("00" + (fi + 1)).slice(-3);
+      out[fi].id = fi + 1;
+    }
+    return out;
+  }
+  window.setrouteAlignWaypointsToTssLanes = alignWaypointsToTssLanes;
+
   var _origGenerateAlgorithmicMaritimeRoute = typeof window.generateAlgorithmicMaritimeRoute === "function"
     ? window.generateAlgorithmicMaritimeRoute
     : null;
 
   if (_origGenerateAlgorithmicMaritimeRoute) {
     window.generateAlgorithmicMaritimeRoute = async function (pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, options) {
+      await ensureTssBrainReady();
       var reqDepth = resolveCalMinDepthM(options);
       var hadPrevDepth = reqDepth > 0;
       var prevMinDepth = window.SETROUTE_MIN_DEPTH_M;
-      if (hadPrevDepth) {
-        window.SETROUTE_MIN_DEPTH_M = reqDepth;
-      }
+      if (hadPrevDepth) window.SETROUTE_MIN_DEPTH_M = reqDepth;
       try {
         var route = await _origGenerateAlgorithmicMaritimeRoute(pOrig, pDest, origCoords, destCoords, speed, xtd, sailMode, options);
         if (route && Array.isArray(route.waypoints) && route.waypoints.length >= 2) {
-          route.waypoints = cleanWaypointBacktracks(route.waypoints);
-          // Sync route name with actual nodePath so title never contradicts geography
           var np = (route.metadata && route.metadata.coreA && route.metadata.coreA.nodePath) || [];
+          route.waypoints = recoverSkippedApproachHubs(route.waypoints, np, speed, xtd, sailMode);
+          route.waypoints = alignWaypointsToTssLanes(route.waypoints, options);
+          route.waypoints = cleanWaypointBacktracks(route.waypoints);
           var hasSuez = np.indexOf("SUEZ_CANAL_MID") !== -1 || np.indexOf("PORT_SAID_APP") !== -1;
           var hasCape = np.indexOf("CAPE_AGULHAS") !== -1 || np.indexOf("CAPE_GOOD_HOPE") !== -1;
           var hasPanama = np.indexOf("PANAMA_BALBOA") !== -1 || np.indexOf("PANAMA_COLON") !== -1;
           var hasMalaccaNpac = (np.indexOf("MALACCA_MID") !== -1 || np.indexOf("SINGAPORE_MAIN") !== -1) &&
                                (np.indexOf("NPAC_GC_MID") !== -1 || np.indexOf("NPAC_GC_WEST") !== -1);
-          if (hasSuez) {
-            route.name = pOrig.name + " to " + pDest.name + " (Via Suez Canal)";
-          } else if (hasPanama) {
-            route.name = pOrig.name + " to " + pDest.name + " (Via Panama Canal)";
-          } else if (hasMalaccaNpac) {
-            route.name = pOrig.name + " to " + pDest.name + " (Via Malacca & North Pacific)";
-          } else if (hasCape) {
-            route.name = pOrig.name + " to " + pDest.name + " (Via Cape of Good Hope)";
-          }
+          if (hasSuez) route.name = pOrig.name + " to " + pDest.name + " (Via Suez Canal)";
+          else if (hasPanama) route.name = pOrig.name + " to " + pDest.name + " (Via Panama Canal)";
+          else if (hasMalaccaNpac) route.name = pOrig.name + " to " + pDest.name + " (Via Malacca & North Pacific)";
+          else if (hasCape) route.name = pOrig.name + " to " + pDest.name + " (Via Cape of Good Hope)";
           route.routeName = route.name;
         }
         return route;
       } finally {
-        if (hadPrevDepth) {
-          window.SETROUTE_MIN_DEPTH_M = prevMinDepth;
-        }
+        if (hadPrevDepth) window.SETROUTE_MIN_DEPTH_M = prevMinDepth;
       }
     };
   }
