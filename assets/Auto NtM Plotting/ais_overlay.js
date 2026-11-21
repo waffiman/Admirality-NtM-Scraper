@@ -40,25 +40,51 @@
     { minLat: 50, minLon: 0, maxLat: 62, maxLon: 22 }       // North Sea (Baltic gate — last)
   ];
 
+  /** Same zoom as own-ship hull outline (OWN_SHIP_HULL_ZOOM). */
+  const AIS_HULL_ZOOM = 14;
+
+  /** Shared ECDIS hull path (clipped bow, flat stern) — bow toward -Y. */
+  function aisHullSvgHtml(rotDeg, fillCol) {
+    const rot = ((Number(rotDeg) % 360) + 360) % 360;
+    const fill = fillCol || "#94a3b8";
+    return (
+      '<div class="ais-hull-wrap" style="transform:rotate(' +
+      rot +
+      'deg);transform-origin:24px 50px;width:48px;height:72px;">' +
+      '<svg class="ais-hull-svg" width="48" height="72" viewBox="0 0 48 72" aria-hidden="true">' +
+      '<path d="M22 6 L26 6 L33 20 L33 62 L15 62 L15 20 Z" fill="' +
+      fill +
+      '" fill-opacity="0.18" stroke="#0f172a" stroke-width="1.65" stroke-linejoin="miter"/>' +
+      '<line x1="24" y1="8" x2="24" y2="60" stroke="#0f172a" stroke-width="1.15"/>' +
+      '<line x1="14" y1="50" x2="34" y2="50" stroke="#0f172a" stroke-width="1.25" stroke-linecap="round"/>' +
+      '<circle cx="24" cy="50" r="2.35" fill="none" stroke="#0f172a" stroke-width="1.35"/>' +
+      '<circle cx="24" cy="50" r="0.9" fill="#0f172a"/>' +
+      "</svg></div>"
+    );
+  }
+
   /** Zoom LOD: fewer / coarser markers far out; denser as user zooms in. */
   function aisLodForZoom(z) {
     const zoom = Number(z) || 2;
     if (zoom <= 2) {
-      return { maxMarkers: 320, cellDeg: 10, maxPerZone: 28, maxZones: 14, digi: false, triangles: false, radius: 2 };
+      return { maxMarkers: 320, cellDeg: 10, maxPerZone: 28, maxZones: 14, digi: false, triangles: false, hulls: false, radius: 2 };
     }
     if (zoom <= 3) {
-      return { maxMarkers: 520, cellDeg: 6, maxPerZone: 45, maxZones: 14, digi: false, triangles: false, radius: 2.2 };
+      return { maxMarkers: 520, cellDeg: 6, maxPerZone: 45, maxZones: 14, digi: false, triangles: false, hulls: false, radius: 2.2 };
     }
     if (zoom <= 5) {
-      return { maxMarkers: 1100, cellDeg: 3, maxPerZone: 120, maxZones: 12, digi: false, triangles: false, radius: 2.5 };
+      return { maxMarkers: 1100, cellDeg: 3, maxPerZone: 120, maxZones: 12, digi: false, triangles: false, hulls: false, radius: 2.5 };
     }
     if (zoom <= 7) {
-      return { maxMarkers: 2200, cellDeg: 1.4, maxPerZone: 400, maxZones: 10, digi: true, triangles: false, radius: 2.8 };
+      return { maxMarkers: 2200, cellDeg: 1.4, maxPerZone: 400, maxZones: 10, digi: true, triangles: false, hulls: false, radius: 2.8 };
     }
     if (zoom <= 10) {
-      return { maxMarkers: 4500, cellDeg: 0.6, maxPerZone: 2000, maxZones: 8, digi: true, triangles: true, radius: 3 };
+      return { maxMarkers: 4500, cellDeg: 0.6, maxPerZone: 2000, maxZones: 8, digi: true, triangles: true, hulls: false, radius: 3 };
     }
-    return { maxMarkers: ABS_MARKER_CAP, cellDeg: 0.25, maxPerZone: 8000, maxZones: 6, digi: true, triangles: true, radius: 3.2 };
+    if (zoom < AIS_HULL_ZOOM) {
+      return { maxMarkers: ABS_MARKER_CAP, cellDeg: 0.25, maxPerZone: 8000, maxZones: 6, digi: true, triangles: true, hulls: false, radius: 3.2 };
+    }
+    return { maxMarkers: ABS_MARKER_CAP, cellDeg: 0.25, maxPerZone: 8000, maxZones: 6, digi: true, triangles: true, hulls: true, radius: 3.2 };
   }
 
   /**
@@ -351,7 +377,18 @@
       const lon = lonOnVisibleCopy(lonRaw, map);
       const col = shipColor(v.navStat, v.sog);
       let m;
-      if (!useTriangles) {
+      const heading = Number(v.heading);
+      const hasHdg = Number.isFinite(heading) && heading >= 0 && heading < 360;
+      if (lod.hulls && hasHdg) {
+        // Close zoom + true HDG: same clipped-bow hull outline as own ship (nose = HDG)
+        const icon = L.divIcon({
+          className: "ais-target-icon ais-target-hull",
+          html: aisHullSvgHtml(heading, col),
+          iconSize: [48, 72],
+          iconAnchor: [24, 50]
+        });
+        m = L.marker([lat, lon], { icon, keyboard: false });
+      } else if (!useTriangles) {
         m = L.circleMarker([lat, lon], {
           radius: lod.radius,
           color: "#0f172a",
@@ -363,13 +400,11 @@
           keyboard: false
         });
       } else {
-        const heading = Number(v.heading);
-        const rot =
-          Number.isFinite(heading) && heading < 360
-            ? heading
-            : Number(v.cog) < 360
-              ? Number(v.cog)
-              : 0;
+        const rot = hasHdg
+          ? heading
+          : Number(v.cog) < 360
+            ? Number(v.cog)
+            : 0;
         const icon = L.divIcon({
           className: "ais-target-icon",
           html:

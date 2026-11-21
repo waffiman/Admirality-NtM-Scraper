@@ -225,10 +225,13 @@
 
 
 
-  <link rel="icon" href="assets/SetSail LOGOS/setsail_logo_square.png" type="image/png" sizes="any" />
-  <link rel="icon" href="assets/SetSail LOGOS/setsail_logo_square.webp" type="image/webp" />
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/SetSail LOGOS/setsail_logo_square.png" />
-  <link rel="shortcut icon" href="assets/SetSail LOGOS/setsail_logo_square.png" type="image/png" />
+  <!-- Favicons: root paths without spaces (Google needs ≥48×48; "SetSail LOGOS" spaces broke SERP icons) -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon-180.png" />
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
 
 
@@ -10000,7 +10003,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.239" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.249" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
   <style>
@@ -14830,7 +14833,7 @@ select option {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.239" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.239';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.249" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.249';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -14852,7 +14855,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.239" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.249" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -22764,26 +22767,26 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.239"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.239" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.239"></script>
-  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.239"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.249"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.249" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.249"></script>
+  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.249"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.239",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.249",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.240"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.248"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.239"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.249"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.249"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.249"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.239"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.249"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -22856,15 +22859,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.248"></script>
-<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.247"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.249"></script>
+<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.249"></script>
 <script>if (typeof window.__setsailToggleNtmSidebar === 'function') { window.toggleNtmSidebar = window.__setsailToggleNtmSidebar; }</script>
-<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.245"></script>
-<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.246"></script>
-<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.241"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.239"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.239"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.239"></script>
+<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.249"></script>
+<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.249"></script>
+<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.249"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.249"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.249"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.249"></script>
 
 
 

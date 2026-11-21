@@ -14734,37 +14734,27 @@ function getOwnShipHullIcon(headingDeg, showVector) {
 
   const rot = has ? ((Number(headingDeg) % 360) + 360) % 360 : 0;
 
-  // Local coords: bow toward -Y (up). Hull centered near (24, 34); beam athwartships through that center.
+  // Local coords: bow toward -Y (up). Clipped bow tip + flat stern; CCRP near stern (24,50).
 
-  const beamSvg = `<line class="own-ship-beam" x1="8" y1="34" x2="40" y2="34" stroke="#0f172a" stroke-width="1.55" stroke-linecap="round"/>`;
+  const beamSvg = `<line class="own-ship-beam" x1="14" y1="50" x2="34" y2="50" stroke="#0f172a" stroke-width="1.35" stroke-linecap="round"/>`;
 
   const html = `
 
-    <div class="own-ship-wrap own-ship-wrap--hull" style="transform:rotate(${rot}deg);transform-origin:24px 34px;">
+    <div class="own-ship-wrap own-ship-wrap--hull" style="transform:rotate(${rot}deg);transform-origin:24px 50px;">
 
-      <svg class="own-ship-svg" width="48" height="64" viewBox="0 0 48 64" aria-hidden="true">
+      <svg class="own-ship-svg" width="48" height="72" viewBox="0 0 48 72" aria-hidden="true">
+
+        <path d="M22 6 L26 6 L33 20 L33 62 L15 62 L15 20 Z"
+
+          fill="#f4efe3" fill-opacity="0.22" stroke="#0f172a" stroke-width="1.65" stroke-linejoin="miter"/>
+
+        <line x1="24" y1="8" x2="24" y2="60" stroke="#0f172a" stroke-width="1.15"/>
 
         ${beamSvg}
 
-        <path d="M24 14
+        <circle cx="24" cy="50" r="2.35" fill="none" stroke="#0f172a" stroke-width="1.35"/>
 
-          C28.5 14 31.5 18 31.5 24
-
-          L31.5 46
-
-          C31.5 49.5 29 51.5 24 51.5
-
-          C19 51.5 16.5 49.5 16.5 46
-
-          L16.5 24
-
-          C16.5 18 19.5 14 24 14 Z"
-
-          fill="#f4efe3" fill-opacity="0.94" stroke="#0f172a" stroke-width="2.1" stroke-linejoin="round"/>
-
-        <line x1="17.2" y1="44" x2="30.8" y2="44" stroke="#64748b" stroke-width="1.15"/>
-
-        <line x1="24" y1="16" x2="24" y2="50" stroke="#94a3b8" stroke-width="1"/>
+        <circle cx="24" cy="50" r="0.9" fill="#0f172a"/>
 
       </svg>
 
@@ -14776,9 +14766,9 @@ function getOwnShipHullIcon(headingDeg, showVector) {
 
     className: "own-ship-marker",
 
-    iconSize: [48, 64],
+    iconSize: [48, 72],
 
-    iconAnchor: [24, 34]
+    iconAnchor: [24, 50]
 
   });
 
