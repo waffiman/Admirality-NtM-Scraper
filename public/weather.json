@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "0200 UTC",
-  "lastSyncUtc": "2026-11-22T02:51:43.264032+00:00",
+  "synopticCycle": "1000 UTC",
+  "lastSyncUtc": "2026-11-22T10:47:52.544182+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,20 +9,20 @@
       "shortName": "Xavier",
       "category": "Tropical Storm (JTWC)",
       "center": [
-        -11.9,
-        -166.8
+        -11.6,
+        -167.6
       ],
-      "centralPressure": 997,
-      "maxWinds": 45,
-      "gusts": 56,
-      "movement": "W at 6 kts",
+      "centralPressure": 998,
+      "maxWinds": 40,
+      "gusts": 50,
+      "movement": "W at 5 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -12.0,
-            -168.0
+            -11.8,
+            -168.7
           ],
           "winds": 40,
           "radiusNm": 56
@@ -30,17 +30,17 @@
         {
           "tau": 24,
           "coords": [
-            -12.3,
-            -168.9
+            -12.0,
+            -169.5
           ],
-          "winds": 40,
+          "winds": 35,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            -12.5,
-            -169.7
+            -12.0,
+            -170.3
           ],
           "winds": 35,
           "radiusNm": 90
@@ -48,8 +48,8 @@
         {
           "tau": 48,
           "coords": [
-            -12.4,
-            -170.6
+            -11.7,
+            -171.4
           ],
           "winds": 30,
           "radiusNm": 107
@@ -57,11 +57,73 @@
         {
           "tau": 60,
           "coords": [
-            -11.9,
-            -171.9
+            -11.1,
+            -172.9
           ],
           "winds": 30,
           "radiusNm": 124
+        }
+      ]
+    },
+    {
+      "id": "SH982026",
+      "name": "Invest 98S",
+      "shortName": "98S",
+      "category": "Tropical Disturbance (Active Invest)",
+      "center": [
+        -9.1,
+        165.1
+      ],
+      "centralPressure": 1008,
+      "maxWinds": 25,
+      "gusts": 32,
+      "movement": "ESE at 4 kts",
+      "dangerRadiusNm": 65,
+      "forecastTrack": [
+        {
+          "tau": 12,
+          "coords": [
+            -9.3,
+            165.8
+          ],
+          "winds": 30,
+          "radiusNm": 45
+        },
+        {
+          "tau": 24,
+          "coords": [
+            -9.4,
+            166.5
+          ],
+          "winds": 35,
+          "radiusNm": 60
+        },
+        {
+          "tau": 36,
+          "coords": [
+            -9.5,
+            167.1
+          ],
+          "winds": 40,
+          "radiusNm": 75
+        },
+        {
+          "tau": 48,
+          "coords": [
+            -9.6,
+            167.9
+          ],
+          "winds": 45,
+          "radiusNm": 90
+        },
+        {
+          "tau": 60,
+          "coords": [
+            -9.4,
+            168.6
+          ],
+          "winds": 50,
+          "radiusNm": 105
         }
       ]
     },
@@ -138,8 +200,8 @@
       ],
       "radiusNm": 240,
       "waveHeight": 3.1,
-      "swellPeriod": 9,
-      "swellDir": "WNW"
+      "swellPeriod": 8,
+      "swellDir": "WSW"
     },
     {
       "id": "W2",
@@ -149,19 +211,19 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 2.7,
-      "swellPeriod": 8,
-      "swellDir": "WNW"
+      "waveHeight": 3.1,
+      "swellPeriod": 10,
+      "swellDir": "W"
     },
     {
       "id": "WS1",
       "name": "Xavier Cyclonic Wave Field",
       "center": [
-        -11.9,
-        -166.8
+        -11.6,
+        -167.6
       ],
       "radiusNm": 150,
-      "waveHeight": 3.2,
+      "waveHeight": 2.8,
       "swellPeriod": 9,
       "swellDir": "SE"
     }
@@ -169,11 +231,20 @@
   "pressureCenters": [
     {
       "type": "L",
-      "value": 997,
+      "value": 998,
       "name": "Tropical Storm XAVIER Core Low",
       "coords": [
-        -11.9,
-        -166.8
+        -11.6,
+        -167.6
+      ]
+    },
+    {
+      "type": "L",
+      "value": 1008,
+      "name": "Invest 98S Core Low",
+      "coords": [
+        -9.1,
+        165.1
       ]
     },
     {
@@ -216,12 +287,21 @@
   "windVectors": [
     {
       "coords": [
-        -11.6,
-        -166.5
+        -11.3,
+        -167.3
       ],
       "dir": 160,
-      "speed": 45,
-      "label": "45 kts (Xavier)"
+      "speed": 40,
+      "label": "40 kts (Xavier)"
+    },
+    {
+      "coords": [
+        -8.8,
+        165.4
+      ],
+      "dir": 200,
+      "speed": 25,
+      "label": "25 kts (98S)"
     },
     {
       "coords": [
