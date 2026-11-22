@@ -26272,3 +26272,152 @@ body.light-theme .exp-btn-route-primary,
   border-color: rgba(2, 132, 199, 0.4) !important;
   color: #0369a1 !important;
 }
+
+/* v5.254: Unified Weather tile (cursor meteo + forecast timeline) ? visual design only */
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified,
+.ntm-wx-unified {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 0 0 auto;
+  align-self: center;
+  order: -2;
+  height: 30px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  background: linear-gradient(180deg, rgba(17, 34, 62, 0.94) 0%, rgba(8, 15, 36, 0.94) 100%);
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 8px rgba(2, 8, 23, 0.35);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.ntm-wx-unified:has(> #ntmWxCursorTile[hidden]) { display: none !important; }
+.ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) {
+  border-color: rgba(240, 90, 54, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 0 1px rgba(240, 90, 54, 0.12), 0 2px 10px rgba(240, 90, 54, 0.18);
+}
+/* children: strip their own card chrome */
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-cursor-tile,
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  margin: 0 !important;
+  order: 0 !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+}
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-cursor-tile {
+  padding: 0 8px 0 4px !important;
+  gap: 4px !important;
+}
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile {
+  padding: 0 6px 0 10px !important;
+  margin-left: 2px !important;
+  gap: 8px !important;
+  position: relative;
+}
+/* thin divider between the two zones */
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 3px; bottom: 3px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(148, 163, 184, 0.45), transparent);
+}
+/* WX badge: coral brand accent */
+#tab-ntm .ntm-wx-unified .ntm-wx-cursor-badge {
+  color: #ff7a5c;
+  background: rgba(240, 90, 54, 0.14);
+  border: 1px solid rgba(240, 90, 54, 0.5);
+  border-radius: 6px;
+  height: 20px !important;
+  letter-spacing: 0.08em;
+}
+#tab-ntm .ntm-wx-unified .ntm-wx-cursor-badge .wx-badge-spinner {
+  border-color: rgba(240, 90, 54, 0.25);
+  border-top-color: #ff7a5c;
+  border-right-color: #f05a36;
+}
+/* chips: flat, quiet, separated by hairlines */
+#tab-ntm .ntm-wx-unified .wx-chip {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 7px !important;
+  height: 18px !important;
+  position: relative;
+}
+#tab-ntm .ntm-wx-unified .wx-chip + .wx-chip::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 3px; bottom: 3px;
+  width: 1px;
+  background: rgba(148, 163, 184, 0.2);
+}
+#tab-ntm .ntm-wx-unified .ntm-wx-timeline-tile .ntm-wx-tl-rail { background: rgba(148, 163, 184, 0.2); }
+#tab-ntm .ntm-wx-unified .ntm-wx-tl-fill { background: linear-gradient(90deg, #0284c7 0%, #38bdf8 100%); }
+.ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) .ntm-wx-tl-fill {
+  background: linear-gradient(90deg, #f05a36 0%, #ff8a6b 100%);
+}
+.ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) .ntm-wx-tl-thumb-pill {
+  background: linear-gradient(180deg, #f05a36 0%, #d4401f 100%);
+  border-color: #ffb3a0;
+  box-shadow: 0 1px 5px rgba(2, 8, 23, 0.55), 0 0 8px rgba(240, 90, 54, 0.5);
+}
+.ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) .ntm-wx-tl-play:not(.is-playing) {
+  color: #ff7a5c !important;
+  border-color: rgba(240, 90, 54, 0.5) !important;
+  background: rgba(240, 90, 54, 0.14) !important;
+}
+/* light theme (higher specificity than dark base) */
+[data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified,
+body.light-theme #tab-ntm .ntm-toolbar-right .ntm-wx-unified {
+  background: linear-gradient(180deg, #ffffff 0%, #eaf4fb 100%);
+  border-color: rgba(2, 132, 199, 0.32);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
+}
+[data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active),
+body.light-theme #tab-ntm .ntm-toolbar-right .ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) {
+  border-color: rgba(234, 76, 37, 0.6);
+  box-shadow: 0 1px 6px rgba(234, 76, 37, 0.18);
+}
+[data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-cursor-tile,
+[data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile,
+body.light-theme #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-cursor-tile,
+body.light-theme #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+[data-theme="light"] #tab-ntm .ntm-wx-unified .wx-chip { color: #334155; }
+[data-theme="light"] #tab-ntm .ntm-wx-unified .wx-chip b { color: #0f172a; }
+/* light theme */
+[data-theme="light"] .ntm-wx-unified,
+body.light-theme .ntm-wx-unified {
+  background: linear-gradient(180deg, #ffffff 0%, #eaf4fb 100%);
+  border-color: rgba(2, 132, 199, 0.32);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
+}
+[data-theme="light"] .ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) {
+  border-color: rgba(234, 76, 37, 0.6);
+  box-shadow: 0 1px 6px rgba(234, 76, 37, 0.18);
+}
+[data-theme="light"] #tab-ntm .ntm-wx-unified .ntm-wx-cursor-badge {
+  color: #ea4c25;
+  background: rgba(234, 76, 37, 0.1);
+  border-color: rgba(234, 76, 37, 0.45);
+}
+[data-theme="light"] #tab-ntm .ntm-wx-unified .wx-chip + .wx-chip::before { background: rgba(15, 23, 42, 0.14); }
+[data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile::before {
+  background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.25), transparent);
+}
+@media (max-width: 1100px) {
+  .ntm-wx-unified { flex-wrap: wrap; height: auto; max-width: 100%; }
+}
+

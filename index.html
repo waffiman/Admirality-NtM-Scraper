@@ -254,7 +254,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.253" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.254" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -10004,7 +10004,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.253" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.254" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
   <style>
@@ -13999,7 +13999,7 @@ select option {
       background: #f8fafc !important;
     }
 
-    /* v5.253: Redesigned Clean Weather Forecast Timeline with Pill Thumb (+XH) */
+    /* v5.254: Redesigned Clean Weather Forecast Timeline with Pill Thumb (+XH) */
     #tab-ntm .ntm-toolbar-right .ntm-wx-timeline-tile[hidden],
     .ntm-wx-timeline-tile[hidden] {
       display: none !important;
@@ -14217,7 +14217,154 @@ select option {
         width: auto;
       }
     }
-    /* Future Own-Ship Ghost Marker */
+    /* v5.254: Unified Weather tile (cursor meteo + forecast timeline) ? visual design only */
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified,
+.ntm-wx-unified {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 0 0 auto;
+  align-self: center;
+  order: -2;
+  height: 30px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  background: linear-gradient(180deg, rgba(17, 34, 62, 0.94) 0%, rgba(8, 15, 36, 0.94) 100%);
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 8px rgba(2, 8, 23, 0.35);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.ntm-wx-unified:has(> #ntmWxCursorTile[hidden]) { display: none !important; }
+.ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) {
+  border-color: rgba(240, 90, 54, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 0 1px rgba(240, 90, 54, 0.12), 0 2px 10px rgba(240, 90, 54, 0.18);
+}
+/* children: strip their own card chrome */
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-cursor-tile,
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  margin: 0 !important;
+  order: 0 !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+}
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-cursor-tile {
+  padding: 0 8px 0 4px !important;
+  gap: 4px !important;
+}
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile {
+  padding: 0 6px 0 10px !important;
+  margin-left: 2px !important;
+  gap: 8px !important;
+  position: relative;
+}
+/* thin divider between the two zones */
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 3px; bottom: 3px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(148, 163, 184, 0.45), transparent);
+}
+/* WX badge: coral brand accent */
+#tab-ntm .ntm-wx-unified .ntm-wx-cursor-badge {
+  color: #ff7a5c;
+  background: rgba(240, 90, 54, 0.14);
+  border: 1px solid rgba(240, 90, 54, 0.5);
+  border-radius: 6px;
+  height: 20px !important;
+  letter-spacing: 0.08em;
+}
+#tab-ntm .ntm-wx-unified .ntm-wx-cursor-badge .wx-badge-spinner {
+  border-color: rgba(240, 90, 54, 0.25);
+  border-top-color: #ff7a5c;
+  border-right-color: #f05a36;
+}
+/* chips: flat, quiet, separated by hairlines */
+#tab-ntm .ntm-wx-unified .wx-chip {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 7px !important;
+  height: 18px !important;
+  position: relative;
+}
+#tab-ntm .ntm-wx-unified .wx-chip + .wx-chip::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 3px; bottom: 3px;
+  width: 1px;
+  background: rgba(148, 163, 184, 0.2);
+}
+#tab-ntm .ntm-wx-unified .ntm-wx-timeline-tile .ntm-wx-tl-rail { background: rgba(148, 163, 184, 0.2); }
+#tab-ntm .ntm-wx-unified .ntm-wx-tl-fill { background: linear-gradient(90deg, #0284c7 0%, #38bdf8 100%); }
+.ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) .ntm-wx-tl-fill {
+  background: linear-gradient(90deg, #f05a36 0%, #ff8a6b 100%);
+}
+.ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) .ntm-wx-tl-thumb-pill {
+  background: linear-gradient(180deg, #f05a36 0%, #d4401f 100%);
+  border-color: #ffb3a0;
+  box-shadow: 0 1px 5px rgba(2, 8, 23, 0.55), 0 0 8px rgba(240, 90, 54, 0.5);
+}
+.ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) .ntm-wx-tl-play:not(.is-playing) {
+  color: #ff7a5c !important;
+  border-color: rgba(240, 90, 54, 0.5) !important;
+  background: rgba(240, 90, 54, 0.14) !important;
+}
+/* light theme (higher specificity than dark base) */
+[data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified,
+body.light-theme #tab-ntm .ntm-toolbar-right .ntm-wx-unified {
+  background: linear-gradient(180deg, #ffffff 0%, #eaf4fb 100%);
+  border-color: rgba(2, 132, 199, 0.32);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
+}
+[data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active),
+body.light-theme #tab-ntm .ntm-toolbar-right .ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) {
+  border-color: rgba(234, 76, 37, 0.6);
+  box-shadow: 0 1px 6px rgba(234, 76, 37, 0.18);
+}
+[data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-cursor-tile,
+[data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile,
+body.light-theme #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-cursor-tile,
+body.light-theme #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+[data-theme="light"] #tab-ntm .ntm-wx-unified .wx-chip { color: #334155; }
+[data-theme="light"] #tab-ntm .ntm-wx-unified .wx-chip b { color: #0f172a; }
+/* light theme */
+[data-theme="light"] .ntm-wx-unified,
+body.light-theme .ntm-wx-unified {
+  background: linear-gradient(180deg, #ffffff 0%, #eaf4fb 100%);
+  border-color: rgba(2, 132, 199, 0.32);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
+}
+[data-theme="light"] .ntm-wx-unified:has(.ntm-wx-timeline-tile.is-forecast-active) {
+  border-color: rgba(234, 76, 37, 0.6);
+  box-shadow: 0 1px 6px rgba(234, 76, 37, 0.18);
+}
+[data-theme="light"] #tab-ntm .ntm-wx-unified .ntm-wx-cursor-badge {
+  color: #ea4c25;
+  background: rgba(234, 76, 37, 0.1);
+  border-color: rgba(234, 76, 37, 0.45);
+}
+[data-theme="light"] #tab-ntm .ntm-wx-unified .wx-chip + .wx-chip::before { background: rgba(15, 23, 42, 0.14); }
+[data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile::before {
+  background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.25), transparent);
+}
+@media (max-width: 1100px) {
+  .ntm-wx-unified { flex-wrap: wrap; height: auto; max-width: 100%; }
+}
+/* Future Own-Ship Ghost Marker */
     .ss-ghost-vessel-marker {
       background: transparent !important;
       border: none !important;
@@ -14257,7 +14404,7 @@ select option {
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
     }
 
-    /* v5.253: Minimalist Export to ECDIS Modal */
+    /* v5.254: Minimalist Export to ECDIS Modal */
     #ntmExportModal .ntm-export-box {
       max-width: 440px !important;
       padding: 0.95rem 1.05rem !important;
@@ -14519,7 +14666,7 @@ select option {
   </style>
 
   <script>
-    // v5.253 — retired one-shot v5.33 cache wipe+reload (it restarted the boot bar mid-progress).
+    // v5.254 — retired one-shot v5.33 cache wipe+reload (it restarted the boot bar mid-progress).
     (function () {
       try {
         localStorage.setItem('setsail_force_v533', '1');
@@ -15341,7 +15488,7 @@ select option {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.253" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.253';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.254" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.254';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -15363,7 +15510,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.253" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.254" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -16062,6 +16209,19 @@ select option {
           </div>
 
           <div class="ntm-toolbar-right">
+            <!-- Unified Weather tile: cursor meteo + forecast timeline (design only; all IDs unchanged) -->
+            <div class="ntm-wx-unified" id="ntmWxUnifiedTile">
+            <div class="ntm-wx-cursor-tile" id="ntmWxCursorTile" hidden title="Weather at cursor — wind, waves, pressure, SST and ocean current">
+              <span class="ntm-wx-cursor-badge" id="ntmWxCursorBadge"><span class="wx-badge-text">WX</span><span class="wx-badge-spinner" aria-hidden="true"></span></span>
+              <div class="ntm-wx-cursor-body" id="ntmWxCursorBody">
+                <span class="wx-chip" title="Wind"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><path d="M4 8h9a3 3 0 1 0-3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 12h13a3.5 3.5 0 1 1-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 16h7a2.5 2.5 0 1 1-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>—</b></span>
+                <span class="wx-chip" title="Waves Hs"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><path d="M3 14c2.2-2.4 3.8-3.5 6-3.5S13.8 14 16 14s3.8-1.1 5-2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 18c2.2-2.4 3.8-3.5 6-3.5S13.8 18 16 18s3.8-1.1 5-2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/></svg></span><b>—</b></span>
+                <span class="wx-chip" title="Pressure"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 12l3.2-4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="1.35" fill="currentColor"/></svg></span><b>— mb</b></span>
+                <span class="wx-chip" title="Air / SST"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><path d="M10 13.2V6.8a2 2 0 1 1 4 0v6.4a3.2 3.2 0 1 1-4 0z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 15.2v1.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><b>—° / —°</b></span>
+                <span class="wx-chip" title="Ocean current"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><path d="M5 12h11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M13 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 8c1.6 1.2 1.6 2.8 0 4 1.6 1.2 1.6 2.8 0 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/></svg></span><b>—</b></span>
+              </div>
+              <span class="ntm-wx-cursor-meta" id="ntmWxCursorMeta">Move cursor…</span>
+            </div>
             <div class="ntm-wx-timeline-tile" id="ntmWxTimelineTile" hidden title="Weather Forecast Timeline — drag slider to scrub forecast hours ahead">
               <button type="button" class="ntm-wx-tl-play" id="ntmWxTimelinePlayBtn" title="Play / Pause forecast timeline" aria-label="Play forecast">
                 <svg class="wx-tl-ico-play" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7 5 19 12 7 19" fill="currentColor"/></svg>
@@ -16075,16 +16235,6 @@ select option {
                 <input type="range" class="ntm-wx-tl-slider" id="ntmWxTimelineSlider" min="0" max="72" step="1" value="0" aria-label="Weather forecast hours ahead" />
               </div>
             </div>
-            <div class="ntm-wx-cursor-tile" id="ntmWxCursorTile" hidden title="Weather at cursor — wind, waves, pressure, SST and ocean current">
-              <span class="ntm-wx-cursor-badge" id="ntmWxCursorBadge"><span class="wx-badge-text">WX</span><span class="wx-badge-spinner" aria-hidden="true"></span></span>
-              <div class="ntm-wx-cursor-body" id="ntmWxCursorBody">
-                <span class="wx-chip" title="Wind"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><path d="M4 8h9a3 3 0 1 0-3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 12h13a3.5 3.5 0 1 1-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 16h7a2.5 2.5 0 1 1-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>—</b></span>
-                <span class="wx-chip" title="Waves Hs"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><path d="M3 14c2.2-2.4 3.8-3.5 6-3.5S13.8 14 16 14s3.8-1.1 5-2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 18c2.2-2.4 3.8-3.5 6-3.5S13.8 18 16 18s3.8-1.1 5-2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/></svg></span><b>—</b></span>
-                <span class="wx-chip" title="Pressure"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 12l3.2-4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="1.35" fill="currentColor"/></svg></span><b>— mb</b></span>
-                <span class="wx-chip" title="Air / SST"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><path d="M10 13.2V6.8a2 2 0 1 1 4 0v6.4a3.2 3.2 0 1 1-4 0z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 15.2v1.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><b>—° / —°</b></span>
-                <span class="wx-chip" title="Ocean current"><span class="wx-ico" aria-hidden="true"><svg class="wx-ico-svg" viewBox="0 0 24 24"><path d="M5 12h11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M13 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 8c1.6 1.2 1.6 2.8 0 4 1.6 1.2 1.6 2.8 0 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/></svg></span><b>—</b></span>
-              </div>
-              <span class="ntm-wx-cursor-meta" id="ntmWxCursorMeta">Move cursor…</span>
             </div>
 
 
@@ -23278,26 +23428,26 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.253"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.253" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.253"></script>
-  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.253"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.254"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.254" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.254"></script>
+  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.254"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.253",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.254",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.253"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.253"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.253"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.254"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.254"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.254"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.253"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.254"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -23370,15 +23520,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.253"></script>
-<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.253"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.254"></script>
+<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.254"></script>
 <script>if (typeof window.__setsailToggleNtmSidebar === 'function') { window.toggleNtmSidebar = window.__setsailToggleNtmSidebar; }</script>
-<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.253"></script>
-<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.253"></script>
-<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.253"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.253"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.253"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.253"></script>
+<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.254"></script>
+<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.254"></script>
+<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.254"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.254"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.254"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.254"></script>
 
 
 
@@ -24042,7 +24192,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.253.0' && k !== 'setsail-tiles-cache-v5.253.0').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.254.0' && k !== 'setsail-tiles-cache-v5.254.0').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 function showSetSailHardRefreshTip(cacheLabel) {
@@ -24092,17 +24242,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.253', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.254', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.253 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.254 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.253') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.253.0'); }, 1200);
+              if (last && last.indexOf('v5.254') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.254.0'); }, 1200);
               }
             } catch (eTip) {}
           })
