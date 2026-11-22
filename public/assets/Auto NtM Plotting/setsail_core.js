@@ -16526,31 +16526,26 @@ function updateExportModalCounts() {
   const elPerm = document.getElementById("expCountPerm");
 
   const elSummary = document.getElementById("expSummaryText");
-
-
+  const elChartBadge = document.getElementById("expChartBadge");
+  const elChartSub = document.getElementById("expChartSubtitle");
 
   if (elNavtex) elNavtex.textContent = `${countNavtex}`;
-
   if (elT) elT.textContent = `${countT}`;
-
   if (elP) elP.textContent = `${countP}`;
-
   if (elPerm) elPerm.textContent = `${countPerm}`;
 
-
-
   const selected = getExportSelectedNotices();
-
   let totalPts = 0;
-
   selected.forEach(s => totalPts += (s.coords ? s.coords.length : 0));
 
-
-
+  if (elChartBadge) {
+    elChartBadge.textContent = `${selected.length} selected`;
+  }
+  if (elChartSub) {
+    elChartSub.textContent = `${selected.length} warnings (${totalPts} points) ready for ECDIS export`;
+  }
   if (elSummary) {
-
     elSummary.textContent = `Will export: ${selected.length} notices (${totalPts} points) | UTC: ${getExportUtcTimestamp()}`;
-
   }
 
 }
@@ -31645,9 +31640,11 @@ function calculateHaversineDistanceNM(lat1, lon1, lat2, lon2) {
 
 
 
-function exportSetRouteGeoJson() {
+function exportSetRouteGeoJson(route) {
 
-  if (!activeRouteData || !activeRouteData.waypoints) {
+  const targetRoute = route || activeRouteData;
+
+  if (!targetRoute || !targetRoute.waypoints || targetRoute.waypoints.length === 0) {
 
     showSetSailToast("No generated passage plan available to export.", "warning");
 
@@ -31657,7 +31654,7 @@ function exportSetRouteGeoJson() {
 
 
 
-  const lineCoords = activeRouteData.waypoints.map(w => [w.lon, w.lat]);
+  const lineCoords = targetRoute.waypoints.map(w => [w.lon, w.lat]);
 
   const features = [
 
@@ -31671,11 +31668,11 @@ function exportSetRouteGeoJson() {
 
         layer: "My_Route_Track",
 
-        routeName: activeRouteData.name,
+        routeName: targetRoute.name,
 
-        distanceNM: activeRouteData.totalDistanceNM,
+        distanceNM: targetRoute.totalDistanceNM,
 
-        steamingDays: activeRouteData.steamingDays,
+        steamingDays: targetRoute.steamingDays,
 
         generator: "SetRoute AI"
 
@@ -31687,7 +31684,7 @@ function exportSetRouteGeoJson() {
 
 
 
-  activeRouteData.waypoints.forEach(wp => {
+  targetRoute.waypoints.forEach(wp => {
 
     features.push({
 
@@ -31733,7 +31730,7 @@ function exportSetRouteGeoJson() {
 
     metadata: {
 
-      routeName: activeRouteData.name,
+      routeName: targetRoute.name,
 
       exportedAtUtc: new Date().toISOString(),
 
@@ -31747,7 +31744,8 @@ function exportSetRouteGeoJson() {
 
 
 
-  const fname = `SetRoute_Passage_Plan_${getExportUtcTimestamp()}.geojson`;
+  const routeClean = String(targetRoute.name || "SetRoute_Passage_Plan").replace(/[^a-zA-Z0-9_\- ]/g, "").trim().replace(/\s+/g, "_") || "SetRoute_Passage_Plan";
+  const fname = `${routeClean}_${getExportUtcTimestamp()}.geojson`;
 
   downloadTextFile(JSON.stringify(geoJson, null, 2), fname, "application/geo+json");
 
@@ -33895,272 +33893,298 @@ function exportUserChartCsv() {
 
 
 
-function openNavDataExportModal() {
+function getExportableRoutesList() {
+  const routes = [];
+  const seenIds = new Set();
+  const drActiveId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : "";
 
-  const modal = document.getElementById("ntmExportModal");
+  const pushRoute = (r, isLiveActive) => {
+    if (!r || !Array.isArray(r.waypoints) || r.waypoints.length === 0) return;
+    const key = String(r.id || r.name || ("route_" + routes.length)).trim();
+    if (!key || seenIds.has(key)) return;
+    seenIds.add(key);
+    routes.push({
+      key,
+      route: r,
+      isCurrent: Boolean(drActiveId && (r.id === drActiveId || r.name === drActiveId)),
+      isLiveActive: Boolean(isLiveActive)
+    });
+  };
 
-  if (!modal) return;
-
-
-
-  const hasRoute = Boolean(activeRouteData && activeRouteData.waypoints && activeRouteData.waypoints.length > 0);
-
-  const routeBadge = document.getElementById("expRouteBadge");
-
-  const routeSub = document.getElementById("expRouteSubtitle");
-
-  const btnRtz = document.getElementById("expBtnRtz");
-
-  const btnRouteCsv = document.getElementById("expBtnRouteCsv");
-
-  const btnRouteGeo = document.getElementById("expBtnRouteGeoJson");
-
-
-
-  if (routeBadge) {
-
-    routeBadge.textContent = hasRoute ? `${activeRouteData.waypoints.length} WPTs Active` : "No Active Route";
-
-    routeBadge.style.color = hasRoute ? "#38bdf8" : "#94a3b8";
-
-    routeBadge.style.borderColor = hasRoute ? "rgba(56, 189, 248, 0.4)" : "rgba(255, 255, 255, 0.1)";
-
+  if (typeof activeRouteData !== "undefined" && activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
+    pushRoute(activeRouteData, true);
   }
-
-  if (routeSub) {
-
-    routeSub.textContent = hasRoute 
-
-      ? `Passage: "${activeRouteData.name}" (${activeRouteData.totalDistanceNM || 0} NM)`
-
-      : "Plot or generate a passage route in SetRoute to export route files.";
-
+  if (typeof getSavedRoutesLibrary === "function") {
+    const lib = getSavedRoutesLibrary();
+    if (Array.isArray(lib)) {
+      lib.forEach((r) => pushRoute(r, false));
+    }
   }
-
-  [btnRtz, btnRouteCsv, btnRouteGeo].forEach(btn => {
-
-    if (btn) btn.disabled = !hasRoute;
-
-  });
-
-
-
-  const chartSub = document.getElementById("expChartSubtitle");
-
-  const ntmCnt = typeof NTM_STORE !== "undefined" ? NTM_STORE.filter(n => !n.isCancelled).length : 0;
-
-  const portCnt = typeof PORT_DEPTHS_DB !== "undefined" ? PORT_DEPTHS_DB.length : 0;
-
-  if (chartSub) {
-
-    chartSub.textContent = `All chart objects: ${ntmCnt} NtM notices & ${portCnt} World Ports bathymetry`;
-
-  }
-
-
-
-  if (typeof updateExportModalCounts === "function") {
-
-    updateExportModalCounts();
-
-  }
-
-
-
-  modal.classList.add("open");
-
+  return routes;
 }
 
+function getSelectedExportRoute() {
+  const sel = document.getElementById("expRouteSelect");
+  const list = getExportableRoutesList();
+  if (!list.length) return null;
+  const val = sel ? String(sel.value || "").trim() : "";
+  if (val) {
+    const found = list.find((item) => item.key === val);
+    if (found && found.route) return found.route;
+  }
+  return list[0].route;
+}
 
-
-function initNavDataExportListeners() {
-
+function syncExportRouteCardState() {
+  const routeBadge = document.getElementById("expRouteBadge");
+  const routeSub = document.getElementById("expRouteSubtitle");
   const btnRtz = document.getElementById("expBtnRtz");
-
   const btnRouteCsv = document.getElementById("expBtnRouteCsv");
-
   const btnRouteGeo = document.getElementById("expBtnRouteGeoJson");
 
+  const chosen = getSelectedExportRoute();
+  const hasRoute = Boolean(chosen && Array.isArray(chosen.waypoints) && chosen.waypoints.length > 0);
+  const wptCount = hasRoute ? chosen.waypoints.length : 0;
+  let distNm = hasRoute ? Number(chosen.totalDistanceNM) : 0;
+  if (hasRoute && (!Number.isFinite(distNm) || distNm <= 0) && typeof setrouteRouteLegLengths === "function") {
+    const wps = typeof setrouteNormalizeRouteWps === "function" ? setrouteNormalizeRouteWps(chosen) : chosen.waypoints;
+    distNm = Math.round(setrouteRouteLegLengths(wps).total || 0);
+  }
+
+  if (routeBadge) {
+    routeBadge.textContent = hasRoute ? `${wptCount} WPTs` : "No Route";
+    routeBadge.style.color = hasRoute ? "#38bdf8" : "#94a3b8";
+    routeBadge.style.borderColor = hasRoute ? "rgba(56, 189, 248, 0.4)" : "rgba(255, 255, 255, 0.1)";
+  }
+  if (routeSub) {
+    routeSub.textContent = hasRoute
+      ? `${chosen.name || "Passage Route"} · ${distNm || 0} NM`
+      : "Create or upload a route in My Route to export";
+  }
+  [btnRtz, btnRouteCsv, btnRouteGeo].forEach((btn) => {
+    if (btn) btn.disabled = !hasRoute;
+  });
+}
+
+function openNavDataExportModal() {
+  const modal = document.getElementById("ntmExportModal");
+  if (!modal) return;
+
+  const sel = document.getElementById("expRouteSelect");
+  const list = getExportableRoutesList();
+  if (sel) {
+    const prevVal = sel.value;
+    sel.innerHTML = "";
+    if (!list.length) {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "No saved routes available";
+      sel.appendChild(opt);
+      sel.disabled = true;
+    } else {
+      sel.disabled = false;
+      let defaultKey = list[0].key;
+      const curItem = list.find((it) => it.isCurrent) || list.find((it) => it.isLiveActive);
+      if (curItem) defaultKey = curItem.key;
+      if (prevVal && list.some((it) => it.key === prevVal)) defaultKey = prevVal;
+
+      list.forEach((it) => {
+        const opt = document.createElement("option");
+        opt.value = it.key;
+        const wptCnt = Array.isArray(it.route.waypoints) ? it.route.waypoints.length : 0;
+        const tag = it.isCurrent ? " [Current]" : "";
+        opt.textContent = `${it.route.name || "Passage Route"}${tag} (${wptCnt} WPTs)`;
+        sel.appendChild(opt);
+      });
+      sel.value = defaultKey;
+    }
+  }
+
+  syncExportRouteCardState();
+
+  if (typeof updateExportModalCounts === "function") {
+    updateExportModalCounts();
+  }
+
+  modal.classList.add("open");
+}
+
+function initNavDataExportListeners() {
+  const btnRtz = document.getElementById("expBtnRtz");
+  const btnRouteCsv = document.getElementById("expBtnRouteCsv");
+  const btnRouteGeo = document.getElementById("expBtnRouteGeoJson");
+  const routeSelect = document.getElementById("expRouteSelect");
+  const formatSelect = document.getElementById("expUserChartFormatSelect");
+  const btnDownloadUserChart = document.getElementById("expBtnDownloadUserChart");
+  const openFilterLink = document.getElementById("expOpenFilterPanelLink");
+
   const expBtnFuruno = document.getElementById("expBtnFuruno");
-
   const expBtnJrcUch = document.getElementById("expBtnJrcUch");
-
   const expBtnJrc = document.getElementById("expBtnJrc");
-
   const expBtnTransas = document.getElementById("expBtnTransas");
-
   const expBtnSperry = document.getElementById("expBtnSperry");
-
   const expBtnSam = document.getElementById("expBtnSam");
-
   const expBtnPdf = document.getElementById("expBtnPdf");
-
   const expBtnGeo = document.getElementById("expBtnGeoJson");
-
   const expBtnCsv = document.getElementById("expBtnCsv");
-
   const modal = document.getElementById("ntmExportModal");
 
+  if (routeSelect) {
+    routeSelect.addEventListener("change", () => {
+      syncExportRouteCardState();
+    });
+  }
 
+  ["expChkT", "expChkP", "expChkPerm", "expChkNavtex"].forEach((id) => {
+    const chk = document.getElementById(id);
+    if (chk) {
+      chk.addEventListener("change", () => {
+        if (typeof updateExportModalCounts === "function") updateExportModalCounts();
+      });
+    }
+  });
 
   if (btnRtz) {
-
     btnRtz.addEventListener("click", () => {
-
-      exportRouteToRtz(activeRouteData);
-
+      const targetRoute = getSelectedExportRoute();
+      exportRouteToRtz(targetRoute);
       if (modal) modal.classList.remove("open");
-
     });
-
   }
 
   if (btnRouteCsv) {
-
     btnRouteCsv.addEventListener("click", () => {
-
-      exportRouteToJrcCsv(activeRouteData);
-
+      const targetRoute = getSelectedExportRoute();
+      exportRouteToJrcCsv(targetRoute);
       if (modal) modal.classList.remove("open");
-
     });
-
   }
 
   if (btnRouteGeo) {
-
     btnRouteGeo.addEventListener("click", () => {
-
-      exportSetRouteGeoJson();
-
+      const targetRoute = getSelectedExportRoute();
+      exportSetRouteGeoJson(targetRoute);
       if (modal) modal.classList.remove("open");
-
     });
-
   }
 
   const runNoticeExport = (fn) => {
-
     const selected = getExportSelectedNotices();
-
     if (selected.length === 0) {
-
-      alert("No notices match the selected export criteria.");
-
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("No notices match the selected checkboxes / active map filters.", "warning");
+      } else {
+        alert("No notices match the selected export criteria.");
+      }
       return;
-
     }
-
     fn(selected);
-
     if (modal) modal.classList.remove("open");
-
   };
 
-  if (expBtnFuruno) {
-
-    expBtnFuruno.addEventListener("click", () => {
-
-      runNoticeExport((selected) => downloadFurunoUserChartXml(selected, `Furuno_UserChart_${getExportUtcTimestamp()}.xml`));
-
+  if (btnDownloadUserChart) {
+    btnDownloadUserChart.addEventListener("click", () => {
+      const fmt = formatSelect ? String(formatSelect.value || "furuno_xml") : "furuno_xml";
+      const ts = getExportUtcTimestamp();
+      if (fmt === "furuno_xml") {
+        runNoticeExport((selected) => downloadFurunoUserChartXml(selected, `Furuno_UserChart_${ts}.xml`));
+      } else if (fmt === "jrc_uch") {
+        runNoticeExport((selected) => downloadJrcUchFile(selected, `NSWARN_${ts}.uch`));
+      } else if (fmt === "jrc_uchm") {
+        runNoticeExport((selected) => {
+          if (typeof window.downloadJrcUchmFile === "function") {
+            window.downloadJrcUchmFile(selected, `Admiralty_NtM_Overlay_${ts}.uchm`);
+          }
+        });
+      } else if (fmt === "transas_aiz") {
+        runNoticeExport((selected) => downloadTransasAizFile(selected, `route_warnings_transas_${ts}.aiz`));
+      } else if (fmt === "sperry_update") {
+        runNoticeExport((selected) => downloadSperryUpdateFile(selected, `NS_NAVAREA_Warnings_${ts}.update`));
+      } else if (fmt === "sam_umo") {
+        runNoticeExport((selected) => downloadSamUserChartFile(selected, `SAM_Chartpilot_Warnings_${ts}.umo`));
+      } else if (fmt === "pdf") {
+        runNoticeExport((selected) => downloadWarningsPdfSummary(selected, `Selected_Warnings_${ts}.pdf`));
+      } else if (fmt === "geojson") {
+        runNoticeExport(() => exportUserChartGeoJson());
+      } else if (fmt === "csv") {
+        runNoticeExport(() => exportUserChartCsv());
+      }
     });
-
   }
 
-  if (expBtnJrcUch) {
-
-    expBtnJrcUch.addEventListener("click", () => {
-
-      runNoticeExport((selected) => downloadJrcUchFile(selected, `NSWARN_${getExportUtcTimestamp()}.uch`));
-
-    });
-
-  }
-
-  if (expBtnJrc) {
-
-    expBtnJrc.addEventListener("click", () => {
-
-      runNoticeExport((selected) => {
-
-        const fname = `Admiralty_NtM_Overlay_${getExportUtcTimestamp()}.uchm`;
-
-        if (typeof window.downloadJrcUchmFile === "function") {
-
-          window.downloadJrcUchmFile(selected, fname);
-
+  if (openFilterLink) {
+    openFilterLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (modal) modal.classList.remove("open");
+      if (typeof window.toggleNtmSidebar === "function") {
+        window.toggleNtmSidebar(true);
+      }
+      setTimeout(() => {
+        if (typeof syncDynamicFilterPopover === "function") syncDynamicFilterPopover();
+        const filterPop = document.getElementById("ntmFilterPopover");
+        const filterBtn = document.getElementById("ntmFilterMenuBtn");
+        if (filterPop) filterPop.classList.add("open");
+        if (filterBtn) {
+          filterBtn.classList.add("active");
+          try { filterBtn.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (_) {}
         }
+      }, 160);
+    });
+  }
 
+  if (expBtnFuruno) {
+    expBtnFuruno.addEventListener("click", () => {
+      runNoticeExport((selected) => downloadFurunoUserChartXml(selected, `Furuno_UserChart_${getExportUtcTimestamp()}.xml`));
+    });
+  }
+  if (expBtnJrcUch) {
+    expBtnJrcUch.addEventListener("click", () => {
+      runNoticeExport((selected) => downloadJrcUchFile(selected, `NSWARN_${getExportUtcTimestamp()}.uch`));
+    });
+  }
+  if (expBtnJrc) {
+    expBtnJrc.addEventListener("click", () => {
+      runNoticeExport((selected) => {
+        const fname = `Admiralty_NtM_Overlay_${getExportUtcTimestamp()}.uchm`;
+        if (typeof window.downloadJrcUchmFile === "function") {
+          window.downloadJrcUchmFile(selected, fname);
+        }
       });
-
     });
-
   }
-
   if (expBtnTransas) {
-
     expBtnTransas.addEventListener("click", () => {
-
       runNoticeExport((selected) => downloadTransasAizFile(selected, `route_warnings_transas_${getExportUtcTimestamp()}.aiz`));
-
     });
-
   }
-
   if (expBtnSperry) {
-
     expBtnSperry.addEventListener("click", () => {
-
       runNoticeExport((selected) => downloadSperryUpdateFile(selected, `NS_NAVAREA_Warnings_${getExportUtcTimestamp()}.update`));
-
     });
-
   }
-
   if (expBtnSam) {
-
     expBtnSam.addEventListener("click", () => {
-
       runNoticeExport((selected) => downloadSamUserChartFile(selected, `SAM_Chartpilot_Warnings_${getExportUtcTimestamp()}.umo`));
-
     });
-
   }
-
   if (expBtnPdf) {
-
     expBtnPdf.addEventListener("click", () => {
-
       runNoticeExport((selected) => downloadWarningsPdfSummary(selected, `Selected_Warnings_${getExportUtcTimestamp()}.pdf`));
-
     });
-
   }
-
   if (expBtnGeo) {
-
     expBtnGeo.addEventListener("click", () => {
-
       exportUserChartGeoJson();
-
       if (modal) modal.classList.remove("open");
-
     });
-
   }
-
   if (expBtnCsv) {
-
     expBtnCsv.addEventListener("click", () => {
-
       exportUserChartCsv();
-
       if (modal) modal.classList.remove("open");
-
     });
-
   }
-
 }
 
 

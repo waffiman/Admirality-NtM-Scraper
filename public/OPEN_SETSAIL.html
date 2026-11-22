@@ -254,7 +254,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.251" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.252" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -10004,7 +10004,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.251" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.252" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
   <style>
@@ -13999,7 +13999,7 @@ select option {
       background: #f8fafc !important;
     }
 
-    /* v5.251: Designer Weather Forecast Timeline & Future Ghost Vessel */
+    /* v5.252: Designer Weather Forecast Timeline & Future Ghost Vessel */
     .ntm-wx-timeline-tile[hidden] {
       display: none !important;
     }
@@ -14274,10 +14274,270 @@ select option {
       pointer-events: none;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
     }
+
+    /* v5.252: Minimalist Export to ECDIS Modal */
+    #ntmExportModal .ntm-export-box {
+      max-width: 440px !important;
+      padding: 0.95rem 1.05rem !important;
+      border-radius: 12px !important;
+    }
+    #ntmExportModal .ntm-exp-header {
+      padding-bottom: 0.65rem !important;
+      margin-bottom: 0.7rem !important;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    }
+    #ntmExportModal .ntm-exp-header-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #ntmExportModal .ntm-exp-header-title h3 {
+      margin: 0;
+      font-size: 0.96rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    #ntmExportModal .ntm-export-choice-card {
+      padding: 10px 12px !important;
+      margin-bottom: 9px !important;
+      border-radius: 9px !important;
+    }
+    #ntmExportModal .ntm-export-card-header {
+      margin-bottom: 8px !important;
+      gap: 8px !important;
+    }
+    #ntmExportModal .ntm-export-card-title {
+      font-size: 0.84rem !important;
+      font-weight: 700 !important;
+    }
+    #ntmExportModal .ntm-export-card-subtitle {
+      font-size: 0.7rem !important;
+      line-height: 1.25 !important;
+    }
+    .ntm-exp-field-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .ntm-exp-field-lbl {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+    .ntm-exp-select {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 31px;
+      padding: 0 26px 0 9px;
+      border-radius: 6px;
+      background-color: rgba(9, 16, 36, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.26);
+      color: #f1f5f9;
+      font-size: 0.75rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .ntm-exp-select:hover,
+    .ntm-exp-select:focus {
+      border-color: rgba(56, 189, 248, 0.55);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.14);
+    }
+    .ntm-exp-select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #ntmExportModal .ntm-exp-route-btns {
+      display: grid !important;
+      grid-template-columns: 1.25fr 0.95fr 0.85fr !important;
+      gap: 6px !important;
+    }
+    #ntmExportModal .ntm-exp-route-btns .exp-btn-pill {
+      height: 30px !important;
+      min-height: 30px !important;
+      padding: 0 8px !important;
+      font-size: 0.72rem !important;
+      display: inline-flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 5px !important;
+      white-space: nowrap !important;
+    }
+    #ntmExportModal .exp-btn-route-primary {
+      background: rgba(56, 189, 248, 0.14) !important;
+      border-color: rgba(56, 189, 248, 0.42) !important;
+      color: #7dd3fc !important;
+    }
+    #ntmExportModal .exp-btn-route-primary:hover:not(:disabled) {
+      background: rgba(56, 189, 248, 0.24) !important;
+      border-color: rgba(56, 189, 248, 0.68) !important;
+      color: #e0f2fe !important;
+    }
+    #ntmExportModal .ntm-exp-ticks-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 6px !important;
+      margin-bottom: 10px !important;
+    }
+    #ntmExportModal .ntm-exp-tick-item {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      gap: 6px !important;
+      height: 30px !important;
+      min-height: 30px !important;
+      padding: 0 8px !important;
+      margin: 0 !important;
+      border-radius: 6px !important;
+      background: rgba(9, 16, 36, 0.65);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      cursor: pointer;
+      user-select: none;
+      box-sizing: border-box !important;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    #ntmExportModal .ntm-exp-tick-item:hover {
+      border-color: rgba(148, 163, 184, 0.36);
+      background: rgba(15, 25, 52, 0.82);
+    }
+    #ntmExportModal .ntm-exp-tick-item input[type="checkbox"] {
+      width: 13px !important;
+      height: 13px !important;
+      margin: 0 !important;
+      accent-color: #38bdf8;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    #ntmExportModal .ntm-exp-tick-item .tick-dot {
+      width: 6px !important;
+      height: 6px !important;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    #ntmExportModal .ntm-exp-tick-item .tick-name {
+      font-size: 0.73rem !important;
+      font-weight: 600 !important;
+      color: #e2e8f0;
+      flex: 1 1 auto;
+      text-align: left !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #ntmExportModal .ntm-exp-tick-item .ntm-export-count-badge {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.65rem !important;
+      font-weight: 700 !important;
+      padding: 1px 5px !important;
+      border-radius: 4px;
+      background: rgba(148, 163, 184, 0.14);
+      color: #cbd5e1;
+      flex-shrink: 0;
+    }
+    .ntm-exp-action-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ntm-exp-download-btn {
+      flex: 0 0 auto;
+      height: 31px;
+      padding: 0 13px !important;
+      font-size: 0.75rem !important;
+      font-weight: 700 !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .ntm-exp-filter-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      padding: 7px 10px;
+      border-radius: 7px;
+      background: rgba(56, 189, 248, 0.07);
+      border: 1px dashed rgba(56, 189, 248, 0.25);
+      font-size: 0.69rem;
+      line-height: 1.38;
+      color: #94a3b8;
+    }
+    .ntm-exp-filter-note b {
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+    .ntm-exp-note-ico {
+      width: 13px;
+      height: 13px;
+      color: #38bdf8;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .ntm-exp-filter-link {
+      background: none;
+      border: none;
+      padding: 0;
+      margin-left: 2px;
+      color: #38bdf8;
+      font-size: 0.69rem;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
+    }
+    .ntm-exp-filter-link:hover {
+      color: #7dd3fc;
+    }
+    body.light-theme .ntm-exp-select,
+    [data-theme="light"] .ntm-exp-select {
+      background-color: #ffffff;
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    body.light-theme .ntm-exp-tick-item,
+    [data-theme="light"] .ntm-exp-tick-item {
+      background: #ffffff;
+      border-color: #cbd5e1;
+    }
+    body.light-theme .ntm-exp-tick-item .tick-name,
+    [data-theme="light"] .ntm-exp-tick-item .tick-name {
+      color: #0f172a;
+    }
+    body.light-theme .ntm-exp-tick-item .ntm-export-count-badge,
+    [data-theme="light"] .ntm-exp-tick-item .ntm-export-count-badge {
+      background: #f1f5f9;
+      color: #334155;
+    }
+    body.light-theme .ntm-exp-filter-note,
+    [data-theme="light"] .ntm-exp-filter-note {
+      background: rgba(2, 132, 199, 0.06);
+      border-color: rgba(2, 132, 199, 0.28);
+      color: #475569;
+    }
+    body.light-theme .ntm-exp-filter-note b,
+    [data-theme="light"] .ntm-exp-filter-note b {
+      color: #0f172a;
+    }
+    body.light-theme .ntm-exp-filter-link,
+    [data-theme="light"] .ntm-exp-filter-link {
+      color: #0284c7;
+    }
+    body.light-theme .exp-btn-route-primary,
+    [data-theme="light"] .exp-btn-route-primary {
+      background: rgba(2, 132, 199, 0.1) !important;
+      border-color: rgba(2, 132, 199, 0.4) !important;
+      color: #0369a1 !important;
+    }
   </style>
 
   <script>
-    // v5.251 — retired one-shot v5.33 cache wipe+reload (it restarted the boot bar mid-progress).
+    // v5.252 — retired one-shot v5.33 cache wipe+reload (it restarted the boot bar mid-progress).
     (function () {
       try {
         localStorage.setItem('setsail_force_v533', '1');
@@ -15099,7 +15359,7 @@ select option {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.251" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.251';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.252" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.252';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -15121,7 +15381,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.251" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.252" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -17573,120 +17833,111 @@ select option {
 
       <div class="ntm-modal" id="ntmExportModal">
         <div class="ntm-modal-box ntm-export-box">
-          <div class="ntm-modal-header">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <svg class="setsail-icon" viewBox="0 0 24 24" style="stroke:#38bdf8;width:18px;height:18px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <h3 style="margin:0;font-size:1.05rem;font-weight:700;">Export Navigational Data</h3>
+          <div class="ntm-modal-header ntm-exp-header">
+            <div class="ntm-exp-header-title">
+              <svg class="setsail-icon" viewBox="0 0 24 24" style="stroke:#38bdf8;width:17px;height:17px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <h3>Export to ECDIS</h3>
             </div>
             <button type="button" class="ntm-modal-close" id="expBtnClose" title="Close">×</button>
           </div>
 
-          <!-- Choice 1: Passage Route Plan (Dedicated Route Formats) -->
+          <!-- Section 1: Passage Route Export -->
           <div class="ntm-export-choice-card" id="expCardRoute">
             <div class="ntm-export-card-header">
               <span class="ntm-export-card-icon" style="color:#38bdf8;">
                 <svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="4.5" cy="19.5" r="2.5"/><circle cx="19.5" cy="4.5" r="2.5"/><path d="M4.5 17c0-4 4-5.5 8-5.5s7-2 7-7" stroke-dasharray="3 2"/><polygon points="16.5 4 20 4.5 18.5 7.5"/></svg>
               </span>
               <div class="ntm-export-card-title-wrap">
-                <div class="ntm-export-card-title">Passage Route Plan</div>
-                <div class="ntm-export-card-subtitle" id="expRouteSubtitle">Vessel passage route track, sequential waypoints &amp; safety corridor</div>
+                <div class="ntm-export-card-title">Passage Route</div>
+                <div class="ntm-export-card-subtitle" id="expRouteSubtitle">Select route and ECDIS file format</div>
               </div>
-              <span class="ntm-export-badge" id="expRouteBadge">Route Loaded</span>
+              <span class="ntm-export-badge" id="expRouteBadge">0 WPTs</span>
             </div>
-            <div class="ntm-export-btn-group">
-              <button type="button" class="exp-btn-pill" id="expBtnRtz" title="Export IEC 61174 RTZ Route for ECDIS (JRC, Furuno, Transas, Sperry)">
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+
+            <div class="ntm-exp-field-row">
+              <label class="ntm-exp-field-lbl" for="expRouteSelect">Route</label>
+              <select class="ntm-exp-select" id="expRouteSelect" aria-label="Select route to export">
+                <option value="">No saved routes available</option>
+              </select>
+            </div>
+
+            <div class="ntm-export-btn-group ntm-exp-route-btns">
+              <button type="button" class="exp-btn-pill exp-btn-route-primary" id="expBtnRtz" title="Export IEC 61174 RTZ Route for ECDIS (JRC, Furuno, Transas, Sperry)">
+                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 IEC 61174 (.rtz)
               </button>
               <button type="button" class="exp-btn-pill" id="expBtnRouteCsv" title="Export JRC ECDIS Route Sheet CSV">
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-                JRC Route (.csv)
+                JRC (.csv)
               </button>
               <button type="button" class="exp-btn-pill" id="expBtnRouteGeoJson" title="Export Route as GeoJSON">
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
-                GeoJSON (.geojson)
+                GeoJSON
               </button>
             </div>
           </div>
 
-          <!-- Choice 2: ECDIS User Chart Layer (All Other Chart Objects) -->
+          <!-- Section 2: ECDIS User Chart Export -->
           <div class="ntm-export-choice-card" id="expCardUserChart">
             <div class="ntm-export-card-header">
               <span class="ntm-export-card-icon" style="color:#f05a36;">
                 <svg class="setsail-icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
               </span>
               <div class="ntm-export-card-title-wrap">
-                <div class="ntm-export-card-title">ECDIS User Chart Layer</div>
-                <div class="ntm-export-card-subtitle" id="expChartSubtitle">All chart objects: NtM notices, bathymetry, fairway hazards &amp; TSS</div>
+                <div class="ntm-export-card-title">User Chart</div>
+                <div class="ntm-export-card-subtitle" id="expChartSubtitle">Navigational warnings &amp; chart objects</div>
               </div>
-              <span class="ntm-export-badge" id="expChartBadge" style="background:rgba(240,90,54,0.15);color:#ff7a5c;border-color:rgba(240,90,54,0.3);">User Chart</span>
+              <span class="ntm-export-badge" id="expChartBadge" style="background:rgba(240,90,54,0.14);color:#ff7a5c;border-color:rgba(240,90,54,0.3);">0 objects</span>
             </div>
 
-            <div class="ntm-export-types-row" style="margin-bottom:10px;grid-template-columns:repeat(4,1fr);">
-              <label class="ntm-type-toggle-pill type-navtex" style="border-color:rgba(244,63,94,0.35);">
-                <input type="checkbox" id="expChkNavtex" checked />
-                <span class="pill-dot" style="background:#f43f5e;"></span>
-                <span class="pill-text">NAVTEX</span>
-                <span class="ntm-export-count-badge" id="expCountNavtex">0</span>
-              </label>
-              <label class="ntm-type-toggle-pill type-t">
+            <div class="ntm-exp-ticks-grid">
+              <label class="ntm-exp-tick-item type-t" title="Include Temporary (T) Notices">
                 <input type="checkbox" id="expChkT" checked />
-                <span class="pill-dot"></span>
-                <span class="pill-text">Temp (T)</span>
+                <span class="tick-dot" style="background:#f59e0b;"></span>
+                <span class="tick-name">NtM (T)</span>
                 <span class="ntm-export-count-badge" id="expCountT">0</span>
               </label>
-              <label class="ntm-type-toggle-pill type-p">
+              <label class="ntm-exp-tick-item type-p" title="Include Preliminary (P) Notices">
                 <input type="checkbox" id="expChkP" checked />
-                <span class="pill-dot"></span>
-                <span class="pill-text">Prelim (P)</span>
+                <span class="tick-dot" style="background:#38bdf8;"></span>
+                <span class="tick-name">NtM (P)</span>
                 <span class="ntm-export-count-badge" id="expCountP">0</span>
               </label>
-              <label class="ntm-type-toggle-pill type-perm">
+              <label class="ntm-exp-tick-item type-perm" title="Include Permanent Notices">
                 <input type="checkbox" id="expChkPerm" checked />
-                <span class="pill-dot"></span>
-                <span class="pill-text">Perm</span>
+                <span class="tick-dot" style="background:#a855f7;"></span>
+                <span class="tick-name">NtM Perm</span>
                 <span class="ntm-export-count-badge" id="expCountPerm">0</span>
+              </label>
+              <label class="ntm-exp-tick-item type-navtex" title="Include NAVTEX Warnings">
+                <input type="checkbox" id="expChkNavtex" checked />
+                <span class="tick-dot" style="background:#f43f5e;"></span>
+                <span class="tick-name">NAVTEX</span>
+                <span class="ntm-export-count-badge" id="expCountNavtex">0</span>
               </label>
             </div>
 
-            <div class="ntm-export-btn-group" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
-              <button type="button" class="exp-btn-pill exp-btn-primary" id="expBtnFuruno" title="Download Furuno ECDIS UserChart XML (.xml)">
+            <div class="ntm-exp-action-bar">
+              <select class="ntm-exp-select" id="expUserChartFormatSelect" aria-label="Select ECDIS User Chart format">
+                <option value="furuno_xml">Furuno FMD UserChart (.xml)</option>
+                <option value="jrc_uch">JRC JAN-7201 / 9201 (.uch)</option>
+                <option value="jrc_uchm">JRC JAN-701B / 901B (.uchm)</option>
+                <option value="transas_aiz">Transas / Wärtsilä Navi-Sailor (.aiz)</option>
+                <option value="sperry_update">Sperry VisionMaster FT (.update)</option>
+                <option value="sam_umo">SAM Electronics Chartpilot (.umo)</option>
+                <option value="pdf">Printable Warnings Summary (.pdf)</option>
+                <option value="geojson">Universal GeoJSON (.geojson)</option>
+                <option value="csv">Spreadsheet Table (.csv)</option>
+              </select>
+              <button type="button" class="exp-btn-pill exp-btn-primary ntm-exp-download-btn" id="expBtnDownloadUserChart">
                 <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Furuno (.xml)
-              </button>
-              <button type="button" class="exp-btn-pill exp-btn-primary" id="expBtnJrcUch" title="Download JRC ECDIS User Chart (.uch)">
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                JRC UCH (.uch)
-              </button>
-              <button type="button" class="exp-btn-pill exp-btn-primary" id="expBtnJrc" title="Download JRC ECDIS User Chart (.uchm)">
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                JRC (.uchm)
-              </button>
-              <button type="button" class="exp-btn-pill" id="expBtnTransas" title="Download Transas / Wärtsilä Navi-Sailor AddInfo (.aiz)">
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Transas (.aiz)
-              </button>
-              <button type="button" class="exp-btn-pill" id="expBtnSperry" title="Download Sperry Marine VisionMaster FT (.update)">
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Sperry (.update)
-              </button>
-              <button type="button" class="exp-btn-pill" id="expBtnSam" title="Download SAM Electronics Chartpilot User Map Objects (.umo)">
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                SAM (.umo)
-              </button>
-              <button type="button" class="exp-btn-pill" id="expBtnPdf" title="Download Printable ECDIS Warnings Summary (.pdf)">
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                PDF Summary (.pdf)
-              </button>
-              <button type="button" class="exp-btn-pill" id="expBtnGeoJson" title="Download User Chart Layer as GeoJSON">
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
-                GeoJSON (.geojson)
-              </button>
-              <button type="button" class="exp-btn-pill" id="expBtnCsv" title="Download User Chart Layer as CSV">
-                <svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-                CSV (.csv)
+                Export
               </button>
             </div>
+          </div>
+
+          <!-- Footnote: Map & Multisearch Filter Link -->
+          <div class="ntm-exp-filter-note">
+            <svg class="ntm-exp-note-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <span>Exports only objects currently visible on the SetChart map via the <b>Multi Search</b> panel. <button type="button" class="ntm-exp-filter-link" id="expOpenFilterPanelLink">Open Filters →</button></span>
           </div>
         </div>
       </div><script>
@@ -23046,26 +23297,26 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.251"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.251" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.251"></script>
-  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.251"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.252"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.252" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.252"></script>
+  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.252"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.251",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.252",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.251"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.251"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.251"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.252"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.252"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.252"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.251"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.252"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -23138,15 +23389,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.251"></script>
-<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.251"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.252"></script>
+<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.252"></script>
 <script>if (typeof window.__setsailToggleNtmSidebar === 'function') { window.toggleNtmSidebar = window.__setsailToggleNtmSidebar; }</script>
-<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.251"></script>
-<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.251"></script>
-<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.251"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.251"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.251"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.251"></script>
+<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.252"></script>
+<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.252"></script>
+<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.252"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.252"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.252"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.252"></script>
 
 
 
@@ -23810,7 +24061,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.251.0' && k !== 'setsail-tiles-cache-v5.251.0').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.252.0' && k !== 'setsail-tiles-cache-v5.252.0').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 function showSetSailHardRefreshTip(cacheLabel) {
@@ -23860,17 +24111,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.251', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.252', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.251 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.252 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.251') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.251.0'); }, 1200);
+              if (last && last.indexOf('v5.252') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.252.0'); }, 1200);
               }
             } catch (eTip) {}
           })
