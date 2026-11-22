@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-22T10:47:54Z",
-  "generatedAt": "2026-11-22T10:47:54Z",
+  "updatedAt": "2026-11-22T18:16:24Z",
+  "generatedAt": "2026-11-22T18:16:24Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -20,7 +20,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/cma-shipping",
-      "publishedAt": "2026-11-22T10:47:54Z",
+      "publishedAt": "2026-11-22T18:16:24Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -52,7 +52,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/crew-connect-global",
-      "publishedAt": "2026-11-22T10:47:54Z",
+      "publishedAt": "2026-11-22T18:16:24Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -73,6 +73,148 @@
       "takeaways": [
         "Operational Area: Global Maritime.",
         "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-0399F55C7B",
+      "title": "Pan Continental and PanStar launch new PHX service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/pan-continental-and-panstar-launch-new-phx-service/",
+      "publishedAt": "2026-11-22T17:00:04Z",
+      "category": "Ports & Terminals",
+      "region": "China & East Asia",
+      "regions": [
+        "China & East Asia",
+        "Japan & Korea"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "china"
+      ],
+      "coords": [
+        30.6,
+        122.1
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/images-22-300x183.jpg",
+      "summary": "Pan Continental and PanStar will launch a new weekly container service connecting South Korea, Vietnam and China, with CK Line taking slots on the operation, as reported by DynaLiners. The new service, branded PHX, will deploy two container ships with capacities of approximately 700 TEU and 1,000 TEU. Its port...",
+      "body": "Services Sticky News Pan Continental and PanStar launch new PHX service November 22, 2026 Facebook Twitter WhatsApp Linkedin Email Pan Continental and PanStar will launch a new weekly container service connecting South Korea, Vietnam and China, with CK Line taking slots on the operation, as reported by DynaLiners. The new service, branded PHX, will deploy two container ships with capacities of approximately 700 TEU and 1,000 TEU. Its port rotation will be: Busan – Incheon – Hai Phong – Shenzhen (Shekou) – Busan Following the launch, Pan Continental will withdraw from the joint Busan–Incheon–Hai Phong service, known as BIH, which it currently operates with Namsung Shipping. Namsung will continue operating BIH independently with two ships of approximately 1,000 TEU. CK Line will transfer its slot allocation from BIH to the new PHX service, while KMTC will remain a slot charterer on BIH. The submitted text cuts off before providing the complete revised BIH rotation. The currently published BIH coverage includes Busan, Gwangyang, Incheon, Hong Kong and Hai Phong, but this should be confirmed against the complete source before inclusion. TAGS BIH Busan CK Line Hai Phong Incheon KMTC Namsung Shipping Pan Continental PanStar PHX Shekou Facebook Twitter WhatsApp Linkedin Email Previous article Claus-Peter Offen orders four 7,000 TEU boxships Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The new service, branded PHX, will deploy two container ships with capacities of approximately 700 TEU and 1,000 TEU.",
+        "Namsung will continue operating BIH independently with two ships of approximately 1,000 TEU.",
+        "CK Line will transfer its slot allocation from BIH to the new PHX service, while KMTC will remain a slot charterer on BIH."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-B99F1BF352",
+      "title": "Suspected Drone Attack Caused Explosion On Russian Ship At Benghazi Port",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/suspected-drone-attack-caused-explosion-on-russian-ship-at-benghazi-port/",
+      "publishedAt": "2026-11-22T15:09:48Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Rotterdam & North Sea",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "tanker",
+        "lng",
+        "port",
+        "safety"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
+      "summary": "Nov 22 (Reuters) – Libya’s eastern-based government said on Sunday that a preliminary investigation indicated an explosion at the Benghazi naval base in eastern Libya occurred aboard a Russian ship docked at...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Russian Navy Steregushchy-class corvette Boikiy sails under the Great Belt bridge towards the Baltic Sea, in Korsor, Denmark, January 24, 2026. REUTERS/Yoruk Isik Nov 22 (Reuters) – Libya’s eastern-based government said on Sunday that a preliminary investigation indicated an explosion at the Benghazi naval base in eastern Libya occurred aboard a Russian ship docked at the city’s port. It said a drone attack was suspected. The government said the vessel had stopped at Benghazi port to refuel and resupply on its way back to Russia, under maritime cooperation agreements between the two countries. Related Article: Stricken Russian LNG Tanker ‘Arctic Metagaz’ Anchored Off Libya After Two-Month Odyssey, Future Uncertain Two medical sources said no deaths had been reported, but there were injuries. The number and nationalities of those injured were not immediately known. There was no immediate reaction from Russian authorities, and no one had claimed responsibility for the suspected attack. Read Also: Russian Military-Linked Cargo Ship Burns After Suspected Drone Strike in Gulf of Finland The eastern-based government said port and naval base facilities, including warehouses, were safe and that normal operations would resume once the fire was brought under control and the site secured. It condemned the suspected attack as a violation of Libya’s sovereignty and a threat to maritime safety, saying it would take legal and diplomatic measures against anyone found responsible. “The Libyan government will not allow Libyan ports, territory or territorial waters to be turned into an arena for settling scores or exporting international conflicts,” it said. (Reporting by Ayman Al Warfali and Ahmed Elumami; Writing by Eman AbouhassiraEditing by Tomasz Janowski) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! HELSINKI, Nov 22 (Reuters) – A fire onboard a Russian cargo ship that was struck by drones in the Baltic Sea continued to burn through the night even as efforts were made to... A liquefied petroleum gas tanker sank off Bulgaria's Black Sea coast on Tuesday, Bulgaria's defense ministry said, a few dozen miles from where another ship went down after a drone attack a day earlier. BUCHAREST, Nov 15 (Reuters) – Drones have struck three commercial ships in the Black Sea near Romania’s Sulina canal, Prime Minister Luca Niculescu said on Sunday, adding that his armed forces had scrambled fighter jets... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Join the leading maritime news network Russian Navy Steregushchy-class corvette Boikiy sails under the Great Belt bridge towards the Baltic Sea, in Korsor, Denmark, January 24, 2026.",
+        "It said a drone attack was suspected."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-97C26576EC",
+      "title": "Russian Cargo Ship Still On Fire Off Finland After Attack",
+      "source": "gCaptain",
+      "sourceIcon": "⚓",
+      "sourceRegion": "USA / Global",
+      "url": "https://gcaptain.com/russian-cargo-ship-still-on-fire-off-finland-after-attack/",
+      "publishedAt": "2026-11-22T14:31:31Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Baltic Sea & Northern Europe",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80",
+      "summary": "HELSINKI, Nov 22 (Reuters) – A fire onboard a Russian cargo ship that was struck by drones in the Baltic Sea continued to burn through the night even as efforts were made to...",
+      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Finnish Border Guard's handout photo of the Russian cargo ship Sparta II as the extinguishing of the fire continues in the Gulf of Finland November 22, 2026. Finnish Border Guard/Handout via REUTERS HELSINKI, Nov 22 (Reuters) – A fire onboard a Russian cargo ship that was struck by drones in the Baltic Sea continued to burn through the night even as efforts were made to douse the flames, Finland’s coast guard said on Sunday. The Finnish military has said the strike on the Sparta II on Saturday was likely carried out by Ukraine and that the vessel later drifted into Finnish waters where it remains at anchor. The 16 crew members were evacuated onto a nearby Russian ship. Pictures and video released by the coast guard showed several vessels spraying the Sparta II with water cannons during the night in a bid to put out the flames and cool down containers stacked on its deck. Ukraine has sent waves of military drones towards Russia’s northwest coastal Leningrad region this year, including some that strayed into the airspace of nearby Baltic countries, leading to fears that the war was spilling onto NATO territory. The ship, bound for Russian exclave Kaliningrad, was damaged in international waters west of Russia’s Gogland island, Finland’s Defence Forces have said, corroborating an account by Russian officials. The risk of further attacks in the Gulf of Finland, a narrow arm of the Baltic Sea, cannot be ruled out, Estonian Navy Commander Ivo Vark told public broadcaster ERR on Sunday. Finland’s military said last week it had detected a strike on a Russian warship in the same area during Ukrainian drone attacks. The Sparta II is a 121-m (397-foot) Russian-flagged cargo vessel owned by Russian shipping company Oboronlogistika that left St Petersburg on Friday, according to LSEG data. The vessel is subject to US sanctions, according to the US Treasury Department. Oboronlogistika provides logistics services for the Russian Defence Ministry, according to the company’s website. (Reporting by Essi Lehto in Helsinki, additional reporting by Nerijus Adomaitis, writing by Terje SolsvikEditing by Tomasz Janowski) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! Nov 22 (Reuters) – Libya’s eastern-based government said on Sunday that a preliminary investigation indicated an explosion at the Benghazi naval base in eastern Libya occurred aboard a Russian ship docked at... BUCHAREST, Nov 15 (Reuters) – Drones have struck three commercial ships in the Black Sea near Romania’s Sulina canal, Prime Minister Luca Niculescu said on Sunday, adding that his armed forces had scrambled fighter jets... Bulgaria summoned Russia’s ambassador to Sofia after two ships were hit off the country’s coast, as concerns mount over the security of Black Sea shipping. Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
+      "takeaways": [
+        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
+        "Join the leading maritime news network Finnish Border Guard's handout photo of the Russian cargo ship Sparta II as the extinguishing of the fire continues in the Gulf of Finland November 22, 2026.",
+        "The Finnish military has said the strike on the Sparta II on Saturday was likely carried out by Ukraine and that the vessel later drifted into Finnish waters where it remains at anchor."
+      ],
+      "readingMinutes": 3,
+      "readMinutes": 3
+    },
+    {
+      "id": "SN-1B5FF65C2F",
+      "title": "Claus-Peter Offen orders four 7,000 TEU boxships",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/claus-peter-offen-orders-four-7000-teu-boxships/",
+      "publishedAt": "2026-11-22T13:00:46Z",
+      "category": "Ports & Terminals",
+      "region": "China & East Asia",
+      "regions": [
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "china",
+        "shipyard"
+      ],
+      "coords": [
+        30.6,
+        122.1
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/06/HLAG_Salahuddin_Rotterdam_1280x800_rgb-300x188.jpg",
+      "summary": "German non-operating owner Claus-Peter Offen has reportedly ordered four container ships of approximately 7,000 TEU from China’s Guangzhou Shipyard International (GSI), as citted by DynaLiners. The conventionally powered vessels are expected to be delivered in 2030. All four ships have reportedly secured seven-year...",
+      "body": "News Sticky News Claus-Peter Offen orders four 7,000 TEU boxships November 22, 2026 Facebook Twitter WhatsApp Linkedin Email German non-operating owner Claus-Peter Offen has reportedly ordered four container ships of approximately 7,000 TEU from China’s Guangzhou Shipyard International (GSI), as citted by DynaLiners. The conventionally powered vessels are expected to be delivered in 2030. All four ships have reportedly secured seven-year charter agreements with German container carrier Hapag-Lloyd. The contract value and further technical details have not been disclosed. TAGS Claus-Peter Offen Container shipping CONTAINERSHIPS GSI Guangzhou Shipyard International Hapag Lloyd newbuildings shipbuilding Facebook Twitter WhatsApp Linkedin Email Previous article Cool Carriers takes delivery of world-first gate-rudder reefer Next article Pan Continental and PanStar launch new PHX service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The conventionally powered vessels are expected to be delivered in 2030.",
+        "All four ships have reportedly secured seven-year charter agreements with German container carrier Hapag-Lloyd.",
+        "The contract value and further technical details have not been disclosed."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -451,40 +593,6 @@
       "readMinutes": 2
     },
     {
-      "id": "SN-966D2510C5",
-      "title": "Maersk delays Australia and New Zealand no-load policy",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/maersk-delays-australia-and-new-zealand-no-load-policy/",
-      "publishedAt": "2026-11-21T17:30:53Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Australia & Pilbara",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/07/COLUMBINE-MAERSK-300x225.jpg",
-      "summary": "Maersk has extended the transition period for its No Shipping Instruction, No Load Policy covering export cargo from Australia and New Zealand. The carrier had planned to begin full enforcement on 30 November 2026, following a soft launch on 2 November. However, the hard-stop date will no longer apply, and Maersk has...",
-      "body": "Maersk has extended the transition period for its No Shipping Instruction, No Load Policy covering export cargo from Australia and New Zealand. The carrier had planned to begin full enforcement on 30 November 2026, following a soft launch on 2 November. However, the hard-stop date will no longer apply, and Maersk has not yet announced a replacement implementation date. The company said the extension will give customers additional time to establish the required documentation processes and address any outstanding readiness issues with its teams. Under the policy, exporters must submit complete and accurate Shipping Instructions, review the Verify Copy of the bill of lading and complete any necessary amendments before cargo can be confirmed for vessel planning. Maersk had initially required the Shipping Instruction and Verify Copy process to be completed no later than 38 hours before the vessel’s estimated arrival at the applicable load port. The carrier has now placed that 38-hour timeline under review. However, it intends to retain the underlying requirement that Shipping Instructions and verification must be completed before cargo is loaded. During the extended transition period, Maersk will continue working with customers in Australia and New Zealand. The carrier said it will provide advance notice before introducing full enforcement. Once implemented, cargo that has not completed the required documentation process may be excluded from the final load list and rolled to a later vessel. Associated storage, detention, demurrage, handling or rehandling costs may also apply.",
-      "takeaways": [
-        "Maersk has extended the transition period for its No Shipping Instruction, No Load Policy covering export cargo from Australia and New Zealand.",
-        "The carrier had planned to begin full enforcement on 30 November 2026, following a soft launch on 2 November.",
-        "However, the hard-stop date will no longer apply, and Maersk has not yet announced a replacement implementation date."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
       "id": "SN-8E3DCD1E26",
       "title": "Russian Military-Linked Cargo Ship Burns After Suspected Drone Strike in Gulf of Finland",
       "source": "gCaptain",
@@ -521,41 +629,6 @@
       ],
       "readingMinutes": 6,
       "readMinutes": 6
-    },
-    {
-      "id": "SN-4F5976B454",
-      "title": "MSC expands regional network with two new services",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/msc-expands-regional-network-with-two-new-services/",
-      "publishedAt": "2026-11-21T16:00:19Z",
-      "category": "Ports & Terminals",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Suez Canal & Eastern Med",
-        "India & Indian Ocean"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/07/MSC-Ruby-en-puerto-de-Bilbao-300x200.jpeg",
-      "summary": "MSC is expanding its regional network with two new services covering the Arabian Gulf and the Indian Subcontinent. The carrier will launch Fujairah Shuttle 2 in December 2026, while also introducing a dedicated connection between Ennore in India and Chittagong in Bangladesh. Fujairah Shuttle 2 Fujairah Shuttle 2 will...",
-      "body": "Services Sticky News MSC expands regional network with two new services November 21, 2026 Facebook Twitter WhatsApp Linkedin Email MSC Ruby en puerto de Bilbao MSC is expanding its regional network with two new services covering the Arabian Gulf and the Indian Subcontinent. The carrier will launch Fujairah Shuttle 2 in December 2026, while also introducing a dedicated connection between Ennore in India and Chittagong in Bangladesh. Fujairah Shuttle 2 Fujairah Shuttle 2 will connect Colombo with Khor Fakkan and Fujairah in the United Arab Emirates, as well as Sohar in Oman. MSC has scheduled vessels ranging from 1,700 to 9,400 TEU to operate on the service. The announced port sequence is: Colombo – Khor Fakkan – Fujairah – Sohar Ennore to Chittagong MSC has also introduced a service marketed as Ennore to Chittagong. A single 1,700 TEU container ship will operate the connection, offering one sailing every ten days between the two ports. The rotation is: Ennore – Chittagong – Ennore TAGS Mediterranean Shipping Co. (MSC) Facebook Twitter WhatsApp Linkedin Email Previous article Caerus Shipping launches direct Oman–India service Next article Maersk delays Australia and New Zealand no-load policy Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The carrier will launch Fujairah Shuttle 2 in December 2026, while also introducing a dedicated connection between Ennore in India and Chittagong in Bangladesh.",
-        "Fujairah Shuttle 2 Fujairah Shuttle 2 will connect Colombo with Khor Fakkan and Fujairah in the United Arab Emirates, as well as Sohar in Oman.",
-        "MSC has scheduled vessels ranging from 1,700 to 9,400 TEU to operate on the service."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
     },
     {
       "id": "SN-7AC1DFD0F1",
@@ -1072,9 +1145,13 @@
       "region": "Strait of Hormuz & Persian Gulf",
       "regions": [
         "Strait of Hormuz & Persian Gulf",
-        "Singapore & Malacca Strait"
+        "Suez Canal & Eastern Med",
+        "Rotterdam & North Sea"
       ],
       "tags": [
+        "tanker",
+        "port",
+        "hormuz",
         "singapore"
       ],
       "coords": [
@@ -1084,13 +1161,14 @@
       "navarea": "IX",
       "image": "https://images.marinelink.com/images/maritime/w150/adobe-stockchristianthielnet-175225.jpeg",
       "summary": "US Treasury Department officials met with government authorities in Singapore and Malaysia this week, including regulators and national security bodies, to warn of potential risks they could face if they do not comply with US sanctions on Iran.Washington is urging the countries…",
-      "body": "US Treasury Department officials met with government authorities in Singapore and Malaysia this week, including regulators and national security bodies, to warn of potential risks they could face if they do not comply with US sanctions on Iran.Washington is urging the countries…",
+      "body": "US Treasury Urges Singapore, Malaysia of Compliance With Iran Sanctions Maritime Activity Reports, Inc. November 20, 2026 © Adobe Stock/christianthiel.net US Treasury Department officials met with government authorities in Singapore and Malaysia this week, including regulators and national security bodies, to warn of potential risks they could face if they do not comply with US sanctions on Iran. Washington is urging the countries, as well as law firms and banks operating there, to stay alert for Iranian front companies, as it steps up efforts to enforce sanctions in Asia and bring about a speedy end to the conflict in the Middle East. The US is urging additional scrutiny on \"high-risk\" sectors such as maritime transport, aviation services and procurement networks, \"to make sure they're not fronting for Iran,\" said a Treasury Department official. \"We want it to be understood too, that we're going to target these lifelines, and it's not going to be a negotiation when we find a lifeline that needs to be targeted,\" the official said. Since the US and Israel commenced strikes on Iran in February, the US has intensified actions to throttle Tehran's business interests overseas. In August, President Donald Trump's administration launched Operation Economic Outcast, resulting in a barrage of sanctions against targets spanning Canadian digital currency platforms to a major Russian banking group. OIL ON WATER For years, tankers have regularly made stops in the waters around Malaysia, Singapore and Indonesia to make ship-to-ship transfers of Iranian oil that help obscure its origin. Last year, Malaysian authorities said they would more tightly enforce rules around these transfers and in February seized two tankers and their cargoes. Since April, the US Navy has imposed a blockade on shipping reaching Iran through the Strait of Hormuz, and this month has cracked down on movement over Iran's land borders and through the Caspian Sea. In July, the Treasury Department sanctioned dozens of individuals, vessels and companies based in Singapore, Hong Kong, the UAE, the Marshall Islands and St Kitts and Nevis linked to Iranian oil magnate Mohammad Hossein Shamkhani. These efforts were starting to disrupt Iran's source of revenue, the US official said, citing data showing that the country is currently undergoing the worst GDP contraction in four decades and the highest rate of inflation since World War II. IRANIAN AIRLINES However, the official said there was still work to be done. \"There's an Iranian airline that flies to Malaysia, or has, recently, so we raised this,\" the US official said, without naming the carrier. Using public flight records, Reuters identified a regularly scheduled flight between Tehran and Kuala Lumpur operated by Iran Airtour, which flew as recently as November 14. A scheduled flight on November 17 did not depart, the records also show. Iran Airtour did not respond to an emailed request for comment sent outside of business hours on Friday. Most Iranian airlines largely stopped flying to Malaysia in 2022 due to US sanctions on refuelling Iranian planes. However, Iran Airtour, a privately owned airline, resumed flights to Malaysia in November 2025, according to Iranian media. On September 8, the US imposed sanctions on dozens of companies in the UAE, Britain, Malaysia, Turkey and Kazakhstan it said were supporting Iran's aviation sector to move weapons, personnel and illicit cargo. The following day, Iran Air officials met with Malaysia's ambassador to Iran to discuss resuming direct flights between Iran and Kuala Lumpur. 'DOING OUR PART' Both Malaysia and Singapore implement UN Security Council sanctions on Iran. Singapore's government said in a statement it \"is firmly committed to doing our part\" and \"preventing bad actors from abusing our corporate vehicles,\" citing its efforts to strengthen vigilance in the maritime and financial industries this year. The Malaysian government did not respond to requests for comment. (Reuters)",
       "takeaways": [
-        "Operational Area: Strait of Hormuz & Persian Gulf, Singapore & Malacca Strait.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+        "US Treasury Urges Singapore, Malaysia of Compliance With Iran Sanctions Maritime Activity Reports, Inc.",
+        "The US is urging additional scrutiny on \"high-risk\" sectors such as maritime transport, aviation services and procurement networks, \"to make sure they're not fronting for Iran,\" said a Treasury Department official.",
+        "\"We want it to be understood too, that we're going to target these lifelines, and it's not going to be a negotiation when we find a lifeline that needs to be targeted,\" the official said."
       ],
-      "readingMinutes": 2,
-      "readMinutes": 2
+      "readingMinutes": 3,
+      "readMinutes": 3
     },
     {
       "id": "SN-D0D33C948C",
@@ -1104,8 +1182,7 @@
       "region": "Strait of Hormuz & Persian Gulf",
       "regions": [
         "Strait of Hormuz & Persian Gulf",
-        "Red Sea & Bab el-Mandeb",
-        "Singapore & Malacca Strait"
+        "Red Sea & Bab el-Mandeb"
       ],
       "tags": [
         "port",
@@ -1118,14 +1195,13 @@
       "navarea": "IX",
       "image": "https://images.marinelink.com/images/maritime/w150/au-usanakul-adobe-stock-175224.jpeg",
       "summary": "The Saudi-led coalition fighting Yemen's Iran-aligned Houthis said it had struck the Red Sea port of Hodeidah to destroy Houthi capabilities on Friday, as the militants warned airlines to avoid Saudi airspace, pledging new air strikes within hours.The developments…",
-      "body": "Saudi Forces Strike Hodeidah Port as Houthis Warn Airlines Away From Airspace Maritime Activity Reports, Inc. November 20, 2026 © AU USAnakul / Adobe Stock The Saudi-led coalition fighting Yemen's Iran-aligned Houthis said it had struck the Red Sea port of Hodeidah to destroy Houthi capabilities on Friday, as the militants warned airlines to avoid Saudi airspace, pledging new air strikes within hours. The developments, a day after the group struck the tallest skyscraper in Riyadh, signalled a worsening of a conflict that has brought a humanitarian crisis to Yemen and severe disruption to Saudi Arabia, in parallel with the US-led war against Iran. Hodeidah is the main port bringing food and other supplies into Houthi-controlled northern Yemen. The coalition had earlier warned civilians to evacuate the area. The Saudi-led coalition said it destroyed operational capabilities at the port that were used in smuggling operations and the transport of weapons and ballistic missiles. The port remains fully operational and the flow of goods will continue, according to Yemen’s Information Minister. HOUTHIS TELL SHIPPING COMPANIES TO EVACUATE FROM SAUDI PORTS There was no immediate comment from the Houthis, who had earlier said they would hit Red Sea ports if the Saudis carried out their own threat to strike the Yemeni port. \"We warn all employees, workers, and those in the vicinity of (Saudi Arabia's Red Sea) ports to evacuate them immediately and stay away. We also urge all shipping companies to immediately evacuate their ships from these ports,\" Houthi military spokesperson Yahya Saree said in a statement. Airlines should avoid Saudi airspace \"because it will be the scene of our operations in the coming hours,\" Saree said, making an exception for airspace near the Muslim holy cities of Mecca and Medina. He also said the group would target a power station at Shuqaiq in southern Saudi Arabia. The Saudi-led coalition also said it carried out an operation in Yemen's capital Sanaa targeting ballistic missile and drone capabilities and that operations in Saada and Taiz were ongoing. Since fighting resumed in Yemen in July in parallel with the wider Iran war, the Houthis have rapidly advanced in Yemen, seizing territory from Yemen's internationally recognised government and its allies, who are backed by Saudi Arabia. The Saudis have carried out air strikes on Yemen in support of their allies on the ground, while the Houthis have struck Saudi oil targets, airports and office towers. Deadly strikes on Riyadh's main airport last month led to the cancellation of most international flights, and Saudi Arabia has postponed or cancelled high-profile global events including soccer's AFC Asian Cup. Saudi Arabia, a close ally of the United States, has been backing Yemen's internationally recognised government for more than a decade in a war that was fought to a stalemate in 2022 but reignited in July this year. The Houthis have seized Yemen's Red Sea coast and forced the Saudi-backed forces aligned with the government to retreat over the weekend to defend their temporary capital in the southern port of Aden. (Reuters)",
+      "body": "The Saudi-led coalition fighting Yemen's Iran-aligned Houthis said it had struck the Red Sea port of Hodeidah to destroy Houthi capabilities on Friday, as the militants warned airlines to avoid Saudi airspace, pledging new air strikes within hours.The developments…",
       "takeaways": [
-        "Saudi Forces Strike Hodeidah Port as Houthis Warn Airlines Away From Airspace Maritime Activity Reports, Inc.",
-        "Hodeidah is the main port bringing food and other supplies into Houthi-controlled northern Yemen.",
-        "The coalition had earlier warned civilians to evacuate the area."
+        "Operational Area: Strait of Hormuz & Persian Gulf, Red Sea & Bab el-Mandeb.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
       ],
-      "readingMinutes": 3,
-      "readMinutes": 3
+      "readingMinutes": 2,
+      "readMinutes": 2
     },
     {
       "id": "SN-FD41A8CDE5",
@@ -1238,43 +1314,6 @@
       "readMinutes": 4
     },
     {
-      "id": "SN-8B209235A1",
-      "title": "US Treasury Presses Singapore and Malaysia on Iran Sanctions Compliance",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/us-treasury-presses-singapore-and-malaysia-on-iran-sanctions-compliance/",
-      "publishedAt": "2026-11-20T17:12:46Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "Suez Canal & Eastern Med",
-        "Rotterdam & North Sea"
-      ],
-      "tags": [
-        "tanker",
-        "port",
-        "hormuz",
-        "singapore"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://images.unsplash.com/photo-1519074069444-1ba4ea16e66c?auto=format&fit=crop&w=900&q=80",
-      "summary": "US Treasury Department officials met with government authorities in Singapore and Malaysia this week, including regulators and national security bodies, to warn of potential risks they could face if they do not comply with US sanctions on Iran.",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Russia's shadow fleet vessels wait in the unofficial anchorage area in the Gulf of Finland near Vaindloo, Estonia April 10, 2026. REUTERS/Ints Kalnins SINGAPORE, Nov 20 (Reuters) – US Treasury Department officials met with government authorities in Singapore and Malaysia this week, including regulators and national security bodies, to warn of potential risks they could face if they do not comply with US sanctions on Iran. Washington is urging the countries, as well as law firms and banks operating there, to stay alert for Iranian front companies, as it steps up efforts to enforce sanctions in Asia and bring about a speedy end to the conflict in the Middle East. The US is urging additional scrutiny on “high-risk” sectors such as maritime transport, aviation services and procurement networks, “to make sure they’re not fronting for Iran,” said a Treasury Department official. “We want it to be understood too, that we’re going to target these lifelines, and it’s not going to be a negotiation when we find a lifeline that needs to be targeted,” the official said. Since the US and Israel commenced strikes on Iran in February, the US has intensified actions to throttle Tehran’s business interests overseas. In August, President Donald Trump’s administration launched Operation Economic Outcast, resulting in a barrage of sanctions against targets spanning Canadian digital currency platforms to a major Russian banking group. OIL ON WATER For years, tankers have regularly made stops in the waters around Malaysia, Singapore and Indonesia to make ship-to-ship transfers of Iranian oil that help obscure its origin. Last year, Malaysian authorities said they would more tightly enforce rules around these transfers and in February seized two tankers and their cargoes. Since April, the US Navy has imposed a blockade on shipping reaching Iran through the Strait of Hormuz, and this month has cracked down on movement over Iran’s land borders and through the Caspian Sea. In July, the Treasury Department sanctioned dozens of individuals, vessels and companies based in Singapore, Hong Kong, the UAE, the Marshall Islands and St Kitts and Nevis linked to Iranian oil magnate Mohammad Hossein Shamkhani. These efforts were starting to disrupt Iran’s source of revenue, the US official said, citing data showing that the country is currently undergoing the worst GDP contraction in four decades and the highest rate of inflation since World War II. However, the official said there was still work to be done. “There’s an Iranian airline that flies to Malaysia, or has, recently, so we raised this,” the US official said, without naming the carrier. Using public flight records, Reuters identified a regularly scheduled flight between Tehran and Kuala Lumpur operated by Iran Airtour, which flew as recently as November 14. A scheduled flight on November 17 did not depart, the records also show. Iran Airtour did not respond to an emailed request for comment sent outside of business hours on Friday. Most Iranian airlines largely stopped flying to Malaysia in 2022 due to US sanctions on refueling Iranian planes. However, Iran Airtour, a privately owned airline, resumed flights to Malaysia in November 2025, according to Iranian media. On September 8, the US imposed sanctions on dozens of companies in the UAE, Britain, Malaysia, Turkey and Kazakhstan it said were supporting Iran’s aviation sector to move weapons, personnel and illicit cargo. The following day, Iran Air officials met with Malaysia’s ambassador to Iran to discuss resuming direct flights between Iran and Kuala Lumpur. Both Malaysia and Singapore implement UN Security Council sanctions on Iran. Singapore’s government said in a statement it “is firmly committed to doing our part” and “preventing bad actors from abusing our corporate vehicles,” citing its efforts to strengthen vigilance in the maritime and financial industries this year. The Malaysian government did not respond to requests for comment. (Reporting by Gregor Stuart Hunter; Additional reporting by Ashley Tang and Jun Yuan Yong; Editing by Hugh Lawson) (c) Copyright Thomson Reuters 2026. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! The United States on Wednesday sanctioned a network of individuals and companies accused of operating fraudulent ship registries that helped Iran’s shadow fleet evade sanctions, while issuing a new warning... Contacts between Iran and the United States to end their eight-month war are continuing, Tehran said on Monday, after days of Iranian talks with Qatari mediators ended with altered proposals but no breakthrough. The United States has imposed a new round of sanctions targeting a law firm, shipping agents and nine vessels accused of helping Iran move oil and other commodities through international... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
-      "takeaways": [
-        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
-        "Join the leading maritime news network Russia's shadow fleet vessels wait in the unofficial anchorage area in the Gulf of Finland near Vaindloo, Estonia April 10, 2026.",
-        "The US is urging additional scrutiny on “high-risk” sectors such as maritime transport, aviation services and procurement networks, “to make sure they’re not fronting for Iran,” said a Treasury Department official."
-      ],
-      "readingMinutes": 5,
-      "readMinutes": 5
-    },
-    {
       "id": "SN-932639FEE4",
       "title": "Container shipping rate tactics draw competition criticism",
       "source": "Seatrade Maritime",
@@ -1305,41 +1344,6 @@
       ],
       "readingMinutes": 2,
       "readMinutes": 2
-    },
-    {
-      "id": "SN-7C89EF302C",
-      "title": "Carnival Orders Two LNG-Powered Cruise Ships in $2.2 Billion Fincantieri Deal",
-      "source": "gCaptain",
-      "sourceIcon": "⚓",
-      "sourceRegion": "USA / Global",
-      "url": "https://gcaptain.com/carnival-orders-two-lng-powered-cruise-ships-in-2-2-billion-fincantieri-deal/",
-      "publishedAt": "2026-11-20T16:15:36Z",
-      "category": "Weather & Cyclones",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "lng",
-        "port",
-        "shipyard"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=900&q=80",
-      "summary": "Carnival Corporation has signed a contract with Italian shipbuilding giant Fincantieri for two next-generation cruise ships, marking a shift toward smaller vessels designed to reach more destinations. The agreement, valued...",
-      "body": "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe. Join the leading maritime news network Carnival Destiny Rendering. Image courtesy Carnival Corporation Carnival Corporation has signed a contract with Italian shipbuilding giant Fincantieri for two next-generation cruise ships, marking a shift toward smaller vessels designed to reach more destinations. The agreement, valued at more than €2 billion ($2.2 billion), calls for construction of two dual-fuel cruise ships at Fincantieri’s Marghera shipyard in Italy, with deliveries scheduled for 2033 and 2035. Each vessel will measure approximately 130,000 gross tons and feature around 1,650 passenger cabins. The ships will primarily operate on liquefied natural gas (LNG) and incorporate advanced environmental and digital technologies. Unlike Carnival’s recent focus on increasingly massive cruise ships, the new class is being designed with greater operational flexibility in mind, allowing the company to serve ports and destinations that may be inaccessible to its largest vessels. Carnival Cruise Line President Christine Duffy said the new ships will complement the company’s existing fleet of 29 vessels. “With a 29-ship fleet, we know our guests appreciate choices,” Duffy said. “They love the incredible experiences and amenities on our Excel Class ships, the largest in our fleet, but they also love the intimacy our smaller ships offer.” Fincantieri said the design has also been developed as a multi-brand platform, potentially allowing Carnival Corporation to adopt the same basic vessel design across several of its cruise lines in the future. Fincantieri+2 The order comes as Fincantieri is already building three much larger Ace-class cruise ships for Carnival at its Monfalcone shipyard. Those vessels, measuring approximately 230,000 gross tons and capable of carrying nearly 8,000 passengers at full capacity, are scheduled for delivery in 2029, 2031 and 2033. Construction of the first ship, Carnival Destiny, began in July 2026. The latest order therefore represents a significant departure from the industry’s trend toward ever-larger cruise ships. At approximately 130,000 gross tons, the new vessels will be about 43% smaller by gross tonnage than the Ace-class ships. Carnival Corporation CEO Josh Weinstein said the company now has 12 ships on order for delivery through 2039 across its Carnival Cruise Line, Princess Cruises and AIDA Cruises brands. The company is also expanding its private destination infrastructure, including two additional phases at Celebration Key on Grand Bahama, scheduled for 2028 and 2030. Together, the expansions will increase the destination’s land-side guest capacity by 6,000. The latest contract extends a relationship spanning three decades between Carnival and Fincantieri. The Italian shipbuilder has delivered 76 vessels across Carnival Corporation’s brands, including 15 for Carnival Cruise Line. The new contract remains subject to financing and other customary terms and conditions. Sign up for gCaptain’s newsletter and never miss an update Essential maritime and offshore news, insights, and updates delivered daily straight to your inbox Dive into a sea of curated content with our weekly ‘Dispatch’ email. Your personal maritime briefing awaits! After disembarking more than 200 passengers who had paid tens of thousands of dollars to live on board for years, the Villa Vie Odyssey cruise ship departed Cambodia early on Wednesday. The U.S. Coast Guard has detained the cruise ship MSC Poesia at PortMiami, forcing MSC Cruises to cancel an 11-night Caribbean voyage after the vessel remained in port for two... Villa Vie Residences has suspended operations of its residential cruise ship Villa Vie Odyssey in Cambodia, forcing residents to disembark as soaring fuel costs push the company toward financial restructuring.... Subscribe to gCaptain Daily and stay informed with the latest global maritime and offshore news Stay informed with the latest maritime and offshore news, delivered daily straight to your inbox Stay informed with the latest maritime and offshore news, delivered straight to your inbox For general inquiries and to contact us, please email: [email protected] To submit a story idea or contact our editors, please email: [email protected] For advertising opportunities contact Email: [email protected] Phone: +1.805.704.2536. Essential news coupled with the finest maritime content sourced from across the globe.",
-      "takeaways": [
-        "Advertise Forum Jobs Subscribe Grab a Seat at the Captain’s Table Essential news coupled with the finest maritime content sourced from across the globe.",
-        "Join the leading maritime news network Carnival Destiny Rendering.",
-        "The agreement, valued at more than €2 billion ($2.2 billion), calls for construction of two dual-fuel cruise ships at Fincantieri’s Marghera shipyard in Italy, with deliveries scheduled for 2033 and 2035."
-      ],
-      "readingMinutes": 4,
-      "readMinutes": 4
     },
     {
       "id": "SN-41ACFDA350",
@@ -1381,30 +1385,26 @@
       "sourceRegion": "USA / Maritime Tech",
       "url": "https://www.marinelink.com/news/hatenboerwater-breaks-ground-new-544505",
       "publishedAt": "2026-11-20T14:52:59Z",
-      "category": "Ports & Terminals",
-      "region": "Strait of Hormuz & Persian Gulf",
+      "category": "Shipping & Tankers",
+      "region": "Global Maritime",
       "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "US Gulf & Port of Houston",
-        "Rotterdam & North Sea"
+        "Global Maritime"
       ],
       "tags": [
-        "port",
-        "houston",
-        "singapore"
+        "shipping",
+        "global"
       ],
       "coords": [
-        26.56,
-        56.25
+        25.0,
+        -40.0
       ],
-      "navarea": "IX",
+      "navarea": "GLOBAL",
       "image": "https://images.marinelink.com/images/maritime/w150/hatenboerwater-175222.jpg",
       "summary": "Hatenboer-Water has started building a new headquarters in Schiedam, driving the first foundation pile on Thursday after early demolition work.Due to finish in the third quarter of 2027, the new building project adds manufacturing space and…",
-      "body": "Hatenboer-Water Breaks Ground on New Headquarters in Schiedam Maritime Activity Reports, Inc. November 20, 2026 © Hatenboer-Water Hatenboer-Water has started building a new headquarters in Schiedam, driving the first foundation pile on Thursday after early demolition work. Due to finish in the third quarter of 2027, the new building project adds manufacturing space and twice the company's current testing capacity as orders grow across shipping and offshore energy. Hatenboer-Water's existing premises in Schiedam have reached their limit. Rebuilding on site upgrades its engineering workshops and manufacturing facilities and keeps the business inside the Port of Rotterdam maritime cluster. Schiedam's focus on maritime manufacturing puts the company close to European shipbuilders, engineering firms and offshore service providers. The site also serves as the main hub for regional offices in Aberdeen, Dubai, Houston, Singapore and Hamburg. Doubling production and testing capacity means Hatenboer-Water can build more systems and run several demanding tests simultaneously, cutting waiting times and speeding up delivery. Inside, the building includes new production equipment, a better layout for moving materials, shared meeting spaces for visiting clients, and upgraded IT infrastructure and access controls. Separate, fully secured office zones with restricted access will let teams work on confidential projects. Designed as an all-electric, fully insulated building, it will also operate without natural gas. Daily operations will not stop during construction. Using a phased 'chessboard' plan, the existing building will stay in use while the first new sections are built. Staff and equipment will move across step by step as each part finishes, keeping production and support running as normal through 2027.",
+      "body": "Hatenboer-Water has started building a new headquarters in Schiedam, driving the first foundation pile on Thursday after early demolition work.Due to finish in the third quarter of 2027, the new building project adds manufacturing space and…",
       "takeaways": [
-        "Hatenboer-Water Breaks Ground on New Headquarters in Schiedam Maritime Activity Reports, Inc.",
-        "November 20, 2026 © Hatenboer-Water Hatenboer-Water has started building a new headquarters in Schiedam, driving the first foundation pile on Thursday after early demolition work.",
-        "Due to finish in the third quarter of 2027, the new building project adds manufacturing space and twice the company's current testing capacity as orders grow across shipping and offshore energy."
+        "Operational Area: Global Maritime.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1518,28 +1518,25 @@
       "sourceRegion": "USA / Maritime Tech",
       "url": "https://www.marinelink.com/news/energysaving-system-marine-generators-544501",
       "publishedAt": "2026-11-20T13:57:30Z",
-      "category": "Weather & Cyclones",
-      "region": "Singapore & Malacca Strait",
+      "category": "Navigation & Safety",
+      "region": "Japan & Korea",
       "regions": [
-        "Singapore & Malacca Strait",
         "Japan & Korea"
       ],
       "tags": [
-        "port",
         "safety"
       ],
       "coords": [
-        1.26,
-        103.82
+        35.1,
+        129.04
       ],
       "navarea": "XI",
       "image": "https://images.marinelink.com/images/maritime/w150/copyright-xavier-marchantadobestock-175218.jpg",
       "summary": "NYK Line, MTI Co., Oshima Shipbuilding, Terasaki Electric and Daihatsu Infinearth have verified the energy-saving performance and operational safety of the Hz Controller System, an energy-saving system for marine generators developed through joint testing.",
-      "body": "Energy-Saving System for Marine Generators Touts 10% Fuel Savings Maritime Activity Reports, Inc. November 20, 2026 Copyright Xavier MARCHANT/AdobeStock NYK Line, MTI Co., Oshima Shipbuilding, Terasaki Electric and Daihatsu Infinearth have verified the energy-saving performance and operational safety of the Hz Controller System, an energy-saving system for marine generators developed through joint testing. General sales of the system will now begin. Building on their joint research, the five companies will expand deployment beyond NYK-operated vessels, promoting installation on newbuildings and retrofitting on existing ships owned by other shipowners. The System reduces power consumption and generator fuel consumption by lowering the generator frequency while maintaining the performance required by onboard equipment. This is possible because onboard equipment such as pumps and motors that operate in conjunction with the power supply frequency is designed to deliver the required performance even under anticipated severe conditions and may therefore have excess capacity during normal navigation. Specifically, the System switches between the regular frequency and a lower energy-saving frequency according to shipboard conditions within the range specified by ship classification rules. It utilizes generator frequency control technology (Patent Number JP6238600) that is jointly patented by NYK and Tsuneishi Shipbuilding. Demonstration tests confirmed an approximately 10% reduction in generator fuel consumption compared with operation at the regular frequency. Subsequent verification on an increasing number of vessels equipped with the system confirmed a similar reduction. For general sales, Terasaki Electric will be responsible for the design and supply of the System, while Daihatsu Infinearth will expand its lineup of generator engines compatible with the System.",
+      "body": "NYK Line, MTI Co., Oshima Shipbuilding, Terasaki Electric and Daihatsu Infinearth have verified the energy-saving performance and operational safety of the Hz Controller System, an energy-saving system for marine generators developed through joint testing.",
       "takeaways": [
-        "Energy-Saving System for Marine Generators Touts 10% Fuel Savings Maritime Activity Reports, Inc.",
-        "General sales of the system will now begin.",
-        "Building on their joint research, the five companies will expand deployment beyond NYK-operated vessels, promoting installation on newbuildings and retrofitting on existing ships owned by other shipowners."
+        "Operational Area: Japan & Korea.",
+        "Watchkeepers transiting affected waters should cross-check active NAVAREA & UKMTO advisories on SetChart."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1740,7 +1737,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2015/07/Subsea-7-Seven-Borealis-300x200.jpeg",
       "summary": "Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis, which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally...",
-      "body": "Europe Offshore Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger Bojan Lepic November 20, 2026 0 2,564 1 minute read Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis , which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month. The regulator required the disposal of Seven Borealis to address competition concerns in Brazil’s offshore engineering, procurement, construction, and installation market, where both contractors have a substantial presence. Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure. Those commitments currently extend into 2028. The company has not identified a prospective buyer or disclosed an asking price for the vessel. The planned merger will create Saipem 7, combining two of the world’s largest offshore construction contractors. Subsea 7 said 13 of the 16 relevant competition authorities have approved the transaction. Reviews remain underway in Australia, the EU, and West Africa, with completion now expected in early 2027. The Seven Borealis disposal remains a condition of the Brazilian approval. Tags Italy Norway Bojan Lepic November 20, 2026 0 2,564 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger Bojan Lepic November 20, 2026 0 2,760 1 minute read Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis , which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month. The regulator required the disposal of Seven Borealis to address competition concerns in Brazil’s offshore engineering, procurement, construction, and installation market, where both contractors have a substantial presence. Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure. Those commitments currently extend into 2028. The company has not identified a prospective buyer or disclosed an asking price for the vessel. The planned merger will create Saipem 7, combining two of the world’s largest offshore construction contractors. Subsea 7 said 13 of the 16 relevant competition authorities have approved the transaction. Reviews remain underway in Australia, the EU, and West Africa, with completion now expected in early 2027. The Seven Borealis disposal remains a condition of the Brazilian approval. Tags Italy Norway Bojan Lepic November 20, 2026 0 2,760 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month.",
         "Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure.",
@@ -1774,7 +1771,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2026/10/Seaway-Phoenix-Seaway-7-300x180.jpg",
       "summary": "Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift, Seaway Strashnov, and Seaway Phoenix, with offshore work expected during 2029 and 2030....",
-      "body": "Europe Offshore Renewables Seaway 7 lines up vessel trio for Scottish offshore wind project Bojan Lepic November 20, 2026 0 960 1 minute read Seaway 7 Seaway 7 Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030. The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables. SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations. The project is located around 38 km off the Scottish Borders in the outer Firth of Forth, with average water depths of approximately 52 m. SSE expects Berwick Bank B to become the world’s deepest fixed-bottom offshore wind farm once completed. The development forms part of the wider Berwick Bank offshore wind complex, which has a proposed capacity of approximately 4.1GW. The Berwick Bank B agreement remains subject to final contract award and SSE’s final investment decision, expected in late 2027. Subject to approval, preparatory offshore construction could begin in 2028, with foundation and cable installation continuing into 2031. Seaway 7 previously worked with SSE on the Beatrice and Seagreen offshore wind farms. Tags Norway Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 960 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Seaway 7 lines up vessel trio for Scottish offshore wind project Bojan Lepic November 20, 2026 0 1,008 1 minute read Seaway 7 Seaway 7 Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030. The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables. SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations. The project is located around 38 km off the Scottish Borders in the outer Firth of Forth, with average water depths of approximately 52 m. SSE expects Berwick Bank B to become the world’s deepest fixed-bottom offshore wind farm once completed. The development forms part of the wider Berwick Bank offshore wind complex, which has a proposed capacity of approximately 4.1GW. The Berwick Bank B agreement remains subject to final contract award and SSE’s final investment decision, expected in late 2027. Subject to approval, preparatory offshore construction could begin in 2028, with foundation and cable installation continuing into 2031. Seaway 7 previously worked with SSE on the Beatrice and Seagreen offshore wind farms. Tags Norway Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 1,008 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030.",
         "The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables.",
@@ -1841,7 +1838,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2023/08/Ingka-floating-wind-300x185.jpg",
       "summary": "The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity...",
-      "body": "Europe Offshore Renewables Scotland greenlights 1 GW floating offshore wind project Bojan Lepic November 20, 2026 0 892 1 minute read Ingka Group Ingka Group The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes. The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure. Muir Mhòr was awarded seabed rights in Scotland’s ScotWind leasing round in 2022 and is among the country’s most advanced commercial-scale floating wind developments. Fred. Olsen Seawind took full ownership of the project earlier this year after acquiring Vattenfall’s 50% interest. The developer is targeting the start of electricity generation in the early 2030s, subject to further commercial and investment decisions. The project has already awarded £18.4m in development contracts, including £7.96m to Scottish suppliers. The latest approval comes with conditions requiring measures to address the wind farm’s potential impact on commercial fisheries and seabirds. The Scottish Fishermen’s Federation criticised the decision, arguing that questions remain about whether fishing vessels can operate safely around the project’s floating foundations, moorings, and subsea cables. Scotland currently has more than 11GW of consented offshore wind capacity, according to the government. The consent is a significant development milestone for Muir Mhòr, although the project has yet to reach a final investment decision. Tags Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 892 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Scotland greenlights 1 GW floating offshore wind project Bojan Lepic November 20, 2026 0 945 1 minute read Ingka Group Ingka Group The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes. The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure. Muir Mhòr was awarded seabed rights in Scotland’s ScotWind leasing round in 2022 and is among the country’s most advanced commercial-scale floating wind developments. Fred. Olsen Seawind took full ownership of the project earlier this year after acquiring Vattenfall’s 50% interest. The developer is targeting the start of electricity generation in the early 2030s, subject to further commercial and investment decisions. The project has already awarded £18.4m in development contracts, including £7.96m to Scottish suppliers. The latest approval comes with conditions requiring measures to address the wind farm’s potential impact on commercial fisheries and seabirds. The Scottish Fishermen’s Federation criticised the decision, arguing that questions remain about whether fishing vessels can operate safely around the project’s floating foundations, moorings, and subsea cables. Scotland currently has more than 11GW of consented offshore wind capacity, according to the government. The consent is a significant development milestone for Muir Mhòr, although the project has yet to reach a final investment decision. Tags Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 945 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Olsen Seawind off the Aberdeenshire coast.",
         "Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes.",
