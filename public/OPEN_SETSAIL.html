@@ -254,7 +254,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.252" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.253" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -10004,7 +10004,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.252" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.253" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
   <style>
@@ -13999,240 +13999,222 @@ select option {
       background: #f8fafc !important;
     }
 
-    /* v5.252: Designer Weather Forecast Timeline & Future Ghost Vessel */
+    /* v5.253: Redesigned Clean Weather Forecast Timeline with Pill Thumb (+XH) */
+    #tab-ntm .ntm-toolbar-right .ntm-wx-timeline-tile[hidden],
     .ntm-wx-timeline-tile[hidden] {
       display: none !important;
     }
+    #tab-ntm .ntm-toolbar-right .ntm-wx-timeline-tile,
     .ntm-wx-timeline-tile {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      height: 28px;
-      min-height: 28px;
-      max-height: 28px;
-      padding: 0 8px 0 5px;
-      border-radius: 7px;
-      background: linear-gradient(135deg, rgba(11, 22, 40, 0.94), rgba(15, 29, 54, 0.90));
-      border: 1px solid rgba(56, 189, 248, 0.30);
-      box-shadow: 0 2px 10px rgba(2, 8, 23, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      display: inline-flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      gap: 8px !important;
+      height: 28px !important;
+      min-height: 28px !important;
+      max-height: 28px !important;
+      padding: 0 10px 0 6px !important;
+      margin: 0 !important;
+      border-radius: 6px !important;
+      background: rgba(8, 47, 73, 0.55) !important;
+      border: 1px solid rgba(34, 211, 238, 0.28) !important;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.25) !important;
       font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       color: #e2e8f0;
-      box-sizing: border-box;
-      flex-shrink: 0;
-      order: -2;
+      box-sizing: border-box !important;
+      flex: 0 0 auto !important;
+      align-self: center !important;
+      order: -2 !important;
+      overflow: hidden !important;
       user-select: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      transition: border-color 0.18s ease, background 0.18s ease;
     }
+    #tab-ntm .ntm-toolbar-right .ntm-wx-timeline-tile.is-forecast-active,
     .ntm-wx-timeline-tile.is-forecast-active {
-      border-color: rgba(56, 189, 248, 0.62);
-      box-shadow: 0 2px 12px rgba(14, 165, 233, 0.24), inset 0 1px 0 rgba(56, 189, 248, 0.14);
+      border-color: rgba(56, 189, 248, 0.65) !important;
+      background: rgba(12, 34, 62, 0.78) !important;
     }
+    #tab-ntm .ntm-toolbar-right .ntm-wx-tl-play,
     .ntm-wx-tl-play {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 18px !important;
+      min-width: 18px !important;
+      max-width: 18px !important;
+      height: 18px !important;
+      min-height: 18px !important;
+      max-height: 18px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border-radius: 4px !important;
+      border: 1px solid rgba(56, 189, 248, 0.38) !important;
+      background: rgba(14, 165, 233, 0.16) !important;
+      color: #38bdf8 !important;
+      cursor: pointer;
+      flex: 0 0 18px !important;
+      box-sizing: border-box !important;
+      line-height: 1 !important;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    #tab-ntm .ntm-toolbar-right .ntm-wx-tl-play:hover,
+    .ntm-wx-tl-play:hover {
+      background: rgba(56, 189, 248, 0.28) !important;
+      color: #f0f9ff !important;
+      border-color: rgba(56, 189, 248, 0.7) !important;
+    }
+    #tab-ntm .ntm-toolbar-right .ntm-wx-tl-play.is-playing,
+    .ntm-wx-tl-play.is-playing {
+      background: rgba(245, 158, 11, 0.22) !important;
+      border-color: rgba(245, 158, 11, 0.65) !important;
+      color: #fbbf24 !important;
+    }
+    .ntm-wx-tl-play svg {
+      width: 10px !important;
+      height: 10px !important;
+      display: block;
+      flex-shrink: 0;
+    }
+    .ntm-wx-tl-play .wx-tl-ico-pause {
+      display: none !important;
+    }
+    .ntm-wx-tl-play.is-playing .wx-tl-ico-play {
+      display: none !important;
+    }
+    .ntm-wx-tl-play.is-playing .wx-tl-ico-pause {
+      display: block !important;
+    }
+    .ntm-wx-tl-track-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 240px;
+      min-width: 180px;
+      height: 22px;
+      flex: 0 0 auto;
+      box-sizing: border-box;
+      --wx-tl-pct: 0;
+    }
+    .ntm-wx-tl-rail {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.24);
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .ntm-wx-tl-fill {
+      height: 100%;
+      width: calc(var(--wx-tl-pct, 0) * 1%);
+      background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+      border-radius: 999px;
+    }
+    .ntm-wx-tl-thumb-pill {
+      position: absolute;
+      top: 50%;
+      left: calc(19px + (100% - 38px) * (var(--wx-tl-pct, 0) / 100));
+      transform: translate(-50%, -50%);
+      min-width: 38px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+      border: 1px solid #7dd3fc;
+      box-shadow: 0 1px 5px rgba(2, 8, 23, 0.55), 0 0 8px rgba(56, 189, 248, 0.45);
+      color: #f8fafc;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      line-height: 16px;
+      text-align: center;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 20px;
-      height: 20px;
-      padding: 0;
-      border-radius: 5px;
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      background: rgba(14, 165, 233, 0.16);
-      color: #38bdf8;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: all 0.16s ease;
-    }
-    .ntm-wx-tl-play:hover {
-      background: rgba(56, 189, 248, 0.28);
-      color: #f0f9ff;
-      border-color: rgba(56, 189, 248, 0.65);
-      transform: scale(1.04);
-    }
-    .ntm-wx-tl-play.is-playing {
-      background: rgba(245, 158, 11, 0.22);
-      border-color: rgba(245, 158, 11, 0.65);
-      color: #fbbf24;
-    }
-    .ntm-wx-tl-play svg {
-      width: 11px;
-      height: 11px;
-      display: block;
-    }
-    .ntm-wx-tl-play .wx-tl-ico-pause {
-      display: none;
-    }
-    .ntm-wx-tl-play.is-playing .wx-tl-ico-play {
-      display: none;
-    }
-    .ntm-wx-tl-play.is-playing .wx-tl-ico-pause {
-      display: block;
-    }
-    .ntm-wx-tl-now {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      height: 20px;
-      padding: 0 6px;
-      border-radius: 4px;
-      border: 1px solid rgba(148, 163, 184, 0.24);
-      background: rgba(15, 23, 42, 0.68);
-      color: #cbd5e1;
-      font-family: inherit;
-      font-size: 0.65rem;
-      font-weight: 700;
-      line-height: 1;
-      cursor: pointer;
       white-space: nowrap;
-      flex-shrink: 0;
-      transition: all 0.16s ease;
+      pointer-events: none;
+      box-sizing: border-box;
+      z-index: 2;
     }
-    .ntm-wx-tl-now:hover {
-      border-color: rgba(56, 189, 248, 0.52);
-      color: #f8fafc;
-    }
-    .ntm-wx-tl-now.is-now .wx-tl-offset {
+    .ntm-wx-tl-thumb-pill.is-now {
+      background: rgba(15, 23, 42, 0.92);
+      border-color: rgba(52, 211, 153, 0.65);
       color: #34d399;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-    }
-    .ntm-wx-tl-now.is-now .wx-tl-utc {
-      color: #94a3b8;
-      font-size: 0.58rem;
-      font-weight: 600;
-    }
-    .ntm-wx-tl-now.is-forecast {
-      background: rgba(14, 165, 233, 0.18);
-      border-color: rgba(56, 189, 248, 0.55);
-    }
-    .ntm-wx-tl-now.is-forecast .wx-tl-offset {
-      color: #38bdf8;
-      font-weight: 800;
-    }
-    .ntm-wx-tl-now.is-forecast .wx-tl-utc {
-      color: #e2e8f0;
-      font-size: 0.60rem;
-      font-weight: 600;
-    }
-    .ntm-wx-tl-track-wrap {
-      display: flex;
-      align-items: center;
-      width: 118px;
-      min-width: 84px;
-      height: 20px;
-      position: relative;
+      box-shadow: 0 1px 4px rgba(2, 8, 23, 0.45);
     }
     .ntm-wx-tl-slider {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 3;
       -webkit-appearance: none;
       appearance: none;
-      width: 100%;
-      height: 5px;
-      margin: 0;
-      border-radius: 999px;
-      outline: none;
-      cursor: pointer;
-      --wx-tl-pct: 0%;
-      background: linear-gradient(
-        90deg,
-        #0ea5e9 0%,
-        #38bdf8 var(--wx-tl-pct),
-        rgba(148, 163, 184, 0.25) var(--wx-tl-pct),
-        rgba(148, 163, 184, 0.25) 100%
-      );
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45);
     }
     .ntm-wx-tl-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 13px;
-      height: 13px;
-      border-radius: 50%;
-      background: #f8fafc;
-      border: 2px solid #0ea5e9;
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.85), 0 1px 3px rgba(0, 0, 0, 0.5);
+      width: 38px;
+      height: 20px;
       cursor: grab;
-      transition: transform 0.12s ease, box-shadow 0.12s ease;
-    }
-    .ntm-wx-tl-slider::-webkit-slider-thumb:hover,
-    .ntm-wx-tl-slider:active::-webkit-slider-thumb {
-      transform: scale(1.16);
-      background: #ffffff;
-      border-color: #38bdf8;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 1);
-      cursor: grabbing;
     }
     .ntm-wx-tl-slider::-moz-range-thumb {
-      width: 13px;
-      height: 13px;
-      border-radius: 50%;
-      background: #f8fafc;
-      border: 2px solid #0ea5e9;
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.85);
+      width: 38px;
+      height: 20px;
+      border: none;
+      background: transparent;
       cursor: grab;
     }
-    .ntm-wx-tl-max {
-      font-size: 0.62rem;
-      font-weight: 700;
-      color: #94a3b8;
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+    body.light-theme #tab-ntm .ntm-toolbar-right .ntm-wx-timeline-tile,
+    [data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-timeline-tile,
     [data-theme="light"] .ntm-wx-timeline-tile {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.94));
-      border-color: rgba(2, 132, 199, 0.30);
+      background: rgba(224, 242, 254, 0.95) !important;
+      border-color: rgba(2, 132, 199, 0.35) !important;
       color: #0f172a;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.07);
+      box-shadow: none !important;
     }
-    [data-theme="light"] .ntm-wx-timeline-tile.is-forecast-active {
-      border-color: rgba(2, 132, 199, 0.62);
-      box-shadow: 0 2px 10px rgba(2, 132, 199, 0.16);
-    }
+    body.light-theme #tab-ntm .ntm-toolbar-right .ntm-wx-tl-play,
+    [data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-tl-play,
     [data-theme="light"] .ntm-wx-tl-play {
-      background: rgba(2, 132, 199, 0.10);
-      border-color: rgba(2, 132, 199, 0.32);
-      color: #0284c7;
+      background: rgba(2, 132, 199, 0.12) !important;
+      border-color: rgba(2, 132, 199, 0.35) !important;
+      color: #0284c7 !important;
     }
-    [data-theme="light"] .ntm-wx-tl-now {
-      background: rgba(241, 245, 249, 0.92);
-      border-color: rgba(148, 163, 184, 0.40);
-      color: #1e293b;
+    body.light-theme .ntm-wx-tl-rail,
+    [data-theme="light"] .ntm-wx-tl-rail {
+      background: rgba(2, 132, 199, 0.22);
     }
-    [data-theme="light"] .ntm-wx-tl-now.is-now .wx-tl-offset {
+    body.light-theme .ntm-wx-tl-thumb-pill.is-now,
+    [data-theme="light"] .ntm-wx-tl-thumb-pill.is-now {
+      background: #ffffff;
+      border-color: #059669;
       color: #059669;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
     }
-    [data-theme="light"] .ntm-wx-tl-now.is-now .wx-tl-utc {
-      color: #64748b;
-    }
-    [data-theme="light"] .ntm-wx-tl-now.is-forecast {
-      background: rgba(2, 132, 199, 0.12);
-      border-color: rgba(2, 132, 199, 0.45);
-    }
-    [data-theme="light"] .ntm-wx-tl-now.is-forecast .wx-tl-offset {
-      color: #0284c7;
-    }
-    [data-theme="light"] .ntm-wx-tl-now.is-forecast .wx-tl-utc {
-      color: #0f172a;
-    }
-    [data-theme="light"] .ntm-wx-tl-slider {
-      background: linear-gradient(
-        90deg,
-        #0284c7 0%,
-        #38bdf8 var(--wx-tl-pct),
-        rgba(148, 163, 184, 0.35) var(--wx-tl-pct),
-        rgba(148, 163, 184, 0.35) 100%
-      );
-      box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.15);
-    }
-    [data-theme="light"] .ntm-wx-tl-max {
-      color: #475569;
-    }
-    @media (max-width: 900px) {
+    @media (max-width: 1100px) {
       .ntm-wx-tl-track-wrap {
-        width: 78px;
-        min-width: 64px;
+        width: 170px;
+        min-width: 130px;
       }
-      .ntm-wx-tl-now .wx-tl-utc {
-        display: none;
+    }
+    @media (max-width: 820px) {
+      #tab-ntm .ntm-toolbar-right .ntm-wx-timeline-tile,
+      .ntm-wx-timeline-tile {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+      }
+      .ntm-wx-tl-track-wrap {
+        flex: 1 1 auto;
+        width: auto;
       }
     }
     /* Future Own-Ship Ghost Marker */
@@ -14275,7 +14257,7 @@ select option {
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
     }
 
-    /* v5.252: Minimalist Export to ECDIS Modal */
+    /* v5.253: Minimalist Export to ECDIS Modal */
     #ntmExportModal .ntm-export-box {
       max-width: 440px !important;
       padding: 0.95rem 1.05rem !important;
@@ -14537,7 +14519,7 @@ select option {
   </style>
 
   <script>
-    // v5.252 — retired one-shot v5.33 cache wipe+reload (it restarted the boot bar mid-progress).
+    // v5.253 — retired one-shot v5.33 cache wipe+reload (it restarted the boot bar mid-progress).
     (function () {
       try {
         localStorage.setItem('setsail_force_v533', '1');
@@ -15359,7 +15341,7 @@ select option {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.252" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.252';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.253" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.253';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -15381,7 +15363,7 @@ select option {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.252" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.253" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -16080,19 +16062,18 @@ select option {
           </div>
 
           <div class="ntm-toolbar-right">
-            <div class="ntm-wx-timeline-tile" id="ntmWxTimelineTile" hidden title="Weather Forecast Timeline — scrub forward up to max cyclone forecast horizon">
+            <div class="ntm-wx-timeline-tile" id="ntmWxTimelineTile" hidden title="Weather Forecast Timeline — drag slider to scrub forecast hours ahead">
               <button type="button" class="ntm-wx-tl-play" id="ntmWxTimelinePlayBtn" title="Play / Pause forecast timeline" aria-label="Play forecast">
                 <svg class="wx-tl-ico-play" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7 5 19 12 7 19" fill="currentColor"/></svg>
                 <svg class="wx-tl-ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg>
               </button>
-              <button type="button" class="ntm-wx-tl-now is-now" id="ntmWxTimelineNowBtn" title="Click to reset to live current weather (0h)">
-                <span class="wx-tl-offset" id="ntmWxTimelineOffsetLbl">NOW</span>
-                <span class="wx-tl-utc" id="ntmWxTimelineUtcLbl">LIVE</span>
-              </button>
               <div class="ntm-wx-tl-track-wrap">
-                <input type="range" class="ntm-wx-tl-slider" id="ntmWxTimelineSlider" min="0" max="72" step="0.5" value="0" aria-label="Weather forecast hours ahead" />
+                <div class="ntm-wx-tl-rail">
+                  <div class="ntm-wx-tl-fill" id="ntmWxTimelineFill"></div>
+                </div>
+                <div class="ntm-wx-tl-thumb-pill is-now" id="ntmWxTimelineThumbPill">NOW</div>
+                <input type="range" class="ntm-wx-tl-slider" id="ntmWxTimelineSlider" min="0" max="72" step="1" value="0" aria-label="Weather forecast hours ahead" />
               </div>
-              <span class="ntm-wx-tl-max" id="ntmWxTimelineMaxLbl" title="Maximum forecast horizon (synced with active cyclone tracks)">+72h</span>
             </div>
             <div class="ntm-wx-cursor-tile" id="ntmWxCursorTile" hidden title="Weather at cursor — wind, waves, pressure, SST and ocean current">
               <span class="ntm-wx-cursor-badge" id="ntmWxCursorBadge"><span class="wx-badge-text">WX</span><span class="wx-badge-spinner" aria-hidden="true"></span></span>
@@ -23297,26 +23278,26 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.252"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.252" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.252"></script>
-  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.252"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.253"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.253" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.253"></script>
+  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.253"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.252",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.253",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.252"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.252"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.252"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.253"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.253"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.253"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.252"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.253"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -23389,15 +23370,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.252"></script>
-<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.252"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.253"></script>
+<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.253"></script>
 <script>if (typeof window.__setsailToggleNtmSidebar === 'function') { window.toggleNtmSidebar = window.__setsailToggleNtmSidebar; }</script>
-<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.252"></script>
-<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.252"></script>
-<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.252"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.252"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.252"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.252"></script>
+<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.253"></script>
+<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.253"></script>
+<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.253"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.253"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.253"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.253"></script>
 
 
 
@@ -24061,7 +24042,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.252.0' && k !== 'setsail-tiles-cache-v5.252.0').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.253.0' && k !== 'setsail-tiles-cache-v5.253.0').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 function showSetSailHardRefreshTip(cacheLabel) {
@@ -24111,17 +24092,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.252', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.253', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.252 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.253 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.252') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.252.0'); }, 1200);
+              if (last && last.indexOf('v5.253') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.253.0'); }, 1200);
               }
             } catch (eTip) {}
           })

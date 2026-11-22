@@ -1014,7 +1014,7 @@ def decode_mvt_tile(raw_bytes: bytes, z: int, x: int, y: int) -> list:
     return features_out
 
 NAVTEX_COORD_PATTERNS = [
-    re.compile(r"(\d{1,2})\s*[-°\s]\s*(\d{1,2}(?:[\.,]\d+)?)\s*(?:['′]\s*)?(?:(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\"″]\s*)?)?([NS])\s*[,/\s]+\s*(\d{1,3})\s*[-°\s]\s*(\d{1,2}(?:[\.,]\d+)?)\s*(?:['′]\s*)?(?:(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\"″]\s*)?)?([EW])", re.IGNORECASE),
+    re.compile(r"(\d{1,2})\s*[-°\s]\s*(\d{1,2}(?:[\.,]\d+)?)\s*(?:[-'′]\s*)?(?:(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\"″]\s*)?)?([NS])\s*[,/\s]+\s*(\d{1,3})\s*[-°\s]\s*(\d{1,2}(?:[\.,]\d+)?)\s*(?:[-'′]\s*)?(?:(\d{1,2}(?:[\.,]\d+)?)\s*(?:[\"″]\s*)?)?([EW])", re.IGNORECASE),
     re.compile(r"\b(\d{2})(\d{2}(?:\.\d+)?)([NS])\s+(\d{3})(\d{2}(?:\.\d+)?)([EW])\b", re.IGNORECASE),
 ]
 
@@ -1274,10 +1274,153 @@ def scrape_nga_msi_warnings() -> list:
         print(f"  [!] NGA MSI API warning: {e}")
     return []
 
+JCG_KAIHO_BASE_URL = "https://www1.kaiho.mlit.go.jp/TUHO/keiho/cgi"
+JCG_RCG_ORDINALS = {
+    1: "1st RCG", 2: "2nd RCG", 3: "3rd RCG", 4: "4th RCG",
+    5: "5th RCG", 6: "6th RCG", 7: "7th RCG", 8: "8th RCG",
+    9: "9th RCG", 10: "10th RCG", 11: "11th RCG"
+}
+
+def _clean_jcg_html_block(raw_html: str) -> tuple:
+    """Convert a single JCG warning HTML block into (published_str, clean_body_text)."""
+    published = ""
+    m_dt = re.search(r"Date:\s*(\d{4})/(\d{2})/(\d{2})\s+(\d{1,2})\s*UTC", raw_html, re.IGNORECASE)
+    if m_dt:
+        published = f"{m_dt.group(1)}-{m_dt.group(2)}-{m_dt.group(3)}T{int(m_dt.group(4)):02d}:00:00Z"
+    txt = re.sub(r"<br\s*/?>", "\n", raw_html, flags=re.IGNORECASE)
+    txt = re.sub(r"<[^>]+>", "", txt)
+    txt = txt.replace("\u300c", "").replace("\u300d", "").replace("&nbsp;", " ").replace("&amp;", "&")
+    lines = [ln.strip() for ln in txt.splitlines() if ln.strip()]
+    return published, "\n".join(lines)
+
+def scrape_jcg_kaiho_warnings(years=(2026, 2025)) -> list:
+    """Scrape active NAVTEX, NAVAREA XI, and Local (1st-11th RCG) warnings in English directly from Japan Coast Guard (kaiho.mlit.go.jp)."""
+    results = []
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Referer": "https://www1.kaiho.mlit.go.jp/TUHO/keiho/navtex_en.html"
+    })
+    member_re = re.compile(r"<Member>(.*?)</Member>", re.DOTALL | re.IGNORECASE)
+    tag_re = lambda tag, s: (re.search(rf"<{tag}>(.*?)</{tag}>", s, re.DOTALL | re.IGNORECASE).group(1).strip()
+                             if re.search(rf"<{tag}>(.*?)</{tag}>", s, re.DOTALL | re.IGNORECASE) else "")
+
+    for yr in years:
+        yr_full = str(yr)
+        yr_short = yr_full[-2:]
+        # 1) NAVTEX and NAVAREA11 feeds
+        for feed_type in ("NAVTEX", "NAVAREA11"):
+            try:
+                resp = session.post(
+                    f"{JCG_KAIHO_BASE_URL}/warnings.cgi",
+                    data={"YEAR": yr_full, "TYPE": feed_type, "LANG": "EG"},
+                    timeout=15
+                )
+                if resp.status_code != 200:
+                    continue
+                members = []
+                for m_str in member_re.findall(resp.text):
+                    num_raw = tag_re("number", m_str)
+                    tana = tag_re("tana", m_str)
+                    cat = tag_re("categoly", m_str)
+                    title = tag_re("title", m_str)
+                    if num_raw and tana:
+                        members.append({"num": str(int(num_raw)) if num_raw.isdigit() else num_raw,
+                                        "tana": tana, "category_raw": cat, "title": title})
+                for b_start in range(0, len(members), 25):
+                    batch = members[b_start:b_start + 25]
+                    tana_arg = ":".join(x["tana"] for x in batch) + ":"
+                    d_resp = session.post(
+                        f"{JCG_KAIHO_BASE_URL}/disp_warnings.cgi",
+                        data={"TYPE": feed_type, "TANA": tana_arg, "LANG": "EG"},
+                        timeout=18
+                    )
+                    if d_resp.status_code != 200:
+                        continue
+                    body_part = re.split(r"</H1>", d_resp.text, flags=re.IGNORECASE)[-1]
+                    blocks = [b.strip() for b in re.split(r"<hr[^>]*>", body_part, flags=re.IGNORECASE)
+                              if "<STRONG>" in b.upper()]
+                    for idx, item in enumerate(batch):
+                        if idx >= len(blocks):
+                            break
+                        pub_iso, clean_txt = _clean_jcg_html_block(blocks[idx])
+                        results.append({
+                            "feed_type": feed_type,
+                            "kanku": "",
+                            "num": item["num"],
+                            "year_full": yr_full,
+                            "year_short": yr_short,
+                            "category_raw": item["category_raw"],
+                            "title": item["title"],
+                            "published": pub_iso,
+                            "body": clean_txt
+                        })
+            except Exception as e:
+                print(f"  [!] JCG {feed_type} ({yr_full}) scrape warning: {e}")
+
+        # 2) Local Navigational Warnings (1st-11th RCG, KANKU=0)
+        try:
+            resp = session.post(
+                f"{JCG_KAIHO_BASE_URL}/local_warnings.cgi",
+                data={"YEAR": yr_full, "KANKU": "0", "LANG": "EG"},
+                timeout=15
+            )
+            if resp.status_code == 200:
+                members = []
+                for m_str in member_re.findall(resp.text):
+                    kanku = tag_re("kanku", m_str)
+                    num_raw = tag_re("number", m_str)
+                    tana = tag_re("tana", m_str)
+                    cat = tag_re("categoly", m_str)
+                    title = tag_re("title", m_str)
+                    if kanku and num_raw and tana:
+                        k_pad = f"{int(kanku):02d}" if kanku.isdigit() else kanku
+                        members.append({
+                            "kanku": k_pad,
+                            "num": str(int(num_raw)) if num_raw.isdigit() else num_raw,
+                            "full_tana": f"{k_pad}{tana}",
+                            "category_raw": cat,
+                            "title": title
+                        })
+                for b_start in range(0, len(members), 25):
+                    batch = members[b_start:b_start + 25]
+                    tana_arg = ":".join(x["full_tana"] for x in batch) + ":"
+                    d_resp = session.post(
+                        f"{JCG_KAIHO_BASE_URL}/local_disp_warnings.cgi",
+                        data={"TANA": tana_arg, "LANG": "EG"},
+                        timeout=18
+                    )
+                    if d_resp.status_code != 200:
+                        continue
+                    body_part = re.split(r"</H1>", d_resp.text, flags=re.IGNORECASE)[-1]
+                    blocks = [b.strip() for b in re.split(r"<hr[^>]*>", body_part, flags=re.IGNORECASE)
+                              if "<STRONG>" in b.upper()]
+                    for idx, item in enumerate(batch):
+                        if idx >= len(blocks):
+                            break
+                        pub_iso, clean_txt = _clean_jcg_html_block(blocks[idx])
+                        results.append({
+                            "feed_type": "LOCAL",
+                            "kanku": item["kanku"],
+                            "num": item["num"],
+                            "year_full": yr_full,
+                            "year_short": yr_short,
+                            "category_raw": item["category_raw"],
+                            "title": item["title"],
+                            "published": pub_iso,
+                            "body": clean_txt
+                        })
+        except Exception as e:
+            print(f"  [!] JCG LOCAL ({yr_full}) scrape warning: {e}")
+
+    print(f"  [+] Fetched {len(results)} active warnings from Japan Coast Guard (kaiho.mlit.go.jp: NAVTEX, NAVAREA XI, Local RCG)")
+    return results
+
 def build_global_navtex_notices() -> tuple:
     now_utc = datetime.datetime.now(timezone.utc)
     ns_warnings = scrape_nautoshark_mvt_warnings()
     nga_warnings = scrape_nga_msi_warnings()
+    jcg_warnings = scrape_jcg_kaiho_warnings()
 
     navtex_notices = {}
     all_cancelled_refs = set()
@@ -1549,6 +1692,140 @@ def build_global_navtex_notices() -> tuple:
                 "points": [[c["lat"], c["lon"]] for c in coords]
             }]
         navtex_notices[full_id] = notice_obj
+
+    existing_jcg_keys = set()
+    for wobj in navtex_notices.values():
+        c_lbl = str(wobj.get("country") or "").strip().upper()
+        n_s = str(wobj.get("num") or "").strip()
+        y_s = str(wobj.get("year") or "").strip()[-2:]
+        if n_s.isdigit():
+            existing_jcg_keys.add((c_lbl, int(n_s), y_s))
+
+    jcg_added = 0
+    for jw in jcg_warnings:
+        feed_type = jw.get("feed_type") or "NAVTEX"
+        kanku = str(jw.get("kanku") or "").strip()
+        num_str = str(jw.get("num") or "").strip()
+        yr_full = str(jw.get("year_full") or now_utc.year).strip()
+        yr_short = str(jw.get("year_short") or yr_full[-2:]).strip()
+        yr_int = int(yr_full) if yr_full.isdigit() else now_utc.year
+        cat_raw = str(jw.get("category_raw") or "").strip()
+        raw_title = str(jw.get("title") or "").strip()
+        published = str(jw.get("published") or "").strip()
+        text_body = str(jw.get("body") or "").strip()
+        if not num_str or not num_str.isdigit() or not text_body:
+            continue
+        num_int = int(num_str)
+
+        if feed_type == "NAVAREA11":
+            country_lbl = "NAVAREA XI"
+            display_id = f"NAVAREA XI {num_int}/{yr_short}"
+            notice_number = f"{num_int}/{yr_full}"
+            scope_key = ("XI", "NAVAREA XI")
+        elif feed_type == "LOCAL":
+            k_int = int(kanku) if kanku.isdigit() else 3
+            rcg_lbl = JCG_RCG_ORDINALS.get(k_int, f"{k_int}th RCG")
+            country_lbl = f"NAVAREA XI — {rcg_lbl}"
+            display_id = f"{rcg_lbl} {num_int}/{yr_full}"
+            notice_number = f"{num_int}/{yr_full}"
+            scope_key = ("XI", rcg_lbl.upper())
+        else:
+            country_lbl = "NAVAREA XI — NAVTEX"
+            display_id = f"NAVAREA XI NAVTEX {num_int}/{yr_full}"
+            notice_number = f"{num_int}/{yr_full}"
+            scope_key = ("XI", "NAVTEX")
+
+        cancels_list, self_exp_iso = extract_cancellations_and_expiry(text_body, yr_int)
+        for c_ref in cancels_list:
+            all_cancelled_refs.add(f"{scope_key[1]} {c_ref}")
+            cancelled_by_scope.setdefault(scope_key, set()).add(c_ref)
+            if "/" in c_ref:
+                c_n, c_y = c_ref.split("/", 1)
+                cancelled_by_scope[scope_key].add(f"{int(c_n) if c_n.isdigit() else c_n}/{c_y[-2:]}")
+
+        # Strict deduplication: skip if already present from NautoShark MVT or NGA MSI
+        dedup_key = (country_lbl.upper(), num_int, yr_short)
+        if (display_id in navtex_notices
+                or dedup_key in existing_jcg_keys
+                or (feed_type == "NAVAREA11" and ("XI", num_int, yr_short) in seen_main_navarea_keys)):
+            continue
+
+        # Skip pure self-cancelling cancellation notices ("CANCEL ... AND THIS MSG" / "CANCEL THIS MSG.")
+        if (re.search(r"\bCANCEL\b[^.\n]*\bAND\s+THIS\s+(?:MSG|MESSAGE|WARNING)\b", text_body, re.IGNORECASE)
+                or re.search(r"\bCANCEL\s+THIS\s+(?:MSG|MESSAGE|WARNING)\s*\.", text_body, re.IGNORECASE)):
+            continue
+
+        if self_exp_iso:
+            exp_dt = _parse_iso_utc(self_exp_iso)
+            if exp_dt and exp_dt < now_utc:
+                continue
+
+        coords = extract_coords_from_navtex_text(text_body)[:35]
+        if not coords:
+            continue
+        first_lat = coords[0]["lat"]
+        first_lon = coords[0]["lon"]
+
+        cat_detail = cat_raw.title() if cat_raw else "General"
+        category = f"Navigational Warning — {cat_detail}"
+        is_restr_cat = any(k in f"{cat_raw} {raw_title} {text_body[:160]}".lower()
+                           for k in ["hazard", "gunnery", "firing", "rocket", "military", "prohibited", "restricted", "exercise", "bombing"])
+
+        is_poly = len(coords) >= 3 and any(k in text_body.upper() for k in ["AREA BOUNDED", "BOUNDED BY", "WITHIN AREA", "AREA BETWEEN"])
+        is_line = (not is_poly) and len(coords) >= 2 and any(k in text_body.upper() for k in ["TRACKLINE", "CABLE", "PIPELINE", "JOINING", "TOWING"])
+        if is_poly and (coords[0]["lat"] != coords[-1]["lat"] or coords[0]["lon"] != coords[-1]["lon"]):
+            coords.append({"lat": coords[0]["lat"], "lon": coords[0]["lon"]})
+
+        subj_base = raw_title or display_id
+        subject_str = f"[{category}] {subj_base[:135]}"
+        region_lbl = f"{category} ({NAVAREA_REGION_NAMES.get('XI', 'Western Pacific & SE Asia')})"
+
+        notice_obj = {
+            "id": display_id,
+            "noticeNumber": notice_number,
+            "num": str(num_int),
+            "type": "NAVTEX",
+            "source": "NAVTEX / NAVAREA",
+            "geometrySource": "jcg_kaiho",
+            "year": yr_short,
+            "navarea": "XI",
+            "country": country_lbl,
+            "region": region_lbl,
+            "category": category,
+            "subject": subject_str,
+            "charts": [],
+            "coords": coords,
+            "lat": first_lat,
+            "lon": first_lon,
+            "isPolygon": is_poly,
+            "isLine": is_line,
+            "body": text_body[:1000],
+            "published": published,
+            "expires": self_exp_iso[:19] + "Z" if (self_exp_iso and len(self_exp_iso) >= 19) else (self_exp_iso or ""),
+            "cancels": cancels_list,
+            "status": "ACTIVE",
+            "isCancelled": False,
+            "checkedForExport": True,
+            "_scopeKey": scope_key
+        }
+        if is_poly:
+            notice_obj["subPolygons"] = [{
+                "name": raw_title[:45] or display_id,
+                "category": "restricted_area" if is_restr_cat else "precautionary_area",
+                "points": [[c["lat"], c["lon"]] for c in coords]
+            }]
+        elif is_line:
+            notice_obj["subPolygons"] = [{
+                "name": raw_title[:45] or display_id,
+                "category": "line",
+                "points": [[c["lat"], c["lon"]] for c in coords]
+            }]
+        navtex_notices[display_id] = notice_obj
+        existing_jcg_keys.add(dedup_key)
+        jcg_added += 1
+
+    if jcg_added:
+        print(f"  [+] Added {jcg_added} newly published JCG warnings not yet in NautoShark/NGA feeds")
 
     reconciled_count = 0
     final_notices = []

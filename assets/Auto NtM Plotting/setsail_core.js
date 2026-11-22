@@ -12797,6 +12797,8 @@ function setWeatherForecastHours(tauHours, opts) {
     window._wxForecastHours = tau;
   }
   const slider = document.getElementById("ntmWxTimelineSlider");
+  const thumbPill = document.getElementById("ntmWxTimelineThumbPill");
+  const trackWrap = slider ? slider.closest(".ntm-wx-tl-track-wrap") : null;
   const offsetLbl = document.getElementById("ntmWxTimelineOffsetLbl");
   const utcLbl = document.getElementById("ntmWxTimelineUtcLbl");
   const nowBtn = document.getElementById("ntmWxTimelineNowBtn");
@@ -12808,11 +12810,19 @@ function setWeatherForecastHours(tauHours, opts) {
     }
     slider.style.setProperty("--wx-tl-pct", pct.toFixed(2) + "%");
   }
+  if (trackWrap) {
+    trackWrap.style.setProperty("--wx-tl-pct", pct.toFixed(2));
+  }
   const isNow = tau <= 0.05;
+  const labelText = isNow
+    ? "NOW"
+    : (Math.abs(tau - Math.round(tau)) < 0.08 ? ("+" + Math.round(tau) + "H") : ("+" + tau.toFixed(1) + "H"));
+  if (thumbPill) {
+    thumbPill.textContent = labelText;
+    thumbPill.classList.toggle("is-now", isNow);
+  }
   if (offsetLbl) {
-    offsetLbl.textContent = isNow
-      ? "NOW"
-      : (Math.abs(tau - Math.round(tau)) < 0.08 ? ("+" + Math.round(tau) + "h") : ("+" + tau.toFixed(1) + "h"));
+    offsetLbl.textContent = labelText;
   }
   if (utcLbl) {
     utcLbl.textContent = formatWeatherTimelineUtc(tau);
@@ -12823,6 +12833,9 @@ function setWeatherForecastHours(tauHours, opts) {
   }
   if (tile) {
     tile.classList.toggle("is-forecast-active", !isNow);
+    tile.title = isNow
+      ? "Weather Forecast Timeline — LIVE (0H). Drag slider to scrub forecast ahead"
+      : ("Weather Forecast Timeline — " + labelText + " (" + formatWeatherTimelineUtc(tau) + "). Double-click slider to reset to NOW");
   }
   updateWeatherDynamicOverlaysAtTau(tau);
   updateWeatherFutureGhostVessel(tau);
@@ -12846,6 +12859,10 @@ function initWeatherTimelineSlider() {
   slider.addEventListener("change", (e) => {
     const val = Number(e.target.value) || 0;
     setWeatherForecastHours(val, { fastDrag: false });
+  });
+  slider.addEventListener("dblclick", () => {
+    stopWeatherTimelinePlayback();
+    setWeatherForecastHours(0, { fastDrag: false });
   });
   const nowBtn = document.getElementById("ntmWxTimelineNowBtn");
   if (nowBtn) {
