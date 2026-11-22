@@ -2691,6 +2691,7 @@ function setrouteProjectOntoRoute(lat, lon, wps) {
     }
     alongBefore += legNm;
   }
+  if (best) best.totalNm = alongBefore;
   return best;
 }
 
@@ -9307,6 +9308,16 @@ function renderWeatherOnMap(map = null) {
 
   const wxSub = window.WEATHER_SUBFILTERS || loadWeatherSubfilters();
 
+  const tauNow = (typeof window !== "undefined" && Number(window._wxForecastHours) > 0) ? Number(window._wxForecastHours) : 0;
+
+  if (typeof window !== "undefined") {
+
+    window._wxDynamicStormHandles = [];
+
+    window._wxDynamicWaveHandles = [];
+
+  }
+
   const activeStormCenters = (MARINE_WEATHER_STORE.storms || []).map(s => s.center).filter(Boolean);
 
 
@@ -9325,13 +9336,21 @@ function renderWeatherOnMap(map = null) {
 
     }
 
-    const isSevere = (storm.maxWinds || 0) >= 64;
+    const stNow = (tauNow > 0 && typeof setrouteStormStateAtTau === "function") ? setrouteStormStateAtTau(storm, tauNow) : null;
+
+    const curCenter = stNow ? [stNow.lat, stNow.lon] : storm.center;
+
+    const curWinds = stNow ? Math.round(stNow.winds) : (storm.maxWinds || 0);
+
+    const curRadiusNm = stNow ? stNow.radiusNm : (storm.dangerRadiusNm || 100);
+
+    const isSevere = curWinds >= 64;
 
     const primaryColor = isSevere ? "#ef4444" : "#f59e0b";
 
-    const dangerRadiusM = (storm.dangerRadiusNm || 100) * NM_TO_METERS;
+    const dangerRadiusM = curRadiusNm * NM_TO_METERS;
 
-    const dangerCircle = L.circle(storm.center, {
+    const dangerCircle = L.circle(curCenter, {
 
       radius: dangerRadiusM,
 
@@ -9713,7 +9732,7 @@ function renderWeatherOnMap(map = null) {
 
         </svg>
 
-        <div style="position:absolute;top:${iconDim + 2}px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.90);color:${badgeTextCol};border:1px solid ${badgeBorder};font-size:8.5px;font-weight:700;padding:0px 4px;border-radius:3px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.45);">${shortLabel} ${storm.maxWinds}kn</div>
+        <div class="wx-storm-kn-lbl" style="position:absolute;top:${iconDim + 2}px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.90);color:${badgeTextCol};border:1px solid ${badgeBorder};font-size:8.5px;font-weight:700;padding:0px 4px;border-radius:3px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.45);">${shortLabel} ${curWinds}kn</div>
 
       </div>
 
@@ -9731,7 +9750,23 @@ function renderWeatherOnMap(map = null) {
 
     });
 
-    const stormMarker = L.marker(storm.center, { icon: stormIcon });
+    const stormMarker = L.marker(curCenter, { icon: stormIcon });
+
+    if (typeof window !== "undefined" && Array.isArray(window._wxDynamicStormHandles)) {
+
+      window._wxDynamicStormHandles.push({
+
+        storm,
+
+        stormMarker,
+
+        dangerCircle,
+
+        shortLabel
+
+      });
+
+    }
 
     const posStr = Math.abs(storm.center[0]).toFixed(1) + "°" + (storm.center[0] >= 0 ? "N" : "S") + "  " +
 
@@ -10074,6 +10109,18 @@ function renderWeatherOnMap(map = null) {
   // 7. Pressure MSL — NOT painted as a map grid (laggy + clutter). Sampled into WX tile at cursor.
 
   // Ocean currents: no map arrows — sampled into the cursor weather tile instead
+
+  if (typeof updateWeatherFutureGhostVessel === "function") {
+
+    updateWeatherFutureGhostVessel(tauNow, currentMap);
+
+  }
+
+  if (typeof syncWeatherTimelineBounds === "function") {
+
+    syncWeatherTimelineBounds();
+
+  }
 
 }
 
@@ -11552,6 +11599,10 @@ async function prefetchOpenMeteoPointWx(lat, lon, opts) {
 
     let marine = null;
 
+    let windHourly = null;
+
+    let marineHourly = null;
+
     try {
 
       const windUrl =
@@ -11562,6 +11613,8 @@ async function prefetchOpenMeteoPointWx(lat, lon, opts) {
 
         "&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,temperature_2m" +
 
+        "&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,temperature_2m&forecast_days=7" +
+
         "&wind_speed_unit=kn&timezone=GMT";
 
       const wr = await fetch(windUrl, { cache: "no-store" });
@@ -11569,6 +11622,8 @@ async function prefetchOpenMeteoPointWx(lat, lon, opts) {
       if (wr.ok) {
 
         const j = await wr.json();
+
+        if (j && j.hourly) windHourly = j.hourly;
 
         const c = j && j.current;
 
@@ -11606,6 +11661,8 @@ async function prefetchOpenMeteoPointWx(lat, lon, opts) {
 
         "&current=ocean_current_velocity,ocean_current_direction,wave_height,wave_direction,wave_period,sea_surface_temperature" +
 
+        "&hourly=ocean_current_velocity,ocean_current_direction,wave_height,wave_direction,wave_period,sea_surface_temperature&forecast_days=7" +
+
         "&timezone=GMT";
 
       const mr = await fetch(marineUrl, { cache: "no-store" });
@@ -11613,6 +11670,8 @@ async function prefetchOpenMeteoPointWx(lat, lon, opts) {
       if (mr.ok) {
 
         const j = await mr.json();
+
+        if (j && j.hourly) marineHourly = j.hourly;
 
         const c = j && j.current;
 
@@ -11664,7 +11723,7 @@ async function prefetchOpenMeteoPointWx(lat, lon, opts) {
 
     } catch (eM) {}
 
-    const pack = { at: Date.now(), key, lat: la, lon: lo, wind, current, marine };
+    const pack = { at: Date.now(), key, lat: la, lon: lo, wind, current, marine, windHourly, marineHourly };
 
     _omPointWxCache.set(key, pack);
 
@@ -11701,6 +11760,91 @@ async function prefetchOpenMeteoPointWx(lat, lon, opts) {
 window.prefetchOpenMeteoPointWx = prefetchOpenMeteoPointWx;
 
 window.getCachedOpenMeteoPointWx = getCachedOpenMeteoPointWx;
+
+function getOpenMeteoPointWxAtTau(lat, lon, tauHours) {
+  const pack = getCachedOpenMeteoPointWx(lat, lon);
+  if (!pack) return null;
+  const tau = Number(tauHours);
+  if (!(tau > 0.05) || (!pack.windHourly && !pack.marineHourly)) {
+    return pack;
+  }
+  const nowH = new Date().getUTCHours() + new Date().getUTCMinutes() / 60;
+  const idxFloat = Math.max(0, nowH + tau);
+  const i0 = Math.floor(idxFloat);
+  const i1 = i0 + 1;
+  const frac = idxFloat - i0;
+  const lerpS = (arr, fb) => {
+    if (!Array.isArray(arr) || !arr.length) return fb;
+    const v0 = Number(arr[Math.min(i0, arr.length - 1)]);
+    const v1 = Number(arr[Math.min(i1, arr.length - 1)]);
+    if (Number.isFinite(v0) && Number.isFinite(v1)) return v0 + (v1 - v0) * frac;
+    return Number.isFinite(v0) ? v0 : fb;
+  };
+  const lerpAng = (arr, fb) => {
+    if (!Array.isArray(arr) || !arr.length) return fb;
+    const a0 = Number(arr[Math.min(i0, arr.length - 1)]);
+    const a1 = Number(arr[Math.min(i1, arr.length - 1)]);
+    if (Number.isFinite(a0) && Number.isFinite(a1)) {
+      let d = ((a1 - a0 + 540) % 360) - 180;
+      return (a0 + d * frac + 360) % 360;
+    }
+    return Number.isFinite(a0) ? a0 : fb;
+  };
+  const wh = pack.windHourly || {};
+  const mh = pack.marineHourly || {};
+  const baseW = pack.wind || {};
+  const baseC = pack.current || {};
+  const baseM = pack.marine || {};
+  const wKt = lerpS(wh.wind_speed_10m, baseW.windKt);
+  const gKt = lerpS(wh.wind_gusts_10m, baseW.gustKt);
+  const wDir = lerpAng(wh.wind_direction_10m, baseW.windDir);
+  const pMb = lerpS(wh.pressure_msl, baseW.pressureMb);
+  const aC = lerpS(wh.temperature_2m, baseW.airC);
+  const curKmh = lerpS(mh.ocean_current_velocity, null);
+  const curKn = Number.isFinite(curKmh) ? Math.round((curKmh / 1.852) * 100) / 100 : baseC.speedKn;
+  const curDir = lerpAng(mh.ocean_current_direction, baseC.dirDeg);
+  const wHs = lerpS(mh.wave_height, baseM.waveHs);
+  const wvDir = lerpAng(mh.wave_direction, baseM.waveDir);
+  const wvPer = lerpS(mh.wave_period, baseM.wavePeriod);
+  const sst = lerpS(mh.sea_surface_temperature, baseM.sstC);
+  return {
+    at: pack.at,
+    key: pack.key,
+    lat: pack.lat,
+    lon: pack.lon,
+    wind: {
+      windKt: wKt,
+      gustKt: gKt,
+      windDir: wDir,
+      pressureMb: pMb,
+      airC: aC,
+      speedKn: wKt,
+      dirDeg: wDir,
+      gustKn: gKt,
+      pressureHpa: pMb,
+      tempC: aC,
+      source: "open-meteo-forecast"
+    },
+    current: {
+      ok: Number.isFinite(curKn),
+      speedKn: curKn,
+      dirDeg: Number.isFinite(curDir) ? Math.round(((curDir % 360) + 360) % 360) : baseC.dirDeg,
+      nearestNm: 0,
+      source: "open-meteo-forecast"
+    },
+    marine: {
+      waveHs: wHs,
+      waveDir: wvDir,
+      wavePeriod: wvPer,
+      sstC: sst,
+      waveHeightM: wHs,
+      waveDirDeg: wvDir,
+      wavePeriodS: wvPer,
+      source: "open-meteo-forecast"
+    }
+  };
+}
+window.getOpenMeteoPointWxAtTau = getOpenMeteoPointWxAtTau;
 
 
 
@@ -12382,8 +12526,384 @@ function fmtWxNum(v, digits) {
 
 
 
+function getWeatherMaxForecastHorizonHours() {
+  let maxTau = 0;
+  try {
+    const storms = (typeof MARINE_WEATHER_STORE !== "undefined" && MARINE_WEATHER_STORE && Array.isArray(MARINE_WEATHER_STORE.storms))
+      ? MARINE_WEATHER_STORE.storms
+      : [];
+    for (let i = 0; i < storms.length; i++) {
+      const st = storms[i];
+      const ft = st && Array.isArray(st.forecastTrack) ? st.forecastTrack : [];
+      for (let j = 0; j < ft.length; j++) {
+        const t = Number(ft[j] && ft[j].tau);
+        if (Number.isFinite(t) && t > maxTau) maxTau = t;
+      }
+    }
+  } catch (e) {}
+  if (!(maxTau > 0)) maxTau = 72;
+  return Math.max(6, Math.min(216, Math.round(maxTau)));
+}
+
+function formatWeatherTimelineUtc(tauHours) {
+  const tau = Number(tauHours) || 0;
+  if (tau <= 0.05) return "LIVE";
+  const dt = new Date(Date.now() + tau * 3600000);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const dd = String(dt.getUTCDate()).padStart(2, "0");
+  const mon = months[dt.getUTCMonth()] || "UTC";
+  const hh = String(dt.getUTCHours()).padStart(2, "0");
+  const mm = String(dt.getUTCMinutes()).padStart(2, "0");
+  return dd + " " + mon + " " + hh + ":" + mm + "Z";
+}
+
+function syncWeatherTimelineBounds() {
+  const maxH = getWeatherMaxForecastHorizonHours();
+  if (typeof window !== "undefined") {
+    window._wxMaxForecastHours = maxH;
+  }
+  const slider = document.getElementById("ntmWxTimelineSlider");
+  const maxLbl = document.getElementById("ntmWxTimelineMaxLbl");
+  if (maxLbl) maxLbl.textContent = "+" + maxH + "h";
+  if (slider) {
+    slider.max = String(maxH);
+    const curVal = Number(window._wxForecastHours) || 0;
+    if (curVal > maxH) {
+      setWeatherForecastHours(maxH, { fastDrag: false });
+    } else {
+      const pct = maxH > 0 ? Math.max(0, Math.min(100, (curVal / maxH) * 100)) : 0;
+      slider.style.setProperty("--wx-tl-pct", pct.toFixed(2) + "%");
+    }
+  }
+  return maxH;
+}
+
+function updateWeatherDynamicOverlaysAtTau(tauHours) {
+  const tau = Math.max(0, Number(tauHours) || 0);
+  const NM_TO_METERS = 1852;
+  const handles = (typeof window !== "undefined" && Array.isArray(window._wxDynamicStormHandles))
+    ? window._wxDynamicStormHandles
+    : [];
+  for (let i = 0; i < handles.length; i++) {
+    const h = handles[i];
+    if (!h || !h.storm) continue;
+    const st = (tau > 0.02 && typeof setrouteStormStateAtTau === "function")
+      ? setrouteStormStateAtTau(h.storm, tau)
+      : {
+          lat: h.storm.center[0],
+          lon: h.storm.center[1],
+          winds: h.storm.maxWinds || 0,
+          radiusNm: h.storm.dangerRadiusNm || 100
+        };
+    if (!st || !Number.isFinite(st.lat) || !Number.isFinite(st.lon)) continue;
+    const newLatLng = [st.lat, st.lon];
+    const windsRound = Math.round(st.winds || 0);
+    const isSevere = windsRound >= 64;
+    const primaryColor = isSevere ? "#ef4444" : "#f59e0b";
+    if (h.stormMarker && typeof h.stormMarker.setLatLng === "function") {
+      h.stormMarker.setLatLng(newLatLng);
+      const el = h.stormMarker.getElement ? h.stormMarker.getElement() : null;
+      if (el) {
+        const lbl = el.querySelector(".wx-storm-kn-lbl");
+        if (lbl) {
+          lbl.textContent = (h.shortLabel || h.storm.name || "TC") + " " + windsRound + "kn";
+          lbl.style.color = isSevere ? "#fecaca" : "#fde68a";
+          lbl.style.borderColor = isSevere ? "rgba(239,68,68,0.65)" : "rgba(245,158,11,0.65)";
+        }
+      }
+    }
+    if (h.dangerCircle) {
+      if (typeof h.dangerCircle.setLatLng === "function") h.dangerCircle.setLatLng(newLatLng);
+      if (typeof h.dangerCircle.setRadius === "function") h.dangerCircle.setRadius((st.radiusNm || 100) * NM_TO_METERS);
+      if (typeof h.dangerCircle.setStyle === "function") {
+        h.dangerCircle.setStyle({ color: primaryColor, fillColor: primaryColor });
+      }
+    }
+  }
+}
+
+function updateWeatherFutureGhostVessel(tauHours, mapOverride) {
+  const map = mapOverride || (typeof window !== "undefined" ? window.leafletMap : null) || (typeof leafletMap !== "undefined" ? leafletMap : null);
+  const removeGhost = () => {
+    if (typeof window === "undefined") return;
+    if (window._wxGhostVesselMarker) {
+      try { window._wxGhostVesselMarker.remove(); } catch (e) {}
+      window._wxGhostVesselMarker = null;
+    }
+    if (window._wxGhostVesselTrackLine) {
+      try { window._wxGhostVesselTrackLine.remove(); } catch (e) {}
+      window._wxGhostVesselTrackLine = null;
+    }
+  };
+  if (!map || typeof L === "undefined") {
+    removeGhost();
+    return null;
+  }
+  const states = (typeof window !== "undefined" && window.OVERLAY_STATES)
+    ? window.OVERLAY_STATES
+    : (typeof OVERLAY_STATES !== "undefined" ? OVERLAY_STATES : null);
+  const wxOn = !!(states && states.weather);
+  const tau = Number(tauHours) || 0;
+  if (!wxOn || !(tau > 0.05)) {
+    removeGhost();
+    return null;
+  }
+  const v = (typeof userVessel !== "undefined" && userVessel && isValidVesselLatLon(userVessel.lat, userVessel.lon))
+    ? userVessel
+    : ((typeof window !== "undefined" && window.userVessel && isValidVesselLatLon(window.userVessel.lat, window.userVessel.lon)) ? window.userVessel : null);
+  if (!v) {
+    removeGhost();
+    return null;
+  }
+  const sogKn = typeof resolveOwnShipSogKn === "function" ? resolveOwnShipSogKn(v) : Number(v.sog || v.speed || 0);
+  if (!Number.isFinite(sogKn) || !(sogKn > 0.05)) {
+    removeGhost();
+    return null;
+  }
+  const activeRouteId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : "";
+  const activeRoute = (activeRouteId && typeof getDrActiveRoute === "function") ? getDrActiveRoute() : null;
+  if (!activeRoute) {
+    removeGhost();
+    return null;
+  }
+  const wps = typeof setrouteNormalizeRouteWps === "function" ? setrouteNormalizeRouteWps(activeRoute) : [];
+  if (!Array.isArray(wps) || wps.length < 2) {
+    removeGhost();
+    return null;
+  }
+  const vLat = Number(v.lat);
+  const vLon = Number(v.lon);
+  const proj = typeof setrouteProjectOntoRoute === "function" ? setrouteProjectOntoRoute(vLat, vLon, wps) : null;
+  if (!proj || !Number.isFinite(proj.alongNm)) {
+    removeGhost();
+    return null;
+  }
+  const routeTotalNm = Number.isFinite(proj.totalNm)
+    ? proj.totalNm
+    : (typeof setrouteRouteLegLengths === "function" ? (setrouteRouteLegLengths(wps).total || 0) : 0);
+  if (!(routeTotalNm > 0)) {
+    removeGhost();
+    return null;
+  }
+  const distTravelNm = sogKn * tau;
+  const targetAlongNm = Math.min(routeTotalNm, Math.max(0, proj.alongNm + distTravelNm));
+  const futurePt = typeof setroutePointAlongRoute === "function" ? setroutePointAlongRoute(wps, targetAlongNm) : null;
+  if (!futurePt || !Number.isFinite(futurePt.lat) || !Number.isFinite(futurePt.lon)) {
+    removeGhost();
+    return null;
+  }
+  let futureHdg = Number.isFinite(futurePt.course)
+    ? Number(futurePt.course)
+    : (Number(proj.course ?? v.heading ?? v.cog ?? 0) || 0);
+  const sampleStepNm = Math.min(2.5, Math.max(0.25, routeTotalNm * 0.01));
+  if (targetAlongNm + sampleStepNm <= routeTotalNm) {
+    const aheadPt = setroutePointAlongRoute(wps, targetAlongNm + sampleStepNm);
+    if (aheadPt && typeof setrouteInitialBearingDeg === "function") {
+      futureHdg = setrouteInitialBearingDeg(futurePt.lat, futurePt.lon, aheadPt.lat, aheadPt.lon);
+    }
+  } else if (targetAlongNm - sampleStepNm >= 0) {
+    const behindPt = setroutePointAlongRoute(wps, targetAlongNm - sampleStepNm);
+    if (behindPt && typeof setrouteInitialBearingDeg === "function") {
+      futureHdg = setrouteInitialBearingDeg(behindPt.lat, behindPt.lon, futurePt.lat, futurePt.lon);
+    }
+  }
+  const tauDisp = Math.abs(tau - Math.round(tau)) < 0.08 ? ("+" + Math.round(tau) + "h") : ("+" + tau.toFixed(1) + "h");
+  const utcStr = formatWeatherTimelineUtc(tau);
+  const vName = String(v.name || "OWN SHIP").trim();
+  const hdgR = Math.round(((futureHdg % 360) + 360) % 360);
+  const ghostHtml =
+    '<div class="ss-ghost-vessel-wrap" title="' + vName.replace(/"/g, "&quot;") + ' forecast position (' + tauDisp + ' · ' + utcStr + ')">' +
+      '<svg class="ss-ghost-vessel-svg" width="38" height="38" viewBox="0 0 48 68" style="transform:rotate(' + hdgR + 'deg);" aria-hidden="true">' +
+        '<path d="M22 6 L26 6 L33 20 L33 62 L15 62 L15 20 Z" fill="rgba(56,189,248,0.28)" stroke="#38bdf8" stroke-width="2.4" stroke-dasharray="4 2.5" stroke-linejoin="round"/>' +
+        '<line x1="24" y1="8" x2="24" y2="28" stroke="#e0f2fe" stroke-width="1.6" stroke-linecap="round" opacity="0.85"/>' +
+        '<circle cx="24" cy="36" r="3.2" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.3"/>' +
+      '</svg>' +
+      '<span class="ss-ghost-vessel-tag">' + tauDisp + '</span>' +
+    '</div>';
+  const ghostIcon = L.divIcon({
+    className: "ss-ghost-vessel-marker",
+    html: ghostHtml,
+    iconSize: [38, 38],
+    iconAnchor: [19, 19]
+  });
+  const popupHtml =
+    '<div style="font-family:\'JetBrains Mono\',monospace;font-size:11px;line-height:1.45;min-width:175px;">' +
+      '<div style="font-weight:800;color:#38bdf8;margin-bottom:3px;">' + vName + ' · ' + tauDisp + ' FORECAST</div>' +
+      '<div><b>ETA UTC:</b> ' + utcStr + '</div>' +
+      '<div><b>Pos:</b> ' + futurePt.lat.toFixed(3) + '°, ' + futurePt.lon.toFixed(3) + '°</div>' +
+      '<div><b>SOG / CRS:</b> ' + sogKn.toFixed(1) + ' kn · ' + String(hdgR).padStart(3, "0") + '°T</div>' +
+      '<div><b>Run:</b> +' + Math.round(targetAlongNm - proj.alongNm) + ' NM along Current route</div>' +
+    '</div>';
+  if (!window._wxGhostVesselMarker || !map.hasLayer(window._wxGhostVesselMarker)) {
+    removeGhost();
+    window._wxGhostVesselMarker = L.marker([futurePt.lat, futurePt.lon], {
+      icon: ghostIcon,
+      interactive: true,
+      zIndexOffset: 940
+    }).bindPopup(popupHtml);
+    window._wxGhostVesselMarker.addTo(map);
+  } else {
+    window._wxGhostVesselMarker.setLatLng([futurePt.lat, futurePt.lon]);
+    window._wxGhostVesselMarker.setIcon(ghostIcon);
+    if (window._wxGhostVesselMarker.getPopup()) {
+      window._wxGhostVesselMarker.setPopupContent(popupHtml);
+    }
+  }
+  // Build breadcrumb path along route between current projection and future position
+  const pathPts = [[vLat, vLon]];
+  const stepNm = Math.max(4, (targetAlongNm - proj.alongNm) / 18);
+  for (let d = proj.alongNm + stepNm; d < targetAlongNm; d += stepNm) {
+    const p = setroutePointAlongRoute(wps, d);
+    if (p && Number.isFinite(p.lat) && Number.isFinite(p.lon)) {
+      pathPts.push([p.lat, p.lon]);
+    }
+  }
+  pathPts.push([futurePt.lat, futurePt.lon]);
+  if (!window._wxGhostVesselTrackLine || !map.hasLayer(window._wxGhostVesselTrackLine)) {
+    window._wxGhostVesselTrackLine = L.polyline(pathPts, {
+      color: "#38bdf8",
+      weight: 2,
+      opacity: 0.65,
+      dashArray: "5, 6",
+      interactive: false
+    }).addTo(map);
+  } else {
+    window._wxGhostVesselTrackLine.setLatLngs(pathPts);
+  }
+  return futurePt;
+}
+
+function stopWeatherTimelinePlayback() {
+  if (typeof window !== "undefined" && window._wxTimelinePlayTimer) {
+    cancelAnimationFrame(window._wxTimelinePlayTimer);
+    window._wxTimelinePlayTimer = null;
+  }
+  if (typeof window !== "undefined") {
+    window._wxTimelinePlaying = false;
+  }
+  const playBtn = document.getElementById("ntmWxTimelinePlayBtn");
+  if (playBtn) {
+    playBtn.classList.remove("is-playing");
+    playBtn.setAttribute("aria-label", "Play forecast");
+  }
+}
+
+function setWeatherForecastHours(tauHours, opts) {
+  initWeatherTimelineSlider();
+  const maxH = syncWeatherTimelineBounds();
+  const clamped = Math.max(0, Math.min(maxH, Number(tauHours) || 0));
+  const tau = Math.round(clamped * 2) / 2;
+  if (typeof window !== "undefined") {
+    window._wxForecastHours = tau;
+  }
+  const slider = document.getElementById("ntmWxTimelineSlider");
+  const offsetLbl = document.getElementById("ntmWxTimelineOffsetLbl");
+  const utcLbl = document.getElementById("ntmWxTimelineUtcLbl");
+  const nowBtn = document.getElementById("ntmWxTimelineNowBtn");
+  const tile = document.getElementById("ntmWxTimelineTile");
+  const pct = maxH > 0 ? Math.max(0, Math.min(100, (tau / maxH) * 100)) : 0;
+  if (slider) {
+    if (Math.abs(Number(slider.value) - tau) > 0.01) {
+      slider.value = String(tau);
+    }
+    slider.style.setProperty("--wx-tl-pct", pct.toFixed(2) + "%");
+  }
+  const isNow = tau <= 0.05;
+  if (offsetLbl) {
+    offsetLbl.textContent = isNow
+      ? "NOW"
+      : (Math.abs(tau - Math.round(tau)) < 0.08 ? ("+" + Math.round(tau) + "h") : ("+" + tau.toFixed(1) + "h"));
+  }
+  if (utcLbl) {
+    utcLbl.textContent = formatWeatherTimelineUtc(tau);
+  }
+  if (nowBtn) {
+    nowBtn.classList.toggle("is-now", isNow);
+    nowBtn.classList.toggle("is-forecast", !isNow);
+  }
+  if (tile) {
+    tile.classList.toggle("is-forecast-active", !isNow);
+  }
+  updateWeatherDynamicOverlaysAtTau(tau);
+  updateWeatherFutureGhostVessel(tau);
+  if (typeof window !== "undefined" && typeof window.refreshWxSynopticAtTau === "function") {
+    window.refreshWxSynopticAtTau(!!(opts && opts.fastDrag));
+  } else if (typeof window !== "undefined" && Number.isFinite(window._wxCursorLat) && Number.isFinite(window._wxCursorLon)) {
+    updateNdbcCursorTile(window._wxCursorLat, window._wxCursorLon);
+  }
+  return tau;
+}
+
+function initWeatherTimelineSlider() {
+  const slider = document.getElementById("ntmWxTimelineSlider");
+  if (!slider || slider.dataset.wxTlBound === "1") return;
+  slider.dataset.wxTlBound = "1";
+  syncWeatherTimelineBounds();
+  slider.addEventListener("input", (e) => {
+    const val = Number(e.target.value) || 0;
+    setWeatherForecastHours(val, { fastDrag: true });
+  });
+  slider.addEventListener("change", (e) => {
+    const val = Number(e.target.value) || 0;
+    setWeatherForecastHours(val, { fastDrag: false });
+  });
+  const nowBtn = document.getElementById("ntmWxTimelineNowBtn");
+  if (nowBtn) {
+    nowBtn.addEventListener("click", () => {
+      stopWeatherTimelinePlayback();
+      setWeatherForecastHours(0, { fastDrag: false });
+    });
+  }
+  const playBtn = document.getElementById("ntmWxTimelinePlayBtn");
+  if (playBtn) {
+    playBtn.addEventListener("click", () => {
+      if (window._wxTimelinePlaying) {
+        stopWeatherTimelinePlayback();
+        setWeatherForecastHours(window._wxForecastHours || 0, { fastDrag: false });
+        return;
+      }
+      window._wxTimelinePlaying = true;
+      playBtn.classList.add("is-playing");
+      playBtn.setAttribute("aria-label", "Pause forecast");
+      const maxH = syncWeatherTimelineBounds();
+      if ((Number(window._wxForecastHours) || 0) >= maxH - 0.25) {
+        setWeatherForecastHours(0, { fastDrag: true });
+      }
+      let lastTs = performance.now();
+      const stepFrame = (nowTs) => {
+        if (!window._wxTimelinePlaying) return;
+        const dtSec = Math.min(0.1, Math.max(0.001, (nowTs - lastTs) / 1000));
+        lastTs = nowTs;
+        const curMax = window._wxMaxForecastHours || getWeatherMaxForecastHorizonHours();
+        const speedHoursPerSec = Math.max(6, curMax / 9);
+        const nextTau = (Number(window._wxForecastHours) || 0) + dtSec * speedHoursPerSec;
+        if (nextTau >= curMax) {
+          setWeatherForecastHours(curMax, { fastDrag: false });
+          stopWeatherTimelinePlayback();
+          return;
+        }
+        setWeatherForecastHours(nextTau, { fastDrag: true });
+        window._wxTimelinePlayTimer = requestAnimationFrame(stepFrame);
+      };
+      window._wxTimelinePlayTimer = requestAnimationFrame(stepFrame);
+    });
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.getWeatherMaxForecastHorizonHours = getWeatherMaxForecastHorizonHours;
+  window.syncWeatherTimelineBounds = syncWeatherTimelineBounds;
+  window.setWeatherForecastHours = setWeatherForecastHours;
+  window.updateWeatherDynamicOverlaysAtTau = updateWeatherDynamicOverlaysAtTau;
+  window.updateWeatherFutureGhostVessel = updateWeatherFutureGhostVessel;
+  window.stopWeatherTimelinePlayback = stopWeatherTimelinePlayback;
+  window.initWeatherTimelineSlider = initWeatherTimelineSlider;
+  window.syncNdbcCursorTileVisibility = syncNdbcCursorTileVisibility;
+}
+
 function syncNdbcCursorTileVisibility() {
   const tile = document.getElementById("ntmWxCursorTile");
+  const tlTile = document.getElementById("ntmWxTimelineTile");
   if (!tile) return;
   const states = (typeof window !== "undefined" && window.OVERLAY_STATES)
     ? window.OVERLAY_STATES
@@ -12397,6 +12917,16 @@ function syncNdbcCursorTileVisibility() {
     tile.style.setProperty("display", "flex", "important");
     tile.style.visibility = "visible";
     tile.setAttribute("aria-hidden", "false");
+    if (tlTile) {
+      tlTile.hidden = false;
+      tlTile.removeAttribute("hidden");
+      tlTile.style.setProperty("display", "flex", "important");
+      tlTile.style.visibility = "visible";
+      tlTile.setAttribute("aria-hidden", "false");
+      initWeatherTimelineSlider();
+      syncWeatherTimelineBounds();
+      updateWeatherFutureGhostVessel(window._wxForecastHours || 0);
+    }
     try {
       const v = (typeof window !== "undefined" && window.userVessel) ? window.userVessel : null;
       const seedLat = (typeof window !== "undefined" && typeof window._wxCursorLat === "number" && Number.isFinite(window._wxCursorLat))
@@ -12414,6 +12944,14 @@ function syncNdbcCursorTileVisibility() {
     tile.setAttribute("aria-hidden", "true");
     tile.classList.remove("is-live");
     tile.classList.remove("is-loading-data");
+    if (tlTile) {
+      tlTile.hidden = true;
+      tlTile.setAttribute("hidden", "");
+      tlTile.style.setProperty("display", "none", "important");
+      tlTile.setAttribute("aria-hidden", "true");
+    }
+    stopWeatherTimelinePlayback();
+    updateWeatherFutureGhostVessel(0);
   }
 }
 
@@ -12926,6 +13464,18 @@ async function refreshMarineWeather(force = false) {
   if (typeof renderWeatherOnMap === "function") {
 
     renderWeatherOnMap();
+
+  }
+
+  if (typeof syncWeatherTimelineBounds === "function") {
+
+    syncWeatherTimelineBounds();
+
+  }
+
+  if (typeof updateWeatherFutureGhostVessel === "function") {
+
+    updateWeatherFutureGhostVessel((typeof window !== "undefined" && Number(window._wxForecastHours)) || 0);
 
   }
 
@@ -15243,13 +15793,22 @@ window.nudgeOwnShipVectorMinutes = nudgeOwnShipVectorMinutes;
 
 function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
 
-  const prev = userVessel || {};
+  const prev = Object.assign({}, (typeof window !== "undefined" && window.userVessel) ? window.userVessel : {}, userVessel || {});
 
-  const normLon = setrouteWrapLon180(lon);
+  const useLat = (lat !== undefined && lat !== null) ? Number(lat) : Number(prev.lat);
+
+  const useLon = (lon !== undefined && lon !== null) ? Number(lon) : Number(prev.lon);
+
+  if (!Number.isFinite(useLat) || !Number.isFinite(useLon)) return;
+
+  lat = useLat;
+  lon = useLon;
+
+  const normLon = setrouteWrapLon180(useLon);
 
   userVessel = Object.assign({}, prev, {
 
-    lat,
+    lat: useLat,
 
     lon: normLon,
 
@@ -15258,6 +15817,12 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
     updatedAt: new Date().toISOString()
 
   });
+
+  if (typeof window !== "undefined") {
+
+    window.userVessel = userVessel;
+
+  }
 
   // Avoid writing localStorage on every 2s visual tick — only persist on real fixes / slower cadence
 
@@ -15376,6 +15941,12 @@ function plotUserVessel(lat, lon, source = "manual", skipFly = false) {
       updateOwnShipHdgLine(lat, normLon, resolveOwnShipTrueHdgDeg(userVessel));
 
     } catch (eHdgLn) {}
+
+    if (typeof updateWeatherFutureGhostVessel === "function") {
+
+      updateWeatherFutureGhostVessel((typeof window !== "undefined" && Number(window._wxForecastHours)) || 0);
+
+    }
 
     // Global wind/current model for HDG/STW (Open-Meteo fills ocean gaps)
 
@@ -18355,13 +18926,13 @@ function initNtMMap() {
     function _drawEcdisPipeline(ctx, pts) {
       const walker = _getPolylineDistanceWalker(pts);
       const totalLen = walker.totalLen;
-      if (totalLen < 3) return;
+      if (totalLen < 4) return;
       const getPos = walker.getPos;
 
-      const cycle = 56.0;
-      const dashLen = 15.0;
-      const rCirc = 2.2;
-      let s = 4.0;
+      const cycle = 78.0;
+      const dashLen = 11.0;
+      const rCirc = 1.45;
+      let s = 8.0;
 
       while (s < totalLen) {
         const sDashEnd = Math.min(s + dashLen, totalLen);
@@ -18395,15 +18966,15 @@ function initNtMMap() {
     function _drawEcdisCable(ctx, pts) {
       const walker = _getPolylineDistanceWalker(pts);
       const totalLen = walker.totalLen;
-      if (totalLen < 3) return;
+      if (totalLen < 4) return;
       const getPos = walker.getPos;
 
-      const cycle = 73.0;
-      let s = 4.0;
+      const cycle = 96.0;
+      let s = 8.0;
 
       while (s < totalLen) {
-        // 1. Straight dash: s to s + 14
-        const sDashEnd = Math.min(s + 14.0, totalLen);
+        // 1. Subtle straight dash: s to s + 10
+        const sDashEnd = Math.min(s + 10.0, totalLen);
         if (s < sDashEnd) {
           ctx.beginPath();
           const pStart = getPos(s, 0);
@@ -18419,9 +18990,9 @@ function initNtMMap() {
           ctx.stroke();
         }
 
-        // 2. Wave 1: s + 18 to s + 30 (length 12)
-        const w1Start = s + 18.0;
-        const w1End = Math.min(s + 30.0, totalLen);
+        // 2. Low-profile S-52 cable wave: s + 22 to s + 34 (amplitude 1.45px)
+        const w1Start = s + 22.0;
+        const w1End = Math.min(s + 34.0, totalLen);
         const w1Span = w1End - w1Start;
         if (w1Span > 2) {
           ctx.beginPath();
@@ -18431,44 +19002,43 @@ function initNtMMap() {
           for (let k = 1; k <= steps; k++) {
             const u = k / steps;
             const ws = w1Start + u * w1Span;
-            const wh = -Math.sin(u * 2 * Math.PI) * 2.5;
+            const wh = -Math.sin(u * 2 * Math.PI) * 1.45;
             const p = getPos(ws, wh);
             ctx.lineTo(p.x, p.y);
           }
           ctx.stroke();
         }
 
-        // 3. Lightning bolt: centered at s + 38 (scaled 1.5x thinner)
-        if (s + 38.0 <= totalLen + 5) {
-          const sb = s + 38.0;
-          const p1 = getPos(sb + 2.7, -6.0);
-          const p2 = getPos(sb - 1.3, 0.0);
-          const p3 = getPos(sb + 3.3, 2.0);
-          const p4 = getPos(sb - 0.7, 6.7);
+        // 3. Second subtle dash: s + 48 to s + 58
+        const sDash2Start = s + 48.0;
+        const sDash2End = Math.min(s + 58.0, totalLen);
+        if (sDash2Start < sDash2End) {
+          ctx.beginPath();
+          const pStart2 = getPos(sDash2Start, 0);
+          ctx.moveTo(pStart2.x, pStart2.y);
+          let ds2 = 3.0;
+          while (sDash2Start + ds2 < sDash2End) {
+            const pMid2 = getPos(sDash2Start + ds2, 0);
+            ctx.lineTo(pMid2.x, pMid2.y);
+            ds2 += 3.0;
+          }
+          const pEnd2 = getPos(sDash2End, 0);
+          ctx.lineTo(pEnd2.x, pEnd2.y);
+          ctx.stroke();
+        }
+
+        // 4. Compact micro-flash tick at s + 74 (only 3.2px tall so it never dominates buoys/TSS)
+        if (s + 74.0 <= totalLen + 3) {
+          const sb = s + 74.0;
+          const p1 = getPos(sb + 1.4, -3.1);
+          const p2 = getPos(sb - 0.8, 0.0);
+          const p3 = getPos(sb + 1.8, 1.0);
+          const p4 = getPos(sb - 0.5, 3.2);
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p2.x, p2.y);
           ctx.lineTo(p3.x, p3.y);
           ctx.lineTo(p4.x, p4.y);
-          ctx.stroke();
-        }
-
-        // 4. Wave 2: s + 46 to s + 58 (length 12)
-        const w2Start = s + 46.0;
-        const w2End = Math.min(s + 58.0, totalLen);
-        const w2Span = w2End - w2Start;
-        if (w2Span > 2) {
-          ctx.beginPath();
-          const p0 = getPos(w2Start, 0);
-          ctx.moveTo(p0.x, p0.y);
-          const steps = 8;
-          for (let k = 1; k <= steps; k++) {
-            const u = k / steps;
-            const ws = w2Start + u * w2Span;
-            const wh = -Math.sin(u * 2 * Math.PI) * 2.5;
-            const p = getPos(ws, wh);
-            ctx.lineTo(p.x, p.y);
-          }
           ctx.stroke();
         }
 
@@ -18489,12 +19059,13 @@ function initNtMMap() {
         const isCable = subseaType === "CBL";
         const isOil = layer.options.isOil !== false;
         const isHovered = !!layer.options._isHovered;
+        const z = (leafletMap && typeof leafletMap.getZoom === "function") ? leafletMap.getZoom() : 9;
 
         ctx.save();
 
         if (isHovered) {
-          ctx.lineWidth = isCable ? 3.7 : 4.0;
-          ctx.strokeStyle = isCable ? "rgba(244, 114, 182, 0.45)" : (isOil ? "rgba(244, 114, 182, 0.45)" : "rgba(148, 163, 184, 0.45)");
+          ctx.lineWidth = isCable ? 2.6 : 2.8;
+          ctx.strokeStyle = isCable ? "rgba(244, 114, 182, 0.38)" : (isOil ? "rgba(244, 114, 182, 0.38)" : "rgba(148, 163, 184, 0.38)");
           ctx.lineCap = "round";
           ctx.lineJoin = "round";
           ctx.beginPath();
@@ -18507,12 +19078,15 @@ function initNtMMap() {
           ctx.stroke();
         }
 
+        const baseAlpha = isHovered ? 0.85 : (z <= 8 ? 0.24 : z <= 10 ? 0.32 : 0.42);
         const strokeColor = isCable
-          ? (isHovered ? "#f472b6" : "#b52895")
-          : (isOil ? (isHovered ? "#f472b6" : "#b52895") : (isHovered ? "#94a3b8" : "#5b636c"));
+          ? (isHovered ? "rgba(244, 114, 182, 0.88)" : `rgba(176, 72, 152, ${baseAlpha})`)
+          : (isOil
+              ? (isHovered ? "rgba(244, 114, 182, 0.88)" : `rgba(168, 68, 146, ${baseAlpha})`)
+              : (isHovered ? "rgba(148, 163, 184, 0.85)" : `rgba(100, 116, 139, ${baseAlpha})`));
 
         ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = 0.93;
+        ctx.lineWidth = isHovered ? 0.95 : (z <= 9 ? 0.62 : 0.72);
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
 
@@ -18595,7 +19169,7 @@ function initNtMMap() {
         return;
       }
       const z = leafletMap.getZoom ? leafletMap.getZoom() : 5;
-      if (z < 7) {
+      if (z < 8) {
         if (_subseaInfraLayer.getLayers().length > 0) {
           _subseaInfraLayer.clearLayers();
         }
@@ -18610,8 +19184,8 @@ function initNtMMap() {
 
     function renderSubseaInfra() {
       if (!_subseaInfraData || !Array.isArray(_subseaInfraData.features) || !leafletMap) return;
-      const z = leafletMap.getZoom ? leafletMap.getZoom() : 7;
-      if (z < 7) {
+      const z = leafletMap.getZoom ? leafletMap.getZoom() : 8;
+      if (z < 8) {
         _subseaInfraLayer.clearLayers();
         return;
       }
@@ -18621,7 +19195,7 @@ function initNtMMap() {
         _subseaRenderer = new EcdisSubseaRenderer({
           pane: "subseaInfrastructurePane",
           padding: 0.25,
-          tolerance: 6
+          tolerance: 4
         });
       }
 
@@ -18639,7 +19213,7 @@ function initNtMMap() {
               subseaType: isCable ? "CBL" : "PIP",
               isOil: isOil,
               stroke: true,
-              weight: 10,
+              weight: 6,
               opacity: 0,
               lineCap: "round"
             };
@@ -26313,11 +26887,13 @@ function setrouteStormStateAtTau(st, tauHours) {
 
     const f = (tau - a.tau) / span;
 
+    const dLon = typeof setrouteWrapLon180 === "function" ? setrouteWrapLon180(b.coords[1] - a.coords[1]) : (b.coords[1] - a.coords[1]);
+
     return {
 
       lat: a.coords[0] + (b.coords[0] - a.coords[0]) * f,
 
-      lon: a.coords[1] + (b.coords[1] - a.coords[1]) * f,
+      lon: typeof setrouteWrapLon180 === "function" ? setrouteWrapLon180(a.coords[1] + dLon * f) : (a.coords[1] + dLon * f),
 
       winds: a.winds + (b.winds - a.winds) * f,
 
@@ -26332,6 +26908,12 @@ function setrouteStormStateAtTau(st, tauHours) {
   }
 
   return { lat: last.coords[0], lon: last.coords[1], winds: last.winds, radiusNm: last.radiusNm, tau, name: st.name };
+
+}
+
+if (typeof window !== "undefined") {
+
+  window.setrouteStormStateAtTau = setrouteStormStateAtTau;
 
 }
 

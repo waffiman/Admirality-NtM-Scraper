@@ -151,6 +151,63 @@
     return null;
   }
 
+  function getForecastTauHours() {
+    var t = (typeof window !== "undefined" && Number.isFinite(Number(window._wxForecastHours)))
+      ? Number(window._wxForecastHours)
+      : 0;
+    return t > 0 ? t : 0;
+  }
+
+  function resolveStormAtCurrentTau(st) {
+    if (!st) return null;
+    var sc0 = extractStormCenter(st);
+    var tau = getForecastTauHours();
+    var baseW = Number(
+      st.maxWinds != null ? st.maxWinds :
+      (st.maxWindKt != null ? st.maxWindKt :
+      (st.windKt != null ? st.windKt : 65))
+    );
+    var baseP = Number(
+      st.centralPressure != null ? st.centralPressure :
+      (st.pressureMb != null ? st.pressureMb :
+      (st.centralPressureMb != null ? st.centralPressureMb :
+      Math.round(1010 - baseW * 0.55)))
+    );
+    var baseRad = Math.max(55, Number(st.dangerRadiusNm) || 90);
+    if (tau > 0.01 && typeof window !== "undefined" && typeof window.setrouteStormStateAtTau === "function") {
+      try {
+        var stTau = window.setrouteStormStateAtTau(st, tau);
+        if (stTau && Number.isFinite(stTau.lat) && Number.isFinite(stTau.lon)) {
+          var wNow = Number.isFinite(stTau.winds) && stTau.winds > 0 ? stTau.winds : baseW;
+          var pNow = clampNum(Math.round(baseP - (wNow - baseW) * 0.55), 885, 1012);
+          return {
+            lat: stTau.lat,
+            lon: stTau.lon,
+            originLat: sc0 ? sc0[0] : stTau.lat,
+            originLon: sc0 ? sc0[1] : stTau.lon,
+            maxKt: wNow,
+            coreMb: pNow,
+            dangerNm: Math.max(55, Number.isFinite(stTau.radiusNm) ? stTau.radiusNm : baseRad),
+            shortName: st.shortName || st.name || "Cyclone",
+            name: st.name || st.shortName || "Cyclone"
+          };
+        }
+      } catch (eSt) {}
+    }
+    if (!sc0) return null;
+    return {
+      lat: sc0[0],
+      lon: sc0[1],
+      originLat: sc0[0],
+      originLon: sc0[1],
+      maxKt: baseW,
+      coreMb: baseP,
+      dangerNm: baseRad,
+      shortName: st.shortName || st.name || "Cyclone",
+      name: st.name || st.shortName || "Cyclone"
+    };
+  }
+
   // Fast coarse continent interior check so coastal/island seas are never blanked out at z=2..4,
   // while deep continental interiors (Sahara, Siberia, North America interior, Amazon, Australia interior) are masked.
   var CONTINENT_INTERIOR_BOXES = [
@@ -285,7 +342,14 @@
 
     // 1. Synoptic High / Low Pressure Centers from weather.json (supports pc.coords & pc.value)
     // Skip L centers that duplicate an active storm center (handled by full Holland storm profile below)
-    var storms = Array.isArray(store.storms) ? store.storms : [];
+    var tauNow = getForecastTauHours();
+    var staticDecay = tauNow > 0.01 ? Math.exp(-tauNow / 48) : 1.0;
+    var rawStorms = Array.isArray(store.storms) ? store.storms : [];
+    var resolvedStorms = [];
+    for (var rs = 0; rs < rawStorms.length; rs++) {
+      var rst = resolveStormAtCurrentTau(rawStorms[rs]);
+      if (rst) resolvedStorms.push(rst);
+    }
     var pCenters = Array.isArray(store.pressureCenters) ? store.pressureCenters : [];
     for (var i = 0; i < pCenters.length; i++) {
       var pc = pCenters[i];
@@ -295,9 +359,10 @@
       var pcLon = pcCoords[1];
       var isDupStorm = false;
       if (pc.type === "L") {
-        for (var sIdx = 0; sIdx < storms.length; sIdx++) {
-          var sc0 = extractStormCenter(storms[sIdx]);
-          if (sc0 && Math.hypot(sc0[0] - pcLat, wrapLon180(sc0[1] - pcLon)) < 2.0) {
+        for (var sIdx = 0; sIdx < resolvedStorms.length; sIdx++) {
+          var stCheck = resolvedStorms[sIdx];
+          if (Math.hypot(stCheck.lat - pcLat, wrapLon180(stCheck.lon - pcLon)) < 2.2 ||
+              Math.hypot(stCheck.originLat - pcLat, wrapLon180(stCheck.originLon - pcLon)) < 2.2) {
             isDupStorm = true;
             break;
           }
@@ -312,7 +377,7 @@
       if (!Number.isFinite(targetMb)) continue;
       var dPc = gcdNm(lat, wLon, pcLat, pcLon);
       if (dPc < 1400) {
-        var gPc = Math.exp(-(dPc * dPc) / (2 * 540 * 540));
+        var gPc = Math.exp(-(dPc * dPc) / (2 * 540 * 540)) * staticDecay;
         // Blend smoothly towards the synoptic center value
         if (base.source === "open-meteo") {
           pressure = pressure * (1 - 0.35 * gPc) + targetMb * (0.35 * gPc);
@@ -328,6 +393,17 @@
       var wa = waveAreas[wIdx];
       var wCoords = extractCoordsPair(wa);
       if (!wCoords) continue;
+      var wLat = wCoords[0];
+      var wLonArea = wCoords[1];
+      var isStormWave = false;
+      for (var swI = 0; swI < resolvedStorms.length; swI++) {
+        if (Math.hypot(resolvedStorms[swI].originLat - wLat, wrapLon180(resolvedStorms[swI].originLon - wLonArea)) < 2.2) {
+          wLat = resolvedStorms[swI].lat;
+          wLonArea = resolvedStorms[swI].lon;
+          isStormWave = true;
+          break;
+        }
+      }
       var hM = Number(
         wa.waveHeight != null ? wa.waveHeight :
         (wa.significantWaveHeightM != null ? wa.significantWaveHeightM :
@@ -335,9 +411,10 @@
       );
       if (!Number.isFinite(hM)) continue;
       var radNm = Number(wa.radiusNm) || 220;
-      var dWv = gcdNm(lat, wLon, wCoords[0], wCoords[1]);
+      var dWv = gcdNm(lat, wLon, wLat, wLonArea);
       if (dWv < radNm * 2.8) {
-        var gWv = Math.exp(-(dWv * dWv) / (2 * (radNm * 0.95) * (radNm * 0.95)));
+        var wWeight = isStormWave ? 1.0 : staticDecay;
+        var gWv = Math.exp(-(dWv * dWv) / (2 * (radNm * 0.95) * (radNm * 0.95))) * wWeight;
         var targetWave = wave * (1 - gWv) + hM * gWv;
         if (targetWave > wave) wave = targetWave;
       }
@@ -349,12 +426,21 @@
       var wv = windVectors[vIdx];
       var vCoords = extractCoordsPair(wv);
       if (!vCoords) continue;
+      var vLat = vCoords[0], vLon = vCoords[1];
+      var nearStormOrigin = false;
+      for (var svI = 0; svI < resolvedStorms.length; svI++) {
+        if (Math.hypot(resolvedStorms[svI].originLat - vLat, wrapLon180(resolvedStorms[svI].originLon - vLon)) < 2.2) {
+          nearStormOrigin = true;
+          break;
+        }
+      }
+      if (nearStormOrigin && tauNow > 0.01) continue;
       var vSpd = Number(wv.speed != null ? wv.speed : wv.speedKt);
       var vDir = Number(wv.dir != null ? wv.dir : wv.dirDeg);
       if (!Number.isFinite(vSpd) || !Number.isFinite(vDir)) continue;
-      var dVec = gcdNm(lat, wLon, vCoords[0], vCoords[1]);
+      var dVec = gcdNm(lat, wLon, vLat, vLon);
       if (dVec < 240) {
-        var gVec = Math.exp(-(dVec * dVec) / (2 * 95 * 95)) * 0.45;
+        var gVec = Math.exp(-(dVec * dVec) / (2 * 95 * 95)) * 0.45 * staticDecay;
         windU = windU * (1 - gVec) + (vSpd * Math.sin(vDir * Math.PI / 180)) * gVec;
         windV = windV * (1 - gVec) + (vSpd * Math.cos(vDir * Math.PI / 180)) * gVec;
       }
@@ -363,30 +449,19 @@
     // 4. Full Mesoscale Tropical Cyclone / Hurricane Vortex Model (ALL 5 parameters)
     var nearestStormNm = 99999;
     var activeStormName = null;
-    for (var s = 0; s < storms.length; s++) {
-      var st = storms[s];
-      var sc = extractStormCenter(st);
-      if (!sc) continue;
-      var sLat = sc[0];
-      var sLon = sc[1];
+    for (var s = 0; s < resolvedStorms.length; s++) {
+      var st = resolvedStorms[s];
+      var sLat = st.lat;
+      var sLon = st.lon;
       var dNm = gcdNm(lat, wLon, sLat, sLon);
       if (dNm < nearestStormNm) {
         nearestStormNm = dNm;
         activeStormName = st.shortName || st.name || "Cyclone";
       }
 
-      var maxKt = Number(
-        st.maxWinds != null ? st.maxWinds :
-        (st.maxWindKt != null ? st.maxWindKt :
-        (st.windKt != null ? st.windKt : 65))
-      );
-      var coreMb = Number(
-        st.centralPressure != null ? st.centralPressure :
-        (st.pressureMb != null ? st.pressureMb :
-        (st.centralPressureMb != null ? st.centralPressureMb :
-        Math.round(1010 - maxKt * 0.55)))
-      );
-      var dangerNm = Math.max(55, Number(st.dangerRadiusNm) || 90);
+      var maxKt = st.maxKt;
+      var coreMb = st.coreMb;
+      var dangerNm = st.dangerNm;
       var outerNm = Math.max(380, dangerNm * 3.6);
       if (dNm >= outerNm) continue;
 
@@ -538,26 +613,18 @@
       ? window.MARINE_WEATHER_STORE
       : ((typeof MARINE_WEATHER_STORE !== "undefined" && MARINE_WEATHER_STORE) ? MARINE_WEATHER_STORE : {});
 
+    var tauNow = getForecastTauHours();
+    var staticDecay = tauNow > 0.01 ? Math.exp(-tauNow / 48) : 1.0;
     var rawStorms = Array.isArray(store.storms) ? store.storms : [];
     var storms = [];
     for (var s = 0; s < rawStorms.length; s++) {
-      var st = rawStorms[s];
-      var sc = extractStormCenter(st);
-      if (!sc) continue;
-      var sLat = sc[0];
-      var sLon = wrapLon180(sc[1]);
-      var maxKt = Number(
-        st.maxWinds != null ? st.maxWinds :
-        (st.maxWindKt != null ? st.maxWindKt :
-        (st.windKt != null ? st.windKt : 65))
-      );
-      var coreMb = Number(
-        st.centralPressure != null ? st.centralPressure :
-        (st.pressureMb != null ? st.pressureMb :
-        (st.centralPressureMb != null ? st.centralPressureMb :
-        Math.round(1010 - maxKt * 0.55)))
-      );
-      var dangerNm = Math.max(55, Number(st.dangerRadiusNm) || 90);
+      var rst = resolveStormAtCurrentTau(rawStorms[s]);
+      if (!rst) continue;
+      var sLat = rst.lat;
+      var sLon = wrapLon180(rst.lon);
+      var maxKt = rst.maxKt;
+      var coreMb = rst.coreMb;
+      var dangerNm = rst.dangerNm;
       var outerNm = Math.max(380, dangerNm * 3.6);
       var rmw = clampNum(dangerNm * 0.26, 18, 30);
       var cosS = Math.cos(sLat * DEG2RAD);
@@ -565,6 +632,8 @@
       storms.push({
         lat: sLat,
         lon: sLon,
+        originLat: rst.originLat,
+        originLon: wrapLon180(rst.originLon),
         cosLat: cosS,
         sinLat: Math.sin(sLat * DEG2RAD),
         maxDLat: degPad,
@@ -592,7 +661,8 @@
       var dup = false;
       if (pc.type === "L") {
         for (var si = 0; si < storms.length; si++) {
-          if (Math.hypot(storms[si].lat - pcLat, wrapLon180(storms[si].lon - pcLon)) < 2.0) {
+          if (Math.hypot(storms[si].lat - pcLat, wrapLon180(storms[si].lon - pcLon)) < 2.2 ||
+              Math.hypot(storms[si].originLat - pcLat, wrapLon180(storms[si].originLon - pcLon)) < 2.2) {
             dup = true;
             break;
           }
@@ -614,8 +684,8 @@
         sinLat: Math.sin(pcLat * DEG2RAD),
         maxDLat: pDegPad,
         maxDLon: Math.min(180, pDegPad / Math.max(0.18, Math.abs(cosP))),
-        targetMb: targetMb,
-        deltaAmbientMb: targetMb - 1013.2,
+        targetMb: 1013.2 + (targetMb - 1013.2) * staticDecay,
+        deltaAmbientMb: (targetMb - 1013.2) * staticDecay,
         invTwoSigSq: 1 / (2 * 540 * 540)
       });
     }
@@ -626,6 +696,15 @@
       var wa = rawW[w];
       var wCoords = extractCoordsPair(wa);
       if (!wCoords) continue;
+      var wLat = wCoords[0];
+      var wLon = wrapLon180(wCoords[1]);
+      for (var sw = 0; sw < storms.length; sw++) {
+        if (Math.hypot(storms[sw].originLat - wLat, wrapLon180(storms[sw].originLon - wLon)) < 2.2) {
+          wLat = storms[sw].lat;
+          wLon = storms[sw].lon;
+          break;
+        }
+      }
       var hM = Number(
         wa.waveHeight != null ? wa.waveHeight :
         (wa.significantWaveHeightM != null ? wa.significantWaveHeightM :
@@ -634,13 +713,13 @@
       if (!Number.isFinite(hM)) continue;
       var radNm = Number(wa.radiusNm) || 220;
       var cutoffNm = radNm * 2.8;
-      var cosW = Math.cos(wCoords[0] * DEG2RAD);
+      var cosW = Math.cos(wLat * DEG2RAD);
       var wDegPad = cutoffNm / 58.0 + 1.5;
       waveAreas.push({
-        lat: wCoords[0],
-        lon: wrapLon180(wCoords[1]),
+        lat: wLat,
+        lon: wLon,
         cosLat: cosW,
-        sinLat: Math.sin(wCoords[0] * DEG2RAD),
+        sinLat: Math.sin(wLat * DEG2RAD),
         maxDLat: wDegPad,
         maxDLon: Math.min(180, wDegPad / Math.max(0.18, Math.abs(cosW))),
         hM: hM,
@@ -687,23 +766,143 @@
     }
   }
 
+  function lerpHourlyScalar(arr, i0, i1, frac, fallback) {
+    if (!arr || !arr.length) return fallback;
+    var a = arr[i0];
+    var b = arr[i1];
+    var hasA = a != null && Number.isFinite(Number(a));
+    var hasB = b != null && Number.isFinite(Number(b));
+    if (hasA && hasB) return Number(a) * (1 - frac) + Number(b) * frac;
+    if (hasA) return Number(a);
+    if (hasB) return Number(b);
+    return fallback;
+  }
+
+  function lerpHourlyVector(spdArr, dirArr, i0, i1, frac, scaleSpd, fbSpd, fbDir) {
+    if (!spdArr || !dirArr || !spdArr.length) {
+      var uFb = fbSpd * Math.sin(fbDir * Math.PI / 180);
+      var vFb = fbSpd * Math.cos(fbDir * Math.PI / 180);
+      return { spd: fbSpd, dir: fbDir, u: uFb, v: vFb };
+    }
+    var s0Raw = spdArr[i0], s1Raw = spdArr[i1];
+    var d0Raw = dirArr[i0], d1Raw = dirArr[i1];
+    var s0 = (s0Raw != null && Number.isFinite(Number(s0Raw))) ? Number(s0Raw) * scaleSpd : fbSpd;
+    var s1 = (s1Raw != null && Number.isFinite(Number(s1Raw))) ? Number(s1Raw) * scaleSpd : s0;
+    var d0 = (d0Raw != null && Number.isFinite(Number(d0Raw))) ? Number(d0Raw) : fbDir;
+    var d1 = (d1Raw != null && Number.isFinite(Number(d1Raw))) ? Number(d1Raw) : d0;
+    var u0 = s0 * Math.sin(d0 * Math.PI / 180), v0 = s0 * Math.cos(d0 * Math.PI / 180);
+    var u1 = s1 * Math.sin(d1 * Math.PI / 180), v1 = s1 * Math.cos(d1 * Math.PI / 180);
+    var u = u0 * (1 - frac) + u1 * frac;
+    var v = v0 * (1 - frac) + v1 * frac;
+    var spd = s0 * (1 - frac) + s1 * frac;
+    var dir = (Math.hypot(u, v) > 1e-4)
+      ? (((Math.atan2(u, v) * 180 / Math.PI) + 360) % 360)
+      : d0;
+    return {
+      spd: spd,
+      dir: dir,
+      u: spd * Math.sin(dir * Math.PI / 180),
+      v: spd * Math.cos(dir * Math.PI / 180)
+    };
+  }
+
   function getLiveCachedNode(lat, lon) {
     var key = nodeCacheKey(lat, lon);
     var hit = _nodeCache.get(key);
     if (!hit) return null;
     if ((Date.now() - hit.ts) > NODE_TTL_MS) return null;
-    return hit;
+    var tau = getForecastTauHours();
+    if (tau <= 0.01 || (!hit.fcSeries && !hit.marSeries)) {
+      return hit;
+    }
+
+    var targetMs = Date.now() + tau * 3600000;
+    var windKt = hit.windKt;
+    var windDir = hit.windDir;
+    var windU = hit.windU;
+    var windV = hit.windV;
+    var pressure = hit.pressure;
+    var tempC = hit.tempC;
+    if (hit.fcSeries && hit.fcSeries.len > 0 && Number.isFinite(hit.fcSeries.t0Ms)) {
+      var fIdx = clampNum((targetMs - hit.fcSeries.t0Ms) / 3600000, 0, hit.fcSeries.len - 1);
+      var i0 = Math.floor(fIdx);
+      var i1 = Math.min(hit.fcSeries.len - 1, i0 + 1);
+      var frac = fIdx - i0;
+      var wv = lerpHourlyVector(hit.fcSeries.windKt, hit.fcSeries.windDir, i0, i1, frac, 1.0, hit.windKt, hit.windDir);
+      windKt = wv.spd;
+      windDir = wv.dir;
+      windU = wv.u;
+      windV = wv.v;
+      pressure = lerpHourlyScalar(hit.fcSeries.pressure, i0, i1, frac, hit.pressure);
+      tempC = lerpHourlyScalar(hit.fcSeries.tempC, i0, i1, frac, hit.tempC);
+    }
+
+    var wave = hit.wave;
+    var waveFallback = hit.waveFallback;
+    var currKt = hit.currKt;
+    var currDir = hit.currDir;
+    var currU = hit.currU;
+    var currV = hit.currV;
+    var sst = hit.sst;
+    if (hit.marSeries && hit.marSeries.len > 0 && Number.isFinite(hit.marSeries.t0Ms)) {
+      var mIdx = clampNum((targetMs - hit.marSeries.t0Ms) / 3600000, 0, hit.marSeries.len - 1);
+      var m0 = Math.floor(mIdx);
+      var m1 = Math.min(hit.marSeries.len - 1, m0 + 1);
+      var mFrac = mIdx - m0;
+      var rawW = lerpHourlyScalar(hit.marSeries.wave, m0, m1, mFrac, null);
+      if (rawW != null && Number.isFinite(rawW)) {
+        wave = rawW;
+        waveFallback = rawW;
+      } else {
+        waveFallback = clampNum(0.45 + 0.062 * Math.pow(windKt || 10, 1.12), 0.35, 11.0);
+        if (hit.isSea) wave = waveFallback;
+      }
+      var cv = lerpHourlyVector(hit.marSeries.currKmH, hit.marSeries.currDir, m0, m1, mFrac, 1 / 1.852, hit.currKt, hit.currDir);
+      if (cv.spd > 0.01) {
+        currKt = cv.spd;
+        currDir = cv.dir;
+        currU = cv.u;
+        currV = cv.v;
+      }
+      sst = lerpHourlyScalar(hit.marSeries.sst, m0, m1, mFrac, hit.sst);
+    } else {
+      waveFallback = clampNum(0.45 + 0.062 * Math.pow(windKt || 10, 1.12), 0.35, 11.0);
+      if (hit.isSea && wave == null) wave = waveFallback;
+    }
+
+    return {
+      ts: hit.ts,
+      isSea: hit.isSea,
+      wave: wave,
+      waveFallback: waveFallback,
+      pressure: pressure,
+      windKt: windKt,
+      windDir: windDir,
+      windU: windU,
+      windV: windV,
+      currKt: currKt,
+      currDir: currDir,
+      currU: currU,
+      currV: currV,
+      tempC: tempC,
+      sst: sst,
+      hasFc: hit.hasFc,
+      hasMar: hit.hasMar,
+      source: hit.source || "open-meteo"
+    };
   }
 
   // Synthesize background synoptic node (without mesoscale cyclone superposition, which is applied once at exact query points)
   function synthesizeBaselineNode(lat, lon) {
     var wLon = wrapLon180(lon);
+    var tau = getForecastTauHours();
     var latRad = lat * Math.PI / 180;
-    var lonRad = wLon * Math.PI / 180;
+    var lonRad = (wLon - tau * 0.22) * Math.PI / 180;
 
-    // 1. Check Open-Meteo point cache (correctly reading nested .wind, .marine, .current objects!)
-    var cachedOm = (typeof window.getCachedOpenMeteoPointWx === "function")
-      ? window.getCachedOpenMeteoPointWx(lat, wLon) : null;
+    // 1. Check Open-Meteo point cache (supporting forecast tau hours when available)
+    var cachedOm = (typeof window.getOpenMeteoPointWxAtTau === "function")
+      ? window.getOpenMeteoPointWxAtTau(lat, wLon, tau)
+      : ((typeof window.getCachedOpenMeteoPointWx === "function") ? window.getCachedOpenMeteoPointWx(lat, wLon) : null);
     if (cachedOm && (cachedOm.wind || cachedOm.marine || cachedOm.current)) {
       var cw = cachedOm.wind || {};
       var cm = cachedOm.marine || {};
@@ -1849,14 +2048,14 @@
     var storms = Array.isArray(store.storms) ? store.storms : [];
     var ctrLng = map.getCenter ? map.getCenter().lng : 0;
     for (var i = 0; i < storms.length; i++) {
-      var sc = extractStormCenter(storms[i]);
-      if (!sc) continue;
-      var sLon = sc[1];
+      var rst = resolveStormAtCurrentTau(storms[i]);
+      if (!rst) continue;
+      var sLon = rst.lon;
       while (sLon - ctrLng > 180) sLon -= 360;
       while (sLon - ctrLng < -180) sLon += 360;
       var pt = (originX != null && map.project)
-        ? map.project([sc[0], sLon], zoom)
-        : map.latLngToContainerPoint([sc[0], sLon]);
+        ? map.project([rst.lat, sLon], zoom)
+        : map.latLngToContainerPoint([rst.lat, sLon]);
       if (pt) {
         out.push(originX != null ? { x: pt.x - originX, y: pt.y - originY } : pt);
       }
@@ -2110,12 +2309,20 @@
           for (var i = 0; i < batch.length; i++) {
             inFlight.set(batch[i].key, now + 16000);
           }
+          var maxH = (typeof window.getWeatherMaxForecastHorizonHours === "function")
+            ? window.getWeatherMaxForecastHorizonHours()
+            : 120;
+          var fcDays = Math.min(9, Math.max(4, Math.ceil((maxH + 12) / 24) + 1));
           var lats = batch.map(function (pt) { return pt.lat.toFixed(3); }).join(",");
           var lons = batch.map(function (pt) { return pt.lon.toFixed(3); }).join(",");
           var fcUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + lats + "&longitude=" + lons
-            + "&current=wind_speed_10m,wind_direction_10m,pressure_msl,temperature_2m&wind_speed_unit=kn&timezone=GMT";
+            + "&current=wind_speed_10m,wind_direction_10m,pressure_msl,temperature_2m"
+            + "&hourly=wind_speed_10m,wind_direction_10m,pressure_msl,temperature_2m&forecast_days=" + fcDays
+            + "&wind_speed_unit=kn&timezone=GMT";
           var marUrl = "https://marine-api.open-meteo.com/v1/marine?latitude=" + lats + "&longitude=" + lons
-            + "&current=wave_height,ocean_current_velocity,ocean_current_direction,sea_surface_temperature&timezone=GMT";
+            + "&current=wave_height,ocean_current_velocity,ocean_current_direction,sea_surface_temperature"
+            + "&hourly=wave_height,ocean_current_velocity,ocean_current_direction,sea_surface_temperature&forecast_days=" + fcDays
+            + "&timezone=GMT";
 
           fetchWithEndpointTimeout(fcUrl).then(function (fcRaw) {
             if (!self._map || !fcRaw) return;
@@ -2123,7 +2330,8 @@
             var ts = Date.now();
             var stored = 0;
             for (var j = 0; j < batch.length; j++) {
-              var fcCur = fcArr[j] && fcArr[j].current ? fcArr[j].current : null;
+              var fcItem = fcArr[j];
+              var fcCur = fcItem && fcItem.current ? fcItem.current : null;
               if (!fcCur) continue;
               var prev = _nodeCache.get(batch[j].key) || synthesizeBaselineNode(batch[j].lat, batch[j].lon);
               var windKt = fcCur.wind_speed_10m != null ? Number(fcCur.wind_speed_10m) : prev.windKt;
@@ -2135,6 +2343,22 @@
               var waveEst = (prev.wave != null && Number.isFinite(prev.wave))
                 ? prev.wave
                 : clampNum(0.45 + 0.062 * Math.pow(safeWindKt, 1.12), 0.35, 11.0);
+              var fcSeries = prev.fcSeries || null;
+              var fcH = fcItem.hourly;
+              if (fcH && Array.isArray(fcH.time) && fcH.time.length > 0) {
+                var t0Str = String(fcH.time[0]);
+                var t0Ms = Date.parse(t0Str.indexOf("Z") !== -1 ? t0Str : (t0Str + "Z"));
+                if (Number.isFinite(t0Ms)) {
+                  fcSeries = {
+                    t0Ms: t0Ms,
+                    len: fcH.time.length,
+                    windKt: fcH.wind_speed_10m || [],
+                    windDir: fcH.wind_direction_10m || [],
+                    pressure: fcH.pressure_msl || [],
+                    tempC: fcH.temperature_2m || []
+                  };
+                }
+              }
               _nodeCache.set(batch[j].key, {
                 ts: ts,
                 isSea: prev.isSea,
@@ -2151,6 +2375,8 @@
                 currV: prev.currV,
                 tempC: Number.isFinite(tempC) ? tempC : prev.tempC,
                 sst: prev.sst != null ? prev.sst : (Number.isFinite(tempC) ? tempC : prev.tempC),
+                fcSeries: fcSeries,
+                marSeries: prev.marSeries || null,
                 hasFc: true,
                 hasMar: Boolean(prev.hasMar),
                 source: "open-meteo"
@@ -2170,7 +2396,8 @@
             var ts = Date.now();
             var stored = 0;
             for (var j = 0; j < batch.length; j++) {
-              var marCur = marArr[j] && marArr[j].current ? marArr[j].current : null;
+              var marItem = marArr[j];
+              var marCur = marItem && marItem.current ? marItem.current : null;
               if (!marCur) continue;
               var prev = _nodeCache.get(batch[j].key) || synthesizeBaselineNode(batch[j].lat, batch[j].lon);
               var rawWave = marCur.wave_height != null ? Number(marCur.wave_height) : null;
@@ -2193,6 +2420,22 @@
               var sst = (marCur.sea_surface_temperature != null && Number.isFinite(Number(marCur.sea_surface_temperature)))
                 ? Number(marCur.sea_surface_temperature)
                 : (prev.sst != null ? prev.sst : prev.tempC);
+              var marSeries = prev.marSeries || null;
+              var marH = marItem.hourly;
+              if (marH && Array.isArray(marH.time) && marH.time.length > 0) {
+                var m0Str = String(marH.time[0]);
+                var m0Ms = Date.parse(m0Str.indexOf("Z") !== -1 ? m0Str : (m0Str + "Z"));
+                if (Number.isFinite(m0Ms)) {
+                  marSeries = {
+                    t0Ms: m0Ms,
+                    len: marH.time.length,
+                    wave: marH.wave_height || [],
+                    currKmH: marH.ocean_current_velocity || [],
+                    currDir: marH.ocean_current_direction || [],
+                    sst: marH.sea_surface_temperature || []
+                  };
+                }
+              }
               _nodeCache.set(batch[j].key, {
                 ts: ts,
                 isSea: hasMarineWave ? true : !isDeepLandInterior(batch[j].lat, batch[j].lon),
@@ -2209,6 +2452,8 @@
                 currV: safeCurrKt * Math.cos(safeCurrDir * Math.PI / 180),
                 tempC: (Number.isFinite(prev.tempC) && prev.hasFc) ? prev.tempC : sst,
                 sst: sst,
+                fcSeries: prev.fcSeries || null,
+                marSeries: marSeries,
                 hasFc: Boolean(prev.hasFc),
                 hasMar: true,
                 source: "open-meteo"
@@ -2548,7 +2793,7 @@
 
   // Upgraded Cursor HUD (#ntmWxCursorTile) updater:
   // Ensures all 5 chips (Wind, Waves Hs, Pressure, Air/SST, Ocean Current) always show full numerical data
-  // matching the map symbols & cyclone vortex at the cursor position.
+  // matching the map symbols & cyclone vortex at the cursor position and selected forecast hour.
   window.updateNdbcCursorTile = function (lat, lon) {
     var tile = document.getElementById("ntmWxCursorTile");
     if (!tile || tile.hidden) return;
@@ -2562,15 +2807,17 @@
     var lo = Number(lon);
     if (!Number.isFinite(la) || !Number.isFinite(lo)) return;
 
+    var tau = getForecastTauHours();
     var syn = sampleSynopticWeatherAtLatLon(la, lo);
     var nearStorm = syn && syn.nearestStormNm < 320;
 
-    var s = (!nearStorm && typeof window.sampleNdbcAtLatLon === "function")
+    // Physical NDBC buoys are present-only observations; when tau > 0 use forecast model + vortex
+    var s = (!nearStorm && tau <= 0.01 && typeof window.sampleNdbcAtLatLon === "function")
       ? window.sampleNdbcAtLatLon(la, lo)
       : { ok: false };
-    var omPack = typeof window.getCachedOpenMeteoPointWx === "function"
-      ? window.getCachedOpenMeteoPointWx(la, lo)
-      : null;
+    var omPack = (typeof window.getOpenMeteoPointWxAtTau === "function")
+      ? window.getOpenMeteoPointWxAtTau(la, lo, tau)
+      : ((typeof window.getCachedOpenMeteoPointWx === "function") ? window.getCachedOpenMeteoPointWx(la, lo) : null);
 
     if (!omPack && typeof window.prefetchOpenMeteoPointWx === "function") {
       try {
@@ -2605,9 +2852,11 @@
     var sstC = (s && s.ok && s.sstC != null)
       ? s.sstC
       : (!nearStorm && omPack && omPack.marine && omPack.marine.sstC != null ? omPack.marine.sstC : (syn ? syn.sst : null));
-    var curObj = window.sampleCurrentAtLatLon(la, lo);
-    var curKt = (curObj && curObj.ok && curObj.speedKn != null) ? curObj.speedKn : (syn ? syn.currKt : null);
-    var curDir = (curObj && curObj.ok && curObj.dirDeg != null) ? curObj.dirDeg : (syn ? syn.currDir : null);
+    var curObj = (tau > 0.01 && omPack && omPack.current && omPack.current.ok)
+      ? omPack.current
+      : window.sampleCurrentAtLatLon(la, lo);
+    var curKt = (!nearStorm && curObj && curObj.ok && curObj.speedKn != null) ? curObj.speedKn : (syn ? syn.currKt : null);
+    var curDir = (!nearStorm && curObj && curObj.ok && curObj.dirDeg != null) ? curObj.dirDeg : (syn ? syn.currDir : null);
 
     var fmt = function (v, d) {
       if (v == null || !Number.isFinite(Number(v))) return "\u2014";
@@ -2628,6 +2877,16 @@
       body.innerHTML = window.renderNdbcCursorChips(windTxt, waveTxt, pressureTxt, airSstTxt, curTxt);
     }
     if (meta) { meta.textContent = ""; meta.title = ""; }
+  };
+
+  window.refreshWxSynopticAtTau = function (fastDrag) {
+    _latestSynopticGrid = null;
+    var m = (typeof window.leafletMap !== "undefined" && window.leafletMap) ? window.leafletMap : null;
+    if (m && m._wxSynopticLayer) {
+      m._wxSynopticLayer._dirty = true;
+      m._wxSynopticLayer._hasValidCache = false;
+      m._wxSynopticLayer._scheduleDraw(Boolean(fastDrag));
+    }
   };
 
   window.ensureWxSynopticPane = ensureWxSynopticPane;

@@ -25754,3 +25754,279 @@
 .route-wpt-div-icon.is-passed .route-wpt-dot svg circle:last-child {
   fill: #dc2626 !important;
 }
+
+/* v5.251: Designer Weather Forecast Timeline & Future Ghost Vessel */
+.ntm-wx-timeline-tile[hidden] {
+  display: none !important;
+}
+.ntm-wx-timeline-tile {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  padding: 0 8px 0 5px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, rgba(11, 22, 40, 0.94), rgba(15, 29, 54, 0.90));
+  border: 1px solid rgba(56, 189, 248, 0.30);
+  box-shadow: 0 2px 10px rgba(2, 8, 23, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #e2e8f0;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  order: -2;
+  user-select: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.ntm-wx-timeline-tile.is-forecast-active {
+  border-color: rgba(56, 189, 248, 0.62);
+  box-shadow: 0 2px 12px rgba(14, 165, 233, 0.24), inset 0 1px 0 rgba(56, 189, 248, 0.14);
+}
+.ntm-wx-tl-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 5px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(14, 165, 233, 0.16);
+  color: #38bdf8;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.16s ease;
+}
+.ntm-wx-tl-play:hover {
+  background: rgba(56, 189, 248, 0.28);
+  color: #f0f9ff;
+  border-color: rgba(56, 189, 248, 0.65);
+  transform: scale(1.04);
+}
+.ntm-wx-tl-play.is-playing {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: rgba(245, 158, 11, 0.65);
+  color: #fbbf24;
+}
+.ntm-wx-tl-play svg {
+  width: 11px;
+  height: 11px;
+  display: block;
+}
+.ntm-wx-tl-play .wx-tl-ico-pause {
+  display: none;
+}
+.ntm-wx-tl-play.is-playing .wx-tl-ico-play {
+  display: none;
+}
+.ntm-wx-tl-play.is-playing .wx-tl-ico-pause {
+  display: block;
+}
+.ntm-wx-tl-now {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: rgba(15, 23, 42, 0.68);
+  color: #cbd5e1;
+  font-family: inherit;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.16s ease;
+}
+.ntm-wx-tl-now:hover {
+  border-color: rgba(56, 189, 248, 0.52);
+  color: #f8fafc;
+}
+.ntm-wx-tl-now.is-now .wx-tl-offset {
+  color: #34d399;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.ntm-wx-tl-now.is-now .wx-tl-utc {
+  color: #94a3b8;
+  font-size: 0.58rem;
+  font-weight: 600;
+}
+.ntm-wx-tl-now.is-forecast {
+  background: rgba(14, 165, 233, 0.18);
+  border-color: rgba(56, 189, 248, 0.55);
+}
+.ntm-wx-tl-now.is-forecast .wx-tl-offset {
+  color: #38bdf8;
+  font-weight: 800;
+}
+.ntm-wx-tl-now.is-forecast .wx-tl-utc {
+  color: #e2e8f0;
+  font-size: 0.60rem;
+  font-weight: 600;
+}
+.ntm-wx-tl-track-wrap {
+  display: flex;
+  align-items: center;
+  width: 118px;
+  min-width: 84px;
+  height: 20px;
+  position: relative;
+}
+.ntm-wx-tl-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 5px;
+  margin: 0;
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  --wx-tl-pct: 0%;
+  background: linear-gradient(
+    90deg,
+    #0ea5e9 0%,
+    #38bdf8 var(--wx-tl-pct),
+    rgba(148, 163, 184, 0.25) var(--wx-tl-pct),
+    rgba(148, 163, 184, 0.25) 100%
+  );
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+.ntm-wx-tl-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #f8fafc;
+  border: 2px solid #0ea5e9;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.85), 0 1px 3px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.ntm-wx-tl-slider::-webkit-slider-thumb:hover,
+.ntm-wx-tl-slider:active::-webkit-slider-thumb {
+  transform: scale(1.16);
+  background: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 1);
+  cursor: grabbing;
+}
+.ntm-wx-tl-slider::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #f8fafc;
+  border: 2px solid #0ea5e9;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.85);
+  cursor: grab;
+}
+.ntm-wx-tl-max {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+[data-theme="light"] .ntm-wx-timeline-tile {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.94));
+  border-color: rgba(2, 132, 199, 0.30);
+  color: #0f172a;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.07);
+}
+[data-theme="light"] .ntm-wx-timeline-tile.is-forecast-active {
+  border-color: rgba(2, 132, 199, 0.62);
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.16);
+}
+[data-theme="light"] .ntm-wx-tl-play {
+  background: rgba(2, 132, 199, 0.10);
+  border-color: rgba(2, 132, 199, 0.32);
+  color: #0284c7;
+}
+[data-theme="light"] .ntm-wx-tl-now {
+  background: rgba(241, 245, 249, 0.92);
+  border-color: rgba(148, 163, 184, 0.40);
+  color: #1e293b;
+}
+[data-theme="light"] .ntm-wx-tl-now.is-now .wx-tl-offset {
+  color: #059669;
+}
+[data-theme="light"] .ntm-wx-tl-now.is-now .wx-tl-utc {
+  color: #64748b;
+}
+[data-theme="light"] .ntm-wx-tl-now.is-forecast {
+  background: rgba(2, 132, 199, 0.12);
+  border-color: rgba(2, 132, 199, 0.45);
+}
+[data-theme="light"] .ntm-wx-tl-now.is-forecast .wx-tl-offset {
+  color: #0284c7;
+}
+[data-theme="light"] .ntm-wx-tl-now.is-forecast .wx-tl-utc {
+  color: #0f172a;
+}
+[data-theme="light"] .ntm-wx-tl-slider {
+  background: linear-gradient(
+    90deg,
+    #0284c7 0%,
+    #38bdf8 var(--wx-tl-pct),
+    rgba(148, 163, 184, 0.35) var(--wx-tl-pct),
+    rgba(148, 163, 184, 0.35) 100%
+  );
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.15);
+}
+[data-theme="light"] .ntm-wx-tl-max {
+  color: #475569;
+}
+@media (max-width: 900px) {
+  .ntm-wx-tl-track-wrap {
+    width: 78px;
+    min-width: 64px;
+  }
+  .ntm-wx-tl-now .wx-tl-utc {
+    display: none;
+  }
+}
+/* Future Own-Ship Ghost Marker */
+.ss-ghost-vessel-marker {
+  background: transparent !important;
+  border: none !important;
+}
+.ss-ghost-vessel-wrap {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.72));
+  opacity: 0.86;
+  transition: transform 0.08s linear;
+}
+.ss-ghost-vessel-svg {
+  display: block;
+  transform-origin: 50% 50%;
+}
+.ss-ghost-vessel-tag {
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 4px;
+  height: 13px;
+  line-height: 13px;
+  border-radius: 3px;
+  background: rgba(11, 22, 40, 0.92);
+  border: 1px solid rgba(56, 189, 248, 0.72);
+  color: #7dd3fc;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px;
+  font-weight: 800;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
