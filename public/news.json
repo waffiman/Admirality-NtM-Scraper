@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-21T22:49:58Z",
-  "generatedAt": "2026-11-21T22:49:58Z",
+  "updatedAt": "2026-11-22T02:51:45Z",
+  "generatedAt": "2026-11-22T02:51:45Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -20,7 +20,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/cma-shipping",
-      "publishedAt": "2026-11-21T22:49:58Z",
+      "publishedAt": "2026-11-22T02:51:45Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -52,7 +52,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/crew-connect-global",
-      "publishedAt": "2026-11-21T22:49:58Z",
+      "publishedAt": "2026-11-22T02:51:45Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -73,6 +73,73 @@
       "takeaways": [
         "Operational Area: Global Maritime.",
         "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-C2406927AB",
+      "title": "JSV Logistic reconnects Türkiye with Canary Islands",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/jsv-logistic-reconnects-turkiye-with-canary-islands/",
+      "publishedAt": "2026-11-22T00:34:29Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/08/MilaGreen-1-09.27.05-1024x682-JSV-300x200.jpeg",
+      "summary": "JSV Logistic has reinstated the Canary Islands leg of its weekly Türkiye–Spain service, restoring direct calls between Türkiye and the Spanish archipelago. The Canary Islands section was separated from the operation in mid-2026. Following its return, JSV Logistic has increased the service’s deployment to three...",
+      "body": "Services Top Right JSV Logistic reconnects Türkiye with Canary Islands November 22, 2026 Facebook Twitter WhatsApp Linkedin Email MilaGreen JSV Logistic has reinstated the Canary Islands leg of its weekly Türkiye–Spain service, restoring direct calls between Türkiye and the Spanish archipelago. The Canary Islands section was separated from the operation in mid-2026. Following its return, JSV Logistic has increased the service’s deployment to three container ships ranging from 750 to 1,200 TEU. The revised rotation is: Izmit (Derince) – Alicante – Barcelona – Santa Cruz de Tenerife – Las Palmas – Arrecife – Alicante – Barcelona – Izmit (Derince) TAGS JSV Logistic Facebook Twitter WhatsApp Linkedin Email Previous article Port of Los Angeles releases environmental impact report Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The Canary Islands section was separated from the operation in mid-2026.",
+        "Following its return, JSV Logistic has increased the service’s deployment to three container ships ranging from 750 to 1,200 TEU.",
+        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-D941FFC7C1",
+      "title": "Port of Los Angeles releases environmental impact report",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/port-of-los-angeles-releases-environmental-impact-report/",
+      "publishedAt": "2026-11-21T22:54:27Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "port"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/06/Port-of-Los-Angeles-Main-Aerial-300x200.jpg",
+      "summary": "The Port of Los Angeles has released a Draft Environmental Impact Report for a proposed Marine Oil Terminal and Wharf Improvements Project at Berths 148-151 in Wilmington, a terminal operated by Phillips 66. The report is intended to gather further feedback that will be incorporated into the Final Environmental...",
+      "body": "The Port of Los Angeles has released a Draft Environmental Impact Report for a proposed Marine Oil Terminal and Wharf Improvements Project at Berths 148-151 in Wilmington, a terminal operated by Phillips 66. The report is intended to gather further feedback that will be incorporated into the Final Environmental Impact Report. Phillips 66 proposes to build a new berthing facility at Berths 150-151 that complies with the Marine Oil Terminal Engineering and Maintenance Standards. The existing wharf at Berths 148-149 would continue to serve as a marine oil terminal while the new facilities are under construction. Afterwards, its uses would be limited to non-terminal functions such as storing topside equipment and occasionally mooring harbour craft to reduce congestion in the channel. Landside facilities, including piping, vapour recovery systems, support systems and tankage, would be modified and upgraded to serve the new loading platform. The project considers up to 40 years of continued operation as a marine oil terminal at Berths 148-151, proposed through a new 20-year entitlement with two optional 10-year extensions. The environmental review began with an Initial Study and Notice of Preparation released in February 2023.",
+      "takeaways": [
+        "The Port of Los Angeles has released a Draft Environmental Impact Report for a proposed Marine Oil Terminal and Wharf Improvements Project at Berths 148-151 in Wilmington, a terminal operated by Phillips 66.",
+        "The report is intended to gather further feedback that will be incorporated into the Final Environmental Impact Report.",
+        "Phillips 66 proposes to build a new berthing facility at Berths 150-151 that complies with the Marine Oil Terminal Engineering and Maintenance Standards."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -136,7 +203,7 @@
       "navarea": "III",
       "image": "https://container-news.com/wp-content/uploads/2025/09/MSC-Beatrice-300x190.webp",
       "summary": "MSC is reinstating calls at St. Petersburg, Rotterdam and Jacksonville on its Ecuador–NWC–USA service, as repirted by DynaLiners. The three ports were removed from the service in July 2026. Under the latest revision, Jacksonville will be called on the westbound transatlantic leg, while Klaipeda will be dropped from...",
-      "body": "Services Sticky News MSC reinstates three calls on Ecuador–NWC–USA service November 21, 2026 Facebook Twitter WhatsApp Linkedin Email MSC is reinstating calls at St. Petersburg, Rotterdam and Jacksonville on its Ecuador–NWC–USA service, as repirted by DynaLiners. The three ports were removed from the service in July 2026. Under the latest revision, Jacksonville will be called on the westbound transatlantic leg, while Klaipeda will be dropped from the rotation. The updated service will connect Northern Europe and the US East Coast with ports in Central America and on South America’s Pacific coast. The revised rotation is: Antwerp – Le Havre – New York – Philadelphia – Baltimore – Norfolk – Savannah – Jacksonville – Colon (Cristobal) – Balboa – Paita – Guayaquil – Puerto Bolivar – Cristobal – Moin – Antwerp – Rotterdam – St. Petersburg – Bremerhaven – Antwerp TAGS Mediterranean Shipping Co. (MSC) Facebook Twitter WhatsApp Linkedin Email Previous article Lloyd’s Register approves new classification rules for nuclear-powered ships Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "body": "Services Sticky News MSC reinstates three calls on Ecuador–NWC–USA service November 21, 2026 Facebook Twitter WhatsApp Linkedin Email MSC is reinstating calls at St. Petersburg, Rotterdam and Jacksonville on its Ecuador–NWC–USA service, as repirted by DynaLiners. The three ports were removed from the service in July 2026. Under the latest revision, Jacksonville will be called on the westbound transatlantic leg, while Klaipeda will be dropped from the rotation. The updated service will connect Northern Europe and the US East Coast with ports in Central America and on South America’s Pacific coast. The revised rotation is: Antwerp – Le Havre – New York – Philadelphia – Baltimore – Norfolk – Savannah – Jacksonville – Colon (Cristobal) – Balboa – Paita – Guayaquil – Puerto Bolivar – Cristobal – Moin – Antwerp – Rotterdam – St. Petersburg – Bremerhaven – Antwerp TAGS Mediterranean Shipping Co. (MSC) Facebook Twitter WhatsApp Linkedin Email Previous article Lloyd’s Register approves new classification rules for nuclear-powered ships Next article Port of Los Angeles releases environmental impact report Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
       "takeaways": [
         "Services Sticky News MSC reinstates three calls on Ecuador–NWC–USA service November 21, 2026 Facebook Twitter WhatsApp Linkedin Email MSC is reinstating calls at St.",
         "Petersburg, Rotterdam and Jacksonville on its Ecuador–NWC–USA service, as repirted by DynaLiners.",
@@ -521,75 +588,6 @@
         "Services Top Right Interasia and T.S.",
         "Lines restore two Southeast Asia services November 21, 2026 Facebook Twitter WhatsApp Linkedin Email Interasia Lines and T.S.",
         "Lines are restoring two weekly container services connecting South China with Southeast Asia."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-7B991F0A2A",
-      "title": "Fincantieri secures order for two LNG-powered Carnival cruise ships",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/fincantieri-secures-order-for-two-lng-powered-carnival-cruise-ships/",
-      "publishedAt": "2026-11-21T07:47:12Z",
-      "category": "Weather & Cyclones",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "lng",
-        "port",
-        "shipyard"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/Κρουαζιερόπλοιο-υπό-κατασκευή-στο-ναυπηγείο-cleaned-300x169.png",
-      "summary": "Fincantieri has signed a contract with Carnival Corporation to build two new dual-fuel cruise ships for Carnival Cruise Line. The vessels will be constructed at the Italian shipbuilder’s Marghera yard, with deliveries scheduled for 2033 and 2035. Each ship will have a gross tonnage of approximately 130,000 GT and...",
-      "body": "Fincantieri has signed a contract with Carnival Corporation to build two new dual-fuel cruise ships for Carnival Cruise Line. The vessels will be constructed at the Italian shipbuilder’s Marghera yard, with deliveries scheduled for 2033 and 2035. Each ship will have a gross tonnage of approximately 130,000 GT and around 1,650 guest cabins. The contract is subject to financing and other customary conditions. Fincantieri described its value as significant but did not disclose a financial figure. New vessels to feature LNG propulsion The two cruise ships will feature dual-fuel propulsion systems, with liquefied natural gas (LNG) as their primary fuel. According to Fincantieri, the vessels will combine advanced environmental and digital technologies with an energy-efficient design. The new design has also been developed as a platform that Carnival Corporation could use across several of its cruise brands in the future. The latest order expands a shipbuilding relationship spanning three decades. Fincantieri has delivered 76 vessels to Carnival Corporation’s various cruise brands, including 15 ships for Carnival Cruise Line. “With 12 new ships now on order for delivery through 2039 across Carnival Cruise Line, Princess and AIDA, we have a strong pipeline that supports our measured approach to growth,” said Josh Weinstein, CEO of Carnival Corporation. Weinstein also highlighted the importance of introducing new technologies and improving vessel efficiency as the company expands its fleet. Order adds to Carnival’s existing shipbuilding programme The two new vessels will join Carnival Cruise Line’s existing three-ship Ace-class programme at Fincantieri. Construction of the first Ace-class vessel, Carnival Destiny, began at the shipbuilder’s Monfalcone facility in July 2026. Unlike the newly ordered ships, the Ace-class vessels are being built to a larger design of approximately 230,000 GT. Pierroberto Folgiero, CEO and Managing Director of Fincantieri, said the new contract strengthens the company’s long-term relationship with Carnival Corporation. He also pointed to ongoing investments in shipyard infrastructure, digitalisation, automation and robotics under Fincantieri’s Shipyard of the Future strategy. The latest agreement extends the shipbuilder’s cruise vessel delivery schedule and supports future activity at its Italian facilities.",
-      "takeaways": [
-        "Fincantieri has signed a contract with Carnival Corporation to build two new dual-fuel cruise ships for Carnival Cruise Line.",
-        "The vessels will be constructed at the Italian shipbuilder’s Marghera yard, with deliveries scheduled for 2033 and 2035.",
-        "Each ship will have a gross tonnage of approximately 130,000 GT and around 1,650 guest cabins."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-B087B57A17",
-      "title": "Akkon Lines launches Türkiye–Levant service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/akkon-lines-launches-turkiye-levant-service/",
-      "publishedAt": "2026-11-21T06:00:08Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "lng",
-        "container",
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/pexels-adempercem-35531300-300x199.jpg",
-      "summary": "Akkon Lines will launch a new container service connecting Türkiye with Syria and Lebanon in December 2026. The new Levant Bridge Service (LBS) will be operated by a single 340 TEU vessel, offering one sailing every ten days. The service will connect three Turkish ports with Latakia in Syria and Beirut in Lebanon....",
-      "body": "Services Top Right Akkon Lines launches Türkiye–Levant service November 21, 2026 Facebook Twitter WhatsApp Linkedin Email Akkon Lines will launch a new container service connecting Türkiye with Syria and Lebanon in December 2026. The new Levant Bridge Service (LBS) will be operated by a single 340 TEU vessel, offering one sailing every ten days. The service will connect three Turkish ports with Latakia in Syria and Beirut in Lebanon. Its rotation will be: Izmir – Mersin – Iskenderun – Latakia – Beirut – Izmir TAGS AKKON LINES Facebook Twitter WhatsApp Linkedin Email Previous article Seatrium reports S$12.2 billion order book as new contracts increase Next article Fincantieri secures order for two LNG-powered Carnival cruise ships Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The new Levant Bridge Service (LBS) will be operated by a single 340 TEU vessel, offering one sailing every ten days.",
-        "The service will connect three Turkish ports with Latakia in Syria and Beirut in Lebanon.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1492,28 +1490,27 @@
       "sourceRegion": "USA / Maritime Tech",
       "url": "https://www.marinelink.com/news/vice-adm-burdian-appointed-dhs-joint-task-544503",
       "publishedAt": "2026-11-20T14:14:40Z",
-      "category": "Navigation & Safety",
-      "region": "Strait of Hormuz & Persian Gulf",
+      "category": "Shipping & Tankers",
+      "region": "Global Maritime",
       "regions": [
-        "Strait of Hormuz & Persian Gulf",
-        "US Gulf & Port of Houston"
+        "Global Maritime"
       ],
       "tags": [
-        "port",
-        "uscg"
+        "shipping",
+        "global"
       ],
       "coords": [
-        26.56,
-        56.25
+        25.0,
+        -40.0
       ],
-      "navarea": "IX",
+      "navarea": "GLOBAL",
       "image": "https://images.marinelink.com/images/maritime/w150/vice-adm-joann-burdian-image-175221.jpg",
       "summary": "Vice Adm. Jo‑Ann Burdian was presidentially appointed as the director, Department of Homeland Security Joint Task Force–Maritime (JTF-M), effective Nov. 10, 2026.DHS Secretary Markwayne Mullin nominated Burdian as director of JTF-M, in accordance with 6 U.S.C.",
-      "body": "Vice Adm. Burdian appointed as DHS Joint Task Force-Maritime Director Maritime Activity Reports, Inc. November 20, 2026 Vice Adm. Jo‑Ann Burdian. Image courtesy USCG Vice Adm. Jo‑Ann Burdian was presidentially appointed as the director, Department of Homeland Security Joint Task Force–Maritime (JTF-M), effective Nov. 10, 2026. DHS Secretary Markwayne Mullin nominated Burdian as director of JTF-M, in accordance with 6 U.S.C. § 348(b)(3)(A), to ensure the critical, continued role of JTF-M in synchronizing multi-agency maritime operations and securing the nation’s maritime borders. “Vice Admiral Burdian’s appointment as the JTF-M director marks a pivotal moment for our collective maritime defense,\" said Mullin. \"Her unmatched operational expertise is critical as JTF-M continues to dismantle illicit networks, prevent hostile exploitation of our maritime borders, and leverage the MOC-P construct to achieve departmental unity of effort and drive nationwide success.\" JTF-M synchronizes DHS component operations, intelligence, and investigations across the maritime domain to secure U.S. borders, prevent and respond to homeland security crises and facilitate regionally based joint operations. As the DHS Maritime Operations Coordination Plan (MOC-P) program office, JTF-M enhances coordination among DHS components, eliminating redundancy and increasing effectiveness through 35 Regional Coordinating Mechanisms (ReCoMs). These ReCoMs execute DHS missions at every major U.S. port, along all U.S. coastlines and approaches to maritime borders of the U.S. and its territories. The ReCoMs help prevent terrorist, criminal, and hostile activities and dismantle illicit networks attempting to exploit the maritime domain and reduce vulnerabilities while safeguarding legal trade and travel. \"I am honored to lead the dedicated staff of Joint Task Force-Maritime as we strengthen our borders and streamline interagency response,\" said Burdian. \"Through our 35 ReCoMs and strong partnerships with the Department of War, we will continue to safeguard legal trade and travel while remaining an impenetrable barrier against cross-border smuggling, illegal immigration and illicit trafficking.\" Burdian also serves as commander, Coast Guard Atlantic Area and commander, Coast Guard Defense Force East, providing Coast Guard forces and operations across all mission areas from the Arctic Ocean to the Arabian Gulf in support of the DoW and combatant commanders for national defense missions.",
+      "body": "Vice Adm. Jo‑Ann Burdian was presidentially appointed as the director, Department of Homeland Security Joint Task Force–Maritime (JTF-M), effective Nov. 10, 2026.DHS Secretary Markwayne Mullin nominated Burdian as director of JTF-M, in accordance with 6 U.S.C.",
       "takeaways": [
-        "Burdian appointed as DHS Joint Task Force-Maritime Director Maritime Activity Reports, Inc.",
         "Jo‑Ann Burdian was presidentially appointed as the director, Department of Homeland Security Joint Task Force–Maritime (JTF-M), effective Nov.",
-        "DHS Secretary Markwayne Mullin nominated Burdian as director of JTF-M, in accordance with 6 U.S.C."
+        "10, 2026.DHS Secretary Markwayne Mullin nominated Burdian as director of JTF-M, in accordance with 6 U.S.C.",
+        "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1627,12 +1624,11 @@
       "sourceRegion": "USA / Maritime Tech",
       "url": "https://www.marinelink.com/news/us-coast-guard-commissions-new-cutter-544499",
       "publishedAt": "2026-11-20T13:19:43Z",
-      "category": "Geopolitics & Chokepoints",
+      "category": "Navigation & Safety",
       "region": "Panama Canal & Caribbean",
       "regions": [
         "Panama Canal & Caribbean",
-        "US Gulf & Port of Houston",
-        "US West Coast & Pacific"
+        "US Gulf & Port of Houston"
       ],
       "tags": [
         "port",
@@ -1645,11 +1641,10 @@
       "navarea": "IV",
       "image": "https://images.marinelink.com/images/maritime/w150/credit-us-coast-guard-175217.jpg",
       "summary": "The U.S. Coast Guard has commissioned its newest Sentinel-class fast response cutter, USCGC Marvin Perrett (WPC 1164), during a ceremony in New Orleans, ahead of the vessel's deployment to its homeport in San Juan, Puerto Rico.The commissioning…",
-      "body": "US Coast Guard Commissions New Cutter for Caribbean Ops Maritime Activity Reports, Inc. November 20, 2026 (Credit: US Coast Guard) The U.S. Coast Guard has commissioned its newest Sentinel-class fast response cutter, USCGC Marvin Perrett (WPC 1164), during a ceremony in New Orleans, ahead of the vessel's deployment to its homeport in San Juan, Puerto Rico. The commissioning ceremony took place at the Julia Street Cruise Ship Terminal, marking the cutter's official entry into active service. Following commissioning, the vessel and its crew will transit to San Juan, from where they will conduct operations across the Caribbean and the United States' southern maritime approaches. Its missions will include search and rescue, maritime law enforcement and homeland security operations. The Sentinel-class cutter is equipped with advanced maritime sensors, integrated intelligence and communications systems, and capabilities for deploying pursuit boats over the horizon. The Coast Guard said the vessel would strengthen its capacity to conduct maritime security, border protection and search and rescue missions in the region. The cutter is named after Marvin Perrett, a New Orleans native and Coast Guard veteran who operated Higgins landing craft during World War II, participating in the Normandy landings and subsequent operations in southern France and the Pacific. Perrett later received a Knight of the Legion of Honor medal from France in recognition of his wartime service.",
+      "body": "The U.S. Coast Guard has commissioned its newest Sentinel-class fast response cutter, USCGC Marvin Perrett (WPC 1164), during a ceremony in New Orleans, ahead of the vessel's deployment to its homeport in San Juan, Puerto Rico.The commissioning…",
       "takeaways": [
-        "US Coast Guard Commissions New Cutter for Caribbean Ops Maritime Activity Reports, Inc.",
-        "November 20, 2026 (Credit: US Coast Guard) The U.S.",
-        "Coast Guard has commissioned its newest Sentinel-class fast response cutter, USCGC Marvin Perrett (WPC 1164), during a ceremony in New Orleans, ahead of the vessel's deployment to its homeport in San Juan, Puerto Rico."
+        "Operational Area: Panama Canal & Caribbean, US Gulf & Port of Houston.",
+        "Watchkeepers transiting affected waters should cross-check active NAVAREA & UKMTO advisories on SetChart."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -1748,7 +1743,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2015/07/Subsea-7-Seven-Borealis-300x200.jpeg",
       "summary": "Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis, which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally...",
-      "body": "Europe Offshore Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger Bojan Lepic November 20, 2026 0 2,102 1 minute read Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis , which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month. The regulator required the disposal of Seven Borealis to address competition concerns in Brazil’s offshore engineering, procurement, construction, and installation market, where both contractors have a substantial presence. Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure. Those commitments currently extend into 2028. The company has not identified a prospective buyer or disclosed an asking price for the vessel. The planned merger will create Saipem 7, combining two of the world’s largest offshore construction contractors. Subsea 7 said 13 of the 16 relevant competition authorities have approved the transaction. Reviews remain underway in Australia, the EU, and West Africa, with completion now expected in early 2027. The Seven Borealis disposal remains a condition of the Brazilian approval. Tags Italy Norway Bojan Lepic November 20, 2026 0 2,102 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger Bojan Lepic November 20, 2026 0 2,416 1 minute read Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis , which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month. The regulator required the disposal of Seven Borealis to address competition concerns in Brazil’s offshore engineering, procurement, construction, and installation market, where both contractors have a substantial presence. Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure. Those commitments currently extend into 2028. The company has not identified a prospective buyer or disclosed an asking price for the vessel. The planned merger will create Saipem 7, combining two of the world’s largest offshore construction contractors. Subsea 7 said 13 of the 16 relevant competition authorities have approved the transaction. Reviews remain underway in Australia, the EU, and West Africa, with completion now expected in early 2027. The Seven Borealis disposal remains a condition of the Brazilian approval. Tags Italy Norway Bojan Lepic November 20, 2026 0 2,416 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month.",
         "Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure.",
@@ -1782,7 +1777,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2026/10/Seaway-Phoenix-Seaway-7-300x180.jpg",
       "summary": "Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift, Seaway Strashnov, and Seaway Phoenix, with offshore work expected during 2029 and 2030....",
-      "body": "Europe Offshore Renewables Seaway 7 lines up vessel trio for Scottish offshore wind project Bojan Lepic November 20, 2026 0 782 1 minute read Seaway 7 Seaway 7 Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030. The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables. SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations. The project is located around 38 km off the Scottish Borders in the outer Firth of Forth, with average water depths of approximately 52 m. SSE expects Berwick Bank B to become the world’s deepest fixed-bottom offshore wind farm once completed. The development forms part of the wider Berwick Bank offshore wind complex, which has a proposed capacity of approximately 4.1GW. The Berwick Bank B agreement remains subject to final contract award and SSE’s final investment decision, expected in late 2027. Subject to approval, preparatory offshore construction could begin in 2028, with foundation and cable installation continuing into 2031. Seaway 7 previously worked with SSE on the Beatrice and Seagreen offshore wind farms. Tags Norway Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 782 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Seaway 7 lines up vessel trio for Scottish offshore wind project Bojan Lepic November 20, 2026 0 888 1 minute read Seaway 7 Seaway 7 Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030. The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables. SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations. The project is located around 38 km off the Scottish Borders in the outer Firth of Forth, with average water depths of approximately 52 m. SSE expects Berwick Bank B to become the world’s deepest fixed-bottom offshore wind farm once completed. The development forms part of the wider Berwick Bank offshore wind complex, which has a proposed capacity of approximately 4.1GW. The Berwick Bank B agreement remains subject to final contract award and SSE’s final investment decision, expected in late 2027. Subject to approval, preparatory offshore construction could begin in 2028, with foundation and cable installation continuing into 2031. Seaway 7 previously worked with SSE on the Beatrice and Seagreen offshore wind farms. Tags Norway Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 888 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030.",
         "The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables.",
@@ -1849,7 +1844,7 @@
       "navarea": "I",
       "image": "https://splash247.com/wp-content/uploads/2023/08/Ingka-floating-wind-300x185.jpg",
       "summary": "The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity...",
-      "body": "Europe Offshore Renewables Scotland greenlights 1 GW floating offshore wind project Bojan Lepic November 20, 2026 0 646 1 minute read Ingka Group Ingka Group The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes. The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure. Muir Mhòr was awarded seabed rights in Scotland’s ScotWind leasing round in 2022 and is among the country’s most advanced commercial-scale floating wind developments. Fred. Olsen Seawind took full ownership of the project earlier this year after acquiring Vattenfall’s 50% interest. The developer is targeting the start of electricity generation in the early 2030s, subject to further commercial and investment decisions. The project has already awarded £18.4m in development contracts, including £7.96m to Scottish suppliers. The latest approval comes with conditions requiring measures to address the wind farm’s potential impact on commercial fisheries and seabirds. The Scottish Fishermen’s Federation criticised the decision, arguing that questions remain about whether fishing vessels can operate safely around the project’s floating foundations, moorings, and subsea cables. Scotland currently has more than 11GW of consented offshore wind capacity, according to the government. The consent is a significant development milestone for Muir Mhòr, although the project has yet to reach a final investment decision. Tags Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 646 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "body": "Europe Offshore Renewables Scotland greenlights 1 GW floating offshore wind project Bojan Lepic November 20, 2026 0 804 1 minute read Ingka Group Ingka Group The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes. The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure. Muir Mhòr was awarded seabed rights in Scotland’s ScotWind leasing round in 2022 and is among the country’s most advanced commercial-scale floating wind developments. Fred. Olsen Seawind took full ownership of the project earlier this year after acquiring Vattenfall’s 50% interest. The developer is targeting the start of electricity generation in the early 2030s, subject to further commercial and investment decisions. The project has already awarded £18.4m in development contracts, including £7.96m to Scottish suppliers. The latest approval comes with conditions requiring measures to address the wind farm’s potential impact on commercial fisheries and seabirds. The Scottish Fishermen’s Federation criticised the decision, arguing that questions remain about whether fishing vessels can operate safely around the project’s floating foundations, moorings, and subsea cables. Scotland currently has more than 11GW of consented offshore wind capacity, according to the government. The consent is a significant development milestone for Muir Mhòr, although the project has yet to reach a final investment decision. Tags Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 804 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
       "takeaways": [
         "Olsen Seawind off the Aberdeenshire coast.",
         "Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes.",

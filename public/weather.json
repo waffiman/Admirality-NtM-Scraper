@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "2200 UTC",
-  "lastSyncUtc": "2026-11-21T22:49:56.313612+00:00",
+  "synopticCycle": "0200 UTC",
+  "lastSyncUtc": "2026-11-22T02:51:43.264032+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -10,55 +10,55 @@
       "category": "Tropical Storm (JTWC)",
       "center": [
         -11.9,
-        -165.6
+        -166.8
       ],
       "centralPressure": 997,
       "maxWinds": 45,
       "gusts": 56,
-      "movement": "WSW at 7 kts",
+      "movement": "W at 6 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -12.2,
-            -166.9
+            -12.0,
+            -168.0
           ],
-          "winds": 45,
+          "winds": 40,
           "radiusNm": 56
         },
         {
           "tau": 24,
           "coords": [
-            -12.6,
-            -168.2
+            -12.3,
+            -168.9
           ],
-          "winds": 45,
+          "winds": 40,
           "radiusNm": 73
         },
         {
           "tau": 36,
           "coords": [
-            -12.9,
-            -169.1
+            -12.5,
+            -169.7
           ],
-          "winds": 40,
+          "winds": 35,
           "radiusNm": 90
         },
         {
           "tau": 48,
           "coords": [
-            -12.9,
-            -170.1
+            -12.4,
+            -170.6
           ],
-          "winds": 35,
+          "winds": 30,
           "radiusNm": 107
         },
         {
           "tau": 60,
           "coords": [
-            -12.6,
-            -171.3
+            -11.9,
+            -171.9
           ],
           "winds": 30,
           "radiusNm": 124
@@ -77,14 +77,14 @@
       "centralPressure": 1007,
       "maxWinds": 25,
       "gusts": 32,
-      "movement": "W at 6 kts",
+      "movement": "WSW at 8 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -11.7,
-            89.8
+            -12.6,
+            89.7
           ],
           "winds": 30,
           "radiusNm": 45
@@ -92,8 +92,8 @@
         {
           "tau": 24,
           "coords": [
-            -12.0,
-            89.0
+            -13.1,
+            88.9
           ],
           "winds": 35,
           "radiusNm": 60
@@ -101,7 +101,7 @@
         {
           "tau": 36,
           "coords": [
-            -12.4,
+            -13.4,
             88.2
           ],
           "winds": 40,
@@ -110,8 +110,8 @@
         {
           "tau": 48,
           "coords": [
-            -12.8,
-            87.6
+            -13.6,
+            87.5
           ],
           "winds": 45,
           "radiusNm": 90
@@ -119,7 +119,7 @@
         {
           "tau": 60,
           "coords": [
-            -13.0,
+            -14.0,
             86.7
           ],
           "winds": 50,
@@ -137,7 +137,7 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 3.3,
+      "waveHeight": 3.1,
       "swellPeriod": 9,
       "swellDir": "WNW"
     },
@@ -149,21 +149,21 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 2.6,
+      "waveHeight": 2.7,
       "swellPeriod": 8,
-      "swellDir": "NW"
+      "swellDir": "WNW"
     },
     {
       "id": "WS1",
       "name": "Xavier Cyclonic Wave Field",
       "center": [
         -11.9,
-        -165.6
+        -166.8
       ],
       "radiusNm": 150,
-      "waveHeight": 3.3,
-      "swellPeriod": 8,
-      "swellDir": "ENE"
+      "waveHeight": 3.2,
+      "swellPeriod": 9,
+      "swellDir": "SE"
     }
   ],
   "pressureCenters": [
@@ -173,7 +173,7 @@
       "name": "Tropical Storm XAVIER Core Low",
       "coords": [
         -11.9,
-        -165.6
+        -166.8
       ]
     },
     {
@@ -217,7 +217,7 @@
     {
       "coords": [
         -11.6,
-        -165.3
+        -166.5
       ],
       "dir": 160,
       "speed": 45,
