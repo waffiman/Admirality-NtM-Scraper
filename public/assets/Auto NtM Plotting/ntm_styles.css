@@ -26417,6 +26417,59 @@ body.light-theme .ntm-wx-unified {
 [data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile::before {
   background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.25), transparent);
 }
+/* v5.255: Fixed-width cursor weather slots so changing numbers never shift tile or slider width */
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified,
+.ntm-wx-unified {
+  width: 728px !important;
+  min-width: 728px !important;
+  max-width: 728px !important;
+  flex: 0 0 728px !important;
+}
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-cursor-tile {
+  width: 434px !important;
+  min-width: 434px !important;
+  max-width: 434px !important;
+  flex: 0 0 434px !important;
+}
+#tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile {
+  width: 284px !important;
+  min-width: 284px !important;
+  max-width: 284px !important;
+  flex: 0 0 284px !important;
+}
+#tab-ntm .ntm-wx-unified .ntm-wx-cursor-body {
+  gap: 0 !important;
+  width: 388px !important;
+  min-width: 388px !important;
+  max-width: 388px !important;
+  flex: 0 0 388px !important;
+}
+#tab-ntm .ntm-wx-unified .wx-chip {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  font-variant-numeric: tabular-nums !important;
+  justify-content: flex-start !important;
+  padding: 0 6px !important;
+  box-sizing: border-box !important;
+}
+#tab-ntm .ntm-wx-unified .wx-chip b {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  font-variant-numeric: tabular-nums !important;
+}
+#tab-ntm .ntm-wx-unified .wx-chip:nth-child(1) {
+  width: 88px !important; min-width: 88px !important; max-width: 88px !important; flex: 0 0 88px !important;
+}
+#tab-ntm .ntm-wx-unified .wx-chip:nth-child(2) {
+  width: 62px !important; min-width: 62px !important; max-width: 62px !important; flex: 0 0 62px !important;
+}
+#tab-ntm .ntm-wx-unified .wx-chip:nth-child(3) {
+  width: 70px !important; min-width: 70px !important; max-width: 70px !important; flex: 0 0 70px !important;
+}
+#tab-ntm .ntm-wx-unified .wx-chip:nth-child(4) {
+  width: 74px !important; min-width: 74px !important; max-width: 74px !important; flex: 0 0 74px !important;
+}
+#tab-ntm .ntm-wx-unified .wx-chip:nth-child(5) {
+  width: 94px !important; min-width: 94px !important; max-width: 94px !important; flex: 0 0 94px !important;
+}
 @media (max-width: 1100px) {
   .ntm-wx-unified { flex-wrap: wrap; height: auto; max-width: 100%; }
 }

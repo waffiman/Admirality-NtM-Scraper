@@ -12711,21 +12711,6 @@ function updateWeatherFutureGhostVessel(tauHours, mapOverride) {
   const utcStr = formatWeatherTimelineUtc(tau);
   const vName = String(v.name || "OWN SHIP").trim();
   const hdgR = Math.round(((futureHdg % 360) + 360) % 360);
-  const ghostHtml =
-    '<div class="ss-ghost-vessel-wrap" title="' + vName.replace(/"/g, "&quot;") + ' forecast position (' + tauDisp + ' · ' + utcStr + ')">' +
-      '<svg class="ss-ghost-vessel-svg" width="38" height="38" viewBox="0 0 48 68" style="transform:rotate(' + hdgR + 'deg);" aria-hidden="true">' +
-        '<path d="M22 6 L26 6 L33 20 L33 62 L15 62 L15 20 Z" fill="rgba(56,189,248,0.28)" stroke="#38bdf8" stroke-width="2.4" stroke-dasharray="4 2.5" stroke-linejoin="round"/>' +
-        '<line x1="24" y1="8" x2="24" y2="28" stroke="#e0f2fe" stroke-width="1.6" stroke-linecap="round" opacity="0.85"/>' +
-        '<circle cx="24" cy="36" r="3.2" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.3"/>' +
-      '</svg>' +
-      '<span class="ss-ghost-vessel-tag">' + tauDisp + '</span>' +
-    '</div>';
-  const ghostIcon = L.divIcon({
-    className: "ss-ghost-vessel-marker",
-    html: ghostHtml,
-    iconSize: [38, 38],
-    iconAnchor: [19, 19]
-  });
   const popupHtml =
     '<div style="font-family:\'JetBrains Mono\',monospace;font-size:11px;line-height:1.45;min-width:175px;">' +
       '<div style="font-weight:800;color:#38bdf8;margin-bottom:3px;">' + vName + ' · ' + tauDisp + ' FORECAST</div>' +
@@ -12736,6 +12721,21 @@ function updateWeatherFutureGhostVessel(tauHours, mapOverride) {
     '</div>';
   if (!window._wxGhostVesselMarker || !map.hasLayer(window._wxGhostVesselMarker)) {
     removeGhost();
+    const ghostHtml =
+      '<div class="ss-ghost-vessel-wrap" title="' + vName.replace(/"/g, "&quot;") + ' forecast position (' + tauDisp + ' · ' + utcStr + ')">' +
+        '<svg class="ss-ghost-vessel-svg" width="38" height="38" viewBox="0 0 48 68" style="transform:rotate(' + hdgR + 'deg);" aria-hidden="true">' +
+          '<path d="M22 6 L26 6 L33 20 L33 62 L15 62 L15 20 Z" fill="rgba(56,189,248,0.28)" stroke="#38bdf8" stroke-width="2.4" stroke-dasharray="4 2.5" stroke-linejoin="round"/>' +
+          '<line x1="24" y1="8" x2="24" y2="28" stroke="#e0f2fe" stroke-width="1.6" stroke-linecap="round" opacity="0.85"/>' +
+          '<circle cx="24" cy="36" r="3.2" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.3"/>' +
+        '</svg>' +
+        '<span class="ss-ghost-vessel-tag">' + tauDisp + '</span>' +
+      '</div>';
+    const ghostIcon = L.divIcon({
+      className: "ss-ghost-vessel-marker",
+      html: ghostHtml,
+      iconSize: [38, 38],
+      iconAnchor: [19, 19]
+    });
     window._wxGhostVesselMarker = L.marker([futurePt.lat, futurePt.lon], {
       icon: ghostIcon,
       interactive: true,
@@ -12744,8 +12744,16 @@ function updateWeatherFutureGhostVessel(tauHours, mapOverride) {
     window._wxGhostVesselMarker.addTo(map);
   } else {
     window._wxGhostVesselMarker.setLatLng([futurePt.lat, futurePt.lon]);
-    window._wxGhostVesselMarker.setIcon(ghostIcon);
-    if (window._wxGhostVesselMarker.getPopup()) {
+    const el = window._wxGhostVesselMarker.getElement ? window._wxGhostVesselMarker.getElement() : null;
+    if (el) {
+      const wrap = el.querySelector(".ss-ghost-vessel-wrap");
+      if (wrap) wrap.title = vName + " forecast position (" + tauDisp + " · " + utcStr + ")";
+      const svg = el.querySelector(".ss-ghost-vessel-svg");
+      if (svg) svg.style.transform = "rotate(" + hdgR + "deg)";
+      const tag = el.querySelector(".ss-ghost-vessel-tag");
+      if (tag && tag.textContent !== tauDisp) tag.textContent = tauDisp;
+    }
+    if (window._wxGhostVesselMarker.getPopup() && window._wxGhostVesselMarker.isPopupOpen && window._wxGhostVesselMarker.isPopupOpen()) {
       window._wxGhostVesselMarker.setPopupContent(popupHtml);
     }
   }
@@ -12790,11 +12798,15 @@ function stopWeatherTimelinePlayback() {
 
 function setWeatherForecastHours(tauHours, opts) {
   initWeatherTimelineSlider();
-  const maxH = syncWeatherTimelineBounds();
+  const isFast = !!(opts && (opts.fastDrag || opts.smoothPlay));
+  const maxH = (isFast && typeof window !== "undefined" && window._wxMaxForecastHours > 0)
+    ? window._wxMaxForecastHours
+    : syncWeatherTimelineBounds();
   const clamped = Math.max(0, Math.min(maxH, Number(tauHours) || 0));
   const tau = Math.round(clamped * 2) / 2;
   if (typeof window !== "undefined") {
     window._wxForecastHours = tau;
+    window._wxPlaybackFloatTau = clamped;
   }
   const slider = document.getElementById("ntmWxTimelineSlider");
   const thumbPill = document.getElementById("ntmWxTimelineThumbPill");
@@ -12803,7 +12815,8 @@ function setWeatherForecastHours(tauHours, opts) {
   const utcLbl = document.getElementById("ntmWxTimelineUtcLbl");
   const nowBtn = document.getElementById("ntmWxTimelineNowBtn");
   const tile = document.getElementById("ntmWxTimelineTile");
-  const pct = maxH > 0 ? Math.max(0, Math.min(100, (tau / maxH) * 100)) : 0;
+  const pctVal = (opts && opts.smoothPlay) ? clamped : tau;
+  const pct = maxH > 0 ? Math.max(0, Math.min(100, (pctVal / maxH) * 100)) : 0;
   if (slider) {
     if (Math.abs(Number(slider.value) - tau) > 0.01) {
       slider.value = String(tau);
@@ -12813,19 +12826,20 @@ function setWeatherForecastHours(tauHours, opts) {
   if (trackWrap) {
     trackWrap.style.setProperty("--wx-tl-pct", pct.toFixed(2));
   }
-  const isNow = tau <= 0.05;
+  const dispTau = (opts && opts.smoothPlay) ? Math.round(clamped) : tau;
+  const isNow = dispTau <= 0.05;
   const labelText = isNow
     ? "NOW"
-    : (Math.abs(tau - Math.round(tau)) < 0.08 ? ("+" + Math.round(tau) + "H") : ("+" + tau.toFixed(1) + "H"));
+    : (Math.abs(dispTau - Math.round(dispTau)) < 0.08 ? ("+" + Math.round(dispTau) + "H") : ("+" + dispTau.toFixed(1) + "H"));
   if (thumbPill) {
-    thumbPill.textContent = labelText;
+    if (thumbPill.textContent !== labelText) thumbPill.textContent = labelText;
     thumbPill.classList.toggle("is-now", isNow);
   }
-  if (offsetLbl) {
+  if (offsetLbl && offsetLbl.textContent !== labelText) {
     offsetLbl.textContent = labelText;
   }
   if (utcLbl) {
-    utcLbl.textContent = formatWeatherTimelineUtc(tau);
+    utcLbl.textContent = formatWeatherTimelineUtc(dispTau);
   }
   if (nowBtn) {
     nowBtn.classList.toggle("is-now", isNow);
@@ -12833,16 +12847,24 @@ function setWeatherForecastHours(tauHours, opts) {
   }
   if (tile) {
     tile.classList.toggle("is-forecast-active", !isNow);
-    tile.title = isNow
-      ? "Weather Forecast Timeline — LIVE (0H). Drag slider to scrub forecast ahead"
-      : ("Weather Forecast Timeline — " + labelText + " (" + formatWeatherTimelineUtc(tau) + "). Double-click slider to reset to NOW");
+    if (!isFast) {
+      tile.title = isNow
+        ? "Weather Forecast Timeline — LIVE (0H). Drag slider to scrub forecast ahead"
+        : ("Weather Forecast Timeline — " + labelText + " (" + formatWeatherTimelineUtc(dispTau) + "). Double-click slider to reset to NOW");
+    }
   }
-  updateWeatherDynamicOverlaysAtTau(tau);
-  updateWeatherFutureGhostVessel(tau);
-  if (typeof window !== "undefined" && typeof window.refreshWxSynopticAtTau === "function") {
-    window.refreshWxSynopticAtTau(!!(opts && opts.fastDrag));
-  } else if (typeof window !== "undefined" && Number.isFinite(window._wxCursorLat) && Number.isFinite(window._wxCursorLon)) {
-    updateNdbcCursorTile(window._wxCursorLat, window._wxCursorLon);
+  // During smoothPlay, always move smooth map markers (storm icons + ghost vessel) every frame,
+  // but throttle heavy cursor-tile / synoptic re-sampling to 0.5h steps
+  updateWeatherDynamicOverlaysAtTau(clamped);
+  updateWeatherFutureGhostVessel(clamped);
+  const stepChanged = (typeof window === "undefined") || (window._wxLastSynopticTau !== tau) || !isFast;
+  if (stepChanged) {
+    if (typeof window !== "undefined") window._wxLastSynopticTau = tau;
+    if (typeof window !== "undefined" && typeof window.refreshWxSynopticAtTau === "function") {
+      window.refreshWxSynopticAtTau(isFast);
+    } else if (typeof window !== "undefined" && Number.isFinite(window._wxCursorLat) && Number.isFinite(window._wxCursorLon)) {
+      updateNdbcCursorTile(window._wxCursorLat, window._wxCursorLon);
+    }
   }
   return tau;
 }
@@ -12853,6 +12875,9 @@ function initWeatherTimelineSlider() {
   slider.dataset.wxTlBound = "1";
   syncWeatherTimelineBounds();
   slider.addEventListener("input", (e) => {
+    if (typeof window !== "undefined" && window._wxTimelinePlaying) {
+      stopWeatherTimelinePlayback();
+    }
     const val = Number(e.target.value) || 0;
     setWeatherForecastHours(val, { fastDrag: true });
   });
@@ -12879,27 +12904,29 @@ function initWeatherTimelineSlider() {
         setWeatherForecastHours(window._wxForecastHours || 0, { fastDrag: false });
         return;
       }
+      const maxH = syncWeatherTimelineBounds();
+      let playTau = Number(window._wxPlaybackFloatTau ?? window._wxForecastHours) || 0;
+      if (playTau >= maxH - 0.25) {
+        playTau = 0;
+        setWeatherForecastHours(0, { fastDrag: true, smoothPlay: true });
+      }
       window._wxTimelinePlaying = true;
       playBtn.classList.add("is-playing");
       playBtn.setAttribute("aria-label", "Pause forecast");
-      const maxH = syncWeatherTimelineBounds();
-      if ((Number(window._wxForecastHours) || 0) >= maxH - 0.25) {
-        setWeatherForecastHours(0, { fastDrag: true });
-      }
       let lastTs = performance.now();
       const stepFrame = (nowTs) => {
         if (!window._wxTimelinePlaying) return;
         const dtSec = Math.min(0.1, Math.max(0.001, (nowTs - lastTs) / 1000));
         lastTs = nowTs;
-        const curMax = window._wxMaxForecastHours || getWeatherMaxForecastHorizonHours();
-        const speedHoursPerSec = Math.max(6, curMax / 9);
-        const nextTau = (Number(window._wxForecastHours) || 0) + dtSec * speedHoursPerSec;
-        if (nextTau >= curMax) {
+        const curMax = window._wxMaxForecastHours || maxH || 72;
+        const speedHoursPerSec = Math.max(8, curMax / 8);
+        playTau += dtSec * speedHoursPerSec;
+        if (playTau >= curMax) {
           setWeatherForecastHours(curMax, { fastDrag: false });
           stopWeatherTimelinePlayback();
           return;
         }
-        setWeatherForecastHours(nextTau, { fastDrag: true });
+        setWeatherForecastHours(playTau, { fastDrag: true, smoothPlay: true });
         window._wxTimelinePlayTimer = requestAnimationFrame(stepFrame);
       };
       window._wxTimelinePlayTimer = requestAnimationFrame(stepFrame);
@@ -13006,6 +13033,22 @@ function renderNdbcCursorChips(wind, wave, pressure, airSst, current) {
 
   );
 
+}
+
+function applyNdbcCursorChipsInPlace(body, wind, wave, pressure, airSst, current) {
+  const chips = body.querySelectorAll(".wx-chip");
+  if (chips.length !== 5) {
+    body.innerHTML = renderNdbcCursorChips(wind, wave, pressure, airSst, current);
+    return body.querySelectorAll(".wx-chip");
+  }
+  const vals = [wind, wave, pressure, airSst, current];
+  for (let i = 0; i < 5; i++) {
+    const b = chips[i].querySelector("b");
+    if (b && b.textContent !== vals[i]) {
+      b.textContent = vals[i];
+    }
+  }
+  return chips;
 }
 
 
@@ -13186,7 +13229,7 @@ function updateNdbcCursorTile(lat, lon) {
 
     tile.classList.toggle("is-live", hasAny);
 
-    body.innerHTML = renderNdbcCursorChips(windTxt, waveTxt, pressureTxt, airSstTxt, curTxt);
+    applyNdbcCursorChipsInPlace(body, windTxt, waveTxt, pressureTxt, airSstTxt, curTxt);
 
     if (meta) { meta.textContent = ""; meta.title = ""; }
 
@@ -13234,21 +13277,14 @@ function updateNdbcCursorTile(lat, lon) {
 
   const wave = s.waveHs != null ? (fmtWxNum(s.waveHs, 1) + " m") : "\u2014";
 
-  body.innerHTML = renderNdbcCursorChips(
-
+  const chips = applyNdbcCursorChipsInPlace(
+    body,
     wind,
-
     wave,
-
     pressureTxt,
-
     fmtWxNum(s.airC, 0) + "\u00b0/" + fmtWxNum(s.sstC, 0) + "\u00b0",
-
     curTxt
-
   );
-
-  const chips = body.querySelectorAll(".wx-chip");
 
   if (chips[0]) chips[0].title = windTitle;
 
