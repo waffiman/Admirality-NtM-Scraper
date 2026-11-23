@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-11-23T00:01:28Z",
-  "generatedAt": "2026-11-23T00:01:28Z",
+  "updatedAt": "2026-11-23T08:38:21Z",
+  "generatedAt": "2026-11-23T08:38:21Z",
   "updateSchedule": "Every 6 Hours (Live Global Maritime Wire)",
   "sources": [
     "gCaptain",
@@ -20,7 +20,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/cma-shipping",
-      "publishedAt": "2026-11-23T00:01:28Z",
+      "publishedAt": "2026-11-23T08:38:21Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -52,7 +52,7 @@
       "sourceIcon": "🚢",
       "sourceRegion": "UK / Global",
       "url": "https://www.seatrade-maritime.com/events/crew-connect-global",
-      "publishedAt": "2026-11-23T00:01:28Z",
+      "publishedAt": "2026-11-23T08:38:21Z",
       "category": "Shipping & Tankers",
       "region": "Global Maritime",
       "regions": [
@@ -73,6 +73,578 @@
       "takeaways": [
         "Operational Area: Global Maritime.",
         "Relevant for gas carrier (LPG/LNG) and tanker fleet chartering, bunkering, and terminal turnaround planning."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-566E584AF1",
+      "title": "No safe harbour as maritime war spreads beyond Black Sea",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/no-safe-harbour-as-maritime-war-spreads-beyond-black-sea/",
+      "publishedAt": "2026-11-23T08:35:06Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Red Sea & Bab el-Mandeb",
+      "regions": [
+        "Red Sea & Bab el-Mandeb",
+        "Suez Canal & Eastern Med",
+        "Baltic Sea & Northern Europe"
+      ],
+      "tags": [
+        "tanker",
+        "container",
+        "port"
+      ],
+      "coords": [
+        13.5,
+        42.8
+      ],
+      "navarea": "IX",
+      "image": "https://splash247.com/wp-content/uploads/2026/11/Merkury-copy-300x183.jpg",
+      "summary": "The maritime war between Russia and Ukraine has expanded far beyond the Black Sea, with a Russian naval corvette sunk in Libya and a sanctioned Russian cargo ship attacked in the Baltic over the weekend. The Russian navy’s Merkury, a Project 20380 corvette, was struck at the port of Benghazi on Sunday (pictured)...",
+      "body": "Africa Containers Europe Operations Ports and Logistics Tankers No safe harbour as maritime war spreads beyond Black Sea Sam Chambers November 23, 2026 0 378 1 minute read X.com X.com The maritime war between Russia and Ukraine has expanded far beyond the Black Sea, with a Russian naval corvette sunk in Libya and a sanctioned Russian cargo ship attacked in the Baltic over the weekend. The Russian navy’s Merkury, a Project 20380 corvette, was struck at the port of Benghazi on Sunday (pictured) while taking on fuel and supplies. Officials from Libya’s eastern administration said suspected sea drones attacked the vessel, sparking a fire. Satellite imagery subsequently showed the warship capsized and largely submerged alongside the quay. Two Libyan military officials told the Associated Press that six Ukrainian sea drones had been launched from western Libya, with four intercepted and two hitting the warship. A second attack was reported off Benghazi later on Sunday, with explosive-laden sea drones striking a Maltese-flagged merchant vessel (see video below). Libyan authorities said the crew had been rescued, with some receiving treatment for minor injuries. The Mediterranean strikes came just 24 hours after the Russian-flagged Sparta II, a US-sanctioned cargo ship operated by Oboronlogistika, which provides logistics services to Russia’s defence ministry, was attacked in the Gulf of Finland. The 121 m vessel was sailing from St Petersburg to Kaliningrad when two drones struck in international waters on Saturday, setting the ship ablaze. All 16 crewmembers were evacuated as the burning vessel drifted into Finnish territorial waters. Finnish, Estonian and Russian rescue assets battled the blaze throughout the weekend before the Russian rescue vessel Murman began towing the damaged ship back towards Russian waters on Sunday. Finnish authorities reported no pollution, although the vessel had developed a slight list. Meanwhile, Russia’s defence ministry claimed on Sunday that its forces had struck a dry cargo vessel carrying dual-use goods northeast of Odesa, along with port infrastructure at Kiliya on the Ukrainian Danube. The maritime attacks coincided with continuing strikes against energy infrastructure. Early on Monday, Ukrainian monitoring channels reported a major fire at Russia’s Novoshakhtinsk refinery in the Rostov region following a drone attack. The extent of the damage remains unclear. On Friday, Ukraine’s military confirmed that an earlier strike on the Kaleykino oil pumping station in Tatarstan, a key hub feeding the Druzhba pipeline, had damaged three large storage tanks. Footage of the Ukrainian BEC strike on the vessel \"Askalon.\" 22 November , 2026. pic.twitter.com/yFhYUG9seP — 🅱🅸🆃 🅾🅵 🅲🅾🅽🆃🅴🆇🆃 (@TheSDPadresFan) November 22, 2026 Tags Finland Libya Russia Ukraine Sam Chambers November 23, 2026 0 378 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The Russian navy’s Merkury, a Project 20380 corvette, was struck at the port of Benghazi on Sunday (pictured) while taking on fuel and supplies.",
+        "Officials from Libya’s eastern administration said suspected sea drones attacked the vessel, sparking a fire.",
+        "Satellite imagery subsequently showed the warship capsized and largely submerged alongside the quay."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-B9F993C87B",
+      "title": "ASL Marine exits Batam shipyard in $23m deal",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/asl-marine-exits-batam-shipyard-in-23m-deal/",
+      "publishedAt": "2026-11-23T08:32:23Z",
+      "category": "Shipping & Tankers",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "tanker",
+        "singapore",
+        "shipyard"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://splash247.com/wp-content/uploads/2026/11/Cemara-Intan-Shipyard-300x180.jpg",
+      "summary": "Singapore-listed ASL Marine Holdings is selling an underused shipyard in Indonesia for IDR420bn ($23m), in a deal expected to generate a gain of around S$17.2m ($13.3m) before taxes and transaction expenses. The marine group disclosed that its wholly owned subsidiary, Intan Overseas Investments, has signed a sale and...",
+      "body": "Asia Shipyards ASL Marine exits Batam shipyard in $23m deal Adis Ajdin November 23, 2026 0 12 1 minute read Cemara Intan Shipyard Cemara Intan Shipyard Singapore-listed ASL Marine Holdings is selling an underused shipyard in Indonesia for IDR420bn ($23m), in a deal expected to generate a gain of around S$17.2m ($13.3m) before taxes and transaction expenses. The marine group disclosed that its wholly owned subsidiary, Intan Overseas Investments, has signed a sale and purchase agreement with Indonesian shipping company PT Global Sinergi Maritim to dispose of its entire stake in PT Cemara Intan Shipyard. The Batam-based business, incorporated in 2006, is involved in shipbuilding, repair and general engineering.ASL said the yard’s limited operational activity had prompted the decision to sell, allowing the group to concentrate resources on its remaining businesses. The IDR420bn consideration, equivalent to approximately S$29.8m, includes settlement of the shipyard subsidiary’s obligations to creditors. The transaction remains subject to conditions, with completion to be announced separately. Cemara Intan had net tangible assets of S$12.6m at the end of June and recorded a S$1.6m loss for ASL’s 2026 financial year. The Singapore group said it plans to use the disposal proceeds for capital expenditure and working capital. ASL retains shipbuilding and repair operations in Singapore and Indonesia, alongside a chartering fleet of more than 180 tugboats and barges. Its remaining shipyard activities cover vessels ranging from tugs and tankers to specialised offshore tonnage. Tags Indonesia Singapore Adis Ajdin November 23, 2026 0 12 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The IDR420bn consideration, equivalent to approximately S$29.8m, includes settlement of the shipyard subsidiary’s obligations to creditors.",
+        "The transaction remains subject to conditions, with completion to be announced separately.",
+        "Cemara Intan had net tangible assets of S$12.6m at the end of June and recorded a S$1.6m loss for ASL’s 2026 financial year."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-A4584B57D6",
+      "title": "Gulf Energy Maritime doubles down on LR1s in South Korea",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/gulf-energy-maritime-doubles-down-on-lr1s-in-south-korea/",
+      "publishedAt": "2026-11-23T08:25:50Z",
+      "category": "Ports & Terminals",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Panama Canal & Caribbean",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "tanker",
+        "lng",
+        "port",
+        "panama",
+        "imo"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://splash247.com/wp-content/uploads/2025/07/K-Shipbuilding-300x180.jpg",
+      "summary": "Dubai-based tanker owner Gulf Energy Maritime (GEM) has signed up for another series of LR1 product tanker newbuildings at South Korea’s K Shipbuilding, extending its investment in the panamax segment. Shipbuilding sources have identified GEM as the Middle Eastern customer behind a package of up to four 74,000 dwt...",
+      "body": "Asia Middle East Shipyards Tankers Gulf Energy Maritime doubles down on LR1s in South Korea Adis Ajdin November 23, 2026 0 32 1 minute read K Shipbuilding K Shipbuilding Dubai-based tanker owner Gulf Energy Maritime (GEM) has signed up for another series of LR1 product tanker newbuildings at South Korea’s K Shipbuilding, extending its investment in the panamax segment. Shipbuilding sources have identified GEM as the Middle Eastern customer behind a package of up to four 74,000 dwt vessels at the Jinhae-based yard, with delivery slots reportedly lined up for 2029. The potential four-ship deal has been valued by market sources at around $264m, putting the price at about $66m per vessel. K Shipbuilding announced the contracts earlier this year without naming the buyers. Its original disclosure covered two firm LR1 vessels and options for another two, alongside a separate order for two 50,000 dwt MR tankers from a European customer. The newbuildings will meet IMO’s EEDI Phase III requirements and feature designs allowing conversion to LNG or methanol propulsion. The deal marks another round of contracting between GEM and K Shipbuilding. The Dubai owner was previously linked to four 75,000 dwt LR1 tankers at the same yard in July 2024 . GEM has also been expanding its MR fleet. Earlier this year, the company ordered six 50,000 dwt product tankers at HD Hyundai’s South Korean and Vietnamese facilities in a deal worth around $300m. The company’s website currently lists 18 vessels in its operating fleet, including five LR1s, along with another 10 ships on order. Tags South Korea United Arab Emirates Adis Ajdin November 23, 2026 0 32 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "Shipbuilding sources have identified GEM as the Middle Eastern customer behind a package of up to four 74,000 dwt vessels at the Jinhae-based yard, with delivery slots reportedly lined up for 2029.",
+        "The potential four-ship deal has been valued by market sources at around $264m, putting the price at about $66m per vessel.",
+        "K Shipbuilding announced the contracts earlier this year without naming the buyers."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-EAC4D0B7C7",
+      "title": "COP31 collapse casts shadow over shipping’s net-zero showdown",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/cop31-collapse-casts-shadow-over-shippings-net-zero-showdown/",
+      "publishedAt": "2026-11-23T08:20:37Z",
+      "category": "Navigation & Safety",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "port",
+        "imo"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://splash247.com/wp-content/uploads/2021/10/Tanker-Pollution-Singapore-300x183.jpg",
+      "summary": "Global climate negotiations have collapsed in Turkey just as shipping’s fiercely contested decarbonisation talks resume at the International Maritime Organization (IMO) in London. The COP31 summit in Antalya ended on Sunday without an overarching agreement after nearly 200 countries failed to bridge divisions over...",
+      "body": "Environment Regulatory COP31 collapse casts shadow over shipping’s net-zero showdown Sam Chambers November 23, 2026 0 38 2 minutes read Piet Sinke / Maasmond Maritime Piet Sinke / Maasmond Maritime Global climate negotiations have collapsed in Turkey just as shipping’s fiercely contested decarbonisation talks resume at the International Maritime Organization (IMO) in London. The COP31 summit in Antalya ended on Sunday without an overarching agreement after nearly 200 countries failed to bridge divisions over fossil fuels and climate finance. The European Union, Britain and vulnerable island states rejected a proposed Antalya Pact that made no explicit reference to moving away from coal, oil and gas, while Saudi Arabia and Russia resisted tougher language. Some subsidiary decisions were agreed, but the summit’s central political declaration failed. The acrimonious outcome provides a troubling backdrop for IMO delegates, who begin five days of technical discussions today ahead of next week’s Marine Environment Protection Committee (MEPC 85). Shipping’s proposed Net-Zero Framework, approved in draft form last year but not adopted, combines tightening greenhouse gas fuel-intensity requirements with financial compliance payments and incentives for cleaner fuels. While delegates have made headway on technical standards, the economic element remains deeply divisive. The US opposes mandatory emissions charges, while other governments are pressing for changes to targets, payment structures and the distribution of funds. Adoption was postponed in October 2025, and an extraordinary IMO meeting is provisionally scheduled for December 4, subject to confirmation at MEPC 85. The similarities with Antalya are striking: who pays for decarbonisation, how quickly fossil fuels should be displaced and how developing economies are supported. Last week, nine shipping associations, including Cruise Lines International Association (CLIA), BIMCO, the International Chamber of Shipping, Intertanko and the World Shipping Council, urged governments to agree practical and enforceable global rules, warning that prolonged uncertainty threatens investment in alternative-fuel ships and fuel supply. Unlike COP’s consensus-driven negotiations, IMO treaty amendments can be adopted by a two-thirds majority of parties present and voting. That offers a procedural route forward, but no guarantee of agreement. For shipowners already navigating the EU ETS and FuelEU Maritime, the stakes include the risk of overlapping regional rules if global talks fail again. Although COP31 failed to produce an overarching deal, shipping left Antalya with voluntary commitments rather than new binding rules. More than 30 organisations backed a target for electricity to supply at least 20% of international shipping’s final energy demand by 2035. Guinea, Côte d’Ivoire and Mauritania signed agreements to develop carbon-financing systems potentially covering shipping, without setting levy dates. A separate coalition endorsed so-called blue shipping corridors combining cleaner fuels with marine conservation. Tags Turkey Sam Chambers November 23, 2026 0 38 2 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The COP31 summit in Antalya ended on Sunday without an overarching agreement after nearly 200 countries failed to bridge divisions over fossil fuels and climate finance.",
+        "The European Union, Britain and vulnerable island states rejected a proposed Antalya Pact that made no explicit reference to moving away from coal, oil and gas, while Saudi Arabia and Russia resisted tougher language.",
+        "Some subsidiary decisions were agreed, but the summit’s central political declaration failed."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-9A50998270",
+      "title": "CSSC leasing executive caught in disciplinary probe",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/cssc-leasing-executive-caught-in-disciplinary-probe/",
+      "publishedAt": "2026-11-23T08:17:14Z",
+      "category": "Shipping & Tankers",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "China & East Asia",
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "china",
+        "shipyard"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://splash247.com/wp-content/uploads/2015/02/cssc1-300x225.jpg",
+      "summary": "Chinese authorities have launched an investigation into a senior executive at CSSC (Hong Kong) Shipping over suspected serious disciplinary and legal violations. Guo Yang, general manager of the company’s second business department, has voluntarily surrendered to authorities and is undergoing disciplinary and...",
+      "body": "Finance and Insurance Greater China Operations Regulatory Shipyards CSSC leasing executive caught in disciplinary probe Adis Ajdin November 23, 2026 0 32 1 minute read Chinese authorities have launched an investigation into a senior executive at CSSC (Hong Kong) Shipping over suspected serious disciplinary and legal violations. Guo Yang, general manager of the company’s second business department, has voluntarily surrendered to authorities and is undergoing disciplinary and supervisory investigations, according to a notice issued by Shanghai’s disciplinary inspection authorities. The investigation is being conducted by the disciplinary inspection team stationed at China State Shipbuilding Corporation (CSSC), together with the supervisory commission of Shanghai’s Chongming district. Authorities have not disclosed the nature of the alleged violations or whether any formal charges have been brought. Hong Kong-listed CSSC Shipping is the ship leasing arm of China’s state-owned shipbuilding conglomerate. Established in 2012 and listed in Hong Kong in 2019, the company provides financial and operating leases to shipowners and operators worldwide. The company’s fleet stood at 135 vessels at the end of 2025, including 114 operating ships and 21 vessels under construction. Adis Ajdin November 23, 2026 0 32 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The investigation is being conducted by the disciplinary inspection team stationed at China State Shipbuilding Corporation (CSSC), together with the supervisory commission of Shanghai’s Chongming district.",
+        "Authorities have not disclosed the nature of the alleged violations or whether any formal charges have been brought.",
+        "Hong Kong-listed CSSC Shipping is the ship leasing arm of China’s state-owned shipbuilding conglomerate."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-F576C5F7D3",
+      "title": "Singapore Shipping returns to newbuilds with $210m car carrier deal",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/singapore-shipping-returns-to-newbuilds-with-210m-car-carrier-deal/",
+      "publishedAt": "2026-11-23T08:08:16Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "China & East Asia"
+      ],
+      "tags": [
+        "lng",
+        "port",
+        "singapore",
+        "china",
+        "shipyard"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://splash247.com/wp-content/uploads/2026/11/Sirius-Leader-car-carrier-Singapore-Shipping-Corp-300x180.jpg",
+      "summary": "Singapore Shipping Corporation (SSC) has returned to the newbuilding market with a $210m investment in two LNG dual-fuel car carriers in China, launching a fleet renewal programme that could eventually reach $400m. The Singapore-listed owner has signed contracts with Guangzhou Shipyard International (GSI) and China...",
+      "body": "Asia Operations Singapore Shipping returns to newbuilds with $210m car carrier deal Adis Ajdin November 23, 2026 0 58 1 minute read Singapore Shipping Corp Singapore Shipping Corp Singapore Shipping Corporation (SSC) has returned to the newbuilding market with a $210m investment in two LNG dual-fuel car carriers in China, launching a fleet renewal programme that could eventually reach $400m. The Singapore-listed owner has signed contracts with Guangzhou Shipyard International (GSI) and China Shipbuilding Trading Company (CSTC) for two 7,000 ceu pure car and truck carriers (PCTCs). The ships are scheduled for delivery in March and June 2031, respectively. According to the company’s stock exchange filing, the shipbuilding contracts carry a combined price of $187m, or $93.5m per vessel. The total estimated investment rises to $210m when financing costs, stores, spares and other expenses are included. The deal marks SSC’s first newbuilding move in more than a decade and comes with much of its existing car carrier fleet approaching retirement. The company currently owns five PCTCs with a combined capacity of 32,410 ceu. Four were built between 1999 and 2004, while its youngest vessel dates from 2015. SSC warned in its latest annual report that around 80% of its vessels are approaching the end of their economic useful lives, requiring substantial investment in replacement tonnage. The two contracted ships could be followed by further orders. SSC has sought regulatory clearance for potential acquisitions of up to four PCTCs at a combined cost of as much as $400m. The Singapore Exchange has granted a conditional waiver from shareholder approval requirements for the programme. However, one condition remained outstanding at the time of the announcement, with SSC holding voting undertakings from shareholders representing 49.42% against the required level of more than 50%. Executive chairman C K Ow said the investment is part of a long-term renewal strategy rather than a bet on current car carrier market conditions. SSC, whose business also includes shipmanagement, shipping agency, terminal operations and logistics, plans to finance the newbuildings through existing cash resources and external funding. Tags Singapore Adis Ajdin November 23, 2026 0 58 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The Singapore-listed owner has signed contracts with Guangzhou Shipyard International (GSI) and China Shipbuilding Trading Company (CSTC) for two 7,000 ceu pure car and truck carriers (PCTCs).",
+        "The ships are scheduled for delivery in March and June 2031, respectively.",
+        "According to the company’s stock exchange filing, the shipbuilding contracts carry a combined price of $187m, or $93.5m per vessel."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-7E24DBE7E1",
+      "title": "Gulftainer signs 10-year partnership with CU Lines for Khorfakkan Port",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/gulftainer-signs-10-year-partnership-with-cu-lines-for-khorfakkan-port/",
+      "publishedAt": "2026-11-23T08:00:31Z",
+      "category": "Ports & Terminals",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Singapore & Malacca Strait",
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "china"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/1795172557404-300x218.jpeg",
+      "summary": "Gulftainer has entered into a 10-year strategic partnership with China United Lines (CU Lines), securing long-term container volumes through Khorfakkan Port in the United Arab Emirates. The agreement aims to strengthen trade connections between China and the UAE while supporting more reliable cargo flows through the...",
+      "body": "Gulftainer has entered into a 10-year strategic partnership with China United Lines (CU Lines), securing long-term container volumes through Khorfakkan Port in the United Arab Emirates. The agreement aims to strengthen trade connections between China and the UAE while supporting more reliable cargo flows through the port. According to Gulftainer, the partnership will also connect maritime services with inland dry ports and logistics facilities in Sharjah, offering customers a more integrated transport network. The arrangement builds on existing cooperation between the two companies. Earlier in November, Gulftainer’s container shipping division, GT Lines, announced cooperation with CU Lines on the CGX service, also identified as KCX 5. The service connects Qingdao, Ningbo, Shekou and Nansha in China with Port Klang in Malaysia and Khorfakkan in the UAE. Long-term agreement strengthens Khorfakkan’s role The new partnership provides a longer-term framework for cargo movements through Khorfakkan, supporting Gulftainer’s efforts to develop the port as a gateway for trade between Asia and the Gulf. It also forms part of the company’s wider strategy to integrate port operations with inland container handling and logistics services in Sharjah. Gulftainer said the agreement is intended to provide customers with greater reliability and long-term capacity. The company has not disclosed the container volumes covered by the partnership or its financial terms. Further operational details, including any additional service commitments under the 10-year arrangement, have not been announced.",
+      "takeaways": [
+        "Gulftainer has entered into a 10-year strategic partnership with China United Lines (CU Lines), securing long-term container volumes through Khorfakkan Port in the United Arab Emirates.",
+        "The agreement aims to strengthen trade connections between China and the UAE while supporting more reliable cargo flows through the port.",
+        "According to Gulftainer, the partnership will also connect maritime services with inland dry ports and logistics facilities in Sharjah, offering customers a more integrated transport network."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-0C1533595E",
+      "title": "Grounded bulker faces complex salvage operation off French coast",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/grounded-bulker-faces-complex-salvage-operation-off-french-coast/",
+      "publishedAt": "2026-11-23T07:46:58Z",
+      "category": "Weather & Cyclones",
+      "region": "Brazil & South Atlantic",
+      "regions": [
+        "Brazil & South Atlantic"
+      ],
+      "tags": [
+        "weather",
+        "brazil"
+      ],
+      "coords": [
+        -23.96,
+        -46.33
+      ],
+      "navarea": "V",
+      "image": "https://splash247.com/wp-content/uploads/2026/11/Miro-G-French-Navy-300x196.jpg",
+      "summary": "French authorities are preparing a difficult salvage operation to free a 28,200 dwt bulk carrier driven onto an Atlantic beach during a storm, with failed generators and shallow water hampering efforts to pull it clear. The 2011-built, Malta-flagged Miro G grounded early on Friday at Cap de l’Homy, near Lit-et-Mixe...",
+      "body": "Dry Cargo Europe Operations Grounded bulker faces complex salvage operation off French coast Sam Chambers November 23, 2026 0 373 1 minute read French Navy French Navy French authorities are preparing a difficult salvage operation to free a 28,200 dwt bulk carrier driven onto an Atlantic beach during a storm, with failed generators and shallow water hampering efforts to pull it clear. The 2011-built, Malta-flagged Miro G grounded early on Friday at Cap de l’Homy, near Lit-et-Mixe in southwestern France, after gusts of 48 knots dragged its anchors. The vessel was sailing in ballast from Santander to Rouen when it encountered difficulties. French air force helicopters evacuated 19 of the vessel’s 22 seafarers on Friday. The master and two crew remained to assist recovery teams but were airlifted out on Saturday alongside eight salvors, experts and an insurance representative as weather deteriorated. French maritime authorities stabilised the ship by taking on ballast water, but that water must now be pumped out to lighten the hull for refloating. Both main generators are unavailable, leaving teams working to restore temporary electrical power. Les Abeilles International’s rescue tug Abeille Bretagne, dispatched from Brest, will have to operate at least 900 m offshore because of shallow water. Passing a 1,000 m Kevlar towline to the grounded bulker, which is lying parallel to the beach, presents another major challenge. Authorities have warned that the operation’s outcome remains highly uncertain, with declining tidal heights narrowing the window for a successful pull. A 1,000 m exclusion zone has been established. Although the ship was sailing without cargo, it has around 100 tonnes of fuel aboard. French naval surveillance has detected no pollution. No timetable has been set for refloating. 📸 La préfecture maritime de l’Atlantique met à disposition une banque d’images relatives à l’opération d’assistance au cargo MIRO G, accessible via la médiathèque de la @MarineNationale . 🔗: https://t.co/y4c1FznPDc pic.twitter.com/QziKiRuMm0 — Préfecture maritime et commandement en chef ATLANT (@premar_ceclant) November 20, 2026 Tags France Sam Chambers November 23, 2026 0 373 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The 2011-built, Malta-flagged Miro G grounded early on Friday at Cap de l’Homy, near Lit-et-Mixe in southwestern France, after gusts of 48 knots dragged its anchors.",
+        "The vessel was sailing in ballast from Santander to Rouen when it encountered difficulties.",
+        "French air force helicopters evacuated 19 of the vessel’s 22 seafarers on Friday."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-6B8264B2EA",
+      "title": "Spain joins growing global crackdown on scrubbers",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/spain-joins-growing-global-crackdown-on-scrubbers/",
+      "publishedAt": "2026-11-23T07:31:17Z",
+      "category": "Weather & Cyclones",
+      "region": "Suez Canal & Eastern Med",
+      "regions": [
+        "Suez Canal & Eastern Med",
+        "Baltic Sea & Northern Europe",
+        "Singapore & Malacca Strait"
+      ],
+      "tags": [
+        "port",
+        "singapore",
+        "china",
+        "imo"
+      ],
+      "coords": [
+        30.58,
+        32.34
+      ],
+      "navarea": "III",
+      "image": "https://splash247.com/wp-content/uploads/2021/04/scrubber-e1597391075324-300x182.jpg",
+      "summary": "Spain has become the latest country to clamp down on ship scrubbers, announcing a nationwide ban on washwater discharges in ports and designated coastal waters from July 1, 2027. Unlike countries that have initially targeted open-loop systems, Spain’s new royal decree covers open-loop, closed-loop and hybrid...",
+      "body": "Environment Europe Regulatory Spain joins growing global crackdown on scrubbers Sam Chambers November 23, 2026 0 138 1 minute read Spain has become the latest country to clamp down on ship scrubbers, announcing a nationwide ban on washwater discharges in ports and designated coastal waters from July 1, 2027. Unlike countries that have initially targeted open-loop systems, Spain’s new royal decree covers open-loop, closed-loop and hybrid scrubbers from day one. The restrictions apply to all merchant vessels, regardless of flag, operating in Spanish internal maritime waters, port areas and designated anchorages within territorial waters. Ships will not have to remove their scrubbers but must switch to compliant low-sulphur fuel or retain wastewater onboard for subsequent disposal ashore. Spain’s decision goes beyond last year’s OSPAR agreement, which requires northeast Atlantic countries to ban open-loop discharges in ports and internal waters by July 2027, extending to all scrubber types in 2029. Madrid is bringing forward the latter deadline by two years and extending the restrictions to Mediterranean ports. Spanish shipowners’ association Anave welcomed regulatory consistency but questioned the absence of a published environmental risk assessment justifying the accelerated timetable. It also raised concerns about whether ports will have sufficient waste reception capacity. The decision follows similar moves elsewhere. Denmark, Sweden and Finland banned open-loop discharges in their territorial waters in July 2025, with restrictions on closed-loop systems following in 2029. Greenland’s parliament voted last month to introduce a phased ban, starting in July 2027. China, Singapore and Turkey already enforce restrictions in their waters. Scrubbers have become increasingly controversial since the IMO’s global sulphur cap took effect in 2020. While the technology allows ships to continue burning cheaper high-sulphur fuel oil, environmental campaigners argue it transfers pollution from the atmosphere into the oceans. Spain says scrubber washwater can contain heavy metals and organic pollutants and contribute to marine acidification. Tags Spain Sam Chambers November 23, 2026 0 138 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "Unlike countries that have initially targeted open-loop systems, Spain’s new royal decree covers open-loop, closed-loop and hybrid scrubbers from day one.",
+        "The restrictions apply to all merchant vessels, regardless of flag, operating in Spanish internal maritime waters, port areas and designated anchorages within territorial waters.",
+        "Ships will not have to remove their scrubbers but must switch to compliant low-sulphur fuel or retain wastewater onboard for subsequent disposal ashore."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-56FDA7F1D2",
+      "title": "Tanker inferno greets UN oceans advocate’s swim through Hormuz",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/tanker-inferno-greets-un-oceans-advocates-swim-through-hormuz/",
+      "publishedAt": "2026-11-23T07:16:40Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Red Sea & Bab el-Mandeb",
+        "Rotterdam & North Sea"
+      ],
+      "tags": [
+        "tanker",
+        "lpg",
+        "port",
+        "hormuz"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://splash247.com/wp-content/uploads/2026/11/Pugh-Hormuz2-300x176.jpeg",
+      "summary": "Three tankers have been hit by projectiles in the Strait of Hormuz in the space of 15 hours as more images emerge of the huge marine damage the nine-month war is having on the marine environment. The Joint Maritime Information Center (JMIC), in an update issued on Sunday, identified two of the vessels as the …",
+      "body": "Middle East Operations Tankers Tanker inferno greets UN oceans advocate’s swim through Hormuz Sam Chambers November 23, 2026 0 290 3 minutes read Lewis Pugh Foundation Lewis Pugh Foundation Three tankers have been hit by projectiles in the Strait of Hormuz in the space of 15 hours as more images emerge of the huge marine damage the nine-month war is having on the marine environment. The Joint Maritime Information Center (JMIC), in an update issued on Sunday, identified two of the vessels as the Hong Kong-flagged Torkel and Arina. Torkel was struck on its stern approximately 11 nautical miles north of Khasab, Oman, early on Saturday, sparking a fire. The tanker was subsequently reported at anchor. Less than an hour later, Arina was hit in its engine room, 17 nautical miles east of Khasab. No casualties were reported in either incident, although the extent of the damage and any environmental impact remain unclear. A third tanker, whose identity has not been officially disclosed, was struck on its port bow eight nautical miles north of Khasab on Friday afternoon, also resulting in a fire. Iranian authorities claimed over the weekend that tankers had struck naval mines after entering restricted waters, but JMIC stressed that the claims remained unverified. The attacks bring the number of tankers struck in Hormuz since November 16 to seven. The UK Maritime Trade Operations (UKMTO) centre also reported a separate incident on Sunday involving a tanker and military forces in the Gulf of Oman, off Iran’s southeastern coast. No details of the vessel or the forces involved were immediately available. JMIC continues to classify the threat in Hormuz as severe, warning that further attacks on tankers using the Omani side of the strait are highly likely. Lewis Pugh, the United Nations Environment Programme (UNEP) patron of the oceans, has just completed a three-day, 15 km swim through the Strait of Hormuz, witnessing attacks on commercial shipping as he sought to draw international attention to the devastating environmental consequences of war. The swim took Pugh from Musandam Island in the Strait of Hormuz, to the Cape of Hormuz, at the northern tip of Oman’s Musandam Peninsula. On the first day of the swim, an oil tanker was struck by a projectile approximately four kilometres from where Pugh was swimming. He heard two explosions, followed by the sound of fighter jets overhead. The second day saw fireballs rising above a headland that separated Pugh from the burning LPG carrier, the Tara Gas (pictured above). On the return to port, he passed close to the vessel, which was still engulfed in flames. “My immediate thoughts were for the seafarers onboard,” said Pugh. “The flames were enormous. These vessels carry highly flammable gases, and an attack on one can have catastrophic consequences – not just for crewmembers, but also on the surrounding marine environment.” Throughout the three days, Pugh continued to hear explosions in the distance and fighter jets overhead. He also witnessed convoys of commercial vessels travelling close to the Omani coastline as they hurried to leave the Gulf, round the Musandam Peninsula and enter the Gulf of Oman. The Strait of Hormuz is far more than a vital shipping route. On one side are the dramatic mountains and fjords of Oman’s Musandam Peninsula. On the other are Iran’s remarkable mangrove forests. Beneath the surface lies a rich marine ecosystem, home to extraordinary wildlife, including dugongs, sea turtles and whale sharks. The environmental damage from the conflict is already severe. According to the United Nations, at least 175 vessels have been attacked since fighting began in late February. About 30 have caused significant pollution. Oil spills threaten marine wildlife and fragile habitats, including coral reefs, seagrass meadows and mangrove forests. More than a dozen Marine Protected Areas are reported to have been affected. Greenpeace has identified more than 600 possible oil spills across the Gulf, Strait of Hormuz and Arabian Sea since the US-Iran war began on February 28, with satellite imagery showing a cumulative slick footprint of approximately 20,000 sq km. Not all detections have been conclusively linked to attacks on shipping. The environmental consequences could last for decades. A 2022 study published in the Journal of Marine Science and Engineering found extensive oil deposits along more than 25 km of Saudi Arabia’s Abu Ali Island coastline, almost 40 years after the 1983–85 Nowruz oil spills during the Iran-Iraq war. Researchers found oil contamination in 76% of 1,434 test pits, demonstrating how petroleum residues can persist long after surface slicks disappear. The danger goes far beyond oil pollution. Heavy metals and toxic chemicals can contaminate the sea for decades. Damage to desalination plants and energy infrastructure also threatens the fresh drinking water on which tens of millions of people across the Gulf depend. “When we look at the Strait of Hormuz, we see oil tankers, warships and a vital shipping route. But beneath the surface is an extraordinary natural world. It deserves our protection, not destruction,” said Pugh. A former maritime lawyer, endurance swimmer Pugh was appointed to his UN role in 2013. Tags Iran Sam Chambers November 23, 2026 0 290 3 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "The Joint Maritime Information Center (JMIC), in an update issued on Sunday, identified two of the vessels as the Hong Kong-flagged Torkel and Arina.",
+        "Torkel was struck on its stern approximately 11 nautical miles north of Khasab, Oman, early on Saturday, sparking a fire.",
+        "The tanker was subsequently reported at anchor."
+      ],
+      "readingMinutes": 5,
+      "readMinutes": 5
+    },
+    {
+      "id": "SN-03390A4991",
+      "title": "CMA CGM shifts Manaus cargo from PEX2 to SEAS 2 service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/cma-cgm-shifts-manaus-cargo-from-pex2-to-seas-2-service/",
+      "publishedAt": "2026-11-23T07:00:19Z",
+      "category": "Ports & Terminals",
+      "region": "Panama Canal & Caribbean",
+      "regions": [
+        "Panama Canal & Caribbean",
+        "China & East Asia",
+        "US West Coast & Pacific"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "panama",
+        "china"
+      ],
+      "coords": [
+        9.08,
+        -79.68
+      ],
+      "navarea": "IV",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/SEAS-2-MANAUS-FOCUS-for-news_0.png",
+      "summary": "CMA CGM has announced a new routing arrangement for container shipments between the Far East and Manaus, Brazil, shifting cargo from its PEX2 service to SEAS 2. Under the revised network, shipments will move through Rio de Janeiro before connecting with the weekly BRACO service operated by the group’s subsidiary,...",
+      "body": "CMA CGM has announced a new routing arrangement for container shipments between the Far East and Manaus, Brazil, shifting cargo from its PEX2 service to SEAS 2. Under the revised network, shipments will move through Rio de Janeiro before connecting with the weekly BRACO service operated by the group’s subsidiary, MERCOSUL. The change will establish a single routing arrangement managed by CMA CGM Group. According to the carrier, it is designed to improve service reliability and operational efficiency. SEAS 2 provides weekly connections with major export hubs across northern, central and southern China. Its first Brazilian call at Rio de Janeiro will serve as the transshipment point for Manaus cargo. New routing bypasses Panama Canal The BRACO service will provide weekly connections to and from Manaus, with a transit time of 11 days from Rio de Janeiro. The revised arrangement will also remove the need to route Manaus shipments through the Panama Canal. CMA CGM said the new structure will offer greater flexibility for cargo volumes while reducing exposure to operational constraints associated with the canal. The transition will take place across several scheduled sailings. The last PEX2 vessel carrying Manaus cargo will be CSCL LONG BEACH, voyage PEX0B0E19, which began its rotation at Vung Tau, Vietnam, on 18 November 2026. The final Manaus Shuttle sailing under the previous arrangement will be operated by CMA CGM ALEXANDRIA, voyage MAS0Y0S19, with arrival in Manaus expected on 20 January 2027. Meanwhile, COSCO SHIPPING BRAZIL, voyage SE2080W19, will be the first SEAS 2 vessel to carry Manaus cargo under the new arrangement. The vessel is scheduled to begin its rotation at Qingdao, China, on 4 December 2026. The changes form part of CMA CGM’s wider adjustments to its services connecting Asia with South America’s east coast.",
+      "takeaways": [
+        "CMA CGM has announced a new routing arrangement for container shipments between the Far East and Manaus, Brazil, shifting cargo from its PEX2 service to SEAS 2.",
+        "Under the revised network, shipments will move through Rio de Janeiro before connecting with the weekly BRACO service operated by the group’s subsidiary, MERCOSUL.",
+        "The change will establish a single routing arrangement managed by CMA CGM Group."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-828CD6A211",
+      "title": "Going beyond visibility to being valued",
+      "source": "Splash247",
+      "sourceIcon": "🌊",
+      "sourceRegion": "Singapore / Global",
+      "url": "https://splash247.com/going-beyond-visibility-to-being-valued/",
+      "publishedAt": "2026-11-23T06:41:42Z",
+      "category": "Weather & Cyclones",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "Japan & Korea",
+        "India & Indian Ocean"
+      ],
+      "tags": [
+        "port",
+        "bunker"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://splash247.com/wp-content/uploads/2023/03/Synergy-female-crew-PPE-300x180.jpg",
+      "summary": "Despite calls for change, much of maritime still has manels and treats inclusion as a separate box to tick. Maritime SheEO founder Sanjam Sahi Gupta explains why our industry still has a long way to go, and discusses the need to build spaces where inclusion is the foundation rather than an afterthought. Recent years...",
+      "body": "Asia Contributions Operations Going beyond visibility to being valued Splash November 23, 2026 0 222 4 minutes read Synergy Synergy Despite calls for change, much of maritime still has manels and treats inclusion as a separate box to tick. Maritime SheEO founder Sanjam Sahi Gupta explains why our industry still has a long way to go, and discusses the need to build spaces where inclusion is the foundation rather than an afterthought. Recent years have seen the maritime industry become fluent in the language of inclusion. But behind the language of inclusion, far too many are still slow to share power. The 2024 Women in Maritime survey tells us that women account for roughly 19% of the workforce among participating member states, and just 1% of seafarers. I can’t help wondering how many of those women will stay in an industry that is happy to count them but not always to empower them. We talk a great deal about recruiting more women. We talk far less about whether they are given real opportunities once they arrive. India tells both stories at once. The Directorate General of Shipping’s 2026 survey shows women seafarers rising from 0.77% of the seafarer workforce in 2019 to 2.17% in 2025. That is close to a threefold increase, and every woman behind that number deserves to be celebrated. Yet women officers accounted for only 0.1% of all seafarers in 2025. The pipeline is widening but it is not yet at the point of carrying women to where decisions are made. The same is true on shore. Women remain a minority in leadership and on conference stages. The all-male panel is still a mainstay of our industry calendar, and when women are invited to speak, they are too often asked to talk only about inclusion. Our women engineers, lawyers, financiers and seafarers have much more to say, yet few are given the chance to say it, or the room to falter, or even fail, while they learn. Even I, after a long career in maritime, am still sometimes spoken over, or invited simply to be counted rather than to have my opinion considered. It was with this in mind that we chose the theme for the recent 7th Maritime SheEO Conference in Mumbai: “She Owns. She Builds. She Invests.” For years, our industry has worked hard to get women through the door, and that work matters. The harder question is what happens next. Are women given visibility, a voice, meaningful responsibility and the ability to shape the decisions that matter? Or are they warmly welcomed into the room, then left without the authority to act? Leaders who made it count What gave me the most hope in Mumbai was watching leaders stand up and make public commitments. Capt Animesh Hore of Mitsui O.S.K. Lines (MOL) put the challenge plainly: once the door is open, do women receive real responsibility, authority and sponsorship? He asked every leader in the room to identify a talented woman, give her meaningful responsibility, and invest time, trust and influence in her. MOL backs it with its Human Capital 2035 targets: 20% women in Group Key Positions, 30% in Head Office management positions, and women making up 4% of total officers and engineers by 2030. Nathasha Egodage of Ceyline Group shared that a workforce survey found women made up 18% of the company, and announced Ceyline’s commitment to reach 30% by 2030. I admire that honesty. Publishing a baseline and setting a target is how accountability starts. Captain Deepak Correa announced that Fleet Management achieved a 30% increase in women seafarers by 2025, a result worth cheering. He also offered a wise warning. Good intentions are not enough, he said, and without effective implementation these efforts will fail. There must be ownership of the outcomes. Aditi Garg, group legal director at Fleet Management, explained that strong governance means creating an environment where people can contribute and challenge assumptions constructively. For Fleet, being “powered by people” means equal pay for equal work, women-specific PPE and medical provisions, well-being support and mentoring. She spoke with real pride about Captain Deepti Singh and Captain Nilam Pande, Fleet’s first and second women seafarers to reach the rank of master. I hope they will be the first of many. The Indian government is setting the tone too. Sameer Khare (Retd. IAS), chairman of the National Shipping Board, noted that India has moved from women’s development to women-led development. Section 4 of the Merchant Shipping Act, 2025 requires at least four women among the nominated members of the National Shipping Board, which he called a legal commitment to representation at the apex of Indian shipping, not a symbolic one. Visibility is not power What connects these leaders is not sentiment but structure: targets that are published, outcomes that someone owns, and authority that is genuinely shared. That is the shift we need, from asking whether women are present to committing to the end result, and part of that result must be women who are empowered in their positions. Visibility alone cannot be our measure of success. A woman in the room is not always the same as a woman speaking with authority and expertise on a panel. Yet when an all-male panel takes place today, the explanation is still too often that no women speakers could be found. A photograph of a diverse team is not the same as a diverse board. If we count appearances rather than authority, we risk applauding progress that has not happened. That is why Maritime SheEO is growing. Our annual leadership conference remains our home for people and leadership, now joined by satellite events on technology and digitalisation, with a focus on women in STEM; ports, bunkering and freight forwarding; risk; and the ship lifecycle from building to recycling. Women belong in these conversations as experts, not as a separate agenda item. We haven’t moved beyond the need to drive inclusion, and we won’t wait for the manel to retire itself. Where there are too few forums for women experts to be heard, we will build them. I hope you will join us. Tags India Seafarers Splash November 23, 2026 0 222 4 minutes read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
+      "takeaways": [
+        "Maritime SheEO founder Sanjam Sahi Gupta explains why our industry still has a long way to go, and discusses the need to build spaces where inclusion is the foundation rather than an afterthought.",
+        "Recent years have seen the maritime industry become fluent in the language of inclusion.",
+        "But behind the language of inclusion, far too many are still slow to share power."
+      ],
+      "readingMinutes": 6,
+      "readMinutes": 6
+    },
+    {
+      "id": "SN-688433F542",
+      "title": "How the Hormuz blockade moved from the map to the cargo",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/how-the-hormuz-blockade-moved-from-the-map-to-the-cargo/",
+      "publishedAt": "2026-11-23T06:00:28Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Japan & Korea"
+      ],
+      "tags": [
+        "container",
+        "hormuz",
+        "imo"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/cleaned_Επιχείρηση-μεταφοράς-δεξαμενόπλοιων-στο-ηλιοβασίλεμα-300x169.png",
+      "summary": "A new US rule on ship-to-ship transfers continues the blockade’s steady tightening, but it shifts the risk onto the ships that keep Gulf oil moving.",
+      "body": "CN Premium Articles Sticky News How the Hormuz blockade moved from the map to the cargo November 23, 2026 Facebook Twitter WhatsApp Linkedin Email A new US rule on ship-to-ship transfers continues the blockade’s steady tightening, but it shifts the risk onto the ships that keep Gulf oil moving. This content is locked Select a CN Premium Subscription Package To Unlock The Content! Remember Me Lost your password? Don't have an account? Register TAGS blockade Hormuz Strait IRAN USA Facebook Twitter WhatsApp Linkedin Email Previous article MSC adds Busan call to Pearl service Next article CMA CGM shifts Manaus cargo from PEX2 to SEAS 2 service Alexandros Itimoudis https://container-news.com/ Shipping Analyst Linkedin Mail",
+      "takeaways": [
+        "This content is locked Select a CN Premium Subscription Package To Unlock The Content!",
+        "Operational Area: Strait of Hormuz & Persian Gulf, Japan & Korea.",
+        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-D3AB93A027",
+      "title": "MSC adds Busan call to Pearl service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/msc-adds-busan-call-to-pearl-service/",
+      "publishedAt": "2026-11-23T04:30:38Z",
+      "category": "Geopolitics & Chokepoints",
+      "region": "Strait of Hormuz & Persian Gulf",
+      "regions": [
+        "Strait of Hormuz & Persian Gulf",
+        "Suez Canal & Eastern Med",
+        "China & East Asia"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "hormuz",
+        "china"
+      ],
+      "coords": [
+        26.56,
+        56.25
+      ],
+      "navarea": "IX",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/1-1-300x225.jpg",
+      "summary": "MSC has added Busan to the westbound leg of its weekly Pearl service between the Far East and the US West Coast. The South Korean port will be called after Los Angeles and Oakland, before the vessels continue to Hai Phong in Vietnam. MSC operates the service with seven container ships ranging from 7,800 to […]",
+      "body": "Services Top Right MSC adds Busan call to Pearl service November 23, 2026 Facebook Twitter WhatsApp Linkedin Email MSC HANNAH III : VesselFinder MSC has added Busan to the westbound leg of its weekly Pearl service between the Far East and the US West Coast. The South Korean port will be called after Los Angeles and Oakland, before the vessels continue to Hai Phong in Vietnam. MSC operates the service with seven container ships ranging from 7,800 to 11,000 TEU. The revised rotation is: Shenzhen (Yantian) – Los Angeles – Oakland – Busan – Hai Phong – Shenzhen (Yantian) TAGS Mediterranean Shipping Co. (MSC) Facebook Twitter WhatsApp Linkedin Email Previous article ONE to launch new Korea-China-Jakarta service Next article How the Hormuz blockade moved from the map to the cargo Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The South Korean port will be called after Los Angeles and Oakland, before the vessels continue to Hai Phong in Vietnam.",
+        "MSC operates the service with seven container ships ranging from 7,800 to 11,000 TEU.",
+        "The revised rotation is: Shenzhen (Yantian) – Los Angeles – Oakland – Busan – Hai Phong – Shenzhen (Yantian) TAGS Mediterranean Shipping Co."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-E19CC7C877",
+      "title": "ONE to launch new Korea-China-Jakarta service",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/one-to-launch-new-korea-china-jakarta-service/",
+      "publishedAt": "2026-11-23T03:00:37Z",
+      "category": "Ports & Terminals",
+      "region": "Singapore & Malacca Strait",
+      "regions": [
+        "Singapore & Malacca Strait",
+        "China & East Asia",
+        "Japan & Korea"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "china"
+      ],
+      "coords": [
+        1.26,
+        103.82
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2026/11/images-23-300x200.jpg",
+      "summary": "Ocean Network Express (ONE) will launch a new weekly Korea-China-Jakarta service in late November. The new service, branded KCJ, is expected to replace ONE’s current slot arrangement on the KCI service operated by Gold Star Line, Interasia Lines, Namsung Shipping and T.S. Lines. ONE will deploy six container ships of...",
+      "body": "Services Sticky News ONE to launch new Korea-China-Jakarta service November 23, 2026 Facebook Twitter WhatsApp Linkedin Email Ocean Network Express (ONE) will launch a new weekly Korea-China-Jakarta service in late November. The new service, branded KCJ, is expected to replace ONE’s current slot arrangement on the KCI service operated by Gold Star Line, Interasia Lines, Namsung Shipping and T.S. Lines. ONE will deploy six container ships of approximately 4,500 TEU on the new operation. The KCJ port rotation will be: Xiamen – Busan – Tianjin – Qingdao – Busan – Shanghai – Laem Chabang – Jakarta – Xiamen The service will provide direct connections between ports in South Korea and China and the Southeast Asian markets of Thailand and Indonesia. TAGS Busan Gold Star Line Interasia Lines Jakarta KCI KCJ Namsung Shipping Ocean Network Express one T.S. Lines Facebook Twitter WhatsApp Linkedin Email Previous article Maersk announces ASAS blank sailing Next article MSC adds Busan call to Pearl service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The new service, branded KCJ, is expected to replace ONE’s current slot arrangement on the KCI service operated by Gold Star Line, Interasia Lines, Namsung Shipping and T.S.",
+        "ONE will deploy six container ships of approximately 4,500 TEU on the new operation.",
+        "TAGS Busan Gold Star Line Interasia Lines Jakarta KCI KCJ Namsung Shipping Ocean Network Express one T.S."
+      ],
+      "readingMinutes": 2,
+      "readMinutes": 2
+    },
+    {
+      "id": "SN-E772B9BDA7",
+      "title": "Maersk announces ASAS blank sailing",
+      "source": "Container News",
+      "sourceIcon": "📦",
+      "sourceRegion": "Europe / Liner & Ports",
+      "url": "https://container-news.com/maersk-announces-asas-blank-sailing/",
+      "publishedAt": "2026-11-23T01:54:36Z",
+      "category": "Ports & Terminals",
+      "region": "China & East Asia",
+      "regions": [
+        "China & East Asia",
+        "Japan & Korea"
+      ],
+      "tags": [
+        "container",
+        "port",
+        "china"
+      ],
+      "coords": [
+        30.6,
+        122.1
+      ],
+      "navarea": "XI",
+      "image": "https://container-news.com/wp-content/uploads/2025/08/Marie-Maersk1-22082025-300x157.jpg",
+      "summary": "Maersk will blank one sailing on its ASAS service connecting Far East Asia with the East Coast of Latin America. The carrier attributed the capacity adjustment to cargo seasonality and fluctuations in demand. The affected westbound sailing is voyage 652W, scheduled to begin in Shanghai on 20 December 2026. The...",
+      "body": "Services Top Right Maersk announces ASAS blank sailing November 23, 2026 Facebook Twitter WhatsApp Linkedin Email Maersk will blank one sailing on its ASAS service connecting Far East Asia with the East Coast of Latin America. The carrier attributed the capacity adjustment to cargo seasonality and fluctuations in demand. The affected westbound sailing is voyage 652W, scheduled to begin in Shanghai on 20 December 2026. The corresponding eastbound voyage 705E was scheduled to begin in Buenos Aires on 4 February 2027. Direction Voyage First port Scheduled date Westbound 652W Shanghai 20 December 2026 Eastbound 705E Buenos Aires 4 February 2027 Customers may place bookings on the following westbound sailing, San Antonio Maersk voyage 653W. TAGS A.P. Moeller-Maersk Facebook Twitter WhatsApp Linkedin Email Previous article Hapag-Lloyd introduces Vietnam equipment surcharge Next article ONE to launch new Korea-China-Jakarta service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "takeaways": [
+        "The carrier attributed the capacity adjustment to cargo seasonality and fluctuations in demand.",
+        "The affected westbound sailing is voyage 652W, scheduled to begin in Shanghai on 20 December 2026.",
+        "The corresponding eastbound voyage 705E was scheduled to begin in Buenos Aires on 4 February 2027."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
@@ -102,7 +674,7 @@
       "navarea": "I",
       "image": "https://container-news.com/wp-content/uploads/2026/09/HLAG_Cargo_on_Rail_Ningbo_1280x800-300x188.jpg",
       "summary": "Hapag-Lloyd will introduce an Equipment Imbalance Surcharge (EIS) on intra-Asia shipments to Vietnam. The surcharge will apply to dry and refrigerated containers loaded on sailings commencing from 1 December 2026. It will remain in effect until further notice. Container type Surcharge 20-foot dry US$50 per container...",
-      "body": "Rates & Surcharges Top Right Hapag-Lloyd introduces Vietnam equipment surcharge November 23, 2026 Facebook Twitter WhatsApp Linkedin Email FILE PHOTO: A Hapag-Lloyd container is pictured at a loading terminal in the port of Hamburg Germany July 26, 2018. Picture taken July 26, 2018. REUTERS/Fabian Bimmer/File Photo | Nur für redaktionelle Verwendung. Hapag-Lloyd will introduce an Equipment Imbalance Surcharge (EIS) on intra-Asia shipments to Vietnam. The surcharge will apply to dry and refrigerated containers loaded on sailings commencing from 1 December 2026. It will remain in effect until further notice. Container type Surcharge 20-foot dry US$50 per container 40-foot dry US$100 per container 40-foot high cube US$100 per container 20-foot reefer US$50 per container 40-foot reefer US$100 per container The EIS will apply in addition to relevant ocean freight, bunker-related and security surcharges, Terminal Handling Charges and any applicable local or contingency charges. TAGS Hapag-Lloyd AG Facebook Twitter WhatsApp Linkedin Email Previous article Maersk raises UK and Ireland intermodal fuel fees Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
+      "body": "Rates & Surcharges Top Right Hapag-Lloyd introduces Vietnam equipment surcharge November 23, 2026 Facebook Twitter WhatsApp Linkedin Email FILE PHOTO: A Hapag-Lloyd container is pictured at a loading terminal in the port of Hamburg Germany July 26, 2018. Picture taken July 26, 2018. REUTERS/Fabian Bimmer/File Photo | Nur für redaktionelle Verwendung. Hapag-Lloyd will introduce an Equipment Imbalance Surcharge (EIS) on intra-Asia shipments to Vietnam. The surcharge will apply to dry and refrigerated containers loaded on sailings commencing from 1 December 2026. It will remain in effect until further notice. Container type Surcharge 20-foot dry US$50 per container 40-foot dry US$100 per container 40-foot high cube US$100 per container 20-foot reefer US$50 per container 40-foot reefer US$100 per container The EIS will apply in addition to relevant ocean freight, bunker-related and security surcharges, Terminal Handling Charges and any applicable local or contingency charges. TAGS Hapag-Lloyd AG Facebook Twitter WhatsApp Linkedin Email Previous article Maersk raises UK and Ireland intermodal fuel fees Next article Maersk announces ASAS blank sailing Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
       "takeaways": [
         "REUTERS/Fabian Bimmer/File Photo | Nur für redaktionelle Verwendung.",
         "Hapag-Lloyd will introduce an Equipment Imbalance Surcharge (EIS) on intra-Asia shipments to Vietnam.",
@@ -689,211 +1261,6 @@
       ],
       "readingMinutes": 3,
       "readMinutes": 3
-    },
-    {
-      "id": "SN-1B5FF65C2F",
-      "title": "Claus-Peter Offen orders four 7,000 TEU boxships",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/claus-peter-offen-orders-four-7000-teu-boxships/",
-      "publishedAt": "2026-11-22T13:00:46Z",
-      "category": "Ports & Terminals",
-      "region": "China & East Asia",
-      "regions": [
-        "China & East Asia"
-      ],
-      "tags": [
-        "container",
-        "port",
-        "china",
-        "shipyard"
-      ],
-      "coords": [
-        30.6,
-        122.1
-      ],
-      "navarea": "XI",
-      "image": "https://container-news.com/wp-content/uploads/2026/06/HLAG_Salahuddin_Rotterdam_1280x800_rgb-300x188.jpg",
-      "summary": "German non-operating owner Claus-Peter Offen has reportedly ordered four container ships of approximately 7,000 TEU from China’s Guangzhou Shipyard International (GSI), as citted by DynaLiners. The conventionally powered vessels are expected to be delivered in 2030. All four ships have reportedly secured seven-year...",
-      "body": "News Sticky News Claus-Peter Offen orders four 7,000 TEU boxships November 22, 2026 Facebook Twitter WhatsApp Linkedin Email German non-operating owner Claus-Peter Offen has reportedly ordered four container ships of approximately 7,000 TEU from China’s Guangzhou Shipyard International (GSI), as citted by DynaLiners. The conventionally powered vessels are expected to be delivered in 2030. All four ships have reportedly secured seven-year charter agreements with German container carrier Hapag-Lloyd. The contract value and further technical details have not been disclosed. TAGS Claus-Peter Offen Container shipping CONTAINERSHIPS GSI Guangzhou Shipyard International Hapag Lloyd newbuildings shipbuilding Facebook Twitter WhatsApp Linkedin Email Previous article Cool Carriers takes delivery of world-first gate-rudder reefer Next article Pan Continental and PanStar launch new PHX service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The conventionally powered vessels are expected to be delivered in 2030.",
-        "All four ships have reportedly secured seven-year charter agreements with German container carrier Hapag-Lloyd.",
-        "The contract value and further technical details have not been disclosed."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-24F45B0284",
-      "title": "Cool Carriers takes delivery of world-first gate-rudder reefer",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/cool-carriers-takes-delivery-of-world-first-gate-rudder-reefer/",
-      "publishedAt": "2026-11-22T09:00:22Z",
-      "category": "Weather & Cyclones",
-      "region": "Red Sea & Bab el-Mandeb",
-      "regions": [
-        "Red Sea & Bab el-Mandeb",
-        "Japan & Korea"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        13.5,
-        42.8
-      ],
-      "navarea": "IX",
-      "image": "https://container-news.com/wp-content/uploads/2026/11/Snow_Land_News_Hero-1-300x163.webp",
-      "summary": "Cool Carriers has taken delivery of Snow Land, the third vessel in its seven-ship Snow-class newbuilding programme. Kitanihon Shipbuilding delivered the ice-class vessel in Japan on 12 November 2026. According to Cool Carriers, Snow Land is the world’s first specialised refrigerated cargo vessel equipped with a gate...",
-      "body": "Cool Carriers has taken delivery of Snow Land, the third vessel in its seven-ship Snow-class newbuilding programme. Kitanihon Shipbuilding delivered the ice-class vessel in Japan on 12 November 2026. According to Cool Carriers, Snow Land is the world’s first specialised refrigerated cargo vessel equipped with a gate rudder. The Gate Rudder System replaces the conventional single rudder behind the propeller with two high-lift foil rudders positioned on either side of it. During voyages, water flowing across the rudder blades generates additional forward thrust, allowing the vessel to maintain speed while consuming less fuel. Each blade can also be controlled separately to improve manoeuvrability during berthing operations. Wärtsilä, a licensee of the technology, has reported fuel savings of up to 20% on vessels using the system. Kitanihon Shipbuilding said Snow Land’s overall design achieves a carbon dioxide intensity approximately 50% below the reference level for a vessel of its type and size. The calculation is based on the Energy Efficiency Design Index and operation using heavy fuel oil. Refrigerated cargo capacity Snow Land measures 162.5 metres in length and 25 metres in breadth, with a fully laden service speed of approximately 18 knots. The vessel provides 660,738 cubic feet, or 18,710 cubic metres, of refrigerated cargo capacity. Eight cooling zones allow fresh and frozen products to be transported at different temperatures ranging from -25°C to 15°C during the same voyage. Snow Land can also carry up to 168 forty-foot refrigerated containers on deck. The vessel follows sister ships Snow Flower and Snow Flake. Cool Carriers expects the remaining four Snow-class vessels to join its fleet over the next two years. “The Snow-class reflects our ongoing commitment to innovation and efficiency. It enables us to design new and exclusive itineraries, offer a higher standard of service and use next-generation environmental technologies that support our decarbonisation goals,” said Glenn Selling, Chief Operations Officer at Cool Carriers.",
-      "takeaways": [
-        "Cool Carriers has taken delivery of Snow Land, the third vessel in its seven-ship Snow-class newbuilding programme.",
-        "Kitanihon Shipbuilding delivered the ice-class vessel in Japan on 12 November 2026.",
-        "According to Cool Carriers, Snow Land is the world’s first specialised refrigerated cargo vessel equipped with a gate rudder."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-2907876636",
-      "title": "Swire Shipping reduces feeder surcharge for Indian Subcontinent trades",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/swire-shipping-reduces-feeder-surcharge-for-indian-subcontinent-trades/",
-      "publishedAt": "2026-11-22T07:00:21Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "India & Indian Ocean",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2020/10/Lae-Chief-Courtesy-of-Swire-Shipping-1-300x180.jpg",
-      "summary": "Swire Shipping will reduce its Feeder and Equipment Surcharge (FES) for selected trades involving the Indian Subcontinent. The revised surcharge will apply to Bills of Lading with an on-board date on or after 20 November 2026. Trades regulated by the US Federal Maritime Commission remain subject to the applicable...",
-      "body": "Swire Shipping will reduce its Feeder and Equipment Surcharge (FES) for selected trades involving the Indian Subcontinent. The revised surcharge will apply to Bills of Lading with an on-board date on or after 20 November 2026. Trades regulated by the US Federal Maritime Commission remain subject to the applicable regulatory notice period. Swire Shipping introduced the FES on 1 April 2026 to cover the use of feeder partners that extend its network beyond its core service areas. Under the revised structure, exports from the Indian Subcontinent will be subject to charges of US$175 for all 20-foot containers and US$350 for 20-foot reefers. Rates for all 40-foot containers and 40-foot reefers will be US$350 and US$700, respectively. For imports into the Indian Subcontinent, the surcharge will be US$150 for all 20-foot containers, US$500 for 20-foot reefers, US$300 for all 40-foot containers and US$1,000 for 40-foot reefers. FES rates from 20 November Trade direction 20-foot all 20-foot reefer 40-foot all 40-foot reefer Exports from North Europe, Scandinavia, Mediterranean, UK, Black Sea, North and South Africa US$100 US$200 US$200 US$400 Exports from Indian Subcontinent US$175 US$350 US$350 US$700 Imports to North Europe, Scandinavia, Mediterranean, UK, Black Sea, North and South Africa US$1,950 US$2,300 US$2,800 US$4,060 Imports to Indian Subcontinent US$150 US$500 US$300 US$1,000 All FES amounts for origins and destinations outside the revised Indian Subcontinent scope remain unchanged. Swire Shipping said it will continue monitoring operational costs and intends to reduce or withdraw the surcharge when conditions allow.",
-      "takeaways": [
-        "Swire Shipping will reduce its Feeder and Equipment Surcharge (FES) for selected trades involving the Indian Subcontinent.",
-        "The revised surcharge will apply to Bills of Lading with an on-board date on or after 20 November 2026.",
-        "Trades regulated by the US Federal Maritime Commission remain subject to the applicable regulatory notice period."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-1F8A6EE9D8",
-      "title": "Valenciaport container traffic holds steady as vehicle traffic rises",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/valenciaport-container-traffic-holds-steady-as-vehicle-traffic-rises/",
-      "publishedAt": "2026-11-22T05:00:15Z",
-      "category": "Ports & Terminals",
-      "region": "Brazil & South Atlantic",
-      "regions": [
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        -23.96,
-        -46.33
-      ],
-      "navarea": "V",
-      "image": "https://container-news.com/wp-content/uploads/2025/01/Aerea-puerto-Valencia_parcial-300x200.jpg",
-      "summary": "Container traffic at the terminals managed by the Port Authority of València remains virtually stable, with the rolling twelve-month total of 5,628,895 TEUs up 0.15%. Rail traffic reached 258,910 TEUs, up 20.26 percent on 2025, further strengthening the role of rail in logistics linked to Valenciaport. Vehicle...",
-      "body": "Container traffic at the terminals managed by the Port Authority of València remains virtually stable, with the rolling twelve-month total of 5,628,895 TEUs up 0.15%. Rail traffic reached 258,910 TEUs, up 20.26 percent on 2025, further strengthening the role of rail in logistics linked to Valenciaport. Vehicle traffic handled as cargo has risen 9 percent year-on-year, including a 27% jump in October alone, when the automotive terminals at Sagunto and València handled 61,793 vehicles. From 1 January to 30 October, cargo traffic at the ports of València, Sagunto and Gandia totalled 65,931,152 tonnes, down 2.08 percent, while container traffic reached 4,718,532 TEUs, down 0.71 percent. In October alone, cargo traffic amounted to 6,681,689 tonnes, down 1.6%, and container traffic to 473,487 TEUs, up 1.1%. On a rolling twelve-month basis, the ports handled 78,664,787 tonnes, down 1.74%. Vessel calls were equally steady: 7,309 over the last twelve months against 7,310 in the previous period. Imports remain the main driver of activity. Full import containers have grown 10.79% since January to 959,880 TEUs, while full exports totalled 760,096 TEUs, a marginal decline of 0.04%. The sectors with the highest growth were vehicles and automotive parts (+10.12%), processed construction materials (+4.54%) and chemical products (+2.36%).",
-      "takeaways": [
-        "Container traffic at the terminals managed by the Port Authority of València remains virtually stable, with the rolling twelve-month total of 5,628,895 TEUs up 0.15%.",
-        "Rail traffic reached 258,910 TEUs, up 20.26 percent on 2025, further strengthening the role of rail in logistics linked to Valenciaport.",
-        "Vehicle traffic handled as cargo has risen 9 percent year-on-year, including a 27% jump in October alone, when the automotive terminals at Sagunto and València handled 61,793 vehicles."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-4FB8595DBD",
-      "title": "Sidra Line revises Mediterranean–West Africa service",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/sidra-line-revises-mediterranean-west-africa-service/",
-      "publishedAt": "2026-11-22T02:59:31Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2026/09/sidra-line8238.png",
-      "summary": "Sidra Line will realign its Mediterranean–West Africa service, adding three North African ports while removing Adana from the rotation, accoring to DynaLiners. The revised WAF service will introduce calls at Misurata in Libya, Rades in Tunisia and Casablanca in Morocco. It will continue to connect the Mediterranean...",
-      "body": "Services Top Right Sidra Line revises Mediterranean–West Africa service November 22, 2026 Facebook Twitter WhatsApp Linkedin Email Sidra Line will realign its Mediterranean–West Africa service, adding three North African ports while removing Adana from the rotation, accoring to DynaLiners. The revised WAF service will introduce calls at Misurata in Libya, Rades in Tunisia and Casablanca in Morocco. It will continue to connect the Mediterranean with Conakry in Guinea. A single 750 TEU container ship will operate the revised rotation: Alexandria – Misurata – Rades – Casablanca – Conakry – Alexandria TAGS Sidra Line Facebook Twitter WhatsApp Linkedin Email Previous article JSV Logistic reconnects Türkiye with Canary Islands Next article Valenciaport container traffic holds steady as vehicle traffic rises Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The revised WAF service will introduce calls at Misurata in Libya, Rades in Tunisia and Casablanca in Morocco.",
-        "It will continue to connect the Mediterranean with Conakry in Guinea.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-C2406927AB",
-      "title": "JSV Logistic reconnects Türkiye with Canary Islands",
-      "source": "Container News",
-      "sourceIcon": "📦",
-      "sourceRegion": "Europe / Liner & Ports",
-      "url": "https://container-news.com/jsv-logistic-reconnects-turkiye-with-canary-islands/",
-      "publishedAt": "2026-11-22T00:34:29Z",
-      "category": "Ports & Terminals",
-      "region": "Suez Canal & Eastern Med",
-      "regions": [
-        "Suez Canal & Eastern Med",
-        "Singapore & Malacca Strait",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        30.58,
-        32.34
-      ],
-      "navarea": "III",
-      "image": "https://container-news.com/wp-content/uploads/2026/08/MilaGreen-1-09.27.05-1024x682-JSV-300x200.jpeg",
-      "summary": "JSV Logistic has reinstated the Canary Islands leg of its weekly Türkiye–Spain service, restoring direct calls between Türkiye and the Spanish archipelago. The Canary Islands section was separated from the operation in mid-2026. Following its return, JSV Logistic has increased the service’s deployment to three...",
-      "body": "Services Top Right JSV Logistic reconnects Türkiye with Canary Islands November 22, 2026 Facebook Twitter WhatsApp Linkedin Email MilaGreen JSV Logistic has reinstated the Canary Islands leg of its weekly Türkiye–Spain service, restoring direct calls between Türkiye and the Spanish archipelago. The Canary Islands section was separated from the operation in mid-2026. Following its return, JSV Logistic has increased the service’s deployment to three container ships ranging from 750 to 1,200 TEU. The revised rotation is: Izmit (Derince) – Alicante – Barcelona – Santa Cruz de Tenerife – Las Palmas – Arrecife – Alicante – Barcelona – Izmit (Derince) TAGS JSV Logistic Facebook Twitter WhatsApp Linkedin Email Previous article Port of Los Angeles releases environmental impact report Next article Sidra Line revises Mediterranean–West Africa service Giannis Nikolakis https://container-news.com/ Managing Director Linkedin Mail",
-      "takeaways": [
-        "The Canary Islands section was separated from the operation in mid-2026.",
-        "Following its return, JSV Logistic has increased the service’s deployment to three container ships ranging from 750 to 1,200 TEU.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
     },
     {
       "id": "SN-43EA2FF49F",
@@ -1624,343 +1991,6 @@
         "The marine license granted by the Marine Directorate, previously Marine Scotland, allows the 1 MW-rated, unmanned floating oscillating water column device, developed by OceanEnergy, to be deployed at EMEC.",
         "Its only moving part, the turbine rotor, sits on deck above the waves, while all electrical equipment is housed below deck in a sealed machine room.",
         "As waves cause air trapped within the OE Buoy hull to oscillate, the airflow drives the turbine to generate electricity."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-4C9F4FECAD",
-      "title": "US Coast Guard Commissions New Cutter for Caribbean Ops",
-      "source": "MarineLink",
-      "sourceIcon": "🧭",
-      "sourceRegion": "USA / Maritime Tech",
-      "url": "https://www.marinelink.com/news/us-coast-guard-commissions-new-cutter-544499",
-      "publishedAt": "2026-11-20T13:19:43Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean",
-        "US Gulf & Port of Houston",
-        "US West Coast & Pacific"
-      ],
-      "tags": [
-        "port",
-        "uscg"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://images.marinelink.com/images/maritime/w150/credit-us-coast-guard-175217.jpg",
-      "summary": "The U.S. Coast Guard has commissioned its newest Sentinel-class fast response cutter, USCGC Marvin Perrett (WPC 1164), during a ceremony in New Orleans, ahead of the vessel's deployment to its homeport in San Juan, Puerto Rico.The commissioning…",
-      "body": "US Coast Guard Commissions New Cutter for Caribbean Ops Maritime Activity Reports, Inc. November 20, 2026 (Credit: US Coast Guard) The U.S. Coast Guard has commissioned its newest Sentinel-class fast response cutter, USCGC Marvin Perrett (WPC 1164), during a ceremony in New Orleans, ahead of the vessel's deployment to its homeport in San Juan, Puerto Rico. The commissioning ceremony took place at the Julia Street Cruise Ship Terminal, marking the cutter's official entry into active service. Following commissioning, the vessel and its crew will transit to San Juan, from where they will conduct operations across the Caribbean and the United States' southern maritime approaches. Its missions will include search and rescue, maritime law enforcement and homeland security operations. The Sentinel-class cutter is equipped with advanced maritime sensors, integrated intelligence and communications systems, and capabilities for deploying pursuit boats over the horizon. The Coast Guard said the vessel would strengthen its capacity to conduct maritime security, border protection and search and rescue missions in the region. The cutter is named after Marvin Perrett, a New Orleans native and Coast Guard veteran who operated Higgins landing craft during World War II, participating in the Normandy landings and subsequent operations in southern France and the Pacific. Perrett later received a Knight of the Legion of Honor medal from France in recognition of his wartime service.",
-      "takeaways": [
-        "US Coast Guard Commissions New Cutter for Caribbean Ops Maritime Activity Reports, Inc.",
-        "November 20, 2026 (Credit: US Coast Guard) The U.S.",
-        "Coast Guard has commissioned its newest Sentinel-class fast response cutter, USCGC Marvin Perrett (WPC 1164), during a ceremony in New Orleans, ahead of the vessel's deployment to its homeport in San Juan, Puerto Rico."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-4227DC544E",
-      "title": "Nexans completes deep-water cable laying ops off Australia for Chevron",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/20/nexans-completes-deep-water-cable-laying-ops-off-australia-for-chevron",
-      "publishedAt": "2026-11-20T12:22:36Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait",
-        "Japan & Korea",
-        "Australia & Pilbara"
-      ],
-      "tags": [
-        "lng",
-        "shipyard"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://www.offshore-energy.biz/api/media/file/Nexans%20completes%20deep-water%20cable%20laying%20ops%20off%20Australia%20for%20Chevron-800x548.jpg?prefix=media",
-      "summary": "Nexans has completed the laying and trenching of the high-voltage dynamic cable for Chevron's Jansz-Io Compression (J-IC) project offshore...",
-      "body": "Cabling November 20, 2026 · 1 minute ago Nexans completes deep-water cable laying ops off Australia for Chevron NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Nexans Nexans has completed the laying and trenching of the high-voltage dynamic cable for Chevron's Jansz-Io Compression (J-IC) project offshore Western Australia. The cable-laying vessel (CLV) Nexans Aurora installed 26 buoyancy modules and trenched 30 kilometers of cable, after which it left Australia on October 23. J-IC uses subsea compression to sustain gas supply to the Gorgon LNG and domestic gas plants on Barrow Island. The 145 kV cable, about 135 kilometers long, runs from the island to a floating field control station, which powers and controls the compressors on the seabed. The completed operation included the overboarding and pull-in of the cable head to the field control station, installation of the buoyancy modules using a horizontal method developed, laying of the cable in its dynamic configuration, installation of about 200 meters of vortex-induced vibration (VIV) strakes in the Scarp section, cable lay up the Scarp, float-out and pull-in of the second cable end at Barrow Island, as-laid survey and cable trenching. Before handover, the remaining work includes cable jointing at the field control station and on Barrow Island, rock stabilization along the last 28 kilometers of the route, and final soak test, planned for February. Nexans Chevron sanctioned the Jansz-Io compression project in early July 2021 and ordered the field control station from the Daewoo Shipbuilding & Marine Engineering (DSME) shipyard, now known as Hanwha Ocean, a few months later. Hanwha Ocean confirmed the load-out of the field control station for the project in November 2024. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Cabling Production & Processing Subsea Oil & Gas Fossil Energy Project & Tenders",
-      "takeaways": [
-        "The cable-laying vessel (CLV) Nexans Aurora installed 26 buoyancy modules and trenched 30 kilometers of cable, after which it left Australia on October 23.",
-        "J-IC uses subsea compression to sustain gas supply to the Gorgon LNG and domestic gas plants on Barrow Island.",
-        "The 145 kV cable, about 135 kilometers long, runs from the island to a floating field control station, which powers and controls the compressors on the seabed."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-5C7612B0AC",
-      "title": "Cyberattack against Equinor is over with no data breach or impact on production",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/20/cyberattack-against-equinor-is-over-with-no-data-breach-or-impact-on-production",
-      "publishedAt": "2026-11-20T12:04:31Z",
-      "category": "Ports & Terminals",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://www.offshore-energy.biz/api/media/file/_2Fapi_2Fmedia_2Ffile_2FEquinor-1-1600x900-800x450.png?prefix=media",
-      "summary": "Equinor has brought a cyberattack against its systems to a halt without any reported disruption to production.",
-      "body": "IT & Software November 20, 2026 · 2 minutes ago Cyberattack against Equinor is over with no data breach or impact on production Equinor has brought a cyberattack against its systems to a halt without any reported disruption to production. MC Melisa Cavcic Senior Editor 1 minutes read LinkedIn X Email Equinor's headquarters in Stavanger Source: Equinor Norway’s state-owned energy giant Equinor has put an end to a cyberattack that kept its security teams busy this week, while its operations continued as normal, with the company finding no evidence of stolen or altered data. The firm also emphasizes that there have been no negative consequences for employees, partners, or suppliers. Equinor detected a cyber-attack on November 17, 2026, against certain IT systems and confirmed the mobilization of relevant resources to neutralize the attack and regain full integrity. After days of working to stop the attack and restore full integrity to the affected systems, the firm announced the resolution of the issue on November 20, reaffirming that production remained uninterrupted, with no signs of data theft. The Norwegian giant highlighted: “The cyber-attack against Equinor has now been stopped. Production is running as normal, and there is no indication that data has been stolen or altered. There is also no indication that the attack has had any negative consequences for employees, partners or suppliers. The incident has been reported to the police.\" Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under IT & Software Business Developments & Projects Business & Finance Fossil Energy Oil & Gas News",
-      "takeaways": [
-        "The firm also emphasizes that there have been no negative consequences for employees, partners, or suppliers.",
-        "Equinor detected a cyber-attack on November 17, 2026, against certain IT systems and confirmed the mobilization of relevant resources to neutralize the attack and regain full integrity.",
-        "The Norwegian giant highlighted: “The cyber-attack against Equinor has now been stopped."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-10ADE30F79",
-      "title": "Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/subsea-7-seeks-buyer-for-pipelay-vessel-ahead-of-saipem-merger/",
-      "publishedAt": "2026-11-20T12:00:00Z",
-      "category": "Shipping & Tankers",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait",
-        "Australia & Pilbara"
-      ],
-      "tags": [
-        "shipping",
-        "rotterdam"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://splash247.com/wp-content/uploads/2015/07/Subsea-7-Seven-Borealis-300x200.jpeg",
-      "summary": "Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis, which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally...",
-      "body": "Europe Offshore Subsea 7 seeks buyer for pipelay vessel ahead of Saipem merger Bojan Lepic November 20, 2026 0 2,847 1 minute read Norwegian offshore engineering contractor Subsea 7 has begun identifying a buyer for its pipelay and heavy-lift vessel Seven Borealis , which it must divest as part of its planned merger with Saipem. The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month. The regulator required the disposal of Seven Borealis to address competition concerns in Brazil’s offshore engineering, procurement, construction, and installation market, where both contractors have a substantial presence. Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure. Those commitments currently extend into 2028. The company has not identified a prospective buyer or disclosed an asking price for the vessel. The planned merger will create Saipem 7, combining two of the world’s largest offshore construction contractors. Subsea 7 said 13 of the 16 relevant competition authorities have approved the transaction. Reviews remain underway in Australia, the EU, and West Africa, with completion now expected in early 2027. The Seven Borealis disposal remains a condition of the Brazilian approval. Tags Italy Norway Bojan Lepic November 20, 2026 0 2,847 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "The company confirmed the move in its third-quarter results, after Brazil’s competition authority, CADE, conditionally approved the merger earlier this month.",
-        "Subsea 7 said the vessel would be sold under an arrangement that allows it to continue fulfilling existing project commitments through a sale-and-leaseback structure.",
-        "Those commitments currently extend into 2028."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-210DC29BF2",
-      "title": "Seaway 7 lines up vessel trio for Scottish offshore wind project",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/seaway-7-lines-up-vessel-trio-for-scottish-offshore-wind-project/",
-      "publishedAt": "2026-11-20T11:00:00Z",
-      "category": "Shipping & Tankers",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Brazil & South Atlantic"
-      ],
-      "tags": [
-        "shipping",
-        "rotterdam"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://splash247.com/wp-content/uploads/2026/10/Seaway-Phoenix-Seaway-7-300x180.jpg",
-      "summary": "Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift, Seaway Strashnov, and Seaway Phoenix, with offshore work expected during 2029 and 2030....",
-      "body": "Europe Offshore Renewables Seaway 7 lines up vessel trio for Scottish offshore wind project Bojan Lepic November 20, 2026 0 1,030 1 minute read Seaway 7 Seaway 7 Offshore construction contractor Seaway 7 is preparing to deploy three vessels on SSE Renewables’ proposed 1.4GW Berwick Bank B offshore wind development in Scotland. The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030. The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables. SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations. The project is located around 38 km off the Scottish Borders in the outer Firth of Forth, with average water depths of approximately 52 m. SSE expects Berwick Bank B to become the world’s deepest fixed-bottom offshore wind farm once completed. The development forms part of the wider Berwick Bank offshore wind complex, which has a proposed capacity of approximately 4.1GW. The Berwick Bank B agreement remains subject to final contract award and SSE’s final investment decision, expected in late 2027. Subject to approval, preparatory offshore construction could begin in 2028, with foundation and cable installation continuing into 2031. Seaway 7 previously worked with SSE on the Beatrice and Seagreen offshore wind farms. Tags Norway Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 1,030 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "The planned installation fleet comprises the Seaway Alfa Lift , Seaway Strashnov , and Seaway Phoenix , with offshore work expected during 2029 and 2030.",
-        "The vessels form part of Seaway 7’s proposed engineering, procurement, construction and installation package covering turbine foundations and inter-array cables.",
-        "SSE selected the Subsea 7 subsidiary as preferred supplier in October for work including the design, supply, and installation of approximately 90 fixed-bottom turbine foundations."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-DA540385D5",
-      "title": "FMC warns container lines of 1 March export policy deadline",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/containers/fmc-warns-container-lines-of-1-march-export-policy-deadline",
-      "publishedAt": "2026-11-20T10:28:02Z",
-      "category": "Ports & Terminals",
-      "region": "Global Maritime",
-      "regions": [
-        "Global Maritime"
-      ],
-      "tags": [
-        "container",
-        "port"
-      ],
-      "coords": [
-        25.0,
-        -40.0
-      ],
-      "navarea": "GLOBAL",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltc85b81593c9fb9f9/6b002313c16b67c07b0b4c39/Container_ship_at_Port_of_Oakland_credit_Port_of_Oakland.jpg?width=720&quality=80&disable=upscale",
-      "summary": "Carriers face daily fines of up to $74,943 if they fail to submit annual policies on equipment, blank sailings, and vessel space.",
-      "body": "Carriers face daily fines of up to $74,943 if they fail to submit annual policies on equipment, blank sailings, and vessel space.",
-      "takeaways": [
-        "Carriers face daily fines of up to $74,943 if they fail to submit annual policies on equipment, blank sailings, and vessel space.",
-        "Operational Area: Global Maritime.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-78E7FC277A",
-      "title": "Scotland greenlights 1 GW floating offshore wind project",
-      "source": "Splash247",
-      "sourceIcon": "🌊",
-      "sourceRegion": "Singapore / Global",
-      "url": "https://splash247.com/scotland-greenlights-1-gw-floating-offshore-wind-project/",
-      "publishedAt": "2026-11-20T10:00:00Z",
-      "category": "Shipping & Tankers",
-      "region": "Rotterdam & North Sea",
-      "regions": [
-        "Rotterdam & North Sea",
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "shipping",
-        "rotterdam"
-      ],
-      "coords": [
-        51.95,
-        4.14
-      ],
-      "navarea": "I",
-      "image": "https://splash247.com/wp-content/uploads/2023/08/Ingka-floating-wind-300x185.jpg",
-      "summary": "The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity...",
-      "body": "Europe Offshore Renewables Scotland greenlights 1 GW floating offshore wind project Bojan Lepic November 20, 2026 0 969 1 minute read Ingka Group Ingka Group The Scottish Government has granted offshore planning consent for the 1GW Muir Mhòr floating wind farm being developed by Fred. Olsen Seawind off the Aberdeenshire coast. Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes. The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure. Muir Mhòr was awarded seabed rights in Scotland’s ScotWind leasing round in 2022 and is among the country’s most advanced commercial-scale floating wind developments. Fred. Olsen Seawind took full ownership of the project earlier this year after acquiring Vattenfall’s 50% interest. The developer is targeting the start of electricity generation in the early 2030s, subject to further commercial and investment decisions. The project has already awarded £18.4m in development contracts, including £7.96m to Scottish suppliers. The latest approval comes with conditions requiring measures to address the wind farm’s potential impact on commercial fisheries and seabirds. The Scottish Fishermen’s Federation criticised the decision, arguing that questions remain about whether fishing vessels can operate safely around the project’s floating foundations, moorings, and subsea cables. Scotland currently has more than 11GW of consented offshore wind capacity, according to the government. The consent is a significant development milestone for Muir Mhòr, although the project has yet to reach a final investment decision. Tags Offshore Wind United Kingdom Bojan Lepic November 20, 2026 0 969 1 minute read Follow Us Facebook X LinkedIn Tumblr Pinterest Reddit VKontakte Messenger Messenger WhatsApp Telegram Share via Email Print",
-      "takeaways": [
-        "Olsen Seawind off the Aberdeenshire coast.",
-        "Located approximately 63 km east of Peterhead, the project will comprise up to 67 floating wind turbines capable of generating enough electricity to meet the equivalent annual consumption of around 1.2m homes.",
-        "The offshore approval follows onshore planning permission granted last year for the project’s underground cables and substation infrastructure."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-4809E1E941",
-      "title": "Türkiye's seismic vessel exploring Pakistan's oil & gas potential in its second overseas mission",
-      "source": "Offshore Energy",
-      "sourceIcon": "⚡",
-      "sourceRegion": "Netherlands / Energy",
-      "url": "https://www.offshore-energy.biz/2026/11/20/turkiyes-seismic-vessel-exploring-pakistans-oil-and-gas-potential-in-its-second-overseas-mission",
-      "publishedAt": "2026-11-20T09:59:50Z",
-      "category": "Ports & Terminals",
-      "region": "Singapore & Malacca Strait",
-      "regions": [
-        "Singapore & Malacca Strait"
-      ],
-      "tags": [
-        "port"
-      ],
-      "coords": [
-        1.26,
-        103.82
-      ],
-      "navarea": "XI",
-      "image": "https://www.offshore-energy.biz/api/media/file/T%C3%BCrkiye%27s%20seismic%20vessel%20exploring%20Pakistan%27s%20oil%20%26%20gas%20potential%20in%20its%20second%20overseas%20mission-760x500.png?prefix=media",
-      "summary": "Türkiye's national seismic research vessel has embarked on its second overseas operation, having arrived in Pakistan where it will be deployed to...",
-      "body": "Exploration & Production November 20, 2026 · 1 minute ago Türkiye's seismic vessel exploring Pakistan's oil & gas potential in its second overseas mission NS Nadja Skopljak Managing Editor 2 minutes read LinkedIn X Email Oruç Reis. Source: Turkish Ministry of Energy and Natural Resources Türkiye's national seismic research vessel has embarked on its second overseas operation, having arrived in Pakistan where it will be deployed to assess the country's hydrocarbon potential. A welcome ceremony was held today, November 20, at the Port of Karachi where the vessel Oruç Reis has docked, before starting to collect seismic data in the Indus and Makran basins. Within the scope of the Indus-C Block seismic project, Oruç Reis will carry out 3D seismic data collection activities in a 670 km2 area located approximately 120 kilometers off Karachi Port. This is part of the scope of the agreements signed in 2025 between Turkish Petroleum (TPAO) and Pakistan's energy companies Pakistan Petroleum Limited (PPL), Mari Energies, and Oil & Gas Development Company (OGDCL). \"Our two nations share common values and deep bonds of brotherhood. The strength of the bond between our countries comes from centuries of shared history and the genuine affection our peoples feel for one another,\" Turkish Energy and Natural Resources Minister Alparslan Bayraktar said. \"We have taken this partnership into the field. We have completed the licensing process for five blocks, three offshore and two onshore, and have begun fieldwork. TPAO will use Oruç Reis to acquire 3D seismic data across 670 square kilometers of the Indus C Block. We expect the survey to take 52 days, or about two months.\" According to Minister Bayraktar, the aim is to start drilling next year at sites that will be identified by the collected data. \"Our work onshore and offshore in Pakistan will directly strengthen the security of energy supply in both countries and contribute to the prosperity of our peoples. We have discovered hydrocarbons and brought them into production in our own waters. We want to achieve the same success in Pakistan,\" Bayraktar said. This is the vessel's second overseas mission after its first one in Somalia. Reach the Offshore Energy industry in one go! Offshore Energy is read by thousands of professionals every day. Increase your visibility with banners, tell your story with a branded article, and showcase your expertise with a full-page company profile in our business directory. CONTACT Follow Offshore Energy on: Filed under Exploration & Production Vessels FPSO & Vessels Vessels & Vehicles Subsea Seismic Outlook & Strategy Oil & Gas Fossil Energy Authorities & Government",
-      "takeaways": [
-        "A welcome ceremony was held today, November 20, at the Port of Karachi where the vessel Oruç Reis has docked, before starting to collect seismic data in the Indus and Makran basins.",
-        "Within the scope of the Indus-C Block seismic project, Oruç Reis will carry out 3D seismic data collection activities in a 670 km2 area located approximately 120 kilometers off Karachi Port.",
-        "This is part of the scope of the agreements signed in 2025 between Turkish Petroleum (TPAO) and Pakistan's energy companies Pakistan Petroleum Limited (PPL), Mari Energies, and Oil & Gas Development Company (OGDCL)."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-92D38F3F84",
-      "title": "Tanker rates bounce amid heightened Hormuz hostilities",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/tankers/tanker-rates-bounce-amid-heightened-hormuz-hostilities",
-      "publishedAt": "2026-11-20T09:58:34Z",
-      "category": "Geopolitics & Chokepoints",
-      "region": "Strait of Hormuz & Persian Gulf",
-      "regions": [
-        "Strait of Hormuz & Persian Gulf"
-      ],
-      "tags": [
-        "tanker",
-        "hormuz"
-      ],
-      "coords": [
-        26.56,
-        56.25
-      ],
-      "navarea": "IX",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/bltb18b5b3f7c937a5f/6ae1ffd4608117c6352cb420/Bahri-VLCC-Credit-Bahri.jpg?width=720&quality=80&disable=upscale",
-      "summary": "IEA sees no return to pre-war confidence in the Strait of Hormuz as a safe, reliable energy corridor.",
-      "body": "IEA sees no return to pre-war confidence in the Strait of Hormuz as a safe, reliable energy corridor.",
-      "takeaways": [
-        "IEA sees no return to pre-war confidence in the Strait of Hormuz as a safe, reliable energy corridor.",
-        "Operational Area: Strait of Hormuz & Persian Gulf.",
-        "Assess strait transit security posture, war-risk advisories, and routing alternatives."
-      ],
-      "readingMinutes": 2,
-      "readMinutes": 2
-    },
-    {
-      "id": "SN-FB80E8F3C9",
-      "title": "Panama files criminal complaints against former maritime officials, Hutchison’s Panama Ports",
-      "source": "Seatrade Maritime",
-      "sourceIcon": "🚢",
-      "sourceRegion": "UK / Global",
-      "url": "https://www.seatrade-maritime.com/ports-logistics/panama-files-criminal-complaints-against-former-maritime-officials-hutchison-s-panama-ports",
-      "publishedAt": "2026-11-20T09:22:22Z",
-      "category": "Ports & Terminals",
-      "region": "Panama Canal & Caribbean",
-      "regions": [
-        "Panama Canal & Caribbean"
-      ],
-      "tags": [
-        "port",
-        "panama"
-      ],
-      "coords": [
-        9.08,
-        -79.68
-      ],
-      "navarea": "IV",
-      "image": "https://eu-images.contentstack.com/v3/assets/bltdcfe6aab5515629e/blta14ec29e64f3755b/67ea4d023b94431431686214/Balboa-PPC-Credit-Hutchison-Ports.jpg?width=720&quality=80&disable=upscale",
-      "summary": "Lawsuits take aim at those involved in alleged irregularities related to Balboa and Cristobal concession extensions.",
-      "body": "Lawsuits take aim at those involved in alleged irregularities related to Balboa and Cristobal concession extensions.",
-      "takeaways": [
-        "Lawsuits take aim at those involved in alleged irregularities related to Balboa and Cristobal concession extensions.",
-        "Operational Area: Panama Canal & Caribbean.",
-        "Monitor port controlling depths, berth UKC allowances, and canal transit slot advisories in SetChart."
       ],
       "readingMinutes": 2,
       "readMinutes": 2
