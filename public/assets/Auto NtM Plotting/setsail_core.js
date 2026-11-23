@@ -17678,22 +17678,6 @@ function addNoticesToStore(newNotices, cancelledIds = []) {
 
   saveStoreToStorage();
 
-
-
-  const badge = document.getElementById("ntmBadge");
-
-  const activeCount = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
-
-  if (badge) {
-
-    badge.textContent = activeCount;
-
-    badge.style.display = activeCount > 0 ? "block" : "none";
-
-  }
-
-
-
   renderNtMListAndMap();
 
   updateExportModalCounts();
@@ -17877,18 +17861,6 @@ function applyHydratedNtmStore(parsed) {
   window.NTM_STORE = NTM_STORE;
 
   reconcileAndApplyNoticeOverrides();
-
-  const activeCount = NTM_STORE.filter(n => !n.isCancelled && n.status !== "CANCELLED").length;
-
-  const badge = document.getElementById("ntmBadge");
-
-  if (badge) {
-
-    badge.textContent = activeCount;
-
-    badge.style.display = "block";
-
-  }
 
   return parsed.length >= NTM_MIN_FULL_CORPUS;
 
@@ -18190,16 +18162,6 @@ async function loadRemoteNoticesJson(showFeedback = false) {
         const navCnt = NTM_STORE.filter(n => n.type === "NAVTEX" && !n.isCancelled && n.status !== "CANCELLED").length;
 
         const ukhoCnt = NTM_STORE.filter(n => n.type !== "NAVTEX" && !n.isCancelled && n.status !== "CANCELLED").length;
-
-        const badge = document.getElementById("ntmBadge");
-
-        if (badge) {
-
-          badge.textContent = navCnt + ukhoCnt;
-
-          badge.style.display = (navCnt + ukhoCnt) > 0 ? "block" : "none";
-
-        }
 
         if (showFeedback && typeof showSetSailToast === "function") {
 
