@@ -17527,7 +17527,20 @@
 
   mix-blend-mode: normal !important;
 
+}
+
+.leaflet-container img.leaflet-tile.leaflet-tile-loaded {
+
   visibility: visible !important;
+
+}
+
+.leaflet-container img.setsail-seamark-tiles:not(.leaflet-tile-loaded),
+.leaflet-container img.ecdis-boundaries-labels-tile:not(.leaflet-tile-loaded) {
+
+  visibility: hidden !important;
+
+  opacity: 0 !important;
 
 }
 

@@ -18817,6 +18817,7 @@ function initNtMMap() {
     } catch (eOv) {}
 
     const seamarkUrl = "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png";
+    const transparentTileDataUri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
     const buoysTileLayer = L.tileLayer(seamarkUrl, {
 
@@ -18844,8 +18845,20 @@ function initNtMMap() {
 
       className: "setsail-seamark-tiles",
 
-      pane: "overlayPane"
+      pane: "overlayPane",
 
+      errorTileUrl: transparentTileDataUri
+
+    });
+
+    buoysTileLayer.on("tileerror", function(errEvent) {
+      if (errEvent && errEvent.tile) {
+        errEvent.tile.style.opacity = "0";
+        errEvent.tile.style.visibility = "hidden";
+        if (errEvent.tile.src !== transparentTileDataUri) {
+          errEvent.tile.src = transparentTileDataUri;
+        }
+      }
     });
 
     // Subsea Infrastructure Layer (Submarine Cables & Pipelines)
@@ -35495,6 +35508,7 @@ function createEcdisSimpleBaseLayer() {
   });
 
   // Country & State/Province boundaries + City & Country labels (pure black lines & text, 0 terrain)
+  const _ecdisTransparentTile = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
   const boundariesLabels = L.tileLayer(
     "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
     {
@@ -35504,9 +35518,19 @@ function createEcdisSimpleBaseLayer() {
       className: "ecdis-boundaries-labels-tile",
       attribution: "Boundaries & Places · Esri",
       keepBuffer: 2,
-      updateWhenIdle: true
+      updateWhenIdle: true,
+      errorTileUrl: _ecdisTransparentTile
     }
   );
+  boundariesLabels.on("tileerror", function(errEvent) {
+    if (errEvent && errEvent.tile) {
+      errEvent.tile.style.opacity = "0";
+      errEvent.tile.style.visibility = "hidden";
+      if (errEvent.tile.src !== _ecdisTransparentTile) {
+        errEvent.tile.src = _ecdisTransparentTile;
+      }
+    }
+  });
 
   const landFill = L.layerGroup();
   const group = L.layerGroup([water, landFill, boundariesLabels]);

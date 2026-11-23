@@ -4,8 +4,8 @@
  * High-Speed Satellite & Offline Engine — Instant Tile Pre-Warming & Zero API-Key Watermarks
  */
 
-const CACHE_NAME = 'setsail-cache-v5.256.0';
-const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.256.0';
+const CACHE_NAME = 'setsail-cache-v5.257.0';
+const TILE_CACHE_NAME = 'setsail-tiles-cache-v5.257.0';
 
 const OFFLINE_CORE_ASSETS = [
   './',
@@ -514,14 +514,32 @@ self.addEventListener('fetch', (event) => {
           }
         }
 
+        const isSparseOverlayTile = url.hostname.includes('openseamap.org');
+        const makeTransparentPngResponse = () => {
+          const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+          const bin = atob(b64);
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          return new Response(bytes.buffer, {
+            status: 200,
+            headers: { 'Content-Type': 'image/png', 'Cache-Control': 'no-store' }
+          });
+        };
+
         try {
           const networkTile = await fetchWithTimeout(event.request, 18000);
           if (networkTile && (networkTile.ok || networkTile.type === 'opaque')) {
             tileCache.put(event.request, networkTile.clone());
             return networkTile;
           }
+          if (isSparseOverlayTile) {
+            return makeTransparentPngResponse();
+          }
           return networkTile || new Response('', { status: 504, statusText: 'Tile Gateway Timeout' });
         } catch (fetchErr) {
+          if (isSparseOverlayTile) {
+            return makeTransparentPngResponse();
+          }
           // Return HTTP 504 (never HTTP 200 1x1 blank PNG) so Leaflet keeps tile hidden and triggers CDN failover
           return new Response('', { status: 504, statusText: 'Tile Gateway Timeout' });
         }
