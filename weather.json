@@ -1,6 +1,6 @@
 {
-  "synopticCycle": "2000 UTC",
-  "lastSyncUtc": "2026-11-23T20:55:10.832704+00:00",
+  "synopticCycle": "0500 UTC",
+  "lastSyncUtc": "2026-11-24T05:10:06.689351+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
@@ -9,58 +9,58 @@
       "shortName": "98S",
       "category": "Tropical Disturbance (Active Invest)",
       "center": [
-        -8.9,
-        77.8
+        -10.0,
+        76.8
       ],
       "centralPressure": 1006,
-      "maxWinds": 25,
-      "gusts": 32,
-      "movement": "NNE at 3 kts",
+      "maxWinds": 30,
+      "gusts": 39,
+      "movement": "NE at 10 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -8.3,
-            78.1
+            -8.6,
+            78.2
           ],
-          "winds": 30,
+          "winds": 35,
           "radiusNm": 45
         },
         {
           "tau": 24,
           "coords": [
-            -8.9,
-            78.4
+            -9.1,
+            78.3
           ],
-          "winds": 35,
+          "winds": 40,
           "radiusNm": 60
         },
         {
           "tau": 36,
           "coords": [
-            -9.6,
-            78.3
+            -9.5,
+            78.4
           ],
-          "winds": 40,
+          "winds": 45,
           "radiusNm": 75
         },
         {
           "tau": 48,
           "coords": [
-            -10.1,
-            77.8
+            -9.9,
+            78.5
           ],
-          "winds": 45,
+          "winds": 50,
           "radiusNm": 90
         },
         {
           "tau": 60,
           "coords": [
-            -10.3,
-            77.8
+            -10.5,
+            78.6
           ],
-          "winds": 50,
+          "winds": 55,
           "radiusNm": 105
         }
       ]
@@ -75,8 +75,8 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 4.1,
-      "swellPeriod": 9,
+      "waveHeight": 3.3,
+      "swellPeriod": 8,
       "swellDir": "WNW"
     },
     {
@@ -87,9 +87,21 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 3.1,
+      "waveHeight": 2.9,
       "swellPeriod": 9,
       "swellDir": "W"
+    },
+    {
+      "id": "WS1",
+      "name": "98S Cyclonic Wave Field",
+      "center": [
+        -10.0,
+        76.8
+      ],
+      "radiusNm": 150,
+      "waveHeight": 2.7,
+      "swellPeriod": 9,
+      "swellDir": "SE"
     }
   ],
   "pressureCenters": [
@@ -98,8 +110,8 @@
       "value": 1006,
       "name": "Invest 98S Core Low",
       "coords": [
-        -8.9,
-        77.8
+        -10.0,
+        76.8
       ]
     },
     {
@@ -133,12 +145,12 @@
   "windVectors": [
     {
       "coords": [
-        -8.6,
-        78.1
+        -9.7,
+        77.1
       ],
       "dir": 200,
-      "speed": 25,
-      "label": "25 kts (98S)"
+      "speed": 30,
+      "label": "30 kts (98S)"
     }
   ]
 }
