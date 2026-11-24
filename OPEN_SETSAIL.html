@@ -254,7 +254,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.257" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.258" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -10009,7 +10009,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.257" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.258" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
   <style>
@@ -13898,6 +13898,13 @@ select option {
       z-index: 9999 !important;
       box-shadow: 0 22px 55px rgba(0, 0, 0, 0.88), 0 0 0 1px rgba(56, 189, 248, 0.32) !important;
     }
+    #ntmSidebar .ntm-sidebar-bottom-bar .ntm-popover,
+    #ntmSidebar .ntm-sidebar-bottom-bar #ntmFilterPopover,
+    #ntmSidebar .ntm-sidebar-bottom-bar #ntmSortPopover {
+      top: auto !important;
+      bottom: calc(100% + 8px) !important;
+      left: 0 !important;
+    }
     /* 3. Home Header Top-Left Account + LogIn Button */
     .home-hud-login-btn {
       display: inline-flex !important;
@@ -14004,7 +14011,7 @@ select option {
       background: #f8fafc !important;
     }
 
-    /* v5.257: Redesigned Clean Weather Forecast Timeline with Pill Thumb (+XH) */
+    /* v5.258: Redesigned Clean Weather Forecast Timeline with Pill Thumb (+XH) */
     #tab-ntm .ntm-toolbar-right .ntm-wx-timeline-tile[hidden],
     .ntm-wx-timeline-tile[hidden] {
       display: none !important;
@@ -14222,7 +14229,7 @@ select option {
         width: auto;
       }
     }
-    /* v5.257: Unified Weather tile (cursor meteo + forecast timeline) ? visual design only */
+    /* v5.258: Unified Weather tile (cursor meteo + forecast timeline) ? visual design only */
 #tab-ntm .ntm-toolbar-right .ntm-wx-unified,
 .ntm-wx-unified {
   display: inline-flex;
@@ -14366,7 +14373,7 @@ body.light-theme .ntm-wx-unified {
 [data-theme="light"] #tab-ntm .ntm-toolbar-right .ntm-wx-unified > .ntm-wx-timeline-tile::before {
   background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.25), transparent);
 }
-/* v5.257: Fixed-width cursor weather slots so changing numbers never shift tile or slider width */
+/* v5.258: Fixed-width cursor weather slots so changing numbers never shift tile or slider width */
 #tab-ntm .ntm-toolbar-right .ntm-wx-unified,
 .ntm-wx-unified {
   width: 728px !important;
@@ -14462,7 +14469,7 @@ body.light-theme .ntm-wx-unified {
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
     }
 
-    /* v5.257: Minimalist Export to ECDIS Modal */
+    /* v5.258: Minimalist Export to ECDIS Modal */
     #ntmExportModal .ntm-export-box {
       max-width: 440px !important;
       padding: 0.95rem 1.05rem !important;
@@ -14724,7 +14731,7 @@ body.light-theme .ntm-wx-unified {
   </style>
 
   <script>
-    // v5.257 — retired one-shot v5.33 cache wipe+reload (it restarted the boot bar mid-progress).
+    // v5.258 — retired one-shot v5.33 cache wipe+reload (it restarted the boot bar mid-progress).
     (function () {
       try {
         localStorage.setItem('setsail_force_v533', '1');
@@ -15542,7 +15549,7 @@ body.light-theme .ntm-wx-unified {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.257" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.257';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.258" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.258';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -15564,7 +15571,7 @@ body.light-theme .ntm-wx-unified {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.257" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.258" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -16482,117 +16489,107 @@ body.light-theme .ntm-wx-unified {
 
           <aside class="ntm-sidebar-list" id="ntmSidebar">
 
-
-
-            <div class="ntm-list-header">
-
-
-
-              <div class="ntm-list-header-title">
-
-
-
-                <h3>Multi Search</h3><span class="ntm-list-count" id="ntmListCount" style="display:none;"></span>
-
-
-
-              </div>
-
-
-
-              <button type="button" class="ntm-sidebar-collapse-btn" id="ntmCollapseSidebarBtn" title="Collapse sidebar to maximize chart view" aria-label="Collapse sidebar" onclick="if(window.toggleNtmSidebar){window.toggleNtmSidebar(false);}return false;">
-
-                ◀
-
+            <!-- Routes Column Header (Back + Delete / Import / New / Refresh) -->
+            <div class="ntm-list-header ntm-routes-header">
+              <button type="button" class="ntm-sidebar-collapse-btn ntm-hdr-back-btn" id="ntmCollapseSidebarBtn" title="Collapse sidebar to maximize chart view" aria-label="Collapse sidebar" onclick="if(window.toggleNtmSidebar){window.toggleNtmSidebar(false);}return false;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
               </button>
 
+              <span class="ntm-list-count" id="ntmListCount" style="display:none;"></span>
 
+              <div class="ntm-hdr-actions">
+                <button type="button" class="ntm-hdr-action-btn" id="btnSidebarRouteDelete" title="Delete selected route (move to Bin)">
+                  <span class="ntm-hdr-action-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                  </span>
+                  <span class="ntm-hdr-action-lbl">Delete</span>
+                </button>
 
+                <button type="button" class="ntm-hdr-action-btn" id="btnSidebarRouteImport" title="Import route file (.rtz, .csv, .rtm)">
+                  <span class="ntm-hdr-action-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 3v12"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="5" y1="19" x2="19" y2="19"></line>
+                    </svg>
+                  </span>
+                  <span class="ntm-hdr-action-lbl">Import</span>
+                </button>
+
+                <button type="button" class="ntm-hdr-action-btn" id="btnSidebarRouteNew" aria-expanded="false" title="New route — upload or create">
+                  <span class="ntm-hdr-action-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                      <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                    </svg>
+                  </span>
+                  <span class="ntm-hdr-action-lbl">New</span>
+                </button>
+
+                <button type="button" class="ntm-hdr-action-btn" id="btnSidebarRouteRefresh" title="Refresh routes">
+                  <span class="ntm-hdr-action-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
+                      <polyline points="21 3 21 9 15 9"></polyline>
+                    </svg>
+                  </span>
+                  <span class="ntm-hdr-action-lbl">Refresh</span>
+                </button>
+              </div>
             </div>
 
-
-
-
-
-
-
-            <!-- Integrated Search Box -->
-
-
-
-            <div class="ntm-search-wrap">
-
-
-
-              <span class="ntm-search-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg></span>
-
-
-
-              <input type="text" id="ntmSearchInput" class="ntm-search-input" placeholder="Search notice, region, chart..." />
-
-
-
-              <button type="button" id="ntmClearSearchBtn" class="ntm-search-clear" style="display:none;" title="Clear search">×</button>
-
-
-
+            <!-- Expandable sub-buttons under "+ New": Upload Route or Create Route -->
+            <div class="ntm-new-route-submenu" id="ntmNewRouteSubmenu" hidden>
+              <button type="button" class="ntm-new-route-subbtn" id="btnSidebarNewUploadRoute" title="Upload route file (.rtz, .csv, .rtm)">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>Загрузить трассу</span>
+              </button>
+              <button type="button" class="ntm-new-route-subbtn ntm-new-route-subbtn--create" id="btnSidebarNewCreateRoute" title="Create a new route from scratch">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Создать трассу</span>
+              </button>
             </div>
 
+            <!-- Routes / Bin Sub-Header Tabs -->
+            <div class="ntm-routes-tabs" role="tablist" aria-label="User routes tabs">
+              <button type="button" class="ntm-routes-tab active" id="tabSidebarRoutes" data-routes-tab="routes" role="tab" aria-selected="true">Routes</button>
+              <button type="button" class="ntm-routes-tab" id="tabSidebarBin" data-routes-tab="bin" role="tab" aria-selected="false">Bin</button>
+            </div>
 
+            <!-- Main User Routes Scroll Area -->
+            <div class="ntm-items-scroll" id="ntmItemsScroll"></div>
 
-
-
-
-
-            <!-- Multi-Type Filter Pills Bar -->
-
-
-
-            <!-- Selection Controls Bar with Filter (Funnel) & Sort (Arrows) Popover Menus -->
-
-
-
-            <div class="ntm-select-bar">
-
-
+            <!-- Bottom Bar: Filter + Sort on the left, shorter Search Input on the right in one row -->
+            <div class="ntm-select-bar ntm-sidebar-bottom-bar">
 
               <div class="ntm-select-bar-left">
 
-
-
                 <!-- Funnel Filter Button & Popover -->
-
-
 
                 <div class="ntm-popover-anchor">
 
-
-
-                  <button type="button" class="ntm-icon-btn" id="ntmFilterMenuBtn" title="Filter Notices by Type">
-
-
+                  <button type="button" class="ntm-icon-btn" id="ntmFilterMenuBtn" title="Filter Objects">
 
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
 
-
-
                       <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-
-
 
                     </svg>
 
-
-
                     <span class="filter-active-dot" id="filterActiveDot" style="display:none;"></span>
 
-
-
                   </button>
-
-
-
-
 
 
 
@@ -16794,221 +16791,110 @@ body.light-theme .ntm-wx-unified {
 
                 <!-- Two Arrows Sort Button & Popover -->
 
-
-
                 <div class="ntm-popover-anchor">
 
-
-
-                  <button type="button" class="ntm-icon-btn" id="ntmSortMenuBtn" title="Sort Notices">
-
-
+                  <button type="button" class="ntm-icon-btn" id="ntmSortMenuBtn" title="Sort Routes &amp; Objects">
 
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
 
-
-
                       <path d="m7 15 5 5 5-5"></path>
-
-
 
                       <path d="m7 9 5-5 5 5"></path>
 
-
-
                     </svg>
-
-
 
                   </button>
 
 
 
-
-
-
-
                   <div class="ntm-popover" id="ntmSortPopover">
-
-
 
                     <div class="ntm-popover-header">
 
-
-
-                      <span>Sort Notices</span>
-
-
+                      <span>Sort</span>
 
                       <button type="button" class="ntm-popover-close" id="ntmSortCloseBtn">×</button>
 
-
-
                     </div>
-
-
 
                     <div class="ntm-popover-body">
 
-
-
                       <label class="ntm-popover-radio-item">
-
-
 
                         <input type="radio" name="popSort" value="NUM_DESC" checked />
 
-
-
-                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Notice # (Newest)</span>
-
-
+                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Newest First</span>
 
                       </label>
 
-
-
                       <label class="ntm-popover-radio-item">
-
-
 
                         <input type="radio" name="popSort" value="NUM_ASC" />
 
-
-
-                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg> Notice # (Oldest)</span>
-
-
+                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg> Oldest First</span>
 
                       </label>
 
-
-
                       <label class="ntm-popover-radio-item">
-
-
 
                         <input type="radio" name="popSort" value="COUNTRY" />
 
-
-
-                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg> Country (A-Z)</span>
-
-
+                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg> Name (A-Z)</span>
 
                       </label>
 
-
-
                       <label class="ntm-popover-radio-item">
-
-
 
                         <input type="radio" name="popSort" value="REGION" />
 
-
-
                         <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><polygon points="1 6 8 2 16 6 23 2 23 18 16 22 8 18 1 22 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg> Region (A-Z)</span>
-
-
 
                       </label>
 
-
-
                       <label class="ntm-popover-radio-item">
-
-
 
                         <input type="radio" name="popSort" value="CHARTS" />
 
-
-
-                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Most Charts</span>
-
-
+                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Longest Distance</span>
 
                       </label>
 
-
-
                       <label class="ntm-popover-radio-item">
-
-
 
                         <input type="radio" name="popSort" value="POINTS" />
 
-
-
-                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Most Points</span>
-
-
+                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Most Waypoints</span>
 
                       </label>
-
-
 
                       <label class="ntm-popover-radio-item">
 
-
-
                         <input type="radio" name="popSort" value="TYPE" />
 
-
-
-                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Type (NAVTEX / T / P / Perm)</span>
-
-
+                        <span><svg class="setsail-icon setsail-icon-sm" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Type</span>
 
                       </label>
 
-
-
                     </div>
-
-
 
                   </div>
 
-
-
                 </div>
 
-
-
               </div>
 
+              <!-- Shorter Search Box in the same bottom row -->
+              <div class="ntm-search-wrap ntm-bottom-search-wrap">
+                <span class="ntm-search-icon"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg></span>
+                <input type="text" id="ntmSearchInput" class="ntm-search-input" placeholder="Search routes..." />
+                <button type="button" id="ntmClearSearchBtn" class="ntm-search-clear" style="display:none;" title="Clear search">×</button>
+              </div>
 
-
-
-
-
-
-              <div class="ntm-select-bar-right">
-
-
-
+              <div class="ntm-select-bar-right" style="display:none;">
                 <span class="ntm-active-filters-label" id="ntmActiveFiltersLabel" style="font-size:0.72rem;color:var(--muted);">All Types</span>
-
-
-
               </div>
-
-
 
             </div>
-
-
-
-
-
-
-
-                        
-
-            <div class="ntm-items-scroll" id="ntmItemsScroll"></div>
-
-
 
           </aside>
 
@@ -23482,26 +23368,26 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.257"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.257" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.257"></script>
-  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.257"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.258"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.258" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.258"></script>
+  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.258"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.257",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.258",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.257"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.257"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.257"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.258"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.258"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.258"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.257"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.258"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -23574,15 +23460,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.257"></script>
-<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.257"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.258"></script>
+<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.258"></script>
 <script>if (typeof window.__setsailToggleNtmSidebar === 'function') { window.toggleNtmSidebar = window.__setsailToggleNtmSidebar; }</script>
-<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.257"></script>
-<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.257"></script>
-<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.257"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.257"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.257"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.257"></script>
+<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.258"></script>
+<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.258"></script>
+<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.258"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.258"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.258"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.258"></script>
 
 
 
@@ -24246,7 +24132,7 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.addEventListener('load', () => {
         if (navigator.onLine && 'caches' in window && localStorage.getItem('setsail_sw_v511') !== '1') {
           caches.keys().then(keys => Promise.all(
-            keys.filter(k => k !== 'setsail-cache-v5.257.0' && k !== 'setsail-tiles-cache-v5.257.0').map(k => caches.delete(k))
+            keys.filter(k => k !== 'setsail-cache-v5.258.0' && k !== 'setsail-tiles-cache-v5.258.0').map(k => caches.delete(k))
           )).then(() => localStorage.setItem('setsail_sw_v511', '1')).catch(() => {});
         }
 function showSetSailHardRefreshTip(cacheLabel) {
@@ -24296,17 +24182,17 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.257', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.258', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
-            console.log('[SetSail PWA] Service Worker v5.257 registered, scope:', reg.scope);
+            console.log('[SetSail PWA] Service Worker v5.258 registered, scope:', reg.scope);
             if (navigator.onLine) {
               try { reg.update(); } catch (e) {}
             }
             // If SW cache name advanced since last visit, tip on Home without forcing reload
             try {
               const last = localStorage.getItem('setsail_last_seen_sw') || '';
-              if (last && last.indexOf('v5.257') < 0) {
-                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.257.0'); }, 1200);
+              if (last && last.indexOf('v5.258') < 0) {
+                setTimeout(function() { showSetSailHardRefreshTip('setsail-cache-v5.258.0'); }, 1200);
               }
             } catch (eTip) {}
           })

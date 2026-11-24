@@ -23370,394 +23370,8 @@ function renderNtMListAndMap() {
 
 
 
-  if (listContainer) {
-
-    let html = "";
-
-    const showRoute = hasRoute && (activeOverlayCategory === "ALL" || activeOverlayCategory === "ROUTE");
-
-    const showPorts = isDepthsActive && (activeOverlayCategory === "ALL" || activeOverlayCategory === "PORTS");
-
-    const showNotices = isNoticesActive && (activeOverlayCategory === "ALL" || activeOverlayCategory === "NTM");
-
-
-
-    // SECTION A: ROUTE WAYPOINTS
-
-    if (showRoute) {
-
-      html += `
-
-        <div class="ntm-search-section-header" style="background:rgba(2,132,199,0.12);border-color:rgba(56,189,248,0.3);">
-
-          <span style="color:#38bdf8;">
-
-            <svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;stroke:#38bdf8;"><circle cx="4" cy="19" r="2.5"/><circle cx="20" cy="5" r="2.5"/><path d="M4 16.5c0-4 4-5.5 8-5.5s8-2 8-5.5"/></svg>
-
-            MY ROUTE WAYPOINTS: ${activeRouteData.name || "Passage Plan"} (${filteredWaypoints.length})
-
-          </span>
-
-        </div>
-
-      `;
-
-
-
-      filteredWaypoints.forEach((wp, wIdx) => {
-
-        const globalIdx = activeRouteData.waypoints.indexOf(wp);
-
-        const isStart = globalIdx === 0;
-
-        const isEnd = globalIdx === activeRouteData.waypoints.length - 1;
-
-        const wptDisplayNum = wp.wptNo || ('00' + (globalIdx + 1)).slice(-3);
-
-        const wptLabel = wp.name ? wp.name : `WPT ${wptDisplayNum}`;
-
-        const dmsCoords = formatLatLonDMS(wp.lat, wp.lon);
-
-        const sail = wp.sail || "RL";
-
-        const speed = wp.speedKnots != null ? `${wp.speedKnots} kn` : "14.0 kn";
-
-        const pXtd = wp.portsideXTD != null ? wp.portsideXTD : 0.1;
-
-        const sXtd = wp.starboardXTD != null ? wp.starboardXTD : 0.1;
-
-        const turnRad = wp.turnRadius != null ? `${wp.turnRadius} NM` : "0.5 NM";
-
-        const typeBadgeClass = isStart ? "perm" : (isEnd ? "temp" : "prelim");
-
-        const typeBadgeText = isStart ? "DEP" : (isEnd ? "DEST" : sail);
-
-
-
-        html += `
-
-          <div class="ntm-card-item ntm-wpt-card" data-wpt-idx="${globalIdx}" onclick="centerMapOnWaypoint(${globalIdx})">
-
-            <div class="ntm-card-content" style="padding:0.6rem 0.75rem;">
-
-              <div class="ntm-card-top" style="align-items:center;">
-
-                <span class="ntm-card-id" style="color:#38bdf8;font-weight:700;">#${wptDisplayNum}</span>
-
-                <span class="ntm-tag ${typeBadgeClass}" style="margin-left:6px;font-size:0.68rem;">${typeBadgeText}</span>
-
-                <button type="button" class="ntm-btn-wpt-edit" onclick="event.stopPropagation();openWaypointEditModal(${globalIdx})" title="Edit Waypoint #${wptDisplayNum}">
-
-                  <svg class="setsail-icon" viewBox="0 0 24 24" style="width:11px;height:11px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Edit
-
-                </button>
-
-              </div>
-
-              <div class="ntm-card-subject" style="margin-top:2px;font-weight:600;color:#f1f5f9;">${wptLabel}</div>
-
-              <div style="font-size:0.72rem;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:4px;">
-
-                ${SetSailIcons.svg("pos")} <span>${dmsCoords}</span>
-
-              </div>
-
-              <div class="ntm-wpt-meta-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:5px;font-size:0.68rem;background:rgba(255,255,255,0.03);padding:4px 6px;border-radius:4px;border:1px solid var(--line);">
-
-                <div><span style="color:var(--muted);">SPD:</span> <b style="color:#f1f5f9;">${speed}</b></div>
-
-                <div><span style="color:var(--muted);">XTD:</span> <b style="color:#f1f5f9;">P${pXtd}/S${sXtd}</b></div>
-
-                <div><span style="color:var(--muted);">RAD:</span> <b style="color:#f1f5f9;">${turnRad}</b></div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        `;
-
-      });
-
-    }
-
-
-
-    // SECTION B: WORLD PORTS
-
-    if (showPorts && filteredPorts.length > 0) {
-
-      html += `
-
-        <div class="ntm-search-section-header" style="${showRoute ? 'margin-top:0.6rem;' : ''}">
-
-          <span>
-
-            <svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg>
-
-            WORLD PORTS BATHYMETRY (${filteredPorts.length})
-
-          </span>
-
-        </div>
-
-      `;
-
-
-
-      filteredPorts.forEach(port => {
-
-        const cCode = (port.countryCode || (port.country ? port.country.slice(0, 2) : "UN")).toUpperCase();
-
-        const cLower = cCode.toLowerCase();
-
-        const pDepths = (port.fairways || []).map(f => parseFloat(f.depth) || 0).filter(d => d > 0);
-
-        const minD = pDepths.length ? Math.min(...pDepths) : 12.5;
-
-        const maxD = pDepths.length ? Math.max(...pDepths) : 12.5;
-
-        const rangeTxt = (minD !== maxD) ? `${minD.toFixed(1)}–${maxD.toFixed(1)}m` : `${maxD.toFixed(1)}m`;
-
-        const reachesCnt = (port.fairways || []).length;
-
-        const depthSummary = `${reachesCnt} Reaches • ${rangeTxt}`;
-
-        html += `
-
-          <div class="ntm-card-item ntm-port-search-card" data-port-id="${port.id}" onclick="jumpToPort('${port.id}')" title="Click to inspect ${port.name} (${reachesCnt} surveyed reaches) on map">
-
-            <div class="ntm-card-content" style="padding:0.55rem 0.75rem;">
-
-              <div class="ntm-card-top" style="align-items:center;gap:7px;">
-
-                <span class="port-flag-box" title="${port.country}">
-
-                  <img src="assets/flags/${cLower}.png" 
-
-                       onerror="this.onerror=null;this.src='https://flagcdn.com/w40/${cLower}.png';" 
-
-                       alt="${cCode}" 
-
-                       class="port-flag-img" 
-
-                       width="21" 
-
-                       height="15" 
-
-                       loading="lazy" />
-
-                </span>
-
-                <span class="ntm-card-id" style="color:var(--accent);font-weight:600;font-size:0.86rem;">${port.name}</span>
-
-                <span class="ntm-tag perm" style="margin-left:auto;">${port.unlocode}</span>
-
-              </div>
-
-              <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;justify-content:space-between;">
-
-                <span>${port.country} • <b style="color:#38bdf8;">${depthSummary}</b></span>
-
-                <span style="color:#f05a36;font-size:0.7rem;font-weight:600;">View Chart &rarr;</span>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        `;
-
-      });
-
-    }
-
-
-
-    // SECTION C: NOTICES TO MARINERS & NAVTEX WARNINGS
-
-    if (showNotices) {
-
-      if ((showRoute || showPorts) && filteredNotices.length > 0) {
-
-        html += `
-
-          <div class="ntm-search-section-header" style="margin-top:0.6rem;">
-
-            <span>
-
-              <svg class="setsail-icon" viewBox="0 0 24 24" style="width:13px;height:13px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-
-              NtM &amp; NAVTEX WARNINGS (${filteredNotices.length})
-
-            </span>
-
-          </div>
-
-        `;
-
-      }
-
-
-
-      const renderLimit = Math.max(100, Number(window._ntmSidebarRenderLimit) || 250);
-      const itemsToRender = filteredNotices.slice(0, renderLimit);
-
-      itemsToRender.forEach(item => {
-
-        const isItemCancelled = Boolean(item.isCancelled || item.status === "CANCELLED");
-
-        const tagClass = item.type === "NAVTEX" ? "navtex" : (item.type === "T" ? "temp" : (item.type === "P" ? "prelim" : "perm"));
-
-        const typeLabel = item.type === "NAVTEX" ? "NAVTEX" : (item.type === "T" ? "TEMP (T)" : (item.type === "P" ? "PRELIM (P)" : "PERM"));
-
-        const navarea = getNoticeNavarea(item);
-
-
-
-        const typeBadge = isItemCancelled
-
-          ? `<span class="ntm-tag cancelled">CANCELLED</span>`
-
-          : `<span class="ntm-tag ${tagClass}">${typeLabel}</span>`;
-
-
-
-        // Always rebuild DMS from lat/lon (JSON .dms often has "?" instead of °).
-
-        const c0 = item.coords && item.coords[0];
-
-        const firstCoord = c0 && Number.isFinite(Number(c0.lat)) && Number.isFinite(Number(c0.lon))
-
-          ? formatCoordDmsHelper(c0.lat, c0.lon)
-
-          : "—";
-
-        const extraPts = item.coords && item.coords.length > 1 ? ` (+${item.coords.length - 1})` : "";
-
-        let titleText = String(item.id || "Notice");
-
-        if (titleText.length > 64) titleText = titleText.slice(0, 61) + "…";
-
-        const cancelledNoticeClass = isItemCancelled ? "cancelled is-cancelled-card" : "";
-
-        const navtexCardClass = item.type === "NAVTEX" ? "type-navtex" : `type-${item.type}`;
-
-        const safeId = String(item.id || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-
-        const titleAttr = String(item.id || "").replace(/"/g, "&quot;");
-
-
-
-        html += `
-
-          <div class="ntm-card-item ntm-card-item--compact ${navtexCardClass} ${cancelledNoticeClass}" data-id="${item.id}" onclick="selectNtMNotice('${safeId}')">
-
-            <div class="ntm-card-content">
-
-              <div class="ntm-card-top">
-
-                <span class="ntm-card-id" title="${titleAttr}">${titleText}</span>
-
-                ${typeBadge}
-
-              </div>
-
-              <div class="ntm-card-meta-row">
-
-                <span class="ntm-card-navarea">${navarea}</span>
-
-                <span class="ntm-card-coords" title="Center on chart">${SetSailIcons.svg("pos")} ${firstCoord}${extraPts}</span>
-
-              </div>
-
-              <div class="ntm-card-actions" onclick="event.stopPropagation();">
-
-                <button type="button" class="ntm-card-act-btn" onclick="window.openNoticeDetailModal('${safeId}')" title="View warning details">View</button>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        `;
-
-      });
-
-      if (filteredNotices.length > renderLimit) {
-        const remaining = filteredNotices.length - renderLimit;
-        html += `
-          <div style="padding:0.6rem 0.4rem;text-align:center;">
-            <button type="button" class="ntm-btn-glass" onclick="window._ntmSidebarRenderLimit = (window._ntmSidebarRenderLimit || 250) + 500; renderNtMListAndMap();" style="width:100%;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;border-radius:6px;border:1px solid #0284c7;color:#0284c7;background:rgba(2,132,199,0.06);">
-              Show more warnings (+${remaining.toLocaleString()} remaining)
-            </button>
-          </div>
-        `;
-      }
-
-    }
-
-
-
-    if (!html) {
-
-      const isAisActive = _ovStates ? _ovStates.ais === true : false;
-
-      const anyActiveOverlay = isNoticesActive || isDepthsActive || isWeatherActive || isRouteActive || isAisActive;
-
-      if (!anyActiveOverlay) {
-
-        html = `
-
-          <div class="ntm-empty-hints">
-
-            <div class="ntm-empty-hints-title">Enable a chart layer</div>
-
-            <div class="ntm-empty-hints-sub">Choose an overlay below, or use the dock under the chart.</div>
-
-            <div class="ntm-empty-hint-grid">
-
-              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--notices" data-overlay-hint="notices" title="Warnings (Notices to Mariners &amp; NAVTEX)"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Warnings</span></button>
-
-              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--depths" data-overlay-hint="depths" title="Ports &amp; UKC"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V10l7-4 7 4v11"/><path d="M9 21v-6h6v6"/></svg><span>Ports</span></button>
-
-              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--weather" data-overlay-hint="weather" title="Cyclones &amp; weather"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 17.5a4 4 0 0 0-1.5-7.7A6 6 0 0 0 6.1 11 3.5 3.5 0 0 0 6 18h13.5z"/><path d="M8 21h.01M12 21h.01M16 21h.01"/></svg><span>Weather</span></button>
-
-              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--ais" data-overlay-hint="ais" title="Live AIS targets"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 3 20 20 12 16 4 20"/></svg><span>AIS</span></button>
-
-              <button type="button" class="ntm-empty-hint-btn ntm-empty-hint-btn--route ntm-empty-hint-btn--wide" data-overlay-hint="route" title="My vessel route"><svg class="ntm-empty-hint-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 16.5 15.5 7.5"/></svg><span>My Route</span></button>
-
-            </div>
-
-          </div>
-
-        `;
-
-      } else {
-
-        html = `
-
-          <div style="padding:2rem 1rem;text-align:center;color:var(--muted);font-size:0.8rem;">
-
-            No active items match the current filter or enabled overlays.<br>
-
-            <span style="font-size:0.72rem;opacity:0.8;">Enable overlays from the dock below or clear search filter.</span>
-
-          </div>
-
-        `;
-
-      }
-
-    }
-
-
-
-    listContainer.innerHTML = html;
-
+  if (listContainer && typeof window.renderSidebarUserRoutesList === "function") {
+    window.renderSidebarUserRoutesList();
   }
 
 
@@ -45355,6 +44969,7 @@ function saveRouteToLibrary(route) {
   syncSetRouteTopbarActions();
 
   if (typeof renderVesselRouteLibraryList === "function") renderVesselRouteLibraryList();
+  if (typeof window.renderSidebarUserRoutesList === "function") window.renderSidebarUserRoutesList();
 
   // Live DR: library edits to the Current route reshape rails immediately
 
@@ -45469,6 +45084,7 @@ function deleteRouteFromLibrary(routeId) {
   renderNavSavedRoutesTree();
 
   if (typeof renderVesselRouteLibraryList === "function") renderVesselRouteLibraryList();
+  if (typeof window.renderSidebarUserRoutesList === "function") window.renderSidebarUserRoutesList();
 
   if (typeof showSetSailToast === "function") {
 
@@ -45875,10 +45491,405 @@ function selectSavedRouteFromSidebar(routeId, openRightDrawer = true, opts = {})
   syncSetRouteTopbarActions();
 
   if (typeof renderVesselRouteLibraryList === "function") renderVesselRouteLibraryList();
+  if (typeof window.renderSidebarUserRoutesList === "function") window.renderSidebarUserRoutesList();
 
 }
 
 window.selectSavedRouteFromSidebar = selectSavedRouteFromSidebar;
+
+/* ── v5.258: User Routes Sidebar (Routes / Bin Tabs, Header Actions & Cards) ── */
+const SETSAIL_ROUTES_BIN_KEY = "setsail_routes_bin_v1";
+window._sidebarRoutesActiveTab = window._sidebarRoutesActiveTab || "routes";
+window._sidebarSelectedBinRouteId = window._sidebarSelectedBinRouteId || null;
+
+function getDeletedRoutesBin() {
+  try {
+    const raw = localStorage.getItem(SETSAIL_ROUTES_BIN_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function writeDeletedRoutesBin(list) {
+  try {
+    const clean = Array.isArray(list) ? list.filter(Boolean).slice(0, 60) : [];
+    localStorage.setItem(SETSAIL_ROUTES_BIN_KEY, JSON.stringify(clean));
+  } catch (e) {}
+}
+
+function computeRouteDistanceNmFormatted(rt) {
+  if (!rt) return "0.00";
+  let dist = Number(rt.totalDistanceNM);
+  const wps = Array.isArray(rt.waypoints) ? rt.waypoints : [];
+  if ((!Number.isFinite(dist) || dist <= 0) && wps.length >= 2) {
+    let sum = 0;
+    for (let i = 0; i < wps.length - 1; i++) {
+      const a = wps[i];
+      const b = wps[i + 1];
+      if (a && b && Number.isFinite(Number(a.lat)) && Number.isFinite(Number(a.lon)) && Number.isFinite(Number(b.lat)) && Number.isFinite(Number(b.lon))) {
+        sum += calculateHaversineDistanceNM(Number(a.lat), Number(a.lon), Number(b.lat), Number(b.lon));
+      }
+    }
+    dist = sum;
+  }
+  if (!Number.isFinite(dist) || dist < 0) dist = 0;
+  return dist.toFixed(2);
+}
+
+function moveRouteToBin(routeId) {
+  let lib = [];
+  try { lib = getSavedRoutesLibrary() || []; } catch (e) { lib = []; }
+  if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length) {
+    if (!lib.some((r) => r && ((activeRouteData.id && r.id === activeRouteData.id) || r.name === activeRouteData.name))) {
+      lib = [activeRouteData].concat(lib);
+    }
+  }
+  const target = routeId
+    ? lib.find((r) => r && (r.id === routeId || r.name === routeId))
+    : (activeRouteData || lib[0]);
+  if (!target) {
+    if (typeof showSetSailToast === "function") showSetSailToast("No route selected to delete", "info");
+    return;
+  }
+  const tid = target.id || target.name;
+  const bin = getDeletedRoutesBin().filter((r) => r && r.id !== tid && r.name !== target.name);
+  const archived = Object.assign({}, target, {
+    id: target.id || ("route_" + Date.now().toString(36)),
+    deletedAt: new Date().toISOString()
+  });
+  bin.unshift(archived);
+  writeDeletedRoutesBin(bin);
+  if (typeof deleteRouteFromLibrary === "function") {
+    deleteRouteFromLibrary(tid);
+  }
+  renderSidebarUserRoutesList();
+}
+window.moveRouteToBin = moveRouteToBin;
+
+function restoreRouteFromBin(routeId) {
+  const bin = getDeletedRoutesBin();
+  const idx = bin.findIndex((r) => r && (r.id === routeId || r.name === routeId));
+  if (idx === -1) return;
+  const [restored] = bin.splice(idx, 1);
+  delete restored.deletedAt;
+  writeDeletedRoutesBin(bin);
+  if (typeof saveRouteToLibrary === "function") {
+    saveRouteToLibrary(restored);
+  }
+  if (typeof selectSavedRouteFromSidebar === "function" && restored.id) {
+    selectSavedRouteFromSidebar(restored.id, false);
+  }
+  if (window._sidebarSelectedBinRouteId === routeId) {
+    window._sidebarSelectedBinRouteId = bin[0] ? bin[0].id : null;
+  }
+  renderSidebarUserRoutesList();
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast("Route restored", "success");
+  }
+}
+window.restoreRouteFromBin = restoreRouteFromBin;
+
+function permanentlyDeleteRouteFromBin(routeId) {
+  const bin = getDeletedRoutesBin();
+  if (!bin.length) {
+    if (typeof showSetSailToast === "function") showSetSailToast("Bin is already empty", "info");
+    return;
+  }
+  const targetId = routeId || window._sidebarSelectedBinRouteId || (bin[0] && bin[0].id);
+  const nextBin = bin.filter((r) => r && r.id !== targetId && r.name !== targetId);
+  writeDeletedRoutesBin(nextBin);
+  window._sidebarSelectedBinRouteId = nextBin[0] ? nextBin[0].id : null;
+  renderSidebarUserRoutesList();
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast("Route permanently deleted from Bin", "info");
+  }
+}
+window.permanentlyDeleteRouteFromBin = permanentlyDeleteRouteFromBin;
+
+function renderSidebarUserRoutesList() {
+  const listContainer = document.getElementById("ntmItemsScroll");
+  if (!listContainer) return;
+
+  const tabMode = window._sidebarRoutesActiveTab === "bin" ? "bin" : "routes";
+  const tabRoutesBtn = document.getElementById("tabSidebarRoutes");
+  const tabBinBtn = document.getElementById("tabSidebarBin");
+  if (tabRoutesBtn) {
+    tabRoutesBtn.classList.toggle("active", tabMode === "routes");
+    tabRoutesBtn.setAttribute("aria-selected", tabMode === "routes" ? "true" : "false");
+  }
+  if (tabBinBtn) {
+    tabBinBtn.classList.toggle("active", tabMode === "bin");
+    tabBinBtn.setAttribute("aria-selected", tabMode === "bin" ? "true" : "false");
+  }
+
+  let items = [];
+  if (tabMode === "routes") {
+    try { items = (getSavedRoutesLibrary() || []).slice(); } catch (e) { items = []; }
+    if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
+      const exists = items.some((r) => r && ((activeRouteData.id && r.id === activeRouteData.id) || (!(r.id && activeRouteData.id && r.id !== activeRouteData.id) && r.name === activeRouteData.name)));
+      if (!exists) {
+        if (!activeRouteData.id) {
+          activeRouteData.id = "route_" + Date.now().toString(36);
+        }
+        items.unshift(activeRouteData);
+      }
+    }
+  } else {
+    items = getDeletedRoutesBin();
+  }
+
+  const searchInput = document.getElementById("ntmSearchInput");
+  const q = searchInput && searchInput.value ? String(searchInput.value).trim().toLowerCase() : "";
+  if (q) {
+    items = items.filter((rt) => {
+      if (!rt) return false;
+      const name = String(rt.name || rt.routeName || "").toLowerCase();
+      const od = String(typeof formatVesselRouteOdLabel === "function" ? formatVesselRouteOdLabel(rt) : "").toLowerCase();
+      const wptMatch = Array.isArray(rt.waypoints) && rt.waypoints.some((w) => w && w.name && String(w.name).toLowerCase().includes(q));
+      return name.includes(q) || od.includes(q) || wptMatch;
+    });
+  }
+
+  // Apply sort selection from #ntmSortPopover
+  const checkedSort = document.querySelector('input[name="popSort"]:checked');
+  const sortMode = checkedSort ? checkedSort.value : "NUM_DESC";
+  if (sortMode === "NUM_ASC") {
+    items = items.slice().reverse();
+  } else if (sortMode === "COUNTRY" || sortMode === "REGION") {
+    items = items.slice().sort((a, b) => String((a && (a.name || a.routeName)) || "").localeCompare(String((b && (b.name || b.routeName)) || "")));
+  } else if (sortMode === "CHARTS") {
+    items = items.slice().sort((a, b) => parseFloat(computeRouteDistanceNmFormatted(b)) - parseFloat(computeRouteDistanceNmFormatted(a)));
+  } else if (sortMode === "POINTS") {
+    items = items.slice().sort((a, b) => ((b && b.waypoints ? b.waypoints.length : 0) - (a && a.waypoints ? a.waypoints.length : 0)));
+  }
+
+  if (!items.length) {
+    if (tabMode === "bin") {
+      listContainer.innerHTML = `
+        <div style="padding:2.2rem 1rem;text-align:center;color:var(--muted);font-size:0.78rem;">
+          Bin is empty.<br>
+          <span style="font-size:0.7rem;opacity:0.75;">Deleted routes will appear here.</span>
+        </div>
+      `;
+    } else {
+      listContainer.innerHTML = `
+        <div style="padding:2.2rem 1rem;text-align:center;color:var(--muted);font-size:0.78rem;">
+          ${q ? "No routes match your search." : "No routes loaded yet."}<br>
+          <span style="font-size:0.7rem;opacity:0.75;">Use <b>Import</b> or <b>New</b> above to add a route.</span>
+        </div>
+      `;
+    }
+    return;
+  }
+
+  const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const shipSvg = `
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+      <path d="M20 21c-1.39 0-2.78-.47-4-1.32-2.44 1.71-5.56 1.71-8 0C6.78 20.53 5.39 21 4 21H2v2h2c1.38 0 2.74-.35 4-.99 2.52 1.29 5.48 1.29 8 0 1.26.65 2.62.99 4 .99h2v-2h-2zM3.95 19H4c1.6 0 3.02-.88 4-2 .98 1.12 2.4 2 4 2s3.02-.88 4-2c.98 1.12 2.4 2 4 2h.05l1.89-6.68c.08-.26.06-.54-.06-.78s-.34-.42-.6-.5L20 10.62V6c0-1.1-.9-2-2-2h-3V1H9v3H6c-1.1 0-2 .9-2 2v4.62l-1.29.42c-.26.08-.48.26-.6.5s-.15.52-.06.78L3.95 19zM6 6h12v3.97L12 8 6 9.97V6z"/>
+    </svg>
+  `;
+  const chevronSvg = `
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  `;
+
+  listContainer.innerHTML = items.map((rt) => {
+    const rid = esc(rt.id || rt.name || "");
+    const rawName = String((rt && (rt.name || rt.routeName)) || "").trim();
+    const title = rawName ? esc(rawName) : (typeof formatVesselRouteOdLabel === "function" ? formatVesselRouteOdLabel(rt) : "Route");
+    const distFormatted = computeRouteDistanceNmFormatted(rt);
+    const isActive = tabMode === "routes"
+      ? Boolean(activeRouteData && ((activeRouteData.id && activeRouteData.id === rt.id) || (!(activeRouteData.id && rt.id && activeRouteData.id !== rt.id) && activeRouteData.name === rt.name)))
+      : Boolean(window._sidebarSelectedBinRouteId && (window._sidebarSelectedBinRouteId === rt.id || window._sidebarSelectedBinRouteId === rt.name));
+
+    const rightControls = tabMode === "bin"
+      ? `<button type="button" class="ntm-user-route-restore-btn" data-bin-restore="${rid}" title="Restore route to Routes">Restore</button>`
+      : `<span class="ntm-user-route-chevron">${chevronSvg}</span>`;
+
+    return `
+      <div class="ntm-user-route-card ${isActive ? "is-active" : ""}" data-user-route-card="${rid}" data-route-tab-mode="${tabMode}">
+        <span class="ntm-user-route-ship-ico">${shipSvg}</span>
+        <div class="ntm-user-route-info">
+          <div class="ntm-user-route-title" title="${title}">${title}</div>
+          <div class="ntm-user-route-dist">Distance: ${distFormatted}NM</div>
+        </div>
+        ${rightControls}
+      </div>
+    `;
+  }).join("");
+
+  listContainer.querySelectorAll("[data-bin-restore]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = btn.getAttribute("data-bin-restore");
+      if (id) restoreRouteFromBin(id);
+    });
+  });
+
+  listContainer.querySelectorAll("[data-user-route-card]").forEach((card) => {
+    card.addEventListener("click", () => {
+      const id = card.getAttribute("data-user-route-card");
+      const mode = card.getAttribute("data-route-tab-mode");
+      if (mode === "bin") {
+        window._sidebarSelectedBinRouteId = id;
+        renderSidebarUserRoutesList();
+        return;
+      }
+      if (!id) return;
+      if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
+      if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+      const routeTab = document.querySelector('.excel-tab[data-overlay="route"]');
+      if (routeTab) {
+        routeTab.classList.add("active");
+        routeTab.setAttribute("aria-pressed", "true");
+      }
+      if (typeof selectSavedRouteFromSidebar === "function") {
+        selectSavedRouteFromSidebar(id, false);
+      }
+      if (typeof fitRouteBounds === "function") {
+        try { fitRouteBounds(); } catch (eFit) {}
+      }
+      if (typeof updateRouteMiniWindowUI === "function") {
+        try { updateRouteMiniWindowUI(); } catch (eMini) {}
+      }
+      renderSidebarUserRoutesList();
+    });
+  });
+}
+window.renderSidebarUserRoutesList = renderSidebarUserRoutesList;
+
+function initSidebarUserRoutesPanel() {
+  if (window._sidebarUserRoutesPanelBound) return;
+  window._sidebarUserRoutesPanelBound = true;
+
+  const btnDelete = document.getElementById("btnSidebarRouteDelete");
+  const btnImport = document.getElementById("btnSidebarRouteImport");
+  const btnNew = document.getElementById("btnSidebarRouteNew");
+  const btnRefresh = document.getElementById("btnSidebarRouteRefresh");
+  const newSubmenu = document.getElementById("ntmNewRouteSubmenu");
+  const btnSubUpload = document.getElementById("btnSidebarNewUploadRoute");
+  const btnSubCreate = document.getElementById("btnSidebarNewCreateRoute");
+  const tabRoutes = document.getElementById("tabSidebarRoutes");
+  const tabBin = document.getElementById("tabSidebarBin");
+
+  const closeNewSubmenu = () => {
+    if (newSubmenu) newSubmenu.hidden = true;
+    if (btnNew) {
+      btnNew.classList.remove("is-open");
+      btnNew.setAttribute("aria-expanded", "false");
+    }
+  };
+
+  const triggerRouteFileDialog = () => {
+    closeNewSubmenu();
+    const fileInput = document.getElementById("vesselRouteFile");
+    if (fileInput) fileInput.click();
+  };
+
+  if (btnImport) {
+    btnImport.addEventListener("click", (e) => {
+      e.preventDefault();
+      triggerRouteFileDialog();
+    });
+  }
+
+  if (btnNew && newSubmenu) {
+    btnNew.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const willOpen = newSubmenu.hidden;
+      newSubmenu.hidden = !willOpen;
+      btnNew.classList.toggle("is-open", willOpen);
+      btnNew.setAttribute("aria-expanded", willOpen ? "true" : "false");
+    });
+  }
+
+  if (btnSubUpload) {
+    btnSubUpload.addEventListener("click", (e) => {
+      e.preventDefault();
+      triggerRouteFileDialog();
+    });
+  }
+
+  if (btnSubCreate) {
+    btnSubCreate.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeNewSubmenu();
+      if (typeof window.startManualChartRouteCreation === "function") {
+        window.startManualChartRouteCreation();
+      } else if (typeof showSetSailToast === "function") {
+        showSetSailToast("Создание трассы с нуля будет подключено следующим шагом", "info");
+      }
+    });
+  }
+
+  if (btnDelete) {
+    btnDelete.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeNewSubmenu();
+      if (window._sidebarRoutesActiveTab === "bin") {
+        permanentlyDeleteRouteFromBin(window._sidebarSelectedBinRouteId);
+      } else {
+        const targetId = activeRouteData ? (activeRouteData.id || activeRouteData.name) : null;
+        moveRouteToBin(targetId);
+      }
+    });
+  }
+
+  if (btnRefresh) {
+    btnRefresh.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeNewSubmenu();
+      renderSidebarUserRoutesList();
+      if (typeof renderVesselRouteLibraryList === "function") renderVesselRouteLibraryList();
+      if (typeof renderNavSavedRoutesTree === "function") renderNavSavedRoutesTree();
+      if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length && typeof renderRouteOnMap === "function") {
+        renderRouteOnMap(activeRouteData, false);
+      }
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Routes refreshed", "info");
+      }
+    });
+  }
+
+  if (tabRoutes) {
+    tabRoutes.addEventListener("click", () => {
+      window._sidebarRoutesActiveTab = "routes";
+      renderSidebarUserRoutesList();
+    });
+  }
+
+  if (tabBin) {
+    tabBin.addEventListener("click", () => {
+      window._sidebarRoutesActiveTab = "bin";
+      const bin = getDeletedRoutesBin();
+      if (!window._sidebarSelectedBinRouteId && bin[0]) {
+        window._sidebarSelectedBinRouteId = bin[0].id || bin[0].name;
+      }
+      renderSidebarUserRoutesList();
+    });
+  }
+
+  document.querySelectorAll('input[name="popSort"]').forEach((r) => {
+    r.addEventListener("change", () => {
+      renderSidebarUserRoutesList();
+    });
+  });
+
+  renderSidebarUserRoutesList();
+}
+window.initSidebarUserRoutesPanel = initSidebarUserRoutesPanel;
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initSidebarUserRoutesPanel);
+} else {
+  setTimeout(initSidebarUserRoutesPanel, 0);
+}
 
 
 

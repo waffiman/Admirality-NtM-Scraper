@@ -26487,3 +26487,319 @@ body.light-theme .ntm-wx-unified {
   .ntm-wx-unified { flex-wrap: wrap; height: auto; max-width: 100%; }
 }
 
+/* ── v5.258: User Routes Sidebar (Header Actions, New Submenu, Routes/Bin Tabs, Route Cards & Bottom Search Row) ── */
+#ntmSidebar .ntm-list-header.ntm-routes-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 8px 10px 6px 8px !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14) !important;
+  gap: 6px !important;
+}
+#ntmSidebar .ntm-hdr-back-btn {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  color: #f8fafc !important;
+  border-radius: 7px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+}
+#ntmSidebar .ntm-hdr-back-btn:hover {
+  background: rgba(148, 163, 184, 0.14) !important;
+  color: #38bdf8 !important;
+}
+#ntmSidebar .ntm-hdr-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-left: auto !important;
+}
+#ntmSidebar .ntm-hdr-action-btn {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  background: transparent !important;
+  border: none !important;
+  color: #e2e8f0 !important;
+  cursor: pointer !important;
+  padding: 4px 6px !important;
+  border-radius: 6px !important;
+  min-width: 42px !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+}
+#ntmSidebar .ntm-hdr-action-btn:hover,
+#ntmSidebar .ntm-hdr-action-btn.is-open {
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: #38bdf8 !important;
+}
+#ntmSidebar .ntm-hdr-action-ico {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  color: inherit !important;
+}
+#ntmSidebar .ntm-hdr-action-lbl {
+  font-size: 0.65rem !important;
+  font-weight: 500 !important;
+  color: #cbd5e1 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.01em !important;
+}
+#ntmSidebar .ntm-hdr-action-btn:hover .ntm-hdr-action-lbl,
+#ntmSidebar .ntm-hdr-action-btn.is-open .ntm-hdr-action-lbl {
+  color: #38bdf8 !important;
+}
+#ntmSidebar .ntm-new-route-submenu {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  background: rgba(8, 15, 36, 0.78);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+#ntmSidebar .ntm-new-route-submenu[hidden] {
+  display: none !important;
+}
+#ntmSidebar .ntm-new-route-subbtn {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  background: rgba(30, 41, 59, 0.88);
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+#ntmSidebar .ntm-new-route-subbtn:hover {
+  background: rgba(51, 65, 85, 0.95);
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #ffffff;
+}
+#ntmSidebar .ntm-new-route-subbtn--create {
+  background: rgba(25, 118, 210, 0.24);
+  border-color: rgba(56, 189, 248, 0.42);
+  color: #e0f2fe;
+}
+#ntmSidebar .ntm-new-route-subbtn--create:hover {
+  background: rgba(25, 118, 210, 0.38);
+  border-color: #38bdf8;
+}
+#ntmSidebar .ntm-routes-tabs {
+  display: flex !important;
+  align-items: stretch !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+  background: rgba(10, 18, 38, 0.42) !important;
+  padding: 0 8px !important;
+  gap: 6px !important;
+}
+#ntmSidebar .ntm-routes-tab {
+  flex: 1 1 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2.5px solid transparent !important;
+  color: #94a3b8 !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  padding: 8px 6px 7px !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  transition: color 0.15s ease, border-color 0.15s ease !important;
+}
+#ntmSidebar .ntm-routes-tab:hover {
+  color: #e2e8f0 !important;
+}
+#ntmSidebar .ntm-routes-tab.active {
+  color: #f8fafc !important;
+  border-bottom-color: #2196f3 !important;
+}
+#ntmSidebar #ntmItemsScroll {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  padding: 8px !important;
+}
+#ntmSidebar .ntm-user-route-card {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 11px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+  background: rgba(37, 49, 65, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: #f1f5f9;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+}
+#ntmSidebar .ntm-user-route-card:hover {
+  background: rgba(47, 62, 82, 0.94);
+  border-color: rgba(148, 163, 184, 0.28);
+}
+#ntmSidebar .ntm-user-route-card.is-active {
+  background: linear-gradient(180deg, #2492f2 0%, #1976d2 100%) !important;
+  border-color: rgba(125, 211, 252, 0.52) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(25, 118, 210, 0.34);
+}
+#ntmSidebar .ntm-user-route-ship-ico {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(148, 163, 184, 0.24);
+}
+#ntmSidebar .ntm-user-route-card.is-active .ntm-user-route-ship-ico {
+  color: #ffffff;
+}
+#ntmSidebar .ntm-user-route-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+#ntmSidebar .ntm-user-route-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+}
+#ntmSidebar .ntm-user-route-dist {
+  font-size: 0.73rem;
+  color: rgba(226, 232, 240, 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#ntmSidebar .ntm-user-route-card.is-active .ntm-user-route-dist {
+  color: rgba(255, 255, 255, 0.92);
+}
+#ntmSidebar .ntm-user-route-chevron {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(248, 250, 252, 0.85);
+  padding: 2px 2px 2px 4px;
+}
+#ntmSidebar .ntm-user-route-restore-btn {
+  flex: 0 0 auto;
+  background: rgba(56, 189, 248, 0.16);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #e0f2fe;
+  border-radius: 4px;
+  font-size: 0.67rem;
+  font-weight: 600;
+  padding: 3px 7px;
+  cursor: pointer;
+}
+#ntmSidebar .ntm-user-route-restore-btn:hover {
+  background: rgba(56, 189, 248, 0.3);
+}
+#ntmSidebar .ntm-select-bar.ntm-sidebar-bottom-bar {
+  margin-top: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  padding: 8px 10px !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.16) !important;
+  border-bottom: none !important;
+  background: rgba(9, 16, 34, 0.94) !important;
+  position: relative !important;
+  z-index: 2650 !important;
+}
+#ntmSidebar .ntm-sidebar-bottom-bar .ntm-select-bar-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  flex: 0 0 auto !important;
+}
+#ntmSidebar .ntm-sidebar-bottom-bar .ntm-bottom-search-wrap {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+}
+#ntmSidebar .ntm-sidebar-bottom-bar .ntm-search-input {
+  width: 100% !important;
+  height: 32px !important;
+  padding: 4px 24px 4px 28px !important;
+  font-size: 0.75rem !important;
+  border-radius: 6px !important;
+}
+#ntmSidebar .ntm-sidebar-bottom-bar .ntm-search-icon {
+  left: 8px !important;
+}
+#ntmSidebar .ntm-sidebar-bottom-bar .ntm-search-clear {
+  right: 6px !important;
+}
+#ntmSidebar .ntm-sidebar-bottom-bar .ntm-popover,
+#ntmSidebar .ntm-sidebar-bottom-bar #ntmFilterPopover,
+#ntmSidebar .ntm-sidebar-bottom-bar #ntmSortPopover {
+  top: auto !important;
+  bottom: calc(100% + 8px) !important;
+  left: 0 !important;
+}
+[data-theme="light"] #ntmSidebar .ntm-hdr-back-btn,
+[data-theme="light"] #ntmSidebar .ntm-hdr-action-btn,
+[data-theme="light"] #ntmSidebar .ntm-hdr-action-lbl {
+  color: #1e293b !important;
+}
+[data-theme="light"] #ntmSidebar .ntm-routes-tabs {
+  background: rgba(241, 245, 249, 0.9) !important;
+  border-bottom-color: rgba(15, 23, 42, 0.12) !important;
+}
+[data-theme="light"] #ntmSidebar .ntm-routes-tab {
+  color: #64748b !important;
+}
+[data-theme="light"] #ntmSidebar .ntm-routes-tab.active {
+  color: #0f172a !important;
+  border-bottom-color: #1976d2 !important;
+}
+[data-theme="light"] #ntmSidebar .ntm-user-route-card:not(.is-active) {
+  background: #f1f5f9;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #0f172a;
+}
+[data-theme="light"] #ntmSidebar .ntm-user-route-card:not(.is-active) .ntm-user-route-title {
+  color: #0f172a;
+}
+[data-theme="light"] #ntmSidebar .ntm-user-route-card:not(.is-active) .ntm-user-route-dist,
+[data-theme="light"] #ntmSidebar .ntm-user-route-card:not(.is-active) .ntm-user-route-chevron {
+  color: #475569;
+}
+[data-theme="light"] #ntmSidebar .ntm-select-bar.ntm-sidebar-bottom-bar {
+  background: #f8fafc !important;
+  border-top-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+
