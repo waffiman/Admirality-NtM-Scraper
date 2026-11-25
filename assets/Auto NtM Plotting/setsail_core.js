@@ -8233,6 +8233,26 @@ function renderRouteOnMap(route, shouldFly = true) {
 
     });
 
+    trackLine._routeLineData = {
+      id: route.id || route.name || "active_route",
+      name: route.name || "Active Passage Route",
+      wptCount: cleanWps.length,
+      distanceNm: route.distanceNm || route.totalDistanceNm || null
+    };
+    trackLine.bindPopup(() => {
+      const rName = (route && route.name) || "Active Passage Route";
+      const dTxt = (route && Number.isFinite(Number(route.distanceNm || route.totalDistanceNm)))
+        ? (Math.round(Number(route.distanceNm || route.totalDistanceNm) * 10) / 10 + " NM")
+        : (cleanWps.length + " waypoints");
+      return (
+        '<div style="font-family:\'Segoe UI\',sans-serif;min-width:195px;color:#1e293b;">' +
+          '<div style="font-weight:700;font-size:0.92rem;color:#0a0a0a;border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:5px;">🧭 ' + rName + '</div>' +
+          '<div style="font-size:0.78rem;color:#475569;margin-bottom:2px;"><b>Waypoints:</b> ' + cleanWps.length + '</div>' +
+          '<div style="font-size:0.78rem;color:#475569;"><b>Total Distance:</b> ' + dTxt + '</div>' +
+        '</div>'
+      );
+    }, { maxWidth: 280, autoPan: true });
+
     leafletRouteLayer.addLayer(trackOutline);
 
     leafletRouteLayer.addLayer(trackLine);
@@ -9619,7 +9639,8 @@ function renderWeatherOnMap(map = null) {
 
         if (canvasRenderer) coneOpts.renderer = canvasRenderer;
 
-        leafletWeatherLayer.addLayer(L.polygon(coneCoords, coneOpts));
+        var stormConePoly = L.polygon(coneCoords, coneOpts);
+        leafletWeatherLayer.addLayer(stormConePoly);
 
 
 
@@ -9829,7 +9850,22 @@ function renderWeatherOnMap(map = null) {
 
     `, { className: "ss-wx-storm-popup-wrap", maxWidth: 320 });
 
-    stormMarker._stormData = { id: storm.id || storm.name, name: storm.name || shortLabel, category: catLabel + (storm.maxWinds ? " · " + storm.maxWinds + " kt" : "") };
+    const _sharedStormMeta = { id: storm.id || storm.name, name: storm.name || shortLabel, category: catLabel + (storm.maxWinds ? " · " + storm.maxWinds + " kt" : "") };
+    stormMarker._stormData = _sharedStormMeta;
+    if (dangerCircle) {
+      dangerCircle._stormData = _sharedStormMeta;
+      const stPop = stormMarker.getPopup && stormMarker.getPopup();
+      if (stPop) {
+        dangerCircle.bindPopup(stPop.getContent(), { className: "ss-wx-storm-popup-wrap", maxWidth: 320 });
+      }
+    }
+    if (typeof stormConePoly !== "undefined" && stormConePoly) {
+      stormConePoly._stormData = _sharedStormMeta;
+      const stPop2 = stormMarker.getPopup && stormMarker.getPopup();
+      if (stPop2) {
+        stormConePoly.bindPopup(stPop2.getContent(), { className: "ss-wx-storm-popup-wrap", maxWidth: 320 });
+      }
+    }
 
     leafletWeatherLayer.addLayer(stormMarker);
 
@@ -18529,24 +18565,21 @@ function initNtMMap() {
 
     });
 
-    leafletMap._ssDisableLmbObjectOpen = true;
+    leafletMap._ssDisableLmbObjectOpen = false;
     if (typeof L !== "undefined" && L.Layer && L.Layer.prototype && !L.Layer.prototype._ssOrigOpenPopup) {
       L.Layer.prototype._ssOrigOpenPopup = L.Layer.prototype._openPopup;
       L.Layer.prototype._openPopup = function () {
+        try {
+          const ev0 = arguments[0];
+          if (window._sidebarChartAddWpMode && ev0 && ev0.latlng && typeof window.handleSidebarChartAddWaypointClick === "function") {
+            window.handleSidebarChartAddWaypointClick(ev0.latlng);
+            return;
+          }
+          if (this && this._map && typeof window.clearEcdisPickReticle === "function") {
+            window.clearEcdisPickReticle(this._map);
+          }
+        } catch (ePreOpen) {}
         if (this && this._map && this._map._ssDisableLmbObjectOpen) {
-          try {
-            const ev0 = arguments[0];
-            if (window._sidebarChartAddWpMode && ev0 && ev0.latlng && typeof window.handleSidebarChartAddWaypointClick === "function") {
-              window.handleSidebarChartAddWaypointClick(ev0.latlng);
-              return;
-            }
-            if (this._map._popup && this._map.hasLayer(this._map._popup)) {
-              this._map.closePopup();
-            }
-            if (typeof window.clearEcdisPickReticle === "function") {
-              window.clearEcdisPickReticle(this._map);
-            }
-          } catch (eSuppressLmb) {}
           return;
         }
         return L.Layer.prototype._ssOrigOpenPopup.apply(this, arguments);
@@ -19245,6 +19278,7 @@ function initNtMMap() {
         _subseaGeoJsonLayer = L.geoJSON(_subseaInfraData, {
           pane: "subseaInfrastructurePane",
           renderer: _subseaRenderer,
+          interactive: false,
           style: function(feat) {
             const p = feat.properties || {};
             const isCable = p.t === "CBL";
@@ -19252,6 +19286,7 @@ function initNtMMap() {
             return {
               pane: "subseaInfrastructurePane",
               renderer: _subseaRenderer,
+              interactive: false,
               subseaType: isCable ? "CBL" : "PIP",
               isOil: isOil,
               stroke: true,
@@ -19259,24 +19294,6 @@ function initNtMMap() {
               opacity: 0,
               lineCap: "round"
             };
-          },
-          onEachFeature: function(feat, lyr) {
-            const p = feat.properties || {};
-            lyr.on("mouseover", function() {
-              lyr.options._isHovered = true;
-              lyr.redraw();
-            });
-            lyr.on("mouseout", function() {
-              lyr.options._isHovered = false;
-              lyr.redraw();
-            });
-            lyr.bindPopup(formatSubseaInfraPopup(p), {
-              className: "ss-ais-popup ss-buoy-popup-wrap",
-              maxWidth: 300,
-              minWidth: 220,
-              autoPan: true,
-              offset: [0, -4]
-            });
           }
         });
       }
@@ -20622,85 +20639,176 @@ function initNtMMap() {
           } catch (ePorts) {}
         }
 
-        // 5. ROUTE WAYPOINTS (if Route active)
+        // 5. ROUTE WAYPOINTS & ROUTE LEGS (if My Route active)
         if (isLayerOn("route") || (window.leafletRouteLayer && targetMap.hasLayer(window.leafletRouteLayer))) {
           try {
             if (window.leafletRouteLayer && typeof window.leafletRouteLayer.eachLayer === "function") {
               window.leafletRouteLayer.eachLayer((layer) => {
-                if (!layer || typeof layer.getLatLng !== "function") return;
-                const ll = layer.getLatLng();
-                if (isInside(ll.lat, ll.lng)) {
-                  const d = distNm(ll.lat, ll.lng);
-                  const wpt = layer._wptData || (layer.options && layer.options._wptData) || {};
-                  const name = wpt.name || layer.options.title || ("WPT " + (wpt.index != null ? wpt.index : ""));
-                  addCandidate({
-                    id: "wpt_" + (wpt.name || wpt.index || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
-                    category: "WPT",
-                    catBadge: "WPT",
-                    badgeColor: "#f05a36",
-                    icon: "📍",
-                    name: name,
-                    subtitle: "Route Waypoint · " + (wpt.routeName || "Route") + (wpt.course ? " · Course " + wpt.course + "°" : "") + " · " + d.toFixed(2) + " NM",
-                    distNm: d,
-                    lat: ll.lat,
-                    lon: ll.lng,
-                    open: function() {
-                      if (typeof layer.openPopup === "function") layer.openPopup();
+                if (!layer) return;
+                if (typeof layer.getLatLng === "function") {
+                  const ll = layer.getLatLng();
+                  if (isInside(ll.lat, ll.lng)) {
+                    const d = distNm(ll.lat, ll.lng);
+                    const wpt = layer._wptData || (layer.options && layer.options._wptData) || {};
+                    const name = wpt.name || layer.options.title || ("WPT " + (wpt.index != null ? wpt.index : ""));
+                    addCandidate({
+                      id: "wpt_" + (wpt.name || wpt.index || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
+                      category: "WPT",
+                      catBadge: "WPT",
+                      badgeColor: "#f05a36",
+                      icon: "📍",
+                      name: name,
+                      subtitle: "Route Waypoint · " + (wpt.routeName || "Route") + (wpt.course ? " · Course " + wpt.course + "°" : "") + " · " + d.toFixed(2) + " NM",
+                      distNm: d,
+                      lat: ll.lat,
+                      lon: ll.lng,
+                      open: function() {
+                        if (typeof layer.openPopup === "function") layer.openPopup();
+                      }
+                    });
+                  }
+                } else if (layer._routeLineData && typeof layer.getLatLngs === "function") {
+                  const rawLL = layer.getLatLngs();
+                  const pts = Array.isArray(rawLL[0]) && typeof rawLL[0].lat !== "number" ? rawLL[0] : rawLL;
+                  if (Array.isArray(pts) && pts.length >= 2) {
+                    const pairs = pts.map((p) => [p.lat, ((p.lng + 540) % 360) - 180]);
+                    const lh = _ringHitsPickBox(pairs, lat, lon, dLat, dLon, cosLat, false);
+                    if (lh) {
+                      const rl = layer._routeLineData;
+                      addCandidate({
+                        id: "route_leg_" + rl.id,
+                        category: "ROUTE",
+                        catBadge: "ROUTE",
+                        badgeColor: "#34d399",
+                        icon: "🧭",
+                        name: rl.name,
+                        subtitle: "Passage Plan Leg · " + rl.wptCount + " WPTs · " + lh.distNm.toFixed(2) + " NM",
+                        distNm: lh.distNm,
+                        lat: lh.hitLat,
+                        lon: lh.hitLon,
+                        open: function() {
+                          if (typeof layer.openPopup === "function") layer.openPopup([lh.hitLat, lh.hitLon]);
+                        }
+                      });
                     }
-                  });
+                  }
                 }
               });
             }
           } catch (eRoute) {}
         }
 
-        // 6. WEATHER HAZARDS & STORMS (if Weather active)
+        // 6. WEATHER HAZARDS, HURRICANES & STORMS (if Weather active)
         if (isLayerOn("weather") || (window.leafletWeatherLayer && targetMap.hasLayer(window.leafletWeatherLayer))) {
           try {
             if (window.leafletWeatherLayer && typeof window.leafletWeatherLayer.eachLayer === "function") {
               window.leafletWeatherLayer.eachLayer((layer) => {
-                if (!layer || typeof layer.getLatLng !== "function") return;
-                if (!(layer.getPopup && layer.getPopup())) return;
-                const ll = layer.getLatLng();
-                const isAreaCircle = (typeof L !== "undefined" && L.Circle && layer instanceof L.Circle && !(L.CircleMarker && !(layer instanceof L.Circle)) && typeof layer.getRadius === "function" && layer.getRadius() > 1000);
-                let matchedWx = false;
-                let d = distNm(ll.lat, ll.lng);
-                if (isInside(ll.lat, ll.lng)) {
-                  matchedWx = true;
-                } else if (isAreaCircle) {
-                  try {
-                    const distM = targetMap.distance([lat, lon], [ll.lat, ((ll.lng + 540) % 360) - 180]);
-                    if (distM <= layer.getRadius()) {
-                      matchedWx = true;
-                      d = Math.min(d, 0.25);
-                    }
-                  } catch (eCir) {}
-                }
-                if (matchedWx) {
-                  const wx = layer._stormData || layer._wxData || (layer.options && layer.options._stormData) || {};
-                  const name = wx.name || (layer.options && layer.options.title) || "Weather Hazard";
-                  addCandidate({
-                    id: "wx_" + (wx.id || wx.name || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
-                    category: "WEATHER",
-                    catBadge: "WX",
-                    badgeColor: "#06b6d4",
-                    icon: "🌀",
-                    name: name,
-                    subtitle: (wx.category || wx.type || "Storm / Advisory") + (isAreaCircle ? " · Active Zone" : (" · " + d.toFixed(2) + " NM")),
-                    distNm: d,
-                    lat: isAreaCircle ? clickPt.lat : ll.lat,
-                    lon: isAreaCircle ? clickPt.lng : ll.lng,
-                    open: function() {
-                      if (typeof layer.openPopup === "function") {
-                        if (isAreaCircle) layer.openPopup(clickPt);
-                        else layer.openPopup();
+                if (!layer || !(layer.getPopup && layer.getPopup())) return;
+                if (typeof layer.getLatLng === "function") {
+                  const ll = layer.getLatLng();
+                  const isAreaCircle = (typeof L !== "undefined" && L.Circle && layer instanceof L.Circle && typeof layer.getRadius === "function" && layer.getRadius() > 1000);
+                  let matchedWx = false;
+                  let d = distNm(ll.lat, ll.lng);
+                  if (isInside(ll.lat, ll.lng)) {
+                    matchedWx = true;
+                  } else if (isAreaCircle) {
+                    try {
+                      const distM = targetMap.distance([lat, lon], [ll.lat, ((ll.lng + 540) % 360) - 180]);
+                      if (distM <= layer.getRadius() + 926) {
+                        matchedWx = true;
+                        d = Math.min(d, 0.20);
                       }
+                    } catch (eCir) {}
+                  }
+                  if (matchedWx) {
+                    const wx = layer._stormData || layer._wxData || (layer.options && layer.options._stormData) || {};
+                    const name = wx.name || (layer.options && layer.options.title) || "Weather Hazard";
+                    addCandidate({
+                      id: "wx_" + (wx.id || wx.name || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
+                      category: "WEATHER",
+                      catBadge: "WX",
+                      badgeColor: "#06b6d4",
+                      icon: "🌀",
+                      name: name,
+                      subtitle: (wx.category || wx.type || "Storm / Advisory") + (isAreaCircle ? " · Active Zone" : (" · " + d.toFixed(2) + " NM")),
+                      distNm: d,
+                      lat: isAreaCircle ? clickPt.lat : ll.lat,
+                      lon: isAreaCircle ? clickPt.lng : ll.lng,
+                      open: function() {
+                        if (typeof layer.openPopup === "function") {
+                          if (isAreaCircle) layer.openPopup(clickPt);
+                          else layer.openPopup();
+                        }
+                      }
+                    });
+                  }
+                } else if (typeof L !== "undefined" && layer instanceof L.Polygon && typeof layer.getLatLngs === "function") {
+                  const rawLL = layer.getLatLngs();
+                  const ringLL = Array.isArray(rawLL[0]) ? (Array.isArray(rawLL[0][0]) ? rawLL[0][0] : rawLL[0]) : rawLL;
+                  if (Array.isArray(ringLL) && ringLL.length >= 3) {
+                    const ringPairs = ringLL.map((p) => [p.lat, ((p.lng + 540) % 360) - 180]);
+                    const ch = _ringHitsPickBox(ringPairs, lat, lon, dLat, dLon, cosLat, true);
+                    if (ch) {
+                      const wx = layer._stormData || layer._wxData || {};
+                      const name = wx.name || "Cyclone Forecast Cone";
+                      addCandidate({
+                        id: "wx_" + (wx.id || name),
+                        category: "WEATHER",
+                        catBadge: "WX",
+                        badgeColor: "#f59e0b",
+                        icon: "🌀",
+                        name: name,
+                        subtitle: (wx.category || "Forecast Track Cone") + " · Active Zone",
+                        distNm: ch.distNm,
+                        lat: ch.hitLat,
+                        lon: ch.hitLon,
+                        open: function() {
+                          if (typeof layer.openPopup === "function") layer.openPopup([ch.hitLat, ch.hitLon]);
+                        }
+                      });
                     }
-                  });
+                  }
                 }
               });
             }
           } catch (eWx) {}
+        }
+
+        // 7. MARITIME TIME ZONE (if Time Zone dock overlay active)
+        if (isLayerOn("timezones")) {
+          try {
+            const approxOff = Math.max(-12, Math.min(12, Math.round(lon / 15)));
+            const zSign = approxOff >= 0 ? "+" : "";
+            const zLabel = "UTC" + zSign + approxOff;
+            const nowUtcMs = Date.now();
+            const zDate = new Date(nowUtcMs + approxOff * 3600000);
+            const hh = String(zDate.getUTCHours()).padStart(2, "0");
+            const mm = String(zDate.getUTCMinutes()).padStart(2, "0");
+            addCandidate({
+              id: "tz_band_" + approxOff,
+              category: "TIME ZONE",
+              catBadge: "TZ",
+              badgeColor: "#a78bfa",
+              icon: "🕒",
+              name: "Maritime Time Zone " + zLabel,
+              subtitle: "Zone Time " + hh + ":" + mm + " (" + zLabel + ")",
+              distNm: 0.35,
+              lat: clickPt.lat,
+              lon: clickPt.lng,
+              open: function() {
+                L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, maxWidth: 260, closeButton: true })
+                  .setLatLng(clickPt)
+                  .setContent(
+                    '<div class="ss-ais-popup-body ss-buoy-popup-body">' +
+                      '<div class="ss-ais-head"><span class="ss-ais-name">🕒 ' + zLabel + '</span><span class="ss-ais-mode is-ais">TIME ZONE</span></div>' +
+                      '<div class="ss-ais-row"><span class="ss-ais-k">ZONE TIME</span><span class="ss-ais-v" style="color:#a78bfa;font-family:monospace;font-weight:700;">' + hh + ':' + mm + '</span></div>' +
+                      '<div class="ss-ais-row"><span class="ss-ais-k">MERIDIAN</span><span class="ss-ais-v">' + (approxOff * 15) + '° (' + zLabel + ')</span></div>' +
+                    '</div>'
+                  )
+                  .openOn(targetMap);
+              }
+            });
+          } catch (eTzPick) {}
         }
 
         candidates.sort((a, b) => a.distNm - b.distNm);
@@ -20866,9 +20974,9 @@ function initNtMMap() {
     window.clearEcdisPickReticle = clearEcdisPickReticle;
     window.drawEcdisPickReticle = drawEcdisPickReticle;
 
-    // LMB on SetChart never opens object popups or Cursor Pick list;
-    // it only allows panning/controls and clears any active reticle when popups close.
-    map._ssDisableLmbObjectOpen = true;
+    // Direct LMB clicks on active dock overlays open their popups natively;
+    // LMB on bare chart / baked Marks & Bathymetry only pans or clears the Cursor Pick reticle.
+    map._ssDisableLmbObjectOpen = false;
     map.on("click", (e) => {
       try {
         if (window._sidebarChartAddWpMode && e && e.latlng && typeof window.handleSidebarChartAddWaypointClick === "function") {
@@ -36664,7 +36772,7 @@ function refreshTimezoneViewportLabels() {
 
     html +=
 
-      '<div class="ss-tz-chip" data-tz-offset="' + z.offset + '" title="' + title.replace(/"/g, "") + '" style="left:' + left + 'px">' +
+      '<div class="ss-tz-chip" data-tz-offset="' + z.offset + '" data-tz-id="' + String(z.tzid || "").replace(/"/g, "") + '" data-tz-px="' + Math.round(z.midPx) + '" title="' + title.replace(/"/g, "") + '" style="left:' + left + 'px;pointer-events:auto;cursor:pointer;">' +
 
         '<div class="ss-tz-chip-time">' + timeStr + "</div>" +
 
@@ -36675,6 +36783,33 @@ function refreshTimezoneViewportLabels() {
   });
 
   host.innerHTML = html;
+  if (!host._ssTzClickBound) {
+    host._ssTzClickBound = true;
+    host.addEventListener("click", (ev) => {
+      const chip = ev.target && ev.target.closest && ev.target.closest(".ss-tz-chip");
+      if (!chip || !_tzMapRef) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      const off = Number(chip.getAttribute("data-tz-offset") || 0);
+      const tzid = chip.getAttribute("data-tz-id") || "Maritime Zone";
+      const px = Number(chip.getAttribute("data-tz-px") || (_tzMapRef.getSize().x / 2));
+      const ptLl = _tzMapRef.containerPointToLatLng([px, Math.min(90, _tzMapRef.getSize().y * 0.22)]);
+      const zLbl = formatTzOffsetLabel(off);
+      const zNow = formatTimeAtUtcOffset(off);
+      const utcNow = formatTimeAtUtcOffset(0);
+      L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, maxWidth: 260, closeButton: true })
+        .setLatLng(ptLl)
+        .setContent(
+          '<div class="ss-ais-popup-body ss-buoy-popup-body">' +
+            '<div class="ss-ais-head"><span class="ss-ais-name">🕒 ' + zLbl + '</span><span class="ss-ais-mode is-ais">TIME ZONE</span></div>' +
+            '<div class="ss-ais-row"><span class="ss-ais-k">ZONE</span><span class="ss-ais-v">' + tzid + '</span></div>' +
+            '<div class="ss-ais-row"><span class="ss-ais-k">LOCAL</span><span class="ss-ais-v" style="color:#a78bfa;font-family:monospace;font-weight:700;">' + zNow + '</span></div>' +
+            '<div class="ss-ais-row"><span class="ss-ais-k">UTC</span><span class="ss-ais-v" style="font-family:monospace;">' + utcNow + '</span></div>' +
+          '</div>'
+        )
+        .openOn(_tzMapRef);
+    });
+  }
 
 }
 

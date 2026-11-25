@@ -388,16 +388,16 @@
           iconSize: [48, 72],
           iconAnchor: [24, 50]
         });
-        m = L.marker([lat, lon], { icon, interactive: false, keyboard: false });
+        m = L.marker([lat, lon], { icon, interactive: true, keyboard: false });
       } else if (!useTriangles) {
         m = L.circleMarker([lat, lon], {
-          radius: lod.radius,
+          radius: Math.max(lod.radius, 3.5),
           color: "#0f172a",
           weight: 0.6,
           fillColor: col,
           fillOpacity: 0.92,
           renderer: canvasR,
-          interactive: false,
+          interactive: true,
           keyboard: false
         });
       } else {
@@ -428,9 +428,16 @@
           iconSize: [px, px],
           iconAnchor: [px / 2, px / 2]
         });
-        m = L.marker([lat, lon], { icon, interactive: false, keyboard: false });
+        m = L.marker([lat, lon], { icon, interactive: true, keyboard: false });
       }
       m._aisData = v;
+      m.bindPopup(() => formatAisPopup(v), {
+        className: "ss-ais-popup",
+        autoPan: true,
+        offset: [0, -6],
+        maxWidth: 280,
+        closeButton: true
+      });
       layer.addLayer(m);
     });
 
