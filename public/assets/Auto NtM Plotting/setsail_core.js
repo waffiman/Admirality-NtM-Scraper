@@ -8467,9 +8467,13 @@ function renderRouteOnMap(route, shouldFly = true) {
 
 
 
+        if (typeof window.renderNavtorSidebar === "function" && window._sidebarNavtorState && window._sidebarNavtorState.view !== "list") {
+          try { window.renderNavtorSidebar(); } catch (eNvDr) {}
+        }
+
         if (typeof showSetSailToast === "function") {
 
-          showSetSailToast(`WPT #${idx + 1} moved to ${formatLatLonDMS(wp.lat, wp.lon)}`, "info");
+          showSetSailToast(`WP${idx} moved to ${formatLatLonDMS(wp.lat, wp.lon)}`, "info");
 
         }
 
@@ -18531,6 +18535,11 @@ function initNtMMap() {
       L.Layer.prototype._openPopup = function () {
         if (this && this._map && this._map._ssDisableLmbObjectOpen) {
           try {
+            const ev0 = arguments[0];
+            if (window._sidebarChartAddWpMode && ev0 && ev0.latlng && typeof window.handleSidebarChartAddWaypointClick === "function") {
+              window.handleSidebarChartAddWaypointClick(ev0.latlng);
+              return;
+            }
             if (this._map._popup && this._map.hasLayer(this._map._popup)) {
               this._map.closePopup();
             }
@@ -20349,8 +20358,12 @@ function initNtMMap() {
     // LMB on SetChart never opens object popups or Cursor Pick list;
     // it only allows panning/controls and clears any active reticle when popups close.
     map._ssDisableLmbObjectOpen = true;
-    map.on("click", () => {
+    map.on("click", (e) => {
       try {
+        if (window._sidebarChartAddWpMode && e && e.latlng && typeof window.handleSidebarChartAddWaypointClick === "function") {
+          window.handleSidebarChartAddWaypointClick(e.latlng);
+          return;
+        }
         if (!map._popup || !map.hasLayer(map._popup)) {
           clearEcdisPickReticle(map);
         }
@@ -33221,13 +33234,13 @@ function exportRouteToRtz(route) {
 
     const wptName = (wp.name || `WPT ${idx + 1}`).replace(/[^a-zA-Z0-9_\- ]/g, "").trim();
 
-    const radius = wp.turnRadius || 0.50;
+    const radius = wp.turnRadius != null ? Number(wp.turnRadius) : 0.50;
 
-    const speed = wp.speedKnots || ((targetRoute.metadata && targetRoute.metadata.speedKnots) || 14.5);
+    const speed = wp.speedKnots != null ? Number(wp.speedKnots) : ((targetRoute.metadata && targetRoute.metadata.speedKnots) || 14.5);
 
-    const portXtd = wp.portsideXTD || 0.20;
+    const portXtd = wp.portsideXTD != null ? Number(wp.portsideXTD) : 0.20;
 
-    const stbdXtd = wp.starboardXTD || 0.20;
+    const stbdXtd = wp.starboardXTD != null ? Number(wp.starboardXTD) : 0.20;
 
     const geom = (wp.sail === "GC") ? "GreatCircle" : "Loxodrome";
 
@@ -44724,25 +44737,30 @@ function enrichRouteWithLegsTelemetry(route, opts = {}) {
 
 
 
-    wpA.sail = legInfo.sailType;
+    if (!wpA.sail) wpA.sail = legInfo.sailType;
 
-    wpA.speedKnots = legInfo.speedKnots;
+    if (!Number.isFinite(Number(wpA.speedKnots)) || Number(wpA.speedKnots) <= 0) {
+      wpA.speedKnots = legInfo.speedKnots;
+    }
 
-    wpA.portsideXTD = legInfo.xtdNM;
+    if (!Number.isFinite(Number(wpA.portsideXTD))) wpA.portsideXTD = legInfo.xtdNM;
 
-    wpA.starboardXTD = legInfo.xtdNM;
+    if (!Number.isFinite(Number(wpA.starboardXTD))) wpA.starboardXTD = legInfo.xtdNM;
 
-    wpA.turnRadius = legInfo.turnRadiusNM;
+    if (!Number.isFinite(Number(wpA.turnRadius))) wpA.turnRadius = legInfo.turnRadiusNM;
 
     wpA.wptNo = ('00' + (i + 1)).slice(-3);
 
     wpA._eteAccumH = totalHours;
 
-
+    const effSpeed = Math.max(0.5, Number(wpA.speedKnots) || legInfo.speedKnots || 12.0);
+    const effEteH = legInfo.distanceNM / effSpeed;
+    legInfo.speedKnots = effSpeed;
+    legInfo.eteHours = Math.round(effEteH * 10) / 10;
 
     totalDist += legInfo.distanceNM;
 
-    totalHours += legInfo.eteHours;
+    totalHours += effEteH;
 
   }
 
@@ -44922,9 +44940,16 @@ window.syncSetRouteTopbarActions = syncSetRouteTopbarActions;
 
 function saveRouteToLibrary(route) {
 
-  if (!route || !Array.isArray(route.waypoints) || route.waypoints.length === 0) return;
+  if (!route || !Array.isArray(route.waypoints)) return;
 
-  enrichRouteWithLegsTelemetry(route);
+  if (route.waypoints.length >= 2) {
+    enrichRouteWithLegsTelemetry(route);
+  } else {
+    route.legs = [];
+    route.totalDistanceNM = 0;
+    route.totalSteamingHours = 0;
+    route.steamingDays = "0.0";
+  }
 
   // Persist chat with this route so sidebar reopen restores the conversation
 
@@ -45658,7 +45683,7 @@ function renderSidebarUserRoutesList() {
   let items = [];
   if (tabMode === "routes") {
     try { items = (getSavedRoutesLibrary() || []).slice(); } catch (e) { items = []; }
-    if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0) {
+    if (activeRouteData && Array.isArray(activeRouteData.waypoints)) {
       const exists = items.some((r) => r && ((activeRouteData.id && r.id === activeRouteData.id) || (!(r.id && activeRouteData.id && r.id !== activeRouteData.id) && r.name === activeRouteData.name)));
       if (!exists) {
         if (!activeRouteData.id) {
@@ -45781,17 +45806,28 @@ function renderSidebarUserRoutesList() {
       if (typeof selectSavedRouteFromSidebar === "function") {
         selectSavedRouteFromSidebar(id, false);
       }
-      if (typeof fitRouteBounds === "function") {
+      if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2 && typeof fitRouteBounds === "function") {
         try { fitRouteBounds(); } catch (eFit) {}
       }
       if (typeof updateRouteMiniWindowUI === "function") {
         try { updateRouteMiniWindowUI(); } catch (eMini) {}
       }
-      renderSidebarUserRoutesList();
+      if (typeof window.openNavtorRouteInSidebar === "function") {
+        window.openNavtorRouteInSidebar(id);
+      } else {
+        renderSidebarUserRoutesList();
+      }
     });
   });
 }
-window.renderSidebarUserRoutesList = renderSidebarUserRoutesList;
+window._origRenderSidebarUserRoutesList = renderSidebarUserRoutesList;
+window.renderSidebarUserRoutesList = function () {
+  if (window._sidebarNavtorState && window._sidebarNavtorState.view !== "list" && typeof window.renderNavtorSidebar === "function") {
+    window.renderNavtorSidebar();
+    return;
+  }
+  return renderSidebarUserRoutesList();
+};
 
 function initSidebarUserRoutesPanel() {
   if (window._sidebarUserRoutesPanelBound) return;
@@ -45920,6 +45956,1324 @@ if (document.readyState === "loading") {
 } else {
   setTimeout(initSidebarUserRoutesPanel, 0);
 }
+
+/* ============================================================================
+   v5.260: NAVTOR-Style Route & Waypoint Sidebar Workflow (#ntmSidebar)
+   Screens:
+     1) "list"     — Routes / Bin list (Photo 1)
+     2) "route"    — Route Detail: Empty (Photo 2) & With Waypoints (Photo 3)
+     3) "waypoint" — Edit Waypoint settings (Photo 4)
+   ============================================================================ */
+(function initNavtorSidebarWorkflow() {
+  const NAVTOR_PASSAGE_DEFAULTS = {
+    "Ocean": {
+      portsideXTD: 5.000,
+      starboardXTD: 5.000,
+      turnRadius: 1.500,
+      sail: "RL",
+      speedKnots: 16.6,
+      minSpeedKnots: 1.0,
+      maxSpeedKnots: 30.0
+    },
+    "Coastal": {
+      portsideXTD: 1.000,
+      starboardXTD: 1.000,
+      turnRadius: 1.500,
+      sail: "RL",
+      speedKnots: 15.5,
+      minSpeedKnots: 1.0,
+      maxSpeedKnots: 30.0
+    },
+    "Pilotage/fairway/channel": {
+      portsideXTD: 0.100,
+      starboardXTD: 0.100,
+      turnRadius: 0.500,
+      sail: "RL",
+      speedKnots: 12.0,
+      minSpeedKnots: 1.0,
+      maxSpeedKnots: 30.0
+    }
+  };
+
+  const NAVTOR_PASSAGE_TYPES = [
+    "Pilotage/fairway/channel",
+    "Coastal",
+    "Ocean"
+  ];
+
+  const NAVTOR_PASSAGE_EVENTS = [
+    "Undefined",
+    "Begin of sea passage",
+    "End of sea passage",
+    "Pilot boarding",
+    "Pilot disembarking",
+    "Anchorage",
+    "Berth",
+    "Reporting point",
+    "Security level change"
+  ];
+
+  window._sidebarNavtorState = window._sidebarNavtorState || {
+    view: "list",          // "list" | "route" | "waypoint"
+    routeId: null,
+    wptIdx: 0,
+    wptSearch: "",
+    addingWpOnChart: false,
+    destPickerOpen: false,
+    destQuery: "",
+    newPpMenuOpen: false,
+    renamingRoute: false
+  };
+
+  function escHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function formatNavtorLatDms(lat) {
+    const val = Number(lat);
+    if (!Number.isFinite(val)) return "00°00.000'N";
+    const hem = val >= 0 ? "N" : "S";
+    const abs = Math.min(90, Math.abs(val));
+    let deg = Math.floor(abs);
+    let min = (abs - deg) * 60;
+    if (min >= 59.9995) {
+      deg += 1;
+      min = 0;
+    }
+    return String(deg).padStart(2, "0") + "°" + min.toFixed(3).padStart(6, "0") + "'" + hem;
+  }
+
+  function formatNavtorLonDms(lon) {
+    let val = Number(lon);
+    if (!Number.isFinite(val)) return "000°00.000'E";
+    val = ((val + 180) % 360 + 360) % 360 - 180;
+    const hem = val >= 0 ? "E" : "W";
+    const abs = Math.min(180, Math.abs(val));
+    let deg = Math.floor(abs);
+    let min = (abs - deg) * 60;
+    if (min >= 59.9995) {
+      deg += 1;
+      min = 0;
+    }
+    return String(deg).padStart(3, "0") + "°" + min.toFixed(3).padStart(6, "0") + "'" + hem;
+  }
+
+  function parseNavtorCoord(raw, isLon) {
+    const s = String(raw == null ? "" : raw).trim().toUpperCase();
+    if (!s) return null;
+    const limit = isLon ? 180 : 90;
+    let sign = 1;
+    if (/[SW]/.test(s)) sign = -1;
+    if (/^\s*-/.test(s)) sign = -1;
+
+    // Match DD°MM.MMM'N or DD MM SS N or DD-MM.MMMN
+    const cleaned = s.replace(/[NSEW]/g, "").replace(/[°'′"″:\-]/g, " ").trim();
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      const deg = Math.abs(parseFloat(parts[0]));
+      const min = parseFloat(parts[1]) || 0;
+      const sec = parts[2] ? (parseFloat(parts[2]) || 0) : 0;
+      if (!Number.isFinite(deg) || !Number.isFinite(min) || min < 0 || min >= 60) return null;
+      const dec = (deg + min / 60 + sec / 3600) * sign;
+      if (!Number.isFinite(dec) || Math.abs(dec) > limit) return null;
+      return Number(dec.toFixed(6));
+    }
+    const num = parseFloat(cleaned);
+    if (!Number.isFinite(num) || Math.abs(num) > limit) return null;
+    return Number((Math.abs(num) * (s.includes("-") || /[SW]/.test(s) ? -1 : 1)).toFixed(6));
+  }
+
+  function parseNumericField(raw, fallback, minVal, maxVal) {
+    const m = String(raw == null ? "" : raw).replace(/,/g, ".").match(/-?\d+(?:\.\d+)?/);
+    if (!m) return fallback;
+    let v = parseFloat(m[0]);
+    if (!Number.isFinite(v)) return fallback;
+    if (minVal != null && v < minVal) v = minVal;
+    if (maxVal != null && v > maxVal) v = maxVal;
+    return v;
+  }
+
+  function inferWaypointPassageType(wp, idx, total, legInfo) {
+    if (wp && wp.passageType && NAVTOR_PASSAGE_TYPES.indexOf(wp.passageType) !== -1) {
+      return wp.passageType;
+    }
+    const z = String((legInfo && legInfo.navZone) || (wp && wp.navZone) || "").toLowerCase();
+    if (idx === 0 || idx >= total - 1 || /harbor|pilot|approach|berth|fairway|channel|canal|strait|tss/.test(z)) {
+      return "Pilotage/fairway/channel";
+    }
+    if (/coastal|littoral|shelf/.test(z)) {
+      return "Coastal";
+    }
+    if (/ocean|deep/.test(z)) {
+      return "Ocean";
+    }
+    const xtd = Number(wp && wp.portsideXTD);
+    if (Number.isFinite(xtd)) {
+      if (xtd <= 0.25) return "Pilotage/fairway/channel";
+      if (xtd <= 2.0) return "Coastal";
+      return "Ocean";
+    }
+    return idx === 0 || idx === total - 1 ? "Pilotage/fairway/channel" : "Coastal";
+  }
+
+  function ensureWaypointNavtorFields(wp, idx, total, legInfo) {
+    if (!wp) return wp;
+    const pType = inferWaypointPassageType(wp, idx, total, legInfo);
+    const defs = NAVTOR_PASSAGE_DEFAULTS[pType] || NAVTOR_PASSAGE_DEFAULTS["Coastal"];
+    wp.passageType = pType;
+    if (!wp.passageEvent || NAVTOR_PASSAGE_EVENTS.indexOf(wp.passageEvent) === -1) {
+      wp.passageEvent = "Undefined";
+    }
+    if (!Number.isFinite(Number(wp.portsideXTD))) wp.portsideXTD = defs.portsideXTD;
+    if (!Number.isFinite(Number(wp.starboardXTD))) wp.starboardXTD = defs.starboardXTD;
+    if (!Number.isFinite(Number(wp.turnRadius))) wp.turnRadius = idx === 0 ? 0.000 : defs.turnRadius;
+    if (!wp.sail) wp.sail = defs.sail;
+    if (!Number.isFinite(Number(wp.speedKnots)) || Number(wp.speedKnots) <= 0) wp.speedKnots = defs.speedKnots;
+    if (!Number.isFinite(Number(wp.minSpeedKnots))) wp.minSpeedKnots = defs.minSpeedKnots;
+    if (!Number.isFinite(Number(wp.maxSpeedKnots))) wp.maxSpeedKnots = defs.maxSpeedKnots;
+    if (wp.remarks == null) wp.remarks = "";
+    return wp;
+  }
+
+  function computeLegDistanceNm(wpA, wpB) {
+    if (!wpA || !wpB) return 0;
+    const la1 = Number(wpA.lat), lo1 = Number(wpA.lon);
+    const la2 = Number(wpB.lat), lo2 = Number(wpB.lon);
+    if (!Number.isFinite(la1) || !Number.isFinite(lo1) || !Number.isFinite(la2) || !Number.isFinite(lo2)) return 0;
+    if (String(wpA.sail || "RL").toUpperCase() === "GC" && typeof calculateHaversineDistanceNM === "function") {
+      return calculateHaversineDistanceNM(la1, lo1, la2, lo2);
+    }
+    // Rhumb-line (loxodrome) distance in NM
+    const toRad = Math.PI / 180;
+    const phi1 = Math.max(-85, Math.min(85, la1)) * toRad;
+    const phi2 = Math.max(-85, Math.min(85, la2)) * toRad;
+    const dPhi = phi2 - phi1;
+    let dLon = (((lo2 - lo1) + 540) % 360 - 180) * toRad;
+    const dPsi = Math.log(Math.tan(Math.PI / 4 + phi2 / 2) / Math.tan(Math.PI / 4 + phi1 / 2));
+    const q = Math.abs(dPsi) > 1e-10 ? dPhi / dPsi : Math.cos(phi1);
+    const distRad = Math.sqrt(dPhi * dPhi + q * q * dLon * dLon);
+    return distRad * 3440.065;
+  }
+
+  function recomputeRouteNavtorMetrics(route) {
+    if (!route) return { totalDistNm: 0, totalHours: 0, legDists: [] };
+    const wps = Array.isArray(route.waypoints) ? route.waypoints : [];
+    const legsArr = Array.isArray(route.legs) ? route.legs : [];
+    const legDists = [];
+    let totalDist = 0;
+    let totalHours = 0;
+
+    for (let i = 0; i < wps.length; i++) {
+      ensureWaypointNavtorFields(wps[i], i, wps.length, legsArr[i] || null);
+      if (i < wps.length - 1) {
+        const d = computeLegDistanceNm(wps[i], wps[i + 1]);
+        legDists.push(d);
+        totalDist += d;
+        const spd = Math.max(0.5, Number(wps[i].speedKnots) || 12.0);
+        totalHours += d / spd;
+      } else {
+        legDists.push(0);
+      }
+    }
+    route.totalDistanceNM = Number(totalDist.toFixed(2));
+    route.totalSteamingHours = Number(totalHours.toFixed(2));
+    route.steamingDays = (totalHours / 24).toFixed(1);
+    return { totalDistNm: totalDist, totalHours: totalHours, legDists: legDists };
+  }
+
+  function formatNavtorDuration(totalHours) {
+    if (!Number.isFinite(totalHours) || totalHours <= 0.001) {
+      return "0h 00min";
+    }
+    const totalMins = Math.round(totalHours * 60);
+    const days = Math.floor(totalMins / 1440);
+    const remMins = totalMins % 1440;
+    const hours = Math.floor(remMins / 60);
+    const mins = remMins % 60;
+    if (days > 0) {
+      return days + "d " + hours + "h " + String(mins).padStart(2, "0") + "min";
+    }
+    return hours + "h " + String(mins).padStart(2, "0") + "min";
+  }
+
+  function formatNavtorHeaderDist(distNm) {
+    if (!Number.isFinite(distNm) || distNm <= 0.005) return "0NM";
+    if (distNm >= 100) return Math.round(distNm) + "NM";
+    return Number(distNm.toFixed(2)) + "NM";
+  }
+
+  function formatNavtorLegDist(distNm) {
+    if (!Number.isFinite(distNm) || distNm <= 0.005) return "0.0NM";
+    return Number(distNm.toFixed(2)) + "NM";
+  }
+
+  function isGenericAutoWpName(name, idx) {
+    const s = String(name || "").trim();
+    if (!s) return true;
+    if (/^WPT?\s*#?\s*0*\d+$/i.test(s)) return true;
+    if (s.toUpperCase() === "WP" + idx || s.toUpperCase() === "WPT " + (idx + 1)) return true;
+    return false;
+  }
+
+  function getActiveNavtorRoute() {
+    const st = window._sidebarNavtorState;
+    let lib = [];
+    try { lib = getSavedRoutesLibrary() || []; } catch (e) { lib = []; }
+    if (st.routeId) {
+      const match = lib.find((r) => r && (r.id === st.routeId || r.name === st.routeId));
+      if (match) {
+        if (!activeRouteData || (activeRouteData.id !== match.id && activeRouteData.name !== match.name)) {
+          activeRouteData = match;
+        }
+        return activeRouteData;
+      }
+    }
+    if (activeRouteData) return activeRouteData;
+    return null;
+  }
+
+  function persistCurrentNavtorRoute(rerenderMap) {
+    const rt = getActiveNavtorRoute();
+    if (!rt) return;
+    recomputeRouteNavtorMetrics(rt);
+    try { persistActiveRouteToStorage(rt); } catch (e) {}
+    if (typeof saveRouteToLibrary === "function") {
+      saveRouteToLibrary(rt);
+    }
+    if (rerenderMap && typeof leafletMap !== "undefined" && leafletMap && typeof renderRouteOnMap === "function") {
+      window._setsailLastRouteRenderSig = "";
+      renderRouteOnMap(rt, false);
+    }
+  }
+
+  function setChartAddWpMode(enabled) {
+    const st = window._sidebarNavtorState;
+    st.addingWpOnChart = !!enabled;
+    window._sidebarChartAddWpMode = !!enabled;
+    const mapEl = document.getElementById("ntmMap");
+    if (mapEl) {
+      mapEl.classList.toggle("ntm-adding-wpt-cursor", !!enabled);
+    }
+    let banner = document.getElementById("ntmAddWpFloatingBanner");
+    if (enabled) {
+      if (!banner) {
+        banner = document.createElement("div");
+        banner.id = "ntmAddWpFloatingBanner";
+        banner.className = "ntm-add-wp-floating-banner";
+        const host = document.getElementById("ntmMapContainer") || document.body;
+        host.appendChild(banner);
+      }
+      banner.innerHTML =
+        '<span>Click on chart to place waypoints</span>' +
+        '<button type="button" id="btnFinishChartWpAdd">Done</button>';
+      banner.hidden = false;
+      const doneBtn = banner.querySelector("#btnFinishChartWpAdd");
+      if (doneBtn) {
+        doneBtn.onclick = function (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          setChartAddWpMode(false);
+          renderNavtorSidebar();
+        };
+      }
+    } else if (banner) {
+      banner.hidden = true;
+    }
+  }
+
+  window.handleSidebarChartAddWaypointClick = function (latlng) {
+    const st = window._sidebarNavtorState;
+    if (!st.addingWpOnChart || !latlng) return false;
+    const rt = getActiveNavtorRoute();
+    if (!rt) return false;
+    if (!Array.isArray(rt.waypoints)) rt.waypoints = [];
+    const lat = Number(Number(latlng.lat).toFixed(5));
+    const lon = Number(((((Number(latlng.lng) + 180) % 360) + 360) % 360 - 180).toFixed(5));
+    const idx = rt.waypoints.length;
+    const pType = idx === 0 ? "Pilotage/fairway/channel" : "Coastal";
+    const defs = NAVTOR_PASSAGE_DEFAULTS[pType];
+    rt.waypoints.push({
+      name: "",
+      lat: lat,
+      lon: lon,
+      passageType: pType,
+      passageEvent: "Undefined",
+      portsideXTD: defs.portsideXTD,
+      starboardXTD: defs.starboardXTD,
+      turnRadius: idx === 0 ? 0.000 : defs.turnRadius,
+      sail: defs.sail,
+      speedKnots: defs.speedKnots,
+      minSpeedKnots: defs.minSpeedKnots,
+      maxSpeedKnots: defs.maxSpeedKnots,
+      remarks: ""
+    });
+    if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
+    if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+    const routeTab = document.querySelector('.excel-tab[data-overlay="route"]');
+    if (routeTab) {
+      routeTab.classList.add("active");
+      routeTab.setAttribute("aria-pressed", "true");
+    }
+    persistCurrentNavtorRoute(true);
+    renderNavtorSidebar();
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Added WP" + idx + " (" + formatNavtorLatDms(lat) + " " + formatNavtorLonDms(lon) + ")", "success");
+    }
+    return true;
+  };
+
+  // Esc exits chart waypoint placement mode
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape" && window._sidebarChartAddWpMode) {
+      setChartAddWpMode(false);
+      renderNavtorSidebar();
+    }
+  });
+
+  function ensureNavtorContainers() {
+    const sidebar = document.getElementById("ntmSidebar");
+    if (!sidebar) return null;
+    let routePanel = document.getElementById("ntmNavtorRoutePanel");
+    if (!routePanel) {
+      routePanel = document.createElement("div");
+      routePanel.id = "ntmNavtorRoutePanel";
+      routePanel.className = "ntm-navtor-panel";
+      routePanel.hidden = true;
+      sidebar.appendChild(routePanel);
+    }
+    let wptPanel = document.getElementById("ntmNavtorWptPanel");
+    if (!wptPanel) {
+      wptPanel = document.createElement("div");
+      wptPanel.id = "ntmNavtorWptPanel";
+      wptPanel.className = "ntm-navtor-panel";
+      wptPanel.hidden = true;
+      sidebar.appendChild(wptPanel);
+    }
+    return { sidebar, routePanel, wptPanel };
+  }
+
+  function runRouteSafetyCheck(rt) {
+    const wps = (rt && Array.isArray(rt.waypoints)) ? rt.waypoints : [];
+    if (wps.length < 2) {
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Route check: add at least 2 waypoints to validate legs.", "info");
+      }
+      return;
+    }
+    if (typeof enrichRouteWithLegsTelemetry === "function") {
+      try { enrichRouteWithLegsTelemetry(rt); } catch (e) {}
+    }
+    let ntmCount = 0;
+    let wxCount = 0;
+    (rt.legs || []).forEach((lg) => {
+      if (lg && Array.isArray(lg.ntmHits)) ntmCount += lg.ntmHits.length;
+      if (lg && Array.isArray(lg.weatherHits)) wxCount += lg.weatherHits.length;
+    });
+    if (ntmCount === 0 && wxCount === 0) {
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Route Check OK: " + (wps.length - 1) + " legs clear of active NtM & storm advisories.", "success");
+      }
+    } else if (typeof showSetSailToast === "function") {
+      showSetSailToast("Route Check: " + ntmCount + " NtM/NAVTEX & " + wxCount + " weather advisories near track.", "warning");
+    }
+  }
+
+  function reverseCurrentRoute(rt) {
+    if (!rt || !Array.isArray(rt.waypoints) || rt.waypoints.length < 2) {
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Need at least 2 waypoints to reverse route.", "info");
+      }
+      return;
+    }
+    rt.waypoints.reverse();
+    rt.waypoints.forEach((wp) => {
+      if (!wp) return;
+      const tmp = wp.portsideXTD;
+      wp.portsideXTD = wp.starboardXTD;
+      wp.starboardXTD = tmp;
+    });
+    // Swap "A TO B" title automatically if formatted with " TO "
+    if (rt.name && /\s+TO\s+/i.test(rt.name)) {
+      const parts = rt.name.split(/\s+TO\s+/i);
+      if (parts.length === 2) {
+        rt.name = parts[1].trim() + " TO " + parts[0].trim();
+      }
+    }
+    persistCurrentNavtorRoute(true);
+    renderNavtorSidebar();
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Route reversed", "success");
+    }
+  }
+
+  function insertWaypointAtChartCenter(rt, asDestination) {
+    if (!rt) return;
+    if (!Array.isArray(rt.waypoints)) rt.waypoints = [];
+    const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+    let lat = 20.0, lon = 0.0;
+    if (map && typeof map.getCenter === "function") {
+      const c = map.getCenter();
+      lat = Number(c.lat.toFixed(5));
+      lon = Number(((((c.lng + 180) % 360) + 360) % 360 - 180).toFixed(5));
+    } else if (rt.waypoints.length > 0) {
+      const prev = rt.waypoints[rt.waypoints.length - 1];
+      lat = Number((Number(prev.lat) + 0.05).toFixed(5));
+      lon = Number((Number(prev.lon) + 0.05).toFixed(5));
+    }
+    const idx = rt.waypoints.length;
+    const pType = (idx === 0 || asDestination) ? "Pilotage/fairway/channel" : "Coastal";
+    const defs = NAVTOR_PASSAGE_DEFAULTS[pType];
+    rt.waypoints.push({
+      name: asDestination ? "DESTINATION" : "",
+      lat: lat,
+      lon: lon,
+      passageType: pType,
+      passageEvent: asDestination ? "End of sea passage" : "Undefined",
+      portsideXTD: defs.portsideXTD,
+      starboardXTD: defs.starboardXTD,
+      turnRadius: idx === 0 ? 0.000 : defs.turnRadius,
+      sail: defs.sail,
+      speedKnots: defs.speedKnots,
+      minSpeedKnots: defs.minSpeedKnots,
+      maxSpeedKnots: defs.maxSpeedKnots,
+      remarks: ""
+    });
+    if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
+    if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+    persistCurrentNavtorRoute(true);
+    window._sidebarNavtorState.wptIdx = idx;
+    window._sidebarNavtorState.view = "waypoint";
+    renderNavtorSidebar();
+  }
+
+  function renderRouteDetailView(routePanel, rt) {
+    const st = window._sidebarNavtorState;
+    const wps = Array.isArray(rt.waypoints) ? rt.waypoints : [];
+    const metrics = recomputeRouteNavtorMetrics(rt);
+    const routeName = String(rt.name || rt.routeName || "Route1").trim() || "Route1";
+    const distLabel = formatNavtorHeaderDist(metrics.totalDistNm);
+    const durLabel = formatNavtorDuration(metrics.totalHours);
+    const q = String(st.wptSearch || "").trim().toLowerCase();
+
+    let wptListHtml = "";
+    if (wps.length > 0) {
+      const rows = [];
+      for (let i = 0; i < wps.length; i++) {
+        const wp = wps[i];
+        const wpCode = "WP" + i;
+        const customName = isGenericAutoWpName(wp.name, i) ? "" : String(wp.name || "").trim();
+        const pType = wp.passageType || "Coastal";
+        const spdStr = (Number(wp.speedKnots) || 12.0).toFixed(1) + "kn";
+        const legDistStr = formatNavtorLegDist(metrics.legDists[i] || 0);
+        const subLine = "Planned speed: " + spdStr + " / Dist: " + legDistStr;
+
+        if (q) {
+          const hay = (wpCode + " " + customName + " " + pType + " " + (wp.passageEvent || "") + " " + (wp.remarks || "")).toLowerCase();
+          if (hay.indexOf(q) === -1) continue;
+        }
+
+        const hasEvent = wp.passageEvent && wp.passageEvent !== "Undefined";
+        const isSolidEvent = hasEvent && /begin|end|pilot|berth/i.test(wp.passageEvent);
+        const flagHtml = hasEvent
+          ? (isSolidEvent
+              ? '<span class="ntm-nv-wp-flag" title="' + escHtml(wp.passageEvent) + '"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M5 3v18h2v-7h11l-2-4 2-4H7V3H5z"/></svg></span>'
+              : '<span class="ntm-nv-wp-flag" title="' + escHtml(wp.passageEvent) + '"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h12l-2 4 2 4H5"/></svg></span>')
+          : "";
+
+        rows.push(
+          '<div class="ntm-nv-wp-row" data-nv-wp-idx="' + i + '">' +
+            '<div class="ntm-nv-wp-code">' + wpCode + '</div>' +
+            '<div class="ntm-nv-wp-mid">' +
+              (customName ? '<div class="ntm-nv-wp-name">' + escHtml(customName) + '</div>' : '') +
+              '<div class="ntm-nv-wp-ptype">' + escHtml(pType) + '</div>' +
+              '<div class="ntm-nv-wp-stats">' + escHtml(subLine) + '</div>' +
+            '</div>' +
+            '<div class="ntm-nv-wp-right">' +
+              flagHtml +
+              '<span class="ntm-nv-wp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+      wptListHtml =
+        '<div class="ntm-nv-wp-scroll" id="ntmNavtorWpScroll">' +
+          (rows.length ? rows.join("") : '<div class="ntm-nv-empty-filter">No waypoints match "' + escHtml(st.wptSearch) + '"</div>') +
+        '</div>';
+    }
+
+    // Optional inline New PP drawer (RTZ / CSV / SetRoute)
+    const newPpHtml = st.newPpMenuOpen
+      ? '<div class="ntm-nv-subdrawer">' +
+          '<button type="button" class="ntm-nv-subbtn" id="btnNvExportRtz">Export ECDIS (.rtz)</button>' +
+          '<button type="button" class="ntm-nv-subbtn" id="btnNvOpenSetRoute">Passage Plan Table</button>' +
+        '</div>'
+      : "";
+
+    // Optional active chart-click placement helper bar
+    const addWpHelperHtml = st.addingWpOnChart
+      ? '<div class="ntm-nv-helper-bar">' +
+          '<span>Click on chart to drop waypoints</span>' +
+          '<div class="ntm-nv-helper-btns">' +
+            '<button type="button" id="btnNvInsertCenterWp">+ At Center</button>' +
+            '<button type="button" id="btnNvStopChartWp" class="is-done">Done</button>' +
+          '</div>' +
+        '</div>'
+      : "";
+
+    // Optional destination port picker
+    let destPickerHtml = "";
+    if (st.destPickerOpen) {
+      const ports = Array.isArray(window.PORT_DEPTHS_DB) ? window.PORT_DEPTHS_DB : [];
+      const dq = String(st.destQuery || "").trim().toLowerCase();
+      const filteredPorts = ports.filter((p) => {
+        if (!p) return false;
+        if (!dq) return true;
+        return String(p.name || "").toLowerCase().indexOf(dq) !== -1 ||
+               String(p.country || "").toLowerCase().indexOf(dq) !== -1 ||
+               String(p.unlocode || "").toLowerCase().indexOf(dq) !== -1;
+      }).slice(0, 25);
+
+      destPickerHtml =
+        '<div class="ntm-nv-dest-picker">' +
+          '<div class="ntm-nv-dest-head">' +
+            '<input type="text" id="nvDestSearchInput" class="ntm-nv-dest-input" placeholder="Search port or UN/LOCODE..." value="' + escHtml(st.destQuery) + '" />' +
+            '<button type="button" id="btnNvDestAtCenter" class="ntm-nv-dest-mini" title="Add destination at current chart center">+ Center</button>' +
+            '<button type="button" id="btnNvDestClose" class="ntm-nv-dest-close" title="Close">×</button>' +
+          '</div>' +
+          '<div class="ntm-nv-dest-list">' +
+            (filteredPorts.length
+              ? filteredPorts.map((p, idx) => {
+                  const pCoords = p.approachCoords || p.coords || [0, 0];
+                  return (
+                    '<button type="button" class="ntm-nv-dest-item" data-dest-lat="' + Number(pCoords[0]) + '" data-dest-lon="' + Number(pCoords[1]) + '" data-dest-name="' + escHtml(p.name) + '">' +
+                      '<span>' + escHtml(p.name) + (p.country ? ' <small>(' + escHtml(p.country) + ')</small>' : '') + '</span>' +
+                      '<small>' + escHtml(p.unlocode || '') + '</small>' +
+                    '</button>'
+                  );
+                }).join("")
+              : '<div class="ntm-nv-empty-filter">No matching ports. Use "+ Center" or Add new waypoint.</div>') +
+          '</div>' +
+        '</div>';
+    }
+
+    const titleMarkup = st.renamingRoute
+      ? '<div class="ntm-nv-rename-row">' +
+          '<input type="text" id="nvRouteRenameInput" class="ntm-nv-rename-input" value="' + escHtml(routeName) + '" />' +
+          '<button type="button" id="btnNvRenameOk" class="ntm-nv-rename-btn">OK</button>' +
+        '</div>'
+      : '<div class="ntm-nv-summary-title" id="nvRouteSummaryTitle" title="Click to rename route">' + escHtml(routeName) + '</div>';
+
+    routePanel.innerHTML =
+      '<div class="ntm-list-header ntm-routes-header ntm-nv-topbar">' +
+        '<button type="button" class="ntm-hdr-back-btn" id="btnNvBackToRoutes" title="Back to Routes list" aria-label="Back to Routes">' +
+          '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>' +
+        '</button>' +
+        '<div class="ntm-hdr-actions ntm-nv-actions">' +
+          '<button type="button" class="ntm-hdr-action-btn" id="btnNvCheck" title="Check route against NtM, TSS &amp; weather">' +
+            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' +
+            '<span class="ntm-hdr-action-lbl">Check</span>' +
+          '</button>' +
+          '<button type="button" class="ntm-hdr-action-btn ' + (st.newPpMenuOpen ? 'is-open' : '') + '" id="btnNvNewPp" title="New Passage Plan / Export">' +
+            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg></span>' +
+            '<span class="ntm-hdr-action-lbl ntm-nv-lbl-stack">New<br>PP</span>' +
+          '</button>' +
+          '<button type="button" class="ntm-hdr-action-btn" id="btnNvReverse" title="Reverse route direction">' +
+            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 2 21 6 17 10"/><line x1="3" y1="6" x2="21" y2="6"/><polyline points="7 22 3 18 7 14"/><line x1="21" y1="18" x2="3" y2="18"/></svg></span>' +
+            '<span class="ntm-hdr-action-lbl">Reverse</span>' +
+          '</button>' +
+          '<button type="button" class="ntm-hdr-action-btn" id="btnNvSave" title="Save route">' +
+            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg></span>' +
+            '<span class="ntm-hdr-action-lbl">Save</span>' +
+          '</button>' +
+          '<button type="button" class="ntm-hdr-action-btn" id="btnNvHelp" title="Route panel help">' +
+            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></span>' +
+            '<span class="ntm-hdr-action-lbl">Help</span>' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+      newPpHtml +
+      '<div class="ntm-nv-body">' +
+        '<div class="ntm-nv-summary-card">' +
+          titleMarkup +
+          '<div class="ntm-nv-summary-metrics">' +
+            '<span>Distance: ' + escHtml(distLabel) + '</span>' +
+            '<span>Duration: ' + escHtml(durLabel) + '</span>' +
+          '</div>' +
+        '</div>' +
+        addWpHelperHtml +
+        destPickerHtml +
+        wptListHtml +
+        '<div class="ntm-nv-dual-actions">' +
+          '<button type="button" class="ntm-nv-dual-btn ' + (st.addingWpOnChart ? 'is-active' : '') + '" id="btnNvAddWaypoint">Add new waypoint</button>' +
+          '<button type="button" class="ntm-nv-dual-btn ' + (st.destPickerOpen ? 'is-active' : '') + '" id="btnNvAddDestination">Add destination</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ntm-nv-bottom-search">' +
+        '<input type="text" id="nvWpSearchInput" class="ntm-nv-search-box" placeholder="Search waypoint" value="' + escHtml(st.wptSearch) + '" />' +
+        (st.wptSearch ? '<button type="button" id="btnNvClearWpSearch" class="ntm-nv-search-clear" title="Clear">×</button>' : '') +
+      '</div>';
+
+    // Wire Route Detail handlers
+    const backBtn = routePanel.querySelector("#btnNvBackToRoutes");
+    if (backBtn) {
+      backBtn.onclick = () => {
+        setChartAddWpMode(false);
+        st.destPickerOpen = false;
+        st.newPpMenuOpen = false;
+        st.renamingRoute = false;
+        st.view = "list";
+        renderNavtorSidebar();
+      };
+    }
+
+    const titleEl = routePanel.querySelector("#nvRouteSummaryTitle");
+    if (titleEl) {
+      titleEl.onclick = () => {
+        st.renamingRoute = true;
+        renderNavtorSidebar();
+        const inp = document.getElementById("nvRouteRenameInput");
+        if (inp) { inp.focus(); inp.select(); }
+      };
+    }
+
+    const renameInp = routePanel.querySelector("#nvRouteRenameInput");
+    const renameOk = routePanel.querySelector("#btnNvRenameOk");
+    const commitRename = () => {
+      if (renameInp) {
+        const nextName = renameInp.value.trim();
+        if (nextName) rt.name = nextName;
+      }
+      st.renamingRoute = false;
+      persistCurrentNavtorRoute(false);
+      renderNavtorSidebar();
+    };
+    if (renameOk) renameOk.onclick = commitRename;
+    if (renameInp) {
+      renameInp.onkeydown = (ev) => {
+        if (ev.key === "Enter") { ev.preventDefault(); commitRename(); }
+        if (ev.key === "Escape") { st.renamingRoute = false; renderNavtorSidebar(); }
+      };
+    }
+
+    const btnCheck = routePanel.querySelector("#btnNvCheck");
+    if (btnCheck) btnCheck.onclick = () => runRouteSafetyCheck(rt);
+
+    const btnNewPp = routePanel.querySelector("#btnNvNewPp");
+    if (btnNewPp) {
+      btnNewPp.onclick = () => {
+        st.newPpMenuOpen = !st.newPpMenuOpen;
+        renderNavtorSidebar();
+      };
+    }
+
+    const btnExpRtz = routePanel.querySelector("#btnNvExportRtz");
+    if (btnExpRtz) {
+      btnExpRtz.onclick = () => {
+        st.newPpMenuOpen = false;
+        if (typeof exportRouteToRtz === "function") exportRouteToRtz(rt);
+        renderNavtorSidebar();
+      };
+    }
+
+    const btnOpenSr = routePanel.querySelector("#btnNvOpenSetRoute");
+    if (btnOpenSr) {
+      btnOpenSr.onclick = () => {
+        st.newPpMenuOpen = false;
+        if (typeof displaySetRouteResults === "function") displaySetRouteResults(rt, true);
+        const tabBtn = document.querySelector('[data-tab="tab-route"], #navBtnRoute');
+        if (tabBtn) tabBtn.click();
+        renderNavtorSidebar();
+      };
+    }
+
+    const btnRev = routePanel.querySelector("#btnNvReverse");
+    if (btnRev) btnRev.onclick = () => reverseCurrentRoute(rt);
+
+    const btnSave = routePanel.querySelector("#btnNvSave");
+    if (btnSave) {
+      btnSave.onclick = () => {
+        if (st.renamingRoute) commitRename();
+        else persistCurrentNavtorRoute(true);
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("Route \"" + (rt.name || "Route") + "\" saved", "success");
+        }
+      };
+    }
+
+    const btnHelp = routePanel.querySelector("#btnNvHelp");
+    if (btnHelp) {
+      btnHelp.onclick = () => {
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("Click 'Add new waypoint' to plot on chart, 'Add destination' to pick a port, or click any WP row to edit settings.", "info");
+        }
+      };
+    }
+
+    const btnAddWp = routePanel.querySelector("#btnNvAddWaypoint");
+    if (btnAddWp) {
+      btnAddWp.onclick = () => {
+        st.destPickerOpen = false;
+        setChartAddWpMode(!st.addingWpOnChart);
+        renderNavtorSidebar();
+      };
+    }
+
+    const btnInsertCenter = routePanel.querySelector("#btnNvInsertCenterWp");
+    if (btnInsertCenter) {
+      btnInsertCenter.onclick = () => {
+        setChartAddWpMode(false);
+        insertWaypointAtChartCenter(rt, false);
+      };
+    }
+
+    const btnStopChartWp = routePanel.querySelector("#btnNvStopChartWp");
+    if (btnStopChartWp) {
+      btnStopChartWp.onclick = () => {
+        setChartAddWpMode(false);
+        renderNavtorSidebar();
+      };
+    }
+
+    const btnAddDest = routePanel.querySelector("#btnNvAddDestination");
+    if (btnAddDest) {
+      btnAddDest.onclick = () => {
+        setChartAddWpMode(false);
+        st.destPickerOpen = !st.destPickerOpen;
+        renderNavtorSidebar();
+        if (st.destPickerOpen) {
+          const inp = document.getElementById("nvDestSearchInput");
+          if (inp) inp.focus();
+        }
+      };
+    }
+
+    const destInp = routePanel.querySelector("#nvDestSearchInput");
+    if (destInp) {
+      destInp.oninput = () => {
+        const pos = destInp.selectionStart;
+        st.destQuery = destInp.value;
+        renderRouteDetailView(routePanel, rt);
+        const nextInp = routePanel.querySelector("#nvDestSearchInput");
+        if (nextInp) {
+          nextInp.focus();
+          try { nextInp.setSelectionRange(pos, pos); } catch (e) {}
+        }
+      };
+    }
+
+    const btnDestCenter = routePanel.querySelector("#btnNvDestAtCenter");
+    if (btnDestCenter) {
+      btnDestCenter.onclick = () => {
+        st.destPickerOpen = false;
+        insertWaypointAtChartCenter(rt, true);
+      };
+    }
+
+    const btnDestClose = routePanel.querySelector("#btnNvDestClose");
+    if (btnDestClose) {
+      btnDestClose.onclick = () => {
+        st.destPickerOpen = false;
+        renderNavtorSidebar();
+      };
+    }
+
+    routePanel.querySelectorAll("[data-dest-name]").forEach((btn) => {
+      btn.onclick = () => {
+        const pLat = parseFloat(btn.getAttribute("data-dest-lat"));
+        const pLon = parseFloat(btn.getAttribute("data-dest-lon"));
+        const pName = btn.getAttribute("data-dest-name") || "BERTH";
+        if (!Number.isFinite(pLat) || !Number.isFinite(pLon)) return;
+        const defs = NAVTOR_PASSAGE_DEFAULTS["Pilotage/fairway/channel"];
+        rt.waypoints.push({
+          name: pName.toUpperCase(),
+          lat: Number(pLat.toFixed(5)),
+          lon: Number(pLon.toFixed(5)),
+          passageType: "Pilotage/fairway/channel",
+          passageEvent: "End of sea passage",
+          portsideXTD: defs.portsideXTD,
+          starboardXTD: defs.starboardXTD,
+          turnRadius: 0.000,
+          sail: "RL",
+          speedKnots: defs.speedKnots,
+          minSpeedKnots: defs.minSpeedKnots,
+          maxSpeedKnots: defs.maxSpeedKnots,
+          remarks: ""
+        });
+        if (/^Route\s*\d+$/i.test(String(rt.name || "").trim())) {
+          const firstWp = rt.waypoints[0];
+          if (firstWp && firstWp.name && rt.waypoints.length >= 2 && firstWp.name.toUpperCase() !== pName.toUpperCase()) {
+            rt.name = firstWp.name.toUpperCase() + " TO " + pName.toUpperCase();
+          } else {
+            rt.name = "TO " + pName.toUpperCase();
+          }
+        }
+        st.destPickerOpen = false;
+        st.destQuery = "";
+        if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
+        if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+        persistCurrentNavtorRoute(true);
+        if (window.leafletMap && typeof window.leafletMap.flyTo === "function") {
+          try { window.leafletMap.flyTo([pLat, pLon], Math.max(window.leafletMap.getZoom(), 8), { duration: 0.8 }); } catch (e) {}
+        }
+        renderNavtorSidebar();
+      };
+    });
+
+    routePanel.querySelectorAll("[data-nv-wp-idx]").forEach((row) => {
+      row.onclick = () => {
+        const idx = parseInt(row.getAttribute("data-nv-wp-idx"), 10);
+        if (!Number.isFinite(idx) || !rt.waypoints[idx]) return;
+        setChartAddWpMode(false);
+        st.wptIdx = idx;
+        st.view = "waypoint";
+        const wp = rt.waypoints[idx];
+        const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+        if (map && Number.isFinite(Number(wp.lat)) && Number.isFinite(Number(wp.lon))) {
+          try { map.flyTo([Number(wp.lat), Number(wp.lon)], Math.max(map.getZoom(), 10), { duration: 0.65 }); } catch (e) {}
+        }
+        renderNavtorSidebar();
+      };
+    });
+
+    const wpSearchInp = routePanel.querySelector("#nvWpSearchInput");
+    if (wpSearchInp) {
+      wpSearchInp.oninput = () => {
+        const pos = wpSearchInp.selectionStart;
+        st.wptSearch = wpSearchInp.value;
+        renderRouteDetailView(routePanel, rt);
+        const nextS = routePanel.querySelector("#nvWpSearchInput");
+        if (nextS) {
+          nextS.focus();
+          try { nextS.setSelectionRange(pos, pos); } catch (e) {}
+        }
+      };
+    }
+
+    const clrSearch = routePanel.querySelector("#btnNvClearWpSearch");
+    if (clrSearch) {
+      clrSearch.onclick = () => {
+        st.wptSearch = "";
+        renderRouteDetailView(routePanel, rt);
+      };
+    }
+  }
+
+  function renderWaypointEditView(wptPanel, rt) {
+    const st = window._sidebarNavtorState;
+    const wps = Array.isArray(rt.waypoints) ? rt.waypoints : [];
+    if (!wps.length) {
+      st.view = "route";
+      renderNavtorSidebar();
+      return;
+    }
+    let idx = Math.max(0, Math.min(wps.length - 1, Number(st.wptIdx) || 0));
+    st.wptIdx = idx;
+    const legsArr = Array.isArray(rt.legs) ? rt.legs : [];
+    const wp = ensureWaypointNavtorFields(wps[idx], idx, wps.length, legsArr[idx] || null);
+
+    const hasPrev = idx > 0;
+    const hasNext = idx < wps.length - 1;
+    const dispName = isGenericAutoWpName(wp.name, idx) ? "" : String(wp.name || "");
+    const latStr = formatNavtorLatDms(wp.lat);
+    const lonStr = formatNavtorLonDms(wp.lon);
+    const portXtdStr = Number(wp.portsideXTD).toFixed(3) + " NM";
+    const stbdXtdStr = Number(wp.starboardXTD).toFixed(3) + " NM";
+    const radStr = Number(wp.turnRadius).toFixed(3) + " NM";
+    const sailCode = String(wp.sail || "RL").toUpperCase() === "GC" ? "GC" : "RL";
+    const planSpdStr = Number(wp.speedKnots).toFixed(1) + " kn";
+    const minSpdStr = Number(wp.minSpeedKnots).toFixed(1) + " kn";
+    const maxSpdStr = Number(wp.maxSpeedKnots).toFixed(1) + " kn";
+
+    const pTypeOptionsHtml = NAVTOR_PASSAGE_TYPES.map((pt) => (
+      '<option value="' + escHtml(pt) + '"' + (wp.passageType === pt ? ' selected' : '') + '>' + escHtml(pt) + '</option>'
+    )).join("");
+
+    const pEventOptionsHtml = NAVTOR_PASSAGE_EVENTS.map((evName) => (
+      '<option value="' + escHtml(evName) + '"' + (wp.passageEvent === evName ? ' selected' : '') + '>' + escHtml(evName) + '</option>'
+    )).join("");
+
+    wptPanel.innerHTML =
+      '<div class="ntm-list-header ntm-routes-header ntm-nv-topbar ntm-nv-wpt-topbar">' +
+        '<div class="ntm-nv-wpt-left">' +
+          '<button type="button" class="ntm-hdr-back-btn" id="btnNvWptBack" title="Back to route">' +
+            '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>' +
+          '</button>' +
+          '<span class="ntm-nv-wpt-hdr-title">Edit waypoint</span>' +
+        '</div>' +
+        '<div class="ntm-hdr-actions ntm-nv-actions">' +
+          '<button type="button" class="ntm-hdr-action-btn ' + (!hasPrev ? 'is-disabled' : '') + '" id="btnNvWptPrev" ' + (!hasPrev ? 'disabled' : '') + ' title="Previous waypoint">' +
+            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></span>' +
+            '<span class="ntm-hdr-action-lbl">Prev</span>' +
+          '</button>' +
+          '<button type="button" class="ntm-hdr-action-btn ' + (!hasNext ? 'is-disabled' : '') + '" id="btnNvWptNext" ' + (!hasNext ? 'disabled' : '') + ' title="Next waypoint">' +
+            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></span>' +
+            '<span class="ntm-hdr-action-lbl">Next</span>' +
+          '</button>' +
+          '<button type="button" class="ntm-hdr-action-btn" id="btnNvWptDelete" title="Delete waypoint">' +
+            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></span>' +
+            '<span class="ntm-hdr-action-lbl">Delete</span>' +
+          '</button>' +
+          '<button type="button" class="ntm-hdr-action-btn" id="btnNvWptHelp" title="Waypoint fields help">' +
+            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></span>' +
+            '<span class="ntm-hdr-action-lbl">Help</span>' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ntm-nv-wpt-form-scroll">' +
+        '<div class="ntm-nv-wpt-id-row">' +
+          '<span class="ntm-nv-lbl">Waypoint:</span>' +
+          '<span class="ntm-nv-wpt-id-val">WP' + idx + '</span>' +
+        '</div>' +
+        '<div class="ntm-nv-inline-field">' +
+          '<label class="ntm-nv-lbl" for="nvWptName">WP name:</label>' +
+          '<input type="text" id="nvWptName" class="ntm-nv-input" value="' + escHtml(dispName) + '" placeholder="" />' +
+        '</div>' +
+        '<div class="ntm-nv-grid-2">' +
+          '<div class="ntm-nv-field">' +
+            '<label class="ntm-nv-lbl" for="nvWptLat">Latitude:</label>' +
+            '<input type="text" id="nvWptLat" class="ntm-nv-input" value="' + escHtml(latStr) + '" />' +
+          '</div>' +
+          '<div class="ntm-nv-field">' +
+            '<label class="ntm-nv-lbl" for="nvWptLon">Longitude:</label>' +
+            '<input type="text" id="nvWptLon" class="ntm-nv-input" value="' + escHtml(lonStr) + '" />' +
+          '</div>' +
+        '</div>' +
+        '<div class="ntm-nv-grid-2">' +
+          '<div class="ntm-nv-field">' +
+            '<label class="ntm-nv-lbl" for="nvWptXtdPort">XTD Port:</label>' +
+            '<input type="text" id="nvWptXtdPort" class="ntm-nv-input" value="' + escHtml(portXtdStr) + '" />' +
+          '</div>' +
+          '<div class="ntm-nv-field">' +
+            '<label class="ntm-nv-lbl" for="nvWptXtdStbd">XTD Starboard:</label>' +
+            '<input type="text" id="nvWptXtdStbd" class="ntm-nv-input" value="' + escHtml(stbdXtdStr) + '" />' +
+          '</div>' +
+        '</div>' +
+        '<div class="ntm-nv-grid-2">' +
+          '<div class="ntm-nv-field">' +
+            '<label class="ntm-nv-lbl" for="nvWptTurnRad">Turning radius:</label>' +
+            '<input type="text" id="nvWptTurnRad" class="ntm-nv-input" value="' + escHtml(radStr) + '" />' +
+          '</div>' +
+          '<div class="ntm-nv-field">' +
+            '<label class="ntm-nv-lbl" for="nvWptLegType">Leg type:</label>' +
+            '<div class="ntm-nv-select-wrap">' +
+              '<select id="nvWptLegType" class="ntm-nv-select">' +
+                '<option value="RL"' + (sailCode === "RL" ? ' selected' : '') + '>Rhumb line</option>' +
+                '<option value="GC"' + (sailCode === "GC" ? ' selected' : '') + '>Great circle</option>' +
+              '</select>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ntm-nv-field">' +
+          '<label class="ntm-nv-lbl" for="nvWptPassageType">Passage type:</label>' +
+          '<div class="ntm-nv-select-wrap">' +
+            '<select id="nvWptPassageType" class="ntm-nv-select">' + pTypeOptionsHtml + '</select>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ntm-nv-field">' +
+          '<label class="ntm-nv-lbl" for="nvWptPassageEvent">Passage type event:</label>' +
+          '<div class="ntm-nv-select-wrap">' +
+            '<select id="nvWptPassageEvent" class="ntm-nv-select">' + pEventOptionsHtml + '</select>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ntm-nv-field">' +
+          '<label class="ntm-nv-lbl" for="nvWptPlanSpeed">Planned speed:</label>' +
+          '<input type="text" id="nvWptPlanSpeed" class="ntm-nv-input" value="' + escHtml(planSpdStr) + '" />' +
+        '</div>' +
+        '<div class="ntm-nv-grid-2">' +
+          '<div class="ntm-nv-field">' +
+            '<label class="ntm-nv-lbl" for="nvWptMinSpeed">Minimum speed:</label>' +
+            '<input type="text" id="nvWptMinSpeed" class="ntm-nv-input" value="' + escHtml(minSpdStr) + '" />' +
+          '</div>' +
+          '<div class="ntm-nv-field">' +
+            '<label class="ntm-nv-lbl" for="nvWptMaxSpeed">Maximum speed:</label>' +
+            '<input type="text" id="nvWptMaxSpeed" class="ntm-nv-input" value="' + escHtml(maxSpdStr) + '" />' +
+          '</div>' +
+        '</div>' +
+        '<div class="ntm-nv-field">' +
+          '<label class="ntm-nv-lbl" for="nvWptRemarks">Remarks:</label>' +
+          '<textarea id="nvWptRemarks" class="ntm-nv-textarea" rows="3">' + escHtml(wp.remarks || "") + '</textarea>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ntm-nv-wpt-footer">' +
+        '<button type="button" class="ntm-nv-reset-link" id="btnNvResetDefaults">Reset to default values</button>' +
+        '<button type="button" class="ntm-nv-reset-broom" id="btnNvResetBroom" title="Reset waypoint parameters to Passage type defaults">' +
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19.36 2.72L20.78 4.14L15.06 9.85C16.13 11.39 16.28 13.24 15.38 14.44L9.06 8.12C10.26 7.22 12.11 7.37 13.65 8.44L19.36 2.72M5.93 17.57C3.92 15.56 2.69 13.16 2.35 10.92L7.23 8.83L14.67 16.27L12.58 21.15C10.34 20.81 7.94 19.58 5.93 17.57Z"/></svg>' +
+        '</button>' +
+      '</div>';
+
+    const readAndApplyForm = (replot) => {
+      const elName = wptPanel.querySelector("#nvWptName");
+      const elLat = wptPanel.querySelector("#nvWptLat");
+      const elLon = wptPanel.querySelector("#nvWptLon");
+      const elXP = wptPanel.querySelector("#nvWptXtdPort");
+      const elXS = wptPanel.querySelector("#nvWptXtdStbd");
+      const elRad = wptPanel.querySelector("#nvWptTurnRad");
+      const elLeg = wptPanel.querySelector("#nvWptLegType");
+      const elPT = wptPanel.querySelector("#nvWptPassageType");
+      const elPE = wptPanel.querySelector("#nvWptPassageEvent");
+      const elSpd = wptPanel.querySelector("#nvWptPlanSpeed");
+      const elMinS = wptPanel.querySelector("#nvWptMinSpeed");
+      const elMaxS = wptPanel.querySelector("#nvWptMaxSpeed");
+      const elRem = wptPanel.querySelector("#nvWptRemarks");
+
+      if (elName) wp.name = elName.value.trim();
+      let coordsMoved = false;
+      if (elLat) {
+        const parsedLat = parseNavtorCoord(elLat.value, false);
+        if (parsedLat !== null && Math.abs(parsedLat - Number(wp.lat)) > 1e-6) {
+          wp.lat = parsedLat;
+          coordsMoved = true;
+        }
+        elLat.value = formatNavtorLatDms(wp.lat);
+      }
+      if (elLon) {
+        const parsedLon = parseNavtorCoord(elLon.value, true);
+        if (parsedLon !== null && Math.abs(parsedLon - Number(wp.lon)) > 1e-6) {
+          wp.lon = parsedLon;
+          coordsMoved = true;
+        }
+        elLon.value = formatNavtorLonDms(wp.lon);
+      }
+      if (elXP) {
+        wp.portsideXTD = parseNumericField(elXP.value, wp.portsideXTD, 0, 50);
+        elXP.value = Number(wp.portsideXTD).toFixed(3) + " NM";
+      }
+      if (elXS) {
+        wp.starboardXTD = parseNumericField(elXS.value, wp.starboardXTD, 0, 50);
+        elXS.value = Number(wp.starboardXTD).toFixed(3) + " NM";
+      }
+      if (elRad) {
+        wp.turnRadius = parseNumericField(elRad.value, wp.turnRadius, 0, 25);
+        elRad.value = Number(wp.turnRadius).toFixed(3) + " NM";
+      }
+      if (elLeg) wp.sail = elLeg.value === "GC" ? "GC" : "RL";
+      if (elPT) wp.passageType = elPT.value;
+      if (elPE) wp.passageEvent = elPE.value;
+      if (elSpd) {
+        wp.speedKnots = parseNumericField(elSpd.value, wp.speedKnots, 0.5, 60);
+        elSpd.value = Number(wp.speedKnots).toFixed(1) + " kn";
+      }
+      if (elMinS) {
+        wp.minSpeedKnots = parseNumericField(elMinS.value, wp.minSpeedKnots, 0, 60);
+        elMinS.value = Number(wp.minSpeedKnots).toFixed(1) + " kn";
+      }
+      if (elMaxS) {
+        wp.maxSpeedKnots = parseNumericField(elMaxS.value, wp.maxSpeedKnots, 0.5, 80);
+        elMaxS.value = Number(wp.maxSpeedKnots).toFixed(1) + " kn";
+      }
+      if (elRem) wp.remarks = elRem.value;
+
+      persistCurrentNavtorRoute(Boolean(replot || coordsMoved));
+    };
+
+    // Bind blur / change listeners for live persistence & unit formatting
+    ["#nvWptName", "#nvWptLat", "#nvWptLon", "#nvWptXtdPort", "#nvWptXtdStbd", "#nvWptTurnRad", "#nvWptPlanSpeed", "#nvWptMinSpeed", "#nvWptMaxSpeed", "#nvWptRemarks"].forEach((sel) => {
+      const inp = wptPanel.querySelector(sel);
+      if (!inp) return;
+      inp.addEventListener("change", () => readAndApplyForm(true));
+      if (inp.tagName === "INPUT") {
+        inp.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") {
+            ev.preventDefault();
+            inp.blur();
+          }
+        });
+      }
+    });
+
+    ["#nvWptLegType", "#nvWptPassageType", "#nvWptPassageEvent"].forEach((sel) => {
+      const sEl = wptPanel.querySelector(sel);
+      if (sEl) sEl.addEventListener("change", () => readAndApplyForm(true));
+    });
+
+    const btnBack = wptPanel.querySelector("#btnNvWptBack");
+    if (btnBack) {
+      btnBack.onclick = () => {
+        readAndApplyForm(true);
+        st.view = "route";
+        renderNavtorSidebar();
+      };
+    }
+
+    const btnPrev = wptPanel.querySelector("#btnNvWptPrev");
+    if (btnPrev && hasPrev) {
+      btnPrev.onclick = () => {
+        readAndApplyForm(false);
+        st.wptIdx = idx - 1;
+        const target = rt.waypoints[st.wptIdx];
+        if (window.leafletMap && target) {
+          try { window.leafletMap.panTo([Number(target.lat), Number(target.lon)]); } catch (e) {}
+        }
+        renderWaypointEditView(wptPanel, rt);
+      };
+    }
+
+    const btnNext = wptPanel.querySelector("#btnNvWptNext");
+    if (btnNext && hasNext) {
+      btnNext.onclick = () => {
+        readAndApplyForm(false);
+        st.wptIdx = idx + 1;
+        const target = rt.waypoints[st.wptIdx];
+        if (window.leafletMap && target) {
+          try { window.leafletMap.panTo([Number(target.lat), Number(target.lon)]); } catch (e) {}
+        }
+        renderWaypointEditView(wptPanel, rt);
+      };
+    }
+
+    const btnDel = wptPanel.querySelector("#btnNvWptDelete");
+    if (btnDel) {
+      btnDel.onclick = () => {
+        rt.waypoints.splice(idx, 1);
+        persistCurrentNavtorRoute(true);
+        if (rt.waypoints.length === 0) {
+          st.wptIdx = 0;
+          st.view = "route";
+        } else {
+          st.wptIdx = Math.min(idx, rt.waypoints.length - 1);
+        }
+        renderNavtorSidebar();
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("Deleted WP" + idx, "info");
+        }
+      };
+    }
+
+    const btnHelp = wptPanel.querySelector("#btnNvWptHelp");
+    if (btnHelp) {
+      btnHelp.onclick = () => {
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("Enter coordinates as DD°MM.MMM'N/S or decimal degrees. Use Prev/Next arrows to step along the route.", "info");
+        }
+      };
+    }
+
+    const doResetDefaults = () => {
+      const ptEl = wptPanel.querySelector("#nvWptPassageType");
+      const pType = (ptEl && ptEl.value) || wp.passageType || "Pilotage/fairway/channel";
+      const defs = NAVTOR_PASSAGE_DEFAULTS[pType] || NAVTOR_PASSAGE_DEFAULTS["Coastal"];
+      wp.passageType = pType;
+      wp.portsideXTD = defs.portsideXTD;
+      wp.starboardXTD = defs.starboardXTD;
+      wp.turnRadius = idx === 0 ? 0.000 : defs.turnRadius;
+      wp.sail = defs.sail;
+      wp.speedKnots = defs.speedKnots;
+      wp.minSpeedKnots = defs.minSpeedKnots;
+      wp.maxSpeedKnots = defs.maxSpeedKnots;
+      persistCurrentNavtorRoute(true);
+      renderWaypointEditView(wptPanel, rt);
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast("Reset WP" + idx + " to " + pType + " defaults", "info");
+      }
+    };
+
+    const btnResetLink = wptPanel.querySelector("#btnNvResetDefaults");
+    const btnResetBroom = wptPanel.querySelector("#btnNvResetBroom");
+    if (btnResetLink) btnResetLink.onclick = doResetDefaults;
+    if (btnResetBroom) btnResetBroom.onclick = doResetDefaults;
+  }
+
+  function renderNavtorSidebar() {
+    const dom = ensureNavtorContainers();
+    if (!dom) return;
+    const { sidebar, routePanel, wptPanel } = dom;
+    const st = window._sidebarNavtorState;
+    const rt = getActiveNavtorRoute();
+
+    if ((st.view === "route" || st.view === "waypoint") && !rt) {
+      st.view = "list";
+      setChartAddWpMode(false);
+    }
+
+    sidebar.setAttribute("data-sidebar-view", st.view);
+
+    if (st.view === "list") {
+      routePanel.hidden = true;
+      wptPanel.hidden = true;
+      if (typeof window._origRenderSidebarUserRoutesList === "function") {
+        window._origRenderSidebarUserRoutesList();
+      }
+      return;
+    }
+
+    if (st.view === "route") {
+      routePanel.hidden = false;
+      wptPanel.hidden = true;
+      renderRouteDetailView(routePanel, rt);
+      return;
+    }
+
+    if (st.view === "waypoint") {
+      routePanel.hidden = true;
+      wptPanel.hidden = false;
+      renderWaypointEditView(wptPanel, rt);
+    }
+  }
+
+  window.renderNavtorSidebar = renderNavtorSidebar;
+
+  // Open a route directly into NAVTOR Route Detail View (Photo 2 if empty, Photo 3 if has waypoints)
+  window.openNavtorRouteInSidebar = function (routeId) {
+    const st = window._sidebarNavtorState;
+    setChartAddWpMode(false);
+    st.routeId = routeId || (activeRouteData && (activeRouteData.id || activeRouteData.name)) || null;
+    st.wptSearch = "";
+    st.destPickerOpen = false;
+    st.newPpMenuOpen = false;
+    st.renamingRoute = false;
+    st.view = "route";
+    renderNavtorSidebar();
+  };
+
+  // Create a brand new empty route (Route1, Route2...) and open Photo 2 screen
+  window.startManualChartRouteCreation = function () {
+    let lib = [];
+    try { lib = getSavedRoutesLibrary() || []; } catch (e) { lib = []; }
+    let n = 1;
+    const existingNames = new Set(lib.map((r) => String((r && (r.name || r.routeName)) || "").trim().toUpperCase()));
+    while (existingNames.has("ROUTE" + n)) n++;
+    const newRoute = {
+      id: "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 6),
+      name: "Route" + n,
+      waypoints: [],
+      legs: [],
+      totalDistanceNM: 0,
+      totalSteamingHours: 0,
+      steamingDays: "0.0",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    activeRouteData = newRoute;
+    try { persistActiveRouteToStorage(newRoute); } catch (e) {}
+    if (typeof saveRouteToLibrary === "function") {
+      saveRouteToLibrary(newRoute);
+    }
+    if (typeof leafletMap !== "undefined" && leafletMap && typeof renderRouteOnMap === "function") {
+      renderRouteOnMap(newRoute, false);
+    }
+    window.openNavtorRouteInSidebar(newRoute.id);
+  };
+
+  // Redirect legacy openWaypointEditModal(idx) into NAVTOR sidebar Edit Waypoint view (Photo 4)
+  window.openWaypointEditModal = function (idx) {
+    const sidebar = document.getElementById("ntmSidebar");
+    if (sidebar && activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints[idx]) {
+      if (typeof window.toggleNtmSidebar === "function") {
+        window.toggleNtmSidebar(true);
+      }
+      window._sidebarNavtorState.routeId = activeRouteData.id || activeRouteData.name || null;
+      window._sidebarNavtorState.wptIdx = idx;
+      window._sidebarNavtorState.view = "waypoint";
+      renderNavtorSidebar();
+      return;
+    }
+  };
+})();
+
 
 
 
