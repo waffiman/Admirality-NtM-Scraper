@@ -21,13 +21,11 @@ var OVERLAY_STATES = window.OVERLAY_STATES || {
   bathymetry: true,
   timezones: false,
   weather: false,
-  route: hasSavedDrCurrentRoute,
+  route: false,
   ais: false
 };
 OVERLAY_STATES.buoys = true;
-if (hasSavedDrCurrentRoute) {
-  OVERLAY_STATES.route = true;
-}
+OVERLAY_STATES.route = false;
 window.OVERLAY_STATES = OVERLAY_STATES;
 
 let leafletPortDepthsLayer = null;
@@ -19917,13 +19915,7 @@ function initExcelOverlayDock(map) {
       infoId: "btnAisOverlayInfo",
       onInfo: () => { if (typeof window.showAisInfoModal === "function") window.showAisInfoModal(); }
     },
-    { key: "timezones", tabId: "tabOverlayTimezones" },
-    {
-      key: "route",
-      tabId: "tabOverlayRoute",
-      infoId: "btnRouteOverlayInfo",
-      onInfo: () => { if (typeof window.showRouteInfoSummary === "function") window.showRouteInfoSummary(); }
-    }
+    { key: "timezones", tabId: "tabOverlayTimezones" }
   ];
 
   overlayTabSpecs.forEach((spec) => {
@@ -19951,10 +19943,7 @@ function initExcelOverlayDock(map) {
     }
   });
 
-  if (hasSavedDrCurrentRoute) {
-    OVERLAY_STATES.route = true;
-    if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
-  }
+  // Route visibility on chart is strictly controlled by route selection in #ntmSidebar
 
   // Sync initial dock tab visual states with OVERLAY_STATES
   overlayTabSpecs.forEach(({ key }) => {
@@ -19970,9 +19959,7 @@ function initExcelOverlayDock(map) {
     try { window.syncNdbcCursorTileVisibility(); } catch (eSync) {}
   }
 
-  if (hasSavedDrCurrentRoute && typeof window.ensureCurrentRouteRenderedOnChart === "function") {
-    try { window.ensureCurrentRouteRenderedOnChart(); } catch (eCurRt) {}
-  }
+
 
   // Restore or run weekly depth check on startup
   runWeeklyDepthAudit(false);

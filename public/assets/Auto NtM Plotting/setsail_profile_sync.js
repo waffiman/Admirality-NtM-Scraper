@@ -341,9 +341,13 @@
       localStorage.setItem("setsail_route_v1", JSON.stringify(route));
     } catch (e) {}
     try {
-      global.activeRouteData = route;
-      if (typeof global.renderRouteOnMap === "function" && global.leafletMap) {
-        global.renderRouteOnMap(route, false);
+      if (typeof global.isRouteSelectedInSidebar === "function" && global.isRouteSelectedInSidebar(route)) {
+        global.activeRouteData = route;
+        if (typeof global.renderRouteOnMap === "function" && global.leafletMap) {
+          global.renderRouteOnMap(route, false);
+        }
+      } else if (typeof global.renderSidebarUserRoutesList === "function") {
+        try { global.renderSidebarUserRoutesList(); } catch (eSb) {}
       }
       if (typeof global.updateRouteMiniWindowUI === "function") {
         try { global.updateRouteMiniWindowUI(); } catch (eUi) {}

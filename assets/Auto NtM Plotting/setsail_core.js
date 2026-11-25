@@ -7774,9 +7774,46 @@ function parseCsvRoute(csvStr, fallbackName) {
 
 function parseRtmRoute(arrayBuffer, fallbackName) {
 
-  const view = new DataView(arrayBuffer);
+  let routeName = String(fallbackName || "Route").replace(/\.rtm$/i, "");
 
-  let routeName = fallbackName.replace(/\.rtm$/i, "");
+  // Fallback for text/XML/INI Navi-Sailor .rtm variants
+  try {
+    const headBytes = new Uint8Array(arrayBuffer, 0, Math.min(256, arrayBuffer.byteLength));
+    let printable = 0;
+    for (let i = 0; i < headBytes.length; i++) {
+      const c = headBytes[i];
+      if ((c >= 32 && c <= 126) || c === 9 || c === 10 || c === 13) printable++;
+    }
+    if (headBytes.length > 0 && printable / headBytes.length > 0.88) {
+      const txt = new TextDecoder("utf-8", { fatal: false }).decode(arrayBuffer);
+      if (/<route|<waypoint/i.test(txt) && typeof parseRtzRoute === "function") {
+        const xmlRes = parseRtzRoute(txt, fallbackName);
+        if (xmlRes && Array.isArray(xmlRes.waypoints) && xmlRes.waypoints.length > 0) {
+          xmlRes.format = "RTM";
+          return xmlRes;
+        }
+      }
+      const txtWps = [];
+      const lines = txt.split(/\r?\n/);
+      for (let li = 0; li < lines.length; li++) {
+        const ln = lines[li].trim();
+        if (!ln || ln.startsWith(";") || ln.startsWith("#")) continue;
+        const nums = ln.match(/-?\d+\.\d+/g);
+        if (nums && nums.length >= 2) {
+          const a = parseFloat(nums[0]);
+          const b = parseFloat(nums[1]);
+          if (Math.abs(a) <= 90 && Math.abs(b) <= 180 && !(a === 0 && b === 0)) {
+            txtWps.push({ id: txtWps.length + 1, lat: a, lon: b, name: "WPT " + (txtWps.length + 1) });
+          }
+        }
+      }
+      if (txtWps.length > 0) {
+        return { name: routeName, waypoints: sanitizeRouteWaypoints(txtWps), format: "RTM" };
+      }
+    }
+  } catch (eTxtRtm) {}
+
+  const view = new DataView(arrayBuffer);
 
   const waypoints = [];
 
@@ -8649,6 +8686,12 @@ function ensureCurrentRouteRenderedOnChart(opts) {
   opts = opts || {};
   const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
   if (!map) return;
+  if (typeof window.isRouteSelectedInSidebar === "function" && !window.isRouteSelectedInSidebar()) {
+    if (typeof window.clearChartRouteDisplayOnly === "function") {
+      window.clearChartRouteDisplayOnly();
+    }
+    return;
+  }
 
   const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
   let targetRoute = null;
@@ -8771,7 +8814,20 @@ function openAndPlotRouteOnSetChart(routeOverride) {
     if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
   }
   const token = window._setsailExplicitRouteToken || 0;
+  if (hasWpts && window._sidebarNavtorState) {
+    if (!targetRoute.id) {
+      targetRoute.id = "route_" + Date.now().toString(36);
+    }
+    if (typeof saveRouteToLibrary === "function") {
+      try { saveRouteToLibrary(targetRoute); } catch (eSvSr) {}
+    }
+    window._sidebarNavtorState.routeId = targetRoute.id || targetRoute.name;
+    window._sidebarNavtorState.view = "route";
+  }
   if (typeof switchToTab === "function") switchToTab("tab-ntm", "user");
+  if (hasWpts && typeof window.openNavtorRouteInSidebar === "function") {
+    try { window.openNavtorRouteInSidebar(targetRoute.id || targetRoute.name, { fitChart: true }); } catch (eOpenSb) {}
+  }
 
   const runPlot = (attempt) => {
     const map = (typeof leafletMap !== "undefined" ? leafletMap : null) || window.leafletMap;
@@ -13997,6 +14053,11 @@ function initVesselTracking() {
 
       } catch (eEn) {}
 
+      if (window._sidebarNavtorState) {
+        window._sidebarNavtorState.routeId = parsed.id;
+        window._sidebarNavtorState.view = "route";
+      }
+
       try {
 
         if (typeof saveRouteToLibrary === "function") saveRouteToLibrary(parsed);
@@ -14004,6 +14065,10 @@ function initVesselTracking() {
       } catch (eLib) {}
 
       renderRouteOnMap(parsed, true);
+
+      if (typeof window.openNavtorRouteInSidebar === "function") {
+        try { window.openNavtorRouteInSidebar(parsed.id, { skipPlot: true }); } catch (eOpenImp) {}
+      }
 
       const asCurrent = !!window._setsailRouteUploadAsCurrent;
 
@@ -38522,7 +38587,7 @@ function restoreSetSailUserHistory(email, silent = false) {
 
       localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(snap.activeRoute));
 
-      if (leafletMap && typeof renderRouteOnMap === "function" && typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES.route) {
+      if (leafletMap && typeof renderRouteOnMap === "function" && typeof window.isRouteSelectedInSidebar === "function" && window.isRouteSelectedInSidebar(snap.activeRoute)) {
 
         renderRouteOnMap(snap.activeRoute, false);
 
@@ -42110,25 +42175,10 @@ function updateRouteMiniWindowUI() {
 
   const win = document.getElementById("ntmRouteMiniWindow");
 
-  if (!win) return;
-
-
-
-  const hasRoute = Boolean(activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length > 0);
-
-  const isRouteVisible = typeof OVERLAY_STATES === "undefined" || OVERLAY_STATES.route !== false;
-
-  if (!hasRoute || !isRouteVisible) {
-
+  if (win) {
     win.style.display = "none";
-
-    return;
-
   }
-
-
-
-  win.style.display = "block";
+  return;
 
   const wpts = activeRouteData.waypoints;
 
@@ -45755,10 +45805,7 @@ function deleteRouteFromLibrary(routeId) {
 
     try { persistActiveRouteToStorage(null); } catch (eLs) {}
 
-    if (lib.length > 0 && typeof selectSavedRouteFromSidebar === "function") {
-
-      selectSavedRouteFromSidebar(lib[0].id, false, { skipSavePrev: true });
-
+    if (false) {
     } else {
 
       try { if (typeof clearActiveRoute === "function") clearActiveRoute(); } catch (eClr) {}
@@ -46205,10 +46252,56 @@ function selectSavedRouteFromSidebar(routeId, openRightDrawer = true, opts = {})
 
 window.selectSavedRouteFromSidebar = selectSavedRouteFromSidebar;
 
-/* ── v5.258: User Routes Sidebar (Routes / Bin Tabs, Header Actions & Cards) ── */
+/* ── v5.263: User Routes Sidebar (Routes / Bin Tabs, Checkboxes & Header Actions) ── */
 const SETSAIL_ROUTES_BIN_KEY = "setsail_routes_bin_v1";
 window._sidebarRoutesActiveTab = window._sidebarRoutesActiveTab || "routes";
 window._sidebarSelectedBinRouteId = window._sidebarSelectedBinRouteId || null;
+window._sidebarCheckedRouteIds = window._sidebarCheckedRouteIds || new Set();
+
+function isRouteSelectedInSidebar(rt) {
+  const st = window._sidebarNavtorState;
+  if (!st || (st.view !== "route" && st.view !== "waypoint") || !st.routeId) return false;
+  if (!rt) return true;
+  return Boolean((rt.id && rt.id === st.routeId) || (rt.name && rt.name === st.routeId));
+}
+window.isRouteSelectedInSidebar = isRouteSelectedInSidebar;
+
+function clearChartRouteDisplayOnly() {
+  activeRouteData = null;
+  window.activeRouteData = null;
+  window._setsailExplicitChartRoute = null;
+  window._setsailRouteUnrolled = null;
+  window._setsailRouteStrokeRefs = {};
+  window._setsailLastRouteRenderSig = "";
+  window.ROUTE_CORRIDOR_FILTER_ENABLED = false;
+  try {
+    if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.route = false;
+    if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = false;
+  } catch (eOv) {}
+  try {
+    const rLayer = window.leafletRouteLayer || (typeof leafletRouteLayer !== "undefined" ? leafletRouteLayer : null);
+    if (rLayer && typeof rLayer.clearLayers === "function") {
+      rLayer.clearLayers();
+    }
+  } catch (eClrR) {}
+  try {
+    if (window.leafletRouteBufferLayer && typeof window.leafletRouteBufferLayer.clearLayers === "function") {
+      window.leafletRouteBufferLayer.clearLayers();
+    } else if (typeof window.renderRouteBufferCorridorOnMap === "function") {
+      window.renderRouteBufferCorridorOnMap();
+    }
+  } catch (eClrBuf) {}
+  try {
+    if (typeof window._setsailRefreshRouteCourseLabels === "function") {
+      window._setsailRefreshRouteCourseLabels();
+    }
+  } catch (eClrLbl) {}
+  try {
+    const win = document.getElementById("ntmRouteMiniWindow");
+    if (win) win.style.display = "none";
+  } catch (eMini) {}
+}
+window.clearChartRouteDisplayOnly = clearChartRouteDisplayOnly;
 
 function getDeletedRoutesBin() {
   try {
@@ -46247,33 +46340,47 @@ function computeRouteDistanceNmFormatted(rt) {
   return dist.toFixed(2);
 }
 
-function moveRouteToBin(routeId) {
+function moveRouteToBin(routeIdsOrSingle) {
   let lib = [];
   try { lib = getSavedRoutesLibrary() || []; } catch (e) { lib = []; }
-  if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length) {
-    if (!lib.some((r) => r && ((activeRouteData.id && r.id === activeRouteData.id) || r.name === activeRouteData.name))) {
-      lib = [activeRouteData].concat(lib);
-    }
+  const ids = Array.isArray(routeIdsOrSingle)
+    ? routeIdsOrSingle.filter(Boolean)
+    : (routeIdsOrSingle ? [routeIdsOrSingle] : Array.from(window._sidebarCheckedRouteIds || []));
+
+  let targets = [];
+  if (ids.length > 0) {
+    targets = lib.filter((r) => r && (ids.indexOf(r.id) !== -1 || ids.indexOf(r.name) !== -1));
+  } else if (lib.length === 1) {
+    targets = [lib[0]];
   }
-  const target = routeId
-    ? lib.find((r) => r && (r.id === routeId || r.name === routeId))
-    : (activeRouteData || lib[0]);
-  if (!target) {
-    if (typeof showSetSailToast === "function") showSetSailToast("No route selected to delete", "info");
+
+  if (!targets.length) {
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast(lib.length ? "Tick a route checkbox to move it to Bin" : "No routes to delete", "info");
+    }
     return;
   }
-  const tid = target.id || target.name;
-  const bin = getDeletedRoutesBin().filter((r) => r && r.id !== tid && r.name !== target.name);
-  const archived = Object.assign({}, target, {
-    id: target.id || ("route_" + Date.now().toString(36)),
-    deletedAt: new Date().toISOString()
+
+  let bin = getDeletedRoutesBin();
+  targets.forEach((target) => {
+    const tid = target.id || target.name;
+    window._sidebarCheckedRouteIds.delete(tid);
+    bin = bin.filter((r) => r && r.id !== tid && r.name !== target.name);
+    const archived = Object.assign({}, target, {
+      id: target.id || ("route_" + Date.now().toString(36)),
+      deletedAt: new Date().toISOString()
+    });
+    bin.unshift(archived);
+    if (typeof deleteRouteFromLibrary === "function") {
+      deleteRouteFromLibrary(tid);
+    }
   });
-  bin.unshift(archived);
   writeDeletedRoutesBin(bin);
-  if (typeof deleteRouteFromLibrary === "function") {
-    deleteRouteFromLibrary(tid);
+  clearChartRouteDisplayOnly();
+  _renderSidebarRoutesListBase();
+  if (typeof showSetSailToast === "function") {
+    showSetSailToast(targets.length > 1 ? (targets.length + " routes moved to Bin") : "Route moved to Bin", "info");
   }
-  renderSidebarUserRoutesList();
 }
 window.moveRouteToBin = moveRouteToBin;
 
@@ -46284,46 +46391,60 @@ function restoreRouteFromBin(routeId) {
   const [restored] = bin.splice(idx, 1);
   delete restored.deletedAt;
   writeDeletedRoutesBin(bin);
+  window._sidebarCheckedRouteIds.delete(routeId);
   if (typeof saveRouteToLibrary === "function") {
     saveRouteToLibrary(restored);
   }
-  if (typeof selectSavedRouteFromSidebar === "function" && restored.id) {
-    selectSavedRouteFromSidebar(restored.id, false);
-  }
   if (window._sidebarSelectedBinRouteId === routeId) {
-    window._sidebarSelectedBinRouteId = bin[0] ? bin[0].id : null;
+    window._sidebarSelectedBinRouteId = bin[0] ? (bin[0].id || bin[0].name) : null;
   }
-  renderSidebarUserRoutesList();
+  clearChartRouteDisplayOnly();
+  _renderSidebarRoutesListBase();
   if (typeof showSetSailToast === "function") {
-    showSetSailToast("Route restored", "success");
+    showSetSailToast("Route restored to Routes", "success");
   }
 }
 window.restoreRouteFromBin = restoreRouteFromBin;
 
-function permanentlyDeleteRouteFromBin(routeId) {
+function permanentlyDeleteRouteFromBin(routeIdsOrSingle) {
   const bin = getDeletedRoutesBin();
   if (!bin.length) {
     if (typeof showSetSailToast === "function") showSetSailToast("Bin is already empty", "info");
     return;
   }
-  const targetId = routeId || window._sidebarSelectedBinRouteId || (bin[0] && bin[0].id);
-  const nextBin = bin.filter((r) => r && r.id !== targetId && r.name !== targetId);
+  let ids = Array.isArray(routeIdsOrSingle)
+    ? routeIdsOrSingle.filter(Boolean)
+    : (routeIdsOrSingle ? [routeIdsOrSingle] : Array.from(window._sidebarCheckedRouteIds || []));
+  if (!ids.length && window._sidebarSelectedBinRouteId) {
+    ids = [window._sidebarSelectedBinRouteId];
+  }
+  if (!ids.length && bin.length === 1) {
+    ids = [bin[0].id || bin[0].name];
+  }
+  if (!ids.length) {
+    if (typeof showSetSailToast === "function") showSetSailToast("Select a route in Bin to delete permanently", "info");
+    return;
+  }
+  const idSet = new Set(ids);
+  const nextBin = bin.filter((r) => r && !idSet.has(r.id) && !idSet.has(r.name));
+  ids.forEach((id) => window._sidebarCheckedRouteIds.delete(id));
   writeDeletedRoutesBin(nextBin);
-  window._sidebarSelectedBinRouteId = nextBin[0] ? nextBin[0].id : null;
-  renderSidebarUserRoutesList();
+  window._sidebarSelectedBinRouteId = nextBin[0] ? (nextBin[0].id || nextBin[0].name) : null;
+  _renderSidebarRoutesListBase();
   if (typeof showSetSailToast === "function") {
-    showSetSailToast("Route permanently deleted from Bin", "info");
+    showSetSailToast("Permanently deleted from Bin", "info");
   }
 }
 window.permanentlyDeleteRouteFromBin = permanentlyDeleteRouteFromBin;
 
-function renderSidebarUserRoutesList() {
+function _renderSidebarRoutesListBase() {
   const listContainer = document.getElementById("ntmItemsScroll");
   if (!listContainer) return;
 
   const tabMode = window._sidebarRoutesActiveTab === "bin" ? "bin" : "routes";
   const tabRoutesBtn = document.getElementById("tabSidebarRoutes");
   const tabBinBtn = document.getElementById("tabSidebarBin");
+  const btnDeleteHdr = document.getElementById("btnSidebarRouteDelete");
   if (tabRoutesBtn) {
     tabRoutesBtn.classList.toggle("active", tabMode === "routes");
     tabRoutesBtn.setAttribute("aria-selected", tabMode === "routes" ? "true" : "false");
@@ -46332,19 +46453,20 @@ function renderSidebarUserRoutesList() {
     tabBinBtn.classList.toggle("active", tabMode === "bin");
     tabBinBtn.setAttribute("aria-selected", tabMode === "bin" ? "true" : "false");
   }
+  if (btnDeleteHdr) {
+    btnDeleteHdr.title = tabMode === "bin"
+      ? "Permanently delete selected route(s) from Bin"
+      : "Delete checked route(s) (move to Bin)";
+  }
+
+  // In list view, no route is selected -> ensure no route is drawn on the chart
+  if (!window._sidebarNavtorState || window._sidebarNavtorState.view === "list") {
+    clearChartRouteDisplayOnly();
+  }
 
   let items = [];
   if (tabMode === "routes") {
     try { items = (getSavedRoutesLibrary() || []).slice(); } catch (e) { items = []; }
-    if (activeRouteData && Array.isArray(activeRouteData.waypoints)) {
-      const exists = items.some((r) => r && ((activeRouteData.id && r.id === activeRouteData.id) || (!(r.id && activeRouteData.id && r.id !== activeRouteData.id) && r.name === activeRouteData.name)));
-      if (!exists) {
-        if (!activeRouteData.id) {
-          activeRouteData.id = "route_" + Date.now().toString(36);
-        }
-        items.unshift(activeRouteData);
-      }
-    }
   } else {
     items = getDeletedRoutesBin();
   }
@@ -46361,7 +46483,6 @@ function renderSidebarUserRoutesList() {
     });
   }
 
-  // Apply sort selection from #ntmSortPopover
   const checkedSort = document.querySelector('input[name="popSort"]:checked');
   const sortMode = checkedSort ? checkedSort.value : "NUM_DESC";
   if (sortMode === "NUM_ASC") {
@@ -46394,11 +46515,6 @@ function renderSidebarUserRoutesList() {
   }
 
   const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  const shipSvg = `
-    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
-      <path d="M20 21c-1.39 0-2.78-.47-4-1.32-2.44 1.71-5.56 1.71-8 0C6.78 20.53 5.39 21 4 21H2v2h2c1.38 0 2.74-.35 4-.99 2.52 1.29 5.48 1.29 8 0 1.26.65 2.62.99 4 .99h2v-2h-2zM3.95 19H4c1.6 0 3.02-.88 4-2 .98 1.12 2.4 2 4 2s3.02-.88 4-2c.98 1.12 2.4 2 4 2h.05l1.89-6.68c.08-.26.06-.54-.06-.78s-.34-.42-.6-.5L20 10.62V6c0-1.1-.9-2-2-2h-3V1H9v3H6c-1.1 0-2 .9-2 2v4.62l-1.29.42c-.26.08-.48.26-.6.5s-.15.52-.06.78L3.95 19zM6 6h12v3.97L12 8 6 9.97V6z"/>
-    </svg>
-  `;
   const chevronSvg = `
     <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <polyline points="9 18 15 12 9 6"></polyline>
@@ -46406,21 +46522,23 @@ function renderSidebarUserRoutesList() {
   `;
 
   listContainer.innerHTML = items.map((rt) => {
-    const rid = esc(rt.id || rt.name || "");
+    const rawId = String(rt.id || rt.name || "");
+    const rid = esc(rawId);
     const rawName = String((rt && (rt.name || rt.routeName)) || "").trim();
     const title = rawName ? esc(rawName) : (typeof formatVesselRouteOdLabel === "function" ? formatVesselRouteOdLabel(rt) : "Route");
     const distFormatted = computeRouteDistanceNmFormatted(rt);
-    const isActive = tabMode === "routes"
-      ? Boolean(activeRouteData && ((activeRouteData.id && activeRouteData.id === rt.id) || (!(activeRouteData.id && rt.id && activeRouteData.id !== rt.id) && activeRouteData.name === rt.name)))
-      : Boolean(window._sidebarSelectedBinRouteId && (window._sidebarSelectedBinRouteId === rt.id || window._sidebarSelectedBinRouteId === rt.name));
+    const isChecked = window._sidebarCheckedRouteIds && window._sidebarCheckedRouteIds.has(rawId);
+    const isBinSelected = tabMode === "bin" && Boolean(window._sidebarSelectedBinRouteId && (window._sidebarSelectedBinRouteId === rt.id || window._sidebarSelectedBinRouteId === rt.name));
 
     const rightControls = tabMode === "bin"
       ? `<button type="button" class="ntm-user-route-restore-btn" data-bin-restore="${rid}" title="Restore route to Routes">Restore</button>`
       : `<span class="ntm-user-route-chevron">${chevronSvg}</span>`;
 
     return `
-      <div class="ntm-user-route-card ${isActive ? "is-active" : ""}" data-user-route-card="${rid}" data-route-tab-mode="${tabMode}">
-        <span class="ntm-user-route-ship-ico">${shipSvg}</span>
+      <div class="ntm-user-route-card ${(isChecked || isBinSelected) ? "is-checked-for-del" : ""}" data-user-route-card="${rid}" data-route-tab-mode="${tabMode}">
+        <label class="ntm-user-route-chk-wrap" title="Select route for Delete">
+          <input type="checkbox" class="ntm-user-route-chk" data-route-chk="${rid}" ${isChecked ? "checked" : ""} />
+        </label>
         <div class="ntm-user-route-info">
           <div class="ntm-user-route-title" title="${title}">${title}</div>
           <div class="ntm-user-route-dist">Distance: ${distFormatted}NM</div>
@@ -46429,6 +46547,24 @@ function renderSidebarUserRoutesList() {
       </div>
     `;
   }).join("");
+
+  listContainer.querySelectorAll(".ntm-user-route-chk-wrap, .ntm-user-route-chk").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  });
+
+  listContainer.querySelectorAll("[data-route-chk]").forEach((chk) => {
+    chk.addEventListener("change", (e) => {
+      e.stopPropagation();
+      const id = chk.getAttribute("data-route-chk");
+      if (!id) return;
+      if (chk.checked) window._sidebarCheckedRouteIds.add(id);
+      else window._sidebarCheckedRouteIds.delete(id);
+      const card = chk.closest(".ntm-user-route-card");
+      if (card) card.classList.toggle("is-checked-for-del", chk.checked);
+    });
+  });
 
   listContainer.querySelectorAll("[data-bin-restore]").forEach((btn) => {
     btn.addEventListener("click", (e) => {
@@ -46445,67 +46581,38 @@ function renderSidebarUserRoutesList() {
       const mode = card.getAttribute("data-route-tab-mode");
       if (mode === "bin") {
         window._sidebarSelectedBinRouteId = id;
-        renderSidebarUserRoutesList();
+        if (window._sidebarCheckedRouteIds.has(id)) window._sidebarCheckedRouteIds.delete(id);
+        else window._sidebarCheckedRouteIds.add(id);
+        _renderSidebarRoutesListBase();
         return;
       }
       if (!id) return;
-      if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
-      if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
-      const routeTab = document.querySelector('.excel-tab[data-overlay="route"]');
-      if (routeTab) {
-        routeTab.classList.add("active");
-        routeTab.setAttribute("aria-pressed", "true");
-      }
-      if (typeof selectSavedRouteFromSidebar === "function") {
-        selectSavedRouteFromSidebar(id, false);
-      }
-      if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length >= 2 && typeof fitRouteBounds === "function") {
-        try { fitRouteBounds(); } catch (eFit) {}
-      }
-      if (typeof updateRouteMiniWindowUI === "function") {
-        try { updateRouteMiniWindowUI(); } catch (eMini) {}
-      }
       if (typeof window.openNavtorRouteInSidebar === "function") {
-        window.openNavtorRouteInSidebar(id);
-      } else {
-        renderSidebarUserRoutesList();
+        window.openNavtorRouteInSidebar(id, { fitChart: true });
       }
     });
   });
 }
-window._origRenderSidebarUserRoutesList = renderSidebarUserRoutesList;
+
+window._origRenderSidebarUserRoutesList = _renderSidebarRoutesListBase;
 window.renderSidebarUserRoutesList = function () {
   if (window._sidebarNavtorState && window._sidebarNavtorState.view !== "list" && typeof window.renderNavtorSidebar === "function") {
     window.renderNavtorSidebar();
     return;
   }
-  return renderSidebarUserRoutesList();
+  return _renderSidebarRoutesListBase();
 };
 
 function initSidebarUserRoutesPanel() {
   if (window._sidebarUserRoutesPanelBound) return;
   window._sidebarUserRoutesPanelBound = true;
 
+  const sidebar = document.getElementById("ntmSidebar");
   const btnDelete = document.getElementById("btnSidebarRouteDelete");
   const btnImport = document.getElementById("btnSidebarRouteImport");
   const btnNew = document.getElementById("btnSidebarRouteNew");
-  const btnRefresh = document.getElementById("btnSidebarRouteRefresh");
-  const newSubmenu = document.getElementById("ntmNewRouteSubmenu");
-  const btnSubUpload = document.getElementById("btnSidebarNewUploadRoute");
-  const btnSubCreate = document.getElementById("btnSidebarNewCreateRoute");
-  const tabRoutes = document.getElementById("tabSidebarRoutes");
-  const tabBin = document.getElementById("tabSidebarBin");
-
-  const closeNewSubmenu = () => {
-    if (newSubmenu) newSubmenu.hidden = true;
-    if (btnNew) {
-      btnNew.classList.remove("is-open");
-      btnNew.setAttribute("aria-expanded", "false");
-    }
-  };
 
   const triggerRouteFileDialog = () => {
-    closeNewSubmenu();
     const fileInput = document.getElementById("vesselRouteFile");
     if (fileInput) fileInput.click();
   };
@@ -46513,36 +46620,18 @@ function initSidebarUserRoutesPanel() {
   if (btnImport) {
     btnImport.addEventListener("click", (e) => {
       e.preventDefault();
+      e.stopPropagation();
       triggerRouteFileDialog();
     });
   }
 
-  if (btnNew && newSubmenu) {
+  // "New" directly creates a manual route (no upload submenu — "Import" handles file uploads)
+  if (btnNew) {
     btnNew.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const willOpen = newSubmenu.hidden;
-      newSubmenu.hidden = !willOpen;
-      btnNew.classList.toggle("is-open", willOpen);
-      btnNew.setAttribute("aria-expanded", willOpen ? "true" : "false");
-    });
-  }
-
-  if (btnSubUpload) {
-    btnSubUpload.addEventListener("click", (e) => {
-      e.preventDefault();
-      triggerRouteFileDialog();
-    });
-  }
-
-  if (btnSubCreate) {
-    btnSubCreate.addEventListener("click", (e) => {
-      e.preventDefault();
-      closeNewSubmenu();
       if (typeof window.startManualChartRouteCreation === "function") {
         window.startManualChartRouteCreation();
-      } else if (typeof showSetSailToast === "function") {
-        showSetSailToast("Создание трассы с нуля будет подключено следующим шагом", "info");
       }
     });
   }
@@ -46550,57 +46639,52 @@ function initSidebarUserRoutesPanel() {
   if (btnDelete) {
     btnDelete.addEventListener("click", (e) => {
       e.preventDefault();
-      closeNewSubmenu();
+      e.stopPropagation();
       if (window._sidebarRoutesActiveTab === "bin") {
-        permanentlyDeleteRouteFromBin(window._sidebarSelectedBinRouteId);
+        permanentlyDeleteRouteFromBin();
       } else {
-        const targetId = activeRouteData ? (activeRouteData.id || activeRouteData.name) : null;
-        moveRouteToBin(targetId);
+        moveRouteToBin();
       }
     });
   }
 
-  if (btnRefresh) {
-    btnRefresh.addEventListener("click", (e) => {
-      e.preventDefault();
-      closeNewSubmenu();
-      renderSidebarUserRoutesList();
-      if (typeof renderVesselRouteLibraryList === "function") renderVesselRouteLibraryList();
-      if (typeof renderNavSavedRoutesTree === "function") renderNavSavedRoutesTree();
-      if (activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints.length && typeof renderRouteOnMap === "function") {
-        renderRouteOnMap(activeRouteData, false);
-      }
-      if (typeof showSetSailToast === "function") {
-        showSetSailToast("Routes refreshed", "info");
-      }
-    });
-  }
-
-  if (tabRoutes) {
-    tabRoutes.addEventListener("click", () => {
-      window._sidebarRoutesActiveTab = "routes";
-      renderSidebarUserRoutesList();
-    });
-  }
-
-  if (tabBin) {
-    tabBin.addEventListener("click", () => {
-      window._sidebarRoutesActiveTab = "bin";
+  const switchRoutesSubtab = (targetTab) => {
+    const mode = targetTab === "bin" ? "bin" : "routes";
+    window._sidebarRoutesActiveTab = mode;
+    window._sidebarCheckedRouteIds.clear();
+    if (window._sidebarNavtorState) {
+      window._sidebarNavtorState.view = "list";
+      window._sidebarNavtorState.routeId = null;
+    }
+    if (mode === "bin") {
       const bin = getDeletedRoutesBin();
       if (!window._sidebarSelectedBinRouteId && bin[0]) {
         window._sidebarSelectedBinRouteId = bin[0].id || bin[0].name;
       }
-      renderSidebarUserRoutesList();
+    }
+    clearChartRouteDisplayOnly();
+    _renderSidebarRoutesListBase();
+  };
+
+  // Delegated + direct click handling so Routes & Bin tabs are always responsive
+  if (sidebar) {
+    sidebar.addEventListener("click", (e) => {
+      const tabBtn = e.target && e.target.closest && e.target.closest("[data-routes-tab]");
+      if (!tabBtn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      switchRoutesSubtab(tabBtn.getAttribute("data-routes-tab"));
     });
   }
 
   document.querySelectorAll('input[name="popSort"]').forEach((r) => {
     r.addEventListener("change", () => {
-      renderSidebarUserRoutesList();
+      _renderSidebarRoutesListBase();
     });
   });
 
-  renderSidebarUserRoutesList();
+  clearChartRouteDisplayOnly();
+  _renderSidebarRoutesListBase();
 }
 window.initSidebarUserRoutesPanel = initSidebarUserRoutesPanel;
 
@@ -47278,7 +47362,11 @@ if (document.readyState === "loading") {
         st.destPickerOpen = false;
         st.newPpMenuOpen = false;
         st.renamingRoute = false;
+        st.routeId = null;
         st.view = "list";
+        if (typeof window.clearChartRouteDisplayOnly === "function") {
+          window.clearChartRouteDisplayOnly();
+        }
         renderNavtorSidebar();
       };
     }
@@ -47847,6 +47935,10 @@ if (document.readyState === "loading") {
     if (st.view === "list") {
       routePanel.hidden = true;
       wptPanel.hidden = true;
+      st.routeId = null;
+      if (typeof window.clearChartRouteDisplayOnly === "function") {
+        window.clearChartRouteDisplayOnly();
+      }
       if (typeof window._origRenderSidebarUserRoutesList === "function") {
         window._origRenderSidebarUserRoutesList();
       }
@@ -47869,8 +47961,9 @@ if (document.readyState === "loading") {
 
   window.renderNavtorSidebar = renderNavtorSidebar;
 
-  // Open a route directly into NAVTOR Route Detail View (Photo 2 if empty, Photo 3 if has waypoints)
-  window.openNavtorRouteInSidebar = function (routeId) {
+  // Open a route directly into NAVTOR Route Detail View and display it on SetChart
+  window.openNavtorRouteInSidebar = function (routeId, opts) {
+    opts = opts || {};
     const st = window._sidebarNavtorState;
     setChartAddWpMode(false);
     st.routeId = routeId || (activeRouteData && (activeRouteData.id || activeRouteData.name)) || null;
@@ -47879,6 +47972,25 @@ if (document.readyState === "loading") {
     st.newPpMenuOpen = false;
     st.renamingRoute = false;
     st.view = "route";
+
+    const rt = getActiveNavtorRoute();
+    if (rt && !opts.skipPlot) {
+      activeRouteData = rt;
+      window.activeRouteData = rt;
+      if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.route = true;
+      if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+      if (Array.isArray(rt.waypoints) && rt.waypoints.length > 0) {
+        const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+        if (map && typeof renderRouteOnMap === "function") {
+          window._setsailLastRouteRenderSig = "";
+          renderRouteOnMap(rt, Boolean(opts.fitChart && rt.waypoints.length >= 2));
+        }
+      } else if (typeof window.clearChartRouteDisplayOnly === "function") {
+        window.clearChartRouteDisplayOnly();
+        activeRouteData = rt;
+        window.activeRouteData = rt;
+      }
+    }
     renderNavtorSidebar();
   };
 

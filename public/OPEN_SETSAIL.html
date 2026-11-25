@@ -254,7 +254,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.262" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.263" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -10009,7 +10009,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.262" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.263" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
   <style>
@@ -15549,7 +15549,7 @@ body.light-theme .ntm-wx-unified {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.262" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.262';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.263" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.263';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -15571,7 +15571,7 @@ body.light-theme .ntm-wx-unified {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.262" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.263" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -16521,7 +16521,7 @@ body.light-theme .ntm-wx-unified {
                   <span class="ntm-hdr-action-lbl">Import</span>
                 </button>
 
-                <button type="button" class="ntm-hdr-action-btn" id="btnSidebarRouteNew" aria-expanded="false" title="New route — upload or create">
+                <button type="button" class="ntm-hdr-action-btn" id="btnSidebarRouteNew" title="Create new route manually">
                   <span class="ntm-hdr-action-ico" aria-hidden="true">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                       <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
@@ -16529,36 +16529,7 @@ body.light-theme .ntm-wx-unified {
                   </span>
                   <span class="ntm-hdr-action-lbl">New</span>
                 </button>
-
-                <button type="button" class="ntm-hdr-action-btn" id="btnSidebarRouteRefresh" title="Refresh routes">
-                  <span class="ntm-hdr-action-ico" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
-                      <polyline points="21 3 21 9 15 9"></polyline>
-                    </svg>
-                  </span>
-                  <span class="ntm-hdr-action-lbl">Refresh</span>
-                </button>
               </div>
-            </div>
-
-            <!-- Expandable sub-buttons under "+ New": Upload Route or Create Route -->
-            <div class="ntm-new-route-submenu" id="ntmNewRouteSubmenu" hidden>
-              <button type="button" class="ntm-new-route-subbtn" id="btnSidebarNewUploadRoute" title="Upload route file (.rtz, .csv, .rtm)">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="17 8 12 3 7 8"></polyline>
-                  <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <span>Upload route</span>
-              </button>
-              <button type="button" class="ntm-new-route-subbtn ntm-new-route-subbtn--create" id="btnSidebarNewCreateRoute" title="Create a new route from scratch">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                <span>Create new route</span>
-              </button>
             </div>
 
             <!-- Routes / Bin Sub-Header Tabs -->
@@ -17082,21 +17053,6 @@ body.light-theme .ntm-wx-unified {
                     </svg>
                   </span>
                   <span class="excel-tab-name">Time Zone</span>
-                </button>
-                <button type="button" class="excel-tab excel-tab-route" data-overlay="route" id="tabOverlayRoute" aria-pressed="false" title="Toggle Active Passage Route &amp; Waypoints">
-                  <span class="excel-tab-ico-wrap" aria-hidden="true">
-                    <span class="excel-tab-spinner"></span>
-                    <svg class="excel-tab-svg" viewBox="0 0 24 24">
-                      <polyline points="4.5 18.5 9.5 11.5 14.8 14 19.5 5.5"/>
-                      <circle class="ico-fill" cx="4.5" cy="18.5" r="2.1"/>
-                      <circle class="ico-fill" cx="9.5" cy="11.5" r="1.7"/>
-                      <circle class="ico-fill" cx="14.8" cy="14" r="1.7"/>
-                      <circle class="ico-dot" cx="19.5" cy="5.5" r="2.15"/>
-                      <polyline class="ico-spark" points="16.2 5.2 19.7 5.3 19.6 8.8"/>
-                    </svg>
-                  </span>
-                  <span class="excel-tab-name">My Route</span>
-                  <span class="excel-tab-info-btn" id="btnRouteOverlayInfo" title="Passage Plan &amp; Waypoint Information"><svg class="setsail-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="16" x2="12" y2="11"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg></span>
                 </button>
               </div>
             </div>
@@ -23342,26 +23298,26 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.262"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.262" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.262"></script>
-  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.262"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.263"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.263" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.263"></script>
+  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.263"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.262",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.263",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.262"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.262"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.262"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.263"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.263"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.263"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.262"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.263"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -23434,15 +23390,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.262"></script>
-<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.262"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.263"></script>
+<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.263"></script>
 <script>if (typeof window.__setsailToggleNtmSidebar === 'function') { window.toggleNtmSidebar = window.__setsailToggleNtmSidebar; }</script>
-<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.262"></script>
-<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.262"></script>
-<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.262"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.262"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.262"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.262"></script>
+<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.263"></script>
+<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.263"></script>
+<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.263"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.263"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.263"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.263"></script>
 
 
 
@@ -24156,7 +24112,7 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.262', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.263', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.258 registered, scope:', reg.scope);
             if (navigator.onLine) {

@@ -27433,3 +27433,68 @@ body.light-theme .ntm-wx-unified {
   color: #0f172a;
   border-color: rgba(15, 23, 42, 0.22);
 }
+
+/* ── v5.263: Delete Red Hover, Active Routes/Bin Tabs, Card Checkbox & Hide Route Mini-Window ── */
+#ntmRouteMiniWindow {
+  display: none !important;
+}
+
+#ntmSidebar .ntm-routes-tabs {
+  position: relative !important;
+  z-index: 2620 !important;
+  pointer-events: auto !important;
+}
+
+#ntmSidebar .ntm-routes-tab {
+  position: relative !important;
+  z-index: 2621 !important;
+  pointer-events: auto !important;
+}
+
+#ntmSidebar #btnSidebarRouteDelete:hover,
+#ntmSidebar #btnNvWptDelete:hover {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #ef4444 !important;
+}
+
+#ntmSidebar #btnSidebarRouteDelete:hover .ntm-hdr-action-ico,
+#ntmSidebar #btnSidebarRouteDelete:hover .ntm-hdr-action-lbl,
+#ntmSidebar #btnNvWptDelete:hover .ntm-hdr-action-ico,
+#ntmSidebar #btnNvWptDelete:hover .ntm-hdr-action-lbl {
+  color: #ef4444 !important;
+}
+
+[data-theme="light"] #ntmSidebar #btnSidebarRouteDelete:hover,
+[data-theme="light"] #ntmSidebar #btnNvWptDelete:hover {
+  background: rgba(220, 38, 38, 0.12) !important;
+  color: #dc2626 !important;
+}
+
+[data-theme="light"] #ntmSidebar #btnSidebarRouteDelete:hover .ntm-hdr-action-ico,
+[data-theme="light"] #ntmSidebar #btnSidebarRouteDelete:hover .ntm-hdr-action-lbl,
+[data-theme="light"] #ntmSidebar #btnNvWptDelete:hover .ntm-hdr-action-ico,
+[data-theme="light"] #ntmSidebar #btnNvWptDelete:hover .ntm-hdr-action-lbl {
+  color: #dc2626 !important;
+}
+
+#ntmSidebar .ntm-user-route-chk-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 2px;
+  cursor: pointer;
+}
+
+#ntmSidebar .ntm-user-route-chk {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #ef4444;
+  cursor: pointer;
+}
+
+#ntmSidebar .ntm-user-route-card.is-checked-for-del {
+  border-color: rgba(239, 68, 68, 0.55) !important;
+  background: rgba(239, 68, 68, 0.10) !important;
+}
