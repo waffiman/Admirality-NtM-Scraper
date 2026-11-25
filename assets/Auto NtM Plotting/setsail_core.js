@@ -8514,29 +8514,6 @@ function renderRouteOnMap(route, shouldFly = true) {
       </div>
     `);
 
-    marker.on("click", (ev) => {
-      if (ev && ev.originalEvent) ev.originalEvent._ecdisPickHandled = true;
-      if (typeof window.handleEcdisObjectPick === "function" && leafletMap) {
-        const pt = (ev && ev.latlng) || L.latLng(wp.lat, wp.lon);
-        const wptCand = {
-          id: "wpt_" + (wp.name || wp.id || idx),
-          category: "WPT",
-          catBadge: "WPT",
-          badgeColor: "#f05a36",
-          icon: "📍",
-          name: wp.name || wp.id || ("WPT " + (idx + 1)),
-          subtitle: `Route Waypoint · ${route.name || "Route"}${wp.course ? " · Course " + wp.course + "°" : ""} · 0.00 NM`,
-          distNm: 0,
-          lat: wp.lat,
-          lon: wp.lon,
-          open: function() {
-            marker.openPopup();
-          }
-        };
-        window.handleEcdisObjectPick(pt, leafletMap, wptCand);
-      }
-    });
-
     leafletRouteLayer.addLayer(marker);
 
   });
@@ -9584,6 +9561,8 @@ function renderWeatherOnMap(map = null) {
 
           dot.bindTooltip(`${storm.shortName || storm.name} +${fp.tau}h (${fp.winds}kn)`, { direction: "top" });
 
+          dot._wxData = { id: (storm.id || storm.name || "storm") + "_t" + fp.tau, name: (storm.shortName || storm.name || "Cyclone") + " +" + fp.tau + "h", category: fp.winds + " kt forecast" };
+
           dot.bindPopup(popupHtml, { className: "ss-wx-storm-popup-wrap", maxWidth: 260 });
 
           leafletWeatherLayer.addLayer(dot);
@@ -9603,6 +9582,8 @@ function renderWeatherOnMap(map = null) {
           });
 
           const wptMarker = L.marker(fp.coords, { icon: wptIcon });
+
+          wptMarker._wxData = { id: (storm.id || storm.name || "storm") + "_wpt" + fp.tau, name: (storm.shortName || storm.name || "Cyclone") + " +" + fp.tau + "h", category: fp.winds + " kt forecast" };
 
           wptMarker.bindPopup(popupHtml, { className: "ss-wx-storm-popup-wrap", maxWidth: 260 });
 
@@ -9844,6 +9825,8 @@ function renderWeatherOnMap(map = null) {
 
     `, { className: "ss-wx-storm-popup-wrap", maxWidth: 320 });
 
+    stormMarker._stormData = { id: storm.id || storm.name, name: storm.name || shortLabel, category: catLabel + (storm.maxWinds ? " · " + storm.maxWinds + " kt" : "") };
+
     leafletWeatherLayer.addLayer(stormMarker);
 
   });
@@ -9895,6 +9878,8 @@ function renderWeatherOnMap(map = null) {
       </div>
 
     `);
+
+    waveCircle._wxData = { id: "wave_" + (wave.name || ""), name: wave.name || "High Seas Wave Zone", category: "Hs " + wave.waveHeight + " m (" + wave.swellPeriod + "s)" };
 
     leafletWeatherLayer.addLayer(waveCircle);
 
@@ -9986,6 +9971,8 @@ function renderWeatherOnMap(map = null) {
 
     `);
 
+    pcMarker._wxData = { id: "pc_" + pc.type + "_" + pc.value, name: pc.name + " (" + pc.value + " hPa)", category: isLow ? "Low Pressure System" : "High Pressure System" };
+
     leafletWeatherLayer.addLayer(pcMarker);
 
   });
@@ -10021,6 +10008,8 @@ function renderWeatherOnMap(map = null) {
       });
 
       const wvMarker = L.marker(plotCoords, { icon: windIcon });
+
+      wvMarker._wxData = { id: "wv_" + plotCoords[0] + "_" + plotCoords[1], name: "Wind " + wv.speed + " kn", category: wv.label || "Marine Wind Vector" };
 
       wvMarker.bindPopup(`<strong>Wind Vector:</strong> ${wv.label}`);
 
@@ -10077,6 +10066,8 @@ function renderWeatherOnMap(map = null) {
         `<div style="font-size:9px;color:#64748b;margin-top:5px;">NOAA OPC High Seas · ${w.basin || ""}</div></div>`
 
       );
+
+      circle._wxData = { id: "opc_" + (w.headline || w.severity || ""), name: w.headline || w.severity || "OPC Warning", category: "NOAA OPC High Seas" + (w.basin ? " · " + w.basin : "") };
 
       leafletWeatherLayer.addLayer(circle);
 
@@ -18534,6 +18525,25 @@ function initNtMMap() {
 
     });
 
+    leafletMap._ssDisableLmbObjectOpen = true;
+    if (typeof L !== "undefined" && L.Layer && L.Layer.prototype && !L.Layer.prototype._ssOrigOpenPopup) {
+      L.Layer.prototype._ssOrigOpenPopup = L.Layer.prototype._openPopup;
+      L.Layer.prototype._openPopup = function () {
+        if (this && this._map && this._map._ssDisableLmbObjectOpen) {
+          try {
+            if (this._map._popup && this._map.hasLayer(this._map._popup)) {
+              this._map.closePopup();
+            }
+            if (typeof window.clearEcdisPickReticle === "function") {
+              window.clearEcdisPickReticle(this._map);
+            }
+          } catch (eSuppressLmb) {}
+          return;
+        }
+        return L.Layer.prototype._ssOrigOpenPopup.apply(this, arguments);
+      };
+    }
+
 
 
     // keepBuffer high enough for date-line neighbour tiles (seamless wrap).
@@ -19664,6 +19674,56 @@ function initNtMMap() {
         addCandidate(originatingObject);
       }
 
+      // 0. OWN SHIP & FORECAST GHOST VESSEL
+      try {
+        if (typeof _ownShipMarker !== "undefined" && _ownShipMarker && typeof _ownShipMarker.getLatLng === "function") {
+          const onChart = (typeof leafletVesselLayer !== "undefined" && leafletVesselLayer && targetMap.hasLayer(leafletVesselLayer) && leafletVesselLayer.hasLayer(_ownShipMarker)) || targetMap.hasLayer(_ownShipMarker);
+          if (onChart) {
+            const oll = _ownShipMarker.getLatLng();
+            if (oll && isInside(oll.lat, oll.lng)) {
+              const od = distNm(oll.lat, oll.lng);
+              const uv = (typeof userVessel !== "undefined" && userVessel) ? userVessel : (window.userVessel || {});
+              addCandidate({
+                id: "own_ship_ccrp",
+                category: "OWN SHIP",
+                catBadge: "OWN",
+                badgeColor: "#00e5ff",
+                icon: "🚢",
+                name: uv.name || "Own Ship",
+                subtitle: "CCRP" + (uv.mmsi ? " · MMSI " + uv.mmsi : "") + " · " + od.toFixed(2) + " NM",
+                distNm: od,
+                lat: oll.lat,
+                lon: oll.lng,
+                open: function() {
+                  if (typeof _ownShipMarker.openPopup === "function") _ownShipMarker.openPopup();
+                }
+              });
+            }
+          }
+        }
+        if (window._wxGhostVesselMarker && targetMap.hasLayer(window._wxGhostVesselMarker) && typeof window._wxGhostVesselMarker.getLatLng === "function") {
+          const gll = window._wxGhostVesselMarker.getLatLng();
+          if (gll && isInside(gll.lat, gll.lng)) {
+            const gd = distNm(gll.lat, gll.lng);
+            addCandidate({
+              id: "own_ship_forecast_ghost",
+              category: "FORECAST",
+              catBadge: "FCST",
+              badgeColor: "#38bdf8",
+              icon: "🚢",
+              name: "Forecast Vessel Position",
+              subtitle: "Projected route position · " + gd.toFixed(2) + " NM",
+              distNm: gd,
+              lat: gll.lat,
+              lon: gll.lng,
+              open: function() {
+                if (typeof window._wxGhostVesselMarker.openPopup === "function") window._wxGhostVesselMarker.openPopup();
+              }
+            });
+          }
+        }
+      } catch (eOwnPick) {}
+
       // 1. BUOYS & SEAMARKS (if Buoys layer active)
       const isBuoysActive = isLayerOn("buoys") || (window.seamarkLayer && targetMap.hasLayer(window.seamarkLayer)) || (seamarkLyr && targetMap.hasLayer(seamarkLyr)) || (window._buoysVectorGroup && targetMap.hasLayer(window._buoysVectorGroup));
       if (isBuoysActive) {
@@ -19781,6 +19841,54 @@ function initNtMMap() {
             }
           }
         }
+
+        // Subsea Cables & Pipelines (when Seamarks/Buoys overlay is active)
+        try {
+          if (_subseaGeoJsonLayer && typeof _subseaGeoJsonLayer.eachLayer === "function") {
+            _subseaGeoJsonLayer.eachLayer((sLyr) => {
+              if (!sLyr || typeof sLyr.getLatLngs !== "function") return;
+              const rawPts = sLyr.getLatLngs();
+              const chains = (Array.isArray(rawPts) && Array.isArray(rawPts[0])) ? rawPts : [rawPts];
+              let bestSubD = 999;
+              for (let ci = 0; ci < chains.length; ci++) {
+                const ch = chains[ci];
+                if (!Array.isArray(ch) || ch.length < 2) continue;
+                for (let pi = 0; pi < ch.length - 1; pi++) {
+                  const a = ch[pi], b = ch[pi + 1];
+                  if (!a || !b) continue;
+                  const aLon = ((a.lng + 540) % 360) - 180;
+                  const bLon = ((b.lng + 540) % 360) - 180;
+                  if (isInside(a.lat, aLon) || isInside(b.lat, bLon)) {
+                    bestSubD = Math.min(bestSubD, distNm(a.lat, aLon), distNm(b.lat, bLon));
+                  } else if (typeof pointToSegmentDistanceNM === "function") {
+                    const sd = pointToSegmentDistanceNM(lat, lon, a.lat, aLon, b.lat, bLon);
+                    if (sd <= 0.71) bestSubD = Math.min(bestSubD, sd);
+                  }
+                }
+              }
+              if (bestSubD <= 0.75) {
+                const sp = (sLyr.feature && sLyr.feature.properties) || {};
+                const isCbl = (sLyr.options && sLyr.options.subseaType === "CBL") || String(sp.t || "").toLowerCase() !== "pipeline";
+                const sName = sp.n || (isCbl ? "Submarine Cable" : "Subsea Pipeline");
+                addCandidate({
+                  id: "subsea_" + sName + "_" + bestSubD.toFixed(2),
+                  category: isCbl ? "CABLE" : "PIPE",
+                  catBadge: isCbl ? "CBL" : "PIP",
+                  badgeColor: isCbl ? "#c084fc" : "#fb923c",
+                  icon: "〰️",
+                  name: sName,
+                  subtitle: (isCbl ? "Submarine Cable" : "Subsea Pipeline") + " · " + bestSubD.toFixed(2) + " NM",
+                  distNm: bestSubD,
+                  lat: clickPt.lat,
+                  lon: clickPt.lng,
+                  open: function() {
+                    if (typeof sLyr.openPopup === "function") sLyr.openPopup(clickPt);
+                  }
+                });
+              }
+            });
+          }
+        } catch (eSubPick) {}
       }
 
       // 2. AIS TARGETS (if AIS overlay active)
@@ -19806,7 +19914,7 @@ function initNtMMap() {
                   lat: ll.lat,
                   lon: ll.lng,
                   open: function() {
-                    if (typeof marker.openPopup === "function") {
+                    if (marker.getPopup && marker.getPopup() && typeof marker.openPopup === "function") {
                       marker.openPopup();
                     } else if (typeof window.formatAisPopup === "function") {
                       L.popup({ className: "ss-ais-popup", autoPan: true, offset: [0, -6], maxWidth: 280, closeButton: true })
@@ -20081,11 +20189,25 @@ function initNtMMap() {
           if (window.leafletWeatherLayer && typeof window.leafletWeatherLayer.eachLayer === "function") {
             window.leafletWeatherLayer.eachLayer((layer) => {
               if (!layer || typeof layer.getLatLng !== "function") return;
+              if (!(layer.getPopup && layer.getPopup())) return;
               const ll = layer.getLatLng();
+              const isAreaCircle = (typeof L !== "undefined" && L.Circle && layer instanceof L.Circle && !(L.CircleMarker && !(layer instanceof L.Circle)) && typeof layer.getRadius === "function" && layer.getRadius() > 1000);
+              let matchedWx = false;
+              let d = distNm(ll.lat, ll.lng);
               if (isInside(ll.lat, ll.lng)) {
-                const d = distNm(ll.lat, ll.lng);
+                matchedWx = true;
+              } else if (isAreaCircle) {
+                try {
+                  const distM = targetMap.distance([lat, lon], [ll.lat, ((ll.lng + 540) % 360) - 180]);
+                  if (distM <= layer.getRadius()) {
+                    matchedWx = true;
+                    d = Math.min(d, 0.25);
+                  }
+                } catch (eCir) {}
+              }
+              if (matchedWx) {
                 const wx = layer._stormData || layer._wxData || (layer.options && layer.options._stormData) || {};
-                const name = wx.name || layer.options.title || "Weather Hazard";
+                const name = wx.name || (layer.options && layer.options.title) || "Weather Hazard";
                 addCandidate({
                   id: "wx_" + (wx.id || wx.name || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
                   category: "WEATHER",
@@ -20093,12 +20215,15 @@ function initNtMMap() {
                   badgeColor: "#06b6d4",
                   icon: "🌀",
                   name: name,
-                  subtitle: `${wx.category || wx.type || "Storm / Advisory"} · ${d.toFixed(2)} NM`,
+                  subtitle: (wx.category || wx.type || "Storm / Advisory") + (isAreaCircle ? " · Active Zone" : (" · " + d.toFixed(2) + " NM")),
                   distNm: d,
-                  lat: ll.lat,
-                  lon: ll.lng,
+                  lat: isAreaCircle ? clickPt.lat : ll.lat,
+                  lon: isAreaCircle ? clickPt.lng : ll.lng,
                   open: function() {
-                    if (typeof layer.openPopup === "function") layer.openPopup();
+                    if (typeof layer.openPopup === "function") {
+                      if (isAreaCircle) layer.openPopup(clickPt);
+                      else layer.openPopup();
+                    }
                   }
                 });
               }
@@ -20111,69 +20236,47 @@ function initNtMMap() {
       candidates.sort((a, b) => a.distNm - b.distNm);
 
       // =======================================================================
-      // EVALUATE CANDIDATE COUNT
+      // RENDER CURSOR PICK REPORT POPUP (invoked via RMB -> Cursor Pick)
       // =======================================================================
-      // Empty 1×1 NM frame → no popup (never show IALA Region A/B stub)
-      if (candidates.length === 0) {
-        clearEcdisPickReticle(targetMap);
-        return;
-      }
-
-      // CASE 1: Exactly 1 object in the 1x1 NM square -> Open its details immediately!
-      if (candidates.length === 1) {
-        drawEcdisPickReticle(clickPt, targetMap, dLat, dLon);
-        const single = candidates[0];
-        if (typeof single.open === "function") {
-          single.open();
-        }
-        const onSingleClose = () => {
-          setTimeout(() => {
-            if (_ecdisPickSessionId === currentSession) {
-              if (!targetMap._popup || !targetMap.hasLayer(targetMap._popup)) {
-                clearEcdisPickReticle(targetMap);
-                targetMap.off("popupclose", onSingleClose);
-              }
-            }
-          }, 120);
-        };
-        targetMap.once("popupclose", onSingleClose);
-        return;
-      }
-
-      // CASE 2: 2 or more objects in the 1x1 NM square -> Show ECDIS Pick Report scroll list!
       drawEcdisPickReticle(clickPt, targetMap, dLat, dLon);
       const count = candidates.length;
-      const dms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
+      const countLabel = count === 1 ? "1 OBJECT" : (count + " OBJECTS");
+      const dms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : (lat.toFixed(4) + "°, " + lon.toFixed(4) + "°");
 
-      const listHtml = `
-        <div class="ss-ecdis-pick-container">
-          <div class="ss-ecdis-pick-head">
-            <div class="ss-ecdis-pick-title-wrap">
-              <span class="ss-ecdis-pick-reticle-ico">🎯</span>
-              <div>
-                <div class="ss-ecdis-pick-title">CHART QUERY · 1×1 NM</div>
-                <div class="ss-ecdis-pick-pos">${dms}</div>
-              </div>
-            </div>
-            <span class="ss-ecdis-pick-count-badge">${count} OBJECTS</span>
-          </div>
-          <div class="ss-ecdis-pick-list">
-            ${candidates.map((c, idx) => `
-              <button type="button" class="ss-ecdis-pick-row" data-idx="${idx}">
-                <div class="ss-ecdis-pick-row-left">
-                  <span class="ss-ecdis-pick-badge" style="background:${c.badgeColor}22;color:${c.badgeColor};border:1px solid ${c.badgeColor}66;">${c.catBadge}</span>
-                  <div class="ss-ecdis-pick-row-info">
-                    <div class="ss-ecdis-pick-row-name">${c.name}</div>
-                    <div class="ss-ecdis-pick-row-sub">${c.subtitle}</div>
-                  </div>
-                </div>
-                <span class="ss-ecdis-pick-row-arrow">›</span>
-              </button>
-            `).join("")}
-          </div>
-          <div class="ss-ecdis-pick-foot">Click an object to inspect full details</div>
-        </div>
-      `;
+      const rowsMarkup = count > 0
+        ? candidates.map((c, idx) => (
+            '<button type="button" class="ss-ecdis-pick-row" data-idx="' + idx + '">' +
+              '<div class="ss-ecdis-pick-row-left">' +
+                '<span class="ss-ecdis-pick-badge" style="background:' + c.badgeColor + '22;color:' + c.badgeColor + ';border:1px solid ' + c.badgeColor + '66;">' + c.catBadge + '</span>' +
+                '<div class="ss-ecdis-pick-row-info">' +
+                  '<div class="ss-ecdis-pick-row-name">' + c.name + '</div>' +
+                  '<div class="ss-ecdis-pick-row-sub">' + c.subtitle + '</div>' +
+                '</div>' +
+              '</div>' +
+              '<span class="ss-ecdis-pick-row-arrow">›</span>' +
+            '</button>'
+          )).join("")
+        : '<div class="ss-ecdis-pick-empty">No active chart objects within 1×1 NM</div>';
+
+      const footMarkup = count > 0
+        ? "Click an object to inspect full details"
+        : "Enable chart overlays or right-click over an object";
+
+      const listHtml =
+        '<div class="ss-ecdis-pick-container">' +
+          '<div class="ss-ecdis-pick-head">' +
+            '<div class="ss-ecdis-pick-title-wrap">' +
+              '<span class="ss-ecdis-pick-reticle-ico">🎯</span>' +
+              '<div>' +
+                '<div class="ss-ecdis-pick-title">CURSOR PICK · 1×1 NM</div>' +
+                '<div class="ss-ecdis-pick-pos">' + dms + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<span class="ss-ecdis-pick-count-badge">' + countLabel + '</span>' +
+          '</div>' +
+          '<div class="ss-ecdis-pick-list">' + rowsMarkup + '</div>' +
+          '<div class="ss-ecdis-pick-foot">' + footMarkup + '</div>' +
+        '</div>';
 
       const pickPopup = L.popup({
         className: "ss-ecdis-pick-popup",
@@ -20199,9 +20302,14 @@ function initNtMMap() {
         }, 120);
       });
 
-      setTimeout(() => {
+      const wirePickRows = () => {
         const el = pickPopup.getElement ? pickPopup.getElement() : null;
-        if (!el) return;
+        if (!el || el._ssPickWired) return false;
+        el._ssPickWired = true;
+        if (typeof L !== "undefined" && L.DomEvent) {
+          L.DomEvent.disableClickPropagation(el);
+          L.DomEvent.disableScrollPropagation(el);
+        }
         el.querySelectorAll(".ss-ecdis-pick-row").forEach((btn) => {
           btn.addEventListener("click", (ev) => {
             ev.preventDefault();
@@ -20226,30 +20334,27 @@ function initNtMMap() {
             targetMap.once("popupclose", onChosenClose);
           });
         });
-      }, 50);
+        return true;
+      };
+
+      if (!wirePickRows()) {
+        setTimeout(wirePickRows, 40);
+      }
     }
 
     window.handleEcdisObjectPick = handleEcdisObjectPick;
     window.clearEcdisPickReticle = clearEcdisPickReticle;
     window.drawEcdisPickReticle = drawEcdisPickReticle;
 
-    // Unified chart click handler (all layers equal).
-    // preclick: if a popup is already open, this LMB only closes it — do not open a new pick.
-    map.on("preclick", () => {
+    // LMB on SetChart never opens object popups or Cursor Pick list;
+    // it only allows panning/controls and clears any active reticle when popups close.
+    map._ssDisableLmbObjectOpen = true;
+    map.on("click", () => {
       try {
-        map._ssEcdisPickClosingOnly = !!(map._popup && map.hasLayer(map._popup));
-      } catch (ePre) {
-        map._ssEcdisPickClosingOnly = false;
-      }
-    });
-    map.on("click", (e) => {
-      if (e.originalEvent && e.originalEvent._ecdisPickHandled) return;
-      if (map._ssEcdisPickClosingOnly) {
-        map._ssEcdisPickClosingOnly = false;
-        try { clearEcdisPickReticle(map); } catch (eClr) {}
-        return;
-      }
-      handleEcdisObjectPick(e.latlng, map);
+        if (!map._popup || !map.hasLayer(map._popup)) {
+          clearEcdisPickReticle(map);
+        }
+      } catch (eClr) {}
     });
 
 
@@ -20356,57 +20461,8 @@ function initNtMMap() {
       }
 
       function updateVectorBuoyMarkers() {
-        if (!map.hasLayer(seamarkLyr)) {
-          _buoysVectorGroup.clearLayers();
-          return;
-        }
-        const z = map.getZoom();
+        // LMB buoy hitboxes disabled: buoys are inspected via RMB -> Cursor Pick (_buoyMarksData)
         _buoysVectorGroup.clearLayers();
-        if (z < 7) return;
-
-        const bounds = (typeof map.getBounds === "function" && map.getBounds().pad) ? map.getBounds().pad(0.4) : map.getBounds();
-        _buoyMarksData.forEach((m) => {
-          if (!bounds.contains([m.lat, m.lon])) return;
-          // 100% invisible interactive hitbox: NO visible dots, NO borders, NO tooltips!
-          // Preserves original OpenSeaMap PNG rendering strictly untouched while enabling direct LMB clicks on buoys.
-          const hitbox = L.circleMarker([m.lat, m.lon], {
-            radius: z >= 12 ? 22 : 16,
-            stroke: false,
-            fill: true,
-            fillOpacity: 0,
-            opacity: 0,
-            pane: "overlayPane",
-            className: "ss-buoy-hitbox",
-            interactive: true
-          });
-          hitbox.on("click", (ev) => {
-            if (ev.originalEvent) {
-              ev.originalEvent._stopped = true;
-              ev.originalEvent._ecdisPickHandled = true;
-            }
-            const pt = ev.latlng || L.latLng(m.lat, m.lon);
-            const buoyCandidate = {
-              id: "buoy_" + (m.name || (m.lat.toFixed(4) + "_" + m.lon.toFixed(4))),
-              category: "BUOY",
-              catBadge: "BUOY",
-              badgeColor: "#38bdf8",
-              icon: "⚓",
-              name: m.name || m.type || "Seamark Buoy",
-              subtitle: `${m.light ? m.light + " · " : ""}${m.colour || m.shape || "IALA"} · 0.00 NM`,
-              distNm: 0,
-              lat: m.lat,
-              lon: m.lon,
-              open: function() {
-                L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 280, minWidth: 200, closeButton: true })
-                  .setLatLng([m.lat, m.lon])
-                  .setContent(formatBuoyPopup(m))
-                  .openOn(map);
-              }
-            };
-            handleEcdisObjectPick(pt, map, buoyCandidate);
-          });
-          _buoysVectorGroup.addLayer(hitbox);
-        });
       }
 
       function buildTssFeatureStyle(typeCode, isPoly, z) {
@@ -21708,7 +21764,7 @@ function initMapContextMenu(map) {
 
 
 
-﻿function openMapContextMenu(latlng, map) {
+function openMapContextMenu(latlng, map) {
 
   if (!map || !latlng) return;
 
@@ -21720,6 +21776,11 @@ function initMapContextMenu(map) {
 
   // Unwrapped position (keeps tools on the world copy the user clicked)
   const rawLatLng = L.latLng(lat, lon);
+  try {
+    if (typeof window.clearEcdisPickReticle === "function") {
+      window.clearEcdisPickReticle(map);
+    }
+  } catch (eClrRet) {}
 
   // Popup pane must sit above route / WPT / own-ship panes or its buttons die
   try {
@@ -21770,7 +21831,7 @@ function initMapContextMenu(map) {
 
   })
 
-  .setLatLng([lat, lon])
+  .setLatLng(rawLatLng)
 
   .setContent(container)
 
@@ -21829,6 +21890,20 @@ function initMapContextMenu(map) {
             '</div>' +
 
             '<span class="ss-ctx-arrow">+</span>' +
+
+          '</button>' +
+
+          '<button type="button" class="ss-ctx-btn ss-ctx-btn-pick" id="btnCtxCursorPick">' +
+
+            '<div class="ss-ctx-btn-left">' +
+
+              '<span class="ss-ctx-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.2" fill="#ef4444"/></svg></span>' +
+
+              '<span class="ss-ctx-btn-label">Cursor Pick</span>' +
+
+            '</div>' +
+
+            '<span class="ss-ctx-arrow">›</span>' +
 
           '</button>' +
 
@@ -21906,6 +21981,18 @@ function initMapContextMenu(map) {
       if (typeof window.addVrmEblTool === "function") {
 
         window.addVrmEblTool(map, rawLatLng);
+
+      }
+
+    });
+
+    bindAction("#btnCtxCursorPick", () => {
+
+      try { map.closePopup(popup); } catch (eCl) {}
+
+      if (typeof window.handleEcdisObjectPick === "function") {
+
+        window.handleEcdisObjectPick(rawLatLng, map);
 
       }
 
@@ -23729,40 +23816,6 @@ function renderNtMListAndMap() {
         configurable: true
       });
       lyr.bindPopup(() => lyr._popupHtml, { maxWidth: 325, minWidth: 240, autoPan: true });
-      lyr.on("click", (ev) => {
-        if (ev && ev.originalEvent) ev.originalEvent._ecdisPickHandled = true;
-        if (typeof handleEcdisObjectPick === "function" && ev && ev.latlng) {
-          if (ev.originalEvent) {
-            try { L.DomEvent.stopPropagation(ev.originalEvent); } catch (eS) {}
-          }
-          const pt = ev.latlng;
-          const title = item.id || item.noticeNumber || item.title || "NtM / NAVTEX";
-          const typeBadge = item.type === "NAVTEX" ? "NAVTEX" : ("NtM " + (item.type || ""));
-          const noticeCand = {
-            id: "ntm_" + (item.id || item.noticeNumber || (pt.lat.toFixed(4) + "_" + pt.lng.toFixed(4))),
-            category: typeBadge.trim(),
-            catBadge: typeBadge.trim(),
-            badgeColor: item.type === "NAVTEX" ? "#f97316" : (item.type === "T" ? "#eab308" : "#d946ef"),
-            icon: "⚠️",
-            name: title,
-            subtitle: `${item.country || ("NAVAREA " + (item.navarea || ""))} · ${(item.category || item.subject || "Warning").slice(0, 42)} · 0.00 NM`,
-            distNm: 0,
-            lat: pt.lat,
-            lon: pt.lng,
-            open: function() {
-              if (lyr._popupHtml) {
-                L.popup({ maxWidth: 325, minWidth: 240, autoPan: true, closeButton: true })
-                  .setLatLng(pt)
-                  .setContent(lyr._popupHtml)
-                  .openOn(mapRef);
-              } else if (typeof lyr.openPopup === "function") {
-                lyr.openPopup(pt);
-              }
-            }
-          };
-          handleEcdisObjectPick(pt, mapRef, noticeCand);
-        }
-      });
       leafletMarkersLayer.addLayer(lyr);
     };
 
@@ -24029,29 +24082,6 @@ function renderNtMListAndMap() {
         );
 
         m._clusterData = cl;
-
-        m.on("click", (ev) => {
-          if (ev && ev.originalEvent) ev.originalEvent._ecdisPickHandled = true;
-          if (typeof handleEcdisObjectPick === "function" && mapRef) {
-            const pt = (ev && ev.latlng) || L.latLng(cl.lat, cl.lon);
-            const clCand = {
-              id: "ntm_cl_" + cl.lat.toFixed(4) + "_" + cl.lon.toFixed(4),
-              category: "CLUSTER",
-              catBadge: `${count} NtM`,
-              badgeColor: "#f97316",
-              icon: "⚠️",
-              name: `${count} NtM / NAVTEX Notices`,
-              subtitle: `${typeSummary} · Cluster`,
-              distNm: 0,
-              lat: cl.lat,
-              lon: cl.lon,
-              open: function() {
-                m.openPopup();
-              }
-            };
-            handleEcdisObjectPick(pt, mapRef, clCand);
-          }
-        });
 
         markersLayer.addLayer(m);
 

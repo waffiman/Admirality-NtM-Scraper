@@ -25702,6 +25702,24 @@
   text-align: center;
 }
 
+.ss-ecdis-pick-empty {
+  padding: 14px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.ss-ctx-btn.ss-ctx-btn-pick {
+  margin-top: 2px;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.ss-ctx-btn.ss-ctx-btn-pick:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: #ef4444;
+}
+
 /* WX Cursor Badge & Loading Spinner */
 .ntm-wx-cursor-badge {
   flex: 0 0 auto;

@@ -294,6 +294,7 @@
       '<div style="margin-top:5px;padding-top:3px;border-top:1px solid #e2e8f0;font-size:10px;color:#64748b;">Source: ' + src + "</div></div>"
     );
   }
+  window.formatAisPopup = formatAisPopup;
 
   const OWN_VESSEL_PRIORITY_RADIUS_NM = 100;
 
@@ -387,7 +388,7 @@
           iconSize: [48, 72],
           iconAnchor: [24, 50]
         });
-        m = L.marker([lat, lon], { icon, keyboard: false });
+        m = L.marker([lat, lon], { icon, interactive: false, keyboard: false });
       } else if (!useTriangles) {
         m = L.circleMarker([lat, lon], {
           radius: lod.radius,
@@ -396,7 +397,7 @@
           fillColor: col,
           fillOpacity: 0.92,
           renderer: canvasR,
-          interactive: z >= 4 || !!v.nearOwnShip100Nm,
+          interactive: false,
           keyboard: false
         });
       } else {
@@ -427,44 +428,9 @@
           iconSize: [px, px],
           iconAnchor: [px / 2, px / 2]
         });
-        m = L.marker([lat, lon], { icon, keyboard: false });
+        m = L.marker([lat, lon], { icon, interactive: false, keyboard: false });
       }
       m._aisData = v;
-      if (z >= 4 || !!v.nearOwnShip100Nm) {
-        m.on("click", (ev) => {
-          if (ev.originalEvent) {
-            ev.originalEvent._stopped = true;
-            ev.originalEvent._ecdisPickHandled = true;
-          }
-          const pt = ev.latlng || L.latLng(lat, lon);
-          if (typeof window.handleEcdisObjectPick === "function") {
-            const aisCandidate = {
-              id: "ais_" + (v.mmsi || lat.toFixed(4) + "_" + lon.toFixed(4)),
-              category: "AIS",
-              catBadge: "AIS",
-              badgeColor: "#10b981",
-              icon: "🚢",
-              name: v.name || v.shipName || ("MMSI " + (v.mmsi || "Target")),
-              subtitle: `${v.shipTypeName || v.shipType || "Vessel"} · SOG ${v.sog != null ? Number(v.sog).toFixed(1) : "—"} kn · 0.00 NM`,
-              distNm: 0,
-              lat: lat,
-              lon: lon,
-              open: function() {
-                L.popup({ className: "ss-ais-popup", autoPan: true, offset: [0, -6], maxWidth: 280, closeButton: true })
-                  .setLatLng([lat, lon])
-                  .setContent(formatAisPopup(v))
-                  .openOn(map);
-              }
-            };
-            window.handleEcdisObjectPick(pt, map, aisCandidate);
-          } else {
-            L.popup({ className: "ss-ais-popup", autoPan: true, offset: [0, -6], maxWidth: 280, closeButton: true })
-              .setLatLng([lat, lon])
-              .setContent(formatAisPopup(v))
-              .openOn(map);
-          }
-        });
-      }
       layer.addLayer(m);
     });
 
