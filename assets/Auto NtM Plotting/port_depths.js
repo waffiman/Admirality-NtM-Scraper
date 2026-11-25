@@ -17,13 +17,14 @@ var OVERLAY_STATES = window.OVERLAY_STATES || {
   depths: false,
   isobaths: false,
   notices: false,
-  buoys: false,
-  bathymetry: false,
+  buoys: true,
+  bathymetry: true,
   timezones: false,
   weather: false,
   route: hasSavedDrCurrentRoute,
   ais: false
 };
+OVERLAY_STATES.buoys = true;
 if (hasSavedDrCurrentRoute) {
   OVERLAY_STATES.route = true;
 }
@@ -19916,8 +19917,6 @@ function initExcelOverlayDock(map) {
       infoId: "btnAisOverlayInfo",
       onInfo: () => { if (typeof window.showAisInfoModal === "function") window.showAisInfoModal(); }
     },
-    { key: "buoys", tabId: "tabOverlayBuoys" },
-    { key: "bathymetry", tabId: "tabOverlayBathymetry" },
     { key: "timezones", tabId: "tabOverlayTimezones" },
     {
       key: "route",

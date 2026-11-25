@@ -2102,7 +2102,364 @@
     );
   }
 
+
+  /* =========================================================================
+     BATHYMETRY & LAND ELEVATION 1x1 NM CURSOR PICK QUERY HELPER (v5.261)
+     Queries both rendered & decoded vector-tile features (contours / isobaths,
+     spot soundings, and ECDIS land elevation contours) intersecting the exact
+     1x1 NM frame around the right-click point.
+     ========================================================================= */
+  function formatBathymetryPickPopupHtml(item) {
+    const isSounding = item.kind === "sounding";
+    const isElev = item.kind === "elevation";
+    const depthStr = Number.isFinite(item.depthM)
+      ? (Math.abs(item.depthM - Math.round(item.depthM)) < 0.05 ? String(Math.round(item.depthM)) : item.depthM.toFixed(1))
+      : "—";
+    const icon = isElev ? "⛰️" : (isSounding ? "🔹" : "🌊");
+    const title = isElev
+      ? (depthStr + " m Elevation Contour")
+      : (isSounding ? ("Spot Sounding " + depthStr + " m") : (depthStr + " m Isobath"));
+    const badge = isElev ? "LNDELV" : (isSounding ? "SOUNDG" : "DEPCNT");
+    const s57Class = isElev
+      ? "S-57 LNDELV (Land Elevation Contour)"
+      : (isSounding ? "S-57 SOUNDG (Charted Spot Sounding)" : "S-57 DEPCNT (Depth Contour / Isobath)");
+    const posDms = (typeof global.formatLatLonDMS === "function")
+      ? global.formatLatLonDMS(item.lat, item.lon)
+      : (formatCoordDms(item.lat, item.lon));
+    const safetyNote = isElev
+      ? "Topographic elevation above mean sea level (AWS Terrarium DEM)."
+      : (item.depthM <= 10
+          ? "SHALLOW WATER (< 10 m): Verify UKC, squat, and tide height before crossing."
+          : item.depthM <= 20
+            ? "COASTAL / APPROACH DEPTH (10–20 m): Monitor echo sounder and safety contour."
+            : "Deep water seabed bathymetry contour / sounding relative to chart datum.");
+    const accent = isElev ? "#d97706" : (item.depthM <= 10 ? "#ef4444" : (item.depthM <= 20 ? "#f59e0b" : "#22d3ee"));
+
+    return (
+      '<div class="ss-ais-popup-body ss-buoy-popup-body">' +
+        '<div class="ss-ais-head">' +
+          '<span class="ss-ais-name" title="' + escHtml(title) + '">' + icon + " " + escHtml(title) + '</span>' +
+          '<span class="ss-ais-mode is-ais" style="background:' + accent + '22;color:' + accent + ';border:1px solid ' + accent + '66;">' + badge + '</span>' +
+        '</div>' +
+        '<div class="ss-ais-row"><span class="ss-ais-k">CLASS</span><span class="ss-ais-v">' + escHtml(s57Class) + '</span></div>' +
+        '<div class="ss-ais-row"><span class="ss-ais-k">' + (isElev ? "HEIGHT" : "DEPTH") + '</span><span class="ss-ais-v" style="color:' + accent + ';font-family:monospace;font-weight:700;">' + depthStr + ' m</span></div>' +
+        '<div class="ss-ais-row"><span class="ss-ais-k">DATUM</span><span class="ss-ais-v">' + (isElev ? "MSL (Terrarium)" : "Charted Seabed (Metres)") + '</span></div>' +
+        '<div class="ss-ais-row"><span class="ss-ais-k">DIST</span><span class="ss-ais-v">' + item.distNm.toFixed(2) + ' NM from cursor</span></div>' +
+        '<div class="ss-ais-row"><span class="ss-ais-k">POS</span><span class="ss-ais-v" style="font-family:monospace;font-size:10px;">' + escHtml(posDms) + '</span></div>' +
+        '<div class="ss-ais-foot" style="margin-top:4px;padding:3px 5px;background:rgba(255,255,255,0.06);border-left:2px solid ' + accent + ';border-radius:2px;font-size:10px;color:#cbd5e1;line-height:1.35;">' + escHtml(safetyNote) + '</div>' +
+        '<div class="ss-ais-foot">ECDIS Bathymetry · Open Waters Seascape</div>' +
+      '</div>'
+    );
+  }
+
+  function _clipSegmentToBox1x1(aLat, aLonRaw, bLat, bLonRaw, box) {
+    const cLat = box.lat;
+    const cLon = box.lon;
+    const dLat = box.dLat;
+    const dLon = box.dLon;
+    const cosLat = box.cosLat;
+    const aLon = cLon + (((aLonRaw - cLon + 540) % 360) - 180);
+    const bLon = cLon + (((bLonRaw - cLon + 540) % 360) - 180);
+    const xMin = cLon - dLon;
+    const xMax = cLon + dLon;
+    const yMin = cLat - dLat;
+    const yMax = cLat + dLat;
+    const dx = bLon - aLon;
+    const dy = bLat - aLat;
+    let t0 = 0;
+    let t1 = 1;
+    const p = [-dx, dx, -dy, dy];
+    const q = [aLon - xMin, xMax - aLon, aLat - yMin, yMax - aLat];
+    for (let i = 0; i < 4; i++) {
+      if (Math.abs(p[i]) < 1e-12) {
+        if (q[i] < 0) return null;
+      } else {
+        const r = q[i] / p[i];
+        if (p[i] < 0) {
+          if (r > t1) return null;
+          if (r > t0) t0 = r;
+        } else {
+          if (r < t0) return null;
+          if (r < t1) t1 = r;
+        }
+      }
+    }
+    if (t0 > t1) return null;
+    const sx0 = (aLon + dx * t0 - cLon) * 60 * cosLat;
+    const sy0 = (aLat + dy * t0 - cLat) * 60;
+    const sx1 = (aLon + dx * t1 - cLon) * 60 * cosLat;
+    const sy1 = (aLat + dy * t1 - cLat) * 60;
+    const vx = sx1 - sx0;
+    const vy = sy1 - sy0;
+    const len2 = vx * vx + vy * vy;
+    const u = len2 > 1e-10 ? Math.max(0, Math.min(1, -(sx0 * vx + sy0 * vy) / len2)) : 0;
+    const bestT = t0 + u * (t1 - t0);
+    const hitLat = aLat + dy * bestT;
+    const hitLon = (((aLon + dx * bestT) + 540) % 360) - 180;
+    const distNm = Math.hypot(sx0 + u * vx, sy0 + u * vy);
+    return { distNm: distNm, hitLat: hitLat, hitLon: hitLon };
+  }
+
+  function _pointInBox1x1(pLat, pLonRaw, box) {
+    if (!Number.isFinite(pLat) || !Number.isFinite(pLonRaw)) return null;
+    if (Math.abs(pLat - box.lat) > box.dLat) return null;
+    const dLonSigned = (((pLonRaw - box.lon + 540) % 360) - 180);
+    if (Math.abs(dLonSigned) > box.dLon) return null;
+    const dy = (pLat - box.lat) * 60;
+    const dx = dLonSigned * 60 * box.cosLat;
+    return {
+      distNm: Math.hypot(dx, dy),
+      hitLat: pLat,
+      hitLon: (((box.lon + dLonSigned) + 540) % 360) - 180
+    };
+  }
+
+  function queryOpenWatersBathymetryPick(map, bathyLayer, box) {
+    const out = [];
+    if (!map || !box) return out;
+
+    const north = box.lat + box.dLat;
+    const south = box.lat - box.dLat;
+    const east = box.lon + box.dLon;
+    const west = box.lon - box.dLon;
+
+    let pixelBbox = null;
+    try {
+      if (typeof map.latLngToContainerPoint === "function") {
+        const pNW = map.latLngToContainerPoint([north, west]);
+        const pSE = map.latLngToContainerPoint([south, east]);
+        const minX = Math.min(pNW.x, pSE.x) - 2;
+        const minY = Math.min(pNW.y, pSE.y) - 2;
+        const maxX = Math.max(pNW.x, pSE.x) + 2;
+        const maxY = Math.max(pNW.y, pSE.y) + 2;
+        pixelBbox = [[minX, minY], [maxX, maxY]];
+      }
+    } catch (ePx) {}
+
+    // 1. Bathymetry Isobaths (contours) & Spot Soundings (soundings)
+    const gl = bathyLayer && typeof bathyLayer.getMaplibreMap === "function" ? bathyLayer.getMaplibreMap() : null;
+    if (gl && bathyLayer && map.hasLayer && map.hasLayer(bathyLayer)) {
+      try {
+        if (typeof bathyLayer._syncView === "function") bathyLayer._syncView(true);
+      } catch (eSv) {}
+
+      const contourHits = [];
+      const soundingHits = [];
+
+      const inspectContourFeat = (feat) => {
+        if (!feat || !feat.geometry) return;
+        const props = feat.properties || {};
+        if (props.sys === "ft") return;
+        const rawD = props.depth_abs_m != null ? Number(props.depth_abs_m) : (props.depth_m != null ? Math.abs(Number(props.depth_m)) : NaN);
+        if (!Number.isFinite(rawD)) return;
+        const gType = feat.geometry.type;
+        const coords = feat.geometry.coordinates;
+        if (!Array.isArray(coords)) return;
+        const lines = gType === "LineString" ? [coords] : (gType === "MultiLineString" ? coords : []);
+        let best = null;
+        for (let li = 0; li < lines.length; li++) {
+          const ln = lines[li];
+          if (!Array.isArray(ln) || ln.length < 2) continue;
+          for (let i = 0; i < ln.length - 1; i++) {
+            const a = ln[i];
+            const b = ln[i + 1];
+            if (!a || !b) continue;
+            const clip = _clipSegmentToBox1x1(Number(a[1]), Number(a[0]), Number(b[1]), Number(b[0]), box);
+            if (clip && (!best || clip.distNm < best.distNm)) {
+              best = clip;
+            }
+          }
+        }
+        if (best) {
+          contourHits.push({
+            kind: "isobath",
+            depthM: rawD,
+            distNm: best.distNm,
+            lat: best.hitLat,
+            lon: best.hitLon
+          });
+        }
+      };
+
+      const inspectSoundingFeat = (feat) => {
+        if (!feat || !feat.geometry) return;
+        const props = feat.properties || {};
+        if (props.sys === "ft") return;
+        const rawD = props.depth_m != null ? Math.abs(Number(props.depth_m)) : (props.depth_abs_m != null ? Number(props.depth_abs_m) : NaN);
+        if (!Number.isFinite(rawD)) return;
+        const gType = feat.geometry.type;
+        const coords = feat.geometry.coordinates;
+        if (!Array.isArray(coords)) return;
+        const pts = gType === "Point" ? [coords] : (gType === "MultiPoint" ? coords : []);
+        for (let pi = 0; pi < pts.length; pi++) {
+          const pt = pts[pi];
+          if (!pt || pt.length < 2) continue;
+          const hit = _pointInBox1x1(Number(pt[1]), Number(pt[0]), box);
+          if (hit) {
+            soundingHits.push({
+              kind: "sounding",
+              depthM: rawD,
+              distNm: hit.distNm,
+              lat: hit.hitLat,
+              lon: hit.hitLon
+            });
+          }
+        }
+      };
+
+      try {
+        if (pixelBbox && typeof gl.queryRenderedFeatures === "function") {
+          const renLayers = [];
+          if (gl.getLayer && gl.getLayer("ow-bathy-contours")) renLayers.push("ow-bathy-contours");
+          if (gl.getLayer && gl.getLayer("ow-bathy-soundings")) renLayers.push("ow-bathy-soundings");
+          if (renLayers.length) {
+            const renFeats = gl.queryRenderedFeatures(pixelBbox, { layers: renLayers }) || [];
+            for (let i = 0; i < renFeats.length; i++) {
+              const rf = renFeats[i];
+              const lid = rf && rf.layer && rf.layer.id;
+              if (lid === "ow-bathy-soundings" || rf.sourceLayer === "soundings") {
+                inspectSoundingFeat(rf);
+              } else {
+                inspectContourFeat(rf);
+              }
+            }
+          }
+        }
+      } catch (eRen) {}
+
+      try {
+        if (typeof gl.querySourceFeatures === "function" && gl.getSource && gl.getSource("seascape-vector")) {
+          const srcContours = gl.querySourceFeatures("seascape-vector", { sourceLayer: "contours" }) || [];
+          for (let i = 0; i < srcContours.length; i++) {
+            inspectContourFeat(srcContours[i]);
+          }
+          const srcSoundings = gl.querySourceFeatures("seascape-vector", { sourceLayer: "soundings" }) || [];
+          for (let i = 0; i < srcSoundings.length; i++) {
+            inspectSoundingFeat(srcSoundings[i]);
+          }
+        }
+      } catch (eSrc) {}
+
+      // Sort & deduplicate contiguous MVT contour chunks of identical depth
+      contourHits.sort((a, b) => a.distNm - b.distNm);
+      const keptContours = [];
+      for (let i = 0; i < contourHits.length; i++) {
+        const c = contourHits[i];
+        let dup = false;
+        for (let k = 0; k < keptContours.length; k++) {
+          const prev = keptContours[k];
+          if (Math.abs(prev.depthM - c.depthM) < 0.05) {
+            const dLatNm = (prev.lat - c.lat) * 60;
+            const dLonNm = (((prev.lon - c.lon + 540) % 360) - 180) * 60 * box.cosLat;
+            if (Math.hypot(dLatNm, dLonNm) < 0.25) {
+              dup = true;
+              break;
+            }
+          }
+        }
+        if (!dup) keptContours.push(c);
+      }
+
+      for (let i = 0; i < keptContours.length; i++) {
+        const item = keptContours[i];
+        const depthLabel = Math.abs(item.depthM - Math.round(item.depthM)) < 0.05
+          ? String(Math.round(item.depthM))
+          : item.depthM.toFixed(1);
+        const badgeColor = item.depthM <= 10 ? "#ef4444" : (item.depthM <= 20 ? "#f59e0b" : "#22d3ee");
+        out.push({
+          id: "bathy_isobath_" + depthLabel + "_" + item.lat.toFixed(4) + "_" + item.lon.toFixed(4),
+          category: "BATHYMETRY",
+          catBadge: "ISOBATH",
+          badgeColor: badgeColor,
+          icon: "🌊",
+          name: depthLabel + " m Isobath",
+          subtitle: "Depth Contour (DEPCNT) · " + depthLabel + " m · " + item.distNm.toFixed(2) + " NM",
+          distNm: item.distNm,
+          lat: item.lat,
+          lon: item.lon,
+          popupHtml: formatBathymetryPickPopupHtml(item)
+        });
+      }
+
+      // Deduplicate & add spot soundings
+      soundingHits.sort((a, b) => a.distNm - b.distNm);
+      const seenSnd = new Set();
+      for (let i = 0; i < soundingHits.length; i++) {
+        const s = soundingHits[i];
+        const depthLabel = Math.abs(s.depthM - Math.round(s.depthM)) < 0.05
+          ? String(Math.round(s.depthM))
+          : s.depthM.toFixed(1);
+        const key = depthLabel + "_" + s.lat.toFixed(4) + "_" + s.lon.toFixed(4);
+        if (seenSnd.has(key)) continue;
+        seenSnd.add(key);
+        const badgeColor = s.depthM <= 10 ? "#fb7185" : "#38bdf8";
+        out.push({
+          id: "bathy_sounding_" + key,
+          category: "BATHYMETRY",
+          catBadge: "SOUNDG",
+          badgeColor: badgeColor,
+          icon: "🔹",
+          name: "Sounding " + depthLabel + " m",
+          subtitle: "Charted Depth (SOUNDG) · " + depthLabel + " m · " + s.distNm.toFixed(2) + " NM",
+          distNm: s.distNm,
+          lat: s.lat,
+          lon: s.lon,
+          popupHtml: formatBathymetryPickPopupHtml(s)
+        });
+      }
+    }
+
+    // 2. ECDIS Land Elevation Contours (when active on ECDIS chart at z >= 9)
+    try {
+      if (_ecdisElevWanted && _ecdisElevLayer && map.hasLayer && map.hasLayer(_ecdisElevLayer)) {
+        const elevGl = _ecdisElevLayer.getMaplibreMap && _ecdisElevLayer.getMaplibreMap();
+        if (elevGl && pixelBbox && typeof elevGl.queryRenderedFeatures === "function" && elevGl.getLayer && elevGl.getLayer("ecdis-elev-lines")) {
+          const elevFeats = elevGl.queryRenderedFeatures(pixelBbox, { layers: ["ecdis-elev-lines"] }) || [];
+          const elevMap = new Map();
+          for (let i = 0; i < elevFeats.length; i++) {
+            const ef = elevFeats[i];
+            const ele = ef && ef.properties && Number(ef.properties.ele);
+            if (!Number.isFinite(ele) || ele <= 0 || !ef.geometry) continue;
+            const coords = ef.geometry.coordinates;
+            const lines = ef.geometry.type === "LineString" ? [coords] : (ef.geometry.type === "MultiLineString" ? coords : []);
+            for (let li = 0; li < lines.length; li++) {
+              const ln = lines[li];
+              if (!Array.isArray(ln) || ln.length < 2) continue;
+              for (let si = 0; si < ln.length - 1; si++) {
+                const clip = _clipSegmentToBox1x1(Number(ln[si][1]), Number(ln[si][0]), Number(ln[si + 1][1]), Number(ln[si + 1][0]), box);
+                if (clip) {
+                  const prev = elevMap.get(ele);
+                  if (!prev || clip.distNm < prev.distNm) {
+                    elevMap.set(ele, { kind: "elevation", depthM: ele, distNm: clip.distNm, lat: clip.hitLat, lon: clip.hitLon });
+                  }
+                }
+              }
+            }
+          }
+          elevMap.forEach((item, ele) => {
+            out.push({
+              id: "ecdis_elev_" + ele,
+              category: "ELEVATION",
+              catBadge: "ELEV",
+              badgeColor: "#d97706",
+              icon: "⛰️",
+              name: ele + " m Land Contour",
+              subtitle: "Land Elevation (LNDELV) · " + ele + " m · " + item.distNm.toFixed(2) + " NM",
+              distNm: item.distNm,
+              lat: item.lat,
+              lon: item.lon,
+              popupHtml: formatBathymetryPickPopupHtml(item)
+            });
+          });
+        }
+      }
+    } catch (eElevPick) {}
+
+    return out;
+  }
+
   global.ensureOpenWatersMapLibre = ensureMapLibreReady;
+  global.queryOpenWatersBathymetryPick = queryOpenWatersBathymetryPick;
   global.createOpenWatersBathymetryLayer = createBathymetryLayer;
   global.createEcdisElevationContourLayer = createEcdisElevationContourLayer;
   global.syncEcdisLandElevationContours = syncEcdisLandElevationContours;

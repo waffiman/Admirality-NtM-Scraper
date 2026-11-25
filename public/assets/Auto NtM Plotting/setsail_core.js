@@ -19631,17 +19631,331 @@ function initNtMMap() {
       window._ecdisPickReticleLayer = _ecdisPickReticleLayer;
     }
 
+
+    // =========================================================================
+    // COMPLETE MARKS & OPENSEAMAP 1x1 NM QUERY HELPERS (v5.261)
+    // =========================================================================
+    const _osmSeamarkBoxCache = new Map();
+
+    const LIGHT_COLOUR_NAMES = {
+      w: "White", r: "Red", g: "Green", y: "Yellow", o: "Orange", b: "Blue", v: "Violet", m: "Magenta",
+      white: "White", red: "Red", green: "Green", yellow: "Yellow", amber: "Amber", orange: "Orange", blue: "Blue", violet: "Violet"
+    };
+
+    function _clipLineSegToPickBox(aLat, aLonRaw, bLat, bLonRaw, cLat, cLon, dLat, dLon, cosLat) {
+      if (!Number.isFinite(aLat) || !Number.isFinite(aLonRaw) || !Number.isFinite(bLat) || !Number.isFinite(bLonRaw)) return null;
+      const aLon = cLon + (((aLonRaw - cLon + 540) % 360) - 180);
+      const bLon = cLon + (((bLonRaw - cLon + 540) % 360) - 180);
+      const xMin = cLon - dLon;
+      const xMax = cLon + dLon;
+      const yMin = cLat - dLat;
+      const yMax = cLat + dLat;
+      const dx = bLon - aLon;
+      const dy = bLat - aLat;
+      let t0 = 0;
+      let t1 = 1;
+      const p = [-dx, dx, -dy, dy];
+      const q = [aLon - xMin, xMax - aLon, aLat - yMin, yMax - aLat];
+      for (let i = 0; i < 4; i++) {
+        if (Math.abs(p[i]) < 1e-12) {
+          if (q[i] < 0) return null;
+        } else {
+          const r = q[i] / p[i];
+          if (p[i] < 0) {
+            if (r > t1) return null;
+            if (r > t0) t0 = r;
+          } else {
+            if (r < t0) return null;
+            if (r < t1) t1 = r;
+          }
+        }
+      }
+      if (t0 > t1) return null;
+      const sx0 = (aLon + dx * t0 - cLon) * 60 * cosLat;
+      const sy0 = (aLat + dy * t0 - cLat) * 60;
+      const sx1 = (aLon + dx * t1 - cLon) * 60 * cosLat;
+      const sy1 = (aLat + dy * t1 - cLat) * 60;
+      const vx = sx1 - sx0;
+      const vy = sy1 - sy0;
+      const len2 = vx * vx + vy * vy;
+      const u = len2 > 1e-10 ? Math.max(0, Math.min(1, -(sx0 * vx + sy0 * vy) / len2)) : 0;
+      const bestT = t0 + u * (t1 - t0);
+      return {
+        distNm: Math.hypot(sx0 + u * vx, sy0 + u * vy),
+        hitLat: aLat + dy * bestT,
+        hitLon: (((aLon + dx * bestT) + 540) % 360) - 180
+      };
+    }
+
+    function _ringHitsPickBox(ring, cLat, cLon, dLat, dLon, cosLat, isClosedPoly) {
+      if (!Array.isArray(ring) || ring.length < 2) return null;
+      if (isClosedPoly && ring.length >= 3 && pointInTssPolygon(cLat, cLon, ring)) {
+        return { distNm: 0, hitLat: cLat, hitLon: cLon };
+      }
+      let best = null;
+      const count = isClosedPoly ? ring.length : ring.length - 1;
+      for (let i = 0; i < count; i++) {
+        const a = ring[i];
+        const b = ring[(i + 1) % ring.length];
+        if (!a || !b) continue;
+        const clip = _clipLineSegToPickBox(a[0], a[1], b[0], b[1], cLat, cLon, dLat, dLon, cosLat);
+        if (clip && (!best || clip.distNm < best.distNm)) {
+          best = clip;
+        }
+      }
+      return best;
+    }
+
+    function _formatLightSectorsSummary(sectors) {
+      if (!Array.isArray(sectors) || !sectors.length) return { short: "Light", rowsHtml: "", isSector: false };
+      const parts = [];
+      let isSector = false;
+      for (let i = 0; i < sectors.length; i++) {
+        const s = sectors[i];
+        if (!s || s.length < 3) continue;
+        const code = String(s[0] || "w").toLowerCase();
+        const cName = LIGHT_COLOUR_NAMES[code] || code.toUpperCase();
+        const a = Number(s[1]);
+        const b = Number(s[2]);
+        const full = (a === 0 && b === 360) || Math.abs(((b - a + 360) % 360)) < 0.08;
+        if (full) {
+          parts.push("All-round " + cName);
+        } else {
+          isSector = true;
+          const brg1 = Math.round((a + 180) % 360);
+          const brg2 = Math.round((b + 180) % 360);
+          parts.push(cName + " " + String(brg1).padStart(3, "0") + "°–" + String(brg2).padStart(3, "0") + "°(T)");
+        }
+      }
+      const uniq = Array.from(new Set(parts));
+      return {
+        short: uniq.slice(0, 3).join(" · ") + (uniq.length > 3 ? " +" + (uniq.length - 3) : ""),
+        full: uniq.join(" | "),
+        isSector: isSector
+      };
+    }
+
+    function _parseOsmSeamarkElement(el, cLat, cLon, dLat, dLon, cosLat) {
+      if (!el || !el.tags) return null;
+      const tags = el.tags;
+      const rawType = String(tags["seamark:type"] || "").trim();
+      if (!rawType) return null;
+
+      let hit = null;
+      if (el.type === "node" && Number.isFinite(el.lat) && Number.isFinite(el.lon)) {
+        if (Math.abs(el.lat - cLat) <= dLat) {
+          const dLonS = (((el.lon - cLon + 540) % 360) - 180);
+          if (Math.abs(dLonS) <= dLon) {
+            hit = {
+              distNm: Math.hypot((el.lon - cLon) * 60 * cosLat, (el.lat - cLat) * 60),
+              hitLat: el.lat,
+              hitLon: el.lon
+            };
+          }
+        }
+      } else if (Array.isArray(el.geometry) && el.geometry.length >= 2) {
+        const ring = el.geometry.map((pt) => [Number(pt.lat), Number(pt.lon)]);
+        const closed = ring.length >= 4 && Math.abs(ring[0][0] - ring[ring.length - 1][0]) < 1e-6 && Math.abs(ring[0][1] - ring[ring.length - 1][1]) < 1e-6;
+        hit = _ringHitsPickBox(ring, cLat, cLon, dLat, dLon, cosLat, closed);
+      } else if (el.center && Number.isFinite(el.center.lat) && Number.isFinite(el.center.lon)) {
+        if (Math.abs(el.center.lat - cLat) <= dLat) {
+          const dLonS = (((el.center.lon - cLon + 540) % 360) - 180);
+          if (Math.abs(dLonS) <= dLon) {
+            hit = {
+              distNm: Math.hypot(dLonS * 60 * cosLat, (el.center.lat - cLat) * 60),
+              hitLat: el.center.lat,
+              hitLon: el.center.lon
+            };
+          }
+        }
+      }
+      if (!hit) return null;
+
+      const humanType = rawType.replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase());
+      const subCat = tags["seamark:" + rawType + ":category"] || tags["seamark:category"] || "";
+      const subCatClean = subCat ? subCat.replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase()) : "";
+      const colourRaw = tags["seamark:" + rawType + ":colour"] || tags["seamark:beacon_lateral:colour"] || tags["seamark:buoy_lateral:colour"] || tags["seamark:colour"] || "";
+      const shapeRaw = tags["seamark:" + rawType + ":shape"] || tags["seamark:shape"] || "";
+      const topmarkRaw = tags["seamark:topmark:shape"] || "";
+      const sysRaw = tags["seamark:" + rawType + ":system"] || tags["seamark:buoy_lateral:system"] || tags["seamark:beacon_lateral:system"] || "";
+
+      // Light character assembly (single or multi-sector)
+      let lightDesc = "";
+      const lChar = tags["seamark:light:character"] || tags["seamark:light:1:character"] || "";
+      const lGroup = tags["seamark:light:group"] || tags["seamark:light:1:group"] || "";
+      const lCol = tags["seamark:light:colour"] || tags["seamark:light:1:colour"] || "";
+      const lPer = tags["seamark:light:period"] || tags["seamark:light:1:period"] || "";
+      const lRng = tags["seamark:light:range"] || tags["seamark:light:1:range"] || "";
+      if (lChar || lCol) {
+        const colShort = lCol ? (LIGHT_COLOUR_NAMES[lCol.toLowerCase()] || lCol) : "";
+        lightDesc = (lChar || "Lt") + (lGroup ? "(" + lGroup + ")" : "") + (colShort ? " " + colShort : "") + (lPer ? " " + lPer + "s" : "") + (lRng ? " " + lRng + "M" : "");
+      }
+
+      // Classify badge, colour & icon across buoys, beacons, lights, signs, hazards, and areas
+      let catBadge = "MARK";
+      let badgeColor = "#38bdf8";
+      let icon = "⚓";
+      let hand = "";
+      if (rawType.indexOf("buoy") === 0 || rawType === "mooring") {
+        catBadge = "BUOY";
+        if (subCat === "port" || colourRaw === "red") { badgeColor = "#ef4444"; icon = "🟥"; hand = "port"; }
+        else if (subCat === "starboard" || colourRaw === "green") { badgeColor = "#22c55e"; icon = "🟩"; hand = "starboard"; }
+        else if (rawType.indexOf("cardinal") >= 0) { badgeColor = "#eab308"; icon = "▲"; }
+        else if (rawType.indexOf("isolated_danger") >= 0) { badgeColor = "#f59e0b"; icon = "⚠️"; }
+        else if (rawType.indexOf("safe_water") >= 0) { badgeColor = "#f87171"; icon = "⚪"; }
+        else { badgeColor = "#38bdf8"; icon = "⚓"; }
+      } else if (rawType.indexOf("beacon") === 0 || rawType === "daymark" || rawType === "cairn" || rawType === "pile") {
+        catBadge = "BCN";
+        badgeColor = subCat === "port" ? "#ef4444" : (subCat === "starboard" ? "#22c55e" : "#fbbf24");
+        icon = "🗼";
+      } else if (rawType.indexOf("light") === 0) {
+        catBadge = "LIGHT";
+        badgeColor = "#fde047";
+        icon = "🚨";
+      } else if (
+        rawType === "notice" || rawType === "sign" || rawType === "distance_mark" ||
+        rawType === "landmark" || rawType.indexOf("signal_station") === 0 ||
+        rawType === "calling-in_point" || rawType === "pilot_boarding" ||
+        rawType.indexOf("radar") === 0 || rawType === "fog_signal" || rawType === "coastguard_station"
+      ) {
+        catBadge = "SIGN";
+        badgeColor = "#f472b6";
+        icon = "🪧";
+      } else if (rawType === "wreck" || rawType === "rock" || rawType === "obstruction" || rawType === "foul_ground") {
+        catBadge = "HAZARD";
+        badgeColor = "#fb7185";
+        icon = "⚠️";
+      } else if (rawType === "anchorage" || rawType === "anchor_berth" || rawType === "berth" || rawType === "harbour") {
+        catBadge = "ANCH";
+        badgeColor = "#60a5fa";
+        icon = "⚓";
+      } else {
+        catBadge = "SEAMARK";
+        badgeColor = "#a78bfa";
+        icon = "📍";
+      }
+
+      const markName =
+        tags["seamark:name"] ||
+        tags["name:en"] ||
+        tags["name"] ||
+        (subCatClean ? (subCatClean + " " + humanType) : humanType);
+
+      const infoNote =
+        tags["seamark:information"] ||
+        tags["seamark:notice:information"] ||
+        tags["description"] ||
+        (tags["depth"] ? ("Charted depth: " + tags["depth"] + " m") : "");
+
+      const markObj = {
+        id: "osm_" + el.type + "_" + el.id,
+        name: markName,
+        type: rawType,
+        typeLabel: subCatClean ? (humanType + " (" + subCatClean + ")") : humanType,
+        categoryBadge: catBadge,
+        hand: hand,
+        icon: icon,
+        lat: hit.hitLat,
+        lon: hit.hitLon,
+        light: lightDesc || undefined,
+        colour: colourRaw ? colourRaw.replace(/;/g, " / ").replace(/_/g, " ") : undefined,
+        shape: shapeRaw ? shapeRaw.replace(/_/g, " ") : undefined,
+        topmark: topmarkRaw ? topmarkRaw.replace(/_/g, " ") : undefined,
+        ialaRegion: sysRaw ? sysRaw.toUpperCase() : undefined,
+        description: infoNote || undefined
+      };
+
+      const subParts = [];
+      if (subCatClean && markName.indexOf(subCatClean) < 0) subParts.push(subCatClean);
+      else subParts.push(humanType);
+      if (lightDesc) subParts.push(lightDesc);
+      else if (markObj.colour) subParts.push(markObj.colour);
+      subParts.push(hit.distNm.toFixed(2) + " NM");
+
+      return {
+        id: markObj.id,
+        category: catBadge,
+        catBadge: catBadge,
+        badgeColor: badgeColor,
+        icon: icon,
+        name: markName,
+        subtitle: subParts.join(" · "),
+        distNm: hit.distNm,
+        lat: hit.hitLat,
+        lon: hit.hitLon,
+        markObj: markObj
+      };
+    }
+
+    async function _fetchOpenSeaMapMarksInBox(south, west, north, east, cLat, cLon, dLat, dLon, cosLat) {
+      if (typeof navigator !== "undefined" && navigator.onLine === false) return [];
+      // Handle antimeridian wrap cleanly
+      const wNorm = (((west + 540) % 360) - 180);
+      const eNorm = (((east + 540) % 360) - 180);
+      if (wNorm > eNorm) return [];
+      const cacheKey = south.toFixed(3) + "," + wNorm.toFixed(3) + "," + north.toFixed(3) + "," + eNorm.toFixed(3);
+      if (_osmSeamarkBoxCache.has(cacheKey)) {
+        const cachedEls = _osmSeamarkBoxCache.get(cacheKey) || [];
+        const parsedCached = [];
+        for (let i = 0; i < cachedEls.length; i++) {
+          const p = _parseOsmSeamarkElement(cachedEls[i], cLat, cLon, dLat, dLon, cosLat);
+          if (p) parsedCached.push(p);
+        }
+        return parsedCached;
+      }
+
+      const bboxStr = south.toFixed(5) + "," + wNorm.toFixed(5) + "," + north.toFixed(5) + "," + eNorm.toFixed(5);
+      const ql = '[out:json][timeout:4];(nwr["seamark:type"](' + bboxStr + '););out geom tags;';
+      const endpoints = [
+        "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(ql),
+        "https://overpass.kumi.systems/api/interpreter?data=" + encodeURIComponent(ql)
+      ];
+
+      for (let ei = 0; ei < endpoints.length; ei++) {
+        const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+        const tId = ctrl ? setTimeout(() => { try { ctrl.abort(); } catch (eA) {} }, 2800) : null;
+        try {
+          const resp = await fetch(endpoints[ei], {
+            method: "GET",
+            signal: ctrl ? ctrl.signal : undefined,
+            credentials: "omit"
+          });
+          if (tId) clearTimeout(tId);
+          if (!resp.ok) continue;
+          const data = await resp.json();
+          const els = (data && Array.isArray(data.elements)) ? data.elements : [];
+          if (_osmSeamarkBoxCache.size > 60) {
+            const firstK = _osmSeamarkBoxCache.keys().next().value;
+            _osmSeamarkBoxCache.delete(firstK);
+          }
+          _osmSeamarkBoxCache.set(cacheKey, els);
+          const parsed = [];
+          for (let i = 0; i < els.length; i++) {
+            const p = _parseOsmSeamarkElement(els[i], cLat, cLon, dLat, dLon, cosLat);
+            if (p) parsed.push(p);
+          }
+          return parsed;
+        } catch (eFetch) {
+          if (tId) clearTimeout(tId);
+        }
+      }
+      return [];
+    }
+
     function handleEcdisObjectPick(clickPt, targetMap, originatingObject) {
       if (!targetMap || !clickPt) return;
       const currentSession = ++_ecdisPickSessionId;
       const lat = clickPt.lat;
       const lon = ((clickPt.lng + 540) % 360) - 180;
-      const z = targetMap.getZoom ? targetMap.getZoom() : 10;
 
       // 1x1 NM Query Box: 0.5 NM half-height and half-width
       const dLat = 0.5 / 60; // 0.008333 deg
       const cosLat = Math.cos(Math.max(-85, Math.min(85, lat)) * Math.PI / 180);
       const dLon = 0.5 / (60 * Math.max(0.08, cosLat));
+      const north = lat + dLat;
+      const south = lat - dLat;
+      const east = lon + dLon;
+      const west = lon - dLon;
 
       function isInside(tLat, tLon) {
         if (!Number.isFinite(tLat) || !Number.isFinite(tLon)) return false;
@@ -19666,665 +19980,790 @@ function initNtMMap() {
         if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES && OVERLAY_STATES[name] != null) {
           return Boolean(OVERLAY_STATES[name]);
         }
-        const tab = document.querySelector(`.excel-tab[data-overlay="${name}"], .ntm-layer-thumb-btn[data-overlay="${name}"]`);
+        const tab = document.querySelector('.excel-tab[data-overlay="' + name + '"], .ntm-layer-thumb-btn[data-overlay="' + name + '"]');
         return tab ? (tab.classList.contains("active") || tab.classList.contains("active-overlay")) : false;
       }
 
-      const candidates = [];
-      const seen = new Set();
+      const activeBaseKey = (typeof window.getSetChartActiveBaseKey === "function")
+        ? window.getSetChartActiveBaseKey()
+        : ((typeof ecdisLayer !== "undefined" && ecdisLayer && targetMap.hasLayer(ecdisLayer)) ? "ecdis" : "ocean");
 
-      function addCandidate(c) {
-        if (!c || !c.id || seen.has(c.id)) return;
-        seen.add(c.id);
-        candidates.push(c);
-      }
+      let extraOsmSeamarks = [];
+      let asyncScanPending = false;
+      let pickPopup = null;
+      let latestCandidates = [];
+      let navigatingToDetail = false;
 
-      if (originatingObject) {
-        addCandidate(originatingObject);
-      }
+      function collectAllCandidates() {
+        const candidates = [];
+        const seen = new Set();
 
-      // 0. OWN SHIP & FORECAST GHOST VESSEL
-      try {
-        if (typeof _ownShipMarker !== "undefined" && _ownShipMarker && typeof _ownShipMarker.getLatLng === "function") {
-          const onChart = (typeof leafletVesselLayer !== "undefined" && leafletVesselLayer && targetMap.hasLayer(leafletVesselLayer) && leafletVesselLayer.hasLayer(_ownShipMarker)) || targetMap.hasLayer(_ownShipMarker);
-          if (onChart) {
-            const oll = _ownShipMarker.getLatLng();
-            if (oll && isInside(oll.lat, oll.lng)) {
-              const od = distNm(oll.lat, oll.lng);
-              const uv = (typeof userVessel !== "undefined" && userVessel) ? userVessel : (window.userVessel || {});
+        function addCandidate(c) {
+          if (!c || !c.id || seen.has(c.id)) return;
+          seen.add(c.id);
+          candidates.push(c);
+        }
+
+        if (originatingObject) {
+          addCandidate(originatingObject);
+        }
+
+        // 0. OWN SHIP & FORECAST GHOST VESSEL
+        try {
+          if (typeof _ownShipMarker !== "undefined" && _ownShipMarker && typeof _ownShipMarker.getLatLng === "function") {
+            const onChart = (typeof leafletVesselLayer !== "undefined" && leafletVesselLayer && targetMap.hasLayer(leafletVesselLayer) && leafletVesselLayer.hasLayer(_ownShipMarker)) || targetMap.hasLayer(_ownShipMarker);
+            if (onChart) {
+              const oll = _ownShipMarker.getLatLng();
+              if (oll && isInside(oll.lat, oll.lng)) {
+                const od = distNm(oll.lat, oll.lng);
+                const uv = (typeof userVessel !== "undefined" && userVessel) ? userVessel : (window.userVessel || {});
+                addCandidate({
+                  id: "own_ship_ccrp",
+                  category: "OWN SHIP",
+                  catBadge: "OWN",
+                  badgeColor: "#00e5ff",
+                  icon: "🚢",
+                  name: uv.name || "Own Ship",
+                  subtitle: "CCRP" + (uv.mmsi ? " · MMSI " + uv.mmsi : "") + " · " + od.toFixed(2) + " NM",
+                  distNm: od,
+                  lat: oll.lat,
+                  lon: oll.lng,
+                  open: function() {
+                    if (typeof _ownShipMarker.openPopup === "function") _ownShipMarker.openPopup();
+                  }
+                });
+              }
+            }
+          }
+          if (window._wxGhostVesselMarker && targetMap.hasLayer(window._wxGhostVesselMarker) && typeof window._wxGhostVesselMarker.getLatLng === "function") {
+            const gll = window._wxGhostVesselMarker.getLatLng();
+            if (gll && isInside(gll.lat, gll.lng)) {
+              const gd = distNm(gll.lat, gll.lng);
               addCandidate({
-                id: "own_ship_ccrp",
-                category: "OWN SHIP",
-                catBadge: "OWN",
-                badgeColor: "#00e5ff",
+                id: "own_ship_forecast_ghost",
+                category: "FORECAST",
+                catBadge: "FCST",
+                badgeColor: "#38bdf8",
                 icon: "🚢",
-                name: uv.name || "Own Ship",
-                subtitle: "CCRP" + (uv.mmsi ? " · MMSI " + uv.mmsi : "") + " · " + od.toFixed(2) + " NM",
-                distNm: od,
-                lat: oll.lat,
-                lon: oll.lng,
+                name: "Forecast Vessel Position",
+                subtitle: "Projected route position · " + gd.toFixed(2) + " NM",
+                distNm: gd,
+                lat: gll.lat,
+                lon: gll.lng,
                 open: function() {
-                  if (typeof _ownShipMarker.openPopup === "function") _ownShipMarker.openPopup();
+                  if (typeof window._wxGhostVesselMarker.openPopup === "function") window._wxGhostVesselMarker.openPopup();
                 }
               });
             }
           }
-        }
-        if (window._wxGhostVesselMarker && targetMap.hasLayer(window._wxGhostVesselMarker) && typeof window._wxGhostVesselMarker.getLatLng === "function") {
-          const gll = window._wxGhostVesselMarker.getLatLng();
-          if (gll && isInside(gll.lat, gll.lng)) {
-            const gd = distNm(gll.lat, gll.lng);
-            addCandidate({
-              id: "own_ship_forecast_ghost",
-              category: "FORECAST",
-              catBadge: "FCST",
-              badgeColor: "#38bdf8",
-              icon: "🚢",
-              name: "Forecast Vessel Position",
-              subtitle: "Projected route position · " + gd.toFixed(2) + " NM",
-              distNm: gd,
-              lat: gll.lat,
-              lon: gll.lng,
-              open: function() {
-                if (typeof window._wxGhostVesselMarker.openPopup === "function") window._wxGhostVesselMarker.openPopup();
-              }
-            });
-          }
-        }
-      } catch (eOwnPick) {}
+        } catch (eOwnPick) {}
 
-      // 1. BUOYS & SEAMARKS (if Buoys layer active)
-      const isBuoysActive = isLayerOn("buoys") || (window.seamarkLayer && targetMap.hasLayer(window.seamarkLayer)) || (seamarkLyr && targetMap.hasLayer(seamarkLyr)) || (window._buoysVectorGroup && targetMap.hasLayer(window._buoysVectorGroup));
-      if (isBuoysActive) {
-        const _marksArr = (Array.isArray(_buoyMarksData) && _buoyMarksData.length) ? _buoyMarksData : (Array.isArray(window._buoyMarksData) ? window._buoyMarksData : []);
-        if (_marksArr.length) {
-          for (let i = 0; i < _marksArr.length; i++) {
-            const m = _marksArr[i];
-            if (isInside(m.lat, m.lon)) {
-              const d = distNm(m.lat, m.lon);
+        // 1. MARKS LAYER: BUOYS, BEACONS, SIGNS, LIGHT SECTORS, TSS & SUBSEA INFRASTRUCTURE
+        // Marks is baked into ECDIS, Ocean, and Satellite views by default.
+        const isBuoysActive =
+          activeBaseKey === "ecdis" ||
+          activeBaseKey === "ocean" ||
+          activeBaseKey === "sat" ||
+          isLayerOn("buoys") ||
+          (window.seamarkLayer && targetMap.hasLayer(window.seamarkLayer)) ||
+          (seamarkLyr && targetMap.hasLayer(seamarkLyr));
+
+        if (isBuoysActive) {
+          const pointMarkCoords = [];
+          const hasNearbyPointMark = (pLat, pLon, tolNm) => {
+            for (let i = 0; i < pointMarkCoords.length; i++) {
+              const pm = pointMarkCoords[i];
+              const dy = (pm[0] - pLat) * 60;
+              const dx = (((pm[1] - pLon + 540) % 360) - 180) * 60 * cosLat;
+              if (Math.hypot(dx, dy) <= tolNm) return pm[2];
+            }
+            return null;
+          };
+
+          // (1A) Live OpenSeaMap / S-57 buoys, beacons, signs, hazards & areas in 1x1 NM
+          if (Array.isArray(extraOsmSeamarks) && extraOsmSeamarks.length) {
+            for (let i = 0; i < extraOsmSeamarks.length; i++) {
+              const osm = extraOsmSeamarks[i];
+              if (!osm) continue;
+              pointMarkCoords.push([osm.lat, osm.lon, osm.markObj]);
               addCandidate({
-                id: "buoy_" + (m.lat.toFixed(5) + "_" + m.lon.toFixed(5) + "_" + (m.name || "")),
-                category: "BUOY",
-                catBadge: "BUOY",
-                badgeColor: "#38bdf8",
-                icon: "⚓",
-                name: m.name || m.type || "Seamark Buoy",
-                subtitle: `${m.light ? m.light + " · " : ""}${m.colour || m.shape || "IALA"} · ${d.toFixed(2)} NM`,
-                distNm: d,
-                lat: m.lat,
-                lon: m.lon,
+                id: osm.id,
+                category: osm.category,
+                catBadge: osm.catBadge,
+                badgeColor: osm.badgeColor,
+                icon: osm.icon,
+                name: osm.name,
+                subtitle: osm.subtitle,
+                distNm: osm.distNm,
+                lat: osm.lat,
+                lon: osm.lon,
                 open: function() {
                   L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 280, minWidth: 200, closeButton: true })
-                    .setLatLng([m.lat, m.lon])
-                    .setContent(formatBuoyPopup(m))
+                    .setLatLng([osm.lat, osm.lon])
+                    .setContent(formatBuoyPopup(osm.markObj))
                     .openOn(targetMap);
                 }
               });
             }
           }
-        }
 
-        // TSS Schemes (named routing polygons + global/SANHO vector TSS fallback)
-        const _tssArr = (Array.isArray(_buoyTssData) && _buoyTssData.length) ? _buoyTssData : (Array.isArray(window._buoyTssData) ? window._buoyTssData : []);
-        let matchedNamedTss = false;
-        if (_tssArr.length) {
+          // (1B) Curated IALA buoys, cardinal marks & lightvessels (_buoyMarksData)
+          const _marksArr = (Array.isArray(_buoyMarksData) && _buoyMarksData.length)
+            ? _buoyMarksData
+            : (Array.isArray(window._buoyMarksData) ? window._buoyMarksData : []);
+          for (let i = 0; i < _marksArr.length; i++) {
+            const m = _marksArr[i];
+            if (!m || !isInside(m.lat, m.lon)) continue;
+            if (hasNearbyPointMark(m.lat, m.lon, 0.025)) continue;
+            pointMarkCoords.push([m.lat, m.lon, m]);
+            const d = distNm(m.lat, m.lon);
+            addCandidate({
+              id: "buoy_" + (m.lat.toFixed(5) + "_" + m.lon.toFixed(5) + "_" + (m.name || "")),
+              category: "BUOY",
+              catBadge: m.type && String(m.type).indexOf("light") === 0 ? "LIGHT" : "BUOY",
+              badgeColor: "#38bdf8",
+              icon: m.icon || "⚓",
+              name: m.name || m.typeLabel || m.type || "Seamark Buoy",
+              subtitle: (m.light ? m.light + " · " : "") + (m.colour || m.shape || "IALA") + " · " + d.toFixed(2) + " NM",
+              distNm: d,
+              lat: m.lat,
+              lon: m.lon,
+              open: function() {
+                L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 280, minWidth: 200, closeButton: true })
+                  .setLatLng([m.lat, m.lon])
+                  .setContent(formatBuoyPopup(m))
+                  .openOn(targetMap);
+              }
+            });
+          }
+
+          // (1C) Global Lighted Seamarks & Light Sectors (_lightSectorsData — 27,708 marks)
+          const _lsArr = Array.isArray(_lightSectorsData)
+            ? _lightSectorsData
+            : (Array.isArray(window._lightSectorsData) ? window._lightSectorsData : []);
+          for (let i = 0; i < _lsArr.length; i++) {
+            const row = _lsArr[i];
+            if (!row || row.length < 3) continue;
+            const lLat = Number(row[0]);
+            const lLon = Number(row[1]);
+            if (!isInside(lLat, lLon)) continue;
+            const secInfo = _formatLightSectorsSummary(row[2]);
+            const existingMark = hasNearbyPointMark(lLat, lLon, 0.025);
+            if (existingMark) {
+              if (!existingMark.light && secInfo.short) {
+                existingMark.light = secInfo.short;
+              }
+              if (secInfo.isSector && (!existingMark.description || existingMark.description.indexOf("Sectors:") < 0)) {
+                existingMark.description = (existingMark.description ? existingMark.description + " · " : "") + "Sectors: " + secInfo.full;
+              }
+              continue;
+            }
+            const d = distNm(lLat, lLon);
+            const syntheticLight = {
+              name: secInfo.isSector ? "Sector Light / Beacon" : "Navigational Light",
+              type: "light_minor",
+              typeLabel: secInfo.isSector ? "Directional Sector Light (S-57 LIGHTS)" : "All-Round Navigational Light (S-57 LIGHTS)",
+              categoryBadge: "LIGHT",
+              icon: "🚨",
+              lat: lLat,
+              lon: lLon,
+              light: secInfo.short,
+              colour: secInfo.full || "Standard S-52 Light",
+              shape: "Lighthouse / Lighted Beacon / Buoy",
+              description: secInfo.isSector ? ("True bearings from seaward: " + secInfo.full) : undefined
+            };
+            pointMarkCoords.push([lLat, lLon, syntheticLight]);
+            addCandidate({
+              id: "light_sec_" + lLat.toFixed(5) + "_" + lLon.toFixed(5),
+              category: "LIGHT",
+              catBadge: "LIGHT",
+              badgeColor: "#fde047",
+              icon: "🚨",
+              name: syntheticLight.name,
+              subtitle: secInfo.short + " · " + d.toFixed(2) + " NM",
+              distNm: d,
+              lat: lLat,
+              lon: lLon,
+              open: function() {
+                L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 280, minWidth: 200, closeButton: true })
+                  .setLatLng([lLat, lLon])
+                  .setContent(formatBuoyPopup(syntheticLight))
+                  .openOn(targetMap);
+              }
+            });
+          }
+
+          // (1D) TSS Schemes (named routing polygons + global chart TSS features intersecting 1x1 NM)
+          const _tssArr = (Array.isArray(_buoyTssData) && _buoyTssData.length)
+            ? _buoyTssData
+            : (Array.isArray(window._buoyTssData) ? window._buoyTssData : []);
+          const matchedNamedSchemeZones = new Set();
           for (let s = 0; s < _tssArr.length; s++) {
             const scheme = _tssArr[s];
             if (!scheme || !Array.isArray(scheme.parts)) continue;
             for (let p = 0; p < scheme.parts.length; p++) {
               const part = scheme.parts[p];
-              if (pointInTssPolygon(lat, lon, part.ring)) {
-                matchedNamedTss = true;
+              const hit = _ringHitsPickBox(part.ring, lat, lon, dLat, dLon, cosLat, true);
+              if (hit) {
+                matchedNamedSchemeZones.add(part.category || "tss");
                 const tssObj = Object.assign({}, part, { schemeName: scheme.name });
                 addCandidate({
-                  id: "tss_" + scheme.name + "_" + (part.category || p),
+                  id: "tss_" + scheme.name + "_" + (part.name || part.category || p),
                   category: "TSS",
                   catBadge: "TSS",
                   badgeColor: part.category === "separation_zone" ? "#ef4444" : "#60a5fa",
                   icon: "🧭",
-                  name: scheme.name,
-                  subtitle: `${part.category === "separation_zone" ? "Separation Zone (Hard Ban)" : "Traffic Lane"} · COLREG Rule 10`,
-                  distNm: 0,
-                  lat: clickPt.lat,
-                  lon: clickPt.lng,
+                  name: part.name || scheme.name,
+                  subtitle: (part.category === "separation_zone" ? "Separation Zone" : "Traffic Lane") + " · COLREG Rule 10 · " + hit.distNm.toFixed(2) + " NM",
+                  distNm: hit.distNm,
+                  lat: hit.hitLat,
+                  lon: hit.hitLon,
                   open: function() {
                     L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 280, minWidth: 200, closeButton: true })
-                      .setLatLng(clickPt)
-                      .setContent(formatTssPopup(tssObj, lat, lon))
+                      .setLatLng([hit.hitLat, hit.hitLon])
+                      .setContent(formatTssPopup(tssObj, hit.hitLat, hit.hitLon))
                       .openOn(targetMap);
                   }
                 });
               }
             }
           }
-        }
-        const _tssChartArr = Array.isArray(_tssChartData) ? _tssChartData : (Array.isArray(window._tssChartData) ? window._tssChartData : []);
-        if (!matchedNamedTss && _tssChartArr.length) {
-          const padDeg = 0.04;
-          const catMap = { z: "separation_zone", r: "separation_zone", p: "precautionary_area", i: "inshore_traffic_zone", l: "traffic_lane", m: "traffic_lane", b: "separation_boundary", s: "separation_line", t: "two_way_route", d: "deep_water_route", c: "deep_water_route", x: "separation_crossing" };
-          for (let ci = 0; ci < _tssChartArr.length; ci++) {
-            const it = _tssChartArr[ci];
-            if (!it || it.length < 6) continue;
-            const bb = it[4];
-            if (!bb || lat < bb[0] - padDeg || lat > bb[2] + padDeg || lon < bb[1] - padDeg || lon > bb[3] + padDeg) continue;
-            const rings = Array.isArray(it[5][0]) && Array.isArray(it[5][0][0]) ? it[5] : [it[5]];
-            let hit = false;
-            if (it[1] === 1) {
-              hit = rings.some(rg => pointInTssPolygon(lat, lon, rg));
-            } else {
-              for (let ri = 0; ri < rings.length && !hit; ri++) {
-                const rg = rings[ri];
-                for (let pi = 0; pi < rg.length - 1 && !hit; pi++) {
-                  const aLat = rg[pi][0], aLon = rg[pi][1], bLat = rg[pi + 1][0], bLon = rg[pi + 1][1];
-                  const dx = (bLon - aLon) * 60 * cosLat, dy = (bLat - aLat) * 60;
-                  const px = (lon - aLon) * 60 * cosLat, py = (lat - aLat) * 60;
-                  const l2 = dx * dx + dy * dy;
-                  const u = l2 > 1e-8 ? Math.max(0, Math.min(1, (px * dx + py * dy) / l2)) : 0;
-                  if (Math.hypot(px - u * dx, py - u * dy) <= 1.2) hit = true;
+
+          const _tssChartArr = Array.isArray(_tssChartData)
+            ? _tssChartData
+            : (Array.isArray(window._tssChartData) ? window._tssChartData : []);
+          if (_tssChartArr.length) {
+            const catMap = {
+              z: "separation_zone", r: "separation_zone", p: "precautionary_area",
+              i: "inshore_traffic_zone", l: "traffic_lane", m: "traffic_lane",
+              b: "separation_boundary", s: "separation_line", t: "two_way_route",
+              d: "deep_water_route", c: "deep_water_route", x: "separation_crossing"
+            };
+            const seenChartTssKeys = new Set();
+            for (let ci = 0; ci < _tssChartArr.length; ci++) {
+              const it = _tssChartArr[ci];
+              if (!it || it.length < 6) continue;
+              const bb = it[4];
+              if (!bb || north < bb[0] - 0.01 || south > bb[2] + 0.01) continue;
+              const rings = Array.isArray(it[5][0]) && Array.isArray(it[5][0][0]) ? it[5] : [it[5]];
+              const isPoly = it[1] === 1;
+              let bestHit = null;
+              for (let ri = 0; ri < rings.length; ri++) {
+                const rh = _ringHitsPickBox(rings[ri], lat, lon, dLat, dLon, cosLat, isPoly);
+                if (rh && (!bestHit || rh.distNm < bestHit.distNm)) {
+                  bestHit = rh;
                 }
               }
-            }
-            if (hit) {
-              const cat = catMap[it[0]] || "traffic_lane";
-              const title = it[3] || (cat === "separation_zone" ? "Traffic Separation Zone" : cat === "precautionary_area" ? "TSS Precautionary Area" : "Traffic Separation Lane");
-              const tssObj = { category: cat, name: title, schemeName: title, directionDeg: it[2] != null ? it[2] : null };
-              addCandidate({
-                id: "tss_chart_" + ci,
-                category: "TSS",
-                catBadge: "TSS",
-                badgeColor: cat === "separation_zone" ? "#ef4444" : "#d946ef",
-                icon: "🧭",
-                name: title,
-                subtitle: `${cat.replace(/_/g, " ")} · COLREG Rule 10`,
-                distNm: 0,
-                lat: clickPt.lat,
-                lon: clickPt.lng,
-                open: function() {
-                  L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 280, minWidth: 200, closeButton: true })
-                    .setLatLng(clickPt)
-                    .setContent(formatTssPopup(tssObj, lat, lon))
-                    .openOn(targetMap);
-                }
-              });
-              break;
+              if (bestHit) {
+                const cat = catMap[it[0]] || "traffic_lane";
+                if (matchedNamedSchemeZones.has(cat) && !it[3]) continue;
+                const title = it[3] || (
+                  cat === "separation_zone" ? "Traffic Separation Zone" :
+                  cat === "precautionary_area" ? "TSS Precautionary Area" :
+                  cat === "separation_boundary" ? "TSS Boundary Line" :
+                  cat === "separation_line" ? "TSS Separation Line" :
+                  cat === "inshore_traffic_zone" ? "Inshore Traffic Zone" :
+                  cat === "deep_water_route" ? "Deep Water Route" :
+                  cat === "two_way_route" ? "Two-Way Route" : "Traffic Separation Lane"
+                );
+                const dedupKey = cat + "|" + title + "|" + String(it[2] != null ? it[2] : "");
+                if (seenChartTssKeys.has(dedupKey)) continue;
+                seenChartTssKeys.add(dedupKey);
+                const tssObj = { category: cat, name: title, schemeName: title, directionDeg: it[2] != null ? it[2] : null };
+                addCandidate({
+                  id: "tss_chart_" + ci,
+                  category: "TSS",
+                  catBadge: "TSS",
+                  badgeColor: cat === "separation_zone" ? "#ef4444" : "#d946ef",
+                  icon: "🧭",
+                  name: title,
+                  subtitle: cat.replace(/_/g, " ") + (it[2] != null ? " · " + it[2] + "°" : "") + " · " + bestHit.distNm.toFixed(2) + " NM",
+                  distNm: bestHit.distNm,
+                  lat: bestHit.hitLat,
+                  lon: bestHit.hitLon,
+                  open: function() {
+                    L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 280, minWidth: 200, closeButton: true })
+                      .setLatLng([bestHit.hitLat, bestHit.hitLon])
+                      .setContent(formatTssPopup(tssObj, bestHit.hitLat, bestHit.hitLon))
+                      .openOn(targetMap);
+                  }
+                });
+              }
             }
           }
-        }
 
-        // Subsea Cables & Pipelines (when Seamarks/Buoys overlay is active)
-        try {
-          if (_subseaGeoJsonLayer && typeof _subseaGeoJsonLayer.eachLayer === "function") {
-            _subseaGeoJsonLayer.eachLayer((sLyr) => {
-              if (!sLyr || typeof sLyr.getLatLngs !== "function") return;
-              const rawPts = sLyr.getLatLngs();
-              const chains = (Array.isArray(rawPts) && Array.isArray(rawPts[0])) ? rawPts : [rawPts];
-              let bestSubD = 999;
-              for (let ci = 0; ci < chains.length; ci++) {
-                const ch = chains[ci];
-                if (!Array.isArray(ch) || ch.length < 2) continue;
-                for (let pi = 0; pi < ch.length - 1; pi++) {
-                  const a = ch[pi], b = ch[pi + 1];
+          // (1E) Subsea Cables & Pipelines (_subseaInfraData — queried across all zooms!)
+          try {
+            const subData = _subseaInfraData || window._subseaInfraData;
+            const subFeats = (subData && Array.isArray(subData.features)) ? subData.features : [];
+            for (let fi = 0; fi < subFeats.length; fi++) {
+              const feat = subFeats[fi];
+              if (!feat || !feat.geometry || !Array.isArray(feat.geometry.coordinates)) continue;
+              const gType = feat.geometry.type;
+              const lines = gType === "LineString"
+                ? [feat.geometry.coordinates]
+                : (gType === "MultiLineString" ? feat.geometry.coordinates : []);
+              let bestSub = null;
+              for (let li = 0; li < lines.length; li++) {
+                const ln = lines[li];
+                if (!Array.isArray(ln) || ln.length < 2) continue;
+                for (let pi = 0; pi < ln.length - 1; pi++) {
+                  const a = ln[pi], b = ln[pi + 1];
                   if (!a || !b) continue;
-                  const aLon = ((a.lng + 540) % 360) - 180;
-                  const bLon = ((b.lng + 540) % 360) - 180;
-                  if (isInside(a.lat, aLon) || isInside(b.lat, bLon)) {
-                    bestSubD = Math.min(bestSubD, distNm(a.lat, aLon), distNm(b.lat, bLon));
-                  } else if (typeof pointToSegmentDistanceNM === "function") {
-                    const sd = pointToSegmentDistanceNM(lat, lon, a.lat, aLon, b.lat, bLon);
-                    if (sd <= 0.71) bestSubD = Math.min(bestSubD, sd);
+                  const clip = _clipLineSegToPickBox(Number(a[1]), Number(a[0]), Number(b[1]), Number(b[0]), lat, lon, dLat, dLon, cosLat);
+                  if (clip && (!bestSub || clip.distNm < bestSub.distNm)) {
+                    bestSub = clip;
                   }
                 }
               }
-              if (bestSubD <= 0.75) {
-                const sp = (sLyr.feature && sLyr.feature.properties) || {};
-                const isCbl = (sLyr.options && sLyr.options.subseaType === "CBL") || String(sp.t || "").toLowerCase() !== "pipeline";
-                const sName = sp.n || (isCbl ? "Submarine Cable" : "Subsea Pipeline");
+              if (bestSub) {
+                const sp = feat.properties || {};
+                const isCbl = String(sp.t || "").toUpperCase() === "CBL" || String(sp.t || "").toLowerCase() !== "pip" && String(sp.t || "").toLowerCase() !== "pipeline";
+                const sName = sp.name || sp.n || (isCbl ? "Submarine Cable" : "Subsea Pipeline");
                 addCandidate({
-                  id: "subsea_" + sName + "_" + bestSubD.toFixed(2),
+                  id: "subsea_" + (sp.id || (fi + "_" + sName)),
                   category: isCbl ? "CABLE" : "PIPE",
                   catBadge: isCbl ? "CBL" : "PIP",
                   badgeColor: isCbl ? "#c084fc" : "#fb923c",
                   icon: "〰️",
                   name: sName,
-                  subtitle: (isCbl ? "Submarine Cable" : "Subsea Pipeline") + " · " + bestSubD.toFixed(2) + " NM",
-                  distNm: bestSubD,
-                  lat: clickPt.lat,
-                  lon: clickPt.lng,
+                  subtitle: (isCbl ? "Submarine Cable" : ("Subsea Pipeline" + (sp.sub ? " (" + sp.sub + ")" : ""))) + " · " + bestSub.distNm.toFixed(2) + " NM",
+                  distNm: bestSub.distNm,
+                  lat: bestSub.hitLat,
+                  lon: bestSub.hitLon,
                   open: function() {
-                    if (typeof sLyr.openPopup === "function") sLyr.openPopup(clickPt);
-                  }
-                });
-              }
-            });
-          }
-        } catch (eSubPick) {}
-      }
-
-      // 2. AIS TARGETS (if AIS overlay active)
-      if (isLayerOn("ais") || (window.leafletAisLayer && targetMap.hasLayer(window.leafletAisLayer))) {
-        try {
-          if (window.leafletAisLayer && typeof window.leafletAisLayer.eachLayer === "function") {
-            window.leafletAisLayer.eachLayer((marker) => {
-              if (!marker || typeof marker.getLatLng !== "function") return;
-              const ll = marker.getLatLng();
-              if (isInside(ll.lat, ll.lng)) {
-                const d = distNm(ll.lat, ll.lng);
-                const v = marker._aisData || (marker.options && marker.options._aisData) || {};
-                const name = v.name || v.shipName || marker.options.title || ("MMSI " + (v.mmsi || "Target"));
-                addCandidate({
-                  id: "ais_" + (v.mmsi || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
-                  category: "AIS",
-                  catBadge: "AIS",
-                  badgeColor: "#10b981",
-                  icon: "🚢",
-                  name: name,
-                  subtitle: `${v.shipTypeName || v.shipType || "Vessel"} · SOG ${v.sog != null ? Number(v.sog).toFixed(1) : "—"} kn · ${d.toFixed(2)} NM`,
-                  distNm: d,
-                  lat: ll.lat,
-                  lon: ll.lng,
-                  open: function() {
-                    if (marker.getPopup && marker.getPopup() && typeof marker.openPopup === "function") {
-                      marker.openPopup();
-                    } else if (typeof window.formatAisPopup === "function") {
-                      L.popup({ className: "ss-ais-popup", autoPan: true, offset: [0, -6], maxWidth: 280, closeButton: true })
-                        .setLatLng(ll)
-                        .setContent(window.formatAisPopup(v))
-                        .openOn(targetMap);
-                    }
-                  }
-                });
-              }
-            });
-          }
-        } catch (eAis) {}
-      }
-
-      // 3. ADMIRALTY NtM & NAVTEX WARNINGS (if Notices/Warnings active)
-      const isNoticesOn = isLayerOn("notices") || isLayerOn("warnings") || (window.leafletMarkersLayer && targetMap.hasLayer(window.leafletMarkersLayer));
-      if (isNoticesOn) {
-        try {
-          // (A) Check layers on map (including cluster markers and individual markers/polygons)
-          if (window.leafletMarkersLayer && typeof window.leafletMarkersLayer.eachLayer === "function") {
-            window.leafletMarkersLayer.eachLayer((layer) => {
-              if (!layer) return;
-
-              // Unpack NtM Cluster Marker
-              if (layer._clusterData) {
-                const cl = layer._clusterData;
-                if (isInside(cl.lat, cl.lon)) {
-                  const clItems = Array.isArray(cl.items) ? cl.items : [];
-                  clItems.forEach((n) => {
-                    const title = n.id || n.noticeNumber || n.title || "NtM / NAVTEX";
-                    const typeBadge = n.type === "NAVTEX" ? "NAVTEX" : ("NtM " + (n.type || ""));
-                    const d = distNm(cl.lat, cl.lon);
-                    addCandidate({
-                      id: "ntm_" + (n.id || n.noticeNumber || (cl.lat.toFixed(4) + "_" + cl.lon.toFixed(4))),
-                      category: typeBadge.trim(),
-                      catBadge: typeBadge.trim(),
-                      badgeColor: n.type === "NAVTEX" ? "#f97316" : (n.type === "T" ? "#eab308" : "#d946ef"),
-                      icon: "⚠️",
-                      name: title,
-                      subtitle: `${n.country || ("NAVAREA " + (n.navarea || ""))} · ${(n.category || n.subject || "Warning").slice(0, 42)} · ${d.toFixed(2)} NM`,
-                      distNm: d,
-                      lat: cl.lat,
-                      lon: cl.lon,
-                      open: function() {
-                        if (typeof window.openNoticeDetailModal === "function" && n.id) {
-                          window.openNoticeDetailModal(n.id);
-                        } else if (typeof buildPopupHtml === "function") {
-                          L.popup({ maxWidth: 325, minWidth: 240, autoPan: true, closeButton: true })
-                            .setLatLng([cl.lat, wrapLongitudeDeg(cl.lon)])
-                            .setContent(buildPopupHtml(n))
-                            .openOn(targetMap);
-                        }
-                      }
-                    });
-                  });
-                }
-                return;
-              }
-
-              // Individual Notice Layer
-              const n = layer._noticeData || (layer.options && layer.options._noticeData) || null;
-              if (!n) return;
-              let matched = false;
-              let d = 999;
-              let hitLat = lat;
-              let hitLon = lon;
-
-              if (typeof layer.getLatLng === "function") {
-                const ll = layer.getLatLng();
-                if (ll && isInside(ll.lat, ll.lng)) {
-                  matched = true;
-                  d = distNm(ll.lat, ll.lng);
-                  hitLat = ll.lat;
-                  hitLon = ll.lng;
-                }
-              } else if (typeof L !== "undefined" && layer instanceof L.Polygon && typeof layer.getLatLngs === "function") {
-                const rawLL = layer.getLatLngs();
-                const ringLL = Array.isArray(rawLL[0]) ? (Array.isArray(rawLL[0][0]) ? rawLL[0][0] : rawLL[0]) : rawLL;
-                if (Array.isArray(ringLL) && ringLL.length >= 3) {
-                  const ringPairs = ringLL.map(p => [p.lat, ((p.lng + 540) % 360) - 180]);
-                  if (typeof pointInTssPolygon === "function" && pointInTssPolygon(lat, lon, ringPairs)) {
-                    matched = true;
-                    d = 0.05;
-                  } else {
-                    for (let i = 0; i < ringPairs.length; i++) {
-                      const a = ringPairs[i];
-                      const b = ringPairs[(i + 1) % ringPairs.length];
-                      if (isInside(a[0], a[1])) {
-                        matched = true;
-                        d = Math.min(d, distNm(a[0], a[1]));
-                      } else if (typeof pointToSegmentDistanceNM === "function") {
-                        const segD = pointToSegmentDistanceNM(lat, lon, a[0], a[1], b[0], b[1]);
-                        if (segD <= 0.71) {
-                          matched = true;
-                          d = Math.min(d, segD);
-                        }
-                      }
-                    }
-                  }
-                }
-              } else if (typeof L !== "undefined" && layer instanceof L.Polyline && typeof layer.getLatLngs === "function") {
-                const rawLL = layer.getLatLngs();
-                const lineLL = Array.isArray(rawLL[0]) ? rawLL[0] : rawLL;
-                if (Array.isArray(lineLL) && lineLL.length >= 2) {
-                  for (let i = 0; i < lineLL.length - 1; i++) {
-                    const aLat = lineLL[i].lat, aLon = ((lineLL[i].lng + 540) % 360) - 180;
-                    const bLat = lineLL[i + 1].lat, bLon = ((lineLL[i + 1].lng + 540) % 360) - 180;
-                    if (isInside(aLat, aLon) || isInside(bLat, bLon)) {
-                      matched = true;
-                      d = Math.min(d, distNm(aLat, aLon), distNm(bLat, bLon));
-                    } else if (typeof pointToSegmentDistanceNM === "function") {
-                      const segD = pointToSegmentDistanceNM(lat, lon, aLat, aLon, bLat, bLon);
-                      if (segD <= 0.71) {
-                        matched = true;
-                        d = Math.min(d, segD);
-                      }
-                    }
-                  }
-                }
-              }
-
-              if (!matched) return;
-              const title = n.id || n.noticeNumber || n.title || "NtM / NAVTEX";
-              const typeBadge = n.type === "NAVTEX" ? "NAVTEX" : ("NtM " + (n.type || ""));
-              addCandidate({
-                id: "ntm_" + (n.id || n.noticeNumber || (hitLat.toFixed(4) + "_" + hitLon.toFixed(4))),
-                category: typeBadge.trim(),
-                catBadge: typeBadge.trim(),
-                badgeColor: n.type === "NAVTEX" ? "#f97316" : (n.type === "T" ? "#eab308" : "#d946ef"),
-                icon: "⚠️",
-                name: title,
-                subtitle: `${n.country || ("NAVAREA " + (n.navarea || ""))} · ${(n.category || n.subject || "Warning").slice(0, 42)} · ${d.toFixed(2)} NM`,
-                distNm: d,
-                lat: hitLat,
-                lon: hitLon,
-                open: function() {
-                  if (layer._popupHtml) {
-                    L.popup({ maxWidth: 325, minWidth: 240, autoPan: true, closeButton: true })
-                      .setLatLng(clickPt)
-                      .setContent(layer._popupHtml)
+                    L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", maxWidth: 300, minWidth: 220, autoPan: true, offset: [0, -4], closeButton: true })
+                      .setLatLng([bestSub.hitLat, bestSub.hitLon])
+                      .setContent(formatSubseaInfraPopup(sp))
                       .openOn(targetMap);
-                  } else if (typeof layer.openPopup === "function") {
-                    layer.openPopup(clickPt);
                   }
+                });
+              }
+            }
+          } catch (eSubPick) {}
+        }
+
+        // 1.5. BATHYMETRY LAYER: ISOBATHS (DEPCNT), SPOT SOUNDINGS (SOUNDG) & ECDIS CONTOURS
+        // Baked into ECDIS view (and whenever Bathymetry GL layer is active on map).
+        const bathyLyr = (typeof window.getSetChartBathymetryLayer === "function") ? window.getSetChartBathymetryLayer() : null;
+        const isBathyActive =
+          activeBaseKey === "ecdis" ||
+          isLayerOn("bathymetry") ||
+          Boolean(bathyLyr && targetMap.hasLayer(bathyLyr));
+
+        if (isBathyActive && typeof window.queryOpenWatersBathymetryPick === "function") {
+          try {
+            const bathyItems = window.queryOpenWatersBathymetryPick(targetMap, bathyLyr, {
+              lat: lat,
+              lon: lon,
+              dLat: dLat,
+              dLon: dLon,
+              cosLat: cosLat
+            }) || [];
+            for (let bi = 0; bi < bathyItems.length; bi++) {
+              const bItem = bathyItems[bi];
+              addCandidate({
+                id: bItem.id,
+                category: bItem.category,
+                catBadge: bItem.catBadge,
+                badgeColor: bItem.badgeColor,
+                icon: bItem.icon,
+                name: bItem.name,
+                subtitle: bItem.subtitle,
+                distNm: bItem.distNm,
+                lat: bItem.lat,
+                lon: bItem.lon,
+                open: function() {
+                  L.popup({ className: "ss-ais-popup ss-buoy-popup-wrap", autoPan: true, offset: [0, -6], maxWidth: 290, minWidth: 210, closeButton: true })
+                    .setLatLng([bItem.lat, bItem.lon])
+                    .setContent(bItem.popupHtml)
+                    .openOn(targetMap);
                 }
               });
-            });
-          }
+            }
+          } catch (eBathyPick) {}
+        }
 
-          // (B) Query filtered notices data store directly for complete coverage
-          if (typeof getFilteredNotices === "function") {
-            const fnList = getFilteredNotices();
-            if (Array.isArray(fnList)) {
-              for (let i = 0; i < fnList.length; i++) {
-                const fn = fnList[i];
-                if (!fn || !Array.isArray(fn.coords)) continue;
-                const candId = "ntm_" + (fn.id || fn.noticeNumber);
-                if (seen.has(candId)) continue;
-                let bestD = 999;
-                let hitCoord = null;
-                for (let c = 0; c < fn.coords.length; c++) {
-                  const coord = fn.coords[c];
-                  const cLat = Number(coord.lat), cLon = Number(coord.lon);
-                  if (isInside(cLat, cLon)) {
-                    const d = distNm(cLat, cLon);
-                    if (d < bestD) {
-                      bestD = d;
-                      hitCoord = [cLat, cLon];
-                    }
-                  }
-                }
-                if (hitCoord && bestD <= 0.75) {
-                  const title = fn.id || fn.noticeNumber || fn.title || "NtM / NAVTEX";
-                  const typeBadge = fn.type === "NAVTEX" ? "NAVTEX" : ("NtM " + (fn.type || ""));
+        // 2. AIS TARGETS (if AIS overlay active)
+        if (isLayerOn("ais") || (window.leafletAisLayer && targetMap.hasLayer(window.leafletAisLayer))) {
+          try {
+            if (window.leafletAisLayer && typeof window.leafletAisLayer.eachLayer === "function") {
+              window.leafletAisLayer.eachLayer((marker) => {
+                if (!marker || typeof marker.getLatLng !== "function") return;
+                const ll = marker.getLatLng();
+                if (isInside(ll.lat, ll.lng)) {
+                  const d = distNm(ll.lat, ll.lng);
+                  const v = marker._aisData || (marker.options && marker.options._aisData) || {};
+                  const name = v.name || v.shipName || marker.options.title || ("MMSI " + (v.mmsi || "Target"));
                   addCandidate({
-                    id: candId,
-                    category: typeBadge.trim(),
-                    catBadge: typeBadge.trim(),
-                    badgeColor: fn.type === "NAVTEX" ? "#f97316" : (fn.type === "T" ? "#eab308" : "#d946ef"),
-                    icon: "⚠️",
-                    name: title,
-                    subtitle: `${fn.country || ("NAVAREA " + (fn.navarea || ""))} · ${(fn.category || fn.subject || "Warning").slice(0, 42)} · ${bestD.toFixed(2)} NM`,
-                    distNm: bestD,
-                    lat: hitCoord[0],
-                    lon: hitCoord[1],
+                    id: "ais_" + (v.mmsi || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
+                    category: "AIS",
+                    catBadge: "AIS",
+                    badgeColor: "#10b981",
+                    icon: "🚢",
+                    name: name,
+                    subtitle: (v.shipTypeName || v.shipType || "Vessel") + " · SOG " + (v.sog != null ? Number(v.sog).toFixed(1) : "—") + " kn · " + d.toFixed(2) + " NM",
+                    distNm: d,
+                    lat: ll.lat,
+                    lon: ll.lng,
                     open: function() {
-                      if (typeof window.openNoticeDetailModal === "function" && fn.id) {
-                        window.openNoticeDetailModal(fn.id);
-                      } else if (typeof buildPopupHtml === "function") {
-                        L.popup({ maxWidth: 325, minWidth: 240, autoPan: true, closeButton: true })
-                          .setLatLng(hitCoord)
-                          .setContent(buildPopupHtml(fn))
+                      if (marker.getPopup && marker.getPopup() && typeof marker.openPopup === "function") {
+                        marker.openPopup();
+                      } else if (typeof window.formatAisPopup === "function") {
+                        L.popup({ className: "ss-ais-popup", autoPan: true, offset: [0, -6], maxWidth: 280, closeButton: true })
+                          .setLatLng(ll)
+                          .setContent(window.formatAisPopup(v))
                           .openOn(targetMap);
                       }
                     }
                   });
                 }
-              }
+              });
             }
-          }
-        } catch (eNtm) {}
-      }
+          } catch (eAis) {}
+        }
 
-      // 4. PORT DEPTHS & SOUNDINGS (if Depths active)
-      if (isLayerOn("depths") || isLayerOn("ports") || (window.leafletPortDepthsLayer && targetMap.hasLayer(window.leafletPortDepthsLayer))) {
-        try {
-          if (window.leafletPortDepthsLayer && typeof window.leafletPortDepthsLayer.eachLayer === "function") {
-            window.leafletPortDepthsLayer.eachLayer((layer) => {
-              if (!layer || typeof layer.getLatLng !== "function") return;
-              const ll = layer.getLatLng();
-              if (isInside(ll.lat, ll.lng)) {
-                const d = distNm(ll.lat, ll.lng);
-                const p = layer._portData || (layer.options && layer.options._portData) || {};
-                const name = p.name || layer.options.title || "Harbour / Port";
-                addCandidate({
-                  id: "port_" + (p.unlocode || p.name || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
-                  category: "PORT",
-                  catBadge: "PORT",
-                  badgeColor: "#3b82f6",
-                  icon: "⚓",
-                  name: name,
-                  subtitle: `${p.unlocode || "Harbour"} · Depths & Tides · ${d.toFixed(2)} NM`,
-                  distNm: d,
-                  lat: ll.lat,
-                  lon: ll.lng,
-                  open: function() {
-                    if (typeof layer.openPopup === "function") layer.openPopup();
-                  }
-                });
-              }
-            });
-          }
-        } catch (ePorts) {}
-      }
+        // 3. ADMIRALTY NtM & NAVTEX WARNINGS (if Notices/Warnings active)
+        const isNoticesOn = isLayerOn("notices") || isLayerOn("warnings") || (window.leafletMarkersLayer && targetMap.hasLayer(window.leafletMarkersLayer));
+        if (isNoticesOn) {
+          try {
+            if (window.leafletMarkersLayer && typeof window.leafletMarkersLayer.eachLayer === "function") {
+              window.leafletMarkersLayer.eachLayer((layer) => {
+                if (!layer) return;
 
-      // 5. ROUTE WAYPOINTS (if Route active)
-      if (isLayerOn("route") || (window.leafletRouteLayer && targetMap.hasLayer(window.leafletRouteLayer))) {
-        try {
-          if (window.leafletRouteLayer && typeof window.leafletRouteLayer.eachLayer === "function") {
-            window.leafletRouteLayer.eachLayer((layer) => {
-              if (!layer || typeof layer.getLatLng !== "function") return;
-              const ll = layer.getLatLng();
-              if (isInside(ll.lat, ll.lng)) {
-                const d = distNm(ll.lat, ll.lng);
-                const wpt = layer._wptData || (layer.options && layer.options._wptData) || {};
-                const name = wpt.name || layer.options.title || ("WPT " + (wpt.index != null ? wpt.index : ""));
-                addCandidate({
-                  id: "wpt_" + (wpt.name || wpt.index || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
-                  category: "WPT",
-                  catBadge: "WPT",
-                  badgeColor: "#f05a36",
-                  icon: "📍",
-                  name: name,
-                  subtitle: `Route Waypoint · ${wpt.routeName || "Route"}${wpt.course ? " · Course " + wpt.course + "°" : ""} · ${d.toFixed(2)} NM`,
-                  distNm: d,
-                  lat: ll.lat,
-                  lon: ll.lng,
-                  open: function() {
-                    if (typeof layer.openPopup === "function") layer.openPopup();
+                if (layer._clusterData) {
+                  const cl = layer._clusterData;
+                  if (isInside(cl.lat, cl.lon)) {
+                    const clItems = Array.isArray(cl.items) ? cl.items : [];
+                    clItems.forEach((n) => {
+                      const title = n.id || n.noticeNumber || n.title || "NtM / NAVTEX";
+                      const typeBadge = n.type === "NAVTEX" ? "NAVTEX" : ("NtM " + (n.type || ""));
+                      const d = distNm(cl.lat, cl.lon);
+                      addCandidate({
+                        id: "ntm_" + (n.id || n.noticeNumber || (cl.lat.toFixed(4) + "_" + cl.lon.toFixed(4))),
+                        category: typeBadge.trim(),
+                        catBadge: typeBadge.trim(),
+                        badgeColor: n.type === "NAVTEX" ? "#f97316" : (n.type === "T" ? "#eab308" : "#d946ef"),
+                        icon: "⚠️",
+                        name: title,
+                        subtitle: (n.country || ("NAVAREA " + (n.navarea || ""))) + " · " + String(n.category || n.subject || "Warning").slice(0, 42) + " · " + d.toFixed(2) + " NM",
+                        distNm: d,
+                        lat: cl.lat,
+                        lon: cl.lon,
+                        open: function() {
+                          if (typeof window.openNoticeDetailModal === "function" && n.id) {
+                            window.openNoticeDetailModal(n.id);
+                          } else if (typeof buildPopupHtml === "function") {
+                            L.popup({ maxWidth: 325, minWidth: 240, autoPan: true, closeButton: true })
+                              .setLatLng([cl.lat, wrapLongitudeDeg(cl.lon)])
+                              .setContent(buildPopupHtml(n))
+                              .openOn(targetMap);
+                          }
+                        }
+                      });
+                    });
                   }
-                });
-              }
-            });
-          }
-        } catch (eRoute) {}
-      }
+                  return;
+                }
 
-      // 6. WEATHER HAZARDS & STORMS (if Weather active)
-      if (isLayerOn("weather") || (window.leafletWeatherLayer && targetMap.hasLayer(window.leafletWeatherLayer))) {
-        try {
-          if (window.leafletWeatherLayer && typeof window.leafletWeatherLayer.eachLayer === "function") {
-            window.leafletWeatherLayer.eachLayer((layer) => {
-              if (!layer || typeof layer.getLatLng !== "function") return;
-              if (!(layer.getPopup && layer.getPopup())) return;
-              const ll = layer.getLatLng();
-              const isAreaCircle = (typeof L !== "undefined" && L.Circle && layer instanceof L.Circle && !(L.CircleMarker && !(layer instanceof L.Circle)) && typeof layer.getRadius === "function" && layer.getRadius() > 1000);
-              let matchedWx = false;
-              let d = distNm(ll.lat, ll.lng);
-              if (isInside(ll.lat, ll.lng)) {
-                matchedWx = true;
-              } else if (isAreaCircle) {
-                try {
-                  const distM = targetMap.distance([lat, lon], [ll.lat, ((ll.lng + 540) % 360) - 180]);
-                  if (distM <= layer.getRadius()) {
-                    matchedWx = true;
-                    d = Math.min(d, 0.25);
+                const n = layer._noticeData || (layer.options && layer.options._noticeData) || null;
+                if (!n) return;
+                let matched = false;
+                let d = 999;
+                let hitLat = lat;
+                let hitLon = lon;
+
+                if (typeof layer.getLatLng === "function") {
+                  const ll = layer.getLatLng();
+                  if (ll && isInside(ll.lat, ll.lng)) {
+                    matched = true;
+                    d = distNm(ll.lat, ll.lng);
+                    hitLat = ll.lat;
+                    hitLon = ll.lng;
                   }
-                } catch (eCir) {}
-              }
-              if (matchedWx) {
-                const wx = layer._stormData || layer._wxData || (layer.options && layer.options._stormData) || {};
-                const name = wx.name || (layer.options && layer.options.title) || "Weather Hazard";
+                } else if (typeof L !== "undefined" && layer instanceof L.Polygon && typeof layer.getLatLngs === "function") {
+                  const rawLL = layer.getLatLngs();
+                  const ringLL = Array.isArray(rawLL[0]) ? (Array.isArray(rawLL[0][0]) ? rawLL[0][0] : rawLL[0]) : rawLL;
+                  if (Array.isArray(ringLL) && ringLL.length >= 3) {
+                    const ringPairs = ringLL.map((p) => [p.lat, ((p.lng + 540) % 360) - 180]);
+                    const rh = _ringHitsPickBox(ringPairs, lat, lon, dLat, dLon, cosLat, true);
+                    if (rh) {
+                      matched = true;
+                      d = rh.distNm;
+                      hitLat = rh.hitLat;
+                      hitLon = rh.hitLon;
+                    }
+                  }
+                } else if (typeof L !== "undefined" && layer instanceof L.Polyline && typeof layer.getLatLngs === "function") {
+                  const rawLL = layer.getLatLngs();
+                  const lineLL = Array.isArray(rawLL[0]) ? rawLL[0] : rawLL;
+                  if (Array.isArray(lineLL) && lineLL.length >= 2) {
+                    const linePairs = lineLL.map((p) => [p.lat, ((p.lng + 540) % 360) - 180]);
+                    const lh = _ringHitsPickBox(linePairs, lat, lon, dLat, dLon, cosLat, false);
+                    if (lh) {
+                      matched = true;
+                      d = lh.distNm;
+                      hitLat = lh.hitLat;
+                      hitLon = lh.hitLon;
+                    }
+                  }
+                }
+
+                if (!matched) return;
+                const title = n.id || n.noticeNumber || n.title || "NtM / NAVTEX";
+                const typeBadge = n.type === "NAVTEX" ? "NAVTEX" : ("NtM " + (n.type || ""));
                 addCandidate({
-                  id: "wx_" + (wx.id || wx.name || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
-                  category: "WEATHER",
-                  catBadge: "WX",
-                  badgeColor: "#06b6d4",
-                  icon: "🌀",
-                  name: name,
-                  subtitle: (wx.category || wx.type || "Storm / Advisory") + (isAreaCircle ? " · Active Zone" : (" · " + d.toFixed(2) + " NM")),
+                  id: "ntm_" + (n.id || n.noticeNumber || (hitLat.toFixed(4) + "_" + hitLon.toFixed(4))),
+                  category: typeBadge.trim(),
+                  catBadge: typeBadge.trim(),
+                  badgeColor: n.type === "NAVTEX" ? "#f97316" : (n.type === "T" ? "#eab308" : "#d946ef"),
+                  icon: "⚠️",
+                  name: title,
+                  subtitle: (n.country || ("NAVAREA " + (n.navarea || ""))) + " · " + String(n.category || n.subject || "Warning").slice(0, 42) + " · " + d.toFixed(2) + " NM",
                   distNm: d,
-                  lat: isAreaCircle ? clickPt.lat : ll.lat,
-                  lon: isAreaCircle ? clickPt.lng : ll.lng,
+                  lat: hitLat,
+                  lon: hitLon,
                   open: function() {
-                    if (typeof layer.openPopup === "function") {
-                      if (isAreaCircle) layer.openPopup(clickPt);
-                      else layer.openPopup();
+                    if (layer._popupHtml) {
+                      L.popup({ maxWidth: 325, minWidth: 240, autoPan: true, closeButton: true })
+                        .setLatLng(clickPt)
+                        .setContent(layer._popupHtml)
+                        .openOn(targetMap);
+                    } else if (typeof layer.openPopup === "function") {
+                      layer.openPopup(clickPt);
                     }
                   }
                 });
+              });
+            }
+
+            if (typeof getFilteredNotices === "function") {
+              const fnList = getFilteredNotices();
+              if (Array.isArray(fnList)) {
+                for (let i = 0; i < fnList.length; i++) {
+                  const fn = fnList[i];
+                  if (!fn || !Array.isArray(fn.coords)) continue;
+                  const candId = "ntm_" + (fn.id || fn.noticeNumber);
+                  if (seen.has(candId)) continue;
+                  let bestD = 999;
+                  let hitCoord = null;
+                  for (let c = 0; c < fn.coords.length; c++) {
+                    const coord = fn.coords[c];
+                    const cLat = Number(coord.lat), cLon = Number(coord.lon);
+                    if (isInside(cLat, cLon)) {
+                      const d = distNm(cLat, cLon);
+                      if (d < bestD) {
+                        bestD = d;
+                        hitCoord = [cLat, cLon];
+                      }
+                    }
+                  }
+                  if (hitCoord && bestD <= 0.75) {
+                    const title = fn.id || fn.noticeNumber || fn.title || "NtM / NAVTEX";
+                    const typeBadge = fn.type === "NAVTEX" ? "NAVTEX" : ("NtM " + (fn.type || ""));
+                    addCandidate({
+                      id: candId,
+                      category: typeBadge.trim(),
+                      catBadge: typeBadge.trim(),
+                      badgeColor: fn.type === "NAVTEX" ? "#f97316" : (fn.type === "T" ? "#eab308" : "#d946ef"),
+                      icon: "⚠️",
+                      name: title,
+                      subtitle: (fn.country || ("NAVAREA " + (fn.navarea || ""))) + " · " + String(fn.category || fn.subject || "Warning").slice(0, 42) + " · " + bestD.toFixed(2) + " NM",
+                      distNm: bestD,
+                      lat: hitCoord[0],
+                      lon: hitCoord[1],
+                      open: function() {
+                        if (typeof window.openNoticeDetailModal === "function" && fn.id) {
+                          window.openNoticeDetailModal(fn.id);
+                        } else if (typeof buildPopupHtml === "function") {
+                          L.popup({ maxWidth: 325, minWidth: 240, autoPan: true, closeButton: true })
+                            .setLatLng(hitCoord)
+                            .setContent(buildPopupHtml(fn))
+                            .openOn(targetMap);
+                        }
+                      }
+                    });
+                  }
+                }
               }
-            });
-          }
-        } catch (eWx) {}
+            }
+          } catch (eNtm) {}
+        }
+
+        // 4. PORT DEPTHS & HARBOURS (if Ports active)
+        if (isLayerOn("depths") || isLayerOn("ports") || (window.leafletPortDepthsLayer && targetMap.hasLayer(window.leafletPortDepthsLayer))) {
+          try {
+            if (window.leafletPortDepthsLayer && typeof window.leafletPortDepthsLayer.eachLayer === "function") {
+              window.leafletPortDepthsLayer.eachLayer((layer) => {
+                if (!layer || typeof layer.getLatLng !== "function") return;
+                const ll = layer.getLatLng();
+                if (isInside(ll.lat, ll.lng)) {
+                  const d = distNm(ll.lat, ll.lng);
+                  const p = layer._portData || (layer.options && layer.options._portData) || {};
+                  const name = p.name || layer.options.title || "Harbour / Port";
+                  addCandidate({
+                    id: "port_" + (p.unlocode || p.name || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
+                    category: "PORT",
+                    catBadge: "PORT",
+                    badgeColor: "#3b82f6",
+                    icon: "⚓",
+                    name: name,
+                    subtitle: (p.unlocode || "Harbour") + " · Depths & Tides · " + d.toFixed(2) + " NM",
+                    distNm: d,
+                    lat: ll.lat,
+                    lon: ll.lng,
+                    open: function() {
+                      if (typeof layer.openPopup === "function") layer.openPopup();
+                    }
+                  });
+                }
+              });
+            }
+          } catch (ePorts) {}
+        }
+
+        // 5. ROUTE WAYPOINTS (if Route active)
+        if (isLayerOn("route") || (window.leafletRouteLayer && targetMap.hasLayer(window.leafletRouteLayer))) {
+          try {
+            if (window.leafletRouteLayer && typeof window.leafletRouteLayer.eachLayer === "function") {
+              window.leafletRouteLayer.eachLayer((layer) => {
+                if (!layer || typeof layer.getLatLng !== "function") return;
+                const ll = layer.getLatLng();
+                if (isInside(ll.lat, ll.lng)) {
+                  const d = distNm(ll.lat, ll.lng);
+                  const wpt = layer._wptData || (layer.options && layer.options._wptData) || {};
+                  const name = wpt.name || layer.options.title || ("WPT " + (wpt.index != null ? wpt.index : ""));
+                  addCandidate({
+                    id: "wpt_" + (wpt.name || wpt.index || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
+                    category: "WPT",
+                    catBadge: "WPT",
+                    badgeColor: "#f05a36",
+                    icon: "📍",
+                    name: name,
+                    subtitle: "Route Waypoint · " + (wpt.routeName || "Route") + (wpt.course ? " · Course " + wpt.course + "°" : "") + " · " + d.toFixed(2) + " NM",
+                    distNm: d,
+                    lat: ll.lat,
+                    lon: ll.lng,
+                    open: function() {
+                      if (typeof layer.openPopup === "function") layer.openPopup();
+                    }
+                  });
+                }
+              });
+            }
+          } catch (eRoute) {}
+        }
+
+        // 6. WEATHER HAZARDS & STORMS (if Weather active)
+        if (isLayerOn("weather") || (window.leafletWeatherLayer && targetMap.hasLayer(window.leafletWeatherLayer))) {
+          try {
+            if (window.leafletWeatherLayer && typeof window.leafletWeatherLayer.eachLayer === "function") {
+              window.leafletWeatherLayer.eachLayer((layer) => {
+                if (!layer || typeof layer.getLatLng !== "function") return;
+                if (!(layer.getPopup && layer.getPopup())) return;
+                const ll = layer.getLatLng();
+                const isAreaCircle = (typeof L !== "undefined" && L.Circle && layer instanceof L.Circle && !(L.CircleMarker && !(layer instanceof L.Circle)) && typeof layer.getRadius === "function" && layer.getRadius() > 1000);
+                let matchedWx = false;
+                let d = distNm(ll.lat, ll.lng);
+                if (isInside(ll.lat, ll.lng)) {
+                  matchedWx = true;
+                } else if (isAreaCircle) {
+                  try {
+                    const distM = targetMap.distance([lat, lon], [ll.lat, ((ll.lng + 540) % 360) - 180]);
+                    if (distM <= layer.getRadius()) {
+                      matchedWx = true;
+                      d = Math.min(d, 0.25);
+                    }
+                  } catch (eCir) {}
+                }
+                if (matchedWx) {
+                  const wx = layer._stormData || layer._wxData || (layer.options && layer.options._stormData) || {};
+                  const name = wx.name || (layer.options && layer.options.title) || "Weather Hazard";
+                  addCandidate({
+                    id: "wx_" + (wx.id || wx.name || ll.lat.toFixed(4) + "_" + ll.lng.toFixed(4)),
+                    category: "WEATHER",
+                    catBadge: "WX",
+                    badgeColor: "#06b6d4",
+                    icon: "🌀",
+                    name: name,
+                    subtitle: (wx.category || wx.type || "Storm / Advisory") + (isAreaCircle ? " · Active Zone" : (" · " + d.toFixed(2) + " NM")),
+                    distNm: d,
+                    lat: isAreaCircle ? clickPt.lat : ll.lat,
+                    lon: isAreaCircle ? clickPt.lng : ll.lng,
+                    open: function() {
+                      if (typeof layer.openPopup === "function") {
+                        if (isAreaCircle) layer.openPopup(clickPt);
+                        else layer.openPopup();
+                      }
+                    }
+                  });
+                }
+              });
+            }
+          } catch (eWx) {}
+        }
+
+        candidates.sort((a, b) => a.distNm - b.distNm);
+        return candidates;
       }
 
-      // Sort candidates ascending by distance
-      candidates.sort((a, b) => a.distNm - b.distNm);
+      function buildPickPopupHtml(candidates) {
+        const count = candidates.length;
+        const countLabel = count === 1 ? "1 OBJECT" : (count + " OBJECTS");
+        const dms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : (lat.toFixed(4) + "°, " + lon.toFixed(4) + "°");
+        const rowsMarkup = count > 0
+          ? candidates.map((c, idx) => (
+              '<button type="button" class="ss-ecdis-pick-row" data-idx="' + idx + '">' +
+                '<div class="ss-ecdis-pick-row-left">' +
+                  '<span class="ss-ecdis-pick-badge" style="background:' + c.badgeColor + '22;color:' + c.badgeColor + ';border:1px solid ' + c.badgeColor + '66;">' + c.catBadge + '</span>' +
+                  '<div class="ss-ecdis-pick-row-info">' +
+                    '<div class="ss-ecdis-pick-row-name">' + c.name + '</div>' +
+                    '<div class="ss-ecdis-pick-row-sub">' + c.subtitle + '</div>' +
+                  '</div>' +
+                '</div>' +
+                '<span class="ss-ecdis-pick-row-arrow">›</span>' +
+              '</button>'
+            )).join("")
+          : '<div class="ss-ecdis-pick-empty">' + (asyncScanPending ? "Scanning chart seamarks & contours…" : "No chart objects within 1×1 NM") + '</div>';
 
-      // =======================================================================
-      // RENDER CURSOR PICK REPORT POPUP (invoked via RMB -> Cursor Pick)
-      // =======================================================================
-      drawEcdisPickReticle(clickPt, targetMap, dLat, dLon);
-      const count = candidates.length;
-      const countLabel = count === 1 ? "1 OBJECT" : (count + " OBJECTS");
-      const dms = (typeof formatLatLonDMS === "function") ? formatLatLonDMS(lat, lon) : (lat.toFixed(4) + "°, " + lon.toFixed(4) + "°");
+        const footMarkup = asyncScanPending
+          ? "Scanning OpenSeaMap marks & depth contours…"
+          : (count > 0 ? "Click an object to inspect full details" : "No Marks, Bathymetry or active overlay objects in 1×1 NM");
 
-      const rowsMarkup = count > 0
-        ? candidates.map((c, idx) => (
-            '<button type="button" class="ss-ecdis-pick-row" data-idx="' + idx + '">' +
-              '<div class="ss-ecdis-pick-row-left">' +
-                '<span class="ss-ecdis-pick-badge" style="background:' + c.badgeColor + '22;color:' + c.badgeColor + ';border:1px solid ' + c.badgeColor + '66;">' + c.catBadge + '</span>' +
-                '<div class="ss-ecdis-pick-row-info">' +
-                  '<div class="ss-ecdis-pick-row-name">' + c.name + '</div>' +
-                  '<div class="ss-ecdis-pick-row-sub">' + c.subtitle + '</div>' +
+        return (
+          '<div class="ss-ecdis-pick-container">' +
+            '<div class="ss-ecdis-pick-head">' +
+              '<div class="ss-ecdis-pick-title-wrap">' +
+                '<span class="ss-ecdis-pick-reticle-ico">🎯</span>' +
+                '<div>' +
+                  '<div class="ss-ecdis-pick-title">CURSOR PICK · 1×1 NM</div>' +
+                  '<div class="ss-ecdis-pick-pos">' + dms + '</div>' +
                 '</div>' +
               '</div>' +
-              '<span class="ss-ecdis-pick-row-arrow">›</span>' +
-            '</button>'
-          )).join("")
-        : '<div class="ss-ecdis-pick-empty">No active chart objects within 1×1 NM</div>';
-
-      const footMarkup = count > 0
-        ? "Click an object to inspect full details"
-        : "Enable chart overlays or right-click over an object";
-
-      const listHtml =
-        '<div class="ss-ecdis-pick-container">' +
-          '<div class="ss-ecdis-pick-head">' +
-            '<div class="ss-ecdis-pick-title-wrap">' +
-              '<span class="ss-ecdis-pick-reticle-ico">🎯</span>' +
-              '<div>' +
-                '<div class="ss-ecdis-pick-title">CURSOR PICK · 1×1 NM</div>' +
-                '<div class="ss-ecdis-pick-pos">' + dms + '</div>' +
-              '</div>' +
+              '<span class="ss-ecdis-pick-count-badge">' + countLabel + '</span>' +
             '</div>' +
-            '<span class="ss-ecdis-pick-count-badge">' + countLabel + '</span>' +
-          '</div>' +
-          '<div class="ss-ecdis-pick-list">' + rowsMarkup + '</div>' +
-          '<div class="ss-ecdis-pick-foot">' + footMarkup + '</div>' +
-        '</div>';
-
-      const pickPopup = L.popup({
-        className: "ss-ecdis-pick-popup",
-        autoPan: true,
-        offset: [0, -6],
-        maxWidth: 320,
-        minWidth: 260,
-        closeButton: true
-      })
-      .setLatLng(clickPt)
-      .setContent(listHtml)
-      .openOn(targetMap);
-
-      let navigatingToDetail = false;
-
-      pickPopup.on("remove", () => {
-        setTimeout(() => {
-          if (!navigatingToDetail && _ecdisPickSessionId === currentSession) {
-            if (!targetMap._popup || !targetMap.hasLayer(targetMap._popup)) {
-              clearEcdisPickReticle(targetMap);
-            }
-          }
-        }, 120);
-      });
+            '<div class="ss-ecdis-pick-list">' + rowsMarkup + '</div>' +
+            '<div class="ss-ecdis-pick-foot">' + footMarkup + '</div>' +
+          '</div>'
+        );
+      }
 
       const wirePickRows = () => {
-        const el = pickPopup.getElement ? pickPopup.getElement() : null;
-        if (!el || el._ssPickWired) return false;
-        el._ssPickWired = true;
-        if (typeof L !== "undefined" && L.DomEvent) {
+        const el = pickPopup && pickPopup.getElement ? pickPopup.getElement() : null;
+        if (!el) return false;
+        if (!el._ssPickStopBound && typeof L !== "undefined" && L.DomEvent) {
+          el._ssPickStopBound = true;
           L.DomEvent.disableClickPropagation(el);
           L.DomEvent.disableScrollPropagation(el);
         }
         el.querySelectorAll(".ss-ecdis-pick-row").forEach((btn) => {
+          if (btn._ssRowBound) return;
+          btn._ssRowBound = true;
           btn.addEventListener("click", (ev) => {
             ev.preventDefault();
             ev.stopPropagation();
             const idx = parseInt(btn.getAttribute("data-idx"), 10);
-            const chosen = candidates[idx];
+            const chosen = latestCandidates[idx];
             navigatingToDetail = true;
             targetMap.closePopup(pickPopup);
             if (chosen && typeof chosen.open === "function") {
@@ -20346,9 +20785,81 @@ function initNtMMap() {
         return true;
       };
 
+      const refreshOpenPickPopup = () => {
+        if (_ecdisPickSessionId !== currentSession || navigatingToDetail) return;
+        if (!pickPopup || !targetMap.hasLayer(pickPopup)) return;
+        latestCandidates = collectAllCandidates();
+        pickPopup.setContent(buildPickPopupHtml(latestCandidates));
+        if (!wirePickRows()) {
+          setTimeout(wirePickRows, 30);
+        }
+      };
+
+      // =======================================================================
+      // RENDER CURSOR PICK REPORT POPUP IMMEDIATELY + MERGE ASYNC MARKS/TILES
+      // =======================================================================
+      drawEcdisPickReticle(clickPt, targetMap, dLat, dLon);
+
+      const asyncTasks = [];
+      if (!(_buoyMarksData.length > 0 && _subseaInfraData && _lightSectorsData && _tssChartData && _buoyTssData.length > 0)) {
+        asyncTasks.push(loadBuoyDatasets().catch(() => {}));
+      }
+      asyncTasks.push(
+        _fetchOpenSeaMapMarksInBox(south, west, north, east, lat, lon, dLat, dLon, cosLat)
+          .then((list) => {
+            if (Array.isArray(list) && list.length) {
+              extraOsmSeamarks = list;
+            }
+          })
+          .catch(() => {})
+      );
+
+      asyncScanPending = asyncTasks.length > 0;
+      latestCandidates = collectAllCandidates();
+
+      pickPopup = L.popup({
+        className: "ss-ecdis-pick-popup",
+        autoPan: true,
+        offset: [0, -6],
+        maxWidth: 320,
+        minWidth: 260,
+        closeButton: true
+      })
+        .setLatLng(clickPt)
+        .setContent(buildPickPopupHtml(latestCandidates))
+        .openOn(targetMap);
+
+      pickPopup.on("remove", () => {
+        setTimeout(() => {
+          if (!navigatingToDetail && _ecdisPickSessionId === currentSession) {
+            if (!targetMap._popup || !targetMap.hasLayer(targetMap._popup)) {
+              clearEcdisPickReticle(targetMap);
+            }
+          }
+        }, 120);
+      });
+
       if (!wirePickRows()) {
         setTimeout(wirePickRows, 40);
       }
+
+      if (asyncTasks.length) {
+        Promise.all(asyncTasks).finally(() => {
+          asyncScanPending = false;
+          refreshOpenPickPopup();
+        });
+      }
+
+      // If ECDIS Bathymetry GL tiles are still streaming, re-scan once idle so no contour/sounding is missed
+      try {
+        const bathyLyrNow = (typeof window.getSetChartBathymetryLayer === "function") ? window.getSetChartBathymetryLayer() : null;
+        const glNow = bathyLyrNow && typeof bathyLyrNow.getMaplibreMap === "function" ? bathyLyrNow.getMaplibreMap() : null;
+        if (glNow && typeof glNow.areTilesLoaded === "function" && !glNow.areTilesLoaded()) {
+          glNow.once("idle", () => {
+            refreshOpenPickPopup();
+          });
+        }
+      } catch (eGlIdle) {}
     }
 
     window.handleEcdisObjectPick = handleEcdisObjectPick;
@@ -36419,7 +36930,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
   selector.innerHTML = `
 
-    <button type="button" class="ntm-layer-thumb-btn active-base" data-base="ecdis" title="ECDIS — blue water, yellow land, detailed coastline">
+    <button type="button" class="ntm-layer-thumb-btn active-base" data-base="ecdis" title="ECDIS — nautical chart with Bathymetry & Marks">
 
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(180deg,#B5C4C5 0%,#B5C4C5 52%,#EFB562 52%,#EFB562 100%);">
 
@@ -36433,7 +36944,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
 
 
-    <button type="button" class="ntm-layer-thumb-btn" data-base="ocean" title="Esri Ocean Nautical Chart">
+    <button type="button" class="ntm-layer-thumb-btn" data-base="ocean" title="Ocean — Esri Ocean chart with Marks">
 
       <div class="ntm-layer-thumb-preview" style="background:linear-gradient(145deg,#0d3b66 0%,#1d6fa5 55%,#7bdff2 100%);">
 
@@ -36447,7 +36958,7 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
 
 
-    <button type="button" class="ntm-layer-thumb-btn" data-base="sat" title="World Satellite Imagery">
+    <button type="button" class="ntm-layer-thumb-btn" data-base="sat" title="Satellite — World Imagery with Marks">
 
       <div class="ntm-layer-thumb-preview" style="background:radial-gradient(circle at 30% 30%,#1b4332 0%,#081c15 55%,#001219 100%);">
 
@@ -36549,17 +37060,24 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
 
 
-  let activeBaseKey = "ocean";
+  let activeBaseKey = (layers.ecdis && mapInstance.hasLayer(layers.ecdis))
+    ? "ecdis"
+    : ((layers.sat && mapInstance.hasLayer(layers.sat)) ? "sat" : "ocean");
 
-  let isBuoysActive = false;
+  let isBuoysActive = true;
 
   let isBathymetryActive = false;
+
+  let _wantedBathymetry = activeBaseKey === "ecdis";
 
   let isTimezonesActive = false;
 
   let bathymetryLayerRef = layers.bathymetry || null;
 
   let owOverlayBusy = false;
+
+  window.getSetChartActiveBaseKey = () => activeBaseKey;
+  window.getSetChartBathymetryLayer = () => bathymetryLayerRef;
 
 
 
@@ -36645,156 +37163,136 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
 
 
-  const toggleOwMapLibreOverlay = async (overlayKey, btn, desiredOn) => {
-
-    if (owOverlayBusy) return;
-
+  const toggleOwMapLibreOverlay = async (overlayKey, btn, desiredOn, opts) => {
+    const silent = Boolean(opts && opts.silent);
     const meta = OW_OVERLAY_META[overlayKey];
-
     if (!meta) return;
-
     const targetBtn = btn || document.querySelector('.excel-tab[data-overlay="' + overlayKey + '"]');
-
     const curOn = Boolean(meta.getOn());
-
     const turningOn = typeof desiredOn === "boolean" ? desiredOn : !curOn;
-
+    if (overlayKey === "bathymetry") {
+      _wantedBathymetry = turningOn;
+    }
     const idleTitle = (targetBtn && targetBtn.dataset && targetBtn.dataset.idleTitle) || (targetBtn && targetBtn.title) || meta.title;
-
     const label = meta.label;
 
-    if (turningOn === curOn) {
-
-      syncVisualOverlayTab(overlayKey, targetBtn, curOn);
-
-      setOverlayBusy(targetBtn, false, idleTitle);
-
-      return;
-
-    }
-
-
-
     if (!turningOn) {
-
       const lyr = meta.getRef();
-
       if (lyr && mapInstance.hasLayer(lyr)) mapInstance.removeLayer(lyr);
-
       meta.setOn(false);
-
       syncVisualOverlayTab(overlayKey, targetBtn, false);
-
       setOverlayBusy(targetBtn, false, idleTitle);
-
-      if (typeof flashOpenWatersLayerStatus === "function") {
-
+      if (!silent && curOn && typeof flashOpenWatersLayerStatus === "function") {
         flashOpenWatersLayerStatus(label + " off", false);
-
       }
-
       return;
-
     }
 
+    if (turningOn && curOn && meta.getRef() && mapInstance.hasLayer(meta.getRef())) {
+      syncVisualOverlayTab(overlayKey, targetBtn, true);
+      setOverlayBusy(targetBtn, false, idleTitle);
+      return;
+    }
 
-
+    if (owOverlayBusy) return;
     owOverlayBusy = true;
-
+    syncVisualOverlayTab(overlayKey, targetBtn, true);
     setOverlayBusy(targetBtn, true, idleTitle);
-
-    if (typeof flashOpenWatersLayerStatus === "function") {
-
+    if (!silent && typeof flashOpenWatersLayerStatus === "function") {
       flashOpenWatersLayerStatus("Loading " + label + "…", false);
-
     }
 
     try {
-
       let lyr = meta.getRef();
-
       if (!lyr) {
-
         const createFn = typeof window !== "undefined" ? window[meta.create] : null;
-
         if (typeof createFn !== "function") {
-
           throw new Error("Open Waters " + label + " helper missing");
-
         }
-
         lyr = await createFn();
-
         meta.setRef(lyr);
-
       }
-
-      lyr.addTo(mapInstance);
-
+      if (overlayKey === "bathymetry" && !_wantedBathymetry) {
+        if (lyr && mapInstance.hasLayer(lyr)) mapInstance.removeLayer(lyr);
+        meta.setOn(false);
+        syncVisualOverlayTab(overlayKey, targetBtn, false);
+        setOverlayBusy(targetBtn, false, idleTitle);
+        return;
+      }
+      if (!mapInstance.hasLayer(lyr)) {
+        lyr.addTo(mapInstance);
+      }
       if (typeof wireOpenWatersGlLayerResize === "function") {
-
         wireOpenWatersGlLayerResize(lyr, mapInstance);
-
       }
-
       const waitFnName = meta.waitReady || "waitForOpenWatersGlStyle";
-
       const waitFn = typeof window !== "undefined" ? window[waitFnName] : null;
-
       if (typeof waitFn === "function") {
-
         await waitFn(lyr, meta.waitMs);
-
       } else if (typeof waitForOpenWatersGlStyle === "function") {
-
         await waitForOpenWatersGlStyle(lyr, meta.waitMs);
-
       }
-
+      if (overlayKey === "bathymetry" && !_wantedBathymetry) {
+        if (lyr && mapInstance.hasLayer(lyr)) mapInstance.removeLayer(lyr);
+        meta.setOn(false);
+        syncVisualOverlayTab(overlayKey, targetBtn, false);
+        setOverlayBusy(targetBtn, false, idleTitle);
+        return;
+      }
       meta.setOn(true);
-
       syncVisualOverlayTab(overlayKey, targetBtn, true);
-
       setOverlayBusy(targetBtn, false, idleTitle);
-
-      if (typeof flashOpenWatersLayerStatus === "function") {
-
+      if (!silent && typeof flashOpenWatersLayerStatus === "function") {
         flashOpenWatersLayerStatus(label + " on", false);
-
       }
-
     } catch (err) {
-
       console.warn("[SetSail] Open Waters overlay failed:", err);
-
       try {
-
         const bad = meta.getRef();
-
         if (bad && mapInstance.hasLayer(bad)) mapInstance.removeLayer(bad);
-
         meta.setRef(null);
-
       } catch (e2) {}
-
       syncVisualOverlayTab(overlayKey, targetBtn, false);
-
       setOverlayBusy(targetBtn, false, idleTitle + " (unavailable)");
-
       meta.setOn(false);
-
-      if (typeof flashOpenWatersLayerStatus === "function") {
-
+      if (!silent && typeof flashOpenWatersLayerStatus === "function") {
         flashOpenWatersLayerStatus(label + " failed: " + (err && err.message ? err.message : "error"), true);
-
       }
-
     } finally {
-
       owOverlayBusy = false;
+      if (overlayKey === "bathymetry" && _wantedBathymetry && !isBathymetryActive) {
+        setTimeout(() => {
+          if (_wantedBathymetry && !isBathymetryActive && !owOverlayBusy) {
+            toggleOwMapLibreOverlay("bathymetry", null, true, { silent: true });
+          }
+        }, 120);
+      }
+    }
+  };
 
+  // Bake Marks & Bathymetry into map views automatically:
+  // - ECDIS: Marks ON + Bathymetry ON
+  // - Ocean: Marks ON + Bathymetry OFF
+  // - Satellite: Marks ON + Bathymetry OFF
+  // - Globe 3D: Bathymetry OFF while 3D canvas is active
+  const syncBakedLayersForBase = (baseKey) => {
+    const key = baseKey || activeBaseKey || "ecdis";
+    const wantMarks = (key === "ecdis" || key === "ocean" || key === "sat");
+    const wantBathy = (key === "ecdis");
+
+    if (layers.buoys) {
+      isBuoysActive = wantMarks;
+      syncVisualOverlayTab("buoys", null, wantMarks);
+      if (wantMarks) {
+        if (!mapInstance.hasLayer(layers.buoys)) {
+          layers.buoys.addTo(mapInstance);
+        }
+      } else if (mapInstance.hasLayer(layers.buoys)) {
+        mapInstance.removeLayer(layers.buoys);
+      }
     }
 
+    toggleOwMapLibreOverlay("bathymetry", null, wantBathy, { silent: true });
   };
 
 
@@ -37580,6 +38078,8 @@ function initVisualChartLayerSelector(mapInstance, layers) {
 
         }
 
+        syncBakedLayersForBase(baseKey);
+
         if (!isCoarsePointer()) selector.classList.add("collapsed");
 
       }
@@ -37587,6 +38087,24 @@ function initVisualChartLayerSelector(mapInstance, layers) {
     });
 
   });
+
+  // Also keep Leaflet's baselayerchange event synchronized if triggered externally
+  mapInstance.on("baselayerchange", (ev) => {
+    if (!ev || !ev.layer) return;
+    if (layers.ecdis && ev.layer === layers.ecdis) activeBaseKey = "ecdis";
+    else if (layers.ocean && ev.layer === layers.ocean) activeBaseKey = "ocean";
+    else if (layers.sat && ev.layer === layers.sat) activeBaseKey = "sat";
+    selector.querySelectorAll("[data-base]").forEach((b) => {
+      b.classList.toggle("active-base", b.getAttribute("data-base") === activeBaseKey);
+    });
+    syncBakedLayersForBase(activeBaseKey);
+  });
+
+  // Activate baked Marks & Bathymetry immediately for the initial basemap on startup
+  selector.querySelectorAll("[data-base]").forEach((b) => {
+    b.classList.toggle("active-base", b.getAttribute("data-base") === activeBaseKey);
+  });
+  syncBakedLayersForBase(activeBaseKey);
 
   /**
    * Toggle visual map overlays (Marks, Bathymetry, Time Zones) from the bottom
