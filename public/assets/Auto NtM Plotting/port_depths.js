@@ -22,7 +22,8 @@ var OVERLAY_STATES = window.OVERLAY_STATES || {
   timezones: false,
   weather: false,
   route: false,
-  ais: false
+  ais: false,
+  userchart: false
 };
 OVERLAY_STATES.buoys = true;
 OVERLAY_STATES.route = false;
@@ -19893,8 +19894,8 @@ function initExcelOverlayDock(map) {
     {
       key: "notices",
       tabId: "tabOverlayNotices",
-      infoId: "btnNtmOverlayInfo",
-      onInfo: () => { if (typeof window.openNtmOverlayInfoModal === "function") window.openNtmOverlayInfoModal(); },
+      // ^ opens route-distance filter panel (wired in userchart_draw.js)
+      skipClosest: ["#btnNtmWarnFilterToggle", "#ssWarnFilterPanel"],
       beforeToggle: (isActive) => { setOverlayNoticesLoading(isActive); }
     },
     {
@@ -19915,7 +19916,12 @@ function initExcelOverlayDock(map) {
       infoId: "btnAisOverlayInfo",
       onInfo: () => { if (typeof window.showAisInfoModal === "function") window.showAisInfoModal(); }
     },
-    { key: "timezones", tabId: "tabOverlayTimezones" }
+    { key: "timezones", tabId: "tabOverlayTimezones" },
+    {
+      key: "userchart",
+      tabId: "tabOverlayUserChart",
+      skipClosest: ["#btnUserChartLayers", "#ssUcLayerPanel"]
+    }
   ];
 
   overlayTabSpecs.forEach((spec) => {
@@ -19926,6 +19932,14 @@ function initExcelOverlayDock(map) {
           e.stopPropagation();
           spec.onInfo();
           return;
+        }
+        if (spec.skipClosest && e.target) {
+          for (let i = 0; i < spec.skipClosest.length; i++) {
+            if (e.target.closest(spec.skipClosest[i])) {
+              e.stopPropagation();
+              return;
+            }
+          }
         }
         const isActive = !tab.classList.contains("active");
         if (spec.beforeToggle) spec.beforeToggle(isActive);
@@ -20165,6 +20179,11 @@ function setOverlayActive(overlayKey, isActive, map = null) {
         window.renderRouteBufferCorridorOnMap();
       }
       setTimeout(() => setOverlayTileLoading("route", false), 300);
+    } else if (overlayKey === "userchart") {
+      if (window.SetSailUserChartDraw && typeof window.SetSailUserChartDraw.setOverlayActive === "function") {
+        window.SetSailUserChartDraw.setOverlayActive(Boolean(isActive));
+      }
+      setTimeout(() => setOverlayTileLoading("userchart", false), 200);
     }
   }
 

@@ -16674,6 +16674,8 @@ function updateExportModalCounts() {
 
   const elPerm = document.getElementById("expCountPerm");
 
+  const elManual = document.getElementById("expCountManualUc");
+
   const elSummary = document.getElementById("expSummaryText");
   const elChartBadge = document.getElementById("expChartBadge");
   const elChartSub = document.getElementById("expChartSubtitle");
@@ -16683,18 +16685,32 @@ function updateExportModalCounts() {
   if (elP) elP.textContent = `${countP}`;
   if (elPerm) elPerm.textContent = `${countPerm}`;
 
+  const manualCount =
+    window.SetSailUserChartDraw && typeof window.SetSailUserChartDraw.countObjects === "function"
+      ? window.SetSailUserChartDraw.countObjects()
+      : 0;
+  if (elManual) elManual.textContent = `${manualCount}`;
+
   const selected = getExportSelectedNotices();
   let totalPts = 0;
   selected.forEach(s => totalPts += (s.coords ? s.coords.length : 0));
+  const includeManual = document.getElementById("expChkManualUc")
+    ? document.getElementById("expChkManualUc").checked
+    : false;
+  const manualExtra = includeManual ? manualCount : 0;
 
   if (elChartBadge) {
-    elChartBadge.textContent = `${selected.length} selected`;
+    elChartBadge.textContent = `${selected.length + manualExtra} selected`;
   }
   if (elChartSub) {
-    elChartSub.textContent = `${selected.length} warnings (${totalPts} points) ready for ECDIS export`;
+    elChartSub.textContent = `${selected.length} warnings (${totalPts} pts)` +
+      (manualExtra ? ` + ${manualExtra} manual` : "") +
+      ` ready for ECDIS export`;
   }
   if (elSummary) {
-    elSummary.textContent = `Will export: ${selected.length} notices (${totalPts} points) | UTC: ${getExportUtcTimestamp()}`;
+    elSummary.textContent = `Will export: ${selected.length} notices (${totalPts} points)` +
+      (manualExtra ? ` + ${manualExtra} manual drawings` : "") +
+      ` | UTC: ${getExportUtcTimestamp()}`;
   }
 
 }
@@ -34044,6 +34060,49 @@ function exportRouteToJrcCsv(route) {
 
 
 
+
+function shouldIncludeManualUserChartInExport() {
+  const el = document.getElementById("expChkManualUc");
+  return !!(el && el.checked);
+}
+
+function appendManualUserChartGeoJsonFeatures(features) {
+  if (!shouldIncludeManualUserChartInExport()) return;
+  if (!window.SetSailUserChartDraw || typeof window.SetSailUserChartDraw.getExportFeatures !== "function") return;
+  const manual = window.SetSailUserChartDraw.getExportFeatures() || [];
+  manual.forEach((f) => {
+    if (f && f.geometry) features.push(f);
+  });
+}
+
+function appendManualUserChartToFurunoBuckets(areas, lines, points, labels, esc) {
+  if (!shouldIncludeManualUserChartInExport()) return;
+  if (!window.SetSailUserChartDraw || typeof window.SetSailUserChartDraw.getExportFeatures !== "function") return;
+  const manual = window.SetSailUserChartDraw.getExportFeatures() || [];
+  manual.forEach((f, idx) => {
+    const props = f.properties || {};
+    const name = esc(props.text || props.kind || ("DRAW-" + (idx + 1)));
+    const desc = esc(props.chartName || "Manual User Chart");
+    const g = f.geometry || {};
+    if (g.type === "Polygon" && g.coordinates && g.coordinates[0]) {
+      const ring = g.coordinates[0];
+      const vtxXml = ring.map((c, i) => `        <vertex id="${i + 1}" latitude="${Number(c[1]).toFixed(6)}" longitude="${Number(c[0]).toFixed(6)}"/>`).join("\n");
+      areas.push(`    <area name="${name}" description="${desc}">\n      <position>\n${vtxXml}\n      </position>\n      <type checkDanger="0" displayRadar="0" hasNotes="0" notesType="0"/>\n    </area>`);
+    } else if (g.type === "LineString" && g.coordinates) {
+      const vtxXml = g.coordinates.map((c, i) => `        <vertex id="${i + 1}" latitude="${Number(c[1]).toFixed(6)}" longitude="${Number(c[0]).toFixed(6)}"/>`).join("\n");
+      lines.push(`    <line name="${name}" description="${desc}">\n      <position>\n${vtxXml}\n      </position>\n      <type checkDanger="0" displayRadar="0" hasNotes="0" notesType="0"/>\n    </line>`);
+    } else if (g.type === "Point" && g.coordinates) {
+      const lon = Number(g.coordinates[0]);
+      const lat = Number(g.coordinates[1]);
+      if (props.kind === "text") {
+        labels.push(`    <label name="${name}" description="${name}">\n      <position>\n        <vertex id="1" latitude="${lat.toFixed(6)}" longitude="${lon.toFixed(6)}"/>\n      </position>\n      <attribute labelStyle="2" labelText="${name}"/>\n      <type checkDanger="0" displayRadar="0"/>\n    </label>`);
+      } else {
+        points.push(`    <point name="${name}" description="${desc}">\n      <position>\n        <vertex id="1" latitude="${lat.toFixed(6)}" longitude="${lon.toFixed(6)}"/>\n      </position>\n      <type checkDanger="0" displayRadar="0" shape="1" hasNotes="0" notesType="0"/>\n    </point>`);
+      }
+    }
+  });
+}
+
 function exportUserChartGeoJson() {
 
   const selectedNotices = typeof getExportSelectedNotices === "function" ? getExportSelectedNotices() : [];
@@ -34169,6 +34228,8 @@ function exportUserChartGeoJson() {
   }
 
 
+
+  appendManualUserChartGeoJsonFeatures(features);
 
   const geoJson = {
 
@@ -34404,7 +34465,7 @@ function initNavDataExportListeners() {
     });
   }
 
-  ["expChkT", "expChkP", "expChkPerm", "expChkNavtex"].forEach((id) => {
+  ["expChkT", "expChkP", "expChkPerm", "expChkNavtex", "expChkManualUc"].forEach((id) => {
     const chk = document.getElementById(id);
     if (chk) {
       chk.addEventListener("change", () => {
@@ -34989,6 +35050,8 @@ function downloadFurunoUserChartXml(notices, filename) {
   });
 
 
+
+  appendManualUserChartToFurunoBuckets(areas, lines, points, labels, esc);
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<!--userchart node-->\n<userchart name="SELECTED NAVAREA WARNINGS" description="SetSail Admiralty NtM Export" version="1.0">\n`;
 
