@@ -1,13 +1,13 @@
 {
-  "synopticCycle": "1300 UTC",
-  "lastSyncUtc": "2026-11-26T13:45:08.222348+00:00",
+  "synopticCycle": "2200 UTC",
+  "lastSyncUtc": "2026-11-26T22:50:59.451751+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
     {
       "id": "CP962026",
       "name": "Invest 96C",
       "shortName": "96C",
-      "category": "Tropical Disturbance (Formation Chance 10%)",
+      "category": "Tropical Disturbance (Formation Chance 0%)",
       "center": [
         8.1,
         -168.8
@@ -15,14 +15,14 @@
       "centralPressure": 1008,
       "maxWinds": 25,
       "gusts": 32,
-      "movement": "SE at 5 kts",
+      "movement": "ESE at 12 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            7.4,
-            -168.1
+            7.1,
+            -166.6
           ],
           "winds": 30,
           "radiusNm": 45
@@ -30,8 +30,8 @@
         {
           "tau": 24,
           "coords": [
-            6.8,
-            -167.8
+            6.7,
+            -166.4
           ],
           "winds": 35,
           "radiusNm": 60
@@ -39,8 +39,8 @@
         {
           "tau": 36,
           "coords": [
-            6.2,
-            -167.6
+            6.5,
+            -167.3
           ],
           "winds": 40,
           "radiusNm": 75
@@ -48,8 +48,8 @@
         {
           "tau": 48,
           "coords": [
-            5.4,
-            -169.8
+            5.8,
+            -167.7
           ],
           "winds": 45,
           "radiusNm": 90
@@ -57,8 +57,8 @@
         {
           "tau": 60,
           "coords": [
-            5.1,
-            -171.1
+            4.7,
+            -168.3
           ],
           "winds": 50,
           "radiusNm": 105
@@ -133,58 +133,58 @@
       "shortName": "97S",
       "category": "Tropical Disturbance (Active Invest)",
       "center": [
-        -8.9,
-        67.6
+        -9.4,
+        66.8
       ],
-      "centralPressure": 1009,
-      "maxWinds": 25,
-      "gusts": 32,
-      "movement": "SSE at 2 kts",
+      "centralPressure": 1010,
+      "maxWinds": 30,
+      "gusts": 39,
+      "movement": "SSW at 2 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -9.3,
-            67.7
+            -9.7,
+            66.7
           ],
-          "winds": 30,
+          "winds": 35,
           "radiusNm": 45
         },
         {
           "tau": 24,
           "coords": [
-            -9.5,
-            67.4
+            -9.8,
+            66.4
           ],
-          "winds": 35,
+          "winds": 40,
           "radiusNm": 60
         },
         {
           "tau": 36,
           "coords": [
-            -9.8,
-            67.3
+            -11.0,
+            66.7
           ],
-          "winds": 40,
+          "winds": 45,
           "radiusNm": 75
         },
         {
           "tau": 48,
           "coords": [
-            -9.7,
-            67.0
+            -11.6,
+            66.3
           ],
-          "winds": 45,
+          "winds": 50,
           "radiusNm": 90
         },
         {
           "tau": 60,
           "coords": [
-            -10.2,
-            67.1
+            -11.8,
+            66.1
           ],
-          "winds": 50,
+          "winds": 55,
           "radiusNm": 105
         }
       ]
@@ -199,8 +199,8 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 7.5,
-      "swellPeriod": 12,
+      "waveHeight": 6.6,
+      "swellPeriod": 11,
       "swellDir": "W"
     },
     {
@@ -211,9 +211,21 @@
         35.0
       ],
       "radiusNm": 300,
-      "waveHeight": 2.6,
-      "swellPeriod": 9,
-      "swellDir": "SW"
+      "waveHeight": 2.7,
+      "swellPeriod": 8,
+      "swellDir": "WSW"
+    },
+    {
+      "id": "WS3",
+      "name": "97S Cyclonic Wave Field",
+      "center": [
+        -9.4,
+        66.8
+      ],
+      "radiusNm": 150,
+      "waveHeight": 2.5,
+      "swellPeriod": 7,
+      "swellDir": "SE"
     }
   ],
   "pressureCenters": [
@@ -237,11 +249,11 @@
     },
     {
       "type": "L",
-      "value": 1009,
+      "value": 1010,
       "name": "Invest 97S Core Low",
       "coords": [
-        -8.9,
-        67.6
+        -9.4,
+        66.8
       ]
     },
     {
@@ -293,12 +305,12 @@
     },
     {
       "coords": [
-        -8.6,
-        67.9
+        -9.1,
+        67.1
       ],
       "dir": 200,
-      "speed": 25,
-      "label": "25 kts (97S)"
+      "speed": 30,
+      "label": "30 kts (97S)"
     }
   ]
 }
