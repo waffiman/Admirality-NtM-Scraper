@@ -8329,12 +8329,18 @@ function renderRouteOnMap(route, shouldFly = true) {
 
 
     const titleBit = isStart ? "Departure" : (isEnd ? "Destination" : ("WPT #" + (idx + 1)));
+    const canDragThisWpt = Boolean(
+      window._sidebarNavtorState &&
+      window._sidebarNavtorState.editMode &&
+      typeof window.isRouteSelectedInSidebar === "function" &&
+      window.isRouteSelectedInSidebar(route)
+    );
 
     const marker = L.marker(wptCoords, {
 
       pane: wptPane,
 
-      draggable: true,
+      draggable: canDragThisWpt,
 
       autoPan: true,
 
@@ -18651,7 +18657,7 @@ function initNtMMap() {
       L.Layer.prototype._openPopup = function () {
         try {
           const ev0 = arguments[0];
-          if (window._sidebarChartAddWpMode && ev0 && ev0.latlng && typeof window.handleSidebarChartAddWaypointClick === "function") {
+          if (window._sidebarChartAddWpMode && ev0 && ev0.latlng && !this._wptData && this._setsailRouteWptIdx == null && typeof window.handleSidebarChartAddWaypointClick === "function") {
             window.handleSidebarChartAddWaypointClick(ev0.latlng);
             return;
           }
@@ -46977,12 +46983,15 @@ if (document.readyState === "loading") {
 }
 
 /* ============================================================================
-   v5.265: NAVTOR-Style Route & Waypoint Sidebar Workflow (#ntmSidebar)
-   Screens:
-     1) "list"     — Routes list (Left Current Flag, Right Checkbox, Reverse/Delete/Import/New)
-     2) "route"    — Pinned Header (Editable Name + Edit / Mark as Current / Passage plan +
-                     Distance & Duration) + Planning / Monitoring (coming soon) Tabs
-     3) "waypoint" — Edit Waypoint settings
+   v5.266: NAVTOR-Style Route & Waypoint Sidebar Workflow (#ntmSidebar)
+   - Explicit Edit / Coral Save mode (#btnNvHdrEdit):
+     * Until Edit is pressed: route name, all waypoint fields, and chart
+       waypoint dragging are locked.
+     * While Edit is active: button turns coral with Save icon, a route icon
+       follows the mouse cursor, waypoints on chart are draggable, all waypoint
+       parameters are editable, and single LMB click on chart appends next WP.
+     * Pressing coral Save persists changes, exits Edit mode, and restores
+       the Edit button.
    ============================================================================ */
 (function initNavtorSidebarWorkflow() {
   const NAVTOR_PASSAGE_DEFAULTS = {
@@ -47037,6 +47046,7 @@ if (document.readyState === "loading") {
     view: "list",          // "list" | "route" | "waypoint"
     routeId: null,
     detailTab: "planning", // "planning" | "monitoring"
+    editMode: false,       // true ONLY after user clicks Edit until they click coral Save
     wptIdx: 0,
     wptSearch: "",
     addingWpOnChart: false,
@@ -47047,6 +47057,9 @@ if (document.readyState === "loading") {
   if (!window._sidebarNavtorState.detailTab) {
     window._sidebarNavtorState.detailTab = "planning";
   }
+  if (typeof window._sidebarNavtorState.editMode !== "boolean") {
+    window._sidebarNavtorState.editMode = false;
+  }
 
   function escHtml(s) {
     return String(s == null ? "" : s)
@@ -47055,6 +47068,92 @@ if (document.readyState === "loading") {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
   }
+
+  // Floating route icon badge next to mouse cursor while Edit mode is active
+  function ensureRouteCursorFollower() {
+    let badge = document.getElementById("ntmRouteCursorBadge");
+    if (!badge) {
+      badge = document.createElement("div");
+      badge.id = "ntmRouteCursorBadge";
+      badge.className = "ntm-route-cursor-badge";
+      badge.hidden = true;
+      badge.innerHTML =
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<polyline points="4 18 9.5 11 14.5 14 20 6"></polyline>' +
+          '<circle cx="4" cy="18" r="2.2" fill="currentColor"></circle>' +
+          '<circle cx="9.5" cy="11" r="1.8" fill="currentColor"></circle>' +
+          '<circle cx="14.5" cy="14" r="1.8" fill="currentColor"></circle>' +
+          '<circle cx="20" cy="6" r="2.2" fill="currentColor"></circle>' +
+        '</svg>';
+      document.body.appendChild(badge);
+    }
+    if (!window._ntmRouteCursorMoveBound) {
+      window._ntmRouteCursorMoveBound = true;
+      document.addEventListener("mousemove", (ev) => {
+        const st = window._sidebarNavtorState;
+        const b = document.getElementById("ntmRouteCursorBadge");
+        if (!b) return;
+        if (!st || !st.editMode || (st.view !== "route" && st.view !== "waypoint")) {
+          if (!b.hidden) b.hidden = true;
+          return;
+        }
+        b.hidden = false;
+        b.style.transform = "translate3d(" + (ev.clientX + 14) + "px, " + (ev.clientY + 14) + "px, 0)";
+      }, { passive: true });
+    }
+    return badge;
+  }
+
+  function syncChartWaypointsDraggableState() {
+    const st = window._sidebarNavtorState;
+    const rt = getActiveNavtorRoute();
+    const canDrag = Boolean(st && st.editMode && (st.view === "route" || st.view === "waypoint") && rt && isRouteSelectedInSidebar(rt));
+    const rLayer = window.leafletRouteLayer || (typeof leafletRouteLayer !== "undefined" ? leafletRouteLayer : null);
+    if (rLayer && typeof rLayer.eachLayer === "function") {
+      rLayer.eachLayer((layer) => {
+        if (!layer || layer._setsailRouteWptIdx == null) return;
+        if (layer.dragging) {
+          try {
+            if (canDrag) layer.dragging.enable();
+            else layer.dragging.disable();
+          } catch (eDrg) {}
+        }
+        if (typeof layer.getElement === "function") {
+          const el = layer.getElement();
+          if (el) {
+            const dot = el.querySelector(".route-wpt-dot");
+            if (dot) dot.style.cursor = canDrag ? "grab" : "pointer";
+          }
+        }
+      });
+    }
+  }
+  window.syncChartWaypointsDraggableState = syncChartWaypointsDraggableState;
+
+  function setRouteEditMode(enabled) {
+    const st = window._sidebarNavtorState;
+    const isOn = Boolean(enabled);
+    st.editMode = isOn;
+    st.addingWpOnChart = isOn;
+    window._sidebarChartAddWpMode = isOn;
+    if (!isOn) {
+      st.destPickerOpen = false;
+    }
+    const mapEl = document.getElementById("ntmMap");
+    if (mapEl) {
+      mapEl.classList.toggle("ntm-adding-wpt-cursor", isOn);
+    }
+    const badge = ensureRouteCursorFollower();
+    if (badge && !isOn) {
+      badge.hidden = true;
+    }
+    const oldBanner = document.getElementById("ntmAddWpFloatingBanner");
+    if (oldBanner) {
+      oldBanner.hidden = true;
+    }
+    syncChartWaypointsDraggableState();
+  }
+  window.setRouteEditMode = setRouteEditMode;
 
   function formatNavtorLatDms(lat) {
     const val = Number(lat);
@@ -47258,16 +47357,16 @@ if (document.readyState === "loading") {
   }
 
   window.syncNavtorHeaderCurrentBadge = function () {
-    const btnCur = document.getElementById("btnNvHdrCurrent");
-    if (!btnCur) return;
-    const rt = getActiveNavtorRoute();
-    const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
-    const isCur = Boolean(rt && drId && ((rt.id && rt.id === drId) || (rt.name && rt.name === drId)));
-    btnCur.classList.toggle("is-current", isCur);
-    btnCur.setAttribute("aria-pressed", isCur ? "true" : "false");
-    btnCur.title = isCur ? "Current route (click to unmark)" : "Mark as Current";
-    const svg = btnCur.querySelector("svg");
-    if (svg) svg.setAttribute("fill", isCur ? "currentColor" : "none");
+    document.querySelectorAll("#btnNvHdrCurrent, [data-nv-hdr-current]").forEach((btnCur) => {
+      const rt = getActiveNavtorRoute();
+      const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+      const isCur = Boolean(rt && drId && ((rt.id && rt.id === drId) || (rt.name && rt.name === drId)));
+      btnCur.classList.toggle("is-current", isCur);
+      btnCur.setAttribute("aria-pressed", isCur ? "true" : "false");
+      btnCur.title = isCur ? "Current route (click to unmark)" : "Mark as Current";
+      const svg = btnCur.querySelector("svg");
+      if (svg) svg.setAttribute("fill", isCur ? "currentColor" : "none");
+    });
   };
 
   function persistCurrentNavtorRoute(rerenderMap) {
@@ -47285,46 +47384,13 @@ if (document.readyState === "loading") {
     if (rerenderMap) {
       syncChartRoutesDisplay({ force: true });
     }
+    syncChartWaypointsDraggableState();
   }
 
-  function setChartAddWpMode(enabled) {
-    const st = window._sidebarNavtorState;
-    st.addingWpOnChart = !!enabled;
-    window._sidebarChartAddWpMode = !!enabled;
-    const mapEl = document.getElementById("ntmMap");
-    if (mapEl) {
-      mapEl.classList.toggle("ntm-adding-wpt-cursor", !!enabled);
-    }
-    let banner = document.getElementById("ntmAddWpFloatingBanner");
-    if (enabled) {
-      if (!banner) {
-        banner = document.createElement("div");
-        banner.id = "ntmAddWpFloatingBanner";
-        banner.className = "ntm-add-wp-floating-banner";
-        const host = document.getElementById("ntmMapContainer") || document.body;
-        host.appendChild(banner);
-      }
-      banner.innerHTML =
-        '<span>Click on chart to place waypoints</span>' +
-        '<button type="button" id="btnFinishChartWpAdd">Done</button>';
-      banner.hidden = false;
-      const doneBtn = banner.querySelector("#btnFinishChartWpAdd");
-      if (doneBtn) {
-        doneBtn.onclick = function (ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          setChartAddWpMode(false);
-          renderNavtorSidebar();
-        };
-      }
-    } else if (banner) {
-      banner.hidden = true;
-    }
-  }
-
+  // Single LMB click on chart while route is in Edit mode creates the next waypoint
   window.handleSidebarChartAddWaypointClick = function (latlng) {
     const st = window._sidebarNavtorState;
-    if (!st.addingWpOnChart || !latlng) return false;
+    if (!st || !st.editMode || (st.view !== "route" && st.view !== "waypoint") || !latlng) return false;
     const rt = getActiveNavtorRoute();
     if (!rt) return false;
     if (!Array.isArray(rt.waypoints)) rt.waypoints = [];
@@ -47357,13 +47423,6 @@ if (document.readyState === "loading") {
     }
     return true;
   };
-
-  document.addEventListener("keydown", (ev) => {
-    if (ev.key === "Escape" && window._sidebarChartAddWpMode) {
-      setChartAddWpMode(false);
-      renderNavtorSidebar();
-    }
-  });
 
   function ensureNavtorContainers() {
     const sidebar = document.getElementById("ntmSidebar");
@@ -47414,7 +47473,8 @@ if (document.readyState === "loading") {
   }
 
   function insertWaypointAtChartCenter(rt, asDestination) {
-    if (!rt) return;
+    const st = window._sidebarNavtorState;
+    if (!rt || !st || !st.editMode) return;
     if (!Array.isArray(rt.waypoints)) rt.waypoints = [];
     const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
     let lat = 20.0, lon = 0.0;
@@ -47453,26 +47513,197 @@ if (document.readyState === "loading") {
     renderNavtorSidebar();
   }
 
+  function buildPinnedRouteHeaderHtml(rt, metrics, isWptView) {
+    const st = window._sidebarNavtorState;
+    const routeName = String(rt.name || rt.routeName || "Route1").trim() || "Route1";
+    const distLabel = formatNavtorHeaderDist(metrics.totalDistNm);
+    const durLabel = formatNavtorDuration(metrics.totalHours);
+    const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+    const isCurrent = Boolean(drId && ((rt.id && rt.id === drId) || (rt.name && rt.name === drId)));
+    const isEditing = Boolean(st.editMode);
+
+    const editOrSaveSvg = isEditing
+      ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>'
+      : '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
+
+    const ppDrawerHtml = st.ppMenuOpen
+      ? '<div class="ntm-nv-subdrawer">' +
+          '<button type="button" class="ntm-nv-subbtn" data-nv-pp-action="open">Passage Plan</button>' +
+          '<button type="button" class="ntm-nv-subbtn" data-nv-pp-action="rtz">Export .rtz</button>' +
+          '<button type="button" class="ntm-nv-subbtn" data-nv-pp-action="check">Check Route</button>' +
+        '</div>'
+      : "";
+
+    return (
+      '<div class="ntm-nv-pinned-header">' +
+        '<div class="ntm-nv-hdr-top">' +
+          '<button type="button" class="ntm-hdr-back-btn ntm-nv-back-compact" id="' + (isWptView ? 'btnNvHdrBackFromWpt' : 'btnNvBackToRoutes') + '" title="' + (isWptView ? 'Back to route waypoints' : 'Back to Routes list') + '" aria-label="Back">' +
+            '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>' +
+          '</button>' +
+          '<input type="text" id="nvRouteNameInput" class="ntm-nv-route-name-input ' + (!isEditing ? 'is-locked' : '') + '" value="' + escHtml(routeName) + '" ' + (!isEditing ? 'readonly title="Click Edit button to rename route"' : 'title="Route name (editable)"') + ' aria-label="Route name" />' +
+          '<div class="ntm-nv-hdr-icons">' +
+            '<button type="button" class="ntm-nv-hdr-icon-btn ' + (isEditing ? 'is-editing-save' : '') + '" id="btnNvHdrEdit" aria-pressed="' + (isEditing ? 'true' : 'false') + '" title="' + (isEditing ? 'Save route (exit Edit mode)' : 'Edit route') + '">' +
+              editOrSaveSvg +
+            '</button>' +
+            '<button type="button" class="ntm-nv-hdr-icon-btn ' + (isCurrent ? 'is-current' : '') + '" id="btnNvHdrCurrent" data-nv-hdr-current="1" aria-pressed="' + (isCurrent ? 'true' : 'false') + '" title="' + (isCurrent ? 'Current route (click to unmark)' : 'Mark as Current') + '">' +
+              '<svg viewBox="0 0 24 24" width="16" height="16" fill="' + (isCurrent ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h12l-2 4 2 4H5"/></svg>' +
+            '</button>' +
+            '<button type="button" class="ntm-nv-hdr-icon-btn ' + (st.ppMenuOpen ? 'is-open' : '') + '" id="btnNvHdrPassagePlan" title="Passage plan">' +
+              '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ntm-nv-hdr-metrics">' +
+          '<span>Distance: <b>' + escHtml(distLabel) + '</b></span>' +
+          '<span>Duration: <b>' + escHtml(durLabel) + '</b></span>' +
+        '</div>' +
+      '</div>' +
+      ppDrawerHtml
+    );
+  }
+
+  function wirePinnedRouteHeaderHandlers(panelEl, rt, onBeforeSaveCallback) {
+    const st = window._sidebarNavtorState;
+    const routeName = String(rt.name || rt.routeName || "Route1").trim() || "Route1";
+
+    const nameInp = panelEl.querySelector("#nvRouteNameInput");
+    const commitRouteName = () => {
+      if (!nameInp || !st.editMode) return;
+      const nextName = nameInp.value.trim();
+      if (nextName && nextName !== rt.name) {
+        const curBefore = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+        const wasCur = Boolean(curBefore && (rt.id === curBefore || rt.name === curBefore));
+        rt.name = nextName;
+        if (!rt.id) {
+          rt.id = "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 6);
+        }
+        st.routeId = rt.id;
+        persistCurrentNavtorRoute(true);
+        if (wasCur && typeof setDrActiveRouteId === "function") {
+          setDrActiveRouteId(rt.id, { keepSidebarView: true });
+        }
+      } else if (!nextName) {
+        nameInp.value = routeName;
+      }
+    };
+    if (nameInp) {
+      nameInp.addEventListener("change", commitRouteName);
+      nameInp.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          nameInp.blur();
+        } else if (ev.key === "Escape") {
+          nameInp.value = rt.name || routeName;
+          nameInp.blur();
+        }
+      });
+    }
+
+    // Edit <-> Coral Save Toggle Button
+    const btnEdit = panelEl.querySelector("#btnNvHdrEdit");
+    if (btnEdit) {
+      btnEdit.onclick = () => {
+        if (!st.editMode) {
+          // Activate Edit Mode: button turns coral Save, route cursor icon appears, chart click adds WP
+          if (st.view === "route" && st.detailTab !== "planning") {
+            st.detailTab = "planning";
+          }
+          setRouteEditMode(true);
+          renderNavtorSidebar();
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast("Edit mode ON — click chart to add waypoints, drag WPs, or edit parameters. Click Save when done.", "info");
+          }
+        } else {
+          // Coral Save clicked: commit any pending name/form changes, persist route, and return to Edit button
+          commitRouteName();
+          if (typeof onBeforeSaveCallback === "function") {
+            try { onBeforeSaveCallback(); } catch (ePreSv) {}
+          }
+          persistCurrentNavtorRoute(true);
+          setRouteEditMode(false);
+          renderNavtorSidebar();
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast('Route "' + (rt.name || "Route") + '" saved', "success");
+          }
+        }
+      };
+    }
+
+    // Mark as Current Button
+    const btnCur = panelEl.querySelector("#btnNvHdrCurrent");
+    if (btnCur) {
+      btnCur.onclick = () => {
+        if (!rt.id) {
+          rt.id = "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 6);
+        }
+        st.routeId = rt.id;
+        persistCurrentNavtorRoute(false);
+        const curNow = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+        const currentlyMarked = Boolean(curNow && (rt.id === curNow || rt.name === curNow));
+        if (currentlyMarked) {
+          persistCurrentRouteSnapshot(null);
+          if (typeof setDrActiveRouteId === "function") {
+            setDrActiveRouteId(null, { wipeOrphan: true, keepSidebarView: true });
+          }
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast('Unmarked "' + (rt.name || "Route") + '" as Current', "info");
+          }
+        } else {
+          persistCurrentRouteSnapshot(rt);
+          if (typeof setDrActiveRouteId === "function") {
+            setDrActiveRouteId(rt.id, { keepSidebarView: true });
+          }
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast('Marked "' + (rt.name || "Route") + '" as Current route', "success");
+          }
+        }
+        syncChartRoutesDisplay({ force: true });
+        renderNavtorSidebar();
+      };
+    }
+
+    // Passage plan Button & Drawer
+    const btnPp = panelEl.querySelector("#btnNvHdrPassagePlan");
+    if (btnPp) {
+      btnPp.onclick = () => {
+        st.ppMenuOpen = !st.ppMenuOpen;
+        renderNavtorSidebar();
+      };
+    }
+
+    panelEl.querySelectorAll("[data-nv-pp-action]").forEach((actBtn) => {
+      actBtn.onclick = () => {
+        const act = actBtn.getAttribute("data-nv-pp-action");
+        st.ppMenuOpen = false;
+        if (act === "open") {
+          if (!Array.isArray(rt.waypoints) || rt.waypoints.length < 2) {
+            if (typeof showSetSailToast === "function") {
+              showSetSailToast("Add at least 2 waypoints to open Passage Plan", "info");
+            }
+            renderNavtorSidebar();
+            return;
+          }
+          persistCurrentNavtorRoute(false);
+          if (typeof displaySetRouteResults === "function") displaySetRouteResults(rt, true);
+          const tabBtn = document.querySelector('[data-tab="tab-route"], #navBtnRoute');
+          if (tabBtn) tabBtn.click();
+        } else if (act === "rtz") {
+          if (typeof exportRouteToRtz === "function") exportRouteToRtz(rt);
+        } else if (act === "check") {
+          runRouteSafetyCheck(rt);
+        }
+        renderNavtorSidebar();
+      };
+    });
+  }
+
   function renderRouteDetailView(routePanel, rt) {
     const st = window._sidebarNavtorState;
     const wps = Array.isArray(rt.waypoints) ? rt.waypoints : [];
     const metrics = recomputeRouteNavtorMetrics(rt);
-    const routeName = String(rt.name || rt.routeName || "Route1").trim() || "Route1";
-    const distLabel = formatNavtorHeaderDist(metrics.totalDistNm);
-    const durLabel = formatNavtorDuration(metrics.totalHours);
     const q = String(st.wptSearch || "").trim().toLowerCase();
     const activeTab = st.detailTab === "monitoring" ? "monitoring" : "planning";
-
-    const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
-    const isCurrent = Boolean(drId && ((rt.id && rt.id === drId) || (rt.name && rt.name === drId)));
-
-    const ppDrawerHtml = st.ppMenuOpen
-      ? '<div class="ntm-nv-subdrawer">' +
-          '<button type="button" class="ntm-nv-subbtn" id="btnNvOpenSetRoute">Passage Plan</button>' +
-          '<button type="button" class="ntm-nv-subbtn" id="btnNvExportRtz">Export .rtz</button>' +
-          '<button type="button" class="ntm-nv-subbtn" id="btnNvCheckSafety">Check Route</button>' +
-        '</div>'
-      : "";
+    const isEditing = Boolean(st.editMode);
 
     let tabBodyHtml = "";
     if (activeTab === "monitoring") {
@@ -47534,18 +47765,14 @@ if (document.readyState === "loading") {
           '</div>';
       }
 
-      const addWpHelperHtml = st.addingWpOnChart
-        ? '<div class="ntm-nv-helper-bar">' +
-            '<span>Click on chart to drop waypoints</span>' +
-            '<div class="ntm-nv-helper-btns">' +
-              '<button type="button" id="btnNvInsertCenterWp">+ At Center</button>' +
-              '<button type="button" id="btnNvStopChartWp" class="is-done">Done</button>' +
-            '</div>' +
+      const editBannerHtml = isEditing
+        ? '<div class="ntm-nv-helper-bar is-coral-edit">' +
+            '<span>Edit mode: click LMB on chart to add next WP, or drag WPs</span>' +
           '</div>'
         : "";
 
       let destPickerHtml = "";
-      if (st.destPickerOpen) {
+      if (isEditing && st.destPickerOpen) {
         const ports = Array.isArray(window.PORT_DEPTHS_DB) ? window.PORT_DEPTHS_DB : [];
         const dq = String(st.destQuery || "").trim().toLowerCase();
         const filteredPorts = ports.filter((p) => {
@@ -47574,19 +47801,19 @@ if (document.readyState === "loading") {
                       '</button>'
                     );
                   }).join("")
-                : '<div class="ntm-nv-empty-filter">No matching ports. Use "+ Center" or Add new waypoint.</div>') +
+                : '<div class="ntm-nv-empty-filter">No matching ports. Use "+ Center" or click chart.</div>') +
             '</div>' +
           '</div>';
       }
 
       tabBodyHtml =
         '<div class="ntm-nv-body">' +
-          addWpHelperHtml +
+          editBannerHtml +
           destPickerHtml +
           wptListHtml +
           '<div class="ntm-nv-dual-actions">' +
-            '<button type="button" class="ntm-nv-dual-btn ' + (st.addingWpOnChart ? 'is-active' : '') + '" id="btnNvAddWaypoint">Add new waypoint</button>' +
-            '<button type="button" class="ntm-nv-dual-btn ' + (st.destPickerOpen ? 'is-active' : '') + '" id="btnNvAddDestination">Add destination</button>' +
+            '<button type="button" class="ntm-nv-dual-btn ' + (isEditing ? 'is-active' : 'is-locked-btn') + '" id="btnNvAddWaypoint" ' + (!isEditing ? 'disabled title="Click Edit in the route header first"' : '') + '>Add new waypoint</button>' +
+            '<button type="button" class="ntm-nv-dual-btn ' + (isEditing && st.destPickerOpen ? 'is-active' : (!isEditing ? 'is-locked-btn' : '')) + '" id="btnNvAddDestination" ' + (!isEditing ? 'disabled title="Click Edit in the route header first"' : '') + '>Add destination</button>' +
           '</div>' +
         '</div>' +
         '<div class="ntm-nv-bottom-search">' +
@@ -47596,48 +47823,19 @@ if (document.readyState === "loading") {
     }
 
     routePanel.innerHTML =
-      '<div class="ntm-nv-pinned-header">' +
-        '<div class="ntm-nv-hdr-top">' +
-          '<button type="button" class="ntm-hdr-back-btn ntm-nv-back-compact" id="btnNvBackToRoutes" title="Back to Routes list" aria-label="Back to Routes">' +
-            '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>' +
-          '</button>' +
-          '<input type="text" id="nvRouteNameInput" class="ntm-nv-route-name-input" value="' + escHtml(routeName) + '" aria-label="Route name" title="Route name (editable)" />' +
-          '<div class="ntm-nv-hdr-icons">' +
-            '<button type="button" class="ntm-nv-hdr-icon-btn" id="btnNvHdrEdit" title="Edit">' +
-              '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
-            '</button>' +
-            '<button type="button" class="ntm-nv-hdr-icon-btn ' + (isCurrent ? 'is-current' : '') + '" id="btnNvHdrCurrent" aria-pressed="' + (isCurrent ? 'true' : 'false') + '" title="' + (isCurrent ? 'Current route (click to unmark)' : 'Mark as Current') + '">' +
-              '<svg viewBox="0 0 24 24" width="16" height="16" fill="' + (isCurrent ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h12l-2 4 2 4H5"/></svg>' +
-            '</button>' +
-            '<button type="button" class="ntm-nv-hdr-icon-btn ' + (st.ppMenuOpen ? 'is-open' : '') + '" id="btnNvHdrPassagePlan" title="Passage plan">' +
-              '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>' +
-            '</button>' +
-          '</div>' +
-        '</div>' +
-        '<div class="ntm-nv-hdr-metrics">' +
-          '<span>Distance: <b>' + escHtml(distLabel) + '</b></span>' +
-          '<span>Duration: <b>' + escHtml(durLabel) + '</b></span>' +
-        '</div>' +
-      '</div>' +
-      ppDrawerHtml +
+      buildPinnedRouteHeaderHtml(rt, metrics, false) +
       '<div class="ntm-nv-mode-tabs" role="tablist" aria-label="Route mode tabs">' +
         '<button type="button" class="ntm-nv-mode-tab ' + (activeTab === "planning" ? "active" : "") + '" data-nv-mode-tab="planning" role="tab" aria-selected="' + (activeTab === "planning" ? "true" : "false") + '">Planning</button>' +
         '<button type="button" class="ntm-nv-mode-tab ' + (activeTab === "monitoring" ? "active" : "") + '" data-nv-mode-tab="monitoring" role="tab" aria-selected="' + (activeTab === "monitoring" ? "true" : "false") + '">Monitoring <span class="ntm-nv-soon-pill">coming soon</span></button>' +
       '</div>' +
       tabBodyHtml;
 
+    wirePinnedRouteHeaderHandlers(routePanel, rt, null);
+
     const backBtn = routePanel.querySelector("#btnNvBackToRoutes");
     if (backBtn) {
       backBtn.onclick = () => {
-        const nameInpNow = routePanel.querySelector("#nvRouteNameInput");
-        if (nameInpNow) {
-          const nv = nameInpNow.value.trim();
-          if (nv && nv !== rt.name) {
-            rt.name = nv;
-            persistCurrentNavtorRoute(false);
-          }
-        }
-        setChartAddWpMode(false);
+        setRouteEditMode(false);
         st.destPickerOpen = false;
         st.ppMenuOpen = false;
         st.routeId = null;
@@ -47647,136 +47845,10 @@ if (document.readyState === "loading") {
       };
     }
 
-    const nameInp = routePanel.querySelector("#nvRouteNameInput");
-    const commitRouteName = () => {
-      if (!nameInp) return;
-      const nextName = nameInp.value.trim();
-      if (nextName && nextName !== rt.name) {
-        const curBefore = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
-        const wasCur = Boolean(curBefore && (rt.id === curBefore || rt.name === curBefore));
-        rt.name = nextName;
-        if (!rt.id) {
-          rt.id = "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 6);
-        }
-        st.routeId = rt.id;
-        persistCurrentNavtorRoute(true);
-        if (wasCur && typeof setDrActiveRouteId === "function") {
-          setDrActiveRouteId(rt.id, { keepSidebarView: true });
-        }
-      } else if (!nextName) {
-        nameInp.value = routeName;
-      }
-    };
-    if (nameInp) {
-      nameInp.addEventListener("change", commitRouteName);
-      nameInp.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter") {
-          ev.preventDefault();
-          nameInp.blur();
-        } else if (ev.key === "Escape") {
-          nameInp.value = rt.name || routeName;
-          nameInp.blur();
-        }
-      });
-    }
-
-    const btnEdit = routePanel.querySelector("#btnNvHdrEdit");
-    if (btnEdit) {
-      btnEdit.onclick = () => {
-        if (st.detailTab !== "planning") {
-          st.detailTab = "planning";
-          renderRouteDetailView(routePanel, rt);
-        }
-        const inp = routePanel.querySelector("#nvRouteNameInput");
-        if (inp) {
-          inp.focus();
-          inp.select();
-        }
-      };
-    }
-
-    const btnCur = routePanel.querySelector("#btnNvHdrCurrent");
-    if (btnCur) {
-      btnCur.onclick = () => {
-        if (!rt.id) {
-          rt.id = "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 6);
-        }
-        st.routeId = rt.id;
-        persistCurrentNavtorRoute(false);
-        const curNow = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
-        const currentlyMarked = Boolean(curNow && (rt.id === curNow || rt.name === curNow));
-        if (currentlyMarked) {
-          persistCurrentRouteSnapshot(null);
-          if (typeof setDrActiveRouteId === "function") {
-            setDrActiveRouteId(null, { wipeOrphan: true, keepSidebarView: true });
-          }
-          if (typeof showSetSailToast === "function") {
-            showSetSailToast('Unmarked "' + (rt.name || "Route") + '" as Current', "info");
-          }
-        } else {
-          persistCurrentRouteSnapshot(rt);
-          if (typeof setDrActiveRouteId === "function") {
-            setDrActiveRouteId(rt.id, { keepSidebarView: true });
-          }
-          if (typeof showSetSailToast === "function") {
-            showSetSailToast('Marked "' + (rt.name || "Route") + '" as Current route', "success");
-          }
-        }
-        syncChartRoutesDisplay({ force: true });
-        renderRouteDetailView(routePanel, rt);
-      };
-    }
-
-    const btnPp = routePanel.querySelector("#btnNvHdrPassagePlan");
-    if (btnPp) {
-      btnPp.onclick = () => {
-        st.ppMenuOpen = !st.ppMenuOpen;
-        renderRouteDetailView(routePanel, rt);
-      };
-    }
-
-    const btnOpenSr = routePanel.querySelector("#btnNvOpenSetRoute");
-    if (btnOpenSr) {
-      btnOpenSr.onclick = () => {
-        st.ppMenuOpen = false;
-        if (!Array.isArray(rt.waypoints) || rt.waypoints.length < 2) {
-          if (typeof showSetSailToast === "function") {
-            showSetSailToast("Add at least 2 waypoints to open Passage Plan", "info");
-          }
-          renderRouteDetailView(routePanel, rt);
-          return;
-        }
-        persistCurrentNavtorRoute(false);
-        if (typeof displaySetRouteResults === "function") displaySetRouteResults(rt, true);
-        const tabBtn = document.querySelector('[data-tab="tab-route"], #navBtnRoute');
-        if (tabBtn) tabBtn.click();
-        renderRouteDetailView(routePanel, rt);
-      };
-    }
-
-    const btnExpRtz = routePanel.querySelector("#btnNvExportRtz");
-    if (btnExpRtz) {
-      btnExpRtz.onclick = () => {
-        st.ppMenuOpen = false;
-        if (typeof exportRouteToRtz === "function") exportRouteToRtz(rt);
-        renderRouteDetailView(routePanel, rt);
-      };
-    }
-
-    const btnChk = routePanel.querySelector("#btnNvCheckSafety");
-    if (btnChk) {
-      btnChk.onclick = () => {
-        st.ppMenuOpen = false;
-        runRouteSafetyCheck(rt);
-        renderRouteDetailView(routePanel, rt);
-      };
-    }
-
     routePanel.querySelectorAll("[data-nv-mode-tab]").forEach((tabBtn) => {
       tabBtn.onclick = () => {
         const nextMode = tabBtn.getAttribute("data-nv-mode-tab") === "monitoring" ? "monitoring" : "planning";
         if (nextMode !== "planning") {
-          setChartAddWpMode(false);
           st.destPickerOpen = false;
         }
         st.detailTab = nextMode;
@@ -47791,32 +47863,18 @@ if (document.readyState === "loading") {
     const btnAddWp = routePanel.querySelector("#btnNvAddWaypoint");
     if (btnAddWp) {
       btnAddWp.onclick = () => {
+        if (!st.editMode) return;
         st.destPickerOpen = false;
-        setChartAddWpMode(!st.addingWpOnChart);
-        renderNavtorSidebar();
-      };
-    }
-
-    const btnInsertCenter = routePanel.querySelector("#btnNvInsertCenterWp");
-    if (btnInsertCenter) {
-      btnInsertCenter.onclick = () => {
-        setChartAddWpMode(false);
-        insertWaypointAtChartCenter(rt, false);
-      };
-    }
-
-    const btnStopChartWp = routePanel.querySelector("#btnNvStopChartWp");
-    if (btnStopChartWp) {
-      btnStopChartWp.onclick = () => {
-        setChartAddWpMode(false);
-        renderNavtorSidebar();
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast("Click anywhere on the chart with LMB to place the next waypoint", "info");
+        }
       };
     }
 
     const btnAddDest = routePanel.querySelector("#btnNvAddDestination");
     if (btnAddDest) {
       btnAddDest.onclick = () => {
-        setChartAddWpMode(false);
+        if (!st.editMode) return;
         st.destPickerOpen = !st.destPickerOpen;
         renderNavtorSidebar();
         if (st.destPickerOpen) {
@@ -47858,6 +47916,7 @@ if (document.readyState === "loading") {
 
     routePanel.querySelectorAll("[data-dest-name]").forEach((btn) => {
       btn.onclick = () => {
+        if (!st.editMode) return;
         const pLat = parseFloat(btn.getAttribute("data-dest-lat"));
         const pLon = parseFloat(btn.getAttribute("data-dest-lon"));
         const pName = btn.getAttribute("data-dest-name") || "BERTH";
@@ -47902,7 +47961,6 @@ if (document.readyState === "loading") {
       row.onclick = () => {
         const idx = parseInt(row.getAttribute("data-nv-wp-idx"), 10);
         if (!Number.isFinite(idx) || !rt.waypoints[idx]) return;
-        setChartAddWpMode(false);
         st.wptIdx = idx;
         st.view = "waypoint";
         const wp = rt.waypoints[idx];
@@ -47945,10 +48003,14 @@ if (document.readyState === "loading") {
       renderNavtorSidebar();
       return;
     }
+    const metrics = recomputeRouteNavtorMetrics(rt);
     const idx = Math.max(0, Math.min(wps.length - 1, Number(st.wptIdx) || 0));
     st.wptIdx = idx;
     const legsArr = Array.isArray(rt.legs) ? rt.legs : [];
     const wp = ensureWaypointNavtorFields(wps[idx], idx, wps.length, legsArr[idx] || null);
+    const isEditing = Boolean(st.editMode);
+    const disAttr = isEditing ? "" : " disabled";
+    const lockCls = isEditing ? "" : " is-locked";
 
     const hasPrev = idx > 0;
     const hasNext = idx < wps.length - 1;
@@ -47972,12 +48034,13 @@ if (document.readyState === "loading") {
     )).join("");
 
     wptPanel.innerHTML =
+      buildPinnedRouteHeaderHtml(rt, metrics, true) +
       '<div class="ntm-list-header ntm-routes-header ntm-nv-topbar ntm-nv-wpt-topbar">' +
         '<div class="ntm-nv-wpt-left">' +
           '<button type="button" class="ntm-hdr-back-btn" id="btnNvWptBack" title="Back to route">' +
-            '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>' +
+            '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>' +
           '</button>' +
-          '<span class="ntm-nv-wpt-hdr-title">Edit waypoint</span>' +
+          '<span class="ntm-nv-wpt-hdr-title">' + (isEditing ? 'Edit waypoint' : 'Waypoint details') + '</span>' +
         '</div>' +
         '<div class="ntm-hdr-actions ntm-nv-actions">' +
           '<button type="button" class="ntm-hdr-action-btn ' + (!hasPrev ? 'is-disabled' : '') + '" id="btnNvWptPrev" ' + (!hasPrev ? 'disabled' : '') + ' title="Previous waypoint">' +
@@ -47988,7 +48051,7 @@ if (document.readyState === "loading") {
             '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></span>' +
             '<span class="ntm-hdr-action-lbl">Next</span>' +
           '</button>' +
-          '<button type="button" class="ntm-hdr-action-btn" id="btnNvWptDelete" title="Delete waypoint">' +
+          '<button type="button" class="ntm-hdr-action-btn ' + (!isEditing ? 'is-disabled' : '') + '" id="btnNvWptDelete"' + disAttr + ' title="Delete waypoint">' +
             '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></span>' +
             '<span class="ntm-hdr-action-lbl">Delete</span>' +
           '</button>' +
@@ -47998,6 +48061,9 @@ if (document.readyState === "loading") {
           '</button>' +
         '</div>' +
       '</div>' +
+      (!isEditing
+        ? '<div class="ntm-nv-wpt-lock-notice">Read-only mode — click <b>Edit</b> in the header above to modify waypoint parameters.</div>'
+        : '') +
       '<div class="ntm-nv-wpt-form-scroll">' +
         '<div class="ntm-nv-wpt-id-row">' +
           '<span class="ntm-nv-lbl">Waypoint:</span>' +
@@ -48005,37 +48071,37 @@ if (document.readyState === "loading") {
         '</div>' +
         '<div class="ntm-nv-inline-field">' +
           '<label class="ntm-nv-lbl" for="nvWptName">WP name:</label>' +
-          '<input type="text" id="nvWptName" class="ntm-nv-input" value="' + escHtml(dispName) + '" placeholder="" />' +
+          '<input type="text" id="nvWptName" class="ntm-nv-input' + lockCls + '" value="' + escHtml(dispName) + '" placeholder=""' + disAttr + ' />' +
         '</div>' +
         '<div class="ntm-nv-grid-2">' +
           '<div class="ntm-nv-field">' +
             '<label class="ntm-nv-lbl" for="nvWptLat">Latitude:</label>' +
-            '<input type="text" id="nvWptLat" class="ntm-nv-input" value="' + escHtml(latStr) + '" />' +
+            '<input type="text" id="nvWptLat" class="ntm-nv-input' + lockCls + '" value="' + escHtml(latStr) + '"' + disAttr + ' />' +
           '</div>' +
           '<div class="ntm-nv-field">' +
             '<label class="ntm-nv-lbl" for="nvWptLon">Longitude:</label>' +
-            '<input type="text" id="nvWptLon" class="ntm-nv-input" value="' + escHtml(lonStr) + '" />' +
+            '<input type="text" id="nvWptLon" class="ntm-nv-input' + lockCls + '" value="' + escHtml(lonStr) + '"' + disAttr + ' />' +
           '</div>' +
         '</div>' +
         '<div class="ntm-nv-grid-2">' +
           '<div class="ntm-nv-field">' +
             '<label class="ntm-nv-lbl" for="nvWptXtdPort">XTD Port:</label>' +
-            '<input type="text" id="nvWptXtdPort" class="ntm-nv-input" value="' + escHtml(portXtdStr) + '" />' +
+            '<input type="text" id="nvWptXtdPort" class="ntm-nv-input' + lockCls + '" value="' + escHtml(portXtdStr) + '"' + disAttr + ' />' +
           '</div>' +
           '<div class="ntm-nv-field">' +
             '<label class="ntm-nv-lbl" for="nvWptXtdStbd">XTD Starboard:</label>' +
-            '<input type="text" id="nvWptXtdStbd" class="ntm-nv-input" value="' + escHtml(stbdXtdStr) + '" />' +
+            '<input type="text" id="nvWptXtdStbd" class="ntm-nv-input' + lockCls + '" value="' + escHtml(stbdXtdStr) + '"' + disAttr + ' />' +
           '</div>' +
         '</div>' +
         '<div class="ntm-nv-grid-2">' +
           '<div class="ntm-nv-field">' +
             '<label class="ntm-nv-lbl" for="nvWptTurnRad">Turning radius:</label>' +
-            '<input type="text" id="nvWptTurnRad" class="ntm-nv-input" value="' + escHtml(radStr) + '" />' +
+            '<input type="text" id="nvWptTurnRad" class="ntm-nv-input' + lockCls + '" value="' + escHtml(radStr) + '"' + disAttr + ' />' +
           '</div>' +
           '<div class="ntm-nv-field">' +
             '<label class="ntm-nv-lbl" for="nvWptLegType">Leg type:</label>' +
             '<div class="ntm-nv-select-wrap">' +
-              '<select id="nvWptLegType" class="ntm-nv-select">' +
+              '<select id="nvWptLegType" class="ntm-nv-select' + lockCls + '"' + disAttr + '>' +
                 '<option value="RL"' + (sailCode === "RL" ? ' selected' : '') + '>Rhumb line</option>' +
                 '<option value="GC"' + (sailCode === "GC" ? ' selected' : '') + '>Great circle</option>' +
               '</select>' +
@@ -48045,42 +48111,43 @@ if (document.readyState === "loading") {
         '<div class="ntm-nv-field">' +
           '<label class="ntm-nv-lbl" for="nvWptPassageType">Passage type:</label>' +
           '<div class="ntm-nv-select-wrap">' +
-            '<select id="nvWptPassageType" class="ntm-nv-select">' + pTypeOptionsHtml + '</select>' +
+            '<select id="nvWptPassageType" class="ntm-nv-select' + lockCls + '"' + disAttr + '>' + pTypeOptionsHtml + '</select>' +
           '</div>' +
         '</div>' +
         '<div class="ntm-nv-field">' +
           '<label class="ntm-nv-lbl" for="nvWptPassageEvent">Passage type event:</label>' +
           '<div class="ntm-nv-select-wrap">' +
-            '<select id="nvWptPassageEvent" class="ntm-nv-select">' + pEventOptionsHtml + '</select>' +
+            '<select id="nvWptPassageEvent" class="ntm-nv-select' + lockCls + '"' + disAttr + '>' + pEventOptionsHtml + '</select>' +
           '</div>' +
         '</div>' +
         '<div class="ntm-nv-field">' +
           '<label class="ntm-nv-lbl" for="nvWptPlanSpeed">Planned speed:</label>' +
-          '<input type="text" id="nvWptPlanSpeed" class="ntm-nv-input" value="' + escHtml(planSpdStr) + '" />' +
+          '<input type="text" id="nvWptPlanSpeed" class="ntm-nv-input' + lockCls + '" value="' + escHtml(planSpdStr) + '"' + disAttr + ' />' +
         '</div>' +
         '<div class="ntm-nv-grid-2">' +
           '<div class="ntm-nv-field">' +
             '<label class="ntm-nv-lbl" for="nvWptMinSpeed">Minimum speed:</label>' +
-            '<input type="text" id="nvWptMinSpeed" class="ntm-nv-input" value="' + escHtml(minSpdStr) + '" />' +
+            '<input type="text" id="nvWptMinSpeed" class="ntm-nv-input' + lockCls + '" value="' + escHtml(minSpdStr) + '"' + disAttr + ' />' +
           '</div>' +
           '<div class="ntm-nv-field">' +
             '<label class="ntm-nv-lbl" for="nvWptMaxSpeed">Maximum speed:</label>' +
-            '<input type="text" id="nvWptMaxSpeed" class="ntm-nv-input" value="' + escHtml(maxSpdStr) + '" />' +
+            '<input type="text" id="nvWptMaxSpeed" class="ntm-nv-input' + lockCls + '" value="' + escHtml(maxSpdStr) + '"' + disAttr + ' />' +
           '</div>' +
         '</div>' +
         '<div class="ntm-nv-field">' +
           '<label class="ntm-nv-lbl" for="nvWptRemarks">Remarks:</label>' +
-          '<textarea id="nvWptRemarks" class="ntm-nv-textarea" rows="3">' + escHtml(wp.remarks || "") + '</textarea>' +
+          '<textarea id="nvWptRemarks" class="ntm-nv-textarea' + lockCls + '" rows="3"' + disAttr + '>' + escHtml(wp.remarks || "") + '</textarea>' +
         '</div>' +
       '</div>' +
       '<div class="ntm-nv-wpt-footer">' +
-        '<button type="button" class="ntm-nv-reset-link" id="btnNvResetDefaults">Reset to default values</button>' +
-        '<button type="button" class="ntm-nv-reset-broom" id="btnNvResetBroom" title="Reset waypoint parameters to Passage type defaults">' +
+        '<button type="button" class="ntm-nv-reset-link ' + (!isEditing ? 'is-disabled' : '') + '" id="btnNvResetDefaults"' + disAttr + '>Reset to default values</button>' +
+        '<button type="button" class="ntm-nv-reset-broom ' + (!isEditing ? 'is-disabled' : '') + '" id="btnNvResetBroom"' + disAttr + ' title="Reset waypoint parameters to Passage type defaults">' +
           '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19.36 2.72L20.78 4.14L15.06 9.85C16.13 11.39 16.28 13.24 15.38 14.44L9.06 8.12C10.26 7.22 12.11 7.37 13.65 8.44L19.36 2.72M5.93 17.57C3.92 15.56 2.69 13.16 2.35 10.92L7.23 8.83L14.67 16.27L12.58 21.15C10.34 20.81 7.94 19.58 5.93 17.57Z"/></svg>' +
         '</button>' +
       '</div>';
 
     const readAndApplyForm = (replot) => {
+      if (!st.editMode) return;
       const elName = wptPanel.querySelector("#nvWptName");
       const elLat = wptPanel.querySelector("#nvWptLat");
       const elLon = wptPanel.querySelector("#nvWptLon");
@@ -48145,38 +48212,43 @@ if (document.readyState === "loading") {
       persistCurrentNavtorRoute(Boolean(replot || coordsMoved));
     };
 
-    ["#nvWptName", "#nvWptLat", "#nvWptLon", "#nvWptXtdPort", "#nvWptXtdStbd", "#nvWptTurnRad", "#nvWptPlanSpeed", "#nvWptMinSpeed", "#nvWptMaxSpeed", "#nvWptRemarks"].forEach((sel) => {
-      const inp = wptPanel.querySelector(sel);
-      if (!inp) return;
-      inp.addEventListener("change", () => readAndApplyForm(true));
-      if (inp.tagName === "INPUT") {
-        inp.addEventListener("keydown", (ev) => {
-          if (ev.key === "Enter") {
-            ev.preventDefault();
-            inp.blur();
-          }
-        });
-      }
-    });
+    wirePinnedRouteHeaderHandlers(wptPanel, rt, () => readAndApplyForm(false));
 
-    ["#nvWptLegType", "#nvWptPassageType", "#nvWptPassageEvent"].forEach((sel) => {
-      const sEl = wptPanel.querySelector(sel);
-      if (sEl) sEl.addEventListener("change", () => readAndApplyForm(true));
-    });
+    if (isEditing) {
+      ["#nvWptName", "#nvWptLat", "#nvWptLon", "#nvWptXtdPort", "#nvWptXtdStbd", "#nvWptTurnRad", "#nvWptPlanSpeed", "#nvWptMinSpeed", "#nvWptMaxSpeed", "#nvWptRemarks"].forEach((sel) => {
+        const inp = wptPanel.querySelector(sel);
+        if (!inp) return;
+        inp.addEventListener("change", () => readAndApplyForm(true));
+        if (inp.tagName === "INPUT") {
+          inp.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter") {
+              ev.preventDefault();
+              inp.blur();
+            }
+          });
+        }
+      });
 
-    const btnBack = wptPanel.querySelector("#btnNvWptBack");
-    if (btnBack) {
-      btnBack.onclick = () => {
-        readAndApplyForm(true);
-        st.view = "route";
-        renderNavtorSidebar();
-      };
+      ["#nvWptLegType", "#nvWptPassageType", "#nvWptPassageEvent"].forEach((sel) => {
+        const sEl = wptPanel.querySelector(sel);
+        if (sEl) sEl.addEventListener("change", () => readAndApplyForm(true));
+      });
     }
+
+    const goBackToRoute = () => {
+      if (st.editMode) readAndApplyForm(true);
+      st.view = "route";
+      renderNavtorSidebar();
+    };
+    const btnBack = wptPanel.querySelector("#btnNvWptBack");
+    const btnHdrBack = wptPanel.querySelector("#btnNvHdrBackFromWpt");
+    if (btnBack) btnBack.onclick = goBackToRoute;
+    if (btnHdrBack) btnHdrBack.onclick = goBackToRoute;
 
     const btnPrev = wptPanel.querySelector("#btnNvWptPrev");
     if (btnPrev && hasPrev) {
       btnPrev.onclick = () => {
-        readAndApplyForm(false);
+        if (st.editMode) readAndApplyForm(false);
         st.wptIdx = idx - 1;
         const target = rt.waypoints[st.wptIdx];
         if (window.leafletMap && target) {
@@ -48189,7 +48261,7 @@ if (document.readyState === "loading") {
     const btnNext = wptPanel.querySelector("#btnNvWptNext");
     if (btnNext && hasNext) {
       btnNext.onclick = () => {
-        readAndApplyForm(false);
+        if (st.editMode) readAndApplyForm(false);
         st.wptIdx = idx + 1;
         const target = rt.waypoints[st.wptIdx];
         if (window.leafletMap && target) {
@@ -48200,7 +48272,7 @@ if (document.readyState === "loading") {
     }
 
     const btnDel = wptPanel.querySelector("#btnNvWptDelete");
-    if (btnDel) {
+    if (btnDel && isEditing) {
       btnDel.onclick = () => {
         rt.waypoints.splice(idx, 1);
         persistCurrentNavtorRoute(true);
@@ -48221,12 +48293,18 @@ if (document.readyState === "loading") {
     if (btnHelp) {
       btnHelp.onclick = () => {
         if (typeof showSetSailToast === "function") {
-          showSetSailToast("Enter coordinates as DD°MM.MMM'N/S or decimal degrees. Use Prev/Next arrows to step along the route.", "info");
+          showSetSailToast(
+            st.editMode
+              ? "Enter coordinates as DD°MM.MMM'N/S or decimal degrees. Click coral Save button in header when done."
+              : "Click Edit in the route header above to unlock waypoint parameters and chart dragging.",
+            "info"
+          );
         }
       };
     }
 
     const doResetDefaults = () => {
+      if (!st.editMode) return;
       const ptEl = wptPanel.querySelector("#nvWptPassageType");
       const pType = (ptEl && ptEl.value) || wp.passageType || "Pilotage/fairway/channel";
       const defs = NAVTOR_PASSAGE_DEFAULTS[pType] || NAVTOR_PASSAGE_DEFAULTS["Coastal"];
@@ -48247,8 +48325,8 @@ if (document.readyState === "loading") {
 
     const btnResetLink = wptPanel.querySelector("#btnNvResetDefaults");
     const btnResetBroom = wptPanel.querySelector("#btnNvResetBroom");
-    if (btnResetLink) btnResetLink.onclick = doResetDefaults;
-    if (btnResetBroom) btnResetBroom.onclick = doResetDefaults;
+    if (btnResetLink && isEditing) btnResetLink.onclick = doResetDefaults;
+    if (btnResetBroom && isEditing) btnResetBroom.onclick = doResetDefaults;
   }
 
   function renderNavtorSidebar() {
@@ -48260,7 +48338,7 @@ if (document.readyState === "loading") {
 
     if ((st.view === "route" || st.view === "waypoint") && !rt) {
       st.view = "list";
-      setChartAddWpMode(false);
+      setRouteEditMode(false);
     }
 
     sidebar.setAttribute("data-sidebar-view", st.view);
@@ -48269,6 +48347,7 @@ if (document.readyState === "loading") {
       routePanel.hidden = true;
       wptPanel.hidden = true;
       st.routeId = null;
+      if (st.editMode) setRouteEditMode(false);
       syncChartRoutesDisplay();
       if (typeof window._origRenderSidebarUserRoutesList === "function") {
         window._origRenderSidebarUserRoutesList();
@@ -48280,6 +48359,7 @@ if (document.readyState === "loading") {
       routePanel.hidden = false;
       wptPanel.hidden = true;
       renderRouteDetailView(routePanel, rt);
+      syncChartWaypointsDraggableState();
       return;
     }
 
@@ -48287,15 +48367,17 @@ if (document.readyState === "loading") {
       routePanel.hidden = true;
       wptPanel.hidden = false;
       renderWaypointEditView(wptPanel, rt);
+      syncChartWaypointsDraggableState();
     }
   }
 
   window.renderNavtorSidebar = renderNavtorSidebar;
 
+  // Open a route into Route Detail View (starts with Edit OFF so user sees the Edit button)
   window.openNavtorRouteInSidebar = function (routeId, opts) {
     opts = opts || {};
     const st = window._sidebarNavtorState;
-    setChartAddWpMode(false);
+    setRouteEditMode(Boolean(opts.startInEditMode));
     st.routeId = routeId || (activeRouteData && (activeRouteData.id || activeRouteData.name)) || null;
     st.detailTab = opts.detailTab === "monitoring" ? "monitoring" : "planning";
     st.wptSearch = "";
