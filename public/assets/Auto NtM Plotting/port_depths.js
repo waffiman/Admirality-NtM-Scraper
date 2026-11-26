@@ -21,12 +21,12 @@ var OVERLAY_STATES = window.OVERLAY_STATES || {
   bathymetry: true,
   timezones: false,
   weather: false,
-  route: false,
+  route: Boolean(hasSavedDrCurrentRoute),
   ais: false,
   userchart: false
 };
 OVERLAY_STATES.buoys = true;
-OVERLAY_STATES.route = false;
+OVERLAY_STATES.route = Boolean(hasSavedDrCurrentRoute);
 window.OVERLAY_STATES = OVERLAY_STATES;
 
 let leafletPortDepthsLayer = null;
@@ -19957,7 +19957,13 @@ function initExcelOverlayDock(map) {
     }
   });
 
-  // Route visibility on chart is strictly controlled by route selection in #ntmSidebar
+  if (hasSavedDrCurrentRoute) {
+    OVERLAY_STATES.route = true;
+    if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+  }
+  if (typeof window.syncChartRoutesDisplay === "function") {
+    try { window.syncChartRoutesDisplay(); } catch (eSyncCurRt) {}
+  }
 
   // Sync initial dock tab visual states with OVERLAY_STATES
   overlayTabSpecs.forEach(({ key }) => {

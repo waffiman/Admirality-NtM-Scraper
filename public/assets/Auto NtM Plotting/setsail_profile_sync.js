@@ -341,12 +341,10 @@
       localStorage.setItem("setsail_route_v1", JSON.stringify(route));
     } catch (e) {}
     try {
-      if (typeof global.isRouteSelectedInSidebar === "function" && global.isRouteSelectedInSidebar(route)) {
-        global.activeRouteData = route;
-        if (typeof global.renderRouteOnMap === "function" && global.leafletMap) {
-          global.renderRouteOnMap(route, false);
-        }
-      } else if (typeof global.renderSidebarUserRoutesList === "function") {
+      if (typeof global.syncChartRoutesDisplay === "function") {
+        try { global.syncChartRoutesDisplay(); } catch (eSyncR) {}
+      }
+      if (typeof global.renderSidebarUserRoutesList === "function") {
         try { global.renderSidebarUserRoutesList(); } catch (eSb) {}
       }
       if (typeof global.updateRouteMiniWindowUI === "function") {
@@ -386,6 +384,15 @@
       }
       if (typeof global.renderVesselRouteLibraryList === "function") {
         global.renderVesselRouteLibraryList();
+      }
+      if (typeof global.syncChartRoutesDisplay === "function") {
+        try { global.syncChartRoutesDisplay({ force: true }); } catch (eSyncDr) {}
+      }
+      if (typeof global.syncNavtorHeaderCurrentBadge === "function") {
+        try { global.syncNavtorHeaderCurrentBadge(); } catch (eBadgeDr) {}
+      }
+      if (typeof global.renderSidebarUserRoutesList === "function") {
+        try { global.renderSidebarUserRoutesList(); } catch (eSbDr) {}
       }
     } catch (eDr) {}
   }

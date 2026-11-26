@@ -2428,27 +2428,27 @@ function setDrActiveRouteId(routeId, opts) {
   } catch (e) {}
 
   if (id && typeof getSavedRoutesLibrary === "function") {
-
-    const found = getSavedRoutesLibrary().find((r) => r && (r.id === id || r.name === id));
-
-    if (found && typeof selectSavedRouteFromSidebar === "function") {
-
-      try { selectSavedRouteFromSidebar(found.id, false); } catch (eSel) {
-
-        try {
-
-          if (typeof renderRouteOnMap === "function") renderRouteOnMap(found, false);
-
-        } catch (eMap) {}
-
-      }
-
-    } else if (found && typeof renderRouteOnMap === "function") {
-
-      try { renderRouteOnMap(found, false); } catch (e2) {}
-
+    const found = getSavedRoutesLibrary().find((r) => r && (r.id === id || r.name === id)) ||
+      (activeRouteData && (activeRouteData.id === id || activeRouteData.name === id) ? activeRouteData : null);
+    if (found && typeof window.persistCurrentRouteSnapshot === "function") {
+      window.persistCurrentRouteSnapshot(found);
     }
-
+    if (found && !opts.keepSidebarView && !(typeof window.isRouteSelectedInSidebar === "function" && window.isRouteSelectedInSidebar())) {
+      if (typeof selectSavedRouteFromSidebar === "function") {
+        try { selectSavedRouteFromSidebar(found.id, false); } catch (eSel) {}
+      }
+    }
+  } else if (!id && typeof window.persistCurrentRouteSnapshot === "function") {
+    window.persistCurrentRouteSnapshot(null);
+  }
+  if (typeof window.syncChartRoutesDisplay === "function") {
+    try { window.syncChartRoutesDisplay({ force: true }); } catch (eSyncDrMap) {}
+  }
+  if (typeof window.syncNavtorHeaderCurrentBadge === "function") {
+    try { window.syncNavtorHeaderCurrentBadge(); } catch (eSyncHdrBadge) {}
+  }
+  if (typeof window.renderSidebarUserRoutesList === "function") {
+    try { window.renderSidebarUserRoutesList(); } catch (eSbList) {}
   }
 
   if (typeof window.renderRouteBufferCorridorOnMap === "function") {
@@ -2540,23 +2540,19 @@ window.loadDrLastRailsWps = loadDrLastRailsWps;
 
 
 function getDrActiveRoute() {
-
   const id = getDrActiveRouteId();
-
   if (!id) return null;
-
-  // Prefer live chart copy so waypoint edits / drag apply to DR immediately
-
   if (activeRouteData && (activeRouteData.id === id || activeRouteData.name === id)) {
-
     return activeRouteData;
-
   }
-
-  if (typeof getSavedRoutesLibrary !== "function") return null;
-
-  return getSavedRoutesLibrary().find((r) => r && (r.id === id || r.name === id)) || null;
-
+  if (typeof getSavedRoutesLibrary === "function") {
+    const inLib = getSavedRoutesLibrary().find((r) => r && (r.id === id || r.name === id));
+    if (inLib) return inLib;
+  }
+  if (typeof window.resolveCurrentRouteObject === "function") {
+    return window.resolveCurrentRouteObject();
+  }
+  return null;
 }
 
 window.getDrActiveRoute = getDrActiveRoute;
@@ -8686,9 +8682,12 @@ function ensureCurrentRouteRenderedOnChart(opts) {
   opts = opts || {};
   const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
   if (!map) return;
-  if (typeof window.isRouteSelectedInSidebar === "function" && !window.isRouteSelectedInSidebar()) {
-    if (typeof window.clearChartRouteDisplayOnly === "function") {
-      window.clearChartRouteDisplayOnly();
+  if (typeof window.syncChartRoutesDisplay === "function") {
+    window.syncChartRoutesDisplay({ force: Boolean(opts.force || window._setsailRouteNeedsRepaint) });
+    window._setsailRouteNeedsRepaint = false;
+    const curIdNow = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+    if (curIdNow && typeof applyOwnVesselDeadReckoning === "function") {
+      try { applyOwnVesselDeadReckoning({ toast: false, force: false, visual: true }); } catch (eDrAuto) {}
     }
     return;
   }
@@ -20720,11 +20719,14 @@ function initNtMMap() {
           } catch (ePorts) {}
         }
 
-        // 5. ROUTE WAYPOINTS & ROUTE LEGS (if My Route active)
-        if (isLayerOn("route") || (window.leafletRouteLayer && targetMap.hasLayer(window.leafletRouteLayer))) {
+        // 5. ROUTE WAYPOINTS & ROUTE LEGS (Active route + persistent Current route)
+        const _routePickGroups = [window.leafletRouteLayer, window.leafletCurrentBgRouteLayer].filter(
+          (g) => g && typeof g.eachLayer === "function" && targetMap.hasLayer(g)
+        );
+        if (isLayerOn("route") || _routePickGroups.length > 0) {
           try {
-            if (window.leafletRouteLayer && typeof window.leafletRouteLayer.eachLayer === "function") {
-              window.leafletRouteLayer.eachLayer((layer) => {
+            _routePickGroups.forEach((_rGrp) => {
+              _rGrp.eachLayer((layer) => {
                 if (!layer) return;
                 if (typeof layer.getLatLng === "function") {
                   const ll = layer.getLatLng();
@@ -20775,7 +20777,7 @@ function initNtMMap() {
                   }
                 }
               });
-            }
+            });
           } catch (eRoute) {}
         }
 
@@ -38650,10 +38652,8 @@ function restoreSetSailUserHistory(email, silent = false) {
 
       localStorage.setItem(ROUTE_STORAGE_KEY, JSON.stringify(snap.activeRoute));
 
-      if (leafletMap && typeof renderRouteOnMap === "function" && typeof window.isRouteSelectedInSidebar === "function" && window.isRouteSelectedInSidebar(snap.activeRoute)) {
-
-        renderRouteOnMap(snap.activeRoute, false);
-
+      if (typeof window.syncChartRoutesDisplay === "function") {
+        window.syncChartRoutesDisplay();
       }
 
     }
@@ -46315,10 +46315,8 @@ function selectSavedRouteFromSidebar(routeId, openRightDrawer = true, opts = {})
 
 window.selectSavedRouteFromSidebar = selectSavedRouteFromSidebar;
 
-/* ── v5.263: User Routes Sidebar (Routes / Bin Tabs, Checkboxes & Header Actions) ── */
-const SETSAIL_ROUTES_BIN_KEY = "setsail_routes_bin_v1";
-window._sidebarRoutesActiveTab = window._sidebarRoutesActiveTab || "routes";
-window._sidebarSelectedBinRouteId = window._sidebarSelectedBinRouteId || null;
+/* ── v5.265: User Routes Sidebar (Current Flag, Right Checkbox, Reverse Copy & Persistent Current Route) ── */
+const SETSAIL_CURRENT_ROUTE_SNAP_KEY = "setsail_current_route_obj_v1";
 window._sidebarCheckedRouteIds = window._sidebarCheckedRouteIds || new Set();
 
 function isRouteSelectedInSidebar(rt) {
@@ -46329,7 +46327,196 @@ function isRouteSelectedInSidebar(rt) {
 }
 window.isRouteSelectedInSidebar = isRouteSelectedInSidebar;
 
+function persistCurrentRouteSnapshot(rt) {
+  try {
+    if (rt && Array.isArray(rt.waypoints)) {
+      localStorage.setItem(SETSAIL_CURRENT_ROUTE_SNAP_KEY, JSON.stringify(rt));
+    } else {
+      localStorage.removeItem(SETSAIL_CURRENT_ROUTE_SNAP_KEY);
+    }
+  } catch (e) {}
+}
+window.persistCurrentRouteSnapshot = persistCurrentRouteSnapshot;
+
+function resolveCurrentRouteObject() {
+  const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+  if (!drId) return null;
+
+  let found = null;
+  if (typeof getSavedRoutesLibrary === "function") {
+    try {
+      const lib = getSavedRoutesLibrary();
+      if (Array.isArray(lib)) {
+        found = lib.find((r) => r && (r.id === drId || r.name === drId)) || null;
+      }
+    } catch (eLib) {}
+  }
+
+  if (!found && activeRouteData && (activeRouteData.id === drId || activeRouteData.name === drId)) {
+    found = activeRouteData;
+  }
+
+  if (!found) {
+    try {
+      const rawLib = localStorage.getItem(SETSAIL_ROUTES_LIBRARY_KEY);
+      if (rawLib) {
+        const parsed = JSON.parse(rawLib);
+        if (Array.isArray(parsed)) {
+          found = parsed.find((r) => r && (r.id === drId || r.name === drId)) || null;
+        }
+      }
+    } catch (eRaw) {}
+  }
+
+  if (!found) {
+    try {
+      const rawSnap = localStorage.getItem(SETSAIL_CURRENT_ROUTE_SNAP_KEY);
+      if (rawSnap) {
+        const snap = JSON.parse(rawSnap);
+        if (snap && (snap.id === drId || snap.name === drId)) {
+          found = snap;
+          if (typeof isSetSailSignedIn === "function" && !isSetSailSignedIn() && typeof saveRouteToLibrary === "function" && !window._hydratingCurrentSnap) {
+            window._hydratingCurrentSnap = true;
+            try { saveRouteToLibrary(snap); } catch (eHyd) {}
+            window._hydratingCurrentSnap = false;
+          }
+        }
+      }
+    } catch (eSnap) {}
+  }
+
+  if (!found) {
+    try {
+      const rawAct = localStorage.getItem(ROUTE_STORAGE_KEY);
+      if (rawAct) {
+        const act = JSON.parse(rawAct);
+        if (act && (act.id === drId || act.name === drId)) found = act;
+      }
+    } catch (eAct) {}
+  }
+
+  return found || null;
+}
+window.resolveCurrentRouteObject = resolveCurrentRouteObject;
+
+function clearBackgroundCurrentRouteLayer() {
+  try {
+    if (window.leafletCurrentBgRouteLayer && typeof window.leafletCurrentBgRouteLayer.clearLayers === "function") {
+      window.leafletCurrentBgRouteLayer.clearLayers();
+    }
+  } catch (eBgClr) {}
+}
+
+function renderBackgroundCurrentRouteOnMap(currentRt) {
+  const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+  if (!map || typeof L === "undefined") return;
+  if (!currentRt || !Array.isArray(currentRt.waypoints) || currentRt.waypoints.length === 0) {
+    clearBackgroundCurrentRouteLayer();
+    return;
+  }
+
+  if (!window.leafletCurrentBgRouteLayer) {
+    window.leafletCurrentBgRouteLayer = L.layerGroup();
+  }
+  const bgLayer = window.leafletCurrentBgRouteLayer;
+  bgLayer.clearLayers();
+
+  const cleanWps = [];
+  for (let i = 0; i < currentRt.waypoints.length; i++) {
+    const w = currentRt.waypoints[i];
+    if (!w) continue;
+    const lat = Number(w.lat);
+    const lon = Number(w.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    cleanWps.push({ lat: lat, lon: lon, name: w.name || w.id || ("WP" + i), idx: i });
+  }
+  if (!cleanWps.length) return;
+
+  const unrolled = [];
+  let rLon = ((cleanWps[0].lon + 180) % 360 + 360) % 360 - 180;
+  unrolled.push([cleanWps[0].lat, rLon]);
+  for (let i = 1; i < cleanWps.length; i++) {
+    let cl = ((cleanWps[i].lon + 180) % 360 + 360) % 360 - 180;
+    while (cl - rLon > 180) cl -= 360;
+    while (cl - rLon < -180) cl += 360;
+    rLon = cl;
+    unrolled.push([cleanWps[i].lat, rLon]);
+  }
+
+  const rtTitle = String(currentRt.name || currentRt.routeName || "Current Route");
+  const escPop = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  if (unrolled.length >= 2) {
+    const outline = L.polyline(unrolled, {
+      color: "#0b1120",
+      weight: 6,
+      opacity: 0.72,
+      interactive: false
+    });
+    const line = L.polyline(unrolled, {
+      color: "#f97316",
+      weight: 3.2,
+      opacity: 0.92,
+      dashArray: "8, 5",
+      className: "setsail-route-centerline setsail-current-bg-centerline"
+    });
+    line._routeLineData = {
+      id: "cur_" + String(currentRt.id || rtTitle),
+      name: rtTitle + " (Current)",
+      waypointsCount: cleanWps.length,
+      totalDistNm: Number(currentRt.totalDistanceNM) || 0
+    };
+    line.bindPopup(
+      '<div style="font-family:\'Segoe UI\',sans-serif;min-width:175px;color:#1e293b;">' +
+        '<div style="font-weight:700;font-size:0.9rem;color:#ea580c;border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:4px;">Current Route: ' + escPop(rtTitle) + '</div>' +
+        '<div style="font-size:0.76rem;color:#475569;">Waypoints: ' + cleanWps.length + ' · Dist: ' + (Number(currentRt.totalDistanceNM) || 0).toFixed(2) + ' NM</div>' +
+      '</div>'
+    );
+    bgLayer.addLayer(outline);
+    bgLayer.addLayer(line);
+  }
+
+  for (let i = 0; i < cleanWps.length; i++) {
+    const wp = cleanWps[i];
+    const coord = unrolled[i];
+    const isEndPt = (i === 0 || i === cleanWps.length - 1);
+    const dot = L.circleMarker(coord, {
+      radius: isEndPt ? 5.5 : 4,
+      color: "#0f172a",
+      weight: 1.6,
+      fillColor: "#fb923c",
+      fillOpacity: 0.95
+    });
+    dot._wptData = {
+      name: wp.name,
+      index: i + 1,
+      lat: wp.lat,
+      lon: wp.lon,
+      routeName: rtTitle + " (Current)"
+    };
+    const coordTxt = typeof formatLatLonDMS === "function" ? formatLatLonDMS(wp.lat, wp.lon) : (wp.lat.toFixed(4) + ", " + wp.lon.toFixed(4));
+    dot.bindPopup(
+      '<div style="font-family:\'Segoe UI\',sans-serif;min-width:175px;color:#1e293b;">' +
+        '<div style="font-weight:700;font-size:0.88rem;color:#ea580c;border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:4px;">Current WP' + i + ': ' + escPop(wp.name) + '</div>' +
+        '<div style="font-size:0.76rem;color:#475569;">' + escPop(coordTxt) + '</div>' +
+        '<div style="font-size:0.72rem;color:#64748b;">Route: ' + escPop(rtTitle) + '</div>' +
+      '</div>'
+    );
+    bgLayer.addLayer(dot);
+  }
+
+  if (!map.hasLayer(bgLayer)) {
+    bgLayer.addTo(map);
+  }
+  try {
+    if (typeof window._setsailRefreshRouteCourseLabels === "function") {
+      window._setsailRefreshRouteCourseLabels();
+    }
+  } catch (eLbl) {}
+}
+
 function clearChartRouteDisplayOnly() {
+  clearBackgroundCurrentRouteLayer();
   activeRouteData = null;
   window.activeRouteData = null;
   window._setsailExplicitChartRoute = null;
@@ -46366,23 +46553,97 @@ function clearChartRouteDisplayOnly() {
 }
 window.clearChartRouteDisplayOnly = clearChartRouteDisplayOnly;
 
-function getDeletedRoutesBin() {
-  try {
-    const raw = localStorage.getItem(SETSAIL_ROUTES_BIN_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
-  } catch (e) {
-    return [];
+/**
+ * Master synchronizer for route visibility on SetChart:
+ * - Route marked as `Current` (`getDrActiveRouteId()`) is ALWAYS visible on SetChart.
+ * - Any route currently opened in `#ntmSidebar` (`view === "route"` or `"waypoint"`)
+ *   is also displayed interactively on SetChart while selected, and removed when
+ *   unselected (leaving `Current` route visible if one is marked).
+ */
+function syncChartRoutesDisplay(opts) {
+  opts = opts || {};
+  const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+  const currentRt = resolveCurrentRouteObject();
+  const hasCurrentWps = Boolean(currentRt && Array.isArray(currentRt.waypoints) && currentRt.waypoints.length > 0);
+  if (currentRt) {
+    persistCurrentRouteSnapshot(currentRt);
   }
-}
 
-function writeDeletedRoutesBin(list) {
-  try {
-    const clean = Array.isArray(list) ? list.filter(Boolean).slice(0, 60) : [];
-    localStorage.setItem(SETSAIL_ROUTES_BIN_KEY, JSON.stringify(clean));
-  } catch (e) {}
+  const st = window._sidebarNavtorState;
+  const isInspecting = Boolean(st && (st.view === "route" || st.view === "waypoint") && st.routeId);
+  let selectedRt = null;
+  if (isInspecting) {
+    let lib = [];
+    try { lib = getSavedRoutesLibrary() || []; } catch (e) { lib = []; }
+    selectedRt = lib.find((r) => r && (r.id === st.routeId || r.name === st.routeId)) ||
+      (activeRouteData && (activeRouteData.id === st.routeId || activeRouteData.name === st.routeId) ? activeRouteData : null);
+  }
+  const hasSelectedWps = Boolean(selectedRt && Array.isArray(selectedRt.waypoints) && selectedRt.waypoints.length > 0);
+  const sameAsCurrent = Boolean(
+    currentRt && selectedRt && (
+      (currentRt.id && selectedRt.id && currentRt.id === selectedRt.id) ||
+      (!(currentRt.id && selectedRt.id && currentRt.id !== selectedRt.id) && currentRt.name && selectedRt.name && currentRt.name === selectedRt.name)
+    )
+  );
+
+  // Case 1: User is inspecting a route in the left panel
+  if (isInspecting && selectedRt) {
+    if (hasCurrentWps && !sameAsCurrent) {
+      renderBackgroundCurrentRouteOnMap(currentRt);
+    } else {
+      clearBackgroundCurrentRouteLayer();
+    }
+
+    if (hasSelectedWps) {
+      activeRouteData = selectedRt;
+      window.activeRouteData = selectedRt;
+      try {
+        if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.route = true;
+        if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+      } catch (eOv1) {}
+      if (map && typeof renderRouteOnMap === "function") {
+        if (opts.force) window._setsailLastRouteRenderSig = "";
+        renderRouteOnMap(selectedRt, Boolean(opts.fitChart && selectedRt.waypoints.length >= 2));
+      }
+    } else {
+      try {
+        const rLayer = window.leafletRouteLayer || (typeof leafletRouteLayer !== "undefined" ? leafletRouteLayer : null);
+        if (rLayer && typeof rLayer.clearLayers === "function") rLayer.clearLayers();
+      } catch (eEmpty) {}
+      activeRouteData = selectedRt;
+      window.activeRouteData = selectedRt;
+      const anyOnChart = Boolean(hasCurrentWps && !sameAsCurrent);
+      try {
+        if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.route = anyOnChart;
+        if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = anyOnChart;
+      } catch (eOv2) {}
+      try {
+        if (typeof window._setsailRefreshRouteCourseLabels === "function") window._setsailRefreshRouteCourseLabels();
+      } catch (eLbl2) {}
+    }
+    return;
+  }
+
+  // Case 2: Not inspecting any route in sidebar, BUT a Current route exists -> ALWAYS show Current on chart!
+  if (hasCurrentWps) {
+    clearBackgroundCurrentRouteLayer();
+    activeRouteData = currentRt;
+    window.activeRouteData = currentRt;
+    try {
+      if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.route = true;
+      if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
+    } catch (eOv3) {}
+    if (map && typeof renderRouteOnMap === "function") {
+      if (opts.force) window._setsailLastRouteRenderSig = "";
+      renderRouteOnMap(currentRt, Boolean(opts.fitChart && currentRt.waypoints.length >= 2));
+    }
+    return;
+  }
+
+  // Case 3: Neither sidebar-selected route nor Current route -> clear chart completely
+  clearChartRouteDisplayOnly();
 }
+window.syncChartRoutesDisplay = syncChartRoutesDisplay;
 
 function computeRouteDistanceNmFormatted(rt) {
   if (!rt) return "0.00";
@@ -46403,136 +46664,147 @@ function computeRouteDistanceNmFormatted(rt) {
   return dist.toFixed(2);
 }
 
-function moveRouteToBin(routeIdsOrSingle) {
+function buildReversedRouteName(origName, existingNamesUpper) {
+  let base = String(origName || "Route").trim() || "Route";
+  if (/\s+TO\s+/i.test(base)) {
+    const parts = base.split(/\s+TO\s+/i);
+    if (parts.length === 2 && parts[0].trim() && parts[1].trim()) {
+      base = parts[1].trim() + " TO " + parts[0].trim();
+    } else {
+      base = base + " (Rev)";
+    }
+  } else if (/\s*\(Rev\)$/i.test(base)) {
+    base = base.replace(/\s*\(Rev\)$/i, "").trim() || base;
+  } else {
+    base = base + " (Rev)";
+  }
+  let candidate = base;
+  let n = 2;
+  while (existingNamesUpper.has(candidate.toUpperCase())) {
+    candidate = base + " (" + n + ")";
+    n++;
+  }
+  existingNamesUpper.add(candidate.toUpperCase());
+  return candidate;
+}
+
+function createReversedRoutesFromChecked() {
   let lib = [];
   try { lib = getSavedRoutesLibrary() || []; } catch (e) { lib = []; }
-  const ids = Array.isArray(routeIdsOrSingle)
-    ? routeIdsOrSingle.filter(Boolean)
-    : (routeIdsOrSingle ? [routeIdsOrSingle] : Array.from(window._sidebarCheckedRouteIds || []));
-
-  let targets = [];
-  if (ids.length > 0) {
-    targets = lib.filter((r) => r && (ids.indexOf(r.id) !== -1 || ids.indexOf(r.name) !== -1));
-  } else if (lib.length === 1) {
-    targets = [lib[0]];
-  }
+  const checkedIds = Array.from(window._sidebarCheckedRouteIds || []);
+  const targets = lib.filter((r) => r && (checkedIds.indexOf(r.id) !== -1 || checkedIds.indexOf(r.name) !== -1));
 
   if (!targets.length) {
     if (typeof showSetSailToast === "function") {
-      showSetSailToast(lib.length ? "Tick a route checkbox to move it to Bin" : "No routes to delete", "info");
+      showSetSailToast("Tick a route checkbox on the right to create a reversed copy", "info");
     }
     return;
   }
 
-  let bin = getDeletedRoutesBin();
+  const existingNamesUpper = new Set(
+    lib.map((r) => String((r && (r.name || r.routeName)) || "").trim().toUpperCase()).filter(Boolean)
+  );
+  const createdNames = [];
+
+  targets.forEach((srcRt, idxOffset) => {
+    const srcWps = Array.isArray(srcRt.waypoints) ? srcRt.waypoints : [];
+    const clonedWps = srcWps.map((w) => Object.assign({}, w)).reverse();
+    clonedWps.forEach((wp, wIdx) => {
+      if (!wp) return;
+      const tmpXtd = wp.portsideXTD;
+      wp.portsideXTD = wp.starboardXTD;
+      wp.starboardXTD = tmpXtd;
+      if (wIdx === 0) wp.turnRadius = 0.000;
+    });
+
+    const revName = buildReversedRouteName(srcRt.name || srcRt.routeName || "Route", existingNamesUpper);
+    const revRoute = {
+      id: "route_" + Date.now().toString(36) + "_" + idxOffset + "_" + Math.random().toString(36).slice(2, 6),
+      name: revName,
+      waypoints: clonedWps,
+      legs: [],
+      totalDistanceNM: Number(srcRt.totalDistanceNM) || 0,
+      totalSteamingHours: Number(srcRt.totalSteamingHours) || 0,
+      steamingDays: srcRt.steamingDays || "0.0",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      _isFreshFileUpload: true
+    };
+    if (typeof saveRouteToLibrary === "function") {
+      saveRouteToLibrary(revRoute);
+    }
+    createdNames.push(revName);
+  });
+
+  window._sidebarCheckedRouteIds.clear();
+  _renderSidebarRoutesListBase();
+  syncChartRoutesDisplay();
+
+  if (typeof showSetSailToast === "function" && createdNames.length) {
+    showSetSailToast(
+      createdNames.length === 1
+        ? ('Reversed copy created: "' + createdNames[0] + '"')
+        : (createdNames.length + " reversed route copies created"),
+      "success"
+    );
+  }
+}
+window.createReversedRoutesFromChecked = createReversedRoutesFromChecked;
+
+function deleteCheckedRoutesFromSidebar() {
+  let lib = [];
+  try { lib = getSavedRoutesLibrary() || []; } catch (e) { lib = []; }
+  const checkedIds = Array.from(window._sidebarCheckedRouteIds || []);
+  const targets = lib.filter((r) => r && (checkedIds.indexOf(r.id) !== -1 || checkedIds.indexOf(r.name) !== -1));
+
+  if (!targets.length) {
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast(lib.length ? "Tick a route checkbox on the right to delete" : "No routes to delete", "info");
+    }
+    return;
+  }
+
+  const curId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
   targets.forEach((target) => {
     const tid = target.id || target.name;
     window._sidebarCheckedRouteIds.delete(tid);
-    bin = bin.filter((r) => r && r.id !== tid && r.name !== target.name);
-    const archived = Object.assign({}, target, {
-      id: target.id || ("route_" + Date.now().toString(36)),
-      deletedAt: new Date().toISOString()
-    });
-    bin.unshift(archived);
+    if (curId && (target.id === curId || target.name === curId)) {
+      persistCurrentRouteSnapshot(null);
+      if (typeof setDrActiveRouteId === "function") {
+        setDrActiveRouteId(null, { wipeOrphan: true, keepSidebarView: true });
+      }
+    }
     if (typeof deleteRouteFromLibrary === "function") {
       deleteRouteFromLibrary(tid);
     }
   });
-  writeDeletedRoutesBin(bin);
-  clearChartRouteDisplayOnly();
+
+  syncChartRoutesDisplay({ force: true });
   _renderSidebarRoutesListBase();
-  if (typeof showSetSailToast === "function") {
-    showSetSailToast(targets.length > 1 ? (targets.length + " routes moved to Bin") : "Route moved to Bin", "info");
+  if (typeof showSetSailToast === "function" && targets.length > 1) {
+    showSetSailToast(targets.length + " routes deleted", "info");
   }
 }
-window.moveRouteToBin = moveRouteToBin;
+window.deleteCheckedRoutesFromSidebar = deleteCheckedRoutesFromSidebar;
 
-function restoreRouteFromBin(routeId) {
-  const bin = getDeletedRoutesBin();
-  const idx = bin.findIndex((r) => r && (r.id === routeId || r.name === routeId));
-  if (idx === -1) return;
-  const [restored] = bin.splice(idx, 1);
-  delete restored.deletedAt;
-  writeDeletedRoutesBin(bin);
-  window._sidebarCheckedRouteIds.delete(routeId);
-  if (typeof saveRouteToLibrary === "function") {
-    saveRouteToLibrary(restored);
-  }
-  if (window._sidebarSelectedBinRouteId === routeId) {
-    window._sidebarSelectedBinRouteId = bin[0] ? (bin[0].id || bin[0].name) : null;
-  }
-  clearChartRouteDisplayOnly();
-  _renderSidebarRoutesListBase();
-  if (typeof showSetSailToast === "function") {
-    showSetSailToast("Route restored to Routes", "success");
-  }
-}
-window.restoreRouteFromBin = restoreRouteFromBin;
-
-function permanentlyDeleteRouteFromBin(routeIdsOrSingle) {
-  const bin = getDeletedRoutesBin();
-  if (!bin.length) {
-    if (typeof showSetSailToast === "function") showSetSailToast("Bin is already empty", "info");
-    return;
-  }
-  let ids = Array.isArray(routeIdsOrSingle)
-    ? routeIdsOrSingle.filter(Boolean)
-    : (routeIdsOrSingle ? [routeIdsOrSingle] : Array.from(window._sidebarCheckedRouteIds || []));
-  if (!ids.length && window._sidebarSelectedBinRouteId) {
-    ids = [window._sidebarSelectedBinRouteId];
-  }
-  if (!ids.length && bin.length === 1) {
-    ids = [bin[0].id || bin[0].name];
-  }
-  if (!ids.length) {
-    if (typeof showSetSailToast === "function") showSetSailToast("Select a route in Bin to delete permanently", "info");
-    return;
-  }
-  const idSet = new Set(ids);
-  const nextBin = bin.filter((r) => r && !idSet.has(r.id) && !idSet.has(r.name));
-  ids.forEach((id) => window._sidebarCheckedRouteIds.delete(id));
-  writeDeletedRoutesBin(nextBin);
-  window._sidebarSelectedBinRouteId = nextBin[0] ? (nextBin[0].id || nextBin[0].name) : null;
-  _renderSidebarRoutesListBase();
-  if (typeof showSetSailToast === "function") {
-    showSetSailToast("Permanently deleted from Bin", "info");
-  }
-}
-window.permanentlyDeleteRouteFromBin = permanentlyDeleteRouteFromBin;
-
-function _renderSidebarRoutesListBase() {
+function _renderSidebarRoutesListBase(opts) {
+  opts = opts || {};
   const listContainer = document.getElementById("ntmItemsScroll");
   if (!listContainer) return;
 
-  const tabMode = window._sidebarRoutesActiveTab === "bin" ? "bin" : "routes";
   const tabRoutesBtn = document.getElementById("tabSidebarRoutes");
-  const tabBinBtn = document.getElementById("tabSidebarBin");
-  const btnDeleteHdr = document.getElementById("btnSidebarRouteDelete");
   if (tabRoutesBtn) {
-    tabRoutesBtn.classList.toggle("active", tabMode === "routes");
-    tabRoutesBtn.setAttribute("aria-selected", tabMode === "routes" ? "true" : "false");
-  }
-  if (tabBinBtn) {
-    tabBinBtn.classList.toggle("active", tabMode === "bin");
-    tabBinBtn.setAttribute("aria-selected", tabMode === "bin" ? "true" : "false");
-  }
-  if (btnDeleteHdr) {
-    btnDeleteHdr.title = tabMode === "bin"
-      ? "Permanently delete selected route(s) from Bin"
-      : "Delete checked route(s) (move to Bin)";
+    tabRoutesBtn.classList.add("active");
+    tabRoutesBtn.setAttribute("aria-selected", "true");
   }
 
-  // In list view, no route is selected -> ensure no route is drawn on the chart
-  if (!window._sidebarNavtorState || window._sidebarNavtorState.view === "list") {
-    clearChartRouteDisplayOnly();
+  // In list view, keep Current route visible on chart (and clear non-Current temporary selection)
+  if (!opts.skipChartSync && (!window._sidebarNavtorState || window._sidebarNavtorState.view === "list")) {
+    syncChartRoutesDisplay();
   }
 
   let items = [];
-  if (tabMode === "routes") {
-    try { items = (getSavedRoutesLibrary() || []).slice(); } catch (e) { items = []; }
-  } else {
-    items = getDeletedRoutesBin();
-  }
+  try { items = (getSavedRoutesLibrary() || []).slice(); } catch (e) { items = []; }
 
   const searchInput = document.getElementById("ntmSearchInput");
   const q = searchInput && searchInput.value ? String(searchInput.value).trim().toLowerCase() : "";
@@ -46559,30 +46831,18 @@ function _renderSidebarRoutesListBase() {
   }
 
   if (!items.length) {
-    if (tabMode === "bin") {
-      listContainer.innerHTML = `
-        <div style="padding:2.2rem 1rem;text-align:center;color:var(--muted);font-size:0.78rem;">
-          Bin is empty.<br>
-          <span style="font-size:0.7rem;opacity:0.75;">Deleted routes will appear here.</span>
-        </div>
-      `;
-    } else {
-      listContainer.innerHTML = `
-        <div style="padding:2.2rem 1rem;text-align:center;color:var(--muted);font-size:0.78rem;">
-          ${q ? "No routes match your search." : "No routes loaded yet."}<br>
-          <span style="font-size:0.7rem;opacity:0.75;">Use <b>Import</b> or <b>New</b> above to add a route.</span>
-        </div>
-      `;
-    }
+    listContainer.innerHTML = `
+      <div style="padding:2.2rem 1rem;text-align:center;color:var(--muted);font-size:0.78rem;">
+        ${q ? "No routes match your search." : "No routes loaded yet."}<br>
+        <span style="font-size:0.7rem;opacity:0.75;">Use <b>Import</b> or <b>New</b> above to add a route.</span>
+      </div>
+    `;
     return;
   }
 
   const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  const chevronSvg = `
-    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <polyline points="9 18 15 12 9 6"></polyline>
-    </svg>
-  `;
+  const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+  const flagSvg = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M5 3v18h2v-7h11l-2-4 2-4H7V3H5z"/></svg>`;
 
   listContainer.innerHTML = items.map((rt) => {
     const rawId = String(rt.id || rt.name || "");
@@ -46591,22 +46851,22 @@ function _renderSidebarRoutesListBase() {
     const title = rawName ? esc(rawName) : (typeof formatVesselRouteOdLabel === "function" ? formatVesselRouteOdLabel(rt) : "Route");
     const distFormatted = computeRouteDistanceNmFormatted(rt);
     const isChecked = window._sidebarCheckedRouteIds && window._sidebarCheckedRouteIds.has(rawId);
-    const isBinSelected = tabMode === "bin" && Boolean(window._sidebarSelectedBinRouteId && (window._sidebarSelectedBinRouteId === rt.id || window._sidebarSelectedBinRouteId === rt.name));
+    const isCurrent = Boolean(drId && ((rt.id && rt.id === drId) || (rt.name && rt.name === drId)));
 
-    const rightControls = tabMode === "bin"
-      ? `<button type="button" class="ntm-user-route-restore-btn" data-bin-restore="${rid}" title="Restore route to Routes">Restore</button>`
-      : `<span class="ntm-user-route-chevron">${chevronSvg}</span>`;
+    const leftSlotHtml = isCurrent
+      ? `<span class="ntm-user-route-left-flag is-current" title="Current route (always visible on chart)">${flagSvg}</span>`
+      : `<span class="ntm-user-route-left-flag is-empty" aria-hidden="true"></span>`;
 
     return `
-      <div class="ntm-user-route-card ${(isChecked || isBinSelected) ? "is-checked-for-del" : ""}" data-user-route-card="${rid}" data-route-tab-mode="${tabMode}">
-        <label class="ntm-user-route-chk-wrap" title="Select route for Delete">
-          <input type="checkbox" class="ntm-user-route-chk" data-route-chk="${rid}" ${isChecked ? "checked" : ""} />
-        </label>
+      <div class="ntm-user-route-card ${isCurrent ? "is-current-route" : ""} ${isChecked ? "is-checked-for-action" : ""}" data-user-route-card="${rid}">
+        ${leftSlotHtml}
         <div class="ntm-user-route-info">
           <div class="ntm-user-route-title" title="${title}">${title}</div>
           <div class="ntm-user-route-dist">Distance: ${distFormatted}NM</div>
         </div>
-        ${rightControls}
+        <label class="ntm-user-route-chk-wrap" title="Select route for Reverse or Delete">
+          <input type="checkbox" class="ntm-user-route-chk" data-route-chk="${rid}" ${isChecked ? "checked" : ""} />
+        </label>
       </div>
     `;
   }).join("");
@@ -46625,30 +46885,13 @@ function _renderSidebarRoutesListBase() {
       if (chk.checked) window._sidebarCheckedRouteIds.add(id);
       else window._sidebarCheckedRouteIds.delete(id);
       const card = chk.closest(".ntm-user-route-card");
-      if (card) card.classList.toggle("is-checked-for-del", chk.checked);
-    });
-  });
-
-  listContainer.querySelectorAll("[data-bin-restore]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const id = btn.getAttribute("data-bin-restore");
-      if (id) restoreRouteFromBin(id);
+      if (card) card.classList.toggle("is-checked-for-action", chk.checked);
     });
   });
 
   listContainer.querySelectorAll("[data-user-route-card]").forEach((card) => {
     card.addEventListener("click", () => {
       const id = card.getAttribute("data-user-route-card");
-      const mode = card.getAttribute("data-route-tab-mode");
-      if (mode === "bin") {
-        window._sidebarSelectedBinRouteId = id;
-        if (window._sidebarCheckedRouteIds.has(id)) window._sidebarCheckedRouteIds.delete(id);
-        else window._sidebarCheckedRouteIds.add(id);
-        _renderSidebarRoutesListBase();
-        return;
-      }
       if (!id) return;
       if (typeof window.openNavtorRouteInSidebar === "function") {
         window.openNavtorRouteInSidebar(id, { fitChart: true });
@@ -46659,9 +46902,11 @@ function _renderSidebarRoutesListBase() {
 
 window._origRenderSidebarUserRoutesList = _renderSidebarRoutesListBase;
 window.renderSidebarUserRoutesList = function () {
-  if (window._sidebarNavtorState && window._sidebarNavtorState.view !== "list" && typeof window.renderNavtorSidebar === "function") {
-    window.renderNavtorSidebar();
-    return;
+  if (window._sidebarNavtorState && window._sidebarNavtorState.view !== "list") {
+    if (typeof window.syncNavtorHeaderCurrentBadge === "function") {
+      try { window.syncNavtorHeaderCurrentBadge(); } catch (eB) {}
+    }
+    return _renderSidebarRoutesListBase({ skipChartSync: true });
   }
   return _renderSidebarRoutesListBase();
 };
@@ -46670,8 +46915,8 @@ function initSidebarUserRoutesPanel() {
   if (window._sidebarUserRoutesPanelBound) return;
   window._sidebarUserRoutesPanelBound = true;
 
-  const sidebar = document.getElementById("ntmSidebar");
   const btnDelete = document.getElementById("btnSidebarRouteDelete");
+  const btnReverse = document.getElementById("btnSidebarRouteReverse");
   const btnImport = document.getElementById("btnSidebarRouteImport");
   const btnNew = document.getElementById("btnSidebarRouteNew");
 
@@ -46688,7 +46933,6 @@ function initSidebarUserRoutesPanel() {
     });
   }
 
-  // "New" directly creates a manual route (no upload submenu — "Import" handles file uploads)
   if (btnNew) {
     btnNew.addEventListener("click", (e) => {
       e.preventDefault();
@@ -46699,44 +46943,19 @@ function initSidebarUserRoutesPanel() {
     });
   }
 
+  if (btnReverse) {
+    btnReverse.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      createReversedRoutesFromChecked();
+    });
+  }
+
   if (btnDelete) {
     btnDelete.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (window._sidebarRoutesActiveTab === "bin") {
-        permanentlyDeleteRouteFromBin();
-      } else {
-        moveRouteToBin();
-      }
-    });
-  }
-
-  const switchRoutesSubtab = (targetTab) => {
-    const mode = targetTab === "bin" ? "bin" : "routes";
-    window._sidebarRoutesActiveTab = mode;
-    window._sidebarCheckedRouteIds.clear();
-    if (window._sidebarNavtorState) {
-      window._sidebarNavtorState.view = "list";
-      window._sidebarNavtorState.routeId = null;
-    }
-    if (mode === "bin") {
-      const bin = getDeletedRoutesBin();
-      if (!window._sidebarSelectedBinRouteId && bin[0]) {
-        window._sidebarSelectedBinRouteId = bin[0].id || bin[0].name;
-      }
-    }
-    clearChartRouteDisplayOnly();
-    _renderSidebarRoutesListBase();
-  };
-
-  // Delegated + direct click handling so Routes & Bin tabs are always responsive
-  if (sidebar) {
-    sidebar.addEventListener("click", (e) => {
-      const tabBtn = e.target && e.target.closest && e.target.closest("[data-routes-tab]");
-      if (!tabBtn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      switchRoutesSubtab(tabBtn.getAttribute("data-routes-tab"));
+      deleteCheckedRoutesFromSidebar();
     });
   }
 
@@ -46746,7 +46965,7 @@ function initSidebarUserRoutesPanel() {
     });
   });
 
-  clearChartRouteDisplayOnly();
+  syncChartRoutesDisplay();
   _renderSidebarRoutesListBase();
 }
 window.initSidebarUserRoutesPanel = initSidebarUserRoutesPanel;
@@ -46758,11 +46977,12 @@ if (document.readyState === "loading") {
 }
 
 /* ============================================================================
-   v5.260: NAVTOR-Style Route & Waypoint Sidebar Workflow (#ntmSidebar)
+   v5.265: NAVTOR-Style Route & Waypoint Sidebar Workflow (#ntmSidebar)
    Screens:
-     1) "list"     — Routes / Bin list (Photo 1)
-     2) "route"    — Route Detail: Empty (Photo 2) & With Waypoints (Photo 3)
-     3) "waypoint" — Edit Waypoint settings (Photo 4)
+     1) "list"     — Routes list (Left Current Flag, Right Checkbox, Reverse/Delete/Import/New)
+     2) "route"    — Pinned Header (Editable Name + Edit / Mark as Current / Passage plan +
+                     Distance & Duration) + Planning / Monitoring (coming soon) Tabs
+     3) "waypoint" — Edit Waypoint settings
    ============================================================================ */
 (function initNavtorSidebarWorkflow() {
   const NAVTOR_PASSAGE_DEFAULTS = {
@@ -46816,14 +47036,17 @@ if (document.readyState === "loading") {
   window._sidebarNavtorState = window._sidebarNavtorState || {
     view: "list",          // "list" | "route" | "waypoint"
     routeId: null,
+    detailTab: "planning", // "planning" | "monitoring"
     wptIdx: 0,
     wptSearch: "",
     addingWpOnChart: false,
     destPickerOpen: false,
     destQuery: "",
-    newPpMenuOpen: false,
-    renamingRoute: false
+    ppMenuOpen: false
   };
+  if (!window._sidebarNavtorState.detailTab) {
+    window._sidebarNavtorState.detailTab = "planning";
+  }
 
   function escHtml(s) {
     return String(s == null ? "" : s)
@@ -46870,7 +47093,6 @@ if (document.readyState === "loading") {
     if (/[SW]/.test(s)) sign = -1;
     if (/^\s*-/.test(s)) sign = -1;
 
-    // Match DD°MM.MMM'N or DD MM SS N or DD-MM.MMMN
     const cleaned = s.replace(/[NSEW]/g, "").replace(/[°'′"″:\-]/g, " ").trim();
     const parts = cleaned.split(/\s+/).filter(Boolean);
     if (parts.length >= 2) {
@@ -46947,12 +47169,11 @@ if (document.readyState === "loading") {
     if (String(wpA.sail || "RL").toUpperCase() === "GC" && typeof calculateHaversineDistanceNM === "function") {
       return calculateHaversineDistanceNM(la1, lo1, la2, lo2);
     }
-    // Rhumb-line (loxodrome) distance in NM
     const toRad = Math.PI / 180;
     const phi1 = Math.max(-85, Math.min(85, la1)) * toRad;
     const phi2 = Math.max(-85, Math.min(85, la2)) * toRad;
     const dPhi = phi2 - phi1;
-    let dLon = (((lo2 - lo1) + 540) % 360 - 180) * toRad;
+    const dLon = (((lo2 - lo1) + 540) % 360 - 180) * toRad;
     const dPsi = Math.log(Math.tan(Math.PI / 4 + phi2 / 2) / Math.tan(Math.PI / 4 + phi1 / 2));
     const q = Math.abs(dPsi) > 1e-10 ? dPhi / dPsi : Math.cos(phi1);
     const distRad = Math.sqrt(dPhi * dPhi + q * q * dLon * dLon);
@@ -47036,6 +47257,19 @@ if (document.readyState === "loading") {
     return null;
   }
 
+  window.syncNavtorHeaderCurrentBadge = function () {
+    const btnCur = document.getElementById("btnNvHdrCurrent");
+    if (!btnCur) return;
+    const rt = getActiveNavtorRoute();
+    const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+    const isCur = Boolean(rt && drId && ((rt.id && rt.id === drId) || (rt.name && rt.name === drId)));
+    btnCur.classList.toggle("is-current", isCur);
+    btnCur.setAttribute("aria-pressed", isCur ? "true" : "false");
+    btnCur.title = isCur ? "Current route (click to unmark)" : "Mark as Current";
+    const svg = btnCur.querySelector("svg");
+    if (svg) svg.setAttribute("fill", isCur ? "currentColor" : "none");
+  };
+
   function persistCurrentNavtorRoute(rerenderMap) {
     const rt = getActiveNavtorRoute();
     if (!rt) return;
@@ -47044,9 +47278,12 @@ if (document.readyState === "loading") {
     if (typeof saveRouteToLibrary === "function") {
       saveRouteToLibrary(rt);
     }
-    if (rerenderMap && typeof leafletMap !== "undefined" && leafletMap && typeof renderRouteOnMap === "function") {
-      window._setsailLastRouteRenderSig = "";
-      renderRouteOnMap(rt, false);
+    const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+    if (drId && (rt.id === drId || rt.name === drId)) {
+      persistCurrentRouteSnapshot(rt);
+    }
+    if (rerenderMap) {
+      syncChartRoutesDisplay({ force: true });
     }
   }
 
@@ -47113,11 +47350,6 @@ if (document.readyState === "loading") {
     });
     if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
     if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
-    const routeTab = document.querySelector('.excel-tab[data-overlay="route"]');
-    if (routeTab) {
-      routeTab.classList.add("active");
-      routeTab.setAttribute("aria-pressed", "true");
-    }
     persistCurrentNavtorRoute(true);
     renderNavtorSidebar();
     if (typeof showSetSailToast === "function") {
@@ -47126,7 +47358,6 @@ if (document.readyState === "loading") {
     return true;
   };
 
-  // Esc exits chart waypoint placement mode
   document.addEventListener("keydown", (ev) => {
     if (ev.key === "Escape" && window._sidebarChartAddWpMode) {
       setChartAddWpMode(false);
@@ -47182,34 +47413,6 @@ if (document.readyState === "loading") {
     }
   }
 
-  function reverseCurrentRoute(rt) {
-    if (!rt || !Array.isArray(rt.waypoints) || rt.waypoints.length < 2) {
-      if (typeof showSetSailToast === "function") {
-        showSetSailToast("Need at least 2 waypoints to reverse route.", "info");
-      }
-      return;
-    }
-    rt.waypoints.reverse();
-    rt.waypoints.forEach((wp) => {
-      if (!wp) return;
-      const tmp = wp.portsideXTD;
-      wp.portsideXTD = wp.starboardXTD;
-      wp.starboardXTD = tmp;
-    });
-    // Swap "A TO B" title automatically if formatted with " TO "
-    if (rt.name && /\s+TO\s+/i.test(rt.name)) {
-      const parts = rt.name.split(/\s+TO\s+/i);
-      if (parts.length === 2) {
-        rt.name = parts[1].trim() + " TO " + parts[0].trim();
-      }
-    }
-    persistCurrentNavtorRoute(true);
-    renderNavtorSidebar();
-    if (typeof showSetSailToast === "function") {
-      showSetSailToast("Route reversed", "success");
-    }
-  }
-
   function insertWaypointAtChartCenter(rt, asDestination) {
     if (!rt) return;
     if (!Array.isArray(rt.waypoints)) rt.waypoints = [];
@@ -47258,263 +47461,331 @@ if (document.readyState === "loading") {
     const distLabel = formatNavtorHeaderDist(metrics.totalDistNm);
     const durLabel = formatNavtorDuration(metrics.totalHours);
     const q = String(st.wptSearch || "").trim().toLowerCase();
+    const activeTab = st.detailTab === "monitoring" ? "monitoring" : "planning";
 
-    let wptListHtml = "";
-    if (wps.length > 0) {
-      const rows = [];
-      for (let i = 0; i < wps.length; i++) {
-        const wp = wps[i];
-        const wpCode = "WP" + i;
-        const customName = isGenericAutoWpName(wp.name, i) ? "" : String(wp.name || "").trim();
-        const pType = wp.passageType || "Coastal";
-        const spdStr = (Number(wp.speedKnots) || 12.0).toFixed(1) + "kn";
-        const legDistStr = formatNavtorLegDist(metrics.legDists[i] || 0);
-        const subLine = "Planned speed: " + spdStr + " / Dist: " + legDistStr;
+    const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+    const isCurrent = Boolean(drId && ((rt.id && rt.id === drId) || (rt.name && rt.name === drId)));
 
-        if (q) {
-          const hay = (wpCode + " " + customName + " " + pType + " " + (wp.passageEvent || "") + " " + (wp.remarks || "")).toLowerCase();
-          if (hay.indexOf(q) === -1) continue;
+    const ppDrawerHtml = st.ppMenuOpen
+      ? '<div class="ntm-nv-subdrawer">' +
+          '<button type="button" class="ntm-nv-subbtn" id="btnNvOpenSetRoute">Passage Plan</button>' +
+          '<button type="button" class="ntm-nv-subbtn" id="btnNvExportRtz">Export .rtz</button>' +
+          '<button type="button" class="ntm-nv-subbtn" id="btnNvCheckSafety">Check Route</button>' +
+        '</div>'
+      : "";
+
+    let tabBodyHtml = "";
+    if (activeTab === "monitoring") {
+      tabBodyHtml =
+        '<div class="ntm-nv-monitoring-soon">' +
+          '<div class="ntm-nv-monitoring-icon" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+              '<circle cx="12" cy="12" r="9"></circle>' +
+              '<polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>' +
+            '</svg>' +
+          '</div>' +
+          '<div class="ntm-nv-monitoring-title">Monitoring — Coming soon</div>' +
+          '<div class="ntm-nv-monitoring-desc">Live XTD alerts, wheel-over points, dynamic ETA &amp; track monitoring will be available here.</div>' +
+        '</div>';
+    } else {
+      let wptListHtml = "";
+      if (wps.length > 0) {
+        const rows = [];
+        for (let i = 0; i < wps.length; i++) {
+          const wp = wps[i];
+          const wpCode = "WP" + i;
+          const customName = isGenericAutoWpName(wp.name, i) ? "" : String(wp.name || "").trim();
+          const pType = wp.passageType || "Coastal";
+          const spdStr = (Number(wp.speedKnots) || 12.0).toFixed(1) + "kn";
+          const legDistStr = formatNavtorLegDist(metrics.legDists[i] || 0);
+          const subLine = "Planned speed: " + spdStr + " / Dist: " + legDistStr;
+
+          if (q) {
+            const hay = (wpCode + " " + customName + " " + pType + " " + (wp.passageEvent || "") + " " + (wp.remarks || "")).toLowerCase();
+            if (hay.indexOf(q) === -1) continue;
+          }
+
+          const hasEvent = wp.passageEvent && wp.passageEvent !== "Undefined";
+          const isSolidEvent = hasEvent && /begin|end|pilot|berth/i.test(wp.passageEvent);
+          const flagHtml = hasEvent
+            ? (isSolidEvent
+                ? '<span class="ntm-nv-wp-flag" title="' + escHtml(wp.passageEvent) + '"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M5 3v18h2v-7h11l-2-4 2-4H7V3H5z"/></svg></span>'
+                : '<span class="ntm-nv-wp-flag" title="' + escHtml(wp.passageEvent) + '"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h12l-2 4 2 4H5"/></svg></span>')
+            : "";
+
+          rows.push(
+            '<div class="ntm-nv-wp-row" data-nv-wp-idx="' + i + '">' +
+              '<div class="ntm-nv-wp-code">' + wpCode + '</div>' +
+              '<div class="ntm-nv-wp-mid">' +
+                (customName ? '<div class="ntm-nv-wp-name">' + escHtml(customName) + '</div>' : '') +
+                '<div class="ntm-nv-wp-ptype">' + escHtml(pType) + '</div>' +
+                '<div class="ntm-nv-wp-stats">' + escHtml(subLine) + '</div>' +
+              '</div>' +
+              '<div class="ntm-nv-wp-right">' +
+                flagHtml +
+                '<span class="ntm-nv-wp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>' +
+              '</div>' +
+            '</div>'
+          );
         }
+        wptListHtml =
+          '<div class="ntm-nv-wp-scroll" id="ntmNavtorWpScroll">' +
+            (rows.length ? rows.join("") : '<div class="ntm-nv-empty-filter">No waypoints match "' + escHtml(st.wptSearch) + '"</div>') +
+          '</div>';
+      }
 
-        const hasEvent = wp.passageEvent && wp.passageEvent !== "Undefined";
-        const isSolidEvent = hasEvent && /begin|end|pilot|berth/i.test(wp.passageEvent);
-        const flagHtml = hasEvent
-          ? (isSolidEvent
-              ? '<span class="ntm-nv-wp-flag" title="' + escHtml(wp.passageEvent) + '"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M5 3v18h2v-7h11l-2-4 2-4H7V3H5z"/></svg></span>'
-              : '<span class="ntm-nv-wp-flag" title="' + escHtml(wp.passageEvent) + '"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h12l-2 4 2 4H5"/></svg></span>')
-          : "";
-
-        rows.push(
-          '<div class="ntm-nv-wp-row" data-nv-wp-idx="' + i + '">' +
-            '<div class="ntm-nv-wp-code">' + wpCode + '</div>' +
-            '<div class="ntm-nv-wp-mid">' +
-              (customName ? '<div class="ntm-nv-wp-name">' + escHtml(customName) + '</div>' : '') +
-              '<div class="ntm-nv-wp-ptype">' + escHtml(pType) + '</div>' +
-              '<div class="ntm-nv-wp-stats">' + escHtml(subLine) + '</div>' +
-            '</div>' +
-            '<div class="ntm-nv-wp-right">' +
-              flagHtml +
-              '<span class="ntm-nv-wp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>' +
+      const addWpHelperHtml = st.addingWpOnChart
+        ? '<div class="ntm-nv-helper-bar">' +
+            '<span>Click on chart to drop waypoints</span>' +
+            '<div class="ntm-nv-helper-btns">' +
+              '<button type="button" id="btnNvInsertCenterWp">+ At Center</button>' +
+              '<button type="button" id="btnNvStopChartWp" class="is-done">Done</button>' +
             '</div>' +
           '</div>'
-        );
+        : "";
+
+      let destPickerHtml = "";
+      if (st.destPickerOpen) {
+        const ports = Array.isArray(window.PORT_DEPTHS_DB) ? window.PORT_DEPTHS_DB : [];
+        const dq = String(st.destQuery || "").trim().toLowerCase();
+        const filteredPorts = ports.filter((p) => {
+          if (!p) return false;
+          if (!dq) return true;
+          return String(p.name || "").toLowerCase().indexOf(dq) !== -1 ||
+                 String(p.country || "").toLowerCase().indexOf(dq) !== -1 ||
+                 String(p.unlocode || "").toLowerCase().indexOf(dq) !== -1;
+        }).slice(0, 25);
+
+        destPickerHtml =
+          '<div class="ntm-nv-dest-picker">' +
+            '<div class="ntm-nv-dest-head">' +
+              '<input type="text" id="nvDestSearchInput" class="ntm-nv-dest-input" placeholder="Search port or UN/LOCODE..." value="' + escHtml(st.destQuery) + '" />' +
+              '<button type="button" id="btnNvDestAtCenter" class="ntm-nv-dest-mini" title="Add destination at current chart center">+ Center</button>' +
+              '<button type="button" id="btnNvDestClose" class="ntm-nv-dest-close" title="Close">×</button>' +
+            '</div>' +
+            '<div class="ntm-nv-dest-list">' +
+              (filteredPorts.length
+                ? filteredPorts.map((p) => {
+                    const pCoords = p.approachCoords || p.coords || [0, 0];
+                    return (
+                      '<button type="button" class="ntm-nv-dest-item" data-dest-lat="' + Number(pCoords[0]) + '" data-dest-lon="' + Number(pCoords[1]) + '" data-dest-name="' + escHtml(p.name) + '">' +
+                        '<span>' + escHtml(p.name) + (p.country ? ' <small>(' + escHtml(p.country) + ')</small>' : '') + '</span>' +
+                        '<small>' + escHtml(p.unlocode || '') + '</small>' +
+                      '</button>'
+                    );
+                  }).join("")
+                : '<div class="ntm-nv-empty-filter">No matching ports. Use "+ Center" or Add new waypoint.</div>') +
+            '</div>' +
+          '</div>';
       }
-      wptListHtml =
-        '<div class="ntm-nv-wp-scroll" id="ntmNavtorWpScroll">' +
-          (rows.length ? rows.join("") : '<div class="ntm-nv-empty-filter">No waypoints match "' + escHtml(st.wptSearch) + '"</div>') +
+
+      tabBodyHtml =
+        '<div class="ntm-nv-body">' +
+          addWpHelperHtml +
+          destPickerHtml +
+          wptListHtml +
+          '<div class="ntm-nv-dual-actions">' +
+            '<button type="button" class="ntm-nv-dual-btn ' + (st.addingWpOnChart ? 'is-active' : '') + '" id="btnNvAddWaypoint">Add new waypoint</button>' +
+            '<button type="button" class="ntm-nv-dual-btn ' + (st.destPickerOpen ? 'is-active' : '') + '" id="btnNvAddDestination">Add destination</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ntm-nv-bottom-search">' +
+          '<input type="text" id="nvWpSearchInput" class="ntm-nv-search-box" placeholder="Search waypoint" value="' + escHtml(st.wptSearch) + '" />' +
+          (st.wptSearch ? '<button type="button" id="btnNvClearWpSearch" class="ntm-nv-search-clear" title="Clear">×</button>' : '') +
         '</div>';
     }
-
-    // Optional inline New PP drawer (RTZ / CSV / SetRoute)
-    const newPpHtml = st.newPpMenuOpen
-      ? '<div class="ntm-nv-subdrawer">' +
-          '<button type="button" class="ntm-nv-subbtn" id="btnNvExportRtz">Export ECDIS (.rtz)</button>' +
-          '<button type="button" class="ntm-nv-subbtn" id="btnNvOpenSetRoute">Passage Plan Table</button>' +
-        '</div>'
-      : "";
-
-    // Optional active chart-click placement helper bar
-    const addWpHelperHtml = st.addingWpOnChart
-      ? '<div class="ntm-nv-helper-bar">' +
-          '<span>Click on chart to drop waypoints</span>' +
-          '<div class="ntm-nv-helper-btns">' +
-            '<button type="button" id="btnNvInsertCenterWp">+ At Center</button>' +
-            '<button type="button" id="btnNvStopChartWp" class="is-done">Done</button>' +
-          '</div>' +
-        '</div>'
-      : "";
-
-    // Optional destination port picker
-    let destPickerHtml = "";
-    if (st.destPickerOpen) {
-      const ports = Array.isArray(window.PORT_DEPTHS_DB) ? window.PORT_DEPTHS_DB : [];
-      const dq = String(st.destQuery || "").trim().toLowerCase();
-      const filteredPorts = ports.filter((p) => {
-        if (!p) return false;
-        if (!dq) return true;
-        return String(p.name || "").toLowerCase().indexOf(dq) !== -1 ||
-               String(p.country || "").toLowerCase().indexOf(dq) !== -1 ||
-               String(p.unlocode || "").toLowerCase().indexOf(dq) !== -1;
-      }).slice(0, 25);
-
-      destPickerHtml =
-        '<div class="ntm-nv-dest-picker">' +
-          '<div class="ntm-nv-dest-head">' +
-            '<input type="text" id="nvDestSearchInput" class="ntm-nv-dest-input" placeholder="Search port or UN/LOCODE..." value="' + escHtml(st.destQuery) + '" />' +
-            '<button type="button" id="btnNvDestAtCenter" class="ntm-nv-dest-mini" title="Add destination at current chart center">+ Center</button>' +
-            '<button type="button" id="btnNvDestClose" class="ntm-nv-dest-close" title="Close">×</button>' +
-          '</div>' +
-          '<div class="ntm-nv-dest-list">' +
-            (filteredPorts.length
-              ? filteredPorts.map((p, idx) => {
-                  const pCoords = p.approachCoords || p.coords || [0, 0];
-                  return (
-                    '<button type="button" class="ntm-nv-dest-item" data-dest-lat="' + Number(pCoords[0]) + '" data-dest-lon="' + Number(pCoords[1]) + '" data-dest-name="' + escHtml(p.name) + '">' +
-                      '<span>' + escHtml(p.name) + (p.country ? ' <small>(' + escHtml(p.country) + ')</small>' : '') + '</span>' +
-                      '<small>' + escHtml(p.unlocode || '') + '</small>' +
-                    '</button>'
-                  );
-                }).join("")
-              : '<div class="ntm-nv-empty-filter">No matching ports. Use "+ Center" or Add new waypoint.</div>') +
-          '</div>' +
-        '</div>';
-    }
-
-    const titleMarkup = st.renamingRoute
-      ? '<div class="ntm-nv-rename-row">' +
-          '<input type="text" id="nvRouteRenameInput" class="ntm-nv-rename-input" value="' + escHtml(routeName) + '" />' +
-          '<button type="button" id="btnNvRenameOk" class="ntm-nv-rename-btn">OK</button>' +
-        '</div>'
-      : '<div class="ntm-nv-summary-title" id="nvRouteSummaryTitle" title="Click to rename route">' + escHtml(routeName) + '</div>';
 
     routePanel.innerHTML =
-      '<div class="ntm-list-header ntm-routes-header ntm-nv-topbar">' +
-        '<button type="button" class="ntm-hdr-back-btn" id="btnNvBackToRoutes" title="Back to Routes list" aria-label="Back to Routes">' +
-          '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>' +
-        '</button>' +
-        '<div class="ntm-hdr-actions ntm-nv-actions">' +
-          '<button type="button" class="ntm-hdr-action-btn" id="btnNvCheck" title="Check route against NtM, TSS &amp; weather">' +
-            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' +
-            '<span class="ntm-hdr-action-lbl">Check</span>' +
+      '<div class="ntm-nv-pinned-header">' +
+        '<div class="ntm-nv-hdr-top">' +
+          '<button type="button" class="ntm-hdr-back-btn ntm-nv-back-compact" id="btnNvBackToRoutes" title="Back to Routes list" aria-label="Back to Routes">' +
+            '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>' +
           '</button>' +
-          '<button type="button" class="ntm-hdr-action-btn ' + (st.newPpMenuOpen ? 'is-open' : '') + '" id="btnNvNewPp" title="New Passage Plan / Export">' +
-            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg></span>' +
-            '<span class="ntm-hdr-action-lbl ntm-nv-lbl-stack">New<br>PP</span>' +
-          '</button>' +
-          '<button type="button" class="ntm-hdr-action-btn" id="btnNvReverse" title="Reverse route direction">' +
-            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 2 21 6 17 10"/><line x1="3" y1="6" x2="21" y2="6"/><polyline points="7 22 3 18 7 14"/><line x1="21" y1="18" x2="3" y2="18"/></svg></span>' +
-            '<span class="ntm-hdr-action-lbl">Reverse</span>' +
-          '</button>' +
-          '<button type="button" class="ntm-hdr-action-btn" id="btnNvSave" title="Save route">' +
-            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg></span>' +
-            '<span class="ntm-hdr-action-lbl">Save</span>' +
-          '</button>' +
-          '<button type="button" class="ntm-hdr-action-btn" id="btnNvHelp" title="Route panel help">' +
-            '<span class="ntm-hdr-action-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></span>' +
-            '<span class="ntm-hdr-action-lbl">Help</span>' +
-          '</button>' +
-        '</div>' +
-      '</div>' +
-      newPpHtml +
-      '<div class="ntm-nv-body">' +
-        '<div class="ntm-nv-summary-card">' +
-          titleMarkup +
-          '<div class="ntm-nv-summary-metrics">' +
-            '<span>Distance: ' + escHtml(distLabel) + '</span>' +
-            '<span>Duration: ' + escHtml(durLabel) + '</span>' +
+          '<input type="text" id="nvRouteNameInput" class="ntm-nv-route-name-input" value="' + escHtml(routeName) + '" aria-label="Route name" title="Route name (editable)" />' +
+          '<div class="ntm-nv-hdr-icons">' +
+            '<button type="button" class="ntm-nv-hdr-icon-btn" id="btnNvHdrEdit" title="Edit">' +
+              '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
+            '</button>' +
+            '<button type="button" class="ntm-nv-hdr-icon-btn ' + (isCurrent ? 'is-current' : '') + '" id="btnNvHdrCurrent" aria-pressed="' + (isCurrent ? 'true' : 'false') + '" title="' + (isCurrent ? 'Current route (click to unmark)' : 'Mark as Current') + '">' +
+              '<svg viewBox="0 0 24 24" width="16" height="16" fill="' + (isCurrent ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h12l-2 4 2 4H5"/></svg>' +
+            '</button>' +
+            '<button type="button" class="ntm-nv-hdr-icon-btn ' + (st.ppMenuOpen ? 'is-open' : '') + '" id="btnNvHdrPassagePlan" title="Passage plan">' +
+              '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>' +
+            '</button>' +
           '</div>' +
         '</div>' +
-        addWpHelperHtml +
-        destPickerHtml +
-        wptListHtml +
-        '<div class="ntm-nv-dual-actions">' +
-          '<button type="button" class="ntm-nv-dual-btn ' + (st.addingWpOnChart ? 'is-active' : '') + '" id="btnNvAddWaypoint">Add new waypoint</button>' +
-          '<button type="button" class="ntm-nv-dual-btn ' + (st.destPickerOpen ? 'is-active' : '') + '" id="btnNvAddDestination">Add destination</button>' +
+        '<div class="ntm-nv-hdr-metrics">' +
+          '<span>Distance: <b>' + escHtml(distLabel) + '</b></span>' +
+          '<span>Duration: <b>' + escHtml(durLabel) + '</b></span>' +
         '</div>' +
       '</div>' +
-      '<div class="ntm-nv-bottom-search">' +
-        '<input type="text" id="nvWpSearchInput" class="ntm-nv-search-box" placeholder="Search waypoint" value="' + escHtml(st.wptSearch) + '" />' +
-        (st.wptSearch ? '<button type="button" id="btnNvClearWpSearch" class="ntm-nv-search-clear" title="Clear">×</button>' : '') +
-      '</div>';
+      ppDrawerHtml +
+      '<div class="ntm-nv-mode-tabs" role="tablist" aria-label="Route mode tabs">' +
+        '<button type="button" class="ntm-nv-mode-tab ' + (activeTab === "planning" ? "active" : "") + '" data-nv-mode-tab="planning" role="tab" aria-selected="' + (activeTab === "planning" ? "true" : "false") + '">Planning</button>' +
+        '<button type="button" class="ntm-nv-mode-tab ' + (activeTab === "monitoring" ? "active" : "") + '" data-nv-mode-tab="monitoring" role="tab" aria-selected="' + (activeTab === "monitoring" ? "true" : "false") + '">Monitoring <span class="ntm-nv-soon-pill">coming soon</span></button>' +
+      '</div>' +
+      tabBodyHtml;
 
-    // Wire Route Detail handlers
     const backBtn = routePanel.querySelector("#btnNvBackToRoutes");
     if (backBtn) {
       backBtn.onclick = () => {
+        const nameInpNow = routePanel.querySelector("#nvRouteNameInput");
+        if (nameInpNow) {
+          const nv = nameInpNow.value.trim();
+          if (nv && nv !== rt.name) {
+            rt.name = nv;
+            persistCurrentNavtorRoute(false);
+          }
+        }
         setChartAddWpMode(false);
         st.destPickerOpen = false;
-        st.newPpMenuOpen = false;
-        st.renamingRoute = false;
+        st.ppMenuOpen = false;
         st.routeId = null;
         st.view = "list";
-        if (typeof window.clearChartRouteDisplayOnly === "function") {
-          window.clearChartRouteDisplayOnly();
+        syncChartRoutesDisplay({ force: true });
+        renderNavtorSidebar();
+      };
+    }
+
+    const nameInp = routePanel.querySelector("#nvRouteNameInput");
+    const commitRouteName = () => {
+      if (!nameInp) return;
+      const nextName = nameInp.value.trim();
+      if (nextName && nextName !== rt.name) {
+        const curBefore = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+        const wasCur = Boolean(curBefore && (rt.id === curBefore || rt.name === curBefore));
+        rt.name = nextName;
+        if (!rt.id) {
+          rt.id = "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 6);
         }
-        renderNavtorSidebar();
-      };
-    }
-
-    const titleEl = routePanel.querySelector("#nvRouteSummaryTitle");
-    if (titleEl) {
-      titleEl.onclick = () => {
-        st.renamingRoute = true;
-        renderNavtorSidebar();
-        const inp = document.getElementById("nvRouteRenameInput");
-        if (inp) { inp.focus(); inp.select(); }
-      };
-    }
-
-    const renameInp = routePanel.querySelector("#nvRouteRenameInput");
-    const renameOk = routePanel.querySelector("#btnNvRenameOk");
-    const commitRename = () => {
-      if (renameInp) {
-        const nextName = renameInp.value.trim();
-        if (nextName) rt.name = nextName;
+        st.routeId = rt.id;
+        persistCurrentNavtorRoute(true);
+        if (wasCur && typeof setDrActiveRouteId === "function") {
+          setDrActiveRouteId(rt.id, { keepSidebarView: true });
+        }
+      } else if (!nextName) {
+        nameInp.value = routeName;
       }
-      st.renamingRoute = false;
-      persistCurrentNavtorRoute(false);
-      renderNavtorSidebar();
     };
-    if (renameOk) renameOk.onclick = commitRename;
-    if (renameInp) {
-      renameInp.onkeydown = (ev) => {
-        if (ev.key === "Enter") { ev.preventDefault(); commitRename(); }
-        if (ev.key === "Escape") { st.renamingRoute = false; renderNavtorSidebar(); }
+    if (nameInp) {
+      nameInp.addEventListener("change", commitRouteName);
+      nameInp.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          nameInp.blur();
+        } else if (ev.key === "Escape") {
+          nameInp.value = rt.name || routeName;
+          nameInp.blur();
+        }
+      });
+    }
+
+    const btnEdit = routePanel.querySelector("#btnNvHdrEdit");
+    if (btnEdit) {
+      btnEdit.onclick = () => {
+        if (st.detailTab !== "planning") {
+          st.detailTab = "planning";
+          renderRouteDetailView(routePanel, rt);
+        }
+        const inp = routePanel.querySelector("#nvRouteNameInput");
+        if (inp) {
+          inp.focus();
+          inp.select();
+        }
       };
     }
 
-    const btnCheck = routePanel.querySelector("#btnNvCheck");
-    if (btnCheck) btnCheck.onclick = () => runRouteSafetyCheck(rt);
-
-    const btnNewPp = routePanel.querySelector("#btnNvNewPp");
-    if (btnNewPp) {
-      btnNewPp.onclick = () => {
-        st.newPpMenuOpen = !st.newPpMenuOpen;
-        renderNavtorSidebar();
+    const btnCur = routePanel.querySelector("#btnNvHdrCurrent");
+    if (btnCur) {
+      btnCur.onclick = () => {
+        if (!rt.id) {
+          rt.id = "route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 6);
+        }
+        st.routeId = rt.id;
+        persistCurrentNavtorRoute(false);
+        const curNow = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+        const currentlyMarked = Boolean(curNow && (rt.id === curNow || rt.name === curNow));
+        if (currentlyMarked) {
+          persistCurrentRouteSnapshot(null);
+          if (typeof setDrActiveRouteId === "function") {
+            setDrActiveRouteId(null, { wipeOrphan: true, keepSidebarView: true });
+          }
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast('Unmarked "' + (rt.name || "Route") + '" as Current', "info");
+          }
+        } else {
+          persistCurrentRouteSnapshot(rt);
+          if (typeof setDrActiveRouteId === "function") {
+            setDrActiveRouteId(rt.id, { keepSidebarView: true });
+          }
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast('Marked "' + (rt.name || "Route") + '" as Current route', "success");
+          }
+        }
+        syncChartRoutesDisplay({ force: true });
+        renderRouteDetailView(routePanel, rt);
       };
     }
 
-    const btnExpRtz = routePanel.querySelector("#btnNvExportRtz");
-    if (btnExpRtz) {
-      btnExpRtz.onclick = () => {
-        st.newPpMenuOpen = false;
-        if (typeof exportRouteToRtz === "function") exportRouteToRtz(rt);
-        renderNavtorSidebar();
+    const btnPp = routePanel.querySelector("#btnNvHdrPassagePlan");
+    if (btnPp) {
+      btnPp.onclick = () => {
+        st.ppMenuOpen = !st.ppMenuOpen;
+        renderRouteDetailView(routePanel, rt);
       };
     }
 
     const btnOpenSr = routePanel.querySelector("#btnNvOpenSetRoute");
     if (btnOpenSr) {
       btnOpenSr.onclick = () => {
-        st.newPpMenuOpen = false;
+        st.ppMenuOpen = false;
+        if (!Array.isArray(rt.waypoints) || rt.waypoints.length < 2) {
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast("Add at least 2 waypoints to open Passage Plan", "info");
+          }
+          renderRouteDetailView(routePanel, rt);
+          return;
+        }
+        persistCurrentNavtorRoute(false);
         if (typeof displaySetRouteResults === "function") displaySetRouteResults(rt, true);
         const tabBtn = document.querySelector('[data-tab="tab-route"], #navBtnRoute');
         if (tabBtn) tabBtn.click();
-        renderNavtorSidebar();
+        renderRouteDetailView(routePanel, rt);
       };
     }
 
-    const btnRev = routePanel.querySelector("#btnNvReverse");
-    if (btnRev) btnRev.onclick = () => reverseCurrentRoute(rt);
-
-    const btnSave = routePanel.querySelector("#btnNvSave");
-    if (btnSave) {
-      btnSave.onclick = () => {
-        if (st.renamingRoute) commitRename();
-        else persistCurrentNavtorRoute(true);
-        if (typeof showSetSailToast === "function") {
-          showSetSailToast("Route \"" + (rt.name || "Route") + "\" saved", "success");
-        }
+    const btnExpRtz = routePanel.querySelector("#btnNvExportRtz");
+    if (btnExpRtz) {
+      btnExpRtz.onclick = () => {
+        st.ppMenuOpen = false;
+        if (typeof exportRouteToRtz === "function") exportRouteToRtz(rt);
+        renderRouteDetailView(routePanel, rt);
       };
     }
 
-    const btnHelp = routePanel.querySelector("#btnNvHelp");
-    if (btnHelp) {
-      btnHelp.onclick = () => {
-        if (typeof showSetSailToast === "function") {
-          showSetSailToast("Click 'Add new waypoint' to plot on chart, 'Add destination' to pick a port, or click any WP row to edit settings.", "info");
-        }
+    const btnChk = routePanel.querySelector("#btnNvCheckSafety");
+    if (btnChk) {
+      btnChk.onclick = () => {
+        st.ppMenuOpen = false;
+        runRouteSafetyCheck(rt);
+        renderRouteDetailView(routePanel, rt);
       };
+    }
+
+    routePanel.querySelectorAll("[data-nv-mode-tab]").forEach((tabBtn) => {
+      tabBtn.onclick = () => {
+        const nextMode = tabBtn.getAttribute("data-nv-mode-tab") === "monitoring" ? "monitoring" : "planning";
+        if (nextMode !== "planning") {
+          setChartAddWpMode(false);
+          st.destPickerOpen = false;
+        }
+        st.detailTab = nextMode;
+        renderRouteDetailView(routePanel, rt);
+      };
+    });
+
+    if (activeTab === "monitoring") {
+      return;
     }
 
     const btnAddWp = routePanel.querySelector("#btnNvAddWaypoint");
@@ -47674,7 +47945,7 @@ if (document.readyState === "loading") {
       renderNavtorSidebar();
       return;
     }
-    let idx = Math.max(0, Math.min(wps.length - 1, Number(st.wptIdx) || 0));
+    const idx = Math.max(0, Math.min(wps.length - 1, Number(st.wptIdx) || 0));
     st.wptIdx = idx;
     const legsArr = Array.isArray(rt.legs) ? rt.legs : [];
     const wp = ensureWaypointNavtorFields(wps[idx], idx, wps.length, legsArr[idx] || null);
@@ -47874,7 +48145,6 @@ if (document.readyState === "loading") {
       persistCurrentNavtorRoute(Boolean(replot || coordsMoved));
     };
 
-    // Bind blur / change listeners for live persistence & unit formatting
     ["#nvWptName", "#nvWptLat", "#nvWptLon", "#nvWptXtdPort", "#nvWptXtdStbd", "#nvWptTurnRad", "#nvWptPlanSpeed", "#nvWptMinSpeed", "#nvWptMaxSpeed", "#nvWptRemarks"].forEach((sel) => {
       const inp = wptPanel.querySelector(sel);
       if (!inp) return;
@@ -47999,9 +48269,7 @@ if (document.readyState === "loading") {
       routePanel.hidden = true;
       wptPanel.hidden = true;
       st.routeId = null;
-      if (typeof window.clearChartRouteDisplayOnly === "function") {
-        window.clearChartRouteDisplayOnly();
-      }
+      syncChartRoutesDisplay();
       if (typeof window._origRenderSidebarUserRoutesList === "function") {
         window._origRenderSidebarUserRoutesList();
       }
@@ -48024,40 +48292,23 @@ if (document.readyState === "loading") {
 
   window.renderNavtorSidebar = renderNavtorSidebar;
 
-  // Open a route directly into NAVTOR Route Detail View and display it on SetChart
   window.openNavtorRouteInSidebar = function (routeId, opts) {
     opts = opts || {};
     const st = window._sidebarNavtorState;
     setChartAddWpMode(false);
     st.routeId = routeId || (activeRouteData && (activeRouteData.id || activeRouteData.name)) || null;
+    st.detailTab = opts.detailTab === "monitoring" ? "monitoring" : "planning";
     st.wptSearch = "";
     st.destPickerOpen = false;
-    st.newPpMenuOpen = false;
-    st.renamingRoute = false;
+    st.ppMenuOpen = false;
     st.view = "route";
 
-    const rt = getActiveNavtorRoute();
-    if (rt && !opts.skipPlot) {
-      activeRouteData = rt;
-      window.activeRouteData = rt;
-      if (typeof OVERLAY_STATES !== "undefined" && OVERLAY_STATES) OVERLAY_STATES.route = true;
-      if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
-      if (Array.isArray(rt.waypoints) && rt.waypoints.length > 0) {
-        const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
-        if (map && typeof renderRouteOnMap === "function") {
-          window._setsailLastRouteRenderSig = "";
-          renderRouteOnMap(rt, Boolean(opts.fitChart && rt.waypoints.length >= 2));
-        }
-      } else if (typeof window.clearChartRouteDisplayOnly === "function") {
-        window.clearChartRouteDisplayOnly();
-        activeRouteData = rt;
-        window.activeRouteData = rt;
-      }
+    if (!opts.skipPlot) {
+      syncChartRoutesDisplay({ fitChart: Boolean(opts.fitChart), force: true });
     }
     renderNavtorSidebar();
   };
 
-  // Create a brand new empty route (Route1, Route2...) and open Photo 2 screen
   window.startManualChartRouteCreation = function () {
     let lib = [];
     try { lib = getSavedRoutesLibrary() || []; } catch (e) { lib = []; }
@@ -48075,18 +48326,19 @@ if (document.readyState === "loading") {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
+    if (window._sidebarNavtorState) {
+      window._sidebarNavtorState.routeId = newRoute.id;
+      window._sidebarNavtorState.detailTab = "planning";
+      window._sidebarNavtorState.view = "route";
+    }
     activeRouteData = newRoute;
     try { persistActiveRouteToStorage(newRoute); } catch (e) {}
     if (typeof saveRouteToLibrary === "function") {
       saveRouteToLibrary(newRoute);
     }
-    if (typeof leafletMap !== "undefined" && leafletMap && typeof renderRouteOnMap === "function") {
-      renderRouteOnMap(newRoute, false);
-    }
     window.openNavtorRouteInSidebar(newRoute.id);
   };
 
-  // Redirect legacy openWaypointEditModal(idx) into NAVTOR sidebar Edit Waypoint view (Photo 4)
   window.openWaypointEditModal = function (idx) {
     const sidebar = document.getElementById("ntmSidebar");
     if (sidebar && activeRouteData && Array.isArray(activeRouteData.waypoints) && activeRouteData.waypoints[idx]) {
@@ -48097,12 +48349,9 @@ if (document.readyState === "loading") {
       window._sidebarNavtorState.wptIdx = idx;
       window._sidebarNavtorState.view = "waypoint";
       renderNavtorSidebar();
-      return;
     }
   };
 })();
-
-
 
 
 const _origRenderRouteOnMapV49 = window.renderRouteOnMap || renderRouteOnMap;

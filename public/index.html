@@ -254,7 +254,7 @@
 
 
 
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.264" />
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/ntm_styles.css?v=5.265" />
             <style id="setsail-bundled-offline-css">
 /* required styles */
 
@@ -10225,7 +10225,7 @@ select option {
 
 
 
-  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.264" fetchpriority="high" />
+  <link rel="preload" as="image" href="assets/about/mykhailo_byshliaha.jpg?v=5.265" fetchpriority="high" />
   <link rel="preload" as="image" href="assets/SetSail LOGOS/setsail_logo_square.png" />
 
   <style>
@@ -15765,7 +15765,7 @@ body.light-theme .ntm-wx-unified {
                     SetSail bridges two crafts that rarely intersect: frontline bridge seamanship and modern software engineering. It unites live Admiralty NtMs, dynamic navigational hazards, tidal currents, multi-source AIS, and autonomous passage planning into one unified chart workspace designed to perform seamlessly when the watch is busy and satellite bandwidth is limited.
                   </p>
                   <div class="about-founder">
-                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.264" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.264';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
+                    <img class="about-founder-photo" id="aboutFounderPhoto" src="assets/about/mykhailo_byshliaha.jpg?v=5.265" alt="Mykhailo Byshliaha" width="44" height="44" loading="eager" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='assets/about/founder.jpg?v=5.265';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='https://raw.githubusercontent.com/waffiman/Admirality-NtM-Scraper/main/assets/about/mykhailo_byshliaha.jpg';}else{this.style.visibility='hidden';}" />
                     <div class="about-founder-meta">
                       <span class="about-founder-name">Mykhailo Byshliaha</span>
                       <span class="about-founder-role">Founder · Future officer · IT agency cofounder</span>
@@ -15787,7 +15787,7 @@ body.light-theme .ntm-wx-unified {
             <section class="home-slide-install" id="homeSlideInstall" aria-label="Install SetSail app">
               <div class="home-install-tile">
                 <div class="home-install-stage">
-                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.264" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
+                  <img class="home-install-bg" src="assets/home/install_tile_devices_bg.jpg?v=5.265" alt="SetSail devices on bridge" width="1024" height="571" decoding="async" fetchpriority="low" />
                   <div class="home-install-copy">
                     <div class="saas-eyebrow-pill" style="margin-bottom:0.65rem;align-self:flex-start;"><span class="saas-eyebrow-dot"></span>STANDALONE BRIDGE APPS</div>
                     <h2 class="home-install-title">SetSail on Bridge &amp; Mobile</h2>
@@ -16717,13 +16717,25 @@ body.light-theme .ntm-wx-unified {
               <span class="ntm-list-count" id="ntmListCount" style="display:none;"></span>
 
               <div class="ntm-hdr-actions">
-                <button type="button" class="ntm-hdr-action-btn" id="btnSidebarRouteDelete" title="Delete selected route (move to Bin)">
+                <button type="button" class="ntm-hdr-action-btn" id="btnSidebarRouteDelete" title="Delete checked route(s)">
                   <span class="ntm-hdr-action-ico" aria-hidden="true">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                       <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                     </svg>
                   </span>
                   <span class="ntm-hdr-action-lbl">Delete</span>
+                </button>
+
+                <button type="button" class="ntm-hdr-action-btn" id="btnSidebarRouteReverse" title="Create reversed copy of checked route(s)">
+                  <span class="ntm-hdr-action-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="17 2 21 6 17 10"></polyline>
+                      <line x1="3" y1="6" x2="21" y2="6"></line>
+                      <polyline points="7 22 3 18 7 14"></polyline>
+                      <line x1="21" y1="18" x2="3" y2="18"></line>
+                    </svg>
+                  </span>
+                  <span class="ntm-hdr-action-lbl">Reverse</span>
                 </button>
 
                 <button type="button" class="ntm-hdr-action-btn" id="btnSidebarRouteImport" title="Import route file (.rtz, .csv, .rtm)">
@@ -16748,10 +16760,9 @@ body.light-theme .ntm-wx-unified {
               </div>
             </div>
 
-            <!-- Routes / Bin Sub-Header Tabs -->
+            <!-- Routes Sub-Header Tab -->
             <div class="ntm-routes-tabs" role="tablist" aria-label="User routes tabs">
               <button type="button" class="ntm-routes-tab active" id="tabSidebarRoutes" data-routes-tab="routes" role="tab" aria-selected="true">Routes</button>
-              <button type="button" class="ntm-routes-tab" id="tabSidebarBin" data-routes-tab="bin" role="tab" aria-selected="false">Bin</button>
             </div>
 
             <!-- Main User Routes Scroll Area -->
@@ -23581,27 +23592,27 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/Auto NtM Plotting/pdf.worker.min.js";
     }
   </script>
-  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.264"></script>
-  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.264" />
-  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.264"></script>
-  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.264"></script>
+  <script src="assets/Auto NtM Plotting/ntm_module.js?v=5.265"></script>
+  <link rel="stylesheet" href="assets/Auto NtM Plotting/maplibre-gl.css?v=5.265" />
+  <script src="assets/Auto NtM Plotting/maplibre-gl.js?v=5.265"></script>
+  <script src="assets/Auto NtM Plotting/maplibre-contour.min.js?v=5.265"></script>
   <script>
     // Point MapLibre worker at self-hosted file (no blob/CDN)
     try {
       if (window.maplibregl) {
         window.maplibregl.workerUrl = new URL(
-          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.264",
+          "assets/Auto%20NtM%20Plotting/maplibre-gl-csp-worker.js?v=5.265",
           window.location.href
         ).href;
       }
     } catch (e) {}
   </script>
-  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.264"></script>
-  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.264"></script>
-  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.264"></script>
-  <script src="assets/Auto NtM Plotting/userchart_draw.js?v=5.264"></script>
+  <script src="assets/Auto NtM Plotting/openwaters_chart_layers.js?v=5.265"></script>
+  <script src="assets/Auto NtM Plotting/port_depths.js?v=5.265"></script>
+  <script src="assets/Auto NtM Plotting/ais_overlay.js?v=5.265"></script>
+  <script src="assets/Auto NtM Plotting/userchart_draw.js?v=5.265"></script>
   <!-- SetRoute Core A — standalone skills module (TSS/COLREG…). Edit this file; load BEFORE setsail_core.js -->
-  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.264"></script>
+  <script src="assets/Auto NtM Plotting/setroute_core_a.js?v=5.265"></script>
     <script>
     // Bulletproof Fallback Guards for Multi-Overlay & Export functions
     if (typeof window.initCategoryPills !== 'function') {
@@ -23674,15 +23685,15 @@ function calculateWMMDeclination(latDeg, lonDeg, dateObj) {
   </script>
     <script src="assets/Auto NtM Plotting/xlsx.full.min.js"></script>
   <script src="assets/Auto NtM Plotting/tesseract.min.js"></script>
-<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.264"></script>
-<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.264"></script>
+<script src="assets/Auto NtM Plotting/setsail_core.js?v=5.265"></script>
+<script src="assets/Auto NtM Plotting/setroute_brain_calibration.js?v=5.265"></script>
 <script>if (typeof window.__setsailToggleNtmSidebar === 'function') { window.toggleNtmSidebar = window.__setsailToggleNtmSidebar; }</script>
-<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.264"></script>
-<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.264"></script>
-<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.264"></script>
-<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.264"></script>
-<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.264"></script>
-<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.264"></script>
+<script src="assets/Auto NtM Plotting/setsail_wx_synoptic.js?v=5.265"></script>
+<script src="assets/Auto NtM Plotting/route_course_labels.js?v=5.265"></script>
+<script src="assets/Auto NtM Plotting/ecdis_scale_corner.js?v=5.265"></script>
+<script src="assets/Auto NtM Plotting/setsail_lan_ais.js?v=5.265"></script>
+<script src="assets/Auto NtM Plotting/setsail_wifi_ais_ui.js?v=5.265"></script>
+<script src="assets/Auto NtM Plotting/setsail_profile_sync.js?v=5.265"></script>
 
 
 
@@ -24396,7 +24407,7 @@ function showSetSailHardRefreshTip(cacheLabel) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           showSetSailHardRefreshTip('controller-change');
         });
-        navigator.serviceWorker.register('sw.js?v=5.264', { scope: './', updateViaCache: 'none' })
+        navigator.serviceWorker.register('sw.js?v=5.265', { scope: './', updateViaCache: 'none' })
           .then((reg) => {
             console.log('[SetSail PWA] Service Worker v5.264 registered, scope:', reg.scope);
             if (navigator.onLine) {
