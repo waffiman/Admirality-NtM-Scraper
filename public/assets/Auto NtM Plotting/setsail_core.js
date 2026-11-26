@@ -46983,17 +46983,19 @@ if (document.readyState === "loading") {
 }
 
 /* ============================================================================
-   v5.266: NAVTOR-Style Route & Waypoint Sidebar Workflow (#ntmSidebar)
-   - Explicit Edit / Coral Save mode (#btnNvHdrEdit):
-     * Until Edit is pressed: route name, all waypoint fields, and chart
-       waypoint dragging are locked.
-     * While Edit is active: button turns coral with Save icon, a route icon
-       follows the mouse cursor, waypoints on chart are draggable, all waypoint
-       parameters are editable, and single LMB click on chart appends next WP.
-     * Pressing coral Save persists changes, exits Edit mode, and restores
-       the Edit button.
+   v5.267: NAVTOR-Style Route & Waypoint Sidebar Workflow (#ntmSidebar)
+   - Planning tab waypoint tiles:
+     * Left: always-visible WP number (WP1, WP2...)
+     * Center: horizontally scrollable detailed parameter cells, filtered via
+       the Filter button next to the Search waypoint input, editable in bulk
+       across all checked waypoints when Edit mode is active
+     * Right: always-visible selection checkbox
+   - Route header: editable route name and right-side icon buttons aligned on
+     the exact same horizontal line.
    ============================================================================ */
 (function initNavtorSidebarWorkflow() {
+  const NAVTOR_WP_VISIBLE_PARAMS_KEY = "setsail_nv_wp_visible_params_v1";
+
   const NAVTOR_PASSAGE_DEFAULTS = {
     "Ocean": {
       portsideXTD: 5.000,
@@ -47042,6 +47044,54 @@ if (document.readyState === "loading") {
     "Security level change"
   ];
 
+  // Full catalog of detailed waypoint parameters controllable via the bottom Filter button
+  const NAVTOR_WP_PARAM_SPECS = [
+    { key: "name",          label: "WP name",        short: "Name",     unit: "",   kind: "text",       width: 96 },
+    { key: "portsideXTD",   label: "XTD(P)",         short: "XTD(P)",   unit: "NM", kind: "num3",       width: 76, min: 0, max: 50 },
+    { key: "starboardXTD",  label: "XTD(S)",         short: "XTD(S)",   unit: "NM", kind: "num3",       width: 76, min: 0, max: 50 },
+    { key: "speedKnots",    label: "Planned speed",  short: "Speed",    unit: "kn", kind: "num1",       width: 74, min: 0.5, max: 60 },
+    { key: "turnRadius",    label: "Turning radius", short: "Turn Rad", unit: "NM", kind: "num3",       width: 76, min: 0, max: 25 },
+    { key: "sail",          label: "Leg type",       short: "Leg",      unit: "",   kind: "select-leg", width: 72 },
+    { key: "passageType",   label: "Passage type",   short: "Passage",  unit: "",   kind: "select-pt",  width: 130 },
+    { key: "passageEvent",  label: "Passage event",  short: "Event",    unit: "",   kind: "select-pe",  width: 124 },
+    { key: "lat",           label: "Latitude",       short: "Lat",      unit: "",   kind: "lat",        width: 96 },
+    { key: "lon",           label: "Longitude",      short: "Lon",      unit: "",   kind: "lon",        width: 102 },
+    { key: "minSpeedKnots", label: "Minimum speed",  short: "Min Spd",  unit: "kn", kind: "num1",       width: 74, min: 0, max: 60 },
+    { key: "maxSpeedKnots", label: "Maximum speed",  short: "Max Spd",  unit: "kn", kind: "num1",       width: 74, min: 0.5, max: 80 },
+    { key: "legDist",       label: "Leg distance",   short: "Dist",     unit: "NM", kind: "ro-dist",    width: 68 },
+    { key: "remarks",       label: "Remarks",        short: "Remarks",  unit: "",   kind: "text",       width: 118 }
+  ];
+
+  const DEFAULT_VISIBLE_WP_PARAMS = [
+    "name",
+    "portsideXTD",
+    "starboardXTD",
+    "speedKnots",
+    "passageType",
+    "legDist"
+  ];
+
+  function loadVisibleWpParams() {
+    try {
+      const raw = localStorage.getItem(NAVTOR_WP_VISIBLE_PARAMS_KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr) && arr.length > 0) {
+          const validKeys = new Set(NAVTOR_WP_PARAM_SPECS.map((s) => s.key));
+          const filtered = arr.filter((k) => validKeys.has(k));
+          if (filtered.length > 0) return filtered;
+        }
+      }
+    } catch (e) {}
+    return DEFAULT_VISIBLE_WP_PARAMS.slice();
+  }
+
+  function saveVisibleWpParams(list) {
+    try {
+      localStorage.setItem(NAVTOR_WP_VISIBLE_PARAMS_KEY, JSON.stringify(list));
+    } catch (e) {}
+  }
+
   window._sidebarNavtorState = window._sidebarNavtorState || {
     view: "list",          // "list" | "route" | "waypoint"
     routeId: null,
@@ -47052,13 +47102,23 @@ if (document.readyState === "loading") {
     addingWpOnChart: false,
     destPickerOpen: false,
     destQuery: "",
-    ppMenuOpen: false
+    ppMenuOpen: false,
+    wpFilterOpen: false,
+    visibleWpParams: loadVisibleWpParams(),
+    checkedWpIdxs: new Set(),
+    midScrollLeft: 0
   };
   if (!window._sidebarNavtorState.detailTab) {
     window._sidebarNavtorState.detailTab = "planning";
   }
   if (typeof window._sidebarNavtorState.editMode !== "boolean") {
     window._sidebarNavtorState.editMode = false;
+  }
+  if (!Array.isArray(window._sidebarNavtorState.visibleWpParams) || !window._sidebarNavtorState.visibleWpParams.length) {
+    window._sidebarNavtorState.visibleWpParams = loadVisibleWpParams();
+  }
+  if (!(window._sidebarNavtorState.checkedWpIdxs instanceof Set)) {
+    window._sidebarNavtorState.checkedWpIdxs = new Set();
   }
 
   function escHtml(s) {
@@ -47069,7 +47129,6 @@ if (document.readyState === "loading") {
       .replace(/"/g, "&quot;");
   }
 
-  // Floating route icon badge next to mouse cursor while Edit mode is active
   function ensureRouteCursorFollower() {
     let badge = document.getElementById("ntmRouteCursorBadge");
     if (!badge) {
@@ -47335,7 +47394,7 @@ if (document.readyState === "loading") {
     const s = String(name || "").trim();
     if (!s) return true;
     if (/^WPT?\s*#?\s*0*\d+$/i.test(s)) return true;
-    if (s.toUpperCase() === "WP" + idx || s.toUpperCase() === "WPT " + (idx + 1)) return true;
+    if (s.toUpperCase() === "WP" + idx || s.toUpperCase() === "WP" + (idx + 1) || s.toUpperCase() === "WPT " + (idx + 1)) return true;
     return false;
   }
 
@@ -47419,7 +47478,7 @@ if (document.readyState === "loading") {
     persistCurrentNavtorRoute(true);
     renderNavtorSidebar();
     if (typeof showSetSailToast === "function") {
-      showSetSailToast("Added WP" + idx + " (" + formatNavtorLatDms(lat) + " " + formatNavtorLonDms(lon) + ")", "success");
+      showSetSailToast("Added WP" + (idx + 1) + " (" + formatNavtorLatDms(lat) + " " + formatNavtorLonDms(lon) + ")", "success");
     }
     return true;
   };
@@ -47508,8 +47567,6 @@ if (document.readyState === "loading") {
     if (typeof OVERLAY_STATES !== "undefined") OVERLAY_STATES.route = true;
     if (window.OVERLAY_STATES) window.OVERLAY_STATES.route = true;
     persistCurrentNavtorRoute(true);
-    window._sidebarNavtorState.wptIdx = idx;
-    window._sidebarNavtorState.view = "waypoint";
     renderNavtorSidebar();
   }
 
@@ -47554,8 +47611,8 @@ if (document.readyState === "loading") {
           '</div>' +
         '</div>' +
         '<div class="ntm-nv-hdr-metrics">' +
-          '<span>Distance: <b>' + escHtml(distLabel) + '</b></span>' +
-          '<span>Duration: <b>' + escHtml(durLabel) + '</b></span>' +
+          '<span>Distance: <b id="nvHdrDistVal">' + escHtml(distLabel) + '</b></span>' +
+          '<span>Duration: <b id="nvHdrDurVal">' + escHtml(durLabel) + '</b></span>' +
         '</div>' +
       '</div>' +
       ppDrawerHtml
@@ -47599,22 +47656,19 @@ if (document.readyState === "loading") {
       });
     }
 
-    // Edit <-> Coral Save Toggle Button
     const btnEdit = panelEl.querySelector("#btnNvHdrEdit");
     if (btnEdit) {
       btnEdit.onclick = () => {
         if (!st.editMode) {
-          // Activate Edit Mode: button turns coral Save, route cursor icon appears, chart click adds WP
           if (st.view === "route" && st.detailTab !== "planning") {
             st.detailTab = "planning";
           }
           setRouteEditMode(true);
           renderNavtorSidebar();
           if (typeof showSetSailToast === "function") {
-            showSetSailToast("Edit mode ON — click chart to add waypoints, drag WPs, or edit parameters. Click Save when done.", "info");
+            showSetSailToast("Edit mode ON — edit WP parameters (or check WPs on the right for bulk edit), click chart to add WPs, then click Save.", "info");
           }
         } else {
-          // Coral Save clicked: commit any pending name/form changes, persist route, and return to Edit button
           commitRouteName();
           if (typeof onBeforeSaveCallback === "function") {
             try { onBeforeSaveCallback(); } catch (ePreSv) {}
@@ -47629,7 +47683,6 @@ if (document.readyState === "loading") {
       };
     }
 
-    // Mark as Current Button
     const btnCur = panelEl.querySelector("#btnNvHdrCurrent");
     if (btnCur) {
       btnCur.onclick = () => {
@@ -47662,7 +47715,6 @@ if (document.readyState === "loading") {
       };
     }
 
-    // Passage plan Button & Drawer
     const btnPp = panelEl.querySelector("#btnNvHdrPassagePlan");
     if (btnPp) {
       btnPp.onclick = () => {
@@ -47697,6 +47749,155 @@ if (document.readyState === "loading") {
     });
   }
 
+  function formatWpParamDisplayValue(wp, idx, key, legDistNm) {
+    if (!wp) return "";
+    switch (key) {
+      case "name":
+        return isGenericAutoWpName(wp.name, idx) ? "" : String(wp.name || "");
+      case "portsideXTD":
+        return Number(wp.portsideXTD != null ? wp.portsideXTD : 0.1).toFixed(3);
+      case "starboardXTD":
+        return Number(wp.starboardXTD != null ? wp.starboardXTD : 0.1).toFixed(3);
+      case "turnRadius":
+        return Number(wp.turnRadius != null ? wp.turnRadius : 0).toFixed(3);
+      case "speedKnots":
+        return Number(wp.speedKnots != null ? wp.speedKnots : 12.0).toFixed(1);
+      case "minSpeedKnots":
+        return Number(wp.minSpeedKnots != null ? wp.minSpeedKnots : 1.0).toFixed(1);
+      case "maxSpeedKnots":
+        return Number(wp.maxSpeedKnots != null ? wp.maxSpeedKnots : 30.0).toFixed(1);
+      case "sail":
+        return String(wp.sail || "RL").toUpperCase() === "GC" ? "GC" : "RL";
+      case "passageType":
+        return wp.passageType || "Coastal";
+      case "passageEvent":
+        return wp.passageEvent || "Undefined";
+      case "lat":
+        return formatNavtorLatDms(wp.lat);
+      case "lon":
+        return formatNavtorLonDms(wp.lon);
+      case "legDist":
+        return Number(legDistNm || 0).toFixed(2);
+      case "remarks":
+        return String(wp.remarks || "");
+      default:
+        return "";
+    }
+  }
+
+  function applyParamToSingleWaypoint(wp, paramKey, rawVal) {
+    if (!wp) return { changed: false, coordsMoved: false };
+    let coordsMoved = false;
+    switch (paramKey) {
+      case "name":
+        wp.name = String(rawVal == null ? "" : rawVal).trim();
+        return { changed: true, coordsMoved: false };
+      case "portsideXTD":
+        wp.portsideXTD = parseNumericField(rawVal, wp.portsideXTD, 0, 50);
+        return { changed: true, coordsMoved: false };
+      case "starboardXTD":
+        wp.starboardXTD = parseNumericField(rawVal, wp.starboardXTD, 0, 50);
+        return { changed: true, coordsMoved: false };
+      case "turnRadius":
+        wp.turnRadius = parseNumericField(rawVal, wp.turnRadius, 0, 25);
+        return { changed: true, coordsMoved: false };
+      case "speedKnots":
+        wp.speedKnots = parseNumericField(rawVal, wp.speedKnots, 0.5, 60);
+        return { changed: true, coordsMoved: false };
+      case "minSpeedKnots":
+        wp.minSpeedKnots = parseNumericField(rawVal, wp.minSpeedKnots, 0, 60);
+        return { changed: true, coordsMoved: false };
+      case "maxSpeedKnots":
+        wp.maxSpeedKnots = parseNumericField(rawVal, wp.maxSpeedKnots, 0.5, 80);
+        return { changed: true, coordsMoved: false };
+      case "sail":
+        wp.sail = String(rawVal || "RL").toUpperCase() === "GC" ? "GC" : "RL";
+        return { changed: true, coordsMoved: true };
+      case "passageType":
+        if (NAVTOR_PASSAGE_TYPES.indexOf(rawVal) !== -1) {
+          wp.passageType = rawVal;
+          return { changed: true, coordsMoved: false };
+        }
+        return { changed: false, coordsMoved: false };
+      case "passageEvent":
+        if (NAVTOR_PASSAGE_EVENTS.indexOf(rawVal) !== -1) {
+          wp.passageEvent = rawVal;
+          return { changed: true, coordsMoved: false };
+        }
+        return { changed: false, coordsMoved: false };
+      case "lat": {
+        const pLat = parseNavtorCoord(rawVal, false);
+        if (pLat !== null) {
+          if (Math.abs(pLat - Number(wp.lat)) > 1e-6) coordsMoved = true;
+          wp.lat = pLat;
+          return { changed: true, coordsMoved: coordsMoved };
+        }
+        return { changed: false, coordsMoved: false };
+      }
+      case "lon": {
+        const pLon = parseNavtorCoord(rawVal, true);
+        if (pLon !== null) {
+          if (Math.abs(pLon - Number(wp.lon)) > 1e-6) coordsMoved = true;
+          wp.lon = pLon;
+          return { changed: true, coordsMoved: coordsMoved };
+        }
+        return { changed: false, coordsMoved: false };
+      }
+      case "remarks":
+        wp.remarks = String(rawVal == null ? "" : rawVal);
+        return { changed: true, coordsMoved: false };
+      default:
+        return { changed: false, coordsMoved: false };
+    }
+  }
+
+  function buildWpParamCellHtml(wp, idx, spec, legDistNm, isEditing, isSingleCol) {
+    const valStr = formatWpParamDisplayValue(wp, idx, spec.key, legDistNm);
+    const disAttr = isEditing ? "" : " disabled";
+    const lockCls = isEditing ? "" : " is-locked";
+    const cellStyle = isSingleCol
+      ? "flex:1 1 auto;min-width:" + spec.width + "px;"
+      : "flex:0 0 " + spec.width + "px;width:" + spec.width + "px;";
+    const unitTag = spec.unit ? ' <small>' + escHtml(spec.unit) + '</small>' : '';
+
+    let ctrlHtml = "";
+    if (spec.kind === "ro-dist") {
+      ctrlHtml =
+        '<div class="ntm-nv-wp-cell-ro">' + escHtml(valStr) + '<span>NM</span></div>';
+    } else if (spec.kind === "select-leg") {
+      ctrlHtml =
+        '<select class="ntm-nv-wp-cell-select' + lockCls + '" data-wp-param-idx="' + idx + '" data-wp-param-key="sail"' + disAttr + '>' +
+          '<option value="RL"' + (valStr === "RL" ? ' selected' : '') + '>RL</option>' +
+          '<option value="GC"' + (valStr === "GC" ? ' selected' : '') + '>GC</option>' +
+        '</select>';
+    } else if (spec.kind === "select-pt") {
+      ctrlHtml =
+        '<select class="ntm-nv-wp-cell-select' + lockCls + '" data-wp-param-idx="' + idx + '" data-wp-param-key="passageType"' + disAttr + '>' +
+          NAVTOR_PASSAGE_TYPES.map((pt) => (
+            '<option value="' + escHtml(pt) + '"' + (valStr === pt ? ' selected' : '') + '>' + escHtml(pt) + '</option>'
+          )).join("") +
+        '</select>';
+    } else if (spec.kind === "select-pe") {
+      ctrlHtml =
+        '<select class="ntm-nv-wp-cell-select' + lockCls + '" data-wp-param-idx="' + idx + '" data-wp-param-key="passageEvent"' + disAttr + '>' +
+          NAVTOR_PASSAGE_EVENTS.map((pe) => (
+            '<option value="' + escHtml(pe) + '"' + (valStr === pe ? ' selected' : '') + '>' + escHtml(pe) + '</option>'
+          )).join("") +
+        '</select>';
+    } else {
+      const ph = spec.key === "name" ? ("WP" + (idx + 1)) : "";
+      ctrlHtml =
+        '<input type="text" class="ntm-nv-wp-cell-input' + lockCls + '" data-wp-param-idx="' + idx + '" data-wp-param-key="' + escHtml(spec.key) + '" value="' + escHtml(valStr) + '" placeholder="' + escHtml(ph) + '"' + disAttr + ' />';
+    }
+
+    return (
+      '<div class="ntm-nv-wp-param-cell" style="' + cellStyle + '">' +
+        '<div class="ntm-nv-wp-param-lbl">' + escHtml(spec.short) + unitTag + '</div>' +
+        ctrlHtml +
+      '</div>'
+    );
+  }
+
   function renderRouteDetailView(routePanel, rt) {
     const st = window._sidebarNavtorState;
     const wps = Array.isArray(rt.waypoints) ? rt.waypoints : [];
@@ -47704,6 +47905,20 @@ if (document.readyState === "loading") {
     const q = String(st.wptSearch || "").trim().toLowerCase();
     const activeTab = st.detailTab === "monitoring" ? "monitoring" : "planning";
     const isEditing = Boolean(st.editMode);
+
+    // Prune any out-of-range checked WP indices
+    Array.from(st.checkedWpIdxs).forEach((idx) => {
+      if (!Number.isFinite(idx) || idx < 0 || idx >= wps.length) {
+        st.checkedWpIdxs.delete(idx);
+      }
+    });
+
+    const visibleKeys = Array.isArray(st.visibleWpParams) && st.visibleWpParams.length
+      ? st.visibleWpParams
+      : DEFAULT_VISIBLE_WP_PARAMS;
+    const visibleSpecs = NAVTOR_WP_PARAM_SPECS.filter((s) => visibleKeys.indexOf(s.key) !== -1);
+    const activeSpecs = visibleSpecs.length ? visibleSpecs : [NAVTOR_WP_PARAM_SPECS[1]];
+    const isSingleCol = activeSpecs.length <= 2;
 
     let tabBodyHtml = "";
     if (activeTab === "monitoring") {
@@ -47724,38 +47939,33 @@ if (document.readyState === "loading") {
         const rows = [];
         for (let i = 0; i < wps.length; i++) {
           const wp = wps[i];
-          const wpCode = "WP" + i;
+          const wpCode = "WP" + (i + 1);
           const customName = isGenericAutoWpName(wp.name, i) ? "" : String(wp.name || "").trim();
           const pType = wp.passageType || "Coastal";
-          const spdStr = (Number(wp.speedKnots) || 12.0).toFixed(1) + "kn";
-          const legDistStr = formatNavtorLegDist(metrics.legDists[i] || 0);
-          const subLine = "Planned speed: " + spdStr + " / Dist: " + legDistStr;
 
           if (q) {
-            const hay = (wpCode + " " + customName + " " + pType + " " + (wp.passageEvent || "") + " " + (wp.remarks || "")).toLowerCase();
+            const hay = (wpCode + " WP" + i + " " + customName + " " + pType + " " + (wp.passageEvent || "") + " " + (wp.remarks || "")).toLowerCase();
             if (hay.indexOf(q) === -1) continue;
           }
 
-          const hasEvent = wp.passageEvent && wp.passageEvent !== "Undefined";
-          const isSolidEvent = hasEvent && /begin|end|pilot|berth/i.test(wp.passageEvent);
-          const flagHtml = hasEvent
-            ? (isSolidEvent
-                ? '<span class="ntm-nv-wp-flag" title="' + escHtml(wp.passageEvent) + '"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M5 3v18h2v-7h11l-2-4 2-4H7V3H5z"/></svg></span>'
-                : '<span class="ntm-nv-wp-flag" title="' + escHtml(wp.passageEvent) + '"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21V4h12l-2 4 2 4H5"/></svg></span>')
-            : "";
+          const isChecked = st.checkedWpIdxs.has(i);
+          const cellsHtml = activeSpecs.map((spec) => (
+            buildWpParamCellHtml(wp, i, spec, metrics.legDists[i] || 0, isEditing, isSingleCol)
+          )).join("");
 
           rows.push(
-            '<div class="ntm-nv-wp-row" data-nv-wp-idx="' + i + '">' +
-              '<div class="ntm-nv-wp-code">' + wpCode + '</div>' +
-              '<div class="ntm-nv-wp-mid">' +
-                (customName ? '<div class="ntm-nv-wp-name">' + escHtml(customName) + '</div>' : '') +
-                '<div class="ntm-nv-wp-ptype">' + escHtml(pType) + '</div>' +
-                '<div class="ntm-nv-wp-stats">' + escHtml(subLine) + '</div>' +
+            '<div class="ntm-nv-wp-row ' + (isChecked ? 'is-wp-checked' : '') + '" data-nv-wp-row="' + i + '">' +
+              '<button type="button" class="ntm-nv-wp-code-btn" data-nv-wp-open="' + i + '" title="Open ' + wpCode + ' full details &amp; center on chart">' +
+                wpCode +
+              '</button>' +
+              '<div class="ntm-nv-wp-mid-scroll">' +
+                '<div class="ntm-nv-wp-params-track">' +
+                  cellsHtml +
+                '</div>' +
               '</div>' +
-              '<div class="ntm-nv-wp-right">' +
-                flagHtml +
-                '<span class="ntm-nv-wp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>' +
-              '</div>' +
+              '<label class="ntm-nv-wp-chk-wrap" title="Check ' + wpCode + ' for bulk parameter edit">' +
+                '<input type="checkbox" class="ntm-nv-wp-chk" data-nv-wp-chk="' + i + '" ' + (isChecked ? 'checked' : '') + ' />' +
+              '</label>' +
             '</div>'
           );
         }
@@ -47765,9 +47975,14 @@ if (document.readyState === "loading") {
           '</div>';
       }
 
+      const checkedCount = st.checkedWpIdxs.size;
       const editBannerHtml = isEditing
         ? '<div class="ntm-nv-helper-bar is-coral-edit">' +
-            '<span>Edit mode: click LMB on chart to add next WP, or drag WPs</span>' +
+            '<span>' +
+              (checkedCount > 0
+                ? ('Bulk Edit (' + checkedCount + ' WPs checked): changing a parameter updates all checked WPs')
+                : 'Edit mode: click chart to add WP, or check WPs on the right for bulk edit') +
+            '</span>' +
           '</div>'
         : "";
 
@@ -47806,6 +48021,42 @@ if (document.readyState === "loading") {
           '</div>';
       }
 
+      // Parameter Filter Popover anchored above the bottom bar
+      const allChecked = wps.length > 0 && st.checkedWpIdxs.size === wps.length;
+      const filterPopoverHtml = st.wpFilterOpen
+        ? '<div class="ntm-nv-wp-filter-popover" id="nvWpParamFilterPopover" role="dialog" aria-label="Waypoint parameters filter">' +
+            '<div class="ntm-nv-wp-filter-head">' +
+              '<span class="ntm-nv-wp-filter-title">Show / Hide WP Parameters</span>' +
+              '<div class="ntm-nv-wp-filter-head-btns">' +
+                '<button type="button" class="ntm-nv-wp-filter-mini" id="btnNvFilterAllParams">All</button>' +
+                '<button type="button" class="ntm-nv-wp-filter-mini" id="btnNvFilterDefaultParams">Default</button>' +
+                '<button type="button" class="ntm-nv-wp-filter-close" id="btnNvFilterClose" title="Close">×</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="ntm-nv-wp-filter-bulkbar">' +
+              '<span>Checked WPs: <b>' + st.checkedWpIdxs.size + ' / ' + wps.length + '</b></span>' +
+              '<div class="ntm-nv-wp-filter-head-btns">' +
+                '<button type="button" class="ntm-nv-wp-filter-mini" id="btnNvBulkCheckAll">Check all WPs</button>' +
+                '<button type="button" class="ntm-nv-wp-filter-mini" id="btnNvBulkClearAll">Uncheck all</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="ntm-nv-wp-filter-list">' +
+              NAVTOR_WP_PARAM_SPECS.map((spec) => {
+                const isOn = activeSpecs.some((s) => s.key === spec.key);
+                return (
+                  '<div class="ntm-nv-wp-filter-item">' +
+                    '<label class="ntm-nv-wp-filter-lbl">' +
+                      '<input type="checkbox" data-nv-param-toggle="' + escHtml(spec.key) + '" ' + (isOn ? 'checked' : '') + ' />' +
+                      '<span>' + escHtml(spec.label) + (spec.unit ? ' <small>(' + escHtml(spec.unit) + ')</small>' : '') + '</span>' +
+                    '</label>' +
+                    '<button type="button" class="ntm-nv-wp-filter-only" data-nv-param-only="' + escHtml(spec.key) + '" title="Show only ' + escHtml(spec.label) + ' on WP tiles">Only</button>' +
+                  '</div>'
+                );
+              }).join("") +
+            '</div>' +
+          '</div>'
+        : "";
+
       tabBodyHtml =
         '<div class="ntm-nv-body">' +
           editBannerHtml +
@@ -47817,8 +48068,23 @@ if (document.readyState === "loading") {
           '</div>' +
         '</div>' +
         '<div class="ntm-nv-bottom-search">' +
-          '<input type="text" id="nvWpSearchInput" class="ntm-nv-search-box" placeholder="Search waypoint" value="' + escHtml(st.wptSearch) + '" />' +
-          (st.wptSearch ? '<button type="button" id="btnNvClearWpSearch" class="ntm-nv-search-clear" title="Clear">×</button>' : '') +
+          filterPopoverHtml +
+          '<button type="button" class="ntm-nv-filter-btn ' + (st.wpFilterOpen ? 'is-open' : '') + '" id="btnNvWpParamFilter" title="Filter visible waypoint parameters for bulk edit" aria-expanded="' + (st.wpFilterOpen ? 'true' : 'false') + '">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+              '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>' +
+            '</svg>' +
+            '<span class="ntm-nv-filter-badge">' + activeSpecs.length + '</span>' +
+          '</button>' +
+          '<button type="button" class="ntm-nv-checkall-btn ' + (allChecked ? 'is-all-checked' : '') + '" id="btnNvWpCheckAllBar" title="' + (allChecked ? 'Uncheck all waypoints' : 'Check all waypoints for bulk editing') + '">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+              '<polyline points="9 11 12 14 22 4"></polyline>' +
+              '<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>' +
+            '</svg>' +
+          '</button>' +
+          '<div class="ntm-nv-search-input-wrap">' +
+            '<input type="text" id="nvWpSearchInput" class="ntm-nv-search-box" placeholder="Search waypoint" value="' + escHtml(st.wptSearch) + '" />' +
+            (st.wptSearch ? '<button type="button" id="btnNvClearWpSearch" class="ntm-nv-search-clear" title="Clear">×</button>' : '') +
+          '</div>' +
         '</div>';
     }
 
@@ -47838,6 +48104,8 @@ if (document.readyState === "loading") {
         setRouteEditMode(false);
         st.destPickerOpen = false;
         st.ppMenuOpen = false;
+        st.wpFilterOpen = false;
+        st.checkedWpIdxs.clear();
         st.routeId = null;
         st.view = "list";
         syncChartRoutesDisplay({ force: true });
@@ -47850,6 +48118,7 @@ if (document.readyState === "loading") {
         const nextMode = tabBtn.getAttribute("data-nv-mode-tab") === "monitoring" ? "monitoring" : "planning";
         if (nextMode !== "planning") {
           st.destPickerOpen = false;
+          st.wpFilterOpen = false;
         }
         st.detailTab = nextMode;
         renderRouteDetailView(routePanel, rt);
@@ -47858,6 +48127,244 @@ if (document.readyState === "loading") {
 
     if (activeTab === "monitoring") {
       return;
+    }
+
+    // Restore & sync horizontal scroll across waypoint tiles' middle containers
+    const midScrollEls = Array.from(routePanel.querySelectorAll(".ntm-nv-wp-mid-scroll"));
+    if (st.midScrollLeft > 0) {
+      midScrollEls.forEach((el) => { el.scrollLeft = st.midScrollLeft; });
+    }
+    let syncingScroll = false;
+    midScrollEls.forEach((el) => {
+      el.addEventListener("scroll", () => {
+        if (syncingScroll) return;
+        syncingScroll = true;
+        const sl = el.scrollLeft;
+        st.midScrollLeft = sl;
+        for (let k = 0; k < midScrollEls.length; k++) {
+          if (midScrollEls[k] !== el) midScrollEls[k].scrollLeft = sl;
+        }
+        syncingScroll = false;
+      }, { passive: true });
+    });
+
+    // Left WP1/WP2 button -> opens full single-waypoint view and centers on chart
+    routePanel.querySelectorAll("[data-nv-wp-open]").forEach((btn) => {
+      btn.onclick = (ev) => {
+        ev.stopPropagation();
+        const idx = parseInt(btn.getAttribute("data-nv-wp-open"), 10);
+        if (!Number.isFinite(idx) || !rt.waypoints[idx]) return;
+        st.wptIdx = idx;
+        st.view = "waypoint";
+        const wp = rt.waypoints[idx];
+        const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+        if (map && Number.isFinite(Number(wp.lat)) && Number.isFinite(Number(wp.lon))) {
+          try { map.flyTo([Number(wp.lat), Number(wp.lon)], Math.max(map.getZoom(), 10), { duration: 0.65 }); } catch (e) {}
+        }
+        renderNavtorSidebar();
+      };
+    });
+
+    // Right WP checkbox -> selects/unselects WP for in-bulk editing
+    routePanel.querySelectorAll("[data-nv-wp-chk]").forEach((chk) => {
+      chk.addEventListener("click", (ev) => ev.stopPropagation());
+      chk.addEventListener("change", (ev) => {
+        ev.stopPropagation();
+        const idx = parseInt(chk.getAttribute("data-nv-wp-chk"), 10);
+        if (!Number.isFinite(idx)) return;
+        if (chk.checked) st.checkedWpIdxs.add(idx);
+        else st.checkedWpIdxs.delete(idx);
+        const row = chk.closest(".ntm-nv-wp-row");
+        if (row) row.classList.toggle("is-wp-checked", chk.checked);
+        const allBtn = routePanel.querySelector("#btnNvWpCheckAllBar");
+        if (allBtn) {
+          const allNow = wps.length > 0 && st.checkedWpIdxs.size === wps.length;
+          allBtn.classList.toggle("is-all-checked", allNow);
+        }
+        if (st.editMode) {
+          const bannerSpan = routePanel.querySelector(".ntm-nv-helper-bar.is-coral-edit span");
+          if (bannerSpan) {
+            bannerSpan.textContent = st.checkedWpIdxs.size > 0
+              ? ("Bulk Edit (" + st.checkedWpIdxs.size + " WPs checked): changing a parameter updates all checked WPs")
+              : "Edit mode: click chart to add WP, or check WPs on the right for bulk edit";
+          }
+        }
+      });
+    });
+
+    // Central inline parameter inputs & selects -> single OR in-bulk update across all checked WPs!
+    const handleInlineParamCommit = (ctrlEl) => {
+      if (!st.editMode) return;
+      const srcIdx = parseInt(ctrlEl.getAttribute("data-wp-param-idx"), 10);
+      const paramKey = ctrlEl.getAttribute("data-wp-param-key");
+      if (!Number.isFinite(srcIdx) || !paramKey || !rt.waypoints[srcIdx]) return;
+      const rawVal = ctrlEl.value;
+
+      // Determine target waypoint indices:
+      // If any WPs are checked via right-side checkboxes, apply in bulk to all checked WPs!
+      // Otherwise apply to the edited WP.
+      let targetIdxs = [];
+      if (st.checkedWpIdxs && st.checkedWpIdxs.size > 0) {
+        targetIdxs = Array.from(st.checkedWpIdxs).filter((i) => i >= 0 && i < rt.waypoints.length);
+        if (targetIdxs.indexOf(srcIdx) === -1) {
+          targetIdxs.push(srcIdx);
+        }
+      } else {
+        targetIdxs = [srcIdx];
+      }
+
+      let anyCoordsMoved = false;
+      let updatedCount = 0;
+      targetIdxs.forEach((tIdx) => {
+        const res = applyParamToSingleWaypoint(rt.waypoints[tIdx], paramKey, rawVal);
+        if (res.changed) updatedCount++;
+        if (res.coordsMoved) anyCoordsMoved = true;
+      });
+
+      const newMetrics = recomputeRouteNavtorMetrics(rt);
+      persistCurrentNavtorRoute(anyCoordsMoved);
+
+      // Update header Distance & Duration in-place
+      const distEl = routePanel.querySelector("#nvHdrDistVal");
+      const durEl = routePanel.querySelector("#nvHdrDurVal");
+      if (distEl) distEl.textContent = formatNavtorHeaderDist(newMetrics.totalDistNm);
+      if (durEl) durEl.textContent = formatNavtorDuration(newMetrics.totalHours);
+
+      // Sync formatted values across all affected rows in the DOM without losing scroll position
+      targetIdxs.forEach((tIdx) => {
+        const targetCtrl = routePanel.querySelector('[data-wp-param-idx="' + tIdx + '"][data-wp-param-key="' + paramKey + '"]');
+        if (targetCtrl) {
+          targetCtrl.value = formatWpParamDisplayValue(rt.waypoints[tIdx], tIdx, paramKey, newMetrics.legDists[tIdx] || 0);
+        }
+      });
+
+      // Refresh read-only Dist cells if speed/sail/coords changed
+      routePanel.querySelectorAll(".ntm-nv-wp-row").forEach((rEl) => {
+        const rIdx = parseInt(rEl.getAttribute("data-nv-wp-row"), 10);
+        const roDist = rEl.querySelector(".ntm-nv-wp-cell-ro");
+        if (roDist && Number.isFinite(rIdx)) {
+          roDist.innerHTML = escHtml(Number(newMetrics.legDists[rIdx] || 0).toFixed(2)) + "<span>NM</span>";
+        }
+      });
+
+      if (updatedCount > 1 && typeof showSetSailToast === "function") {
+        const specObj = NAVTOR_WP_PARAM_SPECS.find((s) => s.key === paramKey);
+        showSetSailToast("Updated " + ((specObj && specObj.short) || paramKey) + " on " + updatedCount + " checked waypoints", "success");
+      }
+    };
+
+    routePanel.querySelectorAll(".ntm-nv-wp-cell-input, .ntm-nv-wp-cell-select").forEach((ctrl) => {
+      ctrl.addEventListener("click", (ev) => ev.stopPropagation());
+      ctrl.addEventListener("change", () => handleInlineParamCommit(ctrl));
+      if (ctrl.tagName === "INPUT") {
+        ctrl.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") {
+            ev.preventDefault();
+            ctrl.blur();
+          }
+        });
+      }
+    });
+
+    // Bottom bar Filter button & Popover handlers
+    const btnFilter = routePanel.querySelector("#btnNvWpParamFilter");
+    if (btnFilter) {
+      btnFilter.onclick = (ev) => {
+        ev.stopPropagation();
+        st.wpFilterOpen = !st.wpFilterOpen;
+        renderRouteDetailView(routePanel, rt);
+      };
+    }
+
+    const btnCheckAllBar = routePanel.querySelector("#btnNvWpCheckAllBar");
+    if (btnCheckAllBar) {
+      btnCheckAllBar.onclick = (ev) => {
+        ev.stopPropagation();
+        if (wps.length > 0 && st.checkedWpIdxs.size === wps.length) {
+          st.checkedWpIdxs.clear();
+        } else {
+          for (let i = 0; i < wps.length; i++) st.checkedWpIdxs.add(i);
+        }
+        renderRouteDetailView(routePanel, rt);
+      };
+    }
+
+    const filterPop = routePanel.querySelector("#nvWpParamFilterPopover");
+    if (filterPop) {
+      filterPop.addEventListener("click", (ev) => ev.stopPropagation());
+
+      const btnCloseF = filterPop.querySelector("#btnNvFilterClose");
+      if (btnCloseF) {
+        btnCloseF.onclick = () => {
+          st.wpFilterOpen = false;
+          renderRouteDetailView(routePanel, rt);
+        };
+      }
+
+      const btnAllF = filterPop.querySelector("#btnNvFilterAllParams");
+      if (btnAllF) {
+        btnAllF.onclick = () => {
+          st.visibleWpParams = NAVTOR_WP_PARAM_SPECS.map((s) => s.key);
+          saveVisibleWpParams(st.visibleWpParams);
+          renderRouteDetailView(routePanel, rt);
+        };
+      }
+
+      const btnDefF = filterPop.querySelector("#btnNvFilterDefaultParams");
+      if (btnDefF) {
+        btnDefF.onclick = () => {
+          st.visibleWpParams = DEFAULT_VISIBLE_WP_PARAMS.slice();
+          saveVisibleWpParams(st.visibleWpParams);
+          st.midScrollLeft = 0;
+          renderRouteDetailView(routePanel, rt);
+        };
+      }
+
+      const btnBulkAll = filterPop.querySelector("#btnNvBulkCheckAll");
+      if (btnBulkAll) {
+        btnBulkAll.onclick = () => {
+          for (let i = 0; i < wps.length; i++) st.checkedWpIdxs.add(i);
+          renderRouteDetailView(routePanel, rt);
+        };
+      }
+
+      const btnBulkClr = filterPop.querySelector("#btnNvBulkClearAll");
+      if (btnBulkClr) {
+        btnBulkClr.onclick = () => {
+          st.checkedWpIdxs.clear();
+          renderRouteDetailView(routePanel, rt);
+        };
+      }
+
+      filterPop.querySelectorAll("[data-nv-param-toggle]").forEach((chk) => {
+        chk.onchange = () => {
+          const key = chk.getAttribute("data-nv-param-toggle");
+          const curSet = new Set(st.visibleWpParams);
+          if (chk.checked) {
+            curSet.add(key);
+          } else {
+            if (curSet.size <= 1) {
+              chk.checked = true;
+              return;
+            }
+            curSet.delete(key);
+          }
+          st.visibleWpParams = NAVTOR_WP_PARAM_SPECS.map((s) => s.key).filter((k) => curSet.has(k));
+          saveVisibleWpParams(st.visibleWpParams);
+          renderRouteDetailView(routePanel, rt);
+        };
+      });
+
+      filterPop.querySelectorAll("[data-nv-param-only]").forEach((onlyBtn) => {
+        onlyBtn.onclick = () => {
+          const key = onlyBtn.getAttribute("data-nv-param-only");
+          if (!key) return;
+          st.visibleWpParams = [key];
+          saveVisibleWpParams(st.visibleWpParams);
+          st.midScrollLeft = 0;
+          renderRouteDetailView(routePanel, rt);
+        };
+      });
     }
 
     const btnAddWp = routePanel.querySelector("#btnNvAddWaypoint");
@@ -47952,21 +48459,6 @@ if (document.readyState === "loading") {
         persistCurrentNavtorRoute(true);
         if (window.leafletMap && typeof window.leafletMap.flyTo === "function") {
           try { window.leafletMap.flyTo([pLat, pLon], Math.max(window.leafletMap.getZoom(), 8), { duration: 0.8 }); } catch (e) {}
-        }
-        renderNavtorSidebar();
-      };
-    });
-
-    routePanel.querySelectorAll("[data-nv-wp-idx]").forEach((row) => {
-      row.onclick = () => {
-        const idx = parseInt(row.getAttribute("data-nv-wp-idx"), 10);
-        if (!Number.isFinite(idx) || !rt.waypoints[idx]) return;
-        st.wptIdx = idx;
-        st.view = "waypoint";
-        const wp = rt.waypoints[idx];
-        const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
-        if (map && Number.isFinite(Number(wp.lat)) && Number.isFinite(Number(wp.lon))) {
-          try { map.flyTo([Number(wp.lat), Number(wp.lon)], Math.max(map.getZoom(), 10), { duration: 0.65 }); } catch (e) {}
         }
         renderNavtorSidebar();
       };
@@ -48067,7 +48559,7 @@ if (document.readyState === "loading") {
       '<div class="ntm-nv-wpt-form-scroll">' +
         '<div class="ntm-nv-wpt-id-row">' +
           '<span class="ntm-nv-lbl">Waypoint:</span>' +
-          '<span class="ntm-nv-wpt-id-val">WP' + idx + '</span>' +
+          '<span class="ntm-nv-wpt-id-val">WP' + (idx + 1) + '</span>' +
         '</div>' +
         '<div class="ntm-nv-inline-field">' +
           '<label class="ntm-nv-lbl" for="nvWptName">WP name:</label>' +
@@ -48275,6 +48767,7 @@ if (document.readyState === "loading") {
     if (btnDel && isEditing) {
       btnDel.onclick = () => {
         rt.waypoints.splice(idx, 1);
+        st.checkedWpIdxs.clear();
         persistCurrentNavtorRoute(true);
         if (rt.waypoints.length === 0) {
           st.wptIdx = 0;
@@ -48284,7 +48777,7 @@ if (document.readyState === "loading") {
         }
         renderNavtorSidebar();
         if (typeof showSetSailToast === "function") {
-          showSetSailToast("Deleted WP" + idx, "info");
+          showSetSailToast("Deleted WP" + (idx + 1), "info");
         }
       };
     }
@@ -48319,7 +48812,7 @@ if (document.readyState === "loading") {
       persistCurrentNavtorRoute(true);
       renderWaypointEditView(wptPanel, rt);
       if (typeof showSetSailToast === "function") {
-        showSetSailToast("Reset WP" + idx + " to " + pType + " defaults", "info");
+        showSetSailToast("Reset WP" + (idx + 1) + " to " + pType + " defaults", "info");
       }
     };
 
@@ -48373,7 +48866,6 @@ if (document.readyState === "loading") {
 
   window.renderNavtorSidebar = renderNavtorSidebar;
 
-  // Open a route into Route Detail View (starts with Edit OFF so user sees the Edit button)
   window.openNavtorRouteInSidebar = function (routeId, opts) {
     opts = opts || {};
     const st = window._sidebarNavtorState;
@@ -48383,6 +48875,9 @@ if (document.readyState === "loading") {
     st.wptSearch = "";
     st.destPickerOpen = false;
     st.ppMenuOpen = false;
+    st.wpFilterOpen = false;
+    st.checkedWpIdxs.clear();
+    st.midScrollLeft = 0;
     st.view = "route";
 
     if (!opts.skipPlot) {
