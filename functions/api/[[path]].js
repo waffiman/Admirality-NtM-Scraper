@@ -8,6 +8,7 @@ import utc from "../../api/utc.js";
 import track from "../../api/track.js";
 import stats from "../../api/stats.js";
 import userProfile from "../../api/user-profile.js";
+import monitoringEmail from "../../api/monitoring-email.js";
 import setrouteIntent from "../../api/setroute-intent.js";
 import turnstileConfig from "../../api/turnstile-config.js";
 import turnstileVerify from "../../api/turnstile-verify.js";
@@ -21,6 +22,7 @@ const HANDLERS = {
   track,
   stats,
   "user-profile": userProfile,
+  "monitoring-email": monitoringEmail,
   "setroute-intent": setrouteIntent,
   "turnstile-config": turnstileConfig,
   "turnstile-verify": turnstileVerify,

@@ -187,6 +187,7 @@
     var ntmOverrides = null;
     var gyroDevTable = undefined;
     var newsProfile = null;
+    var monitoringAlerts = null;
     var drActiveRouteId = null;
     var drHandoff = null;
     var drLastRails = null;
@@ -208,6 +209,9 @@
     try {
       newsProfile = JSON.parse(localStorage.getItem("setsail_news_user_profile_v1") || "null");
     } catch (e6) {}
+    try {
+      monitoringAlerts = JSON.parse(localStorage.getItem("setsail_monitoring_alerts_v1") || "null");
+    } catch (e6m) {}
     try {
       drActiveRouteId = localStorage.getItem("setsail_dr_active_route_id_v1") || null;
       var hoRaw = localStorage.getItem("setsail_dr_route_handoff_v1");
@@ -257,6 +261,8 @@
       gyroUpdatedAt: getLocalStamp("setsail_gyro_updated_at_v1"),
       newsProfile: newsProfile,
       newsUpdatedAt: getLocalStamp("setsail_news_updated_at_v1"),
+      monitoringAlerts: monitoringAlerts,
+      monitoringAlertsUpdatedAt: getLocalStamp("setsail_monitoring_alerts_updated_at_v1"),
       settings: settings,
       settingsUpdatedAt: getLocalStamp("setsail_settings_updated_at_v1"),
       updatedAt: Date.now()
@@ -436,6 +442,14 @@
         setLocalStamp("setsail_news_updated_at_v1", rNewsTs);
       }
     } catch (eNw) {}
+
+    try {
+      var rMonTs = Number(profile.monitoringAlertsUpdatedAt) || 0;
+      if (profile.monitoringAlerts && rMonTs > getLocalStamp("setsail_monitoring_alerts_updated_at_v1")) {
+        localStorage.setItem("setsail_monitoring_alerts_v1", JSON.stringify(profile.monitoringAlerts));
+        setLocalStamp("setsail_monitoring_alerts_updated_at_v1", rMonTs);
+      }
+    } catch (eMon) {}
 
     try {
       var rSetTs = Number(profile.settingsUpdatedAt) || 0;
@@ -767,6 +781,8 @@
       setLocalStamp("setsail_gyro_updated_at_v1", now);
     } else if (domain === "news") {
       setLocalStamp("setsail_news_updated_at_v1", now);
+    } else if (domain === "monitoring_alerts") {
+      setLocalStamp("setsail_monitoring_alerts_updated_at_v1", now);
     } else if (domain === "settings") {
       setLocalStamp("setsail_settings_updated_at_v1", now);
     }

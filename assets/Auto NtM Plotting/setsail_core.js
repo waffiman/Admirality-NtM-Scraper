@@ -47329,7 +47329,15 @@ if (document.readyState === "loading") {
     wpFilterOpen: false,
     visibleWpParams: loadVisibleWpParams(),
     checkedWpIdxs: new Set(),
-    midScrollLeft: 0
+    midScrollLeft: 0,
+    monSeverityFilter: "all",
+    monCategoryFilter: "all",
+    monViewOverride: null,
+    monExpandedIds: new Set(),
+    monPassedOpen: false,
+    monEmailOpen: false,
+    monEmailSending: false,
+    monLastStatusMsg: ""
   };
   if (!window._sidebarNavtorState.detailTab) {
     window._sidebarNavtorState.detailTab = "planning";
@@ -47342,6 +47350,9 @@ if (document.readyState === "loading") {
   }
   if (!(window._sidebarNavtorState.checkedWpIdxs instanceof Set)) {
     window._sidebarNavtorState.checkedWpIdxs = new Set();
+  }
+  if (!(window._sidebarNavtorState.monExpandedIds instanceof Set)) {
+    window._sidebarNavtorState.monExpandedIds = new Set();
   }
 
   function escHtml(s) {
@@ -47729,28 +47740,27 @@ if (document.readyState === "loading") {
   }
 
   function runRouteSafetyCheck(rt) {
+    const st = window._sidebarNavtorState;
     const wps = (rt && Array.isArray(rt.waypoints)) ? rt.waypoints : [];
+    if (st) {
+      st.detailTab = "monitoring";
+    }
     if (wps.length < 2) {
       if (typeof showSetSailToast === "function") {
         showSetSailToast("Route check: add at least 2 waypoints to validate legs.", "info");
       }
       return;
     }
-    if (typeof enrichRouteWithLegsTelemetry === "function") {
-      try { enrichRouteWithLegsTelemetry(rt); } catch (e) {}
-    }
-    let ntmCount = 0;
-    let wxCount = 0;
-    (rt.legs || []).forEach((lg) => {
-      if (lg && Array.isArray(lg.ntmHits)) ntmCount += lg.ntmHits.length;
-      if (lg && Array.isArray(lg.weatherHits)) wxCount += lg.weatherHits.length;
-    });
-    if (ntmCount === 0 && wxCount === 0) {
+    const rep = evaluateRouteMonitoringReport(rt);
+    if (rep.alarms.length === 0 && rep.warnings.length === 0) {
       if (typeof showSetSailToast === "function") {
-        showSetSailToast("Route Check OK: " + (wps.length - 1) + " legs clear of active NtM & storm advisories.", "success");
+        showSetSailToast("Route Check OK: 0 Alarms, 0 Warnings across " + (wps.length - 1) + " legs.", "success");
       }
     } else if (typeof showSetSailToast === "function") {
-      showSetSailToast("Route Check: " + ntmCount + " NtM/NAVTEX & " + wxCount + " weather advisories near track.", "warning");
+      showSetSailToast(
+        "Route Monitoring: " + rep.alarms.length + " Alarm(s), " + rep.warnings.length + " Warning(s) detected.",
+        rep.alarms.length > 0 ? "warning" : "info"
+      );
     }
   }
 
@@ -48130,6 +48140,2095 @@ if (document.readyState === "loading") {
     );
   }
 
+
+  // ===========================================================================
+  // v5.269: ECDIS ROUTE MONITORING ENGINE (Static Route Check + Blind-Bridge Live Watch)
+  //         & Account Email Alert Notification Module
+  // ===========================================================================
+  const MONITORING_ALERTS_STORAGE_KEY = "setsail_monitoring_alerts_v1";
+  let _monitoringLiveInterval = null;
+  let _monitoringFocusLayer = null;
+  let _monitoringSubseaLoadTried = false;
+  let _monitoringCoastLoadTried = false;
+
+  function loadMonitoringEmailPrefs() {
+    const defaults = {
+      enabled: false,
+      level: "alarms_only", // "alarms_only" | "all"
+      categories: { nav: true, traffic: true, weather: true, ntm: true },
+      cooldownMin: 30,
+      lastSentAt: 0,
+      lastSentIso: "",
+      lastDigestHash: "",
+      formsubmitActivated: false
+    };
+    try {
+      const raw = localStorage.getItem(MONITORING_ALERTS_STORAGE_KEY);
+      if (!raw) return defaults;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return defaults;
+      const cats = Object.assign({}, defaults.categories, parsed.categories || {});
+      return Object.assign({}, defaults, parsed, { categories: cats });
+    } catch (e) {
+      return defaults;
+    }
+  }
+
+  function saveMonitoringEmailPrefs(prefs, skipCloud) {
+    try {
+      localStorage.setItem(MONITORING_ALERTS_STORAGE_KEY, JSON.stringify(prefs));
+      localStorage.setItem("setsail_monitoring_alerts_updated_at_v1", String(Date.now()));
+    } catch (e) {}
+    if (!skipCloud) {
+      try {
+        if (window.SetSailProfileSync && typeof window.SetSailProfileSync.touchDomain === "function") {
+          window.SetSailProfileSync.touchDomain("monitoring_alerts");
+        } else if (window.SetSailProfileSync && typeof window.SetSailProfileSync.schedulePush === "function") {
+          window.SetSailProfileSync.schedulePush();
+        }
+      } catch (eSync) {}
+    }
+  }
+
+  function warmMonitoringDatasets() {
+    if (!_monitoringCoastLoadTried && typeof loadSetrouteCoastGrid === "function") {
+      if (!SETROUTE_COAST_GRID || !SETROUTE_LAND_MASK) {
+        _monitoringCoastLoadTried = true;
+        loadSetrouteCoastGrid(false)
+          .then(() => {
+            refreshMonitoringPanelInPlace();
+          })
+          .catch(() => {});
+      }
+    }
+    if (!_monitoringSubseaLoadTried && !window._subseaInfraData && typeof fetch === "function") {
+      _monitoringSubseaLoadTried = true;
+      fetch("assets/geo/setroute_subsea_cables_pipelines.json", { cache: "force-cache" })
+        .then((r) => (r && r.ok ? r.json() : null))
+        .then((d) => {
+          if (d && Array.isArray(d.features)) {
+            window._subseaInfraData = d;
+            refreshMonitoringPanelInPlace();
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
+  function clearMonitoringChartFocus() {
+    if (_monitoringFocusLayer) {
+      try {
+        const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+        if (map && map.hasLayer && map.hasLayer(_monitoringFocusLayer)) {
+          map.removeLayer(_monitoringFocusLayer);
+        }
+      } catch (e) {}
+      _monitoringFocusLayer = null;
+    }
+  }
+
+  function pulseMonitoringChartFocus(lat, lon, severity, targetZoom) {
+    const map = window.leafletMap || (typeof leafletMap !== "undefined" ? leafletMap : null);
+    if (!map || typeof L === "undefined" || !Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    clearMonitoringChartFocus();
+    const color = severity === "alarm" ? "#ef4444" : "#f59e0b";
+    try {
+      const zNow = typeof map.getZoom === "function" ? map.getZoom() : 8;
+      const zDest = Math.max(zNow, Number(targetZoom) || 9);
+      map.flyTo([lat, lon], zDest, { duration: 0.65 });
+      const grp = L.layerGroup();
+      L.circleMarker([lat, lon], {
+        radius: 15,
+        color: color,
+        weight: 2.4,
+        opacity: 0.95,
+        fillColor: color,
+        fillOpacity: 0.14,
+        dashArray: "4, 3",
+        interactive: false
+      }).addTo(grp);
+      L.circleMarker([lat, lon], {
+        radius: 5,
+        color: "#ffffff",
+        weight: 1.8,
+        opacity: 1,
+        fillColor: color,
+        fillOpacity: 0.95,
+        interactive: false
+      }).addTo(grp);
+      grp.addTo(map);
+      _monitoringFocusLayer = grp;
+    } catch (eFocus) {}
+  }
+
+  function monAngleDiffSigned(targetDeg, refDeg) {
+    return (((targetDeg - refDeg) % 360) + 540) % 360 - 180;
+  }
+
+  function monAngleDiffAbs(a, b) {
+    return Math.abs(monAngleDiffSigned(a, b));
+  }
+
+  function monBearingDeg(lat1, lon1, lat2, lon2) {
+    const toRad = Math.PI / 180;
+    const f1 = lat1 * toRad;
+    const f2 = lat2 * toRad;
+    const dLon = (((lon2 - lon1) + 540) % 360 - 180) * toRad;
+    const y = Math.sin(dLon) * Math.cos(f2);
+    const x = Math.cos(f1) * Math.sin(f2) - Math.sin(f1) * Math.cos(f2) * Math.cos(dLon);
+    return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+  }
+
+  function monCompass8(deg) {
+    if (!Number.isFinite(deg)) return "—";
+    const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return dirs[Math.round((((deg % 360) + 360) % 360) / 45) % 8];
+  }
+
+  /**
+   * High-sensitivity land/coastline test for Route Check (catches short coastal,
+   * island, breakwater, and peninsula crossings down to 0.35 NM while trimming
+   * berth-endpoint shoreline touch on the very first/last 6% of port legs).
+   */
+  function monCheckLegCrossesLand(wpA, wpB, legIdx, totalLegs, legDistNm) {
+    if (!wpA || !wpB || legDistNm < 0.35) return null;
+    const tStart = legIdx === 0 ? 0.07 : 0.015;
+    const tEnd = legIdx === totalLegs - 1 ? 0.93 : 0.985;
+    if (tEnd <= tStart) return null;
+
+    const pA = setrouteLerpLatLon(Number(wpA.lat), Number(wpA.lon), Number(wpB.lat), Number(wpB.lon), tStart);
+    const pB = setrouteLerpLatLon(Number(wpA.lat), Number(wpA.lon), Number(wpB.lat), Number(wpB.lon), tEnd);
+
+    if (SETROUTE_COAST_GRID && SETROUTE_COAST_GRID.cells) {
+      const testedRef = { n: 0 };
+      const budget = 900;
+      if (
+        setrouteTestCoastSegBuckets(
+          pA[0], pA[1], pB[0], pB[1],
+          SETROUTE_COAST_GRID.cells,
+          SETROUTE_COAST_GRID.cellDeg || 2.5,
+          testedRef,
+          budget
+        )
+      ) {
+        const mid = setrouteLerpLatLon(pA[0], pA[1], pB[0], pB[1], 0.5);
+        return { lat: mid[0], lon: mid[1], source: "coastline" };
+      }
+      if (SETROUTE_COAST_GRID.landPolyCells && SETROUTE_COAST_GRID.landPolyCellDeg) {
+        if (
+          setrouteTestCoastSegBuckets(
+            pA[0], pA[1], pB[0], pB[1],
+            SETROUTE_COAST_GRID.landPolyCells,
+            SETROUTE_COAST_GRID.landPolyCellDeg,
+            testedRef,
+            budget
+          )
+        ) {
+          const mid = setrouteLerpLatLon(pA[0], pA[1], pB[0], pB[1], 0.5);
+          return { lat: mid[0], lon: mid[1], source: "land_polygon" };
+        }
+      }
+    }
+
+    // Dense interior raster check for long island/continental chords
+    if (legDistNm >= 12) {
+      const steps = Math.min(28, Math.max(4, Math.ceil(legDistNm / 15)));
+      for (let s = 1; s < steps; s++) {
+        const frac = tStart + ((tEnd - tStart) * s) / steps;
+        const pt = setrouteLerpLatLon(Number(wpA.lat), Number(wpA.lon), Number(wpB.lat), Number(wpB.lon), frac);
+        if (typeof setroutePointInLandMask === "function" && setroutePointInLandMask(pt[0], pt[1])) {
+          return { lat: pt[0], lon: pt[1], source: "land_mask" };
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Project vessel onto route legs and compute signed XTD (PORT / STBD),
+   * active leg index, remaining distance on leg, and cumulative remaining voyage distance.
+   */
+  function monProjectVesselOntoRoute(vLat, vLon, vCog, wps, legDists) {
+    if (!Array.isArray(wps) || wps.length < 2) return null;
+    let best = null;
+    let bestScore = Infinity;
+
+    for (let i = 0; i < wps.length - 1; i++) {
+      const a = wps[i];
+      const b = wps[i + 1];
+      const proj = setrouteProjectOntoRoute(vLat, vLon, [a, b]);
+      if (!proj) continue;
+      const legCourse = typeof calculateLegCourseDegrees === "function"
+        ? calculateLegCourseDegrees(Number(a.lat), Number(a.lon), Number(b.lat), Number(b.lon), a.sail || "RL")
+        : monBearingDeg(Number(a.lat), Number(a.lon), Number(b.lat), Number(b.lon));
+      // Slight tie-break preference for course-aligned leg near waypoint turns
+      const cogPenalty = Number.isFinite(vCog) ? (monAngleDiffAbs(vCog, legCourse) / 180) * 0.18 : 0;
+      const score = proj.distNm + cogPenalty;
+      if (score < bestScore) {
+        bestScore = score;
+        best = {
+          legIdx: i,
+          distNm: proj.distNm,
+          projLat: proj.projLat,
+          projLon: proj.projLon,
+          legTotalNm: legDists[i] || proj.totalNm || computeLegDistanceNm(a, b),
+          alongLegNm: proj.sNm || 0,
+          legCourse: legCourse
+        };
+      }
+    }
+    if (!best) return null;
+
+    const wpA = wps[best.legIdx];
+    const wpB = wps[best.legIdx + 1];
+    const brgFromWpA = monBearingDeg(Number(wpA.lat), Number(wpA.lon), vLat, vLon);
+    const relFromTrack = monAngleDiffSigned(brgFromWpA, best.legCourse);
+    // relFromTrack > 0 means ship sits to STARBOARD of planned track; < 0 means PORT of track
+    const xtdSide = best.distNm < 0.005 ? "ON TRACK" : (relFromTrack >= 0 ? "STBD" : "PORT");
+    const pXtd = Number.isFinite(Number(wpA.portsideXTD)) ? Math.max(0.02, Number(wpA.portsideXTD)) : 0.15;
+    const sXtd = Number.isFinite(Number(wpA.starboardXTD)) ? Math.max(0.02, Number(wpA.starboardXTD)) : 0.15;
+    const allowedXtdNm = xtdSide === "PORT" ? pXtd : (xtdSide === "STBD" ? sXtd : Math.min(pXtd, sXtd));
+
+    const remOnLegNm = Math.max(0, computeLegDistanceNm({ lat: best.projLat, lon: best.projLon, sail: wpA.sail }, wpB));
+    let remAfterLegNm = 0;
+    for (let k = best.legIdx + 1; k < wps.length - 1; k++) {
+      remAfterLegNm += (legDists[k] || computeLegDistanceNm(wps[k], wps[k + 1]));
+    }
+
+    return Object.assign(best, {
+      xtdSide,
+      portXtdLimit: pXtd,
+      stbdXtdLimit: sXtd,
+      allowedXtdNm,
+      xtdRatio: best.distNm / Math.max(0.02, allowedXtdNm),
+      signedRatio: (xtdSide === "PORT" ? -1 : 1) * Math.min(1.6, best.distNm / Math.max(0.02, allowedXtdNm)),
+      remOnLegNm,
+      remVoyageNm: remOnLegNm + remAfterLegNm
+    });
+  }
+
+  /**
+   * Sample local wind / waves / pressure at (lat, lon) using SetSail synoptic & cached Open-Meteo feeds.
+   */
+  function monSamplePointWeather(lat, lon) {
+    let windKt = null;
+    let windDirDeg = null;
+    let waveM = null;
+    let pressureHpa = null;
+    let currentKn = null;
+
+    try {
+      if (typeof window.getCachedOpenMeteoPointWx === "function") {
+        const om = window.getCachedOpenMeteoPointWx(lat, lon);
+        if (om && typeof om === "object") {
+          if (Number.isFinite(Number(om.windKt))) windKt = Number(om.windKt);
+          else if (Number.isFinite(Number(om.windSpeedKt))) windKt = Number(om.windSpeedKt);
+          if (Number.isFinite(Number(om.windDir))) windDirDeg = Number(om.windDir);
+          if (Number.isFinite(Number(om.waveHeightM))) waveM = Number(om.waveHeightM);
+          else if (Number.isFinite(Number(om.waveM))) waveM = Number(om.waveM);
+          if (Number.isFinite(Number(om.pressureHpa))) pressureHpa = Number(om.pressureHpa);
+        }
+      }
+    } catch (eOm) {}
+
+    try {
+      if (typeof window.sampleSynopticWeatherAtLatLon === "function") {
+        const syn = window.sampleSynopticWeatherAtLatLon(lat, lon);
+        if (syn && typeof syn === "object") {
+          if (windKt == null && Number.isFinite(Number(syn.windKt))) windKt = Number(syn.windKt);
+          if (windDirDeg == null && Number.isFinite(Number(syn.windFromDeg != null ? syn.windFromDeg : syn.windDirDeg))) {
+            windDirDeg = Number(syn.windFromDeg != null ? syn.windFromDeg : syn.windDirDeg);
+          }
+          if (waveM == null && Number.isFinite(Number(syn.waveHeightM != null ? syn.waveHeightM : syn.waveM))) {
+            waveM = Number(syn.waveHeightM != null ? syn.waveHeightM : syn.waveM);
+          }
+          if (pressureHpa == null && Number.isFinite(Number(syn.pressureHpa != null ? syn.pressureHpa : syn.slpHpa))) {
+            pressureHpa = Number(syn.pressureHpa != null ? syn.pressureHpa : syn.slpHpa);
+          }
+        }
+      }
+    } catch (eSyn) {}
+
+    try {
+      if (windKt == null && typeof window.sampleWindAtLatLon === "function") {
+        const w = window.sampleWindAtLatLon(lat, lon);
+        if (w && Number.isFinite(Number(w.speedKt != null ? w.speedKt : w.windKt))) {
+          windKt = Number(w.speedKt != null ? w.speedKt : w.windKt);
+          if (Number.isFinite(Number(w.fromDeg != null ? w.fromDeg : w.dirDeg))) {
+            windDirDeg = Number(w.fromDeg != null ? w.fromDeg : w.dirDeg);
+          }
+        }
+      }
+      if (pressureHpa == null && typeof window.samplePressureGridAtLatLon === "function") {
+        const p = window.samplePressureGridAtLatLon(lat, lon);
+        if (Number.isFinite(Number(p))) pressureHpa = Number(p);
+        else if (p && Number.isFinite(Number(p.hpa))) pressureHpa = Number(p.hpa);
+      }
+      if (typeof window.sampleCurrentAtLatLon === "function") {
+        const cur = window.sampleCurrentAtLatLon(lat, lon);
+        if (cur && Number.isFinite(Number(cur.speedKt != null ? cur.speedKt : cur.kn))) {
+          currentKn = Number(cur.speedKt != null ? cur.speedKt : cur.kn);
+        }
+      }
+    } catch (eGrid) {}
+
+    // Fallback wave check against MARINE_WEATHER_STORE.waves basins
+    if (waveM == null && typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.waves)) {
+      for (let i = 0; i < MARINE_WEATHER_STORE.waves.length; i++) {
+        const wb = MARINE_WEATHER_STORE.waves[i];
+        if (!wb || !Array.isArray(wb.center)) continue;
+        const d = calculateHaversineDistanceNM(lat, lon, wb.center[0], wb.center[1]);
+        if (d <= (wb.radiusNm || 200) * 1.15 && Number.isFinite(Number(wb.waveHeight))) {
+          waveM = Math.max(waveM || 0, Number(wb.waveHeight));
+        }
+      }
+    }
+
+    return { windKt, windDirDeg, waveM, pressureHpa, currentKn };
+  }
+
+  /**
+   * Compute live AIS CPA / TCPA / Bow Crossing & COLREG encounter geometry around Own Ship.
+   */
+  function monEvaluateLiveAisTraffic(vLat, vLon, vSog, vCog, ownMmsi, ownName) {
+    const out = { alerts: [], nearestSummary: "Clear >12 NM", targetsNearCount: 0, minCpaNm: null, minTcpaMin: null };
+    if (typeof window.getAisTargetsSnapshot !== "function") return out;
+
+    let snap = [];
+    try {
+      snap = window.getAisTargetsSnapshot(3000) || [];
+    } catch (e) {
+      snap = [];
+    }
+    if (!snap.length) return out;
+
+    const ownMmsiClean = String(ownMmsi || "").trim();
+    const ownNameClean = String(ownName || "").trim().toUpperCase();
+    const cosLat = Math.max(0.15, Math.cos((vLat * Math.PI) / 180));
+    const toRad = Math.PI / 180;
+    const ownSpd = Number.isFinite(vSog) && vSog >= 0 ? vSog : 0;
+    const ownCrs = Number.isFinite(vCog) ? vCog : 0;
+    const vOx = ownSpd * Math.sin(ownCrs * toRad);
+    const vOy = ownSpd * Math.cos(ownCrs * toRad);
+
+    let closestTarget = null;
+    const candidates = [];
+
+    for (let i = 0; i < snap.length; i++) {
+      const t = snap[i];
+      if (!t || !Number.isFinite(t.lat) || !Number.isFinite(t.lon)) continue;
+      const tMmsi = String(t.mmsi || "").trim();
+      const tName = String(t.name || "").trim();
+      if (ownMmsiClean && tMmsi && tMmsi === ownMmsiClean) continue;
+      if (!ownMmsiClean && ownNameClean && tName && tName.toUpperCase() === ownNameClean) continue;
+
+      const dy = (t.lat - vLat) * 60;
+      const dx = (((t.lon - vLon) + 540) % 360 - 180) * 60 * cosLat;
+      const rangeNm = Math.hypot(dx, dy);
+      if (rangeNm > 20 || rangeNm < 0.002) continue;
+      out.targetsNearCount++;
+
+      const tSpd = Number.isFinite(t.sog) && t.sog >= 0 ? t.sog : 0;
+      const tCrs = Number.isFinite(t.cog) ? t.cog : (Number.isFinite(t.heading) ? t.heading : 0);
+      const vTx = tSpd * Math.sin(tCrs * toRad);
+      const vTy = tSpd * Math.cos(tCrs * toRad);
+
+      // Relative velocity of Target wrt Own Ship (NM / hour)
+      const rVx = vTx - vOx;
+      const rVy = vTy - vOy;
+      const relSpdSq = rVx * rVx + rVy * rVy;
+
+      let cpaNm = rangeNm;
+      let tcpaMin = 0;
+      if (relSpdSq > 0.04) {
+        const tcpaHours = -(dx * rVx + dy * rVy) / relSpdSq;
+        if (tcpaHours > 0) {
+          tcpaMin = tcpaHours * 60;
+          const cpaX = dx + rVx * tcpaHours;
+          const cpaY = dy + rVy * tcpaHours;
+          cpaNm = Math.hypot(cpaX, cpaY);
+        } else {
+          tcpaMin = tcpaHours * 60; // Negative = diverging / past CPA
+          cpaNm = rangeNm;
+        }
+      }
+
+      const trueBrg = ((Math.atan2(dx, dy) * 180) / Math.PI + 360) % 360;
+      const relBrg = (((trueBrg - ownCrs) % 360) + 360) % 360; // 0..360 clockwise from bow
+
+      if (!closestTarget || (tcpaMin >= 0 && cpaNm < closestTarget.cpaNm) || (closestTarget.tcpaMin < 0 && rangeNm < closestTarget.rangeNm)) {
+        closestTarget = { name: tName || ("MMSI " + (tMmsi || "?")), rangeNm, cpaNm, tcpaMin };
+      }
+
+      const isAlarm =
+        rangeNm < 0.45 ||
+        (tcpaMin >= 0 && tcpaMin <= 15 && cpaNm < 0.50);
+      const isWarning =
+        !isAlarm &&
+        ((tcpaMin >= 0 && tcpaMin <= 35 && cpaNm < 1.50) ||
+          (tSpd < 0.5 && rangeNm <= 1.2 && (relBrg <= 30 || relBrg >= 330)));
+
+      if (!isAlarm && !isWarning) continue;
+
+      // Classify COLREG encounter (Rules 13, 14, 15, 17)
+      let colregRole = "COLREG Rule 7/8 — Risk of collision";
+      let actionHint = "Monitor radar/AIS bearing drift; take early, substantial action.";
+      if (tSpd < 0.5) {
+        colregRole = "Stationary / Anchored target ahead";
+        actionHint = "Target SOG < 0.5 kn — keep clear with wide berth.";
+      } else {
+        const crsDiff = monAngleDiffAbs(ownCrs, tCrs);
+        const onBow = relBrg <= 14 || relBrg >= 346;
+        if (onBow && crsDiff >= 162) {
+          colregRole = "COLREG Rule 14 — Head-On Situation";
+          actionHint = "Alter course to STARBOARD so each vessel passes on port side of the other.";
+        } else if (relBrg > 112.5 && relBrg < 247.5) {
+          colregRole = "COLREG Rule 13 — Being Overtaken (Stand-On)";
+          actionHint = "Maintain course and speed; overtaking vessel must keep clear.";
+        } else {
+          // Check if we are abaft target's beam (overtaking target)
+          const brgTargetToOwn = (trueBrg + 180) % 360;
+          const relOnTarget = (((brgTargetToOwn - tCrs) % 360) + 360) % 360;
+          if (relOnTarget > 112.5 && relOnTarget < 247.5 && ownSpd > tSpd + 0.5) {
+            colregRole = "COLREG Rule 13 — Overtaking (Give-Way)";
+            actionHint = "You are overtaking — keep out of the way of the vessel being overtaken.";
+          } else if (relBrg >= 5 && relBrg <= 112.5) {
+            colregRole = "COLREG Rule 15 — Crossing (GIVE-WAY)";
+            actionHint = "Target on your STARBOARD side — alter course to Starboard / reduce speed; avoid crossing ahead.";
+          } else {
+            colregRole = "COLREG Rule 17 — Crossing (STAND-ON)";
+            actionHint = "Target on your PORT side — maintain course & speed; take action per Rule 17(a)(ii) if give-way vessel fails to act.";
+          }
+        }
+      }
+
+      const relSideStr = relBrg <= 180
+        ? ("Stbd " + Math.round(relBrg) + "°")
+        : ("Port " + Math.round(360 - relBrg) + "°");
+      const dispName = tName || (tMmsi ? "MMSI " + tMmsi : "AIS Target");
+
+      candidates.push({
+        id: "ais_" + (tMmsi || dispName),
+        severity: isAlarm ? "alarm" : "warning",
+        category: "traffic",
+        tag: "TRAFFIC",
+        sortKey: cpaNm + (tcpaMin > 0 ? tcpaMin * 0.01 : 0),
+        title: (isAlarm ? "Collision Risk: " : "Traffic CPA: ") + dispName,
+        badge: "CPA " + cpaNm.toFixed(2) + " NM · " + Math.max(0, Math.round(tcpaMin)) + "m",
+        summary: "Rng " + rangeNm.toFixed(1) + " NM (" + relSideStr + ") · SOG " + tSpd.toFixed(1) + " kn · COG " + Math.round(tCrs) + "°",
+        detail: colregRole + ". " + actionHint + (tMmsi ? " [MMSI " + tMmsi + (t.shipType ? ", " + t.shipType : "") + "]" : ""),
+        lat: t.lat,
+        lon: t.lon,
+        zoom: 11
+      });
+    }
+
+    candidates.sort((a, b) => {
+      if (a.severity !== b.severity) return a.severity === "alarm" ? -1 : 1;
+      return a.sortKey - b.sortKey;
+    });
+    out.alerts = candidates.slice(0, 8);
+
+    if (closestTarget) {
+      if (closestTarget.tcpaMin >= 0 && closestTarget.tcpaMin <= 60) {
+        out.nearestSummary = "CPA " + closestTarget.cpaNm.toFixed(2) + " NM / " + Math.round(closestTarget.tcpaMin) + "m";
+        out.minCpaNm = closestTarget.cpaNm;
+        out.minTcpaMin = closestTarget.tcpaMin;
+      } else {
+        out.nearestSummary = closestTarget.rangeNm.toFixed(1) + " NM (diverging)";
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Main deterministic Route Monitoring evaluator.
+   * Produces `{ mode, isLiveEligible, liveUnavailableReason, telemetry, alarms, warnings, passed, digestHash }`.
+   */
+  function evaluateRouteMonitoringReport(rt) {
+    warmMonitoringDatasets();
+
+    const st = window._sidebarNavtorState || {};
+    const wps = rt && Array.isArray(rt.waypoints) ? rt.waypoints : [];
+    const metrics = recomputeRouteNavtorMetrics(rt);
+    const legDists = metrics.legDists || [];
+    const totalLegs = Math.max(0, wps.length - 1);
+
+    const alarms = [];
+    const warnings = [];
+    const passed = [];
+    const seenIds = new Set();
+
+    const pushItem = (item) => {
+      if (!item || !item.id || seenIds.has(item.id)) return;
+      seenIds.add(item.id);
+      if (item.severity === "alarm") alarms.push(item);
+      else warnings.push(item);
+    };
+
+    // Determine Own-Ship & Current Route Live Watch eligibility
+    const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+    const isMarkedCurrent = Boolean(rt && drId && ((rt.id && rt.id === drId) || (rt.name && rt.name === drId)));
+    const v = window.userVessel || (typeof userVessel !== "undefined" ? userVessel : null);
+    const hasLiveCoords = Boolean(v && typeof isValidVesselLatLon === "function" && isValidVesselLatLon(v.lat, v.lon));
+    const hasAisCoords = Boolean(v && typeof isValidVesselLatLon === "function" && isValidVesselLatLon(v.aisFixLat, v.aisFixLon));
+    const hasVessel = Boolean(v && (hasLiveCoords || hasAisCoords));
+
+    const vLat = hasVessel ? Number(hasLiveCoords ? v.lat : v.aisFixLat) : NaN;
+    const vLon = hasVessel ? Number(hasLiveCoords ? v.lon : v.aisFixLon) : NaN;
+    const vSog = hasVessel && v.sog != null && Number.isFinite(Number(v.sog)) ? Number(v.sog) : 0;
+    const vCog = hasVessel && v.cog != null && Number.isFinite(Number(v.cog))
+      ? Number(v.cog)
+      : (hasVessel && v.heading != null && Number.isFinite(Number(v.heading)) && Number(v.heading) < 360 ? Number(v.heading) : NaN);
+
+    let shipProj = null;
+    if (hasVessel && wps.length >= 2) {
+      shipProj = monProjectVesselOntoRoute(vLat, vLon, vCog, wps, legDists);
+    }
+
+    const onRouteThresholdNm = shipProj ? Math.max(shipProj.allowedXtdNm * 2.5, 1.5) : 1.5;
+    const isVesselOnRoute = Boolean(isMarkedCurrent && hasVessel && shipProj && shipProj.distNm <= onRouteThresholdNm);
+
+    let liveUnavailableReason = "";
+    if (!isMarkedCurrent) {
+      liveUnavailableReason = "Mark route as Current (coral flag) with your vessel on track to unlock Blind-Bridge Live Watch.";
+    } else if (!hasVessel) {
+      liveUnavailableReason = "Select your vessel in 'My Vessel' to activate Live Watch.";
+    } else if (shipProj && shipProj.distNm > onRouteThresholdNm) {
+      liveUnavailableReason = "Vessel is " + shipProj.distNm.toFixed(1) + " NM off route — Live Watch activates automatically once within route corridor.";
+    }
+
+    const mode = isVesselOnRoute && st.monViewOverride !== "check" ? "live" : "check";
+
+    if (wps.length < 2) {
+      pushItem({
+        id: "geom_min_wps",
+        severity: "warning",
+        category: "nav",
+        tag: "GEOM",
+        title: "Route requires at least 2 waypoints",
+        badge: wps.length + " WP",
+        summary: "Add waypoints in Planning tab (Edit mode) to run full navigational checks.",
+        detail: "Static Route Check and Live Bridge Watch validate legs WP1→WP2... across land, bathymetry, TSS, weather, NtM, and AIS.",
+        lat: wps[0] ? Number(wps[0].lat) : null,
+        lon: wps[0] ? Number(wps[0].lon) : null,
+        zoom: 7
+      });
+      return {
+        mode: "check",
+        isLiveEligible: false,
+        liveUnavailableReason,
+        telemetry: null,
+        alarms,
+        warnings,
+        passed,
+        digestHash: "empty"
+      };
+    }
+
+    // Prefetch Open-Meteo point weather asynchronously for active position or route midpoint
+    try {
+      if (typeof window.prefetchOpenMeteoPointWx === "function" && navigator.onLine) {
+        const samplePt = mode === "live" ? [vLat, vLon] : [Number(wps[Math.floor(wps.length / 2)].lat), Number(wps[Math.floor(wps.length / 2)].lon)];
+        window.prefetchOpenMeteoPointWx(samplePt[0], samplePt[1]);
+      }
+    } catch (ePref) {}
+
+    // Determine starting leg index: in Live Watch we inspect from active leg forward; in Static Check we inspect all legs 0..totalLegs-1
+    const startLegIdx = mode === "live" && shipProj ? shipProj.legIdx : 0;
+
+    // -------------------------------------------------------------------------
+    // A. LIVE BLIND-BRIDGE CONNING, XTD, WHEEL-OVER, SENSOR & AIS TRAFFIC
+    // -------------------------------------------------------------------------
+    let telemetry = null;
+    if (mode === "live" && shipProj) {
+      const actIdx = shipProj.legIdx;
+      const wpFrom = wps[actIdx];
+      const wpTo = wps[actIdx + 1];
+      const legPlannedSpd = Math.max(0.5, Number(wpFrom.speedKnots) || 12.0);
+      const effSpdForEta = vSog >= 0.8 ? vSog : legPlannedSpd;
+      const ttgNextMin = (shipProj.remOnLegNm / Math.max(0.5, effSpdForEta)) * 60;
+      const remHours = shipProj.remVoyageNm / Math.max(0.5, effSpdForEta);
+      const etaDate = new Date(Date.now() + remHours * 3600000);
+      const etaUtcStr = etaDate.toISOString().slice(5, 16).replace("T", " ") + " UTC";
+
+      // Next leg turn & Wheel-Over Point (WOP)
+      let nextCourseDeg = null;
+      let turnDegSigned = 0;
+      let wopDistNm = shipProj.remOnLegNm;
+      if (actIdx + 2 < wps.length) {
+        const wpAfter = wps[actIdx + 2];
+        nextCourseDeg = typeof calculateLegCourseDegrees === "function"
+          ? calculateLegCourseDegrees(Number(wpTo.lat), Number(wpTo.lon), Number(wpAfter.lat), Number(wpAfter.lon), wpTo.sail || "RL")
+          : monBearingDeg(Number(wpTo.lat), Number(wpTo.lon), Number(wpAfter.lat), Number(wpAfter.lon));
+        turnDegSigned = monAngleDiffSigned(nextCourseDeg, shipProj.legCourse);
+        const turnRadNm = Math.max(0, Number(wpTo.turnRadius) || 0.3);
+        const halfTurnRad = (Math.min(150, Math.abs(turnDegSigned)) * Math.PI) / 360;
+        const leadNm = turnRadNm * Math.tan(halfTurnRad) + 0.08;
+        wopDistNm = Math.max(0, shipProj.remOnLegNm - leadNm);
+      }
+
+      // Course to regain centerline ~1.5 NM ahead along active leg
+      const lookAheadS = Math.min(shipProj.legTotalNm, shipProj.alongLegNm + Math.max(0.8, Math.min(2.5, shipProj.remOnLegNm)));
+      const regainFrac = shipProj.legTotalNm > 0.01 ? Math.min(1, lookAheadS / shipProj.legTotalNm) : 1;
+      const regainPt = setrouteLerpLatLon(Number(wpFrom.lat), Number(wpFrom.lon), Number(wpTo.lat), Number(wpTo.lon), regainFrac);
+      const ctsDeg = monBearingDeg(vLat, vLon, regainPt[0], regainPt[1]);
+      const driftDeg = Number.isFinite(vCog) ? Math.round(monAngleDiffSigned(vCog, shipProj.legCourse)) : null;
+
+      // Local weather at own ship
+      const localWx = monSamplePointWeather(vLat, vLon);
+      // Live AIS traffic CPA/TCPA
+      const aisEval = monEvaluateLiveAisTraffic(vLat, vLon, vSog, vCog, v && v.mmsi, v && v.name);
+
+      telemetry = {
+        vesselName: (v && v.name) || "Own Vessel",
+        mmsi: (v && v.mmsi) || "",
+        lat: vLat,
+        lon: vLon,
+        posFormatted: formatNavtorLatDms(vLat) + " " + formatNavtorLonDms(vLon),
+        sog: vSog,
+        plannedSpd: legPlannedSpd,
+        cog: Number.isFinite(vCog) ? Math.round(vCog) : null,
+        legCourse: Math.round(shipProj.legCourse),
+        ctsDeg: Math.round(ctsDeg),
+        driftDeg: driftDeg,
+        legNo: actIdx + 1,
+        totalLegs: totalLegs,
+        nextWpCode: "WP" + (actIdx + 2),
+        distToNextWpNm: shipProj.remOnLegNm,
+        wopDistNm: wopDistNm,
+        ttgNextMin: ttgNextMin,
+        nextCourseDeg: nextCourseDeg != null ? Math.round(nextCourseDeg) : null,
+        turnDegSigned: Math.round(turnDegSigned),
+        xtdNm: shipProj.distNm,
+        xtdSide: shipProj.xtdSide,
+        allowedXtdNm: shipProj.allowedXtdNm,
+        portXtdLimit: shipProj.portXtdLimit,
+        stbdXtdLimit: shipProj.stbdXtdLimit,
+        signedRatio: shipProj.signedRatio,
+        remVoyageNm: shipProj.remVoyageNm,
+        etaUtcStr: etaUtcStr,
+        windLabel: localWx.windKt != null
+          ? ((localWx.windDirDeg != null ? monCompass8(localWx.windDirDeg) + " " : "") + Math.round(localWx.windKt) + " kt")
+          : "Synoptic OK",
+        waveLabel: localWx.waveM != null ? ("Hs " + localWx.waveM.toFixed(1) + "m") : (localWx.pressureHpa != null ? Math.round(localWx.pressureHpa) + " hPa" : "Calm"),
+        aisSummary: aisEval.nearestSummary,
+        aisNearCount: aisEval.targetsNearCount
+      };
+
+      // 1) XTD Corridor Monitor
+      if (shipProj.distNm > shipProj.allowedXtdNm) {
+        pushItem({
+          id: "live_xtd_alarm",
+          severity: "alarm",
+          category: "nav",
+          tag: "XTD",
+          title: "Off-Track Alarm (" + shipProj.xtdSide + " of corridor)",
+          badge: shipProj.distNm.toFixed(2) + " / " + shipProj.allowedXtdNm.toFixed(2) + " NM",
+          summary: "Vessel exceeded " + shipProj.xtdSide + " XTD limit on Leg " + (actIdx + 1) + " (WP" + (actIdx + 1) + "→WP" + (actIdx + 2) + ").",
+          detail: "Recommended Course to Steer (CTS) to regain centerline: " + String(Math.round(ctsDeg)).padStart(3, "0") + "°T (Planned leg course " + String(Math.round(shipProj.legCourse)).padStart(3, "0") + "°T).",
+          lat: vLat,
+          lon: vLon,
+          zoom: 12
+        });
+      } else if (shipProj.xtdRatio >= 0.75) {
+        pushItem({
+          id: "live_xtd_warn",
+          severity: "warning",
+          category: "nav",
+          tag: "XTD",
+          title: "Approaching " + shipProj.xtdSide + " XTD limit (" + Math.round(shipProj.xtdRatio * 100) + "%)",
+          badge: shipProj.distNm.toFixed(2) + " NM " + shipProj.xtdSide,
+          summary: "Within 25% margin of " + shipProj.allowedXtdNm.toFixed(2) + " NM XTD rail on Leg " + (actIdx + 1) + ".",
+          detail: "Adjust heading toward " + String(Math.round(ctsDeg)).padStart(3, "0") + "°T to return to planned track centerline.",
+          lat: vLat,
+          lon: vLon,
+          zoom: 12
+        });
+      } else {
+        passed.push("XTD Track Keeping: " + shipProj.distNm.toFixed(2) + " NM (" + Math.round(shipProj.xtdRatio * 100) + "% of " + shipProj.allowedXtdNm.toFixed(2) + " NM limit)");
+      }
+
+      // 2) Course / Wrong-Way / Leeway Monitor
+      if (Number.isFinite(vCog) && vSog >= 0.8) {
+        const diffCrs = monAngleDiffAbs(vCog, shipProj.legCourse);
+        if (diffCrs >= 115) {
+          pushItem({
+            id: "live_wrong_way",
+            severity: "alarm",
+            category: "nav",
+            tag: "CONNING",
+            title: "Reverse / Wrong-Way Course on Leg " + (actIdx + 1),
+            badge: "COG " + Math.round(vCog) + "° vs " + Math.round(shipProj.legCourse) + "°",
+            summary: "Vessel COG opposes active leg WP" + (actIdx + 1) + "→WP" + (actIdx + 2) + " by " + Math.round(diffCrs) + "°.",
+            detail: "Verify active route direction (or use Reverse Route if sailing inbound) and check helm/autopilot setpoint.",
+            lat: vLat,
+            lon: vLon,
+            zoom: 11
+          });
+        } else if (diffCrs >= 18 && shipProj.remOnLegNm > 0.4) {
+          pushItem({
+            id: "live_course_drift",
+            severity: "warning",
+            category: "nav",
+            tag: "CONNING",
+            title: "Course Set / Drift Deviation (" + (driftDeg > 0 ? "+" : "") + driftDeg + "°)",
+            badge: "COG " + Math.round(vCog) + "°",
+            summary: "COG diverges from Leg " + (actIdx + 1) + " course (" + Math.round(shipProj.legCourse) + "°T) at SOG " + vSog.toFixed(1) + " kn.",
+            detail: "Check wind leeway and tidal stream set; steer CTS " + String(Math.round(ctsDeg)).padStart(3, "0") + "°T to hold centerline.",
+            lat: vLat,
+            lon: vLon,
+            zoom: 11
+          });
+        }
+      }
+
+      // 3) Speed Envelope Check
+      const maxSpd = Number(wpFrom.maxSpeedKnots) || 30;
+      const minSpd = Number(wpFrom.minSpeedKnots) || 0;
+      if (vSog > maxSpd + 1.0) {
+        pushItem({
+          id: "live_spd_high",
+          severity: "warning",
+          category: "nav",
+          tag: "CONNING",
+          title: "Speed Exceeds Leg Maximum (" + vSog.toFixed(1) + " kn)",
+          badge: "Max " + maxSpd.toFixed(1) + " kn",
+          summary: "Current SOG exceeds WP" + (actIdx + 1) + " limit (" + (wpFrom.passageType || "Coastal") + ").",
+          detail: "Excess speed increases dynamic squat and reduces UKC & stopping margin in confined waters.",
+          lat: vLat,
+          lon: vLon,
+          zoom: 11
+        });
+      } else if (vSog >= 0.4 && vSog + 0.8 < minSpd) {
+        pushItem({
+          id: "live_spd_low",
+          severity: "warning",
+          category: "nav",
+          tag: "CONNING",
+          title: "Speed Below Planned Minimum (" + vSog.toFixed(1) + " kn)",
+          badge: "Min " + minSpd.toFixed(1) + " kn",
+          summary: "Current SOG is below minimum steerage/schedule threshold on Leg " + (actIdx + 1) + ".",
+          detail: "Verify engine telegraph / current set; rudder effectiveness may degrade at low speed.",
+          lat: vLat,
+          lon: vLon,
+          zoom: 11
+        });
+      }
+
+      // 4) Wheel-Over Point (WOP) & Upcoming Waypoint Callout
+      if (nextCourseDeg != null && Math.abs(turnDegSigned) >= 6) {
+        const turnDir = turnDegSigned >= 0 ? "STBD" : "PORT";
+        const wopTtgMin = (wopDistNm / Math.max(0.5, effSpdForEta)) * 60;
+        if (wopDistNm <= 0.18 || (vSog >= 1.0 && wopTtgMin <= 3.0)) {
+          pushItem({
+            id: "live_wop_now",
+            severity: "alarm",
+            category: "nav",
+            tag: "WOP",
+            title: "Wheel-Over Now at WP" + (actIdx + 2) + " → " + String(Math.round(nextCourseDeg)).padStart(3, "0") + "°T",
+            badge: turnDir + " " + Math.abs(Math.round(turnDegSigned)) + "°",
+            summary: "WOP distance " + wopDistNm.toFixed(2) + " NM (WP" + (actIdx + 2) + " in " + shipProj.remOnLegNm.toFixed(2) + " NM).",
+            detail: "Execute turn " + turnDir + " " + Math.abs(Math.round(turnDegSigned)) + "° onto Leg " + (actIdx + 2) + " (" + String(Math.round(nextCourseDeg)).padStart(3, "0") + "°T, R=" + Number(wpTo.turnRadius || 0).toFixed(2) + " NM, " + (wpTo.passageType || "Coastal") + ").",
+            lat: Number(wpTo.lat),
+            lon: Number(wpTo.lon),
+            zoom: 12
+          });
+        } else if (wopDistNm <= 1.6 || (vSog >= 1.0 && wopTtgMin <= 12.0)) {
+          pushItem({
+            id: "live_wop_soon",
+            severity: "warning",
+            category: "nav",
+            tag: "WOP",
+            title: "Upcoming Turn at WP" + (actIdx + 2) + " (" + turnDir + " " + Math.abs(Math.round(turnDegSigned)) + "°)",
+            badge: "WOP " + wopDistNm.toFixed(2) + " NM · " + Math.max(1, Math.round(wopTtgMin)) + "m",
+            summary: "Next leg course " + String(Math.round(nextCourseDeg)).padStart(3, "0") + "°T · Radius " + Number(wpTo.turnRadius || 0).toFixed(2) + " NM.",
+            detail: "Verify clear water on " + turnDir.toLowerCase() + " quarter/bow before wheel-over at WP" + (actIdx + 2) + ".",
+            lat: Number(wpTo.lat),
+            lon: Number(wpTo.lon),
+            zoom: 11
+          });
+        }
+      } else if (actIdx === totalLegs - 1 && shipProj.remOnLegNm <= 2.0) {
+        pushItem({
+          id: "live_arrival_wp",
+          severity: shipProj.remOnLegNm <= 0.35 ? "alarm" : "warning",
+          category: "nav",
+          tag: "WOP",
+          title: "Approaching Final Destination WP" + wps.length,
+          badge: shipProj.remOnLegNm.toFixed(2) + " NM",
+          summary: "End of route '" + (wpTo.name || ("WP" + wps.length)) + "' ahead.",
+          detail: "Prepare for arrival / pilotage / anchorage speed reduction.",
+          lat: Number(wpTo.lat),
+          lon: Number(wpTo.lon),
+          zoom: 12
+        });
+      }
+
+      // 5) Live AIS Collision Avoidance Alerts
+      if (aisEval.alerts.length > 0) {
+        aisEval.alerts.forEach((al) => pushItem(al));
+      } else {
+        passed.push("AIS Traffic Watch: Clear of close CPA targets (" + aisEval.targetsNearCount + " vessel(s) within 20 NM)");
+      }
+
+      // 6) Own-Ship Position Sensor / DR Integrity
+      const isDr = Boolean(v && (v.deadReckoned || /ais-dr/i.test(String(v.source || ""))));
+      const aisAgeMs = typeof getOwnShipAisAgeMs === "function" ? getOwnShipAisAgeMs(v) : 0;
+      const aisAgeMin = Number.isFinite(aisAgeMs) && aisAgeMs > 0 ? Math.round(aisAgeMs / 60000) : 0;
+      const inConfined = (wpFrom.passageType || "").indexOf("Pilotage") >= 0;
+      if (aisAgeMin > 60 && inConfined) {
+        pushItem({
+          id: "live_sensor_stale_alarm",
+          severity: "alarm",
+          category: "nav",
+          tag: "SENSOR",
+          title: "Stale Vessel Fix in Confined Waters (" + aisAgeMin + "m old)",
+          badge: isDr ? "DR MODE" : (aisAgeMin + "m"),
+          summary: "Own-ship AIS fix is >60 min old during Pilotage/Fairway leg.",
+          detail: "Switch to live GPS / Wi-Fi AIS feed or cross-check radar/visual terrestrial fix immediately.",
+          lat: vLat,
+          lon: vLon,
+          zoom: 11
+        });
+      } else if (isDr || aisAgeMin >= 15) {
+        pushItem({
+          id: "live_sensor_dr_warn",
+          severity: "warning",
+          category: "nav",
+          tag: "SENSOR",
+          title: isDr ? "Position Estimated by Dead Reckoning (DR)" : ("AIS Fix Age " + aisAgeMin + " min"),
+          badge: isDr ? "DR RAILS" : (aisAgeMin + "m"),
+          summary: "Own-ship position is projected along route rails since last AIS fix.",
+          detail: "Verify live GNSS / Wi-Fi AIS connection when making close-quarters or pilotage decisions.",
+          lat: vLat,
+          lon: vLon,
+          zoom: 10
+        });
+      } else {
+        passed.push("Position Sensor Integrity: Live fix active");
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // B. ROUTE CORRIDOR & LEG CHECKS (All legs in Static Check; Ahead legs in Live Watch)
+    // -------------------------------------------------------------------------
+    const draftM = Number((v && (v.draught || v.draft)) || (rt && rt.metadata && rt.metadata.draftMeters) || 11.5);
+    let landHitCount = 0;
+    let depthIssueCount = 0;
+    let tssIssueCount = 0;
+    let ialaIssueCount = 0;
+    let geomIssueCount = 0;
+    let cableCrossCount = 0;
+
+    // Intermediate waypoint land check
+    for (let wi = Math.max(1, startLegIdx + 1); wi < wps.length - 1; wi++) {
+      const wp = wps[wi];
+      if (typeof setroutePointInLandMask === "function" && setroutePointInLandMask(Number(wp.lat), Number(wp.lon))) {
+        landHitCount++;
+        pushItem({
+          id: "land_wp_" + wi,
+          severity: "alarm",
+          category: "nav",
+          tag: "LAND",
+          title: "WP" + (wi + 1) + " plotted on charted land mass",
+          badge: "WP" + (wi + 1),
+          summary: formatNavtorLatDms(wp.lat) + " " + formatNavtorLonDms(wp.lon) + " falls inside land mask.",
+          detail: "Click Edit in the route header and relocate WP" + (wi + 1) + " into navigable water.",
+          lat: Number(wp.lat),
+          lon: Number(wp.lon),
+          zoom: 9
+        });
+      }
+    }
+
+    let cumHours = 0;
+    for (let i = startLegIdx; i < totalLegs; i++) {
+      const wpA = wps[i];
+      const wpB = wps[i + 1];
+      const legNm = legDists[i] != null ? legDists[i] : computeLegDistanceNm(wpA, wpB);
+      const legSpd = Math.max(0.5, Number(wpA.speedKnots) || 12.0);
+      const legLabel = "Leg " + (i + 1) + " (WP" + (i + 1) + "→WP" + (i + 2) + ")";
+      const midPt = setrouteLerpLatLon(Number(wpA.lat), Number(wpA.lon), Number(wpB.lat), Number(wpB.lon), 0.5);
+
+      // 1) Land / Coastline intersection
+      const landHit = monCheckLegCrossesLand(wpA, wpB, i, totalLegs, legNm);
+      if (landHit) {
+        landHitCount++;
+        pushItem({
+          id: "land_leg_" + i,
+          severity: "alarm",
+          category: "nav",
+          tag: "LAND",
+          title: "Track Crosses Coastline / Land Mass",
+          badge: "WP" + (i + 1) + "→WP" + (i + 2),
+          summary: legLabel + " (" + legNm.toFixed(1) + " NM) intersects charted coastline.",
+          detail: "Grounding hazard! Insert coastal clearing waypoints around headland/island in Edit mode.",
+          lat: landHit.lat,
+          lon: landHit.lon,
+          zoom: 9
+        });
+      }
+
+      // 2) Safety Depth / UKC & Shoals
+      if (typeof setrouteEstimateDepthM === "function" && legNm >= 0.3) {
+        const isConfined = (wpA.passageType || "").indexOf("Pilotage") >= 0;
+        const squatM = ((0.78 * Math.pow(legSpd, 2)) / 100) * (isConfined ? 1.3 : 1.0);
+        const zeroUkcDepth = draftM + squatM;
+        const safeDepthM = zeroUkcDepth + Math.max(1.2, draftM * 0.10);
+        const samples = legNm > 120 ? [0.15, 0.35, 0.5, 0.65, 0.85] : [0.25, 0.5, 0.75];
+        let minEstD = Infinity;
+        let minPt = midPt;
+        for (let si = 0; si < samples.length; si++) {
+          const sp = setrouteLerpLatLon(Number(wpA.lat), Number(wpA.lon), Number(wpB.lat), Number(wpB.lon), samples[si]);
+          const dEst = setrouteEstimateDepthM(sp[0], sp[1]);
+          if (Number.isFinite(dEst) && dEst < minEstD) {
+            minEstD = dEst;
+            minPt = sp;
+          }
+        }
+        if (minEstD < zeroUkcDepth) {
+          depthIssueCount++;
+          pushItem({
+            id: "depth_alarm_" + i,
+            severity: "alarm",
+            category: "nav",
+            tag: "DEPTH",
+            title: "Insufficient Depth / Grounding Risk (~" + minEstD.toFixed(1) + "m)",
+            badge: "WP" + (i + 1) + "→WP" + (i + 2),
+            summary: legLabel + ": est. depth " + minEstD.toFixed(1) + "m < Draft+Squat " + zeroUkcDepth.toFixed(1) + "m.",
+            detail: "Vessel draft " + draftM.toFixed(1) + "m + squat " + squatM.toFixed(2) + "m leaves zero UKC. Verify ENC soundings and reroute to deeper contour.",
+            lat: minPt[0],
+            lon: minPt[1],
+            zoom: 10
+          });
+        } else if (minEstD < safeDepthM) {
+          depthIssueCount++;
+          pushItem({
+            id: "depth_warn_" + i,
+            severity: "warning",
+            category: "nav",
+            tag: "DEPTH",
+            title: "Shallow UKC Margin (~" + minEstD.toFixed(1) + "m vs " + safeDepthM.toFixed(1) + "m)",
+            badge: "WP" + (i + 1) + "→WP" + (i + 2),
+            summary: legLabel + ": UKC below policy (" + (minEstD - zeroUkcDepth).toFixed(1) + "m net UKC at " + legSpd.toFixed(1) + " kn).",
+            detail: "Reduce speed to cut dynamic squat (" + squatM.toFixed(2) + "m) and check tidal height window.",
+            lat: minPt[0],
+            lon: minPt[1],
+            zoom: 10
+          });
+        }
+      }
+
+      // 3) COLREG Rule 10 TSS Analysis
+      if (typeof setrouteTssLegAnalysis === "function" && legNm >= 0.2) {
+        const tss = setrouteTssLegAnalysis(Number(wpA.lat), Number(wpA.lon), Number(wpB.lat), Number(wpB.lon));
+        if (tss && Array.isArray(tss.hits)) {
+          tss.hits.forEach((h, hIdx) => {
+            if (h.category === "traffic_lane_wrong_way" || h.category === "separation_zone") {
+              tssIssueCount++;
+              pushItem({
+                id: "tss_alarm_" + i + "_" + h.category,
+                severity: "alarm",
+                category: "traffic",
+                tag: "TSS",
+                title: h.category === "traffic_lane_wrong_way"
+                  ? ("Wrong-Way in TSS Lane: " + (h.name || "TSS"))
+                  : ("Crosses TSS Separation Zone: " + (h.name || "TSS")),
+                badge: "WP" + (i + 1) + "→WP" + (i + 2),
+                summary: legLabel + " violates " + (h.rule || "COLREG Rule 10") + ".",
+                detail: "COLREG Rule 10: Do not proceed against established traffic flow or enter a Traffic Separation Zone except in emergency.",
+                lat: midPt[0],
+                lon: midPt[1],
+                zoom: 10
+              });
+            } else if (
+              h.category === "traffic_lane_oblique" ||
+              h.category === "separation_zone_graze" ||
+              h.category === "precautionary_area"
+            ) {
+              tssIssueCount++;
+              pushItem({
+                id: "tss_warn_" + i + "_" + h.category + "_" + hIdx,
+                severity: "warning",
+                category: "traffic",
+                tag: "TSS",
+                title: h.category === "precautionary_area"
+                  ? ("TSS Precautionary Area: " + (h.name || "Caution"))
+                  : ("TSS Alignment Caution: " + (h.name || "TSS")),
+                badge: "WP" + (i + 1) + "→WP" + (i + 2),
+                summary: legLabel + ": " + (h.rule || "COLREG Rule 10 advisory") + ".",
+                detail: h.category === "precautionary_area"
+                  ? "Crossing traffic & pilot boarding likely; post extra lookout and keep engines ready for maneuver."
+                  : "Join/leave TSS at small angles or cross traffic lanes as nearly as practicable at 90° (Rule 10(c)).",
+                lat: midPt[0],
+                lon: midPt[1],
+                zoom: 10
+              });
+            }
+          });
+        }
+      }
+
+      // 4) IALA Buoyage & Cardinal Danger Side
+      if (typeof setrouteIalaLegAnalysis === "function" && legNm > 0.1 && legNm <= 45) {
+        const iala = setrouteIalaLegAnalysis(Number(wpA.lat), Number(wpA.lon), Number(wpB.lat), Number(wpB.lon));
+        if (iala && Array.isArray(iala.hits)) {
+          iala.hits.forEach((ih) => {
+            if (ih.category === "cardinal_danger") {
+              ialaIssueCount++;
+              pushItem({
+                id: "iala_alarm_" + i + "_" + ih.cardinal,
+                severity: "alarm",
+                category: "nav",
+                tag: "MARKS",
+                title: "Danger Side of IALA " + ih.cardinal + "-Cardinal Mark",
+                badge: ih.distNm + " NM · Leg " + (i + 1),
+                summary: legLabel + " passes within " + ih.distNm + " NM on foul side of Cardinal mark.",
+                detail: ih.rule || "Alter track to pass on the named safe quadrant of the Cardinal mark.",
+                lat: midPt[0],
+                lon: midPt[1],
+                zoom: 12
+              });
+            } else if (ih.category === "cardinal_caution") {
+              ialaIssueCount++;
+              pushItem({
+                id: "iala_warn_" + i + "_" + ih.cardinal,
+                severity: "warning",
+                category: "nav",
+                tag: "MARKS",
+                title: "Near IALA " + ih.cardinal + "-Cardinal Mark (" + ih.distNm + " NM)",
+                badge: "WP" + (i + 1) + "→WP" + (i + 2),
+                summary: ih.rule || "Verify safe clearing bearing past Cardinal mark.",
+                detail: "IALA Region " + (iala.region || "A") + " buoyage active on this approach leg.",
+                lat: midPt[0],
+                lon: midPt[1],
+                zoom: 11
+              });
+            }
+          });
+        }
+      }
+
+      // 5) Route Geometry, Turn Radius, Speed & XTD Sanity
+      if (legNm < 0.03) {
+        geomIssueCount++;
+        pushItem({
+          id: "geom_dup_" + i,
+          severity: "warning",
+          category: "nav",
+          tag: "GEOM",
+          title: "Zero-Length / Duplicate Waypoints WP" + (i + 1) + "–WP" + (i + 2),
+          badge: legNm.toFixed(3) + " NM",
+          summary: "Consecutive waypoints are < 0.03 NM apart.",
+          detail: "Delete redundant waypoint in Edit mode to prevent ECDIS autopilot sequencing glitches.",
+          lat: Number(wpA.lat),
+          lon: Number(wpA.lon),
+          zoom: 13
+        });
+      }
+
+      if (i < totalLegs - 1) {
+        const wpC = wps[i + 2];
+        const nextNm = legDists[i + 1] != null ? legDists[i + 1] : computeLegDistanceNm(wpB, wpC);
+        const crs1 = monBearingDeg(Number(wpA.lat), Number(wpA.lon), Number(wpB.lat), Number(wpB.lon));
+        const crs2 = monBearingDeg(Number(wpB.lat), Number(wpB.lon), Number(wpC.lat), Number(wpC.lon));
+        const dTurn = monAngleDiffAbs(crs2, crs1);
+        const rTurn = Math.max(0, Number(wpB.turnRadius) || 0);
+        if (dTurn >= 12 && rTurn > 0) {
+          const reqTangentNm = rTurn * Math.tan((Math.min(165, dTurn) * Math.PI) / 360);
+          const maxAvailNm = 0.49 * Math.min(legNm, nextNm);
+          if (reqTangentNm > maxAvailNm && Math.min(legNm, nextNm) > 0.05) {
+            geomIssueCount++;
+            pushItem({
+              id: "geom_turn_rad_alarm_" + (i + 1),
+              severity: "alarm",
+              category: "nav",
+              tag: "GEOM",
+              title: "Turn Radius Overlap at WP" + (i + 2) + " (" + Math.round(dTurn) + "° turn)",
+              badge: "R " + rTurn.toFixed(2) + " NM",
+              summary: "Arc tangent (" + reqTangentNm.toFixed(2) + " NM) exceeds half-leg length (" + maxAvailNm.toFixed(2) + " NM).",
+              detail: "Reduce Turning Radius at WP" + (i + 2) + " below " + Math.max(0.05, maxAvailNm / Math.tan((Math.min(165, dTurn) * Math.PI) / 360)).toFixed(2) + " NM or lengthen adjacent legs.",
+              lat: Number(wpB.lat),
+              lon: Number(wpB.lon),
+              zoom: 12
+            });
+          }
+        }
+        if (dTurn >= 80 && (rTurn < 0.08 || legSpd > 13.5)) {
+          geomIssueCount++;
+          pushItem({
+            id: "geom_sharp_turn_" + (i + 1),
+            severity: "warning",
+            category: "nav",
+            tag: "GEOM",
+            title: "Sharp Course Alteration at WP" + (i + 2) + " (" + Math.round(dTurn) + "°)",
+            badge: "WP" + (i + 2),
+            summary: "Turn " + Math.round(dTurn) + "° with R=" + rTurn.toFixed(2) + " NM at " + legSpd.toFixed(1) + " kn.",
+            detail: "Set an appropriate Turning Radius (e.g. 0.3–0.8 NM) or reduce planned speed before WP" + (i + 2) + ".",
+            lat: Number(wpB.lat),
+            lon: Number(wpB.lon),
+            zoom: 11
+          });
+        }
+      }
+
+      const isPilotLeg = (wpA.passageType || "").indexOf("Pilotage") >= 0;
+      if (isPilotLeg && (Number(wpA.portsideXTD) > 0.35 || Number(wpA.starboardXTD) > 0.35)) {
+        geomIssueCount++;
+        pushItem({
+          id: "geom_wide_xtd_" + i,
+          severity: "warning",
+          category: "nav",
+          tag: "GEOM",
+          title: "Wide XTD in Pilotage / Fairway (" + Math.max(Number(wpA.portsideXTD) || 0, Number(wpA.starboardXTD) || 0).toFixed(2) + " NM)",
+          badge: "WP" + (i + 1),
+          summary: legLabel + " marked Pilotage/Fairway but XTD > 0.35 NM.",
+          detail: "Tighten XTD(P)/XTD(S) to 0.05–0.20 NM for confined fairway monitoring.",
+          lat: Number(wpA.lat),
+          lon: Number(wpA.lon),
+          zoom: 11
+        });
+      }
+
+      // 6) Subsea Cable / Pipeline crossing in pilotage/coastal anchorage depths
+      if (isPilotLeg && window._subseaInfraData && Array.isArray(window._subseaInfraData.features) && cableCrossCount < 3) {
+        const feats = window._subseaInfraData.features;
+        for (let fi = 0; fi < feats.length; fi++) {
+          const f = feats[fi];
+          const geom = f && f.geometry;
+          if (!geom || geom.type !== "LineString" || !Array.isArray(geom.coordinates)) continue;
+          const coords = geom.coordinates;
+          let hitPt = null;
+          for (let ci = 0; ci < coords.length - 1; ci += Math.max(1, Math.floor(coords.length / 12))) {
+            const c1 = coords[ci];
+            const c2 = coords[Math.min(coords.length - 1, ci + 1)];
+            if (c1 && c2 && setrouteSegmentsIntersect(Number(wpA.lat), Number(wpA.lon), Number(wpB.lat), Number(wpB.lon), c1[1], c1[0], c2[1], c2[0])) {
+              hitPt = [(c1[1] + c2[1]) * 0.5, (c1[0] + c2[0]) * 0.5];
+              break;
+            }
+          }
+          if (hitPt) {
+            cableCrossCount++;
+            const pName = (f.properties && (f.properties.name || f.properties.kind)) || "Subsea Cable / Pipeline";
+            pushItem({
+              id: "infra_cable_" + i + "_" + fi,
+              severity: "warning",
+              category: "nav",
+              tag: "INFRA",
+              title: "Subsea Infrastructure Crossing: " + String(pName).slice(0, 42),
+              badge: "WP" + (i + 1) + "→WP" + (i + 2),
+              summary: legLabel + " crosses charted subsea cable/pipeline in approach waters.",
+              detail: "Do NOT drop or drag anchor near charted subsea cables or high-pressure pipelines.",
+              lat: hitPt[0],
+              lon: hitPt[1],
+              zoom: 11
+            });
+            break;
+          }
+        }
+      }
+
+      // 7) Admiralty NtM & NAVTEX Navigational Warnings along leg
+      if (typeof NTM_STORE !== "undefined" && Array.isArray(NTM_STORE)) {
+        const corridorNm = legNm > 180 ? 22 : 12;
+        const hardNm = Math.max(1.0, Number(wpA.portsideXTD) || 0.2, Number(wpA.starboardXTD) || 0.2);
+        for (let ni = 0; ni < NTM_STORE.length; ni++) {
+          const n = NTM_STORE[ni];
+          if (!n || n.isCancelled || n.status === "CANCELLED") continue;
+          const cLat = Number.isFinite(n.lat) ? n.lat : (n.coords && n.coords[0] ? n.coords[0].lat : NaN);
+          const cLon = Number.isFinite(n.lon) ? n.lon : (n.coords && n.coords[0] ? n.coords[0].lon : NaN);
+          if (!Number.isFinite(cLat) || !Number.isFinite(cLon)) continue;
+
+          // In Live Watch on current leg, ignore notices already >3 NM astern of vessel
+          if (mode === "live" && i === startLegIdx && shipProj) {
+            const dShip = calculateHaversineDistanceNM(vLat, vLon, cLat, cLon);
+            const brgNotice = monBearingDeg(vLat, vLon, cLat, cLon);
+            if (dShip > 3.0 && monAngleDiffAbs(brgNotice, shipProj.legCourse) > 110) continue;
+          }
+
+          const dSeg = pointToSegmentDistanceNM(cLat, cLon, Number(wpA.lat), Number(wpA.lon), Number(wpB.lat), Number(wpB.lon));
+          if (dSeg > corridorNm) continue;
+
+          // Check polygon interior hit if notice has subPolygons
+          let insidePoly = false;
+          if (Array.isArray(n.subPolygons)) {
+            for (let pi = 0; pi < n.subPolygons.length && !insidePoly; pi++) {
+              const pts = n.subPolygons[pi].points || (n.subPolygons[pi].coords || []).map((c) => [c.lat, c.lon]);
+              if (pts && pts.length >= 3 && setroutePointInRing(midPt[0], midPt[1], pts)) {
+                insidePoly = true;
+              }
+            }
+          }
+
+          const blob = ((n.subject || "") + " " + (n.title || "") + " " + (n.text || "")).toUpperCase();
+          const isDangerKw = /DANGEROUS WRECK|PROHIBITED|EXCLUSION|MINE|FIRING|GUNNERY|ROCKET|UNLIT|ADRIFT|DERELICT|SHOAL|LESS WATER/.test(blob);
+          const isAlarm = insidePoly || (dSeg <= hardNm && isDangerKw) || dSeg <= 0.4;
+
+          let distBadge = dSeg.toFixed(1) + " NM · Leg " + (i + 1);
+          if (mode === "live") {
+            const dFromShip = calculateHaversineDistanceNM(vLat, vLon, cLat, cLon);
+            distBadge = dFromShip.toFixed(1) + " NM (" + monCompass8(monBearingDeg(vLat, vLon, cLat, cLon)) + ")";
+          }
+
+          pushItem({
+            id: "ntm_" + (n.id || ni),
+            severity: isAlarm ? "alarm" : "warning",
+            category: "ntm",
+            tag: n.type === "NAVTEX" ? "NAVTEX" : "NTM",
+            title: String(n.subject || n.title || ("Notice " + (n.id || ""))).slice(0, 62),
+            badge: distBadge,
+            summary: (n.authority || n.navarea || n.type || "Warning") + " · " + (insidePoly ? "Track enters notice area" : (dSeg.toFixed(1) + " NM off " + legLabel)),
+            detail: String(n.summary || n.text || n.description || "Inspect full chart notice polygon & plotted coordinates before transit.").slice(0, 220),
+            lat: cLat,
+            lon: cLon,
+            zoom: 10
+          });
+        }
+      }
+
+      // 8) Tropical Cyclones & Synoptic Gale / Heavy Swell along leg
+      const legEtaMidH = cumHours + (legNm / legSpd) * 0.5;
+      if (typeof MARINE_WEATHER_STORE !== "undefined" && Array.isArray(MARINE_WEATHER_STORE.storms)) {
+        for (let si = 0; si < MARINE_WEATHER_STORE.storms.length; si++) {
+          const strm = MARINE_WEATHER_STORE.storms[si];
+          if (!strm || !Array.isArray(strm.center)) continue;
+          let sLat = strm.center[0];
+          let sLon = strm.center[1];
+          let sWinds = Number(strm.maxWinds) || 50;
+          let sRad = Number(strm.dangerRadiusNm) || 90;
+          if (Array.isArray(strm.forecastTrack) && strm.forecastTrack.length) {
+            let bestTrack = null;
+            let bestTauDiff = Math.abs(0 - legEtaMidH);
+            strm.forecastTrack.forEach((ft) => {
+              if (ft && Array.isArray(ft.coords)) {
+                const td = Math.abs(Number(ft.tau || 0) - legEtaMidH);
+                if (td < bestTauDiff) {
+                  bestTauDiff = td;
+                  bestTrack = ft;
+                }
+              }
+            });
+            if (bestTrack) {
+              sLat = bestTrack.coords[0];
+              sLon = bestTrack.coords[1];
+              sWinds = Number(bestTrack.winds) || sWinds;
+              sRad = Number(bestTrack.radiusNm) || sRad;
+            }
+          }
+          const dStorm = pointToSegmentDistanceNM(sLat, sLon, Number(wpA.lat), Number(wpA.lon), Number(wpB.lat), Number(wpB.lon));
+          if (dStorm <= sRad) {
+            pushItem({
+              id: "wx_cyclone_alarm_" + (strm.id || si),
+              severity: "alarm",
+              category: "weather",
+              tag: "CYCLONE",
+              title: strm.name + " Danger Sector (" + sWinds + " kt)",
+              badge: "CPA " + Math.round(dStorm) + " NM",
+              summary: legLabel + " enters " + sRad + " NM danger radius at ETA +" + Math.round(legEtaMidH) + "h.",
+              detail: (strm.category || "Tropical Cyclone") + " (" + (strm.movement || "") + "). Apply 1-2-3 Mariner's Rule & avoid navigable/dangerous semicircle.",
+              lat: sLat,
+              lon: sLon,
+              zoom: 6
+            });
+          } else if (dStorm <= sRad + 140) {
+            pushItem({
+              id: "wx_cyclone_warn_" + (strm.id || si),
+              severity: "warning",
+              category: "weather",
+              tag: "CYCLONE",
+              title: strm.name + " Caution Buffer (" + sWinds + " kt)",
+              badge: "CPA " + Math.round(dStorm) + " NM",
+              summary: "Passes " + Math.round(dStorm) + " NM from forecast track on " + legLabel + " (+" + Math.round(legEtaMidH) + "h).",
+              detail: "Monitor 6-hourly JTWC/NHC advisories, barometric tendency, and long-period swell.",
+              lat: sLat,
+              lon: sLon,
+              zoom: 6
+            });
+          }
+        }
+      }
+
+      const wxMid = monSamplePointWeather(midPt[0], midPt[1]);
+      if ((wxMid.windKt != null && wxMid.windKt >= 48) || (wxMid.waveM != null && wxMid.waveM >= 6.0)) {
+        pushItem({
+          id: "wx_storm_leg_" + i,
+          severity: "alarm",
+          category: "weather",
+          tag: "WEATHER",
+          title: "Storm-Force Weather on " + legLabel,
+          badge: (wxMid.windKt != null ? Math.round(wxMid.windKt) + " kt" : "") + (wxMid.waveM != null ? " · Hs " + wxMid.waveM.toFixed(1) + "m" : ""),
+          summary: "Severe wind/sea state sampled near " + formatNavtorLatDms(midPt[0]) + " " + formatNavtorLonDms(midPt[1]) + ".",
+          detail: "Heavy weather precautions: secure deck cargo, check parametric roll period, consider weather routing diversion.",
+          lat: midPt[0],
+          lon: midPt[1],
+          zoom: 7
+        });
+      } else if ((wxMid.windKt != null && wxMid.windKt >= 28) || (wxMid.waveM != null && wxMid.waveM >= 3.5)) {
+        pushItem({
+          id: "wx_gale_leg_" + i,
+          severity: "warning",
+          category: "weather",
+          tag: "WEATHER",
+          title: "Near-Gale / Heavy Swell on " + legLabel,
+          badge: (wxMid.windKt != null ? Math.round(wxMid.windKt) + " kt" : "") + (wxMid.waveM != null ? " · Hs " + wxMid.waveM.toFixed(1) + "m" : ""),
+          summary: "Elevated sea state along " + legLabel + (wxMid.pressureHpa != null ? " (" + Math.round(wxMid.pressureHpa) + " hPa)" : "") + ".",
+          detail: "Expect speed loss / leeway; verify lashing and heavy-weather checklist.",
+          lat: midPt[0],
+          lon: midPt[1],
+          zoom: 7
+        });
+      }
+
+      cumHours += legNm / legSpd;
+    }
+
+    // Populate nominal / passed check lines for clean collapsible summary
+    if (landHitCount === 0) {
+      passed.push("Land & Coastline Check: All " + (totalLegs - startLegIdx) + " checked leg(s) clear of land");
+    }
+    if (depthIssueCount === 0) {
+      passed.push("Bathymetry & UKC: Safe depth margin clear (Draft " + draftM.toFixed(1) + "m)");
+    }
+    if (tssIssueCount === 0) {
+      passed.push("COLREG Rule 10 TSS: No separation-zone or wrong-way violations");
+    }
+    if (ialaIssueCount === 0) {
+      passed.push("IALA Buoyage: Clear of Cardinal danger quadrants");
+    }
+    if (geomIssueCount === 0) {
+      passed.push("Route Geometry: Turn radii, leg lengths & XTD envelopes valid");
+    }
+    if (!alarms.some((a) => a.category === "weather") && !warnings.some((w) => w.category === "weather")) {
+      passed.push("Marine Weather & Cyclones: No storm or gale advisories on track");
+    }
+    if (!alarms.some((a) => a.category === "ntm") && !warnings.some((w) => w.category === "ntm")) {
+      passed.push("Admiralty NtM & NAVTEX: Track clear of active navigational warnings");
+    }
+
+    const digestHash =
+      alarms.map((a) => a.id).join("|") +
+      "::" +
+      warnings.map((w) => w.id).slice(0, 10).join("|");
+
+    return {
+      mode,
+      isLiveEligible: isVesselOnRoute,
+      liveUnavailableReason,
+      telemetry,
+      alarms,
+      warnings,
+      passed,
+      digestHash,
+      distanceLabel: formatNavtorHeaderDist(metrics.totalDistNm),
+      durationLabel: formatNavtorDuration(metrics.totalHours)
+    };
+  }
+  window.evaluateRouteMonitoringReport = evaluateRouteMonitoringReport;
+
+  /**
+   * Build payload & dispatch Monitoring report to the user's SetSail login email.
+   */
+  async function dispatchMonitoringEmailReport(rt, report, isAutoTrigger) {
+    const st = window._sidebarNavtorState;
+    const authUser = typeof getSetSailAuthUser === "function" ? getSetSailAuthUser() : null;
+    const email = authUser && authUser.email ? String(authUser.email).trim() : "";
+    if (!email || email.indexOf("@") < 1) {
+      if (!isAutoTrigger && typeof showSetSailToast === "function") {
+        showSetSailToast("Sign in to your SetSail account first to send alerts to your login email.", "warning");
+      }
+      return { ok: false, reason: "no_auth" };
+    }
+
+    const prefs = loadMonitoringEmailPrefs();
+    const filterCats = prefs.categories || { nav: true, traffic: true, weather: true, ntm: true };
+    const filteredAlarms = (report.alarms || []).filter((a) => filterCats[a.category] !== false);
+    const filteredWarnings = prefs.level === "all" || !isAutoTrigger
+      ? (report.warnings || []).filter((w) => filterCats[w.category] !== false)
+      : [];
+
+    const payloadReport = {
+      routeName: (rt && (rt.name || rt.routeName)) || "Route",
+      mode: report.mode,
+      distanceLabel: report.distanceLabel,
+      passedCount: (report.passed || []).length,
+      digestHash: report.digestHash,
+      vessel: report.telemetry
+        ? {
+            name: report.telemetry.vesselName,
+            mmsi: report.telemetry.mmsi,
+            pos: report.telemetry.posFormatted,
+            sog: report.telemetry.sog != null ? report.telemetry.sog.toFixed(1) : null,
+            cog: report.telemetry.cog,
+            xtdLabel: report.telemetry.xtdNm.toFixed(2) + " NM " + report.telemetry.xtdSide
+          }
+        : null,
+      alarms: filteredAlarms,
+      warnings: filteredWarnings
+    };
+
+    let token = "";
+    try {
+      token =
+        sessionStorage.getItem("setsail_google_auth_token") ||
+        localStorage.getItem("setsail_google_auth_token") ||
+        "";
+    } catch (eTok) {}
+
+    const headers = {
+      "Content-Type": "application/json",
+      "X-SetSail-User-Email": email
+    };
+    if (authUser && authUser.sub) headers["X-SetSail-User-Sub"] = String(authUser.sub);
+    if (token) headers.Authorization = "Bearer " + token;
+
+    st.monEmailSending = true;
+    refreshMonitoringPanelInPlace();
+
+    let delivered = false;
+    let statusNote = "";
+    let fallbackSubject = "[SetSail Monitoring] " + payloadReport.routeName;
+    let fallbackBody = "";
+
+    try {
+      const resp = await fetch("/api/monitoring-email", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ prefs: prefs, report: payloadReport })
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (data && data.subject) fallbackSubject = data.subject;
+      if (data && data.textBody) fallbackBody = data.textBody;
+      if (resp.ok && data && data.delivered) {
+        delivered = true;
+        statusNote = "Sent to " + email + " (" + (data.provider || "SetSail Mail") + ")";
+      }
+    } catch (eApi) {}
+
+    // Zero-key browser AJAX dispatch via FormSubmit to the verified account email if server SMTP secret isn't set
+    if (!delivered && navigator.onLine) {
+      try {
+        const alarmLines = filteredAlarms.length
+          ? filteredAlarms.map((a, idx) => (idx + 1) + ") [" + a.tag + "] " + a.title + " — " + a.summary).join("\n")
+          : "0 Alarms";
+        const warnLines = filteredWarnings.length
+          ? filteredWarnings.map((w, idx) => (idx + 1) + ") [" + w.tag + "] " + w.title + " — " + w.summary).join("\n")
+          : "0 Warnings";
+
+        const fsPayload = {
+          _subject: fallbackSubject,
+          _template: "table",
+          _captcha: "false",
+          SetSail_Account: email,
+          Route: payloadReport.routeName + " (" + (payloadReport.distanceLabel || "") + ")",
+          Mode: report.mode === "live" ? "LIVE BRIDGE WATCH" : "STATIC ROUTE CHECK",
+          Vessel_Telemetry: payloadReport.vessel
+            ? (payloadReport.vessel.name + " | " + payloadReport.vessel.pos + " | SOG " + payloadReport.vessel.sog + " kn | XTD " + payloadReport.vessel.xtdLabel)
+            : "Static Route Check",
+          Red_Alarms: alarmLines,
+          Yellow_Warnings: warnLines,
+          Generated_UTC: new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC"
+        };
+
+        const fsResp = await fetch("https://formsubmit.co/ajax/" + encodeURIComponent(email), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json"
+          },
+          body: JSON.stringify(fsPayload)
+        });
+        const fsJson = await fsResp.json().catch(() => ({}));
+        const msgLow = String((fsJson && fsJson.message) || "").toLowerCase();
+        if (fsResp.ok && (fsJson.success === true || fsJson.success === "true")) {
+          delivered = true;
+          prefs.formsubmitActivated = true;
+          statusNote = "Dispatched to " + email;
+        } else if (msgLow.indexOf("activation") >= 0 || msgLow.indexOf("activate") >= 0 || msgLow.indexOf("confirm") >= 0) {
+          delivered = true;
+          statusNote = "Check " + email + " once to confirm activation — future alerts arrive automatically.";
+        }
+      } catch (eFs) {}
+    }
+
+    st.monEmailSending = false;
+    st.monLastMailtoSubject = fallbackSubject;
+    st.monLastMailtoBody = fallbackBody;
+
+    if (delivered) {
+      prefs.lastSentAt = Date.now();
+      prefs.lastSentIso = new Date().toISOString().slice(11, 19) + " UTC";
+      prefs.lastDigestHash = report.digestHash || "";
+      saveMonitoringEmailPrefs(prefs, false);
+      st.monLastStatusMsg = statusNote;
+      if (typeof showSetSailToast === "function") {
+        showSetSailToast(statusNote, "success");
+      }
+    } else {
+      st.monLastStatusMsg = "Direct relay unavailable — click 'Gmail / Mail' below to send.";
+      if (!isAutoTrigger && typeof showSetSailToast === "function") {
+        showSetSailToast("Relay unreachable — opening draft for " + email, "info");
+        openMonitoringGmailOrMailto(email, fallbackSubject, fallbackBody);
+      }
+    }
+
+    refreshMonitoringPanelInPlace();
+    return { ok: delivered, statusNote };
+  }
+
+  function openMonitoringGmailOrMailto(email, subject, body) {
+    const subj = encodeURIComponent(subject || "[SetSail] Bridge Route Monitoring");
+    const txt = encodeURIComponent(String(body || "Open SetSail Monitoring: https://setsail-nav.com").slice(0, 1800));
+    const to = encodeURIComponent(email || "");
+    if (/@gmail\.com$|@googlemail\.com$/i.test(String(email || ""))) {
+      window.open("https://mail.google.com/mail/?view=cm&fs=1&to=" + to + "&su=" + subj + "&body=" + txt, "_blank", "noopener");
+    } else {
+      window.location.href = "mailto:" + to + "?subject=" + subj + "&body=" + txt;
+    }
+  }
+
+  function maybeAutoTriggerMonitoringAlerts(rt, report) {
+    const prefs = loadMonitoringEmailPrefs();
+    if (!prefs.enabled) return;
+    const authUser = typeof getSetSailAuthUser === "function" ? getSetSailAuthUser() : null;
+    if (!authUser || !authUser.email) return;
+
+    const cats = prefs.categories || { nav: true, traffic: true, weather: true, ntm: true };
+    const trigAlarms = (report.alarms || []).filter((a) => cats[a.category] !== false);
+    const trigWarnings = prefs.level === "all"
+      ? (report.warnings || []).filter((w) => cats[w.category] !== false)
+      : [];
+
+    if (trigAlarms.length === 0 && trigWarnings.length === 0) return;
+
+    const sig = trigAlarms.map((a) => a.id).join("|") + "::" + trigWarnings.map((w) => w.id).join("|");
+    if (!sig || sig === prefs.lastDigestHash) return;
+
+    const cooldownMs = Math.max(5, Number(prefs.cooldownMin) || 30) * 60000;
+    if (prefs.lastSentAt && Date.now() - prefs.lastSentAt < cooldownMs) return;
+
+    // Desktop notification if granted
+    try {
+      if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+        const topItem = trigAlarms[0] || trigWarnings[0];
+        new Notification("SetSail Bridge Alert — " + ((rt && rt.name) || "Route"), {
+          body: (topItem ? "[" + topItem.tag + "] " + topItem.title + ": " + topItem.summary : "New route monitoring alert")
+        });
+      }
+    } catch (eNotif) {}
+
+    dispatchMonitoringEmailReport(rt, report, true);
+  }
+
+  function refreshMonitoringPanelInPlace() {
+    const st = window._sidebarNavtorState;
+    if (!st || st.view !== "route" || st.detailTab !== "monitoring") return;
+    if (st.monEmailSending) return;
+    const activeEl = document.activeElement;
+    if (activeEl && activeEl.closest && activeEl.closest("#nvMonEmailDrawer")) return;
+    const routePanel = document.getElementById("ntmNavtorRoutePanel");
+    const rt = getActiveNavtorRoute();
+    if (!routePanel || routePanel.hidden || !rt) return;
+    const scrollEl = routePanel.querySelector("#nvMonitoringScroll");
+    const prevScroll = scrollEl ? scrollEl.scrollTop : 0;
+    renderRouteDetailView(routePanel, rt);
+    const nextScrollEl = routePanel.querySelector("#nvMonitoringScroll");
+    if (nextScrollEl && prevScroll > 0) {
+      nextScrollEl.scrollTop = prevScroll;
+    }
+  }
+
+  function ensureMonitoringLiveTicker() {
+    if (_monitoringLiveInterval) return;
+    _monitoringLiveInterval = setInterval(() => {
+      const st = window._sidebarNavtorState;
+      const sidebar = document.getElementById("ntmSidebar");
+      if (!st || st.view !== "route" || st.detailTab !== "monitoring" || !sidebar || sidebar.offsetParent === null) {
+        return;
+      }
+      const rt = getActiveNavtorRoute();
+      if (!rt) return;
+      const drId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+      const isCur = Boolean(drId && ((rt.id && rt.id === drId) || (rt.name && rt.name === drId)));
+      if (isCur) {
+        refreshMonitoringPanelInPlace();
+      }
+    }, 5000);
+  }
+
+  function buildMonitoringTabHtml(rt, report) {
+    const st = window._sidebarNavtorState;
+    const prefs = loadMonitoringEmailPrefs();
+    const authUser = typeof getSetSailAuthUser === "function" ? getSetSailAuthUser() : null;
+    const userEmail = authUser && authUser.email ? String(authUser.email).trim() : "";
+
+    const sevFilter = st.monSeverityFilter || "all";
+    const catFilter = st.monCategoryFilter || "all";
+
+    const filterFn = (it) => {
+      if (catFilter !== "all" && it.category !== catFilter) return false;
+      return true;
+    };
+    const visAlarms = (sevFilter === "warning" ? [] : report.alarms).filter(filterFn);
+    const visWarnings = (sevFilter === "alarm" ? [] : report.warnings).filter(filterFn);
+
+    // 1. Top Mode & Summary Bar
+    const modeSwitchHtml = report.isLiveEligible
+      ? '<div class="ntm-mon-mode-seg" role="group" aria-label="Monitoring mode">' +
+          '<button type="button" class="ntm-mon-mode-pill ' + (report.mode === "live" ? "is-live-on" : "") + '" data-mon-mode="live" title="Live ship-relative bridge monitoring">' +
+            '<span class="ntm-mon-pulse-dot"></span>Live' +
+          '</button>' +
+          '<button type="button" class="ntm-mon-mode-pill ' + (report.mode === "check" ? "is-check-on" : "") + '" data-mon-mode="check" title="Full static route check from WP1 to end">' +
+            'Check' +
+          '</button>' +
+        '</div>'
+      : '<div class="ntm-mon-mode-badge" title="' + escHtml(report.liveUnavailableReason) + '">' +
+          '<span class="ntm-mon-static-dot"></span>ROUTE CHECK' +
+        '</div>';
+
+    const topBarHtml =
+      '<div class="ntm-mon-topbar">' +
+        modeSwitchHtml +
+        '<div class="ntm-mon-top-actions">' +
+          '<button type="button" class="ntm-mon-sev-chip is-all ' + (sevFilter === "all" ? "active" : "") + '" data-mon-sev="all" title="Show all alerts">All</button>' +
+          '<button type="button" class="ntm-mon-sev-chip is-alarm ' + (sevFilter === "alarm" ? "active" : "") + (report.alarms.length === 0 ? " is-zero" : "") + '" data-mon-sev="alarm" title="Filter Red Alarms">' +
+            '<span class="ntm-mon-dot-red"></span>' + report.alarms.length +
+          '</button>' +
+          '<button type="button" class="ntm-mon-sev-chip is-warn ' + (sevFilter === "warning" ? "active" : "") + (report.warnings.length === 0 ? " is-zero" : "") + '" data-mon-sev="warning" title="Filter Yellow Warnings">' +
+            '<span class="ntm-mon-dot-amber"></span>' + report.warnings.length +
+          '</button>' +
+          '<button type="button" class="ntm-mon-icon-btn ' + (st.monEmailOpen ? "is-open" : "") + (prefs.enabled && userEmail ? " is-armed" : "") + '" id="btnNvMonEmailToggle" title="Email Alert Notifications (' + (userEmail || "Sign in") + ')">' +
+            '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>' +
+            (prefs.enabled && userEmail ? '<span class="ntm-mon-armed-dot"></span>' : '') +
+          '</button>' +
+          '<button type="button" class="ntm-mon-icon-btn" id="btnNvMonRefresh" title="Re-scan route now">' +
+            '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+
+    // 2. Collapsible Email Alert Notification Drawer
+    let emailDrawerHtml = "";
+    if (st.monEmailOpen) {
+      if (!userEmail) {
+        emailDrawerHtml =
+          '<div class="ntm-mon-email-drawer" id="nvMonEmailDrawer">' +
+            '<div class="ntm-mon-email-head">' +
+              '<span>Email Bridge Alerts</span>' +
+              '<button type="button" class="ntm-mon-email-close" id="btnNvMonEmailClose">×</button>' +
+            '</div>' +
+            '<div class="ntm-mon-email-guest">' +
+              'Sign in to your SetSail Google account to receive automatic Alarm &amp; Warning dispatches on your login email.' +
+              '<button type="button" class="ntm-mon-email-signin-btn" id="btnNvMonTriggerSignIn">Sign In with Google</button>' +
+            '</div>' +
+          '</div>';
+      } else {
+        const cats = prefs.categories || { nav: true, traffic: true, weather: true, ntm: true };
+        emailDrawerHtml =
+          '<div class="ntm-mon-email-drawer" id="nvMonEmailDrawer">' +
+            '<div class="ntm-mon-email-head">' +
+              '<div class="ntm-mon-email-acct" title="SetSail login email">' +
+                '<span class="ntm-mon-email-lbl">Account:</span> ' +
+                '<strong>' + escHtml(userEmail) + '</strong>' +
+              '</div>' +
+              '<button type="button" class="ntm-mon-email-close" id="btnNvMonEmailClose" title="Close">×</button>' +
+            '</div>' +
+            '<div class="ntm-mon-email-row">' +
+              '<label class="ntm-mon-email-switch">' +
+                '<input type="checkbox" id="chkNvMonEmailAuto" ' + (prefs.enabled ? "checked" : "") + ' />' +
+                '<span>Auto-notify on new alerts</span>' +
+              '</label>' +
+              '<select id="selNvMonEmailCooldown" class="ntm-mon-email-select" title="Minimum interval between automatic alert emails">' +
+                '<option value="15"' + (Number(prefs.cooldownMin) === 15 ? " selected" : "") + '>15m</option>' +
+                '<option value="30"' + (Number(prefs.cooldownMin) === 30 ? " selected" : "") + '>30m</option>' +
+                '<option value="60"' + (Number(prefs.cooldownMin) === 60 ? " selected" : "") + '>1h</option>' +
+                '<option value="360"' + (Number(prefs.cooldownMin) === 360 ? " selected" : "") + '>6h</option>' +
+              '</select>' +
+            '</div>' +
+            '<div class="ntm-mon-email-row">' +
+              '<div class="ntm-mon-lvl-seg">' +
+                '<button type="button" class="ntm-mon-lvl-btn ' + (prefs.level === "alarms_only" ? "active" : "") + '" data-mon-email-lvl="alarms_only">Alarms Only</button>' +
+                '<button type="button" class="ntm-mon-lvl-btn ' + (prefs.level === "all" ? "active" : "") + '" data-mon-email-lvl="all">Alarms + Warnings</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="ntm-mon-email-cats">' +
+              '<label><input type="checkbox" data-mon-email-cat="nav" ' + (cats.nav !== false ? "checked" : "") + ' />Nav/XTD</label>' +
+              '<label><input type="checkbox" data-mon-email-cat="traffic" ' + (cats.traffic !== false ? "checked" : "") + ' />Traffic</label>' +
+              '<label><input type="checkbox" data-mon-email-cat="weather" ' + (cats.weather !== false ? "checked" : "") + ' />Weather</label>' +
+              '<label><input type="checkbox" data-mon-email-cat="ntm" ' + (cats.ntm !== false ? "checked" : "") + ' />NtM</label>' +
+            '</div>' +
+            '<div class="ntm-mon-email-actions">' +
+              '<button type="button" class="ntm-mon-send-btn" id="btnNvMonSendNow" ' + (st.monEmailSending ? "disabled" : "") + '>' +
+                (st.monEmailSending ? "Sending..." : "Send Report Now") +
+              '</button>' +
+              '<button type="button" class="ntm-mon-mailto-btn" id="btnNvMonOpenMail" title="Open pre-filled Watch Report in Gmail / Mail client">Gmail / Mail</button>' +
+            '</div>' +
+            ((st.monLastStatusMsg || prefs.lastSentIso)
+              ? '<div class="ntm-mon-email-status">' +
+                  escHtml(st.monLastStatusMsg || ("Last sent: " + prefs.lastSentIso)) +
+                '</div>'
+              : '') +
+          '</div>';
+      }
+    }
+
+    // 3. Blind-Bridge Live Conning HUD (shown when mode === "live") OR concise Static Info Strip
+    let hudHtml = "";
+    if (report.mode === "live" && report.telemetry) {
+      const t = report.telemetry;
+      // Needle position 0..100% where 50% = centerline, 10% = Port XTD rail, 90% = Stbd XTD rail
+      const clampedSigned = Math.max(-1.25, Math.min(1.25, t.signedRatio || 0));
+      const needlePct = Math.round(50 + clampedSigned * 36);
+      const xtdStateCls = Math.abs(t.signedRatio) > 1.0 ? "is-alarm" : (Math.abs(t.signedRatio) >= 0.75 ? "is-warn" : "is-ok");
+
+      const turnBadge = t.nextCourseDeg != null && Math.abs(t.turnDegSigned) >= 2
+        ? ((t.turnDegSigned >= 0 ? "R " : "L ") + Math.abs(t.turnDegSigned) + "° → " + String(t.nextCourseDeg).padStart(3, "0") + "°")
+        : "Final leg";
+
+      hudHtml =
+        '<div class="ntm-mon-hud">' +
+          '<div class="ntm-mon-hud-xtd ' + xtdStateCls + '">' +
+            '<div class="ntm-mon-xtd-top">' +
+              '<span class="ntm-mon-xtd-lim">P ' + t.portXtdLimit.toFixed(2) + '</span>' +
+              '<span class="ntm-mon-xtd-val">XTD: <b>' + t.xtdNm.toFixed(2) + ' NM ' + escHtml(t.xtdSide) + '</b></span>' +
+              '<span class="ntm-mon-xtd-lim">S ' + t.stbdXtdLimit.toFixed(2) + '</span>' +
+            '</div>' +
+            '<div class="ntm-mon-xtd-bar">' +
+              '<span class="ntm-mon-xtd-rail-l"></span>' +
+              '<span class="ntm-mon-xtd-center"></span>' +
+              '<span class="ntm-mon-xtd-rail-r"></span>' +
+              '<span class="ntm-mon-xtd-ship ' + xtdStateCls + '" style="left:' + needlePct + '%;"></span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="ntm-mon-hud-grid">' +
+            '<div class="ntm-mon-hud-cell">' +
+              '<span class="ntm-mon-hud-lbl">COG / CTS</span>' +
+              '<span class="ntm-mon-hud-num">' + (t.cog != null ? String(t.cog).padStart(3, "0") + "°" : "—") + ' <small>/ ' + String(t.ctsDeg).padStart(3, "0") + '°</small></span>' +
+            '</div>' +
+            '<div class="ntm-mon-hud-cell">' +
+              '<span class="ntm-mon-hud-lbl">SOG / PLAN</span>' +
+              '<span class="ntm-mon-hud-num">' + t.sog.toFixed(1) + ' <small>/ ' + t.plannedSpd.toFixed(1) + ' kn</small></span>' +
+            '</div>' +
+            '<div class="ntm-mon-hud-cell">' +
+              '<span class="ntm-mon-hud-lbl">NEXT ' + escHtml(t.nextWpCode) + '</span>' +
+              '<span class="ntm-mon-hud-num">' + t.distToNextWpNm.toFixed(1) + ' NM <small>' + Math.max(1, Math.round(t.ttgNextMin)) + 'm</small></span>' +
+            '</div>' +
+            '<div class="ntm-mon-hud-cell">' +
+              '<span class="ntm-mon-hud-lbl">TURN / WOP</span>' +
+              '<span class="ntm-mon-hud-num">' + escHtml(turnBadge) + '</span>' +
+            '</div>' +
+            '<div class="ntm-mon-hud-cell">' +
+              '<span class="ntm-mon-hud-lbl">WIND / SEA</span>' +
+              '<span class="ntm-mon-hud-num">' + escHtml(t.windLabel) + ' <small>' + escHtml(t.waveLabel) + '</small></span>' +
+            '</div>' +
+            '<div class="ntm-mon-hud-cell">' +
+              '<span class="ntm-mon-hud-lbl">TRAFFIC CPA</span>' +
+              '<span class="ntm-mon-hud-num">' + escHtml(t.aisSummary) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="ntm-mon-hud-foot">' +
+            '<span>Leg <b>' + t.legNo + '/' + t.totalLegs + '</b></span>' +
+            '<span>Rem <b>' + t.remVoyageNm.toFixed(1) + ' NM</b></span>' +
+            '<span>ETA <b>' + escHtml(t.etaUtcStr) + '</b></span>' +
+          '</div>' +
+        '</div>';
+    } else if (!report.isLiveEligible && report.liveUnavailableReason) {
+      hudHtml =
+        '<div class="ntm-mon-static-hint">' +
+          '<span>' + escHtml(report.liveUnavailableReason) + '</span>' +
+        '</div>';
+    }
+
+    // 4. Render Scannable 2-Line Alert Cards (Alarms Red -> Warnings Yellow)
+    const renderCard = (item) => {
+      const isExp = st.monExpandedIds && st.monExpandedIds.has(item.id);
+      const sevCls = item.severity === "alarm" ? "is-alarm" : "is-warning";
+      const hasCoords = Number.isFinite(item.lat) && Number.isFinite(item.lon);
+      return (
+        '<div class="ntm-mon-card ' + sevCls + (isExp ? " is-expanded" : "") + '" data-mon-card-id="' + escHtml(item.id) + '" ' +
+          (hasCoords ? ('data-mon-lat="' + item.lat + '" data-mon-lon="' + item.lon + '" data-mon-zoom="' + (item.zoom || 10) + '" data-mon-sev-kind="' + item.severity + '"') : '') +
+          ' title="Click to locate on chart &amp; view bridge action">' +
+          '<div class="ntm-mon-card-row1">' +
+            '<span class="ntm-mon-tag ' + sevCls + '">' + escHtml(item.tag) + '</span>' +
+            '<span class="ntm-mon-card-title">' + escHtml(item.title) + '</span>' +
+            (item.badge ? '<span class="ntm-mon-card-badge">' + escHtml(item.badge) + '</span>' : '') +
+          '</div>' +
+          '<div class="ntm-mon-card-row2">' + escHtml(item.summary) + '</div>' +
+          (isExp && item.detail
+            ? '<div class="ntm-mon-card-detail">' + escHtml(item.detail) + '</div>'
+            : '') +
+        '</div>'
+      );
+    };
+
+    let listInnerHtml = "";
+    if (visAlarms.length > 0) {
+      listInnerHtml +=
+        '<div class="ntm-mon-sec-hdr is-alarm">ALARMS (' + visAlarms.length + ')</div>' +
+        visAlarms.map(renderCard).join("");
+    }
+    if (visWarnings.length > 0) {
+      listInnerHtml +=
+        '<div class="ntm-mon-sec-hdr is-warning">WARNINGS (' + visWarnings.length + ')</div>' +
+        visWarnings.map(renderCard).join("");
+    }
+    if (visAlarms.length === 0 && visWarnings.length === 0) {
+      listInnerHtml +=
+        '<div class="ntm-mon-all-clear">' +
+          '<span class="ntm-mon-clear-check">✓</span>' +
+          '<div>' +
+            '<div class="ntm-mon-clear-title">' +
+              (sevFilter !== "all" || catFilter !== "all" ? "No alerts match current filter" : "All Monitored Checks Clear") +
+            '</div>' +
+            '<div class="ntm-mon-clear-sub">' +
+              (report.mode === "live"
+                ? "Track corridor, UKC, TSS, weather, NtM &amp; AIS CPA nominal."
+                : "No land crossings, shoals, TSS violations, storms or NtM hazards on route.") +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    // 5. Collapsible Nominal / Passed Systems Accordion
+    if (report.passed.length > 0 && sevFilter === "all") {
+      listInnerHtml +=
+        '<div class="ntm-mon-passed-wrap">' +
+          '<button type="button" class="ntm-mon-passed-toggle" id="btnNvMonPassedToggle" aria-expanded="' + (st.monPassedOpen ? "true" : "false") + '">' +
+            '<span>✓ ' + report.passed.length + ' Nominal Checks Passed</span>' +
+            '<span class="ntm-mon-passed-chev">' + (st.monPassedOpen ? "▴" : "▾") + '</span>' +
+          '</button>' +
+          (st.monPassedOpen
+            ? '<div class="ntm-mon-passed-list">' +
+                report.passed.map((p) => '<div class="ntm-mon-passed-item"><span>✓</span>' + escHtml(p) + '</div>').join("") +
+              '</div>'
+            : '') +
+        '</div>';
+    }
+
+    // 6. Bottom Category Bar + Live Timestamp
+    const nowUtc = new Date().toISOString().slice(11, 19) + " UTC";
+    const bottomBarHtml =
+      '<div class="ntm-mon-bottom-bar">' +
+        '<div class="ntm-mon-cat-pills">' +
+          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "all" ? "active" : "") + '" data-mon-cat="all">All</button>' +
+          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "nav" ? "active" : "") + '" data-mon-cat="nav">Nav</button>' +
+          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "traffic" ? "active" : "") + '" data-mon-cat="traffic">Traffic</button>' +
+          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "weather" ? "active" : "") + '" data-mon-cat="weather">Weather</button>' +
+          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "ntm" ? "active" : "") + '" data-mon-cat="ntm">NtM</button>' +
+        '</div>' +
+        '<span class="ntm-mon-utc-stamp">' + nowUtc + '</span>' +
+      '</div>';
+
+    return (
+      '<div class="ntm-nv-body ntm-mon-body">' +
+        topBarHtml +
+        emailDrawerHtml +
+        hudHtml +
+        '<div class="ntm-mon-scroll" id="nvMonitoringScroll">' +
+          listInnerHtml +
+        '</div>' +
+      '</div>' +
+      bottomBarHtml
+    );
+  }
+
+  function wireMonitoringTabHandlers(routePanel, rt, report) {
+    const st = window._sidebarNavtorState;
+    ensureMonitoringLiveTicker();
+    maybeAutoTriggerMonitoringAlerts(rt, report);
+
+    // Mode toggle (Live Watch vs Static Route Check)
+    routePanel.querySelectorAll("[data-mon-mode]").forEach((btn) => {
+      btn.onclick = () => {
+        const m = btn.getAttribute("data-mon-mode");
+        st.monViewOverride = m === "check" ? "check" : "live";
+        renderRouteDetailView(routePanel, rt);
+      };
+    });
+
+    // Severity chips (All / Alarms / Warnings)
+    routePanel.querySelectorAll("[data-mon-sev]").forEach((btn) => {
+      btn.onclick = () => {
+        const sev = btn.getAttribute("data-mon-sev") || "all";
+        st.monSeverityFilter = st.monSeverityFilter === sev && sev !== "all" ? "all" : sev;
+        renderRouteDetailView(routePanel, rt);
+      };
+    });
+
+    // Category bottom chips (All / Nav / Traffic / Weather / NtM)
+    routePanel.querySelectorAll("[data-mon-cat]").forEach((btn) => {
+      btn.onclick = () => {
+        const cat = btn.getAttribute("data-mon-cat") || "all";
+        st.monCategoryFilter = st.monCategoryFilter === cat && cat !== "all" ? "all" : cat;
+        renderRouteDetailView(routePanel, rt);
+      };
+    });
+
+    // Manual Refresh / Re-scan button
+    const btnRef = routePanel.querySelector("#btnNvMonRefresh");
+    if (btnRef) {
+      btnRef.onclick = () => {
+        renderRouteDetailView(routePanel, rt);
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast(
+            "Monitoring updated: " + report.alarms.length + " Alarm(s), " + report.warnings.length + " Warning(s)",
+            report.alarms.length > 0 ? "warning" : "info"
+          );
+        }
+      };
+    }
+
+    // Email drawer toggle & close
+    const btnEmail = routePanel.querySelector("#btnNvMonEmailToggle");
+    if (btnEmail) {
+      btnEmail.onclick = () => {
+        st.monEmailOpen = !st.monEmailOpen;
+        renderRouteDetailView(routePanel, rt);
+      };
+    }
+    const btnEmailClose = routePanel.querySelector("#btnNvMonEmailClose");
+    if (btnEmailClose) {
+      btnEmailClose.onclick = () => {
+        st.monEmailOpen = false;
+        renderRouteDetailView(routePanel, rt);
+      };
+    }
+
+    // Guest Sign-In trigger inside Email drawer
+    const btnSignIn = routePanel.querySelector("#btnNvMonTriggerSignIn");
+    if (btnSignIn) {
+      btnSignIn.onclick = () => {
+        const authBtn = document.querySelector("#btnHeaderAuth, #btnGoogleSignIn, [data-auth-trigger]");
+        if (authBtn) authBtn.click();
+        else if (typeof showSetSailToast === "function") {
+          showSetSailToast("Use the Google Sign-In button in the top navigation bar to connect your account.", "info");
+        }
+      };
+    }
+
+    // Email Auto-notify toggle
+    const chkAuto = routePanel.querySelector("#chkNvMonEmailAuto");
+    if (chkAuto) {
+      chkAuto.onchange = () => {
+        const prefs = loadMonitoringEmailPrefs();
+        prefs.enabled = Boolean(chkAuto.checked);
+        saveMonitoringEmailPrefs(prefs, false);
+        if (prefs.enabled && typeof Notification !== "undefined" && Notification.permission === "default") {
+          try { Notification.requestPermission(); } catch (ePerm) {}
+        }
+        renderRouteDetailView(routePanel, rt);
+        if (typeof showSetSailToast === "function") {
+          const u = typeof getSetSailAuthUser === "function" ? getSetSailAuthUser() : null;
+          showSetSailToast(
+            prefs.enabled
+              ? ("Email Watch ARMED for " + ((u && u.email) || "account"))
+              : "Email Watch paused",
+            prefs.enabled ? "success" : "info"
+          );
+        }
+      };
+    }
+
+    // Email Cooldown selector
+    const selCd = routePanel.querySelector("#selNvMonEmailCooldown");
+    if (selCd) {
+      selCd.onchange = () => {
+        const prefs = loadMonitoringEmailPrefs();
+        prefs.cooldownMin = parseInt(selCd.value, 10) || 30;
+        saveMonitoringEmailPrefs(prefs, false);
+      };
+    }
+
+    // Email Level segmented buttons (Alarms Only vs Alarms + Warnings)
+    routePanel.querySelectorAll("[data-mon-email-lvl]").forEach((btn) => {
+      btn.onclick = () => {
+        const prefs = loadMonitoringEmailPrefs();
+        prefs.level = btn.getAttribute("data-mon-email-lvl") === "all" ? "all" : "alarms_only";
+        saveMonitoringEmailPrefs(prefs, false);
+        renderRouteDetailView(routePanel, rt);
+      };
+    });
+
+    // Email Category checkboxes
+    routePanel.querySelectorAll("[data-mon-email-cat]").forEach((chk) => {
+      chk.onchange = () => {
+        const key = chk.getAttribute("data-mon-email-cat");
+        if (!key) return;
+        const prefs = loadMonitoringEmailPrefs();
+        prefs.categories = prefs.categories || { nav: true, traffic: true, weather: true, ntm: true };
+        prefs.categories[key] = Boolean(chk.checked);
+        saveMonitoringEmailPrefs(prefs, false);
+      };
+    });
+
+    // Send Report Now button
+    const btnSendNow = routePanel.querySelector("#btnNvMonSendNow");
+    if (btnSendNow) {
+      btnSendNow.onclick = () => {
+        dispatchMonitoringEmailReport(rt, report, false);
+      };
+    }
+
+    // Open in Gmail / Mail client button
+    const btnOpenMail = routePanel.querySelector("#btnNvMonOpenMail");
+    if (btnOpenMail) {
+      btnOpenMail.onclick = () => {
+        const u = typeof getSetSailAuthUser === "function" ? getSetSailAuthUser() : null;
+        const email = (u && u.email) || "";
+        const subj = "[SetSail " + (report.alarms.length ? "ALARM x" + report.alarms.length : "Watch") + '] "' + (rt.name || "Route") + '"';
+        const lines = [
+          "SetSail Bridge Route Monitoring — " + (rt.name || "Route"),
+          "Mode: " + (report.mode === "live" ? "LIVE BRIDGE WATCH" : "STATIC ROUTE CHECK"),
+          "Alarms: " + report.alarms.length + " | Warnings: " + report.warnings.length,
+          ""
+        ];
+        report.alarms.slice(0, 12).forEach((a, idx) => {
+          lines.push((idx + 1) + ". [ALARM / " + a.tag + "] " + a.title + " — " + a.summary);
+        });
+        report.warnings.slice(0, 12).forEach((w, idx) => {
+          lines.push((idx + 1) + ". [WARN / " + w.tag + "] " + w.title + " — " + w.summary);
+        });
+        openMonitoringGmailOrMailto(email, subj, lines.join("\n"));
+      };
+    }
+
+    // Alert card click -> expand Bridge Decision guidance + fly chart to hazard coordinates
+    routePanel.querySelectorAll("[data-mon-card-id]").forEach((cardEl) => {
+      cardEl.onclick = () => {
+        const id = cardEl.getAttribute("data-mon-card-id");
+        if (id) {
+          if (st.monExpandedIds.has(id)) st.monExpandedIds.delete(id);
+          else st.monExpandedIds.add(id);
+        }
+        const lat = parseFloat(cardEl.getAttribute("data-mon-lat"));
+        const lon = parseFloat(cardEl.getAttribute("data-mon-lon"));
+        const zoom = parseInt(cardEl.getAttribute("data-mon-zoom"), 10) || 10;
+        const sevKind = cardEl.getAttribute("data-mon-sev-kind") || "warning";
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          pulseMonitoringChartFocus(lat, lon, sevKind, zoom);
+        }
+        const scrollEl = routePanel.querySelector("#nvMonitoringScroll");
+        const prevTop = scrollEl ? scrollEl.scrollTop : 0;
+        renderRouteDetailView(routePanel, rt);
+        const nextScroll = routePanel.querySelector("#nvMonitoringScroll");
+        if (nextScroll) nextScroll.scrollTop = prevTop;
+      };
+    });
+
+    // Passed nominal checks accordion
+    const btnPassed = routePanel.querySelector("#btnNvMonPassedToggle");
+    if (btnPassed) {
+      btnPassed.onclick = () => {
+        st.monPassedOpen = !st.monPassedOpen;
+        const scrollEl = routePanel.querySelector("#nvMonitoringScroll");
+        const prevTop = scrollEl ? scrollEl.scrollTop : 0;
+        renderRouteDetailView(routePanel, rt);
+        const nextScroll = routePanel.querySelector("#nvMonitoringScroll");
+        if (nextScroll) nextScroll.scrollTop = prevTop;
+      };
+    }
+  }
+
   function renderRouteDetailView(routePanel, rt) {
     const st = window._sidebarNavtorState;
     const wps = Array.isArray(rt.waypoints) ? rt.waypoints : [];
@@ -48152,19 +50251,23 @@ if (document.readyState === "loading") {
     const activeSpecs = visibleSpecs.length ? visibleSpecs : [NAVTOR_WP_PARAM_SPECS[1]];
     const isSingleCol = activeSpecs.length <= 2;
 
+    const monReport = evaluateRouteMonitoringReport(rt);
+    let monTabBadgesHtml = "";
+    if (wps.length >= 2) {
+      if (monReport.alarms.length > 0) {
+        monTabBadgesHtml += '<span class="ntm-nv-mon-pill is-alarm">' + monReport.alarms.length + '</span>';
+      }
+      if (monReport.warnings.length > 0) {
+        monTabBadgesHtml += '<span class="ntm-nv-mon-pill is-warn">' + monReport.warnings.length + '</span>';
+      }
+      if (monReport.alarms.length === 0 && monReport.warnings.length === 0) {
+        monTabBadgesHtml += '<span class="ntm-nv-mon-pill is-ok">✓</span>';
+      }
+    }
+
     let tabBodyHtml = "";
     if (activeTab === "monitoring") {
-      tabBodyHtml =
-        '<div class="ntm-nv-monitoring-soon">' +
-          '<div class="ntm-nv-monitoring-icon" aria-hidden="true">' +
-            '<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
-              '<circle cx="12" cy="12" r="9"></circle>' +
-              '<polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>' +
-            '</svg>' +
-          '</div>' +
-          '<div class="ntm-nv-monitoring-title">Monitoring — Coming soon</div>' +
-          '<div class="ntm-nv-monitoring-desc">Live XTD alerts, wheel-over points, dynamic ETA &amp; track monitoring will be available here.</div>' +
-        '</div>';
+      tabBodyHtml = buildMonitoringTabHtml(rt, monReport);
     } else {
       let wptListHtml = "";
       if (wps.length > 0) {
@@ -48324,7 +50427,7 @@ if (document.readyState === "loading") {
       buildPinnedRouteHeaderHtml(rt, metrics, false) +
       '<div class="ntm-nv-mode-tabs" role="tablist" aria-label="Route mode tabs">' +
         '<button type="button" class="ntm-nv-mode-tab ' + (activeTab === "planning" ? "active" : "") + '" data-nv-mode-tab="planning" role="tab" aria-selected="' + (activeTab === "planning" ? "true" : "false") + '">Planning</button>' +
-        '<button type="button" class="ntm-nv-mode-tab ' + (activeTab === "monitoring" ? "active" : "") + '" data-nv-mode-tab="monitoring" role="tab" aria-selected="' + (activeTab === "monitoring" ? "true" : "false") + '">Monitoring <span class="ntm-nv-soon-pill">coming soon</span></button>' +
+        '<button type="button" class="ntm-nv-mode-tab ' + (activeTab === "monitoring" ? "active" : "") + '" data-nv-mode-tab="monitoring" role="tab" aria-selected="' + (activeTab === "monitoring" ? "true" : "false") + '">Monitoring ' + monTabBadgesHtml + '</button>' +
       '</div>' +
       tabBodyHtml;
 
@@ -48334,9 +50437,12 @@ if (document.readyState === "loading") {
     if (backBtn) {
       backBtn.onclick = () => {
         setRouteEditMode(false);
+        clearMonitoringChartFocus();
         st.destPickerOpen = false;
         st.ppMenuOpen = false;
         st.wpFilterOpen = false;
+        st.monEmailOpen = false;
+        st.monViewOverride = null;
         st.checkedWpIdxs.clear();
         st.routeId = null;
         st.view = "list";
@@ -48351,6 +50457,9 @@ if (document.readyState === "loading") {
         if (nextMode !== "planning") {
           st.destPickerOpen = false;
           st.wpFilterOpen = false;
+          if (st.editMode) setRouteEditMode(false);
+        } else {
+          clearMonitoringChartFocus();
         }
         st.detailTab = nextMode;
         renderRouteDetailView(routePanel, rt);
@@ -48358,6 +50467,7 @@ if (document.readyState === "loading") {
     });
 
     if (activeTab === "monitoring") {
+      wireMonitoringTabHandlers(routePanel, rt, monReport);
       return;
     }
 
