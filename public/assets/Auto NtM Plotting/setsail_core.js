@@ -969,6 +969,9 @@ function applyVesselProfile(data, opts) {
     scheduleOwnVesselAisRefresh();
 
   }
+  if (!opts.fromCloudSync && !opts.skipPlot && typeof window.revalidateActiveCurrentRouteWithVessel === "function") {
+    try { window.revalidateActiveCurrentRouteWithVessel({ toast: true }); } catch (eRevCur) {}
+  }
 
 }
 
@@ -2363,6 +2366,205 @@ window.resolveDrRailsForShip = resolveDrRailsForShip;
 
 
 
+
+/**
+ * v5.268: Evaluate whether a route can be marked as the vessel's `Current` route.
+ * Two conditions must hold:
+ *   1) The user must have an active own vessel (`userVessel` with valid coordinates).
+ *   2) The vessel must EITHER already be within the route's corridor limits (XTD envelope),
+ *      OR be underway (`SOG >= 0.3 kn` with valid course `COG`/`Heading`) and able to
+ *      reach/intersect the route anywhere along any of its legs at its current course & speed.
+ */
+function evaluateRouteCurrentEligibility(route) {
+  if (!route || !Array.isArray(route.waypoints)) {
+    return {
+      eligible: false,
+      reason: "Route has no waypoints."
+    };
+  }
+  const rawWps = route.waypoints.filter(
+    (w) => w && Number.isFinite(Number(w.lat)) && Number.isFinite(Number(w.lon))
+  );
+  if (rawWps.length < 2) {
+    return {
+      eligible: false,
+      reason: "Route must have at least 2 waypoints to be marked as Current."
+    };
+  }
+
+  const v = window.userVessel || (typeof userVessel !== "undefined" ? userVessel : null);
+  const hasLiveCoords = Boolean(v && typeof isValidVesselLatLon === "function" && isValidVesselLatLon(v.lat, v.lon));
+  const hasAisCoords = Boolean(v && typeof isValidVesselLatLon === "function" && isValidVesselLatLon(v.aisFixLat, v.aisFixLon));
+  if (!v || (!hasLiveCoords && !hasAisCoords)) {
+    return {
+      eligible: false,
+      reason: "Cannot mark as Current: select your vessel in 'My Vessel' first."
+    };
+  }
+
+  const vLat = Number(hasLiveCoords ? v.lat : v.aisFixLat);
+  const vLon = Number(hasLiveCoords ? v.lon : v.aisFixLon);
+
+  // Step 1: Check if the vessel is ALREADY within the route bounds (any leg's XTD corridor)
+  let minDistNm = Infinity;
+  for (let i = 0; i < rawWps.length - 1; i++) {
+    const wpA = rawWps[i];
+    const wpB = rawWps[i + 1];
+    const legProj = setrouteProjectOntoRoute(vLat, vLon, [wpA, wpB]);
+    if (!legProj) continue;
+    if (legProj.distNm < minDistNm) {
+      minDistNm = legProj.distNm;
+    }
+    const portXtd = Math.max(Number(wpA.portsideXTD) || 0, Number(wpB.portsideXTD) || 0, 0.5);
+    const stbdXtd = Math.max(Number(wpA.starboardXTD) || 0, Number(wpB.starboardXTD) || 0, 0.5);
+    const allowedXtd = legProj.xtdNm >= 0 ? stbdXtd : portXtd;
+    if (legProj.distNm <= allowedXtd) {
+      return {
+        eligible: true,
+        mode: "on_route",
+        legIdx: i,
+        distNm: legProj.distNm
+      };
+    }
+  }
+
+  // Step 2: Vessel is outside the route corridor. Check if its current course & speed can reach the route.
+  const rawSog = Number.isFinite(Number(v.sog)) ? Number(v.sog) : Number(v.aisFixSog);
+  const sogKn = Number.isFinite(rawSog) ? rawSog : 0;
+  if (sogKn < 0.3) {
+    return {
+      eligible: false,
+      reason:
+        "Cannot mark as Current: vessel is stationary (" +
+        sogKn.toFixed(1) +
+        " kn) and " +
+        (Number.isFinite(minDistNm) ? minDistNm.toFixed(2) : "—") +
+        " NM outside the route."
+    };
+  }
+
+  const rawCog = Number.isFinite(Number(v.cog))
+    ? Number(v.cog)
+    : (Number.isFinite(Number(v.aisFixCog)) ? Number(v.aisFixCog) : Number(v.heading));
+  if (!Number.isFinite(rawCog)) {
+    return {
+      eligible: false,
+      reason: "Cannot mark as Current: vessel is outside the route and has no course (COG / Heading) set."
+    };
+  }
+
+  const cogDeg = ((rawCog % 360) + 360) % 360;
+  const cogRad = (cogDeg * Math.PI) / 180;
+  // Forward ray direction in conformal Web Mercator (lon, mercY) where constant-bearing Rhumb lines are straight
+  const vx = Math.sin(cogRad);
+  const vy = Math.cos(cogRad);
+  const pY = setrouteMercYDeg(vLat);
+  const MAX_APPROACH_DIST_NM = 350;
+
+  for (let i = 0; i < rawWps.length - 1; i++) {
+    const wpA = rawWps[i];
+    const wpB = rawWps[i + 1];
+    const aLat = Number(wpA.lat);
+    const aLon = Number(wpA.lon);
+    const bLat = Number(wpB.lat);
+    const dLonAB = setrouteWrapLon180(Number(wpB.lon) - aLon);
+    const bLon = aLon + dLonAB;
+    const midLon = (aLon + bLon) * 0.5;
+    const pLon = midLon + setrouteWrapLon180(vLon - midLon);
+
+    const aY = setrouteMercYDeg(aLat);
+    const bY = setrouteMercYDeg(bLat);
+    const dx = bLon - aLon;
+    const dy = bY - aY;
+
+    const corridorNm = Math.max(
+      Number(wpA.portsideXTD) || 0,
+      Number(wpA.starboardXTD) || 0,
+      Number(wpB.portsideXTD) || 0,
+      Number(wpB.starboardXTD) || 0,
+      0.75
+    );
+
+    // (2a) Direct ray-segment intersection: P + u * V = A + t * (B - A), u >= 0, t in [0, 1]
+    const det = vy * dx - vx * dy;
+    if (Math.abs(det) > 1e-12) {
+      const rhsX = aLon - pLon;
+      const rhsY = aY - pY;
+      const u = (rhsY * dx - rhsX * dy) / det;
+      const t = (vx * rhsY - vy * rhsX) / det;
+      if (u >= 0 && t >= -0.02 && t <= 1.02) {
+        const tClamped = Math.max(0, Math.min(1, t));
+        const qLat = aLat + (bLat - aLat) * tClamped;
+        const qLon = setrouteWrapLon180(aLon + dx * tClamped);
+        const reachNm = setrouteRhumbCourseDist({ lat: vLat, lon: vLon }, { lat: qLat, lon: qLon }).distNm;
+        if (reachNm <= MAX_APPROACH_DIST_NM) {
+          return {
+            eligible: true,
+            mode: "ray_intersect",
+            legIdx: i,
+            distNm: reachNm
+          };
+        }
+      }
+    }
+
+    // (2b) Check if the forward ray enters the leg's XTD corridor or heads within +-15 deg of any point on the leg
+    const SAMPLES = 8;
+    for (let s = 0; s <= SAMPLES; s++) {
+      const frac = s / SAMPLES;
+      const sLat = aLat + (bLat - aLat) * frac;
+      const sLon = setrouteWrapLon180(aLon + dx * frac);
+      const rhToPt = setrouteRhumbCourseDist({ lat: vLat, lon: vLon }, { lat: sLat, lon: sLon });
+      if (rhToPt.distNm > MAX_APPROACH_DIST_NM) continue;
+      const angDiff = Math.abs(((cogDeg - rhToPt.course + 540) % 360) - 180);
+      if (angDiff >= 85) continue;
+      const crossMissNm = rhToPt.distNm * Math.sin((angDiff * Math.PI) / 180);
+      if (crossMissNm <= corridorNm || (rhToPt.distNm <= 60 && angDiff <= 15)) {
+        return {
+          eligible: true,
+          mode: "ray_corridor",
+          legIdx: i,
+          distNm: rhToPt.distNm
+        };
+      }
+    }
+  }
+
+  return {
+    eligible: false,
+    reason:
+      "Cannot mark as Current: at course " +
+      Math.round(cogDeg) +
+      "° and speed " +
+      sogKn.toFixed(1) +
+      " kn, vessel cannot reach this route (" +
+      (Number.isFinite(minDistNm) ? minDistNm.toFixed(2) : "—") +
+      " NM away)."
+  };
+}
+window.evaluateRouteCurrentEligibility = evaluateRouteCurrentEligibility;
+
+function revalidateActiveCurrentRouteWithVessel(opts) {
+  opts = opts || {};
+  const curId = typeof getDrActiveRouteId === "function" ? getDrActiveRouteId() : null;
+  if (!curId) return true;
+  const curRt = typeof getDrActiveRoute === "function" ? getDrActiveRoute() : null;
+  if (!curRt) return true;
+  const check = evaluateRouteCurrentEligibility(curRt);
+  if (!check.eligible) {
+    if (typeof window.persistCurrentRouteSnapshot === "function") {
+      window.persistCurrentRouteSnapshot(null);
+    }
+    setDrActiveRouteId(null, { wipeOrphan: true, keepSidebarView: true });
+    if (opts.toast && typeof showSetSailToast === "function") {
+      showSetSailToast("Current route unmarked: " + check.reason.replace(/^Cannot mark as Current:\s*/i, ""), "info");
+    }
+    return false;
+  }
+  return true;
+}
+window.revalidateActiveCurrentRouteWithVessel = revalidateActiveCurrentRouteWithVessel;
+
 function setDrActiveRouteId(routeId, opts) {
 
   opts = opts || {};
@@ -2397,6 +2599,16 @@ function setDrActiveRouteId(routeId, opts) {
 
       foundEarly = activeRouteData;
 
+    }
+
+    if (foundEarly && !opts.fromCloudSync && !opts.skipEligibilityCheck && typeof evaluateRouteCurrentEligibility === "function") {
+      const elig = evaluateRouteCurrentEligibility(foundEarly);
+      if (!elig.eligible) {
+        if (typeof showSetSailToast === "function") {
+          showSetSailToast(elig.reason, "warning");
+        }
+        return false;
+      }
     }
 
     clearDrHandoffState();
@@ -46121,8 +46333,19 @@ function renderVesselRouteLibraryList() {
       } else {
 
         const prev = cur;
+        const targetRt = lib.find((r) => r && (r.id === id || r.name === id)) || null;
+        if (targetRt && typeof evaluateRouteCurrentEligibility === "function") {
+          const check = evaluateRouteCurrentEligibility(targetRt);
+          if (!check.eligible) {
+            if (typeof showSetSailToast === "function") {
+              showSetSailToast(check.reason, "warning");
+            }
+            return;
+          }
+        }
 
-        setDrActiveRouteId(id);
+        const okSet = setDrActiveRouteId(id, { skipEligibilityCheck: true });
+        if (okSet === false) return;
 
         if (typeof showSetSailToast === "function") {
 
@@ -46460,7 +46683,7 @@ function renderBackgroundCurrentRouteOnMap(currentRt) {
       interactive: false
     });
     const line = L.polyline(unrolled, {
-      color: "#f97316",
+      color: "#f05a36",
       weight: 3.2,
       opacity: 0.92,
       dashArray: "8, 5",
@@ -47702,9 +47925,18 @@ if (document.readyState === "loading") {
             showSetSailToast('Unmarked "' + (rt.name || "Route") + '" as Current', "info");
           }
         } else {
+          if (typeof evaluateRouteCurrentEligibility === "function") {
+            const check = evaluateRouteCurrentEligibility(rt);
+            if (!check.eligible) {
+              if (typeof showSetSailToast === "function") {
+                showSetSailToast(check.reason, "warning");
+              }
+              return;
+            }
+          }
           persistCurrentRouteSnapshot(rt);
           if (typeof setDrActiveRouteId === "function") {
-            setDrActiveRouteId(rt.id, { keepSidebarView: true });
+            setDrActiveRouteId(rt.id, { keepSidebarView: true, skipEligibilityCheck: true });
           }
           if (typeof showSetSailToast === "function") {
             showSetSailToast('Marked "' + (rt.name || "Route") + '" as Current route', "success");

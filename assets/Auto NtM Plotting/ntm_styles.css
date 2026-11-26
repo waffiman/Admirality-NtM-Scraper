@@ -28430,3 +28430,46 @@ body.light-theme .ntm-wx-unified {
 [data-theme="light"] #ntmSidebar .ntm-nv-wp-filter-lbl {
   color: #0f172a !important;
 }
+
+/* ── v5.268: Hide SetChart LIVE ECDIS Badge, Coral Current Flag & Remove Gold Frame on Current Route Card ── */
+#tab-ntm .page-top-badge {
+  display: none !important;
+}
+
+/* Remove gold/orange border & gradient frame from Current route card in the routes list (flag icon alone is enough) */
+#ntmSidebar .ntm-user-route-card.is-current-route:not(.is-checked-for-action) {
+  border-color: rgba(148, 163, 184, 0.14) !important;
+  background: rgba(30, 41, 59, 0.86) !important;
+}
+
+#ntmSidebar .ntm-user-route-card.is-current-route:not(.is-checked-for-action):hover {
+  border-color: rgba(125, 211, 252, 0.35) !important;
+  background: rgba(41, 55, 78, 0.94) !important;
+}
+
+[data-theme="light"] #ntmSidebar .ntm-user-route-card.is-current-route:not(.is-checked-for-action) {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  background: #f1f5f9 !important;
+}
+
+/* Coral color for the Current flag icon in the routes list */
+#ntmSidebar .ntm-user-route-left-flag.is-current {
+  color: #f05a36 !important;
+  filter: drop-shadow(0 0 6px rgba(240, 90, 54, 0.45)) !important;
+}
+
+/* Coral color for the Mark as Current flag button (#btnNvHdrCurrent) in the route header */
+#ntmSidebar .ntm-nv-hdr-icon-btn.is-current,
+[data-theme="light"] #ntmSidebar .ntm-nv-hdr-icon-btn.is-current {
+  background: linear-gradient(135deg, #ff6b4a 0%, #f05a36 100%) !important;
+  border-color: #ff947d !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(240, 90, 54, 0.45) !important;
+}
+
+#ntmSidebar .ntm-nv-hdr-icon-btn.is-current:hover,
+[data-theme="light"] #ntmSidebar .ntm-nv-hdr-icon-btn.is-current:hover {
+  background: linear-gradient(135deg, #ff7d61 0%, #f96542 100%) !important;
+  border-color: #ffb2a1 !important;
+  color: #ffffff !important;
+}
