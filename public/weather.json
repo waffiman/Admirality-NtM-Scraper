@@ -1,128 +1,66 @@
 {
-  "synopticCycle": "0400 UTC",
-  "lastSyncUtc": "2026-11-27T04:49:12.487348+00:00",
+  "synopticCycle": "1400 UTC",
+  "lastSyncUtc": "2026-11-27T14:44:49.996819+00:00",
   "provider": "NOAA NHC + JTWC + ATCF B-Decks + JMA RSMC + Open-Meteo ECMWF IFS",
   "storms": [
-    {
-      "id": "CP962026",
-      "name": "Invest 96C",
-      "shortName": "96C",
-      "category": "Tropical Disturbance (Active Invest)",
-      "center": [
-        8.1,
-        -168.8
-      ],
-      "centralPressure": 1008,
-      "maxWinds": 25,
-      "gusts": 32,
-      "movement": "ESE at 12 kts",
-      "dangerRadiusNm": 65,
-      "forecastTrack": [
-        {
-          "tau": 12,
-          "coords": [
-            7.1,
-            -166.6
-          ],
-          "winds": 30,
-          "radiusNm": 45
-        },
-        {
-          "tau": 24,
-          "coords": [
-            6.7,
-            -166.4
-          ],
-          "winds": 35,
-          "radiusNm": 60
-        },
-        {
-          "tau": 36,
-          "coords": [
-            6.5,
-            -167.3
-          ],
-          "winds": 40,
-          "radiusNm": 75
-        },
-        {
-          "tau": 48,
-          "coords": [
-            5.8,
-            -167.7
-          ],
-          "winds": 45,
-          "radiusNm": 90
-        },
-        {
-          "tau": 60,
-          "coords": [
-            4.7,
-            -168.3
-          ],
-          "winds": 50,
-          "radiusNm": 105
-        }
-      ]
-    },
     {
       "id": "SH972026",
       "name": "Invest 97S",
       "shortName": "97S",
       "category": "Tropical Disturbance (Active Invest)",
       "center": [
-        -9.8,
-        66.5
+        -10.0,
+        66.1
       ],
       "centralPressure": 1008,
-      "maxWinds": 25,
-      "gusts": 32,
-      "movement": "ENE at 3 kts",
+      "maxWinds": 20,
+      "gusts": 26,
+      "movement": "ESE at 1 kts",
       "dangerRadiusNm": 65,
       "forecastTrack": [
         {
           "tau": 12,
           "coords": [
-            -9.7,
-            67.0
+            -10.1,
+            66.3
           ],
-          "winds": 30,
+          "winds": 25,
           "radiusNm": 45
         },
         {
           "tau": 24,
           "coords": [
-            -9.9,
-            66.8
+            -10.5,
+            66.4
           ],
-          "winds": 35,
+          "winds": 30,
           "radiusNm": 60
         },
         {
           "tau": 36,
           "coords": [
-            -10.4,
-            66.8
+            -10.7,
+            66.7
           ],
-          "winds": 40,
+          "winds": 35,
           "radiusNm": 75
         },
         {
           "tau": 48,
           "coords": [
-            -10.8,
-            66.9
+            -11.0,
+            67.1
           ],
-          "winds": 45,
+          "winds": 40,
           "radiusNm": 90
         },
         {
           "tau": 60,
           "coords": [
-            -11.4,
-            67.1
+            -11.6,
+            67.6
           ],
-          "winds": 50,
+          "winds": 45,
           "radiusNm": 105
         }
       ]
@@ -137,9 +75,9 @@
         -25.0
       ],
       "radiusNm": 240,
-      "waveHeight": 6.1,
+      "waveHeight": 5.1,
       "swellPeriod": 11,
-      "swellDir": "W"
+      "swellDir": "WNW"
     },
     {
       "id": "W2",
@@ -158,19 +96,10 @@
     {
       "type": "L",
       "value": 1008,
-      "name": "Invest 96C Core Low",
-      "coords": [
-        8.1,
-        -168.8
-      ]
-    },
-    {
-      "type": "L",
-      "value": 1008,
       "name": "Invest 97S Core Low",
       "coords": [
-        -9.8,
-        66.5
+        -10.0,
+        66.1
       ]
     },
     {
@@ -204,21 +133,12 @@
   "windVectors": [
     {
       "coords": [
-        8.4,
-        -168.5
-      ],
-      "dir": 160,
-      "speed": 25,
-      "label": "25 kts (96C)"
-    },
-    {
-      "coords": [
-        -9.5,
-        66.8
+        -9.7,
+        66.4
       ],
       "dir": 200,
-      "speed": 25,
-      "label": "25 kts (97S)"
+      "speed": 20,
+      "label": "20 kts (97S)"
     }
   ]
 }
