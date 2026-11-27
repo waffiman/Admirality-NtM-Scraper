@@ -284,6 +284,13 @@
         if (!delTs) return true;
         return routeStampMs(r) > delTs + 5000;
       });
+      var remoteStamp = Number(profile.routesLibraryUpdatedAt) || 0;
+      var localStamp = getLocalStamp("setsail_routes_library_updated_at_v1");
+      // v5.272: never wipe a non-empty local library with an empty/stale remote
+      if (remoteLib.length === 0 && localLib.length > 0 && remoteStamp <= localStamp) {
+        return;
+      }
+
       var localIds = localLib.map(function (r) { return (r && r.id) + ":" + routeStampMs(r); }).join("|");
       var remoteIds = remoteLib.map(function (r) { return (r && r.id) + ":" + routeStampMs(r); }).join("|");
       if (localIds === remoteIds && localLib.length === remoteLib.length) return;
@@ -297,6 +304,9 @@
       }
       if (typeof global.renderVesselRouteLibraryList === "function") {
         try { global.renderVesselRouteLibraryList(); } catch (e2) {}
+      }
+      if (typeof global.renderSidebarUserRoutesList === "function") {
+        try { global.renderSidebarUserRoutesList(); } catch (e3) {}
       }
     } catch (e) {}
   }

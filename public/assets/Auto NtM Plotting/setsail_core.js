@@ -7698,9 +7698,17 @@ let activeRouteData = null;
 
 const ROUTE_STORAGE_KEY = "setsail_active_route";
 
-/** Guest (signed-out) route library — memory only; cleared when the tab closes. */
-
+/** Guest (signed-out) route library — sessionStorage so refresh keeps routes; cleared when the tab closes. */
+const SETSAIL_GUEST_ROUTES_SESSION_KEY = "setsail_guest_routes_lib_v1";
 let __setsailGuestRoutesLib = [];
+(function _hydrateGuestRoutesFromSession() {
+  try {
+    const raw = sessionStorage.getItem(SETSAIL_GUEST_ROUTES_SESSION_KEY);
+    if (!raw) return;
+    const list = JSON.parse(raw);
+    if (Array.isArray(list)) __setsailGuestRoutesLib = list;
+  } catch (eHydGuest) {}
+})();
 
 
 
@@ -39243,6 +39251,7 @@ function setSetSailAuthUser(userObj) {
       try {
 
         __setsailGuestRoutesLib = [];
+        try { sessionStorage.removeItem(SETSAIL_GUEST_ROUTES_SESSION_KEY); } catch (eGuestWipe) {}
 
         activeRouteData = null;
 
@@ -45790,6 +45799,8 @@ function writeSavedRoutesLibrary(lib) {
 
     __setsailGuestRoutesLib = capped;
 
+    try { sessionStorage.setItem(SETSAIL_GUEST_ROUTES_SESSION_KEY, JSON.stringify(capped)); } catch (eGuestWrite) {}
+
     return;
 
   }
@@ -46885,6 +46896,139 @@ function buildReversedRouteName(origName, existingNamesUpper) {
   return candidate;
 }
 
+
+function ensureOrphanRoutesInLibrary() {
+  if (window._ensuringOrphanRoutes) return false;
+  window._ensuringOrphanRoutes = true;
+  let changed = false;
+  try {
+    let lib = [];
+    try { lib = getSavedRoutesLibrary() || []; } catch (eLib0) { lib = []; }
+    const byKey = new Set();
+    lib.forEach((r) => {
+      if (!r) return;
+      if (r.id) byKey.add("id:" + r.id);
+      const nm = String((r.name || r.routeName) || "").trim().toUpperCase();
+      if (nm) byKey.add("name:" + nm);
+    });
+
+    const candidates = [];
+    const pushCand = (rt) => {
+      if (!rt || !Array.isArray(rt.waypoints) || !rt.waypoints.length) return;
+      candidates.push(rt);
+    };
+    try {
+      if (typeof activeRouteData !== "undefined" && activeRouteData) pushCand(activeRouteData);
+    } catch (eAct) {}
+    try {
+      const rawSnap = localStorage.getItem(SETSAIL_CURRENT_ROUTE_SNAP_KEY);
+      if (rawSnap) pushCand(JSON.parse(rawSnap));
+    } catch (eSnap) {}
+    try {
+      const rawAct = localStorage.getItem(ROUTE_STORAGE_KEY);
+      if (rawAct) pushCand(JSON.parse(rawAct));
+    } catch (eRaw) {}
+
+    const seen = new Set();
+    candidates.forEach((rt) => {
+      const idKey = rt.id ? ("id:" + rt.id) : "";
+      const nameKey = String((rt.name || rt.routeName) || "").trim().toUpperCase();
+      const nmKey = nameKey ? ("name:" + nameKey) : "";
+      if ((idKey && byKey.has(idKey)) || (nmKey && byKey.has(nmKey))) return;
+      const dedupe = idKey || nmKey || ("wp:" + rt.waypoints.length);
+      if (seen.has(dedupe)) return;
+      seen.add(dedupe);
+
+      const clone = Object.assign({}, rt, {
+        waypoints: (rt.waypoints || []).map((w) => Object.assign({}, w)),
+        id: rt.id || ("route_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7)),
+        name: rt.name || rt.routeName || "Route"
+      });
+      lib = [clone].concat(lib);
+      if (clone.id) byKey.add("id:" + clone.id);
+      const cnm = String(clone.name || "").trim().toUpperCase();
+      if (cnm) byKey.add("name:" + cnm);
+      changed = true;
+    });
+
+    if (changed && typeof writeSavedRoutesLibrary === "function") {
+      writeSavedRoutesLibrary(lib.slice(0, 35));
+    }
+  } catch (eEns) {}
+  window._ensuringOrphanRoutes = false;
+  return changed;
+}
+window.ensureOrphanRoutesInLibrary = ensureOrphanRoutesInLibrary;
+
+
+function buildCopiedRouteName(origName, existingNamesUpper) {
+  let base = String(origName || "Route").trim() || "Route";
+  let candidate = base + " (copy)";
+  let n = 2;
+  while (existingNamesUpper.has(candidate.toUpperCase())) {
+    candidate = base + " (copy " + n + ")";
+    n++;
+  }
+  existingNamesUpper.add(candidate.toUpperCase());
+  return candidate;
+}
+
+function createCopiedRoutesFromChecked() {
+  let lib = [];
+  try { lib = getSavedRoutesLibrary() || []; } catch (e) { lib = []; }
+  const checkedIds = Array.from(window._sidebarCheckedRouteIds || []);
+  const targets = lib.filter((r) => r && (checkedIds.indexOf(r.id) !== -1 || checkedIds.indexOf(r.name) !== -1));
+
+  if (!targets.length) {
+    if (typeof showSetSailToast === "function") {
+      showSetSailToast("Tick a route checkbox on the right to create a copy", "info");
+    }
+    return;
+  }
+
+  const existingNamesUpper = new Set(
+    lib.map((r) => String((r && (r.name || r.routeName)) || "").trim().toUpperCase()).filter(Boolean)
+  );
+  const createdNames = [];
+
+  targets.forEach((srcRt, idxOffset) => {
+    const srcWps = Array.isArray(srcRt.waypoints) ? srcRt.waypoints : [];
+    const clonedWps = srcWps.map((w) => Object.assign({}, w));
+
+    const copyName = buildCopiedRouteName(srcRt.name || srcRt.routeName || "Route", existingNamesUpper);
+    const copyRoute = {
+      id: "route_" + Date.now().toString(36) + "_c" + idxOffset + "_" + Math.random().toString(36).slice(2, 6),
+      name: copyName,
+      waypoints: clonedWps,
+      legs: Array.isArray(srcRt.legs) ? srcRt.legs.map((l) => Object.assign({}, l)) : [],
+      totalDistanceNM: Number(srcRt.totalDistanceNM) || 0,
+      totalSteamingHours: Number(srcRt.totalSteamingHours) || 0,
+      steamingDays: srcRt.steamingDays || "0.0",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      _isFreshFileUpload: true
+    };
+    if (typeof saveRouteToLibrary === "function") {
+      saveRouteToLibrary(copyRoute);
+    }
+    createdNames.push(copyName);
+  });
+
+  window._sidebarCheckedRouteIds.clear();
+  _renderSidebarRoutesListBase();
+  syncChartRoutesDisplay();
+
+  if (typeof showSetSailToast === "function" && createdNames.length) {
+    showSetSailToast(
+      createdNames.length === 1
+        ? ('Copy created: "' + createdNames[0] + '"')
+        : (createdNames.length + " route copies created"),
+      "success"
+    );
+  }
+}
+window.createCopiedRoutesFromChecked = createCopiedRoutesFromChecked;
+
 function createReversedRoutesFromChecked() {
   let lib = [];
   try { lib = getSavedRoutesLibrary() || []; } catch (e) { lib = []; }
@@ -47000,6 +47144,9 @@ function _renderSidebarRoutesListBase(opts) {
     syncChartRoutesDisplay();
   }
 
+  // v5.272: if Current/active route exists on chart/storage but library is empty, re-seed the list
+  try { ensureOrphanRoutesInLibrary(); } catch (eOrphan) {}
+
   let items = [];
   try { items = (getSavedRoutesLibrary() || []).slice(); } catch (e) { items = []; }
 
@@ -47061,7 +47208,7 @@ function _renderSidebarRoutesListBase(opts) {
           <div class="ntm-user-route-title" title="${title}">${title}</div>
           <div class="ntm-user-route-dist">Distance: ${distFormatted}NM</div>
         </div>
-        <label class="ntm-user-route-chk-wrap" title="Select route for Reverse or Delete">
+        <label class="ntm-user-route-chk-wrap" title="Select route for Copy, Reverse or Delete">
           <input type="checkbox" class="ntm-user-route-chk" data-route-chk="${rid}" ${isChecked ? "checked" : ""} />
         </label>
       </div>
@@ -47118,6 +47265,7 @@ function initSidebarUserRoutesPanel() {
 
   const btnDelete = document.getElementById("btnSidebarRouteDelete");
   const btnReverse = document.getElementById("btnSidebarRouteReverse");
+  const btnCopy = document.getElementById("btnSidebarRouteCopy");
   const btnImport = document.getElementById("btnSidebarRouteImport");
   const btnNew = document.getElementById("btnSidebarRouteNew");
 
@@ -47149,6 +47297,14 @@ function initSidebarUserRoutesPanel() {
       e.preventDefault();
       e.stopPropagation();
       createReversedRoutesFromChecked();
+    });
+  }
+
+  if (btnCopy) {
+    btnCopy.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      createCopiedRoutesFromChecked();
     });
   }
 

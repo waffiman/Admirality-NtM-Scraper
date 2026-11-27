@@ -26621,12 +26621,17 @@ body.light-theme .ntm-wx-unified {
   border-color: #38bdf8;
 }
 #ntmSidebar .ntm-routes-tabs {
-  display: flex !important;
-  align-items: stretch !important;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
-  background: rgba(10, 18, 38, 0.42) !important;
-  padding: 0 8px !important;
-  gap: 6px !important;
+  /* v5.272: obsolete single-tab strip — keep hidden (was causing empty tile under header) */
+  display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
 }
 #ntmSidebar .ntm-routes-tab {
   flex: 1 1 0 !important;
@@ -27998,8 +28003,17 @@ body.light-theme .ntm-wx-unified {
 /* ── v5.267: Hide Single Routes Tab, Fix Route Header Row Alignment & Bulk-Editable WP Tiles with Parameter Filter ── */
 
 /* (A) Hide the single "Routes" tab bar in #ntmSidebar */
-#ntmSidebar > .ntm-routes-tabs {
+#ntmSidebar > .ntm-routes-tabs,
+#ntmSidebar .ntm-routes-tabs {
   display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /* (B) Reset global button { margin-top: 0.65rem } inside #ntmSidebar so header input & right buttons sit on one exact line */
@@ -29468,3 +29482,10 @@ body.light-theme .ntm-wx-unified {
   user-select: none;
 }
 
+
+
+/* ── v5.272: Copy header btn + collapsed routes-tabs strip ── */
+#ntmSidebar #btnSidebarRouteCopy:hover {
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: #38bdf8 !important;
+}
