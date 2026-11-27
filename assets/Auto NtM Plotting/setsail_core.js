@@ -49055,7 +49055,7 @@ if (document.readyState === "loading") {
       liveUnavailableReason = "Vessel is " + shipProj.distNm.toFixed(1) + " NM off route — Live Watch activates automatically once within route corridor.";
     }
 
-    const mode = isVesselOnRoute && st.monViewOverride !== "check" ? "live" : "check";
+    const mode = isVesselOnRoute ? "live" : "check";
 
     if (wps.length < 2) {
       pushItem({
@@ -50080,9 +50080,9 @@ if (document.readyState === "loading") {
   function refreshMonitoringPanelInPlace() {
     const st = window._sidebarNavtorState;
     if (!st || st.view !== "route" || st.detailTab !== "monitoring") return;
-    if (st.monEmailSending) return;
+    if (st.monEmailSending || st.monFilterOpen) return;
     const activeEl = document.activeElement;
-    if (activeEl && activeEl.closest && activeEl.closest("#nvMonEmailDrawer")) return;
+    if (activeEl && (activeEl.id === "nvMonSearchInput" || (activeEl.closest && activeEl.closest("#nvMonEmailDrawer")))) return;
     const routePanel = document.getElementById("ntmNavtorRoutePanel");
     const rt = getActiveNavtorRoute();
     if (!routePanel || routePanel.hidden || !rt) return;
@@ -50113,196 +50113,119 @@ if (document.readyState === "loading") {
     }, 5000);
   }
 
+  const MON_FILTER_SPECS = [
+    { key: "sev_alarm",   kind: "sev", val: "alarm",   label: "Alarms (Red)" },
+    { key: "sev_warning", kind: "sev", val: "warning", label: "Warnings (Yellow)" },
+    { key: "cat_nav",     kind: "cat", val: "nav",     label: "Navigation & Route" },
+    { key: "cat_traffic", kind: "cat", val: "traffic", label: "Traffic & TSS" },
+    { key: "cat_weather", kind: "cat", val: "weather", label: "Weather & Cyclones" },
+    { key: "cat_ntm",     kind: "cat", val: "ntm",     label: "NtM & NAVTEX" }
+  ];
+
+  function ensureMonitoringFilterState(st) {
+    if (!st.monFilterMap || typeof st.monFilterMap !== "object") {
+      st.monFilterMap = {
+        sev_alarm: true,
+        sev_warning: true,
+        cat_nav: true,
+        cat_traffic: true,
+        cat_weather: true,
+        cat_ntm: true
+      };
+    }
+    if (typeof st.monSearch !== "string") st.monSearch = "";
+    if (typeof st.monFilterOpen !== "boolean") st.monFilterOpen = false;
+  }
+
   function buildMonitoringTabHtml(rt, report) {
     const st = window._sidebarNavtorState;
+    ensureMonitoringFilterState(st);
     const prefs = loadMonitoringEmailPrefs();
     const authUser = typeof getSetSailAuthUser === "function" ? getSetSailAuthUser() : null;
     const userEmail = authUser && authUser.email ? String(authUser.email).trim() : "";
+    const isSubscribed = Boolean(prefs.enabled && userEmail);
 
-    const sevFilter = st.monSeverityFilter || "all";
-    const catFilter = st.monCategoryFilter || "all";
+    const fmap = st.monFilterMap;
+    const mq = String(st.monSearch || "").trim().toLowerCase();
 
-    const filterFn = (it) => {
-      if (catFilter !== "all" && it.category !== catFilter) return false;
+    const matchesFilter = (it) => {
+      if (it.severity === "alarm" && !fmap.sev_alarm) return false;
+      if (it.severity === "warning" && !fmap.sev_warning) return false;
+      const ck = "cat_" + (it.category || "nav");
+      if (ck in fmap && !fmap[ck]) return false;
+      if (mq) {
+        const hay = ((it.tag || "") + " " + (it.title || "") + " " + (it.badge || "") + " " + (it.summary || "") + " " + (it.detail || "")).toLowerCase();
+        if (hay.indexOf(mq) === -1) return false;
+      }
       return true;
     };
-    const visAlarms = (sevFilter === "warning" ? [] : report.alarms).filter(filterFn);
-    const visWarnings = (sevFilter === "alarm" ? [] : report.warnings).filter(filterFn);
 
-    const modeSwitchHtml = report.isLiveEligible
-      ? '<div class="ntm-mon-mode-seg" role="group" aria-label="Monitoring mode">' +
-          '<button type="button" class="ntm-mon-mode-pill ' + (report.mode === "live" ? "is-live-on" : "") + '" data-mon-mode="live" title="Live watch">' +
-            '<span class="ntm-mon-pulse-dot"></span>Live' +
-          '</button>' +
-          '<button type="button" class="ntm-mon-mode-pill ' + (report.mode === "check" ? "is-check-on" : "") + '" data-mon-mode="check" title="Static route check">' +
-            'Check' +
-          '</button>' +
-        '</div>'
-      : '<div class="ntm-mon-mode-badge" title="' + escHtml(report.liveUnavailableReason || "Static route check") + '">' +
-          '<span class="ntm-mon-static-dot"></span>Check' +
-        '</div>';
+    const visAlarms = (report.alarms || []).filter(matchesFilter);
+    const visWarnings = (report.warnings || []).filter(matchesFilter);
 
+    // Minimal top bar: ONLY Email alerts & Refresh
     const topBarHtml =
       '<div class="ntm-mon-topbar">' +
-        modeSwitchHtml +
-        '<div class="ntm-mon-top-actions">' +
-          '<button type="button" class="ntm-mon-sev-chip is-all ' + (sevFilter === "all" ? "active" : "") + '" data-mon-sev="all" title="All">All</button>' +
-          '<button type="button" class="ntm-mon-sev-chip is-alarm ' + (sevFilter === "alarm" ? "active" : "") + (report.alarms.length === 0 ? " is-zero" : "") + '" data-mon-sev="alarm" title="Alarms">' +
-            '<span class="ntm-mon-dot-red"></span>' + report.alarms.length +
-          '</button>' +
-          '<button type="button" class="ntm-mon-sev-chip is-warn ' + (sevFilter === "warning" ? "active" : "") + (report.warnings.length === 0 ? " is-zero" : "") + '" data-mon-sev="warning" title="Warnings">' +
-            '<span class="ntm-mon-dot-amber"></span>' + report.warnings.length +
-          '</button>' +
-          '<button type="button" class="ntm-mon-icon-btn ' + (st.monEmailOpen ? "is-open" : "") + (prefs.enabled && userEmail ? " is-armed" : "") + '" id="btnNvMonEmailToggle" title="Email alerts">' +
-            '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>' +
-            (prefs.enabled && userEmail ? '<span class="ntm-mon-armed-dot"></span>' : '') +
-          '</button>' +
-          '<button type="button" class="ntm-mon-icon-btn" id="btnNvMonRefresh" title="Refresh">' +
-            '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
-          '</button>' +
-        '</div>' +
+        '<button type="button" class="ntm-mon-top-btn ' + (st.monEmailOpen ? "is-open" : "") + (isSubscribed ? " is-armed" : "") + '" id="btnNvMonEmailToggle" title="Email alerts">' +
+          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>' +
+          '<span>Email alerts</span>' +
+          (isSubscribed ? '<span class="ntm-mon-armed-dot"></span>' : '') +
+        '</button>' +
+        '<button type="button" class="ntm-mon-icon-btn" id="btnNvMonRefresh" title="Refresh">' +
+          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>' +
+        '</button>' +
       '</div>';
 
+    // Simplified Email Alerts Drawer: notification choices + frequency + Subscribe button
     let emailDrawerHtml = "";
     if (st.monEmailOpen) {
-      if (!userEmail) {
-        emailDrawerHtml =
-          '<div class="ntm-mon-email-drawer" id="nvMonEmailDrawer">' +
-            '<div class="ntm-mon-email-head">' +
-              '<span>Email</span>' +
-              '<button type="button" class="ntm-mon-email-close" id="btnNvMonEmailClose">×</button>' +
-            '</div>' +
-            '<div class="ntm-mon-email-guest">' +
-              '<button type="button" class="ntm-mon-email-signin-btn" id="btnNvMonTriggerSignIn">Sign in</button>' +
-            '</div>' +
-          '</div>';
-      } else {
-        const cats = prefs.categories || { nav: true, traffic: true, weather: true, ntm: true };
-        emailDrawerHtml =
-          '<div class="ntm-mon-email-drawer" id="nvMonEmailDrawer">' +
-            '<div class="ntm-mon-email-head">' +
-              '<div class="ntm-mon-email-acct" title="' + escHtml(userEmail) + '">' +
-                '<strong>' + escHtml(userEmail) + '</strong>' +
-              '</div>' +
-              '<button type="button" class="ntm-mon-email-close" id="btnNvMonEmailClose" title="Close">×</button>' +
-            '</div>' +
-            '<div class="ntm-mon-email-row">' +
-              '<label class="ntm-mon-email-switch">' +
-                '<input type="checkbox" id="chkNvMonEmailAuto" ' + (prefs.enabled ? "checked" : "") + ' />' +
-                '<span>Auto</span>' +
-              '</label>' +
-              '<select id="selNvMonEmailCooldown" class="ntm-mon-email-select" title="Cooldown">' +
-                '<option value="15"' + (Number(prefs.cooldownMin) === 15 ? " selected" : "") + '>15m</option>' +
-                '<option value="30"' + (Number(prefs.cooldownMin) === 30 ? " selected" : "") + '>30m</option>' +
-                '<option value="60"' + (Number(prefs.cooldownMin) === 60 ? " selected" : "") + '>1h</option>' +
-                '<option value="360"' + (Number(prefs.cooldownMin) === 360 ? " selected" : "") + '>6h</option>' +
-              '</select>' +
-            '</div>' +
-            '<div class="ntm-mon-email-row">' +
-              '<div class="ntm-mon-lvl-seg">' +
-                '<button type="button" class="ntm-mon-lvl-btn ' + (prefs.level === "alarms_only" ? "active" : "") + '" data-mon-email-lvl="alarms_only">Alarms</button>' +
-                '<button type="button" class="ntm-mon-lvl-btn ' + (prefs.level === "all" ? "active" : "") + '" data-mon-email-lvl="all">All</button>' +
-              '</div>' +
-            '</div>' +
-            '<div class="ntm-mon-email-cats">' +
-              '<label><input type="checkbox" data-mon-email-cat="nav" ' + (cats.nav !== false ? "checked" : "") + ' />Nav</label>' +
-              '<label><input type="checkbox" data-mon-email-cat="traffic" ' + (cats.traffic !== false ? "checked" : "") + ' />AIS</label>' +
-              '<label><input type="checkbox" data-mon-email-cat="weather" ' + (cats.weather !== false ? "checked" : "") + ' />Wx</label>' +
-              '<label><input type="checkbox" data-mon-email-cat="ntm" ' + (cats.ntm !== false ? "checked" : "") + ' />NtM</label>' +
-            '</div>' +
-            '<div class="ntm-mon-email-actions">' +
-              '<button type="button" class="ntm-mon-send-btn" id="btnNvMonSendNow" ' + (st.monEmailSending ? "disabled" : "") + '>' +
-                (st.monEmailSending ? "…" : "Send") +
-              '</button>' +
-              '<button type="button" class="ntm-mon-mailto-btn" id="btnNvMonOpenMail" title="Open mail client">Mail</button>' +
-            '</div>' +
-            ((st.monLastStatusMsg || prefs.lastSentIso)
-              ? '<div class="ntm-mon-email-status">' +
-                  escHtml(st.monLastStatusMsg || ("Sent " + prefs.lastSentIso)) +
-                '</div>'
-              : '') +
-          '</div>';
-      }
-    }
-
-    let hudHtml = "";
-    if (report.mode === "live" && report.telemetry) {
-      const t = report.telemetry;
-      const clampedSigned = Math.max(-1.25, Math.min(1.25, t.signedRatio || 0));
-      const needlePct = Math.round(50 + clampedSigned * 36);
-      const xtdStateCls = Math.abs(t.signedRatio) > 1.0 ? "is-alarm" : (Math.abs(t.signedRatio) >= 0.75 ? "is-warn" : "is-ok");
-
-      const turnBadge = t.nextCourseDeg != null && Math.abs(t.turnDegSigned) >= 2
-        ? ((t.turnDegSigned >= 0 ? "R " : "L ") + Math.abs(t.turnDegSigned) + "°")
-        : "—";
-
-      hudHtml =
-        '<div class="ntm-mon-hud">' +
-          '<div class="ntm-mon-hud-xtd ' + xtdStateCls + '">' +
-            '<div class="ntm-mon-xtd-top">' +
-              '<span class="ntm-mon-xtd-lim">P ' + t.portXtdLimit.toFixed(2) + '</span>' +
-              '<span class="ntm-mon-xtd-val"><b>' + t.xtdNm.toFixed(2) + ' ' + escHtml(t.xtdSide) + '</b></span>' +
-              '<span class="ntm-mon-xtd-lim">S ' + t.stbdXtdLimit.toFixed(2) + '</span>' +
-            '</div>' +
-            '<div class="ntm-mon-xtd-bar">' +
-              '<span class="ntm-mon-xtd-rail-l"></span>' +
-              '<span class="ntm-mon-xtd-center"></span>' +
-              '<span class="ntm-mon-xtd-rail-r"></span>' +
-              '<span class="ntm-mon-xtd-ship ' + xtdStateCls + '" style="left:' + needlePct + '%;"></span>' +
-            '</div>' +
+      const cats = prefs.categories || { nav: true, traffic: true, weather: true, ntm: true };
+      const wantWarnings = prefs.level === "all";
+      emailDrawerHtml =
+        '<div class="ntm-mon-email-drawer" id="nvMonEmailDrawer">' +
+          '<div class="ntm-mon-email-grid">' +
+            '<label><input type="checkbox" data-mon-email-cat="alarms" checked disabled />Alarms</label>' +
+            '<label><input type="checkbox" id="chkNvMonEmailWarnings" ' + (wantWarnings ? "checked" : "") + ' />Warnings</label>' +
+            '<label><input type="checkbox" data-mon-email-cat="nav" ' + (cats.nav !== false ? "checked" : "") + ' />Navigation</label>' +
+            '<label><input type="checkbox" data-mon-email-cat="traffic" ' + (cats.traffic !== false ? "checked" : "") + ' />Traffic</label>' +
+            '<label><input type="checkbox" data-mon-email-cat="weather" ' + (cats.weather !== false ? "checked" : "") + ' />Weather</label>' +
+            '<label><input type="checkbox" data-mon-email-cat="ntm" ' + (cats.ntm !== false ? "checked" : "") + ' />Warnings / NtM</label>' +
           '</div>' +
-          '<div class="ntm-mon-hud-grid">' +
-            '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">COG</span>' +
-              '<span class="ntm-mon-hud-num">' + (t.cog != null ? String(t.cog).padStart(3, "0") + "°" : "—") + ' <small>' + String(t.ctsDeg).padStart(3, "0") + '°</small></span>' +
-            '</div>' +
-            '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">SOG</span>' +
-              '<span class="ntm-mon-hud-num">' + t.sog.toFixed(1) + ' <small>' + t.plannedSpd.toFixed(1) + '</small></span>' +
-            '</div>' +
-            '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">' + escHtml(t.nextWpCode) + '</span>' +
-              '<span class="ntm-mon-hud-num">' + t.distToNextWpNm.toFixed(1) + ' <small>' + Math.max(1, Math.round(t.ttgNextMin)) + 'm</small></span>' +
-            '</div>' +
-            '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">TURN</span>' +
-              '<span class="ntm-mon-hud-num">' + escHtml(turnBadge) + '</span>' +
-            '</div>' +
-            '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">WX</span>' +
-              '<span class="ntm-mon-hud-num">' + escHtml(t.windLabel) + '</span>' +
-            '</div>' +
-            '<div class="ntm-mon-hud-cell">' +
-              '<span class="ntm-mon-hud-lbl">CPA</span>' +
-              '<span class="ntm-mon-hud-num">' + escHtml(t.aisSummary) + '</span>' +
-            '</div>' +
+          '<div class="ntm-mon-email-freq-row">' +
+            '<span>Frequency</span>' +
+            '<select id="selNvMonEmailCooldown" class="ntm-mon-email-select">' +
+              '<option value="15"' + (Number(prefs.cooldownMin) === 15 ? " selected" : "") + '>Every 15 min</option>' +
+              '<option value="30"' + (Number(prefs.cooldownMin) === 30 ? " selected" : "") + '>Every 30 min</option>' +
+              '<option value="60"' + (Number(prefs.cooldownMin) === 60 ? " selected" : "") + '>Every 1 hour</option>' +
+              '<option value="360"' + (Number(prefs.cooldownMin) === 360 ? " selected" : "") + '>Every 6 hours</option>' +
+              '<option value="1440"' + (Number(prefs.cooldownMin) === 1440 ? " selected" : "") + '>Daily</option>' +
+            '</select>' +
           '</div>' +
-          '<div class="ntm-mon-hud-foot">' +
-            '<span>' + t.legNo + '/' + t.totalLegs + '</span>' +
-            '<span>' + t.remVoyageNm.toFixed(1) + ' NM</span>' +
-            '<span>' + escHtml(t.etaUtcStr) + '</span>' +
-          '</div>' +
+          '<button type="button" class="ntm-mon-sub-btn ' + (isSubscribed ? "is-subscribed" : "") + '" id="btnNvMonSubscribe" ' + (st.monEmailSending ? "disabled" : "") + '>' +
+            (st.monEmailSending
+              ? "Saving..."
+              : (isSubscribed ? ("Subscribed (" + escHtml(userEmail) + ")") : "Subscribe")) +
+          '</button>' +
         '</div>';
     }
 
+    // Unified scannable list of Alarms (Red) and Warnings (Yellow)
     const renderCard = (item) => {
       const isExp = st.monExpandedIds && st.monExpandedIds.has(item.id);
       const sevCls = item.severity === "alarm" ? "is-alarm" : "is-warning";
       const hasCoords = Number.isFinite(item.lat) && Number.isFinite(item.lon);
-      const expandBody = [];
-      if (item.summary) expandBody.push(escHtml(item.summary));
-      if (item.detail) expandBody.push(escHtml(item.detail));
+      const expandText = item.summary || item.detail || "";
       return (
         '<div class="ntm-mon-card ' + sevCls + (isExp ? " is-expanded" : "") + '" data-mon-card-id="' + escHtml(item.id) + '" ' +
           (hasCoords ? ('data-mon-lat="' + item.lat + '" data-mon-lon="' + item.lon + '" data-mon-zoom="' + (item.zoom || 10) + '" data-mon-sev-kind="' + item.severity + '"') : '') +
-          ' title="Locate on chart">' +
+          '>' +
           '<div class="ntm-mon-card-row1">' +
             '<span class="ntm-mon-tag ' + sevCls + '">' + escHtml(item.tag) + '</span>' +
             '<span class="ntm-mon-card-title">' + escHtml(item.title) + '</span>' +
             (item.badge ? '<span class="ntm-mon-card-badge">' + escHtml(item.badge) + '</span>' : '') +
           '</div>' +
-          (isExp && expandBody.length
-            ? '<div class="ntm-mon-card-detail">' + expandBody.join("<br>") + '</div>'
+          (isExp && expandText
+            ? '<div class="ntm-mon-card-detail">' + escHtml(expandText) + '</div>'
             : '') +
         '</div>'
       );
@@ -50310,50 +50233,63 @@ if (document.readyState === "loading") {
 
     let listInnerHtml = "";
     if (visAlarms.length || visWarnings.length) {
-      listInnerHtml += visAlarms.map(renderCard).join("") + visWarnings.map(renderCard).join("");
+      listInnerHtml = visAlarms.map(renderCard).join("") + visWarnings.map(renderCard).join("");
     } else {
-      listInnerHtml +=
+      listInnerHtml =
         '<div class="ntm-mon-all-clear">' +
           '<span class="ntm-mon-clear-check">✓</span>' +
           '<div class="ntm-mon-clear-title">' +
-            (sevFilter !== "all" || catFilter !== "all" ? "No matches" : "Clear") +
+            (mq ? ('No matches for "' + escHtml(st.monSearch) + '"') : "No active alarms or warnings") +
           '</div>' +
         '</div>';
     }
 
-    if (report.passed.length > 0 && sevFilter === "all") {
-      listInnerHtml +=
-        '<div class="ntm-mon-passed-wrap">' +
-          '<button type="button" class="ntm-mon-passed-toggle" id="btnNvMonPassedToggle" aria-expanded="' + (st.monPassedOpen ? "true" : "false") + '">' +
-            '<span>' + report.passed.length + ' ok</span>' +
-            '<span class="ntm-mon-passed-chev">' + (st.monPassedOpen ? "▴" : "▾") + '</span>' +
-          '</button>' +
-          (st.monPassedOpen
-            ? '<div class="ntm-mon-passed-list">' +
-                report.passed.map((p) => '<div class="ntm-mon-passed-item">' + escHtml(p) + '</div>').join("") +
+    // Planning-style bottom funnel filter popover + search input
+    const activeFilterCount = MON_FILTER_SPECS.filter((s) => fmap[s.key]).length;
+    const filterPopoverHtml = st.monFilterOpen
+      ? '<div class="ntm-nv-wp-filter-popover" id="nvMonFilterPopover" role="dialog" aria-label="Monitoring filter">' +
+          '<div class="ntm-nv-wp-filter-head">' +
+            '<span class="ntm-nv-wp-filter-title">Filter Monitoring</span>' +
+            '<div class="ntm-nv-wp-filter-head-btns">' +
+              '<button type="button" class="ntm-nv-wp-filter-mini" id="btnNvMonFilterAll">All</button>' +
+              '<button type="button" class="ntm-nv-wp-filter-close" id="btnNvMonFilterClose" title="Close">×</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="ntm-nv-wp-filter-list">' +
+            MON_FILTER_SPECS.map((spec) => (
+              '<div class="ntm-nv-wp-filter-item">' +
+                '<label class="ntm-nv-wp-filter-lbl">' +
+                  '<input type="checkbox" data-nv-mon-flt="' + escHtml(spec.key) + '" ' + (fmap[spec.key] ? 'checked' : '') + ' />' +
+                  '<span>' + escHtml(spec.label) + '</span>' +
+                '</label>' +
+                '<button type="button" class="ntm-nv-wp-filter-only" data-nv-mon-only="' + escHtml(spec.key) + '">Only</button>' +
               '</div>'
-            : '') +
-        '</div>';
-    }
+            )).join("") +
+          '</div>' +
+        '</div>'
+      : "";
 
-    const nowUtc = new Date().toISOString().slice(11, 16) + "Z";
     const bottomBarHtml =
-      '<div class="ntm-mon-bottom-bar">' +
-        '<div class="ntm-mon-cat-pills">' +
-          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "all" ? "active" : "") + '" data-mon-cat="all">All</button>' +
-          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "nav" ? "active" : "") + '" data-mon-cat="nav">Nav</button>' +
-          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "traffic" ? "active" : "") + '" data-mon-cat="traffic">AIS</button>' +
-          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "weather" ? "active" : "") + '" data-mon-cat="weather">Wx</button>' +
-          '<button type="button" class="ntm-mon-cat-btn ' + (catFilter === "ntm" ? "active" : "") + '" data-mon-cat="ntm">NtM</button>' +
+      '<div class="ntm-nv-bottom-search">' +
+        filterPopoverHtml +
+        '<button type="button" class="ntm-nv-filter-btn ' + (st.monFilterOpen ? 'is-open' : '') + '" id="btnNvMonFilter" title="Filter monitoring items" aria-expanded="' + (st.monFilterOpen ? 'true' : 'false') + '">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>' +
+          '</svg>' +
+          (activeFilterCount < MON_FILTER_SPECS.length
+            ? '<span class="ntm-nv-filter-badge">' + activeFilterCount + '</span>'
+            : '') +
+        '</button>' +
+        '<div class="ntm-nv-search-input-wrap">' +
+          '<input type="text" id="nvMonSearchInput" class="ntm-nv-search-box" placeholder="Search monitoring" value="' + escHtml(st.monSearch) + '" />' +
+          (st.monSearch ? '<button type="button" id="btnNvClearMonSearch" class="ntm-nv-search-clear" title="Clear">×</button>' : '') +
         '</div>' +
-        '<span class="ntm-mon-utc-stamp">' + nowUtc + '</span>' +
       '</div>';
 
     return (
       '<div class="ntm-nv-body ntm-mon-body">' +
         topBarHtml +
         emailDrawerHtml +
-        hudHtml +
         '<div class="ntm-mon-scroll" id="nvMonitoringScroll">' +
           listInnerHtml +
         '</div>' +
@@ -50364,51 +50300,17 @@ if (document.readyState === "loading") {
 
   function wireMonitoringTabHandlers(routePanel, rt, report) {
     const st = window._sidebarNavtorState;
+    ensureMonitoringFilterState(st);
     ensureMonitoringLiveTicker();
     maybeAutoTriggerMonitoringAlerts(rt, report);
 
-    // Mode toggle (Live Watch vs Static Route Check)
-    routePanel.querySelectorAll("[data-mon-mode]").forEach((btn) => {
-      btn.onclick = () => {
-        const m = btn.getAttribute("data-mon-mode");
-        st.monViewOverride = m === "check" ? "check" : "live";
-        renderRouteDetailView(routePanel, rt);
-      };
-    });
-
-    // Severity chips (All / Alarms / Warnings)
-    routePanel.querySelectorAll("[data-mon-sev]").forEach((btn) => {
-      btn.onclick = () => {
-        const sev = btn.getAttribute("data-mon-sev") || "all";
-        st.monSeverityFilter = st.monSeverityFilter === sev && sev !== "all" ? "all" : sev;
-        renderRouteDetailView(routePanel, rt);
-      };
-    });
-
-    // Category bottom chips (All / Nav / Traffic / Weather / NtM)
-    routePanel.querySelectorAll("[data-mon-cat]").forEach((btn) => {
-      btn.onclick = () => {
-        const cat = btn.getAttribute("data-mon-cat") || "all";
-        st.monCategoryFilter = st.monCategoryFilter === cat && cat !== "all" ? "all" : cat;
-        renderRouteDetailView(routePanel, rt);
-      };
-    });
-
-    // Manual Refresh / Re-scan button
     const btnRef = routePanel.querySelector("#btnNvMonRefresh");
     if (btnRef) {
       btnRef.onclick = () => {
         renderRouteDetailView(routePanel, rt);
-        if (typeof showSetSailToast === "function") {
-          showSetSailToast(
-            "Monitoring updated: " + report.alarms.length + " Alarm(s), " + report.warnings.length + " Warning(s)",
-            report.alarms.length > 0 ? "warning" : "info"
-          );
-        }
       };
     }
 
-    // Email drawer toggle & close
     const btnEmail = routePanel.querySelector("#btnNvMonEmailToggle");
     if (btnEmail) {
       btnEmail.onclick = () => {
@@ -50416,50 +50318,27 @@ if (document.readyState === "loading") {
         renderRouteDetailView(routePanel, rt);
       };
     }
-    const btnEmailClose = routePanel.querySelector("#btnNvMonEmailClose");
-    if (btnEmailClose) {
-      btnEmailClose.onclick = () => {
-        st.monEmailOpen = false;
-        renderRouteDetailView(routePanel, rt);
-      };
-    }
 
-    // Guest Sign-In trigger inside Email drawer
-    const btnSignIn = routePanel.querySelector("#btnNvMonTriggerSignIn");
-    if (btnSignIn) {
-      btnSignIn.onclick = () => {
-        const authBtn = document.querySelector("#btnHeaderAuth, #btnGoogleSignIn, [data-auth-trigger]");
-        if (authBtn) authBtn.click();
-        else if (typeof showSetSailToast === "function") {
-          showSetSailToast("Use the Google Sign-In button in the top navigation bar to connect your account.", "info");
-        }
-      };
-    }
-
-    // Email Auto-notify toggle
-    const chkAuto = routePanel.querySelector("#chkNvMonEmailAuto");
-    if (chkAuto) {
-      chkAuto.onchange = () => {
+    const chkWarn = routePanel.querySelector("#chkNvMonEmailWarnings");
+    if (chkWarn) {
+      chkWarn.onchange = () => {
         const prefs = loadMonitoringEmailPrefs();
-        prefs.enabled = Boolean(chkAuto.checked);
+        prefs.level = chkWarn.checked ? "all" : "alarms_only";
         saveMonitoringEmailPrefs(prefs, false);
-        if (prefs.enabled && typeof Notification !== "undefined" && Notification.permission === "default") {
-          try { Notification.requestPermission(); } catch (ePerm) {}
-        }
-        renderRouteDetailView(routePanel, rt);
-        if (typeof showSetSailToast === "function") {
-          const u = typeof getSetSailAuthUser === "function" ? getSetSailAuthUser() : null;
-          showSetSailToast(
-            prefs.enabled
-              ? ("Email Watch ARMED for " + ((u && u.email) || "account"))
-              : "Email Watch paused",
-            prefs.enabled ? "success" : "info"
-          );
-        }
       };
     }
 
-    // Email Cooldown selector
+    routePanel.querySelectorAll("[data-mon-email-cat]").forEach((chk) => {
+      chk.onchange = () => {
+        const key = chk.getAttribute("data-mon-email-cat");
+        if (!key || key === "alarms") return;
+        const prefs = loadMonitoringEmailPrefs();
+        prefs.categories = prefs.categories || { nav: true, traffic: true, weather: true, ntm: true };
+        prefs.categories[key] = Boolean(chk.checked);
+        saveMonitoringEmailPrefs(prefs, false);
+      };
+    });
+
     const selCd = routePanel.querySelector("#selNvMonEmailCooldown");
     if (selCd) {
       selCd.onchange = () => {
@@ -50469,60 +50348,34 @@ if (document.readyState === "loading") {
       };
     }
 
-    // Email Level segmented buttons (Alarms Only vs Alarms + Warnings)
-    routePanel.querySelectorAll("[data-mon-email-lvl]").forEach((btn) => {
-      btn.onclick = () => {
+    const btnSub = routePanel.querySelector("#btnNvMonSubscribe");
+    if (btnSub) {
+      btnSub.onclick = () => {
+        const authUser = typeof getSetSailAuthUser === "function" ? getSetSailAuthUser() : null;
+        const userEmail = authUser && authUser.email ? String(authUser.email).trim() : "";
+        if (!userEmail) {
+          const authBtn = document.querySelector("#btnHeaderAuth, #btnGoogleSignIn, [data-auth-trigger]");
+          if (authBtn) authBtn.click();
+          else if (typeof showSetSailToast === "function") {
+            showSetSailToast("Sign in to your SetSail account to subscribe to email alerts.", "info");
+          }
+          return;
+        }
         const prefs = loadMonitoringEmailPrefs();
-        prefs.level = btn.getAttribute("data-mon-email-lvl") === "all" ? "all" : "alarms_only";
+        prefs.enabled = !prefs.enabled;
         saveMonitoringEmailPrefs(prefs, false);
-        renderRouteDetailView(routePanel, rt);
-      };
-    });
-
-    // Email Category checkboxes
-    routePanel.querySelectorAll("[data-mon-email-cat]").forEach((chk) => {
-      chk.onchange = () => {
-        const key = chk.getAttribute("data-mon-email-cat");
-        if (!key) return;
-        const prefs = loadMonitoringEmailPrefs();
-        prefs.categories = prefs.categories || { nav: true, traffic: true, weather: true, ntm: true };
-        prefs.categories[key] = Boolean(chk.checked);
-        saveMonitoringEmailPrefs(prefs, false);
-      };
-    });
-
-    // Send Report Now button
-    const btnSendNow = routePanel.querySelector("#btnNvMonSendNow");
-    if (btnSendNow) {
-      btnSendNow.onclick = () => {
-        dispatchMonitoringEmailReport(rt, report, false);
+        if (prefs.enabled) {
+          dispatchMonitoringEmailReport(rt, report, false);
+        } else {
+          renderRouteDetailView(routePanel, rt);
+          if (typeof showSetSailToast === "function") {
+            showSetSailToast("Unsubscribed from email alerts", "info");
+          }
+        }
       };
     }
 
-    // Open in Gmail / Mail client button
-    const btnOpenMail = routePanel.querySelector("#btnNvMonOpenMail");
-    if (btnOpenMail) {
-      btnOpenMail.onclick = () => {
-        const u = typeof getSetSailAuthUser === "function" ? getSetSailAuthUser() : null;
-        const email = (u && u.email) || "";
-        const subj = "[SetSail " + (report.alarms.length ? "ALARM x" + report.alarms.length : "Watch") + '] "' + (rt.name || "Route") + '"';
-        const lines = [
-          "SetSail Bridge Route Monitoring — " + (rt.name || "Route"),
-          "Mode: " + (report.mode === "live" ? "LIVE BRIDGE WATCH" : "STATIC ROUTE CHECK"),
-          "Alarms: " + report.alarms.length + " | Warnings: " + report.warnings.length,
-          ""
-        ];
-        report.alarms.slice(0, 12).forEach((a, idx) => {
-          lines.push((idx + 1) + ". [ALARM / " + a.tag + "] " + a.title + " — " + a.summary);
-        });
-        report.warnings.slice(0, 12).forEach((w, idx) => {
-          lines.push((idx + 1) + ". [WARN / " + w.tag + "] " + w.title + " — " + w.summary);
-        });
-        openMonitoringGmailOrMailto(email, subj, lines.join("\n"));
-      };
-    }
-
-    // Alert card click -> expand Bridge Decision guidance + fly chart to hazard coordinates
+    // Card click -> locate on chart & toggle 1-line detail
     routePanel.querySelectorAll("[data-mon-card-id]").forEach((cardEl) => {
       cardEl.onclick = () => {
         const id = cardEl.getAttribute("data-mon-card-id");
@@ -50545,16 +50398,74 @@ if (document.readyState === "loading") {
       };
     });
 
-    // Passed nominal checks accordion
-    const btnPassed = routePanel.querySelector("#btnNvMonPassedToggle");
-    if (btnPassed) {
-      btnPassed.onclick = () => {
-        st.monPassedOpen = !st.monPassedOpen;
-        const scrollEl = routePanel.querySelector("#nvMonitoringScroll");
-        const prevTop = scrollEl ? scrollEl.scrollTop : 0;
+    // Bottom Funnel Filter button & popover handlers
+    const btnFlt = routePanel.querySelector("#btnNvMonFilter");
+    if (btnFlt) {
+      btnFlt.onclick = (ev) => {
+        ev.stopPropagation();
+        st.monFilterOpen = !st.monFilterOpen;
         renderRouteDetailView(routePanel, rt);
-        const nextScroll = routePanel.querySelector("#nvMonitoringScroll");
-        if (nextScroll) nextScroll.scrollTop = prevTop;
+      };
+    }
+    const btnFltClose = routePanel.querySelector("#btnNvMonFilterClose");
+    if (btnFltClose) {
+      btnFltClose.onclick = () => {
+        st.monFilterOpen = false;
+        renderRouteDetailView(routePanel, rt);
+      };
+    }
+    const btnFltAll = routePanel.querySelector("#btnNvMonFilterAll");
+    if (btnFltAll) {
+      btnFltAll.onclick = () => {
+        MON_FILTER_SPECS.forEach((s) => { st.monFilterMap[s.key] = true; });
+        renderRouteDetailView(routePanel, rt);
+      };
+    }
+    routePanel.querySelectorAll("[data-nv-mon-flt]").forEach((chk) => {
+      chk.onchange = () => {
+        const k = chk.getAttribute("data-nv-mon-flt");
+        if (!k) return;
+        st.monFilterMap[k] = Boolean(chk.checked);
+        renderRouteDetailView(routePanel, rt);
+      };
+    });
+    routePanel.querySelectorAll("[data-nv-mon-only]").forEach((btn) => {
+      btn.onclick = () => {
+        const k = btn.getAttribute("data-nv-mon-only");
+        if (!k) return;
+        const spec = MON_FILTER_SPECS.find((s) => s.key === k);
+        if (!spec) return;
+        if (spec.kind === "sev") {
+          st.monFilterMap.sev_alarm = (k === "sev_alarm");
+          st.monFilterMap.sev_warning = (k === "sev_warning");
+        } else {
+          MON_FILTER_SPECS.forEach((s) => {
+            if (s.kind === "cat") st.monFilterMap[s.key] = (s.key === k);
+          });
+        }
+        renderRouteDetailView(routePanel, rt);
+      };
+    });
+
+    // Bottom Search input
+    const searchInp = routePanel.querySelector("#nvMonSearchInput");
+    if (searchInp) {
+      searchInp.addEventListener("input", () => {
+        const pos = searchInp.selectionStart;
+        st.monSearch = searchInp.value;
+        renderRouteDetailView(routePanel, rt);
+        const nextInp = routePanel.querySelector("#nvMonSearchInput");
+        if (nextInp) {
+          nextInp.focus();
+          try { nextInp.setSelectionRange(pos, pos); } catch (eSel) {}
+        }
+      });
+    }
+    const btnClrSearch = routePanel.querySelector("#btnNvClearMonSearch");
+    if (btnClrSearch) {
+      btnClrSearch.onclick = () => {
+        st.monSearch = "";
+        renderRouteDetailView(routePanel, rt);
       };
     }
   }
@@ -50582,18 +50493,6 @@ if (document.readyState === "loading") {
     const isSingleCol = activeSpecs.length <= 2;
 
     const monReport = evaluateRouteMonitoringReport(rt);
-    let monTabBadgesHtml = "";
-    if (wps.length >= 2) {
-      if (monReport.alarms.length > 0) {
-        monTabBadgesHtml += '<span class="ntm-nv-mon-pill is-alarm">' + monReport.alarms.length + '</span>';
-      }
-      if (monReport.warnings.length > 0) {
-        monTabBadgesHtml += '<span class="ntm-nv-mon-pill is-warn">' + monReport.warnings.length + '</span>';
-      }
-      if (monReport.alarms.length === 0 && monReport.warnings.length === 0) {
-        monTabBadgesHtml += '<span class="ntm-nv-mon-pill is-ok">✓</span>';
-      }
-    }
 
     let tabBodyHtml = "";
     if (activeTab === "monitoring") {
@@ -50762,7 +50661,7 @@ if (document.readyState === "loading") {
       buildPinnedRouteHeaderHtml(rt, metrics, false) +
       '<div class="ntm-nv-mode-tabs" role="tablist" aria-label="Route mode tabs">' +
         '<button type="button" class="ntm-nv-mode-tab ' + (activeTab === "planning" ? "active" : "") + '" data-nv-mode-tab="planning" role="tab" aria-selected="' + (activeTab === "planning" ? "true" : "false") + '">Planning</button>' +
-        '<button type="button" class="ntm-nv-mode-tab ' + (activeTab === "monitoring" ? "active" : "") + '" data-nv-mode-tab="monitoring" role="tab" aria-selected="' + (activeTab === "monitoring" ? "true" : "false") + '">Monitoring ' + monTabBadgesHtml + '</button>' +
+        '<button type="button" class="ntm-nv-mode-tab ' + (activeTab === "monitoring" ? "active" : "") + '" data-nv-mode-tab="monitoring" role="tab" aria-selected="' + (activeTab === "monitoring" ? "true" : "false") + '">Monitoring</button>' +
       '</div>' +
       tabBodyHtml;
 
