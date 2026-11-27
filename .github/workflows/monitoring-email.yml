@@ -1,0 +1,46 @@
+name: SetSail Bridge Monitoring Email Dispatcher
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      email:
+        description: 'Optional target SetSail account email'
+        required: false
+        default: ''
+      force:
+        description: 'Force immediate dispatch ignoring cooldown'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+
+jobs:
+  dispatch-monitoring-emails:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install cryptography
+
+      - name: Dispatch SetSail Route Monitoring Emails
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "${{ github.event.inputs.email }}" ]; then
+            python scripts/monitoring_email_dispatcher.py --email "${{ github.event.inputs.email }}" --force
+          else
+            python scripts/monitoring_email_dispatcher.py
+          fi

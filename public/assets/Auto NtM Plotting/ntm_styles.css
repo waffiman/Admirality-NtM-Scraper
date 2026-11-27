@@ -30236,3 +30236,65 @@ html body #ssUcLayerPanel .ss-uc-layer-add:hover {
   color: #0f172a !important;
   border-color: rgba(15, 23, 42, 0.15) !important;
 }
+
+/* ── v5.278: (1) Live NM Dimension HUD While Resizing Draw Shapes ── */
+.ss-uc-resize-hud {
+  background: transparent !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+.ss-uc-resize-hud-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(8, 15, 34, 0.94);
+  border: 1.5px solid #38bdf8;
+  color: #f8fafc;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65), 0 0 10px rgba(56, 189, 248, 0.35);
+  transform: translate(-50%, -50%);
+  pointer-events: none !important;
+  user-select: none;
+}
+
+/* ── v5.278: (2) Compact Draw Eyebrow Rail (#ssUcDrawRail) Width <= Top-Right Layer Switcher Button ── */
+html body .ss-uc-draw-rail {
+  right: 10px !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  max-width: 42px !important;
+  padding: 3px !important;
+  gap: 4px !important;
+  border-radius: 10px !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
+}
+html body .ss-uc-draw-rail .ss-uc-tool-btn {
+  width: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 !important;
+  border-radius: 7px !important;
+  gap: 0 !important;
+}
+html body .ss-uc-draw-rail .ss-uc-tool-btn svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+html body .ss-uc-draw-rail .ss-uc-tool-lbl {
+  display: none !important;
+}
+
+/* ── v5.278: (3) Ensure Monitoring Email Drawer Respects [hidden] Attribute on Envelope Toggle ── */
+#ntmSidebar .ntm-mon-email-drawer[hidden] {
+  display: none !important;
+}

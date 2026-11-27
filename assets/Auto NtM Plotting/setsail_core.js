@@ -50108,18 +50108,18 @@ if (document.readyState === "loading") {
       const resp = await fetch("/api/monitoring-email", {
         method: "POST",
         headers: headers,
-        body: JSON.stringify({ prefs: prefs, report: payloadReport })
+        body: JSON.stringify({ prefs: prefs, report: payloadReport, forceDispatch: !isAutoTrigger })
       });
       const data = await resp.json().catch(() => ({}));
       if (data && data.subject) fallbackSubject = data.subject;
       if (data && data.textBody) fallbackBody = data.textBody;
-      if (resp.ok && data && data.delivered) {
+      if (resp.ok && data && (data.delivered || data.queued)) {
         delivered = true;
-        statusNote = "Sent to " + email + " (" + (data.provider || "SetSail Mail") + ")";
+        statusNote = "Dispatched to " + email + " (" + (data.provider || "SetSail DKIM Mail") + ")";
       }
     } catch (eApi) {}
 
-    // Zero-key browser AJAX dispatch via FormSubmit to the verified account email if server SMTP secret isn't set
+    // Fallback only if server endpoint was unreachable
     if (!delivered && navigator.onLine) {
       try {
         const alarmLines = filteredAlarms.length
@@ -50215,9 +50215,6 @@ if (document.readyState === "loading") {
 
     if (trigAlarms.length === 0 && trigWarnings.length === 0) return;
 
-    const sig = trigAlarms.map((a) => a.id).join("|") + "::" + trigWarnings.map((w) => w.id).join("|");
-    if (!sig || sig === prefs.lastDigestHash) return;
-
     const cooldownMs = Math.max(5, Number(prefs.cooldownMin) || 30) * 60000;
     if (prefs.lastSentAt && Date.now() - prefs.lastSentAt < cooldownMs) return;
 
@@ -50237,7 +50234,8 @@ if (document.readyState === "loading") {
   function refreshMonitoringPanelInPlace() {
     const st = window._sidebarNavtorState;
     if (!st || st.view !== "route" || st.detailTab !== "monitoring") return;
-    if (st.monEmailSending || st.monFilterOpen) return;
+    // Pause background DOM replacement while the Email alerts drawer or Filter popover is open
+    if (st.monEmailSending || st.monFilterOpen || st.monEmailOpen) return;
     const activeEl = document.activeElement;
     if (activeEl && (activeEl.id === "nvMonSearchInput" || (activeEl.closest && activeEl.closest("#nvMonEmailDrawer")))) return;
     const routePanel = document.getElementById("ntmNavtorRoutePanel");
@@ -50255,6 +50253,21 @@ if (document.readyState === "loading") {
   function ensureMonitoringLiveTicker() {
     if (_monitoringLiveInterval) return;
     _monitoringLiveInterval = setInterval(() => {
+      try {
+        const prefs = loadMonitoringEmailPrefs();
+        const authUser = typeof getSetSailAuthUser === "function" ? getSetSailAuthUser() : null;
+        if (prefs && prefs.enabled && authUser && authUser.email) {
+          const cooldownMs = Math.max(5, Number(prefs.cooldownMin) || 30) * 60000;
+          if (!prefs.lastSentAt || (Date.now() - prefs.lastSentAt >= cooldownMs)) {
+            const targetRt = getActiveNavtorRoute() || (typeof getSavedRoutesLibrary === "function" ? (getSavedRoutesLibrary() || [])[0] : null);
+            if (targetRt) {
+              const autoRep = evaluateRouteMonitoringReport(targetRt);
+              maybeAutoTriggerMonitoringAlerts(targetRt, autoRep);
+            }
+          }
+        }
+      } catch (eAutoMon) {}
+
       const st = window._sidebarNavtorState;
       const sidebar = document.getElementById("ntmSidebar");
       if (!st || st.view !== "route" || st.detailTab !== "monitoring" || !sidebar || sidebar.offsetParent === null) {
@@ -50333,38 +50346,35 @@ if (document.readyState === "loading") {
         '</button>' +
       '</div>';
 
-    // Simplified Email Alerts Drawer: notification choices + frequency + Subscribe button
-    let emailDrawerHtml = "";
-    if (st.monEmailOpen) {
-      const cats = prefs.categories || { nav: true, traffic: true, weather: true, ntm: true };
-      const wantWarnings = prefs.level === "all";
-      emailDrawerHtml =
-        '<div class="ntm-mon-email-drawer" id="nvMonEmailDrawer">' +
-          '<div class="ntm-mon-email-grid">' +
-            '<label><input type="checkbox" data-mon-email-cat="alarms" checked disabled />Alarms</label>' +
-            '<label><input type="checkbox" id="chkNvMonEmailWarnings" ' + (wantWarnings ? "checked" : "") + ' />Warnings</label>' +
-            '<label><input type="checkbox" data-mon-email-cat="nav" ' + (cats.nav !== false ? "checked" : "") + ' />Navigation</label>' +
-            '<label><input type="checkbox" data-mon-email-cat="traffic" ' + (cats.traffic !== false ? "checked" : "") + ' />Traffic</label>' +
-            '<label><input type="checkbox" data-mon-email-cat="weather" ' + (cats.weather !== false ? "checked" : "") + ' />Weather</label>' +
-            '<label><input type="checkbox" data-mon-email-cat="ntm" ' + (cats.ntm !== false ? "checked" : "") + ' />Warnings / NtM</label>' +
-          '</div>' +
-          '<div class="ntm-mon-email-freq-row">' +
-            '<span>Frequency</span>' +
-            '<select id="selNvMonEmailCooldown" class="ntm-mon-email-select">' +
-              '<option value="15"' + (Number(prefs.cooldownMin) === 15 ? " selected" : "") + '>Every 15 min</option>' +
-              '<option value="30"' + (Number(prefs.cooldownMin) === 30 ? " selected" : "") + '>Every 30 min</option>' +
-              '<option value="60"' + (Number(prefs.cooldownMin) === 60 ? " selected" : "") + '>Every 1 hour</option>' +
-              '<option value="360"' + (Number(prefs.cooldownMin) === 360 ? " selected" : "") + '>Every 6 hours</option>' +
-              '<option value="1440"' + (Number(prefs.cooldownMin) === 1440 ? " selected" : "") + '>Daily</option>' +
-            '</select>' +
-          '</div>' +
-          '<button type="button" class="ntm-mon-sub-btn ' + (isSubscribed ? "is-subscribed" : "") + '" id="btnNvMonSubscribe" ' + (st.monEmailSending ? "disabled" : "") + '>' +
-            (st.monEmailSending
-              ? "Saving..."
-              : (isSubscribed ? ("Subscribed (" + escHtml(userEmail) + ")") : "Subscribe")) +
-          '</button>' +
-        '</div>';
-    }
+    // Simplified Email Alerts Drawer: notification choices + frequency + Subscribe button (always rendered, toggled via hidden)
+    const cats = prefs.categories || { nav: true, traffic: true, weather: true, ntm: true };
+    const wantWarnings = prefs.level === "all";
+    const emailDrawerHtml =
+      '<div class="ntm-mon-email-drawer" id="nvMonEmailDrawer"' + (st.monEmailOpen ? "" : " hidden") + '>' +
+        '<div class="ntm-mon-email-grid">' +
+          '<label><input type="checkbox" data-mon-email-cat="alarms" checked disabled />Alarms</label>' +
+          '<label><input type="checkbox" id="chkNvMonEmailWarnings" ' + (wantWarnings ? "checked" : "") + ' />Warnings</label>' +
+          '<label><input type="checkbox" data-mon-email-cat="nav" ' + (cats.nav !== false ? "checked" : "") + ' />Navigation</label>' +
+          '<label><input type="checkbox" data-mon-email-cat="traffic" ' + (cats.traffic !== false ? "checked" : "") + ' />Traffic</label>' +
+          '<label><input type="checkbox" data-mon-email-cat="weather" ' + (cats.weather !== false ? "checked" : "") + ' />Weather</label>' +
+          '<label><input type="checkbox" data-mon-email-cat="ntm" ' + (cats.ntm !== false ? "checked" : "") + ' />Warnings / NtM</label>' +
+        '</div>' +
+        '<div class="ntm-mon-email-freq-row">' +
+          '<span>Frequency</span>' +
+          '<select id="selNvMonEmailCooldown" class="ntm-mon-email-select">' +
+            '<option value="15"' + (Number(prefs.cooldownMin) === 15 ? " selected" : "") + '>Every 15 min</option>' +
+            '<option value="30"' + (Number(prefs.cooldownMin) === 30 ? " selected" : "") + '>Every 30 min</option>' +
+            '<option value="60"' + (Number(prefs.cooldownMin) === 60 ? " selected" : "") + '>Every 1 hour</option>' +
+            '<option value="360"' + (Number(prefs.cooldownMin) === 360 ? " selected" : "") + '>Every 6 hours</option>' +
+            '<option value="1440"' + (Number(prefs.cooldownMin) === 1440 ? " selected" : "") + '>Daily</option>' +
+          '</select>' +
+        '</div>' +
+        '<button type="button" class="ntm-mon-sub-btn ' + (isSubscribed ? "is-subscribed" : "") + '" id="btnNvMonSubscribe" ' + (st.monEmailSending ? "disabled" : "") + '>' +
+          (st.monEmailSending
+            ? "Sending..."
+            : (isSubscribed ? ("Subscribed (" + escHtml(userEmail) + ")") : "Subscribe")) +
+        '</button>' +
+      '</div>';
 
     // Unified scannable list of Alarms (Red) and Warnings (Yellow)
     const renderCard = (item) => {
@@ -50470,9 +50480,20 @@ if (document.readyState === "loading") {
 
     const btnEmail = routePanel.querySelector("#btnNvMonEmailToggle");
     if (btnEmail) {
-      btnEmail.onclick = () => {
+      btnEmail.onclick = (ev) => {
+        if (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+        }
         st.monEmailOpen = !st.monEmailOpen;
-        renderRouteDetailView(routePanel, rt);
+        btnEmail.classList.toggle("is-open", Boolean(st.monEmailOpen));
+        btnEmail.setAttribute("aria-expanded", st.monEmailOpen ? "true" : "false");
+        const drawerEl = routePanel.querySelector("#nvMonEmailDrawer");
+        if (drawerEl) {
+          drawerEl.hidden = !st.monEmailOpen;
+        } else {
+          renderRouteDetailView(routePanel, rt);
+        }
       };
     }
 

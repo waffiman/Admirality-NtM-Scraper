@@ -438,6 +438,9 @@ module.exports = async function handler(req, res) {
       email: toEmail,
       updatedAt: Date.now()
     });
+    if (report && typeof report === "object" && (report.routeName || report.alarms || report.warnings)) {
+      alertState.latestReport = report;
+    }
     if (!saveOnly) {
       alertState.lastAttemptAt = new Date().toISOString();
       if (report.digestHash) alertState.lastDigestHash = String(report.digestHash);
@@ -455,7 +458,43 @@ module.exports = async function handler(req, res) {
   }
 
   const { subject, textBody, htmlBody } = buildEmailContent(toEmail, report);
-  const sendRes = await dispatchServerEmail(toEmail, subject, textBody, htmlBody);
+  let sendRes = await dispatchServerEmail(toEmail, subject, textBody, htmlBody);
+
+  // If no HTTP mail secret is set on the Worker, trigger the repository's DKIM SMTP workflow dispatcher
+  if (!sendRes.delivered) {
+    try {
+      const ghTok = (
+        process.env.SETSAIL_ANALYTICS_GITHUB_TOKEN ||
+        process.env.GITHUB_TOKEN ||
+        (typeof store.githubToken === "function" ? store.githubToken() : "") ||
+        ""
+      ).trim();
+      if (ghTok) {
+        const wfResp = await fetch(
+          "https://api.github.com/repos/waffiman/Admirality-NtM-Scraper/actions/workflows/monitoring-email.yml/dispatches",
+          {
+            method: "POST",
+            headers: {
+              Accept: "application/vnd.github+json",
+              Authorization: "Bearer " + ghTok,
+              "User-Agent": "SetSail-MonitoringEmailWorker",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              ref: "main",
+              inputs: {
+                email: toEmail,
+                force: "true"
+              }
+            })
+          }
+        );
+        if (wfResp.ok || wfResp.status === 204) {
+          sendRes = { delivered: true, provider: "SetSail DKIM Mail" };
+        }
+      }
+    } catch (eWf) {}
+  }
 
   res.statusCode = 200;
   return res.json({

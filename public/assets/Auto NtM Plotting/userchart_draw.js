@@ -813,6 +813,14 @@
       var lCoords = g.coordinates || [];
       if (lCoords.length < 2) return null;
       var lPts = lCoords.map(function (c) { return m.latLngToContainerPoint([c[1], c[0]]); });
+      var dStart = Math.hypot(pt.x - lPts[0].x, pt.y - lPts[0].y);
+      var dEnd = Math.hypot(pt.x - lPts[lPts.length - 1].x, pt.y - lPts[lPts.length - 1].y);
+      if (dStart <= BORDER_HIT_PX + 2) {
+        return { feature: f, id: fId, zone: "border", dir: "line-start", vertexIdx: 0, cursor: "nwse-resize" };
+      }
+      if (dEnd <= BORDER_HIT_PX + 2) {
+        return { feature: f, id: fId, zone: "border", dir: "line-end", vertexIdx: lCoords.length - 1, cursor: "nwse-resize" };
+      }
       for (var s = 0; s < lPts.length - 1; s++) {
         if (distToSegmentPx(pt, lPts[s], lPts[s + 1]) <= BORDER_HIT_PX) {
           return { feature: f, id: fId, zone: "stroke", cursor: "move" };
@@ -832,6 +840,140 @@
       if (hit) return hit;
     }
     return null;
+  }
+
+  /* ── Live NM Dimension HUD While Resizing / Sizing Shapes ── */
+  var resizeHudMarker = null;
+
+  function fmtNmVal(nm) {
+    if (!Number.isFinite(nm) || nm < 0) return "0.00";
+    if (nm >= 100) return nm.toFixed(1);
+    if (nm >= 10) return nm.toFixed(2);
+    return nm.toFixed(2);
+  }
+
+  function computeSphericalPolygonAreaNm2(ringCoords) {
+    if (!Array.isArray(ringCoords) || ringCoords.length < 3) return 0;
+    var R_NM = 3440.065; // Earth mean radius in Nautical Miles (6371000 / 1852)
+    var deg2rad = Math.PI / 180;
+    var sum = 0;
+    for (var i = 0; i < ringCoords.length; i++) {
+      var p1 = ringCoords[i];
+      var p2 = ringCoords[(i + 1) % ringCoords.length];
+      var lon1 = Number(p1[0]) * deg2rad;
+      var lat1 = Number(p1[1]) * deg2rad;
+      var lon2 = Number(p2[0]) * deg2rad;
+      var lat2 = Number(p2[1]) * deg2rad;
+      sum += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2));
+    }
+    return Math.abs((sum * R_NM * R_NM) / 2.0);
+  }
+
+  function computeFeatureResizeMeasurement(f) {
+    var m = map();
+    if (!m || !f || !f.geometry) return null;
+    var g = f.geometry;
+    var props = f.properties || {};
+    var kind = String(props.kind || "").toLowerCase();
+
+    // 1. Circle -> Radius in NM
+    if (g.type === "Point" && kind === "circle" && Number.isFinite(props.radiusM)) {
+      var radNm = Math.max(0, Number(props.radiusM)) / 1852;
+      return {
+        latlng: L.latLng(g.coordinates[1], g.coordinates[0]),
+        label: "R: " + fmtNmVal(radNm) + " NM"
+      };
+    }
+
+    // 2. Line -> Length in NM
+    if (g.type === "LineString" && Array.isArray(g.coordinates) && g.coordinates.length >= 2) {
+      var totalM = 0;
+      for (var i = 0; i < g.coordinates.length - 1; i++) {
+        var a = g.coordinates[i];
+        var b = g.coordinates[i + 1];
+        totalM += m.distance([a[1], a[0]], [b[1], b[0]]);
+      }
+      var mid = g.coordinates[Math.floor(g.coordinates.length / 2)];
+      return {
+        latlng: L.latLng(mid[1], mid[0]),
+        label: "L: " + fmtNmVal(totalM / 1852) + " NM"
+      };
+    }
+
+    // 3. Polygon -> Rectangle shows 2 sides (W × H NM); other polygons show Area (NM²)
+    if (g.type === "Polygon" && Array.isArray(g.coordinates) && Array.isArray(g.coordinates[0])) {
+      var ring = g.coordinates[0];
+      if (ring.length < 3) return null;
+      var minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+      ring.forEach(function (c) {
+        if (c[1] < minLat) minLat = c[1];
+        if (c[1] > maxLat) maxLat = c[1];
+        if (c[0] < minLon) minLon = c[0];
+        if (c[0] > maxLon) maxLon = c[0];
+      });
+      var cLat = (minLat + maxLat) * 0.5;
+      var cLon = (minLon + maxLon) * 0.5;
+      var centerLl = L.latLng(cLat, cLon);
+
+      if (kind === "rect") {
+        var widthNm = m.distance([cLat, minLon], [cLat, maxLon]) / 1852;
+        var heightNm = m.distance([minLat, cLon], [maxLat, cLon]) / 1852;
+        return {
+          latlng: centerLl,
+          label: fmtNmVal(widthNm) + " × " + fmtNmVal(heightNm) + " NM"
+        };
+      }
+
+      var areaNm2 = computeSphericalPolygonAreaNm2(ring);
+      return {
+        latlng: centerLl,
+        label: "Area: " + fmtNmVal(areaNm2) + " NM²"
+      };
+    }
+    return null;
+  }
+
+  function showResizeHudForFeature(f) {
+    var m = map();
+    if (!m || !global.L) return;
+    var info = computeFeatureResizeMeasurement(f);
+    if (!info || !info.latlng || !info.label) return;
+    ensurePane(m);
+    var html = '<div class="ss-uc-resize-hud-pill">' + escapeHtml(info.label) + '</div>';
+    if (!resizeHudMarker) {
+      resizeHudMarker = L.marker(info.latlng, {
+        pane: PANE,
+        interactive: false,
+        keyboard: false,
+        icon: L.divIcon({
+          className: "ss-uc-resize-hud",
+          html: html,
+          iconSize: null
+        })
+      });
+      m.addLayer(resizeHudMarker);
+    } else {
+      resizeHudMarker.setLatLng(info.latlng);
+      var el = resizeHudMarker.getElement && resizeHudMarker.getElement();
+      if (el) {
+        el.innerHTML = html;
+      } else {
+        resizeHudMarker.setIcon(L.divIcon({
+          className: "ss-uc-resize-hud",
+          html: html,
+          iconSize: null
+        }));
+      }
+      if (!m.hasLayer(resizeHudMarker)) m.addLayer(resizeHudMarker);
+    }
+  }
+
+  function hideResizeHud() {
+    var m = map();
+    if (resizeHudMarker && m) {
+      try { m.removeLayer(resizeHudMarker); } catch (e) {}
+    }
+    resizeHudMarker = null;
   }
 
   function updateFeatureLayerRealtime(f) {
@@ -1053,6 +1195,18 @@
           var centerLl = L.latLng(act.origGeom.coordinates[1], act.origGeom.coordinates[0]);
           fRes.properties.radiusM = Math.max(10, centerLl.distanceTo(ll));
           updateFeatureLayerRealtime(fRes);
+          showResizeHudForFeature(fRes);
+          return;
+        }
+        if (act.origGeom.type === "LineString" && Array.isArray(act.origGeom.coordinates)) {
+          var newLine = act.origGeom.coordinates.map(function (c) { return c.slice(); });
+          var vIdx = act.vertexIdx >= 0 ? act.vertexIdx : (act.dir === "line-start" ? 0 : newLine.length - 1);
+          if (newLine[vIdx]) {
+            newLine[vIdx] = [ll.lng, ll.lat];
+            fRes.geometry.coordinates = newLine;
+            updateFeatureLayerRealtime(fRes);
+            showResizeHudForFeature(fRes);
+          }
           return;
         }
         if (act.origGeom.type === "Polygon") {
@@ -1087,6 +1241,7 @@
             ];
           }
           updateFeatureLayerRealtime(fRes);
+          showResizeHudForFeature(fRes);
           return;
         }
       }
@@ -1100,6 +1255,7 @@
         if (tempFeat) {
           act.previewLayer = leafletFromFeature(tempFeat);
           if (act.previewLayer) m.addLayer(act.previewLayer);
+          showResizeHudForFeature(tempFeat);
         }
         return;
       }
@@ -1118,6 +1274,7 @@
   }
 
   function onGlobalMouseUp() {
+    hideResizeHud();
     if (!state.action) return;
     var m = map();
     var act = state.action;
@@ -1332,10 +1489,30 @@
     rebuildMapLayers(opts && opts.focusTextId ? opts.focusTextId : null);
   }
 
+  function syncRailWidthToLayerBtn() {
+    var rail = document.getElementById("ssUcDrawRail");
+    if (!rail) return;
+    var layerSel = document.querySelector(".ntm-chart-layer-selector.collapsed") || document.querySelector(".ntm-layer-trigger-btn");
+    var maxW = 42;
+    if (layerSel) {
+      var r = layerSel.getBoundingClientRect();
+      if (r && r.width >= 34 && r.width <= 54) {
+        maxW = Math.floor(r.width);
+      }
+    }
+    rail.style.setProperty("width", maxW + "px", "important");
+    rail.style.setProperty("max-width", maxW + "px", "important");
+    rail.style.setProperty("min-width", maxW + "px", "important");
+  }
+
   function setOverlayActive(on, opts) {
     state.overlayOn = !!on;
+    hideResizeHud();
     var rail = document.getElementById("ssUcDrawRail");
-    if (rail) rail.hidden = !state.overlayOn;
+    if (rail) {
+      rail.hidden = !state.overlayOn;
+      if (state.overlayOn) syncRailWidthToLayerBtn();
+    }
     var tab = document.getElementById("tabOverlayUserChart");
     if (tab) {
       tab.classList.toggle("active", state.overlayOn);
